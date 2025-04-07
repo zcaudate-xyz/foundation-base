@@ -342,3 +342,9 @@
   {:added "4.0"}
   [sym-id & [doc? attrs? & more]]
   (defvar-fn &form "lua" sym-id doc? attrs? more))
+
+(defmacro defvar.py
+  "shortcut for a js getter and a reset var"
+  {:added "4.0"}
+  [sym-id & [doc? attrs? & more]]
+  (defvar-fn &form "python" sym-id doc? attrs? more))
