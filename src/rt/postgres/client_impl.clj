@@ -33,7 +33,8 @@
 (defn raw-eval-pg
   "executes a raw value"
   {:added "4.0"}
-  [{:keys [instance]} body]
+  [{:keys [instance] :as rt} body]
+  (h/prn instance body)
   (conn/conn-execute @instance body))
 
 (defn init-ptr-pg

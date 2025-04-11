@@ -135,6 +135,12 @@
              env/sys:ns-dir
              env/sys:ns-file
              env/sys:ns-url
+             env/match-filter
+             env/dbg
+             env/dbg-print
+             env/with:dbg
+             env/dbg:add-filters
+             env/dbg:remove-filters
              
              resource/res:spec-get
              resource/res:spec-add

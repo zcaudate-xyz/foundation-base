@@ -1,5 +1,7 @@
 (ns std.lang.base.runtime
   (:require [std.protocol.context :as protocol.context]
+            [std.protocol.component :as protocol.component]
+            [std.lang.base.runtime-proxy :as proxy]
             [std.lang.base.pointer :as ptr]
             [std.lang.base.emit-common :as common]
             [std.lang.base.emit-preprocess :as preprocess]
@@ -12,6 +14,10 @@
             [std.json :as json]
             [std.lib :as h :refer [defimpl]]
             [std.string :as str]))
+
+;;
+;; Default Runtime
+;;
 
 (defn default-tags-ptr
   "runtime default args"
@@ -80,16 +86,70 @@
 (defn- rt-default-string [{:keys [lang]}]
   (str "#rt:lang" [lang]))
 
-(defimpl RuntimeDefault [lang runtime]
+(defimpl RuntimeDefault [lang redirect]
   :string rt-default-string
-  :prefix "default-"
-  :protocols [protocol.context/IContext])
+  :protocols
+  [protocol.context/IContext
+   :body
+   {-raw-eval      (if redirect
+                     (proxy/proxy-raw-eval rt string)
+                     (default-raw-eval rt string))
+    -init-ptr      (if redirect
+                     (proxy/proxy-init-ptr rt ptr)
+                     (default-init-ptr rt ptr))
+    -tags-ptr      (if redirect
+                     (proxy/proxy-tags-ptr rt ptr)
+                     (default-tags-ptr rt ptr))
+    -deref-ptr     (if redirect
+                     (proxy/proxy-deref-ptr rt ptr)
+                     (default-deref-ptr rt ptr))
+    -display-ptr   (if redirect
+                     (proxy/proxy-display-ptr rt ptr)
+                     (default-display-ptr rt ptr))
+    -invoke-ptr    (if redirect
+                     (proxy/proxy-invoke-ptr rt ptr args)
+                     (default-invoke-ptr rt ptr args))
+    -transform-in-ptr   (if redirect
+                          (proxy/proxy-transform-in-ptr rt ptr args)
+                          (default-transform-in-ptr rt ptr args))
+    -transform-out-ptr  (if redirect
+                          (proxy/proxy-transform-out-ptr rt ptr return)
+                          (default-transform-out-ptr rt ptr return))}
+   protocol.component/IComponent
+   :body
+   {-start   (do (when redirect
+                   (doseq [[module shortcut]
+                           (:module/internal
+                            (proxy/proxy-get-rt redirect lang))]
+                     (when (not= module redirect)
+                       (h/suppress (require [module :as shortcut])))))
+                 component)
+    -stop    component
+    -kill    component}
+   
+   protocol.component/IComponentQuery
+   :body
+   {-started?      (if redirect
+                     (proxy/proxy-started? component)
+                     true)
+    -stopped?      (if redirect
+                     (proxy/proxy-stopped? component)
+                     true)
+    -info          (if redirect
+                     (proxy/proxy-info component level)
+                     {})
+    -remote?       (if redirect
+                     (proxy/proxy-remote? component)
+                     false)
+    -health        (if redirect
+                     (proxy/proxy-health component)
+                     true)}])
 
 (defn rt-default
   "creates a lang runtime"
   {:added "4.0"}
-  ([{:keys [lang] :as m}]
-   (map->RuntimeDefault (merge m {:runtime :default}))))
+  ([{:keys [lang runtime] :as m}]
+   (map->RuntimeDefault (merge  m {:runtime :default}))))
 
 (defn rt-default?
   "checks if object is default runtime"
@@ -101,6 +161,10 @@
  {:type :hara/lang.rt
   :config {:bootstrap false}
   :instance {:create rt-default}})
+
+;;
+;;
+;;
 
 (defn install-lang!
   "installs a language within `std.lib.context`"

@@ -30,8 +30,9 @@
  [dir:repo-rebuild  github/gh-refresh]
  [dir:repo-setup    github/gh-setup]
  
- [run:shell   common/make-shell]
- [run         common/make-run]
+ [run:shell    common/make-shell]
+ [run          common/make-run]
+ [run-close    common/make-run-close]
  [run-internal common/make-run-internal]
  [run:init    common/make-run-init]
  [run:package common/make-run-package]

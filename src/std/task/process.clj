@@ -31,16 +31,6 @@
                        :else (throw (ex-info "`count` is a value between 1 to 4" {:count count})))]
      [main args?])))
 
-(defn select-match
-  "returns true if selector matches with input
- 
-   (select-match 'code 'code.test) => true
- 
-   (select-match 'hara 'spirit.common) => false"
-  {:added "3.0"}
-  ([sel input]
-   (or (.startsWith (str input) (str sel)))))
-
 (defn select-filter
   "matches given a range of filters
  
@@ -48,7 +38,8 @@
    => \"hello\""
   {:added "4.0"}
   [selector id]
-  (cond (fn? selector)
+  (cond (or (fn?  selector)
+            (var? selector))
         (h/suppress (selector id))
 
         (or (string? selector)
@@ -57,7 +48,7 @@
         (.startsWith (str id) (str selector))
 
         (h/regexp? selector)
-        (re-find selector (str id))
+        (boolean (re-find selector (str id)))
         
         (set? selector) (selector id)
 

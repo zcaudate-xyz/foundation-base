@@ -3,7 +3,8 @@
   (:require [std.lang.base.script :as script]
             [std.lang.model.spec-lua :as lua]
             [std.lang.base.book :as book]
-            [std.lang :as l]))
+            [std.lang :as l]
+            [lua.ore]))
 
 (l/script+ [:LUA.0 :lua]
   {:runtime :oneshot

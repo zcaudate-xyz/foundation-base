@@ -14,18 +14,18 @@
   (main-function ns-unmap 1)
   => (contains [h/vargs? true]))
 
-^{:refer std.task.process/select-match :added "3.0"}
-(fact "returns true if selector matches with input"
-
-  (select-match 'code 'code.test) => true
-
-  (select-match 'hara 'spirit.common) => false)
-
 ^{:refer std.task.process/select-filter :added "4.0"}
 (fact "matches given a range of filters"
 
-  (select-filter #"hello" 'hello)
-  => "hello")
+  (select-filter #"ello" 'hello)
+  => true
+
+  (select-filter #"^ello" 'hello)
+  => false
+
+  (select-filter 'code 'code.test) => true
+
+  (select-filter 'hara 'spirit.common) => false)
 
 ^{:refer std.task.process/select-inputs :added "3.0"}
 (fact "selects inputs based on matches"

@@ -309,7 +309,7 @@
         more (if (vector? (first more))
                more
                (first more))
-        def-sym (symbol (str "defn." tag))]
+        def-sym (clojure.core/symbol (str "defn." tag))]
     (h/$ [(~def-sym ~(with-meta sym-id (merge (meta &form)
                                               (meta sym-id)))
             []
@@ -317,7 +317,7 @@
                      ~sym-ns
                      ~sym-key
                      (fn ~@more))))
-          (~def-sym ~(with-meta (symbol (str sym-id "-reset"))
+          (~def-sym ~(with-meta (clojure.core/symbol (str sym-id "-reset"))
                        (merge (meta &form)
                               (meta sym-id)))
             [val]

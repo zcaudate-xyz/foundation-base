@@ -2,10 +2,15 @@
   (:require [clojure.pprint :as pprint]
             [std.lib.atom :as at]
             [std.lib.time :as t]
+            [std.lib.foundation :as f]
             [std.string.common :as str])
   (:refer-clojure :exclude [prn require])
   (:import (java.io StringWriter
                     PrintWriter)))
+
+(def ^:dynamic *debug* false)
+
+(defonce +debug+ (atom #{}))
 
 (def ^:dynamic *local* true)
 
@@ -341,4 +346,76 @@
                                             ~column)
                            "\n"
                            (throwable-string ~'t)))))))
+
+;;
+
+(defn match-filter
+  "matches given a range of filters
+ 
+   (match-filter #\"hello\" 'hello)
+   => \"hello\""
+  {:added "4.0"}
+  [filt id]
+  (cond (or (fn?  filt)
+            (var? filt))
+        (f/suppress (filt id))
+
+        (or (string? filt)
+            (symbol? filt))
+        (.startsWith (str id) (str filt))
+
+        (f/regexp? filt)
+        (boolean (re-find filt (str id)))
+        
+        (set? filt)   (filt id)
+        
+        (list? filt)  (every? #(match-filter % id)
+                              filt)
+        
+        
+        (vector? filt) (some #(match-filter % id)
+                             filt)
+        
+        :else
+        (throw (ex-info "Filt not valid" {:filt filt}))))
+
+(defn dbg-print
+  [ns-str {:keys [line column]} & args]
+  (when (or *debug*
+            (some (fn [filt]
+                    (match-filter filt ns-str))
+                  (seq @+debug+)))
+    (local :println (format "%s (%d:%d)"
+                            ns-str
+                            line
+                            column))
+    (doseq [arg args]
+      (local :pprint arg))))
+
+(defmacro dbg
+  ([& body]
+   (let [{:keys [line column]} (meta &form)]
+     `(do (dbg-print ~(meta &form)
+                     ~(str (ns-sym))
+                     ~@body)))))
+
+(defmacro with:dbg
+  [flag & body]
+  `(binding [*debug* ~flag]
+     ~@body))
+
+(defn dbg-global
+  ([] *debug*)
+  ([flag]
+   (alter-var-root #'*debug* (fn [_] flag))))
+
+(defn dbg:add-filters
+  ([& filters]
+   (swap! +debug+
+          (fn [coll] (apply conj coll filters)))))
+
+(defn dbg:remove-filters
+  ([& filters]
+   (swap! +debug+
+          (fn [coll] (apply disj coll filters)))))
 

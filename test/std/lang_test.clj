@@ -1,6 +1,7 @@
 (ns std.lang-test
   (:use code.test)
   (:require [std.lang :as l]
+            [js.core]
             [xt.lang.base-lib :as k]))
 
 ^{:refer std.lang/CANARY :adopt true :added "4.0"}

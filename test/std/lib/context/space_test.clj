@@ -10,11 +10,14 @@
                    (doto sp (space-context-set :null :default {})))}}})
 
 ^{:refer std.lib.context.space/space-context-set :added "3.0"
-  :use [|sp|]}
+  :setup  [(def |sp| (space-create {:namespace 'test}))]}
 (fact "sets the context in the space"
   ^:hidden
 
-  (space-context-set |sp| :null :default {}))
+  (space-context-set |sp| :null :default {})
+  => (contains-in
+      [:changed {:null {:context :null, :scratch std.lib.context.registry.RuntimeNull,
+                        :key :default, :resource :hara/context.rt.null, :config {}}}]))
 
 ^{:refer std.lib.context.space/space-context-unset :added "3.0"
   :use [|sp|]}
@@ -99,3 +102,38 @@
 
 ^{:refer std.lib.context.space/space:rt-current :added "4.0"}
 (fact "gets the current rt in the space")
+
+
+^{:refer std.lib.context.space/rt-proxy? :added "4.0"}
+(fact "gets the current rt in the space"
+  ^:hidden
+  
+  (rt-proxy?
+   (map->RuntimeProxy {:namespace 'test
+                       :ctx   :null}))
+  true)
+
+
+(comment
+  space-context-set
+  (space:rt-get rt:scratch :lang/lua)
+  (reg/registry-list)
+  (space-rt (space 'std.lang.codegen.form-test)
+            :lang/start)
+  
+  (rt:current)
+  
+  (res/res:spec-get :hara/context.space)
+  (res/res-key :namespace :hara/context.space :default {:namespace (the-ns 'std.lib.context.pointer)})
+  
+  (res/res-stop :hara/context.space)
+  
+  
+  (h/hash-code (res/res :hara/context.space))
+  (h/hash-code (res/res :hara/context.space {:namespace 'std.lib.context.pointer}))
+  (h/hash-code (res/res :hara/context.space {:namespace (the-ns 'std.lib.context.pointer)}))
+  
+
+  (space-create )
+  (into {} (space))
+  (into {} (space 'hello)))

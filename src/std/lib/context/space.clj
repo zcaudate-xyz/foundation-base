@@ -154,7 +154,6 @@
                                      :default  `*namespace*})]
   (vals (:sigs protocol.context/ISpace)))
 
-
 (defn space:rt-current
   "gets the current rt in the space"
   {:added "4.0"}
@@ -167,27 +166,3 @@
      (or (space:rt-get sp ctx)
          (reg/registry-scratch ctx)
          reg/+rt-null+))))
-
-(comment
-  space-context-set
-  (rt:scratch :lang/lua)
-  (reg/registry-list)
-  (space-rt (space 'std.lang.codegen.form-test)
-                 :lang/start)
-  
-  (rt:current)
-  
-  (res/res:spec-get :hara/context.space)
-  (res/res-key :namespace :hara/context.space :default {:namespace (the-ns 'std.lib.context.pointer)})
-  
-  (res/res-stop :hara/context.space)
-  
-  
-  (h/hash-code (res/res :hara/context.space))
-  (h/hash-code (res/res :hara/context.space {:namespace 'std.lib.context.pointer}))
-  (h/hash-code (res/res :hara/context.space {:namespace (the-ns 'std.lib.context.pointer)}))
-  
-
-  (space-create )
-  (into {} (space))
-  (into {} (space 'hello)))

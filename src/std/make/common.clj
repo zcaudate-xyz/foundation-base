@@ -176,6 +176,15 @@
                  (Thread/sleep 200)
                  (os/tmux:run-command "DEV" tns cmd)))))))
 
+(defn make-run-close
+  ([{:keys [instance] :as mcfg} & [command]]
+   (let [command (or command :build)
+         {:keys [tag ns]} @instance
+         tns  (-> (str (str/upper-case (h/strn command))
+                       (if tag (str "-" tag)))
+                  (.replaceAll "\\." "-"))]
+     (os/tmux:kill-window  "DEV" tns))))
+
 (defn make-run-internal
   [mcfg & commands]
   (with:internal-shell

@@ -65,7 +65,6 @@
          {:keys [form form-input lang op-key]} entry
          form (or form form-input)
          reserved (get-reserved lang)
-         
          [vars lint-input] (case op-key 
                              (:defn
                               :defgen) [(volatile! (collect-vars (nth form 2)))

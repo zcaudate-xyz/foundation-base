@@ -135,3 +135,19 @@
 (comment "prints the stacktrace for an exception"
 
   (explode (throw (ex-info "Error" {}))))
+
+^{:refer std.lib.env/match-filter :added "4.0"}
+(fact "matches given a range of filters"
+  ^:hidden
+  
+  (match-filter #"ello" 'hello)
+  => true
+
+  (match-filter #"^ello" 'hello)
+  => false
+
+  (match-filter 'code 'code.test)
+  => true
+
+  (match-filter 'hara 'spirit.common)
+  => false)

@@ -457,7 +457,7 @@
   (project/in-context (locate-code 'code.format.ns
                                    {:query code.format.ns/+load-has-shorthand+
                                     :print {:function true}}))
-
+  
   (project/in-context (locate-parent 'code.format.ns
                                      {:query code.format.ns/+load-has-shorthand+
                                       :print {:function true}}))
