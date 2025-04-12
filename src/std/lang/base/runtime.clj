@@ -117,13 +117,13 @@
                           (default-transform-out-ptr rt ptr return))}
    protocol.component/IComponent
    :body
-   {-start   (do (when redirect
-                   (doseq [[module shortcut]
-                           (:module/internal
-                            (proxy/proxy-get-rt redirect lang))]
-                     (when (not= module redirect)
-                       (h/suppress (require [module :as shortcut])))))
-                 component)
+   {-start  (if redirect
+              (let [rt (proxy/proxy-get-rt redirect lang)
+                    _   (doseq [[module shortcut] (:module/internal rt)]
+                          (when (not= module redirect)
+                            (h/suppress (require [module :as shortcut]))))]
+                component)
+              component)
     -stop    component
     -kill    component}
    

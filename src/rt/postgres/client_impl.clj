@@ -34,7 +34,6 @@
   "executes a raw value"
   {:added "4.0"}
   [{:keys [instance] :as rt} body]
-  (h/prn instance body)
   (conn/conn-execute @instance body))
 
 (defn init-ptr-pg
