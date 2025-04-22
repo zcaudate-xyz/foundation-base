@@ -2,6 +2,9 @@
   (:require [std.lang :as l]
             [clojure.set :as set]))
 
+(l/script+ [:live :js]
+  {:runtime :basic})
+
 (l/script :lua
   {:runtime :basic})
 
