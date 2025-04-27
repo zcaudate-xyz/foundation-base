@@ -140,7 +140,7 @@
   neg
   "negative function"
   {:added "4.0"}
-  ([x] (list '- x)))
+  ([x] (list '- (list 'quote x))))
 
 (defmacro.xt ^{:standalone true}
   inc
@@ -297,13 +297,13 @@
   {:added "4.0"}
   [num] (list 'x:m-log10 num))
 
-(defmacro.xt ^{:standalone true}
+(defmacro.xt ^{:standalone 'x:m-max}
   max
   "gets the maximum value"
   {:added "4.0"}
   [& args] (clojure.core/apply list 'x:m-max args))
 
-(defmacro.xt ^{:standalone true}
+(defmacro.xt ^{:standalone 'x:m-max}
   min
   "gets the minimum value"
   {:added "4.0"}
@@ -361,7 +361,7 @@
 ;; COMMON
 ;;
 
-(defmacro.xt ^{:standalone true}
+(defmacro.xt ^{:standalone 'x:cat}
   cat
   "concat strings together"
   {:added "4.0"}
@@ -405,7 +405,7 @@
   ([f args]
    (list 'x:apply f args)))
 
-(defmacro.xt ^{:standalone true}
+(defmacro.xt ^{:standalone 'x:print}
   print
   "prints a string (for debugging)"
   {:added "4.0"}
@@ -670,8 +670,8 @@
   has-key?
   "checks that key in contained in object"
   {:added "4.0"}
-  ([obj k & [check]]
-   (list 'x:has-key? obj k check)))
+  ([obj k]
+   (list 'x:has-key? obj k)))
 
 (defmacro.xt ^{:standalone true}
   del-key
@@ -680,21 +680,23 @@
   ([obj k]
    (list 'x:del-key obj k)))
 
-(defmacro.xt ^{:standalone true}
+(defmacro.xt ^{:standalone '(fn [obj k d]
+                              (return (x:get-key obj k d)))}
   get-key
   "gets a value"
   {:added "4.0"}
   ([obj k & [default]]
    (list 'x:get-key obj k default)))
 
-(defmacro.xt ^{:standalone true}
+(defmacro.xt
   get-path
   "gets the value in the path"
   {:added "4.0"}
-  ([obj [:as path] & [default]]
+  ([obj path & [default]]
    (list 'x:get-path obj path default)))
 
-(defmacro.xt ^{:standalone true}
+(defmacro.xt ^{:standalone '(fn [arr i d]
+                              (return (x:get-idx arr i d)))}
   get-idx
   "gets a value in the array (no offsets)"
   {:added "4.0"}
@@ -873,7 +875,7 @@
    (list 'x:js-decode s)))
 
 (defmacro.xt  ^{:standalone true}
-  js-push
+  json-push
   "pushes an element into a json string"
   {:added "4.0"}
   [json e]
@@ -886,7 +888,7 @@
         "]"))
 
 (defmacro.xt  ^{:standalone true}
-  js-push-first
+  json-push-first
   "pushes an element as the first element of a json string"
   {:added "4.0"}
   [json e]
@@ -907,7 +909,7 @@
   ([obj]
    (list 'x:del obj)))
 
-(defmacro.xt ^{:standalone true}
+(defmacro.xt ^{:standalone 'x:shell}
   x:shell
   "calls a shell command"
   {:added "4.0"}

@@ -210,7 +210,8 @@
                                               {:module sym-module
                                                :id sym-id
                                                :form sym})
-                                     (h/form? standalone)
+                                     (or (h/form? standalone)
+                                         (symbol? standalone))
                                      (:standalone entry)
                                      
                                      :else

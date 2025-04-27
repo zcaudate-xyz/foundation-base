@@ -199,9 +199,9 @@
    (let [{:keys [runtime]} config
          rt-config (script-test-prep lang config)
          ns (:module rt-config)
-         _ (control/script-rt-get lang
-                                  (:runtime config)
-                                  rt-config)
+         _  (control/script-rt-get lang
+                                   (:runtime config)
+                                   rt-config)
          _  (annex/register-annex-tag ns tag lang runtime config)
          rt (annex/get-annex-runtime ns tag)]
      (if (or (not rt)

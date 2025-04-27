@@ -51,14 +51,15 @@
 
 (def +js-core+
   {:x-del            {:emit :alias :raw 'delete}
-   :x-cat            {:macro #'js-tf-x-cat  :emit :macro}
+   :x-cat            {:macro #'js-tf-x-cat  :emit :macro :value true
+                      :raw "(function (...args) {return args.join('')})"}
    :x-len            {:macro #'js-tf-x-len  :emit :macro}
    :x-err            {:emit :alias :raw 'throw}
    :x-eval           {:emit :alias :raw 'eval}
    :x-apply          {:macro #'js-tf-x-apply   :emit :macro}
    :x-unpack         {:emit :alias :raw :..}
-   :x-print          {:emit :alias :raw 'console.log}
-   :x-random         {:emit :alias :raw 'Math.random}
+   :x-print          {:emit :alias :raw 'console.log :value true}
+   :x-random         {:emit :alias :raw 'Math.random :value true}
    :x-shell          {:macro #'js-tf-x-shell         :emit :macro}
    :x-now-ms         {:emit :alias :raw 'Date.now}
    :x-type-native    {:macro #'js-tf-x-type-native   :emit :macro}})
@@ -108,27 +109,27 @@
 (defn js-tf-x-m-quot  [[_ num denom]] (list 'Math.floor (list '/  num denom)))
 
 (def +js-math+
-  {:x-m-abs           {:emit :alias :raw 'Math.abs}
-   :x-m-acos          {:emit :alias :raw 'Math.acos}
-   :x-m-asin          {:emit :alias :raw 'Math.asin}
-   :x-m-atan          {:emit :alias :raw 'Math.atan}
-   :x-m-ceil          {:emit :alias :raw 'Math.ceil}
-   :x-m-cos           {:emit :alias :raw 'Math.cos}
-   :x-m-cosh          {:emit :alias :raw 'Math.cosh}
-   :x-m-exp           {:emit :alias :raw 'Math.exp}
-   :x-m-floor         {:emit :alias :raw 'Math.floor}
-   :x-m-loge          {:emit :alias :raw 'Math.log}
-   :x-m-log10         {:emit :alias :raw 'Math.log10}
-   :x-m-max           {:macro #'js-tf-x-m-max,                 :emit :macro}
-   :x-m-min           {:macro #'js-tf-x-m-min,                 :emit :macro}
-   :x-m-mod           {:macro #'js-tf-x-m-mod,                 :emit :macro}
-   :x-m-pow           {:emit :alias :raw 'Math.pow}
+  {:x-m-abs           {:emit :alias :raw 'Math.abs  :value true}
+   :x-m-acos          {:emit :alias :raw 'Math.acos :value true}
+   :x-m-asin          {:emit :alias :raw 'Math.asin :value true}
+   :x-m-atan          {:emit :alias :raw 'Math.atan :value true}
+   :x-m-ceil          {:emit :alias :raw 'Math.ceil :value true}
+   :x-m-cos           {:emit :alias :raw 'Math.cos  :value true}
+   :x-m-cosh          {:emit :alias :raw 'Math.cosh :value true}
+   :x-m-exp           {:emit :alias :raw 'Math.exp  :value true}
+   :x-m-floor         {:emit :alias :raw 'Math.floor :value true}
+   :x-m-loge          {:emit :alias :raw 'Math.log  :value true}
+   :x-m-log10         {:emit :alias :raw 'Math.log10 :value true}
+   :x-m-max           {:macro #'js-tf-x-m-max,      :raw 'Math.max :emit :macro :value true}
+   :x-m-min           {:macro #'js-tf-x-m-min,      :raw 'Math.min :emit :macro :value true}
+   :x-m-mod           {:macro #'js-tf-x-m-mod,      :emit :macro}
+   :x-m-pow           {:emit :alias :raw 'Math.pow  :value true}
    :x-m-quot          {:macro #'js-tf-x-m-quot,                :emit :macro}
-   :x-m-sin           {:emit :alias :raw 'Math.sin}
-   :x-m-sinh          {:emit :alias :raw 'Math.sinh}
-   :x-m-sqrt          {:emit :alias :raw 'Math.sqrt}
-   :x-m-tan           {:emit :alias :raw 'Math.tan}
-   :x-m-tanh          {:emit :alias :raw 'Math.tanh}})
+   :x-m-sin           {:emit :alias :raw 'Math.sin  :value true}
+   :x-m-sinh          {:emit :alias :raw 'Math.sinh :value true}
+   :x-m-sqrt          {:emit :alias :raw 'Math.sqrt :value true}
+   :x-m-tan           {:emit :alias :raw 'Math.tan  :value true}
+   :x-m-tanh          {:emit :alias :raw 'Math.tanh :value true}})
 
 ;;
 ;; TYPE

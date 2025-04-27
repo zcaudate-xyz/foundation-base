@@ -2291,44 +2291,44 @@
    (k/js-decode (k/js-encode [1 2 {:a [{:b 3}]}])))
   => [1 2 {"a" [{"b" 3}]}])
 
-^{:refer xt.lang.base-macro/js-push :added "4.0"}
+^{:refer xt.lang.base-macro/json-push :added "4.0"}
 (fact "pushes an element into a json string"
   ^:hidden
   
   (!.js
-   (k/js-push "[1,2,3]" "4"))
+   (k/json-push "[1,2,3]" "4"))
   => "[1,2,3,4]"
 
   (!.lua
-   (k/js-push "[1,2,3]" "4"))
+   (k/json-push "[1,2,3]" "4"))
   => "[1,2,3,4]"
 
   (!.py
-   (k/js-push "[1,2,3]" "4"))
+   (k/json-push "[1,2,3]" "4"))
   => "[1,2,3,4]"
 
   (!.R
-   (k/js-push "[1,2,3]" "4"))
+   (k/json-push "[1,2,3]" "4"))
   => "[1,2,3,4]")
 
-^{:refer xt.lang.base-macro/js-push-first :added "4.0"}
+^{:refer xt.lang.base-macro/json-push-first :added "4.0"}
 (fact "pushes an element as the first element of a json string"
   ^:hidden
   
   (!.js
-   (k/js-push-first "[1,2,3]" "4"))
+   (k/json-push-first "[1,2,3]" "4"))
   => "[4,1,2,3]"
 
   (!.lua
-   (k/js-push-first "[1,2,3]" "4"))
+   (k/json-push-first "[1,2,3]" "4"))
   => "[4,1,2,3]"
 
   (!.py
-   (k/js-push-first "[1,2,3]" "4"))
+   (k/json-push-first "[1,2,3]" "4"))
   => "[4,1,2,3]"
 
   (!.R
-   (k/js-push-first "[1,2,3]" "4"))
+   (k/json-push-first "[1,2,3]" "4"))
   => "[4,1,2,3]")
 
 ^{:refer xt.lang.base-macro/x:del :added "4.0"}
