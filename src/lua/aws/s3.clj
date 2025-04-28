@@ -66,7 +66,7 @@
   (return
    (-/s3-request {:method "PUT"
                   :route (k/cat bucket "?policy")
-                  :body  (k/js-encode policy)}
+                  :body  (k/json-encode policy)}
                  aws opts)))
 
 (defn.lua list-objects-process

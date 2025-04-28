@@ -31,7 +31,7 @@
                   
                   (== op "eval")
                   (do (k/del-key active id)
-                      (var out (k/js-decode body))
+                      (var out (k/json-decode body))
                       (var #{type value} out)
                       (cond (== type "data")
                             (return (resolve out.value))

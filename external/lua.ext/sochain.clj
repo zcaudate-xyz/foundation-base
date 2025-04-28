@@ -75,10 +75,10 @@
   (var #{status
          body} res)
   (when (== status 200)
-    (return (k/js-decode body)))
+    (return (k/json-decode body)))
 
   (var '[ok out] (pcall (fn []
-                          (return (k/js-decode body)))))
+                          (return (k/json-decode body)))))
   
   (return (:? ok out {:status "error"
                       :message body})))
@@ -197,7 +197,7 @@
                    {:method "POST"
                     :headers {"Accept" "application/json"
                               "Content-Type" "application/json"}
-                    :body (k/js-encode {:tx-hex tx-hex})
+                    :body (k/json-encode {:tx-hex tx-hex})
                     :ssl_verify false}))
   
   (return (-/get-response res err)))

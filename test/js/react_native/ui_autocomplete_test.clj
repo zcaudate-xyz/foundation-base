@@ -33,7 +33,7 @@
                       (return
                        [:% n/Text
                         {:style {:padding 5}}
-                        (k/js-encode entry)]))))
+                        (k/json-encode entry)]))))
     (return
      (n/EnclosedCode 
 {:label "js.react-native.ui-autocomplete/AutocompleteModal"} 
@@ -88,7 +88,7 @@
                       (return
                        [:% n/Text
                         {:style {:padding 5}}
-                        (k/js-encode entry)]))))
+                        (k/json-encode entry)]))))
     (return
      (n/EnclosedCode 
 {:label "js.react-native.ui-autocomplete/Autocomplete"} 

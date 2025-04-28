@@ -17,7 +17,7 @@
          (if (k/is-string? e)
            (return [e true])
            (if (k/nil? e)
-             (k/err (k/cat "Invalid link - " (k/js-encode obj)))
+             (k/err (k/cat "Invalid link - " (k/json-encode obj)))
              (return [(k/get-key e "id") true])))))
   (return
    (k/obj-keep obj

@@ -68,21 +68,21 @@
   ^:hidden
   
   (!.js
-   [(route/interim-to-url {"params" {(k/js-encode ["hello" "world"])
+   [(route/interim-to-url {"params" {(k/json-encode ["hello" "world"])
                                      {"id" "1", "type" "name"}}, "path" ["hello" "world"]})
     (route/interim-to-url {"params" {"[]" {"id" "1"}}, "path" []})
     (route/interim-to-url {"params" {}, "path" ["hello"]})])
   => ["hello/world?id=1&type=name" "?id=1" "hello"]
 
   (!.lua
-   [(route/interim-to-url {"params" {(k/js-encode ["hello" "world"])
+   [(route/interim-to-url {"params" {(k/json-encode ["hello" "world"])
                                      {"type" "name"}}, "path" ["hello" "world"]})
     (route/interim-to-url {"params" {"{}" {"id" "1"}}, "path" []})
     (route/interim-to-url {"params" {}, "path" ["hello"]})])
   => ["hello/world?type=name" "?id=1" "hello"]
 
   (!.py
-   [(route/interim-to-url {"params" {(k/js-encode ["hello" "world"])
+   [(route/interim-to-url {"params" {(k/json-encode ["hello" "world"])
                                      {"id" "1", "type" "name"}}, "path" ["hello" "world"]})
     (route/interim-to-url {"params" {"[]" {"id" "1"}}, "path" []})
     (route/interim-to-url {"params" {}, "path" ["hello"]})])

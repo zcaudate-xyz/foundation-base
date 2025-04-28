@@ -17,8 +17,8 @@
 (h/template-entries [l/tmpl-entry {:type :fragment
                                    :base ["cjson"]
                                    :tag "lua"}]
-  [[js-encode encode]
-   [js-decode decode]])
+  [[json-encode encode]
+   [json-decode decode]])
 
 (h/template-entries [l/tmpl-entry {:type :fragment
                                    :base ["table"]

@@ -1361,7 +1361,7 @@
   {:added "4.0"}
   [v]
   (cond (k/is-string? v)
-        (return (k/js-decode v))
+        (return (k/json-decode v))
 
         :else (return v)))
 
@@ -1639,7 +1639,7 @@
          (k/for:array [key spec-i]
            (when (k/nil? (-/get-key spec-map key))
              (-/err (-/cat "NOT VALID."
-                           (k/js-encode {:required key
+                           (k/json-encode {:required key
                                          :actual (-/obj-keys spec-map)})))))
          (return (-/obj-assign
                   acc

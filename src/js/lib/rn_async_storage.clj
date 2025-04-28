@@ -32,7 +32,7 @@
       (then (fn [res]
               (when (k/is-string? res)
                 (try
-                  (return (k/js-decode res))
+                  (return (k/json-decode res))
                   (catch e (return nil)))))))))
 
 (defn.js setJSON
@@ -40,13 +40,13 @@
   {:added "4.0"}
   [key data]
   (return
-   (-/setItem key (k/js-encode data))))
+   (-/setItem key (k/json-encode data))))
 
 (defn.js mergeJSON
   "merges json data on the same key"
   {:added "4.0"}
   [key data]
   (return
-   (-/mergeItem key (k/js-encode data))))
+   (-/mergeItem key (k/json-encode data))))
 
 (def.js MODULE (!:module))

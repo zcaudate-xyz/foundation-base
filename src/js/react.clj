@@ -612,7 +612,7 @@
   (:= f (or f k/first))
   (:= data (or data []))
   (var [value setValue] (or state (-/local (f data))))
-  (-/watch [(k/js-encode data)]
+  (-/watch [(k/json-encode data)]
     (when (and (k/not-empty? data)
                (or (k/nil? value)
                    (> 0 (j/indexOf data value))))

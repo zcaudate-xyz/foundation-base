@@ -124,7 +124,7 @@
         :field "currency_id"
         :items [" STATS " " XLM " " USD "]}]
       [:box {:top 1 :shrink true
-             :content (+ "" (k/js-encode indices))}]])))
+             :content (+ "" (k/json-encode indices))}]])))
 
 ^{:refer js.blessed.ui-group/EnumMulti :added "4.0"}
 (fact  "Constructs EnumMultiIndexed"
@@ -145,7 +145,7 @@
         :format (fn:> [x] (+ " " x " "))
         :data ["STATS" "XLM" "USD"]}]
       [:box {:top 1 :shrink true
-             :content (+ "" (k/js-encode values))}]])))
+             :content (+ "" (k/json-encode values))}]])))
 
 ^{:refer js.blessed.ui-group/TabsView :added "4.0"}
 (fact "Constructs Tabs"
@@ -354,28 +354,28 @@
                   :width 3
                   :color "yellow"
                   :listFormat j/toUpperCase
-                  :formatFn k/js-encode}
+                  :formatFn k/json-encode}
                  {:type "tabs"
                   :initial l1
                   :setInitial setL1
                   :width 30
                   :color "red"
                   :tabsFormat j/toUpperCase
-                  :formatFn k/js-encode}
+                  :formatFn k/json-encode}
                  {:type "list"
                   :width 4
                   :initial l2
                   :color "green"
                   :setInitial setL2
                   :listFormat j/toUpperCase
-                  :formatFn k/js-encode}
+                  :formatFn k/json-encode}
                  {:type "tabs"
                   :color "blue"
                   :width 10
                   :initial l3
                   :setInitial setL3
                   :tabsFormat j/toUpperCase
-                  :formatFn k/js-encode}]}]
+                  :formatFn k/json-encode}]}]
       [:box {:top 10 :shrink true
              :content (j/inspect #{initial l1 l2 l3})}]])))
 

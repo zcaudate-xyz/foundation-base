@@ -56,7 +56,7 @@
   
   (!.lua
    (local conn (lua-postgres/connect-constructor {:database "test-scratch"}))
-   (k/js-decode
+   (k/json-decode
     (dbsql/query conn (graph/select sample-scratch/Schema
                                     ["Entry"
                                      ["name"
@@ -67,7 +67,7 @@
   
   (!.lua
    (local conn (lua-postgres/connect-constructor {:database "test-scratch"}))
-   (k/js-decode
+   (k/json-decode
     (dbsql/query conn (graph/select sample-scratch/Schema
                                     ["Entry"
                                      ["name"
@@ -79,7 +79,7 @@
 
   (!.lua
    (local conn (lua-postgres/connect-constructor {:database "test-scratch"}))
-   (k/js-decode
+   (k/json-decode
     (dbsql/query conn (graph/select sample-scratch/Schema
                                     ["Entry"
                                      ["name"
@@ -92,7 +92,7 @@
 
   (!.lua
    (local conn (lua-postgres/connect-constructor {:database "test-scratch"}))
-   (k/js-decode
+   (k/json-decode
     (dbsql/query conn (graph/select sample-scratch/Schema
                                     ["Entry"
                                      ["name"

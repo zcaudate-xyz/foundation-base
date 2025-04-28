@@ -393,7 +393,7 @@
   ^:hidden
 
   (!.lua
-   (k/js-decode
+   (k/json-decode
     (stream/mq-stream-broadcast-multi
      "test:stream"
      (cjson.encode [["p1" "hello1"]

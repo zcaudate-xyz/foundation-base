@@ -406,19 +406,19 @@
 ;; JSON
 ;;
 
-(defn python-tf-x-js-encode
+(defn python-tf-x-json-encode
   ([[_ obj]]
    (list '. (list '__import__ "json")
          (list 'dumps obj))))
 
-(defn python-tf-x-js-decode
+(defn python-tf-x-json-decode
   ([[_ s]]
    (list '. (list '__import__ "json")
          (list 'loads s))))
 
 (def +python-js+
-  {:x-js-encode      {:macro #'python-tf-x-js-encode      :emit :macro}
-   :x-js-decode      {:macro #'python-tf-x-js-decode      :emit :macro}})
+  {:x-json-encode      {:macro #'python-tf-x-json-encode      :emit :macro}
+   :x-json-decode      {:macro #'python-tf-x-json-decode      :emit :macro}})
 
 ;;
 ;; RETURN

@@ -64,7 +64,7 @@
         {:title "Trigger"
          :onPress (fn:> (cl/view-refresh ["basic" "ping"] cell))}]] 
 [:% n/Caption
-       {:text (k/js-encode {:count (getCount)
+       {:text (k/json-encode {:count (getCount)
                             :data (cl/get-val ["basic" "ping"]
                                               []
                                               cell)})
@@ -142,7 +142,7 @@
                   :setInitial setL0
                   :listWidth 100
                   :listFormat j/toUpperCase
-                  :formatFn k/js-encode
+                  :formatFn k/json-encode
                   :branchesFn
                   (fn:> [cell]
                     (k/sort (cl/list-models cell)))
@@ -154,7 +154,7 @@
                   :setInitial setL1
                   :listWidth 100
                   :listFormat j/toUpperCase
-                  :formatFn k/js-encode
+                  :formatFn k/json-encode
                   :branchesFn 
                   (fn [model parents cell]
                     (when (and (k/first parents)
@@ -188,7 +188,7 @@
        {:tree  {}
         :levels []}] 
 [:% n/Caption
-       {:text (k/js-encode #{initial})
+       {:text (k/json-encode #{initial})
         :style {:marginTop 10}}])))
   
   (def.js MODULE (!:module))

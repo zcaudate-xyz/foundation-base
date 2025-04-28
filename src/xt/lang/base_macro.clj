@@ -861,18 +861,18 @@
 ;;
 
 (defmacro.xt ^{:standalone true}
-  js-encode
+  json-encode
   "encodes object to json"
   {:added "4.0"}
   ([obj]
-   (list 'x:js-encode obj)))
+   (list 'x:json-encode obj)))
 
 (defmacro.xt ^{:standalone true}
-  js-decode
+  json-decode
   "decodes json to object"
   {:added "4.0"}
   ([s]
-   (list 'x:js-decode s)))
+   (list 'x:json-decode s)))
 
 (defmacro.xt  ^{:standalone true}
   json-push

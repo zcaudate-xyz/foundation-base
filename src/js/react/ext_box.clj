@@ -22,7 +22,7 @@
   (var getFn (fn:> (k/clone-shallow
                     (event-box/get-data box path))))
   (var [data changeData] (r/local getFn))
-  (r/watch [(k/js-encode path)]
+  (r/watch [(k/json-encode path)]
     (var listener-id (j/randomId 4))
     (event-box/add-listener box listener-id path
                             (fn [m]

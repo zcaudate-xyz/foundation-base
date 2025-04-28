@@ -255,7 +255,7 @@
   (var model-deps (-/get-model-deps model-id views))
   (var unknown-deps (-/get-unknown-deps model-id views model-deps cell))
   (when (k/not-empty? unknown-deps)
-    (console.log (k/cat "ERR - deps not found - " (k/js-encode unknown-deps))
+    (console.log (k/cat "ERR - deps not found - " (k/json-encode unknown-deps))
                  model-deps))
   (var model-views {})
   (k/for:object [[view-id view] views]
@@ -283,7 +283,7 @@
   (var #{models} cell)
   (var dependents (-/get-model-dependents cell models))
   (when (k/not-empty? dependents)
-    (k/err (k/cat "ERR - existing model dependents - " (k/js-encode dependents))))
+    (k/err (k/cat "ERR - existing model dependents - " (k/json-encode dependents))))
   (var curr (k/get-key models model-id))
   (k/del-key models model-id)
   (return curr))
@@ -295,7 +295,7 @@
   (var #{models} cell)
   (var dependents (-/get-view-dependents cell model-id view-id))
   (when (k/not-empty? dependents)
-    (k/err (k/cat "ERR - existing view dependents - " (k/js-encode dependents))))
+    (k/err (k/cat "ERR - existing view dependents - " (k/json-encode dependents))))
   (var model (k/get-key models model-id))
   (when model
     (var #{views} model)

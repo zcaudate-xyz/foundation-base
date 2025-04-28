@@ -83,7 +83,7 @@
         (return {})
 
         :else
-        (return (k/js-decode mstr))))
+        (return (k/json-decode mstr))))
 
 (defn.xt meta-update
   "updates the meta map"
@@ -93,7 +93,7 @@
   (var mprev (-/meta-get type))
   (var mcurr (f mprev))
   (var mkey (-/meta-key type))
-  (-/set g mkey (k/js-encode mcurr))
+  (-/set g mkey (k/json-encode mcurr))
   (return mcurr))
 
 (defn.xt meta-assoc

@@ -129,7 +129,7 @@
   "add listener to cell"
   {:added "4.0"}
   [cell path listener-id f meta pred]
-  (var view-key (k/js-encode path))
+  (var view-key (k/json-encode path))
   (return
    (event-common/add-keyed-listener
     cell view-key listener-id "cell" f meta pred)))
@@ -138,7 +138,7 @@
   "remove listeners from cell"
   {:added "4.0"}
   [cell path listener-id]
-  (var view-key (k/js-encode path))
+  (var view-key (k/json-encode path))
   (return
    (event-common/remove-keyed-listener
     cell view-key listener-id)))
@@ -147,7 +147,7 @@
   "lists listeners in a cell path"
   {:added "4.0"}
   [cell path]
-  (var view-key (k/js-encode path))
+  (var view-key (k/json-encode path))
   (return
    (event-common/list-keyed-listeners cell view-key)))
 
@@ -159,7 +159,7 @@
   (var out {})
   (k/for:object [[view-key callbacks] listeners]
     (k/set-in out
-              (k/js-decode view-key)
+              (k/json-decode view-key)
               (k/obj-keys callbacks)))
   (return out))
 
@@ -167,7 +167,7 @@
   "triggers listeners"
   {:added "4.0"}
   [cell path event]
-  (var view-key (k/js-encode path))
+  (var view-key (k/json-encode path))
   (return
    (event-common/trigger-keyed-listeners
     cell view-key (j/assign {:path path} event))))

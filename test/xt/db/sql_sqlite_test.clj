@@ -92,7 +92,7 @@
                               sample/SchemaLookup
                               (ut/sqlite-opts nil))))
    (k/arr-sort
-    (k/js-decode
+    (k/json-decode
      (dbsql/query-sync DB "SELECT json_group_array(name) FROM sqlite_schema where type='table'"))
     k/identity
     k/lt))
@@ -108,7 +108,7 @@
                               sample/SchemaLookup
                               (ut/sqlite-opts nil))))
    (k/arr-sort
-    (k/js-decode
+    (k/json-decode
      (or (dbsql/query-sync DB "SELECT json_group_array(name) FROM sqlite_schema where type='table'")
          (dbsql/query-sync DB "SELECT json_group_array(name) FROM sqlite_master where type='table'")))
     k/identity

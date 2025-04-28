@@ -110,7 +110,7 @@
   [schema table-key field]
   (let [attr (k/get-in schema [table-key field "ref"])
         _    (if (not attr)
-               (k/err (k/cat "Not a valid link type: " (k/js-encode [table-key field]))))
+               (k/err (k/cat "Not a valid link type: " (k/json-encode [table-key field]))))
         #{ns type rval} attr
         [table-link
          inverse-link] (k/get-key {:reverse ["rev_links" "ref_links"]

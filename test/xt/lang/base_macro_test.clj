@@ -2245,50 +2245,50 @@
    (k/uri-decode (k/uri-encode "+.\n ")))
   => "+.\n ")
 
-^{:refer xt.lang.base-macro/js-encode :added "4.0"}
+^{:refer xt.lang.base-macro/json-encode :added "4.0"}
 (fact "encodes object to json"
   ^:hidden
   
   (json/read
    (!.js
-    (k/js-encode [1 2 {:a [{:b 3}]}])))
+    (k/json-encode [1 2 {:a [{:b 3}]}])))
   => [1 2 {"a" [{"b" 3}]}]
 
   (json/read
    (!.lua
     (var cjson := (require "cjson"))
-    (k/js-encode [1 2 {:a [{:b 3}]}])))
+    (k/json-encode [1 2 {:a [{:b 3}]}])))
   => [1 2 {"a" [{"b" 3}]}]
 
   (json/read
    (!.py
-    (k/js-encode [1 2 {:a [{:b 3}]}])))
+    (k/json-encode [1 2 {:a [{:b 3}]}])))
   => [1 2 {"a" [{"b" 3}]}]
 
   (json/read
    (!.R
-    (k/js-encode [1 2 {:a [{:b 3}]}])))
+    (k/json-encode [1 2 {:a [{:b 3}]}])))
   => [1 2 {"a" [{"b" 3}]}])
 
-^{:refer xt.lang.base-macro/js-decode :added "4.0"}
+^{:refer xt.lang.base-macro/json-decode :added "4.0"}
 (fact "decodes json to object"
   ^:hidden
 
   (!.js
-   (k/js-decode (k/js-encode [1 2 {:a [{:b 3}]}])))
+   (k/json-decode (k/json-encode [1 2 {:a [{:b 3}]}])))
   => [1 2 {"a" [{"b" 3}]}]
 
   (!.lua
    (var cjson := (require "cjson"))
-   (k/js-decode (k/js-encode [1 2 {:a [{:b 3}]}])))
+   (k/json-decode (k/json-encode [1 2 {:a [{:b 3}]}])))
   => [1 2 {"a" [{"b" 3}]}]
 
   (!.py
-   (k/js-decode (k/js-encode [1 2 {:a [{:b 3}]}])))
+   (k/json-decode (k/json-encode [1 2 {:a [{:b 3}]}])))
   => [1 2 {"a" [{"b" 3}]}]
 
   (!.R
-   (k/js-decode (k/js-encode [1 2 {:a [{:b 3}]}])))
+   (k/json-decode (k/json-encode [1 2 {:a [{:b 3}]}])))
   => [1 2 {"a" [{"b" 3}]}])
 
 ^{:refer xt.lang.base-macro/json-push :added "4.0"}

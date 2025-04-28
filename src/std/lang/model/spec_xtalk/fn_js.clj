@@ -366,8 +366,8 @@
 ;;
 
 (def +js-js+
-  {:x-js-encode      {:emit :alias :raw 'JSON.stringify}
-   :x-js-decode      {:emit :alias :raw 'JSON.parse}})
+  {:x-json-encode      {:emit :alias :raw 'JSON.stringify}
+   :x-json-decode      {:emit :alias :raw 'JSON.parse}})
 
 ;;
 ;; COM

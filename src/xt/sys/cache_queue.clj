@@ -71,7 +71,7 @@
   "gets the queue meta"
   {:added "4.0"}
   [cache]
-  (return (k/js-decode (or (x:cache-get cache "__meta__:queue")
+  (return (k/json-decode (or (x:cache-get cache "__meta__:queue")
                            "{}"))))
 
 (defn.xt buffer-item
@@ -110,7 +110,7 @@
   [cache key item]
   (var meta (-/queue-meta cache))
   (k/set-key meta key item)
-  (cache/set cache -/META-KEY (k/js-encode meta))
+  (cache/set cache -/META-KEY (k/json-encode meta))
   (return meta))
 
 (defn.xt queue-meta-dissoc
@@ -120,7 +120,7 @@
   (var meta (-/queue-meta cache))
   (var out  (k/get-key meta key))
   (k/del-key meta key)
-  (cache/set cache -/META-KEY (k/js-encode meta))
+  (cache/set cache -/META-KEY (k/json-encode meta))
   (return out))
 
 (defn.xt create-queue

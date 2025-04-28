@@ -371,8 +371,8 @@
 ;;
 
 (def +lua-js+
-  {:x-js-encode      {:emit :alias :raw 'cjson.encode}
-   :x-js-decode      {:emit :alias :raw 'cjson.decode}})
+  {:x-json-encode      {:emit :alias :raw 'cjson.encode}
+   :x-json-decode      {:emit :alias :raw 'cjson.decode}})
 
 ;;
 ;; RETURN

@@ -331,7 +331,7 @@
   {:added "4.0"}
   [view args opts]
   (:= opts (or opts {}))
-  (r/watch [(k/js-encode args)]
+  (r/watch [(k/json-encode args)]
     (return
      (-/refreshArgsFn view args opts))))
 

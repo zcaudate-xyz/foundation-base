@@ -113,7 +113,7 @@
                               ["id"]]]]
                            (ut/sqlite-opts nil)))
             (. [0] ["values"] [0] [0])
-            k/js-decode)))
+            k/json-decode)))
   => #{{"currency" [{"id" "XLM"}],
         "id" "222de282-ca29-4d04-81dd-86ec3f9189cf"}
        {"currency" [{"id" "XLM.T"}],
@@ -138,7 +138,7 @@
                             ["currency"]]]]]]]]]
                       (ut/sqlite-opts nil)))
        (. [0] ["values"] [0] [0])
-       k/js-decode))
+       k/json-decode))
   => [{"is_official" 0,
        "nickname" "root",
        "profile"

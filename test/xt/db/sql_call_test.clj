@@ -36,26 +36,26 @@
   ^:hidden
   
   (!.lua
-   (call/decode-return (k/js-encode
+   (call/decode-return (k/json-encode
                         {:status "ok"
                          :data 1})))
   => 1
 
   (!.lua
-   (call/decode-return (k/js-encode
+   (call/decode-return (k/json-encode
                         {:status "error"
                          :data "NOT VALID"})))
   => (throws)
 
 
   (!.js
-   (call/decode-return (k/js-encode
+   (call/decode-return (k/json-encode
                         {:status "ok"
                          :data 1})))
   => 1
 
   (!.js
-   (call/decode-return (k/js-encode
+   (call/decode-return (k/json-encode
                         {:status "error"
                          :data "NOT VALID"})))
   => (throws))
@@ -109,7 +109,7 @@
   (!.lua
    (var conn (driver/connect {:constructor lua-postgres/connect-constructor
                               :database "test-scratch"}))
-   (k/js-decode
+   (k/json-decode
     (call/call-raw conn
                    (@! (pg/bind-function scratch/addf))
                    [10 20])))
@@ -136,7 +136,7 @@
   (!.lua
    (var conn (driver/connect {:constructor lua-postgres/connect-constructor
                               :database "test-scratch"}))
-   (k/js-decode
+   (k/json-decode
     (call/call-api conn
                    (@! (pg/bind-function scratch/addf))
                    [10 20])))

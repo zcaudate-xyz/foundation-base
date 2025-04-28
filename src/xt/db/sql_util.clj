@@ -103,7 +103,7 @@
   "encodes a json value"
   {:added "4.0"}
   [v]
-  (return (k/cat "'" (k/replace (k/js-encode v)
+  (return (k/cat "'" (k/replace (k/json-encode v)
                                 "'" "''")
                  "'")))
 
@@ -481,9 +481,9 @@
                          (return (:? (< indent 2) s (k/cat "(\n" (k/pad-lines s 2 " ") ")"))))
            :operators        {:ilike "LIKE"}
            :coerce           {:boolean -/sqlite-to-boolean
-                              :jsonb   k/js-decode
-                              :map     k/js-decode
-                              :array   k/js-decode}
+                              :jsonb   k/json-decode
+                              :map     k/json-decode
+                              :array   k/json-decode}
            :column-fn        -/default-quote-fn
            :table-fn         -/default-quote-fn
            :return-format-fn -/sqlite-return-format-fn

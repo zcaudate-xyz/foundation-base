@@ -347,17 +347,17 @@
 ;; JSON
 ;;
 
-(defn r-tf-x-js-encode
+(defn r-tf-x-json-encode
   ([[_ obj]]
    (list 'toJSON obj :auto-unbox true)))
 
-(defn r-tf-x-js-decode
+(defn r-tf-x-json-decode
   ([[_ s]]
    (list 'fromJSON s)))
 
 (def +r-js+
-  {:x-js-encode      {:macro #'r-tf-x-js-encode      :emit :macro}
-   :x-js-decode      {:macro #'r-tf-x-js-decode      :emit :macro}})
+  {:x-json-encode      {:macro #'r-tf-x-json-encode      :emit :macro}
+   :x-json-decode      {:macro #'r-tf-x-json-decode      :emit :macro}})
 
 
 

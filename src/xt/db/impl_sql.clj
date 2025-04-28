@@ -63,7 +63,7 @@
   "runs a pull statement"
   {:added "4.0"}
   [instance schema tree opts]
-  (return (k/js-decode (or (conn-dbsql/query-sync
+  (return (k/json-decode (or (conn-dbsql/query-sync
                             instance
                             (sql-graph/select schema tree opts))
                            "null"))))

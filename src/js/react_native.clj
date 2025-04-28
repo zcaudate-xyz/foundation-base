@@ -1016,7 +1016,7 @@
          :setValues setValues
          :format (fn:> [s] (+ \" \" s \" \"))}]
        [:% n/Caption
-        {:text (k/js-encode #{values})
+        {:text (k/json-encode #{values})
          :style {:marginTop 10}}]]))"
   {:added "4.0"}
   ([#{[data

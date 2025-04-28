@@ -354,8 +354,8 @@
    {:op :x-str-trim-right  :symbol #{'x:str-trim-right}  :emit :abstract}])
 
 (def +op-xtalk-js+
-  [{:op :x-js-encode      :symbol #{'x:js-encode}       :emit :abstract}
-   {:op :x-js-decode      :symbol #{'x:js-decode}       :emit :abstract}])
+  [{:op :x-json-encode      :symbol #{'x:json-encode}       :emit :abstract}
+   {:op :x-json-decode      :symbol #{'x:json-decode}       :emit :abstract}])
 
 (def +op-xtalk-return+
   [{:op :x-return-encode   :symbol #{'x:return-encode}   :emit :abstract}

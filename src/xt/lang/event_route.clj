@@ -27,7 +27,7 @@
         (return {:path path :params {}})
 
         :else
-        (return {:path path :params {(k/js-encode path) params}})))
+        (return {:path path :params {(k/json-encode path) params}})))
 
 (defn.xt interim-to-url
   "creates url from interim"
@@ -35,7 +35,7 @@
   [interim]
   (var #{path params} interim)
   (var param-arr [])
-  (k/for:object [[key val] (or (k/get-key params (k/js-encode path))
+  (k/for:object [[key val] (or (k/get-key params (k/json-encode path))
                                {})]
     (when val
       (x:arr-push param-arr (k/cat key "=" val))))
@@ -52,10 +52,10 @@
   (var out {})
   (var arr [])
   (k/for:array [[i v] path]
-    (k/set-key out (k/js-encode arr) v)
+    (k/set-key out (k/json-encode arr) v)
     (x:arr-push arr v))
   (when terminate
-    (k/set-key out (k/js-encode arr) nil))
+    (k/set-key out (k/json-encode arr) nil))
   (return out))
 
 (defn.xt interim-to-tree
@@ -72,10 +72,10 @@
   {:added "4.0"}
   [tree]
   (var path [])
-  (var v    (k/get-key tree (k/js-encode path)))
+  (var v    (k/get-key tree (k/json-encode path)))
   (while (k/not-empty? v)
     (x:arr-push path v)
-    (:= v (k/get-key tree (k/js-encode path))))
+    (:= v (k/get-key tree (k/json-encode path))))
   (return path))
 
 (defn.xt path-params-from-tree
@@ -85,7 +85,7 @@
   (return
    (or (-> tree
            (k/get-key "params")
-           (k/get-key (k/js-encode path)))
+           (k/get-key (k/json-encode path)))
        {})))
 
 (defn.xt interim-from-tree
@@ -135,7 +135,7 @@
     (when (not= pv v)
       (:= changed true))
     (when changed
-      (k/set-key all (k/js-encode arr) true))
+      (k/set-key all (k/json-encode arr) true))
     (x:arr-push arr v))
   (return all))
 
@@ -159,7 +159,7 @@
   {:added "4.0"}
   [route path]
   (var #{tree} route)
-  (var pkey (k/js-encode path))
+  (var pkey (k/json-encode path))
   (return (k/get-key tree pkey)))
 
 (defn.xt get-param
@@ -212,7 +212,7 @@
   "adds a path listener"
   {:added "4.0"}
   [route path listener-id callback meta]
-  (var pkey (k/js-encode path))
+  (var pkey (k/json-encode path))
   (return
    (event-common/add-listener
     route listener-id "route.path"
@@ -243,7 +243,7 @@
   "adds a full listener"
   {:added "4.0"}
   [route path param listener-id callback meta]
-  (var pkey (k/js-encode path))
+  (var pkey (k/json-encode path))
   (return
    (event-common/add-listener
     route listener-id "route.full"
@@ -278,7 +278,7 @@
   ^CHANGES
   (var ppath   (-/path-from-tree tree))
   (var npath   (k/get-key ninterim "path"))
-  (var pkey    (k/js-encode npath))
+  (var pkey    (k/json-encode npath))
   
   (var pparams (k/get-key all-params pkey))
   (var nparams (k/get-key ninterim-params pkey))
@@ -313,7 +313,7 @@
   ^CHANGES
   (var ppath    (-/path-from-tree tree))
   (var npath    (or path ppath))
-  (var pkey    (k/js-encode npath))
+  (var pkey    (k/json-encode npath))
   
   (var pparams  (k/get-key all-params pkey))
   (var nparams  (or params pparams))
@@ -343,7 +343,7 @@
   {:added "4.0"}
   [route path value]
   (var #{tree} route)
-  (var pkey   (k/js-encode path))
+  (var pkey   (k/json-encode path))
   (var pvalue (k/get-key tree pkey))
   (k/set-key tree pkey value)
   
@@ -362,7 +362,7 @@
   [route param value path]
   (var #{tree} route)
   (:= path  (or path (-/path-from-tree tree)))
-  (var pkey (k/js-encode path))
+  (var pkey (k/json-encode path))
   (var all-params (k/get-key tree "params"))
   (var pparams (or (k/get-key all-params pkey) {}))
   (var pvalue  (k/get-key pparams param))

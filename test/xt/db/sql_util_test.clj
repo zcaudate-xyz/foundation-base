@@ -107,8 +107,8 @@
 (fact "encodes a value to sql"
   ^:hidden
 
-  (!.js (k/js-encode 100000000000000000))
-  (!.lua (k/js-encode 100000000000000000))
+  (!.js (k/json-encode 100000000000000000))
+  (!.lua (k/json-encode 100000000000000000))
   
   (!.lua
    (string.format "%0.f" 100000000000000000))

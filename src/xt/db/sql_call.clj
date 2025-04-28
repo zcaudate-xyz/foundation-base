@@ -12,7 +12,7 @@
   "decodes the return value"
   {:added "4.0"}
   [outstr alt]
-  (var out (k/js-decode outstr))
+  (var out (k/json-decode outstr))
   (var #{status data} out)
   (when (== "error" status)
     (k/err (k/cat "ERR - API: " outstr)))
@@ -54,10 +54,10 @@
   (var targs (k/get-key spec "input"))
   (var [l-ok l-err] (check/check-args-length args targs))
   (when (not l-ok)
-    (k/err (k/cat "ERR: - " (k/js-encode l-err))))
+    (k/err (k/cat "ERR: - " (k/json-encode l-err))))
   (var [t-ok t-err] (check/check-args-type args targs))
   (when (not t-ok)
-    (k/err (k/cat "ERR: - " (k/js-encode t-err))))
+    (k/err (k/cat "ERR: - " (k/json-encode t-err))))
   (var q  (-/call-format-query spec args))
   (var success-fn
        (fn [val]
@@ -66,13 +66,13 @@
                        (== val ""))
                  (return nil)
                  (return (:? (k/is-string? val)
-                             (k/js-decode val)
+                             (k/json-decode val)
                              val)))
                :else
                (return val))))
   (var error-fn
        (fn [err]
-         (k/err (k/cat "ERR: - " (k/js-encode err)))))
+         (k/err (k/cat "ERR: - " (k/json-encode err)))))
   (return (driver/query conn q
                         (k/obj-assign
                          {:success  success-fn
@@ -86,12 +86,12 @@
   (var targs (k/get-key spec "input"))
   (var [l-ok l-err] (check/check-args-length args targs))
   (when (not l-ok)
-    (return (k/js-encode {:status "error"
+    (return (k/json-encode {:status "error"
                           :data l-err})))
   
   (var [t-ok t-err] (check/check-args-type args targs))
   (when (not t-ok)
-    (return (k/js-encode {:status "error"
+    (return (k/json-encode {:status "error"
                           :data t-err})))
   (var q  (-/call-format-query spec args))
   
@@ -100,12 +100,12 @@
                      (k/cat "{\"status\": \"ok\", \"data\":"
                             (:? (== "jsonb" (k/get-key spec "return"))
                                 (or val "null")
-                                (k/js-encode val))
+                                (k/json-encode val))
                             "}"))))
   (var error-fn (fn [err]
                   (if (. err ["status"])
-                    (return (k/js-encode err))
-                    (return (k/js-encode {:status "error"
+                    (return (k/json-encode err))
+                    (return (k/json-encode {:status "error"
                                           :data err})))))
   (return (driver/query
            conn q

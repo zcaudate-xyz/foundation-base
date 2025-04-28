@@ -39,7 +39,7 @@
         {:outputSelection
          {"*" {"*" ["*"]}}}})
   (return
-   (k/js-decode (-/compile (k/js-encode input)))))
+   (k/json-decode (-/compile (k/json-encode input)))))
 
 
 (def.js MODULE (!:module))

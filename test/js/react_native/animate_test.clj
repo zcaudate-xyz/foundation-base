@@ -722,7 +722,7 @@
                            :style {:padding 5
                                    :width 100
                                    :textAlign "right"}}]]] 
-[:% n/Text (k/js-encode progress)])))))
+[:% n/Text (k/json-encode progress)])))))
 
 ^{:refer js.react-native.animate/useLinearIndicator :added "4.0"}
 (fact "uses the linear indicator"
@@ -787,7 +787,7 @@
                           :style {:padding 5
                                   :width 100
                                   :textAlign "right"}}]] 
-[:% n/Text (k/js-encode progress)])))))
+[:% n/Text (k/json-encode progress)])))))
 
 ^{:refer js.react-native.animate/useIndexIndicator :added "4.0"}
 (fact "creates a index indicator from state"
@@ -934,7 +934,7 @@
                           :style {:padding 5
                                   :width 100
                                   :textAlign "right"}}]] 
-[:% n/Text (k/js-encode progress)])))))
+[:% n/Text (k/json-encode progress)])))))
 
 ^{:refer js.react-native.animate/usePosition :added "4.0"}
 (fact "constructs position indicator for slider and pan"
@@ -990,7 +990,7 @@
                         :style {:padding 5
                                 :width 100
                                 :textAlign "right"}}]] 
-[:% n/Text (k/js-encode #{value position})]))))
+[:% n/Text (k/json-encode #{value position})]))))
 
 ^{:refer js.react-native.animate/useRange :added "4.0"}
 (fact "constructs lower and upper bound indicator for range"
@@ -1080,7 +1080,7 @@
                         :style {:padding 5
                                 :width 100
                                 :textAlign "right"}}]] 
-[:% n/Text (k/js-encode #{upper lower})]))))
+[:% n/Text (k/json-encode #{upper lower})]))))
 
 ^{:refer js.react-native.animate/useShowing :added "4.0"}
 (fact "constructs a function that removes"
@@ -1129,6 +1129,6 @@
                         :style {:padding 5
                                 :width 100
                                 :textAlign "right"}}]] 
-[:% n/Text (k/js-encode #{visible showing})])))
+[:% n/Text (k/json-encode #{visible showing})])))
 
   (def.js MODULE (!:module)))

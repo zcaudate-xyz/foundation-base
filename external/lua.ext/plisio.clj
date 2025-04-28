@@ -91,7 +91,7 @@
   (when (or (== 401 (. res status))
             (== 200 (. res status)))
     (return
-     (k/js-decode (. res body))))
+     (k/json-decode (. res body))))
 
   (return
    {:status "error"

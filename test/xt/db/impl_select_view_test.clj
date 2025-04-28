@@ -124,7 +124,7 @@
   
   (!.lua
    (local conn (lua-postgres/connect-constructor {:database "test-scratch"}))
-   (k/js-decode
+   (k/json-decode
     (dbsql/query conn 
                  (view/query-combined
                   sample-scratch/Schema
@@ -147,7 +147,7 @@
 
   (!.lua
    (local conn (lua-postgres/connect-constructor {:database "test-scratch"}))
-   (k/js-decode
+   (k/json-decode
     (dbsql/query conn 
                  (view/query-combined
                   sample-scratch/Schema
