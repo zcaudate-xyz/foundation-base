@@ -3,7 +3,11 @@
             [std.string :as str]))
 
 (defn create-compose-single
-  [compose environment depends-on network ip-address]
+  [compose {:keys [environment
+                   depends-on
+                   network
+                   ip-address
+                   override]}]
   (let [keys (mapv first compose)
         vals (mapv second compose)
         lu   (zipmap keys vals)
@@ -11,16 +15,29 @@
                (not-empty depends-on) (assoc :depends_on depends-on))
         keys (cond-> keys
                (not (get lu :environment))   (conj :environment)
-               :then (conj :depends_on))]
-    
-    (cond-> (map (fn [k] [k (get m k)]) keys)
-      :then (->> (filterv second))
-      (not (:networks lu)) (conj 
-                            [:networks
-                             {network
-                              (if ip-address
-                                {:ipv4_address ip-address}
-                                {})}]))))
+               :then (conj :depends_on))
+        override (if (map? (:ports override))
+                   (assoc override :ports
+                          (str/join ","
+                                    (map (fn [[k v]]
+                                           (str k ":" v))
+                                         (:ports override))))
+                   override)
+        out  (->> keys 
+                  (map (fn [k] [k (get m k)]))
+                  (filterv second))
+        out  (if (empty? override)
+               out
+               (reduce conj out override))
+        out  (if (:networks lu)
+               out
+               (conj out 
+                     [:networks
+                      {network
+                       (if ip-address
+                         {:ipv4_address ip-address}
+                         {})}]))]
+    out))
 
 (defn create-compose
   [{:keys [config
@@ -40,7 +57,6 @@
                                m))
                             config)
         environments (h/map-vals (fn [{:keys [deps environment]}]
-                                   
                                    (->> deps
                                         (map (fn [k]
                                                (get-in prep [k :export])))
@@ -51,11 +67,15 @@
                                 config)]
     (->> prep
          (map (fn [[k {:keys [compose]}]]
+                
                 [k (create-compose-single
                     compose
-                    (get environments k)
-                    (get depends-on k)
-                    network
-                    (get-in config [k :ip]))]))
+                    {:environment (get environments k)
+                     :depends-on  (get depends-on k)
+                     :network      network
+                     :ip-address  (get-in config [k :ip])
+                   :override    (dissoc (get config k)
+                                        :type :name
+                                        :ip :environment :deps)})]))
          (sort-by (comp order first))
          vec)))

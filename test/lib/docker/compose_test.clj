@@ -61,10 +61,10 @@
     [:volumes 
      ["./volumes/app-db/data:/var/lib/postgresql/data"]]
     [:healthcheck {:test ["CMD" "pg_isready" "-U" "postgres"], :interval "1m"}]]
-   {:EV_HOST "172.1.0.20", :EV_PORT 6379},
-   ["redis"],
-   :stats_dev_internal
-   "172.1.0.10")
+   {:environment {:EV_HOST "172.1.0.20", :EV_PORT 6379},
+    :depends-on ["redis"],
+    :network :stats_dev_internal
+    :ip-address "172.1.0.10"})
   => [[:image "postgres:14"]
       [:environment
        {:POSTGRES_USER "postgres",
@@ -92,7 +92,7 @@
                                 :ip "172.1.0.50"
                                 :ports {80 8080}
                                 :deps [:redis-mq
-                                     :minio]}}
+                                       :minio]}}
     :entries  {:minio    #'entry-minio
                :redis.mq #'entry-redis-mq
                :app      #'entry-app-server}
@@ -140,6 +140,8 @@
           :APP_MINIO_PASS "minioadmin",
           :APP_MINIO_URL_IMAGE "image"}]
         [:depends_on ["redis-mq" "minio"]]
+        [:image "app-server-2"]
+        [:ports "80:8080"]
         [:networks {:app-demo {:ipv4_address "172.1.0.50"}}]]]])
 
 
