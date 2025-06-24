@@ -35,6 +35,8 @@ pom.xml.asc
 .hgignore
 .hg/
 .build
+.clj-kondo
+.cpcache
 /src-infra/*/build
 /src-app/**/build
 /src-infra/*/.build

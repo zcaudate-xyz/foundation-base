@@ -18,11 +18,15 @@
          async-ns (set (-> mopts :emit :static :import/async))]
      (case imports
        :none nil
-       (:global :commonjs) (let [sym (if (vector? as)
+       (:global) (let [sym (if (vector? as)
                                        (last as)
                                        as)]
                              (list 'Object.defineProperty '!:G (str sym) 
                                    {:value (list 'require (str name))}))
+       (:commonjs) (let [sym (if (vector? as)
+                               (last as)
+                               as)]
+                     (list 'const sym := (list 'require (str name))))
        (let [imports (cond-> []
                        as    (conj (if (vector? as)
                                      (list :- (first as) :as (last as))
