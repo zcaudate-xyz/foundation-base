@@ -16,6 +16,16 @@
                (fn:> [e] (k/obj-assign {:type type}
                                        e)))))
 
+(defn.xt collect-routes-object
+  "collect routes"
+  {:added "4.0"}
+  [routes type]
+  (return
+   (k/arr-juxt (k/obj-vals routes)
+               (fn:> [e] (k/get-key e "url"))
+               (fn:> [e] (k/obj-assign {:type type}
+                                       e)))))
+
 (defn.xt collect-views
   "collect views into views structure"
   {:added "4.0"}

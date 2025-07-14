@@ -1,0 +1,6 @@
+{:theme    "bolton"
+ :output   "public"
+ :pages    {std-lib-stream
+            {:input "src-doc/documentation/std_lib_stream.clj"
+             :title "std.lib.stream"
+             :subtitle "streams and transducers"}}}

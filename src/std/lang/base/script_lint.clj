@@ -43,15 +43,6 @@
                    (vals native)))
       (:lang/lint-globals static)))))
 
-(comment
-  (collect-module-globals
-   (std.lang/rt:module (std.lang/rt 'js.react-native :js)))
-  
-  (collect-module-globals
-   (std.lang/rt:module (std.lang/rt 'js.lib.datetime :js)))
-
-  *entry*)
-
 (defn collect-sym-vars
   "collect symbols and vars"
   {:added "4.0"}
@@ -160,8 +151,11 @@
    (let [{:keys [id op]} entry]
      (cond ('#{defn def defgen defglobal} op)
            (let [{:keys [vars syms]} (collect-sym-vars entry module lang-globals)
+                 internal (disj (set (vals (:internal module)))
+                                '-)
                  unused  (h/difference (disj vars '_) syms)
-                 unknown (h/difference syms vars)]
+                 unknown (h/difference syms vars)
+                 unknown (h/difference unknown internal)]
              (when (not-empty unused)
                (when (= :print (:unused options))
                  (h/p (str "UNUSED VAR @ " (:module entry) "/" id)
@@ -180,7 +174,6 @@
 ;;
 ;;
 ;;
-
 
 (defonce +registry+
   (atom {}))
@@ -276,3 +269,7 @@
         (linter entry module globals {:unknown :error
                                       :unused  :silent})))))
 
+
+(comment
+  (keys *module*)
+  )

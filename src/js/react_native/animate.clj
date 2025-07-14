@@ -130,6 +130,33 @@
                (-/start anim callback)
                (return anim))))))
 
+(defn.js setPropsAll
+  [elem props]
+  (cond (and elem
+             elem.setNativeProps
+             (k/fn? elem.setNativeProps))
+        (try (elem.setNativeProps props)
+             (catch e))
+        
+        (== "web" (. n/Platform OS))
+        (k/for:object [[k0 v0] props]
+          (when (props.hasOwnProperty k0)
+            (cond (and (== k0 "style")
+                       (== "object" (typeof v0)))
+                  (:= elem.style
+                      (k/arr-foldl [elem.style v0]
+                                   k/obj-assign
+                                   {}))
+                  
+                  (and (== k0 "text")
+                       (or (== "INPUT" elem.tagName)
+                           (== "TEXTAREA" elem.tagName)))
+                  (:= elem.v0ue v0)
+                  
+                  :else
+                  (:= (. elem [k0])
+                      (. props [k0])))))))
+
 (def.js IMPL
   {:create-val        (fn:> [v]
                         (-/val v))
@@ -154,8 +181,7 @@
                                    (/ (j/round (* aval._value 20))
                                       20)))))
    :set-value         (fn:> [aval v] (-/setValue aval v))
-   :set-props         (fn [elem props]
-                        (elem.setNativeProps props))
+   :set-props         -/setPropsAll
    :is-animated       -/isAnimatedValue
    :create-transition -/createTransition
    :stop-transition   (fn:> [anim] (-/stop anim))})

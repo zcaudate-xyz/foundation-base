@@ -72,7 +72,9 @@
      (stop-pg-temp-teardown pg))
    pg))
 
-(def ^{:arglists '([pg])} stop-pg (h/wrap-stop stop-pg-raw
-                                                  [{:key :container
-                                                    :setup     docker/start-runtime
-                                                    :teardown  docker/stop-runtime}]))
+(def ^{:arglists '([pg])}
+  stop-pg
+  (h/wrap-stop stop-pg-raw
+               [{:key :container
+                 :setup     docker/start-runtime
+                 :teardown  docker/stop-runtime}]))

@@ -4,4 +4,5 @@
             :tracking-enabled "true"
             :tracking "UA-31320512-2"}
  :snippets "config/snippets"
- :sites      {:core         [:include "config/publish/foundation.core.edn" {:type :edn}]}}
+ :sites      {:core         [:include "config/publish/foundation.core.edn" {:type :edn}]
+              :std.lib      [:include "config/publish/std.lib.edn" {:type :edn}]}}
