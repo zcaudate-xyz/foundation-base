@@ -1,6 +1,7 @@
 (ns js.lib.osc
   (:require [std.lang :as l]
-            [std.lib :as h]))
+            [std.lib :as h])
+  (:refer-clojure :exclude [send]))
 
 (l/script :js
   {:macro-only true

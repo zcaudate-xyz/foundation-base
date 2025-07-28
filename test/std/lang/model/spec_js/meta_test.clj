@@ -21,7 +21,7 @@
   
   (js-module-import 'react '{:as [:* React]
                              :refer [hello world]} {:emit {:lang/imports :commonjs}})
-  => '(Object.defineProperty !:G "React" {:value (require "react")})
+  => '(const React := (require "react"))
 
   (js-module-import 'react '{:as [:* React]
                              :refer [hello world]} {:emit {:lang/imports :global}})

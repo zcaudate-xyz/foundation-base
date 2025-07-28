@@ -151,26 +151,40 @@
                 export
                 suppress]
          :as module}
-   & [graph]]
+   & [{:keys [type]
+       :as options}]]
   (let [setup    (setup-module-form book module)
         teardown (teardown-module-form book module)
         code    (->> (vals (dissoc (:code module)
                                    (:as export)))
                      (sort-by (juxt :priority :line :time)))
-        link    (if graph
-                  (keep (fn [[sym ns]]
-                          (cond (= ns (:id module)) nil
-                                (get suppress ns) nil
-                                
-                                :else
-                                (let [link (module-link-form book ns graph)]
-                                  [link (if (vector? sym)
-                                          {:refer sym
-                                           :ns ns}
-                                          {:as sym
-                                           :ns ns})])))
-                        link)
-                  {})]
+        link    (case type
+                  :graph    (keep (fn [[sym ns]]
+                                    (cond (= ns (:id module)) nil
+                                          (get suppress ns) nil
+                                          
+                                          :else
+                                          (let [link (module-link-form book ns options)]
+                                            [link (if (vector? sym)
+                                                    {:refer sym
+                                                     :ns ns}
+                                                    {:as sym
+                                                     :ns ns})])))
+                                  link)
+                  :directory (keep (fn [[sym ns]]
+                                     (cond (= ns (:id module)) nil
+                                           (get suppress ns) nil
+                                           
+                                           :else
+                                           (let [link (module-link-form book ns options)]
+                                             [link (if (vector? sym)
+                                                     {:refer sym
+                                                      :ns ns}
+                                                     {:as sym
+                                                      :ns ns})])))
+                                   link)
+                  ;; an empty map differs from the array
+                  ^:meta/empty {})]
     {:setup    setup
      :teardown teardown
      :code     code

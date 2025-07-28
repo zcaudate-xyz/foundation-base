@@ -18,11 +18,11 @@
          async-ns (set (-> mopts :emit :static :import/async))]
      (case imports
        :none nil
-       (:global) (let [sym (if (vector? as)
-                                       (last as)
-                                       as)]
-                             (list 'Object.defineProperty '!:G (str sym) 
-                                   {:value (list 'require (str name))}))
+       (:global)   (let [sym (if (vector? as)
+                               (last as)
+                               as)]
+                     (list 'Object.defineProperty '!:G (str sym) 
+                           {:value (list 'require (str name))}))
        (:commonjs) (let [sym (if (vector? as)
                                (last as)
                                as)]

@@ -20,7 +20,9 @@
                                                                        meta))
         module (get-in book [:modules module-id])]
     [[stage grammar book namespace (assoc mopts :module module)]
-     (deps/collect-module book module (:compile emit))]))
+     (deps/collect-module book
+                          module
+                          (:compile emit))]))
 
 ;;
 ;; SETUP
@@ -63,6 +65,53 @@
        (filter not-empty)
        (str/join "\n\n")))
 
+(defn emit-module-setup-native-arr
+  [module-id
+   {:keys [library
+           lang
+           emit] :as meta}
+   prep]
+  (let [[[stage grammar book namespace mopts]
+         {:keys [setup
+                 native
+                 link
+                 header
+                 code
+                 export]}] prep]
+    (if (not (-> emit :native :suppress))
+      (let [native-opts  (update mopts :emit merge (:native emit))]
+        (keep (fn [[name module]]
+                (if-let [form (deps/module-import-form book name module native-opts)]
+                  (impl/emit-direct grammar
+                                    form
+                                    namespace
+                                    native-opts)))
+              native)))))
+    
+(defn emit-module-setup-link-arr
+  [module-id
+   {:keys [library
+           lang
+           emit] :as meta}
+   prep]
+  (let [[[stage grammar book namespace mopts]
+         {:keys [setup
+                 native
+                 link
+                 header
+                 code
+                 export]}] prep]
+    (if (and (= :module (:layout mopts))
+             (not (-> emit :link :suppress)))
+      (let [link-opts    (update mopts :emit merge (:link emit))]
+        (keep (fn [[name module]]
+                (if-let [form (deps/module-import-form book name module link-opts)]
+                  (impl/emit-direct grammar
+                                    form
+                                    namespace
+                                    link-opts)))
+              link)))))
+
 (defn emit-module-setup-raw
   "creates module setup map of array strings"
   {:added "4.0"}
@@ -70,13 +119,14 @@
    {:keys [library
            lang
            emit] :as meta}]
-  (let [[[stage grammar book namespace mopts]
+  (let [prep   (emit-module-prep module-id meta) 
+        [[stage grammar book namespace mopts]
          {:keys [setup
                  native
                  link
                  header
                  code
-                 export]}] (emit-module-prep module-id meta)
+                 export]}] prep
         setup-body   (if (and (not (-> emit :setup :suppress))
                               setup)
                        (impl/emit-direct grammar
@@ -84,32 +134,14 @@
                                          namespace
                                          (update mopts :emit merge (:setup emit))))
         
-        native-arr   (if (not (-> emit :native :suppress))
-                       (let [native-opts  (update mopts :emit merge (:native emit))]
-                         (keep (fn [[name module]]
-                                 (if-let [form (deps/module-import-form book name module native-opts)]
-                                   (impl/emit-direct grammar
-                                                     form
-                                                     namespace
-                                                     native-opts)))
-                               native)))
-        link-arr     (if (and (= :module (:layout mopts))
-                              (not (-> emit :link :suppress)))
-                       (let [link-opts    (update mopts :emit merge (:link emit))]
-                         (keep (fn [[name module]]
-                                 (if-let [form (deps/module-import-form book name module link-opts)]
-                                   (impl/emit-direct grammar
-                                                     form
-                                                     namespace
-                                                     link-opts)))
-                               link)))
+        native-arr   (emit-module-setup-native-arr module-id meta prep)
+        link-arr     (emit-module-setup-link-arr module-id meta prep)
         header-arr   (if (not (-> emit :header :suppress))
                        (let [header-opts  (update mopts :emit merge (:header emit))]
                          (keep (fn [entry]
                                  (binding [*ns* (:namespace entry)]
                                    (entry/emit-entry grammar entry header-opts)))
                                header)))
-        
         code-arr     (if (not (-> emit :code :suppress))
                        (let [code-opts    (update mopts :emit merge (:code emit))]
                          (keep (fn [entry]
@@ -141,7 +173,7 @@
                              mopts)))]
     {:setup-body setup-body
      :native-arr native-arr
-     :link-arr link-arr
+     :link-arr   link-arr
      :header-arr header-arr
      :code-arr code-arr
      :export-body export-body}))

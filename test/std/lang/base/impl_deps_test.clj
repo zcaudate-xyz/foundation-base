@@ -154,7 +154,8 @@
 
   (-> (deps/collect-module (lib/get-book +library-ext+ :lua)
                            (lib/get-module +library-ext+ :lua 'L.util)
-                           {:root-ns 'L.script})
+                           {:type :graph
+                            :root-ns 'L.script})
       (update :code (fn [arr]
                       (set (map :id arr)))))
   => '{:setup nil,

@@ -15,7 +15,7 @@
              [npx expo build:web]]
             [:dev
              [yarn install]
-             [npx expo start --web]]
+             [npx expo start --web --port 19007]]
             [:ios
              [yarn install]
              [npx expo start --ios]]
@@ -60,7 +60,19 @@
    :github   {:repo   "zcaudate-xyz/demo.foundation-base"
               :description "Js Web Components"}
    :sections {:common [+expo-makefile+
-                       +github-workflows-build+]
+                       +github-workflows-build+
+                       {:type :raw
+                        :file "metro.config.js"
+                        :main
+                        ["const { getDefaultConfig } = require('expo/metro-config');"
+                         ""
+                         "const config = getDefaultConfig(__dirname);"
+                         ""
+                         "// Extend asset and source extensions"
+                         "config.resolver.assetExts.push('db', 'ttf'); // Add 'ttf' for TrueType Fonts"
+                         "config.resolver.sourceExts.push('db'); // If you have custom '.db' files that need resolving"
+                         ""
+                         "module.exports = config;"]}]
               :node   [{:type :gitignore,
                         :main
                         ["node_modules/**/*"
@@ -93,7 +105,8 @@
                        
                        {:type :package.json,
                         :main
-                        {"main" "node_modules/expo/AppEntry.js"
+                        { ;;"main" "node_modules/expo/AppEntry.js",
+                         "main" "./src/App.js",
                          "name"  "native-v1"
                          "scripts" {"start" "expo start"
                                     "android" "expo start --android"

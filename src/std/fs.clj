@@ -57,3 +57,22 @@
           (take-while identity)
           f
           (h/unlazy)))))
+
+(defn get-namespace
+  ([forms]
+   (->> forms
+        (filter #(-> % first (= 'ns)))
+        first
+        second)))
+
+(defn file-namespace
+  "reads the namespace of the given path
+ 
+   (file-namespace \"src/code/project.clj\")
+   => 'code.project"
+  {:added "3.0"}
+  ([path]
+   (try
+     (read-code path get-namespace)
+     (catch Throwable t
+       (h/local :println path "Cannot be loaded")))))

@@ -4,7 +4,7 @@
             [std.lang.model.spec-lua :as lua]
             [std.lang.base.book :as book]
             [std.lang :as l]
-            [lua.ore]))
+            [lua.core]))
 
 (l/script+ [:LUA.0 :lua]
   {:runtime :oneshot

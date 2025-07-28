@@ -28,12 +28,6 @@
   (project-name)
   => symbol?)
 
-^{:refer code.project/file-namespace :added "3.0"}
-(fact "reads the namespace of the given path"
-
-  (file-namespace "src/code/project.clj")
-  => 'code.project)
-
 ^{:refer code.project/exclude :added "3.0"}
 (fact "helper function for excluding certain namespaces"
 

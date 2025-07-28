@@ -21,17 +21,20 @@
 
   (:link (second (emit-module-prep 'xt.lang.base-lib
                                    {:lang :lua
-                                    :emit {:compile {:root-ns 'lua}}})))
+                                    :emit {:compile {:type :graph
+                                                     :root-ns 'lua}}})))
   => ()
   
   (:link (second (emit-module-prep 'js.blessed
                                    {:lang :js
-                                    :emit {:compile {:root-ns 'js}}})))
+                                    :emit {:compile {:type :graph
+                                                     :root-ns 'js}}})))
   => ()
   
   (:link (second (emit-module-prep 'js.blessed.ui-core
                                    {:lang :js
-                                    :emit {:compile {:base    'js
+                                    :emit {:compile {:type :graph
+                                                     :base    'js
                                                      :root-ns 'js.blessed.ui-core}}})))
   => '(["./xt/lang/base-lib" {:as k, :ns xt.lang.base-lib}]
        ["./js/react" {:as r, :ns js.react}]
@@ -50,6 +53,50 @@
                                      :code   {:label true}}})
       (emit-module-setup-join))
   => string?)
+
+^{:refer std.lang.base.impl-lifecycle/emit-module-setup-native-arr :added "4.0"}
+(fact "creates the setup code for native imports"
+  ^:hidden
+  
+  (emit-module-setup-native-arr 'js.blessed.ui-core
+                                {:lang :js}
+                                (emit-module-prep 'js.blessed.ui-core
+                                                  {:lang :js
+                                                   :emit {:compile {:type :graph
+                                                                    :base    'js
+                                                                    :root-ns 'js.blessed.ui-core}}}))
+  => '("import nodeUtil from 'util'"
+       "import React from 'react'"
+       "import blessed from 'blessed'"
+       "import reactBlessed from 'react-blessed'"))
+
+^{:refer std.lang.base.impl-lifecycle/emit-module-setup-link-arr :added "4.0"}
+(fact "creates the setup code for internal links"
+  ^:hidden
+  
+  (emit-module-setup-link-arr 'js.blessed.ui-core
+                              {:lang :js}
+                              (emit-module-prep 'js.blessed.ui-core
+                                                {:lang :js
+                                                 :emit {:compile {:type :graph
+                                                                  :base    'js
+                                                                  :root-ns 'js.blessed.ui-core}}}))
+  => '("import k from './xt/lang/base-lib'"
+       "import r from './js/react'"
+       "import ui_style from './js/blessed/ui-style'")
+
+  (defn RUN []
+    (emit-module-setup-link-arr 'js.blessed.ui-core
+                                {:lang :js}
+                                (emit-module-prep 'js.blessed.ui-core
+                                                  {:lang :js
+                                                   :emit {:compile {:type :graph
+                                                                    :base    'js
+                                                                    :root-ns 'js.blessed.ui-core}}})))
+  (RUN)
+  => '("import k from './xt/lang/base-lib'"
+       "import r from './js/react'"
+       "import ui_style from './js/blessed/ui-style'"))
 
 ^{:refer std.lang.base.impl-lifecycle/emit-module-setup-raw :added "4.0"}
 (fact "creates module setup map of array strings"

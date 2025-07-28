@@ -40,7 +40,7 @@
   ([]
    (->> (fs/select "test" {:include ["*.clj$"]})
         (map (juxt identity
-                   project/file-namespace
+                   fs/file-namespace
                    (comp symbol
                          #(apply str (replace  {\_ "-" \/ "."} %))
                          #(str/replace % #"\.clj$" "")

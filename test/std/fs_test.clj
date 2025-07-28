@@ -27,3 +27,9 @@
        first
        (take 2))
   => '(ns std.fs))
+
+^{:refer std.fs/file-namespace :added "3.0"}
+(fact "reads the namespace of the given path"
+
+  (file-namespace "src/std/fs.clj")
+  => 'std.fs)

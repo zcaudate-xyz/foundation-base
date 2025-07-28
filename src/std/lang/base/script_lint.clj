@@ -8,7 +8,6 @@
 ;; dumb linter
 ;;
 
-
 (defn get-reserved-raw
   "gets all reserved symbols in the grammar"
   {:added "4.0"}

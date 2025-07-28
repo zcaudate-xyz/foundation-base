@@ -61,25 +61,6 @@
   ([path]
    (:name (project path))))
 
-(defn- get-namespace
-  ([forms]
-   (->> forms
-        (filter #(-> % first (= 'ns)))
-        first
-        second)))
-
-(defn file-namespace
-  "reads the namespace of the given path
- 
-   (file-namespace \"src/code/project.clj\")
-   => 'code.project"
-  {:added "3.0"}
-  ([path]
-   (try
-     (fs/read-code path get-namespace)
-     (catch Throwable t
-       (h/local :println path "Cannot be loaded")))))
-
 (defn exclude
   "helper function for excluding certain namespaces
  
@@ -112,7 +93,7 @@
   [:recent {:key str
             :compare fs/last-modified}]
   ([path]
-   (let [ns (file-namespace path)]
+   (let [ns (fs/file-namespace path)]
      (swap! common/*lookup* assoc ns path)
      [ns (str path)])))
 

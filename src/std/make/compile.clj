@@ -260,7 +260,8 @@
          file   (or file
                     (if name (str name "." (h/strn (or suffix format))))
                     (:file m)
-                    (h/error "Need file or name"))
+                    (h/error (str "Need a :file or :name entry for "
+                                  (dissoc sopts :root :main))))
          output (compile-out-path (assoc sopts :file file))]
      (compile-write output full))))
 
