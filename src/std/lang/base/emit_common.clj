@@ -720,8 +720,8 @@
      (str raw " " (emit-invoke raw (cons sym more) grammar mopts)))))
 
 (defn emit-class-static-invoke
-  "invokes a constructor"
-  {:added "3.0"}
+  "creates"
+  {:added "4.0"}
   ([raw [sym field & args] grammar mopts]
    (let [{:keys [static]} (helper/get-options grammar [:default :invoke])]
      (cond (keyword? field)

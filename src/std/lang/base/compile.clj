@@ -5,6 +5,7 @@
             [std.lang.base.book :as book]
             [std.lang.base.pointer :as ptr]
             [std.lang.base.impl :as impl]
+            [std.lang.base.impl-deps :as deps]
             [std.lang.base.impl-lifecycle :as lifecycle]
             [std.lang.base.library :as lib]
             [std.lang.base.library-snapshot :as snap]
@@ -36,7 +37,7 @@
 (defn compile-module-single
   "compiles a single module"
   {:added "4.0"}
-  ([{:keys [header lang footer main graph] :as opts}]
+  ([{:keys [header lang footer main] :as opts}]
    (let [mopts   (last (impl/emit-options opts))
          body    (lifecycle/emit-module-setup main
                                               mopts)
@@ -48,12 +49,16 @@
   (compile/types-add :module.single #'compile-module-single))
 
 (defn compile-module-graph-rel
+  "compiles a module graph"
+  {:added "4.0"}
   [path]
   (subs (str path)
         0
         (.lastIndexOf (str path) ".")))
 
 (defn compile-module-graph-single
+  "compiles a single module file"
+  {:added "4.0"}
   [ns
    {:keys [root-path
            root-output
@@ -88,7 +93,8 @@
       :output output-path
       :main ns 
       :emit (assoc emit
-                   :compile {:base ns :root-ns module-id}
+                   :compile {:type :graph
+                             :base ns :root-ns module-id}
                    :static  (:static module))
       :snapshot snapshot})))
 
@@ -107,9 +113,13 @@
          root-output (if (empty? target)
                        root
                        (str root "/" target))
-         files       (mapv (fn [dep]
+         #_#__           (h/prn {:module-id module-id
+                                 :deps deps
+                                 :root-path root-path
+                                 :root-output root-output})
+         files       (mapv (fn [ns]
                              (compile-module-graph-single
-                              dep
+                              ns
                               {:book book
                                :snapshot snapshot
                                :root-path   root-path
@@ -122,32 +132,30 @@
   (compile/types-add :module.graph #'compile-module-graph)) ;
 
 (defn compile-module-directory-single
+  "TODO"
+  {:added "4.0"}
   [ns
-   {:keys [root-path
-           root-output
-           snapshot
+   {:keys [snapshot
            book]
     :as interim}
    {:keys [header footer lang
            main root target emit]
     :as opts}]
-  (let [module-id   main
-        is-ext      (str/starts-with? (name ns) (compile-module-graph-rel (str module-id)))
-        ns-path     (if-not is-ext
-                      (str/replace (compile-module-graph-rel (name ns)) #"\." "/")
-                      (->> (str/replace (name ns) #"\." "/")
-                           (fs/parent)
-                           (fs/relativize root-path)))
-        ns-path     (if (= "" (str ns-path))
-                      nil
-                      ns-path)
+  (let [sub-path (deps/collect-module-directory-form
+                  nil
+                  ns
+                  (assoc (get-in emit [:code :link])
+                         :root-ns main
+                         :root-prefix "."))
+        root-output (if (empty? target)
+                      root
+                      (str root "/" target))
         module      (book/get-module book ns)
-        ns-file     (or (:file module)
-                        (book/module-create-filename
-                         book
-                         (or (:id module)
-                             (h/error "MODULE NOT FOUND" {:ns ns}))))
-        output-path (str/join "/" (filter identity [root-output ns-path ns-file]))]
+        
+        output-path (str/join "/" (filter identity [root-output sub-path]))
+        #_#__  (h/prn {:sub-path sub-path
+                   :root-output root-output
+                   :output-path output-path})]
     (compile-module-single
      {:lang  lang
       :layout :module
@@ -156,12 +164,15 @@
       :output output-path
       :main ns 
       :emit (assoc emit
-                   :compile {:base ns :root-ns module-id}
+                   :compile (merge (get-in emit [:code :link])
+                                   {:type :directory
+                                    :base ns
+                                    :root-ns main})
                    :static  (:static module))
       :snapshot snapshot})))
 
 (defn compile-module-directory
-  "compiles a module graph"
+  "TODO"
   {:added "4.0"}
   ([{:keys [header footer lang main paths root target emit] :as opts}]
    (let [lib         (impl/runtime-library)
@@ -178,6 +189,7 @@
                                     (str main)))
          ns-selected (filter ns-has? ns-all)
 
+         
          ;; require all the paths of the file.
          _  (doseq [ns ns-selected]
               (require ns))
@@ -190,24 +202,20 @@
                           (set)
                           (filter (comp not ns-has?)))
 
-         ;; generate files for 
-         f-selected  (mapv (fn [dep]
-                             ;; generate for main modules
-                             )
-                           ns-selected)
-
-         f-extras    (mapv (fn [dep]
-                             ;; generate for main modules
-                             )
-                           ns-extras)
-         
-         
-         ;; output through compile-module-single
-
          ;; output the libs
-         _  (h/prn opts)
-         _  (h/prn ns-extras)]
-     #_(compile/compile-summarise files))))
+         #_#__  (h/prn opts)
+         #_#__  (h/prn ns-extras)
+         
+         ;; generate files for 
+         files  (mapv (fn [ns]
+                        (compile-module-directory-single
+                         ns
+                         {:book book
+                          :snapshot snapshot}
+                         opts))
+                      (concat ns-selected
+                              ns-extras))]
+     (compile/compile-summarise files))))
 
 (def +install-module-directory-fn+
   (compile/types-add :module.directory #'compile-module-directory))

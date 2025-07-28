@@ -68,7 +68,7 @@
       ~@body)))
 
 (defmacro with:rt
-  ""
+  "forcibly applies a runtime"
   {:added "4.0"}
   ([[rt] & body]
    `(binding [std.lib.context.pointer/*runtime* ~rt]

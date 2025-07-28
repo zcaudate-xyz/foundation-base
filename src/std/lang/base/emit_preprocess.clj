@@ -51,6 +51,14 @@
    (to-input-form '(@! (+ 1 2 3)))
    => '(!:template (+ 1 2 3))
    
+   (to-input-form '(-/Class$$new))
+   => (any '(static-invoke -/Class \"new\")
+           nil)
+   
+   (to-input-form '(Class$$new 1 2 3))
+   => (any '(static-invoke Class \"new\" 1 2 3)
+           nil)
+   
    (to-input-form '@#'hello)
    => '(!:deref (var std.lang.base.emit-preprocess-test/hello))
    

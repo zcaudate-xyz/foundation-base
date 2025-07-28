@@ -61,14 +61,14 @@
 (defn js-module-link
   "gets the relative js based module"
   {:added "4.0"}
-  ([ns graph]
+  ([ns options]
    (let [parent-rel (fn [path]
                       (let [idx (.lastIndexOf (str path) ".")
                             idx (if (neg? idx)
                                   (count path)
                                   idx)]
                         (subs (str path) 0 idx)))
-         {:keys [base root-ns]} graph
+         {:keys [base root-ns]} options
          root-rel     (parent-rel (str root-ns))
          is-ext       (not (str/starts-with? (name ns) root-rel))
          is-ext-base  (not (str/starts-with? (name base) root-rel))

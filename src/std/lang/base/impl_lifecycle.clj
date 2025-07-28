@@ -66,6 +66,8 @@
        (str/join "\n\n")))
 
 (defn emit-module-setup-native-arr
+  "creates the setup code for native imports"
+  {:added "4.0"}
   [module-id
    {:keys [library
            lang
@@ -89,6 +91,8 @@
               native)))))
     
 (defn emit-module-setup-link-arr
+  "creates the setup code for internal links"
+  {:added "4.0"}
   [module-id
    {:keys [library
            lang
@@ -195,7 +199,7 @@
 (defn emit-module-teardown-concat
   "joins teardown raw into individual blocks
  
-   (-> (emit-module-teardown-raw 'xt.lang
+   (-> (emit-module-teardown-raw 'xt.lang.base-lib
                                  {:lang :lua})
        (emit-module-teardown-concat))
    => coll?"
@@ -212,7 +216,7 @@
 (defn emit-module-teardown-join
   "joins teardown raw into code
  
-   (-> (emit-module-teardown-raw 'xt.lang
+   (-> (emit-module-teardown-raw 'xt.lang.base-lib
                                  {:lang :lua})
        (emit-module-teardown-join))
    => string?"

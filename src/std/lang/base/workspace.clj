@@ -25,7 +25,7 @@
                     :id sym-id})))
 
 (defn sym-pointer
-  "gets the entry using a symbol"
+  "converts to a pointer map"
   {:added "4.0"}
   [lang sym]
   (let [[sym-module sym-id] (ut/sym-pair sym)]
@@ -93,7 +93,7 @@
                        ptr))
 
 (defn ptr-setup-deps
-  "calls setup on a pointer"
+  "calls setup on a pointer and all dependencies"
   {:added "4.0"}
   [ptr]
   (let [deps (->> (h/deps:ordered (lib/get-book (impl/runtime-library)
@@ -105,7 +105,7 @@
       (ptr-setup p))))
 
 (defn ptr-teardown-deps
-  "calls teardown on a pointer"
+  "calls teardown on pointer all dependencies"
   {:added "4.0"}
   [ptr]
   (let [deps (->> (h/deps:ordered (lib/get-book (impl/runtime-library)

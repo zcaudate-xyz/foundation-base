@@ -146,16 +146,100 @@
        {"cjson" {:as cjson}}])
 
 ^{:refer std.lang.base.impl-deps/collect-script-summary :added "4.0"}
-(fact "summaries the output of `collect-script`")
+(fact "summaries the output of `collect-script`"
+  ^:hidden
+  
+  (-> '[(+ (L.util/sub-fn 1 2) (L.util/add-fn 3 4))
+        ()
+        {"cjson" {:as cjson}}]
+      (deps/collect-script-summary))
+  => '[(+ (L.util/sub-fn 1 2)
+          (L.util/add-fn 3 4))
+       ()
+       {"cjson" {:as cjson}}])
 
+^{:refer std.lang.base.impl-deps/collect-module-check-options :added "4.0"}
+(fact "does the checks for the inputs "
+  ^:hidden
+  
+  (deps/collect-module-check-options
+   {:type :graph
+    :root-ns 'L.script
+    :path-suffix ""})
+  => nil
+
+  (deps/collect-module-check-options
+   {:type :graph
+    :path-suffix ""})
+  => (throws)
+  
+  (deps/collect-module-check-options
+   {:type :directory
+    :root-ns 'L
+    :root-libs "libs"
+    :root-prefix "@"
+    :path-suffix ".lua"})
+  => nil
+
+  (deps/collect-module-check-options
+   {:type :directory
+    :root-prefix "@"
+    :path-suffix ".lua"})
+  => (throws)
+
+  (deps/collect-module-check-options
+   {:type :custom
+    :fn-link-form (fn [_ _ _])
+    :root-ns 'L
+    :params {}})
+  => nil
+
+  (deps/collect-module-check-options
+   {:type :custom
+    :fn-link-form (fn [_ _ _])
+    :params {}})
+  => (throws))
+
+^{:refer std.lang.base.impl-deps/collect-module-directory-form :added "4.0"}
+(fact "collects forms for "
+  ^:hidden
+
+  (deps/collect-module-directory-form
+   nil
+   'kmi.common
+   {:root-ns 'L
+    :root-libs "libs"
+    :root-prefix "@"
+    :path-suffix ".lua"})
+  => "@/libs/kmi/common.lua"
+
+  (deps/collect-module-directory-form
+   nil
+   'L.script
+   {:root-ns 'L
+    :root-libs "libs"
+    :root-prefix "@"
+    :path-suffix ".lua"})
+  => "@/script.lua"
+
+  (deps/collect-module-directory-form
+   nil
+   'L.script
+   {:root-ns 'L
+    :root-libs "libs"
+    :root-prefix "."
+    :path-suffix ""})
+  => "./script")
 
 ^{:refer std.lang.base.impl-deps/collect-module :added "4.0"}
-(fact "collects module"
-
+(fact "collects information for the entire module"
+  ^:hidden
+  
   (-> (deps/collect-module (lib/get-book +library-ext+ :lua)
                            (lib/get-module +library-ext+ :lua 'L.util)
                            {:type :graph
-                            :root-ns 'L.script})
+                            :root-ns 'L.script
+                            :path-suffix ""})
       (update :code (fn [arr]
                       (set (map :id arr)))))
   => '{:setup nil,
@@ -163,10 +247,20 @@
        :code #{add-fn sub-fn},
        :native {"cjson" {:as cjson}},
        :link (["./core" {:as u, :ns L.core}]),
-       :export {:entry nil}})
+       :export {:entry nil}}
 
+  (-> (deps/collect-module (lib/get-book +library-ext+ :lua)
+                           (lib/get-module +library-ext+ :lua 'L.util)
+                           {:type :directory
+                            :root-ns 'L
+                            :root-libs   "libs"
+                            :root-prefix "@"
+                            :path-suffix ".lua"})
+        (update :code (fn [arr]
+                        (set (map :id arr)))))
+  => '{:setup nil, :teardown nil, :code #{add-fn sub-fn}, :native {"cjson" {:as cjson}},
+       :link (["@/core.lua" {:as u, :ns L.core}]),
+       :export {:entry nil}})
 
 (comment
   (./import))
-
-

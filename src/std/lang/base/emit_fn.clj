@@ -113,7 +113,7 @@
                   (get-in grammar [:function key])))
 
 (defn emit-fn-preamble-args
-  "constructs the function preamble"
+  "constructs the function preamble args"
   {:added "4.0"}
   ([key args grammar mopts]
    (let [args  (helper/emit-typed-args args grammar)

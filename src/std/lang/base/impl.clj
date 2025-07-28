@@ -195,7 +195,7 @@
                       (assoc mopts :module module))))
 
 (defn emit-entry-deps-collect
-  "emits only the entry deps"
+  "only collects the dependencies"
   {:added "4.0"}
   [{:keys [lang
            module

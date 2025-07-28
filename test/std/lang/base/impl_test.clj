@@ -51,7 +51,7 @@
   => '{:setup nil,
        :teardown nil
        :native {"cjson" {:as cjson}},
-       :link (),
+       :link   {}
        :export {:entry nil}})
 
 ^{:refer std.lang.base.impl-lifecycle/emit-module :adopt true :added "4.0"}

@@ -30,7 +30,7 @@
 ;;
 
 (defn emit-def-assign-inline
-  "assigns an inline form"
+  "assigns an inline form directly"
   {:added "4.0"}
   [sym [link & input] grammar {:keys [lang book snapshot] :as mopts}]
   (let [[link-module link-id] (ut/sym-pair link)

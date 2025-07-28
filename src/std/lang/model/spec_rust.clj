@@ -11,6 +11,8 @@
             [std.lib :as h]))
 
 (defn rst-typesystem
+  "TODO"
+  {:added "4.0"}
   [arr grammar mopts]
   (let [{:keys [sep] :as opts} (helper/get-options grammar [:data :vector])
         [sym & more] (rest arr)]
@@ -24,7 +26,7 @@
                                 more))">")))
 
 (defn rst-vector
-  "emits a js vector"
+  "TODO"
   {:added "4.0"}
   ([arr grammar mopts]
    (let [sym (first arr)]
@@ -35,6 +37,8 @@
            (data/emit-coll :vector arr grammar mopts)))))
 
 (defn rst-attributes
+  "TODO"
+  {:added "4.0"}
   [sym]
   (let [lines (:% (meta sym))]
     (str/join ""
@@ -42,7 +46,7 @@
                    lines))))
 
 (defn rst-defenum
-  "transforms a defenum call"
+  "TODO"
   {:added "4.0"}
   [[_ sym values]]
   (list :%
@@ -53,7 +57,7 @@
               (list :- "}"))))
 
 (defn rst-deftrait
-  "transforms a defenum call"
+  "TODO"
   {:added "4.0"}
   [[_ sym & body]]
   (let [body (h/postwalk (fn [x]
@@ -75,7 +79,7 @@
                 (list :- "\n}")))))
 
 (defn rst-defimpl
-  "emits a defclass template for python"
+  "TODO"
   {:added "4.0"}
   ([[_ sym inherit & body]]
    (list :%
@@ -88,7 +92,7 @@
                (list :- "\n}")))))
 
 (defn rst-new
-  "transforms a defstruct call"
+  "TODO"
   {:added "4.0"}
   [[_ sym & args] grammar mopts]
   (let [items (map (fn [[k v]]
@@ -98,7 +102,7 @@
          "{" (str/join ", " items) "}")))
 
 (defn rst-exec
-  "transforms a defstruct call"
+  "TODO"
   {:added "4.0"}
   [[_ & body] grammar mopts]
   (str "{"
@@ -108,7 +112,7 @@
        "\n}"))
 
 (defn rst-defstruct
-  "transforms a defstruct call"
+  "TODO"
   {:added "4.0"}
   [[_ sym items] grammar mopts]
   (str (rst-attributes sym)

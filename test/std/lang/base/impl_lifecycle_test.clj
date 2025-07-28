@@ -38,7 +38,13 @@
                                                      :root-ns 'js.blessed.ui-core}}})))
   => '(["./xt/lang/base-lib" {:as k, :ns xt.lang.base-lib}]
        ["./js/react" {:as r, :ns js.react}]
-       ["./js/blessed/ui-style" {:as ui-style, :ns js.blessed.ui-style}]))
+       ["./js/blessed/ui-style" {:as ui-style, :ns js.blessed.ui-style}])
+
+  (emit-module-prep 'js.blessed.ui-core
+                    {:lang :js
+                     :emit {:compile {:type :directory
+                                      :base    'js
+                                      :root-ns 'js.blessed.ui-core}}}))
 
 ^{:refer std.lang.base.impl-lifecycle/emit-module-setup-concat :added "4.0"}
 (fact "joins setup raw into individual blocks")
@@ -85,18 +91,32 @@
        "import r from './js/react'"
        "import ui_style from './js/blessed/ui-style'")
 
-  (defn RUN []
-    (emit-module-setup-link-arr 'js.blessed.ui-core
-                                {:lang :js}
-                                (emit-module-prep 'js.blessed.ui-core
-                                                  {:lang :js
-                                                   :emit {:compile {:type :graph
-                                                                    :base    'js
-                                                                    :root-ns 'js.blessed.ui-core}}})))
-  (RUN)
-  => '("import k from './xt/lang/base-lib'"
-       "import r from './js/react'"
-       "import ui_style from './js/blessed/ui-style'"))
+  (emit-module-setup-link-arr 'js.blessed.ui-core
+                              {:lang :js}
+                              (emit-module-prep 'js.blessed.ui-core
+                                                {:lang :js
+                                                 :emit {:compile {:type :directory
+                                                                  :base    'js
+                                                                  :root-ns 'js
+                                                                  :root-prefix "@"
+                                                                  }}}))
+  => '("import k from '@/libs/xt/lang/base-lib'"
+       "import r from '@/react'"
+       "import ui_style from '@/blessed/ui-style'")
+  
+  (emit-module-setup-link-arr 'js.blessed.ui-core
+                              {:lang :js}
+                              (emit-module-prep 'js.blessed.ui-core
+                                                {:lang :js
+                                                 :emit {:compile {:type :directory
+                                                                  :base    'js
+                                                                  :root-ns 'js
+                                                                  :root-prefix "@"
+                                                                  :path-separator "|"
+                                                                  :path-suffix ".tsx"}}}))  
+  => '("import k from '@|libs|xt|lang|base-lib.tsx'"
+       "import r from '@|react.tsx'"
+       "import ui_style from '@|blessed|ui-style.tsx'"))
 
 ^{:refer std.lang.base.impl-lifecycle/emit-module-setup-raw :added "4.0"}
 (fact "creates module setup map of array strings"

@@ -5,7 +5,8 @@
             [std.lang.base.impl-entry :as entry]
             [std.lang.base.book :as b]
             [std.string :as str]
-            [std.lib :as h]))
+            [std.lib :as h]
+            [clojure.set :as set]))
 
 ;;
 ;;
@@ -26,8 +27,8 @@
 (defn module-link-form
   "link form for projects"
   {:added "4.0"}
-  [{:keys [meta] :as book} ns graph]
-  (if-let [f (:module-link meta)] (f ns graph)))
+  [{:keys [meta] :as book} ns options]
+  (if-let [f (:module-link meta)] (f ns options)))
 
 (defn has-module-form
   "checks if module is available"
@@ -131,20 +132,71 @@
 ;;
 ;;
 
+(defn collect-module-check-options
+  "does the checks for the inputs"
+  {:added "4.0"}
+  [{:keys [type] :as options}]
+  (let [ks-input (set (keys options))
+        [ks-required
+         ks-optional] (case type
+                        nil        [#{} #{}]
+                        :custom    [#{:type
+                                      :fn-link-form
+                                      :root-ns
+                                      :params} #{:base}]
+                        :graph     [#{:type :root-ns}
+                                    #{:path-suffix :base}]
+                        :directory [#{:type
+                                      :root-ns}
+                                    #{:root-libs
+                                      :root-prefix
+                                      :path-separator
+                                      :path-suffix
+                                      :base}])
+        ks-errored {:input options
+                    :required ks-required
+                    :optional ks-optional}]
+    (if-not (= ks-required (set/intersection ks-required ks-input))
+      (h/error "Required keys missing" ks-errored))
+    (if-not (empty? (set/difference ks-input
+                                    (set/union ks-required
+                                               ks-optional) ))
+      (h/error "Extra keys in map" ks-errored))))
+
+(defn collect-module-directory-form
+  "collects forms for"
+  {:added "4.0"}
+  [_ ns {:keys [root-ns
+                root-libs
+                root-prefix
+                path-separator
+                path-suffix]
+         :or {root-libs   "libs"
+              root-prefix "."
+              path-suffix ""
+              path-separator "/"}
+         :as options}]
+  (let [[ns-str
+         root-str] [(str ns)
+                    (str root-ns)]        
+        is-sub? (.startsWith ^String ns-str
+                             root-str)
+        ns-new  (if is-sub?
+                  (subs ns-str
+                        (inc (count root-str)))
+                  ns-str)]
+    (str root-prefix
+         (if is-sub?
+           path-separator
+           (str path-separator root-libs path-separator))
+         (.replaceAll ^String ns-new
+                      "\\."
+                      path-separator)
+         "."
+         path-suffix)))
+
 (defn collect-module
-  "collects module
- 
-   (-> (deps/collect-module (lib/get-book +library-ext+ :lua)
-                            (lib/get-module +library-ext+ :lua 'L.util)
-                            {:root-ns 'L.script})
-       (update :code (fn [arr]
-                       (set (map :id arr)))))
-   => '{:setup nil,
-        :teardown nil,
-        :code #{add-fn sub-fn},
-       :native {\"cjson\" {:as cjson}},
-        :link ([\"./core\" {:as u, :ns L.core}]),
-        :export {:entry nil}}"
+  "collects information for the entire module"
   {:added "4.0"}
   [book {:keys [native
                 link
@@ -153,36 +205,38 @@
          :as module}
    & [{:keys [type]
        :as options}]]
-  (let [setup    (setup-module-form book module)
+  (let [_        (collect-module-check-options options)
+        
+        setup    (setup-module-form book module)
         teardown (teardown-module-form book module)
         code    (->> (vals (dissoc (:code module)
                                    (:as export)))
                      (sort-by (juxt :priority :line :time)))
+        form-fn  (cond (= type :custom)
+                       (or (:fn-link-form options)
+                           (h/error (str "Missing key " :fn-link-form)
+                                    options))
+                       
+                       (= type :graph)
+                       module-link-form
+                       
+                       (= type :directory)
+                       collect-module-directory-form) 
+        
         link    (case type
-                  :graph    (keep (fn [[sym ns]]
-                                    (cond (= ns (:id module)) nil
-                                          (get suppress ns) nil
-                                          
-                                          :else
-                                          (let [link (module-link-form book ns options)]
-                                            [link (if (vector? sym)
-                                                    {:refer sym
-                                                     :ns ns}
-                                                    {:as sym
-                                                     :ns ns})])))
-                                  link)
-                  :directory (keep (fn [[sym ns]]
-                                     (cond (= ns (:id module)) nil
-                                           (get suppress ns) nil
-                                           
-                                           :else
-                                           (let [link (module-link-form book ns options)]
-                                             [link (if (vector? sym)
-                                                     {:refer sym
-                                                      :ns ns}
-                                                     {:as sym
-                                                      :ns ns})])))
-                                   link)
+                  (:graph :directory :custom)
+                  (keep (fn [[sym ns]]
+                          (cond (= ns (:id module)) nil
+                                (get suppress ns) nil
+                                
+                                :else
+                                (let [link (form-fn book ns options)]
+                                  [link (if (vector? sym)
+                                          {:refer sym
+                                           :ns ns}
+                                          {:as sym
+                                           :ns ns})])))
+                        link)
                   ;; an empty map differs from the array
                   ^:meta/empty {})]
     {:setup    setup

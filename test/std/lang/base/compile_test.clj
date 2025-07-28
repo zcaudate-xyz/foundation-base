@@ -92,7 +92,9 @@
       {:files 1, :status :changed, :written [[string?]]}))
 
 ^{:refer std.lang.base.compile/compile-module-directory-single :added "4.0"}
-(fact "TODO")
+(fact "compiles a single directory file"
+
+  )
 
 ^{:refer std.lang.base.compile/compile-module-directory :added "4.0"}
 (fact "TODO")
