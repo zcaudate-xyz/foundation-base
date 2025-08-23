@@ -152,10 +152,7 @@
                       (str root "/" target))
         module      (book/get-module book ns)
         
-        output-path (str/join "/" (filter identity [root-output sub-path]))
-        #_#__  (h/prn {:sub-path sub-path
-                   :root-output root-output
-                   :output-path output-path})]
+        output-path (str/join "/" (filter identity [root-output sub-path]))]
     (compile-module-single
      {:lang  lang
       :layout :module
@@ -174,14 +171,13 @@
 (defn compile-module-directory
   "TODO"
   {:added "4.0"}
-  ([{:keys [header footer lang main paths root target emit] :as opts}]
+  ([{:keys [header footer lang main search root target emit] :as opts}]
    (let [lib         (impl/runtime-library)
          snapshot    (lib/get-snapshot lib)
          book        (snap/get-book snapshot lang)
-         all-paths   (->> paths
+         all-paths   (->> (or search ["src"])
                           (map #(fs/path %))
                           (mapcat #(fs/select % {:include [".clj"]})))
-         
          ;; get paths of all the clojure files with the root namespace
          ns-all      (pmap fs/file-namespace all-paths)
          ns-has?     (fn [ns]
@@ -189,7 +185,6 @@
                                     (str main)))
          ns-selected (filter ns-has? ns-all)
 
-         
          ;; require all the paths of the file.
          _  (doseq [ns ns-selected]
               (require ns))

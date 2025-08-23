@@ -144,7 +144,11 @@
  xyz.zcaudate/js.react-native
  {:description "js react native ui libraries" 
   :include [[js.react-native :complete]]}
-   
+
+ xyz.zcaudate/js.tamagui
+ {:description "js tamagui libraries" 
+  :include [[js.tamagui :complete]]}
+
  xyz.zcaudate/kmi.queue
  {:description "kmi queue library" 
   :include [[kmi.queue    :complete]]} 

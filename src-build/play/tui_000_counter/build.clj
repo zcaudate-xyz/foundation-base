@@ -13,6 +13,7 @@
                        webpack/+node-makefile+
                        webpack/+node-gitignore+]}
    :default  [{:type   :module.single
+               :name   "tui-000-counter"
                :lang   :js
                :main   'play.tui-000-counter.main
                :file   "src/main.js"

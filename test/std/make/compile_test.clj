@@ -49,6 +49,17 @@
      :main [["assets/std.make/tangle.sh" "tangle.make.sh"]]}))
   => coll?)
 
+^{:refer std.make.compile/compile-resource :added "4.0"}
+(fact "copies resources to the build directory"
+  ^:hidden
+  
+  (with:mock-compile
+   (compile-resource 
+    {:type :resource
+     :target "assets"
+     :main [["assets/std.make/tangle.sh" "tangle.make.sh"]]}))
+  => coll?)
+
 ^{:refer std.make.compile/compile-custom :added "4.0"}
 (fact "creates a custom "
   ^:hidden

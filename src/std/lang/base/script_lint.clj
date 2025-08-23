@@ -148,7 +148,7 @@
                                                 :unused  :silent}))
   ([entry module lang-globals options]
    (let [{:keys [id op]} entry]
-     (cond ('#{defn def defgen defglobal} op)
+     (cond ('#{defn def defgen defglobal fn} op)
            (let [{:keys [vars syms]} (collect-sym-vars entry module lang-globals)
                  internal (disj (set (vals (:internal module)))
                                 '-)

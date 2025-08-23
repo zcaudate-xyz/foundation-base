@@ -119,7 +119,8 @@
                                                                    (into-array CopyOption))]
                      (when-not simulate
                        (Files/createDirectories (.getParent dest) attr/*empty*)
-                       (Files/copy ^Path path ^Path dest copts))
+                       (when (not (path/directory? dest))
+                         (Files/copy ^Path path ^Path dest copts)))
                      (swap! accumulator
                             assoc
                             (str path)

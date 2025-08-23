@@ -4,12 +4,25 @@
 
 (l/script :js
   {:macro-only true
-   :bundle {:default  [["tamagui" :as Tamagui]]}})
+   :bundle {:default  [["tamagui" :as [* Tamagui]]]}})
+
+(defn tmpl-tamagui
+  "forms for various argument types"
+  {:added "4.0"}
+  [s]
+  (list 'def.js s
+        (list `data/wrapData (list '. 'Tamagui s))))
+
+(comment
+  #_#_:require [[js.react :as r]
+                [js.react.helper-data :as data]
+                [js.core :as j]]
+  [tmpl-tamagui]
+  (def.js MODULE (!:module)))
 
 (h/template-entries [l/tmpl-entry {:type :fragment
                                    :base "Tamagui"
                                    :tag "js"}]
-
   [Accordion
    Adapt
    AdaptContents
@@ -88,8 +101,6 @@
    Handle
    Header
    Heading
-   INITIAL_STATE
-   IS_FABRIC
    Image
    Input
    InputFrame
@@ -102,8 +113,12 @@
    ListItemTitle
    Main
    Nav
-   Overlay
-   Paragraph
+   Overlay])
+
+(h/template-entries [l/tmpl-entry {:type :fragment
+                                   :base "Tamagui"
+                                   :tag "js"}]
+  [Paragraph
    ParentSheetContext
    Popover
    PopoverAnchor
@@ -185,7 +200,7 @@
    SwitchThumb
    Tabs
    TabsProvider
-   TamaguiProvider
+   
    Text
    TextArea
    TextAreaFrame
@@ -197,7 +212,7 @@
    TooltipGroup
    TooltipSimple
    Track
-   USE_NATIVE_PORTAL
+   
    Unspaced
    View
    VisuallyHidden
@@ -211,7 +226,11 @@
                                    :base "Tamagui"
                                    :tag "js"}]
 
-  [addTheme
+  [USE_NATIVE_PORTAL
+   INITIAL_STATE
+   IS_FABRIC
+   TamaguiProvider
+   addTheme
    allPortalHosts
    clamp
    closeOpenTooltips

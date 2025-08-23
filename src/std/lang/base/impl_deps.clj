@@ -152,6 +152,7 @@
                                       :root-prefix
                                       :path-separator
                                       :path-suffix
+                                      :path-replace
                                       :base}])
         ks-errored {:input options
                     :required ks-required
@@ -170,11 +171,13 @@
                 root-libs
                 root-prefix
                 path-separator
-                path-suffix]
+                path-suffix
+                path-replace]
          :or {root-libs   "libs"
               root-prefix "."
               path-suffix ""
-              path-separator "/"}
+              path-separator "/"
+              path-replace {}}
          :as options}]
   (let [[ns-str
          root-str] [(str ns)
@@ -184,14 +187,19 @@
         ns-new  (if is-sub?
                   (subs ns-str
                         (inc (count root-str)))
-                  ns-str)]
+                  ns-str)
+        ns-paths (str/split ns-new #"\.")
+        ns-paths (mapv (fn [path]
+                         (reduce (fn [s [pat sub]]
+                                   (str/replace s pat sub))
+                                 path
+                                 path-replace))
+                       ns-paths)]
     (str root-prefix
          (if is-sub?
            path-separator
            (str path-separator root-libs path-separator))
-         (.replaceAll ^String ns-new
-                      "\\."
-                      path-separator)
+         (str/join path-separator ns-paths)
          "."
          path-suffix)))
 

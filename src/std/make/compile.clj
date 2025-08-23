@@ -86,6 +86,33 @@
                  (fs/copy-single in-path out-path)))))
          main)))
 
+(comment
+  
+  (fs/copy "resources/v1-assets"
+           ".build/hello"
+           {:include [fs/file?]
+            :recursive true
+            :options [:replace-existing]}))
+
+(defn compile-directory
+  "copies resources to the build directory"
+  {:added "4.0"}
+  ([{:keys [main root] :as opts}]
+   (vec (mapcat (fn [[input output]]
+                  (let [out-path (compile-out-path (assoc opts :file output))]
+                    (cond *mock-compile*
+                          (map #(str (fs/path out-path (fs/relativize input %))) 
+                               (keys (fs/list input
+                                              {:include [fs/file?]
+                                               :recursive true})))
+
+                          :else
+                          (fs/copy input out-path
+                                   {:include [fs/file?]
+                                    :recursive true
+                                    :options [:replace-existing]}))))
+                main))))
+
 ;;;;
 ;;
 ;; CUSTOM
@@ -101,6 +128,7 @@
      (compile-write output full))))
 
 (defonce +types+ (atom {:resource #'compile-resource
+                        :directory #'compile-directory
                         :custom #'compile-custom}))
 
 (defn types-list

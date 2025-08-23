@@ -27,9 +27,9 @@
   ([arr grammar mopts]
    (cond (= :% (first arr))
          (if (second arr)
-           (let [tag (keyword (common/emit-symbol (second arr)
-                                                  grammar
-                                                  mopts))]
+           (let [tag (keyword (emit/emit-main (second arr)
+                                              grammar
+                                              mopts))]
              (cons tag (drop 2 arr)))
            (h/error "MISSING TAG"))
          
