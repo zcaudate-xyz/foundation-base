@@ -1,4 +1,4 @@
-(defproject xyz.zcaudate/foundation-base "4.0.11"
+(defproject xyz.zcaudate/foundation-base "4.0.12"
   :description "base libraries for foundation"
   :url "https://www.github.com/zcaudate-xyz/foundation-base"
   :license  {:name "MIT License"

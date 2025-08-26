@@ -94,10 +94,37 @@
 ^{:refer std.lang.base.compile/compile-module-directory-single :added "4.0"}
 (fact "compiles a single directory file"
 
-  )
+  (let [lib (impl/runtime-library)
+        snapshot    (lib/get-snapshot lib)
+        book        (snap/get-book snapshot :lua)]
+    (make/with:mock-compile
+      (compile-module-directory-single
+       'xt.lang.base-lib
+       {:lib         lib
+        :snapshot    snapshot
+        :book        book
+        :root-path   (std.fs/path "." "xt/lang"),
+        :root-output ".build/src"}
+       {:lang :lua
+        :root   ".build"
+        :target "src"
+        :file   "pkg/file.lua"
+        :main   'xt.lang.base-iter
+        :layout :flat
+        :entry {:label true}
+        :emit {:code {:link
+                      {:root-libs   "LIBS"
+                       :root-prefix "."
+                       :path-suffix "lua"
+                       :path-separator "/"
+                       :path-replace {}}}}})))
+  => (contains-in
+      [".build/src/./LIBS/xt/lang/base-lib.lua" 
+       string?]))
 
 ^{:refer std.lang.base.compile/compile-module-directory :added "4.0"}
-(fact "TODO")
+(fact "TODO"
+  )
 
 ^{:refer std.lang.base.compile/compile-module-schema :added "4.0"}
 (fact "compiles all namespaces into a single file (for sql)"

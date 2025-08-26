@@ -64,8 +64,13 @@
                                             (drop 2 form)])
          syms (volatile! #{})
          sym-fn (fn [form]
-                  (let [[ftag] form]
-                    (cond (#{'var 'const 'fn 'fn:> 'local} ftag)
+                  (let [[ftag] form
+                        form (if (and (= ftag 'fn)
+                                      (symbol? (second form)))
+                               (do (vswap! vars h/union (collect-vars (second form)))
+                                   (cons 'fn (drop 2 form)))
+                               form)]
+                    (cond (#{'var 'const 'fn:> 'fn 'local} ftag)
                           (do (vswap! vars h/union (collect-vars (second form)))
                               (drop 2 form))
 

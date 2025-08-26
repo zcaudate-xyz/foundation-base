@@ -39,9 +39,14 @@
   {:added "4.0"}
   ([{:keys [header lang footer main] :as opts}]
    (let [mopts   (last (impl/emit-options opts))
+         {:keys [emit]} mopts
          body    (lifecycle/emit-module-setup main
                                               mopts)
          full    (compile/compile-fullbody body opts)
+         full    (reduce (fn [full transform]
+                           (transform full (-> emit :static)))
+                         full
+                         (-> emit :code :transforms))
          output  (compile/compile-out-path opts)]
      (compile/compile-write output full))))
 
@@ -177,7 +182,7 @@
          book        (snap/get-book snapshot lang)
          all-paths   (->> (or search ["src"])
                           (map #(fs/path %))
-                          (mapcat #(fs/select % {:include [".clj"]})))
+                          (mapcat #(fs/select % {:include [".clj$"]})))
          ;; get paths of all the clojure files with the root namespace
          ns-all      (pmap fs/file-namespace all-paths)
          ns-has?     (fn [ns]

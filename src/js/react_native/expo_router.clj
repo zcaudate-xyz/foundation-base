@@ -1,4 +1,4 @@
-(ns js.expo-router
+(ns js.react-native.expo-router
   (:require [std.lang :as l]
             [std.lib :as h]))
 

@@ -12,7 +12,7 @@
 (def.js WrappedContext
   (r/createContext nil))
 
-(defn.js createWrappedComponent
+(defn.js useWrappedComponent
   [Component #{[$id
                 $data
                 (:.. props)]}]
@@ -43,17 +43,28 @@
                     wrapped)))
 
 (defn.js wrapData
-  [Component]
+  [Component displayName]
   (var WrappedComponent
        (fn [props]
-         (return (-/createWrappedComponent Component props))))
+         (return (-/useWrappedComponent Component props))))
 
-  (:= (. WrappedComponent displayName)
-      (. Component displayName))
+  (when displayName
+    (:= (. WrappedComponent displayName)
+        displayName))
   
   (:= (. WrappedComponent [-/__WRAPPED__])
       true)
 
   (return WrappedComponent))
+
+(defn.js wrapForward
+  [Component displayName]
+  (return
+   (-/wrapData
+    (r/forwardRef
+     (fn ForwardInner [props ref]
+       (return
+        (r/createElement Component (j/assign {:ref ref} props)))))
+    displayName)))
 
 (def.js MODULE (!:module))
