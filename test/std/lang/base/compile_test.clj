@@ -36,7 +36,12 @@
       :file   "pkg/file.lua"
       :main   'xt.lang.base-lib
       :layout :flat
-      :entry {:label true}}))
+      :entry {:label true}
+      :emit  {:static {:header true}
+              :code {:transforms [(fn [out static]
+                                    (if (:header static)
+                                      (str "HEADER\n\n" out)
+                                      out))]}}}))
   => (contains-in
       [".build/src/pkg/file.lua"
        string?]))

@@ -200,11 +200,13 @@
                                                                         :module])}))]
             (or (if *macro-skip-deps* sym-full)
                 (case type
-                  (:header :code)   (let [_  (if (get (:suppress module) sym-module)
+                  (:header :code)   (let [{:keys [op]} entry
+                                          _  (if (and (get (:suppress module) sym-module)
+                                                      (not= 'defglobal op))
                                                (h/error "Suppressed module - macros only"
                                                         {:sym [sym-module sym-id]
                                                          :module (dissoc module :code :fragment)}))
-                                          {:keys [op]} entry
+                                          
                                           _ (if (not (or *macro-skip-deps*
                                                          (= 'defglobal op)
                                                          (= 'defrun op)))

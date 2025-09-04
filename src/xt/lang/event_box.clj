@@ -40,11 +40,11 @@
     (fn [event]
       (return (-/check-event event path))))))
 
-(def.xt ^{:arglists '([box listener-id])}
+(def.xt ^{:arglists ([box listener-id])}
   remove-listener
   event-common/remove-listener)
 
-(def.xt ^{:arglists '([box])}
+(def.xt ^{:arglists ([box])}
   list-listeners
   event-common/list-listeners)
 

@@ -12,8 +12,21 @@
 (def.js WrappedContext
   (r/createContext nil))
 
+(def.js WrappedCache
+  (new Map))
+
+(defn.js wrapMemoize
+  [component wrap-fn]
+  (var cached (. -/WrappedCache (get component)))
+  (when cached
+    (return cached))
+
+  (var wrapped (wrap-fn component))
+  (. -/WrappedCache (set component wrapped))
+  (return wrapped))
+
 (defn.js useWrappedComponent
-  [Component #{[$id
+  [component #{[$id
                 $data
                 (:.. props)]}]
   (var top  (r/useContext -/WrappedContext))
@@ -22,7 +35,7 @@
     (return (r/createElement
              (. -/WrappedContext Provider)
              {:value #{[(:.. top) (:.. $data)]}}
-             (r/createElement Component props))))
+             (r/createElement component props))))
 
   (var ntop (j/assignNew (and top (. top [(+ "$." $id)]))
                          $data))
@@ -34,7 +47,7 @@
                              (not (. k (startsWith "$")))))))))
   
   (var wrapped (r/createElement
-                Component
+                component
                 (j/assignNew props nprops)))
   
   (return
@@ -43,28 +56,33 @@
                     wrapped)))
 
 (defn.js wrapData
-  [Component displayName]
-  (var WrappedComponent
-       (fn [props]
-         (return (-/useWrappedComponent Component props))))
+  [component displayName]
+  (return
+   (-/wrapMemoize
+    component
+    (fn [component]
+      (var WrappedComponent
+           (fn [props]
+             (return (-/useWrappedComponent component props))))
 
-  (when displayName
-    (:= (. WrappedComponent displayName)
-        displayName))
-  
-  (:= (. WrappedComponent [-/__WRAPPED__])
-      true)
+      (when displayName
+        (:= (. WrappedComponent displayName)
+            displayName))
+      
+      (:= (. WrappedComponent [-/__WRAPPED__])
+          true)
 
-  (return WrappedComponent))
+      (return WrappedComponent)))))
 
 (defn.js wrapForward
-  [Component displayName]
+  [component displayName]
   (return
    (-/wrapData
     (r/forwardRef
      (fn ForwardInner [props ref]
        (return
-        (r/createElement Component (j/assign {:ref ref} props)))))
+        (r/createElement component (j/assign {:ref ref} props)))))
     displayName)))
 
 (def.js MODULE (!:module))
+

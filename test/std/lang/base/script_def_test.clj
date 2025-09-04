@@ -28,7 +28,13 @@
                                  :tag "js"}]))
   => '(defmacro.js length
         ([obj] (clojure.core/list (quote .) obj (quote length))))
-
+  
+  (h/with:template-meta {:tag "js"}
+    (tmpl-macro '[length [arr]  {:property true
+                                 :tag "js"
+                                 :subtree [auth]}]))
+  => '(defmacro.js length ([obj] (clojure.core/list (quote .) obj auth (quote length))))
+  
   (h/with:template-meta {:tag "js"}
     (tmpl-macro '[forEach [f]]))
   => '(defmacro.js forEach

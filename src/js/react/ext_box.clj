@@ -9,13 +9,13 @@
              [js.core :as j]]
    :export [MODULE]})
 
-(defn.js makeBox
+(defn.js createBox
   "creates a box for react"
   {:added "4.0"}
   [initial]
-  (return (r/const (event-box/make-box initial))))
+  (return (event-box/make-box initial)))
 
-(defn.js listenBox
+(defn.js useListenBox
   "listens to the box out"
   {:added "4.0"}
   [box path meta]
@@ -36,10 +36,58 @@
   "getters and setters for the box"
   {:added "4.0"}
   [box path meta]
-  (var data (-/listenBox box path meta))
+  (var data (-/useListenBox box path meta))
   (var setData
        (r/const (fn [value]
                   (event-box/set-data box path value))))
   (return [data setData]))
+
+(defn.js attachLocalStorage
+  [storage-key box listener-id path]
+  (var initial (event-box/get-data box path))
+  (when (not= (typeof localStorage) "undefined")
+    (var stored (. localStorage (getItem storage-key)))
+    (when stored
+      (try
+        (:= stored (JSON.parse stored))
+        (catch e
+            (:= stored initial)))
+      (event-box/get-data box path stored))
+    
+    
+    (event-box/add-listener
+     box
+     listener-id
+     path
+     (fn [#{data}]
+       (j/future
+         (. localStorage (setItem storage-key (JSON.stringify data)))))))
+  (return box))
+
+(def.js listenBox -/useListenBox)
+
+(def.js ^{:arglists ([box path])}
+  getData event-box/get-data)
+
+(def.js ^{:arglists ([box path value])}
+  setData event-box/set-data)
+
+(def.js ^{:arglists ([box path])}
+  delData event-box/del-data)
+
+(def.js ^{:arglists ([box])}
+  resetData event-box/reset-data)
+
+(def.js ^{:arglists ([box path value])}
+  mergeData event-box/merge-data)
+
+(def.js ^{:arglists ([box path value])}
+  appendData event-box/append-data)
+
+(def.js ^{:arglists ([box listener-id path callback meta])}
+  addListener event-box/add-listener)
+
+(def.js ^{:arglists ([box listener-id])}
+  removeListener event-box/remove-listener)
 
 (def.js MODULE (!:module))

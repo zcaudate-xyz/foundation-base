@@ -79,6 +79,7 @@
                                   (str/join ","))
 
                              (or (symbol? e)
+                                 (string? e)
                                  (and (h/form? e)
                                       (#{:..} (first e))))
                              (common/*emit-fn* e grammar mopts)

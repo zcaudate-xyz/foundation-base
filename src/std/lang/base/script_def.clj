@@ -30,7 +30,7 @@
   "forms for various argument types"
   {:added "4.0"}
   [[s args {:keys [property optional vargs empty]}]]
-  (let [{:keys [tag inst prefix]
+  (let [{:keys [tag inst prefix subtree]
          :or {inst "obj"}} (h/template-meta)
         
         inst (symbol (str inst))
@@ -90,9 +90,10 @@
                                          [])]
                              `(~'fn:> [~isym ~@args ~@optional ~@vargs]
                                   (~'. ~isym (~msym ~@args ~@optional ~@vargs))))))
+        subtree-fn (fn [s] (list 'quote (symbol s)))
         sform (if property
-                `(list ~''. ~inst (quote ~msym))
-                `(list ~''. ~inst ~aform))]
+                `(list ~''. ~inst ~@(map subtree-fn subtree) (quote ~msym))
+                `(list ~''. ~inst ~@(map subtree-fn subtree) ~aform))]
     `(~(symbol (str "defmacro." tag)) ~(with-meta sym {:standalone (list 'quote standalone)})
       ([~inst ~@dargs]
        ~sform))))

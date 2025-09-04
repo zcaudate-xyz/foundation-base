@@ -59,7 +59,6 @@
         (j/clearInterval interval))))
   (return conn))
 
-
 (def.js MODULE (!:module))
 
 (l/script :lua

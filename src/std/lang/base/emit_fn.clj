@@ -29,7 +29,7 @@
          tmodarr (mapv arr-fn tmod)
          kmodarr (mapv arr-fn kmod)
          mod-rev?    (and (or (empty tmodarr)
-                             (not-empty kmodarr))
+                              (not-empty kmodarr))
                           reversed)
          mod-has?    (or (not-empty tmodarr)
                          (not-empty kmodarr))

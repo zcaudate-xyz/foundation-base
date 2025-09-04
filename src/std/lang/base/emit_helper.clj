@@ -216,7 +216,9 @@
                     (-> grammar
                         :allow
                         :assign
-                        :quote)))
+                        :quote))
+               (and (h/form? sym)
+                    (= := (first sym))))
            (if (:symbol curr)
              (recur (conj all curr) {:modifiers [] :symbol sym} more)
              (recur all (assoc curr :symbol sym) more))

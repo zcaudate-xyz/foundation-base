@@ -4,7 +4,8 @@
 
 (l/script :js
   {:macro-only true
-   :bundle {:default  [["tamagui" :as [* Tamagui]]]}})
+   :bundle {:default  [["tamagui" :as [* Tamagui]]]
+            :token    [["@tamagui/get-token" :as [* TamaguiToken]]]}})
 
 (defn tmpl-tamagui
   "forms for various argument types"
@@ -19,6 +20,12 @@
                 [js.core :as j]]
   [tmpl-tamagui]
   (def.js MODULE (!:module)))
+
+(h/template-entries [l/tmpl-entry {:type :fragment
+                                   :base "TamaguiToken"
+                                   :tag "js"}]
+
+  [getSize])
 
 (h/template-entries [l/tmpl-entry {:type :fragment
                                    :base "Tamagui"
@@ -90,6 +97,7 @@
    ForwardSelectContext
    Frame
    Group
+   Group.Item
    GroupContext
    GroupFrame
    H1
@@ -365,3 +373,5 @@
    variableToString
    withStaticProperties
    wrapChildrenInText])
+
+

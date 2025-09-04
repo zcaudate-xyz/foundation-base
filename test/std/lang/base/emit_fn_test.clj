@@ -22,7 +22,7 @@
       first
       (emit-input-default "=" {} {}))
   => "int i = 9"
-
+  
   (emit-input-default
    '{:modifiers [:int], :symbol i, :assign true, :force true, :value 9}
    "=" {} {})
