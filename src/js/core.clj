@@ -147,18 +147,24 @@
 (defmacro.js import-set-global
   "sets all dependent imports to global"
   {:added "4.0"}
-  []
+  [& [exclude]]
   (->> (module/linked-natives :js)
-       (clojure.core/map (fn [[pkg {:keys [as]}]]
+       (clojure.core/keep (fn [[pkg {:keys [as]}]]
               (let [sym (if (vector? as)
                           (clojure.core/last as)
                           as)]
-                (if sym
-                  (h/$ (js.core/defineProperty 'globalThis ~(.replaceAll (name sym)
-                                                                         "-"
-                                                                         "_")
-                         {:value ~sym
-                          :writeable true}))))))
+                (if (and sym
+                         (not ((or exclude #{})
+                               sym)))
+                  (h/$ (when (not (. globalThis ~(symbol (.replaceAll (name sym)
+                                                                      "-"
+                                                                      "_"))))
+                         
+                         (js.core/defineProperty globalThis ~(.replaceAll (name sym)
+                                                                          "-"
+                                                                          "_")
+                           {:value ~sym
+                            :writeable true})))))))
        (clojure.core/apply list 'do)))
 
 (defmacro.js  ^{:standalone true}
