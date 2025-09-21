@@ -10,6 +10,8 @@
             :safearea [["react-native-safe-area-context" :as [* RNSafeArea]]]
             :gesture  [["react-native-gesture-handler" :as [* RNGestureHandler]]]
             :error    [["react-native-error-boundary" :as RNErrorBoundary]]
+            :video    [["react-native-video" :as RNVideo]]
+            :gradient [["expo-linear-gradient" :as [* ExpoLinearGradient]]]
             :nav      {:default  [["@react-navigation/native" :as [* RNNav]]]
                        :stack    [["@react-navigation/stack"  :as [* RNNavStack]]]
                        :drawer   [["@react-navigation/drawer" :as [* RNNavDrawer]]]
@@ -403,6 +405,19 @@
    [[navReset reset] []]
    [[navResetRoot resetRoot]  []]
    [[navSetParams setParams]  [params]]])
+
+
+;;
+;; LinearGradient
+;;
+
+(def$.js ExpoLinearGradient (. ExpoLinearGradient LinearGradient))
+
+;;
+;; Video
+;;
+
+(def$.js Video RNVideo)
 
 ;;
 ;; Icon

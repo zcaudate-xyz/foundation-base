@@ -208,6 +208,8 @@
                                 require}}
          :js    {:linters [sym-check-linter]
                  :globals '#{Worker
+                             Request
+                             Response
                              Promise
                              alert
                              setTimeout

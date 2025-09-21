@@ -14,6 +14,9 @@
              [xt.lang.base-lib :as k]]
    :export [MODULE]})
 
+(defrun.js __init__
+  (:# "eslint-disable react-hooks/rules-of-hooks"))
+
 ;;
 ;; React
 ;;
@@ -74,7 +77,8 @@
   "returns a constant val"
   {:added "4.0"}
   ([val]
-   (list 'React.useCallback val [])))
+   (list '. (list 'React.useRef val)
+         'current)))
 
 (defmacro.js ^{:style/indent 1}
   derive
@@ -171,6 +175,7 @@
   "make as random id"
   {:added "4.0"}
   [n]
+  (:# "eslint-disable-next-line react-hooks/rules-of-hooks")
   (return (-/const (j/randomId (or n 6)))))
 
 ;;
@@ -201,7 +206,8 @@
   [component]
   (if (k/fn? component)
     (return component)
-    (return (-/const (-/lazy (fn:> component))))))
+    (do (:# "eslint-disable-next-line react-hooks/rules-of-hooks")
+        (return (-/const (-/lazy (fn:> component)))))))
 
 ;;
 ;; useRef
@@ -230,7 +236,9 @@
   {:added "4.0"}
   [value f]
   (:= f (or f k/identity))
+  (:# "eslint-disable-next-line react-hooks/rules-of-hooks")
   (var valueRef (-/ref (f value)))
+  (:# "eslint-disable-next-line react-hooks/rules-of-hooks")
   (-/watch [value]
     (-/curr:set valueRef (f value)))
   (return valueRef))
@@ -279,8 +287,9 @@
   [value delay isMounted]
   (when (== 0 delay)
     (return [value k/noop]))
-
+  (:# "eslint-disable-next-line react-hooks/rules-of-hooks")
   (var [delayed setDelayed] (-/local value))
+  (:# "eslint-disable-next-line react-hooks/rules-of-hooks")
   (-/watch [value]
     (j/future-delayed [delay]
       (when (isMounted)
@@ -482,6 +491,7 @@
      result
      setResult}]
   (var isMounted (-/useIsMounted))
+  (:# "eslint-disable-next-line react-hooks/rules-of-hooks")
   (:= [result setResult] (:? (k/nil? setResult)
                              (-/local)
                              [result setResult]))
@@ -611,6 +621,7 @@
   [data f state]
   (:= f (or f k/first))
   (:= data (or data []))
+  (:# "eslint-disable-next-line react-hooks/rules-of-hooks")
   (var [value setValue] (or state (-/local (f data))))
   (-/watch [(k/json-encode data)]
     (when (and (k/not-empty? data)

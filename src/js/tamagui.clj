@@ -4,15 +4,16 @@
 
 (l/script :js
   {:macro-only true
-   :bundle {:default  [["tamagui" :as [* Tamagui]]]
-            :token    [["@tamagui/get-token" :as [* TamaguiToken]]]}})
+   :bundle {:default  [["tamagui" :as [* T]]]
+            :toast    [["@tamagui/toast" :as [* TToast]]]
+            :token    [["@tamagui/get-token" :as [* TToken]]]}})
 
 (defn tmpl-tamagui
   "forms for various argument types"
   {:added "4.0"}
   [s]
   (list 'def.js s
-        (list `data/wrapData (list '. 'Tamagui s))))
+        (list `data/wrapData (list '. 'Tama s))))
 
 (comment
   #_#_:require [[js.react :as r]
@@ -22,13 +23,27 @@
   (def.js MODULE (!:module)))
 
 (h/template-entries [l/tmpl-entry {:type :fragment
-                                   :base "TamaguiToken"
+                                   :base "TToken"
                                    :tag "js"}]
 
   [getSize])
 
 (h/template-entries [l/tmpl-entry {:type :fragment
-                                   :base "Tamagui"
+                                   :base "TToast"
+                                   :tag "js"}]
+
+  [Toast
+   ToastProvider
+   ToastViewport
+   useToastController
+   useToastState
+   [ToastTitle Toast.Title]
+   [ToastDescription Toast.Description]
+   [ToastClose Toast.Close]
+   [ToastAction Toast.Action]])
+
+(h/template-entries [l/tmpl-entry {:type :fragment
+                                   :base "T"
                                    :tag "js"}]
   [Accordion
    Adapt
@@ -66,6 +81,7 @@
    CardFrame
    CardHeader
    Checkbox
+   [CheckboxIndicator Checkbox.Indicator]
    CheckboxContext
    CheckboxFrame
    CheckboxIndicatorFrame
@@ -124,7 +140,7 @@
    Overlay])
 
 (h/template-entries [l/tmpl-entry {:type :fragment
-                                   :base "Tamagui"
+                                   :base "T"
                                    :tag "js"}]
   [Paragraph
    ParentSheetContext
@@ -173,6 +189,18 @@
    SelectItemParentProvider
    SelectProvider
    SelectSeparator
+   [SelectContent Select.Content]
+   [SelectFocusScope Select.FocusScope]
+   [SelectGroup Select.Group]
+   [SelectItem Select.Item]
+   [SelectItemIndicator Select.ItemIndicator]
+   [SelectItemText Select.ItemText]
+   [SelectLabel Select.Label]
+   [SelectScrollDownButton Select.ScrollDownButton]
+   [SelectScrollUpButton Select.ScrollUpButton]
+   [SelectTrigger Select.Trigger]
+   [SelectValue Select.Value]
+   [SelectViewport Select.Viewport]
    Separator
    Sheet
    SheetController
@@ -216,6 +244,7 @@
    ThemeableStack
    Thumb
    ToggleGroup
+   [ToggleGroupItem ToggleGroup.Item]
    Tooltip
    TooltipGroup
    TooltipSimple
@@ -231,7 +260,7 @@
    ZStack])
 
 (h/template-entries [l/tmpl-entry {:type :fragment
-                                   :base "Tamagui"
+                                   :base "T"
                                    :tag "js"}]
 
   [USE_NATIVE_PORTAL

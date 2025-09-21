@@ -33,7 +33,7 @@
   ^:hidden
   
   (notify/wait-on :js
-    (j/future-delayed [100]
+                  (j/future-delayed [100]
       (repl/notify true)))
   => true)
 

@@ -4,20 +4,25 @@
 
 (l/script :js
   {:macro-only true
-   :bundle {:client   [["@supabase/supabase-js" :as [* SupabaseClient]]]
-            :ssr      [["@supabase/ssr" :as [* SupabaseSSR]]]}})
+   :bundle {:default   [["@supabase/supabase-js" :as [* SupabaseClient]]]}})
 
 (h/template-entries [l/tmpl-entry {:type :fragment
                                    :base "SupabaseClient"
                                    :tag "js"}]
   [SupabaseClient
-   createClient])
+   [createSupabaseClient createClient]])
 
-(h/template-entries [l/tmpl-entry {:type :fragment
+#_(h/template-entries [l/tmpl-entry {:type :fragment
                                    :base "SupabaseSSR"
                                    :tag "js"}]
   [createBrowserClient
    Session])
+
+(h/template-entries [l/tmpl-macro {:base "SupabaseClient"
+                                   :inst "supabase"
+                                   :subtree []
+                                   :tag "js"}]
+  [[rpc             [method] {:vargs args}]])
 
 (h/template-entries [l/tmpl-macro {:base "SupabaseClient"
                                    :inst "supabase"

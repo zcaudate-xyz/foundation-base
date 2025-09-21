@@ -164,6 +164,17 @@
                                                ks-optional) ))
       (h/error "Extra keys in map" ks-errored))))
 
+(defn collect-module-ns-select
+  [ns selection]
+  (let [{:keys [default]} selection
+        selected (first (keep (fn [[kns value]]
+                                (if (.startsWith (str ns)
+                                                 (str kns))
+                                  [kns value]))
+                              (dissoc selection :default)))]
+    (or selected
+        [nil default])))
+
 (defn collect-module-directory-form
   "collects forms for"
   {:added "4.0"}
@@ -179,7 +190,15 @@
               path-separator "/"
               path-replace {}}
          :as options}]
-  (let [[ns-str
+  (let [[root-local root-prefix] (if (string? root-prefix)
+                                   [nil root-prefix]
+                                   (collect-module-ns-select ns root-prefix))
+        [_ path-suffix] (if (string? path-suffix)
+                          [nil path-suffix]
+                          (collect-module-ns-select ns path-suffix))
+        root-ns   (or root-local root-ns)
+
+        [ns-str
          root-str] [(str ns)
                     (str root-ns)]        
         is-sub? (.startsWith ^String ns-str
@@ -200,8 +219,9 @@
            path-separator
            (str path-separator root-libs path-separator))
          (str/join path-separator ns-paths)
-         "."
-         path-suffix)))
+         (if (not-empty path-suffix)
+           (str "."
+                path-suffix)))))
 
 (defn collect-module
   "collects information for the entire module"
@@ -247,6 +267,7 @@
                         link)
                   ;; an empty map differs from the array
                   ^:meta/empty {})]
+    (h/prn link)
     {:setup    setup
      :teardown teardown
      :code     code

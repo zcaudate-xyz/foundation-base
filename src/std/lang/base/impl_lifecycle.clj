@@ -139,7 +139,7 @@
                                          (update mopts :emit merge (:setup emit))))
         
         native-arr   (emit-module-setup-native-arr module-id meta prep)
-        link-arr     (emit-module-setup-link-arr module-id meta prep)
+        link-arr     (h/do:prn (emit-module-setup-link-arr module-id meta prep))
         header-arr   (if (not (-> emit :header :suppress))
                        (let [header-opts  (update mopts :emit merge (:header emit))]
                          (keep (fn [entry]

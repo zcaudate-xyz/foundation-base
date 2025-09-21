@@ -38,11 +38,16 @@
   "compiles a single module"
   {:added "4.0"}
   ([{:keys [header lang footer main] :as opts}]
+   
+   #_(h/pp (:emit opts))
+   
    (let [mopts   (last (impl/emit-options opts))
          {:keys [emit]} mopts
          body    (lifecycle/emit-module-setup main
                                               mopts)
          full    (compile/compile-fullbody body opts)
+
+         ;; output transformations
          full    (reduce (fn [full transform]
                            (transform full (-> emit :static)))
                          full
@@ -183,30 +188,33 @@
          all-paths   (->> (or search ["src"])
                           (map #(fs/path %))
                           (mapcat #(fs/select % {:include [".clj$"]})))
+
          ;; get paths of all the clojure files with the root namespace
          ns-all      (pmap fs/file-namespace all-paths)
          ns-has?     (fn [ns]
                        (.startsWith (str ns)
                                     (str main)))
          ns-selected (filter ns-has? ns-all)
-
+         
          ;; require all the paths of the file.
          _  (doseq [ns ns-selected]
               (require ns))
-
+         
          ;; for each file in the directory, find 'extra' deps 
-         ns-extras   (->> (mapcat (fn [ns]
-                                    (-> (h/deps:resolve book [ns])
-                                        :all))
-                                  ns-selected)
-                          (set)
-                          (filter (comp not ns-has?)))
-
+         ns-extras   (if (-> emit :code :extra-namespaces false?)
+                       []
+                       (->> (mapcat (fn [ns]
+                                      (-> (h/deps:resolve book [ns])
+                                          :all))
+                                    ns-selected)
+                            (set)
+                            (filter (comp not ns-has?))))
+         
          ;; output the libs
          #_#__  (h/prn opts)
          #_#__  (h/prn ns-extras)
          
-         ;; generate files for 
+         ;; generate for all namespaces
          files  (mapv (fn [ns]
                         (compile-module-directory-single
                          ns

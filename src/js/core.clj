@@ -148,24 +148,36 @@
   "sets all dependent imports to global"
   {:added "4.0"}
   [& [exclude]]
-  (->> (module/linked-natives :js)
-       (clojure.core/keep (fn [[pkg {:keys [as]}]]
-              (let [sym (if (vector? as)
-                          (clojure.core/last as)
-                          as)]
-                (if (and sym
-                         (not ((or exclude #{})
-                               sym)))
-                  (h/$ (when (not (. globalThis ~(symbol (.replaceAll (name sym)
-                                                                      "-"
-                                                                      "_"))))
-                         
-                         (js.core/defineProperty globalThis ~(.replaceAll (name sym)
-                                                                          "-"
-                                                                          "_")
-                           {:value ~sym
-                            :writeable true})))))))
-       (clojure.core/apply list 'do)))
+  (let [form-fn (fn [sym]
+                  
+                  (let [sym-str (.replaceAll (clojure.core/name sym)
+                                             "-"
+                                             "_")]
+                    (list 'when
+                          (list 'not 
+                                (list '. 'globalThis
+                                      (symbol sym-str)))
+                          (list 'js.core/defineProperty 'globalThis
+                                sym-str
+                                {:value sym
+                                 :writeable true}))))
+        output (->> (module/linked-natives :js)
+                    (clojure.core/mapcat
+                     (fn [[pkg {:keys [as]}]]
+                       (cond (set? as)
+                             (mapv form-fn as)
+                             
+                             :else
+                             (let [sym (if (vector? as)
+                                         (clojure.core/last as)
+                                         as)]
+                               (if (and sym
+                                        (not ((or exclude #{})
+                                              sym)))
+                                 [(form-fn sym)])))))
+                    (clojure.core/keep clojure.core/identity)
+                    (clojure.core/apply list 'do))]
+    output))
 
 (defmacro.js  ^{:standalone true}
   arrayify
@@ -306,7 +318,7 @@
                                (return res)))
                        (catch (fn [err]
                                 (console.log ~label ~line "\n\n" err)
-                               (return err)))))
+                                (return err)))))
             (do (console.log ~label ~line "\n\n" out)
                 (return out)))))))
 

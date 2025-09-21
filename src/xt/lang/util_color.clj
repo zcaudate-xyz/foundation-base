@@ -306,7 +306,6 @@
            (k/min 100 s)
            (k/min 100 l)]))
 
-
 (defn.xt hue->v
   "converts a hue to a value"
   {:added "4.0"}

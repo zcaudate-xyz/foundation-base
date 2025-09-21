@@ -19,16 +19,21 @@
   "listens to the box out"
   {:added "4.0"}
   [box path meta]
-  (var getFn (fn:> (k/clone-shallow
-                    (event-box/get-data box path))))
-  (var [data changeData] (r/local getFn))
-  (r/watch [(k/json-encode path)]
+  (var dataFn (r/useCallback
+               (fn []
+                 (return (k/clone-shallow
+                          (event-box/get-data box path))))
+               [box path]))
+  (var [data setData] (r/local (dataFn)))
+  (r/watch [box path meta dataFn]
     (var listener-id (j/randomId 4))
     (event-box/add-listener box listener-id path
                             (fn [m]
-                              (changeData getFn))
+                              (setData (dataFn)))
                             meta)
-    (changeData getFn)
+    (var nData (dataFn))
+    (when (not (k/eq-nested data nData))
+      (setData nData))
     (return (fn [] (event-box/remove-listener box listener-id))))
   (return data))
 
@@ -38,8 +43,10 @@
   [box path meta]
   (var data (-/useListenBox box path meta))
   (var setData
-       (r/const (fn [value]
-                  (event-box/set-data box path value))))
+       (r/useCallback
+        (fn [value]
+          (event-box/set-data box path value))
+        [box path]))
   (return [data setData]))
 
 (defn.js attachLocalStorage
@@ -52,7 +59,7 @@
         (:= stored (JSON.parse stored))
         (catch e
             (:= stored initial)))
-      (event-box/get-data box path stored))
+      (event-box/set-data box path stored))
     
     
     (event-box/add-listener

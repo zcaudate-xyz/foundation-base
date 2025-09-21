@@ -36,7 +36,11 @@
   (emit-input-default
    '{:modifiers [:const :int]}
    "=" {} {})
-  => "const int")
+  => "const int"
+
+  (emit-input-default
+   '{:symbol #{key url}, :assign true, :force true, :value 10}
+   "=" {} {}))
 
 ^{:refer std.lang.base.emit-fn/emit-hint-type :added "4.0"}
 (fact "emits the return type")

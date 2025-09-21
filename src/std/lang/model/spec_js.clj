@@ -37,7 +37,9 @@
   "emits a map key"
   {:added "4.0"}
   ([key grammar nsp]
-   (cond (or (symbol? key) (h/form? key))
+   (cond (or (symbol? key)
+             (and (h/form? key)
+                  (not= :- (first key))))
          (str  "[" (common/*emit-fn* key grammar nsp) "]")
 
          :else
@@ -77,7 +79,7 @@
                                   (map (fn [pair]
                                          (data/emit-map-entry pair grammar mopts)))
                                   (str/join ","))
-
+                             
                              (or (symbol? e)
                                  (string? e)
                                  (and (h/form? e)
