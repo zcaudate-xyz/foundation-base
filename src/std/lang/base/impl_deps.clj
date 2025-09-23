@@ -168,9 +168,14 @@
   [ns selection]
   (let [{:keys [default]} selection
         selected (first (keep (fn [[kns value]]
-                                (if (.startsWith (str ns)
-                                                 (str kns))
-                                  [kns value]))
+                                (cond (and (symbol? kns)
+                                           (.startsWith (str ns)
+                                                        (str kns)))
+                                      [kns value]
+
+                                      (and (h/regexp? kns)
+                                           (re-find kns (str ns)))
+                                      [nil value]))
                               (dissoc selection :default)))]
     (or selected
         [nil default])))
@@ -267,7 +272,6 @@
                         link)
                   ;; an empty map differs from the array
                   ^:meta/empty {})]
-    (h/prn link)
     {:setup    setup
      :teardown teardown
      :code     code

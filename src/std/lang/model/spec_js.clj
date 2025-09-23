@@ -37,13 +37,7 @@
   "emits a map key"
   {:added "4.0"}
   ([key grammar nsp]
-   (cond (or (symbol? key)
-             (and (h/form? key)
-                  (not= :- (first key))))
-         (str  "[" (common/*emit-fn* key grammar nsp) "]")
-
-         :else
-         (data/default-map-key key grammar nsp))))
+   (data/default-map-key key grammar nsp)))
 
 (defn js-vector
   "emits a js vector"
