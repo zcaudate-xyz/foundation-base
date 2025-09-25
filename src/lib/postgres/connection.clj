@@ -19,6 +19,8 @@
            (com.impossibl.postgres.api.data InetAddr)
            (com.impossibl.postgres.api.jdbc PGNotificationListener)))
 
+
+
 (def ^:dynamic *execute* nil)
 
 ;;
@@ -61,10 +63,15 @@
   "creates a pooled connection"
   {:added "4.0"}
   ([{:keys [host port user pass dbname]
-     :or {host "localhost"
-          port 5432
-          user "postgres"
-          pass "postgres"}
+     :or {host (or (System/getenv "DEFAULT_RT_POSTGRES_HOST")
+                   "127.0.0.1")
+          port (h/parse-long
+                (or (System/getenv "DEFAULT_RT_POSTGRES_PORT")
+                    "5432"))
+          user (or (System/getenv "DEFAULT_RT_POSTGRES_USER")
+                   "postgres")
+          pass (or (System/getenv "DEFAULT_RT_POSTGRES_PASS")
+                   "postgres")}
      :as m}]
    (let [ds (doto (PGConnectionPoolDataSource.)
               (.setHost host)
@@ -136,10 +143,15 @@
   "creates a notify channel"
   {:added "4.0"}
   [{:keys [host port user pass dbname]
-    :or {host "localhost"
-         port 5432
-         user "postgres"
-         pass "postgres"}}
+    :or {host (or (System/getenv "DEFAULT_RT_POSTGRES_HOST")
+                   "127.0.0.1")
+          port (h/parse-long
+                (or (System/getenv "DEFAULT_RT_POSTGRES_PORT")
+                    "5432"))
+          user (or (System/getenv "DEFAULT_RT_POSTGRES_USER")
+                   "postgres")
+          pass (or (System/getenv "DEFAULT_RT_POSTGRES_PASS")
+                   "postgres")}}
    {:keys [channel on-close on-notify]
     :as m}]
   (let [listener (notify-listener m)

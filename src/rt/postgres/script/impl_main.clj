@@ -102,7 +102,7 @@
   "contructs a delete form with prep"
   {:added "4.0"}
   ([[entry tsch mopts] {:keys [where returning into as single args] :as params
-              :or {as :json}}]
+                        :or {as :json}}]
    (let [{:static/keys [tracker]} entry
          table-sym (ut/sym-full entry)
          params      (tracker/add-tracker params tracker table-sym :delete)
@@ -126,3 +126,30 @@
               :or {as :json}}]
    (let [[entry tsch mopts] (base/prep-table spec-sym false (l/macro-opts))]
      (t-delete-raw [entry tsch mopts] params))))
+
+
+;;
+;; fields
+;;
+
+(defn t-fields-raw
+  "contructs a delete form with prep"
+  {:added "4.0"}
+  ([[entry tsch mopts] {:keys [scope path] :as params
+                        :or {path [:web :modify]}}]
+   (cond scope
+         (schema/get-returning tsch scope)
+
+         :else
+         (->> tsch
+              (sort-by (fn [[_ [{:keys [order]}]]]
+                         order))
+              (keep (fn [[k [{:keys [primary unique order]}]]]
+                      (if (and (not (or primary #_unique))
+                               order)
+                        (str k))))))))
+
+(defn t-fields
+  [spec-sym {:keys [scope path] :as params}]
+  (let [[entry tsch mopts] (base/prep-table spec-sym false (l/macro-opts))]
+    (t-fields-raw [entry tsch mopts] params)))

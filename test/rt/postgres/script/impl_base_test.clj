@@ -15,12 +15,22 @@
 
 (deftype.pg Hello
   [:id   {:type :text :primary true}
-   :task {:type :ref :ref {:ns scratch/Task}}])
+   :task {:type :ref :ref {:ns scratch/Task}
+          :profiles {:web  {:editable #{:create
+                                        :modify}}}}])
 
-(def -tsch- (get-in (app/app "scratch")
-                    [:schema
-                     :tree
-                     :Task]))
+(comment
+  (def -hsch- (get-in (app/app "scratch")
+                      [:schema
+                       :tree
+                       :Hello]))
+
+  (def -tsch- (get-in (app/app "scratch")
+                      [:schema
+                       :tree
+                       :Task])))
+
+
 
 ^{:refer rt.postgres.script.impl-base/prep-entry :added "4.0"
   :setup [@Hello]}
@@ -29,6 +39,10 @@
   
   (second (prep-entry '-/Hello (l/rt:macro-opts :postgres)))
   => book/book-entry?)
+
+(comment
+  (prep-entry 'szndb.core.app-common/Currency
+              (l/rt:macro-opts :postgres)))
 
 ^{:refer rt.postgres.script.impl-base/prep-table :added "4.0"}
 (fact "prepares data related to the table sym"

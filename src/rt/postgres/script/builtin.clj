@@ -257,8 +257,6 @@
 
 (def +jsonb+
   '[jsonb-agg
-    jsonb-array-element
-    jsonb-array-element-text
     jsonb-array-elements
     jsonb-array-elements-text
     jsonb-array-length

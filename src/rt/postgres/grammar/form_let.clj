@@ -174,3 +174,24 @@
       (common/block-do-suppress form)
       grammar
       mopts))))
+
+(defn pg-loop-block
+  "emits a block with let usage"
+  {:added "4.0"}
+  ([[_ & forms] grammar mopts]
+   (binding [*input-syms* (or *input-syms* (volatile! #{}))]
+     (emit-common/*emit-fn* 
+      (apply common/block-loop-block forms)
+      grammar
+      mopts))))
+
+(defn pg-case-block
+  "emits a block with let usage"
+  {:added "4.0"}
+  ([[_ & forms] grammar mopts]
+   (binding [*input-syms* (or *input-syms* (volatile! #{}))]
+     (emit-common/*emit-fn* 
+      (apply common/block-case-block forms)
+      grammar
+      mopts))))
+

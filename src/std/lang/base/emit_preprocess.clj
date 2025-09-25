@@ -274,8 +274,9 @@
               (walk-fn (try (binding [*macro-form* form]
                               (apply (:template fe) (rest form)))
                             (catch Throwable t
-                              (h/error "Cannot process form:" {:form form
-                                                               :cause t}))))
+                              (h/error (.getMessage t)
+                                       {:form form
+                                        :cause t}))))
               form)))))
 
 (defn to-staging

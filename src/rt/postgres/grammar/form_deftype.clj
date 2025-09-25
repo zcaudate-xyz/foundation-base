@@ -24,22 +24,48 @@
 ;;
 ;;
 
-(defn pg-deftype-ref
+
+(defn pg-deftype-ref-link
   "creates the ref entry"
   {:added "4.0"}
-  ([col {:keys [ns link column] :or {column :id}} {:keys [snapshot] :as mopts}]
+  ([col {:keys [ns link current column] :or {column :id}} {:keys [snapshot] :as mopts}]
    (let [{:keys [lang module section id]} link
          book   (snap/get-book snapshot lang)
          r-en   (book/get-base-entry book module id section)
          {:keys [type]
           :as r-ref}  (h/-> (nth (:form r-en) 2)
-                            (apply hash-map %)
-                            (get column)
-                            (or {:type :uuid}))]
+          (apply hash-map %)
+          (get column)
+          (or {:type :uuid}))]
      [(str/snake-case (str (h/strn col) "_id"))
       [(common/pg-type-alias type)]
       [(list (common/pg-base-token #{(name ns)} (:static/schema r-en))
              #{(name column)})]])))
+
+(defn pg-deftype-ref-current
+  "creates the ref entry"
+  {:added "4.0"}
+  ([col {:keys [ns current column] :or {column :id}} {:keys [snapshot] :as mopts}]
+   (let [{:keys [id schema type]}  current]
+     [(str/snake-case (str (h/strn col) "_id"))
+      [(common/pg-type-alias type)]
+      [(list (list '. #{schema} #{id})
+             #{(name column)})]])))
+
+(comment
+  {:id (second ref)
+   :schema (first ref)
+   :type (nth ref 2)})
+
+(defn pg-deftype-ref
+  "creates the ref entry"
+  {:added "4.0"}
+  ([col {:keys [ns link current] :as m} mopts]
+   (cond current
+         (pg-deftype-ref-current col m mopts)
+
+         :else
+         (pg-deftype-ref-link col m mopts))))
 
 (defn pg-deftype-col-sql
   "formats the sql on deftype"
@@ -235,7 +261,12 @@
                     (mapcat (fn [[k {:keys [type primary ref sql scope] :as attrs}]]
                               (let [sql   (cond-> sql
                                             (:process sql) (assoc :process
-                                                                  (h/var-sym (resolve (:process sql)))))
+                                                                  (h/prewalk
+                                                                   (fn [x]
+                                                                     (if (symbol? x)
+                                                                       (h/var-sym (resolve x))
+                                                                       x))
+                                                                   (:process sql))))
                                     attrs (cond-> attrs
                                             sql (assoc :sql sql))]
                                 (if primary
@@ -244,8 +275,18 @@
                                                                           :curr attrs})
                                     (vreset! capture (assoc (select-keys attrs [:type :enum :ref])
                                                             :id k))))
-                                (cond (= :ref type)
+                                (cond (and (= :ref type)
+                                           (vector? ref))
+                                      [k {:type :ref,
+                                          :required true,
+                                          :ref (merge {:ns  (str (first ref) "." (second ref))
+                                                       :current {:id (second ref)
+                                                                 :schema (first ref)
+                                                                 :type (nth ref 2)}}
+                                                      (nth ref 3))
+                                          :scope :-/ref}]
                                       
+                                      (= :ref type)
                                       (let [[link check] (if (and (= "-" (namespace (:ns ref)))
                                                                   (= (name sym) (name (:ns ref))))
                                                            [{:section :code

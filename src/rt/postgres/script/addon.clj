@@ -11,6 +11,13 @@
   {:macro-only true})
 
 (defmacro.pg ^{:- [:text]}
+  id
+  "generates random hex"
+  {:added "4.0"}
+  ([sym & [type]]
+   `(~(or type :uuid) (:->> ~sym "id"))))
+
+(defmacro.pg ^{:- [:text]}
   rand-hex
   "generates random hex"
   {:added "4.0"}

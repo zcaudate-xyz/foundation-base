@@ -33,7 +33,8 @@
     :array  :jsonb
     :long   :bigint
     :enum   :text
-    :image  :jsonb})
+    :image  :jsonb
+    :time   :bigint})
 
 (defn pg-type-alias
   "gets the type alias"
@@ -259,6 +260,29 @@
      \\ :exception :when-others-then
      \\ :end \;
      \\ :$$ :language "plpgsql" \;]))
+
+(defn block-loop-block
+  "initates do block"
+  {:added "4.0"}
+  ([_ & forms]
+   `[:loop
+     \\ (\| (~'do ~@forms))
+     \\ :end-loop]))
+
+(defn block-case-block
+  "initates do block"
+  {:added "4.0"}
+  ([value & args]
+   (let [args  (partition 2 args)
+         block (mapcat (fn [[chk body]]
+                         (if (= :else chk)
+                           [:ELSE (list :% body) \\]
+                           [:WHEN (list :% chk) :THEN (list :% body) \\]))
+                       args)]
+     (list '% (vec (concat [:case value \\]
+                           [(apply list \| block)]
+                           [:end]))))))
+
 
 ;;
 ;; defenum

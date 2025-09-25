@@ -92,6 +92,25 @@
                     [k [v (first (get tsch k))]])
                   m)))
 
+(defn t-val-process
+  [process out]
+  (cond (vector? process)
+        (reduce
+         (fn [out step]
+           (cond (symbol? step)
+                 (list step out)
+
+                 (vector? step)
+                 (apply list (first step) out (rest step))
+                 
+                 :else
+                 out))
+         out
+         process)
+        
+        :else
+        (list process out)))
+
 (defn t-val-fn
   "builds a js val given input"
   {:added "4.0"}
@@ -136,7 +155,7 @@
                            :else
                            (list type v))))]
      (cond->> out
-       (:process sql) (list (:process sql))))))
+       (:process sql) (t-val-process (:process sql))))))
 
 (defn t-key-attrs-fn
   "builds a js key"

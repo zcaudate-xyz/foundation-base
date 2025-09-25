@@ -21,7 +21,7 @@
          columns (set (or columns
                           (->> tsch
                                (keep (fn [[k [{:keys [primary unique order]}]]]
-                                       (if (and (not (or primary unique))
+                                       (if (and (not (or primary #_unique))
                                                 order)
                                          k))))))
          all-columns (vec (h/union columns (set (keys trkm))))
@@ -49,7 +49,7 @@
                                     :else
                                     (apply list 'coalesce inputs))
                             out (cond->> out
-                                  (:process sql) (list (:process sql)))]
+                                  (:process sql) (base/t-val-process (:process sql)))]
                         (list '== #{(base/t-key-fn tsch k)} out)))
                     ks)]
      (list '--- body))))
@@ -72,8 +72,8 @@
      (->> (mapv (fn [k]
                   (let [{:keys [sql] :as attrs} (get-in tsch [k 0])
                         out (get m k)
-                        out (cond->> out
-                              (:process sql) (list (:process sql)))]
+                        #_#_out (cond->> out
+                              (:process sql) (base/t-val-process (:process sql)))]
                     (list '==
                           #{(base/t-key-fn tsch k)}
                           out)))

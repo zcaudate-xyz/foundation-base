@@ -123,5 +123,14 @@
              :or {as :json}}]]
    (update/t-modify spec-sym params)))
 
+(defmacro.pg ^{:- [:block]
+               :style/indent 1}
+  t:fields
+  "flat modify"
+  {:added "4.0"}
+  ([spec-sym & [{:keys [scope path] :as params
+                 :or {path [:web :modify]}}]]
+   (main/t-fields spec-sym params)))
+
 (comment
   (./create-tests))

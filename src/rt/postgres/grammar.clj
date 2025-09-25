@@ -76,16 +76,21 @@
       ;; OPS
       ;;
       (grammar/build:extend
-       {:doblk   {:op :doblk   :symbol #{'do:block}    :emit  #'form-let/pg-do-block :type :block}
+       {
+        :doblk   {:op :doblk   :symbol #{'do:block}    :emit  #'form-let/pg-do-block :type :block}
         :dosup   {:op :dosup   :symbol #{'do:suppress} :emit  #'form-let/pg-do-suppress :type :block}
         :doast   {:op :doast   :symbol #{'do:assert}   :emit  #'common/pg-do-assert :type :block :style/indent 1}
+        
         :letblk  {:op :letblk  :symbol #{'let:block}   :macro #'form-let/pg-tf-let-block :emit :macro :type :block}
         :let     {:op :let     :symbol #{'let}         :macro #'form-let/pg-tf-let :emit :macro :type :block}
+        :loop    {:op :loop    :symbol #{'loop}        :emit  #'form-let/pg-loop-block :type :block}
+        :case    {:op :case    :symbol #{'case}        :emit  #'form-let/pg-case-block :type :block}
         :forech  {:op :forech  :symbol #{'for:each}    :macro #'tf/pg-tf-foreach :emit :macro :type :block}
         :fdata   {:op :fdata   :symbol #{'>-<}        :macro #'pg-tf-free-data :emit :macro :type :block}
         :fvec    {:op :fdata   :symbol #{'---}        :macro #'pg-tf-free-vec :emit :macro :type :block}
         :concat  {:op :concat  :symbol #{'||}          :value true :raw "||" :emit :infix}
         :cast    {:op :cast    :symbol #{'++}          :emit #'common/pg-typecast}
+        :idxe    {:op :idxe    :symbol #{:#>>}         :value true :raw "#>>" :emit :infix}
         :idxt    {:op :idxt    :symbol #{:->>}         :value true :raw "->>" :emit :infix}
         :idxj    {:op :idxj    :symbol #{:->}          :value true :raw "->"  :emit :infix}
         :remc    {:op :remc    :symbol #{'re}          :raw "~"    :emit :bi}  
