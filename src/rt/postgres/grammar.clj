@@ -89,6 +89,8 @@
         :fdata   {:op :fdata   :symbol #{'>-<}        :macro #'pg-tf-free-data :emit :macro :type :block}
         :fvec    {:op :fdata   :symbol #{'---}        :macro #'pg-tf-free-vec :emit :macro :type :block}
         :concat  {:op :concat  :symbol #{'||}          :value true :raw "||" :emit :infix}
+        :find    {:op :find    :symbol #{'find}        :raw "?"   :emit :infix}
+        :findm   {:op :findm   :symbol #{'findm}       :raw "@>" :emit :infix}
         :cast    {:op :cast    :symbol #{'++}          :emit #'common/pg-typecast}
         :idxe    {:op :idxe    :symbol #{:#>>}         :value true :raw "#>>" :emit :infix}
         :idxt    {:op :idxt    :symbol #{:->>}         :value true :raw "->>" :emit :infix}

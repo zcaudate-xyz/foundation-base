@@ -10,12 +10,28 @@
   rt.postgres
   {:macro-only true})
 
+
+(defmacro.pg ^{:- [:array]}
+  ARRAY
+  "generates random hex"
+  {:added "4.0"}
+  ([& args]
+   (list :% (list :- "ARRAY[") (list 'quote (vec args)) (list :- "]"))))
+
 (defmacro.pg ^{:- [:text]}
   id
   "generates random hex"
   {:added "4.0"}
   ([sym & [type]]
    `(~(or type :uuid) (:->> ~sym "id"))))
+
+(defmacro.pg ^{:- [:text]}
+  str
+  "generates random hex"
+  {:added "4.0"}
+  ([table]
+   (l/emit-str (common/pg-linked-token table (l/macro-opts))
+               (l/macro-opts))))
 
 (defmacro.pg ^{:- [:text]}
   rand-hex
