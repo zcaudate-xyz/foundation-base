@@ -112,18 +112,23 @@
 (defn t-upsert-raw
   "contructs an upsert form with prep"
   {:added "4.0"}
-  ([[entry tsch mopts] data {:keys [where returning into as single on-conflict] :as params}]
+  ([[entry tsch mopts] data {:keys [where returning into as single
+                                    on-conflict
+                                    on-update] :as params}]
    (let [pkeys  (keep (fn [[k [attr]]]
                         (if (:primary attr) k))
                       tsch)
          ckeys  (cond (map? data) (keys data)
                       (symbol? data) (keys tsch)
                       :else (h/error "Invalid data type." {:input data}))
-         [_ ckeys]  (base/t-returning tsch (set ckeys))
-         ckrow  (map (fn [col] (list '. (list :- "EXCLUDED") col))
-                     ckeys)
+         
+         [_ ccols]  (base/t-returning tsch (set ckeys))
+         ckrow  (map (fn [col key]
+                       (or (get on-update key)
+                           (list '. (list :- "EXCLUDED") col)))
+                     ccols ckeys)
          cargs  [:do-update
-                 :set (list 'quote (apply list ckeys))
+                 :set (list 'quote (apply list ccols))
                  := (cons 'row ckrow)]
          conflicted (list 'quote (apply list (second (base/t-returning
                                                       tsch
