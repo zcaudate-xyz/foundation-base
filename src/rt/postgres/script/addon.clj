@@ -30,8 +30,9 @@
   "generates random hex"
   {:added "4.0"}
   ([table]
-   (l/emit-str (common/pg-linked-token table (l/macro-opts))
-               (l/macro-opts))))
+   (std.json/write
+    (l/emit-str (common/pg-linked-token table (l/macro-opts))
+                (l/macro-opts)))))
 
 (defmacro.pg ^{:- [:text]}
   rand-hex
@@ -203,4 +204,12 @@
   [enum]
   (h/$ [:select p :from (unnest (enum-range (++ nil ~enum))) :as p :order-by (random) :limit 1]))
 
+(defmacro.pg
+  do:plpgsql
+  [& forms]
+  `[:DO :$$
+    :BEGIN
+    ~@forms
+    :END
+    :$$ :LANGUAGE "plpgsql"])
 

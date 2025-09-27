@@ -112,7 +112,7 @@
 (defn t-upsert-raw
   "contructs an upsert form with prep"
   {:added "4.0"}
-  ([[entry tsch mopts] data {:keys [where returning into as single] :as params}]
+  ([[entry tsch mopts] data {:keys [where returning into as single on-conflict] :as params}]
    (let [pkeys  (keep (fn [[k [attr]]]
                         (if (:primary attr) k))
                       tsch)
@@ -125,7 +125,10 @@
          cargs  [:do-update
                  :set (list 'quote (apply list ckeys))
                  := (cons 'row ckrow)]
-         conflicted (list 'quote (apply list (second (base/t-returning tsch (set pkeys)))))
+         conflicted (list 'quote (apply list (second (base/t-returning
+                                                      tsch
+                                                      (or on-conflict
+                                                          (set pkeys))))))
          args   (vec (concat [:on-conflict conflicted] cargs))]
      (-> (t-insert-raw [entry tsch mopts]
                        data
