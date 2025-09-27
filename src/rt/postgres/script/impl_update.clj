@@ -71,9 +71,7 @@
                           (keys m))]
      (->> (mapv (fn [k]
                   (let [{:keys [sql] :as attrs} (get-in tsch [k 0])
-                        out (get m k)
-                        #_#_out (cond->> out
-                              (:process sql) (base/t-val-process (:process sql)))]
+                        out (get m k)]
                     (list '==
                           #{(base/t-key-fn tsch k)}
                           out)))

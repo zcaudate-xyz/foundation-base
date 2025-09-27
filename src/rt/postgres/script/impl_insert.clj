@@ -115,14 +115,30 @@
   ([[entry tsch mopts] data {:keys [where returning into as single
                                     on-conflict
                                     on-update] :as params}]
-   (let [pkeys  (keep (fn [[k [attr]]]
-                        (if (:primary attr) k))
-                      tsch)
-         ckeys  (cond (map? data) (keys data)
-                      (symbol? data) (keys tsch)
-                      :else (h/error "Invalid data type." {:input data}))
-         
+   (let [;; Primary Keys
+         pkeys    (keep (fn [[k [attr]]]
+                          (if (:primary attr) k))
+                        tsch)
+
+         ;; Include Tracker Keys
+         {:static/keys [tracker]} entry
+         table-sym (ut/sym-full entry)
+         uparams   (tracker/add-tracker params tracker table-sym :update)
+         utrkm      (tracker/tracker-map-modify uparams)
+
+         ;; FInd column keys
+         ckeys  (set
+                 (concat (cond (map? data) (keys data)
+                               (symbol? data) (keys tsch)
+                               :else (h/error "Invalid data type." {:input data}))
+                         (keys utrkm)))
+         ckeys      (map first (schema/get-returning tsch ckeys))
          [_ ccols]  (base/t-returning tsch (set ckeys))
+         ;;_ (h/prn ccols ckeys)
+         
+         
+         
+         ;; Create on conflict statement
          ckrow  (map (fn [col key]
                        (or (get on-update key)
                            (list '. (list :- "EXCLUDED") col)))
