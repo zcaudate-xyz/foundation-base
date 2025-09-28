@@ -200,6 +200,14 @@
 ;; linked symbol (defn and deftype)
 ;;
 
+(defn pg-entry-literal
+  "gets the entry token"
+  {:added "4.0"}
+  ([entry]
+   (let [{:static/keys [schema]
+          :keys [op id]} entry]
+     (str schema "." id))))
+
 (defn pg-entry-token
   "gets the entry token"
   {:added "4.0"}
@@ -228,7 +236,11 @@
          module (book/get-module book sym-module)
          {:keys [section] :as e} (or (get-in module [:code sym-id])
                                      (get-in module [:fragment sym-id])
-                                     (h/error "Not found." {:input sym}))]
+                                     (h/error "Token Not found."
+                                              {:input sym
+                                               :module sym-module
+                                               :sym-id sym-id
+                                               :opts mopts}))]
      (case section
        :fragment (:form e)
        :code (pg-entry-token e)))))

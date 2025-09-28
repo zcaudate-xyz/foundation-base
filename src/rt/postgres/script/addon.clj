@@ -2,6 +2,7 @@
   (:require [std.lib :as h]
             [std.lang :as l]
             [std.string :as str]
+            [std.json :as json]
             [rt.postgres.grammar.tf :as tf]
             [rt.postgres.grammar.common :as common])
   (:refer-clojure :exclude [case update assert throw]))
@@ -25,14 +26,15 @@
   ([sym & [type]]
    `(~(or type :uuid) (:->> ~sym "id"))))
 
-(defmacro.pg ^{:- [:text]}
-  str
+(defmacro.pg ^{:- [:jsonb]}
+  full
   "generates random hex"
   {:added "4.0"}
   ([table]
-   (std.json/write
-    (l/emit-str (common/pg-linked-token table (l/macro-opts))
-                (l/macro-opts)))))
+   (let [entry (deref (deref (resolve table)))]
+     (json/write
+      [(:static/schema entry)
+       (str (:id entry))]))))
 
 (defmacro.pg ^{:- [:text]}
   rand-hex

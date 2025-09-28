@@ -137,7 +137,6 @@
          ;;_ (h/prn ccols ckeys)
          
          
-         
          ;; Create on conflict statement
          ckrow  (map (fn [col key]
                        (or (get on-update key)

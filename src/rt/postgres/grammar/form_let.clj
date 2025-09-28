@@ -77,6 +77,17 @@
                                     
                                     :else (h/error "Not Allowed" {:value ei})))
                             e)
+          (vector? e)  (vec
+                        (map-indexed (fn [i ei]
+                                       (cond (symbol? ei)
+                                             `(:= ~ei (:-> ~v ~i))
+                                             
+                                             (h/form? ei)
+                                             `(:= ~(last ei) (~@(butlast ei)
+                                                              (:->> ~v ~i)))
+                                                 
+                                             :else (h/error "Not Allowed" {:value ei})))
+                                     e))
           :else (h/error "Not Allowed" {:value e}))))
 
 (defn pg-tf-let-check-body
@@ -148,6 +159,7 @@
                                                              []
                                                              e)))]
                                (set? e)    (mapcat dec-fn e)
+                               (vector? e) (mapcat dec-fn e)
                                :else (h/error "Not Allowed" {:value e})))
                        declu)
          deqs  (mapcat pg-tf-let-assign pairs)]
