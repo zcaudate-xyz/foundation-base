@@ -36,6 +36,11 @@
       [(:static/schema entry)
        (str (:id entry))]))))
 
+(defn full-str
+  [table]
+  (json/write
+   (-/full table)))
+
 (defmacro.pg ^{:- [:text]}
   rand-hex
   "generates random hex"

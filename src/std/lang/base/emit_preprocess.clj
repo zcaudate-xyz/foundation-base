@@ -274,7 +274,8 @@
               (walk-fn (try (binding [*macro-form* form]
                               (apply (:template fe) (rest form)))
                             (catch Throwable t
-                              (h/error (.getMessage t)
+                              (throw t)
+                              #_(h/error (.getMessage t)
                                        {:form form
                                         :cause t}))))
               form)))))

@@ -260,6 +260,7 @@
                     t-key-attrs-fn)]
      (cond (or (#{'*} returning)
                (h/form? returning)
+               (number? returning)
                (nil? returning))
            returning
            
