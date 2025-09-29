@@ -211,7 +211,7 @@
   [enum]
   (h/$ [:select p :from (unnest (enum-range (++ nil ~enum))) :as p :order-by (random) :limit 1]))
 
-(defmacro.pg
+(defmacro.pg ^{:- [:block]}
   do:plpgsql
   [& forms]
   `[:DO :$$
