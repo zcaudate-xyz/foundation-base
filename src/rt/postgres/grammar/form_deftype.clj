@@ -2,6 +2,7 @@
   (:require [rt.postgres.grammar.common-application :as app]
             [rt.postgres.grammar.common-tracker :as tracker]
             [rt.postgres.grammar.common :as common]
+            [std.lang.base.grammar-spec :as grammar-spec]
             [std.lang.base.emit-preprocess :as preprocess]
             [std.lang.base.library-snapshot :as snap]
             [std.lang.base.book :as book]
@@ -51,11 +52,6 @@
       [(common/pg-type-alias type)]
       [(list (list '. #{schema} #{id})
              #{(name column)})]])))
-
-(comment
-  {:id (second ref)
-   :schema (first ref)
-   :type (nth ref 2)})
 
 (defn pg-deftype-ref
   "creates the ref entry"
@@ -200,8 +196,9 @@
 (defn pg-deftype-format
   "formats an input form"
   {:added "4.0"}
-  [[op sym spec params]]
-  (let [{:keys [prepend append track public] :as msym} (meta sym)
+  [form]
+  (let [[mdefn [op sym spec params]] (grammar-spec/format-defn form)
+        {:keys [prepend append track public] :as msym} (meta sym)
         spec (->> (concat
                    (mapcat pg-deftype-fragment prepend)
                    spec

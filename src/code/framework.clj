@@ -26,6 +26,7 @@
      defn.R
      defn.py
      defn.pg
+     deftype.pg
      defn.sh
      defn.sol
      defn.xt

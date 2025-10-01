@@ -1,6 +1,8 @@
 (ns js.lib.supabase
   (:require [std.lang :as l]
             [std.lib :as h]
+            [std.string :as str]
+            [std.json :as json]
             [net.http :as http]))
 
 (l/script :js
@@ -99,7 +101,7 @@
   [[[invokeFunction
      invoke]      [name] {:optional [options]}]])
 
-(defmacro call-rpc
+(defmacro js-rpc
   [function args
    &
    [{:keys [host
@@ -121,42 +123,69 @@
            ~args)
           (then (xt.lang.base-repl/>notify)))))))
 
-(defn call-api
-  [method endpoint args]
-  ((case method
-     :delete http/delete
-     :get http/get
-     :post http/post)
-   (str (System/getenv "DEFAULT_SUPABASE_API_ENDPOINT")
-        endpoint )
-   {:headers {"apikey" (System/getenv "DEFAULT_SUPABASE_API_KEY_ANON")
-              "Content-Type" "application/json"}
-    :body   (std.json/write
-             args)}))
+(defn api-call
+  [{:keys [key
+           host
+           route
+           method
+           type
+           headers
+           auth]
+    :or {host (System/getenv "DEFAULT_SUPABASE_API_ENDPOINT")
+         method :post
+         type :anon}}
+   body]
+  (let [key (or key
+                (case type
+                  :anon (System/getenv "DEFAULT_SUPABASE_API_KEY_ANON")
+                  :service (System/getenv "DEFAULT_SUPABASE_API_KEY_SERVICE")
+                  :public ""))
+        headers-default (case type
+                          :public {"Content-Type" "application/json"}
+                          {"apikey" key
+                           "Authorization" (str "Bearer " (or auth key))
+                           "Content-Type" "application/json"})
+        headers (merge
+                 headers-default
+                 headers)
+        call-fn (case method
+                  :delete http/delete
+                  :get http/get
+                  :post http/post)]
+    (-> (call-fn (str host route)
+                 {:headers headers
+                  :body   (std.json/write body)})
+        (update :body json/read)
+        (select-keys [:status :body]))))
 
-(defn call-admin
-  [method endpoint & [args]]
-  ((case method
-     :delete http/delete
-     :get http/get
-     :post http/post)
-   (str (System/getenv "DEFAULT_SUPABASE_API_ENDPOINT")
-        endpoint)
-   {:headers {"apikey" (System/getenv "DEFAULT_SUPABASE_API_KEY_SERVICE")
-              "Authorization" (str "Bearer "
-                                   (System/getenv "DEFAULT_SUPABASE_API_KEY_SERVICE"))
-              "Content-Type" "application/json"}
-    :body  (std.json/write args)}))
+(defn api-rpc
+  [{:keys [fn
+           args]
+    :as opts}]
+  (let [{:keys [id]
+         :static/keys [schema]} (deref fn)
+        headers (if schema
+                  {"Content-Profile" schema})
+        route  (str "/rest/v1/rpc/" (str/snake-case (str id)))
+        opts (merge opts
+                    {:headers headers
+                     :route route})]
+    (-> (api-call opts args))))
 
 (defn api-signup
   [{:keys [email
            password]
-    :as args}]
-  (call-api :post "/auth/v1/signup" args))
+    :as body}
+   & [opts]]
+  (api-call (merge opts
+                   {:route "/auth/v1/signup"})
+            body))
 
 (defn api-signup-delete
-  [id]
-  (call-admin :delete
-              (str "/auth/v1/admin/users/" id)
-              nil))
+  [id & [opts]]
+  (api-call (merge opts
+                   {:method :delete
+                    :type :service
+                    :route (str "/auth/v1/admin/users/" id)})
+            {}))
 

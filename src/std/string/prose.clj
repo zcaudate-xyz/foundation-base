@@ -87,15 +87,14 @@
   (->> (common/split-lines s)
        (common/join " ")))
 
-(defn ^{:style/indent 1}
-  join-lines
+(defn join-lines
   "join non empty elements in array
  
    (join-lines \"\" [\"hello\" \"world\"])
    => \"helloworld\""
   {:added "4.0"}
-  [sep arr]
-  (common/join sep (filter not-empty arr)))
+  [arr]
+  (common/join "\n" (filter not-empty arr)))
 
 (defn spaces
   "create `n` spaces
