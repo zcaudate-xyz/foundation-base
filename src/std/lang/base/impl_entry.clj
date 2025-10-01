@@ -258,6 +258,12 @@
                         (emit-entry-cached {:grammar grammar
                                             :entry   entry
                                             :mopts   mopts})))
+           body (reduce (fn [body transform]
+                          (transform body {:grammar grammar
+                                           :entry   entry
+                                           :mopts   mopts}))
+                        body
+                        (-> emit :code :transforms :entry))
            body (cond->> body
                   label (str (emit-entry-label grammar entry) "\n")
                   trim  (trim))]

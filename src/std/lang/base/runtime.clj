@@ -377,7 +377,7 @@
   [rt module-id]
   (let [{:keys [book] :as meta
          :rt/keys [setup]} (default-lifecycle-prep rt)]
-    (lifecycle/emit-module-setup module-id (update meta :emit merge setup))))
+    (lifecycle/emit-module-setup module-id (update meta :emit h/merge-nested-new setup))))
 
 (defn default-setup-module-basic
   "basic setup module action"
@@ -385,7 +385,7 @@
   [rt module-id]
   (let [{:keys [book] :as meta
          :rt/keys [setup]} (default-lifecycle-prep rt)
-        body (lifecycle/emit-module-setup module-id (update meta :emit merge setup))]
+        body (lifecycle/emit-module-setup module-id (update meta :emit h/merge-nested-new setup))]
     (ptr/ptr-invoke rt
                     h/p:rt-raw-eval
                     body
@@ -398,7 +398,7 @@
   [rt module-id]
   (let [{:keys [teardown] :as meta
          :rt/keys [teardown]} (default-lifecycle-prep rt)
-        body (lifecycle/emit-module-teardown module-id (update meta :emit merge teardown))]
+        body (lifecycle/emit-module-teardown module-id (update meta :emit h/merge-nested-new teardown))]
     (ptr/ptr-invoke rt
                     h/p:rt-raw-eval
                     body
@@ -411,7 +411,7 @@
   [rt module-id & [meta]]
   (let [{:keys [book] :as meta
          :rt/keys [setup]} (or meta (default-lifecycle-prep rt))
-        raw  (lifecycle/emit-module-setup-raw module-id (update meta :emit merge setup))
+        raw  (lifecycle/emit-module-setup-raw module-id (update meta :emit h/merge-nested-new setup))
         body (lifecycle/emit-module-setup-join raw)]
     (if (not-empty body)
       (try (ptr/ptr-invoke rt h/p:rt-raw-eval
@@ -441,7 +441,7 @@
   [rt module-id & [meta]]
   (let [{:keys [book] :as meta
          :rt/keys [teardown]} (or meta (default-lifecycle-prep rt))
-        raw  (lifecycle/emit-module-teardown-raw module-id (update meta :emit merge teardown))
+        raw  (lifecycle/emit-module-teardown-raw module-id (update meta :emit h/merge-nested-new teardown))
         body (lifecycle/emit-module-teardown-join raw)]
     (if (not-empty body)
       (try (ptr/ptr-invoke rt h/p:rt-raw-eval

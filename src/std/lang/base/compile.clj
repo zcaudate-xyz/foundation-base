@@ -51,7 +51,7 @@
          full    (reduce (fn [full transform]
                            (transform full (-> emit :static)))
                          full
-                         (-> emit :code :transforms))
+                         (-> emit :code :transforms :full))
          output  (compile/compile-out-path opts)]
      (compile/compile-write output full))))
 

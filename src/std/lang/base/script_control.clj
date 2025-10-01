@@ -41,10 +41,12 @@
          ctx         (ut/lang-context lang)
          placement   (get @(:state sp) ctx)
          started?    (boolean (:instance placement))
-         new-config  (h/merge-nested (:config placement)
-                                     (-> (h/p:registry-get ctx)
-                                         (get-in [:rt key :config]))
-                                     config)
+         
+         new-config  (merge (:config placement)
+                            (-> (h/p:registry-get ctx)
+                                (get-in [:rt key :config]))
+                            config)
+
          changed?    (or (not= new-config 
                                (:config placement))
                          (not= (:key placement) key))

@@ -100,16 +100,22 @@
      invoke]      [name] {:optional [options]}]])
 
 (defmacro call-rpc
-  [function args & [{:keys [host
-                            key]}]]
-  (let [{:keys [id]
+  [function args
+   &
+   [{:keys [host
+            key]
+     :or {key  '(System/getenv "DEFAULT_SUPABASE_API_KEY_ANON")
+          host '(System/getenv "DEFAULT_SUPABASE_API_ENDPOINT")}}]]
+  (let [key  (if (h/form? key)  (eval key)  key)
+        host (if (h/form? host) (eval host) host)
+        {:keys [id]
          :static/keys [schema]} (deref (deref (resolve function)))]
     (h/$
      (xt.lang.base-notify/wait-on :js
        (. (js.lib.supabase/rpc
            (. (js.lib.supabase/createSupabaseClient
-               ~(or host (System/getenv "DEFAULT_SUPABASE_API_ENDPOINT"))
-               ~(or key (System/getenv "DEFAULT_SUPABASE_API_KEY_ANON")))
+               ~host
+               ~key)
               (schema ~(or schema "public")))
            ~(std.string/snake-case (str id))
            ~args)

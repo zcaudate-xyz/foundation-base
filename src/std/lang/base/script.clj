@@ -113,6 +113,7 @@
   {:added "4.0"}
   ([lang module-id config lib]
    (let [primary    (script-ns-import config)
+         config     (update config :emit eval)
          [snapshot] (lib/install-module! lib lang module-id (dissoc config
                                                                     :runtime
                                                                     :config
