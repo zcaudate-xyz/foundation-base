@@ -56,3 +56,7 @@
               (catch Exception (:= err (. traceback (format-exc)))))
             (throw (Exception err)))
           (:= (. (globals) ["OUT"]) (OUT-FN))))
+
+
+^{:refer rt.basic.impl.process-python/default-body-wrap :added "4.0"}
+(fact "TODO")

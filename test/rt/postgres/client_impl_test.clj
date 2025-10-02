@@ -108,3 +108,13 @@
   
   (client-impl/invoke-ptr-pg -pg- builtin/cot [40])
   => -0.8950829176379128)
+
+
+^{:refer rt.postgres.client-impl/invoke-ptr-pg-single :added "4.0"}
+(fact "TODO")
+
+^{:refer rt.postgres.client-impl/invoke-ptr-pg-transform-let :added "4.0"}
+(fact "TODO")
+
+^{:refer rt.postgres.client-impl/invoke-ptr-pg-block :added "4.0"}
+(fact "TODO")

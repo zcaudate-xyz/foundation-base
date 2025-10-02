@@ -217,3 +217,13 @@
   (common/pg-defblock '(def ^{:static/return [:index]
                        :static/schema "scratch"} hello []))
   => '(do [:create :index (. #{"scratch"} #{"hello"})]))
+
+
+^{:refer rt.postgres.grammar.common/pg-entry-literal :added "4.0"}
+(fact "TODO")
+
+^{:refer rt.postgres.grammar.common/block-loop-block :added "4.0"}
+(fact "TODO")
+
+^{:refer rt.postgres.grammar.common/block-case-block :added "4.0"}
+(fact "TODO")

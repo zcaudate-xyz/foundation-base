@@ -82,7 +82,6 @@
              (not= [:block] (get-in book [:modules module section id :static/return])))
         (and (not (:id ptr))
              (= 1 (count args))
-             
              (let [x (first args)]
                (and (not (vector? x))
                     (or (string? x)
@@ -91,26 +90,110 @@
                         (and (h/form? x)
                              (prepend-select-check-form x book)))))))))
 
-(defn invoke-ptr-pg
-  "invokes a pointer in runtime"
-  {:added "4.0"}
+(defn invoke-ptr-pg-single
   [{:keys [instance] :as pg} ptr args]
-  (let [{:keys [bulk]} (meta args)
-        add-select (prepend-select-check ptr args)
-        body (ptr/ptr-invoke-string ptr args {:lang :postgres
-                                              :layout :module
-                                              :emit {:transform (fn [forms {:keys [bulk] :as opts}]
-                                                                  (if (not bulk)
-                                                                    forms
-                                                                    (if add-select
-                                                                      (first forms)
-                                                                      (apply list 'do forms))))}})]
-    (binding [conn/*execute* (if (and bulk
-                                      (not add-select))
-                               jdbc/execute
-                               jdbc/fetch)]
+  (let [add-select (prepend-select-check ptr args)
+        body (ptr/ptr-invoke-string
+              ptr args
+              {:lang :postgres
+               :layout :module
+               :emit {:transform (fn [forms {:keys [bulk] :as opts}]
+                                   (if (not bulk)
+                                     forms
+                                     (if add-select
+                                       (first forms)
+                                       (apply list 'do forms))))}})]
+    (binding [conn/*execute* (if (or add-select
+                                     (= :select (ffirst args)))
+                               jdbc/fetch
+                               jdbc/execute)]
       (ptr/ptr-invoke pg
                       raw-eval-pg
                       body
                       (if add-select {:in (fn [s] (str "select " s ";"))})
                       raw-eval-pg-return))))
+
+(defn invoke-ptr-pg-transform-let
+  [form]
+  (let [inner (h/postwalk (fn [x]
+                            (cond (and (list? x)
+                                       (= 'return (first x)))
+                                  (list 'do
+                                        [:perform (list 'set_config "temp.out" (list :text (second x)) false)]
+                                        'exit)
+                                  
+                                  :else x))
+                          form)
+        changed (not= inner form)
+        nform [:DO :$$
+               :BEGIN \\
+               (list \|
+                     (list 'do [:LOOP \\
+                                `(\| (~'do ~inner ~'exit))
+                                \\
+                                :END-LOOP]))
+               \\
+               :END :$$ :LANGUAGE "plpgsql"]]
+    (cond changed
+          [[nform false]
+           ['[:select (current-setting "temp.out" false)] true]]
+          
+          :else
+          [[nform true]])))
+
+(defn invoke-ptr-pg-block
+  [{:keys [instance] :as pg} ptr args]
+  (let [results (->> args
+                     (mapcat (fn [form]
+                               (cond (and (list? form)
+                                          (= 'let (first form)))
+                                     (invoke-ptr-pg-transform-let form)
+                                     
+                                     :else
+                                     [[form true]])))
+                     (mapcat (fn [[form show]]
+                               (let [res (invoke-ptr-pg-single pg ptr [form])]
+                                 (if show [res])))))]
+    (cond (= 1 (count results))
+          (first results)
+
+          :else results)))
+
+(defn invoke-ptr-pg
+  "invokes a pointer in runtime"
+  {:added "4.0"}
+  [{:keys [instance] :as pg} ptr args]
+  (cond (:id ptr)
+        (invoke-ptr-pg-single pg ptr args)
+        
+        :else
+        (invoke-ptr-pg-block pg ptr args)))
+
+(comment
+  (defn invoke-ptr-pg
+    "invokes a pointer in runtime"
+    {:added "4.0"}
+    [{:keys [instance] :as pg} ptr args]
+    (let [{:keys [bulk]} (meta args)
+          
+          add-select (prepend-select-check ptr args)
+          body (ptr/ptr-invoke-string
+                ptr args
+                {:lang :postgres
+                 :layout :module
+                 :emit {:transform (fn [forms {:keys [bulk] :as opts}]
+                                     (h/prn forms bulk)
+                                     (if (not bulk)
+                                       forms
+                                       (if add-select
+                                         (first forms)
+                                         (apply list 'do forms))))}})]
+      (binding [conn/*execute* (if (and bulk
+                                        (not add-select))
+                                 jdbc/execute
+                                 jdbc/fetch)]
+        (ptr/ptr-invoke pg
+                        raw-eval-pg
+                        body
+                        (if add-select {:in (fn [s] (str "select " s ";"))})
+                        raw-eval-pg-return)))))

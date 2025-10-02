@@ -139,3 +139,10 @@
                              #{"time_created"}
                              #{"time_updated"}])]
        \\ :select (jsonb-agg j-ret) :from j-ret])
+
+
+^{:refer rt.postgres.script.impl-main/t-fields-raw :added "4.0"}
+(fact "TODO")
+
+^{:refer rt.postgres.script.impl-main/t-fields :added "4.0"}
+(fact "TODO")

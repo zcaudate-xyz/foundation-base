@@ -119,3 +119,7 @@
 
 ^{:refer rt.postgres.script.impl/t:modify :added "4.0"}
 (fact "flat modify")
+
+
+^{:refer rt.postgres.script.impl/t:fields :added "4.0"}
+(fact "TODO")

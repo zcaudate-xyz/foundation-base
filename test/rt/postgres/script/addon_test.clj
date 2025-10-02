@@ -139,3 +139,19 @@
 
 (comment
   (./import))
+
+
+^{:refer rt.postgres.script.addon/ARRAY :added "4.0"}
+(fact "TODO")
+
+^{:refer rt.postgres.script.addon/id :added "4.0"}
+(fact "TODO")
+
+^{:refer rt.postgres.script.addon/full :added "4.0"}
+(fact "TODO")
+
+^{:refer rt.postgres.script.addon/full-str :added "4.0"}
+(fact "TODO")
+
+^{:refer rt.postgres.script.addon/do:plpgsql :added "4.0"}
+(fact "TODO")

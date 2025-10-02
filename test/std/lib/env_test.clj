@@ -151,3 +151,22 @@
 
   (match-filter 'hara 'spirit.common)
   => false)
+
+
+^{:refer std.lib.env/dbg-print :added "4.0"}
+(fact "TODO")
+
+^{:refer std.lib.env/dbg :added "4.0"}
+(fact "TODO")
+
+^{:refer std.lib.env/with:dbg :added "4.0"}
+(fact "TODO")
+
+^{:refer std.lib.env/dbg-global :added "4.0"}
+(fact "TODO")
+
+^{:refer std.lib.env/dbg:add-filters :added "4.0"}
+(fact "TODO")
+
+^{:refer std.lib.env/dbg:remove-filters :added "4.0"}
+(fact "TODO")

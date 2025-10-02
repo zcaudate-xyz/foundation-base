@@ -235,3 +235,7 @@
          :written (["<ROOT>/.build/blank" ""]
                    ["<ROOT>/.build/Makefile" "hello:\n\t1 2\n\nworld:\n\t1 2"]
                    ["<ROOT>/.build/package.json" "{\n  \"name\" : \"project\"\n}"])}))
+
+
+^{:refer std.make.compile/compile-directory :added "4.0"}
+(fact "TODO")

@@ -395,6 +395,9 @@
 (def +regexp+
   '[regexp-match regexp-matches regexp-replace regexp-split-to-array regexp-split-to-table])
 
+(def +pgjwt+
+  '[verify])
+
 (defn- pg-tmpl
   "creates fragments in builtin"
   {:added "4.0"}
@@ -414,6 +417,7 @@
                     +jsonb+
                     +math+
                     +regexp+
-                    +xml+)
+                    +xml+
+                    +pgjwt+)
 
 (comment (l/ns:reset))

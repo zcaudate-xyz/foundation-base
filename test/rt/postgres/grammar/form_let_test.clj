@@ -102,3 +102,10 @@
       "EXCEPTION WHEN OTHERS THEN"
       "END;"
       "$$ LANGUAGE 'plpgsql';"))
+
+
+^{:refer rt.postgres.grammar.form-let/pg-loop-block :added "4.0"}
+(fact "TODO")
+
+^{:refer rt.postgres.grammar.form-let/pg-case-block :added "4.0"}
+(fact "TODO")

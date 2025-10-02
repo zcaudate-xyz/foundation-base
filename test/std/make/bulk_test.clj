@@ -21,3 +21,10 @@
 
 ^{:refer std.make.bulk/make-bulk-gh-push :added "4.0"}
 (fact "make bulk push github")
+
+
+^{:refer std.make.bulk/make-bulk-container-filter :added "4.0"}
+(fact "TODO")
+
+^{:refer std.make.bulk/make-bulk-container-build :added "4.0"}
+(fact "TODO")

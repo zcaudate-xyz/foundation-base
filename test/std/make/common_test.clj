@@ -224,3 +224,7 @@
   
   (common/make-dir-exists? +demo-config+)
   => false)
+
+
+^{:refer std.make.common/make-run-close :added "4.0"}
+(fact "TODO")

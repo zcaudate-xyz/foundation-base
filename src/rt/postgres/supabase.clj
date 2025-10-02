@@ -211,11 +211,15 @@
                   :delete http/delete
                   :get http/get
                   :post http/post)]
-    (-> (call-fn (str host route)
-                 {:headers headers
-                  :body   (std.json/write body)})
-        (update :body json/read)
-        (select-keys [:status :body]))))
+    (cond (not (get headers "apikey"))
+          {:status 401, :body {"message" "No API key found in request",
+                               "hint" "No `apikey` request header or url param was found."}}
+          :else
+          (-> (call-fn (str host route)
+                       {:headers headers
+                        :body   (std.json/write body)})
+              (update :body json/read)
+              (select-keys [:status :body])))))
 
 (defn api-rpc
   [{:keys [fn
@@ -252,11 +256,28 @@
                    {:route "/auth/v1/signup"})
             body))
 
+(defn api-signin
+  [{:keys [email
+           password]
+    :as body}
+   & [opts]]
+  (api-call (merge opts
+                   {:route "/auth/v1/token?grant_type=password"})
+            body))
+
 (defn api-signup-delete
-  [id & [opts]]
+  [uid & [opts]]
   (api-call (merge opts
                    {:method :delete
                     :type :service
-                    :route (str "/auth/v1/admin/users/" id)})
+                    :route (str "/auth/v1/admin/users/" uid)})
             {}))
+
+(defn api-impersonate
+  [uid
+   & [opts]]
+  (api-call (merge opts
+                   {:route "/auth/v1/token?grant_type=impersonate"
+                    :type :service})
+            {:user-id uid}))
 
