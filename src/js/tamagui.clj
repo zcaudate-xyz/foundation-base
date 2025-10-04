@@ -8,20 +8,6 @@
             :toast    [["@tamagui/toast" :as [* TToast]]]
             :token    [["@tamagui/get-token" :as [* TToken]]]}})
 
-(defn tmpl-tamagui
-  "forms for various argument types"
-  {:added "4.0"}
-  [s]
-  (list 'def.js s
-        (list `data/wrapData (list '. 'Tama s))))
-
-(comment
-  #_#_:require [[js.react :as r]
-                [js.react.helper-data :as data]
-                [js.core :as j]]
-  [tmpl-tamagui]
-  (def.js MODULE (!:module)))
-
 (h/template-entries [l/tmpl-entry {:type :fragment
                                    :base "TToken"
                                    :tag "js"}]

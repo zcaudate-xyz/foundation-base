@@ -10,6 +10,8 @@
 (defonce +base+ (ClassLoader/getSystemClassLoader))
 
 (defn all-class-urls
+  "runs all class urls"
+  {:added "4.0"}
   []
   (let [classpath (System/getProperty "java.class.path")
         separator (System/getProperty "path.separator")
@@ -40,18 +42,3 @@
   (-remove-url  [loader path]
     (throw (ex-info "Cannot remove path:" {:path path}))))
 
-
-(comment
-  (type (first @+class-urls+))
-  
-  (.getProtectionDomain String)
-  (get-loaded-jars)
-  (Class/forName (.getName (first (.getDefinedPackages (ClassLoader/getSystemClassLoader))))
-                 true
-                 )
-  
-  (seq (.getDefinedPackages (ClassLoader/getSystemClassLoader)))
-
-  (.? (first (.getDefinedPackages (ClassLoader/getSystemClassLoader))))
-
-  (System/getProperty "java.class.path"))

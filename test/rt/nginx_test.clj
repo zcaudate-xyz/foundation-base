@@ -71,6 +71,12 @@
   (make-temp {})
   => vector?)
 
+^{:refer rt.nginx/start-test-server-shell :added "4.0"}
+(fact "starts in shell")
+
+^{:refer rt.nginx/start-test-server-container :added "4.0"}
+(fact "starts in container")
+
 ^{:refer rt.nginx/start-test-server :added "4.0"
   :let [|port| (h/port:check-available 0)]
   :teardown [(stop-test-server {:port |port|})]}
@@ -139,10 +145,3 @@
   (l/emit :lua )
   (./pull '[compliment "0.3.11"])
   )
-
-
-^{:refer rt.nginx/start-test-server-shell :added "4.0"}
-(fact "TODO")
-
-^{:refer rt.nginx/start-test-server-container :added "4.0"}
-(fact "TODO")

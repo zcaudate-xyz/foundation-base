@@ -16,6 +16,8 @@
   (new Map))
 
 (defn.js wrapMemoize
+  "wraps a component to pass data"
+  {:added "4.0"}
   [component wrap-fn]
   (var cached (. -/WrappedCache (get component)))
   (when cached
@@ -26,6 +28,8 @@
   (return wrapped))
 
 (defn.js useWrappedComponent
+  "uses a wrappedComponent"
+  {:added "4.0"}
   [component #{[$id
                 $data
                 (:.. props)]}]
@@ -56,6 +60,8 @@
                     wrapped)))
 
 (defn.js wrapData
+  "wraps the data"
+  {:added "4.0"}
   [component displayName]
   (return
    (-/wrapMemoize
@@ -75,6 +81,8 @@
       (return WrappedComponent)))))
 
 (defn.js wrapForward
+  "allows :ref to be passed"
+  {:added "4.0"}
   [component displayName]
   (return
    (-/wrapData

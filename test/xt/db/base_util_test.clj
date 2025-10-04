@@ -204,3 +204,7 @@
                       {:id "d"}]}]})])
   => [{"a" {"b" {"id" "b"}}}
       {"a" {"b" {"sub" {"d" {"id" "d"}, "c" {"id" "c"}}, "id" "b"}}}])
+
+
+^{:refer xt.db.base-util/collect-routes-object :added "4.0"}
+(fact "TODO")

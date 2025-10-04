@@ -11,6 +11,9 @@
             [lib.jdbc :as jdbc]
             [std.lib :as h]))
 
+^{:refer rt.postgres.client-impl/invoke-ptr-pg-transform-let :added "4.0"}
+(fact "TODO")
+
 ^{:refer rt.postgres.client-impl/raw-eval-pg-return :added "4.0"}
 (fact "returns a regularised result"
   ^:hidden
@@ -39,11 +42,7 @@
 (fact "initiates a pointer in the runtime"
 
   (do (client-impl/init-ptr-pg -pg- scratch/addf))
-  => anything
-
-  #_#_#_
-  (client-impl/init-ptr-pg -pg- scratch/addf)
-  => -2)
+  => anything)
 
 ^{:refer rt.postgres.client-impl/prepend-select-check-form :added "4.0"}
 (fact "checks if form needs a `SELECT` prepended"
@@ -100,6 +99,104 @@
   (client-impl/prepend-select-check builtin/cot [40])
   => true)
 
+^{:refer rt.postgres.client-impl/invoke-ptr-pg-single :added "4.0"
+  :setup [(def -pg- (client/rt-postgres {:dbname "test-scratch"}))]
+  :teardown (h/stop -pg-)}
+(fact "invokes single "
+  ^:hidden
+  
+  (client-impl/invoke-ptr-pg-single -pg-
+                                    (ut/lang-pointer :postgres)
+                                    '[(+ 1 2)])
+  => 3)
+
+^{:refer rt.postgres.client-impl/invoke-ptr-pg-transform-let-fn :added "4.0"}
+(fact "transforms the let form"
+  ^:hidden
+  
+  (client-impl/invoke-ptr-pg-transform-let-fn
+   'form)
+  => '[:DO :$$ :BEGIN \\ (\| (do [:LOOP \\ (\| (do form [:exit])) \\ :END-LOOP])) \\ :END :$$ :LANGUAGE "plpgsql"])
+
+^{:refer rt.postgres.client-impl/invoke-ptr-pg-transform-try-fn :added "4.0"}
+(fact "transforms the try form"
+  ^:hidden
+
+  (client-impl/invoke-ptr-pg-transform-try-fn
+   'form)
+  => '[:DO :$$ form :$$ :LANGUAGE "plpgsql"])
+
+^{:refer rt.postgres.client-impl/invoke-ptr-pg-transform-prep :added "4.0"}
+(fact "transforms a form"
+  ^:hidden
+  
+  (client-impl/invoke-ptr-pg-transform-prep
+   '(try
+      (return (+ a b c))
+      (catch others
+          (return 1)))
+   false)
+  => '[(try (do [:perform (set_config "temp.out" (:text (+ a b c)) false)]) (catch others (do [:perform (set_config "temp.out" (:text 1) false)]))) true])
+
+^{:refer rt.postgres.client-impl/invoke-ptr-pg-transform :added "4.0"}
+(fact "transforms a let and try form"
+  ^:hidden
+
+  (client-impl/invoke-ptr-pg-transform
+   :try
+   '(try
+      (return (+ a b c))
+      (catch others
+          (return 1))))
+  => '[[[:select (set-config "temp.out" nil false)] false]
+       [[:DO
+         :$$
+         (try
+           (do [:perform (set_config "temp.out" (:text (+ a b c)) false)])
+           (catch
+               others
+               (do [:perform (set_config "temp.out" (:text 1) false)])))
+         :$$
+         :LANGUAGE
+         "plpgsql"]
+        false]
+       [[:select (current-setting "temp.out" false)] true]]
+
+  (client-impl/invoke-ptr-pg-transform
+   :let
+   '(let [(:integer a) 1
+          (:integer b) 2]
+      (return (+ a b))))
+  => '[[[:select (set-config "temp.out" nil false)] false]
+       [[:DO
+         :$$
+         :BEGIN
+         \\
+         (\|
+          (do
+            [:LOOP
+             \\
+             (\|
+              (do
+                (let
+                    [(:integer a) 1 (:integer b) 2]
+                  (do
+                    [:perform (set_config "temp.out" (:text (+ a b)) false)]
+                    [:exit]))
+                [:exit]))
+             \\
+             :END-LOOP]))
+         \\
+         :END
+         :$$
+         :LANGUAGE
+         "plpgsql"]
+        false]
+       [[:select (current-setting "temp.out" false)] true]])
+
+^{:refer rt.postgres.client-impl/invoke-ptr-pg-block :added "4.0"}
+(fact "TODO")
+
 ^{:refer rt.postgres.client-impl/invoke-ptr-pg :added "4.0"
   :setup [(def -pg- (client/rt-postgres {:dbname "test-scratch"}))]
   :teardown (h/stop -pg-)}
@@ -107,14 +204,11 @@
   ^:hidden
   
   (client-impl/invoke-ptr-pg -pg- builtin/cot [40])
-  => -0.8950829176379128)
+  => -0.8950829176379128
 
-
-^{:refer rt.postgres.client-impl/invoke-ptr-pg-single :added "4.0"}
-(fact "TODO")
-
-^{:refer rt.postgres.client-impl/invoke-ptr-pg-transform-let :added "4.0"}
-(fact "TODO")
-
-^{:refer rt.postgres.client-impl/invoke-ptr-pg-block :added "4.0"}
-(fact "TODO")
+  (client-impl/invoke-ptr-pg -pg-
+                             (ut/lang-pointer :postgres)
+                             '[(let [(:integer a) 1
+                                     (:integer b) 2]
+                                 (return (+ a b)))])
+  => 3)

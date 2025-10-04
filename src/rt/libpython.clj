@@ -16,10 +16,7 @@
   (delay (lp/initialize!)))
 
 (defn eval-raw
-  "performs an exec expression
- 
-   (str (eval-raw +js+ \"1 + 1\"))
-   => \"2\""
+  "performs an exec expression"
   {:added "3.0"}
   ([_ string]
    @+preamble+
@@ -27,10 +24,10 @@
 
 (defn eval-libpython
   "evals body in the runtime
- 
-   (str (eval-libpython (l/rt :js)
-                    \"1+1\"))
-   => \"2\""
+   
+   (lp/eval-libpython nil
+                      \"OUT = 1 + 1\")
+   => 2"
   {:added "4.0"}
   ([_ string]
    (get-in (eval-raw nil string)
@@ -42,9 +39,9 @@
 (defn invoke-libpython
   "invokes a pointer in the runtime
  
-   (invoke-libpython (l/rt :js)
-                 k/sub
-                 [1 2])
+   (lp/invoke-libpython (l/rt :python)
+                        k/sub
+                        [1 2])
    => -1"
   {:added "4.0"}
   ([{:keys [state lang layout] :as rt} ptr args]
@@ -82,10 +79,10 @@
 (defn rt-libpython:create
   "creates a libpython runtime
  
-   (h/-> (rt-libpython:create {:lang :js})
+   (h/-> (lp/rt-libpython:create {:lang :js})
          (h/start)
          (h/stop))
-   => rt-libpython?"
+   => lp/rt-libpython?"
   {:added "4.0"}
   [{:keys [id]
     :or {id (h/sid)}
@@ -93,15 +90,15 @@
   (map->RuntimeLibpython (assoc m :id id)))
 
 (defn rt-libpython
-  "creates and starts a libpython runtime"
-  {:added "3.0"}
+  "creates a libpython rt"
+  {:added "4.0"}
   ([m]
    (-> (rt-libpython:create m)
        (h/start))))
 
 (defn rt-libpython?
-  "checks that object is a libpython runtime"
-  {:added "3.0"}
+  "checks object is a libpython rt"
+  {:added "4.0"}
   [obj]
   (instance? RuntimeLibpython obj))
 

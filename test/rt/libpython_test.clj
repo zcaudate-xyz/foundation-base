@@ -68,9 +68,8 @@
         (h/stop))
   => lp/rt-libpython?)
 
-
 ^{:refer rt.libpython/rt-libpython :added "4.0"}
-(fact "TODO")
+(fact "creates a libpython rt")
 
 ^{:refer rt.libpython/rt-libpython? :added "4.0"}
-(fact "TODO")
+(fact "checks object is a libpython rt")

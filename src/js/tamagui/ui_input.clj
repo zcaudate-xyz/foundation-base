@@ -136,6 +136,8 @@
                    {:paddingHorizontal (. input tokens space [val])}))}}}))
 
 (defn.js getIconSize
+  "TODO"
+  {:added "4.0"}
   [size scale]
   (return
    (:? (=== (typeof size) "number")

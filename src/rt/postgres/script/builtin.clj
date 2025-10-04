@@ -418,6 +418,6 @@
                     +math+
                     +regexp+
                     +xml+
-                    +pgjwt+)
+                    +pg)
 
 (comment (l/ns:reset))

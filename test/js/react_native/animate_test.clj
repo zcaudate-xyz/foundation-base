@@ -56,19 +56,6 @@
                    :width 100
                    :textAlign "right"}}]])))))
 
-(comment
-  (!.js
-   (REF.current.setNativeProps
-    {:text "HELLO"}))
-
-  (!.js
-   (REF.current.setNativeProps
-    {:style {:backgroundColor "red"}}))
-
-  (!.js
-   (REF.current.setNativeProps
-    {:text "hello"})))
-
 ^{:refer js.react-native.animate/isAnimatedValue :added "4.0"}
 (comment "checks that value is animated"
   ^:hidden
@@ -127,6 +114,9 @@
                           :editable false
                           :style {:padding 5
                                   :textAlign "right"}}]])))))
+
+^{:refer js.react-native.animate/setPropsAll :added "4.0"}
+(fact "sets props for all the elements")
 
 ^{:refer js.react-native.animate/derive :added "4.0"}
 (fact "derives a value from one or more Animated.Value"
@@ -1132,3 +1122,16 @@
 [:% n/Text (k/json-encode #{visible showing})])))
 
   (def.js MODULE (!:module)))
+
+(comment
+  (!.js
+   (REF.current.setNativeProps
+    {:text "HELLO"}))
+
+  (!.js
+   (REF.current.setNativeProps
+    {:style {:backgroundColor "red"}}))
+
+  (!.js
+   (REF.current.setNativeProps
+    {:text "hello"})))

@@ -53,12 +53,12 @@
   (pg-tf-let '(let [(:int a) 1]
                 (let [(:int b) 2]
                   (return (+ a b)))))
-
-  (pg-tf-let '(let [_   [:set-role service_role]
-                    (:text o-role)  current_user]
+  => '(do [:declare \\ (\| (do (var :int a))) \\ :begin \\ (\| (do (:= a 1) (let [(:int b) 2] (return (+ a b))))) \\ :end])
+  
+  (pg-tf-let '(let [(:text o-role)  current_user]
                 (let [(:integer o-out) (pg/t:count type-sys/Op)]
-                  (return #{o-role
-                            o-out})))))
+                  (return (+ o-role o-out)))))
+  => (throws))
 
 ^{:refer rt.postgres.grammar.form-let/pg-do-block :added "4.0"}
 (fact "emits a block with let usage"

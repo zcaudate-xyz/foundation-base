@@ -227,3 +227,6 @@
 
 ^{:refer rt.postgres.grammar.common/block-case-block :added "4.0"}
 (fact "TODO")
+
+^{:refer rt.postgres.grammar.common/pg-defpolicy :added "4.0"}
+(fact "TODO")

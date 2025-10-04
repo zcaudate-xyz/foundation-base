@@ -234,3 +234,7 @@
 
 ^{:refer xt.lang.base-runtime/defvar.lua :added "4.0"}
 (fact "shortcut for a lua getter and a reset var")
+
+
+^{:refer xt.lang.base-runtime/defvar.py :added "4.0"}
+(fact "TODO")

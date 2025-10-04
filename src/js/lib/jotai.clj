@@ -50,36 +50,6 @@
    useSetAtom
    useStore])
 
-(defn.js useListenNested
-  [baseAtom path]
-  (var p (r/useMemo
-          (optics/compose (:.. path))
-          [path]))
-  (var [state] (-/useAtom baseAtom))
-  (return
-   (:? (:- state :instanceOf Promise)
-       (. state (then (fn [value] (return (optics/preview p value)))))
-       (optics/preview p state))))
-
-(defn.js useNested
-  [baseAtom path]
-  (var p (r/useMemo
-          (optics/compose (:.. path))
-          [path]))
-  (var setter (r/useCallback
-                 (fn [])))
-  )
-
-
-
-(!.js
-    (var v {:a {:b {:c {:d 1}}}})
-    (var p (optics/compose "a" "b"))
-    (optics/preview p v)
-    (optics/modify p
-                   (fn [] (return "CHANGED"))
-                   v))
-
 (def.js MODULE (!:module))
 
 

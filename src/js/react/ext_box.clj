@@ -50,6 +50,8 @@
   (return [data setData]))
 
 (defn.js attachLocalStorage
+  "attaches localstorage to the box"
+  {:added "4.0"}
   [storage-key box listener-id path]
   (var initial (event-box/get-data box path))
   (when (not= (typeof localStorage) "undefined")

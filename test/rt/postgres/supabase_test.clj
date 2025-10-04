@@ -64,3 +64,21 @@
 
 ^{:refer rt.postgres.supabase/api-impersonate :added "4.0"}
 (fact "TODO")
+
+^{:refer rt.postgres.supabase/create-role :added "4.0"}
+(fact "TODO")
+
+^{:refer rt.postgres.supabase/raise :added "4.0"}
+(fact "TODO")
+
+^{:refer rt.postgres.supabase/show-roles :added "4.0"}
+(fact "TODO")
+
+^{:refer rt.postgres.supabase/get-form-type :added "4.0"}
+(fact "TODO")
+
+^{:refer rt.postgres.supabase/with-role :added "4.0"}
+(fact "TODO")
+
+^{:refer rt.postgres.supabase/with-auth :added "4.0"}
+(fact "TODO")

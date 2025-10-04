@@ -1,4 +1,4 @@
-(ns python.remote-port-server
+(ns python.remote-socket-server
   (:require [std.lib :as h]
             [std.lang :as l]))
 

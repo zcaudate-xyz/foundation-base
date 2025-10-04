@@ -51,3 +51,7 @@
   => vector?)
 
 
+
+
+^{:refer xt.db.gen-bind/route-map :added "4.0"}
+(fact "TODO")

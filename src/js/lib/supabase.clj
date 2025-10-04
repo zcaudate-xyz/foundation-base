@@ -102,6 +102,8 @@
      invoke]      [name] {:optional [options]}]])
 
 (defmacro js-rpc
+  "creates a js rpc call"
+  {:added "4.0"}
   [function args
    &
    [{:keys [host
@@ -122,70 +124,3 @@
            ~(std.string/snake-case (str id))
            ~args)
           (then (xt.lang.base-repl/>notify)))))))
-
-(defn api-call
-  [{:keys [key
-           host
-           route
-           method
-           type
-           headers
-           auth]
-    :or {host (System/getenv "DEFAULT_SUPABASE_API_ENDPOINT")
-         method :post
-         type :anon}}
-   body]
-  (let [key (or key
-                (case type
-                  :anon (System/getenv "DEFAULT_SUPABASE_API_KEY_ANON")
-                  :service (System/getenv "DEFAULT_SUPABASE_API_KEY_SERVICE")
-                  :public ""))
-        headers-default (case type
-                          :public {"Content-Type" "application/json"}
-                          {"apikey" key
-                           "Authorization" (str "Bearer " (or auth key))
-                           "Content-Type" "application/json"})
-        headers (merge
-                 headers-default
-                 headers)
-        call-fn (case method
-                  :delete http/delete
-                  :get http/get
-                  :post http/post)]
-    (-> (call-fn (str host route)
-                 {:headers headers
-                  :body   (std.json/write body)})
-        (update :body json/read)
-        (select-keys [:status :body]))))
-
-(defn api-rpc
-  [{:keys [fn
-           args]
-    :as opts}]
-  (let [{:keys [id]
-         :static/keys [schema]} (deref fn)
-        headers (if schema
-                  {"Content-Profile" schema})
-        route  (str "/rest/v1/rpc/" (str/snake-case (str id)))
-        opts (merge opts
-                    {:headers headers
-                     :route route})]
-    (-> (api-call opts args))))
-
-(defn api-signup
-  [{:keys [email
-           password]
-    :as body}
-   & [opts]]
-  (api-call (merge opts
-                   {:route "/auth/v1/signup"})
-            body))
-
-(defn api-signup-delete
-  [id & [opts]]
-  (api-call (merge opts
-                   {:method :delete
-                    :type :service
-                    :route (str "/auth/v1/admin/users/" id)})
-            {}))
-
