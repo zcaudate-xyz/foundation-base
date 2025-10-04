@@ -414,6 +414,6 @@
                     +math+
                     +regexp+
                     +xml+
-                    +pg)
+                    +pgjwt+)
 
 (comment (l/ns:reset))
