@@ -3,25 +3,25 @@
   (:require [rt.basic.type-remote-port :refer :all]))
 
 ^{:refer rt.basic.type-remote-port/start-remote-port :added "4.0"}
-(fact "TODO")
+(fact "starts the connection to the remote port")
 
 ^{:refer rt.basic.type-remote-port/stop-remote-port :added "4.0"}
-(fact "TODO")
+(fact "stops the connection to the remote port")
 
 ^{:refer rt.basic.type-remote-port/raw-eval-remote-port-relay :added "4.0"}
-(fact "TODO")
+(fact "evaluates over the remote port")
 
 ^{:refer rt.basic.type-remote-port/raw-eval-remote-port :added "4.0"}
-(fact "TODO")
+(fact "evaluates over the remote port")
 
 ^{:refer rt.basic.type-remote-port/invoke-ptr-remote-port :added "4.0"}
-(fact "TODO")
+(fact "invokes over the remote port")
 
 ^{:refer rt.basic.type-remote-port/rt-remote-port-string :added "4.0"}
-(fact "TODO")
+(fact "gets the remote port string")
 
 ^{:refer rt.basic.type-remote-port/rt-remote-port:create :added "4.0"}
-(fact "TODO")
+(fact "creates the service")
 
 ^{:refer rt.basic.type-remote-port/rt-remote-port :added "4.0"}
-(fact "TODO")
+(fact "create and starts the service")

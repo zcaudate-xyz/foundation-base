@@ -16,6 +16,33 @@
     :snapshot (l/get-snapshot (l/runtime-library))})
   => '[(. #{"scratch"} #{"EnumStatus"})])
 
+^{:refer rt.postgres.grammar.form-deftype/pg-deftype-ref-link :added "4.0"}
+(fact "creates the ref entry for "
+  ^:hidden
+  
+  (pg-deftype-ref-link
+   :cache
+   '{:ns :TaskCache,
+     :link {:context :lang/postgres, :lang :postgres,
+            :id TaskCache, :module rt.postgres.script.scratch,
+            :section :code}}
+   {:lang :postgres
+    :snapshot (l/get-snapshot (l/runtime-library))})
+  => '["cache_id" [:uuid] [((. #{"scratch"} #{"TaskCache"}) #{"id"})]])
+
+^{:refer rt.postgres.grammar.form-deftype/pg-deftype-ref-current :added "4.0"}
+(fact "creates the ref entry for "
+  ^:hidden
+
+  (pg-deftype-ref-current
+   :user
+   '{:current {:id "user"
+               :schema #{"auth"}
+               :type :uuid},}
+   {:lang :postgres
+    :snapshot (l/get-snapshot (l/runtime-library))})
+  => '["user_id" [:uuid] [((. #{#{"auth"}} #{"user"}) #{"id"})]])
+
 ^{:refer rt.postgres.grammar.form-deftype/pg-deftype-ref :added "4.0"}
 (fact "creates the ref entry"
   ^:hidden
@@ -203,10 +230,3 @@
 
 ^{:refer rt.postgres.grammar.form-deftype/pg-deftype-hydrate-hook :added "4.0"}
 (fact "updates the application schema")
-
-
-^{:refer rt.postgres.grammar.form-deftype/pg-deftype-ref-link :added "4.0"}
-(fact "TODO")
-
-^{:refer rt.postgres.grammar.form-deftype/pg-deftype-ref-current :added "4.0"}
-(fact "TODO")

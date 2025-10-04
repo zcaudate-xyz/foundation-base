@@ -17,6 +17,41 @@
   :teardown [(l/rt:teardown :postgres)
              (l/rt:stop)]})
 
+^{:refer rt.postgres.script.addon/exec :added "4.0"}
+(fact "executes an sql statement"
+  ^:hidden
+
+  (pg/exec [:select 1])
+  => 1)
+
+^{:refer rt.postgres.script.addon/ARRAY :added "4.0"}
+(fact "creates an array"
+  ^:hidden
+  
+  (pg/ARRAY 1 2 3 4)
+  => '(1 2 3 4))
+
+^{:refer rt.postgres.script.addon/id :added "4.0"}
+(fact "gets the id of an object"
+  ^:hidden
+  
+  (str (pg/id {:id "40ff7565-2f3d-4ac0-acb5-3527370eb646"}))
+  => "40ff7565-2f3d-4ac0-acb5-3527370eb646")
+
+^{:refer rt.postgres.script.addon/full :added "4.0"}
+(fact "gets the full jsonb for table or function"
+  ^:hidden
+
+  (pg/full scratch/Task)
+  => ["scratch" "Task"])
+
+^{:refer rt.postgres.script.addon/full-str :added "4.0"}
+(fact "gets the full json str form table or function"
+  ^:hidden
+
+  (pg/full-str scratch/Task)
+  => "[\"scratch\",\"Task\"]")
+
 ^{:refer rt.postgres.script.addon/rand-hex :added "4.0"}
 (fact "generates random hex"
   ^:hidden
@@ -137,21 +172,15 @@
   (keyword (pg/random-enum scratch/EnumStatus))
   => #{:pending :error :success})
 
+^{:refer rt.postgres.script.addon/do:plpgsql :added "4.0"}
+(fact "creates a do block"
+  ^:hidden
+  
+  (pg/do:plpgsql
+   '(let [(:integer a) 1
+          (:integer b) 1]
+      (:= a (+ a b))))
+  => nil)
+
 (comment
   (./import))
-
-
-^{:refer rt.postgres.script.addon/ARRAY :added "4.0"}
-(fact "TODO")
-
-^{:refer rt.postgres.script.addon/id :added "4.0"}
-(fact "TODO")
-
-^{:refer rt.postgres.script.addon/full :added "4.0"}
-(fact "TODO")
-
-^{:refer rt.postgres.script.addon/full-str :added "4.0"}
-(fact "TODO")
-
-^{:refer rt.postgres.script.addon/do:plpgsql :added "4.0"}
-(fact "TODO")

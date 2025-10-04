@@ -27,7 +27,7 @@
 
 
 (defn pg-deftype-ref-link
-  "creates the ref entry"
+  "TODO"
   {:added "4.0"}
   ([col {:keys [ns link current column] :or {column :id}} {:keys [snapshot] :as mopts}]
    (let [{:keys [lang module section id]} link
@@ -44,9 +44,10 @@
              #{(name column)})]])))
 
 (defn pg-deftype-ref-current
-  "creates the ref entry"
+  "TODO"
   {:added "4.0"}
   ([col {:keys [ns current column] :or {column :id}} {:keys [snapshot] :as mopts}]
+   (h/prn column)
    (let [{:keys [id schema type]}  current]
      [(str/snake-case (str (h/strn col) "_id"))
       [(common/pg-type-alias type)]

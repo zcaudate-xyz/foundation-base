@@ -404,10 +404,6 @@
   [sym]
   (h/$ (def$.pg ~sym ~sym)))
 
-(defmacro.pg ^{:- [:block]}
-  exec
-  [args] args)
-
 (h/template-entries [pg-tmpl]
                     +array+
                     +bit+

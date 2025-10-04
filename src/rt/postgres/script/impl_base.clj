@@ -93,6 +93,8 @@
                   m)))
 
 (defn t-val-process
+  "allows additional filters to be added"
+  {:added "4.0"}
   [process out]
   (cond (vector? process)
         (reduce
@@ -397,7 +399,7 @@
                                cols))))))
 
 (defn t-wrap-order-sort
-  "adds an `order-by` clause"
+  "determines asc or desc key"
   {:added "4.0"}
   ([form sort tsch {:keys [newline]}]
    (cond-> form sort  (conj sort))))

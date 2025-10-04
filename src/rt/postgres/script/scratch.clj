@@ -14,6 +14,8 @@
             :all    {:schema   ["scratch"]}}})
 
 (defn.pg as-array
+  "returns a jsonb array"
+  {:added "4.0"}
   [:jsonb input]
   (when (== input "{}")
     (return "[]"))
@@ -49,6 +51,8 @@
               :append [RecordType]
               :public true}
   TaskCache
+  "constructs a task cache"
+  {:added "4.0"}
   [:id        {:type :uuid :primary true 
                :web {:example "AUD"}
                :sql {:default (rt.postgres/uuid-generate-v4)}}])
@@ -58,6 +62,8 @@
               :append  [RecordType]
               :public true}
   Task
+  "constructs a task"
+  {:added "4.0"}
   [:status   {:type :enum :required true :scope :-/info
               :enum {:ns -/EnumStatus}
               :web {:example "success"}}
@@ -72,6 +78,8 @@
               :append  [RecordType]
               :public true}
   Entry
+  "construcs an entry"
+  {:added "4.0"}
   [:name     {:type :text :required true
               :sql {:unique "default"
                     :index {:using :hash}}}
@@ -100,6 +108,8 @@
            :- [:citext]
            :props [:immutable :parallel-safe]}
   as-upper
+  "converts to upper case"
+  {:added "4.0"}
   [:citext input]
   (:citext (pg/upper (:text input))))
 
@@ -164,7 +174,7 @@
     (return out)))
 
 (defn.pg insert-entry
-  "inserts a task"
+  "inserts an entry"
   {:added "4.0"}
   [:text i-name :jsonb i-tags :jsonb o-op]
   (let [out (pg/g:insert -/Entry

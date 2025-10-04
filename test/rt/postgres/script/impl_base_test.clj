@@ -19,19 +19,6 @@
           :profiles {:web  {:editable #{:create
                                         :modify}}}}])
 
-(comment
-  (def -hsch- (get-in (app/app "scratch")
-                      [:schema
-                       :tree
-                       :Hello]))
-
-  (def -tsch- (get-in (app/app "scratch")
-                      [:schema
-                       :tree
-                       :Task])))
-
-
-
 ^{:refer rt.postgres.script.impl-base/prep-entry :added "4.0"
   :setup [@Hello]}
 (fact "prepares data given an entry sym"
@@ -39,10 +26,6 @@
   
   (second (prep-entry '-/Hello (l/rt:macro-opts :postgres)))
   => book/book-entry?)
-
-(comment
-  (prep-entry 'szndb.core.app-common/Currency
-              (l/rt:macro-opts :postgres)))
 
 ^{:refer rt.postgres.script.impl-base/prep-table :added "4.0"}
 (fact "prepares data related to the table sym"
@@ -92,6 +75,15 @@
                   :web {:example "success"},
                   :order 1,
                   :ident :Task/status}]})
+
+^{:refer rt.postgres.script.impl-base/t-val-process :added "4.0"}
+(fact "allows additional filters to be added"
+  ^:hidden
+
+  (t-val-process [['add 5]
+                  ['sub 5]]
+                 'i)
+  => '(sub (add i 5) 5))
 
 ^{:refer rt.postgres.script.impl-base/t-val-fn :added "4.0"}
 (fact "builds a js val given input"
@@ -340,6 +332,21 @@
 (fact "adds `additional` args")
 
 (comment
+  (def -hsch- (get-in (app/app "scratch")
+                      [:schema
+                       :tree
+                       :Hello]))
+
+  (def -tsch- (get-in (app/app "scratch")
+                      [:schema
+                       :tree
+                       :Task])))
+
+(comment
+  (prep-entry 'szndb.core.app-common/Currency
+              (l/rt:macro-opts :postgres)))
+
+(comment
   (./import)
 
   (do (l/reset-annex)
@@ -373,7 +380,3 @@
                     :module 'rt.postgres.script.scratch
                     :id 'Node
                     :section :code}))
-
-
-^{:refer rt.postgres.script.impl-base/t-val-process :added "4.0"}
-(fact "TODO")

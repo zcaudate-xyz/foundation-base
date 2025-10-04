@@ -1,3 +1,4 @@
+^{:no-test true}
 (ns scratch
   (:require [std.lang :as l]
             [clojure.set :as set]

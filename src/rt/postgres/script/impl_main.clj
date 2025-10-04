@@ -133,7 +133,7 @@
 ;;
 
 (defn t-fields-raw
-  "contructs a delete form with prep"
+  "returns the raw fields"
   {:added "4.0"}
   ([[entry tsch mopts] {:keys [scope path] :as params
                         :or {path [:web :modify]}}]
@@ -147,9 +147,11 @@
               (keep (fn [[k [{:keys [primary unique order]}]]]
                       (if (and (not (or primary #_unique))
                                order)
-                        (str k))))))))
+                        (symbol (str/snake-case (h/strn k))))))))))
 
 (defn t-fields
+  "returns fields"
+  {:added "4.0"}
   [spec-sym {:keys [scope path] :as params}]
   (let [[entry tsch mopts] (base/prep-table spec-sym false (l/macro-opts))]
     (t-fields-raw [entry tsch mopts] params)))

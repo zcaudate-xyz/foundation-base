@@ -129,8 +129,7 @@
   t:fields
   "flat modify"
   {:added "4.0"}
-  ([spec-sym & [{:keys [scope path] :as params
-                 :or {path [:web :modify]}}]]
+  ([spec-sym & [{:keys [scope path] :as params}]]
    (main/t-fields spec-sym params)))
 
 (comment

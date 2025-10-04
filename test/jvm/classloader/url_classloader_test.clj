@@ -3,4 +3,4 @@
   (:require [jvm.classloader.url-classloader :refer :all]))
 
 ^{:refer jvm.classloader.url-classloader/ucp-remove-url :added "4.0"}
-(fact "TODO")
+(fact "removes the url")

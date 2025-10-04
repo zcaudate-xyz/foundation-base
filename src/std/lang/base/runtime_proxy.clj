@@ -10,13 +10,13 @@
    (str "#rt.proxy" [lang redirect namespace])))
 
 (defn proxy-get-rt
-  "TODO"
+  "gets the redirected runtime"
   {:added "4.0"}
   [redirect lang]
   (space/space:rt-current redirect (ut/lang-context lang)))
 
 (defn proxy-raw-eval
-  "TODO"
+  "evaluates the raw string"
   {:added "4.0"}
   [{:keys [redirect lang]} string]
   (protocol.context/-raw-eval
@@ -24,7 +24,7 @@
    string))
 
 (defn proxy-init-ptr
-  "TODO"
+  "initialises ptr"
   {:added "4.0"}
   [{:keys [redirect lang]} ptr]
   (protocol.context/-init-ptr
@@ -32,7 +32,7 @@
    ptr))
 
 (defn proxy-tags-ptr
-  "TODO"
+  "gets the ptr tags"
   {:added "4.0"}
   [{:keys [redirect lang]} ptr]
   (protocol.context/-tags-ptr
@@ -40,7 +40,7 @@
    ptr))
 
 (defn proxy-deref-ptr
-  "TODO"
+  "dereefs the pointer"
   {:added "4.0"}
   [{:keys [redirect lang]} ptr]
   (protocol.context/-deref-ptr
@@ -48,7 +48,7 @@
    ptr))
 
 (defn proxy-display-ptr
-  "TODO"
+  "displays the pointer"
   {:added "4.0"}
   [{:keys [redirect lang]} ptr]
   (protocol.context/-display-ptr
@@ -56,7 +56,7 @@
    ptr))
 
 (defn proxy-invoke-ptr
-  "TODO"
+  "invokes the pointer"
   {:added "4.0"}
   [{:keys [redirect lang]} ptr args]
   (protocol.context/-invoke-ptr
@@ -65,7 +65,7 @@
    args))
 
 (defn proxy-transform-in-ptr
-  "TODO"
+  "transforms the pointer on in"
   {:added "4.0"}
   [{:keys [redirect lang]} ptr args]
   (protocol.context/-transform-in-ptr
@@ -74,7 +74,7 @@
    args))
 
 (defn proxy-transform-out-ptr
-  "TODO"
+  "transforms the pointer on out"
   {:added "4.0"}
   [{:keys [redirect lang]} ptr return]
   (protocol.context/-transform-out-ptr
@@ -83,28 +83,28 @@
    return))
 
 (defn proxy-started?
-  "TODO"
+  "checks if proxied has started"
   {:added "4.0"}
   [{:keys [redirect lang]}]
   (protocol.component/-started?
    (proxy-get-rt redirect lang)))
 
 (defn proxy-stopped?
-  "TODO"
+  "checks if proxied has stopped"
   {:added "4.0"}
   [{:keys [redirect lang]}]
   (protocol.component/-stopped?
    (proxy-get-rt redirect lang)))
 
 (defn proxy-remote?
-  "TODO"
+  "checks if proxied is remote"
   {:added "4.0"}
   [{:keys [redirect lang]}]
   (protocol.component/-remote?
    (proxy-get-rt redirect lang)))
 
 (defn proxy-info
-  "TODO"
+  "gets the proxied info"
   {:added "4.0"}
   [{:keys [redirect lang]} level]
   (protocol.component/-info
@@ -112,7 +112,7 @@
    level))
 
 (defn proxy-health
-  "TODO"
+  "checks the proxied health"
   {:added "4.0"}
   [{:keys [redirect lang]}]
   (protocol.component/-health

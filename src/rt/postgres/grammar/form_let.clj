@@ -197,7 +197,7 @@
       mopts))))
 
 (defn pg-loop-block
-  "emits a block with let usage"
+  "creates a loop block"
   {:added "4.0"}
   ([[_ & forms] grammar mopts]
    (binding [*input-syms* (or *input-syms* (volatile! #{}))]
@@ -207,7 +207,7 @@
       mopts))))
 
 (defn pg-case-block
-  "emits a block with let usage"
+  "creates a case block"
   {:added "4.0"}
   ([[_ & forms] grammar mopts]
    (binding [*input-syms* (or *input-syms* (volatile! #{}))]

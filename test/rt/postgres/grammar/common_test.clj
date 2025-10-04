@@ -133,6 +133,13 @@
   (common/pg-full-token "hello" "schema")
   => '(. #{"schema"} #{"hello"}))
 
+^{:refer rt.postgres.grammar.common/pg-entry-literal :added "4.0"}
+(fact "creates an entry literal"
+  ^:hidden
+
+  (common/pg-entry-literal scratch/addf)
+  => ".addf")
+
 ^{:refer rt.postgres.grammar.common/pg-entry-token :added "4.0"}
 (fact "gets the entry token"
   ^:hidden
@@ -191,6 +198,24 @@
        \\ :end \;
        \\ :$$ :language "plpgsql" \;])
 
+^{:refer rt.postgres.grammar.common/block-loop-block :added "4.0"}
+(fact "emits loop block"
+  ^:hidden
+  
+  (common/block-loop-block
+   '_ '(+ 1 2 3) '(+ 4 5 6))
+  => '[:loop \\ (\| (do (+ 1 2 3) (+ 4 5 6))) \\ :end-loop])
+
+^{:refer rt.postgres.grammar.common/block-case-block :added "4.0"}
+(fact "emits case block"
+  ^:hidden
+
+  (common/block-case-block
+   'type
+   "object" '(from-object x)
+   "string" '(from-string x))
+  => '(% [:case type \\ (\| :WHEN (:% "object") :THEN (:% (from-object x)) \\ :WHEN (:% "string") :THEN (:% (from-string x)) \\) :end]))
+
 ^{:refer rt.postgres.grammar.common/pg-defenum :added "4.0"}
 (fact "defenum block"
   ^:hidden
@@ -210,6 +235,16 @@
   (common/pg-defindex '(defindex hello []))
   => '(do [:create-index :if-not-exists #{"hello"}]))
 
+^{:refer rt.postgres.grammar.common/pg-defpolicy :added "4.0"}
+(fact "defpolicy block"
+  ^:hidden
+  
+  (common/pg-defpolicy '(defprotocol Hellopolicy
+                        "This is the policy"
+                        [-/Table]
+                        [:to anon]))
+  => '[:create-policy #{"This is the policy - Hellopolicy"} \\ :on -/Table \\ :to anon \;])
+
 ^{:refer rt.postgres.grammar.common/pg-defblock :added "4.0"}
 (fact "creates generic defblock"
   ^:hidden
@@ -217,16 +252,3 @@
   (common/pg-defblock '(def ^{:static/return [:index]
                        :static/schema "scratch"} hello []))
   => '(do [:create :index (. #{"scratch"} #{"hello"})]))
-
-
-^{:refer rt.postgres.grammar.common/pg-entry-literal :added "4.0"}
-(fact "TODO")
-
-^{:refer rt.postgres.grammar.common/block-loop-block :added "4.0"}
-(fact "TODO")
-
-^{:refer rt.postgres.grammar.common/block-case-block :added "4.0"}
-(fact "TODO")
-
-^{:refer rt.postgres.grammar.common/pg-defpolicy :added "4.0"}
-(fact "TODO")

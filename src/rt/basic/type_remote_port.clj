@@ -9,7 +9,7 @@
             [rt.basic.type-common :as common]))
 
 (defn start-remote-port
-  "starts the remote rt"
+  "starts the connection to the remote port"
   {:added "4.0"}
   ([{:keys [host port] :as rt}]
    (let [relay (cc/relay
@@ -21,7 +21,7 @@
      (assoc rt :relay relay))))
 
 (defn stop-remote-port
-  "stops the remote rt"
+  "stops the connection to the remote port"
   {:added "4.0"}
   [{:keys [id lang bench container] :as rt}]
   (let [{:keys [relay]} rt
@@ -30,7 +30,7 @@
     (dissoc rt :relay)))
 
 (defn raw-eval-remote-port-relay
-  "performs raw eval"
+  "evaluates over the remote port"
   {:added "4.0"}
   [rt body & [timeout]]
   (h/prn body)
@@ -77,20 +77,20 @@
           {:status "not-connected"})))
 
 (defn raw-eval-remote-port
-  "raw eval for remote rt"
+  "evaluates over the remote port"
   {:added "4.0"}
   ([{:keys [id lang process raw-eval] :as rt} body]
    ((or raw-eval raw-eval-remote-port-relay)
     rt body (:timeout process))))
 
 (defn invoke-ptr-remote-port
-  "invoke for remote rt"
+  "invokes over the remote port"
   {:added "4.0"}
   ([{:keys [process lang layout] :as rt} ptr args]
    (default/default-invoke-script rt ptr args raw-eval-remote-port process)))
 
 (defn rt-remote-port-string
-  "string for remote rt"
+  "gets the remote port string"
   {:added "4.0"}
   [{:keys [id lang host port]}]
   (str "#rt.remote-port"
@@ -109,7 +109,7 @@
                        -invoke-ptr  invoke-ptr-remote-port}])
 
 (defn rt-remote-port:create
-  "creates a remote rt"
+  "creates the service"
   {:added "4.0"}
   [{:keys [id
            lang
@@ -129,12 +129,7 @@
                                  :lifecycle process}))))
 
 (defn rt-remote-port
-  "creates and starts a remote rt
- 
-   (def +rt+ (rt-remote-port {:lang :lua
-                        :program :luajit}))
-   
-   (h/stop +rt+)"
+  "create and starts the service"
   {:added "4.0"}
   [{:keys [id
            lang

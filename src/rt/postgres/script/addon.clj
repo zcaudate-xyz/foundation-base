@@ -11,24 +11,27 @@
   rt.postgres
   {:macro-only true})
 
+(defmacro.pg ^{:- [:block]}
+  exec
+  [args] args)
 
 (defmacro.pg ^{:- [:array]}
   ARRAY
-  "generates random hex"
+  "creates an array"
   {:added "4.0"}
   ([& args]
    (list :% (list :- "ARRAY[") (list 'quote (vec args)) (list :- "]"))))
 
 (defmacro.pg ^{:- [:text]}
   id
-  "generates random hex"
+  "gets the id of an object"
   {:added "4.0"}
   ([sym & [type]]
    `(~(or type :uuid) (:->> ~sym "id"))))
 
 (defmacro.pg ^{:- [:jsonb]}
   full
-  "generates random hex"
+  "gets the full jsonb for table or function"
   {:added "4.0"}
   ([table]
    (let [entry (deref (deref (resolve table)))]
@@ -37,6 +40,8 @@
        (str (:id entry))]))))
 
 (defn full-str
+  "gets the full json str form table or function"
+  {:added "4.0"}
   [table]
   (json/write
    (-/full table)))
@@ -111,7 +116,9 @@
    => \"CASE WHEN 1 THEN 2\\nWHEN 3 THEN 4\\nEND\"
  
    ((:template @pg/case) 1 2 3 4)
-   => '(% [:case :when 1 :then 2 \\ :when 3 :then 4 \\ :end])"
+   => '(% [:case :when (:% 1) :then (:% 2)
+           \\ :when (:% 3) :then (:% 4)
+           \\ :end])"
   {:added "4.0"}
   ([& args]
    (let [args  (partition 2 args)
@@ -213,6 +220,8 @@
 
 (defmacro.pg ^{:- [:block]}
   do:plpgsql
+  "creates a do block"
+  {:added "4.0"}
   [& forms]
   `[:DO :$$
     :BEGIN

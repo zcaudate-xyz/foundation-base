@@ -65,6 +65,15 @@
   (scratch/as-array {})
   => [])
 
+^{:refer rt.postgres.script.scratch/TaskCache :added "4.0"}
+(fact "constructs a task cache")
+
+^{:refer rt.postgres.script.scratch/Task :added "4.0"}
+(fact "constructs a task")
+
+^{:refer rt.postgres.script.scratch/Entry :added "4.0"}
+(fact "construcs an entry")
+
 ^{:refer rt.postgres.script.scratch/as-upper :added "4.0"}
 (fact "converts to upper case")
 
@@ -135,13 +144,3 @@
 
   
   )
-
-
-^{:refer rt.postgres.script.scratch/TaskCache :added "4.0"}
-(fact "TODO")
-
-^{:refer rt.postgres.script.scratch/Task :added "4.0"}
-(fact "TODO")
-
-^{:refer rt.postgres.script.scratch/Entry :added "4.0"}
-(fact "TODO")

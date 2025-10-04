@@ -46,6 +46,8 @@
 
 
 (defn default-body-wrap
+  "creates the scaffolding for the runtime eval to work"
+  {:added "4.0"}
   [forms]
   (list 'do
         (list 'defn (with-meta 'OUT-FN

@@ -201,7 +201,7 @@
 ;;
 
 (defn pg-entry-literal
-  "gets the entry token"
+  "TODO"
   {:added "4.0"}
   ([entry]
    (let [{:static/keys [schema]
@@ -274,7 +274,7 @@
      \\ :$$ :language "plpgsql" \;]))
 
 (defn block-loop-block
-  "initates do block"
+  "emits loop block"
   {:added "4.0"}
   ([_ & forms]
    `[:loop
@@ -282,7 +282,7 @@
      \\ :end-loop]))
 
 (defn block-case-block
-  "initates do block"
+  "emits case block"
   {:added "4.0"}
   ([value & args]
    (let [args  (partition 2 args)
@@ -331,7 +331,7 @@
 ;;
 
 (defn pg-defpolicy
-  "defindex block"
+  "defpolicy block"
   {:added "4.0"}
   [[_ sym doc? attr? [table] body :as form]]
   

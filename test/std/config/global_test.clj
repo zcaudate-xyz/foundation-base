@@ -35,6 +35,9 @@
   (:group (global-project-raw))
   => "xyz.zcaudate")
 
+^{:refer std.config.global/global-env-file-raw :added "4.0"}
+(fact "gets env from env.edn")
+
 ^{:refer std.config.global/global-home-raw :added "3.0"}
 (fact "returns the global object for all global types"
 
@@ -60,7 +63,3 @@
 
 (comment
   (global :all))
-
-
-^{:refer std.config.global/global-env-file-raw :added "4.0"}
-(fact "TODO")

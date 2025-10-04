@@ -39,8 +39,8 @@
 (defn init-ptr-pg
   "initiates a pointer in the runtime
  
-   (base/init-ptr-pg -pg- scratch/addf)
-   => -2"
+   (do (client-impl/init-ptr-pg -pg- scratch/addf))
+   => anything"
   {:added "4.0"}
   [{:keys [mode] :as pg} ptr]
   (if (and (= :dev mode)
@@ -91,8 +91,8 @@
                              (prepend-select-check-form x book)))))))))
 
 (defn invoke-ptr-pg-single
-    "invokes a pointer in runtime"
-    {:added "4.0"}
+  "invokes single"
+  {:added "4.0"}
     [{:keys [instance] :as pg} ptr args]
     (let [{:keys [bulk]} (meta args)
           add-select (prepend-select-check ptr args)
@@ -117,6 +117,8 @@
                         raw-eval-pg-return))))
 
 (defn invoke-ptr-pg-transform-let-fn
+  "transforms the let form"
+  {:added "4.0"}
   [inner]
   [:DO :$$
    :BEGIN
@@ -130,11 +132,15 @@
    :END :$$ :LANGUAGE "plpgsql"])
 
 (defn invoke-ptr-pg-transform-try-fn
+  "transforms the try form"
+  {:added "4.0"}
   [inner]
   [:DO :$$ inner
    :$$ :LANGUAGE "plpgsql"])
 
 (defn invoke-ptr-pg-transform-prep
+  "transforms a form"
+  {:added "4.0"}
   [form show-exit]
   (let [inner (h/postwalk (fn [x]
                             (cond (and (list? x)
@@ -149,6 +155,8 @@
     [inner changed]))
 
 (defn invoke-ptr-pg-transform
+  "transforms a let and try form"
+  {:added "4.0"}
   [type form]
   (let [[inner changed] (invoke-ptr-pg-transform-prep form
                                                       (case type
@@ -166,6 +174,8 @@
           [[nform (if (:hide (meta form)) false true)]])))
 
 (defn invoke-ptr-pg-block
+  "invokes a block"
+  {:added "4.0"}
   [{:keys [instance] :as pg} ptr args]
   (let [results (->> args
                      (mapcat (fn [form]

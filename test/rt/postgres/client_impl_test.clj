@@ -11,9 +11,6 @@
             [lib.jdbc :as jdbc]
             [std.lib :as h]))
 
-^{:refer rt.postgres.client-impl/invoke-ptr-pg-transform-let :added "4.0"}
-(fact "TODO")
-
 ^{:refer rt.postgres.client-impl/raw-eval-pg-return :added "4.0"}
 (fact "returns a regularised result"
   ^:hidden
@@ -194,8 +191,18 @@
         false]
        [[:select (current-setting "temp.out" false)] true]])
 
-^{:refer rt.postgres.client-impl/invoke-ptr-pg-block :added "4.0"}
-(fact "TODO")
+^{:refer rt.postgres.client-impl/invoke-ptr-pg-block :added "4.0"
+  :setup [(def -pg- (client/rt-postgres {:dbname "test-scratch"}))]
+  :teardown (h/stop -pg-)}
+(fact "invokes a block"
+  ^:hidden
+  
+  (client-impl/invoke-ptr-pg-block -pg-
+                                   (ut/lang-pointer :postgres)
+                                   '[(let [(:integer a) 1
+                                           (:integer b) 2]
+                                       (return (+ a b)))])
+  => 3)
 
 ^{:refer rt.postgres.client-impl/invoke-ptr-pg :added "4.0"
   :setup [(def -pg- (client/rt-postgres {:dbname "test-scratch"}))]

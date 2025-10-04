@@ -142,7 +142,19 @@
 
 
 ^{:refer rt.postgres.script.impl-main/t-fields-raw :added "4.0"}
-(fact "TODO")
+(fact "returns the raw fields"
+  ^:hidden
+  
+  (l/with:macro-opts [(l/rt:macro-opts :postgres)]
+    (main/t-fields 'scratch/Task
+                   {}))
+  => '(status name cache op_created op_updated time_created time_updated __deleted__))
 
 ^{:refer rt.postgres.script.impl-main/t-fields :added "4.0"}
-(fact "TODO")
+(fact "returns fields"
+  ^:hidden
+  
+  (l/with:macro-opts [(l/rt:macro-opts :postgres)]
+    (main/t-fields 'scratch/Task
+                   {}))
+  => '(status name cache op_created op_updated time_created time_updated __deleted__))

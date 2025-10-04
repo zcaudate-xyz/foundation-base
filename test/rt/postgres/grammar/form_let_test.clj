@@ -124,7 +124,28 @@
 
 
 ^{:refer rt.postgres.grammar.form-let/pg-loop-block :added "4.0"}
-(fact "TODO")
+(fact "creates a loop block"
+  ^:hidden
+  
+  (l/with:emit
+    (pg-loop-block '(loop []
+                      (let [a 1
+                            b 2]
+                        (return (+ a b))))
+                   (:grammar (l/get-book (l/runtime-library)
+                                         :postgres))
+                   (l/rt:macro-opts :postgres)))
+  => "LOOP\n  DECLARE\n    a JSONB;\n    b JSONB;\n  BEGIN\n    a := 1;\n    b := 2;\n    RETURN a + b;\n  END;\nEND LOOP")
 
 ^{:refer rt.postgres.grammar.form-let/pg-case-block :added "4.0"}
-(fact "TODO")
+(fact "creates a case block"
+  ^:hidden
+
+  (l/with:emit
+    (pg-case-block '(case type
+                      "a" "hello"
+                      "b" "world")
+                   (:grammar (l/get-book (l/runtime-library)
+                                         :postgres))
+                   (l/rt:macro-opts :postgres)))
+  => "CASE type\n  WHEN 'a' THEN 'hello'\n  WHEN 'b' THEN 'world'\n  END")

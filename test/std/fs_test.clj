@@ -34,6 +34,9 @@
   (file-namespace "src/std/fs.clj")
   => 'std.fs)
 
-
 ^{:refer std.fs/get-namespace :added "4.0"}
-(fact "TODO")
+(fact "gets the namespace given forms"
+  ^:hidden
+  
+  (get-namespace '[(ns hello)])
+  => 'hello)
