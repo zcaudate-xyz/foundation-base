@@ -216,7 +216,7 @@
   [& forms]
   `[:DO :$$
     :BEGIN
-    ~@forms
+    (do ~@forms)
     :END
     :$$ :LANGUAGE "plpgsql"])
 

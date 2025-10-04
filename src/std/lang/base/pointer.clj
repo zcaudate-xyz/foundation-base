@@ -139,12 +139,12 @@
            (let [entry (get-entry ptr)]
              (cond (nil? entry)
                    (str (ptr-tag ptr :not-found))
-
+                   
                    (= :fragment section)
                    (let [{:keys [form standalone template]} entry]
                      (cond (h/form? standalone)
                            (str/trim (with-out-str (clojure.pprint/pprint (second standalone))))
-
+                           
                            (not template)
                            (impl/emit-str form meta)
                            

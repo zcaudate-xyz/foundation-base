@@ -48,7 +48,17 @@
                       (:= b 2)
                       (:= a (+ a b))
                       (return a)))
-           \\ :end]))
+           \\ :end])
+  
+  (pg-tf-let '(let [(:int a) 1]
+                (let [(:int b) 2]
+                  (return (+ a b)))))
+
+  (pg-tf-let '(let [_   [:set-role service_role]
+                    (:text o-role)  current_user]
+                (let [(:integer o-out) (pg/t:count type-sys/Op)]
+                  (return #{o-role
+                            o-out})))))
 
 ^{:refer rt.postgres.grammar.form-let/pg-do-block :added "4.0"}
 (fact "emits a block with let usage"
@@ -74,7 +84,16 @@
       "    RETURN a + b;"
       "  END;"
       "END;"
-      "$$ LANGUAGE 'plpgsql';"))
+      "$$ LANGUAGE 'plpgsql';")
+
+  (l/with:emit
+   (pg-do-block '(do:block
+                  (let [(:int a) 1]
+                    (let [(:int b) 2]
+                      (return (+ a b)))))
+                (:grammar (l/get-book (l/runtime-library)
+                                      :postgres))
+                (l/rt:macro-opts :postgres))))
 
 ^{:refer rt.postgres.grammar.form-let/pg-do-suppress :added "4.0"}
 (fact "emits a suppress block with let ussage"

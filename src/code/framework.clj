@@ -27,6 +27,7 @@
      defn.py
      defn.pg
      deftype.pg
+     defpolicy.pg
      defn.sh
      defn.sol
      defn.xt

@@ -326,6 +326,22 @@
         ttok  (pg-full-token sym schema)]
     `(~'do [:create-index :if-not-exists ~ttok ~@array])))
 
+;;
+;; defindex
+;;
+
+(defn pg-defpolicy
+  "defindex block"
+  {:added "4.0"}
+  [[_ sym doc? attr? [table] body :as form]]
+  
+  (let [[{:keys [doc]
+          :as mdefn} [_ sym [table] body]] (grammar-spec/format-defn form)]
+    (vec (concat [:create-policy #{(str doc " - " sym)} \\
+                  :on table \\]
+                 body
+                 [\;]))))
+
 (defn pg-defblock
   "creates generic defblock"
   {:added "4.0"}

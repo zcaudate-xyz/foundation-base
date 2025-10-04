@@ -46,7 +46,7 @@
                                :block
                                :control-base
                                [:control-general :include [:for :branch]]
-                               :control-try-catch
+                               #_:control-try-catch
                                :top-base
                                :macro])
       (grammar/build:override
@@ -71,12 +71,15 @@
                     :hydrate #'common/pg-hydrate
                     :macro   #'common/pg-defblock}
         :for       {:macro #'tf/pg-tf-for  :emit :macro}})
-
+      
       ;;
       ;; OPS
       ;;
       (grammar/build:extend
-       {
+       {:try     {:op :try         :symbol #{'try}
+                  :type :block     :block  {:main #{:body}
+                                            :control [[:catch   {:required true
+                                                                 :main #{:parameter :body}}]]}}
         :doblk   {:op :doblk   :symbol #{'do:block}    :emit  #'form-let/pg-do-block :type :block}
         :dosup   {:op :dosup   :symbol #{'do:suppress} :emit  #'form-let/pg-do-suppress :type :block}
         :doast   {:op :doast   :symbol #{'do:assert}   :emit  #'common/pg-do-assert :type :block :style/indent 1}
@@ -123,7 +126,18 @@
                     :hydrate      #'form-defconst/pg-defconst-hydrate
                     :macro        #'form-defconst/pg-defconst
                     :static/dbtype :const}
-
+        :defindex  {:op :defindex :symbol '#{defindex}
+                    :type :def :section :code :emit :macro
+                    :hydrate      #'common/pg-hydrate
+                    :macro        #'common/pg-defindex
+                    :static/dbtype :index}
+        :defpolicy  {:op :defpolicy :symbol '#{defpolicy}
+                     :type :def :section :code :emit :macro
+                     :hydrate      #'common/pg-hydrate
+                     :macro        #'common/pg-defpolicy
+                     :static/dbtype :policy}
+        
+        #_#_
         :defrole  {:op :defrole :symbol '#{defrole}
                    :type :def :section :code :emit :macro
                    :format       #'common/pg-format
@@ -158,7 +172,15 @@
                                                        :start "" :end ""}}
                                       :if      {:raw "IF"}
                                       :elseif  {:raw "ELSIF"}
-                                      :else    {:raw "ELSE"}}}}
+                                      :else    {:raw "ELSE"}}}
+                  :try     {:raw "BEGIN"
+                            :wrap    {:start "" :end "END;"}
+                            :body    {:start "" :end "EXCEPTION"}
+                            :control {:default {:parameter  {:start "" :end ""}
+                                                :body {:append true
+                                                       :start "" :end ""}}
+                                      :catch   {:raw "WHEN"
+                                                :parameter  {:start " " :end " THEN"}}}}}
         :function {:defn    {:args  {:assign "DEFAULT"}}}}
        (h/merge-nested (emit/default-grammar))))
 

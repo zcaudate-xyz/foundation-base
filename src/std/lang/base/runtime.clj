@@ -64,7 +64,8 @@
   {:added "4.0"}
   ([{:keys [lang library module emit] :as rt} ptr]
    (cond (#{:defglobal} (:op-key @ptr))
-         (let [body (impl/emit-as lang [(ut/sym-full ptr)] {:layout :full})]
+         (let [body (impl/emit-as lang [(ut/sym-full ptr)] {:layout :full
+                                                            :emit emit})]
            (ptr/ptr-invoke rt
                            h/p:rt-raw-eval
                            body
@@ -72,7 +73,8 @@
                            (or (:json emit) :full)))
          
          :else
-         (ptr/ptr-display ptr {:library library}))))
+         (ptr/ptr-display ptr {:library library
+                               :emit emit}))))
 
 (def default-raw-eval
   (fn [_ string] string))

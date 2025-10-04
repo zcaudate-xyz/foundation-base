@@ -55,7 +55,8 @@
    (main/t-id spec-sym params)))
 
 (defmacro.pg ^{:- [:block]
-               :style/indent 1}
+               :style/indent 1
+               :static/type [:integer]}
   t:count
   "get count entry"
   {:added "4.0"}
@@ -69,7 +70,7 @@
   "flat delete"
   {:added "4.0"}
   ([spec-sym & [{:keys [where returning into as single args] :as params
-             :or {as :json}}]]
+                 :or {as :json}}]]
    (main/t-delete spec-sym params)))
 
 (defmacro.pg ^{:- [:block]

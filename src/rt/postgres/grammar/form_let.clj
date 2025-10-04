@@ -99,14 +99,22 @@
              (vswap! *input-syms* h/union dsyms))
          _ (h/prewalk (fn [x]
                         (cond (h/form? x)
-                              (apply list
-                                     (atom (first x))
-                                     (rest x))
+                              (cond (= 'let
+                                       (first x))
+                                    (binding [*input-syms* (volatile! @not-checked)]
+                                      (apply list
+                                             (atom (first x))
+                                             (rest x)))
+                                    
+                                    :else
+                                    (apply list
+                                             (atom (first x))
+                                             (rest x)))
 
                               (and (set? x)
                                    (vector? (first x)))
                               (atom x)
-
+                              
                               (and (symbol? x)
                                    (re-find #"^\w-\w+"  (str x))
                                    (not (re-find #"^\w-ret$" (str x)))
@@ -134,10 +142,11 @@
                          
                          (if (empty? forms)
                            [out dsyms]
-                           (let [csyms (h/walk:find (fn [x]
-                                                      (and (symbol? x)
-                                                           (nil? (namespace x))))
-                                                    form)]
+                           (let [csyms (h/walk:find
+                                        (fn [x]
+                                          (and (symbol? x)
+                                               (nil? (namespace x))))
+                                        form)]
                              (recur (h/union dsyms csyms)
                                     more
                                     (if (and (symbol? form)

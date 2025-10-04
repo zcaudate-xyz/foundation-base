@@ -13,6 +13,14 @@
             [std.task.process :as process]
             [std.lib :as h]))
 
+(defn rt-resolve
+  "resolves an rt given keyword"
+  {:added "4.0"}
+  [lang-or-rt]
+  (if (keyword? lang-or-rt)
+    (ut/lang-rt lang-or-rt)
+    lang-or-rt))
+
 (defn sym-entry
   "gets the entry using a symbol"
   {:added "4.0"}
@@ -55,21 +63,22 @@
   {:added "4.0"}
   ([ptr & [opts]]
    (impl-entry/with:cache-force
-    (ptr/ptr-display ptr opts))))
+    (ptr/ptr-display ptr (or opts
+                             (ut/lang-rt-default ptr))))))
 
 (defn ptr-clip
   "copies pointer text to clipboard"
   {:added "4.0"}
   [ptr]
   (impl-entry/with:cache-force
-    (h/clip:nil (ptr/ptr-display ptr {}))))
+   (h/clip:nil (ptr/ptr-display ptr (ut/lang-rt-default ptr)))))
 
 (defn ptr-print
   "copies pointer text to clipboard"
   {:added "4.0"}
   [ptr]
   (impl-entry/with:cache-force
-   (h/pl (ptr/ptr-display ptr {}))))
+   (h/pl (ptr/ptr-display ptr (ut/lang-rt-default ptr)))))
 
 (defn ptr-setup
   "calls setup on a pointer"
@@ -115,14 +124,6 @@
                   (filter #(-> % :op-key (= 'defn))))]
     (doseq [p deps]
       (ptr-teardown p))))
-
-(defn rt-resolve
-  "resolves an rt given keyword"
-  {:added "4.0"}
-  [lang-or-rt]
-  (if (keyword? lang-or-rt)
-    (ut/lang-rt lang-or-rt)
-    lang-or-rt))
 
 (defn emit-module
   "emits the entire module"

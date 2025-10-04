@@ -4,10 +4,16 @@
             [std.json :as json]
             [std.string :as str]
             [std.lang :as l]
-            [std.lang.base.impl :as impl]))
+            [std.lang.base.impl :as impl]
+            [rt.postgres.grammar.common :as common]))
 
 (l/script :postgres
   {:macro-only true})
+
+(defmacro.pg create-role
+  [role]
+  (pop (common/block-do-suppress
+        (list 'do [:create-role role]))))
 
 (defmacro.pg grant-public
   "grants the schema to be in public"
@@ -108,11 +114,112 @@
   (list 'exists
         [:select 1 :from 'information_schema.schemata :where {:schema-name "auth"}]))
 
+(defmacro.pg
+  raise
+  "raises a json error with value"
+  {:added "4.0"}
+  ([message detail
+    & [{:keys [http-status
+               http-headers
+               state]}]]
+   (filter identity
+           (list 'do
+                 (if http-status
+                   [:perform (list 'set-config "response.status" (str http-status) true)])
+                 (if http-headers
+                   [:perform (list 'set-config "response.headers"
+                                   (std.json/write http-headers) true)])
+                 [:raise (or state :exception) :using
+                  (list 'quote [['detail := (list '% detail)]
+                                ['message := message]])]))))
+
+(defmacro.pg ^{:- [:block]}
+  show-roles
+  []
+  [:select ''[rolname rolsuper rolbypassrls rolcanlogin]
+   :from  'pg_roles
+   :where 'rolname :in ''("authenticated"
+                          "service_role"
+                          "anon")])
+
+(defn get-form-type
+  [form]
+  (cond (string? form)
+        :text
+
+        (integer? form)
+        :bigint
+        
+        (number? form)
+        :numeric
+
+        (map? form)
+        :jsonb
+
+        (:type (meta form))
+        (:type (meta form))
+
+        (list? form)
+        (let [fsym (first form)]
+          (cond (keyword? fsym)
+                fsym
+
+                (symbol? fsym)
+                (let [fvar (resolve fsym)]
+                  (cond (h/pointer? (deref fvar))
+                        (let [ret  (or (:static/type @@fvar)
+                                       (:static/return @@fvar))]
+                          (if (or (nil? ret)
+                                  (= ret [:block]))
+                            (h/error "Cannot determine type"
+                                     {:form form})
+                            (first ret)))
+                        
+                        :else
+                        (h/error "Cannot determine type"
+                                 {:form form})))))
+        
+        
+        :else
+        (h/error "Cannot determine type"
+                 {:form form})))
+
+(defmacro with-role
+  [[role type] form]
+  (let [role (case role
+               :admin 'service_role
+               :auth  'authenticated
+               :anon  'anon
+               role)
+        type (or type (get-form-type form))]
+    (list '!.pg
+          (list 'try
+                [:set-local-role role]
+                (list 'let [(list type 'out)  form]
+                      (list 'return 'out))
+                (list 'catch 'others
+                      (list 'return {:code 'SQLSTATE
+                                     :message 'SQLERRM}))))))
+
+(defmacro with-auth
+  [[user-id type] form]
+  (let [type (or type (get-form-type form))]
+    (list '!.pg
+          (list 'try
+                [:set-local-role 'authenticated]
+                [:perform (list 'set-config
+                                "request.jwt.claim.sub"
+                                user-id
+                                true)]
+                (list 'let [(list type 'out)  form]
+                      (list 'return 'out))
+                (list 'catch 'others
+                      (list 'return {:code 'SQLSTATE
+                                     :message 'SQLERRM}))))))
 
 ;;
 ;; transformations
 ;;
-
 
 (defn transform-entry-defn
   [body {:keys [grammar
@@ -153,19 +260,40 @@
                 entry
                 mopts]
          :as env}]
-  (let [{:sb/keys [rls]} (:api/meta (meta (:id entry)))
+  (let [{:sb/keys [rls
+                   access]} (:api/meta (meta (:id entry)))
         table-form (list '.
                          #{(:static/schema entry)}
-                         #{(str (:id entry))})]
-    (cond rls
-          (let [rls-str (impl/emit-direct
-                         grammar
-                         [:alter-table table-form :enable-row-level-security]
-                         *ns*
-                         mopts)]
-            (str body "\n" rls-str))
-          
-          :else body)))
+                         #{(str (:id entry))})
+        rls-str    (if rls
+                     (impl/emit-direct
+                      grammar
+                      [:alter-table table-form :enable-row-level-security \;]
+                      *ns*
+                      mopts))
+        access-str (if access
+                     (impl/emit-direct
+                      grammar
+                      (apply list 'do
+                             (map (fn [[role operations]]
+                                    (let [operations (cond (vector? operations)
+                                                           (list 'quote (mapv (comp symbol h/strn) operations))
+
+                                                           (= :all operations)
+                                                           ''[select update delete insert]
+
+                                                           :else operations)
+                                          role (case role
+                                                 :admin 'service_role
+                                                 :auth  'authenticated
+                                                 :anon  'anon)]
+                                      [:grant operations :on-table table-form :to role]))
+                                  access))
+                      *ns*
+                      mopts))]
+    (->> [body rls-str access-str]
+         (filter identity)
+         (str/join "\n"))))
 
 (defn transform-entry
   [body {:keys [grammar
