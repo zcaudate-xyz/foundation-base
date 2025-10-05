@@ -430,6 +430,17 @@
                    {:route "/auth/v1/token?grant_type=password"})
             body))
 
+(defn api-signup-create
+  [{:keys [email
+           password
+           user-metadata]
+    :as body}
+   & [opts]]
+  (api-call (merge opts
+                   {:route "/auth/v1/admin/users"
+                    :type :service})
+            body))
+
 (defn api-signup-delete
   [uid & [opts]]
   (api-call (merge opts

@@ -3,6 +3,9 @@
   (:require [net.http.client :as client]
 	    [net.http.websocket :as ws]
             [std.object :as obj]
+            [std.json :as json]
+            [std.string :as str]
+            [std.lib.encode :as enc]
             [std.lib :as h])
   (:import java.net.URLEncoder)
   (:refer-clojure :exclude [get]))
@@ -28,6 +31,16 @@
 
 (defn url-encode [^String s]
   (.replace (URLEncoder/encode s "UTF-8") "+" "%20"))
+
+(defn decode-jwt
+  [^String jwt]
+  (->> (str/split
+        jwt
+        #"\.")
+       (take 2)
+       (mapv (fn [s]
+               (json/read
+                (String. (enc/from-base64 s)))))))
 
 (defn encode-form-params
   [params]
