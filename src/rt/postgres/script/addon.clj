@@ -29,6 +29,14 @@
   ([sym & [type]]
    `(~(or type :uuid) (:->> ~sym "id"))))
 
+(defmacro.pg ^{:- [:text]}
+  name
+  "gets the full jsonb for table or function"
+  {:added "4.0"}
+  ([table]
+   (let [entry (deref (deref (resolve table)))]
+     (str (:id entry)))))
+
 (defmacro.pg ^{:- [:jsonb]}
   full
   "gets the full jsonb for table or function"

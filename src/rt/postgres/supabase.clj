@@ -184,7 +184,7 @@
         (h/error "Cannot determine type"
                  {:form form})))
 
-(defmacro with-role
+(defmacro with-role-single
   [[role type] form]
   (let [role (case role
                :admin 'service_role
@@ -201,7 +201,20 @@
                       (list 'return {:code 'SQLSTATE
                                      :message 'SQLERRM}))))))
 
-(defmacro with-auth
+(defmacro with-role
+  [[role type] & forms]
+  (let [res (mapv (fn [form]
+                    (list `with-role-single
+                          [role type]
+                          form))
+                  forms)]
+    (cond (= 1 (count forms))
+          (first res)
+
+          :else
+          res)))
+
+(defmacro with-auth-single
   [[user-id type] form]
   (let [type (or type (get-form-type form))]
     (list '!.pg
@@ -216,6 +229,21 @@
                 (list 'catch 'others
                       (list 'return {:code 'SQLSTATE
                                      :message 'SQLERRM}))))))
+
+(defmacro with-auth
+  [[user-id type] & forms]
+  (let [res (mapv (fn [form]
+                    (list `with-auth-single
+                          [user-id type]
+                          form))
+                  forms)]
+    (cond (= 1 (count forms))
+          (first res)
+
+          :else
+          res)))
+
+
 
 ;;
 ;; transformations
@@ -275,19 +303,23 @@
                      (impl/emit-direct
                       grammar
                       (apply list 'do
-                             (map (fn [[role operations]]
+                             (keep (fn [[role operations]]
                                     (let [operations (cond (vector? operations)
                                                            (list 'quote (mapv (comp symbol h/strn) operations))
 
                                                            (= :all operations)
                                                            ''[select update delete insert]
 
+                                                           (= :none operations)
+                                                           :skip
+                                                           
                                                            :else operations)
                                           role (case role
                                                  :admin 'service_role
                                                  :auth  'authenticated
                                                  :anon  'anon)]
-                                      [:grant operations :on-table table-form :to role]))
+                                      (when-not (= :skip operations)
+                                        [:grant operations :on-table table-form :to role])))
                                   access))
                       *ns*
                       mopts))]
