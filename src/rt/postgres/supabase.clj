@@ -13,7 +13,12 @@
 (defmacro.pg create-role
   [role]
   (pop (common/block-do-suppress
-        (list 'do [:create-role role]))))
+        [:create-role role \;])))
+
+(defmacro.pg alter-role-bypassrls
+  [role]
+  (pop (common/block-do-suppress
+        [:alter-role role :bypassrls \;])))
 
 (defmacro.pg grant-public
   "grants the schema to be in public"

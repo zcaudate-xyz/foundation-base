@@ -20,7 +20,8 @@
                                    :inst "supabase"
                                    :subtree []
                                    :tag "js"}]
-  [[rpc             [method] {:vargs args}]])
+  [[rpc             [method] {:vargs args}]
+   [schema          [s] {}]])
 
 (h/template-entries [l/tmpl-macro {:base "SupabaseClient"
                                    :inst "supabase"
