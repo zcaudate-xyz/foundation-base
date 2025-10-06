@@ -46,8 +46,7 @@
 (defn pg-deftype-ref-current
   "TODO"
   {:added "4.0"}
-  ([col {:keys [ns current column] :or {column :id}} {:keys [snapshot] :as mopts}]
-   (h/prn column)
+  ([col {:keys [current column] :or {column :id}} {:keys [snapshot] :as mopts}]
    (let [{:keys [id schema type]}  current]
      [(str/snake-case (str (h/strn col) "_id"))
       [(common/pg-type-alias type)]

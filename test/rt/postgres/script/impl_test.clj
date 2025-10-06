@@ -212,5 +212,5 @@
   
   (l/with:emit
     (l/emit-as :postgres
-               `[(pg/t:count scratch/Task
+               `[(pg/t:fields scratch/Task
                    {:where {:name "home"}})])))

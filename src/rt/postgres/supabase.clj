@@ -248,6 +248,44 @@
           :else
           res)))
 
+(defmacro with-super-single
+  [[user-id type] form]
+  (let [type (or type (get-form-type form))]
+    (list '!.pg
+          (list 'try
+                [:set-local-role 'authenticated]
+                [:perform (list 'set-config
+                                "request.jwt.claim.sub"
+                                user-id
+                                true)]
+                [:perform (list 'set-config
+                                "request.jwt.claim"
+                                (list :text {:user_metadata {:super true}})
+                                true)]
+                [:perform (list 'set-config
+                                "request.jwt.claims"
+                                (list :text {:user_metadata {:super true}})
+                                true)]
+                (list 'let [(list type 'out)  form]
+                      (list 'return 'out))
+                (list 'catch 'others
+                      (list 'return {:code 'SQLSTATE
+                                     :message 'SQLERRM}))))))
+
+(defmacro with-super
+  [[user-id type] & forms]
+  (let [res (mapv (fn [form]
+                    (list `with-super-single
+                          [user-id type]
+                          form))
+                  forms)]
+    (cond (= 1 (count forms))
+          (first res)
+
+          :else
+          res)))
+
+
 
 
 ;;
