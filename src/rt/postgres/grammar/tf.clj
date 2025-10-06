@@ -86,15 +86,18 @@
 (defn pg-tf-throw
   "creates throw transform"
   {:added "4.0"}
-  ([[_ {:as m}]]
-   `[:raise-exception :using-detail := (~'% ~m)]))
+  ([[_ {:as m} tag]]
+   [:raise-exception
+    :using (list 'quote
+                 [[:detail := (list '% m)]
+                  [:message := (str tag)]])]))
 
 (defn pg-tf-error
   "creates error transform"
   {:added "4.0"}
-  ([[_ {:as m}]]
+  ([[_ & [{:as m} tag]]]
    (let [m (if (map? m) m {:value m})]
-     (pg-tf-throw [nil (merge {:status "error"} m)]))))
+     (pg-tf-throw [nil (merge {:status "error"} m) tag]))))
 
 (defn pg-tf-assert
   "creates assert transform"
@@ -103,7 +106,7 @@
    (let [m (if (map? data)
              (merge {:tag tag} data)
              {:tag  tag :data data})]
-     `(~'if [:NOT '(~chk)] ~(pg-tf-error [nil m])))))
+     `(~'if [:NOT '(~chk)] ~(pg-tf-error [nil m tag])))))
 
 
 (comment
