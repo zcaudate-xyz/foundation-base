@@ -5,7 +5,7 @@
             [std.json :as json]
             [rt.postgres.grammar.tf :as tf]
             [rt.postgres.grammar.common :as common])
-  (:refer-clojure :exclude [case update assert throw]))
+  (:refer-clojure :exclude [case update assert throw name]))
 
 (l/script :postgres
   rt.postgres

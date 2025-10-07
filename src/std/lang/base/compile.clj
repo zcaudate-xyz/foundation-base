@@ -197,14 +197,14 @@
          ns-selected (filter ns-has? ns-all)
 
          ;; output the libs
-         #_#__  (h/prn search ns-selected)
+         _  (h/prn search ns-selected)
          
          ;; require all the paths of the file.
          _  (doseq [ns ns-selected]
               (require ns))
          
          ;; for each file in the directory, find 'extra' deps 
-         ns-extras   (if (-> emit :code :output-extra false?)
+         ns-extras   (if (-> emit :code :extra-namespaces false?)
                        []
                        (->> (mapcat (fn [ns]
                                       (-> (h/deps:resolve book [ns])

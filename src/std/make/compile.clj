@@ -41,27 +41,34 @@
   ([file body]
    (if *mock-compile*
      [file body]
-     (let [path (fs/path file)
-           _    (if-not (fs/exists? (fs/parent path))
-                  (fs/create-directory (fs/parent path)))]
-       (if-not (fs/exists? file)
-         (if (empty? body)
-           [:unchanged file]
-           [:written (doto file (spit body))])
-         (let [orig (slurp file)]
-           (cond (empty? body)
-                 [:deleted  (doto file (fs/delete))]
-                 
-                 (= orig body)
-                 [:unchanged   file]
+     (let [path  (fs/path file)
+           orig  (when (fs/exists? file)
+                   (slurp file))]
+       (cond (not (fs/exists? file))
+             (cond (empty? body)
+                   [:blank file]
 
-                 :else
-                 [:written (doto file (spit body))])))))))
+                   :else
+                   (do (fs/create-directory (fs/parent path))
+                       [:written (doto file (spit body))]))
+
+             (empty? body)
+             [:deleted  (doto file (fs/delete))]
+             
+             (= orig body)
+             [:unchanged   file]
+
+             :else
+             [:written (doto file (spit body))])))))
+
 
 (defn compile-summarise
   [files]
-  (let [written (remove (comp #(= % :unchanged) first) files)]
-    (merge {:files (count files)}
+  (let [non-blank (filter (comp #(and (not= % :blank)
+                                      (not= % :deleted)) first) files)
+        written   (remove (comp #(or (= % :unchanged)
+                                     (= % :blank)) first) files)]
+    (merge {:files (count non-blank)}
            (if (empty? written)
              {:status :unchanged}
              {:status :changed
