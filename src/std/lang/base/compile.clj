@@ -197,7 +197,7 @@
          ns-selected (filter ns-has? ns-all)
 
          ;; output the libs
-         _  (h/prn search ns-selected)
+         #_#__  (h/prn search ns-selected)
          
          ;; require all the paths of the file.
          _  (doseq [ns ns-selected]

@@ -79,17 +79,19 @@
                  link
                  header
                  code
-                 export]}] prep]
-    (if (not (-> emit :native :suppress))
-      (let [native-opts  (update mopts :emit merge (:native emit))]
-        (keep (fn [[name module]]
-                (if-let [form (deps/module-import-form book name module native-opts)]
-                  (impl/emit-direct grammar
-                                    form
-                                    namespace
-                                    native-opts)))
-              native)))))
-    
+                 export]}] prep
+        native-opts  (update mopts :emit merge (:native emit))
+        native (if (-> emit :native :suppress)
+                 []
+                 native)]
+    (keep (fn [[name module]]
+            (if-let [form (deps/module-import-form book name module native-opts)]
+              (impl/emit-direct grammar
+                                form
+                                namespace
+                                native-opts)))
+          native)))
+
 (defn emit-module-setup-link-arr
   "creates the setup code for internal links"
   {:added "4.0"}
@@ -104,17 +106,23 @@
                  link
                  header
                  code
-                 export]}] prep]
-    (if (and (= :module (:layout mopts))
-             (not (-> emit :link :suppress)))
-      (let [link-opts    (update mopts :emit merge (:link emit))]
-        (keep (fn [[name module]]
-                (if-let [form (deps/module-import-form book name module link-opts)]
-                  (impl/emit-direct grammar
-                                    form
-                                    namespace
-                                    link-opts)))
-              link)))))
+                 export]}] prep
+        link (if (and (= :module (:layout mopts))
+                      (not (-> emit :link :suppress)))
+               link
+               [])
+        link-opts    (update mopts :emit merge (:link emit))]
+    (keep (fn [[name module]]
+            (let [{:keys [refer as ns]} module
+                  module {:as (or refer as)
+                          :ns ns}
+                  form (deps/module-import-form book name module link-opts)]
+              (if form
+                (impl/emit-direct grammar
+                                  form
+                                  namespace
+                                  link-opts))))
+          link)))
 
 (defn emit-module-setup-raw
   "creates module setup map of array strings"

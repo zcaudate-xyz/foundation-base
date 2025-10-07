@@ -66,7 +66,9 @@
           (keep (fn [[ns & {:keys [as with primary]}]]
                   (clojure.core/require
                    (cond-> [ns]
-                     as    (conj :as as)
+                     as    (conj :as (if (vector? as)
+                                       (last as)
+                                       as))
                      with  (conj :refer with)))
                   (if primary ns)))
           set))))

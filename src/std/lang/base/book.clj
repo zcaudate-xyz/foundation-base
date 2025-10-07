@@ -345,7 +345,15 @@
          export    (if export
                      (merge {:as (first export)}
                             (apply hash-map (rest export))))
-         link     (-> (h/map-entries (fn [[id {:keys [as]}]] [(or as id) id]) requires)
+         internal (-> (h/map-entries (fn [[id {:keys [as]}]] [id (or as id)])
+                                     requires)
+                      (assoc module-id '-))
+         link     (-> (h/map-entries (fn [[id {:keys [as]}]]
+                                       [(if (vector? as)
+                                          (last as)
+                                          (or as id))
+                                        id])
+                                     requires)
                       (assoc '- module-id))
          internal (h/transpose link)
          bundled  (module-create-bundled book requires)
