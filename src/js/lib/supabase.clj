@@ -21,7 +21,42 @@
                                    :subtree []
                                    :tag "js"}]
   [[rpc             [method] {:vargs args}]
-   [schema          [s] {}]])
+   [schema          [s] {}]
+   [select          []      {:optional [cols opts]}]
+   [insert          [vals]  {:optional [opts]}]
+   [upsert          [vals]  {:optional [opts]}]
+   [insert          [vals opts]]
+   [delete          [opts]]
+   [eq              [col val]]
+   [neq             [col val]]
+   [gt              [col val]]
+   [gte             [col val]]
+   [lt              [col val]]
+   [lte             [col val]]
+   [like            [col pattern]]
+   [ilike           [col pattern]]
+   [is              [col val]]
+   [in              [col values]]
+   [contains        [col value]]
+   [containedBy     [col value]]
+   [rangeGt         [col range]]
+   [rangeGte        [col range]]
+   [rangeLt         [col range]]
+   [rangeLte        [col range]]
+   [rangeAdjacent   [col range]]
+   [overlays        [col value]]
+   [textSerch       [col query] {:optional [opts]}]
+   [match           [query]]
+   [not             [col op value]]
+   [or              [filters opts]]
+   [order           [col opts]]
+   [limit           [count opts]]
+   [range           [from to  opts]]
+   [single          []]
+   [csv             []]
+   [explai          [opts]]
+   [then            [f]]
+   [finally         [f]]])
 
 (h/template-entries [l/tmpl-macro {:base "SupabaseClient"
                                    :inst "supabase"
@@ -31,7 +66,7 @@
    [fetchJwk   [kid jws]]
    [getClaims  [jwt] {:optional [options]}]
    [getSession []]
-   [getUser    [jwt]]
+   [getUser    [] {:optional [jwt]}]
    [getUserIdentities []]
    [initialize []]
    [linkIdentity [credentials]]
@@ -125,3 +160,4 @@
            ~(std.string/snake-case (str id))
            ~args)
           (then (xt.lang.base-repl/>notify)))))))
+

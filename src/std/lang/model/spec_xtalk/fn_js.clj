@@ -193,7 +193,7 @@
   "converts map to array"
   {:added "4.0"}
   ([[_ lu obj]]
-   (h/$ (. ~lu (delete ~obj)))))
+   (h/$ (. ~lu (del ~obj)))))
 
 (def +js-lu+
   {:x-lu-create      {:default '(new WeakMap)}

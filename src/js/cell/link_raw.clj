@@ -142,7 +142,7 @@
   {:added "4.0"}
   [link key]
   (var prev (. link ["callbacks"] [key]))
-  (delete (. link ["callbacks"] [key]))
+  (del (. link ["callbacks"] [key]))
   (return [prev]))
 
 ;;

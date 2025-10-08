@@ -230,7 +230,7 @@
        {:property   {:op :property  :symbol  '#{property}   :assign ":" :raw "property" :emit :def-assign}
         :teq        {:op :teq       :symbol  '#{===}        :raw "===" :emit :bi}
         :tneq       {:op :tneq      :symbol  '#{!==}        :raw "!==" :emit :bi}
-        :delete     {:op :delete    :symbol  '#{delete}     :raw "delete" :value true :emit :prefix}
+        :delete     {:op :delete    :symbol  '#{del}        :raw "delete" :value true :emit :prefix}
         :typeof     {:op :typeof    :symbol  '#{typeof}     :raw "typeof" :emit :prefix}
         :instanceof {:op :instof    :symbol  '#{instanceof} :raw "instanceof" :emit :bi}
         :undef      {:op :undef     :symbol  '#{undefined}  :raw "undefined" :value true :emit :throw}
@@ -239,10 +239,11 @@
         :var-let    {:op :var-let   :symbol  '#{var}     :macro  #'tf-var-let :type :macro}
         :var-const  {:op :var-const :symbol  '#{const}   :macro  #'tf-var-const :type :macro}})))
 
+
 (def +template+
   (->> {:banned #{:keyword}
         :allow   {:assign  #{:symbol :vector :set}}
-        :highlight '#{return break delete tab reject}
+        :highlight '#{return break del tab reject}
         :default  {:common    {:namespace-full "$$"}
                    :function  {:raw "function" :space ""}}
         :token    {:nil       {:as "null"}
@@ -274,4 +275,6 @@
 
 (def +init+
   (script/install +book+))
+
+
 

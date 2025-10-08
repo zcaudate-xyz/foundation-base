@@ -221,6 +221,7 @@
                              WebSocket
                              EventSource
                              self
+                             arguments
                              fetch
                              FileReader
                              globalThis
