@@ -135,7 +135,14 @@
   "transforms the try form"
   {:added "4.0"}
   [inner]
-  [:DO :$$ inner
+  [:DO :$$
+   :DECLARE
+   (list \| '(do [e_code text]
+                 [e_msg text]
+                 [e_detail text]
+                 [e_hint text]
+                 [e_context text]))
+   inner
    :$$ :LANGUAGE "plpgsql"])
 
 (defn invoke-ptr-pg-transform-prep

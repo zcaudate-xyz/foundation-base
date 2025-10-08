@@ -89,8 +89,8 @@
   ([[_ {:as m} tag]]
    [:raise-exception
     :using (list 'quote
-                 [[:detail := (list '% m)]
-                  [:message := (str tag)]])]))
+                 [[:detail := (list :text (list '% m))]
+                  [:message := (h/strn tag)]])]))
 
 (defn pg-tf-error
   "creates error transform"

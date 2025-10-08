@@ -139,6 +139,16 @@
                            block
                            [:end]))))))
 
+(defmacro.pg ^{:- [:block]}
+  get-stack-diagnostics
+  []
+  [:get-stacked-diagnostics
+   ''[[e_code := :returned_sqlstate]
+      [e_msg := :message_text]
+      [e_detail := :pg_exception_detail]
+      [e_hint := :pg_exception_hint]
+      [e_context := :pg_exception_context]]])
+
 (defmacro.pg
   field-id
   "shorthand for getting the field-id for a linked map"

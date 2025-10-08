@@ -5,7 +5,8 @@
             [std.string :as str]
             [std.lang :as l]
             [std.lang.base.impl :as impl]
-            [rt.postgres.grammar.common :as common]))
+            [rt.postgres.grammar.common :as common]
+            [rt.postgres.script.addon :as addon]))
 
 (l/script :postgres
   {:macro-only true})
@@ -204,7 +205,11 @@
                       (list 'return 'out))
                 (list 'catch 'others
                       (list 'return {:code 'SQLSTATE
-                                     :message 'SQLERRM}))))))
+                                     :message 'SQLERRM})
+                      #_#_
+                      (list 'rt.postgres/get-stack-diagnostics)
+                      (list 'return {:code    'e_code
+                                     :message 'e_msg}))))))
 
 (defmacro with-role
   [[role type] & forms]
@@ -257,10 +262,6 @@
                 [:perform (list 'set-config
                                 "request.jwt.claim.sub"
                                 user-id
-                                true)]
-                [:perform (list 'set-config
-                                "request.jwt.claim"
-                                (list :text {:user_metadata {:super true}})
                                 true)]
                 [:perform (list 'set-config
                                 "request.jwt.claims"
