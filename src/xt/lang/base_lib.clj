@@ -1318,6 +1318,16 @@
            -/eq-nested-arr
            nil)))
 
+(defn.xt eq-shallow
+  "checking for nested equality"
+  {:added "4.0"}
+  [obj m]
+  (return (-/eq-nested-loop
+           obj m
+           -/eq
+           -/eq
+           nil)))
+
 (defn.xt obj-diff
   "diffs only keys within map"
   {:added "4.0"}

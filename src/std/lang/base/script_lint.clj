@@ -232,6 +232,7 @@
                              document
                              window
                              screen
+                             location
                              localStorage
                              sessionStorage
                              Array

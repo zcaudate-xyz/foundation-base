@@ -169,6 +169,15 @@
   `(~'% [(~'jsonb-agg (~f ~'o-ret ~@args)) :from ~rel :as ~'o-ret]))
 
 (defmacro.pg ^{:- [:jsonb]}
+  map:js-text
+  "basic map across json"
+  {:added "4.0"}
+  ([f arr & args]
+   (h/$ (% [(coalesce (jsonb-agg (~f o-ret ~@args))
+                      (js []))
+            \\ :from (jsonb-array-elements-text ~arr) :as o-ret]))))
+
+(defmacro.pg ^{:- [:jsonb]}
   map:js
   "basic map across json"
   {:added "4.0"}

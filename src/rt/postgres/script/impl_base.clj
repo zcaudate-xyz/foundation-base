@@ -11,6 +11,8 @@
             [std.lib.schema :as schema]
             [std.string :as str]))
 
+(def ^:dynamic *skip-checks* false)
+
 ;;
 ;; PREP
 ;;
@@ -38,16 +40,18 @@
   "prepares data related to the table sym"
   {:added "4.0"}
   ([sym full {:keys [lang snapshot] :as mopts}]
-   (let [[book entry]  (prep-entry sym mopts)
-         {:keys [op]
-          :static/keys [application schema dbtype schema-seed]} entry
-         schema  (if (or (not full)
-                         (not application))
-                   schema-seed
-                   (:schema (app/app (first application))))
-         tsch    (get-in schema [:tree (keyword (name sym))])]
-     [entry tsch (merge mopts {:schema schema
-                               :book book})])))
+   (if *skip-checks*
+     [{:id sym} {} (snap/get-book snapshot lang)]
+     (let [[book entry]  (prep-entry sym mopts)
+           {:keys [op]
+            :static/keys [application schema dbtype schema-seed]} entry
+           schema  (if (or (not full)
+                           (not application))
+                     schema-seed
+                     (:schema (app/app (first application))))
+           tsch    (get-in schema [:tree (keyword (name sym))])]
+       [entry tsch (merge mopts {:schema schema
+                                 :book book})]))))
 
 
 ;;
@@ -348,7 +352,9 @@
            
            (map? where)
            (let [[_ err]      (schema/check-valid-columns tsch (keys where))
-                 _ (if err (h/error "Invalid columns." (assoc err :data where)))]
+                 _   (if (and err
+                              (not *skip-checks*))
+                       (h/error "Invalid columns." (assoc err :data where)))]
              (tf-fn where))
            
            :else (h/error "Not Allowed" {:value where})))))

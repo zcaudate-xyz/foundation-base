@@ -32,7 +32,7 @@
                               (setData (dataFn)))
                             meta)
     (var nData (dataFn))
-    (when (not (k/eq-nested data nData))
+    (when (not (k/eq-shallow data nData))
       (setData nData))
     (return (fn [] (event-box/remove-listener box listener-id))))
   (return data))

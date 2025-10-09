@@ -19,7 +19,9 @@
             as args single order-by order-sort group-by limit offset key-fn]
      :as params
      :or {as :json}}]
-   (let [table-sym (ut/sym-full entry)
+   (let [table-sym (if base/*skip-checks*
+                     (:id entry)
+                     (ut/sym-full entry))
          returning (base/t-returning tsch (or returning
                                               (if (not (#{:raw} as))
                                               :*/default
@@ -48,8 +50,10 @@
   {:added "4.0"}
   ([spec-sym {:keys [where returning into as args single order-by limit key-fn] :as params
           :or {as :json}}]
-   (let [[entry tsch mopts] (base/prep-table spec-sym false (l/macro-opts))]
-     (t-select-raw [entry tsch mopts] params))))
+   (binding [base/*skip-checks* (not (and (symbol? spec-sym)
+                                          (namespace spec-sym)))]
+     (let [[entry tsch mopts] (base/prep-table spec-sym false (l/macro-opts))]
+       (t-select-raw [entry tsch mopts] params)))))
 
 ;;
 ;; id
