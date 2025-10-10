@@ -25,14 +25,15 @@
                           (event-box/get-data box path))))
                [box path]))
   (var [data setData] (r/local (dataFn)))
-  (r/watch [box path meta dataFn]
+  (var path-str (k/json-encode path))
+  (r/watch [path-str]
     (var listener-id (j/randomId 4))
     (event-box/add-listener box listener-id path
                             (fn [m]
                               (setData (dataFn)))
                             meta)
     (var nData (dataFn))
-    (when (not (k/eq-shallow data nData))
+    (when (not (k/eq-nested data nData))
       (setData nData))
     (return (fn [] (event-box/remove-listener box listener-id))))
   (return data))

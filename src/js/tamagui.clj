@@ -79,6 +79,7 @@
    DialogClose
    DialogContent
    DialogContext
+   [DialogFocusScope Dialog.FocusScope]
    DialogDescription
    DialogOverlay
    DialogOverlayFrame
