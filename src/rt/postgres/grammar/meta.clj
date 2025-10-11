@@ -8,58 +8,58 @@
   "checks for existence of a function"
   {:added "4.0"}
   ([name schema]
-   `[:select (~'exists [:select ~'*
-                        :from  ~'pg_catalog.pg_proc
-                        :where {:proname ~name
-                                :pronamespace
-                                [:eq
-                                 [:select #{~'oid}
-                                  :from  ~'pg_catalog.pg_namespace
-                                  :where {:nspname ~schema}]]}])]))
+   [:select (list 'exists [:select '*
+                           :from  'pg_catalog.pg_proc
+                           :where {:proname name
+                                   :pronamespace
+                                   [:eq
+                                    [:select #{'oid}
+                                     :from  'pg_catalog.pg_namespace
+                                     :where {:nspname schema}]]}])]))
 
 (defn has-table
   "checks for existence of a table"
   {:added "4.0"}
   ([name schema]
-  `[:select (~'exists [:select ~'*
-                     :from  ~'information_schema.tables 
-                     :where {:table-schema ~schema
-                             :table-name ~name}])]))
+   [:select (list 'exists [:select '*
+                           :from  'information_schema.tables 
+                           :where {:table-schema schema
+                                   :table-name name}])]))
 
 (defn has-enum
   "checks for existence of an enum"
   {:added "4.0"}
   ([name schema]
-   `[:select
-     (~'exists [:select ~'*
-              :from  ~'pg_catalog.pg_type
-              :where {:proname ~name
-                      :pronamespace
-                      [:eq
-                       [:select #{~'oid}
-                        :from  ~'pg_catalog.pg_namespace
-                        :where {:nspname ~schema}]]}])]))
+   [:select
+    (list 'exists [:select '*
+                   :from  'pg_catalog.pg_type
+                   :where {:proname name
+                           :pronamespace
+                           [:eq
+                            [:select #{'oid}
+                             :from  'pg_catalog.pg_namespace
+                             :where {:nspname schema}]]}])]))
 
 (defn has-index
   "cheks for the existence of an index"
   {:added "4.0"}
   ([name schema]
    `[:select
-     (~'exists
-      [:select ~'*
-       :from ~'pg_catalog.pg_index
-       :where {~'indkey
-               [:eq [:select #{~'attrelid}
-                     :from ~'pg_catalog.pg_attribute
-                     :where {:attrelid
-                             [:eq [:select #{~'oid}
-                                   :from ~'pg_catalog.pg_class
-                                   :where {:relname ~name
-                                           :relnamespace
-                                           [:eq
-                                            [:select #{~'oid}
-                                             :from  ~'pg_catalog.pg_namespace
-                                             :where {:nspname ~schema}]]}]]}]]}])]))
+     (list 'exists
+           [:select '*
+            :from 'pg_catalog.pg_index
+            :where {'indkey
+                    [:eq [:select #{'attrelid}
+                          :from 'pg_catalog.pg_attribute
+                          :where {:attrelid
+                                  [:eq [:select #{'oid}
+                                        :from 'pg_catalog.pg_class
+                                        :where {:relname name
+                                                :relnamespace
+                                                [:eq
+                                                 [:select #{'oid}
+                                                  :from  'pg_catalog.pg_namespace
+                                                  :where {:nspname schema}]]}]]}]]}])]))
 
 (defn get-extensions
   "gets import forms"
@@ -75,13 +75,39 @@
   "makes create extension forms"
   {:added "4.0"}
   ([ex]
-   `[:create-extension :if-not-exists #{~ex}]))
+   [:create-extension :if-not-exists #{ex}]))
 
 (defn drop-extension
   "makes drop extension forms"
   {:added "4.0"}
   ([ex]
-   `[:drop-extension :if-exists #{~ex} :cascade]))
+   [:drop-extension :if-exists #{ex} :cascade]))
+
+(defn has-policy
+  [{:static/keys [schema
+                  policy-name
+                  policy-schema
+                  policy-table]}]
+  [:select
+   (list 'exists
+         [:select 1
+          :from 'pg_policies
+          :where {:schemaname (or policy-schema
+                                  schema)
+                  :tablename policy-table
+                  :policyname policy-name}])])
+
+(defn drop-policy
+  "makes drop extension forms"
+  {:added "4.0"}
+  ([{:static/keys [schema
+                   policy-name
+                   policy-schema
+                   policy-table]}]
+   [:drop-policy :if-exists #{policy-name}
+    :on (list '. #{(or policy-schema
+                       schema)}
+              #{policy-table})]))
 
 (defn get-schema-seed
   "gets schema seed for a given module"
@@ -95,21 +121,21 @@
   "checks that schema exists"
   {:added "4.0"}
   ([sch]
-   `(~'exists [:select ~'*
-               :from  ~'pg_catalog.pg_namespace
-               :where {:nspname ~sch}])))
+   (list 'exists [:select '*
+                  :from  'pg_catalog.pg_namespace
+                  :where {:nspname sch}])))
 
 (defn create-schema
   "creates a schema"
   {:added "4.0"}
   ([sch]
-   `[:create-schema :if-not-exists #{~sch}]))
+   [:create-schema :if-not-exists #{sch}]))
 
 (defn drop-schema
   "drops a schema"
   {:added "4.0"}
   ([sch]
-   `[:drop-schema :if-exists #{~sch} :cascade]))
+   [:drop-schema :if-exists #{sch} :cascade]))
 
 (defn classify-ptr
   "classifies the pointer"
@@ -147,14 +173,19 @@
                            :table    (has-table name sch)
                            :enum     (has-enum name sch)
                            :index    (has-index name sch)
-                           :function (has-function name sch))))
+                           :function (has-function name sch)
+                           :policy   (has-policy (ptr/get-entry ptr)))))
    :setup-ptr        (fn [ptr]
                        (:form (ptr/get-entry ptr)))
    :teardown-ptr     (fn [ptr]
                        (let [[name sch dbtype existing op] (classify-ptr ptr)
                              type (cond (= op :enum)
                                         :type
-
+                                        
                                         :else dbtype)]
-                         (if (and type (not existing))
-                           `(~'do [:drop ~type :if-exists (. #{~sch} #{~name}) :cascade]))))})
+                         (cond (= dbtype :policy)
+                               (drop-policy (ptr/get-entry ptr))
+
+                               (and type
+                                    (not existing))
+                               (list 'do [:drop type :if-exists (list '. #{sch} #{name}) :cascade]))))})

@@ -68,6 +68,27 @@
     [msym
      (apply list op (with-meta sym msym) body)]))
 
+(defn pg-policy-format
+  "formats a defn form"
+  {:added "4.0"}
+  ([form]
+   (let [[mdefn [op sym [table] policy]] (grammar-spec/format-defn form)
+         mname    (str (:doc mdefn) " - " sym)
+         [mschema
+          mtable] (if-let [v (resolve table)]
+                    [nil (str (:id @v))]
+                    (str/split (str table) #"\."))
+         msym   (assoc (meta sym)
+                       :static/policy-name mname
+                       :static/policy-table  mtable
+                       :static/policy-schema mschema)]
+     [(merge mdefn msym)
+      (list op
+            (with-meta sym msym)
+            (:doc mdefn)
+            [table]
+            policy)])))
+
 (defn pg-hydrate-module-static
   "gets the static module"
   {:added "4.0"}
@@ -327,7 +348,7 @@
     `(~'do [:create-index :if-not-exists ~ttok ~@array])))
 
 ;;
-;; defindex
+;; defpolicy
 ;;
 
 (defn pg-defpolicy
@@ -337,10 +358,31 @@
   
   (let [[{:keys [doc]
           :as mdefn} [_ sym [table] body]] (grammar-spec/format-defn form)]
-    (vec (concat [:create-policy #{(str doc " - " sym)} \\
-                  :on table \\]
-                 body
-                 [\;]))))
+    (list
+     'do
+     [:drop-policy-if-exists #{(str doc " - " sym)} :on table]
+     (vec (concat [:create-policy #{(str doc " - " sym)} :on table \\]
+                  body)))))
+
+;;
+;; deftrigger
+;;
+
+(defn pg-deftrigger
+  "deftrigger block"
+  {:added "4.0"}
+  [[_ sym doc? attr? [table] body :as form]]
+  (let [[{:keys [doc]
+          :as mdefn}
+         [_ sym [table] body]] (grammar-spec/format-defn form)
+        {:static/keys [return]} (meta sym)]
+    (list
+     'do
+     [:drop-trigger-if-exists #{(str sym)} :on table]
+     (vec (concat [:create-trigger #{(str sym)}]
+                  return
+                  [:on table \\]
+                  body)))))
 
 (defn pg-defblock
   "creates generic defblock"

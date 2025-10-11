@@ -120,7 +120,6 @@
                     :hydrate-hook #'form-deftype/pg-deftype-hydrate-hook
                     :macro        #'form-deftype/pg-deftype
                     :static/dbtype :table}
-
         :defconst  {:op :defconst :symbol '#{defconst}
                     :type :def :section :code :emit :macro
                     :hydrate      #'form-defconst/pg-defconst-hydrate
@@ -133,17 +132,16 @@
                     :static/dbtype :index}
         :defpolicy  {:op :defpolicy :symbol '#{defpolicy}
                      :type :def :section :code :emit :macro
+                     :format       #'common/pg-policy-format
                      :hydrate      #'common/pg-hydrate
                      :macro        #'common/pg-defpolicy
                      :static/dbtype :policy}
-        
-        #_#_
-        :defrole  {:op :defrole :symbol '#{defrole}
-                   :type :def :section :code :emit :macro
-                   :format       #'common/pg-format
-                   :hydrate      #'common/pg-hydrate
-                   :macro        #'form-defrole/pg-defrole
-                   :static/dbtype :access}})))
+        :deftrigger  {:op :deftrigger :symbol '#{deftrigger}
+                      :type :def :section :code :emit :macro
+                      :format       #'common/pg-format
+                      :hydrate      #'common/pg-hydrate
+                      :macro        #'common/pg-deftrigger
+                      :static/dbtype :trigger}})))
 
 (def +template+
   (->> {:banned #{}

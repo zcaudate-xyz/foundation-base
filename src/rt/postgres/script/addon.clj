@@ -84,14 +84,14 @@
   "returns the time in ms"
   {:added "4.0"}
   ([]
-   '(* 1000 (extract [epoch :from (now)]))))
+   '(:bigint (* 1000 (extract [epoch :from (now)])))))
 
 (defmacro.pg ^{:- [:bigint]}
   time-us
   "returns the time in us"
   {:added "4.0"}
   ([]
-   '(* 1000000 (extract [epoch :from (now)]))))
+   '(:bigint (* 1000000 (extract [epoch :from (now)])))))
 
 (defmacro.pg ^{:- [:block]}
   throw
