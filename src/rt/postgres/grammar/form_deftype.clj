@@ -89,7 +89,7 @@
             [(common/pg-type-alias type)]])
          col-attrs (cond-> col-attrs
                      (= type :enum) (pg-deftype-enum-col enum mopts)
-                     primary  (conj :primary-key)
+                     (true? primary)  (conj :primary-key)
                      required (conj :not-null)
                      unique   (conj :unique)
                      (= type :ref)     (conj :references ref-toks)
@@ -119,6 +119,23 @@
                               keys)]
                (list '% [:unique (list 'quote kcols)])))
            (vals groups)))))
+
+(defn pg-deftype-primaries
+  "collect unique keys on deftype"
+  {:added "4.0"}
+  ([schema-primary]
+   (let [schema-primary (if (map? schema-primary)
+                          [schema-primary]
+                          schema-primary)]
+     (if (< 1 (count schema-primary))
+       [(list :-
+              [:primary-key
+               (list 'quote
+                     (map (fn [{:keys [id type]}]
+                            (if (= :ref type)
+                              (symbol (str (str/snake-case (name id)) "_id"))
+                              (symbol (str/snake-case (name id)))))
+                          schema-primary))])]))))
 
 (defn pg-deftype-indexes
   "create index statements"
@@ -154,12 +171,13 @@
   {:added "4.0"}
   ([[_ sym spec params]]
    (let [mopts (preprocess/macro-opts)
-         {:static/keys [schema]
+         {:static/keys [schema schema-primary]
           :keys [final existing]} (meta sym)
          col-spec (mapv vec (partition 2 spec))
          cols     (mapv #(pg-deftype-col-fn % mopts) col-spec)
          ttok     (common/pg-full-token sym schema)
          tuniques (pg-deftype-uniques col-spec)
+         tprimaries (pg-deftype-primaries schema-primary)
          tindexes (pg-deftype-indexes col-spec ttok)
          tconstraints (->> (:constraints params)
                            (mapv (fn [[k val]]
@@ -171,6 +189,7 @@
              \\ (\|  ~(vec (interpose
                             (list :- ",\n")
                             (concat cols
+                                    tprimaries
                                     tuniques
                                     tconstraints))))
              \\ \)]
@@ -253,7 +272,7 @@
                                          book
                                          snapshot]
                                   :as mopts}]
-   (let [capture (volatile! nil)
+   (let [capture (volatile! [])
          spec  (->> (partition 2 spec)
                     (mapcat (fn [[k {:keys [type primary ref sql scope] :as attrs}]]
                               (let [sql   (cond-> sql
@@ -261,17 +280,18 @@
                                                                   (h/prewalk
                                                                    (fn [x]
                                                                      (if (symbol? x)
-                                                                       (h/var-sym (resolve x))
+                                                                       (h/var-sym (or (resolve x)
+                                                                                      (h/error "Cannot resolve symbol"
+                                                                                               {:symbol x
+                                                                                                :col k
+                                                                                                :attrs attrs})))
                                                                        x))
                                                                    (:process sql))))
                                     attrs (cond-> attrs
                                             sql (assoc :sql sql))]
                                 (if primary
-                                  (if @capture
-                                    (h/error "Only one primary allowed." {:prev @capture
-                                                                          :curr attrs})
-                                    (vreset! capture (assoc (select-keys attrs [:type :enum :ref])
-                                                            :id k))))
+                                  (vswap! capture conj (assoc (select-keys attrs [:type :enum :ref])
+                                                              :id k)))
                                 (cond (and (= :ref type)
                                            (vector? ref))
                                       [k {:type :ref,
@@ -315,8 +335,14 @@
          presch  (schema/schema [(keyword (str sym)) spec])
          hmeta  (assoc (common/pg-hydrate-module-static module)
                        :static/schema-seed presch
-                       :static/schema-primary (or @capture
-                                                  (h/error "Primary not available")))]
+                       :static/schema-primary (cond (empty? @capture)
+                                                    (h/error "Primary not available")
+                                                    
+                                                    (= 1 (count @capture))
+                                                    (first @capture)
+
+                                                    :else
+                                                    @capture))]
      [hmeta
       (list op (with-meta sym
                  (merge (meta sym) hmeta))

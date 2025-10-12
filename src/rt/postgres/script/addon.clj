@@ -59,21 +59,21 @@
   "generates random hex"
   {:added "4.0"}
   ([n]
-   `(~'encode (~'gen-random-bytes ~(quot n 2)) "hex")))
+   (list 'encode (list 'gen-random-bytes (list '/ n 2)) "hex")))
 
 (defmacro.pg ^{:- [:string]}
   sha1
   "calculates the sha1"
   {:added "4.0"}
   ([text]
-   `(~'encode (~'digest (:bytea ~text) "sha1") "hex")))
+   (list 'encode (list 'digest (:bytea text) "sha1") "hex")))
 
 (defmacro.pg ^{:- [:block]}
   client-list
   "gets the client list for pg"
   {:added "4.0"}
   []
-  '[:select * :from pg_stat_activity])
+  [:select * :from 'pg_stat_activity])
 
 ;;
 ;; time
