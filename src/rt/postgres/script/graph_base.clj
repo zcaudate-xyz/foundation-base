@@ -18,10 +18,12 @@
                          :as mopts}]
   (let [{:keys [ref]} attrs
         {:keys [type link rval]} ref
-        v  (if (or (map? v)
-                   (ut/hashvec? v))
-             v
-             {:id v})]
+        v  (cond (or (map? v)
+                     (ut/hashvec? v))
+                 v
+                 
+                 :else
+                 {:id v})]
     (cond (and (= type :forward)
                (map? v)
                (= [:id] (keys v))
@@ -29,6 +31,9 @@
                    (:fn/value (meta (:id v)))))
           [k [:eq (:id v)]]
 
+          (= v :*)
+          [k :*]
+          
           (and (= type :forward)
                (map? v)
                (= [:id] (keys v))
@@ -112,6 +117,21 @@
           (h/error "Entry not valid." {:tsch (keys tsch)
                                        :input where}))))
 
+(defn id-where-fn
+  "constructs id-fn"
+  {:added "4.0"}
+  ([spec-sym {:keys [where] :as params}]
+   (let [[entry tsch mopts] (base/prep-table spec-sym true (l/macro-opts))
+         t-key   (-> entry :static/schema-seed :vec first)
+         t-spec  (-> entry :static/schema-seed :tree t-key)
+         output  (where-fn tsch where mopts)]
+     [(h/map-keys (fn [k]
+                    (cond (-> t-spec k first :type (= :ref))
+                          (keyword (str (name k) "_id"))
+
+                          :else k))
+                  output)])))
+
 (defn id-fn
   "constructs id-fn"
   {:added "4.0"}
@@ -127,6 +147,14 @@
    (let [[entry tsch mopts] (base/prep-table spec-sym true (l/macro-opts))
          where   (where-fn tsch where mopts)]
      (main/t-count-raw [entry tsch mopts] (assoc params :where where)))))
+
+(defn exists-fn
+  "constructs exists-fn"
+  {:added "4.0"}
+  ([spec-sym {:keys [where] :as params}]
+   (let [[entry tsch mopts] (base/prep-table spec-sym true (l/macro-opts))
+         where   (where-fn tsch where mopts)]
+     (main/t-exists-raw [entry tsch mopts] (assoc params :where where)))))
 
 (defn select-fn-raw
   "constructs a select fn with prep"

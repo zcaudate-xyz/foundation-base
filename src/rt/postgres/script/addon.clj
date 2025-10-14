@@ -54,6 +54,17 @@
   (json/write
    (-/full table)))
 
+(defmacro.pg ^{:- [:jsonb]}
+  coord
+  "gets the full jsonb for table or function"
+  {:added "4.0"}
+  ([table row-id]
+   (let [entry (deref (deref (resolve table)))]
+     (list 'jsonb-build-array
+           (:static/schema entry)
+           (str (:id entry))
+           row-id))))
+
 (defmacro.pg ^{:- [:text]}
   rand-hex
   "generates random hex"

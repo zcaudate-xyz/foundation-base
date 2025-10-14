@@ -342,10 +342,27 @@
 (defn pg-defindex
   "defindex block"
   {:added "4.0"}
-  [[_ sym array]]
-  (let [{:static/keys [schema]} (meta sym)
-        ttok  (pg-full-token sym schema)]
-    `(~'do [:create-index :if-not-exists ~ttok ~@array])))
+  [[_ sym doc? attr? [table & cols] body :as form]]
+  (let [[{:keys [doc]
+          :as mdefn} [_ sym [table & cols] body]] (grammar-spec/format-defn form)]
+    (vec (concat
+          [:create-index :if-not-exists
+           sym
+           :on table (list 'quote (list  (vec cols)))]
+          body
+          [\;]))))
+
+
+#_#_
+(defrun.pg AccessRequestPending
+  [:create-index AccessRequest-status-pending
+   :on -/AccessRequest '(#{"status"}) :where #{"status"} := "pending"])
+
+
+(defindex.pg AccessRequest-status-pending
+  [-/AccessRequest #{"status"}]
+  [:where {:status "pending"}])
+
 
 ;;
 ;; defpolicy
@@ -378,8 +395,8 @@
         {:static/keys [return]} (meta sym)]
     (list
      'do
-     [:drop-trigger-if-exists #{(str sym)} :on table]
-     (vec (concat [:create-trigger #{(str sym)}]
+     [:drop-trigger-if-exists sym :on table]
+     (vec (concat [:create-trigger sym]
                   return
                   [:on table \\]
                   body)))))

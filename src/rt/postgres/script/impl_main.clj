@@ -89,7 +89,7 @@
                      (merge {:as :raw
                              :returning '(count *)}
                             params))
-       (with-meta {:op/type :id}))))
+       (with-meta {:op/type :count}))))
 
 (defn t-count
   "create count statement"
@@ -97,6 +97,32 @@
   ([spec-sym params]
    (let [[entry tsch mopts] (base/prep-table spec-sym false (l/macro-opts))]
      (t-count-raw [entry tsch mopts] params))))
+
+
+;;
+;; exists
+;;
+
+(defn t-exists-raw
+  "constructs a exists form with prep"
+  {:added "4.0"}
+  ([[entry tsch mopts]  params]
+   (let [query (t-select-raw [entry tsch mopts]
+                             (merge {:as :raw
+                                     :returning '1}
+                                    params))]
+     (with-meta
+       [:select (list 'exists
+                      query)]
+       {:op/type :exists}))))
+
+(defn t-exists
+  "create exists statement"
+  {:added "4.0"}
+  ([spec-sym params]
+   (let [[entry tsch mopts] (base/prep-table spec-sym false (l/macro-opts))]
+     (t-exists-raw [entry tsch mopts] params))))
+
 
 ;;
 ;; delete

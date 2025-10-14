@@ -41,7 +41,7 @@
                      {:returning #{{:expr '(count *)}
                                    {:expr '(count abc)}}})
   => '[:with j-ret :as [:select (--- [(count *)
-                                       (count abc)])
+                                      (count abc)])
                         :from rt.postgres.script.scratch/Task]
        \\ :select (jsonb-agg j-ret) :from j-ret])
 
@@ -102,6 +102,23 @@
     (main/t-count 'scratch/Task
                   {}))
   => '[:select (count *) :from rt.postgres.script.scratch/Task])
+
+^{:refer rt.postgres.script.impl-main/t-exists-raw :added "4.0"}
+(fact "constructs a exists form with prep"
+  ^:hidden
+  
+  (main/t-exists-raw (base/prep-table 'scratch/Task false (l/rt:macro-opts :postgres))
+                    {})
+  => '[:select (exists *) :from rt.postgres.script.scratch/Task])
+
+^{:refer rt.postgres.script.impl-main/t-exists :added "4.0"}
+(fact "create exists statement"
+  ^:hidden
+  
+  (l/with:macro-opts [(l/rt:macro-opts :postgres)]
+    (main/t-exists 'scratch/Task
+                  {}))
+  => '[:select (exists *) :from rt.postgres.script.scratch/Task])
 
 ^{:refer rt.postgres.script.impl-main/t-delete-raw :added "4.0"}
 (fact  "contructs a delete form with prep"

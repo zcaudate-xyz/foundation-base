@@ -114,6 +114,20 @@
                                          :from rt.postgres.script.scratch/Task
                                          \\ :where {"cache_id" [:eq "cache-001"]}]]}]]})
 
+^{:refer rt.postgres.script.graph-base/id-where-fn :added "4.0"}
+(fact "constructs id-fn"
+  ^:hidden
+  
+  (l/with:macro-opts [(l/rt:macro-opts :postgres)]
+    (base/id-where-fn 'scratch/TaskCache
+                {:where {:tasks "tasks-001"}}))
+  => '[{:id [:in [:select (--- [#{"cache_id"}]) :from rt.postgres.script.scratch/Task \\ :where {"id" [:eq "tasks-001"]}]]}]
+  
+  (l/with:macro-opts [(l/rt:macro-opts :postgres)]
+    (base/id-where-fn 'scratch/Task
+                      {:where {:cache "tasks-001"}}))
+  => [{:cache_id [:eq "tasks-001"]}])
+
 ^{:refer rt.postgres.script.graph-base/id-fn :added "4.0"}
 (fact "constructs id-fn"
   ^:hidden

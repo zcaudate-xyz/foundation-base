@@ -148,6 +148,12 @@
                           "service_role"
                           "anon")])
 
+(defn process-return
+  [ret]
+  (if (= ret "")
+    nil
+    ret))
+
 (defn get-form-type
   [form]
   (cond (string? form)
@@ -198,18 +204,19 @@
                :anon  'anon
                role)
         type (or type (get-form-type form))]
-    (list '!.pg
-          (list 'try
-                [:set-local-role role]
-                (list 'let [(list type 'out)  form]
-                      (list 'return 'out))
-                (list 'catch 'others
-                      (list 'return {:code 'SQLSTATE
-                                     :message 'SQLERRM})
-                      #_#_
-                      (list 'rt.postgres/get-stack-diagnostics)
-                      (list 'return {:code    'e_code
-                                     :message 'e_msg}))))))
+    (list `process-return
+          (list '!.pg
+                (list 'try
+                      [:set-local-role role]
+                      (list 'let [(list type 'out)  form]
+                            (list 'return 'out))
+                      (list 'catch 'others
+                            (list 'return {:code 'SQLSTATE
+                                           :message 'SQLERRM})
+                            #_#_
+                            (list 'rt.postgres/get-stack-diagnostics)
+                            (list 'return {:code    'e_code
+                                           :message 'e_msg})))))))
 
 (defmacro with-role
   [[role type] & forms]
@@ -227,18 +234,19 @@
 (defmacro with-auth-single
   [[user-id type] form]
   (let [type (or type (get-form-type form))]
-    (list '!.pg
-          (list 'try
-                [:set-local-role 'authenticated]
-                [:perform (list 'set-config
-                                "request.jwt.claim.sub"
-                                user-id
-                                true)]
-                (list 'let [(list type 'out)  form]
-                      (list 'return 'out))
-                (list 'catch 'others
-                      (list 'return {:code 'SQLSTATE
-                                     :message 'SQLERRM}))))))
+    (list `process-return
+          (list '!.pg
+                (list 'try
+                      [:set-local-role 'authenticated]
+                      [:perform (list 'set-config
+                                      "request.jwt.claim.sub"
+                                      (list :text user-id)
+                                      true)]
+                      (list 'let [(list type 'out)  form]
+                            (list 'return 'out))
+                      (list 'catch 'others
+                            (list 'return {:code 'SQLSTATE
+                                           :message 'SQLERRM})))))))
 
 (defmacro with-auth
   [[user-id type] & forms]
@@ -256,22 +264,24 @@
 (defmacro with-super-single
   [[user-id type] form]
   (let [type (or type (get-form-type form))]
-    (list '!.pg
-          (list 'try
-                [:set-local-role 'authenticated]
-                [:perform (list 'set-config
-                                "request.jwt.claim.sub"
-                                user-id
-                                true)]
-                [:perform (list 'set-config
-                                "request.jwt.claims"
-                                (list :text {:user_metadata {:super true}})
-                                true)]
-                (list 'let [(list type 'out)  form]
-                      (list 'return 'out))
-                (list 'catch 'others
-                      (list 'return {:code 'SQLSTATE
-                                     :message 'SQLERRM}))))))
+    (list `process-return
+          (list '!.pg
+                (list 'try
+                      [:set-local-role 'authenticated]
+                      [:perform (list 'set-config
+                                      "request.jwt.claim.sub"
+                                      user-id
+                                      true)]
+                      [:perform (list 'set-config
+                                      "request.jwt.claims"
+                                      (list :text {:sub user-id
+                                                   :user_metadata {:super true}})
+                                      true)]
+                      (list 'let [(list type 'out)  form]
+                            (list 'return 'out))
+                      (list 'catch 'others
+                            (list 'return {:code 'SQLSTATE
+                                           :message 'SQLERRM})))))))
 
 (defmacro with-super
   [[user-id type] & forms]
@@ -440,14 +450,15 @@
     (api-call opts args)))
 
 (defn api-select-all
-  [fn & [opts]]
+  [table & [opts]]
   (let [{:keys [id]
-         :static/keys [schema]} (deref fn)
+         :static/keys [schema]} (deref table)
         headers (if schema
                   {"Content-Profile" schema})
         route  (str "/rest/v1/" id "?select=*")
         opts (merge opts
-                    {:headers headers
+                    {:method :get
+                     :headers headers
                      :route route})]
     (api-call opts {})))
 

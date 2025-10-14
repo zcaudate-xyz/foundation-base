@@ -13,6 +13,16 @@
 
 (defmacro.pg ^{:- [:block]
                :style/indent 1}
+  g:where
+  "gets only id"
+  {:added "4.0"}
+  ([spec-sym where]
+   (or (not-empty where)
+       (h/error "No WHERE clause" {:where where}))
+   (base/id-where-fn spec-sym {:where where}))) 
+
+(defmacro.pg ^{:- [:block]
+               :style/indent 1}
   g:id
   "gets only id"
   {:added "4.0"}
@@ -27,8 +37,17 @@
   "gets only count"
   {:added "4.0"}
   ([spec-sym & [{:keys [where returning into as args single order-by limit] :as params
-             :or {as :json}}]]
+                 :or {as :json}}]]
    (base/count-fn spec-sym params)))
+
+(defmacro.pg ^{:- [:block]
+               :style/indent 1}
+  g:exists
+  "gets only exists"
+  {:added "4.0"}
+  ([spec-sym & [{:keys [where returning into as args single order-by limit] :as params
+             :or {as :json}}]]
+   (base/exists-fn spec-sym params)))
 
 (defmacro.pg ^{:- [:block]
                :style/indent 1}

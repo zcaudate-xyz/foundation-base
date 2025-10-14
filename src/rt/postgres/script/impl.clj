@@ -65,6 +65,16 @@
    (main/t-count spec-sym params)))
 
 (defmacro.pg ^{:- [:block]
+               :style/indent 1
+               :static/type [:integer]}
+  t:exists
+  "get exists entry"
+  {:added "4.0"}
+  ([spec-sym & [{:keys [where returning into as args single order-by limit] :as params
+                 :or {as :json}}]]
+   (main/t-exists spec-sym params)))
+
+(defmacro.pg ^{:- [:block]
                :style/indent 1}
   t:delete
   "flat delete"
