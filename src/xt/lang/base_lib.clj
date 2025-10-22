@@ -1639,6 +1639,20 @@
       (x:arr-push out line)))
   (return out))
 
+(defn.xt str-rand
+  "splits a long string"
+  {:added "4.0"}
+  [n]
+  (var choices ["A" "B" "C" "D" "E" "F" "G" "H" "I" "J" "K" "L" "M" "N"
+                "O" "P" "Q" "R" "S" "T" "U" "V" "W" "X" "Y" "Z"
+                "a" "b" "c" "d" "e" "f" "g" "h" "i" "j" "k" "l" "m" "n"
+                "o" "p" "q" "r" "s" "t" "u" "v" "w" "x" "y" "z"
+                "0" "1" "2" "3" "4" "5" "6" "7" "8"])
+  (var out "")
+  (k/for:index [i [0 n]]
+               (:= out (x:cat out (-/arr-random choices))))
+  (return out))
+
 (defn.xt proto-spec
   "creates the spec map from interface definitions"
   {:added "4.0"}
@@ -1647,10 +1661,10 @@
        (fn [acc e]
          (var [spec-i spec-map] e)
          (k/for:array [key spec-i]
-           (when (k/nil? (-/get-key spec-map key))
-             (-/err (-/cat "NOT VALID."
-                           (k/json-encode {:required key
-                                         :actual (-/obj-keys spec-map)})))))
+                      (when (k/nil? (-/get-key spec-map key))
+                        (-/err (-/cat "NOT VALID."
+                                      (k/json-encode {:required key
+                                                      :actual (-/obj-keys spec-map)})))))
          (return (-/obj-assign
                   acc
                   spec-map))))
@@ -1785,5 +1799,7 @@
   [& body]
   (h/$ (do (var f (fn [] ~@body))
            (return (xt.lang.base-lib/trace-run f)))))
+
+
 
 (def.xt MODULE (!:module))
