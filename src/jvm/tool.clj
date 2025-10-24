@@ -45,8 +45,8 @@
 
 (defn- inject-tools
   []
-  (create-ns '.)
-  (l/link {:ns .}
+  (create-ns 's)
+  (l/link {:ns s}
           jvm.tool/hotkey-0
           jvm.tool/hotkey-1
           jvm.tool/hotkey-2
@@ -59,12 +59,12 @@
           jvm.tool/hotkey-set
           jvm.require/force-require)
   
-  (l/link {:ns .}
+  (l/link {:ns s}
           std.log/with-logger-basic
           std.log/spy
           std.log/trace)
   
-  (l/link {:ns .}
+  (l/link {:ns s}
           lib.aether/pull
           lib.aether/push
           
