@@ -23,7 +23,7 @@
                      (:id entry)
                      (ut/sym-full entry))
          returning  (if base/*skip-checks*
-                      (if (vector? returning)
+                      (if (coll? returning)
                         (base/t-returning-cols-default returning key-fn)
                         returning)
                       (base/t-returning tsch (or returning
