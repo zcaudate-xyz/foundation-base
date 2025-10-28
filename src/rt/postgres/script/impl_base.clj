@@ -239,6 +239,10 @@
 ;;
 ;;
 
+(defn t-returning-cols-default
+  [returning key-fn]
+  (mapv (comp hash-set ut/sym-default-str) returning))
+
 (defn t-returning-cols
   "formats returning cols given"
   {:added "4.0"}
@@ -249,7 +253,8 @@
                     expr))
          map-ks   (filter map? returning)
          [_ err]  (schema/check-valid-columns tsch (map :as map-ks))
-         _ (if err (h/error "Not valid." (assoc err :data map-ks)))
+         _        (if err
+                    (h/error "Not valid." (assoc err :data map-ks)))
          sym-ks   (filter symbol? returning)
          data-entries (schema/get-returning tsch (filter keyword? returning))]
      (vec (concat (map (comp hash-set key-fn) data-entries)

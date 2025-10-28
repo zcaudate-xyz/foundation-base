@@ -22,11 +22,15 @@
    (let [table-sym (if base/*skip-checks*
                      (:id entry)
                      (ut/sym-full entry))
-         returning (base/t-returning tsch (or returning
-                                              (if (not (#{:raw} as))
-                                              :*/default
-                                              '*))
-                                     key-fn)
+         returning  (if base/*skip-checks*
+                      (if (vector? returning)
+                        (base/t-returning-cols-default returning key-fn)
+                        returning)
+                      (base/t-returning tsch (or returning
+                                                 (if (not (#{:raw} as))
+                                                   :*/default
+                                                   '*))
+                                        key-fn))
          select  [:select returning :from table-sym]
          js-out  (if single 'to-jsonb 'jsonb-agg)
          limit   (if single 1 limit)]
@@ -74,8 +78,10 @@
   "contructs an id form"
   {:added "4.0"}
   ([spec-sym params]
-   (let [[entry tsch mopts] (base/prep-table spec-sym false (l/macro-opts))]
-     (t-id-raw [entry tsch mopts] params))))
+   (binding [base/*skip-checks* (not (and (symbol? spec-sym)
+                                          (namespace spec-sym)))]
+     (let [[entry tsch mopts] (base/prep-table spec-sym false (l/macro-opts))]
+       (t-id-raw [entry tsch mopts] params)))))
 
 ;;
 ;; count
@@ -95,8 +101,10 @@
   "create count statement"
   {:added "4.0"}
   ([spec-sym params]
-   (let [[entry tsch mopts] (base/prep-table spec-sym false (l/macro-opts))]
-     (t-count-raw [entry tsch mopts] params))))
+   (binding [base/*skip-checks* (not (and (symbol? spec-sym)
+                                          (namespace spec-sym)))]
+     (let [[entry tsch mopts] (base/prep-table spec-sym false (l/macro-opts))]
+       (t-count-raw [entry tsch mopts] params)))))
 
 
 ;;
@@ -120,8 +128,10 @@
   "create exists statement"
   {:added "4.0"}
   ([spec-sym params]
-   (let [[entry tsch mopts] (base/prep-table spec-sym false (l/macro-opts))]
-     (t-exists-raw [entry tsch mopts] params))))
+   (binding [base/*skip-checks* (not (and (symbol? spec-sym)
+                                          (namespace spec-sym)))]
+     (let [[entry tsch mopts] (base/prep-table spec-sym false (l/macro-opts))]
+       (t-exists-raw [entry tsch mopts] params)))))
 
 
 ;;
@@ -154,8 +164,10 @@
   {:added "4.0"}
   ([spec-sym {:keys [where returning into as single args] :as params
               :or {as :json}}]
-   (let [[entry tsch mopts] (base/prep-table spec-sym false (l/macro-opts))]
-     (t-delete-raw [entry tsch mopts] params))))
+   (binding [base/*skip-checks* (not (and (symbol? spec-sym)
+                                          (namespace spec-sym)))]
+     (let [[entry tsch mopts] (base/prep-table spec-sym false (l/macro-opts))]
+       (t-delete-raw [entry tsch mopts] params)))))
 
 
 ;;
@@ -183,5 +195,7 @@
   "returns fields"
   {:added "4.0"}
   [spec-sym {:keys [scope path] :as params}]
-  (let [[entry tsch mopts] (base/prep-table spec-sym false (l/macro-opts))]
-    (t-fields-raw [entry tsch mopts] params)))
+  (binding [base/*skip-checks* (not (and (symbol? spec-sym)
+                                         (namespace spec-sym)))]
+    (let [[entry tsch mopts] (base/prep-table spec-sym false (l/macro-opts))]
+      (t-fields-raw [entry tsch mopts] params))))

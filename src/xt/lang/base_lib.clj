@@ -1196,6 +1196,13 @@
                 (:= i (+ i 1))))
             (return curr))))
 
+(defn.xt path-fn
+  "creates a key access function"
+  {:added "4.0"}
+  ([path]
+   (return
+    (fn:> [x] (-/get-in x path)))))
+
 (defn.xt set-in
   "sets item in object"
   {:added "4.0"}
