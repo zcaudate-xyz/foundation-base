@@ -11,10 +11,10 @@
 (fact "invokes a fact object")
 
 ^{:refer code.test.compile.types/fact-display-info :added "4.0"}
-(fact "displays a fact")
+(fact "displays detailed information about a given fact"))
 
 ^{:refer code.test.compile.types/fact-display :added "3.0"}
-(fact "displays a fact")
+(fact "displays a general representation of a given fact"))
 
 ^{:refer code.test.compile.types/fact? :added "3.0"}
 (fact "checks if object is a fact")

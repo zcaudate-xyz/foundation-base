@@ -24,16 +24,16 @@
 (fact "updates global data")
 
 ^{:refer code.test.base.runtime/list-links :added "3.0"}
-(fact "lists ns links")
+(fact "lists all currently registered namespace links"))
 
 ^{:refer code.test.base.runtime/clear-links :added "3.0"}
-(fact "clear ns links")
+(fact "clears all currently registered namespace links"))
 
 ^{:refer code.test.base.runtime/add-link :added "3.0"}
-(fact "add ns link")
+(fact "adds a new namespace link to the runtime configuration"))
 
 ^{:refer code.test.base.runtime/remove-link :added "3.0"}
-(fact "remove ms link")
+(fact "removes a namespace link from the runtime configuration"))
 
 ^{:refer code.test.base.runtime/all-facts :added "3.0"}
 (fact "retrieves a list of all the facts in a namespace"
@@ -54,10 +54,10 @@
   => [])
 
 ^{:refer code.test.base.runtime/parse-args :added "3.0"}
-(fact "helper function for variable args")
+(fact "parses and normalizes variable arguments for internal use"))
 
 ^{:refer code.test.base.runtime/get-fact :added "3.0"}
-(fact "gets a fact"
+(fact "retrieves a specific fact by its identifier or properties")
 
   (get-fact (fsym) :refer)
   => 'code.test.base.runtime/purge-all ^:hidden
@@ -107,10 +107,10 @@
   => 6)
 
 ^{:refer code.test.base.runtime/exec-thunk :added "3.0"}
-(fact "executes the fact thunk (only the check")
+(fact "executes the fact's thunk, focusing solely on the check portion of the test"))
 
 ^{:refer code.test.base.runtime/exec-slim :added "3.0"}
-(fact "executes the fact slim (only the body")
+(fact "executes a slimmed-down version of the fact, focusing solely on the test body without checks"))
 
 ^{:refer code.test.base.runtime/no-dots :added "3.0"}
 (fact "removes dots and slash from the string")

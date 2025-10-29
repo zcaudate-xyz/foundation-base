@@ -10,10 +10,10 @@
 (fact "creates a clojure.zip pattern")
 
 ^{:refer code.query.traverse/wrap-meta :added "3.0"}
-(fact "helper for traversing meta tags")
+(fact "provides a wrapper for traversing and manipulating metadata tags within code structures"))
 
 ^{:refer code.query.traverse/wrap-delete-next :added "3.0"}
-(fact "wrapper for deleting next element in the zip")
+(fact "provides a wrapper function to delete the element immediately following the current position in a zipper"))
 
 ^{:refer code.query.traverse/traverse-delete-form :added "3.0"}
 (fact "traversing deletion form")
@@ -25,10 +25,10 @@
 (fact "traversing deletion level")
 
 ^{:refer code.query.traverse/prep-insert-pattern :added "3.0"}
-(fact "helper for insertion")
+(fact "prepares a pattern for insertion operations during code traversal"))
 
 ^{:refer code.query.traverse/wrap-insert-next :added "3.0"}
-(fact "wrapper for insertion")
+(fact "provides a wrapper function to insert an element immediately following the current position in a zipper"))
 
 ^{:refer code.query.traverse/traverse-insert-form :added "3.0"}
 (fact "traversing insertion form")
@@ -40,7 +40,7 @@
 (fact "traversing insertion level")
 
 ^{:refer code.query.traverse/wrap-cursor-next :added "3.0"}
-(fact "wrapper for locating cursor")
+(fact "provides a wrapper function to locate the cursor at the next element during code traversal"))
 
 ^{:refer code.query.traverse/traverse-cursor-form :added "3.0"}
 (fact "traversing cursor form")
@@ -49,7 +49,7 @@
 (fact "traversing cursor level")
 
 ^{:refer code.query.traverse/count-elements :added "3.0"}
-(fact "counting elements")
+(fact "counts the number of elements in a given code structure"))
 
 ^{:refer code.query.traverse/traverse :added "3.0"}
 (fact "basic traverse functions"

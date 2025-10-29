@@ -4,7 +4,7 @@
             [code.query.block :as nav]))
 
 ^{:refer code.query.match/matcher :added "3.0"}
-(fact "creates a matcher"
+(fact "creates a predicate function that can be used to match against values")
 
   ((matcher string?) "hello")
   => true)
@@ -173,7 +173,7 @@
   => false)
 
 ^{:refer code.query.match/p-nth :added "3.0"}
-(fact "checks that the last element of the container has a certain characteristic"
+(fact "checks that the element at a specific Nth index within the container has a certain characteristic")
   ((p-nth [0 'defn]) (-> (nav/parse-string "(defn [] 1)")))
   => true
 
@@ -184,7 +184,7 @@
   => false)
 
 ^{:refer code.query.match/p-nth-left :added "3.0"}
-(fact "checks that the last element of the container has a certain characteristic"
+(fact "checks that the element at a specific Nth index to the left of the current position has a certain characteristic")
   ((p-nth-left [0 'defn]) (-> (nav/parse-string "(defn [] 1)") nav/down))
   => true
 
@@ -192,7 +192,7 @@
   => true)
 
 ^{:refer code.query.match/p-nth-right :added "3.0"}
-(fact "checks that the last element of the container has a certain characteristic"
+(fact "checks that the element at a specific Nth index to the right of the current position has a certain characteristic")
   ((p-nth-right [0 'defn]) (-> (nav/parse-string "(defn [] 1)") nav/down))
   => true
 
@@ -208,7 +208,7 @@
   => true)
 
 ^{:refer code.query.match/tree-search :added "3.0"}
-(fact "helper function for p-contains")
+(fact "recursively searches a tree structure for elements matching a predicate, used as a helper for `p-contains`"))
 
 ^{:refer code.query.match/p-contains :added "3.0"}
 (fact "checks that any element (deeply nested also) of the container matches"
@@ -219,7 +219,7 @@
   => true)
 
 ^{:refer code.query.match/tree-depth-search :added "3.0"}
-(fact "helper function for p-nth-contains")
+(fact "performs a depth-first search for a match N levels down in a tree structure, used as a helper for `p-nth-contains`"))
 
 ^{:refer code.query.match/p-nth-contains :added "3.0"}
 (fact "search for match n-levels down"
@@ -279,7 +279,7 @@
   => false)
 
 ^{:refer code.query.match/p-left-most :added "3.0"}
-(fact "checks that any element on the right has a certain characteristic"
+(fact "checks if the navigator is at the left-most expression within its current level")
   ((p-left-most true) (-> (nav/parse-string "(= x y)") nav/down))
   => true
 
@@ -287,7 +287,7 @@
   => false)
 
 ^{:refer code.query.match/p-right-most :added "3.0"}
-(fact "checks that any element on the right has a certain characteristic"
+(fact "checks if the navigator is at the right-most expression within its current level")
   ((p-right-most true) (-> (nav/parse-string "(= x y)") nav/down nav/next))
   => false
 

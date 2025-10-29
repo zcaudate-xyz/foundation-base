@@ -19,7 +19,7 @@
                   [:clj std.lib]}})
 
 ^{:refer code.link/read-packages :added "3.0"}
-(fact "reads in a list of packages to "
+(fact "reads a list of packages from a configuration file (e.g., 'config/packages.edn')")
   (-> (read-packages {:file "config/packages.edn"})
       (get 'xyz.zcaudate/std.lib))
   => (contains {:description string?
@@ -127,7 +127,7 @@
   => coll?)
 
 ^{:refer code.link/collect :added "3.0"}
-(fact "cellects all information given lookups and project"
+(fact "collects comprehensive project information, including dependencies, exports, and imports, given package and file lookups")
   ^:hidden
   (-> (collect -packages- -lookups- (project/project))
       (get 'xyz.zcaudate/std.lib)
@@ -153,12 +153,12 @@
       :c {:internal #{}}})
 
 ^{:refer code.link/all-linkages :added "4.0"}
-(fact "gets all linkages"
+(fact "retrieves all linkages for a given project")
 
   (all-linkages (make-project)))
 
 ^{:refer code.link/make-linkages :added "3.0"}
-(fact "creates linkages"
+(fact "creates a map of linkages for a given project")
 
   (make-linkages (make-project))
   => map?)

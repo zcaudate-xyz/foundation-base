@@ -132,7 +132,7 @@
 (fact "gets the current fact symbol")
 
 ^{:refer code.test.compile/fact-eval-current :added "3.0"}
-(fact "helper function for eval")
+(fact "evaluates the current fact, typically used within a testing context"))
 
 ^{:refer code.test.compile/fact:let-install :added "3.0"}
 (fact "installer for `fact:let` macro")

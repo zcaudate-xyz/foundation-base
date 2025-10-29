@@ -24,13 +24,13 @@
   => true)
 
 ^{:refer code.test.checker.collection/contains-map :added "3.0"}
-(fact "map check helper function for `contains`")
+(fact "helper function for the `contains` checker, specifically for validating map structures"))
 
 ^{:refer code.test.checker.collection/contains-vector :added "3.0"}
-(fact "vector check helper function for `contains`")
+(fact "helper function for the `contains` checker, specifically for validating vector structures"))
 
 ^{:refer code.test.checker.collection/contains-set :added "3.0"}
-(fact "set check helper function for `contains`"
+(fact "helper function for the `contains` checker, specifically for validating set structures")
 
   ((contains-set #{1 2 3}) [1 2 3 4 5])
   => true
@@ -70,13 +70,13 @@
   => true)
 
 ^{:refer code.test.checker.collection/just-map :added "3.0"}
-(fact "map check helper function for `just`")
+(fact "helper function for the `just` checker, specifically for validating exact map structures"))
 
 ^{:refer code.test.checker.collection/just-vector :added "3.0"}
-(fact "vector check helper function for `just`")
+(fact "helper function for the `just` checker, specifically for validating exact vector structures"))
 
 ^{:refer code.test.checker.collection/just-set :added "3.0"}
-(fact "set check helper function for `just`"
+(fact "helper function for the `just` checker, specifically for validating exact set structures")
 
   ((just-set #{1 2 3}) [1 2 3])
   => true)

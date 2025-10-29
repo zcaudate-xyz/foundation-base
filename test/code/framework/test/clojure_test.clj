@@ -17,7 +17,7 @@
   => "(boolean? 4)\n  => true")
 
 ^{:refer code.framework.test.clojure/gather-deftest-body :added "3.0"}
-(fact "helper function for `gather-deftest`"
+(fact "extracts and formats the body of a `deftest` form into docstring notation, used as a helper for `gather-deftest`")
 
   (-> "(\n  (is (= 1 1))^:hidden\n  (is (identical? 2 4)))"
       (nav/parse-string)

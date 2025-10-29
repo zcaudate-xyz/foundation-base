@@ -20,7 +20,7 @@
   => vector?)
 
 ^{:refer code.framework/analyse-source-function :added "3.0"}
-(fact "helper function for `analyse-source-code`")
+(fact "analyzes a single function definition within a source file, used as a helper for `analyse-source-code`")
 
 ^{:refer code.framework/analyse-source-code :added "3.0"}
 (fact "analyses a source file for namespace and function definitions"
@@ -58,7 +58,7 @@
                  :intro ""}))
 
 ^{:refer code.framework/analyse-file :added "3.0"}
-(fact "helper function for analyse, taking a file as input"
+(fact "analyzes a source or test file for namespace and function definitions, used as a helper for `analyse`")
 
   (analyse-file [:source "src/code/framework.clj"]))
 

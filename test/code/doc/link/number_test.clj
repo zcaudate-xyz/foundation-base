@@ -12,7 +12,7 @@
   => "2")
 
 ^{:refer code.doc.link.number/link-numbers-loop :added "3.0"}
-(fact "helper function for link-numbers")
+(fact "iterates and assigns sequential numbers to elements, used as a helper for `link-numbers`")
 
 ^{:refer code.doc.link.number/link-numbers :added "3.0"}
 (fact "creates numbers for each of the elements in the list")

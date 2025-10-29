@@ -60,13 +60,13 @@
 (fact "gets the context for loading forms")
 
 ^{:refer code.query/wrap-vec :added "3.0"}
-(fact "helper for dealing with vectors")
+(fact "ensures an item is wrapped in a vector, or handles it as a vector if it already is one"))
 
 ^{:refer code.query/wrap-return :added "3.0"}
 (fact "decides whether to return a string, zipper or sexp representation`")
 
 ^{:refer code.query/$* :added "3.0"}
-(fact "helper function for `$`")
+(fact "provides a lower-level interface for selecting and manipulating Clojure source code, used as a helper for `$`"))
 
 ^{:refer code.query/$ :added "3.0"}
 (fact "select and manipulation of clojure source code"
