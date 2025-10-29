@@ -311,6 +311,7 @@
 ;;
 
 (comment
+  (sh "afplay")
   
   ;;(sh "tmux" "kill-window" "-t" "DEV:CMD")
   (tmux:fin "hello" "bash")
@@ -376,7 +377,9 @@
   ([]
    ;; Also (eval '(.beep (java.awt.Toolkit/getDefaultToolkit)))
    (if (= (os) "Mac OS X")
-     (sh "afplay" "/System/Library/Sounds/Funk.aiff" {:inherit true :async true})
+     (try 
+       (sh "afplay" "/System/Library/Sounds/Funk.aiff" {:inherit true :async true})
+       (catch Throwable t))
      (sh "/bin/bash" "-c" "echo -ne '\\007' > /dev/tty" {:inherit true :async true}))))
 
 (defn clip
