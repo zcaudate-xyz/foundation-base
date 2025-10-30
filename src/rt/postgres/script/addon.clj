@@ -13,6 +13,8 @@
 
 (defmacro.pg ^{:- [:block]}
   exec
+  "executes an sql statement"
+  {:added "4.0"}
   [args] args)
 
 (defmacro.pg ^{:- [:array]}
@@ -31,7 +33,7 @@
 
 (defmacro.pg ^{:- [:text]}
   name
-  "gets the full jsonb for table or function"
+  "TODO"
   {:added "4.0"}
   ([table]
    (let [entry (deref (deref (resolve table)))]
@@ -56,7 +58,7 @@
 
 (defmacro.pg ^{:- [:jsonb]}
   coord
-  "gets the full jsonb for table or function"
+  "TODO"
   {:added "4.0"}
   ([table row-id]
    (let [entry (deref (deref (resolve table)))]
@@ -152,6 +154,8 @@
 
 (defmacro.pg ^{:- [:block]}
   get-stack-diagnostics
+  "TODO"
+  {:added "4.0"}
   []
   [:get-stacked-diagnostics
    ''[[e_code := :returned_sqlstate]
@@ -181,7 +185,7 @@
 
 (defmacro.pg ^{:- [:jsonb]}
   map:js-text
-  "basic map across json"
+  "TODO"
   {:added "4.0"}
   ([f arr & args]
    (h/$ (% [(coalesce (jsonb-agg (~f o-ret ~@args))

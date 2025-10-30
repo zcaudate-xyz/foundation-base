@@ -41,7 +41,7 @@
 
 (defn populate-artifact
   "allows coordinate to fill rest of values
- 
+   
    (populate-artifact '[midje \"1.6.3\"]
                       {:artifacts [{:extension \"pom\"
                                     :file \"midje.pom\"}
@@ -50,9 +50,9 @@
    => {:artifacts [{:extension \"pom\",
                     :file \"midje.pom\",
                     :artifact \"midje\",
-                   :group \"midje\",
+                    :group \"midje\",
                     :version \"1.6.3\"}
-                   {:extension \"jar\",
+                  {:extension \"jar\",
                     :file \"midje.jar\",
                     :artifact \"midje\",
                     :group \"midje\",

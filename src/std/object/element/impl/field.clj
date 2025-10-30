@@ -12,6 +12,8 @@
     (catch Throwable t)))
 
 (defn patch-field
+  "TODO"
+  {:added "4.0"}
   [^java.lang.reflect.Field field]
   (cond +modifiers+
         (.setInt ^Field +modifiers+

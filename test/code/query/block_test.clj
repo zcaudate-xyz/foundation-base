@@ -9,7 +9,7 @@
   (:refer-clojure :exclude [next replace type]))
 
 ^{:refer code.query.block/nav-template :added "3.0"}
-(fact "generates a navigation function definition from a given symbol and a block tag function")
+(fact "generates a navigation function definition from a given symbol and a block tag function"
   ^:hidden
 
   (nav-template '-tag- #'std.block.base/block-tag)
@@ -279,7 +279,7 @@
   => "<0,5> (  [[|3]]  )")
 
 ^{:refer code.query.block/find-next-token :added "3.0" :class [:nav/move]}
-(fact "moves to the next token")
+(fact "moves to the next token"
   ^:hidden
   
   (-> (parse-string "(#|  [[3 2]]  )")
@@ -495,7 +495,7 @@
   => "<0,1> (|1  )")
 
 ^{:refer code.query.block/insert :added "3.0" :class [:nav/edit]}
-(fact "inserts an element at the current cursor position and moves the cursor past the inserted element")
+(fact "inserts an element at the current cursor position and moves the cursor past the inserted element"
   ^:hidden
   
   (-> (parse-string "(#|0)")
@@ -618,7 +618,7 @@
 
 
 ^{:refer code.query.block/swap :added "3.0" :class [:nav/edit]}
-(fact "applies a function to the element at the current cursor position, replacing it with the result")
+(fact "applies a function to the element at the current cursor position, replacing it with the result"
   ^:hidden
   
   (-> (parse-string "(0  #|1   2 3)")

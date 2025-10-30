@@ -17,7 +17,7 @@
                                        e)))))
 
 (defn.xt collect-routes-object
-  "collect routes"
+  "TODO"
   {:added "4.0"}
   [routes type]
   (return

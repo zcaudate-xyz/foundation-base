@@ -48,9 +48,7 @@
            (recur (rest values))))))
 
 (definvoke enum-map
-  "cached map of enum values
- 
-   (enum-map ElementType)"
+  "cached map of enum values"
   {:added "3.0"}
   [:memoize]
   ([type]
@@ -59,9 +57,7 @@
                   (enum-values type))))
 
 (defn enum-map-form
-  "creates the form for the enum
- 
-   (enum-map-form ElementType)"
+  "creates the form for the enum"
   {:added "3.0"}
   ([^Class type]
    (coll/map-juxt [(comp keyword case/spear-case str)
@@ -69,16 +65,14 @@
                   (enum-values type))))
 
 (defmacro enum-map>
-  "a macro for getting elements of the enum
- 
-   (enum-map> ElementType)"
+  "a macro for getting elements of the enum"
   {:added "3.0"}
   ([type]
    (enum-map-form (resolve type))))
 
 (defn to-enum
   "gets an enum value given a symbol
- 
+   
    (to-enum \"TYPE\" ElementType)
    => ElementType/TYPE
  

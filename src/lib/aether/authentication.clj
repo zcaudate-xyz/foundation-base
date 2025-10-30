@@ -30,7 +30,7 @@
 
 (defn auth-map
   "creates a map of the `:authentications` element
-  
+ 
    (auth-map (-> (AuthenticationBuilder.)
                  (.addUsername \"chris\")
                  (.addPassword \"lucid\")))

@@ -35,7 +35,7 @@
 
 (defn.sol ^{:- [:external :payable]}
   make-payment-erc20
-  "adds supporting keys to the contract"
+  "makes a payment"
   {:added "4.0"}
   [:address token-address :uint amount]
   (s/require (not= s/msg-value amount)
@@ -50,7 +50,7 @@
 
 (defn.sol ^{:- [:external :payable]}
   makePayment
-  "adds supporting keys to the contract"
+  "makes a payment with camelCase"
   {:added "4.0"}
   [:address token-address :uint amount]
   (s/require (not= s/msg-value amount)
@@ -66,7 +66,7 @@
 (defn.sol ^{:- [:external :view]
             :static/returns :uint}
   get-account-balance
-  "adds supporting keys to the contract"
+  "gets account balance"
   {:added "4.0"}
   [:address token-address]
   (var (-/IERC20 erc20) (-/IERC20 token-address))
@@ -75,7 +75,7 @@
 (defn.sol ^{:- [:external :view]
             :static/returns :address}
   get-sender
-  "adds supporting keys to the contract"
+  "gets the sender for a message"
   {:added "4.0"}
   []
   (return s/msg-sender))

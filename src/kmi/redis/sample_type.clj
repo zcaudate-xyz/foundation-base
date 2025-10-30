@@ -184,7 +184,7 @@
 (def X> (partial r/compile <SPEC>))
 
 (defmacro.lua >
-  "compiles redis structures compatible with the type schema"
+  "shortcut for data access"
   {:added "4.0"}
   ([& blocks]
    (apply r/compile <SPEC> blocks)))
@@ -244,7 +244,7 @@
                                  :priority-frame         <PUBLIC-PRIORITY-FRAME>}})
 
 (defmacro.lua P>
-  "compiles redis structures compatible with the public schema"
+  "shortcut for data access"
   {:added "4.0"}
   ([& blocks]
    (apply r/compile <PUBLIC-SPEC> blocks)))

@@ -25,6 +25,8 @@
 (defonce ucp-add-url  (reflect/query-class +ucp-type+ ["addURL" :#]))
 
 (defn ucp-remove-url
+  "removes the url"
+  {:added "4.0"}
   [ucp ^URL entry]
   (let [^java.util.ArrayList paths (ucp-access-path ucp)      ;; util.ArrayList
         ^java.util.Stack urls (ucp-access-urls ucp)       ;; util.Stack

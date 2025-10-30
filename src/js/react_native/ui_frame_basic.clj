@@ -11,7 +11,7 @@
    :export [MODULE]})
 
 (defn.js FramePane
-  "creates a Frame Pane"
+  "creates a frame pane"
   {:added "4.0"}
   [#{[style
       (:= aspect "width")
@@ -27,7 +27,7 @@
         children)]))
 
 (defn.js Frame
-  "creates a Frame"
+  "creates a frame"
   {:added "4.0"}
   [#{[topComponent
       topProps

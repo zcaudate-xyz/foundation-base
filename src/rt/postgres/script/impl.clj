@@ -23,7 +23,7 @@
 (defmacro.pg ^{:- [:block]
                :style/indent 1}
   t:get-field
-  "get single entry"
+  "gets single field"
   {:added "4.0"}
   ([spec-sym & [{:keys [where returning into as args order-by] :as params
                  :or {as :json}}]]
@@ -68,7 +68,7 @@
                :style/indent 1
                :static/type [:integer]}
   t:exists
-  "get exists entry"
+  "TODO"
   {:added "4.0"}
   ([spec-sym & [{:keys [where returning into as args single order-by limit] :as params
                  :or {as :json}}]]
@@ -94,7 +94,7 @@
 (defmacro.pg ^{:- [:block]
                :style/indent 1}
   t:insert!
-  "flat insert"
+  "inserts without o-op"
   {:added "4.0"}
   ([spec-sym data & [{:keys [returning into as args] :as params}]]
    (insert/t-insert spec-sym data (merge {:track :ignore} params))))
@@ -119,7 +119,7 @@
 (defmacro.pg ^{:- [:block]
                :style/indent 1}
   t:update!
-  "flat update"
+  "updates with o-op"
   {:added "4.0"}
   ([spec-sym & [{:keys [set where returning into as single args] :as params
              :or {as :json}}]]
@@ -137,7 +137,7 @@
 (defmacro.pg ^{:- [:block]
                :style/indent 1}
   t:fields
-  "flat modify"
+  "gets the fields"
   {:added "4.0"}
   ([spec-sym & [{:keys [scope path] :as params}]]
    (main/t-fields spec-sym params)))

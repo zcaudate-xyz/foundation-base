@@ -273,7 +273,7 @@
         (finally (stop ~var))))))
 
 (defn wrap-start
-  "install setup steps for rt keys"
+  "wraps the start function with more steps"
   {:added "4.0"}
   ([f steps]
    (fn [rt]
@@ -293,7 +293,7 @@
                    (filter :start steps))))))
 
 (defn wrap-stop
-  "install teardown steps for rt keys"
+  "wraps the stop function with more steps"
   {:added "4.0"}
   ([f steps]
    (fn [rt]

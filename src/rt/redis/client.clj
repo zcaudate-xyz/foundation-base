@@ -23,7 +23,7 @@
   "creates a redis client
  
    (r/client:create {:id \"localhost\"
-                     :port 17000})
+                     :port 17001})
    => r/client?"
   {:added "3.0"}
   ([{:keys [id env mode host port] :as m}]

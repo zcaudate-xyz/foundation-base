@@ -37,7 +37,7 @@
   (deletion? 'a) => false)
 
 ^{:refer code.query.common/prewalk :added "3.0"}
-(fact "applies a function to elements in a depth-first, pre-order traversal, modifying them eagerly"))
+(fact "applies a function to elements in a depth-first, pre-order traversal, modifying them eagerly")
 
 ^{:refer code.query.common/remove-items :added "3.0"}
 (fact "removes items from a form matching the predicate"
@@ -56,7 +56,7 @@
   => '(+ 2))
 
 ^{:refer code.query.common/prepare-insertion :added "3.0"}
-(fact "removes extraneous symbols from a form in preparation for an insertion operation")
+(fact "removes extraneous symbols from a form in preparation for an insertion operation"
   (prepare-insertion '(+ a 2))
   => '(+ a 2)
 

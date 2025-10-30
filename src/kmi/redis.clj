@@ -166,6 +166,8 @@
                        (unpack (. -/key-getters [t] [2])))])))
 
 (defn.lua dump-db
+  "dumps all keys in db"
+  {:added "4.0"}
   []
   (local ks (-/call "KEYS" "*"))
   (return (k/arr-juxt ks k/identity -/key-export)))

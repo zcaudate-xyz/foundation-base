@@ -554,7 +554,7 @@
 
 (defn.js EnclosedCodeContainer
   "creates a enclosed section with label"
-  {:added "0.1"}
+  {:added "4.0"}
   [#{[code
       label
       children]}]
@@ -576,6 +576,8 @@
         children)]))
 
 (defmacro.js EnclosedCode
+  "creates an enclosed code section"
+  {:added "4.0"}
   [props & children]
   (let [code (l/emit-str (apply list 'do children) (l/macro-opts))]
     (apply vector
@@ -1023,16 +1025,16 @@
      []
      (var [values setValues] (r/local [\"A\" \"C\"]))
      (return
-     [:% n/Enclosed
-       {:label \"js.react-native/TabsMulti\"}
-       [:% n/TabsMulti
+     (n/EnclosedCode 
+ {:label \"js.react-native/TabsMulti\"} 
+ [:% n/TabsMulti
         {:data [\"A\" \"B\" \"C\" \"D\"]
          :values values
          :setValues setValues
-         :format (fn:> [s] (+ \" \" s \" \"))}]
-       [:% n/Caption
+         :format (fn:> [s] (+ \" \" s \" \"))}] 
+ [:% n/Caption
         {:text (k/json-encode #{values})
-         :style {:marginTop 10}}]]))"
+         :style {:marginTop 10}}])))"
   {:added "4.0"}
   ([#{[data
        valueFn

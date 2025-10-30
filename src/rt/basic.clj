@@ -25,6 +25,8 @@
  websocket/rt-websocket:create)
 
 (defn clean-relay
+  "cleans the relay on the server"
+  {:added "4.0"}
   [rt]
   (let [record (server-basic/get-server (:id rt)
                                         (:lang rt))]

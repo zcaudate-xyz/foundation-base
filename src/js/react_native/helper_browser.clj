@@ -11,6 +11,8 @@
    :export [MODULE]})
 
 (defn.js getHash
+  "gets the window location hash"
+  {:added "4.0"}
   []
   (when (and window
              window.location)
@@ -50,6 +52,8 @@
           (+ "/" routeUrl)))))
 
 (defn.js setHashParam
+  "sets the hash param"
+  {:added "4.0"}
   [key value path]
   #_(k/LOG! (-/getHashRoute))
   (var route (event-route/make-route (-/getHashRoute)))

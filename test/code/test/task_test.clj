@@ -6,7 +6,7 @@
 (fact "interrupts the test")
 
 ^{:refer code.test.task/run :added "3.0" :class [:test/general]}
-(fact "executes all tests, optionally filtering by list or specific namespace")
+(fact "executes all tests, optionally filtering by list or specific namespace"
 
   (task/run :list)
 
@@ -18,7 +18,7 @@
 (fact "runs the current namespace")
 
 ^{:refer code.test.task/run:test :added "3.0"}
-(fact "executes tests that are currently loaded in the runtime"))
+(fact "executes tests that are currently loaded in the runtime")
 
 ^{:refer code.test.task/run:unload :added "3.0"}
 (fact "unloads the test namespace")

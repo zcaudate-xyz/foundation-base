@@ -10,6 +10,8 @@
    :export [MODULE]})
 
 (defn.js create-client
+  "creates the debug client ws"
+  {:added "4.0"}
   [host port path]
   (return
    (client/client-ws (or host window.location.hostname)
@@ -19,6 +21,8 @@
                       :path (or path "dev/ws")})))
 
 (defn.js DebugClient
+  "creates the debug client ui"
+  {:added "4.0"}
   [props]
   (var #{globalField
          host

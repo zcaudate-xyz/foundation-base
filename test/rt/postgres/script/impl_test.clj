@@ -214,3 +214,7 @@
     (l/emit-as :postgres
                `[(pg/t:fields scratch/Task
                    {:where {:name "home"}})])))
+
+
+^{:refer rt.postgres.script.impl/t:exists :added "4.0"}
+(fact "TODO")

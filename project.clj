@@ -143,6 +143,17 @@
    ;; std.text.diff
    [com.googlecode.java-diff-utils/diffutils "1.3.0"]
    
+   
+   ;; MCP
+   [org.hugoduncan/mcp-clj-server "0.1.60"]
+   [org.clojure/core.async "1.6.681"]
+   [http-kit "2.8.0"]
+   [cheshire "5.13.0"]
+   [com.cognitect/transit-clj "1.0.333"]
+   [medley "1.4.0"]
+   [org.clojure/tools.logging "1.3.0"]
+   [ch.qos.logback/logback-classic "1.5.6"]
+   [org.clojure/data.json "2.5.1"]
 
    ;; TESTS - std.object
    [org.eclipse.jgit/org.eclipse.jgit "5.13.0.202109080827-r"]]
@@ -154,11 +165,11 @@
                      comment [[:inner 0]]}}
   :profiles {:dev {:plugins [[lein-ancient "0.6.15"]
                              [lein-exec "0.3.7"]
-                             [cider/cider-nrepl "0.45.0"]]}
+                             [cider/cider-nrepl "0.58.0"]]}
              :repl {:injections [(try (require 'jvm.tool)
                                       (require '[std.lib :as h])
                                       (catch Throwable t (.printStackTrace t)))]}}
-  :resource-paths    ["resources" "src-build" "src-doc" "test-data" "test-code"]
+  :resource-paths    ["resources" "src-build" "src-extra" "src-doc" "test-data" "test-code"]
   :java-source-paths ["src-java" "test-java"]
   :java-output-path  "target/classes"
   :repl-options {:host "0.0.0.0"

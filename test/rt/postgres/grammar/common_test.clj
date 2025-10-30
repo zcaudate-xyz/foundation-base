@@ -252,3 +252,10 @@
   (common/pg-defblock '(def ^{:static/return [:index]
                        :static/schema "scratch"} hello []))
   => '(do [:create :index (. #{"scratch"} #{"hello"})]))
+
+
+^{:refer rt.postgres.grammar.common/pg-policy-format :added "4.0"}
+(fact "TODO")
+
+^{:refer rt.postgres.grammar.common/pg-deftrigger :added "4.0"}
+(fact "TODO")

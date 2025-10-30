@@ -325,10 +325,7 @@
 (comment (code.manage/arrange ['code.framework] {:print {:function true :item true :result true :summary true}}))
 
 (definvoke locate-code
-  "locates code base upon query
- 
-   (locate-code '[code.manage]
-                {:query '[ns | {:first :import}]})"
+  "locates code base upon query"
   {:added "3.0"}
   [:task {:template :code.locate
           :params {:title "LOCATE CODE"
@@ -344,7 +341,7 @@
                             :print {:function true :item true :result true :summary true}}))
 
 (definvoke locate-test
-  "refactors code tests based on given `:edits`"
+  "locates test based upon query"
   {:added "4.0"}
   [:task {:template :code.locate
           :params {:title "LOCATE TEST"

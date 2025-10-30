@@ -63,6 +63,8 @@
 
 
 (defn compile-summarise
+  "summaries the output"
+  {:added "4.0"}
   [files]
   (let [non-blank (filter (comp #(and (not= % :blank)
                                       (not= % :deleted)) first) files)
@@ -102,7 +104,7 @@
             :options [:replace-existing]}))
 
 (defn compile-directory
-  "copies resources to the build directory"
+  "TODO"
   {:added "4.0"}
   ([{:keys [main root] :as opts}]
    (vec (mapcat (fn [[input output]]
@@ -140,10 +142,7 @@
                         :custom #'compile-custom}))
 
 (defn types-list
-  "lists all compilation types
- 
-   (set (types-list))
-   => #{:script :module.graph :custom :module.single :resource}"
+  "lists all compilation types"
   {:added "4.0"}
   []
   (keys @+types+))

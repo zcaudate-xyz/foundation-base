@@ -71,18 +71,15 @@
   "returns the global object for thecurrent project
  
    (:group (global-project-raw))
-   => \"tahto\""
+   => \"xyz.zcaudate\""
   {:added "3.0"}
   ([]
    (try (project/project)
         (catch clojure.lang.ExceptionInfo e))))
 
 (defn global-env-file-raw
-  "returns the global object for thecurrent project
- 
-   (:group (global-project-raw))
-   => \"tahto\""
-  {:added "3.0"}
+  "gets env from env.edn"
+  {:added "4.0"}
   ([]
    (let [path (fs/path "./env.edn")]
      (if (fs/exists? path)
@@ -112,7 +109,7 @@
   "returns the global object for all global types
  
    (:group (global-all-raw))
-   => \"tahto\""
+   => \"xyz.zcaudate\""
   {:added "3.0"}
   ([]
    (h/merge-nested (global-env-raw)

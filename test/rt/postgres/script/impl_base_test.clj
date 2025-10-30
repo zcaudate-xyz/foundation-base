@@ -380,3 +380,7 @@
                     :module 'rt.postgres.script.scratch
                     :id 'Node
                     :section :code}))
+
+
+^{:refer rt.postgres.script.impl-base/t-returning-cols-default :added "4.0"}
+(fact "TODO")

@@ -59,6 +59,8 @@
           (h/unlazy)))))
 
 (defn get-namespace
+  "gets the namespace given forms"
+  {:added "4.0"}
   ([forms]
    (->> forms
         (filter #(-> % first (= 'ns)))
@@ -68,8 +70,8 @@
 (defn file-namespace
   "reads the namespace of the given path
  
-   (file-namespace \"src/code/project.clj\")
-   => 'code.project"
+   (file-namespace \"src/std/fs.clj\")
+   => 'std.fs"
   {:added "3.0"}
   ([path]
    (try

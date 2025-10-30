@@ -392,6 +392,8 @@
         (return [])))
 
 (defn.xt reset-route
+  "resets the route, clearing all params"
+  {:added "4.0"}
   [route url]
   (k/set-key route "history" [])
   (k/set-key route "tree"

@@ -43,7 +43,7 @@
       [:url "http/mit.license"]])
 
 ^{:refer code.maven.package/pom-xml :added "3.0"}
-(fact "generates the XML content for a Maven Project Object Model (POM) file")
+(fact "generates the XML content for a Maven Project Object Model (POM) file"
   ^:hidden
 
   (->> (pom-xml '{:description "task execution of and standardization",

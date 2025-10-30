@@ -28,7 +28,7 @@
           int inc char str))))
 
 (defn link-numbers-loop
-  "helper function for link-numbers"
+  "iterates and assigns sequential numbers to elements, used as a helper for `link-numbers`"
   {:added "3.0"}
   ([elements auto-number]
    (link-numbers-loop elements auto-number new-counter []))

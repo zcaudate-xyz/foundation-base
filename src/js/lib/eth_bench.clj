@@ -11,6 +11,8 @@
    :export [MODULE]})
 
 (defn.js send-wei
+  "sends currency for bench"
+  {:added "4.0"}
   [url private-key to-address amount]
   (var signer (eth-lib/get-signer url private-key))
   (return (eth-lib/send-wei signer to-address amount)))
@@ -57,7 +59,7 @@
                               k/identity)))))))
 
 (defn.js get-past-events
-  "gets the past events on a contract"
+  "gets all past events"
   {:added "4.0"}
   [url address abi name opts]
   (var provider (eth-lib/new-rpc-provider url))

@@ -240,6 +240,8 @@
 ;;
 
 (defn t-returning-cols-default
+  "TODO"
+  {:added "4.0"}
   [returning key-fn]
   (mapv (comp hash-set ut/sym-default-str) returning))
 

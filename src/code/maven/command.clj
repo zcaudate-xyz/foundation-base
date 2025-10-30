@@ -60,7 +60,7 @@
 (defn clean
   "cleans the interim directory
  
-   (def -args- ['hara/object nil -collected- (project/project)])
+   (def -args- ['xyz.zcaudate/std.object nil -collected- (project/project)])
  
    (apply package/package -args-)
  
@@ -90,7 +90,7 @@
 (defn install
   "installs a package to the local `.m2` repository
  
-   (install 'hara/std.object
+   (install 'xyz.zcaudate/std.object
             {}
             -collected-
             (assoc (project/project) :version \"3.0.1\" :aether (aether/aether)))
@@ -109,7 +109,7 @@
 (defn deploy
   "deploys a package to a test repo
  
-   (deploy 'hara/base
+   (deploy 'xyz.zcaudate/std.lib
            {:tag :dev}   ;;(read-config)
           -collected-
            (assoc (project/project)

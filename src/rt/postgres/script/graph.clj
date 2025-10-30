@@ -14,7 +14,7 @@
 (defmacro.pg ^{:- [:block]
                :style/indent 1}
   g:where
-  "gets only id"
+  "TODO"
   {:added "4.0"}
   ([spec-sym where]
    (or (not-empty where)
@@ -43,7 +43,7 @@
 (defmacro.pg ^{:- [:block]
                :style/indent 1}
   g:exists
-  "gets only exists"
+  "TODO"
   {:added "4.0"}
   ([spec-sym & [{:keys [where returning into as args single order-by limit] :as params
              :or {as :json}}]]

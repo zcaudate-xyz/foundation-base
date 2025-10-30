@@ -11,10 +11,7 @@
   {:dev/web-main 29001})
 
 (defn raw-eval-websocket-server
-  "raw eval for websocket connection
- 
-   (!.js (+ 1 2 3))
-   => 6"
+  "raw eval for websocket connection"
   {:added "4.0"}
   ([{:keys [id lang]} body & [timeout]]
    (let [{:keys [channel return]} (get-in @basic/*env* [lang id])]
@@ -34,6 +31,8 @@
                output))))))
 
 (defn create-websocket-handler-receive
+  "gets the websocket handler"
+  {:added "4.0"}
   [msg return channel]
   (cond (= msg "ping")
         (server/send! channel "pong")

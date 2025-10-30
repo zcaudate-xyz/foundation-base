@@ -23,7 +23,7 @@
    (-> {:group \"hara\" :artifact \"hara\" :version \"2.4.0\"}
        (map->Rep)
        (rep->path))
-   => \"<.m2>/hara/hara/2.4.0/hara-2.4.0.jar\""
+   => #\"/hara/hara/2.4.0/hara-2.4.0.jar\""
   {:added "3.0"}
   ([{:keys [group artifact version extension]}]
    (str/join base/*sep*

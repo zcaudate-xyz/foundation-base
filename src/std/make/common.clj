@@ -13,7 +13,7 @@
 (defonce ^:dynamic *triggers* (atom {}))
 
 (defmacro with:triggers
-  "sets the mock output flag"
+  "purges triggers"
   {:added "4.0"}
   [[triggers] & body]
   `(binding [*triggers* ~triggers]
@@ -52,7 +52,14 @@
                @*triggers*)))
 
 (defn get-triggered
-  "gets all configs given a trigger namespace"
+  "gets all configs given a trigger namespace
+ 
+   (mapv (fn [mcfg]
+           (:tag @(:instance mcfg)))
+         (common/with:triggers
+          [+triggers+]
+          (common/get-triggered 'hello)))
+   => [\"test.demo-make\"]"
   {:added "4.0"}
   ([] (get-triggered (env/ns-sym)))
   ([ns]
@@ -75,7 +82,7 @@
 (def ^:dynamic *internal-shell* nil)
 
 (defmacro with:internal-shell
-  "sets the mock output flag"
+  "with internal shell"
   {:added "4.0"}
   [& body]
   `(binding [*internal-shell* true]
@@ -102,6 +109,8 @@
    (instance? MakeConfig obj)))
 
 (defn get-config-tag
+  "gets the tag for a config"
+  {:added "4.0"}
   [mcfg]
   (when (make-config? mcfg)
     (:tag @(:instance mcfg))))
@@ -135,7 +144,10 @@
    (reset! instance (make-config-map new-config))))
 
 (defn make-dir
-  "gets the dir specified by the config"
+  "gets the dir specified by the config
+ 
+   (common/make-dir +demo-config+)
+   => string?"
   {:added "4.0"}
   ([{:keys [instance] :as mcfg}]
    (let [{:keys [ns root build]} @instance]
@@ -177,6 +189,8 @@
                  (os/tmux:run-command "DEV" tns cmd)))))))
 
 (defn make-run-close
+  "TODO"
+  {:added "4.0"}
   ([{:keys [instance] :as mcfg} & [command]]
    (let [command (or command :build)
          {:keys [tag ns]} @instance
@@ -186,6 +200,8 @@
      (os/tmux:kill-window  "DEV" tns))))
 
 (defn make-run-internal
+  "runs the make executable internal"
+  {:added "4.0"}
   [mcfg & commands]
   (with:internal-shell
    (mapv (partial make-run mcfg)

@@ -101,7 +101,7 @@
        (:.. rprops)]}]))
 
 (defn.js FadeIn
-  "creates a Fade"
+  "creates a fade in helper"
   {:added "4.0"}
   [props]
   (var [visible setVisible] (r/local false))

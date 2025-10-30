@@ -24,11 +24,7 @@
         (h/map-vals (comp set (partial map first))))))
 
 (defn config-to-args
-  "convert config map to args
- 
-   (config-to-args {:port 21001
-                    :appendonly true})
-   => \"port 21001\\nappendonly yes\""
+  "convert config map to args"
   {:added "4.0"}
   [m]
   (->> m

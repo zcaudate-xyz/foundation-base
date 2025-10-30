@@ -8,7 +8,7 @@
   (tests-in-wrong-file))
 
 ^{:refer code.dev/to-test-path :added "3.0"}
-(fact "converts a given namespace symbol into its corresponding test file path")
+(fact "converts a given namespace symbol into its corresponding test file path"
 
   (to-test-path 'code.dev-test)
   => "test/code/dev_test.clj")

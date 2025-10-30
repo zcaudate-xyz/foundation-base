@@ -7,7 +7,16 @@
    :export [MODULE]})
 
 (defn.js fetch-call
-  "completes a http call with options"
+  "completes a http call with options
+   ;;^:hidden
+ 
+   #_#_#_
+   (notify/wait-on :js
+     (-> (http/fetch-call (+ \"http://localhost:\"
+                             (@! (:http-port (l/default-notify))))
+                          {:as \"text\"})
+         (. (then (repl/>notify)))))
+   => \"OK\""
   {:added "4.0"}
   [url options]
   (var as-ret (. options ["as"]))
@@ -96,7 +105,7 @@
    (. conn (close))))
 
 (defn.js ws-send
-  "closes the websocket"
+  "sends text through websocket"
   {:added "4.0"}
   [conn text]
   (return

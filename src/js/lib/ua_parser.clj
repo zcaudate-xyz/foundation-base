@@ -8,6 +8,8 @@
    :import [["ua-parser-js" :as UAParser]]})
 
 (defmacro.js parseString
+  "gets information from the user agent on browser"
+  {:added "4.0"}
   [& [s]]
   (list 'JSON.parse
         (list 'JSON.stringify

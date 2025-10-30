@@ -3,6 +3,8 @@
             [std.string :as str]))
 
 (defn create-compose-single
+  "executes a shell command"
+  {:added "4.0" :guard true}
   [compose {:keys [environment
                    depends-on
                    network
@@ -40,6 +42,8 @@
     out))
 
 (defn create-compose
+  "executes a docker command"
+  {:added "4.0"}
   [{:keys [config
            network
            entries]}]

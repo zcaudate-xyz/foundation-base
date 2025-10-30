@@ -45,4 +45,4 @@
 (fact "fact ns getter and setter")
 
 ^{:refer code.test.manage/fact:ns :added "3.0"}
-(fact "provides a macro for managing namespace-related operations within facts"))
+(fact "provides a macro for managing namespace-related operations within facts")

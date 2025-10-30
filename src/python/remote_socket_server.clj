@@ -11,6 +11,8 @@
 
 (defn.py ^{:- [:async]}
   handle-connection
+  "handles the connection"
+  {:added "4.0"}
   [client]
   (var loop (. asyncio (get-event-loop)))
   (while true
@@ -33,6 +35,8 @@
 
 (defn.py ^{:- [:async]}
   run-server
+  "runs the server"
+  {:added "4.0"}
   [host port]
   (var loop (. asyncio (get-event-loop)))
   (var server (. socket (socket (. socket AF_INET)
@@ -46,6 +50,8 @@
     (. loop (create-task (-/handle-connection (. ret [0]))))))
 
 (defn.py start-async-loop
+  "starts the async loop"
+  {:added "4.0"}
   [port]
   (var loop (. asyncio (new-event-loop)))
   (var coroutine
@@ -56,6 +62,8 @@
   (. loop (run-forever)))
 
 (defn.py start-async
+  "starts the async server"
+  {:added "4.0"}
   [port]
   (var thread 
        (. threading

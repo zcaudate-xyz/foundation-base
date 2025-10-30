@@ -12,6 +12,8 @@
 (def ^:dynamic *verbose* true)
 
 (defmacro with-verbose
+  "with verbose github messages"
+  {:added "4.0"}
   [verbose & body]
   `(binding [*verbose* ~verbose] ~@body))
 
@@ -168,7 +170,7 @@
 
 
 (defn gh-dwim-init
-  "prepares the initial mcfg commit"
+  "gh dwim init"
   {:added "4.0"}
   [mcfg & [message]]
   (do (gh-local-purge mcfg)
@@ -182,7 +184,7 @@
       (gh-push mcfg)))
 
 (defn gh-dwim-push
-  "prepares the mcfg push"
+  "gh dwim push"
   {:added "4.0"}
   [mcfg & [message]]
   (do (project/build-all mcfg)

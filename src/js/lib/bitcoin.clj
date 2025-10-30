@@ -222,13 +222,15 @@
         (list 'fromWIF s network)))
 
 (defmacro.js pair-from-random
-  "gets public/private pair from wif"
+  "makes a random key"
   {:added "4.0"}
   []
   (list '. (list '(. ECPairFactory default) 'TinySecp256k1)
         (list 'makeRandom)))
 
 (defn.js sign-message
+  "signs a message given wif"
+  {:added "4.0"}
   [message wif network options]
   (var pair (-/pair-from-wif wif network))
   (var signature (. BitcoinMessage (sign message
@@ -239,6 +241,8 @@
   (return (. signature (toString "base64"))))
 
 (defn.js verify-message
+  "verifies a message given address and signature"
+  {:added "4.0"}
   [message address signature network]
   (return (. BitcoinMessage (verify message
                                     address
@@ -247,6 +251,8 @@
                                     false))))
 
 (defn.js account-from-random
+  "generates an account from random"
+  {:added "4.0"}
   [network]
   (var pair (-/pair-from-random))
   (var wif  (-/wif-encode (. network wif) (. pair privateKey) true))
@@ -268,6 +274,8 @@
                                 from-inputs
                                 to-address]}])}
   build-sweep-tx
+  "builds a sweep tx"
+  {:added "4.0"}
   [m]
   (var #{network
          fee-per-kb
@@ -309,6 +317,8 @@
                                 from-inputs
                                 to-address]}])}
   build-payment-tx
+  "builds a payment tx"
+  {:added "4.0"}
   [m]
   (var #{network
          fee-per-kb

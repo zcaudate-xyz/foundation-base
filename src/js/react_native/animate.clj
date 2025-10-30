@@ -131,6 +131,8 @@
                (return anim))))))
 
 (defn.js setPropsAll
+  "sets props for all the elements"
+  {:added "4.0"}
   [elem props]
   (cond (and elem
              elem.setNativeProps

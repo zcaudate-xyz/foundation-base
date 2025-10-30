@@ -216,7 +216,7 @@
             :rt/db {:in  [:text :text :text]
                     :out :integer}}
   mq-list-write
-  "writes entry to a list"
+  "writes a given value to list"
   {:added "4.0"}
   ([key partition item]
    (return (r/call "RPUSH" (q/mq-path key partition) item))))

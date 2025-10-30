@@ -3,6 +3,7 @@
   (:require [rt.basic.type-basic :refer :all]
             [rt.basic.server-basic :as server]
             [rt.basic.impl.process-lua :as lua]
+            [rt.basic.impl.process-js :as js]
             [std.lib :as h]))
 
 ^{:refer rt.basic.type-basic/start-basic :added "4.0"}
@@ -30,6 +31,8 @@
 (fact "creates and starts a basic rt"
 
   (def +rt+ (rt-basic {:lang :lua
-                       :program :luajit}))
+                       :program :lua}))
+  (def +rt+ (rt-basic {:lang :js
+                       :runtime :basic}))
   
   (h/stop +rt+))

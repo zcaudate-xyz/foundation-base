@@ -8,9 +8,9 @@
   "creates a digest out of a byte array
  
    (digest)
-   => (contains [\"MD2\" \"MD5\" \"SHA\" \"SHA-224\"
+   => (contains [\"MD2\" \"MD5\" \"SHA-224\"
                  \"SHA-256\" \"SHA-384\" \"SHA-512\"] :in-any-order :gaps-ok)
- 
+   
    (-> (digest (.getBytes \"hello world\")
                \"SHA\")
        (encode/to-hex))

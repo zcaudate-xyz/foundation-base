@@ -18,7 +18,7 @@
   "creates a lucene directory (store
  
    (directory {:store :memory})
-   => org.apache.lucene.store.RAMDirectory"
+   => org.apache.lucene.store.ByteBuffersDirectory"
   {:added "3.0"}
   :store)
 
@@ -26,7 +26,7 @@
   "creates a ram directory
  
    (directory-memory {})
-   => org.apache.lucene.store.RAMDirectory"
+   => org.apache.lucene.store.ByteBuffersDirectory"
   {:added "3.0"}
   [:method {:multi directory
             :val :memory}]

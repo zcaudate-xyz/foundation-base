@@ -138,11 +138,9 @@
           :main {:fn #'command/deploy}}])
 
 (definvoke deploy-lein
-  "deploys all variables
+  "deploys packages to clojars using lein
    
-   (deploy-lein '[xyz.zcaudate]
-            {:tag :all
-             :print {:item true :result false :summary false}})"
+   (deploy-lein '[xyz.zcaudate] {:tag :all})"
   {:added "4.0"}
   [:task {:template :deploy.linkage
           :params {:title "DEPLOY USING LEIN"

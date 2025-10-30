@@ -84,6 +84,8 @@
    [:drop-extension :if-exists #{ex} :cascade]))
 
 (defn has-policy
+  "TODO"
+  {:added "4.0"}
   [{:static/keys [schema
                   policy-name
                   policy-schema
@@ -98,7 +100,7 @@
                   :policyname policy-name}])])
 
 (defn drop-policy
-  "makes drop extension forms"
+  "TODO"
   {:added "4.0"}
   ([{:static/keys [schema
                    policy-name

@@ -44,7 +44,7 @@
 (fact "initialises memory with cache files")
 
 ^{:refer code.framework.cache/purge :added "3.0"}
-(fact "clears all entries from the cache"))
+(fact "clears all entries from the cache")
 
 (comment
   (./incomplete)

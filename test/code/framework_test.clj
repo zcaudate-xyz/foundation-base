@@ -58,7 +58,7 @@
                  :intro ""}))
 
 ^{:refer code.framework/analyse-file :added "3.0"}
-(fact "analyzes a source or test file for namespace and function definitions, used as a helper for `analyse`")
+(fact "analyzes a source or test file for namespace and function definitions, used as a helper for `analyse`"
 
   (analyse-file [:source "src/code/framework.clj"]))
 

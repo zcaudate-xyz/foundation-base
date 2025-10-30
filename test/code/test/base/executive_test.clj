@@ -4,7 +4,7 @@
             [code.project :as project]))
 
 ^{:refer code.test.base.executive/accumulate :added "3.0"}
-(fact "accumulates test results from various facts and files into a single data structure"))
+(fact "accumulates test results from various facts and files into a single data structure")
 
 ^{:refer code.test.base.executive/interim :added "3.0"}
 (fact "summary function for accumulated results")
@@ -34,7 +34,7 @@
 (fact "runs the current namespace (which can be a non test namespace)")
 
 ^{:refer code.test.base.executive/eval-namespace :added "3.0"}
-(fact "evaluates the code within a specified namespace"))
+(fact "evaluates the code within a specified namespace")
 
 (comment
 

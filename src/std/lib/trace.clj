@@ -50,7 +50,7 @@
 
 (defn apply-trace
   "applies a trace with arguments
- 
+   
    (apply-trace identity
                 (make-trace #'get-trace :basic)
                 identity

@@ -44,6 +44,8 @@
 ;;
 
 (defn create-web3-node
+  "creates the node runtime"
+  {:added "4.0"}
   [{:keys [id lang url] :as rt}]
   (let [rt-node (basic/rt-basic
                  {:id (h/sid)
@@ -84,6 +86,8 @@
 
 
 (defn invoke-ptr-web3-check
+  "checks that arguments are correct"
+  {:added "4.0"}
   [contract fn-name args]
   (let [spec  (first (filter #(-> (get % "name")
                                               (= fn-name))
@@ -137,7 +141,7 @@
                             js.core/toString))))
 
 (defn invoke-ptr-web3
-  "invokes"
+  "invokes the runtime, deploying the contract if not available"
   {:added "4.0"}
   [{:keys [mode] :as rt} ptr args]
   (let [mode  (cond (= common/*clean* false)

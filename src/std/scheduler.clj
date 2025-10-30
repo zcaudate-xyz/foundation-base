@@ -270,16 +270,7 @@
      output)))
 
 (defn set-interval
-  "manually overrides the interval for a spawn/program
- 
-   (h/bench-ms
-    (test-scaffold
-     (fn [runner q]
-       (set-interval runner :world 10)
-       (spawn runner :world)
-       (doall (for [i (range 2)]
-                (cc/take q))))))
-   => #(<= 15 % 50)"
+  "manually overrides the interval for a spawn/program"
   {:added "3.0"}
   ([{:keys [runtime] :as runner} program-id interval]
    (h/map-vals (fn [spawn]

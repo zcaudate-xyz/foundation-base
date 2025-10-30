@@ -86,6 +86,8 @@
                         ~ms))))))
 
 (defmacro.js timeout
+  "creates a timeout call"
+  {:added "4.0"}
   [ms]
   (h/$ (new Promise (fn [resolve]
                       (setTimeout resolve ~ms)))))
@@ -350,6 +352,8 @@
                                                 :default (. esm default [key])}))))))})))
 
 (defmacro.js module:demos
+  "adds a demos module"
+  {:added "4.0"}
   [ns]
   (apply vector :<> 
          (->> (ns-interns ns)

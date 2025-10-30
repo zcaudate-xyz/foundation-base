@@ -136,7 +136,7 @@
                    {:paddingHorizontal (. input tokens space [val])}))}}}))
 
 (defn.js getIconSize
-  "TODO"
+  "gets the icon size"
   {:added "4.0"}
   [size scale]
   (return

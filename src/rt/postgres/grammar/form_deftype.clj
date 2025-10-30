@@ -27,7 +27,7 @@
 
 
 (defn pg-deftype-ref-link
-  "TODO"
+  "creates the ref entry for"
   {:added "4.0"}
   ([col {:keys [ns link current column] :or {column :id}} {:keys [snapshot] :as mopts}]
    (let [{:keys [lang module section id]} link
@@ -44,7 +44,7 @@
              #{(name column)})]])))
 
 (defn pg-deftype-ref-current
-  "TODO"
+  "creates the ref entry for"
   {:added "4.0"}
   ([col {:keys [current column] :or {column :id}} {:keys [snapshot] :as mopts}]
    (let [{:keys [id schema type]}  current]
@@ -121,7 +121,7 @@
            (vals groups)))))
 
 (defn pg-deftype-primaries
-  "collect unique keys on deftype"
+  "TODO"
   {:added "4.0"}
   ([schema-primary]
    (let [schema-primary (if (map? schema-primary)

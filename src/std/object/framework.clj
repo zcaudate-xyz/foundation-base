@@ -41,10 +41,10 @@
   "creates an accessibility layer for map-like objects
  
    (framework/map-like
-    org.eclipse.jgit.revwalk.RevCommit
+     org.eclipse.jgit.revwalk.RevCommit
     {:tag \"commit\"
      :include [:commit-time :name :author-ident :full-message]})
- 
+   
    (framework/map-like
     org.eclipse.jgit.lib.PersonIdent
     {:tag \"person\"
@@ -52,9 +52,9 @@
  
    (framework/map-like
     org.eclipse.jgit.api.Status
-   {:tag \"status\"
+    {:tag \"status\"
      :display (fn [m]
-                (reduce-kv (fn [out k v]
+               (reduce-kv (fn [out k v]
                              (if (and (or (instance? java.util.Collection v)
                                           (instance? java.util.Map v))
                                       (empty? v))

@@ -29,11 +29,8 @@
    (System/getProperty "os.name")))
 
 (defn os-arch
-  "returns the current os
- 
-   (os) ;;\"Mac OS X\"
-   => string?"
-  {:added "3.0"}
+  "TODO"
+  {:added "4.0"}
   ([]
    (System/getProperty "os.arch")))
 

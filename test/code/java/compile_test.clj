@@ -63,7 +63,7 @@
 (fact "displays output of compilation")
 
 ^{:refer code.java.compile/javac-process :added "3.0"}
-(fact "processes Java compilation, handling class reloading and output options")
+(fact "processes Java compilation, handling class reloading and output options"
 
   (javac-process {"test.Pet" (fs/read-all-bytes "target/classes/test/Pet.class")
                   "test.Cat" (fs/read-all-bytes "target/classes/test/Cat.class")}

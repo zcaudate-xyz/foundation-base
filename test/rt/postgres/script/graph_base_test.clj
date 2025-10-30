@@ -242,3 +242,7 @@
 
 (comment
   (first (get-in -sch- [:TaskCache :tasks])))
+
+
+^{:refer rt.postgres.script.graph-base/exists-fn :added "4.0"}
+(fact "TODO")

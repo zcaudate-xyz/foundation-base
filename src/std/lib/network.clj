@@ -89,7 +89,7 @@
   "check that port is available
  
    (port:check-available 51311)
-   => boolean?"
+   => anything"
   {:added "4.0"}
   ([port]
    (try
@@ -102,7 +102,7 @@
 (defn port:get-available
   "get first available port from a range
  
-   (port:get-available [51311 51312 51313])
+   (port:get-available [51312 51313])
    => number?"
   {:added "4.0"}
   ([ports]
@@ -113,7 +113,8 @@
 (defn wait-for-port
   "waits for a port to be ready
  
-   (wait-for-port \"localhost\" 51311 {:timeout 1000})"
+   (wait-for-port \"localhost\" 51313 {:timeout 1000})
+   => (throws)"
   {:added "3.0"}
   ([host port]
    (wait-for-port host port {}))

@@ -190,6 +190,7 @@
   (h/$ ((. ffi C ~(symbol (name func))) ~@args)))
 
 (defn.lua reduce-iter
+  "reduces iterate"
   {:added "4.0"}
   [iter f init]
   (var '[acc v] '[init nil])
@@ -200,10 +201,7 @@
   (return acc))
 
 (defn.lua slurp
-  "slurps a file as string
-   
-   (read-string (u/slurp \"project.clj\"))
-   => h/form?"
+  "slurps the output from path"
   {:added "4.0"}
   [path]
   (var lines (-/io-lines path))
@@ -214,14 +212,7 @@
   (return body))
 
 (defn.lua spit
-  "spits out a string to file
- 
-   (u/spit \"./test-scratch/hello.txt\"
-           \"HELLO\")
-   => true
-   
-   (slurp \"./test-scratch/hello.txt\")
-   => \"HELLO\""
+  "spits the output from path"
   {:added "4.0"}
   [path body]
   (var file (-/io-open path "w"))

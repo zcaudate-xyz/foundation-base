@@ -33,13 +33,13 @@
 (fact "setup form for use (with component)")
 
 ^{:refer code.test.compile.snippet/fact-use-setup-eval :added "3.0"}
-(fact "evaluates the setup form for a `fact:use` component")
+(fact "evaluates the setup form for a `fact:use` component"
 
   (fact-use-setup-eval '*serv*)
   => '(list :database))
 
 ^{:refer code.test.compile.snippet/fact-use-setup :added "3.0"}
-(fact "prepares the setup form for a `fact:use` component, including any necessary initialization")
+(fact "prepares the setup form for a `fact:use` component, including any necessary initialization"
 
   (fact-use-setup '*serv*)
   => '(start (list :database)))

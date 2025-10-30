@@ -43,18 +43,24 @@
 (defn.sol ^{:- [:external :view]
             :static/returns :uint}
   totalSupply
+  "gets the totalSupply"
+  {:added "4.0"}
   []
   (return -/totalSupply_))
 
 (defn.sol ^{:- [:external :view]
             :static/returns :uint}
   balanceOf
+  "gets the balance of an address"
+  {:added "4.0"}
   [:address tokenOwner]
   (return (. -/balances [tokenOwner])))
 
 (defn.sol ^{:- [:external]
             :static/returns :bool}
   transfer
+  "transfers to another balance"
+  {:added "4.0"}
   [:address receiver
    :uint amount]
   (:-= (. -/balances [s/msg-sender]) amount)
@@ -67,6 +73,8 @@
 
 (defn.sol ^{:- [:external]}
   transferFrom
+  "transfers from account, requires approval"
+  {:added "4.0"}
   [:address from
    :address receiver
    :uint amount]
@@ -79,6 +87,8 @@
 
 (defn.sol ^{:- [:external]}
   approve
+  "approves transfer for one account to another"
+  {:added "4.0"}
   [:address spender
    :uint amount]
   (:-= (. -/balances [s/msg-sender]) amount)

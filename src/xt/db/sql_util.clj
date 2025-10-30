@@ -145,7 +145,7 @@
   (return (column-fn name)))
 
 (defn.xt encode-sql-tuple
-  "encodes a sql column"
+  "encodes a sql tuple"
   {:added "4.0"}
   [v column-fn opts loop-fn]
   (var #{args} v)

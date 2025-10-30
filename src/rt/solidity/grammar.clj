@@ -183,7 +183,7 @@
           \;)))
 
 (defn sol-definterface
-  "transforms a interface call"
+  "transforms a definterface call"
   {:added "4.0"}
   [[_ sym body] grammar mopts]
   (let [fn-stct (fn [sym args]

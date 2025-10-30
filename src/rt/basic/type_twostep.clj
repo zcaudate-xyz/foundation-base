@@ -9,7 +9,7 @@
             [rt.basic.type-common :as common]))
 
 (defn sh-exec
-  "basic function for executing a shell process"
+  "basic function for executing the compile and run process"
   {:added "4.0"}
   [input-args input-body {:keys [pipe
                                  trim
@@ -33,14 +33,14 @@
                 }))))
 
 (defn raw-eval-twostep
-  "evaluates a raw statement with twostep"
+  "evaluates the twostep evaluation"
   {:added "4.0"}
   ([{:keys [exec
             process] :as rt} body]
    (sh-exec exec body process)))
 
 (defn invoke-ptr-twostep
-  "gets the oneshow invoke working"
+  "invokes twostep pointer"
   {:added "4.0"}
   ([{:keys [process lang layout] :as rt
      :or {layout :full}} ptr args]
@@ -58,7 +58,7 @@
                        -invoke-ptr  invoke-ptr-twostep}])
 
 (defn rt-twostep-setup
-  "helper function for preparing twostep params"
+  "setup params for the twostep runtime"
   {:added "4.0"}
   ([lang program process exec]
    (rt-twostep-setup lang program process exec :twostep))
@@ -93,7 +93,7 @@
                                 :process process))))
 
 (defn rt-twostep
-  "creates a twostep runtime"
+  "creates an active twostep runtime"
   {:added "4.0"}
   [{:keys [id
            lang

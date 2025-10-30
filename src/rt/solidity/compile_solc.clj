@@ -291,7 +291,11 @@
                      refresh))
 
 (defn create-file-entry
-  "creates a compiled module contract entry"
+  "creates a file entry
+   
+   (compile/create-file-entry +rt+
+                              {:name \"USDT.sol\"
+                               :file \"resources/assets/rt.solidity/example/USDT.sol\"})"
   {:added "4.0"}
   [rt m & [refresh]]
   (create-base-entry rt (fn [input]

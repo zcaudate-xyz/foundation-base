@@ -120,3 +120,10 @@
       [-/task-by-name "hello"]
     {:limit 10})
   => string?)
+
+
+^{:refer rt.postgres.script.graph/g:where :added "4.0"}
+(fact "TODO")
+
+^{:refer rt.postgres.script.graph/g:exists :added "4.0"}
+(fact "TODO")

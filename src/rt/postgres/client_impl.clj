@@ -93,7 +93,7 @@
 (defn invoke-ptr-pg-single
   "invokes single"
   {:added "4.0"}
-    [{:keys [instance] :as pg} ptr args]
+  [{:keys [instance] :as pg} ptr args]
     (let [{:keys [bulk]} (meta args)
           add-select (prepend-select-check ptr args)
           body (ptr/ptr-invoke-string

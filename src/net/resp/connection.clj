@@ -301,7 +301,7 @@
 (defmacro with-test:connection
   "creates an runs statements using a test connection
  
-   (with-connection [conn {:port 17000}]
+   (with-connection [conn {:port 17001}]
      (cc/bulk conn
              (fn []
                (cc/req conn [\"FLUSHDB\"])
@@ -318,7 +318,7 @@
 (defmacro with-connection
   "creates a temporary connection and runs code
  
-   (with-connection [conn  {:port 17000}]
+   (with-connection [conn  {:port 17001}]
      (cc/bulk conn
              (fn []
                (cc/req conn [\"FLUSHDB\"])

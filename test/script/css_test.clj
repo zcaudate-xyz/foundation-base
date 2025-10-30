@@ -17,7 +17,7 @@
   => "node {\n  bold: true;\n  color: black;\n}\nh1 {\n  align: left;\n}")
 
 ^{:refer script.css/parse-pair :added "3.0"}
-(fact "parses a single CSS style string (e.g., \"bold: true\") into a keyword-string pair (e.g., [:bold \"true\"])")
+(fact "parses a single CSS style string (e.g., \"bold: true\") into a keyword-string pair (e.g., [:bold \"true\"])"
 
   (parse-pair "bold: true")
   => [:bold "true"])

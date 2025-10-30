@@ -165,6 +165,8 @@
       (h/error "Extra keys in map" ks-errored))))
 
 (defn collect-module-ns-select
+  "TODO"
+  {:added "4.0"}
   [ns selection]
   (let [{:keys [default]} selection
         selected (first (keep (fn [[kns value]]

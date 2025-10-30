@@ -67,7 +67,7 @@
   => {:is code.query.common/any})
 
 ^{:refer code.query.compile/compile-section :added "3.0"}
-(fact "compiles a query section based on direction, context, and element details")
+(fact "compiles a query section based on direction, context, and element details"
   (compile-section :up nil '{:element if, :type :nth, :step 3})
   => '{:nth-ancestor [3 {:form if}]}
 
@@ -75,7 +75,7 @@
   => '{:contains {:form if}})
 
 ^{:refer code.query.compile/compile-submap :added "3.0"}
-(fact "compiles a nested sub-query map based on traversal direction and a processed path")
+(fact "compiles a nested sub-query map based on traversal direction and a processed path"
   (compile-submap :down (process-path '[if try]))
   => '{:child {:child {:form if}, :form try}}
 
@@ -83,7 +83,7 @@
   => '{:parent {:parent {:form defn}, :form if}})
 
 ^{:refer code.query.compile/prepare :added "3.0"}
-(fact "prepares a query vector by compiling its sections and identifying cursor positions")
+(fact "prepares a query vector by compiling its sections and identifying cursor positions"
   (prepare '[defn if])
   => '[{:child {:form if}, :form defn} [nil :cursor]]
 

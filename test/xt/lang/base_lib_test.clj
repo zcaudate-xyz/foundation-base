@@ -3274,3 +3274,13 @@
                    {"data" 2}]))
 
 (comment)
+
+
+^{:refer xt.lang.base-lib/path-fn :added "4.0"}
+(fact "TODO")
+
+^{:refer xt.lang.base-lib/eq-shallow :added "4.0"}
+(fact "TODO")
+
+^{:refer xt.lang.base-lib/str-rand :added "4.0"}
+(fact "TODO")

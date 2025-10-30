@@ -471,7 +471,7 @@
   (return out))
 
 (defn.xt arr-find
-  "reverses the array"
+  "finds first index matching predicate"
   {:added "4.0"}
   [arr pred]
   (k/for:array [[i v] arr]
@@ -1197,7 +1197,7 @@
             (return curr))))
 
 (defn.xt path-fn
-  "creates a key access function"
+  "TODO"
   {:added "4.0"}
   ([path]
    (return
@@ -1326,7 +1326,7 @@
            nil)))
 
 (defn.xt eq-shallow
-  "checking for nested equality"
+  "TODO"
   {:added "4.0"}
   [obj m]
   (return (-/eq-nested-loop
@@ -1647,7 +1647,7 @@
   (return out))
 
 (defn.xt str-rand
-  "splits a long string"
+  "TODO"
   {:added "4.0"}
   [n]
   (var choices ["A" "B" "C" "D" "E" "F" "G" "H" "I" "J" "K" "L" "M" "N"

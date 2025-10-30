@@ -40,7 +40,7 @@
   (test-frameworks 'clojure.test) => :clojure)
 
 ^{:refer code.framework.common/analyse-test :added "3.0"}
-(fact "serves as the entry point for analyzing test code, taking a test framework keyword and a parsed code structure")
+(fact "serves as the entry point for analyzing test code, taking a test framework keyword and a parsed code structure"
 
   (analyse-test :fact
                 (nav/parse-root (slurp "test/code/framework_test.clj"))))

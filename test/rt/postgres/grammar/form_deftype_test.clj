@@ -230,3 +230,7 @@
 
 ^{:refer rt.postgres.grammar.form-deftype/pg-deftype-hydrate-hook :added "4.0"}
 (fact "updates the application schema")
+
+
+^{:refer rt.postgres.grammar.form-deftype/pg-deftype-primaries :added "4.0"}
+(fact "TODO")

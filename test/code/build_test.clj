@@ -10,7 +10,7 @@
 (fact "gets dependencies for a given file")
 
 ^{:refer code.build/build-prep :added "4.0"}
-(fact "prepares the build environment or data structures for a given namespace, returning a vector of prepared items")
+(fact "prepares the build environment or data structures for a given namespace, returning a vector of prepared items"
 
   (build-prep 'std.lang)
   => vector?)

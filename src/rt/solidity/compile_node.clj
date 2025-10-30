@@ -31,7 +31,7 @@
            :address address)))
 
 (defn rt-set-contract
-  "TODO"
+  "sets the compiled contract"
   {:added "4.0"}
   [address m & [rt]]
   (let [rt (:node (or rt (l/rt (.getName *ns*) :solidity)))
@@ -70,7 +70,10 @@
          (rt-get-caller-private-key rt))))
 
 (defn rt:node-get-block-number
-  "TODO"
+  "gets the current block number
+ 
+   (compile-node/rt:node-get-block-number)
+   => number?"
   {:added "4.0"}
   [& [rt]]
   (compile-solc/compile-rt-eval
@@ -101,7 +104,7 @@
                      []))
 
 (defn rt:send-wei
-  "TODO"
+  "sends wei to another address"
   {:added "4.0"}
   [to-address amount & [rt]]
   (compile-solc/compile-rt-eval

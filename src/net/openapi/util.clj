@@ -4,7 +4,7 @@
             [net.openapi.params :as params]))
 
 (defn call-api
-  "TODO"
+  "Call an API by making HTTP request and return its response."
   {:added "4.0"}
   [path method {:keys [path-params
                        query-params

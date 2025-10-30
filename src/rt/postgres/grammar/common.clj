@@ -69,7 +69,7 @@
      (apply list op (with-meta sym msym) body)]))
 
 (defn pg-policy-format
-  "formats a defn form"
+  "TODO"
   {:added "4.0"}
   ([form]
    (let [[mdefn [op sym [table] policy]] (grammar-spec/format-defn form)
@@ -222,7 +222,7 @@
 ;;
 
 (defn pg-entry-literal
-  "TODO"
+  "creates an entry literal"
   {:added "4.0"}
   ([entry]
    (let [{:static/keys [schema]
@@ -386,7 +386,7 @@
 ;;
 
 (defn pg-deftrigger
-  "deftrigger block"
+  "TODO"
   {:added "4.0"}
   [[_ sym doc? attr? [table] body :as form]]
   (let [[{:keys [doc]

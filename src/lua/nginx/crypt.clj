@@ -21,11 +21,13 @@
             :max-salt 22}})
 
 (defn.lua crypt
+  "same functionality as postgres crypt"
   {:added "4.0"}
   [key salt]
   (return (ngxcryptcore.crypt key salt)))
 
 (defn.lua gen-salt
+  "generates salt compatible with pgcrypto libraries"
   {:added "4.0"}
   [method]
   (var #{prefix

@@ -31,7 +31,7 @@
       tmeta)))
 
 (defn route-map
-  "lists all routes"
+  "TODO"
   {:added "4.0"}
   [& [ns]]
   (into {}

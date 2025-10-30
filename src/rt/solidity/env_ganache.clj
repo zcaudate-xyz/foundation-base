@@ -71,7 +71,7 @@
 (defonce ^:dynamic *server* (atom nil))
 
 (defn start-ganache-server
-  "starts the ganache server in a given directory"
+  "starts the ganache service"
   {:added "4.0"}
   []
   (or @*server*
@@ -106,7 +106,7 @@
                 @*server*))))))
 
 (defn stop-ganache-server
-  "stop the ganache server"
+  "stops the ganache service"
   {:added "4.0"}
   []
   (let [{:keys [type process] :as entry} @*server*]

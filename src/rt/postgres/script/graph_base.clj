@@ -149,7 +149,7 @@
      (main/t-count-raw [entry tsch mopts] (assoc params :where where)))))
 
 (defn exists-fn
-  "constructs exists-fn"
+  "TODO"
   {:added "4.0"}
   ([spec-sym {:keys [where] :as params}]
    (let [[entry tsch mopts] (base/prep-table spec-sym true (l/macro-opts))

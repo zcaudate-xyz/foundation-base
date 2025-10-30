@@ -25,10 +25,14 @@
   (compile/compile mcfg :default))
 
 (defn changed-files
+  "gets changed files from result"
+  {:added "4.0"}
   [build-result]
   (vec (filter string? (h/flatten-nested build-result))))
 
 (defn is-changed?
+  "checks that project result is changed"
+  {:added "4.0"}
   [build-result]
   (not (empty? (filter string? (h/flatten-nested build-result)))))
 

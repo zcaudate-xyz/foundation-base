@@ -12,18 +12,22 @@
   {:macro-only true})
 
 (defmacro.pg create-role
+  "creates a role"
+  {:added "4.0"}
   [role]
   (pop (common/block-do-suppress
         [:create-role role \;])))
 
 (defmacro.pg alter-role-bypassrls
+  "TODO"
+  {:added "4.0"}
   [role]
   (pop (common/block-do-suppress
         [:alter-role role :bypassrls \;])))
 
 (defmacro.pg grant-public
-  "grants the schema to be in public"
-  {:added "0.1"}
+  "grants public access to schema"
+  {:added "4.0"}
   [schema]
   `(do [:grant-usage-on-schema ~schema
         :to ~''[anon authenticated service_role]]
@@ -34,30 +38,30 @@
         ~''[anon authenticated service_role]]))
 
 (defmacro.pg revoke-execute-privileges-from-public
-  "revokes public prvilages"
-  {:added "0.1"}
+  "revotes execute privileges"
+  {:added "4.0"}
   [schema]
   `[:alter-default-privileges-for-role ~'postgres
     :in-schema ~schema
     :revoke-execute-on-functions-from-public])
 
 (defmacro.pg grant-usage
-  "grants usage to a schema"
-  {:added "0.1"}
+  "grants usage on a schema"
+  {:added "4.0"}
   [schema & [roles]]
   `[:grant-usage-on-schema ~schema
     :to ~(or roles ''[anon authenticated service_role])])
 
 (defmacro.pg grant-tables
-  "grants table access to schema"
-  {:added "0.1"}
+  "grants table access on a schema"
+  {:added "4.0"}
   [schema & [roles]]
   `[:grant-all-on-all-tables-in-schema ~schema
     :to ~(or roles ''[anon authenticated service_role])])
 
 (defmacro.pg grant-privileges
-  "grants privileges to a schema"
-  {:added "0.1"}
+  "grants privileges on a schema"
+  {:added "4.0"}
   [schema & [roles]]
   `[:alter-default-privileges-for-role ~'postgres
     :in-schema ~schema
@@ -65,8 +69,8 @@
     ~(or roles ''[anon authenticated service_role])])
 
 (defmacro.pg grant-all
-  "grants all acess to multiple schemas"
-  {:added "0.1"}
+  "grants privileges on a schema"
+  {:added "4.0"}
   [schemas & [roles access]]
   (let [roles (or roles '[anon authenticated service_role])
         {:keys [usage
@@ -86,43 +90,43 @@
 
 (defmacro.pg
   auth-uid
-  "returns the superbase uid"
-  {:added "0.1"}
+  "calls auth.uid()"
+  {:added "4.0"}
   []
   '(auth.uid))
 
 (defmacro.pg
   auth-email
-  "returns the superbase email"
-  {:added "0.1"}
+  "calls auth.email()"
+  {:added "4.0"}
   []
   '(auth.email))
 
 (defmacro.pg
   auth-role
-  "returns the user role"
-  {:added "0.1"}
+  "calls auth.role()"
+  {:added "4.0"}
   []
   '(auth.role))
 
 (defmacro.pg
   auth-jwt
-  "returns the superbase jtw"
-  {:added "0.1"}
+  "calls auth.jwt()"
+  {:added "4.0"}
   []
   '(auth.jwt))
 
 (defmacro.pg ^{:- [:boolean]}
   is-supabase
-  "checks if supabase is installed"
-  {:added "0.1"}
+  "checks that supabase is installed"
+  {:added "4.0"}
   []
   (list 'exists
         [:select 1 :from 'information_schema.schemata :where {:schema-name "auth"}]))
 
 (defmacro.pg
   raise
-  "raises a json error with value"
+  "raises an error"
   {:added "4.0"}
   ([message detail
     & [{:keys [http-status
@@ -141,6 +145,8 @@
 
 (defmacro.pg ^{:- [:block]}
   show-roles
+  "show supabase role information"
+  {:added "4.0"}
   []
   [:select ''[rolname rolsuper rolbypassrls rolcanlogin]
    :from  'pg_roles
@@ -149,12 +155,16 @@
                           "anon")])
 
 (defn process-return
+  "TODO"
+  {:added "4.0"}
   [ret]
   (if (= ret "")
     nil
     ret))
 
 (defn get-form-type
+  "gets the form type"
+  {:added "4.0"}
   [form]
   (cond (string? form)
         :text
@@ -197,6 +207,8 @@
                  {:form form})))
 
 (defmacro with-role-single
+  "TODO"
+  {:added "4.0"}
   [[role type] form]
   (let [role (case role
                :admin 'service_role
@@ -219,6 +231,15 @@
                                            :message 'e_msg})))))))
 
 (defmacro with-role
+  "executes a statement with role
+  (macroexpand-1 ' (s/with-role [anon :integer] (+ 1 2 3)))
+  => '(!.pg
+       (try
+         [:set-local-role anon]
+         (let [(:integer out) (+ 1 2 3)]
+           (return out))
+        (catch others (return {:code SQLSTATE, :message SQLERRM}))))"
+  {:added "4.0"}
   [[role type] & forms]
   (let [res (mapv (fn [form]
                     (list `with-role-single
@@ -232,6 +253,8 @@
           res)))
 
 (defmacro with-auth-single
+  "TODO"
+  {:added "4.0"}
   [[user-id type] form]
   (let [type (or type (get-form-type form))]
     (list `process-return
@@ -249,6 +272,24 @@
                                            :message 'SQLERRM})))))))
 
 (defmacro with-auth
+  "TODO
+ 
+   (macroexpand-1
+    '(s/with-auth [\"00000000-0000-0000-0000-000000000000\"
+                   :integer]
+       (+ 1 2 3)))
+   => '(!.pg
+        (try
+          [:set-local-role authenticated]
+          [:perform
+          (set-config
+            \"request.jwt.claim.sub\"
+            \"00000000-0000-0000-0000-000000000000\"
+            true)]
+          (let [(:integer out) (+ 1 2 3)]
+            (return out))
+          (catch others (return {:code SQLSTATE, :message SQLERRM}))))"
+  {:added "4.0"}
   [[user-id type] & forms]
   (let [res (mapv (fn [form]
                     (list `with-auth-single
@@ -262,6 +303,8 @@
           res)))
 
 (defmacro with-super-single
+  "TODO"
+  {:added "4.0"}
   [[user-id type] form]
   (let [type (or type (get-form-type form))]
     (list `process-return
@@ -284,6 +327,8 @@
                                            :message 'SQLERRM})))))))
 
 (defmacro with-super
+  "TODO"
+  {:added "4.0"}
   [[user-id type] & forms]
   (let [res (mapv (fn [form]
                     (list `with-super-single
@@ -304,6 +349,8 @@
 ;;
 
 (defn transform-entry-defn
+  "transforms a defn entry"
+  {:added "4.0"}
   [body {:keys [grammar
                 entry
                 mopts]
@@ -338,6 +385,8 @@
           :else body)))
 
 (defn transform-entry-deftype
+  "transforms a deftype"
+  {:added "4.0"}
   [body {:keys [grammar
                 entry
                 mopts]
@@ -382,6 +431,8 @@
          (str/join "\n"))))
 
 (defn transform-entry
+  "transforms a book entry"
+  {:added "4.0"}
   [body {:keys [grammar
                 entry
                 mopts]
@@ -397,6 +448,8 @@
 ;;
 
 (defn api-call
+  "calls an api"
+  {:added "4.0"}
   [{:keys [key
            host
            route
@@ -436,6 +489,8 @@
               (select-keys [:status :body])))))
 
 (defn api-rpc
+  "calls the rpc"
+  {:added "4.0"}
   [{:keys [fn
            args]
     :as opts}]
@@ -450,6 +505,8 @@
     (api-call opts args)))
 
 (defn api-select-all
+  "does a select all call"
+  {:added "4.0"}
   [table & [opts]]
   (let [{:keys [id]
          :static/keys [schema]} (deref table)
@@ -463,6 +520,8 @@
     (api-call opts {})))
 
 (defn api-signup
+  "sign up via supabase api"
+  {:added "4.0"}
   [{:keys [email
            password]
     :as body}
@@ -472,6 +531,8 @@
             body))
 
 (defn api-signin
+  "sign in via supabase api"
+  {:added "4.0"}
   [{:keys [email
            password]
     :as body}
@@ -481,6 +542,8 @@
             body))
 
 (defn api-signup-create
+  "TODO"
+  {:added "4.0"}
   [{:keys [email
            password
            user-metadata]
@@ -492,6 +555,8 @@
             body))
 
 (defn api-signup-delete
+  "remove user via supabase api"
+  {:added "4.0"}
   [uid & [opts]]
   (api-call (merge opts
                    {:method :delete
@@ -500,6 +565,8 @@
             {}))
 
 (defn api-impersonate
+  "inpersonates a user"
+  {:added "4.0"}
   [uid
    & [opts]]
   (api-call (merge opts

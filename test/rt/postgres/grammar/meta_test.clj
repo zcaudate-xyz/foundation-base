@@ -86,3 +86,10 @@
   
   (classify-ptr builtin/acosd)
   => '["acosd" "public" nil nil def$])
+
+
+^{:refer rt.postgres.grammar.meta/has-policy :added "4.0"}
+(fact "TODO")
+
+^{:refer rt.postgres.grammar.meta/drop-policy :added "4.0"}
+(fact "TODO")

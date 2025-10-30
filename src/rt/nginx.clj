@@ -63,19 +63,13 @@
         (h/map-vals (comp set (partial map first))))))
 
 (defn all-nginx-active
-  "gets all active nginx processes for a port
- 
-   (all-nginx-active 1000)
-   => (any vector? nil?)"
+  "gets all active nginx processes for a port"
   {:added "4.0"}
   [port]
   (get (all-nginx-ports) port))
 
 (defn make-conf
-  "creates a config
- 
-   (make-conf nil)
-   => string?"
+  "creates a config"
   {:added "4.0"}
   [{:keys [conf-fn] :as rt}]
   (let [conf-fn (cond (nil? conf-fn) config/create-conf
@@ -90,10 +84,7 @@
     conf))
 
 (defn make-temp
-  "makes a temp directory and conf
- 
-   (make-temp {})
-   => vector?"
+  "makes a temp directory and conf"
   {:added "4.0"}
   [rt]
   (let [conf     (make-conf rt)
@@ -103,6 +94,8 @@
     [tmp-dir tmp-file conf]))
 
 (defn start-test-server-shell
+  "starts in shell"
+  {:added "4.0"}
   [{:keys [port]
     :as rt}]
   (let [[tmp-dir tmp-file] (make-temp rt)
@@ -123,7 +116,7 @@
           [:started tmp-dir tmp-file])))
 
 (defn start-test-server-container
-  "starts the test server for a given port"
+  "starts in container"
   {:added "4.0"}
   ([{:keys [port container]
      :as rt}]

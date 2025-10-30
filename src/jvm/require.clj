@@ -3,7 +3,7 @@
   (:refer-clojure :exclude [load resolve]))
 
 (defn force-require
-  "forces requiring on namespaces until compilation error occurs"
+  "a more flexible require, reloading namespaces if errored"
   {:added "4.0"}
   ([ns]
    (force-require ns []))

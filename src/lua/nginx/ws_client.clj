@@ -8,7 +8,7 @@
    :import [["resty.websocket.client" :as ngxwsclient]]})
 
 (defmacro.lua new
-  "creates a new lua client"
+  "creates a new ws client"
   {:added "4.0"}
   []
   '(. ngxwsclient (new)))

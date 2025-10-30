@@ -29,6 +29,8 @@
      bulk-order]))
 
 (defn make-bulk-build
+  "build make bulk datastructure"
+  {:added "4.0"}
   [m]
   (let [{:keys [name
                 refresh
@@ -127,6 +129,8 @@
      :total ms-total}))
 
 (defn make-bulk-container-filter
+  "TODO"
+  {:added "4.0"}
   [configs containers]
   (let [containers (set containers)]
     (h/filter-vals (fn [{:keys [instance]}]
@@ -136,6 +140,8 @@
                    configs)))
 
 (defn make-bulk-container-build
+  "TODO"
+  {:added "4.0"}
   [configs & [containers opts]]
   (let [ks  (vec (keys
                   (if (not-empty containers)

@@ -31,7 +31,7 @@
                           opts)))
 
 (defn.xt table-delete-single
-  "generates single update statement"
+  "generates single delete statement"
   {:added "4.0"}
   [schema table-name id opts]
   (var cols  (base-schema/table-columns schema table-name))

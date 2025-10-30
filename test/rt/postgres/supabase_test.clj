@@ -177,3 +177,25 @@
 
 ^{:refer rt.postgres.supabase/api-impersonate :added "4.0"}
 (fact "inpersonates a user")
+
+
+^{:refer rt.postgres.supabase/alter-role-bypassrls :added "4.0"}
+(fact "TODO")
+
+^{:refer rt.postgres.supabase/process-return :added "4.0"}
+(fact "TODO")
+
+^{:refer rt.postgres.supabase/with-role-single :added "4.0"}
+(fact "TODO")
+
+^{:refer rt.postgres.supabase/with-auth-single :added "4.0"}
+(fact "TODO")
+
+^{:refer rt.postgres.supabase/with-super-single :added "4.0"}
+(fact "TODO")
+
+^{:refer rt.postgres.supabase/with-super :added "4.0"}
+(fact "TODO")
+
+^{:refer rt.postgres.supabase/api-signup-create :added "4.0"}
+(fact "TODO")

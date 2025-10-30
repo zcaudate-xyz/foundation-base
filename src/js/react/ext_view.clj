@@ -299,6 +299,8 @@
                    (return res)))))))))
 
 (defn.js refreshArgsFn
+  "creates the refresh args function"
+  {:added "4.0"}
   [view args opts]
   (cond (k/arr-every args k/not-nil?)
         (return

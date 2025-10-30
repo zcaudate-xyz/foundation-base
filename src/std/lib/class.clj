@@ -166,10 +166,14 @@
 (defn ancestor:tree
   "Lists the hierarchy of bases and interfaces of a class.
    (ancestor:tree Class)
-   => [[java.lang.Object #{java.io.Serializable
-                           java.lang.reflect.Type
-                           java.lang.reflect.AnnotatedElement
-                           java.lang.reflect.GenericDeclaration}]]"
+   => [[java.lang.Object
+        #{java.lang.constant.Constable
+          java.lang.invoke.TypeDescriptor
+          java.lang.reflect.GenericDeclaration
+          java.io.Serializable
+          java.lang.reflect.Type
+          java.lang.reflect.AnnotatedElement
+          java.lang.invoke.TypeDescriptor$OfField}]]"
   {:added "3.0"}
   ([cls] (ancestor:tree cls []))
   ([^Class cls output]
@@ -183,10 +187,12 @@
  
    (ancestor:all String)
    => #{java.lang.CharSequence
-        java.io.Serializable
-        java.lang.Object
+        java.lang.constant.ConstantDesc
+        java.lang.constant.Constable
+        java.lang.Comparable
         java.lang.String
-        java.lang.Comparable}"
+        java.io.Serializable
+        java.lang.Object}"
   {:added "3.0"}
   ([cls]
    (let [bases (ancestor:list cls)

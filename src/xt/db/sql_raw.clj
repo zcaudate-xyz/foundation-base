@@ -76,7 +76,7 @@
                   ";"))))
 
 (defn.xt raw-update
-  "encodes a delete query"
+  "encodes an update query"
   {:added "4.0"}
   ([table-name where-params data opts]
    (var table-fn   (k/get-key opts "table_fn" k/identity))

@@ -37,6 +37,8 @@
 (def ^{:arglists '([conn])} client:kill  (h/wrap-stop  pool/pool:kill  (client-steps)))
 
 (defn client-string
+  "creates a cliet string"
+  {:added "4.0"}
   [{:keys [host port pool]}]
   (str "#rt.redis.client " (merge {:host host :port port}
                                    (h/comp:info pool))))
@@ -55,11 +57,7 @@
 (def ^{:arglists '([conn])} client:start (h/wrap-start client-start (client-steps)))
 
 (defn client-create
-  "creates a redis client
- 
-   (r/client:create {:id \"localhost\"
-                     :port 17000})
-   => r/client?"
+  "creates a redis client"
   {:added "3.0"}
   ([{:keys [id env mode host port] :as m}]
    (let [id   (or id (h/sid))

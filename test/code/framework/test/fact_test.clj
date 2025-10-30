@@ -6,7 +6,7 @@
             [std.lib :as h]))
 
 ^{:refer code.framework.test.fact/gather-fact-body :added "3.0"}
-(fact "extracts and formats the body of a `fact` form into docstring notation, used as a helper for `gather-fact`")
+(fact "extracts and formats the body of a `fact` form into docstring notation, used as a helper for `gather-fact`"
   (-> "(\n  (+ 1 1) => 2\n  (long? 3) => true)"
       nav/parse-string
       nav/down

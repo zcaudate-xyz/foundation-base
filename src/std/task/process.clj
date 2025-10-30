@@ -34,8 +34,15 @@
 (defn select-filter
   "matches given a range of filters
  
-   (select-filter #\"hello\" 'hello)
-   => \"hello\""
+   (select-filter #\"ello\" 'hello)
+   => true
+ 
+   (select-filter #\"^ello\" 'hello)
+   => false
+ 
+   (select-filter 'code 'code.test) => true
+ 
+   (select-filter 'hara 'spirit.common) => false"
   {:added "4.0"}
   [selector id]
   (cond (or (fn?  selector)

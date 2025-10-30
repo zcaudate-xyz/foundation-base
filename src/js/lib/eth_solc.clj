@@ -15,7 +15,7 @@
 (def$.js compile solc.compile)
 
 (defn.js contract-wrap-body
-  "wraps the body into a contract"
+  "wraps the body in a contract"
   {:added "4.0"}
   [code name prefix]
   (return

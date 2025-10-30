@@ -20,10 +20,7 @@
                         :pprint-str #(with-out-str (pprint/pprint %))}))
 
 (defn ns-sym
-  "returns the namespace symbol
- 
-   (ns-sym)
-   => 'std.lib.env-test"
+  "returns the namespace symbol"
   {:added "3.0"}
   ([]
    (if (instance? clojure.lang.Namespace *ns*)
@@ -31,9 +28,7 @@
      (throw (ex-info "Not a namespace" {:input *ns*})))))
 
 (defn ns-get
-  "gets a symbol in the current namespace
- 
-   (ns-get 'std.lib.env \"ns-get\")"
+  "gets a symbol in the current namespace"
   {:added "3.0"}
   ([sym]
    (ns-get clojure.core/*ns* sym))
@@ -51,10 +46,7 @@
    (#'clojure.core/serialized-require sym)))
 
 (defn dev?
-  "checks if current environment is dev
- 
-   (dev?)
-   => boolean?"
+  "checks if current environment is dev"
   {:added "3.0"}
   ([]
    (-> (try
@@ -63,21 +55,13 @@
        boolean)))
 
 (defn ^java.net.URL sys:resource
-  "finds a resource on class path
- 
-   (sys:resource \"std/lib.clj\")
-   => java.net.URL"
+  "finds a resource on class path"
   {:added "3.0"}
   ([n] (sys:resource n (.getContextClassLoader (Thread/currentThread))))
   ([n ^ClassLoader loader] (.getResource loader n)))
 
 (defn sys:resource-cached
-  "caches the operation on a resource call
- 
-   (sys:resource-cached (atom {})
-                        \"project.clj\"
-                        slurp)
-   => string?"
+  "caches the operation on a resource call"
   {:added "4.0"}
   [atom path f]
   (let [url   (sys:resource path)
@@ -99,10 +83,7 @@
   (atom {}))
 
 (defn sys:resource-content
-  "reads the content
- 
-   (sys:resource-content \"project.clj\")
-   => string?"
+  "reads the content"
   {:added "3.0"}
   ([path]
    (sys:resource-cached +sys:resource-content+
@@ -314,8 +295,8 @@
         @~'out))))
 
 (defmacro meter-out
-  "measure and prints time taken for a form"
-  {:added "3.0"}
+  "measures and output meter"
+  {:added "4.0"}
   ([& body]
    `(let [~'out (volatile! nil)]
       [(t/bench-ms {:no-gc true} (vreset! ~'out (do ~@body)))
@@ -350,10 +331,7 @@
 ;;
 
 (defn match-filter
-  "matches given a range of filters
- 
-   (match-filter #\"hello\" 'hello)
-   => \"hello\""
+  "matches given a range of filters"
   {:added "4.0"}
   [filt id]
   (cond (or (fn?  filt)
@@ -380,6 +358,8 @@
         (throw (ex-info "Filt not valid" {:filt filt}))))
 
 (defn dbg-print
+  "TODO"
+  {:added "4.0"}
   [ns-str {:keys [line column]} & args]
   (when (or *debug*
             (some (fn [filt]
@@ -393,6 +373,8 @@
       (local :pprint arg))))
 
 (defmacro dbg
+  "TODO"
+  {:added "4.0"}
   ([& body]
    (let [{:keys [line column]} (meta &form)]
      `(do (dbg-print ~(meta &form)
@@ -400,21 +382,29 @@
                      ~@body)))))
 
 (defmacro with:dbg
+  "TODO"
+  {:added "4.0"}
   [flag & body]
   `(binding [*debug* ~flag]
      ~@body))
 
 (defn dbg-global
+  "TODO"
+  {:added "4.0"}
   ([] *debug*)
   ([flag]
    (alter-var-root #'*debug* (fn [_] flag))))
 
 (defn dbg:add-filters
+  "TODO"
+  {:added "4.0"}
   ([& filters]
    (swap! +debug+
           (fn [coll] (apply conj coll filters)))))
 
 (defn dbg:remove-filters
+  "TODO"
+  {:added "4.0"}
   ([& filters]
    (swap! +debug+
           (fn [coll] (apply disj coll filters)))))

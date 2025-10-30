@@ -115,7 +115,7 @@
   (return (-/set-data box (initial) [])))
 
 (defn.xt merge-data
-  "sets data with a trigger"
+  "merges the data in the box"
   {:added "4.0"}
   [box path value]
   (var prev   (-/get-data box path))
@@ -124,7 +124,7 @@
    (-/set-data box path merged)))
 
 (defn.xt append-data
-  "sets data with a trigger"
+  "merges the data in the box"
   {:added "4.0"}
   [box path value]
   (var arr   (k/arr-clone (-/get-data box path)))

@@ -142,7 +142,35 @@
   (compile/types-add :module.graph #'compile-module-graph)) ;
 
 (defn compile-module-directory-single
-  "TODO"
+  "compiles a single directory file
+ 
+   (let [lib (impl/runtime-library)
+         snapshot    (lib/get-snapshot lib)
+         book        (snap/get-book snapshot :lua)]
+     (make/with:mock-compile
+       (compile-module-directory-single
+        'xt.lang.base-lib
+        {:lib         lib
+         :snapshot    snapshot
+        :book        book
+         :root-path   (std.fs/path \".\" \"xt/lang\"),
+         :root-output \".build/src\"}
+        {:lang :lua
+         :root   \".build\"
+         :target \"src\"
+         :file   \"pkg/file.lua\"
+         :main   'xt.lang.base-iter
+         :layout :flat
+         :entry {:label true}
+         :emit {:code {:link
+                       {:root-libs   \"LIBS\"
+                        :root-prefix \".\"
+                        :path-suffix \"lua\"
+                        :path-separator \"/\"
+                        :path-replace {}}}}})))
+   => (contains-in
+       [\".build/src/./LIBS/xt/lang/base-lib.lua\" 
+        string?])"
   {:added "4.0"}
   [ns
    {:keys [snapshot
