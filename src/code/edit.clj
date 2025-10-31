@@ -1,9 +1,10 @@
-(ns code.query.block
+(ns code.edit
   (:require [std.block.base :as base]
             [std.block.construct :as construct]
             [std.block.type :as type]
             [std.block.parse :as parse]
             [std.lib.zip :as zip]
+            [std.string :as str]
             [std.lib :as h])
   (:refer-clojure :exclude [next replace type]))
 
@@ -210,6 +211,12 @@
   ([string]
    (navigator (parse/parse-root string))))
 
+(defn parse-first
+  "parses the navigator from root string"
+  {:added "3.0"}
+  ([string]
+   (navigator (parse/parse-first string))))
+
 (defn parse-root-status
   "parses string and creates a navigator from status"
   {:added "3.0"}
@@ -226,6 +233,8 @@
         (zip/right-elements)
         (map base/block-string)
         (apply str))))
+
+
 
 (defn left-expression
   "returns the expression on the left"
@@ -256,6 +265,12 @@
   ([nav]
    (->> (zip/right-elements nav)
         (filter base/expression?))))
+
+(defn top
+  "moves to the top"
+  {:added "3.0"}
+  ([nav]
+   (zip/step-outside-most nav)))
 
 (defn left
   "moves to the left expression"
@@ -339,6 +354,12 @@
   {:added "3.0"}
   ([nav]
    (zip/find-next nav base/expression?)))
+
+(defn find-next
+  "moves tot the next token"
+  {:added "3.0"}
+  ([nav pred]
+   (zip/find-next nav pred)))
 
 (defn find-next-token
   "moves tot the next token"

@@ -2,7 +2,7 @@
   (:require [code.framework :as base]
             [std.string :as str]
             [code.query :as query]
-            [code.query.block :as nav]
+            [code.edit :as nav]
             [code.project :as project]))
 
 (defn list-transform

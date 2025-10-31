@@ -2,7 +2,7 @@
   (:use code.test)
   (:require [code.framework.test.fact :refer :all]
             [code.framework.docstring :as docstring]
-            [code.query.block :as nav]
+            [code.edit :as nav]
             [std.lib :as h]))
 
 ^{:refer code.framework.test.fact/gather-fact-body :added "3.0"}

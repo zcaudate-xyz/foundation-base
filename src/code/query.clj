@@ -4,7 +4,7 @@
             [code.query.match :as match]
             [code.query.traverse :as traverse]
             [code.query.walk :as walk]
-            [code.query.block :as nav])
+            [code.edit :as nav])
   (:refer-clojure :exclude [find]))
 
 (defn match

@@ -6,7 +6,7 @@
             [code.framework.test.clojure]
             [code.framework.test.fact]
             [code.framework.text :as text]
-            [code.query.block :as nav]
+            [code.edit :as nav]
             [code.query :as query]
             [std.fs :as fs]
             [code.project :as project]

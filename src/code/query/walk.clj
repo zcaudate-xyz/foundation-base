@@ -1,5 +1,5 @@
 (ns code.query.walk
-  (:require [code.query.block :as nav]
+  (:require [code.edit :as nav]
             [std.lib.zip :as zip]))
 
 (defn wrap-meta

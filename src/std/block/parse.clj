@@ -522,5 +522,13 @@
        (reader/read-repeatedly -parse type/eof-block?)
        (construct/root))))
 
+(defn parse-first
+  {:added "3.0"}
+  ([string]
+   (->> (parse-root string)
+        (base/block-children)
+        (filter type/code-block?)
+        (first))))
+
 (comment
   (def rdr (reader/create (slurp "test-scratch/gather.clj"))))

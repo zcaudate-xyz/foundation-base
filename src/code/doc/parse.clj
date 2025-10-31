@@ -1,7 +1,7 @@
 (ns code.doc.parse
   (:require [clojure.java.io :as io]
             [code.query :as query]
-            [code.query.block :as nav]
+            [code.edit :as nav]
             [code.doc.parse.check :as checks]
             [std.block :as block]))
 

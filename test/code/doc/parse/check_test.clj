@@ -3,7 +3,7 @@
   (:require [code.doc.parse.check :refer :all]
             [code.query :as query]
             [std.block.parse :as p]
-            [code.query.block :as nav]))
+            [code.edit :as nav]))
 
 ^{:refer code.doc.parse.check/wrap-meta :added "3.0"}
 (fact "helper function for navigating `^:meta` tags"
