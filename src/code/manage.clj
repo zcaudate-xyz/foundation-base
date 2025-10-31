@@ -491,7 +491,7 @@
                 [narrow]
                 (fn [nav]
                   (-> nav
-                      (code.query.block/swap update-fn)))))]}
+                      (code.edit/swap update-fn)))))]}
     params)))
 
 (comment

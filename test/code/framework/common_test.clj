@@ -3,7 +3,7 @@
   (:require [code.framework.common :refer :all]
             [code.framework.test.clojure]
             [code.framework.test.fact]
-            [code.query.block :as nav]
+            [code.edit :as nav]
             [std.block :as block]))
 
 ^{:refer code.framework.common/display-entry :added "3.0"}

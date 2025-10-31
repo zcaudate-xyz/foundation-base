@@ -1,6 +1,6 @@
-(ns code.query.block-test
+(ns code.edit-test
   (:use code.test)
-  (:require [code.query.block :refer :all]
+  (:require [code.edit :refer :all]
             [std.block.type :as type]
             [std.block.construct :as construct]
             [std.block.base :as base]
@@ -8,7 +8,7 @@
             [std.lib.zip :as zip])
   (:refer-clojure :exclude [next replace type]))
 
-^{:refer code.query.block/nav-template :added "3.0"}
+^{:refer code.edit/nav-template :added "3.0"}
 (fact "generates a navigation function definition from a given symbol and a block tag function"
   ^:hidden
 
@@ -19,7 +19,7 @@
          (clojure.core/if-let [elem (std.lib.zip/get zip)]
            (std.block.base/block-tag elem)))))
 
-^{:refer code.query.block/left-anchor :added "3.0" :class [:nav/primitive]}
+^{:refer code.edit/left-anchor :added "3.0" :class [:nav/primitive]}
 (fact "calculates the length to the last newline"
   ^:hidden
   
@@ -27,7 +27,7 @@
                    (zip/step-right)))
   => 3)
 
-^{:refer code.query.block/update-step-left :added "3.0" :class [:nav/primitive]}
+^{:refer code.edit/update-step-left :added "3.0" :class [:nav/primitive]}
 (fact "updates the step position to the left"
   ^:hidden
   
@@ -35,7 +35,7 @@
       (update-step-left (construct/block [1 2 3])))
   => {:position [0 0]})
 
-^{:refer code.query.block/update-step-right :added "3.0" :class [:nav/primitive]}
+^{:refer code.edit/update-step-right :added "3.0" :class [:nav/primitive]}
 (fact "updates the step position to the right"
   ^:hidden
   
@@ -43,7 +43,7 @@
       (update-step-right (construct/block [1 2 3])))
   => {:position [0 7]})
 
-^{:refer code.query.block/update-step-inside :added "3.0" :class [:nav/primitive]}
+^{:refer code.edit/update-step-inside :added "3.0" :class [:nav/primitive]}
 (fact "updates the step position to within a block"
   ^:hidden
   
@@ -51,13 +51,13 @@
       (update-step-inside (construct/block #{})))
   => {:position [0 2]})
 
-^{:refer code.query.block/update-step-inside-left :added "3.0" :class [:nav/primitive]}
+^{:refer code.edit/update-step-inside-left :added "3.0" :class [:nav/primitive]}
 (fact "updates the step position to within a block"
   (-> {:position [0 3]}
       (update-step-inside-left (construct/block #{})))
   => {:position [0 2]})
 
-^{:refer code.query.block/update-step-outside :added "3.0" :class [:nav/primitive]}
+^{:refer code.edit/update-step-outside :added "3.0" :class [:nav/primitive]}
 (fact "updates the step position to be outside a block"
   ^:hidden
   
@@ -68,7 +68,7 @@
         :position))
   => [0 7])
 
-^{:refer code.query.block/display-navigator :added "3.0" :class [:nav/primitive]}
+^{:refer code.edit/display-navigator :added "3.0" :class [:nav/primitive]}
 (fact "displays a string representing the navigator"
   ^:hidden
   
@@ -76,56 +76,56 @@
       (display-navigator))
   => "<0,0> |[1 2 3 4]")
 
-^{:refer code.query.block/navigator :added "3.0" :class [:nav/general]}
+^{:refer code.edit/navigator :added "3.0" :class [:nav/general]}
 (fact "creates a navigator for the block"
   ^:hidden
   
   (str (navigator [1 2 3 4]))
   => "<0,0> |[1 2 3 4]")
 
-^{:refer code.query.block/navigator? :added "3.0" :class [:nav/general]}
+^{:refer code.edit/navigator? :added "3.0" :class [:nav/general]}
 (fact "checks if object is navigator"
   ^:hidden
   
   (navigator? (navigator [1 2 3 4]))
   => true)
 
-^{:refer code.query.block/from-status :added "3.0" :class [:nav/general]}
+^{:refer code.edit/from-status :added "3.0" :class [:nav/general]}
 (fact "constructs a navigator from a given status"
   ^:hidden
   
   (str (from-status (construct/block [1 2 3 (construct/cursor) 4])))
   => "<0,7> [1 2 3 |4]")
 
-^{:refer code.query.block/parse-string :added "3.0" :class [:nav/general]}
+^{:refer code.edit/parse-string :added "3.0" :class [:nav/general]}
 (fact "creates a navigator from string"
   ^:hidden
   
   (str (parse-string "(2   #|   3  )"))
   => "<0,5> (2   |   3  )")
 
-^{:refer code.query.block/parse-root :added "3.0" :class [:nav/general]}
+^{:refer code.edit/parse-root :added "3.0" :class [:nav/general]}
 (fact "parses the navigator from root string"
   ^:hidden
   
   (str (parse-root "a b c"))
   => "<0,0> |a b c")
 
-^{:refer code.query.block/parse-root-status :added "3.0" :class [:nav/general]}
+^{:refer code.edit/parse-root-status :added "3.0" :class [:nav/general]}
 (fact "parses string and creates a navigator from status"
   ^:hidden
   
   (str (parse-root-status "a b #|c"))
   => "<0,6> a b |c")
 
-^{:refer code.query.block/root-string :added "3.0" :class [:nav/general]}
+^{:refer code.edit/root-string :added "3.0" :class [:nav/general]}
 (fact "returns the top level string"
   ^:hidden
   
   (root-string (navigator [1 2 3 4]))
   => "[1 2 3 4]")
 
-^{:refer code.query.block/left-expression :added "3.0" :class [:nav/general]}
+^{:refer code.edit/left-expression :added "3.0" :class [:nav/general]}
 (fact "returns the expression on the left"
   ^:hidden
   
@@ -135,7 +135,7 @@
       (base/block-value))
   => [1 2 3])
 
-^{:refer code.query.block/left-expressions :added "3.0" :class [:nav/general]}
+^{:refer code.edit/left-expressions :added "3.0" :class [:nav/general]}
 (fact "returns all expressions on the left"
   ^:hidden
   
@@ -148,7 +148,7 @@
        (mapv base/block-value))
   => [:a :b])
 
-^{:refer code.query.block/right-expression :added "3.0" :class [:nav/general]}
+^{:refer code.edit/right-expression :added "3.0" :class [:nav/general]}
 (fact "returns the expression on the right"
   ^:hidden
   
@@ -158,7 +158,7 @@
       (base/block-value))
   => [1 2 3])
 
-^{:refer code.query.block/right-expressions :added "3.0" :class [:nav/general]}
+^{:refer code.edit/right-expressions :added "3.0" :class [:nav/general]}
 (fact "returns all expressions on the right"
   ^:hidden
   
@@ -171,7 +171,7 @@
        (mapv base/block-value))
   => [:b :a])
 
-^{:refer code.query.block/left :added "3.0" :class [:nav/move]}
+^{:refer code.edit/left :added "3.0" :class [:nav/move]}
 (fact "moves to the left expression"
   ^:hidden
   
@@ -180,7 +180,7 @@
       str)
   => "<0,4> (1  |[1 2 3]    )")
 
-^{:refer code.query.block/left-most :added "3.0" :class [:nav/move]}
+^{:refer code.edit/left-most :added "3.0" :class [:nav/move]}
 (fact "moves to the left-most expression"
   ^:hidden
   
@@ -189,7 +189,7 @@
       str)
   => "<0,1> (|1  [1 2 3]  3 4   )")
 
-^{:refer code.query.block/left-most? :added "3.0" :class [:nav/move]}
+^{:refer code.edit/left-most? :added "3.0" :class [:nav/move]}
 (fact "checks if navigator is at left-most"
   ^:hidden
   
@@ -197,7 +197,7 @@
       (left-most?))
   => true)
 
-^{:refer code.query.block/right :added "3.0" :class [:nav/move]}
+^{:refer code.edit/right :added "3.0" :class [:nav/move]}
 (fact "moves to the expression on the right"
   ^:hidden
   
@@ -206,7 +206,7 @@
       str)
   => "<0,10> ([1 2 3]  |3 4  )")
 
-^{:refer code.query.block/right-most :added "3.0" :class [:nav/move]}
+^{:refer code.edit/right-most :added "3.0" :class [:nav/move]}
 (fact "moves to the right-most expression"
    ^:hidden
  
@@ -215,7 +215,7 @@
       str)
   => "<0,12> ([1 2 3]  3 |4  )")
 
-^{:refer code.query.block/right-most? :added "3.0" :class [:nav/move]}
+^{:refer code.edit/right-most? :added "3.0" :class [:nav/move]}
 (fact "checks if navigator is at right-most"
   ^:hidden
   
@@ -223,42 +223,42 @@
       (right-most?))
   => true)
 
-^{:refer code.query.block/up :added "3.0" :class [:nav/move]}
+^{:refer code.edit/up :added "3.0" :class [:nav/move]}
 (fact "navigates outside of the form"
   ^:hidden
   
   (str (up (from-status [1 [2 (construct/cursor) 3]])))
   => "<0,3> [1 |[2 3]]")
 
-^{:refer code.query.block/down :added "3.0" :class [:nav/move]}
+^{:refer code.edit/down :added "3.0" :class [:nav/move]}
 (fact "navigates into the form"
   ^:hidden
   
   (str (down (from-status [1 (construct/cursor) [2 3]])))
   => "<0,4> [1 [|2 3]]")
 
-^{:refer code.query.block/right* :added "3.0" :class [:nav/move]}
+^{:refer code.edit/right* :added "3.0" :class [:nav/move]}
 (fact "navigates to right element, including whitespace"
   ^:hidden
   
   (str (right* (from-status [(construct/cursor) 1 2])))
   => "<0,2> [1| 2]")
 
-^{:refer code.query.block/left* :added "3.0" :class [:nav/move]}
+^{:refer code.edit/left* :added "3.0" :class [:nav/move]}
 (fact "navigates to left element, including whitespace"
   ^:hidden
   
   (str (left* (from-status [1 (construct/cursor) 2])))
   => "<0,2> [1| 2]")
 
-^{:refer code.query.block/block :added "3.0" :class [:nav/general]}
+^{:refer code.edit/block :added "3.0" :class [:nav/general]}
 (fact "returns the current block"
   ^:hidden
   
   (block (from-status [1 [2 (construct/cursor) 3]]))
   => (construct/block 3))
 
-^{:refer code.query.block/prev :added "3.0" :class [:nav/move]}
+^{:refer code.edit/prev :added "3.0" :class [:nav/move]}
 (fact "moves to the previous expression"
   ^:hidden
   
@@ -267,7 +267,7 @@
       str)
   => "<0,7> ([1 2 [|3]] )")
 
-^{:refer code.query.block/next :added "3.0" :class [:nav/move]}
+^{:refer code.edit/next :added "3.0" :class [:nav/move]}
 (fact "moves to the next expression"
   ^:hidden
   
@@ -278,7 +278,7 @@
       str)
   => "<0,5> (  [[|3]]  )")
 
-^{:refer code.query.block/find-next-token :added "3.0" :class [:nav/move]}
+^{:refer code.edit/find-next-token :added "3.0" :class [:nav/move]}
 (fact "moves to the next token"
   ^:hidden
   
@@ -287,7 +287,7 @@
       str)
   => "<0,7> (  [[3 |2]]  )")
 
-^{:refer code.query.block/prev-anchor :added "3.0" :class [:nav/move]}
+^{:refer code.edit/prev-anchor :added "3.0" :class [:nav/move]}
 (fact "moves to the previous newline"
   ^:hidden
   
@@ -301,7 +301,7 @@
       (:position))
   => [0 0])
 
-^{:refer code.query.block/next-anchor :added "3.0" :class [:nav/move]}
+^{:refer code.edit/next-anchor :added "3.0" :class [:nav/move]}
 (fact "moves to the next newline"
   ^:hidden
   
@@ -310,7 +310,7 @@
       (:position))
   => [3 0])
 
-^{:refer code.query.block/left-token :added "3.0" :class [:nav/move]}
+^{:refer code.edit/left-token :added "3.0" :class [:nav/move]}
 (fact "moves to the left token"
   ^:hidden
   
@@ -319,7 +319,7 @@
       str)
   => "<0,1> (|1  {}  2 3 4)")
 
-^{:refer code.query.block/left-most-token :added "3.0" :class [:nav/move]}
+^{:refer code.edit/left-most-token :added "3.0" :class [:nav/move]}
 (fact "moves to the left-most token"
   ^:hidden
   
@@ -328,7 +328,7 @@
       str)
   "<0,10> (1  {}  2 |3 4)")
 
-^{:refer code.query.block/right-token :added "3.0" :class [:nav/move]}
+^{:refer code.edit/right-token :added "3.0" :class [:nav/move]}
 (fact "moves to the right token"
   ^:hidden
   
@@ -337,7 +337,7 @@
       str)
   => "<0,8> (1  {}  |2 3 4)")
 
-^{:refer code.query.block/right-most-token :added "3.0" :class [:nav/move]}
+^{:refer code.edit/right-most-token :added "3.0" :class [:nav/move]}
 (fact "moves to the right-most token"
   ^:hidden
   
@@ -346,7 +346,7 @@
       str)
   => "<0,10> (1  {}  2 |3 [4])")
 
-^{:refer code.query.block/prev-token :added "3.0" :class [:nav/move]}
+^{:refer code.edit/prev-token :added "3.0" :class [:nav/move]}
 (fact "moves to the previous token"
   ^:hidden
   
@@ -355,7 +355,7 @@
       str)
   => "<0,9> (1 (2 3 [|4]))")
 
-^{:refer code.query.block/next-token :added "3.0" :class [:nav/move]}
+^{:refer code.edit/next-token :added "3.0" :class [:nav/move]}
 (fact "moves to the next token"
   ^:hidden
   
@@ -364,7 +364,7 @@
       str)
   => "<0,3> ([[|1 2 3 4]])")
 
-^{:refer code.query.block/position-left :added "3.0" :class [:nav/move]}
+^{:refer code.edit/position-left :added "3.0" :class [:nav/move]}
 (fact "moves the cursor to left expression"
   ^:hidden
   
@@ -378,7 +378,7 @@
       str)
   => "<0,1> (|      3  )")
 
-^{:refer code.query.block/position-right :added "3.0" :class [:nav/move]}
+^{:refer code.edit/position-right :added "3.0" :class [:nav/move]}
 (fact "moves the cursor the right expression"
   ^:hidden
   
@@ -392,7 +392,7 @@
       str)
   => "<0,10> (2        |)")
 
-^{:refer code.query.block/tighten-left :added "3.0" :class [:nav/edit]}
+^{:refer code.edit/tighten-left :added "3.0" :class [:nav/edit]}
 (fact "removes extra spaces on the left"
   ^:hidden
   
@@ -411,7 +411,7 @@
       str)
   => "<0,1> (|)")
 
-^{:refer code.query.block/tighten-right :added "3.0" :class [:nav/edit]}
+^{:refer code.edit/tighten-right :added "3.0" :class [:nav/edit]}
 (fact "removes extra spaces on the right"
   ^:hidden
   
@@ -430,7 +430,7 @@
       str)
   => "<0,1> (|)")
 
-^{:refer code.query.block/tighten :added "3.0" :class [:nav/edit]}
+^{:refer code.edit/tighten :added "3.0" :class [:nav/edit]}
 (fact "removes extra spaces on both the left and right"
   ^:hidden
   
@@ -439,7 +439,7 @@
       str)
   => "<0,5> (1 2 |3 4)")
 
-^{:refer code.query.block/level-empty? :added "3.0" :class [:nav/edit]}
+^{:refer code.edit/level-empty? :added "3.0" :class [:nav/edit]}
 (fact "checks if current container has expressions"
   ^:hidden
   
@@ -447,7 +447,7 @@
       (level-empty?))
   => true)
 
-^{:refer code.query.block/insert-empty :added "3.0" :class [:nav/edit]}
+^{:refer code.edit/insert-empty :added "3.0" :class [:nav/edit]}
 (fact "inserts an element into an empty container"
   ^:hidden
   
@@ -456,7 +456,7 @@
       str)
   => "<0,1> (|1  )")
 
-^{:refer code.query.block/insert-right :added "3.0" :class [:nav/edit]}
+^{:refer code.edit/insert-right :added "3.0" :class [:nav/edit]}
 (fact "inserts an element to the right"
   ^:hidden
   
@@ -475,7 +475,7 @@
       str)
   => "<0,1> (|1  )")
 
-^{:refer code.query.block/insert-left :added "3.0" :class [:nav/edit]}
+^{:refer code.edit/insert-left :added "3.0" :class [:nav/edit]}
 (fact "inserts an element to the left"
   ^:hidden
   
@@ -494,7 +494,7 @@
       str)
   => "<0,1> (|1  )")
 
-^{:refer code.query.block/insert :added "3.0" :class [:nav/edit]}
+^{:refer code.edit/insert :added "3.0" :class [:nav/edit]}
 (fact "inserts an element at the current cursor position and moves the cursor past the inserted element"
   ^:hidden
   
@@ -513,16 +513,16 @@
       str)
   => "<0,1> (|1  )")
 
-^{:refer code.query.block/insert-all :added "3.0"}
+^{:refer code.edit/insert-all :added "3.0"}
 (fact "inserts all expressions into the block")
 
-^{:refer code.query.block/insert-newline :added "3.0"}
+^{:refer code.edit/insert-newline :added "3.0"}
 (fact "insert newline/s into the block")
 
-^{:refer code.query.block/insert-space :added "3.0"}
+^{:refer code.edit/insert-space :added "3.0"}
 (fact "insert space/s into the block")
 
-^{:refer code.query.block/delete-left :added "3.0" :class [:nav/edit]}
+^{:refer code.edit/delete-left :added "3.0" :class [:nav/edit]}
 (fact "deletes left of the current expression"
   ^:hidden
   
@@ -549,7 +549,7 @@
       str)
   => "<0,1> (|)")
 
-^{:refer code.query.block/delete-right :added "3.0" :class [:nav/edit]}
+^{:refer code.edit/delete-right :added "3.0" :class [:nav/edit]}
 (fact "deletes right of the current expression"
   ^:hidden
   
@@ -573,7 +573,7 @@
       str)
   => "<0,1> (|)")
 
-^{:refer code.query.block/delete :added "3.0" :class [:nav/edit]}
+^{:refer code.edit/delete :added "3.0" :class [:nav/edit]}
 (fact "deletes the current element"
   ^:hidden
   
@@ -592,7 +592,7 @@
       str)
   => "<0,1> (|)")
 
-^{:refer code.query.block/backspace :added "3.0" :class [:nav/edit]}
+^{:refer code.edit/backspace :added "3.0" :class [:nav/edit]}
 (fact "the reverse of insert"
   ^:hidden
   
@@ -606,7 +606,7 @@
       str)
   => "<0,1> (|2 3)")
 
-^{:refer code.query.block/replace :added "3.0" :class [:nav/edit]}
+^{:refer code.edit/replace :added "3.0" :class [:nav/edit]}
 (fact "replaces an element at the cursor"
   ^:hidden
   
@@ -617,7 +617,7 @@
   => "<0,4> (0  |:a   2 3)")
 
 
-^{:refer code.query.block/swap :added "3.0" :class [:nav/edit]}
+^{:refer code.edit/swap :added "3.0" :class [:nav/edit]}
 (fact "applies a function to the element at the current cursor position, replacing it with the result"
   ^:hidden
   
@@ -627,7 +627,7 @@
       str)
   => "<0,4> (0  |2   2 3)")
 
-^{:refer code.query.block/update-children :added "3.0" :class [:nav/edit]}
+^{:refer code.edit/update-children :added "3.0" :class [:nav/edit]}
 (fact "replaces the current children"
   ^:hidden
   
@@ -638,7 +638,7 @@
       str)
   => "<0,0> |[4 5]")
 
-^{:refer code.query.block/line-info :added "3.0" :class [:nav/general]}
+^{:refer code.edit/line-info :added "3.0" :class [:nav/general]}
 (fact "returns the line info for the current block"
   ^:hidden
   

@@ -96,7 +96,7 @@
 
 (comment
   (project/in-context (import))
-  (require '[code.query.block :as nav])
+  (require '[code.edit :as nav])
   (def nav (-> (nav/parse-root (slurp "src/hara/code/unit.clj"))
                (nav/down)))
 

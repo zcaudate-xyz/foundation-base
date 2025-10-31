@@ -1,7 +1,7 @@
 (ns code.doc.parse.check
   (:require [code.query :as query]
             [std.block :as block]
-            [code.query.block :as nav]))
+            [code.edit :as nav]))
 
 (def directives
   #{:article :file :reference :ns

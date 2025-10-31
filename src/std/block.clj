@@ -41,8 +41,10 @@
 
               parse/parse-string
               parse/parse-root
-
+              parse/parse-first
+              
               [void?      type/void-block?]
+              [code?      type/code-block?]
               [space?     type/space-block?]
               [linebreak? type/linebreak-block?]
               [linespace? type/linespace-block?]

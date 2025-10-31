@@ -15,20 +15,20 @@
                        (= 'n/Enclosed (second form))))]
                (fn [nav]
                  (let [forms  (->> nav
-                                   (code.query.block/children)
+                                   (code.edit/children)
                                    (filter (comp not std.block.type/void-block?))
                                    (drop 2))]
                    (-> nav
-                       (code.query.block/replace '())
-                       (code.query.block/down)
-                       (code.query.block/insert 'n/EnclosedCode)
+                       (code.edit/replace '())
+                       (code.edit/down)
+                       (code.edit/insert 'n/EnclosedCode)
                        (h/-> (reduce (fn [nav elem]
                                        (-> nav
-                                           (code.query.block/insert elem)
-                                           (code.query.block/insert-newline)))
+                                           (code.edit/insert elem)
+                                           (code.edit/insert-newline)))
                                      %
                                      forms))
-                       (code.query.block/up))))))]})
+                       (code.edit/up))))))]})
   
   (code.manage/locate-test
    :all

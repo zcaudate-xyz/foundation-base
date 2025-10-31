@@ -2,7 +2,7 @@
   (:require [std.string :as str]
             [code.project :as project]
             [std.block :as block]
-            [code.query.block :as nav]))
+            [code.edit :as nav]))
 
 (def ^:dynamic *path* nil)
 

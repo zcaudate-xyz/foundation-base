@@ -14,7 +14,7 @@ providing the building blocks for building more declarative and robust systems.
 - [benchmark](./hara-benchmark.html)
 - [code](./hara-code.html)
 - [code.block](./hara-code-block.html)
-- [code.query.block](./hara-code-navigate.html)
+- [code.edit](./hara-code-navigate.html)
 - [code.query](./hara-code-query.html)
 - [config](./hara-config.html)
 - [core](./hara-core.html)

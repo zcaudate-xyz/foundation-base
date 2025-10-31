@@ -1,7 +1,7 @@
 (ns code.framework.test.fact
   (:require [code.framework.common :as common]
             [code.query :as query]
-            [code.query.block :as nav]))
+            [code.edit :as nav]))
 
 (defn gather-fact-body
   "helper function for `gather-fact`

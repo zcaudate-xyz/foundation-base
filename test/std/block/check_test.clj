@@ -75,6 +75,13 @@
   (void? \newline)
   => true)
 
+^{:refer std.block.check/not-void? :added "3.0"}
+(fact "determines if an input is a void input"
+
+  (void? \newline)
+  => true)
+
+
 ^{:refer std.block.check/token-tag :added "3.0"}
 (fact "returns the tag associated with the input"
 

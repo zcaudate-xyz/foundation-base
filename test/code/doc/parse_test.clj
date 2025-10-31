@@ -1,7 +1,7 @@
 (ns code.doc.parse-test
   (:use code.test)
   (:require [code.doc.parse :refer :all]
-            [code.query.block :as nav]))
+            [code.edit :as nav]))
 
 ^{:refer code.doc.parse/parse-ns-form :added "3.0"}
 (fact "converts a ns zipper into an element"

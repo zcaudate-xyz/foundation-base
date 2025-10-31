@@ -389,3 +389,9 @@
   {:added "3.0"}
   ([tag string command]
    (->ModifierBlock tag string command)))
+
+(defn code-block?
+  [block]
+  (or (token-block? block)
+      (container-block? block)
+      (modifier-block? block)))

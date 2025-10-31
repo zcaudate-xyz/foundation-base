@@ -1,7 +1,7 @@
 (ns code.manage.unit.scaffold
   (:require [std.fs :as fs]
             [code.project :as project]
-            [code.query.block :as nav]
+            [code.edit :as nav]
             [std.block :as block]
             [std.string :as str]
             [std.lib :as h]))
