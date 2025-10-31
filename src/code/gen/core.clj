@@ -3,48 +3,6 @@
             [std.lib :as h]
             [std.string :as str]))
 
-(declare data->block)
-
-(defn data-list->blocks
-  "Helper to convert a list of data to a vector of blocks with spaces."
-  [coll]
-  (->> coll
-       (map data->block)
-       (interpose (b/space))
-       (apply vector)))
-
-(defn data->block
-  "TODO"
-  {:added "4.0"}
-  [data]
-  (cond
-    ;; Primitives
-    (symbol? data)  (b/block :token (str data))
-    (string? data)  (b/block :token (pr-str data)) ; Add quotes
-    (number? data)  (b/block :token (str data))
-    (keyword? data) (b/block :token (str data))
-    (nil? data)     (b/block :token "nil")
-
-    ;; Collections
-    (list? data)    (b/container (data-list->blocks data)
-                                 ;; Preserve original string-fn for parens
-                                 {:string-fn (fn [s] (str "(" s ")"))})
-    (vector? data)  (b/container (data-list->blocks data)
-                                 ;; Preserve original string-fn for brackets
-                                 {:string-fn (fn [s] (str "[" s "]"))})
-    
-    (map? data)     (let [kv-blocks (mapcat (fn [[k v]]
-                                             [(data->block k) (b/space) (data->block v)])
-                                           data)]
-                      (b/container (apply vector kv-blocks)
-                                   ;; Preserve original string-fn for braces
-                                   {:string-fn (fn [s] (str "{" s "}"))}))
-
-    ;; Handle data that is *already* a block
-    (b/block? data) data
-
-    :else (b/block :token (str data))))
-
 (defn splice-data->blocks
   "Converts a collection of data into a vector of blocks for splicing (~@).
    This is used for function bodies, argument lists, etc."
@@ -53,11 +11,12 @@
     (throw (Exception. (str "Splicing ~@ substitution requires a collection. Got: " (type data)))))
   
   (->> data
-       (map data->block)
+       (map b/block)
        ;; We can decide to join with spaces, or newlines.
        ;; Let's use newlines and indentation for function bodies.
        (interpose (b/newline))
        (apply vector)))
+
 
 (defn walk-and-substitute
   "Walks the template AST and substitutes data from the bindings map."
@@ -74,7 +33,7 @@
               v (get bindings k)]
           (if (nil? v)
             (throw (Exception. (str "Splicing binding not found for: " k)))
-            (splice-data->blocks v))) ; Returns a vector of blocks
+            (splice-data->blocks v)))   ; Returns a vector of blocks
 
         ;; 3. Single substitution: ~name
         (str/starts-with? val-str "~")
@@ -82,7 +41,7 @@
               v (get bindings k)]
           (if (nil? v)
             (throw (Exception. (str "Binding not found for: " k)))
-            (data->block v))) ; Returns a single block
+            (b/block v)))               ; Returns a single block
 
         ;; 4. Not a substitution, return as-is
         :else block))
@@ -110,16 +69,13 @@
   {:added "4.0"}
   [resource-path]
   (if-let [url (h/sys:resource resource-path)]
-    (-> (h/slurp url)
-        (b/parse-string))
+    (-> (slurp url)
+        (b/parse-root))
     (throw (Exception. (str "Template file not found on classpath: " resource-path)))))
 
 (defn generate
   "TODO"
   {:added "4.0"}
-  my/templates/def_greeter.block.clj"
-             {:name 'hello}
-             {:preprocess-fn (fn [b] (assoc b :doc-extra "(preprocessed)"))})"
   [template-path bindings-map & [opts]]
   (let [;; Get the preprocess-fn from opts, default to identity
         preprocess-fn    (get opts :preprocess-fn identity)
