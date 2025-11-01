@@ -14,7 +14,8 @@
 
 (def ^:dynamic *local* true)
 
-(defonce +local+ (atom {:println clojure.core/println
+(defonce +local+ (atom {:print clojure.core/print
+                        :println clojure.core/println
                         :prn clojure.core/prn
                         :pprint pprint/pprint
                         :pprint-str #(with-out-str (pprint/pprint %))}))
@@ -151,6 +152,12 @@
   {:added "3.0"}
   ([& args]
    (apply local :println args)))
+
+(defn pr
+  "shortcut to `(local :println)`"
+  {:added "3.0"}
+  ([& args]
+   (apply local :print args)))
 
 (defn pp-str
   "pretty prints a string"

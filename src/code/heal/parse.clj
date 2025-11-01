@@ -3,7 +3,7 @@
 
 (defn- delimiter-info [char]
   (case char
-    \( {:type :open, :style :paren}
+    \( {:type :open, :style :paren }
     \) {:type :close, :style :paren}
     \[ {:type :open, :style :square}
     \] {:type :close, :style :square}
@@ -11,71 +11,68 @@
     \} {:type :close, :style :curly}
     nil))
 
-(defn catalog-delimiters-in-string
-  "Reads a Clojure string and catalogs the delimiters, tracking their line and column.
-   Accounts for single-line comments (;) and strings."
+(defn parse-delimiters
+  "gets all the delimiters in the file"
+  {:added "4.0"}
   [content]
-  (loop [line-num 1
+  (loop [chars (seq content)
+         line-num 1
          col-num 1
          in-comment? false
-         lines (clojure.string/split-lines content)
+         in-string? false
+         escaped? false
          delimiters []]
-    (if (empty? lines)
+    (if-not (seq chars)
       delimiters
-      (let [line (first lines)
-            [new-delimiters new-col-num]
-            (loop [col 1
-                   in-comment-line? false
-                   in-string? false
-                   escaped? false
-                   line-chars (seq line)
-                   line-delimiters []]
-              (if (empty? line-chars)
-                [line-delimiters col]
-                (let [char (first line-chars)]
-                  (cond
-                    ;; 1. Inside a comment, do nothing until end of line
-                    in-comment-line?
-                    (recur (inc col) true false false (rest line-chars) line-delimiters)
+      (let [char (first chars)
+            rest-chars (rest chars)]
+        (cond
+          ;; Newline character
+          (= char \newline)
+          (recur rest-chars (inc line-num) 1 false in-string? false delimiters)
 
-                    ;; 2. Inside a string
-                    in-string?
-                    (cond escaped?  ; previous char was '\'
-                          (recur (inc col) false true false (rest line-chars) line-delimiters)
-                          
-                          (= char \\) ; current char is '\'
-                          (recur (inc col) false true true (rest line-chars) line-delimiters)
-                          
-                          (= char \") ; end of string
-                          (recur (inc col) false false false (rest line-chars) line-delimiters)
-                          
-                          :else ; just a regular char in a string
-                          (recur (inc col) false true false (rest line-chars) line-delimiters))
+          ;; Previous character was an escape character
+          escaped?
+          (recur rest-chars line-num (inc col-num) in-comment? in-string? false delimiters)
 
-                    ;; 3. Not in a comment or string
-                    :else
-                    (let [info (delimiter-info char)]
-                      (cond (= char \;) ; start of comment
-                            (recur (inc col) true false false (rest line-chars) line-delimiters)
-                            
-                            (= char \") ; start of string
-                            (recur (inc col) false true false (rest line-chars) line-delimiters)
-                            
-                            info ; a delimiter!
-                            (recur (inc col) false false false (rest line-chars)
-                                   (conj line-delimiters (merge {:char char
-                                                                 :line line-num
-                                                                 :col col} info)))
-                            :else ; some other char
-                            (recur (inc col) false false false (rest line-chars) line-delimiters)))))))]
-        (recur (inc line-num)
-               1
-               false
-               (rest lines)
-               (into delimiters new-delimiters))))))
+          ;; Current character is an escape character
+          (= char \\)
+          (recur rest-chars line-num (inc col-num) in-comment? in-string? true delimiters)
+
+          ;; Inside a single-line comment
+          in-comment?
+          (recur rest-chars line-num (inc col-num) true in-string? false delimiters)
+
+          ;; Inside a string
+          in-string?
+          (cond
+            (= char \")
+            (recur rest-chars line-num (inc col-num) false false false delimiters)
+
+            :else
+            (recur rest-chars line-num (inc col-num) false true false delimiters))
+
+          ;; Not in a comment or string
+          :else
+          (let [info (delimiter-info char)]
+            (cond
+              (= char \;)
+              (recur rest-chars line-num (inc col-num) true false false delimiters)
+
+              (= char \")
+              (recur rest-chars line-num (inc col-num) false true false delimiters)
+
+              info
+              (recur rest-chars line-num (inc col-num) false false false
+                     (conj delimiters (merge {:char (str char)
+                                              :line line-num
+                                              :col col-num} info)))
+              :else
+              (recur rest-chars line-num (inc col-num) false false false delimiters))))))))
 
 (defn print-delimiters
-  "Prints the code with carets highlighting the positions of delimiters."
+  "prints all the parsed carets"
+  {:added "4.0"}
   [content delimiters & [{:keys [line-numbers print-blank-carets]
                           :or {pad-width 4
                                print-blank-carets true}}]]
@@ -96,3 +93,40 @@
                     (aset caret-chars (dec (:col delim)) \^))))
               (h/p (str (apply str (repeat (count line-prefix) " "))
                         (String. caret-chars))))))))))
+
+(defn pair-delimiters
+  "pairs the delimiters and annotates whether it's erroring"
+  {:added "4.0"}
+  [delimiters]
+  (loop [delims delimiters
+         stack []
+         processed []
+         pair-id 0]
+    (if (empty? delims)
+      (let [unmatched (map #(assoc % :correct? false) stack)]
+        (sort-by (juxt :line :col) (concat processed unmatched)))
+      (let [delim (first delims)
+            rest-delims (rest delims)]
+        (if (= (:type delim) :open)
+          (let [level (count stack)
+                new-delim (assoc delim :level level)]
+            (recur rest-delims (conj stack new-delim) processed pair-id))
+          (if-let [open-delim (peek stack)]
+            (let [level (:level open-delim)
+                  correct? (= (:style open-delim) (:style delim))
+                  updated-open (assoc open-delim :correct? correct? :pair-id pair-id)
+                  updated-close (assoc delim :level level :correct? correct? :pair-id pair-id)]
+              (recur rest-delims
+                     (pop stack)
+                     (conj processed updated-open updated-close)
+                     (inc pair-id)))
+            (let [new-delim (assoc delim :level 0 :correct? false)]
+              (recur rest-delims stack (conj processed new-delim) pair-id))))))))
+
+(defn group-delimiter-indentation
+  "groups the open delimiters by their indentation"
+  {:added "4.0"}
+  [delimiters]
+  (->> delimiters
+       (filter (comp #(= % :open) :type))
+       (group-by :line)))

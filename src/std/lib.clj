@@ -118,6 +118,7 @@
              env/do:pl
              env/do:pp
              env/p
+             env/pr
              env/pl
              env/pl:fn
              env/pl-add-lines

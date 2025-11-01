@@ -1,134 +1,103 @@
-;; src/code/heal/core.clj
 (ns code.heal.core
-  (:require [clojure.java.shell :as shell]
-            [clojure.string :as str]
-            [clojure.tools.reader :as reader]
-            [clojure.tools.reader.reader-types :as reader-types]))
+  (:require [code.heal.parse :as parse]
+            [std.lib :as h]
+            [std.string :as str]))
 
-(defn- git-log
-  "Executes `git log` command and returns the output."
-  [repo-path & args]
-  (let [{:keys [exit out err]} (apply shell/sh "git" "log" args :dir repo-path)]
-    (if (zero? exit)
-      out
-      (throw (ex-info (str "Git log failed: " err) {:repo-path repo-path :error err})))))
+(defn update-content
+  "performs the necessary edits to a string"
+  {:added "4.0"}
+  [content edits]
+  (let [lines (str/split-lines content)]
+    (->> edits
+         (reduce (fn [lines edit]
+                   (let [{:keys [action new-char]} edit
+                         old-line  (nth lines
+                                        (dec (:line edit)))
+                         new-line  (case action
+                                     :replace
+                                     (str/replace-at old-line
+                                                     (dec (:col edit))
+                                                     new-char)
+                                     :insert
+                                     (str/insert-at old-line
+                                                    (dec (:col edit))
+                                                    new-char))]
+                     (assoc lines (dec (:line edit)) new-line)))
+                 lines)
+         (str/join "\n"))))
+ 
+(defn create-mismatch-edits
+  "find the actions required to edit the content"
+  {:added "4.0"}
+  [delimiters]
+  (let [pairs (->> delimiters
+                   (filter :pair-id)
+                   (group-by :pair-id))
+        mismatched-pairs (filter (fn [[_ pair]]
+                                   (not (:correct? (first pair))))
+                                 pairs)]
+    (for [[_ pair] mismatched-pairs
+          :let [open (first (filter #(= :open (:type %)) pair))
+                close (first (filter #(= :close (:type %)) pair))]]
+      {:action :replace
+       :line (:line close)
+       :col (:col close)
+       :new-char (case (:char open)
+                   "(" ")"
+                   "[" "]"
+                   "{" "}")})))
 
-(defn- git-show
-  "Executes `git show` command for a specific commit and file."
-  [repo-path commit-hash file-path]
-  (let [{:keys [exit out err]} (shell/sh "git" "show" (str commit-hash ":" file-path) :dir repo-path)]
-    (if (zero? exit)
-      out
-      (throw (ex-info (str "Git show failed: " err) {:repo-path repo-path :commit commit-hash :file file-path :error err})))))
+(defn heal-mismatch
+  "heals a style mismatch for paired delimiters"
+  {:added "4.0"}
+  [content]
+  (let [delimiters (parse/pair-delimiters
+                    (parse/parse-delimiters
+                     content))
+        edits  (create-mismatch-edits delimiters)]
+    (update-content content edits)))
 
-(defn- parse-clojure-forms
-  "Parses a string of Clojure code into a sequence of forms,
-   returning a map with :forms and :error (if any)."
-  [code-str]
-  (try
-    (loop [rdr (reader-types/string-reader code-str)
-           forms []]
-      (let [form (reader/read {:read-cond :allow :features #{:clj} :eof ::reader/eof} rdr)]
-        (if (= form ::reader/eof)
-          {:forms forms :error nil}
-          (recur rdr (conj forms form))))) ; Use conj to add to the end
-    (catch Exception e
-      {:forms [] :error (.getMessage e)}))) ; Return empty vector on error
+(defn create-unclosed-edits
+  "gets the edits for healing unclosed forms"
+  {:added "4.0"}
+  [delimiters]
+  )
 
-(defn- extract-file-changes
-  "Extracts changes for a specific file from a git diff, hunk by hunk.
-   Returns a sequence of maps, each representing a hunk with :old-code and :new-code."
-  [diff-str file-path]
-  (let [lines (str/split-lines diff-str)
-        file-diff-lines (drop-while #(not (str/starts-with? % "diff --git")) lines)
-        target-file-diff-lines (->> file-diff-lines
-                                    (partition-by #(str/starts-with? % "diff --git"))
-                                    (filter #(some (fn [line] (str/includes? line (str "a/" file-path))) %))
-                                    first)
-        hunks (->> target-file-diff-lines
-                   (partition-by #(str/starts-with? % "@@"))
-                   (filter #(str/starts-with? (first %) "@@")))]
-    (map (fn [hunk-lines]
-           (let [hunk-header (first hunk-lines)
-                 content-lines (rest hunk-lines)
-                 old-lines (atom [])
-                 new-lines (atom [])]
-             (doseq [line content-lines]
-               (cond
-                 (str/starts-with? line "+") (swap! new-lines conj (subs line 1))
-                 (str/starts-with? line "-") (swap! old-lines conj (subs line 1))
-                 :else (do (swap! old-lines conj (subs line 1))
-                           (swap! new-lines conj (subs line 1))))) ; Context lines go to both
-             {:old-code (str/join "\n" @old-lines)
-              :new-code (str/join "\n" @new-lines)}))
-         hunks)))
 
-(defn analyze-commit-for-healing
-  "Analyzes a single commit for potential healing patterns in a given file.
-   Looks for 'fix' in the commit message and extracts code changes."
-  [repo-path commit-hash file-path]
-  (let [commit-info (git-log repo-path "-n" "1" commit-hash)
-        commit-message (first (str/split-lines commit-info))
-        diff-output (git-show repo-path commit-hash file-path)
-        hunk-changes (extract-file-changes diff-output file-path)]
-    (when (str/includes? (str/lower-case commit-message) "fix")
-      (map (fn [hunk] ; Iterate over hunks
-             (let [added-parsed (parse-clojure-forms (:new-code hunk))
-                   removed-parsed (parse-clojure-forms (:old-code hunk))]
-               {:commit-hash commit-hash
-                :message commit-message
-                :file-path file-path
-                :old-code (:old-code hunk)
-                :new-code (:new-code hunk)
-                :added-forms (:forms added-parsed)
-                :removed-forms (:forms removed-parsed)
-                :added-error (:error added-parsed)
-                :removed-error (:error removed-parsed)}))
-           hunk-changes))))
+(defn heal-unclosed
+  "heals unclosed forms"
+  {:added "4.0"}
+  [content]
+  (let [delimiters (parse/pair-delimiters
+                    (parse/parse-delimiters
+                     content))
+        edits  (create-unclosed-edits delimiters)]
+    (update-content content edits)))
 
-(defn- canonicalize-form
-  "Converts a Clojure form into a canonical representation for fuzzy matching.
-   Removes metadata, sorts map keys, and normalizes whitespace."
-  [form]
-  (cond
-    (map? form)
-    (->> form
-         (sort-by key)
-         (into {}) ; Preserve map type
-         (canonicalize-form)) ; Recurse for nested maps
+(comment
 
-    (coll? form)
-    (->> form
-         (map canonicalize-form)
-         (into (empty form))) ; Preserve collection type
-
-    (string? form)
-    (str/trim (str/replace form #"\s+" " ")) ; Normalize whitespace in strings
-
-    :else
-    form))
-
-(defn suggest-parenthesis-healing
-  "Analyzes a commit analysis result and suggests parenthesis healing.
-   (Very basic heuristic for now)."
-  [analysis-result]
-  (when (and (:removed-error analysis-result)
-             (nil? (:added-error analysis-result)))
-    ;; This is a commit where a parsing error was fixed.
-    ;; Now, try to identify the specific change.
-    ;; This is a placeholder for more advanced diffing.
-    (let [{:keys [removed-forms added-forms]} analysis-result]
-      (when (and (= 1 (count removed-forms))
-                 (= 1 (count added-forms)))
-        (let [removed-form (first removed-forms)
-              added-form (first added-forms)
-              canonical-removed (canonicalize-form removed-form)
-              canonical-added (canonicalize-form added-form)]
-          ;; If the forms are structurally similar (fuzzy match)
-          ;; but one had an error and the other doesn't, it's a candidate.
-          (when (= canonical-removed canonical-added) ; Simple fuzzy match for now
-            {:type :parenthesis-fix
-             :description (str "Potential parenthesis fix: changed from "
-                               (pr-str removed-form) " to " (pr-str added-form))
-             :original-form removed-form
-             :fixed-form added-form}))))))
+  (let [delimiters (parse/pair-delimiters (parse/parse-delimiters content))
+        lines      (vec (parse/parse-lines content))
+        unmatched-open (filter #(and (= (:type %) :open)
+                                     (not (:correct? %))) delimiters)]
+    (h/prn unmatched-open)
+    (reduce (fn [changes open-delim]
+              (let [start-line-num  (:line open-delim)
+                    start-line-info (get lines (dec start-line-num))
+                    start-indent    (:indent start-line-info)
+                    de-indent-line-info (heal-unclosed-find-line lines start-line-num start-indent)]
+                (h/prn [start-line-num
+                        start-line-info
+                        start-indent
+                        de-indent-line-info])
+                (if de-indent-line-info
+                  (let [insertion-line-num (dec (:line-num de-indent-line-info))
+                        insertion-line-info (get lines (dec insertion-line-num))
+                        insertion-col (count (:content insertion-line-info))]
+                    (conj changes {:action :insert
+                                   :line insertion-line-num
+                                   :col (inc insertion-col)
+                                   :new-char (get-closing-char (:char open-delim))}))
+                  changes)))
+            []
+            unmatched-open)))

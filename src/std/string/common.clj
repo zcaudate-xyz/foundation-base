@@ -336,4 +336,14 @@
   [^String s match re]
   (.replaceAll s match re))
 
+(defn ^String replace-at
+  [^String s i new]
+  (str (subs s 0 i)
+       new
+       (subs s (+ i 1))))
 
+(defn ^String insert-at
+  [^String s i new]
+  (str (subs s 0 i)
+       new
+       (subs s i)))

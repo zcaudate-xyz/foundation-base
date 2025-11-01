@@ -1,0 +1,414 @@
+(ns sznui.v1.screens.demo.quickstart-page-demo.detailed-guides
+  (:require [std.lang :as l]
+            [std.lib :as h]))
+
+(l/script :js
+  {:runtime :websocket
+   :require [[js.react :as r]
+             [js.tamagui :as tm]
+             [xt.lang.base-lib :as k]]
+   :import  [["@tamagui/lucide-icons"
+              :as #{CheckCircle2 Clock Users Coins Target BarChart3 Zap Copy ExternalLink BookOpen Play Code Rocket Settings Share2 Download}]]
+   :export [MODULE]})
+
+(defn.js QuickstartDetailedGuides
+  [#{onNavigate copied copyCode}]
+  (return
+    [:% tm/View {:borderTopWidth 1 :borderTopColor "$border" :paddingVertical "$8"}
+     [:% tm/View {:maxWidth "container" :marginHorizontal "auto" :paddingHorizontal "$4"}
+      [:% tm/Tabs {:defaultValue "campaign" :maxWidth "$5xl" :marginHorizontal "auto"}
+       [:% tm/TabsList {:marginBottom "$8" :width "100%" :display "grid" :gridTemplateColumns "repeat(2, minmax(0, 1fr))" :$lg {:gridTemplateColumns "repeat(4, minmax(0, 1fr))"}}
+        [:% tm/TabsTrigger {:value "campaign"} "Campaign"]
+        [:% tm/TabsTrigger {:value "token"} "Token"]
+        [:% tm/TabsTrigger {:value "tasks"} "Tasks"]
+        [:% tm/TabsTrigger {:value "widget"} "Widget"]]
+
+       ;; Campaign Guide
+       [:% tm/TabsContent {:value "campaign"}
+        [:% tm/Card
+         [:% tm/View {:borderBottomWidth 1 :borderBottomColor "$border" :padding "$6"}
+          [:% tm/View {:display "flex" :alignItems "flex-start" :justifyContent "space-between"}
+           [:% tm/View
+            [:% tm/Text {:tag "h2" :fontSize "$5" :fontFamily "$heading" :marginBottom "$2"} "Launch Your First Campaign"]
+            [:% tm/Text {:color "$color10"}
+             "Create a prediction market campaign in 5 simple steps"]] 
+           [:% tm/Badge {:variant "secondary"} "5-10 min"]]]
+
+         [:% tm/View {:padding "$6"}
+          [:% tm/View {:gap "$6"}
+           ;; Step 1
+           [:% tm/View {:display "flex" :gap "$4"}
+            [:% tm/View {:display "flex" :height "$4" :width "$4" :flexShrink 0 :alignItems "center" :justifyContent "center" :borderRadius "$full" :backgroundColor "$primary" :color "$primaryForeground"}
+             "1"]
+            [:% tm/View {:flex 1}
+             [:% tm/Text {:tag "h4" :fontSize "$4" :fontFamily "$heading" :marginBottom "$2"} "Access Campaign Builder"]
+             [:% tm/Text {:marginBottom "$3" :fontSize "$sm" :color "$color10"}
+              "Navigate to the Campaign Builder from your dashboard or the main menu."]
+             [:% tm/Button {:variant "outline"
+                            :size "sm"
+                            :onPress (fn [] (onNavigate "campaign-builder"))}
+              "Open Campaign Builder"
+              [:% ExternalLink {:marginLeft "$2" :height "$1" :width "$1"}]]]]
+
+           [:% tm/Separator]
+
+           ;; Step 2
+           [:% tm/View {:display "flex" :gap "$4"}
+            [:% tm/View {:display "flex" :height "$4" :width "$4" :flexShrink 0 :alignItems "center" :justifyContent "center" :borderRadius "$full" :backgroundColor "$primary" :color "$primaryForeground"}
+             "2"]
+            [:% tm/View {:flex 1}
+             [:% tm/Text {:tag "h4" :fontSize "$4" :fontFamily "$heading" :marginBottom "$2"} "Define Campaign Details"]
+             [:% tm/Text {:marginBottom "$3" :fontSize "$sm" :color "$color10"}
+              "Enter your campaign name, description, and choose a relevant category (Product Launch, Brand Campaign, etc.)"]
+             [:% tm/Card {:backgroundColor "$background" :padding "$4"}
+              [:% tm/View {:gap "$2" :fontSize "$sm"}
+               [:% tm/Text
+                [:% tm/Text {:tag "strong" :fontWeight "bold"} "Campaign Name:"] " Tesla Model Y Launch Prediction"]
+               [:% tm/Text
+                [:% tm/Text {:tag "strong" :fontWeight "bold"} "Category:"] " Product Launch"]
+               [:% tm/Text
+                [:% tm/Text {:tag "strong" :fontWeight "bold"} "Duration:"] " 30 days"]]]
+
+           [:% tm/Separator]
+
+           ;; Step 3
+           [:% tm/View {:display "flex" :gap "$4"}
+            [:% tm/View {:display "flex" :height "$4" :width "$4" :flexShrink 0 :alignItems "center" :justifyContent "center" :borderRadius "$full" :backgroundColor "$primary" :color "$primaryForeground"}
+             "3"]
+            [:% tm/View {:flex 1}
+             [:% tm/Text {:tag "h4" :fontSize "$4" :fontFamily "$heading" :marginBottom "$2"} "Create Prediction Questions"]
+             [:% tm/Text {:marginBottom "$3" :fontSize "$sm" :color "$color10"}
+              "Add engaging questions for participants to predict. You can have multiple questions per campaign."]
+             [:% tm/Card {:backgroundColor "$background" :padding "$4"}
+              [:% tm/Text {:fontSize "$sm" :marginBottom "$2"}
+               [:% tm/Text {:tag "strong" :fontWeight "bold"} "Example Questions:"]]
+              [:% tm/View {:gap "$1" :fontSize "$sm" :color "$color10"}
+               [:% tm/Text "• When will the Model Y be launched? (Date range)"]
+               [:% tm/Text "• What will be the starting price? (Price range)"]
+               [:% tm/Text "• How many pre-orders in the first week? (Number range)"]]]]]
+
+           [:% tm/Separator]
+
+           ;; Step 4
+           [:% tm/View {:display "flex" :gap "$4"}
+            [:% tm/View {:display "flex" :height "$4" :width "$4" :flexShrink 0 :alignItems "center" :justifyContent "center" :borderRadius "$full" :backgroundColor "$primary" :color "$primaryForeground"}
+             "4"]
+            [:% tm/View {:flex 1}
+             [:% tm/Text {:tag "h4" :fontSize "$4" :fontFamily "$heading" :marginBottom "$2"} "Configure Rewards"]
+             [:% tm/Text {:marginBottom "$3" :fontSize "$sm" :color "$color10"}
+              "Set up your token rewards for participants. Choose participation rewards and winner bonuses."]
+             [:% tm/Card {:backgroundColor "$background" :padding "$4"}
+              [:% tm/View {:gap "$2" :fontSize "$sm"}
+               [:% tm/View {:display "flex" :justifyContent "space-between"}
+                [:% tm/Text "Participation Reward:"]
+                [:% tm/Text {:color "$primary"} "50 tokens"]] 
+               [:% tm/View {:display "flex" :justifyContent "space-between"}
+                [:% tm/Text "Winner Pool:"]
+                [:% tm/Text {:color "$primary"} "10,000 tokens"]] 
+               [:% tm/View {:display "flex" :justifyContent "space-between"}
+                [:% tm/Text "Total Budget:"]
+                [:% tm/Text {:color "$primary"} "25,000 tokens"]]]]]
+
+           [:% tm/Separator]
+
+           ;; Step 5
+           [:% tm/View {:display "flex" :gap "$4"}
+            [:% tm/View {:display "flex" :height "$4" :width "$4" :flexShrink 0 :alignItems "center" :justifyContent "center" :borderRadius "$full" :backgroundColor "$primary" :color "$primaryForeground"}
+             "5"]
+            [:% tm/View {:flex 1}
+             [:% tm/Text {:tag "h4" :fontSize "$4" :fontFamily "$heading" :marginBottom "$2"} "Launch & Share"]
+             [:% tm/Text {:marginBottom "$3" :fontSize "$sm" :color "$color10"}
+              "Review your campaign, publish it, and share it with your audience using our built-in sharing tools."]
+             [:% tm/View {:display "flex" :gap "$2"}
+              [:% tm/Button
+               [:% Rocket {:marginRight "$2" :height "$1" :width "$1"}]
+               "Launch Campaign"]
+              [:% tm/Button {:variant "outline"}
+               [:% Share2 {:marginRight "$2" :height "$1" :width "$1"}]
+               "Share"]]]]]
+
+          [:% tm/View {:marginTop "$8" :borderRadius "$3" :backgroundColor "$primary/5" :padding "$6"}
+           [:% tm/View {:display "flex" :alignItems "flex-start" :gap "$3"}
+            [:% CheckCircle2 {:height "$2" :width "$2" :flexShrink 0 :color "$green9"}]
+            [:% tm/View
+             [:% tm/Text {:tag "h4" :fontSize "$4" :fontFamily "$heading" :marginBottom "$2"} "You're all set!"]
+             [:% tm/Text {:fontSize "$sm" :color "$color10"}
+              "Your campaign is now live. Monitor performance in real-time using the Analytics Dashboard."]
+             [:% tm/Button {:variant "outline"
+                            :size "sm"
+                            :marginTop "$3"
+                            :onPress (fn [] (onNavigate "analytics"))}
+              "View Analytics"
+              [:% BarChart3 {:marginLeft "$2" :height "$1" :width "$1"}]]]]
+
+       ;; Token Guide
+       [:% tm/TabsContent {:value "token"}
+        [:% tm/Card
+         [:% tm/View {:borderBottomWidth 1 :borderBottomColor "$border" :padding "$6"}
+          [:% tm/View {:display "flex" :alignItems "flex-start" :justifyContent "space-between"}
+           [:% tm/View
+            [:% tm/Text {:tag "h2" :fontSize "$5" :fontFamily "$heading" :marginBottom "$2"} "Create a Promotional Token"]
+            [:% tm/Text {:color "$color10"}
+             "Design your custom token in 4 easy steps"]] 
+           [:% tm/Badge {:variant "secondary"} "8-12 min"]]]
+
+         [:% tm/View {:padding "$6"}
+          [:% tm/View {:gap "$6"}
+           ;; Step 1
+           [:% tm/View {:display "flex" :gap "$4"}
+            [:% tm/View {:display "flex" :height "$4" :width "$4" :flexShrink 0 :alignItems "center" :justifyContent "center" :borderRadius "$full" :backgroundColor "$primary" :color "$primaryForeground"}
+             "1"]
+            [:% tm/View {:flex 1}
+             [:% tm/Text {:tag "h4" :fontSize "$4" :fontFamily "$heading" :marginBottom "$2"} "Open Token Creator"]
+             [:% tm/Text {:marginBottom "$3" :fontSize "$sm" :color "$color10"}
+              "Navigate to the Token Creator tool from your dashboard."]
+             [:% tm/Button {:variant "outline"
+                            :size "sm"
+                            :onPress (fn [] (onNavigate "token-creator"))}
+              "Open Token Creator"
+              [:% ExternalLink {:marginLeft "$2" :height "$1" :width "$1"}]]]]
+
+           [:% tm/Separator]
+
+           ;; Step 2
+           [:% tm/View {:display "flex" :gap "$4"}
+            [:% tm/View {:display "flex" :height "$4" :width "$4" :flexShrink 0 :alignItems "center" :justifyContent "center" :borderRadius "$full" :backgroundColor "$primary" :color "$primaryForeground"}
+             "2"]
+            [:% tm/View {:flex 1}
+             [:% tm/Text {:tag "h4" :fontSize "$4" :fontFamily "$heading" :marginBottom "$2"} "Define Token Properties"]
+             [:% tm/Text {:marginBottom "$3" :fontSize "$sm" :color "$color10"}
+              "Set your token name, symbol, total supply, and initial distribution strategy."]
+             [:% tm/Card {:backgroundColor "$background" :padding "$4"}
+              [:% tm/View {:gap "$2" :fontSize "$sm"}
+               [:% tm/Text
+                [:% tm/Text {:tag "strong" :fontWeight "bold"} "Token Name:"] " Nike Rewards"]
+               [:% tm/Text
+                [:% tm/Text {:tag "strong" :fontWeight "bold"} "Symbol:"] " NKR"]
+               [:% tm/Text
+                [:% tm/Text {:tag "strong" :fontWeight "bold"} "Total Supply:"] " 1,000,000"]
+               [:% tm/Text
+                [:% tm/Text {:tag "strong" :fontWeight "bold"} "Initial Price:"] " $1.00"]]] 
+
+           [:% tm/Separator]
+
+           ;; Step 3
+           [:% tm/View {:display "flex" :gap "$4"}
+            [:% tm/View {:display "flex" :height "$4" :width "$4" :flexShrink 0 :alignItems "center" :justifyContent "center" :borderRadius "$full" :backgroundColor "$primary" :color "$primaryForeground"}
+             "3"]
+            [:% tm/View {:flex 1}
+             [:% tm/Text {:tag "h4" :fontSize "$4" :fontFamily "$heading" :marginBottom "$2"} "Configure Utility & Rewards"]
+             [:% tm/Text {:marginBottom "$3" :fontSize "$sm" :color "$color10"}
+              "Define how users can earn and redeem your tokens."]
+             [:% tm/Card {:backgroundColor "$background" :padding "$4"}
+              [:% tm/Text {:fontSize "$sm" :marginBottom "$2"}
+               [:% tm/Text {:tag "strong" :fontWeight "bold"} "Earning Methods:"]]
+              [:% tm/View {:marginBottom "$3" :gap "$1" :fontSize "$sm" :color "$color10"}
+               [:% tm/Text "• Campaign participation"]
+               [:% tm/Text "• Social media tasks"]
+               [:% tm/Text "• Referrals"]]
+              [:% tm/Text {:fontSize "$sm" :marginBottom "$2"}
+               [:% tm/Text {:tag "strong" :fontWeight "bold"} "Redemption Options:"]]
+              [:% tm/View {:gap "$1" :fontSize "$sm" :color "$color10"}
+               [:% tm/Text "• Product discounts"]
+               [:% tm/Text "• Exclusive merchandise"]
+               [:% tm/Text "• VIP experiences"]]]]] 
+
+           [:% tm/Separator]
+
+           ;; Step 4
+           [:% tm/View {:display "flex" :gap "$4"}
+            [:% tm/View {:display "flex" :height "$4" :width "$4" :flexShrink 0 :alignItems "center" :justifyContent "center" :borderRadius "$full" :backgroundColor "$primary" :color "$primaryForeground"}
+             "4"]
+            [:% tm/View {:flex 1}
+             [:% tm/Text {:tag "h4" :fontSize "$4" :fontFamily "$heading" :marginBottom "$2"} "Deploy & Distribute"]
+             [:% tm/Text {:marginBottom "$3" :fontSize "$sm" :color "$color10"}
+              "Review your token settings and start distributing to your audience."]
+             [:% tm/Button
+              [:% Coins {:marginRight "$2" :height "$1" :width "$1"}]
+              "Deploy Token"]]]]]
+
+         ;; Tasks Guide
+         [:% tm/TabsContent {:value "tasks"}
+          [:% tm/Card
+           [:% tm/View {:borderBottomWidth 1 :borderBottomColor "$border" :padding "$6"}
+            [:% tm/View {:display "flex" :alignItems "flex-start" :justifyContent "space-between"}
+             [:% tm/View
+              [:% tm/Text {:tag "h2" :fontSize "$5" :fontFamily "$heading" :marginBottom "$2"} "Set Up Engagement Tasks"]
+              [:% tm/Text {:color "$color10"}
+               "Create social media tasks that drive engagement"]] 
+             [:% tm/Badge {:variant "secondary"} "5-8 min"]]]
+
+           [:% tm/View {:padding "$6"}
+            [:% tm/View {:gap "$6"}
+             ;; Step 1
+             [:% tm/View {:display "flex" :gap "$4"}
+              [:% tm/View {:display "flex" :height "$4" :width "$4" :flexShrink 0 :alignItems "center" :justifyContent "center" :borderRadius "$full" :backgroundColor "$primary" :color "$primaryForeground"}
+               "1"]
+              [:% tm/View {:flex 1}
+               [:% tm/Text {:tag "h4" :fontSize "$4" :fontFamily "$heading" :marginBottom "$2"} "Choose Task Type"]
+               [:% tm/Text {:marginBottom "$3" :fontSize "$sm" :color "$color10"}
+                "Select from pre-built task templates: Social Follow, Share Content, Create Content, Survey, or Referral."]
+               [:% tm/Button {:variant "outline"
+                              :size "sm"
+                              :onPress (fn [] (onNavigate "task-creator"))}
+                "Open Task Creator"
+                [:% ExternalLink {:marginLeft "$2" :height "$1" :width "$1"}]]]]
+
+             [:% tm/Separator]
+
+             ;; Step 2
+             [:% tm/View {:display "flex" :gap "$4"}
+              [:% tm/View {:display "flex" :height "$4" :width "$4" :flexShrink 0 :alignItems "center" :justifyContent "center" :borderRadius "$full" :backgroundColor "$primary" :color "$primaryForeground"}
+               "2"]
+              [:% tm/View {:flex 1}
+               [:% tm/Text {:tag "h4" :fontSize "$4" :fontFamily "$heading" :marginBottom "$2"} "Configure Task Details"]
+               [:% tm/Text {:marginBottom "$3" :fontSize "$sm" :color "$color10"}
+                "Set task name, description, platform, and specific requirements (URLs, hashtags, etc.)"]
+               [:% tm/Card {:backgroundColor "$background" :padding "$4"}
+                [:% tm/View {:gap "$2" :fontSize "$sm"}
+                 [:% tm/Text
+                  [:% tm/Text {:tag "strong" :fontWeight "bold"} "Task:"] " Follow us on Twitter"]
+                 [:% tm/Text
+                  [:% tm/Text {:tag "strong" :fontWeight "bold"} "Platform:"] " Twitter"]
+                 [:% tm/Text
+                  [:% tm/Text {:tag "strong" :fontWeight "bold"} "Reward:"] " 50 tokens"]
+                 [:% tm/Text
+                  [:% tm/Text {:tag "strong" :fontWeight "bold"} "Profile:"] " @yourcompany"]]]] 
+
+             [:% tm/Separator]
+
+             ;; Step 3
+             [:% tm/View {:display "flex" :gap "$4"}
+              [:% tm/View {:display "flex" :height "$4" :width "$4" :flexShrink 0 :alignItems "center" :justifyContent "center" :borderRadius "$full" :backgroundColor "$primary" :color "$primary"}
+               "3"]
+              [:% tm/View {:flex 1}
+               [:% tm/Text {:tag "h4" :fontSize "$4" :fontFamily "$heading" :marginBottom "$2"} "Activate & Monitor"]
+               [:% tm/Text {:marginBottom "$3" :fontSize "$sm" :color "$color10"}
+                "Launch your task and track completions in real-time through the analytics dashboard."]
+               [:% tm/Button
+                [:% Target {:marginRight "$2" :height "$1" :width "$1"}]
+                "Create Task"]]]] 
+
+         ;; Widget Guide
+         [:% tm/TabsContent {:value "widget"}
+          [:% tm/Card
+           [:% tm/View {:borderBottomWidth 1 :borderBottomColor "$border" :padding "$6"}
+            [:% tm/View {:display "flex" :alignItems "flex-start" :justifyContent "space-between"}
+             [:% tm/View
+              [:% tm/Text {:tag "h2" :fontSize "$5" :fontFamily "$heading" :marginBottom "$2"} "Embed a Widget"]
+              [:% tm/Text {:color "$color10"}
+               "Share your campaign on websites and social media"]] 
+             [:% tm/Badge {:variant "secondary"} "3-5 min"]]]
+
+           [:% tm/View {:padding "$6"}
+            [:% tm/View {:gap "$6"}
+             ;; Step 1
+             [:% tm/View {:display "flex" :gap "$4"}
+              [:% tm/View {:display "flex" :height "$4" :width "$4" :flexShrink 0 :alignItems "center" :justifyContent "center" :borderRadius "$full" :backgroundColor "$primary" :color "$primaryForeground"}
+               "1"]
+              [:% tm/View {:flex 1}
+               [:% tm/Text {:tag "h4" :fontSize "$4" :fontFamily "$heading" :marginBottom "$2"} "Open Widget Builder"]
+               [:% tm/Text {:marginBottom "$3" :fontSize "$sm" :color "$color10"}
+                "Access the Widget Builder tool and select your widget type (Campaign Card, Token Info, Leaderboard, or Live Stats)."]
+               [:% tm/Button {:variant "outline"
+                              :size "sm"
+                              :onPress (fn [] (onNavigate "widget-builder"))}
+                "Open Widget Builder"
+                [:% ExternalLink {:marginLeft "$2" :height "$1" :width "$1"}]]]]
+
+             [:% tm/Separator]
+
+             ;; Step 2
+             [:% tm/View {:display "flex" :gap "$4"}
+              [:% tm/View {:display "flex" :height "$4" :width "$4" :flexShrink 0 :alignItems "center" :justifyContent "center" :borderRadius "$full" :backgroundColor "$primary" :color "$primaryForeground"}
+               "2"]
+              [:% tm/View {:flex 1}
+               [:% tm/Text {:tag "h4" :fontSize "$4" :fontFamily "$heading" :marginBottom "$2"} "Customize Widget"]
+               [:% tm/Text {:marginBottom "$3" :fontSize "$sm" :color "$color10"}
+                "Select your campaign, adjust colors, sizing, and preview in desktop/mobile views."]
+               [:% tm/Card {:backgroundColor "$background" :padding "$4"}
+                [:% tm/View {:gap "$2" :fontSize "$sm"}
+                 [:% tm/Text
+                  [:% tm/Text {:tag "strong" :fontWeight "bold"} "Widget Type:"] " Campaign Card"]
+                 [:% tm/Text
+                  [:% tm/Text {:tag "strong" :fontWeight "bold"} "Theme:"] " Light"]
+                 [:% tm/Text
+                  [:% tm/Text {:tag "strong" :fontWeight "bold"} "Size:"] " 400x500px"]
+                 [:% tm/Text
+                  [:% tm/Text {:tag "strong" :fontWeight "bold"} "Responsive:"] " Yes"]]]] 
+
+             [:% tm/Separator]
+
+             ;; Step 3
+             [:% tm/View {:display "flex" :gap "$4"}
+              [:% tm/View {:display "flex" :height "$4" :width "$4" :flexShrink 0 :alignItems "center" :justifyContent "center" :borderRadius "$full" :backgroundColor "$primary" :color "$primaryForeground"}
+               "3"]
+              [:% tm/View {:flex 1}
+               [:% tm/Text {:tag "h4" :fontSize "$4" :fontFamily "$heading" :marginBottom "$2"} "Copy Embed Code"]
+               [:% tm/Text {:marginBottom "$3" :fontSize "$sm" :color "$color10"}
+                "Choose your platform (HTML, React, WordPress) and copy the generated code."]
+               [:% tm/Card {:backgroundColor "$background" :padding "$4"}
+                [:% tm/View {:marginBottom "$2" :display "flex" :alignItems "center" :justifyContent "space-between"}
+                 [:% tm/Text {:fontSize "$sm"} "HTML Embed Code"]
+                 [:% tm/Button {:variant "ghost"
+                                :size "sm"
+                                :onPress (fn [] (copyCode "<iframe src=\"...\"></iframe>"))}
+                  (:? copied
+                      [:% tm/View
+                       [:% CheckCircle2 {:marginRight "$2" :height "$1" :width "$1"}]
+                       "Copied!"]
+                      [:% tm/View
+                       [:% Copy {:marginRight "$2" :height "$1" :width "$1"}]
+                       "Copy"])]]
+                [:% tm/Text {:tag "pre" :overflowX "scroll" :borderRadius "$3" :backgroundColor "$background" :padding "$3" :fontSize "$xs"}
+                 "<iframe \n  src=\"https://statstrade.com/embed/campaign/tesla\" 
+  width=\"400\" 
+  height=\"500\"
+  frameborder=\"0\">
+</iframe>"]]]]]
+
+         ;; FAQ
+         [:% tm/View {:borderTopWidth 1 :borderTopColor "$border" :paddingVertical "$8"}
+          [:% tm/View {:maxWidth "container" :marginHorizontal "auto" :paddingHorizontal "$4"}
+           [:% tm/View {:maxWidth "$3xl" :marginHorizontal "auto"}
+            [:% tm/Text {:tag "h2" :fontSize "$5" :fontFamily "$heading" :marginBottom "$8" :textAlign "center"} "Frequently Asked Questions"]
+
+            [:% tm/Accordion {:type "single" :collapsible true}
+             [:% tm/AccordionItem {:value "item-1"}
+              [:% tm/AccordionTrigger "How long does it take to launch my first campaign?"]
+              [:% tm/AccordionContent
+               "Most users can launch their first campaign in 5-10 minutes using our Campaign Builder wizard. The process is designed to be intuitive and requires no technical knowledge."]]
+
+             [:% tm/AccordionItem {:value "item-2"}
+              [:% tm/AccordionTrigger "Do I need to create a token before launching a campaign?"]
+              [:% tm/AccordionContent
+               "Yes, you'll need to create a token to use as rewards for your campaign. However, you can use our Token Creator to design and deploy a token in just 8-12 minutes."]]
+
+             [:% tm/AccordionItem {:value "item-3"}
+              [:% tm/AccordionTrigger "Can I edit my campaign after it's launched?"]
+              [:% tm/AccordionContent
+               "You can edit certain aspects of your campaign like description and branding, but core prediction questions and reward structures cannot be changed once the campaign is live to maintain fairness for all participants."]]
+
+             [:% tm/AccordionItem {:value "item-4"}
+              [:% tm/AccordionTrigger "How do I track campaign performance?"]
+              [:% tm/AccordionContent
+               "Use the Analytics Dashboard to monitor real-time metrics including participant count, engagement rate, token distribution, and prediction trends. You can also set up custom reports and automated alerts."]]
+
+             [:% tm/AccordionItem {:value "item-5"}
+              [:% tm/AccordionTrigger "What platforms can I embed widgets on?"]
+              [:% tm/AccordionContent
+               "Our widgets work on any website that supports iframes or JavaScript. We provide specific implementations for HTML, React, WordPress, and other popular platforms. Widgets are fully responsive and work on all devices."]]
+
+            [:% tm/Card {:marginTop "$8" :backgroundColor "$primary/5" :padding "$6" :textAlign "center"}
+             [:% tm/Text {:tag "h3" :fontSize "$4" :fontFamily "$heading" :marginBottom "$2"} "Still have questions?"]
+             [:% tm/Text {:marginBottom "$4" :color "$color10"}
+              "Check out our full documentation or reach out to our support team."]
+             [:% tm/View {:display "flex" :flexWrap "wrap" :justifyContent "center" :gap "$2"}
+              [:% tm/Button {:variant "outline" :onPress (fn [] (onNavigate "documentation"))}
+               [:% BookOpen {:marginRight "$2" :height "$1" :width "$1"}]
+               "View Documentation"]
+              [:% tm/Button "Contact Support"]]]]]]
+
+     [:% ui-common/Footer {:onNavigate onNavigate}]))
+
+(def.js MODULE (!:module))
