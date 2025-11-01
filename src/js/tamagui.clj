@@ -222,6 +222,9 @@
    SwitchStyledContext
    SwitchThumb
    Tabs
+   [TabsList Tabs.List]
+   [TabsContent Tabs.Content]
+   [TabsTrigger Tabs.Trigger]
    TabsProvider
    
    Text
