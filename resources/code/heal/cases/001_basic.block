@@ -1,0 +1,5 @@
+(defn my-function [x]
+  ;; This is a comment
+  (let [{:keys [a b]} x]
+    (println "Hello")
+    [a b]))
