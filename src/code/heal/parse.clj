@@ -98,35 +98,64 @@
   "pairs the delimiters and annotates whether it's erroring"
   {:added "4.0"}
   [delimiters]
-  (loop [delims delimiters
-         stack []
-         processed []
-         pair-id 0]
-    (if (empty? delims)
-      (let [unmatched (map #(assoc % :correct? false) stack)]
-        (sort-by (juxt :line :col) (concat processed unmatched)))
-      (let [delim (first delims)
-            rest-delims (rest delims)]
-        (if (= (:type delim) :open)
-          (let [level (count stack)
-                new-delim (assoc delim :level level)]
-            (recur rest-delims (conj stack new-delim) processed pair-id))
-          (if-let [open-delim (peek stack)]
-            (let [level (:level open-delim)
-                  correct? (= (:style open-delim) (:style delim))
-                  updated-open (assoc open-delim :correct? correct? :pair-id pair-id)
-                  updated-close (assoc delim :level level :correct? correct? :pair-id pair-id)]
-              (recur rest-delims
-                     (pop stack)
-                     (conj processed updated-open updated-close)
-                     (inc pair-id)))
-            (let [new-delim (assoc delim :level 0 :correct? false)]
-              (recur rest-delims stack (conj processed new-delim) pair-id))))))))
+  (let [initial-state {:stack []
+                       :processed []
+                       :pair-id 0
+                       :unmatched-close-count 0}
+        final-state (reduce (fn [state delim]
+                              (let [{:keys [stack processed pair-id unmatched-close-count]} state]
+                                (if (= (:type delim) :open)
+                                  ;; Handle open delimiter
+                                  (let [level (count stack)
+                                        new-delim (assoc delim :level level)]
+                                    (assoc state
+                                           :stack (conj stack new-delim)))
+                                  ;; Handle close delimiter
+                                  (if-let [open-delim (peek stack)]
+                                    ;; Stack not empty, try to match
+                                    (let [level (:level open-delim)
+                                          correct? (= (:style open-delim) (:style delim))
+                                          updated-open (assoc open-delim :correct? correct? :pair-id pair-id)
+                                          updated-close (assoc delim :level level :correct? correct? :pair-id pair-id)]
+                                      (assoc state
+                                             :stack (pop stack)
+                                             :processed (conj processed updated-open updated-close)
+                                             :pair-id (inc pair-id)))
+                                    ;; Stack empty, unmatched close delimiter
+                                    (let [new-unmatched-close-count (inc unmatched-close-count)
+                                          new-delim (assoc delim :level (- new-unmatched-close-count) :correct? false)]
+                                      (assoc state
+                                             :processed (conj processed new-delim)
+                                             :unmatched-close-count new-unmatched-close-count))))))
+                            initial-state
+                            delimiters)
+        {:keys [stack processed]} final-state
+        unmatched (map #(assoc % :correct? false) stack)]
+     (sort-by (juxt :line :col) (concat processed unmatched))))
 
-(defn group-delimiter-indentation
-  "groups the open delimiters by their indentation"
+(defn flag-level-discrepancies
+  "Flags opening delimiters where the column is less than a previous opening delimiter at the same level."
   {:added "4.0"}
   [delimiters]
-  (->> delimiters
-       (filter (comp #(= % :open) :type))
-       (group-by :line)))
+  (let [initial-state {:result []
+                       :last-open-col-at-level {}} ;; Map: level -> last_col_of_open_delimiter
+        final-state (reduce (fn [acc delim]
+                               (let [{:keys [result last-open-col-at-level]} acc
+                                     delim-type (:type delim)
+                                     level (:level delim)
+                                     col (:col delim)]
+                                 (if (= delim-type :open)
+                                   (let [prev-col (get last-open-col-at-level level)
+                                         discrepancy? (and prev-col (< col prev-col))
+                                         new-delim (if discrepancy? (assoc delim :discrepancy? true) delim)]
+                                     {:result (conj result new-delim)
+                                      :last-open-col-at-level (assoc last-open-col-at-level level col)})
+                                   ;; For close delimiters, we don't update last-open-col-at-level
+                                   ;; as they don't establish a new 'open' column for the level.
+                                   {:result (conj result delim)
+                                    :last-open-col-at-level last-open-col-at-level}))) ; Keep the map as is for close delimiters
+                               initial-state
+                               delimiters)]
+    (:result final-state)))
+
+

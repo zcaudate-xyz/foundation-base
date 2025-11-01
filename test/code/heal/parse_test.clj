@@ -66,6 +66,15 @@
        {:char "]", :line 1, :col 2, :type :close, :style :square, :level 0, :correct? true, :pair-id 0})
 
   (parse/pair-delimiters
+   (parse/parse-delimiters "]"))
+  => '({:char "]", :line 1, :col 1, :type :close, :style :square, :level -1, :correct? false})
+
+  (parse/pair-delimiters
+   (parse/parse-delimiters "]]"))
+  => '({:char "]", :line 1, :col 1, :type :close, :style :square, :level -1, :correct? false}
+       {:char "]", :line 1, :col 2, :type :close, :style :square, :level -2, :correct? false})
+  
+  (parse/pair-delimiters
    (parse/parse-delimiters "[[[]"))
   => '({:char "[", :line 1, :col 1, :type :open, :style :square, :level 0, :correct? false}
        {:char "[", :line 1, :col 2, :type :open, :style :square, :level 1, :correct? false}
@@ -75,24 +84,44 @@
   (parse/pair-delimiters
    (parse/parse-delimiters "{)"))
   => '({:char "{", :line 1, :col 1, :type :open, :style :curly, :level 0, :correct? false, :pair-id 0}
-       {:char ")", :line 1, :col 2, :type :close, :style :paren, :level 0, :correct? false, :pair-id 0}))
+       {:char ")", :line 1, :col 2, :type :close, :style :paren, :level 0, :correct? false, :pair-id 0})
 
-^{:refer code.heal.parse/group-delimiter-indentation :added "4.0"}
-(fact "groups the open delimiters by their indentation"
+  (parse/pair-delimiters
+   (parse/parse-delimiters "
+(defn
+ (do
+   (it)
+ (this))"))
+  => '({:char "(", :line 2, :col 1, :type :open, :style :paren, :level 0, :correct? false}
+       {:char "(", :line 3, :col 2, :type :open, :style :paren, :level 1, :correct? true, :pair-id 2}
+       {:char "(", :line 4, :col 4, :type :open, :style :paren, :level 2, :correct? true, :pair-id 0}
+       {:char ")", :line 4, :col 7, :type :close, :style :paren, :level 2, :correct? true, :pair-id 0}
+       {:char "(", :line 5, :col 2, :type :open, :style :paren, :level 2, :correct? true, :pair-id 1}
+       {:char ")", :line 5, :col 7, :type :close, :style :paren, :level 2, :correct? true, :pair-id 1}
+       {:char ")", :line 5, :col 8, :type :close, :style :paren, :level 1, :correct? true, :pair-id 2}))
+
+
+
+^{:refer code.heal.parse/flag-level-discrepancies :added "4.0"}
+(fact "TODO"
   ^:hidden
   
-  (parse/group-delimiter-indentation
+  (parse/flag-level-discrepancies
    (parse/pair-delimiters
-    (parse/parse-delimiters "{)")))
-  => {1 [{:char "{", :line 1, :col 1, :type :open, :style :curly, :level 0, :correct? false, :pair-id 0}]})
+    (parse/parse-delimiters "
+(defn
+ (do
+   (it)
+ (this))")))
+  => [{:char "(", :line 2, :col 1, :type :open, :style :paren, :level 0, :correct? false}
+   {:char "(", :line 3, :col 2, :type :open, :style :paren, :level 1, :correct? true, :pair-id 2}
+   {:char "(", :line 4, :col 4, :type :open, :style :paren, :level 2, :correct? true, :pair-id 0}
+   {:char ")", :line 4, :col 7, :type :close, :style :paren, :level 2, :correct? true, :pair-id 0}
+   {:correct? true, :pair-id 1, :type :open, :discrepancy? true, :style :paren, :level 2, :line 5, :col 2, :char "("}
+   {:char ")", :line 5, :col 7, :type :close, :style :paren, :level 2, :correct? true, :pair-id 1}
+   {:char ")", :line 5, :col 8, :type :close, :style :paren, :level 1, :correct? true, :pair-id 2}])
 
-^{:refer code.heal.parse/parse-lines :added "4.0"}
-(fact "parses the code to get line information"
-  ^:hidden
-
-  (parse/parse-lines
-   (h/sys:resource-content "code/heal/cases/001_basic.block"))
-  (parse/parse-lines
-   (h/sys:resource-content "code/heal/cases/002_complex.block"))
+(comment
   
   )
+
