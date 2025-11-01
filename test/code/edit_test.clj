@@ -616,6 +616,15 @@
       str)
   => "<0,4> (0  |:a   2 3)")
 
+^{:refer code.edit/replace-splice :added "3.0" :class [:nav/edit]}
+(fact "replaces an element at the cursor"
+  ^:hidden
+  
+  (-> (parse-string "(0  #|1   2 3)")
+      (position-right)
+      (replace-splice [:a :b :c])
+      str)
+  => "<0,4> (0  |:a :b :c   2 3)")
 
 ^{:refer code.edit/swap :added "3.0" :class [:nav/edit]}
 (fact "applies a function to the element at the current cursor position, replacing it with the result"

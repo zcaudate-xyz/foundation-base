@@ -134,6 +134,7 @@
  workspace/print-module
  
  workspace/ptr-clip
+ workspace/ptr-display-str
  workspace/ptr-print
  workspace/ptr-setup
  workspace/ptr-teardown

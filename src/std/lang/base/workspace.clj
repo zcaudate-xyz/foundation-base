@@ -66,19 +66,25 @@
     (ptr/ptr-display ptr (or opts
                              (ut/lang-rt-default ptr))))))
 
-(defn ptr-clip
+(defn ptr-display-str
   "copies pointer text to clipboard"
   {:added "4.0"}
   [ptr]
   (impl-entry/with:cache-force
-   (h/clip:nil (ptr/ptr-display ptr (ut/lang-rt-default ptr)))))
+   (ptr/ptr-display ptr (ut/lang-rt-default ptr))))
+
+(defn ptr-clip
+  "copies pointer text to clipboard"
+  {:added "4.0"}
+  [ptr]
+  (h/clip:nil (ptr-display-str ptr)))
 
 (defn ptr-print
   "copies pointer text to clipboard"
   {:added "4.0"}
   [ptr]
   (impl-entry/with:cache-force
-   (h/pl (ptr/ptr-display ptr (ut/lang-rt-default ptr)))))
+   (h/pl (ptr-display-str ptr))))
 
 (defn ptr-setup
   "calls setup on a pointer"

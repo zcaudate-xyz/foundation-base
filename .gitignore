@@ -43,5 +43,6 @@ pom.xml.asc
 /src-app/**/.build
 /src-infra/*/live
 /temp
+/prompt/aaa
 *_temp
 *.~undo-tree~

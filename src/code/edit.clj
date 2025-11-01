@@ -680,6 +680,25 @@
                  :else
                  (throw (ex-info "Replace failed - no element" {:nav nav})))))))
 
+(defn replace-splice
+  "replaces an element at the cursor"
+  {:added "3.0"}
+  ([nav data]
+   (cond (level-empty? nav)
+         (throw (ex-info "Replace failed - level empty." {:nav nav}))
+
+         :else
+         (let [nav (position-right nav)]
+           (cond (base/expression? (zip/right-element nav))
+                 (delete
+                  (reduce (fn [nav item]
+                            (insert-right nav item))
+                          nav
+                          (reverse data)))
+                 
+                 :else
+                 (throw (ex-info "Replace failed - no element" {:nav nav})))))))
+
 (defn swap
   "replaces an element at the cursor"
   {:added "3.0"}
