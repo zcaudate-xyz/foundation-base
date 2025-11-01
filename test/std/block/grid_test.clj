@@ -1,7 +1,8 @@
 (ns std.block.grid-test
   (:use code.test)
   (:require [std.block.grid :refer :all]
-            [std.block.construct :as construct]))
+            [std.block.construct :as construct]
+            [std.block.parse :as parse]))
 
 ;; if scope is empty, then grid follows the first indent rule for
 ;; if scope is zero, then forms follow indentation without first indent rule
