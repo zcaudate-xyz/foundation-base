@@ -34,7 +34,7 @@
             [std.lib.walk :as walk]
             [clojure.set :as set])
   (:refer-clojure :exclude [-> ->> keyword swap! reset! aget fn
-                            ns require prn memoize set! future future?
+                            ns require pr prn memoize set! future future?
                             parse-long parse-double]))
 
 (f/intern-all std.lib.atom

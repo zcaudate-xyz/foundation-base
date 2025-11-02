@@ -4,7 +4,7 @@
             [std.lib.time :as t]
             [std.lib.foundation :as f]
             [std.string.common :as str])
-  (:refer-clojure :exclude [prn require])
+  (:refer-clojure :exclude [prn require pr])
   (:import (java.io StringWriter
                     PrintWriter)))
 
