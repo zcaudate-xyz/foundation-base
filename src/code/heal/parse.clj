@@ -1,6 +1,16 @@
 (ns code.heal.parse
   (:use [std.lib :as h]))
 
+(def lu-close
+  {"(" ")"
+   "[" "]"
+   "{" "}"})
+
+(def lu-open
+  {")" "(" 
+   "]" "[" 
+   "}" "{"})
+
 (defn- delimiter-info [char]
   (case char
     \( {:type :open, :style :paren }

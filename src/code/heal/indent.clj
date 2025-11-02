@@ -52,8 +52,7 @@
   {:added "4.0"}
   [delimiters line-lu]
   (let [singles (filter (fn [{:keys [type col]}]
-                          (and (= type :open)
-                               (> col 1)))
+                          (= type :open))
                         (reverse delimiters))]
     (vec (keep (fn [single]
                  (let [results (flag-indent-discrepancies-single delimiters line-lu single)]
@@ -61,31 +60,94 @@
                      [(:index single) results])))
                singles))))
 
-(defn flag-indent-discrepancies
-  "combines discrepancies that are the same"
+
+(defn candidates-merge-common
+  "combines candidates that are the same"
   {:added "4.0"}
+  [candidates]
+  (->> (group-by second candidates)
+       (vals)
+       (map last)
+       (sort-by first)
+       (vec)))
+
+(defn candidates-filter-difficult
+  "combines candidates that are the same"
+  {:added "4.0"}
+  [candidates & [{:keys [limit minimium]
+                  :or {minimium true}}]]
+  (cond (empty? candidates)
+        []
+
+        :else
+        (let [limit (or limit
+                        (apply min (map (comp count second) candidates)))]
+          (filterv (fn [loc]
+                     (>= limit (count (second loc))))
+                   candidates))))
+
+(defn candidates-invert-lookup
+  [candidates]
+  (let [lu (reduce (fn [lu [index-limit locs]]
+                     (reduce (fn [lu {:keys [index]}]
+                               (update-in lu [index] conj index-limit))
+                             lu
+                             locs))
+                   {}
+                   candidates)]
+    (h/map-vals #(apply min %) lu)))
+
+(defn flag-indent-discrepancies
   [delimiters]
-  (let [discrepancies (flag-indent-discrepancies-raw
-                       delimiters
-                       (parse/make-delimiter-line-lu delimiters))]
-    (->> (group-by second discrepancies)
-         (vals)
-         (map last)
-         (sort-by first)
-         (vec))))
+  (let [candidates (flag-indent-discrepancies-raw
+                    delimiters
+                    (parse/make-delimiter-line-lu delimiters))
+        candidates  (candidates-merge-common candidates)
+        inv-lu      (candidates-invert-lookup candidates)
+        lu          (->> (group-by second inv-lu)
+                         (h/map-vals
+                          (fn [idxs]
+                            (->> idxs
+                                 (map first)
+                                 sort
+                                 reverse
+                                 (map delimiters)))))]
+    (vec (sort lu))))
 
 (defn find-indent-last-close
   "finds the last close delimiter"
   {:added "4.0"}
-  [delimiters entry index-limit]
-  (let [{:keys [depth]} entry]
-    (loop [index (dec index-limit)]
-      (when (> index (:index entry) )
-        (let [e (get delimiters index)]
-          (if (= :close (:type e))
-            e
-            (recur (dec index))))))))
+  [delimiters index-upper index-lower]
+  (loop [index (dec index-upper)]
+    (let [e (get delimiters index)]
+      (cond (or (nil? e)
+                (< index index-lower))
+            nil
 
+            (= :close (:type e))
+            e
+            
+            :else
+            (recur (dec index))))))
+
+(defn build-indent-edit
+  [{:keys [line col]} vals]
+  {:action :insert
+   :line  line
+   :col   col
+   :new-char (apply str
+                    (map (fn [{:keys [char]}]
+                           (parse/lu-close char))
+                         vals))})
+
+(defn build-indent-edits
+  [delimiters candidates]
+  (keep (fn [[idx vals]]
+          (if-let [loc (find-indent-last-close delimiters
+                                               idx
+                                               (:index (first vals)))]
+            (build-indent-edit loc vals)))
+        candidates))
 
 (comment
 
@@ -94,7 +156,12 @@
     (parse/pair-delimiters
      (parse/parse-delimiters (h/sys:resource-content "code/heal/cases/004_shorten.block"))))
   
-  (flag-indent-discrepancies-single
+  (build-indent-edits
+   *dlm4*
+   (flag-indent-discrepancies
+    *dlm4*))
+  
+  (flag-indent-candidates-single
    *dlm4*
    (parse/make-delimiter-line-lu *dlm4*)
    (get *dlm4* 177)))
