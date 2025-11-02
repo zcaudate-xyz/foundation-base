@@ -1,0 +1,72 @@
+(ns sznui.v1.screens.demo.quickstart-page-demo.detailed-guides
+  (:require [std.lang :as l]
+            [std.lib :as h]))
+
+(l/script :js
+  {:runtime :websocket
+   :require [[js.react :as r]
+             [js.tamagui :as tm]
+             [xt.lang.base-lib :as k]]
+   :import  [["@tamagui/lucide-icons"
+              :as #{CheckCircle2 Clock Users Coins Target BarChart3 Zap Copy ExternalLink BookOpen Play Code Rocket Settings Share2 Download}]]
+   :export [MODULE]})
+
+(defn.js QuickstartDetailedGuides
+  [#{onNavigate copied copyCode}]
+  (return
+    [:% tm/View {:borderTopWidth 1 :borderTopColor "$border" :paddingVertical "$8"}
+     [:% tm/View {:maxWidth "container" :marginHorizontal "auto" :paddingHorizontal "$4"}
+      [:% tm/Tabs {:defaultValue "campaign" :maxWidth "$5xl" :marginHorizontal "auto"}
+       [:% tm/TabsList {:marginBottom "$8" :width "100%" :display "grid" :gridTemplateColumns "repeat(2, minmax(0, 1fr))" :$lg {:gridTemplateColumns "repeat(4, minmax(0, 1fr))"}}
+        [:% tm/TabsTrigger {:value "campaign"} "Campaign"]
+        [:% tm/TabsTrigger {:value "token"} "Token"]
+        [:% tm/TabsTrigger {:value "tasks"} "Tasks"]
+        [:% tm/TabsTrigger {:value "widget"} "Widget"]]
+
+       ;; Campaign Guide
+       [:% tm/TabsContent {:value "campaign"}
+        [:% tm/Card
+         [:% tm/View {:borderBottomWidth 1 :borderBottomColor "$border" :padding "$6"}
+          [:% tm/View {:display "flex" :alignItems "flex-start" :justifyContent "space-between"}
+           [:% tm/View
+            [:% tm/Text {:tag "h2" :fontSize "$5" :fontFamily "$heading" :marginBottom "$2"} "Launch Your First Campaign"]
+            [:% tm/Text {:color "$color10"}
+             "Create a prediction market campaign in 5 simple steps"]] 
+           [:% tm/Badge {:variant "secondary"} "5-10 min"]]]
+
+         [:% tm/View {:padding "$6"}
+          [:% tm/View {:gap "$6"}
+           ;; Step 1
+           [:% tm/View {:display "flex" :gap "$4"}
+            [:% tm/View {:display "flex" :height "$4" :width "$4" :flexShrink 0 :alignItems "center" :justifyContent "center" :borderRadius "$full" :backgroundColor "$primary" :color "$primaryForeground"}
+             "1"]
+            [:% tm/View {:flex 1}
+             [:% tm/Text {:tag "h4" :fontSize "$4" :fontFamily "$heading" :marginBottom "$2"} "Access Campaign Builder"]
+             [:% tm/Text {:marginBottom "$3" :fontSize "$sm" :color "$color10"}
+              "Navigate to the Campaign Builder from your dashboard or the main menu."]
+             [:% tm/Button {:variant "outline"
+                            :size "sm"
+                            :onPress (fn [] (onNavigate "campaign-builder"))}
+              "Open Campaign Builder"
+              [:% ExternalLink {:marginLeft "$2" :height "$1" :width "$1"}]]]]
+
+           [:% tm/Separator]
+
+           ;; Step 2
+           [:% tm/View {:display "flex" :gap "$4"}
+            [:% tm/View {:display "flex" :height "$4" :width "$4" :flexShrink 0 :alignItems "center" :justifyContent "center" :borderRadius "$full" :backgroundColor "$primary" :color "$primaryForeground"}
+             "2"]
+            [:% tm/View {:flex 1}
+             [:% tm/Text {:tag "h4" :fontSize "$4" :fontFamily "$heading" :marginBottom "$2"} "Define Campaign Details"]
+             [:% tm/Text {:marginBottom "$3" :fontSize "$sm" :color "$color10"}
+              "Enter your campaign name, description, and choose a relevant category (Product Launch, Brand Campaign, etc.)"]
+             [:% tm/Card {:backgroundColor "$background" :padding "$4"}
+              [:% tm/View {:gap "$2" :fontSize "$sm"}
+               [:% tm/Text
+                [:% tm/Text {:tag "strong" :fontWeight "bold"} "Campaign Name:"] " Tesla Model Y Launch Prediction"]
+               [:% tm/Text
+                [:% tm/Text {:tag "strong" :fontWeight "bold"} "Category:"] " Product Launch"]
+               [:% tm/Text
+                [:% tm/Text {:tag "strong" :fontWeight "bold"} "Duration:"] " 30 days"]]]
+
+           [:% tm/Separator]

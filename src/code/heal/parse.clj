@@ -141,33 +141,15 @@
 ;; indentation
 ;;
 
-(defn make-delimiter-lu
+(defn make-delimiter-line-lu
+  {:added "4.0"}
+  [delimiters]
+  (group-by :line delimiters))
+
+(defn make-delimiter-index-lu
   "creates a delimiter lookup"
   {:added "4.0"}
   [delimiters]
   (h/map-juxt [:index
                identity]
               delimiters))
-
-(comment
-  (find-depth-indent-parent
-   [{:char "(", :line 2, :col 1, :type :open, :style :paren, :depth 0, :correct? false, :index 0}
-    {:correct? true, :index 1, :pair-id 2, :type :open, :style :paren, :depth 1, :line 3, :col 2, :char "("}
-    {:correct? true, :index 2, :pair-id 0, :type :open, :style :paren, :depth 2, :line 4, :col 4, :char "("}
-    {:correct? true, :index 3, :pair-id 0, :type :close, :style :paren, :depth 2, :line 4, :col 7, :char ")"}
-    {:correct? true, :index 4, :pair-id 1, :type :open, :discrepancy? true, :style :paren, :depth 2, :line 5, :col 2, :char "("}
-    {:correct? true, :index 5, :pair-id 1, :type :close, :style :paren, :depth 2, :line 5, :col 7, :char ")"}
-    {:correct? true, :index 6, :pair-id 2, :type :close, :style :paren, :depth 1, :line 5, :col 8, :char ")"}]
-   {:correct? true, :index 4, :pair-id 1, :type :open, :discrepancy? true, :style :paren, :depth 2, :line 5, :col 2, :char "("})
-
-  (find-depth-indent-last-close
-   [{:char "(", :line 2, :col 1, :type :open, :style :paren, :depth 0, :correct? false, :index 0}
-    {:correct? true, :index 1, :pair-id 2, :type :open, :style :paren, :depth 1, :line 3, :col 2, :char "("}
-    {:correct? true, :index 2, :pair-id 0, :type :open, :style :paren, :depth 2, :line 4, :col 4, :char "("}
-    {:correct? true, :index 3, :pair-id 0, :type :close, :style :paren, :depth 2, :line 4, :col 7, :char ")"}
-    {:correct? true, :index 4, :pair-id 1, :type :open, :discrepancy? true, :style :paren, :depth 2, :line 5, :col 2, :char "("}
-    {:correct? true, :index 5, :pair-id 1, :type :close, :style :paren, :depth 2, :line 5, :col 7, :char ")"}
-    {:correct? true, :index 6, :pair-id 2, :type :close, :style :paren, :depth 1, :line 5, :col 8, :char ")"}]
-   {:correct? true, :index 4, :pair-id 1, :type :open, :discrepancy? true, :style :paren, :depth 2, :line 5, :col 2, :char "("}))
-
-

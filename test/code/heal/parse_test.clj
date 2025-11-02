@@ -110,7 +110,7 @@
 (fact "creates a delimiter lookup "
   ^:hidden
   
-  (parse/make-delimiter-lu
+  (parse/make-delimiter-index-lu
    (parse/pair-delimiters
     (parse/parse-delimiters "
 (defn
@@ -126,3 +126,10 @@
   
     
   )
+
+
+^{:refer code.heal.parse/make-delimiter-line-lu :added "4.0"}
+(fact "TODO")
+
+^{:refer code.heal.parse/make-delimiter-index-lu :added "4.0"}
+(fact "TODO")
