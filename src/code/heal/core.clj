@@ -8,29 +8,33 @@
   "performs the necessary edits to a string"
   {:added "4.0"}
   [content edits]
-  (let [lines (str/split-lines content)]
-    (->> edits
-         (reduce (fn [lines edit]
-                   (let [{:keys [action new-char]} edit
-                         old-line  (nth lines
-                                        (dec (:line edit)))
-                         new-line  (case action
-                                     :replace
-                                     (str/replace-at old-line
-                                                     (dec (:col edit))
-                                                     new-char)
-                                     :insert
-                                     (str/insert-at old-line
-                                                    (dec (:col edit))
-                                                    new-char)
+  (cond (empty? edits)
+        content
 
-                                     :remove
-                                     (str/replace-at old-line
-                                                     (dec (:col edit))
-                                                     ""))]
-                     (assoc lines (dec (:line edit)) new-line)))
-                 lines)
-         (str/join "\n"))))
+        :else
+        (let [lines (str/split-lines content)]
+          (->> edits
+               (reduce (fn [lines edit]
+                         (let [{:keys [action new-char]} edit
+                               old-line  (nth lines
+                                              (dec (:line edit)))
+                               new-line  (case action
+                                           :replace
+                                           (str/replace-at old-line
+                                                           (dec (:col edit))
+                                                           new-char)
+                                           :insert
+                                           (str/insert-at old-line
+                                                          (dec (:col edit))
+                                                          new-char)
+
+                                           :remove
+                                           (str/replace-at old-line
+                                                           (dec (:col edit))
+                                                           ""))]
+                           (assoc lines (dec (:line edit)) new-line)))
+                       lines)
+               (str/join "\n")))))
  
 (defn create-mismatch-edits
   "find the actions required to edit the content"
@@ -54,7 +58,8 @@
 (defn heal-mismatch
   "heals a style mismatch for paired delimiters"
   {:added "4.0"}
-  [content]
+  [content & [{:keys [ensure
+                      print]}]]
   (let [delimiters (parse/pair-delimiters
                     (parse/parse-delimiters
                      content))
@@ -93,7 +98,8 @@
                             unclosed))}]))
 
 (defn heal-append
-  [content & [{:keys [ensure]}]]
+  [content & [{:keys [ensure
+                      print]}]]
   (let [delimiters (parse/pair-delimiters
                     (parse/parse-delimiters
                      content))
@@ -121,20 +127,35 @@
   "find the actions required to edit the content"
   {:added "4.0"}
   [delimiters]
-  (let [unclosed (reverse (filter check-remove-fn delimiters))
-        close (last delimiters)]
-    [{:action :remove
-      :line (:line close)
-      :col  (:col close)}]))
+  (let [unopened (reverse (filter check-remove-fn delimiters))]
+    (mapv (fn [{:keys [line col]}]
+            {:action :remove
+             :line line
+             :col  col})
+          unopened)))
 
 (defn heal-remove
-  [content & [{:keys [ensure]}]]
+  [content & [{:keys [print]}]]
   (let [delimiters (parse/pair-delimiters
                     (parse/parse-delimiters
                      content))]
     (update-content content
                     (create-remove-edits
                      delimiters))))
+
+#_(defn heal-remove
+  "heals unclosed forms"
+  {:added "4.0"}
+  [content & [{:keys [print]
+               :as opts}]]
+  (loop [old-content content
+         pass 0]
+    (when print
+      (h/prn "REMOVE Pass:" pass))
+    (let [new-content (heal-remove-single-pass old-content opts)]
+      (if (= new-content old-content)
+        new-content
+        (recur new-content (inc pass))))))
 
 ;;
 ;; Heal generated code that is indented correctly but parens has not be placed right
@@ -159,7 +180,7 @@
                                               selected)]
     (update-content content edits)))
 
-(defn heal-indented-multi-pass
+(defn heal-indented
   "heals unclosed forms"
   {:added "4.0"}
   [content & [{:keys [limit minimum print]
@@ -167,21 +188,22 @@
   (loop [old-content content
          pass 0]
     (when print
-      (h/prn "Pass:" pass))
+      (h/prn "Indented Pass:" pass))
     (let [new-content (heal-indented-single-pass old-content opts)]
       (if (= new-content old-content)
         new-content
         (recur new-content (inc pass))))))
 
-(defn heal-indented
+(defn heal
   "heals unclosed forms"
   {:added "4.0"}
   [content & [{:keys [limit minimum print]
                :as opts}]]
-  (-> (heal-indented-multi-pass content opts)
-      (heal-append)
-      (heal-mismatch)
-      (heal-remove)))
+  (-> content
+      (heal-indented  opts)
+      (heal-append opts)
+      (heal-mismatch opts)
+      (heal-remove opts)))
 
 (comment
 
