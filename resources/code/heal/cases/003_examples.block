@@ -1,0 +1,8 @@
+(defn
+ (do
+   (it)|
+ (this))
+
+(defn
+ (do (it)))
+ (this))

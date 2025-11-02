@@ -106,24 +106,24 @@
                               (let [{:keys [stack processed pair-id unmatched-close-count]} state]
                                 (if (= (:type delim) :open)
                                   ;; Handle open delimiter
-                                  (let [level (count stack)
-                                        new-delim (assoc delim :level level)]
+                                  (let [depth (count stack)
+                                        new-delim (assoc delim :depth depth)]
                                     (assoc state
                                            :stack (conj stack new-delim)))
                                   ;; Handle close delimiter
                                   (if-let [open-delim (peek stack)]
                                     ;; Stack not empty, try to match
-                                    (let [level (:level open-delim)
+                                    (let [depth (:depth open-delim)
                                           correct? (= (:style open-delim) (:style delim))
                                           updated-open (assoc open-delim :correct? correct? :pair-id pair-id)
-                                          updated-close (assoc delim :level level :correct? correct? :pair-id pair-id)]
+                                          updated-close (assoc delim :depth depth :correct? correct? :pair-id pair-id)]
                                       (assoc state
                                              :stack (pop stack)
                                              :processed (conj processed updated-open updated-close)
                                              :pair-id (inc pair-id)))
                                     ;; Stack empty, unmatched close delimiter
                                     (let [new-unmatched-close-count (inc unmatched-close-count)
-                                          new-delim (assoc delim :level (- new-unmatched-close-count) :correct? false)]
+                                          new-delim (assoc delim :depth (- new-unmatched-close-count) :correct? false)]
                                       (assoc state
                                              :processed (conj processed new-delim)
                                              :unmatched-close-count new-unmatched-close-count))))))
@@ -131,31 +131,43 @@
                             delimiters)
         {:keys [stack processed]} final-state
         unmatched (map #(assoc % :correct? false) stack)]
-     (sort-by (juxt :line :col) (concat processed unmatched))))
+    (->> (concat processed unmatched)
+         (sort-by (juxt :line :col))
+         (map-indexed (fn [i entry]
+                        (assoc entry :index i)))
+         (vec))))
 
-(defn flag-level-discrepancies
-  "Flags opening delimiters where the column is less than a previous opening delimiter at the same level."
+;;
+;; indentation
+;;
+
+(defn make-delimiter-lu
+  "creates a delimiter lookup"
   {:added "4.0"}
   [delimiters]
-  (let [initial-state {:result []
-                       :last-open-col-at-level {}} ;; Map: level -> last_col_of_open_delimiter
-        final-state (reduce (fn [acc delim]
-                               (let [{:keys [result last-open-col-at-level]} acc
-                                     delim-type (:type delim)
-                                     level (:level delim)
-                                     col (:col delim)]
-                                 (if (= delim-type :open)
-                                   (let [prev-col (get last-open-col-at-level level)
-                                         discrepancy? (and prev-col (< col prev-col))
-                                         new-delim (if discrepancy? (assoc delim :discrepancy? true) delim)]
-                                     {:result (conj result new-delim)
-                                      :last-open-col-at-level (assoc last-open-col-at-level level col)})
-                                   ;; For close delimiters, we don't update last-open-col-at-level
-                                   ;; as they don't establish a new 'open' column for the level.
-                                   {:result (conj result delim)
-                                    :last-open-col-at-level last-open-col-at-level}))) ; Keep the map as is for close delimiters
-                               initial-state
-                               delimiters)]
-    (:result final-state)))
+  (h/map-juxt [:index
+               identity]
+              delimiters))
+
+(comment
+  (find-depth-indent-parent
+   [{:char "(", :line 2, :col 1, :type :open, :style :paren, :depth 0, :correct? false, :index 0}
+    {:correct? true, :index 1, :pair-id 2, :type :open, :style :paren, :depth 1, :line 3, :col 2, :char "("}
+    {:correct? true, :index 2, :pair-id 0, :type :open, :style :paren, :depth 2, :line 4, :col 4, :char "("}
+    {:correct? true, :index 3, :pair-id 0, :type :close, :style :paren, :depth 2, :line 4, :col 7, :char ")"}
+    {:correct? true, :index 4, :pair-id 1, :type :open, :discrepancy? true, :style :paren, :depth 2, :line 5, :col 2, :char "("}
+    {:correct? true, :index 5, :pair-id 1, :type :close, :style :paren, :depth 2, :line 5, :col 7, :char ")"}
+    {:correct? true, :index 6, :pair-id 2, :type :close, :style :paren, :depth 1, :line 5, :col 8, :char ")"}]
+   {:correct? true, :index 4, :pair-id 1, :type :open, :discrepancy? true, :style :paren, :depth 2, :line 5, :col 2, :char "("})
+
+  (find-depth-indent-last-close
+   [{:char "(", :line 2, :col 1, :type :open, :style :paren, :depth 0, :correct? false, :index 0}
+    {:correct? true, :index 1, :pair-id 2, :type :open, :style :paren, :depth 1, :line 3, :col 2, :char "("}
+    {:correct? true, :index 2, :pair-id 0, :type :open, :style :paren, :depth 2, :line 4, :col 4, :char "("}
+    {:correct? true, :index 3, :pair-id 0, :type :close, :style :paren, :depth 2, :line 4, :col 7, :char ")"}
+    {:correct? true, :index 4, :pair-id 1, :type :open, :discrepancy? true, :style :paren, :depth 2, :line 5, :col 2, :char "("}
+    {:correct? true, :index 5, :pair-id 1, :type :close, :style :paren, :depth 2, :line 5, :col 7, :char ")"}
+    {:correct? true, :index 6, :pair-id 2, :type :close, :style :paren, :depth 1, :line 5, :col 8, :char ")"}]
+   {:correct? true, :index 4, :pair-id 1, :type :open, :discrepancy? true, :style :paren, :depth 2, :line 5, :col 2, :char "("}))
 
 
