@@ -194,10 +194,11 @@
         new-content
         (recur new-content (inc pass))))))
 
-(defn heal
+(defn heal-raw
   "heals unclosed forms"
   {:added "4.0"}
-  [content & [{:keys [limit minimum print]
+  [content & [{:keys [limit minimum print
+                      write]
                :as opts}]]
   (-> content
       (heal-indented  opts)
@@ -205,8 +206,29 @@
       (heal-mismatch opts)
       (heal-remove opts)))
 
+
+(defn heal
+  [ns & [{:keys [limit minimum print
+                 write]
+          :as opts}]]
+  (let [ns (if (instance? clojure.lang.Namespace ns)
+             (symbol (name *ns*))
+             ns)
+        [path content] (cond (string? ns)
+                             [nil nil]
+                             
+                             (symbol? ns)
+                             [(slurp (code.project/lookup-path ns))
+                              (code.project/lookup-path ns)])
+        healed (heal-raw content opts)]
+    (if write
+      (spit path healed))))
+
 (comment
 
+  (heal
+   (code.project/lookup-path 'code.ai.server))
+  
   (let [delimiters (parse/pair-delimiters (parse/parse-delimiters content))
         lines      (vec (parse/parse-lines content))
         unmatched-open (filter #(and (= (:type %) :open)

@@ -172,7 +172,7 @@
    (doseq [v body]
      (p (pp-str v) "\n"))))
 
-(defmacro pp
+(defmacro ^{:style/indent 1} pp
   "shortcut to `(local :pprint)`"
   {:added "3.0"}
   ([& body]
@@ -287,8 +287,7 @@
     (do (when (not no-pad) (local :println ""))
         (local :pprint v))))
 
-(defmacro meter
-  "measure and prints time taken for a form"
+(defmacro ^{:style/indent 1} meter
   {:added "3.0"}
   ([label & body]
    (let [[label body] (if (keyword? label)

@@ -155,10 +155,12 @@
 
 (defn- relay-started?
   ([{:keys [instance]}]
-   (let [{:keys [type in]} @instance
+   (let [{:keys [type in ^Process process]} @instance
          {:keys [bus id]} in]
      (and bus
-          (bus/bus:has-id? bus id)))))
+          (or (bus/bus:has-id? bus id)
+              (and (= type :process)
+                   (.isAlive process)))))))
 
 (defn- relay-stopped?
   ([relay]

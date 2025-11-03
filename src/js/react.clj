@@ -43,7 +43,7 @@
 ;;
 ;;
 
-(defmacro.js curr
+(defmacro.js ^{:style/indent 0} curr
   "shortcut for `<ref>.current`"
   {:added "4.0"}
   ([ref]
@@ -65,7 +65,7 @@
 ;; local
 ;;
 
-(defmacro.js local
+(defmacro.js ^{:style/indent 1} local
   "shortcut for useState"
   {:added "4.0"}
   ([& [init]]

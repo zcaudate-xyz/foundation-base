@@ -1,4 +1,5 @@
-{:aliases
+{:deps {org.http-kit/http-kit {:mvn/version "2.5.3"}}
+ :aliases
  {:mcp {:extra-deps {org.clojure/tools.nrepl {:mvn/version "0.2.13"}
                       cider/cider-nrepl {:mvn/version "0.45.0"}
                       refactor-nrepl/refactor-nrepl {:mvn/version "3.10.0"}
@@ -10,4 +11,4 @@
                     "--middleware"
                     "[refactor-nrepl.middleware/wrap-refactor,cider.nrepl/cider-middleware]"
                     "--port" "51311"
-                    "--host" "0.0.0.0"]}}} 
+                    "--host" "0.0.0.0"]}}}

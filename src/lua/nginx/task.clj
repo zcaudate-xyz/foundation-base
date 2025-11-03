@@ -16,7 +16,7 @@
 ;; handling
 ;;
 
-(defmacro.lua
+(defmacro.lua ^{:style/indent 0}
   INSTANCE-KEY
   "creates a new instance key
  

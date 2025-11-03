@@ -81,7 +81,7 @@
    [org.scijava/parsington "3.1.0"]
    
    ;; rt.basic
-   [http-kit "2.6.0"]
+   [http-kit "2.8.0"]
    
    ;; rt.graal
    [org.graalvm.sdk/graal-sdk "21.2.0"]
