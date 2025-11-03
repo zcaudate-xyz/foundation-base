@@ -26,13 +26,19 @@
 
 ^{:refer std.lib.zip/left-element :added "3.0" :class [:zip/element]}
 (fact "element directly left of current position"
-
-  (-> (vector-zip [1 2 3 4])
-      (step-inside))
-
+  ^:hidden
+  
   (-> (from-status '[1 2 3 | 4])
       (left-element))
-  => 3)
+  => 3
+
+  (-> (from-status '[1 [2 [| 3]]])
+      (left-element))
+  => nil
+
+  (-> (from-status '[1 [2 [nil | 3]]])
+      (left-element))
+  => nil)
 
 ^{:refer std.lib.zip/right-element :added "3.0" :class [:zip/element]}
 (fact "element directly right of current position"
@@ -103,7 +109,8 @@
 ^{:refer std.lib.zip/at-left-most? :added "3.0" :class [:zip/move]}
 (fact "check if at left-most point of a container"
 
-  (-> (from-status [1 2 ['| 3 4]])
+  (-> (from-status [1 2 ['| 3 4] 5 6])
+      
       (at-left-most?))
   => true)
 

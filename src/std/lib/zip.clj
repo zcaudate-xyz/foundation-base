@@ -2,6 +2,8 @@
   (:require [std.lib.foundation :as h])
   (:refer-clojure :exclude [find get]))
 
+(declare display-zipper)
+
 (def ^:dynamic *handler* nil)
 
 (def +nil-handler+
@@ -13,11 +15,12 @@
 
 (defrecord Zipper [context prefix display]
   Object
-  (toString [obj]
+  (toString [{:keys [parent]
+              :as obj}]
     (str (or prefix "#zip")
          (if display
            (display obj)
-           (into {} (dissoc obj :context :prefix :display))))))
+           (display-zipper obj)))))
 
 (defmethod print-method Zipper
   ([v ^java.io.Writer w]
@@ -86,7 +89,8 @@
    (zipper root context {}))
   ([root context opts]
    (map->Zipper (merge opts
-                       {:left    ()
+                       {:depth   0
+                        :left    ()
                         :right   (list root)
                         :context (check-context context)}))))
 
@@ -502,7 +506,8 @@
          (let [elem     (right-element zip)
                children (list-child-elements zip :right)]
            (-> zip
-               (assoc :left ()
+               (assoc :depth (inc (:depth zip))
+                      :left ()
                       :right children
                       :parent zip)
                (h/call (:update-step-inside context) elem)))))
@@ -531,12 +536,12 @@
          :else
          (let [elem     (left-element zip)
                children (list-child-elements zip :left)
-               {:keys [left right]} zip
+               {:keys [left right depth]} zip
                parent (assoc zip
                              :left (rest left)
                              :right (cons (first left) right))]
            (-> zip
-               (assoc :left (reverse children) :right () :parent parent)
+               (assoc :depth (inc  depth) :left (reverse children) :right () :parent parent)
                (h/call (:update-step-inside-left context) elem)))))
   ([zip n]
    (nth (iterate step-inside-left zip) n)))
@@ -550,7 +555,7 @@
    => '([1 2 | [3 4]])"
   {:added "3.0"}
   ([zip]
-   (let [{:keys [context left right parent]} zip]
+   (let [{:keys [context left right parent depth]} zip]
      (cond ((:at-outside-most? context) zip)
            (if-let [zip-fn (get-in *handler* [:step :at-outside-most])]
              (zip-fn zip)
@@ -560,7 +565,8 @@
            (let [elements (concat (reverse left) right)
                  body  {:left   (:left parent)
                         :right  (:right parent)
-                        :parent (:parent parent)}]
+                        :parent (:parent parent)
+                        :depth  (dec depth)}]
              (cond-> (merge zip body)
                (:changed? zip)  (update-child-elements elements)
                :then (h/call (:update-step-outside context) left))))))
@@ -873,8 +879,10 @@
        (status))
    => '([1 [[| 2] 3]])"
   {:added "3.0"}
-  ([{:keys [context] :as zip}]
-   (->> (insert-left zip (:cursor context))
+  ([{:keys [context] :as zip}  & [no-cursor]]
+   (->> (if no-cursor
+          zip
+          (insert-left zip (:cursor context)))
         (step-outside-most)
         (current-elements)
         (apply list))))
@@ -891,6 +899,20 @@
   ([zip]
    (->> (status zip)
         (apply pr-str))))
+
+(defn display-zipper
+  [{:keys [parent context] :as zip}]
+  (cond-> zip
+    :then  (dissoc :context :prefix :display :changed?)
+    parent (assoc :parent
+                  (first
+                   (status
+                    (replace-right parent
+                                   ((:add-element context)
+                                    ((:create-container context))
+                                    ((:create-element context)
+                                     '...)))
+                    true)))))
 
 (defn step-next
   "step status through the tree in depth first order
