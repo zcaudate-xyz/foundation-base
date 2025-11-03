@@ -2,43 +2,41 @@
   (:require [code.heal.core :as core]
             [code.heal.print :as print]
             [code.heal.parse :as parse]
-            [std.lib :as h]))
+            [code.framework :as framework]
+            [std.lib :as h :refer [definvoke]]
+            [std.task :as task]
+            [code.manage.unit.template :as template]))
 
-(h/intern-in [heal core/heal])
+(h/intern-in core/heal)
 
-(defn pprint
+(comment
+  heal-filenames
+  heal-namespaces
+  
+  )
+
+(defn heal-code-single
+  "helper function for heal-code"
+  {:added "4.0"}
+  ([ns params lookup project]
+   (let [params (assoc params :transform core/heal-raw)]
+     (framework/transform-code ns params lookup project))))
+
+(definvoke heal-code
+  "helper function to fix parents"
+  {:added "4.0"}
+  [:task {:template :code
+          :params   {:title "Heal Code"
+                     :parallel true
+                     :print {:result true :summary true}}
+          :main     {:fn #'heal-code-single}
+          :result   (template/code-default-columns :changed)}])
+
+(defn print-rainbox
+  "prints out the code in rainbow"
+  {:added "4.0"}
   [content]
   (print/print-rainbow
    content
    (parse/pair-delimiters
     (parse/parse-delimiters content))))
-
-
-(comment
-
-  (pprint
-   (slurp
-    "src/sznui/_gen/quickstart_page_demo/guide_selection.clj"))
-
-
-  (core/heal-indented
-   "(\"hello)\" ))")
-  
-  (parse/pair-delimiters
-   (parse/parse-delimiters
-    (core/heal
-     (slurp
-      "src/sznui/_gen/quickstart_page_demo/guide_selection.clj"))))
-  
-  
-  (doseq [path (keys (std.fs/list
-                      "src/sznui/_gen"
-                      {:include [#"\d.+\.clj$"]
-                       :recursive true}))]
-    (h/prn path)
-    (spit path
-          (core/heal
-           (slurp path)
-           {:print true})))
-
-  )

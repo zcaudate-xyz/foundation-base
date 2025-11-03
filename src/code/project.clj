@@ -93,7 +93,7 @@
   [:recent {:key str
             :compare fs/last-modified}]
   ([path]
-   (let [ns (fs/file-namespace path)]
+   (when-let [ns (fs/file-namespace path)]
      (swap! common/*lookup* assoc ns path)
      [ns (str path)])))
 
@@ -104,6 +104,23 @@
   {:added "3.0"}
   ([ns]
    (get @common/*lookup* ns)))
+
+(defn get-path
+  "gets the path given the `ns`
+   
+   (reset! code.project.common/*lookup* {})
+   (get-path (h/ns-sym))
+   => \"test/code/project_test.clj\""
+  {:added "4.0"}
+  ([ns & [project]]
+   (or (get @common/*lookup* ns)
+       (some (fn [root]
+               (second 
+                (lookup-ns
+                 (str root "/" (fs/ns->file ns) ".clj"))))
+             (concat
+              (or (:source-paths project) ["src"])
+              (or (:test-paths project)   ["test"]))))))
 
 (defn all-files
   "returns all the clojure files in a directory

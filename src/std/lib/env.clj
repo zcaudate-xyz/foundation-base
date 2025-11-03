@@ -20,6 +20,23 @@
                         :pprint pprint/pprint
                         :pprint-str #(with-out-str (pprint/pprint %))}))
 
+(defmacro with-system
+  "with system print instead of local"
+  {:added "3.0"}
+  ([& body]
+   `(binding [*local* false]
+      ~@body)))
+
+(defmacro with-out-str
+  "gets the local string
+ 
+   (print/with-out-str (print/print \"hello\"))
+   => \"hello\""
+  {:added "3.0"}
+  ([& body]
+   `(binding [*local* false]
+      (clojure.core/with-out-str ~@body))))
+
 (defn ns-sym
   "returns the namespace symbol"
   {:added "3.0"}

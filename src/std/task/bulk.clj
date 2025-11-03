@@ -50,7 +50,7 @@
   ([f inputs {:keys [idxs] :as context} params lookup env args]
    (->> (pmap (fn [idx input]
                 (let [output  (volatile! nil)
-                      out-str (print/with-out-str
+                      out-str (h/with-out-str
                                 (bulk-process-item f (assoc context
                                                             :idx idx
                                                             :input input

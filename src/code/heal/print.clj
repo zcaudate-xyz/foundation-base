@@ -2,26 +2,27 @@
   (:require [std.lib :as h]))
 
 (def +rainbow-colors+
-  ["\u001b[31m"  ; red
-   "\u001b[33m"  ; yellow
-   "\u001b[32m"  ; green
-   "\u001b[34m"  ; blue
-   "\u001b[35m"  ; magenta
-   "\u001b[36m"]) ; cyan
+  ["\u001b[35m"                        ; magenta
+   "\u001b[34m"                        ; blue
+   "\u001b[36m"                        ; cyan
+   "\u001b[32m"                        ; green
+   "\u001b[33m"                        ; yellow
+   "\u001b[31m"                        ; red
+   ])                     
 
 (def +error-color+ "\u001b[41m") ; red background
 
 (def +reset-color+ "\u001b[0m")
 
 (defn print-rainbow
-  "Prints the code with delimiters colored by nesting level."
+  "Prints the code with delimiters colored by nesting depth."
   [content delimiters]
   (let [color-map (->> delimiters
                        (map (fn [delim]
-                              (let [level (get delim :level 0)
+                              (let [depth (get delim :depth 0)
                                     correct? (get delim :correct? true)
                                     color (if correct?
-                                            (get +rainbow-colors+ (mod level (count +rainbow-colors+)))
+                                            (get +rainbow-colors+ (mod depth (count +rainbow-colors+)))
                                             +error-color+)]
                                 [[(:line delim) (:col delim)] color])))
                        (into {}))]

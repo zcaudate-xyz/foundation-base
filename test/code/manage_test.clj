@@ -19,9 +19,9 @@
 (fact "returns the list of vars in a namespace"
 
   (vars 'code.manage)
-
+  
   (vars 'code.manage {:sorted false})
-
+  
   (vars '#{code.manage} {:return #{:errors :summary}})
   => (contains-in {:errors any
                    :summary {:errors 0

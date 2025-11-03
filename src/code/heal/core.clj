@@ -25,7 +25,7 @@
                                                            new-char)
                                            :insert
                                            (str/insert-at old-line
-                                                          (dec (:col edit))
+                                                          (:col edit)
                                                           new-char)
 
                                            :remove
@@ -59,10 +59,8 @@
   "heals a style mismatch for paired delimiters"
   {:added "4.0"}
   [content & [{:keys [ensure
-                      print]}]]
-  (let [delimiters (parse/pair-delimiters
-                    (parse/parse-delimiters
-                     content))
+                      debug]}]]
+  (let [delimiters (parse/parse content)
         edits  (create-mismatch-edits delimiters)]
     (update-content content edits)))
 
@@ -72,19 +70,21 @@
 ;;
 
 (defn check-append-fn
+  "check for open unpaired"
+  {:added "4.0"}
   [{:keys [type pair-id]}]
   (and (= type :open)
        (not pair-id)))
 
 (defn check-append-edits
-  "find the actions required to edit the content"
+  "checks that append edits are value"
   {:added "4.0"}
   [delimiters]
   (= (take-while check-append-fn delimiters)
      (filter check-append-fn delimiters )))
 
 (defn create-append-edits
-  "find the actions required to edit the content"
+  "creates the append edits"
   {:added "4.0"}
   [delimiters]
   (let [unclosed (take-while check-append-fn delimiters)
@@ -98,13 +98,15 @@
                             unclosed))}]))
 
 (defn heal-append
-  [content & [{:keys [ensure
-                      print]}]]
-  (let [delimiters (parse/pair-delimiters
-                    (parse/parse-delimiters
-                     content))
+  "appends at the"
+  {:added "4.0"}
+  [content & [{:keys [debug]}]]
+  (let [delimiters (parse/parse content)
         enabled    (check-append-edits delimiters)]
-    (cond enabled 
+    (cond (parse/is-close-heavy delimiters)
+          content
+          
+          enabled 
           (update-content content (create-append-edits
                                    delimiters))
 
@@ -119,12 +121,14 @@
 ;;
 
 (defn check-remove-fn
+  "check for close unpaired"
+  {:added "4.0"}
   [{:keys [type pair-id]}]
   (and (= type :close)
        (not pair-id)))
 
 (defn create-remove-edits
-  "find the actions required to edit the content"
+  "creates removes edits"
   {:added "4.0"}
   [delimiters]
   (let [unopened (reverse (filter check-remove-fn delimiters))]
@@ -135,122 +139,121 @@
           unopened)))
 
 (defn heal-remove
-  [content & [{:keys [print]}]]
-  (let [delimiters (parse/pair-delimiters
-                    (parse/parse-delimiters
-                     content))]
-    (update-content content
-                    (create-remove-edits
-                     delimiters))))
-
-#_(defn heal-remove
-  "heals unclosed forms"
+  "removed unmatched parens"
   {:added "4.0"}
-  [content & [{:keys [print]
-               :as opts}]]
-  (loop [old-content content
-         pass 0]
-    (when print
-      (h/prn "REMOVE Pass:" pass))
-    (let [new-content (heal-remove-single-pass old-content opts)]
-      (if (= new-content old-content)
-        new-content
-        (recur new-content (inc pass))))))
+  [content & [{:keys [debug]}]]
+  (let [delimiters (parse/parse content)
+        edits  (create-remove-edits
+                delimiters)
+        #_#__ (when debug
+            (h/prn :REMOVE   (count edits)))]
+    (update-content content edits)))
 
 ;;
 ;; Heal generated code that is indented correctly but parens has not be placed right
 ;;
 
-(defn heal-indented-single-pass
-  "heals unclosed forms"
+(defn heal-close-heavy-single-pass
+  "creates deletion for multiple early closes on first pass"
   {:added "4.0"}
-  [content & [{:keys [limit minimum print]
+  [content & [{:keys [debug]
                :as opts}]]
-  (let [delimiters (parse/pair-delimiters
-                    (parse/parse-delimiters
-                     content))
-        candidates (indent/flag-indent-discrepancies
-                    delimiters)
-        selected   (indent/candidates-filter-difficult candidates opts)
-        _          (when print
-                     (h/prn :ALL      (map (comp count second) candidates))
-                     (h/prn :SELECTED (map (comp count second) selected)))
+  (let [delimiters (parse/parse content)
+        candidates (indent/flag-close-heavy delimiters)
         
-        edits      (indent/build-indent-edits delimiters
-                                              selected)]
+        #_#__          (when debug
+                         (h/prn :ALL      (map (comp count second) candidates)))
+        edits      (indent/build-remove-edits delimiters
+                                              candidates)]
     (update-content content edits)))
 
-(defn heal-indented
-  "heals unclosed forms"
+(defn heal-close-heavy
+  "multiple close deletions"
   {:added "4.0"}
-  [content & [{:keys [limit minimum print]
+  [content & [{:keys [limit debug]
+               :or {limit 50}
                :as opts}]]
   (loop [old-content content
          pass 0]
-    (when print
-      (h/prn "Indented Pass:" pass))
-    (let [new-content (heal-indented-single-pass old-content opts)]
-      (if (= new-content old-content)
+    (when debug
+      (h/prn "Heal Close Heavy:" pass))
+    (let [new-content (heal-close-heavy-single-pass old-content opts)]
+      (if (or (= new-content old-content)
+              (> pass limit))
+        new-content
+        (recur new-content (inc pass))))))
+
+(defn heal-open-heavy-single-pass
+  "heals content that has been wrongly 
+ 
+   (read-string
+    (core/heal-open-heavy-single-pass \"
+ (defn
+  (do
+    (it)
+  (this)
+  (this))\"))
+   => '(defn (do (it)) (this) (this))"
+  {:added "4.0"}
+  [content & [{:keys [debug]
+               :as opts}]]
+  (let [delimiters (parse/parse content)
+        candidates (indent/flag-open-heavy
+                    delimiters)
+        selected   (indent/flagged-candidates-filter-run candidates opts)
+        #_#__          (when debug
+                         (h/prn :ALL      (map (comp count second) candidates))
+                         (h/prn :SELECTED (map (comp count second) selected)))
+        
+        edits      (indent/build-insert-edits delimiters
+                                              selected
+                                              content)]
+    (update-content content edits)))
+
+(defn heal-open-heavy
+  "fixes indentation parens"
+  {:added "4.0"}
+  [content & [{:keys [limit minimum debug]
+               :or {limit 50}
+               :as opts}]]
+  (loop [old-content content
+         pass 0]
+    (when debug
+      (h/prn "Heal Open Heavy:" pass))
+    (let [new-content (heal-open-heavy-single-pass old-content opts)]
+      (if (or (= new-content old-content)
+              (> pass limit))
         new-content
         (recur new-content (inc pass))))))
 
 (defn heal-raw
-  "heals unclosed forms"
+  "combining all strategies for code heal"
   {:added "4.0"}
-  [content & [{:keys [limit minimum print
-                      write]
+  [content & [{:keys [limit minimum debug]
                :as opts}]]
   (-> content
-      (heal-indented  opts)
+      (heal-close-heavy opts)
+      (heal-open-heavy opts)
       (heal-append opts)
       (heal-mismatch opts)
       (heal-remove opts)))
 
-
 (defn heal
-  [ns & [{:keys [limit minimum print
-                 write]
-          :as opts}]]
-  (let [ns (if (instance? clojure.lang.Namespace ns)
-             (symbol (name *ns*))
-             ns)
-        [path content] (cond (string? ns)
-                             [nil nil]
-                             
-                             (symbol? ns)
-                             [(slurp (code.project/lookup-path ns))
-                              (code.project/lookup-path ns)])
+  "heals the content"
+  {:added "4.0"}
+  [s & [{:keys [write]
+         :as opts}]]
+  (let [[path content] (cond (std.fs/path? s)
+                             [(str s)
+                              (slurp s)]
+
+                             (string? s)
+                             [nil s]
+
+                             :else
+                             [nil s])
         healed (heal-raw content opts)]
-    (if write
-      (spit path healed))))
+    (if (and write path)
+      (spit path healed))
+    healed))
 
-(comment
-
-  (heal
-   (code.project/lookup-path 'code.ai.server))
-  
-  (let [delimiters (parse/pair-delimiters (parse/parse-delimiters content))
-        lines      (vec (parse/parse-lines content))
-        unmatched-open (filter #(and (= (:type %) :open)
-                                     (not (:correct? %))) delimiters)]
-    (h/prn unmatched-open)
-    (reduce (fn [changes open-delim]
-              (let [start-line-num  (:line open-delim)
-                    start-line-info (get lines (dec start-line-num))
-                    start-indent    (:indent start-line-info)
-                    de-indent-line-info (heal-unclosed-find-line lines start-line-num start-indent)]
-                (h/prn [start-line-num
-                        start-line-info
-                        start-indent
-                        de-indent-line-info])
-                (if de-indent-line-info
-                  (let [insertion-line-num (dec (:line-num de-indent-line-info))
-                        insertion-line-info (get lines (dec insertion-line-num))
-                        insertion-col (count (:content insertion-line-info))]
-                    (conj changes {:action :insert
-                                   :line insertion-line-num
-                                   :col (inc insertion-col)
-                                   :new-char (get-closing-char (:char open-delim))}))
-                  changes)))
-            []
-            unmatched-open)))

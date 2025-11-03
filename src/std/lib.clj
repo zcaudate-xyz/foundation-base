@@ -105,6 +105,8 @@
              [dependents:all deps/dependents-all]
              [dependents:refresh deps/dependents-refresh]
 
+             env/with-system
+             env/with-out-str
              env/ns-get
              env/ns-sym
              env/dev?

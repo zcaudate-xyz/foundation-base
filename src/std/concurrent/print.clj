@@ -76,23 +76,6 @@
   ([item]
    (print (pprint-str item))))
 
-(defmacro with-system
-  "with system print instead of local"
-  {:added "3.0"}
-  ([& body]
-   `(binding [env/*local* false]
-      ~@body)))
-
-(defmacro with-out-str
-  "gets the local string
- 
-   (print/with-out-str (print/print \"hello\"))
-   => \"hello\""
-  {:added "3.0"}
-  ([& body]
-   `(binding [env/*local* false]
-      (clojure.core/with-out-str ~@body))))
-
 (env/local:set :prn prn
                :println println
                :print print

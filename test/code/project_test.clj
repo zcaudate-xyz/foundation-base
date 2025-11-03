@@ -40,13 +40,21 @@
 ^{:refer code.project/lookup-ns :added "3.0"}
 (fact "fast lookup for all-files function"
 
-  (first (lookup-ns (lookup-path (h/ns-sym))))
+  (first (lookup-ns (get-path (h/ns-sym))))
   => 'code.project-test)
 
 ^{:refer code.project/lookup-path :added "3.0"}
 (fact "looks up the path given the `ns`"
 
   (lookup-path (h/ns-sym)))
+
+^{:refer code.project/get-path :added "4.0"
+  :setup [(reset! code.project.common/*lookup* {})]}
+(fact "gets the path given the `ns`"
+  ^:hidden
+  
+  (get-path (h/ns-sym))
+  => "test/code/project_test.clj")
 
 ^{:refer code.project/all-files :added "3.0"}
 (fact "returns all the clojure files in a directory"

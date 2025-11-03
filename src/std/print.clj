@@ -6,7 +6,6 @@
 
 (h/intern-in print/print
              print/println
-             print/with-out-str
              print/prn
 
              report/print-header

@@ -33,8 +33,8 @@
    (file->ns  \"std/fs_test\")
    => \"std.fs-test\""
   {:added "3.0"}
-  ([^String ns]
-   (-> ns
+  ([^String file]
+   (-> file
        (.replaceAll "/" ".")
        (.replaceAll "_" "-"))))
 

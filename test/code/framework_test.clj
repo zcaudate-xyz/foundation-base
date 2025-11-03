@@ -90,6 +90,7 @@
 
 ^{:refer code.framework/vars :added "3.0"}
 (fact "returns all vars in a given namespace"
+
   (project/in-context (vars {:sorted true}))
   => (contains '[analyse
                  analyse-file
