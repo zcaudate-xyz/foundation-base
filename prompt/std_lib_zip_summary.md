@@ -56,7 +56,7 @@ The `std.lib.zip` namespace provides a powerful and flexible implementation of a
 
 4.  **Editing Operations:**
     *   **`insert-left [zip data & more]`**: Inserts one or more elements to the left of the current position.
-    *   **`insert-right [zip data & more]`**: Inserts one or more elements to the right of the current position.
+    *   **`insert-token-to-right [zip data & more]`**: Inserts one or more elements to the right of the current position.
     *   **`delete-left [zip & [n]]`**: Deletes `n` elements to the left of the current position.
     *   **`delete-right [zip & [n]]`**: Deletes `n` elements to the right of the current position.
     *   **`replace-left [zip data]`**: Replaces the element to the left of the current position.

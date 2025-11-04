@@ -146,7 +146,7 @@
                (let [inserts (->> (iterate zip/step-right npattern)
                                   (take-while zip/get)
                                   (map prep-insert-pattern))
-                     nsource (reduce nav/insert-right source (reverse inserts))]
+                     nsource (reduce nav/insert-token-to-right source (reverse inserts))]
                  (-> pos
                      (assoc :source  (nav/up nsource)
                             :pattern (zip/step-outside pattern))
@@ -179,7 +179,7 @@
    ((:insert-level op)
     (let [val (prep-insert-pattern pattern)]
       (assoc pos
-             :source (nav/insert-left source val)
+             :source (nav/insert-token-to-left source val)
              :next true)))))
 
 (defn traverse-insert-level

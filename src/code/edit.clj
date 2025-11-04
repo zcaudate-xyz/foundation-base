@@ -515,7 +515,7 @@
        (zip/step-left-most)
        (zip/insert-right data))))
 
-(defn insert-right
+(defn insert-token-to-right
   "inserts an element to the right"
   {:added "3.0"}
   ([nav data]
@@ -530,7 +530,7 @@
                (zip/insert-right (construct/space))
                (zip/step-left))))))
 
-(defn insert-left
+(defn insert-token-to-left
   "inserts an element to the left"
   {:added "3.0"}
   ([nav data]
@@ -692,7 +692,7 @@
            (cond (base/expression? (zip/right-element nav))
                  (delete
                   (reduce (fn [nav item]
-                            (insert-right nav item))
+                            (insert-token-to-right nav item))
                           nav
                           (reverse data)))
                  

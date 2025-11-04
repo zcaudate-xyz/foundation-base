@@ -212,7 +212,7 @@
                                     (sort))
                          edits (reduce (fn [nav node]
                                          (let [nav (-> nav
-                                                       (nav/insert-right node)
+                                                       (nav/insert-token-to-right node)
                                                        (nav/right)
                                                        (zip/insert-left (block/newline)))]
                                            (apply zip/insert-left nav (repeat (dec col) (block/space)))))

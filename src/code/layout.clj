@@ -82,8 +82,8 @@
         special?   (and (list? elem)
                         (+special-forms+ (first elem)))
         insert-fn  (if (:initial flags)
-                     zip/insert-left
-                     edit/insert-left)]
+                     zip/insert-token-to-left
+                     edit/insert-token-to-left)]
     (cond (not (coll? elem))
           [(assoc state
                   :code   (insert-fn  code elem)

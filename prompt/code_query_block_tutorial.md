@@ -680,25 +680,25 @@ Inserts an element to the right of the current cursor position.
 ;; => "<0,1> (|1  )"
 ```
 
-##### `insert-left`
+##### `insert-token-to-left`
 
-`^{:refer code.query.block/insert-left :added "3.0" :class [:nav/edit]}`
+`^{:refer code.query.block/insert-token-to-left :added "3.0" :class [:nav/edit]}`
 
 Inserts an element to the left of the current cursor position.
 
 ```clojure
 (-> (parse-string "(#|0)")
-      (insert-left 1)
+      (insert-token-to-left 1)
       str)
 ;; => "<0,3> (1 |0)"
 
 (-> (parse-string "(#|)")
-      (insert-left 1)
+      (insert-token-to-left 1)
       str)
 ;; => "<0,1> (|1)"
 
 (-> (parse-string "( #| )")
-      (insert-left 1)
+      (insert-token-to-left 1)
       str)
 ;; => "<0,1> (|1  )"
 ```

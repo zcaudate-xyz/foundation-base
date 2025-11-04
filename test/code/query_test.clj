@@ -53,7 +53,7 @@
   (nav/string
    (modify (nav/parse-root "^:a (defn hello3) (defn hello)") ['(defn | _)]
            (fn [zloc]
-             (nav/insert-left zloc :hello))))
+             (nav/insert-token-to-left zloc :hello))))
   => "^:a (defn :hello hello3) (defn :hello hello)")
 
 ^{:refer code.query/context-zloc :added "3.0"}

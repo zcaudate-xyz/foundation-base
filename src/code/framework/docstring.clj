@@ -100,10 +100,10 @@
    (if node
      (-> nav
          (zip/step-right)
-         (zip/insert-right node)
-         (zip/insert-right (block/space))
-         (zip/insert-right (block/space))
-         (zip/insert-right (block/newline))
+         (zip/insert-token-to-right node)
+         (zip/insert-token-to-right (block/space))
+         (zip/insert-token-to-right (block/space))
+         (zip/insert-token-to-right (block/newline))
          (zip/step-left))
      nav)))
 

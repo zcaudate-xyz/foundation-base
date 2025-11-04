@@ -40,13 +40,13 @@
   "Ensures there is exactly one space to the left of the current position."
   [nav]
   (let [nav (remove-left-whitespace nav)]
-    (nav/insert-left nav (construct/space))))
+    (nav/insert-token-to-left nav (construct/space))))
 
 (defn- ensure-single-space-right
   "Ensures there is exactly one space to the right of the current position."
   [nav]
   (let [nav (remove-right-whitespace nav)]
-    (nav/insert-right nav (construct/space))))
+    (nav/insert-token-to-right nav (construct/space))))
 
 ;; --- Line Wrapping Helpers ---
 
@@ -71,7 +71,7 @@
   "Applies line wrapping based on directives and max-line-length."
   [nav line-wrap-strategy]
   (if (should-line-wrap? nav line-wrap-strategy)
-    (nav/insert-left nav (construct/newline)) ; Simple strategy: always break before if too long
+    (nav/insert-token-to-left nav (construct/newline)) ; Simple strategy: always break before if too long
     nav))
 
 (defn- apply-metadata-spacing
@@ -89,14 +89,14 @@
   "Applies indentation based on directives."
   [nav indent-level]
   (if (and indent-level (pos? indent-level))
-    (nav/insert-left nav (construct/spaces indent-level))
+    (nav/insert-token-to-left nav (construct/spaces indent-level))
     nav))
 
 (defn- apply-line-break
   "Applies a line break based on directives."
   [nav line-break-after]
   (if line-break-after
-    (nav/insert-right nav (construct/newline))
+    (nav/insert-token-to-right nav (construct/newline))
     nav))
 
 (defn- apply-space-before

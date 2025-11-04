@@ -154,8 +154,6 @@
 ;;
 
 (defn heal-close-heavy-single-pass
-  "creates deletion for multiple early closes on first pass"
-  {:added "4.0"}
   [content & [{:keys [debug]
                :as opts}]]
   (let [delimiters (parse/parse content)
@@ -168,8 +166,6 @@
     (update-content content edits)))
 
 (defn heal-close-heavy
-  "multiple close deletions"
-  {:added "4.0"}
   [content & [{:keys [limit debug]
                :or {limit 50}
                :as opts}]]

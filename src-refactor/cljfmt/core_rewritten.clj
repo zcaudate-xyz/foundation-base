@@ -109,7 +109,7 @@
        (element? (e/right* nav))))
 
 (defn- insert-space-right [nav]
-  (e/insert-right nav (n-spaces 1)))
+  (e/insert-token-to-right nav (n-spaces 1)))
 
 (defn insert-missing-whitespace [form]
   (transform form edit-all missing-whitespace? insert-space-right))
@@ -157,7 +157,7 @@
                             remove-clojure-whitespace)]
     (-> nav-elem-before
         e/next
-        (e/insert-left (n-newlines (if (comment? nav-elem-before) 1 2))))))
+        (e/insert-token-to-left (n-newlines (if (comment? nav-elem-before) 1 2))))))
 
 (defn remove-consecutive-blank-lines [form]
   (transform form edit-all consecutive-blank-line? replace-consecutive-blank-lines))
@@ -465,7 +465,7 @@
 (defn- indent-line [nav indents context]
   (let [width (indent-amount nav indents context)]
     (if (> width 0)
-      (e/insert-right nav (n-spaces width))
+      (e/insert-token-to-right nav (n-spaces width))
       nav)))
 
 (defn- find-namespace [nav]
@@ -525,7 +525,7 @@
   (and (map-key? nav) (not (preceded-by-line-break? nav))))
 
 (defn- insert-newline-left [nav]
-  (e/insert-left nav (n-newlines 1)))
+  (e/insert-token-to-left nav (n-newlines 1)))
 
 (defn split-keypairs-over-multiple-lines [form]
   (transform form edit-all map-key-without-line-break? insert-newline-left))
@@ -574,7 +574,7 @@
     (cond
       (space? left) (let [n (max 0 (+ delta (node-str-length left)))]
                       (e/right* (e/replace left (n-spaces n))))
-      (pos? delta)  (e/insert-left nav (n-spaces delta))
+      (pos? delta)  (e/insert-token-to-left nav (n-spaces delta))
       :else         nav)))
 
 (defn- nil-if-end [nav]

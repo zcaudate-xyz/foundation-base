@@ -456,41 +456,41 @@
       str)
   => "<0,1> (|1  )")
 
-^{:refer code.edit/insert-right :added "3.0" :class [:nav/edit]}
+^{:refer code.edit/insert-token-to-right :added "3.0" :class [:nav/edit]}
 (fact "inserts an element to the right"
   ^:hidden
   
   (-> (parse-string "(#|0)")
-      (insert-right 1)
+      (insert-token-to-right 1)
       str)
   => "<0,1> (|0 1)"
 
   (-> (parse-string "(#|)")
-      (insert-right 1)
+      (insert-token-to-right 1)
       str)
   => "<0,1> (|1)"
 
   (-> (parse-string "( #| )")
-      (insert-right 1)
+      (insert-token-to-right 1)
       str)
   => "<0,1> (|1  )")
 
-^{:refer code.edit/insert-left :added "3.0" :class [:nav/edit]}
+^{:refer code.edit/insert-token-to-left :added "3.0" :class [:nav/edit]}
 (fact "inserts an element to the left"
   ^:hidden
   
   (-> (parse-string "(#|0)")
-      (insert-left 1)
+      (insert-token-to-left 1)
       str)
   => "<0,3> (1 |0)"
 
   (-> (parse-string "(#|)")
-      (insert-left 1)
+      (insert-token-to-left 1)
       str)
   => "<0,1> (|1)"
 
   (-> (parse-string "( #| )")
-      (insert-left 1)
+      (insert-token-to-left 1)
       str)
   => "<0,1> (|1  )")
 
@@ -504,12 +504,12 @@
   => "<0,3> (0 |1)"
 
   (-> (parse-string "(#|)")
-      (insert-right 1)
+      (insert-token-to-right 1)
       str)
   => "<0,1> (|1)"
 
   (-> (parse-string "( #| )")
-      (insert-right 1)
+      (insert-token-to-right 1)
       str)
   => "<0,1> (|1  )")
 

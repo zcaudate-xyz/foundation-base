@@ -64,6 +64,17 @@
       :code
       (edit/root-string))
   => "1"
+
+  (-> (layout/layout-form-initial {})
+      (layout/layout-form-insert
+       (zip/form-zip '1))
+      first
+      (layout/layout-form-insert
+       (zip/form-zip '2))
+      first)
+  :code
+  (edit/root-string)
+  => "1 2"
   )
 
 ^{:refer code.layout/layout-form-initial :added "4.0"}
