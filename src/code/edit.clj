@@ -507,6 +507,12 @@
   ([nav]
    (empty? (filter base/expression? (zip/current-elements nav)))))
 
+(defn insert-raw
+  [nav data]
+  (-> nav
+      (zip/step-right)
+      (zip/insert-left data)))
+
 (defn insert-empty
   "inserts an element into an empty container"
   {:added "3.0"}
@@ -543,7 +549,7 @@
                (zip/insert-left data)
                (zip/insert-left (construct/space)))))))
 
-(defn insert
+(defn insert-token
   "inserts an element and moves"
   {:added "3.0"}
   ([nav data]
@@ -561,7 +567,7 @@
   "inserts all expressions into the block"
   {:added "3.0"}
   ([nav [data & more :as arr]]
-   (reduce insert nav arr)))
+   (reduce insert-token nav arr)))
 
 (defn insert-newline
   "insert newline/s into the block"

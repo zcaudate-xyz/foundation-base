@@ -1,112 +1,120 @@
 (ns code.layout
   (:require [std.lib.zip :as zip]
-            [code.edit :as edit])
+            [code.edit :as edit]
+            [code.layout.primitives :as p]
+            [std.lib :as h])
   (:refer-clojure :exclude [next replace type]))
 
 (def *max-row-length* 80)
 
-(def +special-forms+
-  {'let     {:args    [{:type :vector
-                        :pair-multiline true}]
-             :layout  [[:block 1]]} ; Binding vector and body indented 1 space from 'l'
-   'defn    {:args    [{:type :symbol}]
-             :layout  [[:inner 0]]} ; Docstring, args, body align with opening paren
-   'cond    {:layout  [[:block 0]]} ; Clauses align with 'c'
-   'do      {:layout  [[:block 0]]} ; Body aligns with 'd'
-   'if      {:layout  [[:block 1]]} ; Test, then, else indented 1 space from 'i'
-   ;; Add more special forms as needed
-   })
 
-(defn get-max-width-children
-  [children]
-  (let [child-widths (map get-max-width children)]
-    (+ (apply + child-widths)
-       (dec (count child-widths)))))
 
-(defn get-max-width
-  [form & [{:keys [ruleset]
-            :as opts}]]
-  (cond (coll? form)
-        (cond (empty? form)
-              (if (set? form) 3 2)
-              
-              :else
-              (let [top-width    (if (set? form) 3 2)]
-                (+ top-width    
-                   (get-max-width-children form))))
-        
-        :else (count (pr-str form))))
-
-(defn estimate-multiline-special
-  [form & [{:keys [readable-len] :as opts}]]
-  (let [[form-name & args] form]
-    (case form-name
-      let   (let [binding-vector (first args)]
-              (boolean (or (> (count binding-vector) 0) ; If many bindings
-                           (> (get-max-width form) readable-len))))
-      do    (if (> (count args) 1)
-              true
-              (> (get-max-width form) readable-len))
-      if    (if (some coll? (rest args))
-              true
-              (> (get-max-width form) readable-len))
-      cond  (not-empty args)
-      (> (get-max-width form) readable-len))))
-
-(defn estimate-multiline
-  [form & [{:keys [readable-len]
-            :or {readable-len 30}
-            :as opts}]]
-  (cond (coll? form)
-        (cond (empty? form)
-              false
-
-              (+special-forms+ (first form))
-              (estimate-multiline-special form opts)
-
-              :else
-              (> (get-max-width form opts)
-                 readable-len))
-        
-        :else false))
-
-(defn layout-form-insert
+(defn layout-form-insert-vector
   [{:keys [stack code flags options]
     :as state} loc]
-  (let [{:keys []} options
-        {:keys [indent]
-         :as parent} (last stack)
-        elem       (zip/get loc)
-        max-width  (get-max-width elem)
-        multiline  (estimate-multiline elem)
+  (let [elem       (zip/get loc)
         special?   (and (list? elem)
-                        (+special-forms+ (first elem)))
-        insert-fn  (if (:initial flags)
-                     zip/insert-token-to-left
-                     edit/insert-token-to-left)]
-    (cond (not (coll? elem))
-          [(assoc state
-                  :code   (insert-fn  code elem)
-                  :flags  (assoc flags :initial false))
-           
-           
+                        (+special-forms+ (first elem)))]
+    (cond (not special?)
+          (let []
+            (edit/insert)))))
+
+
+
+
+(defn layout-form-insert-map
+  [{:keys [stack code flags options]
+    :as state} loc]
+  (let [elem       (zip/get loc)
+        special?   (and (list? elem)
+                        (+special-forms+ (first elem)))]
+    (cond (not special?)
+          (edit/insert-empty))))
+
+
+(declare layout-form-insert)
+
+
+(defn layout-form-insert-special
+  [{:keys [stack code options]
+    :as state} loc]
+  (let [elem       (zip/get loc)
+        code       ]
+    [state ]))
+
+(defn layout-form-insert-call
+  [{:keys [stack code flags options]
+    :as state} loc]
+  (let [elem       (zip/get loc)
+        special?   (and (list? elem)
+                        (+special-forms+ (first elem)))]
+    (cond (not special?)
+          (edit/insert-empty))))
+
+(defn layout-form-classify
+  [state])
+
+
+(defn layout-form-insert-multiline
+  [{:keys [stack code options]
+    :as state} loc]
+  (let [elem       (zip/get loc)
+        special?   (and (list? elem)
+                        (+special-forms+ (first elem)))]
+    (h/prn :multiline code elem)
+    (cond (not special?)
+          (let [[state loc] (layout-form-insert
+                             {:code (-> code
+                                        (edit/insert ())
+                                        (edit/down)
+                                        (edit/insert (first elem)))
+                              :flags {:in-multiline true}}
+                             (zip/step-next))])
+          
+          :else
+          (layout-form-insert-special state loc))))
+
+(defn layout-form-get-indent
+  [{:keys [indent]
+    :as flags}]
+  indent)
+
+(defn layout-form-insert
+  "inserts a single element"
+  {:added "4.0"}
+  [{:keys [stack code options]
+    :as state} loc]
+  (let [{:keys [indent
+                in-multiline]
+         :as flags}  (last stack)
+        elem         (zip/get loc)
+        max-width    (get-max-width elem)
+        multiline?   (estimate-multiline elem)
+        code         (if in-multiline
+                       (-> code
+                           (edit/insert-newline)
+                           (edit/insert-space (layout-form-get-indent flags)))
+                       code)]
+    (h/prn code elem)
+    (cond (not multiline?)
+          [(assoc state :code   (edit/insert-token  code elem))
            (zip/step-next loc)]
 
           :else
-          [(assoc state
-                  :code   (insert-fn code 'TODO)
-                  :flags  (assoc flags :initial false))
-           (zip/step-next loc)])))
+          (layout-form-insert-multiline state loc))))
 
 (defn layout-form-initial
+  "generates the initial state"
+  {:added "4.0"}
   [opts]
-  {:code    (edit/parse-root "")
-   :stack   [{:indent (or (:indent opts) 0)}]
-   :flags   {:initial true
-             :skip false}
+  {:code    (edit/parse-string "")
+   :stack   [{:type :root :indent (or (:indent opts) 0)
+              :position 0}]
    :options opts})
 
 (defn layout-form
+  "layout a form"
+  {:added "4.0"}
   [form & [{:keys [indent ruleset]
             :as opts}]]
   (loop [state    (layout-form-initial opts)
@@ -116,8 +124,11 @@
         (recur new-state new-loc)
         (:code new-state)))))
 
-
-
+(comment
+  (layout-form '(let [a 1
+                      b 2]
+                  (+ a b))
+               {}))
 
 (comment
   (layout-form-insert
@@ -139,10 +150,7 @@
     [type code value opts]
     ))
 
-(layout-form '(let [a 1
-                    b 2]
-                (+ a b))
-             {})
+
 
 (comment
   (zip/get 
@@ -161,14 +169,14 @@
   
   (defn ^{:hello true}
     hello [])
-
+  
   (meta #'hello)
 
   (defn
     hello
     [])
 
-
+  
   (comment
   (get-max-width
    '(let [a 1

@@ -514,7 +514,11 @@
   => "<0,1> (|1  )")
 
 ^{:refer code.edit/insert-all :added "3.0"}
-(fact "inserts all expressions into the block")
+(fact "inserts all expressions into the block"
+  ^:hidden
+  
+  (-> (parse-string "")
+      (insert-all [1 2 3 4 5 6])))
 
 ^{:refer code.edit/insert-newline :added "3.0"}
 (fact "insert newline/s into the block")
