@@ -1,10 +1,25 @@
 (ns std.lib.zip
-  (:require [std.lib.foundation :as h])
+  (:require [std.lib.foundation :as h]
+            [std.lib.walk :as walk])
   (:refer-clojure :exclude [find get]))
 
 (declare display-zipper)
 
 (def ^:dynamic *handler* nil)
+
+(defonce +types+ (atom {}))
+
+(defn register-type
+  "registers a zip type"
+  {:added "4.0"}
+  [type context]
+  (swap! +types+ assoc type context))
+
+(defn unregister-type
+  "unregisters a zip type"
+  {:added "4.0"}
+  [type context]
+  (swap! +types+ dissoc type))
 
 (def +nil-handler+
   {:at-inside-most h/NIL
@@ -27,10 +42,7 @@
    (.write w (str v))))
 
 (defn check-context
-  "checks that the zipper contains valid functions
- 
-   (check-context {})
-   => (throws)"
+  "checks that the zipper contains valid functions"
   {:added "3.0"}
   ([context]
    (let [missing (->> [:create-container
@@ -53,10 +65,7 @@
        context))))
 
 (defn check-optional
-  "checks that the meta contains valid functions
- 
-   (check-optional {})
-   => (throws)"
+  "checks that the meta contains valid functions"
   {:added "3.0"}
   ([context]
    (let [missing (->> [:update-step-left
@@ -67,17 +76,16 @@
                        :update-delete-left
                        :update-delete-right
                        :update-insert-left
-                       :update-insert-right]
+                       :update-insert-right
+                       :wrap-data
+                       :unwrap-data]
                       (remove context))]
      (if (seq missing)
        (throw (ex-info "Missing keys." {:keys missing}))
        context))))
 
 (defn zipper?
-  "checks to see if an object is a zipper
- 
-   (zipper? 1)
-   => false"
+  "checks to see if an object is a zipper"
   {:added "3.0"}
   ([x]
    (instance? Zipper x)))
@@ -88,76 +96,56 @@
   ([root context]
    (zipper root context {}))
   ([root context opts]
-   (map->Zipper (merge opts
-                       {:depth   0
-                        :left    ()
-                        :right   (list root)
-                        :context (check-context context)}))))
+   (let [{:keys [wrap-data]
+          :or {wrap-data identity}} context]
+     (map->Zipper (merge opts
+                         {:depth   0
+                          :left    ()
+                          :right   (list (wrap-data root))
+                          :context (check-context context)})))))
+
+(defn unwrap-element
+  "unwraps an element"
+  {:added "4.0"}
+  ([{:keys [context]
+     :as zip}
+    element]
+   (let [{:keys [unwrap-data]
+          :or {unwrap-data identity}} context]
+     (unwrap-data element))))
 
 (defn left-element
-  "element directly left of current position
- 
-   (-> (vector-zip [1 2 3 4])
-       (step-inside))
- 
-   (-> (from-status '[1 2 3 | 4])
-       (left-element))
-   => 3"
+  "element directly left of current position"
   {:added "3.0"}
   ([zip]
    (first (:left zip))))
 
 (defn right-element
-  "element directly right of current position
- 
-   (-> (from-status '[1 2 3 | 4])
-       (right-element))
-   => 4"
+  "element directly right of current position"
   {:added "3.0"}
   ([zip]
    (first (:right zip))))
 
 (defn left-elements
-  "all elements left of current position
- 
-   (-> (from-status '[1 2 | 3 4])
-       (left-elements))
-   => '(1 2)"
+  "all elements left of current position"
   {:added "3.0"}
   ([zip]
    (reverse (:left zip))))
 
 (defn right-elements
-  "all elements right of current position
- 
-   (-> (from-status '[1 2 | 3 4])
-       (right-elements))
-   => '(3 4)"
+  "all elements right of current position"
   {:added "3.0"}
   ([zip]
    (:right zip)))
 
 (defn current-elements
-  "all elements left and right of current position
- 
-   (-> (from-status '[1 2 | 3 4])
-       (current-elements))
-   => '(1 2 3 4)
- 
-   (-> (from-status '[1 [2 | 3] 4])
-       (current-elements))
-   => '(2 3)"
+  "all elements left and right of current position"
   {:added "3.0"}
   ([{:keys [left right] :as zip}]
    (concat (reverse left) right)))
 
 (defn is
-  "checks zip given a predicate
- 
-   (-> (vector-zip [0 1 2 3 4])
-       (step-inside)
-       (is zero?))
-   => true"
+  "checks zip given a predicate"
   {:added "3.0"}
   ([zip pred]
    (is zip pred :right))
@@ -175,12 +163,7 @@
          false)))))
 
 (defn get
-  "gets the value of the zipper
- 
-   (-> (vector-zip [0 1 2 3 4])
-       (step-inside)
-       (get))
-   => 0"
+  "gets the value of the zipper"
   {:added "3.0"}
   ([zip]
    (get zip identity :right))
@@ -222,59 +205,33 @@
    (is zip (-> context :is-empty-container?) step)))
 
 (defn at-left-most?
-  "check if at left-most point of a container
- 
-   (-> (from-status [1 2 ['| 3 4]])
-       (at-left-most?))
-   => true"
+  "check if at left-most point of a container"
   {:added "3.0"}
   ([zip]
    (empty? (:left zip))))
 
 (defn at-right-most?
-  "check if at right-most point of a container
- 
-   (-> (from-status '[1 2 [3 4 |]])
-       (at-right-most?))
-   => true"
+  "check if at right-most point of a container"
   {:added "3.0"}
   ([zip]
    (empty? (:right zip))))
 
 (defn at-inside-most?
-  "check if at inside-most point of a container
- 
-   (-> (from-status '[1 2 [3 4 |]])
-       (at-inside-most?))
-   => true"
+  "check if at inside-most point of a container"
   {:added "3.0"}
   ([zip]
    (or (empty? (:right zip))
        (not (is-container? zip :right)))))
 
 (defn at-inside-most-left?
-  "check if at inside-most left point of a container
- 
-   (-> (from-status '[1 2 [| 1 2]])
-       (at-inside-most-left?))
-   => true"
+  "check if at inside-most left point of a container"
   {:added "3.0"}
   ([zip]
    (or (empty? (:left zip))
        (not (is-container? zip :left)))))
 
 (defn at-outside-most?
-  "check if at outside-most point of the tree
- 
-   (-> (from-status [1 2 [3 4 '|]])
-       (at-outside-most?))
-   => false
- 
-   (-> (from-status '[1 2 [3 4 |]])
-       (step-outside)
-       (step-outside)
-       (at-outside-most?))
-   => true"
+  "check if at outside-most point of the tree"
   {:added "3.0"}
   ([zip]
    (nil? (:parent zip))))
@@ -288,11 +245,7 @@
    :at-outside-most?     at-outside-most?})
 
 (defn seq-zip
-  "constructs a sequence zipper
- 
-   (seq-zip '(1 2 3 4 5))
-   => (contains {:left (),
-                 :right '((1 2 3 4 5))})"
+  "constructs a sequence zipper"
   {:added "3.0"}
   ([root]
    (seq-zip root nil))
@@ -310,11 +263,7 @@
            opts)))
 
 (defn vector-zip
-  "constructs a vector based zipper
- 
-   (vector-zip [1 2 3 4 5])
-   => (contains {:left (),
-                 :right '([1 2 3 4 5])})"
+  "constructs a vector based zipper"
   {:added "3.0"}
   ([root]
    (vector-zip root nil))
@@ -332,15 +281,7 @@
            opts)))
 
 (defn list-child-elements
-  "lists elements of a container 
- 
-   (-> (vector-zip [1 2 3])
-       (list-child-elements :right))
-   => '(1 2 3)
- 
-   (-> (vector-zip 1)
-       (list-child-elements :right))
-   => (throws)"
+  "lists elements of a container"
   {:added "3.0"}
   ([zip]
    (list-child-elements zip :right))
@@ -353,12 +294,7 @@
        (throw (ex-info "Not a org." {:element elem}))))))
 
 (defn update-child-elements
-  "updates elements of a container
- 
-   (-> (vector-zip [1 2])
-       (update-child-elements [1 2 3 4] :right)
-       (right-element))
-   => [1 2 3 4]"
+  "updates elements of a container"
   {:added "3.0"}
   ([zip child-elements]
    (update-child-elements zip child-elements :right))
@@ -404,46 +340,25 @@
    (not ((:at-right-most? context) zip))))
 
 (defn can-step-inside?
-  "check if can step down from current status
- 
-   (-> (from-status '[1 2 [3 4 |]])
-       (can-step-inside?))
-   => false
- 
-   (-> (from-status '[1 2 | [3 4]])
-       (can-step-inside?))
-   => true"
+  "check if can step down from current status"
   {:added "3.0"}
   ([{:keys [context] :as zip}]
    (not ((:at-inside-most? context) zip))))
 
 (defn can-step-inside-left?
-  "check if can step left inside a container
- 
-   (-> (from-status '[[3 4] |])
-       (can-step-inside-left?))
-   => true"
+  "check if can step left inside a container"
   {:added "3.0"}
   ([{:keys [context] :as zip}]
    (not ((:at-inside-most-left? context) zip))))
 
 (defn can-step-outside?
-  "check if can step up from current status
- 
-   (-> (from-status '[1 2 [3 4 |]])
-       (can-step-outside?))
-   => true"
+  "check if can step up from current status"
   {:added "3.0"}
   ([{:keys [context] :as zip}]
    (not ((:at-outside-most? context) zip))))
 
 (defn step-left
-  "step left from current status
- 
-   (-> (from-status '[1 2 [3 4 |]])
-       (step-left)
-       (status))
-   => '([1 2 [3 | 4]])"
+  "step left from current status"
   {:added "3.0"}
   ([{:keys [left context right] :as zip}]
    (cond ((:at-left-most? context) zip)
@@ -461,12 +376,7 @@
    (nth (iterate step-left zip) n)))
 
 (defn step-right
-  "step right from current status
- 
-   (-> (from-status '[1 2 [| 3 4]])
-       (step-right)
-       (status))
-   => '([1 2 [3 | 4]])"
+  "step right from current status"
   {:added "3.0"}
   ([{:keys [left right context] :as zip}]
    (cond ((:at-right-most? context) zip)
@@ -484,12 +394,7 @@
    (nth (iterate step-right zip) n)))
 
 (defn step-inside
-  "step down from current status
- 
-   (-> (from-status '[1 2 | [3 4]])
-       (step-inside)
-       (status))
-   => '([1 2 [| 3 4]])"
+  "step down from current status"
   {:added "3.0"}
   ([{:keys [context] :as zip}]
    (cond ((:at-right-most? context) zip)
@@ -515,12 +420,7 @@
    (nth (iterate step-inside zip) n)))
 
 (defn step-inside-left
-  "steps into the form on the left side
- 
-   (-> (from-status '[[1 2] |])
-       (step-inside-left)
-       (status))
-   => '([[1 2 |]])"
+  "steps into the form on the left side"
   {:added "3.0"}
   ([{:keys [context] :as zip}]
    (cond ((:at-left-most? context) zip)
@@ -547,12 +447,7 @@
    (nth (iterate step-inside-left zip) n)))
 
 (defn step-outside
-  "step out to the current container
- 
-   (-> (from-status '[1 2 [| 3 4]])
-       (step-outside)
-       (status))
-   => '([1 2 | [3 4]])"
+  "step out to the current container"
   {:added "3.0"}
   ([zip]
    (let [{:keys [context left right parent depth]} zip]
@@ -574,12 +469,7 @@
    (nth (iterate step-outside zip) n)))
 
 (defn step-outside-right
-  "the right of the current container
- 
-   (-> (from-status '[1 2 [| 3 4]])
-       (step-outside-right)
-       (status))
-   => '([1 2 [3 4] |])"
+  "the right of the current container"
   {:added "3.0"}
   ([zip]
    (-> zip
@@ -589,12 +479,7 @@
    (nth (iterate step-outside-right zip) n)))
 
 (defn step-left-most
-  "step to left-most point of current container
- 
-   (-> (from-status '[1 2 [3 4 |]])
-       (step-left-most)
-       (status))
-   => '([1 2 [| 3 4]])"
+  "step to left-most point of current container"
   {:added "3.0"}
   ([{:keys [context] :as zip}]
    (if ((:at-left-most? context) zip)
@@ -602,12 +487,7 @@
      (recur (step-left zip)))))
 
 (defn step-right-most
-  "step to right-most point of current container
- 
-   (-> (from-status '[1 2 [| 3 4]])
-       (step-right-most)
-       (status))
-   => '([1 2 [3 4 |]])"
+  "step to right-most point of current container"
   {:added "3.0"}
   ([{:keys [context] :as zip}]
    (if ((:at-right-most? context) zip)
@@ -615,12 +495,7 @@
      (recur (step-right zip)))))
 
 (defn step-inside-most
-  "step to at-inside-most point of current container
- 
-   (-> (from-status '[1 2 | [[3] 4]])
-       (step-inside-most)
-       (status))
-   => '([1 2 [[| 3] 4]])"
+  "step to at-inside-most point of current container"
   {:added "3.0"}
   ([{:keys [context] :as zip}]
    (if ((:at-inside-most? context) zip)
@@ -628,12 +503,7 @@
      (recur (step-inside zip)))))
 
 (defn step-inside-most-left
-  "steps all the way inside to the left side
- 
-   (-> (from-status '[[1 [2]] | 3 4])
-       (step-inside-most-left)
-       (status))
-   => '([[1 [2 |]] 3 4])"
+  "steps all the way inside to the left side"
   {:added "3.0"}
   ([{:keys [context] :as zip}]
    (if ((:at-inside-most-left? context) zip)
@@ -641,12 +511,7 @@
      (recur (step-inside-left zip)))))
 
 (defn step-outside-most
-  "step to outside-most point of the tree
- 
-   (-> (from-status '[1 2 [| 3 4]])
-       (step-outside-most)
-       (status))
-   => '(| [1 2 [3 4]])"
+  "step to outside-most point of the tree"
   {:added "3.0"}
   ([{:keys [context] :as zip}]
    (if ((:at-outside-most? context) zip)
@@ -654,12 +519,7 @@
      (recur (step-outside zip)))))
 
 (defn step-outside-most-right
-  "step to outside-most point of the tree to the right
- 
-   (-> (from-status '[1 2 [| 3 4]])
-       (step-outside-most-right)
-       (status))
-   => '([1 2 [3 4]] |)"
+  "step to outside-most point of the tree to the right"
   {:added "3.0"}
   ([{:keys [context] :as zip}]
    (if ((:at-outside-most? context) zip)
@@ -667,12 +527,7 @@
      (step-right (step-outside-most zip)))))
 
 (defn step-end
-  "steps status to container directly at end
- 
-   (->> (from-status '[1 | [[]]])
-        (step-end)
-        (status))
-   => '([1 [[|]]])"
+  "steps status to container directly at end"
   {:added "3.0"}
   ([{:keys [context] :as zip}]
    (-> zip
@@ -681,12 +536,7 @@
        (step-inside-most-left))))
 
 (defn insert-left
-  "insert element/s left of the current status
- 
-   (-> (from-status '[1 2  [[| 3] 4]])
-       (insert-left 1 2 3)
-       (status))
-   => '([1 2 [[1 2 3 | 3] 4]])"
+  "insert element/s left of the current status"
   {:added "3.0"}
   ([{:keys [context] :as zip} data]
    (let [create-fn (:create-element context)
@@ -699,12 +549,7 @@
    (apply insert-left (insert-left zip data) more)))
 
 (defn insert-right
-  "insert element/s right of the current status
- 
-   (-> (from-status '[| 1 2 3])
-       (insert-right 1 2 3)
-       (status))
-   => '([| 3 2 1 1 2 3])"
+  "insert element/s right of the current status"
   {:added "3.0"}
   ([{:keys [context] :as zip} data]
    (let [create-fn (:create-element context)
@@ -717,12 +562,7 @@
    (apply insert-right (insert-right zip data) more)))
 
 (defn delete-left
-  "delete element/s left of the current status
- 
-   (-> (from-status '[1 2 | 3])
-       (delete-left)
-       (status))
-   => '([1 | 3])"
+  "delete element/s left of the current status"
   {:added "3.0"}
   ([{:keys [context left] :as zip}]
    (cond ((:at-left-most? context) zip)
@@ -740,12 +580,7 @@
    (nth (iterate delete-left zip) n)))
 
 (defn delete-right
-  "delete element/s right of the current status
- 
-   (-> (from-status '[1 2 | 3])
-       (delete-right)
-       (status))
-   => '([1 2 |])"
+  "delete element/s right of the current status"
   {:added "3.0"}
   ([{:keys [context right] :as zip}]
    (cond ((:at-right-most? context) zip)
@@ -763,12 +598,7 @@
    (nth (iterate delete-right zip) n)))
 
 (defn replace-left
-  "replace element left of the current status
- 
-   (-> (from-status '[1 2 | 3])
-       (replace-left \"10\")
-       (status))
-   => '([1 \"10\" | 3])"
+  "replace element left of the current status"
   {:added "3.0"}
   ([zip data]
    (-> zip
@@ -776,12 +606,7 @@
        (insert-left data))))
 
 (defn replace-right
-  "replace element right of the current status
- 
-   (-> (from-status '[1 2 | 3])
-       (replace-right \"10\")
-       (status))
-   => '([1 2 | \"10\"])"
+  "replace element right of the current status"
   {:added "3.0"}
   ([zip data]
    (-> zip
@@ -789,12 +614,7 @@
        (insert-right data))))
 
 (defn hierarchy
-  "replace element right of the current status
- 
-   (->> (from-status '[1 [[|]]])
-        (hierarchy)
-        (map right-element))
-   => [[] [[]] [1 [[]]]]"
+  "replace element right of the current status"
   {:added "3.0"}
   ([{:keys [context] :as zip}]
    (loop [out []
@@ -804,15 +624,7 @@
        (recur (conj out zip) (step-outside zip))))))
 
 (defn at-end?
-  "replace element right of the current status
- 
-   (->> (from-status '[1 [[|]]])
-        (at-end?))
-   => true
- 
-   (->> (from-status '[1 [[[2 |]] 3]])
-        (at-end?))
-   => false"
+  "replace element right of the current status"
   {:added "3.0"}
   ([{:keys [context] :as zip}]
    (and ((:at-right-most? context) zip)
@@ -821,18 +633,7 @@
              (every? (:at-right-most? context))))))
 
 (defn surround
-  "nests elements in current block within another container
- 
-   (-> (vector-zip 3)
-       (insert-left 1 2)
-       (surround)
-       (status))
-   => '(| [1 2 3])
- 
-   (->> (from-status '[1 [1 2 | 3 4]])
-        (surround)
-        (status))
-   => '([1 [| [1 2 3 4]]])"
+  "nests elements in current block within another container"
   {:added "3.0"}
   ([{:keys [context parent left] :as zip}]
    (let [list-fn    (:list-elements context)
@@ -855,12 +656,7 @@
                (step-inside))))))
 
 (defn root-element
-  "accesses the top level node
- 
-   (-> (vector-zip [[[3] 2] 1])
-       (step-inside-most)
-       (root-element))
-   => [[[3] 2] 1]"
+  "accesses the top level node"
   {:added "3.0"}
   ([zip]
    (-> zip
@@ -869,15 +665,7 @@
        (right-element))))
 
 (defn status
-  "returns the form with the status showing
- 
-   (-> (vector-zip [1 [[2] 3]])
-       (step-inside)
-       (step-right)
-       (step-inside)
-       (step-inside)
-       (status))
-   => '([1 [[| 2] 3]])"
+  "returns the form with the status showing"
   {:added "3.0"}
   ([{:keys [context] :as zip}  & [no-cursor]]
    (->> (if no-cursor
@@ -885,47 +673,37 @@
           (insert-left zip (:cursor context)))
         (step-outside-most)
         (current-elements)
-        (apply list))))
+        (apply list)
+        (unwrap-element zip))))
 
 (defn status-string
-  "returns the string form of the status
- 
-   (-> (vector-zip [1 [[2] 3]])
-       (step-inside)
-       (step-right)
-       (status-string))
-   => \"[1 | [[2] 3]]\""
+  "returns the string form of the status"
   {:added "3.0"}
   ([zip]
    (->> (status zip)
         (apply pr-str))))
 
 (defn display-zipper
+  "displays the zipper"
+  {:added "4.0"}
   [{:keys [parent context] :as zip}]
+  #_(dissoc zip :context :prefix :display :changed?)
   (cond-> zip
-    :then  (dissoc :context :prefix :display :changed?)
-    parent (assoc :parent
-                  (first
-                   (status
-                    (replace-right parent
-                                   ((:add-element context)
-                                    ((:create-container context))
-                                    ((:create-element context)
-                                     '...)))
-                    true)))))
+      :then  (dissoc :context :prefix :display :changed?)
+      parent (assoc :parent
+                    (root-element
+                     
+                     (replace-right parent
+                                    ((:update-elements context)
+                                     (first (:right parent))
+                                     [((:create-element context)
+                                       '...)]))))))
 
 (defn step-next
-  "step status through the tree in depth first order
- 
-   (->> (from-status '[| 1 [2 [6 7] 3] [4 5]])
-        (iterate step-next)
-        (take-while identity)
-        (map right-element))
-   => '(1 [2 [6 7] 3] 2 [6 7] 6 7 3 [4 5] 4 5)"
+  "step status through the tree in depth first order"
   {:added "3.0"}
   ([{:keys [context] :as zip}]
    (cond (nil? zip) nil
-
          (and (can-step-inside? zip)
               (not (is-empty-container? zip)))
          (let [zip (step-inside zip)
@@ -955,13 +733,7 @@
                  (recur (step-outside-right zip)))))))
 
 (defn step-prev
-  "step status in reverse through the tree in depth first order
- 
-   (->> (from-status '[1 [2 [6 7] 3] [4 | 5]])
-        (iterate step-prev)
-        (take 10)
-        (map right-element))
-   => '(5 4 [4 5] 3 7 6 [6 7] 2 [2 [6 7] 3] 1)"
+  "step status in reverse through the tree in depth first order"
   {:added "3.0"}
   ([{:keys [context] :as zip}]
    (cond (nil? zip) nil
@@ -994,16 +766,7 @@
         (first))))
 
 (defn find-left
-  "steps status left to search predicate
- 
-   (-> (from-status '[0 1 [2 3] [4 5] 6 |])
-       (find-left odd?)
-       (status))
-   => '([0 | 1 [2 3] [4 5] 6])
- 
-   (-> (from-status '[0 1 [2 3] [4 5] 6 |])
-       (find-left keyword?))
-   => nil"
+  "steps status left to search predicate"
   {:added "3.0"}
   ([zip pred]
    (binding [*handler* (assoc-in *handler*
@@ -1012,12 +775,7 @@
      (find zip step-left pred))))
 
 (defn find-right
-  "steps status right to search for predicate
- 
-   (-> (from-status '[0 | 1 [2 3] [4 5] 6])
-       (find-right even?)
-       (status))
-   => '([0 1 [2 3] [4 5] | 6])"
+  "steps status right to search for predicate"
   {:added "3.0"}
   ([zip pred]
    (binding [*handler* (assoc-in *handler*
@@ -1026,37 +784,19 @@
      (find zip step-right pred))))
 
 (defn find-next
-  "step status through the tree in depth first order to the first matching element
- 
-   (-> (vector-zip [1 [2 [6 7] 3] [4 5]])
-       (find-next #{7})
-       (status))
-   => '([1 [2 [6 | 7] 3] [4 5]])
- 
-   (-> (vector-zip [1 [2 [6 7] 3] [4 5]])
-       (find-next keyword))
-   => nil"
+  "step status through the tree in depth first order to the first matching element"
   {:added "3.0"}
   ([zip pred]
    (find zip step-next pred)))
 
 (defn find-prev
-  "step status through the tree in reverse order to the last matching element
- 
-   (-> (from-status '[1 [2 [6 | 7] 3] [4 5]])
-       (find-prev even?)
-       (status))
-   => '([1 [2 [| 6 7] 3] [4 5]])"
+  "step status through the tree in reverse order to the last matching element"
   {:added "3.0"}
   ([zip pred]
    (find zip step-prev pred)))
 
 (defn from-status
-  "returns a zipper given a data structure with | as the status
- 
-   (from-status '[1 2 3 | 4])
-   => (contains {:left '(3 2 1),
-                 :right '(4)})"
+  "returns a zipper given a data structure with | as the status"
   {:added "3.0"}
   ([data]
    (from-status data vector-zip))
@@ -1067,15 +807,65 @@
        (delete-right nzip)
        zip))))
 
+(defn form-zip-wrap
+  "wraps nils for the zipper"
+  {:added "4.0"}
+  [form]
+  (walk/prewalk
+   (fn [x]
+     (if (nil? x)
+       (h/wrapped x nil nil pr-str)
+       x))
+   form))
+
+(defn form-zip-unwrap
+  "unwraps nils for the zipper"
+  {:added "4.0"}
+  [form]
+  (walk/prewalk
+   (fn [x]
+     (if (h/wrapped? x)
+       @x
+       x))
+   form))
+
+(defn form-zip
+  "creates a form zip"
+  {:added "4.0"}
+  ([root]
+   (form-zip root nil))
+  ([root opts]
+   (zipper root
+           (merge {:wrap-data         form-zip-wrap
+                   :unwrap-data       form-zip-unwrap
+                   :create-container  (fn [] '()) ; Default to an empty list for new containers
+                   :create-element    identity
+                   :is-container?       (fn [x] (or (list? x) (vector? x) (map? x) (set? x)))
+                   :is-empty-container? empty?
+                   :is-element?         (complement nil?)
+                   :list-elements     seq
+                   :update-elements   (fn [container new-elements]
+                                        ;; Reconstructs the container, preserving its original type
+                                        (cond
+                                          (list? container) (apply list new-elements)
+                                          (vector? container) (vec new-elements)
+                                          (map? container) (into {} new-elements)
+                                          (set? container) (into #{} new-elements)
+                                          :else (throw (ex-info "Unsupported container type for update" {:type (type container)}))))
+                   :add-element       (fn [container element]
+                                        ;; Adds an element, preserving container type.
+                                        ;; Note: conj behavior varies by collection type (front for lists, end for vectors).
+                                        (cond
+                                          (list? container) (concat container [element])
+                                          (vector? container) (conj container element)
+                                          (map? container) (conj container element)
+                                          (set? container) (conj container element)
+                                          :else (throw (ex-info "Unsupported container type for add" {:type (type container)}))))}
+                  +base+)
+           opts)))
+
 (defn prewalk
-  "emulates std.lib.walk/prewalk behavior with zipper
- 
-   (-> (vector-zip [[1 2] [3 4]])
-       (prewalk (fn [v] (if (vector? v)
-                          (conj v 100)
-                          (+ v 100))))
-       (root-element))
-   => [[101 102 200] [103 104 200] 200]"
+  "emulates std.lib.walk/prewalk behavior with zipper"
   {:added "3.0"}
   ([{:keys [context] :as zip} f]
    (let [elem (right-element zip)
@@ -1092,14 +882,7 @@
            :else zip))))
 
 (defn postwalk
-  "emulates std.lib.walk/postwalk behavior with zipper
- 
-   (-> (vector-zip [[1 2] [3 4]])
-       (postwalk (fn [v] (if (vector? v)
-                           (conj v 100)
-                           (+ v 100))))
-       (root-element))
-   => [[101 102 100] [103 104 100] 100]"
+  "emulates std.lib.walk/postwalk behavior with zipper"
   {:added "3.0"}
   ([zip f]
    (let [zip (cond (can-step-inside? zip)
@@ -1118,16 +901,7 @@
        zip))))
 
 (defn matchwalk
-  "performs a match at each level
- 
-   (-> (matchwalk (vector-zip [1 [2 [3 [4]]]])
-                  [(fn [zip]
-                     (= 2 (first (right-element zip))))
-                   (fn [zip]
-                     (= 4 (first (right-element zip))))]
-                  delete-left)
-       (root-element))
-   => [1 [2 [[4]]]]"
+  "performs a match at each level"
   {:added "3.0"}
   ([zip matchers f]
    (matchwalk zip matchers f matchwalk {}))
@@ -1156,15 +930,7 @@
      zip)))
 
 (defn levelwalk
-  "performs a match at the same level
- 
-   (-> (vector-zip [1 2 3 4])
-       (step-inside)
-       (levelwalk [(fn [zip]
-                     (odd? (right-element zip)))]
-                  delete-right)
-       (root-element))
-   => [2 4]"
+  "performs a match at the same level"
   {:added "3.0"}
   ([zip [pred] f]
    (levelwalk zip [pred] f levelwalk {}))

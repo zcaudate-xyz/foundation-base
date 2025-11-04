@@ -884,13 +884,17 @@
                   (list 'std.lib/prn diff))))
     vars))
 
-(deftype Wrapped [val show type]
+(deftype Wrapped [val show type display]
   java.lang.Object
   (toString [_]
-    (str (if type
-           (str "<" type ">"))
-         "\n"
-         ((or show identity) (str val))))
+    (cond display
+          (display val)
+
+          :else
+          (str (if type
+                 (str "<" type ">"))
+               "\n"
+               ((or show identity) (str val)))))
   
   clojure.lang.IDeref
   (deref [_] val))
@@ -903,11 +907,13 @@
   "object to display shell result"
   {:added "4.0"}
   ([val]
-   (wrapped val identity))
+   (wrapped val identity nil))
   ([val show]
-   (wrapped val show nil))
+   (wrapped val show nil nil))
   ([val show type]
-   (Wrapped. val show type)))
+   (Wrapped. val show type nil))
+  ([val show type display]
+   (Wrapped. val show type display)))
 
 (defn wrapped?
   "checks that an object is wrapped"
