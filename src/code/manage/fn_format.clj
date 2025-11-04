@@ -17,7 +17,7 @@
                  (recur next)
                  nav))]
      (-> nav
-         (nav/insert ())
+         (nav/insert-token ())
          (nav/insert-newline)
          (nav/insert-space 2)
          (nav/down)
