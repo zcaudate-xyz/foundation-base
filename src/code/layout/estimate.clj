@@ -5,6 +5,8 @@
             [std.lib :as h]))
 
 (defn get-max-width
+  "gets the max width of whole form"
+  {:added "4.0"}
   [form]
   (count (pr-str form)))
 
@@ -21,16 +23,20 @@
 ;;
 
 (defn estimate-multiline-basic
+  "TODO"
+  {:added "4.0"}
   [form {:keys [readable-len]
          :or {readable-len 30}}]
   (> (get-max-width form) readable-len))
 
 (defn estimate-multiline-data
+  "TODO"
+  {:added "4.0"}
   [form opts]
   (estimate-multiline-basic form opts))
 
 (defn estimate-multiline-vector
-  "estimates if special forms are multilined"
+  "TODO"
   {:added "4.0"}
   [form opts]
   (estimate-multiline-basic form opts))
