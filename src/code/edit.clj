@@ -507,6 +507,12 @@
   ([nav]
    (empty? (filter base/expression? (zip/current-elements nav)))))
 
+
+;;
+;; Insert Functions
+;;
+
+
 (defn insert-raw
   [nav data]
   (-> nav

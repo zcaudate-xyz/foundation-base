@@ -51,6 +51,7 @@
    (or (void-lookup ch)
        (let [tag  (check/void-tag ch)
              width (case tag
+                     :eof       0
                      :linebreak 0
                      :linetab type/*tab-width*
                      1)
@@ -351,10 +352,7 @@
    (container :list [])))
 
 (defn root
-  "constructs a root block
- 
-   (str (root '[a b]))
-   => \"a b\""
+  "constructs a root block"
   {:added "3.0"}
   ([children]
    (block (container :root (construct-children children)))))
@@ -373,3 +371,23 @@
      (-> block
          pr-str
          read-string))))
+
+(defn max-width
+  "gets the max width of given block, along with starting offset"
+  {:added "3.0"}
+  ([block]
+   (max-width block 0))
+  ([block offset]
+   (cond (= 0 (base/block-height block))
+         (base/block-width block)
+                  
+         :else
+         (let [counts (->> (base/block-string block)
+                           (str/split-lines)
+                           (mapv count))
+               counts (if (zero? offset)
+                        counts
+                        (update counts 0 + offset))]
+               
+           (- (apply max counts)
+              offset)))))

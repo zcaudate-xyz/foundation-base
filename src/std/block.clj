@@ -4,7 +4,6 @@
             [std.block.grid :as grid]
             [std.block.parse :as parse]
             [std.block.type :as type]
-            [std.lib.zip :as zip]
             [std.lib :as h])
   (:refer-clojure :exclude [type next replace string newline comment]))
 
@@ -38,6 +37,7 @@
               construct/contents
               construct/container
               construct/root
+              construct/max-width
 
               parse/parse-string
               parse/parse-root

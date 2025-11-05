@@ -141,7 +141,8 @@
 
 ^{:refer std.block.construct/root :added "3.0"}
 (fact "constructs a root block"
-
+  ^:hidden
+  
   (str (root '[a b]))
   => "a b")
 
@@ -150,3 +151,58 @@
 
   (contents (block [1 2 3]))
   => '[1 ␣ 2 ␣ 3])
+
+
+^{:refer std.block.construct/max-width :added "3.0"}
+(fact "gets the max width of given block, along with starting offset"
+  ^:hidden
+  
+  [(max-width
+    (parse/parse-string ""))
+   (base/block-info
+    (parse/parse-string ""))]
+  => [0 {:type :void, :tag :eof, :string "", :height 0, :width 0}]
+
+  [(max-width
+    (parse/parse-root ""))
+   (base/block-info
+    (parse/parse-root ""))]
+  => [0 {:type :collection, :tag :root, :string "", :height 0, :width 0}]  
+  
+  [(max-width
+   (parse/parse-string "\"\n\""))
+   (base/block-info
+    (parse/parse-string "\"\n\""))]
+  => [1 {:type :token, :tag :string, :string "\"\n\"", :height 1, :width 1}]
+  
+  (base/block-info
+   (parse/parse-string "\"\n\n\""))
+  => {:type :token, :tag :string, :string "\"\n\n\"", :height 2, :width 1}
+  
+  (base/block-info
+   (block [:very-long-line (newline) (void) 2]))
+  => {:type :collection, :tag :vector, :string "[:very-long-line\n 2]", :height 1, :width 3}
+
+  
+  ;; longest line at the start
+  (max-width
+   (block [:very-long-line (newline) (void) 2]))
+  => 16
+
+  (max-width
+   (block [:very-long-line (newline) (void) 2])
+   10)
+  => 16
+
+    
+  ;; longest line in the middle
+  (max-width
+   (block [(newline)
+           (void) :very-long-line (newline)  (void) 2]))
+  => 16
+
+  (max-width
+   (block [(newline)
+           (void) :very-long-line (newline)  (void) 2])
+   10)
+  => 6)

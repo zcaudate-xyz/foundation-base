@@ -45,7 +45,7 @@
    \formfeed "\\f"})
 
 (def ^:dynamic *container-limits*
-  {:root           {:start "#["  :end "]"}
+  {:root           {:start ""    :end ""}
    :fn             {:start "#("  :end ")"}
    :list           {:start "("   :end ")"}
    :map            {:start "{"   :end "}"}

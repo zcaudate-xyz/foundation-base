@@ -92,6 +92,12 @@
 ^{:refer std.block.type/container-height :added "3.0"}
 (fact "calculates the height of a container"
 
+  (container-height (construct/block []))
+  => 0
+  
+  (container-height (construct/block [(construct/newline)]))
+  => 1
+  
   (container-height (construct/block [(construct/newline)
                                       (construct/newline)]))
   => 2)

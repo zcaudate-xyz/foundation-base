@@ -15,12 +15,16 @@
     :inline/square
     :inline/function})
 
+
+{:spec/function }
+
+{:spec/call- } 
+
 (def +layout-vector+
   {:vector/default  {:block      -1
                      :layout     {:default {:type :vector
                                             :inline :inline/auto
-                                            :align true}}
-                     :checks      {:multiline let-check-multiline}}
+                                            :align true}}}
    :%               {:block      -1
                      :layout      {:default {:type :vector
                                              :inline :inline/function}}}}) 
@@ -151,13 +155,7 @@
 
 
 (comment
-  (arg-label-sort
-   {:arg/bindings
-    {:at 1,
-     :inline true,
-     :layout {:type :vector, :columns 2, :align-col true}},
-    :arg/default {}})
-  [[:bindings {:at 1, :inline true, :layout {:type :vector, :columns 2, :align-col true}}] [:default {}]]
+  
 
   '(let [a 1 b 2] (+ a 1))
   '([a 1 b 2] (+ a 1))
@@ -196,33 +194,3 @@
      :layout {:type :vector, :columns 2, :align-col true}},
     :default {}}))
 
-
-
-{:type :form
- :op 'let
- :block 1,
- :args
- {:bindings
-  {:at 1,
-   :inline true,
-   :layout {:type :vector, :columns 2, :align-col true}},
-  :default {}},
- :fn {:multiline let-check-multiline}}
-
-
-{:type :form
- :op 'let
- :args        {1 :bindings
-               :default :body}
- :indentation {:body 2 ;; this is calculated through block 1
-               :bindings 5}
- :layout      {:bindings {:type :vector
-                          :columns 2
-                          :align true}}
- :checks      {:multiline let-check-multiline}
- :current 1}
-
-
-;;
-;;
-;;
