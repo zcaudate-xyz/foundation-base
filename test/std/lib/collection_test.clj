@@ -9,10 +9,6 @@
   (hash-map? {})    => true
   (hash-map? [])    => false)
 
-(comment
-  (./purge {:write true})
-  (./import))
-
 ^{:refer std.lib.collection/lazy-seq? :added "3.0"}
 (fact "Returns `true` if `x` implements `clojure.lang.LazySeq`."
 
@@ -311,6 +307,22 @@
   (remove-at [:a :b :c :d] 2)
   => [:a :b :d])
 
+^{:refer std.lib.collection/split-by :added "4.0"}
+(fact "splits a sequences using a predicate "
+  ^:hidden
+  
+  (split-by #(= % :split) [:a :b :split :c :d :split :e])
+   => [[:a :b] [:c :d] [:e]]
+
+   (split-by even? [1 3 5 2 7 9 4 11])
+   => [[1 3 5] [7 9] [11]]
+
+   (split-by #(= % :split) [:split :a :b :split :c])
+   => [[] [:a :b] [:c]]
+
+   (split-by #(= % :split) [:a :b :c])
+   => [[:a :b :c]])
+
 ^{:refer std.lib.collection/deduped? :added "3.0"}
 (fact "checks if elements in the collection are unique"
 
@@ -416,3 +428,7 @@
         df  (diff m2 m1 true)]
     (diff:unpatch m2 df))
   => {:a {:b 1 :d 3}})
+
+(comment
+  (./purge {:write true})
+  (./import))

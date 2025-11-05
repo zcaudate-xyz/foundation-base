@@ -592,6 +592,26 @@
          (keep-indexed #(if (not (and (>= %1 i)
                                       (< %1 (+ i n)))) %2) coll))))
 
+(defn split-by
+  "splits a sequences using a predicate"
+  {:added "4.0"}
+  [pred coll]
+  (loop [remaining coll
+         current-chunk []
+         result []]
+    (if (empty? remaining)
+      (if (empty? current-chunk)
+        result
+        (conj result current-chunk))
+      (let [item (first remaining)]
+        (if (pred item)
+          (recur (rest remaining)
+                 []
+                 (conj result current-chunk))
+          (recur (rest remaining)
+                 (conj current-chunk item)
+                 result))))))
+
 (defn deduped?
   "checks if elements in the collection are unique
  

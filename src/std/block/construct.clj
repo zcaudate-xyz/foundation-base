@@ -3,6 +3,7 @@
             [std.block.check :as check]
             [std.block.type :as type]
             [std.block.value :as value]
+            [std.lib.collection :as c]
             [std.string :as str])
   (:refer-clojure :exclude [empty newline comment]))
 
@@ -108,6 +109,16 @@
    => \"\\\n\\\n\\\n\\\n\\\n\""
   {:added "3.0"}
   ([n] (repeat n +newline+)))
+
+(defn newline?
+  "checks if a block is a newline
+ 
+   (newline? (newline))
+   => true"
+  {:added "4.0"}
+  ([block]
+   (and (type/void-block? block)
+        (= :linebreak (base/block-tag block)))))
 
 (defn comment
   "creates a comment block
@@ -391,3 +402,63 @@
                
            (- (apply max counts)
               offset)))))
+
+(defn rep
+  "returns the clojure forms representation of the dsl
+   
+   (rep (block [1 2 3 4]))
+   => [1 2 3 4]"
+  {:added "4.0"}
+  [block]
+  (read-string (pr-str block)))
+
+(defn line-split
+  "splits a block collection into"
+  {:added "4.0"}
+  [block]
+  (let [lines  (->> (base/block-children block)
+                    (c/split-by newline?))
+        lines  (mapv (fn [line]
+                       (mapv (fn [block]
+                               (if (or (not (type/container-block? block))
+                                       (= 0 (base/block-height block)))
+                                 block
+                                 (split-lines block)))
+                             line))
+                     lines)]
+    {:tag   (base/block-tag block)
+     :lines lines}))
+
+(defn line-restore
+  "restores a dom rep, adding body indentation"
+  {:added "4.0"}
+  [dom offset]
+  (let [{:keys [tag lines]} dom
+        process-fn (fn [line offset]
+                     (mapv (fn [elem]
+                             (if (map? elem)
+                               (line-restore elem offset)
+                               elem))
+                           line))
+        children (reduce (fn [out nline]
+                           (-> (reduce (fn [out _] (conj out (space)))
+                                       (conj out (newline))
+                                       (range offset))
+                               (concat (process-fn nline offset))
+                               (vec)))
+                         
+                         (process-fn (first lines) 0)
+                         (rest lines))]
+    (container tag children)))
+
+(defn indent-body
+  "indents the body given offset"
+  {:added "4.0"}
+  ([block offset]
+   (cond (or (not (type/container-block? block))
+             (= 0 (base/block-height block)))
+         block
+         
+         :else
+         (-> (line-split block)
+             (line-restore offset)))))
