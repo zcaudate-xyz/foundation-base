@@ -7,29 +7,85 @@
 
 (def *max-row-length* 80)
 
+(def +special-forms+
+  {'defn    {:block 0
+             :args    [{:type :symbol}] ; Docstring, args, body align with opening paren
+             :multiline (fn [args] true)} 
+   
+   'cond    {:block 0
+             :multiline (fn [args]
+                          (not-empty args))}
+   
+   'do      {:block 0
+             :multiline (fn [args]
+                          (> (count args) 1))}
+   'if      {:block 1
+             :multiline  (fn [args]
+                           (some coll? (rest args)))}
+   'assoc   {:block -1
+             :multiline  (fn [args]
+                           (> (count args) 3))}})
 
 
-(defn layout-form-insert-vector
-  [{:keys [stack code flags options]
-    :as state} loc]
-  (let [elem       (zip/get loc)
-        special?   (and (list? elem)
-                        (+special-forms+ (first elem)))]
-    (cond (not special?)
-          (let []
-            (edit/insert)))))
+(defn get-special-check
+  [form-name]
+  (or (get-in +special-forms+ [form-name :multiline :check])
+      h/F))
 
+(declare get-max-width)
 
+(defn get-max-width-children
+  "gets the max with of the children"
+  {:added "4.0"}
+  [children]
+  (let [child-widths (map get-max-width children)]
+    (+ (apply + child-widths)
+       (dec (count child-widths)))))
 
+(defn get-max-width
+  "gets the max width of whole form"
+  {:added "4.0"}
+  [form & [{:keys [ruleset]
+            :as opts}]]
+  (cond (coll? form)
+        (cond (empty? form)
+              (if (set? form) 3 2)
+              
+              :else
+              (let [top-width    (if (set? form) 3 2)]
+                (+ top-width    
+                   (get-max-width-children form))))
+        
+        :else (count (pr-str form))))
 
-(defn layout-form-insert-map
-  [{:keys [stack code flags options]
-    :as state} loc]
-  (let [elem       (zip/get loc)
-        special?   (and (list? elem)
-                        (+special-forms+ (first elem)))]
-    (cond (not special?)
-          (edit/insert-empty))))
+(defn estimate-multiline-special
+  "estimates if special forms are multilined"
+  {:added "4.0"}
+  [form & [{:keys [readable-len] :as opts}]]
+  (let [[form-name & args] form
+        check-fn (get-special-check form-name)]
+    (or (check-fn args)
+        (> (get-max-width form) readable-len))))
+
+(defn estimate-multiline
+  "creates multiline function"
+  {:added "4.0"}
+  [form & [{:keys [readable-len]
+            :or {readable-len 30}
+            :as opts}]]
+  (cond (coll? form)
+        (cond (empty? form)
+              false
+
+              (+special-forms+ (first form))
+              (estimate-multiline-special form opts)
+
+              :else
+              (> (get-max-width form opts)
+                 readable-len))
+        
+        :else false))
+
 
 
 (declare layout-form-insert)
