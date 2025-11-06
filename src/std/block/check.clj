@@ -1,5 +1,6 @@
 (ns std.block.check
-  (:require [std.lib :as h]))
+  (:require [std.lib.foundation :as h]
+            [std.lib.collection :as c]))
 
 (def ^:dynamic *boundaries*
   #{\" \: \; \' \@ \^ \` \~ \( \) \[ \] \{ \} \\ nil})
@@ -119,8 +120,8 @@
    :regexp  h/regexp?})
 
 (def ^:dynamic *collection-checks*
-  {:list   list?
-   :map    h/hash-map?
+  {:list   c/form?
+   :map    c/hash-map?
    :set    set?
    :vector vector?})
 

@@ -147,7 +147,7 @@
          (= tag :regexp)
          (let [lines (str/split-lines string)]
            [(count (last lines)) (dec (count lines))])
-
+         
          :else
          [(count string) 0])))
 
@@ -163,11 +163,12 @@
   ([form]
    (let [tag     :string
          lines   (str/split-lines form)
-         height  (dec (count lines))
+         height  (dec (max 1 (count lines)))
          width   (cond-> (inc (count (last lines)))
                    (zero? height) inc)
          string  (str "\"" form "\"")]
      (type/token-block tag string form string width height))))
+
 
 (defn token
   "creates a token
@@ -412,6 +413,10 @@
   [block]
   (read-string (pr-str block)))
 
+;;
+;; indentation
+;;
+
 (defn line-split
   "splits a block collection into"
   {:added "4.0"}
@@ -423,7 +428,7 @@
                                (if (or (not (type/container-block? block))
                                        (= 0 (base/block-height block)))
                                  block
-                                 (split-lines block)))
+                                 (line-split block)))
                              line))
                      lines)]
     {:tag   (base/block-tag block)
