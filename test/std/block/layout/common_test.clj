@@ -1,6 +1,7 @@
 (ns std.block.layout.common-test
   (:use code.test)
   (:require [std.block.layout.common :as common]
+            [std.block.layout.bind :as bind]
             [std.block.construct :as construct]
             [std.block.base :as base]
             [std.string :as str]))
@@ -198,8 +199,96 @@
                                :indents 2}))
   => '[[(:a ␣ 1) (:b ␣ 2)] (\n ␣ ␣)])
 
+
 ^{:refer std.block.layout.common/layout-multiline-custom :added "4.0"}
-(fact "TODO")
+(fact "layout standard paired inputs"
+  ^:hidden
+
+  (-> (common/layout-multiline-custom '(defn hello
+                                         "oeuoeu"
+                                         {:add 1}
+                                         [x]
+                                         (+ x 1))
+                                      {:spec {:col-from 1
+                                              :col-start 2}})
+      (base/block-string)
+      (str/split-lines))
+  => ["(defn hello"
+      "  \"oeuoeu\""
+      "  {:add 1}"
+      "  [x]"
+      "  (+ x 1))"]
+  
+  (-> (common/layout-multiline-custom '(assoc hello :key1 val :key2-oeueu-oeue val2)
+                                      {:spec {:columns 2
+                                              :col-from 1
+                                              :col-align true}})
+      (base/block-string)
+      (str/split-lines))
+  => ["(assoc hello"
+      "       :key1            val"
+      "       :key2-oeueu-oeue val2)"]
+  
+
+  (-> (common/layout-multiline-custom '(assoc hello :key1 val :key2-oeueu-oeue val2)
+                                      {:spec {:columns 2
+                                              :col-from 1
+                                              :col-align false}})
+      (base/block-string)
+      (str/split-lines))
+  => ["(assoc hello"
+      "       :key1 val"
+      "       :key2-oeueu-oeue val2)"]
+
+
+  (-> (common/layout-multiline-custom '(hash-map :key1 val :key2-oeueu-oeue val2)
+                                      {:spec {:columns 2
+                                              :col-from 0
+                                              :col-align true}})
+      (base/block-string)
+      (str/split-lines))
+  => ["(hash-map :key1            val"
+      "          :key2-oeueu-oeue val2)"]
+
+  (-> (common/layout-multiline-custom '(hash-map :key1 val :key2-oeueu-oeue val2)
+                                      {:spec {:columns 2
+                                              :col-from 0
+                                              :col-align false}})
+      (base/block-string)
+      (str/split-lines))
+  => ["(hash-map :key1 val"
+      "          :key2-oeueu-oeue val2)"]
+  
+
+  (-> (common/layout-multiline-custom '(case (type) :a 1 :b 2)
+                                      {:spec {:columns 2
+                                              :col-from 1
+                                              :col-start 2}})
+      (base/block-string)
+      (str/split-lines))
+  => ["(case (type)"
+      "  :a 1"
+      "  :b 2)"]
+  
+  (-> (common/layout-multiline-custom '(something to do (type) :a 1 :b 2)
+                                      {:spec {:columns 2
+                                              :col-from 3
+                                              :col-start 2}})
+      (base/block-string)
+      (str/split-lines))
+  => ["(something to do (type)"
+      "  :a 1"
+      "  :b 2)"]
+
+  (-> (common/layout-multiline-custom '(something to do (type) :a 1 :b 2)
+                                      {:spec {:columns 2
+                                              :col-from 3
+                                              :col-start 2}})
+      (base/block-string)
+      (str/split-lines))
+  => ["(something to do (type)"
+      "  :a 1"
+      "  :b 2)"])
 
 ^{:refer std.block.layout.common/layout-multiline-paired :added "4.0"}
 (fact "layout standard paired inputs"
@@ -315,7 +404,20 @@
                                       {:spec {:col-align true}})
       (base/block-string)
       (str/split-lines))
-  => ["[:a 1" " :b 2]"])
+  => ["[:a 1" " :b 2]"]
+
+
+  (binding [common/*layout-fn* bind/layout-default-fn]
+    (-> (common/layout-multiline-vector
+         '[{:keys [col-align
+                   columns]
+            :as spec}       (merge {:columns 2
+                                    :col-align false}
+                                   spec)]
+         {:spec {:col-align true}})
+        (base/block-string)
+        (str/split-lines)))
+  => ["[{:keys [col-align columns]" "  :as spec}                (merge {:columns 2" "                                    :col-align false}" "                                   spec)]"])
 
 ^{:refer std.block.layout.common/layout-with-bindings :added "4.0"}
 (fact "layout with bindings"

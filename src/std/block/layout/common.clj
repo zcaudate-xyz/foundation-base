@@ -41,11 +41,12 @@
         (str/split-lines s)))
 
 (defn layout-row
-  [row
-   {:keys [spec
-           indents]
-    :or {indents 0}
-    :as opts}]
+  "layouts a row"
+  {:added "4.0"}
+  [row {:keys [spec
+               indents]
+        :or {indents 0}
+        :as opts}]
   (if (empty? row)
     []
     (:interim
@@ -53,7 +54,7 @@
                            opts]} val]
                 (let [{:keys [indents]} opts
                       prev  (last interim)
-                      nindents  (+ indents (base/block-width prev) 1)
+                      nindents   (+ indents (base/block-width prev) 1)
                       nopts      (assoc opts :indents nindents)
                       curr       (*layout-fn* val nopts)]
                   {:interim (conj interim (construct/space) curr)
@@ -65,10 +66,9 @@
 (defn layout-one-column
   "layout for one column"
   {:added "4.0"}
-  [vals
-   {:keys [indents]
-    :or {indents 0}
-    :as opts}]
+  [vals {:keys [indents]
+         :or {indents 0}
+         :as opts}]
   (mapv (fn [arg]
           (*layout-fn* arg opts))
         vals))
@@ -78,19 +78,25 @@
   {:added "4.0"}
   [pairs
    {:keys [col-align]
-    :or {col-align true}}
+    :or {col-align true}
+    :as spec}
    {:keys [indents]
     :or {indents 0}
     :as opts}]
   (let [pair-keys    (->> (map first pairs)
                           (mapv (fn [arg]
                                   (*layout-fn* arg opts))))
+
+        
         pair-max-offset  (if col-align
                            (+ 1 indents (apply max (map construct/max-width pair-keys))))
+        _ (std.lib/prn [:KEYS pair-keys 
+                        :INDENT indents 
+                        :MAX-OFFSET pair-max-offset])
         pair-fn           (cond col-align
                                 (fn [i [_ val]]
                                   (let [pair-key  (get pair-keys i)
-                                        spaces    (repeat (- pair-max-offset
+                                        spaces    (repeat (- (inc pair-max-offset)
                                                              indents
                                                              (base/block-width pair-key))
                                                           (construct/space))
@@ -101,7 +107,7 @@
                                 :else
                                 (fn [i [_ val]]
                                   (let [pair-key  (get pair-keys i)
-                                        nopts     (assoc opts :indents (+ (base/block-width pair-key) 1)) 
+                                        nopts     (assoc opts :indents (+ indents (base/block-width pair-key) 1)) 
                                         pair-val  (*layout-fn* val nopts)]
                                     [pair-key (construct/space) pair-val])))]
     (vec (map-indexed pair-fn pairs))))
@@ -109,10 +115,9 @@
 (defn layout-n-column-space
   "layouts a set of columns with single space"
   {:added "4.0"}
-  [rows
-   {:keys [indents]
-    :or {indents 0}
-    :as opts}]
+  [rows {:keys [indents]
+         :or {indents 0}
+         :as opts}]
   (mapv #(layout-row % opts) rows))
 
 (defn layout-n-column-pad
@@ -231,7 +236,7 @@
           :as opts}]
    (let [start-sym (*layout-fn* (first form)
                                 opts)
-         nindents (+ indents 2 (construct/max-width start-sym))]
+         nindents (+ indents 2 (construct/max-width start-sym indents))]
      [start-sym nindents])))
 
 (defn layout-multiline-form
@@ -253,6 +258,8 @@
                                        arg-blocks))))))
 
 (defn layout-pair-blocks
+  "layout-pair-blocks"
+  {:added "4.0"}
   [form {:keys [indents
                 spec]
          :or {indents 0}
@@ -277,10 +284,14 @@
                  columns
                  col-align
                  col-start]
-          :or {col-from 1
-               col-align true}} spec
+          :or {columns 1
+               col-from 1
+               col-align true}}
+         spec
          [start-sym
           nindents]      (layout-multiline-form-setup form opts)
+         
+
          initial-blocks  (layout-row (take col-from (rest form))
                                      (assoc opts :indents nindents))
 
@@ -298,17 +309,19 @@
                             (layout-two-column   (partition-all 2 (seq rarr)) spec ropts)
                             
                             :else
-                            (layout-n-column (partition-all columns (seq rarr)) spec ropts))]
-     (construct/container :list
-                          (vec (concat [start-sym]
-                                       (if (not-empty initial-blocks)
-                                         [(construct/space)])
-                                       initial-blocks
-                                       (if (and (nil? col-start)
-                                                (= col-from 0))
-                                         [(construct/space)]
-                                         rspacing)
-                                       (join-block-arrays rspacing row-blocks)))))))
+                            (layout-n-column (partition-all columns (seq rarr)) spec ropts))
+         join-fn (if (= 1 columns) join-blocks join-block-arrays)]
+     (construct/container
+      :list
+      (vec (concat [start-sym]
+                   (if (not-empty initial-blocks)
+                     [(construct/space)])
+                   initial-blocks
+                   (if (and (nil? col-start)
+                            (= col-from 0))
+                     [(construct/space)]
+                     rspacing)
+                   (join-fn rspacing row-blocks)))))))
 
 (defn layout-multiline-paired
   "layout standard paired inputs"
@@ -317,32 +330,7 @@
                  spec]
           :or {indents 0}
           :as opts}]
-   (let [{:keys [col-from
-                 columns
-                 col-align
-                 col-start]
-          :or {col-from 1
-               col-align true}} spec
-         [start-sym
-          nindents]   (layout-multiline-form-setup form opts)
-         initial-blocks   (layout-row (take col-from (rest form))
-                                  (assoc opts :indents nindents))
-         pindents     (if col-start
-                        (+ indents col-start)
-                        nindents)
-         popts        (assoc opts :indents pindents)
-         [pair-blocks
-          pair-spacing] (layout-pair-blocks (drop (inc col-from) form) popts)]
-     (construct/container :list
-                          (vec (concat [start-sym]
-                                       (if (not-empty initial-blocks)
-                                         [(construct/space)])
-                                       initial-blocks
-                                       (if (and (nil? col-start)
-                                                (= col-from 0))
-                                         [(construct/space)]
-                                         pair-spacing)
-                                       (join-block-arrays pair-spacing pair-blocks)))))))
+   (layout-multiline-custom form (assoc-in opts [:spec :columns] 2))))
 
 (defn layout-multiline-hashmap
   "layouts the hashmap"
@@ -353,42 +341,56 @@
           :as opts}]
    (let [{:keys [col-align
                  columns]
-          :or {columns 2
-               col-align true}} spec
+          :as spec}  (merge {:columns 2
+                             :col-align false}
+                            spec)
          nindents     (+ indents 1)
          arg-spacing  (concat  [(construct/newline)]
-                               (repeat nindents (construct/space)))
-         nopts        (assoc opts :indents nindents)
+                               (repeat nindents (construct/space)))        
+         nopts        (-> opts
+                          (assoc :indents nindents
+                                 :spec spec))
          row-blocks   (cond (== columns 1)
-                            (layout-two-column (mapcat identity (seq m)) spec nopts)
+                            (layout-one-column (mapcat identity (seq m)) spec nopts)
                             
                             (== columns 2)
                             (layout-two-column m spec nopts)
-                                
+                            
                             :else
                             (layout-n-column (->> (mapcat identity (seq m))
                                                   (partition-all columns))
                                              spec
-                                             nopts))]
-     (construct/container :map (vec (join-block-arrays arg-spacing row-blocks))))))
+                                             nopts))
+         join-fn (if (= 1 columns) join-blocks join-block-arrays)]
+     (construct/container :map (vec (join-fn arg-spacing row-blocks))))))
 
-(defn layout-coll-children
+;;
+;;
+;;
+
+(defn layout-by-columns
   "layout collection children"
   {:added "4.0"}
   ([arr indents-start {:keys [indents
-                             spec]
-                      :or {indents 0}
-                      :as opts}]
+                              spec]
+                       :or {indents 0}
+                       :as opts}]
    (let [{:keys [col-align
                  columns]
-          :or {columns 2
-               col-align true}} spec
+          :as spec}   (merge {:columns (if (< (count arr) 2)
+                                         (count arr)
+                                         2)
+                              :col-align true}
+                             spec)
          nindents     (+ indents indents-start)
          arg-spacing  (concat  [(construct/newline)]
                                (repeat nindents (construct/space)))
-         nopts  (assoc opts :indents nindents)
+         nopts       (-> opts
+                         (assoc :indents nindents)
+                         (update :spec merge {:columns columns
+                                              :col-align col-align}))
          row-blocks  (cond (== columns 1)
-                           (layout-one-column   (seq arr) opts)
+                           (layout-one-column   (seq arr) nopts)
 
                            (== columns 2)
                            (layout-two-column   (partition-all 2 (seq arr)) spec nopts)
@@ -398,13 +400,40 @@
          join-fn (if (= 1 columns) join-blocks join-block-arrays)]
      (vec (join-fn arg-spacing row-blocks)))))
 
+(defn layout-by-rows
+  "layout collection children"
+  {:added "4.0"}
+  ([arr indents-start {:keys [indents
+                             spec]
+                      :or {indents 0}
+                      :as opts}]
+   (let [{:keys [row-wrap
+                 row-len]
+          :or {row-len 50}} spec
+         nindents     (+ indents indents-start)
+         row-spacing  (concat  [(construct/newline)]
+                               (repeat nindents (construct/space)))
+         nopts       (-> opts
+                         (assoc :indents nindents)
+                         (update :spec merge {:row-len row-len}))])))
+
+(defn layout-by
+  [arr indents-start {:keys [spec]
+                      :as opts}]
+  (let [{:keys [row-wrap]} spec]
+    (cond row-wrap
+          (layout-by-rows arr indents-start opts)
+
+          :else
+          (layout-by-columns arr indents-start opts))))
+
 (defn layout-multiline-hashset
   "layouts the hashset"
   {:added "4.0"}
   ([arr    {:keys [indents]
             :or {indents 0}
             :as opts}]
-   (let [children (layout-coll-children arr 2 opts)]
+   (let [children (layout-by-columns arr 2 opts)]
      (construct/container :set children))))
 
 (defn layout-multiline-vector
@@ -413,10 +442,16 @@
   ([arr    {:keys [indents]
             :or {indents 0}
             :as opts}]
-   (let [children (layout-coll-children arr 1 opts)]
+   (let [children (layout-by-columns arr 1 opts)]
      (construct/container :vector children))))
 
+;;
+;; maybe replacable
+;;
+
 (defn layout-with-bindings
+  "layout with bindings"
+  {:added "4.0"}
   ([form {:keys [indents]
           :or {indents 0}
           :as opts}]
@@ -440,66 +475,3 @@
                                        [bindings]
                                        arg-spacing
                                        arg-blocks))))))
-
-(comment
-  (defn layout-with-columns
-    ([form {:keys [indents]
-            :or {indents 0}
-            :as opts}]
-     (let [[start-sym nindents] (layout-multiline-form-setup form opts)
-           start-blocks (list start-sym (construct/space))
-           bopts        (assoc opts
-                               :spec   {:col-align true
-                                        :columns 2}
-                               :indents nindents)
-           binding-vector (layout-multiline-vector (second form)
-                                                   bopts)
-           aopts        (assoc opts :indents ( + 1 indents))
-           arg-spacing  (concat  [(construct/newline)]
-                                 (repeat (+ 1 indents) (construct/space)))
-           arg-blocks   (->> (drop 2 form)
-                             (map (fn [arg]
-                                    (*layout-fn* arg aopts)))
-                             (join-blocks arg-spacing))]
-       (construct/container :list
-                            (vec (concat start-blocks
-                                         [binding-vector]
-                                         arg-spacing
-                                         arg-blocks))))))
-
-  (defn layout-multiline-paired
-    "layout standard paired inputs"
-    {:added "4.0"}
-    ([form {:keys [indents
-                   spec]
-            :or {indents 0}
-            :as opts}]
-     (let [{:keys [col-from
-                   col-align
-                   col-start]
-            :or {col-from 2
-                 col-align true}} spec
-           [start-sym nindents] (layout-multiline-form-setup form opts)
-           start-blocks (list start-sym (construct/space))
-           arg-initial  (take (dec col-from)
-                              (rest form))
-           arg-spacing  (concat  [(construct/newline)]
-                                 (repeat nindents (construct/space)))
-           nopts        (assoc opts :indents nindents)
-           arg-blocks   (->> arg-initial
-                             (map (fn [arg]
-                                    (*layout-fn* arg nopts)))
-                             (join-blocks arg-spacing))
-           pindents     (if col-start
-                          (+ indents col-start)
-                          nindents)
-           popts        (assoc opts :indents pindents)
-           [pair-blocks
-            pair-spacing] (layout-pair-blocks form popts)]
-       (construct/container :list
-                            (vec (concat start-blocks
-                                         arg-blocks
-                                         (if (empty? arg-initial)
-                                           []
-                                           pair-spacing)
-                                         pair-blocks)))))))

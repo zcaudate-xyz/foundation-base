@@ -392,7 +392,7 @@
   ([block offset]
    (cond (= 0 (base/block-height block))
          (base/block-width block)
-                  
+         
          :else
          (let [counts (->> (base/block-string block)
                            (str/split-lines)
@@ -400,7 +400,7 @@
                counts (if (zero? offset)
                         counts
                         (update counts 0 + offset))]
-               
+           
            (- (apply max counts)
               offset)))))
 
