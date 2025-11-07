@@ -404,6 +404,18 @@
            (- (apply max counts)
               offset)))))
 
+(defn line-width
+  "gets the max width of given block, along with starting offset"
+  {:added "3.0"}
+  ([block]
+   (max-width block 0))
+  ([block offset]
+   (cond (= 0 (base/block-height block))
+         (base/block-width block)
+         
+         :else
+         (- (base/block-width block) offset))))
+
 (defn rep
   "returns the clojure forms representation of the dsl
    

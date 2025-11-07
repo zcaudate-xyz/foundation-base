@@ -92,3 +92,5 @@
 
   (p/stack-entry-root {})
   => {:type :root, :op :type/root, :indent 0, :position 0})
+
+

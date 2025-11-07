@@ -237,15 +237,14 @@
    (with-meta `(pl ~body nil) (meta &form)))
   ([body range]
    (let [{:keys [line column]} (meta &form)]
-     `(local :println (format "%s (%d:%d)"
-                              ~(str (ns-sym))
-                              ~line
-                              ~column)
-             
-             "\n"
-             (pl-add-lines (with-out-str (println ~body))
-                           ~range)
-             "\n"))))
+     `(do (local :println (format "%s (%d:%d)"
+                                  ~(str (ns-sym))
+                                  ~line
+                                  ~column))
+          (local :println
+                 (pl-add-lines (with-out-str (println ~body))
+                               ~range)
+                 "\n")))))
 
 (defmacro do:pl
   "doto `pl`"
@@ -271,8 +270,8 @@
      `(do (local :println (format "%s (%d:%d)"
                                   ~(str (ns-sym))
                                   ~line
-                                  ~column)
-                 "\n"
+                                  ~column))
+          (local :println
                  ~@(map (fn [v]
                           `(pr-str ~v))
                         body)

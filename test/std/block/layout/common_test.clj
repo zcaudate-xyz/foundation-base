@@ -35,12 +35,12 @@
                     "oeuoeuoe"
                     "oeoeuoe"]))
 
-^{:refer std.block.layout.common/layout-row :added "4.0"}
+^{:refer std.block.layout.common/layout-single-row :added "4.0"}
 (fact "layouts a row"
   ^:hidden
   
   (construct/rep
-   (common/layout-row
+   (common/layout-single-row
     '(1 2 3 4 5)
     {:indent 10}))
   => '[1 ␣ 2 ␣ 3 ␣ 4 ␣ 5])
@@ -173,7 +173,7 @@
   (construct/rep
    (common/layout-multiline-form-setup '(apply 1 2 3 4)
                                        {:indents 0}))
-  => '[apply 7])
+  => '[apply 6])
 
 ^{:refer std.block.layout.common/layout-multiline-form :added "4.0"}
 (fact "layout standard multiline forms"
@@ -194,11 +194,22 @@
   
   (construct/rep
    (common/layout-pair-blocks '(:a 1 :b 2) 
-                              {:spec {:col-align true
-                                      }
+                              {:spec {:col-align true}
                                :indents 2}))
-  => '[[(:a ␣ 1) (:b ␣ 2)] (\n ␣ ␣)])
+  => '[[(:a ␣ 1) (:b ␣ 2)] (\n ␣ ␣)]
 
+  
+  (construct/rep
+   (common/layout-pair-blocks '(:a 1 :b 2) 
+                              {:spec {:col-align true}
+                               :indents 5}))
+  => '[[(:a ␣ 1) (:b ␣ 2)] (\n ␣ ␣ ␣ ␣ ␣)]
+
+  (construct/rep
+   (common/layout-pair-blocks '(:a-long 1 :b 2) 
+                              {:spec {:col-align true}
+                               :indents 5}))
+  => '[[(:a-long ␣ 1) (:b ␣ ␣ ␣ ␣ ␣ ␣ 2)] (\n ␣ ␣ ␣ ␣ ␣)])
 
 ^{:refer std.block.layout.common/layout-multiline-custom :added "4.0"}
 (fact "layout standard paired inputs"
@@ -374,15 +385,47 @@
   => ["{:a 1"
       "      :b 2}"])
 
-^{:refer std.block.layout.common/layout-coll-children :added "4.0"}
-(fact "layout collection children"
+^{:refer std.block.layout.common/layout-by-columns :added "4.0"}
+(fact "layout data using columns"
+  ^:hidden
+
+  (construct/rep
+   (common/layout-by-columns [:a-long 1 :b 2]
+                             1
+                             {:spec {:col-align false}}))
+  => '[:a-long ␣ 1 \n ␣ :b ␣ 2]
+
+  (construct/rep
+   (common/layout-by-columns [:a-long 1 :b 2]
+                             2
+                             {:spec {:col-align true}}))
+  => '[:a-long ␣ 1 \n ␣ ␣ :b ␣ ␣ ␣ ␣ ␣ ␣ 2])
+
+^{:refer std.block.layout.common/layout-by-rows :added "4.0"}
+(fact "layout data using rows"
   ^:hidden
   
   (construct/rep
-   (common/layout-coll-children [:a 1 :b 2]
-                                1
-                                {:spec {:col-align true}}))
-  => '[:a ␣ 1 \n ␣ :b ␣ 2])
+   (common/layout-by-rows [:a-long 1 :b-long 2]
+                          1
+                          {:spec {:row-len 10}}))
+  => '[:a-long ␣ 1 \n ␣ :b-long ␣ 2]
+
+  (construct/rep
+   (common/layout-by-rows [:a-long 1 :b-long 2 :c-long 3 :d-long 4]
+                          10
+                          {:spec {:row-len 20}}))
+  => '[:a-long ␣ 1 ␣ :b-long ␣ 2
+       \n ␣ ␣ ␣ ␣ ␣ ␣ ␣ ␣ ␣ ␣ :c-long ␣ 3 ␣ :d-long ␣ 4]
+
+  (construct/rep
+   (common/layout-by-rows [:a-long 1 :b-long 2 :c-long 3 :d-long 4]
+                          10
+                          {:spec {:row-len 50}}))
+  => '[:a-long ␣ 1 ␣ :b-long ␣ 2 ␣ :c-long ␣ 3 ␣ :d-long ␣ 4])
+
+^{:refer std.block.layout.common/layout-by :added "4.0"}
+(fact "general layout function")
 
 ^{:refer std.block.layout.common/layout-multiline-hashset :added "4.0"}
 (fact "layouts the hashset"
@@ -406,6 +449,22 @@
       (str/split-lines))
   => ["[:a 1" " :b 2]"]
 
+  (binding [common/*layout-fn* bind/layout-default-fn]
+    (-> (common/layout-multiline-vector
+         '[{:keys [col-align
+                   columns]
+            :as spec}       (merge {:columns 2
+                                    :col-align false}
+                                   spec)
+           hello world]
+         {:spec {:col-align true}})
+        (base/block-string)
+        (str/split-lines)))
+  => ["[{:keys [col-align columns]"
+      "  :as spec}                 (merge {:columns 2"
+      "                                    :col-align false}"
+      "                                   spec)"
+      " hello                      world]"]
 
   (binding [common/*layout-fn* bind/layout-default-fn]
     (-> (common/layout-multiline-vector
@@ -413,11 +472,17 @@
                    columns]
             :as spec}       (merge {:columns 2
                                     :col-align false}
-                                   spec)]
-         {:spec {:col-align true}})
+                                   spec)
+           hello world]
+         {:spec {:col-align true
+                 :col-compact true}})
         (base/block-string)
         (str/split-lines)))
-  => ["[{:keys [col-align columns]" "  :as spec}                (merge {:columns 2" "                                    :col-align false}" "                                   spec)]"])
+  => ["[{:keys [col-align columns]"
+      "  :as spec}  (merge {:columns 2"
+      "                     :col-align false}"
+      "                    spec)"
+      " hello       world]"])
 
 ^{:refer std.block.layout.common/layout-with-bindings :added "4.0"}
 (fact "layout with bindings"
@@ -442,3 +507,15 @@
       (str/split-lines))
   => ["(binding [*ns* 1]"
       " (do (make-something-with *ns* 1 2 3)))"])
+
+(comment
+  (std.lib/p
+   (binding [common/*layout-fn* bind/layout-default-fn]
+     (-> (common/layout-multiline-vector
+          '[{:a 1}       (merge {:columns 2
+                                 :col-align false}
+                                spec)
+            hello world]
+          {:spec {:col-align true}})
+         (base/block-string)
+         ))))

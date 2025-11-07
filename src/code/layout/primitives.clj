@@ -1,7 +1,5 @@
 (ns code.layout.primitives
-  (:require [std.lib.zip :as zip]
-            [code.edit :as edit]
-            [std.lib :as h]))
+  (:require [std.lib :as h]))
 
 (defn fn-multiline-let
   "multiline check for let"
@@ -14,11 +12,6 @@
   #{:inline/auto
     :inline/square
     :inline/function})
-
-
-{:spec/function }
-
-{:spec/call- } 
 
 (def +layout-vector+
   {:vector/default  {:block      -1

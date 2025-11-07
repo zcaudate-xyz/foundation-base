@@ -55,6 +55,16 @@
                                                    :c2-data 5}
                                    :b2-data-long1 4}}]]))
   
+
+  (h/p 
+   (bind/layout-main '[{:keys [a ab abc]
+                        :as data}   (merge {:a1 {:b1-data-long0 1
+                                                 :b1-data-long1 2}
+                                            :a2 {:b2-data-long0 3
+                                                 :b2-data-long1 4}}
+                                           spec)]
+                     {}))
+  
   
   (h/p 
    (bind/layout-main '[[{:keys [a ab abc]
@@ -62,7 +72,8 @@
                                                   :b1-data-long1 2}
                                              :a2 {:b2-data-long0 3
                                                   :b2-data-long1 4}}
-                         spec)]]
+                                            spec)
+                        foo-bind     [1 2 3]]]
                      {}))
-
+  
   )
