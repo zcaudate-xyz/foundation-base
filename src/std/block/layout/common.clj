@@ -291,6 +291,8 @@
      [start-sym nindents])))
 
 (defn layout-multiline-call
+  "custom function for most list based functions"
+  {:added "4.0"}
   ([type form {:keys [indents
                       spec]
                :or {indents 0}
@@ -378,7 +380,7 @@
                  spec]
           :or {indents 0}
           :as opts}]
-   (layout-multiline-call form (assoc-in opts [:spec :columns] 2))))
+   (layout-multiline-call :list form (assoc-in opts [:spec :columns] 2))))
 
 (defn layout-multiline-hashmap
   "layouts the hashmap"

@@ -153,10 +153,7 @@
 
   (-> (parse-collection (reader/create "#{1 2 3 4}") :set)
       (base/block-value))
-  => #{1 4 3 2}
-
-  (-> (parse-collection (reader/create "#[1 2 3 4]") :root)
-      (base/block-value)))
+  => #{1 4 3 2})
 
 ^{:refer std.block.parse/parse-cons :added "3.0"}
 (fact "parses a cons"

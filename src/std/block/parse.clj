@@ -325,10 +325,7 @@
  
    (-> (parse-collection (reader/create \"#{1 2 3 4}\") :set)
        (base/block-value))
-   => #{1 4 3 2}
- 
-   (-> (parse-collection (reader/create \"#[1 2 3 4]\") :root)
-       (base/block-value))"
+   => #{1 4 3 2}"
   {:added "3.0"}
   ([reader tag]
    (let [{:keys [start end]} (construct/*container-props* tag)
@@ -523,7 +520,11 @@
        (construct/root))))
 
 (defn parse-first
-  {:added "3.0"}
+  "gets the first element in root
+   
+   (str (parse-first \"a b c\"))
+   => \"a\""
+  {:added "4.0"}
   ([string]
    (->> (parse-root string)
         (base/block-children)

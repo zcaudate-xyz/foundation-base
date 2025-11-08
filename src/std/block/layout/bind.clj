@@ -72,7 +72,8 @@
           (walk/postwalk
            (fn [x]
              (cond  (vector? x)
-                    (c/merge-meta x {:readable-len 10
+                    (c/merge-meta x {:tag :vector
+                                     :readable-len 10
                                      :spec {:columns 1}})
 
                     (map? x)
@@ -93,7 +94,8 @@
                    [(walk/postwalk
                      (fn [x]
                        (cond (vector? x)
-                             (c/merge-meta x {:readable-len 10
+                             (c/merge-meta x {:tag :vector
+                                              :readable-len 10
                                               :spec {:columns 1}})
 
                              (map? x)
@@ -172,7 +174,7 @@
         :else form))
 
 (defn layout-default-fn
-  "TODO"
+  "the default function for level 1 transformation"
   {:added "4.0"}
   [form opts]
   (let [is-multiline (est/estimate-multiline form {})

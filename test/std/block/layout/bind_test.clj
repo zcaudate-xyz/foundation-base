@@ -41,7 +41,7 @@
     (pr-str (bind/layout-annotate-arglist
              '[{:keys [a b c d e]
                 :as other}])))
-  => "[^{:readable-len 10} {:keys ^{:readable-len 10, :spec {:columns 1}} [a b c d e], :as other}]")
+  => "[^{:readable-len 10} {:keys ^{:tag :vector, :readable-len 10, :spec {:columns 1}} [a b c d e], :as other}]")
 
 ^{:refer std.block.layout.bind/layout-annotate-bindings :added "4.0"}
 (fact"adds layout metadata to bindings"
@@ -51,7 +51,7 @@
     (pr-str (bind/layout-annotate-bindings
              '[{:keys [a b c d e]
                 :as other} {:a 1 :b 2}])))
-  => "[^{:readable-len 10} {:keys ^{:readable-len 10, :spec {:columns 1}} [a b c d e], :as other} {:a 1, :b 2}]")
+  => "[^{:readable-len 10} {:keys ^{:tag :vector, :readable-len 10, :spec {:columns 1}} [a b c d e], :as other} {:a 1, :b 2}]")
 
 ^{:refer std.block.layout.bind/layout-annotate-fn-named :added "4.0"}
 (fact "adds layout metadata to named functions"
@@ -62,7 +62,7 @@
              '(defn hello
                 ([{:keys [a b c d e]
                    :as other}])))))
-  => "(defn hello ([^{:readable-len 10} {:keys ^{:readable-len 10, :spec {:columns 1}} [a b c d e], :as other}]))"
+  => "(defn hello ([^{:readable-len 10} {:keys ^{:tag :vector, :readable-len 10, :spec {:columns 1}} [a b c d e], :as other}]))"
 
   (binding [*print-meta* true]
     (pr-str (bind/layout-annotate-fn-named
@@ -71,7 +71,7 @@
                 {:a 1}
                 [{:keys [a b c d e]
                     :as other}]))))
-  => "(defn hello \"docstring\" {:a 1} [^{:readable-len 10} {:keys ^{:readable-len 10, :spec {:columns 1}} [a b c d e], :as other}])")
+  => "(defn hello \"docstring\" {:a 1} [^{:readable-len 10} {:keys ^{:tag :vector, :readable-len 10, :spec {:columns 1}} [a b c d e], :as other}])")
 
 ^{:refer std.block.layout.bind/layout-annotate-fn-anon :added "4.0"}
 (fact "adds layout metadata to `fn` calls"
@@ -81,7 +81,7 @@
     (pr-str (bind/layout-annotate-fn-anon
              '(fn [{:keys [a b c d e]
                     :as other}]))))
-  => "(fn [^{:readable-len 10} {:keys ^{:readable-len 10, :spec {:columns 1}} [a b c d e], :as other}])")
+  => "(fn [^{:readable-len 10} {:keys ^{:tag :vector, :readable-len 10, :spec {:columns 1}} [a b c d e], :as other}])")
 
 ^{:refer std.block.layout.bind/layout-annotate :added "4.0"}
 (fact "adds metadata annotation to form"
@@ -91,7 +91,7 @@
     (pr-str (bind/layout-annotate '(let [{:keys [a b c d e]
                                           :as other}
                                          b 2]))))
-  => "(let [^{:readable-len 10} {:keys ^{:readable-len 10, :spec {:columns 1}} [a b c d e], :as other} b])")
+  => "(let [^{:readable-len 10} {:keys ^{:tag :vector, :readable-len 10, :spec {:columns 1}} [a b c d e], :as other} b])")
 
 ^{:refer std.block.layout.bind/layout-default-fn :added "4.0"}
 (fact "the default function for level 1 transformation")

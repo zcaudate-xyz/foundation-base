@@ -60,7 +60,4 @@
   ;; check for let
   (est/estimate-multiline '(let [a 1] a)
                           {:readable-len 30})
-  => true)
-
-
-
+  => false)

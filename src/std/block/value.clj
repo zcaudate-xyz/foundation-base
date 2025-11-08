@@ -46,7 +46,7 @@
 (defn root-value
   "returns the value of a :root block
  
-   (root-value (parse/parse-string \"#[1 2 3]\"))
+   (root-value (parse/parse-root \"1 2 3\"))
    => '(do 1 2 3)"
   {:added "3.0"}
   ([block]

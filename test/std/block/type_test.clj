@@ -145,4 +145,11 @@
   (modifier-block :hash-uneval "#_" (fn [acc _] acc)))
 
 ^{:refer std.block.type/code-block? :added "4.0"}
-(fact "TODO")
+(fact "checks if a block can be representated as code"
+  ^:hidden
+  
+  (code-block? (construct/void))
+  => false
+
+  (code-block? (construct/token '+))
+  => true)

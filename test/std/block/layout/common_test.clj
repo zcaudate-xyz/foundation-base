@@ -198,6 +198,16 @@
                                        {:indents 0}))
   => '[apply 6])
 
+^{:refer std.block.layout.common/layout-multiline-call :added "4.0"}
+(fact "custom function for most list based functions"
+  ^:hidden
+
+  (construct/rep
+   (common/layout-multiline-call :list
+                                 '(apply 1 2 3 4)
+                                 {:indents 0}))
+  => '(apply 1 2 3 4))
+
 ^{:refer std.block.layout.common/layout-multiline-list :added "4.0"}
 (fact "layout standard paired inputs"
   ^:hidden
@@ -552,6 +562,3 @@
          (base/block-string)
          ))))
 
-
-^{:refer std.block.layout.common/layout-multiline-call :added "4.0"}
-(fact "TODO")

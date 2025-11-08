@@ -238,6 +238,12 @@
 (defn container-height
   "calculates the height of a container
  
+   (container-height (construct/block []))
+   => 0
+   
+   (container-height (construct/block [(construct/newline)]))
+   => 1
+   
    (container-height (construct/block [(construct/newline)
                                        (construct/newline)]))
    => 2"
@@ -391,6 +397,8 @@
    (->ModifierBlock tag string command)))
 
 (defn code-block?
+  "checks if a block can be representated as code"
+  {:added "4.0"}
   [block]
   (or (token-block? block)
       (container-block? block)
