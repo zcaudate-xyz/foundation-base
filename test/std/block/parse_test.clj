@@ -272,6 +272,14 @@
   (str (parse-root "a b c"))
   => "a b c")
 
+^{:refer std.block.parse/parse-first :added "4.0"}
+(fact "gets the first element in root"
+  
+  (str (parse-first "a b c"))
+  => "a")
+
 (comment
 
   (./run '[std.block]))
+
+

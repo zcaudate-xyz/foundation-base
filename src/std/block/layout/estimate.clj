@@ -2,7 +2,7 @@
   (:require [std.lib.foundation :as h]
             [std.lib.collection :as c]))
 
-(def ^:dynamic *readable-len* 20)
+(def ^:dynamic *readable-len* 30)
 
 (defn get-max-width
   "gets the max width of whole form"
@@ -23,20 +23,21 @@
 ;;
 
 (defn estimate-multiline-basic
-  "TODO"
+  "does basic estimation"
   {:added "4.0"}
   [form {:keys [readable-len]
-         :or {readable-len *readable-len*}}]
+         :or {readable-len (or (:readable-len (meta form))
+                               *readable-len*)}}]
   (> (get-max-width form) readable-len))
 
 (defn estimate-multiline-data
-  "TODO"
+  "estimation for maps and sets"
   {:added "4.0"}
   [form opts]
   (estimate-multiline-basic form opts))
 
 (defn estimate-multiline-vector
-  "TODO"
+  "estimation for vectors"
   {:added "4.0"}
   [form opts]
   (estimate-multiline-basic form opts))
@@ -61,13 +62,9 @@
         (vector? form)
         (estimate-multiline-vector form opts)
         
-        
         (or (map? form)
             (set? form))
         (estimate-multiline-data form opts)        
         
         :else
         (estimate-multiline-basic form opts)))
-
-(comment
-  (count "(+special-lists+ (first form))"))

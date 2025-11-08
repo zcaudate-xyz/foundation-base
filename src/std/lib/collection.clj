@@ -749,3 +749,12 @@
                     (dissoc-nested m arr))
                   %
                   (keys (:+ diff)))))))
+
+
+;;
+;;
+
+(defn merge-meta
+  [obj metadata]
+  (with-meta obj (merge-nested (meta obj)
+                               metadata)))

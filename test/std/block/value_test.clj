@@ -22,7 +22,7 @@
 ^{:refer std.block.value/root-value :added "3.0"}
 (fact "returns the value of a :root block"
 
-  (root-value (parse/parse-string "#[1 2 3]"))
+  (root-value (parse/parse-root "1 2 3"))
   => '(do 1 2 3))
 
 ^{:refer std.block.value/from-value-string :added "3.0"}

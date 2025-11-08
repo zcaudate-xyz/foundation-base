@@ -4,6 +4,7 @@
             [std.block.grid :as grid]
             [std.block.parse :as parse]
             [std.block.type :as type]
+            [std.block.layout.bind :as bind]
             [std.lib :as h])
   (:refer-clojure :exclude [type next replace string newline comment]))
 
@@ -42,6 +43,8 @@
               parse/parse-string
               parse/parse-root
               parse/parse-first
+
+              [layout bind/layout-main]
               
               [void?      type/void-block?]
               [code?      type/code-block?]

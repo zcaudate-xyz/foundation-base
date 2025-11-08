@@ -143,3 +143,6 @@
 (fact "creates a modifier block, specifically #_"
 
   (modifier-block :hash-uneval "#_" (fn [acc _] acc)))
+
+^{:refer std.block.type/code-block? :added "4.0"}
+(fact "TODO")

@@ -1,7 +1,8 @@
 (ns std.block.construct-test
   (:use code.test)
   (:require [std.block.construct :refer :all]
-            [std.block.base :as base])
+            [std.block.base :as base]
+            [std.block.parse :as parse])
   (:refer-clojure :exclude [comment newline empty]))
 
 ^{:refer std.block.construct/void :added "3.0"}
@@ -212,16 +213,40 @@
    10)
   => 6)
 
+^{:refer std.block.construct/line-width :added "4.0"}
+(fact "get the width at the line which it finishes"
+  ^:hidden
+  
+  (line-width
+   (block [:very-long-line (newline) (void) 2]))
+  => 3
+
+  (line-width
+   (block [:very-long-line (newline) (void) 2])
+   3)
+  => 0)
+
 ^{:refer std.block.construct/rep :added "4.0"}
 (fact "returns the clojure forms representation of the dsl"
+  ^:hidden
   
   (rep (block [1 2 3 4]))
   => [1 2 3 4])
 
+^{:refer std.block.construct/get-lines :added "4.0"}
+(fact "gets the lines for a block"
+  ^:hidden
+  
+  (get-lines (block [(newline)
+                     (void) :very-long-line (newline)  (void) 2]))
+  => ["["
+      " :very-long-line"
+      " 2]"])
+
 ^{:refer std.block.construct/line-split :added "4.0"}
 (fact "splits a block collection into "
   ^:hidden
-
+  
   (str (line-split
         (block [(newline)
                 (void) :very-long-line (newline)  (void) 2])
@@ -233,7 +258,7 @@
     (block [(newline) 1 (newline)
             [(newline) 2 (newline)
              [(newline) 3 (newline)]]])))
-  => {:tag :vector, :lines [[] [1] [{:tag :vector, :items [[] [2] [{:tag :vector, :items [[] [3]]}]]}]]})
+  => {:tag :vector, :lines [[] [1] [{:tag :vector, :lines [[] [2] [{:tag :vector, :lines [[] [3]]}]]}]]})
 
 ^{:refer std.block.construct/line-restore :added "4.0"}
 (fact "restores a dom rep, adding body indentation"

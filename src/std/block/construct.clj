@@ -302,7 +302,12 @@
 
 (defmethod construct-collection :vector
   ([form]
-   (let [tag      (first (keys (meta form)))
+   (let [metadata (meta form) 
+         tag      (or (:tag metadata)
+                      (first
+                       (keys metadata)))
+         tag      (if (contains? base/*container-limits* tag)
+                    tag)
          children (construct-children form)]
      (container (or tag :vector) children))))
 
@@ -405,10 +410,10 @@
               offset)))))
 
 (defn line-width
-  "gets the max width of given block, along with starting offset"
-  {:added "3.0"}
+  "get the width at the line which it finishes"
+  {:added "4.0"}
   ([block]
-   (max-width block 0))
+   (line-width block 0))
   ([block offset]
    (cond (= 0 (base/block-height block))
          (base/block-width block)
@@ -417,13 +422,17 @@
          (- (base/block-width block) offset))))
 
 (defn rep
-  "returns the clojure forms representation of the dsl
-   
-   (rep (block [1 2 3 4]))
-   => [1 2 3 4]"
+  "returns the clojure forms representation of the dsl"
   {:added "4.0"}
   [block]
   (read-string (pr-str block)))
+
+(defn get-lines
+  "gets the lines for a block"
+  {:added "4.0"}
+  [block]
+  (->> (base/block-string block)
+       (str/split-lines)))
 
 ;;
 ;; indentation
