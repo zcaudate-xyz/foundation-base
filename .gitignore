@@ -17,6 +17,7 @@ form-init*
 .hara
 .clj-kondo/.cache
 .calva
+.prompts
 .lsp/.cache
 /hsperfdata_root
 /tmp*

@@ -67,6 +67,8 @@
   (l/link {:ns s}
           lib.aether/pull
           lib.aether/push
+
+          jvm.artifact.search/class-seq
           
           code.project/project
           code.project/all-files

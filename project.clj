@@ -26,10 +26,18 @@
    [com.sun.xml.bind/jaxb-core "4.0.3"]
    [com.sun.xml.bind/jaxb-impl "4.0.3"]
    [clj-kondo "2025.02.20"]
-   
+
+   ;; code.ai
+   [org.apache.opennlp/opennlp-tools "2.4.0"]
+   [ai.djl/api "0.35.0"]
+   [ai.djl/model-zoo "0.35.0"]
+   [ai.djl.huggingface/tokenizers "0.35.0"]
+   [ai.djl.pytorch/pytorch-engine "0.35.0"]
+   [ai.djl.pytorch/pytorch-model-zoo "0.35.0"]
+
    ;; code.doc
    [markdown-clj/markdown-clj "1.11.8"] ;; not mustache
-
+   
    ;; code.java.compile
    [org.ow2.asm/asm "9.7.1"]
    
@@ -154,7 +162,7 @@
    [org.clojure/tools.logging "1.3.0"]
    [ch.qos.logback/logback-classic "1.5.6"]
    [org.clojure/data.json "2.5.1"]
-
+   
    ;; TESTS - std.object
    [org.eclipse.jgit/org.eclipse.jgit "5.13.0.202109080827-r"]]
   :global-vars {*warn-on-reflection* true}
@@ -169,6 +177,7 @@
              :repl {:injections [(try (require 'jvm.tool)
                                       (require '[std.lib :as h])
                                       (catch Throwable t (.printStackTrace t)))]}}
+  #_#_:repositories [["atlassian" "https://maven.artifacts.atlassian.com/"]]
   :resource-paths    ["resources" "src-build" "src-extra" "src-doc" "test-data" "test-code"]
   :java-source-paths ["src-java" "test-java"]
   :java-output-path  "target/classes"

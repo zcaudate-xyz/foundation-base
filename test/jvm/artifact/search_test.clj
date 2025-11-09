@@ -11,12 +11,15 @@
   => ("<.m2>/org/eclipse/aether/aether-api/1.1.0/aether-api-1.1.0.jar"))
 
 ^{:refer jvm.artifact.search/class-seq :added "3.0"}
-(comment "creates a sequence of class names"
-
-  (-> (all-jars '[org.eclipse.aether/aether-api "1.1.0"])
-      (class-seq)
-      (count))
-  => 128)
+(fact "creates a sequence of class names"
+  ^:hidden
+  
+  (class-seq
+   '[[org.eclipse.aether/aether-api "1.1.0"]])
+  
+  (class-seq
+   '[[classifier4j/classifier4j "0.6"]])
+  )
 
 ^{:refer jvm.artifact.search/search-match :added "3.0"}
 (fact "constructs a matching function for filtering"

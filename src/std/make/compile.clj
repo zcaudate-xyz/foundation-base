@@ -376,12 +376,18 @@
   "creates files based on entries"
   {:added "4.0"}
   [{:keys [instance] :as cfg} & directives]
-  (let [{:keys [sections default] :as m}  @instance
+  (let [{:keys [sections hooks default] :as m}  @instance
         m          (dissoc m :sections :triggers)
         directives (or (not-empty directives)
-                       [:default])]
-    (mapv (fn [directive]
-            [directive (compile-directive m (assoc sections
-                                                   :default default)
-                                          directive)])
-          directives)))
+                       [:default])
+        output   (mapv (fn [directive]
+                         [directive (compile-directive m (assoc sections
+                                                                :default default)
+                                                       directive)])
+                       directives)
+        _ (when (:post hooks)
+            (doseq [hook (:post hooks)]
+              (try ((:fn hook) m)
+                   (catch Throwable t
+                     (h/p "Hook " (:id hook) " failed to run")))))]
+    output))

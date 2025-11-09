@@ -174,6 +174,7 @@
     :main  {}
     :emit  {:native {:suppress true}
             :body  {:transform #'rt/return-transform}
+            :lang/jsx false
             :lang/imports :global}
     :json :full
     :encode :json

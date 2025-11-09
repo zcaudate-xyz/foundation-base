@@ -10,13 +10,18 @@
             [std.lib :as h]))
 
 (def +bindings+
-  '#{if let while while-let defn defmacro if-let if-some
-     binding with-bindings with-bindings* fn
-     with-local-vars with-redefs
-     with-open with-in-str with-precision})
+  '#{if let while ns 
+     if-let if-some if-not
+     when when-not when-some when-first
+     doto dotimes 
+     binding with-bindings with-bindings*
+     with-local-vars with-redefs for loop doseq
+     with-open with-in-str with-precision
+     extend extend-protocol extend-type})
 
 (def +pairing+
-  '#{case cond-> cond->> some-> some->>})
+  '#{case cond-> cond->> some-> some->>
+     as-> })
 
 (defn layout-hiccup-like
   "checks if form is hiccup structure"
@@ -159,7 +164,7 @@
         (cond ('#{fn} (first form))
               (layout-annotate-fn-anon form)
 
-              ('#{defn defmacro} (first form))
+              ('#{defn- defn defmacro} (first form))
               (layout-annotate-fn-named form)
               
               (+bindings+ (first form))

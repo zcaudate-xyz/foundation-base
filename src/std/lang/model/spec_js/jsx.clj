@@ -315,5 +315,5 @@
    {:grammar {:jsx false}})
   
   (emit/emit-main '(React.createElement "h1" {} "hello")
-             (std.lang/grammar:js)
-             {:grammar {:jsx false}}))
+                  (std.lang/grammar:js)
+                  {:grammar {:jsx false}}))
