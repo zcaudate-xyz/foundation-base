@@ -1,4 +1,4 @@
-(ns code.dev.server.page-main
+(ns code.dev.client.page-main
   (:require [std.lib :as h]
             [std.lang :as l]))
 

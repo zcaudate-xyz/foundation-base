@@ -156,6 +156,15 @@
                                         (layout-annotate-arglist args)
                                         rest)))))))))
 
+(defn layout-annotate-svg-path
+  [[tag attrs & more :as form]]
+  (let [path   (with-meta
+                 (str/split (:d attrs)
+                            #" ")
+                 {:tag :vector
+                  :spec {:columns 5}})]
+    (apply vector tag (assoc attrs :d path) more)))
+
 (defn layout-annotate
   "adds metadata annotation to form"
   {:added "4.0"}
@@ -175,6 +184,10 @@
                        more))
 
               :else form)
+
+        (and (vector? form)
+             (= :path (first form)))
+        (layout-annotate-svg-path form)
         
         :else form))
 

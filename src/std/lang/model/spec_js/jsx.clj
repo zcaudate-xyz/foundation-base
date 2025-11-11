@@ -32,9 +32,25 @@
                                               mopts))]
              (cons tag (drop 2 arr)))
            (h/error "MISSING TAG"))
+
+         (= :<> (first arr))
+         (cons :React.Fragment (rest arr))
          
          :else
          arr)))
+
+(defn jsx-standardise-params
+  [params]
+  (let [{:keys [class className]} params
+        className (or class
+                      className)
+        value  (if (vector? className)
+                 (str/join " " (map h/strn className))
+                 className)
+        params (if value
+                 (assoc params :className value)
+                 params)]
+    (dissoc params :class)))
 
 (defn jsx-arr-norm
   "normalises the jsx array
@@ -46,10 +62,9 @@
    (let [[tag & children] arr
          params? (first children)
          [tag params children] (cond (map? params?)
-                                     (let [{:keys [className] :as params} (h/map-keys jsx-key-fn params?)
-                                           params (if (vector? className)
-                                                    (assoc params :className (str/join " " (map h/strn className)))
-                                                    params)]
+                                     (let [params (->>  params?
+                                                        (h/map-keys jsx-key-fn)
+                                                        (jsx-standardise-params))]
                                        [tag params (rest children)])
                                      
                                      (set? params?)
@@ -112,7 +127,8 @@
            (let [groups (data/emit-table-group (first params))
                  svar   (filter is-sym groups)
                  mvar   (->> (filter vector? groups)
-                             (into {}))
+                             (into {})
+                             (jsx-standardise-params))
                  fvar   (remove (fn [x]
                                   (or (vector? x)
                                       (is-sym x)))
@@ -268,12 +284,11 @@
                                (volatile! form)
                                
                                (map? form)
-                               (h/map-keys (fn [k]
-                                             (if (keyword? k)
-                                               (name (jsx-key-fn k))
-                                               k))
-                                           form)
-                               
+                               (->> form
+                                    (jsx-standardise-params)
+                                    (h/map-keys (fn [k]
+                                                  (h/strn (jsx-key-fn k)))))
+
                                :else
                                form)
                          (catch Throwable t

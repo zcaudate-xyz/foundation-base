@@ -1,7 +1,7 @@
 (ns code.dev.server
   (:require [org.httpkit.server :as http]
             [code.dev.server.router :as router]
-            [code.dev.server.frontend :as frontend]
+            [code.dev.server.pages :as pages]
             [std.json :as json]
             [std.lib :as h]
             [std.lib.bin :as bin]
@@ -17,13 +17,46 @@
 (defonce ^:dynamic *instance*
   (atom nil))
 
+
+(defn from-html
+  [body]
+  (std.block/string
+   (std.block/layout
+    (std.lib.walk/postwalk
+     (fn [x]
+       (if (map? x)
+         (let [v (or (:class x)
+                     (:classname x))
+               v (if (string? v)
+                   [v]
+                   (vec (keep (fn [v]
+                                (not-empty (str/trim v)))
+                              v)))]
+           (-> x
+               (assoc :class v)
+               (dissoc :classname)))
+         x))
+     (std.html/tree body)))))
+
+(defn to-html
+  [body]
+  (std.html/html
+   (try 
+     (read-string body)
+     (catch Throwable t
+       ""))))
+
 (def dev-route-handler
   (router/router
    {#_#_#_#_
-    "GET /" (fn [req] (html/html (#'frontend/index-page)))
-    "GET /page/demo" (fn [req] (html/html (#'frontend/demo-page)))
-    "POST /api/translate/html"      (fn [req] (json/write
-                                               {:op :translate-html}))
+    "GET /" (fn [req] (html/html (#'pages/index-page)))
+    "GET /page/demo" (fn [req] (html/html (#'pages/demo-page)))
+    "POST /api/translate/from-html"  (fn [req]
+                                       (json/write
+                                        {:data (from-html (:body req))}))
+    "POST /api/translate/to-html"    (fn [req]
+                                       (json/write
+                                        {:data (to-html (:body req))}))
     "POST /api/translate/js"        (fn [req] (json/write
                                                {:op :translate-js}))
     "POST /api/translate/python"    (fn [req] (json/write
@@ -34,11 +67,9 @@
 (defn dev-handler
   [req]
   (let [{:keys [uri request-method ^org.httpkit.BytesInputStream body]} req
-        parsed-body (if body
-                      (json/read
-                       (String. (. body
-                                   (readAllBytes))))
-                      {})]
+        body (if body
+               (String. (. body (readAllBytes)))
+               {})]
     (or (#'dev-route-handler
          (assoc req :body body))
 
@@ -46,13 +77,13 @@
               {:status 200
                :headers {"Content-Type" "text/html"}
                :body    
-               (html/html (#'frontend/index-page))}
+               (#'pages/index-page)}
 
               (= uri "/page/demo")
               {:status 200
                :headers {"Content-Type" "text/html"}
                :body    
-               (html/html (#'frontend/demo-page))}
+               (#'pages/demo-page)}
 
               (= request-method :get)
               (router/serve-resource uri *public-path*)

@@ -83,13 +83,17 @@
   {:added "4.0"}
   [pairs
    {:keys [col-align
-           col-compact]
+           col-compact
+           col-sort]
     :or {col-align true}
     :as spec}
    {:keys [indents]
     :or {indents 0}
     :as opts}]
-  (let [width-fn     (if col-compact
+  (let [pairs        (if col-sort
+                       (sort-by first pairs)
+                       pairs)
+        width-fn     (if col-compact
                        base/block-width
                        #(construct/max-width % indents))
         pair-keys    (->> (map first pairs)
@@ -392,6 +396,7 @@
    (let [{:keys [col-align
                  columns]
           :as spec}  (merge {:columns 2
+                             :col-sort  false
                              :col-align false}
                             spec)
          nindents     (+ indents 1)

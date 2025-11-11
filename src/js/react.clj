@@ -1,7 +1,10 @@
 ^{:no-test true}
 (ns js.react
   (:require [std.lang :as l]
-            [std.lib :as h])
+            [std.lib :as h]
+            [std.string :as str]
+            [std.lib.walk :as walk]
+            [js.react.compile :as compile])
   (:refer-clojure :exclude [> ref derive sync]))
 
 (l/script :js
@@ -133,25 +136,31 @@
                                    :tag "js"}]
   [[renderNil render]])
 
-(defmacro.js LOG!
-  "logging with meta info"
+(defmacro.js
+  get
+  [state]
+  (list '. (symbol (str/camel-case (name state)))))
+
+(defmacro.js
+  set
+  [state]
+  (list '. (symbol (str/camel-case (str "set-" (name state))))))
+
+(defmacro.js ^{:style/indent 1}
+  ui
+  "shortcut for useEffect [var] (f var)"
   {:added "4.0"}
-  [& args]
-  (let [{:keys [label]} (meta  (l/macro-form))
-        {:meta/keys [fn line]} (k/meta:info-fn)]
-    (list 'React.useEffect
-          (list 'fn []
-                (clojure.core/apply list 'console.log
-                                    (clojure.core/str
-                                     label
-                                     " "
-                                     fn)
-                                    line "\n\n"
-                                    args))
-          (vec args))))
+  ([layout components]
+   (compile/ui-compile nil layout components)))
 
 ;;
 ;;
+
+(defn.js useStateFor
+  [controls key]
+  (var setterKey (+ "set" (k/decapitalize key)))
+  [(. controls [key])
+   (. controls [setterKey])])
 
 (defclass.js Try
   [:- -/Component]
