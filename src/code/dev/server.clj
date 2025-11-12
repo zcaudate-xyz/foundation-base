@@ -2,7 +2,9 @@
   (:require [org.httpkit.server :as http]
             [code.dev.server.router :as router]
             [code.dev.server.pages :as pages]
+            [code.heal :as heal]
             [std.json :as json]
+            [std.block :as block]
             [std.lib :as h]
             [std.lib.bin :as bin]
             [std.html :as html]
@@ -17,26 +19,29 @@
 (defonce ^:dynamic *instance*
   (atom nil))
 
-
 (defn from-html
   [body]
-  (std.block/string
-   (std.block/layout
-    (std.lib.walk/postwalk
-     (fn [x]
-       (if (map? x)
-         (let [v (or (:class x)
-                     (:classname x))
-               v (if (string? v)
-                   [v]
-                   (vec (keep (fn [v]
-                                (not-empty (str/trim v)))
-                              v)))]
-           (cond-> x
-             :then (dissoc :classname :class)
-             (seq v) (assoc :class v)))
-         x))
-     (std.html/tree body)))))
+  (let [full (std.html/tree
+              (str "<div>" body "</div>"))
+        full (if (= 2 (count full))
+               (second full)
+               full)
+        full (std.lib.walk/postwalk
+              (fn [x]
+                (if (map? x)
+                  (let [v (or (:class x)
+                              (:classname x))
+                        v (if (string? v)
+                            [v]
+                            (vec (keep (fn [v]
+                                         (not-empty (str/trim v)))
+                                       v)))]
+                    (cond-> x
+                      :then (dissoc :classname :class)
+                      (seq v) (assoc :class v)))
+                  x))
+              full)]
+    (block/string (block/layout full))))
 
 (defn to-html
   [body]
@@ -57,6 +62,10 @@
     "POST /api/translate/to-html"    (fn [req]
                                        (json/write
                                         {:data (to-html (:body req))}))
+
+    "POST /api/heal"                 (fn [req]
+                                       (json/write
+                                        {:data (heal/heal (:body req))}))
     "POST /api/translate/js"        (fn [req] (json/write
                                                {:op :translate-js}))
     "POST /api/translate/python"    (fn [req] (json/write

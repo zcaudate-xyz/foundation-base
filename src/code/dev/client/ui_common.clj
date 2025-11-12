@@ -8,15 +8,21 @@
              [xt.lang.base-client :as client]]
    :export [MODULE]})
 
+(def$.js ReactDiffViewer
+  window.ReactDiffViewer)
+
 (defn.js TabComponent
   [#{[controls
-      (:= key "current")
+      (:= controlKey "current")
       (:= pages [])]}]
   (var [current
         setCurrent] (:? controls
-                        (r/useStateFor
-                         controls key)
-                        (r/useState 0)))
+        (r/useStateFor
+         controls controlKey)
+        (r/useState 0)))
+  (when (k/nil? current)
+    (:= current 0)
+    (setCurrent 0))
   (var CurrentPage (. pages [current]))
   (return
    (r/ui [:ui/tab-layout
@@ -184,7 +190,6 @@
                                  [])))
   (var historyStr (JSON.stringify history))
   (r/watch [historyStr]
-    (console.log history)
     (. localStorage (setItem history-key
                              historyStr)))
   (return [history setHistory]))
@@ -275,6 +280,37 @@
       {:className "flex-1 grow bg-white overflow-y-auto"}
       right]]))
 
+(defn.js TextDiffViewer
+  [#{oldValue newValue}]
+  (var diff (. (. window Diff) (diffLines oldValue newValue)))
+  (console.log diff)
+  
+  (var diff-elements [])
+  (var line 1)
+  (k/for:array [[index part] diff]
+    (var className "") 
+    (cond (. part added)
+          (do (:= className "diff-added")
+              (k/arr-pushl diff-elements
+                           [:span {:key index :class ["bg-green-100"]}
+                            (+ "L" line ": " (. part value))])
+              (:= line (+ line (. part count))))
+
+          
+          (. part removed)
+          (do (:= className "diff-removed")
+              (k/arr-pushl diff-elements
+                           [:span {:key index :class ["bg-red-100"]}
+                            (+ "L" line ": " (. part value))]))
+
+          :else 
+          (:= line (+ line (. part count)))))
+  
+  (return
+    [:pre {:className "diff-viewer-pre"}
+     diff-elements]))
+
+
 (def +ui-common+
   `{:ui/button.icon [:ui/button
                      {:class   ["btn" "btn-sm"]}
@@ -297,6 +333,10 @@
     :ui/split-pane {:tag -/SplitPane
                     :children []}
 
+    :ui/diffviewer   {:tag -/ReactDiffViewer
+                      :children []}
+    :ui/diffview   {:tag -/TextDiffViewer
+                    :children []}
     :ui/editor {:tag -/CodeEditor
                 :view {:type :input
                        :key :onSubmit

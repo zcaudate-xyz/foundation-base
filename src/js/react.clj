@@ -169,9 +169,10 @@
 
 (defn.js useStateFor
   [controls key]
-  (var setterKey (+ "set" (k/decapitalize key)))
-  [(. controls [key])
-   (. controls [setterKey])])
+  (var setterKey (+ "set" (k/capitalize key)))
+  (return
+   [(. controls [key])
+    (. controls [setterKey])]))
 
 (defclass.js Try
   [:- -/Component]

@@ -32,6 +32,7 @@
     ;; codemirror
     [:link {:href "https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/codemirror.min.css"
             :rel "stylesheet" :type "text/css"}]
+
     [:script {:src "https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/codemirror.min.js"}]
     [:script {:src "https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/mode/javascript/javascript.min.js"}]
     [:script {:src "https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/mode/python/python.min.js"}]
@@ -65,6 +66,16 @@
     ;; react query
     [:script {:src "https://unpkg.com/react-query@3/dist/react-query.production.min.js"}]
 
+    ;; diff viewer
+    [:link {:href "https://unpkg.com/react-diff-viewer@3.1.1/dist/index.css"
+            :rel "stylesheet" :type "text/css"}]
+    [:script {:type "module"}
+     "import ReactDiffViewer from 'https://esm.sh/react-diff-viewer@3.1.1'"
+     "\n"
+     "window.ReactDiffViewer = ReactDiffViewer"]
+    ;; diff
+    [:script {:src "https://cdnjs.cloudflare.com/ajax/libs/jsdiff/5.1.0/diff.min.js"}]
+        
     [:style
      
      ".CodeMirror {
@@ -76,6 +87,16 @@
   */
   line-height: 1.0;
   min-height: 300px;
+}
+
+  /* This targets the diff viewer's preformatted text blocks */
+.DiffViewer pre {
+  font-size: 9px !important;
+}
+
+/* You may also need to target the line numbers */
+.DiffViewer table td:first-of-type {
+  font-size: 9px !important;
 }"]
     #_#_#_ ;; flowbite
     [:link   {:href "https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.css"
