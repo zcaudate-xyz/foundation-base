@@ -3,6 +3,7 @@
             [std.lang :as l]
             [std.html :as html]
             [std.string :as str]
+            [script.css :as css]
             [code.dev.client.page-demo :as demo]
             [code.dev.client.page-index :as index]
             [std.lang.base.runtime :as default]))
@@ -18,7 +19,8 @@
                            ns)
     :emit {:native {:suppress true}
            :lang/jsx false}
-    :layout :flat}))
+    :layout :full}))
+
 (defn make-page
   [{:keys [title
            body]}]
@@ -64,6 +66,7 @@
     [:script {:src "https://unpkg.com/react-query@3/dist/react-query.production.min.js"}]
 
     [:style
+     
      ".CodeMirror {
   font-size: 10px; /* Your desired font size */
   
@@ -71,7 +74,8 @@
     adjust the line-height along with the font-size 
     to keep the cursor and line numbers aligned.
   */
-  line-height: 1.0; 
+  line-height: 1.0;
+  min-height: 300px;
 }"]
     #_#_#_ ;; flowbite
     [:link   {:href "https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.css"
@@ -87,6 +91,18 @@
     [:script
      {:type "text/javascript"}
      (or body "")]]])
+
+(comment
+(css/generate-css
+      [[".CodeMirror" {:line-height "100%"
+                       :font-size "10px"
+
+                       #_#_:height "100%"
+                       :top 0
+                       :bottom 0
+                       #_#_#_#_:right 0
+                       :left 0}]])
+  )
 
 (defn index-page
   []

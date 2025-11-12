@@ -271,9 +271,10 @@
   {:added "4.0"}
   [val modulo]
   (var out (mod val modulo))
-  (return (:? (< out 0)
-              (+ out modulo)
-              out)))
+  (return
+   (:? (< out 0)
+       (+ out modulo)
+       out)))
 
 (defn.xt mod-offset
   "calculates the closet offset"

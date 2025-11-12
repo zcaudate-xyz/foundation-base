@@ -31,9 +31,14 @@
                  @(resolve inputs))
             inputs)
 
-        (list? inputs)
-        (eval inputs)
-
+        (h/form? inputs)
+        (eval
+         (map (fn [x]
+                (if (map? x)
+                  (list 'quote x)
+                  x))
+              inputs))
+        
         :else
         inputs))
 
@@ -66,9 +71,13 @@
   [inputs]
   (let [inputs (h/map-vals
                 (fn [tmpl]
-                  (if (vector? tmpl)
-                    (classify-tagged tmpl true)
-                    tmpl))
+                  (cond (vector? tmpl)
+                        (classify-tagged tmpl true)
+
+                        (map? tmpl)
+                        (merge {:props {}
+                                :children [:props/children]}
+                               tmpl)))
                 inputs)
         deps   (components-find-deps inputs)]
     (h/merge-nested inputs deps)))
@@ -93,6 +102,9 @@
                 (if-let [ns (namespace x)]
                   (= "props" ns)))
            (get props x)
+
+           #_#_(vector? x)
+           (vec (filter identity x))
            
            :else x))
    template))
@@ -130,14 +142,20 @@
     [tmpl body]))
 
 (defn getter-symbol
+  "creates the getter symbol"
+  {:added "4.0"}
   [kw]
   (symbol (str/camel-case (name kw))))
 
 (defn setter-symbol
+  "creates the setter symbol"
+  {:added "4.0"}
   [kw]
   (symbol (str/camel-case (str "set-" (name kw)))))
 
 (defn compile-walk-variables
+  "replace :var/<name> as react states"
+  {:added "4.0"}
   [form]
   (let [is-var (fn [x]
                  (and (keyword? x)
@@ -156,22 +174,54 @@
      form)))
 
 (defn compile-element-action-do
+  "does a do block"
+  {:added "4.0"}
   [form {:keys []}]
   (compile-walk-variables form))
 
 (defn compile-element-action-set
-  [var {:keys [from
+  "compiles the :%/set action"
+  {:added "4.0"}
+  [var {:keys [to
                transform]}]
   (list (setter-symbol var)
-        (cond->> (compile-walk-variables from)
+        (cond->> (compile-walk-variables to)
           transform (list transform))))
 
+(defn compile-element-action-inc
+  "compiles the :%/set action"
+  {:added "4.0"}
+  [var {:keys [val mod]}]
+  (list (setter-symbol var)
+        (cond->> (list '+  (getter-symbol var)
+                       (or val 1))
+          mod (list (h/$
+                      (fn [val]
+                        (return (:? (<= 0 val)
+                                    (mod val ~mod)
+                                    (+ (mod val ~mod) ~mod)))))))))
+
+(defn compile-element-action-dec
+  "compiles the :%/set action"
+  {:added "4.0"}
+  [var {:keys [val mod]}]
+  (list (setter-symbol var)
+        (cond->> (list '-  (getter-symbol var)
+                       (or val 1))
+          mod (list (h/$
+                      (fn [val]
+                        (return (:? (<= 0 val)
+                                    (mod val ~mod)
+                                    (+ (mod val ~mod) ~mod)))))))))
+
 (defn compile-element-action-set-async
-  [var {:keys [from
+  "compiles the :%/set-async action"
+  {:added "4.0"}
+  [var {:keys [to
                error
                pending
                transform]}]
-  (let [from (compile-walk-variables from)
+  (let [to (compile-walk-variables to)
         form-pending-start (if pending
                              (list (js.react.compile-components/setter-symbol pending) true))
         form-pending-end   (if pending
@@ -188,7 +238,7 @@
                                         (~(js.react.compile-components/setter-symbol var) res))))]
     (h/$ (do ~@(if pending
                  [form-pending-start])
-             (. ~from
+             (. ~to
                 ~@(if transform
                     [form-transform])
                 ~form-set
@@ -198,6 +248,8 @@
                     [form-pending-end]))))))
 
 (defn compile-element-actions
+  "compiles the element actions"
+  {:added "4.0"}
   [actions]
   (cond (list? actions)
         (compile-walk-variables actions)
@@ -215,6 +267,16 @@
                                (:%/set-async action)
                                action)
 
+                              (:%/inc action)
+                              (compile-element-action-inc
+                               (:%/inc action)
+                               action)                              
+                              
+                              (:%/dec action)
+                              (compile-element-action-dec
+                               (:%/dec action)
+                               action)                              
+
                               (:%/do action)
                               (compile-element-action-do
                                (:%/do action)
@@ -222,19 +284,28 @@
                       actions))))
 
 (defn compile-element-directives
+  "compiles element directives"
+  {:added "4.0"}
   [view props]
   (case (:type view)
-    :input  (let [{:keys [get set]} view]
-              (if (:%/value props)
-                (-> props
-                    (dissoc :%/value)
-                    (assoc get (getter-symbol (:%/value props))
-                           set (setter-symbol (:%/value props))))))
+    :input  (let [{:keys [get set key]} view]
+              (cond-> props
+                (:%/value props) (-> (dissoc :%/value)
+                                     (assoc (:key get) (cond->> (getter-symbol (:%/value props))
+                                                         (:transform get) (list (compile-walk-variables (:transform get))))
+                                            (:key set) (let [set-fn  (setter-symbol (:%/value props))]
+                                                         (if (:transform set)
+                                                           (h/$ (fn [input]
+                                                                  (~set-fn (~(:transform set)
+                                                                            input))))
+                                                           set-fn))))
+                (:%/action props) (-> (dissoc :%/action)
+                                       (assoc key (compile-element-actions (:%/action props))))))
     :action (let [{:keys [key]} view]
-              (if (:%/actions props)
+              (if (:%/action props)
                 (-> props
-                    (dissoc :%/actions)
-                    (assoc key (compile-element-actions (:%/actions props))))))))
+                    (dissoc :%/action)
+                    (assoc key (compile-element-actions (:%/action props))))))))
 
 (defn compile-element
   "expands the template"
@@ -244,7 +315,8 @@
                 props
                 children]} (classify-tagged elem false)
         tmpl (get components tag)
-        ns-props (find-namespaced-props (:children tmpl))
+        ns-props (find-namespaced-props [(:props tmpl)
+                                         (:children tmpl)])
         [tmpl-props
          body-props]  (get-tmpl-props props ns-props)
         
@@ -253,7 +325,10 @@
                       (:view tmpl)
                       body-props)
                      body-props)
-        body (cons (merge  (:props tmpl) body-props)
+        body (cons (compile-replace (merge  (:props tmpl)
+                                            body-props)
+                                    tmpl-props
+                                    [])
                    (compile-replace (:children tmpl)
                                     tmpl-props
                                     children))]

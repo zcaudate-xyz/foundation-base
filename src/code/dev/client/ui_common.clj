@@ -32,12 +32,14 @@
            (:? (k/is-function? CurrentPage.content)
                [:% CurrentPage.content]
                CurrentPage.content)]]
-     {:ui/tab-layout    [:div]
+     {:ui/tab-layout    [:div
+                         {:class ["flex" "flex-col" "grow"]}]
       :ui/tab-list      [:div
                          {:role      "tablist"
                           :className ["tabs tabs-border"]}]
       :ui/tab-action    [:div {:role      "tab"}]
-      :ui/tab-content   [:div]})))
+      :ui/tab-content   [:div
+                         {:class ["flex" "flex-col"  "grow" "py-4" "px-2"]}]})))
 
 (def.js languageToMode
   {:javascript "javascript"
@@ -49,35 +51,47 @@
 (defn.js CodeEditor
   [#{[value
       onChange
+      onSubmit
       (:= language "javascript")
       (:.. props)]}]
   (var textareaRef (r/useRef nil))
   (var editorRef (r/useRef nil)) 
-
+  (var onSubmitRef   (r/useRef onSubmit))
+  (r/watch [onSubmit]
+    (:= onSubmitRef.current onSubmit))
+  
   (r/useEffect
-    (fn []
-      (if (or (== (typeof window.CodeMirror) "undefined")
-              (k/nil? (. textareaRef current)))
-        (return nil))
+   (fn []
+     (if (or (== (typeof window.CodeMirror) "undefined")
+             (k/nil? (. textareaRef current)))
+       (return nil))
+     
+     (var currentMode (. -/languageToMode [language]))
 
-      (var currentMode (. -/languageToMode [language]))
+     (var handleSubmit (fn [cm]
+                         (if onSubmitRef.current (onSubmitRef.current (. cm (getValue))))))
+      
+     (var editor (window.CodeMirror.fromTextArea
+                  (. textareaRef current)
+                  {:lineNumbers true
+                   :lineWrapping false
+                   :mode currentMode
+                   :extraKeys
+                   {"Ctrl-Enter" handleSubmit
+                    "Cmd-Enter"  handleSubmit}}))
 
-      (var editor (window.CodeMirror.fromTextArea (. textareaRef current)
-                                                    {:lineNumbers true
-                                                     :mode currentMode}))
+     (:= (. editorRef current) editor)
+     (. editor (setValue (or value "")))
 
-      (:= (. editorRef current) editor)
-      (. editor (setValue (or value "")))
+     (. editor (on "change"
+                   (fn [instance]
+                     (return (onChange (. instance (getValue)))))))
 
-      (. editor (on "change"
-                    (fn [instance]
-                      (return (onChange (. instance (getValue)))))))
-
-      (return
-        (fn []
-          (if (. editorRef current)
-            (return (. (. editorRef current) (toTextArea)))))))
-    [])
+     (return
+      (fn []
+        (if (. editorRef current)
+          (return (. (. editorRef current) (toTextArea)))))))
+   [])
 
   
   (r/useEffect
@@ -99,6 +113,8 @@
    [:textarea
     #{[:ref textareaRef
        (:.. props)]}]))
+
+
 
 (defn.js Icon
   [#{[name color size strokeWidth className (:.. rest)]}]
@@ -168,13 +184,124 @@
                                  [])))
   (var historyStr (JSON.stringify history))
   (r/watch [historyStr]
+    (console.log history)
     (. localStorage (setItem history-key
                              historyStr)))
   (return [history setHistory]))
 
 
+(defn.js SplitPane
+  [#{left right}]
+  ;; State for the left panel's width.
+  ;; We use `nil` to signify "use the default CSS width (w-1/2)".
+  (var [leftWidth setLeftWidth] (r/useState nil))
 
+  ;; Ref for the main container to calculate bounds
+  (var containerRef (r/useRef nil))
+  
+  ;; 1. --- Mouse Move Handler ---
+  ;; This is wrapped in `useCallback` so it can be safely added
+  ;; and removed from the document's event listeners.
+  (var handleMouseMove
+    (r/useCallback
+     (fn [e]
+       ;; Bail out if we don't have the container ref yet
+       (if (k/nil? (. containerRef current))
+         (return nil))
 
+       (var containerRect (. (. containerRef current) (getBoundingClientRect)))
+
+       ;; Calculate new width from the mouse's X position
+       (var newLeftWidth (- (. e clientX) (. containerRect left)))
+
+       ;; Optional: Add constraints for min/max width
+       (var minWidth 100) ;; e.g., 100px minimum
+       (var maxWidth (- (. containerRect width) 100)) ;; e.g., 100px for right panel
+
+       (if (< newLeftWidth minWidth)
+         (:= newLeftWidth minWidth))
+       (if (> newLeftWidth maxWidth)
+         (:= newLeftWidth maxWidth))
+
+       ;; Set the new width in state
+       (setLeftWidth newLeftWidth))
+     [])) ;; `setLeftWidth` is stable, so no dependencies needed.
+  
+  ;; 2. --- Mouse Up Handler ---
+  ;; This cleans up the global event listeners.
+  (var handleMouseUp
+    (r/useCallback
+     (fn []
+       (. document (removeEventListener "mousemove" handleMouseMove))
+       (. document (removeEventListener "mouseup" handleMouseUp)))
+     [handleMouseMove]))
+
+  ;; 3. --- Mouse Down Handler ---
+  ;; This is attached to the divider. It kicks off the whole process.
+  (var handleMouseDown
+    (fn [e]
+      ;; Prevent default text selection
+      (. e (preventDefault))
+
+      ;; Add global listeners
+      (. document (addEventListener "mousemove" handleMouseMove))
+      (. document (addEventListener "mouseup" handleMouseUp))))
+
+  (return
+    [:div
+     {:ref containerRef ;; Attach the ref to the main container
+      :className "flex w-full overflow-hidden bg-gray-200"}
+
+     ;; LEFT PANEL
+     ;; - It uses the default 'w-1/2' class only if `leftWidth` is nil.
+     ;; - Once dragging starts, its width is set via the `style` prop.
+     [:div
+      {:className (+ "bg-white overflow-y-auto w-1/2"
+                     #_(:? (k/nil? leftWidth) "w-1/2" "flex-1"))
+       #_#_:style (:? (k/not-nil? leftWidth)
+                  {:width (+ leftWidth "px")} {})}
+      left]
+
+     ;; DIVIDER
+     ;; - The `onMouseDown` handler starts the drag.
+     [:div
+      {:onMouseDown handleMouseDown
+       :className "w-3 bg-gray-200 cursor-col-resize hover:bg-gray-200"}]
+
+     ;; RIGHT PANEL
+     ;; - 'flex-1' is the magic. It automatically fills the
+     ;;   remaining space left by the other two elements.
+     [:div
+      {:className "flex-1 grow bg-white overflow-y-auto"}
+      right]]))
+
+(def +ui-common+
+  `{:ui/button.icon [:ui/button
+                     {:class   ["btn" "btn-sm"]}
+                     [:ui/icon
+                      {:name :props/icon
+                       :size  16}]]
+
+    :ui/html       {:tag :div
+                    :props {:dangerouslySetInnerHTML
+                            {"__html" :props/input}}}
+    
+    :ui/button     {:tag :a
+                    :props {:class   ["btn" "btn-sm"]}
+                    :view {:type :action
+                           :key :onClick}}
+    
+    :ui/icon       {:tag -/Icon
+                    :children []}
+
+    :ui/split-pane {:tag -/SplitPane
+                    :children []}
+
+    :ui/editor {:tag -/CodeEditor
+                :view {:type :input
+                       :key :onSubmit
+                       :get {:key :value}
+                       :set {:key :onChange}}}})
 
 
 

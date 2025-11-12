@@ -151,7 +151,18 @@
   "shortcut for useEffect [var] (f var)"
   {:added "4.0"}
   ([layout components]
-   (compile/ui-compile nil layout components)))
+   (compile/compile-layout layout components)))
+
+(defmacro.js
+  return-ui
+  "shortcut for useEffect [var] (f var)"
+  {:added "4.0"}
+  ([{:keys [layout
+            states
+            actions
+            components]
+     :as input}]
+   (compile/compile-full input)))
 
 ;;
 ;;

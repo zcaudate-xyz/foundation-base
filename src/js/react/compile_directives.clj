@@ -12,21 +12,22 @@
                 props
                 children]} (c/classify-tagged elem false)
         pclasses (if (string? (:class props))
-                  (str/split (:class props) #" ")
-                  (:class props))
+                   (str/split (:class props) #" ")
+                   (:class props))
         tclasses (map (fn [[k v]]
                         (cond (boolean? v)
                               (name k)
                               
                               :else
                               (str (name k) "-" (h/strn v))))
-                      (dissoc props :style :class))
+                      (dissoc (h/unqualified-keys props) :style :class))
         ;; media query classes
         qclasses []]
-    [:div (merge {:class (vec (concat classes
-                                      pclasses
-                                      tclasses))}
-                 (select-keys props [:style]))]))
+    (apply vector :div (merge {:class (vec (concat classes
+                                                   pclasses
+                                                   tclasses))}
+                              (select-keys props [:style]))
+           children)))
 
 (defn compile-directives
   "templates the control directives"
@@ -34,9 +35,9 @@
   [elem components]
   (let [[op control & more] elem]
     (case (name op)
-      "pad" (compile-ui-tailwind elem ["grow"])
-      "v"   (compile-ui-tailwind elem ["flex" "flex-col" "grow"])
-      "h"   (compile-ui-tailwind elem ["flex" "flex-row" "grow"])
+      "pad" (compile-ui-tailwind elem ["flex" "grow"])
+      "v"   (compile-ui-tailwind elem ["flex" "flex-col"])
+      "h"   (compile-ui-tailwind elem ["flex" "flex-row"])
       "for" (let [[[idx val] array]  control]
               (h/$
                (. ~array (map (fn [~val ~idx]

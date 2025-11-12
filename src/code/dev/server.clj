@@ -32,9 +32,9 @@
                    (vec (keep (fn [v]
                                 (not-empty (str/trim v)))
                               v)))]
-           (-> x
-               (assoc :class v)
-               (dissoc :classname)))
+           (cond-> x
+             :then (dissoc :classname :class)
+             (seq v) (assoc :class v)))
          x))
      (std.html/tree body)))))
 

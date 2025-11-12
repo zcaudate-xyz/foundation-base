@@ -113,7 +113,7 @@
     :main   {}
    :emit   {:body  {:transform #'rt/return-transform}
             :lang/imports :global}
-    :json   :full
+   :json   :full
    :encode :json ;; default
    :timeout 2000})
 

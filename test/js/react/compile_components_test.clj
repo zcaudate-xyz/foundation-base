@@ -210,15 +210,19 @@
 
   (c/compile-element-directives
    {:type :input
-    :get :value
-    :set :onChange}
+    :get {:key :value}
+    :set {:key :onChange
+          :transform '(fn [e]
+                        (return
+                         e.target.value))}}
    {:%/value :var/output})
-  => '{:value output, :onChange setOutput}
+  => '{:value output,
+       :onChange (fn [input] (setOutput ((fn [e] (return e.target.value)) input)))}
 
   (c/compile-element-directives
    {:type :action
     :key :onPress}
-   '{:%/actions [{:%/set-async :var/output
+   '{:%/action [{:%/set-async :var/output
                   :from (async-fn :var/dsl-code)
                   :pending :var/pending
                   :error   :var/error
@@ -262,20 +266,40 @@
    c/compile-element)
   => [:div {} [:ui/text {:name "hello"} [:a]]]
 
-
   (c/compile-element-loop
    [:ui/toolbar.history-clear]
    (c/components-expand
     {:ui/toolbar.history-clear
      [:ui/button
-      {:%/actions [{:%/set :var/combined
+      {:%/action [{:%/set :var/combined
                     :from 'i}]}
       [:ui/text ]]
-     :ui/button    [:button
-                    {:class ["p-8"]}]
+     :ui/button    {:tag :button
+                    :props {:class ["p-8"]}
+                    :children [:props/children]
+                    :view {:type :action
+                           :key :onClick}}
      :ui/container [:div]
      :ui/text      [:p]})
    c/compile-element)
-  => '[:button {:class ["p-8"],
-               :%/actions [{:%/set :var/combined, :from i}]}
-      [:ui/text]])
+  => '[:button
+       {:class ["p-8"],
+        :onClick (fn [] (setCombined i))} [:ui/text]]
+
+
+
+  (c/compile-element-loop
+   [:ui/toolbar.history-clear
+    {:%/actions [{:%/set :var/combined
+                  :from 'i}]}]
+   (c/components-expand
+    {:ui/toolbar.history-clear [:ui/button
+                                [:ui/text ]]
+     :ui/button    {:tag :button
+                    :props {:class ["p-8"]}
+                    :children [:props/children]
+                    :view {:type :action
+                           :key :onClick}}
+     :ui/container [:div]
+     :ui/text      [:p]})
+   c/compile-element))
