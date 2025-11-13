@@ -231,6 +231,7 @@
                              import
                              document
                              window
+                             navigator
                              screen
                              location
                              localStorage

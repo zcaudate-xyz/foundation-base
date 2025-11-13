@@ -283,8 +283,6 @@
 (defn.js TextDiffViewer
   [#{oldValue newValue}]
   (var diff (. (. window Diff) (diffLines oldValue newValue)))
-  (console.log diff)
-  
   (var diff-elements [])
   (var line 1)
   (k/for:array [[index part] diff]
@@ -307,8 +305,8 @@
           (:= line (+ line (. part count)))))
   
   (return
-    [:pre {:className "diff-viewer-pre"}
-     diff-elements]))
+   [:pre {:className "diff-viewer-pre"}
+    diff-elements]))
 
 
 (def +ui-common+

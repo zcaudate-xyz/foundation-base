@@ -21,6 +21,7 @@
            :lang/jsx false}
     :layout :full}))
 
+
 (defn make-page
   [{:keys [title
            body]}]
@@ -32,7 +33,7 @@
     ;; codemirror
     [:link {:href "https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/codemirror.min.css"
             :rel "stylesheet" :type "text/css"}]
-
+    
     [:script {:src "https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/codemirror.min.js"}]
     [:script {:src "https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/mode/javascript/javascript.min.js"}]
     [:script {:src "https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/mode/python/python.min.js"}]
@@ -40,17 +41,27 @@
     [:script {:src "https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/mode/css/css.min.js"}]
     [:script {:src "https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/mode/htmlmixed/htmlmixed.min.js"}]
     [:script {:src "https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/mode/sql/sql.min.js"}]
-    [:script {:src "https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/mode/clojure/clojure.min.js"}]    
+    [:script {:src "https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/mode/clojure/clojure.min.js"}]
+    [:script {:src "https://unpkg.com/@xtalk/clojure-mode@0.3.7/dist/clojure-mode.umd.js"}]    
+
+    ;; clojure-mode
+    [:script {:src "/js/clojure_mode.umd.js"}]
+    
+    ;; puck
+    [:script {:src "/js/puck.umd.js"}]
+
+    ;; radix
+    [:script {:src "/js/radix.umd.js"}]    
     
     ;; daisyui
     [:link {:href "https://cdn.jsdelivr.net/npm/daisyui@5"
             :rel "stylesheet" :type "text/css"}]
     [:link {:href "https://cdn.jsdelivr.net/npm/daisyui@5/themes.css"
             :rel "stylesheet" :type "text/css"}]    
-    
+
     ;; tailwind
     [:script {:src "https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"}]
-
+    
     ;; lucide
     [:script {:src "https://unpkg.com/lucide/dist/umd/lucide.min.js"}]
     
@@ -63,19 +74,13 @@
     [:script {:src "https://cdn.jsdelivr.net/npm/zod@3/lib/index.umd.js"}]
     [:script {:src "https://cdn.jsdelivr.net/npm/@hookform/resolvers/zod/dist/zod.umd.js"}]
     
+    
     ;; react query
     [:script {:src "https://unpkg.com/react-query@3/dist/react-query.production.min.js"}]
 
-    ;; diff viewer
-    [:link {:href "https://unpkg.com/react-diff-viewer@3.1.1/dist/index.css"
-            :rel "stylesheet" :type "text/css"}]
-    [:script {:type "module"}
-     "import ReactDiffViewer from 'https://esm.sh/react-diff-viewer@3.1.1'"
-     "\n"
-     "window.ReactDiffViewer = ReactDiffViewer"]
     ;; diff
     [:script {:src "https://cdnjs.cloudflare.com/ajax/libs/jsdiff/5.1.0/diff.min.js"}]
-        
+    
     [:style
      
      ".CodeMirror {
@@ -98,20 +103,44 @@
 .DiffViewer table td:first-of-type {
   font-size: 9px !important;
 }"]
-    #_#_#_ ;; flowbite
-    [:link   {:href "https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.css"
-              :rel "stylesheet"}]
-    [:script {:src "https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.js"}]
-    [:script {:src "https://unpkg.com/flowbite-react@0.9.0/dist/flowbite-react.umd.js"}]
+   #_#_#_ ;; flowbite
+   [:link   {:href "https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.css"
+             :rel "stylesheet"}]
+   [:script {:src "https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.js"}]
+   [:script {:src "https://unpkg.com/flowbite-react@0.9.0/dist/flowbite-react.umd.js"}]
     
-    #_#_ ;; babel
-    [:script {:src "https://unpkg.com/@babel/standalone/babel.min.js"}]
-    [:script {:type "text/babel"}]]
-   [:body
-    [:div {:id "root"}]
-    [:script
-     {:type "text/javascript"}
-     (or body "")]]])
+    ;; babel
+    #_[:script {:src "https://unpkg.com/@babel/standalone/babel.min.js"}]]
+  [:body
+   [:div {:id "root"}]
+   [:script
+    {:type "text/javascript"}
+    (or body "")]
+   
+   #_[:script {:type "text/babel"
+              :data-type "module"}
+     "// Import modules using the names defined in the Import Map
+    import React from 'react';
+    import ReactDOM from 'react-dom/client';
+    import Puck from '@measured/puck'; 
+
+    const config = {
+        components: {
+            Heading: {
+                render: ({ title }) => <h1>{title}</h1>,
+                fields: { title: { type: 'text' } },
+                defaultData: { title: 'Puck Configured' }
+            }
+        }
+    };
+    
+    console.log(Puck,'hello');
+    function App() {
+        return <Puck config={config} />;
+    }
+
+    const root = ReactDOM.createRoot(document.getElementById('root'));
+    root.render(<App />);"]]])
 
 (comment
 (css/generate-css
