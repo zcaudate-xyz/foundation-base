@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8" />
+  <title>React In HTML Demo</title>
+  
+  <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+</head>
+
+<body>
+
+  <h2>React In HTML Demo</h2>
+
+  <div id="root"></div>
+
+  <script type="text/babel">
+    
+    // Standard React code... with JSX!
+    
+    // A simple JSX component
+    function Greeter(props) {
+      return <h1>Hello, {props.name}! This is JSX.</h1>;
+    }
+
+    // You can define a more complex component
+    function Counter() {
+      const [count, setCount] = React.useState(0);
+
+      return (
+        <div>
+          <p>You clicked {count} times</p>
+          <button onClick={() => setCount(count + 1)}>
+            Click me
+          </button>
+        </div>
+      );
+    }
+    
+    // This is the "app" component that combines the others
+    function App() {
+      return (
+        <div>
+          <Greeter name="User" />
+          <Counter />
+        </div>
+      );
+    }
+
+    // Find the root element
+    const rootElement = document.getElementById('root');
+    
+    // Create a React root
+    const root = ReactDOM.createRoot(rootElement);
+    
+    // Render your App component into the root
+    root.render(<App />);
+
+  </script>
+
+</body>
+</html>
