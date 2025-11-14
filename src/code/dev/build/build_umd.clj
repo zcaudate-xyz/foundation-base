@@ -2,12 +2,52 @@
   (:require [std.make :as make :refer [def.make]]
             [std.lib :as h]
             [std.lang :as l]
-            [std.fs :as fs]))
+            [std.fs :as fs]
+            [code.heal :as heal]
+            [std.text.diff :as diff]))
+
+(def +packages+
+  {:puck
+   {:package "@measured/puck"
+    :input    "@measured/puck/dist/index.js"
+    :module  "Puck"
+    :file    "puck.umd.js"}
+   :clojure-mode
+   {:package "@nextjournal/clojure-mode"
+    :input    "@nextjournal/clojure-mode/dist/nextjournal/clojure_mode.mjs"
+    :module  "ClojureMode"
+    :file    "clojure-mode.umd.js"}
+   :react-live
+   {:package "react-live"
+    :input    "react-live/dist/index.js"
+    :module  "ReactLive"
+    :file    "react-live.umd.js"}
+   :radix-base
+   {:package "radix-ui"
+    :input    "radix-ui/dist/index.js"
+    :module  "RadixBase"
+    :file    "radix-base.umd.js"}
+   :radix-main
+   {:package "@radix-ui/themes"
+    :input    "@radix-ui/themes/dist/esm/index.js"
+    :module  "RadixMain"
+    :file    "radix-main.umd.js"}
+   :recharts
+   {:package "recharts"
+    :input    "recharts/es6/index.js"
+    :module  "Recharts"
+    :file    "recharts.umd.js"}
+   :lexical
+   {:package "lexical"
+    :input    "lexical/Lexical.prod.mjs"
+    :module  "Lexical"
+    :file    "lexical.umd.js"}
+   })
 
 (def INDEXJS
   (l/emit-as
    :js
-   '[(def fs (require "fs")) ;
+   '[(def fs (require "fs"))            ;
      (def webpack (require "webpack"))
      (defn ^{:- [:async]} generateUmdBuildString
        [entryPath moduleName outputPath]
@@ -17,21 +57,7 @@
               :mode "production"
               :output {:library {:type "umd"
                                  :name moduleName}
-                       :filename outputPath}
-              :plugins
-              [(new webpack.DefinePlugin
-                    {"process.browser" true})]
-              :target "web"
-              
-              :module
-              {:rules
-               [{:test    #"\\.js$"
-                 :enforce "pre"
-                 :use     [{:loader  "string-replace-loader"
-                            :options {:search  "[\u0080-\uFFFF]"
-                                      :replace ""
-                                      :flags   "g"}}
-                           "babel-loader"]}]}}))
+                       :filename outputPath}}))
        (return
         (new Promise
              (fn [resolve reject]
@@ -41,11 +67,8 @@
                       (if (or err (. stats (hasErrors)))
                         (do
                           (var errorDetails (:? stats (. stats (toJson) errors) err))
-                          (console.log "FAILED" (JSON.stringify errorDetails))
-                          (reject (new Error (+ "Webpack compilation failed: " (JSON.stringify errorDetails))))
-                          (return nil))
+                          (reject (new Error (+ "Webpack compilation failed:" (JSON.stringify errorDetails)))))
                         (try
-                          (console.log "SUCCESS")
                           (resolve true)
                           (catch readError
                               (reject
@@ -80,7 +103,6 @@
                (process.exit 1)))))
      (main)]))
 
-
 (def.make BUILD_UMD
   {:tag       "code.dev.build-umd"
    :build     ".build/code-dev-build-umd"
@@ -92,21 +114,20 @@
                         "main" "index.js",
                         "dependencies" {"memory-fs" "^0.3.0",
                                         "webpack" "^5.90.0",
-                                        "webpack-cli" "^5.1.4"
-                                        "string-replace-loader" "^3.2.0"}}}
+                                        "webpack-cli" "^5.1.4"}}}
               {:type :raw
                :file "index.js"
                :main [INDEXJS]}]})
 
 (defn initialise
   []
-  (h/sh {:root ".build/code-dev-build-umd"
-         :args ["npm" "install"]}))
+  (h/p (h/sh {:root ".build/code-dev-build-umd"
+              :args ["npm" "install"]})))
 
 (defn generate-umd-install
   [package]
-  (h/sh {:root ".build/code-dev-build-umd"
-         :args ["npm" "install" package]}))
+  (h/p (h/sh {:root ".build/code-dev-build-umd"
+              :args ["npm" "install" package]})))
 
 (defn generate-umd
   [input-file umd-module umd-file]
@@ -115,7 +136,7 @@
       (fs/move (str ".build/code-dev-build-umd/dist/" umd-file)
                (str "resources/assets/code.dev/public/js/" umd-file))))
 
-(defn generate
+(defn generate-entry
   [{:keys [package
            input
            module
@@ -123,37 +144,43 @@
   (do (generate-umd-install package)
       (generate-umd input module file)))
 
-(def +packages+
-  {:puck
-   {:package "@measured/puck"
-    :input    "@measured/puck/dist/index.js"
-    :module  "Puck"
-    :file    "puck.umd.js"}
-   :clojure-mode
-   {:package "@nextjournal/clojure-mode"
-    :input    "@nextjournal/clojure-mode/dist/nextjournal/clojure_mode.mjs"
-    :module  "ClojureMode"
-    :file    "clojure_mode.umd.js"}
-   :radix-ui
-   {:package "@nextjournal/clojure-mode"
-    :input    "@nextjournal/clojure-mode/dist/nextjournal/clojure_mode.mjs"
-    :module  "ClojureMode"
-    :file    "clojure_mode.umd.js"}})
+(defn list-packages
+  []
+  (keys +packages+))
+
+(defn build-package
+  [package-key]
+  (generate-entry
+   (get +packages+ package-key)))
+
+
+
+
 
 (comment
-  (do(make/build-all BUILD_UMD)
-     (generate (:clojure-mode
-                +packages+)))
+
+  (build-package :puck)
+  (build-package :lexical)
+  (build-package :clojure-mode)
+  (build-package :react-live)
+  (build-package :radix-base)
+  (build-package :radix-main)
   
-  (generate (:puck
-             +packages+))
+    )
+
+
+(comment
+
+  (doseq [f  (keys
+              (fs/list "/Users/chris/Development/greenways/Szncampaigncenter/src-dsl"
+                       {:include [".clj"]}))]
+    (let [_       (h/p f)
+          input   (slurp f)
+          output  (heal/heal input)
+          layout  (try (std.block/parse-root output)
+                       (catch :FAILED))]
+      (h/p (diff/->string (diff/diff input output)))))
   
-  
-  (generate-umd-install "@measured/puck")
-  
-  (generate-umd "@measured/puck/dist/index.js"
-                "Puck"
-                "puck.umd.js")
   )
 
 
@@ -161,6 +188,25 @@
 
 
 (comment
+
+  (generate-entry (:recharts
+                   +packages+))
+  
+  (generate-entry (:puck
+                   +packages+))
+  (generate-entry (:radix-base
+                   +packages+))
+  
+  (generate-entry (:radix-main
+                   +packages+))
+  
+  
+  (generate-umd-install "@measured/puck")
+  
+  (generate-umd "@measured/puck/dist/index.js"
+                "Puck"
+                "puck.umd.js")
+
   
   (make/build-all BUILD_UMD)
   (h/sh {:root ".build/code-dev-build-umd"

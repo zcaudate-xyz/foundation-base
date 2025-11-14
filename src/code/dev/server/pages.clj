@@ -4,8 +4,9 @@
             [std.html :as html]
             [std.string :as str]
             [script.css :as css]
-            [code.dev.client.page-demo :as demo]
-            [code.dev.client.page-index :as index]
+            [code.dev.client.page-demo :as page-demo]
+            [code.dev.client.page-index :as page-index]
+            [code.dev.client.page-tasks :as page-tasks]
             [std.lang.base.runtime :as default]))
 
 (defn emit-main
@@ -21,14 +22,19 @@
            :lang/jsx false}
     :layout :full}))
 
-
 (defn make-page
   [{:keys [title
            body]}]
   [:html
    [:head
     [:meta {:charset "UTF-8"}]
+    [:meta {:http-equiv "Content-Security-Policy"
+            :content    "script-src self https:  http: 'unsafe-eval' 'unsafe-inline';"}]
+    
     [:title title]
+
+    ;; babel
+    #_[:script {:src "https://unpkg.com/@babel/standalone/babel.min.js"}]
     
     ;; codemirror
     [:link {:href "https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/codemirror.min.css"
@@ -45,13 +51,28 @@
     [:script {:src "https://unpkg.com/@xtalk/clojure-mode@0.3.7/dist/clojure-mode.umd.js"}]    
 
     ;; clojure-mode
-    [:script {:src "/js/clojure_mode.umd.js"}]
-    
+    [:script {:src "/js/clojure-mode.umd.js"}]
+
     ;; puck
-    [:script {:src "/js/puck.umd.js"}]
+    [:script {:type "module"}
+     "import * as Puck from 'https://cdn.jsdelivr.net/npm/@measured/puck@0.20.2/+esm';\n
+      window.Puck = Puck"]
+    #_[:script {:src "/js/puck.umd.js"}]
 
     ;; radix
-    [:script {:src "/js/radix.umd.js"}]    
+    [:script {:type "module"}
+     "import * as RadixMain from 'https://cdn.jsdelivr.net/npm/@radix-ui/themes@3.2.1/+esm';\n
+      console.log(RadixMain)
+      window.RadixMain = RadixMain"]
+    #_[:script {:src "/js/radix-main.umd.js"}]
+
+    ;; react-live
+    [:script {:type "module"}
+     "import ReactLive from 'https://cdn.jsdelivr.net/npm/react-live@4.1.8/+esm';\n
+      window.ReactLive = ReactLive"]
+    
+    ;; recharts
+    [:script {:src "/js/recharts.umd.js"}]
     
     ;; daisyui
     [:link {:href "https://cdn.jsdelivr.net/npm/daisyui@5"
@@ -64,6 +85,8 @@
     
     ;; lucide
     [:script {:src "https://unpkg.com/lucide/dist/umd/lucide.min.js"}]
+    [:script
+     "window.Lucide = window.lucide;"]
     
     ;; react
     [:script {:src "https://unpkg.com/react@18/umd/react.development.js", :crossorigin ""}]
@@ -72,14 +95,17 @@
     ;; react hook form
     [:script {:src "https://unpkg.com/react-hook-form@7/dist/index.umd.js"}]
     [:script {:src "https://cdn.jsdelivr.net/npm/zod@3/lib/index.umd.js"}]
-    [:script {:src "https://cdn.jsdelivr.net/npm/@hookform/resolvers/zod/dist/zod.umd.js"}]
-    
+    [:script {:src "https://cdn.jsdelivr.net/npm/@hookform/resolvers/zod/dist/zod.umd.js"}]    
     
     ;; react query
     [:script {:src "https://unpkg.com/react-query@3/dist/react-query.production.min.js"}]
 
     ;; diff
     [:script {:src "https://cdnjs.cloudflare.com/ajax/libs/jsdiff/5.1.0/diff.min.js"}]
+
+    [:script
+     {:type "module"}
+     #_(or body "")]
     
     [:style
      
@@ -103,55 +129,23 @@
 .DiffViewer table td:first-of-type {
   font-size: 9px !important;
 }"]
-   #_#_#_ ;; flowbite
-   [:link   {:href "https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.css"
-             :rel "stylesheet"}]
-   [:script {:src "https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.js"}]
-   [:script {:src "https://unpkg.com/flowbite-react@0.9.0/dist/flowbite-react.umd.js"}]
     
-    ;; babel
-    #_[:script {:src "https://unpkg.com/@babel/standalone/babel.min.js"}]]
-  [:body
-   [:div {:id "root"}]
-   [:script
-    {:type "text/javascript"}
-    (or body "")]
+    ]
    
-   #_[:script {:type "text/babel"
-              :data-type "module"}
-     "// Import modules using the names defined in the Import Map
-    import React from 'react';
-    import ReactDOM from 'react-dom/client';
-    import Puck from '@measured/puck'; 
 
-    const config = {
-        components: {
-            Heading: {
-                render: ({ title }) => <h1>{title}</h1>,
-                fields: { title: { type: 'text' } },
-                defaultData: { title: 'Puck Configured' }
-            }
-        }
-    };
-    
-    console.log(Puck,'hello');
-    function App() {
-        return <Puck config={config} />;
-    }
-
-    const root = ReactDOM.createRoot(document.getElementById('root'));
-    root.render(<App />);"]]])
+   [:body
+    [:div {:id "root"}]]])
 
 (comment
-(css/generate-css
-      [[".CodeMirror" {:line-height "100%"
-                       :font-size "10px"
-
-                       #_#_:height "100%"
-                       :top 0
-                       :bottom 0
-                       #_#_#_#_:right 0
-                       :left 0}]])
+  (css/generate-css
+   [[".CodeMirror" {:line-height "100%"
+                    :font-size "10px"
+                    
+                    #_#_:height "100%"
+                    :top 0
+                    :bottom 0
+                    #_#_#_#_:right 0
+                    :left 0}]])
   )
 
 (defn index-page
@@ -160,6 +154,13 @@
    (make-page
     {:title "Dev Interface"
      :body (emit-main 'code.dev.client.page-index)})))
+
+(defn tasks-page
+  []
+  (html/html
+   (make-page
+    {:title "Tasks Interface"
+     :body (emit-main 'code.dev.client.page-tasks)})))
 
 (defn demo-page
   []

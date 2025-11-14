@@ -110,7 +110,7 @@
           (update-content content (create-append-edits
                                    delimiters))
 
-          ensure
+          #_#_ensure
           (h/error "Not supported" {})
 
           :else content)))

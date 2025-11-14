@@ -79,6 +79,14 @@
      (get-code-deps book id)
      (module/module-deps (get modules id) id))))
 
+(defn get-deps-native
+  "get dependencies for a given id"
+  {:added "4.0"}
+  ([{:keys [modules] :as book} id]
+   (if (namespace id)
+     (get-code-deps book id)
+     (module/module-deps (get modules id) id))))
+
 (defn list-entries
   "lists entries for a given symbol"
   {:added "4.0"}
@@ -385,3 +393,9 @@
 
                           :static static}))))
 
+(comment
+  (std.lang/get-module
+   (std.lang/default-library)
+   :js
+   'js.lib.puck)
+  [])

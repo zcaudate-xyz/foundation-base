@@ -83,16 +83,17 @@
                                 [nil form-input])
          module (assoc (get modules (:module entry))
                        :display :brief)
-         [form deps] (preprocess/to-staging form-hydrate
-                                            grammar
-                                            modules
-                                            (merge {:module module
-                                                    :entry (assoc entry :display :brief)}
-                                                   mopts))
+         [form deps deps-native] (preprocess/to-staging form-hydrate
+                                                        grammar
+                                                        modules
+                                                        (merge {:module module
+                                                                :entry (assoc entry :display :brief)}
+                                                               mopts))
          
          entry (merge (assoc entry
                              :form form
-                             :deps deps)
+                             :deps deps
+                             :deps-native deps-native)
                       hmeta
                       *extra*)
          entry (cond-> entry

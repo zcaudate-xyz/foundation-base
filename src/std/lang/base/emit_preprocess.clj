@@ -288,6 +288,8 @@
             *macro-grammar* grammar
             *macro-opts* mopts]
     (let [deps  (volatile! #{})
+          deps-native  (volatile! #{})
+
           form  (h/prewalk
                  (fn walk-fn [form]
                    (cond (h/form? form)
@@ -304,7 +306,7 @@
                                          @form
                                          form))
                             form)]
-      [form @deps])))
+      [form @deps deps-native])))
 
 (defn to-resolve
   "resolves only the code symbols (no macroexpansion)"

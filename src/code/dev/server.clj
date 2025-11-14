@@ -1,6 +1,6 @@
 (ns code.dev.server
   (:require [org.httpkit.server :as http]
-            [code.dev.server.router :as router]
+            [net.http.router :as router]
             [code.dev.server.pages :as pages]
             [code.heal :as heal]
             [std.json :as json]
@@ -171,13 +171,23 @@
 
         (cond (= uri "/")
               {:status 200
-               :headers {"Content-Type" "text/html"}
+               :headers {"Content-Type" "text/html"
+                         "Content-Security-Policy" "script-src self https:  http: 'unsafe-eval' 'unsafe-inline';"}
                :body    
                (#'pages/index-page)}
 
+              (= uri "/tasks")
+              {:status 200
+               :headers {"Content-Type" "text/html"
+                         "Content-Security-Policy" "script-src self https:  http: 'unsafe-eval' 'unsafe-inline';"}
+               :body    
+               (#'pages/tasks-page)}
+
+              
               (= uri "/page/demo")
               {:status 200
-               :headers {"Content-Type" "text/html"}
+               :headers {"Content-Type" "text/html"
+                         "Content-Security-Policy" "script-src self https:  http: 'unsafe-eval' 'unsafe-inline';"}
                :body    
                (#'pages/demo-page)}
 

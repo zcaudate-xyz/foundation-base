@@ -1,17 +1,15 @@
-(ns code.dev.client.page-index
+(ns code.dev.client.page-tasks
   (:require [std.lib :as h]
             [std.lang :as l]))
 
 (l/script :js
-  {:runtime :websocket
-   :config {:port 1312}
-   :require [[js.react :as r :include [:dom]]
+  {:require [[js.react :as r :include [:dom]]
              [xt.lang.base-lib :as k]
              [xt.lang.base-client :as client]
-             [code.dev.client.browser.browser-main :as browser-main]
+             [code.dev.client.tasks.task-main :as task-main]
              [code.dev.client.ui-common :as ui]]})
 
-(defn.js AppIndex
+(defn.js AppTasks
   []
   (r/init []
     (client/client-ws "localhost" 1312 {}))
@@ -22,7 +20,7 @@
                     {:class ["flex flex-col w-full"]
                      :style {:top 0 :bottom 0}}]
       
-      :app/body    [:% browser-main/BrowserMain]})))
+      :app/body    [:% task-main/TaskMain]})))
 
 (def.js AppRoot nil)
 
@@ -31,5 +29,5 @@
   (var rootElement (document.getElementById "root"))
   (when (not -/AppRoot)
     (:= -/AppRoot (ReactDOM.createRoot rootElement)))
-  (. -/AppRoot (render [:% -/AppIndex]))
+  (. -/AppRoot (render [:% -/AppTasks]))
   (return true))

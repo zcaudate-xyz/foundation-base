@@ -31,13 +31,8 @@
                  @(resolve inputs))
             inputs)
 
-        (h/form? inputs)
-        (eval
-         (map (fn [x]
-                (if (map? x)
-                  (list 'quote x)
-                  x))
-              inputs))
+        (vector? inputs)
+        (apply merge (map components-resolve inputs))
         
         :else
         inputs))

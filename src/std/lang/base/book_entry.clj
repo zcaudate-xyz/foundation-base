@@ -40,7 +40,8 @@
                     
                     ;; linking
                     deps
-
+                    deps-native
+                    
                     ;; required at runtime for dynamic eval to work
                     namespace
 
@@ -76,6 +77,7 @@
             form
             form-input
             deps
+            deps-native
             
             namespace
             

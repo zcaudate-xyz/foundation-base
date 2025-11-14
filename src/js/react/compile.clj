@@ -134,7 +134,7 @@
         components (-> components
                        (c/components-resolve)
                        (c/components-expand))
-        components (compile-replace-actions components actions)
+        components    (compile-replace-actions components actions)
         form-states   (compile-states   (check-valid-variables states states))
         form-triggers (compile-triggers (check-valid-variables states triggers))
         form-layout   (compile-layout   (check-valid-variables states layout)
