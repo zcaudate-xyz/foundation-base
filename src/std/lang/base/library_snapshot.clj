@@ -159,16 +159,21 @@
         shadow-snapshot (snapshot-merge *parent* snapshot)
         {:keys [grammar modules]
          :as book} (get-book shadow-snapshot lang)
+        mopts  (merge {:lang lang
+                       :snapshot shadow-snapshot
+                       :module (book/get-module book module)}
+                      mopts)
         entry  (if (= section :fragment)
-                 entry
+                 (entry/create-fragment-hydrate entry
+                                                grammar
+                                                modules
+                                                mopts)
+                 
                  (entry/create-code-hydrate entry
                                             (get-in grammar [:reserved (:op entry)])
                                             grammar
                                             modules
-                                            (merge {:lang lang
-                                                    :snapshot shadow-snapshot
-                                                    :module (book/get-module book module)}
-                                                   mopts)))]
+                                            mopts))]
     (atom/update-diff snapshot [lang :book]
                       book/set-entry entry)))
 

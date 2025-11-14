@@ -83,17 +83,21 @@
                                 [nil form-input])
          module (assoc (get modules (:module entry))
                        :display :brief)
-         [form deps deps-native] (preprocess/to-staging form-hydrate
-                                                        grammar
-                                                        modules
-                                                        (merge {:module module
-                                                                :entry (assoc entry :display :brief)}
-                                                               mopts))
+         [form
+          deps
+          deps-fragment
+          deps-native] (preprocess/to-staging form-hydrate
+                                              grammar
+                                              modules
+                                              (merge {:module module
+                                                      :entry (assoc entry :display :brief)}
+                                                     mopts))
          
          entry (merge (assoc entry
                              :form form
                              :deps deps
-                             :deps-native deps-native)
+                             :deps-fragment deps-fragment
+                             :deps-native   deps-native)
                       hmeta
                       *extra*)
          entry (cond-> entry
@@ -127,6 +131,16 @@
   {:added "4.0"}
   [[_ sym value] {return :-
                   :as meta}]
+  (def *meta* meta)
+  #_(let [[form
+         deps
+         deps-fragment
+         deps-native]]  (preprocess/to-staging form-hydrate
+                                               grammar
+                                               modules
+                                               (merge {:module module
+                                                       :entry (assoc entry :display :brief)}
+                                                      mopts)))
   (book/book-entry (merge {:op 'def$
                            :id sym
                            :form value
@@ -134,6 +148,25 @@
                            :static/return return}
                           (create-common meta)
                           (h/qualified-keys meta :rt))))
+
+(defn create-fragment-hydrate
+  "hydrates the forms"
+  {:added "4.0"}
+  ([entry grammar modules mopts]
+   (if (:template entry)
+     entry
+     (let [{:keys [form]} entry
+           [_
+            deps
+            deps-fragment
+            deps-native]   (preprocess/to-staging form
+                                                  grammar
+                                                  modules
+                                                  mopts)]
+       (assoc entry
+              :deps #{}
+              :deps-fragment deps-fragment
+              :deps-native   deps-native)))))
 
 (defn create-macro
   "creates a macro"

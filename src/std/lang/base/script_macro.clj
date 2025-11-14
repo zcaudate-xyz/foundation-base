@@ -56,10 +56,11 @@
   {:added "4.0"}
   ([lang [op sym body :as form] smeta]
    (let [[module fmeta] (intern-prep lang form)
-         entry  (entry/create-fragment form (merge smeta
-                                                   fmeta
-                                                   {:lang lang
-                                                    :module module}))
+         entry  (entry/create-fragment form
+                                       (merge smeta
+                                              fmeta
+                                              {:lang lang
+                                               :module module}))
          lib    (impl/runtime-library)
          _      (lib/add-entry-single! lib entry)]
      (ptr/ptr-intern (:namespace entry)

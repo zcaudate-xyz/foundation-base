@@ -346,8 +346,6 @@
                  require-impl
                  import alias
                  export file
-                 macro-only
-                 bundle
                  static]} options
          requires  (module-create-requires require)
          export    (if export
@@ -364,11 +362,14 @@
                                      requires)
                       (assoc '- module-id))
          internal (h/transpose link)
-         bundled  (module-create-bundled book requires)
-         suppress (h/keep-vals :suppress bundled)
-         imports  (apply concat import (map :native (vals bundled)))
-         native   (h/map-juxt [first #(apply hash-map (rest %))]
-                              imports)
+         native     (h/map-juxt [first #(apply hash-map (rest %))]
+                                import)
+         native-lu  (->> native
+                         (mapcat (fn [[import {:keys [as]}]]
+                                   (->> (disj (set (flatten (seq (h/seqify as)))) '*)
+                                        (filter symbol?)
+                                        (map (fn [sym] [sym import])))))
+                         (into {}))
          alias    (merge (h/map-juxt [#(nth % 2) first] alias)
                          (->> (vals native)
                               (map :as)
@@ -383,9 +384,7 @@
                           :link       link
                           :internal   internal
                           :native     native
-                          :macro-only (or macro-only false)
-                          :bundle bundle
-                          :suppress   suppress
+                          :native-lu  native-lu
                           :require-impl require-impl
                           
                           :export     export
@@ -394,8 +393,18 @@
                           :static static}))))
 
 (comment
-  (std.lang/get-module
-   (std.lang/default-library)
-   :js
-   'js.lib.puck)
-  [])
+  
+  (dissoc (std.lang/get-module
+           (std.lang/default-library)
+           :js
+           'js.lib.puck)
+          :fragment)
+  
+  (dissoc (std.lang/get-module
+           (std.lang/default-library)
+           :js
+           'js.core)
+          #_:fragment
+          :code
+          )
+  )

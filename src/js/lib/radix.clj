@@ -5,13 +5,12 @@
             [std.lang :as l]))
 
 (l/script :js
-  {:macro-only true
-   :bundle  {:default [["@radix-ui/themes" :as [* RadixMain]]]}})
+  {:import [["@radix-ui/themes" :as [* RadixMain]]]})
 
 (h/template-entries [l/tmpl-entry {:type :fragment
                                    :base "RadixMain"
                                    :tag "js"}]
-  [AccessibleIcon
+  [AccqessibleIcon
    AlertDialog
    [AlertDialogAction AlertDialog.Action]
    [AlertDialogCancel AlertDialog.Cancel]

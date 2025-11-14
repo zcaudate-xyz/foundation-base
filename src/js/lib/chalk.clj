@@ -4,9 +4,7 @@
   (:refer-clojure :exclude [keyword]))
 
 (l/script :js
-  {:macro-only true
-   :bundle   {:default [["chalk" :as chalk]]}
-   :import [["chalk" :as chalk]]})
+  {:import [["chalk" :as chalk]]})
 
 ;;
 ;; Chalk

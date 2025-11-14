@@ -4,8 +4,7 @@
             [std.string :as str]))
 
 (l/script :js
-  {:macro-only true
-   :bundle {:default  [["@csstools/convert-colors" :as [* Colors]]]}})
+  {:import [["@csstools/convert-colors" :as [* Colors]]]})
 
 (h/template-entries [l/tmpl-entry {:type :fragment
                                    :base "Colors"

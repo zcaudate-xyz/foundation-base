@@ -11,12 +11,11 @@
                             future concat pop name some keys filter max]))
 
 (l/script :js
-  {:macro-only true
-   :require-impl [js.core.impl
+  {:require-impl [js.core.impl
                   js.core.fetch]
-   :bundle {:node     {:util     [["util"   :as nodeUtil]]
-                       :fetch    [["node-fetch" :as nodeFetch]]}
-            :uuid     [["uuid" :as [* UUID]]]}})
+   :import [["util"   :as nodeUtil]
+            ["node-fetch" :as nodeFetch]
+            ["uuid" :as [* UUID]]]})
 
 (h/intern-all js.core.impl)
 (h/intern-in js.core.fetch/fetch

@@ -5,9 +5,7 @@
   (:refer-clojure :exclude [abs concat eval filter find keys map
                             max min name pop read reduce replace reverse some sort]))
 
-(l/script :js
-  js.core
-  {:macro-only true})
+(l/script :js js.core)
 
 (defmacro.js ^{:style/indent 1}
   delayed

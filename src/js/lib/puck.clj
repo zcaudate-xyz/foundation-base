@@ -54,6 +54,23 @@
 ;;
 ;; helpers
 
+(comment
+  (!.js
+    (return
+     @-/Action))
+  
+  (defn.js hello
+    []
+    (-/Action)
+    (return
+     -/Action))
+
+  (comment
+    @hello
+    (into {} @-/Action)
+    )
+  (:form @hello))
+
 (defn generate-blocks
   []
   (block/layout

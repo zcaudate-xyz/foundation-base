@@ -8,11 +8,10 @@
   (:refer-clojure :exclude [> ref derive sync]))
 
 (l/script :js
-  {:macro-only true
-   :bundle {:default  [["react" :as React]]
-            :nil      [["react-nil" :as ReactNIL]]
-            :dom      [["react-dom/client" :as ReactDOM]]}
-   :import [["react" :as React]]
+  {:import [["react" :as React]
+            ["react-dom/client" :as ReactDOM]
+            ["react-nil" :as ReactNIL]
+            ["react" :as React]]
    :require [[js.core :as j]
              [xt.lang.base-lib :as k]]
    :export [MODULE]})

@@ -3,8 +3,7 @@
             [std.lib :as h]
             [std.string :as str]))
 
-(l/script :js
-  {:macro-only true})
+(l/script :js)
 
 (def +flex-container+
   {:writing-mode #{"horizontal-tb"

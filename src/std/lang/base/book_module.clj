@@ -62,10 +62,9 @@
             alias
             link
             internal
-            macro-only
-            bundle
             native
-            suppress
+            native-lu
+            
             require-impl
             
             file

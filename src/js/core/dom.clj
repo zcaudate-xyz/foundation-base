@@ -6,7 +6,7 @@
             [std.string :as str])
   (:refer-clojure :exclude [remove val]))
 
-(l/script :js {:macro-only true})
+(l/script :js)
 
 (defmacro.js body
   "gets the document body

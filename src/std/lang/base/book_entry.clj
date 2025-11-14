@@ -40,6 +40,7 @@
                     
                     ;; linking
                     deps
+                    deps-fragment
                     deps-native
                     
                     ;; required at runtime for dynamic eval to work

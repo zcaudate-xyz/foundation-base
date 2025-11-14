@@ -1,8 +1,7 @@
 (ns js.core.util
   (:require [std.lang :as l]))
 
-(l/script :js
-  {:export [MODULE]})
+(l/script :js)
 
 (defn.js pass-callback
   "node style callback"
@@ -18,5 +17,3 @@
   (return (. p (then 
                 (fn:> [res] (callback nil res))
                 (fn:> [err] (callback err nil))))))
-
-(def.js MODULE (!:module))

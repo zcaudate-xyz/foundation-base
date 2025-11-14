@@ -177,8 +177,9 @@
   "process namespaced symbols"
   {:added "4.0"}
   [sym modules {:keys [module
-                       entry] :as mopts} deps]
-  (let [[sym-module sym-id sym-full] (process-namespaced-resolve sym modules mopts)
+                       entry] :as mopts} deps deps-macro walk-fn]
+  (let [walk-fn (or walk-fn identity)
+        [sym-module sym-id sym-full] (process-namespaced-resolve sym modules mopts)
         module-id (:id module)]
     (cond (and (= sym-module module-id)
                (= sym-id (:id entry)))
@@ -208,11 +209,16 @@
                                                          :module (dissoc module :code :fragment)}))
                                           
                                           _ (if (not (or *macro-skip-deps*
+                                                         (not deps)
+                                                         #_#_
                                                          (= 'defglobal op)
                                                          (= 'defrun op)))
                                               (vswap! deps conj sym-full))]
                                       sym-full)
-                  :fragment  (let [{:keys [template standalone form]} entry]
+                  :fragment  (let [{:keys [template standalone form]} entry
+                                   _ (if (not (or *macro-skip-deps*
+                                                  (not deps-macro)))
+                                       (vswap! deps-macro conj sym-full))]
                                (cond (not template) form
                                      
                                      (not standalone)
@@ -220,9 +226,10 @@
                                               {:module sym-module
                                                :id sym-id
                                                :form sym})
+                                     
                                      (or (h/form? standalone)
                                          (symbol? standalone))
-                                     (:standalone entry)
+                                     (walk-fn (:standalone entry))
                                      
                                      :else
                                      (let [args (second form)]
@@ -276,9 +283,26 @@
                             (catch Throwable t
                               (throw t)
                               #_(h/error (.getMessage t)
-                                       {:form form
-                                        :cause t}))))
+                                         {:form form
+                                          :cause t}))))
               form)))))
+
+(defn process-standard-symbol
+  [sym modules mopts deps-native]
+  (let [symstr (name sym)
+        idx  (.indexOf (name sym) ".")]
+    (if (<= 0 idx)
+      (let [symlead (symbol (subs symstr 0 idx))
+            import  (get-in mopts
+                            [:module
+                             :native-lu
+                             symlead])]
+        (if import
+          (vswap! deps-native
+                  update
+                  import
+                  (fnil #(conj % symlead) #{})))))
+    sym))
 
 (defn to-staging
   "converts the stage"
@@ -288,17 +312,18 @@
             *macro-grammar* grammar
             *macro-opts* mopts]
     (let [deps  (volatile! #{})
-          deps-native  (volatile! #{})
+          deps-fragment   (volatile! #{})
+          deps-native  (volatile! {})
 
           form  (h/prewalk
                  (fn walk-fn [form]
                    (cond (h/form? form)
                          (to-staging-form form grammar modules mopts walk-fn)
                          
-                         
-                         (and (symbol? form)
-                              (namespace form))
-                         (process-namespaced-symbol form modules mopts deps)
+                         (and (symbol? form))
+                         (if (namespace form)
+                           (process-namespaced-symbol form modules mopts deps deps-fragment walk-fn)
+                           (process-standard-symbol form modules mopts deps-native))
                          
                          :else form))
                  input)
@@ -306,7 +331,8 @@
                                          @form
                                          form))
                             form)]
-      [form @deps deps-native])))
+      
+      [form @deps @deps-fragment @deps-native])))
 
 (defn to-resolve
   "resolves only the code symbols (no macroexpansion)"
@@ -321,11 +347,12 @@
                    (cond  (and (h/form? form)
                                (= (first form) '!:template))
                           (walk-fn (eval (second form)))
-                          
-                          (and (symbol? form)
-                               (namespace form))
-                          (process-namespaced-symbol form modules mopts nil)
 
+                          (symbol? form)
+                          (if (namespace form)
+                            (process-namespaced-symbol form modules mopts nil)
+                            (process-standard-symbol form modules mopts nil))
+                          
                           :else
                           form))
                  input)]
