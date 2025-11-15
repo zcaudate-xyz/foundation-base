@@ -5,8 +5,8 @@
             [std.lang :as l]))
 
 (l/script :js
-  {:macro-only true
-   :import  [["@measured/puck" :as [* Puck]]]})
+  {:import  [["@measured/puck" :as [* Puck]
+              :bundle [["@measured/puck/puck.css"]]]]})
 
 (h/template-entries [l/tmpl-entry {:type :fragment
                                    :base "Puck"
@@ -64,15 +64,23 @@
      @-/Action))
 
   @-/Help
-  
+
   (defn.js hello
     []
     (-/Action)
     (return
      -/Action))
-
+  
+  (defn.js hello1
+    []
+    (-/hello)
+    Puck
+    (return
+     -/Action))
+  
   (comment
     @hello
+    @hello1
     (into {} @-/Action)
     )
   (:form @hello))

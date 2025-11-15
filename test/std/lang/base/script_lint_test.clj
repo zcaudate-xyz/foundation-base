@@ -22,7 +22,7 @@
                            (std.lang/default-library)
                            :js
                            'js.blessed))
-  => '#{blessed React reactBlessed})
+  => '#{BlessedContrib ReactBlessedContrib Bresenham ReactBlessed Blessed Drawille})
 
 ^{:refer std.lang.base.script-lint/collect-sym-vars :added "4.0"}
 (fact "collect symbols and vars")

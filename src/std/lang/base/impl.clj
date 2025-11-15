@@ -217,17 +217,22 @@
 (defn emit-script-imports
   "emit imports"
   {:added "4.0"}
-  [natives emit [stage grammar book namespace mopts]]
+  [natives emit [stage grammar book namespace mopts :as input]]
   (if (not (-> emit :native :suppress))
     (let [imports-opts (update mopts :emit merge (:native emit))]
-      (keep (fn [[name module]]
-              (let [form (deps/module-import-form book name module imports-opts)]
-                (if form
-                  (emit-direct grammar
-                               (list 'do form)
-                               namespace
-                               imports-opts))))
-            natives))))
+      
+      (mapcat (fn [[name module]]
+                (let [{:keys [bundle]} module 
+                      form-bundled (if (not-empty bundle)
+                                     (emit-script-imports bundle emit input))
+                      form (deps/module-import-form book name module imports-opts)]
+                  (if form
+                    (concat form-bundled
+                            [(emit-direct grammar
+                                          (list 'do form)
+                                          namespace
+                                          imports-opts)]))))
+              natives))))
 
 (defn emit-script-deps
   "emits the script deps"

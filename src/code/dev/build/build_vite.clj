@@ -28,7 +28,7 @@
          (fn [m]
            
            (h/sh {:root ".build/code.dev"
-                  :args ["yarn" "dev"]
+                  :args ["npm" "run" "dev"]
                   :inherit true}))))
 
 (defn stop-server
@@ -52,11 +52,14 @@
               :args ["pnpm" "install"]
               :inherit true}))
   (h/p (h/sh {:root ".build/code.dev"
+              :args ["npm" "install"]
+              :inherit true}))
+  (h/p (h/sh {:root ".build/code.dev"
               :args ["yarn" "install"]}))
   (h/p (h/sh {:root ".build/code.dev"
               :args ["yarn" "add" "@measured/puck"]}))
   (h/p (h/sh {:root ".build/code.dev"
-              :args ["yarn" "add" "dnd-kit"]}))
+              :args ["yarn" "add" "@dnd-kit/core"]}))
   (h/p (h/sh {:root ".build/code.dev"
               :args ["yarn" "add" "@radix-ui/themes"]}))
   (h/p (h/sh {:root ".build/code.dev"

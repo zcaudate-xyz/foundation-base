@@ -72,8 +72,9 @@
   
   (script/script-test-prep :js {})
   => '{:module std.lang.base.script-test,
-      :module/internal {std.lang.base.script-test -}
-      :module/primary #{}})
+       :module/internal {std.lang.base.script-test -}
+       :module/primary #{}
+       :emit {}})
 
 ^{:refer std.lang.base.script/script-test :added "4.0"}
 (fact "the `script-` function call"

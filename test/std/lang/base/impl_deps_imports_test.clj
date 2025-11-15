@@ -172,18 +172,19 @@
           :fragment :code)
   => '{:require-impl nil,
        :static nil,
-       :native-lu {Puck "@measured/puck", Radix "@radix-ui/themes"},
+       :native-lu {Puck "@measured/puck",
+                   Radix "@radix-ui/themes"},
        :internal {JS.ui -},
        :lang :js,
        :alias {Puck Puck, Radix Radix},
        :native
        {"@measured/puck" {:as [* Puck]},
         "@radix-ui/themes"
-        {:as [* Radix], :bundle [["@radix-ui/themes/styles.css"]]}},
+        {:as [* Radix], :bundle {"@radix-ui/themes/styles.css" {}}}},
        :link {- JS.ui},
        :id JS.ui,
        :display :default})
-
+  
 ^{:refer std.lang.base.impl-deps-imports/build-script-import-ns :added "4.0"}
 (fact "merges imports for both fragment and code entries"
   ^:hidden
@@ -206,4 +207,27 @@
            ['JS.app/App])))
   => '{"@measured/puck"   {:as [* Puck]},
        "@radix-ui/themes" {:as [* Radix],
-                           :bundle [["@radix-ui/themes/styles.css"]]}})
+                           :bundle {"@radix-ui/themes/styles.css" {}}}})
+
+
+(comment
+  '{:require-impl nil,
+    :static nil,
+    :native-lu {Puck "@measured/puck", Radix "@radix-ui/themes"},
+    :internal {JS.ui -},
+    :lang :js,
+    :alias {Puck Puck, Radix Radix},
+    :native
+    {"@measured/puck" {:as [* Puck]},
+     "@radix-ui/themes"
+     {:as [* Radix], :bundle [["@radix-ui/themes/styles.css"]]}},
+    :link {- JS.ui},
+       :id JS.ui,
+    :display :default}
+
+  (build-script-import-ns
+   '{}
+   '{JS.ui/Puck {"@measured/puck" #{Puck}},
+     JS.ui/Button {"@radix-ui/themes" #{Radix}}}
+   )
+  {JS.ui {"@measured/puck" #{Puck}, "@radix-ui/themes" #{Radix}}})

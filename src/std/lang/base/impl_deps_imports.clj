@@ -7,7 +7,7 @@
             [clojure.set :as set]))
 
 (defn collect-entry-imports
-  "collect all native imports"
+  "gets all fragment imports from code entries"
   {:added "4.0"}
   [entries]
   (->> entries
@@ -16,7 +16,7 @@
        (into {})))
 
 (defn collect-script-fragment-deps
-  "gets all fragment imports from code entries"
+  "gets all the fragment dependencies"
   {:added "4.0"}
   ([book entries]
    (collect-script-fragment-deps book entries #{}))
@@ -42,6 +42,8 @@
     [natives fnatives fragments]))
 
 (defn build-script-import-ns
+  "merges imports for both fragment and code entries"
+  {:added "4.0"}
   [natives fragment-natives]
   (->> (concat natives fragment-natives)
        (map (fn [[sym m]]
@@ -50,11 +52,14 @@
        (apply merge-with #(merge-with set/union %1 %2))))
 
 (defn build-script-imports
+  "gets the ns imports for a script"
+  {:added "4.0"}
   [book entries]
   (let [[natives
          fnatives
          fragments] (collect-script-import-deps book entries)
 
+        
         ;; imports are all done at the front
         ns-natives  (build-script-import-ns natives fnatives)
         imports     (reduce (fn [out [module-id m]]
@@ -65,28 +70,6 @@
                             ns-natives)]
     imports))
 
-
-(comment
-  '{:require-impl nil,
-    :static nil,
-    :native-lu {Puck "@measured/puck", Radix "@radix-ui/themes"},
-    :internal {JS.ui -},
-    :lang :js,
-    :alias {Puck Puck, Radix Radix},
-    :native
-    {"@measured/puck" {:as [* Puck]},
-     "@radix-ui/themes"
-     {:as [* Radix], :bundle [["@radix-ui/themes/styles.css"]]}},
-    :link {- JS.ui},
-       :id JS.ui,
-    :display :default}
-
-  (build-script-import-ns
-   '{}
-   '{JS.ui/Puck {"@measured/puck" #{Puck}},
-     JS.ui/Button {"@radix-ui/themes" #{Radix}}}
-   )
-  {JS.ui {"@measured/puck" #{Puck}, "@radix-ui/themes" #{Radix}}})
 
 
   

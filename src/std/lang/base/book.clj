@@ -370,8 +370,15 @@
                                         id])
                                      requires)
                       (assoc '- module-id))
-         internal (h/transpose link)
-         native     (h/map-juxt [first #(apply hash-map (rest %))]
+         internal   (h/transpose link)
+         native     (h/map-juxt [first (fn [[_ & args]]
+                                         (let [{:keys [bundle]
+                                                :as opts} (apply hash-map args)
+                                               bundle (if bundle
+                                                        (h/map-juxt [first #(apply hash-map (rest %))]
+                                                                    bundle))]
+                                           (cond-> opts
+                                             bundle (assoc :bundle bundle))))]
                                 import)
          native-lu  (->> native
                          (mapcat (fn [[import {:keys [as]}]]

@@ -23,8 +23,8 @@
   (require 'xt.lang.base-lib :reload))
 
 (def +init+
-  (l/link {:ns .} reload-specs))
+  (l/link {:ns s} reload-specs))
 
 (comment
-  (./reload-specs)
+  (s/reload-specs)
   )

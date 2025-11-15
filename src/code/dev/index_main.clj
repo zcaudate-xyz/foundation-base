@@ -5,27 +5,23 @@
 (l/script :js
   {:runtime :websocket
    :config {:port 1311}
-   :require [[js.react :as r :include [:dom]]
+   :require [[js.react :as r]
              [js.core :as j]
              [js.lib.puck :as puck]
              [js.lib.radix :as radix]
              [xt.lang.base-lib :as k]
              [xt.lang.base-client :as client]]})
 
-(defn.js HEllo
-  []
-  Process)
-
 (def.js config
   {:components
    {:HeadingBlock
     {:fields
      {:children
-      {:type "text"}}}
-    :render
-    (fn [#{children}]
-      (return
-       [:h1 children]))}})
+      {:type "text"}}
+     :render
+     (fn [#{children}]
+       (return
+        [:h1 children]))}}})
 
 (def.js initialData {})
 
@@ -53,9 +49,8 @@
 
 (defn.js main
   []
-  (j/import-set-global)
   (var rootElement (document.getElementById "root"))
   (when (not -/AppRoot)
-    (:= -/AppRoot (ReactDOM.createRoot rootElement)))
+    (:= -/AppRoot (r/createDOMRoot rootElement)))
   (. -/AppRoot (render [:% -/AppIndex]))
   (return true))

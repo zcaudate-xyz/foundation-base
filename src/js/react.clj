@@ -40,6 +40,8 @@
 
 (def$.js % React.createElement)
 
+(def$.js createDOMRoot ReactDOM.createRoot)
+
 
 ;;
 ;;

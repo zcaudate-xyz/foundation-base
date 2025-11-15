@@ -37,10 +37,11 @@
             :compare h/hash-code}]
   ([module]
    (let [{:keys [native static]} module]
-     (h/union
-      (set (mapcat #(mapcat h/seqify (vals %))
-                   (vals native)))
-      (:lang/lint-globals static)))))
+     (disj (h/union
+            (set (mapcat #(mapcat h/seqify (vals %))
+                         (vals native)))
+            (:lang/lint-globals static))
+           '*))))
 
 (defn collect-sym-vars
   "collect symbols and vars"

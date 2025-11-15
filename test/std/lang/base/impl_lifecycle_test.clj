@@ -28,6 +28,7 @@
   (:link (second (emit-module-prep 'js.blessed
                                    {:lang :js
                                     :emit {:compile {:type :graph
+                                                     :base    'js
                                                      :root-ns 'js}}})))
   => ()
   
