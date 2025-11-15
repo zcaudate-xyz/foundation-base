@@ -131,16 +131,6 @@
   {:added "4.0"}
   [[_ sym value] {return :-
                   :as meta}]
-  (def *meta* meta)
-  #_(let [[form
-         deps
-         deps-fragment
-         deps-native]]  (preprocess/to-staging form-hydrate
-                                               grammar
-                                               modules
-                                               (merge {:module module
-                                                       :entry (assoc entry :display :brief)}
-                                                      mopts)))
   (book/book-entry (merge {:op 'def$
                            :id sym
                            :form value
@@ -154,7 +144,12 @@
   {:added "4.0"}
   ([entry grammar modules mopts]
    (if (:template entry)
-     entry
+     (let [deps-native  (preprocess/find-natives entry
+                                                 mopts)]
+       (assoc entry
+              :deps #{}
+              :deps-fragment #{}
+              :deps-native   deps-native))
      (let [{:keys [form]} entry
            [_
             deps

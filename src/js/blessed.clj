@@ -4,18 +4,13 @@
   (:refer-clojure :exclude [merge list map]))
 
 (l/script :js
-  {:macro-only true
-   :require [[js.core :as j]
-             [js.react :as r]]
-   :bundle {:lib      [["blessed" :as blessed]]
-            :contrib  [["blessed-contrib" :as [* blessedContrib]]]
-            :react    {:lib [["react-blessed" :as reactBlessed]]
-                       :contrib [["react-blessed-contrib" :as [* reactBlessedContrib]]]}
-            :drawille  [["drawille" :as Drawille]]
-            :bresenham [["bresenham" :as Bresenham]]}
-   :import [["blessed" :as blessed]
-            ["react-blessed" :as reactBlessed]]
-   :export [MODULE]})
+  {:require [[js.react :as r]]
+   :import [["blessed" :as Blessed]
+            ["blessed-contrib" :as [* BlessedContrib]]
+            ["react-blessed" :as ReactBlessed]
+            ["react-blessed-contrib" :as [* ReactBlessedContrib]]
+            ["drawille" :as Drawille]
+            ["bresenham" :as Bresenham]]})
 
 ;;
 ;; Blessed Contrib
@@ -38,7 +33,7 @@
     textbox tput tryRead unicode video widget])
 
 (h/template-entries [l/tmpl-entry {:type :fragment
-                                   :base "blessed"
+                                   :base "Blessed"
                                    :tag "js"}]
   +blessed+)
 
@@ -52,7 +47,7 @@
     serverError sparkline stackedBar table tree])
 
 (h/template-entries [l/tmpl-entry {:type :fragment
-                                   :base "blessedContrib"
+                                   :base "BlessedContrib"
                                    :tag "js"}]
   +blessed-contrib+)
 
@@ -62,7 +57,7 @@
 ;;
 
 (h/template-entries [l/tmpl-entry {:type :fragment
-                                   :base "reactBlessed"
+                                   :base "ReactBlessed"
                                    :tag "js"}]
   [createBlessedRenderer
    [renderBlessed render]])
@@ -77,7 +72,7 @@
     Table Tree createBlessedComponent])
 
 (h/template-entries [l/tmpl-entry {:type :fragment
-                                   :base "reactBlessedContrib"
+                                   :base "ReactBlessedContrib"
                                    :tag "js"}]
   +react-blessed-contrib+)
 
@@ -103,7 +98,7 @@
   {:added "4.0"}
   ([title options]
    (const s (-/screen
-             (j/assign
+             (Object.assign
               {:autoPadding true
                :smartCSR true
                :useBCE true
@@ -129,6 +124,4 @@
   {:added "4.0"}
   [element title options]
   (-/renderBlessed element (-/createScreen title options)))
-
-(def.js MODULE (!:module))
 

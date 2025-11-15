@@ -144,7 +144,7 @@
   {:added "4.0"}
   [{:keys [lang id code fragment link native suppress export] :as module} & [{:keys [counts
                                                                                      deps]}]]
-  (str/join-lines "\n"
+  (str/join-lines
     [(if (not (false? counts))
        (str (ansi/style (common/pad:left (name lang) 10) #{:yellow :bold})
             "  "
@@ -155,10 +155,11 @@
             "  "
             (:as export)))
      (if deps
-       (str/indent  (str/join "\n" (concat (map #(ansi/style (str %) #{:blue})
-                                                (vals (dissoc link '-)))
-                                           (map #(ansi/style (str %) #{:cyan :bold})
-                                                (keys native))))
+       (str/indent  (str/join-lines
+                     (concat (map #(ansi/style (str %) #{:blue})
+                                  (vals (dissoc link '-)))
+                             (map #(ansi/style (str %) #{:cyan :bold})
+                                  (keys native))))
                     12))]))
 
 (definvoke ^{:arglists '([] [module-id] [module-id {:keys [lang entry]}])}
@@ -209,14 +210,14 @@
   "formats the entries of a module"
   {:added "4.0"}
   [{:keys [lang code fragment export] :as module} & [params]]
-  (str (str/join-lines "\n--------------------------------------------------------------\n"
+  (str (str/join "\n--------------------------------------------------------------\n"
          [(str (ansi/style (name lang) #{:yellow :bold}) " " (:as export))
           (->> (lib-module-overview-format module {:counts false
                                                    :deps true})
                (str/split-lines)
                (map str/trim-left)
                (str/join "\n"))
-          (str/join-lines "\n--------------------------------------------------------------\n"
+          (str/join "\n--------------------------------------------------------------\n"
             [(if (not (false? (:code params)))
                (lib-module-entries-format-section module :code #{:green :bold} true))
              (if (not (false? (:fragment params)))

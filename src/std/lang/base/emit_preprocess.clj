@@ -177,7 +177,7 @@
   "process namespaced symbols"
   {:added "4.0"}
   [sym modules {:keys [module
-                       entry] :as mopts} deps deps-macro walk-fn]
+                       entry] :as mopts} deps deps-fragment walk-fn]
   (let [walk-fn (or walk-fn identity)
         [sym-module sym-id sym-full] (process-namespaced-resolve sym modules mopts)
         module-id (:id module)]
@@ -210,15 +210,14 @@
                                           
                                           _ (if (not (or *macro-skip-deps*
                                                          (not deps)
-                                                         #_#_
                                                          (= 'defglobal op)
                                                          (= 'defrun op)))
                                               (vswap! deps conj sym-full))]
                                       sym-full)
                   :fragment  (let [{:keys [template standalone form]} entry
                                    _ (if (not (or *macro-skip-deps*
-                                                  (not deps-macro)))
-                                       (vswap! deps-macro conj sym-full))]
+                                                  (not deps-fragment)))
+                                       (vswap! deps-fragment conj sym-full))]
                                (cond (not template) form
                                      
                                      (not standalone)
@@ -233,7 +232,8 @@
                                      
                                      :else
                                      (let [args (second form)]
-                                       (list 'fn args (list 'return (apply template args))))))))))))
+                                       (list 'fn args (list 'return
+                                                            (apply template args))))))))))))
 
 (defn process-inline-assignment
   "prepares the form for inline assignment"
@@ -254,7 +254,7 @@
 (defn to-staging-form
   "different staging forms"
   {:added "4.0"}
-  [form grammar modules mopts walk-fn]
+  [form grammar modules mopts deps-fragment walk-fn]
   (let [fsym      (first form)
         reserved  (get-in grammar [:reserved (first form)])]
     (cond (= fsym '!:template)
@@ -278,30 +278,38 @@
                                  modules
                                  mopts)]
             (if (:template fe)
-              (walk-fn (try (binding [*macro-form* form]
-                              (apply (:template fe) (rest form)))
-                            (catch Throwable t
-                              (throw t)
-                              #_(h/error (.getMessage t)
-                                         {:form form
-                                          :cause t}))))
+              (do (if deps-fragment
+                    (vswap! deps-fragment conj (ut/sym-full fe)))
+                  (walk-fn (try (binding [*macro-form* form]
+                                  (apply (:template fe) (rest form)))
+                                (catch Throwable t
+                                  (throw t)))))
               form)))))
 
 (defn process-standard-symbol
-  [sym modules mopts deps-native]
+  [sym mopts deps-native]
   (let [symstr (name sym)
-        idx  (.indexOf (name sym) ".")]
-    (if (<= 0 idx)
-      (let [symlead (symbol (subs symstr 0 idx))
-            import  (get-in mopts
-                            [:module
-                             :native-lu
-                             symlead])]
-        (if import
-          (vswap! deps-native
-                  update
-                  import
-                  (fnil #(conj % symlead) #{})))))
+        idx  (.indexOf (name sym) ".")
+        _  (if (<= 0 idx)
+             (let [symlead (symbol (subs symstr 0 idx))
+                   import  (get-in mopts
+                                   [:module
+                                    :native-lu
+                                    symlead])]
+               (if (and import deps-native)
+                 (vswap! deps-native
+                         update
+                         import
+                         (fnil #(conj % symlead) #{}))))
+             (let [import  (get-in mopts
+                                   [:module
+                                    :native-lu
+                                    sym])]
+               (if (and import deps-native)
+                 (vswap! deps-native
+                         update
+                         import
+                         (fnil #(conj % sym) #{})))))]
     sym))
 
 (defn to-staging
@@ -318,12 +326,12 @@
           form  (h/prewalk
                  (fn walk-fn [form]
                    (cond (h/form? form)
-                         (to-staging-form form grammar modules mopts walk-fn)
+                         (to-staging-form form grammar modules mopts deps-fragment walk-fn)
                          
                          (and (symbol? form))
                          (if (namespace form)
                            (process-namespaced-symbol form modules mopts deps deps-fragment walk-fn)
-                           (process-standard-symbol form modules mopts deps-native))
+                           (process-standard-symbol form mopts deps-native))
                          
                          :else form))
                  input)
@@ -350,15 +358,35 @@
 
                           (symbol? form)
                           (if (namespace form)
-                            (process-namespaced-symbol form modules mopts nil)
-                            (process-standard-symbol form modules mopts nil))
+                            (process-namespaced-symbol form modules mopts nil nil identity)
+                            (process-standard-symbol form mopts nil))
                           
                           :else
                           form))
                  input)]
       form)))
 
+(defn find-natives
+  [entry mopts]
+  (let [deps-quoted  (volatile! [])
+        deps-native  (volatile! {})
+        _    (h/postwalk
+              (fn [form]
+                (if (and (list? form)
+                         (= (first form) 'quote))
+                  (vswap! deps-quoted conj (second form)))
+                form)
+              (:form entry))
+        _    (h/postwalk
+              (fn [form]
+                (cond (symbol? form)
+                      (process-standard-symbol form mopts deps-native)
+                      
+                      :else form))
+              @deps-quoted)]
+    @deps-native))
+
 (comment
   
   (comment
-  (get-in (std.lang/grammar :lua) [:reserved 'var*])))
+    (get-in (std.lang/grammar :lua) [:reserved 'var*])))

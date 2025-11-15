@@ -5,9 +5,9 @@
 
 (l/script :js
   {:require [[xt.lang.base-lib :as k]
-             [js.core :as j :include [:node :util]]
-             [js.react   :as r :include [:fn]]
-             [js.blessed :as b :include [:lib :react]]
+             [js.core :as j]
+             [js.react   :as r]
+             [js.blessed :as b]
              [js.blessed.ui-style :as ui-style]]
    :export [MODULE]})
 
@@ -166,7 +166,6 @@
 ;;
 ;; Single State
 ;;
-
 
 (defn.js ToggleSwitch
   "Constructs a Toggle"

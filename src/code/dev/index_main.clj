@@ -12,6 +12,10 @@
              [xt.lang.base-lib :as k]
              [xt.lang.base-client :as client]]})
 
+(defn.js HEllo
+  []
+  Process)
+
 (def.js config
   {:components
    {:HeadingBlock

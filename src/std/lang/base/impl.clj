@@ -87,8 +87,6 @@
                               :book book
                               :snapshot snapshot))))
 
-
-
 (defn to-form
   "input to form"
   {:added "4.0"}

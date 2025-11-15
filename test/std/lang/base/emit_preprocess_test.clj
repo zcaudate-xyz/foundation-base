@@ -5,7 +5,12 @@
             [std.lang.base.emit-helper :as helper]
             [std.lang.base.grammar :as grammar]
             [std.lang.base.emit-prep-lua-test :as prep]
+            [std.lang.base.emit-prep-js-test :as prep-js]
             [std.lang.base.book-entry :as entry]
+            [std.lang.base.library :as lib]
+            [std.lang.base.book :as b]
+            [std.lang.base.library-snapshot :as snap]
+            [std.lang.base.impl-entry :as impl-entry]
             [std.lib :as h]))
 
 (def +reserved+
@@ -103,21 +108,27 @@
                              (:modules prep/+book-min+)
                              {:module   {:id 'L.util
                                          :link '{u L.core}}}
-                             (volatile! #{}))
+                             (volatile! #{})
+                             (volatile! #{})
+                             identity)
   => '(fn [x y] (return (+ x y)))
   
   (process-namespaced-symbol 'u/sub
                              (:modules prep/+book-min+)
                              {:module   {:id 'L.util
                                          :link '{u L.core}}}
-                             (volatile! #{}))
+                             (volatile! #{})
+                             (volatile! #{})
+                             identity)
   => '(fn [x y] (return (- x y)))
 
   (process-namespaced-symbol 'u/identity-fn
                              (:modules prep/+book-min+)
                              {:module   {:id 'L.util
                                          :link '{u L.core}}}
-                             (volatile! #{}))
+                             (volatile! #{})
+                             (volatile! #{})
+                             identity)
   => 'L.core/identity-fn
 
   (process-namespaced-symbol '-/hello
@@ -127,14 +138,18 @@
                               :module   {:id 'L.util
                                          :link '{u L.core
                                                  - L.util}}}
-                             (volatile! #{}))
+                             (volatile! #{})
+                             (volatile! #{})
+                             identity)
   => 'L.util/hello
 
   (process-namespaced-symbol 'u/UNKNOWN
                               (:modules prep/+book-min+)
                               {:module   {:id  'L.util
                                           :link '{u L.core}}}
-                              (volatile! #{}))
+                              (volatile! #{})
+                              (volatile! #{})
+                             identity)
   => (throws))
 
 ^{:refer std.lang.base.emit-preprocess/process-inline-assignment :added "4.0"}
@@ -161,6 +176,7 @@
                    nil
                    (:modules prep/+book-min+)
                    '{:module {:link {u L.core}}}
+                   nil
                    identity)
   => 6
 
@@ -168,6 +184,7 @@
                     nil
                     (:modules prep/+book-min+)
                    '{:module {:link {u L.core}}}
+                   nil
                    identity)
   => '(!:eval (+ 1 2 3))
 
@@ -177,6 +194,7 @@
                                                 (cons '+ (concat args args)))}}}
                    (:modules prep/+book-min+)
                    '{:module {:link {u L.core}}}
+                   nil
                    identity)
   => '(+ 1 2 3 1 2 3)
 
@@ -185,8 +203,31 @@
                                        :raw 'world}}}
                    (:modules prep/+book-min+)
                    '{:module {:link {u L.core}}}
+                   nil
                    identity)
   => '(world 1 2 3))
+
+^{:refer std.lang.base.emit-preprocess/process-standard-symbol :added "4.0"}
+(fact "processes a standard symbol"
+  ^:hidden
+  
+  (def +library-js+
+    (doto (lib/library:create
+           {:snapshot (snap/snapshot {:js {:id :js
+                                           :book prep-js/+book-min+}})})
+      (lib/install-module! :js 'JS.ui
+                           {:import  ' [["@measured/puck" :as [* Puck]]
+                                        ["@radix-ui/themes" :as [* Radix]
+                                         :bundle [["@radix-ui/themes/styles.css"]]]]})))
+
+  (let [deps-native (volatile! {})
+        sym (process-standard-symbol 'Puck.Puck
+                                     {:module (lib/get-module +library-js+
+                                                              :js
+                                                              'JS.ui)}
+                                     deps-native)]
+    [sym @deps-native])
+  => '[Puck.Puck {"@measured/puck" #{Puck}}])
 
 ^{:refer std.lang.base.emit-preprocess/to-staging :added "4.0"}
 (fact "converts the stage"
@@ -196,8 +237,7 @@
               nil
               (:modules prep/+book-min+)
               '{:module {:link {u L.core}}})
-  => '[(+ (L.core/identity-fn 1) 2)
-       #{L.core/identity-fn}]
+  => '[(+ (L.core/identity-fn 1) 2) #{L.core/identity-fn} #{L.core/add} {}]
   
   (to-staging '(u/sub (u/add (u/identity-fn 1) 2)
                       (-/hello))
@@ -206,9 +246,10 @@
               '{:entry {:id hello}
                 :module {:id L.util
                          :link {u L.core}}})
-  => '[(- (+ (L.core/identity-fn 1) 2)
-          (L.util/hello))
-       #{L.core/identity-fn}]
+  => '[(- (+ (L.core/identity-fn 1) 2) (L.util/hello))
+       #{L.core/identity-fn}
+       #{L.core/add L.core/sub}
+       {}]
 
   ((juxt identity
          (comp meta last first))
@@ -216,8 +257,7 @@
                {:reserved {'var {:emit :def-assign}}}
                (:modules prep/+book-min+)
                '{:module {:link {u L.core}}}))
-  => '[[(var a := (L.core/identity-fn 1)) #{}]
-       {:assign/inline true}])
+  => '[[(var a := (L.core/identity-fn 1)) #{} #{} {}] #:assign{:inline true}])
 
 ^{:refer std.lang.base.emit-preprocess/to-resolve :added "4.0"}
 (fact "resolves only the code symbols (no macroexpansion)"
@@ -228,3 +268,33 @@
                (:modules prep/+book-min+)
                '{:module {:link {u L.core}}})
   => '(L.core/add (L.core/identity-fn 1) 2))
+
+^{:refer std.lang.base.emit-preprocess/find-natives :added "4.0"}
+(fact "find natives for a macro entry"
+  ^:hidden
+  
+  (def +library-js+
+    (doto (lib/library:create
+           {:snapshot (snap/snapshot {:js {:id :js
+                                           :book prep-js/+book-min+}})})
+      (lib/install-module! :js 'JS.ui
+                           {:import  ' [["react" :as React]]})
+      (lib/add-entry-single!
+       (impl-entry/create-macro
+        '(defmacro hello
+           [s]
+           (list 'React.useEffect s))
+        {:lang :js
+         :namespace 'JS.ui
+         :module 'JS.ui}))))
+
+  (find-natives 
+   (lib/get-entry +library-js+
+                  {:lang :js
+                   :module 'JS.ui
+                   :id 'hello
+                   :section :fragment})
+   {:module (lib/get-module +library-js+
+                            :js
+                            'JS.ui)})
+  => '{"react" #{React}})

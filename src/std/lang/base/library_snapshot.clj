@@ -225,7 +225,7 @@
   {:added "4.0"}
   [book {module-id :id
          :as module}]
-  (let [soft-keys    [:code :fragment :bundle :export :macro-only]
+  (let [soft-keys    [:code :fragment #_#_:bundle :export #_:macro-only]
         soft-maps    (select-keys module soft-keys)
         hard-maps    (apply dissoc module soft-keys)
         

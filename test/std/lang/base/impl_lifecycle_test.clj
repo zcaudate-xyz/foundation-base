@@ -17,7 +17,7 @@
       second
       keys
       sort)
-  => '(:code :export :link :native :setup :teardown)
+  => '(:code :link :native :setup :teardown)
 
   (:link (second (emit-module-prep 'xt.lang.base-lib
                                    {:lang :lua

@@ -3,11 +3,10 @@
             [std.lang :as l]))
 
 (l/script :js
-  {:macro-only true
-   :bundle  {:default [["recharts" :as [* Recharts]]]}})
+  {:import [["recharts" :as [* Recharts]]]})
 
 (h/template-entries [l/tmpl-entry {:type :fragment
-                                :base "Lucide"
+                                   :base "Recharts"
                                    :tag "js"}]
   [Area
    AreaChart

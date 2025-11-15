@@ -31,6 +31,16 @@
       {:lang :lua
        :namespace 'L.util
        :module 'L.util}
+      {}))
+
+    (lib/add-entry-single!
+     (entry/create-code-base
+      '(defn cjson-read
+         [s]
+         (return (cjson.read s)))
+      {:lang :lua
+       :namespace 'L.util
+       :module 'L.util}
       {}))))
 
 ^{:refer std.lang.base.impl-deps/module-import-form :added "4.0"}
@@ -143,6 +153,15 @@
   => '[(+ (L.util/sub-fn 1 2)
           (L.util/add-fn 3 4))
        (L.core/identity-fn L.util/add-fn L.util/sub-fn)
+       {}]
+
+  (-> (deps/collect-script (lib/get-book +library-ext+ :lua)
+                           '(ut/cjson-read "hello")
+                           {:module {:link '{ut L.util
+                                             u  L.core}}})
+      (deps/collect-script-summary))
+  => '[(L.util/cjson-read "hello")
+       (L.util/cjson-read)
        {"cjson" {:as cjson}}])
 
 ^{:refer std.lang.base.impl-deps/collect-script-summary :added "4.0"}
@@ -200,6 +219,9 @@
     :params {}})
   => (throws))
 
+^{:refer std.lang.base.impl-deps/collect-module-ns-select :added "4.0"}
+(fact "TODO")
+
 ^{:refer std.lang.base.impl-deps/collect-module-directory-form :added "4.0"}
 (fact "collects forms for "
   ^:hidden
@@ -244,10 +266,10 @@
                       (set (map :id arr)))))
   => '{:setup nil,
        :teardown nil,
-       :code #{add-fn sub-fn},
+       :code #{cjson-read add-fn sub-fn},
        :native {"cjson" {:as cjson}},
-       :link (["./core" {:as u, :ns L.core}]),
-       :export {:entry nil}}
+       :link (["./core" {:as u, :ns L.core}])}
+  
 
   (-> (deps/collect-module (lib/get-book +library-ext+ :lua)
                            (lib/get-module +library-ext+ :lua 'L.util)
@@ -258,13 +280,12 @@
                             :path-suffix ".lua"})
         (update :code (fn [arr]
                         (set (map :id arr)))))
-  => '{:setup nil, :teardown nil, :code #{add-fn sub-fn}, :native {"cjson" {:as cjson}},
-       :link (["@/core.lua" {:as u, :ns L.core}]),
-       :export {:entry nil}})
+  => '
+     {:setup nil,
+      :teardown nil,
+      :code #{cjson-read add-fn sub-fn},
+      :native {"cjson" {:as cjson}},
+      :link (["@/core.lua" {:as u, :ns L.core}])})
 
 (comment
   (./import))
-
-
-^{:refer std.lang.base.impl-deps/collect-module-ns-select :added "4.0"}
-(fact "TODO")

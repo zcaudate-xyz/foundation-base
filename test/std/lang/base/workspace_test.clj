@@ -49,7 +49,7 @@
   ^:hidden
   
   (-> (w/ptr-print k/arr-map)
-      (std.concurrent.print/with-out-str))
+      (h/with-out-str))
   => string?)
 
 ^{:refer std.lang.base.workspace/ptr-setup :added "4.0"}
@@ -84,7 +84,7 @@
 ^{:refer std.lang.base.workspace/print-module :added "4.0"}
 (fact "emits and prints out the module"
 
-  (std.print/with-out-str
+  (h/with-out-str
     (w/print-module (l/rt 'xt.lang.base-lib :xtalk)))
   => string?)
 

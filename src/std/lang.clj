@@ -141,6 +141,7 @@
  workspace/ptr-setup-deps
  workspace/ptr-teardown-deps
  workspace/rt:module
+ workspace/rt:module-meta
  workspace/rt:module-purge
  workspace/rt:inner
  workspace/rt:restart

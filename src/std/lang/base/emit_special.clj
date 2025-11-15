@@ -13,6 +13,8 @@
   [snapshot lang module-id allow]
   (let [book   (book/book-from snapshot lang)
         module (book/get-module book module-id)
+
+        #_#_#_#_
         export-sym (get-in module [:export :as])
         _   (if (not export-sym)
               (h/error "No Export for Module" {:module module-id
@@ -21,8 +23,7 @@
                  (vals)
                  (sort-by (juxt :priority :time :line))
                  (filter (fn [{:keys [op id]}]
-                           (and (allow op)
-                                (not= id export-sym))))
+                           (and (allow op))))
                  (map :id))]
     ids))
 

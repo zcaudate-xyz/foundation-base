@@ -23,6 +23,9 @@
   ^:hidden
   
   (js-map-key 'hello +grammar+ {})
+  => "hello"
+
+  (js-map-key '[hello] +grammar+ {})
   => "[hello]"
 
   (js-map-key :hello +grammar+ {})
@@ -41,8 +44,11 @@
 ^{:refer std.lang.model.spec-js/js-set :added "4.0"}
 (fact "emits a js set"
   ^:hidden
-  
+
   (js-set '#{...x y {a 1 :b 2}} +grammar+ {})
+  => "{...x,y,a:1,\"b\":2}"
+  
+  (js-set '#{...x y {[a] 1 :b 2}} +grammar+ {})
   => "{...x,y,[a]:1,\"b\":2}"
 
   (js-set '#{[...x y (% a) 1 :b 2]} +grammar+ {})

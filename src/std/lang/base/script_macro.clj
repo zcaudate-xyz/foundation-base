@@ -226,6 +226,7 @@
          ;;
          ;;     LINT HACK FOR JS
          ;;
+         #_#_
          _      (when (and (#{:js :xtalk :lua} (:lang entry))
                            (not (:static/no-lint smeta)))
                   (lint/lint-entry (lib/get-entry lib entry)

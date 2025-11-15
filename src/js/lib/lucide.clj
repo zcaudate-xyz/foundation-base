@@ -4,8 +4,7 @@
             [std.lang :as l]))
 
 (l/script :js
-  {:macro-only true
-   :bundle  {:default [["lucide-react" :as [* Lucide]]]}})
+  {:import [["lucide-react" :as [* Lucide]]]})
 
 (h/template-bulk [l/tmpl-entry {:type :fragment
                                 :base "Lucide"

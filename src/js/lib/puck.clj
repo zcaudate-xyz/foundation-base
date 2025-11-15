@@ -51,6 +51,10 @@
                                           :children []}
            :puck/render                  {:tag -/Render}]))
 
+(defmacro.js Help
+  []
+  (list `-/Action))
+
 ;;
 ;; helpers
 
@@ -58,6 +62,8 @@
   (!.js
     (return
      @-/Action))
+
+  @-/Help
   
   (defn.js hello
     []

@@ -51,8 +51,7 @@
   => '{:setup nil,
        :teardown nil
        :native {"cjson" {:as cjson}},
-       :link   {}
-       :export {:entry nil}})
+       :link   {}})
 
 ^{:refer std.lang.base.impl-lifecycle/emit-module :adopt true :added "4.0"}
 (fact "emits the module string"
@@ -358,25 +357,23 @@
                 :module (lib/get-module +library-ext+ :lua 'L.util)
                 :layout :flat})
   => (std.string/|
-   "var__(local=cjson,==require(\"cjson\"));"
-   ""
-   "function identity_fn(x){"
-   "  return x;"
-   "}"
-   ""
-   "function add_fn(a,b){"
-   "  return identity_fn(function (x,y){"
-   "    return x + y;"
-   "  })(a,sub_fn(b,0));"
-   "}"
-   ""
-   "function sub_fn(a,b){"
-   "  return identity_fn(function (x,y){"
-   "    return x - y;"
-   "  })(a,b);"
-   "}"
-   ""
-   "add_fn(1,2)")
+      "function identity_fn(x){"
+      "  return x;"
+      "}"
+      ""
+      "function add_fn(a,b){"
+      "  return identity_fn(function (x,y){"
+      "    return x + y;"
+      "  })(a,sub_fn(b,0));"
+      "}"
+      ""
+      "function sub_fn(a,b){"
+      "  return identity_fn(function (x,y){"
+      "    return x - y;"
+      "  })(a,b);"
+      "}"
+      ""
+      "add_fn(1,2)")
   
   
   (emit-script '(-/add-fn 1 2)
@@ -385,25 +382,23 @@
                 :module (lib/get-module +library-ext+ :lua 'L.util)
                 :layout :full})
   => (std.string/|
-   "var__(local=cjson,==require(\"cjson\"));"
-   ""
-   "function L_core____identity_fn(x){"
-   "  return x;"
-   "}"
-   ""
-   "function L_util____add_fn(a,b){"
-   "  return L_core____identity_fn(function (x,y){"
-   "    return x + y;"
-   "  })(a,L_util____sub_fn(b,0));"
-   "}"
-   ""
-   "function L_util____sub_fn(a,b){"
-   "  return L_core____identity_fn(function (x,y){"
-   "    return x - y;"
-   "  })(a,b);"
-   "}"
-   ""
-   "L_util____add_fn(1,2)"))
+      "function L_core____identity_fn(x){"
+      "  return x;"
+      "}"
+      ""
+      "function L_util____add_fn(a,b){"
+      "  return L_core____identity_fn(function (x,y){"
+      "    return x + y;"
+      "  })(a,L_util____sub_fn(b,0));"
+      "}"
+      ""
+      "function L_util____sub_fn(a,b){"
+      "  return L_core____identity_fn(function (x,y){"
+      "    return x - y;"
+      "  })(a,b);"
+      "}"
+      ""
+      "L_util____add_fn(1,2)"))
 
 ^{:refer std.lang.base.impl/emit-scaffold-raw-imports :added "4.0"}
 (fact "gets only the scaffold imports")

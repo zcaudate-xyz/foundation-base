@@ -45,7 +45,8 @@
 ;;
 ;;
 
-(defmacro.js ^{:style/indent 0} curr
+(defmacro.js ^{:style/indent 0}
+  curr
   "shortcut for `<ref>.current`"
   {:added "4.0"}
   ([ref]
@@ -145,14 +146,16 @@
   [state]
   (list '. (symbol (str/camel-case (str "set-" (name state))))))
 
-(defmacro.js ^{:style/indent 1}
+(defmacro.js ^{:style/indent 1
+               :static/deps ['React]}
   ui
   "shortcut for useEffect [var] (f var)"
   {:added "4.0"}
   ([layout components]
+   (:# 'React)
    (compile/compile-layout layout components)))
 
-(defmacro.js
+(defmacro.js ^{:static/deps ['React]}
   return-ui
   "shortcut for useEffect [var] (f var)"
   {:added "4.0"}
@@ -161,6 +164,7 @@
             actions
             components]
      :as input}]
+   (:# 'React)
    (compile/compile-full input)))
 
 ;;

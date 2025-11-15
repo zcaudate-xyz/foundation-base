@@ -28,14 +28,9 @@
                      ;; dependency management
                      alias         ;; map of shortcuts to packages (both external and internal)
                      link          ;; map of internal dependencies
-                     macro-only    ;; do not link unless done explicity by `:fn` keyword in `:bundle`
-                     bundle        ;; bundles native libraries with import (controlled by `:with`)
-                     native        ;; packages that are native to the workspace runtime 
+                     native        ;; packages that are native to the workspace runtime
+                     native-lu     ;; lookup for native imports
                      internal      ;; set of required packages
-                     
-                     ;; project and packaging 
-                     file
-                     export
                      
                      ;; actual code
                      
@@ -64,12 +59,8 @@
             internal
             native
             native-lu
-            
             require-impl
             
-            file
-            export
-
             fragment
             code
 
@@ -80,10 +71,7 @@
    (map->BookModule (merge { ;; Link
                             :alias {}
                             :link {}
-                            :macro-only false
-                            :bundle {}
                             :native {}
-                            :suppress {}
                             :require-impl []
 
                             ;; Code

@@ -4,6 +4,7 @@
             [std.lang.base.emit-preprocess :as preprocess]
             [std.lang.base.impl-entry :as entry]
             [std.lang.base.book :as b]
+            [std.lang.base.impl-deps-imports :as imports]
             [std.string :as str]
             [std.lib :as h]
             [clojure.set :as set]))
@@ -119,7 +120,7 @@
                                                (:grammar book)
                                                (:modules book) mopts)
         [entries module-lu] (collect-script-entries book sym-ids)
-        natives (collect-script-natives (map :module (vals module-lu)) {})]
+        natives (imports/build-script-imports book entries)]
     [form entries natives]))
 
 (defn collect-script-summary
@@ -168,6 +169,7 @@
   "TODO"
   {:added "4.0"}
   [ns selection]
+  (h/prn ns selection)
   (let [{:keys [default]} selection
         selected (first (keep (fn [[kns value]]
                                 (cond (and (symbol? kns)
@@ -227,16 +229,13 @@
            (str path-separator root-libs path-separator))
          (str/join path-separator ns-paths)
          (if (not-empty path-suffix)
-           (str "."
-                path-suffix)))))
+           (str path-suffix)))))
 
 (defn collect-module
   "collects information for the entire module"
   {:added "4.0"}
   [book {:keys [native
-                link
-                export
-                suppress]
+                link]
          :as module}
    & [{:keys [type]
        :as options}]]
@@ -244,8 +243,7 @@
         
         setup    (setup-module-form book module)
         teardown (teardown-module-form book module)
-        code    (->> (vals (dissoc (:code module)
-                                   (:as export)))
+        code    (->> (vals (:code module))
                      (sort-by (juxt :priority :line :time)))
         form-fn  (cond (= type :custom)
                        (or (:fn-link-form options)
@@ -262,8 +260,7 @@
                   (:graph :directory :custom)
                   (keep (fn [[sym ns]]
                           (cond (= ns (:id module)) nil
-                                (get suppress ns) nil
-                                
+
                                 :else
                                 (let [link (form-fn book ns options)]
                                   [link (if (vector? sym)
@@ -278,7 +275,4 @@
      :teardown teardown
      :code     code
      :native   native
-     :link     link
-     :export   (assoc export
-                      :entry (get (:code module)
-                                  (:as export)))}))
+     :link     link}))

@@ -37,6 +37,16 @@
                   {:module mid
                    :symbol sid})))))
 
+(defn get-fragment-entry
+  "gets a code entry in the book"
+  {:added "4.0"}
+  ([{:keys [modules] :as book} id]
+   (let [[mid sid] (ut/sym-pair id)]
+     (or (get-base-entry book mid sid :fragment)
+         (h/error "ENTRY NOT FOUND"
+                  {:module mid
+                   :symbol sid})))))
+
 (defn get-entry
   "gets either the module or code entry"
   {:added "4.0"}
@@ -286,6 +296,7 @@
 ;;
 ;;
 
+#_
 (defn module-create-bundled
   "creates bundled packages given input modules"
   {:added "4.0"}
@@ -293,6 +304,7 @@
   (h/map-vals  (fn [{:keys [id suppress no-default include]}]
                  (let [include  (cond-> (set (flatten include))
                                   (not no-default) (conj :default))
+                       
                        {:keys [macro-only bundle]} (get-module book id)
                        suppress (or suppress
                                     (and macro-only (not (:fn include))))
@@ -348,9 +360,6 @@
                  export file
                  static]} options
          requires  (module-create-requires require)
-         export    (if export
-                     (merge {:as (first export)}
-                            (apply hash-map (rest export))))
          internal (-> (h/map-entries (fn [[id {:keys [as]}]] [id (or as id)])
                                      requires)
                       (assoc module-id '-))
@@ -387,9 +396,6 @@
                           :native-lu  native-lu
                           :require-impl require-impl
                           
-                          :export     export
-                          :file file
-
                           :static static}))))
 
 (comment

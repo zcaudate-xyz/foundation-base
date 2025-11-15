@@ -164,6 +164,17 @@
                      (:lang rt)
                      (:module rt)))))
 
+(defn rt:module-meta
+  "gets the book module for a runtime"
+  {:added "4.0"}
+  ([lang-or-rt]
+   (let [rt (rt-resolve lang-or-rt)]
+     (dissoc (lib/get-module (impl/runtime-library)
+                             (:lang rt)
+                             (:module rt))
+             :fragment
+             :code))))
+
 (defn rt:module-purge
   "purges the current workspace"
   {:added "4.0"}

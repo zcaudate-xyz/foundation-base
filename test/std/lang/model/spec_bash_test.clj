@@ -79,10 +79,10 @@
 
   ;; For LOOP
   (!.sh
-   (for [file :in ($ (ls "*.clj"))]
-     (echo (:$ file))))
+    (for [file :in ($ (ls "*.clj"))]
+      (echo (:$ file))))
   => [0 ["project.clj"]]
-
+  
   (!.sh
    (defn countdown []
      (local -i (:= start $1))  

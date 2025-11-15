@@ -56,9 +56,19 @@
 
   (impl/with:library [+library+]
     (h/filter-vals identity @hello))
-  => '{:section :fragment, :time 1, :op def$, :module L.core, :lang :lua, :line 1,
-       :id hello, :display :default, :form hello, :namespace std.lang.base.script-macro-test}
-
+  => '{:section :fragment,
+       :time 1,
+       :deps-native {},
+       :op def$,
+       :module L.core,
+       :lang :lua,
+       :line 1,
+       :deps-fragment #{},
+       :id hello,
+       :display :default,
+       :form hello,
+       :namespace std.lang.base.script-macro-test,
+       :deps #{}}
   
   (impl/with:library [+library+]
     (ptr/ptr-display hello {}))

@@ -310,10 +310,12 @@
        :section :code,
        :time nil,
        :standalone nil,
+       :deps-native nil,
        :template nil,
        :module L.core,
        :lang :lua,
        :line nil,
+       :deps-fragment nil,
        :priority nil,
        :id identity-fn,
        :declared false,
@@ -350,14 +352,6 @@
       second
       b/book-string)
   => "#book [:redis] {L.core {:code 1, :fragment 0}}")
-
-^{:refer std.lang.base.book/module-create-bundled :added "4.0"}
-(fact "creates bundled packages given input modules"
-  ^:hidden
-  
-  (b/module-create-bundled +redis+
-                           (b/module-create-requires '[[L.core :as u]]))
-  => '{L.core {:suppress false, :native ()}})
 
 ^{:refer std.lang.base.book/module-create-filename :added "4.0"}
 (fact "creates a filename for module"
@@ -424,3 +418,18 @@
                :namespace 'L.core
                :declared false})
   => book-entry?)
+
+
+(comment
+
+  ^{:refer std.lang.base.book/module-create-bundled :added "4.0"}
+  (fact "creates bundled packages given input modules"
+    ^:hidden
+    
+    (b/module-create-bundled
+     +redis+
+     (b/module-create-requires '[[L.core :as u]]))
+    => '{L.core {:suppress false, :native ()}}))
+
+
+  

@@ -5,7 +5,8 @@
             [std.lang :as l]))
 
 (l/script :js
-  {:import [["@radix-ui/themes" :as [* RadixMain]]]})
+  {:import [["@radix-ui/themes" :as [* RadixMain]
+             :bundle [["@radix-ui/themes/styles.css"]]]]})
 
 (h/template-entries [l/tmpl-entry {:type :fragment
                                    :base "RadixMain"
@@ -327,3 +328,7 @@
                    {:tag (symbol "-" (str k))}])
                 (sort (ns-publics *ns*))))))
 
+
+(comment
+  (l/rt:module-meta :js)
+  )
