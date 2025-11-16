@@ -48,4 +48,7 @@
 
 (defn.js main
   []
-  (ui/renderRoot "id" -/AppIndex))
+  (ui/renderRoot "root" -/AppIndex))
+
+(defrun.js __main__
+  (-/main))

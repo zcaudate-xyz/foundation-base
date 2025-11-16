@@ -98,7 +98,8 @@
 
 ^{:refer std.lang.base.compile/compile-module-directory-single :added "4.0"}
 (fact "compiles a single directory file"
-
+  ^:hidden
+  
   (let [lib (impl/runtime-library)
         snapshot    (lib/get-snapshot lib)
         book        (snap/get-book snapshot :lua)]

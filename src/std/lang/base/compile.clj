@@ -56,119 +56,8 @@
 (def +install-module-single-fn+
   (compile/types-add :module.single #'compile-module-single))
 
-(defn compile-module-graph-rel
-  "compiles a module graph"
-  {:added "4.0"}
-  [path]
-  (subs (str path)
-        0
-        (.lastIndexOf (str path) ".")))
-
-(defn compile-module-graph-single
-  "compiles a single module file"
-  {:added "4.0"}
-  [ns
-   {:keys [root-path
-           root-output
-           snapshot
-           book]
-    :as interim}
-   {:keys [header footer lang
-           main root target emit]
-    :as opts}]
-  (let [module-id   main
-        is-ext      (str/starts-with? (name ns) (compile-module-graph-rel (str module-id)))
-        ns-path     (if-not is-ext
-                      (str/replace (compile-module-graph-rel (name ns)) #"\." "/")
-                      (->> (str/replace (name ns) #"\." "/")
-                           (fs/parent)
-                           (fs/relativize root-path)))
-        ns-path     (if (= "" (str ns-path))
-                      nil
-                      ns-path)
-        module      (book/get-module book ns)
-        ns-file     (or (:file module)
-                        (book/module-create-filename
-                         book
-                         (or (:id module)
-                             (h/error "MODULE NOT FOUND" {:ns ns}))))
-        output-path (str/join "/" (filter identity [root-output ns-path ns-file]))]
-    (compile-module-single
-     {:lang  lang
-      :layout :module
-      :header header
-      :footer footer 
-      :output output-path
-      :main ns 
-      :emit (assoc emit
-                   :compile {:type :graph
-                             :base ns :root-ns module-id}
-                   :static  (:static module))
-      :snapshot snapshot})))
-
-(defn compile-module-graph
-  "compiles a module graph"
-  {:added "4.0"}
-  ([{:keys [header footer lang main root target emit] :as opts}]
-   (let [module-id   main
-         lib         (impl/runtime-library)
-         snapshot    (lib/get-snapshot lib)
-         book        (snap/get-book snapshot lang)
-         deps        (-> (deps-imports/module-code-deps book [module-id])
-                         :all)
-         root-path   (-> (str/replace (name module-id) #"\." "/")
-                         (fs/parent))
-         root-output (if (empty? target)
-                       root
-                       (str root "/" target))
-         #_#__           (h/prn {:module-id module-id
-                                 :deps deps
-                                 :root-path root-path
-                                 :root-output root-output})
-         files       (mapv (fn [ns]
-                             (compile-module-graph-single
-                              ns
-                              {:book book
-                               :snapshot snapshot
-                               :root-path   root-path
-                               :root-output root-output}
-                              opts))
-                           deps)]
-     (compile/compile-summarise files))))
-
-(def +install-module-graph-fn+
-  (compile/types-add :module.graph #'compile-module-graph)) ;
-
 (defn compile-module-directory-single
-  "compiles a single directory file
- 
-   (let [lib (impl/runtime-library)
-         snapshot    (lib/get-snapshot lib)
-         book        (snap/get-book snapshot :lua)]
-     (make/with:mock-compile
-       (compile-module-directory-single
-        'xt.lang.base-lib
-        {:lib         lib
-         :snapshot    snapshot
-        :book        book
-         :root-path   (std.fs/path \".\" \"xt/lang\"),
-         :root-output \".build/src\"}
-        {:lang :lua
-         :root   \".build\"
-         :target \"src\"
-         :file   \"pkg/file.lua\"
-         :main   'xt.lang.base-iter
-         :layout :flat
-         :entry {:label true}
-         :emit {:code {:link
-                       {:root-libs   \"LIBS\"
-                        :root-prefix \".\"
-                        :path-suffix \"lua\"
-                        :path-separator \"/\"
-                        :path-replace {}}}}})))
-   => (contains-in
-       [\".build/src/./LIBS/xt/lang/base-lib.lua\" 
-        string?])"
+  "compiles a single directory file"
   {:added "4.0"}
   [ns
    {:keys [snapshot
@@ -204,58 +93,70 @@
                    :static  (:static module))
       :snapshot snapshot})))
 
+(defn compile-module-directory-selected
+  [ns-all {:keys [lang main emit] :as opts}]
+  ;; for each file in the directory, find 'extra' deps
+  (let [lib         (impl/runtime-library)
+        snapshot    (lib/get-snapshot lib)
+        book        (snap/get-book snapshot lang)
+        ns-has?     (fn [ns]
+                      (.startsWith (str ns)
+                                   (str main)))
+        ns-selected (filter ns-has? ns-all)
+        ns-extras   (if (-> emit :code :extra-namespaces false?)
+                      []
+                      (->> (mapcat (fn [ns]
+                                     (:all (deps-imports/module-code-deps book [ns])))
+                                   ns-selected)
+                           (set)
+                           (filter (comp not ns-has?))))
+        
+        ;; generate for all namespaces
+        files  (mapv (fn [ns]
+                       (compile-module-directory-single
+                        ns
+                        {:book book
+                         :snapshot snapshot}
+                        opts))
+                     (concat ns-selected
+                             ns-extras))]
+    (compile/compile-summarise files)))
+
 (defn compile-module-directory
   "TODO"
   {:added "4.0"}
   ([{:keys [header footer lang main search root target emit] :as opts}]
-   (let [lib         (impl/runtime-library)
-         snapshot    (lib/get-snapshot lib)
-         book        (snap/get-book snapshot lang)
-         all-paths   (->> (or search ["src"])
+   (let [all-paths   (->> (or search ["src"])
                           (map #(fs/path %))
                           (mapcat #(fs/select % {:include [".clj$"]})))
-         
-         ;; get paths of all the clojure files with the root namespace
-         ns-all      (pmap fs/file-namespace all-paths)
-         ns-has?     (fn [ns]
-                       (.startsWith (str ns)
-                                    (str main)))
-         ns-selected (filter ns-has? ns-all)
-
-         ;; output the libs
-         #_#__  (h/prn search ns-selected)
-         
-         ;; require all the paths of the file.
-         _  (doseq [ns ns-selected]
-              (require ns))
-         
-         ;; for each file in the directory, find 'extra' deps 
-         ns-extras   (if (-> emit :code :extra-namespaces false?)
-                       []
-                       (->> (mapcat (fn [ns]
-                                      (-> (deps-imports/module-code-deps book [ns])
-                                          :all))
-                                    ns-selected)
-                            (set)
-                            (filter (comp not ns-has?))))
-         
-         ;; output the libs
-         #_#__  (h/prn opts)
-         #_#__  (h/prn ns-extras)
-         
-         ;; generate for all namespaces
-         files  (mapv (fn [ns]
-                        (compile-module-directory-single
-                         ns
-                         {:book book
-                          :snapshot snapshot}
-                         opts))
-                      (concat ns-selected
-                              ns-extras))]
-     (compile/compile-summarise files))))
+         ns-all      (pmap fs/file-namespace all-paths)]
+     (compile-module-directory-selected ns-all opts))))
 
 (def +install-module-directory-fn+
   (compile/types-add :module.directory #'compile-module-directory))
+
+(defn compile-module-graph
+  "compiles a module graph"
+  {:added "4.0"}
+  ([{:keys [lang main] :as opts}]
+   (require main)
+   (let [lib         (impl/runtime-library)
+         snapshot    (lib/get-snapshot lib)
+         book        (snap/get-book snapshot lang)
+         parent (->> (str/split (str main) #"\.")
+                     (butlast)
+                     (str/join ".")
+                     (symbol))
+         selected  (->> (h/do:prn (:all (deps-imports/module-code-deps book [main])))
+                        (filter (fn [ns]
+                                  (.startsWith (str ns)
+                                               (str parent)))))
+         _ (h/prn selected)]
+     (compile-module-directory-selected selected
+                                        (assoc opts :main parent)))))
+
+(def +install-module-graph-fn+
+  (compile/types-add :module.graph #'compile-module-graph)) 
 
 (defn compile-module-schema
   "compiles all namespaces into a single file (for sql)"

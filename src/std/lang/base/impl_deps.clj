@@ -187,29 +187,32 @@
 (defn collect-module-directory-form
   "collects forms for"
   {:added "4.0"}
-  [_ ns {:keys [root-ns
+  [_ ns options]
+  (let [{:keys [root-ns
                 root-libs
                 root-prefix
                 path-separator
                 path-suffix
                 path-replace]
-         :or {root-libs   "libs"
-              root-prefix "."
-              path-suffix ""
-              path-separator "/"
-              path-replace {}}
-         :as options}]
-  (let [[root-local root-prefix] (if (string? root-prefix)
+         :as options} (merge {:root-libs   "libs"
+                              :root-prefix "."
+                              :path-suffix ""
+                              :path-separator "/"
+                              :path-replace {}}
+                             options) 
+        [root-local root-prefix] (if (string? root-prefix)
                                    [nil root-prefix]
                                    (collect-module-ns-select ns root-prefix))
         [_ path-suffix] (if (string? path-suffix)
                           [nil path-suffix]
                           (collect-module-ns-select ns path-suffix))
         root-ns   (or root-local root-ns)
-
+        
+        
         [ns-str
          root-str] [(str ns)
-                    (str root-ns)]        
+                    (str root-ns)]
+        
         is-sub? (.startsWith ^String ns-str
                              root-str)
         ns-new  (if is-sub?

@@ -79,14 +79,16 @@
                              merge (:native emit) {:import :native})
         native (if (-> emit :native :suppress)
                  []
-                 native)]
+                 native)
+        native-bundled  (apply merge (map :bundle (vals native)))]
+    
     (keep (fn [[name module]]
             (if-let [form (deps/module-import-form book name module native-opts)]
               (impl/emit-direct grammar
                                 form
                                 namespace
                                 native-opts)))
-          native)))
+          (merge native native-bundled))))
 
 (defn emit-module-setup-link-arr
   "creates the setup code for internal links"

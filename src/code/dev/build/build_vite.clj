@@ -7,42 +7,33 @@
             [std.text.diff :as diff]
             [code.dev.index-main :as index-main]))
 
-(defonce +server+ (atom nil))
+(def.make CODE_DEV
+  {:tag      "code.dev"
+   :build    ".build/code.dev/src"
+   :default  [{:type   :module.graph
+               :target "."
+               :lang   :js
+               :main   'code.dev.index-main
+               :emit   {:code   {:label true
+                                 :link  {:root-prefix  "@"
+                                         :path-separator "/"
+                                         :path-suffix  ".jsx"}}}}]})
 
-(defn emit-main
-  []
-  (l/emit-script
-   '(code.dev.index-main/main)
-   {:lang :js
-    :library (l/default-library)
-    :module  (l/get-module (l/default-library)
-                           :js
-                           'code.dev.index-main)
-    :emit { ;;:native {:suppress true}
-           :lang/jsx false}
-    :layout :full}))
+(def +init+
+  (make/triggers-set
+   CODE_DEV
+   #{"code.dev"}))
 
-(defn start-server
-  []
-  (swap! +server+
-         (fn [m]
-           
-           (h/sh {:root ".build/code.dev"
-                  :args ["npm" "run" "dev"]
-                  :inherit true}))))
-
-(defn stop-server
-  []
-  (swap! +server+
-         (fn [m]
-           (when m
-             (h/sh {:root ".build/code.dev"
-                    :args ["yarn" "dev"]
-                    :inherit true})))))
 
 
 (comment
-
+  (`make/build-all
+   
+   `CODE_DEV
+   )
+  
+  (std.make/build-all code.dev.build.build-vite/CODE_DEV)
+  
   (h/p (h/sh {:args ["yarn" "create" "vite" "my-project" "--template" "react"]
               }))
 
@@ -64,8 +55,41 @@
               :args ["yarn" "add" "@radix-ui/themes"]}))
   (h/p (h/sh {:root ".build/code.dev"
               :args ["yarn" "add" "@nextjournal/clojure-mode"]}))
-  (h/p )
   (spit ".build/code.dev/src/main.jsx"
         (emit-main))
+
+  
+  (defn emit-main
+    []
+    (l/emit-script
+     '(code.dev.index-main/main)
+     {:lang :js
+      :library (l/default-library)
+      :module  (l/get-module (l/default-library)
+                             :js
+                             'code.dev.index-main)
+      :emit { ;;:native {:suppress true}
+             :lang/jsx false}
+      :layout :full}))
+
+  (defonce +server+ (atom nil))
+  
+  (defn start-server
+    []
+    (swap! +server+
+           (fn [m]           
+             (h/sh {:root ".build/code.dev"
+                    :args ["npm" "run" "dev"]
+                    :inherit true}))))
+
+  (defn stop-server
+    []
+    (swap! +server+
+           (fn [m]
+             (when m
+               (h/sh {:root ".build/code.dev"
+                      :args ["yarn" "dev"]
+                      :inherit true})))))
+
   
   )

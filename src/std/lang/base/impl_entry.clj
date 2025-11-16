@@ -298,7 +298,7 @@
                                            :entry   entry
                                            :mopts   mopts}))
                         body
-                        (get-in snapshot [(:lang entry) :book :meta :transforms :entry]))
+                        (get-in snapshot [(:lang mopts) :book :meta :transforms :entry]))
            body (cond->> body
                   label (str (emit-entry-label grammar entry) "\n")
                   trim  (trim))]
