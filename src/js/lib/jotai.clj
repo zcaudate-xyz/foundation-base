@@ -10,8 +10,7 @@
    :import [["jotai" :as [* Jotai]]
             ["jotai/utils" :as [* JotaiUtils]]]
    :require [[js.react :as r]
-             [js.lib.optics :as optics]]
-   :export [MODULE]})
+             [js.lib.optics :as optics]]})
 
 (h/template-entries [l/tmpl-entry {:type :fragment
                                    :base "JotaiUtils"
@@ -49,8 +48,4 @@
    useAtomValue
    useSetAtom
    useStore])
-
-(def.js MODULE (!:module))
-
-
 

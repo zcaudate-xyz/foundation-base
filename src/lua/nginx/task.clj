@@ -5,8 +5,7 @@
 (l/script :lua
   {:require [[xt.lang.base-lib :as k]
              [xt.sys.cache-common :as cache]
-             [lua.nginx :as n :include [:uuid]]]
-   :export  [MODULE]})
+             [lua.nginx :as n :include [:uuid]]]})
 
 ;;
 ;; tasks are instantiated via a loop
@@ -189,8 +188,6 @@
                     (-/task-loop gid uid handlers instdata)
                     (n/log n/ALERT (cat "\nSTOPPING TASK [" gid "] - " uid))))
     (return uid)))
-
-(def.lua MODULE (!:module))
 
 (comment
   (./import)

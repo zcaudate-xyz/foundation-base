@@ -3,8 +3,7 @@
             [std.lib :as h]))
 
 (l/script :xtalk
-  {:require [[xt.lang.base-lib :as k]]
-   :export [MODULE]})
+  {:require [[xt.lang.base-lib :as k]]})
 
 (defn.xt new-derived
   "creates a new derived value"
@@ -403,4 +402,3 @@
         (set-prev value)
         (return out)))}))
 
-(def.xt MODULE (!:module))

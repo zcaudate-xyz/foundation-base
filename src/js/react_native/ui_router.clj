@@ -15,8 +15,7 @@
              [js.react-native.animate :as a]
              [js.react-native.physical-base :as physical-base]
              [js.react-native.model-context :as model-context]
-             [xt.lang.base-lib :as k]]
-   :export [MODULE]})
+             [xt.lang.base-lib :as k]]})
 
 (defn.js useTransition
   "creates all props involved with transition"
@@ -213,8 +212,5 @@
     (return (r/% Component componentProps)))
 
   (return (r/% -/RouterImpl props)))
-
-
-(def.js MODULE (!:module))
 
 

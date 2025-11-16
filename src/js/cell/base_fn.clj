@@ -7,8 +7,7 @@
   {:require [[js.core :as j]
              [js.cell.base-util :as util]
              [xt.lang.base-runtime :as rt :with [defvar.js]]
-             [xt.lang.base-lib :as k]]
-   :export [MODULE]})
+             [xt.lang.base-lib :as k]]})
 
 (defvar.js ^{:ns "@"}
   CELL_STATE
@@ -249,4 +248,3 @@
                  (k/obj-assign (-/routes-base)
                                routes)))))
 
-(def.js MODULE (!:module))

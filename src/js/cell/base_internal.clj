@@ -7,8 +7,7 @@
              [xt.lang.base-repl :as repl]
              [xt.lang.base-lib :as k]
              [js.cell.base-util :as util]
-             [js.cell.base-fn :as base-fn]]
-   :export [MODULE]})
+             [js.cell.base-fn :as base-fn]]})
 
 (defn.js worker-handle-async
   "worker function for handling async tasks"
@@ -167,4 +166,3 @@
     (-/worker-init-post mock {:done true}))
   (return mock))
 
-(def.js MODULE (!:module))

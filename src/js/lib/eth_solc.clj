@@ -9,8 +9,7 @@
    :bundle {:default  [["solc" :as solc]]}
    :require [[xt.lang.base-lib :as k]
              [js.core :as j]]
-   :import [["solc" :as solc]]
-   :export [MODULE]})
+   :import [["solc" :as solc]]})
 
 (def$.js compile solc.compile)
 
@@ -42,4 +41,3 @@
    (k/json-decode (-/compile (k/json-encode input)))))
 
 
-(def.js MODULE (!:module))

@@ -3,8 +3,7 @@
             [std.lib :as h]))
 
 (l/script :xtalk
-  {:require [[xt.lang.base-lib :as k]]
-   :export [MODULE]})
+  {:require [[xt.lang.base-lib :as k]]})
 
 (defn.xt validate-step
   "validates a single step"
@@ -96,4 +95,3 @@
                                        (return {:status "pending"})))})
   (return result))
 
-(def.xt MODULE (!:module))

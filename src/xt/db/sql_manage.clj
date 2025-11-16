@@ -3,8 +3,7 @@
 
 (l/script :xtalk
   {:require [[xt.lang.base-lib :as k]
-             [xt.db.base-schema :as base-schema]]
-   :export [MODULE]})
+             [xt.db.base-schema :as base-schema]]})
 
 (defn.xt table-create-column
   "column creation function"
@@ -79,4 +78,3 @@
    (return (k/arr-map ks (fn [table-name]
                            (return (-/table-drop schema table-name opts)))))))
 
-(def.xt MODULE (!:module))

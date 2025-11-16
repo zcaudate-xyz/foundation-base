@@ -6,8 +6,7 @@
   {:require [[xt.lang.base-lib :as k]
              [xt.db.sql-graph :as sql-graph]
              [xt.db.sql-util :as sql-util]
-             [xt.db.base-scope :as base-scope]]
-   :export [MODULE]})
+             [xt.db.base-scope :as base-scope]]})
 
 (defn.xt tree-control-array
   "creates a control array"
@@ -233,4 +232,3 @@
     (return qtree)
     (return (sql-graph/select-return schema qtree 0 opts))))
 
-(def.xt MODULE (!:module))

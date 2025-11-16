@@ -4,8 +4,7 @@
 
 (l/script :js
   {:require [[js.core :as j]
-             [xt.lang.base-lib :as k]]
-   :export [MODULE]})
+             [xt.lang.base-lib :as k]]})
 
 (defn.js newRegistry
   "creates a new portal registry"
@@ -118,4 +117,3 @@
       (k/del-key sources name))
     (return (-/triggerSink reg name))))
 
-(def.js MODULE (!:module))

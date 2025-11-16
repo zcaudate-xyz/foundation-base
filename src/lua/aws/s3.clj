@@ -6,8 +6,7 @@
   {:require [[lua.aws.common :as common]
              [lua.nginx :as n :include [:string]]
              [xt.lang.base-lib :as k]
-             [xt.lang.util-xml :as xml]]
-   :export [MODULE]})
+             [xt.lang.util-xml :as xml]]})
 
 (defn.lua policy-public-read-only
   "creates bucket read only policy"
@@ -165,4 +164,3 @@
     (return (-/delete-bucket aws bucket opts)))
   (return m))
 
-(def.lua MODULE (!:module))

@@ -9,8 +9,7 @@
              [js.cell.link-raw :as raw]
              [js.cell.base-util :as util]
              [js.cell.impl-common :as impl-common]
-             [js.core :as j]]
-   :export  [MODULE]})
+             [js.core :as j]]})
 
 (defn.js wrap-cell-args
   "puts the cell as first argument"
@@ -409,4 +408,3 @@
   (var #{link} cell)
   (return (raw/remove-callback link "@/raw")))
 
-(def.js MODULE (!:module))

@@ -4,8 +4,7 @@
   (:refer-clojure :exclude [flush get set]))
 
 (l/script :xtalk
-  {:require  [[xt.lang.base-lib :as k]]
-   :export [MODULE]})
+  {:require  [[xt.lang.base-lib :as k]]})
 
 ;;
 ;; cache encode
@@ -112,4 +111,3 @@
            type
            (fn:> [prev] (k/step-del-key prev key)))))
 
-(def.xt MODULE (!:module))

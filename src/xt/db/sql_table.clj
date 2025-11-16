@@ -5,8 +5,7 @@
   {:require [[xt.lang.base-lib :as k]
              [xt.db.base-schema :as base-schema]
              [xt.db.base-flatten :as f]
-             [xt.db.sql-raw :as raw]]
-   :export [MODULE]})
+             [xt.db.sql-raw :as raw]]})
 
 (defn.xt table-update-single
   "generates single update statement"
@@ -130,4 +129,3 @@
   (var flat (f/flatten schema table-name data {}))
   (return (-/table-emit-flat -/table-emit-upsert schema lookup flat opts)))
 
-(def.xt MODULE (!:module))

@@ -7,8 +7,7 @@
   {:require [[js.core :as j]]
    :import  [["javascript-time-ago" :as TimeAgo]
              ["javascript-time-ago/locale/en" :as TimeAgoEn]
-             ["dateformat" :as DateFormat]]
-   :export [MODULE]})
+             ["dateformat" :as DateFormat]]})
 
 (def.js __init__
   ((fn [] (TimeAgo.addDefaultLocale TimeAgoEn))))
@@ -38,8 +37,6 @@
   {:added "4.0"}
   [date expr]
   (return (DateFormat date expr)))
-
-(def.js MODULE (!:module))
 
 (comment
   (./create-tests))

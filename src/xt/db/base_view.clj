@@ -3,8 +3,7 @@
             [std.lib :as h]))
 
 (l/script :xtalk
-  {:require [[xt.lang.base-lib :as k]]
-   :export [MODULE]})
+  {:require [[xt.lang.base-lib :as k]]})
 
 (defn.xt  all-overview
   "gets an overview of the views"
@@ -37,4 +36,3 @@
                           (return (k/arr-append (method-fn views k "select")
                                                 (method-fn views k "return")))))))
 
-(def.xt MODULE (!:module))

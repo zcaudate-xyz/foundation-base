@@ -16,8 +16,7 @@
              [js.react-native.physical-base :as physical-base]
              [js.react-native.model-geom :as model-geom]
              [js.react-native.model-context :as model-context]
-             [xt.lang.base-lib :as k]]
-   :export [MODULE]})
+             [xt.lang.base-lib :as k]]})
 
 (defn.js tooltipPortalOffset
   "calculates the portal offset"
@@ -253,4 +252,3 @@
            :indicators {:visible vindicator}}}
         children])))
 
-(def.js MODULE (!:module))

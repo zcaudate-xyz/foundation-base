@@ -6,8 +6,7 @@
   {:require [[js.core :as j]
              [js.react :as r]
              [js.react-native :as n]
-             [xt.lang.base-client :as client]]
-   :export [MODULE]})
+             [xt.lang.base-client :as client]]})
 
 (defn.js create-client
   "creates the debug client ws"
@@ -50,4 +49,3 @@
                 {:title "CONNECT"
                  :onPress connFn}]])))
 
-(def.js MODULE (!:module))

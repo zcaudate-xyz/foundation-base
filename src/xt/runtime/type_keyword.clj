@@ -8,8 +8,7 @@
              [xt.lang.base-runtime :as rt :with [defvar.xt]]
              [xt.runtime.interface-common :as interface-common]
              [xt.runtime.interface-spec :as spec]
-             [xt.runtime.common-hash :as common-hash]]
-   :export [MODULE]})
+             [xt.runtime.common-hash :as common-hash]]})
 
 (def.xt KEYWORD_LOOKUP
   {})
@@ -76,4 +75,3 @@
     (return sym))
   (return out))
 
-(def.xt MODULE (!:module))

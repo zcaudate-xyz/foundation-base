@@ -10,8 +10,7 @@
              [js.react-native.physical-base :as physical-base]
              [js.react-native.physical-edit :as physical-edit]
              [js.react-native.helper-theme :as helper-theme]
-             [js.react-native.helper-theme-default :as helper-theme-default]]
-   :export [MODULE]})
+             [js.react-native.helper-theme-default :as helper-theme-default]]})
 
 (defn.js swiperTransform
   "transforms swiper position to screen"
@@ -248,4 +247,3 @@
         (:.. (j/assign touchable
                        panHandlers))]}]]))
 
-(def.js MODULE (!:module))

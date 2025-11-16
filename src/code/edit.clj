@@ -593,6 +593,24 @@
    (reduce zip/insert-left nav
            (take num (repeatedly (fn [] (construct/space)))))))
 
+(defn delete-spaces-left
+  "deletes left of the current expression"
+  {:added "3.0"}
+  ([nav]
+   (cond (level-empty? nav)
+         (tighten-left nav)
+
+         :else
+         (let [elem (zip/left-element nav)]
+           (cond (nil? elem)
+                 nav
+
+                 (base/expression? elem)
+                 nav
+
+                 :else
+                 (recur (zip/delete-left nav)))))))
+
 (defn delete-left
   "deletes left of the current expression"
   {:added "3.0"}

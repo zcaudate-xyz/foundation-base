@@ -5,8 +5,7 @@
             [js.cell.base-fn :as base-fn]))
 
 (l/script :js
-  {:require [[js.cell.link-raw :as link-raw]]
-   :export [MODULE]})
+  {:require [[js.cell.link-raw :as link-raw]]})
 
 (defn tmpl-link-route
   "performs a template"
@@ -47,4 +46,3 @@
     [error base-fn/fn-error]
     [error-async base-fn/fn-error-async]]))
 
-(def.js MODULE (!:module))

@@ -14,8 +14,7 @@
              [js.react-native.physical-base :as physical-base]
              [js.react-native.helper-theme-default :as helper-theme-default]
              [js.react-native.helper-theme :as helper-theme]
-             ]
-   :export [MODULE]})
+             ]})
 
 (defn.js radioBoxTheme
   "creates a radio box theme"
@@ -104,4 +103,3 @@
                (:.. inner)]
        (:.. rprops)]}]))
 
-(def.js MODULE (!:module))

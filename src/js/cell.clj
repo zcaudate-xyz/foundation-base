@@ -9,8 +9,7 @@
              [js.cell.link-raw :as raw]
              [js.cell.impl-common :as impl-common]
              [js.cell.impl-model :as impl-model]
-             [js.core :as j]]
-   :export [MODULE]})
+             [js.core :as j]]})
 
 (defn.js make-cell
   "makes a current cell"
@@ -512,4 +511,3 @@
   (var #{link} cell)
   (return (raw/list-callbacks link)))
 
-(def.js MODULE (!:module))

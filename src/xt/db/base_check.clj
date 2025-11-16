@@ -6,8 +6,7 @@
             [std.json :as json]))
 
 (l/script :xtalk
-  {:require [[xt.lang.base-lib :as k]]
-   :export  [MODULE]})
+  {:require [[xt.lang.base-lib :as k]]})
 
 (defn.xt is-uuid?
   "checks that a string input is a uuid"
@@ -113,8 +112,6 @@
     (-/check-args-length args tlen)
     (-/check-args-type args tlen targs)
     (return true)))
-
-(def.xt MODULE (!:module))
 
 (comment
   (./create-tests)

@@ -8,8 +8,7 @@
              [xt.runtime.interface-spec :as spec]
              [xt.runtime.interface-common :as interface-common]
              [xt.runtime.interface-collection :as interface-collection]
-             [xt.runtime.type-vector-node :as node]]
-   :export [MODULE]})
+             [xt.runtime.type-vector-node :as node]]})
 
 (defn.xt pair-new
   "creates a pair new"
@@ -53,4 +52,3 @@
   [key val]
   (return (-/pair-new key val -/PAIR_PROTOTYPE)))
 
-(def.xt MODULE (!:module))

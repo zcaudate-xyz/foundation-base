@@ -4,8 +4,7 @@
 
 (l/script :js
   {:require [[xt.lang.base-lib :as k]
-             [js.react-native.model-context :as model-context]]
-   :export [MODULE]})
+             [js.react-native.model-context :as model-context]]})
 
 (def.js DefaultTransitions
   {:centered "from_top"
@@ -104,4 +103,3 @@
                                    []))]})
   (return {:style style}))
 
-(def.js MODULE (!:module))

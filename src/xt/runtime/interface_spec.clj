@@ -4,8 +4,7 @@
 
 (l/script :xtalk
   {:require [[xt.lang.base-lib :as k]
-             [xt.lang.base-iter :as it]]
-   :export [MODULE]})
+             [xt.lang.base-iter :as it]]})
   
 (def.xt IAssoc  ["assoc"])
 
@@ -60,5 +59,3 @@
 (def.xt IShow    ["show"])
 
 
-(def.xt MODULE (!:module))
-    

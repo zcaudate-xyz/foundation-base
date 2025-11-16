@@ -6,8 +6,7 @@
   {:require [[xt.lang.base-lib :as k]
              [xt.lang.event-view :as event-view]
              [js.react :as r :include [:fn]]
-             [js.core :as j]]
-   :export [MODULE]})
+             [js.core :as j]]})
 
 (defn.js throttled-setter
   "creates a throttled setter which only updates after a delay"
@@ -401,8 +400,6 @@
   {:added "0.1"}
   [#{view}]
   (return (k/is-empty? (event-view/get-current view))))
-
-(def.js MODULE (!:module))
 
 (comment
   

@@ -8,8 +8,7 @@
              [xt.lang.base-iter :as it]
              [xt.runtime.interface-spec :as spec]
              [xt.runtime.interface-common :as interface-common]
-             [xt.runtime.interface-collection :as interface-collection]]
-   :export [MODULE]})
+             [xt.runtime.interface-collection :as interface-collection]]})
 
 (def.xt EMPTY_MARKER
   {})
@@ -132,4 +131,3 @@
      (-/list-create (f _head)
                     (-/list-map _rest f)))))
 
-(def.xt MODULE (!:module))

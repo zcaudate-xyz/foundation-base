@@ -7,7 +7,5 @@
              [xt.lang.base-iter :as it]
              [xt.runtime.interface-common :as interface-common]
              [xt.runtime.interface-collection :as interface-collection]
-             [xt.runtime.type-vector-node :as node]]
-   :export [MODULE]})
+             [xt.runtime.type-vector-node :as node]]})
 
-(def.xt MODULE (!:module))

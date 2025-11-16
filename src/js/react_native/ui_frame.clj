@@ -7,8 +7,7 @@
              [js.react :as r :include [:fn]]
              [js.react-native :as n :include [:fn]]
              [js.react-native.animate :as a]
-             [js.react-native.physical-base :as physical-base]]
-   :export [MODULE]})
+             [js.react-native.physical-base :as physical-base]]})
 
 (defn.js translationOffset
   "creates the offset translation"
@@ -158,9 +157,6 @@
           :style bottomStyle,
           :visible bottomVisible}
          (r/createElement bottomComponent bottomProps)])]))
-
-(def.js MODULE (!:module))
-
 
 (comment
   )

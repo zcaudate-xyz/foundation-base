@@ -7,8 +7,7 @@
    :bundle {:default [["resty.http" :as ngxhttp]]
             :form    [["multipart" :as ngxmultipart]]}
    :import [["resty.http" :as ngxhttp]
-            ["multipart" :as ngxmultipart]]
-   :export [MODULE]})
+            ["multipart" :as ngxmultipart]]})
 
 (defmacro.lua new
   "creates a new lua client"
@@ -33,4 +32,3 @@
    [parse-uri [uri] {:optional [query-in-path]}]
    [get-client-body-reader [] {:optional [chunksize sock]}]])
 
-(def.lua MODULE (!:module))

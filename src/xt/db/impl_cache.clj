@@ -9,8 +9,7 @@
              [xt.db.cache-pull :as cache-pull]
              [xt.db.cache-util :as cache-util]
              [xt.lang.base-lib :as k]
-             [xt.lang.util-throttle :as th]]
-   :export [MODULE]})
+             [xt.lang.util-throttle :as th]]})
 
 (defn.xt cache-process-event-sync
   "processes event sync data from database"
@@ -77,4 +76,3 @@
   (k/set-key cache "rows" {})
   (return true))
 
-(def.xt MODULE (!:module))

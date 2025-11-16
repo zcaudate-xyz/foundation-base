@@ -3,8 +3,7 @@
             [std.lib :as h]))
 
 (l/script :xtalk
-  {:require [[xt.lang.base-lib :as k]]
-   :export [MODULE]})
+  {:require [[xt.lang.base-lib :as k]]})
 
 (defn-.xt incr-fn
   []
@@ -149,4 +148,3 @@
                 (run-fn)))
   (return [receipt proc]))
 
-(def.xt MODULE (!:module))

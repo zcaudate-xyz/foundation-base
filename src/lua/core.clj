@@ -9,8 +9,7 @@
   {:macro-only true
    :bundle  {:json     {:default [["cjson"  :as cjson]]}
              :ffi      {:default [["ffi"    :as ffi]]}
-             :mustache {:default [["lustache" :as lustache]]}}
-   :export [MODULE]})
+             :mustache {:default [["lustache" :as lustache]]}}})
 
 (def$.lua cjson cjson)
 
@@ -221,4 +220,3 @@
   (-/io-close file)
   (return true))
 
-(def.lua MODULE (!:module))

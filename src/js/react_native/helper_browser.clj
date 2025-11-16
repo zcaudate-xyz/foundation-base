@@ -7,8 +7,7 @@
              [xt.lang.event-route :as event-route]
              [js.react :as r]
              [js.react-native :as n]
-             [js.react.ext-route :as ext-route]]
-   :export [MODULE]})
+             [js.react.ext-route :as ext-route]]})
 
 (defn.js getHash
   "gets the window location hash"
@@ -61,4 +60,3 @@
   (:= window.location.hash (+ "/" (event-route/get-url route))))
 
 
-(def.js MODULE (!:module))

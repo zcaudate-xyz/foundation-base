@@ -3,7 +3,7 @@
             [std.lib :as h]))
 
 (l/script :xtalk
-  {:export [MODULE]})
+  {})
 
 (defn.xt start-interval
   "starts an interval"
@@ -19,4 +19,3 @@
    (return
     (x:stop-interval instance))))
 
-(def.xt MODULE (!:module))

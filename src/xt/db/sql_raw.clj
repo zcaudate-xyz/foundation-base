@@ -3,8 +3,7 @@
 
 (l/script :xtalk
   {:require [[xt.lang.base-lib :as k]
-             [xt.db.sql-util :as ut]]
-   :export [MODULE]})
+             [xt.db.sql-util :as ut]]})
 
 (defn.xt raw-delete
   "encodes a delete query"
@@ -112,4 +111,3 @@
      (x:arr-push out-arr where-str))
    (return (k/cat (k/join "\n " out-arr) ";"))))
 
-(def.xt MODULE (!:module))

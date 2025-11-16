@@ -3,8 +3,7 @@
             [std.lib :as h]))
 
 (l/script :xtalk
-  {:require [[xt.lang.base-lib :as k]]
-   :export [MODULE]})
+  {:require [[xt.lang.base-lib :as k]]})
 
 (def.xt HEX
   (tab ["0" 0]
@@ -362,4 +361,3 @@
   [s]
   (return (-/rgb->hsl (-/hex->rgb s))))
 
-(def.xt MODULE (!:module))

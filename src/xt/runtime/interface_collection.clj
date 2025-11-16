@@ -7,8 +7,7 @@
   {:require [[xt.lang.base-lib :as k]
              [xt.lang.base-iter :as it]
              [xt.runtime.common-hash :as common-hash]
-             [xt.runtime.interface-common :as interface-common]]
-   :export [MODULE]})
+             [xt.runtime.interface-common :as interface-common]]})
 
 (defn.xt start-string
   "TODO"
@@ -119,4 +118,3 @@
    "end_string"
    "sep_string"])
 
-(def.xt MODULE (!:module))

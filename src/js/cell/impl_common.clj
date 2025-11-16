@@ -7,8 +7,7 @@
              [xt.lang.event-common :as event-common]
              [js.cell.link-raw :as raw]
              [js.cell.base-util :as util]
-             [js.core :as j]]
-   :export  [MODULE]})
+             [js.core :as j]]})
 
 (defn.js new-cell-init
   "creates a record for asynchronous resolve"
@@ -172,4 +171,3 @@
    (event-common/trigger-keyed-listeners
     cell view-key (j/assign {:path path} event))))
 
-(def.js MODULE (!:module))

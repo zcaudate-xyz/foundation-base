@@ -7,8 +7,7 @@
 (l/script :lua
   {:bundle {:hmac    [["resty.openssl.hmac" :as ngxhmac]]
             :digest  [["resty.openssl.digest" :as ngxdigest]]}
-   :import  [["resty.openssl.hmac" :as ngxhmac]]
-   :export [MODULE]})
+   :import  [["resty.openssl.hmac" :as ngxhmac]]})
 
 (defn.lua hmac
   "creates an encrypted hmac string
@@ -23,4 +22,3 @@
   (. cipher (update data))
   (return (. cipher (final))))
 
-(def.lua MODULE (!:module))

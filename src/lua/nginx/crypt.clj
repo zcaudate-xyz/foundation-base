@@ -7,8 +7,7 @@
 (l/script :lua
   {:require [[xt.lang.base-lib :as k :suppress true]
              [lua.core :as u]]
-   :import [["crypt.core" :as ngxcryptcore]]
-   :export [MODULE]})
+   :import [["crypt.core" :as ngxcryptcore]]})
 
 (def.lua CHARS "./0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz")
 
@@ -38,4 +37,3 @@
     (:= output (k/cat output (u/substring -/CHARS i i))))
   (return (k/cat prefix output)))
 
-(def.lua MODULE (!:module))

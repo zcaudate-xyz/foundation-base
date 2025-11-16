@@ -14,8 +14,7 @@
              [js.react :as r :include [:fn]]
              [js.react-native :as n :include [:fn]]
              [js.react-native.animate :as a]
-             [js.react-native.helper-theme-default :as helper-theme-default]]
-   :export [MODULE]})
+             [js.react-native.helper-theme-default :as helper-theme-default]]})
 
 (defn.js Tag
   "listens to a single indicator to set ref"
@@ -506,4 +505,3 @@
         :addons addons
         (:.. (j/assign inputable containerProps))]}])))
 
-(def.js MODULE (!:module))

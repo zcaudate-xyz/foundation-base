@@ -5,8 +5,7 @@
 
 (l/script :xtalk
   {:require [[xt.lang.base-lib :as k]
-             [xt.sys.cache-common :as cache]]
-   :export  [MODULE]})
+             [xt.sys.cache-common :as cache]]})
 
 (defn.xt throttle-key
   "creates the throttle key"
@@ -57,4 +56,3 @@
                     id (now-fn))
   (return (-/throttle-run-async throttle id)))
 
-(def.xt MODULE (!:module))

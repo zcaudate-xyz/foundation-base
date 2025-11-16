@@ -10,8 +10,7 @@
                    :lang/jsx false}
             :notify {:host "test.statstrade.io"}}
    :require [[js.core :as j]
-             [xt.lang.base-lib :as k]]
-   :export [MODULE]})
+             [xt.lang.base-lib :as k]]})
 
 ;;
 ;; ROLLER
@@ -116,4 +115,3 @@
       (. ind (setValue shifted))))
   (return true))
 
-(def.js MODULE (!:module))

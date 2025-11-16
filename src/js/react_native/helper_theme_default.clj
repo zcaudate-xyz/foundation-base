@@ -3,8 +3,7 @@
             [std.lib :as h]))
 
 (l/script :js
-  {:require [[js.core :as j]]
-   :export [MODULE]})
+  {:require [[js.core :as j]]})
 
 (def.js FontSize
   {:xxl  {:fontSize 40}
@@ -161,4 +160,3 @@
   (j/assign {}
             -/BaseTheme))
 
-(def.js MODULE (!:module))

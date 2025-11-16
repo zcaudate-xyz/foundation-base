@@ -4,8 +4,7 @@
 
 (l/script :js
   {:require [[js.core :as j]
-             [xt.lang.base-lib :as k]]
-   :export [MODULE]})
+             [xt.lang.base-lib :as k]]})
 
 (def$.js EV_INIT    "@/::INIT")
 
@@ -69,4 +68,3 @@
                       (return x)))
                   k/identity)))
 
-(def.js MODULE (!:module))

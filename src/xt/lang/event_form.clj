@@ -5,8 +5,7 @@
 (l/script :xtalk
   {:require [[xt.lang.base-lib :as k]
              [xt.lang.event-common :as event-common]
-             [xt.lang.util-validate :as validate]]
-   :export [MODULE]})
+             [xt.lang.util-validate :as validate]]})
 
 (defn.xt make-form
   "creates a form"
@@ -252,4 +251,3 @@
       (return true)))
   (return false))
 
-(def.xt MODULE (!:module))

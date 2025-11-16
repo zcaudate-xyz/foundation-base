@@ -4,8 +4,7 @@
             [std.string :as str]))
 
 (l/script :xtalk
-  {:require [[xt.lang.base-lib :as k]]
-   :export [MODULE]})
+  {:require [[xt.lang.base-lib :as k]]})
 
 (defn.xt connect
   "connects to a datasource"
@@ -76,8 +75,6 @@
   (return (-/exec conn "evalsha" [sha "0" (k/unpack args)]
                   {:success (k/wrap-callback cb "success")
                    :error   err-fn})))
-
-(def.xt MODULE (!:module))
 
 (comment
   (./create-tests)

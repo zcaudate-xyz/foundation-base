@@ -7,8 +7,7 @@
   {:require [[js.lib.eth-lib :as eth-lib :include [:fn]]
              [js.lib.eth-solc :as eth-solc  :include [:fn]]
              [xt.lang.base-lib :as k]
-             [js.core :as j]]
-   :export [MODULE]})
+             [js.core :as j]]})
 
 (defn.js send-wei
   "sends currency for bench"
@@ -66,9 +65,6 @@
   (var contract (eth-lib/new-contract address abi provider))
   (var filter   (. contract filters [name]))
   (return (. contract (queryFilter filter))))
-
-(def.js MODULE (!:module))
-
 
 (comment
   )

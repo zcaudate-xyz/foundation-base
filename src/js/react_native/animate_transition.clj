@@ -5,8 +5,7 @@
 (l/script :js
   {:require [[xt.lang.base-lib :as k :suppress true]
              [js.core :as j]
-             [js.react-native.animate :as a]]
-   :export [MODULE]})
+             [js.react-native.animate :as a]]})
 
 ;;
 ;; Transitions
@@ -104,4 +103,3 @@
     (:= (. -/TransitionCache ["default"])
         transition)))
 
-(def.js MODULE (!:module))

@@ -7,8 +7,7 @@
   {:require [[xt.lang.base-lib :as k]
              [xt.lang.base-runtime :as rt]
              [js.core.util :as ut]]
-   :import  [["pg" :as [* Postgres]]]
-   :export [MODULE]})
+   :import  [["pg" :as [* Postgres]]]})
 
 (defn.js default-env
   "gets the default env"
@@ -76,4 +75,3 @@
      (then (fn [] (callback nil conn))))
   (return (-/set-methods conn)))
 
-(def.js MODULE (!:module))

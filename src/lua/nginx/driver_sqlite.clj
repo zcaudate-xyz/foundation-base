@@ -5,8 +5,7 @@
 
 (l/script :lua
   {:require [[xt.lang.base-lib :as k]]
-   :import [["lsqlite3" :as ngxsqlite]]
-   :export [MODULE]})
+   :import [["lsqlite3" :as ngxsqlite]]})
 
 (h/template-entries [l/tmpl-entry {:type :fragment
                                    :base "ngxsqlite"
@@ -79,4 +78,3 @@
         (return (-/raw-query instance query))))
   (return conn))
 
-(def.lua MODULE (!:module))

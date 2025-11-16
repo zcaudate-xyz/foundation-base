@@ -29,4 +29,3 @@
   (TREE.rootNode)
   (. (child 1))))
 
-(def.js MODULE (!:module))

@@ -4,8 +4,7 @@
             [std.lib.function :as f]))
 
 (l/script :xtalk
-  {:require [[xt.lang.base-lib :as k]]
-   :export [MODULE]})
+  {:require [[xt.lang.base-lib :as k]]})
 
 (defn.xt xt-exists?
   "checks that the xt map exists"
@@ -292,8 +291,6 @@
     (k/del-key watch watch-key)
     (return true))
   (return false))
-
-(def.xt MODULE (!:module))
 
 (defn defvar-fn
   "helper function for defvar macros"

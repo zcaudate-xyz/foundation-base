@@ -9,8 +9,7 @@
    :bundle {:default  [["ethers" :as [* ethers]]]}
    :require [[xt.lang.base-lib :as k]
              [js.core :as j]]
-   :import [["ethers" :as [* ethers]]]
-   :export [MODULE]})
+   :import [["ethers" :as [* ethers]]]})
 
 (def$.js ^{:arglists '([message, signature])}
   verifyMessage
@@ -256,4 +255,3 @@
   (. provider (once event-type listener))
   (return (fn [] (. provider (off event-type listener)))))
 
-(def.js MODULE (!:module))

@@ -5,8 +5,7 @@
 
 (l/script :xtalk
   {:require [[xt.lang.base-lib :as k]
-             [xt.db.base-schema :as sch]]
-   :export [MODULE]})
+             [xt.db.base-schema :as sch]]})
 
 (defn.xt flatten-get-links
   "flatten links"
@@ -136,4 +135,3 @@
         (-/flatten-obj schema table-name obj {} acc))))
   (return acc))
 
-(def.xt MODULE (!:module))

@@ -8,8 +8,7 @@
              ["cjson" :as cjson]]
    :require [[xt.lang.base-lib :as k]
              [xt.sys.cache-common :as cache]
-             [lua.nginx :as n :include [:uuid]]]
-   :export  [MODULE]})
+             [lua.nginx :as n :include [:uuid]]]})
 
 (h/template-entries [l/tmpl-macro {:base "websocket"
                                    :inst "wb"
@@ -374,8 +373,6 @@
                       (cache/del (cache/cache name)
                                  uid))}
              {}))
-
-(def.lua MODULE (!:module))
 
 (comment
   (./create-tests)

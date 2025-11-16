@@ -369,9 +369,6 @@
   out-amount
   )
 
-(def.js MODULE (!:module))
-
-
 (comment
   fee-per-kb
   (!.js

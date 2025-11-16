@@ -11,8 +11,7 @@
             :notify {:host "test.statstrade.io"}}
    :require [[js.core :as j]
              [js.react-native :as n :include [:fn]]
-             [xt.lang.base-lib :as k]]
-   :export [MODULE]})
+             [xt.lang.base-lib :as k]]})
 
 (defn.js tagBase
   "base for tag single and tag all"
@@ -59,4 +58,3 @@
                                         m))
                        (return {:value (n/format-entry display)}))})))
 
-(def.js MODULE (!:module))

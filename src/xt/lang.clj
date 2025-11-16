@@ -9,8 +9,7 @@
               [xt.lang.base-lib :as lib   :dynamic true]]
    :header   {:dynamic  true
               :override {:js  xt.lang.override.custom-js
-                         :lua xt.lang.override.custom-lua}}
-   :export [MODULE]})
+                         :lua xt.lang.override.custom-lua}}})
 
 
 

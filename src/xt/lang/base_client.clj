@@ -4,8 +4,7 @@
 
 (l/script :js
   {:require [[xt.lang.base-repl :as repl]
-             [js.core :as j]]
-   :export [MODULE]})
+             [js.core :as j]]})
 
 (defn.js client-basic
   "creates a basic client"
@@ -62,9 +61,7 @@
 (def.js MODULE (!:module))
 
 (l/script :lua
-  {:require [[xt.lang.base-repl :as repl]]
-   :export [MODULE]})
+  {:require [[xt.lang.base-repl :as repl]]})
 
 (l/script :python
-  {:require [[xt.lang.base-repl :as repl]]
-   :export [MODULE]})
+  {:require [[xt.lang.base-repl :as repl]]})

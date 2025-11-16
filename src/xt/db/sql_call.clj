@@ -5,8 +5,7 @@
   {:require [[xt.lang.base-lib :as k]
              [xt.db.sql-util :as ut]
              [xt.db.base-check :as check]
-             [xt.sys.conn-dbsql :as driver]]
-   :export  [MODULE]})
+             [xt.sys.conn-dbsql :as driver]]})
 
 (defn.xt decode-return
   "decodes the return value"
@@ -111,8 +110,6 @@
            conn q
            {:success  success-fn
             :error    error-fn})))
-
-(def.xt MODULE (!:module))
 
 (comment
   (./create-tests)

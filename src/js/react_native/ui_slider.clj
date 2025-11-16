@@ -11,8 +11,7 @@
              [js.react-native.physical-edit :as physical-edit]
              [js.react-native.helper-theme-default :as helper-theme-default]
              [js.react-native.helper-theme :as helper-theme]
-             [xt.lang.base-lib :as k]]
-   :export [MODULE]})
+             [xt.lang.base-lib :as k]]})
 
 (defn.js sliderTheme
   "creates the slider theme"
@@ -168,6 +167,4 @@
                 knobProps)
                (:.. (j/arrayify inner))]
        (:.. rprops)]}]))
-
-(def.js MODULE (!:module))
 

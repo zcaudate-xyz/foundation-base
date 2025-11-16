@@ -8,8 +8,7 @@
              [xt.runtime.interface-spec :as spec]
              [xt.runtime.interface-common :as interface-common]
              [xt.runtime.interface-collection :as interface-collection]
-             [xt.runtime.common-hash :as common-hash]]
-   :export [MODULE]})
+             [xt.runtime.common-hash :as common-hash]]})
 
 (defn.xt syntax-wrap
   "wraps a function to use syntax"
@@ -78,8 +77,6 @@
   (return (:? (k/nil? metadata)
               v
               (-/syntax-create v metadata))))
-
-(def.xt MODULE (!:module))
 
 (comment
   (comment

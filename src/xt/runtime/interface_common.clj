@@ -8,8 +8,7 @@
   {:require [[xt.lang.base-lib :as k]
              [xt.lang.base-iter :as it]
              [xt.runtime.common-hash :as common-hash]
-             [xt.runtime.interface-spec :as spec]]
-   :export [MODULE]})
+             [xt.runtime.interface-spec :as spec]]})
 
 (def.xt NIL  {})
 
@@ -261,4 +260,3 @@
   [coll idx]
   (list '. coll '(empty)))
 
-(def.xt MODULE (!:module))

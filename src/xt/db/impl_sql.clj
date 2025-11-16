@@ -10,8 +10,7 @@
              [xt.db.sql-graph :as sql-graph]
              [xt.db.sql-table :as sql-table]
              [xt.db.sql-raw :as raw]
-             [xt.lang.base-lib :as k]]
-   :export [MODULE]})
+             [xt.lang.base-lib :as k]]})
 
 (defn.xt sql-gen-delete
   "generates the delete statements"
@@ -82,4 +81,3 @@
   [instance]
   (return true))
 
-(def.xt MODULE (!:module))

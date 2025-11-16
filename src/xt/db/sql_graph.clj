@@ -4,8 +4,7 @@
 (l/script :xtalk
   {:require [[xt.lang.base-lib :as k]
              [xt.db.sql-util :as ut]
-             [xt.db.base-scope :as scope]]
-   :export [MODULE]})
+             [xt.db.base-scope :as scope]]})
 
 (defn.xt base-query-inputs
   "formats the query inputs"
@@ -246,4 +245,3 @@
   (var tree (-/select-tree schema query opts))
   (return (-/select-return schema tree 0 opts)))
 
-(def.xt MODULE (!:module))

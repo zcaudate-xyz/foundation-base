@@ -3,8 +3,7 @@
             [std.lang :as l]))
 
 (l/script :xtalk
-  {:require [[xt.lang.base-lib :as k]]
-   :export  [MODULE]})
+  {:require [[xt.lang.base-lib :as k]]})
 
 (def +metatypes+
   {:runtime    {:var {:trigger {}

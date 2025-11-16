@@ -11,8 +11,7 @@
             :notify {:host "test.statstrade.io"}}
    :require [[js.core :as j]
              [js.react-native.helper-color :as c]
-             [xt.lang.base-lib :as k]]
-   :export [MODULE]})
+             [xt.lang.base-lib :as k]]})
 
 ;;
 ;; Pairs
@@ -186,4 +185,3 @@
   (var styleStatic (-/combinedStatic props {} transformFn))
   (return [styleStatic transformFn]))
 
-(def.js MODULE (!:module))

@@ -5,15 +5,13 @@
 (l/script :xtalk
   {:require [[xt.lang.base-lib :as k]
              [xt.db.base-util :as ut]
-             [xt.db.base-scope :as scope]]
-   :export [MODULE]})
+             [xt.db.base-scope :as scope]]})
 
 (l/script :js
   {:require [[js.core :as j]
              [xt.db.base-util :as ut]
              [xt.db.base-scope :as scope]
-             [xt.lang.base-lib :as k]]
-   :export [MODULE]})
+             [xt.lang.base-lib :as k]]})
 
 (defn.xt check-in-clause
   "emulates the sql `in` clause"
@@ -284,4 +282,3 @@
       (:= out (ut/lu-map out))))
   (return out))
 
-(def.xt MODULE (!:module))

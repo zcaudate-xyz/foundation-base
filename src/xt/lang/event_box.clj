@@ -4,8 +4,7 @@
 
 (l/script :xtalk
   {:require [[xt.lang.base-lib :as k]
-             [xt.lang.event-common :as event-common]]
-   :export [MODULE]})
+             [xt.lang.event-common :as event-common]]})
 
 (defn.xt make-box
   "creates a box"
@@ -132,4 +131,3 @@
   (return
    (-/set-data box path arr)))
 
-(def.xt MODULE (!:module))

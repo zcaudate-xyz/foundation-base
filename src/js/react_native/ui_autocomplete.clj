@@ -9,8 +9,7 @@
              [js.react-native :as n :include [:fn [:icon :entypo]]]
              [js.react-native.ui-tooltip :as ui-tooltip]
              [js.react.ext-view :as ext-view]
-             [xt.lang.base-lib :as k]]
-   :export [MODULE]})
+             [xt.lang.base-lib :as k]]})
 
 (defn.js AutocompleteModal
   "creates the autocomplete modal display"
@@ -70,4 +69,3 @@
    (r/% -/AutocompleteModal
         (j/assign #{entries isBusy} rprops))))
 
-(def.js MODULE (!:module))

@@ -11,8 +11,6 @@
              [js.blessed.frame-console :as frame-console]
              [js.blessed.frame-linemenu :as frame-linemenu]
              [js.blessed.frame-sidemenu :as frame-sidemenu]
-             [js.blessed.frame-status :as frame-status]]
-   :export [MODULE]})
+             [js.blessed.frame-status :as frame-status]]})
 
 
-(def.js MODULE (!:module))

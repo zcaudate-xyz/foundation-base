@@ -3,8 +3,7 @@
             [std.lib :as h]))
 
 (l/script :xtalk
-  {:require [[xt.lang.base-lib :as k]]
-   :export [MODULE]})
+  {:require [[xt.lang.base-lib :as k]]})
 
 (defn.xt throttle-create
   "creates a throttle"
@@ -71,4 +70,3 @@
   (var #{queued} throttle)
   (return (k/obj-keys queued)))
 
-(def.xt MODULE (!:module))

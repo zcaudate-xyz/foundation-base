@@ -9,8 +9,7 @@
 (l/script :js
   {:require [[xt.lang.base-lib :as k]
              [xt.lang.base-iter :as it]
-             [xt.lang.base-runtime :as rt]]
-   :export  [MODULE]})
+             [xt.lang.base-runtime :as rt]]})
 
 (defn.js hash-float
   "hashes a floating point"
@@ -27,8 +26,7 @@
 (l/script :lua
   {:require [[xt.lang.base-lib :as k]
              [xt.lang.base-iter :as it]
-             [xt.lang.base-runtime :as rt]]
-   :export  [MODULE]})
+             [xt.lang.base-runtime :as rt]]})
 
 (defn.lua hash-float
   "hashes a floating point"
@@ -48,8 +46,7 @@
 (l/script :python
   {:require [[xt.lang.base-lib :as k]
              [xt.lang.base-iter :as it]
-             [xt.lang.base-runtime :as rt]]
-   :export  [MODULE]})
+             [xt.lang.base-runtime :as rt]]})
 
 (defn.py hash-float
   "hashes a floating point"
@@ -70,8 +67,7 @@
 (l/script :xtalk
   {:require [[xt.lang.base-lib :as k]
              [xt.lang.base-iter :as it]
-             [xt.lang.base-runtime :as rt]]
-   :export  [MODULE]})
+             [xt.lang.base-runtime :as rt]]})
 
 (defabstract.xt hash-float [f])
 
@@ -160,8 +156,4 @@
         (== t "object")
         (return (or (k/get-key x "hash")
                     (rt/xt-lookup-id x)))))
-
-(def.xt MODULE (!:module))
-
-
 

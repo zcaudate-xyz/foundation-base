@@ -7,8 +7,7 @@
              [js.react :as r :include [:fn]]
              [js.core :as j]
              [js.cell :as cl]
-             [js.react.ext-view :as ext-view]]
-   :export [MODULE]})
+             [js.react.ext-view :as ext-view]]})
 
 (def.js TYPES
   {:input    [cl/view-get-input  "current"]
@@ -132,4 +131,3 @@
     (return (fn:> (cl/remove-raw-callback listener-id context))))
   (return listener-id))
 
-(def.js MODULE (!:module))

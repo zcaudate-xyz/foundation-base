@@ -4,8 +4,7 @@
             [std.string :as str]))
 
 (l/script :js
-  {:require [[xt.lang.base-lib :as k]]
-   :export [MODULE]})
+  {:require [[xt.lang.base-lib :as k]]})
 
 
 ;;
@@ -121,4 +120,3 @@
 ;;
 ;;
 
-(def.js MODULE (!:module))

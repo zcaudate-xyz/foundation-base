@@ -6,8 +6,7 @@
   {:require [[xt.lang.base-lib :as k]
              [js.react :as r]
              [js.react-native.animate :as a]
-             [js.react-native.model-roller :as model-roller]]
-   :export [MODULE]})
+             [js.react-native.model-roller :as model-roller]]})
 
 (defn.js useRoller
   "roller model for slider and spinner"
@@ -46,4 +45,3 @@
             offset
             modelFn}))
 
-(def.js MODULE (!:module))

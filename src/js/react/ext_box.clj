@@ -6,8 +6,7 @@
   {:require [[xt.lang.base-lib :as k]
              [xt.lang.event-box :as event-box]
              [js.react :as r]
-             [js.core :as j]]
-   :export [MODULE]})
+             [js.core :as j]]})
 
 (defn.js createBox
   "creates a box for react"
@@ -100,4 +99,3 @@
 (def.js ^{:arglists ([box listener-id])}
   removeListener event-box/remove-listener)
 
-(def.js MODULE (!:module))

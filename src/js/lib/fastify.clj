@@ -7,8 +7,7 @@
   {:require [[js.core :as j]
              [xt.lang.base-runtime :as rt :with [defvar.js]]
              [xt.lang.base-lib :as k]]
-   :import  [["fastify" :as Fastify]]
-   :export [MODULE]})
+   :import  [["fastify" :as Fastify]]})
 
 (defvar.js current-servers
   "gets the current servers"
@@ -62,6 +61,4 @@
                    (close)
                    (then k/T))))
     (return nil)))
-
-(def.js MODULE (!:module))
 

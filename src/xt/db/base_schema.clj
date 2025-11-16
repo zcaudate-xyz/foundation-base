@@ -3,8 +3,7 @@
             [std.lib :as h]))
 
 (l/script :xtalk
-  {:require [[xt.lang.base-lib :as k]]
-   :export [MODULE]})
+  {:require [[xt.lang.base-lib :as k]]})
 
 (def.xt CACHED_SCHEMA (x:lu-create))
 
@@ -212,4 +211,3 @@
               (k/set-key out key val))))
   (return out))
 
-(def.xt MODULE (!:module))

@@ -13,8 +13,7 @@
              [js.react-native :as n :include [:fn]]
              [js.react-native.physical-base :as physical-base]
              [js.react-native.helper-theme-default :as helper-theme-default]
-             [js.react-native.helper-theme :as helper-theme]]
-   :export [MODULE]})
+             [js.react-native.helper-theme :as helper-theme]]})
 
 (defn.js buttonTheme
   "creates the botton theme"
@@ -63,4 +62,3 @@
        :style styleContainer
        (:.. rprops)]}]))
 
-(def.js MODULE (!:module))

@@ -4,8 +4,7 @@
 
 (l/script :js
   {:require [[js.core :as j]
-             [xt.lang.base-lib :as k]]
-   :export [MODULE]})
+             [xt.lang.base-lib :as k]]})
 
 
 ;;
@@ -297,8 +296,6 @@
    (or (k/get-key entry "out")
        (createInFn entry))))
 
-
-(def.js MODULE (!:module))
 
 (comment
   

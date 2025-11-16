@@ -11,8 +11,7 @@
              [js.react-native.physical-base :as physical-base]
              [js.react-native.physical-edit :as physical-edit]
              [js.react-native.helper-theme :as helper-theme]
-             [js.react-native.helper-theme-default :as helper-theme-default]]
-   :export [MODULE]})
+             [js.react-native.helper-theme-default :as helper-theme-default]]})
 
 (def.js styleDigit
   {;;:height 25
@@ -212,4 +211,3 @@
                   iconElem
                   ]]}]))
 
-(def.js MODULE (!:module))

@@ -3,8 +3,7 @@
             [std.lib :as h]))
 
 (l/script :xtalk
-  {:require [[xt.lang.base-lib :as k]]
-   :export [MODULE]})
+  {:require [[xt.lang.base-lib :as k]]})
 
 (defn.xt blank-container
   "creates a blank container"
@@ -186,4 +185,3 @@
       (x:arr-push triggered id)))
   (return triggered))
 
-(def.xt MODULE (!:module))

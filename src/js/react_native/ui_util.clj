@@ -14,8 +14,7 @@
              [js.react-native :as n :include [:fn]]
              [js.react-native.animate :as a]
              [js.react-native.physical-base :as physical-base]
-             [xt.lang.base-lib :as k]]
-   :export [MODULE]})
+             [xt.lang.base-lib :as k]]})
 
 (defn.js Page
   "creates a Page"
@@ -216,4 +215,3 @@
   
   (return (r/% -/FoldImpl props)))
 
-(def.js MODULE (!:module))

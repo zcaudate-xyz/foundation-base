@@ -5,7 +5,7 @@
   (:refer-clojure :exclude [print]))
 
 (l/script :xtalk
- {:export [MODULE]})
+ {})
 
 ;;
 ;; RETURN
@@ -195,4 +195,3 @@
       :error   (fn [err]
                  (return (xt.lang.base-repl/notify err)))}))
 
-(def.xt MODULE (!:module))

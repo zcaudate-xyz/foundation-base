@@ -6,8 +6,7 @@
   {:require [[xt.lang.base-lib :as k]
              [xt.lang.event-form :as event-form]
              [js.react :as r :include [:fn]]
-             [js.core :as j]]
-   :export [MODULE]})
+             [js.core :as j]]})
 
 ;;
 ;; No Validation
@@ -368,4 +367,3 @@
   (return #{onActionReset
             onActionCheck}))
 
-(def.js MODULE (!:module))

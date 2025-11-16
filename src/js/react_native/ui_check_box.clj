@@ -13,8 +13,7 @@
              [js.react-native :as n :include [:fn [:icon :entypo]]]
              [js.react-native.physical-base :as physical-base]
              [js.react-native.helper-theme-default :as helper-theme-default]
-             [js.react-native.helper-theme :as helper-theme]]
-   :export [MODULE]})
+             [js.react-native.helper-theme :as helper-theme]]})
 
 (defn.js checkBoxTheme
   "creates the checkbox theme"
@@ -68,4 +67,3 @@
                (:.. inner)]
        (:.. rprops)]}]))
 
-(def.js MODULE (!:module))

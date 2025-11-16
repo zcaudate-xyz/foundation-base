@@ -9,8 +9,7 @@
             :emit {:native {:suppress true}
                    :lang/jsx false}
             :notify {:host "test.statstrade.io"}}
-   :require [[xt.lang.base-lib :as k]]
-   :export [MODULE]})
+   :require [[xt.lang.base-lib :as k]]})
 
 (def.js POSITION
   {"top"    {:opposite "bottom"
@@ -49,4 +48,3 @@
     (+ "border" S0 "Color") "transparent"
     (+ "border" S1 "Color") "transparent"}))
 
-(def.js MODULE (!:module))

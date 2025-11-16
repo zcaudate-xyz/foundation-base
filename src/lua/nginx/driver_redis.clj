@@ -5,8 +5,7 @@
 
 (l/script :lua
   {:bundle {:default [["resty.redis" :as ngxredis]]}
-   :import  [["resty.redis" :as ngxredis]]
-   :export [MODULE]})
+   :import  [["resty.redis" :as ngxredis]]})
 
 (h/template-entries [l/tmpl-macro {:base "redis"
                                    :inst "rds"
@@ -48,10 +47,6 @@
             (return (f conn (unpack args))))))
     (return conn))
   (return nil err))
-
-(def.lua MODULE (!:module))
-
-
 
 (comment
   (./create-tests)

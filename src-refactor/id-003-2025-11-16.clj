@@ -1,7 +1,7 @@
 (ns refactor.id-001-2025-12-05)
 
 (comment
-
+  
   (code.manage/refactor-code
    '[js]
    {:print {:function true}
@@ -10,10 +10,10 @@
               (code.query/modify
                nav
                [(fn [form]
-                  (= '(def.js MODULE (!:module))))]
+                  (= form '(def.js MODULE (!:module))))]
                (fn [nav]
-                 (-> nav
-                     (code.edit/delete)))))]})
+                 
+                 nav)))]})
   
   (code.manage/locate-test
    :all

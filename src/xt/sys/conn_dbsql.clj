@@ -4,8 +4,7 @@
             [std.string :as str]))
 
 (l/script :xtalk
-  {:require [[xt.lang.base-lib :as k]]
-   :export [MODULE]})
+  {:require [[xt.lang.base-lib :as k]]})
 
 (defn.xt connect
   "connects to a database"
@@ -57,7 +56,4 @@
   (var query-fn (or (k/get-key conn "::query_sync")
                     (k/get-key conn "::query")))
   (return (query-fn raw)))
-
-(def.xt MODULE (!:module))
-
 

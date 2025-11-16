@@ -6,8 +6,7 @@
 (l/script :lua
   {:require [[xt.lang.base-lib :as k]
              [xt.lang.base-runtime :as rt]]
-   :import [["pgmoon" :as ngxpg]]
-   :export [MODULE]})
+   :import [["pgmoon" :as ngxpg]]})
 
 (defn.lua default-env
   "gets the default env"
@@ -137,9 +136,6 @@
         (k/set-key opts "query" query)
         (return (-/raw-query conn query))))
   (return conn))
-
-(def.lua MODULE (!:module))
-
 
 (comment
   (./create-tests))

@@ -6,8 +6,7 @@
   {:require [[xt.lang.event-log :as event-log]
              [js.react :as r]
              [js.core :as j]
-             ]
-   :export [MODULE]})
+             ]})
 
 (defn.js makeLog
   "creates a log for react"
@@ -31,4 +30,3 @@
     (return (fn [] (event-log/remove-listener log listener-id))))
   (return latest))
 
-(def.js MODULE (!:module))

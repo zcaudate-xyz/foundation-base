@@ -4,8 +4,7 @@
             [std.lib.schema.base :as base]))
 
 (l/script :xtalk
-  {:require [[xt.lang.base-lib :as k]]
-   :export [MODULE]})
+  {:require [[xt.lang.base-lib :as k]]})
 
 (def +scope+ (h/map-entries
               (fn [[k v]]
@@ -218,4 +217,3 @@
             :links (k/arr-map links get-child-tree)
             :custom custom}]))
 
-(def.xt MODULE (!:module))

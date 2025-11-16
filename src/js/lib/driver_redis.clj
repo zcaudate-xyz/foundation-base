@@ -5,8 +5,7 @@
 
 (l/script :js
   {:require [[js.core.util :as ut]]
-   :import  [["redis" :as [* Redis]]]
-   :export [MODULE]})
+   :import  [["redis" :as [* Redis]]]})
 
 (h/template-entries [l/tmpl-entry {:type :fragment
                                    :base "Redis"
@@ -47,4 +46,3 @@
      (then (fn [] (callback nil conn))))
   (return conn))
 
-(def.js MODULE (!:module))

@@ -4,8 +4,5 @@
             [net.http :as http]))
 
 (l/script :js
-  {:import [["@supabase/ssr" :as #{createServerClient}]]
-   :export [MODULE]})
+  {:import [["@supabase/ssr" :as #{createServerClient}]]})
 
-(def.js MODULE
-  (!:module))

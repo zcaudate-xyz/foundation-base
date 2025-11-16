@@ -10,8 +10,7 @@
              [xt.runtime.interface-spec :as spec]
              [xt.runtime.interface-collection :as interface-collection]
              [xt.runtime.type-vector-node :as node]
-             [xt.runtime.type-pair :as type-pair]]
-   :export [MODULE]})
+             [xt.runtime.type-pair :as type-pair]]})
 
 (defn.xt vector-get-idx
   "gets the index in the persistent vector"
@@ -354,4 +353,3 @@
 ;; 
 ;;
 
-(def.xt MODULE (!:module))

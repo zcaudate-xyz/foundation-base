@@ -5,8 +5,7 @@
 
 (l/script :xtalk
   {:require [[xt.lang.base-lib :as k]
-             [xt.sys.cache-common :as cache]]
-   :export  [MODULE]})
+             [xt.sys.cache-common :as cache]]})
 
 ;;
 ;;
@@ -318,11 +317,6 @@
                        queue
                        item
                        size)))
-
-(def.xt MODULE (!:module))
-
-
-
 
 (comment
   (./create-tests)

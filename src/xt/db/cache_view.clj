@@ -4,8 +4,7 @@
 
 (l/script :xtalk
   {:require [[xt.lang.base-lib :as k]
-             [xt.db.base-scope :as base-scope]]
-   :export [MODULE]})
+             [xt.db.base-scope :as base-scope]]})
 
 (defn.xt tree-base
   "creates a tree base"
@@ -114,4 +113,3 @@
                                   (k/arr-append sel-input))
                               true)))
 
-(def.xt MODULE (!:module))

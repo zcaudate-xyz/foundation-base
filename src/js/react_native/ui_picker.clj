@@ -12,8 +12,7 @@
              [js.react-native.physical-edit :as physical-edit]
              [js.react-native.helper-roller :as helper-roller]
              [js.react-native.helper-theme :as helper-theme]
-             [js.react-native.helper-theme-default :as helper-theme-default]]
-   :export [MODULE]})
+             [js.react-native.helper-theme-default :as helper-theme-default]]})
 
 (defn.js pickerTheme
   "creates the picker theme"
@@ -197,4 +196,3 @@
                            :zIndex (* 10 scale)
                            :transform [{:translateY (* -2 translate)}]}}))}]))]))
 
-(def.js MODULE (!:module))

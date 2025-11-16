@@ -11,8 +11,7 @@
             :react   [["valtio" :as [* Valtio]]]}
    :import [["valtio/vanilla" :as [* ValtioCore]]
             ["valtio/utils" :as [* ValtioUtils]]
-            ["valtio" :as [* Valtio]]]
-   :export [MODULE]})
+            ["valtio" :as [* Valtio]]]})
 
 ;;
 ;; valtio
@@ -216,7 +215,5 @@
             data
             setData
             resetData}))
-
-(def.js MODULE (!:module))
 
 (comment)

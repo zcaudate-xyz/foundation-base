@@ -5,8 +5,7 @@
 (l/script :xtalk
   {:require [[xt.lang.base-lib :as k]
              [xt.lang.base-iter :as it]
-             [xt.runtime.interface-common :as interface-common]]
-   :export [MODULE]})
+             [xt.runtime.interface-common :as interface-common]]})
 
 (def.xt BITS 5)
 (def.xt WIDTH (k/pow 2 -/BITS))
@@ -204,4 +203,3 @@
 (def.xt EMPTY_VECTOR_NODE
   (-/node-create nil []))
 
-(def.xt MODULE (!:module))

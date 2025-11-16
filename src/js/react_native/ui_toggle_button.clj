@@ -14,8 +14,7 @@
              [js.react-native.physical-base :as physical-base]
              [js.react-native.helper-theme-default :as helper-theme-default]
              [js.react-native.helper-theme :as helper-theme]
-             ]
-   :export [MODULE]})
+             ]})
 
 (defn.js toggleButtonTheme
   "creates the toggle button theme"
@@ -63,6 +62,4 @@
                 textProps)
                (:.. inner)]
        (:.. rprops)]}]))
-
-(def.js MODULE (!:module))
 

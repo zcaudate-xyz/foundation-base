@@ -3,8 +3,7 @@
             [std.lib :as h]))
 
 (l/script :xtalk
-  {:require [[xt.lang.base-lib :as k]]
-   :export [MODULE]})
+  {:require [[xt.lang.base-lib :as k]]})
 
 (defn.xt has-entry
   "checks if entry exists"
@@ -290,4 +289,3 @@
                            :link-id link-id})))))
   (return out))
 
-(def.xt MODULE (!:module))

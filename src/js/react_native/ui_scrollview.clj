@@ -13,8 +13,7 @@
              [js.react :as r :include [:fn]]
              [js.react-native :as n :include [:fn]]
              [js.react-native.animate :as a]
-             [xt.lang.base-lib :as k]]
-   :export [MODULE]})
+             [xt.lang.base-lib :as k]]})
 
 (defn.js ScrollViewImpl
   "creates a non global enhanced scrollview"
@@ -109,8 +108,6 @@
                   styleBackground
                   styleIndicator
                   (:.. rprops)]}]))]))
-
-(def.js MODULE (!:module))
 
 (comment
   (l/lib:unused))

@@ -10,8 +10,7 @@
              [xt.db.impl-sql :as impl-sql]
              [xt.lang.base-lib :as k]
              [xt.lang.util-throttle :as th]
-             [xt.sys.conn-dbsql :as conn-dbsql]]
-   :export [MODULE]})
+             [xt.sys.conn-dbsql :as conn-dbsql]]})
 
 (def.xt IMPL
   {"db.cache" {:create  (fn:> {:rows {}})
@@ -203,4 +202,3 @@
                           :listen listen
                           :callback callback})))
 
-(def.xt MODULE (!:module))

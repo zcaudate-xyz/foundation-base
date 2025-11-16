@@ -6,8 +6,7 @@
   {:runtime :websocket
    :require [[js.core :as j]
              [xt.lang.util-color :as c]
-             [xt.lang.base-lib :as k]]
-   :export [MODULE]})
+             [xt.lang.base-lib :as k]]})
 
 ;;
 ;; hsl function
@@ -250,4 +249,3 @@
                                               2)))
                          (j/join "")))))
 
-(def.js MODULE (!:module))

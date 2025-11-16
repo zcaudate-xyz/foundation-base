@@ -4,8 +4,7 @@
             [std.lib :as h]))
 
 (l/script :xtalk
-  {:require [[xt.lang.base-lib :as k]]
-   :export [MODULE]})
+  {:require [[xt.lang.base-lib :as k]]})
 
 (defn.xt new-observed
   [v]
@@ -61,4 +60,3 @@
    :create-transition -/mock-transition
    :stop-transition   (fn [])})
 
-(def.xt MODULE (!:module))

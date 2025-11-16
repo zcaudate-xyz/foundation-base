@@ -2,12 +2,10 @@
   (:require [std.lang :as l]))
 
 (l/script :xtalk
-  {:require [[xt.lang.base-lib :as k]]
-   :export [MODULE]})
+  {:require [[xt.lang.base-lib :as k]]})
 
 (l/script :lua
-  {:require [[xt.lang.base-lib :as k]]
-   :export [MODULE]})
+  {:require [[xt.lang.base-lib :as k]]})
 
 (def.xt OPERATORS
   {:neq "!="
@@ -493,9 +491,6 @@
                                (return (k/cat "json_group_array(json_object(" (k/join ", " arr) "))")))
            :return-link-fn   (fn [s link-name]
                                (return (k/cat "'" link-name "', " s)))}))
-
-(def.xt MODULE (!:module))
-
 
 (comment
   (./create-tests))

@@ -4,8 +4,7 @@
 
 (l/script :xtalk
   {:require [[xt.lang.base-lib :as k]
-             [xt.lang.event-common :as event-common]]
-   :export  [MODULE]})
+             [xt.lang.event-common :as event-common]]})
 
 ;;
 ;; CREATE
@@ -519,10 +518,6 @@
       :lookup (k/arr-group-by results
                               (k/key-fn key)
                               k/identity)})))
-
-(def.xt MODULE (!:module))
-
-
 
 (comment
   (defn.xt pipeline-run-remote

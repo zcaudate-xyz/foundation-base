@@ -3,8 +3,7 @@
             [std.lib :as h]))
 
 (l/script :xtalk
-  {:require [[xt.lang.base-lib :as k]]
-   :export [MODULE]})
+  {:require [[xt.lang.base-lib :as k]]})
 
 (defn.xt tag-string
   "gets the string description for a given tag"
@@ -21,4 +20,3 @@
                      (k/replace "-" " ")
                      (k/replace (k/trim desc) "")))))
 
-(def.xt MODULE (!:module))

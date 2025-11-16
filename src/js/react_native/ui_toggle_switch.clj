@@ -14,8 +14,7 @@
              [js.react-native.physical-base :as physical-base]
              [js.react-native.helper-theme-default :as helper-theme-default]
              [js.react-native.helper-theme :as helper-theme]
-             ]
-   :export [MODULE]})
+             ]})
 
 (defn.js toggleSwitchTheme
   "creates the toggle switch theme"
@@ -103,4 +102,3 @@
                (:.. inner)]
        (:.. rprops)]}]))
 
-(def.js MODULE (!:module))

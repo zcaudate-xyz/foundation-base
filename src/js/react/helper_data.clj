@@ -4,8 +4,7 @@
 
 (l/script :js
   {:require [[js.react :as r]
-             [js.core :as j]]
-   :export [MODULE]})
+             [js.core :as j]]})
 
 (def.js __WRAPPED__ ((:- "Symbol") "__WRAPPED__"))
 
@@ -91,6 +90,4 @@
        (return
         (r/createElement component (j/assign {:ref ref} props)))))
     displayName)))
-
-(def.js MODULE (!:module))
 

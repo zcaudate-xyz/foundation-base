@@ -8,6 +8,5 @@
 
 (l/script :xtalk
   {:require [[xt.lang.base-lib :as k]
-             [xt.lang.base-runtime :as rt]]
-   :export  [MODULE]})
+             [xt.lang.base-runtime :as rt]]})
 

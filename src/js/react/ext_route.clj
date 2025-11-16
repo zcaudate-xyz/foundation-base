@@ -6,8 +6,7 @@
   {:require [[xt.lang.base-lib :as k]
              [xt.lang.event-route :as event-route]
              [js.react :as r :include [:fn]]
-             [js.core :as j]]
-   :export [MODULE]})
+             [js.core :as j]]})
 
 (defn.js makeRoute
   "makes a react compatible route"
@@ -127,4 +126,3 @@
           (:? flag (setValue flagVal) (setValue nil)))])
   (return [flag setFlag]))
 
-(def.js MODULE (!:module))

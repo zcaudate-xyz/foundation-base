@@ -7,8 +7,7 @@
 ;;
 
 (l/script :lua
-  {:require [[xt.lang.base-lib :as k]]
-   :export [MODULE]})
+  {:require [[xt.lang.base-lib :as k]]})
 
 (defn.lua parse-xml-params
   "parses the args"
@@ -51,8 +50,7 @@
 ;;
 
 (l/script :xtalk
-  {:require [[xt.lang.base-lib :as k]]
-   :export [MODULE]})
+  {:require [[xt.lang.base-lib :as k]]})
 
 (defabstract.xt parse-xml-params [s])
 
@@ -208,4 +206,3 @@
                       "")
           "</" tag ">")))
 
-(def.xt MODULE (!:module))

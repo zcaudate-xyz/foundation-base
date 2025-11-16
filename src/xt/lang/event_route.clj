@@ -4,8 +4,7 @@
 
 (l/script :xtalk
   {:require [[xt.lang.base-lib :as k]
-             [xt.lang.event-common :as event-common]]
-   :export  [MODULE]})
+             [xt.lang.event-common :as event-common]]})
 
 (defn.xt interim-from-url
   "creates interim from url"
@@ -400,4 +399,3 @@
              (-/interim-to-tree (-/interim-from-url (or url "")) true))
   (-/set-url route (or url "") true))
 
-(def.xt MODULE (!:module))

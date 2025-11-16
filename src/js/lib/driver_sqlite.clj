@@ -4,8 +4,7 @@
 
 (l/script :js
   {:require [[xt.lang.base-lib :as k]
-             [js.core.util :as ut]]
-   :export [MODULE]})
+             [js.core.util :as ut]]})
 
 (defn.js raw-query
   "raw query for sql lite results"
@@ -61,9 +60,6 @@
              (then (fn [SQL]
                      (var conn (new SQL.Database))
                      (return (callback nil (-/set-methods conn))))))))
-
-(def.js MODULE (!:module))
-
 
 (comment
   (System/getenv)

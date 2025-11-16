@@ -6,8 +6,7 @@
 (l/script :xtalk
   {:require [[xt.lang.base-lib :as k]
              [xt.lang.base-iter :as it]
-             [xt.runtime.interface-common :as data-common]]
-   :export [MODULE]})
+             [xt.runtime.interface-common :as data-common]]})
 
 (def.xt BITS 5)
 (def.xt WIDTH (k/pow 2 -/BITS))
@@ -86,4 +85,3 @@
                 node
                 (-/node-clone node)))))
 
-(def.xt MODULE (!:module))

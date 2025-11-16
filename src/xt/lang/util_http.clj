@@ -3,8 +3,7 @@
 
 (l/script :js
   {:require [[xt.lang.base-lib :as k :suppress true]
-             [js.core :as j]]
-   :export [MODULE]})
+             [js.core :as j]]})
 
 (defn.js fetch-call
   "completes a http call with options
@@ -116,7 +115,7 @@
 ;;
 
 (l/script :xtalk
-  {:export [MODULE]})
+  {})
 
 (defabstract.xt fetch-call [url options])
 
@@ -136,6 +135,4 @@
 
 (defabstract.xt ws-send [conn text])
 
-
-(def.xt MODULE (!:module))
 

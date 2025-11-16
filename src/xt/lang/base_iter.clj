@@ -6,8 +6,7 @@
                             keep partition take-nth]))
 
 (l/script :xtalk
-  {:require [[xt.lang.base-macro :as k]]
-   :export [MODULE]})
+  {:require [[xt.lang.base-macro :as k]]})
 
 (defmacro.xt ^{:style/indent 1}
   for:iter
@@ -305,4 +304,3 @@
            (:= i (- n 1)))
        (:= i (- i 1))))))
 
-(def.xt MODULE (!:module))

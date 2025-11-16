@@ -3,8 +3,7 @@
             [std.lib :as h]))
 
 (l/script :xtalk
-  {:require [[xt.lang.base-lib :as k]]
-   :export [MODULE]})
+  {:require [[xt.lang.base-lib :as k]]})
 
 (defn.xt new-task
   "creates a new task"
@@ -184,4 +183,3 @@
            (return [id unloaded]))))
   (return (k/arr-keep rorder unload-task)))
 
-(def.xt MODULE (!:module))

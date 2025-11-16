@@ -4,8 +4,7 @@
 
 (l/script :xtalk
   {:require [[xt.lang.base-lib :as k]
-             [xt.lang.event-common :as event-common]]
-   :export  [MODULE]})
+             [xt.lang.event-common :as event-common]]})
 
 (defn.xt new-log-latest
   "creates a new log-latest"
@@ -59,4 +58,3 @@
         :else
         (return false)))
 
-(def.xt MODULE (!:module))

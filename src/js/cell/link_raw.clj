@@ -7,8 +7,7 @@
 (l/script :js
   {:require [[js.core :as j]
              [xt.lang.base-lib :as k]
-             [js.cell.base-util :as util]]
-   :export [MODULE]})
+             [js.cell.base-util :as util]]})
 
 ;;
 ;;
@@ -282,4 +281,3 @@
                                      :body input})
                 (list 'then '(xt.lang.base-repl/>notify))))))
 
-(def.js MODULE (!:module))

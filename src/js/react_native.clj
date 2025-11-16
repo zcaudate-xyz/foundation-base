@@ -28,8 +28,7 @@
              [js.react :as r :include [:fn]]
              [js.react.helper-portal :as helper-portal]
              [xt.lang.base-lib :as k]]
-   :import [["react-native" :as [* ReactNative]]]
-   :export [MODULE]})
+   :import [["react-native" :as [* ReactNative]]]})
 
 (def +StyleLayout+
   #{:alignContent
@@ -1393,9 +1392,6 @@
             setSinkRef
             contentRef
             getLayouts}))
-
-(def.js MODULE (!:module))
-
 
 (comment
   (./ns:purge))

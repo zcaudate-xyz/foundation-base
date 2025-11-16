@@ -4,8 +4,7 @@
 
 (l/script :js
   {:require  [[xt.lang.base-lib :as k]]
-   :import   [["@react-native-async-storage/async-storage" :as RNAsyncStorage]]
-   :export   [MODULE]})
+   :import   [["@react-native-async-storage/async-storage" :as RNAsyncStorage]]})
 
 (h/template-entries [l/tmpl-entry {:type :fragment
                                    :base "RNAsyncStorage.default"
@@ -49,4 +48,3 @@
   (return
    (-/mergeItem key (k/json-encode data))))
 
-(def.js MODULE (!:module))

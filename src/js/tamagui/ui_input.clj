@@ -7,8 +7,7 @@
    :require [[js.tamagui :as tm]
              [js.react :as r]
              [js.react.helper-data :as data]
-             [js.core :as j]]
-   :export [MODULE]})
+             [js.core :as j]]})
 
 (def.js defaultContextValues
   {:size "$true"
@@ -202,4 +201,3 @@
   
   )
 
-(def.js MODULE (!:module))

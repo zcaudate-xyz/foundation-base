@@ -3,8 +3,7 @@
             [std.lang :as l]))
 
 (l/script :xtalk
-  {:require [[xt.lang.base-lib :as k]]
-   :export [MODULE]})
+  {:require [[xt.lang.base-lib :as k]]})
 
 (defn.xt collect-routes
   "collect routes"
@@ -105,8 +104,6 @@
   {:added "4.0"}
   [arr]
   (return (-/lu-nested arr (fn:> [v] (k/get-key v "id")))))
-
-(def.xt MODULE (!:module))
 
 (comment
   (./create-tests)

@@ -12,8 +12,7 @@
              [js.react-native.physical-edit :as physical-edit]
              [js.react-native.helper-roller :as helper-roller]
              [js.react-native.helper-theme :as helper-theme]
-             [js.react-native.helper-theme-default :as helper-theme-default]]
-   :export [MODULE]})
+             [js.react-native.helper-theme-default :as helper-theme-default]]})
   
 (def.js ITEMS
   ["0" "1" "2" "3" "4" "5" "6" "7" "8" "9"])
@@ -289,8 +288,6 @@
                     :style {:position "absolute"
                             :height "100%"
                             :width "100%"}}]]]}]))
-
-(def.js MODULE (!:module))
 
 (comment
 
