@@ -5,7 +5,7 @@
 (l/script :js
   {:runtime :websocket
    :config {:port 1312}
-   :require [[js.react :as r :include [:dom]]
+   :require [[js.react :as r]
              [xt.lang.base-lib :as k]
              [xt.lang.base-client :as client]
              [code.dev.client.browser.browser-main :as browser-main]
@@ -19,17 +19,17 @@
    (r/ui [:app/top
           [:app/body]]
      {:app/top     [:div
-                    {:class ["flex flex-col w-full"]
+                    {:class ["flex flex-col w-full" "bg-green-200"]
                      :style {:top 0 :bottom 0}}]
       
       :app/body    [:% browser-main/BrowserMain]})))
 
-(def.js AppRoot nil)
-
 (defn.js main
   []
-  (var rootElement (document.getElementById "root"))
-  (when (not -/AppRoot)
-    (:= -/AppRoot (ReactDOM.createRoot rootElement)))
-  (. -/AppRoot (render [:% -/AppIndex]))
-  (return true))
+  (ui/renderRoot "id" -/AppIndex))
+
+
+
+(comment
+  (!.js
+    (+ 1 2 3)))

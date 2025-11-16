@@ -50,29 +50,6 @@
     [:script {:src "https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/mode/clojure/clojure.min.js"}]
     [:script {:src "https://unpkg.com/@xtalk/clojure-mode@0.3.7/dist/clojure-mode.umd.js"}]    
 
-    ;; clojure-mode
-    [:script {:src "/js/clojure-mode.umd.js"}]
-
-    ;; puck
-    [:script {:type "module"}
-     "import * as Puck from 'https://cdn.jsdelivr.net/npm/@measured/puck@0.20.2/+esm';\n
-      window.Puck = Puck"]
-    #_[:script {:src "/js/puck.umd.js"}]
-
-    ;; radix
-    [:script {:type "module"}
-     "import * as RadixMain from 'https://cdn.jsdelivr.net/npm/@radix-ui/themes@3.2.1/+esm';\n
-      console.log(RadixMain)
-      window.RadixMain = RadixMain"]
-    #_[:script {:src "/js/radix-main.umd.js"}]
-
-    ;; react-live
-    [:script {:type "module"}
-     "import ReactLive from 'https://cdn.jsdelivr.net/npm/react-live@4.1.8/+esm';\n
-      window.ReactLive = ReactLive"]
-    
-    ;; recharts
-    [:script {:src "/js/recharts.umd.js"}]
     
     ;; daisyui
     [:link {:href "https://cdn.jsdelivr.net/npm/daisyui@5"
@@ -103,9 +80,6 @@
     ;; diff
     [:script {:src "https://cdnjs.cloudflare.com/ajax/libs/jsdiff/5.1.0/diff.min.js"}]
 
-    [:script
-     {:type "module"}
-     #_(or body "")]
     
     [:style
      
@@ -134,7 +108,9 @@
    
 
    [:body
-    [:div {:id "root"}]]])
+    [:div {:id "root"}]
+    [:script
+     (or body "")]]])
 
 (comment
   (css/generate-css
@@ -170,3 +146,29 @@
      :body (emit-main 'code.dev.client.page-demo)})))
 
 
+
+(comment
+;; clojure-mode
+    [:script {:src "/js/clojure-mode.umd.js"}]
+
+    ;; puck
+    [:script {:type "module"}
+     "import * as Puck from 'https://cdn.jsdelivr.net/npm/@measured/puck@0.20.2/+esm';\n
+      window.Puck = Puck"]
+    #_[:script {:src "/js/puck.umd.js"}]
+
+    ;; radix
+    [:script {:type "module"}
+     "import * as RadixMain from 'https://cdn.jsdelivr.net/npm/@radix-ui/themes@3.2.1/+esm';\n
+      console.log(RadixMain)
+      window.RadixMain = RadixMain"]
+    #_[:script {:src "/js/radix-main.umd.js"}]
+
+    ;; react-live
+    [:script {:type "module"}
+     "import ReactLive from 'https://cdn.jsdelivr.net/npm/react-live@4.1.8/+esm';\n
+      window.ReactLive = ReactLive"]
+    
+    ;; recharts
+    [:script {:src "/js/recharts.umd.js"}]
+  )

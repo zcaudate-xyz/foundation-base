@@ -124,11 +124,15 @@
   ([body {:keys [entry mopts]}]
    (let [{:keys [emit]} mopts
          {:lang/keys [format]} emit]
-     (case format
-       (:none :global :commonjs) body
-       (case (:op-key entry)
-         (:defclass :def :defn) (str "export " body)
-         body)))))
+     (cond (= :script (:type emit))
+           body
+
+           :else
+           (case format
+             (:none :global :commonjs) body
+             (case (:op-key entry)
+               (:defclass :def :defn) (str "export " body)
+               body))))))
 
 (def +meta+
   (book/book-meta

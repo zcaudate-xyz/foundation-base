@@ -265,7 +265,8 @@
    {:keys [library
            lang
            emit] :as meta}]
-  (let [[stage grammar book namespace mopts] (emit-options meta)
+  (let [[stage grammar book namespace mopts] (emit-options
+                                              (update meta :emit merge {:type :script}))
         bulk (emit-bulk? form)
         [form deps natives]  (deps/collect-script book form mopts)
         imports-arr  (emit-script-imports natives emit [stage grammar book namespace mopts])
@@ -274,7 +275,9 @@
                                   form
                                   namespace
                                   (-> mopts
-                                      (update :emit merge (:body emit))
+                                      (update :emit
+                                              merge
+                                              (:body emit))
                                       (assoc :bulk bulk)))]
     (emit-script-join imports-arr deps-arr body)))
 

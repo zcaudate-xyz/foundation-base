@@ -22,12 +22,6 @@
       
       :app/body    [:% task-main/TaskMain]})))
 
-(def.js AppRoot nil)
-
 (defn.js main
   []
-  (var rootElement (document.getElementById "root"))
-  (when (not -/AppRoot)
-    (:= -/AppRoot (ReactDOM.createRoot rootElement)))
-  (. -/AppRoot (render [:% -/AppTasks]))
-  (return true))
+  (ui/renderRoot "id" -/AppTasks))

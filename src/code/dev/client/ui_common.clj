@@ -3,13 +3,42 @@
             [std.lang :as l]))
 
 (l/script :js
-  {:require [[js.react :as r :include [:dom :fn]]
+  {:require [[js.react :as r]
              [xt.lang.base-lib :as k]
              [xt.lang.base-client :as client]]
    :export [MODULE]})
 
 (def$.js ReactDiffViewer
   window.ReactDiffViewer)
+
+(defn.js isReactRoot
+  [container]
+  (var internalKey (. (Object.keys container)
+                      (find (fn [key]
+                              (return (. key (startsWith "__reactContainer")))))))
+  (return (or (boolean internalKey)
+              (and (. container (hasOwnProperty "_reactRootContainer"))
+                   (!== (. container _reactRootContainer) undefined)))))
+
+(defn.js getReactRoot
+  [domNode]
+  (var internalKey
+       (k/arr-find (k/obj-keys domNode)
+                   (fn [key]
+                     (return (. key (startsWith "__reactContainer$"))))))
+  
+  (if (> internalKey 0)
+    (return (. domNode [internalKey])))
+  (return nil))
+
+(defn.js renderRoot
+  [id Component]
+  (var rootElement (document.getElementById id))
+  (var root (-/getReactRoot rootElement))
+  (when  (k/nil? root)
+    (:= root (r/createDOMRoot rootElement)))
+  (. root (render [:% Component]))
+  (return true))
 
 (defn.js TabComponent
   [#{[controls

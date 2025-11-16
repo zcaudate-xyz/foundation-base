@@ -4,13 +4,14 @@
 
 (l/script :js
   {:runtime :websocket
-   :config {:port 1311}
+   :config {:port 1313}
    :require [[js.react :as r]
              [js.core :as j]
              [js.lib.puck :as puck]
              [js.lib.radix :as radix]
              [xt.lang.base-lib :as k]
-             [xt.lang.base-client :as client]]})
+             [xt.lang.base-client :as client]
+             [code.dev.client.ui-common :as ui]]})
 
 (def.js config
   {:components
@@ -32,7 +33,7 @@
 (defn.js AppIndex
   []
   (r/init []
-    (client/client-ws "localhost" 1311 {}))
+    (client/client-ws "localhost" 1313 {}))
   (return
    (r/ui [:app/top
           [:app/body]]
@@ -45,12 +46,6 @@
                      :data -/initialData
                      :onPublish -/save}]})))
 
-(def.js AppRoot nil)
-
 (defn.js main
   []
-  (var rootElement (document.getElementById "root"))
-  (when (not -/AppRoot)
-    (:= -/AppRoot (r/createDOMRoot rootElement)))
-  (. -/AppRoot (render [:% -/AppIndex]))
-  (return true))
+  (ui/renderRoot "id" -/AppIndex))

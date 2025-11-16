@@ -31,6 +31,4 @@
 (defn.js BrowserMain
   []
   (return
-   #_[:button "hello"]
-   [:% (. rx/Button render) "HELLO"])
-  )
+   [:button "HELLO"]))
