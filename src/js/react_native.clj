@@ -3,31 +3,33 @@
             [std.lib :as h]))
 
 (l/script :js
-  {:bundle {:default  [["react-native" :as [* ReactNative]]]
-            :localize [["react-native-localize" :as [* RNLocalize]]]
-            :svg      [["react-native-svg" :as [* RNSvg]]]
-            :safearea [["react-native-safe-area-context" :as [* RNSafeArea]]]
-            :gesture  [["react-native-gesture-handler" :as [* RNGestureHandler]]]
-            :error    [["react-native-error-boundary" :as RNErrorBoundary]]
-            :video    [["react-native-video" :as RNVideo]]
-            :gradient [["expo-linear-gradient" :as [* ExpoLinearGradient]]]
-            :nav      {:default  [["@react-navigation/native" :as [* RNNav]]]
-                       :stack    [["@react-navigation/stack"  :as [* RNNavStack]]]
-                       :drawer   [["@react-navigation/drawer" :as [* RNNavDrawer]]]
-                       :tabs     [["@react-navigation/bottom-tabs" :as [* RNNavTabs]]]}
-            :icon     {:material   [["react-native-vector-icons/MaterialCommunityIcons"
-                                     :as RNIcon]]
-                       :feather    [["react-native-vector-icons/Feather" :as RNIcon]]
-                       :fa         [["react-native-vector-icons/FontAwesome" :as RNIcon]]
-                       :fa5        [["react-native-vector-icons/FontAwesome5" :as RNIcon]]
-                       :ionicons   [["react-native-vector-icons/Ionicons" :as RNIcon]]
-                       :entypo     [["react-native-vector-icons/Entypo" :as RNIcon]]
-                       :ant        [["react-native-vector-icons/AntDesign" :as RNIcon]]}}
-   :require [[js.core :as j]
+  {:require [[js.core :as j]
              [js.react :as r]
              [js.react.helper-portal :as helper-portal]
              [xt.lang.base-lib :as k]]
-   :import [["react-native" :as [* ReactNative]]]})
+   :import [["react-native" :as [* ReactNative]]
+            ["react-native-video" :as RNVideo]
+            ["react-native-gesture-handler" :as [* RNGestureHandler]]
+            ["@react-navigation/bottom-tabs" :as [* RNNavTabs]]
+            ["react-native" :as [* ReactNative]]
+            ["react-native-localize" :as [* RNLocalize]]
+            ["@react-navigation/drawer" :as [* RNNavDrawer]]
+            ["expo-linear-gradient" :as [* ExpoLinearGradient]]
+            ["react-native-svg" :as [* RNSvg]]
+            ["@react-navigation/stack" :as [* RNNavStack]]
+            ["react-native-error-boundary" :as RNErrorBoundary]
+            ["react-native-safe-area-context" :as [* RNSafeArea]]
+            ["@react-navigation/native" :as [* RNNav]]
+            ["react-native-vector-icons/MaterialCommunityIcons" :as RNIcon]]})
+
+(comment
+  :icon     {:material   []
+             :feather    [["react-native-vector-icons/Feather" :as RNIcon]]
+             :fa         [["react-native-vector-icons/FontAwesome" :as RNIcon]]
+             :fa5        [["react-native-vector-icons/FontAwesome5" :as RNIcon]]
+             :ionicons   [["react-native-vector-icons/Ionicons" :as RNIcon]]
+             :entypo     [["react-native-vector-icons/Entypo" :as RNIcon]]
+             :ant        [["react-native-vector-icons/AntDesign" :as RNIcon]]})
 
 (def +StyleLayout+
   #{:alignContent
