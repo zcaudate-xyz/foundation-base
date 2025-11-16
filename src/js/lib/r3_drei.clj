@@ -3,8 +3,7 @@
             [std.lib :as h]))
 
 (l/script :js
-  {:macro-only true
-   :bundle  {:default [["@react-three/drei" :as ReactThreeDrei]]}})
+  {:bundle  {:default [["@react-three/drei" :as ReactThreeDrei]]}})
 
 (h/template-entries [l/tmpl-entry {:type :fragment
                                    :base "ReactThreeDrei"

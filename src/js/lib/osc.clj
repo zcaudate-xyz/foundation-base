@@ -4,8 +4,7 @@
   (:refer-clojure :exclude [send]))
 
 (l/script :js
-  {:macro-only true
-   :bundle  {:default [["osc-js" :as OSC]]}
+  {:bundle  {:default [["osc-js" :as OSC]]}
    :import [["osc-js" :as OSC]]})
 
 (defmacro.js newOSC

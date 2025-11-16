@@ -7,7 +7,7 @@
                    nil? fn? first second nth replace last throw]))
 
 (l/script :xtalk
-  {:macro-only true})
+  {})
 
 (defmacro.xt ^{:style/indent 1}
   for:array

@@ -4,8 +4,7 @@
             [std.json :as json]))
 
 (l/script :js
-  {:macro-only true
-   :bundle {:default [["react-native-gesture-handler" :as [* rnGesture]]]}})
+  {:bundle {:default [["react-native-gesture-handler" :as [* rnGesture]]]}})
 
 ;;
 ;; Gestures

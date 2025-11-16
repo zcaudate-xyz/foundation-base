@@ -5,8 +5,7 @@
   (:refer-clojure :exclude [compile]))
 
 (l/script :js
-  {:macro-only true
-   :bundle {:default  [["solc" :as solc]]}
+  {:bundle {:default  [["solc" :as solc]]}
    :require [[xt.lang.base-lib :as k]
              [js.core :as j]]
    :import [["solc" :as solc]]})

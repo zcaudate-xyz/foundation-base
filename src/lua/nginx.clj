@@ -6,8 +6,7 @@
   (:refer-clojure :exclude [print flush time re-find]))
 
 (l/script :lua
-  {:macro-only true
-   :bundle {:string [["resty.string" :as ngxstr]]
+  {:bundle {:string [["resty.string" :as ngxstr]]
             :sha1   [["resty.sha1"   :as ngxsha1]]
             :sha256 [["resty.sha256" :as ngxsha256]]
             :md5    [["resty.md5"    :as ngxmd5]]

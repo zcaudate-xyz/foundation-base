@@ -4,8 +4,7 @@
   (:refer-clojure :exclude [use val proxy]))
 
 (l/script :js
-  {:macro-only true
-   :bundle {:default [["jotai" :as [* Jotai]]
+  {:bundle {:default [["jotai" :as [* Jotai]]
                       ["jotai/utils" :as [* JotaiUtils]]]}
    :import [["jotai" :as [* Jotai]]
             ["jotai/utils" :as [* JotaiUtils]]]

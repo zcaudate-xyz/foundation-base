@@ -3,8 +3,7 @@
             [std.lib :as h]))
 
 (l/script :js
-  {:macro-only true
-   :bundle  {:default [["three" :as [* Three]]]}})
+  {:bundle  {:default [["three" :as [* Three]]]}})
 
 (h/template-entries [l/tmpl-entry {:type :fragment
                                    :base "Three"

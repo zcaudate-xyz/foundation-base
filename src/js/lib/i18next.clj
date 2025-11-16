@@ -3,8 +3,7 @@
             [std.lib :as h]))
 
 (l/script :js
-  {:macro-only true
-   :bundle {:default   [["i18n" :as I18n]]}})
+  {:bundle {:default   [["i18n" :as I18n]]}})
 
 (h/template-entries [l/tmpl-macro {:base "SupabaseClient"
                                    :inst "supabase"

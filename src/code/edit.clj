@@ -611,6 +611,24 @@
                  :else
                  (recur (zip/delete-left nav)))))))
 
+(defn delete-spaces-right
+  "deletes right of the current expression"
+  {:added "3.0"}
+  ([nav]
+   (cond (level-empty? nav)
+         (tighten-right nav)
+
+         :else
+         (let [elem (zip/right-element nav)]
+           (cond (nil? elem)
+                 nav
+
+                 (base/expression? elem)
+                 nav
+
+                 :else
+                 (recur (zip/delete-right nav)))))))
+
 (defn delete-left
   "deletes left of the current expression"
   {:added "3.0"}

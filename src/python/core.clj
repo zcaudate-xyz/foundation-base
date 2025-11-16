@@ -10,7 +10,7 @@
               python.core.builtins)
 
 (l/script :python
-  {:macro-only true})
+  {})
 
 (comment
   (./create-tests))

@@ -6,8 +6,7 @@
             [net.http :as http]))
 
 (l/script :js
-  {:macro-only true
-   :import [["@supabase/supabase-js" :as [* SupabaseClient]]]
+  {:import [["@supabase/supabase-js" :as [* SupabaseClient]]]
    :bundle {:default   [["@supabase/supabase-js" :as [* SupabaseClient]]]}})
 
 (h/template-entries [l/tmpl-entry {:type :fragment

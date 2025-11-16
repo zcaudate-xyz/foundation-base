@@ -4,8 +4,7 @@
   (:refer-clojure :exclude [keyword]))
 
 (l/script :js
-  {:macro-only true
-   :bundle   {:default [["mustache" :as Mustache]]}})
+  {:bundle   {:default [["mustache" :as Mustache]]}})
 
 
 (def$.js renderTemplate Mustache.render)

@@ -3,8 +3,7 @@
             [std.lib :as h]))
 
 (l/script :lua
-  {:macro-only true
-   :bundle {:default [["resty.websocket.client" :as ngxwsclient]]}
+  {:bundle {:default [["resty.websocket.client" :as ngxwsclient]]}
    :import [["resty.websocket.client" :as ngxwsclient]]})
 
 (defmacro.lua new

@@ -3,8 +3,7 @@
             [std.lib :as h]))
 
 (l/script :js
-  {:macro-only true
-   :bundle  {:default [["@react-three/postprocessing" :as [* ReactThreePp]]]}})
+  {:bundle  {:default [["@react-three/postprocessing" :as [* ReactThreePp]]]}})
 
 (h/template-entries [l/tmpl-entry {:type :fragment
                                    :base "ReactThreePp"

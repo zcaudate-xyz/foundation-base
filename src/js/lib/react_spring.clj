@@ -3,8 +3,7 @@
             [std.lib :as h]))
 
 (l/script :js
-  {:macro-only true
-   :bundle  {:native [["@react-spring/native" :as [* ReactSpring]]]
+  {:bundle  {:native [["@react-spring/native" :as [* ReactSpring]]]
              :web    [["@react-spring/web" :as [* ReactSpring]]]}})
 
 (h/template-entries [l/tmpl-entry {:type :fragment

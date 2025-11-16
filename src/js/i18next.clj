@@ -3,8 +3,7 @@
             [std.lib :as h]))
 
 (l/script :js
-  {:macro-only true
-   :bundle {:default  [["react-i18next" :as [* ReactI18next]]
+  {:bundle {:default  [["react-i18next" :as [* ReactI18next]]
                        ["i18next" :as [* I18next]]]}
    :import [["react-i18next" :as [* ReactI18n]]
             ["i18next" :as [* I18next]]]})

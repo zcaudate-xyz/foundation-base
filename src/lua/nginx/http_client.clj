@@ -3,8 +3,7 @@
             [std.lib :as h]))
 
 (l/script :lua
-  {:macro-only true
-   :bundle {:default [["resty.http" :as ngxhttp]]
+  {:bundle {:default [["resty.http" :as ngxhttp]]
             :form    [["multipart" :as ngxmultipart]]}
    :import [["resty.http" :as ngxhttp]
             ["multipart" :as ngxmultipart]]})

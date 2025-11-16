@@ -3,8 +3,7 @@
             [std.lib :as h]))
 
 (l/script :js
-  {:macro-only true
-   :bundle {:default  [["tamagui" :as [* T]]]
+  {:bundle {:default  [["tamagui" :as [* T]]]
             :toast    [["@tamagui/toast" :as [* TToast]]]
             :token    [["@tamagui/get-token" :as [* TToken]]]}})
 

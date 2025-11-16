@@ -3,8 +3,7 @@
             [std.lib :as h]))
 
 (l/script :js
-  {:macro-only true
-   :bundle {:default  [["bitcoinjs-lib" :as Bitcoin]]
+  {:bundle {:default  [["bitcoinjs-lib" :as Bitcoin]]
             :message  [["bitcoinjs-message" :as BitcoinMessage]]
             :ecc      [["tiny-secp256k1" :as TinySecp256k1]]
             :ecpair   [["ecpair" :as ECPairFactory]]

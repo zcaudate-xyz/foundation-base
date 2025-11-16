@@ -4,8 +4,7 @@
   (:refer-clojure :exclude [get set remove chars filter finnd nth]))
 
 (l/script :js
-  {:macro-only true
-   :bundle {:default [["optics-ts/standalone" :as [* Optics]]]}
+  {:bundle {:default [["optics-ts/standalone" :as [* Optics]]]}
    :import [["optics-ts/standalone" :as [* Optics]]]})
 
 (h/template-entries [l/tmpl-entry {:type :fragment

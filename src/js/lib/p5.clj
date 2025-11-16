@@ -3,8 +3,7 @@
             [std.lib :as h]))
 
 (l/script :js
-  {:macro-only true
-   :bundle {:default  [["p5" :as p5]]}})
+  {:bundle {:default  [["p5" :as p5]]}})
 
 (def +p5+
   '[ADD

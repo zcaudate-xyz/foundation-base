@@ -5,7 +5,7 @@
                             merge min namespace partition range
                             reduce reverse shuffle some sort]))
 
-(l/script :js {:macro-only true})
+(l/script :js {})
 
 (defn d3-macro-fn
   "rewrite function

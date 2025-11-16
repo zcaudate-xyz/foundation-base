@@ -11,7 +11,7 @@
 (defonce ^:dynamic *saved-module* nil)
 
 (l/script :xtalk
-  {:macro-only true})
+  {})
 
 (defn current-module
   "gets the current module"

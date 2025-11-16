@@ -5,7 +5,7 @@
 
 (l/script :python
   python.core
-  {:macro-only true})
+  {})
 
 (def$.py ^{:arglists '([name])} __import__ __import__)
 

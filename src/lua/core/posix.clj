@@ -6,8 +6,7 @@
   (:refer-clojure :exclude [print flush time re-find read send sync]))
 
 (l/script :lua
-  {:macro-only true
-   :bundle   {:default [["posix" :as posix]]}
+  {:bundle   {:default [["posix" :as posix]]}
    :import  [["posix" :as posix]]})
 
 (def +methods+

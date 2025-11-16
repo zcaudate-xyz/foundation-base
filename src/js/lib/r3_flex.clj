@@ -3,8 +3,7 @@
             [std.lib :as h]))
 
 (l/script :js
-  {:macro-only true
-   :bundle  {:default [["@react-three/flex" :as [* ReactThreeFlex]]]}})
+  {:bundle  {:default [["@react-three/flex" :as [* ReactThreeFlex]]]}})
 
 (h/template-entries [l/tmpl-entry {:type :fragment
                                    :base "ReactThreeFlex"

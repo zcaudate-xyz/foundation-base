@@ -3,8 +3,7 @@
             [std.lib :as h]))
 
 (l/script :js
-  {:macro-only true
-   :bundle {:default  [["react-native" :as [* ReactNative]]]
+  {:bundle {:default  [["react-native" :as [* ReactNative]]]
             :localize [["react-native-localize" :as [* RNLocalize]]]
             :svg      [["react-native-svg" :as [* RNSvg]]]
             :safearea [["react-native-safe-area-context" :as [* RNSafeArea]]]

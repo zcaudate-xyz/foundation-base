@@ -6,7 +6,7 @@
 
 (l/script :python
   python.core
-  {:macro-only true})
+  {})
 
 (def$.py ^{:arglists '([])} globals globals)
 

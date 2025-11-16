@@ -3,8 +3,7 @@
             [std.lib :as h]))
 
 (l/script :js
-  {:macro-only true
-   :runtime :basic
+  {:runtime :basic
    :bundle {:default  [["tree-sitter" :as parser]]}})
 
 

@@ -3,8 +3,7 @@
             [std.lib :as h]))
 
 (l/script :js
-  {:macro-only true
-   :bundle  {:gltf  [["three/examples/jsm/loaders/GLTFLoader.js" :as [* ThreeGLTF]]]
+  {:bundle  {:gltf  [["three/examples/jsm/loaders/GLTFLoader.js" :as [* ThreeGLTF]]]
              :fbx   [["three/examples/jsm/loaders/FBXLoader.js"  :as [* ThreeFBX]]]
              :orbit [["three/addons/controls/OrbitControls.js"   :as [* ThreeOrbitControl]]]}})
 

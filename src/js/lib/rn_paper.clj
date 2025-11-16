@@ -3,8 +3,7 @@
             [std.lib :as h]))
 
 (l/script :js
-  {:macro-only true
-   :bundle {:default   [["react-native-paper" :as [* RNPaper]]]}})
+  {:bundle {:default   [["react-native-paper" :as [* RNPaper]]]}})
 
 ;;
 ;; Paper

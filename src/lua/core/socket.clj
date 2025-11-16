@@ -6,8 +6,7 @@
 
 (l/script :lua
   lua.core
-  {:macro-only true
-   :bundle  {:socket   {:default [["socket" :as socket]]}
+  {:bundle  {:socket   {:default [["socket" :as socket]]}
              :url      {:default [["socket.url" :as socket-url]]}}})
 
 (def$.lua socket socket)

@@ -3,8 +3,7 @@
             [std.lib :as h]))
 
 (l/script :js
-  {:macro-only true
-   :bundle  {:default [["@react-three/fiber" :as [* ReactThree]]]
+  {:bundle  {:default [["@react-three/fiber" :as [* ReactThree]]]
              :lena    [["leva" :as  [* ReactLena]]]}})
 
 (h/template-entries [l/tmpl-entry {:type :fragment

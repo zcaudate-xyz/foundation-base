@@ -4,8 +4,7 @@
             [std.html :as html]))
 
 (l/script :js
-  {:macro-only true
-   :bundle {:default  [["@primer/react" :as [* Primer]]]}
+  {:bundle {:default  [["@primer/react" :as [* Primer]]]}
    :import [["@primer/react" :as [* Primer]]]})
 
 (h/template-entries [l/tmpl-entry {:type :fragment

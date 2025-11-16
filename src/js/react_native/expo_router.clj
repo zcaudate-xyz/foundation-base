@@ -3,8 +3,7 @@
             [std.lib :as h]))
 
 (l/script :js
-  {:macro-only true
-   :bundle {:default  [["expo-router" :as [* ExpoRouter]]]}})
+  {:bundle {:default  [["expo-router" :as [* ExpoRouter]]]}})
 
 (h/template-entries [l/tmpl-entry {:type :fragment
                                    :base "ExpoRouter"

@@ -3,8 +3,7 @@
             [std.lib :as h]))
 
 (l/script :js
-  {:macro-only true
-   :bundle {:lib       [["expo" :as [* Expo]]]
+  {:bundle {:lib       [["expo" :as [* Expo]]]
             :auth      [["expo-auth-session" :as [* ExpoAuth]]]
             :contacts  [["expo-contacts" :as [* ExpoContacts]]]
             :clipboard [["expo-clipboard" :as [* ExpoClipboard]]]

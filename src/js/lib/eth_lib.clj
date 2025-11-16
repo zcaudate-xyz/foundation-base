@@ -5,8 +5,7 @@
   (:refer-clojure :exclude [compile]))
 
 (l/script :js
-  {:macro-only true
-   :bundle {:default  [["ethers" :as [* ethers]]]}
+  {:bundle {:default  [["ethers" :as [* ethers]]]}
    :require [[xt.lang.base-lib :as k]
              [js.core :as j]]
    :import [["ethers" :as [* ethers]]]})

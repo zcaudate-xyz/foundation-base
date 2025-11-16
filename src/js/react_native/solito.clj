@@ -3,8 +3,7 @@
             [std.lib :as h]))
 
 (l/script :js
-  {:macro-only true
-   :bundle {:link   [["solito/link" :as [* SolLink]]]
+  {:bundle {:link   [["solito/link" :as [* SolLink]]]
             :router [["solito/router" :as [* SolRouter]]]
             :image  [["solito/image" :as [* SolImage]]]
             :moti   [["solito/moti" :as [* SolMoti]]]

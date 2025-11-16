@@ -3,8 +3,7 @@
             [std.lib :as h]))
 
 (l/script :js
-  {:macro-only true
-   :bundle  {:default [["@tanstack/react-query" :as [* ReactQuery]]]}
+  {:bundle  {:default [["@tanstack/react-query" :as [* ReactQuery]]]}
    :import [["@tanstack/react-query" :as [* ReactQuery]]]
    :require [[js.react :as r]
              [xt.lang.base-lib :as k]]})
