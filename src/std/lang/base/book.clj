@@ -292,31 +292,6 @@
   (atom/atom-delete-fn book [[:modules module-id section symbol-id]]))
 
 
-;;
-;;
-;;
-
-#_
-(defn module-create-bundled
-  "creates bundled packages given input modules"
-  {:added "4.0"}
-  [book requires]
-  (h/map-vals  (fn [{:keys [id suppress no-default include]}]
-                 (let [include  (cond-> (set (flatten include))
-                                  (not no-default) (conj :default))
-                       
-                       {:keys [macro-only bundle]} (get-module book id)
-                       suppress (or suppress
-                                    (and macro-only (not (:fn include))))
-                       native  (mapcat (fn bundle-fn [[k e]]
-                                         (cond (not (include k)) nil
-                                               (map? e) (mapcat bundle-fn e)
-                                               (vector? e) e))
-                                       bundle)]
-                   {:suppress suppress
-                    :native   native}))
-               requires))
-
 (defn module-create-filename
   "creates a filename for module"
   {:added "4.0"}

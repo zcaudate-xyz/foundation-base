@@ -1,6 +1,7 @@
 (ns std.lang.base.impl-lifecycle-test
   (:use code.test)
   (:require [std.lang.base.impl-lifecycle :refer :all]
+            [std.lang.base.compile :as compile]
             [js.blessed :as blessed]
             [js.blessed.ui-core :as ui-core]
             [xt.lang.base-lib :as k]
@@ -17,35 +18,27 @@
       second
       keys
       sort)
-  => '(:code :link :native :setup :teardown)
+  => '(:code :direct :native :setup :teardown)
 
-  (:link (second (emit-module-prep 'xt.lang.base-lib
+  (:direct (second (emit-module-prep 'xt.lang.base-lib
                                    {:lang :lua
                                     :emit {:compile {:type :graph
                                                      :root-ns 'lua}}})))
-  => ()
+  => #{}
   
-  (:link (second (emit-module-prep 'js.blessed
+  (:direct (second (emit-module-prep 'js.blessed
                                    {:lang :js
                                     :emit {:compile {:type :graph
                                                      :base    'js
                                                      :root-ns 'js}}})))
-  => ()
+  => #{}
   
-  (:link (second (emit-module-prep 'js.blessed.ui-core
-                                   {:lang :js
-                                    :emit {:compile {:type :graph
-                                                     :base    'js
-                                                     :root-ns 'js.blessed.ui-core}}})))
-  => '(["./xt/lang/base-lib" {:as k, :ns xt.lang.base-lib}]
-       ["./js/react" {:as r, :ns js.react}]
-       ["./js/blessed/ui-style" {:as ui-style, :ns js.blessed.ui-style}])
-
-  (emit-module-prep 'js.blessed.ui-core
-                    {:lang :js
-                     :emit {:compile {:type :directory
-                                      :base    'js
-                                      :root-ns 'js.blessed.ui-core}}}))
+  (:direct (second (emit-module-prep 'js.blessed.ui-core
+                                     {:lang :js
+                                      :emit {:compile {:type :graph
+                                                       :base    'js
+                                                       :root-ns 'js.blessed.ui-core}}})))
+  => '#{js.blessed.ui-style xt.lang.base-lib js.react})
 
 ^{:refer std.lang.base.impl-lifecycle/emit-module-setup-concat :added "4.0"}
 (fact "joins setup raw into individual blocks")
@@ -66,58 +59,84 @@
   ^:hidden
   
   (emit-module-setup-native-arr 'js.blessed.ui-core
-                                {:lang :js}
                                 (emit-module-prep 'js.blessed.ui-core
                                                   {:lang :js
                                                    :emit {:compile {:type :graph
                                                                     :base    'js
                                                                     :root-ns 'js.blessed.ui-core}}}))
-  => '("import nodeUtil from 'util'"
-       "import React from 'react'"
-       "import blessed from 'blessed'"
-       "import reactBlessed from 'react-blessed'"))
+  => '("import React from 'react'" "import Blessed from 'blessed'"))
+
+^{:refer std.lang.base.impl-lifecycle/emit-module-setup-link-import :added "4.0"}
+(fact "creates a import structure from links"
+  ^:hidden
+
+  (emit-module-setup-link-import
+   :graph
+   'js.blessed.ui-core
+   'js.react
+   (compile/compile-module-create-links
+    '[js.blessed.ui-core
+      js.blessed.ui-style
+      js.react
+      xt.lang.base-lib]
+    'js
+    {})
+   (std.lang/get-module
+    (std.lang/default-library)
+    :js
+    'js.blessed.ui-core)
+   {:path-separator "/"
+    :root-prefix "@"})
+  => '{:ns "../react", :suffix "", :as r})
 
 ^{:refer std.lang.base.impl-lifecycle/emit-module-setup-link-arr :added "4.0"}
 (fact "creates the setup code for internal links"
   ^:hidden
   
-  (emit-module-setup-link-arr 'js.blessed.ui-core
-                              {:lang :js}
-                              (emit-module-prep 'js.blessed.ui-core
-                                                {:lang :js
-                                                 :emit {:compile {:type :graph
-                                                                  :base    'js
-                                                                  :root-ns 'js.blessed.ui-core}}}))
-  => '("import k from './xt/lang/base-lib'"
-       "import r from './js/react'"
-       "import ui_style from './js/blessed/ui-style'")
+  (emit-module-setup-link-arr
+   {:emit {:code   {:link {:path-separator "/"
+                           :root-prefix "@"}}
+           :compile {:links  (compile/compile-module-create-links
+                              '[js.blessed.ui-core
+                                js.blessed.ui-style
+                                js.react
+                                xt.lang.base-lib]
+                              'js
+                              {})}}}
+   (emit-module-prep
+    'js.blessed.ui-core
+    {:lang :js
+     :emit {:compile {:type :graph
+                      :base    'js
+                      :root-ns 'js.blessed.ui-core
+                      }}}))
 
-  (emit-module-setup-link-arr 'js.blessed.ui-core
-                              {:lang :js}
-                              (emit-module-prep 'js.blessed.ui-core
-                                                {:lang :js
-                                                 :emit {:compile {:type :directory
-                                                                  :base    'js
-                                                                  :root-ns 'js
-                                                                  :root-prefix "@"
-                                                                  }}}))
-  => '("import k from '@/libs/xt/lang/base-lib'"
-       "import r from '@/react'"
-       "import ui_style from '@/blessed/ui-style'")
-  
-  (emit-module-setup-link-arr 'js.blessed.ui-core
-                              {:lang :js}
-                              (emit-module-prep 'js.blessed.ui-core
-                                                {:lang :js
-                                                 :emit {:compile {:type :directory
-                                                                  :base    'js
-                                                                  :root-ns 'js
-                                                                  :root-prefix "@"
-                                                                  :path-separator "|"
-                                                                  :path-suffix ".tsx"}}}))  
-  => '("import k from '@|libs|xt|lang|base-lib.tsx'"
-       "import r from '@|react.tsx'"
-       "import ui_style from '@|blessed|ui-style.tsx'"))
+  => '("import * as ui_style from '@/blessed/ui-style'"
+       "import * as k from '@/libs/xt/lang/base-lib'"
+       "import * as r from '@//react'")
+
+  (emit-module-setup-link-arr
+   {:emit {:code   {:link {:path-separator "|"
+                           :root-prefix "@"}}
+           :compile {:links  (compile/compile-module-create-links
+                              '[js.blessed.ui-core
+                                js.blessed.ui-style
+                                js.react
+                                xt.lang.base-lib]
+                              'js
+                              {})}}}
+   (emit-module-prep
+    'js.blessed.ui-core
+    {:lang :js
+     :emit {:compile {:type :graph
+                      :base    'js
+                      :root-ns 'js.blessed.ui-core}}}))
+  => '("import * as ui_style from '@|blessed|ui-style'"
+       "import * as k from '@|libs/xt/lang|base-lib'"
+       "import * as r from '@||react'"))
+
+^{:refer std.lang.base.impl-lifecycle/emit-module-setup-export-body :added "4.0"}
+(fact "the code for exporting the body")
 
 ^{:refer std.lang.base.impl-lifecycle/emit-module-setup-raw :added "4.0"}
 (fact "creates module setup map of array strings"

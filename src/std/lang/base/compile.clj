@@ -71,7 +71,19 @@
 ;; DIRECTORY
 ;;
 
+(defn compile-module-create-links
+  [link-all link-root link-opts]
+  (->> link-all
+       (map (fn [ns]
+              [ns (links/link-attributes
+                   link-root
+                   ns
+                   link-opts)]))
+       (into {})))
+
 (defn compile-module-directory-selected
+  "compiles the directory based on sorted imports"
+  {:added "4.0"}
   [type ns-all {:keys [lang main emit root target] :as opts}]
   ;; for each file in the directory, find 'extra' deps
   (let [lib         (impl/runtime-library)
@@ -88,14 +100,11 @@
                                    ns-selected)
                            (set)
                            (filter (comp not ns-has?))))
-        links       (->> (concat ns-selected
-                                 ns-extras)
-                         (map (fn [ns]
-                                [ns (links/link-attributes
-                                     main
-                                     ns
-                                     (:link (:code emit)))]))
-                         (into {}))
+        links      (compile-module-create-links
+                    (concat ns-selected
+                            ns-extras)
+                    main
+                    (:link (:code emit)))
         
         root-path  (if (empty? target)
                      root
@@ -118,7 +127,7 @@
     (compile/compile-summarise files)))
 
 (defn compile-module-directory
-  "TODO"
+  "compiles a directory"
   {:added "4.0"}
   ([{:keys [header footer lang main search root target emit] :as opts}]
    (let [all-paths   (->> (or search ["src"])
@@ -136,6 +145,8 @@
 ;;
 
 (defn compile-module-prep
+  "precs the single entry point setup"
+  {:added "4.0"}
   [{:keys [lang main] :as opts}]
   (let [lib         (impl/runtime-library)
          snapshot    (lib/get-snapshot lib)
@@ -151,7 +162,7 @@
     [selected (assoc opts :main parent)]))
 
 (defn compile-module-root
-  "compiles a module root"
+  "compiles module.root"
   {:added "4.0"}
   ([{:keys [lang main] :as opts}]
    (require main)
@@ -166,7 +177,7 @@
 ;;
 
 (defn compile-module-graph
-  "compiles a module root"
+  "compiles a module graph"
   {:added "4.0"}
   ([{:keys [lang main] :as opts}]
    (require main)

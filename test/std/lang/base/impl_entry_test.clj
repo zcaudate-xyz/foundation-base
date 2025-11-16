@@ -187,3 +187,7 @@
 
 (comment
   (./import))
+
+
+^{:refer std.lang.base.impl-entry/create-fragment-hydrate :added "4.0"}
+(fact "TODO")

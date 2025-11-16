@@ -151,7 +151,9 @@
                                                   require))
                                             {:spec {:columns 1}})))
                          {:indents (second (:position nav))})))))))]})
-
+  
+  
+  
   ;; This gets rid of all the :require [... :include [:fn]] syntax
   (code.manage/refactor-code
    '[lua xt python]
@@ -164,8 +166,8 @@
                 '|
                 map?
                 #_(fn [form]
-                  (and (map? form)
-                       (:require form)))]
+                    (and (map? form)
+                         (:require form)))]
                (fn [nav]
                  (let [cnav    (h/suppress (-> nav
                                                (code.edit/find-next-token :require)

@@ -4,8 +4,7 @@
             [std.lang :as l]
             [std.fs :as fs]
             [code.heal :as heal]
-            [std.text.diff :as diff]
-            [code.dev.index-main :as index-main]))
+            [std.text.diff :as diff]))
 
 (def.make CODE_DEV
   {:tag      "code.dev"
@@ -17,7 +16,9 @@
                :emit   {:code   {:label true
                                  :link  {:root-prefix  "@"
                                          :path-separator "/"
-                                         :path-suffix  ".jsx"}}}}]})
+                                         :path-suffix  ".jsx"
+                                         :ns-label  {'code.dev.index-main "main"}
+                                         :ns-suffix {#"^xt" ".js"}}}}}]})
 
 (def +init+
   (make/triggers-set

@@ -82,6 +82,13 @@
   (b/get-code-entry +sample+ 'L.core/identity-fn)
   => +fn-entry+)
 
+^{:refer std.lang.base.book/get-fragment-entry :added "4.0"}
+(fact "gets a fragment entry in the book"
+  ^:hidden
+  
+  (b/get-fragment-entry +sample+ 'L.core/identity)
+  => +macro-entry+)
+
 ^{:refer std.lang.base.book/get-entry :added "4.0"}
 (fact "gets either the module or code entry"
   ^:hidden
@@ -111,6 +118,35 @@
 
   (b/get-deps +sample+ 'L.core/identity-fn)
   => #{})
+
+^{:refer std.lang.base.book/get-deps-native :added "4.0"}
+(fact "gets the imports for a book"
+  ^:hidden
+  
+  (b/get-deps-native
+   (-> +book+
+       (b/set-module
+        (module/book-module
+         {:id      'L.json
+          :lang    :lua
+          :link    '{- L.json}
+          :native {"cjson" 'cjson}}))
+       second
+       (b/set-entry
+        (entry/book-entry
+         {:lang :lua
+          :id 'read
+          :module 'L.json
+          :section :code
+          :form '(defn read [s] (cjson.read s))
+          :form-input '(defn read [s] (cjson.read s))
+          :deps #{}
+          :deps-native #{"cjson"}
+          :namespace 'L.json
+          :declared false}))
+       second)
+   'L.json/read)
+  => #{"cjson"})
 
 ^{:refer std.lang.base.book/list-entries :added "4.0"}
 (fact "lists entries for a given symbol"
@@ -419,7 +455,6 @@
                :declared false})
   => book-entry?)
 
-
 (comment
 
   ^{:refer std.lang.base.book/module-create-bundled :added "4.0"}
@@ -430,6 +465,3 @@
      +redis+
      (b/module-create-requires '[[L.core :as u]]))
     => '{L.core {:suppress false, :native ()}}))
-
-
-  

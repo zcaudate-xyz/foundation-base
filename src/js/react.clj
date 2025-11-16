@@ -5,7 +5,7 @@
             [std.string :as str]
             [std.lib.walk :as walk]
             [js.react.compile :as compile])
-  (:refer-clojure :exclude [> ref derive sync]))
+  (:refer-clojure :exclude [> ref derive sync get set]))
 
 (l/script :js
   {:import [["react" :as React]

@@ -90,13 +90,6 @@
                                 native-opts)))
           (merge native native-bundled))))
 
-(defn emit-module-setup-link
-  [])
-
-(comment
-
-  (keys *module*))
-
 (defn emit-module-setup-link-import
   [type curr-ns link-ns links module {:keys [root-prefix
                                              path-separator]}]
@@ -112,7 +105,6 @@
          :suffix suffix
          :as link-as})
 
-      :directory
       (let [{:keys [rel label suffix]} (get links link-ns)]
         {:ns (str root-prefix path-separator rel path-separator label)
          :suffix suffix

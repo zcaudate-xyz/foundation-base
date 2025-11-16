@@ -70,9 +70,9 @@
   ^:hidden
   
   (deps/module-export-form prep/+book-min+
-                           '{:as EXPORTED}
+                           {}
                            {})
-  => '(return EXPORTED))
+  => '(return (tab)))
 
 ^{:refer std.lang.base.impl-deps/module-link-form :added "4.0"}
 (fact "link form for projects"
@@ -189,124 +189,29 @@
        ()
        {"cjson" {:as cjson}}])
 
-^{:refer std.lang.base.impl-deps/collect-module-check-options :added "4.0"}
-(fact "does the checks for the inputs "
-  ^:hidden
-  
-  (deps/collect-module-check-options
-   {:type :graph
-    :root-ns 'L.script
-    :path-suffix ""})
-  => nil
-
-  (deps/collect-module-check-options
-   {:type :graph
-    :path-suffix ""})
-  => (throws)
-  
-  (deps/collect-module-check-options
-   {:type :directory
-    :root-ns 'L
-    :root-libs "libs"
-    :root-prefix "@"
-    :path-suffix ".lua"})
-  => nil
-
-  (deps/collect-module-check-options
-   {:type :directory
-    :root-prefix "@"
-    :path-suffix ".lua"})
-  => (throws)
-
-  (deps/collect-module-check-options
-   {:type :custom
-    :fn-link-form (fn [_ _ _])
-    :root-ns 'L
-    :params {}})
-  => nil
-
-  (deps/collect-module-check-options
-   {:type :custom
-    :fn-link-form (fn [_ _ _])
-    :params {}})
-  => (throws))
-
-^{:refer std.lang.base.impl-deps/collect-module-ns-select :added "4.0"}
-(fact "TODO")
-
-^{:refer std.lang.base.impl-deps/collect-module-directory-form :added "4.0"}
-(fact "collects forms for "
-  ^:hidden
-
-  (deps/collect-module-directory-form
-   nil
-   'kmi.common
-   {:root-ns 'L
-    :root-libs "libs"
-    :root-prefix "@"
-    :path-suffix ".lua"})
-  => "@/libs/kmi/common.lua"
-
-  (deps/collect-module-directory-form
-   nil
-   'L.script
-   {:root-ns 'L
-    :root-libs "libs"
-    :root-prefix "@"
-    :path-suffix ".lua"})
-  => "@/script.lua"
-
-  (deps/collect-module-directory-form
-   nil
-   'L.script
-   {:root-ns 'L
-    :root-libs "libs"
-    :root-prefix "."
-    :path-suffix ""})
-  => "./script")
 
 ^{:refer std.lang.base.impl-deps/collect-module :added "4.0"}
 (fact "collects information for the entire module"
   ^:hidden
   
   (-> (deps/collect-module (lib/get-book +library-ext+ :lua)
-                           (lib/get-module +library-ext+ :lua 'L.util)
-                           {:type :graph
-                            :root-ns 'L.script
-                            :path-suffix ""})
+                           (lib/get-module +library-ext+ :lua 'L.util))
       (update :code (fn [arr]
                       (set (map :id arr)))))
-  => '{:setup nil, :teardown nil,
-       :code #{cjson-read add-fn sub-fn},
-       :native {"cjson" {:as cjson}},
-       :link (["./core" {:as u, :ns L.core}])}
+  => '{:setup nil, :teardown nil, :code #{cjson-read add-fn sub-fn}, :native {"cjson" {:as cjson}}, :direct #{L.core}}
   
 
   (-> (deps/collect-module (lib/get-book +library-ext+ :lua)
-                           (lib/get-module +library-ext+ :lua 'L.util)
-                           {:type :directory
-                            :root-ns 'L
-                            :root-libs   "libs"
-                            :root-prefix "@"
-                            :path-suffix ".lua"})
-        (update :code (fn [arr]
+                           (lib/get-module +library-ext+ :lua 'L.util))
+      (update :code (fn [arr]
                         (set (map :id arr)))))
-  => '{:setup nil, :teardown nil,
-       :code #{cjson-read add-fn sub-fn},
-       :native {"cjson" {:as cjson}},
-       :link (["@/core.lua" {:as u, :ns L.core}])}
+  => '{:setup nil, :teardown nil, :code #{cjson-read add-fn sub-fn}, :native {"cjson" {:as cjson}}, :direct #{L.core}}
 
   (-> (deps/collect-module (lib/get-book +library-ext+ :lua)
-                           (lib/get-module +library-ext+ :lua 'L.app)
-                           {:type :graph
-                            :root-ns 'L.app
-                            :path-suffix ""})
+                           (lib/get-module +library-ext+ :lua 'L.app))
       (update :code (fn [arr]
                       (set (map :id arr)))))
-  => '{:setup nil, :teardown nil,
-       :code #{app-read},
-       :native {},
-       :link (["./util" {:as ut, :ns L.util}])})
+  => '{:setup nil, :teardown nil, :code #{app-read}, :native {}, :direct #{L.util}})
 
 
 

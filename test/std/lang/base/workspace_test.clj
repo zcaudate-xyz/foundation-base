@@ -106,3 +106,10 @@
 
 ^{:refer std.lang.base.workspace/intern-macros :added "4.0"}
 (fact "interns all macros from one namespace to another")
+
+
+^{:refer std.lang.base.workspace/ptr-display-str :added "4.0"}
+(fact "TODO")
+
+^{:refer std.lang.base.workspace/rt:module-meta :added "4.0"}
+(fact "TODO")

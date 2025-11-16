@@ -156,3 +156,10 @@
   (lua-module-link 'kmi.exchange
                    {:root-ns 'kmi :target "src"})
   => "./kmi/exchange")
+
+^{:refer std.lang.model.spec-lua/lua-module-export :added "4.0"}
+(fact "outputs the lua module export form"
+  ^:hidden
+  
+  (lua-module-export 'kmi.common {:root-ns 'kmi.hello})
+  => '(return (tab)))

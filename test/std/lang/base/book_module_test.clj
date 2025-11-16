@@ -1,7 +1,9 @@
 (ns std.lang.base.book-module-test
   (:use code.test)
   (:require [std.lang.base.book-module :refer :all]
-            [std.lang :as l]))
+            [std.lang :as l]
+            [js.blessed]
+            [js.blessed.frame]))
 
 ^{:refer std.lang.base.book-module/book-module? :added "4.0"}
 (fact "checks of object is a book module")
@@ -20,8 +22,8 @@
                 :code   '{identity {}}})
   => book-module?)
 
-^{:refer std.lang.base.book-module/module-code-deps :added "4.0"}
-(fact "gets dependencies for a given module"
+^{:refer std.lang.base.book-module/module-deps-code :added "4.0"}
+(fact "gets the code link dependencies"
   ^:hidden
   
   (-> (book-module {:id 'L.nginx
@@ -34,13 +36,10 @@
                     :native   {}
                     :code   '{identity {}}})
       (module-deps-code))
-  => '#{})
+  => '#{}
 
-^{:refer std.lang.base.book-module/module-deps-code :added "4.0"}
-(fact "gets the code link dependencies"
-  ^:hidden
   
-  (module-code-deps
+  (module-deps-code
    (l/get-module
     (l/default-library)
     :js
@@ -100,3 +99,44 @@
         js.core/future-delayed
         js.core/max
         js.react/const})
+
+
+^{:refer std.lang.base.book-module/module-entries :added "4.0"}
+(fact "creates an export entry for a module"
+  ^:hidden
+
+  (module-entries
+   (std.lang/get-module
+    (std.lang/default-library)
+    :js
+    'js.react)
+   #{:defn})
+  => ' ([(:% \" useStateFor \") js.react/useStateFor]
+        [(:% \" id \") js.react/id]
+        [(:% \" useStep \") js.react/useStep]
+        [(:% \" makeLazy \") js.react/makeLazy]
+        [(:% \" useLazy \") js.react/useLazy]
+        [(:% \" useRefresh \") js.react/useRefresh]
+        [(:% \" useGetCount \") js.react/useGetCount]
+        [(:% \" useFollowRef \") js.react/useFollowRef]
+        [(:% \" useIsMounted \") js.react/useIsMounted]
+        [(:% \" useIsMountedWrap \") js.react/useIsMountedWrap]
+        [(:% \" useMountedCallback \") js.react/useMountedCallback]
+        [(:% \" useFollowDelayed \") js.react/useFollowDelayed]
+        [(:% \" useStablized \") js.react/useStablized]
+        [(:% \" runIntervalStop \") js.react/runIntervalStop]
+        [(:% \" runIntervalStart \") js.react/runIntervalStart]
+        [(:% \" useInterval \") js.react/useInterval]
+        [(:% \" runTimeoutStop \") js.react/runTimeoutStop]
+        [(:% \" runTimeoutStart \") js.react/runTimeoutStart]
+        [(:% \" useTimeout \") js.react/useTimeout]
+        [(:% \" useCountdown \") js.react/useCountdown]
+        [(:% \" useNow \") js.react/useNow]
+        [(:% \" useSubmit \") js.react/useSubmit]
+        [(:% \" useSubmitResult \") js.react/useSubmitResult]
+        [(:% \" convertIndex \") js.react/convertIndex]
+        [(:% \" convertModular \") js.react/convertModular]
+        [(:% \" convertIndices \") js.react/convertIndices]
+        [(:% \" convertPosition \") js.react/convertPosition]
+        [(:% \" useChanging \") js.react/useChanging]
+        [(:% \" useTree \") js.react/useTree]))

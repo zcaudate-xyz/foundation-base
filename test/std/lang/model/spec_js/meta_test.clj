@@ -3,6 +3,9 @@
   (:require [std.lang.model.spec-js.meta :refer :all]
             [std.lang :as l]))
 
+^{:refer std.lang.model.spec-js.meta/js-module-import-async :added "4.0"}
+(fact "helper for import")
+
 ^{:refer std.lang.model.spec-js.meta/js-module-import :added "4.0"}
 (fact "outputs the js module import from"
   ^:hidden
@@ -31,11 +34,11 @@
 (fact "outputs the js module export form"
   ^:hidden
   
-  (js-module-export '{:as main} {})
-  => '(:- :export :default main)
+  (js-module-export '{} {:emit {:lang/export true}})
+  => '(:- :export :default (tab))
 
-  (js-module-export '{:as main} {:emit {:lang/exports :commonjs}})
-  => '(:= module.exports main))
+  (js-module-export '{} {:emit {:lang/format :commonjs}})
+  => '(:= module.exports (tab)))
 
 ^{:refer std.lang.model.spec-js.meta/js-module-link :added "4.0"}
 (fact "gets the relative js based module"
@@ -56,3 +59,6 @@
   (js-module-link 'js.core
                     {:base 'kmi.other.main :target "src"})
   => "../../js/core")
+
+^{:refer std.lang.model.spec-js.meta/js-transform-entry :added "4.0"}
+(fact "function for transforming :type :module entries")

@@ -15,6 +15,13 @@
                 {})
   => '[:div {:className a} [:p (hello 1 2 3)]])
 
+^{:refer std.lang.model.spec-js.jsx/jsx-standardise-params :added "4.0"}
+(fact "converts back to a :className a :class"
+  ^:hidden
+  
+  (jsx-standardise-params {:class ["hello" "world"]})
+  => {:className "hello world"})
+
 ^{:refer std.lang.model.spec-js.jsx/jsx-arr-norm :added "4.0"}
 (fact "normalises the jsx array"
 

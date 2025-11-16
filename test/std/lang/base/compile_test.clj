@@ -46,40 +46,6 @@
       [".build/src/pkg/file.lua"
        string?]))
 
-^{:refer std.lang.base.compile/compile-module-graph-rel :added "4.0"}
-(fact "compiles a module graph"
-  ^:hidden
-  
-  (compile-module-graph-rel
-   "hello.world.again")
-  => "hello.world")
-
-^{:refer std.lang.base.compile/compile-module-graph-single :added "4.0"}
-(fact "compiles a single module file"
-  ^:hidden
-
-  (let [lib (impl/runtime-library)
-        snapshot    (lib/get-snapshot lib)
-        book        (snap/get-book snapshot :lua)]
-    (make/with:mock-compile
-      (compile-module-graph-single
-       'xt.lang.base-lib
-       {:lib         lib
-        :snapshot    snapshot
-        :book        book
-        :root-path   (std.fs/path "." "xt/lang"),
-        :root-output ".build/src"}
-       {:lang :lua
-        :root   ".build"
-        :target "src"
-        :file   "pkg/file.lua"
-        :main   'xt.lang.base-iter
-        :layout :flat
-        :entry {:label true}})))
-  => (contains-in
-      [".build/src/base-lib.lua"
-       string?]))
-
 ^{:refer std.lang.base.compile/compile-module-graph :added "4.0"}
 (fact "compiles a module graph"
   ^:hidden
@@ -96,40 +62,8 @@
   => (contains-in
       {:files 1, :status :changed, :written [[string?]]}))
 
-^{:refer std.lang.base.compile/compile-module-directory-single :added "4.0"}
-(fact "compiles a single directory file"
-  ^:hidden
-  
-  (let [lib (impl/runtime-library)
-        snapshot    (lib/get-snapshot lib)
-        book        (snap/get-book snapshot :lua)]
-    (make/with:mock-compile
-      (compile-module-directory-single
-       'xt.lang.base-lib
-       {:lib         lib
-        :snapshot    snapshot
-        :book        book
-        :root-path   (std.fs/path "." "xt/lang"),
-        :root-output ".build/src"}
-       {:lang :lua
-        :root   ".build"
-        :target "src"
-        :file   "pkg/file.lua"
-        :main   'xt.lang.base-iter
-        :layout :flat
-        :entry {:label true}
-        :emit {:code {:link
-                      {:root-libs   "LIBS"
-                       :root-prefix "."
-                       :path-suffix ".lua"
-                       :path-separator "/"
-                       :path-replace {}}}}})))
-  => (contains-in
-      [".build/src/./LIBS/xt/lang/base-lib.lua" 
-       string?]))
-
 ^{:refer std.lang.base.compile/compile-module-directory :added "4.0"}
-(fact "TODO"
+(fact "compiles a directory"
   )
 
 ^{:refer std.lang.base.compile/compile-module-schema :added "4.0"}
@@ -147,6 +81,17 @@
       :entry {:label true}}))
   => (contains-in [".build/src/pkg/schema.sql"
                    string?]))
+
+
+^{:refer std.lang.base.compile/compile-module-directory-selected :added "4.0"}
+(fact "compiles the directory based on sorted imports")
+
+^{:refer std.lang.base.compile/compile-module-prep :added "4.0"}
+(fact "precs the single entry point setup")
+
+^{:refer std.lang.base.compile/compile-module-root :added "4.0"}
+(fact "compiles module.root")
+
 
 (comment
   ^{:refer std.make.compile/compile-script :added "4.0"}
@@ -220,7 +165,7 @@
        :root   ".build"
        :target "src"}))
     => coll?)
-
+  
   ^{:refer std.make.compile/compile-schema :added "4.0"}
   (fact "compiles entire schema of")
 

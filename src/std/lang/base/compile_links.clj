@@ -12,14 +12,9 @@
    :path-replace {}
    :file-replace {}})
 
-(defn get-link-suffix
-  [link-ns ns-suffix]
-  (or (get ns-suffix link-ns)
-      (reduce (fn [[link ns-suffix]]
-                )
-              ns-suffix)))
-
 (defn get-link-lookup
+  "gets a lookup value"
+  {:added "4.0"}
   [link-ns ns-lookup]
   (or (get ns-lookup link-ns)
       (reduce (fn [_ [pattern v]]
@@ -29,6 +24,8 @@
               ns-lookup)))
 
 (defn link-attributes
+  "gets link attributes"
+  {:added "4.0"}
   [root-ns link-ns link-options]
   (let [{:keys [root-libs
                 root-prefix
