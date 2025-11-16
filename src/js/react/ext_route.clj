@@ -5,7 +5,7 @@
 (l/script :js
   {:require [[xt.lang.base-lib :as k]
              [xt.lang.event-route :as event-route]
-             [js.react :as r :include [:fn]]
+             [js.react :as r]
              [js.core :as j]]})
 
 (defn.js makeRoute

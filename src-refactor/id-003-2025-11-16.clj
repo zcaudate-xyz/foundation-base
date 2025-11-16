@@ -1,4 +1,5 @@
-(ns refactor.id-001-2025-12-05)
+(ns refactor.id-001-2025-12-05
+  (:require [std.lib :as h]))
 
 (comment
 
@@ -103,31 +104,67 @@
                                                    bimports))
                                       {:spec {:columns 1}}))))))))))]})
 
+  
+
+
+  ;; This puts the :bundle map into the :import directory
   (code.manage/refactor-code
-   '[lua.nginx.ws-client]
+   '[js lua xt python]
    {:print {:function true}
-    ;;:write true
+    :write true
     :edits [(fn [nav]
               (code.query/modify
                nav
                [(fn [form]
                   (and (map? form)
                        (map? (:bundle form))))]
+               
                (fn [nav]
                  (let [form (code.edit/value nav)
                        {:keys [bundle
+                               require
                                import]} form
                        bimports (mapcat identity (vals bundle))]
                    (-> nav
                        (code.edit/replace
                         (std.block/layout
-                         (-> form
-                             (dissoc :bundle)
-                             (assoc :import
-                                    (with-meta
-                                      (vec (concat import
-                                                   bimports))
-                                      {:spec {:columns 1}}))))))))))]})
+                         (cond-> form
+                           :then (dissoc :bundle)
+                           :then (assoc :import
+                                        (with-meta
+                                          (vec
+                                           (map (fn [x]
+                                                  (with-meta x
+                                                    {:tag :vector
+                                                     :readable-len 100}))
+                                                (concat import
+                                                        bimports)))
+                                          {:spec {:columns 1}}))
+                           require (assoc :require
+                                          (with-meta
+                                            (vec
+                                             (map (fn [x]
+                                                    (with-meta x
+                                                      {:tag :vector
+                                                       :readable-len 100}))
+                                                  require))
+                                            {:spec {:columns 1}})))
+                         {:indents (second (:position nav))})))))))]})
+
+  ;; This gets rid of all the :require [... :include [:fn]] syntax
+  (code.manage/refactor-code
+   '[js.react.ext-form]
+   {:print {:function true}
+    #_#_:write true
+    :edits [(fn [nav]
+              (code.query/modify
+               nav
+               [(fn [form]
+                  (= 'l/script (first form)))]
+               (fn [nav]
+                 (def *nav* nav)
+                 nav)))]})
+  
   )
 
 

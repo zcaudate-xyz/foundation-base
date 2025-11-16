@@ -5,8 +5,7 @@
 (l/script :js
   {:require [[xt.lang.event-log :as event-log]
              [js.react :as r]
-             [js.core :as j]
-             ]})
+             [js.core :as j]]})
 
 (defn.js makeLog
   "creates a log for react"

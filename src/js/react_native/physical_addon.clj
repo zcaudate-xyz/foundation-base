@@ -10,7 +10,7 @@
                    :lang/jsx false}
             :notify {:host "test.statstrade.io"}}
    :require [[js.core :as j]
-             [js.react-native :as n :include [:fn]]
+             [js.react-native :as n]
              [xt.lang.base-lib :as k]]})
 
 (defn.js tagBase

@@ -11,8 +11,8 @@
             :notify {:host "test.statstrade.io"}}
    :require [[xt.lang.base-lib :as k]
              [js.core :as j]
-             [js.react :as r :include [:fn]]
-             [js.react-native :as n :include [:fn]]
+             [js.react :as r]
+             [js.react-native :as n]
              [js.react-native.animate :as a]
              [js.react-native.helper-theme-default :as helper-theme-default]]})
 

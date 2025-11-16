@@ -6,8 +6,8 @@
 (l/script :js
   {:require [[xt.lang.base-lib :as k]
              [js.core :as j]
-             [js.lib.valtio  :as v]
-             [js.react   :as r]
+             [js.lib.valtio :as v]
+             [js.react :as r]
              [js.blessed :as b]
              [js.blessed.ui-style :as ui-style]]})
 

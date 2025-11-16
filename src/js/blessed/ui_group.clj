@@ -11,7 +11,7 @@
                    :lang/jsx false}}
    :require [[xt.lang.base-lib :as k]
              [js.core :as j]
-             [js.react   :as r]
+             [js.react :as r]
              [js.blessed :as b]
              [js.blessed.ui-style :as ui-style]]})
 

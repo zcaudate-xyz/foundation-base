@@ -4,7 +4,7 @@
 
 (l/script :lua
   {:require [[lua.aws.common :as common]
-             [lua.nginx :as n :include [:string]]
+             [lua.nginx :as n]
              [xt.lang.base-lib :as k]
              [xt.lang.util-xml :as xml]]})
 

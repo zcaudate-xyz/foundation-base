@@ -6,7 +6,7 @@
 (l/script :js
   {:require [[xt.lang.base-lib :as k]
              [js.core :as j]
-             [js.react :as r :include [:fn]]
+             [js.react :as r]
              [js.react-native :as n]
              [xt.lang.event-animate :as event-animate]]
    :import [["react-native" :as [* ReactNative]]]})

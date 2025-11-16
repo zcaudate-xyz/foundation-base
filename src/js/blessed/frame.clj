@@ -5,8 +5,8 @@
 
 (l/script :js
   {:require [[xt.lang.base-lib :as k]
-             [js.core    :as j]
-             [js.react   :as r :include [:fn]]
+             [js.core :as j]
+             [js.react :as r]
              [js.lib.chalk :as chalk]
              [js.blessed.frame-console :as frame-console]
              [js.blessed.frame-linemenu :as frame-linemenu]

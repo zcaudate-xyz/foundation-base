@@ -6,7 +6,7 @@
   {:require  [[xt.lang.base-macro :as macro]
               [xt.lang.base-iter :as iter :dynamic true]
               [xt.lang.base-repl :as repl :dynamic true]
-              [xt.lang.base-lib :as lib   :dynamic true]]
+              [xt.lang.base-lib :as lib :dynamic true]]
    :header   {:dynamic  true
               :override {:js  xt.lang.override.custom-js
                          :lua xt.lang.override.custom-lua}}})

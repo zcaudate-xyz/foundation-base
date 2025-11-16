@@ -24,7 +24,7 @@
                        :entypo     [["react-native-vector-icons/Entypo" :as RNIcon]]
                        :ant        [["react-native-vector-icons/AntDesign" :as RNIcon]]}}
    :require [[js.core :as j]
-             [js.react :as r :include [:fn]]
+             [js.react :as r]
              [js.react.helper-portal :as helper-portal]
              [xt.lang.base-lib :as k]]
    :import [["react-native" :as [* ReactNative]]]})

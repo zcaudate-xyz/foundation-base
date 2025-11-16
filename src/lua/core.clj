@@ -6,9 +6,9 @@
                             print remove sort time type slurp spit]))
 
 (l/script :lua
-  {:bundle  {:json     {:default [["cjson"  :as cjson]]}
-             :ffi      {:default [["ffi"    :as ffi]]}
-             :mustache {:default [["lustache" :as lustache]]}}})
+  {:import [["cjson"  :as cjson]
+            ["ffi"    :as ffi]
+            ["lustache" :as lustache]]})
 
 (def$.lua cjson cjson)
 

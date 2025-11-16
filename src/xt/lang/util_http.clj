@@ -2,7 +2,7 @@
   (:require [std.lang :as l]))
 
 (l/script :js
-  {:require [[xt.lang.base-lib :as k :suppress true]
+  {:require [[xt.lang.base-lib :suppress true :as k]
              [js.core :as j]]})
 
 (defn.js fetch-call

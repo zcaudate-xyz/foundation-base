@@ -3,8 +3,8 @@
             [std.lang :as l]))
 
 (l/script :lua
-  {:require [[lua.nginx.openssl :as ssl :include [:hmac]]
-             [lua.nginx :as n :include [:string :sha256 :md5]]
+  {:require [[lua.nginx.openssl :as ssl]
+             [lua.nginx :as n]
              [lua.nginx.http-client :as http]
              [lua.core :as u]
              [xt.lang.base-lib :as k]

@@ -5,7 +5,7 @@
 (l/script :lua
   {:require [[xt.lang.base-lib :as k]
              [xt.sys.cache-common :as cache]
-             [lua.nginx :as n :include [:uuid]]]})
+             [lua.nginx :as n]]})
 
 ;;
 ;; tasks are instantiated via a loop

@@ -5,8 +5,8 @@
 (l/script :js
   {:require [[xt.lang.base-lib :as k]
              [xt.lang.event-form :as base-form]
-             [js.core   :as j]
-             [js.react  :as r]
+             [js.core :as j]
+             [js.react :as r]
              [js.react.ext-form :as ext-form]
              [js.blessed.ui-style :as ui-style]
              [js.blessed.ui-core :as ui-core]

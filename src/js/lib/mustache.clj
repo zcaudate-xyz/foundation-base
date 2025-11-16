@@ -4,7 +4,7 @@
   (:refer-clojure :exclude [keyword]))
 
 (l/script :js
-  {:import ["mustache" :as Mustache]})
+  {:import [["mustache" :as Mustache]]})
 
 
 (def$.js renderTemplate Mustache.render)

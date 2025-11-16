@@ -10,11 +10,10 @@
                    :lang/jsx false}
             :notify {:host "test.statstrade.io"}}
    :require [[js.core :as j]
-             [js.react-native :as n :include [:fn]]
+             [js.react-native :as n]
              [js.react-native.physical-base :as physical-base]
              [js.react-native.helper-theme-default :as helper-theme-default]
-             [js.react-native.helper-theme :as helper-theme]
-             ]})
+             [js.react-native.helper-theme :as helper-theme]]})
 
 (defn.js toggleButtonTheme
   "creates the toggle button theme"

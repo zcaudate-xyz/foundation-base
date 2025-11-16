@@ -4,8 +4,8 @@
             [xt.lang.base-notify :as notify]))
 
 (l/script :js
-  {:require [[js.lib.eth-lib :as eth-lib :include [:fn]]
-             [js.lib.eth-solc :as eth-solc  :include [:fn]]
+  {:require [[js.lib.eth-lib :as eth-lib]
+             [js.lib.eth-solc :as eth-solc]
              [xt.lang.base-lib :as k]
              [js.core :as j]]})
 

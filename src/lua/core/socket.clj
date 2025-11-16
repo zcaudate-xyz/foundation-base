@@ -6,15 +6,14 @@
 
 (l/script :lua
   lua.core
-  {:bundle  {:socket   {:default [["socket" :as socket]]}
-             :url      {:default [["socket.url" :as socket-url]]}}})
+  {:import [["socket" :as socket]
+            ["socket.url" :as socket-url]]})
 
 (def$.lua socket socket)
 
 (def$.lua url socket-url)
 
 (def$.lua dns socket.dns)
-
 
 (h/template-entries [l/tmpl-macro {:inst "sock"
                                    :prefix "t:"

@@ -3,7 +3,7 @@
             [std.lib :as h]))
 
 (l/script :js
-  {:require [[xt.lang.base-lib :as k :suppress true]
+  {:require [[xt.lang.base-lib :suppress true :as k]
              [js.core :as j]
              [js.react-native.animate :as a]]})
 
