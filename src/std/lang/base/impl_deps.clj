@@ -133,153 +133,20 @@
 ;;
 ;;
 
-(defn collect-module-check-options
-  "does the checks for the inputs"
-  {:added "4.0"}
-  [{:keys [type] :as options}]
-  (let [ks-input (set (keys options))
-        [ks-required
-         ks-optional] (case type
-                        nil        [#{} #{}]
-                        :custom    [#{:type
-                                      :fn-link-form
-                                      :root-ns
-                                      :params} #{:base}]
-                        :graph     [#{:type :root-ns}
-                                    #{:path-suffix :base}]
-                        :directory [#{:type
-                                      :root-ns}
-                                    #{:root-libs
-                                      :root-prefix
-                                      :path-separator
-                                      :path-suffix
-                                      :path-replace
-                                      :base}])
-        ks-errored {:input options
-                    :required ks-required
-                    :optional ks-optional}]
-    (if-not (= ks-required (set/intersection ks-required ks-input))
-      (h/error "Required keys missing" ks-errored))
-    (if-not (empty? (set/difference ks-input
-                                    (set/union ks-required
-                                               ks-optional) ))
-      (h/error "Extra keys in map" ks-errored))))
-
-(defn collect-module-ns-select
-  "TODO"
-  {:added "4.0"}
-  [ns selection]
-  (h/prn ns selection)
-  (let [{:keys [default]} selection
-        selected (first (keep (fn [[kns value]]
-                                (cond (and (symbol? kns)
-                                           (.startsWith (str ns)
-                                                        (str kns)))
-                                      [kns value]
-
-                                      (and (h/regexp? kns)
-                                           (re-find kns (str ns)))
-                                      [nil value]))
-                              (dissoc selection :default)))]
-    (or selected
-        [nil default])))
-
-(defn collect-module-directory-form
-  "collects forms for"
-  {:added "4.0"}
-  [_ ns options]
-  (let [{:keys [root-ns
-                root-libs
-                root-prefix
-                path-separator
-                path-suffix
-                path-replace]
-         :as options} (merge {:root-libs   "libs"
-                              :root-prefix "."
-                              :path-suffix ""
-                              :path-separator "/"
-                              :path-replace {}}
-                             options) 
-        [root-local root-prefix] (if (string? root-prefix)
-                                   [nil root-prefix]
-                                   (collect-module-ns-select ns root-prefix))
-        [_ path-suffix] (if (string? path-suffix)
-                          [nil path-suffix]
-                          (collect-module-ns-select ns path-suffix))
-        root-ns   (or root-local root-ns)
-        
-        
-        [ns-str
-         root-str] [(str ns)
-                    (str root-ns)]
-        
-        is-sub? (.startsWith ^String ns-str
-                             root-str)
-        ns-new  (if is-sub?
-                  (subs ns-str
-                        (inc (count root-str)))
-                  ns-str)
-        ns-paths (str/split ns-new #"\.")
-        ns-paths (mapv (fn [path]
-                         (reduce (fn [s [pat sub]]
-                                   (str/replace s pat sub))
-                                 path
-                                 path-replace))
-                       ns-paths)]
-    (str root-prefix
-         (if is-sub?
-           path-separator
-           (str path-separator root-libs path-separator))
-         (str/join path-separator ns-paths)
-         (if (not-empty path-suffix)
-           (str path-suffix)))))
-
 (defn collect-module
   "collects information for the entire module"
   {:added "4.0"}
-  [book {:keys [native]
-         :as module}
-   & [{:keys [type]
-       :as options}]]
-  (let [_        (collect-module-check-options options)
-        setup    (setup-module-form book module)
+  [book
+   {:keys [native]
+    :as module}]
+  (let [setup    (setup-module-form book module)
         teardown (teardown-module-form book module)
         {:keys [direct
                 native]} (imports/module-imports book (:id module))
         code    (->> (vals (:code module))
-                     (sort-by (juxt :priority :line :time)))
-        
-        form-fn  (cond (= type :custom)
-                       (or (:fn-link-form options)
-                           (h/error (str "Missing key " :fn-link-form)
-                                    options))
-                       
-                       (= type :graph)
-                       module-link-form
-                       
-                       (= type :directory)
-                       collect-module-directory-form) 
-        
-        link    (case type
-                  (:graph :directory :custom)
-                  (keep (fn [[sym ns]]
-                          (cond (= ns (:id module)) nil
-                                
-                                :else
-                                (let [link (form-fn book ns options)]
-                                  [link (if (vector? sym)
-                                          {:refer sym
-                                           :ns ns}
-                                          {:as sym
-                                           :ns ns})])))
-                        (h/transpose
-                         (select-keys (:internal module)
-                                      direct)))
-                  ;; an empty map differs from the array
-                  ^:meta/empty {})]
+                     (sort-by (juxt :priority :line :time)))]
     {:setup    setup
      :teardown teardown
      :code     code
      :native   native
-     :link     link}))
-
+     :direct   direct}))

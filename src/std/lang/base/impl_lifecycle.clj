@@ -2,10 +2,12 @@
   (:require [std.lang.base.util :as ut]
             [std.lang.base.emit :as emit]
             [std.lang.base.book :as book]
+            [std.lang.base.book-module :as module]
             [std.lang.base.impl :as impl]
             [std.lang.base.impl-deps :as deps]
             [std.lang.base.impl-entry :as entry]
             [std.string :as str]
+            [std.fs :as fs]
             [std.lib :as h]))
 
 (defn emit-module-prep
@@ -20,9 +22,7 @@
                                                                        meta))
         module (get-in book [:modules module-id])]
     [[stage grammar book namespace (assoc mopts :module module)]
-     (deps/collect-module book
-                          module
-                          (:compile emit))]))
+     (deps/collect-module book module)]))
 
 ;;
 ;; SETUP
@@ -90,6 +90,34 @@
                                 native-opts)))
           (merge native native-bundled))))
 
+(defn emit-module-setup-link
+  [])
+
+(comment
+
+  (keys *module*))
+
+(defn emit-module-setup-link-import
+  [type curr-ns link-ns links module {:keys [root-prefix
+                                             path-separator]}]
+  (let [link-as (get (:internal module) link-ns)]
+    (case type
+      :graph
+      (let [{:keys [rel label suffix]} (get links link-ns)
+            curr (get links curr-ns)]
+        {:ns (str (fs/relativize (:rel curr)
+                                 rel)
+                  path-separator
+                  label)
+         :suffix suffix
+         :as link-as})
+
+      :directory
+      (let [{:keys [rel label suffix]} (get links link-ns)]
+        {:ns (str root-prefix path-separator rel path-separator label)
+         :suffix suffix
+         :as link-as}))))
+
 (defn emit-module-setup-link-arr
   "creates the setup code for internal links"
   {:added "4.0"}
@@ -98,25 +126,27 @@
            emit] :as meta}
    prep]
   (let [[[_ grammar book namespace mopts]
-         {:keys [link]}] prep
-        link (if (and (= :module (:layout mopts))
-                      (not (-> emit :link :suppress)))
-               link
-               [])
-        link-opts    (update mopts
-                             :emit
-                             merge (:link emit)  {:import :link})]
-    (keep (fn [[name module]]
-            (let [{:keys [refer as ns]} module
-                  module {:as (or refer as)
-                          :ns ns}
-                  form (deps/module-import-form book name module link-opts)]
+         {:keys [direct]}]  prep
+        {:keys [links type]} (:compile emit)
+        {:keys [module]} mopts]
+    (keep (fn [ns]
+            (let [import  (emit-module-setup-link-import
+                           type
+                           (:id module)
+                           ns
+                           links
+                           module
+                           (:link (:code emit)))
+                  form (deps/module-import-form book
+                                                (:ns import)
+                                                import
+                                                (assoc-in mopts [:emit :import] :link))]
               (if form
                 (impl/emit-direct grammar
                                   form
                                   namespace
-                                  link-opts))))
-          link)))
+                                  mopts))))
+          direct)))
 
 (defn emit-module-setup-export-body
   "creates the setup code for internal links"

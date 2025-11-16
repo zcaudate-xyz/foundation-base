@@ -10,7 +10,7 @@
 (def.make CODE_DEV
   {:tag      "code.dev"
    :build    ".build/code.dev/src"
-   :default  [{:type   :module.graph
+   :default  [{:type   :module.root
                :target "."
                :lang   :js
                :main   'code.dev.index-main
