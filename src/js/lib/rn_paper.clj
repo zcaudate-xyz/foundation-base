@@ -3,7 +3,7 @@
             [std.lib :as h]))
 
 (l/script :js
-  {:bundle {:default   [["react-native-paper" :as [* RNPaper]]]}})
+  {:import [["react-native-paper" :as [* RNPaper]]]})
 
 ;;
 ;; Paper

@@ -3,8 +3,8 @@
             [std.lib :as h]))
 
 (l/script :js
-  {:bundle {:default [["ua-parser-js" :as UAParser]]}
-   :import [["ua-parser-js" :as UAParser]]})
+  {:import [["ua-parser-js" :as UAParser]
+            ["ua-parser-js" :as UAParser]]})
 
 (defmacro.js parseString
   "gets information from the user agent on browser"

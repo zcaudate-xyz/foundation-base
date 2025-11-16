@@ -4,12 +4,12 @@
   (:refer-clojure :exclude [use val proxy]))
 
 (l/script :js
-  {:bundle {:default [["jotai" :as [* Jotai]]
-                      ["jotai/utils" :as [* JotaiUtils]]]}
+  {:require [[js.react :as r]
+             [js.lib.optics :as optics]]
    :import [["jotai" :as [* Jotai]]
-            ["jotai/utils" :as [* JotaiUtils]]]
-   :require [[js.react :as r]
-             [js.lib.optics :as optics]]})
+            ["jotai/utils" :as [* JotaiUtils]]
+            ["jotai" :as [* Jotai]]
+            ["jotai/utils" :as [* JotaiUtils]]]})
 
 (h/template-entries [l/tmpl-entry {:type :fragment
                                    :base "JotaiUtils"

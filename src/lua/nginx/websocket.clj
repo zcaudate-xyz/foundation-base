@@ -3,12 +3,12 @@
             [std.lib :as h]))
 
 (l/script :lua
-  {:bundle {:server [["resty.websocket.server" :as ngxwsserver]]}
-   :import  [["resty.websocket.server" :as ngxwsserver]
-             ["cjson" :as cjson]]
-   :require [[xt.lang.base-lib :as k]
+  {:require [[xt.lang.base-lib :as k]
              [xt.sys.cache-common :as cache]
-             [lua.nginx :as n :include [:uuid]]]})
+             [lua.nginx :as n :include [:uuid]]]
+   :import [["resty.websocket.server" :as ngxwsserver]
+            ["cjson" :as cjson]
+            ["resty.websocket.server" :as ngxwsserver]]})
 
 (h/template-entries [l/tmpl-macro {:base "websocket"
                                    :inst "wb"

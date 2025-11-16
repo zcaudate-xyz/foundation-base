@@ -6,8 +6,8 @@
   (:refer-clojure :exclude [print flush time re-find read send sync]))
 
 (l/script :lua
-  {:bundle   {:default [["posix" :as posix]]}
-   :import  [["posix" :as posix]]})
+  {:import [["posix" :as posix]
+            ["posix" :as posix]]})
 
 (def +methods+
   '[LOG_MASK

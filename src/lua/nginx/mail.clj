@@ -4,8 +4,8 @@
   (:refer-clojure :exclude [send]))
 
 (l/script :lua
-  {:bundle  {:default [["resty.mail" :as ngxmail]]}
-   :import  [["resty.mail" :as ngxmail]]})
+  {:import [["resty.mail" :as ngxmail]
+            ["resty.mail" :as ngxmail]]})
 
 (h/template-entries [l/tmpl-macro {:base "mail"
                                    :inst "mailer"

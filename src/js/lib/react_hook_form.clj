@@ -3,7 +3,7 @@
             [std.lib :as h]))
 
 (l/script :js
-  {:bundle  {:default [["react-hook-form" :as [* ReactHookForm]]]}
-   :import [["react-hook-form" :as [* ReactHookForm]]]
-   :require [[js.react :as r]
-             [xt.lang.base-lib :as k]]})
+  {:require [[js.react :as r]
+             [xt.lang.base-lib :as k]]
+   :import [["react-hook-form" :as [* ReactHookForm]]
+            ["react-hook-form" :as [* ReactHookForm]]]})

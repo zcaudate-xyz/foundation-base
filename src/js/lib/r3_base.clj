@@ -3,8 +3,8 @@
             [std.lib :as h]))
 
 (l/script :js
-  {:bundle  {:default [["@react-three/fiber" :as [* ReactThree]]]
-             :lena    [["leva" :as  [* ReactLena]]]}})
+  {:import [["@react-three/fiber" :as [* ReactThree]]
+            ["leva" :as [* ReactLena]]]})
 
 (h/template-entries [l/tmpl-entry {:type :fragment
                                    :base "ReactThree"

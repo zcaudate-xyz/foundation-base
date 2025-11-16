@@ -3,11 +3,11 @@
             [std.lib :as h]))
 
 (l/script :js
-  {:bundle {:link   [["solito/link" :as [* SolLink]]]
-            :router [["solito/router" :as [* SolRouter]]]
-            :image  [["solito/image" :as [* SolImage]]]
-            :moti   [["solito/moti" :as [* SolMoti]]]
-            :main   [["solito" :as [* Solito]]]}})
+  {:import [["solito/router" :as [* SolRouter]]
+            ["solito/link" :as [* SolLink]]
+            ["solito/moti" :as [* SolMoti]]
+            ["solito/image" :as [* SolImage]]
+            ["solito" :as [* Solito]]]})
 
 (h/template-entries [l/tmpl-entry {:type :fragment
                                    :base "Solito"

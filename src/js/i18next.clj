@@ -3,9 +3,9 @@
             [std.lib :as h]))
 
 (l/script :js
-  {:bundle {:default  [["react-i18next" :as [* ReactI18next]]
-                       ["i18next" :as [* I18next]]]}
-   :import [["react-i18next" :as [* ReactI18n]]
+  {:import [["react-i18next" :as [* ReactI18n]]
+            ["i18next" :as [* I18next]]
+            ["react-i18next" :as [* ReactI18next]]
             ["i18next" :as [* I18next]]]})
 
 (h/template-entries [l/tmpl-entry {:type :fragment

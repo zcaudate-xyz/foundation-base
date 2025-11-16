@@ -3,10 +3,10 @@
             [std.lib :as h]))
 
 (l/script :js
-  {:bundle  {:default [["@tanstack/react-query" :as [* ReactQuery]]]}
-   :import [["@tanstack/react-query" :as [* ReactQuery]]]
-   :require [[js.react :as r]
-             [xt.lang.base-lib :as k]]})
+  {:require [[js.react :as r]
+             [xt.lang.base-lib :as k]]
+   :import [["@tanstack/react-query" :as [* ReactQuery]]
+            ["@tanstack/react-query" :as [* ReactQuery]]]})
 
 (h/template-entries [l/tmpl-entry {:type :fragment
                                    :base "ReactQuery"

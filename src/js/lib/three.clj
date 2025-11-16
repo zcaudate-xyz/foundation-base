@@ -3,7 +3,7 @@
             [std.lib :as h]))
 
 (l/script :js
-  {:bundle  {:default [["three" :as [* Three]]]}})
+  {:import ["three" :as [* Three]]})
 
 (h/template-entries [l/tmpl-entry {:type :fragment
                                    :base "Three"

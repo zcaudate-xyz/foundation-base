@@ -3,7 +3,7 @@
             [std.lib :as h]))
 
 (l/script :js
-  {:bundle {:default  [["p5" :as p5]]}})
+  {:import ["p5" :as p5]})
 
 (def +p5+
   '[ADD

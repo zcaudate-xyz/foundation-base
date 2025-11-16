@@ -3,9 +3,9 @@
             [std.lib :as h]))
 
 (l/script :js
-  {:bundle {:default  [["tamagui" :as [* T]]]
-            :toast    [["@tamagui/toast" :as [* TToast]]]
-            :token    [["@tamagui/get-token" :as [* TToken]]]}})
+  {:import [["tamagui" :as [* T]]
+            ["@tamagui/toast" :as [* TToast]]
+            ["@tamagui/get-token" :as [* TToken]]]})
 
 (h/template-entries [l/tmpl-entry {:type :fragment
                                    :base "TToken"

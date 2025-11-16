@@ -6,8 +6,8 @@
             [net.http :as http]))
 
 (l/script :js
-  {:import [["@supabase/supabase-js" :as [* SupabaseClient]]]
-   :bundle {:default   [["@supabase/supabase-js" :as [* SupabaseClient]]]}})
+  {:import [["@supabase/supabase-js" :as [* SupabaseClient]]
+            ["@supabase/supabase-js" :as [* SupabaseClient]]]})
 
 (h/template-entries [l/tmpl-entry {:type :fragment
                                    :base "SupabaseClient"

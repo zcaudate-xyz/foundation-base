@@ -5,10 +5,10 @@
   (:refer-clojure :exclude [compile]))
 
 (l/script :js
-  {:bundle {:default  [["solc" :as solc]]}
-   :require [[xt.lang.base-lib :as k]
+  {:require [[xt.lang.base-lib :as k]
              [js.core :as j]]
-   :import [["solc" :as solc]]})
+   :import [["solc" :as solc]
+            ["solc" :as solc]]})
 
 (def$.js compile solc.compile)
 

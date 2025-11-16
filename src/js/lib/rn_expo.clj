@@ -3,17 +3,17 @@
             [std.lib :as h]))
 
 (l/script :js
-  {:bundle {:lib       [["expo" :as [* Expo]]]
-            :auth      [["expo-auth-session" :as [* ExpoAuth]]]
-            :contacts  [["expo-contacts" :as [* ExpoContacts]]]
-            :clipboard [["expo-clipboard" :as [* ExpoClipboard]]]
-            :image-picker  [["expo-image-picker" :as [* ExpoImagePicker]]]
-            :media     [["expo-media-library" :as [* ExpoMedia]]]
-            :facebook  [["expo-facebook" :as [* ExpoFacebook]]]
-            :splash    [["expo-splash-screen" :as [* ExpoSplash]]]
-            :review    [["expo-store-review" :as [* ExpoReview]]]
-            :font      [["expo-font" :as [* ExpoFont]]]
-            :browser   [["expo-web-browser" :as [* ExpoBrowser]]]}})
+  {:import [["expo-image-picker" :as [* ExpoImagePicker]]
+            ["expo-splash-screen" :as [* ExpoSplash]]
+            ["expo-facebook" :as [* ExpoFacebook]]
+            ["expo-contacts" :as [* ExpoContacts]]
+            ["expo-web-browser" :as [* ExpoBrowser]]
+            ["expo-auth-session" :as [* ExpoAuth]]
+            ["expo-font" :as [* ExpoFont]]
+            ["expo-store-review" :as [* ExpoReview]]
+            ["expo-clipboard" :as [* ExpoClipboard]]
+            ["expo" :as [* Expo]]
+            ["expo-media-library" :as [* ExpoMedia]]]})
 
 (h/template-entries [l/tmpl-entry {:type :fragment
                                    :base "Expo"

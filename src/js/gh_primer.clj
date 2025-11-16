@@ -4,8 +4,8 @@
             [std.html :as html]))
 
 (l/script :js
-  {:bundle {:default  [["@primer/react" :as [* Primer]]]}
-   :import [["@primer/react" :as [* Primer]]]})
+  {:import [["@primer/react" :as [* Primer]]
+            ["@primer/react" :as [* Primer]]]})
 
 (h/template-entries [l/tmpl-entry {:type :fragment
                                    :base "Primer"

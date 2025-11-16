@@ -4,7 +4,7 @@
 
 (l/script :js
   {:runtime :basic
-   :bundle {:default  [["tree-sitter" :as parser]]}})
+   :import ["tree-sitter" :as parser]})
 
 
 (!.js

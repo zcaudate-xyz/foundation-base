@@ -5,10 +5,10 @@
   (:refer-clojure :exclude [compile]))
 
 (l/script :js
-  {:bundle {:default  [["ethers" :as [* ethers]]]}
-   :require [[xt.lang.base-lib :as k]
+  {:require [[xt.lang.base-lib :as k]
              [js.core :as j]]
-   :import [["ethers" :as [* ethers]]]})
+   :import [["ethers" :as [* ethers]]
+            ["ethers" :as [* ethers]]]})
 
 (def$.js ^{:arglists '([message, signature])}
   verifyMessage

@@ -6,12 +6,12 @@
 (l/script :js
   {:require [[xt.lang.base-lib :as k]
              [js.core :as j]]
-   :bundle {:default [["valtio/vanilla" :as [* ValtioCore]]
-                      ["valtio/utils" :as [* ValtioUtils]]]
-            :react   [["valtio" :as [* Valtio]]]}
    :import [["valtio/vanilla" :as [* ValtioCore]]
             ["valtio/utils" :as [* ValtioUtils]]
-            ["valtio" :as [* Valtio]]]})
+            ["valtio" :as [* Valtio]]
+            ["valtio" :as [* Valtio]]
+            ["valtio/vanilla" :as [* ValtioCore]]
+            ["valtio/utils" :as [* ValtioUtils]]]})
 
 ;;
 ;; valtio

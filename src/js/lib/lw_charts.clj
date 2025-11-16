@@ -3,7 +3,7 @@
             [std.lib :as h]))
 
 (l/script :js
-  {:bundle {:default  [["lightweight-charts" :as [* LWCharts]]]}})
+  {:import [["lightweight-charts" :as [* LWCharts]]]})
 
 (def +lw-charts+
   '[ColorType

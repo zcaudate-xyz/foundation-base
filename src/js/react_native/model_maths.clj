@@ -4,7 +4,7 @@
             ))
 
 (l/script :js
-  {:bundle {:default  [["react-native/Libraries/Utilities/MatrixMath" :as MatrixMath]]}})
+  {:import [["react-native/Libraries/Utilities/MatrixMath" :as MatrixMath]]})
 
 
 (h/template-entries [common/js-tmpl {:type :fragment

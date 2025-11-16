@@ -3,7 +3,7 @@
             [std.lib :as h]))
 
 (l/script :js
-  {:bundle  {:default [["@react-three/drei" :as ReactThreeDrei]]}})
+  {:import [["@react-three/drei" :as ReactThreeDrei]]})
 
 (h/template-entries [l/tmpl-entry {:type :fragment
                                    :base "ReactThreeDrei"

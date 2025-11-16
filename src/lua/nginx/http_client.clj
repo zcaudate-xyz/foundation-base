@@ -3,9 +3,9 @@
             [std.lib :as h]))
 
 (l/script :lua
-  {:bundle {:default [["resty.http" :as ngxhttp]]
-            :form    [["multipart" :as ngxmultipart]]}
-   :import [["resty.http" :as ngxhttp]
+  {:import [["resty.http" :as ngxhttp]
+            ["multipart" :as ngxmultipart]
+            ["resty.http" :as ngxhttp]
             ["multipart" :as ngxmultipart]]})
 
 (defmacro.lua new

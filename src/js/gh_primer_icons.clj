@@ -4,8 +4,8 @@
             [std.html :as html]))
 
 (l/script :js
-  {:bundle {:default  [["@primer/octicons-react" :as [* ReactOcticons]]]}
-   :import [["@primer/octicons-react" :as [* ReactOcticons]]]})
+  {:import [["@primer/octicons-react" :as [* ReactOcticons]]
+            ["@primer/octicons-react" :as [* ReactOcticons]]]})
 
 (h/template-entries [l/tmpl-entry {:type :fragment
                                    :base "ReactOcticons"

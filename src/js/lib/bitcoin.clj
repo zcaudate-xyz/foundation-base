@@ -3,24 +3,24 @@
             [std.lib :as h]))
 
 (l/script :js
-  {:bundle {:default  [["bitcoinjs-lib" :as Bitcoin]]
-            :message  [["bitcoinjs-message" :as BitcoinMessage]]
-            :ecc      [["tiny-secp256k1" :as TinySecp256k1]]
-            :ecpair   [["ecpair" :as ECPairFactory]]
-            :bip32    [["bip32" :as BIP32Factory]]
-            :bip39    [["bip39" :as BIP39]]
-            :wif      [["wif" :as WIF]]
-            :safe-buffer [["safe-buffer" :as SafeBuffer]]}
-   :require [[xt.lang.base-lib :as k]
+  {:require [[xt.lang.base-lib :as k]
              [js.core :as j]]
-   :import  [["bitcoinjs-lib" :as Bitcoin]
-             ["bitcoinjs-message" :as BitcoinMessage]
-             ["tiny-secp256k1" :as TinySecp256k1]
-             ["ecpair" :as ECPairFactory]
-             ["bip32" :as BIP32Factory]
-             ["bip39" :as BIP39]
-             ["wif" :as WIF]
-             ["safe-buffer" :as SafeBuffer]]})
+   :import [["bitcoinjs-lib" :as Bitcoin]
+            ["bitcoinjs-message" :as BitcoinMessage]
+            ["tiny-secp256k1" :as TinySecp256k1]
+            ["ecpair" :as ECPairFactory]
+            ["bip32" :as BIP32Factory]
+            ["bip39" :as BIP39]
+            ["wif" :as WIF]
+            ["safe-buffer" :as SafeBuffer]
+            ["ecpair" :as ECPairFactory]
+            ["bitcoinjs-lib" :as Bitcoin]
+            ["wif" :as WIF]
+            ["safe-buffer" :as SafeBuffer]
+            ["bip32" :as BIP32Factory]
+            ["bip39" :as BIP39]
+            ["tiny-secp256k1" :as TinySecp256k1]
+            ["bitcoinjs-message" :as BitcoinMessage]]})
 
 (def +networks+
   {:citycoin ["main" "test"],

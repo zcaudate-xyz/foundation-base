@@ -3,8 +3,8 @@
             [std.lib :as h]))
 
 (l/script :js
-  {:bundle {:default  [["@primer/react-brand" :as PrimerBrand]]}
-   :import [["@primer/react-brand" :as PrimerBrand]]})
+  {:import [["@primer/react-brand" :as PrimerBrand]
+            ["@primer/react-brand" :as PrimerBrand]]})
 
 (h/template-entries [l/tmpl-entry {:type :fragment
                                    :base "PrimerBrand"

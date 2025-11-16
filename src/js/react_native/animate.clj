@@ -9,7 +9,7 @@
              [js.react :as r :include [:fn]]
              [js.react-native :as n]
              [xt.lang.event-animate :as event-animate]]
-   :bundle {:default  [["react-native" :as [* ReactNative]]]}})
+   :import [["react-native" :as [* ReactNative]]]})
 
 (h/template-entries [l/tmpl-entry {:type :fragment
                                    :base "ReactNative.Animated"

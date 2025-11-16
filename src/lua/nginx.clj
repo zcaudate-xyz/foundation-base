@@ -6,13 +6,13 @@
   (:refer-clojure :exclude [print flush time re-find]))
 
 (l/script :lua
-  {:bundle {:string [["resty.string" :as ngxstr]]
-            :sha1   [["resty.sha1"   :as ngxsha1]]
-            :sha256 [["resty.sha256" :as ngxsha256]]
-            :md5    [["resty.md5"    :as ngxmd5]]
-            :uuid   [["resty.uuid"   :as ngxuuid]]
-            :shell  [["resty.shell" :as ngxshell]]}
-   :import  [["cjson" :as cjson]]})
+  {:import [["cjson" :as cjson]
+            ["resty.md5" :as ngxmd5]
+            ["resty.string" :as ngxstr]
+            ["resty.sha1" :as ngxsha1]
+            ["resty.sha256" :as ngxsha256]
+            ["resty.uuid" :as ngxuuid]
+            ["resty.shell" :as ngxshell]]})
 
 (def +core+
   '[OK ERROR AGAIN DONE DECLINED])
