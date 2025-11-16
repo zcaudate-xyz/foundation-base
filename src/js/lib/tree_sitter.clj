@@ -4,7 +4,7 @@
 
 (l/script :js
   {:runtime :basic
-   :import ["tree-sitter" :as parser]})
+   :import [["tree-sitter" :as parser]]})
 
 
 (!.js

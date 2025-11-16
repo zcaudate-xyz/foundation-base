@@ -1,5 +1,6 @@
 (ns refactor.id-001-2025-12-05
-  (:require [std.lib :as h]))
+  (:require [std.lib :as h]
+            [code.edit :as e]))
 
 (comment
 
@@ -153,17 +154,66 @@
 
   ;; This gets rid of all the :require [... :include [:fn]] syntax
   (code.manage/refactor-code
-   '[js.react.ext-form]
+   '[lua xt python]
    {:print {:function true}
-    #_#_:write true
+    :write true
     :edits [(fn [nav]
               (code.query/modify
                nav
-               [(fn [form]
-                  (= 'l/script (first form)))]
+               ['l/script
+                '|
+                map?
+                #_(fn [form]
+                  (and (map? form)
+                       (:require form)))]
                (fn [nav]
-                 (def *nav* nav)
-                 nav)))]})
+                 (let [cnav    (h/suppress (-> nav
+                                               (code.edit/find-next-token :require)
+                                               (code.edit/right)))
+                       require (if cnav (code.edit/value cnav))]
+                   (if (not require)
+                     nav
+                     (code.edit/replace
+                      cnav
+                      (std.block/layout
+                       (with-meta
+                         (vec
+                          (map (fn [x]
+                                 (with-meta
+                                   (vec (->> (dissoc (apply hash-map (rest x))
+                                                     :include
+                                                     :supress)
+                                             
+                                             (mapcat identity)
+                                             (cons (first x))))
+                                   {:tag :vector
+                                    :readable-len 100}))
+                               require))
+                         {:tag :vector
+                          :spec {:columns 1}})
+                       {:indents (second (:position cnav))})))))))]})
+
+
+  ;; This standardizes the import statements
+  (code.manage/refactor-code
+   '[js lua python]
+   {:print {:function true}
+    :write true
+    :edits [(fn [nav]
+              (code.query/modify
+               nav
+               ['l/script
+                map?
+                '|
+                (fn [form]
+                  (= form :import))]
+               (fn [nav]
+                 (let [rnav (e/right nav)
+                       v     (e/value rnav)]
+                   (if (not (vector? (first v)))
+                     (-> rnav
+                         (e/replace [(e/right-expression rnav)]))
+                     nav)))))]})
   
   )
 
