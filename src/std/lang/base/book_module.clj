@@ -1,5 +1,6 @@
 (ns std.lang.base.book-module
-  (:require [std.lib :as h :refer [defimpl]]))
+  (:require [std.lib :as h :refer [defimpl]]
+            [clojure.set :as set]))
 
 (defn- book-module-string
   ([{:keys [lang id display] :as module}]
@@ -83,14 +84,46 @@
                             :display :default}
                            m))))
 
-(defn module-deps
+(defn module-deps-code
   "gets dependencies for a given module"
   {:added "4.0"}
-  ([module id]
-   (h/difference (set (vals (:link module)))
-                 (conj (set (keys (:suppress module)))
-                       id))))
+  ([module]
+   (let [entries (vals (:code module))]
+     (disj (apply set/union
+                  (map (fn [e]
+                         (set (map (comp symbol namespace) (:deps e))))
+                       entries))
+           (:id module)))))
 
+(defn module-deps-native
+  "gets dependencies for a given module"
+  {:added "4.0"}
+  ([module]
+   (let [entries (vals (:code module))]
+     (apply merge-with
+            set/union
+            (keep (fn [e]
+                    (not-empty (:deps-native e)))
+                  entries)))))
+
+(defn module-deps-fragment
+  "gets dependencies for a given module"
+  {:added "4.0"}
+  ([module]
+   (let [entries (vals (:code module))]
+     (apply set/union
+            (map :deps-fragment entries)))))
+
+(defn module-entries
+  [module filter-keys]
+  (->> (:code module) 
+       (vals)
+       (sort-by (juxt :priority :time :line))
+       (keep (fn [{:keys [id op-key]
+                   :as entry}]
+               (if (filter-keys op-key)
+                 [(str id) (symbol (str (:id module))
+                                   (name id))])))))
 
 (comment
   h/atom:get

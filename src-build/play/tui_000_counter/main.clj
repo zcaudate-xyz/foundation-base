@@ -11,8 +11,8 @@
 (l/script :js
   {:require [[js.react :as r]
              [js.core :as j]
-             [js.blessed :as b :include [:lib :react]]]
-   :export [MODULE]})
+             [js.blessed :as b]]
+   :static {:export false}})
 
 (defn.js Button
   [#{left top text disabled color action}]

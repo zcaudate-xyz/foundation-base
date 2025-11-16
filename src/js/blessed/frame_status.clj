@@ -5,10 +5,9 @@
 
 (l/script :js
   {:require [[xt.lang.base-lib :as k]
-             [js.core :as j :include [:node :util]]
+             [js.core :as j]
              [js.react   :as r]
-             [js.lib.chalk :as chalk]]
-   :export [MODULE]})
+             [js.lib.chalk :as chalk]]})
 
 (defn.js Status
   "displays status"
@@ -40,6 +39,10 @@
                        :mouse true
                        :on-click (fn [] (setBusy false))
                        :content (:? busy " ! " " * ")}]
-             (:? content [:button {:content (+ " " content " ") :left 3 :mouse true :on-click (fn [] (setStatus {:content "" :type "info"})) :style {:bg (or (. {:error "red" :info "blue" :warn "yellow"} [type]) "blue") :bold (not= type "info") :fg (:? (== type "info") "white" "black")}}])])))
-
-(def.js MODULE (!:module))
+             (:? content
+                 [:button {:content (+ " " content " ")
+                           :left 3 :mouse true
+                           :on-click (fn []
+                                       (setStatus {:content "" :type "info"}))
+                           :style {:bg (or (. {:error "red" :info "blue" :warn "yellow"} [type]) "blue")
+                                   :bold (not= type "info") :fg (:? (== type "info") "white" "black")}}])])))

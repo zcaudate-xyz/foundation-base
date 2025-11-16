@@ -6,6 +6,7 @@
             [std.lang.base.pointer :as ptr]
             [std.lang.base.impl :as impl]
             [std.lang.base.impl-deps :as deps]
+            [std.lang.base.impl-deps-imports :as deps-imports]
             [std.lang.base.impl-lifecycle :as lifecycle]
             [std.lang.base.library :as lib]
             [std.lang.base.library-snapshot :as snap]
@@ -38,9 +39,6 @@
   "compiles a single module"
   {:added "4.0"}
   ([{:keys [header lang footer main] :as opts}]
-   
-   #_(h/pp (:emit opts))
-   
    (let [mopts   (last (impl/emit-options opts))
          {:keys [emit]} mopts
          body    (lifecycle/emit-module-setup main
@@ -116,7 +114,7 @@
          lib         (impl/runtime-library)
          snapshot    (lib/get-snapshot lib)
          book        (snap/get-book snapshot lang)
-         deps        (-> (h/deps:resolve book [module-id])
+         deps        (-> (deps-imports/module-code-deps book [module-id])
                          :all)
          root-path   (-> (str/replace (name module-id) #"\." "/")
                          (fs/parent))
@@ -235,7 +233,7 @@
          ns-extras   (if (-> emit :code :extra-namespaces false?)
                        []
                        (->> (mapcat (fn [ns]
-                                      (-> (h/deps:resolve book [ns])
+                                      (-> (deps-imports/module-code-deps book [ns])
                                           :all))
                                     ns-selected)
                             (set)

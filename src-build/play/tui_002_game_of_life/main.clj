@@ -4,8 +4,9 @@
 
 (l/script :js
   {:require [[js.core :as j]
-             [js.react :as r :include [:fn]]
-             [js.blessed :as b :include [:lib :react]]]})
+             [js.react :as r]
+             [js.blessed :as b]]
+   :static {:export false}})
 
 (def.js ROWS 32)
 
@@ -197,3 +198,9 @@
 
 (defrun.js __main__
   (b/renderBlessed [:% -/App] (-/Screen)))
+
+
+
+(comment
+  (l/rt:module-meta
+   :js))

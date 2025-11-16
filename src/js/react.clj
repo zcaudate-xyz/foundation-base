@@ -13,8 +13,7 @@
             ["react-nil" :as ReactNIL]
             ["react" :as React]]
    :require [[js.core :as j]
-             [xt.lang.base-lib :as k]]
-   :export [MODULE]})
+             [xt.lang.base-lib :as k]]})
 
 (defrun.js __init__
   (:# "eslint-disable react-hooks/rules-of-hooks"))
@@ -697,5 +696,3 @@
             setBranch
             branches
             view}))
-
-(def.js MODULE (!:module))

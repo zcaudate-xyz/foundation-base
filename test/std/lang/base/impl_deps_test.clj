@@ -41,6 +41,18 @@
       {:lang :lua
        :namespace 'L.util
        :module 'L.util}
+      {}))
+    (lib/install-module! :lua 'L.app
+                         {:require '[[L.core :as u]
+                                     [L.util :as ut]]})
+    (lib/add-entry-single!
+     (entry/create-code-base
+      '(defn app-read
+         [s]
+         (return (ut/cjson-read s)))
+      {:lang :lua
+       :namespace 'L.app
+       :module 'L.app}
       {}))))
 
 ^{:refer std.lang.base.impl-deps/module-import-form :added "4.0"}
@@ -264,8 +276,7 @@
                             :path-suffix ""})
       (update :code (fn [arr]
                       (set (map :id arr)))))
-  => '{:setup nil,
-       :teardown nil,
+  => '{:setup nil, :teardown nil,
        :code #{cjson-read add-fn sub-fn},
        :native {"cjson" {:as cjson}},
        :link (["./core" {:as u, :ns L.core}])}
@@ -280,12 +291,25 @@
                             :path-suffix ".lua"})
         (update :code (fn [arr]
                         (set (map :id arr)))))
-  => '
-     {:setup nil,
-      :teardown nil,
-      :code #{cjson-read add-fn sub-fn},
-      :native {"cjson" {:as cjson}},
-      :link (["@/core.lua" {:as u, :ns L.core}])})
+  => '{:setup nil, :teardown nil,
+       :code #{cjson-read add-fn sub-fn},
+       :native {"cjson" {:as cjson}},
+       :link (["@/core.lua" {:as u, :ns L.core}])}
+
+  (-> (deps/collect-module (lib/get-book +library-ext+ :lua)
+                           (lib/get-module +library-ext+ :lua 'L.app)
+                           {:type :graph
+                            :root-ns 'L.app
+                            :path-suffix ""})
+      (update :code (fn [arr]
+                      (set (map :id arr)))))
+  => '{:setup nil, :teardown nil,
+       :code #{app-read},
+       :native {},
+       :link (["./util" {:as ut, :ns L.util}])})
+
+
+
 
 (comment
   (./import))

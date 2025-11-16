@@ -59,6 +59,7 @@
 ;; helpers
 
 (comment
+  (l/rt:module-meta :js)
   (!.js
     (return
      @-/Action))

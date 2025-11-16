@@ -10,11 +10,10 @@
             :emit {:native {:suppress true}
                    :lang/jsx false}}
    :require [[xt.lang.base-lib :as k]
-             [js.core :as j :include [:node :util]]
-             [js.react   :as r :include [:fn]]
-             [js.blessed :as b :include [:lib :react]]
-             [js.blessed.ui-style :as ui-style]]
-   :export [MODULE]})
+             [js.core :as j]
+             [js.react   :as r]
+             [js.blessed :as b]
+             [js.blessed.ui-style :as ui-style]]})
 
 (defn.js useTree
   "wrapper for `js.react/useTree`"
@@ -46,8 +45,26 @@
   "layout tabs for horizontal and vertical"
   {:added "4.0"}
   [items layout height format]
-  (var lefts (:? (== layout "vertical") (j/fill (Array (k/len items)) 0) (-> items (j/reduce (fn [acc item] (let [prev (k/last acc) curr (+ prev 1 (. (format item) ["length"]))] (acc.push curr) (return acc))) [0]))))
-  (var tops  (:? (== layout "vertical") (j/map items (fn:> [e i] (* i (or height 1)))) (j/fill (Array (k/len items)) 0)))
+  (var lefts
+       (:? (== layout "vertical")
+           (j/fill (Array (k/len items))
+                   0)
+           (-> items
+               (j/reduce (fn [acc item]
+                           (let [prev (k/last acc)
+                                 curr (+ prev
+                                         1
+                                         (. (format item) ["length"]))]
+                             (acc.push curr)
+                             (return acc)))
+                         [0]))))
+  (var tops
+       (:? (== layout "vertical")
+         (j/map items
+                (fn:> [e i]
+                  (* i (or height 1))))
+         (j/fill (Array (k/len items))
+                 0)))
   (return [lefts tops]))
 
 (defn.js EnumMultiIndexed
@@ -133,7 +150,11 @@
                        (return
                         [:button {:key item
                                   :style (:? (and (== i internal)
-                                                  (:? checkIndex (checkIndex i) true)) (ui-style/styleSmall color) ui-style/styleInvertDisabled)
+                                                  (:? checkIndex
+                                                      (checkIndex i)
+                                                      true))
+                                             (ui-style/styleSmall color)
+                                             ui-style/styleInvertDisabled)
                                   :left  (. lefts [i])
                                   :top   (. tops [i])
                                   :width (k/len text)
@@ -427,7 +448,3 @@
   (if (k/nil? Target)
     (return [:box])
     (return [:% Target])))
-
-(def.js MODULE
-  (do (:# (!:uuid))
-      (!:module)))

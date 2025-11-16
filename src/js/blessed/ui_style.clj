@@ -4,8 +4,7 @@
             [std.string :as str]))
 
 (l/script :js
-  {:require [[xt.lang.base-lib :as k]
-             [js.core :as j :include [:node :util]]]
+  {:require [[xt.lang.base-lib :as k]]
    :export [MODULE]})
 
 
@@ -36,20 +35,20 @@
   "helper function for top layout props"
   {:added "4.0"}
   [props noShrink]
-  (return (j/assign (-/getLayout props)
-                    {:bg "black"
-                     :shrink (not noShrink)})))
+  (return (k/obj-assign (-/getLayout props)
+                        {:bg "black"
+                         :shrink (not noShrink)})))
 
 (defn.js omitLayoutProps
   "helper function for stripping layout props"
   {:added "4.0"}
   [props]
-  (return (j/assign {}
-                     props
-                     {:left nil
-                      :right nil
-                      :top nil
-                      :bottom nil})))
+  (return (k/obj-assign
+           (k/obj-clone props)
+           {:left nil
+            :right nil
+            :top nil
+            :bottom nil})))
 
 ;;
 ;; style

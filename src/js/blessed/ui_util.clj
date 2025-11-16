@@ -5,22 +5,21 @@
 
 (l/script :js
   {:require [[xt.lang.base-lib :as k]
-             [js.core :as j :include [:node :util]]
-             [js.react   :as r :include [:fn]]
-             [js.blessed :as b :include [:lib :react]]
-             [js.blessed.ui-style :as ui-style]]
-   :export [MODULE]})
+             [js.core :as j]
+             [js.react   :as r]
+             [js.blessed :as b]
+             [js.blessed.ui-style :as ui-style]]})
 
 (defn.js ^{:static/lint-globals '#{process}}
   copyClipboard
   "helper function to copy text to clipboard"
   {:added "4.0"}
   ([text]
-   (let [copyExec (:? (== process.platform "darwin") "pbcopy" "xclip")]
-     (let [proc (. (require "child_process")
-                   (spawn copyExec))]
-       (proc.stdin.write text)
-       (proc.stdin.end)))))
+   (let [copyExec (:? (== process.platform "darwin") "pbcopy" "xclip")
+         proc (. (require "child_process")
+                 (spawn copyExec))]
+     (proc.stdin.write text)
+     (proc.stdin.end))))
 
 (defn.js say
   "helper function to say something"
@@ -113,5 +112,3 @@
                 :content message}
                rprops))
   (return (:? (k/is-empty? message) nil [:button #{...bprops}])))
-
-(def.js MODULE (!:module))

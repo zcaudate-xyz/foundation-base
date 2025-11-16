@@ -5,12 +5,11 @@
 
 (l/script :js
   {:require [[xt.lang.base-lib :as k]
-             [js.core :as j :include [:node :util]]
+             [js.core :as j]
              [js.lib.valtio  :as v]
              [js.react   :as r]
-             [js.blessed :as b :include [:lib :react]]
-             [js.blessed.ui-style :as ui-style]]
-   :export [MODULE]})
+             [js.blessed :as b]
+             [js.blessed.ui-style :as ui-style]]})
 
 ;;
 ;;
@@ -109,5 +108,3 @@
                                           (* height))
                                 :left (:? (== row-count 1) 0 (* width (mod i row-count)))}
                           view])))]]))))
-
-(def.js MODULE (!:module))

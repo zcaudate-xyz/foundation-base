@@ -7,8 +7,7 @@
   {:require [[xt.lang.base-lib :as k]
              [js.core :as j]
              [js.react   :as r]
-             [js.lib.chalk :as chalk]]
-   :export [MODULE]})
+             [js.lib.chalk :as chalk]]})
 
 (defn.js ToggleLabel
   "toggle label `red`/`green`"
@@ -99,5 +98,3 @@
            (k/arr-join "\n")))
   (return
    [:box {:content content}]))
-
-(def.js MODULE (!:module))

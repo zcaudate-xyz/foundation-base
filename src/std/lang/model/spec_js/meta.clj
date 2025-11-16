@@ -3,20 +3,35 @@
             [std.lib :as h]
             [std.fs :as fs]
             [std.lang.base.book :as book]
+            [std.lang.base.book-module :as module]
             [std.lang.base.util :as ut]))
 
 ;;
 ;; MODULE
 ;;
 
+(defn js-module-import-async
+  [name link]
+  (let [{:keys [ns as refer]} link]
+    (list 'const as
+          (list 'new
+                'Proxy
+                (list 'import name)
+                '{:get (fn [esm key]
+                         (return (. esm
+                                    (then (fn [m]
+                                            (return {"__esMODULE" true
+                                                     :default (. m default [key])}))))))}))))
+
 (defn js-module-import
   "outputs the js module import from"
   {:added "4.0"}
   ([name link mopts]
-   (let [{:keys [ns as refer]} link
-         {:lang/keys [imports]} (:emit mopts)
-         async-ns (set (-> mopts :emit :static :import/async))]
-     (case imports
+   (let [{:keys [emit]} mopts
+         async-ns (set (-> emit :static :import/async))
+         {:keys [ns as refer]} link
+         {:lang/keys [format]} emit]
+     (case format
        :none nil
        (:global)   (let [sym (if (vector? as)
                                (last as)
@@ -27,21 +42,17 @@
                                (last as)
                                as)]
                      (list 'const sym := (list 'require (str name))))
-       (let [imports (cond-> []
+       (let [#_#_as (if (= :link (:import emit))
+                      ['* as]
+                      as)
+             imports (cond-> []
                        as    (conj (if (vector? as)
-                                     (list :- (first as) :as (last as))
+                                     (list :- (first as)
+                                           :as (last as))
                                      as))
                        refer (conj (set refer)))]
          (cond (async-ns ns)
-               (list 'const as
-                     (list 'new
-                           'Proxy
-                           (list 'import name)
-                           '{:get (fn [esm key]
-                                    (return (. esm
-                                               (then (fn [m]
-                                                       (return {"__esMODULE" true
-                                                                :default (. m default [key])}))))))}))
+               (js-module-import-async name link)
                
                :else
                (if (empty? imports)
@@ -53,12 +64,20 @@
 (defn js-module-export
   "outputs the js module export form"
   {:added "4.0"}
-  ([{:keys [as refer]} mopts]
-   (let [{:lang/keys [exports]} (:emit mopts)]
-     (case exports
-       :none nil
-       :commonjs (list := 'module.exports as)
-       (list :- :export :default as)))))
+  ([module mopts]
+   (let [{:keys [emit]} mopts
+         {:lang/keys [format]} emit
+         table  (->> (module/module-entries module
+                                            std.lib/T #_#{:defn
+                                              :def
+                                              :defclass})
+                     (cons 'tab))]
+     (h/prn table)
+     (case format
+       (:none
+        :global)  nil
+       :commonjs  (list := 'module.exports table)
+       (list :- :export :default table)))))
 
 (defn js-module-link
   "gets the relative js based module"

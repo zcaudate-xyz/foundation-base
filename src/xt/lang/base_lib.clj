@@ -8,8 +8,7 @@
                    nil? fn? first second nth replace fn? last sort sort-by throw]))
 
 (l/script :xtalk
-  {:require [[xt.lang.base-macro :as k]]
-   :export [MODULE]})
+  {:require [[xt.lang.base-macro :as k]]})
 
 (l/intern-macros :xtalk 'xt.lang.base-macro)
 
@@ -1807,7 +1806,3 @@
   [& body]
   (h/$ (do (var f (fn [] ~@body))
            (return (xt.lang.base-lib/trace-run f)))))
-
-
-
-(def.xt MODULE (!:module))

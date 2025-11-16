@@ -4,8 +4,9 @@
 
 (l/script :js
   {:require [[js.react :as r]
-             [js.core :as j :include [:node :util :fetch]]
-             [js.blessed :as b :include [:lib :react]]]})
+             [js.core :as j]
+             [js.blessed :as b]]
+   :static {:export false}})
 
 (defn.js Button
   [#{left top text disabled color action}]
@@ -74,5 +75,5 @@
 
 (defrun.js __init__
   (do (:# (!:uuid)))
-  (:= (!:G fetch)  nodeFetch)
+  (:= (!:G fetch)  j/NodeFetch)
   (b/renderBlessed [:% -/App] (-/Screen)))

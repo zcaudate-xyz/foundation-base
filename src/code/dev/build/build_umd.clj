@@ -41,13 +41,12 @@
    {:package "lexical"
     :input    "lexical/Lexical.prod.mjs"
     :module  "Lexical"
-    :file    "lexical.umd.js"}
-   })
+    :file    "lexical.umd.js"}})
 
 (def INDEXJS
   (l/emit-as
    :js
-   '[(def fs (require "fs"))            ;
+   '[(def fs (require "fs"))
      (def webpack (require "webpack"))
      (defn ^{:- [:async]} generateUmdBuildString
        [entryPath moduleName outputPath]
@@ -171,15 +170,28 @@
 
 (comment
 
-  (doseq [f  (keys
-              (fs/list "/Users/chris/Development/greenways/Szncampaigncenter/src-dsl"
-                       {:include [".clj"]}))]
-    (let [_       (h/p f)
-          input   (slurp f)
-          output  (heal/heal input)
-          layout  (try (std.block/parse-root output)
-                       (catch :FAILED))]
-      (h/p (diff/->string (diff/diff input output)))))
+
+  (filter identity 
+          (for [f  (keys
+                    (fs/list "/Users/chris/Development/greenways/Szncampaigncenter/src-dsl"
+                             {:include [".clj"]}))]
+            (let [_       (h/p f)
+                  input   (slurp f)
+                  output  (heal/heal input)
+                  layout  (try (std.block/parse-root output)
+                               nil
+                               (catch Throwable t
+                                 f #_[t :FAILED]))
+                  ]
+              (h/p (diff/->string (diff/diff input output)))
+              layout)))
+  
+  (std.block/parse-root
+   (heal/heal
+    (slurp 
+     "/Users/chris/Development/greenways/Szncampaigncenter/src-dsl/task-manager-view.clj")))
+  
+  
   
   )
 

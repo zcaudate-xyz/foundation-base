@@ -101,73 +101,78 @@
       {}))
     ))
 
-(lib/get-entry +library-js+
-               '{:lang :js
-                 :id Puck
-                 :module JS.ui
-                 :section :fragment})
-
-(lib/get-entry +library-js+
-               '{:lang :js
-                 :id Button
-                 :module JS.app
-                 :section :fragment})
-
-
-^{:refer std.lang.base.impl-deps-imports/collect-entry-imports :added "4.0"}
+^{:refer std.lang.base.impl-deps-imports/get-entry-imports :added "4.0"}
 (fact "gets all fragment imports from code entries"
   ^:hidden
   
-  (deps-imports/collect-entry-imports
+  (deps-imports/get-entry-imports
    (map #(b/get-fragment-entry (lib/get-book +library-js+ :js) %) 
-        (deps-imports/collect-script-fragment-deps
+        (deps-imports/get-fragment-deps
          (lib/get-book +library-js+ :js)
          (first (deps/collect-script-entries
                  (lib/get-book +library-js+ :js)
                  ['JS.app/App])))))
-  
-  
-  )
+  => '{JS.ui/Puck {"@measured/puck" #{Puck}}, JS.ui/Button {"@radix-ui/themes" #{Radix}}})
 
+^{:refer std.lang.base.impl-deps-imports/get-namespace-imports :added "4.0"}
+(fact "merges imports for both fragment and code entries"
+  ^:hidden
+  
+  (deps-imports/get-namespace-imports
+   (concat
+    '{JS.ui/Puck {"@measured/puck" #{Puck}}}
+    '{JS.ui/Button {"@radix-ui/themes" #{Radix}}}))
+  => '{JS.ui {"@measured/puck" #{Puck}, "@radix-ui/themes" #{Radix}}})
 
-^{:refer std.lang.base.impl-deps-imports/collect-script-fragment-deps :added "4.0"}
+^{:refer std.lang.base.impl-deps-imports/get-fragment-deps :added "4.0"}
 (fact "gets all the fragment dependencies"
   ^:hidden
   
-  (deps-imports/collect-script-fragment-deps
+  (deps-imports/get-fragment-deps
    (lib/get-book +library-js+ :js)
    (first (deps/collect-script-entries
            (lib/get-book +library-js+ :js)
            ['JS.app/App])))
   => '#{JS.ui/Puck JS.app/Button JS.ui/Button})
 
-^{:refer std.lang.base.impl-deps-imports/collect-script-import-deps :added "4.0"}
+^{:refer std.lang.base.impl-deps-imports/format-namespace-imports :added "4.0"}
+(fact "formats a list of namespace imports into an import map"
+  ^:hidden
+
+  (deps-imports/format-namespace-imports
+   (lib/get-book +library-js+ :js)
+   (deps-imports/get-namespace-imports
+    (concat
+     '{JS.ui/Puck {"@measured/puck" #{Puck}}}
+     '{JS.ui/Button {"@radix-ui/themes" #{Radix}}})))
+  => '{"@measured/puck" {:as [* Puck]},
+       "@radix-ui/themes" {:as [* Radix],
+                           :bundle {"@radix-ui/themes/styles.css" {}}}})
+
+^{:refer std.lang.base.impl-deps-imports/script-import-deps :added "4.0"}
 (fact "collect all native imports"
   ^:hidden
   
-  (deps-imports/collect-script-import-deps
+  (deps-imports/script-import-deps
    (lib/get-book +library-js+ :js)
    (first (deps/collect-script-entries
            (lib/get-book +library-js+ :js)
            ['JS.app/App])))
-  => '[{}
-       {JS.ui/Puck {"@measured/puck" #{Puck}},
-        JS.ui/Button {"@radix-ui/themes" #{Radix}}}
-       #{JS.ui/Puck JS.app/Button JS.ui/Button}]
+  => '{JS.ui {"@measured/puck" #{Puck}, "@radix-ui/themes" #{Radix}}}
 
   (dissoc (lib/get-module +library-js+ :js 'JS.app)
           :fragment :code)
   => '{:require-impl nil,
        :static nil,
-      :native-lu {},
-      :internal {JS.ui ui, JS.app -},
-      :lang :js,
-      :alias {},
-      :native {},
-      :link {ui JS.ui, - JS.app},
+       :native-lu {},
+       :internal {JS.ui ui, JS.app -},
+       :lang :js,
+       :alias {},
+       :native {},
+       :link {ui JS.ui, - JS.app},
       :id JS.app,
-      :display :default}
-
+       :display :default}
+  
   (dissoc (lib/get-module +library-js+ :js 'JS.ui)
           :fragment :code)
   => '{:require-impl nil,
@@ -184,23 +189,12 @@
        :link {- JS.ui},
        :id JS.ui,
        :display :default})
-  
-^{:refer std.lang.base.impl-deps-imports/build-script-import-ns :added "4.0"}
-(fact "merges imports for both fragment and code entries"
-  ^:hidden
-  
-  (deps-imports/build-script-import-ns
-   '{}
-   '{JS.ui/Puck {"@measured/puck" #{Puck}},
-     JS.ui/Button {"@radix-ui/themes" #{Radix}}}
-   )
-  => '{JS.ui {"@measured/puck" #{Puck}, "@radix-ui/themes" #{Radix}}})
 
-^{:refer std.lang.base.impl-deps-imports/build-script-imports :added "4.0"}
+^{:refer std.lang.base.impl-deps-imports/script-imports :added "4.0"}
 (fact "gets the ns imports for a script"
   ^:hidden
   
-  (deps-imports/build-script-imports
+  (deps-imports/script-imports
    (lib/get-book +library-js+ :js)
    (first (deps/collect-script-entries
            (lib/get-book +library-js+ :js)
@@ -209,8 +203,111 @@
        "@radix-ui/themes" {:as [* Radix],
                            :bundle {"@radix-ui/themes/styles.css" {}}}})
 
+^{:refer std.lang.base.impl-deps-imports/module-imports :added "4.0"}
+(fact "gets a modules imports as well as code links"
+  ^:hidden
+  
+  (deps-imports/module-imports
+   (lib/get-book +library-js+ :js)
+   'JS.app)
+  => '{:native {"@measured/puck" {:as [* Puck]},
+                "@radix-ui/themes" {:as [* Radix], :bundle {"@radix-ui/themes/styles.css" {}}}},
+       :direct #{}}
+
+  (deps-imports/module-imports
+   (std.lang/get-book
+    (std.lang/default-library)
+    :js)
+   'js.react)
+  => '{:native {"react" {:as React}}, :direct #{xt.lang.base-lib}}
+  
+  (deps-imports/module-imports
+   (std.lang/get-book
+    (std.lang/default-library)
+    :js)
+   'js.blessed)
+  => '{:native {"react-blessed" {:as ReactBlessed},
+                "blessed" {:as Blessed}},
+       :direct #{}}
+
+  (deps-imports/module-imports
+   (std.lang/get-book
+    (std.lang/default-library)
+    :js)
+   'js.blessed.ui-core)
+  => '{:native {"react" {:as React},
+                "blessed" {:as Blessed}},
+       :direct #{js.blessed.ui-style xt.lang.base-lib js.react}}
+  
+  (deps-imports/module-imports
+   (std.lang/get-book
+    (std.lang/default-library)
+    :js)
+   'js.blessed.frame-status)
+  => '{:native {"react" {:as React}}, :direct #{}}
+
+  (deps-imports/module-imports
+   (std.lang/get-book
+    (std.lang/default-library)
+    :js)
+   'js.blessed.frame-status)
+  => '{:native {"react" {:as React}}, :direct #{}}
+
+  (deps-imports/module-imports
+   (std.lang/get-book
+    (std.lang/default-library)
+    :js)
+   'js.blessed.frame-console)
+  => '{:native {}, :direct #{js.blessed.ui-group xt.lang.base-lib js.blessed.ui-core}})
+
+
+^{:refer std.lang.base.impl-deps-imports/module-code-deps :added "4.0"}
+(fact "gets the code dependencies for the module"
+  ^:hidden
+  
+  (deps-imports/module-code-deps
+   (std.lang/get-book
+    (std.lang/default-library)
+    :js)
+   '[js.blessed.frame-console])
+  => '{:all #{js.blessed.ui-style
+              js.blessed.ui-group
+              js.blessed.frame-console
+              xt.lang.base-lib
+              js.react
+              js.blessed.ui-core}
+       :graph {js.blessed.frame-console  #{js.blessed.ui-group
+                                           xt.lang.base-lib
+                                          js.blessed.ui-core}
+               js.blessed.ui-group       #{js.blessed.ui-style
+                                           xt.lang.base-lib
+                                           js.react}
+               xt.lang.base-lib          #{}
+               js.blessed.ui-core        #{js.blessed.ui-style
+                                           xt.lang.base-lib
+                                           js.react}
+               js.blessed.ui-style       #{xt.lang.base-lib}
+               js.react                  #{xt.lang.base-lib}}}
+  
+  (deps-imports/module-code-deps
+   (std.lang/get-book
+    (std.lang/default-library)
+    :js)
+   '[js.react])
+  => '{:all #{xt.lang.base-lib js.react},
+       :graph {js.react #{xt.lang.base-lib},
+               xt.lang.base-lib #{}}})
 
 (comment
+
+  (dissoc 
+   (std.lang/get-module
+    +library-js+
+    :js
+    'JS.app)
+   :code :fragment
+   )
+
   '{:require-impl nil,
     :static nil,
     :native-lu {Puck "@measured/puck", Radix "@radix-ui/themes"},
@@ -222,12 +319,29 @@
      "@radix-ui/themes"
      {:as [* Radix], :bundle [["@radix-ui/themes/styles.css"]]}},
     :link {- JS.ui},
-       :id JS.ui,
+    :id JS.ui,
     :display :default}
 
-  (build-script-import-ns
+  (get-namespace-imports
    '{}
    '{JS.ui/Puck {"@measured/puck" #{Puck}},
      JS.ui/Button {"@radix-ui/themes" #{Radix}}}
    )
   {JS.ui {"@measured/puck" #{Puck}, "@radix-ui/themes" #{Radix}}})
+
+(comment
+
+  
+(lib/get-entry +library-js+
+               '{:lang :js
+                 :id Puck
+                 :module JS.ui
+                 :section :fragment})
+
+(lib/get-entry +library-js+
+               '{:lang :js
+                 :id Button
+                 :module JS.app
+                 :section :fragment})
+  )
+

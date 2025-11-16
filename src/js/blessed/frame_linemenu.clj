@@ -6,9 +6,8 @@
 (l/script :js
   {:require [[xt.lang.base-lib :as k]
              [js.core    :as j]
-             [js.react   :as r :include [:fn]]
-             [js.lib.chalk :as chalk]]
-   :export [MODULE]})
+             [js.react   :as r]
+             [js.lib.chalk :as chalk]]})
 
 (def.js lineNormal
   {:hover {:fg "black"
@@ -92,10 +91,9 @@
              :shrink true
              :style {:bg "black"}
              (:.. rprops)]}
-     (j/map entries (fn [e] (return
-                             [:% -/LineButton #{[:key e.route
-                                                    :selected (== route e.route)
-                                                    setRoute
-                                                    (:.. e)]}])))])))
-
-(def.js MODULE (!:module))
+     (j/map entries (fn [e]
+                      (return
+                       [:% -/LineButton #{[:key e.route
+                                           :selected (== route e.route)
+                                           setRoute
+                                           (:.. e)]}])))])))

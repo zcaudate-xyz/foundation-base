@@ -120,7 +120,7 @@
         :emit {:code {:link
                       {:root-libs   "LIBS"
                        :root-prefix "."
-                       :path-suffix "lua"
+                       :path-suffix ".lua"
                        :path-separator "/"
                        :path-replace {}}}}})))
   => (contains-in

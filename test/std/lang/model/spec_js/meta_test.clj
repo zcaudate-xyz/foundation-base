@@ -20,11 +20,11 @@
   => "import * as React,{hello,world} from 'react'"
   
   (js-module-import 'react '{:as [:* React]
-                             :refer [hello world]} {:emit {:lang/imports :commonjs}})
+                             :refer [hello world]} {:emit {:lang/format :commonjs}})
   => '(const React := (require "react"))
 
   (js-module-import 'react '{:as [:* React]
-                             :refer [hello world]} {:emit {:lang/imports :global}})
+                             :refer [hello world]} {:emit {:lang/format :global}})
   => '(Object.defineProperty !:G "React" {:value (require "react")}))
 
 ^{:refer std.lang.model.spec-js.meta/js-module-export :added "4.0"}

@@ -68,19 +68,15 @@
 (defn emit-module-setup-native-arr
   "creates the setup code for native imports"
   {:added "4.0"}
-  [module-id
-   {:keys [library
+  [{:keys [library
            lang
            emit] :as meta}
    prep]
-  (let [[[stage grammar book namespace mopts]
-         {:keys [setup
-                 native
-                 link
-                 header
-                 code
-                 export]}] prep
-        native-opts  (update mopts :emit merge (:native emit))
+  (let [[[_ grammar book namespace mopts]
+         {:keys [native]}] prep
+        native-opts  (update mopts
+                             :emit
+                             merge (:native emit) {:import :native})
         native (if (-> emit :native :suppress)
                  []
                  native)]
@@ -95,23 +91,19 @@
 (defn emit-module-setup-link-arr
   "creates the setup code for internal links"
   {:added "4.0"}
-  [module-id
-   {:keys [library
+  [{:keys [library
            lang
            emit] :as meta}
    prep]
-  (let [[[stage grammar book namespace mopts]
-         {:keys [setup
-                 native
-                 link
-                 header
-                 code
-                 export]}] prep
+  (let [[[_ grammar book namespace mopts]
+         {:keys [link]}] prep
         link (if (and (= :module (:layout mopts))
                       (not (-> emit :link :suppress)))
                link
                [])
-        link-opts    (update mopts :emit merge (:link emit))]
+        link-opts    (update mopts
+                             :emit
+                             merge (:link emit)  {:import :link})]
     (keep (fn [[name module]]
             (let [{:keys [refer as ns]} module
                   module {:as (or refer as)
@@ -123,6 +115,25 @@
                                   namespace
                                   link-opts))))
           link)))
+
+(defn emit-module-setup-export-body
+  "creates the setup code for internal links"
+  {:added "4.0"}
+  [{:keys [library
+           lang
+           emit] :as meta}
+   prep]
+  (let [[[_ grammar book namespace mopts]]  prep
+        {:keys [module]} mopts]
+    (if (and (= :module (:layout mopts))
+             (not (-> emit :export :suppress))
+             (not (false? (-> module :static :export))))
+      (let [form (deps/module-export-form book module mopts)]
+        (if form
+          (impl/emit-direct grammar
+                            form
+                            namespace
+                            mopts))))))
 
 (defn emit-module-setup-raw
   "creates module setup map of array strings"
@@ -146,8 +157,8 @@
                                          namespace
                                          (update mopts :emit merge (:setup emit))))
         
-        native-arr   (emit-module-setup-native-arr module-id meta prep)
-        link-arr     (emit-module-setup-link-arr module-id meta prep)
+        native-arr   (emit-module-setup-native-arr meta prep)
+        link-arr     (emit-module-setup-link-arr meta prep)
         header-arr   (if (not (-> emit :header :suppress))
                        (let [header-opts  (update mopts :emit merge (:header emit))]
                          (keep (fn [entry]
@@ -160,29 +171,7 @@
                                  (binding [*ns* (:namespace entry)]
                                    (entry/emit-entry grammar entry code-opts)))
                                code)))
-        export-body  (when (and (= :module (:layout mopts))
-                                (-> mopts :module :export :as)
-                                (not (-> emit :export :suppress)))
-                       (when-not (:as export)
-                         (h/prn   "Missing export `:as` field" {:input export
-                                                                :module module-id})
-                         (h/error "Missing export `:as` field" {:input export
-                                                                :module module-id}))
-                       (when-not (:entry export)
-                         (h/prn   "Missing export `:entry` field" {:input export
-                                                                   :module module-id})
-                         (h/error "Missing export `:entry` field" {:input export
-                                                                   :module module-id}))
-                       (str (entry/emit-entry grammar (:entry export)
-                                              (update mopts :emit merge (:export emit)))
-                            "\n\n"
-                            (impl/emit-direct
-                             grammar
-                             (deps/module-export-form book
-                                                      (-> mopts :module :export)
-                                                      mopts)
-                             namespace
-                             mopts)))]
+        export-body  (emit-module-setup-export-body meta prep)]
     {:setup-body setup-body
      :native-arr native-arr
      :link-arr   link-arr
@@ -287,3 +276,30 @@
            emit] :as meta}]
   (let [raw (emit-module-teardown-raw module-id meta)]
     (emit-module-teardown-join raw)))
+
+
+(comment
+
+  #_(when (and (= :module (:layout mopts))
+                     (-> mopts :module :export :as)
+                     (not (-> emit :export :suppress)))
+            (when-not (:as export)
+              (h/prn   "Missing export `:as` field" {:input export
+                                                     :module module-id})
+              (h/error "Missing export `:as` field" {:input export
+                                                     :module module-id}))
+            (when-not (:entry export)
+              (h/prn   "Missing export `:entry` field" {:input export
+                                                        :module module-id})
+              (h/error "Missing export `:entry` field" {:input export
+                                                        :module module-id}))
+            (str (entry/emit-entry grammar (:entry export)
+                                   (update mopts :emit merge (:export emit)))
+                 "\n\n"
+                 (impl/emit-direct
+                  grammar
+                  (deps/module-export-form book
+                                           (-> mopts :module :export)
+                                           mopts)
+                  namespace
+                  mopts))))

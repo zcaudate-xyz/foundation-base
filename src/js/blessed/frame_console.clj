@@ -5,14 +5,13 @@
 
 (l/script :js
   {:require [[xt.lang.base-lib :as k]
-             [js.core :as j :include [:node :util]]
+             [js.core :as j]
              [js.lib.valtio  :as v]
              [js.react   :as r]
-             [js.blessed :as b :include [:lib :react]]
+             [js.blessed :as b]
              [js.blessed.ui-style :as ui-style]
              [js.blessed.ui-group :as ui-group]
-             [js.blessed.ui-core :as ui-core]]
-   :export [MODULE]})
+             [js.blessed.ui-core :as ui-core]]})
 
 (defn.js ConsoleMain
   "creates a primary frame-console button"
@@ -74,6 +73,6 @@
       screens
       (:.. rprops)]}]
   (return
-   (:? show [:box #{[height (:.. rprops)]} [:% -/ConsoleMain #{current height screens setCurrent setHeight setShow show}]])))
+   (:? show [:box #{[height (:.. rprops)]}
+             [:% -/ConsoleMain #{current height screens setCurrent setHeight setShow show}]])))
 
-(def.js MODULE (!:module))

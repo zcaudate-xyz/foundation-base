@@ -112,7 +112,7 @@
   {:bootstrap #'default-basic-client
     :main   {}
    :emit   {:body  {:transform #'rt/return-transform}
-            :lang/imports :global}
+            :lang/format :global}
    :json   :full
    :encode :json ;; default
    :timeout 2000})
@@ -175,7 +175,7 @@
     :emit  {:native {:suppress true}
             :body  {:transform #'rt/return-transform}
             :lang/jsx false
-            :lang/imports :global}
+            :lang/format :global}
     :json :full
     :encode :json
     :timeout 2000}))

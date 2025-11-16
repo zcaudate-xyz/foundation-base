@@ -6,9 +6,8 @@
 (l/script :js
   {:require [[xt.lang.base-lib :as k]
              [js.core    :as j]
-             [js.react   :as r :include [:fn]]
-             [js.lib.chalk :as chalk]]
-   :export [MODULE]})
+             [js.react   :as r]
+             [js.lib.chalk :as chalk]]})
 
 (def.js primaryNormal
   {:hover {:fg "black"
@@ -548,6 +547,3 @@
        [:% -/LayoutNotify
         {:notify __notify
          :setNotify __setNotify}]]))))
-
-(def.js MODULE
-  (!:module))

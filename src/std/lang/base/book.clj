@@ -87,15 +87,15 @@
   ([{:keys [modules] :as book} id]
    (if (namespace id)
      (get-code-deps book id)
-     (module/module-deps (get modules id) id))))
+     (module/module-deps-code (get modules id)))))
 
 (defn get-deps-native
   "get dependencies for a given id"
   {:added "4.0"}
   ([{:keys [modules] :as book} id]
    (if (namespace id)
-     (get-code-deps book id)
-     (module/module-deps (get modules id) id))))
+     (:deps-native (get-code-entry book id))
+     (module/module-deps-native (get modules id)))))
 
 (defn list-entries
   "lists entries for a given symbol"
@@ -404,6 +404,9 @@
                           :require-impl require-impl
                           
                           :static static}))))
+
+
+
 
 (comment
   

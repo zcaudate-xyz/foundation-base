@@ -13,8 +13,8 @@
 (l/script :js
   {:require-impl [js.core.impl
                   js.core.fetch]
-   :import [["util"   :as nodeUtil]
-            ["node-fetch" :as nodeFetch]
+   :import [["util"   :as NodeUtil]
+            ["node-fetch" :as NodeFetch]
             ["uuid" :as [* UUID]]]})
 
 (h/intern-all js.core.impl)
@@ -25,11 +25,14 @@
              js.core.fetch/toText
              js.core.fetch/toPrint)
 
+(def$.js NodeUtil NodeUtil)
+(def$.js NodeFetch NodeFetch)
+
 ;;
 ;; node
 ;;
 
-(def$.js inspect nodeUtil.inspect)
+(def$.js inspect NodeUtil.inspect)
 
 ;;
 ;; uuid

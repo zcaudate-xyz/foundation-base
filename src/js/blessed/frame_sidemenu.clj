@@ -5,14 +5,13 @@
 
 (l/script :js
   {:require [[xt.lang.base-lib :as k]
-             [js.core :as j :include [:node :util]]
+             [js.core :as j]
              [js.react   :as r]
-             [js.blessed :as b :include [:lib :react]]
+             [js.blessed :as b]
              [js.blessed.ui-style :as ui-style]
              [js.blessed.ui-group :as ui-group]
              [js.blessed.ui-core :as ui-core]
-             [js.lib.chalk :as chalk]]
-   :export [MODULE]})
+             [js.lib.chalk :as chalk]]})
 
 (defn.js SideButton
   "creates a primary frame-sidebutton button"
@@ -121,5 +120,3 @@
              :right 0,
              :style {:bg "black"}}
             [:% MenuFooter]])]))))
-
-(def.js MODULE (!:module))

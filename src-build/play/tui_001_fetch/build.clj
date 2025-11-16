@@ -7,7 +7,9 @@
             [play.tui-001-fetch.main :as main]))
 
 (def.make PROJECT
-  {:github   {:repo "zcaudate/play.tui-001-fetch"}
+  {:tag      "tui-001-fetch"
+   :build    ".build/tui-001-fetch"
+   :github   {:repo "zcaudate/play.tui-001-fetch"}
    :orgfile  "Main.org"
    :sections {:setup  [webpack/+node-basic+
                        webpack/+node-makefile+

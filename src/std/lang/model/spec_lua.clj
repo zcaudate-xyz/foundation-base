@@ -7,6 +7,7 @@
             [std.lang.base.impl :as impl]
             [std.lang.base.util :as ut]
             [std.lang.base.book :as book]
+            [std.lang.base.book-module :as module]
             [std.lang.base.script :as script]
             [std.lang.model.spec-xtalk]
             [std.lang.model.spec-xtalk.fn-lua :as fn]
@@ -271,11 +272,22 @@
               (str "./"))
        (str "./" ns-path)))))
 
+(defn lua-module-export
+  "outputs the js module export form"
+  {:added "4.0"}
+  ([module mopts]
+   (let [table  (->> (module/module-entries module
+                                            #{:defn
+                                              :def})
+                     (cons 'tab))]
+     (list 'return table))))
+
+
 (def +meta+
   (book/book-meta
    {:module-current h/NIL
-    :module-link    lua-module-link
-    :module-export  (fn [{:keys [as]} opts] (h/$ (return ~as)))
+    :module-link    #'lua-module-link
+    :module-export  #'lua-module-export
     :module-import  (fn [name {:keys [as]} opts]  
                       (h/$ (var* :local ~as := (require ~(str name)))))
     :has-ptr        (fn [ptr] (list 'not= (ut/sym-full ptr) nil))

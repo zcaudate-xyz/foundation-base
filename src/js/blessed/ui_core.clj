@@ -8,8 +8,7 @@
              [js.core :as j]
              [js.react   :as r]
              [js.blessed :as b]
-             [js.blessed.ui-style :as ui-style]]
-   :export [MODULE]})
+             [js.blessed.ui-style :as ui-style]]})
 
 (defn.js Enclosed
   "constructs a box with label"
@@ -636,5 +635,3 @@
                          :onClick displayFn
                          :style (ui-style/styleSmall color)
                          :content " ▼ "}]]]))))
-
-(def.js MODULE (!:module))
