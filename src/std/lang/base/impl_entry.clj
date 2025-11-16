@@ -293,7 +293,24 @@
                                            :mopts   mopts}))
                         body
                         (-> emit :code :transforms :entry))
+           body (reduce (fn [body transform]
+                          (transform body {:grammar grammar
+                                           :entry   entry
+                                           :mopts   mopts}))
+                        body
+                        (get-in snapshot [(:lang entry) :book :meta :transforms :entry]))
            body (cond->> body
                   label (str (emit-entry-label grammar entry) "\n")
                   trim  (trim))]
        body))))
+
+(comment
+  (-> (std.lang/get-snapshot
+       (std.lang/default-library))
+      :js
+      :book
+      :meta)
+  
+  (:meta (std.lang/grammar :js))
+  
+  )

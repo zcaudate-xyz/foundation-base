@@ -122,8 +122,9 @@
        (keep (fn [{:keys [id op-key]
                    :as entry}]
                (if (filter-keys op-key)
-                 [(str id) (symbol (str (:id module))
-                                   (name id))])))))
+                 [(list :% \" id \")
+                  (symbol (str (:id module))
+                          (name id))])))))
 
 (comment
   h/atom:get

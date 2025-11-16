@@ -42,9 +42,9 @@
                                (last as)
                                as)]
                      (list 'const sym := (list 'require (str name))))
-       (let [#_#_as (if (= :link (:import emit))
-                      ['* as]
-                      as)
+       (let [as (if (= :link (:import emit))
+                  ['* as]
+                  as)
              imports (cond-> []
                        as    (conj (if (vector? as)
                                      (list :- (first as)
@@ -66,18 +66,19 @@
   {:added "4.0"}
   ([module mopts]
    (let [{:keys [emit]} mopts
-         {:lang/keys [format]} emit
+         {:lang/keys [format
+                      export]} emit
          table  (->> (module/module-entries module
-                                            std.lib/T #_#{:defn
+                                            #{:defn
                                               :def
                                               :defclass})
                      (cons 'tab))]
-     (h/prn table)
      (case format
        (:none
         :global)  nil
        :commonjs  (list := 'module.exports table)
-       (list :- :export :default table)))))
+       (if export
+         (list :- :export :default table))))))
 
 (defn js-module-link
   "gets the relative js based module"
@@ -117,9 +118,22 @@
            :else
            (str "./" interim)))))
 
+(defn js-transform-entry
+  "outputs the js module export form"
+  {:added "4.0"}
+  ([body {:keys [entry mopts]}]
+   (let [{:keys [emit]} mopts
+         {:lang/keys [format]} emit]
+     (case format
+       (:none :global :commonjs) body
+       (case (:op-key entry)
+         (:defclass :def :defn) (str "export " body)
+         body)))))
+
 (def +meta+
   (book/book-meta
    {:module-current (fn [])
     :module-import  #'js-module-import
     :module-export  #'js-module-export
-    :module-link    #'js-module-link}))
+    :module-link    #'js-module-link
+    :transforms {:entry [#'js-transform-entry]}}))

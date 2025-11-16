@@ -19,19 +19,12 @@
              [xt.lang.base-lib :as k]
              [xt.lang.base-client :as client]
              [xt.lang.event-box :as base-box]]
-   :export [MODULE]
-   :file   "App.js"})
+   :static {:export MODULE}})
 
 (defrun.js __import__
+  #_#_
   (j/import-missing)
   (j/import-set-global))
-
-(comment
-  #_(k/LOG! {:top top
-             :ntop ntop
-             :$id $id
-             :$data $data
-             :props props}))
 
 (defn.js UserCard
   [#{name address status}]
@@ -104,5 +97,6 @@
   (var #{Main} (ext-box/listenBox -/Global []))
   (return [:% Main]))
 
-(def.js MODULE
-  (x/registerRootComponent -/App))
+(defrun.js __export__
+  (:- export default
+      (x/registerRootComponent -/App)))
