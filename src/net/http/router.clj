@@ -3,7 +3,7 @@
             [std.lib :as h]
             [std.lib.bin :as bin]))
 
-(defn- compare-masks [as bs]
+(defn compare-masks [as bs]
   (let [a (first as)
         b (first bs)]
     (cond
@@ -18,7 +18,7 @@
       (= "*" b)     -1
       :else         (recur (next as) (next bs)))))
 
-(defn- split [s]
+(defn split [s]
   (let [[_ method path] (re-matches #"(?:([a-zA-Z]+)\s+)?(.*)" s)]
     (->> (str/split path #"/+")
       (cons method)
@@ -33,7 +33,7 @@
     (map (fn [[mask v]] [(split mask) v]))
     (sort-by first compare-masks)))
 
-(defn- matches? [mask path]
+(defn matches [mask path]
   (loop [mask   mask
          path   path
          params []]

@@ -26,7 +26,7 @@
 
 (defn.js main
   []
-  (ui/renderRoot "id" -/AppIndex))
+  (r/renderDOMRoot "root" -/AppIndex))
 
 
 

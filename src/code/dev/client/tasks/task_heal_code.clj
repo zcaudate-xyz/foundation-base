@@ -68,7 +68,7 @@
     
     :actions {:action/heal-input
               [{:%/set-async :var/healed-code
-                :to (. (global/api-post "/api/heal"
+                :to (. (global/api-post "/api/translate/to-heal"
                                         :var/input-code)
                        (then (fn [healed]
                                (navigator.clipboard.writeText healed)

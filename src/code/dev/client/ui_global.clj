@@ -24,4 +24,4 @@
              {:body body
               :method "POST"})
       (then (fn [res] (return (res.json))))
-      (then (fn [#{data}] (return data))))))
+      (then (fn [#{output}] (return output))))))

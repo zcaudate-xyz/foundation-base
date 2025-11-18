@@ -56,6 +56,7 @@
         [:return     spec/+op-return+]
         [:throw      spec/+op-throw+]
         [:await             spec/+op-await+]
+        [:async             spec/+op-async+]
         [:data-table        spec/+op-data-table+]
         [:data-shortcuts    spec/+op-data-shortcuts+]
         [:data-range        spec/+op-data-range+]

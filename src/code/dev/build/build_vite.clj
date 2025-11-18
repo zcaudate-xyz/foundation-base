@@ -51,6 +51,8 @@
   (h/p (h/sh {:root ".build/code.dev"
               :args ["yarn" "add" "@measured/puck"]}))
   (h/p (h/sh {:root ".build/code.dev"
+              :args ["yarn" "add" "lucide-react"]}))
+  (h/p (h/sh {:root ".build/code.dev"
               :args ["yarn" "add" "@dnd-kit/core"]}))
   (h/p (h/sh {:root ".build/code.dev"
               :args ["yarn" "add" "@radix-ui/themes"]}))

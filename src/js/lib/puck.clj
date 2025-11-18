@@ -2,7 +2,8 @@
   (:require [std.string :as str]
             [std.block :as block]
             [std.lib :as h]
-            [std.lang :as l]))
+            [std.lang :as l]
+            [js.react.compile :as compile]))
 
 (l/script :js
   {:import  [["@measured/puck" :as [* Puck]
@@ -51,14 +52,25 @@
                                           :children []}
            :puck/render                  {:tag -/Render}]))
 
-(defmacro.js Help
+(defn init-components
   []
-  (list `-/Action))
+  (compile/add-registry :puck +components+)
+  true)
+
+(def +init+
+  (init-components))
+
+
+
 
 ;;
 ;; helpers
 
 (comment
+
+  (defmacro.js Help
+  []
+  (list `-/Action))
   (l/rt:module-meta :js)
   (!.js
     (return

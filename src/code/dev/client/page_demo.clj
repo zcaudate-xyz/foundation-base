@@ -3,7 +3,8 @@
             [std.lang :as l]))
 
 (l/script :js
-  {:require [[js.react :as r :include [:dom]]]})
+  {:require [[js.react :as r]
+             [code.dev.client.ui-common :as ui]]})
 
 (defn.js Greeter
   [#{name}]
@@ -29,7 +30,5 @@
 
 (defn.js main
   []
-  (var rootElement (document.getElementById "root"))
-  (var root (ReactDOM.createRoot rootElement))
-  (root.render [:% -/App]))
+  (r/renderDOMRoot "root" -/App))
 

@@ -139,6 +139,9 @@
 (def +op-await+
   [{:op :await       :symbol #{'await}       :emit :return   :raw "await"}])
 
+(def +op-async+
+  [{:op :async       :symbol #{'async}       :emit :return   :raw "async"}])
+
 (def +op-data-table+
   [{:op :table       :symbol #{'tab}         :emit :table}])
 

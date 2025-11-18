@@ -62,12 +62,14 @@
   (l/link {:ns s}
           std.log/with-logger-basic
           std.log/spy
-          std.log/trace)
+          std.log/trace
+
+          std.block/layout)
   
   (l/link {:ns s}
           lib.aether/pull
           lib.aether/push
-
+          
           jvm.artifact.search/class-seq
           
           code.project/project

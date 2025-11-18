@@ -2,12 +2,13 @@
   (:require [org.httpkit.server :as http]
             [net.http.router :as router]
             [code.dev.server.pages :as pages]
-            [code.heal :as heal]
-            [std.json :as json]
-            [std.block :as block]
+            [code.dev.server.api-common :as api]
+            [code.dev.server.api-task :as api-task]
+            [code.dev.server.api-prompt :as api-prompt]
+            [code.dev.client.page-index :as page-index]
+            [code.dev.client.page-tasks :as page-tasks]
+            [code.dev.client.page-demo :as page-demo]
             [std.lib :as h]
-            [std.lib.bin :as bin]
-            [std.html :as html]
             [std.string :as str])
   (:import (java.awt Desktop)
            (java.net URI)))
@@ -19,183 +20,38 @@
 (defonce ^:dynamic *instance*
   (atom nil))
 
-(defn from-html
-  [body]
-  (let [full (std.html/tree
-              (str "<div>" body "</div>"))
-        full (if (= 2 (count full))
-               (second full)
-               full)
-        full (std.lib.walk/postwalk
-              (fn [x]
-                (if (map? x)
-                  (let [v (or (:class x)
-                              (:classname x))
-                        v (if (string? v)
-                            [v]
-                            (vec (keep (fn [v]
-                                         (not-empty (str/trim v)))
-                                       v)))]
-                    (cond-> x
-                      :then (dissoc :classname :class)
-                      (seq v) (assoc :class v)))
-                  x))
-              full)]
-    (block/string (block/layout full))))
-
-(defn to-html
-  [body]
-  (std.html/html
-   (try 
-     (read-string body)
-     (catch Throwable t
-       ""))))
-
-(defn translate-js-prompt
-  [body]
-  (str/join-lines
-   ["SYSTEM PROMPT START ----"
-    "You are an expert programming language translator and std.lang expert, being able to translate js/ts/jsx/tsx code"
-    "into a clojure compatible javascript dsl. The dsl spec is presented in the SYSTEM INFO section. You will take code"
-    "presented in USER PROMPT and translate it to std.lang dsl. Only output dsl code with no explainations. Only output"
-    "the function/functions available in the input. Do not output the MODULE form, the ns form or the l/script form as they"
-    "are only there for setup."
-    "SYSTEM PROMPT END ----"
-    "SYSTEM INFO START ----"
-    (slurp ".prompts/plans/translate_js.md")
-    "SYSTEM INFO END ----"
-    "USER PROMPT START ----"
-    body
-    "USER PROMPT END ----"]))
-
-(defn translate-js
-  [body]
-  (let [input  (translate-js-prompt body)
-        output @(h/sh {:args ["gemini" "<<" "EOF" input "EOF"]})]
-    (->> (str/split-lines output)
-         (filter (fn [line]
-                   (not (str/starts-with? line "```"))))
-         (str/join-lines)
-         (heal/heal))))
-
-(defn translate-plpgsql-prompt
-  [body]
-  (str/join-lines
-   ["SYSTEM PROMPT START ----"
-    "You are an expert programming language translator and std.lang expert, being able to translate plpgsql code"
-    "into a clojure compatible javascript dsl. The dsl spec is presented in the SYSTEM INFO section. You will take code"
-    "presented in USER PROMPT and translate it to std.lang dsl. Only output dsl code with no explainations. Only output"
-    "the function/functions available in the input. Do not output the MODULE form, the ns form or the l/script form as they"
-    "are only there for setup."
-    "SYSTEM PROMPT END ----"
-    "SYSTEM INFO START ----"
-    (slurp ".prompts/plans/translate_pg.md")
-    "SYSTEM INFO END ----"
-    "USER PROMPT START ----"
-    body
-    "USER PROMPT END ----"]))
-
-(defn translate-plpgsql
-  [body]
-  (let [input  (translate-plpgsql-prompt body)
-        output @(h/sh {:args ["gemini" "<<" "EOF" input "EOF"]})]
-    (->> (str/split-lines output)
-         (filter (fn [line]
-                   (not (str/starts-with? line "```"))))
-         (str/join-lines)
-         (heal/heal))))
-
-(defn translate-jsxc-prompt
-  [body]
-  (str/join-lines
-   ["SYSTEM PROMPT START ----"
-    "You are an expert programming language.  being able to translate jsxc/ts/jsxcx/tsx code"
-    "into a clojure compatible javascript dsl tree form. There is a decomposition process and a reconstruction"
-    "process, breaking down the components into a managable flat structure. The spec is presented in the SYSTEM INFO section."
-    "You will take code presented in USER PROMPT"
-    "the function/functions available in the input. Do not output the MODULE form, the ns form or the l/script form as they"
-    "are only there for setup."
-    "SYSTEM PROMPT END ----"
-    "SYSTEM INFO START ----";
-    (slurp ".prompts/plans/translate_jsxc.md")
-    "SYSTEM INFO END ----"
-    "USER PROMPT START ----"
-    body
-    "USER PROMPT END ----"]))
-
-(defn translate-jsxc
-  [body]
-  (let [input  (translate-jsxc-prompt body)
-        output @(h/sh {:args ["gemini" "<<" "EOF" input "EOF"]})]
-    (->> (str/split-lines output)
-         (filter (fn [line]
-                   (not (str/starts-with? line "```"))))
-         (str/join-lines)
-         (heal/heal))))
-
-(def dev-route-handler
+(def api-routes
   (router/router
-   {#_#_#_#_
-    "GET /" (fn [req] (html/html (#'pages/index-page)))
-    "GET /page/demo" (fn [req] (html/html (#'pages/demo-page)))
-    "POST /api/translate/from-html"  (fn [req]
-                                       (json/write
-                                        {:data (from-html (:body req))}))
-    "POST /api/translate/to-html"    (fn [req]
-                                       (json/write
-                                        {:data (to-html (:body req))}))
+   (api/create-prompt-routes
+    "POST /api/translate/"
+    {"from-html"       api-task/from-html
+     "to-html"         api-task/to-html
+     "to-heal"         api-task/to-heal
+     "to-js-dsl"       api-task/to-js-dsl
+     "to-jsxc-dsl"     api-task/to-jsxc-dsl
+     "to-python-dsl"   api-task/to-python-dsl
+     "to-plpgsql-dsl"  api-task/to-plpgsql-dsl})))
 
-    "POST /api/heal"                 (fn [req]
-                                       (json/write
-                                        {:data (heal/heal (:body req))}))
-    "POST /api/translate/js"         (fn [req]
-                                       (json/write
-                                        {:data  (translate-js (:body req))}))
-    "POST /api/translate/jsxc"       (fn [req]
-                                       (json/write
-                                        {:data  (translate-jsxc (:body req))}))
-    "POST /api/translate/python"     (fn [req] (json/write
-                                                {:op :translate-python}))
-    "POST /api/translate/plpgsql"    (fn [req]
-                                       (json/write
-                                        {:data  (translate-plpgsql (:body req))}))}))
+(def page-routes
+  (router/router
+   (api/create-routes
+    "GET "           
+    {"/"             (api/page-handler "Dev Index" page-index/main)
+     "/pages/tasks"  (api/page-handler "Dev Tasks" page-tasks/main)
+     "/pages/demo"   (api/page-handler "Dev Demo"  page-demo/main)
+     "*"             (fn [{:keys [uri]}]
+                       (or (router/serve-resource uri *public-path*)
+                           {:status 404 :body "Not Found"}))})))
 
 (defn dev-handler
   [req]
   (let [{:keys [uri request-method ^org.httpkit.BytesInputStream body]} req
         body (if body
-               (String. (. body (readAllBytes)))
-               {})]
-    (or (#'dev-route-handler
-         (assoc req :body body))
-
-        (cond (= uri "/")
-              {:status 200
-               :headers {"Content-Type" "text/html"
-                         "Content-Security-Policy" "script-src self https:  http: 'unsafe-eval' 'unsafe-inline';"}
-               :body    
-               (#'pages/index-page)}
-
-              (= uri "/tasks")
-              {:status 200
-               :headers {"Content-Type" "text/html"
-                         "Content-Security-Policy" "script-src self https:  http: 'unsafe-eval' 'unsafe-inline';"}
-               :body    
-               (#'pages/tasks-page)}
-
-              
-              (= uri "/page/demo")
-              {:status 200
-               :headers {"Content-Type" "text/html"
-                         "Content-Security-Policy" "script-src self https:  http: 'unsafe-eval' 'unsafe-inline';"}
-               :body    
-               (#'pages/demo-page)}
-
-              (= request-method :get)
-              (router/serve-resource uri *public-path*)
-              
-              :else
-              {:status 404 :body "Not Found"}))))
+               (String. (. body (readAllBytes))))
+        req  (assoc req :body body)]
+    (or (#'api-routes  req)
+        (#'page-routes req)
+        {:status 404 :body "Not Found"})))
 
 (defn server-start
   []
@@ -219,7 +75,6 @@
     (server-stop)
     (server-start)))
 
-
 (defn open-client
   []
   (. (Desktop/getDesktop)
@@ -227,7 +82,8 @@
 
 (comment
   (h/sh "curl" "-X" "POST" (str "http://localhost:" *port*
-                                "/api/translate/js"))
+                                "/api/translate/to-heal")
+        "-d" "(+ 1 2 3))")
   (server-toggle)
   (open-client)
   )

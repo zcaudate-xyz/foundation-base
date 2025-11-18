@@ -10,7 +10,7 @@
    :build     ".build/code-dev-server"
    :hooks    {:post [{:id :inject-ui
                       :fn (fn [& _]
-                            (binding [*ns* (the-ns 'code.dev.client.page-index)]
+                            #_(binding [*ns* (the-ns 'code.dev.client.page-index)]
                               (code.dev.client.page-index/main)))}]}
    :default  [{:type   :raw
                :file   "main.js"

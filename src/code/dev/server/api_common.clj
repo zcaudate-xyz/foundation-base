@@ -1,30 +1,48 @@
-(ns code.dev.server.pages
-  (:require [std.lib :as h]
+(ns code.dev.server.api-common
+  (:require [code.heal :as heal]
+            [std.json :as json]
+            [std.block :as block]
+            [std.lib :as h]
             [std.lang :as l]
             [std.html :as html]
+            [std.lib.walk :as walk]
             [std.string :as str]
-            [script.css :as css]
-            [code.dev.client.page-demo :as page-demo]
-            [code.dev.client.page-index :as page-index]
-            [code.dev.client.page-tasks :as page-tasks]
-            [std.lang.base.runtime :as default]))
+            [std.fs :as fs]
+            [script.css :as css]))
 
-(defn emit-main
-  [ns]
+(comment
+  (fn [req]
+    (json/write
+     {:data (from-html (:body req))})))
+
+(defn wrap-api-log
+  [f]
+  (fn [req]
+    ))
+
+
+(defn wrap-api-call
+  [f])
+
+
+
+(defn make-page-script
+  [main]
   (l/emit-script
-   '(-/main)
+   (list (l/sym-full main))
    {:lang :js
     :library (l/default-library)
     :module  (l/get-module (l/default-library)
                            :js
-                           ns)
+                           (:module main))
     :emit {:native {:suppress true}
            :lang/jsx false}
     :layout :full}))
 
-(defn make-page
+(defn make-page-template
   [{:keys [title
-           body]}]
+           body
+           main]}]
   [:html
    [:head
     [:meta {:charset "UTF-8"}]
@@ -33,9 +51,6 @@
     
     [:title title]
 
-    ;; babel
-    #_[:script {:src "https://unpkg.com/@babel/standalone/babel.min.js"}]
-    
     ;; codemirror
     [:link {:href "https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/codemirror.min.css"
             :rel "stylesheet" :type "text/css"}]
@@ -79,15 +94,89 @@
 
     ;; diff
     [:script {:src "https://cdnjs.cloudflare.com/ajax/libs/jsdiff/5.1.0/diff.min.js"}]
-
     [:link {:href "https://cdn.jsdelivr.net/npm/@radix-ui/themes@latest/styles.css"
             :rel "stylesheet" :type "text/css"}]
     
     
     
     [:style
-     
-     ".CodeMirror {
+     (css/generate-css
+      [[".CodeMirror"
+        {:font-size "10px"
+         :line-height "1.0"
+         :min-height "300px"}]
+
+       [".DiffViewer pre"
+        {:font-size "9px !important"}]
+       
+       [".DiffViewer table td:first-of-type"
+        {:font-size "9px !important"}]])]]
+   
+   [:body
+    [:div {:id "root"}]
+    [:script
+     (if main
+       (make-page-script main)
+       (or body ""))]]])
+
+(defn page
+  [title main]
+  (html/html
+   (make-page-template {:title title
+                        :main main})))
+
+(defn page-handler
+  [title main]
+  (fn [req]
+    {:status 200
+     :headers {"Content-Type" "text/html"
+               "Content-Security-Policy" "script-src self https:  http: 'unsafe-eval' 'unsafe-inline';"}
+     :body   (page title main)}))
+
+(defn prompt-handler
+  [f op]
+  (fn [{:keys [body]}]
+    (let [id (h/sid)
+          time-start   (h/time-ms)
+          output       (f body)
+          time-end     (h/time-ms)
+          res          {:id id
+                        :op op
+                        :time-start time-start
+                        :time-end   time-end
+                        :input body
+                        :output output}
+          log-dir      (str ".prompts/log/" op)]
+      (fs/create-directory log-dir)
+      (spit (str log-dir "/" id ".edn")
+            (str (block/layout
+                  res)))
+      {:status  200
+       :headers {"Content-Type" "application/json"}
+       :body    (json/write res)})))
+
+(defn create-routes
+  [prefix routes]
+  (h/map-keys (fn [k]
+                (str prefix k))
+              routes))
+
+(defn create-prompt-routes
+  [prefix routes]
+  (h/map-entries
+   (fn [[op f]]
+     [(str prefix op)
+      (prompt-handler f op)])
+   routes))
+
+
+
+
+
+(comment
+
+
+  ".CodeMirror {
   font-size: 10px; /* Your desired font size */
   
   /* IMPORTANT: With CodeMirror 5, you usually need to 
@@ -106,73 +195,4 @@
 /* You may also need to target the line numbers */
 .DiffViewer table td:first-of-type {
   font-size: 9px !important;
-}"]
-    
-    ]
-   
-
-   [:body
-    [:div {:id "root"}]
-    [:script
-     (or body "")]]])
-
-(comment
-  (css/generate-css
-   [[".CodeMirror" {:line-height "100%"
-                    :font-size "10px"
-                    
-                    #_#_:height "100%"
-                    :top 0
-                    :bottom 0
-                    #_#_#_#_:right 0
-                    :left 0}]])
-  )
-
-(defn index-page
-  []
-  (html/html
-   (make-page
-    {:title "Dev Interface"
-     :body (emit-main 'code.dev.client.page-index)})))
-
-(defn tasks-page
-  []
-  (html/html
-   (make-page
-    {:title "Tasks Interface"
-     :body (emit-main 'code.dev.client.page-tasks)})))
-
-(defn demo-page
-  []
-  (html/html
-   (make-page
-    {:title "Dev Demo Page HELLO WORLD"
-     :body (emit-main 'code.dev.client.page-demo)})))
-
-
-
-(comment
-;; clojure-mode
-    [:script {:src "/js/clojure-mode.umd.js"}]
-
-    ;; puck
-    [:script {:type "module"}
-     "import * as Puck from 'https://cdn.jsdelivr.net/npm/@measured/puck@0.20.2/+esm';\n
-      window.Puck = Puck"]
-    #_[:script {:src "/js/puck.umd.js"}]
-
-    ;; radix
-    [:script {:type "module"}
-     "import * as RadixMain from 'https://cdn.jsdelivr.net/npm/@radix-ui/themes@3.2.1/+esm';\n
-      console.log(RadixMain)
-      window.RadixMain = RadixMain"]
-    #_[:script {:src "/js/radix-main.umd.js"}]
-
-    ;; react-live
-    [:script {:type "module"}
-     "import ReactLive from 'https://cdn.jsdelivr.net/npm/react-live@4.1.8/+esm';\n
-      window.ReactLive = ReactLive"]
-    
-    ;; recharts
-    [:script {:src "/js/recharts.umd.js"}]
-  )
+}")

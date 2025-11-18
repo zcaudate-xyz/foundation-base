@@ -171,6 +171,26 @@
 ;;
 ;;
 
+(defn.js getDOMRoot
+  [domNode]
+  (var internalKey
+       (k/arr-find (k/obj-keys domNode)
+                   (fn [key]
+                     (return (. key (startsWith "__reactContainer$"))))))
+  
+  (if (> internalKey 0)
+    (return (. domNode [internalKey])))
+  (return nil))
+
+(defn.js renderDOMRoot
+  [id Component]
+  (var rootElement (document.getElementById id))
+  (var root (-/getDOMRoot rootElement))
+  (when  (k/nil? root)
+    (:= root (-/createDOMRoot rootElement)))
+  (. root (render [:% Component]))
+  (return true))
+
 (defn.js useStateFor
   [controls key]
   (var setterKey (+ "set" (k/capitalize key)))

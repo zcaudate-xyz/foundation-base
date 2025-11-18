@@ -1,10 +1,34 @@
 (ns js.react.compile
   (:require [std.lib.walk :as walk]
             [std.string :as str]
-            [std.lib :as h]
+            [std.lib :as h :refer [definvoke]]
             [std.lang :as l]
             [js.react.compile-components :as c]
             [js.react.compile-directives :as d]))
+
+(defonce +registry+
+  (atom {}))
+
+(defn get-registry
+  []
+  @+registry+)
+
+(defn put-registry
+  [group components]
+  (swap! +registry+ assoc group components))
+
+(defn del-registry
+  [group]
+  (swap! +registry+ dissoc group))
+
+(definvoke get-default-components
+  "emits using a potentially cached entry"
+  {:added "4.0"}
+  [:recent {:key (fn [_] :default)
+            :compare (fn [_]
+                       (set (keys @+registry+)))}]
+  ([_]
+   (apply merge (vals @+registry+))))
 
 (defn check-valid-variables
   [states form]
@@ -123,6 +147,7 @@
   [layout components]
   (let [components (-> components
                        (c/components-resolve)
+                       (merge (get-default-components nil))
                        (c/components-expand))]
     (-> (compile-layout-raw layout components)
         (c/compile-walk-variables))))
@@ -131,9 +156,11 @@
   [{:keys [triggers actions states layout components]}]
   (let [triggers   (compile-replace-actions triggers actions)
         layout     (compile-replace-actions layout actions)
-        components (-> components
-                       (c/components-resolve)
-                       (c/components-expand))
+        components (->> components
+                        (c/components-resolve)
+                        (merge (get-default-components nil))
+                        (c/components-expand)
+                        )
         components    (compile-replace-actions components actions)
         form-states   (compile-states   (check-valid-variables states states))
         form-triggers (compile-triggers (check-valid-variables states triggers))

@@ -2,7 +2,8 @@
   (:require [std.string :as str]
             [std.block :as block]
             [std.lib :as h]
-            [std.lang :as l]))
+            [std.lang :as l]
+            [js.react.compile :as compile]))
 
 (l/script :js
   {:import [["@radix-ui/themes" :as [* RadixMain]
@@ -328,6 +329,14 @@
                    {:tag (symbol "-" (str k))}])
                 (sort (ns-publics *ns*))))))
 
+
+(defn init-components
+  []
+  (compile/add-registry :radix +components+)
+  true)
+
+(def +init+
+  (init-components))
 
 (comment
   (l/rt:module-meta :js)

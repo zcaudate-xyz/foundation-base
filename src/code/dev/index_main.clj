@@ -11,7 +11,9 @@
              [js.lib.radix :as radix]
              [xt.lang.base-lib :as k]
              [xt.lang.base-client :as client]
-             [code.dev.client.ui-common :as ui]]})
+             [code.dev.webapp.layout-top-bar :as top-bar]
+             [code.dev.webapp.layout-hierarchy-tree :as hierarchy-tree]
+             [code.dev.webapp.layout-library-browser :as library-browser ]]})
 
 (def.js config
   {:components
@@ -36,19 +38,32 @@
     (client/client-ws "localhost" 1313 {}))
   (return
    (r/ui [:app/top
+          [:% top-bar/TopBar]
           [:app/body]]
-     {:app/top     [:div
-                    {:class ["flex flex-col w-full"]
-                     :style {:top 0 :bottom 0}}]
-      
-      :app/body
-      [:% puck/Puck {:config -/config
-                     :data -/initialData
-                     :onPublish -/save}]})))
+     [{:app/top     [:div
+                     {:class ["flex flex-col w-full"]
+                      :style {:top 0 :bottom 0}}]
+       
+       :app/body
+       [:rx/theme
+        [:*/h
+         {:style {:top 0 :bottom 0}}
+         #_[:% hierarchy-tree/HierarchyTree]
+         [:% library-browser/LibraryBrowser]
+         [:*/v {:gap 3}
+          [:rx/button "HELLO"]
+          [:rx/button "HELLO"]
+          [:rx/button "HELLO"]]]]}])))
 
 (defn.js main
   []
-  (ui/renderRoot "root" -/AppIndex))
+  (r/renderDOMRoot "root" -/AppIndex))
 
 (defrun.js __main__
   (-/main))
+
+(comment
+  
+  #_[:% puck/Puck {:config -/config
+                   :data -/initialData
+                   :onPublish -/save}])

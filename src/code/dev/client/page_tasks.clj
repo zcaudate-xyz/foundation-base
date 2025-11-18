@@ -24,4 +24,4 @@
 
 (defn.js main
   []
-  (ui/renderRoot "id" -/AppTasks))
+  (r/renderDOMRoot "root" -/AppTasks))
