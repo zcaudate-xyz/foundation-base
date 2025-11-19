@@ -135,7 +135,7 @@
                                                                                                (handleUpdateStateDefault stateName parsed)
                                                                                                (catch _
                                                                                                  (handleUpdateStateDefault stateName e.target.value))))
-                                                                                 :className "h-6 bg-[#252525] border-[#3a3a3a] text-gray-300 text-xs"}])))]]
+                                                                                 :className "h-6 bg-[#252525] border-[#3a3a3a] text-gray-300 text-xs"}]))]]]
                                                                   [:% fg/Button
                                                                     {:variant "ghost"
                                                                      :size "sm"
@@ -167,7 +167,7 @@
                 {:size "sm"
                  :onClick handleAddState
                  :className "h-7 px-3 bg-purple-600 hover:bg-purple-700 text-white"}
-                [:% lc/Plus {:className "w-3 h-3"}]]]]]]]]))
+                [:% lc/Plus {:className "w-3 h-3"}]]]]]]]))
 
 (defn.js TriggersTab [{:# [component onUpdateTriggers]}]
   (var [newTriggerName setNewTriggerName] (r/useState ""))
@@ -361,8 +361,8 @@
                                                                                 (:? (> availableStates.length 0)
                                                                                     (. availableStates (map (fn [stateName]
                                                                                                               (return [:% fg/SelectItem {:key stateName :value stateName} stateName]))))
-                                                                                    [:% fg/SelectItem {:value "_none" :disabled true} "No states defined"])]]]]
-                                                                          nil)
+                                                                                    [:% fg/SelectItem {:value "_none" :disabled true} "No states defined"])]]])
+                                                                          nil]
 
                                                                       (:? (== actionDef.type "setState")
                                                                           [:div
@@ -389,8 +389,8 @@
                                                                      :size "sm"
                                                                      :onClick (fn [] (return (handleRemoveAction actionName)))
                                                                      :className "h-6 w-6 p-0 ml-2 text-gray-500 hover:text-red-400 hover:bg-red-950/20"}
-                                                                    [:% lc/Trash2 {:className "w-3 h-3"}]]]))))]
-              [:p {:className "text-xs text-gray-500 italic"} "No actions defined"])
+                                                                    [:% lc/Trash2 {:className "w-3 h-3"}]]))))])
+              [:p {:className "text-xs text-gray-500 italic"} "No actions defined"]]
 
           [:div {:className "mt-3 p-3 bg-[#1e1e1e] rounded border border-[#3a3a3a]"}
             [:% fg/Label {:className "text-xs text-gray-400 mb-2 block"} "Add Action"]
@@ -414,4 +414,4 @@
                 {:size "sm"
                  :onClick handleAddAction
                  :className "h-7 px-3 bg-green-600 hover:bg-green-700 text-white"}
-                [:% lc/Plus {:className "w-3 h-3"}]]]]]]]))
+                [:% lc/Plus {:className "w-3 h-3"}]]]]]]))

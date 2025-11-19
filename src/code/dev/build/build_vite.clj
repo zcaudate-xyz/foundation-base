@@ -58,6 +58,8 @@
               :args ["yarn" "add" "@radix-ui/themes"]}))
   (h/p (h/sh {:root ".build/code.dev"
               :args ["yarn" "add" "@nextjournal/clojure-mode"]}))
+  (h/p (h/sh {:root ".build/code.dev"
+              :args ["yarn" "add" "@xtalk/figma-ui"]}))
   (spit ".build/code.dev/src/main.jsx"
         (emit-main))
 

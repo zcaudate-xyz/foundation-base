@@ -60,13 +60,13 @@
                                       [:% fg/SelectItem {:value "$blue9"} "$blue9"]
                                       [:% fg/SelectItem {:value "$red9"} "$red9"]
                                       [:% fg/SelectItem {:value "$green9"} "$green9"]
-                                      [:% fg/SelectItem {:value "$gray1"} "$gray1"]]])))
+                                      [:% fg/SelectItem {:value "$gray1"} "$gray1"]]]))
 
                               (return
                                 [:% fg/Input
                                   {:value (or value "")
                                    :onChange (fn [e] (return (handleChange e.target.value)))
-                                   :className "text-sm"}]))))
+                                   :className "text-sm"}])
 
   (return
     [:div {:className "flex flex-col h-full bg-white border-l"}
@@ -95,8 +95,8 @@
                                                               (return
                                                                 [:div {:key key :className "space-y-1"}
                                                                   [:% fg/Label {:className "text-xs capitalize"}
-                                                                    (. (. (. key (replace #"\B([A-Z])" " $1")) (trim))]
-                                                                  (renderPropertyEditor key value)])))))]]
+                                                                    (. (. (. key (replace #"\B([A-Z])" " $1")) (trim)))]
+                                                                  (renderPropertyEditor key value)]))))]]]
 
           [:% fg/Separator {}]
 
@@ -104,4 +104,4 @@
             [:h3 {:className "text-xs text-gray-500 mb-2"} "Component Info"]
             [:div {:className "text-xs space-y-1 text-gray-600"}
               [:p (+ "Children: " component.children.length)]
-              [:p (+ "Type: Tamagui " component.type)]]]]]]]))
+              [:p (+ "Type: Tamagui " component.type)]]]]]))

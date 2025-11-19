@@ -65,6 +65,8 @@
     [:script {:src "https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.15/mode/clojure/clojure.min.js"}]
     [:script {:src "https://unpkg.com/@xtalk/clojure-mode@0.3.7/dist/clojure-mode.umd.js"}]    
 
+    ;; figmaui
+    #_[:script {:src "https://cdn.jsdelivr.net/npm/@xtalk/figma-ui@0.1.1/dist/index.cjs.min.js"}]
     
     ;; daisyui
     [:link {:href "https://cdn.jsdelivr.net/npm/daisyui@5"
@@ -74,6 +76,7 @@
 
     ;; tailwind
     [:script {:src "https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"}]
+    
     
     ;; lucide
     [:script {:src "https://unpkg.com/lucide/dist/umd/lucide.min.js"}]
@@ -97,7 +100,9 @@
     [:link {:href "https://cdn.jsdelivr.net/npm/@radix-ui/themes@latest/styles.css"
             :rel "stylesheet" :type "text/css"}]
     
-    
+    [:script {:type "module"}
+     " import * as FigmaUi from 'https://cdn.jsdelivr.net/npm/@xtalk/figma-ui@0.1.1/+esm'\n"
+     " window.FigmaUi = FigmaUi"]
     
     [:style
      (css/generate-css

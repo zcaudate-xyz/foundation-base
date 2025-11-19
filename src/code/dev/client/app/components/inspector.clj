@@ -30,7 +30,7 @@
                                  (. details (push
                                               [:div {:key "type" :className "mb-1"}
                                                 [:span {:className "text-blue-600"} "type"] ": " object.type]))))
-                             (return details)))
+                             (return details)
 
   (return
     [:div {:className "flex flex-col h-full bg-white"}

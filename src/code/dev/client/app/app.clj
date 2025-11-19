@@ -81,7 +81,7 @@
                         :label "Action Button"
                         :properties {:children "{input.buttonText}"
                                      :className "px-6 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"}
-                        :children []})]})]})
+                        :children []})]})]})]))
 
   (var [selectedComponent setSelectedComponent] (r/useState "example-card-1"))
   (var [viewMode setViewMode] (r/useState "design"))
@@ -151,7 +151,7 @@
                          :label "Action Button"
                          :properties {:children "{input.buttonText}"
                                       :className "px-6 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"}
-                         :children []})]})]]]))
+                         :children []})]})]})]]))
   (var [historyIndex setHistoryIndex] (r/useState 0))
   (var isUndoRedoAction (r/useRef false))
 
@@ -435,4 +435,4 @@
                :onUpdateInputValues updateComponentInputValues
                :onUpdateStates updateComponentStates
                :onUpdateTriggers updateComponentTriggers
-               :onUpdateActions updateComponentActions}]]]])))
+               :onUpdateActions updateComponentActions}]]]]))

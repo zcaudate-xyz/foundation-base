@@ -72,7 +72,7 @@
                          :label "Subtitle"
                          :properties {:children "The best way to build modern applications"
                                       :className "text-2xl mb-8"}
-                         :children []})]})]})
+                         :children []})]})]})})
    (do {:id "ui.sections/feature-grid"
         :namespace "ui.sections"
         :name "FeatureGrid"
@@ -135,7 +135,7 @@
                          :label "Description"
                          :properties {:children "Yet another awesome feature"
                                       :className "text-gray-600"}
-                         :children []})]})]})
+                         :children []})]})]})})
    (do {:id "ui.navigation/navbar-simple"
         :namespace "ui.navigation"
         :name "NavbarSimple"
@@ -181,7 +181,7 @@
                                :label "Link 3"
                                :properties {:children "Contact"
                                             :className "text-gray-700 hover:text-purple-600 cursor-pointer"}
-                               :children []})]})]})]})
+                               :children []})]})]})]})})
    (do {:id "ui.navigation/navbar-cta"
         :namespace "ui.navigation"
         :name "NavbarWithCTA"
@@ -210,7 +210,7 @@
                          :label "CTA"
                          :properties {:children "Sign Up"
                                       :className "bg-purple-600 px-6 py-2 rounded-lg hover:bg-purple-700"}
-                         :children []})]})]})
+                         :children []})]})]})})
    (do {:id "ui.forms/contact-form"
         :namespace "ui.forms"
         :name "ContactForm"
@@ -245,7 +245,7 @@
                    :label "Submit Button"
                    :properties {:children "Send Message"
                                 :className "w-full bg-purple-600 text-white px-4 py-2 rounded-lg hover:bg-purple-700"}
-                   :children []})]})
+                   :children []})]})})
    (do {:id "ui.forms/login-form"
         :namespace "ui.forms"
         :name "LoginForm"
@@ -281,7 +281,7 @@
                    :label "Login"
                    :properties {:children "Sign In"
                                 :className "w-full bg-blue-600 text-white px-4 py-3 rounded-lg font-semibold hover:bg-blue-700"}
-                   :children []})]})
+                   :children []})]})})
    (do {:id "ui.cards/pricing-card"
         :namespace "ui.cards"
         :name "PricingCard"
@@ -334,7 +334,7 @@
                    :label "Subscribe"
                    :properties {:children "Get Started"
                                 :className "w-full bg-purple-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-purple-700"}
-                   :children []})]})
+                   :children []})]})})
    (do {:id "ui.layout/two-column"
         :namespace "ui.layout"
         :name "TwoColumn"
@@ -380,7 +380,7 @@
                          :label "Content"
                          :properties {:children "Content for the right column goes here"
                                       :className "text-gray-700"}
-                         :children []})]})]})])
+                         :children []})]})]})})})])
 
 (var buildNamespaceTree (fn [components]
                           (var root {:name "root"
@@ -401,7 +401,7 @@
                                                                                                      :children (new Map())}))))
                                                                        (:= current (. current.children (get part))))))
                                                    (. current.components (push comp))))))
-                          (return root)))
+                          (return root))
 
 (defn.js LibraryBrowser [{:# [onImportComponent onImportAndEdit]}]
   (var [search setSearch] (r/useState ""))
@@ -529,4 +529,4 @@
                       (onImportAndEdit comp.component))
            :className "h-5 text-[10px] px-2 bg-[#404040] hover:bg-[#4a4a4a] text-gray-300 opacity-0 group-hover:opacity-100 transition-opacity"}
           [:% lc/Download {:className "w-2.5 h-2.5 mr-1"}]
-          "Import & Edit"]]])))
+          "Import & Edit"]]]))

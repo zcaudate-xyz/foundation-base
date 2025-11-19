@@ -66,9 +66,9 @@
                                   (return
                                     [:div {:key category
                                            :className (+ "px-2 py-1 text-sm cursor-pointer hover:bg-gray-100 "
-                                                         (:? (== selectedCategory category) "bg-blue-100" "")}
+                                                         (:? (== selectedCategory category) "bg-blue-100" ""))
                                            :onClick (fn [] (return (handleCategorySelect category)))}
-                                      category]))))]
+                                      category]))))]]
 
         [:div {:className "w-1/4 border-r flex flex-col"}
           [:div {:className "px-2 py-1 bg-gray-100 border-b text-xs"} "Classes"]
@@ -77,9 +77,9 @@
                                                                (return
                                                                  [:div {:key className
                                                                         :className (+ "px-2 py-1 text-sm cursor-pointer hover:bg-gray-100 "
-                                                                                      (:? (== selectedClass className) "bg-blue-100" "")}
+                                                                                      (:? (== selectedClass className) "bg-blue-100" ""))
                                                                         :onClick (fn [] (return (handleClassSelect className)))}
-                                                                   className]))))]
+                                                                   className]))))]]
 
         [:div {:className "w-1/4 border-r flex flex-col"}
           [:div {:className "px-2 py-1 bg-gray-100 border-b text-xs"} "Protocols"]
@@ -88,7 +88,7 @@
                                                                     (return
                                                                       [:div {:key protocol
                                                                              :className "px-2 py-1 text-sm cursor-pointer hover:bg-gray-100"}
-                                                                        protocol]))))]
+                                                                        protocol]))))]]
 
         [:div {:className "w-1/4 flex flex-col"}
           [:div {:className "px-2 py-1 bg-gray-100 border-b text-xs"} "Methods"]
@@ -97,7 +97,7 @@
                                                            (return
                                                              [:div {:key method
                                                                     :className (+ "px-2 py-1 text-sm cursor-pointer hover:bg-gray-100 "
-                                                                                  (:? (== selectedMethod method) "bg-blue-100" "")}
+                                                                                  (:? (== selectedMethod method) "bg-blue-100" ""))
                                                                     :onClick (fn [] (return (handleMethodSelect method)))}
                                                                method]))))]]]
 
@@ -112,4 +112,4 @@
           [:% fg/Button {:size "sm" :variant "outline" :onClick (fn [] (return (onMessage "Method accepted")))}
             "Accept"]
           [:% fg/Button {:size "sm" :variant "outline" :onClick (fn [] (return (onMessage "Method cancelled")))}
-            "Cancel"]]))]))
+            "Cancel"]]]]))

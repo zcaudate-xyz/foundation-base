@@ -58,7 +58,7 @@
                                 [:% fg/Input
                                   {:value (or value "")
                                    :onChange (fn [e] (return (handleChange e.target.value)))
-                                   :className "h-7 bg-[#1e1e1e] border-[#3a3a3a] text-xs text-gray-300"}]))))
+                                   :className "h-7 bg-[#1e1e1e] border-[#3a3a3a] text-xs text-gray-300"}])))
 
   (return
     [:div {:className "flex flex-col h-full bg-[#252525]"}
@@ -130,7 +130,7 @@
                                                                         {:componentId component.id
                                                                          :propertyKey key
                                                                          :value value
-                                                                         :onUpdateProperty onUpdateProperty}]]))))]]]]
+                                                                         :onUpdateProperty onUpdateProperty}]]))))]]]]]
 
         [:% fg/TabsContent {:value "inputs" :className "flex-1 m-0"}
           [:% ip/InputsPanel
@@ -143,4 +143,4 @@
             {:component component
              :onUpdateStates onUpdateStates
              :onUpdateTriggers onUpdateTriggers
-             :onUpdateActions onUpdateActions}]]]]]))
+             :onUpdateActions onUpdateActions}]]]]))

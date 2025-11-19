@@ -123,8 +123,8 @@
                                                                        :size "sm"
                                                                        :onClick (fn [] (return (handleRemoveInput inputName)))
                                                                        :className "h-6 w-6 p-0 ml-2 text-gray-500 hover:text-red-400 hover:bg-red-950/20"}
-                                                                      [:% lc/Trash2 {:className "w-3 h-3"}]]]])))]
-                [:p {:className "text-xs text-gray-500 italic"} "No inputs defined"])
+                                                                      [:% lc/Trash2 {:className "w-3 h-3"}]]]]))))]
+                [:p {:className "text-xs text-gray-500 italic"} "No inputs defined"])]
 
             [:div {:className "mt-3 p-3 bg-[#1e1e1e] rounded border border-[#3a3a3a]"}
               [:% fg/Label {:className "text-xs text-gray-400 mb-2 block"} "Add Input"]
@@ -149,7 +149,7 @@
                   {:size "sm"
                    :onClick handleAddInput
                    :className "h-7 px-3 bg-blue-600 hover:bg-blue-700 text-white"}
-                  [:% lc/Plus {:className "w-3 h-3"}]]]]]
+                  [:% lc/Plus {:className "w-3 h-3"}]]]]]]
 
           (:? (and component.inputs (> (Object.keys component.inputs).length 0))
               [:<>
@@ -166,4 +166,4 @@
                                                                           [:span {:className "text-gray-600 ml-2"} (+ "- " inputDef.description)]
                                                                           nil)]
                                                                     (renderInputValueEditor inputName inputDef)]))))]]]
-              nil)]]])))
+              nil)]))

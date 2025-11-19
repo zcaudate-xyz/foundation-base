@@ -110,4 +110,4 @@
         [:div {:className "p-8 min-h-full bg-gray-50"}
           [:div {:className "bg-white rounded-lg shadow-sm p-8 min-h-[600px]"}
             (. components (map (fn [component]
-                                 (return [:div {:key component.id} (renderComponent component)]))))]]]))
+                                 (return [:div {:key component.id} (renderComponent component)]))))]]]])
