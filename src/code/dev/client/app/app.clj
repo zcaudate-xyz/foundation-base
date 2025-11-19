@@ -3,8 +3,7 @@
 
 (l/script :js
   {:require [[js.react :as r]
-             [js.react.dnd :as dnd]
-             [js.react.dnd.html5-backend :as dnd-html5]
+             [js.lib.react-dnd :as dnd]
              [code.dev.client.app.components.component-browser :as cb]
              [code.dev.client.app.components.library-browser :as lb]
              [code.dev.client.app.components.viewport-canvas :as vc]
@@ -20,68 +19,64 @@
 (defn.js App []
   (var [components setComponents]
     (r/useState
-      [(do {:id "root"
-            :type "View"
-            :label "Scene"
-            :properties {:padding "$4"
-                         :backgroundColor "$background"}
-            :children
-            [(do {:id "example-card-1"
-                  :type "Card"
-                  :label "Example Card"
-                  :properties {:className "p-6 bg-white rounded-lg shadow-md max-w-md mx-auto mt-8"}
-                  :inputs {:title {:type "string"
-                                   :description "Card title text"}
-                           :description {:type "string"
-                                         :description "Card description"}
-                           :buttonText {:type "string"
-                                        :description "Button label"}
-                           :count {:type "number"
-                                   :description "Counter value"}}
-                  :inputValues {:title "Welcome to Input Binding!"
-                                :description "This card demonstrates how inputs work. Edit the input values in the Inputs tab to see changes."
-                                :buttonText "Click Me"
-                                :count 42}
-                  :states {:isVisible {:type "boolean"
-                                      :default true
-                                      :description "Controls visibility of description"}
-                           :clickCount {:type "number"
-                                        :default 0
-                                        :description "Number of button clicks"}}
-                  :actions {:toggleVisibility {:type "toggleState"
-                                               :target "isVisible"
-                                               :description "Toggle description visibility"}
-                            :incrementClicks {:type "incrementState"
-                                              :target "clickCount"
-                                              :description "Increment click counter"}}
-                  :triggers {:onButtonClick {:event "click"
-                                             :action "incrementClicks"
-                                             :description "Increment counter when button is clicked"}}
-                  :children
-                  [(do {:id "example-heading-1"
-                        :type "Heading"
-                        :label "Card Title"
-                        :properties {:children "{input.title}"
-                                     :className "text-2xl font-bold text-gray-900 mb-4"}
-                        :children []})
-                   (do {:id "example-text-1"
-                        :type "Text"
-                        :label "Card Description"
-                        :properties {:children "{input.description}"
-                                     :className "text-gray-600 mb-4"}
-                        :children []})
-                   (do {:id "example-text-2"
-                        :type "Text"
-                        :label "Counter Display"
-                        :properties {:children "Clicks: {state.clickCount}"
-                                     :className "text-sm text-gray-500 mb-4"}
-                        :children []})
-                   (do {:id "example-button-1"
-                        :type "Button"
-                        :label "Action Button"
-                        :properties {:children "{input.buttonText}"
-                                     :className "px-6 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"}
-                        :children []})]})]})]))
+      [{:properties {:padding "$4"
+              :backgroundColor "$background"}
+ :children [{:inputValues {:description "This card demonstrates how inputs work. Edit the input values in the Inputs tab to see changes."
+               :title "Welcome to Input Binding!"
+               :buttonText "Click Me"
+               :count 42}
+ :properties {:className "p-6 bg-white rounded-lg shadow-md max-w-md mx-auto mt-8"}
+ :children [{:properties {:children "{input.title}"
+              :className "text-2xl font-bold text-gray-900 mb-4"}
+ :children []
+ :type "Heading"
+ :label "Card Title"
+ :id "example-heading-1"}                                        {:properties {:children "{input.description}"
+              :className "text-gray-600 mb-4"}
+ :children []
+ :type "Text"
+ :label "Card Description"
+ :id "example-text-1"}
+            {:properties {:children "Clicks: {state.clickCount}"
+              :className "text-sm text-gray-500 mb-4"}
+ :children []
+ :type "Text"
+ :label "Counter Display"
+ :id "example-text-2"}                                           {:properties {:children "{input.buttonText}"
+              :className "px-6 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"}
+ :children []
+ :type "Button"
+ :label "Action Button"
+ :id "example-button-1"}]
+ :states {:clickCount {:description "Number of button clicks"
+                       :default 0
+                       :type "number"}
+          :isVisible {:description "Controls visibility of description"
+                      :default true
+                      :type "boolean"}}
+ :type "Card"
+ :triggers {:onButtonClick {:description "Increment counter when button is clicked"
+                            :event "click"
+                            :action "incrementClicks"}}
+ :actions {:incrementClicks {:description "Increment click counter"
+                             :type "incrementState"
+                             :target "clickCount"}
+           :toggleVisibility {:description "Toggle description visibility"
+                              :type "toggleState"
+                              :target "isVisible"}}
+ :inputs {:description {:description "Card description"
+                        :type "string"}
+          :title {:description "Card title text"
+                  :type "string"}
+          :buttonText {:description "Button label"
+                       :type "string"}
+          :count {:description "Counter value"
+                  :type "number"}}
+ :label "Example Card"
+ :id "example-card-1"}]
+ :type "View"
+ :label "Scene"
+ :id "root"}]))
 
   (var [selectedComponent setSelectedComponent] (r/useState "example-card-1"))
   (var [viewMode setViewMode] (r/useState "design"))
@@ -90,68 +85,64 @@
   ;; History management
   (var [history setHistory]
     (r/useState
-      [[(do {:id "root"
-             :type "View"
-             :label "Scene"
-             :properties {:padding "$4"
-                          :backgroundColor "$background"}
-             :children
-             [(do {:id "example-card-1"
-                   :type "Card"
-                   :label "Example Card"
-                   :properties {:className "p-6 bg-white rounded-lg shadow-md max-w-md mx-auto mt-8"}
-                   :inputs {:title {:type "string"
-                                    :description "Card title text"}
-                            :description {:type "string"
-                                          :description "Card description"}
-                            :buttonText {:type "string"
-                                         :description "Button label"}
-                            :count {:type "number"
-                                    :description "Counter value"}}
-                   :inputValues {:title "Welcome to Input Binding!"
-                                 :description "This card demonstrates how inputs work. Edit the input values in the Inputs tab to see changes."
-                                 :buttonText "Click Me"
-                                 :count 42}
-                   :states {:isVisible {:type "boolean"
-                                       :default true
-                                       :description "Controls visibility of description"}
-                            :clickCount {:type "number"
-                                         :default 0
-                                         :description "Number of button clicks"}}
-                   :actions {:toggleVisibility {:type "toggleState"
-                                                :target "isVisible"
-                                                :description "Toggle description visibility"}
-                             :incrementClicks {:type "incrementState"
-                                               :target "clickCount"
-                                               :description "Increment click counter"}}
-                   :triggers {:onButtonClick {:event "click"
-                                              :action "incrementClicks"
-                                              :description "Increment counter when button is clicked"}}
-                   :children
-                   [(do {:id "example-heading-1"
-                         :type "Heading"
-                         :label "Card Title"
-                         :properties {:children "{input.title}"
-                                      :className "text-2xl font-bold text-gray-900 mb-4"}
-                         :children []})
-                    (do {:id "example-text-1"
-                         :type "Text"
-                         :label "Card Description"
-                         :properties {:children "{input.description}"
-                                      :className "text-gray-600 mb-4"}
-                         :children []})
-                    (do {:id "example-text-2"
-                         :type "Text"
-                         :label "Counter Display"
-                         :properties {:children "Clicks: {state.clickCount}"
-                                      :className "text-sm text-gray-500 mb-4"}
-                         :children []})
-                    (do {:id "example-button-1"
-                         :type "Button"
-                         :label "Action Button"
-                         :properties {:children "{input.buttonText}"
-                                      :className "px-6 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"}
-                         :children []})]})]})]]))
+      [[{:properties {:padding "$4"
+              :backgroundColor "$background"}
+ :children [{:inputValues {:description "This card demonstrates how inputs work. Edit the input values in the Inputs tab to see changes."
+               :title "Welcome to Input Binding!"
+               :buttonText "Click Me"
+               :count 42}
+ :properties {:className "p-6 bg-white rounded-lg shadow-md max-w-md mx-auto mt-8"}
+ :children [{:properties {:children "{input.title}"
+              :className "text-2xl font-bold text-gray-900 mb-4"}
+ :children []
+ :type "Heading"
+ :label "Card Title"
+ :id "example-heading-1"}                                        {:properties {:children "{input.description}"
+              :className "text-gray-600 mb-4"}
+ :children []
+ :type "Text"
+ :label "Card Description"
+ :id "example-text-1"}
+            {:properties {:children "Clicks: {state.clickCount}"
+              :className "text-sm text-gray-500 mb-4"}
+ :children []
+ :type "Text"
+ :label "Counter Display"
+ :id "example-text-2"}                                           {:properties {:children "{input.buttonText}"
+              :className "px-6 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"}
+ :children []
+ :type "Button"
+ :label "Action Button"
+ :id "example-button-1"}]
+ :states {:clickCount {:description "Number of button clicks"
+                       :default 0
+                       :type "number"}
+          :isVisible {:description "Controls visibility of description"
+                      :default true
+                      :type "boolean"}}
+ :type "Card"
+ :triggers {:onButtonClick {:description "Increment counter when button is clicked"
+                            :event "click"
+                            :action "incrementClicks"}}
+ :actions {:incrementClicks {:description "Increment click counter"
+                             :type "incrementState"
+                             :target "clickCount"}
+           :toggleVisibility {:description "Toggle description visibility"
+                              :type "toggleState"
+                              :target "isVisible"}}
+ :inputs {:description {:description "Card description"
+                        :type "string"}
+          :title {:description "Card title text"
+                  :type "string"}
+          :buttonText {:description "Button label"
+                       :type "string"}
+          :count {:description "Counter value"
+                  :type "number"}}
+ :label "Example Card"
+ :id "example-card-1"}]
+ :type "View"
+ :label "Scene"
+ :id "root"}]]))
   (var [historyIndex setHistoryIndex] (r/useState 0))
   (var isUndoRedoAction (r/useRef false))
 
@@ -207,12 +198,14 @@
                         (return))
 
                       (var newComponent
-                        (do {:id (+ (type.toLowerCase) "-" (Date.now) )
-                             :type type
-                             :label type
-                             :properties (getDefaultProperties type)
-                             :children []
-                             :parent parentId}))
+                        {:properties (getDefaultProperties type)
+ :children []
+ :parent parentId
+ :type type
+ :label type
+ :id (+ (type.toLowerCase)
+        "-"
+        (Date.now))})
 
                       (setComponents (fn [prev]
                                        (var updated [(transduce (map identity) conj [] prev)])
@@ -354,10 +347,20 @@
   (var importComponent (fn [component]
                          (var generateNewIds (fn [comp (:= isRoot true)]
                                                (return
-                                                 (do {:.. comp
-                                                      :id (+ (comp.type.toLowerCase) "-" (Date.now) "-" (. (Math.random) (toString 36) (substr 2 9)))
-                                                      :libraryRef (:? isRoot comp.libraryRef undefined)
-                                                      :children (. comp.children (map (fn [child] (return (generateNewIds child false)))))}))))
+                                                 {:children (. comp.children
+              (map (fn [child]
+                       (return (generateNewIds child false)))))
+ :id (+ (comp.type.toLowerCase)
+        "-"
+        (Date.now)
+        "-"
+        (. (Math.random)
+           (toString 36)
+           (substr 2 9)))
+ :libraryRef (:? isRoot
+                 comp.libraryRef
+                 undefined)
+ :.. comp})))
 
                          (var newComponent (generateNewIds component))
 

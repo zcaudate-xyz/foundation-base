@@ -5,35 +5,42 @@
   {:require [[js.react :as r]
              [js.lib.figma :as fg]
              [js.lib.lucide :as lc]
-             [code.dev.client.app.app :as app]
              [code.dev.client.app.components.inputs-panel :as ip]
              [code.dev.client.app.components.states-triggers-panel :as stp]]})
 
-(def.js PropertyInput
-  (r/memo (fn [{:# [componentId propertyKey value onUpdateProperty]}]
-            (if (== (typeof value) "boolean")
-              (return
-                [:input
-                  {:type "checkbox"
-                   :checked value
-                   :onChange (fn [e] (return (onUpdateProperty componentId propertyKey e.target.checked)))
-                   :className "h-4 w-4"}]))
+(defn.js PropertyInput
+  [{:# [componentId propertyKey value onUpdateProperty]}]
+  (if (== (typeof value) "boolean")
+    (return
+     [:input
+      {:type "checkbox"
+       :checked value
+       :onChange (fn [e] (return (onUpdateProperty componentId propertyKey e.target.checked)))
+       :className "h-4 w-4"}]))
 
-            (if (and (== (typeof value) "string") (> (. value length) 50))
-              (return
-                [:% fg/Textarea
-                  {:value value
-                   :onChange (fn [e] (return (onUpdateProperty componentId propertyKey e.target.value)))
-                   :className "min-h-[80px] bg-[#1e1e1e] border-[#3a3a3a] text-gray-300 text-xs"}]))
+  (if (and (== (typeof value) "string") (> (. value length) 50))
+    (return
+     [:% fg/Textarea
+      {:value value
+       :onChange (fn [e] (return (onUpdateProperty componentId propertyKey e.target.value)))
+       :className "min-h-[80px] bg-[#1e1e1e] border-[#3a3a3a] text-gray-300 text-xs"}]))
 
-            (return
-              [:% fg/Input
-                {:type "text"
-                 :value (or value "")
-                 :onChange (fn [e] (return (onUpdateProperty componentId propertyKey e.target.value)))
-                 :className "h-8 bg-[#1e1e1e] border-[#3a3a3a] text-gray-300 text-xs"}]))))
+  (return
+   [:% fg/Input
+    {:type "text"
+     :value (or value "")
+     :onChange (fn [e] (return (onUpdateProperty componentId propertyKey e.target.value)))
+     :className "h-8 bg-[#1e1e1e] border-[#3a3a3a] text-gray-300 text-xs"}]))
 
-(defn.js PropertiesPanel [{:# [component onUpdateProperty onDeleteComponent onUpdateInputs onUpdateInputValues onUpdateStates onUpdateTriggers onUpdateActions]}]
+(defn.js PropertiesPanel
+  [{:# [component
+        onUpdateProperty
+        onDeleteComponent
+        onUpdateInputs
+        onUpdateInputValues
+        onUpdateStates
+        onUpdateTriggers
+        onUpdateActions]}]
   (when (not component)
     (return
       [:div {:className "flex flex-col h-full bg-[#252525]"}
@@ -64,7 +71,7 @@
     [:div {:className "flex flex-col h-full bg-[#252525]"}
       [:div {:className "h-10 bg-[#2b2b2b] border-b border-[#323232] flex items-center px-3 justify-between"}
         [:span {:className "text-xs text-gray-400"} "Properties"]
-        (:? (!= component.id "root")
+        (:? (not= component.id "root")
             [:% fg/Button
               {:variant "ghost"
                :size "sm"
@@ -120,10 +127,12 @@
                                                                     [:div {:key (+ component.id "-" key)}
                                                                       [:% fg/Label {:className "text-xs text-gray-400 mb-1 block"}
                                                                         key
-                                                                        (:? (and component.inputs (> (Object.keys component.inputs).length 0))
+                                                                       (:? (and component.inputs (> (. (Object.keys component.inputs) length)
+                                                                                                     0))
                                                                             [:span {:className "ml-2 text-[10px] text-blue-400 font-mono"} "{input.name}"]
                                                                             nil)
-                                                                        (:? (and component.states (> (Object.keys component.states).length 0))
+                                                                       (:? (and component.states (> (. (Object.keys component.states) length)
+                                                                                                    0))
                                                                             [:span {:className "ml-2 text-[10px] text-purple-400 font-mono"} "{state.name}"]
                                                                             nil)]
                                                                       [:% -/PropertyInput

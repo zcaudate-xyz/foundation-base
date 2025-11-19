@@ -9,7 +9,107 @@
 (h/template-bulk [l/tmpl-entry {:type :fragment
                                 :base "Lucide"
                                 :tag "js"}]
-  '[ArrowLeftSquare
+  '[AArrowDown
+    AArrowUp
+    ALargeSmall
+    Accessibility
+    Activity
+    ActivitySquare
+    AirVent
+    Airplay
+    AlarmCheck
+    AlarmClock
+    AlarmClockCheck
+    AlarmClockMinus
+    AlarmClockOff
+    AlarmClockPlus
+    AlarmMinus
+    AlarmPlus
+    AlarmSmoke
+    Album
+    AlertCircle
+    AlertOctagon
+    AlertTriangle
+    AlignCenter
+    AlignCenterHorizontal
+    AlignCenterVertical
+    AlignEndHorizontal
+    AlignEndVertical
+    AlignHorizontalDistributeCenter
+    AlignHorizontalDistributeEnd
+    AlignHorizontalDistributeStart
+    AlignHorizontalJustifyCenter
+    AlignHorizontalJustifyEnd
+    AlignHorizontalJustifyStart
+    AlignHorizontalSpaceAround
+    AlignHorizontalSpaceBetween
+    AlignJustify
+    AlignLeft
+    AlignRight
+    AlignStartHorizontal
+    AlignStartVertical
+    AlignVerticalDistributeCenter
+    AlignVerticalDistributeEnd
+    AlignVerticalDistributeStart
+    AlignVerticalJustifyCenter
+    AlignVerticalJustifyEnd
+    AlignVerticalJustifyStart
+    AlignVerticalSpaceAround
+    AlignVerticalSpaceBetween
+    Ambulance
+    Ampersand
+    Ampersands
+    Amphora
+    Anchor
+    Angry
+    Annoyed
+    Antenna
+    Anvil
+    Aperture
+    AppWindow
+    AppWindowMac
+    Apple
+    Archive
+    ArchiveRestore
+    ArchiveX
+    AreaChart
+    Armchair
+    ArrowBigDown
+    ArrowBigDownDash
+    ArrowBigLeft
+    ArrowBigLeftDash
+    ArrowBigRight
+    ArrowBigRightDash
+    ArrowBigUp
+    ArrowBigUpDash
+    ArrowDown
+    ArrowDown01
+    ArrowDown10
+    ArrowDownAZ
+    ArrowDownAz
+    ArrowDownCircle
+    ArrowDownFromLine
+    ArrowDownLeft
+    ArrowDownLeftFromCircle
+    ArrowDownLeftFromSquare
+    ArrowDownLeftSquare
+    ArrowDownNarrowWide
+    ArrowDownRight
+    ArrowDownRightFromCircle
+    ArrowDownRightFromSquare
+    ArrowDownRightSquare
+    ArrowDownSquare
+    ArrowDownToDot
+    ArrowDownToLine
+    ArrowDownUp
+    ArrowDownWideNarrow
+    ArrowDownZA
+    ArrowDownZa
+    ArrowLeft
+    ArrowLeftCircle
+    ArrowLeftFromLine
+    ArrowLeftRight
+    ArrowLeftSquare
     ArrowLeftToLine
     ArrowRight
     ArrowRightCircle
@@ -228,6 +328,7 @@
     CalendarSync
     CalendarX
     CalendarX2
+    Calendars
     Camera
     CameraOff
     CandlestickChart
@@ -654,6 +755,7 @@
     Filter
     FilterX
     Fingerprint
+    FingerprintPattern
     FireExtinguisher
     Fish
     FishOff
@@ -1708,4 +1810,96 @@
     UserMinus2
     UserPen
     UserPlus
-    UserPlus2])
+    UserPlus2
+    UserRound
+    UserRoundCheck
+    UserRoundCog
+    UserRoundMinus
+    UserRoundPen
+    UserRoundPlus
+    UserRoundSearch
+    UserRoundX
+    UserSearch
+    UserSquare
+    UserSquare2
+    UserStar
+    UserX
+    UserX2
+    Users
+    Users2
+    UsersRound
+    Utensils
+    UtensilsCrossed
+    UtilityPole
+    Variable
+    Vault
+    VectorSquare
+    Vegan
+    VenetianMask
+    Venus
+    VenusAndMars
+    Verified
+    Vibrate
+    VibrateOff
+    Video
+    VideoOff
+    Videotape
+    View
+    Voicemail
+    Volleyball
+    Volume
+    Volume1
+    Volume2
+    VolumeOff
+    VolumeX
+    Vote
+    Wallet
+    Wallet2
+    WalletCards
+    WalletMinimal
+    Wallpaper
+    Wand
+    Wand2
+    WandSparkles
+    Warehouse
+    WashingMachine
+    Watch
+    Waves
+    WavesLadder
+    Waypoints
+    Webcam
+    Webhook
+    WebhookOff
+    Weight
+    Wheat
+    WheatOff
+    WholeWord
+    Wifi
+    WifiCog
+    WifiHigh
+    WifiLow
+    WifiOff
+    WifiPen
+    WifiSync
+    WifiZero
+    Wind
+    WindArrowDown
+    Wine
+    WineOff
+    Workflow
+    Worm
+    WrapText
+    Wrench
+    X
+    XCircle
+    XOctagon
+    XSquare
+    Youtube
+    Zap
+    ZapOff
+    ZoomIn
+    ZoomOut
+    createElement
+    createIcons
+    icons])
+  

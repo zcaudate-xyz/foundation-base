@@ -9,18 +9,8 @@
             [code.dev.client.page-tasks :as page-tasks]
             [std.lang.base.runtime :as default]))
 
-(defn emit-main
-  [ns]
-  (l/emit-script
-   '(-/main)
-   {:lang :js
-    :library (l/default-library)
-    :module  (l/get-module (l/default-library)
-                           :js
-                           ns)
-    :emit {:native {:suppress true}
-           :lang/jsx false}
-    :layout :full}))
+
+
 
 (defn make-page
   [{:keys [title

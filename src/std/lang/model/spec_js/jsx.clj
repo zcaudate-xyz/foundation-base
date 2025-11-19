@@ -84,18 +84,22 @@
   {:added "4.0"}
   ([params grammar mopts]
    (binding [common/*indent* (+ common/*indent* 2)]
-     (->> params
-          (map (fn [[k v]]
-                 (let [vstr (cond (string? v)
-                                  (pr-str v)
-                                  
-                                  :else
-                                  (let [body (emit/emit-main v grammar mopts)
-                                        body (if (str/multi-line? body)
-                                               (str/indent-rest body 2)
-                                               body)]
-                                    (str "{" body "}")))]
-                   (str (name k) "=" vstr))))))))
+     (cond-> (mapv (fn [[k v]]
+                     (let [vstr (cond (string? v)
+                                      (pr-str v)
+                                      
+                                      :else
+                                      (let [body (emit/emit-main v grammar mopts)
+                                            body (if (str/multi-line? body)
+                                                   (str/indent-rest body 2)
+                                                   body)]
+                                        (str "{" body "}")))]
+                       (str (name k) "=" vstr)))
+                   (dissoc params :..))
+       (:.. params) (conj (str "{..." (emit/emit-main (first (h/seqify (:.. params)))
+                                                     grammar
+                                                     mopts)
+                               "}"))))))
 
 (defn emit-jsx-set-params
   "emits jsx set params

@@ -31,7 +31,7 @@
   "Given set of routes, builds matcher structure. See `router`"
   [routes]
   (->> routes
-    (map (fn [[mask v]] [(split mask) v]))
+    (map (fn [[mask v]] [(split-path mask) v]))
     (sort-by first compare-masks)))
 
 (defn match-path [mask path]

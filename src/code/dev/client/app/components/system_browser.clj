@@ -5,27 +5,29 @@
   {:require [[js.react :as r]
              [js.lib.figma :as fg]]})
 
-(var categories ["Kernel-Objects" "Collections-Sequenceable" "Collections-Unordered" "Graphics-Primitives" "System-Support"])
-(var classes
+(def.js categories ["Kernel-Objects" "Collections-Sequenceable" "Collections-Unordered" "Graphics-Primitives" "System-Support"])
+
+(def.js  classes
   {:Kernel-Objects ["Object" "Behavior" "Class" "Metaclass" "Boolean" "True" "False" "UndefinedObject"]
    :Collections-Sequenceable ["Array" "OrderedCollection" "SortedCollection" "String" "Symbol"]
    :Collections-Unordered ["Set" "Dictionary" "IdentityDictionary" "Bag"]
    :Graphics-Primitives ["Point" "Rectangle" "Color" "Form"]
    :System-Support ["System" "Transcript" "Compiler" "Debugger"]})
 
-(var methods
+(def.js  methods
   {:Object ["initialize" "printOn:" "isNil" "notNil" "yourself" "copy" "deepCopy" "hash" "class"]
    :Array ["at:" "at:put:" "size" "do:" "collect:" "select:" "reject:" "first" "last"]
    :String ["size" "at:" "concat:" "isEmpty" "asUppercase" "asLowercase" "findString:"]
    :Point ["x" "y" "x:y:" "dist:" "transpose" "dotProduct:"]})
 
-(var methodSource
+(def.js  methodSource
   {:Object-initialize "initialize\n    \"Initialize the receiver\"\n    ^ self"
-   :Object-printOn: "printOn: aStream\n    \"Print the receiver on a stream\"\n    aStream nextPutAll: self class name"
+   :Object-printOn "printOn: aStream\n    \"Print the receiver on a stream\"\n    aStream nextPutAll: self class name"
    :Array-size "size\n    \"Answer the number of elements in the receiver\"\n    ^ self basicSize"
-   :Array-at: "at: index\n    \"Answer the given index\"\n    ^ self basicAt: index"})
+   :Array-at "at: index\n    \"Answer the given index\"\n    ^ self basicAt: index"})
 
-(defn.js SystemBrowser [{:# [onExecute onMessage]}]
+(defn.js SystemBrowser
+  [{:# [onExecute onMessage]}]
   (var [selectedCategory setSelectedCategory] (r/useState (. categories [0])))
   (var [selectedClass setSelectedClass] (r/useState "Object"))
   (var [selectedMethod setSelectedMethod] (r/useState "initialize"))
@@ -42,11 +44,12 @@
                            (updateMethodView className)))
 
   (var updateMethodView (fn [className]
-                          (var classMethods (or (. methods [className]) ["(no methods)"])))
+                          (var classMethods (or (. methods [className]) ["(no methods)"]))
+                          
                           (setSelectedMethod (. classMethods [0]))
                           (setMethodCode (or (. methodSource [(+ className "-" (. classMethods [0]))])
-                                             (+ (. classMethods [0]) "\n    \"Method source not available\""))))
-
+                                             (+ (. classMethods [0]) "\n    \"Method source not available\"")))))
+       
   (var handleMethodSelect (fn [method]
                             (setSelectedMethod method)
                             (var key (+ selectedClass "-" method))
@@ -62,7 +65,7 @@
         [:div {:className "w-1/4 border-r flex flex-col"}
           [:div {:className "px-2 py-1 bg-gray-100 border-b text-xs"} "Categories"]
           [:% fg/ScrollArea {:className "flex-1"}
-            (. categories (map (fn [category]
+            (. -/categories (map (fn [category]
                                   (return
                                     [:div {:key category
                                            :className (+ "px-2 py-1 text-sm cursor-pointer hover:bg-gray-100 "
@@ -73,7 +76,7 @@
         [:div {:className "w-1/4 border-r flex flex-col"}
           [:div {:className "px-2 py-1 bg-gray-100 border-b text-xs"} "Classes"]
           [:% fg/ScrollArea {:className "flex-1"}
-            (. (or (. classes [selectedCategory]) []) (map (fn [className]
+            (. (or (. -/classes [selectedCategory]) []) (map (fn [className]
                                                                (return
                                                                  [:div {:key className
                                                                         :className (+ "px-2 py-1 text-sm cursor-pointer hover:bg-gray-100 "
@@ -93,7 +96,7 @@
         [:div {:className "w-1/4 flex flex-col"}
           [:div {:className "px-2 py-1 bg-gray-100 border-b text-xs"} "Methods"]
           [:% fg/ScrollArea {:className "flex-1"}
-            (. (or (. methods [selectedClass]) []) (map (fn [method]
+            (. (or (. -/methods [selectedClass]) []) (map (fn [method]
                                                            (return
                                                              [:div {:key method
                                                                     :className (+ "px-2 py-1 text-sm cursor-pointer hover:bg-gray-100 "
@@ -102,14 +105,14 @@
                                                                method]))))]]]
 
       [:div {:className "flex-1 flex flex-col"}
-        [:div {:className "px-2 py-1 bg-gray-100 border-b text-xs"}
-          (+ selectedClass " >> " selectedMethod)]
-        [:textarea
-          {:value methodCode
-           :onChange (fn [e] (return (setMethodCode e.target.value)))
-           :className "flex-1 px-3 py-2 font-mono text-sm resize-none focus:outline-none"}]
-        [:div {:className "flex gap-2 px-3 py-2 bg-gray-50 border-t"}
-          [:% fg/Button {:size "sm" :variant "outline" :onClick (fn [] (return (onMessage "Method accepted")))}
-            "Accept"]
-          [:% fg/Button {:size "sm" :variant "outline" :onClick (fn [] (return (onMessage "Method cancelled")))}
-            "Cancel"]]]]))
+       [:div {:className "px-2 py-1 bg-gray-100 border-b text-xs"}
+        (+ selectedClass " >> " selectedMethod)]
+       [:textarea
+        {:value methodCode
+         :onChange (fn [e] (return (setMethodCode e.target.value)))
+         :className "flex-1 px-3 py-2 font-mono text-sm resize-none focus:outline-none"}]
+       [:div {:className "flex gap-2 px-3 py-2 bg-gray-50 border-t"}
+        [:% fg/Button {:size "sm" :variant "outline" :onClick (fn [] (return (onMessage "Method accepted")))}
+         "Accept"]
+        [:% fg/Button {:size "sm" :variant "outline" :onClick (fn [] (return (onMessage "Method cancelled")))}
+         "Cancel"]]]]))

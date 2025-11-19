@@ -6,7 +6,7 @@
              [js.lib.figma :as fg]]})
 
 (defn.js Canvas
-  [{:# [components
+  [{:# [(:= components [])
         selectedComponent
         onSelectComponent
         onAddComponent]}]
@@ -41,11 +41,11 @@
          (case component.type
            "View"
            (return
-            [:div {:.. commonProps
-                   :className (+ commonProps.className " p-4 border rounded")}
+            [:div {:className (+ commonProps.className " p-4 border rounded")
+                   :.. commonProps}
              [:div {:className "text-xs text-gray-400 mb-2"} component.type]
              (renderChildren)])
-
+           
            "XStack"
            (return
             [:div {:.. commonProps
@@ -102,7 +102,6 @@
             [:h2 {:.. commonProps}
              (or textContent "Heading")])
 
-           :else
            (return
             [:div {:.. commonProps}
              [:span {:className "text-gray-500"} component.type]]))))
