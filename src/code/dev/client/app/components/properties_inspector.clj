@@ -1,11 +1,11 @@
-(ns smalltalkinterfacedesign.components.properties-inspector
+(ns code.dev.client.app.components.properties-inspector
   (:require [std.lang :as l]))
 
 (l/script :js
   {:require [[js.react :as r]
              [js.lib.figma :as fg]
              [js.lib.lucide :as lc]
-             [smalltalkinterfacedesign.app :as app]]})
+             [code.dev.client.app.app :as app]]})
 
 (defn.js PropertiesInspector [{:# [component onUpdateProperty onDeleteComponent]}]
   (when (not component)

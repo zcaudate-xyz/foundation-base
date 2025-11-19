@@ -1,4 +1,4 @@
-(ns smalltalkinterfacedesign.components.inspector
+(ns code.dev.client.app.components.inspector
   (:require [std.lang :as l]))
 
 (l/script :js

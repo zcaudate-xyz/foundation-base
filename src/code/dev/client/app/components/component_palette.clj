@@ -1,4 +1,4 @@
-(ns smalltalkinterfacedesign.components.component-palette
+(ns code.dev.client.app.components.component-palette
   (:require [std.lang :as l]))
 
 (l/script :js

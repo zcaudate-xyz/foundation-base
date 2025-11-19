@@ -1,11 +1,11 @@
-(ns smalltalkinterfacedesign.components.hierarchy-tree
+(ns code.dev.client.app.components.hierarchy-tree
   (:require [std.lang :as l]))
 
 (l/script :js
   {:require [[js.react :as r]
              [js.lib.figma :as fg]
              [js.lib.lucide :as lc]
-             [smalltalkinterfacedesign.app :as app]]})
+             [code.dev.client.app.app :as app]]})
 
 (defn.js HierarchyTree [{:# [components selectedComponent onSelectComponent onDeleteComponent]}]
   (var [expandedNodes setExpandedNodes] (r/useState (new Set ["root"])))

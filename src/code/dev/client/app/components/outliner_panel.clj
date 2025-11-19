@@ -1,4 +1,4 @@
-(ns smalltalkinterfacedesign.components.outliner-panel
+(ns code.dev.client.app.components.outliner-panel
   (:require [std.lang :as l]))
 
 (l/script :js
@@ -6,7 +6,7 @@
              [js.react.dnd :as dnd]
              [js.lib.figma :as fg]
              [js.lib.lucide :as lc]
-             [smalltalkinterfacedesign.app :as app]]})
+             [code.dev.client.app.app :as app]]})
 
 (defn.js OutlinerPanel [{:# [components selectedComponent onSelectComponent onDeleteComponent onMoveComponent]}]
   (var [expandedNodes setExpandedNodes] (r/useState (new Set ["root"])))

@@ -1,4 +1,4 @@
-(ns smalltalkinterfacedesign.components.library-browser
+(ns code.dev.client.app.components.library-browser
   (:require [std.lang :as l]))
 
 (l/script :js
@@ -6,7 +6,7 @@
              [js.react.dnd :as dnd]
              [js.lib.figma :as fg]
              [js.lib.lucide :as lc]
-             [smalltalkinterfacedesign.app :as app]]})
+             [code.dev.client.app.app :as app]]})
 
 (var componentLibrary
   [(do {:id "ui.sections/hero-gradient"

@@ -1,11 +1,11 @@
-(ns smalltalkinterfacedesign.components.states-triggers-panel
+(ns code.dev.client.app.components.states-triggers-panel
   (:require [std.lang :as l]))
 
 (l/script :js
   {:require [[js.react :as r]
              [js.lib.figma :as fg]
              [js.lib.lucide :as lc]
-             [smalltalkinterfacedesign.app :as app]]})
+             [code.dev.client.app.app :as app]]})
 
 (defn.js StatesTriggersPanel [{:# [component onUpdateStates onUpdateTriggers onUpdateActions]}]
   (when (not component)

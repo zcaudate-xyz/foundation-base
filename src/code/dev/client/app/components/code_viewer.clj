@@ -1,9 +1,9 @@
-(ns smalltalkinterfacedesign.components.code-viewer
+(ns code.dev.client.app.components.code-viewer
   (:require [std.lang :as l]))
 
 (l/script :js
   {:require [[js.react :as r]
-             #_[js.lib.figma :as fg]
+             [js.lib.figma :as fg]
              [js.lib.lucide :as lc]]
    :import  [["sonner@2.0.3" :as toast]]})
 
@@ -64,7 +64,7 @@
   (return code))
 
 (defn.js generateStdLangCode
-  []
+  [components]
   (var code "")
 
   ;; Header comment
@@ -98,9 +98,13 @@
   ;; Generate layout from components
 
   (when (> components.length 0)
-    (var layoutCode (. components (map (fn [comp] (return (generateLayout comp 4)))) (join "\n\n"))))
-  (:= code (+ code layoutCode "\n\n"))
-
+    (var layoutCode
+         (. components
+            (map (fn [comp]
+                   (return (-/generateLayout comp 4))))
+            (join "\n\n")))
+    (:= code (+ code layoutCode "\n\n")))
+  
   (:= code (+ code "       ;; States Section\n"))
   (:= code (+ code "       :states {}\\n\n"))
 
@@ -124,14 +128,14 @@
 
   (return code))
 
-(defn copyToClipboard
+(defn.js copyToClipboard
   [text]
   (return (. navigator.clipboard (writeText fullCode))))
 
 (defn.js CodeViewer
-  [{:# [components]}]
+  [{:# [(:= components [])]}]
   
-  (var fullCode (generateStdLangCode))
+  (var fullCode (-/generateStdLangCode components))
   (return
    [:div {:className "flex flex-col h-full bg-white"}
     [:div {:className "px-4 py-2 bg-gray-100 border-b flex items-center justify-between"}

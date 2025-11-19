@@ -1,4 +1,4 @@
-(ns smalltalkinterfacedesign.components.system-browser
+(ns code.dev.client.app.components.system-browser
   (:require [std.lang :as l]))
 
 (l/script :js

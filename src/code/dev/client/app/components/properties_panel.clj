@@ -1,13 +1,13 @@
-(ns smalltalkinterfacedesign.components.properties-panel
+(ns code.dev.client.app.components.properties-panel
   (:require [std.lang :as l]))
 
 (l/script :js
   {:require [[js.react :as r]
              [js.lib.figma :as fg]
              [js.lib.lucide :as lc]
-             [smalltalkinterfacedesign.app :as app]
-             [smalltalkinterfacedesign.components.inputs-panel :as ip]
-             [smalltalkinterfacedesign.components.states-triggers-panel :as stp]]})
+             [code.dev.client.app.app :as app]
+             [code.dev.client.app.components.inputs-panel :as ip]
+             [code.dev.client.app.components.states-triggers-panel :as stp]]})
 
 (def.js PropertyInput
   (r/memo (fn [{:# [componentId propertyKey value onUpdateProperty]}]

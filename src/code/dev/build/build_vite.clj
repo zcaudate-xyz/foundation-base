@@ -34,6 +34,7 @@
    )
   
   (std.make/build-all code.dev.build.build-vite/CODE_DEV)
+  (std.make/run:dev code.dev.build.build-vite/CODE_DEV)
   
   (h/p (h/sh {:args ["yarn" "create" "vite" "my-project" "--template" "react"]
               }))
@@ -53,13 +54,13 @@
   (h/p (h/sh {:root ".build/code.dev"
               :args ["yarn" "add" "lucide-react"]}))
   (h/p (h/sh {:root ".build/code.dev"
+              :args ["yarn" "add" "react-dnd"]}))
+  (h/p (h/sh {:root ".build/code.dev"
               :args ["yarn" "add" "@dnd-kit/core"]}))
   (h/p (h/sh {:root ".build/code.dev"
               :args ["yarn" "add" "@radix-ui/themes"]}))
   (h/p (h/sh {:root ".build/code.dev"
               :args ["yarn" "add" "@nextjournal/clojure-mode"]}))
-  (h/p (h/sh {:root ".build/code.dev"
-              :args ["yarn" "add" "@xtalk/figma-ui"]}))
   (spit ".build/code.dev/src/main.jsx"
         (emit-main))
 

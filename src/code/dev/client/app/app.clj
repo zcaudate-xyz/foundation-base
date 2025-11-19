@@ -1,17 +1,17 @@
-(ns smalltalkinterfacedesign.app
+(ns code.dev.client.app.app
   (:require [std.lang :as l]))
 
 (l/script :js
   {:require [[js.react :as r]
              [js.react.dnd :as dnd]
              [js.react.dnd.html5-backend :as dnd-html5]
-             [smalltalkinterfacedesign.components.component-browser :as cb]
-             [smalltalkinterfacedesign.components.library-browser :as lb]
-             [smalltalkinterfacedesign.components.viewport-canvas :as vc]
-             [smalltalkinterfacedesign.components.properties-panel :as pp]
-             [smalltalkinterfacedesign.components.outliner-panel :as op]
-             [smalltalkinterfacedesign.components.top-bar :as tb]
-             [smalltalkinterfacedesign.components.theme-editor :as te]
+             [code.dev.client.app.components.component-browser :as cb]
+             [code.dev.client.app.components.library-browser :as lb]
+             [code.dev.client.app.components.viewport-canvas :as vc]
+             [code.dev.client.app.components.properties-panel :as pp]
+             [code.dev.client.app.components.outliner-panel :as op]
+             [code.dev.client.app.components.top-bar :as tb]
+             [code.dev.client.app.components.theme-editor :as te]
              [js.lib.figma :as fg]]})
 
 (def.js defaultTheme (.- te/defaultTheme))
