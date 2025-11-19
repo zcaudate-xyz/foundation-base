@@ -18,7 +18,8 @@
       (= "*" b)     -1
       :else         (recur (next as) (next bs)))))
 
-(defn split [s]
+(defn split-path
+  [s]
   (let [[_ method path] (re-matches #"(?:([a-zA-Z]+)\s+)?(.*)" s)]
     (->> (str/split path #"/+")
       (cons method)
@@ -33,7 +34,7 @@
     (map (fn [[mask v]] [(split mask) v]))
     (sort-by first compare-masks)))
 
-(defn matches [mask path]
+(defn match-path [mask path]
   (loop [mask   mask
          path   path
          params []]
@@ -52,13 +53,13 @@
 (defn match-impl [matcher path]
   (reduce
     (fn [_ [mask v]]
-      (when-some [params (matches? mask path)]
+      (when-some [params (match-path mask path)]
         (reduced [v params])))
     nil matcher))
 
 (defn match
   [matcher path]
-  (match-impl matcher (split path)))
+  (match-impl matcher (split-path path)))
 
 (defn router
   [routes]

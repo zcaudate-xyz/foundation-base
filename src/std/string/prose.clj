@@ -152,10 +152,14 @@
             (empty? custom))
      block
      (let [[head & rest] (common/split-lines block)]
-       (->> rest
-            (map (fn [line] (str (spaces n) custom line)))
-            (common/join "\n")
-            (str head "\n"))))))
+       (cond (empty? rest)
+             head
+
+             :else
+             (->> rest
+                  (map (fn [line] (str (spaces n) custom line)))
+                  (common/join "\n")
+                  (str head "\n")))))))
 
 (defn multi-line?
   "check that a string has newlines"

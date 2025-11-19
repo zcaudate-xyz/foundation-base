@@ -35,7 +35,7 @@
             [clojure.set :as set])
   (:refer-clojure :exclude [-> ->> keyword swap! reset! aget fn
                             ns require pr prn memoize set! future future?
-                            parse-long parse-double]))
+                            parse-long parse-double with-out-str]))
 
 (f/intern-all std.lib.atom
               std.lib.collection

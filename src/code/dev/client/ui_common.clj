@@ -18,7 +18,7 @@
                               (return (. key (startsWith "__reactContainer")))))))
   (return (or (boolean internalKey)
               (and (. container (hasOwnProperty "_reactRootContainer"))
-                   (!== (. container _reactRootContainer) undefined)))))
+                   (not== (. container _reactRootContainer) undefined)))))
 
 (defn.js getReactRoot
   [domNode]
@@ -132,7 +132,7 @@
   (r/useEffect
     (fn []
       (if (and (. editorRef current)
-               (!== value (. (. editorRef current) (getValue))))
+               (not== value (. (. editorRef current) (getValue))))
         (return (. (. editorRef current) (setValue (or value ""))))))
     [value])
 
@@ -186,7 +186,7 @@
        (. svgEl (setAttribute "stroke-width" strokeWidth)))
      (if className
        ;; We use classList to add classes without removing defaults
-       (k/for:array [cls (. className (split " "))]
+       (k/for:array [cls (. (or className "") (split " "))]
          (if (k/not-empty? cls)
            (svgEl.classList.add cls))))
    
@@ -310,7 +310,8 @@
       right]]))
 
 (defn.js TextDiffViewer
-  [#{oldValue newValue}]
+  [{:# [(:= oldValue "")
+        (:= newValue "")]}]
   (var diff (. (. window Diff) (diffLines oldValue newValue)))
   (var diff-elements [])
   (var line 1)

@@ -4,7 +4,7 @@
             [std.lib.time :as t]
             [std.lib.foundation :as f]
             [std.string.common :as str])
-  (:refer-clojure :exclude [prn require pr])
+  (:refer-clojure :exclude [prn require pr with-out-str])
   (:import (java.io StringWriter
                     PrintWriter)))
 
@@ -18,7 +18,7 @@
                         :println clojure.core/println
                         :prn clojure.core/prn
                         :pprint pprint/pprint
-                        :pprint-str #(with-out-str (pprint/pprint %))}))
+                        :pprint-str #(clojure.core/with-out-str (pprint/pprint %))}))
 
 (defmacro with-system
   "with system print instead of local"

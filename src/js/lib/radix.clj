@@ -332,7 +332,7 @@
 
 (defn init-components
   []
-  (compile/add-registry :radix +components+)
+  (compile/put-registry :radix +components+)
   true)
 
 (def +init+

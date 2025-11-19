@@ -54,7 +54,7 @@
 
 (defn init-components
   []
-  (compile/add-registry :puck +components+)
+  (compile/put-registry :puck +components+)
   true)
 
 (def +init+

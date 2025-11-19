@@ -24,7 +24,7 @@
 (defn emit-html
   "emits html"
   {:added "4.0"}
-  ([arr _ nsp]
+  ([arr _ mopts]
    (data/emit-maybe-multibody ["\n" ""] (html/html arr))))
 
 (defn js-regex
@@ -36,21 +36,51 @@
 (defn js-map-key
   "emits a map key"
   {:added "4.0"}
-  ([key grammar nsp]
-   (data/default-map-key key grammar nsp)))
+  ([key grammar mopts]
+   (data/default-map-key key grammar mopts)))
 
 (defn js-vector
   "emits a js vector"
   {:added "4.0"}
-  ([arr grammar nsp]
+  ([arr grammar mopts]
    (let [o (first arr)]
      (cond (empty? arr) "[]"
            
            (keyword? o)
-           (*template-fn* arr grammar nsp)
+           (*template-fn* arr grammar mopts)
            
            :else
-           (data/emit-coll :vector arr grammar nsp)))))
+           (data/emit-coll :vector arr grammar mopts)))))
+
+(defn js-map
+  [m grammar mopts]
+  (let [rest (get m ':..)
+        syms (get m ':#)
+        out-syms  (map #(common/*emit-fn* % grammar mopts)
+                       syms)
+        out-keys  (map #(data/emit-data :map-entry % grammar mopts)
+                       (dissoc m :# :..))
+        out-rest  (if rest
+                    (map #(str "..."
+                               (common/*emit-fn* %
+                                                 grammar
+                                                 mopts)) 
+                         (h/seqify rest)))]
+    (data/emit-coll-layout :map common/*indent*
+                           (concat out-syms out-keys out-rest)
+                           grammar mopts)))
+
+(comment
+  (std.lang/emit-script
+   '{:# [hello]
+     :c d
+     :.. hello}
+   {:lang :js})
+
+  (comment
+
+    '{:# [className]
+      :.. props}))
 
 (defn js-set
   "emits a js set"
@@ -229,7 +259,7 @@
       (grammar/build:extend
        {:property   {:op :property  :symbol  '#{property}   :assign ":" :raw "property" :emit :def-assign}
         :teq        {:op :teq       :symbol  '#{===}        :raw "===" :emit :bi}
-        :tneq       {:op :tneq      :symbol  '#{!==}        :raw "!==" :emit :bi}
+        :tneq       {:op :tneq      :symbol  '#{not==}      :raw "!==" :emit :bi}
         :delete     {:op :delete    :symbol  '#{del}        :raw "delete" :value true :emit :prefix}
         :typeof     {:op :typeof    :symbol  '#{typeof}     :raw "typeof" :emit :prefix}
         :instanceof {:op :instof    :symbol  '#{instanceof} :raw "instanceof" :emit :bi}
@@ -239,10 +269,9 @@
         :var-let    {:op :var-let   :symbol  '#{var}     :macro  #'tf-var-let :type :macro}
         :var-const  {:op :var-const :symbol  '#{const}   :macro  #'tf-var-const :type :macro}})))
 
-
 (def +template+
   (->> {:banned #{:keyword}
-        :allow   {:assign  #{:symbol :vector :set}}
+        :allow   {:assign  #{:symbol :vector :set :map}}
         :highlight '#{return break del tab reject}
         :default  {:common    {:namespace-full "$$"}
                    :function  {:raw "function" :space ""}}
@@ -251,9 +280,9 @@
                    :string    {}
                    :symbol    {:global #'js-symbol-global}}
         :block    {:for       {:parameter {:sep ";"}}}
-        :data     {:map-entry {:key-fn #'js-map-key}
-                   :vector    {:custom #'js-vector}
-                   :set       {:custom #'js-set}}
+        :data     {:vector    {:custom #'js-vector}
+                   :set       {:custom #'js-set}
+                   :map       {:custom #'js-map}}
         :function {:defgen    {:raw "function*"}
                    :fn.inner  {:raw ""}}
         :define   {:defglobal {:raw ""}

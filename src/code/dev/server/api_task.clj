@@ -46,7 +46,7 @@
 
 (defn to-plpgsql-dsl
   [body]
-  (prompt/with-prompt-fn prompt/to-plpgsql-dsl body))
+  (prompt/with-prompt-fn prompt/to-plpgsql-prompt body))
 
 (defn to-jsxc-dsl
   [body]

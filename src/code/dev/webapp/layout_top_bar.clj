@@ -5,8 +5,7 @@
 (l/script :js
   {:require [[js.react :as r]
              [js.lib.lucide :as lc]
-             [js.lib.radix :as rx]
-             [xt.lang.base-lib :as k]]})
+             [js.lib.radix :as rx]]})
 
 (defn.js TopBar
   [#{viewMode onViewModeChange onUndo onRedo canUndo canRedo}]
@@ -46,9 +45,9 @@
                      :size "sm"
                      :onClick (fn [] (onViewModeChange "design"))
                      :class (+ "h-8 "
-                                   (:? (=== viewMode "design")
-                                       "bg-[#404040] text-white hover:bg-[#4a4a4a]"
-                                       "text-gray-400 hover:text-gray-200 hover:bg-[#323232]"))}
+                               (:? (=== viewMode "design")
+                                   "bg-[#404040] text-white hover:bg-[#4a4a4a]"
+                                   "text-gray-400 hover:text-gray-200 hover:bg-[#323232]"))}
        [:% lc/Layout {:class "w-4 h-4 mr-1"}]
        "Design"]
 

@@ -37,18 +37,18 @@
     
     :states {:var/input-code   {:%/fn box/useBox
                                 :%/args [global/Global
-                                         ["task.heal_code"
-                                          "input_code"]]}
+                                         ["task.heal-code"
+                                          "input-code"]]}
              :var/healed-code    {:%/fn box/useBox
                                   :%/args [global/Global
-                                           ["task.heal_code"
-                                            "healed_code"]]}
+                                           ["task.heal-code"
+                                            "healed-code"]]}
              :var/history        {:%/fn ui/useLocalHistory
-                                  :%/args ["task.heal_code.history"]}
+                                  :%/args ["task.heal-code.history"]}
              :var/history-idx   {:%/fn box/useBox
                                  :%/args [global/Global
-                                          ["task.heal_code"
-                                           "history_idx"]]}}
+                                          ["task.heal-code"
+                                           "history-idx"]]}}
     
     :triggers {:trigger/history
                {:%/watch  [:var/history-idx

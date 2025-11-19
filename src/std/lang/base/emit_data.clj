@@ -88,7 +88,7 @@
      (cond (emit-singleline-array? str-array)
            (-> (str/join sep str-array)
                (common/wrapped-str [:data key] grammar))
-
+           
            tighten
            (-> (str/join (str sep "\n  ") str-array)
                (common/wrapped-str [:data key] grammar)
@@ -110,6 +110,17 @@
    (emit-coll key form grammar mopts common/*emit-fn*))
   ([key form grammar mopts emit-fn]
    (let [indent     common/*indent*
+         form      (if (map? form)
+                     (sort-by  (fn [[k v]]
+                                 (cond (= k :#)
+                                       -1
+                                       
+                                       (= k :..)
+                                       1
+
+                                       :else 0))
+                               (seq form))
+                     form)
          str-array (binding [common/*indent* 0]
                      (common/emit-array form grammar mopts emit-fn))]
      (emit-coll-layout key indent str-array grammar mopts))))

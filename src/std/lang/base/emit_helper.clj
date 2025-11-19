@@ -204,8 +204,12 @@
                     (-> grammar
                         :allow
                         :assign
-                        :set)
-                    (not (:assign curr)))
+                        :set))
+               (and (map? sym)
+                    (-> grammar
+                        :allow
+                        :assign
+                        :map))
                (and (vector? sym)
                     (-> grammar
                         :allow
