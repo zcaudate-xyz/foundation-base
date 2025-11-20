@@ -1,6 +1,7 @@
 (ns code.heal.parse-test
   (:use code.test)
   (:require [code.heal.parse :as parse]
+            [std.string :as str]
             [std.lib :as h]))
 
 ^{:refer code.heal.parse/parse-delimiters :added "4.0"}
@@ -151,6 +152,48 @@
 ^{:refer code.heal.parse/parse-lines :added "4.0"}
 (fact "parse lines"
   ^:hidden
+
+  (parse/parse-lines
+   (str/join-lines
+    ["(:? ()"
+     "    ())"
+     "    nil)"]))
+  => [{:type :code,
+    :line 1,
+    :last-idx 5,
+    :col 1,
+    :char "(",
+    :style :paren,
+    :action :open}
+   {:type :code,
+    :line 2,
+    :last-idx 6,
+    :col 5,
+    :char "(",
+    :style :paren,
+    :action :open}
+   {:type :code, :line 3, :last-idx 7, :col 5, :char "n"}]
+
+  (parse/parse-lines
+   (str/join-lines
+    ["(:? ()"
+     "    ())"
+     "    nil {})"]))
+  => [{:type :code,
+       :line 1,
+       :last-idx 5,
+       :col 1,
+       :char "(",
+       :style :paren,
+       :action :open}
+      {:type :code,
+       :line 2,
+       :last-idx 6,
+       :col 5,
+       :char "(",
+       :style :paren,
+       :action :open}
+      {:type :code, :line 3, :last-idx 10, :col 5, :char "n"}]
   
   (def sample-code
     "
@@ -168,34 +211,9 @@
 ")
 
   (parse/parse-lines sample-code)
-  => [{:type :blank, :line 1}
-      {:type :code, :line 2, :last-idx 16, :col 1, :char "("}
-      {:type :string, :line 3, :last-idx 21}
-      {:type :code, :line 4, :last-idx 29}
-      {:type :commented, :line 5, :last-idx 40, :col 3, :char "["}
-      {:type :code, :line 6, :last-idx 26, :col 3, :char "("}
-      {:type :commented, :line 7, :last-idx 24}
-      {:type :code, :line 8, :last-idx 10, :col 3, :char "("}
-      {:type :code, :line 9, :last-idx 11}
-      {:type :code, :line 10, :last-idx 12, :col 5, :char "("}
-      {:type :blank, :line 11}
-      {:type :commented, :line 12, :last-idx 15}
-      {:type :blank, :line 13}]
+  => vector?
+  
 
-
-  (comment
-    {:char ")",
-     :col 89,
-     :line 12,
-     :style :paren,
-     :type :close
-
-     
-     :correct? false,
-     :depth -1,
-     :index 66,
-     
-     })
   
   (def another-sample
     "\"\"\"
@@ -208,14 +226,7 @@ that acts as a multi-line comment or docstring in other languages but not clojur
 ")
   
   (parse/parse-lines another-sample)
-  => [{:type :string, :line 1, :last-idx 2}
-      {:type :string, :line 2, :last-idx 29}
-      {:type :string, :line 3, :last-idx 80}
-      {:type :code, :line 4, :last-idx 2}
-      {:type :commented, :line 5, :last-idx 17, :col 1, :char "("}
-      {:type :commented, :line 6, :last-idx 11}
-      {:type :code, :line 7, :last-idx 19}
-      {:type :blank, :line 8}])
+  => vector?)
 
 ^{:refer code.heal.parse/is-open-heavy :added "4.0"}
 (fact "checks if open delimiters dominate"

@@ -25,7 +25,8 @@
                                     (cond (= col (:col e))
                                           {:grouped (if (empty? interim)
                                                       grouped
-                                                      (conj grouped interim))
+                                                      (conj grouped
+                                                            interim))
                                            :interim [e]}
                                           
                                           :else
@@ -50,8 +51,10 @@
                   col)]
     (cond-> {:lead  (first entries)
              :line   line
-             :col col}
-      children (assoc :children children))))
+             :level  0
+             :col   (:col (first entries))}
+      (seq children) (assoc :children children
+                            :level  (inc (apply max (map :level children)))))))
 
 (defn group-blocks-multi
   "categorises the blocks"
@@ -61,26 +64,45 @@
   ([entries col]
    (if-let [min-col    (group-min-col entries col)]
      (let [groups      (group-entries entries min-col)
-           blocks      (mapv #(group-blocks-single % min-col) groups)]
-       (conj (vec (butlast blocks))
-             (assoc (last blocks) :last true))))))
+           blocks      (mapv #(group-blocks-single % min-col) groups)
+           blocks      (if (= col 0)
+                         blocks
+                         (conj (vec (butlast blocks))
+                               (assoc (last blocks) :last true)))]
+       (vec (mapcat (fn [{:keys [lead
+                                 children]
+                          :as block}]
+                      (case (:type lead)
+                        :code children
+                        :blank []
+                        [block]))
+                    blocks))))))
+
+(defn group-blocks-prep-entries
+  [delimiters starts]
+  (let [lu          (->> delimiters
+                         (filter #(= (:type %) :open))
+                         (group-by :line))]
+    (vec (mapcat (fn [{:keys [line] :as e}]
+                   
+                   (if-let [delims  (get lu line)]
+                     (if (and (:char e)
+                              (not (:style e)))
+                       (cons e delims)
+                       delims)
+                     [e]))
+                 starts))))
 
 (defn group-blocks-prep
   "prepares the block entries for a file"
   {:added "4.0"}
   [content]
   (let [delimiters  (parse/parse-delimiters content)
-        lu          (->> delimiters
-                         (filter #(= (:type %) :open))
-                         (group-by :line))
         lines       (str/split-lines content)
         starts      (parse/parse-lines-raw lines)
-        entries     (mapcat (fn [{:keys [line] :as e}]
-                              (or (get lu line)
-                                  [e]))
-                            starts)]
+        entries     (group-blocks-prep-entries delimiters starts)]
     {:lines lines
-     :entries (vec entries)
+     :entries entries
      :delimiters delimiters
      :starts starts}))
 
@@ -108,42 +130,42 @@
   {:added "4.0"}
   [block lines]
   (let [{:keys [children]} block
-        child-errors (if (seq children)
-                       (reduce (fn [_ child]
-                                 (if-let [errored (get-errored-loop child lines)]
-                                   (reduced errored)))
-                               nil
-                               children))]
-    (if (not-empty child-errors)
-      child-errors
-      (let [unclosed-fn      (fn [{:keys [pair-id
-                                          type]}]
-                               (and (not pair-id)
-                                    (= type :close)))
-            snippet          (str (str/join-lines
-                                   (get-block-lines lines
-                                                    (:line block)
-                                                    (:col block)))
-                                  (str/spaces (:col block)))
-            interim          (parse/parse snippet)
-            interim-errors   (filter (comp not :correct?) interim)
-            unclosed-errors  (if (and
-                                  ;; Always check tailend forms at the right level
-                                  (not (:last block))    
-                                  ;; ignore non multiline forms
-                                  (not (apply = (:line block))))
-                               (filter unclosed-fn interim-errors)) 
-            
-            other-errors    (remove unclosed-fn interim-errors)
-            all-errors      (vec (concat unclosed-errors
-                                         other-errors))]
-        (when (not-empty all-errors)
-          #_(h/prn [all-errors
-                  (:line block)
-                  (dissoc block :children)])
+        child-error      (if (seq children)
+                           (reduce (fn [_ child]
+                                     (if-let [errored (get-errored-loop child lines)]
+                                       (reduced errored)))
+                                   nil
+                                   children))
+        unclosed-fn      (fn [{:keys [pair-id
+                                      type]}]
+                           (and (not pair-id)
+                                (= type :close)))
+        snippet          (str/join-lines
+                          (get-block-lines lines
+                                           (:line block)
+                                           (:col block)))
+        interim          (parse/parse snippet)
+        interim-errors   (filter (comp not :correct?) interim)
+        unclosed-errors  (if (and
+                              ;; Always check tailend forms at the right level
+                              (not (:last block))    
+                              ;; ignore non multiline forms
+                              #_(not (apply = (:line block))))
+                           (filter unclosed-fn interim-errors)) 
+        
+        other-errors    (remove unclosed-fn interim-errors)
+        all-errors      (vec (concat unclosed-errors
+                                     other-errors))]
+    ;; Child errors might be reporting something that is a stylistic issue and 
+    ;; not structural, and there are many cases where the indentation could be off
+    ;; checking right up to the top level form to see if the lower level error
+    ;; acually affects the top level form is super important to not prematurely
+    ;; destroy the structure by adding unnecessary and damaging parens to the body
+    (when  (not-empty all-errors)
+      (or child-error
           {:errors (mapv #(update % :line + (dec (first (:line block)))) all-errors)
            :lines  (str/split-lines snippet)
-           :at     (dissoc block :children)})))))
+           :at     (dissoc block :children)}))))
 
 (defn get-errored-raw
   "checks content for irregular blocks"
@@ -172,6 +194,7 @@
         errored (get-errored-raw lines blocks)
         edits   (mapcat (fn [{:keys [errors at]
                               :as info}]
+                          (h/prf info)
                           (let [[e1 e2 & more]  errors]
                             (cond
                               
@@ -189,12 +212,16 @@
                                   :new-char (parse/lu-close (:char e1))
                                   :line  line
                                   :col   col}])
-                              
-                              
+                                                            
                               ;; Remove Delimiter
                               (and (= (:type e1) :close)
                                    (nil? e2))
                               (core/create-remove-edits [e1])
+
+                              ;; Remove Delimiters
+                              (and (= (:type e1) :close)
+                                   (= (:type e2) :close))
+                              (core/create-remove-edits [e1 e2])
                               
                               ;; Mismatched Delimiters
                               (and (= (:type e1) :open)
@@ -202,10 +229,9 @@
                               (core/create-mismatch-edits [e1 e2])
                               
                               :else
-                              (do (h/prf info)
-                                (throw
-                                 (ex-info "Not Supported"
-                                          {:info info}))))))
+                              (throw
+                               (ex-info "Not Supported"
+                                        {:info info})))))
                         errored)
         new-content  (try (core/update-content content
                                                edits)
@@ -249,7 +275,11 @@
           _ (h/p (diff/->string deltas))]
       new-content)))
 
-(heal-content-print
+
+
+
+(comment
+  (heal-content-print
  "
 (oheuoeu)
  (hoeuoe
@@ -272,8 +302,19 @@
       (hello))            
 (oheuoeu)")
 
-
-(comment
+  (heal-content-print
+   (str/join-lines
+    ["(:? ()"
+     "    ())"
+     "    nil)"]))
+  
+  (heal-content-print
+   (slurp "/Users/chris/Development/buffer/Smalltalkinterfacedesign/translate/src-translated/components/states_triggers_panel2.clj"))
+  
+  (std.block/parse-root
+   (heal-content-print
+    (slurp "/Users/chris/Development/buffer/Smalltalkinterfacedesign/translate/src-translated/components/library_browser3.clj")))
+  
   (heal-content-print
    (slurp "/Users/chris/Development/buffer/Smalltalkinterfacedesign/translate/src-translated/components/library_browser2.clj"))
   
@@ -283,6 +324,12 @@
          (heal-content-print
           (slurp "/Users/chris/Development/buffer/Smalltalkinterfacedesign/translate/src-translated/components/library_browser.clj"))
          "]")))
+  
+  (read-string
+   (str "["
+        ((wrap-print-diff heal-content)
+         (slurp "/Users/chris/Development/buffer/Smalltalkinterfacedesign/translate/src-translated/components/library_browser.clj"))
+        "]"))
   
   (read-string
    (str "["
@@ -299,6 +346,24 @@
           ((wrap-print-diff heal-content)
            (slurp "/Users/chris/Development/buffer/Smalltalkinterfacedesign/translate/src-translated/components/states_triggers_panel.clj"))))
         "]"))
+  
+  (read-string
+   (str "["
+        (heal-content
+         (slurp "/Users/chris/Development/buffer/Smalltalkinterfacedesign/translate/src-translated/components/outliner_panel.clj"))
+        "]"))
+  (read-string
+   (str "["
+        (heal-content
+         (slurp "/Users/chris/Development/buffer/Smalltalkinterfacedesign/translate/src-translated/components/states_triggers_panel.clj"))
+        "]"))
+  
+  
+  (heal-content
+   )
+  
+  (heal-content
+   (slurp "/Users/chris/Development/buffer/Smalltalkinterfacedesign/translate/src-translated/components/states_triggers_panel2.clj"))
   
   (h/suppress
    ((wrap-print-diff core/heal)
@@ -321,7 +386,23 @@
                   (slurp f))))
                "]"))
          (catch Throwable t
-           (h/p :FAILED)))))
+           (h/p :FAILED))))
+
+  (doseq [f (keys
+             (std.fs/list
+              "/Users/chris/Development/buffer/Smalltalkinterfacedesign/translate/src-translated/components/"
+              {:include [".clj$"]}))]
+    
+    
+    (try (read-string
+          (str "["
+               (heal-content
+                (slurp f))
+               #_((wrap-print-diff heal-content)
+                  (slurp f))
+               "]"))
+         (catch Throwable t
+           (h/p  f :FAILED)))))
 
 
 (comment
@@ -345,7 +426,7 @@
   
   (group-blocks
    (slurp "/Users/chris/Development/buffer/Smalltalkinterfacedesign/translate/src-translated/components/library_browser2.clj"))
-
+  
   (h/p
    (diff/->string
     (diff/diff

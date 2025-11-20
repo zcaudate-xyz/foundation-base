@@ -199,9 +199,13 @@
       output
       (let [current-line (first lines)
             trimmed-line (str/trim-left current-line)
-            indent (- (count current-line) (count trimmed-line))
-            first-char (first trimmed-line)
-            
+            indent (- (count current-line)
+                      (count trimmed-line))
+            char  (str (first trimmed-line))
+            dinfo (if (#{"[" "{" "("}
+                           char)
+                    (h/rename-keys (delimiter-info (first char))
+                                   {:type :action}))
             
             ;; Determine if a string starts or ends on this line
             quote-count (count-unescaped-quotes current-line)
@@ -215,21 +219,23 @@
                             (str/blank? current-line) :blank
                             (str/includes? current-line ";") :commented
                             :else :code)
+
+            has-code  (and (not= char ";")
+                           (or (= line-type :code)
+                               (= line-type :commented)))
             
-            last-idx (let [r-trimmed (str/trim-right current-line)]
-                       (if (not-empty r-trimmed)
+            last-idx  (let [r-trimmed (str/trim-right current-line)]
+                        (if (not-empty r-trimmed)
                          (dec (count r-trimmed))))]
         (recur (rest lines)
                (inc  line-num)
                next-multiline?
                (conj output (cond-> {:type line-type :line line-num}
-                              last-idx   (assoc :last-idx last-idx)
-
-                              (or (= line-type :code)
-                                  (and (not= first-char \;) 
-                                       (= line-type :commented))) (assoc :col (inc indent)
-                                                                         :char (str (#{\( \{ \[}
-                                                                                     first-char))))))))))
+                              last-idx  (assoc :last-idx last-idx)
+                              
+                              has-code  (assoc :col (inc indent)
+                                               :char char)
+                              :then     (merge dinfo))))))))
 
 (defn parse-lines
   "parse lines"
@@ -289,3 +295,48 @@
   (h/map-juxt [:index
                identity]
               delimiters))
+
+
+(comment
+
+  (defn parse-lines-raw
+  [lines]
+  (loop [lines lines
+         line-num 1
+         in-multiline? false
+         output []]
+    (if (empty? lines)
+      output
+      (let [current-line (first lines)
+            trimmed-line (str/trim-left current-line)
+            indent (- (count current-line) (count trimmed-line))
+            first-char (first trimmed-line)
+            
+            
+            ;; Determine if a string starts or ends on this line
+            quote-count (count-unescaped-quotes current-line)
+            
+            next-multiline? (cond (and (zero? quote-count) in-multiline?) true
+                                  (and (odd? quote-count)  in-multiline?) false
+                                  (odd? quote-count) true
+                                  :else false)
+            
+            line-type (cond next-multiline? :string
+                            (str/blank? current-line) :blank
+                            (str/includes? current-line ";") :commented
+                            :else :code)
+            
+            last-idx (let [r-trimmed (str/trim-right current-line)]
+                       (if (not-empty r-trimmed)
+                         (dec (count r-trimmed))))]
+        (recur (rest lines)
+               (inc  line-num)
+               next-multiline?
+               (conj output (cond-> {:type line-type :line line-num}
+                              last-idx   (assoc :last-idx last-idx)
+
+                              (or (= line-type :code)
+                                  (and (not= first-char \;) 
+                                       (= line-type :commented))) (assoc :col (inc indent)
+                                                                         :char (str (#{\( \{ \[}
+                                                                                     first-char)))))))))))
