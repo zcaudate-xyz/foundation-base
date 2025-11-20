@@ -104,8 +104,11 @@
   {:added "3.0"}
   ([row {:keys [padding columns] :as params}]
    (let [pad      (apply str (repeat padding common/+pad+))
+         
          elements (lines:row-basic row params)
-         height   (apply max (map count elements))
+         height   (if (not-empty elements)
+                    (apply max (map count elements))
+                    0)
          style    (fn [lines color]
                     (if color
                       (map #(ansi/style % color) lines)
@@ -160,7 +163,7 @@
   {:added "3.0" :tags #{:print}}
   ([row params]
    (->> (lines:row row params)
-        (apply map vector)
+        (apply vector)
         (map (partial str/join " "))
         (str/join "\n"))))
 

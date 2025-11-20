@@ -298,7 +298,7 @@
                  :updated false
                  :path any})"
   {:added "3.0"}
-  ([ns {:keys [write print skip transform full] :as params} lookup {:keys [root] :as project}]
+  ([ns {:keys [write print skip transform full no-analysis] :as params} lookup {:keys [root] :as project}]
    (cond skip
          (let [path  (lookup ns)
                text  (if (fs/exists? path) "" (slurp path))]
@@ -309,7 +309,9 @@
          (let [path     (lookup ns)
                params   (assoc params :output :map)
                [original analysis] (if (fs/exists? path)
-                                     [(slurp path) (analyse ns params lookup project)]
+                                     [(slurp path) (if no-analysis
+                                                     {}
+                                                     (analyse ns params lookup project))]
                                      ["" {}])
                revised  (transform original)
                deltas   (text/deltas ns analysis original revised)

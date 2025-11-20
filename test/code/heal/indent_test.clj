@@ -49,7 +49,7 @@
 ^{:refer code.heal.indent/flag-open-heavy-function :added "4.0"
   :setup [(def ^:dynamic *dlm4*
             (parse/pair-delimiters
-             (parse/parse-delimiters (h/sys:resource-content "code/heal/cases/004_shorten.block"))))]}
+             (parse/parse-delimiters (slurp "test-data/code.heal/cases/004_shorten.block"))))]}
 (fact "flags the delimiter if there are any discrepancies"
   ^:hidden
 
@@ -82,7 +82,7 @@
   
   (def ^:dynamic *dlm4*
     (parse/pair-delimiters
-     (parse/parse-delimiters (h/sys:resource-content "code/heal/cases/002_complex.block")))))
+     (parse/parse-delimiters (slurp "test-data/code.heal/cases/002_complex.block")))))
 
 ^{:refer code.heal.indent/flag-open-heavy-raw :added "4.0"}
 (fact "finds all discrepancies given some code"
@@ -176,7 +176,7 @@
   
   (def ^:dynamic *dlm3*
     (parse/pair-delimiters
-     (parse/parse-delimiters (h/sys:resource-content "code/heal/cases/001_basic.block"))))
+     (parse/parse-delimiters (slurp "test-data/code.heal/cases/001_basic.block"))))
   
   (indent/flag-open-heavy-raw
    *dlm3*
@@ -185,7 +185,7 @@
 
   (def ^:dynamic *dlm4*
     (parse/pair-delimiters
-     (parse/parse-delimiters (h/sys:resource-content "code/heal/cases/002_complex.block"))))
+     (parse/parse-delimiters (slurp "test-data/code.heal/cases/002_complex.block"))))
   
   (indent/flag-open-heavy-raw
    *dlm4*
@@ -241,7 +241,7 @@
 
   (def ^:dynamic *dlm4*
     (parse/pair-delimiters
-     (parse/parse-delimiters (h/sys:resource-content "code/heal/cases/002_complex.block"))))
+     (parse/parse-delimiters (slurp "test-data/code.heal/cases/002_complex.block"))))
   
   (count
    (indent/flag-open-heavy-raw
@@ -315,14 +315,14 @@
 
 ^{:refer code.heal.indent/build-insert-edit :added "4.0"
   :setup [(def ^:dynamic *dlm4*
-            (parse/parse (h/sys:resource-content "code/heal/cases/002_complex.block")))]}
+            (parse/parse (slurp "test-data/code.heal/cases/002_complex.block")))]}
 (fact "constructs a single edit"
 
   )
 
 ^{:refer code.heal.indent/build-insert-edits :added "4.0"
   :setup [(def ^:dynamic *dlm4*
-            (parse/parse (h/sys:resource-content "code/heal/cases/002_complex.block")))]}
+            (parse/parse (slurp "test-data/code.heal/cases/002_complex.block")))]}
 (fact "builds a list of edits to be made to a "
   ^:hidden
   
@@ -331,7 +331,7 @@
    (indent/flagged-candidates-filter-run
     (indent/flag-open-heavy
      *dlm4*))
-   (h/sys:resource-content "code/heal/cases/002_complex.block"))
+   (slurp "test-data/code.heal/cases/002_complex.block"))
   => [{:action :insert, :line 110, :col 68, :new-char "]"}
       {:action :insert, :line 276, :col 96, :new-char "]"}
       {:action :insert, :line 338, :col 90, :new-char "]"}
@@ -395,7 +395,7 @@
   
   (def ^:dynamic *dlm4*
     (parse/pair-delimiters
-     (parse/parse-delimiters (h/sys:resource-content "code/heal/cases/004_shorten.block"))))
+     (parse/parse-delimiters (slurp "test-data/code.heal/cases/004_shorten.block"))))
   
   (first
    (second

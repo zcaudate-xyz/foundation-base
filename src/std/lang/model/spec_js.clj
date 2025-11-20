@@ -65,7 +65,9 @@
                                (common/*emit-fn* %
                                                  grammar
                                                  mopts)) 
-                         (h/seqify rest)))]
+                         (if (vector?  rest)
+                           rest
+                           [rest])))]
     (data/emit-coll-layout :map common/*indent*
                            (concat out-syms out-keys out-rest)
                            grammar mopts)))
@@ -257,7 +259,7 @@
         :for-async  {:macro  #'tf-for-async :emit :macro}})
       (grammar/build:override fn/+js+)
       (grammar/build:extend
-       {:property   {:op :property  :symbol  '#{property}   :assign ":" :raw "property" :emit :def-assign}
+       {#_#_:property   {:op :property  :symbol  '#{property}   :assign ":" :raw "property" :emit :def-assign}
         :teq        {:op :teq       :symbol  '#{===}        :raw "===" :emit :bi}
         :tneq       {:op :tneq      :symbol  '#{not==}      :raw "!==" :emit :bi}
         :delete     {:op :delete    :symbol  '#{del}        :raw "delete" :value true :emit :prefix}

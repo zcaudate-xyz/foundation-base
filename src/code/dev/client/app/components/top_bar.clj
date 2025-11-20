@@ -108,4 +108,4 @@
       {:variant "ghost"
        :size "sm"
        :className "h-8 text-gray-400 hover:text-gray-200 hover:bg-[#323232]"}
-      [:% lc/Play {:className "w-4 h-4"}]]]))
+      [:% lc/Play {:className "w-4 h-4"}]]]]))

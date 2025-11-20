@@ -117,7 +117,7 @@
   (var [expandedNodes
         setExpandedNodes] (r/useState (new Set ["root"])))
   (var [hiddenNodes
-        setHiddenNodes] (r/useState (new Set())))
+        setHiddenNodes] (r/useState (new Set)))
 
   (var toggleExpanded
        (fn [id]

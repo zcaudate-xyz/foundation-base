@@ -96,9 +96,11 @@
                                         (str "{" body "}")))]
                        (str (name k) "=" vstr)))
                    (dissoc params :..))
-       (:.. params) (conj (str "{..." (emit/emit-main (first (h/seqify (:.. params)))
-                                                     grammar
-                                                     mopts)
+       (:.. params) (conj (str "{..." (emit/emit-main (if (vector?  (:.. params))
+                                                        (first (:.. params))
+                                                        (:.. params))
+                                                      grammar
+                                                      mopts)
                                "}"))))))
 
 (defn emit-jsx-set-params

@@ -189,11 +189,9 @@
           :else
           (recur rest-chars count false))))))
 
-(defn parse-lines
-  "parse lines"
-  {:added "4.0"}
-  [content]
-  (loop [lines (str/split-lines content)
+(defn parse-lines-raw
+  [lines]
+  (loop [lines lines
          line-num 1
          in-multiline? false
          output []]
@@ -201,6 +199,9 @@
       output
       (let [current-line (first lines)
             trimmed-line (str/trim-left current-line)
+            indent (if (#{\( \{ \[}
+                        (first trimmed-line))
+                     (- (count current-line) (count trimmed-line)))
             
             
             ;; Determine if a string starts or ends on this line
@@ -223,7 +224,17 @@
                (inc  line-num)
                next-multiline?
                (conj output (cond-> {:type line-type :line line-num}
-                              last-idx (assoc :last-idx last-idx))))))))
+                              last-idx (assoc :last-idx last-idx)
+                              (and indent
+                                   (or (= line-type :code)
+                                       (= line-type :commented))) (assoc :col (inc indent)
+                                                                         :char (str (first trimmed-line))))))))))
+
+(defn parse-lines
+  "parse lines"
+  {:added "4.0"}
+  [content]
+  (parse-lines-raw (str/split-lines content)))
 
 ;; Predicates
 

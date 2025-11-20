@@ -6,10 +6,6 @@
              [js.lib.figma :as fg]
              [js.lib.lucide :as lc]]})
 
-;; Interface definitions are removed as per spec
-;; export interface Theme { ... }
-;; interface ThemeEditorProps { ... }
-
 (def.js defaultTheme
   {:colors {:primary "#3b82f6"
             :secondary "#8b5cf6"
@@ -30,16 +26,16 @@
                            :base "1rem"
                            :lg "1.125rem"
                            :xl "1.25rem"
-                           :"2xl" "1.5rem"
-                           :"3xl" "1.875rem"
-                           :"4xl" "2.25rem"}}
+                           :2xl "1.5rem"
+                           :3xl "1.875rem"
+                           :4xl "2.25rem"}}
    :spacing {:xs "0.25rem"
              :sm "0.5rem"
              :md "1rem"
              :lg "1.5rem"
              :xl "2rem"
-             :"2xl" "3rem"
-             :"3xl" "4rem"}
+             :2xl "3rem"
+             :3xl "4rem"}
    :borderRadius {:none "0"
                   :sm "0.25rem"
                   :md "0.5rem"
@@ -50,6 +46,51 @@
              :md "0 4px 6px -1px rgb(0 0 0 / 0.1)"
              :lg "0 10px 15px -3px rgb(0 0 0 / 0.1)"
              :xl "0 20px 25px -5px rgb(0 0 0 / 0.1)"}})
+
+
+(defn.js ColorInput
+  [{:# [label value onChange]}]
+  (return
+   [:div {:className "flex items-center gap-3"}
+    [:div {:className "flex-1"}
+     [:% fg/Label {:className "text-xs text-gray-400 mb-1 block"} label]
+     [:% fg/Input
+      {:type "text"
+       :value value
+       :onChange (fn [e] (return (onChange e.target.value)))
+       :className "h-7 bg-[#1e1e1e] border-[#3a3a3a] text-gray-300 text-xs"}]]
+    [:div {:className "pt-5"}
+     [:input
+      {:type "color"
+       :value value
+       :onChange (fn [e] (return (onChange e.target.value)))
+       :className "w-10 h-7 rounded border border-[#3a3a3a] cursor-pointer bg-[#1e1e1e]"}]]]))
+
+(defn.js TextInput
+  [{:# [label value onChange]}]
+  (return
+   [:div
+    [:% fg/Label {:className "text-xs text-gray-400 mb-1 block"} label]
+    [:% fg/Input
+     {:type "text"
+      :value value
+      :onChange (fn [e] (return (onChange e.target.value)))
+      :className "h-7 bg-[#1e1e1e] border-[#3a3a3a] text-gray-300 text-xs"}]]))
+
+(defn.js ShadowInput
+  [{:# [label value onChange]}]
+  (return
+   [:div
+    [:% fg/Label {:className "text-xs text-gray-400 mb-1 block"} label]
+    [:div {:className "flex items-center gap-2"}
+     [:% fg/Input
+      {:type "text"
+       :value value
+       :onChange (fn [e] (return (onChange e.target.value)))
+       :className "flex-1 h-7 bg-[#1e1e1e] border-[#3a3a3a] text-gray-300 text-xs"}]
+     [:div
+      {:className "w-10 h-7 bg-white rounded border border-[#3a3a3a]"
+       :style {:boxShadow value}}]]]))
 
 (defn.js ThemeEditor
   [{:# [theme onThemeChange]}]
@@ -106,19 +147,19 @@
                 (try
                   (await (. navigator.clipboard (writeText themeJSON)))
                   (catch err
-                    (var textArea (document.createElement "textarea"))
-                    (:= textArea.value themeJSON)
-                    (:= textArea.style.position "fixed")
-                    (:= textArea.style.left "-999999px")
-                    (:= textArea.style.top "-999999px")
-                    (. document.body (appendChild textArea))
-                    (. textArea (focus))
-                    (. textArea (select))
-                    (try
-                      (. document (execCommand "copy"))
-                      (catch err2
-                        (console.error "Failed to copy to clipboard")))
-                    (. document.body (removeChild textArea)))))))
+                      (var textArea (document.createElement "textarea"))
+                      (:= textArea.value themeJSON)
+                      (:= textArea.style.position "fixed")
+                      (:= textArea.style.left "-999999px")
+                      (:= textArea.style.top "-999999px")
+                      (. document.body (appendChild textArea))
+                      (. textArea (focus))
+                      (. textArea (select))
+                      (try
+                        (. document (execCommand "copy"))
+                        (catch err2
+                            (console.error "Failed to copy to clipboard")))
+                      (. document.body (removeChild textArea)))))))
 
   (return
    [:div {:className "flex flex-col h-full bg-[#252525]"}
@@ -232,9 +273,9 @@
             [:% -/TextInput {:label "Base" :value theme.typography.fontSize.base :onChange (fn [v] (return (updateTypography "base" v)))}]
             [:% -/TextInput {:label "LG" :value theme.typography.fontSize.lg :onChange (fn [v] (return (updateTypography "lg" v)))}]
             [:% -/TextInput {:label "XL" :value theme.typography.fontSize.xl :onChange (fn [v] (return (updateTypography "xl" v)))}]
-            [:% -/TextInput {:label "2XL" :value theme.typography.fontSize."2xl" :onChange (fn [v] (return (updateTypography "2xl" v)))}]
-            [:% -/TextInput {:label "3XL" :value theme.typography.fontSize."3xl" :onChange (fn [v] (return (updateTypography "3xl" v)))}]
-            [:% -/TextInput {:label "4XL" :value theme.typography.fontSize."4xl" :onChange (fn [v] (return (updateTypography "4xl" v)))}]]]
+            [:% -/TextInput {:label "2XL" :value (. theme.typography.fontSize ["2xl"]) :onChange (fn [v] (return (updateTypography "2xl" v)))}]
+            [:% -/TextInput {:label "3XL" :value (. theme.typography.fontSize ["3xl"]) :onChange (fn [v] (return (updateTypography "3xl" v)))}]
+            [:% -/TextInput {:label "4XL" :value (. theme.typography.fontSize ["4xl"]) :onChange (fn [v] (return (updateTypography "4xl" v)))}]]]
           nil)
 
       (:? (=== activeSection "spacing")
@@ -245,8 +286,8 @@
            [:% -/TextInput {:label "MD" :value theme.spacing.md :onChange (fn [v] (return (updateSpacing "md" v)))}]
            [:% -/TextInput {:label "LG" :value theme.spacing.lg :onChange (fn [v] (return (updateSpacing "lg" v)))}]
            [:% -/TextInput {:label "XL" :value theme.spacing.xl :onChange (fn [v] (return (updateSpacing "xl" v)))}]
-           [:% -/TextInput {:label "2XL" :value theme.spacing."2xl" :onChange (fn [v] (return (updateSpacing "2xl" v)))}]
-           [:% -/TextInput {:label "3XL" :value theme.spacing."3xl" :onChange (fn [v] (return (updateSpacing "3xl" v)))}]]
+           [:% -/TextInput {:label "2XL" :value (. theme.spacing ["2xl"]) :onChange (fn [v] (return (updateSpacing "2xl" v)))}]
+           [:% -/TextInput {:label "3XL" :value (. theme.spacing ["3xl"]) :onChange (fn [v] (return (updateSpacing "3xl" v)))}]]
           nil)
 
       (:? (=== activeSection "borders")
@@ -267,48 +308,4 @@
            [:% -/ShadowInput {:label "MD" :value theme.shadows.md :onChange (fn [v] (return (updateShadow "md" v)))}]
            [:% -/ShadowInput {:label "LG" :value theme.shadows.lg :onChange (fn [v] (return (updateShadow "lg" v)))}]
            [:% -/ShadowInput {:label "XL" :value theme.shadows.xl :onChange (fn [v] (return (updateShadow "xl" v)))}]]
-          nil)]]))
-
-(defn.js ColorInput
-  [{:# [label value onChange]}]
-  (return
-   [:div {:className "flex items-center gap-3"}
-    [:div {:className "flex-1"}
-     [:% fg/Label {:className "text-xs text-gray-400 mb-1 block"} label]
-     [:% fg/Input
-      {:type "text"
-       :value value
-       :onChange (fn [e] (return (onChange e.target.value)))
-       :className "h-7 bg-[#1e1e1e] border-[#3a3a3a] text-gray-300 text-xs"}]]
-    [:div {:className "pt-5"}
-     [:input
-      {:type "color"
-       :value value
-       :onChange (fn [e] (return (onChange e.target.value)))
-       :className "w-10 h-7 rounded border border-[#3a3a3a] cursor-pointer bg-[#1e1e1e]"}]]]))
-
-(defn.js TextInput
-  [{:# [label value onChange]}]
-  (return
-   [:div
-    [:% fg/Label {:className "text-xs text-gray-400 mb-1 block"} label]
-    [:% fg/Input
-     {:type "text"
-      :value value
-      :onChange (fn [e] (return (onChange e.target.value)))
-      :className "h-7 bg-[#1e1e1e] border-[#3a3a3a] text-gray-300 text-xs"}]]))
-
-(defn.js ShadowInput
-  [{:# [label value onChange]}]
-  (return
-   [:div
-    [:% fg/Label {:className "text-xs text-gray-400 mb-1 block"} label]
-    [:div {:className "flex items-center gap-2"}
-     [:% fg/Input
-      {:type "text"
-       :value value
-       :onChange (fn [e] (return (onChange e.target.value)))
-       :className "flex-1 h-7 bg-[#1e1e1e] border-[#3a3a3a] text-gray-300 text-xs"}]
-     [:div
-      {:className "w-10 h-7 bg-white rounded border border-[#3a3a3a]"
-       :style {:boxShadow value}}]]]))
+          nil)]]]))

@@ -25,6 +25,7 @@
              [code.dev.client.app.components.inputs-panel :as ip]
              [code.dev.client.app.components.properties-panel :as pp]
              [code.dev.client.app.components.system-browser :as sb]
+             [code.dev.client.app :as app]
              #_#_#_[code.dev.webapp.layout-top-bar :as top-bar]
              [code.dev.webapp.layout-hierarchy-tree :as hierarchy-tree]
              [code.dev.webapp.layout-library-browser :as library-browser]
@@ -36,41 +37,42 @@
   (r/init []
     (client/client-ws "localhost" 1313 {}))
   (return
-   (r/ui [:app/top
-          #_[:% fg/Button "HELLO"]
-          #_[:% top-bar/TopBar]
-          #_[:% cv/CodeViewer]
-          [:% dnd/DndProvider
-           {:backend dnd/HTML5Backend}
-           [:% sb/SystemBrowser]
-           [:% pp/PropertiesPanel]
-           [:% pi/PropertiesInspector]
-           [:% lb/LibraryBrowser]
-           [:% ins/Inspector]
-           [:% ip/InputsPanel]
-           [:% ht/HierarchyTree]
-           [:% cp/ComponentPalette]
-           [:% cb/ComponentBrowser]
-           [:% canvas/Canvas]]
-          [:% cm/ChatMessage
-           {:message {:text "hello"
-                      :user "hello"
-                      :timestamp (Date.now)}}]
-          [:app/body]]
-     [{:app/top     [:div
-                     {:class ["flex flex-col w-full"]
-                      :style {:top 0 :bottom 0}}]
+   [:% app/App]
+   #_(r/ui [:app/top
+            #_[:% fg/Button "HELLO"]
+            #_[:% top-bar/TopBar]
+            #_[:% cv/CodeViewer]
+            [:% dnd/DndProvider
+             {:backend dnd/HTML5Backend}
+             [:% sb/SystemBrowser]
+             [:% pp/PropertiesPanel]
+             [:% pi/PropertiesInspector]
+             [:% lb/LibraryBrowser]
+             [:% ins/Inspector]
+             [:% ip/InputsPanel]
+             [:% ht/HierarchyTree]
+             [:% cp/ComponentPalette]
+             [:% cb/ComponentBrowser]
+             [:% canvas/Canvas]]
+            [:% cm/ChatMessage
+             {:message {:text "hello"
+                        :user "hello"
+                        :timestamp (Date.now)}}]
+            [:app/body]]
+       [{:app/top     [:div
+                       {:class ["flex flex-col w-full"]
+                        :style {:top 0 :bottom 0}}]
        
-       :app/body
-       [:rx/theme
-        [:*/h
-         {:style {:top 0 :bottom 0}}
-         #_[:% hierarchy-tree/HierarchyTree]
-         #_[:% library-browser/LibraryBrowser]
-         #_[:*/v {:gap 3}
-          [:rx/button "HELLO"]
-          [:rx/button "HELLO"]
-          [:rx/button "HELLO"]]]]}])))
+         :app/body
+         [:rx/theme
+          [:*/h
+           {:style {:top 0 :bottom 0}}
+           #_[:% hierarchy-tree/HierarchyTree]
+           #_[:% library-browser/LibraryBrowser]
+           #_[:*/v {:gap 3}
+              [:rx/button "HELLO"]
+              [:rx/button "HELLO"]
+              [:rx/button "HELLO"]]]]}])))
 
 (defn.js main
   []

@@ -90,25 +90,23 @@
                                      :children []
                                      :type "Heading"
                                      :label "Card Title"
-                                     :id "example-heading-1"}
-                                    {:properties {:children "{input.description}"
-                                                  :className "text-gray-600 mb-4"}
-                                     :children []
-                                     :type "Text"
-                                     :label "Card Description"
-                                     :id "example-text-1"}
+                                     :id "example-heading-1"}                                        {:properties {:children "{input.description}"
+                                                                                                                   :className "text-gray-600 mb-4"}
+                                                                                                      :children []
+                                                                                                      :type "Text"
+                                                                                                      :label "Card Description"
+                                                                                                      :id "example-text-1"}
                                     {:properties {:children "Clicks: {state.clickCount}"
                                                   :className "text-sm text-gray-500 mb-4"}
                                      :children []
                                      :type "Text"
                                      :label "Counter Display"
-                                     :id "example-text-2"}
-                                    {:properties {:children "{input.buttonText}"
-                                                  :className "px-6 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"}
-                                     :children []
-                                     :type "Button"
-                                     :label "Action Button"
-                                     :id "example-button-1"}]
+                                     :id "example-text-2"}                                           {:properties {:children "{input.buttonText}"
+                                                                                                                   :className "px-6 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"}
+                                                                                                      :children []
+                                                                                                      :type "Button"
+                                                                                                      :label "Action Button"
+                                                                                                      :id "example-button-1"}]
                          :states {:clickCount {:description "Number of button clicks"
                                                :default 0
                                                :type "number"}
@@ -317,7 +315,7 @@
                          (setSelectedComponent "root")))
 
   (var findComponentById (fn [components id]
-                           (for:array [component components]
+                           (for [component components]
                              (when (== component.id id)
                                (return component))
                              (var found (findComponentById component.children id))
@@ -411,35 +409,35 @@
           {:onImportComponent (fn [comp] (return (importComponent comp)))
            :onImportAndEdit importAndEditComponent}]]
         [:% fg/TabsContent {:value "theme" :className "flex-1 m-0"}
-         [:% te/ThemeEditor {:theme theme :onThemeChange setTheme}]]]]
-      [:% fg/ResizableHandle {:className "w-[1px] bg-[#323232]"}]
-      [:% fg/ResizablePanel {:defaultSize 50 :minSize 30}
-       [:% fg/ResizablePanelGroup {:direction "vertical"}
-        [:% fg/ResizablePanel {:defaultSize 70 :minSize 40}
-         [:% vc/ViewportCanvas
-          {:components components
-           :selectedComponent selectedComponent
-           :onSelectComponent setSelectedComponent
-           :onAddComponent addComponent
-           :onMoveComponent moveComponent
-           :viewMode viewMode
-           :theme theme}]]
-        [:% fg/ResizableHandle {:className "h-[1px] bg-[#323232]"}]
-        [:% fg/ResizablePanel {:defaultSize 30 :minSize 15}
-         [:% op/OutlinerPanel
-          {:components components
-           :selectedComponent selectedComponent
-           :onSelectComponent setSelectedComponent
-           :onDeleteComponent deleteComponent
-           :onMoveComponent moveComponent}]]]]
-      [:% fg/ResizableHandle {:className "w-[1px] bg-[#323232]"}]
-      [:% fg/ResizablePanel {:defaultSize 30 :minSize 20 :maxSize 40}
-       [:% pp/PropertiesPanel
-        {:component selectedComponentData
-         :onUpdateProperty updateComponentProperty
-         :onDeleteComponent deleteComponent
-         :onUpdateInputs updateComponentInputs
-         :onUpdateInputValues updateComponentInputValues
-         :onUpdateStates updateComponentStates
-         :onUpdateTriggers updateComponentTriggers
-         :onUpdateActions updateComponentActions}]]]]]))
+         [:% te/ThemeEditor {:theme theme :onThemeChange setTheme}]]]]]
+     [:% fg/ResizableHandle {:className "w-[1px] bg-[#323232]"}]
+     [:% fg/ResizablePanel {:defaultSize 50 :minSize 30}
+      [:% fg/ResizablePanelGroup {:direction "vertical"}
+       [:% fg/ResizablePanel {:defaultSize 70 :minSize 40}
+        [:% vc/ViewportCanvas
+         {:components components
+          :selectedComponent selectedComponent
+          :onSelectComponent setSelectedComponent
+          :onAddComponent addComponent
+          :onMoveComponent moveComponent
+          :viewMode viewMode
+          :theme theme}]]
+       [:% fg/ResizableHandle {:className "h-[1px] bg-[#323232]"}]
+       [:% fg/ResizablePanel {:defaultSize 30 :minSize 15}
+        [:% op/OutlinerPanel
+         {:components components
+          :selectedComponent selectedComponent
+          :onSelectComponent setSelectedComponent
+          :onDeleteComponent deleteComponent
+          :onMoveComponent moveComponent}]]]]
+     [:% fg/ResizableHandle {:className "w-[1px] bg-[#323232]"}]
+     [:% fg/ResizablePanel {:defaultSize 30 :minSize 20 :maxSize 40}
+      [:% pp/PropertiesPanel
+       {:component selectedComponentData
+        :onUpdateProperty updateComponentProperty
+        :onDeleteComponent deleteComponent
+        :onUpdateInputs updateComponentInputs
+        :onUpdateInputValues updateComponentInputValues
+        :onUpdateStates updateComponentStates
+        :onUpdateTriggers updateComponentTriggers
+        :onUpdateActions updateComponentActions}]]]]))

@@ -4,13 +4,14 @@
 (def +rainbow-colors+
   ["\u001b[35m"                        ; magenta
    "\u001b[34m"                        ; blue
-   "\u001b[36m"                        ; cyan
-   "\u001b[32m"                        ; green
    "\u001b[33m"                        ; yellow
+   "\u001b[36m"                        ; cyan
    "\u001b[31m"                        ; red
-   ])                     
-
+   "\u001b[32m"                        ; green
+   ])
+  
 (def +error-color+ "\u001b[41m") ; red background
+(def +unpaired-color+ "\u001b[43m") ; red background
 
 (def +reset-color+ "\u001b[0m")
 
@@ -21,9 +22,14 @@
                        (map (fn [delim]
                               (let [depth (get delim :depth 0)
                                     correct? (get delim :correct? true)
-                                    color (if correct?
-                                            (get +rainbow-colors+ (mod depth (count +rainbow-colors+)))
-                                            +error-color+)]
+                                    color (cond correct?
+                                                (get +rainbow-colors+ (mod depth (count +rainbow-colors+)))
+
+                                                (get delim :pair-id)
+                                                +error-color+
+
+                                                :else
+                                                +unpaired-color+)]
                                 [[(:line delim) (:col delim)] color])))
                        (into {}))]
     (loop [chars (seq content)

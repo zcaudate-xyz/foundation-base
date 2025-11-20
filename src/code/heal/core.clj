@@ -233,7 +233,7 @@
       (heal-append opts)
       (heal-mismatch opts)
       (heal-remove opts)
-      (heal-open-heavy opts)))
+      #_(heal-open-heavy opts)))
 
 (defn heal
   "heals the content"

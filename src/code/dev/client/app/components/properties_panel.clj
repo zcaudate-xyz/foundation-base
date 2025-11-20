@@ -122,24 +122,27 @@
                 [:% fg/Label {:className "text-xs text-gray-500 uppercase tracking-wider mb-3 block"}
                   "Properties"]
                 [:div {:className "space-y-3"}
-                  (. (Object.entries component.properties) (map (fn [[key value]]
-                                                                  (return
-                                                                    [:div {:key (+ component.id "-" key)}
-                                                                      [:% fg/Label {:className "text-xs text-gray-400 mb-1 block"}
-                                                                        key
-                                                                       (:? (and component.inputs (> (. (Object.keys component.inputs) length)
-                                                                                                     0))
-                                                                            [:span {:className "ml-2 text-[10px] text-blue-400 font-mono"} "{input.name}"]
-                                                                            nil)
-                                                                       (:? (and component.states (> (. (Object.keys component.states) length)
-                                                                                                    0))
-                                                                            [:span {:className "ml-2 text-[10px] text-purple-400 font-mono"} "{state.name}"]
-                                                                            nil)]
-                                                                      [:% -/PropertyInput
-                                                                        {:componentId component.id
-                                                                         :propertyKey key
-                                                                         :value value
-                                                                         :onUpdateProperty onUpdateProperty}]]))))]]]]]
+                 (. (Object.entries component.properties)
+                    (map (fn [[key value]]
+                           (return
+                            [:div {:key (+ component.id "-" key)}
+                             [:% fg/Label {:className "text-xs text-gray-400 mb-1 block"}
+                              key
+                              (:? (and component.inputs (> (. (Object.keys component.inputs) length)
+                                                           0))
+                                  [:span {:className "ml-2 text-[10px] text-blue-400 font-mono"}
+                                   (:- "'{input.name}'")]
+                                  nil)
+                              (:? (and component.states (> (. (Object.keys component.states) length)
+                                                           0))
+                                  [:span {:className "ml-2 text-[10px] text-purple-400 font-mono"}
+                                   (:- "'{state.name}'")]
+                                  nil)]
+                             [:% -/PropertyInput
+                              {:componentId component.id
+                               :propertyKey key
+                               :value value
+                               :onUpdateProperty onUpdateProperty}]]))))]]]]]
 
         [:% fg/TabsContent {:value "inputs" :className "flex-1 m-0"}
           [:% ip/InputsPanel

@@ -18,3 +18,26 @@
 
   (heal/print-rainbox
    (slurp "test/code/heal_test.clj")))
+
+
+(comment
+  heal-filenames
+  heal-namespaces
+
+  
+
+  (heal-code '[code.dev.client.app.components]
+             {:write true})
+  
+  
+  (heal-code '[code.dev.client.app.components])
+  (heal-code '[code.dev.client.app.components.canvas])
+  
+  (project/get-path 'code.dev.client.app.components.theme-editor
+                    (project/project))
+  (std.fs/ns->file 'code.dev.client.app.theme-editor)
+  ((project/lookup-ns
+    'code.dev.client.app.theme-editor
+    )
+   )
+  )

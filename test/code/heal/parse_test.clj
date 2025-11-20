@@ -56,7 +56,7 @@
   => (contains-in
       [{:char "[", :line 1, :col 1, :type :open, :style :square, :depth 0, :correct? true, :pair-id 0}
        {:char "]", :line 1, :col 2, :type :close, :style :square, :depth 0, :correct? true, :pair-id 0}])
-
+  
   
   (parse/pair-delimiters
    (parse/parse-delimiters "]"))
@@ -114,9 +114,9 @@
 
   (h/with-out-str
     (parse/print-delimiters
-     (h/sys:resource-content "code/heal/cases/001_basic.block")
+     (slurp "test-data/code.heal/cases/001_basic.block")
      (parse/parse-delimiters
-      (h/sys:resource-content "code/heal/cases/001_basic.block"))
+      (slurp "test-data/code.heal/cases/001_basic.block"))
      {:line-numbers true}))
   => string?)
 
@@ -169,19 +169,33 @@
 
   (parse/parse-lines sample-code)
   => [{:type :blank, :line 1}
-      {:type :code, :line 2, :last-idx 16}
+      {:type :code, :line 2, :last-idx 16, :col 1, :char "("}
       {:type :string, :line 3, :last-idx 21}
       {:type :code, :line 4, :last-idx 29}
-      {:type :commented, :line 5, :last-idx 40}
-      {:type :code, :line 6, :last-idx 26}
+      {:type :commented, :line 5, :last-idx 40, :col 3, :char "["}
+      {:type :code, :line 6, :last-idx 26, :col 3, :char "("}
       {:type :commented, :line 7, :last-idx 24}
-      {:type :code, :line 8, :last-idx 10}
+      {:type :code, :line 8, :last-idx 10, :col 3, :char "("}
       {:type :code, :line 9, :last-idx 11}
-      {:type :code, :line 10, :last-idx 12}
+      {:type :code, :line 10, :last-idx 12, :col 5, :char "("}
       {:type :blank, :line 11}
       {:type :commented, :line 12, :last-idx 15}
       {:type :blank, :line 13}]
-  
+
+
+  (comment
+    {:char ")",
+     :col 89,
+     :line 12,
+     :style :paren,
+     :type :close
+
+     
+     :correct? false,
+     :depth -1,
+     :index 66,
+     
+     })
   
   (def another-sample
     "\"\"\"
@@ -198,7 +212,7 @@ that acts as a multi-line comment or docstring in other languages but not clojur
       {:type :string, :line 2, :last-idx 29}
       {:type :string, :line 3, :last-idx 80}
       {:type :code, :line 4, :last-idx 2}
-      {:type :commented, :line 5, :last-idx 17}
+      {:type :commented, :line 5, :last-idx 17, :col 1, :char "("}
       {:type :commented, :line 6, :last-idx 11}
       {:type :code, :line 7, :last-idx 19}
       {:type :blank, :line 8}])
