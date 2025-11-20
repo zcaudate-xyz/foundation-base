@@ -361,11 +361,7 @@
                        [:% Copy {:marginRight "$2" :height "$1" :width "$1"}]
                        "Copy"])]]
                 [:% tm/Text {:tag "pre" :overflowX "scroll" :borderRadius "$3" :backgroundColor "$background" :padding "$3" :fontSize "$xs"}
-                 "<iframe \n  src=\"https://statstrade.com/embed/campaign/tesla\" 
-  width=\"400\" 
-  height=\"500\"
-  frameborder=\"0\">
-</iframe>"]]]]]
+                ]]]]]
 
          ;; FAQ
          [:% tm/View {:borderTopWidth 1 :borderTopColor "$border" :paddingVertical "$8"}

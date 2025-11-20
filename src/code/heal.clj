@@ -2,19 +2,20 @@
   (:require [code.heal.core :as core]
             [code.heal.print :as print]
             [code.heal.parse :as parse]
+            [code.heal.level :as level]
             [code.framework :as framework]
             [std.lib :as h :refer [definvoke]]
             [std.task :as task]
             [code.project :as project]
             [code.manage.unit.template :as template]))
 
-(h/intern-in core/heal)
+(h/intern-in [heal level/heal-content])
 
 (defn heal-code-single
   "helper function for heal-code"
   {:added "4.0"}
   ([ns params lookup project]
-   (let [params (assoc params :transform core/heal-raw)]
+   (let [params (assoc params :transform level/heal-content)]
      (framework/transform-code ns params lookup project))))
 
 (definvoke heal-code
