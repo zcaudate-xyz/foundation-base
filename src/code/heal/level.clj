@@ -137,7 +137,10 @@
             other-errors    (remove unclosed-fn interim-errors)
             all-errors      (vec (concat unclosed-errors
                                          other-errors))]
-        (if (not-empty all-errors)
+        (when (not-empty all-errors)
+          #_(h/prn [all-errors
+                  (:line block)
+                  (dissoc block :children)])
           {:errors (mapv #(update % :line + (dec (first (:line block)))) all-errors)
            :lines  (str/split-lines snippet)
            :at     (dissoc block :children)})))))
@@ -145,7 +148,7 @@
 (defn get-errored-raw
   "checks content for irregular blocks"
   {:added "4.0"}
-  [lines entries blocks]
+  [lines blocks]
   (vec (keep #(get-errored-loop % lines)
              blocks)))
 
@@ -166,14 +169,13 @@
                 delimiters
                 starts]}  (group-blocks-prep content)
         blocks     (group-blocks-multi entries)
-        errored (get-errored-raw lines entries blocks)
-        _        (h/prf errored)
+        errored (get-errored-raw lines blocks)
         edits   (mapcat (fn [{:keys [errors at]
                               :as info}]
                           (let [[e1 e2 & more]  errors]
                             (cond
                               
-                              ;; Append Edit
+                              ;; Append Delimiter
                               (and (= (:type e1) :open)
                                    (nil? e2))
                               (let [closed (->> delimiters
@@ -189,44 +191,176 @@
                                   :col   col}])
                               
                               
-                              ;; Remove Edit
+                              ;; Remove Delimiter
                               (and (= (:type e1) :close)
                                    (nil? e2))
                               (core/create-remove-edits [e1])
                               
-                              ;; Mismatched parens
+                              ;; Mismatched Delimiters
                               (and (= (:type e1) :open)
                                    (= (:type e2) :close))
                               (core/create-mismatch-edits [e1 e2])
                               
                               :else
-                              (throw
-                               (ex-info "Not Supported"
-                                        {:info info})))))
-                        errored)]
-    (core/update-content content
-                         edits)))
+                              (do (h/prf info)
+                                (throw
+                                 (ex-info "Not Supported"
+                                          {:info info}))))))
+                        errored)
+        new-content  (try (core/update-content content
+                                               edits)
+                          (catch Throwable t
+                            
+                            (mapv (fn [{:keys [at]}]
+                                    (h/prn at)
+                                    (h/pl (str/join-lines
+                                           (get-block-lines lines
+                                                            (:line at)
+                                                            (:col at)))))
+                                  errored)
+                            (throw t)))]
+    new-content))
+
+(defn heal-content
+  [content]
+  (loop [content content
+         retries  50]
+    (if (< retries 0)
+      content
+      (let [new-content (heal-content-single-pass content)]
+        (if (= new-content content)
+          content
+          (recur new-content
+                 (dec retries)))))))
 
 (defn heal-content-print
   [content]
-  (let [new-content (heal-content-single-pass content)
+  (let [new-content (heal-content content)
         deltas (diff/diff content new-content)
         _ (h/p (diff/->string deltas))]
     new-content))
 
+(defn wrap-print-diff
+  [print-fn]
+  (fn [content]
+    (h/p "DIFF")
+    (let [new-content (print-fn content)
+          deltas (diff/diff content new-content)
+          _ (h/p (diff/->string deltas))]
+      new-content)))
 
-(defn heal-content
-  [content]
-  (loop [new-content (heal-content-single-pass content)]
-    (if (= new-content content)
-      content
-      (return ))))
+(heal-content-print
+ "
+(oheuoeu)
+ (hoeuoe
+      (var a b)
 
+      (hello))
+
+      (hello))            
+(oheuoeu)")
+
+(h/pl
+ "
+(oheuoeu)
+ (hoeuoe
+      (var a b)
+
+
+      (hello))
+
+      (hello))            
+(oheuoeu)")
 
 
 (comment
+  (heal-content-print
+   (slurp "/Users/chris/Development/buffer/Smalltalkinterfacedesign/translate/src-translated/components/library_browser2.clj"))
+  
+  (s/layout
+   (read-string
+    (str "["
+         (heal-content-print
+          (slurp "/Users/chris/Development/buffer/Smalltalkinterfacedesign/translate/src-translated/components/library_browser.clj"))
+         "]")))
+  
+  (read-string
+   (str "["
+        ((wrap-print-diff code.heal.tokens/heal-tokens)
+         ((wrap-print-diff core/heal)
+          ((wrap-print-diff heal-content)
+           (slurp "/Users/chris/Development/buffer/Smalltalkinterfacedesign/translate/src-translated/components/library_browser.clj"))))
+        "]"))
+  
+  (read-string
+   (str "["
+        (h/suppress
+         ((wrap-print-diff core/heal)
+          ((wrap-print-diff heal-content)
+           (slurp "/Users/chris/Development/buffer/Smalltalkinterfacedesign/translate/src-translated/components/states_triggers_panel.clj"))))
+        "]"))
+  
+  (h/suppress
+   ((wrap-print-diff core/heal)
+    ((wrap-print-diff heal-content)
+     (slurp "/Users/chris/Development/buffer/Smalltalkinterfacedesign/translate/src-translated/components/states_triggers_panel2.clj"))))
+  
+  
+  
+  (doseq [f (keys
+             (std.fs/list
+              "/Users/chris/Development/buffer/Smalltalkinterfacedesign/translate/src-translated/components/"
+              {:include [".clj$"]}))]
+    
+    (h/p f)
+    (try (read-string
+          (str "["
+               ((wrap-print-diff code.heal.tokens/heal-tokens)
+                ((wrap-print-diff core/heal)
+                 ((wrap-print-diff heal-content)
+                  (slurp f))))
+               "]"))
+         (catch Throwable t
+           (h/p :FAILED)))))
+
+
+(comment
+  (count
+   (str/split-lines
+    (slurp "/Users/chris/Development/buffer/Smalltalkinterfacedesign/translate/src-translated/components/library_browser.clj")))
+  
+  (heal-content-single-pass
+   (slurp "/Users/chris/Development/buffer/Smalltalkinterfacedesign/translate/src-translated/components/library_browser.clj"))
+
+  (h/meter :out
+    (heal-content
+     (slurp "/Users/chris/Development/buffer/Smalltalkinterfacedesign/translate/src-translated/components/library_browser.clj")))
+  
+  (h/p (diff/->string
+        (diff/diff
+         (slurp "/Users/chris/Development/buffer/Smalltalkinterfacedesign/translate/src-translated/components/library_browser.clj")
+         *new-content*
+         )))
+  
+  
   (group-blocks
    (slurp "/Users/chris/Development/buffer/Smalltalkinterfacedesign/translate/src-translated/components/library_browser2.clj"))
+
+  (h/p
+   (diff/->string
+    (diff/diff
+     (slurp "/Users/chris/Development/buffer/Smalltalkinterfacedesign/translate/src-translated/components/library_browser.clj")
+     (heal-content-single-pass
+      (heal-content-single-pass
+       (heal-content-single-pass
+        (heal-content-single-pass
+         (heal-content-single-pass
+          (heal-content-single-pass
+           (heal-content-single-pass
+            (heal-content-single-pass
+             (heal-content-single-pass
+              (slurp "/Users/chris/Development/buffer/Smalltalkinterfacedesign/translate/src-translated/components/library_browser.clj")))))))))))))
+  
   
 
   (heal-content-print
@@ -237,8 +371,10 @@
        (heal-content-print
         (heal-content-print
          (heal-content-print
-          (heal-content-print
-           (slurp "/Users/chris/Development/buffer/Smalltalkinterfacedesign/translate/src-translated/components/library_browser2.clj"))))))))))
+          ))))))))
+  
+  (heal-content
+   (slurp "/Users/chris/Development/buffer/Smalltalkinterfacedesign/translate/src-translated/components/library_browser.clj"))
   
   (code.heal/print-rainbow
    (slurp "/Users/chris/Development/buffer/Smalltalkinterfacedesign/translate/src-translated/components/library_browser.clj"))

@@ -199,9 +199,8 @@
       output
       (let [current-line (first lines)
             trimmed-line (str/trim-left current-line)
-            indent (if (#{\( \{ \[}
-                        (first trimmed-line))
-                     (- (count current-line) (count trimmed-line)))
+            indent (- (count current-line) (count trimmed-line))
+            first-char (first trimmed-line)
             
             
             ;; Determine if a string starts or ends on this line
@@ -224,11 +223,13 @@
                (inc  line-num)
                next-multiline?
                (conj output (cond-> {:type line-type :line line-num}
-                              last-idx (assoc :last-idx last-idx)
-                              (and indent
-                                   (or (= line-type :code)
+                              last-idx   (assoc :last-idx last-idx)
+
+                              (or (= line-type :code)
+                                  (and (not= first-char \;) 
                                        (= line-type :commented))) (assoc :col (inc indent)
-                                                                         :char (str (first trimmed-line))))))))))
+                                                                         :char (str (#{\( \{ \[}
+                                                                                     first-char))))))))))
 
 (defn parse-lines
   "parse lines"

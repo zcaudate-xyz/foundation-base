@@ -94,7 +94,7 @@
    => \"helloworld\""
   {:added "4.0"}
   [arr]
-  (common/join "\n" (filter not-empty arr)))
+  (common/join "\n" arr))
 
 (defn spaces
   "create `n` spaces
