@@ -75,7 +75,10 @@
   => "\"hello\""
 
   (str (string-token "hello\nworld"))
-  => "\"hello\\nworld\"")
+  => "\"hello\\nworld\""
+
+  (str (string-token " \"hello\"  " ))
+  => "\" \\\"hello\\\"  \"")
 
 ^{:refer std.block.construct/token :added "3.0"}
 (fact "creates a token"

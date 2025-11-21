@@ -167,7 +167,7 @@
          width   (cond-> (inc (count (last lines)))
                    (zero? height) inc)
          string  (str "\"" form "\"")]
-     (type/token-block tag string form string width height))))
+     (type/token-block tag (pr-str form) form (pr-str form) width height))))
 
 
 (defn token

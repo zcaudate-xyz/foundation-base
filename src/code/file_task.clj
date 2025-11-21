@@ -1,23 +1,19 @@
 (ns code.file-task
   (:require [std.task :as task]
             [std.lib :as h]
-            [std.fs :as fs]))
+            [std.fs :as fs]
+            [std.text.diff :as diff]
+            [std.print.ansi :as ansi]
+            [std.lib.result :as res]
+            [code.heal.level :as level]))
 
-(defn print-file
-  [path params lookup env]
-  #_(h/prn path key lookup env)
-  {:path path :params params})
-
-(defmethod task/task-defaults :file.internal
+(defmethod task/task-defaults :file.transform
   ([_]
    {:construct {:input   (fn [_] :list)
-                :lookup  (fn [opts env]
-                           (let [root-path (fs/path (:root env))]
-                             (->> (fs/list root-path
-                                           env)
-                                  (h/map-keys #(str (fs/relativize root-path %))))))
+                :lookup  (fn [_] {})
                 :env     (fn [_] 
                            {:root "."
+                            :target ""
                             :include [fs/file?]})}
     :params    {:print {:item true
                         :result true
@@ -26,37 +22,369 @@
     :arglists '([] [path] [path params] [path params lookup] [path params lookup env])
     :main      {:arglists '([] [key] [key params] [key params lookup] [key params lookup env])
                 :count 4}
-    :item      {:list    (fn [lookup env]
-                           (sort (keys lookup)))
-                :display (fn [data] (format "%.2f s" (/ (h/time-ms) 1000.0)))}
-    :result    {:keys    {:path :path
-                          :params :params}
-                #_#_:columns [{:key    :key
-                             :align  :left}
-                          {:key    :updated
-                           :align  :left
-                           :length 10
+    :item      {:list    (fn [_ env]
+                           (let [root-path (fs/path (:root env) (:target env))]
+                             (->> (fs/list root-path env)
+                                  (keys)
+                                  (sort)
+                                  (map #(str (fs/relativize root-path %))))))
+                :display (fn [data]
+                           (if (or (:deletes data)
+                                   (:inserts data))
+                             (select-keys data [:deletes
+                                                :inserts
+                                                :verified])
+                             (res/result {:status :info
+                                          :data :no-change})))}
+    :result    {:keys {:inserts :inserts
+                       :deletes :deletes
+                       :verified :verified}
+                :columns [{:key    :key
+                           :align  :left}
+                          {:key    :inserts
+                           :length 8
+                           :align  :center
                            :color  #{:bold}}
-                          {:key    :path
+                          {:key    :deletes
+                           :length 8
+                           :align  :center
+                           :color  #{:bold}}
+                          {:key    :verified
+                           :length 30
                            :align  :left
-                           :length 60
-                           :color  #{:green}}]
-                :columns [{:key :path :length 50}
-                          #_{:key :params :length 10 :align :right}]}}))
+                           :color  #{:bold}}]
+                :ignore (fn [{:keys [deletes inserts verified] :as m}]
+                          (and (true? verified)
+                               (zero? (+ (or inserts 0)
+                                         (or deletes 0)))))}
+    :summary  {:aggregate {:deletes   [:deletes + 0]
+                           :inserts   [:inserts + 0]
+                           :written   [:updated #(if %2 (inc %1) %1) 0]}}}))
 
+(defmethod task/task-defaults :file.extract
+  ([_]
+   {:construct {:input   (fn [_] :list)
+                :lookup  (fn [_] {})
+                :env     (fn [_] 
+                           {:root "."
+                            :target ""
+                            :include [fs/file?]})}
+    :params    {:print {:item true
+                        :result true
+                        :summary true}}
+    :arglists '([] [path] [path params] [path params lookup] [path params lookup env])
+    :main      {:arglists '([] [key] [key params] [key params lookup] [key params lookup env])
+                :count 4}
+    :item      {:list    (fn [_ env]
+                           (let [root-path (fs/path (:root env) (:target env))]
+                             (->> (fs/list root-path env)
+                                  (keys)
+                                  (sort)
+                                  (map #(str (fs/relativize root-path %))))))
+                :display (fn [data]
+                           (get-in data [:data :ns]))}
+    :result    {:keys    {:ns    (fn [m]
+                                   (get-in m [:data :ns]))
+                          :deps  (fn [m] (sort (vec (get-in m [:data :deps]))))}
+                :columns [{:key    :ns
+                           :length 80
+                           :align  :left}
+                          {:key    :deps
+                           :length 80
+                           :align  :right
+                           :color  #{:bold}}]}}))
 
+(defn process-file
+  "transforms the code and performs a diff to see what has changed
+ 
+   ;; options include :skip, :full and :write
+   (project/in-context (transform-code 'code.framework {:transform identity}))
+   => (contains {:changed []
+                 :updated false
+                 :path any})"
+  {:added "3.0"}
+  ([path {:keys [write print process verify full] :as params} _ {:keys [root target]}]
+   (let [full-path  (fs/path root target path)
+         original   (slurp full-path)
+         processed  (process original)]
+     processed)))
 
-(h/definvoke process-files
+(defn transform-file
+  "transforms the code and performs a diff to see what has changed
+ 
+   ;; options include :skip, :full and :write
+   (project/in-context (transform-code 'code.framework {:transform identity}))
+   => (contains {:changed []
+                 :updated false
+                 :path any})"
+  {:added "3.0"}
+  ([path {:keys [write print transform verify full] :as params} _ {:keys [root target]}]
+   (let [full-path  (fs/path root target path)
+         original   (slurp full-path)
+         revised    (transform original)
+         verified   (or (first (keep
+                                (fn [[k f]]
+                                  (try
+                                    (f revised)
+                                    nil
+                                    (catch Throwable t
+                                      (h/prn t)
+                                      [k false])))
+                                verify))
+                        true)
+         deltas     (diff/diff original revised)
+         updated    (when (and write (seq deltas))
+                      (spit full-path revised)
+                      true)
+         _          (when (and (:function print) (seq deltas))
+                      (h/local :print (str "\n" (ansi/style path #{:bold :blue :underline}) "\n\n"))
+                      (h/local :print (diff/->string deltas) "\n"))]
+     (cond-> (diff/summary deltas)
+       full  (assoc :deltas deltas)
+       :then (assoc :updated (boolean updated)
+                    :verified verified
+                    :path (str full-path))))))
+
+(h/definvoke file-transform
   "processes all files in a directory"
   {:added "4.0"}
-  [:task {:template :file.internal
+  [:task {:template :file.transform
           :params {:title (fn [params env]
-                            (str "PROCESS FILES - " (fs/path (:root env))))}
-          :main {:fn #'print-file}}])
+                            (str (:name params) " - " (fs/path (:root env))))}
+          :main {:fn #'transform-file}}])
 
-(process-files :all)
+(h/definvoke file-process
+  "processes all files in a directory"
+  {:added "4.0"}
+  [:task {:template :file.extract
+          :params {:title (fn [params env]
+                            (str (:name params) " - " (fs/path (:root env))))}
+          :main {:fn #'process-file}}])
+
+(defn get-deps
+  [content]
+  (let [nav      (code.edit/parse-root content)
+        ns-name  (code.edit/value
+                  (first (code.query/select nav
+                                            '[(ns | _ & _)])))
+        ns-deps  (set (map first
+                           (:require (code.edit/value
+                                      (first
+                                       (code.query/select nav
+                                                          ['(l/script & _)
+                                                           '|
+                                                           map?]))))))]
+    {:ns ns-name
+     :deps ns-deps}))
+
+
 (comment
-  (process-files :all)
+  (file-transform :all
+                  {:transform level/heal-content
+                   :verify {:read-string read-string
+                            :block std.block/parse-root}
+                   :name "HEAL CONTENT"
+                   :write true
+                   :print {:function true}}
+                  nil
+                  {:root "../Szncampaigncenter/"
+                   :target  "src-translated/"
+                   :include [".clj$"]
+                   :recursive true})
+
+  (def +deps+
+    (file-process :all
+                  {:process get-deps
+                   :name "GET DEPS"
+                   :item {:display (fn [data]
+                                     (get data [:data :ns]))}}
+                  nil
+                  {:root "../Szncampaigncenter/"
+                   :target  "src-translated/"
+                   :include [".clj$"]
+                   :recursive true}))
+
+  (def all-deps
+    (apply clojure.set/union
+           (map :deps (vals +deps+))))
+
+  (def sub-deps
+    (set (map :ns (vals +deps+))))
+
+  (def other-deps
+    (clojure.set/difference
+     all-deps sub-deps))
+  
+  (def recovered-deps
+    (h/map-entries
+     (fn [[path {:keys [ns deps]}]]
+       [ns (clojure.set/difference
+            deps other-deps)])
+     +deps+))
+
+  (std.lib.sort/sort-by-dependency-size
+   recovered-deps
+   (h/topological-sort recovered-deps))
+  
+
+
+
+
+  (defn process-links
+    [content]
+    (let [forms (map std.block/value
+                     (filter std.block/expression?
+                             (std.block/children
+                              (std.block/parse-root
+                               (slurp "../Szncampaigncenter/src-translated/lib/brands.clj")))))
+          ns-form (first (filter #(and (list? %)
+                                       (= (first %) 'ns)) forms))])))
+
+(comment
+  
+  (map process-content
+       (map slurp
+            (keys 
+             (fs/list "../Szncampaigncenter/src-translated/lib/"
+                      {:include [fs/file?]})))
+       )
+
+  (map process-content
+       (map slurp
+            (keys 
+             (fs/list "../Szncampaigncenter/src-translated/"
+                      {:include [fs/file?]
+                       :recursive true})))
+       )
+  
+  
+  (map std.block/value
+       (filter std.block/expression?
+               (std.block/children
+                (std.block/parse-root
+                 content))))
+  (code.query/$ (code.edit/parse-root
+                 (slurp "../Szncampaigncenter/src-translated/lib/brands.clj"))
+      [{:is form?}]))
+
+
+(code.query/select
+ (code.edit/parse-root (slurp "../Szncampaigncenter/src-translated/lib/brands.clj"))
+ '[(ns | _ & _)])
+
+(code.query/select
+ (code.edit/parse-root (prn-str
+                        '(do (ns oeuoeu hoeue))))
+ '[(ns | _ & _)]
+ )
+
+(map code.edit/value
+     (code.query/select
+      (code.edit/navigator (std.block/parse-root
+                            (slurp "../Szncampaigncenter/src-translated/lib/brands.clj")))
+      ['(ns | _ & _)
+       ]))
+
+
+
+(map code.edit/value
+     (code.query/select
+      (code.edit/navigator (std.block/parse-root
+                            (slurp "../Szncampaigncenter/src-translated/lib/brands.clj")))
+      ['ns
+       '(:require & _)
+       '|
+       vector?]))
+
+(map code.edit/value
+     (code.query/select
+      (code.edit/navigator (std.block/parse-root
+                            (slurp "../Szncampaigncenter/src-translated/lib/brands.clj")))
+      ['ns
+       '(:require & _)
+       '|
+       vector?]))
+
+(map code.edit/value
+     (code.query/select
+      (code.edit/navigator (std.block/parse-root
+                            (slurp "../Szncampaigncenter/src-translated/lib/brands.clj")))
+      ['l/script
+       '|
+       map?]))
+
+(code.query/select (code.edit/parse-root
+                    (pr-str '([1 2 3 4 5]))
+                    )
+                   [vector?
+                    #_[_ _ | & _]])
+
+(std.block/value
+ (std.block/parse-root
+  (slurp "../Szncampaigncenter/src-translated/lib/brands.clj")))
+
+
+
+
+
+(comment
+  (file-transform :all
+                  {:transform level/heal-content
+                   :verify {:read-string read-string
+                            :block s/layout}
+                   :name "HEAL CONTENT"
+                   #_#_:write true
+                   :print {:function true}}
+                  nil
+                  {:root "../Szncampaigncenter/"
+                   :target  "src-translated/components"
+                   :include [".clj$"]
+                   #_#_:recursive true})
+  
+  (file-transform :all
+                  {:transform level/heal-content
+                   :verify {:read-string read-string
+                            :block std.block/parse-root}
+                   :name "HEAL CONTENT"
+                   :write true
+                   :print {:function true}}
+                  nil
+                  {:root "../Szncampaigncenter/"
+                   :target  "src-translated/"
+                   :include [".clj$"]
+                   :recursive true}))
+
+
+
+
+
+(comment
+  ((level/wrap-print-diff level/heal-content)
+ (slurp "../Szncampaigncenter/src-translated/components/token_creator.clj"))
+  
+  (szncampaigncenter.lib.brands/brands)
+  
+  (load-string
+   (slurp "../Szncampaigncenter/src-translated/lib/brands.clj"))
+  
+  (s/layout
+   (h/p (std.block/parse-root
+         (slurp "../Szncampaigncenter/src-translated/lib/brands.clj"))))
+  
+  (s/layout ["\"hello\""])
+  
+  (std.block/value-string
+   
+   (std.block/info (s/layout "\"hello\""))
+   {:type :token, :tag :string, :string "\"\"hello\"\"", :height 0, :width 9})
+  
+  (pr-str (s/layout "\"hello\""))
+  )
+
+(comment
+  (fs/list (fs/path "../Szncampaigncenter/src-dsl/"
+                    ""))
+  
   :result    {:keys    {:path :path
                         :params :params}
               :columns [{:key    :key

@@ -34,7 +34,10 @@
    (traverse (nav/parse-string "()")
              '(+ 1 2 3)))
   => (throws)
+  ($ {:string "(ns hello) ()"}
+      [(ns ^:%+ (keyword "oeuoeuoe"))])
 
+  
   (nav/value
    (traverse (nav/parse-string "(defn hello \"world\" {:a 1} [])")
              '(defn ^:% symbol? ^:?%- string? ^:?%- map? ^:% vector? & _)))
@@ -50,6 +53,7 @@
 
 ^{:refer code.query/modify :added "3.0"}
 (fact "modifies location given a function"
+
   (nav/string
    (modify (nav/parse-root "^:a (defn hello3) (defn hello)") ['(defn | _)]
            (fn [zloc]
@@ -70,13 +74,13 @@
 
 ^{:refer code.query/$ :added "3.0"}
 (fact "select and manipulation of clojure source code"
-
+  
   ($ {:string "(defn hello1) (defn hello2)"}
-     [(defn _ ^:%+ (keyword "oeuoeuoe"))])
+      [(defn _ ^:%+ (keyword "oeuoeuoe"))])
   => '[(defn hello1 :oeuoeuoe) (defn hello2 :oeuoeuoe)]
 
   ($ {:string "(defn hello1) (defn hello2)"}
-     [(defn _ | ^:%+ (keyword "oeuoeuoe"))])
+      [(defn _ | ^:%+ (keyword "oeuoeuoe"))])
   => '[:oeuoeuoe :oeuoeuoe]
 
   (->> ($ {:string "(defn hello1) (defn hello2)"}

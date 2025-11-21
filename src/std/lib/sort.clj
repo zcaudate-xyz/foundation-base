@@ -101,3 +101,22 @@
                m (g n)
                g* (reduce #(update-in % [n] set/difference #{%2}) g m)]
            (recur g* (cons n l) (set/union s* (set/intersection (topological-top g*) m)))))))
+
+(defn sort-by-dependency-size
+  "Refines a topologically sorted list by sorting nodes at each dependency level by their dependency count.
+  Takes the dependency graph and a pre-sorted list.
+  A secondary sort is done on the node key to ensure a stable ordering."
+  {:added "4.0"}
+  [g sorted-list]
+  (loop [processed-nodes #{}
+         result-list []
+         remaining-list sorted-list]
+    (if (empty? remaining-list)
+      result-list
+      (let [level-nodes (take-while #(every? processed-nodes (get g %))
+                                  remaining-list)
+            level-count (count level-nodes)
+            sorted-level (sort-by (juxt (fn [n] (count (get g n))) identity) level-nodes)]
+        (recur (apply conj processed-nodes sorted-level)
+               (apply conj result-list sorted-level)
+               (drop level-count remaining-list))))))

@@ -30,7 +30,7 @@
                      :no-analysis true
                      :print {:function true :result true :summary true}}
           :main     {:fn #'heal-code-single}
-          :result   (template/code-default-columns :changed)}])
+          :result   {:columns (template/code-default-columns :changed)}}])
 
 (defn print-rainbow
   "prints out the code in rainbow"
@@ -71,7 +71,7 @@
                              :length 60
                              :color  #{:green}}]}
       :summary  {:written   [:updated #(if %2 (inc %1) %1) 0]}}))
-
+  
   (definvoke heal-directory
     "helper function to fix parents"
     {:added "4.0"}

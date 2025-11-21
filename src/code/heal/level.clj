@@ -163,7 +163,7 @@
     ;; checking right up to the top level form to see if the lower level error
     ;; acually affects the top level form is super important to not prematurely
     ;; destroy the structure by adding unnecessary and damaging parens to the body
-    (when  (not-empty all-errors)
+    (when (not-empty all-errors)
       (or child-error
           {:errors (mapv #(update % :line + (dec (first (:line block)))) all-errors)
            :lines  (str/split-lines snippet)
@@ -259,13 +259,12 @@
         new-content  (try (core/update-content content
                                                edits)
                           (catch Throwable t
-                            
-                            (mapv (fn [{:keys [at]}]
-                                    (h/prn at)
-                                    (h/pl (str/join-lines
-                                           (get-block-lines lines
-                                                            (:line at)
-                                                            (:col at)))))
+                            (mapv (fn [{:keys [at]
+                                        :as info}]
+                                    (h/prf info)
+                                    (throw
+                                     (ex-info "Not Supported"
+                                              {:info info})))
                                   errored)
                             (throw t)))]
     new-content))
