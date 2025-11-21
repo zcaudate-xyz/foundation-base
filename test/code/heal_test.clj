@@ -23,25 +23,28 @@
 
 
 (comment
-  (doseq [f (keys
-             (std.fs/list
-              "../Szncampaigncenter/src-translated/"
-              {:include [".clj$"]
-               :recursive true}))]
-    (try (read-string
-          (str "["
-               ((level/wrap-print-diff level/heal-content)
-                (slurp f))
-               "]"))
-         (h/p f :SUCCESS)
-         (catch Throwable t
-           (h/p f :FAILED)))))
+  (let []
+    (doseq [f (keys
+               (std.fs/list
+                "../Szncampaigncenter/src-translated/"
+                {:include [".clj$"]
+                 :recursive true}))]
+      (try (read-string
+            (str "["
+                 ((level/wrap-print-diff level/heal-content)
+                  (slurp f))
+                 "]"))
+           (h/p f :SUCCESS)
+           (catch Throwable t
+             
+             (h/p f :FAILED))))))
 
 
 (comment
   heal-filenames
   heal-namespaces
 
+  (hael/h)
   
 
   (heal-code '[code.dev.client.app.components]
