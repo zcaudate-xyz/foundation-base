@@ -105,8 +105,9 @@
       [:div {:className "p-3 bg-blue-950/30 border border-blue-900/50 rounded"}
        [:p {:className "text-xs text-blue-300 mb-1"} "💡 Input Binding"]
        [:p {:className "text-[10px] text-blue-400/80"}
-        "Define inputs here, then use " [:code {:className "bg-blue-900/30 px-1 rounded"} "{input.name}"] " or "
-        [:code {:className "bg-blue-900/30 px-1 rounded"} "$input.name"] " in properties to bind values."]]
+        "Define inputs here, then use "
+        [:code {:className "bg-blue-900/30 px-1 rounded"} (:- "'{input.name}'")] " or "
+        [:code {:className "bg-blue-900/30 px-1 rounded"} (:- "'$input.name'")] " in properties to bind values."]]
 
       [:div
        [:h3 {:className "text-xs text-gray-500 uppercase tracking-wider mb-3"} "Input Schema"]

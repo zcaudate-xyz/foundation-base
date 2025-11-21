@@ -1,6 +1,8 @@
 (ns code.heal-test
   (:use code.test)
-  (:require [code.heal :as heal]))
+  (:require [code.heal :as heal]
+            [code.heal.level :as level]
+            [std.lib :as h]))
 
 ^{:refer code.heal/heal-code-single :added "4.0"}
 (fact "helper function for heal-code"
@@ -16,8 +18,24 @@
 ^{:refer code.heal/print-rainbox :added "4.0"}
 (fact "prints out the code in rainbow"
 
-  (heal/print-rainbox
+  (heal/print-rainbow
    (slurp "test/code/heal_test.clj")))
+
+
+(comment
+  (doseq [f (keys
+             (std.fs/list
+              "../Szncampaigncenter/src-translated/"
+              {:include [".clj$"]
+               :recursive true}))]
+    (try (read-string
+          (str "["
+               ((level/wrap-print-diff level/heal-content)
+                (slurp f))
+               "]"))
+         (h/p f :SUCCESS)
+         (catch Throwable t
+           (h/p f :FAILED)))))
 
 
 (comment

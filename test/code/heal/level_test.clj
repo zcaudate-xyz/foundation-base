@@ -196,6 +196,175 @@
 (fact "prepares the block entries for a file"
   ^:hidden 
 
+  (level/get-errored
+   (str/join-lines
+    ["  (map"
+     "    (fn "
+     "      (return"
+     "       [:% Card"
+     "        [:a ]]"
+     "        [:b]"
+     "        [:c]])))"]))
+  => [{:errors
+    [{:correct? false,
+      :index 0,
+      :pair-id 4,
+      :type :open,
+      :style :paren,
+      :line 3,
+      :col 7,
+      :depth 0,
+      :char "("}
+     {:correct? false,
+      :index 9,
+      :pair-id 4,
+      :type :close,
+      :style :square,
+      :line 7,
+      :col 13,
+      :depth 0,
+      :char "]"}],
+    :lines
+    ["      (return"
+     "       [:% Card"
+     "        [:a ]]"
+     "        [:b]"
+     "        [:c]])))"],
+    :at
+    {:lead {:char "(", :line 3, :col 7, :type :open, :style :paren},
+     :line [3 7],
+     :level 2,
+     :col 7,
+     :last true}}]
+  
+  
+  (level/get-errored
+   (str/join-lines
+    [""
+     "          [:% fg/Input"
+     "           {:onChange (fn [e])]"
+     "            :maxLength 10}]"]))
+
+  
+  (level/get-errored
+   (str/join-lines
+    [""
+     "          [:% fg/Input"
+     "           {:onChange (fn [e])]"
+     "            :maxLength 10}]"]))
+  => [{:errors
+       [{:char "]",
+         :line 3,
+         :col 31,
+         :type :close,
+         :style :square,
+         :index 4,
+         :depth -1,
+         :correct? false}],
+       :lines ["                      (fn [e])]"],
+       :at
+       {:lead {:char "(", :line 3, :col 23, :type :open, :style :paren},
+        :line [3 3],
+        :level 1,
+        :col 23}}]
+  
+  (level/get-errored
+   (str/join-lines
+    [""
+     "          [:% fg/Input"
+     "           {:onChange (fn [e])}"
+     "            :maxLength 10}]"]))
+  [{:errors
+    [{:char "]",
+      :line 4,
+      :col 27,
+      :type :close,
+      :style :square,
+      :index 8,
+      :depth -1,
+      :correct? false}
+     {:correct? false,
+      :index 0,
+      :pair-id 3,
+      :type :open,
+      :style :square,
+      :line 2,
+      :col 11,
+      :depth 0,
+      :char "["}
+     {:correct? false,
+      :index 7,
+      :pair-id 3,
+      :type :close,
+      :style :curly,
+      :line 4,
+      :col 26,
+      :depth 0,
+      :char "}"}],
+    :lines
+    ["          [:% fg/Input"
+     "           {:onChange (fn [e])}"
+     "            :maxLength 10}]"],
+    :at
+    {:lead
+     {:char "[", :line 2, :col 11, :type :open, :style :square},
+     :line [2 4],
+     :level 3,
+     :col 11}}]
+  
+  
+  (level/get-errored
+   (str/join-lines
+    [""
+     "          [:% fg/Input"
+     "           {:placeholder \"e.g., TBP\""
+     "            :value tokenData.symbol"
+     "            :onChange (fn [e] (return (handleChange \"symbol\" (. e.target.value (toUpperCase)))))}"
+     "            :className \"bg-[#0a0a0a] border-[#2d2d2d] text-white\""
+     "            :maxLength 10}]"]))
+  
+  => [{:errors
+       [{:char "]",
+         :line 7,
+         :col 27,
+         :type :close,
+         :style :square,
+         :index 16,
+         :depth -1,
+         :correct? false}
+        {:correct? false,
+         :index 0,
+         :pair-id 7,
+         :type :open,
+         :style :square,
+         :line 2,
+         :col 11,
+         :depth 0,
+         :char "["}
+        {:correct? false,
+         :index 15,
+         :pair-id 7,
+         :type :close,
+         :style :curly,
+         :line 7,
+         :col 26,
+         :depth 0,
+         :char "}"}],
+    :lines
+    ["          [:% fg/Input"
+     "           {:placeholder \"e.g., TBP\""
+     "            :value tokenData.symbol"
+     "            :onChange (fn [e] (return (handleChange \"symbol\" (. e.target.value (toUpperCase)))))}"
+     "            :className \"bg-[#0a0a0a] border-[#2d2d2d] text-white\""
+     "            :maxLength 10}]"],
+    :at
+    {:lead
+     {:char "[", :line 2, :col 11, :type :open, :style :square},
+     :line [2 7],
+     :level 7,
+     :col 11}}]
+  
+  
   (level/group-blocks-prep
    (str/join-lines
     ["(:? ()"

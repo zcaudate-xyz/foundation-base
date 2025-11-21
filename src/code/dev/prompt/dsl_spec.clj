@@ -1,6 +1,7 @@
 (ns code.dev.prompt.dsl-spec
   (:require [std.lib :as h]
             [std.lang :as l]
+            [std.fs :as fs]
             [std.string :as str]
             [std.string.prose :as prose]))
 
@@ -270,6 +271,7 @@
                     {} #_(spec-example-files)))
 
 (comment
+  
   (spit "dsl_spec_baseline.md"
         (create-spec))
 

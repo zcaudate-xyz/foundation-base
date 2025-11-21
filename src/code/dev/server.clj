@@ -1,7 +1,6 @@
 (ns code.dev.server
   (:require [org.httpkit.server :as http]
             [net.http.router :as router]
-            [code.dev.server.pages :as pages]
             [code.dev.server.api-common :as api]
             [code.dev.server.api-task :as api-task]
             [code.dev.server.api-prompt :as api-prompt]

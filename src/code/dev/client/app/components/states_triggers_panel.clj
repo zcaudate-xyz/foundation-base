@@ -58,8 +58,11 @@
         [:div {:className "p-3 bg-purple-950/30 border border-purple-900/50 rounded"}
           [:p {:className "text-xs text-purple-300 mb-1"} "💡 Component States"]
           [:p {:className "text-[10px] text-purple-400/80"}
-            "Define reactive state variables. Use " [:code {:className "bg-purple-900/30 px-1 rounded"} "{state.name}"] " or "
-            [:code {:className "bg-purple-900/30 px-1 rounded"} "$state.name"] " in properties to bind to state values."]]
+            "Define reactive state variables. Use " [:code {:className "bg-purple-900/30 px-1 rounded"}
+                                                     (:- "'{state.name}'")] " or "
+            [:code {:className "bg-purple-900/30 px-1 rounded"}
+             (:- "'$state.name'")]
+           " in properties to bind to state values."]]
 
         [:div
           [:h3 {:className "text-xs text-gray-500 uppercase tracking-wider mb-3"} "Defined States"]
@@ -87,7 +90,7 @@
                                [:% fg/Label {:className "text-[10px] text-gray-500 mb-1 block"} "Default Value"]
                                (:? (== stateDef.type "boolean")
                                    [:select
-                                    {:value (. String stateDef.default)
+                                    {:value (String stateDef.default)
                                      :onChange (fn [e] (return (handleUpdateStateDefault stateName (== e.target.value "true"))))
                                      :className "w-full h-6 bg-[#252525] border border-[#3a3a3a] text-gray-300 text-xs rounded px-2"}
                                     [:option {:value "false"} "false"]

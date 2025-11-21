@@ -212,7 +212,7 @@
                                    (Date.now))})
 
                       (setComponents (fn [prev]
-                                       (var updated [(transduce (map identity) conj [] prev)])
+                                       (var updated [(:.. prev)])
                                        (var parent (findComponentById updated parentId))
                                        (when parent
                                          (. parent.children (push newComponent)))
@@ -257,7 +257,7 @@
 
   (var updateComponentProperty (fn [id property value]
                                  (setComponents (fn [prev]
-                                                  (var updated [(transduce (map identity) conj [] prev)])
+                                                  (var updated [(:.. prev)])
                                                   (var component (findComponentById updated id))
                                                   (when component
                                                     (if (== property "label")
@@ -267,7 +267,7 @@
 
   (var updateComponentInputs (fn [id inputs]
                                (setComponents (fn [prev]
-                                                (var updated [(transduce (map identity) conj [] prev)])
+                                                (var updated [(:.. prev)])
                                                 (var component (findComponentById updated id))
                                                 (when component
                                                   (:= component.inputs inputs))
@@ -275,7 +275,7 @@
 
   (var updateComponentInputValues (fn [id inputValues]
                                     (setComponents (fn [prev]
-                                                     (var updated [(transduce (map identity) conj [] prev)])
+                                                     (var updated [(:.. prev)])
                                                      (var component (findComponentById updated id))
                                                      (when component
                                                        (:= component.inputValues inputValues))
@@ -283,7 +283,7 @@
 
   (var updateComponentStates (fn [id states]
                                (setComponents (fn [prev]
-                                                (var updated [(transduce (map identity) conj [] prev)])
+                                                (var updated [(:.. prev)])
                                                 (var component (findComponentById updated id))
                                                 (when component
                                                   (:= component.states states))
@@ -291,7 +291,7 @@
 
   (var updateComponentTriggers (fn [id triggers]
                                  (setComponents (fn [prev]
-                                                  (var updated [(transduce (map identity) conj [] prev)])
+                                                  (var updated [(:.. prev)])
                                                   (var component (findComponentById updated id))
                                                   (when component
                                                     (:= component.triggers triggers))
@@ -299,7 +299,7 @@
 
   (var updateComponentActions (fn [id actions]
                                 (setComponents (fn [prev]
-                                                 (var updated [(transduce (map identity) conj [] prev)])
+                                                 (var updated [(:.. prev)])
                                                  (var component (findComponentById updated id))
                                                  (when component
                                                    (:= component.actions actions))
@@ -310,7 +310,7 @@
                            (return))
 
                          (setComponents (fn [prev]
-                                          (var updated [(transduce (map identity) conj [] prev)])
+                                          (var updated [(:.. prev)])
                                           (removeComponentById updated id)
                                           (return updated)))
 
@@ -369,7 +369,7 @@
                          (var newComponent (generateNewIds component))
 
                          (setComponents (fn [prev]
-                                          (var updated [(transduce (map identity) conj [] prev)])
+                                          (var updated [(:.. prev)])
                                           (var parent (findComponentById updated "root"))
                                           (when parent
                                             (. parent.children (push newComponent)))

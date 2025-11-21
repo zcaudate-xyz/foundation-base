@@ -138,7 +138,7 @@
                                        (reduced errored)))
                                    nil
                                    children))
-        unclosed-fn      (fn [{:keys [pair-id
+        leftover-fn      (fn [{:keys [pair-id
                                       type]}]
                            (and (not pair-id)
                                 (= type :close)))
@@ -148,15 +148,15 @@
                                            (:col block)))
         interim          (parse/parse snippet)
         interim-errors   (filter (comp not :correct?) interim)
-        unclosed-errors  (if (and
+        leftover-errors  (if (and
                               ;; Always check tailend forms at the right level
                               (not (:last block))    
                               ;; ignore non multiline forms
                               #_(not (apply = (:line block))))
-                           (filter unclosed-fn interim-errors)) 
+                           (filter leftover-fn interim-errors)) 
         
-        other-errors    (remove unclosed-fn interim-errors)
-        all-errors      (vec (concat unclosed-errors
+        other-errors    (remove leftover-fn interim-errors)
+        all-errors      (vec (concat leftover-errors
                                      other-errors))]
     ;; Child errors might be reporting something that is a stylistic issue and 
     ;; not structural, and there are many cases where the indentation could be off
@@ -185,6 +185,28 @@
         blocks     (group-blocks-multi entries)]
     (vec (keep #(get-errored-loop % lines)
                blocks))))
+
+(defn heal-content-complex-edits
+  [info errors]
+  (let [[e1 e2 e3 & more] errors
+        lead (get-in info [:at :lead])]
+    (cond
+
+      ;; if there is a leftover :close delimiter that is the same style as the lead
+      ;; delimiter, then delete the paired :close parameter
+      (and (= (:type e1) :close)
+           (= (:style lead) (:style e1))
+           (= -1 (:depth e1))
+           (= :open (:type e2))
+           (= :close (:type e3)))
+      (core/create-remove-edits [e3])
+      
+      
+      :else
+      (do (h/prf info) 
+          (throw
+           (ex-info "Not Supported"
+                    {:info info}))))))
 
 (defn heal-content-single-pass
   "heals the content in a single pass"
@@ -232,10 +254,7 @@
                               (core/create-mismatch-edits [e1 e2])
                               
                               :else
-                              (do (h/prf info) 
-                                  (throw
-                                   (ex-info "Not Supported"
-                                            {:info info}))))))
+                              (heal-content-complex-edits info errors))))
                         errored)
         new-content  (try (core/update-content content
                                                edits)

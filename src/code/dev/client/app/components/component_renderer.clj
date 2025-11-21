@@ -88,8 +88,8 @@
            :children (. comp.children
                         (map (fn [child] (return (resolveComponentBindings child inputsToUse)))))})))
 
-  (var resolvedComponent (-/resolveComponentBindings component))
-
+  (var resolvedComponent (resolveComponentBindings component))
+  
   (var isSelected (=== component.id selectedComponent))
 
   (var resolvedProperties resolvedComponent.properties)

@@ -315,7 +315,7 @@
                          (setSelectedComponent "root")))
 
   (var findComponentById (fn [components id]
-                           (for [component components]
+                           (for:array [component components]
                              (when (== component.id id)
                                (return component))
                              (var found (findComponentById component.children id))
@@ -409,35 +409,35 @@
           {:onImportComponent (fn [comp] (return (importComponent comp)))
            :onImportAndEdit importAndEditComponent}]]
         [:% fg/TabsContent {:value "theme" :className "flex-1 m-0"}
-         [:% te/ThemeEditor {:theme theme :onThemeChange setTheme}]]]]]
-     [:% fg/ResizableHandle {:className "w-[1px] bg-[#323232]"}]
-     [:% fg/ResizablePanel {:defaultSize 50 :minSize 30}
-      [:% fg/ResizablePanelGroup {:direction "vertical"}
-       [:% fg/ResizablePanel {:defaultSize 70 :minSize 40}
-        [:% vc/ViewportCanvas
-         {:components components
-          :selectedComponent selectedComponent
-          :onSelectComponent setSelectedComponent
-          :onAddComponent addComponent
-          :onMoveComponent moveComponent
-          :viewMode viewMode
-          :theme theme}]]
-       [:% fg/ResizableHandle {:className "h-[1px] bg-[#323232]"}]
-       [:% fg/ResizablePanel {:defaultSize 30 :minSize 15}
-        [:% op/OutlinerPanel
-         {:components components
-          :selectedComponent selectedComponent
-          :onSelectComponent setSelectedComponent
-          :onDeleteComponent deleteComponent
-          :onMoveComponent moveComponent}]]]]
-     [:% fg/ResizableHandle {:className "w-[1px] bg-[#323232]"}]
-     [:% fg/ResizablePanel {:defaultSize 30 :minSize 20 :maxSize 40}
-      [:% pp/PropertiesPanel
-       {:component selectedComponentData
-        :onUpdateProperty updateComponentProperty
-        :onDeleteComponent deleteComponent
-        :onUpdateInputs updateComponentInputs
-        :onUpdateInputValues updateComponentInputValues
-        :onUpdateStates updateComponentStates
-        :onUpdateTriggers updateComponentTriggers
-        :onUpdateActions updateComponentActions}]]]]))
+         [:% te/ThemeEditor {:theme theme :onThemeChange setTheme}]]]]
+      [:% fg/ResizableHandle {:className "w-[1px] bg-[#323232]"}]
+      [:% fg/ResizablePanel {:defaultSize 50 :minSize 30}
+       [:% fg/ResizablePanelGroup {:direction "vertical"}
+        [:% fg/ResizablePanel {:defaultSize 70 :minSize 40}
+         [:% vc/ViewportCanvas
+          {:components components
+           :selectedComponent selectedComponent
+           :onSelectComponent setSelectedComponent
+           :onAddComponent addComponent
+           :onMoveComponent moveComponent
+           :viewMode viewMode
+           :theme theme}]]
+        [:% fg/ResizableHandle {:className "h-[1px] bg-[#323232]"}]
+        [:% fg/ResizablePanel {:defaultSize 30 :minSize 15}
+         [:% op/OutlinerPanel
+          {:components components
+           :selectedComponent selectedComponent
+           :onSelectComponent setSelectedComponent
+           :onDeleteComponent deleteComponent
+           :onMoveComponent moveComponent}]]]]
+      [:% fg/ResizableHandle {:className "w-[1px] bg-[#323232]"}]
+      [:% fg/ResizablePanel {:defaultSize 30 :minSize 20 :maxSize 40}
+       [:% pp/PropertiesPanel
+        {:component selectedComponentData
+         :onUpdateProperty updateComponentProperty
+         :onDeleteComponent deleteComponent
+         :onUpdateInputs updateComponentInputs
+         :onUpdateInputValues updateComponentInputValues
+         :onUpdateStates updateComponentStates
+         :onUpdateTriggers updateComponentTriggers
+         :onUpdateActions updateComponentActions}]]]]]))
