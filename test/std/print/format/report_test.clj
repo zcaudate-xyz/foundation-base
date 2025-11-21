@@ -42,7 +42,21 @@
 
   => [["     hello" "          "]
       ["  :world  " "          "]
-      ["[:a :b :c " " :d]      "]])
+      ["[:a :b :c " " :d]      "]]
+  
+  (lines:row ["hello" :world (res/result {:data [:a :b :c :d :e :f]
+                                          :status :info})]
+             {:padding 0
+              :spacing 1
+              :columns [{:align :right :length 10}
+                        {:align :center :length 10}
+                        {:align :left :length 10}]})
+  => '[("     hello"
+        "          ")
+       ("  :world  "
+        "          ")
+       ("[34m[:a :b :c [0m"
+        "[34m :d :e :f][0m")])
 
 ^{:refer std.print.format.report/report:header :added "3.0"}
 (fact "prints a header for the row"
@@ -57,7 +71,7 @@
 
 ^{:refer std.print.format.report/report:row :added "3.0" :tags #{:print}}
 (fact "prints a row to output"
-
+  
   (report:row ["hello" :world (res/result {:data [:a :b :c :d :e :f]
                                            :status :info})]
               {:padding 0
@@ -65,7 +79,6 @@
                :columns [{:align :right :length 10}
                          {:align :center :length 10}
                          {:align :left :length 10}]})
-
   => "     hello   :world   [34m[:a :b :c [0m\n                      [34m :d :e :f][0m")
 
 ^{:refer std.print.format.report/report:title :added "3.0" :tags #{:print}}

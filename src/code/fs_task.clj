@@ -125,14 +125,14 @@
   ;; To run these examples, load this namespace and then:
 
   ;; List all files recursively (default) in the 'src' directory
-  ;; (list-files "src")
-
+  (list-files "src")
+  
   ;; List files non-recursively
-  ;; (list-files "src" {:recursive false})
-
+  (list-files "src" {:recursive false})
+  
   ;; Touch files (simulated change) in the current directory
-  ;; (touch-files "." {:write false})
-
+  (touch-files "." {:write false})
+  
   ;; Grep for the string "task" in all files under 'src/code'
   ;; (grep-files "src/code" {:query "task"})
   )

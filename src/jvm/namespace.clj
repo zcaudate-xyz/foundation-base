@@ -25,7 +25,7 @@
                        :summary false}}
    :warning   {:output  :data}
    :error     {:output  :data}
-   :item      {:list    (fn [_ _]   (common/ns-list))
+   :item      {:list    (fn [_ _]   (sort (common/ns-list)))
                :pre     (fn [input] (.getName (the-ns input)))
                :post    identity
                :output  identity

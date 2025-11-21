@@ -12,6 +12,8 @@
    :require [[js.react :as r]]})
 
 (defn construct-item
+  "constructs the item"
+  {:added "4.0"}
   [form & [alts? desc?]]
   (let [[alts desc]  (cond (string? alts?)
                            [[] alts?]
@@ -25,6 +27,8 @@
                        alts))}))
 
 (defn construct-alts
+  "constructs alternative forms that result in the same JS string"
+  {:added "4.0"}
   [forms & [desc?]]
   {:op  :alternate
    :desc desc?
@@ -258,6 +262,8 @@
                              {:a 1 :b 2})))]])
 
 (defn create-spec
+  "creates the actual spec"
+  {:added "4.0"}
   []
   (create-spec-main (str/join-lines +meta+)
                     (spec-example-forms)

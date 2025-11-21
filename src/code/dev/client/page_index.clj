@@ -25,6 +25,8 @@
       :app/body    [:% browser-main/BrowserMain]})))
 
 (defn.js main
+  "TODO"
+  {:added "4.0"}
   []
   (r/renderDOMRoot "root" -/AppIndex))
 

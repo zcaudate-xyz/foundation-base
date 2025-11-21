@@ -43,10 +43,10 @@
 (comment
   heal-filenames
   heal-namespaces
-
-  (hael/h)
   
-
+  (heal/heal-directory "hello")
+  
+  
   (heal-code '[code.dev.client.app.components]
              {:write true})
   

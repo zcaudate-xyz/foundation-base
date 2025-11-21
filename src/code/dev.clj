@@ -50,7 +50,7 @@
         (vec))))
 
 (defn to-test-path
-  "ns to test path
+  "converts a given namespace symbol into its corresponding test file path
  
    (to-test-path 'code.dev-test)
    => \"test/code/dev_test.clj\""

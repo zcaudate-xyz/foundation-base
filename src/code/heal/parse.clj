@@ -80,6 +80,8 @@
                       (recur rest-chars line-num (inc col-num) false false false delimiters))))))))
 
 (defn pair-delimiters
+  "pairs the delimiters and annotates whether it's erroring"
+  {:added "4.0"}
   [delimiters]
   (let [{:keys [stack output depth]}
         (reduce (fn [{:keys [stack output depth pair-id index]

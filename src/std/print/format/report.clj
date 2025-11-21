@@ -163,7 +163,7 @@
   {:added "3.0" :tags #{:print}}
   ([row params]
    (->> (lines:row row params)
-        (apply vector)
+        (apply map vector)
         (map (partial str/join " "))
         (str/join "\n"))))
 

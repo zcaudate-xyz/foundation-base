@@ -3,44 +3,69 @@
             [std.lib :as h]
             [std.fs :as fs]))
 
-(defn- process-single-file
-  [file-path opts lookup env]
-  (let [file (fs/file file-path)]
-    {:path file-path
-     :size (.length file)}))
+(defn print-file
+  [path params lookup env]
+  #_(h/prn path key lookup env)
+  {:path path :params params})
 
-(defmethod task/task-defaults :file.process
+(defmethod task/task-defaults :file.internal
   ([_]
-   {:construct {:input   (fn [opts]
-                           (h/prn opts))
+   {:construct {:input   (fn [_] :list)
                 :lookup  (fn [opts env]
-                           (h/prn opts env)
-                           (fs/list "./src/code/dev" {:recursive true
-                                                      :include [".clj$"]}))
-                :env     (fn [opts] (h/prn opts)
-                           {:root "."})}
+                           (let [root-path (fs/path (:root env))]
+                             (->> (fs/list root-path
+                                           env)
+                                  (h/map-keys #(str (fs/relativize root-path %))))))
+                :env     (fn [_] 
+                           {:root "."
+                            :include [fs/file?]})}
     :params    {:print {:item true
                         :result true
                         :summary true}
                 :return :summary}
-    :arglists '([] [root-dir] [root-dir params])
+    :arglists '([] [path] [path params] [path params lookup] [path params lookup env])
     :main      {:arglists '([] [key] [key params] [key params lookup] [key params lookup env])
                 :count 4}
     :item      {:list    (fn [lookup env]
-                           (keys lookup))}
-    :result    {:columns [{:key :path :length 80}
-                          {:key :size :length 10 :align :right}]}
-    :summary   {:aggregate {:total-size [[:size] + 0]}}}))
+                           (sort (keys lookup)))
+                :display (fn [data] (format "%.2f s" (/ (h/time-ms) 1000.0)))}
+    :result    {:keys    {:path :path
+                          :params :params}
+                #_#_:columns [{:key    :key
+                             :align  :left}
+                          {:key    :updated
+                           :align  :left
+                           :length 10
+                           :color  #{:bold}}
+                          {:key    :path
+                           :align  :left
+                           :length 60
+                           :color  #{:green}}]
+                :columns [{:key :path :length 50}
+                          #_{:key :params :length 10 :align :right}]}}))
+
+
 
 (h/definvoke process-files
   "processes all files in a directory"
   {:added "4.0"}
-  [:task {:template :file.process
-          :params {:title "PROCESS FILES"}
-          :main {:fn #'process-single-file}}])
+  [:task {:template :file.internal
+          :params {:title (fn [params env]
+                            (str "PROCESS FILES - " (fs/path (:root env))))}
+          :main {:fn #'print-file}}])
 
+(process-files :all)
 (comment
   (process-files :all)
+  :result    {:keys    {:path :path
+                        :params :params}
+              :columns [{:key    :key
+                         :align  :left}
+                        {:key    :path
+                         :align  :left
+                         :length 60
+                         :color  #{:green}}]}
+  
   )
 
 (comment

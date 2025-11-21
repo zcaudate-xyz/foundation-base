@@ -17,7 +17,8 @@
 (def +reset-color+ "\u001b[0m")
 
 (defn print-rainbow
-  "Prints the code with delimiters colored by nesting depth."
+  "prints out the"
+  {:added "4.0"}
   [content delimiters]
   (let [color-map (->> delimiters
                        (map (fn [delim]
