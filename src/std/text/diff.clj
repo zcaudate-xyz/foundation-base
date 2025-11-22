@@ -194,9 +194,24 @@
    => {:deletes 2, :inserts 2}"
   {:added "3.0"}
   ([deltas]
-   (reduce (fn [out {:keys [label original revised]}]
+   (reduce (fn [out {:keys [original revised]}]
              (-> out
                  (update-in [:deletes] (fnil #(+ % (:count original)) 0))
                  (update-in [:inserts] (fnil #(+ % (:count revised)) 0))))
            {}
            deltas)))
+
+(defn get-lines
+  "creates a summary of the various diffs
+ 
+   (summary (diff \"10\\n11\\n\12\\n13\\n14\"
+                  \"10\\n18\\n\12\\n19\\n14\"))
+   => {:deletes 2, :inserts 2}"
+  {:added "3.0"}
+  ([deltas]
+   (mapv (fn [{:keys [type original revised]}]
+           (case type
+             "CHANGE" [(:position original) (:count original)]
+             "INSERT" ["+" (:position revised)  (:count revised)]
+             "DELETE" ["-" (:position original) (:count original)] ))
+        deltas)))

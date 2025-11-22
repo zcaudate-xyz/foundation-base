@@ -19,6 +19,14 @@
      with-open with-in-str with-precision
      extend extend-protocol extend-type})
 
+(def +defs+
+  '#{fn defn defmacro
+     defn-
+     defmacro.js defn.js def.js def$.js def-.js
+     defmacro.py defn.py def.py def$.py def-.py
+     defmacro.lua defn.lua def.lua def$.lua def-.lua
+     defmacro.pg defn.pg deftable.pg defenum.pg defindex.pg})
+
 (def +pairing+
   '#{case cond-> cond->> some-> some->>
      as-> })
@@ -57,6 +65,10 @@
                  :col-from 0}                
                 
                 (+bindings+ (first form))
+                {:col-from 1
+                 :col-start 2}
+
+                (+defs+ (first form))
                 {:col-from 1
                  :col-start 2}
 

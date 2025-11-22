@@ -195,6 +195,43 @@
                    (reader/throw-reader reader "Unexpected EOF while reading string.")))]
      (str/joinl lines "\n"))))
 
+(comment
+  (defn read-string-data
+  "reads string data from the reader
+ 
+   (read-string-data (reader/create \"\\\"hello\\\"\"))
+   => \"hello\""
+  {:added "3.0"}
+  ([reader]
+   (let [reader (reader/step-char reader) ; Consume opening quote
+         sb (StringBuilder.)]
+     (loop [escape? false]
+       (if-let [ch (reader/read-char reader)]
+         (cond
+           escape?
+           (let [ch* (case ch
+                       \t \tab
+                       \r \return
+                       \n \newline
+                       \b \backspace
+                       \f \formfeed
+                       ch)]
+             (.append sb ch*)
+             (recur false))
+
+           (= ch \\)
+           (recur true)
+
+           (= ch \")
+           (str sb)
+
+           :else
+           (do (.append sb ch)
+               (recur false)))
+         (reader/throw-reader reader "Unexpected EOF while reading string."))))))
+
+  )
+
 (defmethod -parse :token
   ([reader]
    (parse-token reader)))

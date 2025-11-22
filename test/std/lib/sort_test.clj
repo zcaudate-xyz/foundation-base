@@ -48,3 +48,24 @@
   (topological-sort {:a #{:b},
                      :b #{:a}})
   => (throws))
+
+^{:refer std.lib.sort/topological-sort-order-by-deps :added "4.0"}
+(fact "sorts topological sort by dependency size"
+  ^:hidden
+  
+  (let [g {:a #{:b :c}
+           :b #{:d :e}
+           :c #{:e :f}
+           :d #{}
+           :e #{:f}
+           :f nil}
+        sorted (topological-sort g)]
+    (topological-sort-order-by-deps g sorted))
+  => [:d :f :e :b :c :a]
+
+  (let [g {:a #{:c}
+           :b #{:c}
+           :c #{}}
+        sorted (topological-sort g)]
+    (topological-sort-order-by-deps g sorted))
+  => [:c :a :b])

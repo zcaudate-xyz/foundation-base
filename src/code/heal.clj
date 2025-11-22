@@ -24,13 +24,13 @@
   [:task {:construct {:input    (fn [_] *ns*)
                       :lookup   (fn [_ project] (project/file-lookup project))
                       :env      (fn [_] (project/project))}
-          :template :code
+          :template :code.transform
           :params   {:title "Heal Code"
                      :parallel true
                      :no-analysis true
                      :print {:function true :result true :summary true}}
           :main     {:fn #'heal-code-single}
-          :result   {:columns (template/code-default-columns :changed)}}])
+          :result template/base-transform-result}])
 
 (defn print-rainbow
   "prints out the code in rainbow"

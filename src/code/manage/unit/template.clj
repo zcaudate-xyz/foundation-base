@@ -146,13 +146,18 @@
              :format "(%s)"
              :length 8
              :align  :center
+             :color  #{:bold}}
+            {:key    :verified
+             :length 20
+             :align  :left
              :color  #{:bold}}])))
 
 (def base-transform-result
   {:columns (code-transform-columns nil #{})
-   :ignore (fn [{:keys [deletes inserts] :as m}]
-             (zero? (+ (or inserts 0)
-                       (or deletes 0))))
+   :ignore (fn [{:keys [deletes inserts verify] :as m}]
+             (and  (true? verify)
+                   (zero? (+ (or inserts 0)
+                             (or deletes 0)))))
    :keys {:count (fn [{:keys [deletes inserts] :as m}]
                    (+ (or inserts 0)
                       (or deletes 0)))}})
@@ -166,14 +171,15 @@
                        :summary  true}}
    :arglists '([] [ns] [ns params] [ns params project] [ns params lookup project])
    :main      {:count 4}
-   :item      {:list source-namespaces
+   :item      {:list    source-namespaces
                :pre      project/sym-name
                :display (empty-result :changed :info :no-change)}
    :result    {:ignore empty?
                :keys {:count count
                       :inserts   :inserts
                       :deletes   :deletes
-                      :updated   :updated}
+                      :updated   :updated
+                      :verified   :verified}
                :columns (code-transform-columns #{:bold :cyan})}
    :summary  {:aggregate {:deletes   [:deletes + 0]
                           :inserts   [:inserts + 0]

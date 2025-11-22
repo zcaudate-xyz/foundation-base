@@ -102,7 +102,7 @@
                g* (reduce #(update-in % [n] set/difference #{%2}) g m)]
            (recur g* (cons n l) (set/union s* (set/intersection (topological-top g*) m)))))))
 
-(defn sort-by-dependency-size
+(defn topological-sort-order-by-deps
   "Refines a topologically sorted list by sorting nodes at each dependency level by their dependency count.
   Takes the dependency graph and a pre-sorted list.
   A secondary sort is done on the node key to ensure a stable ordering."

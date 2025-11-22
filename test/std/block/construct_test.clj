@@ -177,9 +177,12 @@
    (base/block-info
     (parse/parse-root ""))]
   => [0 {:type :collection, :tag :root, :string "", :height 0, :width 0}]  
+
+  (base/block-info
+   (parse/parse-string "\"\n\""))
   
   [(max-width
-   (parse/parse-string "\"\n\""))
+    (parse/parse-string "\"\n\""))
    (base/block-info
     (parse/parse-string "\"\n\""))]
   => [1 {:type :token, :tag :string, :string "\"\n\"", :height 1, :width 1}]

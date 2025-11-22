@@ -115,6 +115,7 @@
           :result template/base-transform-result}])
 
 (comment
+  (into {} transform-code)
   (transform-code ['code.framework]
                   {:transform #(str % "\n\n\n\nhello world")
                    :print {:summary true :result true :item true :function true}}))
@@ -497,8 +498,8 @@
 (comment
   (refactor-code '[hara]
                  {:edits [fn-format/fn:list-forms]
-                  :write true})
-
+                  #_#_:write true})
+  
   (refactor-code '[hara]
                  {:edits [fn-format/fn:defmethod-forms]
                   :write true}))
@@ -542,7 +543,7 @@
                              :function true}}
             :main   {:fn #'var/replace-usages}
             :result (template/code-transform-result :changed)}])
-
+  
   (definvoke replace-refers
     "TODO"
     {:added "3.0"}
@@ -552,7 +553,7 @@
                              :function true}}
             :main   {:fn #'var/replace-refers}
             :result (template/code-transform-result :changed)}])
-
+  
   (definvoke replace-errors
     "TODO"
     {:added "3.0"}
@@ -562,7 +563,7 @@
                              :function true}}
             :main   {:fn #'var/replace-errors}
             :result (template/code-transform-result :changed)}])
-
+  
   (definvoke list-ns-unused
     "TODO"
     {:added "3.0"}
@@ -571,7 +572,7 @@
                      :print {:item true}}
             :item {:list template/source-namespaces}
             :main   {:fn #'var/list-ns-unused}}])
-
+  
   (definvoke remove-ns-unused
     "TODO"
     {:added "3.0"}

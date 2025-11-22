@@ -178,7 +178,10 @@
      :deps ns-deps}))
 
 
+
 (comment
+  
+
   (file-transform :all
                   {:transform level/heal-content
                    :verify {:read-string read-string
@@ -191,7 +194,7 @@
                    :target  "src-translated/"
                    :include [".clj$"]
                    :recursive true})
-
+  
   (def +deps+
     (file-process :all
                   {:process get-deps
@@ -203,7 +206,44 @@
                    :target  "src-translated/"
                    :include [".clj$"]
                    :recursive true}))
+  
+  (defn get-load-order
+    [input-deps]
+    (let [all-deps   (apply clojure.set/union
+                            (map :deps (vals input-deps)))
+          lu-ns      (h/map-vals :ns input-deps)
+          lu-path    (h/transpose lu-ns)
+          load-deps  (set (keys lu-path))
+          sys-deps   (clojure.set/difference
+                      all-deps load-deps)
+          mdeps      (h/map-entries
+                      (fn [[path {:keys [ns deps]}]]
+                        [ns (clojure.set/difference
+                             deps sys-deps)])
+                      input-deps)
+          ordered    (h/topological-sort-order-by-deps
+                      mdeps
+                      (h/topological-sort mdeps))]
+      (mapv lu-path ordered)))
 
+  (def +loaded+
+    (doall
+     (for [f (get-load-order +deps+)]
+       (let [s (slurp (fs/path "../Szncampaigncenter/"
+                               "src-translated/"
+                               f))]
+         (try
+           [f (load-string s)]
+           (catch Throwable t
+             [f :failed]))))))
+  
+
+  [(count +loaded+)
+   (count (filter (comp keyword? second) +loaded+))]
+
+  [49 21]
+  [49 21]
+  
   (def all-deps
     (apply clojure.set/union
            (map :deps (vals +deps+))))
@@ -222,7 +262,7 @@
             deps other-deps)])
      +deps+))
 
-  (std.lib.sort/sort-by-dependency-size
+  (h/topological-sort-order-by-deps
    recovered-deps
    (h/topological-sort recovered-deps))
   
@@ -380,6 +420,34 @@
   
   (pr-str (s/layout "\"hello\""))
   )
+
+(comment
+
+
+  (code.manage/refactor-code
+   :all
+   {:title "HEALING"
+    :transform identity}
+   {:source-paths ["src-translated"]
+    :root "../Szncampaigncenter/"})
+
+  (code.manage/refactor-code
+   :all
+   {:title "HEALING"
+    :transform code.heal/heal
+    :no-analysis true}
+   {:source-paths ["src-translated"]
+    :root "../Szncampaigncenter/"})
+
+  (code.manage/refactor-code
+   :all
+   {:title "HEALING"
+    :transform 
+    :no-analysis true}
+   {:source-paths ["src-translated"]
+    :root "../Szncampaigncenter/"})
+  
+ )
 
 (comment
   (fs/list (fs/path "../Szncampaigncenter/src-dsl/"

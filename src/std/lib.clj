@@ -228,6 +228,7 @@
 
              sort/hierarchical-sort
              sort/topological-sort
+             sort/topological-sort-order-by-deps
 
              template/$
              template/deftemplate

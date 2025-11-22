@@ -18,12 +18,28 @@
 
   (base/block-info (-parse (reader/create ":a")))
   => {:type :token, :tag :keyword, :string ":a", :height 0, :width 2}
-
+  
+  (base/block-info (-parse (reader/create "\"\\\\n\"")))
+  => {:type :token, :tag :string, :string "\"\\\\n\"", :height 0, :width 5}
+  
   (base/block-info (-parse (reader/create "\"\\n\"")))
   => {:type :token, :tag :string, :string "\"\\n\"", :height 0, :width 4}
 
   (base/block-info (-parse (reader/create "\"\n\"")))
-  => {:type :token, :tag :string, :string "\"\n\"", :height 1, :width 1})
+  => {:type :token, :tag :string, :string "\"\n\"", :height 1, :width 1}
+
+
+  (base/block-info (-parse (reader/create (slurp "test-data/std.block/cases/001-newlines.example"))))
+  => {:type :void, :tag :linebreak, :string "\n", :height 1, :width 0}
+
+  (base/block-info (-parse (reader/create (slurp "test-data/std.block/cases/002-string-rep.example"))))
+  => {:type :token, :tag :string, :string "\"\n\n\"", :height 2, :width 1}
+
+  (base/block-info (-parse (reader/create (slurp "test-data/std.block/cases/003-newlines-printed.example"))))
+  => {:type :token, :tag :string, :string "\"\\n\"", :height 0, :width 4}
+  
+  (base/block-info (-parse (reader/create (slurp "test-data/std.block/cases/004-newline-with.example"))))
+  => {:type :token, :tag :string, :string "\"\\n\n\"", :height 1, :width 1})
 
 ^{:refer std.block.parse/parse-void :added "3.0"}
 (fact "reads a void block from reader"
@@ -79,9 +95,24 @@
 
 ^{:refer std.block.parse/read-string-data :added "3.0"}
 (fact "reads string data from the reader"
-
+  
   (read-string-data (reader/create "\"hello\""))
-  => "hello")
+  => "hello"
+  
+  (read-string-data (reader/create "\"\\\"hello\\\"\""))
+  => "\\\"hello\\\""
+  
+  (read-string-data (reader/create (slurp "test-data/std.block/cases/001-newlines.example")))
+  => (throws)
+
+  (read-string-data (reader/create (slurp "test-data/std.block/cases/002-string-rep.example")))
+  => "\n\n"
+
+  (read-string-data (reader/create (slurp "test-data/std.block/cases/003-newlines-printed.example")))
+  => "\\n"
+  
+  (read-string-data (reader/create (slurp "test-data/std.block/cases/004-newline-with.example")))
+  => "\\n\n")
 
 ^{:refer std.block.parse/eof-block? :added "3.0"}
 (fact "checks if block is of tag :eof"

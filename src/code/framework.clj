@@ -298,7 +298,7 @@
                  :updated false
                  :path any})"
   {:added "3.0"}
-  ([ns {:keys [write print skip transform full no-analysis] :as params} lookup {:keys [root] :as project}]
+  ([ns {:keys [write print skip transform verify full no-analysis] :as params} lookup {:keys [root] :as project}]
    (cond skip
          (let [path  (lookup ns)
                text  (if (fs/exists? path) "" (slurp path))]
@@ -314,18 +314,34 @@
                                                      (analyse ns params lookup project))]
                                      ["" {}])
                revised  (transform original)
-               deltas   (text/deltas ns analysis original revised)
+               verified   (or (first (keep
+                                      (fn [[k f]]
+                                        (try
+                                          (f revised)
+                                          nil
+                                          (catch Throwable t
+                                            (h/prn t)
+                                            [k false])))
+                                      verify))
+                              true)
+               deltas   (if no-analysis
+                          (text.diff/diff original revised)
+                          (text/deltas ns analysis original revised))
                path     (str (fs/relativize root path))
                updated  (when (and write (seq deltas))
-                          (spit path revised)
+                          (spit (fs/path root path) revised)
                           true)
                _        (when (and (:function print) (seq deltas))
                           (h/local :print (str "\n" (ansi/style path #{:bold :blue :underline}) "\n\n"))
                           (h/local :print (text.diff/->string deltas) "\n"))]
-           (cond-> (text/summarise-deltas deltas)
+           (cond-> (if no-analysis
+                     (assoc (text.diff/summary deltas)
+                            :changed (text.diff/get-lines deltas))
+                     (text/summarise-deltas deltas))
              full  (assoc :deltas deltas)
              :then (assoc :updated (boolean updated)
-                          :path (str (fs/relativize root path))))))))
+                          :verified verified
+                          :path (str path)))))))
 
 (defn locate-code
   "finds code base upon a query"
