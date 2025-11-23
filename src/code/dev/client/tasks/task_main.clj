@@ -12,7 +12,8 @@
              [code.dev.client.tasks.task-translate-js :as task-translate-js]
              [code.dev.client.tasks.task-translate-html :as task-translate-html]
              [code.dev.client.tasks.task-translate-jsxc :as task-translate-jsxc]
-             [code.dev.client.tasks.task-translate-plpgsql :as task-translate-plpgsql]]})
+             [code.dev.client.tasks.task-translate-plpgsql :as task-translate-plpgsql]
+             [code.dev.client.tasks.task-browser :as task-browser]]})
 
 (defn.js TaskMain
   [#{context}]
@@ -36,4 +37,6 @@
               {:title "Ui"
                :content task-translate-jsxc/TaskTranslateJsxComponent}
               {:title "Plpgsql"
-               :content task-translate-plpgsql/TaskTranslatePlpgsql}]}]]))
+               :content task-translate-plpgsql/TaskTranslatePlpgsql}
+              {:title "Browser"
+               :content task-browser/TaskBrowser}]}]]))

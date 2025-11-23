@@ -1,6 +1,6 @@
 (ns code.heal.parse
-  (:use [std.lib :as h]
-        [std.string :as str]))
+  (:require [std.lib :as h]
+            [std.string :as str]))
 
 (def lu-close
   {"(" ")"
