@@ -28,7 +28,7 @@
            (ansi/style (format "  %s%s" line (or (rel path) "<current>")) #{:bold})
            (if name (str "\n   " (ansi/white "Refer") "  " (ansi/style name #{:bold})) "")
            (if desc (str "\n    " (ansi/white "Info") "  \"" desc "" \") "")
-           (str "\n    " (ansi/white "Form") "  " form)
+           (str "\n    " (ansi/white "Expr") "  " form)
            (str "\n   " (ansi/white "Check") "  " check))))))
 
 (defn print-failure
@@ -44,14 +44,14 @@
            (ansi/style (format "  %s%s" line (or (rel path) "<current>")) #{:bold})
            (if name (str "\n   " (ansi/white "Refer") "  " (ansi/style name #{:bold})) "")
            (if desc (str "\n    " (ansi/white "Info") "  \"" desc "" \") "")
-           (str "\n    " (ansi/white "Form") "  " bform)
+           (str "\n    " (ansi/white "Expr") "  " bform)
            (if compare
              (str "\n   " (ansi/white "Compare") "  \n"
                   (str/indent (pretty/pprint-str compare)
                               4))
              (str
               (str "\n   " (ansi/white "Check") "  " bcheck)
-              (str "\n  " (ansi/white "Actual") "  " (if (coll? actual)
+              (str "\n    " (ansi/white "Eval") "  " (if (coll? actual)
                                                        (pretty/pprint-str actual)
                                                        actual))))
            (if pattern? (str "\n " (ansi/white "Pattern") "  " (ansi/blue (str form " : " check))))
@@ -72,7 +72,7 @@
            (ansi/style (format "  %s%s" line (or (rel path) "<current>")) #{:bold})
            (if name (str "\n   " (ansi/white "Refer") "  " (ansi/style name #{:bold})) "")
            (if desc (str "\n    " (ansi/white "Info") "  \"" desc "" \") "")
-           (str "\n    " (ansi/white "Form") "  " bform)
+           (str "\n    " (ansi/white "Expr") "  " bform)
            (if (not= bform form) (str " :: " form))
            (if pattern? (str "\n " (ansi/white "Pattern") "  " (ansi/blue (str form))))
            (if original (str "\n  " (ansi/white "Linked") "  " (ansi/blue (format "L:%d,%d"
