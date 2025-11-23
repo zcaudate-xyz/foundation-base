@@ -28,7 +28,7 @@
            (ansi/style (format "  %s%s" line (or (rel path) "<current>")) #{:bold})
            (if name (str "\n   " (ansi/white "Refer") "  " (ansi/style name #{:bold})) "")
            (if desc (str "\n    " (ansi/white "Info") "  \"" desc "" \") "")
-           (str "\n    " (ansi/white "Form") "  " form)
+           (str "\n    " (ansi/white "Expr") "  " form)
            (str "\n   " (ansi/white "Check") "  " check))))))
 
 (defn print-failure
@@ -44,7 +44,7 @@
            (ansi/style (format "  %s%s" line (or (rel path) "<current>")) #{:bold})
            (if name (str "\n   " (ansi/white "Refer") "  " (ansi/style name #{:bold})) "")
            (if desc (str "\n    " (ansi/white "Info") "  \"" desc "" \") "")
-           (str "\n    " (ansi/white "Form") "  " bform)
+           (str "\n    " (ansi/white "Expr") "  " bform)
            (if compare
              (str "\n   " (ansi/white "Compare") "  \n"
                   (str/indent (pretty/pprint-str compare)
@@ -72,7 +72,7 @@
            (ansi/style (format "  %s%s" line (or (rel path) "<current>")) #{:bold})
            (if name (str "\n   " (ansi/white "Refer") "  " (ansi/style name #{:bold})) "")
            (if desc (str "\n    " (ansi/white "Info") "  \"" desc "" \") "")
-           (str "\n    " (ansi/white "Form") "  " bform)
+           (str "\n    " (ansi/white "Expr") "  " bform)
            (str "\n   " (ansi/white "Actual") "  " (if (coll? actual)
                                                      (pretty/pprint-str actual)
                                                      actual))
