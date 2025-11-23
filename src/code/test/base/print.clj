@@ -28,7 +28,7 @@
            (ansi/style (format "  %s%s" line (or (rel path) "<current>")) #{:bold})
            (if name (str "\n   " (ansi/white "Refer") "  " (ansi/style name #{:bold})) "")
            (if desc (str "\n    " (ansi/white "Info") "  \"" desc "" \") "")
-           (str "\n    " (ansi/white "Expr") "  " form)
+           (str "\n    " (ansi/white "Form") "  " form)
            (str "\n   " (ansi/white "Check") "  " check))))))
 
 (defn print-failure
@@ -44,7 +44,7 @@
            (ansi/style (format "  %s%s" line (or (rel path) "<current>")) #{:bold})
            (if name (str "\n   " (ansi/white "Refer") "  " (ansi/style name #{:bold})) "")
            (if desc (str "\n    " (ansi/white "Info") "  \"" desc "" \") "")
-           (str "\n    " (ansi/white "Expr") "  " bform)
+           (str "\n    " (ansi/white "Form") "  " bform)
            (if compare
              (str "\n   " (ansi/white "Compare") "  \n"
                   (str/indent (pretty/pprint-str compare)
@@ -63,7 +63,7 @@
 (defn print-thrown
   "outputs the description for a form that throws an exception"
   {:added "3.0"}
-  ([{:keys [path name ns line desc form replace original actual] :as summary}]
+  ([{:keys [path name ns line desc form replace original] :as summary}]
    (let [line (if line (str "L:" line " @ ") "")
          bform (walk/postwalk-replace replace form)
          pattern? (not= bform form)]
@@ -72,10 +72,7 @@
            (ansi/style (format "  %s%s" line (or (rel path) "<current>")) #{:bold})
            (if name (str "\n   " (ansi/white "Refer") "  " (ansi/style name #{:bold})) "")
            (if desc (str "\n    " (ansi/white "Info") "  \"" desc "" \") "")
-           (str "\n    " (ansi/white "Expr") "  " bform)
-           (str "\n   " (ansi/white "Actual") "  " (if (coll? actual)
-                                                     (pretty/pprint-str actual)
-                                                     actual))
+           (str "\n    " (ansi/white "Form") "  " bform)
            (if (not= bform form) (str " :: " form))
            (if pattern? (str "\n " (ansi/white "Pattern") "  " (ansi/blue (str form))))
            (if original (str "\n  " (ansi/white "Linked") "  " (ansi/blue (format "L:%d,%d"
