@@ -1,4 +1,4 @@
-(ns scratch.contains-test-2
+(ns demo.contains-test-2
   (:use code.test))
 
 (fact "Verify contains output on failure with nested structure"
