@@ -120,9 +120,9 @@
   {:added "4.0"}
   [lines [start end] start-col & [end-col]]
   #_(h/prn {:start start
-          :end end
-          :start-col start-col
-          :end-col end-col})
+            :end end
+            :start-col start-col
+            :end-col end-col})
   (cond (= start end)
         (let [line (str (str/spaces (dec start-col))
                         (-> (get lines (dec start))
@@ -154,21 +154,18 @@
   [block lines leftover-errors]
   (let [{:keys [line col]
          :as error} (first leftover-errors)
-        row-offset  (:line (:lead block))
-        
+        row-offset  (:line (:lead block))        
         args   [[row-offset
                  (+ row-offset
                     (dec line))]
                 (:col block)
-                (dec col)]
-        
+                (dec col)]        
         #_#_#_#_#_#_
         _ (h/prn args)
         _ (h/prn (dissoc block :children))
         _ (h/prn error)
         snippet       (str/join-lines
-                       (apply get-block-lines lines args))
-        #_#__             (h/p snippet)]
+                       (apply get-block-lines lines args))]
     (try
       (let [forms (read-string (str "[" snippet "]"))]
         (if (and (:last block)
@@ -177,57 +174,6 @@
           false))
          (catch Throwable t
            true))))
-
-(comment
-#_  (get-errored
-   (slurp "test-data/code.heal/cases/005_example.block"))
-  
-  (get-errored
-   (str/join-lines
-    [""
-     "          [:% fg/Input"
-     "           {:onChange (fn [e])]"
-     "            :maxLength 10}]"]))
-  => [{:errors
-       [{:char "]",
-         :line 3,
-         :col 31,
-         :type :close,
-         :style :square,
-         :index 4,
-         :depth -1,
-         :correct? false}],
-       :lines ["                      (fn [e])]"],
-       :at
-       {:lead {:char "(", :line 3, :col 23, :type :open, :style :paren},
-        :line [3 3],
-        :level 1,
-        :col 23}}]
-  (get-errored
-   (str/join-lines
-    [""
-     "           [{:placeholder \"e.g., TBP\""
-     "             :value tokenData.symbol"
-     "             :onChange (fn [e] (return (handleChange \"symbol\" (. e.target.value (toUpperCase)))))}"
-     "             :className \"bg-[#0a0a0a] border-[#2d2d2d] text-white\""
-     "             :maxLength 10}]"]))
-  => [{:errors
-       [{:char "}",
-         :line 4,
-         :col 98,
-         :type :close,
-         :style :curly,
-         :index 12,
-         :depth -1,
-         :correct? false}],
-       :lines
-       ["                       (fn [e] (return (handleChange \"symbol\" (. e.target.value (toUpperCase)))))}"],
-       :at
-       {:lead {:char "(", :line 4, :col 24, :type :open, :style :paren},
-        :line [4 4],
-        :level 5,
-        :col 24,
-        :last true}}])
 
 (defn get-errored-loop
   "runs the check block loop"
@@ -267,7 +213,7 @@
         #_#_
         _                (h/prf {:is-suspect is-suspect
                                  :child child-error
-                                 #_#_:block   (dissoc block :children)
+                                 :block   (dissoc block :children)
                                  #_#_:interim interim-errors
                                  :leftover  leftover-errors
                                  :other  other-errors
@@ -279,56 +225,11 @@
     ;; destroy the structure by adding unnecessary and damaging parens to the body
     (if is-suspect
       (or child-error block-error)
-      block-error)))
-
-(comment
-  (defn get-errored-loop
-    "runs the check block loop"
-    {:added "4.0"}
-    [block lines]
-    (let [{:keys [children]} block
-          child-error      (if (seq children)
-                             (reduce (fn [_ child]
-                                       (if-let [errored (get-errored-loop child lines)]
-                                         (reduced errored)))
-                                     nil
-                                     children))
-          leftover-fn      (fn [{:keys [pair-id
-                                        type]}]
-                             (and (not pair-id)
-                                  (= type :close)))
-          snippet          (str/join-lines
-                            (get-block-lines lines
-                                             (:line block)
-                                             (:col block)))
-          interim          (parse/parse snippet)
-          interim-errors   (filter (comp not :correct?) interim)
-          
-          leftover-errors  (if (and
-                                ;; Always check tailend forms at the right level
-                                (not (:last block))    
-                                ;; ignore non multiline forms
-                                #_(not (apply = (:line block))))
-                             (filter leftover-fn interim-errors)) 
-          
-          other-errors    (remove leftover-fn interim-errors)
-          all-errors      (vec (concat leftover-errors
-                                       other-errors))
-
-          _                (h/prn snippet)
-          _                (h/prn {:interim interim-errors
-                                   :leftover  leftover-errors
-                                   :other  other-errors})]
-      ;; Child errors might be reporting something that is a stylistic issue and 
-      ;; not structural, and there are many cases where the indentation could be off
-      ;; checking right up to the top level form to see if the lower level error
-      ;; acually affects the top level form is super important to not prematurely
-      ;; destroy the structure by adding unnecessary and damaging parens to the body
-      (when (not-empty all-errors)
-        (or child-error
-            {:errors (mapv #(update % :line + (dec (first (:line block)))) all-errors)
-             :lines  (str/split-lines snippet)
-             :at     (dissoc block :children)})))))
+      (if (and child-error
+               (<= (count (:errors child-error))
+                   (count (:errors block-error))))
+        child-error
+        block-error))))
 
 (defn get-errored-raw
   "helper function for get-errored"

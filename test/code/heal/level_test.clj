@@ -150,24 +150,25 @@
                ["(:? ()"
                 "    ())"
                 "    nil {})"]))))
-  => [{:lead {:char "(", :line 1, :col 1, :type :open, :style :paren},
-       :line [1 3],
-       :level 1,
-       :col 1,
-       :children
-       [{:lead {:char "(", :line 1, :col 5, :type :open, :style :paren},
-         :line [1 1],
-         :level 0,
-         :col 5}
-        {:lead {:char "(", :line 2, :col 5, :type :open, :style :paren},
-         :line [2 2],
-         :level 0,
-         :col 5}
-        {:lead {:char "{", :line 3, :col 9, :type :open, :style :curly},
-         :line [3 3],
-         :level 0,
-         :col 9,
-         :last true}]}])
+  [{:lead {:char "(", :line 1, :col 1, :type :open, :style :paren},
+    :line [1 3],
+    :level 1,
+    :last true
+    :col 1,
+    :children
+    [{:lead {:char "(", :line 1, :col 5, :type :open, :style :paren},
+      :line [1 1],
+      :level 0,
+      :col 5}
+     {:lead {:char "(", :line 2, :col 5, :type :open, :style :paren},
+      :line [2 2],
+      :level 0,
+      :col 5}
+     {:lead {:char "{", :line 3, :col 9, :type :open, :style :curly},
+      :line [3 3],
+      :level 0,
+      :col 9,
+      :last true}]}])
 
 
 ^{:refer code.heal.level/group-blocks-prep-entries :added "4.0"}
@@ -224,13 +225,14 @@
        :children
        [{:lead {:char "(", :line 1, :col 4, :type :open, :style :paren},
          :line [1 1],
-      :level 0,
+         :level 0,
          :col 4}
         {:lead {:char "{", :line 2, :col 3, :type :open, :style :curly},
          :line [2 2],
          :level 0,
          :col 3,
-         :last true}]}]
+         :last true}],
+       :last true}]
   
   (level/group-blocks
    (str/join-lines
@@ -252,7 +254,8 @@
          {:char "(", :line 2, :col 5, :type :open, :style :paren},
          :line [2 2],
          :level 0,
-         :col 5}]}]
+         :col 5}],
+       :last true}]
 
   
   (level/group-blocks
@@ -261,32 +264,35 @@
     [:div {:className \"mb-2\"}
      [:a]]
     nil)")
-  => [{:lead {:char "(", :line 2, :col 1, :type :open, :style :paren},
-    :line [2 5],
-    :level 2,
-    :col 1,
-    :children
-    [{:lead {:char "(", :line 2, :col 5, :type :open, :style :paren},
-      :line [2 2],
-      :level 0,
-      :col 5}
-     {:lead
-      {:char "[", :line 3, :col 5, :type :open, :style :square},
-      :line [3 4],
-      :level 1,
-      :col 5,
-      :children
-      [{:lead
-        {:char "{", :line 3, :col 11, :type :open, :style :curly},
-        :line [3 3],
-        :level 0,
-        :col 11}
-       {:lead
-        {:char "[", :line 4, :col 6, :type :open, :style :square},
-        :line [4 4],
-        :level 0,
-        :col 6,
-        :last true}]}]}]
+  => [{:lead
+       {:char "(", :line 2, :col 1, :type :open, :style :paren},
+       :line [2 5],
+       :level 2,
+       :col 1,
+       :children
+       [{:lead
+         {:char "(", :line 2, :col 5, :type :open, :style :paren},
+         :line [2 2],
+         :level 0,
+         :col 5}
+        {:lead
+         {:char "[", :line 3, :col 5, :type :open, :style :square},
+         :line [3 4],
+         :level 1,
+         :col 5,
+         :children
+         [{:lead
+           {:char "{", :line 3, :col 11, :type :open, :style :curly},
+           :line [3 3],
+           :level 0,
+           :col 11}
+          {:lead
+           {:char "[", :line 4, :col 6, :type :open, :style :square},
+           :line [4 4],
+           :level 0,
+           :col 6,
+           :last true}]}],
+       :last true}]
   
   (level/group-blocks
    (str/join-lines
@@ -294,9 +300,6 @@
           (str/split-lines
            (slurp "test-data/code.heal/cases/005_example.block")))))
   => vector?
-
-
-  
 
   (level/group-blocks
    (str/join-lines
@@ -353,8 +356,8 @@
         :level 0,
         :col 8,
         :last true}],
-      :last true}]}]
-  )
+      :last true}],
+    :last true}])
 
 ^{:refer code.heal.level/get-block-lines :added "4.0"}
 (fact "gets the block lines"
@@ -568,8 +571,6 @@
 (fact "checks content for irregular blocks"
   ^:hidden
 
-
-  
   (level/get-errored
    (str/join-lines
     ["         [:div"
@@ -637,15 +638,16 @@
          :col 16,
          :type :close,
          :style :paren,
-         :index 4,
+         :index 2,
          :depth -1,
          :correct? false}],
-       :lines ["    (+ 1) (+ 2))"],
+       :lines ["          (+ 2))"],
        :at
-       {:lead {:char "(", :line 2, :col 5, :type :open, :style :paren},
+       {:lead {:char "(", :line 2, :col 11, :type :open, :style :paren},
         :line [2 2],
-        :level 1,
-        :col 5}}]
+        :level 0,
+        :col 11,
+        :last true}}]
   
   
   (level/get-errored
@@ -676,20 +678,21 @@
      "    (+ 1 2) (+ 23 4))"
      "    nil {})"]))
   => [{:errors
-    [{:char ")",
-      :line 2,
-      :col 21,
-      :type :close,
-      :style :paren,
-      :index 4,
-      :depth -1,
-      :correct? false}],
-    :lines ["    (+ 1 2) (+ 23 4))"],
-    :at
-    {:lead {:char "(", :line 2, :col 5, :type :open, :style :paren},
-     :line [2 2],
-     :level 1,
-     :col 5}}]
+       [{:char ")",
+         :line 2,
+         :col 21,
+         :type :close,
+         :style :paren,
+         :index 2,
+         :depth -1,
+         :correct? false}],
+       :lines ["            (+ 23 4))"],
+       :at
+       {:lead {:char "(", :line 2, :col 13, :type :open, :style :paren},
+        :line [2 2],
+        :level 0,
+        :col 13,
+        :last true}}]
   
   (level/get-errored
    (str/join-lines
@@ -697,7 +700,31 @@
      "    {(stateName) (Object.assign {} (. component.states [stateName])"
      "       {:description description})}"]))
   => []
-  
+
+  (level/get-errored
+   (str/join-lines
+    ["(:? ()"
+     "    ())"
+     "    nil {})"]))
+  => [{:errors
+    [{:char ")",
+      :line 2,
+      :col 7,
+      :type :close,
+      :style :paren,
+      :index 2,
+      :depth -1,
+      :correct? false}],
+    :lines ["    ())"],
+    :at
+    {:lead {:char "(", :line 2, :col 5, :type :open, :style :paren},
+     :line [2 2],
+     :level 0,
+     :col 5}}])
+
+^{:refer code.heal.level/get-errored.more :added "4.0"}
+(fact "get errored more cases"
+
   (level/get-errored
    (slurp "test-data/code.heal/cases/005_example.block"))
   => [{:errors
@@ -753,21 +780,15 @@
         :last true}}
       {:errors
        [{:char ")",
-         :line 404,
-         :col 41,
+         :line 403,
+         :col 89,
          :type :close,
          :style :paren,
-         :index 84,
+         :index 66,
          :depth -1,
          :correct? false}],
        :lines
-       ["(var buildNamespaceTree (fn [components]"
-        "                          (var root {:name \"root\""
-        "                                     :fullPath \"\""
-        "                                     :components []"
-        "                                     :children (new Map())})"
-        ""
-        "                          (. components (forEach (fn [comp]"
+       ["                          (. components (forEach (fn [comp]"
         "                                                   (var parts (. comp.namespace (split \".\")))"
         "                                                   (var current root)"
         ""
@@ -779,15 +800,13 @@
         "                                                                                                     :components []"
         "                                                                                                     :children (new Map())}))))"
         "                                                                       (:= current (. current.children (get part))))))"
-        "                                                   (. current.components (push comp))))))"
-        "                          (return root)))"
-        ""],
+        "                                                   (. current.components (push comp))))))"],
        :at
        {:lead
-        {:char "(", :line 385, :col 1, :type :open, :style :paren},
-        :line [385 405],
-        :level 17,
-        :col 1}}
+        {:char "(", :line 391, :col 27, :type :open, :style :paren},
+        :line [391 403],
+        :level 15,
+        :col 27}}
       {:errors
        [{:char ")",
          :line 532,
@@ -845,7 +864,8 @@
         {:char "(", :line 491, :col 1, :type :open, :style :paren},
         :line [491 532],
         :level 10,
-        :col 1}}])
+        :col 1,
+        :last true}}])
 
 ^{:refer code.heal.level/heal-content-single-pass :added "4.0"}
 (fact "heals the content in a single pass"
