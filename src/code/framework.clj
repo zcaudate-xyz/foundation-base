@@ -224,6 +224,21 @@
                        nresult)]
      nresult)))
 
+(defn extract
+  "returns all vars in a given namespace
+   (project/in-context (vars {:sorted true}))
+   => (contains '[analyse
+                  analyse-file
+                  analyse-source-code
+                  analyse-source-function])"
+  {:added "3.0"}
+  ([ns {:keys [process] :as params} lookup project]
+   (let [path     (lookup ns)
+         code     (slurp path)
+         results  (process code)]
+     (if (seq results)
+       results))))
+
 (defn var-function
   "constructs a var, with or without namespace
  

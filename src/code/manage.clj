@@ -51,6 +51,31 @@
 
 (comment (code.manage/analyse ['code.format] {:print {:item true :result true :summary true}}))
 
+(definvoke extract
+  "returns the list of vars in a namespace
+ 
+   (vars 'code.manage)
+ 
+   (vars 'code.manage {:sorted false})
+ 
+   (vars '#{code.manage} {:return #{:errors :summary}})
+   => (contains-in {:errors any
+                    :summary {:errors 0
+                              :warnings 0
+                              :items 1
+                              :results 1
+                              :total number?}})"
+  {:added "3.0"}
+  [:task {:template :code
+          :params {:title "PROCESS"
+                   :parallel true
+                   :sorted true
+                   :process identity
+                   :print {:result false :summary false}}
+          :main {:fn #'base/extract}
+          :item {:display identity}
+          :result {:columns (template/code-default-columns :data #{:bold})}}])
+
 (definvoke vars
   "returns the list of vars in a namespace
  

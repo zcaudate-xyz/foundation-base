@@ -6,7 +6,13 @@
             [js.react.compile :as compile]))
 
 (l/script :js
-  {:import [["@xtalk/figma-ui" :as [* FigmaUi]]]})
+  {:import [["@xtalk/figma-ui" :as [* FigmaUi]]
+            ["sonner" :as [* Sonnar]]]})
+
+(h/template-entries [l/tmpl-entry {:type :fragment
+                                   :base "Sonner"
+                                   :tag "js"}]
+  [toast])
 
 (h/template-entries [l/tmpl-entry {:type :fragment
                                    :base "FigmaUi"
@@ -134,6 +140,7 @@
    HoverCard
    HoverCardContent
    HoverCardTrigger
+   ImageWithFallback
    Input
    InputOTP
    InputOTPGroup
@@ -381,6 +388,7 @@
            :fg/hover-card                    {:tag -/HoverCard}
            :fg/hover-card-content            {:tag -/HoverCardContent}
            :fg/hover-card-trigger            {:tag -/HoverCardTrigger}
+           :fg/image-with-fallback           {:tag -/ImageWithFallback}
            :fg/input                         {:tag -/Input}
            :fg/input-otp                     {:tag -/InputOTP}
            :fg/input-otpgroup                {:tag -/InputOTPGroup}

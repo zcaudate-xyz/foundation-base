@@ -179,6 +179,23 @@
   "runs the check block loop"
   {:added "4.0"}
   [block lines]
+  ;;
+  ;; This is the main error checking loop.
+  ;;
+  ;; Child errors might be reporting something that is a stylistic issue and 
+  ;; not structural, and there are many cases where the indentation could be off
+  ;; checking right up to the top level form to see if the lower level error
+  ;; acually affects the top level form is super important to not prematurely
+  ;; destroy the structure by adding unnecessary and damaging parens to the body
+  ;;
+  ;; There are a few checks in place:
+  ;;  - check for leftover delimiters on a line ie. ')', '}', ']'
+  ;;  - if there are, check if the form within the delimiters are valid
+  ;;  - if the element is the last form, make sure that it can only be a single
+  ;;    form. this prevents early termination errors
+  ;;  - if there are child errors and they are less than the currently found errors
+  ;;    return these. otherwise return the errors in the current block
+  ;;
   (let [{:keys [children]} block
         child-error      (if (seq children)
                            (reduce (fn [_ child]
@@ -194,8 +211,6 @@
                           (get-block-lines lines
                                            (:line block)
                                            (:col block)))
-        #_#_
-        _                (h/pl snippet)
         interim          (parse/parse snippet)
         interim-errors   (filter (comp not :correct?) interim)
         leftover-errors  (filter leftover-fn interim-errors)
@@ -211,6 +226,8 @@
                             :lines  (str/split-lines snippet)
                             :at     (dissoc block :children)})
         #_#_
+        _                (h/pl snippet)
+        #_#_
         _                (h/prf {:is-suspect is-suspect
                                  :child child-error
                                  :block   (dissoc block :children)
@@ -218,11 +235,7 @@
                                  :leftover  leftover-errors
                                  :other  other-errors
                                  #_#_:all all-errors})]
-    ;; Child errors might be reporting something that is a stylistic issue and 
-    ;; not structural, and there are many cases where the indentation could be off
-    ;; checking right up to the top level form to see if the lower level error
-    ;; acually affects the top level form is super important to not prematurely
-    ;; destroy the structure by adding unnecessary and damaging parens to the body
+    
     (if is-suspect
       (or child-error block-error)
       (if (and child-error
@@ -262,10 +275,15 @@
            (= :open (:type e2))
            (= :close (:type e3)))
       (core/create-remove-edits [e3])
-      
+
+      ;; if parens are balanced but just mismatched, heal those
+      (and (even? (count errors))
+           (every? :pair-id errors))
+      (core/create-mismatch-edits errors)      
       
       :else
-      (do (h/prn info) 
+      (do (h/prn)
+          (h/prf info) 
           (throw
            (ex-info "Not Supported"
                     {:info info}))))))
