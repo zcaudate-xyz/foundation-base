@@ -6,6 +6,11 @@
   {:a 1}
   => (contains {:a 1}))
 
+(fact "simple correct contains"
+
+  {:a 1}
+  => (contains {:a 2}))
+
 (fact "simple correct"
 
   {:a 1}
