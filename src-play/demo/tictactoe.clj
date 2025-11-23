@@ -1,4 +1,4 @@
-(ns scratch.tictactoe
+(ns demo.tictactoe
   (:require [clojure.set :as set]))
 
 ;;;

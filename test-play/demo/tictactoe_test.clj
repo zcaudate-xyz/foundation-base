@@ -1,8 +1,8 @@
-(ns scratch.tictactoe-test
+(ns demo.tictactoe-test
   (:use code.test)
-  (:require [scratch.tictactoe :as tt]))
+  (:require [demo.tictactoe :as tt]))
 
-^{:refer scratch.tictactoe/new-game :added "4.0"}
+^{:refer demo.tictactoe/new-game :added "4.0"}
 (fact "creates a new game"
   ^:hidden
   
@@ -13,7 +13,7 @@
       :status :active,
       :winner nil})
 
-^{:refer scratch.tictactoe/check-win :added "4.0"}
+^{:refer demo.tictactoe/check-win :added "4.0"}
 (fact "checks if pieces are in the winning position"
   ^:hidden
 
@@ -29,7 +29,7 @@
   (tt/check-win #{:aa :ba :cb})
   => false)
 
-^{:refer scratch.tictactoe/next-move :added "4.0"}
+^{:refer demo.tictactoe/next-move :added "4.0"}
 (fact "transitions from one state to the next"
   ^:hidden
 
