@@ -31,7 +31,7 @@
    (let [results (mapcat :results facts)
          checks  (filter #(-> % :from (= :verify))    results)
          forms   (filter #(-> % :from (= :evaluate))  results)
-         thrown  (filter #(-> % :type (= :exception)) forms)
+         thrown  (filter #(-> % :status (= :exception)) forms)
          passed  (filter checker/succeeded? checks)
          failed  (filter (comp not checker/succeeded?) checks)
          facts   (filter (comp not empty? :results) facts)

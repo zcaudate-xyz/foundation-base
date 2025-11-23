@@ -78,12 +78,15 @@
                          :form (:form expected))
          result   (-> (checker/verify checker actual)
                       (attach-meta meta))
-         compare (if (and (not (:data result))
-                          (coll? (:data actual))
-                          (coll? (:data expected)))
-	           nil
-		   #_(diff/diff (:data actual)
-                              (:data expected)))
+         compare (cond (map? (:data result))
+                       (:data result)
+
+                       (and (not (:data result))
+                            (coll? (:data actual))
+                            (coll? (:data expected)))
+                       nil
+                       #_(diff/diff (:data actual)
+                                    (:data expected)))
          _    (intern *ns* (with-meta '*last* {:dynamic true})
                       (:data actual))
          _    (after)]
