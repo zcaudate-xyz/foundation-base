@@ -22,35 +22,40 @@
   ^:hidden
   
   (spec/construct-alts '[(. this prop long [1] (call))
-                         (. this.prop.long [1] (call))]))
+                         (. this.prop.long [1] (call))])
+  => {:op :alternate,
+      :desc nil,
+      :dsl ["(. this prop long [1] (call))" "(. this.prop.long [1] (call))"],
+      :js ["this.prop.long[1].call()"]})
 
-^{:refer code.dev.prompt.dsl-spec/create-description :added "4.0"}
+^{:refer code.dev.prompt.dsl-spec/create-spec-description :added "4.0"}
 (fact "creates the descriptions for spec"
   ^:hidden
   
-  (spec/create-description
+  (spec/create-spec-description
    (spec/construct-item 'undefined))
   => string?
   
-  (spec/create-description
+  (spec/create-spec-description
    (spec/construct-item '(fn [(:= a 1)
                               (:= b 2)]
                            (return (* a b)))))
   => string?
 
-  (spec/create-description
+  (spec/create-spec-description
    (spec/construct-item '(var x 1)
                         ["var x = 1"
                          "const x = 1"]))
   => string?)
 
-
-^{:refer code.dev.prompt.dsl-spec/create-spec :added "4.0"}
+^{:refer code.dev.prompt.dsl-spec/create-spec-main :added "4.0"}
 (fact "creates the actual spec"
   ^:hidden
-
-  (spec/create-spec spec/+meta+
-                    (spec/spec-examples))
+  
+  (spec/create-spec-main spec/+meta+
+                         (spec/spec-example-forms)
+                         []
+                         [])
   => string?)
 
 ^{:refer code.dev.prompt.dsl-spec/spec-examples :added "4.0"}

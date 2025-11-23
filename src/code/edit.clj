@@ -9,7 +9,7 @@
   (:refer-clojure :exclude [next replace type]))
 
 (defn nav-template
-  "helper function for importing vars"
+  "generates a navigation function definition from a given symbol and a block tag function"
   {:added "3.0"}
   ([sym var]
    `(defn ~sym
@@ -212,8 +212,8 @@
    (navigator (parse/parse-root string))))
 
 (defn parse-first
-  "parses the navigator from root string"
-  {:added "3.0"}
+  "parses the navigator from the first form"
+  {:added "4.0"}
   ([string]
    (navigator (parse/parse-first string))))
 
@@ -267,8 +267,8 @@
         (filter base/expression?))))
 
 (defn top
-  "moves to the top"
-  {:added "3.0"}
+  "moves cursor to the top"
+  {:added "4.0"}
   ([nav]
    (zip/step-outside-most nav)))
 
@@ -349,6 +349,19 @@
   ([nav]
    (zip/find-prev nav base/expression?)))
 
+(defn find-prev
+  "finds the previous token or whitespace"
+  {:added "4.0"}
+  ([nav pred]
+   (zip/find-prev nav pred)))
+
+(defn find-prev-token
+  "finds the previous token"
+  {:added "4.0"}
+  ([nav data]
+   (zip/find-prev nav (fn [block]
+                        (= data (base/block-value block))))))
+
 (defn next
   "moves to the next expression"
   {:added "3.0"}
@@ -356,13 +369,13 @@
    (zip/find-next nav base/expression?)))
 
 (defn find-next
-  "moves tot the next token"
-  {:added "3.0"}
+  "finds the next expression"
+  {:added "4.0"}
   ([nav pred]
    (zip/find-next nav pred)))
 
 (defn find-next-token
-  "moves tot the next token"
+  "moves to the next token"
   {:added "3.0"}
   ([nav data]
    (zip/find-next nav (fn [block]
@@ -512,12 +525,13 @@
 ;; Insert Functions
 ;;
 
-
 (defn insert-raw
+  "inserts a raw element"
+  {:added "4.0"}
   [nav data]
   (-> nav
-      (zip/step-right)
-      (zip/insert-left data)))
+      (zip/insert-right data)
+      (zip/step-right)))
 
 (defn insert-empty
   "inserts an element into an empty container"
@@ -556,8 +570,8 @@
                (zip/insert-left (construct/space)))))))
 
 (defn insert-token
-  "inserts an element and moves"
-  {:added "3.0"}
+  "standard insert token"
+  {:added "4.0"}
   ([nav data]
    (cond (level-empty? nav)
          (insert-empty nav data)
@@ -594,8 +608,8 @@
            (take num (repeatedly (fn [] (construct/space)))))))
 
 (defn delete-spaces-left
-  "deletes left of the current expression"
-  {:added "3.0"}
+  "deletes spaces to the left"
+  {:added "4.0"}
   ([nav]
    (cond (level-empty? nav)
          (tighten-left nav)
@@ -612,8 +626,8 @@
                  (recur (zip/delete-left nav)))))))
 
 (defn delete-spaces-right
-  "deletes right of the current expression"
-  {:added "3.0"}
+  "deletes spaces to the left"
+  {:added "4.0"}
   ([nav]
    (cond (level-empty? nav)
          (tighten-right nav)
@@ -748,7 +762,7 @@
                  (throw (ex-info "Replace failed - no element" {:nav nav})))))))
 
 (defn swap
-  "replaces an element at the cursor"
+  "applies a function to the element at the current cursor position, replacing it with the result"
   {:added "3.0"}
   ([nav f]
    (cond (level-empty? nav)

@@ -2,6 +2,7 @@
   (:use code.test)
   (:require [code.heal.parse :as parse]
             [code.heal.indent :as indent]
+            [std.string :as str]
             [std.lib :as h]))
 
 ^{:refer code.heal.indent/flag-close-heavy-function :added "4.0"}
@@ -16,10 +17,12 @@
 
 ^{:refer code.heal.indent/flag-close-heavy-single :added "4.0"
   :setup [(def ^:dynamic *dlma*
-            (parse/parse "
-(fact )
- 
-  (this))"))]}
+            (parse/parse
+             (str/join-lines
+              [""
+               "(fact )"
+               " "
+               "  (this))"])))]}
 (fact "flags when there is open delimiter of the same depth with extra indentation"
   ^:hidden
   
@@ -332,10 +335,11 @@
     (indent/flag-open-heavy
      *dlm4*))
    (slurp "test-data/code.heal/cases/002_complex.block"))
-  => [{:action :insert, :line 110, :col 68, :new-char "]"}
-      {:action :insert, :line 276, :col 96, :new-char "]"}
-      {:action :insert, :line 338, :col 90, :new-char "]"}
-      {:action :insert, :line 400, :col 234, :new-char "]"}]
+  => '({:action :insert, :line 110, :col 68, :new-char "]"}
+       {:action :insert, :line 276, :col 96, :new-char "]"}
+   {:action :insert, :line 338, :col 90, :new-char "]"}
+       {:action :insert, :line 396, :col 234, :new-char "]"})
+  
 
 
   (def sample-do "

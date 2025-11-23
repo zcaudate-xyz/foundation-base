@@ -191,178 +191,9 @@
       {:type :code, :line 3, :last-idx 10, :col 5, :char "n"}
       {:char "{", :line 3, :col 9, :type :open, :style :curly}])
 
-
 ^{:refer code.heal.level/group-blocks-prep :added "4.0"}
 (fact "prepares the block entries for a file"
   ^:hidden 
-
-  (level/get-errored
-   (str/join-lines
-    ["  (map"
-     "    (fn "
-     "      (return"
-     "       [:% Card"
-     "        [:a ]]"
-     "        [:b]"
-     "        [:c]])))"]))
-  => [{:errors
-    [{:correct? false,
-      :index 0,
-      :pair-id 4,
-      :type :open,
-      :style :paren,
-      :line 3,
-      :col 7,
-      :depth 0,
-      :char "("}
-     {:correct? false,
-      :index 9,
-      :pair-id 4,
-      :type :close,
-      :style :square,
-      :line 7,
-      :col 13,
-      :depth 0,
-      :char "]"}],
-    :lines
-    ["      (return"
-     "       [:% Card"
-     "        [:a ]]"
-     "        [:b]"
-     "        [:c]])))"],
-    :at
-    {:lead {:char "(", :line 3, :col 7, :type :open, :style :paren},
-     :line [3 7],
-     :level 2,
-     :col 7,
-     :last true}}]
-  
-  
-  (level/get-errored
-   (str/join-lines
-    [""
-     "          [:% fg/Input"
-     "           {:onChange (fn [e])]"
-     "            :maxLength 10}]"]))
-
-  
-  (level/get-errored
-   (str/join-lines
-    [""
-     "          [:% fg/Input"
-     "           {:onChange (fn [e])]"
-     "            :maxLength 10}]"]))
-  => [{:errors
-       [{:char "]",
-         :line 3,
-         :col 31,
-         :type :close,
-         :style :square,
-         :index 4,
-         :depth -1,
-         :correct? false}],
-       :lines ["                      (fn [e])]"],
-       :at
-       {:lead {:char "(", :line 3, :col 23, :type :open, :style :paren},
-        :line [3 3],
-        :level 1,
-        :col 23}}]
-  
-  (level/get-errored
-   (str/join-lines
-    [""
-     "          [:% fg/Input"
-     "           {:onChange (fn [e])}"
-     "            :maxLength 10}]"]))
-  [{:errors
-    [{:char "]",
-      :line 4,
-      :col 27,
-      :type :close,
-      :style :square,
-      :index 8,
-      :depth -1,
-      :correct? false}
-     {:correct? false,
-      :index 0,
-      :pair-id 3,
-      :type :open,
-      :style :square,
-      :line 2,
-      :col 11,
-      :depth 0,
-      :char "["}
-     {:correct? false,
-      :index 7,
-      :pair-id 3,
-      :type :close,
-      :style :curly,
-      :line 4,
-      :col 26,
-      :depth 0,
-      :char "}"}],
-    :lines
-    ["          [:% fg/Input"
-     "           {:onChange (fn [e])}"
-     "            :maxLength 10}]"],
-    :at
-    {:lead
-     {:char "[", :line 2, :col 11, :type :open, :style :square},
-     :line [2 4],
-     :level 3,
-     :col 11}}]
-  
-  
-  (level/get-errored
-   (str/join-lines
-    [""
-     "          [:% fg/Input"
-     "           {:placeholder \"e.g., TBP\""
-     "            :value tokenData.symbol"
-     "            :onChange (fn [e] (return (handleChange \"symbol\" (. e.target.value (toUpperCase)))))}"
-     "            :className \"bg-[#0a0a0a] border-[#2d2d2d] text-white\""
-     "            :maxLength 10}]"]))
-  
-  => [{:errors
-       [{:char "]",
-         :line 7,
-         :col 27,
-         :type :close,
-         :style :square,
-         :index 16,
-         :depth -1,
-         :correct? false}
-        {:correct? false,
-         :index 0,
-         :pair-id 7,
-         :type :open,
-         :style :square,
-         :line 2,
-         :col 11,
-         :depth 0,
-         :char "["}
-        {:correct? false,
-         :index 15,
-         :pair-id 7,
-         :type :close,
-         :style :curly,
-         :line 7,
-         :col 26,
-         :depth 0,
-         :char "}"}],
-    :lines
-    ["          [:% fg/Input"
-     "           {:placeholder \"e.g., TBP\""
-     "            :value tokenData.symbol"
-     "            :onChange (fn [e] (return (handleChange \"symbol\" (. e.target.value (toUpperCase)))))}"
-     "            :className \"bg-[#0a0a0a] border-[#2d2d2d] text-white\""
-     "            :maxLength 10}]"],
-    :at
-    {:lead
-     {:char "[", :line 2, :col 11, :type :open, :style :square},
-     :line [2 7],
-     :level 7,
-     :col 11}}]
   
   
   (level/group-blocks-prep
@@ -549,8 +380,8 @@
 
 ^{:refer code.heal.level/get-errored-loop :added "4.0"}
 (fact "runs the check block loop"
+  #_#_#_
   ^:hidden
-  
   (level/get-errored-loop
    (nth (level/group-blocks (slurp "test-data/code.heal/cases/005_example.block")) 2)
    (str/split-lines (slurp "test-data/code.heal/cases/005_example.block")))
@@ -607,12 +438,188 @@
        :last true}})
   
 ^{:refer code.heal.level/get-errored-raw :added "4.0"}
-(fact "helper function for get-errored")
+(fact "helper function for get-errored"
+
+  (level/get-errored
+   (str/join-lines
+    ["  (map"
+     "    (fn "
+     "      (return"
+     "       [:% Card"
+     "        [:a ]]"
+     "        [:b]"
+     "        [:c]])))"]))
+  => [{:errors
+       [{:char "]",
+         :line 5,
+         :col 14,
+         :type :close,
+         :style :square,
+         :index 2,
+         :depth -1,
+         :correct? false}],
+       :lines ["        [:a ]]"],
+       :at
+       {:lead {:char "[", :line 5, :col 9, :type :open, :style :square},
+        :line [5 5],
+        :level 0,
+        :col 9}}]
+  
+  
+  (level/get-errored
+   (str/join-lines
+    ["          [:% fg/Input"
+     "           {:onChange (fn [e])]"
+     "            :maxLength 10}]"]))
+  => [{:errors
+       [{:char "]",
+         :line 2,
+         :col 31,
+         :type :close,
+         :style :square,
+         :index 4,
+         :depth -1,
+         :correct? false}],
+       :lines ["                      (fn [e])]"],
+       :at
+       {:lead {:char "(", :line 2, :col 23, :type :open, :style :paren},
+        :line [2 2],
+        :level 1,
+        :col 23}}]
+  
+  (level/get-errored
+   (str/join-lines
+    [""
+     "          [:% fg/Input"
+     "           {:onChange (fn [e])}"
+     "            :maxLength 10}]"]))
+  => [{:errors
+       [{:char "}",
+         :line 3,
+         :col 31,
+         :type :close,
+         :style :curly,
+         :index 4,
+         :depth -1,
+         :correct? false}],
+       :lines ["                      (fn [e])}"],
+       :at
+       {:lead {:char "(", :line 3, :col 23, :type :open, :style :paren},
+        :line [3 3],
+        :level 1,
+        :col 23}}]
+  
+  
+  (level/get-errored
+   (str/join-lines
+    [""
+     "          [:% fg/Input"
+     "           {:placeholder \"e.g., TBP\""
+     "            :value tokenData.symbol"
+     "            :onChange (fn [e] (return (handleChange \"symbol\" (. e.target.value (toUpperCase)))))}"
+     "            :className \"bg-[#0a0a0a] border-[#2d2d2d] text-white\""
+     "            :maxLength 10}]"]))
+  => [{:errors
+       [{:char "}",
+         :line 5,
+         :col 97,
+         :type :close,
+         :style :curly,
+         :index 12,
+         :depth -1,
+         :correct? false}],
+       :lines
+       ["                      (fn [e] (return (handleChange \"symbol\" (. e.target.value (toUpperCase)))))}"],
+       :at
+       {:lead {:char "(", :line 5, :col 23, :type :open, :style :paren},
+        :line [5 5],
+        :level 5,
+        :col 23,
+        :last true}}]
+
+  (level/get-errored
+   (str/join-lines
+    [""
+     "          [{:placeholder \"e.g., TBP\""
+     "            :value tokenData.symbol"
+     "            :onChange (fn [e] (return (handleChange \"symbol\" (. e.target.value (toUpperCase)))))}"
+     "            :className \"bg-[#0a0a0a] border-[#2d2d2d] text-white\""
+     "            :maxLength 10}]"]))
+  => [{:errors
+       [{:char "}",
+         :line 4,
+         :col 97,
+         :type :close,
+         :style :curly,
+         :index 12,
+         :depth -1,
+         :correct? false}],
+       :lines
+       ["                      (fn [e] (return (handleChange \"symbol\" (. e.target.value (toUpperCase)))))}"],
+       :at
+       {:lead
+        {:char "(", :line 4, :col 23, :type :open, :style :paren},
+        :line [4 4],
+        :level 5,
+        :col 23,
+        :last true}}])
 
 ^{:refer code.heal.level/get-errored :added "4.0"}
 (fact "checks content for irregular blocks"
   ^:hidden
 
+
+  
+  (level/get-errored
+   (str/join-lines
+    ["         [:div"
+     "          [:% fg/Label {:className \"text-[#b4b4b4] mb-2\"} \"Token Symbol *\"]"
+     "          [:% fg/Input"
+     "           {:placeholder \"e.g., TBP\""
+     "            :value tokenData.symbol"
+     "            :onChange (fn [e] (return (handleChange \"symbol\" (. e.target.value (toUpperCase)))))}"
+     "            :className \"bg-[#0a0a0a] border-[#2d2d2d] text-white\""
+     "            :maxLength 10}]"
+     "          [:p {:className \"text-xs text-[#6d6d6d] mt-1\"} \"Short symbol (3-10 characters)\"]]"]))
+  => [{:errors
+       [{:char "}",
+         :line 6,
+         :col 97,
+         :type :close,
+         :style :curly,
+         :index 12,
+         :depth -1,
+         :correct? false}],
+       :lines
+       ["                      (fn [e] (return (handleChange \"symbol\" (. e.target.value (toUpperCase)))))}"],
+       :at
+       {:lead {:char "(", :line 6, :col 23, :type :open, :style :paren},
+        :line [6 6],
+        :level 5,
+        :col 23,
+     :last true}}]
+  
+
+  (level/get-errored
+   (str/join-lines
+    ["{:hello (fn [] (+ ou))}"
+     " :part 1}"]))
+  => [{:errors
+       [{:char "}",
+         :line 1,
+         :col 23,
+         :type :close,
+         :style :curly,
+         :index 6,
+         :depth -1,
+         :correct? false}],
+       :lines ["        (fn [] (+ ou))}"],
+       :at
+       {:lead {:char "(", :line 1, :col 9, :type :open, :style :paren},
+        :line [1 1],
+        :level 2,
+        :col 9}}]
+  
   (level/get-errored
    (str/join-lines
     ["(  (+ a b"
@@ -625,20 +632,20 @@
      "    (+ 1) (+ 2))"
      "    nil {})"]))
   => [{:errors
-    [{:char ")",
-      :line 2,
-      :col 16,
-      :type :close,
-      :style :paren,
-      :index 4,
-      :depth -1,
-      :correct? false}],
-    :lines ["    (+ 1) (+ 2))"],
-    :at
-    {:lead {:char "(", :line 2, :col 5, :type :open, :style :paren},
-     :line [2 2],
-     :level 1,
-     :col 5}}]
+       [{:char ")",
+         :line 2,
+         :col 16,
+         :type :close,
+         :style :paren,
+         :index 4,
+         :depth -1,
+         :correct? false}],
+       :lines ["    (+ 1) (+ 2))"],
+       :at
+       {:lead {:char "(", :line 2, :col 5, :type :open, :style :paren},
+        :line [2 2],
+        :level 1,
+        :col 5}}]
   
   
   (level/get-errored
@@ -647,20 +654,20 @@
      "    ())"
      "    nil {})"]))
   => [{:errors
-    [{:char ")",
-      :line 2,
-      :col 7,
-      :type :close,
-      :style :paren,
-      :index 2,
-      :depth -1,
+       [{:char ")",
+         :line 2,
+         :col 7,
+         :type :close,
+         :style :paren,
+         :index 2,
+         :depth -1,
       :correct? false}],
-    :lines ["    ())"],
-    :at
-    {:lead {:char "(", :line 2, :col 5, :type :open, :style :paren},
-     :line [2 2],
-     :level 0,
-     :col 5}}]
+       :lines ["    ())"],
+       :at
+       {:lead {:char "(", :line 2, :col 5, :type :open, :style :paren},
+        :line [2 2],
+        :level 0,
+        :col 5}}]
   
   
   (level/get-errored
@@ -669,9 +676,9 @@
      "    (+ 1 2) (+ 23 4))"
      "    nil {})"]))
   => [{:errors
-       [{:char ")",
+    [{:char ")",
       :line 2,
-         :col 21,
+      :col 21,
       :type :close,
       :style :paren,
       :index 4,

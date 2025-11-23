@@ -438,16 +438,14 @@
     :no-analysis true}
    {:source-paths ["src-translated"]
     :root "../Szncampaigncenter/"})
-
+  
   (code.manage/refactor-code
    :all
    {:title "HEALING"
-    :transform 
     :no-analysis true}
    {:source-paths ["src-translated"]
     :root "../Szncampaigncenter/"})
-  
- )
+  )
 
 (comment
   (fs/list (fs/path "../Szncampaigncenter/src-dsl/"

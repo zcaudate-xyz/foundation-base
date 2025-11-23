@@ -218,7 +218,7 @@
   ([body [start end]]
    (pl-add-lines body [start end] [2 0]))
   ([body [start end] [pad-h pad-v]]
-   (let [lines (vec (str/split-lines (str/trim body)))
+   (let [lines (vec (str/split-lines body))
          max   (count lines)
          start (dec (or start 1))
          start (if (neg? start) 0 start)
@@ -226,7 +226,7 @@
          end   (if (< max end) max end)]
      (->> (map (fn [i text]
                  (format (str " %0" pad-h "d  %s") i text))
-               (range (inc start) (inc max))
+               (range (inc start)  max)
                (subvec lines start end))
           (str/join (apply str "\n" (repeat pad-v "\n")))))))
 
@@ -315,6 +315,14 @@
                           @~'out)
            (meta &form))
         @~'out))))
+
+(defn wrap-print
+  [f & [format-fn]]
+  (fn [& args]
+    (let [res (apply f args)]
+      (p ((or format-fn
+              identity) res))
+      res)))
 
 (defmacro meter-out
   "measures and output meter"

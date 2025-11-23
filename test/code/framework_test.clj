@@ -158,7 +158,7 @@
 (fact "takes in a series of edits and performs them on the code"
 
   (project/in-context (refactor-code {:edits []}))
-  => {:changed [], :updated false, :path "test/code/framework_test.clj"})
+  => {:changed [], :updated false, :verified true, :path "test/code/framework_test.clj"})
 
 (comment
   (code.manage/import {:write true}))

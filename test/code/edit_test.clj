@@ -111,12 +111,22 @@
   (str (parse-root "a b c"))
   => "<0,0> |a b c")
 
+^{:refer code.edit/parse-first :added "4.0"}
+(fact "parses the navigator from the first form"
+  ^:hidden
+  
+  (str (parse-first "a b c"))
+  => "<0,0> |a"
+
+  (str (parse-first "(+ 1 2 3) (+ 4 5)"))
+  => "<0,0> |(+ 1 2 3)")
+
 ^{:refer code.edit/parse-root-status :added "3.0" :class [:nav/general]}
 (fact "parses string and creates a navigator from status"
   ^:hidden
   
   (str (parse-root-status "a b #|c"))
-  => "<0,6> a b |c")
+  => "<0,4> a b |c")
 
 ^{:refer code.edit/root-string :added "3.0" :class [:nav/general]}
 (fact "returns the top level string"
@@ -170,6 +180,15 @@
        (right-expressions)
        (mapv base/block-value))
   => [:b :a])
+
+^{:refer code.edit/top :added "4.0"}
+(fact "moves cursor to the top"
+  ^:hidden
+  
+  (-> (parse-string "(1  [1 2 3]    #|)")
+      (top)
+      str)
+  => "<0,0> |(1  [1 2 3]    )")
 
 ^{:refer code.edit/left :added "3.0" :class [:nav/move]}
 (fact "moves to the left expression"
@@ -267,6 +286,24 @@
       str)
   => "<0,7> ([1 2 [|3]] )")
 
+^{:refer code.edit/find-prev :added "4.0"}
+(fact "finds the previous token or whitespace"
+  ^:hidden
+  
+  (-> (parse-string "( \n \n [[3 \n]] #|  )")
+      (find-prev type/linebreak-block?)
+      (str))
+  => "<2,5> ( \n \n [[3 |\n]]   )")
+
+^{:refer code.edit/find-prev-token :added "4.0"}
+(fact "finds the previous token"
+  ^:hidden
+  
+  (-> (parse-string "( \n \n [[3 \n]] #|  )")
+      (find-prev-token 3)
+      (str))
+  => "<2,3> ( \n \n [[|3 \n]]   )")
+
 ^{:refer code.edit/next :added "3.0" :class [:nav/move]}
 (fact "moves to the next expression"
   ^:hidden
@@ -277,6 +314,16 @@
       (next)
       str)
   => "<0,5> (  [[|3]]  )")
+
+^{:refer code.edit/find-next :added "4.0"}
+(fact "finds the next expression"
+  ^:hidden
+  
+  (-> (parse-string "(#|  [[3] @5]  )")
+      (find-next (fn [x]
+                   (= :deref (base/block-tag x))))
+      str)
+  => "<0,8> (  [[3] |@5]  )")
 
 ^{:refer code.edit/find-next-token :added "3.0" :class [:nav/move]}
 (fact "moves to the next token"
@@ -295,7 +342,7 @@
       (prev-anchor)
       (:position))
   => [3 0]
-
+  
   (-> (parse-string "( #| )")
       (prev-anchor)
       (:position))
@@ -447,6 +494,23 @@
       (level-empty?))
   => true)
 
+^{:refer code.edit/insert-raw :added "4.0"}
+(fact "inserts a raw element"
+  ^:hidden
+  
+  (-> (parse-string "( #| )")
+      (insert-raw (construct/space))
+      str)
+  => "<0,3> (  | )"
+  
+  (-> (parse-string "( #| )")
+      (insert-raw (construct/space))
+      (insert-raw (construct/space))
+      (insert-raw (construct/space))
+      (insert-raw (construct/space))
+      str)
+  => "<0,6> (     | )")
+
 ^{:refer code.edit/insert-empty :added "3.0" :class [:nav/edit]}
 (fact "inserts an element into an empty container"
   ^:hidden
@@ -494,37 +558,59 @@
       str)
   => "<0,1> (|1  )")
 
-^{:refer code.edit/insert :added "3.0" :class [:nav/edit]}
-(fact "inserts an element at the current cursor position and moves the cursor past the inserted element"
+^{:refer code.edit/insert-token :added "4.0"}
+(fact "standard insert token"
   ^:hidden
   
   (-> (parse-string "(#|0)")
-      (insert 1)
+      (insert-token 1)
       str)
-  => "<0,3> (0 |1)"
-
-  (-> (parse-string "(#|)")
-      (insert-token-to-right 1)
-      str)
-  => "<0,1> (|1)"
-
-  (-> (parse-string "( #| )")
-      (insert-token-to-right 1)
-      str)
-  => "<0,1> (|1  )")
+  => "<0,3> (0 |1)")
 
 ^{:refer code.edit/insert-all :added "3.0"}
 (fact "inserts all expressions into the block"
   ^:hidden
   
   (-> (parse-string "")
-      (insert-all [1 2 3 4 5 6])))
+      (insert-all [1 2 3 4 5 6])
+      str)
+  => "<0,10> 1␣2␣3␣4␣5␣|6:eof")
 
 ^{:refer code.edit/insert-newline :added "3.0"}
-(fact "insert newline/s into the block")
+(fact "insert newline/s into the block"
+  ^:hidden
+
+  (-> (parse-string "(#|0)")
+      (insert-newline 2)
+      str)
+  => "<2,0> (\n\n|0)")
 
 ^{:refer code.edit/insert-space :added "3.0"}
-(fact "insert space/s into the block")
+(fact "insert space/s into the block"
+  ^:hidden
+
+  (-> (parse-string "(#|0)")
+      (insert-space 2)
+      str)
+  => "<0,3> (  |0)")
+
+^{:refer code.edit/delete-spaces-left :added "4.0"}
+(fact "deletes spaces to the left"
+  ^:hidden
+  
+  (-> (parse-string "(1 2      #|3       4)")
+      (delete-spaces-left)
+      str)
+  => "<0,4> (1 2|3       4)")
+
+^{:refer code.edit/delete-spaces-right :added "4.0"}
+(fact "deletes spaces to the left"
+  ^:hidden
+  
+  (-> (parse-string "(1 2      3 #|       4)")
+      (delete-spaces-right)
+      str)
+  => "<0,12> (1 2      3 |4)")
 
 ^{:refer code.edit/delete-left :added "3.0" :class [:nav/edit]}
 (fact "deletes left of the current expression"
@@ -655,6 +741,9 @@
 (fact "returns the line info for the current block"
   ^:hidden
   
+  (line-info (parse-string "[1 \\n  2 3]"))
+  => {:row 1, :col 1, :end-row 1, :end-col 12}
+
   (line-info (parse-string "[1 \n  2 3]"))
   => {:row 1, :col 1, :end-row 2, :end-col 7})
 

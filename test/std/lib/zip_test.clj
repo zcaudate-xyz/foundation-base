@@ -571,7 +571,13 @@
   (-> (from-status '[1 [2 [6 | 7] 3] [4 5]])
       (find-prev even?)
       (status))
-  => '([1 [2 [| 6 7] 3] [4 5]]))
+  => '([1 [2 [| 6 7] 3] [4 5]])
+
+
+  (-> (from-status '[1 [2 [[[6  7]]] [3]] | [4 5]])
+      (find-prev even?)
+      (status))
+  => '([1 [2 [[[| 6 7]]] [3]] [4 5]]))
 
 ^{:refer std.lib.zip/from-status :added "3.0" :class [:zip/general]}
 (fact "returns a zipper given a data structure with | as the status"
