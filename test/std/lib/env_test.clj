@@ -170,3 +170,15 @@
 
 ^{:refer std.lib.env/dbg:remove-filters :added "4.0"}
 (fact "TODO")
+
+^{:refer std.lib.env/with-system :added "4.0"}
+(fact "TODO")
+
+^{:refer std.lib.env/with-out-str :added "4.0"}
+(fact "TODO")
+
+^{:refer std.lib.env/pr :added "4.0"}
+(fact "TODO")
+
+^{:refer std.lib.env/wrap-print :added "4.0"}
+(fact "TODO")

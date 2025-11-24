@@ -25,3 +25,9 @@
 
 ^{:refer net.http.router/serve-resource :added "4.0"}
 (fact "TODO")
+
+^{:refer net.http.router/split-path :added "4.0"}
+(fact "TODO")
+
+^{:refer net.http.router/match-path :added "4.0"}
+(fact "TODO")

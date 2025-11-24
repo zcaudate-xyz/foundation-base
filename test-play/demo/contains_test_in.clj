@@ -1,4 +1,4 @@
-(ns scratch.contains-test-in
+(ns demo.contains-test-in
   (:use code.test))
 
 (fact "Verify contains-in output on failure"

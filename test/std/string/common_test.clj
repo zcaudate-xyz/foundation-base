@@ -186,3 +186,10 @@
 
   (replace-all "hello" "l" "o")
   => "heooo")
+
+
+^{:refer std.string.common/replace-at :added "4.0"}
+(fact "TODO")
+
+^{:refer std.string.common/insert-at :added "4.0"}
+(fact "TODO")
