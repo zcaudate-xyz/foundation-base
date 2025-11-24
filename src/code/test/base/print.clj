@@ -28,7 +28,7 @@
            (ansi/style (format "  %s%s" line (or (rel path) "<current>")) #{:bold})
            (if name (str "\n   " (ansi/white "Refer") "  " (ansi/style name #{:bold})) "")
            (if desc (str "\n    " (ansi/white "Info") "  \"" desc "" \") "")
-           (str "\n    " (ansi/white "Form") "  " (str/indent (pretty/pprint-str form) 4))
+           (str "\n    " (ansi/white "Form") "  " (str/indent-rest (pretty/pprint-str form) 10))
            (str "\n   " (ansi/white "Check") "  " check))))))
 
 (defn print-failure
@@ -44,15 +44,15 @@
            (ansi/style (format "  %s%s" line (or (rel path) "<current>")) #{:bold})
            (if name (str "\n   " (ansi/white "Refer") "  " (ansi/style name #{:bold})) "")
            (if desc (str "\n    " (ansi/white "Info") "  \"" desc "" \") "")
-           (str "\n    " (ansi/white "Form") "  " (str/indent (pretty/pprint-str bform) 4))
+           (str "\n    " (ansi/white "Form") "  " (str/indent-rest (pretty/pprint-str bform) 10))
            (if compare
              (str "\n   " (ansi/white "Compare") "  \n"
                   (str/indent (pretty/pprint-str compare)
                               4))
              (str
-              (str "\n   " (ansi/white "Check") "  " (str/indent (pretty/pprint-str bcheck) 4))
+              (str "\n   " (ansi/white "Check") "  " (str/indent-rest (pretty/pprint-str bcheck) 10))
               (str "\n    " (ansi/white "Eval") "  " (if (coll? actual)
-                                                       (str/indent (pretty/pprint-str actual) 4)
+                                                       (str/indent-rest (pretty/pprint-str actual) 10)
                                                        actual))))
            (if pattern? (str "\n " (ansi/white "Pattern") "  " (ansi/blue (str form " : " check))))
            (if original (str "\n  " (ansi/white "Linked") "  " (ansi/blue (format "L:%d,%d"
@@ -73,7 +73,7 @@
            (ansi/style (format "  %s%s" line (or (rel path) "<current>")) #{:bold})
            (if name (str "\n   " (ansi/white "Refer") "  " (ansi/style name #{:bold})) "")
            (if desc (str "\n    " (ansi/white "Info") "  \"" desc "" \") "")
-           (str "\n    " (ansi/white "Form") "  " (str/indent (pretty/pprint-str bform) 4))
+           (str "\n    " (ansi/white "Form") "  " (str/indent-rest (pretty/pprint-str bform) 10))
            (str "\n    " (ansi/white "Data") "  " (if (instance? Throwable data)
                                                     (or (.getMessage ^Throwable data) data)
                                                     data))
