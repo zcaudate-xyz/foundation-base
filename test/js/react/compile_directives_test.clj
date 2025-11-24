@@ -49,4 +49,4 @@
 
 
 ^{:refer js.react.compile-directives/compile-directives :added "4.0"}
-(fact "TODO")
+(fact "templates the control directives")

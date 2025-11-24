@@ -35,4 +35,4 @@
   (code.manage/import))
 
 ^{:refer std.object.element.impl.field/patch-field :added "4.0"}
-(fact "TODO")
+(fact "removes final modifier from field")

@@ -180,22 +180,22 @@
 
 
 ^{:refer rt.postgres.supabase/alter-role-bypassrls :added "4.0"}
-(fact "TODO")
+(fact "alters role to bypass rls")
 
 ^{:refer rt.postgres.supabase/process-return :added "4.0"}
-(fact "TODO")
+(fact "processes the return value")
 
 ^{:refer rt.postgres.supabase/with-role-single :added "4.0"}
-(fact "TODO")
+(fact "executes a statement with role (single)")
 
 ^{:refer rt.postgres.supabase/with-auth-single :added "4.0"}
-(fact "TODO")
+(fact "executes a statement with auth (single)")
 
 ^{:refer rt.postgres.supabase/with-super-single :added "4.0"}
-(fact "TODO")
+(fact "executes a statement with super (single)")
 
 ^{:refer rt.postgres.supabase/with-super :added "4.0"}
-(fact "TODO")
+(fact "executes a statement with super")
 
 ^{:refer rt.postgres.supabase/api-signup-create :added "4.0"}
-(fact "TODO")
+(fact "create user via supabase api")

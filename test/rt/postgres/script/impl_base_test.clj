@@ -383,4 +383,4 @@
 
 
 ^{:refer rt.postgres.script.impl-base/t-returning-cols-default :added "4.0"}
-(fact "TODO")
+(fact "formats returning columns default")

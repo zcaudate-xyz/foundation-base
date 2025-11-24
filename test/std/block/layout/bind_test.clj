@@ -437,4 +437,4 @@
 
 
 ^{:refer std.block.layout.bind/layout-annotate-svg-path :added "4.0"}
-(fact "TODO")
+(fact "parses the d string in svg path for better formatting")

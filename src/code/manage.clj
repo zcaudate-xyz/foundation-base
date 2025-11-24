@@ -10,7 +10,8 @@
             [std.task :as task]
             [std.lib :as h :refer [definvoke]]
             [std.lib.result :as res])
-  (:refer-clojure :exclude [import]))
+  (:refer-clojure :exclude [import])
+  (:gen-class))
 
 (h/intern-in ns-rename/ns-rename)
 
@@ -660,3 +661,76 @@
     (./import)
     (code.manage/line-limit ['hara] {:length 110})))
 
+(defn process-args
+  "processes input arguments
+
+   (process-args [\":a\" \"1\" \":b\"])
+   => {:a 1 :b true}"
+  ([args]
+   (loop [m     {}
+          [k v]  args]
+     (if (or (nil? k) (empty? args))
+       m
+       (let [k (if (string? k)
+                 (try (read-string k)
+                      (catch Throwable t k))
+                 k)
+             v (if (string? v)
+                 (try (read-string v)
+                      (catch Throwable t v))
+                 v)]
+         (cond (not (keyword? k))
+               (recur m (rest args))
+
+               (or (keyword? v) (nil? v))
+               (recur (assoc m k true)
+                      (rest args))
+
+               :else
+               (let [next-m (case k
+                              :only    (assoc m :run v)
+                              :in      (assoc m :run [v])
+                              (assoc m k v))]
+                 (recur next-m (drop 2 args)))))))))
+
+(defn -main
+  "main entry point for code.manage"
+  [& args]
+  (let [[cmd & rest-args] args
+        opts (process-args rest-args)
+        ns-list (or (:run opts) [])
+        target-ns (if (vector? ns-list) ns-list (if ns-list [ns-list] []))
+        task-params (dissoc opts :run)
+        run-cmd (fn [func]
+                  (if (seq target-ns)
+                    (func target-ns task-params)
+                    (func task-params)))]
+    (case cmd
+      "analyse"       (run-cmd analyse)
+      "extract"       (run-cmd extract)
+      "vars"          (run-cmd vars)
+      "docstrings"    (run-cmd docstrings)
+      "transform-code" (run-cmd transform-code)
+      "import"        (run-cmd import)
+      "purge"         (run-cmd purge)
+      "missing"       (run-cmd missing)
+      "todos"         (run-cmd todos)
+      "incomplete"    (run-cmd incomplete)
+      "orphaned"      (run-cmd orphaned)
+      "scaffold"      (run-cmd scaffold)
+      "create-tests"  (run-cmd create-tests)
+      "in-order"      (run-cmd in-order?)
+      "arrange"       (run-cmd arrange)
+      "locate-code"   (run-cmd locate-code)
+      "locate-test"   (run-cmd locate-test)
+      "grep"          (run-cmd grep)
+      "grep-replace"  (run-cmd grep-replace)
+      "unclean"       (run-cmd unclean)
+      "unchecked"     (run-cmd unchecked)
+      "commented"     (run-cmd commented)
+      "pedantic"      (run-cmd pedantic)
+      "refactor-code" (run-cmd refactor-code)
+      "refactor-test" (run-cmd refactor-test)
+      "ns-format"     (run-cmd ns-format)
+      "find-usages"   (run-cmd find-usages)
+      (println "Unknown command:" cmd))))

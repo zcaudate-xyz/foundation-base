@@ -174,4 +174,4 @@
 
 
 ^{:refer std.lang.model.spec-js/js-map :added "4.0"}
-(fact "TODO")
+(fact "emits a js map")

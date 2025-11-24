@@ -435,4 +435,4 @@
 
 
 ^{:refer std.lib.collection/merge-meta :added "4.0"}
-(fact "TODO")
+(fact "merges metadata into an object")

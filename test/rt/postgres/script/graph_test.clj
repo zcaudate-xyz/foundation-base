@@ -123,7 +123,7 @@
 
 
 ^{:refer rt.postgres.script.graph/g:where :added "4.0"}
-(fact "TODO")
+(fact "constructs the where clause")
 
 ^{:refer rt.postgres.script.graph/g:exists :added "4.0"}
-(fact "TODO")
+(fact "checks for existence")

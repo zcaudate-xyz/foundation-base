@@ -701,4 +701,4 @@
 
 
 ^{:refer std.lib.zip/insert-right :added "4.0"}
-(fact "TODO")
+(fact "inserts element/s right of the current status")

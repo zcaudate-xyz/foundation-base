@@ -227,4 +227,4 @@
 
 
 ^{:refer std.make.common/make-run-close :added "4.0"}
-(fact "TODO")
+(fact "closes the make run window")

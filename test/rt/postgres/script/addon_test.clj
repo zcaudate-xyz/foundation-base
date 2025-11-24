@@ -187,13 +187,13 @@
 
 
 ^{:refer rt.postgres.script.addon/name :added "4.0"}
-(fact "TODO")
+(fact "gets the name of a table")
 
 ^{:refer rt.postgres.script.addon/coord :added "4.0"}
-(fact "TODO")
+(fact "gets the coordinate of a row")
 
 ^{:refer rt.postgres.script.addon/get-stack-diagnostics :added "4.0"}
-(fact "TODO")
+(fact "gets the stack diagnostics")
 
 ^{:refer rt.postgres.script.addon/map:js-text :added "4.0"}
-(fact "TODO")
+(fact "maps across json text")
