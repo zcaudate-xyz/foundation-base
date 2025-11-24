@@ -12,16 +12,11 @@
    => true"
   {:added "3.0"}
   ([ck data]
-   (let [results (reduce-kv (fn [out k sck]
-                              (let [res (common/verify sck (get data k))]
-                                (if (common/succeeded? res)
-                                  out
-                                  (assoc out k (:actual res)))))
-                            {}
-                            ck)]
-     (if (empty? results)
-       true
-       results))))
+   (->> (reduce-kv (fn [out k sck]
+                     (conj out (common/verify sck (get data k))))
+                   []
+                   ck)
+        (every? common/succeeded?))))
 
 (defn verify-seq
   "takes two seqs and determines if they fit

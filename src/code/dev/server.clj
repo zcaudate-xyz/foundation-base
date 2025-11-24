@@ -14,10 +14,10 @@
 
 (def ^:dynamic *port* 1311)
 
+(defonce *instance* (atom nil))
+
 (def ^:dynamic *public-path* "assets/code.dev/public")
 
-(defonce ^:dynamic *instance*
-  (atom nil))
 
 (def api-routes
   (router/router
@@ -29,7 +29,22 @@
      "to-js-dsl"       api-task/to-js-dsl
      "to-jsxc-dsl"     api-task/to-jsxc-dsl
      "to-python-dsl"   api-task/to-python-dsl
-     "to-plpgsql-dsl"  api-task/to-plpgsql-dsl})))
+     "to-plpgsql-dsl"  api-task/to-plpgsql-dsl
+     "browser/namespaces" (fn [req]
+                            (let [lang (or (get-in req [:params :lang]) "js")]
+                              (require 'code.dev.server.api-browser)
+                              ((resolve 'code.dev.server.api-browser/list-namespaces) lang)))
+     "browser/components" (fn [req]
+                            (let [lang (or (get-in req [:params :lang]) "js")
+                                  ns   (get-in req [:params :ns])]
+                              (require 'code.dev.server.api-browser)
+                              ((resolve 'code.dev.server.api-browser/list-components) lang ns)))
+     "browser/component"  (fn [req]
+                            (let [lang (or (get-in req [:params :lang]) "js")
+                                  ns   (get-in req [:params :ns])
+                                  comp (get-in req [:params :component])]
+                              (require 'code.dev.server.api-browser)
+                              ((resolve 'code.dev.server.api-browser/get-component) lang ns comp)))})))
 
 (def page-routes
   (router/router
