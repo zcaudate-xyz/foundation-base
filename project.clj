@@ -4,7 +4,8 @@
   :license  {:name "MIT License"
              :url  "http://opensource.org/licenses/MIT"}
   :aliases
-  {"test"  ["run" "-m" "code.test"]
+  {"test"    ["run" "-m" "code.test"]
+   "manage"  ["run" "-m" "code.manage"]
    #_#_"test-unit"   ["run" "-m" "code.test" "exit"]
    "publish"     ["exec" "-ep" "(use 'code.doc)     (deploy-template :all) (publish :all)"]
    "incomplete"  ["exec" "-ep" "(use 'code.manage)  (incomplete :all) (System/exit 0)"]
