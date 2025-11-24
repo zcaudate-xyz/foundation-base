@@ -34,8 +34,10 @@
    (traverse (nav/parse-string "()")
              '(+ 1 2 3)))
   => (throws)
+
   ($ {:string "(ns hello) ()"}
       [(ns ^:%+ (keyword "oeuoeuoe"))])
+  => '[(ns hello :oeuoeuoe) ()]
 
   
   (nav/value
@@ -61,13 +63,20 @@
   => "^:a (defn :hello hello3) (defn :hello hello)")
 
 ^{:refer code.query/context-zloc :added "3.0"}
-(fact "gets the context for loading forms")
+(fact "gets the context for loading forms"
+
+  (context-zloc (nav/parse-string "1"))
+  => (comp nav/navigator?))
 
 ^{:refer code.query/wrap-vec :added "3.0"}
-(fact "ensures an item is wrapped in a vector, or handles it as a vector if it already is one")
+(fact "ensures an item is wrapped in a vector, or handles it as a vector if it already is one"
+  ((wrap-vec (fn [x opts] x)) [1] {}) => [1]
+  ((wrap-vec (fn [x opts] x)) 1 {}) => 1)
 
 ^{:refer code.query/wrap-return :added "3.0"}
-(fact "decides whether to return a string, zipper or sexp representation`")
+(fact "decides whether to return a string, zipper or sexp representation`"
+  ((wrap-return (fn [res opts] res)) (nav/parse-string "1") {:return :string})
+  => "1")
 
 ^{:refer code.query/$* :added "3.0"}
 (fact "provides a lower-level interface for selecting and manipulating Clojure source code, used as a helper for `$`")
@@ -88,7 +97,7 @@
           {:return :string}))
   => [":oeuoeuoe" ":oeuoeuoe"]
 
-  ($ (nav/parse-root "a b c") [{:is a}])
+  ($ (nav/parse-root "a b c") [{:is 'a}])
   => '[a])
 
 (comment

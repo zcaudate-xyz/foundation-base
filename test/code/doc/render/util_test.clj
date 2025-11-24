@@ -16,7 +16,8 @@
   => "&lt;&gt;")
 
 ^{:refer code.doc.render.util/basic-html-unescape :added "3.0"}
-(fact "unescape html output for rendering")
+(fact "unescape html output for rendering"
+  (basic-html-unescape "&amp;lt;") => "&lt;")
 
 ^{:refer code.doc.render.util/join-string :added "3.0"}
 (fact "join string in the form of vector or string"

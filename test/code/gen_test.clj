@@ -13,12 +13,21 @@
     "  []"
     "  (hello-name (szndb.core.fn-util/auth-uid) 1 2 3))"]))
 
+(def TEMPLATE_QUERY
+  (str/join-lines
+   ["(defn.pg ^{:%% :sql"
+    "           :- ~return"
+    "           :api/meta ~meta-entry}"
+    "  ~sym"
+    "  []"
+    "  (~name (szndb.core.fn-util/auth-uid) ~@hello))"]))
+
 ^{:refer code.gen/get-template-params :added "4.0"}
 (fact "gets the template params in the query"
   ^:hidden
   
   (gen/get-template-params
-   (b/parse-first PUBLIC_QUERY))
+   (b/parse-first TEMPLATE_QUERY))
   => '((unquote return)
        (unquote meta-entry)
        (unquote sym)
@@ -28,7 +37,8 @@
 ^{:refer code.gen/get-template :added "4.0"}
 (fact "gets the template"
 
-  (gen/get-template PUBLIC_QUERY))
+  (gen/get-template TEMPLATE_QUERY)
+  => map?)
 
 ^{:refer code.gen/fill-template :added "4.0"}
 (fact "fills out the template"
@@ -36,7 +46,7 @@
   
   (str/split-lines
    (gen/fill-template
-    (gen/get-template PUBLIC_QUERY)
+    (gen/get-template TEMPLATE_QUERY)
     '{return :json
       meta-entry {:sb/grant :all}
       sym hello
@@ -109,4 +119,4 @@
   (second
    (b/children
     (b/parse-root PUBLIC_QUERY)))
-  )
+)

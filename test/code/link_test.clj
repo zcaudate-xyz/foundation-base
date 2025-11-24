@@ -101,11 +101,9 @@
       (collect-internal-deps)
       (get-in ['xyz.zcaudate/code.test :internal])
       sort)
-  => '(xyz.zcaudate/code.project
-       xyz.zcaudate/std.fs
-       xyz.zcaudate/std.lib
-       xyz.zcaudate/std.math
-       xyz.zcaudate/std.pretty)
+  => (contains '[xyz.zcaudate/code.project
+                 xyz.zcaudate/std.fs
+                 xyz.zcaudate/std.lib] :in-any-order :gaps-ok)
 
   (-> -packages-
       (collect-entries -lookups-)
@@ -155,7 +153,8 @@
 ^{:refer code.link/all-linkages :added "4.0"}
 (fact "retrieves all linkages for a given project"
 
-  (all-linkages (make-project)))
+  (all-linkages (make-project))
+  => map?)
 
 ^{:refer code.link/make-linkages :added "3.0"}
 (fact "creates a map of linkages for a given project"

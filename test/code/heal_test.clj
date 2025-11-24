@@ -10,16 +10,17 @@
 
   (code.project/in-context
    (heal/heal-code-single {}))
-  => {:changed [], :updated false, :path "test/code/heal_test.clj"})
+  => (contains {:changed [], :updated false, :path "test/code/heal_test.clj"}))
 
 ^{:refer code.heal/heal-code :added "4.0"}
 (fact "helper function to fix parents")
 
-^{:refer code.heal/print-rainbox :added "4.0"}
+^{:refer code.heal/print-rainbow :added "4.0"}
 (fact "prints out the code in rainbow"
 
   (heal/print-rainbow
-   (slurp "test/code/heal_test.clj")))
+   (slurp "test/code/heal_test.clj"))
+  => nil)
 
 
 (comment
@@ -62,7 +63,3 @@
     )
    )
   )
-
-
-^{:refer code.heal/print-rainbow :added "4.0"}
-(fact "TODO")

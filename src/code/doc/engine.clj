@@ -30,7 +30,7 @@
                                  (wrap-hidden (h/multi:clone v (str k))))
 
                           (fn? v)
-                          (assoc out (keyword v) v)
+                          (assoc out (keyword k) v)
 
                           :else out)))
                 {}
