@@ -32,7 +32,9 @@
   => {:title "hello", :tag "hello-3"})
 
 ^{:refer code.doc.link.tag/link-tags :added "3.0"}
-(fact "link tags to all elements for a particular article")
+(fact "link tags to all elements for a particular article"
 
-(comment
-  (code.manage/import))
+  (-> (link-tags {:articles {"doc" {:elements [{:type :chapter :title "Intro"}]}}}
+                 "doc")
+      (get-in [:articles "doc" :elements]))
+  => [{:type :chapter :title "Intro" :tag "intro"}])

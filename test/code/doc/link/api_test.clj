@@ -16,45 +16,25 @@
       code.test.compile [fact facts =>]})
 
 ^{:refer code.doc.link.api/create-api-table :added "3.0"}
-(fact "creates a api table for publishing")
+(fact "creates a api table for publishing"
+  ;; Test this needs a lot of context (project, references).
+  ;; Mocking might be needed, or using a simple project structure.
+  ;; For now, we can test with empty data to see if it runs.
+
+  (create-api-table {}
+                    {:lookup (constantly nil)}
+                    'code.doc.link.api)
+  => {})
 
 ^{:refer code.doc.link.api/link-apis :added "3.0"}
-(fact "links all the api source and test files to the elements")
+(fact "links all the api source and test files to the elements"
 
-(comment
-  (external-vars (project/file-lookup (project/project))
-                 'std.block)
-
-  (external-vars (project/file-lookup (project/project))
-                 'std.string)
-
-  (-> INTERIM
-      (link-apis "hara-zip")
-      (get-in [:articles "hara-zip" :elements])
-      (->> (filter #(-> % :type (= :api))))
-      (first)
-      :table
-      (keys))
-
-  (keys (:references INTERIM)))
-
-(comment
-  (do (require '[code.doc :as publish]
-               '[code.doc.theme :as theme]
-               '[code.project :as project]
-               '[code.doc.parse :as parse]
-               '[code.doc.collect.reference :refer [collect-references]]
-               '[code.doc.collect.api :refer [collect-apis]])
-
-      (def project-file "/Users/chris/Development/chit/hara/project.clj")
-
-      (def PROJECT (let [project (project/project project-file)]
-                     (assoc project :lookup (project/file-lookup project))))
-
-      (theme/load-settings "stark" PROJECT)
-
-      (def INTERIM (-> (parse/parse-file
-                        "test/documentation/hara_zip.clj" PROJECT)
-                       (->> (assoc-in {} [:articles "hara-zip" :elements]))
-                       (assoc :project PROJECT)
-                       (collect-references "hara-zip")))))
+  (let [project {:lookup (constantly nil) :root "."}
+        interim {:references {}
+                 :project project
+                 :articles {"doc" {:elements [{:type :api :namespace "code.doc.link.api"}]}}}]
+    (-> (link-apis interim "doc")
+        (get-in [:articles "doc" :elements])
+        first
+        keys)
+    => (contains [:project :table])))

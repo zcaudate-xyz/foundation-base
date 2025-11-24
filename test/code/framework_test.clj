@@ -20,7 +20,11 @@
   => vector?)
 
 ^{:refer code.framework/analyse-source-function :added "3.0"}
-(fact "analyzes a single function definition within a source file, used as a helper for `analyse-source-code`")
+(fact "analyzes a single function definition within a source file, used as a helper for `analyse-source-code`"
+
+  (analyse-source-function (code.edit/parse-string "(defn foo [] 1)"))
+  => (contains {:var 'foo
+                :source {:code "(defn foo [] 1)"}}))
 
 ^{:refer code.framework/analyse-source-code :added "3.0"}
 (fact "analyses a source file for namespace and function definitions"
@@ -60,7 +64,8 @@
 ^{:refer code.framework/analyse-file :added "3.0"}
 (fact "analyzes a source or test file for namespace and function definitions, used as a helper for `analyse`"
 
-  (analyse-file [:source "src/code/framework.clj"]))
+  (analyse-file [:source "src/code/framework.clj"])
+  => (contains {:source (contains {'code.framework (contains '[analyse])})}))
 
 ^{:refer code.framework/analyse :added "3.0"}
 (fact "seed analyse function for the `code.manage/analyse` task"
@@ -98,10 +103,13 @@
                  analyse-source-function]))
 
 ^{:refer code.framework/read-ns-form :added "4.0"}
-(fact "memoised version of fs/read-ns")
+(fact "memoised version of fs/read-ns"
+  (read-ns-form "src/code/framework.clj")
+  => (contains '(ns code.framework)))
 
 ^{:refer code.framework/no-test :added "4.0"}
-(fact "checks that a namespace does not require test")
+(fact "checks that a namespace does not require test"
+  (project/in-context (no-test 'code.framework)) => nil)
 
 ^{:refer code.framework/docstrings :added "3.0"}
 (fact "returns all docstrings in a given namespace with given keys"
@@ -145,7 +153,8 @@
 (fact "finds code based on string query"
 
   (project/in-context (grep-search {:query '[docstrings]
-                                    :print {:function true}})))
+                                    :print {:function true}}))
+  => seq?)
 
 ^{:refer code.framework/grep-replace :added "3.0"}
 (fact "replaces code based on string query"

@@ -13,7 +13,8 @@
 ^{:refer code.project/project-map :added "3.0"}
 (fact "returns the project map"
 
-  (project-map (fs/path "project.clj")))
+  (project-map (fs/path "project.clj"))
+  => map?)
 
 ^{:refer code.project/project :added "3.0"}
 (fact "returns project options as a map"
@@ -46,7 +47,8 @@
 ^{:refer code.project/lookup-path :added "3.0"}
 (fact "looks up the path given the `ns`"
 
-  (lookup-path (h/ns-sym)))
+  (lookup-path (h/ns-sym))
+  => string?)
 
 ^{:refer code.project/get-path :added "4.0"
   :setup [(reset! code.project.common/*lookup* {})]}
@@ -125,7 +127,8 @@
 ^{:refer code.project/code-files :added "3.0"}
 (fact "returns only the code files for the current project"
 
-  (code-files))
+  (code-files)
+  => (contains '{code.project any} :gaps-ok))
 
 ^{:refer code.project/code-path :added "3.0"}
 (fact "returns the path of the code"

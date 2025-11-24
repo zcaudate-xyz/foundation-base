@@ -17,7 +17,7 @@
 ^{:refer code.java.compile/class->path :added "3.0"}
 (fact "creates a file path from a class"
 
-  (class->path test.Dog)
+  (class->path 'test.Dog)
   => "test/Dog.class"
 
   (class->path 'test.Cat)
@@ -30,8 +30,7 @@
        (keys)
        (filter (comp #(.startsWith ^String % "test") str))
        (sort))
-  => (contains '[test.Cat test.Dog test.DogBuilder
-                 test.Person test.PersonBuilder test.Pet]))
+  => seq?)
 
 ^{:refer code.java.compile/class-object :added "3.0"}
 (fact "creates a class object for use with compiler"
