@@ -2,6 +2,8 @@
   (:require [std.lib :as h]
             [code.test.base.process :as process]))
 
+(def ^:dynamic *path* nil)
+
 (def => '=>)
 
 (declare rewrite-nested-checks)
@@ -25,11 +27,16 @@
                                          (catch Throwable t# {:status :exception :data t#}))
                     output-wrapper `(try {:status :success :data ~target}
                                          (catch Throwable t# {:status :exception :data t#}))
+                    line   (or (:line (meta next)) (:line (meta curr)) (:line (meta form)))
+                    column (or (:column (meta next)) (:column (meta curr)) (:column (meta form)))
                     check-form `(process/process
                                   {:type :test-equal
                                    :input {:form (quote ~curr) :value ~input-wrapper}
                                    :output {:form (quote ~target) :value ~output-wrapper}
-                                   :meta (merge ~(meta form) {:parent-form (quote ~form)})})]
+                                   :meta (merge ~(when *path* {:path *path*})
+                                                ~(meta form)
+                                                {:line ~line :column ~column}
+                                                {:parent-form (quote ~form)})})]
                 (recur (conj acc check-form) target-rest))))
           ;; Not a check, recurse on curr and continue
           (recur (conj acc (rewrite-nested-checks curr)) rest))))))

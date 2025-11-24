@@ -64,7 +64,7 @@
 (defn print-thrown
   "outputs the description for a form that throws an exception"
   {:added "3.0"}
-  ([{:keys [path name ns line desc form replace original actual parent] :as summary}]
+  ([{:keys [path name ns line desc form replace original actual parent data] :as summary}]
    (let [line (if line (str "L:" line " @ ") "")
          bform (walk/postwalk-replace replace form)
          pattern? (not= bform form)]
