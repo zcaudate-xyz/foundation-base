@@ -33,6 +33,7 @@
       :return
       :throw
       :await
+      :async
       :data-table
       :data-shortcuts
       :data-range

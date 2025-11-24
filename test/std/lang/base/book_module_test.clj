@@ -79,6 +79,7 @@
         xt.lang.base-lib/nil?
         js.react/Component
         js.react/init
+        js.react/createDOMRoot
         xt.lang.base-lib/get-key
         js.core/min
         js.react/local
@@ -111,32 +112,34 @@
     :js
     'js.react)
    #{:defn})
-  => ' ([(:% \" useStateFor \") js.react/useStateFor]
-        [(:% \" id \") js.react/id]
-        [(:% \" useStep \") js.react/useStep]
-        [(:% \" makeLazy \") js.react/makeLazy]
-        [(:% \" useLazy \") js.react/useLazy]
-        [(:% \" useRefresh \") js.react/useRefresh]
-        [(:% \" useGetCount \") js.react/useGetCount]
-        [(:% \" useFollowRef \") js.react/useFollowRef]
-        [(:% \" useIsMounted \") js.react/useIsMounted]
-        [(:% \" useIsMountedWrap \") js.react/useIsMountedWrap]
-        [(:% \" useMountedCallback \") js.react/useMountedCallback]
-        [(:% \" useFollowDelayed \") js.react/useFollowDelayed]
-        [(:% \" useStablized \") js.react/useStablized]
-        [(:% \" runIntervalStop \") js.react/runIntervalStop]
-        [(:% \" runIntervalStart \") js.react/runIntervalStart]
-        [(:% \" useInterval \") js.react/useInterval]
-        [(:% \" runTimeoutStop \") js.react/runTimeoutStop]
-        [(:% \" runTimeoutStart \") js.react/runTimeoutStart]
-        [(:% \" useTimeout \") js.react/useTimeout]
-        [(:% \" useCountdown \") js.react/useCountdown]
-        [(:% \" useNow \") js.react/useNow]
-        [(:% \" useSubmit \") js.react/useSubmit]
-        [(:% \" useSubmitResult \") js.react/useSubmitResult]
-        [(:% \" convertIndex \") js.react/convertIndex]
-        [(:% \" convertModular \") js.react/convertModular]
-        [(:% \" convertIndices \") js.react/convertIndices]
-        [(:% \" convertPosition \") js.react/convertPosition]
-        [(:% \" useChanging \") js.react/useChanging]
-        [(:% \" useTree \") js.react/useTree]))
+  => '([(:% \" getDOMRoot \") js.react/getDOMRoot]
+       [(:% \" renderDOMRoot \") js.react/renderDOMRoot]
+       [(:% \" useStateFor \") js.react/useStateFor]
+       [(:% \" id \") js.react/id]
+       [(:% \" useStep \") js.react/useStep]
+       [(:% \" makeLazy \") js.react/makeLazy]
+       [(:% \" useLazy \") js.react/useLazy]
+       [(:% \" useRefresh \") js.react/useRefresh]
+       [(:% \" useGetCount \") js.react/useGetCount]
+       [(:% \" useFollowRef \") js.react/useFollowRef]
+       [(:% \" useIsMounted \") js.react/useIsMounted]
+       [(:% \" useIsMountedWrap \") js.react/useIsMountedWrap]
+       [(:% \" useMountedCallback \") js.react/useMountedCallback]
+       [(:% \" useFollowDelayed \") js.react/useFollowDelayed]
+       [(:% \" useStablized \") js.react/useStablized]
+       [(:% \" runIntervalStop \") js.react/runIntervalStop]
+       [(:% \" runIntervalStart \") js.react/runIntervalStart]
+       [(:% \" useInterval \") js.react/useInterval]
+       [(:% \" runTimeoutStop \") js.react/runTimeoutStop]
+       [(:% \" runTimeoutStart \") js.react/runTimeoutStart]
+       [(:% \" useTimeout \") js.react/useTimeout]
+       [(:% \" useCountdown \") js.react/useCountdown]
+       [(:% \" useNow \") js.react/useNow]
+       [(:% \" useSubmit \") js.react/useSubmit]
+       [(:% \" useSubmitResult \") js.react/useSubmitResult]
+       [(:% \" convertIndex \") js.react/convertIndex]
+       [(:% \" convertModular \") js.react/convertModular]
+       [(:% \" convertIndices \") js.react/convertIndices]
+       [(:% \" convertPosition \") js.react/convertPosition]
+       [(:% \" useChanging \") js.react/useChanging]
+       [(:% \" useTree \") js.react/useTree]))

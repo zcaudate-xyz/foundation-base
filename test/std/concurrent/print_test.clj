@@ -28,9 +28,3 @@
 
 ^{:refer std.concurrent.print/with-system :added "3.0"}
 (fact "with system print instead of local")
-
-^{:refer std.concurrent.print/with-out-str :added "3.0"}
-(fact "gets the local string"
-
-  (print/with-out-str (print/print "hello"))
-  => "hello")

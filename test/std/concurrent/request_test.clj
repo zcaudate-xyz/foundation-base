@@ -147,7 +147,7 @@
                 (req + [1 2 3] {:debug true})
                 (req + [1 2 3] {:debug true})
                 (req - [4 5 6] {:debug true}))
-      (std.print/with-out-str))
+      (h/with-out-str))
   => string?)
 
 ^{:refer std.concurrent.request/bulk-context :added "3.0"}
@@ -482,7 +482,7 @@
   (-> (req:transact [|client| {:debug true}]
                     (req |client| {:type :eval :form 1} {:debug true})
                     (req |client| {:type :eval :form 2} {:debug true}))
-      (std.print/with-out-str))
+      (h/with-out-str))
   => string?)
 
 ^{:refer std.concurrent.request/bulk:map :added "3.0"
