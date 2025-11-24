@@ -28,6 +28,8 @@
 
 (defonce ^:dynamic *root* ".")
 
+(defonce ^:dynamic *results* nil)
+
 ;; When a namespace is run:
 ;; - *eval* is set to false
 ;; - the namespace is cleared

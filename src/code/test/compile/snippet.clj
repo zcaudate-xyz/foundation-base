@@ -183,7 +183,8 @@
    (let [{:keys [before after]} check]
      `(fn [~'thunk]
         (fn []
-          (binding [rt/*eval-check* {:guard  ~guard
+          (binding [rt/*results* (atom [])
+                    rt/*eval-check* {:guard  ~guard
                                      :before (fn []
                                                ~@(mapcat #(fact-use % [:check :before]) (:use m))
                                                ~@(vecify before))
