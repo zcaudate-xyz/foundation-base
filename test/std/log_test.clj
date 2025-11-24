@@ -1,17 +1,21 @@
 (ns std.log-test
   (:use code.test)
   (:require [std.log :as log]
-            [std.log.common :as common]))
+            [std.log.common :as common]
+            [std.print.format.common :as format.common]
+            [std.protocol.log :as protocol.log]))
 
 ^{:refer std.log/create :added "3.0"}
 (fact "creates a component compatible logger"
 
-  (log/create {:type :basic}))
+  (log/create {:type :basic})
+  => (partial satisfies? protocol.log/ILogger))
 
 ^{:refer std.log/logger :added "3.0"}
 (fact "creates an starts a logger"
 
-  (log/logger {:type :basic}))
+  (log/logger {:type :basic})
+  => (partial satisfies? protocol.log/ILogger))
 
 ^{:refer std.log/logger? :added "3.0"}
 (fact "checks if the object is a logger"
@@ -20,22 +24,47 @@
   => true)
 
 ^{:refer std.log/with-indent :added "3.0"}
-(fact "executes body with a given indent")
+(fact "executes body with a given indent"
+
+  (log/with-indent 2
+    format.common/*indent*)
+  => 2)
 
 ^{:refer std.log/with-level :added "3.0"}
-(fact "executes body with a given level")
+(fact "executes body with a given level"
+
+  (log/with-level :info
+    common/*level*)
+  => :info)
 
 ^{:refer std.log/with-logger :added "3.0"}
-(fact "executes code with a logger")
+(fact "executes code with a logger"
+
+  (let [l (log/create {:type :basic})]
+    (log/with-logger l
+      common/*logger*))
+  => (partial satisfies? protocol.log/ILogger))
 
 ^{:refer std.log/with-overwrite :added "3.0"}
-(fact "executes code with a given overwrite")
+(fact "executes code with a given overwrite"
+
+  (log/with-overwrite {:a 1}
+    common/*overwrite*)
+  => {:a 1})
 
 ^{:refer std.log/current-context :added "3.0"}
-(fact "returns the current context")
+(fact "returns the current context"
+
+  (log/with-context {:a 1}
+    (log/current-context))
+  => (contains {:a 1}))
 
 ^{:refer std.log/with-context :added "3.0"}
-(fact "executes code with a given context")
+(fact "executes code with a given context"
+
+  (log/with-context {:a 1}
+    common/*context*)
+  => (contains {:a 1}))
 
 ^{:refer std.log/with :added "3.0"}
 (fact "enables targeted printing of statements" ^:hidden
@@ -56,10 +85,18 @@
   => nil)
 
 ^{:refer std.log/with-logger-basic :added "3.0"}
-(fact "executes code with the basic logger (for debugging the logger)")
+(fact "executes code with the basic logger (for debugging the logger)"
+
+  (log/with-logger-basic
+    common/*logger*)
+  => (partial satisfies? protocol.log/ILogger))
 
 ^{:refer std.log/with-logger-verbose :added "3.0"}
-(fact "executes code with a verbose logger (for printing out everything)")
+(fact "executes code with a verbose logger (for printing out everything)"
+
+  (log/with-logger-verbose
+    common/*level*)
+  => :verbose)
 
 (comment
   (./import)
