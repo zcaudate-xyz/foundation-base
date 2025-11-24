@@ -6,6 +6,7 @@
             [code.test.base.runtime :as rt]
             [code.test.compile.snippet :as snippet]
             [code.test.compile.types :as types]
+            [code.test.compile.rewrite :as rewrite]
             [std.math :as math]
             [std.lib :as h]))
 
@@ -196,6 +197,7 @@
   {:added "3.0"}
   ([meta body]
    (let [{:keys [ns id global]} meta
+         body  (map rewrite/rewrite-nested-checks body)
          bare  (strip body)
          full  (binding [*compile-meta* meta] (split body))
          code  {:declare  (snippet/fact-declare meta)

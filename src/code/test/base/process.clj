@@ -12,11 +12,13 @@
         (into {}))
    => (contains {:status :success, :data 6, :form '(+ 1 2 3), :from :evaluate})"
   {:added "3.0"}
-  ([{:keys [form]}]
-   (let [out (try
-               {:status :success :data (eval form)}
-               (catch Throwable t
-                 {:status :exception :data t}))]
+  ([{:keys [form value]}]
+   (let [out (if value
+               value
+               (try
+                 {:status :success :data (eval form)}
+                 (catch Throwable t
+                   {:status :exception :data t})))]
      (res/result (assoc out :form form :from :evaluate)))))
 
 (defmulti process
@@ -90,6 +92,8 @@
      (h/signal {:test :check :result (assoc result
                                             :replace rt/*eval-replace*
                                             :compare compare)})
+     (when rt/*results*
+       (swap! rt/*results* conj result))
      (if (and guard (not (:data result)))
        (h/error "Guard failed" {}))
      result)))
@@ -103,15 +107,16 @@
    => true"
   {:added "3.0"}
   ([meta results]
-   (h/signal {:id rt/*run-id* :test :fact :meta meta :results results})
-   (and (->> results
-             (filter #(-> % :from (= :verify)))
-             (mapv :data)
-             (every? true?))
-        (->> results
-             (filter #(and (-> % :from (= :evaluate))
-                           (-> % :type (= :exception))))
-             (empty?)))))
+   (let [results (if rt/*results* @rt/*results* results)]
+     (h/signal {:id rt/*run-id* :test :fact :meta meta :results results})
+     (and (->> results
+               (filter #(-> % :from (= :verify)))
+               (mapv :data)
+               (every? true?))
+          (->> results
+               (filter #(and (-> % :from (= :evaluate))
+                             (-> % :type (= :exception))))
+               (empty?))))))
 
 (defn skip
   "returns the form with no ops evaluated"
