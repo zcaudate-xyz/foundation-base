@@ -13,15 +13,19 @@
   '#{if let while ns 
      if-let if-some if-not
      when when-not when-some when-first
-     doto dotimes 
+     doto dotimes
+     letfn locking monitor-enter
      binding with-bindings with-bindings*
-     with-local-vars with-redefs for loop doseq
+     with-local-vars with-redefs with-redefs-fn
+     for loop doseq
      with-open with-in-str with-precision
      extend extend-protocol extend-type})
 
 (def +defs+
   '#{fn defn defmacro
      defn-
+     defonce defmulti defmethod
+     defprotocol defrecord deftype
      defmacro.js defn.js def.js def$.js def-.js
      defmacro.py defn.py def.py def$.py def-.py
      defmacro.lua defn.lua def.lua def$.lua def-.lua
@@ -62,7 +66,16 @@
 
                 (= 'hash-map (first form))
                 {:columns 2
-                 :col-from 0}                
+                 :col-from 0}
+
+                (= 'cond (first form))
+                {:columns 2
+                 :col-from 0
+                 :col-align true}
+
+                (= 'defmethod (first form))
+                {:col-from 2
+                 :col-start 2}
                 
                 (+bindings+ (first form))
                 {:col-from 1
@@ -190,10 +203,12 @@
               
               (+bindings+ (first form))
               (let [[sym bindings & more] form]
-                (apply list
-                       sym
-                       (layout-annotate-bindings bindings)
-                       more))
+                (if (= sym 'letfn)
+                  form
+                  (apply list
+                         sym
+                         (layout-annotate-bindings bindings)
+                         more)))
 
               :else form)
 
