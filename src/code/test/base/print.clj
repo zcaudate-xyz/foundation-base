@@ -4,6 +4,7 @@
             [std.fs :as fs]
             [code.test.checker.common :as checker]
             [code.test.base.runtime :as rt]
+            [code.test.diff :as diff]
             [std.lib.walk :as walk]
             [std.print :as print]
             [std.pretty :as pretty]))
@@ -17,6 +18,12 @@
 
         :else path))
 
+(defn pad [s n]
+  (let [len (count s)]
+    (if (< len n)
+      (str (apply str (repeat (- n len) " ")) s)
+      s)))
+
 (defn print-success
   "outputs the description for a successful test"
   {:added "3.0"}
@@ -26,39 +33,80 @@
       "\n"
       (str (ansi/style "Success" #{:green :bold})
            (ansi/style (format "  %s%s" line (or (rel path) "<current>")) #{:bold})
-           (if name (str "\n   " (ansi/white "Refer") "  " (ansi/style name #{:bold})) "")
-           (if desc (str "\n    " (ansi/white "Info") "  \"" desc "" \") "")
-           (str "\n    " (ansi/white "Form") "  " (str/indent (pretty/pprint-str form) 4))
-           (str "\n   " (ansi/white "Check") "  " check))))))
+           (if name (str "\n   " (ansi/white (pad "Refer" 7)) "  " (ansi/style name #{:bold})) "")
+           (if desc (str "\n   " (ansi/white (pad "Info" 7)) "  \"" desc "" \") "")
+           (str "\n   " (ansi/white (pad "Form" 7)) "  " (str/indent (pretty/pprint-str form) 4))
+           (str "\n   " (ansi/white (pad "Check" 7)) "  " check))))))
+
+(defn format-diff-map [diff indent]
+  (let [missing (:+ diff)
+        extra   (:- diff)
+        changed (:> diff)]
+    (str/join "\n"
+              (concat
+               (for [[k v] missing]
+                 (str (apply str (repeat indent " ")) (ansi/green "+ ") (pr-str k) " " (pr-str v)))
+               (for [[k v] extra]
+                 (str (apply str (repeat indent " ")) (ansi/red "- ") (pr-str k) " " (pr-str v)))
+               (for [[k v] changed]
+                 (str (apply str (repeat indent " ")) (ansi/yellow "> ") (pr-str k) " " (pr-str v)))))))
+
+(defn format-diff-seq [diff indent]
+  (if (vector? diff)
+    (str/join "\n"
+              (for [[op & args] diff]
+                (str (apply str (repeat indent " "))
+                     (case op
+                       :+ (str (ansi/green "+") " at " (first args) ": " (pr-str (second args)))
+                       :- (str (ansi/red "-") " at " (first args) ": " (second args) " items")
+                       (pr-str [op args])))))
+    (str/indent (pretty/pprint-str diff) indent)))
+
+(defn format-diff [diff]
+  (cond (and (map? diff) (or (:+ diff) (:- diff) (:> diff)))
+        (format-diff-map diff 4)
+
+        (vector? diff)
+        (format-diff-seq diff 4)
+
+        :else
+        (str/indent (pretty/pprint-str diff) 4)))
 
 (defn print-failure
   "outputs the description for a failed test"
   {:added "3.0"}
-  ([{:keys [path name ns line desc form check compare actual replace original parent] :as summary}]
+  ([{:keys [path name ns line desc form check compare actual replace original parent checker] :as summary}]
    (let [line (if line (str "L:" line " @ ") "")
          bform  (walk/postwalk-replace replace form)
          bcheck (walk/postwalk-replace replace check)
-         pattern? (or (not= bform form) (not= bcheck check))]
+         pattern? (or (not= bform form) (not= bcheck check))
+         expect (or (:expect checker) check)
+         diff   (if (not compare) (diff/diff expect actual))]
      (print/println
       (str (ansi/style "Failure" #{:red :bold})
            (ansi/style (format "  %s%s" line (or (rel path) "<current>")) #{:bold})
-           (if name (str "\n   " (ansi/white "Refer") "  " (ansi/style name #{:bold})) "")
-           (if desc (str "\n    " (ansi/white "Info") "  \"" desc "" \") "")
-           (str "\n    " (ansi/white "Form") "  " (str/indent (pretty/pprint-str bform) 4))
-           (if compare
-             (str "\n   " (ansi/white "Compare") "  \n"
-                  (str/indent (pretty/pprint-str compare)
-                              4))
-             (str
-              (str "\n   " (ansi/white "Check") "  " (str/indent (pretty/pprint-str bcheck) 4))
-              (str "\n    " (ansi/white "Eval") "  " (if (coll? actual)
-                                                       (str/indent (pretty/pprint-str actual) 4)
-                                                       actual))))
-           (if pattern? (str "\n " (ansi/white "Pattern") "  " (ansi/blue (str form " : " check))))
-           (if original (str "\n  " (ansi/white "Linked") "  " (ansi/blue (format "L:%d,%d"
+           (if name (str "\n   " (ansi/white (pad "Refer" 7)) "  " (ansi/style name #{:bold})) "")
+           (if desc (str "\n   " (ansi/white (pad "Info" 7)) "  \"" desc "" \") "")
+           (str "\n   " (ansi/white (pad "Form" 7)) "  " (str/indent (pretty/pprint-str bform) 4))
+           (cond compare
+                 (str "\n   " (ansi/white (pad "Compare" 7)) "  \n"
+                      (str/indent (pretty/pprint-str compare) 4))
+
+                 diff
+                 (str "\n   " (ansi/white (pad "Diff" 7)) "  \n"
+                      (format-diff diff))
+
+                 :else
+                 (str
+                  (str "\n   " (ansi/white (pad "Check" 7)) "  " (str/indent (pretty/pprint-str bcheck) 4))
+                  (str "\n   " (ansi/white (pad "Eval" 7)) "  " (if (coll? actual)
+                                                           (str/indent (pretty/pprint-str actual) 4)
+                                                           actual))))
+           (if pattern? (str "\n " (ansi/white (pad "Pattern" 7)) "  " (ansi/blue (str form " : " check))))
+           (if original (str "\n  " (ansi/white (pad "Linked" 7)) "  " (ansi/blue (format "L:%d,%d"
                                                                                   (:line original)
                                                                                   (:column original)))))
-           (if parent (str "\n  " (ansi/white "Parent") "  " (ansi/blue (str parent))))
+           (if parent (str "\n  " (ansi/white (pad "Parent" 7)) "  " (ansi/blue (str parent))))
            "\n")))))
 
 (defn print-thrown
@@ -71,18 +119,18 @@
      (print/println
       (str (ansi/style " Thrown" #{:yellow :bold})
            (ansi/style (format "  %s%s" line (or (rel path) "<current>")) #{:bold})
-           (if name (str "\n   " (ansi/white "Refer") "  " (ansi/style name #{:bold})) "")
-           (if desc (str "\n    " (ansi/white "Info") "  \"" desc "" \") "")
-           (str "\n    " (ansi/white "Form") "  " (str/indent (pretty/pprint-str bform) 4))
-           (str "\n    " (ansi/white "Data") "  " (if (instance? Throwable data)
+           (if name (str "\n   " (ansi/white (pad "Refer" 7)) "  " (ansi/style name #{:bold})) "")
+           (if desc (str "\n   " (ansi/white (pad "Info" 7)) "  \"" desc "" \") "")
+           (str "\n   " (ansi/white (pad "Form" 7)) "  " (str/indent (pretty/pprint-str bform) 4))
+           (str "\n   " (ansi/white (pad "Data" 7)) "  " (if (instance? Throwable data)
                                                     (or (.getMessage ^Throwable data) data)
                                                     data))
            (if (not= bform form) (str " :: " form))
-           (if pattern? (str "\n " (ansi/white "Pattern") "  " (ansi/blue (str form))))
-           (if original (str "\n  " (ansi/white "Linked") "  " (ansi/blue (format "L:%d,%d"
+           (if pattern? (str "\n " (ansi/white (pad "Pattern" 7)) "  " (ansi/blue (str form))))
+           (if original (str "\n  " (ansi/white (pad "Linked" 7)) "  " (ansi/blue (format "L:%d,%d"
                                                                                   (:line original)
                                                                                   (:column original)))))
-           (if parent (str "\n  " (ansi/white "Parent") "  " (ansi/blue (str parent))))
+           (if parent (str "\n  " (ansi/white (pad "Parent" 7)) "  " (ansi/blue (str parent))))
            "\n")))))
 
 (defn print-fact
@@ -104,14 +152,14 @@
        (print/println
         (str (ansi/style "   Fact" #{:blue :bold})
              (ansi/style (str "  [" (or path "<current>") line "]") #{:bold})
-             (if name (str "\n   " (ansi/white "Refer") "  " (ansi/style name #{:highlight :bold})) "")
-             (if desc (str "\n    " (ansi/white "Info") "  \"" desc "" \") "")
-             (str "\n  " (ansi/white "Passed") "  "
+             (if name (str "\n   " (ansi/white (pad "Refer" 7)) "  " (ansi/style name #{:highlight :bold})) "")
+             (if desc (str "\n   " (ansi/white (pad "Info" 7)) "  \"" desc "" \") "")
+             (str "\n  " (ansi/white (pad "Passed" 7)) "  "
                   (str (ansi/style num (if (= num total) #{:blue} #{:green}))
                        " of "
                        (ansi/blue total)))
              (if (pos? thrown)
-               (str "\n  " (ansi/white "Thrown") "  " (ansi/yellow thrown))
+               (str "\n  " (ansi/white (pad "Thrown" 7)) "  " (ansi/yellow thrown))
                ""))
         "\n")))))
 

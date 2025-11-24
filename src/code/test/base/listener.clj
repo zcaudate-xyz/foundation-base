@@ -18,6 +18,7 @@
     :desc     (-> result :meta :desc)
     :form     (-> result :actual :form)
     :check    (-> result :checker :form)
+    :checker  (-> result :checker)
     :actual   (-> result :actual :data)
     :replace  (-> result :replace)
     :compare  (-> result :compare)
