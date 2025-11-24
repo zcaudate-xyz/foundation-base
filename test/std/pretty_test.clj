@@ -79,7 +79,7 @@
 ^{:refer std.pretty/pprint-cc :added "4.0"}
 (fact "pprint with the std.concurrent.print framework"
 
-  (std.concurrent.print/with-out-str
+  (std.lib/with-out-str
     (pprint-cc {:a 1 :b 2 :c (range 5)}))
   => string?)
 

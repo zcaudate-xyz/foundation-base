@@ -384,12 +384,12 @@
       (status))
   => '([1 2 [[1 2 3 | 3] 4]]))
 
-^{:refer std.lib.zip/insert-token-to-right :added "3.0" :class [:zip/edit]}
+^{:refer std.lib.zip/insert-right :added "3.0" :class [:zip/edit]}
 (fact "insert element/s right of the current status"
   ^:hidden
 
   (-> (from-status '[| 1 2 3])
-      (insert-token-to-right 1 2 3)
+      (insert-right 1 2 3)
       (status))
   => '([| 3 2 1 1 2 3]))
 

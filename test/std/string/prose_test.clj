@@ -57,8 +57,8 @@
 ^{:refer std.string.prose/join-lines :added "4.0"}
 (fact "join non empty elements in array"
 
-  (join-lines "" ["hello" "world"])
-  => "helloworld")
+  (join-lines ["hello" "world"])
+  => "hello\nworld")
 
 ^{:refer std.string.prose/spaces :added "4.0"}
 (fact "create `n` spaces"

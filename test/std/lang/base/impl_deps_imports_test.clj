@@ -213,13 +213,14 @@
   => '{:native {"@measured/puck" {:as [* Puck]},
                 "@radix-ui/themes" {:as [* Radix], :bundle {"@radix-ui/themes/styles.css" {}}}},
        :direct #{}}
-
+  
   (deps-imports/module-imports
    (std.lang/get-book
     (std.lang/default-library)
     :js)
    'js.react)
-  => '{:native {"react" {:as React}}, :direct #{xt.lang.base-lib}}
+  => '{:native {"react" {:as React}, "react-dom/client" {:as ReactDOM}},
+       :direct #{xt.lang.base-lib}}
   
   (deps-imports/module-imports
    (std.lang/get-book

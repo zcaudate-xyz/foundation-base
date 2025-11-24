@@ -81,14 +81,7 @@
   ^:hidden
   
   (set (types-list))
-  => #{:contract.abi
-       :contract.sol
-       :custom
-       :module.graph
-       :module.schema
-       :module.single
-       :resource
-       :script})
+  => #{:script :directory :module.schema :module.graph :custom :module.single :resource :module.directory :module.root})
 
 ^{:refer std.make.compile/types-add :added "4.0"}
 (fact "adds a compilation type")

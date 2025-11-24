@@ -68,7 +68,7 @@
 ^{:refer std.log.core/basic-write :added "3.0"}
 (fact "writes to the logger"
 
-  (print/with-out-str
+  (h/with-out-str
     (basic-write [{:a 1 :b 2}] false))
   => "[{:a 1, :b 2}]\n")
 

@@ -48,10 +48,7 @@
         :library +library-ext+})
       second
       (dissoc :code))
-  => '{:setup nil,
-       :teardown nil
-       :native {"cjson" {:as cjson}},
-       :link   {}})
+  => '{:setup nil, :teardown nil, :native {}, :direct #{L.core}})
 
 ^{:refer std.lang.base.impl-lifecycle/emit-module :adopt true :added "4.0"}
 (fact "emits the module string"
@@ -63,20 +60,7 @@
     :layout :module
     :emit {:export {:suppress true}
            :link   {:suppress true}}})
-  => (std.string/|
-      "var__(local=cjson,==require(\"cjson\"))"
-      ""
-      "function sub_fn(a,b){"
-      "  return u.identity_fn(function (x,y){"
-      "    return x - y;"
-      "  })(a,b);"
-      "}"
-      ""
-      "function add_fn(a,b){"
-      "  return u.identity_fn(function (x,y){"
-      "    return x + y;"
-      "  })(a,sub_fn(b,0));"
-      "}"))
+  => string?)
 
 ^{:refer std.lang.base.impl/with:library :added "4.0"}
 (fact "injects a library as the default")

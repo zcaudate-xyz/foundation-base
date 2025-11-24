@@ -15,21 +15,21 @@
                      :columns [{:align :right :length 10}
                                {:align :center :length 10}
                                {:align :left :length 10}]})
-      (print/with-out-str)) ^:hidden
+      (h/with-out-str)) ^:hidden
   => "[1m        id   name   value     [0m\n\n")
 
 ^{:refer std.print.base.report/print-title :added "3.0" :tags #{:print}}
 (fact "prints the title"
 
   (-> (print-title "Hello World")
-      (print/with-out-str)) ^:hidden
+      (h/with-out-str)) ^:hidden
   => "[1m\n-----------\nHello World\n-----------[0m\n")
 
 ^{:refer std.print.base.report/print-subtitle :added "3.0"}
 (fact "prints the subtitle"
 
   (-> (print-subtitle "Hello Again")
-      (print/with-out-str)) ^:hidden
+      (h/with-out-str)) ^:hidden
   => "[1mHello Again[0m\n")
 
 ^{:refer std.print.base.report/print-row :added "3.0" :tags #{:print}}
@@ -43,7 +43,7 @@
                   :columns [{:align :right :length 10}
                             {:align :center :length 10}
                             {:align :left :length 10}]})
-      (print/with-out-str))
+      (h/with-out-str))
   => "     hello   :world   [34m[:a :b :c [0m\n                      [34m :d :e :f][0m\n")
 
 ^{:refer std.print.base.report/print-column :added "3.0"}
@@ -52,14 +52,14 @@
   (-> (print-column [[:id.a {:data 100}] [:id.b {:data 200}]]
                     :data
                     #{})
-      (print/with-out-str)) ^:hidden
+      (h/with-out-str)) ^:hidden
   => string?)
 
 ^{:refer std.print.base.report/print-summary :added "3.0" :tags #{:print}}
 (fact "outputs the summary of results"
 
   (-> (print-summary {:count 6 :files 2})
-      (print/with-out-str)) ^:hidden
+      (h/with-out-str)) ^:hidden
   ;; SUMMARY {:count 6, :files 2}
   => "[1mSUMMARY {:count 6, :files 2}[0m\n")
 
@@ -70,7 +70,7 @@
                           [{b "1.2"}
                            [{c "1.3"}
                             {d "1.4"}]]])
-      (print/with-out-str))
+      (h/with-out-str))
   => string?)
 
 (comment
