@@ -89,7 +89,7 @@
 
 
 ^{:refer rt.postgres.grammar.meta/has-policy :added "4.0"}
-(fact "TODO")
+(fact "checks that a policy exists")
 
 ^{:refer rt.postgres.grammar.meta/drop-policy :added "4.0"}
-(fact "TODO")
+(fact "drops a policy")

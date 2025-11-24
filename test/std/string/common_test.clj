@@ -189,7 +189,7 @@
 
 
 ^{:refer std.string.common/replace-at :added "4.0"}
-(fact "TODO")
+(fact "replaces the character at the index with a new string")
 
 ^{:refer std.string.common/insert-at :added "4.0"}
-(fact "TODO")
+(fact "inserts a string at the given index")

@@ -75,7 +75,7 @@
   => '(. pages (map (fn [p i] (return [:<> {:key i} [:div [:h2 p.title]]])))))
 
 ^{:refer js.react.layout/ui-template-replace :added "4.0"}
-(fact "TODO")
+(fact "replaces children in template")
 
 ^{:refer js.react.layout/ui-template-namespaced :added "4.0"}
 (fact "template namespaced tags"
@@ -94,13 +94,13 @@
        [:div {:class "container"} nil]])
 
 ^{:refer js.react.layout/ui-template-components-resolve :added "4.0"}
-(fact "TODO")
+(fact "resolves the components map")
 
 ^{:refer js.react.layout/ui-template-components-classify :added "4.0"}
-(fact "TODO")
+(fact "classifies components")
 
 ^{:refer js.react.layout/ui-template-components-expand :added "4.0"}
-(fact "TODO")
+(fact "expands components")
 
 ^{:refer js.react.layout/ui-template :added "4.0"}
 (fact "compiling all the "

@@ -546,28 +546,28 @@ fn main() {
 
 
 ^{:refer std.lang.model.spec-rust/rst-typesystem :added "4.0"}
-(fact "TODO")
+(fact "emits rust typesystem syntax")
 
 ^{:refer std.lang.model.spec-rust/rst-vector :added "4.0"}
-(fact "TODO")
+(fact "emits rust vector syntax")
 
 ^{:refer std.lang.model.spec-rust/rst-attributes :added "4.0"}
-(fact "TODO")
+(fact "emits rust attributes")
 
 ^{:refer std.lang.model.spec-rust/rst-defenum :added "4.0"}
-(fact "TODO")
+(fact "emits rust enum definition")
 
 ^{:refer std.lang.model.spec-rust/rst-deftrait :added "4.0"}
-(fact "TODO")
+(fact "emits rust trait definition")
 
 ^{:refer std.lang.model.spec-rust/rst-defimpl :added "4.0"}
-(fact "TODO")
+(fact "emits rust impl definition")
 
 ^{:refer std.lang.model.spec-rust/rst-new :added "4.0"}
-(fact "TODO")
+(fact "emits rust new expression")
 
 ^{:refer std.lang.model.spec-rust/rst-exec :added "4.0"}
-(fact "TODO")
+(fact "emits rust exec block")
 
 ^{:refer std.lang.model.spec-rust/rst-defstruct :added "4.0"}
-(fact "TODO")
+(fact "emits rust struct definition")

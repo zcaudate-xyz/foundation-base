@@ -306,7 +306,7 @@
 
 
 ^{:refer js.react.compile-components/compile-element-action-inc :added "4.0"}
-(fact "TODO")
+(fact "compiles the :%/set action")
 
 ^{:refer js.react.compile-components/compile-element-action-dec :added "4.0"}
-(fact "TODO")
+(fact "compiles the :%/set action")

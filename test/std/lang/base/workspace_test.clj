@@ -109,7 +109,7 @@
 
 
 ^{:refer std.lang.base.workspace/ptr-display-str :added "4.0"}
-(fact "TODO")
+(fact "copies pointer text to clipboard")
 
 ^{:refer std.lang.base.workspace/rt:module-meta :added "4.0"}
-(fact "TODO")
+(fact "gets the book module for a runtime")

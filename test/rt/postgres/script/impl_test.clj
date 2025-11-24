@@ -217,4 +217,4 @@
 
 
 ^{:refer rt.postgres.script.impl/t:exists :added "4.0"}
-(fact "TODO")
+(fact "check existence of entry")
