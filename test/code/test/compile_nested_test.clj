@@ -20,6 +20,7 @@
         c 3]
     (+ a b) => 3
     (+ b c) => 5
+    ;6u
     (+ a b c) => 6))
 
 (fact "nested assertions in do blocks work correctly"
@@ -33,7 +34,13 @@
   (do
     1 => 1
     2 => 2
-    (+ 1 2) => 3))
+    (+ 1 2) => 3)
+
+  (do
+    1 => 1
+    2 => 2
+    (do 
+      (+ 1 2) => 3)))
 
 (fact "nested assertions in complex structures"
   ^:hidden
@@ -52,13 +59,13 @@
   ^:hidden
   
   ;; Top level
-  1 => 1
+  #_#_#_1 => 1
   
   ;; One level deep
   (let [a 1]
-    a => 1)
+    a => 2)
   
   ;; Two levels deep
   (let [a 1]
     (let [b 2]
-      (+ a b) => 3)))
+      (+ a b) => [])))

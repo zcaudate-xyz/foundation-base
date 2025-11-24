@@ -22,9 +22,10 @@
   => (contains-in {:a {:b 3}}))
 
 (fact "Verify contains-in output on failure with nested structure"
-  
-  {:a {:b 1 :c 2} :d 3}
-  => (contains-in {:a {:b 2}}))
+
+  (let []
+    {:a {:b 1 :c 2} :d 3}
+    => (contains-in {:a {:b 2}})))
 
 (fact "Verify just-map diff output"
 
@@ -44,4 +45,6 @@
 
 (comment
   (s/run '[code.test.compile-fix-test])
+  (s/run '[code.test.compile-fix-test])
+  (s/run '[code.test.compile-])
   )
