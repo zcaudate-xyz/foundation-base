@@ -3,6 +3,7 @@
             [code.test.base.runtime :as rt]
             [code.test.compile.snippet :as snippet]
             [std.lib :as h :refer [defimpl]]
+            [std.lib.future :as f]
             [std.lib.time :as time]))
 
 (def +type+
@@ -47,9 +48,34 @@
   [_])
 
 (defmethod fact-invoke :core
-  ([{:keys [wrap function guard] :as m}]
+  ([{:keys [wrap function guard timeout] :as m}]
    (let [{:keys [bindings ceremony check replace]} wrap
-         result ((-> function :thunk ceremony check bindings replace))]
+         execution-fn (-> function :thunk ceremony check bindings replace)
+         result (if timeout
+                  (let [fut (f/future:call (bound-fn [] (execution-fn)))]
+                    (try
+                      (-> fut
+                          (f/future:timeout timeout)
+                          (f/future:value))
+                      (catch java.util.concurrent.ExecutionException e
+                        (let [cause (.getCause e)]
+                          (if (instance? java.util.concurrent.TimeoutException cause)
+                            (do
+                              (f/future:cancel fut)
+                              (let [ex (ex-info "Test timed out" {:timeout timeout} cause)
+                                    meta (select-keys m [:line :column :path :ns :refer :desc])
+                                    err-result {:status :exception
+                                                :data ex
+                                                :form :timeout
+                                                :from :evaluate
+                                                :meta meta}]
+                                (h/signal {:id rt/*run-id*
+                                           :test :fact
+                                           :meta meta
+                                           :results [err-result]})
+                                false))
+                            (throw cause))))))
+                  (execution-fn))]
      (if (and guard (not result))
        (h/error "Guard failed" (fact-display-info m)))
      result)))

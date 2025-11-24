@@ -44,7 +44,10 @@
 (defn rewrite-nested-checks
   "rewrites code to replace `a => b` with check calls"
   [form]
-  (cond (h/form? form)
+  (cond (and (seq? form) (= 'quote (first form)))
+        form
+
+        (h/form? form)
         (if (some #(= % =>) form)
           (rewrite-list form)
           (map rewrite-nested-checks form))
