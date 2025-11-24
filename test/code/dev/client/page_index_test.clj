@@ -35,3 +35,7 @@
         x))
     (std.html/tree
      (slurp "src/code/dev/server/transform.txt")))))
+
+
+^{:refer code.dev.client.page-index/AppIndex :added "4.0"}
+(fact "TODO")

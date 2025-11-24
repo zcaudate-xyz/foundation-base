@@ -46,3 +46,7 @@
   => '(. pages (map (fn [p i] (return [:<> {:key i} [:div [:h2 p.title]]])))))
 
 
+
+
+^{:refer js.react.compile-directives/compile-directives :added "4.0"}
+(fact "TODO")

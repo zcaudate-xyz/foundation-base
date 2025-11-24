@@ -258,3 +258,7 @@
   (replace-usages '[jvm.classloader.url-classloader]
                   {:var 'hara.data.base.seq/object-of
                    :new 'element-at}))
+
+
+^{:refer code.manage/extract :added "4.0"}
+(fact "TODO")

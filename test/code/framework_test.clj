@@ -162,3 +162,7 @@
 
 (comment
   (code.manage/import {:write true}))
+
+
+^{:refer code.framework/extract :added "4.0"}
+(fact "TODO")

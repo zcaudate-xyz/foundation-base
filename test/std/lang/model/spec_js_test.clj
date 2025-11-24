@@ -171,3 +171,7 @@
          (then (fn [ok] (return ok)))
          (catch (fn [err] (return err)))
          (finally (fn [] (return true)))))
+
+
+^{:refer std.lang.model.spec-js/js-map :added "4.0"}
+(fact "TODO")

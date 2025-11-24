@@ -303,3 +303,10 @@
      :ui/container [:div]
      :ui/text      [:p]})
    c/compile-element))
+
+
+^{:refer js.react.compile-components/compile-element-action-inc :added "4.0"}
+(fact "TODO")
+
+^{:refer js.react.compile-components/compile-element-action-dec :added "4.0"}
+(fact "TODO")
