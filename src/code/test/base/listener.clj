@@ -34,6 +34,7 @@
     :line     (-> result :meta :line)
     :desc     (-> result :meta :desc)
     :form     (-> result :form)
+    :data     (-> result :data)
     :actual   (-> result :data)
     :replace  (-> result :replace)
     :original (-> result :original)}))

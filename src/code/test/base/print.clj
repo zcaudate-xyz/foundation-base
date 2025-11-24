@@ -8,7 +8,7 @@
             [std.print :as print]
             [std.pretty :as pretty]))
 
-(defonce ^:dynamic *options* #{:print-thrown :print-failure :print-bulk})
+(defonce ^:dynamic *options* #{:print-thrown :print-failure :print-bulk :print-success})
 
 (defn- rel
   [path]
@@ -28,7 +28,7 @@
            (ansi/style (format "  %s%s" line (or (rel path) "<current>")) #{:bold})
            (if name (str "\n   " (ansi/white "Refer") "  " (ansi/style name #{:bold})) "")
            (if desc (str "\n    " (ansi/white "Info") "  \"" desc "" \") "")
-           (str "\n    " (ansi/white "Expr") "  " form)
+           (str "\n    " (ansi/white "Form") "  " (str/indent (pretty/pprint-str form) 4))
            (str "\n   " (ansi/white "Check") "  " check))))))
 
 (defn print-failure
@@ -44,15 +44,15 @@
            (ansi/style (format "  %s%s" line (or (rel path) "<current>")) #{:bold})
            (if name (str "\n   " (ansi/white "Refer") "  " (ansi/style name #{:bold})) "")
            (if desc (str "\n    " (ansi/white "Info") "  \"" desc "" \") "")
-           (str "\n    " (ansi/white "Expr") "  " bform)
+           (str "\n    " (ansi/white "Form") "  " (str/indent (pretty/pprint-str bform) 4))
            (if compare
              (str "\n   " (ansi/white "Compare") "  \n"
                   (str/indent (pretty/pprint-str compare)
                               4))
              (str
-              (str "\n   " (ansi/white "Check") "  " bcheck)
+              (str "\n   " (ansi/white "Check") "  " (str/indent (pretty/pprint-str bcheck) 4))
               (str "\n    " (ansi/white "Eval") "  " (if (coll? actual)
-                                                       (pretty/pprint-str actual)
+                                                       (str/indent (pretty/pprint-str actual) 4)
                                                        actual))))
            (if pattern? (str "\n " (ansi/white "Pattern") "  " (ansi/blue (str form " : " check))))
            (if original (str "\n  " (ansi/white "Linked") "  " (ansi/blue (format "L:%d,%d"
@@ -63,7 +63,7 @@
 (defn print-thrown
   "outputs the description for a form that throws an exception"
   {:added "3.0"}
-  ([{:keys [path name ns line desc form replace original] :as summary}]
+  ([{:keys [path name ns line desc form replace original data] :as summary}]
    (let [line (if line (str "L:" line " @ ") "")
          bform (walk/postwalk-replace replace form)
          pattern? (not= bform form)]
@@ -72,7 +72,10 @@
            (ansi/style (format "  %s%s" line (or (rel path) "<current>")) #{:bold})
            (if name (str "\n   " (ansi/white "Refer") "  " (ansi/style name #{:bold})) "")
            (if desc (str "\n    " (ansi/white "Info") "  \"" desc "" \") "")
-           (str "\n    " (ansi/white "Expr") "  " bform)
+           (str "\n    " (ansi/white "Form") "  " (str/indent (pretty/pprint-str bform) 4))
+           (str "\n    " (ansi/white "Data") "  " (if (instance? Throwable data)
+                                                    (or (.getMessage ^Throwable data) data)
+                                                    data))
            (if (not= bform form) (str " :: " form))
            (if pattern? (str "\n " (ansi/white "Pattern") "  " (ansi/blue (str form))))
            (if original (str "\n  " (ansi/white "Linked") "  " (ansi/blue (format "L:%d,%d"

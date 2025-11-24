@@ -72,6 +72,43 @@
          (recur (rest arr)
                 (conj out x)))))
 
+(declare rewrite-nested-checks)
+
+(defn group-and-rewrite [body parent-meta]
+  (loop [forms body
+         out []]
+    (cond (empty? forms)
+          out
+
+          (and (> (count forms) 2)
+               (= (nth forms 1) '=>))
+          (let [input (nth forms 0)
+                arrow (nth forms 1)
+                output (nth forms 2)
+                check `(code.test.base.process/check
+                        (std.lib.result/result {:status :success :data ~input :form (quote ~input) :from :evaluate})
+                        (std.lib.result/result {:status :success :data ~output :form (quote ~output) :from :evaluate})
+                        {:line ~(or (-> arrow meta :line) (:line parent-meta))
+                         :column ~(or (-> arrow meta :column) (:column parent-meta))})]
+            (recur (drop 3 forms) (conj out check)))
+
+          :else
+          (recur (rest forms) (conj out (rewrite-nested-checks (first forms)))))))
+
+(defn rewrite-nested-checks [form]
+  (let [parent-meta (meta form)]
+    (cond (and (list? form) (= 'let (first form)))
+          (let [[_ bindings & body] form
+                nbody (group-and-rewrite body parent-meta)]
+            (with-meta `(let ~bindings ~@nbody) parent-meta))
+
+          (and (list? form) (= 'do (first form)))
+          (let [[_ & body] form
+                nbody (group-and-rewrite body parent-meta)]
+            (with-meta `(do ~@nbody) parent-meta))
+
+          :else form)))
+
 (defn split
   "creates a sequence of pairs from a loose sequence
    (split '[(def a 1)
@@ -113,7 +150,7 @@
            (recur (rest arr)
                   (conj out {:type :form
                              :meta (merge (meta-fn) (meta x))
-                             :form x}))))))
+                             :form (rewrite-nested-checks x)}))))))
 
 (defn fact-id
   "creates an id from fact data
