@@ -6,7 +6,8 @@
             [std.json :as json]
             [clojure.edn :as edn]
             [clojure.java.io :as io]
-            [std.string :as str])
+            [std.string :as str]
+            [code.manage :as manage])
   (:import (org.httpkit.server AsyncChannel))
   (:refer-clojure :exclude [send]))
 
@@ -144,6 +145,30 @@
               {:status 200 :body "Relay stopped"})
           {:status 404 :body "Relay not found"}))
       
+      ;; Manage tasks
+      (and (= uri "/manage/tasks") (= request-method :get))
+      {:status 200
+       :headers {"Content-Type" "application/json"}
+       :body (json/write (map name (keys manage/+tasks+)))}
+
+      (and (re-matches #"/manage/(.*)" uri) (= request-method :post))
+      (let [task-name (keyword (second (re-matches #"/manage/(.*)" uri)))
+            task-fn (get manage/+tasks+ task-name)]
+        (if task-fn
+          (try
+            (let [args (parsed-body "args")
+                  result (if (seq args)
+                           (apply task-fn args)
+                           (task-fn))]
+              {:status 200
+               :headers {"Content-Type" "application/json"}
+               :body (json/write {:status "success" :result result})})
+            (catch Throwable t
+              {:status 500
+               :headers {"Content-Type" "application/json"}
+               :body (json/write {:status "error" :message (.getMessage t)})}))
+          {:status 404 :body "Task not found"}))
+
       (= uri "/")
       (serve-resource "/index.html")
 
