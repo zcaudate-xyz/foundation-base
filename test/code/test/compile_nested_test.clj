@@ -2,7 +2,7 @@
   (:use code.test))
 
 (fact "nested assertions in let bindings work correctly"
-  {:added "4.0"}
+  ^:hidden
   
   ;; Simple let with nested assertion
   (let [a 1]
@@ -23,7 +23,7 @@
     (+ a b c) => 6))
 
 (fact "nested assertions in do blocks work correctly"
-  {:added "4.0"}
+  ^:hidden
   
   ;; Simple do with assertion
   (do
@@ -36,7 +36,7 @@
     (+ 1 2) => 3))
 
 (fact "nested assertions in complex structures"
-  {:added "4.0"}
+  ^:hidden
   
   ;; Inside if
   (if true
@@ -49,7 +49,7 @@
     (+ 2 2) => 4))
 
 (fact "assertions work at different nesting levels"
-  {:added "4.0"}
+  ^:hidden
   
   ;; Top level
   1 => 1

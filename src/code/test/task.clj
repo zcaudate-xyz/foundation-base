@@ -93,7 +93,7 @@
   {:added "4.0"}
   [:task {:template :test
           :main   {:fn executive/run-current}
-          :params {:title "TEST PROJECT"}}])
+          :params {:title "TEST CURRENT"}}])
 
 (definvoke run:test
   "runs loaded tests"
@@ -158,15 +158,25 @@
    => #{:hello}"
   {:added "3.0"}
   ([args]
-   (->> (map read-string args)
-        (map (fn [x]
-               (cond (symbol? x)
-                     (keyword (name x))
+   (loop [m     {}
+          [k v]  args]
+     (let [k (try (read-string k)
+                  (catch Throwable t))
+           v (try (read-string v)
+                  (catch Throwable t))]
+       (cond (not (keyword? k))
+             (recur m (rest args))
 
-                     (keyword? x) x
 
-                     (string? x) (keyword x))))
-        set)))
+             (keyword? v)
+             (recur (assoc m k true)
+                    (rest args))
+             
+             :else
+             (case k
+               :only    (assoc m :run v)
+               :in      (assoc m :run [v])
+               (assoc m k v)))))))
 
 (defn -main
   "main entry point for leiningen
@@ -174,12 +184,12 @@
    (task/-main)"
   {:added "3.0"}
   ([& args]
-   (let [args (process-args args)
-         {:keys [thrown failed] :as stats} (run :all)
+   (let [opts (process-args args)
+         {:keys [thrown failed] :as stats} (run (or (:run opts) :all) (:dissoc opts run))
          res (+ thrown failed)]
-     (if (get args :exit)
-       (System/exit res)
-       res))))
+     (if (get opts :no-exit)
+       res
+       (System/exit res)))))
 
 (defn run-errored
   "runs only the tests that have errored

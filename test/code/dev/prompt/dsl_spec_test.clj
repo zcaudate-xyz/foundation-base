@@ -60,3 +60,13 @@
 
 ^{:refer code.dev.prompt.dsl-spec/spec-examples :added "4.0"}
 (fact "TODO")
+
+
+^{:refer code.dev.prompt.dsl-spec/spec-example-files :added "4.0"}
+(fact "TODO")
+
+^{:refer code.dev.prompt.dsl-spec/spec-example-forms :added "4.0"}
+(fact "TODO")
+
+^{:refer code.dev.prompt.dsl-spec/create-spec :added "4.0"}
+(fact "TODO")

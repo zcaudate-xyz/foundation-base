@@ -35,3 +35,13 @@
 
   {:a 1 :b 2 :c 3}
   => (just {:a 1 :b 3 :c 3}))
+
+(fact "Verify just output on failure"
+
+  (throw (ex-info "Errored"))
+
+  1 => 2)
+
+(comment
+  (s/run '[code.test.compile-fix-test])
+  )

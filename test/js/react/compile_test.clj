@@ -135,3 +135,22 @@
                (+ dslCode htmlCode))
           (return [:div {:class ["p-8"]}
                    [:p {:name htmlCode} [:a]]])))
+
+
+^{:refer js.react.compile/get-registry :added "4.0"}
+(fact "TODO")
+
+^{:refer js.react.compile/put-registry :added "4.0"}
+(fact "TODO")
+
+^{:refer js.react.compile/del-registry :added "4.0"}
+(fact "TODO")
+
+^{:refer js.react.compile/get-default-components :added "4.0"}
+(fact "TODO")
+
+^{:refer js.react.compile/compile-replace-actions :added "4.0"}
+(fact "TODO")
+
+^{:refer js.react.compile/compile-triggers :added "4.0"}
+(fact "TODO")

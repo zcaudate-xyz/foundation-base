@@ -34,7 +34,7 @@
 (defn print-failure
   "outputs the description for a failed test"
   {:added "3.0"}
-  ([{:keys [path name ns line desc form check compare actual replace original] :as summary}]
+  ([{:keys [path name ns line desc form check compare actual replace original parent] :as summary}]
    (let [line (if line (str "L:" line " @ ") "")
          bform  (walk/postwalk-replace replace form)
          bcheck (walk/postwalk-replace replace check)
@@ -58,12 +58,13 @@
            (if original (str "\n  " (ansi/white "Linked") "  " (ansi/blue (format "L:%d,%d"
                                                                                   (:line original)
                                                                                   (:column original)))))
+           (if parent (str "\n  " (ansi/white "Parent") "  " (ansi/blue (str parent))))
            "\n")))))
 
 (defn print-thrown
   "outputs the description for a form that throws an exception"
   {:added "3.0"}
-  ([{:keys [path name ns line desc form replace original data] :as summary}]
+  ([{:keys [path name ns line desc form replace original actual parent] :as summary}]
    (let [line (if line (str "L:" line " @ ") "")
          bform (walk/postwalk-replace replace form)
          pattern? (not= bform form)]
@@ -81,6 +82,7 @@
            (if original (str "\n  " (ansi/white "Linked") "  " (ansi/blue (format "L:%d,%d"
                                                                                   (:line original)
                                                                                   (:column original)))))
+           (if parent (str "\n  " (ansi/white "Parent") "  " (ansi/blue (str parent))))
            "\n")))))
 
 (defn print-fact

@@ -1165,3 +1165,10 @@
    (slurp "../../buffer/Smalltalkinterfacedesign/translate/src-translated/components/library_browser.clj"))
   (get-errored
    (slurp "../../buffer/Smalltalkinterfacedesign/translate/src-translated/components/library_browser.clj")))
+
+
+^{:refer code.heal.level/check-errored-suspect :added "4.0"}
+(fact "TODO")
+
+^{:refer code.heal.level/heal-content-complex-edits :added "4.0"}
+(fact "TODO")

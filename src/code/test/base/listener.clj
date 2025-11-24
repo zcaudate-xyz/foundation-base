@@ -21,7 +21,8 @@
     :actual   (-> result :actual :data)
     :replace  (-> result :replace)
     :compare  (-> result :compare)
-    :original (-> result :original)}))
+    :original (-> result :original)
+    :parent   (-> result :meta :parent-form)}))
 
 (defn summarise-evaluate
   "extract the form into a valid format"
@@ -37,7 +38,8 @@
     :data     (-> result :data)
     :actual   (-> result :data)
     :replace  (-> result :replace)
-    :original (-> result :original)}))
+    :original (-> result :original)
+    :parent   (-> result :meta :parent-form)}))
 
 (defn form-printer
   "prints out result for each form"

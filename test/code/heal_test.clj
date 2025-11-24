@@ -62,3 +62,7 @@
     )
    )
   )
+
+
+^{:refer code.heal/print-rainbow :added "4.0"}
+(fact "TODO")
