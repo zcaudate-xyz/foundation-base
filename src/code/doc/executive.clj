@@ -199,7 +199,7 @@
    (let [{:keys [write print]} (task/single-function-print params)
          {:keys [theme]} (lookup site)
          {:keys [resource manifest]} (load-theme theme)
-         template-path (fs/path root *template-path* site)]
+         template-path (fs/path root *template-path* (str/to-string site))]
      (cond (fs/exists? template-path)
            (throw (ex-info (str "Template for " site " already exists") {:path (str template-path)}))
 

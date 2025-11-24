@@ -6,7 +6,7 @@
 
 (def settings
   {:engine    "winterfell"
-   :resource  "theme/stark"
+   :resource  "assets/code.doc/theme/stark"
    :copy      ["assets"]
    :render    {:article       "render-article"
                :outline       "render-outline"
