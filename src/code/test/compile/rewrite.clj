@@ -49,8 +49,8 @@
 
         (h/form? form)
         (if (some #(= % =>) form)
-          (rewrite-list form)
-          (map rewrite-nested-checks form))
+          (with-meta (rewrite-list form) (meta form))
+          (with-meta (map rewrite-nested-checks form) (meta form)))
 
         (coll? form)
         (if (map? form)
