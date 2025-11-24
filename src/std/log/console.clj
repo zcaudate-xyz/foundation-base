@@ -287,7 +287,7 @@
   ([{:meter/keys [props] :as item} style]
    (let [ansi  (element/style-ansi style)
          pairs (mapv (fn [[k v]]
-                       (let [label-str (ansi/style (str (.toUpperCase (h/strn k)) ":"))
+                       (let [label-str (ansi/style (str (.toUpperCase (h/strn k)) ":") ansi)
                              data-str  (if (string? v)
                                          v
                                          (h/local :pprint-str v))]

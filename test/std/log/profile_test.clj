@@ -2,40 +2,76 @@
   (:use [code.test :exclude [run]])
   (:require [std.log.profile :refer :all]
             [std.log.common :as common]
-            [std.log.core :as core]))
+            [std.log.core :as core]
+            [std.log.console :as console]))
 
 ^{:refer std.log.profile/spy-fn :added "3.0"}
-(fact "constructs a spy function with print on start and end")
+(fact "constructs a spy function with print on start and end"
+
+  (spy-fn (common/default-logger) (fn [] 1) :info {})
+  => 1)
 
 ^{:refer std.log.profile/bind-trace :added "3.0"}
-(fact "binds a trace id to the log")
+(fact "binds a trace id to the log"
+
+  (bind-trace true (fn [] common/*context*))
+  => (contains {:trace/id string?}))
 
 ^{:refer std.log.profile/spy-form :added "3.0"}
-(fact "helper function for the `spy` macro")
+(fact "helper function for the `spy` macro"
+
+  (spy-form :info nil '(+ 1 2) '(+ 1 2) `(common/default-logger) {} {})
+  => seq?)
 
 ^{:refer std.log.profile/defspy :added "3.0"}
-(fact "creates a spy macro")
+(fact "creates a spy macro"
+
+  (defspy myspy :info {})
+  (myspy 1)
+  => 1)
 
 ^{:refer std.log.profile/on-grey :added "3.0"}
-(fact "produces an on-grey style for console label")
+(fact "produces an on-grey style for console label"
+
+  (on-grey :red)
+  => {:text :red :highlight false :bold true :background :grey})
 
 ^{:refer std.log.profile/on-white :added "3.0"}
-(fact "produces an on-white style for console label")
+(fact "produces an on-white style for console label"
+
+  (on-white :red)
+  => {:text :red :highlight true :bold false :background :white})
 
 ^{:refer std.log.profile/on-color :added "3.0"}
-(fact "produces an on-color style for console label")
+(fact "produces an on-color style for console label"
+
+  (on-color :red)
+  => {:text :grey :highlight true :bold false :background :red})
 
 ^{:refer std.log.profile/item-style :added "3.0"}
-(fact "styles the actual log entry")
+(fact "styles the actual log entry"
+
+  (item-style {:label "L"})
+  => (contains {:console/style {:header {:label "L"}}}))
 
 ^{:refer std.log.profile/meter-fn :added "3.0"}
-(fact "constructs a meter function")
+(fact "constructs a meter function"
+
+  (meter-fn (common/default-logger) (fn [] 1) :info {})
+  => 1)
 
 ^{:refer std.log.profile/meter-form :added "3.0"}
-(fact "helper to the `meter` macro")
+(fact "helper to the `meter` macro"
+
+  (meter-form :info nil '(+ 1 2) '(+ 1 2) `(common/default-logger) {} {})
+  => seq?)
 
 ^{:refer std.log.profile/defmeter :added "3.0"}
-(fact "creates a meter macro")
+(fact "creates a meter macro"
+
+  (defmeter mymeter :info {})
+  (mymeter 1)
+  => 1)
 
 (comment
   (note 1)

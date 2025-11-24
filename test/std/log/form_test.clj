@@ -2,7 +2,9 @@
   (:use code.test)
   (:require [std.log.common :as common]
             [std.log.form :refer :all]
-            [std.log.core :as core]))
+            [std.log.core :as core]
+            [std.log.console :as console]
+            [std.protocol.log :as protocol.log]))
 
 ^{:refer std.log.form/log-meta :added "3.0"}
 (fact "gets the metadata information on macroexpand")
@@ -32,7 +34,10 @@
   => #:log{:message "hello"})
 
 ^{:refer std.log.form/log-fn :added "3.0"}
-(fact "actual log function for function application")
+(fact "actual log function for function application"
+
+  (log-fn (common/default-logger) :info "data" nil {})
+  => "data")
 
 ^{:refer std.log.form/log-form :added "3.0"}
 (fact "function for not including log forms on static compilation" ^:hidden
@@ -48,7 +53,11 @@
   => seq?)
 
 ^{:refer std.log.form/with-context :added "3.0"}
-(fact "applies a context to the current one")
+(fact "applies a context to the current one"
+
+  (with-context {:a 1}
+    common/*context*)
+  => (contains {:a 1}))
 
 ^{:refer std.log.form/log-context :added "3.0"}
 (fact "creates a log-context form"
@@ -79,7 +88,10 @@
   (deflog-data [:status]))
 
 ^{:refer std.log.form/log-error-form :added "3.0"}
-(fact "creates forms for  `warn`, `fatal`")
+(fact "creates forms for  `warn`, `fatal`"
+
+  (log-error-form :warn)
+  => seq?)
 
 ^{:refer std.log.form/deflog-error :added "3.0"}
 (fact "creates a standard form given a type" ^:hidden
