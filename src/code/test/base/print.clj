@@ -8,7 +8,7 @@
             [std.print :as print]
             [std.pretty :as pretty]))
 
-(defonce ^:dynamic *options* #{:print-thrown :print-failure :print-bulk :print-success})
+(defonce ^:dynamic *options* #{:print-thrown :print-failure :print-bulk})
 
 (defn- rel
   [path]
