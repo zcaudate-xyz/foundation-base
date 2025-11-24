@@ -59,6 +59,32 @@
      rt/*eval-meta* (assoc :meta rt/*eval-meta*
                            :original meta))))
 
+(defn check
+  "checks two values"
+  {:added "3.0"}
+  ([actual expected meta]
+   (let [{:keys [guard before after]} rt/*eval-check*
+         _ (if before (before))
+         checker  (assoc (checker/->checker (res/result-data expected))
+                         :form (:form expected))
+         result   (-> (checker/verify checker actual)
+                      (attach-meta meta))
+         compare (if (and (not (:data result))
+                          (coll? (:data actual))
+                          (coll? (:data expected)))
+                   nil
+                   #_(diff/diff (:data actual)
+                                (:data expected)))
+         _    (intern *ns* (with-meta '*last* {:dynamic true})
+                      (:data actual))
+         _    (if after (after))]
+     (h/signal {:test :check :result (assoc result
+                                            :replace rt/*eval-replace*
+                                            :compare compare)})
+     (if (and guard (not (:data result)))
+       (h/error "Guard failed" {}))
+     result)))
+
 (defmethod process :form
   ([{:keys [form meta] :as op}]
    (let [result (-> (evaluate op)
@@ -70,29 +96,9 @@
 
 (defmethod process :test-equal
   ([{:keys [input output meta] :as op}]
-   (let [{:keys [guard before after]} rt/*eval-check*
-         _ (before)
-         actual   (evaluate input)
-         expected (evaluate output)
-         checker  (assoc (checker/->checker (res/result-data expected))
-                         :form (:form expected))
-         result   (-> (checker/verify checker actual)
-                      (attach-meta meta))
-         compare (if (and (not (:data result))
-                          (coll? (:data actual))
-                          (coll? (:data expected)))
-	           nil
-		   #_(diff/diff (:data actual)
-                              (:data expected)))
-         _    (intern *ns* (with-meta '*last* {:dynamic true})
-                      (:data actual))
-         _    (after)]
-     (h/signal {:test :check :result (assoc result
-                                            :replace rt/*eval-replace*
-                                            :compare compare)})
-     (if (and guard (not (:data result)))
-       (h/error "Guard failed" {}))
-     result)))
+   (let [actual   (evaluate input)
+         expected (evaluate output)]
+     (check actual expected meta))))
 
 (defn collect
   "makes sure that all returned verified results are true
@@ -128,6 +134,10 @@
                                 rt/*settings*)
            (not rt/*run-id*)
            rt/*eval-mode*)
-     (->> (mapv process body)
-          (collect meta))
+     (let [results (atom [])]
+       (h/signal:with-temp
+        [:test (fn [{:keys [result]}]
+                 (swap! results conj result))]
+        (mapv process body))
+       (collect meta @results))
      (skip meta))))
