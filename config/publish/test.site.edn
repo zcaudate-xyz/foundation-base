@@ -1,0 +1,7 @@
+{:theme    "stark"
+ :output   "docs/test-site"
+ :pages    {index
+            {:base  "home.html"
+             :input "src-doc/test_site/index.clj"
+             :title "Test Site"
+             :subtitle "A generated test site"}}}
