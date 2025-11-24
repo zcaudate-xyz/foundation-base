@@ -14,7 +14,10 @@
   => map?)
 
 ^{:refer rt.basic.type-common/clear-context-options :added "4.0"}
-(fact "clear entries from the `*context-options*` structure")
+(fact "clear entries from the `*context-options*` structure"
+  (with-redefs [common/*context-options* (atom {:a {:b {:c 1}}})]
+    (clear-context-options :a :b :c)
+    @common/*context-options* => {:a {:b {}}}))
 
 ^{:refer rt.basic.type-common/put-context-options :added "4.0"
   :setup [(common/clear-context-options :lua :test.raw)]}
@@ -37,7 +40,7 @@
 ^{:refer rt.basic.type-common/program-exists? :added "4.0"}
 (fact  "checks if an executable exists"
   
-  (program-exists? "gcc")
+  (program-exists? "ls")
   => true)
 
 ^{:refer rt.basic.type-common/get-program-options :added "4.0"}
@@ -52,12 +55,15 @@
 
 ^{:refer rt.basic.type-common/put-program-options :added "4.0"}
 (fact "puts configuration into program options"
-  ^:hidden
-  
-  (put-program-options :lua {}))
+  (with-redefs [common/*program-options* (atom {:lua {}})]
+    (put-program-options :lua {:a 1})
+    @common/*program-options* => {:lua {:a 1}}))
 
 ^{:refer rt.basic.type-common/swap-program-options :added "4.0"}
-(fact "swaps out the program options using a funciotn")
+(fact "swaps out the program options using a funciotn"
+  (with-redefs [common/*program-options* (atom {:lua {:a 1}})]
+    (swap-program-options :lua (fn [m k v] (assoc m k v)) :b 2)
+    (:lua @common/*program-options*) => {:a 1 :b 2}))
 
 ^{:refer rt.basic.type-common/get-program-default :added "4.0"}
 (fact "gets the default program"
@@ -86,5 +92,3 @@
   
   (get-options :lua :oneshot :luajit)
   => map?)
-
-

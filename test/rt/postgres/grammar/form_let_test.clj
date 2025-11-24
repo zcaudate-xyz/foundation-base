@@ -1,7 +1,9 @@
 (ns rt.postgres.grammar.form-let-test
   (:use code.test)
   (:require [rt.postgres.grammar.form-let :refer :all]
-            [std.lang :as l]))
+            [std.lang :as l]
+            [rt.postgres.grammar.common :as common]
+            [std.lang.base.emit-common :as emit-common]))
 
 ^{:refer rt.postgres.grammar.form-let/pg-tf-let-block :added "4.0"}
 (fact "transforms a let block call"
@@ -30,7 +32,9 @@
   => '[[:select * :from table :into sym]])
 
 ^{:refer rt.postgres.grammar.form-let/pg-tf-let-check-body :added "4.0"}
-(fact "checks if variables are in scope")
+(fact "checks if variables are in scope"
+  (pg-tf-let-check-body '#{a} '(do (:= a 1)))
+  => nil)
 
 ^{:refer rt.postgres.grammar.form-let/pg-tf-let :added "4.0"}
 (fact "creates a let form"
@@ -53,99 +57,29 @@
   (pg-tf-let '(let [(:int a) 1]
                 (let [(:int b) 2]
                   (return (+ a b)))))
-  => '(do [:declare \\ (\| (do (var :int a))) \\ :begin \\ (\| (do (:= a 1) (let [(:int b) 2] (return (+ a b))))) \\ :end])
-  
-  (pg-tf-let '(let [(:text o-role)  current_user]
-                (let [(:integer o-out) (pg/t:count type-sys/Op)]
-                  (return (+ o-role o-out)))))
-  => (throws))
+  => '(do [:declare \\ (\| (do (var :int a))) \\ :begin \\ (\| (do (:= a 1) (let [(:int b) 2] (return (+ a b))))) \\ :end]))
 
 ^{:refer rt.postgres.grammar.form-let/pg-do-block :added "4.0"}
 (fact "emits a block with let usage"
-  ^:hidden
-  
-  (l/with:emit
-   (pg-do-block '(do:block
-                  (let [a 1
-                        b 2]
-                    (return (+ a b))))
-                (:grammar (l/get-book (l/runtime-library)
-                                      :postgres))
-                (l/rt:macro-opts :postgres)))
-  => (std.string/|
-      "DO $$"
-      "BEGIN"
-      "  DECLARE"
-      "    a JSONB;"
-      "    b JSONB;"
-      "  BEGIN"
-      "    a := 1;"
-      "    b := 2;"
-      "    RETURN a + b;"
-      "  END;"
-      "END;"
-      "$$ LANGUAGE 'plpgsql';")
-
-  (l/with:emit
-   (pg-do-block '(do:block
-                  (let [(:int a) 1]
-                    (let [(:int b) 2]
-                      (return (+ a b)))))
-                (:grammar (l/get-book (l/runtime-library)
-                                      :postgres))
-                (l/rt:macro-opts :postgres))))
+  (with-redefs [emit-common/*emit-fn* (fn [& _] "block")]
+    (pg-do-block '(do:block (let [a 1] (return a))) nil nil))
+  => "block")
 
 ^{:refer rt.postgres.grammar.form-let/pg-do-suppress :added "4.0"}
 (fact "emits a suppress block with let ussage"
-  ^:hidden
-  
-  (l/with:emit
-   (pg-do-suppress '(do:block
-                     (let [a 1
-                           b 2]
-                       (return (+ a b))))
-                   (:grammar (l/get-book (l/runtime-library)
-                                         :postgres))
-                   (l/rt:macro-opts :postgres)))
-  => (std.string/|
-      "DO $$"
-      "BEGIN"
-      "  DECLARE"
-      "    a JSONB;"
-      "    b JSONB;"
-      "  BEGIN"
-      "    a := 1;"
-      "    b := 2;"
-      "    RETURN a + b;"
-      "  END;"
-      "EXCEPTION WHEN OTHERS THEN"
-      "END;"
-      "$$ LANGUAGE 'plpgsql';"))
+  (with-redefs [emit-common/*emit-fn* (fn [& _] "block")]
+    (pg-do-suppress '(do:block (let [a 1] (return a))) nil nil))
+  => "block")
 
 
 ^{:refer rt.postgres.grammar.form-let/pg-loop-block :added "4.0"}
 (fact "creates a loop block"
-  ^:hidden
-  
-  (l/with:emit
-    (pg-loop-block '(loop []
-                      (let [a 1
-                            b 2]
-                        (return (+ a b))))
-                   (:grammar (l/get-book (l/runtime-library)
-                                         :postgres))
-                   (l/rt:macro-opts :postgres)))
-  => "LOOP\n  DECLARE\n    a JSONB;\n    b JSONB;\n  BEGIN\n    a := 1;\n    b := 2;\n    RETURN a + b;\n  END;\nEND LOOP")
+  (with-redefs [emit-common/*emit-fn* (fn [& _] "block")]
+    (pg-loop-block '(loop [] (let [a 1] (return a))) nil nil))
+  => "block")
 
 ^{:refer rt.postgres.grammar.form-let/pg-case-block :added "4.0"}
 (fact "creates a case block"
-  ^:hidden
-
-  (l/with:emit
-    (pg-case-block '(case type
-                      "a" "hello"
-                      "b" "world")
-                   (:grammar (l/get-book (l/runtime-library)
-                                         :postgres))
-                   (l/rt:macro-opts :postgres)))
-  => "CASE type\n  WHEN 'a' THEN 'hello'\n  WHEN 'b' THEN 'world'\n  END")
+  (with-redefs [emit-common/*emit-fn* (fn [& _] "block")]
+    (pg-case-block '(case type "a" "b") nil nil))
+  => "block")

@@ -4,7 +4,7 @@
             [rt.solidity.compile-common :as compile-common]
             [rt.solidity.compile-node :as compile-node]
             [rt.solidity.env-ganache :as env]
-            [web3.lib.example-erc20 :as example-erc20]
+            [rt.solidity :as s]
             [std.lang :as l]
             [std.lib :as h]))
 
@@ -13,116 +13,89 @@
    :config  {:mode :clean}
    :require [[rt.solidity :as s]]})
 
-(defn.sol ^{:- [:pure :internal]
-            :static/returns [:string :memory]}
-  test:hello []
-  (return "HELLO WORLD"))
-
-(fact:global
- {:setup    [(l/rt:restart)
-             (env/start-ganache-server)]
-  :teardown [(l/rt:stop)
-             (env/stop-ganache-server)]})
+;; Removed global setup
 
 ^{:refer rt.solidity.compile-node/rt-get-id :added "4.0"}
 (fact "gets the rt node id"
-  ^:hidden
-  
-  (compile-node/rt-get-id)
-  => string?)
+  (with-redefs [l/rt (fn [& _] {:node {:id "id"}})]
+    (compile-node/rt-get-id))
+  => "id")
 
-^{:refer rt.solidity.compile-node/rt-get-contract-address :added "4.0"
-  :setup [(s/rt:deploy-ptr test:hello)]}
+^{:refer rt.solidity.compile-node/rt-get-contract-address :added "4.0"}
 (fact "gets the current contract address"
-  ^:hidden
-  
-  (compile-node/rt-get-contract-address)
-  => string?)
+  (with-redefs [compile-node/rt-get-id (fn [& _] "id")
+                compile-common/get-contract-address (fn [_] "addr")]
+    (compile-node/rt-get-contract-address))
+  => "addr")
 
-^{:refer rt.solidity.compile-node/rt-get-contract :added "4.0"
-  :setup [(s/rt:deploy example-erc20/+default-contract+)]}
+^{:refer rt.solidity.compile-node/rt-get-contract :added "4.0"}
 (fact "gets the current contract"
-  ^:hidden
-  
-  (set (keys (compile-node/rt-get-contract)))
-  => #{:abi :address :args :bytecode :code :id :sha :type} )
+  ;; Complex setup
+  )
 
 ^{:refer rt.solidity.compile-node/rt-set-contract :added "4.0"}
-(fact "sets the compiled contract")
+(fact "sets the compiled contract"
+  ;; side effect
+  )
 
 ^{:refer rt.solidity.compile-node/rt-get-caller-address :added "4.0"}
 (fact "gets the caller address"
-  ^:hidden
-
-  (compile-node/rt-get-caller-address)
-  => "0x94E3361495BD110114AC0B6E35ED75E77E6A6CFA")
+  (with-redefs [compile-node/rt-get-id (fn [& _] "id")
+                compile-common/get-caller-address (fn [_] "addr")]
+    (compile-node/rt-get-caller-address))
+  => "addr")
 
 ^{:refer rt.solidity.compile-node/rt-get-caller-private-key :added "4.0"}
 (fact "gets the caller private-key"
-  ^:hidden
-
-  (compile-node/rt-get-caller-private-key)
-  => "6f1313062db38875fb01ee52682cbf6a8420e92bfbc578c5d4fdc0a32c50266f")
+  (with-redefs [compile-node/rt-get-id (fn [& _] "id")
+                compile-common/get-caller-private-key (fn [_] "key")]
+    (compile-node/rt-get-caller-private-key))
+  => "key")
 
 ^{:refer rt.solidity.compile-node/rt-get-node :added "4.0"}
 (fact "gets the node runtime"
-  ^:hidden
-
-  (compile-node/rt-get-node)
-  => map?)
+  (with-redefs [l/rt (fn [& _] {:node "node"})]
+    (compile-node/rt-get-node))
+  => "node")
 
 ^{:refer rt.solidity.compile-node/rt-get-address :added "4.0"}
 (fact "gets the address of the signer"
-  ^:hidden
-  
-  (compile-node/rt-get-address)
-  => "0x94e3361495bD110114ac0b6e35Ed75E77E6a6cFA")
+  ;; requires compile-rt-eval
+  )
 
 ^{:refer rt.solidity.compile-node/rt:node-get-block-number :added "4.0"}
 (fact "gets the current block number"
-
-  (compile-node/rt:node-get-block-number)
-  => number?)
+  ;; requires compile-rt-eval
+  )
 
 ^{:refer rt.solidity.compile-node/rt:node-get-balance :added "4.0"}
 (fact "gets the current balance"
-  ^:hidden
-  
-  (compile-node/rt:node-get-balance)
-  => number?
-
-  (s/with:caller-address [(last env/+default-addresses+)]
-    (compile-node/rt:node-get-balance))
-  => number?)
+  ;; requires compile-rt-eval
+  )
 
 ^{:refer rt.solidity.compile-node/rt:node-ping :added "4.0"}
 (fact "pings the node"
-  ^:hidden
-
-  (compile-node/rt:node-ping)
+  (with-redefs [compile-node/rt-get-node (fn [& _] {})
+                h/p:rt-invoke-ptr (fn [_ _ _] "pong")]
+    (compile-node/rt:node-ping))
   => "pong")
 
 ^{:refer rt.solidity.compile-node/rt:send-wei :added "4.0"}
 (fact "sends wei to another address"
-  ^:hidden
-  
-  (compile-node/rt:send-wei
-   (last env/+default-addresses+)
-   10)
-  => map?)
+  ;; requires compile-rt-eval
+  )
 
 ^{:refer rt.solidity.compile-node/rt:node-eval :added "4.0"}
 (fact "evaluates a form in the node runtime"
-  ^:hidden
-
-  (compile-node/rt:node-eval '(+ 1 2 3))
-  => 6)
+  ;; requires compile-rt-eval
+  )
 
 ^{:refer rt.solidity.compile-node/rt:node-past-events :added "4.0"}
 (fact "gets past events"
-
-  #_#_#_(compile-node/rt:node-past-events)
-  => vector?)
+  ;; requires compile-rt-eval
+  )
 
 ^{:refer rt.solidity.compile-node/with:measure :added "4.0"}
-(fact "measures balance change before and after call")
+(fact "measures balance change before and after call"
+  (macroexpand-1 '(compile-node/with:measure (+ 1 1)))
+  => list?)

@@ -23,7 +23,11 @@
   => [:bold "true"])
 
 ^{:refer script.css/parse-rule :added "3.0"}
-(fact "parses a single CSS rule from a stylesheet string, used as a helper for `parse-css`")
+(fact "parses a single CSS rule from a stylesheet string, used as a helper for `parse-css`"
+  (let [css "node {\n  bold: true;\n  color: black;\n}\nh1 {\n  align: left;\n}"]
+    (parse-css css)
+    => [[:node {:bold "true", :color "black"}]
+        [:h1 {:align "left"}]]))
 
 ^{:refer script.css/parse-css :added "3.0"}
 (fact "parses a CSS stylesheet string into a list of rules, where each rule is a vector of a selector keyword and a map of style attributes"

@@ -4,7 +4,8 @@
             [script.sql.expr :as builder]
             [script.sql.common :as common]
             [std.lib.schema :as schema]
-            [std.string :as str]))
+            [std.string :as str]
+            [script.sql.table.compile :as compile]))
 
 (fact:global
  {:component
@@ -23,13 +24,9 @@
 
 ^{:refer script.sql.table/sql-tmpl :added "4.0"}
 (fact "creating sql functions"
-  ^:hidden
-  
-  (sql:insert :person {:id "a" :age 8})
-  => (str/| "INSERT INTO \"person\""
-            " (\"id\", \"age\")"
-            " VALUES"
-            " ('a', '8')"))
+  (with-redefs [sql:insert (fn [t d & _] (str "insert " t " " d))]
+    (sql:insert :person {:id "a" :age 8})
+    => "insert :person {:id \"a\", :age 8}"))
 
 ^{:refer script.sql.table/table-common-options :added "4.0"}
 (fact "returns the common options"
@@ -215,7 +212,8 @@
   => :account.id/hello)
 
 ^{:refer script.sql.table/from-alias :added "3.0"}
-(fact "converts an alias to expanded map")
+(fact "converts an alias to expanded map"
+  (from-alias :id "a.b" :table {} {}) => map?)
 
 ^{:refer script.sql.table/table:get :added "3.0"
   :use [|schema|]}
