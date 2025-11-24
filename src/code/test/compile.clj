@@ -89,8 +89,13 @@
                 check `(code.test.base.process/check
                         (std.lib.result/result {:status :success :data ~input :form (quote ~input) :from :evaluate})
                         (std.lib.result/result {:status :success :data ~output :form (quote ~output) :from :evaluate})
-                        {:line ~(or (-> arrow meta :line) (:line parent-meta))
-                         :column ~(or (-> arrow meta :column) (:column parent-meta))})]
+                        {:line ~(or (-> arrow meta :line)
+                                    (:line (meta input))
+                                    (:line parent-meta))
+                         :column ~(or (-> arrow meta :column)
+                                      (:column (meta input))
+                                      (:column parent-meta))
+                         :path ~(str (or (:path parent-meta) *file*))})]
             (recur (drop 3 forms) (conj out check)))
 
           :else
@@ -234,7 +239,8 @@
   {:added "3.0"}
   ([meta body]
    (let [{:keys [ns id global]} meta
-         body  (map rewrite/rewrite-nested-checks body)
+         body  (binding [rewrite/*path* (:path meta)]
+                 (mapv rewrite/rewrite-nested-checks body))
          bare  (strip body)
          full  (binding [*compile-meta* meta] (split body))
          code  {:declare  (snippet/fact-declare meta)
