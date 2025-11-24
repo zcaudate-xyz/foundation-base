@@ -34,10 +34,12 @@
 (fact "extend protocols for a type"
 
   (extend-stream-form [nil '{:produce 'produce-nil
-                             :collect 'collect-nil}]))
+                             :collect 'collect-nil}])
+  => any?)
 
 ^{:refer std.lib.stream/extend-stream :added "3.0"}
-(fact "extends the stream protocol for a map of types")
+(fact "extends the stream protocol for a map of types"
+  (resolve 'extend-stream) => var?)
 
 ^{:refer std.lib.stream/add-transforms :added "3.0"}
 (fact "adds a transform to the list"

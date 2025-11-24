@@ -22,18 +22,21 @@
   :teardown [(track/tracked:last [:test :db] :stop 2)]}
 (fact "starts an array of components"
 
-  (start-array [(map->Database nil) (map->Database nil)]))
+  (start-array [(map->Database nil) (map->Database nil)])
+  => any?)
 
 ^{:refer std.lib.system.array/stop-array :added "3.0"}
 (fact "stops an array of components" ^:hidden
 
   (-> (start-array [(map->Database nil) (map->Database nil)])
-      (stop-array)))
+      (stop-array))
+  => any?)
 
 ^{:refer std.lib.system.array/array :added "3.0"}
 (fact "constructs a system array"
 
-  (array {:constructor map->Database} [{:id 1} {:id 2}]))
+  (array {:constructor map->Database} [{:id 1} {:id 2}])
+  => any?)
 
 ^{:refer std.lib.system.array/array? :added "3.0"}
 (fact "checks if object is a system array"

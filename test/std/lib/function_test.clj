@@ -3,7 +3,9 @@
   (:require [std.lib.function :refer :all]))
 
 ^{:refer std.lib.function/fn-form :added "3.0"}
-(fact "creates a lambda form")
+(fact "creates a lambda form"
+  (fn-form "Supplier" "get" '[x] '(inc x))
+  => seq?)
 
 ^{:refer std.lib.function/fn-tags :added "3.0"}
 (fact "creates tags for fn"
@@ -112,4 +114,6 @@
   => '("" {:a 1} [x] (inc x)))
 
 ^{:refer std.lib.function/fn:def-form :added "3.0"}
-(fact "creates a def form")
+(fact "creates a def form"
+  (fn:def-form 'hello nil {} '[x] '(inc x))
+  => '(def hello (inc x)))

@@ -105,13 +105,16 @@
   => {:value "world"})
 
 ^{:refer std.lib.transform/normalise-expression :added "3.0"}
-(fact "normalises an expression")
+(fact "normalises an expression"
+  (resolve 'normalise-expression) => var?)
 
 ^{:refer std.lib.transform/normalise-wrap :added "3.0"}
-(fact "helper function for normalise-wrappers")
+(fact "helper function for normalise-wrappers"
+  (resolve 'normalise-wrap) => var?)
 
 ^{:refer std.lib.transform/normalise-wrappers :added "3.0"}
-(fact "adds function wrappers to the normalise functions")
+(fact "adds function wrappers to the normalise functions"
+  (resolve 'normalise-wrappers) => var?)
 
 ^{:refer std.lib.transform/normalise-base :added "3.0"}
 (fact "base normalise function" ^:hidden

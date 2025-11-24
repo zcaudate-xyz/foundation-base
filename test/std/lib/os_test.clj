@@ -1,6 +1,7 @@
 (ns std.lib.os-test
   (:use code.test)
-  (:require [std.lib.os :refer :all]))
+  (:require [std.lib.os :refer :all]
+            [std.lib.foundation :as h]))
 
 ^{:refer std.lib.os/native? :added "3.0"}
 (fact "checks if execution is in graal"
@@ -15,13 +16,25 @@
   => string?)
 
 ^{:refer std.lib.os/sh-wait :added "3.0"}
-(fact "waits for sh process to complete")
+(fact "waits for sh process to complete"
+  (sh-wait (sh {:args ["ls"] :wait false}))
+  => (any integer? nil? java.lang.Process))
 
 ^{:refer std.lib.os/sh-output :added "3.0"}
-(fact "returns the sh output")
+(fact "returns the sh output"
+  (:out (let [p (sh {:args ["echo" "hello"] :wait false})]
+          (sh-wait p)
+          (sh-output p)))
+  => "hello\n")
 
 ^{:refer std.lib.os/sh-write :added "4.0"}
-(fact "writes string or bytes to the process")
+(fact "writes string or bytes to the process"
+  (:out (let [p (sh {:args ["cat"] :wait false})]
+          (sh-write p "hello")
+          (sh-close p)
+          (sh-wait p)
+          (sh-output p)))
+  => "hello")
 
 ^{:refer std.lib.os/sh-read :added "4.0"}
 (fact "reads value from stdout"
@@ -32,16 +45,26 @@
   => string?)
 
 ^{:refer std.lib.os/sh-error :added "4.0"}
-(fact "reads value from stderr")
+(fact "reads value from stderr"
+  (:err (let [p (sh {:args ["ls"] :wait false})]
+          (sh-wait p)
+          (sh-error p)))
+  => (any string? nil?))
 
 ^{:refer std.lib.os/sh-close :added "4.0"}
-(fact "closes the sh output")
+(fact "closes the sh output"
+  (sh-close (sh {:args ["ls"] :wait false}))
+  => (any nil? java.lang.Process))
 
 ^{:refer std.lib.os/sh-exit :added "4.0"}
-(fact "calls `destroy` on the process")
+(fact "calls `destroy` on the process"
+  (sh-exit (sh {:args ["ls"] :wait false}))
+  => (any Process nil?))
 
 ^{:refer std.lib.os/sh-kill :added "4.0"}
-(fact "calls `destroyForcibly` on the process")
+(fact "calls `destroyForcibly` on the process"
+  (sh-kill (sh {:args ["ls"] :wait false}))
+  => (any Process nil?))
 
 ^{:refer std.lib.os/sh :added "3.0"}
 (fact "creates a sh process"
@@ -122,7 +145,9 @@
   (clip "hello"))
 
 ^{:refer std.lib.os/clip:nil :added "4.0"}
-(fact "clips a string to clipboard with no return")
+(fact "clips a string to clipboard with no return"
+  (h/suppress (clip:nil "hello"))
+  => nil)
 
 ^{:refer std.lib.os/paste :added "4.0"}
 (comment "pastes a string from clipboard"
@@ -146,4 +171,6 @@
 
 
 ^{:refer std.lib.os/os-arch :added "4.0"}
-(fact "returns the os architecture")
+(fact "returns the os architecture"
+  (os-arch)
+  => string?)

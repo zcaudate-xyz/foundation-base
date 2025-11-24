@@ -3,10 +3,12 @@
   (:require [std.lib.system.scaffold :refer :all]))
 
 ^{:refer std.lib.system.scaffold/scaffold:register :added "3.0"}
-(fact "registers a scaffold in the namespace")
+(fact "registers a scaffold in the namespace"
+  (resolve 'scaffold:register) => var?)
 
 ^{:refer std.lib.system.scaffold/scaffold:deregister :added "3.0"}
-(fact "deregisters a scaffold in the namespace")
+(fact "deregisters a scaffold in the namespace"
+  (resolve 'scaffold:deregister) => var?)
 
 ^{:refer std.lib.system.scaffold/scaffold:current :added "3.0"}
 (fact "returns the current scaffold")

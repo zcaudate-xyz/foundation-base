@@ -60,7 +60,8 @@
 ^{:refer std.lib.component.track/untrack-all :added "3.0"}
 (fact "clears all tracked objects"
 
-  (untrack-all [:test :store]))
+  (untrack-all [:test :store])
+  => map?)
 
 ^{:refer std.lib.component.track/tracked:action:add :added "3.0"
   :setup  [(track (Store.))]
@@ -76,7 +77,8 @@
 ^{:refer std.lib.component.track/tracked:action:remove :added "3.0"}
 (fact "removes an action"
 
-  (tracked:action:remove :println))
+  (tracked:action:remove :println)
+  => coll?)
 
 ^{:refer std.lib.component.track/tracked:action:get :added "3.0"}
 (fact "gets an action"
@@ -87,24 +89,29 @@
 ^{:refer std.lib.component.track/tracked:action:list :added "3.0"}
 (fact "lists all actions"
 
-  (tracked:action:list))
+  (tracked:action:list)
+  => (contains [:identity :peek] :in-any-order :gaps-ok))
 
 ^{:refer std.lib.component.track/tracked:all :added "3.0"}
 (fact "returns all tracked objects"
 
   (tracked:all)
+  => map?
 
-  (tracked:all [:test :store]))
+  (tracked:all [:test :store])
+  => (any map? nil?))
 
 ^{:refer std.lib.component.track/tracked :added "3.0"}
 (fact "returns and performs actions on tracked objects"
 
-  (tracked [:test] :identity))
+  (tracked [:test] :identity)
+  => map?)
 
 ^{:refer std.lib.component.track/tracked:count :added "3.0"}
 (fact "returns the count on the categories"
 
-  (tracked:count))
+  (tracked:count)
+  => (any map? number?))
 
 ^{:refer std.lib.component.track/tracked:locate :added "3.0"}
 (fact "locates given entries with tag" ^:hidden
@@ -124,7 +131,8 @@
 ^{:refer std.lib.component.track/tracked:last :added "3.0"}
 (fact "operates on the last tracked objects"
 
-  (tracked:last [] :identity 3))
+  (tracked:last [] :identity 3)
+  => coll?)
 
 ^{:refer std.lib.component.track/track:with-metadata :added "3.0"
   :style/indent 1
@@ -134,4 +142,8 @@
   (track:with-metadata [{:tag :default}]
                        (track (Store.)))
 
-  (tracked:locate {:tag :default}))
+  (tracked:locate {:tag :default})
+  => (comp not empty?))
+
+(tracked:action:add :untrack untrack
+                    :track track)

@@ -62,10 +62,14 @@
   => 'protocol.test/-val)
 
 ^{:refer std.lib.impl/standard-body-input-fn :added "3.0"}
-(fact "creates a standard input function")
+(fact "creates a standard input function"
+  ((standard-body-input-fn nil) {:arglist '[cache val] :name '-val})
+  => '[cache val])
 
 ^{:refer std.lib.impl/standard-body-output-fn :added "3.0"}
-(fact "creates a standard output function")
+(fact "creates a standard output function"
+  ((standard-body-output-fn {}) {:arglist '[cache val] :name '-val})
+  => '(-val cache val))
 
 ^{:refer std.lib.impl/create-body-fn :added "3.0"}
 (fact "creates a body function"
@@ -186,13 +190,19 @@
              (bulk? [entry] false)))
 
 ^{:refer std.lib.impl/dimpl-print-method :added "3.0"}
-(fact "creates a print method form")
+(fact "creates a print method form"
+  (dimpl-print-method 'Type)
+  => (any nil? seq?))
 
 ^{:refer std.lib.impl/dimpl-fn-invoke :added "3.0"}
-(fact "creates an invoke method")
+(fact "creates an invoke method"
+  (dimpl-fn-invoke 'invoke 2)
+  => '(invoke [obj a0 a1] (invoke obj a0 a1)))
 
 ^{:refer std.lib.impl/dimpl-fn-forms :added "3.0"}
-(fact "creates the `IFn` forms")
+(fact "creates the `IFn` forms"
+  (dimpl-fn-forms 'invoke)
+  => (contains '[clojure.lang.IFn]))
 
 ^{:refer std.lib.impl/dimpl-form :added "3.0"}
 (fact "helper for `defimpl`" ^:hidden
@@ -206,10 +216,13 @@
                 :protocols  [ITest
                              protocol.dispatch/IDispatch
                              :method  {-submit submit-executor}
-                             :body  {-bulk?  false}]]))
+                             :body  {-bulk?  false}]])
+  => (contains '(clojure.core/deftype Test [])))
 
 ^{:refer std.lib.impl/defimpl :added "3.0"}
-(fact "creates a high level `deftype` or `defrecord` interface")
+(fact "creates a high level `deftype` or `defrecord` interface"
+  (defimpl Test [])
+  => (contains '(clojure.core/deftype Test [])))
 
 ^{:refer std.lib.impl/eimpl-template-fn :added "3.0"}
 (fact "creates forms compatible with `extend-type` and `extend-protocol`"
@@ -231,7 +244,9 @@
        (-get ([obj] (impl/get-test obj)))))
 
 ^{:refer std.lib.impl/eimpl-print-method :added "3.0"}
-(fact "creates a print method form")
+(fact "creates a print method form"
+  (eimpl-print-method 'Type "string")
+  => seq?)
 
 ^{:refer std.lib.impl/eimpl-form :added "3.0"}
 (fact "creates the extend-impl form" ^:hidden
@@ -243,18 +258,25 @@
      :protocols  [ITest
                   protocol.dispatch/IDispatch
                   :method  {-submit +}
-                  :body  {-bulk?  false}]]))
+                  :body  {-bulk?  false}]])
+  => seq?)
 
 ^{:refer std.lib.impl/extend-impl
   :added "3.0"
   :style/indent 1}
-(fact "extends a class with the protocols")
+(fact "extends a class with the protocols"
+  (extend-impl String [:prefix "string/"])
+  => seq?)
 
 ^{:refer std.lib.impl/build-with-opts-fn :added "3.0"}
-(fact "builds a function with an optional component")
+(fact "builds a function with an optional component"
+  (build-with-opts-fn 'test '((test [x] 1)))
+  => seq?)
 
 ^{:refer std.lib.impl/build-variadic-fn :added "3.0"}
-(fact "builds a variadic function if indicated")
+(fact "builds a variadic function if indicated"
+  (build-variadic-fn 'test '((test [x] 1)))
+  => seq?)
 
 ^{:refer std.lib.impl/build-template-fn :added "3.0"}
 (fact "contructs a template from returned vals with support for variadic"
@@ -308,10 +330,14 @@
        (-invoke [cache a0 a1] (submit cache a0 a1))))
 
 ^{:refer std.lib.impl/build-form :added "3.0"}
-(fact "allows multiple forms to be built")
+(fact "allows multiple forms to be built"
+  (build-form '[ITest])
+  => seq?)
 
 ^{:refer std.lib.impl/build-impl :added "3.0" :style/indent 1}
-(fact "build macro for generating functions from protocols")
+(fact "build macro for generating functions from protocols"
+  (build-impl {:prefix "test/"} ITest)
+  => seq?)
 
 ^{:refer std.lib.impl/impl:proxy :added "3.0"}
 (fact "creates a proxy template given a symbol"

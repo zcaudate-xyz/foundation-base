@@ -26,7 +26,8 @@
   => {:id "math-5"})
 
 ^{:refer std.lib.transform.flatten/wrap-output :added "3.0"}
-(fact "adding cleaned up data to table")
+(fact "adding cleaned up data to table"
+  (resolve 'wrap-output) => var?)
 
 ^{:refer std.lib.transform.flatten/flatten :added "3.0"}
 (fact "converts a graph datastructure into a table"

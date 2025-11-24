@@ -9,7 +9,8 @@
 
   (declare -mem-)
   (def -mem-
-    (->Memoize + nil (atom {}) #'-mem- *registry* (volatile! true))))
+    (->Memoize + nil (atom {}) #'-mem- *registry* (volatile! true)))
+  (resolve 'map->Memoize) => var?)
 
 ^{:refer std.lib.memoize/memoize :added "3.0"}
 (fact "caches the result of a function"
@@ -25,7 +26,8 @@
 ^{:refer std.lib.memoize/register-memoize :added "3.0"}
 (fact "registers the memoize function"
 
-  (register-memoize -inc-))
+  (register-memoize -inc-)
+  => any?)
 
 ^{:refer std.lib.memoize/deregister-memoize :added "3.0"}
 (fact "deregisters the memoize function"
@@ -35,7 +37,8 @@
 ^{:refer std.lib.memoize/registered-memoizes :added "3.0"}
 (fact "lists all registered memoizes"
 
-  (registered-memoizes))
+  (registered-memoizes)
+  => (any nil? seq?))
 
 ^{:refer std.lib.memoize/registered-memoize? :added "3.0"}
 (fact "checks if a memoize function is registered"
