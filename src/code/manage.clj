@@ -6,6 +6,7 @@
             [code.manage.var :as var]
             [code.manage.unit.template :as template]
             [code.manage.unit :as unit]
+            [code.manage.unit.require :as unit.require]
             [code.project :as project]
             [std.task :as task]
             [std.lib :as h :refer [definvoke]]
@@ -554,6 +555,19 @@
 
 (comment (find-usages '[code.manage] {:print {:item true} :var 'code.framework/analyse}))
 
+(definvoke require-file
+  "requires the file and returns public vars
+
+   (require-file 'code.manage)
+   => (contains '[analyse extract ...])"
+  {:added "3.0"}
+  [:task {:template :code
+          :params {:title "REQUIRE FILE"
+                   :parallel true}
+          :main {:fn #'unit.require/require-file}
+          :item {:display identity}
+          :result {:columns (template/code-default-columns :data #{:bold})}}])
+
 (def +tasks+
   {:analyse       analyse
    :extract       extract
@@ -581,14 +595,15 @@
    :refactor-code refactor-code
    :refactor-test refactor-test
    :ns-format     ns-format
-   :find-usages   find-usages})
+   :find-usages   find-usages
+   :require-file  require-file})
 
 (defn -main
   "main entry point for code.manage
 
    (code.manage/-main \"import\" \"[xyz.zcaudate]\" \"{:tag :all}\")"
   {:added "3.0"}
-  [[cmd & args]]
+  [& [cmd & args]]
   (if (not cmd)
     (do (println "Available Tasks:")
         (doseq [cmd  (map name (sort (keys +tasks+)))]
