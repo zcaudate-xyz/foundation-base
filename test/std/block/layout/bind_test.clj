@@ -434,3 +434,7 @@
                                           :col-align false}
                        spec)])
                 {})))
+
+
+^{:refer std.block.layout.bind/layout-annotate-svg-path :added "4.0"}
+(fact "TODO")

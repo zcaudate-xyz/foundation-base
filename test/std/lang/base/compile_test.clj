@@ -171,3 +171,7 @@
 
   
   )
+
+
+^{:refer std.lang.base.compile/compile-module-create-links :added "4.0"}
+(fact "TODO")

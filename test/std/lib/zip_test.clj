@@ -698,3 +698,7 @@
                  delete-right)
       (root-element))
   => [2 4])
+
+
+^{:refer std.lib.zip/insert-right :added "4.0"}
+(fact "TODO")

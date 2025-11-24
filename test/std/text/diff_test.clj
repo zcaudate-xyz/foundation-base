@@ -122,3 +122,7 @@
 
 (comment
   (code.manage/import {:write true}))
+
+
+^{:refer std.text.diff/get-lines :added "4.0"}
+(fact "TODO")
