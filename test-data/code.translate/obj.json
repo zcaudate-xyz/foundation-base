@@ -1,0 +1,82 @@
+{
+  "type": "File",
+  "program": {
+    "type": "Program",
+    "body": [
+      {
+        "type": "VariableDeclaration",
+        "kind": "const",
+        "declarations": [
+          {
+            "type": "VariableDeclarator",
+            "id": {
+              "type": "Identifier",
+              "name": "config"
+            },
+            "init": {
+              "type": "ObjectExpression",
+              "properties": [
+                {
+                  "type": "ObjectProperty",
+                  "key": {
+                    "type": "Identifier",
+                    "name": "host"
+                  },
+                  "value": {
+                    "type": "StringLiteral",
+                    "value": "localhost"
+                  },
+                  "computed": false
+                },
+                {
+                  "type": "ObjectProperty",
+                  "key": {
+                    "type": "Identifier",
+                    "name": "port"
+                  },
+                  "value": {
+                    "type": "NumericLiteral",
+                    "value": 8080
+                  },
+                  "computed": false
+                }
+              ]
+            }
+          }
+        ]
+      },
+      {
+        "type": "ExpressionStatement",
+        "expression": {
+          "type": "CallExpression",
+          "callee": {
+            "type": "MemberExpression",
+            "object": {
+              "type": "Identifier",
+              "name": "console"
+            },
+            "property": {
+              "type": "Identifier",
+              "name": "log"
+            },
+            "computed": false
+          },
+          "arguments": [
+            {
+              "type": "MemberExpression",
+              "object": {
+                "type": "Identifier",
+                "name": "config"
+              },
+              "property": {
+                "type": "Identifier",
+                "name": "host"
+              },
+              "computed": false
+            }
+          ]
+        }
+      }
+    ]
+  }
+}
