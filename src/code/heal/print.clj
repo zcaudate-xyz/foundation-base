@@ -8,12 +8,10 @@
    "\u001b[31m"                        ; red
    "\u001b[36m"                        ; cyan
    "\u001b[33m"                        ; yellow
-   
-])
+   ])
   
-(def +error-color+ "\u001b[41m") ; red background
-(def +unpaired-color+ "\u001b[43m") ; red background
-
+(def +error-color+    "\u001b[41m") ; red background
+(def +unpaired-color+ "\u001b[43m") ; yellow background
 (def +reset-color+ "\u001b[0m")
 
 (defn print-rainbow

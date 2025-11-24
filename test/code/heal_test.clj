@@ -1,7 +1,7 @@
 (ns code.heal-test
   (:use code.test)
   (:require [code.heal :as heal]
-            [code.heal.level :as level]
+            [code.heal.core :as level]
             [std.lib :as h]))
 
 ^{:refer code.heal/heal-code-single :added "4.0"}

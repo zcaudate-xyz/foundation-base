@@ -2,7 +2,7 @@
   (:require [code.manage :as manage]
             [code.edit :as edit]
             [code.query :as query]
-            [code.heal.level :as level]
+            [code.heal.core :as level]
             [code.heal.form-edits :as form-edits]
             [std.block :as b]
             [std.fs :as fs]

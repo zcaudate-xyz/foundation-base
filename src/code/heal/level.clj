@@ -1,9 +1,9 @@
-(ns code.heal.level
+(ns code.heal.core
   (:require [std.lib :as h]
             [std.string :as str]
             [code.heal.parse :as parse]
             [code.heal.indent :as indent]
-            [code.heal.core :as core]
+            [code.heal.edit :as edit]
             [std.text.diff :as diff]))
 
 (defn group-min-col
@@ -274,12 +274,12 @@
            (= -1 (:depth e1))
            (= :open (:type e2))
            (= :close (:type e3)))
-      (core/create-remove-edits [e3])
+      (edit/create-remove-edits [e3])
 
       ;; if parens are balanced but just mismatched, heal those
       (and (even? (count errors))
            (every? :pair-id errors))
-      (core/create-mismatch-edits errors)      
+      (edit/create-mismatch-edits errors)      
       
       :else
       (do (h/prn)
@@ -321,22 +321,22 @@
                               ;; Remove Delimiter
                               (and (= (:type e1) :close)
                                    (nil? e2))
-                              (core/create-remove-edits [e1])
+                              (edit/create-remove-edits [e1])
 
                               ;; Remove Delimiters
                               (and (= (:type e1) :close)
                                    (= (:type e2) :close))
-                              (core/create-remove-edits [e1 e2])
+                              (edit/create-remove-edits [e1 e2])
                               
                               ;; Mismatched Delimiters
                               (and (= (:type e1) :open)
                                    (= (:type e2) :close))
-                              (core/create-mismatch-edits [e1 e2])
+                              (edit/create-mismatch-edits [e1 e2])
                               
                               :else
                               (heal-content-complex-edits info errors))))
                         errored)
-        new-content  (try (core/update-content content
+        new-content  (try (edit/update-content content
                                                edits)
                           (catch Throwable t
                             (mapv (fn [{:keys [at]

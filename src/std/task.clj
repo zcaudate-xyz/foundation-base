@@ -117,3 +117,28 @@
   {:added "3.0"}
   ([name config & body]
    (invoke-intern-task :task name config body)))
+
+(defn process-ns-args
+  [args]
+  (loop [m     {}
+         [k v]  args]
+    (if (not k)
+      m
+      (let [k (try (read-string k)
+                   (catch Throwable t))
+            v (try (read-string v)
+                   (catch Throwable t))]
+        (cond (not (keyword? k))
+              (recur m (rest args))
+
+
+              (keyword? v)
+              (recur (assoc m k true)
+                     (rest args))
+              
+              :else
+              (recur (case k
+                       :only    (assoc m :ns v)
+                       :with    (assoc m :ns [v])
+                       (assoc m k v))
+                     (rest (rest args))))))))

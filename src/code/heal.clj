@@ -2,7 +2,7 @@
   (:require [code.heal.core :as core]
             [code.heal.print :as print]
             [code.heal.parse :as parse]
-            [code.heal.level :as level]
+            [code.heal.core :as level]
             [code.framework :as framework]
             [std.lib :as h :refer [definvoke]]
             [std.task :as task]
@@ -40,6 +40,16 @@
    content
    (parse/pair-delimiters
     (parse/parse-delimiters content))))
+
+(defn -main
+  "main entry point for leiningen
+ 
+   (task/-main)"
+  {:added "3.0"}
+  ([& args]
+   (let [opts (task/process-ns-args args)]
+     ()
+     )))
 
 
 (comment

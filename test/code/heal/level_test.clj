@@ -1,11 +1,11 @@
-(ns code.heal.level-test
+(ns code.heal.core-test
   (:use code.test)
-  (:require [code.heal.level :as level]
+  (:require [code.heal.core :as level]
             [std.string :as str]
             [std.block :as b]
             [std.lib :as h]))
 
-^{:refer code.heal.level/group-min-col :added "4.0"}
+^{:refer code.heal.core/group-min-col :added "4.0"}
 (fact "gets the minimum column"
   ^:hidden
   
@@ -21,7 +21,7 @@
    0)
   => 6)
 
-^{:refer code.heal.level/group-entries :added "4.0"}
+^{:refer code.heal.core/group-entries :added "4.0"}
 (fact "groups entries by colation"
   ^:hidden
   
@@ -86,7 +86,7 @@
        {:type :code :line 531 :last-idx 57 :col 10}
        {:type :code :line 532 :last-idx 30}]])
 
-^{:refer code.heal.level/group-blocks-single :added "4.0"}
+^{:refer code.heal.core/group-blocks-single :added "4.0"}
 (fact "creates a single block"
   ^:hidden
     
@@ -140,7 +140,7 @@
         :level 0,
         :col 5}]})
   
-^{:refer code.heal.level/group-blocks-multi :added "4.0"}
+^{:refer code.heal.core/group-blocks-multi :added "4.0"}
 (fact "categorises the blocks"
   ^:hidden
   
@@ -171,7 +171,7 @@
       :last true}]}])
 
 
-^{:refer code.heal.level/group-blocks-prep-entries :added "4.0"}
+^{:refer code.heal.core/group-blocks-prep-entries :added "4.0"}
 (fact "prepares the block entries for a file"
   ^:hidden 
 
@@ -192,7 +192,7 @@
       {:type :code, :line 3, :last-idx 10, :col 5, :char "n"}
       {:char "{", :line 3, :col 9, :type :open, :style :curly}])
 
-^{:refer code.heal.level/group-blocks-prep :added "4.0"}
+^{:refer code.heal.core/group-blocks-prep :added "4.0"}
 (fact "prepares the block entries for a file"
   ^:hidden 
   
@@ -210,7 +210,7 @@
       {:lines vector?
        :entries vector?}))
 
-^{:refer code.heal.level/group-blocks :added "4.0"}
+^{:refer code.heal.core/group-blocks :added "4.0"}
 (fact "groups the lines by colation sections"
   ^:hidden
 
@@ -359,7 +359,7 @@
       :last true}],
     :last true}])
 
-^{:refer code.heal.level/get-block-lines :added "4.0"}
+^{:refer code.heal.core/get-block-lines :added "4.0"}
 (fact "gets the block lines"
   ^:hidden
 
@@ -381,7 +381,7 @@
       "(l/script :js"
       "  {:require [[js.react :as r]"])
 
-^{:refer code.heal.level/get-errored-loop :added "4.0"}
+^{:refer code.heal.core/get-errored-loop :added "4.0"}
 (fact "runs the check block loop"
   #_#_#_
   ^:hidden
@@ -440,7 +440,7 @@
        :col 8,
        :last true}})
   
-^{:refer code.heal.level/get-errored-raw :added "4.0"}
+^{:refer code.heal.core/get-errored-raw :added "4.0"}
 (fact "helper function for get-errored"
 
   (level/get-errored
@@ -567,7 +567,7 @@
         :col 23,
         :last true}}])
 
-^{:refer code.heal.level/get-errored :added "4.0"}
+^{:refer code.heal.core/get-errored :added "4.0"}
 (fact "checks content for irregular blocks"
   ^:hidden
 
@@ -722,7 +722,7 @@
      :level 0,
      :col 5}}])
 
-^{:refer code.heal.level/get-errored.more :added "4.0"}
+^{:refer code.heal.core/get-errored.more :added "4.0"}
 (fact "get errored more cases"
 
   (level/get-errored
@@ -867,7 +867,7 @@
         :col 1,
         :last true}}])
 
-^{:refer code.heal.level/heal-content-single-pass :added "4.0"}
+^{:refer code.heal.core/heal-content-single-pass :added "4.0"}
 (fact "heals the content in a single pass"
   ^:hidden
   
@@ -949,7 +949,7 @@
         :position 11,
         :count 1}}])
   
-^{:refer code.heal.level/heal-content :added "4.0"}
+^{:refer code.heal.core/heal-content :added "4.0"}
 (fact "allow multiple passes to heal the delimiter"
   ^:hidden
   
@@ -973,10 +973,10 @@
     (slurp "test-data/code.heal/cases/002_complex.block")))
   => b/block?)
 
-^{:refer code.heal.level/wrap-print-diff :added "4.0"}
+^{:refer code.heal.core/wrap-print-diff :added "4.0"}
 (fact "print wrapper for the heal function")
 
-^{:refer code.heal.level/wrap-diff :added "4.0"}
+^{:refer code.heal.core/wrap-diff :added "4.0"}
 (fact "wraps the heal function to output the diff"
   ^:hidden
   
@@ -1167,8 +1167,8 @@
    (slurp "../../buffer/Smalltalkinterfacedesign/translate/src-translated/components/library_browser.clj")))
 
 
-^{:refer code.heal.level/check-errored-suspect :added "4.0"}
+^{:refer code.heal.core/check-errored-suspect :added "4.0"}
 (fact "TODO")
 
-^{:refer code.heal.level/heal-content-complex-edits :added "4.0"}
+^{:refer code.heal.core/heal-content-complex-edits :added "4.0"}
 (fact "TODO")

@@ -118,6 +118,18 @@
           :item   {:output identity}
           :params {:title "TEST LOADED"}}])
 
+(defn run-errored
+  "runs only the tests that have errored
+ 
+   (task/run-errored)"
+  {:added "3.0"}
+  ([]
+   (let [latest @executive/+latest+]
+     (-> (h/union (set (:errored latest))
+                  (set (map (comp :ns :meta) (:failed latest)))
+                  (set (map (comp :ns :meta) (:thrown latest))))
+         (run)))))
+
 (defn print-options
   "output options for test results
  
@@ -151,57 +163,19 @@
 
 ;;(print-options (print-options :default))
 
-(defn process-args
-  "processes input arguments
- 
-   (task/process-args [\"hello\"])
-   => #{:hello}"
-  {:added "3.0"}
-  ([args]
-   (loop [m     {}
-          [k v]  args]
-     (let [k (try (read-string k)
-                  (catch Throwable t))
-           v (try (read-string v)
-                  (catch Throwable t))]
-       (cond (not (keyword? k))
-             (recur m (rest args))
-
-
-             (keyword? v)
-             (recur (assoc m k true)
-                    (rest args))
-             
-             :else
-             (case k
-               :only    (assoc m :run v)
-               :in      (assoc m :run [v])
-               (assoc m k v)))))))
-
 (defn -main
   "main entry point for leiningen
  
    (task/-main)"
   {:added "3.0"}
   ([& args]
-   (let [opts (process-args args)
-         {:keys [thrown failed] :as stats} (run (or (:run opts) :all) (:dissoc opts run))
+   (let [opts (task/process-ns-args args)
+         {:keys [thrown failed] :as stats} (run (or (:ns opts) :all)
+                                             (dissoc opts :ns))
          res (+ thrown failed)]
      (if (get opts :no-exit)
        res
        (System/exit res)))))
-
-(defn run-errored
-  "runs only the tests that have errored
- 
-   (task/run-errored)"
-  {:added "3.0"}
-  ([]
-   (let [latest @executive/+latest+]
-     (-> (h/union (set (:errored latest))
-                  (set (map (comp :ns :meta) (:failed latest)))
-                  (set (map (comp :ns :meta) (:thrown latest))))
-         (run)))))
 
 (comment
   (run '[platform])

@@ -43,6 +43,10 @@
 
   1 => 2)
 
+(fact "Verify just output on failure"
+
+  1 => 2)
+
 (comment
   (s/run '[code.test.compile-fix-test])
   (s/run '[code.test.compile-fix-test])

@@ -10,8 +10,8 @@
        (iterate (fn [nav]
                   (nav/find-next nav
                                  (fn [block]
-                                   (or (= :unquote-splice (:tag (std.block/info block)))
-                                       (= :unquote (:tag (std.block/info block))))))))
+                                   (or (= :unquote-splice (:tag (b/info block)))
+                                       (= :unquote (:tag (b/info block))))))))
        (drop 1)
        (take-while identity)
        (map nav/value)))
