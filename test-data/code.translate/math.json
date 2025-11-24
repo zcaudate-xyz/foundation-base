@@ -1,0 +1,41 @@
+{
+  "type": "File",
+  "program": {
+    "type": "Program",
+    "body": [
+      {
+        "type": "VariableDeclaration",
+        "kind": "const",
+        "declarations": [
+          {
+            "type": "VariableDeclarator",
+            "id": {
+              "type": "Identifier",
+              "name": "result"
+            },
+            "init": {
+              "type": "BinaryExpression",
+              "operator": "+",
+              "left": {
+                "type": "BinaryExpression",
+                "operator": "*",
+                "left": {
+                  "type": "NumericLiteral",
+                  "value": 2
+                },
+                "right": {
+                  "type": "NumericLiteral",
+                  "value": 3
+                }
+              },
+              "right": {
+                "type": "NumericLiteral",
+                "value": 4
+              }
+            }
+          }
+        ]
+      }
+    ]
+  }
+}
