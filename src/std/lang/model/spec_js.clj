@@ -259,7 +259,7 @@
         :for-async  {:macro  #'tf-for-async :emit :macro}})
       (grammar/build:override fn/+js+)
       (grammar/build:extend
-       {#_#_:property   {:op :property  :symbol  '#{property}   :assign ":" :raw "property" :emit :def-assign}
+       {:property   {:op :property  :symbol  '#{property}   :assign ":" :raw "property" :value true :emit :def-assign}
         :teq        {:op :teq       :symbol  '#{===}        :raw "===" :emit :bi}
         :tneq       {:op :tneq      :symbol  '#{not==}      :raw "!==" :emit :bi}
         :delete     {:op :delete    :symbol  '#{del}        :raw "delete" :value true :emit :prefix}
