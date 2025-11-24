@@ -51,7 +51,7 @@
                               4))
              (str
               (str "\n   " (ansi/white "Check") "  " (str/indent-rest (pretty/pprint-str bcheck) 10))
-              (str "\n    " (ansi/white "Eval") "  " (if (coll? actual)
+              (str "\n  " (ansi/white "Result") "  " (if (coll? actual)
                                                        (str/indent-rest (pretty/pprint-str actual) 10)
                                                        actual))))
            (if pattern? (str "\n " (ansi/white "Pattern") "  " (ansi/blue (str form " : " check))))
