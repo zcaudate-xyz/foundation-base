@@ -24,7 +24,7 @@
 
 
 ^{:refer std.make.bulk/make-bulk-container-filter :added "4.0"}
-(fact "TODO")
+(fact "filters configs based on container membership")
 
 ^{:refer std.make.bulk/make-bulk-container-build :added "4.0"}
-(fact "TODO")
+(fact "builds containers for bulk configs")

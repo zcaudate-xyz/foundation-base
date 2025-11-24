@@ -207,4 +207,4 @@
 
 
 ^{:refer xt.db.base-util/collect-routes-object :added "4.0"}
-(fact "TODO")
+(fact "collects routes from an object input")

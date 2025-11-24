@@ -138,19 +138,19 @@
 
 
 ^{:refer js.react.compile/get-registry :added "4.0"}
-(fact "TODO")
+(fact "gets the component registry")
 
 ^{:refer js.react.compile/put-registry :added "4.0"}
-(fact "TODO")
+(fact "puts a component group into the registry")
 
 ^{:refer js.react.compile/del-registry :added "4.0"}
-(fact "TODO")
+(fact "deletes a component group from the registry")
 
 ^{:refer js.react.compile/get-default-components :added "4.0"}
-(fact "TODO")
+(fact "emits using a potentially cached entry")
 
 ^{:refer js.react.compile/compile-replace-actions :added "4.0"}
-(fact "TODO")
+(fact "compiles to react code")
 
 ^{:refer js.react.compile/compile-triggers :added "4.0"}
-(fact "TODO")
+(fact "compiles to react code")

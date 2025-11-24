@@ -3277,10 +3277,10 @@
 
 
 ^{:refer xt.lang.base-lib/path-fn :added "4.0"}
-(fact "TODO")
+(fact "creates a function that accesses a path in an object")
 
 ^{:refer xt.lang.base-lib/eq-shallow :added "4.0"}
-(fact "TODO")
+(fact "checks for shallow equality")
 
 ^{:refer xt.lang.base-lib/str-rand :added "4.0"}
-(fact "TODO")
+(fact "generates a random string of length n")

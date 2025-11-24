@@ -146,4 +146,4 @@
 
 
 ^{:refer std.lib.os/os-arch :added "4.0"}
-(fact "TODO")
+(fact "returns the os architecture")

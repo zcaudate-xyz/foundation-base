@@ -255,7 +255,7 @@
 
 
 ^{:refer rt.postgres.grammar.common/pg-policy-format :added "4.0"}
-(fact "TODO")
+(fact "formats a policy definition")
 
 ^{:refer rt.postgres.grammar.common/pg-deftrigger :added "4.0"}
-(fact "TODO")
+(fact "deftrigger block")

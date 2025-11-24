@@ -233,4 +233,4 @@
 
 
 ^{:refer rt.postgres.grammar.form-deftype/pg-deftype-primaries :added "4.0"}
-(fact "TODO")
+(fact "gets the primary keys for deftype")

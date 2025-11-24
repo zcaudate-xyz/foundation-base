@@ -237,4 +237,4 @@
 
 
 ^{:refer xt.lang.base-runtime/defvar.py :added "4.0"}
-(fact "TODO")
+(fact "shortcut for a python getter and a reset var")

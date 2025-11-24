@@ -154,31 +154,31 @@
 
 
 ^{:refer std.lib.env/dbg-print :added "4.0"}
-(fact "TODO")
+(fact "prints debug info with namespace and location")
 
 ^{:refer std.lib.env/dbg :added "4.0"}
-(fact "TODO")
+(fact "debug macro that prints the form and its result")
 
 ^{:refer std.lib.env/with:dbg :added "4.0"}
-(fact "TODO")
+(fact "macro to bind *debug* flag")
 
 ^{:refer std.lib.env/dbg-global :added "4.0"}
-(fact "TODO")
+(fact "access or set the global *debug* flag")
 
 ^{:refer std.lib.env/dbg:add-filters :added "4.0"}
-(fact "TODO")
+(fact "adds filters to the debug allowlist")
 
 ^{:refer std.lib.env/dbg:remove-filters :added "4.0"}
-(fact "TODO")
+(fact "removes filters from the debug allowlist")
 
 ^{:refer std.lib.env/with-system :added "4.0"}
-(fact "TODO")
+(fact "executes body with system print")
 
 ^{:refer std.lib.env/with-out-str :added "4.0"}
-(fact "TODO")
+(fact "captures output to string using system print")
 
 ^{:refer std.lib.env/pr :added "4.0"}
-(fact "TODO")
+(fact "shortcut to (local :print ...)")
 
 ^{:refer std.lib.env/wrap-print :added "4.0"}
-(fact "TODO")
+(fact "wraps a function to print its result")
