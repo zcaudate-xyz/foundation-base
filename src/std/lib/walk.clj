@@ -9,13 +9,12 @@
 
     (instance? clojure.lang.IMapEntry form) (outer (vec (map inner form)))
     (seq? form) (outer (doall (with-meta (map inner form) (meta form))))
+    (instance? clojure.lang.IRecord form)
+    (outer (reduce (fn [r x] (conj r (inner x))) form form))
 
     (set? form) (outer (with-meta (into (empty form) (map inner form)) (meta form)))
     (map? form) (outer (with-meta (into (empty form) (map inner form)) (meta form)))
     (vector? form) (outer (with-meta (mapv inner form) (meta form)))
-
-    (instance? clojure.lang.IRecord form)
-    (outer (reduce (fn [r x] (conj r (inner x))) form form))
     (coll? form) (outer (into (empty form) (map inner form)))
     :else (outer form)))
 

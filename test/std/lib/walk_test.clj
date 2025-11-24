@@ -2,8 +2,29 @@
   (:use code.test)
   (:require [std.lib.walk :refer :all]))
 
+(defrecord WalkRecord [a])
+
 ^{:refer std.lib.walk/walk :added "3.0"}
-(fact "Traverses form, an arbitrary data structure")
+(fact "Traverses form, an arbitrary data structure"
+  (let [m ^{:a 1} {:x 1}
+        w (walk identity identity m)]
+    (meta w) => {:a 1})
+  
+  (let [v ^{:a 1} [1 2]
+        w (walk identity identity v)]
+    (meta w) => {:a 1})
+
+  (let [l ^{:a 1} (list 1 2)
+        w (walk identity identity l)]
+    (meta w) => {:a 1})
+    
+  (let [s ^{:a 1} #{1 2}
+        w (walk identity identity s)]
+    (meta w) => {:a 1})
+
+  (let [r (with-meta (->WalkRecord 1) {:a 1})
+        w (walk identity identity r)]
+    (meta w) => {:a 1}))
 
 ^{:refer std.lib.walk/postwalk :added "3.0"}
 (fact "Performs a depth-first, post-order traversal of form")
