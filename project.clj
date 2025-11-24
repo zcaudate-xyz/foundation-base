@@ -4,8 +4,8 @@
   :license  {:name "MIT License"
              :url  "http://opensource.org/licenses/MIT"}
   :aliases
-  {"test"  ["exec" "-ep" "(use 'code.test) (def res (run :all)) (System/exit (+ (:failed res) (:thrown res)))"]
-   "test-unit"   ["run" "-m" "code.test" "exit"]
+  {"test"      ["run" "-m" "code.test" "exit"]
+   "test-unit" ["run" "-m" "code.test" "exit"]
    "publish"     ["exec" "-ep" "(use 'code.doc)     (deploy-template :all) (publish :all)"]
    "incomplete"  ["exec" "-ep" "(use 'code.manage)  (incomplete :all) (System/exit 0)"]
    "install"     ["exec" "-ep" "(use 'code.maven)   (install :all {:tag :all}) (System/exit 0)"]

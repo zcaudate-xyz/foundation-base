@@ -155,18 +155,32 @@
   "processes input arguments
  
    (task/process-args [\"hello\"])
-   => #{:hello}"
+   => {:hello true}
+
+   (task/process-args [\":only\" \"hello\"])
+   => {:only \"hello\"}"
   {:added "3.0"}
   ([args]
-   (->> (map read-string args)
-        (map (fn [x]
-               (cond (symbol? x)
-                     (keyword (name x))
+   (loop [out {}
+          [curr & more :as args] args]
+     (cond (empty? args) out
 
-                     (keyword? x) x
+           (= ":only" curr)
+           (recur (assoc out :only (first more))
+                  (rest more))
 
-                     (string? x) (keyword x))))
-        set)))
+           (= "exit" curr)
+           (recur (assoc out :exit true)
+                  more)
+
+           :else
+           (let [k (try (read-string curr) (catch Exception _ (keyword curr)))
+                 k (cond (symbol? k) (keyword (name k))
+                         (keyword? k) k
+                         (string? k) (keyword k)
+                         :else (keyword (str k)))]
+             (recur (assoc out k true)
+                    more))))))
 
 (defn -main
   "main entry point for leiningen
@@ -175,7 +189,10 @@
   {:added "3.0"}
   ([& args]
    (let [args (process-args args)
-         {:keys [thrown failed] :as stats} (run :all)
+         target (or (when-let [ns-arg (:only args)]
+                      (symbol ns-arg))
+                    :all)
+         {:keys [thrown failed] :as stats} (run target)
          res (+ thrown failed)]
      (if (get args :exit)
        (System/exit res)
