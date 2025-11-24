@@ -31,7 +31,9 @@
   (.write w (str "#db" (into {} v))))
 
 ^{:refer std.lib.component/impl:component :added "3.0"}
-(fact "rewrite function compatible with std.lib.impl")
+(fact "rewrite function compatible with std.lib.impl"
+  (impl:component {:name ':-foo})
+  => 'std.lib.component/foo)
 
 ^{:refer std.lib.component/component? :added "3.0"}
 (fact "checks if an instance extends IComponent"
@@ -91,7 +93,8 @@
   => (contains {:init fn?}))
 
 ^{:refer std.lib.component/stop-raw :added "3.0"}
-(fact "switch between stop and kill methods")
+(fact "switch between stop and kill methods"
+  (stop-raw (start (Database.))) => {})
 
 ^{:refer std.lib.component/start :added "3.0"
   :teardown [(track/tracked:last [:test :db] stop)]}
@@ -155,10 +158,18 @@
   => true)
 
 ^{:refer std.lib.component/wrap-start :added "4.0"}
-(fact "wraps the start function with more steps")
+(fact "wraps the start function with more steps"
+  ((wrap-start (fn [rt] (assoc rt :started true))
+               [])
+   {})
+  => {:started true})
 
 ^{:refer std.lib.component/wrap-stop :added "4.0"}
-(fact "wraps the stop function with more steps")
+(fact "wraps the stop function with more steps"
+  ((wrap-stop (fn [rt] (assoc rt :stopped true))
+              [])
+   {})
+  => {:stopped true})
 
 
 (comment
@@ -166,4 +177,3 @@
   (./import)
 
   (track/tracked [:test :db] stop))
-

@@ -100,7 +100,8 @@
 ^{:refer std.lib.bin.buffer/buffer-put :added "3.0"}
 (fact "utility for putting arrays into buffers"
 
-  (buffer-put (double-buffer 2) (double-array [1 2])))
+  (buffer-put (double-buffer 2) (double-array [1 2]))
+  => java.nio.DoubleBuffer)
 
 ^{:refer std.lib.bin.buffer/buffer-get :added "3.0"}
 (fact "utility for getting arrays from buffers"

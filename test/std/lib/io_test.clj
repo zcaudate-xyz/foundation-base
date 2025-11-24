@@ -20,13 +20,21 @@
   => java.nio.charset.Charset)
 
 ^{:refer std.lib.io/input-stream? :added "3.0"}
-(fact "checks if object is an input-stream")
+(fact "checks if object is an input-stream"
+  (input-stream? (java.io.ByteArrayInputStream. (.getBytes "a")))
+  => true)
 
 ^{:refer std.lib.io/output-stream? :added "3.0"}
-(fact "checks if object is an output-stream")
+(fact "checks if object is an output-stream"
+  (output-stream? (java.io.ByteArrayOutputStream.))
+  => true)
 
 ^{:refer std.lib.io/reader? :added "3.0"}
-(fact "checks that object is a reader")
+(fact "checks that object is a reader"
+  (reader? (java.io.StringReader. "a"))
+  => true)
 
 ^{:refer std.lib.io/writer? :added "3.0"}
-(fact "checks that object is a writer")
+(fact "checks that object is a writer"
+  (writer? (java.io.StringWriter.))
+  => true)

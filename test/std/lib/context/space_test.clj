@@ -60,7 +60,9 @@
   => reg/rt-null?)
 
 ^{:refer std.lib.context.space/space-stop :added "3.0"}
-(fact "shutdown all runtimes in the space")
+(fact "shutdown all runtimes in the space"
+  (space-stop (space-create {:namespace 'test}))
+  => space?)
 
 ^{:refer std.lib.context.space/space? :added "3.0"}
 (fact "checks that an object is of type space"
@@ -73,17 +75,20 @@
 (fact "creates a space"
   ^:hidden
 
-  (space-create {:namespace 'test}))
+  (space-create {:namespace 'test})
+  => space?)
 
 ^{:refer std.lib.context.space/space :added "3.0"}
 (fact "gets the space in the current namespace"
 
-  (space))
+  (space)
+  => space?)
 
 ^{:refer std.lib.context.space/space-resolve :added "3.0"}
 (fact "resolves a space given various inputs"
 
-  (space-resolve *ns*))
+  (space-resolve *ns*)
+  => space?)
 
 ^{:refer std.lib.context.space/protocol-tmpl :added "3.0"}
 (fact "constructs a template function"
@@ -101,17 +106,9 @@
                                    (protocol.context/-rt-get ctx)))))
 
 ^{:refer std.lib.context.space/space:rt-current :added "4.0"}
-(fact "gets the current rt in the space")
-
-
-^{:refer std.lib.context.space/rt-proxy? :added "4.0"}
 (fact "gets the current rt in the space"
-  ^:hidden
-  
-  (rt-proxy?
-   (map->RuntimeProxy {:namespace 'test
-                       :ctx   :null}))
-  true)
+  (space:rt-current :null)
+  => reg/rt-null?)
 
 
 (comment

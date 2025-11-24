@@ -95,7 +95,8 @@
 ^{:refer std.lib.stream.async/mono? :added "3.0"}
 (fact "checks if object is a mono"
 
-  (mono? (mono)))
+  (mono? (mono))
+  => any?)
 
 ^{:refer std.lib.stream.async/mono :added "3.0"}
 (fact "constructs a mono"
@@ -227,7 +228,8 @@
 ^{:refer std.lib.stream.async/collect-flux :added "3.0"}
 (fact "writes to a flux"
 
-  (collect-flux (flux) identity (range 5)))
+  (collect-flux (flux) identity (range 5))
+  => any?)
 
 ^{:refer std.lib.stream.async/flux? :added "3.0"}
 (fact "checks if object is a flux"

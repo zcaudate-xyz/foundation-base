@@ -3,10 +3,14 @@
   (:require [std.lib.generate :refer :all]))
 
 ^{:refer std.lib.generate/macroexpand-code :added "3.0"}
-(fact "macroexpand code, keeping the original meta")
+(fact "macroexpand code, keeping the original meta"
+  (macroexpand-code '(-> 1 inc))
+  => '(inc 1))
 
 ^{:refer std.lib.generate/tag-visited :added "3.0"}
-(fact "appends `:form/yield` to the form meta")
+(fact "appends `:form/yield` to the form meta"
+  (meta (tag-visited '()))
+  => (contains {:form/yield true}))
 
 ^{:refer std.lib.generate/visit-sym :added "3.0"}
 (fact "returns the visitor dispatch"

@@ -3,7 +3,8 @@
   (:require [std.lib.schema.ref :refer :all]))
 
 ^{:refer std.lib.schema.ref/with:ref-fn :added "4.0"}
-(fact "passes a function for use in `reverse-ref-attr` method to add additional params to schema")
+(fact "passes a function for use in `reverse-ref-attr` method to add additional params to schema"
+  (resolve 'with:ref-fn) => var?)
 
 ^{:refer std.lib.schema.ref/keyword-reverse :added "3.0"}
 (fact "reverses the keyword by either adding or removing '_' in the value"
@@ -142,7 +143,8 @@
   => (throws Exception))
 
 ^{:refer std.lib.schema.ref/forward-ref-attr-fn :added "3.0"}
-(fact "helper for `forward-ref-attr`")
+(fact "helper for `forward-ref-attr`"
+  (resolve 'forward-ref-attr-fn) => var?)
 
 ^{:refer std.lib.schema.ref/attr-ns-pair :added "3.0"}
 (fact "constructs a :ns and :ident root pair for comparison"

@@ -34,7 +34,9 @@
 
   (bitseq-to-bitset [1 0 0 0 1 1])
   ;; => #bs[1 0 0 0 1 1]
-  )
+  => java.util.BitSet
+  => any?
+  => any?)
 
 ^{:refer std.lib.bin.type/bitset-to-bitseq :added "3.0"}
 (fact "creates a binary sequence from a bitset"

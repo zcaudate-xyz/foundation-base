@@ -4,10 +4,12 @@
   (:refer-clojure :exclude [find get]))
 
 ^{:refer std.lib.zip/register-type :added "4.0"}
-(fact "registers a zip type")
+(fact "registers a zip type"
+  (resolve 'register-type) => var?)
 
 ^{:refer std.lib.zip/unregister-type :added "4.0"}
-(fact "unregisters a zip type")
+(fact "unregisters a zip type"
+  (resolve 'unregister-type) => var?)
 
 ^{:refer std.lib.zip/check-context :added "3.0"}
 (fact "checks that the zipper contains valid functions"
@@ -31,7 +33,8 @@
   => false)
 
 ^{:refer std.lib.zip/zipper :added "3.0"}
-(fact "constructs a zipper")
+(fact "constructs a zipper"
+  (resolve 'zipper) => var?)
 
 ^{:refer std.lib.zip/unwrap-element :added "4.0"}
 (fact "unwraps an element")

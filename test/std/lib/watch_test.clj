@@ -37,7 +37,8 @@
                           :diff true
                           :mode :async
                           :args 2}
-                         (fn [_ _] 1)))
+                         (fn [_ _] 1))
+  (resolve 'process-options) => var?)
 
 ^{:refer std.lib.watch/watch:add :added "3.0"}
 (fact "Adds a watch function through the IWatch protocol" ^:hidden

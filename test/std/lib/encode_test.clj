@@ -12,7 +12,9 @@
   => [\2 \a])
 
 ^{:refer std.lib.encode/to-hex-chars :added "3.0"}
-(fact "turns a byte array into a hex char array")
+(fact "turns a byte array into a hex char array"
+  (vec (to-hex-chars (byte-array [255 42])))
+  => [\f \f \2 \a])
 
 ^{:refer std.lib.encode/to-hex :added "3.0"}
 (fact "turns a byte array into hex string"

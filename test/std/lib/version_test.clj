@@ -132,11 +132,13 @@
 
   (version/init [[:java    :newer {:major 1 :minor 8}]
                  [:clojure :newer {:major 1 :minor 6}]]
-                (:import java.time.Instant)))
+                (:import java.time.Instant))
+  (resolve 'init) => var?)
 
 ^{:refer std.lib.version/run :added "3.0"}
 (fact "only runs the following code is the minimum versions have been met"
 
   (version/run [[:java    :newer {:major 1 :minor 8}]
                 [:clojure :newer {:major 1 :minor 6}]]
-               (eval '(Instant/ofEpochMilli 0))))
+               (eval '(Instant/ofEpochMilli 0)))
+  (resolve 'run) => var?)

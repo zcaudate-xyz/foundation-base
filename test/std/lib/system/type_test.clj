@@ -125,7 +125,8 @@
                :watchmen [{:id 1} {:id 2}]
                :cameras  ^{:hello "world"} [{:id 1} {:id 2 :hello "again"}]})
       (h/start)
-      (info-system)))
+      (info-system))
+  => any?)
 
 ^{:refer std.lib.system.type/health-system :added "3.0"
   :teardown [(track/tracked:last [:system] :stop)]}
@@ -162,7 +163,8 @@
   => false)
 
 ^{:refer std.lib.system.type/system-string :added "3.0"}
-(fact "get the string for the system")
+(fact "get the string for the system"
+  (resolve 'system-string) => var?)
 
 ^{:refer std.lib.system.type/system :added "3.0"
   :teardown [(track/tracked:last [:system] :stop)]}
@@ -208,7 +210,8 @@
                    :fs {:path "/app/local/2", :status "started"}}))
 
 ^{:refer std.lib.system.type/system-import :added "3.0"}
-(fact "imports a component into the system")
+(fact "imports a component into the system"
+  (resolve 'system-import) => var?)
 
 ^{:refer std.lib.system.type/system-expose :added "3.0"}
 (fact "exposes a component into the system")

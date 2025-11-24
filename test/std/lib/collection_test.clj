@@ -21,7 +21,11 @@
   (cons? (cons 1 [1 2 3])) => true)
 
 ^{:refer std.lib.collection/form? :added "3.0"}
-(fact "checks if object is a lisp form")
+(fact "checks if object is a lisp form"
+  (form? '(+ 1 2)) => true
+  (form? [1 2]) => false
+  (form? {:a 1}) => false
+  (form? "a") => false)
 
 ^{:refer std.lib.collection/queue :added "3.0"
   :let [a (queue 1 2 3 4)]}
@@ -48,7 +52,9 @@
   => 1)
 
 ^{:refer std.lib.collection/unlazy :added "3.0"}
-(fact "works on both lazy seqs and objects")
+(fact "works on both lazy seqs and objects"
+  (unlazy (map inc [1 2 3])) => [2 3 4]
+  (unlazy [1 2 3]) => [1 2 3])
 
 ^{:refer std.lib.collection/map-keys :added "3.0"}
 (fact "changes the keys of a map"
@@ -69,7 +75,8 @@
   => {"1" 2, "2" 3, "3" 4, "4" 5, "5" 6})
 
 ^{:refer std.lib.collection/pmap-vals :added "3.0"}
-(fact "uses pmap across the map values")
+(fact "uses pmap across the map values"
+  (pmap-vals inc {:a 1 :b 2}) => {:a 2 :b 3})
 
 ^{:refer std.lib.collection/map-entries :added "3.0"}
 (fact "manipulates a map given the function"
@@ -80,7 +87,10 @@
   => {:1 "a", :2 "b", :3 "c"})
 
 ^{:refer std.lib.collection/pmap-entries :added "3.0"}
-(fact "uses pmap across the entries")
+(fact "uses pmap across the entries"
+  (pmap-entries (fn [[k v]] [(keyword (str v)) (name k)])
+                {:a 1})
+  => {:1 "a"})
 
 ^{:refer std.lib.collection/rename-keys :added "4.0"}
 (fact "rename keys in map"
@@ -435,4 +445,6 @@
 
 
 ^{:refer std.lib.collection/merge-meta :added "4.0"}
-(fact "merges metadata into an object")
+(fact "merges metadata into an object"
+  (meta (merge-meta (with-meta [] {:a 1}) {:b 2}))
+  => {:a 1 :b 2})

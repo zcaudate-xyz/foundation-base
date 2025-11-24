@@ -3,16 +3,20 @@
   (:require [std.lib.walk :refer :all]))
 
 ^{:refer std.lib.walk/walk :added "3.0"}
-(fact "Traverses form, an arbitrary data structure")
+(fact "Traverses form, an arbitrary data structure"
+  (resolve 'walk) => var?)
 
 ^{:refer std.lib.walk/postwalk :added "3.0"}
-(fact "Performs a depth-first, post-order traversal of form")
+(fact "Performs a depth-first, post-order traversal of form"
+  (resolve 'postwalk) => var?)
 
 ^{:refer std.lib.walk/prewalk :added "3.0"}
-(fact "Like postwalk, but does pre-order traversal.")
+(fact "Like postwalk, but does pre-order traversal."
+  (resolve 'prewalk) => var?)
 
 ^{:refer std.lib.walk/keywordize-keys :added "3.0"}
-(fact "Recursively transforms all map keys from strings to keywords.")
+(fact "Recursively transforms all map keys from strings to keywords."
+  (resolve 'keywordize-keys) => var?)
 
 ^{:refer std.lib.walk/keyword-spearify-keys :added "4.0"}
 (fact "recursively transfroms all map keys to spearcase"
