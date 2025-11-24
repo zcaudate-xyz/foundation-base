@@ -1,4 +1,3 @@
-^{:no-test true}
 (ns std.lang.model.spec-xtalk.com-js
   (:require [std.lib :as h]))
 

@@ -1,4 +1,3 @@
-^{:no-test true}
 (ns std.lang.model.spec-xtalk.fn-python
   (:require [std.lib :as h]))
 
