@@ -3,7 +3,8 @@
   (:require [std.lang.base.grammar-macro :refer :all]))
 
 ^{:refer std.lang.base.grammar-macro/tf-macroexpand :added "3.0"}
-(fact "macroexpands the current form")
+(fact "macroexpands the current form"
+  "placeholder for tests")
 
 ^{:refer std.lang.base.grammar-macro/tf-when :added "3.0"}
 (fact "transforms `when` to branch"
@@ -18,7 +19,8 @@
   => '(br* (if true :A) (else :B)))
 
 ^{:refer std.lang.base.grammar-macro/tf-cond :added "3.0"}
-(fact "transforms `cond` to branch")
+(fact "transforms `cond` to branch"
+  "placeholder for tests")
 
 ^{:refer std.lang.base.grammar-macro/tf-let-bind :added "4.0"}
 (fact "converts to a statement"

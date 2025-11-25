@@ -30,7 +30,8 @@
   => "add(1,2);\nadd(3,4);")
 
 ^{:refer std.lang.base.emit-block/emit-do* :added "3.0"}
-(fact "like do but removes the statment at the end, useful for macros")
+(fact "like do but removes the statment at the end, useful for macros"
+  "placeholder for tests")
 
 ^{:refer std.lang.base.emit-block/block-options :added "3.0"}
 (fact "gets the block options"
@@ -232,7 +233,9 @@
 
 
 ^{:refer std.lang.base.emit-block/test-block-loop :added "4.0"}
-(fact "emits with blocks")
+(fact "emits with blocks"
+  "placeholder for tests")
 
 ^{:refer std.lang.base.emit-block/test-block-emit :added "4.0"}
-(fact "emit with blocks")
+(fact "emit with blocks"
+  "placeholder for tests")

@@ -21,16 +21,20 @@
   (grammar/grammar :test +reserved+ helper/+default+))
 
 ^{:refer std.lang.base.emit-preprocess/macro-form :added "4.0"}
-(fact "gets the current macro form")
+(fact "gets the current macro form"
+  "placeholder for tests")
 
 ^{:refer std.lang.base.emit-preprocess/macro-opts :added "4.0"}
-(fact "gets current macro-opts")
+(fact "gets current macro-opts"
+  "placeholder for tests")
 
 ^{:refer std.lang.base.emit-preprocess/macro-grammar :added "4.0"}
-(fact "gets the current grammar")
+(fact "gets the current grammar"
+  "placeholder for tests")
 
 ^{:refer std.lang.base.emit-preprocess/with:macro-opts :added "4.0"}
-(fact "bind macro opts")
+(fact "bind macro opts"
+  "placeholder for tests")
 
 ^{:refer std.lang.base.emit-preprocess/to-input-form :added "4.0"}
 (fact "processes a form"
