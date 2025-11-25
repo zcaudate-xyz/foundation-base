@@ -173,9 +173,21 @@
    => [:span [:pass \"[34m\"] \":hello\" [:pass \"[0m\"]]"
   {:added "3.0"}
   ([printer value]
-   (if-let [metadata (meta value)]
-     (edn/visit-meta printer metadata value)
-     (format-doc-edn printer value))))
+   (if (and (not (or (number? value)
+                     (string? value)
+                     (keyword? value)
+                     (symbol? value)
+                     (char? value)
+                     (boolean? value)
+                     (nil? value)))
+            (get (:visited printer) value))
+     (format-unknown printer value "circular" (.getName (class value)))
+     (let [printer (if (set? (:visited printer))
+                     (assoc printer :visited (conj (:visited printer) value))
+                     printer)]
+       (if-let [metadata (meta value)]
+         (edn/visit-meta printer metadata value)
+         (format-doc-edn printer value))))))
 
 ;; ## Type Handlers
 
@@ -303,7 +315,7 @@
 
 
 (defrecord CanonicalPrinter
-           [print-handlers]
+           [print-handlers visited]
 
   protocol.pretty/IVisitor
 
@@ -411,7 +423,7 @@
   ([]
    (canonical-printer nil))
   ([handlers]
-   (assoc (CanonicalPrinter. handlers)
+   (assoc (CanonicalPrinter. handlers #{})
           :width 0)))
 
 
@@ -429,7 +441,8 @@
             color-markup
             color-scheme
             print-handlers
-            print-fallback]
+            print-fallback
+            visited]
 
   protocol.pretty/IVisitor
 
@@ -587,7 +600,8 @@
   {:added "3.0"}
   ([opts]
    (->> [{:print-meta *print-meta*
-          :print-handlers common-handlers}
+          :print-handlers common-handlers
+          :visited #{}}
          +defaults+
          opts]
         (reduce h/merge-nested)
