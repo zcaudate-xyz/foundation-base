@@ -1,7 +1,8 @@
 (ns std.dispatch.debounce-test
   (:use code.test)
   (:require [std.dispatch.debounce :refer :all]
-            [std.lib.component :as component]))
+            [std.lib.component :as component]
+            [std.lib :as h]))
 
 (defonce ^:dynamic *output*  (atom []))
 
@@ -79,16 +80,24 @@
        {:id 1, :state 9}]))
 
 ^{:refer std.dispatch.debounce/submit-dispatch :added "3.0"}
-(fact "submits to the debounce executor")
+(fact "submits to the debounce executor"
+  (test-scaffold +test-config+ 1 1) => [{:id 0, :state 0}])
 
 ^{:refer std.dispatch.debounce/start-dispatch :added "3.0"}
-(fact "starts the debounce executor")
+(fact "starts the debounce executor"
+  (let [d (create-dispatch +test-config+)]
+    (start-dispatch d)
+    (component/stop d)) => anything)
 
 ^{:refer std.dispatch.debounce/stop-dispatch :added "3.0"}
-(fact "stops the debounce executor")
+(fact "stops the debounce executor"
+  (let [d (create-dispatch +test-config+)]
+    (start-dispatch d)
+    (stop-dispatch d)) => anything)
 
 ^{:refer std.dispatch.debounce/create-dispatch :added "3.0"}
-(fact "creates a debource executor")
+(fact "creates a debource executor"
+  (create-dispatch +test-config+) => map?)
 
 (comment
   (code.manage/import)
