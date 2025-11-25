@@ -1,31 +1,68 @@
 (ns std.lang-test
   (:use code.test)
   (:require [std.lang :as l]
-            [js.core]
-            [xt.lang.base-lib :as k]))
+            [std.lang.base.pointer :as ptr]
+            [std.lang.base.util :as ut]
+            [std.lang.base.impl-entry :as entry]
+            [std.lang.base.book :as book]
+            [std.lang.base.library :as lib]
+            [std.lang.base.library-snapshot :as snap]
+            [std.lang.base.book-meta :as meta]
+            [std.lang.base.grammar :as grammar]
+            [std.lang.base.emit-helper :as helper]
+            [std.lang.base.runtime :as rt]
+            [std.lib.context.space :as space]
+            [std.lib :as h]))
 
-^{:refer std.lang/CANARY :adopt true :added "4.0"}
-(fact "test for lang")
+(def +book+
+  (book/book {:lang :lua
+              :meta (meta/book-meta {:module-export  (fn [{:keys [as]} opts]
+                                                       (h/$ (return ~as)))
+                                     :module-import  (fn [name {:keys [as]} opts]
+                                                       (h/$ (var ~as := (require ~(str name)))))
+                                     :has-ptr        (fn [ptr]
+                                                       (list 'not= (ut/sym-full ptr) nil))
+                                     :teardown-ptr   (fn [ptr]
+                                                       (list := (ut/sym-full ptr) nil))})
+              :grammar (grammar/grammar :lua
+                         (grammar/build)
+                         helper/+default+)}))
 
-^{:refer std.lang/rt:space :added "4.0"}
-(fact "will return space if not found (no default space)")
+(def +library-ext+
+  (doto (lib/library:create
+         {:snapshot (snap/snapshot {:lua {:id :lua
+                                          :book +book+}})})
+    (lib/install-module! :lua 'L.core {})
+    (lib/install-module! :lua 'L.util
+                         {:require '[[L.core :as u]]
+                          :import '[["cjson" :as cjson]]})
+    (lib/add-entry-single!
+     (entry/create-macro
+      '(defmacro add [x y] `(+ ~x ~y))
+      {:lang :lua
+       :namespace 'L.core
+       :module 'L.core}))))
 
-^{:refer std.lang/get-entry :added "4.0"}
-(fact "gets the entry if pointer")
+(def +ptr+
+  (ut/lang-pointer :lua
+                   {:module 'L.core
+                    :id 'add
+                    :section :fragment
+                    :library +library-ext+}))
 
-^{:refer std.lang/as-lua :added "4.0"}
-(fact "change `[]` to `{}`")
+(fact "as-lua"
+  (l/as-lua []) => {}
+  (l/as-lua [1 2 [] 4]) => [1 2 {} 4]
+  (l/as-lua {:a []}) => {:a {}})
 
-^{:refer std.lang/rt:invoke :added "4.0"}
-(fact "invokes code in the given namespace"
+(fact "get-entry"
   ^:hidden
-  
-  (l/rt:invoke 'js.core :js
-               '[(+ 1 2 3)])
-  => "1 + 2 + 3;")
+  (l/get-entry +ptr+) => book/book-entry?)
 
-^{:refer std.lang/force-require :added "4.0"}
-(fact "forces requiring on namespaces until compilation error occurs")
+(fact "force-reload"
+  "difficult to test without dependency injection")
 
-^{:refer std.lang/force-reload :added "4.0"}
-(fact "forces reloading of all dependent namespaces")
+(fact "CANARY test"
+  ^:hidden
+  (l/with:print [] (l/emit-as :lua '[(:= a 1)]))
+  => "a = 1")
