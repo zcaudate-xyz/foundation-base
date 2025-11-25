@@ -2,6 +2,7 @@
   (:require [code.test.checker.common :as checker]
             [code.test.base.match  :as match]
             [code.test.base.runtime :as rt]
+            [code.test.base.context :as ctx]
             [std.lib :as h]
             [std.lib.result :as res]))
 
@@ -56,10 +57,11 @@
   "attaches metadata to the result"
   {:added "3.0"}
   ([m meta]
-   (cond-> m
-     (not rt/*eval-meta*) (assoc :meta meta)
-     rt/*eval-meta* (assoc :meta rt/*eval-meta*
-                           :original meta))))
+   (let [{:keys [eval-meta]} ctx/*context*]
+     (cond-> m
+       (not eval-meta) (assoc :meta meta)
+       eval-meta (assoc :meta eval-meta
+                              :original meta)))))
 
 (defmethod process :form
   ([{:keys [form meta] :as op}]
@@ -67,12 +69,12 @@
                     (attach-meta meta))
          _    (intern *ns* (with-meta '*last* {:dynamic true})
                       (:data result))]
-     (h/signal {:test :form :result (assoc result :replace rt/*eval-replace*)})
+     (h/signal {:test :form :result (assoc result :replace (:eval-replace ctx/*context*))})
      result)))
 
 (defmethod process :test-equal
   ([{:keys [input output meta] :as op}]
-   (let [{:keys [guard before after]} rt/*eval-check*
+   (let [{:keys [guard before after]} (:eval-check ctx/*context*)
          _ (before)
          actual   (evaluate input)
          expected (evaluate output)
@@ -90,10 +92,10 @@
                       (:data actual))
          _    (after)]
      (h/signal {:test :check :result (assoc result
-                                            :replace rt/*eval-replace*
+                                            :replace (:eval-replace ctx/*context*)
                                             :compare compare)})
-     (when rt/*results*
-       (swap! rt/*results* conj result))
+     (when (:results ctx/*context*)
+       (swap! (:results ctx/*context*) conj result))
      (if (and guard (not (:data result)))
        (h/error "Guard failed" {}))
      result)))
@@ -107,8 +109,9 @@
    => true"
   {:added "3.0"}
   ([meta results]
-   (let [results (if rt/*results* @rt/*results* results)]
-     (h/signal {:id rt/*run-id* :test :fact :meta meta :results results})
+   (let [{:keys [results run-id]} ctx/*context*
+         results (if results @results results)]
+     (h/signal {:id run-id :test :fact :meta meta :results results})
      (and (->> results
                (filter #(-> % :from (= :verify)))
                (mapv :data)
@@ -120,19 +123,20 @@
 
 (defn skip
   "returns the form with no ops evaluated"
-  {:added "3.0"}
+  {:added "4.0"}
   ([meta]
-   (h/signal {:id rt/*run-id* :test :fact :meta meta :results [] :skipped true}) :skipped))
+   (h/signal {:id (:run-id ctx/*context*) :test :fact :meta meta :results [] :skipped true}) :skipped))
 
 (defn run-single
   "runs a single check form"
   {:added "3.0"}
   ([{:keys [unit refer] :as meta} body]
-   (if (or (match/match-options {:unit unit
-                                 :refer refer}
-                                rt/*settings*)
-           (not rt/*run-id*)
-           rt/*eval-mode*)
-     (->> (mapv process body)
-          (collect meta))
-     (skip meta))))
+   (let [{:keys [run-id eval-mode settings]} ctx/*context*]
+     (if (or (match/match-options {:unit unit
+                                   :refer refer}
+                                  settings)
+             (not run-id)
+             eval-mode)
+       (->> (mapv process body)
+            (collect meta))
+       (skip meta)))))

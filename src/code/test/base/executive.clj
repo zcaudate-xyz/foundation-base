@@ -6,7 +6,8 @@
             [code.test.checker.common :as checker]
             [code.test.base.runtime :as rt]
             [code.test.base.listener :as listener]
-            [code.test.base.print :as print]))
+            [code.test.base.print :as print]
+            [code.test.base.context :as ctx]))
 
 (defonce +latest+ (atom {}))
 
@@ -15,11 +16,11 @@
   {:added "3.0"}
   ([func id]
    (let [sink (atom [])
-         source rt/*accumulator*]
+         source (:accumulator ctx/*context*)]
      (add-watch source id (fn [_ _ _ n]
                             (if (= (:id n) id)
                               (swap! sink conj n))))
-     (binding [rt/*run-id* id]
+     (ctx/with-context {:run-id id}
        (func))
      (remove-watch source id)
      @sink)))
@@ -131,23 +132,23 @@
   "loads a given namespace for testing"
   {:added "3.0"}
   ([ns _ lookup project]
-   (binding [*warn-on-reflection* false
-             rt/*eval-mode* false]
-     (let [test-ns (unload-namespace ns nil lookup project)
-           _       (when-let [path (or (lookup test-ns)
-                                       (lookup ns))]
-                     (load-file path))]
-       test-ns))))
+   (binding [*warn-on-reflection* false]
+     (ctx/with-context {:eval-mode false}
+       (let [test-ns (unload-namespace ns nil lookup project)
+             _       (when-let [path (or (lookup test-ns)
+                                         (lookup ns))]
+                       (load-file path))]
+         test-ns)))))
 
 (defn test-namespace
   "runs a loaded namespace"
   {:added "3.0"}
   ([ns {:keys [run-id test] :as params} lookup project]
-   (binding [rt/*root*     (:root project)
-             rt/*errors*   (atom {})
-             rt/*settings* (merge rt/*settings* params)]
+   (ctx/with-context {:root (:root project)
+                      :errors (atom {})
+                      :settings (merge (:settings ctx/*context*) params)}
      (let [run-id  (or run-id (h/uuid))
-           test-ns (if rt/*eval-current-ns*
+           test-ns (if (:eval-current-ns ctx/*context*)
                      ns
                      (project/test-ns ns))
            sort-fn (case (:order test)
@@ -185,25 +186,25 @@
   "runs the current namespace (which can be a non test namespace)"
   {:added "4.0"}
   ([ns params lookup project]
-   (binding [rt/*eval-current-ns* true]
+   (ctx/with-context {:eval-current-ns true}
      (test-namespace ns params lookup project))))
 
 (defn eval-namespace
   "evals the namespace"
   {:added "3.0"}
   ([ns {:keys [run-id] :as params} lookup project]
-   (binding [*warn-on-reflection* false
-             rt/*root*     (:root project)
-             rt/*errors*   (atom {})
-             rt/*settings* (merge rt/*settings* params)]
-     (let [run-id (or run-id (h/uuid))
-           test-ns (if rt/*eval-current-ns*
-                     ns
-                     (project/test-ns ns))
-           facts   (accumulate (fn []
-                                 (when-let [path (or (lookup test-ns)
-                                                     (lookup ns))]
-                                   (load-file path)))
-                               run-id)
-           results (interim facts)]
-       results))))
+   (binding [*warn-on-reflection* false]
+     (ctx/with-context {:root (:root project)
+                        :errors (atom {})
+                        :settings (merge (:settings ctx/*context*) params)}
+       (let [run-id (or run-id (h/uuid))
+             test-ns (if (:eval-current-ns ctx/*context*)
+                       ns
+                       (project/test-ns ns))
+             facts   (accumulate (fn []
+                                   (when-let [path (or (lookup test-ns)
+                                                       (lookup ns))]
+                                     (load-file path)))
+                                 run-id)
+             results (interim facts)]
+         results)))))

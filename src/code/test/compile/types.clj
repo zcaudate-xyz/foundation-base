@@ -4,7 +4,8 @@
             [code.test.compile.snippet :as snippet]
             [std.lib :as h :refer [defimpl]]
             [std.lib.future :as f]
-            [std.lib.time :as time]))
+            [std.lib.time :as time]
+            [code.test.base.context :as ctx]))
 
 (def +type+
   #{:core :template :bench :table :check})
@@ -69,7 +70,7 @@
                                                 :form :timeout
                                                 :from :evaluate
                                                 :meta meta}]
-                                (h/signal {:id rt/*run-id*
+                                (h/signal {:id (:run-id ctx/*context*)
                                            :test :fact
                                            :meta meta
                                            :results [err-result]})
@@ -83,7 +84,7 @@
 (defmethod fact-invoke :derived
   ([{:keys [wrap function] :as m}]
    (let [{:keys [bindings check ceremony replace]} wrap]
-     (binding [rt/*eval-meta* (select-keys m [:line :column :path :ns :refer :desc])]
+     (ctx/with-context {:eval-meta (select-keys m [:line :column :path :ns :refer :desc])}
        ((-> function :thunk ceremony check bindings replace))))))
 
 (defmethod fact-invoke :table
@@ -95,9 +96,9 @@
                             (let [nlet (snippet/replace-bindings (:let m)
                                                                  (interleave header input))
                                   bind-fn (eval (snippet/fact-wrap-bindings {:let nlet}))]
-                              (binding [rt/*eval-meta* (-> (select-keys m [:path :ns :refer :desc])
-                                                           (merge (clojure.core/meta input)))
-                                        rt/*eval-replace* (apply hash-map nlet)]
+                              (ctx/with-context {:eval-meta (-> (select-keys m [:path :ns :refer :desc])
+                                                                (merge (clojure.core/meta input)))
+                                                 :eval-replace (apply hash-map nlet)}
                                 ((bind-fn thunk)))))
                           inputs))]
      ((-> table-fn ceremony bindings)))))
@@ -157,34 +158,10 @@
          check-form `(fn [~'thunk]
                        (fn []
                          (for [~@inputs]
-                           (binding [~@(flatten bsyms)
-                                     rt/*eval-replace* ~(h/map-keys (fn [s]
-                                                                      (list 'quote s))
-                                                                    (into {} bsyms))]
-                             (~'thunk)))))
+                           (binding [~@(flatten bsyms)]
+                             (ctx/with-context {:eval-replace ~(h/map-keys (fn [s]
+                                                                             (list 'quote s))
+                                                                           (into {} bsyms))}
+                               (~'thunk))))))
          check-fn (eval check-form)]
      ((-> thunk check-fn ceremony check bindings)))))
-
-(comment
-
-  {:<>        #{:id :setup :teardown :let}
-   :base      {:fn   #{:setup :teardown :thunk :slim}
-               :wrap #{:ceremony :bindings}
-               :body #{:full :bare}}
-   :template  [:base]
-   :derived   [:->source
-               {:params #{:let :replace}}]
-   :table     [:->source
-               {:params #{:let :replace}
-                :cases  []}]
-   :check     [:->source
-               {:params #{:let :replace}
-                :inputs []}]
-   :bench     [:->source
-               {;; if id, save history to namespace
-                ;; if no id, warn
-                :params #{:runs :batch :gc :rerun}
-                :inputs [[:map     {:let [x 1 y 2] :replace []}]
-                         [:pmap    [x 1 y 2]]
-                         [:bulk-5  [x 1 y 2]]
-                         [:bulk-10 [x 1 y 2]]]}]})
