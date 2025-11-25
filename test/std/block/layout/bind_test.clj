@@ -94,7 +94,11 @@
   => "(let [^{:readable-len 10} {:keys ^{:tag :vector, :readable-len 10, :spec {:columns 1}} [a b c d e], :as other} b])")
 
 ^{:refer std.block.layout.bind/layout-default-fn :added "4.0"}
-(fact "the default function for level 1 transformation")
+(fact "the default function for level 1 transformation"
+
+  (construct/rep
+   (bind/layout-default-fn [1 2 3] {}))
+  => [1 2 3])
 
 ^{:refer std.block.layout.bind/layout-main :added "4.0"}
 (fact "performs the main layout"
@@ -437,4 +441,7 @@
 
 
 ^{:refer std.block.layout.bind/layout-annotate-svg-path :added "4.0"}
-(fact "parses the d string in svg path for better formatting")
+(fact "parses the d string in svg path for better formatting"
+
+  (bind/layout-annotate-svg-path [:path {:d "M 10 10 L 20 20"}])
+  => (contains [:path (contains {:d ["M" "10" "10" "L" "20" "20"]})]))

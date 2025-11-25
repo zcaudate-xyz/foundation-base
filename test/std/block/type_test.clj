@@ -142,7 +142,8 @@
 ^{:refer std.block.type/modifier-block :added "3.0"}
 (fact "creates a modifier block, specifically #_"
 
-  (modifier-block :hash-uneval "#_" (fn [acc _] acc)))
+  (modifier-block :hash-uneval "#_" (fn [acc _] acc))
+  => modifier-block?)
 
 ^{:refer std.block.type/code-block? :added "4.0"}
 (fact "checks if a block can be representated as code"

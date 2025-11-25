@@ -76,7 +76,10 @@
   => 1)
 
 ^{:refer std.block.base/block-verify :added "3.0"}
-(fact "checks that the block has correct data")
+(fact "checks that the block has correct data"
+
+  (block-verify (construct/token "hello"))
+  => true)
 
 ^{:refer std.block.base/expression? :added "3.0"}
 (fact "checks if the block has a value associated with it"
