@@ -13,4 +13,6 @@
   => "label {\n  hello \n  where\n}")
 
 ^{:refer rt.nginx.script/write :added "4.0"}
-(fact "link to `std.make.compile`")
+(fact "link to `std.make.compile`"
+  (write {:a 1})
+  => "a 1;")

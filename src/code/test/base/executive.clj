@@ -31,9 +31,20 @@
    (let [results (mapcat :results facts)
          checks  (filter #(-> % :from (= :verify))    results)
          forms   (filter #(-> % :from (= :evaluate))  results)
-         thrown  (filter #(-> % :status (= :exception)) forms)
+
+         timedout      (filter #(-> % :form (= :timeout)) forms)
+         thrown-forms  (filter #(and (-> % :status (= :exception))
+                                     (not= :timeout (:form %))) forms)
+         thrown-checks (filter #(or (-> % :status (= :exception))
+                                    (-> % :actual :status (= :exception))) checks)
+         thrown        (concat thrown-forms thrown-checks)
+
          passed  (filter checker/succeeded? checks)
-         failed  (filter (comp not checker/succeeded?) checks)
+         failed  (filter (fn [res]
+                           (and (not (checker/succeeded? res))
+                                (not= :exception (:status res))
+                                (not= :exception (-> res :actual :status)))) checks)
+
          facts   (filter (comp not empty? :results) facts)
          files   (->> checks
                       (map (comp :path :meta))
@@ -41,6 +52,7 @@
                       (keys))]
      {:files  files
       :thrown thrown
+      :timedout timedout
       :facts  facts
       :checks checks
       :passed passed
@@ -67,14 +79,23 @@
              (listener/summarise-verify)
              (print/print-failure)))
        (doseq [thrown (:thrown items)]
-         (-> thrown
+         (if (= :verify (:from thrown))
+           (-> thrown
+               (listener/summarise-verify)
+               (print/print-thrown))
+           (-> thrown
+               (listener/summarise-evaluate)
+               (print/print-thrown))))
+       (doseq [timedout (:timedout items)]
+         (-> timedout
              (listener/summarise-evaluate)
-             (print/print-thrown)))
+             (print/print-timedout)))
        (if (seq summary)
          (print/print-summary summary)))
      (swap! +latest+ assoc
             :failed (:failed items)
-            :thrown (:thrown items))
+            :thrown (:thrown items)
+            :timedout (:timedout items))
      summary)))
 
 (defn summarise-bulk

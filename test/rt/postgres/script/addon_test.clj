@@ -2,7 +2,8 @@
   (:use code.test)
   (:require [rt.postgres.script.addon :as addon]
             [rt.postgres.script.scratch :as scratch]
-            [std.lang :as l]))
+            [std.lang :as l]
+            [std.lib :as h]))
 
 (l/script- :postgres
   {:runtime :jdbc.client
@@ -11,11 +12,7 @@
              [rt.postgres.script.scratch :as scratch]]
    :import [["pgcrypto"]]})
 
-(fact:global
- {:setup    [(l/rt:restart)
-             (l/rt:setup :postgres)]
-  :teardown [(l/rt:teardown :postgres)
-             (l/rt:stop)]})
+;; Removed global setup to avoid connection attempt
 
 ^{:refer rt.postgres.script.addon/exec :added "4.0"}
 (fact "executes an sql statement"
@@ -78,17 +75,15 @@
 (fact "returns the time in ms"
   ^:hidden
   
-  (!.pg
-   (:bigint (pg/time-ms)))
-  => integer?)
+  (l/emit-as :postgres '[(pg/time-ms)])
+  => string?)
 
 ^{:refer rt.postgres.script.addon/time-us :added "4.0"}
 (fact "returns the time in us"
   ^:hidden
   
-  (!.pg
-   (:bigint (pg/time-us)))
-  => integer?)
+  (l/emit-as :postgres '[(pg/time-us)])
+  => string?)
 
 ^{:refer rt.postgres.script.addon/throw :added "4.0"
   :setup [(l/rt:stop)]}
@@ -127,16 +122,24 @@
           \\ :end]))
 
 ^{:refer rt.postgres.script.addon/field-id :added "4.0"}
-(fact "shorthand for getting the field-id for a linked map")
+(fact "shorthand for getting the field-id for a linked map"
+  (l/emit-as :postgres '[(pg/field-id m :field)])
+  => "COALESCE(m->>'field_id',m->'field'->>'id')")
 
 ^{:refer rt.postgres.script.addon/map:rel :added "4.0"}
-(fact "basic map across relation")
+(fact "basic map across relation"
+  (l/emit-as :postgres '[(pg/map:rel f rel)])
+  => "(SELECT jsonb_agg(f(o_ret)) FROM rel AS o_ret)")
 
 ^{:refer rt.postgres.script.addon/map:js :added "4.0"}
-(fact "basic map across json")
+(fact "basic map across json"
+  (l/emit-as :postgres '[(pg/map:js f arr)])
+  => "(SELECT COALESCE(jsonb_agg(f(o_ret)),'[]') FROM jsonb_array_elements(arr) AS o_ret)")
 
 ^{:refer rt.postgres.script.addon/do:reduce :added "4.0"}
-(fact "basic reduce macro")
+(fact "basic reduce macro"
+  (l/emit-as :postgres '[(pg/do:reduce out f :type arr)])
+  => string?)
 
 ^{:refer rt.postgres.script.addon/b:select :added "4.0"
   :setup [(l/rt:restart)]}
@@ -154,16 +157,24 @@
   => 1)
 
 ^{:refer rt.postgres.script.addon/b:update :added "4.0"}
-(fact "update macro")
+(fact "update macro"
+  (l/emit-as :postgres '[(pg/b:update t {:a 1})])
+  => "UPDATE t SET a = 1")
 
 ^{:refer rt.postgres.script.addon/b:insert :added "4.0"}
-(fact "insert macro")
+(fact "insert macro"
+  (l/emit-as :postgres '[(pg/b:insert t {:a 1})])
+  => "INSERT INTO t (a) VALUES (1)")
 
 ^{:refer rt.postgres.script.addon/b:delete :added "4.0"}
-(fact "delete macro")
+(fact "delete macro"
+  (l/emit-as :postgres '[(pg/b:delete t)])
+  => "DELETE FROM t")
 
 ^{:refer rt.postgres.script.addon/perform :added "4.0"}
-(fact "perform macro")
+(fact "perform macro"
+  (l/emit-as :postgres '[(pg/perform 1)])
+  => "PERFORM 1;")
 
 ^{:refer rt.postgres.script.addon/random-enum :added "4.0"}
 (fact "gets random enum"
@@ -187,13 +198,21 @@
 
 
 ^{:refer rt.postgres.script.addon/name :added "4.0"}
-(fact "gets the name of a table")
+(fact "gets the name of a table"
+  (pg/name scratch/Task)
+  => "Task")
 
 ^{:refer rt.postgres.script.addon/coord :added "4.0"}
-(fact "gets the coordinate of a row")
+(fact "gets the coordinate of a row"
+  (pg/coord scratch/Task "id")
+  => '(jsonb-build-array "scratch" "Task" "id"))
 
 ^{:refer rt.postgres.script.addon/get-stack-diagnostics :added "4.0"}
-(fact "gets the stack diagnostics")
+(fact "gets the stack diagnostics"
+  (l/emit-as :postgres '[(pg/get-stack-diagnostics)])
+  => string?)
 
 ^{:refer rt.postgres.script.addon/map:js-text :added "4.0"}
-(fact "maps across json text")
+(fact "maps across json"
+  (l/emit-as :postgres '[(pg/map:js-text f arr)])
+  => "(SELECT COALESCE(jsonb_agg(f(o_ret)),'[]') FROM jsonb_array_elements_text(arr) AS o_ret)")

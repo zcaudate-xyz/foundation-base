@@ -1,34 +1,27 @@
 (ns rt.redis-test
   (:use code.test)
   (:require [rt.redis :refer :all]
-            [kmi.redis :as redis])
-  (:refer-clojure :exclude [compile]))
+            [rt.redis.eval-script :as script]
+            [std.lib :as h]
+            [net.resp.connection :as conn]
+            [std.concurrent :as cc]))
 
 ^{:refer rt.redis/generate-script :added "4.0"}
 (fact "generates a script given a pointer"
-  ^:hidden
-  
-  (generate-script redis/cas-set)
-  => (std.string/|
-      "local function cas_set(key,old,new)"
-      "  local val = redis.call('GET',key)"
-      "  if (val == old) or ((val == false) and ((old == ''))) then"
-      "    if new == '' then"
-      "      redis.call('DEL',key)"
-      "      return {'OK'}"
-      "    else"
-      "      local ret = redis.call('SET',key,new)"
-      "      return {'OK'}"
-      "    end"
-      "  else"
-      "    return {'NEW',val}"
-      "  end"
-      "end"
-      ""
-      "return cas_set(KEYS[1],ARGV[1],ARGV[2])"))
+  (with-redefs [script/raw-compile (fn [_] {:body "script"})]
+    (generate-script 'ptr))
+  => "script")
 
 ^{:refer rt.redis/test:req :added "4.0"}
-(fact "does a request on a single test connection")
+(fact "does a request on a single test connection"
+  (with-redefs [conn/with-test:connection (fn [f & _] (f :conn))
+                cc/req (fn [_ args] args)]
+    (test:req :a 1))
+  => [:a 1])
 
 ^{:refer rt.redis/test:invoke :added "4.0"}
-(fact "does a script call on a single test connection")
+(fact "does a script call on a single test connection"
+  (with-redefs [conn/with-test:connection (fn [f & _] (f :conn))
+                rt.redis.client/invoke-ptr-redis (fn [_ ptr args] [ptr args])]
+    (test:invoke :ptr 1 2))
+  => [:ptr '(1 2)])

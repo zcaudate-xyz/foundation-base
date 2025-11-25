@@ -148,18 +148,19 @@
   (->> (create:enums -schema-)
        (map second)
        first)
-  ["CREATE TABLE IF NOT EXISTS \"meat_grade\" (value text PRIMARY KEY, comment text)"
-   (str/|
-    "INSERT INTO \"meat_grade\""
-    " (value, comment)"
-    " VALUES"
-    " ('horrible', null),"
-    " ('good', null),"
-    " ('awesome', null),"
-    " ('ok', null),"
-    " ('bad', null),"
-    " ('nasty', null),"
-    " ('fair', null)")])
+  => (contains
+      ["CREATE TABLE IF NOT EXISTS \"meat_grade\" (value text PRIMARY KEY, comment text)"
+       (str/|
+        "INSERT INTO \"meat_grade\""
+        " (value, comment)"
+        " VALUES"
+        " ('horrible', null),"
+        " ('good', null),"
+        " ('awesome', null),"
+        " ('ok', null),"
+        " ('bad', null),"
+        " ('nasty', null),"
+        " ('fair', null)")]))
 
 ^{:refer script.sql.table.manage/drop:enums :added "3.0"}
 (fact "generate drop statements for schema enums"

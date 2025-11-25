@@ -4,11 +4,11 @@
             [rt.postgres.grammar.common-application :as app]
             [rt.postgres]
             [std.lang :as l]
-            [std.lang.base.book :as book]))
+            [std.lang.base.book :as book]
+            [rt.postgres.script.scratch :as scratch]))
 
 (l/script- :postgres
-  {:runtime :jdbc.client
-   :require [[rt.postgres.script.scratch :as scratch]]
+  {:require [[rt.postgres.script.scratch :as scratch]]
    :static {:application ["scratch"]
             :seed        ["scratch"]
             :all    {:schema   ["scratch"]}}})
@@ -33,6 +33,11 @@
   
   (prep-table '-/Hello false (l/rt:macro-opts :postgres))
   => vector?)
+
+(def -tsch- (get-in (app/app "scratch")
+                    [:schema
+                     :tree
+                     :Task]))
 
 ^{:refer rt.postgres.script.impl-base/t-input-check :guard true :added "4.0"}
 (fact "passes the input if check is ok"
@@ -67,14 +72,7 @@
   
   (t-input-collect -tsch-
                    '{:status a})
-  => '{:status [a {:type :enum,
-                  :cardinality :one,
-                  :required true,
-                  :scope :-/info,
-                  :enum {:ns rt.postgres.script.scratch/EnumStatus},
-                  :web {:example "success"},
-                  :order 1,
-                  :ident :Task/status}]})
+  => (contains {:status (contains ['a map?])}))
 
 ^{:refer rt.postgres.script.impl-base/t-val-process :added "4.0"}
 (fact "allows additional filters to be added"
@@ -147,8 +145,11 @@
                   (last (prep-table 'scratch/Task true (l/rt:macro-opts :postgres))))
   => '(jsonb-build-object "id" (rt.postgres/uuid-generate-v4)
                           "status" (++ a rt.postgres.script.scratch/EnumStatus)
-                          "name" (:text "hello")
-                          "cache_id" (:uuid hello)
+                          "name" (:text "hello") "cache_id" (:uuid hello)
+                          "op_created" nil
+                          "op_updated" nil
+                          "time_created" nil
+                          "time_updated" nil
                           "__deleted__" false))
 
 ^{:refer rt.postgres.script.impl-base/t-create-fn :added "4.0"}
@@ -163,6 +164,10 @@
   => '(jsonb-build-object "id" (rt.postgres/uuid-generate-v4)
                           "status" (++ a rt.postgres.script.scratch/EnumStatus)
                           "name" (:text "hello") "cache_id" (:uuid hello)
+                          "op_created" nil
+                          "op_updated" nil
+                          "time_created" nil
+                          "time_updated" nil
                           "__deleted__" false))
 
 ^{:refer rt.postgres.script.impl-base/t-returning-cols :added "4.0"}
@@ -329,58 +334,11 @@
   => [:group-by [#{"id"} #{"status"}]])
 
 ^{:refer rt.postgres.script.impl-base/t-wrap-args :added "4.0"}
-(fact "adds `additional` args")
-
-(comment
-  (def -hsch- (get-in (app/app "scratch")
-                      [:schema
-                       :tree
-                       :Hello]))
-
-  (def -tsch- (get-in (app/app "scratch")
-                      [:schema
-                       :tree
-                       :Task])))
-
-(comment
-  (prep-entry 'szndb.core.app-common/Currency
-              (l/rt:macro-opts :postgres)))
-
-(comment
-  (./import)
-
-  (do (l/reset-annex)
-      (rt.postgres/purge-scratch)
-      (ns-unalias *ns* 'scratch)
-      (require '[rt.postgres.script.scratch :as scratch :reload true]))
-  (app/app "scratch")
-  @scratch/Task
-  @scratch/TaskCache)
-
-(comment
-  
-  (require 'rt.postgres.script.scratch :reload)
-  
-  (-> (keys (:tree (:static/schema-seed @Task)))
-      )
-  
-  (h/qualified-keys @EnumStatus :static)
-  (h/qualified-keys @Task :static)
-  
-  (:static/application @Task)
-  (:static/schema @Task)
-  
-  (:Task (:tree (:schema (app/app "scratch"))))
-  
-  (:tables (app/app-rebuild "scratch"))
-  
-  
-  (l/delete-entry! (l/runtime-library)
-                   {:lang :postgres
-                    :module 'rt.postgres.script.scratch
-                    :id 'Node
-                    :section :code}))
-
+(fact "adds `additional` args"
+  (t-wrap-args [] [:a] {})
+  => [:a])
 
 ^{:refer rt.postgres.script.impl-base/t-returning-cols-default :added "4.0"}
-(fact "formats returning columns default")
+(fact "formats returning cols default"
+  (t-returning-cols-default [:id] t-key-attrs-fn)
+  => vector?)

@@ -245,4 +245,8 @@
 
 
 ^{:refer rt.postgres.script.graph-base/exists-fn :added "4.0"}
-(fact "constructs exists-fn")
+(fact "constructs exists-fn"
+  (l/with:macro-opts [(l/rt:macro-opts :postgres)]
+    (base/exists-fn 'scratch/TaskCache
+                    {:where {:tasks "tasks-001"}}))
+  => vector?)

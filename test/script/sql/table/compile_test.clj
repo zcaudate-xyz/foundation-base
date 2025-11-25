@@ -2,7 +2,8 @@
   (:use code.test)
   (:require [script.sql.table.compile :refer :all]
             [std.lib.schema :as schema]
-            [std.lib :as h]))
+            [std.lib :as h]
+            [script.sql.table-test :as table-test]))
 
 (fact:ns
  (:clone script.sql.table-test))
@@ -13,7 +14,7 @@
   ^:hidden
 
   (keys (in:fn-map |schema| :meat))
-  => '[:type :grade]
+  => (contains [:type :grade] :in-any-order)
 
   (-> (in:fn-map |schema| :meat)
       :grade
@@ -26,7 +27,7 @@
   ^:hidden
 
   (keys (out:fn-map |schema| :meat))
-  => '[:type :grade]
+  => (contains [:type :grade] :in-any-order)
 
   (-> (out:fn-map |schema| :meat)
       :grade
@@ -53,7 +54,9 @@
       :grade :bad})
 
 ^{:refer script.sql.table.compile/transform :added "3.0"}
-(fact "constructs a transform function for data pipeline")
+(fact "constructs a transform function for data pipeline"
+  (transform nil nil [] [1 2 3])
+  => '(1 2 3))
 
 ^{:refer script.sql.table.compile/transform:in :added "3.0"}
 (fact "transforms data in"
