@@ -24,51 +24,28 @@
   => 6
   
   (!.js (+ "1" "2"))
-  => 12
+  => "12"
 
   
   (k/add 9 3)
   => 12
 
   (k/sub 3 9)
-  => -6
-
-
-  (comment
-    (l/script- :python
-      {:runtime :graal
-       :require [[xt.lang.base-lib :as k]]})
-    
-    ;; PYTHON
-    (str (h/p:rt-raw-eval (l/rt :python)
-                          "globals()"))
-    => string?
-    
-    (!.py 1 2 3 (+ 1 2 3))
-    => 6
-    
-    (!.py {:a 1 :b 2})
-    => {"a" 1, "b" 2}
-
-    (!.py (:- :import json)
-          (json.dumps true))
-    => true
-    
-    (!.py
-     (k/add 1 2))
-    => 3))
+  => -6)
 
 ^{:refer rt.graal/add-resource-path :added "3.0"
   :setup [(def +js+ (make-raw {:lang :js}))]}
 (fact "adds resource path to context"
 
-  (add-resource-path +js+ "assets"))
+  (add-resource-path +js+ "assets")
+  => +js+)
 
 ^{:refer rt.graal/add-system-path :added "3.0"
   :setup [(def +js+ (make-raw {:lang :js}))]}
 (fact "adds system path to context"
 
-  (add-system-path +js+ "."))
+  (add-system-path +js+ ".")
+  => +js+)
 
 ^{:refer rt.graal/make-raw :added "3.0"
   :setup [(def +js+ (make-raw {:lang :js}))]}
@@ -77,8 +54,11 @@
   (str (.eval ^Context +js+ "js" "1 + 1"))
   => "2")
 
-^{:refer rt.graal/close-raw :added "3.0"}
-(fact "closes the base graal context")
+^{:refer rt.graal/close-raw :added "3.0"
+  :setup [(def +js+ (make-raw {:lang :js}))]}
+(fact "closes the base graal context"
+  (close-raw +js+)
+  => nil)
 
 ^{:refer rt.graal/raw-lang :added "3.0"
   :setup [(def +js+ (make-raw {:lang :js}))]}
@@ -110,10 +90,14 @@
   => -1)
 
 ^{:refer rt.graal/start-graal :added "3.0"}
-(fact "starts the graal runtime")
+(fact "starts the graal runtime"
+  (start-graal (rt-graal:create {:lang :js}))
+  => rt-graal?)
 
 ^{:refer rt.graal/stop-graal :added "3.0"}
-(fact "stops the graal runtime")
+(fact "stops the graal runtime"
+  (stop-graal (start-graal (rt-graal:create {:lang :js})))
+  => rt-graal?)
 
 ^{:refer rt.graal/rt-graal:create :added "4.0"}
 (fact "creates a graal runtime"
@@ -124,7 +108,11 @@
   => rt-graal?)
 
 ^{:refer rt.graal/rt-graal :added "3.0"}
-(fact "creates and starts a graal runtime")
+(fact "creates and starts a graal runtime"
+  (rt-graal {:lang :js})
+  => rt-graal?)
 
 ^{:refer rt.graal/rt-graal? :added "3.0"}
-(fact "checks that object is a graal runtime")
+(fact "checks that object is a graal runtime"
+  (rt-graal? (rt-graal:create {:lang :js}))
+  => true)

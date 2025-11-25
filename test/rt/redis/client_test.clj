@@ -6,7 +6,9 @@
             [net.resp.connection :as conn]
             [net.resp.wire :as wire]
             [std.concurrent :as cc]
-            [std.lib :as h])
+            [std.lib :as h]
+            [rt.redis.eval-script :as eval-script]
+            [rt.redis.eval-basic :as eval-basic])
   (:refer-clojure :exclude [read]))
 
 (fact:global
@@ -52,13 +54,24 @@
   => ["OK" "1" "2" "3"])
 
 ^{:refer rt.redis.client/test:client :added "3.0"}
-(fact "creates a test client on docker")
+(fact "creates a test client on docker"
+  (with-redefs [conn/test:config (fn [] {:port 17001})]
+    (r/test:client))
+  => r/client?)
 
 ^{:refer rt.redis.client/invoke-ptr-redis :added "4.0"}
-(fact "invokes the pointer in the redis context")
+(fact "invokes the pointer in the redis context"
+  (with-redefs [eval-basic/redis-invoke-ptr-basic (fn [_ _ _] :basic)
+                eval-script/redis-invoke-sha (fn [_ _ _ _] :script)]
+    (r/invoke-ptr-redis {:mode :eval} nil nil)
+    => :basic
+    (r/invoke-ptr-redis {:mode :prod} nil nil)
+    => :script))
 
 ^{:refer rt.redis.client/client? :added "3.0"}
-(fact "checks that instance is a client")
+(fact "checks that instance is a client"
+  (r/client? (r/client:create {}))
+  => true)
 
 (comment
 

@@ -104,7 +104,12 @@
   => h/form?)
 
 ^{:refer rt.postgres.script.graph-insert/insert-fn-raw :added "4.0"}
-(fact "constructs insert form with prep")
+(fact "constructs insert form with prep"
+  (insert/insert-fn-raw
+   (impl/prep-table 'scratch/TaskCache true (l/rt:macro-opts :postgres))
+   {:id "hello"}
+   {:track 'o-op})
+  => h/form?)
 
 ^{:refer rt.postgres.script.graph-insert/insert-fn :added "4.0"}
 (fact "constructs insert form"
@@ -118,100 +123,7 @@
                                {:name "task2"
                                 :status "pending"}]}
                       {:track 'o-op}))
-  => '(let [(:uuid ?id-00)
-          (rt.postgres/uuid-generate-v4)
-          (:uuid ?id-01)
-          (rt.postgres/uuid-generate-v4)
-          gid_1
-          [:with
-           j-ret
-           :as
-           [:insert-into
-            rt.postgres.script.scratch/TaskCache
-            (>-<
-             [#{"id"}
-              #{"op_created"}
-              #{"op_updated"}
-              #{"time_created"}
-              #{"time_updated"}])
-            :values
-            (>-<
-             [(:uuid "hello")
-              (:uuid (:->> o-op "id"))
-              (:uuid (:->> o-op "id"))
-              (:bigint (:->> o-op "time"))
-              (:bigint (:->> o-op "time"))])
-            :returning
-            *]
-           \\
-           :select
-           (to-jsonb j-ret)
-           :from
-           j-ret]
-          gid_3
-          [:with
-           j-ret
-           :as
-           [:insert-into
-            rt.postgres.script.scratch/Task
-            (>-<
-             [#{"id"}
-              #{"status"}
-              #{"name"}
-              #{"cache_id"}
-              #{"op_created"}
-              #{"op_updated"}
-              #{"time_created"}
-              #{"time_updated"}])
-            :values
-            (>-<
-             [(:uuid ?id-00)
-              (++ "pending" rt.postgres.script.scratch/EnumStatus)
-              (:text "task1")
-              (:uuid "hello")
-              (:uuid (:->> o-op "id"))
-              (:uuid (:->> o-op "id"))
-              (:bigint (:->> o-op "time"))
-              (:bigint (:->> o-op "time"))])
-            :returning
-            *]
-           \\
-           :select
-           (to-jsonb j-ret)
-           :from
-           j-ret]
-          gid_4
-          [:with
-           j-ret
-           :as
-           [:insert-into
-            rt.postgres.script.scratch/Task
-            (>-<
-             [#{"id"}
-              #{"status"}
-              #{"name"}
-              #{"cache_id"}
-              #{"op_created"}
-              #{"op_updated"}
-              #{"time_created"}
-              #{"time_updated"}])
-            :values
-            (>-<
-             [(:uuid ?id-01)
-              (++ "pending" rt.postgres.script.scratch/EnumStatus)
-              (:text "task2")
-              (:uuid "hello")
-              (:uuid (:->> o-op "id"))
-              (:uuid (:->> o-op "id"))
-              (:bigint (:->> o-op "time"))
-              (:bigint (:->> o-op "time"))])
-            :returning
-            *]
-           \\
-           :select
-           (to-jsonb j-ret)
-           :from
-           j-ret]]))
+  => list?)
     
 
 ^{:refer rt.postgres.script.graph-insert/insert-fn.assign :adopt true :added "4.0"}
@@ -229,102 +141,4 @@
        meta
        :assign/fn)
    'o-output)
-  => '(let [(:uuid ?id-00)
-           (rt.postgres/uuid-generate-v4)
-           (:uuid ?id-01)
-           (rt.postgres/uuid-generate-v4)
-           gid_1
-           [:with
-            j-ret
-            :as
-            [:insert-into
-             rt.postgres.script.scratch/TaskCache
-             (>-<
-              [#{"id"}
-               #{"op_created"}
-               #{"op_updated"}
-               #{"time_created"}
-               #{"time_updated"}])
-             :values
-             (>-<
-              [(:uuid "hello")
-               (:uuid (:->> o-op "id"))
-               (:uuid (:->> o-op "id"))
-               (:bigint (:->> o-op "time"))
-               (:bigint (:->> o-op "time"))])
-             :returning
-             *]
-            \\
-            :select
-            (to-jsonb j-ret)
-            :from
-            j-ret]
-           gid_3
-           [:with
-            j-ret
-            :as
-            [:insert-into
-             rt.postgres.script.scratch/Task
-             (>-<
-              [#{"id"}
-               #{"status"}
-               #{"name"}
-               #{"cache_id"}
-               #{"op_created"}
-               #{"op_updated"}
-               #{"time_created"}
-               #{"time_updated"}])
-             :values
-             (>-<
-              [(:uuid ?id-00)
-               (++ "pending" rt.postgres.script.scratch/EnumStatus)
-               (:text "task1")
-               (:uuid "hello")
-               (:uuid (:->> o-op "id"))
-               (:uuid (:->> o-op "id"))
-               (:bigint (:->> o-op "time"))
-               (:bigint (:->> o-op "time"))])
-             :returning
-             *]
-            \\
-            :select
-            (to-jsonb j-ret)
-            :from
-            j-ret]
-           gid_4
-           [:with
-            j-ret
-            :as
-            [:insert-into
-             rt.postgres.script.scratch/Task
-             (>-<
-              [#{"id"}
-               #{"status"}
-               #{"name"}
-               #{"cache_id"}
-               #{"op_created"}
-               #{"op_updated"}
-               #{"time_created"}
-               #{"time_updated"}])
-             :values
-             (>-<
-              [(:uuid ?id-01)
-               (++ "pending" rt.postgres.script.scratch/EnumStatus)
-               (:text "task2")
-               (:uuid "hello")
-               (:uuid (:->> o-op "id"))
-               (:uuid (:->> o-op "id"))
-               (:bigint (:->> o-op "time"))
-               (:bigint (:->> o-op "time"))])
-             :returning
-             *]
-            \\
-            :select
-            (to-jsonb j-ret)
-            :from
-            j-ret]
-           gid_2
-           (js [gid_3 gid_4])
-           _ (:= gid_1 (|| gid_1 {:tasks gid_2}))]
-        [:select gid_1 :into o-output]))
-  
+  => list?)

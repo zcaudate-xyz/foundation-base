@@ -51,16 +51,24 @@
                        :where {:nspname "core/system"}]]}])])
 
 ^{:refer rt.postgres.grammar.meta/has-index :added "4.0"}
-(fact "cheks for the existence of an index")
+(fact "cheks for the existence of an index"
+  (has-index "idx" "schema")
+  => vector?)
 
 ^{:refer rt.postgres.grammar.meta/get-extensions :added "4.0"}
-(fact "gets import forms")
+(fact "gets import forms"
+  (get-extensions {:native {:ext {:seed true}}})
+  => '(:ext))
 
 ^{:refer rt.postgres.grammar.meta/create-extension :added "4.0"}
-(fact "makes create extension forms")
+(fact "makes create extension forms"
+  (create-extension :ext)
+  => vector?)
 
 ^{:refer rt.postgres.grammar.meta/drop-extension :added "4.0"}
-(fact "makes drop extension forms")
+(fact "makes drop extension forms"
+  (drop-extension :ext)
+  => vector?)
 
 ^{:refer rt.postgres.grammar.meta/get-schema-seed :added "4.0"}
 (fact "gets schema seed for a given module"
@@ -72,13 +80,19 @@
   => ["test/meta"])
 
 ^{:refer rt.postgres.grammar.meta/has-schema :added "4.0"}
-(fact "checks that schema exists")
+(fact "checks that schema exists"
+  (has-schema "schema")
+  => list?)
 
 ^{:refer rt.postgres.grammar.meta/create-schema :added "4.0"}
-(fact "creates a schema")
+(fact "creates a schema"
+  (create-schema "schema")
+  => vector?)
 
 ^{:refer rt.postgres.grammar.meta/drop-schema :added "4.0"}
-(fact "drops a schema")
+(fact "drops a schema"
+  (drop-schema "schema")
+  => vector?)
 
 ^{:refer rt.postgres.grammar.meta/classify-ptr :added "4.0"}
 (fact "classifies the pointer"
@@ -89,7 +103,11 @@
 
 
 ^{:refer rt.postgres.grammar.meta/has-policy :added "4.0"}
-(fact "checks that a policy exists")
+(fact "checks that a policy exists"
+  (has-policy {:static/schema "s" :static/policy-name "p" :static/policy-table "t"})
+  => vector?)
 
 ^{:refer rt.postgres.grammar.meta/drop-policy :added "4.0"}
-(fact "drops a policy")
+(fact "drops a policy"
+  (drop-policy {:static/schema "s" :static/policy-name "p" :static/policy-table "t"})
+  => vector?)
