@@ -46,3 +46,27 @@
 
   (lines "abc\ndef")
   => '(std.string/| "abc" "def"))
+
+(fact "replace-at"
+  (replace-at "abcde" 2 "X")
+  => "abXde")
+
+(fact "insert-at"
+  (insert-at "abcde" 2 "X")
+  => "abXcde")
+
+(fact "single-line"
+  (std.string.prose/single-line "a\nb")
+  => "a b")
+
+(fact "multi-line?"
+  (std.string.prose/multi-line? "a\nb")
+  => true)
+
+(fact "single-line?"
+  (std.string.prose/single-line? "a")
+  => true)
+
+(fact "join"
+  (std.string.wrap/join "|" ["a" "b"])
+  => "a|b")

@@ -36,10 +36,20 @@
        :programs {}})
 
 ^{:refer std.scheduler/runner:stop :added "3.0"}
-(fact "stops the runner")
+(fact "stops the runner"
+  (let [runner (runner:create)]
+    (runner:start runner)
+    (runner:stop runner)
+    (runner:stopped? runner))
+  => true)
 
 ^{:refer std.scheduler/runner:kill :added "3.0"}
-(fact "kills the runner")
+(fact "kills the runner"
+  (let [runner (runner:create)]
+    (runner:start runner)
+    (runner:kill runner)
+    (runner:stopped? runner))
+  => true)
 
 ^{:refer std.scheduler/runner:started? :added "3.0"
   :use [|run|]}
@@ -120,7 +130,12 @@
                    :interval 10}))
 
 ^{:refer std.scheduler/uninstall :added "3.0"}
-(fact "uninstalls a program")
+(fact "uninstalls a program"
+  (let [runner (runner:create)]
+    (install runner {:id :world :type :basic :interval 100 :main-fn (fn [& args])})
+    (uninstall runner :world)
+    (installed? runner :world))
+  => false)
 
 ^{:refer std.scheduler/install :added "3.0"}
 (fact "installs a program" ^:hidden
@@ -151,10 +166,25 @@
   => true)
 
 ^{:refer std.scheduler/spawn :added "3.0"}
-(fact "spawns a runner that contains the program")
+(fact "spawns a runner that contains the program"
+  (let [runner (runner:create)]
+    (runner:start runner)
+    (install runner {:id :world :type :basic :interval 100 :main-fn (fn [& args])})
+    (spawn runner :world)
+    (> (count (get-in @(:runtime runner) [:running :world])) 0))
+  => true)
+
 
 ^{:refer std.scheduler/unspawn :added "3.0"}
-(fact "unspawns the running program")
+(fact "unspawns the running program"
+  (let [runner (runner:create)
+        program {:id :world :type :basic :interval 100 :main-fn (fn [& args])}]
+    (runner:start runner)
+    (install runner program)
+    (spawn runner :world)
+    (unspawn runner :world)
+    (empty? (get-in @(:runtime runner) [:running :world])))
+  => true)
 
 ^{:refer std.scheduler/trigger :added "3.0"}
 (fact "triggers the program manually, without spawning"
