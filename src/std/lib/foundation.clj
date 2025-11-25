@@ -342,7 +342,10 @@
    => 'std.lib.foundation_test"
   {:added "3.0"}
   ([]
-   `(clojure.core/->> (fn []) str (re-find #"^.*?(?=\$|$)") symbol)))
+   `(clojure.core/-> (re-find #"^.*?(?=\$|$)"
+                              (str (fn [])))
+                     (.replaceAll "_" "-")
+                     symbol)))
 
 (defmacro code-line
   "gets the current code line

@@ -219,7 +219,7 @@
 ^{:refer std.lib.foundation/code-ns :added "3.0"}
 (fact "returns the current namespace the code is in"
 
-  (code-ns)
+  (code-ns)  
   => 'std.lib.foundation-test)
 
 ^{:refer std.lib.foundation/code-line :added "3.0"}
@@ -480,34 +480,48 @@
 
 ^{:refer std.lib.foundation/intern-var :added "3.0"}
 (fact "interns a var in sym"
+
   (intern-var (symbol "std.lib.foundation-test/hello") "world")
   (resolve 'hello) => #'hello)
 
 ^{:refer std.lib.foundation/intern-form :added "3.0"}
 (fact "creates base form for `intern-in` and `intern-all`"
-
+  ^:hidden
+  
   (intern-form 'std.lib 'std.lib.foundation/unfold)
-  => (contains '[std.lib/unfold]))
+  => '(std.lib.foundation/intern-var
+       'std.lib
+       'unfold
+       #'std.lib.foundation/unfold
+       'nil))
 
 ^{:refer std.lib.foundation/intern-in :added "3.0"}
 (fact "adds a function to current"
-  (intern-in 'std.lib.foundation/T)
+  ^:hidden
+  
+  (intern-in std.lib.foundation/T)
   => #'T)
 
 ^{:refer std.lib.foundation/intern-all :added "3.0"}
 (fact "adds a namespace to current"
-  (intern-all 'std.lib.foundation)
+  ^:hidden
+  
+  (intern-all std.lib.foundation)
   => vector?)
 
 ^{:refer std.lib.foundation/with:template-meta :added "3.0"}
 (fact "binds the template meta (for testing purposes)"
+  ^:hidden
+  
   (with:template-meta {:a 1} (template-meta))
   => {:a 1})
 
 ^{:refer std.lib.foundation/template-meta :added "3.0"}
 (fact "returns the intern template meta"
+  ^:hidden
+  
   (template-meta)
-  => map?)
+  => nil?)
 
 ^{:refer std.lib.foundation/template-vars :added "3.0"
   :style/indent 1}
