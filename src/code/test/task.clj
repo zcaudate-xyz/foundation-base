@@ -180,7 +180,7 @@
    (let [opts (task/process-ns-args args)
          {:keys [thrown failed timedout] :as stats} (run (or (:ns opts) :all)
                                                          (dissoc opts :ns))
-         res (+ (or thrown 0) (or failed 0) (or timedout 0))]
+         res (+ thrown failed (or timedout 0))]
      (if (get opts :no-exit)
        res
        (System/exit res)))))

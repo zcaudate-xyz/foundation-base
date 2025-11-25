@@ -8,8 +8,7 @@
             [code.test.compile.types :as types]
             [code.test.compile.rewrite :as rewrite]
             [std.math :as math]
-            [std.lib :as h]
-            [code.test.base.context :as ctx]))
+            [std.lib :as h]))
 
 (def ^:dynamic *compile-meta* nil)
 
@@ -285,7 +284,7 @@
    (fact:compile fpkg nil))
   ([fpkg global]
    (let [_ ((-> fpkg :code :declare eval))]
-     (ctx/with-context {:eval-global global}
+     (binding [rt/*eval-global* global]
        (let [meta (select-keys fpkg [:use :let :replace :setup :teardown])
              code {:setup    (snippet/fact-setup meta)
                    :teardown (snippet/fact-teardown meta)
@@ -308,7 +307,7 @@
   "creates the forms in eval mode"
   {:added "3.0"}
   ([{:keys [ns id] :as fpkg}]
-   `(ctx/with-context {:eval-fact true}
+   `(binding [rt/*eval-fact* true]
       ~@(snippet/fact-let-defs fpkg)
       ((rt/get-fact (quote ~ns) (quote ~id))))))
 
@@ -322,7 +321,7 @@
          fpkg (install-fact meta body)]
      (if id
        (intern (:ns fpkg) id fpkg))
-     (if (and (:eval-mode ctx/*context*)
+     (if (and rt/*eval-mode*
               (not (false? eval)))
        (fact-eval fpkg)))))
 
@@ -330,7 +329,7 @@
   "adds a template to the file"
   {:added "3.0" :style/indent 1}
   ([desc & body]
-   `(ctx/with-context {:eval-mode false}
+   `(binding [rt/*eval-mode* false]
       ~(with-meta
          `(fact ~desc ~@body)
          (assoc (meta &form) :eval false)))))
@@ -451,7 +450,7 @@
   "helper function for eval"
   {:added "3.0"}
   ([id meta]
-   (if (and (:eval-mode ctx/*context*)
+   (if (and rt/*eval-mode*
             (not (false? (:eval meta))))
      `((rt/get-fact (quote ~id))))))
 
@@ -521,7 +520,7 @@
 
 (defmacro fact:table
   "runs a form with tabular value substitutions"
-  {:added "4.0" :style/indent 1}
+  {:added "3.0" :style/indent 1}
   ([header & inputs]
    (let [meta (clojure.core/meta &form)
          {:keys [id]} (fact:table-install header inputs meta)]

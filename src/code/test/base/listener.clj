@@ -1,8 +1,7 @@
 (ns code.test.base.listener
   (:require [code.test.base.runtime :as rt]
             [code.test.base.print :as print]
-            [std.lib :as h]
-            [code.test.base.context :as ctx]))
+            [std.lib :as h]))
 
 (defn summarise-verify
   "extract the comparison into a valid format"
@@ -69,20 +68,18 @@
   "accumulator for thrown errors"
   {:added "3.0"}
   ([{:keys [result]}]
-   (let [{:keys [errors]} ctx/*context*]
-     (when errors
-       (if (-> result :status (= :exception))
-         (swap! errors update-in [:exception] conj result))))))
+   (when rt/*errors*
+     (if (-> result :status (= :exception))
+       (swap! rt/*errors* update-in [:exception] conj result)))))
 
 (defn check-error-accumulator
   "accumulator for errors on checks"
   {:added "3.0"}
   ([{:keys [result]}]
-   (let [{:keys [errors]} ctx/*context*]
-     (when errors
-       (if (or (-> result :status (= :exception))
-               (-> result :data (= false)))
-         (swap! errors update-in [:failed] conj result))))))
+   (when rt/*errors*
+     (if (or (-> result :status (= :exception))
+             (-> result :data (= false)))
+       (swap! rt/*errors* update-in [:failed] conj result)))))
 
 (defn fact-printer
   "prints out results after every fact"
@@ -96,35 +93,32 @@
   "accumulator for fact results"
   {:added "3.0"}
   ([{:keys [id meta results]}]
-   (let [{:keys [accumulator]} ctx/*context*]
-     (reset! accumulator {:id id :meta meta :results results}))))
+   (reset! rt/*accumulator* {:id id :meta meta :results results})))
 
 (defn bulk-printer
   "prints out the end summary"
   {:added "3.0"}
   ([{:keys [results]}]
-   (let [{:keys [errors]} ctx/*context*]
-     (if (print/*options* :print-bulk)
-       (print/print-summary results))
-     (when errors
-       (h/local :println "-------------------------")
-       (when-let [failed (:failed @errors)]
-         (doseq [result failed]
-           (print/print-failure (summarise-verify result))))
-       (when-let [exceptions (:exception @errors)]
-         (doseq [result exceptions]
-           (print/print-thrown (summarise-evaluate result))))
-       (h/local :println "")))))
+   (if (print/*options* :print-bulk)
+     (print/print-summary results)) (when rt/*errors*
+                                      (h/local :println "-------------------------")
+                                      (when-let [failed (:failed @rt/*errors*)]
+                                        (doseq [result failed]
+                                          (print/print-failure (summarise-verify result))))
+                                      (when-let [exceptions (:exception @rt/*errors*)]
+                                        (doseq [result exceptions]
+                                          (print/print-thrown (summarise-evaluate result))))
+                                      (h/local :println ""))))
 
 (defn install-listeners
   "installs all listeners"
   {:added "3.0"}
   ([]
-   (do (h/signal:install :test/form-printer  {:test :form}  form-printer)
-       (h/signal:install :test/check-printer {:test :check} check-printer)
-       (h/signal:install :test/form-error-accumulator {:test :form} form-error-accumulator)
-       (h/signal:install :test/check-error-accumulator {:test :check} check-error-accumulator)
-       (h/signal:install :test/fact-printer {:test :fact} fact-printer)
-       (h/signal:install :test/fact-accumulator {:test :fact} fact-accumulator)
-       (h/signal:install :test/bulk-printer {:test :bulk} bulk-printer)
+   (do (h/signal:install :test/form-printer  {:test :form}  #'form-printer)
+       (h/signal:install :test/check-printer {:test :check} #'check-printer)
+       (h/signal:install :test/form-error-accumulator {:test :form} #'form-error-accumulator)
+       (h/signal:install :test/check-error-accumulator {:test :check} #'check-error-accumulator)
+       (h/signal:install :test/fact-printer {:test :fact} #'fact-printer)
+       (h/signal:install :test/fact-accumulator {:test :fact} #'fact-accumulator)
+       (h/signal:install :test/bulk-printer {:test :bulk} #'bulk-printer)
        true)))

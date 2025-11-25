@@ -7,18 +7,16 @@
             [code.test.diff :as diff]
             [std.lib.walk :as walk]
             [std.print :as print]
-            [std.pretty :as pretty]
-            [code.test.base.context :as ctx]))
+            [std.pretty :as pretty]))
 
 (defonce ^:dynamic *options* #{:print-thrown :print-failure :print-bulk})
 
 (defn- rel
   [path]
-  (let [root (:root ctx/*context*)]
-    (cond (and root path)
-          (fs/relativize root path)
+  (cond (and rt/*root* path)
+        (fs/relativize rt/*root* path)
 
-          :else path)))
+        :else path))
 
 (defn pad [s n]
   (let [len (count s)]
@@ -123,7 +121,7 @@
            (if name (str "\n   " (ansi/white "Refer") "  " (ansi/style name #{:bold})) "")
            (if desc (str "\n    " (ansi/white "Info") "  \"" desc "\"") "")
            (str "\n    " (ansi/white "Form") "  " (str/indent-rest (pretty/pprint-str bform) 10))
-           (str "\n    " (ansi/white "Data") "  " (if (instance? Throwable data)
+           (str "\n   " (ansi/white "Error") "  " (if (instance? Throwable data)
                                                     (or (.getMessage ^Throwable data) data)
                                                     data))
            (if (not= bform form) (str " :: " form))
@@ -160,34 +158,6 @@
                                                                                   (:line original)
                                                                                   (:column original)))))
            (if parent (str "\n  " (ansi/white "Parent") "  " (ansi/blue (str parent))))
-           "\n")))))
-
-(defn print-timedout
-  "outputs the description for a form that has timed out"
-  {:added "4.0"}
-  ([{:keys [path name ns line desc form replace original actual parent data] :as summary}]
-   (let [line (if line (str "L:" line " @ ") "")
-         bform (walk/postwalk-replace replace form)
-         pattern? (not= bform form)
-         data (or data actual)
-         data (if (and (map? data) (:status data))
-                (:data data)
-                data)]
-     (print/println
-      (str (ansi/style "Timed Out" #{:red :bold})
-           (ansi/style (format "  %s%s" line (or (rel path) "<current>")) #{:bold})
-           (if name (str "\n   " (ansi/white "Refer") "  " (ansi/style name #{:bold})) "")
-           (if desc (str "\n    " (ansi/white "Info") "  \"" desc "\"") "")
-           (str "\n    " (ansi/white "Form") "  " (str/indent-rest (pretty/pprint-str bform) 10))
-           (str "\n    " (ansi/white "Data") "  " (if (instance? Throwable data)
-                                                    (or (.getMessage ^Throwable data) data)
-                                                    data))
-           (if (not= bform form) (str " :: " form))
-           (if pattern? (str "\n " (ansi/white (pad "Pattern" 7)) "  " (ansi/blue (str form))))
-           (if original (str "\n  " (ansi/white (pad "Linked" 7)) "  " (ansi/blue (format "L:%d,%d"
-                                                                                  (:line original)
-                                                                                  (:column original)))))
-           (if parent (str "\n  " (ansi/white (pad "Parent" 7)) "  " (ansi/blue (str parent))))
            "\n")))))
 
 (defn print-fact
@@ -246,3 +216,4 @@
             (print/println
              (ansi/style (str "Success (" passed ")") #{:cyan :bold})
              "\n")) (print/println "")))
+

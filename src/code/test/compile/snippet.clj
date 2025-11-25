@@ -1,7 +1,6 @@
 (ns code.test.compile.snippet
   (:require [code.test.base.runtime :as rt]
-            [std.lib :as h]
-            [code.test.base.context :as ctx]))
+            [std.lib :as h]))
 
 (defn vecify
   "puts the item in a vector if not already
@@ -147,7 +146,7 @@
                       (merge (:replace m)))]
      `(fn [~'thunk]
         (fn []
-          (ctx/with-context {:eval-replace (quote ~replace)}
+          (binding [rt/*eval-replace* (quote ~replace)]
             (~'thunk)))))))
 
 (defn fact-wrap-ceremony
@@ -184,14 +183,14 @@
    (let [{:keys [before after]} check]
      `(fn [~'thunk]
         (fn []
-          (ctx/with-context {:results (atom [])
-                             :eval-check {:guard  ~guard
-                                          :before (fn []
-                                                    ~@(mapcat #(fact-use % [:check :before]) (:use m))
-                                                    ~@(vecify before))
-                                          :after  (fn []
-                                                    ~@(vecify after)
-                                                    ~@(mapcat #(fact-use % [:check :after]) (:use m)))}}
+          (binding [rt/*results* (atom [])
+                    rt/*eval-check* {:guard  ~guard
+                                     :before (fn []
+                                               ~@(mapcat #(fact-use % [:check :before]) (:use m))
+                                               ~@(vecify before))
+                                     :after  (fn []
+                                               ~@(vecify after)
+                                               ~@(mapcat #(fact-use % [:check :after]) (:use m)))}]
             (~'thunk)))))))
 
 (defn fact-slim
