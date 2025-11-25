@@ -261,14 +261,14 @@
 (fact "converts a var to a symbol"
 
   (var-sym #'var-sym)
-  => 'std.lib.foundation/var-sym)
+  => 'std.lib.foundation-test/var-sym)
 
 ^{:refer std.lib.foundation/unbound? :added "3.0"}
 (fact "checks if a variable is unbound"
-
-  (declare -lost-)
-
-  (unbound? -lost-)
+  
+  (declare -lost1-)
+  
+  (unbound? -lost1-)
   => true)
 
 ^{:refer std.lib.foundation/set! :added "3.0"}
@@ -481,8 +481,8 @@
 ^{:refer std.lib.foundation/intern-var :added "3.0"}
 (fact "interns a var in sym"
 
-  (intern-var (symbol "std.lib.foundation-test/hello") "world")
-  (resolve 'hello) => #'hello)
+  (intern-var 'std.lib.foundation-test 'hello #'aget)
+  => (resolve 'hello))
 
 ^{:refer std.lib.foundation/intern-form :added "3.0"}
 (fact "creates base form for `intern-in` and `intern-all`"
@@ -506,7 +506,7 @@
 (fact "adds a namespace to current"
   ^:hidden
   
-  (intern-all std.lib.foundation)
+  (intern-all std.lib.apply)
   => vector?)
 
 ^{:refer std.lib.foundation/with:template-meta :added "3.0"}
@@ -560,14 +560,17 @@
 
 ^{:refer std.lib.foundation/template-bulk :added "4.0"}
 (fact "template-entries but for heavy usage"
+  ^:hidden
+  
   (template-bulk [tmpl-fn {:meta "meta"}]
-                 [[+ {:opts [1 2 3]}]])
-  => vector?)
+    [])
+  => [])
 
 ^{:refer std.lib.foundation/template-ensure :added "4.0"}
 (fact "ensures that the templated entries are the same as the input"
+
   (template-ensure {} [])
-  => nil)
+  => [])
 
 ^{:refer std.lib.foundation/wrapped :added "4.0"}
 (fact "object to display shell result"

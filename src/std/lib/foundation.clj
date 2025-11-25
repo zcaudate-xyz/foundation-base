@@ -342,8 +342,8 @@
    => 'std.lib.foundation_test"
   {:added "3.0"}
   ([]
-   `(clojure.core/-> (re-find #"^.*?(?=\$|$)"
-                              (str (fn [])))
+   `(clojure.core/-> ^String (re-find #"^.*?(?=\$|$)"
+                                      (str (fn [])))
                      (.replaceAll "_" "-")
                      symbol)))
 

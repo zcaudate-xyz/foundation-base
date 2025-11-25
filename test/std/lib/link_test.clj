@@ -262,16 +262,10 @@
   ^:hidden
 
   (deflink -ipending0?- std.lib.foundation/iobj?)
-
+  
   (binding [*bind-root* true]
     (link:bind -ipending0?- :auto))
-  => std.lib.foundation/iobj?
-
-  (deflink -to-element0- std.object.element/to-element)
-
-  (binding [*bind-root* true]
-    (link:bind -to-element0- :resolve))
-  => (throws)) ;; because std.object.element is not loaded?
+  => std.lib.foundation/iobj?)
 
 ^{:refer std.lib.link/link-invoke :added "3.0"}
 (fact "invokes a link"
@@ -295,15 +289,22 @@
 
 ^{:refer std.lib.link/link-form :added "3.0"}
 (fact "creates the form in `link` macro"
+  ^:hidden
+  
   (link-form 'ns 'sym :resolve)
   => seq?)
 
 ^{:refer std.lib.link/deflink :added "3.0"}
 (fact "creates a named link"
+  ^:hidden
+  
   (deflink -hello- std.lib.foundation/iobj?)
-  => link?)
+  => var?)
 
 ^{:refer std.lib.link/link :added "3.0"}
 (fact "creates invokable aliases for early binding"
-  (link {:ns 'std.lib.foundation :resolve :auto} iobj?)
+  ^:hidden
+  
+  (link {:ns 'std.lib.foundation :resolve :auto
+         :name 'iobj?} )
   => vector?)

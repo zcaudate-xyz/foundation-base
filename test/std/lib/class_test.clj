@@ -36,7 +36,7 @@
 (fact "returns `true` if `class` is an interface"
 
   (class:interface? java.util.Map) => true
-
+  
   (class:interface? Class) => false)
 
 ^{:refer std.lib.class/class:abstract? :added "3.0"}
@@ -96,6 +96,9 @@
 ^{:refer std.lib.class/class:interfaces :added "3.0"}
 (fact "Lists all interfaces for a class"
 
+  (class:interfaces clojure.lang.IFn)
+  => #{java.lang.Runnable java.util.concurrent.Callable}
+  
   (class:interfaces clojure.lang.AFn)
   => #{java.lang.Runnable
        java.util.concurrent.Callable
