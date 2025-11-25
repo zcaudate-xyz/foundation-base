@@ -12,7 +12,7 @@
 ^{:refer std.config.resolve/ex-config :added "3.0"}
 (fact "helper function for creating config exceptions"
 
-  (ex-config "error" {}))
+  (ex-config "error" {}) => clojure.lang.ExceptionInfo)
 
 ^{:refer std.config.resolve/directive? :added "3.0"}
 (fact "checks if a form is a directive"
@@ -125,7 +125,7 @@
 (fact "throws an error with message"
 
   (resolve-directive-error [:error "errored" {}])
-  => (throws))
+  => (throws clojure.lang.ExceptionInfo))
 
 ^{:refer std.config.resolve/resolve-directive-merge :added "3.0"}
 (fact "merges two entries together"

@@ -28,7 +28,12 @@
                       @*output*)))
 
 ^{:refer std.dispatch.core/submit-dispatch :added "3.0"}
-(fact "submits to the core dispatch")
+(fact "submits to the core dispatch"
+  (test-scaffold (assoc +test-config+
+                        :handler (fn [_ _] (Thread/sleep 10)))
+                 10
+                 200)
+  => [0 1 2 3 4 5 6 7 8 9])
 
 ^{:refer std.dispatch.core/create-dispatch :added "3.0"}
 (fact "creates a core dispatch"
@@ -51,30 +56,3 @@
                  80
                  30)
   => #(-> % count (>= 50)))
-
-(comment
-  (code.manage/import)
-
-  (cc/shutdown @(:raw (:runtime -exe-)))
-
-  (def -exe- (create-dispatch {:options {:pool {:size 10
-                                                :max 10
-                                                :keep-alive 100}
-                                         :queue {:size 4}}
-                               :handler (fn [loop event]
-                                          (Thread/sleep 1000))}))
-
-  (submit-dispatch -exe- 1)
-
-  (def +hooks+ {:on-startup (fn [_] (prn :ON-STARTUP))
-                :on-shutdown (fn [_] (prn :ON-SHUTDOWN))
-                :on-submit (fn [_ _] (prn :ON-SUBMIT))
-                :on-queued   (fn [_ e] (prn :ON-QUEUED e))
-                :on-process  (fn [_ e] (prn :ON-PROCESS e))
-                :on-error    (fn [_ _ t] (prn :ON-ERROR t))
-                :on-complete (fn [_ _ t] (prn :ON-COMPLETE t))})
-  (./import)
-  (submit-dispatch -exe- "HELLO")
-
-  (def -exe- (->
-              (common/start-dispatch))))

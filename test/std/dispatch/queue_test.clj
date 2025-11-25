@@ -39,10 +39,14 @@
       (h/stop)))
 
 ^{:refer std.dispatch.queue/handler-fn :added "3.0"}
-(fact "creates a queue handler function")
+(fact "creates a queue handler function"
+  (handler-fn (create-dispatch +test-config+))
+  => fn?)
 
 ^{:refer std.dispatch.queue/submit-dispatch :added "3.0"}
-(fact "submits to a queue executor")
+(fact "submits to a queue executor"
+  (test-scaffold (assoc-in +test-config+ [:options :queue :max-batch] 1000))
+  => (contains [1000]))
 
 ^{:refer std.dispatch.queue/create-dispatch :added "3.0"}
 (fact "creates a queue executor"

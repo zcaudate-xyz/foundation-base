@@ -26,10 +26,13 @@
   => 3)
 
 ^{:refer std.contract.binding/map->Contract :added "3.0" :adopt true}
-(fact "definition of contract type")
+(fact "definition of contract type"
+  (map->Contract {:var #'-add- :function -add- :specs {}}) => contract?)
 
 ^{:refer std.contract.binding/contract? :added "3.0"}
-(fact "checks if object is a contract")
+(fact "checks if object is a contract"
+  (contract? -contract-) => true
+  (contract? "foo") => false)
 
 ^{:refer std.contract.binding/contract-var? :added "3.0"}
 (fact "checks if var contains a contract"
@@ -75,10 +78,15 @@
 
   (type/defspec <number> number?)
 
-  (parse-arg {<number> :strict}))
+  (parse-arg {<number> :strict})
+  => {:spec <number> :opts :strict}
+
+  (parse-arg <number>)
+  => {:spec <number> :opts nil})
 
 ^{:refer std.contract.binding/contract :added "3.0"}
-(fact "defines a contract given var and arguments")
+(fact "defines a contract given var and arguments"
+  (contract #'-add- []) => contract?)
 
 ^{:refer std.contract.binding/defcontract :added "3.0"}
 (fact "defines a contract"
