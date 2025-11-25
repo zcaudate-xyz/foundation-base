@@ -12,13 +12,30 @@
    (->> facts
         (keep (fn [{:keys [results meta] :as fact}]
                 (let [failures  (->> results
-                                     (filter #(and (-> % :from (= :verify))
-                                                   (-> % :data false?)))
-                                     (map (fn [{:keys [actual checker meta]}]
-                                            (-> actual
-                                                (select-keys [:data :form])
-                                                (assoc :check (:form checker)
-                                                       :code (select-keys meta [:line :column]))))))]
+                                     (filter (fn [res]
+                                               (or (and (= :verify (:from res))
+                                                        (or (false? (:data res))
+                                                            (= :exception (:status res))
+                                                            (= :exception (-> res :actual :status))))
+                                                   (and (= :evaluate (:from res))
+                                                        (= :exception (:status res))))))
+                                     (map (fn [{:keys [actual checker meta form data status] :as res}]
+                                            (let [check-form (if checker (:form checker) "N/A")
+                                                  actual-data (cond (= :evaluate (:from res))
+                                                                    data
+
+                                                                    (= :exception (-> actual :status))
+                                                                    (:data actual)
+
+                                                                    (= :exception status)
+                                                                    data
+
+                                                                    :else
+                                                                    (:data actual))]
+                                              {:data actual-data
+                                               :form (or form (:form actual))
+                                               :check check-form
+                                               :code (select-keys (or meta (:meta res)) [:line :column])}))))]
                   (if-not (empty? failures)
                     (assoc meta :output failures))))))))
 

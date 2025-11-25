@@ -16,7 +16,8 @@
 (defn- display-errors
   [data]
   (let [errors (concat (executive/retrieve-line :failed data)
-                       (executive/retrieve-line :thrown data))
+                       (executive/retrieve-line :thrown data)
+                       (executive/retrieve-line :timedout data))
         cnt  (count (:passed data))]
     (if (empty? errors)
       (res/result {:status :highlight
@@ -55,9 +56,11 @@
                 :display  display-errors}
     :result    {:ignore  (fn [data]
                            (and (empty? (:failed data))
-                                (empty? (:thrown data))))
+                                (empty? (:thrown data))
+                                (empty? (:timedout data))))
                 :keys    {:failed  (retrieve-fn :failed)
-                          :thrown  (retrieve-fn :thrown)}
+                          :thrown  (retrieve-fn :thrown)
+                          :timedout (retrieve-fn :timedout)}
                 :columns [{:key    :key
                            :align  :left}
                           {:key    :failed
@@ -67,7 +70,11 @@
                           {:key    :thrown
                            :align  :left
                            :length 40
-                           :color  #{:yellow}}]}
+                           :color  #{:yellow}}
+                          {:key    :timedout
+                           :align  :left
+                           :length 40
+                           :color  #{:red}}]}
     :summary  {:finalise  executive/summarise-bulk}}))
 
 (defn run:interrupt
@@ -127,7 +134,8 @@
    (let [latest @executive/+latest+]
      (-> (h/union (set (:errored latest))
                   (set (map (comp :ns :meta) (:failed latest)))
-                  (set (map (comp :ns :meta) (:thrown latest))))
+                  (set (map (comp :ns :meta) (:thrown latest)))
+                  (set (map (comp :ns :meta) (:timedout latest))))
          (run)))))
 
 (defn print-options
@@ -170,9 +178,9 @@
   {:added "3.0"}
   ([& args]
    (let [opts (task/process-ns-args args)
-         {:keys [thrown failed] :as stats} (run (or (:ns opts) :all)
-                                             (dissoc opts :ns))
-         res (+ thrown failed)]
+         {:keys [thrown failed timedout] :as stats} (run (or (:ns opts) :all)
+                                                         (dissoc opts :ns))
+         res (+ thrown failed (or timedout 0))]
      (if (get opts :no-exit)
        res
        (System/exit res)))))
