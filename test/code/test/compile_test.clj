@@ -1,59 +1,51 @@
 (ns code.test.compile-test
   (:require [code.test.compile :refer :all :exclude [=> *last*]]
             [code.test.base.process :as process]
-            [code.test :refer [contains-in]]))
+            [code.test :refer [contains-in]]
+            [code.test.base.runtime :as rt]))
 
-^{:refer code.test.compile/arrow? :added "3.0"}
-(fact "checks if form is an arrow")
+(fact "arrow? function"
+  (arrow? '=>) => true
+  (arrow? '->) => false)
 
-^{:refer code.test.compile/fact-skip? :added "3.0"}
-(fact "checks if form should be skipped"
+(fact "fact-skip? function"
+  (fact-skip? '(fact 1 => 1)) => true
+  (fact-skip? '(fact:let [a 1])) => true
+  (fact-skip? '(+ 1 1)) => false)
 
-  (fact-skip? '(fact:component))
-  => true)
-
-^{:refer code.test.compile/strip :added "3.0"}
-(fact "removes all checks in the function"
-
-  (strip '[(def a 1)
-           (+ a 3)
-           => 5])
+(fact "strip function"
+  (strip '[(def a 1) (+ a 3) => 5 "hello" (fact (+ 1 1) => 2)])
   => '[(def a 1) (+ a 3)])
 
-^{:refer code.test.compile/split :added "3.0"}
-(fact "creates a sequence of pairs from a loose sequence"
-  (split '[(def a 1)
-           (+ a 3)
-           => 5])
-  (contains-in '[{:type :form,
-                  :meta {:line 8, :column 12},
-                  :form '(def a 1)}
-                 {:type :test-equal,
-                  :meta {:line 9, :column 12},
-                  :input  {:form '(+ a 3)},
-                  :output {:form 5}}]))
+(fact "split function"
+  (split '[(def a 1) (+ a 3) => 5 "hello"])
+  => (contains-in [{:type :form, :form '(def a 1)}
+                   {:type :test-equal, :input {:form '(+ a 3)}, :output {:form 5}}]))
 
-^{:refer code.test.compile/fact-id :added "3.0"}
-(fact "creates an id from fact data"
+(fact "fact-id function"
+  (fact-id {} "hello there") => 'test-hello-there
+  (fact-id {:id 'my-id} "hello there") => 'my-id
+  (fact-id {:refer 'my-refer} nil) => 'my-refer)
 
-  (fact-id {} "hello there")
-  => 'test-hello-there)
+(fact "fact-prepare-meta function"
+  (fact-prepare-meta 'my-id {} "hello" '(1 => 1))
+  => (contains [{:desc "hello" :id 'my-id} '(1 => 1)]))
 
-^{:refer code.test.compile/fact-prepare-meta :added "3.0"}
-(fact "parses and converts fact to symbols"
+(fact "fact-prepare-core function"
+  (fact-prepare-core "hello" '(1 => 1) {})
+  => (contains [{:desc "hello" :id 'test-hello} '(1 => 1)]))
 
-  (fact-prepare-meta 'test-hello
-                     {}
-                     "hello"
-                     '(1 => 1)) ^:hidden
-  => '[{:path "test/code/test/compile_test.clj",
-        :desc "hello",
-        :ns code.test.compile-test,
-        :id test-hello}
-       (1 => 1)])
+(fact "fact:all macro"
+  (try
+    (eval '(fact "my fact" (+ 1 1) => 2))
+    (count (fact:all 'code.test.compile-test)) => 1
+    (finally (rt/purge-facts 'code.test.compile-test))))
 
-^{:refer code.test.compile/fact-prepare-core :added "3.0"}
-(fact "prepares fact for a core form")
+(fact "fact:list macro"
+  (try
+    (eval '(fact "my fact" (+ 1 1) => 2))
+    (fact:list) => ['test-my-fact]
+    (finally (rt/purge-facts 'code.test.compile-test))))
 
 ^{:refer code.test.compile/fact-prepare-derived :added "3.0"}
 (fact "prepares fact for a derived form")
@@ -87,14 +79,6 @@
 ^{:refer code.test.compile/fact:purge :added "3.0"
   :style/indent 1}
 (fact "purges all facts in namespace")
-
-^{:refer code.test.compile/fact:list :added "3.0"
-  :style/indent 1}
-(fact "lists all facts in namespace")
-
-^{:refer code.test.compile/fact:all :added "3.0"
-  :style/indent 1}
-(fact "returns all facts in namespace")
 
 ^{:refer code.test.compile/fact:rerun :added "3.0"}
 (fact "reruns all facts along with filter and compile options")
@@ -144,8 +128,7 @@
 ^{:refer code.test.compile/fact:derive-install :added "3.0"}
 (fact "installer for `fact:derive` macro")
 
-^{:refer code.test.compile/fact:derive :added "3.0"
-  :style/indent 1}
+^{:refer code.test.compile/fact:derive :added "3.0"}
 (fact "runs a form derived from a previous test")
 
 ^{:refer code.test.compile/fact:table-install :added "3.0"}

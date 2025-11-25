@@ -1,30 +1,41 @@
 (ns code.test.task-test
   (:use code.test)
-  (:require [code.test.task :as task]))
+  (:require [code.test.task :as task]
+            [std.task :as std.task]
+            [code.test.base.executive :as executive]))
 
-^{:refer code.test.task/run:interrupt :added "4.0"}
-(fact "interrupts the test")
+(fact "run:interrupt function"
+  (std.task/with-context {:interrupt (atom false)}
+    (task/run:interrupt)
+    @(:interrupt std.task/*context*))
+  => true)
 
-^{:refer code.test.task/run :added "3.0" :class [:test/general]}
-(fact "executes all tests, optionally filtering by list or specific namespace"
+(fact "run function with single namespace"
+  (try
+    (task/run 'code.test.task-test)
+    => map?
+    (finally (std.task/purge))))
 
-  (task/run :list)
+(fact "run:current function"
+  (try
+    (task/run:current)
+    => map?
+    (finally (std.task/purge))))
 
-  (task/run 'std.lib.foundation)
-  ;; {:files 1, :thrown 0, :facts 8, :checks 18, :passed 18, :failed 0}
-  => map?)
+(fact "run:test function"
+  (try
+    (task/run:test)
+    => map?
+    (finally (std.task/purge))))
 
-^{:refer code.test.task/run:current :added "4.0"}
-(fact "runs the current namespace")
-
-^{:refer code.test.task/run:test :added "3.0"}
-(fact "executes tests that are currently loaded in the runtime")
-
-^{:refer code.test.task/run:unload :added "3.0"}
-(fact "unloads the test namespace")
-
-^{:refer code.test.task/run:load :added "3.0"}
-(fact "load test namespace")
+(fact "run:unload and run:load functions"
+  (let [ns 'code.test.task-test]
+    (try
+      (task/run:unload ns)
+      (find-ns ns) => nil?
+      (task/run:load ns)
+      (find-ns ns) => not-nil?
+      (finally (std.task/purge)))))
 
 ^{:refer code.test.task/print-options :added "3.0" :class [:test/general]}
 (fact "output options for test results"

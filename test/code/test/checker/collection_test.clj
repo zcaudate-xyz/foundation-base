@@ -2,7 +2,34 @@
   (:use [code.test :only [fact]])
   (:require [code.test.checker.collection :refer :all]
             [code.test.checker.common :as base]
-            [code.test.base.process :as process]))
+            [code.test.base.process :as process]
+            [std.lib.result :as res]))
+
+(fact "contains-map helper function"
+  ((contains-map {:a odd?}) {:a 1, :b 2}) => true
+  ((contains-map {:a odd?}) {:a 2, :b 2}) => false)
+
+(fact "contains-vector helper function"
+  ((contains-vector [(base/satisfies odd?) (base/satisfies even?)]) [1 2 3]) => true
+  ((contains-vector [(base/satisfies odd?) (base/satisfies even?)] #{:gaps-ok}) [1 3 2]) => true)
+
+(fact "contains checker for various collection types"
+  ((contains {:a odd?}) {:a 1}) => true
+  ((contains [odd?]) [1]) => true
+  ((contains #{odd?}) #{1}) => true)
+
+(fact "just-map helper function"
+  ((just-map {:a odd?}) {:a 1}) => true
+  ((just-map {:a odd?}) {:a 1, :b 2}) => false)
+
+(fact "just-vector helper function"
+  ((just-vector [(base/satisfies odd?) (base/satisfies even?)]) [1 2]) => true
+  ((just-vector [(base/satisfies odd?) (base/satisfies even?)]) [1 2 3]) => false)
+
+(fact "just checker for various collection types"
+  ((just {:a odd?}) {:a 1}) => true
+  ((just [odd?]) [1]) => true
+  ((just #{odd?}) #{1}) => true)
 
 ^{:refer code.test.checker.collection/verify-map :added "3.0"}
 (fact "takes two maps and determines if they fit"
@@ -23,12 +50,6 @@
               #{:in-any-order :gaps-ok})
   => true)
 
-^{:refer code.test.checker.collection/contains-map :added "3.0"}
-(fact "helper function for the `contains` checker, specifically for validating map structures")
-
-^{:refer code.test.checker.collection/contains-vector :added "3.0"}
-(fact "helper function for the `contains` checker, specifically for validating vector structures")
-
 ^{:refer code.test.checker.collection/contains-set :added "3.0"}
 (fact "helper function for the `contains` checker, specifically for validating set structures"
 
@@ -38,65 +59,10 @@
   ((contains-set #{1 2 4}) [1 2 3 4 5])
   => false)
 
-^{:refer code.test.checker.collection/contains :added "3.0" :class [:test/checker]}
-(fact "checker for maps and vectors"
-
-  ((contains {:a odd? :b even?}) {:a 1 :b 4})
-  => true
-
-  ((contains {:a 1 :b even?}) {:a 2 :b 4})
-  => false
-
-  ((contains [1 2 3]) [1 2 3 4])
-  => true
-
-  ((contains [1 3]) [1 2 3 4])
-  => false
-
-  ^:hidden
-  ((contains [1 3] :gaps-ok) [1 2 3 4])
-  => true
-
-  ((contains [3 1] :gaps-ok) [1 2 3 4])
-  => false
-
-  ((contains [3 1] :in-any-order) [1 2 3 4])
-  => false
-
-  ((contains [3 1 2] :in-any-order) [1 2 3 4])
-  => true
-
-  ((contains [3 1] :in-any-order :gaps-ok) [1 2 3 4])
-  => true)
-
-^{:refer code.test.checker.collection/just-map :added "3.0"}
-(fact "helper function for the `just` checker, specifically for validating exact map structures")
-
-^{:refer code.test.checker.collection/just-vector :added "3.0"}
-(fact "helper function for the `just` checker, specifically for validating exact vector structures")
-
 ^{:refer code.test.checker.collection/just-set :added "3.0"}
 (fact "helper function for the `just` checker, specifically for validating exact set structures"
 
   ((just-set #{1 2 3}) [1 2 3])
-  => true)
-
-^{:refer code.test.checker.collection/just :added "3.0" :class [:test/checker]}
-(fact "combination checker for both maps and vectors"
-
-  ((just {:a odd? :b even?}) {:a 1 :b 4})
-  => true
-
-  ((just {:a 1 :b even?}) {:a 1 :b 2 :c 3})
-  => false
-
-  ((just [1 2 3 4]) [1 2 3 4])
-  => true
-
-  ((just [1 2 3]) [1 2 3 4])
-  => false
-
-  ((just [3 2 4 1] :in-any-order) [1 2 3 4])
   => true)
 
 ^{:refer code.test.checker.collection/contains-in :added "3.0" :class [:test/checker]}

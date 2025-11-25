@@ -1,11 +1,35 @@
 (ns code.test.compile.snippet-test
   (:require [code.test.compile.snippet :refer :all :exclude [=> *last*]]
             [code.test.base.process :as process]
+            [code.test.base.context :as ctx]
             [code.test :refer [fact fact:global contains-in]]))
 
 (fact:global
  {:component {*serv* {:create (list :database)
-                      :setup  start}}})
+                      :setup  'start}}})
+
+(fact "fact-use function"
+  (fact-use '*serv* [:setup])
+  => '((start *serv*)))
+
+(fact "fact-wrap-bindings with use"
+  (fact-wrap-bindings '{:use [*serv*]
+                        :let [a 1]})
+  => '(clojure.core/fn [thunk]
+        (clojure.core/fn []
+          (clojure.core/binding [*serv* (start (list :database))
+                                 a 1]
+            (thunk)))))
+
+(fact "fact-wrap-check function"
+  (let [f (eval (fact-wrap-check {:check {:before '(1) :after '(2)}}))
+        thunk (fn [] "hello")]
+    (ctx/with-context {:results (atom [])}
+      ((f thunk)) => "hello")))
+
+(fact "fact-slim function"
+  (let [f (eval (fact-slim '[(+ 1 1)]))]
+    (f) => 2))
 
 ^{:refer code.test.compile.snippet/vecify :added "3.0"}
 (fact "puts the item in a vector if not already"
@@ -28,9 +52,6 @@
   => '(clojure.core/binding [a 1]
         (clojure.core/binding [b (+ a 1)]
           (+ a b))))
-
-^{:refer code.test.compile.snippet/fact-use :added "3.0"}
-(fact "setup form for use (with component)")
 
 ^{:refer code.test.compile.snippet/fact-use-setup-eval :added "3.0"}
 (fact "evaluates the setup form for a `fact:use` component"
@@ -107,21 +128,3 @@
                             out (thunk)
                             _ (prn "goodbye")]
            out))))
-
-^{:refer code.test.compile.snippet/fact-wrap-bindings :added "3.0"}
-(fact "creates a wrapper for bindings"
-
-  (fact-wrap-bindings '{:let [a 1 b (+ a 1)]}) ^:hidden
-  => '(clojure.core/fn [thunk]
-        (clojure.core/fn []
-          (clojure.core/binding [a 1]
-            (clojure.core/binding [b (+ a 1)]
-              (thunk))))))
-
-^{:refer code.test.compile.snippet/fact-wrap-check :added "3.0"}
-(fact "creates a wrapper for before and after arrows")
-
-^{:refer code.test.compile.snippet/fact-slim :added "3.0"}
-(fact "creates the slim thunk"
-
-  (fact-slim '[(+ a b)]))

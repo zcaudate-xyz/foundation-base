@@ -119,10 +119,14 @@
 
   ((->checker (exactly 1)) 1) => true)
 
-^{:refer code.test.checker.common/capture :added "3.0"}
-(fact "adds a form to capture test input")
+(fact "capture macro captures a value"
+  (let [ns (create-ns 'test.capture)
+        checker (binding [*ns* ns]
+                  (eval `(capture ~'x)))]
+    (checker 10) => true
+    @(ns-resolve 'test.capture 'x) => 10
+    (remove-ns 'test.capture)))
 
 (comment
   (./arrange)
   (./import))
-
