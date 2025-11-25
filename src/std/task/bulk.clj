@@ -2,7 +2,10 @@
   (:require [std.print :as print]
             [std.string :as str]
             [std.lib :as h]
-            [std.lib.result :as res]))
+            [std.lib.component :as comp]
+            [std.lib.result :as res]
+            [std.task.unit :as unit]
+            [std.dispatch :as dispatch]))
 
 (defn bulk-display
   "constructs bulk display options"
@@ -23,45 +26,46 @@
   ([f
     {:keys [idx total input output display display-fn]}
     {:keys [print] :as params} lookup env args]
-   (let [start        (System/currentTimeMillis)
-         [key result] (try (apply f input params lookup env args)
-                           (catch Exception e
-                             (print/println ">>" (.getMessage e))
-                             (let [end   (System/currentTimeMillis)]
-                               [input (res/result {:status :error
-                                                   :time (- end start)
-                                                   :data :errored})])))
-         end    (System/currentTimeMillis)
-         result (assoc result :time (- end start))
-         {:keys [status data time]} result
-         _  (if (:item print)
-              (let [index (format "%s/%s" (inc idx) total)
-                    item  (if (= status :return)
-                            (display-fn data)
-                            result)
-                    time  (format "%.2fs" (/ time 1000.0))]
-                (print/print-row [index key item time] display)))
-         _ (if output (vreset! output [key result]))]
-     [key result])))
+   (unit/process-item {:f f
+                       :idx idx
+                       :total total
+                       :input input
+                       :output output
+                       :display display
+                       :display-fn display-fn
+                       :print print
+                       :params params
+                       :lookup lookup
+                       :env env
+                       :args args})))
 
 (defn bulk-items-parallel
   "bulk operation processing in parallel"
   {:added "3.0"}
   ([f inputs {:keys [idxs] :as context} params lookup env args]
-   (->> (pmap (fn [idx input]
-                (let [output  (volatile! nil)
-                      out-str (h/with-out-str
-                                (bulk-process-item f (assoc context
-                                                            :idx idx
-                                                            :input input
-                                                            :output output)
-                                                   params lookup env args))]
-                  [@output out-str]))
-              idxs
-              inputs)
-        (mapv (fn [[output out-str]]
-                (print/print out-str)
-                output)))))
+   (let [handler (fn [_dispatch {:keys [idx input]}]
+                   (let [output  (volatile! nil)
+                         out-str (h/with-out-str
+                                   (bulk-process-item f (assoc context
+                                                               :idx idx
+                                                               :input input
+                                                               :output output)
+                                                      params lookup env args))]
+                     [@output out-str]))
+         d (dispatch/dispatch {:type :core :handler handler})]
+     (try
+       (let [futures (doall
+                      (map (fn [idx input]
+                             (dispatch/submit d {:idx idx :input input}))
+                           idxs
+                           inputs))]
+         (->> futures
+              (mapv deref)
+              (mapv (fn [[output out-str]]
+                      (print/print out-str)
+                      output))))
+       (finally
+         (comp/stop d))))))
 
 (defn bulk-items-single
   "bulk operation processing in single"
