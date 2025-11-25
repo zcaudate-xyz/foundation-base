@@ -73,31 +73,54 @@
   => 1)
 
 ^{:refer std.concurrent.queue/peek-first :added "3.0"}
-(fact "peeks from the front of the queue")
+(fact "peeks from the front of the queue"
+  (q/peek-first (q/deque 1 2 3))
+  => 1)
 
 ^{:refer std.concurrent.queue/peek-last :added "3.0"}
-(fact "peeks from the back of the queue")
+(fact "peeks from the back of the queue"
+  (q/peek-last (q/deque 1 2 3))
+  => 3)
 
 ^{:refer std.concurrent.queue/put-first :added "3.0"}
-(fact "puts at the front of the queue")
+(fact "puts at the front of the queue"
+  (-> (doto (q/deque) (q/put-first 1))
+      (vec))
+  => [1])
 
 ^{:refer std.concurrent.queue/put-last :added "3.0"}
-(fact "puts at the back of the queue")
+(fact "puts at the back of the queue"
+  (-> (doto (q/deque) (q/put-last 1))
+      (vec))
+  => [1])
 
 ^{:refer std.concurrent.queue/take-first :added "3.0"}
-(fact "takes from the front of the queue")
+(fact "takes from the front of the queue"
+  (q/take-first (q/deque 1 2 3))
+  => 1)
 
 ^{:refer std.concurrent.queue/take-last :added "3.0"}
-(fact "takes from the back of the queue")
+(fact "takes from the back of the queue"
+  (q/take-last (q/deque 1 2 3))
+  => 3)
 
 ^{:refer std.concurrent.queue/push :added "3.0"}
-(fact "puts at the front of the queue")
+(fact "puts at the front of the queue"
+  (-> (doto (q/deque) (q/push 1))
+      (vec))
+  => [1])
 
 ^{:refer std.concurrent.queue/pop :added "3.0"}
-(fact "pops from the front of the queue")
+(fact "pops from the front of the queue"
+  (q/pop (q/deque 1 2 3))
+  => 1)
 
 ^{:refer std.concurrent.queue/remove :added "3.0"}
-(fact "removes element from queue")
+(fact "removes element from queue"
+  (let [q (q/deque 1 2 3)]
+    (q/remove q 2)
+    (into [] q))
+  => [1 3])
 
 ^{:refer std.concurrent.queue/process-bulk :added "3.0"}
 (fact "processes elements in the queue"
