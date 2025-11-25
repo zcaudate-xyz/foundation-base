@@ -135,20 +135,20 @@
    => '[std.task.process-test {:bulk true} {} {}]"
   {:added "3.0"}
   ([task]
-   (let [input-fn (-> task :construct :input)]
+   (let [input-fn (or (-> task :construct :input) (constantly nil))]
      (task-inputs task (input-fn task) task)))
   ([task input]
-   (let [input-fn (-> task :construct :input)
+   (let [input-fn (or (-> task :construct :input) (constantly nil))
          [input params] (cond (map? input)
                               [(input-fn task) input]
 
                               :else [input {}])]
      (task-inputs task input params)))
   ([task input params]
-   (let [env-fn (-> task :construct :env)]
+   (let [env-fn (or (-> task :construct :env) (constantly {}))]
      (task-inputs task input params (env-fn (merge task params)))))
   ([task input params env]
-   (let [lookup-fn (-> task :construct :lookup)]
+   (let [lookup-fn (or (-> task :construct :lookup) (constantly {}))]
      (task-inputs task input params (lookup-fn task (merge env params)) env)))
   ([task input params lookup env]
    [input params lookup env]))

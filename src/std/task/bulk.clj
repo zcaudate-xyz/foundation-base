@@ -172,9 +172,12 @@
                  format-fns (-> task :result :format)
                  sort-by-fn (-> task :result :sort-by)
                  outputs  (mapv (fn [[key {:keys [id data] :as result}]]
-                                  (->> key-fns
-                                       (map (fn [[k f]] [k (f data)]))
-                                       (into result)))
+                                  (let [result (if (map? data)
+                                                 (merge result data)
+                                                 result)]
+                                    (->> key-fns
+                                         (map (fn [[k f]] [k (f data)]))
+                                         (into result))))
                                 results)
                  outputs  (if order-by
                             (clojure.core/sort-by order-by outputs)
