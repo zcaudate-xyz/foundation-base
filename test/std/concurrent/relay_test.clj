@@ -16,7 +16,11 @@
   => map?)
 
 ^{:refer std.concurrent.relay/with:bus :added "4.0"}
-(fact "sets the default relay bus")
+(fact "sets the default relay bus"
+  ;; (with:bus [nil]
+  ;;   std.concurrent.relay/*bus*)
+  ;; => nil?
+  )
 
 ^{:refer std.concurrent.relay/attach-read-passive :added "4.0"}
 (fact "attaches a passive process to an input stream")
@@ -35,7 +39,9 @@
   => relay-stream?)
 
 ^{:refer std.concurrent.relay/relay-stream? :added "4.0"}
-(fact "checks if object is a relay stream")
+(fact "checks if object is a relay stream"
+  (relay-stream? (relay-stream "hello" :input nil {}))
+  => true)
 
 ^{:refer std.concurrent.relay/make-socket-instance :added "4.0"
   :setup [(def +server+ (ServerSocket. (h/port:check-available 0)))
@@ -109,16 +115,32 @@
   => map?)
 
 ^{:refer std.concurrent.relay/relay-stop :added "4.0"}
-(fact "stops the relay")
+(fact "stops the relay"
+  (let [relay (doto (relay:create {:type :process
+                                   :args ["bash"]})
+                (relay-start))]
+    (relay-stop relay)
+    (h/stopped? relay))
+  => true)
 
 ^{:refer std.concurrent.relay/relay:create :added "4.0"}
-(fact "creates a relay")
+(fact "creates a relay"
+  (relay:create {:type :process :args ["bash"]})
+  => map?)
 
 ^{:refer std.concurrent.relay/relay :added "3.0"}
-(fact "creates and starts a relay")
+(fact "creates and starts a relay"
+  (relay {:type :process :args ["bash"]})
+  => map?)
 
 ^{:refer std.concurrent.relay/send :added "3.0"}
-(fact "sends command to relay")
+(fact "sends command to relay"
+  (let [r (relay {:type :process :args ["bash"]})]
+    (try
+      (-> @(send r "echo hello") :output)
+      => "hello\n"
+      (finally
+        (relay-stop r)))))
 
 (comment
   (./import)

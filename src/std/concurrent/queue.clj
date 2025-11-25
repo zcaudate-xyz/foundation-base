@@ -202,7 +202,7 @@
   "takes from the front of the queue"
   {:added "3.0"}
   ([^BlockingDeque queue]
-   (take-first queue))
+   (.takeFirst queue))
   ([^BlockingDeque queue timeout]
    (take-first queue timeout :ms))
   ([^BlockingDeque queue timeout timeunit]

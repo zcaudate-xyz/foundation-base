@@ -64,7 +64,12 @@
 
 ^{:refer std.concurrent.pool/pool:dispose-over :added "3.0"
   :use [|pool|]}
-(fact "disposes if idle and busy are over size limit")
+(fact "disposes if idle and busy are over size limit"
+
+  (let [[id _] (pool:acquire |pool|)]
+    (pool:release |pool| id)
+    (pool:dispose-over |pool| id))
+  => string?)
 
 ^{:refer std.concurrent.pool/pool:release :added "3.0"
   :use [|pool|]}
@@ -97,16 +102,31 @@
   => 3)
 
 ^{:refer std.concurrent.pool/pool-handler :added "3.0"}
-(fact "creates a handler loop for cleanup")
+(fact "creates a handler loop for cleanup"
+  (pool-handler {:state (atom {:running true})
+                 :cleanup (fn [])
+                 :poll 100}))
 
-^{:refer std.concurrent.pool/pool:started? :added "3.0"}
-(fact "checks if pool has started")
+^{:refer std.concurrent.pool/pool:started? :added "3.0"
+  :use [|pool|]}
+(fact "checks if pool has started"
 
-^{:refer std.concurrent.pool/pool:stopped? :added "3.0"}
-(fact "checks if pool has stopped")
+  (pool:started? |pool|)
+  => true)
 
-^{:refer std.concurrent.pool/pool:start :added "3.0"}
-(fact "starts the pool")
+^{:refer std.concurrent.pool/pool:stopped? :added "3.0"
+  :use [|pool|]}
+(fact "checks if pool has stopped"
+
+  (pool:stopped? |pool|)
+  => false)
+
+^{:refer std.concurrent.pool/pool:start :added "3.0"
+  :use [|pool|]}
+(fact "starts the pool"
+
+  (pool:start |pool|)
+  => pool:started?)
 
 ^{:refer std.concurrent.pool/pool:stop :added "3.0"
   :use [|pool|]}
