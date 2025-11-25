@@ -1,6 +1,6 @@
 # MCP Client Guidelines for `code.ai.server`
 
-This document provides guidelines for Model Context Protocol (MCP) clients interfacing with `code.ai.server`. It details the available tools, their expected inputs, and usage examples.
+This document provides guidelines for Model Context Protocol (MCP) clients interfacing with `code.ai.server`. It details the available tools, their expected inputs, usage examples, and strategic workflows for AI agents.
 
 ## Overview
 
@@ -13,6 +13,46 @@ The `code.ai.server` exposes a set of tools to interact with the Code AI infrast
 - Documentation management (`code.doc`)
 
 All tools follow the MCP tool schema. Many tools expect arguments encoded as EDN strings to support complex Clojure data structures.
+
+## Workflows & Strategy
+
+To make the most of the MCP offerings, an AI agent should utilize these tools in strategic loops depending on the task at hand.
+
+### 1. Code Exploration & Analysis
+**Goal:** Understand the codebase structure, available variables, and dependencies before making changes.
+
+*   **Step 1: Discover Structure.** Use `code-manage` with tasks like `vars`, `analyse`, or `extract` to see what exists in a namespace.
+    *   *Tool:* `code-manage` | *Task:* `vars` | *Args:* `"[target.namespace]"`
+*   **Step 2: Search Content.** Use `grep` to find specific string occurrences or usages.
+    *   *Tool:* `code-manage` | *Task:* `grep` | *Args:* `"[target.namespace] {:query \"pattern\"}"`
+*   **Step 3: Analyze Dependencies.** Use `find-usages` to see where a function is called.
+    *   *Tool:* `code-manage` | *Task:* `find-usages` | *Args:* `"[target.namespace] {:var target/function}"`
+
+### 2. Code Modification & Healing
+**Goal:** Safely modify code and ensure it is syntactically correct and import-resolved.
+
+*   **Step 1: Heal Code.** After writing or modifying a file, run `code-heal` to automatically fix missing imports or namespace declarations.
+    *   *Tool:* `code-heal` | *Ns:* `"target.namespace"`
+*   **Step 2: Verify Structure.** Run `analyse` to check for compilation errors or warnings.
+    *   *Tool:* `code-manage` | *Task:* `analyse` | *Args:* `"[target.namespace]"`
+
+### 3. Testing & Verification
+**Goal:** Ensure changes do not break existing functionality.
+
+*   **Step 1: targeted Testing.** Run tests specifically for the modified namespace to save time.
+    *   *Tool:* `code-test` | *Target:* `test` | *Args:* `"{:only target.namespace}"`
+*   **Step 2: Full Suite (Optional).** Run a broader set of tests if the change is fundamental.
+    *   *Tool:* `code-test` | *Target:* `test`
+
+### 4. Cross-Language Development
+**Goal:** Work with `std.lang` to generate code for other languages (JS, Lua, Python, etc.).
+
+*   **Step 1: Introspect.** Check available languages and modules.
+    *   *Tool:* `std-lang-list`
+*   **Step 2: Transpile & Verify.** Emit code to verify the DSL translation is correct before committing.
+    *   *Tool:* `lang-emit-as` | *Type:* `"js"` | *Code:* `"(+ 1 2)"`
+
+---
 
 ## Available Tools
 
