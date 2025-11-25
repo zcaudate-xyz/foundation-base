@@ -1,7 +1,8 @@
 (ns std.task.process
   (:require [std.task.bulk :as bulk]
             [std.lib :as h]
-            [std.lib.result :as res]))
+            [std.lib.result :as res]
+            [std.lib.future :as f]))
 
 (def ^:dynamic *interrupt* false)
 
@@ -98,10 +99,14 @@
            output-fn (or (-> task :item :output) identity)
            input  (pre-fn input)
            result (apply f input params lookup env args)
-           result (post-fn result)]
-       (if (:bulk params)
-         [input (res/->result input result)]
-         (output-fn result))))))
+           process-fn (fn [result]
+                        (let [result (post-fn result)]
+                          (if (:bulk params)
+                            [input (res/->result input result)]
+                            (output-fn result))))]
+       (if (f/future? result)
+         (f/on:success result process-fn)
+         (process-fn result))))))
 
 (defn wrap-input
   "enables execution of task with single or multiple inputs"
@@ -135,20 +140,20 @@
    => '[std.task.process-test {:bulk true} {} {}]"
   {:added "3.0"}
   ([task]
-   (let [input-fn (-> task :construct :input)]
+   (let [input-fn (or (-> task :construct :input) (constantly nil))]
      (task-inputs task (input-fn task) task)))
   ([task input]
-   (let [input-fn (-> task :construct :input)
+   (let [input-fn (or (-> task :construct :input) (constantly nil))
          [input params] (cond (map? input)
                               [(input-fn task) input]
 
                               :else [input {}])]
      (task-inputs task input params)))
   ([task input params]
-   (let [env-fn (-> task :construct :env)]
+   (let [env-fn (or (-> task :construct :env) (constantly {}))]
      (task-inputs task input params (env-fn (merge task params)))))
   ([task input params env]
-   (let [lookup-fn (-> task :construct :lookup)]
+   (let [lookup-fn (or (-> task :construct :lookup) (constantly {}))]
      (task-inputs task input params (lookup-fn task (merge env params)) env)))
   ([task input params lookup env]
    [input params lookup env]))
@@ -178,4 +183,7 @@
          result (apply f input params lookup env func-args)]
      (alter-var-root #'*interrupt*
                      (fn [_] false))
-     result)))
+     (if (and (f/future? result)
+              (not (:async params)))
+       @result
+       result))))

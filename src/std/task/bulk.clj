@@ -2,7 +2,8 @@
   (:require [std.print :as print]
             [std.string :as str]
             [std.lib :as h]
-            [std.lib.result :as res]))
+            [std.lib.result :as res]
+            [std.lib.future :as f]))
 
 (defn bulk-display
   "constructs bulk display options"
@@ -24,7 +25,8 @@
     {:keys [idx total input output display display-fn]}
     {:keys [print] :as params} lookup env args]
    (let [start        (System/currentTimeMillis)
-         [key result] (try (apply f input params lookup env args)
+         [key result] (try (let [res (apply f input params lookup env args)]
+                             (if (f/future? res) @res res))
                            (catch Exception e
                              (print/println ">>" (.getMessage e))
                              (let [end   (System/currentTimeMillis)]
@@ -48,32 +50,40 @@
   "bulk operation processing in parallel"
   {:added "3.0"}
   ([f inputs {:keys [idxs] :as context} params lookup env args]
-   (->> (pmap (fn [idx input]
-                (let [output  (volatile! nil)
-                      out-str (h/with-out-str
-                                (bulk-process-item f (assoc context
-                                                            :idx idx
-                                                            :input input
-                                                            :output output)
-                                                   params lookup env args))]
-                  [@output out-str]))
-              idxs
-              inputs)
-        (mapv (fn [[output out-str]]
-                (print/print out-str)
-                output)))))
+   (let [futures (mapv (fn [idx input]
+                         (f/future:run
+                          (fn []
+                            (let [output  (volatile! nil)
+                                  out-str (h/with-out-str
+                                            (bulk-process-item f (assoc context
+                                                                        :idx idx
+                                                                        :input input
+                                                                        :output output)
+                                                               params lookup env args))]
+                              [@output out-str]))
+                          {:pool :pooled}))
+                       idxs
+                       inputs)]
+     (f/on:all futures
+               (fn [results]
+                 (mapv (fn [[output out-str]]
+                         (print/print out-str)
+                         output)
+                       results))))))
 
 (defn bulk-items-single
   "bulk operation processing in single"
   {:added "3.0"}
   ([f inputs {:keys [idxs] :as context} params lookup env args]
-   (mapv (fn [idx input]
-           (bulk-process-item f (assoc context
-                                       :idx idx
-                                       :input input)
-                              params lookup env args))
-         idxs
-         inputs)))
+   (f/future:call
+    (fn []
+      (mapv (fn [idx input]
+              (bulk-process-item f (assoc context
+                                          :idx idx
+                                          :input input)
+                                 params lookup env args))
+            idxs
+            inputs)))))
 
 (defn bulk-items
   "processes each item given a input"
@@ -82,7 +92,7 @@
    (when (:item print)
      (print/print "\n")
      (print/print-subtitle (format "ITEMS (%s)" (count inputs))))
-   (cond (empty? inputs) []
+   (cond (empty? inputs) (f/completed [])
 
          :else
          (let [inputs     (if random (shuffle inputs) inputs)
@@ -172,9 +182,12 @@
                  format-fns (-> task :result :format)
                  sort-by-fn (-> task :result :sort-by)
                  outputs  (mapv (fn [[key {:keys [id data] :as result}]]
-                                  (->> key-fns
-                                       (map (fn [[k f]] [k (f data)]))
-                                       (into result)))
+                                  (let [result (if (map? data)
+                                                 (merge result data)
+                                                 result)]
+                                    (->> key-fns
+                                         (map (fn [[k f]] [k (f data)]))
+                                         (into result))))
                                 results)
                  outputs  (if order-by
                             (clojure.core/sort-by order-by outputs)
@@ -278,17 +291,19 @@
                                            (title params env)
                                            title)))
          start     (h/time-ms)
-         items     (bulk-items task f inputs params lookup env args)
-         elapsed   (h/elapsed-ms start)
-         warnings  (bulk-warnings params items)
-         errors    (bulk-errors params items)
-         results   (bulk-results task params items)
-         summary   (bulk-summary task params items results warnings errors elapsed)]
-     (bulk-package task
-                   {:items items
-                    :warnings warnings
-                    :errors errors
-                    :results results
-                    :summary summary}
-                   (or return :results)
-                   package))))
+         items     (bulk-items task f inputs params lookup env args)]
+     (f/on:success items
+                   (fn [items]
+                     (let [elapsed   (h/elapsed-ms start)
+                           warnings  (bulk-warnings params items)
+                           errors    (bulk-errors params items)
+                           results   (bulk-results task params items)
+                           summary   (bulk-summary task params items results warnings errors elapsed)]
+                       (bulk-package task
+                                     {:items items
+                                      :warnings warnings
+                                      :errors errors
+                                      :results results
+                                      :summary summary}
+                                     (or return :results)
+                                     package)))))))
