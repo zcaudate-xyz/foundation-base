@@ -36,12 +36,12 @@
                     @*output*))
 
 ^{:refer std.dispatch.board/get-ticket :added "3.0"}
-(fact "gets a ticket")
+(fact "gets a ticket"
+  (get-ticket) => integer?)
 
 ^{:refer std.dispatch.board/new-board :added "3.0"}
 (fact "creates a new board"
-
-  (new-board {}))
+  @(new-board {}) => (contains {:return map? :submitted cc/queue?}))
 
 ^{:refer std.dispatch.board/submit-ticket :added "3.0"}
 (fact "adds ticket to the board"
@@ -104,10 +104,16 @@
   => (contains {:groups ["a"], :entry {:id "a"}, :ticket "t0"}))
 
 ^{:refer std.dispatch.board/poll-dispatch :added "3.0"}
-(fact "polls the executor for more work")
+(fact "polls the executor for more work"
+  (def -ex- (doto (create-dispatch +test-config+)
+              (start-dispatch)
+              (submit-board {:id "a"} "t0")))
+  (poll-dispatch -ex- ["a"]) => (contains [h/future?]))
 
 ^{:refer std.dispatch.board/submit-dispatch :added "3.0"}
-(fact "submits to the board executor")
+(fact "submits to the board executor"
+  (def -ex- (doto (create-dispatch +test-config+) (start-dispatch)))
+  (submit-dispatch -ex- {:id "a"}) => h/future?)
 
 ^{:refer std.dispatch.board/start-dispatch :added "3.0"}
 (fact "starts the board executor"
@@ -139,7 +145,10 @@
       :in-any-order))
 
 ^{:refer std.dispatch.board/stop-dispatch :added "3.0"}
-(fact "stops the board executor")
+(fact "stops the board executor"
+  (def -ex- (doto (create-dispatch +test-config+) (start-dispatch)))
+  (stop-dispatch -ex-))
 
 ^{:refer std.dispatch.board/create-dispatch :added "3.0"}
-(fact "creates the board executor")
+(fact "creates the board executor"
+  (create-dispatch +test-config+) => map?)

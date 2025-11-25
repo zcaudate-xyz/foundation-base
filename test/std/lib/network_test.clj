@@ -35,19 +35,36 @@
 (fact "creates a new socket"
 
   (h/suppress
-   (with-open [s ^java.net.Socket (socket 51311)] s)))
+   (with-open [s ^java.net.Socket (socket 51311)] s))
+  => (any nil? java.net.Socket))
 
 ^{:refer std.lib.network/socket:port :added "3.0"}
-(fact "gets the remote socket port")
+(fact "gets the remote socket port"
+  (with-open [s (java.net.ServerSocket. 0)]
+    (with-open [c (socket (.getLocalPort s))]
+      (socket:port c)))
+  => number?)
 
 ^{:refer std.lib.network/socket:local-port :added "3.0"}
-(fact "gets the local socket port")
+(fact "gets the local socket port"
+  (with-open [s (java.net.ServerSocket. 0)]
+    (with-open [c (socket (.getLocalPort s))]
+      (socket:local-port c)))
+  => number?)
 
 ^{:refer std.lib.network/socket:address :added "3.0"}
-(fact "gets the remote socket address")
+(fact "gets the remote socket address"
+  (with-open [s (java.net.ServerSocket. 0)]
+    (with-open [c (socket (.getLocalPort s))]
+      (socket:address c)))
+  => java.net.InetAddress)
 
 ^{:refer std.lib.network/socket:local-address :added "3.0"}
-(fact "getst the local socket address")
+(fact "getst the local socket address"
+  (with-open [s (java.net.ServerSocket. 0)]
+    (with-open [c (socket (.getLocalPort s))]
+      (socket:local-address c)))
+  => java.net.InetAddress)
 
 ^{:refer std.lib.network/port:check-available :added "4.0"}
 (fact "check that port is available"

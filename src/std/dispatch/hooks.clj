@@ -10,7 +10,10 @@
     :queued   (atom 0)
     :process  (atom 0)
     :complete (atom 0)
-    :error    (atom 0)}))
+    :error    (atom 0)
+    :poll     (atom 0)
+    :skip     (atom 0)
+    :batch    (atom 0)}))
 
 (defn inc-counter
   "increment the executor counter"
@@ -108,4 +111,3 @@
   {:added "3.0"}
   ([dispatch]
    (handle-entry dispatch :on-startup)))
-

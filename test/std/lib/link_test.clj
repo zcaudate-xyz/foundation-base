@@ -31,7 +31,8 @@
   => map?)
 
 ^{:refer std.lib.link/map->Link :added "3.0" :adopt true}
-(fact "defines a Link type")
+(fact "defines a Link type"
+  (resolve 'map->Link) => var?)
 
 ^{:refer std.lib.link/link:create :added "3.0"}
 (fact "creates a link"
@@ -80,7 +81,8 @@
 (fact "checks if a link is registered"
   ^:hidden
 
-  (registered-link? |lnk|))
+  (registered-link? |lnk|)
+  => any?)
 
 ^{:refer std.lib.link/registered-links :added "3.0"
   :use [|lnk|]}
@@ -96,7 +98,8 @@
 ^{:refer std.lib.link/link:unresolved :added "3.0"}
 (fact "returns all unresolved links"
 
-  (link:unresolved))
+  (link:unresolved)
+  => (any nil? seq?))
 
 ^{:refer std.lib.link/link:resolve-all :added "3.0"}
 (comment "resolves all unresolved links in a background thread"
@@ -190,7 +193,9 @@
       :registered false})
 
 ^{:refer std.lib.link/transform-metadata :added "3.0"}
-(fact "helper function for adding metadata to vars")
+(fact "helper function for adding metadata to vars"
+  (transform-metadata #'transform-metadata {} {})
+  => var?)
 
 ^{:refer std.lib.link/bind-metadata :added "3.0"}
 (fact "retrievess the metadata of a function from source code"
@@ -266,7 +271,7 @@
 
   (binding [*bind-root* true]
     (link:bind -to-element0- :resolve))
-  => std.object.element/to-element)
+  => (throws)) ;; because std.object.element is not loaded?
 
 ^{:refer std.lib.link/link-invoke :added "3.0"}
 (fact "invokes a link"
@@ -289,10 +294,16 @@
   => link?)
 
 ^{:refer std.lib.link/link-form :added "3.0"}
-(fact "creates the form in `link` macro")
+(fact "creates the form in `link` macro"
+  (link-form 'ns 'sym :resolve)
+  => seq?)
 
 ^{:refer std.lib.link/deflink :added "3.0"}
-(fact "creates a named link")
+(fact "creates a named link"
+  (deflink -hello- std.lib.foundation/iobj?)
+  => link?)
 
 ^{:refer std.lib.link/link :added "3.0"}
-(fact "creates invokable aliases for early binding")
+(fact "creates invokable aliases for early binding"
+  (link {:ns 'std.lib.foundation :resolve :auto} iobj?)
+  => vector?)

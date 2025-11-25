@@ -100,8 +100,11 @@
   (dependents-ordered |ctx| :b)
   => [:a :b])
 
-^{:refer std.lib.deps/dependents-refresh :added "3.0"}
-(fact "refresh all dependents")
+^{:refer std.lib.deps/dependents-refresh :added "3.0"
+  :use [|ctx|]}
+(fact "refresh all dependents"
+  (first (dependents-refresh |ctx| :c))
+  => (contains {:b #{} :c #{}}))
 
 ^{:refer std.lib.deps/unload-entry :added "3.0"
   :use [|ctx|]}

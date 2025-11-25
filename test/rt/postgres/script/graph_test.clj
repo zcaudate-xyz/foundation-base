@@ -123,7 +123,11 @@
 
 
 ^{:refer rt.postgres.script.graph/g:where :added "4.0"}
-(fact "constructs the where clause")
+(fact "constructs the where clause"
+  (pg/g:where scratch/Task {:name "foo"})
+  => string?)
 
 ^{:refer rt.postgres.script.graph/g:exists :added "4.0"}
-(fact "checks for existence")
+(fact "checks for existence"
+  (pg/g:exists scratch/Task {:where {:name "foo"}})
+  => string?)

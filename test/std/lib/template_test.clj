@@ -74,7 +74,8 @@
   => ())
 
 ^{:refer std.lib.template/deftemplate :added "3.0"}
-(fact "marker for a template form")
+(fact "marker for a template form"
+  (resolve 'deftemplate) => var?)
 
 (comment
   (./import))

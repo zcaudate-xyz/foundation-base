@@ -70,7 +70,13 @@
       {:a {:b 1, :c 2, :d 3}}])
 
 ^{:refer std.lib.atom/atom-reduce-fn :added "3.0"}
-(fact "helper function for mutations on atom")
+(fact "helper function for mutations on atom"
+
+  (atom-reduce-fn {}
+                  (fn [v old] (+ v (or old 0)))
+                  (fn [path v old new] [path v old new])
+                  [[[:a] 1]])
+  => '[[[[:a] 1 nil 1]] {:a 1}])
 
 ^{:refer std.lib.atom/atom-set-fn :added "4.0"}
 (fact "constructs the output and next state for a set operation"

@@ -41,6 +41,8 @@
                                    #{"status"}
                                    #{"name"}
                                    #{"cache_id"}
+                                   #{"op_created"}
+                                   #{"op_updated"}
                                    #{"time_created"}
                                    #{"time_updated"}])
                          :from rt.postgres.script.scratch/Task
@@ -50,7 +52,11 @@
                     :clause {:id <%>},
                     :form [:with j-ret :as
                            [:select
-                            (--- [#{"id"} #{"time_created"} #{"time_updated"}])
+                            (--- [#{"id"}
+                                  #{"op_created"}
+                                  #{"op_updated"}
+                                  #{"time_created"}
+                                  #{"time_updated"}])
                             :from rt.postgres.script.scratch/TaskCache
                             \\ :where {"id" [:eq <%>]}]
                            \\ :select (jsonb-agg j-ret) :from j-ret]},

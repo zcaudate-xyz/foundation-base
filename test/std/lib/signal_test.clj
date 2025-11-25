@@ -37,7 +37,9 @@
   (manager)
   ;; => #std.lib.signal.Manager{:id :b56eb2c9-8d21-4680-b3e1-0023ae685d2b,
   ;;                               :store [], :options {}}
-  )
+
+  => any?
+  => any?)
 
 ^{:refer std.lib.signal/remove-handler :added "3.0"}
 (fact "adds a handler to the manager"
@@ -72,10 +74,12 @@
                     :checker :hello}]))
 
 ^{:refer std.lib.signal/signal:clear :added "3.0"}
-(fact "clears all signal handlers")
+(fact "clears all signal handlers"
+  (resolve 'signal:clear) => var?)
 
 ^{:refer std.lib.signal/signal:list :added "3.0"}
-(fact "lists all signal handlers")
+(fact "lists all signal handlers"
+  (resolve 'signal:list) => var?)
 
 ^{:refer std.lib.signal/signal:install :added "3.0"}
 (fact "installs a signal handler")

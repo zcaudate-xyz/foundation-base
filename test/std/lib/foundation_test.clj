@@ -83,7 +83,9 @@
   => #uuid "00000000-0000-0000-0000-000000000000")
 
 ^{:refer std.lib.foundation/uuid-nil :added "4.0"}
-(fact "constructs a nil uuid")
+(fact "constructs a nil uuid"
+  (uuid-nil)
+  => #uuid "00000000-0000-0000-0000-000000000000")
 
 ^{:refer std.lib.foundation/instant :added "3.0"}
 (fact "returns a `java.util.Date` object"
@@ -217,8 +219,8 @@
 ^{:refer std.lib.foundation/code-ns :added "3.0"}
 (fact "returns the current namespace the code is in"
 
-  (code-ns)
-  => 'std.lib.foundation_test)
+  (code-ns)  
+  => 'std.lib.foundation-test)
 
 ^{:refer std.lib.foundation/code-line :added "3.0"}
 (fact "gets the current code line"
@@ -267,12 +269,14 @@
   (declare -lost-)
 
   (unbound? -lost-)
-  = true)
+  => true)
 
 ^{:refer std.lib.foundation/set! :added "3.0"}
 (fact "sets a var without changing current meta"
 
-  (std.lib.foundation/set! -lost- 1))
+  (def -lost- 1)
+  (std.lib.foundation/set! -lost- 2)
+  -lost- => 2)
 
 ^{:refer std.lib.foundation/suppress :added "3.0"}
 (fact "Suppresses any errors thrown in the body."
@@ -458,7 +462,8 @@
   => (hash-id "1"))
 
 ^{:refer std.lib.foundation/hash-code :added "3.0"}
-(fact "returns the hash code of an object")
+(fact "returns the hash code of an object"
+  (hash-code "hello") => number?)
 
 ^{:refer std.lib.foundation/aget :added "3.0"}
 (fact "typesafe aget"
@@ -474,24 +479,49 @@
   => "+test!")
 
 ^{:refer std.lib.foundation/intern-var :added "3.0"}
-(fact "interns a var in sym")
+(fact "interns a var in sym"
+
+  (intern-var (symbol "std.lib.foundation-test/hello") "world")
+  (resolve 'hello) => #'hello)
 
 ^{:refer std.lib.foundation/intern-form :added "3.0"}
 (fact "creates base form for `intern-in` and `intern-all`"
-
-  (intern-form 'std.lib 'std.lib.foundation/unfold))
+  ^:hidden
+  
+  (intern-form 'std.lib 'std.lib.foundation/unfold)
+  => '(std.lib.foundation/intern-var
+       'std.lib
+       'unfold
+       #'std.lib.foundation/unfold
+       'nil))
 
 ^{:refer std.lib.foundation/intern-in :added "3.0"}
-(fact "adds a function to current")
+(fact "adds a function to current"
+  ^:hidden
+  
+  (intern-in std.lib.foundation/T)
+  => #'T)
 
 ^{:refer std.lib.foundation/intern-all :added "3.0"}
-(fact "adds a namespace to current")
+(fact "adds a namespace to current"
+  ^:hidden
+  
+  (intern-all std.lib.foundation)
+  => vector?)
 
 ^{:refer std.lib.foundation/with:template-meta :added "3.0"}
-(fact "binds the template meta (for testing purposes)")
+(fact "binds the template meta (for testing purposes)"
+  ^:hidden
+  
+  (with:template-meta {:a 1} (template-meta))
+  => {:a 1})
 
 ^{:refer std.lib.foundation/template-meta :added "3.0"}
-(fact "returns the intern template meta")
+(fact "returns the intern template meta"
+  ^:hidden
+  
+  (template-meta)
+  => nil?)
 
 ^{:refer std.lib.foundation/template-vars :added "3.0"
   :style/indent 1}
@@ -529,10 +559,15 @@
   => ["clojure.core/-" [4 5 6] {:meta "meta"}])
 
 ^{:refer std.lib.foundation/template-bulk :added "4.0"}
-(fact "template-entries but for heavy usage")
+(fact "template-entries but for heavy usage"
+  (template-bulk [tmpl-fn {:meta "meta"}]
+                 [[+ {:opts [1 2 3]}]])
+  => vector?)
 
 ^{:refer std.lib.foundation/template-ensure :added "4.0"}
-(fact "ensures that the templated entries are the same as the input")
+(fact "ensures that the templated entries are the same as the input"
+  (template-ensure {} [])
+  => nil)
 
 ^{:refer std.lib.foundation/wrapped :added "4.0"}
 (fact "object to display shell result"
@@ -559,4 +594,5 @@
 (fact "defs multiple vars"
   ^:hidden
   
-  (def.m [-a- -b-] [1 2]))
+  (def.m [-a- -b-] [1 2])
+  [-a- -b-] => [1 2])

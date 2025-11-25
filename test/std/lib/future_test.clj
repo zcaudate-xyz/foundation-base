@@ -1,7 +1,7 @@
 (ns std.lib.future-test
   (:use code.test)
-  (:require [std.lib.future :refer :all])
-  (:refer-clojure :exclude [future future?]))
+  (:require [std.lib.future :as f :refer :all])
+  (:refer-clojure :exclude [future future? catch]))
 
 ^{:refer std.lib.future/completed :added "3.0"}
 (fact "creates a completed stage" ^:hidden
@@ -70,7 +70,8 @@
               {:timeout 10
                :default :ok
                :delay 100
-               :pool :async}))
+               :pool :async})
+  => any?)
 
 ^{:refer std.lib.future/future:now :added "3.0"}
 (fact "gets the value of a future at the current moment" ^:hidden
@@ -101,7 +102,9 @@
   => (throws))
 
 ^{:refer std.lib.future/future:done :added "3.0"}
-(fact "helper macro for status functions")
+(fact "helper macro for status functions"
+  (future:done (completed 1) true)
+  => true)
 
 ^{:refer std.lib.future/future:cancelled? :added "3.0"}
 (fact "checks if future has been cancelled" ^:hidden
@@ -156,7 +159,11 @@
 
   (-> (future:run (fn [] (throw (ex-info "Error" {}))))
       (future:wait)
-      (future:success?)))
+      (future:success?))
+  => false
+
+  (future:complete? (completed 1))
+  => true)
 
 ^{:refer std.lib.future/future:force :added "3.0"}
 (fact "forces a value or exception as completed future" ^:hidden
@@ -177,7 +184,11 @@
   => true)
 
 ^{:refer std.lib.future/future:obtrude :added "4.0"}
-(fact "like force but uses obtrude and obtrudeException")
+(fact "like force but uses obtrude and obtrudeException"
+  (-> (future:run (fn [] (Thread/sleep 1000)))
+      (future:obtrude 10)
+      (future:value))
+  => 10)
 
 ^{:refer std.lib.future/future:dependents :added "3.0"}
 (fact "returns number of steps waiting on current result" ^:hidden
@@ -206,9 +217,11 @@
 ^{:refer std.lib.future/on:timeout :added "3.0"}
 (fact "processes a function on timeout" ^:hidden
 
-  @(-> (future {:timeout 10} (Thread/sleep 100))
-       (future:wait)
-       (on:timeout (fn [_] :timeout)))
+  (-> (future (Thread/sleep 100))
+      (future:timeout 10)
+      (on:timeout (fn [_] :timeout))
+      (future:wait)
+      (future:value))
   => :timeout
 
   @(-> (future {:timeout 10} (Thread/sleep 100))
@@ -290,7 +303,7 @@
 
   @(-> (future (throw (ex-info "Error" {:data 1})))
        (then [a] (+ a 1 2 3))
-       (std.lib.future/catch [ex] (ex-data ex)))
+       (f/catch [ex] (ex-data ex)))
   => {:data 1}
 
   @(-> (future (+ 1 2 3))
@@ -301,19 +314,21 @@
 (fact "shortcut for :on/exception" ^:hidden
 
   @(-> (future (+ 2 3))
-       (std.lib.future/catch [e] e))
+       (f/catch [e] e))
   => 5
 
   @(-> (future (throw (ex-info "" {:a 1})))
-       (std.lib.future/catch [e] (ex-data e)))
+       (f/catch [e] (ex-data e)))
   => {:a 1})
 
 ^{:refer std.lib.future/fulfil :added "3.0"}
 (fact "fulfils the return with a function"
 
   (fulfil (incomplete) (fn [] (+ 1 2 3)))
+  => future?
 
-  (fulfil (incomplete) (fn [] (throw (ex-info "Hello" {})))))
+  (fulfil (incomplete) (fn [] (throw (ex-info "Hello" {}))))
+  => future?)
 
 ^{:refer std.lib.future/future:result :added "3.0"}
 (fact "gets the result of the future"
@@ -327,7 +342,9 @@
                 :exception Throwable}))
 
 ^{:refer std.lib.future/future:status :added "3.0"}
-(fact "retrieves a status of either `:success`, `:error` or `waiting`")
+(fact "retrieves a status of either `:success`, `:error` or `waiting`"
+  (future:status (completed 1))
+  => :success)
 
 ^{:refer std.lib.future/future:chain :added "3.0"}
 (fact "chains a set of functions"

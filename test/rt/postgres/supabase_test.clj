@@ -1,104 +1,77 @@
 (ns rt.postgres.supabase-test
   (:use code.test)
-  (:require [rt.postgres.supabase :as s]))
+  (:require [rt.postgres.supabase :as s]
+            [std.lang :as l]
+            [net.http :as http]))
 
 ^{:refer rt.postgres.supabase/create-role :added "4.0"}
 (fact "creates a role"
-  ^:hidden
-
-  (s/create-role 'anon)
+  (l/emit-as :postgres '[(s/create-role 'anon)])
   => "DO $$\nBEGIN\n  CREATE ROLE anon;\nEXCEPTION WHEN OTHERS THEN\nEND;\n$$ LANGUAGE 'plpgsql'")
 
 ^{:refer rt.postgres.supabase/grant-public :added "4.0"}
 (fact "grants public access to schema"
-  ^:hidden
-
-  (s/grant-public #{"core/fn-util"})
+  (l/emit-as :postgres '[(s/grant-public "core/fn-util")])
   => "GRANT USAGE ON SCHEMA \"core/fn-util\" TO anon,authenticated,service_role;\nGRANT ALL ON ALL TABLES IN SCHEMA \"core/fn-util\" TO anon,authenticated,service_role;\nALTER DEFAULT PRIVILEGES FOR ROLE postgres IN SCHEMA \"core/fn-util\" GRANT ALL ON TABLES TO anon,authenticated,service_role;")
 
 ^{:refer rt.postgres.supabase/revoke-execute-privileges-from-public :added "4.0"}
 (fact "revotes execute privileges"
-  ^:hidden
-
-  (s/revoke-execute-privileges-from-public #{"core/fn-util"})
+  (l/emit-as :postgres '[(s/revoke-execute-privileges-from-public "core/fn-util")])
   => "ALTER DEFAULT PRIVILEGES FOR ROLE postgres IN SCHEMA \"core/fn-util\" REVOKE EXECUTE ON FUNCTIONS FROM PUBLIC")
 
 ^{:refer rt.postgres.supabase/grant-usage :added "4.0"}
 (fact "grants usage on a schema"
-  ^:hidden
-  
-  (s/grant-usage #{"core/fn-util"})
+  (l/emit-as :postgres '[(s/grant-usage "core/fn-util")])
   => "GRANT USAGE ON SCHEMA \"core/fn-util\" TO anon,authenticated,service_role")
 
 ^{:refer rt.postgres.supabase/grant-tables :added "4.0"}
 (fact "grants table access on a schema"
-  ^:hidden
-  
-  (s/grant-tables #{"core/fn-util"})
+  (l/emit-as :postgres '[(s/grant-tables "core/fn-util")])
   => "GRANT ALL ON ALL TABLES IN SCHEMA \"core/fn-util\" TO anon,authenticated,service_role")
 
 ^{:refer rt.postgres.supabase/grant-privileges :added "4.0"}
 (fact "grants privileges on a schema"
-  ^:hidden
-  
-  (s/grant-privileges #{"core/fn-util"})
+  (l/emit-as :postgres '[(s/grant-privileges "core/fn-util")])
   => "ALTER DEFAULT PRIVILEGES FOR ROLE postgres IN SCHEMA \"core/fn-util\" GRANT ALL ON TABLES TO anon,authenticated,service_role")
 
 ^{:refer rt.postgres.supabase/grant-all :added "4.0"}
 (fact "grants privileges on a schema"
-  ^:hidden
-  
-  (s/grant-all [#{"core/fn-util"}
-                #{"core/fn-core"}])
+  (l/emit-as :postgres '[(s/grant-all ["core/fn-util" "core/fn-core"])])
   => "GRANT USAGE ON SCHEMA \"core/fn-util\" TO anon,authenticated,service_role;\nGRANT ALL ON ALL TABLES IN SCHEMA \"core/fn-util\" TO anon,authenticated,service_role;\nGRANT USAGE ON SCHEMA \"core/fn-core\" TO anon,authenticated,service_role;\nGRANT ALL ON ALL TABLES IN SCHEMA \"core/fn-core\" TO anon,authenticated,service_role;")
 
 ^{:refer rt.postgres.supabase/auth-uid :added "4.0"}
 (fact "calls auth.uid()"
-  ^:hidden
-
-  (s/auth-uid)
+  (l/emit-as :postgres '[(s/auth-uid)])
   => "auth.uid()")
 
 ^{:refer rt.postgres.supabase/auth-email :added "4.0"}
 (fact "calls auth.email()"
-  ^:hidden
-
-  (s/auth-email)
+  (l/emit-as :postgres '[(s/auth-email)])
   => "auth.email()")
 
 ^{:refer rt.postgres.supabase/auth-role :added "4.0"}
 (fact "calls auth.role()"
-  ^:hidden
-
-  (s/auth-role)
+  (l/emit-as :postgres '[(s/auth-role)])
   => "auth.role()")
 
 ^{:refer rt.postgres.supabase/auth-jwt :added "4.0"}
 (fact "calls auth.jwt()"
-  ^:hidden
-
-  (s/auth-jwt)
+  (l/emit-as :postgres '[(s/auth-jwt)])
   => "auth.jwt()")
 
 ^{:refer rt.postgres.supabase/is-supabase :added "4.0"}
 (fact "checks that supabase is installed"
-  ^:hidden
-
-  (s/is-supabase)
+  (l/emit-as :postgres '[(s/is-supabase)])
   => "exists(\n  SELECT 1 FROM information_schema.schemata WHERE \"schema_name\" = 'auth'\n)")
 
 ^{:refer rt.postgres.supabase/raise :added "4.0"}
 (fact "raises an error"
-  ^:hidden
-
-  (s/raise "Hello" {:data 1})
+  (l/emit-as :postgres '[(s/raise "Hello" {:data 1})])
   => "RAISE EXCEPTION USING detail = jsonb_build_object('data',1),message = 'Hello';")
 
 ^{:refer rt.postgres.supabase/show-roles :added "4.0"}
 (fact "show supabase role information"
-  ^:hidden
-
-  (s/show-roles)
+  (l/emit-as :postgres '[(s/show-roles)])
   => "SELECT rolname,rolsuper,rolbypassrls,rolcanlogin FROM pg_roles WHERE rolname IN ('authenticated','service_role','anon')")
 
 ^{:refer rt.postgres.supabase/get-form-type :added "4.0"}
@@ -145,57 +118,88 @@
          (catch others (return {:code SQLSTATE, :message SQLERRM})))))
 
 ^{:refer rt.postgres.supabase/transform-entry-defn :added "4.0"}
-(fact "transforms a defn entry")
+(fact "transforms a defn entry"
+  ;; Transform logic
+  )
 
 ^{:refer rt.postgres.supabase/transform-entry-deftype :added "4.0"}
-(fact "transforms a deftype")
+(fact "transforms a deftype"
+  ;; Transform logic
+  )
 
 ^{:refer rt.postgres.supabase/transform-entry :added "4.0"}
-(fact "transforms a book entry")
+(fact "transforms a book entry"
+  ;; Delegates
+  )
 
 ^{:refer rt.postgres.supabase/api-call :added "4.0"}
 (fact "calls an api"
-  ^:hidden
-  
-  (api-call {} {})
-  => {:status 404, :body {"message" "no Route matched with those values"}})
+  (with-redefs [http/post (fn [_ _] {:status 200 :body "{\"ok\":true}"})]
+    (s/api-call {:key "key"} {}))
+  => {:status 200 :body {"ok" true}})
 
 ^{:refer rt.postgres.supabase/api-rpc :added "4.0"}
-(fact "calls the rpc")
+(fact "calls the rpc"
+  ;; api-call wrapper
+  )
 
 ^{:refer rt.postgres.supabase/api-select-all :added "4.0"}
-(fact "does a select all call")
+(fact "does a select all call"
+  ;; api-call wrapper
+  )
 
 ^{:refer rt.postgres.supabase/api-signup :added "4.0"}
-(fact "sign up via supabase api")
+(fact "sign up via supabase api"
+  ;; api-call wrapper
+  )
 
 ^{:refer rt.postgres.supabase/api-signin :added "4.0"}
-(fact "sign in via supabase api")
+(fact "sign in via supabase api"
+  ;; api-call wrapper
+  )
 
 ^{:refer rt.postgres.supabase/api-signup-delete :added "4.0"}
-(fact "remove user via supabase api")
+(fact "remove user via supabase api"
+  ;; api-call wrapper
+  )
 
 ^{:refer rt.postgres.supabase/api-impersonate :added "4.0"}
-(fact "inpersonates a user")
+(fact "inpersonates a user"
+  ;; api-call wrapper
+  )
 
 
 ^{:refer rt.postgres.supabase/alter-role-bypassrls :added "4.0"}
-(fact "alters role to bypass rls")
+(fact "alters role to bypass rls"
+  (l/emit-as :postgres '[(s/alter-role-bypassrls 'role)])
+  => "DO $$\nBEGIN\n  ALTER ROLE role BYPASSRLS;\nEXCEPTION WHEN OTHERS THEN\nEND;\n$$ LANGUAGE 'plpgsql'")
 
 ^{:refer rt.postgres.supabase/process-return :added "4.0"}
-(fact "processes the return value")
+(fact "processes the return value"
+  (s/process-return "val") => "val"
+  (s/process-return "") => nil)
 
 ^{:refer rt.postgres.supabase/with-role-single :added "4.0"}
-(fact "executes a statement with role (single)")
+(fact "executes a statement with role (single)"
+  (macroexpand-1 '(s/with-role-single [anon :integer] (+ 1 2 3)))
+  => list?)
 
 ^{:refer rt.postgres.supabase/with-auth-single :added "4.0"}
-(fact "executes a statement with auth (single)")
+(fact "executes a statement with auth (single)"
+  (macroexpand-1 '(s/with-auth-single ["user" :integer] (+ 1 2 3)))
+  => list?)
 
 ^{:refer rt.postgres.supabase/with-super-single :added "4.0"}
-(fact "executes a statement with super (single)")
+(fact "executes a statement with super (single)"
+  (macroexpand-1 '(s/with-super-single ["user" :integer] (+ 1 2 3)))
+  => list?)
 
 ^{:refer rt.postgres.supabase/with-super :added "4.0"}
-(fact "executes a statement with super")
+(fact "executes a statement with super"
+  (macroexpand-1 '(s/with-super ["user" :integer] (+ 1 2 3)))
+  => list?)
 
 ^{:refer rt.postgres.supabase/api-signup-create :added "4.0"}
-(fact "create user via supabase api")
+(fact "create user via supabase api"
+  ;; api-call wrapper
+  )

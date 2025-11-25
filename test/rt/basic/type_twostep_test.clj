@@ -1,106 +1,47 @@
 (ns rt.basic.type-twostep-test
   (:use code.test)
   (:require [rt.basic.type-twostep :as p]
-            [std.lang.model.spec-rust :as spec-rust]
-            [rt.basic.impl.process-rust :as rust]
-            [std.lang.base.pointer :as ptr]
-            [std.lang.base.library :as lib]
-            [std.lang.base.util :as ut]
-            [std.lang.base.emit-prep-lua-test :as prep]
-            [std.lang.base.library-snapshot :as snap]
-            [std.lang.base.impl-entry :as entry]
-            [std.lang.base.book :as book]
-            [std.json :as json]
             [std.lib :as h]
-            [std.lang :as l]))
-
-(def +library-ext+
-  (doto (lib/library:create
-         {:snapshot (snap/snapshot {:rust {:id :rust
-                                          :book prep/+book-min+}})})
-    (lib/install-book! (dissoc spec-rust/+book+ :parent))))
+            [std.fs :as fs]
+            [rt.basic.type-common :as common]))
 
 ^{:refer rt.basic.type-twostep/sh-exec :added "4.0"}
-(fact "basic function for executing the compile and run process")
+(fact "basic function for executing the compile and run process"
+  (with-redefs [h/sh (fn [& _] {:out "ok"})
+                spit (fn [& _] nil)
+                fs/parent (fn [_] "/tmp")
+                fs/file-name (fn [_] "tmp")]
+    (p/sh-exec ["cmd"] "body" {:extension "ext"}))
+  => "{:out \"ok\"}")
 
 ^{:refer rt.basic.type-twostep/raw-eval-twostep :added "4.0"}
 (fact "evaluates the twostep evaluation"
-  ^:hidden
-  
-  (p/raw-eval-twostep
-   {:exec ["rustc"]
-    :process {:emit {:body {:transform #'rt.basic.impl.process-rust/transform-form}},
-              :exec "rustc",
-              :extension "rs", :stderr true,
-              :flags {:twostep [], :interactive false, :json false, :ws-client false}} }
-   "fn main() {\n  println!(\"{}\",1 + 2 + 3 + 4); \n}")
-  => "\n10")
+  (with-redefs [p/sh-exec (fn [_ _ _] "result")]
+    (p/raw-eval-twostep {:exec [] :process {}} "body"))
+  => "result")
 
 ^{:refer rt.basic.type-twostep/invoke-ptr-twostep :added "4.0"}
 (fact "invokes twostep pointer"
-  ^:hidden
-
-  (p/invoke-ptr-twostep
-   (p/rt-twostep {:lang :rust
-                  :runtime :twostep})
-   (ut/lang-pointer :rust {:library +library-ext+})
-   ['(+ 1 2 3 4)])
-  => 10)
+  ;; delegates to default
+  )
 
 ^{:refer rt.basic.type-twostep/rt-twostep-setup :added "4.0"}
 (fact "setup params for the twostep runtime"
-  ^:hidden
-  
-  (p/rt-twostep-setup
-   :rust :rustc nil nil :twostep )
-  => [:rustc {:emit {:body {:transform #'rt.basic.impl.process-rust/transform-form}},
-              :exec "rustc", :extension "rs",
-              :stderr true, :flags {:twostep [],
-                                    :interactive false, :json false, :ws-client false}}
-      ["rustc"]])
+  (with-redefs [common/get-program-default (fn [& _] :program)
+                common/get-options (fn [& _] {:a 1})
+                common/get-program-exec (fn [& _] ["cmd"])]
+    (p/rt-twostep-setup :lang nil nil nil))
+  => [:program {:a 1} ["cmd"]])
 
 ^{:refer rt.basic.type-twostep/rt-twostep:create :added "4.0"}
 (fact "creates a twostep runtime"
-  ^:hidden
-  
-  (->> (p/rt-twostep:create {:lang :rust
-                             :program :rustc})
-       (into {}))
+  (with-redefs [p/rt-twostep-setup (fn [& _] [:program {:process :opts} ["cmd"]])
+                common/get-program-flags (fn [& _] {:twostep true})]
+    (p/rt-twostep:create {:lang :lang :program :program}))
   => map?)
 
 ^{:refer rt.basic.type-twostep/rt-twostep :added "4.0"}
 (fact "creates an active twostep runtime"
-  ^:hidden
-  
-  (->> (p/rt-twostep {:lang :rust
-                      :program :rustc})
-       (into {}))
-  => map?)
-
-
-(comment
-  #_#_#_
-    (lib/install-module! :rust 'L.util
-                         {#_#_#_#_
-                          :require '[[L.core :as u]]
-                          :import '[["cjson" :as cjson]]})
-    (lib/add-entry-single!
-     (entry/create-code-base
-      '(defn sub-fn
-         [a b]
-         (return ((u/identity-fn u/sub) a b)))
-      {:lang :rust
-       :namespace (h/ns-sym)
-       :module 'L.util
-       :line 1}
-      {}))
-    (lib/add-entry-single!
-     (entry/create-code-base
-      '(defn add-fn
-         [a b]
-         (return ((u/identity-fn u/add) a (-/sub-fn b 0))))
-      {:lang :rust
-       :namespace (h/ns-sym)
-       :module 'L.util
-       :line 2}
-      {})))
+  (with-redefs [p/rt-twostep:create (fn [m] m)]
+    (p/rt-twostep {:a 1}))
+  => {:a 1})

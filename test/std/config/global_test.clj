@@ -36,7 +36,11 @@
   => "xyz.zcaudate")
 
 ^{:refer std.config.global/global-env-file-raw :added "4.0"}
-(fact "gets env from env.edn")
+(fact "gets env from env.edn"
+  (with-redefs [std.fs/exists? (constantly true)
+                slurp (constantly "{:a 1}")]
+    (global-env-file-raw))
+  => {:a 1})
 
 ^{:refer std.config.global/global-home-raw :added "3.0"}
 (fact "returns the global object for all global types"
@@ -59,7 +63,7 @@
 ^{:refer std.config.global/global :added "3.0"}
 (fact "returns the entire global map"
 
-  (global :all))
+  (global :all) => map?)
 
 (comment
   (global :all))

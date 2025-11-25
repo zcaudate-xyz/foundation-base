@@ -25,7 +25,12 @@
   => 15)
 
 ^{:refer std.lib.apply/host-apply-in :added "3.0"}
-(fact "helper function for the `host` applicative")
+(fact "helper function for the `host` applicative"
+
+  (host-apply-in (host-applicative {:form '+})
+                 nil
+                 [1 2 3 4 5])
+  => 15)
 
 ^{:refer std.lib.apply/host-applicative :added "3.0"}
 (fact "constructs an applicative that does not need a context"

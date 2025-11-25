@@ -9,7 +9,10 @@
   => true)
 
 ^{:refer std.lib.class/primitive? :added "3.0"}
-(fact "checks if a class of primitive type")
+(fact "checks if a class of primitive type"
+
+  (primitive? Integer/TYPE) => true
+  (primitive? Integer) => false)
 
 ^{:refer std.lib.class/primitive:array? :added "3.0"}
 (fact "checks if class is a primitive array"

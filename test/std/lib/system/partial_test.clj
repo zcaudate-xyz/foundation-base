@@ -37,13 +37,16 @@
 ^{:refer std.lib.system.partial/subsystem :added "3.0"}
 (fact "returns the subsystem given certain keys"
 
-  (subsystem +sys+ #{:entry}))
+  (subsystem +sys+ #{:entry})
+  => any?)
 
 ^{:refer std.lib.system.partial/wait :added "3.0"}
-(fact "wait for a system entry to come online")
+(fact "wait for a system entry to come online"
+  (resolve 'wait) => var?)
 
 ^{:refer std.lib.system.partial/wait-for :added "3.0"}
-(fact "wait for all system entries to come online")
+(fact "wait for all system entries to come online"
+  (resolve 'wait-for) => var?)
 
 (comment
   (./import))

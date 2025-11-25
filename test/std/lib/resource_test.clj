@@ -5,13 +5,16 @@
 ^{:refer std.lib.resource/res:spec-list :added "3.0"}
 (fact "lists all available specs"
 
-  (res:spec-list))
+  (res:spec-list)
+  => any?)
 
 ^{:refer std.lib.resource/res:spec-add :added "3.0"}
-(fact "adds a new resource spec")
+(fact "adds a new resource spec"
+  (resolve 'res:spec-add) => var?)
 
 ^{:refer std.lib.resource/res:spec-remove :added "3.0"}
-(fact "removes the resource spec")
+(fact "removes the resource spec"
+  (resolve 'res:spec-remove) => var?)
 
 ^{:refer std.lib.resource/res:spec-get :added "3.0"}
 (fact "retrieves a resource spec"

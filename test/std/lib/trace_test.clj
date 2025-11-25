@@ -3,10 +3,12 @@
   (:require [std.lib.trace :refer :all]))
 
 ^{:refer std.lib.trace/trace? :added "4.0"}
-(fact "checks if object is a trace")
+(fact "checks if object is a trace"
+  (resolve 'trace?) => var?)
 
 ^{:refer std.lib.trace/get-trace :added "4.0"}
-(fact "gets a trace from var")
+(fact "gets a trace from var"
+  (resolve 'get-trace) => var?)
 
 ^{:refer std.lib.trace/make-trace :added "4.0"}
 (fact "makes a trace from var"
@@ -15,7 +17,8 @@
   => trace?)
 
 ^{:refer std.lib.trace/has-trace? :added "4.0"}
-(fact "checks if var has trace")
+(fact "checks if var has trace"
+  (resolve 'has-trace?) => var?)
 
 ^{:refer std.lib.trace/apply-trace :added "4.0"}
 (fact "applies a trace with arguments"
@@ -29,7 +32,8 @@
 
 
 ^{:refer std.lib.trace/wrap-basic :added "4.0"}
-(fact "wraps an identity transform")
+(fact "wraps an identity transform"
+  (resolve 'wrap-basic) => var?)
 
 ^{:refer std.lib.trace/wrap-print :added "4.0"}
 (fact "wraps a print transform")

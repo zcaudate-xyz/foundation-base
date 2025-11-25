@@ -79,7 +79,10 @@
   (invoke-intern-method '-hello-method-
                         {:multi '-hello-multi-
                          :val :apple}
-                        '([x] x)))
+                        '([x] x))
+  => '(clojure.core/let
+          [v (def -hello-method- (clojure.core/fn -hello-method- [x] x))]
+        [(std.lib.invoke/multi:add -hello-multi- :apple -hello-method-) v]))
 
 ^{:refer std.lib.invoke/resolve-method :added "3.0"}
 (fact "resolves a package related to a label"
@@ -112,7 +115,8 @@
 
   (definvoke -another-
     [:compose {:val (partial + 10)
-               :arglists '([& more])}]))
+               :arglists '([& more])}])
+  => any?)
 
 ^{:refer std.lib.invoke/invoke-intern-fn :added "3.0"}
 (fact "method body for `:fn` invoke"

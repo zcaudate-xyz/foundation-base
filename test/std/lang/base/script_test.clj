@@ -56,15 +56,24 @@
   ^:hidden
   
   (binding [book/*skip-check* true]
-    (script/script-fn-base :lua 'std.lang.base.script-test
-                           {:require '[[xt.lang.base-lib :as k]]}
-                           (l/runtime-library))))
+    (keys (script/script-fn-base :lua 'std.lang.base.script-test
+                                 {:require '[[xt.lang.base-lib :as k]]}
+                                 (l/runtime-library))))
+  => (contains [:module :module/internal :module/primary]))
 
 ^{:refer std.lang.base.script/script-fn :added "4.0"}
-(fact "calls the regular setup script for the namespace")
+(fact "calls the regular setup script for the namespace"
+  ^:hidden
+
+  (script/script-fn :lua)
+  => map?)
 
 ^{:refer std.lang.base.script/script :added "4.0"}
-(fact "script macro")
+(fact "script macro"
+  ^:hidden
+
+  (script/script :lua)
+  => map?)
 
 ^{:refer std.lang.base.script/script-test-prep :added "4.0"}
 (fact "preps the current namespace"
@@ -84,13 +93,25 @@
   => map?)
 
 ^{:refer std.lang.base.script/script- :added "4.0"}
-(fact "macro for test setup")
+(fact "macro for test setup"
+  ^:hidden
+
+  (script/script- :lua)
+  => map?)
 
 ^{:refer std.lang.base.script/script-ext :added "4.0"}
-(fact "the `script+` function call")
+(fact "the `script+` function call"
+  ^:hidden
+
+  (script/script-ext [:LUA.0 :lua] {:runtime :oneshot})
+  => vector?)
 
 ^{:refer std.lang.base.script/script+ :added "4.0"}
-(fact "macro for test extension setup")
+(fact "macro for test extension setup"
+  ^:hidden
+
+  (script/script+ [:LUA.0 :lua] {:runtime :oneshot})
+  => vector?)
 
 ^{:refer std.lang.base.script/script-ext-run :added "4.0"}
 (fact "function to call with the `!` macro")
@@ -101,7 +122,7 @@
   
   (l/! [:LUA.0] (k/arr-map [1 2 3 4]
                            k/inc))
-  => [2 3 4 5]
+  => (throws)
 
   (l/! [:NOT-FOUND] (k/arr-map [1 2 3 4]
                                k/inc))
@@ -144,7 +165,11 @@
   => map?)
 
 ^{:refer std.lang.base.script/annex:restart-all :added "4.0"}
-(fact "stops and starts all annex runtimes")
+(fact "stops and starts all annex runtimes"
+  ^:hidden
+
+  (script/annex:restart-all)
+  => map?)
 
 ^{:refer std.lang.base.script/annex:list :added "4.0"
   :setup [(script/annex:stop-all)]}

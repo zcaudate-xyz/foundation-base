@@ -1,7 +1,11 @@
 (ns std.dispatch.hub-test
   (:use code.test)
   (:require [std.dispatch.hub :refer :all]
-            [std.lib.component :as component]))
+            [std.dispatch.debounce :as debounce]
+            [std.dispatch.hooks :as hooks]
+            [std.lib.component :as component]
+            [std.concurrent :as cc]
+            [std.lib :as h]))
 
 (defonce ^:dynamic *output*   (atom []))
 
@@ -43,34 +47,64 @@
                       [@*counter* @*output*])))
 
 ^{:refer std.dispatch.hub/process-hub :added "3.0"}
-(fact "activates on debounce submit hit")
+(fact "activates on debounce submit hit"
+  (def -hub- (cc/hub:new))
+  (cc/hub:add-entries -hub- [1 2 3])
+  (process-hub {:handler (fn [_ entries] entries) :options {:hub {:max-batch 10}}} :g -hub-)
+  => [1 2 3])
 
 ^{:refer std.dispatch.hub/put-hub :added "3.0"}
-(fact "puts an entry into the group hubs")
+(fact "puts an entry into the group hubs"
+  (def -d- {:runtime {:groups (atom {})}})
+  (put-hub -d- :g 1)
+  => (contains [1])
+  (get @(:groups (:runtime -d-)) :g) => cc/hub?)
 
 ^{:refer std.dispatch.hub/create-hub-handler :added "3.0"}
-(fact "creates the hub handler")
+(fact "creates the hub handler"
+  (create-hub-handler {:runtime {:groups (atom {})}}) => fn?)
 
 ^{:refer std.dispatch.hub/update-debounce-handler! :added "3.0"}
-(fact "updates the debounce handler")
+(fact "updates the debounce handler"
+  (def -d- {:runtime {:debouncer (volatile! (atom {:handler nil})) :groups (atom {})}})
+  (update-debounce-handler! -d-)
+  (:handler @(deref (:debouncer (:runtime -d-)))) => fn?)
 
 ^{:refer std.dispatch.hub/create-debounce :added "3.0"}
-(fact "creates the debounce executor")
+(fact "creates the debounce executor"
+  (create-debounce {:options {:hub {:interval 100 :delay 10}}})
+  => map?)
 
 ^{:refer std.dispatch.hub/start-dispatch :added "3.0"}
-(fact "starts the hub executor")
+(fact "starts the hub executor"
+  (def -d- (create-dispatch +test-config+))
+  (start-dispatch -d-)
+  (started?-dispatch -d-) => true
+  (stop-dispatch -d-))
 
 ^{:refer std.dispatch.hub/stop-dispatch :added "3.0"}
-(fact "stops the hub executor")
+(fact "stops the hub executor"
+  (def -d- (doto (create-dispatch +test-config+) (start-dispatch)))
+  (stop-dispatch -d-)
+  (started?-dispatch -d-) => false)
 
 ^{:refer std.dispatch.hub/kill-dispatch :added "3.0"}
-(fact "kills the hub executor")
+(fact "kills the hub executor"
+  (def -d- (doto (create-dispatch +test-config+) (start-dispatch)))
+  (kill-dispatch -d-)
+  (started?-dispatch -d-) => false)
 
 ^{:refer std.dispatch.hub/submit-dispatch :added "3.0"}
-(fact "submits to the hub executor")
+(fact "submits to the hub executor"
+  (def -d- (doto (create-dispatch +test-config+) (start-dispatch)))
+  (submit-dispatch -d- {:group :a :val 1})
+  (stop-dispatch -d-))
 
 ^{:refer std.dispatch.hub/info-dispatch :added "3.0"}
-(fact "returns dispatch info")
+(fact "returns dispatch info"
+  (def -d- (doto (create-dispatch +test-config+) (start-dispatch)))
+  (info-dispatch -d- nil) => map?
+  (stop-dispatch -d-))
 
 ^{:refer std.dispatch.hub/create-dispatch :added "3.0"}
 (fact "creates the hub executor"
