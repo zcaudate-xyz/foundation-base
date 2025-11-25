@@ -29,7 +29,12 @@
   => (contains {:data {:in "", :out "ABC"}, :time #(.endsWith ^String % ":46:40")}))
 
 ^{:refer std.timeseries.journal/create-template :added "3.0"}
-(fact "creates a template a puts in the cache")
+(fact "creates a template a puts in the cache"
+
+  (let [j (journal {})]
+    (create-template j {:a 1})
+    @(:template j))
+  => map?)
 
 ^{:refer std.timeseries.journal/get-template :added "3.0"}
 (fact "gets existing or creates a new template"
@@ -81,17 +86,24 @@
   => {:order :desc, :count 0, :head []})
 
 ^{:refer std.timeseries.journal/journal-invoke :added "3.0"}
-(fact "invoke function for the journal")
+(fact "invoke function for the journal"
+
+  (journal-invoke (journal {}) :info)
+  => (contains {:order :desc, :count 0, :head []}))
 
 ^{:refer std.timeseries.journal/map->Journal :added "3.0" :adopt true}
-(fact "defines a journal object")
+(fact "defines a journal object"
+
+  (class (map->Journal {}))
+  => std.timeseries.journal.Journal)
 
 ^{:refer std.timeseries.journal/journal :added "3.0"}
 (fact "creates a new journal"
 
-  (journal {:meta {:time {:unit :s :format "HH:mm:ss"}
-                   :entry {:flatten false}
-                   :head {:range [0 3]}}}))
+  (class (journal {:meta {:time {:unit :s :format "HH:mm:ss"}
+                          :entry {:flatten false}
+                          :head {:range [0 3]}}}))
+  => std.timeseries.journal.Journal)
 
 ^{:refer std.timeseries.journal/add-time :added "3.0"}
 (fact "adds time to entry if if doesn't exist"
@@ -100,7 +112,12 @@
   => (contains {:t integer?}))
 
 ^{:refer std.timeseries.journal/update-journal-single :added "3.0"}
-(fact "adds a single entry to the journal")
+(fact "adds a single entry to the journal"
+
+  (-> (journal {})
+      (update-journal-single {:a 1})
+      :entries)
+  => coll?)
 
 ^{:refer std.timeseries.journal/add-entry :added "3.0"}
 (fact "adds an entry to the journal"
@@ -115,7 +132,12 @@
                    :head [{:start 1, :output.value 1, :s/time string?}]}))
 
 ^{:refer std.timeseries.journal/update-journal-bulk :added "3.0"}
-(fact "adds multiple entries to the journal")
+(fact "adds multiple entries to the journal"
+
+  (-> (journal {})
+      (update-journal-bulk [{:a 1} {:a 2}])
+      :entries)
+  => coll?)
 
 ^{:refer std.timeseries.journal/add-bulk :added "3.0"}
 (fact "adds multiple entries to the journal" ^:hidden
@@ -150,10 +172,20 @@
       [{:a 2, :s/time 2} {:a 3, :s/time 3} {:a 4, :s/time 4}]])
 
 ^{:refer std.timeseries.journal/update-meta :added "3.0"}
-(fact "updates journal meta. used for display")
+(fact "updates journal meta. used for display"
+
+  (-> (journal {})
+      (update-meta {:a 1})
+      :meta)
+  => (contains {:a 1}))
 
 ^{:refer std.timeseries.journal/select-series :added "3.0"}
-(fact "select data from the series")
+(fact "select data from the series"
+
+  (let [j (-> (journal {:meta {:time {:key :time}}})
+              (add-bulk [{:a 1 :time 1} {:a 2 :time 2}]))]
+    (select-series (journal-entries j) '(:a)))
+  => '((2) (1)))
 
 ^{:refer std.timeseries.journal/select :added "3.0"}
 (fact "selects data ferom the journal"
@@ -181,11 +213,8 @@
 ^{:refer std.timeseries.journal/derive :added "3.0"}
 (fact "derives the journal given a select statement"
 
-  (derive -jnl- {:range [:1m :15m]
-                 :sample 2000
-                 :transform {:interval :0.1s
-                             :time    {:aggregate :first}
-                             :default {:aggregate :mean :sample 3}}}))
+  (class (derive (journal {:entries [{:a 1 :s/time 1} {:a 2 :s/time 2}]}) {}))
+  => std.timeseries.journal.Journal)
 
 ^{:refer std.timeseries.journal/merge-sorted :added "3.0"}
 (fact "merges a series of arrays together"
@@ -205,25 +234,12 @@
       6 6 6 4 4 3 3 3 3 2 2 1 1 1])
 
 ^{:refer std.timeseries.journal/merge :added "3.0"}
-(fact "merges two journals of the same type together" ^:hiddene
+(fact "merges two journals of the same type together"
 
-  (-> ((merge (derive -jnl- {:range [:1m :3m]
-                             :transform {:interval 1
-                                         :time     {:aggregate :middle}
-                                         :default {:aggregate :mean :sample 3}}})
-              (derive -jnl- {:range [:10m -1]
-                             :transform {:interval :5s
-                                         :time    {:aggregate :first}
-                                         :default {:aggregate :mean}}}))
-       {:sample :0.1s
-        :transform {:interval :1s
-                    :time {:aggregate :first
-                           :fn #(long (/ % 100))}
-                    :custom [{:keys [:output.value]
-                              :aggregate :random
-                              :fn #(long (* % 100))}]}
-        :series [{:data '(:start :output.value)
-                  :s/meta {:title "Output 1" :with :lines}}]})))
+  (let [j1 (journal {:entries [{:a 1 :s/time 1}]})
+        j2 (journal {:entries [{:a 2 :s/time 2}]})]
+    (class (merge j1 j2)))
+  => std.timeseries.journal.Journal)
 
 (comment
   (first (-jnl- :range [0 1]))

@@ -125,4 +125,8 @@
 
 
 ^{:refer std.text.diff/get-lines :added "4.0"}
-(fact "gets the lines that have changed")
+(fact "gets the lines that have changed"
+
+  (get-lines (diff "10\n11\n\12\n13\n14"
+                   "10\n18\n\12\n19\n14"))
+  => '[[1 1] [4 1]])

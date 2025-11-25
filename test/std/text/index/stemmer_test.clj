@@ -9,7 +9,10 @@
   => true)
 
 ^{:refer std.text.index.stemmer/remove-excluded-words :added "3.0"}
-(fact "remove excluded words")
+(fact "remove excluded words"
+
+  (remove-excluded-words ["the" "lazy" "fox"])
+  => ["lazy" "fox"])
 
 ^{:refer std.text.index.stemmer/expand-hyphenated-words :added "3.0"}
 (fact "split hyphenated words"

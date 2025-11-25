@@ -29,8 +29,18 @@
   "helper function for `unindex"
   {:added "3.0"}
   ([index key stems]
-   (doseq [stem (set stems)]
-     (send index update-in [:data stem] #(dissoc % key)))))
+   (send index
+         (fn [{:keys [data] :as m}]
+           (assoc m :data
+                  (->> (set stems)
+                       (reduce (fn [data stem]
+                                 (if-let [stem-val (get data stem)]
+                                   (let [stem-val (dissoc stem-val key)]
+                                     (if (seq stem-val)
+                                       (assoc data stem stem-val)
+                                       (dissoc data stem)))
+                                   data))
+                               data)))))))
 
 ;; ## Functions that take blocks of text
 
@@ -61,7 +71,15 @@
   "clears index"
   {:added "3.0"}
   ([index key]
-   (send index update-in [:data] (fn [state] (reduce #(update-in %1 [%2] dissoc key) state (keys state)))) nil))
+   (send index
+         (fn [{:keys [data] :as m}]
+           (assoc m :data
+                  (into {}
+                        (keep (fn [[stem docs]]
+                                (let [docs (dissoc docs key)]
+                                  (when (seq docs)
+                                    [stem docs]))))
+                        data))))))
 
 (defn query
   "queries index for results"

@@ -42,9 +42,9 @@
   "ensures no null values"
   {:added "3.0"}
   ([f]
-   (fn [arr]
-     (->> (filter identity arr)
-          (f)))))
+   (fn [& args]
+     (let [args (filter (complement nil?) args)]
+       (apply f args)))))
 
 (def +aggregations+
   (h/map-vals wrap-not-nil

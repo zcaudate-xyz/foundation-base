@@ -6,16 +6,28 @@
 ^{:refer std.task/task-defaults :added "3.0"}
 (fact "creates default settings for task groups"
 
-  (task-defaults :namespace))
+  (task-defaults :default)
+  => {:main {:arglists '([] [entry])}})
 
 ^{:refer std.task/map->Task :added "3.0" :adopt true}
-(fact "constructs a invokable Task object")
+(fact "constructs a invokable Task object"
+  (-> (map->Task {:type :namespace
+                  :name "list-interns"
+                  :main {:fn clojure.core/ns-interns}})
+      (task?))
+  => true)
 
 ^{:refer std.task/task-status :added "3.0"}
-(fact "displays the task-status")
+(fact "displays the task-status"
+  (-> (task :namespace "list-interns" ns-interns)
+      (task-status))
+  => :namespace)
 
 ^{:refer std.task/task-info :added "3.0"}
-(fact "displays the task-body")
+(fact "displays the task-body"
+  (-> (task :namespace "list-interns" ns-interns)
+      (task-info))
+  => '{:fn list-interns})
 
 ^{:refer std.task/single-function-print :added "3.0"}
 (fact "if not `:bulk`, then print function output"
@@ -26,11 +38,13 @@
 ^{:refer std.task/task :added "3.0"}
 (fact "creates a task"
 
-  (task :namespace "list-interns" ns-interns)
+  (task? (task :namespace "list-interns" ns-interns))
+  => true
 
-  (task :namespace
+  (task? (task :namespace
         "list-interns"
         {:main {:fn clojure.core/ns-interns}}))
+  => true)
 
 ^{:refer std.task/task? :added "3.0"}
 (fact "check if object is a task"

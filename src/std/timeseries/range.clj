@@ -168,18 +168,19 @@
          (throw (ex-info "Value cannot be negative in :for expressions"))
 
          :else
-         [tag (case tag
-                :array (let [len (count arr)
+         (case tag
+           :array [tag (let [len (count arr)
                              idx (+ len val)]
-                         (if-not (pos? idx) 1 idx))
-                :ratio (+ 1 val)
-                :time  (let [t0 (key (first arr))
+                         (if-not (pos? idx) 1 idx))]
+           :ratio [tag (+ 1 val)]
+           :time  [tag (let [t0 (key (first arr))
                              t1 (key (last arr))
                              op-fn (common/order-op order)
                              t' (op-fn t1 val)]
                          (case order
                            :asc  (- t' t0)
-                           :desc (- t0 t'))))])))
+                           :desc (- t0 t')))]
+           [tag val]))))
 
 (defn select-range-standard
   "helper for standard range select"

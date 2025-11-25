@@ -34,7 +34,10 @@
   => {:type :end, :start [:time -120000], :end [:absolute 0]})
 
 ^{:refer std.timeseries.range/range-wrap :added "3.0"}
-(fact "function wrapper for range-start and range-end functions")
+(fact "function wrapper for range-start and range-end functions"
+
+  ((range-wrap range-start true) [1 2 3] {} [:array 1] {:order :asc :key identity})
+  => [1 [2 3]])
 
 ^{:refer std.timeseries.range/range-start :added "3.0"}
 (fact "chooses the start of the array"

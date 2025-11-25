@@ -189,7 +189,16 @@
 
 
 ^{:refer std.string.common/replace-at :added "4.0"}
-(fact "replaces the character at the index with a new string")
+(fact "replaces the character at the index with a new string"
+
+  (replace-at "hello" 4 "a")
+  => "hella"
+
+  (replace-at "hello" 1 "a")
+  => "hallo")
 
 ^{:refer std.string.common/insert-at :added "4.0"}
-(fact "inserts a string at the given index")
+(fact "inserts a string at the given index"
+
+  (insert-at "hello" 2 "XX")
+  => "heXXllo")

@@ -4,13 +4,22 @@
   (:refer-clojure :exclude [compile]))
 
 ^{:refer std.timeseries.compute/max-fn :added "3.0"}
-(fact "max function accepting array")
+(fact "max function accepting array"
+
+  (max-fn [1 2 3])
+  => 3)
 
 ^{:refer std.timeseries.compute/min-fn :added "3.0"}
-(fact "min function accepting array")
+(fact "min function accepting array"
+
+  (min-fn [1 2 3])
+  => 1)
 
 ^{:refer std.timeseries.compute/range-fn :added "3.0"}
-(fact "range function accepting array")
+(fact "range function accepting array"
+
+  (range-fn [1 2 3])
+  => 2)
 
 ^{:refer std.timeseries.compute/middle-fn :added "3.0"}
 (fact "middling function"
@@ -19,7 +28,10 @@
   => 2)
 
 ^{:refer std.timeseries.compute/wrap-not-nil :added "3.0"}
-(fact "ensures no null values")
+(fact "ensures no null values"
+
+  ((wrap-not-nil +) 1 nil)
+  => 1)
 
 ^{:refer std.timeseries.compute/template? :added "3.0"}
 (fact "checks if vector is a template"
@@ -62,12 +74,14 @@
 ^{:refer std.timeseries.compute/compile-aggregates :added "3.0"}
 (fact "compiles the aggregates"
 
-  (compile-aggregates '{v1 [:s/max :bench.stats.lag]}))
+  (compile-aggregates '{v1 [:s/max :bench.stats.lag]})
+  => seq?)
 
 ^{:refer std.timeseries.compute/compile-form :added "3.0"}
 (fact "compiles the entire form"
 
-  (compile-form '(- [:s/norm :bench.stats.time] [:s/norm :bench.stats.lag])))
+  (compile-form '(- [:s/norm :bench.stats.time] [:s/norm :bench.stats.lag]))
+  => seq?)
 
 ^{:refer std.timeseries.compute/compile-single :added "3.0"}
 (fact "complise a single fn form"
@@ -79,7 +93,8 @@
 (fact "complies a map of expressions"
 
   (compile '{:diff (- [:s/norm :bench.stats.time]
-                      [:s/norm :bench.stats.lag])}))
+                      [:s/norm :bench.stats.lag])})
+  => map?)
 
 ^{:refer std.timeseries.compute/compute :added "3.0"}
 (fact "computes additional values given array"
