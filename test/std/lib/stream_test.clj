@@ -2,7 +2,7 @@
   (:use code.test)
   (:require [std.lib.stream :refer :all]
             [std.lib.function :as fn]
-            [std.lib.stream.xform :as x])
+            [std.lib.stream.iter :as i])
   (:import (java.util.stream Collectors)))
 
 ^{:refer std.lib.stream/produce :added "3.0"}
@@ -20,14 +20,14 @@
 ^{:refer std.lib.stream/seqiter :added "3.0"}
 (fact "creates an non-chunking iterator from a transducer (sink)"
 
-  (seqiter (map inc)
+  (seqiter (i/i:map inc)
            (range 5))
   => (range 1 6))
 
 ^{:refer std.lib.stream/unit :added "3.0"}
 (fact "applies a transducer to single input"
 
-  (unit (map inc) 1)
+  (unit (i/i:map inc) 1)
   => 2)
 
 ^{:refer std.lib.stream/extend-stream-form :added "3.0"}
@@ -44,23 +44,21 @@
 ^{:refer std.lib.stream/add-transforms :added "3.0"}
 (fact "adds a transform to the list"
 
-  (add-transforms :map x/x:map)
+  (add-transforms :map i/i:map)
   => '(:map))
 
 ^{:refer std.lib.stream/pipeline-transform :added "3.0"}
 (fact "transforms a pipeline to transducer form"
 
   (pipeline-transform [[:map inc]
-                       [:map inc]
-                       [:window 5]])
-  => (contains [fn? fn? fn?]))
+                       [:map inc]])
+  => (contains [fn? fn?]))
 
 ^{:refer std.lib.stream/pipeline :added "3.0"}
 (fact "creates a transducer pipeline"
 
   (pipeline [[:map inc]
-             [:map inc]
-             [:window 5]])
+             [:map inc]])
   => fn?)
 
 ^{:refer std.lib.stream/pipe :added "3.0"}
@@ -69,8 +67,8 @@
   (pipe (range 5)
         [[:map inc]
          [:map inc]]
-        ())
-  => '(6 5 4 3 2))
+        [])
+  => [2 3 4 5 6])
 
 ^{:refer std.lib.stream/producer :added "3.0"}
 (fact "creates a source seq"
@@ -148,7 +146,7 @@
 (fact "shortcut for `stream`"
 
   (*> (range 5)
-      (x/x:map inc)
+      (i/i:map inc)
       [])
   => [1 2 3 4 5])
 
@@ -173,14 +171,14 @@
 ^{:refer std.lib.stream/collect-nil :added "3.0"}
 (fact "collect for nil"
 
-  (collect-nil nil (map inc)
+  (collect-nil nil (i/i:map inc)
                (range 5))
   => seq?)
 
 ^{:refer std.lib.stream/collect-ifn :added "3.0"}
 (fact "collect outputs to a source"
 
-  (-> (collect-ifn int-array (map inc)
+  (-> (collect-ifn int-array (i/i:map inc)
                    (range 5))
       seq)
   => '(1 2 3 4 5))
@@ -213,7 +211,7 @@
 (fact "collect for transients"
 
   (-> (collect-transient (transient [])
-                         (map inc)
+                         (i/i:map inc)
                          (range 5))
       (persistent!))
   => [1 2 3 4 5])
@@ -222,7 +220,7 @@
 (fact "collect for java collections"
 
   (-> (collect-collection (java.util.ArrayList.)
-                          (map inc)
+                          (i/i:map inc)
                           (range 5)))
   => [1 2 3 4 5])
 
@@ -241,7 +239,7 @@
 (fact "collects values from seq given a collector"
 
   (collect-collector (Collectors/toList)
-                     (map inc)
+                     (i/i:map inc)
                      (range 5))
   => [1 2 3 4 5])
 
@@ -255,7 +253,7 @@
 (fact "collects given a promise"
 
   @(doto (promise)
-     (collect (map inc) (range 5)))
+     (collect (i/i:map inc) (range 5)))
   => 1)
 
 ^{:refer std.lib.stream/atom-seq :added "3.0"}

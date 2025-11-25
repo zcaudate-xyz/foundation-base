@@ -1,11 +1,10 @@
 (ns std.lib.stream
   (:require [std.lib.generate :as gen]
-            [std.lib.stream.xform :as x]
+            [std.lib.stream.iter :as i]
             [std.protocol.stream :as protocol.stream])
   (:import (clojure.lang IPersistentCollection
                          IPersistentList
-                         ITransientCollection
-                         TransformerIterator)
+                         ITransientCollection)
            (java.util.function Supplier)
            (java.util Collection
                       Spliterator)
@@ -15,8 +14,7 @@
                              Collectors)
            (java.util.concurrent Callable
                                  Future)
-           (hara.lib.stream ISeqSpliterator
-                            IteratorSeq)))
+           (hara.lib.stream ISeqSpliterator)))
 
 (defn produce
   "produces a seq from an object
@@ -47,17 +45,7 @@
   {:added "3.0"}
   ([coll] coll)
   ([xform coll]
-   (->> (clojure.lang.RT/iter coll)
-        (TransformerIterator/create xform)
-        (IteratorSeq.)))
-  ([xform coll & colls]
-   (->> (map #(clojure.lang.RT/iter %) (cons coll colls))
-        (TransformerIterator/createMulti xform)
-        (IteratorSeq.))))
-
-(defmethod print-method IteratorSeq
-  [v ^java.io.Writer w]
-  (.write w (str "<*>")))
+   (xform coll)))
 
 (defn unit
   "applies a transducer to single input
@@ -102,42 +90,37 @@
 ;;
 
 (defonce ^:dynamic *transforms*
-  (atom {:map    x/x:map
-         :map-indexed x/x:map-indexed
-         :keep   x/x:keep
-         :keep-indexed x/x:keep-indexed
-         :some   x/x:some
-         :count  x/x:count
-         :reduce x/x:reduce
-         :peek   x/x:peek
-         :prn    x/x:prn
-         :drop   x/x:drop
-         :drop-last x/x:drop-last
-         :butlast x/x:butlast
-         :mapcat  x/x:mapcat
-         :delay   x/x:delay
-         :filter  x/x:filter
-         :dedupe   dedupe
-         :take-nth take-nth
-         :take     x/x:take
-         :take-last x/x:last
-         :partition-all partition-all
-         :partition-by partition-by
-         :random-sample random-sample
-         :remove   x/x:remove
-         :time     x/x:time
-         :wrap     x/x:wrap
-         :pass     x/x:pass
-         :apply    x/x:apply
-         :window   x/x:window
-         :str      x/x:str
-         :max      x/x:max
-         :min      x/x:min
-         :mean     x/x:mean
-         :stdev    x/x:stdev
-         :sort     x/x:sort
-         :sort-by  x/x:sort-by
-         :reductions x/x:reductions}))
+  (atom {:map    i/i:map
+         :map-indexed i/i:map-indexed
+         :keep   i/i:keep
+         :keep-indexed i/i:keep-indexed
+         :filter  i/i:filter
+         :remove   i/i:remove
+         :take     i/i:take
+         :take-nth i/i:take-nth
+         :drop     i/i:drop
+         :drop-last i/i:drop-last
+         :butlast i/i:butlast
+         :peek   i/i:peek
+         :prn    i/i:prn
+         :mapcat  i/i:mapcat
+         :delay   i/i:delay
+         :dedupe   i/i:dedupe
+         :partition-all i/i:partition-all
+         :partition-by i/i:partition-by
+         :random-sample i/i:random-sample
+         :sort     i/i:sort
+         :sort-by  i/i:sort-by
+         :reductions i/i:reductions
+         :some   i/i:some
+         :count  i/i:count
+         :reduce i/i:reduce
+         :max      i/i:max
+         :min      i/i:min
+         :mean     i/i:mean
+         :stdev    i/i:stdev
+         :last     i/i:last
+         :str      i/i:str}))
 
 (defn add-transforms
   "adds a transform to the list
@@ -178,7 +161,7 @@
    => fn?"
   {:added "3.0"}
   ([stages]
-   (apply comp (pipeline-transform stages))))
+   (apply comp (reverse (pipeline-transform stages)))))
 
 (defn pipe
   "pipes data from one source into another
@@ -418,7 +401,7 @@
    => [1 2 3 4 5]"
   {:added "3.0"}
   ([^ITransientCollection sink xf supply]
-   (transduce xf conj! sink supply)))
+   (reduce conj! sink (xf supply))))
 
 (defn collect-collection
   "collect for java collections
@@ -429,11 +412,10 @@
    => [1 2 3 4 5]"
   {:added "3.0"}
   ([^Collection sink xf supply]
-   (transduce xf
-              (fn
-                ([^Collection coll] coll)
-                ([^Collection coll entry] (doto coll (.add entry))))
-              sink supply)))
+   (reduce (fn [^Collection c e]
+             (doto c (.add e)))
+           sink
+           (xf supply))))
 
 (def +stream:java+
   '{java.lang.Iterable
@@ -449,6 +431,10 @@
 
 (extend-stream +stream:java+)
 
+(defn collect-persistent
+  [sink xf supply]
+  (into sink (xf supply)))
+
 (def +stream:clojure+
   (merge '{clojure.lang.ITransientCollection
            {:produce persistent! :collect collect-transient}
@@ -460,7 +446,7 @@
                    clojure.lang.ASeq
                    clojure.lang.PersistentList
                    clojure.lang.PersistentList$EmptyList]
-                 (repeat  {:produce identity :collect into}))))
+                 (repeat  {:produce identity :collect collect-persistent}))))
 
 (extend-stream +stream:clojure+)
 
