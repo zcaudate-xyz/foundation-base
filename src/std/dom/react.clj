@@ -10,6 +10,37 @@
 
 (def ^:dynamic *react-mute* nil)
 
+;; Scheduler Infrastructure
+(def ^:dynamic *scheduler* nil)
+
+(defn schedule-update
+  "schedules a component update"
+  {:added "4.0"}
+  [dom]
+  (if *scheduler*
+    (swap! *scheduler* conj dom)
+    (update/dom-refresh dom)))
+
+(defn flush-updates
+  "flushes all pending updates"
+  {:added "4.0"}
+  []
+  (when *scheduler*
+    (let [dirty @*scheduler*]
+      (reset! *scheduler* #{})
+      (doseq [dom dirty]
+        (update/dom-refresh dom)))))
+
+(defmacro with-scheduler
+  "executes body with a scheduler bound"
+  {:added "4.0"}
+  [& body]
+  `(binding [*scheduler* (atom #{})]
+     (try
+       ~@body
+       (finally
+         (flush-updates)))))
+
 (defn reactive-pre-render
   "sets up the react key and react store
    
@@ -44,7 +75,8 @@
           (when-not (contains? old-store ref)
             (add-watch ref key
                        (fn [_ _ _ _]
-                         (if-not *react-mute* (update/dom-refresh dom))))))
+                         (if-not *react-mute*
+                           (schedule-update dom))))))
         shadow)))))
 
 (defn reactive-pre-remove
