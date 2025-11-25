@@ -46,3 +46,25 @@
       (str/includes? layout "+--------+") => true
       (str/includes? layout "+---+") => true
       (str/includes? layout "|S  |") => true)))
+
+
+^{:refer std.tailwind.analysis/find-returns :added "4.0"}
+(fact "TODO")
+
+^{:refer std.tailwind.analysis/normalize-props :added "4.0"}
+(fact "TODO")
+
+^{:refer std.tailwind.analysis/get-book :added "4.0"}
+(fact "TODO")
+
+^{:refer std.tailwind.analysis/resolve-symbol :added "4.0"}
+(fact "TODO")
+
+^{:refer std.tailwind.analysis/fetch-component-form :added "4.0"}
+(fact "TODO")
+
+^{:refer std.tailwind.analysis/to-hiccup :added "4.0"}
+(fact "TODO")
+
+^{:refer std.tailwind.analysis/estimate-layout :added "4.0"}
+(fact "TODO")

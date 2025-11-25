@@ -168,3 +168,10 @@
 ^{:refer code.test.compile/fact:check :added "3.0"
   :style/indent 1}
 (fact "runs a check over a range of values")
+
+
+^{:refer code.test.compile/group-and-rewrite :added "4.0"}
+(fact "TODO")
+
+^{:refer code.test.compile/rewrite-nested-checks :added "4.0"}
+(fact "TODO")

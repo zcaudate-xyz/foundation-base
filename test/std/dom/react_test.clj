@@ -47,3 +47,13 @@
   (./import))
 
 
+
+
+^{:refer std.dom.react/schedule-update :added "4.0"}
+(fact "TODO")
+
+^{:refer std.dom.react/flush-updates :added "4.0"}
+(fact "TODO")
+
+^{:refer std.dom.react/with-scheduler :added "4.0"}
+(fact "TODO")

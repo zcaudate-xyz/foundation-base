@@ -1,7 +1,8 @@
 (ns std.block.visual.jvm-interpreter-test
+  (:use code.test)
   (:require [std.block.visual.jvm-interpreter :as jvm]))
 
-(defn -main []
+(defn demo []
   (println "Starting JVM Demo...")
   (Thread/sleep 1000)
 
@@ -33,3 +34,43 @@
      [iload_2]
      [ireturn]
     ]))" 500))
+
+
+^{:refer std.block.visual.jvm-interpreter/block-zip :added "4.0"}
+(fact "TODO")
+
+^{:refer std.block.visual.jvm-interpreter/clear-screen :added "4.0"}
+(fact "TODO")
+
+^{:refer std.block.visual.jvm-interpreter/highlight :added "4.0"}
+(fact "TODO")
+
+^{:refer std.block.visual.jvm-interpreter/block-val :added "4.0"}
+(fact "TODO")
+
+^{:refer std.block.visual.jvm-interpreter/filter-valid :added "4.0"}
+(fact "TODO")
+
+^{:refer std.block.visual.jvm-interpreter/make-jvm :added "4.0"}
+(fact "TODO")
+
+^{:refer std.block.visual.jvm-interpreter/push-frame :added "4.0"}
+(fact "TODO")
+
+^{:refer std.block.visual.jvm-interpreter/pop-frame :added "4.0"}
+(fact "TODO")
+
+^{:refer std.block.visual.jvm-interpreter/current-frame :added "4.0"}
+(fact "TODO")
+
+^{:refer std.block.visual.jvm-interpreter/update-current-frame :added "4.0"}
+(fact "TODO")
+
+^{:refer std.block.visual.jvm-interpreter/exec-inst :added "4.0"}
+(fact "TODO")
+
+^{:refer std.block.visual.jvm-interpreter/visualize :added "4.0"}
+(fact "TODO")
+
+^{:refer std.block.visual.jvm-interpreter/animate :added "4.0"}
+(fact "TODO")

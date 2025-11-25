@@ -262,3 +262,10 @@
 
 ^{:refer code.manage/extract :added "4.0"}
 (fact "TODO")
+
+
+^{:refer code.manage/require-file :added "4.0"}
+(fact "TODO")
+
+^{:refer code.manage/-main :added "4.0"}
+(fact "TODO")

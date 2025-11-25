@@ -72,3 +72,18 @@
   ^:hidden
   (l/with:print [] (l/emit-as :lua '[(:= a 1)]))
   => "a = 1")
+
+^{:refer std.lang/rt:space :added "4.0"}
+(fact "TODO")
+
+^{:refer std.lang/get-entry :added "4.0"}
+(fact "TODO")
+
+^{:refer std.lang/as-lua :added "4.0"}
+(fact "TODO")
+
+^{:refer std.lang/rt:invoke :added "4.0"}
+(fact "TODO")
+
+^{:refer std.lang/force-reload :added "4.0"}
+(fact "TODO")

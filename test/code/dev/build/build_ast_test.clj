@@ -37,3 +37,10 @@
     ;; Cleanup
     (fs/delete +ts-file+)
     (fs/delete +json-file+)))
+
+
+^{:refer code.dev.build.build-ast/initialise :added "4.0"}
+(fact "TODO")
+
+^{:refer code.dev.build.build-ast/generate-ast :added "4.0"}
+(fact "TODO")

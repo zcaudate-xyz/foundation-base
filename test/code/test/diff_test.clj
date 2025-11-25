@@ -43,3 +43,16 @@
         v2 (concat (range 19) [99])]
     (diff-seq v1 v2))
   => [[:- 19 1] [:+ 19 [99]]])
+
+
+^{:refer code.test.diff/checker-equal? :added "4.0"}
+(fact "TODO")
+
+^{:refer code.test.diff/diff-map :added "4.0"}
+(fact "TODO")
+
+^{:refer code.test.diff/diff-seq :added "4.0"}
+(fact "TODO")
+
+^{:refer code.test.diff/diff :added "4.0"}
+(fact "TODO")

@@ -1,4 +1,5 @@
 (ns std.block.visual.scheme-interpreter-test
+  (:use code.test)
   (:require [std.block.visual.scheme-interpreter :as scheme]))
 
 (defn test-fact []
@@ -16,6 +17,6 @@
   (println "\n=== Lambda Application ===")
   (scheme/run "((lambda (x) (+ x x)) 10)"))
 
-(defn -main []
+(defn demo []
   (test-lambda)
   (test-fact))

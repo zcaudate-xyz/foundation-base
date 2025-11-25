@@ -66,3 +66,121 @@
     (spawn-save-past runtime :test spawn)
     (get-in @runtime [:past :test]))
   => (just [spawn?]))
+
+
+^{:refer std.scheduler.spawn/spawn-status :added "4.0"}
+(fact "TODO")
+
+^{:refer std.scheduler.spawn/spawn-info :added "4.0"}
+(fact "TODO")
+
+^{:refer std.scheduler.spawn/spawn? :added "4.0"}
+(fact "TODO")
+
+^{:refer std.scheduler.spawn/create-spawn :added "4.0"}
+(fact "TODO")
+
+^{:refer std.scheduler.spawn/set-props :added "4.0"}
+(fact "TODO")
+
+^{:refer std.scheduler.spawn/get-props :added "4.0"}
+(fact "TODO")
+
+^{:refer std.scheduler.spawn/get-job :added "4.0"}
+(fact "TODO")
+
+^{:refer std.scheduler.spawn/update-job :added "4.0"}
+(fact "TODO")
+
+^{:refer std.scheduler.spawn/remove-job :added "4.0"}
+(fact "TODO")
+
+^{:refer std.scheduler.spawn/add-job :added "4.0"}
+(fact "TODO")
+
+^{:refer std.scheduler.spawn/list-jobs :added "4.0"}
+(fact "TODO")
+
+^{:refer std.scheduler.spawn/list-job-ids :added "4.0"}
+(fact "TODO")
+
+^{:refer std.scheduler.spawn/count-jobs :added "4.0"}
+(fact "TODO")
+
+^{:refer std.scheduler.spawn/send-result :added "4.0"}
+(fact "TODO")
+
+^{:refer std.scheduler.spawn/handler-run :added "4.0"}
+(fact "TODO")
+
+^{:refer std.scheduler.spawn/create-handler-basic :added "4.0"}
+(fact "TODO")
+
+^{:refer std.scheduler.spawn/create-handler-constant :added "4.0"}
+(fact "TODO")
+
+^{:refer std.scheduler.spawn/create-handler :added "4.0"}
+(fact "TODO")
+
+^{:refer std.scheduler.spawn/schedule-timing :added "4.0"}
+(fact "TODO")
+
+^{:refer std.scheduler.spawn/wrap-schedule :added "4.0"}
+(fact "TODO")
+
+^{:refer std.scheduler.spawn/spawn-save-past :added "4.0"}
+(fact "TODO")
+
+^{:refer std.scheduler.spawn/spawn-loop :added "4.0"}
+(fact "TODO")
+
+^{:refer std.scheduler.spawn/run :added "4.0"}
+(fact "TODO")
+
+^{:refer std.scheduler.spawn/get-all-spawn :added "4.0"}
+(fact "TODO")
+
+^{:refer std.scheduler.spawn/get-spawn :added "4.0"}
+(fact "TODO")
+
+^{:refer std.scheduler.spawn/count-spawn :added "4.0"}
+(fact "TODO")
+
+^{:refer std.scheduler.spawn/list-spawn :added "4.0"}
+(fact "TODO")
+
+^{:refer std.scheduler.spawn/latest-spawn :added "4.0"}
+(fact "TODO")
+
+^{:refer std.scheduler.spawn/earliest-spawn :added "4.0"}
+(fact "TODO")
+
+^{:refer std.scheduler.spawn/list-stopped :added "4.0"}
+(fact "TODO")
+
+^{:refer std.scheduler.spawn/latest-stopped :added "4.0"}
+(fact "TODO")
+
+^{:refer std.scheduler.spawn/latest :added "4.0"}
+(fact "TODO")
+
+^{:refer std.scheduler.spawn/stop-spawn :added "4.0"}
+(fact "TODO")
+
+^{:refer std.scheduler.spawn/kill-spawn :added "4.0"}
+(fact "TODO")
+
+^{:refer std.scheduler.spawn/stop-all :added "4.0"}
+(fact "TODO")
+
+^{:refer std.scheduler.spawn/kill-all :added "4.0"}
+(fact "TODO")
+
+^{:refer std.scheduler.spawn/clear :added "4.0"}
+(fact "TODO")
+
+^{:refer std.scheduler.spawn/get-state :added "4.0"}
+(fact "TODO")
+
+^{:refer std.scheduler.spawn/get-program :added "4.0"}
+(fact "TODO")

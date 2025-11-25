@@ -1,7 +1,8 @@
 (ns std.block.visual.scheme-animation-demo
+  (:use code.test)
   (:require [std.block.visual.scheme-interpreter :as scheme]))
 
-(defn -main []
+(defn demo []
   (println "Starting Animation Demo (Factorial 3)...")
   (Thread/sleep 1000)
   (scheme/animate "

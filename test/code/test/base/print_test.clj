@@ -19,3 +19,19 @@
 
 (comment
   (code.manage/import))
+
+
+^{:refer code.test.base.print/pad :added "4.0"}
+(fact "TODO")
+
+^{:refer code.test.base.print/format-diff-map :added "4.0"}
+(fact "TODO")
+
+^{:refer code.test.base.print/format-diff-seq :added "4.0"}
+(fact "TODO")
+
+^{:refer code.test.base.print/format-diff :added "4.0"}
+(fact "TODO")
+
+^{:refer code.test.base.print/print-timedout :added "4.0"}
+(fact "TODO")

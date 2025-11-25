@@ -269,7 +269,7 @@
 
               :else
               (throw (ex-info "Not a function" {:op op}))))))
-      :else z)))
+      :else z))))
 
 ;; Re-fix find-redex for BEGIN
 (defn find-redex [z]
@@ -310,7 +310,7 @@
                 (if (empty? children) z
                   (let [child (first children)]
                     (if (and (expression? child) (not (value? child)))
-                      (recur (-> z zip/step-inside (zip/step-right i))) ;; Recurse down
+                      (recur (-> z zip/step-inside (zip/step-right i)) (dec i)) ;; Recurse down
                       (recur (rest children) (inc i))))))))))
       :else nil)))
 

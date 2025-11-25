@@ -18,3 +18,7 @@
 (fact "lists modules"
   (std-lang/list-modules-fn nil {:lang "js"})
   => (contains {:content (contains [(contains {:text string?})])}))
+
+
+^{:refer code.ai.server.tool.std-lang/lang-emit-as-safe :added "4.0"}
+(fact "TODO")

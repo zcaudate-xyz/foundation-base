@@ -62,3 +62,7 @@
   (deftask -inc-
     {:template :default
      :main {:fn clojure.core/inc}}))
+
+
+^{:refer std.task/process-ns-args :added "4.0"}
+(fact "TODO")

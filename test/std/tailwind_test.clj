@@ -98,3 +98,55 @@
     (str/includes? output "+--------------------------+") => true ;; Top border of image
     (str/includes? output "||Img") => true
     (str/includes? output "||Title") => true))
+
+
+^{:refer std.tailwind/resolve-value :added "4.0"}
+(fact "TODO")
+
+^{:refer std.tailwind/resolve-spacing :added "4.0"}
+(fact "TODO")
+
+^{:refer std.tailwind/resolve-size :added "4.0"}
+(fact "TODO")
+
+^{:refer std.tailwind/match-class :added "4.0"}
+(fact "TODO")
+
+^{:refer std.tailwind/parse-token :added "4.0"}
+(fact "TODO")
+
+^{:refer std.tailwind/deep-merge :added "4.0"}
+(fact "TODO")
+
+^{:refer std.tailwind/parse :added "4.0"}
+(fact "TODO")
+
+^{:refer std.tailwind/make-canvas :added "4.0"}
+(fact "TODO")
+
+^{:refer std.tailwind/draw-point :added "4.0"}
+(fact "TODO")
+
+^{:refer std.tailwind/draw-text :added "4.0"}
+(fact "TODO")
+
+^{:refer std.tailwind/draw-box-outline :added "4.0"}
+(fact "TODO")
+
+^{:refer std.tailwind/render-canvas-str :added "4.0"}
+(fact "TODO")
+
+^{:refer std.tailwind/parse-unit :added "4.0"}
+(fact "TODO")
+
+^{:refer std.tailwind/measure-node :added "4.0"}
+(fact "TODO")
+
+^{:refer std.tailwind/layout-node :added "4.0"}
+(fact "TODO")
+
+^{:refer std.tailwind/draw-node :added "4.0"}
+(fact "TODO")
+
+^{:refer std.tailwind/render :added "4.0"}
+(fact "TODO")

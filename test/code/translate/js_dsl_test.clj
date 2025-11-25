@@ -197,3 +197,10 @@
     (sut/translate-node (read-ast "obj.json"))
     => '[(const (config {:host "localhost" :port 8080}))
          (. console log (. config host))]))
+
+
+^{:refer code.translate.js-dsl/translate-args :added "4.0"}
+(fact "TODO")
+
+^{:refer code.translate.js-dsl/translate-node :added "4.0"}
+(fact "TODO")
