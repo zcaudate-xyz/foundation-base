@@ -136,7 +136,9 @@
           (schedule (fn [] (Thread/sleep 10)) 30)
           (schedule (fn [] (Thread/sleep 10)) 40))
         (do (Thread/sleep 100)
-            (exec:current-completed %)))
+            (let [completed (exec:current-completed %)]
+              (exec:shutdown-now %)
+              completed)))
   => 4)
 
 ^{:refer std.concurrent.executor/schedule:fixed-rate :added "3.0"}
@@ -257,9 +259,8 @@
 
   (let [exe (executor:single)]
     (try
-      (doto exe
-        (exec:pool-max 20)
-        (exec:pool-size 10))
+      (exec:pool-max exe 20)
+      (exec:pool-size exe 10)
       (exec:pool-size exe)
       (finally
         (exec:shutdown exe))))

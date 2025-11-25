@@ -394,7 +394,11 @@
   (let [tag (if (instance? ScheduledThreadPoolExecutor executor)
               "scheduled"
               "raw")]
-    (str "#" tag ".executor" (executor:info executor [:type :counter :current]))))
+    (str "#" tag ".executor"
+         (try {:type (executor:type executor)
+               :id (System/identityHashCode executor)}
+              (catch Throwable t
+                (str "<" (.getMessage t) ">"))))))
 
 (impl/extend-impl java.util.concurrent.ThreadPoolExecutor
   :string executor-string
