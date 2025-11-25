@@ -3,7 +3,8 @@
             [code.test.base.executive :as executive]
             [code.test.compile.snippet :as snippet]
             [code.project :as project]
-            [std.lib :as h]))
+            [std.lib :as h]
+            [code.test.base.context :as ctx]))
 
 (defn fact:global-map
   "sets and gets the global map
@@ -68,11 +69,11 @@
              :remove   (rt/update-global ns
                                          (fn [m]
                                            (h/dissoc-nested m (first args))))
-             :prelim   (if rt/*eval-mode*
+             :prelim   (if (:eval-mode ctx/*context*)
                          (eval (snippet/vecify (rt/get-global ns :prelim))))
-             :setup    (if rt/*eval-mode*
+             :setup    (if (:eval-mode ctx/*context*)
                          (eval (snippet/vecify (rt/get-global ns :setup))))
-             :teardown (if rt/*eval-mode*
+             :teardown (if (:eval-mode ctx/*context*)
                          (eval (snippet/vecify (rt/get-global ns :teardown))))
              :list     (keys (rt/get-global ns :component))
              (eval (snippet/vecify (rt/get-global ns cmd))))))))
@@ -125,7 +126,7 @@
 
 (defn fact:ns-intern
   "imports all interns into current namespace"
-  {:added "3.0"}
+  {:added "3.od"}
   ([ns]
    (mapv (partial apply h/intern-var (h/ns-sym))
          (ns-interns ns))))

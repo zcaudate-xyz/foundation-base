@@ -7,16 +7,18 @@
             [code.test.diff :as diff]
             [std.lib.walk :as walk]
             [std.print :as print]
-            [std.pretty :as pretty]))
+            [std.pretty :as pretty]
+            [code.test.base.context :as ctx]))
 
 (defonce ^:dynamic *options* #{:print-thrown :print-failure :print-bulk})
 
 (defn- rel
   [path]
-  (cond (and rt/*root* path)
-        (fs/relativize rt/*root* path)
+  (let [root (:root ctx/*context*)]
+    (cond (and root path)
+          (fs/relativize root path)
 
-        :else path))
+          :else path)))
 
 (defn pad [s n]
   (let [len (count s)]
@@ -244,4 +246,3 @@
             (print/println
              (ansi/style (str "Success (" passed ")") #{:cyan :bold})
              "\n")) (print/println "")))
-
