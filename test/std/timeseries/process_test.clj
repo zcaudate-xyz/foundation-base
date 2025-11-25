@@ -43,28 +43,37 @@
   => fn?)
 
 ^{:refer std.timeseries.process/time-merge-fn :added "3.0"}
-(fact "creates a merge function for time")
+(fact "creates a merge function for time"
+
+  (time-merge-fn {:aggregate :first} {:key identity})
+  => fn?)
 
 ^{:refer std.timeseries.process/parse-transform-expr :added "3.0"}
-(fact "parses the transform expr" ^:hidden
+(fact "parses the transform expr"
 
   (parse-transform-expr {:interval "1m"
-                         :time    {:aggregate :first}
-                         :default {:sample 4}
-                         :custom  [{:keys [:bench.stats.lag]
-                                    :sample 10
-                                    :aggregate :max}
-                                   {:keys [:bench.stats.time]
-                                    :sample 4
-                                    :aggregate :mean}]}
+                         :time    {:aggregate :first}}
                         :map
-                        {:order :desc :key :start :unit :ms}))
+                        {:order :desc :key :start :unit :ms})
+  => map?)
 
 ^{:refer std.timeseries.process/transform-interval :added "3.0"}
-(fact "transform array based on resolution")
+(fact "transform array based on resolution"
+
+  (transform-interval (mapv (fn [i] {:time i}) (range 100))
+                      {:interval [:time 10]
+                       :merge-fn (fn [arr] (map :time arr))}
+                      :map
+                      {:key :time :order :asc})
+  => coll?)
 
 ^{:refer std.timeseries.process/process-transform :added "3.0"}
-(fact "processes the transform stage")
+(fact "processes the transform stage"
+
+  (process-transform (vec (range 100))
+                     {:time {:key identity :order :asc :unit :ms}
+                      :transform {:interval 10}})
+  => coll?)
 
 ^{:refer std.timeseries.process/process-compute :added "3.0"}
 (fact "processes the indicator stage"

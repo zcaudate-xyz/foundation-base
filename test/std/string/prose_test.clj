@@ -52,7 +52,10 @@
   => "a\nb")
 
 ^{:refer std.string.prose/single-line :added "3.0"}
-(fact "replace newlines with spaces")
+(fact "replace newlines with spaces"
+
+  (single-line "a\nb\nc")
+  => "a b c")
 
 ^{:refer std.string.prose/join-lines :added "4.0"}
 (fact "join non empty elements in array"
@@ -93,10 +96,22 @@
   => "a\n  b\n  c")
 
 ^{:refer std.string.prose/multi-line? :added "4.0"}
-(fact "check that a string has newlines")
+(fact "check that a string has newlines"
+
+  (multi-line? "a\nb")
+  => true
+
+  (multi-line? "a")
+  => false)
 
 ^{:refer std.string.prose/single-line? :added "4.0"}
-(fact "check that a string does not have newlines")
+(fact "check that a string does not have newlines"
+
+  (single-line? "a\nb")
+  => false
+
+  (single-line? "a")
+  => true)
 
 ^{:refer std.string.prose/layout-lines :added "4.0"}
 (fact "layout tokens in lines depending on max length"

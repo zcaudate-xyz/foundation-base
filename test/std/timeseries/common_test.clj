@@ -97,7 +97,10 @@
   => 10000000)
 
 ^{:refer std.timeseries.common/from-ns :added "3.0"}
-(fact "converts a time from ns")
+(fact "converts a time from ns"
+
+  (from-ns 1000000 :ms)
+  => 1)
 
 ^{:refer std.timeseries.common/duration :added "3.0"}
 (fact "calculates the duration from array and options"
@@ -121,10 +124,16 @@
   => {:key identity, :unit :ms, :order :asc, :interval 0})
 
 ^{:refer std.timeseries.common/sampling-fn :added "3.0"}
-(fact "extensible sampling function")
+(fact "extensible sampling function"
+
+  (sampling-fn :unknown)
+  => (throws))
 
 ^{:refer std.timeseries.common/sampling-parser :added "3.0"}
-(fact "extensible parser function")
+(fact "extensible parser function"
+
+  (sampling-parser :unknown)
+  => nil)
 
 ^{:refer std.timeseries.common/parse-sample-expr :added "3.0"}
 (fact "parses a sample expression"

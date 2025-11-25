@@ -151,6 +151,9 @@
    (cond (map? arg)
          (select journal arg)
 
+         (= arg :info)
+         (journal-info journal)
+
          :else
          (select journal {:series arg})))
   ([journal k v & more]

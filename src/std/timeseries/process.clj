@@ -133,9 +133,9 @@
                                                 arr)]
                            (mapv (fn [i]
                                    (or (get sorted i)
-                                       [(case type
-                                          :map  (assoc empty key (op-fn start (* i val)))
-                                          :time (op-fn start (* i val)))]))
+                                       (case type
+                                         :map  [(assoc empty key (op-fn start (* i val)))]
+                                         :time [(op-fn start (* i val))])))
                                  (range steps)))
                  :ratio  (let [num (math/ceil (* len val))]
                            (partition num arr))
@@ -152,8 +152,9 @@
 
          :else
          (let [type  (if (map? (first arr)) :map :time)
-               template (or template
-                            (common/create-template (first arr)))
+               template (when (= type :map)
+                          (or template
+                              (common/create-template (first arr))))
                {:keys [interval]} transform
                transform (assoc transform
                                 :interval (or interval 1)
