@@ -107,7 +107,21 @@
   => module/book-module?)
 
 ^{:refer std.lang.base.book/get-code-deps :added "4.0"}
-(fact "gets `:deps` or if a `:static/template` calculate dependencies")
+(fact "gets `:deps` or if a `:static/template` calculate dependencies"
+  ^:hidden
+  (-> (b/set-entry +sample+
+                   (entry/book-entry {:lang :lua
+                                      :id 'inc-fn
+                                      :module 'L.core
+                                      :section :code
+                                      :form '(defn inc-fn [x] (return (+ 1 x)))
+                                      :form-input '(defn inc-fn [x] (return (+ 1 x)))
+                                      :deps '#{L.core/identity-fn}
+                                      :namespace 'L.core
+                                      :declared false}))
+      second
+      (b/get-code-deps 'L.core/inc-fn))
+  => '#{L.core/identity-fn})
 
 ^{:refer std.lang.base.book/get-deps :added "4.0"}
 (fact "get dependencies for a given id"
@@ -196,7 +210,16 @@
   => b/book?)
 
 ^{:refer std.lang.base.book/book-from :added "4.0"}
-(fact "returns the merged book given snapshot")
+(fact "returns the merged book given snapshot"
+  ^:hidden
+  (let [snapshot {:lua  {:book +sample+}
+                  :redis {:book (b/book {:lang :redis
+                                        :meta    (:meta +book+)
+                                        :grammar (:grammar +book+)
+                                        :parent  :lua
+                                        :merged  #{}})}}]
+    (b/book-from snapshot :redis))
+  => b/book?)
 
 ^{:refer std.lang.base.book/check-compatible-lang :added "4.0"
   :setup [(def +redis+
@@ -409,9 +432,8 @@
 ^{:refer std.lang.base.book/module-create-requires :added "4.0"}
 (fact "creates a map for the requires"
   ^:hidden
-  
   (b/module-create-requires '[[L.core :as u]])
-  = '{L.core {:as u, :id L.core}})
+  => '{L.core {:as u, :id L.core}})
 
 ^{:refer std.lang.base.book/module-create :added "4.0"}
 (fact "creates a module given book and options"
