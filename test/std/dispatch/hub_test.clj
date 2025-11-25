@@ -48,6 +48,7 @@
 
 ^{:refer std.dispatch.hub/process-hub :added "3.0"}
 (fact "activates on debounce submit hit"
+  
   (def -hub- (cc/hub:new))
   (cc/hub:add-entries -hub- [1 2 3])
   (process-hub {:handler (fn [_ entries] entries) :options {:hub {:max-batch 10}}} :g -hub-)
@@ -55,6 +56,7 @@
 
 ^{:refer std.dispatch.hub/put-hub :added "3.0"}
 (fact "puts an entry into the group hubs"
+
   (def -d- {:runtime {:groups (atom {})}})
   (put-hub -d- :g 1)
   => (contains [1])
@@ -102,13 +104,14 @@
 
 ^{:refer std.dispatch.hub/info-dispatch :added "3.0"}
 (fact "returns dispatch info"
+
   (def -d- (doto (create-dispatch +test-config+) (start-dispatch)))
   (info-dispatch -d- nil) => map?
   (stop-dispatch -d-))
 
 ^{:refer std.dispatch.hub/create-dispatch :added "3.0"}
 (fact "creates the hub executor"
-
+  
   ;; Non Sorted
   (->> (test-scaffold +test-config+ 20 5 5)
        second

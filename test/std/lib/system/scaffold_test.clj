@@ -4,7 +4,9 @@
 
 ^{:refer std.lib.system.scaffold/scaffold:register :added "3.0"}
 (fact "registers a scaffold in the namespace"
-  (resolve 'scaffold:register) => var?)
+  (resolve 'scaffold:register) => var?
+
+  (scaffold:register))
 
 ^{:refer std.lib.system.scaffold/scaffold:deregister :added "3.0"}
 (fact "deregisters a scaffold in the namespace"

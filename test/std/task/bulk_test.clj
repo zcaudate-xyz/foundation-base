@@ -104,3 +104,7 @@
 
   (bulk +task+ bulk-test-fn [1 2 3] {:print {}} {} {} {})
   => map?)
+
+
+^{:refer std.task.bulk/prepare-columns :added "4.0"}
+(fact "TODO")

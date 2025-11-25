@@ -1,5 +1,6 @@
 (ns std.concurrent.print
   (:require [std.concurrent.atom :as atom]
+            [std.concurrent.executor :as exe]
             [std.lib.foundation :as h]
             [std.lib.env :as env]
             [std.lib.resource :as res]
@@ -29,8 +30,12 @@
   "gets the print executor"
   {:added "3.0"}
   []
-  (or *executor*
-      (res/res :hara/print)))
+  (let [exe (or *executor*
+                (res/res :hara/print))]
+    (if (or (nil? exe)
+            (exe/exec:shutdown? (:executor exe)))
+      (res/res:restart :hara/print)
+      exe)))
 
 (defn submit
   "submits an entry for printing"

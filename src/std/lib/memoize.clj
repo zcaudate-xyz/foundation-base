@@ -79,11 +79,11 @@
                 :enabled  memoize:enabled?
                 :disabled memoize:disabled?
                 identity)]
-     (cond->> @registry
-       status
-       (keep (fn [[var mem]]
-               (if (memoize:disabled? mem)
-                 var)))))))
+     (keys (cond->> @registry
+             status (keep (fn [[var mem]]
+                            (if (memoize:disabled? mem)
+                              [var mem])))
+             :then (into {}))))))
 
 (defn registered-memoize?
   "checks if a memoize function is registered

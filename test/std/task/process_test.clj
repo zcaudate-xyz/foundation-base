@@ -22,3 +22,19 @@
 
 ^{:refer std.task.process/wrap-input :added "3.0"}
 (fact "enables execution of task with single or multiple inputs")
+
+
+^{:refer std.task.process/main-function :added "4.0"}
+(fact "TODO")
+
+^{:refer std.task.process/select-filter :added "4.0"}
+(fact "TODO")
+
+^{:refer std.task.process/select-inputs :added "4.0"}
+(fact "TODO")
+
+^{:refer std.task.process/task-inputs :added "4.0"}
+(fact "TODO")
+
+^{:refer std.task.process/invoke :added "4.0"}
+(fact "TODO")
