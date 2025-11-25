@@ -266,7 +266,11 @@
 
 (def clojure-interface-handlers
   "Fallback print handlers for other Clojure interfaces."
-  {clojure.lang.IPending
+  {clojure.lang.IRecord
+   (fn [printer value]
+     (format-doc printer (into {} value)))
+
+   clojure.lang.IPending
    (fn pending-handler
      [printer value]
      (let [doc (if (realized? value)

@@ -14,7 +14,7 @@
 
 (defn- memoize-string
   ([mem]
-   (str "#memoize" (memoize:info mem))))
+   (str "#memoize" (select-keys (memoize:info mem) [:status :items]))))
 
 (defimpl Memoize [function memfunction cache var registry status]
   :string memoize-string
@@ -41,7 +41,7 @@
                          (when-let [ret (apply function args)]
                            (swap! cache assoc args ret)
                            ret)))]
-     (Memoize. function memfunction cache var registry status))))
+     (->Memoize function memfunction cache var registry status))))
 
 (defn register-memoize
   "registers the memoize function
