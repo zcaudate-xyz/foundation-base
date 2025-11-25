@@ -6,7 +6,9 @@
             [js.blessed.frame]))
 
 ^{:refer std.lang.base.book-module/book-module? :added "4.0"}
-(fact "checks of object is a book module")
+(fact "checks of object is a book module"
+  ^:hidden
+  (book-module? (book-module {:lang :lua :id 'L.core})) => true)
 
 ^{:refer std.lang.base.book-module/book-module :added "4.0"}
 (fact "creates a book module"

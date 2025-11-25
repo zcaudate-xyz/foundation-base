@@ -43,10 +43,12 @@
    "=" {} {}))
 
 ^{:refer std.lang.base.emit-fn/emit-hint-type :added "4.0"}
-(fact "emits the return type")
+(fact "emits the return type"
+  "placeholder for tests")
 
 ^{:refer std.lang.base.emit-fn/emit-def-type :added "4.0"}
-(fact "emits the def type")
+(fact "emits the def type"
+  "placeholder for tests")
 
 ^{:refer std.lang.base.emit-fn/emit-fn-type :added "3.0"}
 (fact "returns the function type"
@@ -110,7 +112,9 @@
       "}"))
 
 ^{:refer std.lang.base.emit-fn/test-fn-loop :added "4.0"}
-(fact "add blocks, fn, var and const to emit")
+(fact "add blocks, fn, var and const to emit"
+  "placeholder for tests")
 
 ^{:refer std.lang.base.emit-fn/test-fn-emit :added "4.0"}
-(fact  "add blocks, fn, var and const to emit")
+(fact  "add blocks, fn, var and const to emit"
+  "placeholder for tests")

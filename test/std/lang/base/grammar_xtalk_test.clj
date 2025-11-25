@@ -3,19 +3,24 @@
   (:require [std.lang.base.grammar-xtalk :refer :all]))
 
 ^{:refer std.lang.base.grammar-xtalk/tf-throw :added "4.0"}
-(fact "wrapper for throw transform")
+(fact "wrapper for throw transform"
+  "placeholder for tests")
 
 ^{:refer std.lang.base.grammar-xtalk/tf-eq-nil? :added "4.0"}
-(fact "equals nil transform")
+(fact "equals nil transform"
+  "placeholder for tests")
 
 ^{:refer std.lang.base.grammar-xtalk/tf-not-nil? :added "4.0"}
-(fact "not nil transform")
+(fact "not nil transform"
+  "placeholder for tests")
 
 ^{:refer std.lang.base.grammar-xtalk/tf-proto-create :added "4.0"}
-(fact "creates the prototype map")
+(fact "creates the prototype map"
+  "placeholder for tests")
 
 ^{:refer std.lang.base.grammar-xtalk/tf-has-key? :added "4.0"}
-(fact "has key default transform")
+(fact "has key default transform"
+  "placeholder for tests")
 
 ^{:refer std.lang.base.grammar-xtalk/tf-get-path :added "4.0"}
 (fact "get-in transform"
@@ -86,16 +91,20 @@
   => 2)
 
 ^{:refer std.lang.base.grammar-xtalk/tf-offset :added "4.0"}
-(fact "gets the offset")
+(fact "gets the offset"
+  "placeholder for tests")
 
 ^{:refer std.lang.base.grammar-xtalk/tf-offset-rev :added "4.0"}
-(fact "gets the reverse offset")
+(fact "gets the reverse offset"
+  "placeholder for tests")
 
 ^{:refer std.lang.base.grammar-xtalk/tf-offset-len :added "4.0"}
-(fact "gets the length offset")
+(fact "gets the length offset"
+  "placeholder for tests")
 
 ^{:refer std.lang.base.grammar-xtalk/tf-offset-rlen :added "4.0"}
-(fact "gets the reverse length offset")
+(fact "gets the reverse length offset"
+  "placeholder for tests")
 
 ^{:refer std.lang.base.grammar-xtalk/tf-global-set :added "4.0"}
 (fact "default global set transform"

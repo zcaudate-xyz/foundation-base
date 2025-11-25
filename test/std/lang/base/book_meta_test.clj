@@ -5,7 +5,9 @@
             [std.lib :as h]))
 
 ^{:refer std.lang.base.book-meta/book-meta? :added "4.0"}
-(fact "checks if object is a book meta")
+(fact "checks if object is a book meta"
+  ^:hidden
+  (book-meta? (book-meta {})) => true)
 
 ^{:refer std.lang.base.book-meta/book-meta :added "4.0"}
 (fact "creates a book meta"

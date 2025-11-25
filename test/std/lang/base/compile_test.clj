@@ -64,7 +64,7 @@
 
 ^{:refer std.lang.base.compile/compile-module-directory :added "4.0"}
 (fact "compiles a directory"
-  )
+  "placeholder for tests")
 
 ^{:refer std.lang.base.compile/compile-module-schema :added "4.0"}
 (fact "compiles all namespaces into a single file (for sql)"
@@ -84,94 +84,17 @@
 
 
 ^{:refer std.lang.base.compile/compile-module-directory-selected :added "4.0"}
-(fact "compiles the directory based on sorted imports")
+(fact "compiles the directory based on sorted imports"
+  "placeholder for tests")
 
 ^{:refer std.lang.base.compile/compile-module-prep :added "4.0"}
-(fact "precs the single entry point setup")
+(fact "precs the single entry point setup"
+  "placeholder for tests")
 
 ^{:refer std.lang.base.compile/compile-module-root :added "4.0"}
-(fact "compiles module.root")
-
-
-(comment
-  ^{:refer std.make.compile/compile-script :added "4.0"}
-  (fact "compiles a script with dependencies when given a "
-    ^:hidden
-    
-    (with:mock-compile
-     (compile-script {:root   ".build"
-                      :target "src"
-                      :file   "pkg/file.lua"
-                      :main f/to-array
-                      :layout :flat
-                      :entry {:label true}}))
-    => [".build/src/pkg/file.lua"
-        (std.string/|
-         "-- L.core.functional/reduce"
-         "local function reduce(f,acc,seq)"
-         "  if (type(seq) == 'function') then"
-         "    for v in seq do"
-         "      local res, terminate = f(acc,v)"
-         "      acc = res"
-         "      if terminate then"
-         "        return acc"
-         "      end"
-         "    end"
-         "  else"
-         "    for _, v in ipairs(seq) do"
-         "      local res, terminate = f(acc,v)"
-         "      acc = res"
-         "      if terminate then"
-         "        return acc"
-         "      end"
-         "    end"
-         "  end"
-         "  return acc"
-         "end"
-         ""
-         "-- L.core.functional/to-array"
-         "local function to_array(seq)"
-         "  local out = {}"
-         "  reduce(function (_,v)"
-         "    table.insert(out,v)"
-         "  end,nil,seq)"
-         "  return out"
-         "end")])
-
-  ^{:refer std.make.compile/compile-module :added "4.0"}
-  (fact "compiles a module"
-    ^:hidden
-
-    
-    (with:mock-compile
-     (compile-module 'L.core
-                     {:lang :lua
-                      :root   ".build"
-                      :target "src"
-                      :file   "pkg/file.lua"}))
-    => (contains
-        [".build/src/pkg/file.lua"
-         string?]))
-
-  ^{:refer std.make.compile/compile-graph :added "4.0"}
-  (fact "compiles a root module and all dependencies"
-    ^:hidden
-    
-    (require 'js.blessed.form-test)
-    (with:mock-compile
-     (compile-graph 
-      {:lang :js
-       :main 'js.blessed.form-test
-       :root   ".build"
-       :target "src"}))
-    => coll?)
-  
-  ^{:refer std.make.compile/compile-schema :added "4.0"}
-  (fact "compiles entire schema of")
-
-  
-  )
-
+(fact "compiles module.root"
+  "placeholder for tests")
 
 ^{:refer std.lang.base.compile/compile-module-create-links :added "4.0"}
-(fact "creates links for modules")
+(fact "creates links for modules"
+  "placeholder for tests")

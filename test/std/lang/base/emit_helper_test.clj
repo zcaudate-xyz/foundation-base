@@ -12,7 +12,8 @@
   (grammar/grammar :test +reserved+ helper/+default+))
 
 ^{:refer std.lang.base.emit-helper/default-emit-fn :added "4.0"}
-(fact "the default emit function")
+(fact "the default emit function"
+  "placeholder for tests")
 
 ^{:refer std.lang.base.emit-helper/pr-single :added "3.0"}
 (fact "prints a single quoted string"
@@ -74,7 +75,8 @@
        [{:- [:const :int]} j]])
 
 ^{:refer std.lang.base.emit-helper/emit-typed-allowed-args :added "4.0"}
-(fact "allowed declared args other than symbols")
+(fact "allowed declared args other than symbols"
+  "placeholder for tests")
 
 ^{:refer std.lang.base.emit-helper/emit-typed-args :added "3.0"}
 (fact "create types args from declarationns"
