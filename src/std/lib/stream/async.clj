@@ -8,7 +8,7 @@
             [std.lib.generate :as gen]
             [std.lib.time :as time]
             [std.lib.stream :as stream]
-            [std.lib.stream.xform :as x])
+            [std.lib.stream.iter :as i])
   (:refer-clojure :exclude [realized?])
   (:import (java.util.concurrent CompletableFuture
                                  CompletionStage
@@ -199,20 +199,20 @@
   ([obj f m]
    (f/on:success (stage-unit obj) (fn [obj] (f (realize obj))) m)))
 
-(defn x:async
+(defn i:async
   "constructs an async transducer
  
-   (->> (sequence (x:async inc)
+   (->> (sequence (i:async inc)
                   (range 5))
         (map deref))
    => '(1 2 3 4 5)"
   {:added "3.0"}
   ([]
-   (x:async identity))
+   (i:async identity))
   ([f]
-   (x:async f {}))
+   (i:async f {}))
   ([f {:keys [pool timeout delay default] :as m}]
-   (x/x:map
+   (i/i:map
     (fn [obj]
       (cond (stage? obj)
             (next-stage obj f m)
@@ -267,28 +267,28 @@
                      obj)]
            (assoc mono :future (f/future:run (fn [] (f obj)) m))))))
 
-(defn x:step
+(defn i:step
   "constructs a step transducer"
   {:added "3.0"}
   ([]
-   (x:step identity))
+   (i:step identity))
   ([f]
-   (x:step f {}))
+   (i:step f {}))
   ([f {:keys [pool timeout delay default collect] :as m}]
    (-> (fn [obj]
          (let [mono (if (mono? obj) obj (mono {}))
                f (wrap-collectors f mono collect)
                mono (process-mono mono f obj m)]
            mono))
-       (x/x:map))))
+       (i/i:map))))
 
-(defn x:guard
+(defn i:guard
   "constructs a guard transducer"
   {:added "3.0"}
   ([pred accept]
-   (x:guard pred accept nil))
+   (i:guard pred accept nil))
   ([pred accept reject]
-   (x:guard pred accept reject {}))
+   (i:guard pred accept reject {}))
   ([pred accept reject {:keys [pool timeout delay default collect] :as m}]
    (-> (fn [obj]
          (let [mono (if (mono? obj) obj (mono {:future (f/completed obj)}))
@@ -298,11 +298,11 @@
                      [false obj (stream/collect reject [mono])]))
                f (wrap-collectors f mono collect)]
            mono (process-mono mono f obj m)))
-       (x/x:map))))
+       (i/i:map))))
 
-(stream/add-transforms :step  x:step
-                       :async x:async
-                       :guard x:guard)
+(stream/add-transforms :step  i:step
+                       :async i:async
+                       :guard i:guard)
 
 (defn- flux-string
   ([{:keys [id queue]}]
@@ -356,12 +356,12 @@
                                                (f/future:force (:future o) :exception e)
                                                (f/future:force (:future o) :value obj))))
                             [o (update q :requested pop)])))]
-     (into [] (comp xform
-                    (map (fn [val]
-                           (let [m   (mono-fn val)
-                                 ret (atom/swap-return! queue #(queue-fn % m))]
-                             ret))))
-           supply)
+     (->> (xform supply)
+          (map (fn [val]
+                 (let [m   (mono-fn val)
+                       ret (atom/swap-return! queue #(queue-fn % m))]
+                   ret)))
+          (doall))
      flux)))
 
 (defimpl Flux [id queue]
