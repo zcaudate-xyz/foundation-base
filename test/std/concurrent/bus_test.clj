@@ -1,8 +1,9 @@
 (ns std.concurrent.bus-test
   (:use [code.test :exclude [global]])
   (:require [std.concurrent.bus :refer :all]
-            [std.concurrent :as cc])
-  (:refer-clojure :exclude [send]))
+            [std.concurrent :as cc]
+            [std.concurrent.queue :as q]
+            [std.lib.future :as f]))
 
 ^{:refer std.concurrent.bus/bus:get-thread :added "3.0"}
 (fact "gets thread given an id"
@@ -20,7 +21,11 @@
   => string?)
 
 ^{:refer std.concurrent.bus/bus:has-id? :added "3.0"}
-(fact "checks that the bus has a given id")
+(fact "checks that the bus has a given id"
+
+  (bus:with-temp bus
+                 (bus:has-id? bus (bus:get-id bus)))
+  => true)
 
 ^{:refer std.concurrent.bus/bus:get-queue :added "3.0"}
 (fact "gets the message queue associated with the thread"
@@ -45,13 +50,28 @@
   => true)
 
 ^{:refer std.concurrent.bus/bus:get-count :added "3.0"}
-(fact "returns the number of threads registered")
+(fact "returns the number of threads registered"
+
+  (bus:with-temp bus
+                 (bus:get-count bus))
+  => 1)
 
 ^{:refer std.concurrent.bus/bus:register :added "3.0"}
-(fact "registers a thread to the bus")
+(fact "registers a thread to the bus"
+
+  (bus:with-temp bus
+                 (bus:register bus "foo" (Thread.))
+                 (bus:has-id? bus "foo"))
+  => true)
 
 ^{:refer std.concurrent.bus/bus:deregister :added "3.0"}
-(fact "deregisters from the bus")
+(fact "deregisters from the bus"
+
+  (bus:with-temp bus
+                 (bus:register bus "foo" (Thread.))
+                 (bus:deregister bus "foo")
+                 (bus:has-id? bus "foo"))
+  => false)
 
 ^{:refer std.concurrent.bus/bus:send :added "3.0"}
 (fact "sends a message to the given thread" ^:hidden
@@ -59,7 +79,7 @@
   (bus:with-temp bus
                  (bus:send bus (bus:get-id bus)
                            {:op :hello :message "world"})
-                 (cc/take (bus:get-queue bus)))
+                 (cc/take (bus:get-queue bus) 1000 :ms))
   => (contains {:op :hello, :message "world", :id string?}))
 
 ^{:refer std.concurrent.bus/bus:wait :added "3.0"}
@@ -68,36 +88,69 @@
   (bus:with-temp bus
                  (bus:send bus (bus:get-id bus)
                            {:op :hello :message "world"})
-                 (bus:wait bus))
+                 (bus:wait bus {:timeout 1000}))
   => (contains {:op :hello, :message "world", :id string?})
 
   (bus:with-temp bus
                  (bus:wait bus {:timeout 100})))
 
 ^{:refer std.concurrent.bus/handler-thunk :added "3.0"}
-(fact "creates a thread loop for given message handler")
+(fact "creates a thread loop for given message handler"
+
+  (bus:with-temp bus
+                 (let [output (q/queue)
+                       bus (assoc bus :output output)
+                       handler (fn [msg] (assoc msg :handled true))
+                       thunk (handler-thunk bus handler {:stopped (f/incomplete)})
+                       id (bus:get-id bus)]
+                   (f/future
+                     (bus:register bus id (Thread/currentThread))
+                     (thunk))
+                   (Thread/sleep 10)
+                   (bus:send bus id {:op :test})
+                   (q/take output 1000 :ms)))
+  => (contains {:status :success
+                :data (contains {:handled true})}))
 
 ^{:refer std.concurrent.bus/run-handler :added "3.0"}
-(fact "runs the handler in a thread loop")
+(fact "runs the handler in a thread loop"
+
+  (bus:with-temp bus
+                 (let [started (f/incomplete)
+                       stopped (f/incomplete)
+                       _ (f/future (run-handler bus (fn [m] (assoc m :done true))
+                                                 {:started started :stopped stopped}))
+                       {id :id} (deref started 1000 :timeout)]
+                   (bus:send bus id {:op :test})
+                   (bus:send bus id {:op :exit})
+                   (deref stopped 1000 :timeout)))
+  => (contains {:exit :normal}))
 
 ^{:refer std.concurrent.bus/bus:send-all :added "3.0"}
-(fact "bus:sends message to all thread queues")
+(fact "bus:sends message to all thread queues"
+
+  (bus:with-temp bus
+                 (bus:send-all bus {:op :all})
+                 (bus:wait bus {:timeout 1000}))
+  => (contains {:op :all}))
 
 ^{:refer std.concurrent.bus/bus:open :added "3.0"}
 (fact "bus:opens a new handler loop given function"
 
   (bus:with-temp bus
-                 (let [{:keys [id]} @(bus:open bus (fn [m]
-                                                     (update m :value inc)))]
+                 (let [{:keys [id]} (deref (bus:open bus (fn [m]
+                                                           (update m :value inc)))
+                                           1000 :timeout)]
                    (Thread/sleep 100)
-                   @(bus:send bus id {:value 1})))
+                   (deref (bus:send bus id {:value 1}) 1000 :timeout)))
   => (contains {:value 2, :id string?}) ^:hidden
 
   (bus:with-temp bus
-                 (let [{:keys [id stopped]} @(bus:open bus (fn [m]
-                                                             (update m :value inc))
-                                                       {:timeout 400})]
-                   [@stopped (bus:get-count bus)]))
+                 (let [{:keys [id stopped]} (deref (bus:open bus (fn [m]
+                                                                   (update m :value inc))
+                                                             {:timeout 400})
+                                                   1000 :timeout)]
+                   [(deref stopped 1000 :timeout) (bus:get-count bus)]))
   => (contains-in [{:exit :timeout
                     :id string?
                     :start number?
@@ -146,7 +199,7 @@
                                                              (update m :value inc)))]
                    (Thread/sleep 10)
                    (bus:kill bus id)
-                   [@stopped (bus:get-count bus)]))
+                   [(deref stopped 1000 :timeout) (bus:get-count bus)]))
   => (contains-in [{:exit :interrupted
                     :id string?
                     :unprocessed empty?
@@ -173,10 +226,30 @@
   => 1)
 
 ^{:refer std.concurrent.bus/main-thunk :added "3.0"}
-(fact "creates main message return handler")
+(fact "creates main message return handler"
+
+  (bus:with-temp bus
+                 (let [thunk (main-thunk bus)
+                       output (:output bus)
+                       results (:results bus)
+                       id "test-id"
+                       ret (f/incomplete)
+                       t (Thread. thunk)]
+                   (swap! results assoc id ret)
+                   (q/put output {:id id :status :success :data "data"})
+                   (.start t)
+                   (try
+                     (deref ret 1000 :timeout)
+                     (finally
+                       (.interrupt t)
+                       (.join t 100)))))
+  => "data")
 
 ^{:refer std.concurrent.bus/main-loop :added "3.0"}
-(fact "creates a new message return loop")
+(fact "creates a new message return loop"
+  (bus:with-temp bus
+                 (bus:send bus (bus:get-id bus)
+                           {:op :hello :message "world"})))
 
 ^{:refer std.concurrent.bus/started?-bus :added "3.0"}
 (fact "checks if bus is running"
@@ -187,29 +260,77 @@
   => true)
 
 ^{:refer std.concurrent.bus/start-bus :added "3.0"}
-(fact "starts the bus")
+(fact "starts the bus"
+
+  (let [bus (start-bus (bus:create))]
+    (loop [i 0]
+      (if (started?-bus bus)
+        true
+        (if (< i 10)
+          (do (Thread/sleep 20) (recur (inc i)))
+          false))))
+  => true)
 
 ^{:refer std.concurrent.bus/stop-bus :added "3.0"}
-(fact "stops the bus")
+(fact "stops the bus"
+
+  (let [bus (doto (bus:create)
+              (start-bus))]
+    (loop [i 0]
+      (if (started?-bus bus)
+        (do (stop-bus bus)
+            (not (started?-bus bus)))
+        (if (< i 10)
+          (do (Thread/sleep 20) (recur (inc i)))
+          false))))
+  => true)
 
 ^{:refer std.concurrent.bus/info-bus :added "3.0"}
-(fact "returns info about the bus")
+(fact "returns info about the bus"
+
+  (bus:with-temp bus
+                 (loop [i 0]
+                   (if (started?-bus bus)
+                     (info-bus bus)
+                     (if (< i 10)
+                       (do (Thread/sleep 20) (recur (inc i)))
+                       (info-bus bus)))))
+  => (contains {:running true}))
 
 ^{:refer std.concurrent.bus/bus:create :added "3.0"}
-(fact "creates a bus")
+(fact "creates a bus"
+
+  (bus:create)
+  => bus?)
 
 ^{:refer std.concurrent.bus/bus :added "3.0"}
-(fact "creates and starts a bus")
+(fact "creates and starts a bus"
+
+  (bus)
+  => bus?)
 
 ^{:refer std.concurrent.bus/bus? :added "3.0"}
-(fact "checks if object is instance of Bus")
+(fact "checks if object is instance of Bus"
+
+  (bus? (bus))
+  => true)
 
 ^{:refer std.concurrent.bus/bus:with-temp :added "3.0"
   :style/indent 1}
-(fact "checks if object is instance of Bus")
+(fact "checks if object is instance of Bus"
+
+  (bus:with-temp bus
+                 (bus? bus))
+  => true)
 
 ^{:refer std.concurrent.bus/bus:reset-counters :added "4.0"}
-(fact "resets the counters for a bus")
+(fact "resets the counters for a bus"
+
+  (bus:with-temp bus
+                 (bus:send bus (bus:get-id bus) {:op :test})
+                 (bus:reset-counters bus)
+                 @(:received (:counters bus)))
+  => 0)
 
 (comment
 
