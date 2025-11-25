@@ -5,9 +5,11 @@
 ^{:refer code.query.match.impl/actual-pattern :added "3.0"}
 (fact "constructs a pattern used for direct comparison"
 
-  (actual-pattern '_)
+  (:expression (actual-pattern '_))
+  => '_
 
-  (actual-pattern #{1 2 3}))
+  (:expression (actual-pattern #{1 2 3}))
+  => #{1 2 3})
 
 ^{:refer code.query.match.impl/actual-pattern? :added "3.0"}
 (fact "checks if input is an actual pattern"
@@ -21,9 +23,11 @@
 ^{:refer code.query.match.impl/eval-pattern :added "3.0"}
 (fact "constructs a pattern that is evaluated before comparison"
 
-  (eval-pattern '(keyword "a"))
+  (:expression (eval-pattern '(keyword "a")))
+  => '(keyword "a")
 
-  (eval-pattern 'symbol?))
+  (:expression (eval-pattern 'symbol?))
+  => 'symbol?)
 
 ^{:refer code.query.match.impl/eval-pattern? :added "3.0"}
 (fact "checks if input is an eval pattern"

@@ -208,7 +208,10 @@
   => true)
 
 ^{:refer code.query.match/tree-search :added "3.0"}
-(fact "recursively searches a tree structure for elements matching a predicate, used as a helper for `p-contains`")
+(fact "recursively searches a tree structure for elements matching a predicate, used as a helper for `p-contains`"
+  (let [m-fn (fn [nav] (= 'x (nav/value nav)))]
+    (tree-search (nav/parse-string "((a b) (c (d x)))") m-fn nav/down nav/right))
+  => true)
 
 ^{:refer code.query.match/p-contains :added "3.0"}
 (fact "checks that any element (deeply nested also) of the container matches"
@@ -219,7 +222,10 @@
   => true)
 
 ^{:refer code.query.match/tree-depth-search :added "3.0"}
-(fact "performs a depth-first search for a match N levels down in a tree structure, used as a helper for `p-nth-contains`")
+(fact "performs a depth-first search for a match N levels down in a tree structure, used as a helper for `p-nth-contains`"
+  (let [m-fn (fn [nav] (= 'x (nav/value nav)))]
+    (tree-depth-search (nav/parse-string "((a b) (c (d x)))") m-fn 3 nav/down nav/right))
+  => true)
 
 ^{:refer code.query.match/p-nth-contains :added "3.0"}
 (fact "search for match n-levels down"
