@@ -8,10 +8,19 @@
             [code.project :as project]
             [std.task :as task]
             [std.block :as block]
-            [std.lib :as h]
+            [std.lib :as h :refer [definvoke]]
             [std.string :as str]
-            [std.lib.result :as res])
+            [std.lib.result :as res]
+            [code.manage.unit.generate :as generate])
   (:refer-clojure :exclude [import]))
+
+(definvoke generate-tests
+  "generates tests for a given namespace"
+  {:added "3.0"}
+  [:fn {}]
+  ([ns {:keys [fn] :as params} lookup project]
+   (let [f (read-string fn)]
+     (generate/generate-tests ns f params lookup project))))
 
 (defn import
   "imports unit tests as docstrings
