@@ -38,7 +38,7 @@
 (fact "lists all registered memoizes"
 
   (registered-memoizes)
-  => (any nil? seq?))
+  => (any nil? coll?))
 
 ^{:refer std.lib.memoize/registered-memoize? :added "3.0"}
 (fact "checks if a memoize function is registered"
