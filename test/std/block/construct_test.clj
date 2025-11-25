@@ -93,7 +93,19 @@
   => "abc")
 
 ^{:refer std.block.construct/container-checks :added "3.0"}
-(fact "performs checks for the container")
+(fact "performs checks for the container"
+
+  (container-checks :list [] {})
+  => true
+
+  (container-checks :list [(token 1)]
+                    {:cons 1})
+  => true
+
+  (try (container-checks :list [] {:cons 1})
+       (catch clojure.lang.ExceptionInfo e
+         :thrown))
+  => :thrown)
 
 ^{:refer std.block.construct/container :added "3.0"}
 (fact "creates a container"

@@ -23,13 +23,28 @@
   => 11)
 
 ^{:refer std.block.layout.estimate/estimate-multiline-basic :added "4.0"}
-(fact "does basic estimation")
+(fact "does basic estimation"
+
+  (est/estimate-multiline-basic [1 2 3] {:readable-len 10})
+  => false
+
+  (est/estimate-multiline-basic [1 2 3 4 5 6 7 8 9 10 11] {:readable-len 10})
+  => true)
 
 ^{:refer std.block.layout.estimate/estimate-multiline-data :added "4.0"}
-(fact "estimation for maps and sets")
+(fact "estimation for maps and sets"
+
+  (est/estimate-multiline-data {:a 1} {:readable-len 10})
+  => false
+
+  (est/estimate-multiline-data #{1 2 3} {:readable-len 10})
+  => false)
 
 ^{:refer std.block.layout.estimate/estimate-multiline-vector :added "4.0"}
-(fact "estimation for vectors")
+(fact "estimation for vectors"
+
+  (est/estimate-multiline-vector [1 2 3] {:readable-len 10})
+  => false)
 
 ^{:refer std.block.layout.estimate/estimate-multiline-list :added "4.0"}
 (fact "estimates if special forms are multilined"

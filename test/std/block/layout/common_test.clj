@@ -447,7 +447,19 @@
   => '[:a-long ␣ 1 ␣ :b-long ␣ 2 ␣ :c-long ␣ 3 ␣ :d-long ␣ 4])
 
 ^{:refer std.block.layout.common/layout-by :added "4.0"}
-(fact "general layout function")
+(fact "general layout function"
+
+  (construct/rep
+   (common/layout-by [:a 1 :b 2]
+                     0
+                     {:spec {:row-wrap true :row-len 5}}))
+  => '[:a ␣ 1 \n :b ␣ 2]
+
+  (construct/rep
+   (common/layout-by [:a 1 :b 2]
+                     0
+                     {:spec {:columns 2}}))
+  => '[:a ␣ 1 \n :b ␣ 2])
 
 ^{:refer std.block.layout.common/layout-multiline-hashset :added "4.0"}
 (fact "layouts the hashset"
