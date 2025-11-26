@@ -155,6 +155,7 @@
    
    ;; MCP
    [org.hugoduncan/mcp-clj-server "0.1.60"]
+   [ring/ring-core "1.15.3"]
    [org.clojure/core.async "1.6.681"]
    [http-kit "2.8.0"]
    [cheshire "5.13.0"]
@@ -179,6 +180,7 @@
                                       (require '[std.lib :as h])
                                       (catch Throwable t (.printStackTrace t)))]}}
   #_#_:repositories [["atlassian" "https://maven.artifacts.atlassian.com/"]]
+  :paths ["src"]
   :resource-paths    ["resources" "src-build" "src-extra" "src-doc" "test-data" "test-code"]
   :java-source-paths ["src-java" "test-java"]
   :java-output-path  "target/classes"
