@@ -72,7 +72,8 @@
   "creates a summary of given results"
   {:added "3.0"}
   ([items]
-   (let [summary (h/map-vals count items)]
+   (let [summary (h/map-vals count items)
+         summary (merge {:failed 0 :throw 0 :timeout 0} summary)]
      (when (:print-bulk print/*options*)
        (doseq [item  (:failed items)]
          (-> item
