@@ -1,7 +1,7 @@
 (ns indigo.server.api-prompt
   (:require [std.lib :as h]
             [std.string :as str]
-            [code.heal :as heal]))
+            [std.block.heal :as heal]))
 
 (defn with-prompt-fn
   [prompt-fn body]

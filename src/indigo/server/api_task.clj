@@ -1,5 +1,5 @@
 (ns indigo.server.api-task
-  (:require [code.heal :as heal]
+  (:require [std.block.heal :as heal]
             [std.json :as json]
             [std.block :as block]
             [std.lib :as h]
