@@ -31,7 +31,7 @@
   ^:hidden
   
   (bind/layout-spec-fn '(assoc m :a 1 :b 2) true)
-  => {:columns 2, :col-from 1})
+  => {:columns 2, :col-from 1 :col-call true})
 
 ^{:refer std.block.layout.bind/layout-annotate-arglist :added "4.0"}
 (fact "adds layout metadat to arglists"
@@ -178,9 +178,10 @@
        (+ 1 2 3))))
   => ["(let [foo-bind          [1 2 3]"
       "      {:keys [a ab abc]"
-      "       :as data}        (merge {:a1 {:b1-data 1 :b1-data-long1 2}"
-      "                                :a2 {:b2 3 :b2-long1 4}}"
-      "                               spec)"
+      "       :as data}        (merge"
+      "                         {:a1 {:b1-data 1 :b1-data-long1 2}"
+      "                          :a2 {:b2 3 :b2-long1 4}}"
+      "                         spec)"
       "      foo-bind          [1 2 3]]"
       "  (+ 1 2 3))"]
   

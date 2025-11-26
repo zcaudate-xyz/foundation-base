@@ -5,6 +5,13 @@
             [std.lib.future :as f]
             [std.lib.time :as time]))
 
+
+(def ^:dynamic *compile-meta* nil)
+
+(def ^:dynamic *compile-desc* nil)
+
+(def ^:dynamic *file-path* nil)
+
 (def +type+
   #{:core :template})
 

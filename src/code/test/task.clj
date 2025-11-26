@@ -30,8 +30,9 @@
 
 (defn- retrieve-fn [kw]
   (fn [data]
-    (->> (executive/retrieve-line kw data)
-         (mapv #(str (first %) ":" (second %))))))
+    (not-empty
+     (->> (executive/retrieve-line kw data)
+          (mapv #(str (first %) ":" (second %)))))))
 
 (defn- test-lookup [project]
   (project/all-files (:test-paths project)
@@ -65,16 +66,16 @@
                            :align  :left}
                           {:key    :failed
                            :align  :left
-                           :length 40
+                           :length 70
                            :color  #{:red}}
                           {:key    :throw
                            :align  :left
-                           :length 40
+                           :length 20
                            :color  #{:yellow}}
                           {:key    :timeout
                            :align  :left
-                           :length 40
-                           :color  #{:red}}]}
+                           :length 20
+                           :color  #{:magenta}}]}
     :summary  {:finalise  executive/summarise-bulk}}))
 
 (defn run:interrupt

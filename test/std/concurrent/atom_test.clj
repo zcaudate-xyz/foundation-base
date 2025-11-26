@@ -6,11 +6,14 @@
             [std.lib :as h]))
 
 ^{:refer std.concurrent.atom/aq:new :added "3.0"}
-(fact "creates an atom with a vec as queue")
+(fact "creates an atom with a vec as queue"
+
+  @(aq:new)
+  => [])
 
 ^{:refer std.concurrent.atom/aq:process :added "3.0"}
-(fact "processes "
-
+(fact "processes elements given a batch"
+  
   (let [+state+ (atom [])]
   
     (aq:process (fn [elems] (swap! +state+ conj elems))
@@ -21,7 +24,7 @@
 
 ^{:refer std.concurrent.atom/aq:submit :added "3.0"}
 (fact "submission function for one or multiple entries to aq"
-
+  
   (let [-out- (atom [])
         -exe- (executor/executor:single)
         -q-   (atom [])
@@ -130,3 +133,10 @@
               (swap! -hub- update :ticket f/future:force true))
     (hub:wait -hub-))
   => true)
+
+(fact "hello"
+  ^:hidden
+  
+  (let [a 1]
+    (list 'a)
+    => '(a)))

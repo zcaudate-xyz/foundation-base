@@ -14,7 +14,7 @@
   {:added "3.0"}
   ([{:keys [form value]}]
    (if value
-     (assoc value :form form :from :evaluate)
+     value
      (let [eval-fn  (fn []
                       (try
                         {:status :success :data (eval form)}
@@ -58,9 +58,10 @@
   :type)
 
 (defmethod process :form
-  ([{:keys [form meta] :as op}]
+  ([{:keys [form original meta] :as op}]
    (let [result (-> (evaluate op)
-                    (assoc :meta meta))
+                    (assoc :meta meta
+                           :original original))
          _    (intern *ns* (with-meta '*last* {:dynamic true})
                       result)]
      (h/signal {:test :form :result result})

@@ -7,6 +7,7 @@
   "extract the comparison into a valid format"
   {:added "3.0"}
   ([result]
+   #_(h/prfn :VERIFY result)
    {:status    (cond (and (= :success (-> result :status))
                           (= true (-> result :data)))
                      :success
@@ -31,6 +32,7 @@
   "extract the form into a valid format"
   {:added "3.0"}
   ([result]
+   #_(h/prfn :EVAL result)
    {:status   (-> result :status)
     :path     (-> result :meta :path)
     :name     (-> result :meta :refer)
@@ -38,6 +40,7 @@
     :line     (-> result :meta :line)
     :desc     (-> result :meta :desc)
     :form     (-> result :form)
+    :original (-> result :original)
     :data     (-> result :data)}))
 
 (defn form-printer

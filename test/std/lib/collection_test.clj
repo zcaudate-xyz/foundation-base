@@ -27,11 +27,11 @@
   (form? {:a 1}) => false
   (form? "a") => false)
 
-^{:refer std.lib.collection/queue :added "3.0"
-  :let [a (queue 1 2 3 4)]}
+^{:refer std.lib.collection/queue :added "3.0"}
 (fact "returns a `clojure.lang.PersistentQueue` object."
 
-  (pop a) => [2 3 4])
+  (pop (queue 1 2 3 4))
+  => [2 3 4])
 
 ^{:refer std.lib.collection/seqify :added "3.0"}
 (fact "if not a sequence, then make one"

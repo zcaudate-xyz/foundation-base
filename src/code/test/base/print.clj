@@ -63,12 +63,12 @@
 
 (defn print-preliminary
   ([title color
-    {:keys [path name ns line desc form check] :as summary}]
+    {:keys [path name ns line desc form original check] :as summary}]
    (let [line (if line (str "L:" line " @ ") "")]
      (str (ansi/style (pad-left 8 title) #{color :bold})
           (ansi/style (format "  %s%s" line (or (rel path) "<current>")) #{:bold color})
           (if desc (str "\n" (ansi/style (pad-left 8 "Desc:")  #{color}) "  "  (ansi/style (str "\"" desc "\"") #{})) "")
-          (str "\n"  (ansi/style (pad-left 8 "Form:") #{color}) "  " (str/indent-rest (pretty/pprint-str form) 12))))))
+          (str "\n"  (ansi/style (pad-left 8 "Form:") #{color}) "  " (str/indent-rest (pretty/pprint-str (or original form)) 12))))))
 
 (defn print-success
   "outputs the description for a successful test"
@@ -126,7 +126,7 @@
                                                                               (take 20 (str/split-lines
                                                                                         (pr-str result))))
                                                                              10))
-           (if name (str "\n" (ansi/style (pad-left 8 "@") #{:red :bold}) "  " (ansi/style name #{:red :bold})) "")
+           (if name (str "\n" (ansi/style (pad-left 8 "###") #{:red :bold}) "  " (ansi/style name #{:red :bold})) "")
            "\n")))))
 
 (defn print-fact

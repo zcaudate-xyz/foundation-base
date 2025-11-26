@@ -59,6 +59,32 @@
 
 ^{:refer code.test.compile.rewrite/rewrite-list :added "4.0"
   :timeout 100}
+(fact "GO TO Sleep"
+  ^:hidden
+
+  
+  (let [b 1]
+    (let [a 1]
+      (do (Thread/sleep 1000)
+          1)
+      => 1))
+  )
+
+^{:refer code.test.compile.rewrite/rewrite-list :added "4.0"}
+(fact "TODO"
+  ^:hidden
+
+  (let [b 1]
+    (let [a 1]
+      (let [a 1]
+        (+ 1 2)
+        => 1)
+      (+ 1 2)
+      => 1)))
+
+
+^{:refer code.test.compile.rewrite/rewrite-list :added "4.0"
+  :timeout 100}
 (fact "TODO"
   ^:hidden
 
@@ -128,3 +154,9 @@
 
   [1 2 3]
   [4 5 6])
+
+
+(comment
+  (s/run)
+  
+  )

@@ -28,7 +28,7 @@
 
 (defonce ^:dynamic *results* nil)
 
-(defonce ^:dynamic *timeout-global* 60000)
+(defonce ^:dynamic *timeout-global* 20000)
 
 (defonce ^:dynamic *timeout* nil)
 

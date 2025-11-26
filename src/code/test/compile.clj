@@ -10,10 +10,6 @@
             [std.math :as math]
             [std.lib :as h]))
 
-(def ^:dynamic *compile-meta* nil)
-
-(def ^:dynamic *compile-desc* nil)
-
 (def => '=>)
 
 (def +arrows+ '{=> :test-equal})
@@ -63,8 +59,8 @@
    (rewrite-top-level body []))
   ([[x y z & more :as arr] out]
    (let [meta-fn (fn []
-                   (cond-> *compile-meta*
-                     *compile-desc* (assoc :desc *compile-desc*)))]
+                   (cond-> types/*compile-meta*
+                     types/*compile-desc* (assoc :desc types/*compile-desc*)))]
      (cond (empty? arr)
            out
 
@@ -80,14 +76,15 @@
                              :output {:form z}}))
 
            (string? x)
-           (binding [*compile-desc* x]
+           (binding [types/*compile-desc* x]
              (rewrite-top-level (rest arr) out))
 
            :else
            (recur (rest arr)
                   (conj out {:type :form
                              :meta (merge (meta-fn) (meta x))
-                             :form x}))))))
+                             :original x
+                             :form (rewrite/rewrite-nested-checks x)}))))))
 
 (defn fact-id
   "creates an id from fact data
@@ -144,14 +141,13 @@
   {:added "3.0"}
   ([meta body]
    (let [{:keys [ns id global]} meta
-         processed (binding [rewrite/*path* (:path meta)]
-                     (mapv rewrite/rewrite-nested-checks body))
-         full  (binding [*compile-meta* meta] (rewrite-top-level processed))
+         full  (binding [types/*compile-meta* meta
+                         types/*file-path*  (:path meta)]
+                 (rewrite-top-level body))
          code  {:setup    (snippet/fact-setup meta)
                 :teardown (snippet/fact-teardown meta)
                 :check    (snippet/fact-wrap-check meta)
-                :ceremony (snippet/fact-wrap-ceremony meta)
-                :original body}
+                :ceremony (snippet/fact-wrap-ceremony meta)}
          wrap  {:check        (eval (:check code))
                 :ceremony     (eval (:ceremony code))}
          function  {:thunk    (eval (fact-thunk (assoc meta :full full)))

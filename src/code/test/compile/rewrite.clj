@@ -1,10 +1,8 @@
 (ns code.test.compile.rewrite
-  (:require [std.lib :as h]
-            [code.test.base.process :as process]))
-
-(def ^:dynamic *path* nil)
-
-(def => '=>)
+  (:require [std.lib.collection :as c]
+            [std.lib.result :as res]
+            [code.test.base.process :as process]
+            [code.test.compile.types :as types]))
 
 (declare rewrite-nested-checks)
 
@@ -16,7 +14,7 @@
     (if (empty? forms)
       (seq acc)
       (let [[next & next-rest] rest]
-        (if (= next =>)
+        (if (= next '=>)
           (let [[target & target-rest] next-rest]
             (if (nil? target)
               ;; Trailing =>, just keep going
@@ -30,13 +28,14 @@
                     line   (or (:line (meta next)) (:line (meta curr)) (:line (meta form)))
                     column (or (:column (meta next)) (:column (meta curr)) (:column (meta form)))
                     check-form `(process/process
-                                  {:type :test-equal
-                                   :input {:form (quote ~curr) :value ~input-wrapper}
-                                   :output {:form (quote ~target) :value ~output-wrapper}
-                                   :meta (merge ~(when *path* {:path *path*})
-                                                ~(meta form)
-                                                {:line ~line :column ~column}
-                                                {:parent-form (quote ~form)})})]
+                                 {:type :test-equal
+                                  :input  {:form (quote ~curr)   :value (res/result (assoc ~input-wrapper :form (quote ~curr)))}
+                                  :output {:form (quote ~target) :value (res/result (assoc ~output-wrapper :form (quote ~target)))}
+                                  :meta (merge types/*compile-meta*
+                                               ~{:path types/*file-path*}
+                                               ~(meta form)
+                                               {:line ~line :column ~column}
+                                               {:parent-form (quote ~form)})})]
                 (recur (conj acc check-form) target-rest))))
           ;; Not a check, recurse on curr and continue
           (recur (conj acc (rewrite-nested-checks curr)) rest))))))
@@ -47,14 +46,14 @@
   (cond (and (seq? form) (= 'quote (first form)))
         form
 
-        (h/form? form)
-        (if (some #(= % =>) form)
+        (c/form? form)
+        (if (some #(= % '=>) form)
           (with-meta (rewrite-list form) (meta form))
-          (with-meta (map rewrite-nested-checks form) (meta form)))
+          (with-meta (apply list (map rewrite-nested-checks form)) (meta form)))
 
         (coll? form)
         (if (map? form)
-          (into {} (map (fn [[k v]] [(rewrite-nested-checks k) (rewrite-nested-checks v)]) form))
-          (into (empty form) (map rewrite-nested-checks form)))
+          (into {} (mapv (fn [[k v]] [(rewrite-nested-checks k) (rewrite-nested-checks v)]) form))
+          (into (empty form) (mapv rewrite-nested-checks form)))
 
         :else form))
