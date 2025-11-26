@@ -158,6 +158,8 @@
                        [nil body])
          [args & body] body
          header-only?  (:header (meta name))
+         dynamic?      (or (:dynamic (meta name))
+                           (:dynamic (:module mopts)))
          {:keys [compressed] :as block} (emit-fn-block key grammar)
          {:keys [enabled assign space after]}   (helper/get-options grammar [:default :typehint])
          typestr   (emit-fn-type name (or (:raw block) (h/strn tag)) grammar mopts)
@@ -168,6 +170,10 @@
                          after (str assign space typestr)
                          
                          :else (str typestr space assign))
+         body      (if dynamic?
+                     `[(let [~'rt (std.lang.base.util/rt-current ~(:lang mopts))]
+                         ~@body)]
+                     body)
          blockstr  (if header-only?
                      (get-in grammar [:default :common :statement])
                      (binding [common/*compressed* compressed]

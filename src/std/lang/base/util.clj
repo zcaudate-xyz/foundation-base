@@ -104,6 +104,14 @@
   ([ns lang]
    (h/p:space-rt-current ns (lang-context lang))))
 
+(defn rt-current
+  "gets the current runtime"
+  {:added "4.0"}
+  ([lang]
+   (rt-current lang (h/ns-sym)))
+  ([lang ns]
+   (lang-rt ns lang)))
+
 (defn lang-rt-default
   "gets the default runtime function"
   {:added "4.0"}
