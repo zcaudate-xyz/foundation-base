@@ -83,6 +83,7 @@
             [std.pretty.color :as color]
             [std.pretty.dispatch :as dispatch]
             [std.pretty.protocol :as protocol.pretty]
+            [std.pretty.block :as block]
             [std.string :as str]
             [std.concurrent.print :as print]
             [std.lib :as h]))
@@ -114,7 +115,9 @@
     ; special types
     :function-symbol [:bold :blue]
     :class-delimiter [:blue]
-    :class-name      [:bold :blue]}})
+    :class-name      [:bold :blue]
+    :comment         [:bold :white]}}
+)
 
 ;; ## Formatting Methods
 
@@ -262,7 +265,11 @@
    clojure.lang.ISeq
    (fn iseq-handler
      [printer value]
-     (edn/visit-seq printer value))})
+     (edn/visit-seq printer value))
+
+   std.protocol.block.IBlock
+   (fn block-handler [printer value]
+     (block/format-block format-doc printer value))})
 
 (def clojure-interface-handlers
   "Fallback print handlers for other Clojure interfaces."

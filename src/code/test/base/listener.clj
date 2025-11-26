@@ -26,7 +26,7 @@
 
 (defn summarise-evaluate
   "extract the form into a valid format"
-  {:added "3.0"}
+  {:added "3..0"}
   ([result]
    {:status   (-> result :status)
     :path     (-> result :meta :path)
@@ -39,7 +39,8 @@
     :actual   (-> result :data)
     :replace  (-> result :replace)
     :original (-> result :original)
-    :parent   (-> result :meta :parent-form)}))
+    :parent   (-> result :meta :parent-form)
+    :type     (:type result)}))
 
 (defn form-printer
   "prints out result for each form"
