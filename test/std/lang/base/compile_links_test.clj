@@ -6,19 +6,19 @@
 (fact "gets a lookup value"
   ^:hidden
 
-  (get-link-lookup 'code.dev
-                   {'code.dev "hello"})
+  (get-link-lookup 'indigo
+                   {'indigo "hello"})
   => "hello"
 
-  (get-link-lookup 'code.dev
+  (get-link-lookup 'indigo
                    {"code" "hello"})
   => "hello"
 
-  (get-link-lookup 'code.dev
+  (get-link-lookup 'indigo
                    {'code "hello"})
   => "hello"
 
-  (get-link-lookup 'code.dev
+  (get-link-lookup 'indigo
                    {#"code$" "hello"})
   => nil)
 
@@ -27,13 +27,13 @@
   ^:hidden
 
   (link-attributes 'code
-                   'code.dev.server
+                   'indigo.server
                    {:path-suffix ".js"})
   => {:is-lib? false, :rel "dev", :suffix ".js", :label "server", :path "dev/server.js"}
 
 
   (link-attributes 'util
-                   'code.dev.server
+                   'indigo.server
                    {:root-libs "tools"
                     :path-suffix ".js"})
   => {:is-lib? true, :rel "tools/code/dev", :suffix ".js", :label "server", :path "tools/code/dev/server.js"})

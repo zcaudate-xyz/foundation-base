@@ -84,7 +84,7 @@
             [std.pretty.dispatch :as dispatch]
             [std.pretty.protocol :as protocol.pretty]
             [std.block :as block]
-            [code.heal :as heal]
+            [std.block.heal :as heal]
             [std.string :as str]
             [std.concurrent.print :as print]
             [std.lib :as h]))

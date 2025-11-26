@@ -1,7 +1,7 @@
 (ns std.block.layout.common-test
   (:use code.test)
   (:require [std.block.layout.common :as common]
-            [std.block.layout.bind :as bind]
+            [std.block.layout :as bind]
             [std.block.construct :as construct]
             [std.block.base :as base]
             [std.string :as str]))

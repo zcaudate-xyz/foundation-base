@@ -8,7 +8,7 @@
 (comment
 
   (manage/refactor-code
-   '[code.dev.client.app]
+   '[indigo.client.app]
    {:print {:function true}
     :write true
     :edits [(fn [nav]
@@ -24,7 +24,7 @@
   
   ;; replace != with not=
   (manage/refactor-code
-   '[code.dev.client.app]
+   '[indigo.client.app]
    {:print {:function true}
     :write true
     :edits [(fn [nav]
@@ -38,7 +38,7 @@
                   'not=))))]})
   
   (manage/refactor-code
-   '[code.dev.client.app]
+   '[indigo.client.app]
    {:print {:function true}
     :write true
     :edits [(fn [nav]
@@ -54,7 +54,7 @@
 
   ;; exclude do blocks
   (manage/refactor-code
-   '[code.dev.client.app]
+   '[indigo.client.app]
    {:print {:function true}
     :write true
     :edits [(fn [nav]

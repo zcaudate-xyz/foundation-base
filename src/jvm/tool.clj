@@ -81,14 +81,14 @@
           code.test/run-errored
           code.java.compile/javac
 
-          code.dev/test:all
-          code.dev/test:app
-          code.dev/test:base
-          code.dev/test:base+framework
-          code.dev/test:framework
-          code.dev/test:standard
-          code.dev/test:infra
-          code.dev/fix-tests
+          indigo/test:all
+          indigo/test:app
+          indigo/test:base
+          indigo/test:base+framework
+          indigo/test:framework
+          indigo/test:standard
+          indigo/test:infra
+          indigo/fix-tests
 
           code.maven/linkage
           code.maven/package
