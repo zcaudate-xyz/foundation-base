@@ -6,10 +6,12 @@
             [code.test.base.runtime :as rt]
             [code.test.diff :as diff]
             [std.lib.walk :as walk]
+            [std.lib.result :as res]
+            [std.lib.time :as t]
             [std.print :as print]
             [std.pretty :as pretty]))
 
-(defonce ^:dynamic *options* #{:print-thrown :print-failure :print-bulk})
+(defonce ^:dynamic *options* #{:print-throw :print-failed :print-timeout :print-bulk})
 
 (defn- rel
   [path]
@@ -18,25 +20,12 @@
 
         :else path))
 
-(defn pad [s n]
+(defn- pad-left
+  [n s]
   (let [len (count s)]
-    (if (< len n)
+    (if (> n len)
       (str (apply str (repeat (- n len) " ")) s)
       s)))
-
-(defn print-success
-  "outputs the description for a successful test"
-  {:added "3.0"}
-  ([{:keys [path name ns line desc form check] :as summary}]
-   (let [line (if line (str "L:" line " @ ") "")]
-     (print/println
-      "\n"
-      (str (ansi/style "Success" #{:green :bold})
-           (ansi/style (format "  %s%s" line (or (rel path) "<current>")) #{:bold})
-           (if name (str "\n   " (ansi/white "Refer") "  " (ansi/style name #{:bold})) "")
-           (if desc (str "\n    " (ansi/white "Info") "  \"" desc "" \") "")
-           (str "\n    " (ansi/white "Form") "  " (str/indent-rest (pretty/pprint-str form) 10))
-           (str "\n   " (ansi/white "Check") "  " check))))))
 
 (defn format-diff-map [diff indent]
   (let [missing (:+ diff)
@@ -72,92 +61,72 @@
         :else
         (str/indent (pretty/pprint-str diff) 4)))
 
-(defn print-failure
-  "outputs the description for a failed test"
-  {:added "3.0"}
-  ([{:keys [path name ns line desc form check compare actual replace original parent checker] :as summary}]
-   (let [line (if line (str "L:" line " @ ") "")
-         bform  (walk/postwalk-replace replace form)
-         bcheck (walk/postwalk-replace replace check)
-         pattern? (or (not= bform form) (not= bcheck check))
-         expect (or (:expect checker) check)
-         diff   (if (not compare) (diff/diff expect actual))]
-     (print/println
-      (str (ansi/style "Failure" #{:red :bold})
-           (ansi/style (format "  %s%s" line (or (rel path) "<current>")) #{:bold})
-           (if name (str "\n   " (ansi/white "Refer") "  " (ansi/style name #{:bold})) "")
-           (if desc (str "\n    " (ansi/white "Info") "  \"" desc "" \") "")
-           (str "\n    " (ansi/white "Form") "  " (str/indent-rest (pretty/pprint-str bform) 10))
-           (if compare
-             (str "\n   " (ansi/white "Compare") "  \n"
-                  (str/indent (pretty/pprint-str compare)
-                              4))
-             (str
-              (str "\n   " (ansi/white "Check") "  " (str/indent-rest (pretty/pprint-str bcheck) 10))
-              (str "\n  " (ansi/white "Result") "  " (if (coll? actual)
-                                                       (str/indent-rest (pretty/pprint-str actual) 10)
-                                                       actual))))
-           (if pattern? (str "\n " (ansi/white "Pattern") "  " (ansi/blue (str form " : " check))))
-           (if original (str "\n  " (ansi/white "Linked") "  " (ansi/blue (format "L:%d,%d"
-                                                                                  (:line original)
-                                                                                  (:column original)))))
-           (if parent (str "\n  " (ansi/white (pad "Parent" 7)) "  " (ansi/blue (str parent))))
-           "\n")))))
+(defn print-preliminary
+  ([title color
+    {:keys [path name ns line desc form check] :as summary}]
+   (let [line (if line (str "L:" line " @ ") "")]
+     (str (ansi/style (pad-left 8 title) #{color :bold})
+          (ansi/style (format "  %s%s" line (or (rel path) "<current>")) #{:bold color})
+          (if desc (str "\n" (ansi/style (pad-left 8 "Desc:")  #{color}) "  "  (ansi/style (str "\"" desc "\"") #{})) "")
+          (str "\n"  (ansi/style (pad-left 8 "Form:") #{color}) "  " (str/indent-rest (pretty/pprint-str form) 12))))))
 
-(defn print-thrown
+(defn print-success
+  "outputs the description for a successful test"
+  {:added "3.0"}
+  ([{:keys [name check] :as summary}]
+   (print/println
+    (str  "\n"
+          (print-preliminary "SUCCESS" :green summary)
+          (str "\n"  (ansi/style (pad-left 8  "Check:") #{:green :bold}) "  " check)
+          (if name (str "\n" (ansi/style (pad-left 8 "###") #{:green :bold}) "  " (ansi/style name #{:green :bold})) "")
+          "\n"))))
+
+(defn print-throw
   "outputs the description for a form that throws an exception"
   {:added "3.0"}
-  ([{:keys [path name ns line desc form replace original actual parent data] :as summary}]
-   (let [line (if line (str "L:" line " @ ") "")
-         bform (walk/postwalk-replace replace form)
-         pattern? (not= bform form)
-         data (or data actual)
-         data (if (and (map? data) (:status data))
-                (:data data)
-                data)]
-     (print/println
-      (str (ansi/style " Thrown" #{:yellow :bold})
-           (ansi/style (format "  %s%s" line (or (rel path) "<current>")) #{:bold})
-           (if name (str "\n   " (ansi/white "Refer") "  " (ansi/style name #{:bold})) "")
-           (if desc (str "\n    " (ansi/white "Info") "  \"" desc "\"") "")
-           (str "\n    " (ansi/white "Form") "  " (str/indent-rest (pretty/pprint-str bform) 10))
-           (str "\n   " (ansi/white "Error") "  " (if (instance? Throwable data)
-                                                    (or (.getMessage ^Throwable data) data)
-                                                    data))
-           (if (not= bform form) (str " :: " form))
-           (if pattern? (str "\n " (ansi/white "Pattern") "  " (ansi/blue (str form))))
-           (if original (str "\n  " (ansi/white "Linked") "  " (ansi/blue (format "L:%d,%d"
-                                                                                  (:line original)
-                                                                                  (:column original)))))
-           (if parent (str "\n  " (ansi/white "Parent") "  " (ansi/blue (str parent))))
-           "\n")))))
+  ([{:keys [name data] :as summary}]
+   (print/println
+    (str (print-preliminary "THROW" :yellow summary)
+         (str "\n" (ansi/style (pad-left 8 "ERROR") #{:yellow :bold})
+              "  " (str/indent-rest
+                    (str/join-lines
+                     (take 20 (str/split-lines
+                               (pr-str data))))
+                    10))
+         (if name (str "\n" (ansi/style (pad-left 8 "###") #{:yellow :bold}) "  " (ansi/style name #{:yellow  :bold})) "")
+         "\n"))))
 
-(defn print-timedout
+(defn print-timeout
   "outputs the description for a form that has timed out"
   {:added "4.0"}
-  ([{:keys [path name ns line desc form replace original actual parent data] :as summary}]
-   (let [line (if line (str "L:" line " @ ") "")
-         bform (walk/postwalk-replace replace form)
-         pattern? (not= bform form)
-         data (or data actual)
-         data (if (and (map? data) (:status data))
-                (:data data)
-                data)]
+  ([{:keys [name data actual check parent] :as summary}]
+   (print/println
+    (str (print-preliminary "TIMEOUT" :magenta  summary)
+         (if parent (str "\n"  (ansi/style  (pad-left 8 "Parent") #{:magenta}) "  " (str/indent-rest (pretty/pprint-str parent) 12)))
+         (if check  (str "\n"  (ansi/style (pad-left 8  "Check:") #{:magenta}) "  " check))
+         (str "\n" (ansi/style (pad-left 8 "AFTER") #{:bold :magenta}) "  " (ansi/style (str (t/format-ms (if actual
+                                                                                                              (:data actual)
+                                                                                                              data)))
+                                                                                          #{:bold :magenta}))
+         (if name (str "\n" (ansi/style (pad-left 8 "###") #{:magenta :bold}) "  " (ansi/style name #{:magenta :bold})) "")
+         "\n"))))
+
+(defn print-failed
+  "outputs the description for a failed test"
+  {:added "3.0"}
+  ([{:keys [name actual check parent] :as summary}]
+   (let [result (:data actual)]
      (print/println
-      (str (ansi/style "Timed Out" #{:red :bold})
-           (ansi/style (format "  %s%s" line (or (rel path) "<current>")) #{:bold})
-           (if name (str "\n   " (ansi/white "Refer") "  " (ansi/style name #{:bold})) "")
-           (if desc (str "\n    " (ansi/white "Info") "  \"" desc "\"") "")
-           (str "\n    " (ansi/white "Form") "  " (str/indent-rest (pretty/pprint-str bform) 10))
-           (str "\n    " (ansi/white "Data") "  " (if (instance? Throwable data)
-                                                    (or (.getMessage ^Throwable data) data)
-                                                    data))
-           (if (not= bform form) (str " :: " form))
-           (if pattern? (str "\n " (ansi/white "Pattern") "  " (ansi/blue (str form))))
-           (if original (str "\n  " (ansi/white "Linked") "  " (ansi/blue (format "L:%d,%d"
-                                                                                  (:line original)
-                                                                                  (:column original)))))
-           (if parent (str "\n  " (ansi/white "Parent") "  " (ansi/blue (str parent))))
+      (str (print-preliminary "FAILED" :red summary)
+           (if parent  (str "\n" (ansi/style  (pad-left 8 "Parent")
+                                              #{:red}) "  " (str/indent-rest (pretty/pprint-str parent) 12)))
+           (str "\n"  (ansi/style (pad-left 8  "Check:") #{:red}) "  " check)
+           (str "\n"  (ansi/style (pad-left 8 "OUTPUT") #{:red :bold}) "  " (str/indent-rest
+                                                                             (str/join-lines
+                                                                              (take 20 (str/split-lines
+                                                                                        (pr-str result))))
+                                                                             10))
+           (if name (str "\n" (ansi/style (pad-left 8 "@") #{:red :bold}) "  " (ansi/style name #{:red :bold})) "")
            "\n")))))
 
 (defn print-fact
@@ -171,43 +140,49 @@
          num    (count passed)
          total  (count all)
          ops    (->> results (filter #(-> % :from (= :evaluate))))
-         errors (->> ops (filter #(-> % :type (= :exception))))
-         thrown (count errors)]
+         errors  (->> ops (filter #(-> % :status (= :exception))))
+         timeout (->> ops (filter #(-> % :status (= :timeout))))
+         throw  (count errors)]
      (if (or (*options* :print-facts-success)
              (not (and (= num total)
-                       (pos? thrown))))
+                       (pos? throw))))
        (print/println
-        (str (ansi/style "   Fact" #{:blue :bold})
+        (str (ansi/style (pad-left 8 "Fact") #{:blue :bold})
              (ansi/style (str "  [" (or path "<current>") line "]") #{:bold})
-             (if name (str "\n   " (ansi/white (pad "Refer" 7)) "  " (ansi/style name #{:highlight :bold})) "")
-             (if desc (str "\n   " (ansi/white (pad "Info" 7)) "  \"" desc "" \") "")
-             (str "\n  " (ansi/white (pad "Passed" 7)) "  "
+             (if name (str "\n" (ansi/white (pad-left 8 "###")) "  " (ansi/style name #{:highlight :bold})) "")
+             (if desc (str "\n" (ansi/white (pad-left 8 "Info:")) "  \"" desc "" \") "")
+             (str          "\n" (ansi/white (pad-left 8 "Passed:")) "  "
                   (str (ansi/style num (if (= num total) #{:blue} #{:green}))
                        " of "
                        (ansi/blue total)))
-             (if (pos? thrown)
-               (str "\n  " (ansi/white (pad "Thrown" 7)) "  " (ansi/yellow thrown))
+             (if (pos? throw)
+               (str "\n"  (ansi/white (pad-left 8 "Throw")) "  " (ansi/yellow throw))
+               "")
+             (if (pos? timeout)
+               (str "\n"  (ansi/white (pad-left 8 "Timeout")) "  " (ansi/magenta timeout))
                ""))
         "\n")))))
 
 (defn print-summary
   "outputs the description for an entire test run"
   {:added "3.0"}
-  ([{:keys [files thrown facts checks passed failed timedout] :as result}]
+  ([{:keys [files throw facts checks passed failed timeout] :as result}]
    (print/println
     (str (ansi/style (str "Summary (" files ")") #{:blue :bold})
-         (str "\n  " (ansi/white " Files") "  " (ansi/blue files))
-         (str "\n  " (ansi/white " Facts") "  " (ansi/blue facts))
-         (str "\n  " (ansi/white "Checks") "  " (ansi/blue checks))
-         (str "\n  " (ansi/white "Passed") "  " ((if (= passed checks)
+         (str "\n" (ansi/white (pad-left 8 "Files:")) "  " (ansi/blue files))
+         (str "\n" (ansi/white (pad-left 8 "Facts:")) "  " (ansi/blue facts))
+         (str "\n" (ansi/white (pad-left 8 "Checks:")) "  " (ansi/blue checks))
+         (str "\n" (ansi/white (pad-left 8 "Passed:")) "  " ((if (= passed checks)
                                                    ansi/blue
                                                    ansi/yellow) passed))
-         (str "\n  " (ansi/white "Thrown") "  " ((if (pos? thrown)
-                                                   ansi/yellow
-                                                   ansi/blue) thrown))
-         (if (and timedout (pos? timedout))
-           (str "\n  " (ansi/white "Timeout") " " (ansi/red timedout))
-           ""))
+         (str "\n" (ansi/white (pad-left 8 "Throw")) "  " ((if (pos? throw)
+                                                 ansi/yellow
+                                                 ansi/blue)
+                                                      throw))
+         (str "\n" (ansi/white (pad-left 8 "Timeout")) " " ((if (pos? timeout)
+                                                 ansi/magenta
+                                                 ansi/blue)
+                                               timeout)))
     "\n") (if (pos? failed)
             (print/println
              (ansi/style (str "Failed  (" failed ")") #{:red :bold})
@@ -215,5 +190,6 @@
 
             (print/println
              (ansi/style (str "Success (" passed ")") #{:cyan :bold})
-             "\n")) (print/println "")))
+             "\n"))
+   (print/println "")))
 

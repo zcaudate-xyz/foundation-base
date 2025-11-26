@@ -1,10 +1,22 @@
 (ns code.test.base.executive-test
   (:use [code.test :exclude [run]])
-  (:require [code.test.base.executive :refer :all]
-            [code.project :as project]))
-
+  (:require [code.test.base.executive :as executive]
+            [code.test.base.print :as print]
+            [code.project :as project]
+            [std.string :as str]
+            [std.lib :as h]))
+                     
 ^{:refer code.test.base.executive/accumulate :added "3.0"}
-(fact "accumulates test results from various facts and files into a single data structure")
+(fact "accumulates test results from various facts and files into a single data structure"
+  ^:hidden
+  
+  (let [result (ctx/with-context {:accumulator (atom nil)}
+                 (executive/accumulate (fn []
+                                         (ctx/notify {:id :my-test :data 1})
+                                         (ctx/notify {:id :my-test :data 2}))
+                                       :my-test))]
+    result)
+  => [{:id :my-test :data 1} {:id :my-test :data 2}])
 
 ^{:refer code.test.base.executive/interim :added "3.0"}
 (fact "summary function for accumulated results")

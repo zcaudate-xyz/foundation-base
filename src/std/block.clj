@@ -4,6 +4,7 @@
             [std.block.grid :as grid]
             [std.block.parse :as parse]
             [std.block.type :as type]
+            [std.block.highlight :as highlight]
             [std.block.layout.bind :as bind]
             [std.lib :as h])
   (:refer-clojure :exclude [type next replace string newline comment]))

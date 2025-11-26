@@ -387,7 +387,7 @@
    => 1"
   {:added "3.0"}
   ([]
-   `(future:run {} (fn [])))
+   `(future:run (bound-fn []) {}))
   ([opts? & body]
    (let [[opts body] (cond (map? opts?) [opts? body]
                            :else [{} (cons opts? body)])]

@@ -300,8 +300,24 @@
   (when (not no-pad) (local :println ""))
   (if (string? v)
     (local :println (pl-add-lines v []))
-    (do (when (not no-pad) (local :println ""))
+    (do (when (not no-pad)
+          (local :println ""))
         (local :pprint v))))
+
+(defmacro prfn
+  "`prn` but also includes namespace and file info"
+  {:added "3.0"}
+  ([& body]
+   (let [{:keys [line column]} (meta &form)]
+     `(do (local :println (format "%s (%d:%d)"
+                                  ~(str (ns-sym))
+                                  ~line
+                                  ~column))
+          (doseq [v# [~@body]]
+            (if (string? v#)
+              (local :println (pl-add-lines v# []))
+              (local :pprint v#)))
+          (local :println "")))))
 
 (defmacro ^{:style/indent 1} meter
   {:added "3.0"}

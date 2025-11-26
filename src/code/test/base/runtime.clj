@@ -6,8 +6,6 @@
 
 (defonce ^:dynamic *eval-mode* true)
 
-(defonce ^:dynamic *eval-replace* nil)
-
 (defonce ^:dynamic *eval-meta* nil)
 
 (defonce ^:dynamic *eval-global* nil)
@@ -30,11 +28,49 @@
 
 (defonce ^:dynamic *results* nil)
 
+(defonce ^:dynamic *timeout-global* 60000)
+
+(defonce ^:dynamic *timeout* nil)
+
 ;; When a namespace is run:
 ;; - *eval* is set to false
 ;; - the namespace is cleared
 ;; - the file is reloaded (forms are compiled)
 ;; - all the loaded tests are then run
+
+(defn new-context
+  []
+  {:eval-fact false
+   :eval-mode false
+   :eval-meta  nil
+   :eval-global nil
+   :eval-check nil
+   :eval-current-ns nil
+   :run-id true
+   :registry    (atom {})
+   :accumulator (atom {})
+   :errors nil
+   :results nil
+   :timeout 60000})
+
+(defmacro with-new-context
+  [m & body]
+  `(let [ctx# (merge (new-context)
+                     ~m)]
+     (binding [*eval-fact*       (:eval-fact ctx#)
+               *eval-mode*       (:eval-mode ctx#)
+               *eval-meta*       (:eval-meta ctx#)
+               *eval-global*     (:eval-global ctx#)
+               *eval-check*      (:eval-check ctx#)
+               *eval-current-ns* (:eval-current-ns ctx#)
+               *run-id*          (:run-id ctx#)
+               *registry*        (:registry ctx#)
+               *accumulator*     (:accumulator ctx#)
+               *errors*          (:errors ctx#)
+               *settings*        (:settings ctx#)
+               *root*            (:root ctx#)
+               *results*         (:results ctx#)]
+       ~@body)))
 
 (defn purge-all
   "purges all facts from namespace"

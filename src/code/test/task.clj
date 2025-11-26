@@ -16,8 +16,8 @@
 (defn- display-errors
   [data]
   (let [errors (concat (executive/retrieve-line :failed data)
-                       (executive/retrieve-line :thrown data)
-                       (executive/retrieve-line :timedout data))
+                       (executive/retrieve-line :throw data)
+                       (executive/retrieve-line :timeout data))
         cnt  (count (:passed data))]
     (if (empty? errors)
       (res/result {:status :highlight
@@ -56,22 +56,22 @@
                 :display  display-errors}
     :result    {:ignore  (fn [data]
                            (and (empty? (:failed data))
-                                (empty? (:thrown data))
-                                (empty? (:timedout data))))
+                                (empty? (:throw data))
+                                (empty? (:timeout data))))
                 :keys    {:failed  (retrieve-fn :failed)
-                          :thrown  (retrieve-fn :thrown)
-                          :timedout (retrieve-fn :timedout)}
+                          :throw   (retrieve-fn :throw)
+                          :timeout (retrieve-fn :timeout)}
                 :columns [{:key    :key
                            :align  :left}
                           {:key    :failed
                            :align  :left
                            :length 40
                            :color  #{:red}}
-                          {:key    :thrown
+                          {:key    :throw
                            :align  :left
                            :length 40
                            :color  #{:yellow}}
-                          {:key    :timedout
+                          {:key    :timeout
                            :align  :left
                            :length 40
                            :color  #{:red}}]}
@@ -88,7 +88,7 @@
    (task/run :list)
  
    (task/run 'std.lib.foundation)
-   ;; {:files 1, :thrown 0, :facts 8, :checks 18, :passed 18, :failed 0}
+   ;; {:files 1, :throw 0, :facts 8, :checks 18, :passed 18, :failed 0}
    => map?"
   {:added "3.0"}
   [:task {:template :test
@@ -134,8 +134,8 @@
    (let [latest @executive/+latest+]
      (-> (h/union (set (:errored latest))
                   (set (map (comp :ns :meta) (:failed latest)))
-                  (set (map (comp :ns :meta) (:thrown latest)))
-                  (set (map (comp :ns :meta) (:timedout latest))))
+                  (set (map (comp :ns :meta) (:throw latest)))
+                  (set (map (comp :ns :meta) (:timeout latest))))
          (run)))))
 
 (defn print-options
@@ -145,7 +145,7 @@
    => #{:disable :default :all :current :help}
  
    (task/print-options :default)
-   => #{:print-bulk :print-failure :print-thrown}"
+   => #{:print-bulk :print-failed :print-throw}"
   {:added "3.0"}
   ([] (print-options :help))
   ([opts]
@@ -160,14 +160,19 @@
 
          (= :default opts)
          (alter-var-root #'print/*options*
-                         (constantly #{:print-thrown :print-failure :print-bulk}))
+                         (constantly #{:print-throw :print-failed :print-timeout :print-bulk}))
 
          (= :disable opts)
          (alter-var-root #'print/*options* (constantly #{}))
 
          (= :all opts)
-         #{:print-thrown :print-success :print-facts
-           :print-facts-success :print-failure :print-bulk})))
+         #{:print-throw
+           :print-success
+           :print-timeout
+           :print-facts
+           :print-facts-success
+           :print-failed
+           :print-bulk})))
 
 ;;(print-options (print-options :default))
 
@@ -178,9 +183,9 @@
   {:added "3.0"}
   ([& args]
    (let [opts (task/process-ns-args args)
-         {:keys [thrown failed timedout] :as stats} (run (or (:ns opts) :all)
+         {:keys [thrown failed timeout] :as stats} (run (or (:ns opts) :all)
                                                          (dissoc opts :ns))
-         res (+ thrown failed (or timedout 0))]
+         res (+ thrown failed (or timeout 0))]
      (if (get opts :no-exit)
        res
        (System/exit res)))))

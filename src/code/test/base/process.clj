@@ -13,13 +13,18 @@
    => (contains {:status :success, :data 6, :form '(+ 1 2 3), :from :evaluate})"
   {:added "3.0"}
   ([{:keys [form value]}]
-   (let [out (if value
-               value
-               (try
-                 {:status :success :data (eval form)}
-                 (catch Throwable t
-                   {:status :exception :data t})))]
-     (res/result (assoc out :form form :from :evaluate)))))
+   (if value
+     (assoc value :form form :from :evaluate)
+     (let [eval-fn  (fn []
+                      (try
+                        {:status :success :data (eval form)}
+                        (catch Throwable t
+                          {:status :exception :data t})))
+           f    (future (eval-fn))
+           out  (deref f rt/*timeout* {:status :timeout :data rt/*timeout*})
+           _    (when (= (:status out) :timeout)
+                  (future-cancel f))]
+       (res/result (assoc out :type :code/test :form form :from :evaluate))))))
 
 (defmulti process
   "processes a form or a check
@@ -52,22 +57,13 @@
   {:added "3.0"}
   :type)
 
-(defn attach-meta
-  "attaches metadata to the result"
-  {:added "3.0"}
-  ([m meta]
-   (cond-> m
-     (not rt/*eval-meta*) (assoc :meta meta)
-     rt/*eval-meta* (assoc :meta rt/*eval-meta*
-                           :original meta))))
-
 (defmethod process :form
   ([{:keys [form meta] :as op}]
    (let [result (-> (evaluate op)
-                    (attach-meta meta))
+                    (assoc :meta meta))
          _    (intern *ns* (with-meta '*last* {:dynamic true})
-                      (:data result))]
-     (h/signal {:test :form :result (assoc result :replace rt/*eval-replace*)})
+                      result)]
+     (h/signal {:test :form :result result})
      result)))
 
 (defmethod process :test-equal
@@ -79,19 +75,11 @@
          checker  (assoc (checker/->checker (res/result-data expected))
                          :form (:form expected))
          result   (-> (checker/verify checker actual)
-                      (attach-meta meta))
-         compare (if (and (not (:data result))
-                          (coll? (:data actual))
-                          (coll? (:data expected)))
-	           nil
-		   #_(diff/diff (:data actual)
-                              (:data expected)))
+                      (assoc :meta meta))
          _    (intern *ns* (with-meta '*last* {:dynamic true})
                       (:data actual))
          _    (after)]
-     (h/signal {:test :check :result (assoc result
-                                            :replace rt/*eval-replace*
-                                            :compare compare)})
+     (h/signal {:test :check :result result})
      (when rt/*results*
        (swap! rt/*results* conj result))
      (if (and guard (not (:data result)))
@@ -115,24 +103,28 @@
                (every? true?))
           (->> results
                (filter #(and (-> % :from (= :evaluate))
-                             (-> % :type (= :exception))))
+                             (-> % :status #{:exception
+                                             :timeout})))
                (empty?))))))
 
-(defn skip
+(defn skip-check
   "returns the form with no ops evaluated"
   {:added "3.0"}
   ([meta]
    (h/signal {:id rt/*run-id* :test :fact :meta meta :results [] :skipped true}) :skipped))
 
-(defn run-single
+(defn run-check
   "runs a single check form"
   {:added "3.0"}
   ([{:keys [unit refer] :as meta} body]
-   (if (or (match/match-options {:unit unit
-                                 :refer refer}
-                                rt/*settings*)
-           (not rt/*run-id*)
-           rt/*eval-mode*)
-     (->> (mapv process body)
-          (collect meta))
-     (skip meta))))
+   (let [timeout (or (:timeout meta) rt/*timeout-global*)]
+     (binding [rt/*timeout* timeout]
+       (if (or (match/match-options {:unit unit
+                                     :refer refer}
+                                    rt/*settings*)
+               (not rt/*run-id*)
+               rt/*eval-mode*)
+         (->> (mapv process body)
+              (collect meta))
+         (skip-check meta))))))
+

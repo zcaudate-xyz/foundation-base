@@ -1,4 +1,4 @@
-(ns code.test.compile.snippet
+(ns code.test.legacy.snippet
   (:require [code.test.base.runtime :as rt]
             [std.lib :as h]))
 
@@ -84,11 +84,45 @@
    (let [{:keys [teardown]} (rt/get-global (h/ns-sym) :component vsym)]
      `(~(if teardown teardown `identity) ~vsym))))
 
+(defn fact-let-defs
+  "create def forms for symbols
+ 
+   (fact-let-defs '{:let [a 1 b 2]})
+   => '[(def a 1) (def b 2)]"
+  {:added "3.0"}
+  ([m]
+   (map (fn [[id value]]
+          (list 'def (with-meta id {:dynamic true})
+                value))
+        (concat (map (juxt identity fact-use-setup-eval) (:use m))
+                (partition 2 (:let m))))))
+
+(defn fact-let-declare
+  "creates let declarations
+ 
+   (fact-let-declare '{:let [a 1 b 2 c 3]
+                       :use [*serv*]})
+   => '[(def a nil) (def b nil) (def c nil) (def *serv* nil)]"
+  {:added "3.0"}
+  ([m]
+   (->> (concat (take-nth 2 (:let m))
+                (:use m))
+        (map #(vary-meta % assoc :dynamic true))
+        (mapv #(list 'def % nil)))))
+
+(defn fact-declare
+  "creates a declare hook"
+  {:added "3.0"}
+  ([m]
+   `(fn []
+      ~@(fact-let-declare m))))
+
 (defn fact-setup
   "creates a setup hook"
   {:added "3.0"}
   ([m]
    `(fn []
+      ~@(fact-let-defs m)
       ~@(vecify (:setup m)))))
 
 (defn fact-teardown
@@ -124,13 +158,10 @@
   ([{:keys [setup teardown guard] :as m}]
    `(fn [~'thunk]
       (fn []
-        (let [~@(if setup
-                  ['_ setup])
+        (let [~'_ ~(if setup setup)
               ~'out (~'thunk)
-              ~@(if teardown
-                  ['_ teardown])
-              ~@(if (seq (:use m))
-                  ['_ (apply list 'do (map fact-use-teardown (reverse (:use m))))])]
+              ~'_ ~(if teardown teardown)
+              ~'_ (do ~@(map fact-use-teardown (reverse (:use m))))]
           ~'out)))))
 
 (defn fact-wrap-bindings

@@ -20,11 +20,11 @@
            => 5])
   => '[(def a 1) (+ a 3)])
 
-^{:refer code.test.compile/split :added "3.0"}
+^{:refer code.test.compile/rewrite-top-level :added "3.0"}
 (fact "creates a sequence of pairs from a loose sequence"
-  (split '[(def a 1)
-           (+ a 3)
-           => 5])
+  (rewrite-top-level '[(def a 1)
+                       (+ a 3)
+                       => 5])
   (contains-in '[{:type :form,
                   :meta {:line 8, :column 12},
                   :form '(def a 1)}
@@ -131,46 +131,7 @@
   :style/indent 1}
 (fact "gets the current fact symbol")
 
-^{:refer code.test.compile/fact-eval-current :added "3.0"}
-(fact "evaluates the current fact, typically used within a testing context")
-
-^{:refer code.test.compile/fact:let-install :added "3.0"}
-(fact "installer for `fact:let` macro")
-
-^{:refer code.test.compile/fact:let :added "3.0"
-  :style/indent 1}
-(fact "runs a form that has binding substitutions")
-
-^{:refer code.test.compile/fact:derive-install :added "3.0"}
-(fact "installer for `fact:derive` macro")
-
-^{:refer code.test.compile/fact:derive :added "3.0"
-  :style/indent 1}
-(fact "runs a form derived from a previous test")
-
-^{:refer code.test.compile/fact:table-install :added "3.0"}
-(fact "installer for `fact:table` macro")
-
-^{:refer code.test.compile/fact:table :added "3.0"
-  :style/indent 1}
-(fact "runs a form with tabular value substitutions")
-
-^{:refer code.test.compile/fact:bench-install :added "3.0"}
-(fact "installer for `fact:bench` macro")
-
-^{:refer code.test.compile/fact:bench :added "3.0"
-  :style/indent 1}
-(fact "runs a small micro bench for the current fact")
-
-^{:refer code.test.compile/fact:check-install :added "3.0"}
-(fact "installer for `fact:check` macro")
-
-^{:refer code.test.compile/fact:check :added "3.0"
-  :style/indent 1}
-(fact "runs a check over a range of values")
-
-
-^{:refer code.test.compile/group-and-rewrite :added "4.0"}
+^{:refer code.test.compile/rewrite-body :added "4.0"}
 (fact "TODO")
 
 ^{:refer code.test.compile/rewrite-nested-checks :added "4.0"}

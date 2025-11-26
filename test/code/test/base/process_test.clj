@@ -52,8 +52,8 @@
        (collect {}))
   => true)
 
-^{:refer code.test.base.process/skip :added "3.0"}
+^{:refer code.test.base.process/skip-check :added "3.0"}
 (fact "returns the form with no ops evaluated")
 
-^{:refer code.test.base.process/run-single :added "3.0"}
+^{:refer code.test.base.process/run-check :added "3.0"}
 (fact "runs a single check form")

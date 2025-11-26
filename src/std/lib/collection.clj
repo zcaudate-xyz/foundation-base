@@ -32,7 +32,8 @@
   ([form]
    (or (cons? form)
        (list? form)
-       (lazy-seq? form))))
+       (lazy-seq? form)
+       (or (instance? clojure.lang.PersistentVector$ChunkedSeq form)))))
 
 (defn queue
   "returns a `clojure.lang.PersistentQueue` object.

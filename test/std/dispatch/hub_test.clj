@@ -28,23 +28,23 @@
 
 (defn test-scaffold [config wait groups times]
   (component/with [main-fn (create-dispatch config)]
-                  (reset! *executor* main-fn)
-                  (do (try (dotimes [group groups]
-                             (future (dotimes [i times]
-                                       (let [id (swap! *counter* inc)]
-                                         (future
-                                           (Thread/sleep (long (rand-int wait)))
-                                           (main-fn {:id  id
-                                                     :group group
-                                                     :val (+ i (* group groups))}))))
-                                     (if wait (Thread/sleep (long wait)))))
-                           (catch Throwable t
-                             (.printStackTrace t)))
+    (reset! *executor* main-fn)
+    (do (try (dotimes [group groups]
+               (future (dotimes [i times]
+                         (let [id (swap! *counter* inc)]
+                           (future
+                             (Thread/sleep (long (rand-int wait)))
+                             (main-fn {:id  id
+                                       :group group
+                                       :val (+ i (* group groups))}))))
+                       (if wait (Thread/sleep (long wait)))))
+             (catch Throwable t
+               (.printStackTrace t)))
 
-                      (Thread/sleep ;;(if wait (* threads groups wait))
+        (Thread/sleep ;;(if wait (* threads groups wait))
 
-                       500)
-                      [@*counter* @*output*])))
+         500)
+        [@*counter* @*output*])))
 
 ^{:refer std.dispatch.hub/process-hub :added "3.0"}
 (fact "activates on debounce submit hit"

@@ -128,6 +128,7 @@
              env/pp-fn
              env/pp-str
              env/prf
+             env/prfn
              env/meter
              env/meter-out
              env/throwable-string

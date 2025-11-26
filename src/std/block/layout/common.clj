@@ -2,6 +2,7 @@
   (:require [std.lib.foundation :as h]
             [std.lib.collection :as c]
             [std.block.construct :as construct]
+            [std.block.layout.estimate :as est]
             [std.block.check :as check]
             [std.block.type :as type]
             [std.block.base :as base]
@@ -312,7 +313,7 @@
                             spec)
          [start-sym
           nindents]      (layout-multiline-call-setup form
-          (assoc opts :indents (inc indents)))
+                                                      (assoc opts :indents (inc indents)))
          initial-blocks  (layout-single-row (take col-from (rest form))
                                             (assoc opts :indents nindents))
          
@@ -357,8 +358,20 @@
 (defn layout-multiline-list
   "layout standard paired inputs"
   {:added "4.0"}
-  [form opts]
-  (layout-multiline-call :list form opts))
+  [form {:keys [spec]
+         :as opts}]
+  (let [spec (if (and (:col-call spec)
+                      (some #(est/estimate-multiline % opts) (rest form)))
+               (merge spec
+                      {:col-start 1
+                       :col-from  0})
+               spec)
+        form (map (fn [x]
+                    (if (map? x)
+                      (with-meta x {:spec {:col-align true}})
+                      x))
+                  form)]
+    (layout-multiline-call :list form (assoc opts :spec spec))))
 
 (defn layout-multiline-hiccup
   "generates hiccup code"

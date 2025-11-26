@@ -12,6 +12,7 @@
 (def +bindings+
   '#{if let while ns 
      if-let if-some if-not
+     try
      when when-not when-some when-first
      doto dotimes 
      binding with-bindings with-bindings*
@@ -20,16 +21,18 @@
      extend extend-protocol extend-type})
 
 (def +defs+
-  '#{fn defn defmacro
+  '#{fn defn defmacro defrecord deftype
      defn-
      defmacro.js defn.js def.js def$.js def-.js
      defmacro.py defn.py def.py def$.py def-.py
      defmacro.lua defn.lua def.lua def$.lua def-.lua
-     defmacro.pg defn.pg deftable.pg defenum.pg defindex.pg})
+     defmacro.pg defn.pg deftype.pg defenum.pg defindex.pg})
 
 (def +pairing+
   '#{case cond-> cond->> some-> some->>
      as-> })
+
+
 
 (defn layout-hiccup-like
   "checks if form is hiccup structure"
@@ -51,14 +54,20 @@
   {:added "4.0"}
   [form is-multiline]
   (if is-multiline
-    (cond (list? form)
+    (cond (h/form? form)
           (cond (coll? (first form))
                 {:col-from  0
-                 :col-start 1}
+                 :col-start 1
+                 :col-call true}
 
+                (= 'catch (first form))
+                {:col-from 2
+                 :col-start 2}
+                
                 (= 'assoc (first form))
                 {:columns 2
-                 :col-from 1}
+                 :col-from 1
+                 :col-call true}
 
                 (= 'hash-map (first form))
                 {:columns 2
@@ -76,10 +85,12 @@
                 {:columns 2
                  :col-from 1
                  :col-start 2
-                 :col-align true}
+                 :col-align true
+                 :col-call true}
 
                 :else
-                {:col-from  1}))))
+                {:col-from  1
+                 :col-call true}))))
 
 (defn layout-annotate-arglist
   "adds layout metadat to arglists"
@@ -131,9 +142,9 @@
   (let [top-index  (or (if (vector? doc?) 2)
                        (if (vector? attr?) 3)
                        (if (vector? (first body)) 4))
-        list-index (or (if (list? doc?) 2)
-                       (if (list? attr?) 3)
-                       (if (list? (first body)) 4))]
+        list-index (or (if (h/form? doc?) 2)
+                       (if (h/form? attr?) 3)
+                       (if (h/form? (first body)) 4))]
     (if top-index
       (apply list
              (concat (take top-index form)
@@ -153,8 +164,8 @@
   [[_ sym? & body :as form]]
   (let [top-index  (or (if (vector? sym?) 1)
                        (if (vector? (first body)) 2))
-        list-index (or (if (list? sym?) 1)
-                       (if (list? (first body)) 2))]
+        list-index (or (if (h/form? sym?) 1)
+                       (if (h/form? (first body)) 2))]
     (if top-index
       (apply list
              (concat (take top-index form)
@@ -181,7 +192,7 @@
   "adds metadata annotation to form"
   {:added "4.0"}
   [form]
-  (cond (list? form)
+  (cond (h/form? form)
         (cond ('#{fn} (first form))
               (layout-annotate-fn-anon form)
 
@@ -215,7 +226,7 @@
         form  (layout-annotate form)
         nopts (assoc opts :spec spec)]
     (cond (not is-multiline) (construct/block form)
-
+          
           (map? form) (common/layout-multiline-hashmap form nopts)
 
           (set? form) (common/layout-multiline-hashset form nopts)
@@ -224,7 +235,7 @@
                            (common/layout-multiline-hiccup form nopts)
                            (common/layout-multiline-vector form nopts))
 
-          (list? form) (common/layout-multiline-list form nopts)
+          (h/form? form) (common/layout-multiline-list form nopts)
           
           :else (construct/block form))))
 

@@ -32,7 +32,7 @@
          checks  (filter #(-> % :from (= :verify))    results)
          forms   (filter #(-> % :from (= :evaluate))  results)
 
-         timedout      (filter #(-> % :form (= :timeout)) forms)
+         timeout      (filter #(-> % :form (= :timeout)) forms)
          thrown-forms  (filter #(and (-> % :status (= :exception))
                                      (not= :timeout (:form %))) forms)
          thrown-checks (filter #(and (-> % :data false?)
@@ -51,8 +51,8 @@
                       (frequencies)
                       (keys))]
      {:files  files
-      :thrown thrown
-      :timedout timedout
+      :throw thrown
+      :timeout timeout
       :facts  facts
       :checks checks
       :passed passed
@@ -74,28 +74,28 @@
   ([items]
    (let [summary (h/map-vals count items)]
      (when (:print-bulk print/*options*)
-       (doseq [failed (:failed items)]
-         (-> failed
+       (doseq [item  (:failed items)]
+         (-> item
              (listener/summarise-verify)
-             (print/print-failure)))
-       (doseq [thrown (:thrown items)]
-         (if (= :verify (:from thrown))
-           (-> thrown
+             (print/print-failed)))
+       (doseq [item (:throw items)]
+         (if (= :verify (:from item))
+           (-> item
                (listener/summarise-verify)
-               (print/print-thrown))
-           (-> thrown
+               (print/print-throw))
+           (-> item
                (listener/summarise-evaluate)
-               (print/print-thrown))))
-       (doseq [timedout (:timedout items)]
-         (-> timedout
+               (print/print-throw))))
+       (doseq [item (:timeout items)]
+         (-> item
              (listener/summarise-evaluate)
-             (print/print-timedout)))
+             (print/print-timeout)))
        (if (seq summary)
          (print/print-summary summary)))
      (swap! +latest+ assoc
-            :failed (:failed items)
-            :thrown (:thrown items)
-            :timedout (:timedout items))
+            :failed  (:failed items)
+            :throw   (:throw items)
+            :timeout (:timeout items))
      summary)))
 
 (defn summarise-bulk

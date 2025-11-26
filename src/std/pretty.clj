@@ -83,6 +83,8 @@
             [std.pretty.color :as color]
             [std.pretty.dispatch :as dispatch]
             [std.pretty.protocol :as protocol.pretty]
+            [std.block :as block]
+            [code.heal :as heal]
             [std.string :as str]
             [std.concurrent.print :as print]
             [std.lib :as h]))
@@ -117,6 +119,7 @@
     :class-name      [:bold :blue]}})
 
 ;; ## Formatting Methods
+
 
 (defn- order-collection
   "Takes a sequence of entries and checks the mode to determine whether to sort
@@ -356,8 +359,8 @@
   (-visit-seq
     [this value]
     (let [entries (map (partial format-doc this) value)]
-      [:group "(" [:align (interpose " " entries)] ")"]))
-
+          [:group "(" [:align (interpose " " entries)] ")"]))
+  
   (-visit-vector
     [this value]
     (let [entries (map (partial format-doc this) value)]
@@ -403,7 +406,7 @@
 
   ; Special Types
 
-
+  
   (-visit-tagged
     [this value]
     [:span (str "#" (:tag value)) " " (format-doc this (:form value))])
@@ -426,28 +429,23 @@
    (assoc (CanonicalPrinter. handlers #{})
           :width 0)))
 
-
-;; ## Pretty Printer Implementation
-
-
-(defrecord PrettyPrinter
-           [width
-            print-meta
-            sort-keys
-            map-delimiter
-            map-coll-separator
-            seq-limit
-            print-color
-            color-markup
-            color-scheme
-            print-handlers
-            print-fallback
-            visited]
-
+(defrecord PrettyPrinter [width
+                          print-meta
+                          sort-keys
+                          map-delimiter
+                          map-coll-separator
+                          seq-limit
+                          print-color
+                          color-markup
+                          color-scheme
+                          print-handlers
+                          print-fallback
+                          visited]
+  
   protocol.pretty/IVisitor
-
-  ; Primitive Types
-
+  
+                                        ; Primitive Types
+  
   (-visit-nil
     [this]
     (color/-document this :nil "nil"))
@@ -476,27 +474,32 @@
     [this value]
     (color/-document this :symbol (str value)))
 
-
-  ; Collection Types
-
-
+  ;; Collection Types
   (-visit-seq
     [this value]
-    (let [[values trimmed?]
-          (if (and seq-limit (pos? seq-limit))
-            (let [head (take seq-limit value)]
-              [head (<= seq-limit (count head))])
-            [(seq value) false])
-          elements
-          (cond-> (if (symbol? (first values))
-                    (cons (color/-document this :function-symbol (str (first values)))
-                          (map (partial format-doc this) (rest values)))
-                    (map (partial format-doc this) values))
-            trimmed? (concat [(color/-document this :nil "...")]))]
-      [:group
-       (color/-document this :delimiter "(")
-       [:align (interpose :line elements)]
-       (color/-document this :delimiter ")")]))
+    (or (h/suppress
+         [:group [:align
+                  (apply vector :span
+                         (interpose [:line]
+                                    (map #(vector :text %)
+                                         (str/split-lines
+                                          (heal/rainbow (str (block/layout value)))))))]])
+        
+        (let [[values trimmed?]
+              (if (and seq-limit (pos? seq-limit))
+                (let [head (take seq-limit value)]
+                  [head (<= seq-limit (count head))])
+                [(seq value) false])
+              elements
+              (cond-> (if (symbol? (first values))
+                        (cons (color/-document this :function-symbol (str (first values)))
+                              (map (partial format-doc this) (rest values)))
+                        (map (partial format-doc this) values))
+                trimmed? (concat [(color/-document this :nil "...")]))]
+          [:group
+           (color/-document this :delimiter "(")
+           [:align (interpose :line elements)]
+           (color/-document this :delimiter ")")])))
 
   (-visit-vector
     [this value]
@@ -530,7 +533,7 @@
        (color/-document this :delimiter "}")]))
 
 
-  ; Clojure Types
+                                        ; Clojure Types
 
 
   (-visit-meta
@@ -561,7 +564,7 @@
                      (into {} value))))
 
 
-  ; Special Types
+                                        ; Special Types
 
 
   (-visit-tagged

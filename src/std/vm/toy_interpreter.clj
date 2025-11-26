@@ -1,4 +1,4 @@
-(ns std.block.visual.toy-interpreter
+(ns std.vm.toy-interpreter
   (:require [std.block.base :as base]
             [std.block.construct :as construct]
             [std.block.check :as check]

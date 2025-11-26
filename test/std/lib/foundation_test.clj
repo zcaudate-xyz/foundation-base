@@ -26,25 +26,25 @@
   (NIL :hello) => nil
   (NIL 1 2 3) => nil)
 
-^{:refer std.lib.foundation/U :added "3.0"
-  :let [factorial (fn [f]
-                    (fn [n]
-                      (if (zero? n)
-                        1
-                        (* n ((f f) (dec n))))))]}
+^{:refer std.lib.foundation/U :added "3.0"}
 (fact "U Combinator"
 
-  ((U factorial) 5) => 120)
-
-^{:refer std.lib.foundation/Z :added "3.0"
-  :let [factorial (fn [f]
+  (let [factorial (fn [f]
                     (fn [n]
                       (if (zero? n)
                         1
-                        (* n (f (dec n))))))]}
+                        (* n ((f f) (dec n))))))]
+    ((U factorial) 5)) => 120)
+
+^{:refer std.lib.foundation/Z :added "3.0"}
 (fact "Z combinator"
 
-  ((Z factorial) 5) => 120
+  (let [factorial (fn [f]
+                    (fn [n]
+                      (if (zero? n)
+                        1
+                        (* n (f (dec n))))))]
+    ((Z factorial) 5) => 120)
   ^:hidden
 
   ;; The body of Z can be defined as
@@ -261,7 +261,7 @@
 (fact "converts a var to a symbol"
 
   (var-sym #'var-sym)
-  => 'std.lib.foundation-test/var-sym)
+  => 'std.lib.foundation/var-sym)
 
 ^{:refer std.lib.foundation/unbound? :added "3.0"}
 (fact "checks if a variable is unbound"

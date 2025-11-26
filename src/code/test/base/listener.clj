@@ -7,10 +7,15 @@
   "extract the comparison into a valid format"
   {:added "3.0"}
   ([result]
-   {:status    (if (and (= :success (-> result :status))
-                        (= true (-> result :data)))
-                 :success
-                 :failed)
+   {:status    (cond (and (= :success (-> result :status))
+                          (= true (-> result :data)))
+                     :success
+                     
+                     (= :timeout (-> result :actual :status))
+                     :timeout
+                     
+                     :else
+                     :failed)
     :path     (-> result :meta :path)
     :name     (-> result :meta :refer)
     :ns       (-> result :meta :ns)
@@ -19,10 +24,7 @@
     :form     (-> result :actual :form)
     :check    (-> result :checker :form)
     :checker  (-> result :checker)
-    :actual   (-> result :actual :data)
-    :replace  (-> result :replace)
-    :compare  (-> result :compare)
-    :original (-> result :original)
+    :actual   (-> result :actual)
     :parent   (-> result :meta :parent-form)}))
 
 (defn summarise-evaluate
@@ -36,33 +38,40 @@
     :line     (-> result :meta :line)
     :desc     (-> result :meta :desc)
     :form     (-> result :form)
-    :data     (-> result :data)
-    :actual   (-> result :data)
-    :replace  (-> result :replace)
-    :original (-> result :original)
-    :parent   (-> result :meta :parent-form)}))
+    :data     (-> result :data)}))
 
 (defn form-printer
   "prints out result for each form"
   {:added "3.0"}
   ([{:keys [result]}]
-   (when (and (-> result :status (= :exception))
-              (print/*options* :print-thrown))
-     (h/beep)
-     (print/print-thrown (summarise-evaluate result)))))
+   (let [summary (summarise-evaluate result)]
+     (cond (-> result :status (= :exception))
+           (when (print/*options* :print-throw)
+             (h/beep)
+             (print/print-throw summary))
+
+           (-> result :status (= :timeout))
+           (when (print/*options* :print-timeout)
+             (h/beep)
+             (print/print-timeout summary))))))
 
 (defn check-printer
   "prints out result per check"
   {:added "3.0"}
   ([{:keys [result]}]
-   (when (or (and (-> result :status (= :exception))
-                  (print/*options* :print-failure))
-             (and (-> result :data (= false))
-                  (print/*options* :print-failure)))
-     (h/beep)
-     (print/print-failure (summarise-verify result))) (if (and (-> result :data (= true))
-                                                               (print/*options* :print-success))
-                                                        (print/print-success (summarise-verify result)))))
+   (let [summary (summarise-verify result)]
+     (cond (= :timeout (-> result :actual :status))
+           (if (print/*options* :print-timeout)
+             (print/print-timeout summary))
+           
+           (or (and (-> result :status (= :exception)))
+               (and (-> result :data (= false))))
+           (if (print/*options* :print-failed)
+             (print/print-failed (summarise-verify result)))
+
+           (and (-> result :data (= true))
+                (print/*options* :print-success))
+           (print/print-success (summarise-verify result))))))
 
 (defn form-error-accumulator
   "accumulator for thrown errors"
@@ -70,7 +79,10 @@
   ([{:keys [result]}]
    (when rt/*errors*
      (if (-> result :status (= :exception))
-       (swap! rt/*errors* update-in [:exception] conj result)))))
+       (swap! rt/*errors* update-in [:exception] conj result))
+
+     (if (-> result :status (= :timeout))
+       (swap! rt/*errors* update-in [:timeout] conj result)))))
 
 (defn check-error-accumulator
   "accumulator for errors on checks"
@@ -79,7 +91,10 @@
    (when rt/*errors*
      (if (or (-> result :status (= :exception))
              (-> result :data (= false)))
-       (swap! rt/*errors* update-in [:failed] conj result)))))
+       (swap! rt/*errors* update-in [:failed] conj result))
+
+     (if (= :timeout (-> result :actual :status))
+       (swap! rt/*errors* update-in [:timeout] conj result)))))
 
 (defn fact-printer
   "prints out results after every fact"
@@ -104,10 +119,16 @@
                                       (h/local :println "-------------------------")
                                       (when-let [failed (:failed @rt/*errors*)]
                                         (doseq [result failed]
-                                          (print/print-failure (summarise-verify result))))
+                                          (print/print-failed (summarise-verify result))))
                                       (when-let [exceptions (:exception @rt/*errors*)]
                                         (doseq [result exceptions]
-                                          (print/print-thrown (summarise-evaluate result))))
+                                          (print/print-throw (summarise-evaluate result))))
+                                      (when-let [timeouts (:timeout @rt/*errors*)]
+                                        (doseq [result timeouts]
+                                          (if (= :timeout (:status result))
+                                            (print/print-throw (summarise-evaluate result))
+                                            (print/print-throw (summarise-verify result)))))
+                                      
                                       (h/local :println ""))))
 
 (defn install-listeners

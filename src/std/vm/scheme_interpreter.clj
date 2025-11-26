@@ -1,4 +1,4 @@
-(ns std.block.visual.scheme-interpreter
+(ns std.vm.scheme-interpreter
   (:require [std.block.base :as base]
             [std.block.construct :as construct]
             [std.block.check :as check]

@@ -74,9 +74,9 @@
   {:added "3.0"}
   ([ck result]
    (let [out (try
-               {:status :success :data (ck result)}
+               {:type :code/test :status :success :data (ck result)}
                (catch Throwable t
-                 {:status :exception :data t}))]
+                 {:type :code/test :status :exception :data t}))]
      (res/result (assoc out :checker ck :actual result :from :verify)))))
 
 (defn succeeded?

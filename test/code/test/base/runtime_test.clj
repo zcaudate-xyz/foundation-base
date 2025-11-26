@@ -1,12 +1,11 @@
 (ns code.test.base.runtime-test
   (:use code.test)
   (:require [code.test.base.runtime :as rt]
-            [code.test.base.context :as ctx]
             [std.lib :as h]))
 
 (fact "Run tests in a temporary context"
 
-  (ctx/with-context {:registry (atom {})}
+  (ctx/
     (rt/set-global {:a 1})
     (rt/get-global))
   => {:a 1})
@@ -17,7 +16,7 @@
   => nil)
 
 (fact "Test purge-all within a context"
-
+  
   (ctx/with-context {:registry (atom {})}
     (rt/set-global 'code.test.base.runtime-test {:a 1})
     (rt/purge-all 'code.test.base.runtime-test)

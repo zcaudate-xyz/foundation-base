@@ -282,7 +282,7 @@
                       (zero? (compare nelem +newline+)))
                (recur more (conj out elem))
                (recur more (conj out elem +newline+))))
-
+           
            (base/block? elem)
            (recur more (conj out elem))
 
@@ -335,13 +335,13 @@
   ([elem]
    (cond (base/block? elem)
          elem
-
+         
          (check/token? elem)
          (token elem)
 
          (check/collection? elem)
          (construct-collection elem)
-
+         
          :else
          (throw (ex-info "Invalid input." {:input elem})))))
 

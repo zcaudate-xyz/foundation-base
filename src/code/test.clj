@@ -56,15 +56,10 @@
               compile/fact:teardown
               compile/fact:remove
               compile/fact:template
-              compile/fact:let
-              compile/fact:derive
-              compile/fact:table
-              compile/fact:bench
-              compile/fact:check
               compile/fact:compile
               compile/=>)
 
-(defonce +listeners+
+(def +listeners+
   (listener/install-listeners))
 
 (comment)

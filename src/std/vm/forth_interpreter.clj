@@ -1,4 +1,4 @@
-(ns std.block.visual.forth-interpreter
+(ns std.vm.forth-interpreter
   (:require [std.block.base :as base]
             [std.block.construct :as construct]
             [std.block.check :as check]

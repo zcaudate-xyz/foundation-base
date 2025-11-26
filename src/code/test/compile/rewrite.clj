@@ -24,9 +24,9 @@
               ;; Found A => B, rewrite to check
               ;; Capture values using try/catch wrappers
               (let [input-wrapper  `(try {:status :success :data ~curr}
-                                         (catch Throwable t# {:status :exception :data t#}))
+                                         (catch Throwable ~'t {:status :exception :data ~'t}))
                     output-wrapper `(try {:status :success :data ~target}
-                                         (catch Throwable t# {:status :exception :data t#}))
+                                         (catch Throwable ~'t {:status :exception :data ~'t}))
                     line   (or (:line (meta next)) (:line (meta curr)) (:line (meta form)))
                     column (or (:column (meta next)) (:column (meta curr)) (:column (meta form)))
                     check-form `(process/process

@@ -33,5 +33,5 @@
 ^{:refer code.test.base.print/format-diff :added "4.0"}
 (fact "TODO")
 
-^{:refer code.test.base.print/print-timedout :added "4.0"}
+^{:refer code.test.base.print/print-timeout :added "4.0"}
 (fact "TODO")
