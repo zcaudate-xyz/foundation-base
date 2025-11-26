@@ -11,7 +11,8 @@
             [std.lang.base.emit-prep-lua-test :as prep]
             [std.lang.base.runtime :as rt]
             [std.json :as json]
-            [std.lib :as h]))
+            [std.lib :as h]
+            [std.lang :as l]))
 
 (def +library-ext+
   (doto (lib/library:create
@@ -45,6 +46,16 @@
                     :id 'add
                     :section :fragment
                     :library +library-ext+}))
+
+(fact "runs dynamic namespaces"
+  ^:hidden
+
+  (require '[std.lang.base.runtime-test.dynamic-one :as one]
+           '[std.lang.base.runtime-test.dynamic-two :as two]
+           :reload)
+
+  (two/get-emitted-world-id)
+  => "world_id()")
 
 ^{:refer std.lang.base.runtime/default-tags-ptr :added "4.0"}
 (fact "runtime default args"
