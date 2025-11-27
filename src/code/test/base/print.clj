@@ -114,18 +114,21 @@
 (defn print-failed
   "outputs the description for a failed test"
   {:added "3.0"}
-  ([{:keys [name actual check parent] :as summary}]
-   (let [result (:data actual)]
+  ([{:keys [name actual check parent checker] :as summary}]
+   (let [result (:data actual)
+         diff   (try (diff/diff checker result) (catch Throwable _ nil))]
      (print/println
       (str (print-preliminary "FAILED" :red summary)
            (if parent  (str "\n" (ansi/style  (pad-left 8 "Parent")
                                               #{:red}) "  " (str/indent-rest (pretty/pprint-str parent) 12)))
            (str "\n"  (ansi/style (pad-left 8  "Check:") #{:red}) "  " check)
-           (str "\n"  (ansi/style (pad-left 8 "OUTPUT") #{:red :bold}) "  " (str/indent-rest
-                                                                             (str/join-lines
-                                                                              (take 20 (str/split-lines
-                                                                                        (pr-str result))))
-                                                                             10))
+           (if diff
+             (str "\n" (ansi/style (pad-left 8 "Diff:") #{:red :bold}) "  " (str/indent-rest (format-diff diff) 10))
+             (str "\n"  (ansi/style (pad-left 8 "OUTPUT") #{:red :bold}) "  " (str/indent-rest
+                                                                               (str/join-lines
+                                                                                (take 20 (str/split-lines
+                                                                                          (pr-str result))))
+                                                                               10)))
            (if name (str "\n" (ansi/style (pad-left 8 "###") #{:red :bold}) "  " (ansi/style name #{:red :bold})) "")
            "\n")))))
 

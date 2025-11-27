@@ -9,6 +9,13 @@
   (let [ck (common/->checker v1)]
     (common/succeeded? (common/verify ck v2))))
 
+(defn- unflatten
+  [m]
+  (reduce-kv (fn [out k v]
+               (assoc-in out k v))
+             {}
+             m))
+
 (defn diff-map
   "diffs two maps, respecting checkers"
   [expect actual]
@@ -21,16 +28,16 @@
         ;; If something is marked as changed, we check if it actually satisfies the checker.
         ;; If it does, we remove it from changed.
         real-changes (reduce-kv (fn [out k v]
-                                  (let [v-actual (get actual (first k))]
+                                  (let [v-actual (get-in actual k)]
                                     (if (checker-equal? v v-actual)
                                       out
-                                      (assoc out (first k) v))))
+                                      (assoc-in out k v))))
                                 {}
                                 changed)
 
         ;; Unwrap keys for + and - as well
-        missing (coll/map-keys first (:+ diff))
-        extra   (coll/map-keys first (:- diff))
+        missing (unflatten (:+ diff))
+        extra   (unflatten (:- diff))
 
         final-diff (cond-> {}
                      (not-empty missing) (assoc :+ missing)
@@ -66,6 +73,12 @@
                     nil))
 
                 (= tag :just)
+                (diff (:expect expect) actual)
+
+                (= tag :satisfies)
+                (diff (:expect expect) actual)
+
+                (= tag :exactly)
                 (diff (:expect expect) actual)
 
                 :else
