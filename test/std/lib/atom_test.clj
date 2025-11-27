@@ -228,27 +228,27 @@
           :c 12
           :d {:y 9}}})
 
-^{:refer std.lib.atom/atom:cursor :added "3.0"
-  :let [a  (atom {:a {:b 1}})
-        ca (atom:cursor a [:a :b])]}
+^{:refer std.lib.atom/atom:cursor :added "3.0"}
 (fact "adds a cursor to the atom to swap on any change"
   ^:hidden
-  
-  (do (swap! ca + 10)
-      (swap! a update-in [:a :b] + 100)
-      [(deref a) (deref ca)])
+
+  (let [a  (atom {:a {:b 1}})
+        ca (atom:cursor a [:a :b])]
+    (do (swap! ca + 10)
+        (swap! a update-in [:a :b] + 100)
+        [(deref a) (deref ca)]))
   => [{:a {:b 111}} 111])
 
-^{:refer std.lib.atom/atom:derived :added "3.0"
-  :let  [a (atom 1)
-         b (atom 10)
-         c (atom:derived [a b] +)]}
+^{:refer std.lib.atom/atom:derived :added "3.0"}
 (fact "constructs an atom derived from other atoms"
   ^:hidden
-  
-  (do (swap! a + 1)
-      (swap! b + 10)
-      [@a @b @c])
+
+  (let  [a (atom 1)
+         b (atom 10)
+         c (atom:derived [a b] +)]
+    (do (swap! a + 1)
+        (swap! b + 10)
+        [@a @b @c]))
   => [2 20 22])
 
 (comment

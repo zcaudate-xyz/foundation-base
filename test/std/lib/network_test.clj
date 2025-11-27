@@ -54,17 +54,21 @@
 
 ^{:refer std.lib.network/socket:address :added "3.0"}
 (fact "gets the remote socket address"
+  ^:hidden
+  
   (with-open [s (java.net.ServerSocket. 0)]
     (with-open [c (socket (.getLocalPort s))]
       (socket:address c)))
-  => java.net.InetAddress)
+  => "localhost/127.0.0.1")
 
 ^{:refer std.lib.network/socket:local-address :added "3.0"}
 (fact "getst the local socket address"
+  ^:hidden
+  
   (with-open [s (java.net.ServerSocket. 0)]
     (with-open [c (socket (.getLocalPort s))]
       (socket:local-address c)))
-  => java.net.InetAddress)
+  => "/127.0.0.1")
 
 ^{:refer std.lib.network/port:check-available :added "4.0"}
 (fact "check that port is available"

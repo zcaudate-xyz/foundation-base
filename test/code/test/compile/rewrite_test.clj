@@ -56,7 +56,6 @@
           1)
       => 1)))
 
-
 ^{:refer code.test.compile.rewrite/rewrite-list :added "4.0"
   :timeout 100}
 (fact "GO TO Sleep"

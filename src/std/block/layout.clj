@@ -32,8 +32,6 @@
   '#{case cond-> cond->> some-> some->>
      as-> })
 
-
-
 (defn layout-hiccup-like
   "checks if form is hiccup structure"
   {:added "4.0"}

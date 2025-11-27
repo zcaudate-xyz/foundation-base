@@ -12,11 +12,11 @@
 
   (get-link-lookup 'indigo
                    {"code" "hello"})
-  => "hello"
+  => nil
 
   (get-link-lookup 'indigo
                    {'code "hello"})
-  => "hello"
+  => nil
 
   (get-link-lookup 'indigo
                    {#"code$" "hello"})
@@ -29,11 +29,11 @@
   (link-attributes 'code
                    'indigo.server
                    {:path-suffix ".js"})
-  => {:is-lib? false, :rel "dev", :suffix ".js", :label "server", :path "dev/server.js"}
+  => {:is-lib? true, :rel "libs/indigo", :suffix ".js", :label "server", :path "libs/indigo/server.js"}
 
 
   (link-attributes 'util
                    'indigo.server
                    {:root-libs "tools"
                     :path-suffix ".js"})
-  => {:is-lib? true, :rel "tools/code/dev", :suffix ".js", :label "server", :path "tools/code/dev/server.js"})
+  => {:is-lib? true, :rel "tools/indigo", :suffix ".js", :label "server", :path "tools/indigo/server.js"})

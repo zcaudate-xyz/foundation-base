@@ -32,13 +32,13 @@
 
   (thread:spin))
 
-^{:refer std.concurrent.thread/thread:wait-on :added "3.0"
-  :let [lock (Object.)]}
+^{:refer std.concurrent.thread/thread:wait-on :added "3.0"}
 (fact "waits for a lock to notify" ^:hidden
 
-  (future (thread:sleep 500)
-          (thread:notify lock))
-  (thread:wait-on lock))
+  (let [lock (Object.)]
+    (future (thread:sleep 500)
+            (thread:notify lock))
+    (thread:wait-on lock)))
 
 ^{:refer std.concurrent.thread/thread:notify :added "3.0"}
 (fact "notifies threads waiting on lock")
@@ -46,12 +46,12 @@
 ^{:refer std.concurrent.thread/thread:notify-all :added "3.0"}
 (fact "notifies all threads waiting on lock")
 
-^{:refer std.concurrent.thread/thread:has-lock? :added "3.0"
-  :let [lock (Object.)]}
+^{:refer std.concurrent.thread/thread:has-lock? :added "3.0"}
 (fact "checks if thread has the lock" ^:hidden
 
-  (locking lock
-    (thread:has-lock? lock))
+  (let [lock (Object.)]
+    (locking lock
+      (thread:has-lock? lock)))
   => true)
 
 ^{:refer std.concurrent.thread/thread:yield :added "3.0"}

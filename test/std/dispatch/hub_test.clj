@@ -49,7 +49,7 @@
 ^{:refer std.dispatch.hub/process-hub :added "3.0"}
 (fact "activates on debounce submit hit"
   
-  (def -hub- (cc/hub:new))
+  (def -hub- (create-dispatch +test-config+))
   (cc/hub:add-entries -hub- [1 2 3])
   (process-hub {:handler (fn [_ entries] entries) :options {:hub {:max-batch 10}}} :g -hub-)
   => [1 2 3])
@@ -160,7 +160,7 @@
 (comment
 
   @(:debouncer (:runtime -e-))
-
+  
   (def -e- (-> (create-dispatch {:handler (fn [_ entries] (prn :ENTRIES entries))
                                  :options {:pool {:max 100
                                                   :size 100}
@@ -171,12 +171,12 @@
                                                             :run-final true}
                                                  :sort {:sequential false}}}})
                (start-dispatch)))
-
+  
   (do (future (dotimes [i 1000]
                 (Thread/sleep 1)
                 (submit-dispatch -e- 0)))
       (future (dotimes [i 1000]
-                (Thread/sleep 1)
+                (Thread/sleep i)
                 (submit-dispatch -e- 1))))
   (submit-dispatch -e- 2)
   (submit-dispatch -e- 1)

@@ -14,53 +14,61 @@
 (fact "sets the context in the space"
   ^:hidden
 
-  (space-context-set |sp| :null :default {})
+  (space-context-set (space-create {:namespace 'test})
+                     :null :default {})
   => (contains-in
       [:changed {:null {:context :null, :scratch std.lib.context.registry.RuntimeNull,
                         :key :default, :resource :hara/context.rt.null, :config {}}}]))
 
-^{:refer std.lib.context.space/space-context-unset :added "3.0"
-  :use [|sp|]}
+^{:refer std.lib.context.space/space-context-unset :added "3.0"}
 (fact "unsets the context in the space"
   ^:hidden
-
-  (space-context-unset |sp| :null)
+  
+  (space-context-unset (doto (space-create {:namespace 'test})
+                         (space-context-set :null :default {}))
+                       :null)
   => (contains {:context :null, :key :default,
                 :resource :hara/context.rt.null, :config {}}))
 
-^{:refer std.lib.context.space/space-context-get :added "3.0"
-  :use [|sp|]}
+^{:refer std.lib.context.space/space-context-get :added "3.0"}
 (fact "gets the context in the space"
   ^:hidden
 
-  (space-context-get |sp| :null)
+  (space-context-get (doto (space-create {:namespace 'test})
+                       (space-context-set :null :default {}))
+                     :null)
   => (contains
       {:context :null, :key :default,
        :resource :hara/context.rt.null, :config {} :variant :default}))
 
-^{:refer std.lib.context.space/space-rt-start :added "3.0"
-  :use [|sp|]}
+^{:refer std.lib.context.space/space-rt-start :added "3.0"}
 (fact "starts the context runtime"
   ^:hidden
 
-  (space-rt-start |sp| :null)
+  (space-rt-start (doto (space-create {:namespace 'test})
+                       (space-context-set :null :default {}))
+                  :null)
   => reg/rt-null?)
 
-^{:refer std.lib.context.space/space-rt-stop :added "3.0"
-  :use [|sp|]}
+^{:refer std.lib.context.space/space-rt-stop :added "3.0"}
 (fact "stops the context runtime"
   ^:hidden
 
-  (space-rt-stop |sp| :null)
+  (space-rt-stop (doto (space-create {:namespace 'test})
+                       (space-context-set :null :default {}))
+                 :null)
   => nil
 
-  (-> (doto |sp|
-        (space-rt-start :null))
+  (-> (doto (space-create {:namespace 'test})
+            (space-context-set :null :default {})
+            (space-rt-start :null))
       (space-rt-stop :null))
   => reg/rt-null?)
 
 ^{:refer std.lib.context.space/space-stop :added "3.0"}
 (fact "shutdown all runtimes in the space"
+  ^:hidden
+  
   (space-stop (space-create {:namespace 'test}))
   => space?)
 
@@ -107,6 +115,8 @@
 
 ^{:refer std.lib.context.space/space:rt-current :added "4.0"}
 (fact "gets the current rt in the space"
+  ^:hidden
+  
   (space:rt-current :null)
   => reg/rt-null?)
 

@@ -330,3 +330,9 @@
    [res:start   res-start {:args [{:name config :default {}}]}]
    [res:restart res-restart {:args []}]
    [res         res-base  {:args [{:name config :default {}}]}]])
+
+(spit "out.txt"
+      (std.string/join (for [f (keys (std.fs/list "src/std/protocol"
+                                                  {:include [std.fs/file?]}))]
+                         (slurp f))))
+

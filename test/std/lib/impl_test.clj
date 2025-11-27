@@ -111,10 +111,8 @@
   (template-transform
    (filter #(-> % :name (= '-hi))
            (template-signatures 'IHello {:prefix "impl/"}))
-   {:body-output-fn #(get '{-hi "Hi There"} (:name %))})
-  => '([-hi ([cache] "Hi There")]
-       [-hi ([cache a0] "Hi There")]
-       [-hi ([cache a0 a1] "Hi There")]))
+   {:body-output-fn (standard-body-output-fn {}) })
+  => '([-hi ([cache] (-hi cache))] [-hi ([cache a0] (-hi cache a0))] [-hi ([cache a0 a1] (-hi cache a0 a1))]))
 
 ^{:refer std.lib.impl/parse-impl :added "3.0"}
 (fact "parses the different transform types"
@@ -205,8 +203,9 @@
   => (contains '[clojure.lang.IFn]))
 
 ^{:refer std.lib.impl/dimpl-form :added "3.0"}
-(fact "helper for `defimpl`" ^:hidden
-
+(fact "helper for `defimpl`"
+  ^:hidden
+  
   (dimpl-form 'Test '[]
               '[:prefix "common/"
                 :suffix "-test"
@@ -217,12 +216,15 @@
                              protocol.dispatch/IDispatch
                              :method  {-submit submit-executor}
                              :body  {-bulk?  false}]])
-  => (contains '(clojure.core/deftype Test [])))
+  => vector?)
 
 ^{:refer std.lib.impl/defimpl :added "3.0"}
 (fact "creates a high level `deftype` or `defrecord` interface"
-  (defimpl Test [])
-  => (contains '(clojure.core/deftype Test [])))
+  ^:hidden
+  
+  (macroexpand-1
+   '(defimpl Test []))
+  => '[(defrecord Test [])])
 
 ^{:refer std.lib.impl/eimpl-template-fn :added "3.0"}
 (fact "creates forms compatible with `extend-type` and `extend-protocol`"
@@ -249,8 +251,9 @@
   => seq?)
 
 ^{:refer std.lib.impl/eimpl-form :added "3.0"}
-(fact "creates the extend-impl form" ^:hidden
-
+(fact "creates the extend-impl form"
+  ^:hidden
+  
   (eimpl-form
    'clojure.lang.Atom
    '[:prefix "common/"
@@ -259,24 +262,26 @@
                   protocol.dispatch/IDispatch
                   :method  {-submit +}
                   :body  {-bulk?  false}]])
-  => seq?)
+  => vector?)
 
-^{:refer std.lib.impl/extend-impl
-  :added "3.0"
-  :style/indent 1}
+^{:refer std.lib.impl/extend-impl :added "3.0" :style/indent 1}
 (fact "extends a class with the protocols"
+  ^:hidden
+  
   (extend-impl String [:prefix "string/"])
-  => seq?)
+  => vector?)
 
 ^{:refer std.lib.impl/build-with-opts-fn :added "3.0"}
 (fact "builds a function with an optional component"
-  (build-with-opts-fn 'test '((test [x] 1)))
-  => seq?)
+
+  (build-with-opts-fn 'test '[([obj] (val obj))])
+  => '(clojure.core/defn test ([] (val {})) ([obj] (val obj))))
 
 ^{:refer std.lib.impl/build-variadic-fn :added "3.0"}
 (fact "builds a variadic function if indicated"
-  (build-variadic-fn 'test '((test [x] 1)))
-  => seq?)
+
+  (build-variadic-fn 'test '[([obj] (val obj))])
+  => '(clojure.core/defn test ([& obj] (val obj))))
 
 ^{:refer std.lib.impl/build-template-fn :added "3.0"}
 (fact "contructs a template from returned vals with support for variadic"
@@ -336,8 +341,11 @@
 
 ^{:refer std.lib.impl/build-impl :added "3.0" :style/indent 1}
 (fact "build macro for generating functions from protocols"
-  (build-impl {:prefix "test/"} ITest)
-  => seq?)
+
+  (macroexpand-1
+   '(build-impl {:prefix "test/"} ITest))
+  => '[(clojure.core/defn val ([obj] (-val obj)) ([obj k] (-val obj k)))
+       (clojure.core/defn get ([obj] (-get obj)))])
 
 ^{:refer std.lib.impl/impl:proxy :added "3.0"}
 (fact "creates a proxy template given a symbol"

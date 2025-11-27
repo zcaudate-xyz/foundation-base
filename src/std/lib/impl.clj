@@ -120,7 +120,7 @@
                 :or {body-input-fn  (standard-body-input-fn fns)
                      body-output-fn (standard-body-output-fn fns)}} fns]
            (fn [{:keys [self] :as signature}]
-             (let [input (body-input-fn signature)
+             (let [input  (body-input-fn signature)
                    output (body-output-fn signature)]
                (if self
                  `(~input ~output ~(first input))

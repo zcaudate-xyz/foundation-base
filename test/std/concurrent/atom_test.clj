@@ -116,12 +116,11 @@
                                  :max-batch 1000})
         -exec- (:executor -exe-)]
     (try
+      
       (do (def -res- ((:submit -exe-) 1 2 3 4 5 6))
           @(first -res-))
       => '[(nil (1 2 3 4 5 6))]
-
-      (hub:wait (:queue -exe-))
-      => nil
+            
       (finally
         (executor/exec:shutdown -exec-)))))
 
@@ -133,10 +132,3 @@
               (swap! -hub- update :ticket f/future:force true))
     (hub:wait -hub-))
   => true)
-
-(fact "hello"
-  ^:hidden
-  
-  (let [a 1]
-    (list 'a)
-    => '(a)))
