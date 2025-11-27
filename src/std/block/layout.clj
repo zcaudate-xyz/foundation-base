@@ -64,6 +64,12 @@
                 {:col-from 2
                  :col-start 2}
                 
+                (= 'cond (first form))
+                {:columns 2
+                 :col-from 0
+                 :col-align true
+                 :col-call true}
+
                 (= 'assoc (first form))
                 {:columns 2
                  :col-from 1
@@ -117,22 +123,25 @@
   {:added "4.0"}
   [bindings]
   (if (vector? bindings)
-    (->> (partition 2 bindings)
-         (mapcat (fn [[k v]]
-                   [(walk/postwalk
-                     (fn [x]
-                       (cond (vector? x)
-                             (c/merge-meta x {:tag :vector
-                                              :readable-len 10
-                                              :spec {:columns 1}})
+    (with-meta
+      (->> (partition 2 bindings)
+           (mapcat (fn [[k v]]
+                     [(walk/postwalk
+                       (fn [x]
+                         (cond (vector? x)
+                               (c/merge-meta x {:tag :vector
+                                                :readable-len 10
+                                                :spec {:columns 1}})
 
-                             (map? x)
-                             (c/merge-meta x {:readable-len 10})
-                             
-                             :else
-                             x))
-                     k) v]))
-         (vec))
+                               (map? x)
+                               (c/merge-meta x {:readable-len 10})
+
+                               :else
+                               x))
+                       k) v]))
+           (vec))
+      {:spec {:columns 2
+              :col-align true}})
     bindings))
 
 (defn layout-annotate-fn-named
@@ -222,7 +231,7 @@
         {:keys [metadata
                 spec]}  (if (coll? form)
                           (meta form))
-        spec  (or spec (layout-spec-fn form is-multiline))
+        spec  (or spec (:spec opts) (layout-spec-fn form is-multiline))
         form  (layout-annotate form)
         nopts (assoc opts :spec spec)]
     (cond (not is-multiline) (construct/block form)
