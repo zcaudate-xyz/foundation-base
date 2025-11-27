@@ -106,6 +106,17 @@
    (doto (Executors/newCachedThreadPool)
      (track/track))))
 
+(defn executor:virtual
+  "creates a virtual thread executor"
+  {:added "4.0"}
+  []
+  (try
+    (let [method (-> (Class/forName "java.util.concurrent.Executors")
+                     (.getMethod "newVirtualThreadPerTaskExecutor" (into-array Class [])))]
+      (.invoke method nil (into-array Object [])))
+    (catch Throwable _
+      (throw (ex-info "Virtual threads not supported" {})))))
+
 (defn exec:shutdown
   "shuts down executor"
   {:added "3.0"}
@@ -318,9 +329,12 @@
 (defn executor:type
   "returns executor service type"
   {:added "3.0"}
-  ([^ThreadPoolExecutor executor]
+  ([^ExecutorService executor]
    (cond (instance? ScheduledThreadPoolExecutor executor)
          :scheduled
+
+         (not (instance? ThreadPoolExecutor executor))
+         :virtual
 
          (= 1 (exec:pool-max executor))
          :single
@@ -336,30 +350,34 @@
 (defn executor:info
   "returns executor service info"
   {:added "3.0"}
-  ([^ThreadPoolExecutor executor]
+  ([^ExecutorService executor]
    (executor:info executor #{:type :running :current :counter :options}))
-  ([^ThreadPoolExecutor executor k]
-   (let [[return items]  (cond (keyword? k)
-                               [k #{k}]
-
-                               :else
-                               [identity (set k)])
-         queue  (.getQueue executor)]
+  ([^ExecutorService executor k]
+   (if-not (instance? ThreadPoolExecutor executor)
      (cond-> {}
-       (:type items)    (assoc :type (executor:type executor))
-       (:running items) (assoc :running (not (exec:shutdown? executor)))
-       (:current items) (assoc :current {:threads (exec:current-size executor)
-                                         :active  (exec:current-active executor)
-                                         :queued  (count queue)
-                                         :terminated (exec:terminated? executor)})
-       (:counter items) (assoc :counter {:submit   (exec:current-submitted executor)
-                                         :complete (exec:current-completed executor)})
-       (:options items) (assoc :options {:pool {:size (exec:pool-size executor)
-                                                :max (exec:pool-max executor)
-                                                :keep-alive (exec:keep-alive executor)}
-                                         :queue {:remaining (q/remaining-capacity queue)
-                                                 :total (count queue)}})
-       :then return))))
+       :always (assoc :type (executor:type executor)
+                      :running (not (exec:shutdown? executor))))
+     (let [[return items]  (cond (keyword? k)
+                                 [k #{k}]
+
+                                 :else
+                                 [identity (set k)])
+           queue  (.getQueue ^ThreadPoolExecutor executor)]
+       (cond-> {}
+         (:type items)    (assoc :type (executor:type executor))
+         (:running items) (assoc :running (not (exec:shutdown? executor)))
+         (:current items) (assoc :current {:threads (exec:current-size executor)
+                                           :active  (exec:current-active executor)
+                                           :queued  (count queue)
+                                           :terminated (exec:terminated? executor)})
+         (:counter items) (assoc :counter {:submit   (exec:current-submitted executor)
+                                           :complete (exec:current-completed executor)})
+         (:options items) (assoc :options {:pool {:size (exec:pool-size executor)
+                                                  :max (exec:pool-max executor)
+                                                  :keep-alive (exec:keep-alive executor)}
+                                           :queue {:remaining (q/remaining-capacity queue)
+                                                   :total (count queue)}})
+         :then return)))))
 
 (defn executor:props
   "returns props for getters and setters"
@@ -393,8 +411,20 @@
   [executor]
   (let [tag (if (instance? ScheduledThreadPoolExecutor executor)
               "scheduled"
-              "raw")]
+              (if (instance? ThreadPoolExecutor executor)
+                "raw"
+                "virtual"))]
     (str "#" tag ".executor" (executor:info executor [:type :counter :current]))))
+
+(impl/extend-impl java.util.concurrent.ExecutorService
+                  :string executor-string
+                  :prefix "executor:"
+                  :protocols [std.protocol.component/IComponent
+                              :body {-remote? false}
+                              protocol.dispatch/IDispatch
+                              :body {-bulk? false}
+                              protocol.track/ITrack
+                              :body {-track-path  [:raw :executor]}])
 
 (impl/extend-impl java.util.concurrent.ThreadPoolExecutor
   :string executor-string
@@ -431,6 +461,10 @@
 (defmethod executor :cached
   ([_]
    (executor:cached)))
+
+(defmethod executor :virtual
+  ([_]
+   (executor:virtual)))
 
 (defmethod executor :shared
   ([{:keys [id] :as m}]
