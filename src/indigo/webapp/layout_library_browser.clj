@@ -5,7 +5,7 @@
 (l/script :js
   {:require [[js.react :as r]
              [js.lib.lucide :as lc]
-             [js.lib.radix :as rx]
+             [js.lib.figma :as fg]
              [indigo.webapp.layout-library-browser-data :as data]]
    :import  [["react-dnd" :as #{useDrag}]]})
 
@@ -51,12 +51,15 @@
              :components []
              :children (new Map)})
 
+  (if (not components)
+    (return root))
+
   (components.forEach
    (fn [comp]
      (var parts (comp.namespace.split "."))
      (var current root)
      (parts.forEach
-      (fn [port idx]
+      (fn [part idx]
         (if (not (current.children.has part))
           (current.children.set
            part
@@ -99,24 +102,24 @@
         [:% lc/Star {:className "w-2.5 h-2.5 fill-current"}]
         comp.stars]]
       [:p {:className "text-[10px] text-gray-600 mb-1"} comp.description]
-      [:% rx/Button {:size "sm"
-                 :onClick (fn [e]
-                            (e.stopPropagation)
-                            (onImportComponent comp.component))
-                 :className "h-5 text-[10px] px-2 bg-[#404040] hover:bg-[#4a4a4a] text-gray-300 opacity-0 group-hover:opacity-100 transition-opacity"}
-       [:% lc/Download {:className "w-2.5 h-2.5 mr-1"}]
-       "Import"]
-      [:% rx/Button {:size "sm"
-                 :onClick (fn [e]
-                            (e.stopPropagation)
-                            (onImportAndEdit comp.component))
-                 :className "h-5 text-[10px] px-2 bg-[#404040] hover:bg-[#4a4a4a] text-gray-300 opacity-0 group-hover:opacity-100 transition-opacity"}
-       [:% lc/Download {:className "w-2.5 h-2.5 mr-1"}]
-       "Import & Edit"]]]))
+      [:% fg/Button {:size "icon"
+                     :variant "ghost"
+                     :onClick (fn [e]
+                                (e.stopPropagation)
+                                (onImportComponent comp.component))
+                     :className "h-5 w-5 bg-[#404040] hover:bg-[#4a4a4a] text-gray-300 opacity-0 group-hover:opacity-100 transition-opacity"}
+       [:% lc/Download {:className "w-2.5 h-2.5"}]]
+      [:% fg/Button {:size "icon"
+                     :variant "ghost"
+                     :onClick (fn [e]
+                                (e.stopPropagation)
+                                (onImportAndEdit comp.component))
+                     :className "h-5 w-5 bg-[#404040] hover:bg-[#4a4a4a] text-gray-300 opacity-0 group-hover:opacity-100 transition-opacity"}
+       [:% lc/Edit {:className "w-2.5 h-2.5"}]]]]]))
 
 
 (defn.js LibraryBrowser
-  [#{[onImportComponent onImportAndEdit]}]
+  [#{[components onImportComponent onImportAndEdit]}]
   (var [search setSearch] (r/useState ""))
   (var [expandedNamespaces setExpandedNamespaces] (r/useState (new Set ["ui"])))
   
@@ -130,7 +133,7 @@
                                   (return next)))))
 
   (var filteredComponents
-       (. -/componentLibrary
+       (. (or components [])
           (filter
            (fn [comp]
              (if (not search)
@@ -142,8 +145,6 @@
                   (. comp description (toLowerCase) (includes searchLower))))))))
 
   (var namespaceTree (-/buildNamespaceTree filteredComponents))
-
-  (console.log namespaceTree)
   
   (var renderNamespaceNode
        (fn [node (:= depth 0)]
@@ -216,7 +217,7 @@
                :className "h-8 pl-7 bg-[#1e1e1e] border-[#323232] text-gray-300 text-xs placeholder:text-gray-600"}]]]
     
     ;; Namespace Tree
-    [:% rx/ScrollArea {:className "flex-1"}
+    [:% fg/ScrollArea {:className "flex-1"}
      [:div {:className "py-2"}
       (renderNamespaceNode namespaceTree)]]
 
