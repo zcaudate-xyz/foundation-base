@@ -5,11 +5,17 @@
             [std.dispatch.common :as common]
             [std.dispatch.hooks :as hooks]
             [std.dispatch.debounce :as debounce]
-            [std.lib :as h :refer [defimpl]]))
+            [std.lib :as h :refer [defimpl]])
+  (:import (com.google.common.cache Cache CacheBuilder)
+           (java.util.concurrent TimeUnit)))
 
 (def +defaults+ {:group-fn (fn [_ entry] entry)
                  :interval  1000
-                 :max-batch 1000})
+                 :max-batch 1000
+                 :pool      {:size 4}
+                 :cache     {:size 10000
+                             :duration 10
+                             :unit :minutes}})
 
 (defn process-hub
   "activates on debounce submit hit"
@@ -29,25 +35,22 @@
   "puts an entry into the group hubs"
   {:added "3.0"}
   ([{:keys [runtime options] :as dispatch} group entry]
-   (let [{:keys [groups]} runtime
-         hub  (h/swap-return! groups
-                              (fn [m]
-                                (if-let [hub (get m group)]
-                                  [hub m]
-                                  (let [hub (cc/hub:new)]
-                                    [hub (assoc m group hub)]))))]
+   (let [^Cache groups (:groups runtime)
+         hub (.get groups group (reify java.util.concurrent.Callable
+                                  (call [_] (cc/hub:new))))]
      (cc/hub:add-entries hub [entry]))))
 
 (defn create-hub-handler
   "creates the hub handler"
   {:added "3.0"}
   ([{:keys [runtime] :as dispatch}]
-   (let [{:keys [groups]} runtime]
+   (let [^Cache groups (:groups runtime)]
      (fn [_ group]
        (try
-         (let [hub (get @groups group)]
-           (hooks/on-poll dispatch group)
-           (process-hub dispatch group hub))
+         (let [hub (.getIfPresent groups group)]
+           (if hub
+             (do (hooks/on-poll dispatch group)
+                 (process-hub dispatch group hub))))
          (catch Throwable t
            (.printStackTrace t)))))))
 
@@ -63,10 +66,11 @@
   {:added "3.0"}
   ([{:keys [options] :as dispatch}]
    (let [{:keys [hub]} options
-         {:keys [interval delay]} hub
+         {:keys [interval delay pool]} hub
          m  {:type :debounce
              :handler (create-hub-handler dispatch)
              :options (-> (dissoc options :hub)
+                          (assoc :pool pool)
                           (assoc :counter false
                                  :debounce {:strategy :notify
                                             :group-fn (fn [_ group] group)
@@ -169,6 +173,17 @@
 (def create-dispatch-typecheck identity
   #_(types/<dispatch:hub> :strict))
 
+(defn create-groups-cache
+  "creates the groups cache"
+  {:added "4.0"}
+  ([{:keys [size duration unit] :as config}]
+   (let [unit (or (cc/->timeunit unit)
+                  TimeUnit/MINUTES)]
+     (-> (CacheBuilder/newBuilder)
+         (.maximumSize size)
+         (.expireAfterAccess (long duration) unit)
+         (.build)))))
+
 (defn create-dispatch
   "creates the hub executor
  
@@ -181,9 +196,10 @@
   {:added "3.0"}
   ([{:keys [hooks options] :as m}]
    (let [{:keys [hub]} options
-         options (assoc options :hub (h/merge-nested +defaults+ hub))
+         {:keys [cache] :as hub-opts} (h/merge-nested +defaults+ hub)
+         options (assoc options :hub hub-opts)
          runtime (-> {:debouncer (volatile! nil)
-                      :groups (atom {})
+                      :groups (create-groups-cache cache)
                       :counter (hooks/counter)}
                      (assoc-in [:counter :poll]  (atom 0))
                      (assoc-in [:counter :batch] (atom 0)))]

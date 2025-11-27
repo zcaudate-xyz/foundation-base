@@ -51,6 +51,18 @@
   (doto (executor:cached)
     (exec:shutdown)))
 
+^{:refer std.concurrent.executor/executor:virtual :added "4.0"}
+(fact "creates a virtual thread executor"
+
+  (let [exec (executor {:type :virtual})]
+    (executor:type exec) => :virtual
+    (executor:info exec) => (contains {:type :virtual :running true})
+
+    (let [f (submit exec (fn [] :ok))]
+      @f => :ok)
+
+    (exec:shutdown exec)))
+
 ^{:refer std.concurrent.executor/exec:shutdown :added "3.0"}
 (fact "shuts down executor"
   ^:hidden
