@@ -177,6 +177,20 @@
 
 ;;(print-options (print-options :default))
 
+(defn resolve-files
+  [files]
+  (let [paths (str/split (str files) #" ")
+        nss   (keep (fn [path]
+                      (let [[ns _] (project/lookup-ns path)]
+                        (if ns
+                          (cond (= (project/file-type path) :test)
+                                ns
+
+                                :else
+                                (project/test-ns ns)))))
+                    paths)]
+    (vec nss)))
+
 (defn -main
   "main entry point for leiningen
  
@@ -184,8 +198,11 @@
   {:added "3.0"}
   ([& args]
    (let [opts (task/process-ns-args args)
+         opts (if-let [files (:files opts)]
+                (assoc opts :ns (resolve-files files))
+                opts)
          {:keys [thrown failed timeout] :as stats} (run (or (:ns opts) :all)
-                                                         (dissoc opts :ns))
+                                                        (dissoc opts :ns))
          res (+ (or thrown 0) (or failed 0) (or timeout 0))]
      (if (get opts :no-exit)
        res

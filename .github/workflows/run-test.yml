@@ -26,6 +26,8 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
         
       - name: Run Tests
         run: >
@@ -33,7 +35,7 @@ jobs:
           -v /var/run/docker.sock:/var/run/docker.sock 
           -v $(pwd):$(pwd) 
           -w $(pwd) 
-          ghcr.io/zcaudate-xyz/infra-foundation-clean:ci lein test
+          ghcr.io/zcaudate-xyz/infra-foundation-clean:ci bash scripts/test_changed.sh
         
     services:
       postgres:
