@@ -481,7 +481,7 @@
                                       {:spec {:col-align true}})
       (base/block-string)
       (str/split-lines))
-  => ["[:a 1" " :b 2]"]
+  => ["[:a" " 1" " :b" " 2]"]
 
 
   (bind/layout-default-fn
@@ -499,12 +499,12 @@
                                     :col-align false}
                                    spec)
            hello world]
-         {:spec {:col-align true}})
+         {:spec {:col-align true :columns 2}})
         (base/block-string)
         (str/split-lines)))
   => ["[{:keys [col-align"
       "         columns]"
-      "  :as spec}        (merge {:col-align false :columns 2}"
+      "  :as   spec}      (merge {:col-align false :columns 2}"
       "                          spec)"
       " hello             world]"]
   
@@ -521,7 +521,7 @@
         (str/split-lines)))
   => ["(let [{:keys [col-align"
       "              columns]"
-      "       :as spec}        (merge {:col-align false :columns 2}"
+      "       :as   spec}      (merge {:col-align false :columns 2}"
       "                               spec)"
       "      hello             world])"])
 
@@ -574,3 +574,41 @@
          (base/block-string)
          ))))
 
+(defn layout-default [form]
+  (binding [common/*layout-fn* bind/layout-default-fn]
+    (bind/layout-default-fn form {})))
+
+(defn split-block [form]
+  (str/split-lines (base/block-string (layout-default form))))
+
+^{:refer std.block.layout/layout-default-fn-fix :added "4.0"}
+(fact "layout standard vectors as 1 column, but bindings as 2"
+
+  (split-block [:a 1 :b 2 :c 3])
+  => ["[:a 1 :b 2 :c 3]"]
+
+  (split-block ^{:readable-len 10}
+               [:this-is-long-1
+                :this-is-long-2
+                :this-is-long-3])
+  => ["[:this-is-long-1"
+      " :this-is-long-2"
+      " :this-is-long-3]"]
+
+  (split-block ^{:readable-len 10}
+               '(let [variable-a 100
+                      variable-b 200
+                      variable-c (+ variable-a variable-b)]
+                  (println variable-c)))
+  => ["(let [variable-a 100"
+      "      variable-b 200"
+      "      variable-c (+ variable-a variable-b)]"
+      "  (println variable-c))"]
+
+  (split-block ^{:readable-len 10}
+               '(cond (= x 1) :one
+                      (= x 2) :two
+                      :else   :other))
+  => ["(cond (= x 1) :one"
+      "      (= x 2) :two"
+      "      :else   :other)"])

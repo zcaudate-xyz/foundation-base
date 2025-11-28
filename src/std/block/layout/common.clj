@@ -106,7 +106,7 @@
                                  (map-indexed
                                   (fn [i _]
                                     (width-fn (get pair-keys i))))
-                                 (apply max)
+                                 (apply max 0)
                                  (inc)))
 
         pair-fn           (cond col-align
@@ -419,7 +419,7 @@
                           (assoc :indents nindents
                                  :spec spec))
          row-blocks   (cond (== columns 1)
-                            (layout-one-column (mapcat identity (seq m)) spec nopts)
+                            (layout-one-column (mapcat identity (seq m)) nopts)
                             
                             (== columns 2)
                             (layout-two-column m spec nopts)
@@ -535,10 +535,11 @@
 (defn layout-multiline-vector
   "layouts the vector"
   {:added "4.0"}
-  ([arr    {:keys [indents]
+  ([arr    {:keys [indents
+                   spec]
             :or {indents 0}
             :as opts}]
-   (let [children (layout-by-columns arr 1 opts)]
+   (let [children (layout-by-columns arr 1 (assoc opts :spec (merge {:columns 1} spec)))]
      (construct/container :vector children))))
 
 ;;

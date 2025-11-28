@@ -306,7 +306,7 @@
          tag      (or (:tag metadata)
                       (first
                        (keys metadata)))
-         #_#_tag      (if (contains? base/*container-limits* tag)
+         tag      (if (contains? base/*container-limits* tag)
                         tag)
          children (construct-children form)]
      (container (or tag :vector) children))))
