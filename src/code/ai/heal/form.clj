@@ -1,9 +1,9 @@
-(ns std.block.heal.form
+(ns code.ai.heal.form
   (:require [code.manage :as manage]
             [code.edit :as edit]
             [code.query :as query]
             [std.block.heal.core :as level]
-            [std.block.heal.form-edits :as form-edits]
+            [code.ai.heal.form-edits :as form-edits]
             [std.block :as b]
             [std.fs :as fs]
             [std.lib :as h]))

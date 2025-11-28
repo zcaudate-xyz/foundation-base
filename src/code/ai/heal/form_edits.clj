@@ -1,4 +1,4 @@
-(ns std.block.heal.form-edits
+(ns code.ai.heal.form-edits
   (:require [code.edit :as edit]
             [code.query :as query]
             [std.lib :as h]
