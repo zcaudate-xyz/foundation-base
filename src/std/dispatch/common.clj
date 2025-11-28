@@ -28,13 +28,7 @@
     :options options}))
 
 (defn create-map
-  "creates the base executor map
- 
-   (create-map {:options {:pool {:size 1}}})
-   => (contains {:options {:pool {:keep-alive 1000,
-                                  :size 1,
-                                  :max 1}},
-                 :runtime map?})"
+  "creates the base executor map"
   {:added "3.0"}
   ([{:keys [hooks options] :as m}]
    (let [{:keys [type] :as pool} (:pool options)
@@ -52,15 +46,7 @@
             :options options))))
 
 (defn handle-fn
-  "generic handle function for entry
- 
-   (let [thunk (handle-fn (-> {:id :hello
-                               :handler (fn [{:keys [id]} entry]
-                                          {:id id :entry entry})}
-                              create-map)
-                          {:a 1})]
-     (thunk))
-   => {:id :hello, :entry {:a 1}}"
+  "generic handle function for entry"
   {:added "3.0"}
   ([{:keys [handler] :as dispatch} entry]
    (fn []
@@ -139,13 +125,7 @@
    (not (started?-dispatch dispatch))))
 
 (defn info-dispatch
-  "returns generic executor info
- 
-   (info-dispatch |dispatch|)
-   => {:type nil, :running true,
-       :counter {:submit 0, :queued 0, :process 0, :complete 0, :error 0},
-       :options {:pool {:keep-alive 1000, :size 1, :max 1}},
-       :current {:threads 0, :active 0, :queued 0, :terminated false}}"
+  "returns generic executor info"
   {:added "3.0"}
   ([dispatch]
    (info-dispatch dispatch :default))
@@ -155,7 +135,11 @@
        executor (merge (cc/executor:info executor #{:current :running}))))))
 
 (defn health-dispatch
-  "returns the health of the executor"
+  "returns the health of the executor
+ 
+   (let [d (create-map {:options {:pool {:size 1}}})]
+     (health-dispatch d))
+   => {:status :ok}"
   {:added "3.0"}
   ([dispatch]
    {:status :ok}))

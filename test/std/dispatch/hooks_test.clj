@@ -1,22 +1,25 @@
 (ns std.dispatch.hooks-test
   (:use code.test)
   (:require [std.dispatch.hooks :refer :all]
-            [std.concurrent :as cc]))
+            [std.concurrent :as cc]
+            [std.lib :as h]))
 
 ^{:refer std.dispatch.hooks/counter :added "3.0"}
 (fact "creates the executor counter"
 
   (counter)
-  => (contains {:submit atom? :error atom?}))
+  => (contains {:submit h/atom? :error h/atom?}))
 
 ^{:refer std.dispatch.hooks/inc-counter :added "3.0"}
 (fact "increment the executor counter"
+
   (def -c- (counter))
   (inc-counter {:options {} :runtime {:counter -c-}} :submit)
   @(:submit -c-) => 1)
 
 ^{:refer std.dispatch.hooks/update-counter :added "3.0"}
 (fact "updates the executor counter"
+
   (def -c- (counter))
   (update-counter {:options {} :runtime {:counter -c-}} :submit + 5)
   @(:submit -c-) => 5)

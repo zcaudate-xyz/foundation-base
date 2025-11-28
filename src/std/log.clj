@@ -72,13 +72,6 @@
   ([m]
    (satisfies? protocol.log/ILogger m)))
 
-(defmacro with-indent
-  "executes body with a given indent"
-  {:added "3.0"}
-  ([indent & body]
-   `(binding [common/*indent* ~indent]
-      ~@body)))
-
 (defmacro with-level
   "executes body with a given level"
   {:added "3.0"}
@@ -97,7 +90,7 @@
   "executes code with a given overwrite"
   {:added "3.0"}
   ([overwrite & body]
-   `(binding [common/*overwrite* overwrite]
+   `(binding [common/*overwrite* ~overwrite]
       ~@body)))
 
 (defn current-context

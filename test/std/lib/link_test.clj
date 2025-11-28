@@ -3,13 +3,14 @@
   (:require [std.lib.link :refer :all])
   (:import (std.lib.link Link)))
 
-(fact:global
- {:component
-  {|lnk| {:create (do (->Link {:ns 'std.lib.foundation
-                               :name 'ipending?}
-                              #'|lnk|
-                              identity
-                              *registry*))}}})
+(defn create-link
+  []
+  (declare |lnk|)
+  (->Link {:ns 'std.lib.foundation
+           :name 'ipending?}
+          #'|lnk|
+          identity
+          *registry*))
 
 ^{:refer std.lib.link/resource-path :added "3.0"}
 (fact "converts a namespace to a resource path"
@@ -47,7 +48,7 @@
   => link?)
 
 ^{:refer std.lib.link/link? :added "3.0"
-  :use [|lnk|]}
+  :setup [(def |lnk| (create-link))]}
 (fact "checks if object is a link"
   ^:hidden
 
@@ -55,7 +56,7 @@
   => true)
 
 ^{:refer std.lib.link/register-link :added "3.0"
-  :use [|lnk|]}
+  :setup [(def |lnk| (create-link))]}
 (fact "adds link to global registry"
   ^:hidden
 
@@ -66,7 +67,7 @@
   => true)
 
 ^{:refer std.lib.link/deregister-link :added "3.0"
-  :use [|lnk|]}
+  :setup [(def |lnk| (create-link))]}
 (fact "removes a link from global registry"
   ^:hidden
 
@@ -77,7 +78,7 @@
   => false)
 
 ^{:refer std.lib.link/registered-link? :added "3.0"
-  :use [|lnk|]}
+  :setup [(def |lnk| (create-link))]}
 (fact "checks if a link is registered"
   ^:hidden
 
@@ -85,7 +86,7 @@
   => any?)
 
 ^{:refer std.lib.link/registered-links :added "3.0"
-  :use [|lnk|]}
+  :setup [(def |lnk| (create-link))]}
 (fact "returns all registered links"
   ^:hidden
 
@@ -107,7 +108,7 @@
   (link:resolve-all))
 
 ^{:refer std.lib.link/link:bound? :added "3.0"
-  :use [|lnk|]}
+  :setup [(def |lnk| (create-link))]}
 (fact "checks if the var of the link has been bound, should be true"
   ^:hidden
 
@@ -121,7 +122,7 @@
   => false)
 
 ^{:refer std.lib.link/link:status :added "3.0"
-  :use [|lnk|]}
+  :setup [(def |lnk| (create-link))]}
 (fact "lists the current status of the link"
   ^:hidden
 

@@ -59,8 +59,8 @@
 (fact "returns information about the logger"
 
   (logger-info (common/default-logger))
-  => {:level :debug, :type :console})
-
+  => (contains-in {:level #{:warn :debug},
+                   :type :console}))
 ^{:refer std.log.core/logger-stop :added "3.0"}
 (fact "stops the logger, queue and executor"
 

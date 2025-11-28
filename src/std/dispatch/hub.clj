@@ -131,22 +131,22 @@
                          deref))]
      (common/info-dispatch debouncer))))
 
-(defn- started?-dispatch
+(defn started?-dispatch
   ([dispatch]
    (if-let [debouncer @(-> dispatch :runtime :debouncer)]
      (common/started?-dispatch debouncer))))
 
-(defn- stopped?-dispatch
+(defn stopped?-dispatch
   ([dispatch]
    (not (started?-dispatch dispatch))))
 
-(defn- health-dispatch
+(defn health-dispatch
   ([dispatch]
    (if-let [debouncer @(-> dispatch :runtime :debouncer)]
      (common/health-dispatch debouncer)
      {:status :error})))
 
-(defn- props-dispatch
+(defn props-dispatch
   ([dispatch]
    (if-let [debouncer @(-> dispatch :runtime :debouncer)]
      (common/props-dispatch debouncer))))

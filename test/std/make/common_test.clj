@@ -20,6 +20,8 @@
       :main
       ["# hello world"]}]}))
 
+(def +triggers+ (atom {:a 1}))
+
 ^{:refer std.make.common/with:triggers :added "4.0"}
 (fact "purges triggers"
   ^:hidden
@@ -65,7 +67,7 @@
                                 ["hello"]))]}
 (fact "gets a trigger"
   ^:hidden
-
+  
   (common/with:triggers
    [+triggers+]
    (common/triggers-get +demo-config+))

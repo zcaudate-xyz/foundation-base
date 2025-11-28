@@ -5,31 +5,25 @@
             [std.concurrent :as cc]
             [std.lib :as h]))
 
-(fact:global
- {:component
-  {|run| {:create   (runner:create {})
-          :setup    runner:start
-          :teardown runner:stop}}})
-
 (defn test-scaffold
   ([f]
    (test-scaffold f 100))
   ([f interval]
    (h/with:component [runner (runner:create)]
-                     (let [q (cc/queue)]
-                       (install runner {:id :world
-                                        :type :basic
-                                        :interval interval
-                                        :main-fn (fn [args t]
-                                                   (cc/put q t))})
-                       (f runner q)))))
+     (let [q (cc/queue)]
+       (install runner {:id :world
+                        :type :basic
+                        :interval interval
+                        :main-fn (fn [args t]
+                                   (cc/put q t))})
+       (f runner q)))))
 
-^{:refer std.scheduler/runner:start :added "3.0"
-  :let [|runner| (runner:create {})]
-  :teardown [(runner:stop |runner|)]}
+^{:refer std.scheduler/runner:start :added "3.0"}
 (fact "starts up the runner"
-
-  (-> (runner:start |runner|)
+  ^:hidden
+  
+  (h/with:component [runner (runner:create)])
+  (-> (runner:start runner)
       (runner:info))
   =>  {:executors {:core {:threads 0, :active 0, :queued 0, :terminated false},
                    :scheduler {:threads 0, :active 0, :queued 0, :terminated false}},
@@ -37,6 +31,8 @@
 
 ^{:refer std.scheduler/runner:stop :added "3.0"}
 (fact "stops the runner"
+  ^:hidden
+  
   (let [runner (runner:create)]
     (runner:start runner)
     (runner:stop runner)
@@ -45,32 +41,35 @@
 
 ^{:refer std.scheduler/runner:kill :added "3.0"}
 (fact "kills the runner"
+  ^:hidden
+  
   (let [runner (runner:create)]
     (runner:start runner)
     (runner:kill runner)
     (runner:stopped? runner))
   => true)
 
-^{:refer std.scheduler/runner:started? :added "3.0"
-  :use [|run|]}
+^{:refer std.scheduler/runner:started? :added "3.0"}
 (fact "checks if runner is started"
-
-  (runner:started? |run|)
+  ^:hidden
+  
+  (h/with:component [|run| (runner:create)]
+    (runner:started? |run|))
   => true)
 
-^{:refer std.scheduler/runner:stopped? :added "3.0"
-  :use [|run|]}
+^{:refer std.scheduler/runner:stopped? :added "3.0"}
 (fact "checks if runner has stopped"
 
-  (-> (doto |run| (runner:kill))
-      (runner:stopped?))
-  => true)
+  (h/with:component [|run| (runner:create)]
+    (-> (doto |run| (runner:kill))
+        (runner:stopped?))
+    => true))
 
-^{:refer std.scheduler/runner:health :added "3.0"
-  :use [|run|]}
+^{:refer std.scheduler/runner:health :added "3.0"}
 (fact "returns health of runner"
 
-  (runner:health |run|)
+  (h/with:component [|run| (runner:create)]
+    (runner:health |run|))
   => {:status :ok})
 
 ^{:refer std.scheduler/runner:info :added "3.0"}
@@ -95,11 +94,10 @@
                                            :jobs {:submitted number?, :succeeded number?}}},
                           :counts {:submitted number?, :succeeded number?}}}}))
 
-^{:refer std.scheduler/runner? :added "3.0"
-  :use [|run|]}
+^{:refer std.scheduler/runner? :added "3.0"}
 (fact "checks if object is a runner"
-
-  (runner? |run|)
+  
+  (runner? (runner:create))
   => true)
 
 ^{:refer std.scheduler/runner:create :added "3.0"}

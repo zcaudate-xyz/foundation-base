@@ -51,12 +51,13 @@
   => [{:id 0, :state 9} {:id 1, :state 9}])
 
 ^{:refer std.dispatch.debounce/submit-notify :added "3.0"}
-(fact "submits and executes on as well and after delay" ^:hidden
+(fact "submits and executes on as well and after delay"
+  ^:hidden
 
   (test-scaffold (assoc-in +test-config+
                            [:options :debounce :strategy] :notify)
                  10 2)
-  => [{:id 0, :state 0} {:id 1, :state 0} {:id 0, :state 9} {:id 1, :state 9}] ^:hidden
+  => [{:id 0, :state 0} {:id 1, :state 0} {:id 0, :state 9} {:id 1, :state 9}]
 
   (test-scaffold (-> +test-config+
                      (assoc-in [:options :debounce :strategy] :notify)

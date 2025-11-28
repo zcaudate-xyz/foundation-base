@@ -4,26 +4,23 @@
             [std.lib.component.track :as track ]
             [std.lib :as h]))
 
-(declare -p-)
+(defn create-pool
+  []
+  (pool:create {:size 3
+                :max 8
+                :keep-alive 10000
+                :poll 20000
+                :resource {:create (fn [] '<RESOURCE>)
+                           :initial 0.8
+                           :thread-local false}}))
 
-(fact:global
- {:component
-  {|pool| {:create (pool:create {:size 3
-                                 :max 8
-                                 :keep-alive 10000
-                                 :poll 20000
-                                 :resource {:create (fn [] '<RESOURCE>)
-                                            :initial 0.8
-                                            :thread-local false}})
-           :setup    h/start
-           :teardown h/stop}}})
-
-^{:refer std.concurrent.pool/resource-info :added "3.0"
-  :use [|pool|]}
+^{:refer std.concurrent.pool/resource-info :added "3.0"}
 (fact "returns info about the pool resource"
-
-  (->  (pool-resource "hello" |pool|)
-       (resource-info :full))
+  ^:hidden
+  
+  (h/with:component [|pool| (create-pool)]
+    (->  (pool-resource "hello" |pool|)
+         (resource-info :full)))
   => (contains {:total number?,
                 :busy 0.0,
                 :count 0,
@@ -33,10 +30,10 @@
 ^{:refer std.concurrent.pool/resource-string :added "3.0"}
 (fact "returns a string describing the resource")
 
-^{:refer std.concurrent.pool/pool-resource :added "3.0"
-  :use [|pool|]}
+^{:refer std.concurrent.pool/pool-resource :added "3.0"}
 (fact "creates a pool resource"
-
+  ^:hidden
+  
   (pool-resource "hello"
                  {:resource {:create (fn [] '<RESOURCE>)}})
   => (contains {:id "hello",
@@ -46,144 +43,162 @@
                 :update-time number?
                 :busy 0.0, :used 0}))
 
-^{:refer std.concurrent.pool/pool:acquire :added "3.0"
-  :use [|pool|]}
+^{:refer std.concurrent.pool/pool:acquire :added "3.0"}
 (fact "acquires a resource from the pool"
-
-  (pool:acquire |pool|)
+  ^:hidden
+  
+  (h/with:component [|pool| (create-pool)]
+    (pool:acquire |pool|))
   => (contains [string? '<RESOURCE>]))
 
 ^{:refer std.concurrent.pool/dispose-fn :added "3.0"}
 (fact "helper function for `dispose` and `cleanup`")
 
-^{:refer std.concurrent.pool/pool:dispose :added "3.0"
-  :use [|pool|]}
+^{:refer std.concurrent.pool/pool:dispose :added "3.0"}
 (fact "disposes an idle object"
+  ^:hidden
 
-  (pool:dispose |pool| (first (keys (pool:resources:idle |pool|)))))
+  (h/with:component [|pool| (create-pool)]
+    (pool:dispose |pool| (first (keys (pool:resources:idle |pool|))))))
 
-^{:refer std.concurrent.pool/pool:dispose-over :added "3.0"
-  :use [|pool|]}
+^{:refer std.concurrent.pool/pool:dispose-over :added "3.0"}
 (fact "disposes if idle and busy are over size limit"
-
-  (let [[id _] (pool:acquire |pool|)]
-    (pool:release |pool| id)
-    (pool:dispose-over |pool| id))
+  ^:hidden
+  
+  (h/with:component [|pool| (create-pool)]
+    (let [[id _] (pool:acquire |pool|)]
+      (pool:release |pool| id)
+      (pool:dispose-over |pool| id)))
   => string?)
 
-^{:refer std.concurrent.pool/pool:release :added "3.0"
-  :use [|pool|]}
+^{:refer std.concurrent.pool/pool:release :added "3.0"}
 (fact "releases a resource back to the pool"
+  ^:hidden
 
-  (let [[id _] (pool:acquire |pool|)]
-    (pool:release |pool| id))
+  (h/with:component [|pool| (create-pool)]
+    (let [[id _] (pool:acquire |pool|)]
+      (pool:release |pool| id)))
   => string?)
 
-^{:refer std.concurrent.pool/pool:cleanup :added "3.0"
-  :use [|pool|]}
+^{:refer std.concurrent.pool/pool:cleanup :added "3.0"}
 (fact "runs cleanup on the pool" ^:hidden
+  ^:hidden
 
-  (def -ids- (->> (for [i (range 8)]
-                    (pool:acquire |pool|))
-                  (mapv first)))
+  (h/with:component [|pool| (create-pool)]
+    (def -ids- (->> (for [i (range 8)]
+                      (pool:acquire |pool|))
+                    (mapv first)))
 
-  (count (pool:resources:busy |pool|))
-  => 8
+    (count (pool:resources:busy |pool|))
+    => 8
 
-  (doseq [id -ids-]
-    (pool:release |pool| id))
+    (doseq [id -ids-]
+      (pool:release |pool| id))
 
-  (count (pool:resources:idle |pool|))
-  => 8
+    (count (pool:resources:idle |pool|))
+    => 8
 
-  (pool:cleanup |pool|)
+    (pool:cleanup |pool|)
 
-  (count (pool:resources:idle |pool|))
-  => 3)
+    (count (pool:resources:idle |pool|))
+    => 3))
 
 ^{:refer std.concurrent.pool/pool-handler :added "3.0"}
 (fact "creates a handler loop for cleanup"
+  ^:hidden
+  
   (pool-handler {:state (atom {:running true})
                  :cleanup (fn [])
                  :poll 100}))
 
-^{:refer std.concurrent.pool/pool:started? :added "3.0"
-  :use [|pool|]}
+^{:refer std.concurrent.pool/pool:started? :added "3.0"}
 (fact "checks if pool has started"
+  ^:hidden
 
-  (pool:started? |pool|)
+  (h/with:component [|pool| (create-pool)]
+    (pool:started? |pool|))
   => true)
 
-^{:refer std.concurrent.pool/pool:stopped? :added "3.0"
-  :use [|pool|]}
+^{:refer std.concurrent.pool/pool:stopped? :added "3.0"}
 (fact "checks if pool has stopped"
-
-  (pool:stopped? |pool|)
+  ^:hidden
+  
+  (h/with:component [|pool| (create-pool)]
+    (pool:stopped? |pool|))
   => false)
 
-^{:refer std.concurrent.pool/pool:start :added "3.0"
-  :use [|pool|]}
+^{:refer std.concurrent.pool/pool:start :added "3.0"}
 (fact "starts the pool"
+  ^:hidden
+  
+  (h/with:component [|pool| (create-pool)]
+    (pool:start |pool|)
+    => pool:started?))
 
-  (pool:start |pool|)
-  => pool:started?)
-
-^{:refer std.concurrent.pool/pool:stop :added "3.0"
-  :use [|pool|]}
+^{:refer std.concurrent.pool/pool:stop :added "3.0"}
 (fact "stops the pool"
+  ^:hidden
+  
+  (h/with:component [|pool| (create-pool)]
+    (pool:stop |pool|)
+    => pool:stopped?))
 
-  (pool:stop |pool|)
-  => pool:stopped?)
-
-^{:refer std.concurrent.pool/pool:kill :added "3.0"
-  :use [|pool|]}
+^{:refer std.concurrent.pool/pool:kill :added "3.0"}
 (fact "kills the pool"
+  ^:hidden
+  
+  (h/with:component [|pool| (create-pool)]
+    (pool:kill |pool|)
+    => pool:stopped?))
 
-  (pool:kill |pool|)
-  => pool:stopped?)
-
-^{:refer std.concurrent.pool/pool:info :added "3.0"
-  :use [|pool|]}
+^{:refer std.concurrent.pool/pool:info :added "3.0"}
 (fact "returns information about the pool"
-
-  (pool:info |pool|)
+  ^:hidden
+  
+  (h/with:component [|pool| (create-pool)]
+    (pool:info |pool|))
   => (contains-in {:running true,
                    :idle 2, :busy 0,
                    :resource {:count 0, :total number?
                               :busy 0.0, :utilization 0.0,
                               :duration 0}}))
 
-^{:refer std.concurrent.pool/pool:props :added "3.0"
-  :use [|pool|]}
+^{:refer std.concurrent.pool/pool:props :added "3.0"}
 (fact "gets props for the pool"
-
-  (keys (pool:props |pool|))
+  ^:hidden
+  
+  (h/with:component [|pool| (create-pool)]
+    (keys (pool:props |pool|)))
   => (contains [:size :max :keep-alive :poll]))
 
-^{:refer std.concurrent.pool/pool:health :added "3.0"
-  :use [|pool|]}
+^{:refer std.concurrent.pool/pool:health :added "3.0"}
 (fact "returns health of the pool"
-
-  (pool:health |pool|)
+  ^:hidden
+  
+  (h/with:component [|pool| (create-pool)]
+    (pool:health |pool|))
   => {:status :ok})
 
-^{:refer std.concurrent.pool/pool:track-path :added "3.0"
-  :use [|pool|]}
+^{:refer std.concurrent.pool/pool:track-path :added "3.0"}
 (fact "gets props for the pool"
-
-  (pool:track-path |pool|)
+  ^:hidden
+  
+  (h/with:component [|pool| (create-pool)]
+    (pool:track-path |pool|))
   => [:raw :pool])
 
-^{:refer std.concurrent.pool/pool? :added "3.0"
-  :use [|pool|]}
+^{:refer std.concurrent.pool/pool? :added "3.0"}
 (fact "checks that object is a pool"
-
-  (pool? |pool|)
+  ^:hidden
+  
+  (h/with:component [|pool| (create-pool)]
+    (pool? |pool|))
   => true)
 
 ^{:refer std.concurrent.pool/pool:create :added "3.0"}
 (fact "creates an initial pool"
-
+  ^:hidden
+  
   (pool:create {:size 5
                 :max 8
                 :keep-alive 10000
@@ -192,103 +207,108 @@
                            :initial 0.3
                            :thread-local true}}))
 
-^{:refer std.concurrent.pool/pool :added "3.0"
-  :teardown [(pool:stop -p-)]}
+^{:refer std.concurrent.pool/pool :added "3.0"}
 (fact "creates and starts the pool"
+  ^:hidden
+  
+  (h/with:component [p (pool {:size 2
+                              :max 10
+                              :keep-alive 10000
+                              :poll 20000
+                              :resource {:create (fn [] (rand))
+                                         :initial 0.3
+                                         :thread-local true}})]
+    p => pool?))
 
-  (def -p- (pool {:size 2
-                  :max 10
-                  :keep-alive 10000
-                  :poll 20000
-                  :resource {:create (fn [] (rand))
-                             :initial 0.3
-                             :thread-local true}})))
+^{:refer std.concurrent.pool/pool:resources:thread :added "3.0"}
+(fact "returns acquired resources for a given thread"
+  ^:hidden
 
-^{:refer std.concurrent.pool/pool:resources:thread :added "3.0"
-  :use [|pool|]}
-(fact "returns acquired resources for a given thread" ^:hidden
-
-  (-> (doto |pool|
-        (pool:acquire)
-        (pool:acquire))
-      (pool:resources:thread)
-      count)
+  (h/with:component [|pool| (create-pool)]
+    (-> (doto |pool|
+          (pool:acquire)
+          (pool:acquire))
+        (pool:resources:thread)
+        count))
   => 2)
 
-^{:refer std.concurrent.pool/pool:resources:busy :added "3.0"
-  :use [|pool|]}
+^{:refer std.concurrent.pool/pool:resources:busy :added "3.0"}
 (fact "returns all the busy resources" ^:hidden
 
-  (pool:resources:busy |pool|)
+  (h/with:component [|pool| (create-pool)]
+    (pool:resources:busy |pool|))
   => {}
 
-  (-> (doto |pool|
-        (pool:acquire)
-        (pool:acquire))
-      (pool:resources:busy)
-      count)
+  (h/with:component [|pool| (create-pool)]
+    (-> (doto |pool|
+          (pool:acquire)
+          (pool:acquire))
+        (pool:resources:busy)
+        count))
   => 2)
 
-^{:refer std.concurrent.pool/pool:resources:idle :added "3.0"
-  :use [|pool|]}
+^{:refer std.concurrent.pool/pool:resources:idle :added "3.0"}
 (fact "returns all the idle resources" ^:hidden
 
-  (count (pool:resources:idle |pool|))
+  (h/with:component [|pool| (create-pool)]
+    (count (pool:resources:idle |pool|)))
   => 2
 
-  (-> (doto |pool|
-        (pool:acquire)
-        (pool:acquire))
-      (pool:resources:idle))
+  (h/with:component [|pool| (create-pool)]
+    (-> (doto |pool|
+          (pool:acquire)
+          (pool:acquire))
+        (pool:resources:idle)))
   => {})
 
-^{:refer std.concurrent.pool/pool:dispose:mark :added "3.0"
-  :use [|pool|]}
+^{:refer std.concurrent.pool/pool:dispose:mark :added "3.0"}
 (fact "marks the current resource for dispose" ^:hidden
+  
+  (h/with:component [|pool| (create-pool)]
+    (dotimes [i 2]
+      ((wrap-pool-resource
+        (fn [pool]
+          (pool:dispose:mark))
+        |pool|)))
 
-  (dotimes [i 2]
-    ((wrap-pool-resource
-      (fn [pool]
-        (pool:dispose:mark))
-      |pool|)))
+    (count (pool:resources:idle |pool|))
+    => 0))
 
-  (count (pool:resources:idle |pool|))
-  => 0)
-
-^{:refer std.concurrent.pool/pool:dispose:unmark :added "3.0"
-  :use [|pool|]}
+^{:refer std.concurrent.pool/pool:dispose:unmark :added "3.0"}
 (fact "unmarks the current resource for dispose" ^:hidden
 
-  (dotimes [i 2]
-    ((wrap-pool-resource
-      (fn [pool]
-        (pool:dispose:mark)
-        (pool:dispose:unmark))
-      |pool|)))
+  (h/with:component [|pool| (create-pool)]
+    (dotimes [i 2]
+      ((wrap-pool-resource
+        (fn [pool]
+          (pool:dispose:mark)
+          (pool:dispose:unmark))
+        |pool|)))
 
-  (count (pool:resources:idle |pool|))
-  => 2)
+    (count (pool:resources:idle |pool|))
+    => 2))
 
-^{:refer std.concurrent.pool/wrap-pool-resource :added "3.0"
-  :use [|pool|]}
+^{:refer std.concurrent.pool/wrap-pool-resource :added "3.0"}
 (fact "wraps a function to operate on a pool resource" ^:hidden
 
-  ((wrap-pool-resource (fn [obj]
-                         (str obj))
-                       |pool|))
+  (h/with:component [|pool| (create-pool)]
+    ((wrap-pool-resource (fn [obj]
+                           (str obj))
+                         |pool|)))
   => "<RESOURCE>")
 
 ^{:refer std.concurrent.pool/pool:with-resource :added "3.0"
   :style/indent 1
-  :use [|pool|]
   :teardown [(track/tracked:list [] {:namespace (.getName *ns*)} :stop)]}
 (fact "takes an object from the pool, performs operation then returns it" ^:hidden
 
-  (pool:with-resource [obj |pool|]
-                      (str obj))
-  => "<RESOURCE>")
+  (h/with:component [|pool| (create-pool)]
+    (pool:with-resource [obj |pool|]
+      (str obj))
+    => "<RESOURCE>"))
 
 (comment
+  
   (./import)
   (track/tracked:all)
   (track/tracked:count)

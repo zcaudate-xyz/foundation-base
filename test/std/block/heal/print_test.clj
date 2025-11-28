@@ -7,11 +7,13 @@
 ^{:refer std.block.heal.print/print-rainbow :added "4.0"}
 (fact "prints out the "
   ^:hidden
-  
-  (print/print-rainbow
-   (h/sys:resource-content "code/heal/cases/002_complex.block")
-   (parse/pair-delimiters
-    (parse/parse-delimiters (h/sys:resource-content "code/heal/cases/002_complex.block")))))
+
+  (h/with-out-str
+    (print/print-rainbow
+     (slurp "test-data/std.block.heal/cases/002_complex.block")
+     (parse/pair-delimiters
+      (parse/parse-delimiters (slurp "test-data/std.block.heal/cases/002_complex.block")))))
+  => string?)
 
 (comment
   (binding [*ns* (the-ns 'std.block.heal.print-test)]

@@ -69,13 +69,13 @@
                                          (fn [m]
                                            (h/dissoc-nested m (first args))))
              :prelim   (if rt/*eval-mode*
-                         (eval (snippet/vecify (rt/get-global ns :prelim))))
+                         (eval (h/seqify (rt/get-global ns :prelim))))
              :setup    (if rt/*eval-mode*
-                         (eval (snippet/vecify (rt/get-global ns :setup))))
+                         (eval (h/seqify (rt/get-global ns :setup))))
              :teardown (if rt/*eval-mode*
-                         (eval (snippet/vecify (rt/get-global ns :teardown))))
+                         (eval (h/seqify (rt/get-global ns :teardown))))
              :list     (keys (rt/get-global ns :component))
-             (eval (snippet/vecify (rt/get-global ns cmd))))))))
+             (eval (h/seqify (rt/get-global ns cmd))))))))
 
 (defmacro fact:global
   "fact global getter and setter

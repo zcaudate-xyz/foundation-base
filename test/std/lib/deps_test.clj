@@ -21,21 +21,22 @@
 (defn context [m]
   (map->MapContext m))
 
-(fact:global
- {:component
-  {|ctx| {:create (context {:a #{:b}
-                            :b #{:c}
-                            :c #{}})}}})
+(defn create-context
+  []
+  (context {:a #{:b}
+            :b #{:c}
+            :c #{}}))
 
 ^{:refer std.lib.deps/deps-map :added "3.0"
-  :use [|ctx|]}
+  :setup [(def |ctx| (create-context))]}
 (fact "creates a map of deps"
   ^:hidden
+
   (deps-map |ctx| [:a :b])
   => {:a #{:b}, :b #{:c}})
 
 ^{:refer std.lib.deps/deps-resolve :added "3.0"
-  :use [|ctx|]}
+  :setup [(def |ctx| (create-context))]}
 (fact "resolves all dependencies"
   ^:hidden
   (deps-resolve |ctx| [:a])
@@ -46,42 +47,42 @@
   => {:all #{:c}, :graph {:c #{}}})
 
 ^{:refer std.lib.deps/deps-ordered :added "3.0"
-  :use [|ctx|]}
+  :setup [(def |ctx| (create-context))]}
 (fact "orders dependencies "
 
   (deps-ordered |ctx|)
   => '(:c :b :a))
 
 ^{:refer std.lib.deps/construct :added "3.0"
-  :use [|ctx|]}
+  :setup [(def |ctx| (create-context))]}
 (fact "builds an object from context"
 
   (construct |ctx|)
   => #{:c :b :a})
 
 ^{:refer std.lib.deps/deconstruct :added "3.0"
-  :use [|ctx|]}
+  :setup [(def |ctx| (create-context))]}
 (fact "deconstructs an object from context"
 
   (deconstruct |ctx| #{:c :b :a} [:a])
   => #{})
 
 ^{:refer std.lib.deps/dependents-direct :added "3.0"
-  :use [|ctx|]}
+  :setup [(def |ctx| (create-context))]}
 (fact "returns list of direct dependents"
 
   (dependents-direct |ctx| :c)
   => #{:b})
 
 ^{:refer std.lib.deps/dependents-topological :added "3.0"
-  :use [|ctx|]}
+  :setup [(def |ctx| (create-context))]}
 (fact "constructs a topological graph of dependents"
 
   (dependents-topological |ctx| [:c] [:a :b :c])
   => {:c #{:b}})
 
 ^{:refer std.lib.deps/dependents-all :added "3.0"
-  :use [|ctx|]}
+  :setup [(def |ctx| (create-context))]}
 (fact "returns graph of all dependents"
   ^:hidden
   (dependents-all |ctx| :c)
@@ -91,7 +92,7 @@
   => {:b #{:a}, :a #{}})
 
 ^{:refer std.lib.deps/dependents-ordered :added "3.0"
-  :use [|ctx|]}
+  :setup [(def |ctx| (create-context))]}
 (fact "returns ordered depenedents"
 
   (dependents-ordered |ctx| :c)
@@ -101,13 +102,13 @@
   => [:a :b])
 
 ^{:refer std.lib.deps/dependents-refresh :added "3.0"
-  :use [|ctx|]}
+  :setup [(def |ctx| (create-context))]}
 (fact "refresh all dependents"
   (first (dependents-refresh |ctx| :c))
   => (contains {:b #{} :c #{}}))
 
 ^{:refer std.lib.deps/unload-entry :added "3.0"
-  :use [|ctx|]}
+  :setup [(def |ctx| (create-context))]}
 (fact "unloads itself as well as all dependents for a given id"
   ^:hidden
   (-> (unload-entry |ctx| :b)
@@ -116,7 +117,7 @@
       [:a :b]])
 
 ^{:refer std.lib.deps/reload-entry :added "3.0"
-  :use [|ctx|]}
+  :setup [(def |ctx| (create-context))]}
 (fact "unloads and reloads itself and all dependents"
   ^:hidden
   (-> (reload-entry |ctx| :c)

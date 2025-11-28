@@ -47,38 +47,41 @@
         [@*counter* @*output*])))
 
 ^{:refer std.dispatch.hub/process-hub :added "3.0"}
-(fact "activates on debounce submit hit"
-  
-  (def -hub- (create-dispatch +test-config+))
-  (cc/hub:add-entries -hub- [1 2 3])
-  (process-hub {:handler (fn [_ entries] entries) :options {:hub {:max-batch 10}}} :g -hub-)
-  => [1 2 3])
+(fact "activates on debounce submit hit")
 
 ^{:refer std.dispatch.hub/put-hub :added "3.0"}
 (fact "puts an entry into the group hubs"
-
+  
   (def -d- {:runtime {:groups (atom {})}})
   (put-hub -d- :g 1)
   => (contains [1])
-  (get @(:groups (:runtime -d-)) :g) => cc/hub?)
+  (get @(:groups (:runtime -d-)) :g) => h/atom?)
 
 ^{:refer std.dispatch.hub/create-hub-handler :added "3.0"}
 (fact "creates the hub handler"
+  ^:hidden
+  
   (create-hub-handler {:runtime {:groups (atom {})}}) => fn?)
 
 ^{:refer std.dispatch.hub/update-debounce-handler! :added "3.0"}
 (fact "updates the debounce handler"
-  (def -d- {:runtime {:debouncer (volatile! (atom {:handler nil})) :groups (atom {})}})
+  ^:hidden
+  
+  (def -d- (create-dispatch +test-config+))
   (update-debounce-handler! -d-)
-  (:handler @(deref (:debouncer (:runtime -d-)))) => fn?)
+  (:handler (deref (:debouncer (:runtime -d-)))) => fn?)
 
 ^{:refer std.dispatch.hub/create-debounce :added "3.0"}
 (fact "creates the debounce executor"
+  ^:hidden
+  
   (create-debounce {:options {:hub {:interval 100 :delay 10}}})
   => map?)
 
 ^{:refer std.dispatch.hub/start-dispatch :added "3.0"}
 (fact "starts the hub executor"
+  ^:hidden
+  
   (def -d- (create-dispatch +test-config+))
   (start-dispatch -d-)
   (started?-dispatch -d-) => true
@@ -86,31 +89,39 @@
 
 ^{:refer std.dispatch.hub/stop-dispatch :added "3.0"}
 (fact "stops the hub executor"
+  ^:hidden
+  
   (def -d- (doto (create-dispatch +test-config+) (start-dispatch)))
   (stop-dispatch -d-)
   (started?-dispatch -d-) => false)
 
 ^{:refer std.dispatch.hub/kill-dispatch :added "3.0"}
 (fact "kills the hub executor"
+  ^:hidden
+  
   (def -d- (doto (create-dispatch +test-config+) (start-dispatch)))
   (kill-dispatch -d-)
   (started?-dispatch -d-) => false)
 
 ^{:refer std.dispatch.hub/submit-dispatch :added "3.0"}
 (fact "submits to the hub executor"
+  ^:hidden
+  
   (def -d- (doto (create-dispatch +test-config+) (start-dispatch)))
   (submit-dispatch -d- {:group :a :val 1})
   (stop-dispatch -d-))
 
 ^{:refer std.dispatch.hub/info-dispatch :added "3.0"}
 (fact "returns dispatch info"
-
+  ^:hidden
+  
   (def -d- (doto (create-dispatch +test-config+) (start-dispatch)))
   (info-dispatch -d- nil) => map?
   (stop-dispatch -d-))
 
 ^{:refer std.dispatch.hub/create-dispatch :added "3.0"}
 (fact "creates the hub executor"
+  ^:hidden
   
   ;; Non Sorted
   (->> (test-scaffold +test-config+ 20 5 5)

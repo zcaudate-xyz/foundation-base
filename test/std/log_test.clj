@@ -23,13 +23,6 @@
   (log/logger? (log/create {:type :basic}))
   => true)
 
-^{:refer std.log/with-indent :added "3.0"}
-(fact "executes body with a given indent"
-
-  (log/with-indent 2
-    format.common/*indent*)
-  => 2)
-
 ^{:refer std.log/with-level :added "3.0"}
 (fact "executes body with a given level"
 

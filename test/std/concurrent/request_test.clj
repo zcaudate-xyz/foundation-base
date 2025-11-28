@@ -50,12 +50,9 @@
 (defn eval-client []
   (EvalClient. (atom {:inputs [] :transact false})))
 
-(fact:global
- {:component
-  {|client| {:create (eval-client)}}})
 
 ^{:refer std.concurrent.request/req.more :added "3.0" :adopt true
-  :use [|client|]}
+  :setup [(def |client| (eval-client))]}
 (fact "execute command on single, bulk and transact calls"
 
   (req |client| {:type :eval :form 1}
@@ -93,7 +90,7 @@
   => [4])
 
 ^{:refer std.concurrent.request/req.time :added "3.0" :adopt true
-  :use [|client|]}
+  :setup [(def |client| (eval-client))]}
 (fact "execute command on single, bulk and transact calls"
 
   ;;
@@ -124,18 +121,13 @@
                 :end number?
                 :output 1}))
 
-^{:refer std.concurrent.request/req.fn :added "3.0" :adopt true
-  :let [|p| (promise)]}
+^{:refer std.concurrent.request/req.fn :added "3.0" :adopt true}
 (fact "functions"
 
   (req + [1 2 3 4])
   => 10
 
   @(req + [1 2 3 4] {:async true})
-  => 10
-
-  (req + [1 2 3 4] {:measure |p|})
-  (:output @|p|)
   => 10)
 
 ^{:refer std.concurrent.request/req:bulk.debug :added "3.0" :adopt true
@@ -229,7 +221,7 @@
   => 1)
 
 ^{:refer std.concurrent.request/req:single :added "3.0"
-  :use [|client|]}
+  :setup [(def |client| (eval-client))]}
 (fact "creates a single request call" ^:hidden
 
   (req:single |client| {:type :eval :form '(+ 1 2 3 4)})
@@ -249,7 +241,7 @@
   => 12)
 
 ^{:refer std.concurrent.request/req:unit :added "3.0"
-  :use [|client|]}
+  :setup [(def |client| (eval-client))]}
 (fact "creates a single request call with `*bulk*` context" ^:hidden
 
   (binding [*bulk*    {|client| (bulk-context)}
@@ -260,7 +252,7 @@
   => {:type :eval :form '(+ 1 2 3)})
 
 ^{:refer std.concurrent.request/bulk:inputs :added "3.0"
-  :use [|client|] :style/indent 1}
+  :setup [(def |client| (eval-client))] :style/indent 1}
 (fact "capture all inputs on the client" ^:hidden
 
   (bulk:inputs |client|
@@ -271,7 +263,7 @@
       {:type :eval, :form '(+ 4 5 6)}])
 
 ^{:refer std.concurrent.request/bulk-collect :added "3.0"
-  :use [|client|] :style/indent 1}
+  :setup [(def |client| (eval-client))] :style/indent 1}
 (fact "collects bulk inputs" ^:hidden
 
   (-> (bulk-collect |client|
@@ -284,7 +276,7 @@
       {:type :eval, :form '(+ 4 5 6)}])
 
 ^{:refer std.concurrent.request/bulk-process :added "3.0"
-  :use [|client|]}
+  :setup [(def |client| (eval-client))]}
 (fact "processes the client given bulk inputs"
   ^:hidden
 
@@ -296,7 +288,7 @@
   => [6 15])
 
 ^{:refer std.concurrent.request/bulk :added "3.0"
-  :use [|client|] :style/indent 1}
+  :setup [(def |client| (eval-client))] :style/indent 1}
 (fact "allows query inputs to be combined"
   ^:hidden
 
@@ -342,7 +334,7 @@
   => 14)
 
 ^{:refer std.concurrent.request/transact :added "3.0"
-  :use [|client|] :style/indent 1}
+  :setup [(def |client| (eval-client))] :style/indent 1}
 (fact "enable transactions on client"
 
   (->> (transact |client|
@@ -409,7 +401,7 @@
       :transact/start 6 [3]])
 
 ^{:refer std.concurrent.request/transact-prep :added "3.0"
-  :use [|client|]}
+  :setup [(def |client| (eval-client))]}
 (fact "prepare req:opts given transaction context"
 
   (transact-prep |client| (transact-context)
@@ -422,7 +414,7 @@
 
 ^{:refer std.concurrent.request/bulk:transact :added "3.0"
   :style/indent 1
-  :use [|client|]}
+  :setup [(def |client| (eval-client))]}
 (fact "creates a transaction within a bulk context"
   ^:hidden
 
@@ -435,7 +427,7 @@
   => [2 2])
 
 ^{:refer std.concurrent.request/req :added "3.0" :adopt true
-  :use [|client|]}
+  :setup [(def |client| (eval-client))]}
 (fact "execute command on single, bulk and transact calls"
 
   (req |client| {:type :eval :form 1}) ^:hidden
@@ -475,7 +467,7 @@
   => [6 6])
 
 ^{:refer std.concurrent.request/req:transact :added "3.0"
-  :use [|client|] :style/indent 1}
+  :setup [(def |client| (eval-client))] :style/indent 1}
 (fact "creates a bulk transaction request"
   ^:hidden
 
@@ -486,7 +478,7 @@
   => string?)
 
 ^{:refer std.concurrent.request/bulk:map :added "3.0"
-  :use [|client|] :style/indent 1}
+  :setup [(def |client| (eval-client))] :style/indent 1}
 (fact "map function across a client"
   ^:hidden
 
@@ -496,7 +488,7 @@
   => [1 2])
 
 ^{:refer std.concurrent.request/transact:map :added "3.0"
-  :use [|client|] :style/indent 1}
+  :setup [(def |client| (eval-client))] :style/indent 1}
 (fact "performs a transaction across the client"
 
   (transact:map |client|

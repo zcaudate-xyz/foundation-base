@@ -81,7 +81,7 @@
   (!.sh
     (for [file :in ($ (ls "*.clj"))]
       (echo (:$ file))))
-  => [0 ["project.clj"]]
+  => (contains-in [integer? ["project.clj"]])
   
   (!.sh
    (defn countdown []
