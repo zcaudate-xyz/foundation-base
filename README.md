@@ -1,15 +1,23 @@
 # foundation
 
 
-### Installation
+### Getting Started
 
-Currently clojars deploy is broken. To install jars to `.m2` for use in other projects run:
+For a comprehensive guide on installation, usage, and development setup, please refer to [GETTING_STARTED.md](GETTING_STARTED.md).
 
-```
+#### Quick Install (Users)
+
+```bash
 git clone git@github.com:zcaudate-xyz/foundation-base.git
 cd foundation-base
 lein install
 ```
+
+#### Quick Setup (Developers)
+
+1.  **Prerequisites**: Java 21, Leiningen.
+2.  **Setup**: `git clone ...` then `lein deps`.
+3.  **Run Tests**: `./lein test :only std.lib.collection-test` (Do not run full suite initially).
 
 ### std.lang - A Playground for Languages
 
@@ -44,7 +52,7 @@ A runtime/workflow has been developed for live evaluation of solidity code. The 
 
 There are a number of programs needing to be preinstalled for the java environment to shell out to. Not all of them will be needed on your own projects but they will be necessary for running tests in dev.
 
-Please see setup for [the testing environment](https://github.com/zcaudate/infra-testing/blob/main/infra/Dockerfile_foundation) which builds the docker container that is running the [base tests](https://github.com/zcaudate/foundation-ci/actions/workflows/test-base.yml). VNC is not needed for desktop testing.
+Please see [GETTING_STARTED.md](GETTING_STARTED.md) for detailed development instructions.
 
 ### std.lang - overview
 
