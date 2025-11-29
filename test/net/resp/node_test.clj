@@ -6,8 +6,21 @@
             [std.lib :as h]
             [std.concurrent :as cc]))
 
-(fact:ns
- (:clone net.resp.connection-test))
+(defn create-node
+  []
+  (node/start-node nil 4456))
+
+(defn create-conn
+  []
+  (conn/connection {:port 4456}))
+
+(defmacro test-harness
+  [& body]
+  `(h/with:lifecycle [~'|node| {:start (create-node)
+                                :stop node/stop-node}]
+     (h/with:lifecycle [~'|conn| {:start (create-conn)
+                                  :stop conn/connection:close}]
+       ~@body)))
 
 ^{:refer net.resp.node/action-eval :added "3.0"}
 (fact "creates result from an action "
@@ -20,31 +33,32 @@
                ["WRITE" 1 2 3])
   => [:write "123"])
 
-^{:refer net.resp.node/action-write :added "3.0"
-  :use [|node| |conn|]}
+^{:refer net.resp.node/action-write :added "3.0"}
 (fact "writes an action to the connection"
 
-  (action-write |conn| [:write ["PING"]])
-  => nil
+  (test-harness
+    (action-write |conn| [:write ["PING"]])
+    => nil
 
-  (wire/coerce (wire/read |conn|) :string)
-  => "PONG")
+    (wire/coerce (wire/read |conn|) :string)
+    => "PONG"))
 
-^{:refer net.resp.node/handle-multi :added "3.0"
-  :use [|node| |conn|]}
+^{:refer net.resp.node/handle-multi :added "3.0"}
 (fact "handles a call to start transaction"
+  ^:hidden
+  
+  (test-harness
+    (cc/req |conn| ["MULTI"])
+    => "OK"
 
-  (cc/req |conn| ["MULTI"])
-  => "OK"
+    (cc/req |conn| ["PING"])
+    => "QUEUED"
 
-  (cc/req |conn| ["PING"])
-  => "QUEUED"
+    (cc/req |conn| ["PING"])
+    => "QUEUED"
 
-  (cc/req |conn| ["PING"])
-  => "QUEUED"
-
-  (cc/req |conn| ["EXEC"])
-  => ["PONG" "PONG"])
+    (cc/req |conn| ["EXEC"])
+    => ["PONG" "PONG"]))
 
 ^{:refer net.resp.node/handle-exec :added "3.0"}
 (fact "handles a call to perform transaction")

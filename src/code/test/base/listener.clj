@@ -64,12 +64,14 @@
   ([{:keys [result]}]
    (let [summary (summarise-verify result)]
      (cond (= :timeout (-> result :actual :status))
-           (if (print/*options* :print-timeout)
+           (when (print/*options* :print-timeout)
+             (h/beep)
              (print/print-timeout summary))
            
            (or (and (-> result :status (= :exception)))
                (and (-> result :data (= false))))
-           (if (print/*options* :print-failed)
+           (when (print/*options* :print-failed)
+             (h/beep)
              (print/print-failed (summarise-verify result)))
 
            (and (-> result :data (= true))

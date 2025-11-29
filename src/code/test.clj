@@ -28,6 +28,9 @@
               logic/all
               logic/is-not
 
+
+              rt/with-new-context
+              
               manage/fact:global
               manage/fact:ns
               manage/fact:ns-load

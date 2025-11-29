@@ -272,6 +272,15 @@
            `(with [~@more] ~@body))
         (finally (stop ~var))))))
 
+(defmacro with-lifecycle
+  [[var {:keys [start stop]} & more] & body]
+  `(let [~var  ~start]
+     (try
+       ~(if (empty? more)
+          `(do ~@body)
+          `(with-lifecycle [~@more] ~@body))
+       (finally (~stop ~var)))))
+
 (defn wrap-start
   "wraps the start function with more steps"
   {:added "4.0"}

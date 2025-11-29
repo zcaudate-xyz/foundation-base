@@ -79,6 +79,7 @@
              [comp:info component/info]
              [comp:health component/health]
              [with:component component/with]
+             [with:lifecycle component/with-lifecycle]
              [comp:all-props component/all-props]
              [comp:get-prop component/get-prop]
              [comp:set-prop component/set-prop]

@@ -33,21 +33,16 @@
   => #{:disable :default :all :current :help}
 
   (task/print-options :default)
-  => #{:print-bulk :print-failure :print-thrown} ^:hidden
+  => #{:print-failed :print-bulk :print-timeout :print-throw}
 
   (task/print-options :all)
-  => #{:print-bulk
-       :print-facts-success
-       :print-failure
-       :print-thrown
-       :print-facts
-       :print-success})
-
-^{:refer code.test.task/process-args :added "3.0"}
-(fact "processes input arguments"
-
-  (task/process-args ["hello"])
-  => #{:hello})
+  #{:print-failed
+    :print-bulk
+    :print-facts-success
+    :print-timeout
+    :print-facts
+    :print-throw
+    :print-success})
 
 ^{:refer code.test.task/-main :added "3.0" :class [:test/general]}
 (comment "main entry point for leiningen"
