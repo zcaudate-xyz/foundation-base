@@ -1,7 +1,8 @@
 (ns code.framework.cache-test
   (:use code.test)
   (:require [code.framework.cache :refer :all]
-            [std.block :as block])
+            [std.block :as block]
+            [std.fs :as fs])
   (:refer-clojure :exclude [update]))
 
 ^{:refer code.framework.cache/prepare-out :added "3.0"}
@@ -33,18 +34,53 @@
 ^{:refer code.framework.cache/fetch :added "3.0"}
 (fact "reads a the file or gets it from cache"
 
-  (fetch 'code.manage
-         "src/code/manage.clj")
+  (with-redefs [fs/exists? (constantly false)
+                fs/create-directory (constantly nil)
+                fs/select (constantly [])]
+    (fetch 'code.manage
+           "src/code/manage.clj"))
   => (any map? nil?))
 
 ^{:refer code.framework.cache/update :added "3.0"}
-(fact "updates values to the cache")
+(fact "updates values to the cache"
+  (let [memory (atom {})]
+    (with-redefs [file-modified? (constantly true)
+                  fs/last-modified (constantly 100)
+                  fs/path (constantly "cache/path")
+                  spit (fn [_ _] nil)]
+
+      (update 'code.manage "src/code/manage.clj" {'code.manage {'var {:test {:code [(block/parse-string "(+ 1 2)")]}}}} memory "cache" ".cache")
+      (let [entry (get @memory 'code.manage)]
+        {:cache-modified (:cache-modified entry)
+         :file-modified (:file-modified entry)
+         :code (-> entry (get-in [:data 'code.manage 'var :test :code]) first block/string)}))
+    => {:cache-modified 100 :file-modified 100 :code "(+ 1 2)"}))
 
 ^{:refer code.framework.cache/init-memory! :added "3.0"}
-(fact "initialises memory with cache files")
+(fact "initialises memory with cache files"
+  (let [memory (atom {})
+        loaded (atom nil)]
+    (with-redefs [fs/exists? (constantly true)
+                  fs/select (constantly ["file1"])
+                  slurp (constantly "{:meta {:namespace code.manage :file-modified 100} code.manage {var {:test {:code \"(+ 1 2)\"}}}}")
+                  fs/last-modified (constantly 200)
+                  *memory-loaded* loaded]
+      (init-memory! memory "cache")
+      (-> @memory
+          (get-in ['code.manage :data 'code.manage 'var :test :code])
+          first
+          block/string)))
+    => "(+ 1 2)")
 
 ^{:refer code.framework.cache/purge :added "3.0"}
-(fact "clears all entries from the cache")
+(fact "clears all entries from the cache"
+  (let [memory (atom {:a 1})
+        loaded (atom true)]
+    (with-redefs [*memory* memory
+                  *memory-loaded* loaded]
+      (purge)
+      [@memory @loaded])
+    => [{} nil]))
 
 (comment
   (./incomplete)

@@ -28,8 +28,9 @@
       s)))
 
 (defn format-diff-map
-  "TODO"
-  {:added "4.0"} [diff indent]
+  "formats a map diff"
+  {:added "4.0"}
+  [diff indent]
   (let [missing (:+ diff)
         extra   (:- diff)
         changed (:> diff)]
@@ -43,8 +44,9 @@
                  (str (apply str (repeat indent " ")) (ansi/yellow "> ") (pr-str k) " " (pr-str v)))))))
 
 (defn format-diff-seq
-  "TODO"
-  {:added "4.0"} [diff indent]
+  "formats a seq diff"
+  {:added "4.0"}
+  [diff indent]
   (if (vector? diff)
     (str/join "\n"
               (for [[op & args] diff]
@@ -56,8 +58,9 @@
     (str/indent (pretty/pprint-str diff) indent)))
 
 (defn format-diff
-  "TODO"
-  {:added "4.0"} [diff]
+  "formats a diff"
+  {:added "4.0"}
+  [diff]
   (cond (and (map? diff) (or (:+ diff) (:- diff) (:> diff)))
         (format-diff-map diff 4)
 
@@ -68,6 +71,8 @@
         (str/indent (pretty/pprint-str diff) 4)))
 
 (defn print-preliminary
+  "prints preliminary info"
+  {:added "4.1"}
   ([title color
     {:keys [path name ns line desc form original check] :as summary}]
    (let [line (if line (str "L:" line " @ ") "")]
@@ -88,6 +93,8 @@
           "\n"))))
 
 (defn print-throw
+  "prints throw info"
+  {:added "4.1"}
   ([{:keys [name data] :as summary}]
    (print/println
     (str (print-preliminary "THROW" :yellow summary)
@@ -101,7 +108,7 @@
          "\n"))))
 
 (defn print-timeout
-  "TODO"
+  "prints timeout info"
   {:added "4.0"}
   ([{:keys [name data actual check parent] :as summary}]
    (print/println
@@ -116,6 +123,8 @@
          "\n"))))
 
 (defn print-failed
+  "prints failed info"
+  {:added "4.1"}
   ([{:keys [name actual check parent checker] :as summary}]
    (let [result (:data actual)
          diff   (try (diff/diff checker result) (catch Throwable _ nil))]

@@ -4,6 +4,7 @@
             [code.framework.test.clojure]
             [code.framework.test.fact]
             [code.edit :as nav]
+            [code.query :as query]
             [std.block :as block]))
 
 ^{:refer code.framework.common/display-entry :added "3.0"}
@@ -42,8 +43,25 @@
 ^{:refer code.framework.common/analyse-test :added "3.0"}
 (fact "serves as the entry point for analyzing test code, taking a test framework keyword and a parsed code structure"
 
-  (analyse-test :fact
-                (nav/parse-root (slurp "test/code/framework_test.clj"))))
+  (let [code "^{:refer code.manage/import :added \"3.0\"}
+              (fact \"imports a map\"
+                (import {:write true}) => nil)"]
+    (analyse-test :fact (nav/parse-root code)))
+  => (contains {'code.manage (contains {'import (contains {:intro "imports a map"})})}))
+
+(fact "debug analyse-test logic"
+  (let [code "^{:refer code.manage/import :added \"3.0\"}
+              (fact \"imports a map\"
+                (import {:write true}) => nil)"
+        nav (nav/parse-root code)
+        fns (query/$* nav ['(#{fact comment} | & _)] {:return :zipper :walk :top})
+        facts (keep code.framework.test.fact/gather-fact fns)]
+    {:fns-count (count fns)
+     :facts-count (count facts)
+     :first-fact (first facts)})
+  => {:fns-count 1
+      :facts-count 1
+      :first-fact (contains {:intro "imports a map"})})
 
 ^{:refer code.framework.common/gather-meta :added "3.0"}
 (fact "gets the metadata for a particular form"
@@ -61,7 +79,12 @@
   => "\"hello\n  world\n  already\"")
 
 ^{:refer code.framework.common/line-lookup :added "3.0"}
-(fact "creates a function lookup for the project")
+(fact "creates a function lookup for the project"
+  (line-lookup 'code.manage
+               {'code.manage {'a {:source {:line {:row 10 :end-row 12}}}
+                              'b {:test {:line {:row 20 :end-row 22}}}}})
+  => {10 'a 11 'a 12 'a
+      19 'b 20 'b 21 'b 22 'b})
 
 (comment
   (code.manage/import {:write true})

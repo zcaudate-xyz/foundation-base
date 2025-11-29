@@ -45,9 +45,10 @@
   [nav]
   (query/modify
    nav
-   [(fn [form]
-      (and (set form)
-           (:# form)))]
+    [(fn [form]
+       (boolean
+        (and (set? form)
+             (:# form))))]
    (fn [nav] 
      (let [val    (code.edit/value nav)]
        (code.edit/replace

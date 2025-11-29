@@ -11,7 +11,7 @@
 (defonce +latest+ (atom {}))
 
 (defn accumulate
-  "helper function for accumulating results over disparate facts and files"
+  "accumulates test results from various facts and files into a single data structure"
   {:added "3.0"}
   ([func id]
    (let [sink (atom [])
@@ -190,7 +190,7 @@
      (test-namespace ns params lookup project))))
 
 (defn eval-namespace
-  "evals the namespace"
+  "evaluates the code within a specified namespace"
   {:added "3.0"}
   ([ns {:keys [run-id] :as params} lookup project]
    (binding [*warn-on-reflection* false
