@@ -69,7 +69,8 @@
            
            (or (and (-> result :status (= :exception)))
                (and (-> result :data (= false))))
-           (if (print/*options* :print-failed)
+           (when (print/*options* :print-failed)
+             (h/beep)
              (print/print-failed (summarise-verify result)))
 
            (and (-> result :data (= true))

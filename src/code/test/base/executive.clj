@@ -137,7 +137,11 @@
      (let [test-ns (unload-namespace ns nil lookup project)
            _       (when-let [path (or (lookup test-ns)
                                        (lookup ns))]
-                     (load-file path))]
+                     (try
+                       (load-file path)
+                       (catch Throwable t
+                         (h/beep)
+                         (throw t))))]
        test-ns))))
 
 (defn test-namespace
@@ -204,7 +208,11 @@
            facts   (accumulate (fn []
                                  (when-let [path (or (lookup test-ns)
                                                      (lookup ns))]
-                                   (load-file path)))
+                                   (try
+                                     (load-file path)
+                                     (catch Throwable t
+                                       (h/beep)
+                                       (throw t)))))
                                run-id)
            results (interim facts)]
        results))))
