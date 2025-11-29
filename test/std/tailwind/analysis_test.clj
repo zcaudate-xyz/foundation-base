@@ -49,22 +49,33 @@
 
 
 ^{:refer std.tailwind.analysis/find-returns :added "4.0"}
-(fact "TODO")
+(fact "finds return statements in AST"
+  (find-returns '(fn [] (return 1))) => '(1)
+  (find-returns '(do (return 1) (return 2))) => '(1 2))
 
 ^{:refer std.tailwind.analysis/normalize-props :added "4.0"}
-(fact "TODO")
+(fact "normalizes className to class"
+  (normalize-props {:className "foo"}) => {:class "foo"}
+  (normalize-props {:class "bar"}) => {:class "bar"}
+  (normalize-props {:id "baz"}) => {:id "baz"})
 
 ^{:refer std.tailwind.analysis/get-book :added "4.0"}
-(fact "TODO")
+(fact "gets the language book"
+  (get-book :js) => (any nil? map?))
 
 ^{:refer std.tailwind.analysis/resolve-symbol :added "4.0"}
-(fact "TODO")
+(fact "resolves symbol in module context"
+  (resolve-symbol nil nil 'foo) => 'foo)
 
 ^{:refer std.tailwind.analysis/fetch-component-form :added "4.0"}
-(fact "TODO")
+(fact "fetches component form from book"
+  (fetch-component-form nil 'foo) => nil)
 
 ^{:refer std.tailwind.analysis/to-hiccup :added "4.0"}
-(fact "TODO")
+(fact "converts dsl to hiccup"
+  (to-hiccup [:div "hi"]) => [:div "hi"]
+  (to-hiccup '(span "ho")) => [:span {} "ho"])
 
 ^{:refer std.tailwind.analysis/estimate-layout :added "4.0"}
-(fact "TODO")
+(fact "estimates layout from code"
+  (estimate-layout '(return (div "hi"))) => (any seq?))

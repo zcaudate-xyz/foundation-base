@@ -69,7 +69,7 @@
                                     (let [returns (find-returns def-form)
                                           ret (first returns)]
                                       (when ret
-                                        (to-hiccup ret (update ctx :depth inc)))))))]
+                                        (to-hiccup ret (update ctx :depth (fnil inc 0))))))))]
 
            (into [(keyword (str tag)) props]
                  (concat (map #(to-hiccup % ctx) children)

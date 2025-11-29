@@ -31,13 +31,19 @@
           :teardown (fn [rt] (common/kill-runtime @rt))}}})
 
 ^{:refer std.scheduler.spawn/spawn-status :added "3.0"}
-(fact "returns the spawn status")
+(fact "returns the spawn status"
+  (spawn-status (doto (create-spawn)
+                  (set-props :started true)))
+  => :running)
 
 ^{:refer std.scheduler.spawn/spawn-info :added "3.0"}
-(fact "returns the spawn info")
+(fact "returns the spawn info"
+  (keys (spawn-info (create-spawn)))
+  => (contains [:status :duration :jobs :id :state]))
 
 ^{:refer std.scheduler.spawn/spawn? :added "3.0"}
-(fact "checks that object is a spawn")
+(fact "checks that object is a spawn"
+  (spawn? (create-spawn)) => true)
 
 ^{:refer std.scheduler.spawn/create-spawn :added "3.0"}
 (fact "creates a new spawn"
@@ -130,7 +136,11 @@
   => 3)
 
 ^{:refer std.scheduler.spawn/send-result :added "3.0"}
-(fact "sends the result to spawn output")
+(fact "sends the result to spawn output"
+  (let [sp (create-spawn)]
+    (send-result sp "hello")
+    @(:output sp))
+  => "hello")
 
 ^{:refer std.scheduler.spawn/handler-run :added "3.0"}
 (fact "handles the "
@@ -152,10 +162,16 @@
                           :end integer?}}))
 
 ^{:refer std.scheduler.spawn/create-handler-basic :added "3.0"}
-(fact "creates a basic handler")
+(fact "creates a basic handler"
+  ((create-handler-basic *defaults* (create-spawn))
+   {} "j.1")
+  => (throws))
 
-^{:refer std.scheduler.spawn/create-handler-constant :added "3.0"}
-(fact "creates a constant handler")
+^{:refer std.scheduler.spawn/create-handler-constant :added "3.0"
+  :use [|rt|]}
+(fact "creates a constant handler"
+  (create-handler-constant *defaults* (create-spawn))
+  => fn?)
 
 ^{:refer std.scheduler.spawn/create-handler :added "3.0"}
 (fact "creates a run handler"
@@ -171,10 +187,18 @@
   => [1500 865])
 
 ^{:refer std.scheduler.spawn/wrap-schedule :added "3.0"}
-(fact "wrapper for the schedule function")
+(fact "wrapper for the schedule function"
+  ((wrap-schedule {:type :basic} (create-spawn) (fn [s f t] t))
+   nil (fn [id ret] nil) "j.1" nil 0)
+  => ["j.1" 4000])
 
-^{:refer std.scheduler.spawn/spawn-save-past :added "3.0"}
-(fact "helper function to move spawn from :running to :past")
+^{:refer std.scheduler.spawn/spawn-save-past :added "3.0"
+  :use [|rt|]}
+(fact "helper function to move spawn from :running to :past"
+  (spawn-save-past |rt| :test-program {:id "s.1"})
+  => {:id "s.1"}
+  (get-in @|rt| [:past :test-program])
+  => (contains [{:id "s.1"}]))
 
 ^{:refer std.scheduler.spawn/spawn-loop :added "3.0"
   :use [|rt|]}
@@ -300,8 +324,11 @@
       :id)
   => "s2")
 
-^{:refer std.scheduler.spawn/stop-spawn :added "3.0"}
-(fact "stop a spawn and waits for jobs to finish")
+^{:refer std.scheduler.spawn/stop-spawn :added "3.0"
+  :use [|rt3|]}
+(fact "stop a spawn and waits for jobs to finish"
+  (stop-spawn |rt3| :test-program "s1")
+  => spawn?)
 
 ^{:refer std.scheduler.spawn/kill-spawn :added "3.0"
   :use [|rt3|]}
@@ -328,8 +355,12 @@
       (count-spawn :test-program))
   => 0)
 
-^{:refer std.scheduler.spawn/clear :added "3.0"}
-(fact "clears the program and past spawn information")
+^{:refer std.scheduler.spawn/clear :added "3.0"
+  :use [|rt3|]}
+(fact "clears the program and past spawn information"
+  (clear |rt3| :test-program)
+  (count-spawn |rt3| :test-program)
+  => 0)
 
 ^{:refer std.scheduler.spawn/get-state :added "3.0"
   :use [|rt3|]}
@@ -344,107 +375,3 @@
 
   (get-program |rt3| :test-program)
   => {})
-
-(comment
-
-  (h/tracked)
-  (h/tracked [] :stop)
-
-  (./import)
-  (use 'jvm.tool)
-  {:main-fn   (fn [state args t])
-   :create-fn (fn [])
-   :args-fn   (fn [])}
-
-  (use 'jvm.tool)
-  (./scaffold)
-
-  ()
-  (time (dotimes [i 10000] (h/flake)))
-  (time (dotimes [i 10000] (h/uuid)))
-  (time (dotimes [i 10000] (h/sid)))
-  (time (h/uuid))
-  (time (dotimes [i 10000] (System/currentTimeMillis)))
-
-  (import 'hara.io.runtime.spawn.Counter)
-
-  (defmutable Hello [state])
-
-  ()
-
-  (defn update! [a f & args]
-    (cond (h/atom? a)
-          (apply swap! a f args)
-
-          (volatile? a)
-          (vswap! a #(apply f % args))))
-
-  (let [a (atom 0)]
-    (time (dotimes [i 100000]
-            (swap! a inc))))
-
-  Counter
-  (Counter. 0)
-  (let [a (Counter. 0)]
-    (time (dotimes [i 100000]
-            (swap! a inc))))
-
-  (def)
-
-  (let [a []])
-
-  (time
-   (def -a- (reduce conj [] (range 100000))))
-
-  (time (let [a (Counter. 0)]
-          (dotimes [i 100000]
-            (.inc a))))
-
-  (time (let [a (Hello. 1)]
-          (dotimes [i 100000]
-            (h/mutable:set a :state i))))
-
-  (time (let [a (volatile! [])]
-          (dotimes [i 100000]
-            (vswap! a conj i))))
-
-  (time (let [a (atom [])]
-          (dotimes [i 100000]
-            (swap! a conj i))))
-
-  (time (let [a (atom [])]
-          (dotimes [i 100000]
-            (swap! a conj i))))
-
-  (let [a (cc/queue 0)]
-    (time (dotimes [i 100000]
-            (cc/put a i))))
-
-  (let [a (volatile! 0)]
-    (time (dotimes [i 100000]
-            (vswap! a inc))))
-
-  (let [a (atom 0)]
-    (time (dotimes [i 100000]
-            (swap! a inc))))
-
-  (let [a (volatile! 0)
-        b (atom 0)
-        coll [a b]]
-    (time (dotimes [i 100000]
-            (update! (rand-nth coll) inc))))
-
-  (let [a (volatile! 0)
-        b (atom 0)
-        coll [a b]]
-    (time (dotimes [i 100000]
-            (rand-nth coll))))
-
-  (let [a (ref 0)]
-    (time (dotimes [i 100000]
-            (dosync (alter a inc)))))
-
-  (let [a (ref 0)]
-    (time (dosync
-           (dotimes [i 100000]
-             (alter a inc))))))
