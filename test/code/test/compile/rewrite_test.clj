@@ -159,3 +159,7 @@
   (s/run)
   
   )
+
+
+^{:refer code.test.compile.rewrite/rewrite-nested-checks :added "4.1"}
+(fact "TODO")

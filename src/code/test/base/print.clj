@@ -146,7 +146,7 @@
          total  (count all)
          ops    (->> results (filter #(-> % :from (= :evaluate))))
          errors  (->> ops (filter #(-> % :status (= :exception))))
-         timeout (->> ops (filter #(-> % :status (= :timeout))))
+         timeout (->> ops (filter #(-> % :status (= :timeout))) count)
          throw  (count errors)]
      (if (or (*options* :print-facts-success)
              (not (and (= num total)
