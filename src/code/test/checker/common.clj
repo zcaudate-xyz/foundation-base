@@ -242,9 +242,14 @@
    ((->checker (exactly 1)) 1) => true"
   {:added "3.0"}
   ([x]
-   (if (checker? x)
-     x
-     (satisfies x))))
+   (cond (checker? x)
+         x
+
+         (= x 'any)
+         (satisfies anything)
+
+         :else
+         (satisfies x))))
 
 (defmacro capture
   "adds a form to capture test input"

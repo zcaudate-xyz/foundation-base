@@ -94,7 +94,7 @@
             :compare fs/last-modified}]
   ([path]
    (when-let [ns (fs/file-namespace path)]
-     (swap! common/*lookup* assoc ns path)
+     (swap! common/*lookup* assoc ns (str path))
      [ns (str path)])))
 
 (defn lookup-path
