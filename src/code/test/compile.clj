@@ -196,7 +196,11 @@
   {:added "3.0"}
   ([{:keys [ns id] :as fpkg}]
    `(binding [rt/*eval-fact* true]
-      ((rt/get-fact (quote ~ns) (quote ~id))))))
+      (let [fact# (or (rt/get-fact (quote ~ns) (quote ~id))
+                      (get-in @(.getRawRoot #'rt/*registry*) [(quote ~ns) :facts (quote ~id)]))]
+        (when (and fact# (nil? (rt/get-fact (quote ~ns) (quote ~id))))
+          (rt/set-fact (quote ~ns) (quote ~id) fact#))
+        ((rt/get-fact (quote ~ns) (quote ~id)))))))
 
 (defmacro fact
   "top level macro for test definitions"
