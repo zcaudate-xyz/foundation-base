@@ -27,7 +27,9 @@
       (str (apply str (repeat (- n len) " ")) s)
       s)))
 
-(defn format-diff-map [diff indent]
+(defn format-diff-map
+  "TODO"
+  {:added "4.0"} [diff indent]
   (let [missing (:+ diff)
         extra   (:- diff)
         changed (:> diff)]
@@ -40,7 +42,9 @@
                (for [[k v] changed]
                  (str (apply str (repeat indent " ")) (ansi/yellow "> ") (pr-str k) " " (pr-str v)))))))
 
-(defn format-diff-seq [diff indent]
+(defn format-diff-seq
+  "TODO"
+  {:added "4.0"} [diff indent]
   (if (vector? diff)
     (str/join "\n"
               (for [[op & args] diff]
@@ -51,7 +55,9 @@
                        (pr-str [op args])))))
     (str/indent (pretty/pprint-str diff) indent)))
 
-(defn format-diff [diff]
+(defn format-diff
+  "TODO"
+  {:added "4.0"} [diff]
   (cond (and (map? diff) (or (:+ diff) (:- diff) (:> diff)))
         (format-diff-map diff 4)
 
@@ -82,8 +88,6 @@
           "\n"))))
 
 (defn print-throw
-  "outputs the description for a form that throws an exception"
-  {:added "3.0"}
   ([{:keys [name data] :as summary}]
    (print/println
     (str (print-preliminary "THROW" :yellow summary)
@@ -97,7 +101,7 @@
          "\n"))))
 
 (defn print-timeout
-  "outputs the description for a form that has timed out"
+  "TODO"
   {:added "4.0"}
   ([{:keys [name data actual check parent] :as summary}]
    (print/println
@@ -112,8 +116,6 @@
          "\n"))))
 
 (defn print-failed
-  "outputs the description for a failed test"
-  {:added "3.0"}
   ([{:keys [name actual check parent checker] :as summary}]
    (let [result (:data actual)
          diff   (try (diff/diff checker result) (catch Throwable _ nil))]

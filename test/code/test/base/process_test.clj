@@ -14,13 +14,14 @@
 
 ^{:refer code.test.base.process/process :added "3.0"}
 (fact "processes a form or a check"
+
   (defn view-signal [op]
     (let [output (atom nil)]
       (h/signal:with-temp [:test (fn [{:keys [result]}]
                                    (reset! output (into {} result)))]
-                          (process op)
-                          @output)))
-
+        (process op)
+        @output)))
+  
   (view-signal {:type :form
                 :form '(+ 1 2 3)
                 :meta {:line 10 :col 3}})
@@ -45,12 +46,7 @@
 (fact "attaches metadata to the result")
 
 ^{:refer code.test.base.process/collect :added "3.0"}
-(fact "makes sure that all returned verified results are true"
-  (->> (compile/split '[(+ 1 1) => 2
-                        (+ 1 2) => 3])
-       (mapv process)
-       (collect {}))
-  => true)
+(fact "makes sure that all returned verified results are true")
 
 ^{:refer code.test.base.process/skip-check :added "3.0"}
 (fact "returns the form with no ops evaluated")

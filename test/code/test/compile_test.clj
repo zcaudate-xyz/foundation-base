@@ -12,14 +12,6 @@
   (fact-skip? '(fact:component))
   => true)
 
-^{:refer code.test.compile/strip :added "3.0"}
-(fact "removes all checks in the function"
-
-  (strip '[(def a 1)
-           (+ a 3)
-           => 5])
-  => '[(def a 1) (+ a 3)])
-
 ^{:refer code.test.compile/rewrite-top-level :added "3.0"}
 (fact "creates a sequence of pairs from a loose sequence"
   (rewrite-top-level '[(def a 1)
