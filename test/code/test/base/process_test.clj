@@ -15,13 +15,14 @@
 
 ^{:refer code.test.base.process/process :added "3.0"}
 (fact "processes a form or a check"
+
   (defn view-signal [op]
     (let [output (atom nil)]
       (h/signal:with-temp [:test (fn [{:keys [result]}]
                                    (reset! output (into {} result)))]
-                          (process op)
-                          @output)))
-
+        (process op)
+        @output)))
+  
   (view-signal {:type :form
                 :form '(+ 1 2 3)
                 :meta {:line 10 :col 3}})

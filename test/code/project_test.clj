@@ -128,7 +128,7 @@
 (fact "returns only the code files for the current project"
 
   (code-files)
-  => (contains '{code.project any} :gaps-ok))
+  => (contains {'code.project any}))
 
 ^{:refer code.project/code-path :added "3.0"}
 (fact "returns the path of the code"

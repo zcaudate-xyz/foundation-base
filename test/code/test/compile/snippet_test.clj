@@ -3,12 +3,6 @@
             [code.test.base.process :as process]
             [code.test :refer [fact fact:global contains-in]]))
 
-^{:refer code.test.compile.snippet/vecify :added "3.0"}
-(fact "puts the item in a vector if not already"
-
-  (vecify 1)
-  => [1])
-
 ^{:refer code.test.compile.snippet/fact-setup :added "3.0"}
 (fact "creates a setup hook"
   ^:hidden
