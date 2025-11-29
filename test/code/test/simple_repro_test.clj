@@ -58,7 +58,7 @@
       2
       => (fn [x]
            (= 2 x))))
-  => false)
+  => true)
 
 ^{:refer code.test/any.nested :added "3.0"
   :adopt true}
