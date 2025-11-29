@@ -1,6 +1,7 @@
 (ns code.test.base.process-test
   (:use code.test)
   (:require [code.test.base.process :refer :all]
+            [code.test.base.runtime :as rt]
             [code.test.checker.common :as base]
             [code.test.compile :as compile]
             [std.lib :as h]))
@@ -46,14 +47,22 @@
 
 ^{:refer code.test.base.process/collect :added "3.0"}
 (fact "makes sure that all returned verified results are true"
-  (->> (compile/split '[(+ 1 1) => 2
-                        (+ 1 2) => 3])
+  (->> (compile/rewrite-top-level '[(+ 1 1) => 2
+                                    (+ 1 2) => 3])
        (mapv process)
        (collect {}))
   => true)
 
 ^{:refer code.test.base.process/skip-check :added "3.0"}
-(fact "returns the form with no ops evaluated")
+(fact "returns the form with no ops evaluated"
+  (skip-check {}) => :skipped)
 
 ^{:refer code.test.base.process/run-check :added "3.0"}
-(fact "runs a single check form")
+(fact "runs a single check form"
+
+  (binding [rt/*eval-mode* false]
+    (run-check {:unit #{:foo}} []))
+  => :skipped
+
+  (run-check {} [])
+  => true)
