@@ -295,10 +295,12 @@
 
 (defn parse-token [token]
   (let [[_ mod base] (re-find #"(?:(sm|md|lg|xl|2xl):)?(.+)" token)]
-    (if-let [props (match-class base)]
-      (if mod
-        {:media {(keyword mod) props}}
-        props)
+    (if (and base (not (str/blank? base)))
+      (if-let [props (match-class base)]
+        (if mod
+          {:media {(keyword mod) props}}
+          props)
+        nil)
       nil)))
 
 (defn deep-merge [a b]

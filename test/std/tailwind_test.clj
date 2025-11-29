@@ -101,52 +101,91 @@
 
 
 ^{:refer std.tailwind/resolve-value :added "4.0"}
-(fact "TODO")
+(fact "resolves a value from a scale"
+  (resolve-value "4" +spacing-scale+) => "1rem"
+  (resolve-value "500px" +spacing-scale+ "0px") => "0px"
+  (resolve-value "[20px]" nil) => "20px")
 
 ^{:refer std.tailwind/resolve-spacing :added "4.0"}
-(fact "TODO")
+(fact "resolves spacing values"
+  (resolve-spacing "4") => "1rem"
+  (resolve-spacing "1px") => "1px")
 
 ^{:refer std.tailwind/resolve-size :added "4.0"}
-(fact "TODO")
+(fact "resolves size values"
+  (resolve-size "full") => "100%"
+  (resolve-size "1/2") => "50%")
 
 ^{:refer std.tailwind/match-class :added "4.0"}
-(fact "TODO")
+(fact "matches a class against matchers"
+  (match-class "w-full") => {:width "100%"}
+  (match-class "flex") => {:display :flex})
 
 ^{:refer std.tailwind/parse-token :added "4.0"}
-(fact "TODO")
+(fact "parses a single token"
+  (parse-token "w-full") => {:width "100%"}
+  (parse-token "sm:w-full") => {:media {:sm {:width "100%"}}}
+  (parse-token "invalid") => nil)
 
 ^{:refer std.tailwind/deep-merge :added "4.0"}
-(fact "TODO")
+(fact "deep merges two maps"
+  (deep-merge {:a {:b 1}} {:a {:c 2}}) => {:a {:b 1 :c 2}})
 
 ^{:refer std.tailwind/parse :added "4.0"}
-(fact "TODO")
+(fact "parses a class string"
+  (parse "w-full h-10") => {:width "100%" :height "2.5rem"})
 
 ^{:refer std.tailwind/make-canvas :added "4.0"}
-(fact "TODO")
+(fact "creates a blank canvas"
+  (make-canvas 2 2) => [[\space \space] [\space \space]])
 
 ^{:refer std.tailwind/draw-point :added "4.0"}
-(fact "TODO")
+(fact "draws a point on the canvas"
+  (draw-point (make-canvas 2 2) 0 0 \x) => [[\x \space] [\space \space]])
 
 ^{:refer std.tailwind/draw-text :added "4.0"}
-(fact "TODO")
+(fact "draws text on the canvas"
+  (draw-text (make-canvas 5 1) 0 0 "hi") => [[\h \i \space \space \space]])
 
 ^{:refer std.tailwind/draw-box-outline :added "4.0"}
-(fact "TODO")
+(fact "draws a box outline"
+  (render-canvas-str (draw-box-outline (make-canvas 4 4) 0 0 4 4))
+  => (str "+--+\n"
+          "|  |\n"
+          "|  |\n"
+          "+--+"))
 
 ^{:refer std.tailwind/render-canvas-str :added "4.0"}
-(fact "TODO")
+(fact "renders canvas to string"
+  (render-canvas-str [[\a \b] [\c \d]]) => "ab\ncd")
 
 ^{:refer std.tailwind/parse-unit :added "4.0"}
-(fact "TODO")
+(fact "parses a unit string to integer"
+  (parse-unit "1rem" nil) => 4
+  (parse-unit "10px" nil) => 1
+  (parse-unit "50%" 100) => 50
+  (parse-unit "10" nil) => 10)
 
 ^{:refer std.tailwind/measure-node :added "4.0"}
-(fact "TODO")
+(fact "measures a node dimensions"
+  (measure-node "hello" 100) => {:w 5 :h 1 :type :text :content "hello"}
+  (measure-node [:div {:class "w-10 h-10"}] 100) => (contains {:w 10 :h 10}))
 
 ^{:refer std.tailwind/layout-node :added "4.0"}
-(fact "TODO")
+(fact "layouts a node tree"
+  (let [node (measure-node [:div {:class "w-10 h-10"} "hi"] 100)
+        layout (layout-node node 0 0)]
+    (:x layout) => 0
+    (:y layout) => 0
+    (get-in layout [:children 0 :x]) => 0))
 
 ^{:refer std.tailwind/draw-node :added "4.0"}
-(fact "TODO")
+(fact "draws a node to canvas"
+  (let [node (layout-node (measure-node "hi" 10) 0 0)
+        canvas (make-canvas 5 1)]
+    (render-canvas-str (draw-node canvas node)))
+  => "hi   ")
 
 ^{:refer std.tailwind/render :added "4.0"}
-(fact "TODO")
+(fact "renders a hiccup form"
+  (render [:div "hi"]) => (any string?))
