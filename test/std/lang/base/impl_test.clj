@@ -77,7 +77,7 @@
 
 ^{:refer std.lang.base.impl/default-library:reset :added "4.0"}
 (fact "clears the default library, including all grammars"
-  (with-default-library
+  (with:library [(lib/library {})]
     (default-library:reset))
   => anything)
 
