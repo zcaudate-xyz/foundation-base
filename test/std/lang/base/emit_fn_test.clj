@@ -40,15 +40,18 @@
 
   (emit-input-default
    '{:symbol #{key url}, :assign true, :force true, :value 10}
-   "=" {} {}))
+   "=" {} {})
+  => "#{key url} = 10")
 
 ^{:refer std.lang.base.emit-fn/emit-hint-type :added "4.0"}
 (fact "emits the return type"
-  "placeholder for tests")
+  (emit-hint-type {} (with-meta 'hello {:- [:char]}) nil +grammar+ {})
+  => "char")
 
 ^{:refer std.lang.base.emit-fn/emit-def-type :added "4.0"}
 (fact "emits the def type"
-  "placeholder for tests")
+  (emit-def-type (with-meta 'hello {:- [:char]}) nil +grammar+ {})
+  => "char")
 
 ^{:refer std.lang.base.emit-fn/emit-fn-type :added "3.0"}
 (fact "returns the function type"
@@ -113,8 +116,10 @@
 
 ^{:refer std.lang.base.emit-fn/test-fn-loop :added "4.0"}
 (fact "add blocks, fn, var and const to emit"
-  "placeholder for tests")
+  (test-fn-loop '(+ 1 2) +grammar+ {})
+  => "1 + 2")
 
 ^{:refer std.lang.base.emit-fn/test-fn-emit :added "4.0"}
 (fact  "add blocks, fn, var and const to emit"
-  "placeholder for tests")
+  (test-fn-emit '(+ 1 2) +grammar+ {})
+  => "1 + 2")

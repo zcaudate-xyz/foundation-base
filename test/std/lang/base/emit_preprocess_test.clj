@@ -22,19 +22,27 @@
 
 ^{:refer std.lang.base.emit-preprocess/macro-form :added "4.0"}
 (fact "gets the current macro form"
-  "placeholder for tests")
+  (binding [*macro-form* 'hello]
+    (macro-form))
+  => 'hello)
 
 ^{:refer std.lang.base.emit-preprocess/macro-opts :added "4.0"}
 (fact "gets current macro-opts"
-  "placeholder for tests")
+  (binding [*macro-opts* {:a 1}]
+    (macro-opts))
+  => {:a 1})
 
 ^{:refer std.lang.base.emit-preprocess/macro-grammar :added "4.0"}
 (fact "gets the current grammar"
-  "placeholder for tests")
+  (binding [*macro-grammar* {:a 1}]
+    (macro-grammar))
+  => {:a 1})
 
 ^{:refer std.lang.base.emit-preprocess/with:macro-opts :added "4.0"}
 (fact "bind macro opts"
-  "placeholder for tests")
+  (with:macro-opts [{:a 1}]
+    (macro-opts))
+  => {:a 1})
 
 ^{:refer std.lang.base.emit-preprocess/to-input-form :added "4.0"}
 (fact "processes a form"

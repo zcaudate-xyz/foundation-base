@@ -31,7 +31,9 @@
 
 ^{:refer std.lang.base.emit-block/emit-do* :added "3.0"}
 (fact "like do but removes the statment at the end, useful for macros"
-  "placeholder for tests")
+  (binding [common/*emit-fn* common/emit-common]
+    (emit-do* '((add 1 2) (add 3 4)) +grammar+ {}))
+  => "add(1,2);\nadd(3,4)")
 
 ^{:refer std.lang.base.emit-block/block-options :added "3.0"}
 (fact "gets the block options"
@@ -234,8 +236,10 @@
 
 ^{:refer std.lang.base.emit-block/test-block-loop :added "4.0"}
 (fact "emits with blocks"
-  "placeholder for tests")
+  (test-block-loop '(+ 1 2) +grammar+ {})
+  => "1 + 2")
 
 ^{:refer std.lang.base.emit-block/test-block-emit :added "4.0"}
 (fact "emit with blocks"
-  "placeholder for tests")
+  (test-block-emit '(+ 1 2) +grammar+ {})
+  => "1 + 2")

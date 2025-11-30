@@ -44,25 +44,32 @@
                     :library +library-ext+}))
 
 ^{:refer std.lang.base.pointer/with:clip :added "4.0"}
-(fact "form to control `clip` option")
+(fact "form to control `clip` option"
+  (with:clip *clip*) => true)
 
 ^{:refer std.lang.base.pointer/with:print :added "4.0"}
-(fact "form to control `print` option")
+(fact "form to control `print` option"
+  (with:print *print*) => #{:input})
 
 ^{:refer std.lang.base.pointer/with:print-all :added "4.0"}
-(fact "toggles print for all intermediate steps")
+(fact "toggles print for all intermediate steps"
+  (with:print-all *print*) => #{:input-form :raw-input :raw-output})
 
 ^{:refer std.lang.base.pointer/with:rt :added "4.0"}
-(fact "forcibly applies a runtime")
+(fact "forcibly applies a runtime"
+  (with:rt [1] std.lib.context.pointer/*runtime*) => 1)
 
 ^{:refer std.lang.base.pointer/with:rt-wrap :added "4.0"}
-(fact "wraps an additional function to the invoke function")
+(fact "wraps an additional function to the invoke function"
+  (with:rt-wrap [inc] *rt-wrap*) => inc)
 
 ^{:refer std.lang.base.pointer/with:input :added "4.0"}
-(fact "form to control `input` option")
+(fact "form to control `input` option"
+  (with:input *input*) => #{:default})
 
 ^{:refer std.lang.base.pointer/with:raw :added "4.0"}
-(fact "form to control `raw` option")
+(fact "form to control `raw` option"
+  (with:raw *output*) => #{:raw})
 
 ^{:refer std.lang.base.pointer/get-entry :added "4.0"}
 (fact "gets the library entry given pointer"
@@ -108,7 +115,8 @@
 (fact "prepares the meta for a pointer"
   ^:hidden
   
-  (ptr-invoke-meta +ptr+ {}))
+  (ptr-invoke-meta +ptr+ {})
+  => map?)
 
 ^{:refer std.lang.base.pointer/rt-macro-opts :added "4.0"}
 (fact "creates the default macro-opts for a runtime"
@@ -129,7 +137,7 @@
   ^:hidden
   
   (ptr-invoke-script +ptr+ [1 2] {:layout :full})
-  
+  => "1 + 2"
  
   (ptr-invoke-script (ut/lang-pointer :lua
                                       {:module 'L.core
@@ -147,10 +155,12 @@
       "print(L_core____identity_fn(1))"))
 
 ^{:refer std.lang.base.pointer/ptr-intern :added "4.0"}
-(fact "interns the symbol into the workspace environment")
+(fact "interns the symbol into the workspace environment"
+  (ptr-intern *ns* 'foo {:lang :lua}) => #'std.lang.base.pointer-test/foo)
 
 ^{:refer std.lang.base.pointer/ptr-output-json :added "4.0"}
-(fact "extracetd function from ptr-output")
+(fact "extracetd function from ptr-output"
+  (ptr-output-json {"type" "data" "value" 1}) => 1)
 
 ^{:refer std.lang.base.pointer/ptr-output :added "4.0"}
 (fact "output types for embedded return values"
@@ -191,7 +201,8 @@
   => "<Hello>\n1 + 3")
 
 ^{:refer std.lang.base.pointer/ptr-invoke :added "4.0"}
-(fact "invokes the pointer")
+(fact "invokes the pointer"
+  (ptr-invoke nil (fn [_ x] x) 1 {} nil) => 1)
 
 (comment
   (./import)

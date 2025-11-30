@@ -37,10 +37,11 @@
             :compare h/hash-code}]
   ([module]
    (let [{:keys [native static]} module]
-     (disj (h/union
-            (set (mapcat #(mapcat h/seqify (vals %))
-                         (vals native)))
-            (:lang/lint-globals static))
+     (disj (or (h/union
+                (set (mapcat #(mapcat h/seqify (vals %))
+                             (vals native)))
+                (:lang/lint-globals static))
+               #{})
            '*))))
 
 (defn collect-sym-vars
@@ -50,9 +51,10 @@
    (collect-sym-vars entry module #{}))
   ([entry module lang-globals]
    (let [globals 
-         (h/union lang-globals
-                  (collect-module-globals module)
-                  (:static/lint-globals entry))
+         (or (h/union (or lang-globals #{})
+                      (collect-module-globals module)
+                      (:static/lint-globals entry))
+             #{})
          {:keys [form form-input lang op-key]} entry
          form (or form form-input)
          reserved (get-reserved lang)

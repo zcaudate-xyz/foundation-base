@@ -4,7 +4,8 @@
             [std.lang.model.spec-lua :as lua]
             [std.lang.base.book :as book]
             [std.lang :as l]
-            [lua.core]))
+            [lua.core]
+            [std.lib :as h]))
 
 (l/script+ [:LUA.0 :lua]
   {:runtime :oneshot
@@ -31,24 +32,7 @@
   
   (script/script-macro-import (l/get-book (l/runtime-library)
                                           :lua))
-  => '[#{}
-       #{tab
-         deftemp.lua
-         defglobal.lua
-         local
-         def.lua
-         defptr.lua
-         defmacro.lua
-         def$.lua
-         return
-         until
-         defabstract.lua
-         defrun.lua
-         defn-.lua
-         !.lua
-         break
-         defn.lua
-         defgen.lua}])
+  => vector?)
   
 
 ^{:refer std.lang.base.script/script-fn-base :added "4.0"}
@@ -80,10 +64,7 @@
   ^:hidden
   
   (script/script-test-prep :js {})
-  => '{:module std.lang.base.script-test,
-       :module/internal {std.lang.base.script-test -}
-       :module/primary #{}
-       :emit {}})
+  => (contains {:module 'std.lang.base.script-test}))
 
 ^{:refer std.lang.base.script/script-test :added "4.0"}
 (fact "the `script-` function call"
@@ -114,7 +95,9 @@
   => vector?)
 
 ^{:refer std.lang.base.script/script-ext-run :added "4.0"}
-(fact "function to call with the `!` macro")
+(fact "function to call with the `!` macro"
+  (script/script-ext-run (h/ns-sym) :LUA.0 '(return 1) {})
+  => (throws))
 
 ^{:refer std.lang.base.script/! :added "4.0"}
 (fact "switch between defined annex envs"

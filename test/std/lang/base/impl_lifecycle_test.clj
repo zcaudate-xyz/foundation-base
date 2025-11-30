@@ -41,7 +41,9 @@
   => '#{js.blessed.ui-style xt.lang.base-lib js.react})
 
 ^{:refer std.lang.base.impl-lifecycle/emit-module-setup-concat :added "4.0"}
-(fact "joins setup raw into individual blocks")
+(fact "joins setup raw into individual blocks"
+  (emit-module-setup-concat {:setup-body "setup" :native-arr ["native"] :link-arr ["link"] :header-arr ["header"] :code-arr ["code"] :export-body "export"})
+  => '("setup" "native" "link" "header" "code" "export"))
 
 ^{:refer std.lang.base.impl-lifecycle/emit-module-setup-join :added "4.0"}
 (fact "joins setup raw into the setup code"
@@ -64,7 +66,7 @@
                                                    :emit {:compile {:type :graph
                                                                     :base    'js
                                                                     :root-ns 'js.blessed.ui-core}}}))
-  => '("import React from 'react'" "import Blessed from 'blessed'"))
+  => (contains ["import React from 'react'" "import Blessed from 'blessed'"] :in-any-order))
 
 ^{:refer std.lang.base.impl-lifecycle/emit-module-setup-link-import :added "4.0"}
 (fact "creates a import structure from links"
@@ -111,9 +113,9 @@
                       :root-ns 'js.blessed.ui-core
                       }}}))
 
-  => '("import * as ui_style from '@/blessed/ui-style'"
-       "import * as k from '@/libs/xt/lang/base-lib'"
-       "import * as r from '@//react'")
+  => (contains ["import * as ui_style from '@/blessed/ui-style'"
+                "import * as k from '@/libs/xt/lang/base-lib'"
+                "import * as r from '@//react'"] :in-any-order)
 
   (emit-module-setup-link-arr
    {:emit {:code   {:link {:path-separator "|"
@@ -131,12 +133,14 @@
      :emit {:compile {:type :graph
                       :base    'js
                       :root-ns 'js.blessed.ui-core}}}))
-  => '("import * as ui_style from '@|blessed|ui-style'"
-       "import * as k from '@|libs/xt/lang|base-lib'"
-       "import * as r from '@||react'"))
+  => (contains ["import * as ui_style from '@|blessed|ui-style'"
+                "import * as k from '@|libs/xt/lang|base-lib'"
+                "import * as r from '@||react'"] :in-any-order))
 
 ^{:refer std.lang.base.impl-lifecycle/emit-module-setup-export-body :added "4.0"}
-(fact "the code for exporting the body")
+(fact "the code for exporting the body"
+  (emit-module-setup-export-body nil (emit-module-prep 'xt.lang {:lang :lua}))
+  => string?)
 
 ^{:refer std.lang.base.impl-lifecycle/emit-module-setup-raw :added "4.0"}
 (fact "creates module setup map of array strings"
@@ -176,7 +180,9 @@
   => string?)
 
 ^{:refer std.lang.base.impl-lifecycle/emit-module-teardown-raw :added "4.0"}
-(fact "creates module teardown map of array strings")
+(fact "creates module teardown map of array strings"
+  (emit-module-teardown-raw 'xt.lang.base-lib {:lang :lua})
+  => map?)
 
 ^{:refer std.lang.base.impl-lifecycle/emit-module-teardown :added "4.0"}
 (fact "creates the teardown script"

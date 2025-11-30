@@ -4,23 +4,28 @@
 
 ^{:refer std.lang.base.grammar-xtalk/tf-throw :added "4.0"}
 (fact "wrapper for throw transform"
-  "placeholder for tests")
+  (tf-throw '(x:throw "error"))
+  => '(throw "error"))
 
 ^{:refer std.lang.base.grammar-xtalk/tf-eq-nil? :added "4.0"}
 (fact "equals nil transform"
-  "placeholder for tests")
+  (tf-eq-nil? '(x:nil? a))
+  => '(== nil a))
 
 ^{:refer std.lang.base.grammar-xtalk/tf-not-nil? :added "4.0"}
 (fact "not nil transform"
-  "placeholder for tests")
+  (tf-not-nil? '(x:not-nil? a))
+  => '(not= nil a))
 
 ^{:refer std.lang.base.grammar-xtalk/tf-proto-create :added "4.0"}
 (fact "creates the prototype map"
-  "placeholder for tests")
+  (tf-proto-create '(x:proto-create {}))
+  => '(return {}))
 
 ^{:refer std.lang.base.grammar-xtalk/tf-has-key? :added "4.0"}
 (fact "has key default transform"
-  "placeholder for tests")
+  (tf-has-key? '(x:has-key? obj "a"))
+  => '(not= (x:get-key obj "a") nil))
 
 ^{:refer std.lang.base.grammar-xtalk/tf-get-path :added "4.0"}
 (fact "get-in transform"
@@ -92,19 +97,23 @@
 
 ^{:refer std.lang.base.grammar-xtalk/tf-offset :added "4.0"}
 (fact "gets the offset"
-  "placeholder for tests")
+  (tf-offset '(x:offset 10))
+  => 10)
 
 ^{:refer std.lang.base.grammar-xtalk/tf-offset-rev :added "4.0"}
 (fact "gets the reverse offset"
-  "placeholder for tests")
+  (tf-offset-rev '(x:offset-rev 10))
+  => 9)
 
 ^{:refer std.lang.base.grammar-xtalk/tf-offset-len :added "4.0"}
 (fact "gets the length offset"
-  "placeholder for tests")
+  (tf-offset-len '(x:offset-len 10))
+  => 9)
 
 ^{:refer std.lang.base.grammar-xtalk/tf-offset-rlen :added "4.0"}
 (fact "gets the reverse length offset"
-  "placeholder for tests")
+  (tf-offset-rlen '(x:offset-rlen 10))
+  => 10)
 
 ^{:refer std.lang.base.grammar-xtalk/tf-global-set :added "4.0"}
 (fact "default global set transform"

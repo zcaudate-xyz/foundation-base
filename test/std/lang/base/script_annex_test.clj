@@ -79,10 +79,12 @@
   => :hello.rt)
 
 ^{:refer std.lang.base.script-annex/get-annex-runtime :added "4.0"}
-(fact "gets the annex rutime")
+(fact "gets the annex rutime"
+  (annex/get-annex-runtime (h/ns-sym) :hello) => nil)
 
 ^{:refer std.lang.base.script-annex/remove-annex-runtime :added "4.0"}
-(fact "removes the annex runtime")
+(fact "removes the annex runtime"
+  (annex/remove-annex-runtime (h/ns-sym) :hello) => nil)
 
 ^{:refer std.lang.base.script-annex/register-annex-tag :added "4.0"
   :setup [(annex/deregister-annex-tag (h/ns-sym) :redis.0)]}
@@ -100,13 +102,14 @@
   => {:lang :lua, :runtime :redis, :config {}})
 
 ^{:refer std.lang.base.script-annex/deregister-annex-tag :added "4.0"}
-(fact "removes the config for the tag")
+(fact "removes the config for the tag"
+  (annex/deregister-annex-tag (h/ns-sym) :redis.0) => nil)
 
 ^{:refer std.lang.base.script-annex/start-runtime :added "4.0"}
 (fact "starts the runtime in the annex"
   ^:hidden
 
-  (annex/start-runtime :lua :default {}))
+  (annex/start-runtime :lua :default {}) => map?)
 
 ^{:refer std.lang.base.script-annex/same-runtime? :added "4.0"}
 (fact "checks that one runtime is the same as another"

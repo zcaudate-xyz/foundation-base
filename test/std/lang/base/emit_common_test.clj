@@ -5,15 +5,15 @@
 
 ^{:refer std.lang.base.emit-common/with:explode :added "4.0"}
 (fact "form to control `explode` option"
-  "placeholder for tests")
+  (with:explode *explode*) => true)
 
 ^{:refer std.lang.base.emit-common/with-trace :added "4.0"}
 (fact "form to control `trace` option"
-  "placeholder for tests")
+  (with-trace *trace*) => true)
 
 ^{:refer std.lang.base.emit-common/with-compressed :added "3.0"}
 (fact "formats without newlines and indents"
-  "placeholder for tests")
+  (with-compressed *compressed*) => true)
 
 ^{:refer std.lang.base.emit-common/with-indent :added "3.0"}
 (fact "adds indentation levels"

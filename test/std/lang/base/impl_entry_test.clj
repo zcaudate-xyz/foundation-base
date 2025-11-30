@@ -110,10 +110,12 @@
   => e/book-entry?)
 
 ^{:refer std.lang.base.impl-entry/with:cache-none :added "4.0"}
-(fact "skips the cache")
+(fact "skips the cache"
+  (entry/with:cache-none entry/*cache-none*) => true)
 
 ^{:refer std.lang.base.impl-entry/with:cache-force :added "4.0"}
-(fact "forces the cache to update")
+(fact "forces the cache to update"
+  (entry/with:cache-force entry/*cache-force*) => true)
 
 ^{:refer std.lang.base.impl-entry/emit-entry-raw :added "4.0"
   :setup [(def +entry+ (entry/create-code '(defn add-fn
@@ -190,4 +192,5 @@
 
 
 ^{:refer std.lang.base.impl-entry/create-fragment-hydrate :added "4.0"}
-(fact "hydrates the forms")
+(fact "hydrates the forms"
+  "placeholder for tests")

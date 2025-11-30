@@ -84,7 +84,9 @@
   => map?)
 
 ^{:refer std.lang.base.util/lang-rt-default :added "4.0"}
-(fact "gets the default runtime function")
+(fact "gets the default runtime function"
+  (lang-rt-default (lang-pointer :lua {:module 'L.core}))
+  => any?)
 
 ^{:refer std.lang.base.util/lang-pointer :added "4.0"}
 (fact "creates a lang pointer"

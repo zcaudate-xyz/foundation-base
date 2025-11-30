@@ -53,16 +53,20 @@
   => string?)
 
 ^{:refer std.lang.base.workspace/ptr-setup :added "4.0"}
-(fact "calls setup on a pointer")
+(fact "calls setup on a pointer"
+  (w/ptr-setup k/arr-map) => any?)
 
 ^{:refer std.lang.base.workspace/ptr-teardown :added "4.0"}
-(fact "calls teardown on a pointer")
+(fact "calls teardown on a pointer"
+  (w/ptr-teardown k/arr-map) => any?)
 
 ^{:refer std.lang.base.workspace/ptr-setup-deps :added "4.0"}
-(fact "calls setup on a pointer and all dependencies")
+(fact "calls setup on a pointer and all dependencies"
+  (w/ptr-setup-deps k/arr-map) => any?)
 
 ^{:refer std.lang.base.workspace/ptr-teardown-deps :added "4.0"}
-(fact "calls teardown on pointer all dependencies")
+(fact "calls teardown on pointer all dependencies"
+  (w/ptr-teardown-deps k/arr-map) => any?)
 
 ^{:refer std.lang.base.workspace/rt-resolve :added "4.0"}
 (fact "resolves an rt given keyword"
@@ -96,20 +100,26 @@
   => map?)
 
 ^{:refer std.lang.base.workspace/rt:module-purge :added "4.0"}
-(fact "purges the current workspace")
+(fact "purges the current workspace"
+  (w/rt:module-purge (l/rt 'xt.lang.base-lib :xtalk)) => any?)
 
 ^{:refer std.lang.base.workspace/rt:inner :added "4.0"}
-(fact "gets the inner client for a shared runtime")
+(fact "gets the inner client for a shared runtime"
+  (w/rt:inner :xtalk) => any?)
 
 ^{:refer std.lang.base.workspace/rt:restart :added "4.0"}
-(fact "restarts the shared runtime")
+(fact "restarts the shared runtime"
+  (w/rt:restart :xtalk) => (throws))
 
 ^{:refer std.lang.base.workspace/intern-macros :added "4.0"}
-(fact "interns all macros from one namespace to another")
+(fact "interns all macros from one namespace to another"
+  (w/intern-macros :xtalk 'xt.lang.base-lib) => map?)
 
 
 ^{:refer std.lang.base.workspace/ptr-display-str :added "4.0"}
-(fact "copies pointer text to clipboard")
+(fact "copies pointer text to clipboard"
+  (w/ptr-display-str k/arr-map) => string?)
 
 ^{:refer std.lang.base.workspace/rt:module-meta :added "4.0"}
-(fact "gets the book module for a runtime")
+(fact "gets the book module for a runtime"
+  (w/rt:module-meta :xtalk) => (throws))

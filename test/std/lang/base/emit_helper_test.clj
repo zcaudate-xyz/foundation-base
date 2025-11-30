@@ -13,7 +13,7 @@
 
 ^{:refer std.lang.base.emit-helper/default-emit-fn :added "4.0"}
 (fact "the default emit function"
-  "placeholder for tests")
+  (default-emit-fn 'abc {} {}) => "abc")
 
 ^{:refer std.lang.base.emit-helper/pr-single :added "3.0"}
 (fact "prints a single quoted string"
@@ -76,7 +76,8 @@
 
 ^{:refer std.lang.base.emit-helper/emit-typed-allowed-args :added "4.0"}
 (fact "allowed declared args other than symbols"
-  "placeholder for tests")
+  (emit-typed-allowed-args [[{:modifiers [:int]}] {:modifiers [:int]}] {:allow {:assign #{:symbol}}})
+  => throws)
 
 ^{:refer std.lang.base.emit-helper/emit-typed-args :added "3.0"}
 (fact "create types args from declarationns"

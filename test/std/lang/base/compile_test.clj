@@ -7,7 +7,8 @@
             [std.make :as make]
             [xt.lang.base-lib :as k]
             [xt.lang.base-iter :as it]
-            [rt.postgres.script.scratch :as scratch]))
+            [rt.postgres.script.scratch :as scratch]
+            [std.fs :as fs]))
 
 ^{:refer std.lang.base.compile/compile-script :added "4.0"}
 (fact "compiles a script"
@@ -64,7 +65,15 @@
 
 ^{:refer std.lang.base.compile/compile-module-directory :added "4.0"}
 (fact "compiles a directory"
-  "placeholder for tests")
+  (with-redefs [fs/select (constantly ["src/xt/lang/base_lib.clj"])
+                fs/file-namespace (constantly 'xt.lang.base-lib)]
+    (make/with:mock-compile
+      (compile-module-directory
+       {:lang :lua
+        :root ".build"
+        :target "src"
+        :main 'xt.lang.base-lib})))
+  => (contains {:files pos-int?}))
 
 ^{:refer std.lang.base.compile/compile-module-schema :added "4.0"}
 (fact "compiles all namespaces into a single file (for sql)"
@@ -85,16 +94,29 @@
 
 ^{:refer std.lang.base.compile/compile-module-directory-selected :added "4.0"}
 (fact "compiles the directory based on sorted imports"
-  "placeholder for tests")
+  (make/with:mock-compile
+    (compile-module-directory-selected
+      :directory
+      ['xt.lang.base-lib]
+      {:lang :lua :main 'xt.lang.base-lib :root ".build" :target "src"}))
+  => (contains {:files pos-int?}))
 
 ^{:refer std.lang.base.compile/compile-module-prep :added "4.0"}
 (fact "precs the single entry point setup"
-  "placeholder for tests")
+  (compile-module-prep {:lang :lua :main 'xt.lang.base-lib})
+  => vector?)
 
 ^{:refer std.lang.base.compile/compile-module-root :added "4.0"}
 (fact "compiles module.root"
-  "placeholder for tests")
+  (make/with:mock-compile
+    (compile-module-root
+     {:lang :lua
+      :root   ".build"
+      :target "src"
+      :main   'xt.lang.base-lib}))
+  => (contains {:files pos-int?}))
 
 ^{:refer std.lang.base.compile/compile-module-create-links :added "4.0"}
 (fact "creates links for modules"
-  "placeholder for tests")
+  (compile-module-create-links '[a.b a.c] 'a {})
+  => (contains {'a.b (contains {:label "b"}) 'a.c (contains {:label "c"})}))

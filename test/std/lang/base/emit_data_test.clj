@@ -104,7 +104,8 @@
 
 ^{:refer std.lang.base.emit-data/emit-data-standard :added "4.0"}
 (fact "emits either a custom string or default coll"
-  "placeholder for tests")
+  (emit-data-standard :vector [1 2 3] helper/+default+ {})
+  => "[1,2,3]")
 
 ^{:refer std.lang.base.emit-data/emit-data :added "3.0"}
 (fact "main function for data forms"
@@ -124,7 +125,8 @@
 
 ^{:refer std.lang.base.emit-data/emit-table-group :added "4.0"}
 (fact "gets table group"
-  "placeholder for tests")
+  (emit-table-group [:a 1 :b 2 :c :d])
+  => [[:a 1] [:b 2] 'c 'd])
 
 ^{:refer std.lang.base.emit-data/emit-table :added "4.0"}
 (fact "emit quote structures"

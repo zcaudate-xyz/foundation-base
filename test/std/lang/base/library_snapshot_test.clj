@@ -7,6 +7,7 @@
             [std.lang.base.book-module :as m]
             [std.lang.base.book-entry :as e]
             [std.lang.base.book :as b]
+            [std.lang.base.book-meta :as meta]
             [std.lib :as h]))
 
 ^{:refer std.lang.base.library-snapshot/get-deps :added "4.0"}
@@ -130,7 +131,12 @@
   => "#book [:lua] {}")
 
 ^{:refer std.lang.base.library-snapshot/delete-modules :added "4.0"}
-(fact  "deletes a bunch of modules in the snapshot")
+(fact  "deletes a bunch of modules in the snapshot"
+  (-> (snap/delete-modules prep/+snap+ :lua ['L.core])
+      second
+      (get-in [:lua :book])
+      (b/book-string))
+  => "#book [:lua] {}")
 
 ^{:refer std.lang.base.library-snapshot/list-modules :added "4.0"}
 (fact "list modules for a snapshot"
@@ -253,10 +259,13 @@
   => ())
 
 ^{:refer std.lang.base.library-snapshot/install-check-merged :added "4.0"}
-(fact "checks that the book is not merged (used to check mutate)")
+(fact "checks that the book is not merged (used to check mutate)"
+  (snap/install-check-merged {:merged [1]}) => nil)
 
 ^{:refer std.lang.base.library-snapshot/install-module-update :added "4.0"}
-(fact "updates the book module")
+(fact "updates the book module"
+  (snap/install-module-update (b/book {:lang :lua :meta {:a 1} :grammar {:a 1} :modules {}}) {:id :lua :code {}})
+  => vector?)
 
 ^{:refer std.lang.base.library-snapshot/install-module :added "4.0"}
 (fact "adds an new module or update fields if exists"
@@ -274,7 +283,9 @@
   => vector?)
 
 ^{:refer std.lang.base.library-snapshot/install-book-update :added "4.0"}
-(fact "updates the book grammar, meta and parent")
+(fact "updates the book grammar, meta and parent"
+  (snap/install-book-update prep/+snap+ {:lang :lua :grammar {:a 1} :meta {:a 1} :parent :x})
+  => vector?)
 
 ^{:refer std.lang.base.library-snapshot/install-book :added "4.0"}
 (fact "adds a new book or updates grammar if exists"
@@ -282,14 +293,14 @@
   
   (snap/install-book prep/+snap+
                      (b/book {:lang :hello
-                              :meta (b/book-meta {})
+                              :meta (meta/book-meta {})
                               :grammar (assoc (:grammar prep/+book-x+)
                                               :tag :hello)}))
   => vector?
 
   (snap/install-book prep/+snap+
                      (b/book {:lang :redis
-                              :meta    (b/book-meta {})
+                              :meta    (meta/book-meta {})
                               :grammar (assoc lua/+grammar+
                                               :tag :redis)}))
   => vector?)

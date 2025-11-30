@@ -13,7 +13,8 @@
   => string?)
 
 ^{:refer std.lang.base.manage/lib-overview :added "4.0"}
-(fact "specifies lib overview task")
+(fact "specifies lib overview task"
+  (lib-overview :all) => coll?)
 
 ^{:refer std.lang.base.manage/lib-module-env :added "4.0"}
 (fact "compiles the lib-module task environment"
@@ -43,10 +44,13 @@
   => string?)
 
 ^{:refer std.lang.base.manage/lib-module-overview :added "4.0"}
-(fact "lists all modules")
+(fact "lists all modules"
+  (lib-module-overview :all) => coll?)
 
 ^{:refer std.lang.base.manage/lib-module-entries-format-section :added "4.0"}
-(fact "formats either code or fragment section")
+(fact "formats either code or fragment section"
+  (lib-module-entries-format-section (l/get-module (l/default-library) :xtalk 'xt.lang.base-lib) :code {})
+  => string?)
 
 ^{:refer std.lang.base.manage/lib-module-entries-format :added "4.0"}
 (fact "formats the entries of a module"
@@ -59,13 +63,17 @@
   => string?)
 
 ^{:refer std.lang.base.manage/lib-module-entries :added "4.0"}
-(fact "outputs module entries")
+(fact "outputs module entries"
+  (lib-module-entries :all) => coll?)
 
 ^{:refer std.lang.base.manage/lib-module-purge-fn :added "4.0"}
-(fact "the purge module function")
+(fact "the purge module function"
+  (lib-module-purge-fn 'xt.lang.base-lib {:lang :xtalk} (:modules (l/get-book (l/default-library) :xtalk)) nil)
+  => anything)
 
 ^{:refer std.lang.base.manage/lib-module-purge :added "4.0"}
-(fact "purges modules")
+(fact "purges modules"
+  (lib-module-purge :all {:lang :xtalk}) => coll?)
 
 ^{:refer std.lang.base.manage/lib-module-unused-fn :added "4.0"}
 (fact "analyzes the module for unused links"
@@ -79,7 +87,8 @@
   => vector?)
 
 ^{:refer std.lang.base.manage/lib-module-unused :added "4.0"}
-(fact "lists unused modules")
+(fact "lists unused modules"
+  (lib-module-unused :all) => coll?)
 
 ^{:refer std.lang.base.manage/lib-module-missing-line-number-fn :added "4.0"}
 (fact "helper function to `lib-module-missing-line-number`"
@@ -93,7 +102,8 @@
   => nil)
 
 ^{:refer std.lang.base.manage/lib-module-missing-line-number :added "4.0"}
-(fact "lists modules with entries that are missing line numbers (due to inproper macros)")
+(fact "lists modules with entries that are missing line numbers (due to inproper macros)"
+  (lib-module-missing-line-number :all) => coll?)
 
 ^{:refer std.lang.base.manage/lib-module-incorrect-alias-fn :added "4.0"}
 (fact "helper function to `lib-module-incorrect-alias`"
@@ -107,4 +117,5 @@
   => nil)
 
 ^{:refer std.lang.base.manage/lib-module-incorrect-alias :added "4.0"}
-(fact "lists modules that have an incorrect alias")
+(fact "lists modules that have an incorrect alias"
+  (lib-module-incorrect-alias :all) => coll?)
