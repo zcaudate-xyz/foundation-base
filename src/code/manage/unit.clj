@@ -328,7 +328,8 @@
                                        (->> (get-in entry [:test :sexp])
                                             (flatten)
                                             (filter '#{=>})
-                                            (empty?)))
+                                            (empty?))
+                                       (not (:unchecked (:meta entry))))
                                 (with-meta var (get-in entry [:test :line]))))
                             entries))))))))
 
