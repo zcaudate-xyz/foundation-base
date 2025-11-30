@@ -113,11 +113,11 @@
 (defn ptr-deref
   "gets the entry or the free pointer data"
   {:added "4.0"}
-  ([{:keys [library] :as ptr}]
+  ([ptr]
    (let [{:keys [lang module id]} ptr]
      (if (and lang module id)
        (get-entry ptr)
-       (into {} (dissoc ptr :library))))))
+       (into {} ptr)))))
 
 (defn ptr-display
   "emits the display string for pointer"

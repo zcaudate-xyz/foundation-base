@@ -35,7 +35,7 @@
   {:added "4.0"}
   ([prefix tag val & [namespace]]
    (intern (or namespace (h/ns-sym))
-           (with-meta (symbol (str prefix (if (keyword? tag) (name tag) (str tag))))
+           (with-meta (symbol (str prefix (name tag)))
              {:macro true
               :arglists '([& body])})
            val)))
