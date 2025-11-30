@@ -43,7 +43,20 @@
   "clears the default library, including all grammars"
   {:added "4.0"}
   ([& [override]]
-   (h/res:stop :hara/lang.library)))
+   (if-let [lib (or override *library*)]
+     (h/stop lib)
+     (h/res:stop :hara/lang.library))))
+
+(defmacro with-default-library
+  "runs body with a fresh default library"
+  {:added "4.0"}
+  [& body]
+  `(let [lib# (lib/library {})]
+     (try
+       (with:library [lib#]
+         ~@body)
+       (finally
+         (h/stop lib#)))))
 
 (defn runtime-library
   "gets the current runtime (annex or default)
