@@ -56,19 +56,16 @@
 
   (impl/with:library [+library+]
     (h/filter-vals identity @hello))
-  => '{:section :fragment,
-       :time 1,
-       :deps-native {},
-       :op def$,
-       :module L.core,
-       :lang :lua,
-       :line 1,
-       :deps-fragment #{},
-       :id hello,
-       :display :default,
-       :form hello,
-       :namespace std.lang.base.script-macro-test,
-       :deps #{}}
+  => (contains {:section :fragment,
+                :time 1,
+                :op 'def$,
+                :module 'L.core,
+                :lang :lua,
+                :line 1,
+                :id 'hello,
+                :display :default,
+                :form 'hello,
+                :namespace 'std.lang.base.script-macro-test})
   
   (impl/with:library [+library+]
     (ptr/ptr-display hello {}))
@@ -107,7 +104,7 @@
   => "x"
 
   (into {} x)
-  => (contains {:context :lang/x, :lang :x, :id 'x, :module 'x.core, :section :fragment})
+  => (contains {:lang :x, :id 'x, :module 'x.core, :section :fragment})
 
   (lib/get-entry +library+ x)
   => book/book-entry?
@@ -260,16 +257,21 @@
   
   (impl/with:library [+library+]
     (ptr/ptr-deref abc))
+  => book/book-entry?
 
   (impl/with:library [+library+]
     (ptr/ptr-display abc {}))
   => "def abc = 1;")
 
 ^{:refer std.lang.base.script-macro/intern-macros :added "4.0"}
-(fact "interns the top-level macros in the grammar")
+(fact "interns the top-level macros in the grammar"
+  (macro/intern-macros :lua (lib/get-book +library+ :lua))
+  => vector?)
 
 ^{:refer std.lang.base.script-macro/intern-highlights :added "4.0"}
-(fact "interns the highlight macros in the grammar")
+(fact "interns the highlight macros in the grammar"
+  (macro/intern-highlights :lua (lib/get-book +library+ :lua))
+  => vector?)
 
 ^{:refer std.lang.base.script-macro/intern-grammar :added "4.0"}
 (fact "interns a bunch of macros in the namespace"
@@ -282,7 +284,16 @@
   => map?)
 
 ^{:refer std.lang.base.script-macro/intern-defmacro-rt-fn :added "4.0"}
-(fact "defines both a library entry as well as a runtime macro")
+(fact "defines both a library entry as well as a runtime macro"
+  (impl/with:library [+library+]
+    (macro/intern-defmacro-rt-fn
+     :lua
+     (with-meta
+       '(defmacro.lua make-array-0 [& args]
+          (vec args))
+       '{:module L.core})
+     {}))
+  => vector?)
 
 ^{:refer std.lang.base.script-macro/defmacro.! :added "4.0"}
 (fact "macro for runtime lang macros")

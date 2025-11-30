@@ -78,7 +78,8 @@
   => "1 + 2")
 
 ^{:refer std.lang.base.runtime/default-init-ptr :added "4.0"}
-(fact "will init pointer if there is a :rt/init key")
+(fact "will init pointer if there is a :rt/init key"
+  (rt/default-init-ptr {:lang :lua} {}) => nil)
 
 ^{:refer std.lang.base.runtime/default-display-ptr :added "4.0"}
 (fact "runtime default display"
@@ -101,13 +102,18 @@
   => rt/rt-default?)
 
 ^{:refer std.lang.base.runtime/rt-default? :added "4.0"}
-(fact "checks if object is default runtime")
+(fact "checks if object is default runtime"
+  (rt/rt-default? (rt/rt-default {:lang :lua})) => true)
 
 ^{:refer std.lang.base.runtime/install-lang! :added "4.0"}
-(fact "installs a language within `std.lib.context`")
+(fact "installs a language within `std.lib.context`"
+  (rt/install-lang! :lua) => (any map? vector?))
 
 ^{:refer std.lang.base.runtime/install-type! :added "4.0"}
-(fact "installs a specific runtime type given `:lang`")
+(fact "installs a specific runtime type given `:lang`"
+  (rt/install-type! :lua :test-runtime {:type :hara/lang.rt
+                                        :config {:bootstrap false}})
+  => map?)
 
 ^{:refer std.lang.base.runtime/return-format-simple :added "4.0"}
 (fact "format forms for return"
@@ -162,13 +168,37 @@
   => map?)
 
 ^{:refer std.lang.base.runtime/default-scaffold-setup-for :added "4.0"}
-(fact "setup native modules, defglobals and defruns in the runtime")
+(fact "setup native modules, defglobals and defruns in the runtime"
+  (rt/default-scaffold-setup-for
+   (rt/map->RuntimeDefault
+    {:library +library-ext+
+     :lang :lua
+     :module 'L.core
+     :layout :full})
+   'L.core)
+  => string?)
 
 ^{:refer std.lang.base.runtime/default-scaffold-setup-to :added "4.0"}
-(fact "setup scaffold up to but not including the current module in the runtime")
+(fact "setup scaffold up to but not including the current module in the runtime"
+  (rt/default-scaffold-setup-to
+   (rt/map->RuntimeDefault
+    {:library +library-ext+
+     :lang :lua
+     :module 'L.core
+     :layout :full})
+   'L.util)
+  => string?)
 
 ^{:refer std.lang.base.runtime/default-scaffold-imports :added "4.0"}
-(fact "embed native imports to be globally accessible")
+(fact "embed native imports to be globally accessible"
+  (rt/default-scaffold-imports
+   (rt/map->RuntimeDefault
+    {:library +library-ext+
+     :lang :lua
+     :module 'L.core
+     :layout :full})
+   'L.util)
+  => string?)
 
 ^{:refer std.lang.base.runtime/default-lifecycle-fn :added "4.0"}
 (fact "constructs a lifecycle fn"
@@ -235,10 +265,26 @@
   => "L_util____add_fn = nil\n\nL_util____sub_fn = nil")
 
 ^{:refer std.lang.base.runtime/default-setup-module :added "4.0"}
-(fact "default setup module (with error isolation)")
+(fact "default setup module (with error isolation)"
+  (rt/default-setup-module
+   (rt/map->RuntimeDefault
+    {:library +library-ext+
+     :lang :lua
+     :module 'L.core
+     :layout :full})
+   'L.util)
+  => string?)
 
 ^{:refer std.lang.base.runtime/default-teardown-module :added "4.0"}
-(fact "default teardown module (with error isolation)")
+(fact "default teardown module (with error isolation)"
+  (rt/default-teardown-module
+   (rt/map->RuntimeDefault
+    {:library +library-ext+
+     :lang :lua
+     :module 'L.core
+     :layout :full})
+   'L.util)
+  => string?)
 
 ^{:refer std.lang.base.runtime/multistage-invoke :added "4.0"}
 (fact "invokes a multistage pipeline given deps function"

@@ -64,7 +64,7 @@
   "wraps an additional function to the invoke function"
   {:added "4.0"}
   ([[f] & body]
-   `(binding [*rt-wrap* f]
+   `(binding [*rt-wrap* ~f]
       ~@body)))
 
 (defmacro with:rt
@@ -113,11 +113,11 @@
 (defn ptr-deref
   "gets the entry or the free pointer data"
   {:added "4.0"}
-  ([ptr]
+  ([{:keys [library] :as ptr}]
    (let [{:keys [lang module id]} ptr]
      (if (and lang module id)
        (get-entry ptr)
-       (into {} ptr)))))
+       (into {} (dissoc ptr :library))))))
 
 (defn ptr-display
   "emits the display string for pointer"

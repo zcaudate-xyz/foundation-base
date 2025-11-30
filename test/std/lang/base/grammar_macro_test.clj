@@ -4,7 +4,8 @@
 
 ^{:refer std.lang.base.grammar-macro/tf-macroexpand :added "3.0"}
 (fact "macroexpands the current form"
-  "placeholder for tests")
+  (tf-macroexpand '(-> 1 (inc)))
+  => '(inc 1))
 
 ^{:refer std.lang.base.grammar-macro/tf-when :added "3.0"}
 (fact "transforms `when` to branch"
@@ -20,7 +21,11 @@
 
 ^{:refer std.lang.base.grammar-macro/tf-cond :added "3.0"}
 (fact "transforms `cond` to branch"
-  "placeholder for tests")
+  (tf-cond '(cond true :A false :B))
+  => '(br* (if true :A) (elseif false :B))
+
+  (tf-cond '(cond true :A false :B :else :C))
+  => '(br* (if true :A) (elseif false :B) (else :C)))
 
 ^{:refer std.lang.base.grammar-macro/tf-let-bind :added "4.0"}
 (fact "converts to a statement"

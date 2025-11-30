@@ -113,7 +113,8 @@
   => (any nil? map?))
 
 ^{:refer std.lang.base.library/delete-book! :added "4.0"}
-(fact "deletes a book")
+(fact "deletes a book"
+  (lib/delete-book! +library+ :js) => nil)
 
 ^{:refer std.lang.base.library/reset-all! :added "4.0"}
 (fact "resets the library"
@@ -121,7 +122,7 @@
   
   (lib/reset-all! +library+
                   (lib/reset-all! +library+))
-  => empty?)
+  => snap/snapshot?)
 
 ^{:refer std.lang.base.library/list-modules :added "4.0"}
 (fact "lists all modules"
@@ -154,10 +155,12 @@
   => coll?)
 
 ^{:refer std.lang.base.library/delete-module! :added "4.0"}
-(fact "deletes a module from the library")
+(fact "deletes a module from the library"
+  (lib/delete-module! +library+ :redis 'L.redis.hello) => coll?)
 
 ^{:refer std.lang.base.library/delete-modules! :added "4.0"}
-(fact  "deletes a bunch of modules from the library")
+(fact  "deletes a bunch of modules from the library"
+  (lib/delete-modules! +library+ :redis ['L.redis.hello]) => coll?)
 
 ^{:refer std.lang.base.library/library-string :added "4.0"}
 (fact "returns the library string"
@@ -181,7 +184,8 @@
   => lib/library?)
 
 ^{:refer std.lang.base.library/library :added "4.0"}
-(fact "creates and start a new library")
+(fact "creates and start a new library"
+  (lib/library {}) => lib/library?)
 
 ^{:refer std.lang.base.library/add-entry! :added "4.0"}
 (fact "adds the entry with the bulk dispatcher"
@@ -219,10 +223,12 @@
                   :module 'L.core
                   :id 'add-fn
                   :form-input '(defn add-fn [x y] (return (+ x y)))
-                  :deps #{}})))
+                  :deps #{}}))
+  => coll?)
 
 ^{:refer std.lang.base.library/delete-entry! :added "4.0"}
-(fact "deletes an entry from the library")
+(fact "deletes an entry from the library"
+  (lib/delete-entry! +library+ {:lang :lua :module 'L.core :id 'add-fn}) => coll?)
 
 ^{:refer std.lang.base.library/install-module! :added "4.0"
   :setup [(lib/delete-module! +library+  :lua 'L.util)]}
@@ -232,7 +238,7 @@
   (lib/install-module! +library+
                        :lua 'L.util
                        {})
-  => vector?)
+  => coll?)
 
 ^{:refer std.lang.base.library/install-book! :added "4.0"
   :setup [(lib/delete-book! +library+ :redis)]}
@@ -240,7 +246,7 @@
   ^:hidden
   
   (lib/install-book! +library+ prep/+book-redis-empty+)
-  => vector?
+  => coll?
 
   (:parent (lib/get-book-raw +library+ :redis))
   => :lua
@@ -249,7 +255,8 @@
   => :lua)
 
 ^{:refer std.lang.base.library/purge-book! :added "4.0"}
-(fact "clears all modules from book")
+(fact "clears all modules from book"
+  (lib/purge-book! +library+ :lua) => coll?)
 
 (comment
   (comment

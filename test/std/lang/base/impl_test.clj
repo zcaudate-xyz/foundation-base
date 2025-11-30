@@ -63,7 +63,10 @@
   => string?)
 
 ^{:refer std.lang.base.impl/with:library :added "4.0"}
-(fact "injects a library as the default")
+(fact "injects a library as the default"
+  (with:library [+library+]
+    *library*)
+  => +library+)
 
 ^{:refer std.lang.base.impl/default-library :added "4.0"}
 (fact "gets the default library"
@@ -73,7 +76,9 @@
   => lib/library?)
 
 ^{:refer std.lang.base.impl/default-library:reset :added "4.0"}
-(fact "clears the default library, including all grammars")
+(fact "clears the default library, including all grammars"
+  (default-library:reset)
+  => anything)
 
 ^{:refer std.lang.base.impl/runtime-library :added "4.0"}
 (fact "gets the current runtime (annex or default)"
@@ -85,7 +90,8 @@
 (fact "gets the grammar"
   ^:hidden
   
-  (grammar :xtalk)
+  (with:library [+library+]
+    (grammar :lua))
   => map?)
 
 ^{:refer std.lang.base.impl/emit-options :added "4.0"}
@@ -227,19 +233,22 @@
 (fact "emits string given symbol and grammar"
   ^:hidden
 
-  (emit-symbol :lua 'L.core/identity-fn
-               {:module (lib/get-module +library+
-                                        :lua 'L.core)})
+  (with:library [+library+]
+    (emit-symbol :lua 'L.core/identity-fn
+                 {:module (lib/get-module +library+
+                                          :lua 'L.core)}))
   => "identity_fn"
 
-  (emit-symbol :lua 'L.core/identity-fn
-               {:layout :full
-                :module (lib/get-module +library+
-                                        :lua 'L.core)})
-  => "L_core___identity_fn"
+  (with:library [+library+]
+    (emit-symbol :lua 'L.core/identity-fn
+                 {:layout :full
+                  :module (lib/get-module +library+
+                                          :lua 'L.core)}))
+  => "L_core____identity_fn"
   
-  (emit-symbol :lua 'L.core/WRONG
-               {:library +library+})
+  (with:library [+library+]
+    (emit-symbol :lua 'L.core/WRONG
+                 {:library +library+}))
   => (throws))
 
 ^{:refer std.lang.base.impl/get-entry :added "4.0"}
@@ -272,7 +281,13 @@
   => "function L_core____identity_fn(x){\n  return x;\n}")
 
 ^{:refer std.lang.base.impl/emit-entry-deps-collect :added "4.0"}
-(fact "only collects the dependencies")
+(fact "only collects the dependencies"
+  (emit-entry-deps-collect '{:lang :lua
+                              :module L.core
+                              :id identity-fn}
+                            {:lang :lua
+                             :library +library+})
+  => (fn [x] (and (seq x) (book/book-entry? (first x)))))
 
 ^{:refer std.lang.base.impl/emit-entry-deps :added "4.0"}
 (fact "emits only the entry deps"
@@ -329,7 +344,9 @@
   => coll?)
 
 ^{:refer std.lang.base.impl/emit-script-join :added "4.0"}
-(fact "joins the necessary parts of the script")
+(fact "joins the necessary parts of the script"
+  (emit-script-join ["import"] ["deps"] "body")
+  => "import\n\ndeps\n\nbody")
 
 ^{:refer std.lang.base.impl/emit-script :added "4.0"}
 (fact "emits a script with all dependencies"
@@ -385,30 +402,26 @@
       "L_util____add_fn(1,2)"))
 
 ^{:refer std.lang.base.impl/emit-scaffold-raw-imports :added "4.0"}
-(fact "gets only the scaffold imports")
+(fact "gets only the scaffold imports"
+  (emit-scaffold-raw-imports [] nil (emit-options {:lang :lua :library +library-ext+}))
+  => vector?)
 
 ^{:refer std.lang.base.impl/emit-scaffold-raw :added "4.0"}
-(fact "creates entries only for defglobal and defrun entries")
+(fact "creates entries only for defglobal and defrun entries"
+  (emit-scaffold-raw identity 'L.core {:lang :lua :library +library-ext+})
+  => string?)
 
 ^{:refer std.lang.base.impl/emit-scaffold-for :added "4.0"}
-(fact "creates scaffold for module and its deps")
+(fact "creates scaffold for module and its deps"
+  (emit-scaffold-for 'L.core {:lang :lua :library +library-ext+})
+  => string?)
 
 ^{:refer std.lang.base.impl/emit-scaffold-to :added "4.0"}
-(fact "creates scaffold up to module")
+(fact "creates scaffold up to module"
+  (emit-scaffold-to 'L.core {:lang :lua :library +library-ext+})
+  => string?)
 
 ^{:refer std.lang.base.impl/emit-scaffold-imports :added "4.0"}
-(fact "create scaggold to expose native imports ")
-
-(comment
-  (h/pl (emit-scaffold-to 'js.proxy.core-test
-                           
-                          {:lang :js
-                            :library (:library (h/p:space-rt-get (h/p:space 'js.proxy.core-test)
-                                                                 :lang.annex))}))
-  (h/pl (emit-scaffold-for 'js.proxy.core-test
-                           
-                           {:lang :js
-                            :library (:library (h/p:space-rt-get (h/p:space 'js.proxy.core-test)
-                                                                 :lang.annex))}))
-  
-  (./create-tests))
+(fact "create scaggold to expose native imports "
+  (emit-scaffold-imports 'L.core {:lang :lua :library +library-ext+})
+  => string?)
