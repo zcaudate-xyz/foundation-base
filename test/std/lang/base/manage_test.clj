@@ -2,7 +2,8 @@
   (:use code.test)
   (:require [std.lang.base.manage :refer :all]
             [std.lang :as l]
-            [xt.lang.base-lib :as k]))
+            [xt.lang.base-lib :as k]
+            [std.lang.model.spec-xtalk]))
 
 ^{:refer std.lang.base.manage/lib-overview-format :added "4.0"}
 (fact "formats the lib overview"

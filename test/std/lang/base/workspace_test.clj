@@ -4,7 +4,8 @@
             [std.lang :as l]
             [std.lib :as h]
             [xt.lang.base-lib :as k]
-            [std.string :as str]))
+            [std.string :as str]
+            [std.lang.model.spec-xtalk]))
 
 ^{:refer std.lang.base.workspace/sym-entry :added "4.0"}
 (fact "gets the entry using a symbol"
