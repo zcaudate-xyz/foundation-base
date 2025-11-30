@@ -127,7 +127,12 @@
   => {:color "orange", :length 100})
 
 ^{:refer std.dom.local/dom-send-local :added "3.0"}
-(fact "sends events that are in :local/events")
+(fact "sends events that are in :local/events"
+  (let [dom (base/dom-create :test/carrot)]
+    (impl/dom-render dom)
+    (reset! (:local/events (:cache dom)) [{:type :event}])
+    (dom-send-local dom)
+    @(:local/events (:cache dom)) => []))
 
 ^{:refer std.dom.local/dom-apply-local :added "3.0"}
 (fact "applies operations to the dom"
@@ -141,10 +146,19 @@
   => {:color "orange", :length 100})
 
 ^{:refer std.dom.local/localized-watch :added "3.0"}
-(fact "sets up the initial watch and triggers")
+(fact "sets up the initial watch and triggers"
+  (let [dom (base/dom-create :test/carrot {:on/color {:id :event/color}
+                                           :on/top {:id :event/top}})
+        _ (impl/dom-render dom)
+        _ (localized-watch dom (:props dom))]
+    (type (:local/active (:cache dom))) => clojure.lang.Atom))
 
 ^{:refer std.dom.local/dom-set-local :added "3.0"}
-(fact "function for setting local dom")
+(fact "function for setting local dom"
+  (let [dom (base/dom-create :test/carrot)
+        _ (impl/dom-render dom)]
+    (dom-set-local dom {:id :color :new "blue"})
+    @(:local/state (:cache dom)) => (contains {:color "blue"})))
 
 ^{:refer std.dom.local/localized-handler :added "3.0"}
 (fact "distinct handler for a given component"
@@ -161,7 +175,10 @@
   => (contains {:local/state clojure.lang.Atom}))
 
 ^{:refer std.dom.local/localized-wrap-template :added "3.0"}
-(fact "localized wrapper function for :template")
+(fact "localized wrapper function for :template"
+  (let [f (localized-wrap-template (fn [dom props] 1))]
+    (f (base/dom-create :test/carrot) {}))
+  => 1)
 
 ^{:refer std.dom.local/localized-pre-remove :added "3.0"}
 (fact "localized function called on removal"
@@ -180,40 +197,3 @@
             react/*react* (volatile! #{})]
     (local :hello))
   => 1)
-
-(comment
-  (./import)
-  
-  ;;
-  
-  (def -dom- (-> (base/dom-compile [:test/carrot {:color "purple"
-                                                  :length 100}])
-                 (impl/dom-render)
-                 (update/dom-update (base/dom-compile [:test/carrot {:on/color {:id :event/color}
-                                                                     :color "blue"
-                                                                     :length 20}]))
-                 (doto (prn :DOM) (-> (base/dom-item) (prn :ITEM)))
-                 (update/dom-update (base/dom-compile [:test/carrot {:color "orange"}]))
-                 (doto (prn :DOM) (-> (base/dom-item) (prn :ITEM)))
-                 (update/dom-update (base/dom-compile [:test/carrot {:on/color {:id :event/color}
-                                                                     :color "green"
-                                                                     :length 20}]))
-                 (doto (prn :DOM) (-> (base/dom-item) (prn :ITEM)))))
-  
-  
-  ;; testing event
-  
-  (def -dom- (-> (base/dom-compile [:test/carrot])
-                 (impl/dom-render)
-                 (local-watch-add :color {:id :event/color})
-                 ))
-  (binding [react/*react-mute* true]
-    (swap! (:local/state (:cache -dom-)) assoc :color "red"))
-  (swap! (:local/state (:cache -dom-)) assoc :length 10)
-  
-  (base/dom-item -dom-)
-  
-  (:cache -dom-)
-  (-> (base/dom-compile [:test/carrot])
-      (impl/dom-render)
-      (:cache)))

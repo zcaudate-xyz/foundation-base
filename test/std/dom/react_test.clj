@@ -2,7 +2,8 @@
   (:use code.test)
   (:require [std.dom.common :as base]
             [std.dom.mock :as mock]
-            [std.dom.react :refer :all]))
+            [std.dom.react :refer :all]
+            [std.dom.update :as update]))
 
 ^{:refer std.dom.react/reactive-pre-render :added "3.0"}
 (fact "sets up the react key and react store"
@@ -10,10 +11,20 @@
   (-> (doto (base/dom-create :mock/label)
         (reactive-pre-render :hello))
       :cache)
-  => {:react/key :hello, :react/store #{}})
+  => {:react/key :hello, :react/store #{}}
+
+  (-> (doto (base/dom-create :mock/label)
+        (reactive-pre-render))
+      :cache
+      :react/key)
+  => keyword?)
 
 ^{:refer std.dom.react/reactive-wrap-template :added "3.0"}
-(fact "reactive wrapper function for :template")
+(fact "reactive wrapper function for :template"
+  (let [f (reactive-wrap-template (fn [dom props] 1))]
+    (f (doto (base/dom-create :mock/label) (reactive-pre-render :hello))
+       {}))
+  => 1)
 
 ^{:refer std.dom.react/reactive-pre-remove :added "3.0"}
 (fact "removes the react key and react store"
@@ -46,14 +57,30 @@
 (comment
   (./import))
 
-
-
-
 ^{:refer std.dom.react/schedule-update :added "4.0"}
-(fact "TODO")
+(fact "schedules a component update"
+  (let [dom (base/dom-create :mock/label)]
+    (with-redefs [update/dom-refresh (constantly nil)]
+      (with-scheduler
+        (schedule-update dom)
+        (first @*scheduler*))))
+  => base/dom?)
 
 ^{:refer std.dom.react/flush-updates :added "4.0"}
-(fact "TODO")
+(fact "flushes all pending updates"
+  (let [dom (base/dom-create :mock/label)]
+    (with-redefs [update/dom-refresh (constantly nil)]
+      (with-scheduler
+        (schedule-update dom)
+        (flush-updates)
+        @*scheduler*)))
+  => #{})
 
 ^{:refer std.dom.react/with-scheduler :added "4.0"}
-(fact "TODO")
+(fact "executes body with a scheduler bound"
+  (let [dom (base/dom-create :mock/label)]
+    (with-redefs [update/dom-refresh (constantly nil)]
+      (with-scheduler
+        (schedule-update dom)
+        (count @*scheduler*))))
+  => 1)
