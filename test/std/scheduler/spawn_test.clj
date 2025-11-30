@@ -32,12 +32,16 @@
 
 ^{:refer std.scheduler.spawn/spawn-status :added "3.0"}
 (fact "returns the spawn status"
+  ^:hidden
+  
   (spawn-status (doto (create-spawn)
                   (set-props :started true)))
   => :running)
 
 ^{:refer std.scheduler.spawn/spawn-info :added "3.0"}
 (fact "returns the spawn info"
+  ^:hidden
+  
   (keys (spawn-info (create-spawn)))
   => (contains [:status :duration :jobs :id :state]))
 
@@ -79,7 +83,8 @@
   => {:id "j.1"})
 
 ^{:refer std.scheduler.spawn/update-job :added "3.0"}
-(fact "updates a job given key" ^:hidden
+(fact "updates a job given key"
+  ^:hidden
 
   (-> (doto (create-spawn)
         (add-job "j.1" {:id "j.1"})
@@ -88,7 +93,8 @@
   => {:id "j.1", :value 1})
 
 ^{:refer std.scheduler.spawn/remove-job :added "3.0"}
-(fact "removes a job given key" ^:hidden
+(fact "removes a job given key"
+  ^:hidden
 
   (-> (doto (create-spawn)
         (add-job "j.1" {:id "j.1"})
@@ -98,7 +104,8 @@
   => #{"j.2"})
 
 ^{:refer std.scheduler.spawn/add-job :added "3.0"}
-(fact "adds job to the spawn" ^:hidden
+(fact "adds job to the spawn"
+  ^:hidden
 
   (-> (doto (create-spawn)
         (add-job "j.1" {:id "j.1"}))
@@ -163,6 +170,7 @@
 
 ^{:refer std.scheduler.spawn/create-handler-basic :added "3.0"}
 (fact "creates a basic handler"
+  
   ((create-handler-basic *defaults* (create-spawn))
    {} "j.1")
   => (throws))

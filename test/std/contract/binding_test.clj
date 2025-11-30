@@ -11,6 +11,8 @@
 (def -contract-
   (contract #'-add- [] nil))
 
+(declare -minus-)
+
 ^{:refer std.contract.binding/contract-info :added "3.0"}
 (fact "returns the contract info"
 

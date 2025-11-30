@@ -96,25 +96,30 @@
 
 ^{:refer std.scheduler/runner? :added "3.0"}
 (fact "checks if object is a runner"
+  ^:hidden
   
   (runner? (runner:create))
   => true)
 
 ^{:refer std.scheduler/runner:create :added "3.0"}
 (fact "creates a runner"
-
+  ^:hidden
+  
   (runner:create {:id "runner"})
   => runner?)
 
 ^{:refer std.scheduler/runner :added "3.0"}
 (fact "creates and starts a runner"
-
+  ^:hidden
+  
   (-> (runner {:id "runner"})
-      (h/comp:kill)))
+      (h/comp:kill))
+  => runner?)
 
 ^{:refer std.scheduler/installed? :added "3.0"}
 (fact "checks if program is installed"
-
+  ^:hidden
+  
   (test-scaffold
    (fn [runner _]
      (installed? runner :world)))
@@ -122,13 +127,17 @@
 
 ^{:refer std.scheduler/create-program :added "3.0"}
 (fact "creates a runner program"
-
+  ^:hidden
+  
   (create-program {:type :constant
                    :id :hello
-                   :interval 10}))
+                   :interval 10})
+  => map?)
 
 ^{:refer std.scheduler/uninstall :added "3.0"}
 (fact "uninstalls a program"
+  ^:hidden
+  
   (let [runner (runner:create)]
     (install runner {:id :world :type :basic :interval 100 :main-fn (fn [& args])})
     (uninstall runner :world)
@@ -136,7 +145,8 @@
   => false)
 
 ^{:refer std.scheduler/install :added "3.0"}
-(fact "installs a program" ^:hidden
+(fact "installs a program"
+  ^:hidden
 
   (test-scaffold
    (fn [runner _]
@@ -165,6 +175,8 @@
 
 ^{:refer std.scheduler/spawn :added "3.0"}
 (fact "spawns a runner that contains the program"
+  ^:hidden
+
   (let [runner (runner:create)]
     (runner:start runner)
     (install runner {:id :world :type :basic :interval 100 :main-fn (fn [& args])})
@@ -172,9 +184,10 @@
     (> (count (get-in @(:runtime runner) [:running :world])) 0))
   => true)
 
-
 ^{:refer std.scheduler/unspawn :added "3.0"}
 (fact "unspawns the running program"
+  ^:hidden
+
   (let [runner (runner:create)
         program {:id :world :type :basic :interval 100 :main-fn (fn [& args])}]
     (runner:start runner)
@@ -186,6 +199,7 @@
 
 ^{:refer std.scheduler/trigger :added "3.0"}
 (fact "triggers the program manually, without spawning"
+  ^:hidden
 
   (test-scaffold
    (fn [runner q]
@@ -207,7 +221,6 @@
                (cc/take q))))))
   => number?
   
-
   (h/bench-ms
    (test-scaffold
     (fn [runner q]
@@ -218,7 +231,9 @@
   => #(<= 150 % 300))
 
 ^{:refer std.scheduler/get-props :added "3.0"}
-(fact "gets the current props map for the runner" ^:hidden
+(fact "gets the current props map for the runner"
+  ^:hidden
+  ^:hidden
 
   (test-scaffold
    (fn [runner q]

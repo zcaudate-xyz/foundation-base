@@ -6,7 +6,8 @@
             [std.json :as json]))
 
 (fact "translate literals"
-
+  ^:hidden
+  
   (sut/translate-node {:type "NumericLiteral" :value 1})
   => 1
 

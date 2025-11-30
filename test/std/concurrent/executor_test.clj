@@ -9,21 +9,25 @@
 (fact "wraps a function with min-time and delay"
 
   ((wrap-min-time (fn []) 20 0))
-
-  ((wrap-min-time (fn []) 100 10)))
+  => nil
+  
+  ((wrap-min-time (fn []) 100 10))
+  => nil)
 
 ^{:refer std.concurrent.executor/exec:queue :added "3.0"}
 (fact "contructs a raw queue in different ways"
 
   (exec:queue)
-
+  
   (exec:queue 1)
-
+  
   (exec:queue {:size 1})
 
   (exec:queue {})
-
-  (exec:queue (q/queue)))
+  => java.util.concurrent.LinkedBlockingQueue
+  
+  (exec:queue (q/queue))
+  => java.util.concurrent.LinkedBlockingQueue)
 
 ^{:refer std.concurrent.executor/executor:single :added "3.0"
   :teardown [(track/tracked:last [:raw :executor] :stop 2)]}
@@ -32,10 +36,12 @@
   ;; any sized pool
   (doto (executor:single)
     (exec:shutdown))
-
+  => java.util.concurrent.ThreadPoolExecutor
+  
   ;; fixed pool
   (doto (executor:single {:size 10})
-    (exec:shutdown)))
+    (exec:shutdown))
+  => java.util.concurrent.ThreadPoolExecutor)
 
 ^{:refer std.concurrent.executor/executor:pool :added "3.0"
   :teardown [(track/tracked:last [:raw :executor] :stop)]}
@@ -75,22 +81,24 @@
 ^{:refer std.concurrent.executor/exec:get-queue :added "3.0"
   :teardown [(track/tracked:last [:raw :executor] :stop)]}
 (fact "gets the queue from the executor"
-
+  ^:hidden
+  
   (doto (executor:pool 10 10 1000 (q/queue))
-      (exec:get-queue)
-      (exec:shutdown)))
+    (exec:get-queue)
+    (exec:shutdown)))
 
 ^{:refer std.concurrent.executor/submit :added "3.0"
   :teardown [(track/tracked:last [:raw :executor] :stop 2)]}
 (fact "submits a task to an executor"
-
+  ^:hidden
+  
   (let [exe (executor:single)]
     (try
       @(submit exe
                (fn [])
                {:min 100})
       (finally
-        (exec:shutdown exe)))) ^hidden
+        (exec:shutdown exe)))) 
 
   (let [exe (executor:single)]
     (try
