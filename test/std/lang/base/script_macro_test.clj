@@ -179,7 +179,8 @@
 (fact "interns a free pointer macro"
   ^:hidden
   
-  (macro/intern-!-fn :lua [1 2 3] {})
+  (-> (macro/intern-!-fn :lua [1 2 3] {})
+      (str/replace ";" ""))
   => "1\n2\n3"
 
   (macro/intern-!-fn :js [1 2 3] {})
@@ -192,7 +193,8 @@
   (macro/intern-! :lua "hello")
   => #'std.lang.base.script-macro-test/!.hello
 
-  (!.hello 1 2 3 4 5)
+  (-> (!.hello 1 2 3 4 5)
+      (str/replace ";" ""))
   => "1\n2\n3\n4\n5")
 
 ^{:refer std.lang.base.script-macro/intern-free-fn :added "4.0"}
