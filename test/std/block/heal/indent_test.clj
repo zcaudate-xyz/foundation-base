@@ -320,8 +320,9 @@
   :setup [(def ^:dynamic *dlm4*
             (parse/parse (slurp "test-data/std.block.heal/cases/002_complex.block")))]}
 (fact "constructs a single edit"
-
-  )
+  (indent/build-insert-edit {:line 10 :col 5}
+                            [{:char "("} {:char "["}])
+  => {:action :insert, :line 10, :col 5, :new-char ")]"})
 
 ^{:refer std.block.heal.indent/build-insert-edits :added "4.0"
   :setup [(def ^:dynamic *dlm4*
@@ -371,77 +372,3 @@
    (indent/flag-close-heavy
     (parse/parse +sample+)))
   => '({:action :remove, :line 2, :col 6}))
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-;;;
-;;
-;;
-;;
-
-(comment
-  (map (comp count second)
-       (indent/flag-open-heavy
-        *dlm4*))
-  *dlm4*
-  
-  (def ^:dynamic *dlm4*
-    (parse/pair-delimiters
-     (parse/parse-delimiters (slurp "test-data/std.block.heal/cases/004_shorten.block"))))
-  
-  (first
-   (second
-    (last
-     (indent/flag-open-heavy
-      *dlm4*))))
-  (def ^:dynamic *dlm4*
-    (parse/pair-delimiters
-     (parse/parse-delimiters )))
-  
-
-
-  
-  
-  (first
-   (indent/flag-open-heavy
-    *dlm4*))
-  => [177 [{:char "[", :line 59, :col 13, :type :open, :style :square, :depth 10, :correct? false, :index 140} {:correct? true, :index 136, :pair-id 64, :type :open, :style :square, :line 57, :col 13, :depth 10, :char "["} {:char "[", :line 56, :col 12, :type :open, :style :square, :depth 9, :correct? false, :index 133}]]
-
-  (get *dlm4* 177)
-  => {:correct? true, :index 177, :pair-id 83, :type :open, :style :square, :line 72, :col 12, :depth 11, :char "["}
-  
-  (= (indent/find-indent-last-close
-      *dlm4*
-      (get *dlm4* 140)
-      177)
-
-     (indent/find-indent-last-close
-      *dlm4*
-      (get *dlm4* 136)
-      177)
-     (indent/find-indent-last-close
-      *dlm4*
-      (get *dlm4* 133)
-      177))
-  => true
-
-  (indent/find-indent-last-close
-   *dlm4*
-   (get *dlm4* 896)
-   987)
-  => {:correct? true, :index 986, :pair-id 480, :type :close, :style :square, :line 410, :col 51, :depth 25, :char "]"}
-
-  )
-

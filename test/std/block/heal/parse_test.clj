@@ -345,4 +345,6 @@ that acts as a multi-line comment or docstring in other languages but not clojur
 
 
 ^{:refer std.block.heal.parse/parse-lines-raw :added "4.0"}
-(fact "TODO")
+(fact "helper for parse-lines"
+  (parse/parse-lines-raw ["(+ 1 2)"])
+  => [{:type :code :line 1 :last-idx 6 :col 1 :char "(" :style :paren :action :open}])
