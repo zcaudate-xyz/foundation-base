@@ -43,7 +43,16 @@
   "clears the default library, including all grammars"
   {:added "4.0"}
   ([& [override]]
-   (h/res:stop :hara/lang.library)))
+   (if-let [lib (or override *library*)]
+     (h/stop lib)
+     (h/res:stop :hara/lang.library))))
+
+(defn clone-default-library
+  "clones the default library"
+  {:added "4.0"}
+  []
+  (lib/library:create
+   {:snapshot (lib/get-snapshot (default-library))}))
 
 (defn runtime-library
   "gets the current runtime (annex or default)
