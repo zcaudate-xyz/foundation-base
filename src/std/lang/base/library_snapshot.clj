@@ -273,7 +273,7 @@
                                                 {:parent parent
                                                  :grammar grammar})]
     (if (empty? diffs)
-      [(add-book snapshot new-book) :no-change]
+      [new-book :no-change]
       (vec (cons (add-book snapshot new-book) (atom/atom:set-changed diffs))))))
 
 (defn install-book
