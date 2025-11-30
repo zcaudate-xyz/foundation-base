@@ -326,6 +326,7 @@
                               (if (and (->> (get-in entry [:test :form])
                                             (not= 'comment))
                                        (->> (get-in entry [:test :sexp])
+                                            (flatten)
                                             (filter '#{=>})
                                             (empty?)))
                                 (with-meta var (get-in entry [:test :line]))))
