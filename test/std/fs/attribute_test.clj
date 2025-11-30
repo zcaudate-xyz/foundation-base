@@ -1,6 +1,7 @@
 (ns std.fs.attribute-test
   (:use code.test)
-  (:require [std.fs.attribute :refer :all]))
+  (:require [std.fs.attribute :refer :all])
+  (:import (java.nio.file.attribute FileAttribute FileTime)))
 
 ^{:refer std.fs.attribute/to-mode-string :added "3.0"}
 (fact "transforms mode numbers to mode strings"
@@ -65,16 +66,25 @@
   => (throws))
 
 ^{:refer std.fs.attribute/attr :added "3.0"}
-(fact "creates an attribute for input to various functions")
+(fact "creates an attribute for input to various functions"
+  (attr "test" 1)
+  => (partial instance? FileAttribute))
 
 ^{:refer std.fs.attribute/attr-value :added "3.0"}
-(fact "adjusts the attribute value for input")
+(fact "adjusts the attribute value for input"
+  (every? #(instance? java.nio.file.attribute.PosixFilePermission %)
+          (attr-value :permissions "rwxrwxrwx"))
+  => true)
 
 ^{:refer std.fs.attribute/map->attr-array :added "3.0"}
-(fact "converts a clojure map to an array of attrs")
+(fact "converts a clojure map to an array of attrs"
+  (map->attr-array {:permissions "rwxrwxrwx"})
+  => (partial instance? (class (make-array FileAttribute 0))))
 
 ^{:refer std.fs.attribute/attrs->map :added "3.0"}
-(fact "converts the map of attributes into a clojure map")
+(fact "converts the map of attributes into a clojure map"
+  (attrs->map {"owner" "user" "permissions" #{}})
+  => map?)
 
 ^{:refer std.fs.attribute/attributes :added "3.0" :class [:attribute]}
 (fact "shows all attributes for a given path"
@@ -95,14 +105,13 @@
   ;;     :last-modified-time 1476755481000,
   ;;     :creation-time 1472282953000,
   ;;     :dev 16777220, :rdev 0}
-  => map)
+  => map?)
 
 ^{:refer std.fs.attribute/set-attributes :added "3.0" :class [:attribute]}
-(comment "sets all attributes for a given path"
+(fact "sets all attributes for a given path"
 
-  (set-attributes "project.clj"
-                  {:owner "chris",
-                   :group "staff",
-                   :permissions "rw-rw-rw-"})
-  ;;=> #path:"/Users/chris/Development/chit/lucidity/project.clj"
-  )
+  (do (set-attributes "project.clj"
+                  {:last-modified-time 0})
+      (-> (attributes "project.clj")
+          :last-modified-time))
+  => 0)

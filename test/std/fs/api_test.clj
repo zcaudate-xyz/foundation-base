@@ -31,26 +31,26 @@
   => java.io.File)
 
 ^{:refer std.fs.api/create-tmpdir :added "3.0" :class [:operation]}
-(comment "creates a temp directory on the filesystem"
+(fact "creates a temp directory on the filesystem"
 
   (create-tmpdir)
-  ;;=> #path:"/var/folders/d6/yrjldmsd4jd1h0nm970wmzl40000gn/T/4870108199331749225"
-  )
+  => java.nio.file.Path)
 
 ^{:refer std.fs.api/select :added "3.0" :class [:operation]}
 (fact "selects all the files in a directory"
 
   (->> (select "src/std/fs")
-       (map #(path/relativize "std/fs" %))
+       (map #(path/relativize "src/std/fs" %))
        (map str)
-       (sort)))
+       (sort))
+  => (contains ["api.clj" "archive.clj" "attribute.clj" "common.clj" "interop.clj" "path.clj" "walk.clj" "watch.clj"] :in-any-order))
 
 ^{:refer std.fs.api/list :added "3.0"  :class [:operation]}
-(comment "lists the files and attributes for a given directory"
+(fact "lists the files and attributes for a given directory"
 
-  (list "src")
-
-  (list "../hara/src/std/fs" {:recursive true}))
+  (keys (list "src/std/fs"))
+  => (contains [(str (path/path "src/std/fs/api.clj"))
+                (str (path/path "src/std/fs/path.clj"))] :in-any-order :gaps-ok))
 
 ^{:refer std.fs.api/copy :added "3.0" :class [:operation]}
 (fact "copies all specified files from one to another"
@@ -73,27 +73,33 @@
 ^{:refer std.fs.api/copy-into :added "3.0" :class [:operation]}
 (fact "copies a single file to a destination"
 
-  (copy-into "src/std/fs.clj"
-             "test-scratch/std.fs")
+  (create-directory "test-scratch")
+  (copy-into "src/std/fs/api.clj"
+             "test-scratch/fs/api.clj")
   => vector?
 
-  (delete "test-scratch/std.fs"))
+  (delete "test-scratch"))
 
 ^{:refer std.fs.api/delete :added "3.0" :class [:operation]}
 (fact "copies all specified files from one to another"
 
-  (do (copy "src/std/fs.clj" ".src/std/fs.clj")
-      (delete ".src" {:include ["fs.clj"]}))
-  => #{(str (path/path ".src/std/fs.clj"))}
+  (do (create-directory "test-scratch")
+      (copy-single "src/std/fs/api.clj" "test-scratch/fs/api.clj")
+      (delete "test-scratch" {:include ["api.clj"]}))
+  => set?
 
-  (delete ".src")
+  (delete "test-scratch")
   => set?)
 
 ^{:refer std.fs.api/move :added "3.0" :class [:operation]}
 (fact "moves a file or directory"
+  (create-directory "test-scratch/move-src")
+  (spit "test-scratch/move-src/hello" "world")
 
-  (do (move "shortlist" ".shortlist")
-      (move ".shortlist" "shortlist"))
+  (move "test-scratch/move-src" "test-scratch/move-dest")
+  => map?
 
-  (move ".non-existent" ".moved")
-  => {})
+  (path/exists? "test-scratch/move-dest/hello") => true
+  (path/exists? "test-scratch/move-src") => false
+
+  (delete "test-scratch/move-dest"))

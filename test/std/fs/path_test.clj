@@ -4,7 +4,8 @@
             [std.fs.api :as api]
             [std.fs.common :as common]
             [std.string :as str])
-  (:refer-clojure :exclude [resolve]))
+  (:refer-clojure :exclude [resolve])
+  (:import (java.io InputStream OutputStream File)))
 
 ^{:refer std.fs.path/path.functionality :added "3.0" :adopt true}
 (fact "returns a java.nio.file.Path object"
@@ -35,32 +36,30 @@
   => "/usr/home")
 
 ^{:refer std.fs.path/path :added "3.0" :class [:path]}
-(comment "creates a `java.nio.file.Path object"
-  ^:hidden
+(fact "creates a `java.nio.file.Path object"
 
   (path "project.clj")
- ;;=> #path:"/Users/chris/Development/chit/hara/project.clj"
+  => (partial instance? java.nio.file.Path)
 
   (path (path "project.clj"))       ;; idempotent
- ;;=> #path:"/Users/chris/Development/chit/hara/project.clj"
+  => (partial instance? java.nio.file.Path)
 
   (path "~")                       ;; tilda
- ;;=> #path:"/Users/chris"
+  => (partial instance? java.nio.file.Path)
 
-  (path "src" "hara/time.clj")      ;; multiple arguments
- ;;=> #path:"/Users/chris/Development/chit/hara/src/hara/time.clj"
+  (path "src" "std/fs.clj")      ;; multiple arguments
+  => (partial instance? java.nio.file.Path)
 
-  (path ["src" "hara" "time.clj"])  ;; vector 
- ;;=> #path:"/Users/chris/Development/chit/hara/src/hara/time.clj"
+  (path ["src" "std" "fs.clj"])  ;; vector
+  => (partial instance? java.nio.file.Path)
 
   (path (java.io.File.              ;; java.io.File object 
-         "src/hara/time.clj"))
- ;;=> #path:"/Users/chris/Development/chit/hara/src/hara/time.clj"
+         "src/std/fs.clj"))
+  => (partial instance? java.nio.file.Path)
 
   (path (java.net.URI.              ;; java.net.URI object 
-         "file:///Users/chris/Development/chit/hara/project.clj"))
- ;;=> #path:"/Users/chris/Development/chit/hara/project.clj"
-  )
+         "file:///tmp/project.clj"))
+  => (partial instance? java.nio.file.Path))
 
 ^{:refer std.fs.path/path? :added "3.0" :class [:path]}
 (fact "checks to see if the object is of type Path"
@@ -74,8 +73,8 @@
   (str (section "project.clj"))
   => "project.clj"
 
-  (str (section "src" "hara/time.clj"))
-  => "src/hara/time.clj")
+  (str (section "src" "std/fs.clj"))
+  => "src/std/fs.clj")
 
 ^{:refer std.fs.path/to-file :added "3.0"}
 (fact "creates a java.io.File object"
@@ -87,8 +86,8 @@
 ^{:refer std.fs.path/file-name :added "3.0" :class [:path]}
 (fact "returns the last section of the path"
 
-  (str (file-name "src/hara"))
-  => "hara")
+  (str (file-name "src/std"))
+  => "std")
 
 ^{:refer std.fs.path/file-system :added "3.0" :class [:file]}
 (fact "returns the filesystem governing the path"
@@ -124,8 +123,8 @@
 ^{:refer std.fs.path/relativize :added "3.0" :class [:path]}
 (fact "returns one path relative to another"
 
-  (str (relativize "test" "src/hara"))
-  => "../src/hara")
+  (str (relativize "test" "src/std"))
+  => "../src/std")
 
 ^{:refer std.fs.path/subpath :added "3.0" :class [:path]}
 (fact "returns the subpath of a given path"
@@ -161,13 +160,16 @@
   => true)
 
 ^{:refer std.fs.path/set-executable :added "3.0"}
-(fact "sets a file to be executable")
+(fact "sets a file to be executable"
+  (let [tmp (api/create-tmpfile)]
+    (set-executable (path tmp))
+    (executable? tmp) => true))
 
 ^{:refer std.fs.path/permissions :added "3.0" :class [:attribute]}
-(comment "returns the permissions for a given file"
+(fact "returns the permissions for a given file"
 
   (permissions "src")
-  => "rwxr-xr-x")
+  => string?)
 
 ^{:refer std.fs.path/typestring :added "3.0" :class [:attribute]}
 (fact "returns the shorthand string for a given entry"
@@ -237,22 +239,26 @@
 ^{:refer std.fs.path/input-stream :added "3.0" :class [:file]}
 (fact "opens a file as an input-stream"
 
-  (input-stream "project.clj"))
+  (input-stream "project.clj")
+  => (partial instance? InputStream))
 
 ^{:refer std.fs.path/output-stream :added "3.0" :class [:file]}
-(comment "opens a file as an output-stream"
-
-  (output-stream "project.clj"))
+(fact "opens a file as an output-stream"
+  (let [tmp (api/create-tmpfile)]
+    (output-stream tmp)
+    => (partial instance? OutputStream)))
 
 ^{:refer std.fs.path/read-all-lines :added "3.0" :class [:file]}
 (fact "opens a file and reads the contents as an array of lines"
 
-  (read-all-lines "project.clj"))
+  (read-all-lines "project.clj")
+  => (partial every? string?))
 
 ^{:refer std.fs.path/read-all-bytes :added "3.0" :class [:file]}
 (fact "opens a file and reads the contents as a byte array"
 
-  (read-all-bytes "project.clj"))
+  (read-all-bytes "project.clj")
+  => (partial instance? (class (byte-array 0))))
 
 ^{:refer std.fs.path/file :added "3.0" :class [:file]}
 (fact "returns the input as a file"
@@ -268,14 +274,16 @@
 
 ^{:refer std.fs.path/write-into :added "3.0" :class [:file]}
 (fact "writes a stream to a path"
-
-  (write-into "project.clj" (java.io.FileInputStream. "project.clj")
-              {:options #{:replace-existing}}))
+  (let [tmp (api/create-tmpfile)]
+    (write-into tmp (java.io.FileInputStream. "project.clj")
+                {:options #{:replace-existing}})
+    (vec (read-all-bytes tmp)) => (vec (read-all-bytes "project.clj"))))
 
 ^{:refer std.fs.path/write-all-bytes :added "3.0" :class [:file]}
-(comment "writes a byte-array to file"
-
-  (write-all-bytes "hello.txt" (.getBytes "Hello World")))
+(fact "writes a byte-array to file"
+  (let [tmp (api/create-tmpfile)]
+    (write-all-bytes tmp (.getBytes "Hello World"))
+    (first (read-all-lines tmp)) => "Hello World"))
 
 (comment
   (code.manage/import))

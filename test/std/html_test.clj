@@ -1,6 +1,8 @@
 (ns std.html-test
   (:use code.test)
-  (:require [std.html :refer :all]))
+  (:require [std.html :refer :all])
+  (:import (org.jsoup.nodes Element)
+           (org.jsoup.select Elements)))
 
 (def +content+
   (str "<html id=3><head><title>First parse</title></head>"
@@ -70,7 +72,13 @@
       [:body [:p "Parsed HTML into a doc."]]])
 
 ^{:refer std.html/select :added "3.0"}
-(fact "applies css selector to node")
+(fact "applies css selector to node"
+  (let [node (parse "<body><div class='foo'>hello</div></body>")]
+    (select node ".foo")
+    => (partial instance? Elements)))
 
 ^{:refer std.html/select-first :added "3.0"}
-(fact "gets the first match given selector and node")
+(fact "gets the first match given selector and node"
+  (let [node (parse "<body><div class='foo'>hello</div></body>")]
+    (select-first node ".foo")
+    => (partial instance? Element)))
