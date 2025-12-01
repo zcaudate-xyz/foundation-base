@@ -57,7 +57,9 @@
   (let [rest (get m ':..)
         syms (get m ':#)
         out-syms  (map #(common/*emit-fn* % grammar mopts)
-                       syms)
+                       (cond (nil? syms) []
+                             (vector? syms) syms
+                             :else [syms]))
         out-keys  (map #(data/emit-data :map-entry % grammar mopts)
                        (dissoc m :# :..))
         out-rest  (if rest
@@ -306,6 +308,3 @@
 
 (def +init+
   (script/install +book+))
-
-
-
