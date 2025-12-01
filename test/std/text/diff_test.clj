@@ -108,10 +108,11 @@
 
 ^{:refer std.text.diff/->string :added "3.0"}
 (fact "returns a human readable output of the diffs"
-
-  (println (-> (diff "10\n11\n\12\n13\n14"
-                     "10\n18\n\12\n19\n14")
-               (->string))))
+  
+  (-> (diff "10\n11\n\12\n13\n14"
+            "10\n18\n\12\n19\n14")
+      (->string))
+  => string?)
 
 ^{:refer std.text.diff/summary :added "3.0"}
 (fact "creates a summary of the various diffs"

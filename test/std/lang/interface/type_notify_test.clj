@@ -6,7 +6,9 @@
             [std.lib :as h]
             [std.concurrent :as cc]
             [std.json :as json]
-            [std.lang :as l]))
+            [std.json :as json]
+            [std.lang :as l]
+            [std.string :as str]))
 
 (defonce +server+ (notify/notify-server {}))
 
@@ -14,8 +16,14 @@
  {:setup [(h/start +server+)]
   :teardown [(h/stop +server+)]})
 
-^{:refer std.lang.interface.type-notify/has-sink? :added "4.0"}
-(fact "checks that sink exists")
+^{:refer std.lang.interface.type-notify/has-sink? :added "4.0"
+  :setup [(notify/get-sink +server+ "abc")]}
+(fact "checks that sink exists"
+  (notify/has-sink? +server+ "abc")
+  => true
+
+  (notify/has-sink? +server+ "def")
+  => false)
 
 ^{:refer std.lang.interface.type-notify/get-sink :added "4.0"
   :setup [(notify/clear-sink +server+ "abc")]}
@@ -34,10 +42,21 @@
   => h/atom?)
 
 ^{:refer std.lang.interface.type-notify/add-listener :added "4.0"}
-(fact "adds a listener to the sink")
+(fact "adds a listener to the sink"
+  (let [out (atom nil)]
+    (notify/add-listener +server+ "abc" :key (fn [v] (reset! out v)))
+    (reset! (notify/get-sink +server+ "abc") {:a 1})
+    @out)
+  => {:a 1})
 
 ^{:refer std.lang.interface.type-notify/remove-listener :added "4.0"}
-(fact "removes a listener from the sink")
+(fact "removes a listener from the sink"
+  (let [out (atom nil)]
+    (notify/add-listener +server+ "abc" :key (fn [v] (reset! out v)))
+    (notify/remove-listener +server+ "abc" :key)
+    (reset! (notify/get-sink +server+ "abc") {:a 2})
+    @out)
+  => nil)
 
 ^{:refer std.lang.interface.type-notify/get-oneshot-id :added "4.0"}
 (fact "registers a oneshot id for the app server"
@@ -64,14 +83,28 @@
       (count (notify/clear-oneshot-sinks +server+)))
   => 10)
 
+
 ^{:refer std.lang.interface.type-notify/process-print :added "4.0"}
-(fact "processes `print` id option")
+(fact "processes `print` id option"
+  (h/with-out-str
+    (notify/process-print {"value" "hello" "key" ["type" {"data" "world"}]}))
+  => (fn [s] (str/includes? s "world")))
+
 
 ^{:refer std.lang.interface.type-notify/process-capture :added "4.0"}
-(fact "processes `capture` id option")
+(fact "processes `capture` id option"
+  (notify/process-capture {:a 1})
+  (last @notify/*notify-capture*)
+  => {:a 1})
 
 ^{:refer std.lang.interface.type-notify/process-message :added "4.0"}
-(fact "processes a message recieved by the notification server")
+(fact "processes a message recieved by the notification server"
+  (let [out (atom nil)]
+    (notify/add-listener +server+ "msg" :key (fn [v] (reset! out v)))
+    (notify/process-message +server+ (json/write {:id "msg" :data "hello"}))
+    (notify/process-message +server+ (json/write {:id "msg" :data "hello"}))
+    @out)
+  => (contains {:data "hello"}))
 
 ^{:refer std.lang.interface.type-notify/handle-notify-http :added "4.0"}
 (fact "handler for http request")
@@ -90,16 +123,22 @@
   => +value+)
 
 ^{:refer std.lang.interface.type-notify/stop-notify-http :added "4.0"}
-(fact "stops http server")
+(fact "stops http server"
+  (notify/stop-notify-http +server+)
+  @(:http-instance +server+) => nil)
 
 ^{:refer std.lang.interface.type-notify/handle-notify-socket :added "4.0"}
 (fact "handler for socket request")
 
 ^{:refer std.lang.interface.type-notify/start-notify-socket :added "4.0"}
-(fact "starts socket server")
+(fact "starts socket server"
+  (notify/start-notify-socket +server+)
+  @(:socket-instance +server+) => map?)
 
 ^{:refer std.lang.interface.type-notify/stop-notify-socket :added "4.0"}
-(fact "stops socket server")
+(fact "stops socket server"
+  (notify/stop-notify-socket +server+)
+  @(:socket-instance +server+) => nil)
 
 ^{:refer std.lang.interface.type-notify/start-notify :added "4.0"
   :setup [(notify/stop-notify +server+)]}
@@ -109,21 +148,31 @@
   => map?)
 
 ^{:refer std.lang.interface.type-notify/stop-notify :added "4.0"}
-(fact "stops both servers")
+(fact "stops both servers"
+  (notify/stop-notify +server+)
+  @(:http-instance +server+) => nil
+  @(:socket-instance +server+) => nil)
 
 ^{:refer std.lang.interface.type-notify/notify-server:create :added "4.0"}
-(fact "creates notify serve ")
+(fact "creates notify serve "
+  (notify/notify-server:create {})
+  => map?)
 
 ^{:refer std.lang.interface.type-notify/notify-server :added "4.0"}
-(fact "create and start notify server")
+(fact "create and start notify server"
+  (h/stop (notify/notify-server {}))
+  => map?)
 
 ^{:refer std.lang.interface.type-notify/default-notify :added "4.0"}
 (fact "gets the default notify server"
 
-  (notify/default-notify))
+  (notify/default-notify)
+  => map?)
 
 ^{:refer std.lang.interface.type-notify/default-notify:reset :added "4.0"}
-(fact "resets the default notify server")
+(fact "resets the default notify server"
+  (notify/default-notify:reset)
+  => map?)
 
 ^{:refer std.lang.interface.type-notify/watch-oneshot :added "4.0"}
 (fact "returns a completable future"

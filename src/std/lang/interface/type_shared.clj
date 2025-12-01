@@ -197,7 +197,7 @@
   "checks if a runtime is shared"
   {:added "4.0"}
   [obj]
-  (= "std.lang.runtime.shared.SharedRuntime"
+  (= "std.lang.interface.type_shared.SharedRuntime"
      (.getName ^Class (type obj))))
 
 (defn rt-get-inner

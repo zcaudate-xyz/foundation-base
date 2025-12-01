@@ -2,6 +2,7 @@
 
 (defn i:map
   "iterator for map"
+  {:added "4.1"}
   ([f]
    (fn [coll]
      (lazy-seq
@@ -18,6 +19,7 @@
 
 (defn i:map-indexed
   "iterator for map-indexed"
+  {:added "4.1"}
   ([f]
    (fn [coll]
      (letfn [(mapi [idx coll]
@@ -28,6 +30,7 @@
 
 (defn i:filter
   "iterator for filter"
+  {:added "4.1"}
   ([pred]
    (fn [coll]
      (lazy-seq
@@ -39,11 +42,13 @@
 
 (defn i:remove
   "iterator for remove"
+  {:added "4.1"}
   ([pred]
    (i:filter (complement pred))))
 
 (defn i:keep
   "iterator for keep"
+  {:added "4.1"}
   ([f]
    (fn [coll]
      (lazy-seq
@@ -54,7 +59,10 @@
             (cons x ((i:keep f) (rest s))))))))))
 
 (defn i:keep-indexed
-  "iterator for keep-indexed"
+  "iterator for keep-indexed
+   ((i:keep-indexed (fn [i v] (if (odd? i) v))) [:a :b :c :d])
+   => '(:b :d)"
+  {:added "4.1"}
   ([f]
    (fn [coll]
      (letfn [(keepi [idx coll]
@@ -68,6 +76,7 @@
 
 (defn i:take
   "iterator for take"
+  {:added "4.1"}
   ([n]
    (fn [coll]
      (lazy-seq
@@ -76,6 +85,7 @@
 
 (defn i:drop
   "iterator for drop"
+  {:added "4.1"}
   ([n]
    (fn [coll]
      (lazy-seq
@@ -85,6 +95,7 @@
 
 (defn i:take-nth
   "iterator for take-nth"
+  {:added "4.1"}
   ([n]
    (fn [coll]
      (lazy-seq
@@ -94,45 +105,53 @@
 
 (defn i:drop-last
   "iterator for drop-last"
+  {:added "4.1"}
   ([n]
    (fn [coll]
      (map (fn [_ val] val) (drop n coll) coll))))
 
 (defn i:butlast
   "iterator for butlast"
+  {:added "4.1"}
   []
   (i:drop-last 1))
 
 (defn i:peek
   "iterator for peek"
+  {:added "4.1"}
   ([f]
    (i:map (fn [v] (doto v f)))))
 
 (defn i:prn
   "iterator for prn"
+  {:added "4.1"}
   ([f]
    (i:map (fn [v] (doto v (-> f prn))))))
 
 (defn i:mapcat
   "iterator for mapcat"
+  {:added "4.1"}
   ([f]
    (fn [coll]
      (mapcat f coll))))
 
 (defn i:delay
   "iterator for delay"
+  {:added "4.1"}
   ([ms]
    (let [ms-fn (if (fn? ms) ms (constantly ms))]
      (i:map (fn [v] (Thread/sleep (long (ms-fn))) v)))))
 
 (defn i:dedupe
   "iterator for dedupe"
+  {:added "4.1"}
   []
   (fn [coll]
     (dedupe coll)))
 
 (defn i:partition-all
   "iterator for partition-all"
+  {:added "4.1"}
   ([n]
    (fn [coll]
      (partition-all n coll)))
@@ -145,18 +164,21 @@
 
 (defn i:partition-by
   "iterator for partition-by"
+  {:added "4.1"}
   ([f]
    (fn [coll]
      (partition-by f coll))))
 
 (defn i:random-sample
   "iterator for random-sample"
+  {:added "4.1"}
   ([prob]
    (fn [coll]
      (random-sample prob coll))))
 
 (defn i:sort
   "iterator for sort"
+  {:added "4.1"}
   ([]
    (fn [coll]
      (sort coll)))
@@ -166,6 +188,7 @@
 
 (defn i:sort-by
   "iterator for sort-by"
+  {:added "4.1"}
   ([keyfn]
    (fn [coll]
      (sort-by keyfn coll)))
@@ -175,6 +198,7 @@
 
 (defn i:reductions
   "iterator for reductions"
+  {:added "4.1"}
   ([f]
    (fn [coll]
      (reductions f coll)))
@@ -184,18 +208,21 @@
 
 (defn i:some
   "iterator for some"
+  {:added "4.1"}
   ([pred]
    (fn [coll]
      (some pred coll))))
 
 (defn i:count
   "iterator for count"
+  {:added "4.1"}
   ([]
    (fn [coll]
      (count coll))))
 
 (defn i:reduce
   "iterator for reduce"
+  {:added "4.1"}
   ([f]
    (fn [coll]
      (reduce f coll)))
@@ -205,18 +232,21 @@
 
 (defn i:max
   "iterator for max"
+  {:added "4.1"}
   ([]
    (fn [coll]
      (apply max coll))))
 
 (defn i:min
   "iterator for min"
+  {:added "4.1"}
   ([]
    (fn [coll]
      (apply min coll))))
 
 (defn i:mean
   "iterator for mean"
+  {:added "4.1"}
   ([]
    (fn [coll]
      (when (seq coll)
@@ -224,6 +254,7 @@
 
 (defn i:stdev
   "iterator for stdev"
+  {:added "4.1"}
   ([]
    (fn [coll]
      (let [c (vec coll)
@@ -234,12 +265,14 @@
 
 (defn i:last
   "iterator for last"
+  {:added "4.1"}
   ([]
    (fn [coll]
      (last coll))))
 
 (defn i:str
   "iterator for str"
+  {:added "4.1"}
   ([]
    (fn [coll]
      (apply str coll))))

@@ -150,25 +150,25 @@
                ["(:? ()"
                 "    ())"
                 "    nil {})"]))))
-  [{:lead {:char "(", :line 1, :col 1, :type :open, :style :paren},
-    :line [1 3],
-    :level 1,
-    :last true
-    :col 1,
-    :children
-    [{:lead {:char "(", :line 1, :col 5, :type :open, :style :paren},
-      :line [1 1],
-      :level 0,
-      :col 5}
-     {:lead {:char "(", :line 2, :col 5, :type :open, :style :paren},
-      :line [2 2],
-      :level 0,
-      :col 5}
-     {:lead {:char "{", :line 3, :col 9, :type :open, :style :curly},
-      :line [3 3],
-      :level 0,
-      :col 9,
-      :last true}]}])
+  => [{:lead {:char "(", :line 1, :col 1, :type :open, :style :paren},
+       :line [1 3],
+       :level 1,
+       :last true
+       :col 1,
+       :children
+       [{:lead {:char "(", :line 1, :col 5, :type :open, :style :paren},
+         :line [1 1],
+         :level 0,
+         :col 5}
+        {:lead {:char "(", :line 2, :col 5, :type :open, :style :paren},
+         :line [2 2],
+         :level 0,
+         :col 5}
+        {:lead {:char "{", :line 3, :col 9, :type :open, :style :curly},
+         :line [3 3],
+         :level 0,
+         :col 9,
+         :last true}]}])
 
 
 ^{:refer std.block.heal.core/group-blocks-prep-entries :added "4.0"}
@@ -383,8 +383,8 @@
 
 ^{:refer std.block.heal.core/get-errored-loop :added "4.0"}
 (fact "runs the check block loop"
-  #_#_#_
   ^:hidden
+
   (level/get-errored-loop
    (nth (level/group-blocks (slurp "test-data/std.block.heal/cases/005_example.block")) 2)
    (str/split-lines (slurp "test-data/std.block.heal/cases/005_example.block")))
@@ -974,7 +974,16 @@
   => b/block?)
 
 ^{:refer std.block.heal.core/wrap-print-diff :added "4.0"}
-(fact "print wrapper for the heal function")
+(fact "print wrapper for the heal function"
+  ^:hidden
+  
+  (h/with-out-str
+    ((level/wrap-print-diff level/heal-content-single-pass)
+     (str/join-lines
+      ["(:? ()"
+       "    (+ 1))) (+ 2)"
+       "    nil {})"])))
+  => "[1m@@ -1,1 +1,1 [0m\n[31m-[31m[40m    (+ 1))) (+ 2)[0m[0m\n[32m+[32m[40m    (+ 1) (+ 2)[0m[0m\n\n")
 
 ^{:refer std.block.heal.core/wrap-diff :added "4.0"}
 (fact "wraps the heal function to output the diff"

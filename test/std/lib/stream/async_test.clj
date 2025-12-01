@@ -8,74 +8,9 @@
             [std.lib :as h])
   (:refer-clojure :exclude [realized?]))
 
-^{:refer std.lib.stream.async/i:async :added "3.0"}
-(fact "constructs an async transducer"
-
-  (->> (range 5)
-       ((i:async inc))
-       (map deref))
-  => '(1 2 3 4 5))
-
-^{:refer std.lib.stream.async/i:step :added "3.0"}
-(fact "constructs a step transducer" ^:hidden
-
-  ((i:step inc) (range 3))
-  => (all (contains [mono? mono? mono?])
-          (fn [res]
-            (= (map deref res)
-               [1 2 3])))
-
-  (->> (range 3)
-       ((i:step inc))
-       ((i:step inc))
-       ((i:step inc))
-       (map deref))
-  => '(3 4 5)
-
-  (defn slow-inc
-    [x]
-    (Thread/sleep 10)
-    (inc x))
-
-  (def -accept- (q/queue:limited 10))
-
-  (->> [1]
-       ((i:step  slow-inc))
-       ((i:step  slow-inc {:collect [{:path [:time :A]
-                                      :wrap wrap-time}]}))
-       ((i:step  inc))
-       ((i:guard number? -accept-))
-       (first)
-       (realize))
-  => (contains [true 4 anything]))
-
-^{:refer std.lib.stream.async/i:guard :added "3.0"}
-(fact "constructs a guard transducer" ^:hidden
-
-  (def -accept- (flux))
-  (def -reject- (flux))
-
-  (->> (range 5)
-       ((i:step inc))
-       ((i:guard odd? -accept- -reject-))
-       (map (comp first deref)))
-  =>  [true false true false true]
-
-  (->> (s/produce -accept-)
-       (take 3)
-       (map deref)
-       (sort))
-  => '(1 3 5)
-
-  (->> (s/produce -reject-)
-       (take 2)
-       (map deref)
-       (sort))
-  => '(2 4))
-
 ^{:refer std.lib.stream.async/blocking? :added "3.0"}
 (fact "checks that object implements `IBLocking`"
-
+  
   (blocking? (q/queue))
   => true)
 
@@ -185,6 +120,14 @@
                {})
   => 2)
 
+^{:refer std.lib.stream.async/i:async :added "3.0"}
+(fact "constructs an async transducer"
+
+  (->> (range 5)
+       ((i:async inc))
+       (map deref))
+  => '(1 2 3 4 5))
+
 ^{:refer std.lib.stream.async/wrap-time :added "3.0"}
 (fact "wraps timing given the output"
 
@@ -220,6 +163,63 @@
                   :delay 100})
   => 2)
 
+^{:refer std.lib.stream.async/i:step :added "3.0"}
+(fact "constructs a step transducer" ^:hidden
+
+  ((i:step inc) (range 3))
+  => (all (contains [mono? mono? mono?])
+          (fn [res]
+            (= (map deref res)
+               [1 2 3])))
+
+  (->> (range 3)
+       ((i:step inc))
+       ((i:step inc))
+       ((i:step inc))
+       (map deref))
+  => '(3 4 5)
+
+  (defn slow-inc
+    [x]
+    (Thread/sleep 10)
+    (inc x))
+
+  (def -accept- (q/queue:limited 10))
+
+  (->> [1]
+       ((i:step  slow-inc))
+       ((i:step  slow-inc {:collect [{:path [:time :A]
+                                      :wrap wrap-time}]}))
+       ((i:step  inc))
+       ((i:guard number? -accept-))
+       (first)
+       (realize))
+  => (contains [true 4 anything]))
+
+^{:refer std.lib.stream.async/i:guard :added "3.0"}
+(fact "constructs a guard transducer" ^:hidden
+
+  (def -accept- (flux))
+  (def -reject- (flux))
+
+  (->> (range 5)
+       ((i:step inc))
+       ((i:guard odd? -accept- -reject-))
+       (map (comp first deref)))
+  =>  [true false true false true]
+
+  (->> (s/produce -accept-)
+       (take 3)
+       (map deref)
+       (sort))
+  => '(1 3 5)
+
+  (->> (s/produce -reject-)
+       (take 2)
+       (map deref)
+       (sort))
+  => '(2 4))
+
 ^{:refer std.lib.stream.async/produce-flux :added "3.0"}
 (fact "takes from a flux"
 
@@ -239,7 +239,7 @@
   => true)
 
 ^{:refer std.lib.stream.async/flux :added "3.0"}
-(comment "constructs a flux"
+(fact "constructs a flux"
   ^:hidden
   
   (flux)
@@ -268,42 +268,4 @@
       {:time {:A number?, :B number?, :C number?},
        :flux {"hello" {:enter number? :exit number?}}}))
 
-(comment
 
-  (def -a- (f/incomplete))
-  (def -b- (f/completed 0))
-
-  (f/on:complete -b- (fn [_ _]
-                       (f/future:force -a- 1)))
-
-  @-a-
-  (def -f- (flux))
-
-  (s/*> (range 10)
-        -f-)
-
-  (def -s- (s/*> (produce-flux -f-)
-                 [:stage inc]
-                 (s/*)))
-
-  (into {} (first -s-))
-  (+ 1 2)
-  (map deref (take 20 -s-))
-
-  (def -m- (into {} @(first (produce-flux -f-))))
-
-  (.get (f/completed 1))
-  @(:future -m-)
-
-  (try @(:future (into {} @(first -s-)))
-       (catch Throwable t
-         (.printStackTrace t)))
-
-  (realize (s/unit (comp (i:async)
-                         (i:async inc)
-                         (i:async inc)
-                         (i:async))
-                   1))
-
-  {:flux {"hello" {:enter 1598303017142143460, :exit 1598303023052046987}}, :time {:A 5029, :B 2882, :C 10119}}
-  @(:data -s-))
