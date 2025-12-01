@@ -57,9 +57,7 @@
   (let [rest (get m ':..)
         syms (get m ':#)
         out-syms  (map #(common/*emit-fn* % grammar mopts)
-                       (cond (nil? syms) []
-                             (vector? syms) syms
-                             :else [syms]))
+                       syms)
         out-keys  (map #(data/emit-data :map-entry % grammar mopts)
                        (dissoc m :# :..))
         out-rest  (if rest
