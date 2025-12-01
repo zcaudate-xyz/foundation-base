@@ -85,6 +85,16 @@
   => '(:% (k:foreach) (k:space) [1 2 3] (k:space) (k:as) (k:space) (:$ x) (k:space)
           (:% (k:lparen) (% 0) (k:semi) (k:space) (% (+ . $x)) (k:semi) (k:space) (% (* . 2)) (k:rparen))))
 
+^{:refer std.lang.model.spec-jq/jq-args-ast :added "4.1"}
+(fact "ast for args"
+  (jq-args-ast '(a b))
+  => '(:% (k:lparen) a (k:semi) b (k:rparen)))
+
+^{:refer std.lang.model.spec-jq/jq-break :added "4.1"}
+(fact "jq break"
+  (jq-break '(break)) => '(k:break)
+  (jq-break '(break x)) => '(:% (k:break) (k:space) (:$ x)))
+
 (fact "basic emit tests"
   (!.jq
    (def foo [x]
