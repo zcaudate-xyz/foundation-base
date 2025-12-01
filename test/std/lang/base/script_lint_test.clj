@@ -1,8 +1,17 @@
 (ns std.lang.base.script-lint-test
   (:use code.test)
   (:require [std.lang.base.script-lint :refer :all]
+            [std.lang.base.library :as lib]
+            [std.lang.base.impl :as impl]
+            [std.lang :as l]
             [std.lib :as h]
             [js.blessed]))
+
+(def +library+
+  (let [lib (impl/clone-default-library)]
+    (impl/with:library [lib]
+      (require '[js.blessed] :reload))
+    lib))
 
 ^{:refer std.lang.base.script-lint/get-reserved-raw :added "4.0"}
 (fact "gets all reserved symbols in the grammar"
@@ -19,10 +28,11 @@
 (fact "collects global symbols from module"
   ^:hidden
   
-  (collect-module-globals (std.lang/get-module
-                           (std.lang/default-library)
-                           :js
-                           'js.blessed))
+  (impl/with:library [+library+]
+    (collect-module-globals (l/get-module
+                             +library+
+                             :js
+                             'js.blessed)))
   => '#{BlessedContrib ReactBlessedContrib Bresenham ReactBlessed Blessed Drawille})
 
 ^{:refer std.lang.base.script-lint/collect-sym-vars :added "4.0"}
@@ -37,14 +47,15 @@
 (fact "checks the linter"
   ^:hidden
   
-  (def +out+
-    (doseq [[id module] (:modules (std.lang/get-book
-                                   (std.lang/default-library)
-                                   :js))]
-      (doseq [[id entry] (:code module)]
-        (sym-check-linter entry
-                          module
-                          (:globals (:js @+settings+)))))))
+  (impl/with:library [+library+]
+    (def +out+
+      (doseq [[id module] (:modules (l/get-book
+                                     +library+
+                                     :js))]
+        (doseq [[id entry] (:code module)]
+          (sym-check-linter entry
+                            module
+                            (:globals (:js @+settings+))))))))
 
 ^{:refer std.lang.base.script-lint/lint-set :added "4.0"}
 (fact "sets the linter for a namespace"

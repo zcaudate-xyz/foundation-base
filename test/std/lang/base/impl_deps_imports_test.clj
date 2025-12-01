@@ -7,8 +7,22 @@
             [std.lang.model.spec-lua :as lua]
             [std.lang.base.library :as lib]
             [std.lang.base.book :as b]
+            [std.lang.base.impl :as impl]
             [std.lang.base.library-snapshot :as snap]
-            [std.lang.base.impl-entry :as entry]))
+            [std.lang.base.impl-entry :as entry]
+            [js.react]
+            [js.blessed]))
+
+(def +library-js-cloned+
+  (let [lib (impl/clone-default-library)]
+    (impl/with:library [lib]
+      (require '[js.react] :reload)
+      (require '[js.blessed] :reload)
+      (require '[js.blessed.ui-core] :reload)
+      (require '[js.blessed.frame-status] :reload)
+      (require '[js.blessed.frame-console] :reload)
+      (require '[xt.lang.base-lib] :reload))
+    lib))
 
 (def +library-lua+
   (doto (lib/library:create
@@ -214,51 +228,57 @@
                 "@radix-ui/themes" {:as [* Radix], :bundle {"@radix-ui/themes/styles.css" {}}}},
        :direct #{}}
   
-  (deps-imports/module-imports
-   (std.lang/get-book
-    (std.lang/default-library)
-    :js)
-   'js.react)
+  (impl/with:library [+library-js-cloned+]
+    (deps-imports/module-imports
+     (lib/get-book
+      +library-js-cloned+
+      :js)
+     'js.react))
   => '{:native {"react" {:as React}, "react-dom/client" {:as ReactDOM}},
        :direct #{xt.lang.base-lib}}
   
-  (deps-imports/module-imports
-   (std.lang/get-book
-    (std.lang/default-library)
-    :js)
-   'js.blessed)
+  (impl/with:library [+library-js-cloned+]
+    (deps-imports/module-imports
+     (lib/get-book
+      +library-js-cloned+
+      :js)
+     'js.blessed))
   => '{:native {"react-blessed" {:as ReactBlessed},
                 "blessed" {:as Blessed}},
        :direct #{}}
 
-  (deps-imports/module-imports
-   (std.lang/get-book
-    (std.lang/default-library)
-    :js)
-   'js.blessed.ui-core)
+  (impl/with:library [+library-js-cloned+]
+    (deps-imports/module-imports
+     (lib/get-book
+      +library-js-cloned+
+      :js)
+     'js.blessed.ui-core))
   => '{:native {"react" {:as React},
                 "blessed" {:as Blessed}},
        :direct #{js.blessed.ui-style xt.lang.base-lib js.react}}
   
-  (deps-imports/module-imports
-   (std.lang/get-book
-    (std.lang/default-library)
-    :js)
-   'js.blessed.frame-status)
+  (impl/with:library [+library-js-cloned+]
+    (deps-imports/module-imports
+     (lib/get-book
+      +library-js-cloned+
+      :js)
+     'js.blessed.frame-status))
   => '{:native {"react" {:as React}}, :direct #{}}
 
-  (deps-imports/module-imports
-   (std.lang/get-book
-    (std.lang/default-library)
-    :js)
-   'js.blessed.frame-status)
+  (impl/with:library [+library-js-cloned+]
+    (deps-imports/module-imports
+     (lib/get-book
+      +library-js-cloned+
+      :js)
+     'js.blessed.frame-status))
   => '{:native {"react" {:as React}}, :direct #{}}
 
-  (deps-imports/module-imports
-   (std.lang/get-book
-    (std.lang/default-library)
-    :js)
-   'js.blessed.frame-console)
+  (impl/with:library [+library-js-cloned+]
+    (deps-imports/module-imports
+     (lib/get-book
+      +library-js-cloned+
+      :js)
+     'js.blessed.frame-console))
   => '{:native {}, :direct #{js.blessed.ui-group xt.lang.base-lib js.blessed.ui-core}})
 
 
@@ -266,11 +286,12 @@
 (fact "gets the code dependencies for the module"
   ^:hidden
   
-  (deps-imports/module-code-deps
-   (std.lang/get-book
-    (std.lang/default-library)
-    :js)
-   '[js.blessed.frame-console])
+  (impl/with:library [+library-js-cloned+]
+    (deps-imports/module-code-deps
+     (lib/get-book
+      +library-js-cloned+
+      :js)
+     '[js.blessed.frame-console]))
   => '{:all #{js.blessed.ui-style
               js.blessed.ui-group
               js.blessed.frame-console
@@ -290,11 +311,12 @@
                js.blessed.ui-style       #{xt.lang.base-lib}
                js.react                  #{xt.lang.base-lib}}}
   
-  (deps-imports/module-code-deps
-   (std.lang/get-book
-    (std.lang/default-library)
-    :js)
-   '[js.react])
+  (impl/with:library [+library-js-cloned+]
+    (deps-imports/module-code-deps
+     (lib/get-book
+      +library-js-cloned+
+      :js)
+     '[js.react]))
   => '{:all #{xt.lang.base-lib js.react},
        :graph {js.react #{xt.lang.base-lib},
                xt.lang.base-lib #{}}})

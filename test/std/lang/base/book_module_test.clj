@@ -1,9 +1,12 @@
 (ns std.lang.base.book-module-test
   (:use code.test)
   (:require [std.lang.base.book-module :refer :all]
+            [std.lang.base.impl :as impl]
             [std.lang :as l]
             [js.blessed]
             [js.blessed.frame]))
+
+(def +library+ (impl/clone-default-library))
 
 ^{:refer std.lang.base.book-module/book-module? :added "4.0"}
 (fact "checks of object is a book module"
@@ -41,33 +44,36 @@
   => '#{}
 
   
-  (module-deps-code
-   (l/get-module
-    (l/default-library)
-    :js
-    'js.blessed.ui-core))
+  (impl/with:library [+library+]
+    (module-deps-code
+     (l/get-module
+      +library+
+      :js
+      'js.blessed.ui-core)))
   => '#{js.blessed.ui-style xt.lang.base-lib js.react})
 
 ^{:refer std.lang.base.book-module/module-deps-native :added "4.0"}
 (fact "gets the native link dependencies"
   ^:hidden
   
-  (module-deps-native
-   (std.lang/get-module
-    (std.lang/default-library)
-    :js
-    'js.react))
+  (impl/with:library [+library+]
+    (module-deps-native
+     (std.lang/get-module
+      +library+
+      :js
+      'js.react)))
   => '{"react" #{React}})
 
 ^{:refer std.lang.base.book-module/module-deps-fragment :added "4.0"}
 (fact "gets all fragments that have beeen used in js.react"
   ^:hidden
   
-  (module-deps-fragment
-   (std.lang/get-module
-    (std.lang/default-library)
-    :js
-    'js.react))
+  (impl/with:library [+library+]
+    (module-deps-fragment
+     (std.lang/get-module
+      +library+
+      :js
+      'js.react)))
   => '#{js.core/floor
         js.core/map
         js.react/ref
@@ -108,12 +114,13 @@
 (fact "creates an export entry for a module"
   ^:hidden
 
-  (module-entries
-   (std.lang/get-module
-    (std.lang/default-library)
-    :js
-    'js.react)
-   #{:defn})
+  (impl/with:library [+library+]
+    (module-entries
+     (std.lang/get-module
+      +library+
+      :js
+      'js.react)
+     #{:defn}))
   => '([(:% \" getDOMRoot \") js.react/getDOMRoot]
        [(:% \" renderDOMRoot \") js.react/renderDOMRoot]
        [(:% \" useStateFor \") js.react/useStateFor]
