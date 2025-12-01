@@ -92,12 +92,12 @@
 ^{:refer std.lang.model.spec-php/php-defn :added "4.1"}
 (t/fact "emit php function definition"
   (spec-php/php-defn '(defn add [a b] (return (+ a b))))
-  => (list :- "function add(a, b) {\n" '(do (return (+ a b))) "\n}"))
+  => (list :- "function add(a, b) {\n(do (return (+ a b)))\n}"))
 
 ^{:refer std.lang.model.spec-php/php-defn- :added "4.1"}
 (t/fact "emit php anonymous function"
   (spec-php/php-defn- '(fn [a b] (return (+ a b))))
-  => (list :- "function (a, b) {\n" '(do (return (+ a b))) "\n}"))
+  => (list :- "function (a, b) {\n(do (return (+ a b)))\n}"))
 
 ^{:refer std.lang.model.spec-php/php-array :added "4.1"}
 (t/fact "emit php array"

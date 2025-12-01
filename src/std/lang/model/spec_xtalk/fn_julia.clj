@@ -262,7 +262,7 @@
 
 (defn julia-tf-x-str-substring
   ([[_ s start & [end]]]
-   (h/$ (getindex ~s (~(list :to (list '+ start 1) (or end '(end))))))))
+   (list 'getindex s (list :to (list '+ start 1) (or end '(end))))))
 
 (defn julia-tf-x-str-to-upper
   ([[_ s]]

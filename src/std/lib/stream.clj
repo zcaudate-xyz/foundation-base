@@ -523,8 +523,6 @@
 (def +stream:future+
   '{Future
     {:produce produce-deref}
-    clojure.lang.IPending
-    {:produce produce-deref}
     clojure.lang.IDeref
     {:produce produce-deref}})
 

@@ -1177,7 +1177,25 @@
 
 
 ^{:refer std.block.heal.core/check-errored-suspect :added "4.0"}
-(fact "TODO")
+(fact "checks if a block is suspect based on leftover errors"
+  (level/check-errored-suspect
+   {:lead {:line 1 :col 1}
+    :col 1
+    :last true}
+   ["(foo) (bar))"]
+   [{:line 1 :col 12 :type :close}])
+  => true)
 
 ^{:refer std.block.heal.core/heal-content-complex-edits :added "4.0"}
-(fact "TODO")
+(fact "handles complex edits for healing"
+  (level/heal-content-complex-edits
+   {:at {:lead {:style :paren}}}
+   [{:type :close :style :paren :depth -1}
+    {:type :open}
+    {:type :close}])
+  => vector?
+
+  (level/heal-content-complex-edits
+   {:at {:lead {:style :paren}}}
+   [{:pair-id 1} {:pair-id 1}])
+  => seq?)

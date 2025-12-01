@@ -107,4 +107,12 @@
 
 
 ^{:refer std.task.bulk/prepare-columns :added "4.0"}
-(fact "TODO")
+(fact "prepares columns for printing"
+  (prepare-columns [{:key :name}
+                    {:key :data}]
+                   [{:name "Chris"
+                     :data "1"}
+                    {:name "Bob"
+                     :data "100"}])
+  => [{:key :name, :id :name, :length 7}
+      {:key :data, :id :data, :length 5}])

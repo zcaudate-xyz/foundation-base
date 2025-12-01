@@ -180,4 +180,13 @@
 
 
 ^{:refer std.lib.component/with-lifecycle :added "4.1"}
-(fact "TODO")
+(fact "helper for lifecycle management"
+  (def out (atom []))
+  (with-lifecycle [a {:start (do (swap! out conj :start) :resource)
+                      :stop  (fn [x] (swap! out conj [:stop x]))}]
+    (swap! out conj [:body a])
+    :done)
+  => :done
+
+  @out
+  => [:start [:body :resource] [:stop :resource]])

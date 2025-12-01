@@ -247,4 +247,8 @@
 
 
 ^{:refer std.lib.env/prfn :added "4.1"}
-(fact "TODO")
+(fact "prints with formatting"
+  (with-out-str (prfn "hello"))
+  => string?
+  (with-out-str (prfn {:a 1}))
+  => string?)
