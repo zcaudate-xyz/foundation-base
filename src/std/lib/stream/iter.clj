@@ -12,8 +12,9 @@
      (lazy-seq
       (let [s (map seq (cons coll colls))]
         (when (every? identity s)
-          (cons (apply f (map first s))
-                ((apply i:map f colls) (map rest s)))))))))
+          (let [next-s (map rest s)]
+            (cons (apply f (map first s))
+                  ((apply i:map f (rest next-s)) (first next-s))))))))))
 
 (defn i:map-indexed
   "iterator for map-indexed"

@@ -8,28 +8,27 @@
             [std.lib :as h])
   (:refer-clojure :exclude [realized?]))
 
-^{:refer std.lib.stream.async/x:async :added "3.0"}
+^{:refer std.lib.stream.async/i:async :added "3.0"}
 (fact "constructs an async transducer"
 
-  (->> (sequence (x:async inc)
-                 (range 5))
+  (->> (range 5)
+       ((i:async inc))
        (map deref))
   => '(1 2 3 4 5))
 
-^{:refer std.lib.stream.async/x:step :added "3.0"}
+^{:refer std.lib.stream.async/i:step :added "3.0"}
 (fact "constructs a step transducer" ^:hidden
 
-  (sequence (x:step inc)
-            (range 3))
+  ((i:step inc) (range 3))
   => (all (contains [mono? mono? mono?])
           (fn [res]
             (= (map deref res)
                [1 2 3])))
 
-  (->> (sequence (comp (x:step inc)
-                       (x:step inc)
-                       (x:step inc))
-                 (range 3))
+  (->> (range 3)
+       ((i:step inc))
+       ((i:step inc))
+       ((i:step inc))
        (map deref))
   => '(3 4 5)
 
@@ -40,23 +39,25 @@
 
   (def -accept- (q/queue:limited 10))
 
-  (realize (s/unit (comp (x:step  slow-inc)
-                         (x:step  slow-inc {:collect [{:path [:time :A]
-                                                       :wrap wrap-time}]})
-                         (x:step  inc)
-                         (x:guard number? -accept-))
-                   1))
+  (->> [1]
+       ((i:step  slow-inc))
+       ((i:step  slow-inc {:collect [{:path [:time :A]
+                                      :wrap wrap-time}]}))
+       ((i:step  inc))
+       ((i:guard number? -accept-))
+       (first)
+       (realize))
   => (contains [true 4 anything]))
 
-^{:refer std.lib.stream.async/x:guard :added "3.0"}
+^{:refer std.lib.stream.async/i:guard :added "3.0"}
 (fact "constructs a guard transducer" ^:hidden
 
   (def -accept- (flux))
   (def -reject- (flux))
 
-  (->> (sequence (comp (x:step inc)
-                       (x:guard odd? -accept- -reject-))
-                 (range 5))
+  (->> (range 5)
+       ((i:step inc))
+       ((i:guard odd? -accept- -reject-))
        (map (comp first deref)))
   =>  [true false true false true]
 
@@ -98,10 +99,9 @@
   (stage? (mono {}))
   => true)
 
-^{:refer std.lib.stream.async/stage-unit :added "3.0"
-  :let [|f| (f/incomplete)]}
+^{:refer std.lib.stream.async/stage-unit :added "3.0"}
 (fact "returns the base future unit"
-
+  (def |f| (f/incomplete))
   (stage-unit (mono {:future |f|}))
   => |f|)
 
@@ -185,9 +185,6 @@
                {})
   => 2)
 
-^{:refer std.lib.stream.async/i:async :added "4.1"}
-(fact "TODO")
-
 ^{:refer std.lib.stream.async/wrap-time :added "3.0"}
 (fact "wraps timing given the output"
 
@@ -223,12 +220,6 @@
                   :delay 100})
   => 2)
 
-^{:refer std.lib.stream.async/i:step :added "4.1"}
-(fact "TODO")
-
-^{:refer std.lib.stream.async/i:guard :added "4.1"}
-(fact "TODO")
-
 ^{:refer std.lib.stream.async/produce-flux :added "3.0"}
 (fact "takes from a flux"
 
@@ -257,16 +248,16 @@
                  (flux)))
   
   (def -s- (s/*> -f-
-                 (x:step inc)
+                 (i:step inc)
                  (s/<*>)))
   
   (mapv deref (take 10 -s-))
   => '(1 2 3 4 5 6 7 8 9 10)
 
   (def -g- (s/*> (range 10)
-                 (comp (x:step inc {:collect [{:path [:time :A]
+                 (comp (i:step inc {:collect [{:path [:time :A]
                                                :wrap wrap-time}]})
-                       (x:step inc {:collect [{:path [:time :B]
+                       (i:step inc {:collect [{:path [:time :B]
                                                :wrap wrap-time}
                                               {:path [:time :C]
                                                :wrap wrap-time}]}))
@@ -308,10 +299,10 @@
        (catch Throwable t
          (.printStackTrace t)))
 
-  (realize (s/unit (comp (x:async)
-                         (x:async inc)
-                         (x:async inc)
-                         (x:async))
+  (realize (s/unit (comp (i:async)
+                         (i:async inc)
+                         (i:async inc)
+                         (i:async))
                    1))
 
   {:flux {"hello" {:enter 1598303017142143460, :exit 1598303023052046987}}, :time {:A 5029, :B 2882, :C 10119}}
