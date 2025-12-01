@@ -38,3 +38,34 @@
              (print "Halfway")
              (print i))))
   => "DO i = 1, 10\n  IF (i == 5) THEN\n    PRINT *, 'Halfway'\n  ELSE\n    PRINT *, i\n  END IF\nEND DO")
+
+
+^{:refer rt.fortran.grammar/fortran-type :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.fortran.grammar/fortran-args :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.fortran.grammar/fortran-decl :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.fortran.grammar/fortran-defn :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.fortran.grammar/fortran-defprogram :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.fortran.grammar/fortran-def :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.fortran.grammar/fortran-print :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.fortran.grammar/fortran-module :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.fortran.grammar/fortran-emit-if :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.fortran.grammar/fortran-emit-for :added "4.1"}
+(fact "TODO")

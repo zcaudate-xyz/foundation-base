@@ -168,3 +168,34 @@
       "  function transfer(address to,uint value) external returns(bool);"
       "  function balanceOf(address owner) external view returns(uint);"
       "}"))
+
+
+^{:refer rt.solidity.grammar/sol-emit-block :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.solidity.grammar/sol-emit-body :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.solidity.grammar/sol-defcontract :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.solidity.grammar/sol-deflibrary :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.solidity.grammar/sol-deferror :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.solidity.grammar/sol-defmodifier :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.solidity.grammar/sol-unchecked :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.solidity.grammar/sol-emit-let :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.solidity.grammar/sol-assembly :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.solidity.grammar/sol-emit-statement :added "4.1"}
+(fact "TODO")

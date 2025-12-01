@@ -62,3 +62,19 @@
   (l/emit-as :go ['(x-str-join "," ["a" "b"])])
   => "strings.Join([]interface{}{\"a\", \"b\"},\",\")"
 )
+
+
+^{:refer std.lang.model.spec-go/go-typesystem :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-go/go-vector :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-go/tf-go-arrow :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-go/go-defstruct :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-go/go-definterface :added "4.1"}
+(fact "TODO")

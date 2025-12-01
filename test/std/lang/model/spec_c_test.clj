@@ -78,3 +78,25 @@
    ['(sizeof x)]
    {:lang :c})
   => "{sizeof x}")
+
+
+^{:refer std.lang.model.spec-c/tf-struct :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-c/tf-enum :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-c/tf-typedef :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-c/c-fn-args :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-c/tf-defn :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-c/tf-arrow :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-c/tf-sizeof :added "4.1"}
+(fact "TODO")

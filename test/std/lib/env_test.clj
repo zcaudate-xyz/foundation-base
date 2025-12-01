@@ -244,3 +244,7 @@
 (fact "wraps a function to print its result"
   ((wrap-print +) 1 2)
   => 3)
+
+
+^{:refer std.lib.env/prfn :added "4.1"}
+(fact "TODO")

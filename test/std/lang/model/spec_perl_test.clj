@@ -84,3 +84,25 @@
       (x:str-join "," arr))
    {:lang :perl})
   => "split(\",\", \"a,b\");\nuc(\"a\");\njoin(\",\", $arr);")
+
+
+^{:refer std.lang.model.spec-perl/perl-var :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-perl/perl-symbol :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-perl/perl-invoke-args :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-perl/perl-invoke :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-perl/perl-defn :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-perl/perl-array :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-perl/perl-map :added "4.1"}
+(fact "TODO")

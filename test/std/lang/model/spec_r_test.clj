@@ -98,3 +98,25 @@
                                 {:success ok
                                  :error err}))
     => '(tryCatch (block (var ok (call)) ok) :error (fn [err] err))))
+
+
+^{:refer std.lang.model.spec-r/tf-defn :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-r/tf-infix-if :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-r/tf-for-object :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-r/tf-for-array :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-r/tf-for-iter :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-r/tf-for-index :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-r/tf-for-return :added "4.1"}
+(fact "TODO")

@@ -426,3 +426,7 @@
 (fact "create scaggold to expose native imports "
   (emit-scaffold-imports 'L.core {:lang :lua :library +library-ext+})
   => string?)
+
+
+^{:refer std.lang.base.impl/clone-default-library :added "4.1"}
+(fact "TODO")

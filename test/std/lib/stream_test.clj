@@ -268,3 +268,7 @@
   (take 5 (object-seq (volatile! -1)
                       #(vswap! % inc)))
   => '(0 1 2 3 4))
+
+
+^{:refer std.lib.stream/collect-persistent :added "4.1"}
+(fact "TODO")

@@ -192,3 +192,16 @@
   (submit-dispatch -e- 2)
   (submit-dispatch -e- 1)
   (submit-dispatch -e- 3))
+
+
+^{:refer std.dispatch.hub/started?-dispatch :added "4.1"}
+(fact "TODO")
+
+^{:refer std.dispatch.hub/stopped?-dispatch :added "4.1"}
+(fact "TODO")
+
+^{:refer std.dispatch.hub/health-dispatch :added "4.1"}
+(fact "TODO")
+
+^{:refer std.dispatch.hub/props-dispatch :added "4.1"}
+(fact "TODO")

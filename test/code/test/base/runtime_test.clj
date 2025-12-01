@@ -179,3 +179,10 @@
     (with-redefs [h/ns-sym (constantly 'my.ns)]
       (rt/run-op {:line 10} :setup?)))
   => true)
+
+
+^{:refer code.test.base.runtime/new-context :added "4.1"}
+(fact "TODO")
+
+^{:refer code.test.base.runtime/with-new-context :added "4.1"}
+(fact "TODO")

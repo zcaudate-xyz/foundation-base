@@ -67,3 +67,40 @@
    '(x-len arr)
    {:lang :php})
   => "x_len($arr)")
+
+
+^{:refer std.lang.model.spec-php/is-capitalized? :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-php/php-symbol :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-php/php-invoke-args :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-php/php-invoke :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-php/php-var :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-php/php-defn :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-php/php-defn- :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-php/php-array :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-php/php-map :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-php/php-dot-string :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-php/php-dot :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-php/php-new :added "4.1"}
+(fact "TODO")

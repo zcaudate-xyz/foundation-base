@@ -51,3 +51,19 @@
       (x:cat "a" "b"))
    {:lang :ruby})
   => "puts \"hello\"\n\n\"a\" + \"b\"\n")
+
+
+^{:refer std.lang.model.spec-ruby/ruby-symbol :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-ruby/ruby-fn :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-ruby/ruby-defn :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-ruby/ruby-var :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-ruby/ruby-map :added "4.1"}
+(fact "TODO")
