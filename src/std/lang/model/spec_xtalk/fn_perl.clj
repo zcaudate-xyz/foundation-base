@@ -107,8 +107,47 @@
    :x-str-to-upper    {:macro #'perl-tf-x-str-to-upper   :emit :macro :symbol #{'x:str-to-upper}}
    :x-str-to-lower    {:macro #'perl-tf-x-str-to-lower   :emit :macro :symbol #{'x:str-to-lower}}})
 
+;;
+;; RETURN
+;;
+
+(defn perl-tf-x-return-encode
+  ([[_ out id key]]
+   (h/$ (do (:- "use JSON::PP")
+            (eval
+             (return (encode_json {:id  ~id
+                                   :key ~key
+                                   :type  "data"
+                                   :value  ~out})))
+            (if ~(symbol "$@")
+              (return (encode_json {:id  ~id
+                                    :key ~key
+                                    :type  "raw"
+                                    :value (str ~out)})))))))
+
+(defn perl-tf-x-return-wrap
+  ([[_ f encode-fn]]
+   (h/$ (do (:- "use JSON::PP")
+            (eval
+             (:= out (~f)))
+            (if ~(symbol "$@")
+              (return (encode_json {:type "error"
+                                    :value (str ~(symbol "$@"))})))
+            (return (~encode-fn out nil nil))))))
+
+(defn perl-tf-x-return-eval
+  ([[_ s wrap-fn]]
+   (h/$ (return (~wrap-fn (fn []
+                            (return (eval ~s))))))))
+
+(def +perl-return+
+  {:x-return-encode  {:macro #'perl-tf-x-return-encode   :emit :macro}
+   :x-return-wrap    {:macro #'perl-tf-x-return-wrap     :emit :macro}
+   :x-return-eval    {:macro #'perl-tf-x-return-eval     :emit :macro}})
+
 (def +perl+
   (merge +perl-core+
          +perl-math+
          +perl-arr+
-         +perl-str+))
+         +perl-str+
+         +perl-return+))

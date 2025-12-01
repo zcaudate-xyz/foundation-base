@@ -43,6 +43,15 @@
          [:python :libpython]          'rt.libpython
          [:python :remote-port]        'rt.basic.impl.process-python
          [:python :remote-ws]          'rt.basic.impl.process-python
+
+         [:ruby   :oneshot]            'rt.basic.impl.process-ruby
+         [:ruby   :basic]              'rt.basic.impl.process-ruby
+
+         [:perl   :oneshot]            'rt.basic.impl.process-perl
+         [:perl   :basic]              'rt.basic.impl.process-perl
+
+         [:php    :oneshot]            'rt.basic.impl.process-php
+         [:php    :basic]              'rt.basic.impl.process-php
          
          [:r      :oneshot]            'rt.basic.impl.process-r
          [:r      :basic]              'rt.basic.impl.process-r
