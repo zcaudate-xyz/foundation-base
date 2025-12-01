@@ -113,3 +113,10 @@
 
   (!.julia (x:arr-push [1] 2))
   => "push!([1] , 2)")
+
+
+^{:refer std.lang.model.spec-julia/tf-dict :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-julia/tf-push! :added "4.1"}
+(fact "TODO")

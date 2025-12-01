@@ -108,30 +108,26 @@
                              (nil? curr) nil
                              (let [b (zip/right-element curr)]
                                (and (base/block? b)
-                                    (not= :void (base/block-type b))
-                                    (not= :comment (base/block-type b))))
+                                    (not (type/void-block? b))
+                                    (not (type/comment-block? b))))
                              curr
                              :else (recur (zip/step-right curr)))))
             ;; Find label (first valid)
             first-valid (if (let [b (zip/right-element start-z)]
                               (and (base/block? b)
-                                   (not= :void (base/block-type b))
-                                   (not= :comment (base/block-type b))))
+                                   (not (type/void-block? b))
+                                   (not (type/comment-block? b))))
                           start-z
                           (next-valid start-z))
             
-            _ (println "First valid:" (if first-valid (base/block-string (zip/right-element first-valid)) "nil"))
-
             ;; Now skip 'idx' instructions
             inst-z (loop [curr first-valid i 0]
-                     (println "Loop i:" i "Curr:" (if curr (base/block-string (zip/right-element curr)) "nil"))
                      (if (>= i (inc idx)) ;; +1 for label
                        curr
                        (recur (next-valid curr) (inc i))))]
-        (println "Inst Z:" (if inst-z (base/block-string (zip/right-element inst-z)) "nil"))
         (highlight inst-z))
 
-      (do (println "Block not found:" block) z)))) ;; Not found?
+      z))) ;; Not found?
 
 (defn instruction? [b]
   ;; Instructions are vectors [ ... ]
@@ -162,6 +158,8 @@
                           {}
                           blocks)
         entry-label (block-val (first (filter-valid (first blocks))))
+        _ (println "Make VM - Entry:" entry-label "Class:" (class entry-label) "Nil?:" (nil? entry-label))
+        _ (if (nil? entry-label) (throw (ex-info "Entry label not found" {:blocks (count blocks) :first-block (first blocks)})))
         z (block-zip root-code)]
     (LLVMState. {} {} {:block entry-label :idx 0} nil {} block-map nil z)))
 
