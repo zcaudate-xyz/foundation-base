@@ -6,7 +6,7 @@
             [std.string :as str]))
 
 ^{:refer rt.verilog.grammar/tf-module :added "4.1"}
-(fact "test verilog module"
+(fact "transforms module definition"
   (l/emit-as :verilog
    ['(defn my_module [clk rst out]
        (reg [7 0] count)
@@ -46,6 +46,14 @@
    ['(assign out count)])
   => "assign out = count ;")
 
+^{:refer rt.verilog.grammar/tf-initial :added "4.1"}
+(fact "transforms initial block"
+  (l/emit-as :verilog
+   ['(initial
+      (delay 10)
+      (:= clk 0))])
+  => "initial begin \n  #10;\n  clk = 0 ; \nend")
+
 ^{:refer rt.verilog.grammar/tf-always :added "4.1"}
 (fact "transforms always block"
   (l/emit-as :verilog
@@ -71,8 +79,20 @@
    ['(reg [7 0] count)])
   => "reg [7:0] count;")
 
+^{:refer rt.verilog.grammar/tf-wire :added "4.1"}
+(fact "transforms wire declaration"
+  (l/emit-as :verilog
+   ['(wire w1)])
+  => "wire w1;")
+
 ^{:refer rt.verilog.grammar/tf-delay :added "4.1"}
 (fact "transforms delay #10"
   (l/emit-as :verilog
    ['(delay 10)])
   => "#10;")
+
+^{:refer rt.verilog.grammar/tf-concatenation :added "4.1"}
+(fact "transforms concatenation {a, b}"
+  (l/emit-as :verilog
+   ['(cat a b)])
+  => "{a, b}")

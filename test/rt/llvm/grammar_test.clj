@@ -16,7 +16,7 @@
                       [new-reg new-reg]))))
 
 ^{:refer rt.llvm.grammar/tf-define :added "4.1"}
-(fact "basic emit tests"
+(fact "transforms llvm define"
   (l/emit-as :llvm
     ['(define i32 main [i32 %argc ptr %argv]
       (label entry)
@@ -24,15 +24,11 @@
       (ret i32 %1))])
   => "define i32 main(i32 %argc, ptr %argv) { \n  entry:\n  %1 = add i32 %argc, 1\n  ret i32 %1 \n}")
 
-^{:refer rt.llvm.grammar/tf-br :added "4.1"}
-(fact "control flow"
+^{:refer rt.llvm.grammar/tf-declare :added "4.1"}
+(fact "transforms llvm declare"
   (l/emit-as :llvm
-    ['(define void foo [i1 %cond]
-      (label entry)
-      (br %cond %label_true %label_false)
-
-      (label label_true)
-      (ret void)
+   ['(declare i32 printf [ptr i32])])
+  => "declare i32 printf(ptr, i32)")
 
       (label label_false)
       (ret void))])
@@ -49,14 +45,17 @@
       (ret i32 %val))])
   => "define i32 test_mem() { \n  entry:\n  %ptr = alloca i32\n  store i32 42, ptr %ptr\n  %val = load i32, ptr %ptr\n  ret i32 %val \n}")
 
-^{:refer rt.llvm.grammar/tf-icmp :added "4.1"}
-(fact "icmp"
+^{:refer rt.llvm.grammar/tf-label :added "4.1"}
+(fact "transforms label"
   (l/emit-as :llvm
-    ['(define i1 check [i32 %a i32 %b]
-      (label entry)
-      (:= %res (icmp eq i32 %a %b))
-      (ret i1 %res))])
-  => "define i1 check(i32 %a, i32 %b) { \n  entry:\n  %res = icmp eq i32 %a, %b\n  ret i1 %res \n}")
+   ['(label entry)])
+  => "entry:")
+
+^{:refer rt.llvm.grammar/tf-ret :added "4.1"}
+(fact "transforms ret"
+  (l/emit-as :llvm
+   ['(ret i32 0)])
+  => "ret i32 0"
 
 ^{:refer rt.llvm.grammar/tf-call :added "4.1"}
 (fact "call"
@@ -86,18 +85,55 @@
   (l/emit-as :llvm
    ['(ret i32 0)])
   => "ret i32 0")
+  (l/emit-as :llvm
+   ['(ret void)])
+  => "ret void")
 
 ^{:refer rt.llvm.grammar/tf-assign :added "4.1"}
 (fact "transforms assignment"
   (l/emit-as :llvm
    ['(:= %1 2)])
   => "%1 = 2")
+   ['(:= %ptr (alloca i32))])
+  => "%ptr = alloca i32")
 
 ^{:refer rt.llvm.grammar/tf-inst-bin :added "4.1"}
 (fact "helper for binary instructions"
   (l/emit-as :llvm
    ['(add i32 1 2)])
   => "add i32 1, 2")
+   ['(add i32 %a %b)
+    '(sub i32 %a %b)
+    '(mul i32 %a %b)])
+  => "add i32 %a, %b\n\nsub i32 %a, %b\n\nmul i32 %a, %b")
+
+^{:refer rt.llvm.grammar/tf-icmp :added "4.1"}
+(fact "transforms icmp"
+  (l/emit-as :llvm
+   ['(icmp eq i32 %a %b)])
+  => "icmp eq i32 %a, %b")
+
+^{:refer rt.llvm.grammar/tf-br :added "4.1"}
+(fact "transforms br"
+  (l/emit-as :llvm
+   ['(br %label)])
+  => "br label %label"
+
+  (l/emit-as :llvm
+   ['(br %cond %label_true %label_false)])
+  => "br i1 %cond, label %label_true, label %label_false")
+
+^{:refer rt.llvm.grammar/tf-call :added "4.1"}
+(fact "transforms call"
+  (l/emit-as :llvm
+   ['(call i32 printf [[ptr str] [i32 123]])])
+  => "call i32 printf(ptr str, i32 123)")
+
+^{:refer rt.llvm.grammar/tf-alloca :added "4.1"}
+(fact "transforms alloca"
+  (l/emit-as :llvm
+   ['(alloca i32)])
+  => "alloca i32")
 
 ^{:refer rt.llvm.grammar/tf-store :added "4.1"}
 (fact "transforms store"
