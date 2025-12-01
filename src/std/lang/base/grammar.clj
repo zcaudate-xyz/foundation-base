@@ -210,6 +210,7 @@
                    :xtalk-type
                    :xtalk-bit
                    :xtalk-lu
+                   :xtalk-obj
                    :xtalk-arr
                    :xtalk-str
                    :xtalk-js
