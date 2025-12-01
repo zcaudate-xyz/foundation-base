@@ -122,7 +122,8 @@
         :default {:function  {:raw ""}}
         :data    {:vector    {:start "{" :end "}" :space ""}
                   :tuple     {:start "(" :end ")" :space ""}}
-        :block  {:for       {:parameter {:sep ","}}}
+        :block  {:for       {:parameter {:sep ","}}
+                 :script    {:start "" :end ""}}
         :define {:def       {:raw ""}}}
        (h/merge-nested (emit/default-grammar))))
 
