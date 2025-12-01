@@ -81,6 +81,11 @@
     (default-library:reset))
   => anything)
 
+^{:refer std.lang.base.impl/clone-default-library :added "4.1"}
+(fact "clones the default library"
+  (clone-default-library)
+  => lib/library?)
+
 ^{:refer std.lang.base.impl/runtime-library :added "4.0"}
 (fact "gets the current runtime (annex or default)"
 
@@ -426,7 +431,3 @@
 (fact "create scaggold to expose native imports "
   (emit-scaffold-imports 'L.core {:lang :lua :library +library-ext+})
   => string?)
-
-
-^{:refer std.lang.base.impl/clone-default-library :added "4.1"}
-(fact "TODO")
