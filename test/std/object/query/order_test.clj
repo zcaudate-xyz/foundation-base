@@ -26,6 +26,8 @@
 
   (-> (query/query-class (type []) ["create"])
       ((order/merge-terms-fn {:merge true})))
+  => std.object.element.common.Element
+  
   ;;=> #[create :: ([java.util.List]), ([clojure.lang.ISeq]),
   ;;               ([clojure.lang.IReduceInit]), ([java.lang.Object[]]),
   ;;               ([java.lang.Iterable])]
@@ -43,10 +45,7 @@
 
   (->> (query/query-class (type []) ["create"])
        (order/order {:select-terms [:params]}))
-  ;;=> ([java.util.List] [clojure.lang.ISeq]
-  ;;    [clojure.lang.IReduceInit] [[Ljava.lang.Object;]
-  ;;    [java.lang.Iterable])
-  )
+  => not-empty)
 
 (comment
   (code.manage/import))

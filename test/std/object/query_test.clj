@@ -8,17 +8,20 @@
 ^{:refer std.object.query/all-class-members :added "3.0"}
 (fact "returns the raw reflected methods, fields and constructors"
 
-  (all-class-members String))
+  (all-class-members String)
+  => not-empty)
 
 ^{:refer std.object.query/all-class-elements :added "3.0"}
 (fact "returns elements "
 
-  (all-class-elements String))
+  (all-class-elements String)
+  => not-empty)
 
 ^{:refer std.object.query/select-class-elements :added "3.0"}
 (fact "returns the processed reflected methods, fields and constructors"
 
-  (select-class-elements String [#"^c" :name]))
+  (select-class-elements String [#"^c" :name])
+  => not-empty)
 
 ^{:refer std.object.query/query-class :added "3.0"}
 (fact "queries the java view of the class declaration"
@@ -27,17 +30,19 @@
   ;;=> ["charAt" "checkBounds" "codePointAt" "codePointBefore"
   ;;    "codePointCount" "compareTo" "compareToIgnoreCase"
   ;;    "concat" "contains" "contentEquals" "copyValueOf"]
-  )
+  => not-empty)
 
 ^{:refer std.object.query/select-supers-elements :added "3.0"}
 (fact "returns the elements related to the type's super classes"
 
-  (select-supers-elements String []))
+  (select-supers-elements String [])
+  => not-empty)
 
 ^{:refer std.object.query/query-supers :added "3.0"}
 (fact "returns all elements associated with the context class's super"
 
-  (query-supers "122" []))
+  (query-supers "122" [])
+  => not-empty)
 
 ^{:refer std.object.query/query-hierarchy :added "3.0"}
 (fact "lists what methods could be applied to a particular instance"
@@ -48,12 +53,14 @@
 ^{:refer std.object.query/all-instance-elements :added "3.0"}
 (fact "returns the hierarchy of elements corresponding to a class"
 
-  (all-instance-elements String nil))
+  (all-instance-elements String nil)
+  => not-empty)
 
 ^{:refer std.object.query/select-instance-elements :added "3.0"}
 (fact "returns the hierarchy of elements corresponding to a class"
 
-  (select-instance-elements String nil [#"^c" :name]))
+  (select-instance-elements String nil [#"^c" :name])
+  => not-empty)
 
 ^{:refer std.object.query/query-instance :added "3.0"}
 (fact "lists what class methods could be applied to a particular instance"

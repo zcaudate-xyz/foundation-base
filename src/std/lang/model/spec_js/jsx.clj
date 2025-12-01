@@ -195,32 +195,35 @@
          ntag   (cond-> ntag
                   (.startsWith ntag "<") (subs 1)
                   (.endsWith ntag ">") (h/lsubs 1))
-         end    (str  "</" ntag ">")
-         [prefix params] (emit-jsx-params params grammar mopts)
-         start  (str  "<" ntag prefix params
-                      ">")
-         indent   common/*indent*
-         body-arr (binding [common/*indent* 0]
-                    (->> children
-                         (mapv (fn [form]
-                                 (cond (string? form) form
-                                       
-                                       (and (vector? form)
-                                         (keyword? (first form)))
-                                       (emit-jsx-inner form grammar mopts)
-                                       
-                                       :else (str "{" (emit/emit-main form grammar mopts) "}"))))))
-         single?  (data/emit-singleline-array? body-arr)
-         body     (if single?
-                    (str/join "" body-arr)
-                    (str/indent  (str/join "\n" body-arr) (+ 2 indent)))]
-     (str start
-          (if single? "" "\n")
-          body
-          (if (or (not single?)
-                  (str/multi-line? start))
-            (common/newline-indent))
-          end))))
+
+         [prefix params] (emit-jsx-params params grammar mopts)]
+     (if (empty? children)
+       (str "<" ntag prefix params "/>")
+       (let [end    (str  "</" ntag ">")
+             start  (str  "<" ntag prefix params
+                          ">")
+             indent   common/*indent*
+             body-arr (binding [common/*indent* 0]
+                        (->> children
+                             (mapv (fn [form]
+                                     (cond (string? form) form
+
+                                           (and (vector? form)
+                                                (keyword? (first form)))
+                                           (emit-jsx-inner form grammar mopts)
+
+                                           :else (str "{" (emit/emit-main form grammar mopts) "}"))))))
+             single?  (data/emit-singleline-array? body-arr)
+             body     (if single?
+                        (str/join "" body-arr)
+                        (str/indent  (str/join "\n" body-arr) (+ 2 indent)))]
+         (str start
+              (if single? "" "\n")
+              body
+              (if (or (not single?)
+                      (str/multi-line? start))
+                (common/newline-indent))
+              end))))))
 
 (defn emit-jsx-raw
   "emits the jsx transform
