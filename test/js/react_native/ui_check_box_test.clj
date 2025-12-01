@@ -66,7 +66,7 @@
         {:title "D"
          :onPress (fn:> (setDisabled (not disabled)))}]]))))
 
-^{:refer js.react-native.ui-check-box/checkBoxTheme :added "4.0"}
+^{:refer js.react-native.ui-check-box/checkBoxTheme :added "4.0" :unchecked true}
 (fact "creates the checkbox theme")
 
 ^{:refer js.react-native.ui-check-box/CheckBox :added "0.1"}

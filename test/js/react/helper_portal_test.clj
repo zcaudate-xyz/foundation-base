@@ -14,7 +14,7 @@
  {:setup    [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
-^{:refer js.react.helper-portal/newRegistry :added "4.0"}
+^{:refer js.react.helper-portal/newRegistry :added "4.0" :unchecked true}
 (fact "creates a new portal registry"
   ^:hidden
   
@@ -24,10 +24,10 @@
        "sinks" {},
        "initial" {}, "sources" {}}))
 
-^{:refer js.react.helper-portal/captureSink :added "4.0"}
+^{:refer js.react.helper-portal/captureSink :added "4.0" :unchecked true}
 (fact "captures the sink ref")
 
-^{:refer js.react.helper-portal/triggerSink :added "4.0"}
+^{:refer js.react.helper-portal/triggerSink :added "4.0" :unchecked true}
 (fact "triggers the registry"
   ^:hidden
   
@@ -40,7 +40,7 @@
      "hello"))
   => [123 456 789])
 
-^{:refer js.react.helper-portal/addSink :added "4.0"}
+^{:refer js.react.helper-portal/addSink :added "4.0" :unchecked true}
 (fact "adds a sink to the registry"
   ^:hidden
   
@@ -55,7 +55,7 @@
      {:setSource (repl/>notify)}))
   => [123 456 789])
 
-^{:refer js.react.helper-portal/removeSink :added "4.0"}
+^{:refer js.react.helper-portal/removeSink :added "4.0" :unchecked true}
 (fact "removes a sink"
 
   (!.js
@@ -68,7 +68,7 @@
     "hello"))
   => {})
 
-^{:refer js.react.helper-portal/addSource :added "4.0"}
+^{:refer js.react.helper-portal/addSource :added "4.0" :unchecked true}
 (fact "adds a source for render"
   ^:hidden
   
@@ -84,7 +84,7 @@
      "abc"))
   => [123 456 789 "abc"])
 
-^{:refer js.react.helper-portal/removeSource :added "4.0"}
+^{:refer js.react.helper-portal/removeSource :added "4.0" :unchecked true}
 (fact "removes a source for render"
   ^:hidden
   

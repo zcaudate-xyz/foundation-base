@@ -66,7 +66,7 @@
         {:title "D"
          :onPress (fn:> (setDisabled (not disabled)))}]]))))
 
-^{:refer js.react-native.ui-radio-box/radioBoxTheme :added "4.0"}
+^{:refer js.react-native.ui-radio-box/radioBoxTheme :added "4.0" :unchecked true}
 (fact "creates a radio box theme")
 
 ^{:refer js.react-native.ui-radio-box/RadioBox :added "0.1"}

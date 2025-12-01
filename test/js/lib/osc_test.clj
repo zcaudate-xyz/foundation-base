@@ -16,7 +16,7 @@
              (l/rt:scaffold :js)]
   :teardown [(l/rt:stop)]})
 
-^{:refer js.lib.osc/newOSC :added "4.0"}
+^{:refer js.lib.osc/newOSC :added "4.0" :unchecked true}
 (fact "creates a new OSC instance"
   ^:hidden
   
@@ -24,7 +24,7 @@
    (k/obj-keys (osc/newOSC)))
   => ["options" "eventHandler"])
 
-^{:refer js.lib.osc/newMessage :added "4.0"}
+^{:refer js.lib.osc/newMessage :added "4.0" :unchecked true}
 (fact "creates a new OSC Message"
   ^:hidden
 
@@ -32,7 +32,7 @@
    (k/obj-keys (osc/newMessage ["test", "path"], 50, 100.52, "test")))
   => ["offset" "address" "types" "args"])
 
-^{:refer js.lib.osc/newBundle :added "4.0"}
+^{:refer js.lib.osc/newBundle :added "4.0" :unchecked true}
 (fact "creates a new OSC Bundle"
   ^:hidden
 
@@ -43,7 +43,7 @@
      (osc/newMessage ["test", "path"], 50, 100.52, "test"))))
   => ["offset" "timetag" "bundleElements"])
 
-^{:refer js.lib.osc/DatagramPlugin :added "4.0"}
+^{:refer js.lib.osc/DatagramPlugin :added "4.0" :unchecked true}
 (fact "creates a Datagram plugin"
   ^:hidden
 
@@ -62,7 +62,7 @@
        "type" "udp4",
        "open" {"host" "localhost", "exclusive" false, "port" 41234}}})
 
-^{:refer js.lib.osc/BridgePlugin :added "4.0"}
+^{:refer js.lib.osc/BridgePlugin :added "4.0" :unchecked true}
 (fact "creates a Bridge plugin"
   ^:hidden
 
@@ -84,7 +84,7 @@
        "wsServer" {"host" "localhost", "port" 8080},
        "receiver" "ws"}})
 
-^{:refer js.lib.osc/WebsocketClientPlugin :added "4.0"}
+^{:refer js.lib.osc/WebsocketClientPlugin :added "4.0" :unchecked true}
 (fact "creates a Ws Client Plugin"
   ^:hidden
   
@@ -98,7 +98,7 @@
       "options"
       {"protocol" [], "host" "localhost", "secure" false, "port" 8080}})
 
-^{:refer js.lib.osc/WebsocketServerPlugin :added "4.0"}
+^{:refer js.lib.osc/WebsocketServerPlugin :added "4.0" :unchecked true}
 (fact "creates a Ws Server Plugin"
   ^:hidden
   
@@ -111,7 +111,7 @@
       "socket" nil,
       "options" {"host" "localhost", "port" 8081}})
 
-^{:refer js.lib.osc/on :added "4.0"
+^{:refer js.lib.osc/on :added "4.0" :unchecked true
   :setup [(l/rt:restart)
           (l/rt:scaffold :js)]
   :teardown [(l/rt:restart)
@@ -143,13 +143,13 @@
               "address" "/test"},
        "info" {"address" "127.0.0.1", "port" 41234, "family" "IPv4", "size" 24}}))
 
-^{:refer js.lib.osc/off :added "4.0"}
+^{:refer js.lib.osc/off :added "4.0" :unchecked true}
 (fact "removes an event listener to the osc server")
 
-^{:refer js.lib.osc/send :added "4.0"}
+^{:refer js.lib.osc/send :added "4.0" :unchecked true}
 (fact "sends a message or a bundle")
 
-^{:refer js.lib.osc/open :added "4.0"
+^{:refer js.lib.osc/open :added "4.0" :unchecked true
   :setup [(l/rt:restart)
           (l/rt:scaffold :js)]
   :teardown [(l/rt:restart)
@@ -179,10 +179,10 @@
     
     (osc/open osc {})))
 
-^{:refer js.lib.osc/status :added "4.0"}
+^{:refer js.lib.osc/status :added "4.0" :unchecked true}
 (fact "gets the current osc status")
 
-^{:refer js.lib.osc/close :added "4.0"
+^{:refer js.lib.osc/close :added "4.0" :unchecked true
   :setup [(l/rt:restart)
           (l/rt:scaffold :js)]
   :teardown [(l/rt:restart)

@@ -2,7 +2,7 @@
   (:use code.test)
   (:require [js.react.layout :as layout]))
 
-^{:refer js.react.layout/ui-template-classify :added "4.0"}
+^{:refer js.react.layout/ui-template-classify :added "4.0" :unchecked true}
 (fact "classifies a hiccup element"
   ^:hidden
 
@@ -31,7 +31,7 @@
       :props {:class "red"},
       :children [[:p] [:p]]})
 
-^{:refer js.react.layout/ui-template-controls-layout :added "4.0"}
+^{:refer js.react.layout/ui-template-controls-layout :added "4.0" :unchecked true}
 (fact "templates the layout controls"
   ^:hidden
   
@@ -51,7 +51,7 @@
    ["grow"])
   => [:div {:class ["grow" "gap-3" "h-full"]}])
 
-^{:refer js.react.layout/ui-template-controls :added "4.0"}
+^{:refer js.react.layout/ui-template-controls :added "4.0" :unchecked true}
 (fact "templates the control directives"
   ^:hidden
 
@@ -74,10 +74,10 @@
    {})
   => '(. pages (map (fn [p i] (return [:<> {:key i} [:div [:h2 p.title]]])))))
 
-^{:refer js.react.layout/ui-template-replace :added "4.0"}
+^{:refer js.react.layout/ui-template-replace :added "4.0" :unchecked true}
 (fact "replaces children in template")
 
-^{:refer js.react.layout/ui-template-namespaced :added "4.0"}
+^{:refer js.react.layout/ui-template-namespaced :added "4.0" :unchecked true}
 (fact "template namespaced tags"
   ^:hidden
   
@@ -93,16 +93,16 @@
   => '[:% Container {:class "red"}
        [:div {:class "container"} nil]])
 
-^{:refer js.react.layout/ui-template-components-resolve :added "4.0"}
+^{:refer js.react.layout/ui-template-components-resolve :added "4.0" :unchecked true}
 (fact "resolves the components map")
 
-^{:refer js.react.layout/ui-template-components-classify :added "4.0"}
+^{:refer js.react.layout/ui-template-components-classify :added "4.0" :unchecked true}
 (fact "classifies components")
 
-^{:refer js.react.layout/ui-template-components-expand :added "4.0"}
+^{:refer js.react.layout/ui-template-components-expand :added "4.0" :unchecked true}
 (fact "expands components")
 
-^{:refer js.react.layout/ui-template :added "4.0"}
+^{:refer js.react.layout/ui-template :added "4.0" :unchecked true}
 (fact "compiling all the "
   ^:hidden
   

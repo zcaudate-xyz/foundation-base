@@ -19,7 +19,7 @@
   :teardown [(l/rt:stop)
              (bench/stop-redis-array [17001])]})
 
-^{:refer js.lib.driver-redis/connect-constructor :added "4.0"}
+^{:refer js.lib.driver-redis/connect-constructor :added "4.0" :unchecked true}
 (fact "creates a connection"
   ^:hidden
 

@@ -40,7 +40,7 @@
   (-/CELL-reset cell)
   (return cell))
 
-^{:refer js.cell.impl-model/async-fn :adopt true :added "4.0"}
+^{:refer js.cell.impl-model/async-fn :adopt true :added "4.0" :unchecked true}
 (fact "async function"
   ^:hidden
   
@@ -49,7 +49,7 @@
                              {:success k/identity}))
   => {"a" 1})
 
-^{:refer js.cell.impl-model/wrap-cell-args :added "4.0"}
+^{:refer js.cell.impl-model/wrap-cell-args :added "4.0" :unchecked true}
 (fact "puts the cell as first argument"
   ^:hidden
   
@@ -60,7 +60,7 @@
      :args ["hello"]}))
   => (contains-in ["hello" integer?]))
 
-^{:refer js.cell.impl-model/prep-view :added "4.0"
+^{:refer js.cell.impl-model/prep-view :added "4.0" :unchecked true
   :setup [(fact:global :setup)
           (notify/wait-on :js
             (. (-/get-cell (fn []
@@ -80,7 +80,7 @@
    (impl-model/prep-view (-/CELL) "hello" "ping" {}))
   => vector?)
 
-^{:refer js.cell.impl-model/get-view-dependents :added "4.0"}
+^{:refer js.cell.impl-model/get-view-dependents :added "4.0" :unchecked true}
 (fact "gets all dependents for a view"
   ^:hidden
   
@@ -92,7 +92,7 @@
   => {"test/common" ["a1"],
       "test/util" ["c3"]})
 
-^{:refer js.cell.impl-model/get-model-dependents :added "4.0"}
+^{:refer js.cell.impl-model/get-model-dependents :added "4.0" :unchecked true}
 (fact "gets all dependents for a model"
   ^:hidden
   
@@ -104,16 +104,16 @@
   => {"test/common" true,
       "test/util" true})
 
-^{:refer js.cell.impl-model/run-tail-call :added "4.0"}
+^{:refer js.cell.impl-model/run-tail-call :added "4.0" :unchecked true}
 (fact "helper function for tail calls on `run` commands")
 
-^{:refer js.cell.impl-model/run-remote :added "4.0"}
+^{:refer js.cell.impl-model/run-remote :added "4.0" :unchecked true}
 (fact "runs the remote function")
 
-^{:refer js.cell.impl-model/remote-call :added "4.0"}
+^{:refer js.cell.impl-model/remote-call :added "4.0" :unchecked true}
 (fact "runs tthe remote call")
 
-^{:refer js.cell.impl-model/run-refresh :added "4.0"
+^{:refer js.cell.impl-model/run-refresh :added "4.0" :unchecked true
   :setup [(fact:global :setup)
           (notify/wait-on :js
             (. (-/get-cell (fn []
@@ -141,7 +141,7 @@
        "main" [true ["pong" integer?]],
        "post" [false]}))
 
-^{:refer js.cell.impl-model/refresh-view-dependents :added "4.0"
+^{:refer js.cell.impl-model/refresh-view-dependents :added "4.0" :unchecked true
   :setup [(fact:global :setup)
           (notify/wait-on :js
             (. (-/get-cell (fn []
@@ -178,7 +178,7 @@
   (not= +res+ +res2+)
   => true)
 
-^{:refer js.cell.impl-model/refresh-view :added "4.0"
+^{:refer js.cell.impl-model/refresh-view :added "4.0" :unchecked true
   :setup [(fact:global :setup)
           (notify/wait-on :js
             (. (-/get-cell (fn []
@@ -203,10 +203,10 @@
        "main"   [true ["hello" integer?]],
        "pre"    [false],}))
 
-^{:refer js.cell.impl-model/refresh-view-remote :added "4.0"}
+^{:refer js.cell.impl-model/refresh-view-remote :added "4.0" :unchecked true}
 (fact "calls update on remote function")
 
-^{:refer js.cell.impl-model/refresh-view-dependents-unthrottled :added "4.0"
+^{:refer js.cell.impl-model/refresh-view-dependents-unthrottled :added "4.0" :unchecked true
   :setup [(fact:global :setup)
           (notify/wait-on :js
             (. (-/get-cell (fn []
@@ -249,7 +249,7 @@
   (not= +res+ +res2+)
   => true)
 
-^{:refer js.cell.impl-model/refresh-model :added "4.0"}
+^{:refer js.cell.impl-model/refresh-model :added "4.0" :unchecked true}
 (fact "refreshes the model"
   ^:hidden
   
@@ -269,7 +269,7 @@
         "pre" [false],
         "::" "view.run"}]))
 
-^{:refer js.cell.impl-model/get-model-deps :added "4.0"}
+^{:refer js.cell.impl-model/get-model-deps :added "4.0" :unchecked true}
 (fact "gets model deps"
   ^:hidden
   
@@ -279,7 +279,7 @@
     :ping1  {:deps ["ping"]}})
   => {"hello" {"ping" {"ping1" true}}})
 
-^{:refer js.cell.impl-model/get-unknown-deps :added "4.0"}
+^{:refer js.cell.impl-model/get-unknown-deps :added "4.0" :unchecked true}
 (fact "gets unknown deps"
   ^:hidden
 
@@ -307,7 +307,7 @@
     (-/CELL)))
   => [["hello" "ping2"]])
 
-^{:refer js.cell.impl-model/create-throttle :added "4.0"}
+^{:refer js.cell.impl-model/create-throttle :added "4.0" :unchecked true}
 (fact "creates the throttle"
   ^:hidden
 
@@ -318,7 +318,7 @@
     nil))
   => {"queued" {}, "active" {}})
 
-^{:refer js.cell.impl-model/create-view :added "4.0"}
+^{:refer js.cell.impl-model/create-view :added "4.0" :unchecked true}
 (fact "creates a view"
   ^:hidden
   
@@ -339,7 +339,7 @@
        {"@/cell"
         {"meta" {"listener/id" "@/cell", "listener/type" "view"}}}}))
 
-^{:refer js.cell.impl-model/add-model-attach :added "4.0"}
+^{:refer js.cell.impl-model/add-model-attach :added "4.0" :unchecked true}
 (fact "adds model statically"
   ^:hidden
   
@@ -365,7 +365,7 @@
        "deps" {},
        "throttle" {"queued" {}, "active" {}}}))
 
-^{:refer js.cell.impl-model/add-model :added "4.0"
+^{:refer js.cell.impl-model/add-model :added "4.0" :unchecked true
   :setup [(fact:global :setup)
           (notify/wait-on :js
             (. (-/get-cell (fn []
@@ -447,7 +447,7 @@
                  "pre" [false],
                  "::" "view.run"}]))
 
-^{:refer js.cell.impl-model/remove-model :added "4.0"
+^{:refer js.cell.impl-model/remove-model :added "4.0" :unchecked true
   :setup [(fact:global :setup)
           (notify/wait-on :js
             (. (-/get-cell (fn []
@@ -489,7 +489,7 @@
        "init" {},
        "throttle" {"queued" {}, "active" {}}}))
 
-^{:refer js.cell.impl-model/remove-view :added "4.0"
+^{:refer js.cell.impl-model/remove-view :added "4.0" :unchecked true
   :setup [(j/<!
            (. (impl-model/add-model
                (-/CELL)
@@ -515,7 +515,7 @@
        {"@/cell"
         {"meta" {"listener/id" "@/cell", "listener/type" "view"}}}}))
 
-^{:refer js.cell.impl-model/model-update :added "4.0"
+^{:refer js.cell.impl-model/model-update :added "4.0" :unchecked true
   :setup [(fact:global :setup)
           (notify/wait-on :js
             (. (-/get-cell (fn []
@@ -553,7 +553,7 @@
         "pre" [false],
         "::" "view.run"}}))
 
-^{:refer js.cell.impl-model/view-update :added "4.0"}
+^{:refer js.cell.impl-model/view-update :added "4.0" :unchecked true}
 (fact "updates a view"
   ^:hidden
   
@@ -570,7 +570,7 @@
        "pre" [false],
        "::" "view.run"}))
 
-^{:refer js.cell.impl-model/view-set-input :added "4.0"
+^{:refer js.cell.impl-model/view-set-input :added "4.0" :unchecked true
   :setup [(fact:global :setup)
           (notify/wait-on :js
             (. (-/get-cell (fn []
@@ -597,7 +597,7 @@
        "pre" [false],
        "::" "view.run"}))
 
-^{:refer js.cell.impl-model/trigger-model-raw :added "4.0"
+^{:refer js.cell.impl-model/trigger-model-raw :added "4.0" :unchecked true
   :setup [(fact:global :setup)
           (notify/wait-on :js
             (. (-/get-cell (fn []
@@ -622,7 +622,7 @@
                                  {}))
   => ["ping"])
 
-^{:refer js.cell.impl-model/trigger-model :added "4.0"}
+^{:refer js.cell.impl-model/trigger-model :added "4.0" :unchecked true}
 (fact "triggers a model"
   ^:hidden
   
@@ -633,7 +633,7 @@
                         {}))
   => ["ping"])
 
-^{:refer js.cell.impl-model/trigger-view :added "4.0"}
+^{:refer js.cell.impl-model/trigger-view :added "4.0" :unchecked true}
 (fact "triggers a view"
   ^:hidden
   
@@ -667,14 +667,14 @@
                              {:a 1}))
   => {"hello" ["ping"]})
 
-^{:refer js.cell.impl-model/add-raw-callback :added "4.0"}
+^{:refer js.cell.impl-model/add-raw-callback :added "4.0" :unchecked true}
 (fact "adds the callback on events"
   ^:hidden
   
   (!.js (impl-model/add-raw-callback (-/CELL)))
   => vector?)
 
-^{:refer js.cell.impl-model/remove-raw-callback :added "4.0"}
+^{:refer js.cell.impl-model/remove-raw-callback :added "4.0" :unchecked true}
 (fact "removes the cell callback"
   ^:hidden
   

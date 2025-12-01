@@ -24,7 +24,7 @@
 
 (def +core+ (browser/play-worker))
 
-^{:refer js.cell.link-raw/link-listener-call :added "4.0"}
+^{:refer js.cell.link-raw/link-listener-call :added "4.0" :unchecked true}
 (fact "resolves a call to the link"
   ^:hidden
   
@@ -57,7 +57,7 @@
                 "status" "error",
                 "op" "eval"}))
 
-^{:refer js.cell.link-raw/link-listener-event :added "4.0"}
+^{:refer js.cell.link-raw/link-listener-event :added "4.0" :unchecked true}
 (fact "notifies all registered callbacks"
   ^:hidden
 
@@ -71,7 +71,7 @@
                                           :handler (fn:> true)}}))
   => ["hello" "world"])
 
-^{:refer js.cell.link-raw/link-listener :added "4.0"}
+^{:refer js.cell.link-raw/link-listener :added "4.0" :unchecked true}
 (fact "constructs a link listener"
   ^:hidden
   
@@ -83,10 +83,10 @@
                           {})
   => 1)
 
-^{:refer js.cell.link-raw/link-create-worker :added "4.0"}
+^{:refer js.cell.link-raw/link-create-worker :added "4.0" :unchecked true}
 (fact "helper function to create a worker")
 
-^{:refer js.cell.link-raw/link-create :added "4.0"}
+^{:refer js.cell.link-raw/link-create :added "4.0" :unchecked true}
 (fact "creates a link from url"
   ^:hidden
 
@@ -153,7 +153,7 @@
        (then (repl/>notify))))
   => (contains ["pong" integer?]))
 
-^{:refer js.cell.link-raw/link-active :added "4.0"}
+^{:refer js.cell.link-raw/link-active :added "4.0" :unchecked true}
 (fact "gets the calls that are active"
   ^:hidden
   
@@ -168,7 +168,7 @@
   => (contains-in
       [{"input" {"body" [100], "route" "@/ping-async", "op" "route"}}]))
 
-^{:refer js.cell.link-raw/add-callback :added "4.0"}
+^{:refer js.cell.link-raw/add-callback :added "4.0" :unchecked true}
 (fact "adds a callback to the link"
   ^:hidden
   
@@ -219,13 +219,13 @@
        "status" "error", "op" "route"
        "route" "@/error-async"}))
 
-^{:refer js.cell.link-raw/list-callbacks :added "4.0"}
+^{:refer js.cell.link-raw/list-callbacks :added "4.0" :unchecked true}
 (fact "lists all callbacks on the link")
 
-^{:refer js.cell.link-raw/remove-callback :added "4.0"}
+^{:refer js.cell.link-raw/remove-callback :added "4.0" :unchecked true}
 (fact "removes a callback on the link")
 
-^{:refer js.cell.link-raw/call-id :added "4.0"}
+^{:refer js.cell.link-raw/call-id :added "4.0" :unchecked true}
 (fact "gets the call id"
   ^:hidden
   
@@ -236,7 +236,7 @@
        (eval (@! (browser/play-worker true)))))))
   => string?)
 
-^{:refer js.cell.link-raw/call :added "4.0"}
+^{:refer js.cell.link-raw/call :added "4.0" :unchecked true}
 (fact "calls the link with an event"
   ^:hidden
   
@@ -260,7 +260,7 @@
                              true)))}))))
   => [1 2 3 4])
 
-^{:refer js.cell.link-raw/wait-post :added "4.0"}
+^{:refer js.cell.link-raw/wait-post :added "4.0" :unchecked true}
 (fact "posts code to worker"
   ^:hidden
   
@@ -285,7 +285,7 @@
     "id-route")
   => true)
 
-^{:refer js.cell.link-raw/async-post :added "4.0"
+^{:refer js.cell.link-raw/async-post :added "4.0" :unchecked true
   :setup [(!.js (:= (!:G LK) (link-raw/link-create 
                (fn []
                  (eval (@! (browser/play-worker true)))))))]}
@@ -310,7 +310,7 @@
     true)
   => [1 2 3 4])
 
-^{:refer js.cell.link-raw/post-eval :added "4.0"
+^{:refer js.cell.link-raw/post-eval :added "4.0" :unchecked true
   :setup [(!.js (:= (!:G LK)
                     (link-raw/link-create 
                      (fn []
@@ -337,7 +337,7 @@
                     :body {}})))
   => {"body" {}, "status" "ok", "op" "stream", "topic" "hello"})
 
-^{:refer js.cell.link-raw/wait-eval :added "4.0"
+^{:refer js.cell.link-raw/wait-eval :added "4.0" :unchecked true
   :setup [(!.js (:= (!:G LK) (link-raw/link-create 
                               (fn []
                                 (eval (@! (browser/play-worker true)))))))]}

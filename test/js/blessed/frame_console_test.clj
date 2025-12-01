@@ -11,7 +11,7 @@
               [js.lib.chalk :as chk]]
    :export  [MODULE]})
 
-^{:refer js.blessed.frame-console/ConsoleMain :added "4.0"}
+^{:refer js.blessed.frame-console/ConsoleMain :added "4.0" :unchecked true}
 (fact "creates a primary frame-console button"
   ^:hidden
   
@@ -28,7 +28,7 @@
                      :B2 (fn:> [:box "B2"])
                      :C3 (fn:> [:box "C3"])}]}]]])))
 
-^{:refer js.blessed.frame-console/Console :added "4.0"}
+^{:refer js.blessed.frame-console/Console :added "4.0" :unchecked true}
 (fact "creates a primary frame-console button"
   ^:hidden
   

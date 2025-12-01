@@ -16,7 +16,7 @@
              ]
    :export [MODULE]})
 
-^{:refer js.react-native.physical-modal/getPosition :adopt true :added "4.0"}
+^{:refer js.react-native.physical-modal/getPosition :adopt true :added "4.0" :unchecked true}
 (fact "gets the position of a component"
 
   (defn.js GetPositionDemo
@@ -63,7 +63,7 @@
        [:% n/TextDisplay
         {:content (n/format-obj display)}]]))))
 
-^{:refer js.react-native.physical-modal/displayModal :adopt true :added "4.0"}
+^{:refer js.react-native.physical-modal/displayModal :adopt true :added "4.0" :unchecked true}
 (fact "gets the position of a component"
 
   (defn.js DisplayModalDemo

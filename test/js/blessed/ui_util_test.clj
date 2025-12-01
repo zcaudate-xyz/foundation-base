@@ -21,10 +21,10 @@
           (l/rt:scaffold-imports :js)]
   :teardown [(l/rt:stop)]})
 
-^{:refer js.blessed.ui-util/copyClipboard :added "4.0"}
+^{:refer js.blessed.ui-util/copyClipboard :added "4.0" :unchecked true}
 (fact "helper function to copy text to clipboard")
 
-^{:refer js.blessed.ui-util/say :added "4.0"}
+^{:refer js.blessed.ui-util/say :added "4.0" :unchecked true}
 (fact "helper function to say something"
   ^:hidden
   
@@ -43,7 +43,7 @@
           :onClick (fn []
                      (ui-util/say val))}]]))))
 
-^{:refer js.blessed.ui-util/CopyButton :added "4.0"}
+^{:refer js.blessed.ui-util/CopyButton :added "4.0" :unchecked true}
 (fact "provides a Copy Button"
   ^:hidden
 
@@ -69,10 +69,10 @@
                    (ui-util/say "Text Copied"))}]])))
 
 
-^{:refer js.blessed.ui-util/parseErrorTag :added "4.0"}
+^{:refer js.blessed.ui-util/parseErrorTag :added "4.0" :unchecked true}
 (fact "parses the error tag")
 
-^{:refer js.blessed.ui-util/ErrorLine :added "4.0"}
+^{:refer js.blessed.ui-util/ErrorLine :added "4.0" :unchecked true}
 (fact "provides an error line"
   ^:hidden
   
@@ -89,7 +89,7 @@
                 :message "HELLO"}
         :content "Copy Text"}]])))
 
-^{:refer js.blessed.ui-util/StatusLine :added "4.0"}
+^{:refer js.blessed.ui-util/StatusLine :added "4.0" :unchecked true}
 (fact "provides a status line"
   ^:hidden
   

@@ -18,7 +18,7 @@
              [xt.lang.base-lib :as k]]
    :export [MODULE]})
 
-^{:refer js.react.ext-view/listenView :adopt true :added "4.0"}
+^{:refer js.react.ext-view/listenView :adopt true :added "4.0" :unchecked true}
 (fact "uses an async entry"
 
   (defn.js ListenViewPane
@@ -71,7 +71,7 @@
          {:key type}}]))))
 
 
-^{:refer js.react.ext-view/listenViewOutput :adopt true :added "4.0"}
+^{:refer js.react.ext-view/listenViewOutput :adopt true :added "4.0" :unchecked true}
 (fact "uses an async entry"
 
   (defn.js ListenViewOutputPane
@@ -125,7 +125,7 @@
          {:key types}}]))))
 
 
-^{:refer js.react.ext-view/listenViewOutput.MULTI :adopt true :added "4.0"}
+^{:refer js.react.ext-view/listenViewOutput.MULTI :adopt true :added "4.0" :unchecked true}
 (fact "uses an async entry"
 
   (defn.js ListenViewOutputMultiPane

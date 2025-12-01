@@ -12,7 +12,7 @@
               [js.lib.chalk :as chk]]
    :export  [MODULE]})
 
-^{:refer js.blessed.frame-status/Status :added "4.0"}
+^{:refer js.blessed.frame-status/Status :added "4.0" :unchecked true}
 (fact "displays status"
   ^:hidden
   

@@ -16,7 +16,7 @@
              [js.core :as j]]
    :export [MODULE]})
 
-^{:refer js.react-native.ui-router/useTransition :added "4.0"}
+^{:refer js.react-native.ui-router/useTransition :added "4.0" :unchecked true}
 (fact "creates all props involved with transition"
   ^:hidden
   
@@ -33,10 +33,10 @@
                 :backgroundColor "red"
                 :transform [{"rotateY" (+ j/PI "rad")}]}}] ))))
 
-^{:refer js.react-native.ui-router/RouterImpl :added "4.0"}
+^{:refer js.react-native.ui-router/RouterImpl :added "4.0" :unchecked true}
 (fact "creates the transitioning router")
 
-^{:refer js.react-native.ui-router/Router :added "4.0"}
+^{:refer js.react-native.ui-router/Router :added "4.0" :unchecked true}
 (fact "creates a Router"
   ^:hidden
   

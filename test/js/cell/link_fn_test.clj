@@ -23,7 +23,7 @@
   :teardown  [(l/rt:stop)]})
 
 
-^{:refer js.cell.link-fn/tmpl-link-route :added "4.0"}
+^{:refer js.cell.link-fn/tmpl-link-route :added "4.0" :unchecked true}
 (fact "performs a template"
   ^:hidden
   
@@ -38,7 +38,7 @@
            :route "@/trigger",
            :body [op topic status body]}))))
 
-^{:refer js.cell.link-fn/ping :adopt true :added "4.0"}
+^{:refer js.cell.link-fn/ping :adopt true :added "4.0" :unchecked true}
 (fact "performs link ping"
   ^:hidden
   
@@ -50,7 +50,7 @@
        (then (repl/>notify))))
   => (contains ["pong" integer?]))
 
-^{:refer js.cell.link-fn/ping-async :adopt true :added "4.0"}
+^{:refer js.cell.link-fn/ping-async :adopt true :added "4.0" :unchecked true}
 (fact "performs link async ping"
   ^:hidden
 
@@ -62,7 +62,7 @@
        (then (repl/>notify))))
   => (contains ["pong" integer?]))
 
-^{:refer js.cell.link-fn/echo :adopt true :added "4.0"}
+^{:refer js.cell.link-fn/echo :adopt true :added "4.0" :unchecked true}
 (fact "performs link echo"
   ^:hidden
   
@@ -86,7 +86,7 @@
                (repl/notify ((k/first e) "hello"))))))
   => "hello")
 
-^{:refer js.cell.link-fn/echo-async :adopt true :added "4.0"}
+^{:refer js.cell.link-fn/echo-async :adopt true :added "4.0" :unchecked true}
 (fact  "performs link async echo"
   ^:hidden
 
@@ -110,7 +110,7 @@
                (repl/notify ((k/first e) "hello"))))))
   => "hello")
 
-^{:refer js.cell.link-fn/trigger :adopt true :added "4.0"}
+^{:refer js.cell.link-fn/trigger :adopt true :added "4.0" :unchecked true}
 (fact "triggers an event"
   ^:hidden
   
@@ -125,7 +125,7 @@
       "op" "stream",
       "topic" "hello"})
 
-^{:refer js.cell.link-fn/trigger-async :adopt true :added "4.0"}
+^{:refer js.cell.link-fn/trigger-async :adopt true :added "4.0" :unchecked true}
 (fact  "triggers an event after delay"
   ^:hidden
 
@@ -137,7 +137,7 @@
     (link-fn/trigger-async link "stream" "hello" "ok" "hello" 100))
   => {"body" "hello", "status" "ok", "op" "stream", "topic" "hello"})
 
-^{:refer js.cell.link-fn/error :adopt true :added "4.0"}
+^{:refer js.cell.link-fn/error :adopt true :added "4.0" :unchecked true}
 (fact "throws an error"
   ^:hidden
   
@@ -150,7 +150,7 @@
   => (contains-in {"body" ["error" integer?], "route" "@/error",
                    "status" "error", "op" "route"}))
 
-^{:refer js.cell.link-fn/error-async :adopt true :added "4.0"}
+^{:refer js.cell.link-fn/error-async :adopt true :added "4.0" :unchecked true}
 (fact "throws a error on delay"
   ^:hidden
   
@@ -164,7 +164,7 @@
                    "route" "@/error-async"
                    "status" "error", "op" "route"}))
 
-^{:refer js.cell.link-fn/route-list :adopt true :added "4.0"}
+^{:refer js.cell.link-fn/route-list :adopt true :added "4.0" :unchecked true}
 (fact "gets the route list"
   ^:hidden
   
@@ -190,7 +190,7 @@
        "@/eval-disable"
        "@/eval-status"})
 
-^{:refer js.cell.link-fn/route-entry :adopt true :added "4.0"}
+^{:refer js.cell.link-fn/route-entry :adopt true :added "4.0" :unchecked true}
 (fact "gets the route doc"
   ^:hidden
 

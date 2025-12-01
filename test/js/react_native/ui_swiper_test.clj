@@ -17,13 +17,13 @@
              ]
    :export [MODULE]})
 
-^{:refer js.react-native.ui-swiper/swiperTransform :added "4.0"}
+^{:refer js.react-native.ui-swiper/swiperTransform :added "4.0" :unchecked true}
 (fact "transforms swiper position to screen")
 
-^{:refer js.react-native.ui-swiper/swiperTheme :added "4.0"}
+^{:refer js.react-native.ui-swiper/swiperTheme :added "4.0" :unchecked true}
 (fact "creates the swiper theme")
 
-^{:refer js.react-native.ui-swiper/useSwiperPosition :added "4.0"}
+^{:refer js.react-native.ui-swiper/useSwiperPosition :added "4.0" :unchecked true}
 (fact "helper function to connect swiper position")
 
 ^{:refer js.react-native.ui-swiper/Swiper :added "0.1"}

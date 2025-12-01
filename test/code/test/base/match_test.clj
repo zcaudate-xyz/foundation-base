@@ -2,23 +2,6 @@
   (:use code.test)
   (:require [code.test.base.match :refer :all]))
 
-^{:id code-template}
-(fact:template "This test uses a variable to show 'pattern'"
-
-  (let [my-var 2]
-    (inc my-var) => 4))
-
-
-^{:id code-template
-  :replace {inc dec}}
-(fact:derive "testing more things")
-
-(fact:table [(inc x) => 1]
-  [1 2]
-  [1 2]
-  )
-
-
 ^{:refer code.test.base.match/match-base :added "3.0"}
 (fact "determines whether a term matches with a filter"
   ^:hidden

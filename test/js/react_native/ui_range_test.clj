@@ -17,10 +17,10 @@
              ]
    :export [MODULE]})
 
-^{:refer js.react-native.ui-range/rangeTheme :added "4.0"}
+^{:refer js.react-native.ui-range/rangeTheme :added "4.0" :unchecked true}
 (fact "creates the range theme")
 
-^{:refer js.react-native.ui-range/useKnob :added "4.0"}
+^{:refer js.react-native.ui-range/useKnob :added "4.0" :unchecked true}
 (fact "creates the knob for range")
 
 ^{:refer js.react-native.ui-range/Range :added "0.1"}

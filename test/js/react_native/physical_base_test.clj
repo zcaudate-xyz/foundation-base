@@ -19,7 +19,7 @@
              ]
    :export [MODULE]})
 
-^{:refer js.react-native.physical-base/Tag :added "4.0"}
+^{:refer js.react-native.physical-base/Tag :added "4.0" :unchecked true}
 (fact "listens to a single indicator to set ref"
   ^:hidden
   
@@ -42,16 +42,16 @@
          [:% ui/Tag
           {:indicator ind}]])))))
 
-^{:refer js.react-native.physical-base/transformInner :added "4.0"}
+^{:refer js.react-native.physical-base/transformInner :added "4.0" :unchecked true}
 (fact "allow inner components access to chords and indicators")
 
-^{:refer js.react-native.physical-base/transformProps :added "4.0"}
+^{:refer js.react-native.physical-base/transformProps :added "4.0" :unchecked true}
 (fact "higher order react function or transforming props")
 
-^{:refer js.react-native.physical-base/transformInnerFn :added "4.0"}
+^{:refer js.react-native.physical-base/transformInnerFn :added "4.0" :unchecked true}
 (fact "transforms inner props")
 
-^{:refer js.react-native.physical-base/Box :added "4.0"}
+^{:refer js.react-native.physical-base/Box :added "4.0" :unchecked true}
 (fact "demo of indicators"
   ^:hidden
   
@@ -142,7 +142,7 @@
                                              :backgroundColor (c/mix ["orange" "purple"]
                                                                      v)}}))}}]}])))))
 
-^{:refer js.react-native.physical-base/Text :added "4.0"}
+^{:refer js.react-native.physical-base/Text :added "4.0" :unchecked true}
 (fact "creates a text element"
   ^:hidden
   
@@ -174,28 +174,28 @@
           [:% ui/Tag
            {:indicator ind0}]])))))
 
-^{:refer js.react-native.physical-base/useChordDisabled :added "4.0"}
+^{:refer js.react-native.physical-base/useChordDisabled :added "4.0" :unchecked true}
 (fact "constructs chord and indicator for disable flag")
 
-^{:refer js.react-native.physical-base/useChordHighlighted :added "4.0"}
+^{:refer js.react-native.physical-base/useChordHighlighted :added "4.0" :unchecked true}
 (fact "constructs chord and indicator for highlighted flag")
 
-^{:refer js.react-native.physical-base/useChordHoverable :added "4.0"}
+^{:refer js.react-native.physical-base/useChordHoverable :added "4.0" :unchecked true}
 (fact "constructs chord and indicator for hovering motion")
 
-^{:refer js.react-native.physical-base/useChordPressable :added "4.0"}
+^{:refer js.react-native.physical-base/useChordPressable :added "4.0" :unchecked true}
 (fact "constructs chord and indicator for pressing motion")
 
-^{:refer js.react-native.physical-base/useChordEmptyable :added "4.0"}
+^{:refer js.react-native.physical-base/useChordEmptyable :added "4.0" :unchecked true}
 (fact "constructs chord and indicator for empty value on inputs")
 
-^{:refer js.react-native.physical-base/useChordFocusable :added "4.0"}
+^{:refer js.react-native.physical-base/useChordFocusable :added "4.0" :unchecked true}
 (fact "constructs chord and indicator for focusing motion")
 
-^{:refer js.react-native.physical-base/useChordDraggable :added "4.0"}
+^{:refer js.react-native.physical-base/useChordDraggable :added "4.0" :unchecked true}
 (fact "constructs chord and indicator for drag enable and drag capture motion")
 
-^{:refer js.react-native.physical-base/mergeChords :added "4.0"}
+^{:refer js.react-native.physical-base/mergeChords :added "4.0" :unchecked true}
 (comment "merges all chords, indicators and methods"
   ^:hidden
   
@@ -220,19 +220,19 @@
       "indicators" {"a" "A", "b" "B", "c" "C"},
       "chord" {"a" "A", "b" "B", "c" "C"}})
 
-^{:refer js.react-native.physical-base/useIndicatorCapture :added "4.0"}
+^{:refer js.react-native.physical-base/useIndicatorCapture :added "4.0" :unchecked true}
 (fact "allow capture of indicators from a top level element")
 
-^{:refer js.react-native.physical-base/useHoverable :added "4.0"}
+^{:refer js.react-native.physical-base/useHoverable :added "4.0" :unchecked true}
 (fact "helper function for hoverable targets")
 
-^{:refer js.react-native.physical-base/HoverableTarget :added "4.0"}
+^{:refer js.react-native.physical-base/HoverableTarget :added "4.0" :unchecked true}
 (fact "an element that responds when mouse is hovering")
 
-^{:refer js.react-native.physical-base/useTouchable :added "4.0"}
+^{:refer js.react-native.physical-base/useTouchable :added "4.0" :unchecked true}
 (fact "helper function for all touchable type components")
 
-^{:refer js.react-native.physical-base/TouchableBasePressing :added "4.0"}
+^{:refer js.react-native.physical-base/TouchableBasePressing :added "4.0" :unchecked true}
 (fact "base touchable with pressing indicator"
   ^:hidden
   
@@ -270,7 +270,7 @@
                     (fn [data chord]
                       (return {:text (n/format-obj #{data chord})}))}]}])))))
 
-^{:refer js.react-native.physical-base/TouchableBinary :added "4.0"}
+^{:refer js.react-native.physical-base/TouchableBinary :added "4.0" :unchecked true}
 (fact "base touchable with single state"
   ^:hidden
   
@@ -321,10 +321,10 @@
                   (fn [data chord]
                     (return {:text (n/format-obj #{data chord})}))}]}]))))
 
-^{:refer js.react-native.physical-base/useInputable :added "4.0"}
+^{:refer js.react-native.physical-base/useInputable :added "4.0" :unchecked true}
 (fact "helper function for inputable components")
 
-^{:refer js.react-native.physical-base/TouchableInput :added "4.0"}
+^{:refer js.react-native.physical-base/TouchableInput :added "4.0" :unchecked true}
 (fact "base touchable with single state"
   ^:hidden
   

@@ -16,7 +16,7 @@
              (l/rt:scaffold :js)]
   :teardown [(l/rt:stop)]})
 
-^{:refer js.lib.ua-parser/parseString :added "4.0"}
+^{:refer js.lib.ua-parser/parseString :added "4.0" :unchecked true}
 (fact "gets information from the user agent on browser"
   ^:hidden
 

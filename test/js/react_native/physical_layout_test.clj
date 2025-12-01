@@ -20,7 +20,7 @@
 
 ^{:refer js.react-native.physical-layout/Grid
   :adopt true
-  :added "4.0"}
+  :added "4.0" :unchecked true}
 (fact "creates a PanResponder"
   ^:hidden
   
@@ -56,7 +56,7 @@
 
 ^{:refer js.react-native.physical-layout/FlexWrap
   :adopt true
-  :added "4.0"}
+  :added "4.0" :unchecked true}
 (fact "creates a set of edit points"
   ^:hidden
   

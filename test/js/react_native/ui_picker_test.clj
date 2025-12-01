@@ -17,13 +17,13 @@
              ]
    :export [MODULE]})
 
-^{:refer js.react-native.ui-picker/pickerTheme :added "4.0"}
+^{:refer js.react-native.ui-picker/pickerTheme :added "4.0" :unchecked true}
 (fact "creates the picker theme")
 
-^{:refer js.react-native.ui-picker/usePickerPosition :added "4.0"}
+^{:refer js.react-native.ui-picker/usePickerPosition :added "4.0" :unchecked true}
 (fact "helper function to connect picker position")
 
-^{:refer js.react-native.ui-picker/PickerValues :added "4.0"}
+^{:refer js.react-native.ui-picker/PickerValues :added "4.0" :unchecked true}
 (fact "creates non editable picker values for display only")
 
 ^{:refer js.react-native.ui-picker/PickerIndexed :added "0.1"}

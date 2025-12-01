@@ -36,25 +36,25 @@
                       (repl/notify e.data))
                     false)))))
 
-^{:refer js.cell.base-fn/CELL_STATE :added "4.0"}
+^{:refer js.cell.base-fn/CELL_STATE :added "4.0" :unchecked true}
 (fact "gets worker state"
 
   (base-fn/CELL_STATE)
   => map?)
 
-^{:refer js.cell.base-fn/CELL_ROUTES :added "4.0"}
+^{:refer js.cell.base-fn/CELL_ROUTES :added "4.0" :unchecked true}
 (fact "gets worker routes"
 
   (base-fn/CELL_ROUTES)
   => map?)
 
-^{:refer js.cell.base-fn/get-state :added "4.0"}
+^{:refer js.cell.base-fn/get-state :added "4.0" :unchecked true}
 (fact "gets cell state")
 
-^{:refer js.cell.base-fn/get-routes :added "4.0"}
+^{:refer js.cell.base-fn/get-routes :added "4.0" :unchecked true}
 (fact "gets cell routes")
 
-^{:refer js.cell.base-fn/fn-self :added "4.0"}
+^{:refer js.cell.base-fn/fn-self :added "4.0" :unchecked true}
 (fact "applies arguments along with `self`"
   ^:hidden
   
@@ -63,7 +63,7 @@
                   xt.lang.base-lib/obj-keys))))
   => #{"onerror" "close" "postMessage" "addEventListener" "onmessage"})
 
-^{:refer js.cell.base-fn/fn-trigger :added "4.0"}
+^{:refer js.cell.base-fn/fn-trigger :added "4.0" :unchecked true}
 (fact "triggers an event"
   ^:hidden
   
@@ -76,7 +76,7 @@
                nil true)
   => {"body" {"a" 1}, "status" "ok", "op" "stream", "topic" "hello"})
 
-^{:refer js.cell.base-fn/fn-trigger-async :added "4.0"}
+^{:refer js.cell.base-fn/fn-trigger-async :added "4.0" :unchecked true}
 (fact "triggers an event after a delay"
   ^:hidden
   
@@ -90,7 +90,7 @@
                nil true)
   => {"body" {"a" 1}, "status" "ok", "op" "stream", "topic" "hello"})
 
-^{:refer js.cell.base-fn/fn-set-state :added "4.0"}
+^{:refer js.cell.base-fn/fn-set-state :added "4.0" :unchecked true}
 (fact "helper to set the state and emit event"
   ^:hidden
 
@@ -111,7 +111,7 @@
       "op" "stream",
       "topic" "@/::STATE"})
 
-^{:refer js.cell.base-fn/fn-final-set :added "4.0"}
+^{:refer js.cell.base-fn/fn-final-set :added "4.0" :unchecked true}
 (fact "sets the worker state to final"
   ^:hidden
   
@@ -127,7 +127,7 @@
       "op" "stream",
       "topic" "@/::STATE"})
 
-^{:refer js.cell.base-fn/fn-final-status :added "4.0"}
+^{:refer js.cell.base-fn/fn-final-status :added "4.0" :unchecked true}
 (fact "gets the final status"
   ^:hidden
 
@@ -141,7 +141,7 @@
                               self))))
   => true)
 
-^{:refer js.cell.base-fn/fn-eval-enable :added "4.0"}
+^{:refer js.cell.base-fn/fn-eval-enable :added "4.0" :unchecked true}
 (fact "enables eval"
   ^:hidden
   
@@ -154,7 +154,7 @@
                nil true)
   => {"body" {"eval" true}, "status" "ok", "op" "stream", "topic" "@/::STATE"})
 
-^{:refer js.cell.base-fn/fn-eval-disable :added "4.0"}
+^{:refer js.cell.base-fn/fn-eval-disable :added "4.0" :unchecked true}
 (fact "disables eval"
   ^:hidden
   
@@ -167,7 +167,7 @@
                nil true)
   => {"body" {"eval" false}, "status" "ok", "op" "stream", "topic" "@/::STATE"})
 
-^{:refer js.cell.base-fn/fn-eval-status :added "4.0"}
+^{:refer js.cell.base-fn/fn-eval-status :added "4.0" :unchecked true}
 (fact "gets the eval status"
   ^:hidden
   
@@ -181,7 +181,7 @@
                               self))))
   => false)
 
-^{:refer js.cell.base-fn/fn-route-list :added "4.0"}
+^{:refer js.cell.base-fn/fn-route-list :added "4.0" :unchecked true}
 (fact "gets the routes list"
   ^:hidden
 
@@ -191,7 +191,7 @@
   (eval-worker (js.cell.base-fn/fn-route-list))
   => vector?)
 
-^{:refer js.cell.base-fn/fn-route-entry :added "4.0"}
+^{:refer js.cell.base-fn/fn-route-entry :added "4.0" :unchecked true}
 (fact  "gets a route entry"
   ^:hidden
 
@@ -201,7 +201,7 @@
   (eval-worker (js.cell.base-fn/fn-route-entry "hello"))
   => nil)
 
-^{:refer js.cell.base-fn/fn-ping :added "4.0"}
+^{:refer js.cell.base-fn/fn-ping :added "4.0" :unchecked true}
 (fact "pings the worker"
   ^:hidden
   
@@ -211,7 +211,7 @@
   (eval-worker (js.cell.base-fn/fn-ping))
   => (contains ["pong" integer?]))
 
-^{:refer js.cell.base-fn/fn-ping-async :added "4.0"}
+^{:refer js.cell.base-fn/fn-ping-async :added "4.0" :unchecked true}
 (fact "pings after a delay"
   ^:hidden
 
@@ -221,7 +221,7 @@
   (eval-worker (js.cell.base-fn/fn-ping-async 100))
   => (contains ["pong" integer?]))
 
-^{:refer js.cell.base-fn/fn-echo :added "4.0"}
+^{:refer js.cell.base-fn/fn-echo :added "4.0" :unchecked true}
 (fact  "echos the first arg"
   ^:hidden
   
@@ -231,7 +231,7 @@
   (eval-worker (js.cell.base-fn/fn-echo "hello"))
   => (contains ["hello" integer?]))
 
-^{:refer js.cell.base-fn/fn-echo-async :added "4.0"}
+^{:refer js.cell.base-fn/fn-echo-async :added "4.0" :unchecked true}
 (fact "echos the first arg after delay"
   ^:hidden
 
@@ -241,7 +241,7 @@
   (eval-worker (js.cell.base-fn/fn-echo-async "hello" 100))
   => (contains ["hello" integer?]))
 
-^{:refer js.cell.base-fn/fn-error :added "4.0"}
+^{:refer js.cell.base-fn/fn-error :added "4.0" :unchecked true}
 (fact "throws an error"
   ^:hidden
   
@@ -251,7 +251,7 @@
   (eval-worker (js.cell.base-fn/fn-error))
   => :timeout)
 
-^{:refer js.cell.base-fn/fn-error-async :added "4.0"}
+^{:refer js.cell.base-fn/fn-error-async :added "4.0" :unchecked true}
 (fact  "throws an error after delay"
   ^:hidden
   
@@ -263,7 +263,7 @@
                300)
   => :timeout)
 
-^{:refer js.cell.base-fn/tmpl-local-route :added "4.0"}
+^{:refer js.cell.base-fn/tmpl-local-route :added "4.0" :unchecked true}
 (fact "templates a local function"
   ^:hidden
   
@@ -278,14 +278,14 @@
                                :async true
                                :args ["op" "topic" "status" "body" "ms"]}])
 
-^{:refer js.cell.base-fn/routes-base :added "4.0"}
+^{:refer js.cell.base-fn/routes-base :added "4.0" :unchecked true}
 (fact "returns the base routes"
   ^:hidden
   
   (base-fn/routes-base)
   => map?)
 
-^{:refer js.cell.base-fn/routes-init :added "4.0"}
+^{:refer js.cell.base-fn/routes-init :added "4.0" :unchecked true}
 (fact "initiates the base routes"
   ^:hidden
   

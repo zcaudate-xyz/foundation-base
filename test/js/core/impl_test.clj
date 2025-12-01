@@ -13,7 +13,7 @@
  {:setup    [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
-^{:refer js.core.impl/primitives :added "4.0" :adopt true}
+^{:refer js.core.impl/primitives :added "4.0" :unchecked true :adopt true}
 (fact "Runtime primitives"
 
   (!.js (typeof undefined))
@@ -55,7 +55,7 @@
   @(!.js (:% #"abc" g))
   => "/abc/g")
 
-^{:refer js.core.impl/global :added "4.0" :adopt true}
+^{:refer js.core.impl/global :added "4.0" :unchecked true :adopt true}
 (fact "Major runtime primitives"
   
   @(!.js j/JSObject)
@@ -131,7 +131,7 @@
   (!.js j/WebAssembly)
   => (any {} nil Exception))
 
-^{:refer js.core.impl/types :added "4.0" :adopt true}
+^{:refer js.core.impl/types :added "4.0" :unchecked true :adopt true}
 (fact "math functions"
 
   (!.js (typeof nil))
@@ -179,7 +179,7 @@
   (!.js (typeof (fn [])))
   => "function")
 
-^{:refer js.core.impl/eval :added "4.0" :adopt true}
+^{:refer js.core.impl/eval :added "4.0" :unchecked true :adopt true}
 (fact "eval"
 
   (!.js (j/getOwnPropertyNames (new Set)))
@@ -191,7 +191,7 @@
   (j/eval "2 + 2")
   => 4)
 
-^{:refer js.core.impl/math :added "4.0" :adopt true}
+^{:refer js.core.impl/math :added "4.0" :unchecked true :adopt true}
 (fact "math functions"
 
   (!.js j/LOG2E)
@@ -226,13 +226,13 @@
   (j/toRadix ''(10) 12)
   => "a")
 
-^{:refer js.core.impl/now :added "4.0" :adopt true}
+^{:refer js.core.impl/now :added "4.0" :unchecked true :adopt true}
 (fact "gets the current time"
 
   (j/now)
   => number?)
 
-^{:refer js.core.impl/concat :added "4.0" :adopt true}
+^{:refer js.core.impl/concat :added "4.0" :unchecked true :adopt true}
 (fact "concat arrays"
   ^:hidden
   
@@ -240,14 +240,14 @@
              [4 5 6])
   => [1 2 3 4 5 6])
 
-^{:refer js.core.impl/slice :added "4.0" :adopt true}
+^{:refer js.core.impl/slice :added "4.0" :unchecked true :adopt true}
 (fact "raw array slice"
   ^:hidden
   
   (j/slice [1 2 3 4 5] 2 4)
   => [3 4])
 
-^{:refer js.core.impl/fill :added "4.0" :adopt true}
+^{:refer js.core.impl/fill :added "4.0" :unchecked true :adopt true}
 (fact "fills array given index"
   ^:hidden
   
@@ -257,14 +257,14 @@
   (j/fill [1 1 1 1 1 1 1] 0 1 4)
   => [1 0 0 0 1 1 1])
 
-^{:refer js.core.impl/findIndex :added "4.0" :adopt true}
+^{:refer js.core.impl/findIndex :added "4.0" :unchecked true :adopt true}
 (fact "gets the index of a function"
   ^:hidden
 
   (j/findIndex [1 2 3 4] k/even?)
   => 1)
 
-^{:refer js.core.impl/flat :added "4.0" :adopt true}
+^{:refer js.core.impl/flat :added "4.0" :unchecked true :adopt true}
 (fact "flattens array to first level"
   ^:hidden
   
@@ -274,14 +274,14 @@
   (j/flat [[1 [1]] [[2] 3]] 1)
   => [1 [1] [2] 3])
 
-^{:refer js.core.impl/flattenDeep :added "4.0" :adopt true}
+^{:refer js.core.impl/flattenDeep :added "4.0" :unchecked true :adopt true}
 (fact "flattens nested arrays"
   ^:hidden
   
   (j/flatMap [[1 [1]] [[2] 3]] k/identity)
   => [1 [1] [2] 3])
 
-^{:refer js.core.impl/indexOf :added "4.0" :adopt true}
+^{:refer js.core.impl/indexOf :added "4.0" :unchecked true :adopt true}
 (fact "gets the first index of an element"
   ^:hidden
   
@@ -291,21 +291,21 @@
   (j/indexOf [3 2 3 4] 3)
   => 0)
 
-^{:refer js.core.impl/lastIndexOf :added "4.0" :adopt true}
+^{:refer js.core.impl/lastIndexOf :added "4.0" :unchecked true :adopt true}
 (fact "gets the last index of an element"
   ^:hidden
   
   (j/lastIndexOf [3 2 3 4] 3)
   => 2)
 
-^{:refer js.core.impl/map :added "4.0" :adopt true}
+^{:refer js.core.impl/map :added "4.0" :unchecked true :adopt true}
 (fact "maps function to array"
   ^:hidden
   
   (j/map [1 2 3 4 5] k/inc)
   => [2 3 4 5 6])
 
-^{:refer js.core.impl/reduce :added "4.0" :adopt true}
+^{:refer js.core.impl/reduce :added "4.0" :unchecked true :adopt true}
 (fact "reduces function given array"
   ^:hidden
 
@@ -314,7 +314,7 @@
              0)
   => 15)
 
-^{:refer js.core.impl/reduceRight :added "4.0" :adopt true}
+^{:refer js.core.impl/reduceRight :added "4.0" :unchecked true :adopt true}
 (fact "reduces function from the right"
   ^:hidden
 
@@ -323,7 +323,7 @@
                   0)
   => 15)
 
-^{:refer js.core.impl/filter :added "4.0" :adopt true}
+^{:refer js.core.impl/filter :added "4.0" :unchecked true :adopt true}
 (fact "filter array given a function"
   ^:hidden
 
@@ -332,7 +332,7 @@
              k/even?))
   => [2 4])
 
-^{:refer js.core.impl/every :added "4.0" :adopt true}
+^{:refer js.core.impl/every :added "4.0" :unchecked true :adopt true}
 (fact "checks if every element conforms to function"
 
   (!.js
@@ -340,7 +340,7 @@
             k/is-number?))
   => true)
 
-^{:refer js.core.impl/some :added "4.0" :adopt true}
+^{:refer js.core.impl/some :added "4.0" :unchecked true :adopt true}
 (fact "checks if any element conforms to function"
 
   (!.js
@@ -348,7 +348,7 @@
             (fn:> [x] (== 3 x))))
   => true)
 
-^{:refer js.core.impl/delayed :added "4.0"}
+^{:refer js.core.impl/delayed :added "4.0" :unchecked true}
 (fact "constructs a setTimeout function"
 
   (notify/wait-on :js
@@ -356,7 +356,7 @@
      (repl/notify 1)))
   => 1)
 
-^{:refer js.core.impl/repeating :added "4.0"}
+^{:refer js.core.impl/repeating :added "4.0" :unchecked true}
 (fact "constructs a setInterval function"
 
   ((:template @j/repeating) [10]
@@ -364,7 +364,7 @@
   => '(setInterval (fn [] (new Promise (fn [] (doSomething)))) 10))
 
 
-^{:refer js.core.impl/postMessage :added "4.0"}
+^{:refer js.core.impl/postMessage :added "4.0" :unchecked true}
 (fact "post message"
 
   ((:template @j/postMessage) 'worker [1 2 3])

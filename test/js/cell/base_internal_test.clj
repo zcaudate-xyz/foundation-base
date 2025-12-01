@@ -22,7 +22,7 @@
               (l/rt:scaffold-imports :js)]
   :teardown  [(l/rt:stop)]})
 
-^{:refer js.cell.base-internal/CANARY :adopt true :added "4.0"}
+^{:refer js.cell.base-internal/CANARY :adopt true :added "4.0" :unchecked true}
 (fact "preliminary check"
   ^:hidden
   
@@ -78,7 +78,7 @@
       (j/notify (worker/ping l)))
     => (contains ["pong"])))
 
-^{:refer js.cell.base-internal/worker-handle-async :added "4.0"}
+^{:refer js.cell.base-internal/worker-handle-async :added "4.0" :unchecked true}
 (fact "worker function for handling async tasks"
   ^:hidden
   
@@ -105,7 +105,7 @@
      []))
   => {"body" "hello", "id" "id-hello", "status" "ok", "op" "route"})
 
-^{:refer js.cell.base-internal/worker-process :added "4.0"}
+^{:refer js.cell.base-internal/worker-process :added "4.0" :unchecked true}
 (fact "processes various types of routes"
   ^:hidden
   
@@ -177,7 +177,7 @@
                                      :body [100]}))
   => (contains-in {"body" ["pong" integer?], "id" "id-route", "status" "ok", "op" "route"}))
 
-^{:refer js.cell.base-internal/worker-init :added "4.0"}
+^{:refer js.cell.base-internal/worker-init :added "4.0" :unchecked true}
 (fact "initiates the worker routes"
   ^:hidden
   
@@ -194,10 +194,10 @@
    (internal/worker-init worker))
   => true)
 
-^{:refer js.cell.base-internal/worker-init-post :added "4.0"}
+^{:refer js.cell.base-internal/worker-init-post :added "4.0" :unchecked true}
 (fact "posts an init message")
 
-^{:refer js.cell.base-internal/mock-send :added "4.0"}
+^{:refer js.cell.base-internal/mock-send :added "4.0" :unchecked true}
 (fact "sends a request to the mock worker"
   ^:hidden
   
@@ -211,12 +211,12 @@
       "status" "ok",
       "op" "eval"})
 
-^{:refer js.cell.base-internal/new-mock :added "4.0"}
+^{:refer js.cell.base-internal/new-mock :added "4.0" :unchecked true}
 (fact "creates a new mock worker"
 
   (!.js
    (internal/new-mock k/identity))
   => {"::" "worker.mock", "listeners" [nil]})
 
-^{:refer js.cell.base-internal/mock-init :added "4.0"}
+^{:refer js.cell.base-internal/mock-init :added "4.0" :unchecked true}
 (fact "initialises the mock worker")

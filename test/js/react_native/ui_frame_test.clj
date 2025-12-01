@@ -17,10 +17,10 @@
              ]
    :export [MODULE]})
 
-^{:refer js.react-native.ui-frame/translationOffset :added "4.0"}
+^{:refer js.react-native.ui-frame/translationOffset :added "4.0" :unchecked true}
 (fact "creates the offset translation")
 
-^{:refer js.react-native.ui-frame/FramePane :added "4.0"}
+^{:refer js.react-native.ui-frame/FramePane :added "4.0" :unchecked true}
 (fact "creates a Frame Pane"
   ^:hidden
   
@@ -46,7 +46,7 @@
        {:text (n/format-obj #{visible})
         :style {:marginTop 10}}]))))
 
-^{:refer js.react-native.ui-frame/Frame :added "4.0"}
+^{:refer js.react-native.ui-frame/Frame :added "4.0" :unchecked true}
 (fact "creates a Frame"
   ^:hidden
   

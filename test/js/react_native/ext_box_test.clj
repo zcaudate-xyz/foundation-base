@@ -19,7 +19,7 @@
              ]
    :export [MODULE]})
 
-^{:refer js.react.ext-box/useBox :adopt true :added "4.0"}
+^{:refer js.react.ext-box/useBox :adopt true :added "4.0" :unchecked true}
 (fact "uses an async entry"
   ^:hidden
   

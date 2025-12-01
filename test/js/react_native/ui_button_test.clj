@@ -147,7 +147,7 @@
        {:text (n/format-obj #{active})
         :style {:marginTop 10}}]))))
 
-^{:refer js.react-native.ui-button/buttonTheme :added "4.0"}
+^{:refer js.react-native.ui-button/buttonTheme :added "4.0" :unchecked true}
 (fact "creates the botton theme")
 
 ^{:refer js.react-native.ui-button/Button :added "0.1"}

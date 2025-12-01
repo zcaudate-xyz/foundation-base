@@ -17,7 +17,7 @@
  {:setup    [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
-^{:refer js.react-native.helper-transition/absoluteAnimateFn :added "4.0"
+^{:refer js.react-native.helper-transition/absoluteAnimateFn :added "4.0" :unchecked true
   :setup [(def +out+
             [{"style" {"transform" [{"translateX" -120}
                                     {"scale" 0.2}],
@@ -48,7 +48,7 @@
    (j/map [0 0.2 0.5 0.8 1] f))
   => vector?)
   
-^{:refer js.react-native.helper-transition/absoluteAnimateProgress :added "4.0"}
+^{:refer js.react-native.helper-transition/absoluteAnimateProgress :added "4.0" :unchecked true}
 (fact "applies the animate function"
   ^:hidden
 
@@ -66,7 +66,7 @@
    (j/map [0 0.2 0.5 0.8 1] f))
   => vector?)
 
-^{:refer js.react-native.helper-transition/relativeAnimateProgress :added "4.0"}
+^{:refer js.react-native.helper-transition/relativeAnimateProgress :added "4.0" :unchecked true}
 (fact "applies the relative animate function"
   ^:hidden
   

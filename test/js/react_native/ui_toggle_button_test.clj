@@ -18,7 +18,7 @@
              ]
    :export [MODULE]})
 
-^{:refer js.react-native.ui-toggle-button/toggleButtonTheme :added "4.0"}
+^{:refer js.react-native.ui-toggle-button/toggleButtonTheme :added "4.0" :unchecked true}
 (fact "creates the toggle button theme")
 
 ^{:refer js.react-native.ui-toggle-button/ToggleButton

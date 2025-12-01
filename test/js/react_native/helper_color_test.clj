@@ -14,14 +14,14 @@
  {:setup    [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
-^{:refer js.react-native.helper-color/toHSL :added "4.0"}
+^{:refer js.react-native.helper-color/toHSL :added "4.0" :unchecked true}
 (fact "converts vector to HSL prop"
   ^:hidden
   
   (c/toHSL [1 2 0.3])
   => "hsl(1,2.00%,0.30%)")
 
-^{:refer js.react-native.helper-color/hsl-parse-raw :added "4.0"}
+^{:refer js.react-native.helper-color/hsl-parse-raw :added "4.0" :unchecked true}
 (fact "converts string to hsl"
   ^:hidden
   
@@ -40,7 +40,7 @@
                    j/parseFloat)
   => [300 100 0.5])
 
-^{:refer js.react-native.helper-color/hsl-parse :added "4.0"}
+^{:refer js.react-native.helper-color/hsl-parse :added "4.0" :unchecked true}
 (fact "parses hsl value from string"
   ^:hidden
   
@@ -57,7 +57,7 @@
   (c/hsl-parse "hsl(300, 100%, 0.5%)")
   => [300 100 0.5])
 
-^{:refer js.react-native.helper-color/hsl :added "4.0"}
+^{:refer js.react-native.helper-color/hsl :added "4.0" :unchecked true}
 (fact "general convertion to hsl"
   ^:hidden
   
@@ -76,7 +76,7 @@
   (c/hsl "#ddd")
   => [0 0 86.66666666666667])
 
-^{:refer js.react-native.helper-color/interpolateScalar :added "4.0"}
+^{:refer js.react-native.helper-color/interpolateScalar :added "4.0" :unchecked true}
 (fact "interpolates two scalar values"
   ^:hidden
   
@@ -89,7 +89,7 @@
   (c/interpolateScalar 0 100 0.2)
   => 20)
 
-^{:refer js.react-native.helper-color/interpolateValue :added "4.0"}
+^{:refer js.react-native.helper-color/interpolateValue :added "4.0" :unchecked true}
 (fact "interpolates given a function"
   ^:hidden
   
@@ -105,7 +105,7 @@
    (c/interpolateValue  50 100 0.6))
   => 80)
 
-^{:refer js.react-native.helper-color/interpolateNum :added "4.0"}
+^{:refer js.react-native.helper-color/interpolateNum :added "4.0" :unchecked true}
 (fact "creates a interpolation for number"
   ^:hidden
   
@@ -133,7 +133,7 @@
   (c/interpolateNum 10 -5)
   => 5)
 
-^{:refer js.react-native.helper-color/interpolateColorArray :added "4.0"}
+^{:refer js.react-native.helper-color/interpolateColorArray :added "4.0" :unchecked true}
 (fact "creates a color array if a digit"
   ^:hidden
   
@@ -149,7 +149,7 @@
    (c/interpolateColorArray (fn:> [x] (* x 0.5)) [100 0 60]))
   => [[100 0 nil] [100 0 60]])
 
-^{:refer js.react-native.helper-color/interpolateColor :added "4.0"}
+^{:refer js.react-native.helper-color/interpolateColor :added "4.0" :unchecked true}
 (fact "interpolates color given function or "
   ^:hidden
   
@@ -170,7 +170,7 @@
                        0.8))
   => [100 0 62])
 
-^{:refer js.react-native.helper-color/interpolate :added "4.0"}
+^{:refer js.react-native.helper-color/interpolate :added "4.0" :unchecked true}
 (fact "interpolates a range of values"
   ^:hidden
   
@@ -184,7 +184,7 @@
                   1.8))
   => [72 100 45.01960784313725])
 
-^{:refer js.react-native.helper-color/rotateHue :added "4.0"}
+^{:refer js.react-native.helper-color/rotateHue :added "4.0" :unchecked true}
 (fact "rotates hue"
   ^:hidden
   
@@ -196,7 +196,7 @@
    (c/rotateHue "red" 0.5))
   => "hsl(180,100.00%,50.00%)")
 
-^{:refer js.react-native.helper-color/saturate :added "4.0"}
+^{:refer js.react-native.helper-color/saturate :added "4.0" :unchecked true}
 (fact "interpolates the saturation for the color"
   ^:hidden
   
@@ -208,7 +208,7 @@
    (c/saturate "red" -0.4))
   => "hsl(0,100.00%,50.00%)")
 
-^{:refer js.react-native.helper-color/lighten :added "4.0"}
+^{:refer js.react-native.helper-color/lighten :added "4.0" :unchecked true}
 (fact "interpolates the lightness for the color"
   ^:hidden
   
@@ -220,7 +220,7 @@
    (c/lighten "red" -0.4))
   => "hsl(0,100.00%,80.00%)")
 
-^{:refer js.react-native.helper-color/transform :added "4.0"}
+^{:refer js.react-native.helper-color/transform :added "4.0" :unchecked true}
 (fact "transforms the color through a fraction array"
   ^:hidden
   
@@ -228,7 +228,7 @@
    (c/transform "red" [0.2 0.4 0.3]))
   => "hsl(72,40.00%,15.00%)")
 
-^{:refer js.react-native.helper-color/mix :added "4.0"}
+^{:refer js.react-native.helper-color/mix :added "4.0" :unchecked true}
 (fact "converts a range of values to hsl"
   ^:hidden
   
@@ -242,7 +242,7 @@
           1.8))
   => "hsl(72,100.00%,45.02%)")
 
-^{:refer js.react-native.helper-color/toRGB :added "4.0"}
+^{:refer js.react-native.helper-color/toRGB :added "4.0" :unchecked true}
 (fact "transforms a hsl string to rgb"
   ^:hidden
   

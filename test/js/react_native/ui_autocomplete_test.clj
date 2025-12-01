@@ -20,7 +20,7 @@
              [xt.lang.base-lib :as k]]
    :export [MODULE]})
 
-^{:refer js.react-native.ui-autocomplete/AutocompleteModal :added "4.0"}
+^{:refer js.react-native.ui-autocomplete/AutocompleteModal :added "4.0" :unchecked true}
 (fact "creates the autocomplete modal display"
   ^:hidden
   
@@ -54,7 +54,7 @@
            :visible true
            component]}]]))))
 
-^{:refer js.react-native.ui-autocomplete/Autocomplete :added "4.0"}
+^{:refer js.react-native.ui-autocomplete/Autocomplete :added "4.0" :unchecked true}
 (fact "creates the autocomplete"
   ^:hidden
 

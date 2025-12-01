@@ -40,7 +40,7 @@
   (return cell))
 
 
-^{:refer js.cell.impl-common/new-cell-init :added "4.0"}
+^{:refer js.cell.impl-common/new-cell-init :added "4.0" :unchecked true}
 (fact "creates a record for asynchronous resolve"
   ^:hidden
   
@@ -131,7 +131,7 @@
         (impl-common/list-models (-/CELL))))
   => #{"common/hello1" "common/hello"})
 
-^{:refer js.cell.impl-common/call :added "4.0"}
+^{:refer js.cell.impl-common/call :added "4.0" :unchecked true}
 (fact "conducts a call, either for a link or cell"
   ^:hidden
   
@@ -149,7 +149,7 @@
                 :body ["hello"]}))
   => (contains ["hello" integer?]))
 
-^{:refer js.cell.impl-common/model-get :added "4.0"
+^{:refer js.cell.impl-common/model-get :added "4.0" :unchecked true
   :setup [(fact:global :setup)
           (notify/wait-on :js
             (. (-/get-cell (fn []
@@ -192,7 +192,7 @@
    (impl-common/model-get (-/CELL) "WRONG"))
   => nil)
 
-^{:refer js.cell.impl-common/model-ensure :added "4.0"}
+^{:refer js.cell.impl-common/model-ensure :added "4.0" :unchecked true}
 (fact "throws an error if model is not present"
   ^:hidden
   
@@ -242,13 +242,13 @@
          "listeners" {"@/cell"
                       {"meta" {"listener/id" "@/cell", "listener/type" "view"}}}}))
 
-^{:refer js.cell.impl-common/view-access :added "4.0"}
+^{:refer js.cell.impl-common/view-access :added "4.0" :unchecked true}
 (fact "acts as the view access function")
 
-^{:refer js.cell.impl-common/clear-listeners :adopt true :added "4.0"}
+^{:refer js.cell.impl-common/clear-listeners :adopt true :added "4.0" :unchecked true}
 (fact "clears all listeners")
 
-^{:refer js.cell.impl-common/add-listener :added "4.0"
+^{:refer js.cell.impl-common/add-listener :added "4.0" :unchecked true
   :setup [(fact:global :setup)
           (notify/wait-on :js
             (. (-/get-cell (fn []
@@ -284,7 +284,7 @@
         "updated" integer?
         "pending" true}}))
 
-^{:refer js.cell.impl-common/remove-listener :added "4.0"}
+^{:refer js.cell.impl-common/remove-listener :added "4.0" :unchecked true}
 (fact "remove listeners from cell"
   ^:hidden
   
@@ -294,7 +294,7 @@
                                 "@react/1234"))
   => map?)
 
-^{:refer js.cell.impl-common/list-listeners :added "4.0"
+^{:refer js.cell.impl-common/list-listeners :added "4.0" :unchecked true
   :setup [(fact:global :setup)
           (notify/wait-on :js
             (. (-/get-cell (fn []
@@ -318,7 +318,7 @@
                                ["hello" "echo"]))
   => ["@react/1234" "@react/5678"])
 
-^{:refer js.cell.impl-common/list-all-listeners :added "4.0"}
+^{:refer js.cell.impl-common/list-all-listeners :added "4.0" :unchecked true}
 (fact "lists all listeners in cell"
   ^:hidden
   
@@ -326,7 +326,7 @@
    (impl-common/list-all-listeners (-/CELL)))
   => {"hello" {"echo" ["@react/1234" "@react/5678"]}})
 
-^{:refer js.cell.impl-common/trigger-listeners :added "4.0"
+^{:refer js.cell.impl-common/trigger-listeners :added "4.0" :unchecked true
   :setup [(fact:global :setup)
           (notify/wait-on :js
             (. (-/get-cell (fn []

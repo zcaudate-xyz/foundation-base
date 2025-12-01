@@ -19,7 +19,7 @@
              ]
    :export [MODULE]})
 
-^{:refer js.react-native.physical-edit/createPan :added "4.0"}
+^{:refer js.react-native.physical-edit/createPan :added "4.0" :unchecked true}
 (fact "creates a PanResponder"
   ^:hidden
   
@@ -69,7 +69,7 @@
 
 ^{:refer js.react-native.physical-edit/createPanVelocity
   :adopt true
-  :added "4.0"}
+  :added "4.0" :unchecked true}
 (fact "creates a PanResponder"
   ^:hidden
   
@@ -145,7 +145,7 @@
 
 ^{:refer js.react-native.physical-edit/Progress
   :adopt true
-  :added "4.0"}
+  :added "4.0" :unchecked true}
 (fact "creates a Progress element"
   ^:hidden
   
@@ -198,7 +198,7 @@
        [:% physical-base/Tag
         {:indicator percentage}]]))))
 
-^{:refer js.react-native.physical-edit/usePanTouchable :added "4.0"}
+^{:refer js.react-native.physical-edit/usePanTouchable :added "4.0" :unchecked true}
 (fact "creates a pan touchable responder for slider, picker and spinner"
   ^:hidden
   

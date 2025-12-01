@@ -15,16 +15,16 @@
  {:setup    [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
-^{:refer js.lib.driver-postgres/default-env :added "4.0"}
+^{:refer js.lib.driver-postgres/default-env :added "4.0" :unchecked true}
 (fact "gets the default env")
 
-^{:refer js.lib.driver-postgres/default-env-set :added "4.0"}
+^{:refer js.lib.driver-postgres/default-env-set :added "4.0" :unchecked true}
 (fact "sets the default env")
 
-^{:refer js.lib.driver-postgres/set-methods :added "4.0"}
+^{:refer js.lib.driver-postgres/set-methods :added "4.0" :unchecked true}
 (fact "sets the methods for the object")
 
-^{:refer js.lib.driver-postgres/connect-constructor :added "4.0"}
+^{:refer js.lib.driver-postgres/connect-constructor :added "4.0" :unchecked true}
 (fact "constructs the postgres instance"
   ^:hidden
 

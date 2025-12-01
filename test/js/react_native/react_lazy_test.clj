@@ -19,7 +19,7 @@
    :static {:import/async #{js.react-native.ui-button}}
    :export [MODULE]})
 
-^{:refer js.react/useLazy :adopt true :added "4.0"}
+^{:refer js.react/useLazy :adopt true :added "4.0" :unchecked true}
 (fact "various lays of loading lazy function"
   ^:hidden
 

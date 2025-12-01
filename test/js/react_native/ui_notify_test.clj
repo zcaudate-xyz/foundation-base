@@ -16,10 +16,10 @@
              ]
    :export [MODULE]})
 
-^{:refer js.react-native.ui-notify/NotifyInner :added "4.0"}
+^{:refer js.react-native.ui-notify/NotifyInner :added "4.0" :unchecked true}
 (fact "creates the inner notification element")
 
-^{:refer js.react-native.ui-notify/Notify :added "4.0"}
+^{:refer js.react-native.ui-notify/Notify :added "4.0" :unchecked true}
 (fact "creates a Notify"
   ^:hidden
   

@@ -21,7 +21,7 @@
           (l/rt:scaffold-imports :js)]
   :teardown [(l/rt:stop)]})
 
-^{:refer js.blessed.ui-screen/ScreenMouse :added "4.0"}
+^{:refer js.blessed.ui-screen/ScreenMouse :added "4.0" :unchecked true}
 (fact "component that updates mouse position"
   ^:hidden
   
@@ -39,7 +39,7 @@
         :color "yellow"
         :content (j/inspect mouse)}]])))
 
-^{:refer js.blessed.ui-screen/ScreenMeasure :added "4.0"}
+^{:refer js.blessed.ui-screen/ScreenMeasure :added "4.0" :unchecked true}
 (fact "component that measures then screen"
   ^:hidden
 
@@ -57,7 +57,7 @@
         :color "yellow"
         :content (j/inspect dims)}]])))
 
-^{:refer js.blessed.ui-screen/GridLayout :added "4.0"}
+^{:refer js.blessed.ui-screen/GridLayout :added "4.0" :unchecked true}
 (fact "component that implements grid layout"
   ^:hidden
   

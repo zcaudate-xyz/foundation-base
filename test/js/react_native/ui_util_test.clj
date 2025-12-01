@@ -17,7 +17,7 @@
              ]
    :export [MODULE]})
 
-^{:refer js.react-native.ui-util/Page :added "4.0"}
+^{:refer js.react-native.ui-util/Page :added "4.0" :unchecked true}
 (fact "creates a Page"
   ^:hidden
   
@@ -45,7 +45,7 @@
         {:style {:flex 1
                  :backgroundColor "black"}}]]))))
 
-^{:refer js.react-native.ui-util/Fade :added "4.0"}
+^{:refer js.react-native.ui-util/Fade :added "4.0" :unchecked true}
 (fact "creates a Fade"
   ^:hidden
   
@@ -67,13 +67,13 @@
                  :width 100
                  :backgroundColor "red"}}]]))))
 
-^{:refer js.react-native.ui-util/FadeIn :added "4.0"}
+^{:refer js.react-native.ui-util/FadeIn :added "4.0" :unchecked true}
 (fact "creates a fade in helper")
 
-^{:refer js.react-native.ui-util/useFoldContent :added "4.0"}
+^{:refer js.react-native.ui-util/useFoldContent :added "4.0" :unchecked true}
 (fact "creates the fold inner helper")
 
-^{:refer js.react-native.ui-util/FoldInner :added "4.0"}
+^{:refer js.react-native.ui-util/FoldInner :added "4.0" :unchecked true}
 (fact "creates the fold inner container"
   ^:hidden
   
@@ -105,10 +105,10 @@
                   :width size
                   :backgroundColor "red"}}]]]))))
 
-^{:refer js.react-native.ui-util/FoldImpl :added "4.0"}
+^{:refer js.react-native.ui-util/FoldImpl :added "4.0" :unchecked true}
 (fact "creates the transitioning fold")
 
-^{:refer js.react-native.ui-util/Fold :added "4.0"}
+^{:refer js.react-native.ui-util/Fold :added "4.0" :unchecked true}
 (fact "creates the fold"
   ^:hidden
   

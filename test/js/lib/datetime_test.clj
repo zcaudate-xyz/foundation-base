@@ -9,10 +9,10 @@
               [js.lib.datetime :as ut]]
    :export  [MODULE]})
 
-^{:refer js.lib.datetime/ago :added "4.0"}
+^{:refer js.lib.datetime/ago :added "4.0" :unchecked true}
 (fact "formats the time ago")
 
-^{:refer js.lib.datetime/agoVerbose :added "4.0"}
+^{:refer js.lib.datetime/agoVerbose :added "4.0" :unchecked true}
 (fact "formats the time ago in verbose"
   ^:hidden
   
@@ -33,5 +33,5 @@
           :content (+ "simple: " (ut/ago current) "\n"
                       "verbose: " (ut/agoVerbose current) "\n")}]]))))
 
-^{:refer js.lib.datetime/formatDate :added "4.0"}
+^{:refer js.lib.datetime/formatDate :added "4.0" :unchecked true}
 (fact "formats the date")

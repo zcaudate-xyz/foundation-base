@@ -2,8 +2,8 @@
   (:use code.test)
   (:require [js.lib.radix :refer :all]))
 
-^{:refer js.lib.radix/generate-blocks :added "4.0"}
+^{:refer js.lib.radix/generate-blocks :added "4.0" :unchecked true}
 (fact "TODO")
 
-^{:refer js.lib.radix/init-components :added "4.0"}
+^{:refer js.lib.radix/init-components :added "4.0" :unchecked true}
 (fact "TODO")

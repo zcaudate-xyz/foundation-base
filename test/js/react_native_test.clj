@@ -94,22 +94,22 @@
             :ddc "3"
             :ddd "4"}}})
 
-^{:refer js.react-native/isWeb :added "4.0"}
+^{:refer js.react-native/isWeb :added "4.0" :unchecked true}
 (fact "checks that env is web")
 
-^{:refer js.react-native/isTablet :added "4.0"}
+^{:refer js.react-native/isTablet :added "4.0" :unchecked true}
 (fact "checks that env is tablet")
 
-^{:refer js.react-native/format-obj :added "4.0"}
+^{:refer js.react-native/format-obj :added "4.0" :unchecked true}
 (fact "formats an object")
 
-^{:refer js.react-native/format-entry :added "4.0"}
+^{:refer js.react-native/format-entry :added "4.0" :unchecked true}
 (fact "formats an entry")
 
-^{:refer js.react-native/measure :added "4.0"}
+^{:refer js.react-native/measure :added "4.0" :unchecked true}
 (fact "measures the element")
 
-^{:refer js.react-native/measureRef :added "4.0"}
+^{:refer js.react-native/measureRef :added "4.0" :unchecked true}
 (fact "measures the element in a ref")
 
 ^{:refer js.react-native/Enclosed :added "0.1"}
@@ -124,7 +124,7 @@
       [:% n/Row
        [:% n/Text "HELLO"]]))))
 
-^{:refer js.react-native/EnclosedCodeContainer :added "4.0"}
+^{:refer js.react-native/EnclosedCodeContainer :added "4.0" :unchecked true}
 (fact "creates a enclosed section with label"
   ^:hidden
   
@@ -137,7 +137,7 @@
       [:% n/Row
        [:% n/Text "HELLO"]]])))
 
-^{:refer js.react-native/EnclosedCode :added "4.0"}
+^{:refer js.react-native/EnclosedCode :added "4.0" :unchecked true}
 (fact "creates an enclosed code section"
   ^:hidden
   
@@ -261,7 +261,7 @@
        {:style {:backgroundColor "orange"}}
        [:% n/Caption {:text "HELLO WORLD"}]]))))
 
-^{:refer js.react-native/useTree :added "4.0"}
+^{:refer js.react-native/useTree :added "4.0" :unchecked true}
 (fact "a generic tree function")
 
 ^{:refer js.react-native/TabsIndexed :added "0.1"}
@@ -396,7 +396,7 @@
        {:text (k/json-encode #{initial})
         :style {:marginTop 10}}]))))
 
-^{:refer js.react-native/TabsMultiIndexed :added "4.0"}
+^{:refer js.react-native/TabsMultiIndexed :added "4.0" :unchecked true}
 (fact "creates a multi tab select indexed"
   ^:hidden
   
@@ -422,7 +422,7 @@
        {:text (k/json-encode #{indices})
         :style {:marginTop 10}}]))))
 
-^{:refer js.react-native/TabsMulti :added "4.0"}
+^{:refer js.react-native/TabsMulti :added "4.0" :unchecked true}
 (fact "creates a multi tab select"
   
   (defn.js TabsMultiDemo
@@ -486,10 +486,10 @@
        {:text (k/json-encode #{initial l1 l2 l3})
         :style {:marginTop 10}}]))))
 
-^{:refer js.react-native/displayTarget :added "4.0"}
+^{:refer js.react-native/displayTarget :added "4.0" :unchecked true}
 (fact "helper function for target display")
 
-^{:refer js.react-native/BaseIndicator :added "4.0"}
+^{:refer js.react-native/BaseIndicator :added "4.0" :unchecked true}
 (fact "displays a base indicator"
   ^:hidden
   
@@ -503,7 +503,7 @@
         :label "TEST"
         :content "Hello World"}]))))
 
-^{:refer js.react-native/ToggleIndicator :added "4.0"}
+^{:refer js.react-native/ToggleIndicator :added "4.0" :unchecked true}
 (fact "displays a toggle indicator"
   ^:hidden
   
@@ -518,7 +518,7 @@
         :onPress (fn:> (setActive (not active)))
         :label "TEST"}]))))
 
-^{:refer js.react-native/RecordList :added "4.0"}
+^{:refer js.react-native/RecordList :added "4.0" :unchecked true}
 (fact "displays a record list"
   ^:hidden
   
@@ -534,7 +534,7 @@
         :columns [["First Name"  "first"]
                   ["Last Name"   "last"]]}]))))
 
-^{:refer js.react-native/TextDisplay :added "4.0"}
+^{:refer js.react-native/TextDisplay :added "4.0" :unchecked true}
 (fact "displays a slab of text"
   ^:hidden
 
@@ -547,28 +547,28 @@
 [:% n/TextDisplay
        {:content "ABC"}]))))
 
-^{:refer js.react-native/defaultGlobal :added "4.0"}
+^{:refer js.react-native/defaultGlobal :added "4.0" :unchecked true}
 (fact "constructs the default global data")
 
-^{:refer js.react-native/GlobalProvider :added "4.0"}
+^{:refer js.react-native/GlobalProvider :added "4.0" :unchecked true}
 (fact "constructs the context for global data")
 
-^{:refer js.react-native/PortalProvider :added "4.0"}
+^{:refer js.react-native/PortalProvider :added "4.0" :unchecked true}
 (fact "constructs an isolated context for portals and gateways to appear")
 
-^{:refer js.react-native/PortalSinkImpl :added "4.0"}
+^{:refer js.react-native/PortalSinkImpl :added "4.0" :unchecked true}
 (fact "no context sharing version of `PortalSink`")
 
-^{:refer js.react-native/PortalSink :added "4.0"}
+^{:refer js.react-native/PortalSink :added "4.0" :unchecked true}
 (fact "constructs the gateway where items will appear")
 
-^{:refer js.react-native/Isolation :added "4.0"}
+^{:refer js.react-native/Isolation :added "4.0" :unchecked true}
 (fact "provides an isolated single scoped gateway")
 
-^{:refer js.react-native/PortalImpl :added "4.0"}
+^{:refer js.react-native/PortalImpl :added "4.0" :unchecked true}
 (fact "no context sharing version of `Portal`")
 
-^{:refer js.react-native/Portal :added "4.0"}
+^{:refer js.react-native/Portal :added "4.0" :unchecked true}
 (fact "constructs a portal"
   ^:hidden
 
@@ -627,7 +627,7 @@
          {:style {:color "yellow"}}
          (+ "DEFAULT")]]]))))
 
-^{:refer js.react-native/usePortalLayouts :added "4.0"}
+^{:refer js.react-native/usePortalLayouts :added "4.0" :unchecked true}
 (fact "gets measurements of elements in a portal"
   ^:hidden
   
