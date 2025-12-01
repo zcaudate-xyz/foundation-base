@@ -15,88 +15,85 @@
   => '(:- "#define" (:% A (quote (a b))) (+ a b)))
 
 (fact "emit basic C"
-  (l/emit-script
-   ['(define A 1)]
-   {:lang :c})
-  => "{#define A 1}")
+  (l/emit-as :c '[(define A 1)])
+  => "#define A 1")
 
 (fact "emit pointer ops"
-  (l/emit-script
-   ['(:* x)]
-   {:lang :c})
-  => "{*x}")
+  (l/emit-as :c '[(:* x)])
+  => "*x")
 
 (fact "emit math"
-  (l/emit-script
-   ['(+ 1 2)]
-   {:lang :c})
-  => "{1 + 2}")
+  (l/emit-as :c '[(+ 1 2)])
+  => "1 + 2")
 
 (fact "emit control"
-  (l/emit-script
-   ['(if true
-       (return 1)
-       (return 0))]
-   {:lang :c})
-  => "{\n  if(true){\n  return 1;\n}\nelse{\n  return 0;\n}\n}")
+  (l/emit-as :c '[(if true
+                    (return 1)
+                    (return 0))])
+  => "if(true){\n  return 1;\n}\nelse{\n  return 0;\n}")
 
 (fact "emit struct"
-  (l/emit-script
-   ['(struct Point
-       [:int x
-        :int y])]
-   {:lang :c})
-  => "{\n  struct Point { \n  int x;\n  int y; \n};\n}")
+  (l/emit-as :c '[(struct Point
+                    [:int x
+                     :int y])])
+  => "struct Point { \n  int x;\n  int y; \n};")
 
 (fact "emit enum"
-  (l/emit-script
-   ['(enum Color [RED GREEN BLUE])]
-   {:lang :c})
-  => "{enum Color { RED,GREEN,BLUE };}")
+  (l/emit-as :c '[(enum Color [RED GREEN BLUE])])
+  => "enum Color { RED,GREEN,BLUE };")
 
 (fact "emit typedef"
-  (l/emit-script
-   ['(typedef :int :my_int)]
-   {:lang :c})
-  => "{typedef int my_int;}")
+  (l/emit-as :c '[(typedef :int :my_int)])
+  => "typedef int my_int;")
 
 (fact "emit function with types"
-  (l/emit-script
-   ['(defn main [[:int argc] [:char** argv]]
-       (return 0))]
-   {:lang :c})
-  => "{\n  void main (int argc, char** argv) { \n  return 0; \n}\n}")
+  (l/emit-as :c '[(defn main [[:int argc] [:char** argv]]
+                    (return 0))])
+  => "void main (int argc, char** argv) { \n  return 0; \n}")
 
-(fact "emit arrow and sizeof"
-  (l/emit-script
-   ['(arrow ptr field)]
-   {:lang :c})
-  => "{ptr -> field}")
+(fact "emit arrow"
+  (l/emit-as :c '[(arrow ptr field)])
+  => "ptr -> field")
 
 (fact "emit sizeof"
-  (l/emit-script
-   ['(sizeof x)]
-   {:lang :c})
-  => "{sizeof x}")
+  (l/emit-as :c '[(sizeof x)])
+  => "sizeof x")
 
 
 ^{:refer std.lang.model.spec-c/tf-struct :added "4.1"}
-(fact "TODO")
+(fact "transforms struct definition"
+  (tf-struct '(struct Point [:int x :int y]))
+  => (contains '(:- "struct" Point
+                 (:- "{"
+                  (\\ \\ (\| (do (:- :int "x;") (:- :int "y;"))))
+                  (:- "\n};")))))
 
 ^{:refer std.lang.model.spec-c/tf-enum :added "4.1"}
-(fact "TODO")
+(fact "transforms enum definition"
+  (tf-enum '(enum Color [RED GREEN BLUE]))
+  => '(:- "enum" Color (:- "{") (quote [RED GREEN BLUE]) (:- "};")))
 
 ^{:refer std.lang.model.spec-c/tf-typedef :added "4.1"}
-(fact "TODO")
+(fact "transforms typedef"
+  (tf-typedef '(typedef :int :my_int))
+  => '(:- "typedef" :int "my_int;"))
 
 ^{:refer std.lang.model.spec-c/c-fn-args :added "4.1"}
-(fact "TODO")
+(fact "custom C function arguments emission"
+  (c-fn-args '(quote [[:int argc] [:char** argv]]) nil nil)
+  => "(int argc, char** argv)")
 
 ^{:refer std.lang.model.spec-c/tf-defn :added "4.1"}
-(fact "TODO")
+(fact "custom defn for C"
+  (tf-defn '(defn main [[:int argc] [:char** argv]] (return 0)))
+  => (contains '(:- "void" main (:c-args '([:int argc] [:char** argv])))))
 
 ^{:refer std.lang.model.spec-c/tf-arrow :added "4.1"}
-(fact "TODO")
+(fact "transforms arrow ->"
+  (tf-arrow '(arrow ptr field))
+  => '(:% ptr (:- "->" field)))
 
 ^{:refer std.lang.model.spec-c/tf-sizeof :added "4.1"}
-(fact "TODO")
+(fact "transforms sizeof"
+  (tf-sizeof '(sizeof x))
+  => '(:- "sizeof" x))

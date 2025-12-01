@@ -50,24 +50,6 @@
                     :section :fragment
                     :library +library-ext+}))
 
-(fact "as-lua"
-  (l/as-lua []) => {}
-  (l/as-lua [1 2 [] 4]) => [1 2 {} 4]
-  (l/as-lua {:a []}) => {:a {}})
-
-(fact "get-entry"
-  ^:hidden
-  (l/get-entry +ptr+) => book/book-entry?)
-
-(fact "rt:space"
-  "difficult to test due to test runner's context isolation")
-
-(fact "force-require"
-  "difficult to test without dependency injection")
-
-(fact "force-reload"
-  "difficult to test without dependency injection")
-
 (fact "CANARY test"
   ^:hidden
   (l/with:print [] (l/emit-as :lua '[(:= a 1)]))
@@ -77,15 +59,20 @@
 (fact "rt:invoke"
   "difficult to test without dependency injection")
 
-
 ^{:refer std.lang/rt:space :added "4.1"}
-(fact "TODO")
+(fact "rt:space"
+  "difficult to test due to test runner's context isolation")
 
 ^{:refer std.lang/get-entry :added "4.1"}
-(fact "TODO")
+(fact "get-entry"
+  (l/get-entry +ptr+) => book/book-entry?)
 
 ^{:refer std.lang/as-lua :added "4.1"}
-(fact "TODO")
+(fact "as-lua"
+  (l/as-lua []) => {}
+  (l/as-lua [1 2 [] 4]) => [1 2 {} 4]
+  (l/as-lua {:a []}) => {:a {}})
 
 ^{:refer std.lang/force-reload :added "4.1"}
-(fact "TODO")
+(fact "force-reload"
+  "difficult to test without dependency injection")

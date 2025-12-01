@@ -1,11 +1,12 @@
 (ns std.lang.model.spec-go-test
+  (:use code.test)
   (:require [std.lang.model.spec-go :as spec-go]
             [std.lang :as l]
             [std.lib :as h]
             [std.lang.base.emit :as emit]
             [code.test :as t]))
 
-(t/fact "test go emission"
+(fact "test go emission"
   (l/emit-as :go ['(var a 1)])
   => "var a = 1"
 
@@ -43,7 +44,7 @@
   => "map[string]int"
 )
 
-(t/fact "test xtalk integration"
+(fact "test xtalk integration"
   (l/emit-as :go ['(x-print "hello")])
   => "fmt.Println(\"hello\")"
 
@@ -65,16 +66,32 @@
 
 
 ^{:refer std.lang.model.spec-go/go-typesystem :added "4.1"}
-(fact "TODO")
+(fact "handle generic types"
+  (spec-go/go-typesystem '[:> slice int] spec-go/+grammar+ {})
+  => "[]int"
+  (spec-go/go-typesystem '[:> map string int] spec-go/+grammar+ {})
+  => "map[string]int")
 
 ^{:refer std.lang.model.spec-go/go-vector :added "4.1"}
-(fact "TODO")
+(fact "emit vector or slice"
+  (spec-go/go-vector '[1 2 3] spec-go/+grammar+ {})
+  => "[]interface{}{1, 2, 3}"
+  (spec-go/go-vector '[:> slice int] spec-go/+grammar+ {})
+  => "[]int")
 
 ^{:refer std.lang.model.spec-go/tf-go-arrow :added "4.1"}
-(fact "TODO")
+(fact "macro for channel op"
+  (spec-go/tf-go-arrow '(<- ch))
+  => '(:% (:- "<-") ch)
+  (spec-go/tf-go-arrow '(<- ch 1))
+  => '(:% ch (:- " <- ") 1))
 
 ^{:refer std.lang.model.spec-go/go-defstruct :added "4.1"}
-(fact "TODO")
+(fact "defstruct implementation"
+  (spec-go/go-defstruct '(defstruct Person [[name string]]) spec-go/+grammar+ {})
+  => "type Person struct {\n  name string\n}")
 
 ^{:refer std.lang.model.spec-go/go-definterface :added "4.1"}
-(fact "TODO")
+(fact "definterface implementation"
+  (spec-go/go-definterface '(definterface Reader [Read]) spec-go/+grammar+ {})
+  => "type Reader interface {\n  Read\n}")
