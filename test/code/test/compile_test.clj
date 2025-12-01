@@ -122,9 +122,3 @@
 ^{:refer code.test.compile/fact:symbol :added "3.0"
   :style/indent 1}
 (fact "gets the current fact symbol")
-
-^{:refer code.test.compile/rewrite-body :added "4.0"}
-(fact "TODO")
-
-^{:refer code.test.compile/rewrite-nested-checks :added "4.0"}
-(fact "TODO")

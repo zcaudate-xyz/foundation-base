@@ -8,6 +8,70 @@
             [std.lib :as h])
   (:refer-clojure :exclude [realized?]))
 
+^{:refer std.lib.stream.async/x:async :added "3.0"}
+(fact "constructs an async transducer"
+
+  (->> (sequence (x:async inc)
+                 (range 5))
+       (map deref))
+  => '(1 2 3 4 5))
+
+^{:refer std.lib.stream.async/x:step :added "3.0"}
+(fact "constructs a step transducer" ^:hidden
+
+  (sequence (x:step inc)
+            (range 3))
+  => (all (contains [mono? mono? mono?])
+          (fn [res]
+            (= (map deref res)
+               [1 2 3])))
+
+  (->> (sequence (comp (x:step inc)
+                       (x:step inc)
+                       (x:step inc))
+                 (range 3))
+       (map deref))
+  => '(3 4 5)
+
+  (defn slow-inc
+    [x]
+    (Thread/sleep 10)
+    (inc x))
+
+  (def -accept- (q/queue:limited 10))
+
+  (realize (s/unit (comp (x:step  slow-inc)
+                         (x:step  slow-inc {:collect [{:path [:time :A]
+                                                       :wrap wrap-time}]})
+                         (x:step  inc)
+                         (x:guard number? -accept-))
+                   1))
+  => (contains [true 4 anything]))
+
+^{:refer std.lib.stream.async/x:guard :added "3.0"}
+(fact "constructs a guard transducer" ^:hidden
+
+  (def -accept- (flux))
+  (def -reject- (flux))
+
+  (->> (sequence (comp (x:step inc)
+                       (x:guard odd? -accept- -reject-))
+                 (range 5))
+       (map (comp first deref)))
+  =>  [true false true false true]
+
+  (->> (s/produce -accept-)
+       (take 3)
+       (map deref)
+       (sort))
+  => '(1 3 5)
+
+  (->> (s/produce -reject-)
+       (take 2)
+       (map deref)
+       (sort))
+  => '(2 4))
+
 ^{:refer std.lib.stream.async/blocking? :added "3.0"}
 (fact "checks that object implements `IBLocking`"
 
@@ -43,9 +107,10 @@
 
 ^{:refer std.lib.stream.async/stage-realize :added "3.0"}
 (fact "returns the unwrapped result"
-
+   ^:hidden
+  
   (stage-realize (f/future (Thread/sleep 10) 1))
-  => 1 ^:hidden
+  => 1
 
   (stage-realize (mono {:future (f/future (f/future 1))}))
   => 1)
@@ -120,13 +185,8 @@
                {})
   => 2)
 
-^{:refer std.lib.stream.async/x:async :added "3.0"}
-(fact "constructs an async transducer"
-
-  (->> (sequence (x:async inc)
-                 (range 5))
-       (map deref))
-  => '(1 2 3 4 5))
+^{:refer std.lib.stream.async/i:async :added "4.1"}
+(fact "TODO")
 
 ^{:refer std.lib.stream.async/wrap-time :added "3.0"}
 (fact "wraps timing given the output"
@@ -163,61 +223,11 @@
                   :delay 100})
   => 2)
 
-^{:refer std.lib.stream.async/x:step :added "3.0"}
-(fact "constructs a step transducer" ^:hidden
+^{:refer std.lib.stream.async/i:step :added "4.1"}
+(fact "TODO")
 
-  (sequence (x:step inc)
-            (range 3))
-  => (all (contains [mono? mono? mono?])
-          (fn [res]
-            (= (map deref res)
-               [1 2 3])))
-
-  (->> (sequence (comp (x:step inc)
-                       (x:step inc)
-                       (x:step inc))
-                 (range 3))
-       (map deref))
-  => '(3 4 5)
-
-  (defn slow-inc
-    [x]
-    (Thread/sleep 10)
-    (inc x))
-
-  (def -accept- (q/queue:limited 10))
-
-  (realize (s/unit (comp (x:step  slow-inc)
-                         (x:step  slow-inc {:collect [{:path [:time :A]
-                                                       :wrap wrap-time}]})
-                         (x:step  inc)
-                         (x:guard number? -accept-))
-                   1))
-  => (contains [true 4 anything]))
-
-^{:refer std.lib.stream.async/x:guard :added "3.0"}
-(fact "constructs a guard transducer" ^:hidden
-
-  (def -accept- (flux))
-  (def -reject- (flux))
-
-  (->> (sequence (comp (x:step inc)
-                       (x:guard odd? -accept- -reject-))
-                 (range 5))
-       (map (comp first deref)))
-  =>  [true false true false true]
-
-  (->> (s/produce -accept-)
-       (take 3)
-       (map deref)
-       (sort))
-  => '(1 3 5)
-
-  (->> (s/produce -reject-)
-       (take 2)
-       (map deref)
-       (sort))
-  => '(2 4))
+^{:refer std.lib.stream.async/i:guard :added "4.1"}
+(fact "TODO")
 
 ^{:refer std.lib.stream.async/produce-flux :added "3.0"}
 (fact "takes from a flux"
