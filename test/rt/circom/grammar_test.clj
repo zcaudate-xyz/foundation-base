@@ -66,3 +66,34 @@
        (return a)
        (return b))])
   => "if(a > b){\n  return a;\n}\nelse{\n  return b;\n}")
+
+
+^{:refer rt.circom.grammar/format-string :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.circom.grammar/tf-template :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.circom.grammar/tf-component :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.circom.grammar/tf-signal :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.circom.grammar/tf-var :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.circom.grammar/tf-pragma :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.circom.grammar/tf-include :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.circom.grammar/tf-main :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.circom.grammar/tf-constraint :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.circom.grammar/tf-for :added "4.1"}
+(fact "TODO")

@@ -35,3 +35,40 @@
     {:a 1 :b 2}
     {:lang :erlang :book spec-erlang/+book+})
   => "#{a => 1, b => 2}")
+
+
+^{:refer std.lang.model.spec-erlang/to-erlang-var :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-erlang/capitalize-locals :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-erlang/emit-ast :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-erlang/wrap-raw :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-erlang/tf-erlang-defn :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-erlang/emit-erlang-defn :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-erlang/tf-erlang-case :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-erlang/emit-erlang-case :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-erlang/tf-erlang-tuple :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-erlang/emit-erlang-tuple :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-erlang/emit-erlang-var :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-erlang/erlang-map-key :added "4.1"}
+(fact "TODO")

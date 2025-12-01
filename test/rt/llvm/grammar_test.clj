@@ -63,3 +63,40 @@
         (call i32 printf [[ptr str] [i32 123]])
         (ret i32 0))])
   => "declare i32 printf(ptr, i32)\n\ndefine i32 call_test() { \n  entry:\n  call i32 printf(ptr str, i32 123)\n  ret i32 0 \n}")
+
+
+^{:refer rt.llvm.grammar/tf-define :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.llvm.grammar/tf-declare :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.llvm.grammar/tf-label :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.llvm.grammar/tf-ret :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.llvm.grammar/tf-assign :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.llvm.grammar/tf-inst-bin :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.llvm.grammar/tf-icmp :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.llvm.grammar/tf-br :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.llvm.grammar/tf-call :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.llvm.grammar/tf-alloca :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.llvm.grammar/tf-store :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.llvm.grammar/tf-load :added "4.1"}
+(fact "TODO")

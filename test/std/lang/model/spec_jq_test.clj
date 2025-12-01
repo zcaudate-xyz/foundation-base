@@ -117,3 +117,10 @@
   (!.jq
    {:a 1 :b 2})
   => "{\"a\":1,\"b\":2}")
+
+
+^{:refer std.lang.model.spec-jq/jq-args-ast :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-jq/jq-break :added "4.1"}
+(fact "TODO")

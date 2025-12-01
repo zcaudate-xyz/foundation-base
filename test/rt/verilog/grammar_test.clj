@@ -63,3 +63,34 @@
    ['(assign out (cat a b))]
    {:lang :verilog})
   => "assign out = {a, b} ;")
+
+
+^{:refer rt.verilog.grammar/tf-module :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.verilog.grammar/tf-assign :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.verilog.grammar/tf-initial :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.verilog.grammar/tf-always :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.verilog.grammar/tf-non-blocking :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.verilog.grammar/tf-blocking :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.verilog.grammar/tf-reg :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.verilog.grammar/tf-wire :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.verilog.grammar/tf-delay :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.verilog.grammar/tf-concatenation :added "4.1"}
+(fact "TODO")
