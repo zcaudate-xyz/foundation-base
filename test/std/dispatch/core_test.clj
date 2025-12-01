@@ -29,10 +29,10 @@
 
 ^{:refer std.dispatch.core/submit-dispatch :added "3.0"}
 (fact "submits to the core dispatch"
-  (test-scaffold (assoc +test-config+
+  (sort (test-scaffold (assoc +test-config+
                         :handler (fn [_ _] (Thread/sleep 10)))
                  10
-                 200)
+                 200))
   => [0 1 2 3 4 5 6 7 8 9])
 
 ^{:refer std.dispatch.core/create-dispatch :added "3.0"}

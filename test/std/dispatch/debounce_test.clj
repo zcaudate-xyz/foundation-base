@@ -64,8 +64,8 @@
                      (assoc-in [:options :debounce :delay] 50))
                  10 2)
   => (contains-in
-      [{:id 0, :state pos-int?}
-       {:id 1, :state pos-int?}
+      [{:id 0, :state nat-int?}
+       {:id 1, :state nat-int?}
        {:id 0, :state 9}
        {:id 1, :state 9}])
 

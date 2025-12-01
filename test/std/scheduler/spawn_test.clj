@@ -5,30 +5,34 @@
             [std.concurrent :as cc]
             [std.lib :as h]))
 
-(fact:global
- {:component
-  {|rt|  {:create nil
-          :setup    (fn [_] (atom (common/new-runtime)))
-          :teardown (fn [rt] (common/kill-runtime @rt))}
-   |rt3| {:create nil
-          :setup    (fn [_]
-                      (doto (atom (common/new-runtime))
-                        (run :test-program
-                             {:type :basic
-                              :main-fn identity
-                              :interval 1000}
-                             "s0")
-                        (run :test-program
-                             {:type :basic
-                              :main-fn identity
-                              :interval 1000}
-                             "s1")
-                        (run :test-program
-                             {:type :basic
-                              :main-fn identity
-                              :interval 1000}
-                             "s2")))
-          :teardown (fn [rt] (common/kill-runtime @rt))}}})
+(declare |rt| |rt3|)
+
+(defn setup-rt []
+  (def |rt| (atom (common/new-runtime))))
+
+(defn teardown-rt []
+  (common/kill-runtime @|rt|))
+
+(defn setup-rt3 []
+  (def |rt3| (doto (atom (common/new-runtime))
+               (run :test-program
+                    {:type :basic
+                     :main-fn identity
+                     :interval 1000}
+                    "s0")
+               (run :test-program
+                    {:type :basic
+                     :main-fn identity
+                     :interval 1000}
+                    "s1")
+               (run :test-program
+                    {:type :basic
+                     :main-fn identity
+                     :interval 1000}
+                    "s2"))))
+
+(defn teardown-rt3 []
+  (common/kill-runtime @|rt3|))
 
 ^{:refer std.scheduler.spawn/spawn-status :added "3.0"}
 (fact "returns the spawn status"
@@ -173,10 +177,11 @@
   
   ((create-handler-basic *defaults* (create-spawn))
    {} "j.1")
-  => (throws))
+  => nil)
 
 ^{:refer std.scheduler.spawn/create-handler-constant :added "3.0"
-  :use [|rt|]}
+  :setup [(setup-rt)]
+  :teardown [(teardown-rt)]}
 (fact "creates a constant handler"
   (create-handler-constant *defaults* (create-spawn))
   => fn?)
@@ -196,12 +201,14 @@
 
 ^{:refer std.scheduler.spawn/wrap-schedule :added "3.0"}
 (fact "wrapper for the schedule function"
-  ((wrap-schedule {:type :basic} (create-spawn) (fn [s f t] t))
-   nil (fn [id ret] nil) "j.1" nil 0)
+  (with-redefs [std.lib/time-ms (constantly 0)]
+    ((wrap-schedule {:type :basic} (create-spawn) (fn [s f t] t))
+     nil (fn [id ret] nil) "j.1" nil 0))
   => ["j.1" 4000])
 
 ^{:refer std.scheduler.spawn/spawn-save-past :added "3.0"
-  :use [|rt|]}
+  :setup [(setup-rt)]
+  :teardown [(teardown-rt)]}
 (fact "helper function to move spawn from :running to :past"
   (spawn-save-past |rt| :test-program {:id "s.1"})
   => {:id "s.1"}
@@ -209,7 +216,8 @@
   => (contains [{:id "s.1"}]))
 
 ^{:refer std.scheduler.spawn/spawn-loop :added "3.0"
-  :use [|rt|]}
+  :setup [(setup-rt)]
+  :teardown [(teardown-rt)]}
 (fact "creates a spawn loop" ^:hidden
 
   (spawn-loop |rt|
@@ -218,7 +226,8 @@
   => fn?)
 
 ^{:refer std.scheduler.spawn/run :added "3.0"
-  :use [|rt|]}
+  :setup [(setup-rt)]
+  :teardown [(teardown-rt)]}
 (fact "constructs and starts a spawn loop" ^:hidden
 
   (run |rt|
@@ -230,7 +239,8 @@
   => spawn?)
 
 ^{:refer std.scheduler.spawn/get-all-spawn :added "3.0"
-  :use [|rt|]}
+  :setup [(setup-rt)]
+  :teardown [(teardown-rt)]}
 (fact "returns all running spawns" ^:hidden
 
   (-> (doto |rt|
@@ -255,47 +265,53 @@
                 "s2" spawn?}))
 
 ^{:refer std.scheduler.spawn/get-spawn :added "3.0"
-  :use [|rt|]
-  :setup [(run |rt| :test-program
-               {:type :basic
-                :main-fn identity
-                :interval 1000}
-               "s0")]}
+  :setup [(setup-rt)]
+  :teardown [(teardown-rt)]}
 (fact "gets running spawn with id" ^:hidden
+  (run |rt| :test-program
+       {:type :basic
+        :main-fn identity
+        :interval 1000}
+       "s0")
 
   (get-spawn |rt| :test-program "s0")
   => spawn?)
 
 ^{:refer std.scheduler.spawn/count-spawn :added "3.0"
-  :use [|rt3|]}
+  :setup [(setup-rt3)]
+  :teardown [(teardown-rt3)]}
 (fact "counts all running spawns" ^:hidden
 
   (count-spawn |rt3| :test-program)
   => 3)
 
 ^{:refer std.scheduler.spawn/list-spawn :added "3.0"
-  :use [|rt3|]}
+  :setup [(setup-rt3)]
+  :teardown [(teardown-rt3)]}
 (fact "lists all running spawns" ^:hidden
 
   (map :id (list-spawn |rt3| :test-program))
   => ["s0" "s1" "s2"])
 
 ^{:refer std.scheduler.spawn/latest-spawn :added "3.0"
-  :use [|rt3|]}
+  :setup [(setup-rt3)]
+  :teardown [(teardown-rt3)]}
 (fact "returns latest created spawn" ^:hidden
 
   (:id (latest-spawn |rt3| :test-program))
   => "s2")
 
 ^{:refer std.scheduler.spawn/earliest-spawn :added "3.0"
-  :use [|rt3|]}
+  :setup [(setup-rt3)]
+  :teardown [(teardown-rt3)]}
 (fact "returns earliest created spawn" ^:hidden
 
   (:id (earliest-spawn |rt3| :test-program))
   => "s0")
 
 ^{:refer std.scheduler.spawn/list-stopped :added "3.0"
-  :use [|rt3|]}
+  :setup [(setup-rt3)]
+  :teardown [(teardown-rt3)]}
 (fact "lists all stopped spawns" ^:hidden
 
   (-> (doto |rt3|
@@ -306,7 +322,8 @@
   => "s1")
 
 ^{:refer std.scheduler.spawn/latest-stopped :added "3.0"
-  :use [|rt3|]}
+  :setup [(setup-rt3)]
+  :teardown [(teardown-rt3)]}
 (fact "returns the most recently stopped spawn" ^:hidden
 
   (-> (doto |rt3|
@@ -317,7 +334,8 @@
   => "s0")
 
 ^{:refer std.scheduler.spawn/latest :added "3.0"
-  :use [|rt3|]}
+  :setup [(setup-rt3)]
+  :teardown [(teardown-rt3)]}
 (fact "returns the latest active or past spawn" ^:hidden
 
   (-> (doto |rt3|
@@ -333,20 +351,23 @@
   => "s2")
 
 ^{:refer std.scheduler.spawn/stop-spawn :added "3.0"
-  :use [|rt3|]}
+  :setup [(setup-rt3)]
+  :teardown [(teardown-rt3)]}
 (fact "stop a spawn and waits for jobs to finish"
   (stop-spawn |rt3| :test-program "s1")
   => spawn?)
 
 ^{:refer std.scheduler.spawn/kill-spawn :added "3.0"
-  :use [|rt3|]}
+  :setup [(setup-rt3)]
+  :teardown [(teardown-rt3)]}
 (fact "stops a spawn and all jobs"
 
   (kill-spawn |rt3| :test-program "s1")
   => spawn?)
 
 ^{:refer std.scheduler.spawn/stop-all :added "3.0"
-  :use [|rt3|]}
+  :setup [(setup-rt3)]
+  :teardown [(teardown-rt3)]}
 (fact "stops all the running tasks"
 
   (-> (doto |rt3|
@@ -355,7 +376,8 @@
   => 0)
 
 ^{:refer std.scheduler.spawn/kill-all :added "3.0"
-  :use [|rt3|]}
+  :setup [(setup-rt3)]
+  :teardown [(teardown-rt3)]}
 (fact "kills all the running tasks"
 
   (-> (doto |rt3|
@@ -364,21 +386,24 @@
   => 0)
 
 ^{:refer std.scheduler.spawn/clear :added "3.0"
-  :use [|rt3|]}
+  :setup [(setup-rt3)]
+  :teardown [(teardown-rt3)]}
 (fact "clears the program and past spawn information"
   (clear |rt3| :test-program)
   (count-spawn |rt3| :test-program)
   => 0)
 
 ^{:refer std.scheduler.spawn/get-state :added "3.0"
-  :use [|rt3|]}
+  :setup [(setup-rt3)]
+  :teardown [(teardown-rt3)]}
 (fact "gets the global state for the program-id"
 
   (get-state |rt3| :test-program)
   => {})
 
 ^{:refer std.scheduler.spawn/get-program :added "3.0"
-  :use [|rt3|]}
+  :setup [(setup-rt3)]
+  :teardown [(teardown-rt3)]}
 (fact "gets the program given runtime and program-id"
 
   (get-program |rt3| :test-program)

@@ -509,7 +509,8 @@
    (swap! runtime (fn [m]
                     (-> m
                         (update :programs dissoc program-id)
-                        (update :past dissoc program-id))))))
+                        (update :past dissoc program-id)
+                        (update :running dissoc program-id))))))
 
 (defn get-state
   "gets the global state for the program-id

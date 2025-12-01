@@ -77,7 +77,7 @@
 (fact "returns thread stacktrace"
 
   (vec (stacktrace))
-  => )
+  => vector?)
 
 ^{:refer std.concurrent.thread/all-stacktraces :added "3.0"}
 (fact "returns all available stacktraces"
