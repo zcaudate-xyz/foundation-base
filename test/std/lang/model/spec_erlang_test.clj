@@ -70,3 +70,8 @@
 (fact "emits erlang tuple"
   (emit-erlang-tuple '(_ 1 2))
   => '(erl-raw "{1, 2}"))
+
+(fact "erlang data structures"
+  (l/emit-as :erlang
+    [[1 2 3]])
+  => "[1, 2, 3]")

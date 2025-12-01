@@ -73,3 +73,10 @@
    ['(for [i 0 10]
        (=== i 5))])
   => "for ( var i = 0 ; i < 10 ; i++ ) { i === 5;; \n}")
+
+(fact "emit if"
+  (l/emit-as :circom
+   ['(if (> a b)
+       (return a)
+       (return b))])
+  => "if(a > b){\n  return a;\n}\nelse{\n  return b;\n}")
