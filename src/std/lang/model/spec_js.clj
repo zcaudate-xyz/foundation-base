@@ -306,6 +306,3 @@
 
 (def +init+
   (script/install +book+))
-
-
-
