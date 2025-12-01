@@ -10,6 +10,7 @@
             [std.lang.base.script :as script]
             [std.lang.base.util :as ut]
             [std.lang.model.spec-xtalk]
+            [std.lang.model.spec-xtalk.fn-perl :as fn]
             [std.string :as str]
             [std.lib :as h]))
 
@@ -84,22 +85,29 @@
     (str "{" (str/join ", " entries) "}")))
 
 (def +features+
-  (-> (grammar/build :exclude [:pointer :block :data-range])
-      (grammar/build:override
-       {:var        {:macro #'perl-var :emit :macro}
-        :defn       {:macro #'perl-defn :emit :macro}
-        :and        {:raw "&&"}
-        :or         {:raw "||"}
-        :not        {:raw "!"}
-        :eq         {:raw "=="}
-        :neq        {:raw "!="}
-        :gt         {:raw ">"}
-        :lt         {:raw "<"}
-        :gte        {:raw ">="}
-        :lte        {:raw "<="}})
-       (grammar/build:extend
-        {:concat     {:op :concat :symbol #{'concat} :raw "." :emit :infix}
-         :die        {:op :die   :symbol #{'die}   :raw "die"   :emit :prefix}})))
+  (let [base (grammar/build :exclude [:pointer :block :data-range])
+        base-keys (set (keys base))
+        fn-override (select-keys fn/+perl+ base-keys)
+        fn-extend   (apply dissoc fn/+perl+ (keys fn-override))]
+    (-> base
+        (grammar/build:override
+         {:var        {:macro #'perl-var :emit :macro}
+          :defn       {:macro #'perl-defn :emit :macro}
+          :and        {:raw "&&"}
+          :or         {:raw "||"}
+          :not        {:raw "!"}
+          :pow        {:raw "**" :emit :infix :symbol #{'**}}
+          :eq         {:raw "=="}
+          :neq        {:raw "!="}
+          :gt         {:raw ">"}
+          :lt         {:raw "<"}
+          :gte        {:raw ">="}
+          :lte        {:raw "<="}})
+        (grammar/build:override fn-override)
+        (grammar/build:extend fn-extend)
+        (grammar/build:extend
+         {:concat     {:op :concat :symbol #{'concat} :raw "." :emit :infix}
+          :die        {:op :die   :symbol #{'die}   :raw "die"   :emit :prefix}}))))
 
 (def +template+
   (->> {:banned #{:keyword}
@@ -112,7 +120,7 @@
                   :invoke    {:custom #'perl-invoke}}
         :token   {:nil       {:as "undef"}
                   :boolean   {:as (fn [b] (if b "1" "0"))}
-                  :string    {:quote :single}
+                  :string    {:quote :double}
                   :symbol    {:custom #'perl-symbol}}
         :data    {:vector    {:custom #'perl-array}
                   :map       {:custom #'perl-map}}

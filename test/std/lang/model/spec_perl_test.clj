@@ -34,7 +34,7 @@
   (l/emit-script
    '(var m {"a" 1 "b" 2})
    {:lang :perl})
-  => "my $m = {'a' => 1, 'b' => 2}")
+  => "my $m = {\"a\" => 1, \"b\" => 2}")
 
 (t/fact "test perl invoke"
   (l/emit-script
@@ -42,10 +42,45 @@
       (print "Hello")
       (add 1 2))
    {:lang :perl})
-  => "print('Hello');\nadd(1, 2);")
+  => "print(\"Hello\");\nadd(1, 2);")
 
 (t/fact "test perl concat"
   (l/emit-script
    '(var s (concat "a" "b"))
    {:lang :perl})
-  => "my $s = 'a' . 'b'")
+  => "my $s = \"a\" . \"b\"")
+
+(t/fact "test perl xtalk core"
+  (l/emit-script
+   '(do
+      (x:len arr)
+      (x:cat "a" "b")
+      (x:print "hello"))
+   {:lang :perl})
+  => "scalar($arr);\n\"a\" . \"b\";\nprint(\"hello\", \"\\n\");")
+
+(t/fact "test perl xtalk math"
+  (l/emit-script
+   '(do
+      (x:m-abs -1)
+      (x:m-pow 2 3)
+      (x:m-sqrt 9))
+   {:lang :perl})
+  => "abs(-1);\n2 ** 3;\nsqrt(9);")
+
+(t/fact "test perl xtalk array"
+  (l/emit-script
+   '(do
+      (x:arr-push arr 1)
+      (x:arr-pop arr))
+   {:lang :perl})
+  => "push($arr, 1);\npop($arr);")
+
+(t/fact "test perl xtalk string"
+  (l/emit-script
+   '(do
+      (x:str-split "a,b" ",")
+      (x:str-to-upper "a")
+      (x:str-join "," arr))
+   {:lang :perl})
+  => "split(\",\", \"a,b\");\nuc(\"a\");\njoin(\",\", $arr);")
