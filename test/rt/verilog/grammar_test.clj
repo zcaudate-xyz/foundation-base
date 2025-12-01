@@ -18,6 +18,28 @@
            (<= count (+ count 1)))))])
   => "module my_module (clk, rst, out) ; \n \n  reg [7:0] count;\n  assign out = count ;\n  always @(posedge clk) begin \n    if (rst) begin\n      count <= 0 ;\n    end\n    else begin\n      count <= count + 1 ;\n    end\n     \n  end \nendmodule")
 
+^{:refer rt.verilog.grammar/tf-initial :added "4.1"}
+(fact "test verilog initial"
+  (l/emit-as :verilog
+   ['(initial
+      (delay 10)
+      (:= clk 0)
+      (delay 10)
+      (:= clk 1))])
+  => "initial begin \n  #10;\n  clk = 0 ;\n  #10;\n  clk = 1 ; \nend")
+
+^{:refer rt.verilog.grammar/tf-wire :added "4.1"}
+(fact "test verilog wire"
+  (l/emit-as :verilog
+   ['(wire w1)])
+  => "wire w1;")
+
+^{:refer rt.verilog.grammar/tf-concatenation :added "4.1"}
+(fact "test concatenation"
+  (l/emit-as :verilog
+   ['(assign out (cat a b))])
+  => "assign out = {a, b} ;")
+
 ^{:refer rt.verilog.grammar/tf-assign :added "4.1"}
 (fact "transforms assign"
   (l/emit-as :verilog
@@ -36,8 +58,8 @@
 (fact "transforms always block"
   (l/emit-as :verilog
    ['(always [posedge clk]
-       (if rst (<= count 0)))])
-  => "always @(posedge clk) begin \n  if (rst) begin\n    count <= 0 ;\n  end\n   \nend")
+       (<= count (+ count 1)))])
+  => "always @(posedge clk) begin \n  count <= count + 1 ; \nend")
 
 ^{:refer rt.verilog.grammar/tf-non-blocking :added "4.1"}
 (fact "transforms non-blocking assignment <="

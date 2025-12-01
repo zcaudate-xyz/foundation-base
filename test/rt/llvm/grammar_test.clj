@@ -30,6 +30,21 @@
    ['(declare i32 printf [ptr i32])])
   => "declare i32 printf(ptr, i32)")
 
+      (label label_false)
+      (ret void))])
+  => "define void foo(i1 %cond) { \n  entry:\n  br i1 %cond, label %label_true, label %label_false\n  label_true:\n  ret void\n  label_false:\n  ret void \n}")
+
+^{:refer rt.llvm.grammar/tf-alloca :added "4.1"}
+(fact "memory ops"
+  (l/emit-as :llvm
+    ['(define i32 test_mem []
+      (label entry)
+      (:= %ptr (alloca i32))
+      (store i32 42 ptr %ptr)
+      (:= %val (load i32 ptr %ptr))
+      (ret i32 %val))])
+  => "define i32 test_mem() { \n  entry:\n  %ptr = alloca i32\n  store i32 42, ptr %ptr\n  %val = load i32, ptr %ptr\n  ret i32 %val \n}")
+
 ^{:refer rt.llvm.grammar/tf-label :added "4.1"}
 (fact "transforms label"
   (l/emit-as :llvm
@@ -42,6 +57,34 @@
    ['(ret i32 0)])
   => "ret i32 0"
 
+^{:refer rt.llvm.grammar/tf-call :added "4.1"}
+(fact "call"
+  (l/emit-as :llvm
+    ['(declare i32 printf [ptr i32])
+
+     '(define i32 call_test []
+        (label entry)
+        (call i32 printf [[ptr str] [i32 123]])
+        (ret i32 0))])
+  => "declare i32 printf(ptr, i32)\n\ndefine i32 call_test() { \n  entry:\n  call i32 printf(ptr str, i32 123)\n  ret i32 0 \n}")
+
+^{:refer rt.llvm.grammar/tf-declare :added "4.1"}
+(fact "transforms llvm declare"
+  (l/emit-as :llvm
+   ['(declare i32 printf [ptr i32])])
+  => "declare i32 printf(ptr, i32)")
+
+^{:refer rt.llvm.grammar/tf-label :added "4.1"}
+(fact "transforms label"
+  (l/emit-as :llvm
+   ['(label entry)])
+  => "entry:")
+
+^{:refer rt.llvm.grammar/tf-ret :added "4.1"}
+(fact "transforms ret"
+  (l/emit-as :llvm
+   ['(ret i32 0)])
+  => "ret i32 0")
   (l/emit-as :llvm
    ['(ret void)])
   => "ret void")
@@ -49,12 +92,16 @@
 ^{:refer rt.llvm.grammar/tf-assign :added "4.1"}
 (fact "transforms assignment"
   (l/emit-as :llvm
+   ['(:= %1 2)])
+  => "%1 = 2")
    ['(:= %ptr (alloca i32))])
   => "%ptr = alloca i32")
 
 ^{:refer rt.llvm.grammar/tf-inst-bin :added "4.1"}
 (fact "helper for binary instructions"
   (l/emit-as :llvm
+   ['(add i32 1 2)])
+  => "add i32 1, 2")
    ['(add i32 %a %b)
     '(sub i32 %a %b)
     '(mul i32 %a %b)])
