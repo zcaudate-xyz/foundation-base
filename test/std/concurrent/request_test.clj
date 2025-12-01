@@ -143,25 +143,29 @@
   => string?)
 
 ^{:refer std.concurrent.request/bulk-context :added "3.0"}
-(fact "creates a bulk context" ^:hidden
+(fact "creates a bulk context"
+  ^:hidden
 
   (bulk-context)
   => map?)
 
 ^{:refer std.concurrent.request/transact-context :added "3.0"}
-(fact "creates a transact context" ^:hidden
+(fact "creates a transact context"
+  ^:hidden
 
   (transact-context)
   => h/atom?)
 
 ^{:refer std.concurrent.request/req:opts-clean :added "3.0"}
-(fact "clean opts for processing inputs" ^:hidden
+(fact "clean opts for processing inputs"
+  ^:hidden
 
   (req:opts-clean {})
   => {})
 
 ^{:refer std.concurrent.request/req:opts :added "3.0"}
-(fact "clean opts for processing inputs" ^:hidden
+(fact "clean opts for processing inputs"
+  ^:hidden
 
   (req:opts {} {})
   => {})
@@ -189,8 +193,9 @@
 
 ^{:refer std.concurrent.request/req:return :added "3.0"}
 (fact "returns the output"
-
-  (req:return 1 false) ^:hidden
+   ^:hidden
+  
+  (req:return 1 false)
   => 1
 
   (req:return (h/completed 1)
@@ -202,16 +207,18 @@
 
 ^{:refer std.concurrent.request/req:single-prep :added "3.0"}
 (fact "prepares `req:single` options"
-
-  (req:single-prep {:async true}) ^:hidden
+   ^:hidden
+  
+  (req:single-prep {:async true})
   => map?
 
   (req:single-prep {:async true :transacted (h/incomplete)})
   => map?)
 
 ^{:refer std.concurrent.request/req:single-complete :added "3.0"}
-(fact "completes the `req:single` call" ^:hidden
-
+(fact "completes the `req:single` call" 
+  ^:hidden
+  
   (req:single-complete (req:single-prep {})
                        1)
   => 1
@@ -222,8 +229,9 @@
 
 ^{:refer std.concurrent.request/req:single :added "3.0"
   :setup [(def |client| (eval-client))]}
-(fact "creates a single request call" ^:hidden
-
+(fact "creates a single request call"
+   ^:hidden
+  
   (req:single |client| {:type :eval :form '(+ 1 2 3 4)})
   => 10
 
@@ -242,7 +250,8 @@
 
 ^{:refer std.concurrent.request/req:unit :added "3.0"
   :setup [(def |client| (eval-client))]}
-(fact "creates a single request call with `*bulk*` context" ^:hidden
+(fact "creates a single request call with `*bulk*` context"
+  ^:hidden
 
   (binding [*bulk*    {|client| (bulk-context)}
             *current* {|client| (atom [])}]
@@ -264,7 +273,8 @@
 
 ^{:refer std.concurrent.request/bulk-collect :added "3.0"
   :setup [(def |client| (eval-client))] :style/indent 1}
-(fact "collects bulk inputs" ^:hidden
+(fact "collects bulk inputs"
+  ^:hidden
 
   (-> (bulk-collect |client|
                     (fn []

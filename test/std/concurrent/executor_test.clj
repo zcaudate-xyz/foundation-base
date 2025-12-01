@@ -16,7 +16,7 @@
 
 ^{:refer std.concurrent.executor/exec:queue :added "3.0"}
 (fact "contructs a raw queue in different ways"
-
+  
   (exec:queue)
   
   (exec:queue 1)
@@ -48,14 +48,16 @@
 (fact "constructs a pool executor"
 
   (doto (executor:pool 10 10 1000 {:size 10})
-    (exec:shutdown)))
+    (exec:shutdown))
+  => java.util.concurrent.ThreadPoolExecutor)
 
 ^{:refer std.concurrent.executor/executor:cached :added "3.0"
   :teardown [(track/tracked:last [:raw :executor] :stop)]}
 (fact "creates a cached executor"
 
   (doto (executor:cached)
-    (exec:shutdown)))
+    (exec:shutdown))
+  => java.util.concurrent.ThreadPoolExecutor)
 
 ^{:refer std.concurrent.executor/exec:shutdown :added "3.0"}
 (fact "shuts down executor"
@@ -126,14 +128,16 @@
                    1000)
     (submit-notify (fn [])
                    1000)
-    (exec:shutdown)))
+    (exec:shutdown))
+  => java.util.concurrent.ThreadPoolExecutor)
 
 ^{:refer std.concurrent.executor/executor:scheduled :added "3.0"
   :teardown [(track/tracked:last [:raw :executor] :stop)]}
 (fact "constructs a scheduled executor"
 
   (doto (executor:scheduled 10)
-    (exec:shutdown)))
+    (exec:shutdown))
+  => java.util.concurrent.ThreadPoolExecutor)
 
 ^{:refer std.concurrent.executor/schedule :added "3.0"}
 (fact "schedules task for execution" ^:hidden
@@ -401,11 +405,13 @@
                    :size 3
                    :max 3
                    :keep-alive 1000})
-    (exec:shutdown)) ^:hidden
-
+    (exec:shutdown))
+   ^:hidden
+  
   (doto (executor {:type :single
                    :size 1})
-    (exec:shutdown)))
+    (exec:shutdown))
+  => java.util.concurrent.ThreadPoolExecutor)
 
 ^{:refer std.concurrent.executor/executor:shared :added "3.0"}
 (fact "lists all shared executors"
