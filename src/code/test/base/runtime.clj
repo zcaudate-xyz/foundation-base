@@ -112,8 +112,8 @@
   {:added "3.0"}
   ([f]
    (update-global (h/ns-sym) f))
-  ([ns f]
-   (-> (swap! *registry* update-in [ns :global] f)
+  ([ns f & args]
+   (-> (apply swap! *registry* update-in [ns :global] f args)
        (get-in [ns :global]))))
 
 (defn list-links
@@ -128,7 +128,7 @@
   {:added "3.0"}
   ([] (clear-links (h/ns-sym)))
   ([ns]
-   (-> (swap! *registry* assoc [ns :links] nil)
+   (-> (swap! *registry* assoc-in [ns :links] nil)
        (get-in [ns :links]))))
 
 (defn add-link
@@ -256,7 +256,7 @@
   "updates a fact given a function"
   {:added "3.0"}
   ([ns id f & args]
-   (let [[ns id [f args]] (parse-args ns id f args)]
+   (let [[ns id [f & args]] (parse-args ns id f args)]
      (apply swap! *registry* update-in [ns :facts id] f args)
      [ns id])))
 
