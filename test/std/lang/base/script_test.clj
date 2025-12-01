@@ -3,9 +3,16 @@
   (:require [std.lang.base.script :as script]
             [std.lang.model.spec-lua :as lua]
             [std.lang.base.book :as book]
+            [std.lang.base.library :as lib]
+            [std.lang.base.library-snapshot :as snap]
+            [std.lang.base.emit-prep-lua-test :as prep-lua]
+            [std.lang.base.impl :as impl]
             [std.lang :as l]
             [lua.core]
             [std.lib :as h]))
+
+(def +library+
+  (impl/clone-default-library))
 
 (l/script+ [:LUA.0 :lua]
   {:runtime :oneshot
@@ -15,23 +22,26 @@
 (fact "installs a language"
   ^:hidden
   
-  (binding [*ns* (the-ns 'std.lang.model.spec-lua)]
-    (script/install lua/+book+))
+  (impl/with:library [+library+]
+    (binding [*ns* (the-ns 'std.lang.model.spec-lua)]
+      (script/install lua/+book+)))
   => vector?)
 
 ^{:refer std.lang.base.script/script-ns-import :added "4.0"}
 (fact "imports the namespace and sets a primary flag"
   ^:hidden
   
-  (script/script-ns-import {:require '[[xt.lang.base-lib :as k :primary true]]})
+  (impl/with:library [+library+]
+    (script/script-ns-import {:require '[[xt.lang.base-lib :as k :primary true]]}))
   => '#{xt.lang.base-lib})
 
 ^{:refer std.lang.base.script/script-macro-import :added "4.0"}
 (fact "import macros into the namespace"
   ^:hidden
   
-  (script/script-macro-import (l/get-book (l/runtime-library)
-                                          :lua))
+  (impl/with:library [+library+]
+    (script/script-macro-import (l/get-book (l/runtime-library)
+                                            :lua)))
   => vector?)
   
 
@@ -39,10 +49,11 @@
 (fact "setup for the runtime"
   ^:hidden
   
-  (binding [book/*skip-check* true]
-    (keys (script/script-fn-base :lua 'std.lang.base.script-test
-                                 {:require '[[xt.lang.base-lib :as k]]}
-                                 (l/runtime-library))))
+  (impl/with:library [+library+]
+    (binding [book/*skip-check* true]
+      (keys (script/script-fn-base :lua 'std.lang.base.script-test
+                                   {:require '[[xt.lang.base-lib :as k]]}
+                                   (l/runtime-library)))))
   => (contains [:module :module/internal :module/primary]))
 
 ^{:refer std.lang.base.script/script-fn :added "4.0"}

@@ -2,12 +2,25 @@
   (:use code.test)
   (:require [std.lang.base.impl-lifecycle :refer :all]
             [std.lang.base.compile :as compile]
+            [std.lang.base.library :as lib]
+            [std.lang.base.impl :as impl]
             [js.blessed :as blessed]
             [js.blessed.ui-core :as ui-core]
             [xt.lang.base-lib :as k]
             [xt.lang]
             [std.lang :as l]
             [std.lib :as h]))
+
+(def +library+
+  (let [lib (impl/clone-default-library)]
+    (impl/with:library [lib]
+      (require '[js.react] :reload)
+      (require '[js.blessed] :reload)
+      (require '[js.blessed.ui-core] :reload)
+      (require '[js.blessed.frame-status] :reload)
+      (require '[js.blessed.frame-console] :reload)
+      (require '[xt.lang.base-lib] :reload))
+    lib))
 
 ^{:refer std.lang.base.impl-lifecycle/emit-module-prep :added "4.0"}
 (fact "prepares the module for emit"
@@ -72,23 +85,24 @@
 (fact "creates a import structure from links"
   ^:hidden
 
-  (emit-module-setup-link-import
-   :graph
-   'js.blessed.ui-core
-   'js.react
-   (compile/compile-module-create-links
-    '[js.blessed.ui-core
-      js.blessed.ui-style
-      js.react
-      xt.lang.base-lib]
-    'js
-    {})
-   (std.lang/get-module
-    (std.lang/default-library)
-    :js
-    'js.blessed.ui-core)
-   {:path-separator "/"
-    :root-prefix "@"})
+  (impl/with:library [+library+]
+    (emit-module-setup-link-import
+     :graph
+     'js.blessed.ui-core
+     'js.react
+     (compile/compile-module-create-links
+      '[js.blessed.ui-core
+        js.blessed.ui-style
+        js.react
+        xt.lang.base-lib]
+      'js
+      {})
+     (l/get-module
+      +library+
+      :js
+      'js.blessed.ui-core)
+     {:path-separator "/"
+      :root-prefix "@"}))
   => '{:ns "../react", :suffix "", :as r})
 
 ^{:refer std.lang.base.impl-lifecycle/emit-module-setup-link-arr :added "4.0"}
