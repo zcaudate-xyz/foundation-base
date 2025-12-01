@@ -50,8 +50,9 @@
         (= :collection tag)))) ;; For generic block constructions
 
 (defn symbol-token? [b]
-  (or (= :symbol (base/block-tag b))
-      (symbol? (base/block-value b))))
+  (and (expression? b)
+       (or (= :symbol (base/block-tag b))
+           (symbol? (base/block-value b)))))
 
 (defn value? [b]
   (cond
@@ -231,24 +232,11 @@
               (zip/replace-right z (construct/block nil))
               (if (= 1 (count rest-exprs))
                 (zip/replace-right z (first rest-exprs))
-                ;; (begin a b c) -> (begin b c) if a is value?
-                ;; Actually in functional substitution, we assume 'a' was evaluated if we are here?
-                ;; No, find-redex for 'begin' selects the whole block.
-                ;; We need to eval items sequentially.
-                ;; This substitution model for side-effects is tricky.
-                ;; We'll assume 'begin' simply unwraps if head is value.
-                ;; But wait, find-redex stops at 'begin'.
-                ;; We need to find the first non-value in begin.
-                ;; Let's adjust find-redex for 'begin' later if needed.
-                ;; For now, standard substitution: replace (begin v1 v2) with (begin v2).
                 (let [first-expr (first rest-exprs)]
                   (if (value? first-expr)
                     (let [new-children (cons op (rest rest-exprs))]
                       (zip/replace-right z (base/replace-children node new-children)))
-                    ;; If first not value, we shouldn't be reducing 'begin' yet?
-                    ;; find-redex should have pointed to first-expr.
-                    ;; Correct. `find-redex` for begin should recurse.
-                    z))))
+                    z)))))
 
           ;; Application
           :else
@@ -257,62 +245,19 @@
             (cond
               ;; Primitive
               (fn? func)
-              (let [arg-vals (map block-val args)]
-                (zip/replace-right z (construct/block (apply func arg-vals))))
+              (let [arg-vals (map block-val args)
+                    res (apply func arg-vals)]
+                (zip/replace-right z (construct/block res)))
 
               ;; Lambda (Closure)
-              ;; func might be a Block (if literal lambda) or list (from env lookup)
-              ;; If from env, it might be raw list data. Construct block first.
               (or (lambda? func) (and (list? func) (= 'lambda (first func))))
               (let [func-block (if (base/block? func) func (construct/block func))]
                 (zip/replace-right z (apply-lambda func-block args)))
 
               :else
-              (throw (ex-info "Not a function" {:op op}))))))
-      :else z))))
-
-;; Re-fix find-redex for BEGIN
-(defn find-redex [z]
-  (let [node (zip/right-element z)]
-    (cond
-      (symbol-token? node)
-      (if (lookup (block-val node)) z nil)
-
-      (list-expression? node)
-      (let [exprs (get-exprs node)]
-        (if (empty? exprs) nil
-          (let [op (first exprs)
-                op-sym (if (symbol-token? op) (block-val op))]
-            (cond
-              (= 'lambda op-sym) nil
-              (= 'quote op-sym) nil
-              (= 'if op-sym) (let [t (second exprs)] (if (value? t) z (recur (-> z zip/step-inside (zip/step-right (.indexOf (vec (base/block-children node)) t))))))
-              (= 'define op-sym) (let [v (nth exprs 2 nil)] (if (value? v) z (recur (-> z zip/step-inside (zip/step-right (.indexOf (vec (base/block-children node)) v))))))
-
-              (= 'begin op-sym)
-              ;; Find first non-value
-              (let [children (base/block-children node)
-                    ;; skip 'begin symbol
-                    expr-children (rest exprs)
-                    first-non-val (first (filter (complement value?) expr-children))]
-                (if first-non-val
-                  ;; Use .indexOf on `exprs` (which are blocks) to find index in `exprs` list?
-                  ;; No, we need index in `children` list.
-                  ;; `exprs` is derived from `children` filtering for expressions.
-                  ;; `first-non-val` is one of the blocks in `children`.
-                  (recur (-> z zip/step-inside (zip/step-right (.indexOf (vec children) first-non-val))))
-                  ;; All values? Then begin is redex (to reduce to last val)
-                  z))
-
-              :else
-              ;; App
-              (loop [children (base/block-children node) i 0]
-                (if (empty? children) z
-                  (let [child (first children)]
-                    (if (and (expression? child) (not (value? child)))
-                      (recur (-> z zip/step-inside (zip/step-right i)) (dec i)) ;; Recurse down
-                      (recur (rest children) (inc i))))))))))
-      :else nil)))
+              (do (println "DEBUG: Not a function op=" op " func=" func " type=" (type func))
+                  (throw (ex-info "Not a function" {:op op})))))))
+      :else z)))
 
 ;; --- Visuals ---
 
