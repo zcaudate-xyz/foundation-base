@@ -2,7 +2,8 @@
   (:use code.test)
   (:require [rt.solidity.grammar :as g]
             [std.lib :as h]
-            [std.lang :as l]))
+            [std.lang :as l]
+            [std.lang.base.emit :as emit]))
 
 ^{:refer rt.solidity.grammar/sol-util-types :added "4.0"}
 (fact "format sol types"
@@ -22,8 +23,9 @@
 (fact "no typecast, straight forward print"
   ^:hidden
   
-  (g/sol-keyword-fn '(:int hello) g/+grammar+ {})
-  => "(:- :int hello)")
+  (emit/with:emit
+   (g/sol-keyword-fn '(:int hello) g/+grammar+ {}))
+  => "int hello")
 
 ^{:refer rt.solidity.grammar/sol-def :added "4.0"}
 (fact "creates a definition string"
@@ -37,43 +39,46 @@
   ^:hidden
 
   (g/sol-fn-elements 'hello '[:uint b :uint c]
-                     '(return (+ b c))
+                     '((return (+ b c)))
                      g/+grammar+
                      {})
-  => ["" "hello(uint b,uint c)" "{\n  return;\n  (+ b c);\n}"])
+  => ["" "hello(uint b,uint c)" "{\n  return b + c;\n}"])
 
 ^{:refer rt.solidity.grammar/sol-emit-returns :added "4.0"}
 (fact "emits returns"
   ^:hidden
   
-  (g/sol-emit-returns
-   '(returns :uint)
-   g/+grammar+
-   {})
-  => "(returns (:- :uint))")
+  (emit/with:emit
+   (g/sol-emit-returns
+    '(returns :uint)
+    g/+grammar+
+    {}))
+  => "returns(uint)")
 
 ^{:refer rt.solidity.grammar/sol-defn :added "4.0"}
 (fact "creates def contstructor form"
   ^:hidden
 
-  (g/sol-defn '(defn ^{:- [:pure]
-                       :static/returns :uint}
-                 hello [:uint b :uint c]
-                 (return (+ b c)))
-              g/+grammar+
-              {})
-  => "function hello(uint b,uint c) pure (returns (:- :uint)) {\n  (return (+ b c));\n}")
+  (emit/with:emit
+   (g/sol-defn '(defn ^{:static/modifiers [:pure]
+                        :static/returns :uint}
+                  hello [:uint b :uint c]
+                  (return (+ b c)))
+               g/+grammar+
+               {}))
+  => "function hello(uint b,uint c) pure returns(uint) {\n  return b + c;\n}")
 
 ^{:refer rt.solidity.grammar/sol-defconstructor :added "4.0"}
 (fact "creates the constructor"
   ^:hidden
   
-  (g/sol-defconstructor '(defconstructor
-                           __init__ [:uint b :uint c]
-                           (return (+ b c)))
-                        g/+grammar+
-                        {})
-  => "constructor(uint b,uint c) {\n  (return (+ b c));\n}")
+  (emit/with:emit
+   (g/sol-defconstructor '(defconstructor
+                            __init__ [:uint b :uint c]
+                            (return (+ b c)))
+                         g/+grammar+
+                         {}))
+  => "constructor(uint b,uint c) {\n  return b + c;\n}")
 
 ^{:refer rt.solidity.grammar/sol-defevent :added "4.0"}
 (fact "creates an event"
@@ -146,19 +151,20 @@
 (fact "transforms a definterface call"
   ^:hidden
 
-  (g/sol-definterface
-   '(definterface.sol IERC20
-      [^{:- [:external]
-         :static/returns :bool}
-       transfer [:address to
-                 :uint value]
-       ^{:- [:external :view]
-         :static/returns :uint}
-       balanceOf [:address owner]])
-   g/+grammar+
-   {})
+  (emit/with:emit
+   (g/sol-definterface
+    '(definterface.sol IERC20
+       [^{:- [:external]
+          :static/returns :bool}
+        transfer [:address to
+                  :uint value]
+        ^{:- [:external :view]
+          :static/returns :uint}
+        balanceOf [:address owner]])
+    g/+grammar+
+    {}))
   => (std.string/|
       "interface IERC20 {"
-      "  function transfer(address to,uint value) external (returns (:- :bool));"
-      "  function balanceOf(address owner) external view (returns (:- :uint));"
+      "  function transfer(address to,uint value) external returns(bool);"
+      "  function balanceOf(address owner) external view returns(uint);"
       "}"))

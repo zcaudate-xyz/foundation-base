@@ -73,6 +73,13 @@
            "")
          ";")))
 
+(defn sol-emit-block
+  "emits block with braces and binding"
+  {:added "4.0"}
+  [key block body grammar mopts]
+  (binding [emit-common/*emit-fn* emit/emit-main-loop]
+    (emit-block/emit-block-body key block body grammar mopts)))
+
 (defn sol-fn-elements
   "creates elements for function"
   {:added "4.0"}
@@ -82,7 +89,7 @@
         preamble (emit-fn/emit-fn-preamble [:defn sym args]
                                            grammar
                                            mopts)
-        codebody (emit-block/emit-block-body nil block body grammar mopts)]
+        codebody (sol-emit-block nil block body grammar mopts)]
     [typestr preamble codebody]))
 
 (defn sol-emit-returns
@@ -107,8 +114,10 @@
   [[_ sym args & body :as form] grammar mopts]
   (let [{:static/keys [returns
                        modifiers]} (meta sym)
-        [typestr preamble codebody] (sol-fn-elements sym args body grammar mopts)]
-    (str/join " " (filter not-empty ["function" preamble typestr
+        [typestr preamble codebody] (sol-fn-elements sym args body grammar mopts)
+        modstr (if modifiers
+                 (str/join " " (map h/strn modifiers)))]
+    (str/join " " (filter not-empty ["function" preamble typestr modstr
                                      (if returns
                                        (sol-emit-returns [nil returns] grammar mopts))
                                      codebody]))))
@@ -215,6 +224,79 @@
          (str/indent fns 2)
          "\n}")))
 
+(defn sol-emit-body
+  "emits body without extra braces"
+  {:added "4.0"}
+  [body grammar mopts]
+  (let [grammar (h/merge-nested grammar
+                                {:default {:block {:body {:start "" :end ""}}}})]
+    (sol-emit-block nil nil body grammar mopts)))
+
+(defn sol-defcontract
+  "creates a contract"
+  {:added "4.0"}
+  [[_ sym & body] grammar mopts]
+  (let [is-clause (if-let [is (:is (meta sym))]
+                    (str " is " (str/join ", " (map h/strn is)))
+                    "")]
+    (str "contract " sym is-clause " {\n"
+         (sol-emit-body body grammar mopts)
+         "\n}")))
+
+(defn sol-deflibrary
+  "creates a library"
+  {:added "4.0"}
+  [[_ sym & body] grammar mopts]
+  (str "library " sym " {\n"
+       (sol-emit-body body grammar mopts)
+       "\n}"))
+
+(defn sol-deferror
+  "creates an error definition"
+  {:added "4.0"}
+  [[_ sym args] grammar mopts]
+  (let [preamble (emit-fn/emit-fn-preamble [:defn sym args] grammar mopts)]
+    (str "error " preamble ";")))
+
+(defn sol-defmodifier
+  "creates a modifier"
+  {:added "4.0"}
+  [[_ sym args & body] grammar mopts]
+  (let [preamble (emit-fn/emit-fn-preamble [:defn sym args] grammar mopts)
+        codebody (sol-emit-block nil nil body grammar mopts)]
+    (str "modifier " preamble " " codebody)))
+
+(defn sol-unchecked
+  "unchecked block"
+  {:added "4.0"}
+  [[_ & body] grammar mopts]
+  (str "unchecked {\n"
+       (sol-emit-body body grammar mopts)
+       "\n}"))
+
+(defn sol-emit-let
+  "emits a let binding"
+  {:added "4.0"}
+  [[_ & args] grammar mopts]
+  (str "let " (str/join " " (map #(emit-common/*emit-fn* % grammar mopts) args))))
+
+(defn sol-assembly
+  "assembly block"
+  {:added "4.0"}
+  [[_ & body] grammar mopts]
+  (let [grammar (h/merge-nested grammar
+                                {:reserved '{let {:emit #'sol-emit-let}
+                                             :=  {:emit :token :raw ":="}}})]
+    (str "assembly {\n"
+         (sol-emit-body body grammar mopts)
+         "\n}")))
+
+(defn sol-emit-statement
+  "emit statement"
+  {:added "4.0"}
+  [[_ form] grammar mopts]
+  (str "emit " (emit-common/*emit-fn* form grammar mopts) ";"))
+
 (def +features+
   (-> (grammar/build :include [:builtin
                                :builtin-global
@@ -254,14 +336,44 @@
       
       (grammar/build:extend
        {:delete    {:op :delete  :symbol  '#{delete} :raw "delete" :emit :prefix}
-        :emit      {:op :emit    :symbol  '#{emit}  :raw "emit" :emit :prefix}
+        :emit      {:op :emit    :symbol  '#{emit}
+                    :emit    #'sol-emit-statement
+                    :type :statement}
         :mapping   {:op :mapping  :symbol #{:mapping}
                     :macro #'sol-tf-mapping :emit :macro}
-        :blank     {:op :blank    :symbol  '#{_} :raw ""
-                    :value true :emit :throw}})
+        :blank     {:op :blank    :symbol  '#{_} :raw "_"
+                    :value true :emit :raw}})
       
       (grammar/build:extend
-       {:definterface   {:op :definterface :symbol '#{definterface}
+       {:defcontract    {:op :defcontract :symbol '#{defcontract}
+                         :type :def :section :header
+                         :emit   #'sol-defcontract
+                         :static/type :contract}
+
+        :deflibrary     {:op :deflibrary :symbol '#{deflibrary}
+                         :type :def :section :header
+                         :emit   #'sol-deflibrary
+                         :static/type :library}
+
+        :deferror       {:op :deferror :symbol '#{deferror}
+                         :type :def :section :header
+                         :emit   #'sol-deferror
+                         :static/type :error}
+
+        :defmodifier    {:op :defmodifier :symbol '#{defmodifier}
+                         :type :def :section :code
+                         :emit   #'sol-defmodifier
+                         :static/type :modifier}
+
+        :unchecked      {:op :unchecked :symbol '#{unchecked}
+                         :type :statement
+                         :emit #'sol-unchecked}
+
+        :assembly       {:op :assembly :symbol '#{assembly}
+                         :type :statement
+                         :emit #'sol-assembly}
+
+        :definterface   {:op :definterface :symbol '#{definterface}
                          :type :def :section :header
                          :emit   #'sol-definterface
                          :static/type :interface}
