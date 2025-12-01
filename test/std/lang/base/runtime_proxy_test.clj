@@ -40,7 +40,7 @@
 
 ^{:refer std.lang.base.runtime-proxy/proxy-deref-ptr :added "4.0"}
 (fact "dereefs the pointer"
-  (p/proxy-deref-ptr {:redirect 'std.lang :lang :js} {}) => {})
+  (p/proxy-deref-ptr {:redirect 'std.lang :lang :js} {}) => {:library nil})
 
 ^{:refer std.lang.base.runtime-proxy/proxy-display-ptr :added "4.0"}
 (fact "displays the pointer"

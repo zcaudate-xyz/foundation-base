@@ -25,6 +25,18 @@
   (test-lambda)
   (test-fact))
 
+(defn demo []
+  (println "Starting Animation Demo (Factorial 3)...")
+  (Thread/sleep 1000)
+  (scheme/animate "
+(begin
+  (define fact
+    (lambda (n)
+      (if (= n 0)
+          1
+          (* n (fact (- n 1))))))
+  (fact 3))" 500))
+
 
 ^{:refer std.vm.scheme-interpreter/block-zip :added "4.0"}
 (fact "creates a zipper for Scheme code"
@@ -137,3 +149,5 @@
 ^{:refer std.vm.scheme-interpreter/run :added "4.0"}
 (fact "runs the full execution"
   (scheme/run "(+ 1 2)") => any)
+
+

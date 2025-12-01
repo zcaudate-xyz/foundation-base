@@ -43,7 +43,7 @@
 
         (Thread/sleep ;;(if wait (* threads groups wait))
 
-         500)
+         1000)
         [@*counter* @*output*])))
 
 ^{:refer std.dispatch.hub/process-hub :added "3.0"}

@@ -133,3 +133,6 @@
 ^{:refer std.vm.jvm-interpreter/animate :added "4.0"}
 (fact "animates execution"
   (jvm/animate "(class T (method main [[iconst_1]]))" 0) => any)
+
+(fact "runs the demo"
+  (demo) => any)

@@ -62,7 +62,76 @@
 ;; --- BlockIR Structure ---
 
 (defn block-val [b]
-  (if (base/block? b) (base/block-value b) b))
+  (if (and (base/block? b) (base/expression? b))
+    (base/block-value b)
+    b))
+
+(defn filter-valid [blocks]
+  (let [items (if (base/container? blocks)
+                (base/block-children blocks)
+                (if (seq? blocks) blocks [blocks]))]
+    (filter (fn [b] (and (base/block? b)
+                         (not= :void (base/block-type b))
+                         (not= :comment (base/block-type b))
+                         (not= :linespace (base/block-type b))
+                         (not= :linebreak (base/block-type b))))
+            items)))
+
+;; ... (rest of file)
+
+(defn highlight-ip [vm]
+  (let [{:keys [block idx]} (:ip vm)
+        z (:code-zip vm)
+        ;; Find function body
+        func-z (zip/step-inside z) ;; define
+        ;; Search for block with label == block
+        found-block-z (loop [curr (zip/step-right (zip/step-right (zip/step-right func-z)))] ;; skip define @main (args)
+                        (let [node (zip/right-element curr)]
+                          (cond
+                            (nil? node) nil
+                            
+                            (and (base/container? node)
+                                 (= block (block-val (first (filter-valid node)))))
+                            curr
+
+                            :else (if (zip/can-step-right? curr)
+                                    (recur (zip/step-right curr))
+                                    nil))))]
+    (if found-block-z
+      ;; Step into block and find instruction at idx + 1 (label is 0)
+      ;; We need to skip the label (first valid) and then skip 'idx' more valid instructions.
+      (let [start-z (zip/step-inside found-block-z)
+            ;; Helper to find next valid sibling
+            next-valid (fn [z]
+                         (loop [curr (zip/step-right z)]
+                           (cond
+                             (nil? curr) nil
+                             (let [b (zip/right-element curr)]
+                               (and (base/block? b)
+                                    (not= :void (base/block-type b))
+                                    (not= :comment (base/block-type b))))
+                             curr
+                             :else (recur (zip/step-right curr)))))
+            ;; Find label (first valid)
+            first-valid (if (let [b (zip/right-element start-z)]
+                              (and (base/block? b)
+                                   (not= :void (base/block-type b))
+                                   (not= :comment (base/block-type b))))
+                          start-z
+                          (next-valid start-z))
+            
+            _ (println "First valid:" (if first-valid (base/block-string (zip/right-element first-valid)) "nil"))
+
+            ;; Now skip 'idx' instructions
+            inst-z (loop [curr first-valid i 0]
+                     (println "Loop i:" i "Curr:" (if curr (base/block-string (zip/right-element curr)) "nil"))
+                     (if (>= i (inc idx)) ;; +1 for label
+                       curr
+                       (recur (next-valid curr) (inc i))))]
+        (println "Inst Z:" (if inst-z (base/block-string (zip/right-element inst-z)) "nil"))
+        (highlight inst-z))
+
+      (do (println "Block not found:" block) z)))) ;; Not found?
 
 (defn instruction? [b]
   ;; Instructions are vectors [ ... ]
@@ -79,20 +148,20 @@
 (defn make-vm [root-code]
   ;; Root code: (define @main ... (entry ...) (label ...))
   ;; We need to index the basic blocks.
-  (let [func-def (filter (complement check/void?) (base/block-children root-code))
+  (let [func-def (filter-valid root-code)
         ;; Skip 'define' '@name' 'args'
         body (drop 3 func-def)
         ;; Body is a list of Basic Blocks (lists)
         ;; (label inst inst ...)
         blocks (filter base/container? body)
         block-map (reduce (fn [acc b]
-                            (let [children (base/block-children b)
+                            (let [children (filter-valid b)
                                   label (block-val (first children))
                                   insts (vec (rest children))]
                               (assoc acc label insts)))
                           {}
                           blocks)
-        entry-label (block-val (first (base/block-children (first blocks))))
+        entry-label (block-val (first (filter-valid (first blocks))))
         z (block-zip root-code)]
     (LLVMState. {} {} {:block entry-label :idx 0} nil {} block-map nil z)))
 
@@ -118,7 +187,7 @@
   (update-in vm [:ip :idx] inc))
 
 (defn exec-inst [vm inst-block]
-  (let [parts (map block-val (base/block-children inst-block))
+  (let [parts (map block-val (filter-valid (if (base/container? inst-block) inst-block (construct/block inst-block))))
         ;; Formats:
         ;; [%res = op type op1 op2]
         ;; [op type op1 op2]  (void)
@@ -218,7 +287,9 @@
                         (let [node (zip/right-element curr)]
                           (cond
                             (nil? node) nil
-                            (= block (block-val (first (base/block-children node))))
+                            
+                            (and (base/container? node)
+                                 (= block (block-val (first (filter-valid node)))))
                             curr
 
                             :else (if (zip/can-step-right? curr)
@@ -226,9 +297,38 @@
                                     nil))))]
     (if found-block-z
       ;; Step into block and find instruction at idx + 1 (label is 0)
-      (let [inst-z (-> found-block-z
-                       (zip/step-inside)
-                       (zip/step-right (inc idx)))] ;; +1 to skip label
+      ;; We need to skip the label (first valid) and then skip 'idx' more valid instructions.
+      (let [start-z (zip/step-inside found-block-z)
+            ;; Helper to find next valid sibling
+            next-valid (fn [z]
+                         (loop [curr (zip/step-right z)]
+                           (cond
+                             (nil? curr) nil
+                             (let [b (zip/right-element curr)]
+                               (and (base/block? b)
+                                    (not= :void (base/block-type b))
+                                    (not= :comment (base/block-type b))
+                                    (not= :linespace (base/block-type b))
+                                    (not= :linebreak (base/block-type b))))
+                             curr
+                             :else (recur (zip/step-right curr)))))
+            ;; Find label (first valid) - actually step-inside might land on void if block starts with newline?
+            ;; No, step-inside goes to first child.
+            ;; If first child is void, we need to find first valid.
+            first-valid (if (let [b (zip/right-element start-z)]
+                              (and (base/block? b)
+                                   (not= :void (base/block-type b))
+                                   (not= :comment (base/block-type b))
+                                   (not= :linespace (base/block-type b))
+                                   (not= :linebreak (base/block-type b))))
+                          start-z
+                          (next-valid start-z))
+            
+            ;; Now skip 'idx' instructions
+            inst-z (loop [curr first-valid i 0]
+                     (if (>= i (inc idx)) ;; +1 for label
+                       curr
+                       (recur (next-valid curr) (inc i))))]
         (highlight inst-z))
 
       z))) ;; Not found?

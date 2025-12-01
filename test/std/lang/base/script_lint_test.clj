@@ -4,6 +4,7 @@
             [std.lang.base.library :as lib]
             [std.lang.base.impl :as impl]
             [std.lang :as l]
+            [std.lang.base.runtime :as rt]
             [std.lib :as h]
             [js.blessed]))
 
@@ -12,6 +13,8 @@
     (impl/with:library [lib]
       (require '[js.blessed] :reload))
     lib))
+
+(rt/install-lang! :lua)
 
 ^{:refer std.lang.base.script-lint/get-reserved-raw :added "4.0"}
 (fact "gets all reserved symbols in the grammar"

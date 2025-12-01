@@ -8,11 +8,14 @@
             [std.lang.base.emit-prep-lua-test :as prep-lua]
             [std.lang.base.impl :as impl]
             [std.lang :as l]
+            [std.lang.base.runtime :as rt]
             [lua.core]
             [std.lib :as h]))
 
 (def +library+
   (impl/clone-default-library))
+
+(rt/install-lang! :lua)
 
 (l/script+ [:LUA.0 :lua]
   {:runtime :oneshot
@@ -108,7 +111,7 @@
 ^{:refer std.lang.base.script/script-ext-run :added "4.0"}
 (fact "function to call with the `!` macro"
   (script/script-ext-run (h/ns-sym) :LUA.0 '(return 1) {})
-  => (throws))
+  => 1)
 
 ^{:refer std.lang.base.script/! :added "4.0"}
 (fact "switch between defined annex envs"
@@ -116,7 +119,7 @@
   
   (l/! [:LUA.0] (k/arr-map [1 2 3 4]
                            k/inc))
-  => (throws)
+  => [2 3 4 5]
 
   (l/! [:NOT-FOUND] (k/arr-map [1 2 3 4]
                                k/inc))

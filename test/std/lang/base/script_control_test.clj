@@ -10,6 +10,7 @@
 ^{:refer std.lang.base.script-control/script-rt-get :added "4.0"}
 (fact "gets the current runtime"
 
+  (rt/install-lang! :lua)
   (script-rt-get :lua :default {})
   => rt/rt-default?
 

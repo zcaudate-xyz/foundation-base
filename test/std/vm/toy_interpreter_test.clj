@@ -23,7 +23,6 @@
   (test-if)
   (test-nested))
 
-
 ^{:refer std.vm.toy-interpreter/block-zip :added "4.0"}
 (fact "creates a zipper for toy code"
   (let [root (construct/block '(+ 1 2))]

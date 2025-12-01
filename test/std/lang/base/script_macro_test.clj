@@ -8,9 +8,14 @@
             [std.lang.base.library-snapshot-prep-test :as prep]
             [std.lang.model.spec-js :as js]
             [std.lang.model.spec-lua :as lua]
+            [std.lang.base.runtime :as rt]
+            [std.string :as str]
             [std.lib :as h]))
 
 (def +library+ (lib/library {:snapshot prep/+snap+}))
+
+(rt/install-lang! :lua)
+(rt/install-lang! :js)
 
 ^{:refer std.lang.base.script-macro/body-arglists :added "4.0"}
 (fact "makes arglists from body"
