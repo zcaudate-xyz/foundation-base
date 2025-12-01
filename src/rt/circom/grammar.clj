@@ -7,6 +7,9 @@
             [std.string :as str]
             [std.lib :as h]))
 
+(defn format-string [x]
+  (if (string? x) (pr-str x) x))
+
 ;;
 ;; Transformations for Circom Constructs
 ;;
@@ -19,10 +22,9 @@
         args-str (str "("
                       (str/join ", " (map ut/sym-default-str args))
                       ")")]
-    (list :- "template" sym args-str
+    (list :- (str "template " (ut/sym-default-str sym) args-str)
           (list :- "{"
-                (list \\
-                      \\ (list \| (apply list 'do body)))
+                (apply list 'do body)
                 (list :- "\n}")))))
 
 (defn tf-component
@@ -30,7 +32,7 @@
    (component c (MyTemplate arg1 arg2)) -> component c = MyTemplate(arg1, arg2);"
   [[_ name [tmpl & args]]]
   (let [call (cons tmpl args)]
-    (list :- "component" name "=" call)))
+    (list :% (list :- "component" name "=" call) (list :- ";"))))
 
 (defn tf-signal
   "Transforms signal declaration.
@@ -42,25 +44,25 @@
                       [(first args) (second args)]
                       [nil (first args)])
         type-str (if type (str "signal " type) "signal")]
-    (list :- type-str name)))
+    (list :% (list :- type-str name) (list :- ";"))))
 
 (defn tf-var
   "Transforms var declaration.
    (var x 10) -> var x = 10;"
   [[_ name val]]
-  (list :- "var" name "=" val))
+  (list :% (list :- "var" name "=" (format-string val)) (list :- ";")))
 
 (defn tf-pragma
   "Transforms pragma.
    (pragma circom 2.0.0) -> pragma circom 2.0.0;"
   [[_ & args]]
-  (apply list :- "pragma" args))
+  (list :% (apply list :- "pragma" (map format-string args)) (list :- ";")))
 
 (defn tf-include
   "Transforms include.
    (include \"filename.circom\") -> include \"filename.circom\";"
   [[_ filename]]
-  (list :- "include" filename))
+  (list :% (list :- "include" (format-string filename)) (list :- ";")))
 
 (defn tf-main
   "Transforms main component definition.
@@ -71,7 +73,27 @@
                      (str "{public [" (str/join "," (map ut/sym-default-str public-args)) "]}")
                      "")
         call (if (seq? tmpl-call) tmpl-call (list tmpl-call))]
-    (list :- "component" "main" public-str "=" call)))
+    (list :% (list :- "component" "main" public-str "=" call) (list :- ";"))))
+
+(defn tf-constraint
+  "Transforms constraints to add semicolon"
+  [[op & args]]
+  (list :% (list :- (first args) (str op) (second args)) (list :- ";")))
+
+(defn tf-for
+  "Transforms for loop.
+   (for [i 0 10] ...) -> for (var i = 0; i < 10; i++) ..."
+  [[_ [sym start end step] & body]]
+  (let [init (list :- "var" sym "=" start)
+        cond (list '< sym end)
+        step (if step
+               (list :- sym "=" sym "+" step)
+               (str sym "++"))
+        header (list :- "for" "(" init ";" cond ";" step ")")]
+    (list :- header
+          (list :- "{"
+                (apply list 'do body)
+                (list :- "\n}")))))
 
 ;;
 ;; Grammar Definition
@@ -83,7 +105,8 @@
                                :class
                                :macro-arrow])
       (grammar/build:override
-       {:var       {:op :var :symbol #{'var} :emit :macro :macro #'tf-var :section :code :type :def}})
+       {:var       {:op :var :symbol #{'var} :emit :macro :macro #'tf-var :section :code :type :def}
+        :for       {:op :for :symbol #{'for} :emit :macro :macro #'tf-for :section :code :type :block}})
       (grammar/build:extend
        {:template  {:op :template :symbol #{'template} :emit :macro :macro #'tf-template :section :code :type :def}
         :component {:op :component :symbol #{'component} :emit :macro :macro #'tf-component :section :code :type :def}
@@ -93,11 +116,12 @@
         :main      {:op :main :symbol #{'main} :emit :macro :macro #'tf-main :section :code :type :def}
 
         ;; Constraint operators
-        :assign-constraint {:op :assign-constraint :symbol #{'<==} :emit :infix :raw "<=="}
-        :constraint-assign {:op :constraint-assign :symbol #{'==>} :emit :infix :raw "==>"}
-        :constraint-eq     {:op :constraint-eq :symbol #{'===} :emit :infix :raw "==="}
-        :assign-signal     {:op :assign-signal :symbol #{'<--} :emit :infix :raw "<--"}
-        :signal-assign     {:op :signal-assign :symbol #{'-->} :emit :infix :raw "-->"}
+        :assign-constraint {:op :assign-constraint :symbol #{'<==} :emit :macro :macro #'tf-constraint}
+        :constraint-assign {:op :constraint-assign :symbol #{'==>} :emit :macro :macro #'tf-constraint}
+        :constraint-eq     {:op :constraint-eq :symbol #{'===} :emit :macro :macro #'tf-constraint}
+        :assign-signal     {:op :assign-signal :symbol #{'<--} :emit :macro :macro #'tf-constraint}
+        :signal-assign     {:op :signal-assign :symbol #{'-->} :emit :macro :macro #'tf-constraint}
+        :inc               {:op :inc :symbol #{'++} :emit :postfix :raw "++"}
         })))
 
 (def +template+

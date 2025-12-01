@@ -5,74 +5,64 @@
             [std.lib :as h]))
 
 (fact "emit pragma"
-  (l/emit-script
-   ['(pragma circom "2.0.0")]
-   {:lang :circom})
-  => "{pragma circom \"2.0.0\";}")
+  (l/emit-as :circom
+   ['(pragma circom "2.0.0")])
+  => "pragma circom \"2.0.0\";")
 
 (fact "emit include"
-  (l/emit-script
-   ['(include "circomlib/circuits/poseidon.circom")]
-   {:lang :circom})
-  => "{include \"circomlib/circuits/poseidon.circom\";}")
+  (l/emit-as :circom
+   ['(include "circomlib/circuits/poseidon.circom")])
+  => "include \"circomlib/circuits/poseidon.circom\";")
 
 (fact "emit template"
-  (l/emit-script
+  (l/emit-as :circom
    ['(template Multiplier [n]
        (signal input a)
        (signal input b)
        (signal output c)
-       (<== c (* a b)))]
-   {:lang :circom})
-  => "{\n  template Multiplier(n) { \n  signal input a;\n  signal input b;\n  signal output c;\n  c <== a * b; \n}\n}")
+       (<== c (* a b)))])
+  => "template Multiplier(n) { \n  signal input a;\n  signal input b;\n  signal output c;\n  c <== (a * b);\n}")
 
 (fact "emit signals"
-  (l/emit-script
+  (l/emit-as :circom
    ['(signal input x)
     '(signal output y)
-    '(signal intermediate)]
-   {:lang :circom})
-  => "{signal input x;\nsignal output y;\nsignal intermediate;}")
+    '(signal intermediate)])
+  => "signal input x;\n\nsignal output y;\n\nsignal intermediate;")
 
 (fact "emit vars"
-  (l/emit-script
-   ['(var x 10)]
-   {:lang :circom})
-  => "{var x = 10;}")
+  (l/emit-as :circom
+   ['(var x 10)])
+  => "var x = 10;")
 
 (fact "emit constraints"
-  (l/emit-script
+  (l/emit-as :circom
    ['(<== a b)
     '(==> c d)
     '(=== e f)
     '(<-- g h)
-    '(--> i j)]
-   {:lang :circom})
-  => "{a <== b;\nc ==> d;\ne === f;\ng <-- h;\ni --> j;}")
+    '(--> i j)])
+  => "a <== b;\n\nc ==> d;\n\ne === f;\n\ng <-- h;\n\ni --> j;")
 
 (fact "emit component instantiation"
-  (l/emit-script
-   ['(component comp (Multiplier 2))]
-   {:lang :circom})
-  => "{component comp = Multiplier(2);}")
+  (l/emit-as :circom
+   ['(component comp (Multiplier 2))])
+  => "component comp = Multiplier(2);")
 
 (fact "emit main component"
-  (l/emit-script
-   ['(main {:public [a]} (Multiplier 2))]
-   {:lang :circom})
-  => "{component main {public [a]} = Multiplier(2);}")
+  (l/emit-as :circom
+   ['(main {:public [a]} (Multiplier 2))])
+  => "component main {public [a]} = Multiplier(2);")
 
 (fact "emit for loop"
-  (l/emit-script
+  (l/emit-as :circom
    ['(for [i 0 10]
-       (=== i 5))]
-   {:lang :circom})
-  => "{\n  for(var i = 0; i < 10; i = i + 1){\n  i === 5;\n}\n}")
+       (=== i 5))])
+  => "for(var i = 0; i < 10; i++){\n  i === 5;\n}")
 
 (fact "emit if"
-  (l/emit-script
+  (l/emit-as :circom
    ['(if (> a b)
        (return a)
-       (return b))]
-   {:lang :circom})
-  => "{\n  if(a > b){\n  return a;\n}\nelse{\n  return b;\n}\n}")
+       (return b))])
+  => "if(a > b){\n  return a;\n}\nelse{\n  return b;\n}")
