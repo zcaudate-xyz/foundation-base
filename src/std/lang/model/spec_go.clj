@@ -7,6 +7,8 @@
             [std.lang.base.util :as ut]
             [std.lang.base.book :as book]
             [std.lang.base.script :as script]
+            [std.lang.model.spec-xtalk]
+            [std.lang.model.spec-xtalk.fn-go :as fn-go]
             [std.string :as str]
             [std.lib :as h]))
 
@@ -82,6 +84,7 @@
       (grammar/build:override
        {:var        {:symbol '#{var} :raw "var"}
         :new        {:symbol '#{new} :raw "new" :emit :call}})
+      (grammar/build:override fn-go/+go+)
       (grammar/build:extend
        {:go-chan    {:op :go-chan    :symbol '#{chan} :raw "chan " :emit :pre}
         :go-arrow   {:op :go-arrow   :symbol '#{<-}   :macro #'tf-go-arrow :emit :macro :type :macro}
@@ -110,7 +113,8 @@
                   :block     {:start " {" :end "}"}}
         :token   {:symbol {:replace {\- "_"}}}
         :data    {:vector {:custom #'go-vector}
-                  :map    {:start "map[string]interface{}{" :end "}" :space ""}}})))
+                  :map    {:start "map[string]interface{}{" :end "}" :space ""}}
+        :xtalk   {:notify {:custom true}}})))
 
 (def +grammar+
   (grammar/grammar :go
@@ -125,6 +129,7 @@
 
 (def +book+
   (book/book {:lang :go
+              :parent :xtalk
               :meta +meta+
               :grammar +grammar+}))
 

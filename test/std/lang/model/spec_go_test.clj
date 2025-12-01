@@ -42,3 +42,23 @@
   (l/emit-as :go ['[:> map string int]])
   => "map[string]int"
 )
+
+(t/fact "test xtalk integration"
+  (l/emit-as :go ['(x-print "hello")])
+  => "fmt.Println(\"hello\")"
+
+  (l/emit-as :go ['(x-len [1 2 3])])
+  => "len([]interface{}{1, 2, 3})"
+
+  (l/emit-as :go ['(x-cat "a" "b")])
+  => "\"a\" + \"b\""
+
+  (l/emit-as :go ['(x-m-abs -1)])
+  => "math.Abs(-1)"
+
+  (l/emit-as :go ['(x-arr-push arr 1)])
+  => "arr = append(arr,1)"
+
+  (l/emit-as :go ['(x-str-join "," ["a" "b"])])
+  => "strings.Join([]interface{}{\"a\", \"b\"},\",\")"
+)
