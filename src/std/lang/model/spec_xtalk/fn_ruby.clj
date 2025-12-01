@@ -128,9 +128,47 @@
    :x-str-to-upper    {:macro #'ruby-tf-x-str-to-upper   :emit :macro}
    :x-str-to-lower    {:macro #'ruby-tf-x-str-to-lower   :emit :macro}})
 
+;;
+;; RETURN
+;;
+
+(defn ruby-tf-x-return-encode
+  ([[_ out id key]]
+   (h/$ (do (:- "require 'json'")
+            (begin
+              (return (JSON.generate {:id  ~id
+                                      :key ~key
+                                      :type  "data"
+                                      :value  ~out}))
+              (rescue Exception
+                      (return (JSON.generate {:id ~id
+                                              :key ~key
+                                              :type  "raw"
+                                              :value (. ~out (to_s))}))))))))
+
+(defn ruby-tf-x-return-wrap
+  ([[_ f encode-fn]]
+   (h/$ (do (:- "require 'json'")
+            (begin
+              (:= out (~f))
+              (rescue Exception
+                      (return (JSON.generate {:type "error"
+                                              :value (. $! (to_s))}))))
+            (return (~encode-fn out nil nil))))))
+
+(defn ruby-tf-x-return-eval
+  ([[_ s wrap-fn]]
+   (h/$ (return (~wrap-fn (fn []
+                            (return (eval ~s))))))))
+
+(def +ruby-return+
+  {:x-return-encode  {:macro #'ruby-tf-x-return-encode   :emit :macro}
+   :x-return-wrap    {:macro #'ruby-tf-x-return-wrap     :emit :macro}
+   :x-return-eval    {:macro #'ruby-tf-x-return-eval     :emit :macro}})
 
 (def +ruby+
   (merge +ruby-core+
          +ruby-math+
          +ruby-arr+
-         +ruby-str+))
+         +ruby-str+
+         +ruby-return+))

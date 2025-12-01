@@ -220,10 +220,47 @@
   {:x-json-encode      {:emit :alias :raw 'json_encode}
    :x-json-decode      {:emit :alias :raw 'json_decode}})
 
+;;
+;; RETURN
+;;
+
+(defn php-tf-x-return-encode
+  ([[_ out id key]]
+   (h/$ (do (try
+              (return (json_encode {:id  ~id
+                                    :key ~key
+                                    :type  "data"
+                                    :value  ~out}))
+              (catch Exception $e
+                (return (json_encode {:id ~id
+                                      :key ~key
+                                      :type  "raw"
+                                      :value (. "" ~out)}))))))))
+
+(defn php-tf-x-return-wrap
+  ([[_ f encode-fn]]
+   (h/$ (do (try
+              (:= out (~f))
+              (catch Exception $e
+                (return (json_encode {:type "error"
+                                      :value (. "" $e)}))))
+            (return (~encode-fn out nil nil))))))
+
+(defn php-tf-x-return-eval
+  ([[_ s wrap-fn]]
+   (h/$ (return (~wrap-fn (function []
+                            (return (eval ~s))))))))
+
+(def +php-return+
+  {:x-return-encode  {:macro #'php-tf-x-return-encode   :emit :macro}
+   :x-return-wrap    {:macro #'php-tf-x-return-wrap     :emit :macro}
+   :x-return-eval    {:macro #'php-tf-x-return-eval     :emit :macro}})
+
 (def +php+
   (merge +php-core+
          +php-math+
          +php-type+
          +php-arr+
          +php-str+
-         +php-js+))
+         +php-js+
+         +php-return+))
