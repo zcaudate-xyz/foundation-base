@@ -78,7 +78,14 @@
    [org.bouncycastle/bcpg-jdk15on "1.65"]
 
    ;; lib.postgres
-   [com.impossibl.pgjdbc-ng/pgjdbc-ng "0.8.9"]
+   [com.impossibl.pgjdbc-ng/pgjdbc-ng "0.8.9"
+    :exclusions [io.netty/netty-common
+                 io.netty/netty-buffer
+                 io.netty/netty-transport
+                 io.netty/netty-codec
+                 io.netty/netty-handler
+                 io.netty/netty-transport-native-unix-common]]
+   [io.netty/netty-all "4.1.118.Final"]
    
    ;; lib.oshi
    [com.github.oshi/oshi-core "6.4.11"]
