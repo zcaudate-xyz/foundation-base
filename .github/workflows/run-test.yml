@@ -27,13 +27,29 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
         
-      - name: Run Tests
+      - name: Run Tests - std, math, net and script
         run: >
           docker run --network host 
           -v /var/run/docker.sock:/var/run/docker.sock 
           -v $(pwd):$(pwd) 
           -w $(pwd) 
-          ghcr.io/zcaudate-xyz/infra-foundation-clean:ci lein test :with std
+          ghcr.io/zcaudate-xyz/infra-foundation-clean:ci lein test :with "[std math net script]" 
+          
+  run-code-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        
+      - name: Run Tests - code and jvm
+        run: >
+          docker run --network host 
+          -v /var/run/docker.sock:/var/run/docker.sock 
+          -v $(pwd):$(pwd) 
+          -w $(pwd) 
+          ghcr.io/zcaudate-xyz/infra-foundation-clean:ci lein test :with "[code jvm]"
         
     services:
       postgres:
@@ -46,7 +62,7 @@ jobs:
         ports:
           - 5432:5432
           
-  run-code-tests:
+  run-rt-tests:
     runs-on: ubuntu-latest
     timeout-minutes: 40
     
@@ -54,13 +70,13 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
         
-      - name: Run Tests
+      - name: Run Tests - lib and rt
         run: >
           docker run --network host 
           -v /var/run/docker.sock:/var/run/docker.sock 
           -v $(pwd):$(pwd) 
           -w $(pwd) 
-          ghcr.io/zcaudate-xyz/infra-foundation-clean:ci lein test :with code
+          ghcr.io/zcaudate-xyz/infra-foundation-clean:ci lein test :with "[lib rt]"
         
     services:
       postgres:
