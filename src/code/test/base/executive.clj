@@ -1,6 +1,7 @@
 (ns code.test.base.executive
   (:require [std.lib :as h]
             [std.fs :as fs]
+            [std.lib.time :as t]
             [std.task :as task]
             [code.project :as project]
             [code.test.checker.common :as checker]
@@ -62,11 +63,13 @@
   "returns the line of the test"
   {:added "3.0"}
   ([key results]
-   (->> (mapv (fn [result]
-                (let [refer (-> result :meta :refer)
-                      line (-> result :meta :line)]
-                  [line (if refer (-> refer name symbol))]))
-              (get results key)))))
+   (let [items (or (get-in results [:data key])
+                   (get results key))]
+     (->> (mapv (fn [result]
+                  (let [refer (-> result :meta :refer)
+                        line (-> result :meta :line)]
+                    [line (if refer (-> refer name symbol))]))
+                items)))))
 
 (defn summarise
   "creates a summary of given results"
@@ -97,7 +100,32 @@
             :failed  (:failed items)
             :throw   (:throw items)
             :timeout (:timeout items))
-     summary)))
+     (assoc summary :data items))))
+
+(defn save-report
+  "saves the report to .hara/runs"
+  {:added "3.0"}
+  ([items]
+   (let [process (fn [type item]
+                   (case type
+                     :failed (listener/summarise-verify item)
+                     :throw  (if (= :verify (:from item))
+                               (listener/summarise-verify item)
+                               (listener/summarise-evaluate item))
+                     :timeout (listener/summarise-evaluate item)))
+         failures (reduce (fn [out k]
+                            (let [data (map (partial process k) (get items k))]
+                              (if (seq data)
+                                (assoc out k data)
+                                out)))
+                          {}
+                          [:failed :throw :timeout])]
+     (when (seq failures)
+       (let [dir  (str (fs/path rt/*root* ".hara/runs"))
+             _    (fs/create-directory dir)
+             file (str (fs/path dir (str "run-" (t/system-ms) ".edn")))]
+         (spit file (with-out-str (clojure.pprint/pprint failures)))
+         (println (str "Report saved to " file)))))))
 
 (defn summarise-bulk
   "creates a summary of all bulk results"
@@ -115,6 +143,7 @@
                                        (swap! +latest+ update-in [:errored] conj ns)
                                        true))
                                    items))]
+     (save-report all-items)
      (summarise all-items))))
 
 (defn unload-namespace
