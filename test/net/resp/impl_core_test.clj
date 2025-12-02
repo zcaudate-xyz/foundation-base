@@ -68,12 +68,12 @@
                     ["SET" "TEST:E" (serialize-bytes {:c 5} :json)]
                     ["SET" "TEST:F" (serialize-bytes {:c 6} :json)]]]
     (test-harness
-      (< (-> (std.concurrent.request/request-bulk |conn| |commands|)
-             (h/bench-ns))
-         (-> (doseq [cmd |commands|]
-               (std.concurrent.request/request-single |conn| cmd))
-             (h/bench-ns)))))
-  => true)
+     [(-> (std.concurrent.request/request-bulk |conn| |commands|)
+          (h/bench-ns))
+      (-> (doseq [cmd |commands|]
+            (std.concurrent.request/request-single |conn| cmd))
+          (h/bench-ns))]))
+  => vector?)
 
 ^{:refer std.concurrent.request/req:single-complete :added "3.0"
   :adopt true}

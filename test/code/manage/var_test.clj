@@ -6,7 +6,7 @@
 
 ^{:refer code.manage.var/create-candidates :added "3.0"}
 (fact "creates candidates for search"
-  (create-candidates '[:require [a :as b]] 'a/c 'c)
+  (create-candidates '[a :as b] 'a/c 'c)
   => #{'a/c 'b/c})
 
 ^{:refer code.manage.var/find-candidates :added "3.0"}

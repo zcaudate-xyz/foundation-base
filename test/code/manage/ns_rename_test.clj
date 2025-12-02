@@ -12,8 +12,8 @@
 ^{:refer code.manage.ns-rename/change-list :added "3.0"}
 (fact "compiles a list of code changes"
   (with-redefs [code.framework/transform-code (constantly {:deltas []})]
-    (change-list ['old 'new] {} {'old "path"} nil))
-  => (any seq? nil?))
+    (vec (change-list ['old 'new] {} {'old "path"} nil)))
+  => (just []))
 
 ^{:refer code.manage.ns-rename/ns-rename :added "3.0"}
 (fact "top-level ns rename function"

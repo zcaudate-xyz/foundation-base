@@ -36,8 +36,9 @@
          timeout      (filter #(-> % :form (= :timeout)) forms)
          thrown-forms  (filter #(and (-> % :status (= :exception))
                                      (not= :timeout (:form %))) forms)
-         thrown-checks (filter #(and (-> % :data false?)
-                                     (-> % :actual :status (= :exception))) checks)
+         thrown-checks (filter #(or (and (-> % :data false?)
+                                         (-> % :actual :status (= :exception)))
+                                    (-> % :status (= :exception))) checks)
          thrown        (concat thrown-forms thrown-checks)
 
          passed  (filter checker/succeeded? checks)

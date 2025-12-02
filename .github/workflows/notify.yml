@@ -9,8 +9,8 @@ jobs:
     strategy:
       matrix:
         downstream:
-            - 'zcaudate-xyz/foundation-embed'
-            - 'zcaudate-xyz/foundation-fx'
+#            - 'zcaudate-xyz/foundation-embed'
+#            - 'zcaudate-xyz/foundation-fx'
             - 'zcaudate-xyz/foundation-web'
     
     steps:    

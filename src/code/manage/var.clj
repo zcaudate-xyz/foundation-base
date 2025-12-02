@@ -26,7 +26,6 @@
          nsform (-> (query/$* nav
                               [{:first :require} '| {:first nsp}])
                     (first))
-         nsform (if nsform (nav/value nsform))
          candidates (create-candidates nsform var sym)]
      [candidates nsp sym])))
 
