@@ -19,6 +19,7 @@
 
   (object/from-data {:artifact '[hara/hara "2.4.8"]}
                     Dependency)
+  => (partial instance? Dependency)
   ;;=> #dep{:artifact "hara:hara:jar:2.4.8",
   ;;        :exclusions [],
   ;;        :optional false,
@@ -31,6 +32,7 @@
 
   (object/from-data {:artifact '[hara/hara "2.4.8"]}
                     DependencyNode)
+  => (partial instance? DependencyNode)
   ;;=> #dep.node {:children [],
   ;;              :relocations [],
   ;;              :repositories [],
@@ -42,7 +44,7 @@
   )
 
 ^{:refer lib.aether.request/artifact-request :added "3.0"}
-(comment "creates an `ArtifactRequest` object from map"
+(fact "creates an `ArtifactRequest` object from map"
 
   (artifact-request
    {:artifact "hara:hara:2.4.8"
@@ -50,6 +52,7 @@
                     :authentication {:username "zcaudate"
                                      :password "hello"}
                     :url "https://clojars.org/repo/"}]})
+  => (partial instance? ArtifactRequest)
   ;;=> #req.artifact{:artifact "hara:hara:jar:2.4.8",
   ;;                 :repositories [{:id "clojars",
   ;;                                 :url "https://clojars.org/repo/"
@@ -64,6 +67,7 @@
    {:root {:artifact "hara:hara:2.4.8"}
     :repositories [{:id "clojars"
                     :url "https://clojars.org/repo/"}]})
+  => (partial instance? CollectRequest)
   ;;=> #req.collect{:root {:artifact "hara:hara:jar:2.4.8",
   ;;                       :exclusions [],
   ;;                       :optional false,
@@ -80,6 +84,7 @@
    {:root {:artifact "hara:hara:2.4.8"}
     :repositories [{:id "clojars"
                     :url "https://clojars.org/repo/"}]})
+  => (partial instance? DependencyRequest)
   ;;=> #req.dependency{:root {:artifact "hara:hara:jar:2.4.8",
   ;;                          :exclusions [],
   ;;                          :optional false,
@@ -102,6 +107,7 @@
                  :url "https://clojars.org/repo/"
                  :authentication {:username "zcaudate"
                                   :password "hello"}}})
+  => (partial instance? DeployRequest)
   ;;=> #req.deploy{:artifacts ["hara:std.string:jar:2.4.8"]
   ;;               :repository {:id "clojars",
   ;;                            :authentication {:username "zcaudate", :password "hello"}
@@ -122,6 +128,7 @@
                  :version "2.4.8"
                  :extension "pom"
                  :file "hara-string.pom"}]})
+  => (partial instance? InstallRequest)
   ;;=> #req.install{:artifacts ["hara:std.string:jar:2.4.8"
   ;;                            "hara:std.string:pom:2.4.8"]
   ;;                :metadata []}
@@ -137,7 +144,8 @@
     :repository {:id "clojars"
                  :url "https://clojars.org/repo/"
                  :authentication {:username "zcaudate"
-                                  :password "hello"}}}))
+                                  :password "hello"}}})
+  => (partial instance? org.eclipse.aether.resolution.MetadataRequest))
 
 ^{:refer lib.aether.request/range-request :added "3.0"}
 (fact "constructs a range request"
@@ -148,7 +156,8 @@
                   :repositories [{:id "clojars"
                                   :url "https://clojars.org/repo/"
                                   :authentication {:username "zcaudate"
-                                                   :password "hello"}}]}))
+                                                   :password "hello"}}]})
+  => (partial instance? org.eclipse.aether.resolution.VersionRangeRequest))
 
 ^{:refer lib.aether.request/version-request :added "3.0"}
 (fact "constructs a version request"
@@ -159,4 +168,5 @@
                     :repositories [{:id "clojars"
                                     :url "https://clojars.org/repo/"
                                     :authentication {:username "zcaudate"
-                                                     :password "hello"}}]}))
+                                                     :password "hello"}}]})
+  => (partial instance? org.eclipse.aether.resolution.VersionRequest))

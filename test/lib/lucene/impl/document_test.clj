@@ -1,6 +1,7 @@
 (ns lib.lucene.impl.document-test
   (:use code.test)
-  (:require [lib.lucene.impl.document :refer :all]))
+  (:require [lib.lucene.impl.document :refer :all]
+            [std.object :as object]))
 
 ^{:refer lib.lucene.impl.document/field-type-display :added "3.0"}
 (fact "returns field types that are not defaults"
@@ -12,7 +13,8 @@
 ^{:refer lib.lucene.impl.document/field-type-set-index :added "3.0"}
 (fact "sets the field type index value"
 
-  (field-type-set-index (field-type {}) #{:doc}))
+  (field-type-set-index (field-type {}) #{:doc})
+  => org.apache.lucene.document.FieldType)
 
 ^{:refer lib.lucene.impl.document/field-type-get-index :added "3.0"}
 (fact "gets the field type index value"
@@ -34,7 +36,9 @@
   => org.apache.lucene.index.DocValuesType/NONE)
 
 ^{:refer lib.lucene.impl.document/field-display :added "3.0"}
-(fact "displays the field")
+(fact "displays the field"
+  (field-display {:name "hello" :type {} :length 5})
+  => (contains {:name "hello"}))
 
 ^{:refer lib.lucene.impl.document/field-construct :added "3.0"}
 (fact "constructs a field"
@@ -60,15 +64,19 @@
 (fact "setters for document fields"
 
   (-> (document {})
-      (document-set-fields [{:name "hello" :value "world" :type {}}])))
+      (document-set-fields [{:name "hello" :value "world" :type {}}]))
+  => org.apache.lucene.document.Document)
 
 ^{:refer lib.lucene.impl.document/document-display :added "3.0"}
-(fact "display function for document")
+(fact "display function for document"
+  (document-display {:fields [{:name "hello"}]})
+  => map?)
 
 ^{:refer lib.lucene.impl.document/document :added "3.0"}
 (fact "constructs a document"
 
-  (document {:fields [{:name "hello" :value "world" :type {}}]}))
+  (document {:fields [{:name "hello" :value "world" :type {}}]})
+  => org.apache.lucene.document.Document)
 
 ^{:refer lib.lucene.impl.document/to-map :added "3.0"}
 (fact "turns the document into a map"

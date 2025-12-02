@@ -112,13 +112,23 @@
            noloop (clojure.core/conj "NOLOOP")))))
 
 ^{:refer lib.redis.impl.generator/collect-optional :added "3.0"}
-(fact "collect all optional variables")
+(fact "collect all optional variables"
+  (collect-optional [{:optional true}] (volatile! nil) :key)
+  => (fn [x] (and (seq? x)
+                  (= :optional (:type (first x)))
+                  (:multiple (first x)))))
 
 ^{:refer lib.redis.impl.generator/command-arguments :added "3.0"}
-(fact "function for command arguments")
+(fact "function for command arguments"
+  (command-arguments [{:type "key"}] :key {} (volatile! nil) (volatile! nil))
+  => (fn [x] (and (seq? x)
+                  (= :key (:type (first x)))
+                  (= 'key (:sym (first x))))))
 
 ^{:refer lib.redis.impl.generator/command-parse :added "3.0"}
-(fact "parse params for a given skeleton")
+(fact "parse params for a given skeleton"
+  (command-parse (ref/command :ttl) {})
+  => (contains {:id :ttl :return :data}))
 
 ^{:refer lib.redis.impl.generator/command-params :added "3.0"}
 (fact "create command params for form generation"
@@ -131,7 +141,8 @@
                     :optional nil, :display nil}),
        :prefix ("TTL"), :return :data, :optionals false, :multiple false}
 
-  (command-params [:set {}]))
+  (command-params [:set {}])
+  => map?)
 
 ^{:refer lib.redis.impl.generator/command-form :added "3.0"}
 (fact "create the command form"
@@ -150,8 +161,10 @@
   ^:hidden
 
   (select-commands {:group :list})
+  => seq?
 
   (select-commands {:group [:set]})
+  => seq?
 
-  (select-commands {:include [:ttl]}))
-
+  (select-commands {:include [:ttl]})
+  => seq?)

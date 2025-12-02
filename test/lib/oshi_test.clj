@@ -1,6 +1,7 @@
 (ns lib.oshi-test
   (:use [code.test :exclude [all]])
-  (:require [lib.oshi :refer :all]))
+  (:require [lib.oshi :refer :all]
+            [std.lib :as h]))
 
 ^{:refer lib.oshi/to-data :added "3.0"}
 (fact "converts the object to a map provided *raw* is false")
@@ -10,7 +11,7 @@
 
   (all)
   ;; => <EVERYTHING>
-  )
+  => (complement nil?))
 
 ^{:refer lib.oshi/computer-system :added "3.0" :class [:oshi/general]}
 (fact "returns specs of  the current system"
@@ -23,7 +24,7 @@
   ;;                    :version "MBP114.0172.B13"},
   ;;         :manufacturer "Apple Inc.",
   ;;         :model "MacBook Pro (MacBookPro11,5)", :serial-number "C02RR24EG8WP"}
-  )
+  => (complement nil?))
 
 ^{:refer lib.oshi/fs :added "3.0" :class [:oshi/general]}
 (fact "returns disk store information"
@@ -37,7 +38,7 @@
   ;;                         :type "EFI System Partition"}]
   ;;           :time-stamp 1487147164390, :read-bytes 3176375808,
   ;;           :reads 132357, :model "APPLE SSD SM0512G"})
-  )
+  => (any nil? seq?))
 
 ^{:refer lib.oshi/displays :added "3.0" :class [:oshi/general]}
 (fact "returns display information"
@@ -48,7 +49,7 @@
   ;;                     0 0 0 0 16 0 0 0 0 0 0 0 0 0 0 0 0
   ;;                     ...
   ;;                     0 0 0 -48]})
-  )
+  => (any nil? seq?))
 
 ^{:refer lib.oshi/memory :added "3.0" :class [:oshi/general]}
 (fact "returns memory information"
@@ -58,7 +59,7 @@
   ;;            :swap-total 0,
   ;;            :swap-used 0,
   ;;            :total 17179869184}
-  )
+  => (complement nil?))
 
 ^{:refer lib.oshi/network-ifs :added "3.0" :class [:oshi/general]}
 (fact "returns network interface information"
@@ -71,7 +72,7 @@
   ;;          :in-errors 0, :display-name "awdl0",
   ;;          :ipv6addr ["fe80:0:0:0:5033:aaff:fe41:8627"],
   ;;          :time-stamp 1487147416141, :bytes-recv 0})
-  )
+  => (any nil? seq?))
 
 ^{:refer lib.oshi/power :added "3.0" :class [:oshi/general]}
 (fact "returns power information"
@@ -80,7 +81,7 @@
   ;; => (#power{:name "InternalBattery-0",
   ;;            :remaining-capacity 1.0,
   ;;            :time-remaining -2.0})
-  )
+  => (any nil? seq?))
 
 ^{:refer lib.oshi/cpu :added "3.0" :class [:oshi/general]}
 (fact "returns cpu information"
@@ -98,7 +99,7 @@
   ;;         :system-uptime 30980, :stepping "1",
   ;;         :system-load-average 1.19970703125,
   ;;         :vendor-freq 2500000000, :model "70"}
-  )
+  => (complement nil?))
 
 ^{:refer lib.oshi/sensors :added "3.0" :class [:oshi/general]}
 (fact "returns sensor information"
@@ -107,7 +108,7 @@
   ;; => #sensors{:cpu-temperature 42.125,
   ;;             :cpu-voltage 173798.992,
   ;;             :fan-speeds [2163 1999]}
-  )
+  => (complement nil?))
 
 ^{:refer lib.oshi/usb :added "3.0" :class [:oshi/general]}
 (fact "returns usb information"
@@ -119,7 +120,7 @@
   ;;     #usb{:name "Bluetooth USB Host Controller",
   ;;          :product-id "8290",
   ;;          :vendor "Broadcom Corp."})
-  )
+  => (any nil? seq?))
 
 ^{:refer lib.oshi/os :added "3.0" :class [:oshi/general]}
 (fact "returns operating system information"
@@ -142,14 +143,14 @@
   ;;                  :code-name "Sierra",
   ;;                  :osx-version-number 12,
   ;;                  :version "10.12.3"}}
-  )
+  => (complement nil?))
 
 ^{:refer lib.oshi/process-id :added "3.0" :class [:oshi/process]}
 (fact "returns the current process id"
 
   (process-id)
   ;;=> 9317
-  )
+  => number?)
 
 ^{:refer lib.oshi/process :added "3.0" :class [:oshi/process]}
 (fact "returns information about a process given it's id"
@@ -170,7 +171,7 @@
   ;;             :bytes-read 16384,
   ;;             :up-time 7672182,
   ;;             :process-id 9317}
-  )
+  => (complement nil?))
 
 ^{:refer lib.oshi/list-processes :added "3.0" :class [:oshi/process]}
 (fact "returns information about all running processes on the os"
@@ -191,7 +192,7 @@
   ;;              :bytes-read 61440,
   ;;              :up-time 31522999,
   ;;              :process-id 1360})
-  )
+  => (complement nil?))
 
 (comment
   (./import))
