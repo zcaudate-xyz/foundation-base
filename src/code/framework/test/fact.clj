@@ -52,20 +52,29 @@
                 :test  \"\\n  (+ 1 1) => 2\\n  (long? 3) => true\"})"
   {:added "3.0"}
   ([nav]
-   (if-let [mta (common/gather-meta nav)]
-     (let [exp (nav/value nav)
+   (let [nav (if (nil? (nav/tag nav))
+               (nav/left nav)
+               nav)
+         nav (if (= :list (nav/tag nav))
+               (nav/down nav)
+               nav)]
+     (if-let [mta (common/gather-meta nav)]
+       (let [nav (if (symbol? (nav/value nav))
+                   (nav/right nav)
+                   nav)
+             exp (and nav (nav/value nav))
            [intro nnav] (if (string? exp)
                           [exp (if (nav/right nav)
                                  (nav/right* nav))]
                           ["" nav])]
-       (assoc mta
-              :form  (-> nav nav/left nav/value)
-              :sexp  (-> nav nav/up nav/value)
-              :line  (nav/line-info (nav/up nav))
-              :test  (if nnav
-                       (gather-fact-body nnav)
-                       [])
-              :intro intro)))))
+         (assoc mta
+                :form  (-> nav nav/left nav/value)
+                :sexp  (-> nav nav/up nav/value)
+                :line  (nav/line-info (nav/up nav))
+                :test  (if nnav
+                         (gather-fact-body nnav)
+                         [])
+                :intro intro))))))
 
 (defmethod common/test-frameworks 'midje.sweet
   ([_]
@@ -76,7 +85,12 @@
 
 (defmethod common/analyse-test :fact
   ([type nav]
-   (let [fns  (query/$* nav ['(#{fact comment} | & _)] {:return :zipper :walk :top})]
+   (let [root (if (= :root (nav/tag nav))
+                (nav/down nav)
+                nav)
+         fns  (if root
+                (query/$* root ['(#{fact comment} | & _)] {:return :zipper :walk :top})
+                [])]
      (->> (keep gather-fact fns)
           (reduce (fn [m {:keys [ns var class sexp test intro line form] :as meta}]
                     (-> m

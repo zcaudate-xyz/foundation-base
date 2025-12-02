@@ -272,12 +272,12 @@
 
 ^{:refer std.lang.base.script-macro/intern-macros :added "4.0"}
 (fact "interns the top-level macros in the grammar"
-  (macro/intern-macros :lua (lib/get-book +library+ :lua))
+  (macro/intern-macros :lua (:grammar (lib/get-book +library+ :lua)))
   => vector?)
 
 ^{:refer std.lang.base.script-macro/intern-highlights :added "4.0"}
 (fact "interns the highlight macros in the grammar"
-  (macro/intern-highlights :lua (lib/get-book +library+ :lua))
+  (macro/intern-highlights :lua (:grammar (lib/get-book +library+ :lua)))
   => vector?)
 
 ^{:refer std.lang.base.script-macro/intern-grammar :added "4.0"}

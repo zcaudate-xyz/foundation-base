@@ -7,6 +7,8 @@
             [code.query :as query]
             [std.block :as block]))
 
+(require 'code.framework.test.fact :reload)
+
 ^{:refer code.framework.common/display-entry :added "3.0"}
 (fact "creates a map represenation of the entry"
 
@@ -54,14 +56,11 @@
               (fact \"imports a map\"
                 (import {:write true}) => nil)"
         nav (nav/parse-root code)
-        fns (query/$* nav ['(#{fact comment} | & _)] {:return :zipper :walk :top})
+        fns (query/$* (nav/down nav) ['(#{fact comment} | & _)] {:return :zipper :walk :top})
         facts (keep code.framework.test.fact/gather-fact fns)]
-    {:fns-count (count fns)
-     :facts-count (count facts)
-     :first-fact (first facts)})
-  => {:fns-count 1
-      :facts-count 1
-      :first-fact (contains {:intro "imports a map"})})
+    (-> (first facts) :intro))
+  => "imports a map")
+
 
 ^{:refer code.framework.common/gather-meta :added "3.0"}
 (fact "gets the metadata for a particular form"

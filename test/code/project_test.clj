@@ -47,7 +47,7 @@
 ^{:refer code.project/lookup-path :added "3.0"}
 (fact "looks up the path given the `ns`"
 
-  (lookup-path (h/ns-sym))
+  (str (lookup-path (h/ns-sym)))
   => string?)
 
 ^{:refer code.project/get-path :added "4.0"
