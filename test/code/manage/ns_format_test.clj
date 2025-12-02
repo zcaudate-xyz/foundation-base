@@ -5,8 +5,8 @@
 
 ^{:refer code.manage.ns-format/first-element :added "3.0"}
 (fact "returns first element of list"
-  (first-element [1 2]) => 1
-  (first-element 1) => 1)
+  (first-element ['a 'b]) => 'a
+  (first-element 'a) => 'a)
 
 ^{:refer code.manage.ns-format/key-order :added "3.0"}
 (fact "gets key order"

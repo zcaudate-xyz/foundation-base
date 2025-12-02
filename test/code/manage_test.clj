@@ -261,9 +261,9 @@
 
 
 ^{:refer code.manage/extract :added "4.0"}
-(fact "returns the list of vars in a namespace"
+(fact "extracts content using process function"
   (extract 'code.manage)
-  => vector?)
+  => string?)
 
 
 ^{:refer code.manage/require-file :added "4.0"}

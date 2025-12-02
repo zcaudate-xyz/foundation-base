@@ -1,5 +1,5 @@
 (ns code.ai.server.tool.code-heal
-  (:require [std.block.heal :as heal]
+  (:require [code.heal.core :as heal]
             [code.project :as project]
             [std.lib :as h]))
 
