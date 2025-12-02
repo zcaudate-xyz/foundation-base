@@ -65,6 +65,8 @@
          _    (intern *ns* (with-meta '*last* {:dynamic true})
                       result)]
      (h/signal {:test :form :result result})
+     (when rt/*results*
+       (swap! rt/*results* conj result))
      result)))
 
 (defmethod process :test-equal
@@ -119,7 +121,8 @@
   {:added "3.0"}
   ([{:keys [unit refer] :as meta} body]
    (let [timeout (or (:timeout meta) rt/*timeout-global*)]
-     (binding [rt/*timeout* timeout]
+     (binding [rt/*timeout* timeout
+               rt/*results* (atom [])]
        (if (or (match/match-options {:unit unit
                                      :refer refer}
                                     rt/*settings*)
