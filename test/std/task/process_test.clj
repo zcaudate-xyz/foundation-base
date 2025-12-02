@@ -1,7 +1,9 @@
 (ns std.task.process-test
   (:use code.test)
   (:require [std.task.process :refer :all]
-            [std.lib.result :as res]))
+            [std.lib.result :as res]
+            [std.task :as task]
+            [std.lib :as h]))
 
 (defn- process-test-fn
   ([input params lookup env & args]
@@ -21,20 +23,47 @@
   => 3)
 
 ^{:refer std.task.process/wrap-input :added "3.0"}
-(fact "enables execution of task with single or multiple inputs")
+(fact "enables execution of task with single or multiple inputs"
+  ((wrap-input process-test-fn +task+)
+   1 {} {} {})
+  => 2
+
+  (let [task (assoc-in +task+ [:item :list] (constantly [1 2 3]))
+        f    (wrap-execute process-test-fn task)
+        res  ((wrap-input f task) :all {} {} {})]
+    (get res 2) => 3
+    (get res 3) => 5
+    (get res 4) => 7))
 
 
 ^{:refer std.task.process/main-function :added "4.0"}
-(fact "TODO")
+(fact "creates a main function to be used for execution"
+  (main-function ns-aliases 1)
+  => (contains [h/vargs? false]))
 
 ^{:refer std.task.process/select-filter :added "4.0"}
-(fact "TODO")
+(fact "matches given a range of filters"
+  (select-filter #"ello" 'hello)
+  => true
+  (select-filter #"^ello" 'hello)
+  => false)
 
 ^{:refer std.task.process/select-inputs :added "4.0"}
-(fact "TODO")
+(fact "selects inputs based on matches"
+  (select-inputs {:item {:list (fn [_ _] ['code.test 'spirit.common])}}
+                 {}
+                 {}
+                 ['code])
+  => ['code.test])
 
 ^{:refer std.task.process/task-inputs :added "4.0"}
-(fact "TODO")
+(fact "constructs inputs to the task given a set of parameters"
+  (task-inputs (task/task :default "ns-interns" ns-interns)
+               'std.task)
+  => (contains ['std.task map? fn? map?]))
 
 ^{:refer std.task.process/invoke :added "4.0"}
-(fact "TODO")
+(fact "executes the task, given functions and parameters"
+  (keys (invoke (task/task :default "ns-interns" ns-interns)
+                'std.task.process-test))
+  => (contains '[process-test-fn] :in-any-order :gaps-ok))

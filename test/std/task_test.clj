@@ -79,4 +79,12 @@
 
 
 ^{:refer std.task/process-ns-args :added "4.0"}
-(fact "TODO")
+(fact "processes arguments for tasks"
+  (process-ns-args [":only" "foo"])
+  => {:ns 'foo}
+  (process-ns-args [":verbose"])
+  => {:verbose nil}
+  (process-ns-args [":verbose" ":other"])
+  => {:verbose true :other nil}
+  (process-ns-args [":timeout" "100"])
+  => {:timeout 100})

@@ -172,7 +172,7 @@
                               :body      {:start "" :end ""}}
                   :function  {:raw ""
                               :args {:sep " "}}
-                  :invoke    {:sep " "}}
+                  :invoke    {:sep " " :start " " :end ""}}
         :data    {:vector    {:start "[" :end "]" :space "" :custom #'haskell-vector}
                   :tuple     {:start "(" :end ")" :space ""}}
         :token   {:symbol    {:replace +sym-replace+}}

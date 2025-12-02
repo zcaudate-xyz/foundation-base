@@ -57,7 +57,7 @@
   "for index transform"
   {:added "4.0"}
   [[_ [i [start end step :as range]] & body]]
-  (apply list 'for [i :in (list :to start (or step 1) end)]
+  (apply list 'for [i :in (list 'to start (or step 1) end)]
            body))
 
 (defn tf-dict
@@ -74,7 +74,15 @@
   "push! transform to avoid sanitization"
   {:added "4.0"}
   [[_ arr item]]
-  (list '- "push!(" arr "," item ")"))
+  (list :% "push!(" arr ", " item ")"))
+
+(defn emit-to
+  "emits the range"
+  {:added "4.0"}
+  [[_ start step end] grammar mopts]
+  (if (= step 1)
+    (str start ":" end)
+    (str start ":" step ":" end)))
 
 (def +features+
   (-> (grammar/build :include [:builtin
@@ -117,9 +125,11 @@
        {:cat    {:op :cat    :symbol '#{cat}       :raw "*"   :emit :infix}
         :len    {:op :len    :symbol '#{len}       :raw "length"    :emit  :pre}
         :local  {:op :local  :symbol '#{local var} :macro  #'tf-local :type :macro}
-        :pair   {:op :pair   :symbol '#{=>}        :raw " => "      :emit :infix}
+        :pair   {:op :pair   :symbol '#{=>}        :raw "=>"        :emit :infix}
         :dict   {:op :dict   :symbol '#{dict}      :macro #'tf-dict :emit :macro}
-        :push!  {:op :push!  :symbol '#{push!}     :macro #'tf-push! :emit :macro}})))
+        :push!  {:op :push!  :symbol '#{push!}     :macro #'tf-push! :emit :macro}
+        :%      {:op :%      :symbol #{:%}         :emit :squash}
+        :to     {:op :to     :symbol #{'to}        :emit #'emit-to}})))
 
 (def +template+
   (->> {:banned #{:set :regex}

@@ -34,7 +34,12 @@
 
   (l/emit-as :haskell ['(concat [1] [2])])
   => "[1] ++ [2]"
-  )
+
+  (l/emit-as :haskell ['(do (print "a") (print "b"))])
+  => "do\n  print \"a\"\n  print \"b\""
+
+  (l/emit-as :haskell ['[1 2 3]])
+  => "[1,2,3]")
 
 (t/fact "types emit"
   (l/emit-as :haskell ['[:> List Int]])

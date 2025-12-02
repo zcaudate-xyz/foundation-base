@@ -271,4 +271,8 @@
 
 
 ^{:refer std.lib.stream/collect-persistent :added "4.1"}
-(fact "TODO")
+(fact "collects into a persistent collection"
+  (collect-persistent [] (i/i:map inc) (range 5))
+  => [1 2 3 4 5]
+  (collect-persistent #{} (i/i:map inc) (range 5))
+  => #{1 2 3 4 5})
