@@ -12,7 +12,7 @@
      (-> (set [var
                (if as (symbol (str as) (str sym)))
                (if (or (= refer :all)
-                       ((set refer) sym))
+                       ((set (if (coll? refer) refer [refer])) sym))
                  sym)])
          (disj nil))
      #{var})))
@@ -26,6 +26,7 @@
          nsform (-> (query/$* nav
                               [{:first :require} '| {:first nsp}])
                     (first))
+         nsform (if nsform (nav/value nsform))
          candidates (create-candidates nsform var sym)]
      [candidates nsp sym])))
 
