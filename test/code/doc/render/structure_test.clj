@@ -34,7 +34,9 @@
         [{:type :paragraph :text "p2"}]]]])
 
 ^{:refer code.doc.render.structure/mapify-unit :added "3.0"}
-(fact "helper class for mapify")
+(fact "helper class for mapify"
+  (mapify-unit {:a 1}) => {:a 1}
+  (mapify-unit [{:type :chapter} {:type :text}]) => {:type :chapter :elements [{:type :text}]})
 
 ^{:refer code.doc.render.structure/mapify :added "3.0"}
 (fact "creates the hierarchical structure for a flat list of elements"

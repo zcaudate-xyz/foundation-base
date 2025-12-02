@@ -67,7 +67,11 @@
   => "'e' 'd' '\n '")
 
 ^{:refer code.framework.docstring/insert-docstring :added "3.0"}
-(fact "inserts the meta information and docstring from tests")
+(fact "inserts the meta information and docstring from tests"
+  (insert-docstring (nav/parse-string "(defn foo [])")
+                    'ns
+                    {'ns {'foo {:intro "intro" :test {:code "code"}}}})
+  => nav/navigator?)
 
 (comment
   (code.manage/analyse))

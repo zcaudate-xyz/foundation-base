@@ -3,11 +3,13 @@
   (:require [code.edit :as nav]
             [code.query.traverse :refer :all]))
 
-#_(defn source [pos]
+(defn source [pos]
     (-> pos :source nav/value))
 
 ^{:refer code.query.traverse/pattern-zip :added "3.0"}
-(fact "creates a clojure.zip pattern")
+(fact "creates a clojure.zip pattern"
+  (pattern-zip [1 2 3])
+  => (satisfies std.lib.zip.Zipper))
 
 ^{:refer code.query.traverse/wrap-meta :added "3.0"}
 (fact "provides a wrapper for traversing and manipulating metadata tags within code structures")
@@ -49,7 +51,8 @@
 (fact "traversing cursor level")
 
 ^{:refer code.query.traverse/count-elements :added "3.0"}
-(fact "counts the number of elements in a given code structure")
+(fact "counts the number of elements in a given code structure"
+  (count-elements [1 2 3]) => 4)
 
 ^{:refer code.query.traverse/traverse :added "3.0"}
 (fact "basic traverse functions"
@@ -62,7 +65,7 @@
    (traverse (nav/parse-string "^:a (hello)")
              '(hello)))
   => '(hello)
-  ^:hidden
+
   (source
    (traverse (nav/parse-string "^:a (hello)")
              '(^:- hello)))

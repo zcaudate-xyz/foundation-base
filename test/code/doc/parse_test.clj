@@ -115,19 +115,38 @@
   => {:type :code, :indentation 0, :code ["(+ 1 1)"]})
 
 ^{:refer code.doc.parse/wrap-meta :added "3.0"}
-(fact "if form is meta, then go down a level")
+(fact "if form is meta, then go down a level"
+  (let [func (wrap-meta (fn [n] (nav/string n)))]
+    (func (nav/parse-string "^:a a")) => "a"
+    (func (nav/parse-string "a")) => "a"))
 
 ^{:refer code.doc.parse/wrap-line-info :added "3.0"}
-(fact "helper to add the line information to the parser (used by `parse-loop`)")
+(fact "helper to add the line information to the parser (used by `parse-loop`)"
+  (let [func (wrap-line-info (constantly {}))]
+    (func (nav/parse-string "a"))
+    => {:line {:row 1, :col 1, :end-row 1, :end-col 2}}))
 
 ^{:refer code.doc.parse/parse-single :added "3.0"}
-(fact "parse a single zloc")
+(fact "parse a single zloc"
+  (parse-single (nav/parse-string "a"))
+  => {:type :code, :indentation 0, :code ["a"]})
 
 ^{:refer code.doc.parse/merge-current :added "3.0"}
-(fact "if not whitespace, then merge output")
+(fact "if not whitespace, then merge output"
+  (merge-current [] {:type :whitespace})
+  => []
+
+  (merge-current [] {:type :code})
+  => [{:type :code}])
 
 ^{:refer code.doc.parse/parse-inner :added "3.0"}
-(fact "parses the inner form of the fact and comment function")
+(fact "parses the inner form of the fact and comment function"
+  (parse-inner (nav/parse-string "(comment (+ 1 1))")
+               #(-> % nav/down nav/right)
+               []
+               nil
+               {})
+  => (contains-in [{:type :code, :indentation 2, :code ["(+ 1 1)"]}]))
 
 ^{:refer code.doc.parse/parse-loop :added "3.0"}
 (fact "the main loop for the parser"
@@ -150,4 +169,8 @@
                                                      :gaps-ok)}]))
 
 ^{:refer code.doc.parse/parse-file :added "3.0"}
-(fact "parses the entire file")
+(fact "parses the entire file"
+  (with-redefs [slurp (constantly "(+ 1 1)")
+                io/input-stream (fn [_] (java.io.ByteArrayInputStream. (.getBytes "")))]
+    (parse-file "foo.clj" {}))
+  => (contains [{:type :code :indentation 0 :code ["(+ 1 1)"]}]))

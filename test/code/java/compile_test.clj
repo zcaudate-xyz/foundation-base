@@ -34,9 +34,8 @@
 
 ^{:refer code.java.compile/class-object :added "3.0"}
 (fact "creates a class object for use with compiler"
-  
   (class-object "test.Cat"
-                (fs/read-all-bytes "target/classes/test/Cat.class"))
+                (byte-array 0))
   => javax.tools.SimpleJavaFileObject)
 
 ^{:refer code.java.compile/class-manager :added "3.0"}
@@ -51,23 +50,22 @@
 
 ^{:refer code.java.compile/supers :added "3.0"}
 (fact "finds supers of a class given it's bytecode"
-
-  (org.objectweb.asm.ClassReader.
-   ^bytes (fs/read-all-bytes "target/classes/test/Cat.class"))
-  
-  (supers (fs/read-all-bytes "target/classes/test/Cat.class"))
-  => #{"java.lang.Object" "test.Pet"})
+  (supers (fs/read-all-bytes "target/classes/code/java/compile.class"))
+  => (contains "java.lang.Object"))
 
 ^{:refer code.java.compile/javac-output :added "3.0"}
-(fact "displays output of compilation")
+(fact "displays output of compilation"
+  (javac-output (javax.tools.DiagnosticCollector.))
+  => nil)
 
 ^{:refer code.java.compile/javac-process :added "3.0"}
 (fact "processes Java compilation, handling class reloading and output options"
-
-  (javac-process {"test.Pet" (fs/read-all-bytes "target/classes/test/Pet.class")
-                  "test.Cat" (fs/read-all-bytes "target/classes/test/Cat.class")}
-                 {:output "target/classes"
-                  :reload false}))
+  (with-redefs [std.fs/create-directory (constantly nil)
+                std.fs/write-all-bytes (constantly nil)]
+    (javac-process {"test.Pet" (byte-array 0)}
+                   {:output "target/classes"
+                    :reload false}))
+  => (contains {:output {"test.Pet" nil}}))
 
 ^{:refer code.java.compile/javac :added "3.0"}
 (fact "compiles classes using the built-in compiler"

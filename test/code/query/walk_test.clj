@@ -5,10 +5,16 @@
             [code.edit :as nav]))
 
 ^{:refer code.query.walk/wrap-meta :added "3.0"}
-(fact "allows matchwalk to handle meta tags")
+(fact "allows matchwalk to handle meta tags"
+  (let [f (wrap-meta (fn [nav _ _ _ _] nav))]
+    (f (nav/parse-string "^:x ()") nil nil nil nil)
+    => (satisfies nav/navigator?)))
 
 ^{:refer code.query.walk/wrap-suppress :added "3.0"}
-(fact "allows matchwalk to handle exceptions")
+(fact "allows matchwalk to handle exceptions"
+  (let [f (wrap-suppress (fn [_ _ _ _ _] (throw (Exception.))))]
+    (f :nav nil nil nil nil)
+    => :nav))
 
 ^{:refer code.query.walk/matchwalk :added "3.0"}
 (fact "match every entry within a form"

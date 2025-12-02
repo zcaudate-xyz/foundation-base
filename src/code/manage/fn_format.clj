@@ -3,6 +3,8 @@
             [std.string :as str]
             [code.query :as query]
             [code.edit :as nav]
+            [std.lib.zip :as zip]
+            [std.block.construct :as construct]
             [code.project :as project]))
 
 (defn list-transform
@@ -12,21 +14,27 @@
    (let [nav (-> nav nav/left)
          exprs (nav/right-expressions nav)
          nav (loop [nav nav]
-               (if-let [next (try (nav/delete nav)
-                                  (catch Throwable t))]
-                 (recur next)
-                 nav))]
-     (-> nav
-         (nav/insert-token ())
-         (nav/insert-newline)
-         (nav/insert-space 2)
-         (nav/down)
-         (nav/insert-all (take 2 exprs))
-         (nav/insert-newline)
-         (nav/insert-space 3)
-         (nav/insert-all (vec (drop 2 exprs)))
-         (nav/up)
-         (nav/tighten-right)))))
+               (if (nav/right-expression nav)
+                 (recur (nav/delete nav))
+                 nav))
+         head (take 2 exprs)
+         tail (vec (drop 2 exprs))
+         new-list (construct/block (apply list head))]
+     (let [nav (-> nav
+                   (zip/insert-right new-list)
+                   (zip/step-right)
+                   (nav/insert-newline)
+                   (nav/insert-space 2))]
+       (if (seq tail)
+         (-> nav
+             (nav/down)
+             (nav/right-most)
+             (nav/insert-newline)
+             (nav/insert-space 3)
+             (nav/insert-all tail)
+             (nav/up)
+             (nav/tighten-right))
+         (nav/tighten-right nav))))))
 
 (defn fn:list-forms
   "query to find `defn` and `defmacro` forms with a vector"

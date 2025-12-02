@@ -25,7 +25,9 @@
   => std.lib.result.Result)
 
 ^{:refer code.manage.unit.template/code-default-columns :added "3.0"}
-(fact "creates columns for default code operations")
+(fact "creates columns for default code operations"
+  (code-default-columns #{:red})
+  => vector?)
 
 ^{:refer code.manage.unit.template/empty-result :added "3.0"}
 (fact "constructs a function that outputs on an empty key"
@@ -36,16 +38,25 @@
   => std.lib.result.Result)
 
 ^{:refer code.manage.unit.template/code-transform-result :added "3.0"}
-(fact "creates result for code transform operations")
+(fact "creates result for code transform operations"
+  (code-transform-result :k)
+  => (contains {:keys (contains {:count fn? :functions :k})
+                :ignore fn?}))
 
 ^{:refer code.manage.unit.template/code-transform-columns :added "3.0"}
-(fact "creates columns for code transform operations")
+(fact "creates columns for code transform operations"
+  (code-transform-columns #{:red})
+  => seq?)
 
 ^{:refer code.manage.unit.template/line-string :added "3.0"}
-(fact "constructs a line string")
+(fact "constructs a line string"
+  (line-string [{:row 1 :end-row 2}])
+  => ["(1-2)"])
 
 ^{:refer code.manage.unit.template/line-count :added "3.0"}
-(fact "calculates number of lines")
+(fact "calculates number of lines"
+  (line-count [{:row 1 :end-row 2}])
+  => 2)
 
 (comment
   (code.manage/import {:write true}))

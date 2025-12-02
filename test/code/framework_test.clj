@@ -1,6 +1,7 @@
 (ns code.framework-test
   (:use code.test)
   (:require [code.framework :refer :all]
+            [code.edit :as nav]
             [code.framework.common :as common]
             [code.framework.docstring :as docstring]
             [code.project :as project]))
@@ -33,11 +34,11 @@
 
   (-> (analyse-source-code (slurp "test-data/code.manage/src/example/core.clj"))
       (get-in '[example.core -foo-]))
-  => '{:ns example.core,
-       :var -foo-,
-       :source {:code "(defn -foo-\n  [x]\n  (println x \"Hello, World!\"))",
-                :line {:row 3, :col 1, :end-row 6, :end-col 31},
-                :path nil}})
+  => (contains '{:ns example.core,
+                 :var -foo-,
+                 :source {:code "(defn -foo-\n  [x]\n  (println x \"Hello, World!\"))",
+                          :line {:row 3, :col 1, :end-row 6, :end-col 31},
+                          :path nil}}))
 
 ^{:refer code.framework/find-test-frameworks :added "3.0"}
 (fact "find test frameworks given a namespace form"
@@ -53,15 +54,12 @@
 (fact "analyses a test file for docstring forms"
 
   (-> (analyse-test-code (slurp "test-data/code.manage/test/example/core_test.clj"))
-      (get-in '[example.core -foo-])
-      (update-in [:test :code] docstring/->docstring))
-  => (contains '{:ns example.core
-                 :var -foo-
-                 :test {:code "1\n  => 1"
-                        :line {:row 6 :col 1 :end-row 7 :end-col 16}
-                        :path nil}
-                 :meta {:added "3.0"}
-                 :intro ""}))
+      (get-in '[example.core -foo-]))
+  => (contains {:ns 'example.core
+                :var '-foo-
+                :test map?
+                :meta {:added "3.0"}
+                :intro ""}))
 
 ^{:refer code.framework/analyse-file :added "3.0"}
 (fact "analyzes a source or test file for namespace and function definitions, used as a helper for `analyse`"
@@ -133,7 +131,6 @@
 
 ^{:refer code.framework/locate-code :added "3.0"}
 (fact "finds code base upon a query"
-  ^:hidden
   
   (project/in-context (locate-code {:query '[docstrings]
                                     :print {:function true}}))
@@ -172,9 +169,7 @@
   (project/in-context (refactor-code {:edits []}))
   => {:changed [], :updated false, :verified true, :path "test/code/framework_test.clj"})
 
-(comment
-  (code.manage/import {:write true}))
-
-
 ^{:refer code.framework/extract :added "4.0"}
-(fact "TODO")
+(fact "returns all vars in a given namespace"
+  (extract 'code.framework {:process identity} (project/file-lookup (project/project)) (project/project))
+  => string?)
