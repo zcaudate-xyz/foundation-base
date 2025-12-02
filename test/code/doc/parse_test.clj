@@ -1,7 +1,9 @@
 (ns code.doc.parse-test
   (:use code.test)
   (:require [code.doc.parse :refer :all]
-            [code.edit :as nav]))
+            [code.edit :as nav]
+            [clojure.java.io :as io]
+            [markdown.core :as md]))
 
 ^{:refer code.doc.parse/parse-ns-form :added "3.0"}
 (fact "converts a ns zipper into an element"
@@ -173,4 +175,20 @@
   (with-redefs [slurp (constantly "(+ 1 1)")
                 io/input-stream (fn [_] (java.io.ByteArrayInputStream. (.getBytes "")))]
     (parse-file "foo.clj" {}))
-  => (contains [{:type :code :indentation 0 :code ["(+ 1 1)"]}]))
+  => (contains [{:type :code :indentation 0 :code ["(+ 1 1)"]
+                 :line {:row 1 :col 1 :end-row 1 :end-col 8}}])
+
+  (with-redefs [slurp (constantly "# Chapter\n\ncontent\n\n## Section")
+                md/md-to-html-string (fn [s] (str "<html>" s "</html>"))]
+    (parse-file "foo.md" {}))
+  => (contains [{:type :chapter :title "Chapter"}
+                {:type :html :src "<html>\ncontent\n</html>"}
+                {:type :section :title "Section"}]))
+
+^{:refer code.doc.parse/parse-markdown :added "3.0"}
+(fact "parses markdown into sections"
+  (parse-markdown "# Chapter\nText\n## Section\nMore text")
+  => (contains [{:type :chapter :title "Chapter"}
+                {:type :html :src "<p>Text</p>"}
+                {:type :section :title "Section"}
+                {:type :html :src "<p>More text</p>"}]))

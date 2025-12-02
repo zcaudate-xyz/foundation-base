@@ -1,9 +1,11 @@
 (ns code.doc.parse
   (:require [clojure.java.io :as io]
+            [clojure.string :as str]
             [code.query :as query]
             [code.edit :as nav]
             [code.doc.parse.check :as checks]
-            [std.block :as block]))
+            [std.block :as block]
+            [markdown.core :as md]))
 
 (def ^:dynamic *spacing* 2)
 (def ^:dynamic *indentation* 0)
@@ -353,6 +355,53 @@
                                                    opts))
                    (recur (nav/right* nav) opts element (merge-current output current))))))))
 
+(defn- count-indentation [line]
+  (count (take-while #{\space \tab} line)))
+
+(defn parse-header
+  "parses a markdown header line"
+  {:added "3.0"}
+  [line]
+  (if (>= (count-indentation line) 4)
+    nil
+    (let [trimmed (str/trim line)]
+      (cond
+        (str/starts-with? trimmed "# ")   {:type :chapter :title (subs trimmed 2)}
+        (str/starts-with? trimmed "## ")  {:type :section :title (subs trimmed 3)}
+        (str/starts-with? trimmed "### ") {:type :subsection :title (subs trimmed 4)}
+        (str/starts-with? trimmed "#### ") {:type :subsubsection :title (subs trimmed 5)}
+        :else nil))))
+
+(defn parse-markdown
+  "parses markdown content into code.doc elements"
+  {:added "3.0"}
+  [content]
+  (let [lines (str/split-lines content)]
+    (loop [remaining lines
+           current-block []
+           output []
+           in-code-block? false]
+      (if (empty? remaining)
+        (if (seq current-block)
+          (conj output {:type :html :src (md/md-to-html-string (str/join "\n" current-block))})
+          output)
+        (let [line (first remaining)
+              trimmed (str/trim line)
+              code-fence? (or (str/starts-with? trimmed "```") (str/starts-with? trimmed "~~~"))
+              new-in-code-block? (if code-fence? (not in-code-block?) in-code-block?)
+              header (if new-in-code-block? nil (parse-header line))]
+          (if header
+            (recur (rest remaining)
+                   []
+                   (cond-> output
+                     (seq current-block) (conj {:type :html :src (md/md-to-html-string (str/join "\n" current-block))})
+                     true (conj header))
+                   false)
+            (recur (rest remaining)
+                   (conj current-block line)
+                   output
+                   new-in-code-block?)))))))
+
 (defn parse-file
   "parses the entire file"
   {:added "3.0"}
@@ -360,7 +409,9 @@
    (let [path (if (:root opts)
                 (str (:root opts) "/" file)
                 file)]
-     (with-open [input (io/input-stream path)]
-       (parse-loop (-> (nav/parse-root (slurp path))
-                       (nav/down))
-                   opts)))))
+     (if (str/ends-with? file ".md")
+       (parse-markdown (slurp path))
+       (with-open [input (io/input-stream path)]
+         (parse-loop (-> (nav/parse-root (slurp path))
+                         (nav/down))
+                     opts))))))
