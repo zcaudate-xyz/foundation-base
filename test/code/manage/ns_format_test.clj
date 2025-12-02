@@ -1,18 +1,33 @@
 (ns code.manage.ns-format-test
   (:use code.test)
-  (:require [code.manage.ns-format :refer :all]))
+  (:require [code.manage.ns-format :refer :all]
+            [code.edit :as nav]))
 
 ^{:refer code.manage.ns-format/first-element :added "3.0"}
-(fact "returns first element of list")
+(fact "returns first element of list"
+  (first-element [1 2]) => 1
+  (first-element 1) => 1)
 
 ^{:refer code.manage.ns-format/key-order :added "3.0"}
-(fact "gets key order")
+(fact "gets key order"
+  (key-order :use) => 0
+  (key-order :require) => 1)
 
 ^{:refer code.manage.ns-format/replace-nodes :added "3.0"}
-(fact "replace nodes with new ones")
+(fact "replace nodes with new ones"
+  (-> (nav/parse-string "[1 2 3]")
+      (nav/down)
+      (replace-nodes [4 5 6])
+      (nav/root-string))
+  => "[4 5 6]")
 
 ^{:refer code.manage.ns-format/sort-nodes :added "3.0"}
-(fact "sorts nodes")
+(fact "sorts nodes"
+  (-> (nav/parse-string "[3 1 2]")
+      (nav/down)
+      (sort-nodes identity)
+      (nav/root-string))
+  => "[1 2 3]")
 
 ^{:refer code.manage.ns-format/merge-nodes :added "3.0"}
 (fact "merge nodes")
@@ -54,4 +69,7 @@
 (fact "sorts the entries by alphabetical order")
 
 ^{:refer code.manage.ns-format/ns-format :added "3.0"}
-(fact "top-level ns-format form")
+(fact "top-level ns-format form"
+  (with-redefs [code.framework/refactor-code (constantly {:updated true})]
+    (ns-format 'code.manage.ns-format {} nil nil))
+  => {:updated true})

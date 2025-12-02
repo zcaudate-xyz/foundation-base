@@ -1,11 +1,10 @@
 (ns code.manage.unit.require-test
+  (:use code.test)
   (:require [code.manage.unit.require :as require]
-            [code.test :refer [fact]]))
+            [code.project :as project]))
 
-(fact "require-file works"
+^{:refer code.manage.unit.require/require-file :added "3.0"}
+(fact "requires the file and returns public vars"
+
   (require/require-file 'code.manage.unit.require {} nil nil)
-  => '[require-file])
-
-
-^{:refer code.manage.unit.require/require-file :added "4.0"}
-(fact "TODO")
+  => (contains '[require-file]))

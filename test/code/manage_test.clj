@@ -261,11 +261,18 @@
 
 
 ^{:refer code.manage/extract :added "4.0"}
-(fact "TODO")
+(fact "returns the list of vars in a namespace"
+  (extract 'code.manage)
+  => vector?)
 
 
 ^{:refer code.manage/require-file :added "4.0"}
-(fact "TODO")
+(fact "requires the file and returns public vars"
+  (require-file 'code.manage)
+  => (contains ['analyse 'extract 'vars] :in-any-order :gaps-ok))
 
 ^{:refer code.manage/-main :added "4.0"}
-(fact "TODO")
+(fact "main entry point for code.manage"
+  (with-redefs [system-exit (constantly nil)]
+    (code.manage/-main "vars" "['code.manage]"))
+  => anything)

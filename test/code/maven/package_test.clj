@@ -106,7 +106,16 @@
        "META-INF/maven/xyz.zcaudate/std.task/pom.properties"]))
 
 ^{:refer code.maven.package/generate-project-clj :added "4.0"}
-(fact "generates the project.clj")
+(fact "generates the project.clj"
+  (generate-project-clj {:description "task execution of and standardization",
+                         :name 'xyz.zcaudate/std.task,
+                         :artifact "std.task",
+                         :group "xyz.zcaudate",
+                         :version "3.0.1",
+                         :dependencies [['xyz.zcaudate/std.lib "3.0.1"]]}
+                        "test-scratch"
+                        {:simulate true})
+  => string?)
 
 ^{:refer code.maven.package/linkage :added "3.0"}
 (fact "returns the linkage for a given name"
