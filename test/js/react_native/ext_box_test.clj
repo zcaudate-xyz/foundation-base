@@ -15,8 +15,7 @@
              [js.react :as r :include [:fn]]
              [js.react-native :as n :include [:fn]]
              [js.react.ext-box :as ext-box]
-             [xt.lang.event-box :as event-box]
-             ]
+             [xt.lang.event-box :as event-box]]
    :export [MODULE]})
 
 ^{:refer js.react.ext-box/useBox :adopt true :added "4.0" :unchecked true}
@@ -25,14 +24,14 @@
   
   (defn.js UseBoxDemo
     []
-    (var box (ext-box/makeBox
+    (var box (ext-box/createBox
               (fn:> {"account" "hello"})))
     (var getCount (r/useGetCount))
     (var [value setValue] (ext-box/useBox box ["account"]))
     (return
      (n/EnclosedCode 
-{:label "js.react.ext-box/useBox"} 
-[:% n/Row
+      {:label "js.react.ext-box/useBox"} 
+      [:% n/Row
        [:% n/TextInput
         {:value value
          :onChangeText setValue}]
@@ -59,10 +58,10 @@
                          (event-box/get-data
                           box
                           ["account"])))}]] 
-[:% n/TextDisplay
+      [:% n/TextDisplay
        {:content (n/format-entry {:data (event-box/get-data box)
                                   :value value
                                   :counter (getCount)})}])))
   
-  (def.js MODULE (!:module))
-  )
+  (def.js MODULE (!:module)))
+  

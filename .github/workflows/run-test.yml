@@ -49,7 +49,34 @@ jobs:
           -v /var/run/docker.sock:/var/run/docker.sock 
           -v $(pwd):$(pwd) 
           -w $(pwd) 
-          ghcr.io/zcaudate-xyz/infra-foundation-clean:ci lein test :with "[code jvm]"
+          ghcr.io/zcaudate-xyz/infra-foundation-clean:ci lein test :with "[code]"
+        
+    services:
+      postgres:
+        image: ghcr.io/zcaudate-xyz/infra-db:main
+        env:
+          POSTGRES_DB: test
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_PORT: 5432
+          POSTGRES_USER: postgres
+        ports:
+          - 5432:5432
+          
+  run-lib-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        
+      - name: Run Tests - lib and rt
+        run: >
+          docker run --network host 
+          -v /var/run/docker.sock:/var/run/docker.sock 
+          -v $(pwd):$(pwd) 
+          -w $(pwd) 
+          ghcr.io/zcaudate-xyz/infra-foundation-clean:ci lein test :with "[lib jvm]"
         
     services:
       postgres:
@@ -76,7 +103,7 @@ jobs:
           -v /var/run/docker.sock:/var/run/docker.sock 
           -v $(pwd):$(pwd) 
           -w $(pwd) 
-          ghcr.io/zcaudate-xyz/infra-foundation-clean:ci lein test :with "[lib rt]"
+          ghcr.io/zcaudate-xyz/infra-foundation-clean:ci lein test :with "[rt]"
         
     services:
       postgres:
@@ -88,6 +115,22 @@ jobs:
           POSTGRES_USER: postgres
         ports:
           - 5432:5432
+          
+  run-indigo-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        
+      - name: Run Tests - indigo
+        run: >
+          docker run --network host 
+          -v /var/run/docker.sock:/var/run/docker.sock 
+          -v $(pwd):$(pwd) 
+          -w $(pwd) 
+          ghcr.io/zcaudate-xyz/infra-foundation-clean:ci lein test :with "[indigo]" 
           
   build-js-web:
     runs-on: ubuntu-latest
