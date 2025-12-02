@@ -13,6 +13,9 @@
             [rt.basic.impl.process-js :as js])
   (:import [java.io StringWriter]))
 
+(h/intern-in basic/echo-fn basic/ping-fn
+             std-lang/lang-emit-as-safe std-lang/lang-emit-as-fn)
+
 (defonce *server* (atom nil))
 
 (defonce *rt* (atom nil))

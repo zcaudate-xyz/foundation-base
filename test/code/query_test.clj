@@ -36,7 +36,7 @@
   => (throws)
 
   ($ {:string "(ns hello) ()"}
-      [(ns ^:%+ (keyword "oeuoeuoe"))])
+      [(ns _ ^:%+ (keyword "oeuoeuoe"))])
   => (just (just (list 'ns 'hello :oeuoeuoe))
            (just (list)))
 

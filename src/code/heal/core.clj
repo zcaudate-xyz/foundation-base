@@ -1,0 +1,28 @@
+(ns code.heal.core
+  (:require [std.block.heal.core :as core]
+            [std.block.heal :as heal]
+            [code.project :as project]
+            [code.manage.unit.template :as template]
+            [code.framework :as framework]
+            [std.lib :as h :refer [definvoke]]))
+
+(defn heal-code-single
+  "helper function for heal-code"
+  {:added "4.0"}
+  ([ns params lookup project]
+   (let [params (assoc params :transform core/heal-content)]
+     (framework/transform-code ns params lookup project))))
+
+(definvoke heal-code
+  "helper function to fix parents"
+  {:added "4.0"}
+  [:task {:construct {:input    (fn [_] *ns*)
+                      :lookup   (fn [_ project] (project/file-lookup project))
+                      :env      (fn [_] (project/project))}
+          :template :code.transform
+          :params   {:title "Heal Code"
+                     :parallel true
+                     :no-analysis true
+                     :print {:function true :result true :summary true}}
+          :main     {:fn #'heal-code-single}
+          :result template/base-transform-result}])
