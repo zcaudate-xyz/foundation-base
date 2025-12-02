@@ -5,6 +5,18 @@
 
 For a comprehensive guide on installation, usage, and development setup, please refer to [GETTING_STARTED.md](GETTING_STARTED.md).
 
+### Guides
+
+Detailed usage guides and scenarios for core libraries can be found in the `guides/` directory:
+
+- [code.test](guides/code.test.md): A robust testing framework replacing `clojure.test`.
+- [code.manage](guides/code.manage.md): Tools for code maintenance, refactoring, and test management.
+- [std.task](guides/std.task.md): Task definition and execution engine.
+- [std.block](guides/std.block.md): Source code block parsing and layout.
+- [code.query](guides/code.query.md): Pattern matching and structural editing for code.
+- [std.timeseries](guides/std.timeseries.md): Time-series data management and aggregation.
+- [std.scheduler](guides/std.scheduler.md): Concurrent task scheduling and scaling.
+
 #### Quick Install (Users)
 
 ```bash
