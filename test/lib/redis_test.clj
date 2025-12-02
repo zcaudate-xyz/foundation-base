@@ -1,45 +1,33 @@
-^{:no-test true}
 (ns lib.redis-test
   (:use [code.test :exclude [run]])
   (:require [lib.redis.bench :as bench]
             [lib.redis.event :as event]
             [lib.redis :as r]
             [net.resp.connection :as conn]
-            [net.resp.wire :as wire]
+            [net.resp.pool :as pool]
             [std.concurrent :as cc]
-            [std.lib :as h])
-  (:refer-clojure :exclude [read]))
+            [std.lib :as h]))
 
-(fact:global
- {:setup [(bench/start-redis-array [17001])]
-  :component
-  {|client|   {:create   (r/client-create {:port 17001})
-               :setup    h/start
-               :teardown h/stop}}
-  :teardown [(bench/stop-redis-array [17001])]})
+(defn mock-pool []
+  (reify java.lang.AutoCloseable (close [_])))
 
 ^{:refer lib.redis/client-steps :added "3.0"}
-(fact "clients steps for start up and shutdown")
+(fact "clients steps for start up and shutdown"
+  (r/client-steps) => vector?)
 
 ^{:refer lib.redis/client-string :added "4.0"}
-(fact "creates a cliet string")
+(fact "creates a cliet string"
+  (r/client-string {:host "h" :port 1 :pool :p})
+  => string?)
 
 ^{:refer lib.redis/client-start :added "4.0"}
-(fact "starts the client")
+(fact "starts the client"
+  (with-redefs [pool/pool (constantly :pool)
+                pool/pool:start (fn [c] (assoc c :started true))]
+    (r/client-start {:id :id :host "h" :port 1}))
+  => (contains {:started true :pool :pool}))
 
 ^{:refer lib.redis/client-create :added "3.0"}
 (fact "creates a redis client"
-  ^:hidden
-  
-  (r/client-create {:id "localhost"
-                    :port 17001})
-  => map?
-  
-  (cc/req (h/start (r/client-create {:id "localhost"
-                                     :port 17001}))
-          ["PING"]))
-
-(comment
-
-  (./import)
-  (h/tracked:all [:redis]))
+  (r/client-create {:id "localhost" :port 17001})
+  => map?)

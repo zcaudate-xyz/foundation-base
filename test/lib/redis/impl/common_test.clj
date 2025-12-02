@@ -5,7 +5,8 @@
             [std.lib :as h]))
 
 ^{:refer lib.redis.impl.common/opts:cache :added "3.0"}
-(fact "creates a opts map for bulk operations")
+(fact "creates a opts map for bulk operations"
+  (opts:cache {:a 1}) => map?)
 
 ^{:refer lib.redis.impl.common/make-key :added "3.0"}
 (fact "creates a namespaced key"
@@ -128,4 +129,3 @@
 
   (in:hash-args [:a 1 :b 2])
   => '[:a 1 :b 2])
-

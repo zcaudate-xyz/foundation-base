@@ -1,7 +1,10 @@
 (ns lib.aether.result-test
   (:use code.test)
   (:require [lib.aether.result :refer :all]
-            [std.string :as str]))
+            [std.string :as str]
+            [jvm.artifact :as artifact])
+  (:import (org.eclipse.aether.graph DependencyNode DefaultDependencyNode)
+           (org.eclipse.aether.artifact DefaultArtifact)))
 
 ^{:refer lib.aether.result/clojure-core? :added "3.0"}
 (fact "checks if artifact represents clojure.core"
@@ -29,7 +32,11 @@
   => string?)
 
 ^{:refer lib.aether.result/dependency-graph :added "3.0"}
-(fact "creates a dependency graph for the results")
+(fact "creates a dependency graph for the results"
+  (let [node (doto (DefaultDependencyNode. (DefaultArtifact. "g:a:1.0"))
+               (.setChildren [(DefaultDependencyNode. (DefaultArtifact. "g:b:1.0"))]))]
+    (dependency-graph node :coord))
+  => ['[g/a "1.0"] ['[g/b "1.0"]]])
 
 ^{:refer lib.aether.result/flatten-tree :added "3.0"}
 (fact "converts a tree structure into a vector"
@@ -41,29 +48,13 @@
   => '[[a "1.1"] [b "1.1"] [c "1.1"] [d "1.1"]])
 
 ^{:refer lib.aether.result/summary :added "3.0"}
-(fact "creates a summary for the different types of results")
+(fact "creates a summary for the different types of results"
+  (summary [] {}) => [])
 
 ^{:refer lib.aether.result/return :added "3.0"}
-(fact "returns a summary of install and deploy results")
+(fact "returns a summary of install and deploy results"
+  (return [] [] {:return :default}) => [])
 
 ^{:refer lib.aether.result/return-deps :added "3.0"}
-(fact "returns a summary of resolve and collect results")
-
-(comment
-  (def res (lib.aether/install-artifact
-            '[hara/hara.stuff "2.4.10"]
-            {:artifacts [{:file "project.clj"
-                          :extension "project"}
-                         {:file "README.md"
-                          :extension "readme"}]}))
-
-  (def res (lib.aether/collect-dependencies
-            '[hara.class.enum]))
-
-  (lib.aether/collect-dependencies '[[im.chit/hara.class.enum "2.4.8"]
-                                     [im.chit/hara.class "2.4.8"]]
-                                   {:return :resolved
-                                    :type :coord})
-
-  (lib.aether/resolve-dependencies '[[im.chit/hara.class.enum "2.4.8"]
-                                     [im.chit/hara.class "2.4.8"]]))
+(fact "returns a summary of resolve and collect results"
+  (return-deps [] [] {:return :resolved}) => [])

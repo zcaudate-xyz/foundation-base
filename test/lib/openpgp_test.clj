@@ -192,7 +192,8 @@
                                            :private +private-key+})
                       (.getEncoded))]
     (write-sig-file "test-scratch/project.clj.asc"
-                    signature)))
+                    signature))
+  => nil)
 
 ^{:refer lib.openpgp/read-sig-file :added "3.0"}
 (fact "reads bytes from a GPG compatible file"
@@ -226,6 +227,3 @@
           "test-scratch/project.clj.asc"
           {:public  +public-key+})
   => true)
-
-(comment
-  (./code:import))
