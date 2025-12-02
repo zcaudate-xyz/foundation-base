@@ -629,17 +629,17 @@
   {:added "3.0"}
   [& [cmd & args]]
   (if (not cmd)
-    (do (println "Available Tasks:")
+    (do (h/p "Available Tasks:")
         (doseq [cmd  (map name (sort (keys +tasks+)))]
-          (println (str "  - " cmd))))
+          (h/p (str "  - " cmd))))
     (let [opts (task/process-ns-args args)
           func (ns-resolve (find-ns 'code.manage) (symbol cmd))
           args (mapv (fn [x] (try (read-string x) (catch Throwable _ x))) args)]
       (if func
         (func (or (:ns opts) :all) (dissoc opts :ns))
-        (do (println "Available Tasks:")
+        (do (h/p "Available Tasks:")
             (doseq [cmd  (map name (sort (keys +tasks+)))]
-              (println (str "  - " cmd)))))
+              (h/p (str "  - " cmd)))))
       (if-not (get opts :no-exit)
         (System/exit 0)))))
 

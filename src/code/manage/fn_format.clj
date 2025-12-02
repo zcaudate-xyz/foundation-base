@@ -22,7 +22,7 @@
          new-list (construct/block (apply list head))]
      (let [nav (-> nav
                    (zip/insert-right new-list)
-                   (zip/step-right)
+                   (nav/right)
                    (nav/insert-newline)
                    (nav/insert-space 2))]
        (if (seq tail)

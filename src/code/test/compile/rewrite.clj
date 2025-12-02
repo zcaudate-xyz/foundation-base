@@ -47,9 +47,14 @@
         form
 
         (c/form? form)
-        (if (some #(= % '=>) form)
-          (with-meta (rewrite-list form) (meta form))
-          (with-meta (apply list (map rewrite-nested-checks form)) (meta form)))
+        (cond (some #(= % '=>) form)
+              (with-meta (rewrite-list form) (meta form))
+
+              (= 'fact (first form))
+              form
+
+              :else
+              (with-meta (apply list (map rewrite-nested-checks form)) (meta form)))
 
         (coll? form)
         (if (map? form)

@@ -36,10 +36,9 @@
   => (throws)
 
   ($ {:string "(ns hello) ()"}
-      [(ns ^:%+ (keyword "oeuoeuoe"))])
+      [(ns _ ^:%+ (keyword "oeuoeuoe"))])
   => (just (just (list 'ns 'hello :oeuoeuoe))
            (just (list)))
-
   
   (nav/value
    (traverse (nav/parse-string "(defn hello \"world\" {:a 1} [])")

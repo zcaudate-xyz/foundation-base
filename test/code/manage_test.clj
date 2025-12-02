@@ -185,7 +185,8 @@
 
 ^{:refer code.manage/refactor-code :added "3.0"}
 (comment "refactors code based on given `:edits`"
-
+  ^:hidden
+  
   (refactor-code '[code.manage]
                  {:edits []}))
 
@@ -199,10 +200,34 @@
 (fact "formats ns forms")
 
 ^{:refer code.manage/find-usages :added "3.0"}
-(comment "find usages of a var"
-
+(fact "find usages of a var"
+  ^:hidden
+  
   (find-usages '[code.manage]
-               {:var 'code.framework/analyse}))
+               {:var 'code.framework/analyse})
+  => map?)
+
+^{:refer code.manage/extract :added "4.0"}
+(fact "returns the list of vars in a namespace"
+  
+  (extract 'code.manage)
+  => string?)
+
+
+^{:refer code.manage/require-file :added "4.0"}
+(fact "requires the file and returns public vars"
+  ^:hidden
+  
+  (require-file 'code.manage)
+  => (contains ['analyse 'extract 'vars] :in-any-order :gaps-ok))
+
+^{:refer code.manage/-main :added "4.0"}
+(fact "main entry point for code.manage"
+  ^:hidden
+  
+  (code.manage/-main "vars" ":with" "[code.manage]" ":no-exit" "true")
+  => anything)
+
 
 (comment
   ^{:refer code.manage/replace-usages :added "3.0"}
@@ -227,6 +252,8 @@
 
     (line-limit '[code.manage]
                 {:length 100})))
+
+
 
 (comment
   (code.manage/import {:write true}))
@@ -259,20 +286,3 @@
                   {:var 'hara.data.base.seq/object-of
                    :new 'element-at}))
 
-
-^{:refer code.manage/extract :added "4.0"}
-(fact "returns the list of vars in a namespace"
-  (extract 'code.manage)
-  => vector?)
-
-
-^{:refer code.manage/require-file :added "4.0"}
-(fact "requires the file and returns public vars"
-  (require-file 'code.manage)
-  => (contains ['analyse 'extract 'vars] :in-any-order :gaps-ok))
-
-^{:refer code.manage/-main :added "4.0"}
-(fact "main entry point for code.manage"
-  (with-redefs [system-exit (constantly nil)]
-    (code.manage/-main "vars" "['code.manage]"))
-  => anything)
