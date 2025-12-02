@@ -2,7 +2,7 @@
   (:require [code.manage :as manage]
             [code.edit :as edit]
             [code.query :as query]
-            [std.block.heal.core :as level]
+            [std.block.heal.core :as heal]
             [code.ai.heal.form-edits :as form-edits]
             [std.block :as b]
             [std.fs :as fs]
@@ -59,7 +59,7 @@
    (h/merge-nested
     {:title (fn [params env]
               (str "HEAL DIRECTORY" " - " (fs/path (:root env))))
-     :transform level/heal-content
+     :transform heal/heal-content
      :print {:function true}
      :verify {:read b/parse-root}
      :no-analysis true}

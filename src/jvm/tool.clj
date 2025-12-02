@@ -112,6 +112,8 @@
           code.manage/commented
           code.manage/in-order?
           code.manage/pedantic
+          code.manage/heal-code
+          code.manage/transform-code
 
           code.doc/publish
           code.doc/init-template

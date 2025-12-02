@@ -4,6 +4,7 @@
             [std.block.grid :as grid]
             [std.block.parse :as parse]
             [std.block.type :as type]
+            [std.block.heal :as heal]
             [std.block.layout :as layout]
             [std.lib :as h])
   (:refer-clojure :exclude [type next replace string newline comment]))
@@ -24,6 +25,8 @@
               [children       base/block-children]
               [info           base/block-info]
 
+              heal/heal
+              
               construct/block
               construct/void
               construct/space

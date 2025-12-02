@@ -27,12 +27,9 @@
 ^{:refer rt.llvm.grammar/tf-declare :added "4.1"}
 (fact "transforms llvm declare"
   (l/emit-as :llvm
-   ['(declare i32 printf [ptr i32])])
+             ['(declare i32 printf [ptr i32])])
+  
   => "declare i32 printf(ptr, i32)")
-
-      (label label_false)
-      (ret void))])
-  => "define void foo(i1 %cond) { \n  entry:\n  br i1 %cond, label %label_true, label %label_false\n  label_true:\n  ret void\n  label_false:\n  ret void \n}")
 
 ^{:refer rt.llvm.grammar/tf-alloca :added "4.1"}
 (fact "memory ops"
@@ -94,18 +91,12 @@
   (l/emit-as :llvm
    ['(:= %1 2)])
   => "%1 = 2")
-   ['(:= %ptr (alloca i32))])
-  => "%ptr = alloca i32")
 
 ^{:refer rt.llvm.grammar/tf-inst-bin :added "4.1"}
 (fact "helper for binary instructions"
   (l/emit-as :llvm
    ['(add i32 1 2)])
   => "add i32 1, 2")
-   ['(add i32 %a %b)
-    '(sub i32 %a %b)
-    '(mul i32 %a %b)])
-  => "add i32 %a, %b\n\nsub i32 %a, %b\n\nmul i32 %a, %b")
 
 ^{:refer rt.llvm.grammar/tf-icmp :added "4.1"}
 (fact "transforms icmp"

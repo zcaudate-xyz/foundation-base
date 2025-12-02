@@ -8,6 +8,7 @@
             [code.manage.unit :as unit]
             [code.manage.unit.require :as unit.require]
             [code.project :as project]
+            [std.block :as block]
             [std.task :as task]
             [std.lib :as h :refer [definvoke]]
             [std.lib.result :as res])
@@ -146,6 +147,28 @@
   (transform-code ['code.framework]
                   {:transform #(str % "\n\n\n\nhello world")
                    :print {:summary true :result true :item true :function true}}))
+
+(definvoke heal-code
+  "helper function for any arbitrary transformation of text
+ 
+   (transform-code {:transform #(str % \"\\n\\n\\n\\nhello world\")})
+   ;; {:deletes 0, :inserts 5, :changed [arrange], :updated false}
+   => map?
+ 
+   (transform-code '#{code.manage.unit}
+                   {:print {:summary true :result true :item true :function true}
+                    :transform #(str % \"\\n\\n\\n\\nhello world\")
+                    :full true})"
+  {:added "3.0"}
+  [:task {:template :code.transform
+          :params {:title "HEAL CODE"
+                   :transform block/heal
+                   :no-analysis true
+                   :print {:function true :result true :summary true}
+                   :parallel true}
+          :main   {:fn #'base/transform-code}
+          :result template/base-transform-result}])
+
 
 (definvoke import
   "import docstrings from tests
@@ -596,7 +619,8 @@
    :refactor-test refactor-test
    :ns-format     ns-format
    :find-usages   find-usages
-   :require-file  require-file})
+   :require-file  require-file
+   :heal-code     heal-code})
 
 (defn -main
   "main entry point for code.manage
