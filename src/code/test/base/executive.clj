@@ -42,9 +42,10 @@
 
          passed  (filter checker/succeeded? checks)
          failed  (filter (fn [res]
-                           (and (not (checker/succeeded? res))
-                                (not= :exception (:status res))
-                                (not= :exception (-> res :actual :status)))) checks)
+                           (if (= :exception (:status res))
+                             true
+                             (and (not (checker/succeeded? res))
+                                  (not= :exception (-> res :actual :status))))) checks)
 
          facts   (filter (comp not empty? :results) facts)
          files   (->> checks

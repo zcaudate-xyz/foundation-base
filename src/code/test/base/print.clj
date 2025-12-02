@@ -189,6 +189,9 @@
          (str "\n" (ansi/white (pad-left 8 "Passed:")) "  " ((if (= passed checks)
                                                    ansi/blue
                                                    ansi/yellow) passed))
+         (str "\n" (ansi/white (pad-left 8 "Failed:")) "  " ((if (pos? failed)
+                                                                 ansi/red
+                                                                 ansi/blue) failed))
          (str "\n" (ansi/white (pad-left 8 "Throw")) "  " ((if (pos? throw)
                                                  ansi/yellow
                                                  ansi/blue)
@@ -206,4 +209,3 @@
              (ansi/style (str "Success (" passed ")") #{:cyan :bold})
              "\n"))
    (print/println "")))
-
