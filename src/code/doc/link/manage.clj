@@ -23,7 +23,8 @@
   "runs a manage task and returns the output string"
   {:added "3.0"}
   ([task args formatter]
-   (let [task-fn (if (symbol? task)
+   (let [task (if (string? task) (symbol task) task)
+         task-fn (if (symbol? task)
                    (ns-resolve (find-ns 'code.manage) task)
                    task)]
      (if task-fn
@@ -35,7 +36,7 @@
            (format-manage-output result formatter))
          (with-out-str
            (apply task-fn (or args []))))
-       (str "Task not found: " task)))))
+       (throw (ex-info (str "Task not found: " task) {:task task}))))))
 
 (defn link-manage
   "links manage tasks to the document"
