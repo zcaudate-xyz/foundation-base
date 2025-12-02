@@ -7,20 +7,18 @@
             [std.string :as str]
             [script.sql.table.compile :as compile]))
 
-(fact:global
- {:component
-  {|schema| {:create
-             (schema/schema
-              [:meat      [:id     {:sql {:primary true}}
-                           :type   {:sql {:format :edn}}
-                           :amount {:type :int}
-                           :grade  {:type :enum
-                                    :enum {:ns :meat.grade
-                                           :values #{:good :bad :ok :nasty
-                                                     :fair :horrible :awesome}}}]
-               :vegetable [:id     {:sql {:primary true}}
-                           :cost   {:type :int}
-                           :grade  {:type :real}]])}}})
+(def |schema|
+  (schema/schema
+   [:meat      [:id     {:sql {:primary true}}
+                :type   {:sql {:format :edn}}
+                :amount {:type :int}
+                :grade  {:type :enum
+                         :enum {:ns :meat.grade
+                                :values #{:good :bad :ok :nasty
+                                          :fair :horrible :awesome}}}]
+    :vegetable [:id     {:sql {:primary true}}
+                :cost   {:type :int}
+                :grade  {:type :real}]]))
 
 ^{:refer script.sql.table/sql-tmpl :added "4.0"}
 (fact "creating sql functions"
@@ -47,8 +45,7 @@
                  :wallet  {}})
   => [[:account {}] [:wallet {}]])
 
-^{:refer script.sql.table/schema:ids:alias :added "3.0"
-  :use [|schema|]}
+^{:refer script.sql.table/schema:ids:alias :added "3.0"}
 (fact "retreives the alias for a given id"
   ^:hidden
   
@@ -80,8 +77,7 @@
   (table:update :user {:id "id-0" :name "User-0"})
   => "UPDATE \"user\" SET \"name\" = 'User-0' WHERE \"id\" = 'id-0'")
 
-^{:refer script.sql.table/table-compile :added "4.0"
-  :use [|schema|]}
+^{:refer script.sql.table/table-compile :added "4.0"}
 (fact "compiles a table in the schema"
   ^:hidden
   
@@ -93,8 +89,7 @@
                         common/*options*))
   => string?)
 
-^{:refer script.sql.table/table-batch :added "3.0"
-  :use [|schema|]}
+^{:refer script.sql.table/table-batch :added "3.0"}
 (fact "helper function for batch calls"
   ^:hidden
 
@@ -108,8 +103,7 @@
                     " VALUES" " ('a0', ':beef', '100', 'good'),"
                     " ('b0', ':pork', '10', 'bad')")]])
 
-^{:refer script.sql.table/table:put:batch :added "3.0"
-  :use [|schema|]}
+^{:refer script.sql.table/table:put:batch :added "3.0"}
 (fact "constructs a batch upsert statement"
   ^:hidden
 
@@ -128,8 +122,7 @@
               " DO UPDATE SET (\"type\", \"amount\", \"grade\")"
               " = ROW(EXCLUDED.\"type\", EXCLUDED.\"amount\", EXCLUDED.\"grade\")")]])
 
-^{:refer script.sql.table/table:put:single :added "3.0"
-  :use [|schema|]}
+^{:refer script.sql.table/table:put:single :added "3.0"}
 (fact "constructs a single upsert statement"
   ^:hidden
 
@@ -143,8 +136,7 @@
       " DO UPDATE SET (\"type\", \"amount\", \"grade\")"
       " = ROW(EXCLUDED.\"type\", EXCLUDED.\"amount\", EXCLUDED.\"grade\")"))
 
-^{:refer script.sql.table/table:set:batch :added "3.0"
-  :use [|schema|]}
+^{:refer script.sql.table/table:set:batch :added "3.0"}
 (fact "constructs a batch insert statement"
   ^:hidden
 
@@ -160,8 +152,7 @@
               " ('b0', ':pork', '10', 'bad'),"
               " ('c0', ':fish', '1', 'nasty')")]])
 
-^{:refer script.sql.table/table:set:single :added "3.0"
-  :use [|schema|]}
+^{:refer script.sql.table/table:set:single :added "3.0"}
 (fact "constructs a single insert statement"
   ^:hidden
 
@@ -173,16 +164,14 @@
       " VALUES"
       " ('a0', ':chicken', '100', 'good')"))
 
-^{:refer script.sql.table/table:delete :added "3.0"
-  :use [|schema|]}
+^{:refer script.sql.table/table:delete :added "3.0"}
 (fact "constructs a delete statement"
   ^:hidden
 
   (table:delete :meat "id-0" {:schema |schema|})
   => "DELETE FROM \"meat\" WHERE \"id\" = 'id-0'")
 
-^{:refer script.sql.table/table:keys :added "3.0"
-  :use [|schema|]}
+^{:refer script.sql.table/table:keys :added "3.0"}
 (fact "constructs a key search statement"
 
   (table:keys :meat {:schema |schema|})
@@ -195,8 +184,7 @@
   (table:clear :meat)
   => "DELETE FROM \"meat\"")
 
-^{:refer script.sql.table/table:select :added "3.0"
-  :use [|schema|]}
+^{:refer script.sql.table/table:select :added "3.0"}
 (fact "constructs sql select statement"
   ^:hidden
 
@@ -215,16 +203,14 @@
 (fact "converts an alias to expanded map"
   (from-alias :id "a.b" :table {} {}) => map?)
 
-^{:refer script.sql.table/table:get :added "3.0"
-  :use [|schema|]}
+^{:refer script.sql.table/table:get :added "3.0"}
 (fact "constructs an sql get statement"
   ^:hidden
 
   (table:get :meat "a0" {:schema |schema|})
   => "SELECT * FROM \"meat\" WHERE \"id\" = 'a0'")
 
-^{:refer script.sql.table/table:cas :added "3.0"
-  :use [|schema|]}
+^{:refer script.sql.table/table:cas :added "3.0"}
 (fact "constructs a cas statement"
   ^:hidden
 
@@ -245,16 +231,14 @@
       " END IF;"
       "END; $$"))
 
-^{:refer script.sql.table/table:count :added "3.0"
-  :use [|schema|]}
+^{:refer script.sql.table/table:count :added "3.0"}
 (fact "constructs an sql count statement"
   ^:hidden
 
   (table:count :meat nil {:schema |schema|})
   => "SELECT count(*) FROM \"meat\"")
 
-^{:refer script.sql.table/order-keys :added "3.0"
-  :use [|schema|]}
+^{:refer script.sql.table/order-keys :added "3.0"}
 (fact "order keys in the schema"
 
   (order-keys (:vec |schema|))
@@ -269,8 +253,7 @@
                :wallet {}})
   => [[:account {}] [:wallet {}]])
 
-^{:refer script.sql.table/table:batch :added "3.0"
-  :use [|schema|]}
+^{:refer script.sql.table/table:batch :added "3.0"}
 (fact "batched queries grouped by op and table"
   ^:hidden
 

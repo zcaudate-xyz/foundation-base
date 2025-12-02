@@ -112,14 +112,14 @@
                     [["a" "12345"]
                      ["b" "67890"]]
                     {})
-  => [(str/| "INSERT INTO user"
-             " (id, account)"
-             " VALUES\n "
-             " (?, ?),\n "
-             " (?, ?)"
-             " ON CONFLICT (id)"
-             " DO UPDATE SET (account)"
-             " = ROW(EXCLUDED.account)")
+  => [(str "INSERT INTO user\n"
+           " (id, account)\n"
+           " VALUES\n"
+           " (?, ?),\n"
+           " (?, ?)\n"
+           " ON CONFLICT (id)\n"
+           " DO UPDATE SET (account)\n"
+           " = ROW(EXCLUDED.account)")
       "a" "12345" "b" "67890"])
 
 ^{:refer script.sql.expr/for-cas :added "3.0"}
