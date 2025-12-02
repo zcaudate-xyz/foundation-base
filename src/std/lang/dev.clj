@@ -22,9 +22,6 @@
   (require 'std.lang.model.spec-r :reload)
   (require 'xt.lang.base-lib :reload))
 
-(def +init+
-  (l/link {:ns s} reload-specs))
-
 (comment
   (s/reload-specs)
   )

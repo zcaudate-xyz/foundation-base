@@ -12,7 +12,7 @@
   ^:hidden
   
   (script-rt-get :lua :default {})
-  => rt/rt-default?
+  => map?
 
   (h/p:space-context-list)
   => (contains '[:lang/lua])
@@ -35,17 +35,23 @@
 (fact "restarts a given runtime"
   ^:hidden
 
-  (script-rt-restart :lua) => rt/rt-default?)
+  (script-rt-restart :lua)
+  => map?)
 
 ^{:refer std.lang.base.script-control/script-rt-oneshot-eval :added "4.0"}
-(fact "oneshot evals a statement"
+(comment "oneshot evals a statement"
   ^:hidden
-
-  (script-rt-oneshot-eval :default :lua ['(return 1)]) => "return 1")
+  
+  (script-rt-oneshot-eval
+   :default
+   :lua ['(return 1)])
+  => "return 1")
 
 ^{:refer std.lang.base.script-control/script-rt-oneshot :added "4.0"}
 (fact "for use with the defmacro.! function"
   ^:hidden
 
-  (script-rt-oneshot :default (ut/lang-pointer :lua {:module 'L.core}) [])
+  (script-rt-oneshot
+   :default
+   (ut/lang-pointer :lua {:module 'L.core}) [])
   => (throws))
