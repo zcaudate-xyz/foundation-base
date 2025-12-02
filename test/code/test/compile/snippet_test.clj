@@ -7,7 +7,7 @@
 (fact "creates a setup hook"
   ^:hidden
 
-  (fact-setup '{:setup (prn (+ a b))})
+  (fact-setup '{:setup [(prn (+ a b))]})
   => '(clojure.core/fn [] (prn (+ a b))))
 
 ^{:refer code.test.compile.snippet/fact-teardown :added "3.0"}

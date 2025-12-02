@@ -32,7 +32,7 @@
                 (rest args))
 
          :else
-         (let [[args body] args]
+         (let [[args & body] args]
            (apply list 'fn.inner args body)))))
 
 (defn ruby-defn
