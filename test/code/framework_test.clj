@@ -22,10 +22,12 @@
 
 ^{:refer code.framework/analyse-source-function :added "3.0"}
 (fact "analyzes a single function definition within a source file, used as a helper for `analyse-source-code`"
-  (binding [common/*path* "path"]
-    (analyse-source-function 'foo (nav/parse-string "foo")))
-  => (contains ['foo (contains {:var 'foo
-                                :ns 'foo})]))
+
+  (second (analyse-source-function 'foo (-> (code.edit/parse-string "(defn foo [] 1)")
+                                            (code.edit/down)
+                                            (code.edit/right))))
+  => (contains {:var 'foo
+                :source (contains {:code "(defn foo [] 1)"})}))
 
 ^{:refer code.framework/analyse-source-code :added "3.0"}
 (fact "analyses a source file for namespace and function definitions"
@@ -62,8 +64,9 @@
 ^{:refer code.framework/analyse-file :added "3.0"}
 (fact "analyzes a source or test file for namespace and function definitions, used as a helper for `analyse`"
 
-  (analyse-file [:source "src/code/framework.clj"])
-  => (contains {:source any}))
+  (-> (analyse-file [:source "src/code/framework.clj"])
+      (common/display-entry))
+  => (contains-in {:source {'code.framework (contains '[analyse])}}))
 
 ^{:refer code.framework/analyse :added "3.0"}
 (fact "seed analyse function for the `code.manage/analyse` task"

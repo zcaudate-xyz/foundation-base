@@ -102,13 +102,15 @@
 
 ^{:refer std.lang.model.spec-xtalk.fn-ruby/ruby-tf-x-return-encode :added "4.1"}
 (fact "ruby-tf-x-return-encode"
-  (ruby-tf-x-return-encode '(x:return-encode out id key))
-  => (contains '(:- "require 'json'")))
+  (let [res (ruby-tf-x-return-encode '(x:return-encode out id key))]
+    (first res) => 'do
+    (second res) => '(:- "require 'json'")))
 
 ^{:refer std.lang.model.spec-xtalk.fn-ruby/ruby-tf-x-return-wrap :added "4.1"}
 (fact "ruby-tf-x-return-wrap"
-  (ruby-tf-x-return-wrap '(x:return-wrap f enc))
-  => (contains '(:- "require 'json'")))
+  (let [res (ruby-tf-x-return-wrap '(x:return-wrap f enc))]
+    (first res) => 'do
+    (second res) => '(:- "require 'json'")))
 
 ^{:refer std.lang.model.spec-xtalk.fn-ruby/ruby-tf-x-return-eval :added "4.1"}
 (fact "ruby-tf-x-return-eval"

@@ -153,7 +153,7 @@
                 (entry
                   [ret i32 0]))"]
     (h/with-out-str (llvm/animate code 0))
-    => (contains "Finished")))
+    => (fn [s] (str/includes? s "Finished"))))
 
 
 (comment

@@ -37,7 +37,8 @@
 
   ($ {:string "(ns hello) ()"}
       [(ns ^:%+ (keyword "oeuoeuoe"))])
-  => '[(ns hello :oeuoeuoe) ()]
+  => (just (just (list 'ns 'hello :oeuoeuoe))
+           (just (list)))
 
   
   (nav/value
@@ -97,8 +98,8 @@
           {:return :string}))
   => [":oeuoeuoe" ":oeuoeuoe"]
 
-  ($ (nav/parse-root "a b c") [{:is 'a}])
-  => '[a])
+  (nav/value (first ($ (nav/parse-root "a b c") [{:is 'a}])))
+  => 'a)
 
 (comment
   (def fragment {:string "(defn hello [] (println \"hello\"))\n
