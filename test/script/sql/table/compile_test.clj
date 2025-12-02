@@ -8,45 +8,42 @@
 (fact:ns
  (:clone script.sql.table-test))
 
-^{:refer script.sql.table.compile/in:fn-map :added "3.0"
-  :use [|schema|]}
+^{:refer script.sql.table.compile/in:fn-map :added "3.0"}
 (fact "constructs an function map for sql input"
   ^:hidden
 
-  (keys (in:fn-map |schema| :meat))
+  (keys (in:fn-map table-test/|schema| :meat))
   => (contains [:type :grade] :in-any-order)
 
-  (-> (in:fn-map |schema| :meat)
+  (-> (in:fn-map table-test/|schema| :meat)
       :grade
       (h/invoke :bad))
   => [:grade "bad"])
 
-^{:refer script.sql.table.compile/out:fn-map :added "3.0"
-  :use [|schema|]}
+^{:refer script.sql.table.compile/out:fn-map :added "3.0"}
 (fact "constructs a function map for sql output"
   ^:hidden
 
-  (keys (out:fn-map |schema| :meat))
+  (keys (out:fn-map table-test/|schema| :meat))
   => (contains [:type :grade] :in-any-order)
 
-  (-> (out:fn-map |schema| :meat)
+  (-> (out:fn-map table-test/|schema| :meat)
       :grade
       (h/invoke "bad"))
   => [:grade :bad])
 
-^{:refer script.sql.table.compile/transform:fn :added "3.0"
-  :use [|schema|]}
+^{:refer script.sql.table.compile/transform:fn :added "3.0"}
 (fact "constructs a data transform function"
   ^:hidden
 
-  ((transform:fn in:fn-map |schema| :meat)
+  ((transform:fn in:fn-map table-test/|schema| :meat)
    {:id "a"
     :type :beef
     :amount 100
     :grade :bad})
   => {:id "a", :type ":beef", :amount 100, :grade "bad"}
 
-  ((transform:fn out:fn-map |schema| :meat)
+  ((transform:fn out:fn-map table-test/|schema| :meat)
    {:id "a", :type ":beef", :amount 100, :grade "bad"})
   => {:id "a"
       :type :beef

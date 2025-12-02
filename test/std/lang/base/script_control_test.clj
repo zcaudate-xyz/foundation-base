@@ -3,7 +3,8 @@
   (:require [std.lang.base.script-control :refer :all]
             [std.lang.base.runtime :as rt]
             [std.lib :as h]
-            [std.lang.base.util :as ut]))
+            [std.lang.base.util :as ut]
+            [std.lang.model.spec-lua]))
 
 (rt/install-lang! :lua)
 
@@ -35,7 +36,7 @@
 
 ^{:refer std.lang.base.script-control/script-rt-oneshot-eval :added "4.0"}
 (fact "oneshot evals a statement"
-  (script-rt-oneshot-eval :default :lua ['(return 1)]) => "return 1;")
+  (script-rt-oneshot-eval :default :lua ['(return 1)]) => "return 1")
 
 ^{:refer std.lang.base.script-control/script-rt-oneshot :added "4.0"}
 (fact "for use with the defmacro.! function"
