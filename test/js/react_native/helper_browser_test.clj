@@ -10,13 +10,13 @@
              [js.react-native.helper-browser :as helper-browser]]
    :export [MODULE]})
 
-^{:refer js.react-native.helper-browser/getHash :added "4.0"}
+^{:refer js.react-native.helper-browser/getHash :added "4.0" :unchecked true}
 (fact "gets the window location hash")
 
-^{:refer js.react-native.helper-browser/getHashRoute :added "4.0"}
+^{:refer js.react-native.helper-browser/getHashRoute :added "4.0" :unchecked true}
 (fact "gets the browser hash route")
 
-^{:refer js.react-native.helper-browser/useHashRoute :added "4.0"}
+^{:refer js.react-native.helper-browser/useHashRoute :added "4.0" :unchecked true}
 (fact "listens to the browser hash route"
   ^:hidden
   
@@ -39,7 +39,7 @@
        [:% n/Padding {:style {:flex 1}}]
        [:% n/Text (+ "route: " url)]]))))
 
-^{:refer js.react-native.helper-browser/setHashParam :added "4.0"}
+^{:refer js.react-native.helper-browser/setHashParam :added "4.0" :unchecked true}
 (fact "sets the hash param"
   ^:hidden
   

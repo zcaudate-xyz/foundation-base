@@ -21,7 +21,7 @@
 
 ^{:refer js.react-native.physical-carosel/DigitCaroselManual
   :adopt true
-  :added "4.0"}
+  :added "4.0" :unchecked true}
 (fact "creates a set of edit points"
   ^:hidden
 

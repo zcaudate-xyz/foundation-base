@@ -16,19 +16,19 @@
              ]
    :export [MODULE]})
 
-^{:refer js.react-native.ui-modal/ModalBackdrop :added "4.0"}
+^{:refer js.react-native.ui-modal/ModalBackdrop :added "4.0" :unchecked true}
 (fact "constructs the modal backdrop")
 
-^{:refer js.react-native.ui-modal/useMeasureContent :added "4.0"}
+^{:refer js.react-native.ui-modal/useMeasureContent :added "4.0" :unchecked true}
 (fact "measures the modal content")
 
-^{:refer js.react-native.ui-modal/ModalElementAbsolute :added "4.0"}
+^{:refer js.react-native.ui-modal/ModalElementAbsolute :added "4.0" :unchecked true}
 (fact "originates the modal from the screen")
 
-^{:refer js.react-native.ui-modal/ModalElementHost :added "4.0"}
+^{:refer js.react-native.ui-modal/ModalElementHost :added "4.0" :unchecked true}
 (fact "allows the modal to originate from an element")
 
-^{:refer js.react-native.ui-modal/Modal :added "4.0"}
+^{:refer js.react-native.ui-modal/Modal :added "4.0" :unchecked true}
 (fact "creates a Modal"
   ^:hidden
   

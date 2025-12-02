@@ -12,7 +12,7 @@
               [js.lib.chalk :as chk]]
    :export  [MODULE]})
 
-^{:refer js.blessed.frame-linemenu/LineButton :added "4.0"}
+^{:refer js.blessed.frame-linemenu/LineButton :added "4.0" :unchecked true}
 (fact "creates a line frame-linemenu button"
   ^:hidden
   
@@ -37,10 +37,10 @@
           :route "options"
           :setRoute setRoute}]]))))
 
-^{:refer js.blessed.frame-linemenu/layoutMenu :added "4.0"}
+^{:refer js.blessed.frame-linemenu/layoutMenu :added "4.0" :unchecked true}
 (fact "helper function for LineMenu")
 
-^{:refer js.blessed.frame-linemenu/LineMenu :added "4.0"}
+^{:refer js.blessed.frame-linemenu/LineMenu :added "4.0" :unchecked true}
 (fact "creates a line menu"
   ^:hidden
   

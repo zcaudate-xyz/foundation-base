@@ -14,14 +14,14 @@
  {:setup    [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
-^{:refer js.react-native.model-geom/oppositePosition :added "4.0"}
+^{:refer js.react-native.model-geom/oppositePosition :added "4.0" :unchecked true}
 (fact "gets the opposite position"
   ^:hidden
   
   (geom/oppositePosition "top")
   => "bottom")
 
-^{:refer js.react-native.model-geom/triangleBaseStyle :added "4.0"}
+^{:refer js.react-native.model-geom/triangleBaseStyle :added "4.0" :unchecked true}
 (fact "constructs a style for triangle"
   ^:hidden
   

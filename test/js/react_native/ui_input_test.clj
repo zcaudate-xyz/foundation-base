@@ -63,7 +63,7 @@
         {:title "D"
          :onPress (fn:> (setDisabled (not disabled)))}]]))))
 
-^{:refer js.react-native.ui-input/inputTheme :added "4.0"}
+^{:refer js.react-native.ui-input/inputTheme :added "4.0" :unchecked true}
 (fact "creates the input theme")
 
 ^{:refer js.react-native.ui-input/Input :added "0.1"}

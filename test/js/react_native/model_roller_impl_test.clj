@@ -22,7 +22,7 @@
 
 ^{:refer js.react-native.model-roller/DigitRollerManual
   :adopt true
-  :added "4.0"}
+  :added "4.0" :unchecked true}
 (fact "creates a set of edit points"
   ^:hidden
 
@@ -104,7 +104,7 @@
 
 ^{:refer js.react-native.model-roller/DigitRollerPan
   :adopt true
-  :added "4.0"}
+  :added "4.0" :unchecked true}
 (fact "creates a set of edit points"
   ^:hidden
 

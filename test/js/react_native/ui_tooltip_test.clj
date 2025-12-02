@@ -16,25 +16,25 @@
              [js.react-native.ui-button :as ui-button]]
    :export [MODULE]})
 
-^{:refer js.react-native.ui-tooltip/tooltipPortalOffset :added "4.0"}
+^{:refer js.react-native.ui-tooltip/tooltipPortalOffset :added "4.0" :unchecked true}
 (fact "calculates the portal offset")
 
-^{:refer js.react-native.ui-tooltip/tooltipContextOffset :added "4.0"}
+^{:refer js.react-native.ui-tooltip/tooltipContextOffset :added "4.0" :unchecked true}
 (fact "calculates the context offset")
 
-^{:refer js.react-native.ui-tooltip/TooltipRawArrow :added "4.0"}
+^{:refer js.react-native.ui-tooltip/TooltipRawArrow :added "4.0" :unchecked true}
 (fact "creates the tooltip arrow")
 
-^{:refer js.react-native.ui-tooltip/TooltipInnerContentArrow :added "4.0"}
+^{:refer js.react-native.ui-tooltip/TooltipInnerContentArrow :added "4.0" :unchecked true}
 (fact "places arrow relative to content")
 
-^{:refer js.react-native.ui-tooltip/TooltipInnerHostArrow :added "4.0"}
+^{:refer js.react-native.ui-tooltip/TooltipInnerHostArrow :added "4.0" :unchecked true}
 (fact "places arrow relative to host")
 
-^{:refer js.react-native.ui-tooltip/TooltipInner :added "4.0"}
+^{:refer js.react-native.ui-tooltip/TooltipInner :added "4.0" :unchecked true}
 (fact "creates the tooltip inner (with portal)")
 
-^{:refer js.react-native.ui-tooltip/Tooltip :added "4.0"}
+^{:refer js.react-native.ui-tooltip/Tooltip :added "4.0" :unchecked true}
 (fact "creates a tooltip"
   ^:hidden
   

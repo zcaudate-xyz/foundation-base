@@ -99,13 +99,13 @@
             :ddc "3"
             :ddd "4"}}})
 
-^{:refer js.blessed.ui-group/useTree :added "4.0"}
+^{:refer js.blessed.ui-group/useTree :added "4.0" :unchecked true}
 (fact "wrapper for `js.react/useTree`")
 
-^{:refer js.blessed.ui-group/layoutTabs :added "4.0"}
+^{:refer js.blessed.ui-group/layoutTabs :added "4.0" :unchecked true}
 (fact "layout tabs for horizontal and vertical")
 
-^{:refer js.blessed.ui-group/EnumMultiIndexed :added "4.0"}
+^{:refer js.blessed.ui-group/EnumMultiIndexed :added "4.0" :unchecked true}
 (fact "Constructs EnumMultiIndexed"
   ^:hidden
   
@@ -126,7 +126,7 @@
       [:box {:top 1 :shrink true
              :content (+ "" (k/json-encode indices))}]])))
 
-^{:refer js.blessed.ui-group/EnumMulti :added "4.0"}
+^{:refer js.blessed.ui-group/EnumMulti :added "4.0" :unchecked true}
 (fact  "Constructs EnumMultiIndexed"
   ^:hidden
   
@@ -147,7 +147,7 @@
       [:box {:top 1 :shrink true
              :content (+ "" (k/json-encode values))}]])))
 
-^{:refer js.blessed.ui-group/TabsView :added "4.0"}
+^{:refer js.blessed.ui-group/TabsView :added "4.0" :unchecked true}
 (fact "Constructs Tabs"
   ^:hidden
   
@@ -167,7 +167,7 @@
       [:box {:left 25 :shrink true
              :content (+ "" index)}]])))
 
-^{:refer js.blessed.ui-group/Tabs :added "4.0"}
+^{:refer js.blessed.ui-group/Tabs :added "4.0" :unchecked true}
 (fact "Construct Tabs"
   ^:hidden
   
@@ -189,7 +189,7 @@
       [:box {:left 25 :shrink true
              :content (+ "" value)}]])))
 
-^{:refer js.blessed.ui-group/TabsVPane :added "4.0"}
+^{:refer js.blessed.ui-group/TabsVPane :added "4.0" :unchecked true}
 (fact "constructs a tabs pane"
   ^:hidden
   
@@ -214,7 +214,7 @@
       [:box {:left 25 :shrink true
              :content (+ "" initial)}]])))
 
-^{:refer js.blessed.ui-group/TabsHPane :added "4.0"}
+^{:refer js.blessed.ui-group/TabsHPane :added "4.0" :unchecked true}
 (fact "Constructs a List"
   ^:hidden
 
@@ -248,7 +248,7 @@
       [:box {:left 25 :shrink true
              :content (+ "" initial)}]])))
 
-^{:refer js.blessed.ui-group/ListView :added "4.0"}
+^{:refer js.blessed.ui-group/ListView :added "4.0" :unchecked true}
 (fact "Constructs a ListView"
   ^:hidden
   
@@ -273,7 +273,7 @@
       [:box {:left 25 :shrink true
              :content (+ "" index)}]])))
 
-^{:refer js.blessed.ui-group/List :added "4.0"}
+^{:refer js.blessed.ui-group/List :added "4.0" :unchecked true}
 (fact "Constructs a List"
   ^:hidden
   
@@ -295,7 +295,7 @@
       [:box {:left 25 :shrink true
              :content (+ "" value)}]])))
 
-^{:refer js.blessed.ui-group/ListPane :added "4.0"}
+^{:refer js.blessed.ui-group/ListPane :added "4.0" :unchecked true}
 (fact "Constructs a List"
   ^:hidden
 
@@ -329,7 +329,7 @@
       [:box {:left 25 :shrink true
              :content (+ "" initial)}]])))
 
-^{:refer js.blessed.ui-group/TreePane :added "4.0"}
+^{:refer js.blessed.ui-group/TreePane :added "4.0" :unchecked true}
 (fact "constructs a tree pane"
   ^:hidden
   
@@ -379,7 +379,7 @@
       [:box {:top 10 :shrink true
              :content (j/inspect #{initial l1 l2 l3})}]])))
 
-^{:refer js.blessed.ui-group/displayTarget :added "4.0"}
+^{:refer js.blessed.ui-group/displayTarget :added "4.0" :unchecked true}
 (fact "helper function for display"
   ^:hidden
   

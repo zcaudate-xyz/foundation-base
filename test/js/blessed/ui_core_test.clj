@@ -15,16 +15,16 @@
 
 (defn.js boolText
   "gets the text for true or false"
-  {:added "4.0"}
+  {:added "4.0" :unchecked true}
   [b]
   (return (:? b
               [(chk/green "true")
                (chk/red "false")])))
 
-^{:refer js.blessed.ui-core/Enclosed :added "4.0"}
+^{:refer js.blessed.ui-core/Enclosed :added "4.0" :unchecked true}
 (fact "constructs a box with label")
 
-^{:refer js.blessed.ui-core/SmallLabel :added "4.0"}
+^{:refer js.blessed.ui-core/SmallLabel :added "4.0" :unchecked true}
 (fact "Constructs a Small Label"
   ^:hidden
   
@@ -38,7 +38,7 @@
         :left 0
         :content "Account Details"}]])))
 
-^{:refer js.blessed.ui-core/MinimalButton :added "4.0"}
+^{:refer js.blessed.ui-core/MinimalButton :added "4.0" :unchecked true}
 (fact "Constructs a Minimal Button"
   ^:hidden
   
@@ -73,7 +73,7 @@
       [:box {:left 25 :shrink true
              :content (+ "" val)}]])))
 
-^{:refer js.blessed.ui-core/SmallButton :added "4.0"}
+^{:refer js.blessed.ui-core/SmallButton :added "4.0" :unchecked true}
 (fact "Constructs a Small Button"
   ^:hidden
   
@@ -108,7 +108,7 @@
       [:box {:left 25 :shrink true
              :content (+ "" val)}]])))
 
-^{:refer js.blessed.ui-core/ToggleButton :added "4.0"}
+^{:refer js.blessed.ui-core/ToggleButton :added "4.0" :unchecked true}
 (fact "Constructs a toggle button"
   ^:hidden
   
@@ -144,7 +144,7 @@
       [:box {:left 22 :shrink true
              :content (+ "" val)}]])))
 
-^{:refer js.blessed.ui-core/BigButton :added "4.0"}
+^{:refer js.blessed.ui-core/BigButton :added "4.0" :unchecked true}
 (fact "Constructs a Big Button"
   ^:hidden
   
@@ -179,7 +179,7 @@
       [:box {:left 25 :shrink true
              :content (+ "" val)}]])))
 
-^{:refer js.blessed.ui-core/BigCheckBox :added "4.0"}
+^{:refer js.blessed.ui-core/BigCheckBox :added "4.0" :unchecked true}
 (fact "Constructs a Big Checkbox"
   ^:hidden
 
@@ -199,7 +199,7 @@
              :left 8
              :content (-/boolText selected)}]])))
 
-^{:refer js.blessed.ui-core/ToggleSwitch :added "4.0"}
+^{:refer js.blessed.ui-core/ToggleSwitch :added "4.0" :unchecked true}
 (fact "Constructs a Toggle"
   ^:hidden
 
@@ -218,7 +218,7 @@
       [:box {:left 22
              :content (-/boolText selected)}]])))
 
-^{:refer js.blessed.ui-core/Spinner :added "4.0"}
+^{:refer js.blessed.ui-core/Spinner :added "4.0" :unchecked true}
 (fact "Constructs a Spinner"
   ^:hidden
 
@@ -243,7 +243,7 @@
       [:box {:left 25 :shrink true
              :content (+ "" (j/toFixed value 1))}]])))
 
-^{:refer js.blessed.ui-core/EnumBoxIndexed :added "4.0"}
+^{:refer js.blessed.ui-core/EnumBoxIndexed :added "4.0" :unchecked true}
 (fact "Constructs a EnumBoxIndexed"
   ^:hidden
   
@@ -263,7 +263,7 @@
       [:box {:left 25 :shrink true
              :content (+ "" index)}]])))
 
-^{:refer js.blessed.ui-core/EnumBox :added "4.0"}
+^{:refer js.blessed.ui-core/EnumBox :added "4.0" :unchecked true}
 (fact "Constructs a EnumBox"
   ^:hidden
 
@@ -283,10 +283,10 @@
       [:box {:left 25 :shrink true
              :content (+ "" value)}]])))
 
-^{:refer js.blessed.ui-core/displayDropdown :added "4.0"}
+^{:refer js.blessed.ui-core/displayDropdown :added "4.0" :unchecked true}
 (fact "helper function for dropdown")
 
-^{:refer js.blessed.ui-core/DropdownIndexed :added "4.0"}
+^{:refer js.blessed.ui-core/DropdownIndexed :added "4.0" :unchecked true}
 (fact "Constructs a Dropdown"
   ^:hidden
 
@@ -306,7 +306,7 @@
       [:box {:left 25 :shrink true
              :content (+ "" index)}]])))
 
-^{:refer js.blessed.ui-core/Dropdown :added "4.0"}
+^{:refer js.blessed.ui-core/Dropdown :added "4.0" :unchecked true}
 (fact "Constructs a Dropdown"
   ^:hidden
 
@@ -326,7 +326,7 @@
       [:box {:left 25 :shrink true
              :content (+ "" value)}]])))
 
-^{:refer js.blessed.ui-core/TextBox :added "4.0"}
+^{:refer js.blessed.ui-core/TextBox :added "4.0" :unchecked true}
 (fact "Constructs a Dropdown"
   ^:hidden
 
@@ -347,7 +347,7 @@
              :shrink true
              :content (+ "" content)}]])))
 
-^{:refer js.blessed.ui-core/TextDisplay :added "4.0"}
+^{:refer js.blessed.ui-core/TextDisplay :added "4.0" :unchecked true}
 (fact "Displays text as content"
   ^:hidden
   
@@ -369,10 +369,10 @@
         :width 30
         :content content}]])))
 
-^{:refer js.blessed.ui-core/displayNumberGrid :added "4.0"}
+^{:refer js.blessed.ui-core/displayNumberGrid :added "4.0" :unchecked true}
 (fact "helper function for NumberGridBox")
 
-^{:refer js.blessed.ui-core/NumberGridBox :added "4.0"}
+^{:refer js.blessed.ui-core/NumberGridBox :added "4.0" :unchecked true}
 (fact "Constructs a NumberGridBox"
   ^:hidden
   

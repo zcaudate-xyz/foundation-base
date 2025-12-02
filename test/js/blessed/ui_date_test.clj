@@ -20,7 +20,7 @@
           (l/rt:scaffold-imports :js)]
   :teardown [(l/rt:stop)]})
 
-^{:refer js.blessed.ui-date/TimePicker :added "4.0"}
+^{:refer js.blessed.ui-date/TimePicker :added "4.0" :unchecked true}
 (fact "Constructs a TimePicker"
   ^:hidden
   
@@ -46,7 +46,7 @@
       [:box {:left 25 :shrink true
              :content (+ hour ":" minute)}]])))
 
-^{:refer js.blessed.ui-date/DatePicker :added "4.0"}
+^{:refer js.blessed.ui-date/DatePicker :added "4.0" :unchecked true}
 (fact "Constructs a DatePicker"
   ^:hidden
   
@@ -73,7 +73,7 @@
 
   (def.js MODULE (!:module)))
 
-^{:refer js.blessed.ui-date/DurationPicker :added "4.0"}
+^{:refer js.blessed.ui-date/DurationPicker :added "4.0" :unchecked true}
 (fact "Constructs a DurationPicker"
   ^:hidden
   

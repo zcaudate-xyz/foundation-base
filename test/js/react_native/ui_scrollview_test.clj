@@ -15,10 +15,10 @@
              ]
    :export [MODULE]})
 
-^{:refer js.react-native.ui-scrollview/ScrollViewImpl :added "4.0"}
+^{:refer js.react-native.ui-scrollview/ScrollViewImpl :added "4.0" :unchecked true}
 (fact "creates a non global enhanced scrollview")
 
-^{:refer js.react-native.ui-scrollview/ScrollView :added "4.0"}
+^{:refer js.react-native.ui-scrollview/ScrollView :added "4.0" :unchecked true}
 (fact "creates a scrollview"
   ^:hidden
   

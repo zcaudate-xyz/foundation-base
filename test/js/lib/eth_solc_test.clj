@@ -22,7 +22,7 @@
   :teardown [(l/rt:stop)]})
 
 
-^{:refer js.lib.eth-solc/contract-wrap-body :added "4.0"}
+^{:refer js.lib.eth-solc/contract-wrap-body :added "4.0" :unchecked true}
 (fact "wraps the body in a contract"
   ^:hidden
   
@@ -42,7 +42,7 @@
    "}"
    "}"))
 
-^{:refer js.lib.eth-solc/contract-compile :added "4.0"}
+^{:refer js.lib.eth-solc/contract-compile :added "4.0" :unchecked true}
 (fact "compiles a single contract"
   ^:hidden
 

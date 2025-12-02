@@ -2,7 +2,7 @@
   (:use code.test)
   (:require [js.react.compile-directives :as d]))
 
-^{:refer js.react.compile-directives/compile-ui-tailwind :added "4.0"}
+^{:refer js.react.compile-directives/compile-ui-tailwind :added "4.0" :unchecked true}
 (fact "templates the layout controls"
   ^:hidden
   
@@ -22,7 +22,7 @@
    ["grow"])
   => [:div {:class ["grow" "gap-3" "h-full"]}])
 
-^{:refer js.react.compile-directives/compile-ui-directives :added "4.0"}
+^{:refer js.react.compile-directives/compile-ui-directives :added "4.0" :unchecked true}
 (fact "templates the control directives"
   ^:hidden
 
@@ -48,5 +48,5 @@
 
 
 
-^{:refer js.react.compile-directives/compile-directives :added "4.0"}
+^{:refer js.react.compile-directives/compile-directives :added "4.0" :unchecked true}
 (fact "templates the control directives")

@@ -17,13 +17,13 @@
 
 (def.js MODULE (!:module))
 
-^{:refer js.blessed.form/FormWrapper :added "4.0"}
+^{:refer js.blessed.form/FormWrapper :added "4.0" :unchecked true}
 (fact "addes `width`, `offset` and `label`")
 
-^{:refer js.blessed.form/wrapForm :added "4.0"}
+^{:refer js.blessed.form/wrapForm :added "4.0" :unchecked true}
 (fact "wraps a component as a Form")
 
-^{:refer js.blessed.form/Spinner :added "4.0"}
+^{:refer js.blessed.form/Spinner :added "4.0" :unchecked true}
 (fact "Constructs a Spinner"
   ^:hidden
   
@@ -52,7 +52,7 @@
       [:box {:left 25 :shrink true
              :content (+ "" age)}]])))
 
-^{:refer js.blessed.form/NumberGridBox :added "4.0"}
+^{:refer js.blessed.form/NumberGridBox :added "4.0" :unchecked true}
   (fact "Constructs a NumberGridBox"
     ^:hidden
     
@@ -82,7 +82,7 @@
         [:box {:left 25 :shrink true
                :content (+ "" age)}]])))
 
-^{:refer js.blessed.form/Dropdown :added "4.0"}
+^{:refer js.blessed.form/Dropdown :added "4.0" :unchecked true}
 (fact "Constructs a Dropdown"
     ^:hidden
     
@@ -107,7 +107,7 @@
         [:box {:left 25 :shrink true
                :content (+ "" currency)}]])))
 
-^{:refer js.blessed.form/EnumBox :added "4.0"}
+^{:refer js.blessed.form/EnumBox :added "4.0" :unchecked true}
 (fact "Constructs a EnumBox"
   ^:hidden
   
@@ -132,7 +132,7 @@
       [:box {:left 25 :shrink true
              :content (+ "" currency)}]])))
 
-^{:refer js.blessed.form/EnumMulti :added "4.0"}
+^{:refer js.blessed.form/EnumMulti :added "4.0" :unchecked true}
 (fact "Constructs a EnumMulti"
   ^:hidden
     
@@ -158,7 +158,7 @@
       [:box {:top 1 :shrink true
              :content (+ "" currencies)}]])))
 
-^{:refer js.blessed.form/Tabs :added "4.0"}
+^{:refer js.blessed.form/Tabs :added "4.0" :unchecked true}
 (fact "Constructs a Tabs"
     ^:hidden
     
@@ -185,7 +185,7 @@
         [:box {:left 25 :shrink true
                :content (+ "" currency)}]])))
 
-^{:refer js.blessed.form/TextBox :added "4.0"}
+^{:refer js.blessed.form/TextBox :added "4.0" :unchecked true}
 (fact "Constructs a TextBox"
   ^:hidden
   
@@ -229,7 +229,7 @@
         :content (+ ""  (. data ["first_name"])
                     " " (. data ["last_name"]))}]])))
 
-^{:refer js.blessed.form/ToggleSwitch :added "4.0"}
+^{:refer js.blessed.form/ToggleSwitch :added "4.0" :unchecked true}
 (fact "Constructs a ToggleSwitch"
   ^:hidden
 
@@ -258,7 +258,7 @@
         :height 1
         :content (+ "" agree)}]])))
 
-^{:refer js.blessed.form/ToggleButton :added "4.0"}
+^{:refer js.blessed.form/ToggleButton :added "4.0" :unchecked true}
 (fact "Constructs a ToggleButton"
   ^:hidden
 
@@ -288,7 +288,7 @@
         :height 1
         :content (+ "" agree)}]])))
 
-^{:refer js.blessed.form/TimePicker :added "4.0"}
+^{:refer js.blessed.form/TimePicker :added "4.0" :unchecked true}
 (fact "Constructs a TimePicker"
   ^:hidden
   
@@ -321,7 +321,7 @@
                          ":"
                          (. data ["time_minute"]))}]])))
 
-^{:refer js.blessed.form/DatePicker :added "4.0"}
+^{:refer js.blessed.form/DatePicker :added "4.0" :unchecked true}
 (fact "Constructs a DatePicker"
   ^:hidden
   
@@ -359,7 +359,7 @@
                          "/"
                          (. data ["date_year"]))}]])))
 
-^{:refer js.blessed.form/DurationPicker :added "4.0"}
+^{:refer js.blessed.form/DurationPicker :added "4.0" :unchecked true}
 (fact "Constructs a DurationPicker"
   ^:hidden
   

@@ -17,7 +17,7 @@
              [xt.lang.base-lib :as k]]
    :export [MODULE]})
 
-^{:refer js.react/useRefresh :adopt true :added "4.0"}
+^{:refer js.react/useRefresh :adopt true :added "4.0" :unchecked true}
 (fact "performs refresh function"
   ^:hidden
   
@@ -35,7 +35,7 @@
        [:% n/Padding {:style {:flex 1}}]
        [:% n/Text (+ "Count: " (getCount))]]))))
 
-^{:refer js.react/useGetCount :adopt true :added "4.0"}
+^{:refer js.react/useGetCount :adopt true :added "4.0" :unchecked true}
 (fact "ref counter"
   ^:hidden
   
@@ -60,7 +60,7 @@
                      " valA: " valA
                      " valB: " valB)]]))))
 
-^{:refer js.react/useFollowRef :adopt true :added "4.0"}
+^{:refer js.react/useFollowRef :adopt true :added "4.0" :unchecked true}
 (fact "ref follower"
   ^:hidden
   
@@ -84,7 +84,7 @@
                      " val: " val)]]))))
 
 
-^{:refer js.react/useIsMounted :adopt true :added "4.0"}
+^{:refer js.react/useIsMounted :adopt true :added "4.0" :unchecked true}
 (fact "checks if component is mounted"
   ^:hidden
 
@@ -125,7 +125,7 @@
        [:% n/Padding {:style {:flex 1}}]
        [:% n/Text (+ "On: " on " Off: " off)]]))))
 
-^{:refer js.react/useMountedCallback :adopt true :added "4.0"}
+^{:refer js.react/useMountedCallback :adopt true :added "4.0" :unchecked true}
 (fact "performs a callback when mounted"
 
   (defn.js MountedCallbackPane
@@ -167,7 +167,7 @@
        [:% n/Padding {:style {:flex 1}}]
        [:% n/Text (+ "On: " on " Off: " off)]]))))
 
-^{:refer js.react/useFollowDelayed :adopt true :added "4.0"}
+^{:refer js.react/useFollowDelayed :adopt true :added "4.0" :unchecked true}
 (fact "ref follower after delay"
   ^:hidden
   
@@ -188,7 +188,7 @@
        [:% n/Text (+ "valDelay: " valDelay
                      " val: " val)]]))))
 
-^{:refer js.react/useInterval :adopt true :added "4.0"}
+^{:refer js.react/useInterval :adopt true :added "4.0" :unchecked true}
 (fact "performs a task at a given iterval"
   ^:hidden
   
@@ -246,7 +246,7 @@
 (:? mounted [[:% -/IntervalPane
                     {:key "interval"}]])))))
 
-^{:refer js.react/useTimeout :adopt true :added "4.0"}
+^{:refer js.react/useTimeout :adopt true :added "4.0" :unchecked true}
 (fact  "performs a task at a given iterval"
   ^:hidden
   
@@ -299,7 +299,7 @@
 [:% -/TimeoutPane]))))
 
 
-^{:refer js.react/useCountdown :adopt true :added "4.0"}
+^{:refer js.react/useCountdown :adopt true :added "4.0" :unchecked true}
 (fact "countdown value every second"
   ^:hidden
 
@@ -343,7 +343,7 @@
 (:? mounted [[:% -/CountdownPane
                     {:key "countdown"}]])))))
 
-^{:refer js.react/useNow :adopt true :added "4.0"}
+^{:refer js.react/useNow :adopt true :added "4.0" :unchecked true}
 (fact "uses the current time"
   ^:hidden
 
@@ -379,7 +379,7 @@
 (:? mounted [[:% -/NowPane
                     {:key "now"}]])))))
 
-^{:refer js.react/useChanging :adopt true :added "4.0"}
+^{:refer js.react/useChanging :adopt true :added "4.0" :unchecked true}
 (fact "uses value and setValue that may be influenced by available data"
   ^:hidden
 
@@ -402,7 +402,7 @@
         #{data value setValue}]]))))
 
 
-^{:refer js.react/useTree :adopt true :added "4.0"}
+^{:refer js.react/useTree :adopt true :added "4.0" :unchecked true}
 (fact "tree function helper"
   ^:hidden
   

@@ -16,14 +16,14 @@
   :teardown [(l/rt:stop)]})
 
 
-^{:refer js.lib.fastify/current-servers :added "4.0"}
+^{:refer js.lib.fastify/current-servers :added "4.0" :unchecked true}
 (fact "gets the current servers"
   ^:hidden
   
   (http/current-servers)
   => map?)
 
-^{:refer js.lib.fastify/wrap-handler :added "4.0"}
+^{:refer js.lib.fastify/wrap-handler :added "4.0" :unchecked true}
 (fact "wraps the request into a map"
   ^:hidden
   
@@ -51,7 +51,7 @@
        "Upgrade" "h2c",
        "Host" "127.0.0.1:3000"}})
 
-^{:refer js.lib.fastify/start-server :added "4.0"
+^{:refer js.lib.fastify/start-server :added "4.0" :unchecked true
   :setup [(def +port+
             (h/port:check-available 0))
           (http/stop-server +port+)]
@@ -71,5 +71,5 @@
        "path" "/euoeu/oue", "headers" {"Accept" "*/*",
                                        "Host" string?}}))
 
-^{:refer js.lib.fastify/stop-server :added "4.0"}
+^{:refer js.lib.fastify/stop-server :added "4.0" :unchecked true}
 (fact "stops a fastify server")

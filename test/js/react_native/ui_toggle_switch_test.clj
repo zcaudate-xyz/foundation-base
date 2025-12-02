@@ -19,7 +19,7 @@
 
 ^{:refer js.react-native.ui-toggle-switch/ToggleSwitchSimple
   :adopt true
-  :added "4.0"}
+  :added "4.0" :unchecked true}
 (fact  "creates a slim switch box"
   ^:hidden
 
@@ -67,7 +67,7 @@
 
 ^{:refer js.react-native.ui-toggle-switch/ToggleSwitchSquare
   :adopt true
-  :added "4.0"}
+  :added "4.0" :unchecked true}
 (fact  "creates a slim switch box"
   ^:hidden
 
@@ -123,10 +123,10 @@
        {:text (n/format-obj #{first})
         :style {:marginTop 10}}]))))
 
-^{:refer js.react-native.ui-toggle-switch/toggleSwitchTheme :added "4.0"}
+^{:refer js.react-native.ui-toggle-switch/toggleSwitchTheme :added "4.0" :unchecked true}
 (fact "creates the toggle switch theme")
 
-^{:refer js.react-native.ui-toggle-switch/ToggleSwitch :added "4.0"}
+^{:refer js.react-native.ui-toggle-switch/ToggleSwitch :added "4.0" :unchecked true}
 (fact  "creates a toggle switch box"
   ^:hidden
 

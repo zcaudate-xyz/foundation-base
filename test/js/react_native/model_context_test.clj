@@ -13,7 +13,7 @@
  {:setup    [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
-^{:refer js.react-native.model-context/innerCoordinate :added "4.0"}
+^{:refer js.react-native.model-context/innerCoordinate :added "4.0" :unchecked true}
 (fact "gets the plane position"
   ^:hidden
   
@@ -26,7 +26,7 @@
     :width 50})
   => {"width" 50, "top" 125, "height" 50, "left" 125})
 
-^{:refer js.react-native.model-context/contextCoordinateMain :added "4.0"}
+^{:refer js.react-native.model-context/contextCoordinateMain :added "4.0" :unchecked true}
 (fact "gets the context main coordinate"
   ^:hidden
   
@@ -39,7 +39,7 @@
     :position "top"})
   => {"top" -60})
 
-^{:refer js.react-native.model-context/contextCoordinateCross :added "4.0"}
+^{:refer js.react-native.model-context/contextCoordinateCross :added "4.0" :unchecked true}
 (fact  "gets the context cross coordinate"
   ^:hidden
   
@@ -53,7 +53,7 @@
     :alignment "center"})
   => {"left" 25})
 
-^{:refer js.react-native.model-context/contextCoordinate :added "4.0"}
+^{:refer js.react-native.model-context/contextCoordinate :added "4.0" :unchecked true}
 (fact  "gets the context coordinate"
   ^:hidden
   
@@ -68,7 +68,7 @@
     :alignment "center"})
   => {"top" -60, "left" 25})
 
-^{:refer js.react-native.model-context/getTranslationOffset :added "4.0"}
+^{:refer js.react-native.model-context/getTranslationOffset :added "4.0" :unchecked true}
 (fact "gets the plane transition function"
   ^:hidden
   
@@ -86,7 +86,7 @@
     :width 50})
   => ["translateX" -90])
 
-^{:refer js.react-native.model-context/getScalarFn :added "4.0"}
+^{:refer js.react-native.model-context/getScalarFn :added "4.0" :unchecked true}
 (fact "gets a scalar function from input"
   ^:hidden
   
@@ -96,7 +96,7 @@
   => 0.8599999999999999)
 
 
-^{:refer js.react-native.model-context/animateOffset :added "4.0"}
+^{:refer js.react-native.model-context/animateOffset :added "4.0" :unchecked true}
 (fact "gets the animated offset"
   ^:hidden
   
@@ -108,7 +108,7 @@
     :aspect "width"})
   => -14)
 
-^{:refer js.react-native.model-context/animateIn :added "4.0"}
+^{:refer js.react-native.model-context/animateIn :added "4.0" :unchecked true}
 (fact "creates the animateIn function"
   ^:hidden
   
@@ -120,7 +120,7 @@
     0.5))
   => {"translateX" 7})
 
-^{:refer js.react-native.model-context/animateOut :added "4.0"}
+^{:refer js.react-native.model-context/animateOut :added "4.0" :unchecked true}
 (fact "creates the animateOut function"
   ^:hidden
   

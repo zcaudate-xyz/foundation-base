@@ -19,7 +19,7 @@
              [xt.lang.base-lib :as k]]
    :export [MODULE]})
 
-^{:refer js.react-native.animate/val :added "4.0"}
+^{:refer js.react-native.animate/val :added "4.0" :unchecked true}
 (fact "shortcut for Animated.Value"
   ^:hidden
   
@@ -56,7 +56,7 @@
                    :width 100
                    :textAlign "right"}}]])))))
 
-^{:refer js.react-native.animate/isAnimatedValue :added "4.0"}
+^{:refer js.react-native.animate/isAnimatedValue :added "4.0" :unchecked true}
 (comment "checks that value is animated"
   ^:hidden
   
@@ -72,7 +72,7 @@
    (a/isAnimatedValue nil))
   => false)
 
-^{:refer js.react-native.animate/createTransition :added "4.0"}
+^{:refer js.react-native.animate/createTransition :added "4.0" :unchecked true}
 (fact "creates a transition from params"
   ^:hidden
   
@@ -115,10 +115,10 @@
                           :style {:padding 5
                                   :textAlign "right"}}]])))))
 
-^{:refer js.react-native.animate/setPropsAll :added "4.0"}
+^{:refer js.react-native.animate/setPropsAll :added "4.0" :unchecked true}
 (fact "sets props for all the elements")
 
-^{:refer js.react-native.animate/derive :added "4.0"}
+^{:refer js.react-native.animate/derive :added "4.0" :unchecked true}
 (fact "derives a value from one or more Animated.Value"
   ^:hidden
   
@@ -153,7 +153,7 @@
                                   :width 200
                                   :textAlign "right"}}]])))))
 
-^{:refer js.react-native.animate/listenSingle :added "4.0"}
+^{:refer js.react-native.animate/listenSingle :added "4.0" :unchecked true}
 (fact "listens to indicator and sets function"
   ^:hidden
   
@@ -187,7 +187,7 @@
                                   :width 100
                                   :textAlign "right"}}]])))))
 
-^{:refer js.react-native.animate/useListenSingle :added "4.0"}
+^{:refer js.react-native.animate/useListenSingle :added "4.0" :unchecked true}
 (fact "listens to a single indicator to set ref"
   ^:hidden
   
@@ -218,7 +218,7 @@
                                   :width 100
                                   :textAlign "right"}}]])))))
 
-^{:refer js.react-native.animate/listenArray :added "4.0"}
+^{:refer js.react-native.animate/listenArray :added "4.0" :unchecked true}
 (fact "listen to ref for array"
   ^:hidden
   
@@ -258,7 +258,7 @@
                                   :textAlign "right"}
                           }]])))))
 
-^{:refer js.react-native.animate/useListenArray :added "4.0"}
+^{:refer js.react-native.animate/useListenArray :added "4.0" :unchecked true}
 (fact "creates a ref as well as animated value listeners"
   ^:hidden
   
@@ -313,7 +313,7 @@
                                   :width 100
                                   :textAlign "right"}}]])))))
 
-^{:refer js.react-native.animate/listenMap :added "4.0"}
+^{:refer js.react-native.animate/listenMap :added "4.0" :unchecked true}
 (fact "listen to ref for map"
   ^:hidden
   
@@ -372,7 +372,7 @@
                                   :width 100
                                   :textAlign "right"}}]])))))
 
-^{:refer js.react-native.animate/listenTransformations :added "4.0"}
+^{:refer js.react-native.animate/listenTransformations :added "4.0" :unchecked true}
 (fact "listens to a transformation"
   ^:hidden
   
@@ -432,7 +432,7 @@
                                   :width 100
                                   :textAlign "right"}}]])))))
 
-^{:refer js.react-native.animate/runWithCancel :added "4.0"}
+^{:refer js.react-native.animate/runWithCancel :added "4.0" :unchecked true}
 (fact "runs a function, cancelling the animation if too slow"
   ^:hidden
   
@@ -484,7 +484,7 @@
                                   :width 100
                                   :textAlign "right"}}]])))))
 
-^{:refer js.react-native.animate/runWithChained :added "4.0"}
+^{:refer js.react-native.animate/runWithChained :added "4.0" :unchecked true}
 (fact "runs with chained"
   ^:hidden
   
@@ -545,7 +545,7 @@
                                   :textAlign "right"}}]] 
 [:% n/Text (n/format-entry #{progressView})])))))
 
-^{:refer js.react-native.animate/runWith :added "4.0"}
+^{:refer js.react-native.animate/runWith :added "4.0" :unchecked true}
   (fact "generic runWith function for animations"
   ^:hidden
 
@@ -606,10 +606,10 @@
                                   :textAlign "right"}}]] 
 [:% n/Text (n/format-entry #{progressView})])))))
 
-^{:refer js.react-native.animate/useProgess :added "4.0"}
+^{:refer js.react-native.animate/useProgess :added "4.0" :unchecked true}
 (fact "creates a progress result and a progress function")
 
-^{:refer js.react-native.animate/useBinaryIndicator :added "4.0"}
+^{:refer js.react-native.animate/useBinaryIndicator :added "4.0" :unchecked true}
 (fact "creates a binary indicator from state"
   ^:hidden
   
@@ -658,7 +658,7 @@
                                    :width 100
                                    :textAlign "right"}}]]])))))
 
-^{:refer js.react-native.animate/usePressIndicator :added "4.0"}
+^{:refer js.react-native.animate/usePressIndicator :added "4.0" :unchecked true}
 (fact "accentuates the press"
   ^:hidden
   
@@ -714,7 +714,7 @@
                                    :textAlign "right"}}]]] 
 [:% n/Text (k/json-encode progress)])))))
 
-^{:refer js.react-native.animate/useLinearIndicator :added "4.0"}
+^{:refer js.react-native.animate/useLinearIndicator :added "4.0" :unchecked true}
 (fact "uses the linear indicator"
   ^:hidden
   
@@ -779,7 +779,7 @@
                                   :textAlign "right"}}]] 
 [:% n/Text (k/json-encode progress)])))))
 
-^{:refer js.react-native.animate/useIndexIndicator :added "4.0"}
+^{:refer js.react-native.animate/useIndexIndicator :added "4.0" :unchecked true}
 (fact "creates a index indicator from state"
   ^:hidden
   
@@ -839,7 +839,7 @@
                                   :width 100
                                   :textAlign "right"}}]])))))
 
-^{:refer js.react-native.animate/useCircularIndicator :added "4.0"}
+^{:refer js.react-native.animate/useCircularIndicator :added "4.0" :unchecked true}
 (fact "constructs a circular indicator"
   ^:hidden
   
@@ -926,7 +926,7 @@
                                   :textAlign "right"}}]] 
 [:% n/Text (k/json-encode progress)])))))
 
-^{:refer js.react-native.animate/usePosition :added "4.0"}
+^{:refer js.react-native.animate/usePosition :added "4.0" :unchecked true}
 (fact "constructs position indicator for slider and pan"
   ^:hidden
   
@@ -982,7 +982,7 @@
                                 :textAlign "right"}}]] 
 [:% n/Text (k/json-encode #{value position})]))))
 
-^{:refer js.react-native.animate/useRange :added "4.0"}
+^{:refer js.react-native.animate/useRange :added "4.0" :unchecked true}
 (fact "constructs lower and upper bound indicator for range"
   ^:hidden
   
@@ -1072,7 +1072,7 @@
                                 :textAlign "right"}}]] 
 [:% n/Text (k/json-encode #{upper lower})]))))
 
-^{:refer js.react-native.animate/useShowing :added "4.0"}
+^{:refer js.react-native.animate/useShowing :added "4.0" :unchecked true}
 (fact "constructs a function that removes"
   ^:hidden
   

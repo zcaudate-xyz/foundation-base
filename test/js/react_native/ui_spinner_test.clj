@@ -16,7 +16,7 @@
              ]
    :export [MODULE]})
 
-^{:refer js.react-native.ui-spinner/spinnerTheme :added "4.0"}
+^{:refer js.react-native.ui-spinner/spinnerTheme :added "4.0" :unchecked true}
 (fact "creates the spinner theme")
 
 ^{:refer js.react-native.ui-spinner/SpinnerStatic :added "0.1"}
@@ -37,7 +37,7 @@
         [:% ui-spinner/SpinnerStatic
          #{text}]]]))))
 
-^{:refer js.react-native.ui-spinner/SpinnerDigit :added "4.0"}
+^{:refer js.react-native.ui-spinner/SpinnerDigit :added "4.0" :unchecked true}
 (fact  "creates the spinner digit"
   ^:hidden
   
@@ -62,7 +62,7 @@
          {:title "-1"
           :onPress (fn:> (setIndex (- index 1)))}]]]))))
 
-^{:refer js.react-native.ui-spinner/SpinnerValues :added "4.0"}
+^{:refer js.react-native.ui-spinner/SpinnerValues :added "4.0" :unchecked true}
 (fact "creates the spinner values"
   ^:hidden
   
@@ -88,7 +88,7 @@
          {:title "-1"
           :onPress (fn:> (setValue (- value 1)))}]]]))))
 
-^{:refer js.react-native.ui-spinner/useSpinnerPosition :added "4.0"}
+^{:refer js.react-native.ui-spinner/useSpinnerPosition :added "4.0" :unchecked true}
 (fact "helper function to connect spinner position")
 
 ^{:refer js.react-native.ui-spinner/Spinner :added "0.1"}

@@ -112,3 +112,25 @@
 (t/fact "emit perl hash reference"
   (spec-perl/perl-map {"a" 1 "b" 2} spec-perl/+grammar+ {})
   => "{\"a\" => 1, \"b\" => 2}")
+
+
+^{:refer std.lang.model.spec-perl/perl-var :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-perl/perl-symbol :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-perl/perl-invoke-args :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-perl/perl-invoke :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-perl/perl-defn :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-perl/perl-array :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-perl/perl-map :added "4.1"}
+(fact "TODO")

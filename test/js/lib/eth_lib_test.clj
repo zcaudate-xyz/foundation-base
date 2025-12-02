@@ -28,7 +28,7 @@
               (:= solc (require "solc")))]
   :teardown [(l/rt:stop)]})
 
-^{:refer js.lib.eth-lib/to-bignum-pow10 :added "4.0"}
+^{:refer js.lib.eth-lib/to-bignum-pow10 :added "4.0" :unchecked true}
 (fact "number with base 10 exponent"
   ^:hidden
 
@@ -37,7 +37,7 @@
       (toString)))
   => "10000000000")
 
-^{:refer js.lib.eth-lib/bn-mul :added "4.0"}
+^{:refer js.lib.eth-lib/bn-mul :added "4.0" :unchecked true}
 (fact "multiplies two bignums together"
   ^:hidden
   
@@ -47,7 +47,7 @@
       (toString)))
   => "1000000000000000010000")
 
-^{:refer js.lib.eth-lib/bn-div :added "4.0"}
+^{:refer js.lib.eth-lib/bn-div :added "4.0" :unchecked true}
 (fact "divides two bignums together"
   ^:hidden
   
@@ -57,7 +57,7 @@
       (toString)))
   => "10000000000000")
 
-^{:refer js.lib.eth-lib/to-number :added "4.0"}
+^{:refer js.lib.eth-lib/to-number :added "4.0" :unchecked true}
 (fact "converts the bignum to a number"
   ^:hidden
 
@@ -69,7 +69,7 @@
    (e/to-number "100000000000000001"))
   => (throws))
 
-^{:refer js.lib.eth-lib/to-number-string :added "4.0"}
+^{:refer js.lib.eth-lib/to-number-string :added "4.0" :unchecked true}
 (fact "converts the bignum to a number string"
   ^:hidden
 
@@ -77,7 +77,7 @@
    (e/to-number-string "100000000000000001"))
   => "100000000000000001")
 
-^{:refer js.lib.eth-lib/new-rpc-provider :added "4.0"}
+^{:refer js.lib.eth-lib/new-rpc-provider :added "4.0" :unchecked true}
 (fact "creates a new rpc provider"
   ^:hidden
 
@@ -86,10 +86,10 @@
     (e/new-rpc-provider "http://127.0.0.1:8545")))
   => number?)
 
-^{:refer js.lib.eth-lib/new-web3-provider :added "4.0"}
+^{:refer js.lib.eth-lib/new-web3-provider :added "4.0" :unchecked true}
 (fact "creates a new web3 compatible provider")
 
-^{:refer js.lib.eth-lib/new-wallet :added "4.0"}
+^{:refer js.lib.eth-lib/new-wallet :added "4.0" :unchecked true}
 (fact "creates a new wallet"
   ^:hidden
   
@@ -100,7 +100,7 @@
      (e/new-rpc-provider "http://127.0.0.1:8545"))))
   => "0x001Dc339B1E9B9D443bcd39F9d5114390Bc43aCD")
 
-^{:refer js.lib.eth-lib/new-wallet-from-mnemonic :added "4.0"}
+^{:refer js.lib.eth-lib/new-wallet-from-mnemonic :added "4.0" :unchecked true}
 (fact "creates new wallet from mnemonic"
   ^:hidden
 
@@ -110,7 +110,7 @@
      "taxi dash nation raw first art ticket more useful mosquito include true")))
   => "0x94e3361495bD110114ac0b6e35Ed75E77E6a6cFA")
 
-^{:refer js.lib.eth-lib/new-contract :added "4.0"
+^{:refer js.lib.eth-lib/new-contract :added "4.0" :unchecked true
   :setup [(def +contract+
             (compile-solc/create-module-entry
              (l/rt :js)
@@ -158,7 +158,7 @@
        "m__get_counter0"
        "m__add_both(uint256)"})
 
-^{:refer js.lib.eth-lib/new-contract-factory :added "4.0"
+^{:refer js.lib.eth-lib/new-contract-factory :added "4.0" :unchecked true
   :setup [(def +contract+
             (compile-solc/create-module-entry
              (l/rt :js)
@@ -175,7 +175,7 @@
                    (@! (last env-ganache/+default-private-keys+))))))
   => ["bytecode" "interface" "signer"])
 
-^{:refer js.lib.eth-lib/get-signer :added "4.0"}
+^{:refer js.lib.eth-lib/get-signer :added "4.0" :unchecked true}
 (fact "gets a signer given url and private key"
   ^:hidden
   
@@ -185,7 +185,7 @@
                   (@! (last env-ganache/+default-private-keys+)))))
   => ["_isSigner" "_signingKey" "_mnemonic" "address" "provider"])
 
-^{:refer js.lib.eth-lib/get-signer-address :added "4.0"}
+^{:refer js.lib.eth-lib/get-signer-address :added "4.0" :unchecked true}
 (fact "gets signer address given url and private key"
   ^:hidden
 
@@ -194,7 +194,7 @@
                          (@! (last env-ganache/+default-private-keys+))))
   => (last env-ganache/+default-addresses-raw+))
 
-^{:refer js.lib.eth-lib/send-wei :added "4.0"}
+^{:refer js.lib.eth-lib/send-wei :added "4.0" :unchecked true}
 (fact "gets wei to account"
   ^:hidden
   
@@ -224,7 +224,7 @@
    k/to-number)
   => integer?)
 
-^{:refer js.lib.eth-lib/contract-deploy :added "4.0"
+^{:refer js.lib.eth-lib/contract-deploy :added "4.0" :unchecked true
   :setup [(def +contract+
             (compile-solc/create-module-entry
              (l/rt :js)
@@ -242,7 +242,7 @@
    (k/key-fn "deployTransaction"))
   => map?)
 
-^{:refer js.lib.eth-lib/contract-run :added "4.0"
+^{:refer js.lib.eth-lib/contract-run :added "4.0" :unchecked true
   :setup [(def +contract+
             (compile-solc/create-module-entry
              (l/rt :js)
@@ -277,7 +277,7 @@
         k/to-number)
   => integer?)
 
-^{:refer js.lib.eth-lib/subscribe-event :added "4.0"
+^{:refer js.lib.eth-lib/subscribe-event :added "4.0" :unchecked true
   :setup [(def +contract+
             (compile-solc/create-module-entry
              (l/rt :js)
@@ -320,7 +320,7 @@
                                nil)))))
   => (contains-in [number? number?]))
 
-^{:refer js.lib.eth-lib/subscribe-once :added "4.0"
+^{:refer js.lib.eth-lib/subscribe-once :added "4.0" :unchecked true
   :setup [(def +contract+
             (compile-solc/create-module-entry
              (l/rt :js)

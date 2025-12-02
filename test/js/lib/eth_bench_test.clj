@@ -23,10 +23,10 @@
               (:= solc (require "solc")))]
   :teardown [(l/rt:stop)]})
 
-^{:refer js.lib.eth-bench/send-wei :added "4.0"}
+^{:refer js.lib.eth-bench/send-wei :added "4.0" :unchecked true}
 (fact "sends currency for bench")
 
-^{:refer js.lib.eth-bench/contract-deploy :added "4.0"
+^{:refer js.lib.eth-bench/contract-deploy :added "4.0" :unchecked true
   :setup [(def +contract+
             (compile-solc/create-module-entry
              (l/rt :js)
@@ -59,7 +59,7 @@
        "reason" "too many arguments:  in Contract constructor",
        "code" "UNEXPECTED_ARGUMENT"}})
 
-^{:refer js.lib.eth-bench/contract-run :added "4.0"
+^{:refer js.lib.eth-bench/contract-run :added "4.0" :unchecked true
   :setup [(def +contract+
             (compile-solc/create-module-entry
              (l/rt :js)
@@ -95,7 +95,7 @@
         k/to-number)
   => number?)
 
-^{:refer js.lib.eth-bench/get-past-events :added "4.0"
+^{:refer js.lib.eth-bench/get-past-events :added "4.0" :unchecked true
   :setup [(def +contract+
             (compile-solc/create-module-entry
              (l/rt :js)

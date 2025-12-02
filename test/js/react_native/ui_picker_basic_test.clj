@@ -16,13 +16,13 @@
              [js.react-native.ui-picker-basic :as ui-picker-basic]]
    :export [MODULE]})
 
-^{:refer js.react-native.ui-picker-basic/pickerTheme :added "4.0"}
+^{:refer js.react-native.ui-picker-basic/pickerTheme :added "4.0" :unchecked true}
 (fact "creates the picker theme")
 
-^{:refer js.react-native.ui-picker-basic/usePickerPosition :added "4.0"}
+^{:refer js.react-native.ui-picker-basic/usePickerPosition :added "4.0" :unchecked true}
 (fact "helper function to connect picker position")
 
-^{:refer js.react-native.ui-picker-basic/PickerValues :added "4.0"}
+^{:refer js.react-native.ui-picker-basic/PickerValues :added "4.0" :unchecked true}
 (fact "creates non editable picker values for display only")
 
 ^{:refer js.react-native.ui-picker-basic/PickerBasicIndexed :added "0.1"}

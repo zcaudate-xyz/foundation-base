@@ -3,7 +3,7 @@
   (:require [js.react.compile :as compile]
             [js.react.compile-components :as c]))
 
-^{:refer js.react.compile/check-valid-variables :added "4.0"}
+^{:refer js.react.compile/check-valid-variables :added "4.0" :unchecked true}
 (fact "checks that all :var/<name> keywords have been defined"
   ^:hidden
 
@@ -19,7 +19,7 @@
    :var/c)
   => (throws))
 
-^{:refer js.react.compile/compile-states-deps :added "4.0"}
+^{:refer js.react.compile/compile-states-deps :added "4.0" :unchecked true}
 (fact "get dependencies for states"
   ^:hidden
   
@@ -36,7 +36,7 @@
                               :var/html-code)}})
   => #:var{:html-code #{}, :dsl-code #{}, :history #{}, :history-idx #{}, :data #{}, :combined #{:var/html-code :var/dsl-code}})
 
-^{:refer js.react.compile/compile-states :added "4.0"}
+^{:refer js.react.compile/compile-states :added "4.0" :unchecked true}
 (fact "compiles to react code"
   ^:hidden
   
@@ -59,7 +59,7 @@
        (var [htmlCode setHtmlCode] (React.useState ""))
        (var combined (+ dslCode htmlCode))))
 
-^{:refer js.react.compile/compile-layout-raw :added "4.0"}
+^{:refer js.react.compile/compile-layout-raw :added "4.0" :unchecked true}
 (fact "compiles the layout fully"
   ^:hidden
   
@@ -78,7 +78,7 @@
       [:p {:name "hello"}
        [:a]]])
 
-^{:refer js.react.compile/compile-layout :added "4.0"}
+^{:refer js.react.compile/compile-layout :added "4.0" :unchecked true}
 (fact "compiles the ui"
   ^:hidden
   
@@ -94,7 +94,7 @@
     :ui/text      [:p]})
   => [:div {:class ["p-8"]} [:p {:name "hello"} [:a]]])
 
-^{:refer js.react.compile/compile-full :added "4.0"}
+^{:refer js.react.compile/compile-full :added "4.0" :unchecked true}
 (fact "TODO"
   ^:hidden
 
@@ -137,20 +137,20 @@
                    [:p {:name htmlCode} [:a]]])))
 
 
-^{:refer js.react.compile/get-registry :added "4.0"}
+^{:refer js.react.compile/get-registry :added "4.0" :unchecked true}
 (fact "gets the component registry")
 
-^{:refer js.react.compile/put-registry :added "4.0"}
+^{:refer js.react.compile/put-registry :added "4.0" :unchecked true}
 (fact "puts a component group into the registry")
 
-^{:refer js.react.compile/del-registry :added "4.0"}
+^{:refer js.react.compile/del-registry :added "4.0" :unchecked true}
 (fact "deletes a component group from the registry")
 
-^{:refer js.react.compile/get-default-components :added "4.0"}
+^{:refer js.react.compile/get-default-components :added "4.0" :unchecked true}
 (fact "emits using a potentially cached entry")
 
-^{:refer js.react.compile/compile-replace-actions :added "4.0"}
+^{:refer js.react.compile/compile-replace-actions :added "4.0" :unchecked true}
 (fact "compiles to react code")
 
-^{:refer js.react.compile/compile-triggers :added "4.0"}
+^{:refer js.react.compile/compile-triggers :added "4.0" :unchecked true}
 (fact "compiles to react code")

@@ -21,20 +21,20 @@
               (l/rt:scaffold-imports :js)]
   :teardown  [(l/rt:stop)]})
 
-^{:refer js.cell.base-fn/CELL_STATE :adopt true :added "4.0"
+^{:refer js.cell.base-fn/CELL_STATE :adopt true :added "4.0" :unchecked true
   :setup [(base-fn/CELL_STATE-reset {:eval true})]}
 (fact "gets worker state"
 
   (base-fn/CELL_STATE)
   => map?)
 
-^{:refer js.cell.base-fn/CELL_ROUTES :adopt true :added "4.0"}
+^{:refer js.cell.base-fn/CELL_ROUTES :adopt true :added "4.0" :unchecked true}
 (fact "gets worker routes"
 
   (base-fn/CELL_ROUTES)
   => map?)
 
-^{:refer js.cell.base-fn/fn-trigger :adopt true :added "4.0"}
+^{:refer js.cell.base-fn/fn-trigger :adopt true :added "4.0" :unchecked true}
 (fact "triggers an event"
   ^:hidden
   
@@ -50,7 +50,7 @@
       "op" "stream",
       "topic" "hello"})
 
-^{:refer js.cell.base-fn/fn-trigger-async :adopt true :added "4.0"}
+^{:refer js.cell.base-fn/fn-trigger-async :adopt true :added "4.0" :unchecked true}
 (fact "triggers an event after a delay"
   ^:hidden
 
@@ -64,7 +64,7 @@
      100))
   => {"body" {"a" 1}, "status" "ok", "op" "stream", "topic" "hello"})
 
-^{:refer js.cell.base-fn/fn-set-state :adopt true :added "4.0"
+^{:refer js.cell.base-fn/fn-set-state :adopt true :added "4.0" :unchecked true
   :setup [(!.js
            (j/assign (base-fn/CELL_STATE)
                      {:final false}))]}
@@ -82,7 +82,7 @@
       "op" "stream",
       "topic" "@/::STATE"})
 
-^{:refer js.cell.base-fn/fn-final-set :adopt true :added "4.0"
+^{:refer js.cell.base-fn/fn-final-set :adopt true :added "4.0" :unchecked true
   :setup [(!.js
            (j/assign (base-fn/CELL_STATE)
                      {:final false}))]}
@@ -97,7 +97,7 @@
       "op" "stream",
       "topic" "@/::STATE"})
 
-^{:refer js.cell.base-fn/fn-final-status :adopt true :added "4.0"
+^{:refer js.cell.base-fn/fn-final-status :adopt true :added "4.0" :unchecked true
   :setup [(!.js
            (j/assign (base-fn/CELL_STATE)
                      {:final false}))]}
@@ -107,7 +107,7 @@
   (!.js (base-fn/fn-final-status))
   => false)
 
-^{:refer js.cell.base-fn/fn-eval-enable :adopt true :added "4.0"
+^{:refer js.cell.base-fn/fn-eval-enable :adopt true :added "4.0" :unchecked true
   :setup [(!.js
            (j/assign (base-fn/CELL_STATE)
                      {:eval true}))]}
@@ -122,7 +122,7 @@
       "op" "stream",
       "topic" "@/::STATE"})
 
-^{:refer js.cell.base-fn/fn-eval-disable :adopt true :added "4.0"
+^{:refer js.cell.base-fn/fn-eval-disable :adopt true :added "4.0" :unchecked true
   :setup [(!.js
            (j/assign (base-fn/CELL_STATE)
                      {:eval true}))]}
@@ -137,63 +137,63 @@
       "op" "stream",
       "topic" "@/::STATE"})
 
-^{:refer js.cell.base-fn/fn-eval-status :adopt true :added "4.0"}
+^{:refer js.cell.base-fn/fn-eval-status :adopt true :added "4.0" :unchecked true}
 (fact "gets the eval status"
   ^:hidden
   
   (base-fn/fn-eval-status)
   => boolean?)
 
-^{:refer js.cell.base-fn/fn-route-list :adopt true :added "4.0"}
+^{:refer js.cell.base-fn/fn-route-list :adopt true :added "4.0" :unchecked true}
 (fact "gets the routes list"
   ^:hidden
 
   (base-fn/fn-route-list)
   => vector?)
 
-^{:refer js.cell.base-fn/fn-route-entry :adopt true :added "4.0"}
+^{:refer js.cell.base-fn/fn-route-entry :adopt true :added "4.0" :unchecked true}
 (fact  "gets a route entry"
   ^:hidden
 
   (base-fn/fn-route-entry "hello")
   => nil)
 
-^{:refer js.cell.base-fn/fn-ping :adopt true :added "4.0"}
+^{:refer js.cell.base-fn/fn-ping :adopt true :added "4.0" :unchecked true}
 (fact "pings the worker"
   ^:hidden
   
   (base-fn/fn-ping)
   => (contains ["pong" integer?]))
 
-^{:refer js.cell.base-fn/fn-ping-async :adopt true :added "4.0"}
+^{:refer js.cell.base-fn/fn-ping-async :adopt true :added "4.0" :unchecked true}
 (fact "pings after a delay"
   ^:hidden
 
   (j/<! (base-fn/fn-ping-async 100))
   => (contains ["pong" integer?]))
 
-^{:refer js.cell.base-fn/fn-echo :adopt true :added "4.0"}
+^{:refer js.cell.base-fn/fn-echo :adopt true :added "4.0" :unchecked true}
 (fact  "echos the first arg"
   ^:hidden
   
   (base-fn/fn-echo "hello")
   => (contains ["hello" integer?]))
 
-^{:refer js.cell.base-fn/fn-echo-async :adopt true :added "4.0"}
+^{:refer js.cell.base-fn/fn-echo-async :adopt true :added "4.0" :unchecked true}
 (fact "echos the first arg after delay"
   ^:hidden
 
   (j/<! (base-fn/fn-echo-async "hello" 100))
   => (contains ["hello" integer?]))
 
-^{:refer js.cell.base-fn/fn-error :adopt true :added "4.0"}
+^{:refer js.cell.base-fn/fn-error :adopt true :added "4.0" :unchecked true}
 (fact "throws an error"
   ^:hidden
   
   (base-fn/fn-error)
   => (throws))
 
-^{:refer js.cell.base-fn/fn-error-async :adopt true :added "4.0"}
+^{:refer js.cell.base-fn/fn-error-async :adopt true :added "4.0" :unchecked true}
 (fact  "throws an error after delay"
   ^:hidden
   
@@ -202,14 +202,14 @@
   => (contains ["error"]))
 
 
-^{:refer js.cell.base-fn/routes-base :adopt true :added "4.0"}
+^{:refer js.cell.base-fn/routes-base :adopt true :added "4.0" :unchecked true}
 (fact "returns the base routes"
   ^:hidden
   
   (base-fn/routes-base)
   => map?)
 
-^{:refer js.cell.base-fn/routes-init :adopt true :added "4.0"}
+^{:refer js.cell.base-fn/routes-init :adopt true :added "4.0" :unchecked true}
 (fact "initiates the base routes"
   ^:hidden
   
@@ -217,7 +217,7 @@
   => (contains [true]))
 
 
-^{:refer js.cell.base-internal/create-mock :adopt true :added "4.0"}
+^{:refer js.cell.base-internal/create-mock :adopt true :added "4.0" :unchecked true}
 (fact "initiates the base routes"
   ^:hidden
 
@@ -226,7 +226,7 @@
                              {}))
   => {"body" {"done" true}, "status" "ok", "op" "stream", "topic" "@/::INIT"})
 
-^{:refer js.cell.base-internal/worker-process :adopt true :added "4.0"
+^{:refer js.cell.base-internal/worker-process :adopt true :added "4.0" :unchecked true
   :setup [(l/rt:restart)]}
 (fact "initiates the base routes"
   ^:hidden
@@ -273,7 +273,7 @@
        "op" "route"}))
 
 
-^{:refer js.cell.link-raw/link-create-mock :adopt true :added "4.0"
+^{:refer js.cell.link-raw/link-create-mock :adopt true :added "4.0" :unchecked true
   :setup [(l/rt:restart)]}
 (fact "creates a mock link for testing purposes"
 

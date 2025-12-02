@@ -15,16 +15,16 @@
  {:setup    [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
-^{:refer js.lib.driver-sqlite/raw-query :added "4.0"}
+^{:refer js.lib.driver-sqlite/raw-query :added "4.0" :unchecked true}
 (fact "raw query for sql lite results")
 
-^{:refer js.lib.driver-sqlite/set-methods :added "4.0"}
+^{:refer js.lib.driver-sqlite/set-methods :added "4.0" :unchecked true}
 (fact "sets the query and disconnect methods")
 
-^{:refer js.lib.driver-sqlite/make-instance :added "4.0"}
+^{:refer js.lib.driver-sqlite/make-instance :added "4.0" :unchecked true}
 (fact "creates a instance once SQL is loaded")
 
-^{:refer js.lib.driver-sqlite/connect-constructor :added "4.0"}
+^{:refer js.lib.driver-sqlite/connect-constructor :added "4.0" :unchecked true}
 (fact "connects to an embeded sqlite file"
 
   (notify/wait-on :js

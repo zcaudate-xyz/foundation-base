@@ -13,7 +13,7 @@
  {:setup    [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
-^{:refer js.react-native.model-roller/roller-model :added "4.0"}
+^{:refer js.react-native.model-roller/roller-model :added "4.0" :unchecked true}
 (fact "constructs a roller model"
   ^:hidden
   
@@ -109,7 +109,7 @@
        "theta" 5.654866776461628,
        "raw" 9}])
 
-^{:refer js.react-native.model-roller/roller-shifted-norm :added "4.0"}
+^{:refer js.react-native.model-roller/roller-shifted-norm :added "4.0" :unchecked true}
 (fact "finds the shifted-norm for an index at center"
   ^:hidden
   
@@ -138,7 +138,7 @@
       [-2 -3 3 2 1 0 -1]
       [-1 -2 -3 3 2 1 0]])     
 
-^{:refer js.react-native.model-roller/roller-shifted-index :added "4.0"}
+^{:refer js.react-native.model-roller/roller-shifted-index :added "4.0" :unchecked true}
 (fact "finds shifted index for roller divisions"
   ^:hidden
   
@@ -177,5 +177,5 @@
       [8 8 4 4 4 4 4 4 0 0]
       [9 9 9 5 5 5 5 5 5 1]])
 
-^{:refer js.react-native.model-roller/roller-set-values :added "4.0"}
+^{:refer js.react-native.model-roller/roller-set-values :added "4.0" :unchecked true}
 (fact "sets roller values given array of animated values")

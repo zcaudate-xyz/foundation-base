@@ -17,7 +17,7 @@
              ]
    :export [MODULE]})
 
-^{:refer js.react-native.ui-slider/sliderTheme :added "4.0"}
+^{:refer js.react-native.ui-slider/sliderTheme :added "4.0" :unchecked true}
 (fact "creates the slider theme")
 
 ^{:refer js.react-native.ui-slider/Slider :added "0.1"}

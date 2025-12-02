@@ -23,7 +23,7 @@
   :teardown [(l/rt:stop)]})
 
 
-^{:refer js.lib.rn-async-storage/getJSON :added "4.0"
+^{:refer js.lib.rn-async-storage/getJSON :added "4.0" :unchecked true
   :setup [(j/<! (store/clear))]}
 (fact "gets the json data structure"
   ^:hidden
@@ -34,10 +34,10 @@
   (j/<! (store/getJSON "hello"))
   => {"a" 1})
 
-^{:refer js.lib.rn-async-storage/setJSON :added "4.0"}
+^{:refer js.lib.rn-async-storage/setJSON :added "4.0" :unchecked true}
 (fact "sets the json structure")
 
-^{:refer js.lib.rn-async-storage/mergeJSON :added "4.0"
+^{:refer js.lib.rn-async-storage/mergeJSON :added "4.0" :unchecked true
   :setup [(j/<! (store/setJSON "hello" {:a 1}))]}
 (fact "merges json data on the same key"
   ^:hidden

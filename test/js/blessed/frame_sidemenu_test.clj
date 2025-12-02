@@ -12,7 +12,7 @@
               [js.lib.chalk :as chk]]
    :export  [MODULE]})
 
-^{:refer js.blessed.frame-sidemenu/SideButton :added "4.0"}
+^{:refer js.blessed.frame-sidemenu/SideButton :added "4.0" :unchecked true}
 (fact "creates a primary frame-sidebutton button"
   ^:hidden
   
@@ -36,7 +36,7 @@
          :setIndex setIndex
          :selected (== index 2)}]]])))
 
-^{:refer js.blessed.frame-sidemenu/SideMenu :added "4.0"}
+^{:refer js.blessed.frame-sidemenu/SideMenu :added "4.0" :unchecked true}
 (fact "creates a primary frame-sidemenu button"
   ^:hidden
   

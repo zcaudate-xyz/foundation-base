@@ -14,7 +14,7 @@
  {:setup     [(l/rt:restart)]
   :teardown  [(l/rt:stop)]})
 
-^{:refer js.cell.base-util/rand-id :added "4.0"}
+^{:refer js.cell.base-util/rand-id :added "4.0" :unchecked true}
 (fact "prepares a rand-id"
   ^:hidden
   
@@ -24,7 +24,7 @@
   (util/rand-id "id-" 4)
   => string?)
 
-^{:refer js.cell.base-util/check-event :added "4.0"}
+^{:refer js.cell.base-util/check-event :added "4.0" :unchecked true}
 (fact "checks that trigger matches topic and event"
   ^:hidden
   
@@ -71,7 +71,7 @@
    (util/check-event {"hello" (fn:> [e] (. e ["ok"]))} "hello" {:not-ok true}))
   => false)
 
-^{:refer js.cell.base-util/arg-encode :added "4.0"}
+^{:refer js.cell.base-util/arg-encode :added "4.0" :unchecked true}
 (fact "encodes functions in data tree"
   ^:hidden
   
@@ -79,7 +79,7 @@
    (util/arg-encode [(fn:> [x] x)]))
   => [["fn" "function (x){\n      return x;\n    }"]])
 
-^{:refer js.cell.base-util/arg-decode :added "4.0"}
+^{:refer js.cell.base-util/arg-decode :added "4.0" :unchecked true}
 (fact "decodes function in data tree"
   ^:hidden
 

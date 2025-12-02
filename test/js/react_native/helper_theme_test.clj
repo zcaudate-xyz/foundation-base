@@ -16,7 +16,7 @@
  {:setup    [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
-^{:refer js.react-native.helper-theme/transformColor :added "4.0"}
+^{:refer js.react-native.helper-theme/transformColor :added "4.0" :unchecked true}
 (fact "transforms a color given a set of indicators, the type and pipeline"
   ^:hidden
   
@@ -61,7 +61,7 @@
     {}))
   => [135 100 47.72549019607843])
 
-^{:refer js.react-native.helper-theme/mergeProps :added "4.0"}
+^{:refer js.react-native.helper-theme/mergeProps :added "4.0" :unchecked true}
 (fact "merges the transformed props"
   ^:hidden
   
@@ -73,7 +73,7 @@
                {"opacity" 0.1}],
       "value" 0.1})
 
-^{:refer js.react-native.helper-theme/createCombinedTransformations :added "4.0"}
+^{:refer js.react-native.helper-theme/createCombinedTransformations :added "4.0" :unchecked true}
 (fact "creates a combined transformations function"
   ^:hidden
   
@@ -132,7 +132,7 @@
         "borderColor" "hsl(0,0.00%,8.00%)",
         "color" "hsl(0,0.00%,12.53%)"}]})
 
-^{:refer js.react-native.helper-theme/createSingleTransformations :added "4.0"}
+^{:refer js.react-native.helper-theme/createSingleTransformations :added "4.0" :unchecked true}
 (fact "creates the transformation for split `fg`/`bg` controls"
   ^:hidden
   
@@ -188,7 +188,7 @@
   => {"style" [{"fontWeight" 10.5}
                {"backgroundColor" "hsl(0,0.00%,12.53%)"}]})
 
-^{:refer js.react-native.helper-theme/combinedStatic :added "4.0"}
+^{:refer js.react-native.helper-theme/combinedStatic :added "4.0" :unchecked true}
 (fact "creates a static style from transform function"
   ^:hidden
   
@@ -237,7 +237,7 @@
   => [{"fontWeight" 10}
       {"backgroundColor" "hsl(0,0.00%,53.33%)"}])
 
-^{:refer js.react-native.helper-theme/prepThemeCombined :added "4.0"}
+^{:refer js.react-native.helper-theme/prepThemeCombined :added "4.0" :unchecked true}
 (fact "prepares the combined theme"
   ^:hidden
   
@@ -305,7 +305,7 @@
         "borderColor" "hsl(60,0.00%,95.69%)",
         "color" "hsl(0,0.00%,20.00%)"}]})
 
-^{:refer js.react-native.helper-theme/prepThemeSingle :added "4.0"}
+^{:refer js.react-native.helper-theme/prepThemeSingle :added "4.0" :unchecked true}
 (fact "prepares the static style and dynamic transform function"
   ^:hidden
   

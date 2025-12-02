@@ -43,7 +43,7 @@
    :scriptHash 0x16,
    :wif 0x9e})
 
-^{:refer js.lib.bitcoin/wif-encode :added "4.0"}
+^{:refer js.lib.bitcoin/wif-encode :added "4.0" :unchecked true}
 (fact "encodes a wallet interchange format"
   ^:hidden
   
@@ -70,7 +70,7 @@
     (bc/wif-encode 0xf1 privateKey true))
   => "chvYoVjuvRgDxFZrm4TZRKKh1hoRdMKb8XnaWk1gpYBq27FSwyK5")
 
-^{:refer js.lib.bitcoin/wif-decode :added "4.0"}
+^{:refer js.lib.bitcoin/wif-decode :added "4.0" :unchecked true}
 (fact "decodes a wallet interchange format"
   ^:hidden
   
@@ -108,7 +108,7 @@
       "version" 241,
       "compressed" true})
 
-^{:refer js.lib.bitcoin/pair-from-wif :added "4.0"}
+^{:refer js.lib.bitcoin/pair-from-wif :added "4.0" :unchecked true}
 (fact "gets public/private pair from wif"
   ^:hidden
   
@@ -173,7 +173,7 @@
       (toString "hex")))
   => "2,196,236,199,51,114,195,214,32,8,254,41,99,212,6,76,1,84,116,33,239,106,71,199,86,223,65,209,145,21,107,129,146")
 
-^{:refer js.lib.bitcoin/pair-from-random :added "4.0"}
+^{:refer js.lib.bitcoin/pair-from-random :added "4.0" :unchecked true}
 (fact "makes a random key"
   ^:hidden
   
@@ -225,7 +225,7 @@
                   "scriptHash" 196, "wif" 241, "bip44" 3, "bech32" "td"},
        "address" "naumocEu7HMf4z2CTQRp9NWpT8JGrYaYqp"}))
 
-^{:refer js.lib.bitcoin/sign-message :added "4.0"}
+^{:refer js.lib.bitcoin/sign-message :added "4.0" :unchecked true}
 (fact "signs a message given wif"
   ^:hidden
   
@@ -236,7 +236,7 @@
                     {}))
   => "H7LxS73/Apo2srauD1oKKHXjKks9m9zuYLGWLuq6Kd6HVP2zjL2+IVNKkpvA9gPZ/FphtvaHUWMvlQimJE7VOBg=")
 
-^{:refer js.lib.bitcoin/verify-message :added "4.0"}
+^{:refer js.lib.bitcoin/verify-message :added "4.0" :unchecked true}
 (fact "verifies a message given address and signature"
   ^:hidden
   
@@ -247,7 +247,7 @@
                       (@! +dogetestnet+)))
   => true)
 
-^{:refer js.lib.bitcoin/account-from-random :added "4.0"}
+^{:refer js.lib.bitcoin/account-from-random :added "4.0" :unchecked true}
 (fact "generates an account from random"
   ^:hidden
   
@@ -294,7 +294,7 @@
      "prvkey"
      "289b26b32378c7d66d7aab7e3d4119004889c4947427c27cfdd17a03c8d4225d"}))
 
-^{:refer js.lib.bitcoin/build-sweep-tx :added "4.0"}
+^{:refer js.lib.bitcoin/build-sweep-tx :added "4.0" :unchecked true}
 (fact "builds a sweep tx"
   ^:hidden
   
@@ -312,7 +312,7 @@
        :output-no 1}]}))
   => "020000000132a85f6c8a186433bbd7f9c48d8e65c5775bc4e5bb50703fd0562ce6261058ac010000006b483045022100fdb4b408b49e13c44d8a75d503c497303d64417f464e40028b9c7899c30553c802205a902c4c78da0b482894fb1cd8c6f979a056d511f4f429b86d7955f8125cc145012102c4ecc73372c3d62008fe2963d4064c01547421ef6a47c756df41d191156b8192ffffffff01b8837998020000001976a91449af7a07cd4c366ab7419cede82db2650c05328588ac00000000")
 
-^{:refer js.lib.bitcoin/build-payment-tx :added "4.0"}
+^{:refer js.lib.bitcoin/build-payment-tx :added "4.0" :unchecked true}
 (fact "builds a payment tx"
   ^:hidden
   

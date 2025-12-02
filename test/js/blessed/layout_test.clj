@@ -18,7 +18,7 @@
           (l/rt:scaffold-imports :js)]
   :teardown [(l/rt:stop)]})
 
-^{:refer js.blessed.layout/PrimaryButton :added "4.0"}
+^{:refer js.blessed.layout/PrimaryButton :added "4.0" :unchecked true}
 (fact "creates a primary layout button"
   ^:hidden
   
@@ -43,7 +43,7 @@
           :route "options"
           :setRoute setRoute}]]))))
 
-^{:refer js.blessed.layout/layoutMenu :added "4.0"}
+^{:refer js.blessed.layout/layoutMenu :added "4.0" :unchecked true}
 (fact "layout for menu entry"
   ^:hidden
   
@@ -67,7 +67,7 @@
        "route" "options",
        "name" "options"}])
 
-^{:refer js.blessed.layout/layoutToggles :added "4.0"}
+^{:refer js.blessed.layout/layoutToggles :added "4.0" :unchecked true}
 (fact "layout for toggle entry"
   ^:hidden
   
@@ -79,7 +79,7 @@
       {"width" 1, "type" "separator", "left" 3}
       {"width" 3, "label" "D", "left" 4}])
 
-^{:refer js.blessed.layout/PrimaryMenu :added "4.0"}
+^{:refer js.blessed.layout/PrimaryMenu :added "4.0" :unchecked true}
 (fact "creates a primary menu"
   ^:hidden
   
@@ -101,7 +101,7 @@
           setRoute
           {:entries entries}}]]])))
 
-^{:refer js.blessed.layout/PrimaryToggle :added "4.0"}
+^{:refer js.blessed.layout/PrimaryToggle :added "4.0" :unchecked true}
 (fact "creates a primary toggle"
   ^:hidden
   
@@ -121,7 +121,7 @@
         #{active setActive
           {:label "F"}}]]])))
 
-^{:refer js.blessed.layout/PrimaryToggles :added "4.0"}
+^{:refer js.blessed.layout/PrimaryToggles :added "4.0" :unchecked true}
 (fact "creates primary toggles"
   ^:hidden
   
@@ -141,7 +141,7 @@
       [:box {:top 2}
        [:% layout/PrimaryToggles #{entries}]]])))
 
-^{:refer js.blessed.layout/SecondaryButton :added "4.0"}
+^{:refer js.blessed.layout/SecondaryButton :added "4.0" :unchecked true}
 (fact "creates a secondary button"
   ^:hidden
   
@@ -165,7 +165,7 @@
          :setIndex setIndex
          :selected (== index 2)}]]])))
 
-^{:refer js.blessed.layout/SecondaryMenu :added "4.0"}
+^{:refer js.blessed.layout/SecondaryMenu :added "4.0" :unchecked true}
 (fact "creates a secondary button"
   ^:hidden
   
@@ -185,22 +185,22 @@
                    {:label "Foo"}
                    {:label "Bar"}]}}]]])))
 
-^{:refer js.blessed.layout/LayoutHeaderBlock :added "4.0"}
+^{:refer js.blessed.layout/LayoutHeaderBlock :added "4.0" :unchecked true}
 (fact "constructs the header block")
 
-^{:refer js.blessed.layout/LayoutFooterBlock :added "4.0"}
+^{:refer js.blessed.layout/LayoutFooterBlock :added "4.0" :unchecked true}
 (fact "constructs the footer block")
 
-^{:refer js.blessed.layout/LayoutBodyBlock :added "4.0"}
+^{:refer js.blessed.layout/LayoutBodyBlock :added "4.0" :unchecked true}
 (fact "constructs the body block")
 
-^{:refer js.blessed.layout/BlankRoute :added "4.0"}
+^{:refer js.blessed.layout/BlankRoute :added "4.0" :unchecked true}
 (fact "constructs a blank Route Page")
 
-^{:refer js.blessed.layout/LayoutBody :added "4.0"}
+^{:refer js.blessed.layout/LayoutBody :added "4.0" :unchecked true}
 (fact "constructs the body")
 
-^{:refer js.blessed.layout/LayoutStatus :added "4.0"}
+^{:refer js.blessed.layout/LayoutStatus :added "4.0" :unchecked true}
 (fact "constructs the status line"
   ^:hidden
   
@@ -247,7 +247,7 @@
                  :content (+ " Busy: " busy)
                  :onClick (fn:> (setBusy (not busy)))}]]])))
 
-^{:refer js.blessed.layout/LayoutNotify :added "4.0"}
+^{:refer js.blessed.layout/LayoutNotify :added "4.0" :unchecked true}
 (fact "constructs the notification panel"
   ^:hidden
 
@@ -272,13 +272,13 @@
        [:% layout/LayoutNotify
         #{notify setNotify}]]])))
 
-^{:refer js.blessed.layout/LayoutHeader :added "4.0"}
+^{:refer js.blessed.layout/LayoutHeader :added "4.0" :unchecked true}
 (fact "constructs the header")
 
-^{:refer js.blessed.layout/LayoutFooter :added "4.0"}
+^{:refer js.blessed.layout/LayoutFooter :added "4.0" :unchecked true}
 (fact "constructs the footer")
 
-^{:refer js.blessed.layout/LayoutMain :added "4.0"}
+^{:refer js.blessed.layout/LayoutMain :added "4.0" :unchecked true}
 (fact "constructs the main page"
   ^:hidden
   

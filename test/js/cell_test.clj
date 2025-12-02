@@ -26,10 +26,10 @@
               (l/rt:scaffold-imports :js)]
   :teardown  [(l/rt:stop)]})
 
-^{:refer js.cell/make-cell :added "4.0"}
+^{:refer js.cell/make-cell :added "4.0" :unchecked true}
 (fact "makes a current cell")
 
-^{:refer js.cell/GD :added "4.0"
+^{:refer js.cell/GD :added "4.0" :unchecked true
   :setup [(!.js
            (cl/GD-reset
             (cl/make-cell
@@ -41,7 +41,7 @@
   (cl/GD)
   => map?)
 
-^{:refer js.cell/GX :added "4.0"
+^{:refer js.cell/GX :added "4.0" :unchecked true
   :setup [(!.js
            (cl/GX-set
             "p0"
@@ -55,14 +55,14 @@
    (k/obj-keys (cl/GX)))
   => ["p0"])
 
-^{:refer js.cell/GX-val :added "4.0"}
+^{:refer js.cell/GX-val :added "4.0" :unchecked true}
 (fact "gets the current annex key"
   ^:hidden
   
   (cl/GX-val "p0")
   => map?)
 
-^{:refer js.cell/GX-set :added "4.0"}
+^{:refer js.cell/GX-set :added "4.0" :unchecked true}
 (fact "set the current annex key"
   ^:hidden
   
@@ -74,14 +74,14 @@
        (eval (@! (playground/play-worker true)))))))
   => map?)
 
-^{:refer js.cell/get-cell :added "4.0"}
+^{:refer js.cell/get-cell :added "4.0" :unchecked true}
 (fact "gets the current cell"
   ^:hidden
   
   (cl/get-cell)
   => map?)
 
-^{:refer js.cell/fn-call-cell :added "4.0"}
+^{:refer js.cell/fn-call-cell :added "4.0" :unchecked true}
 (fact "calls the cell in context"
   ^:hidden
   
@@ -91,7 +91,7 @@
   (cl/fn-call-cell k/identity [] "p0")
   => map?)
 
-^{:refer js.cell/fn-call-model :added "4.0"
+^{:refer js.cell/fn-call-model :added "4.0" :unchecked true
   :setup [(!.js
            (cl/add-model-attach "hello"
                                 {:echo  {:handler link-fn/echo
@@ -102,7 +102,7 @@
   (cl/fn-call-model impl-common/model-get "hello" [])
   => map?)
 
-^{:refer js.cell/fn-call-view :added "4.0"}
+^{:refer js.cell/fn-call-view :added "4.0" :unchecked true}
 (fact "calls the view in context"
   ^:hidden
   
@@ -110,7 +110,7 @@
    (k/second (cl/fn-call-view impl-common/view-ensure ["hello" "echo"] [])))
   => map?)
 
-^{:refer js.cell/fn-access-cell :added "4.0"
+^{:refer js.cell/fn-access-cell :added "4.0" :unchecked true
   :setup [(!.js
            (cl/GD-reset
             (cl/make-cell
@@ -129,7 +129,7 @@
   => (contains-in
       {"hello" {"echo" ["HELLO" integer?]}}))
 
-^{:refer js.cell/fn-access-model :added "4.0"}
+^{:refer js.cell/fn-access-model :added "4.0" :unchecked true}
 (fact "calls access function on the current model"
   ^:hidden
   
@@ -137,7 +137,7 @@
   => (contains-in
       {"echo" ["HELLO" integer?]}))
 
-^{:refer js.cell/fn-access-view :added "4.0"
+^{:refer js.cell/fn-access-view :added "4.0" :unchecked true
   :setup [(!.js
            (cl/GD-reset
             (cl/make-cell
@@ -156,7 +156,7 @@
                            ["hello" "echo"] []))
   => (contains ["HELLO" integer?]))
 
-^{:refer js.cell/list-models :added "4.0"}
+^{:refer js.cell/list-models :added "4.0" :unchecked true}
 (fact "lists all models"
   ^:hidden
   
@@ -164,7 +164,7 @@
    (cl/list-models))
   => ["hello"])
 
-^{:refer js.cell/list-views :added "4.0"}
+^{:refer js.cell/list-views :added "4.0" :unchecked true}
 (fact "lists all views"
   ^:hidden
   
@@ -172,21 +172,21 @@
    (cl/list-views "hello"))
   => ["echo"])
 
-^{:refer js.cell/get-model :added "4.0"}
+^{:refer js.cell/get-model :added "4.0" :unchecked true}
 (fact "gets the model in context"
   ^:hidden
   
   (cl/get-model "hello")
   => map?)
 
-^{:refer js.cell/get-view :added "4.0"}
+^{:refer js.cell/get-view :added "4.0" :unchecked true}
 (fact "gets the view in context"
   ^:hidden
   
   (cl/get-view ["hello" "echo"])
   => map?)
 
-^{:refer js.cell/cell-vals :added "4.0"}
+^{:refer js.cell/cell-vals :added "4.0" :unchecked true}
 (fact "gets all vals in the context"
   ^:hidden
   
@@ -196,7 +196,7 @@
   (cl/cell-inputs "p0")
   => {})
 
-^{:refer js.cell/cell-outputs :added "4.0"}
+^{:refer js.cell/cell-outputs :added "4.0" :unchecked true}
 (fact "gets all output data in the context"
   ^:hidden
   
@@ -208,7 +208,7 @@
   (cl/cell-inputs "p0")
   => {})
 
-^{:refer js.cell/cell-inputs :added "4.0"}
+^{:refer js.cell/cell-inputs :added "4.0" :unchecked true}
 (fact "gets all output data in the context"
   ^:hidden
   
@@ -219,7 +219,7 @@
   (cl/cell-inputs "p0")
   => {})
 
-^{:refer js.cell/cell-trigger :added "4.0"
+^{:refer js.cell/cell-trigger :added "4.0" :unchecked true
   :setup [(!.js
            (cl/GD-reset
             (cl/make-cell
@@ -245,7 +245,7 @@
       (cl/view-val ["hello" "echo"]))
   => (contains-in ["HELLO" integer?]))
 
-^{:refer js.cell/model-outputs :added "4.0"}
+^{:refer js.cell/model-outputs :added "4.0" :unchecked true}
 (fact "gets the model outputs"
   ^:hidden
   
@@ -253,20 +253,20 @@
   => (contains-in {"echo" {"current" ["HELLO" integer?],
                            "updated" integer?}}))
 
-^{:refer js.cell/model-vals :added "4.0"}
+^{:refer js.cell/model-vals :added "4.0" :unchecked true}
 (fact "gets model vals"
   ^:hidden
   
   (cl/model-vals "hello")
   => (contains-in {"echo" ["HELLO" integer?]}))
 
-^{:refer js.cell/model-is-errored :added "4.0"}
+^{:refer js.cell/model-is-errored :added "4.0" :unchecked true}
 (fact "checks if model has errored")
 
-^{:refer js.cell/model-is-pending :added "4.0"}
+^{:refer js.cell/model-is-pending :added "4.0" :unchecked true}
 (fact "checks if model is pending")
 
-^{:refer js.cell/add-model-attach :added "4.0"
+^{:refer js.cell/add-model-attach :added "4.0" :unchecked true
   :setup [(!.js
            (cl/GD-reset
             (cl/make-cell
@@ -294,7 +294,7 @@
    (cl/list-models))
   => ["hello0"])
 
-^{:refer js.cell/add-model :added "4.0"
+^{:refer js.cell/add-model :added "4.0" :unchecked true
   :setup [(!.js
            (cl/GD-reset
             (cl/make-cell
@@ -315,10 +315,10 @@
         "pre" [false],
         "::" "view.run"}]))
 
-^{:refer js.cell/remove-model :added "4.0"}
+^{:refer js.cell/remove-model :added "4.0" :unchecked true}
 (fact "removes a model from cell")
 
-^{:refer js.cell/model-update :added "4.0"
+^{:refer js.cell/model-update :added "4.0" :unchecked true
   :setup [(!.js
            (cl/GD-reset
             (cl/make-cell
@@ -356,7 +356,7 @@
         "pre" [false],
         "::" "view.run"}}))
 
-^{:refer js.cell/model-trigger :added "4.0"
+^{:refer js.cell/model-trigger :added "4.0" :unchecked true
   :setup [(fact:global :setup)
           (!.js
            (cl/GD-reset
@@ -377,10 +377,10 @@
   (cl/model-trigger "hello" "@/::HELLO" {})
   => ["echo"])
 
-^{:refer js.cell/view-success :added "4.0"}
+^{:refer js.cell/view-success :added "4.0" :unchecked true}
 (fact "gets the success value")
 
-^{:refer js.cell/view-val :added "4.0"
+^{:refer js.cell/view-val :added "4.0" :unchecked true
   :setup [(fact:global :setup)
           (!.js
            (cl/GD-reset
@@ -402,14 +402,14 @@
       (cl/view-val ["hello" "echo"]))
   => 1)
 
-^{:refer js.cell/view-get-input :added "4.0"}
+^{:refer js.cell/view-get-input :added "4.0" :unchecked true}
 (fact "gets the view input"
   ^:hidden
 
   (cl/view-get-input ["hello" "echo"])
   => map?)
 
-^{:refer js.cell/view-get-output :added "4.0"}
+^{:refer js.cell/view-get-output :added "4.0" :unchecked true}
 (fact "gets the view output"
   ^:hidden
   
@@ -420,7 +420,7 @@
   (cl/view-get-output ["hello" "WRONG"])
   => nil)
 
-^{:refer js.cell/view-set-val :added "4.0"}
+^{:refer js.cell/view-set-val :added "4.0" :unchecked true}
 (fact "sets the view val"
   ^:hidden
   
@@ -436,17 +436,17 @@
        "meta" {"listener/id" "oneshot", "listener/type" "cell"},
        "data" {"elapsed" nil, "current" 1, "updated" integer?}}))
 
-^{:refer js.cell/view-get-time-updated :added "4.0"}
+^{:refer js.cell/view-get-time-updated :added "4.0" :unchecked true}
 (fact "gets updated"
   ^:hidden
   
   (cl/view-get-time-updated ["hello" "echo"])
   => integer?)
 
-^{:refer js.cell/view-is-errored :added "4.0"}
+^{:refer js.cell/view-is-errored :added "4.0" :unchecked true}
 (fact "gets the errored flag for view")
 
-^{:refer js.cell/view-is-pending :added "4.0"}
+^{:refer js.cell/view-is-pending :added "4.0" :unchecked true}
 (fact "gets pending"
   ^:hidden
   
@@ -454,7 +454,7 @@
    (cl/view-is-pending ["hello" "echo"]))
   => false)
 
-^{:refer js.cell/view-get-time-elapsed :added "4.0"
+^{:refer js.cell/view-get-time-elapsed :added "4.0" :unchecked true
   :setup [(j/<!
            (cl/view-refresh ["hello" "echo"]))]}
 (fact "gets the elapsed time"
@@ -464,7 +464,7 @@
    (cl/view-get-time-elapsed ["hello" "echo"]))
   => integer?)
 
-^{:refer js.cell/view-set-input :added "4.0"}
+^{:refer js.cell/view-set-input :added "4.0" :unchecked true}
 (fact "sets the view input"
   ^:hidden
   
@@ -478,7 +478,7 @@
        "main" [true ["WORLD" integer?]],
        "pre" [false]}))
 
-^{:refer js.cell/view-refresh :added "4.0"
+^{:refer js.cell/view-refresh :added "4.0" :unchecked true
   :setup [(fact:global :setup)
           (!.js
            (cl/GD-reset
@@ -502,7 +502,7 @@
        "main" [true ["HELLO" integer?]],
        "pre" [false]}))
 
-^{:refer js.cell/view-update :added "4.0"}
+^{:refer js.cell/view-update :added "4.0" :unchecked true}
 (fact "updates the view"
   ^:hidden
   
@@ -514,14 +514,14 @@
        "main" [true ["HELLO" integer?]],
        "pre" [false]}))
 
-^{:refer js.cell/view-ensure :added "4.0"}
+^{:refer js.cell/view-ensure :added "4.0" :unchecked true}
 (fact "ensures view"
   ^:hidden
 
   (!.js (cl/view-ensure ["hello" "echo"]))
   => (contains [map? map?]))
 
-^{:refer js.cell/view-call-remote :added "4.0"}
+^{:refer js.cell/view-call-remote :added "4.0" :unchecked true}
 (fact "calls the remote function"
   ^:hidden
   
@@ -534,7 +534,7 @@
        "pre" [false],
        "remote" [false]})
 
-^{:refer js.cell/view-refresh-remote :added "4.0"}
+^{:refer js.cell/view-refresh-remote :added "4.0" :unchecked true}
 (fact "refreshes the remote function"
   ^:hidden
   
@@ -545,7 +545,7 @@
       "pre" [false],
       "remote" [false]})
 
-^{:refer js.cell/view-trigger :added "4.0"}
+^{:refer js.cell/view-trigger :added "4.0" :unchecked true}
 (fact "triggers the view with an event"
   ^:hidden
   
@@ -560,28 +560,28 @@
        "pre" [false],
        "::" "view.run"}))
 
-^{:refer js.cell/view-for :added "4.0"}
+^{:refer js.cell/view-for :added "4.0" :unchecked true}
 (fact "gets the view after update"
   ^:hidden
   
   (j/<! (cl/view-for ["hello" "echo"]))
   => (contains-in ["HELLO" integer?]))
 
-^{:refer js.cell/view-for-input :added "4.0"}
+^{:refer js.cell/view-for-input :added "4.0" :unchecked true}
 (fact "gets the view after setting input"
   ^:hidden
   
   (j/<! (cl/view-for-input ["hello" "echo"] {}))
   => (contains-in ["HELLO" integer?]))
 
-^{:refer js.cell/get-val :added "4.0"}
+^{:refer js.cell/get-val :added "4.0" :unchecked true}
 (fact "gets the subview"
   ^:hidden
   
   (first (cl/get-val ["hello" "echo"]))
   => "HELLO")
 
-^{:refer js.cell/get-for :added "4.0"}
+^{:refer js.cell/get-for :added "4.0" :unchecked true}
 (fact "gets the subview after update"
   ^:hidden
   
@@ -589,16 +589,16 @@
                     [0]))
   => "HELLO")
 
-^{:refer js.cell/nil-view :added "4.0"}
+^{:refer js.cell/nil-view :added "4.0" :unchecked true}
 (fact "sets view input to nil")
 
-^{:refer js.cell/nil-model :added "4.0"}
+^{:refer js.cell/nil-model :added "4.0" :unchecked true}
 (fact "sets all model inputs to nil")
 
-^{:refer js.cell/clear-listeners :added "4.0"}
+^{:refer js.cell/clear-listeners :added "4.0" :unchecked true}
 (fact "clears all listeners")
 
-^{:refer js.cell/add-listener :added "4.0"
+^{:refer js.cell/add-listener :added "4.0" :unchecked true
   :setup [(fact:global :setup)
           (!.js
            (cl/GD-reset
@@ -645,16 +645,16 @@
   => (contains-in
       {"meta" {"listener/id" "@react/1234", "listener/type" "cell"}}))
 
-^{:refer js.cell/remove-listener :added "4.0"}
+^{:refer js.cell/remove-listener :added "4.0" :unchecked true}
 (fact "removes a listener")
 
-^{:refer js.cell/list-listeners :added "4.0"}
+^{:refer js.cell/list-listeners :added "4.0" :unchecked true}
 (fact "lists view listeners")
 
-^{:refer js.cell/list-all-listeners :added "4.0"}
+^{:refer js.cell/list-all-listeners :added "4.0" :unchecked true}
 (fact "lists all listeners")
 
-^{:refer js.cell/add-raw-callback :added "4.0"
+^{:refer js.cell/add-raw-callback :added "4.0" :unchecked true
   :setup [(fact:global :setup)
           (!.js
            (cl/GD-reset
@@ -682,8 +682,8 @@
   (cl/remove-raw-callback "@/TEST")
   => vector?)
 
-^{:refer js.cell/remove-raw-callback :added "4.0"}
+^{:refer js.cell/remove-raw-callback :added "4.0" :unchecked true}
 (fact "removes a raw callback")
 
-^{:refer js.cell/list-raw-callbacks :added "4.0"}
+^{:refer js.cell/list-raw-callbacks :added "4.0" :unchecked true}
 (fact "lists all raw calllbacks")

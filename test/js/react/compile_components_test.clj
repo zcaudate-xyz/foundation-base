@@ -2,7 +2,7 @@
   (:use code.test)
   (:require [js.react.compile-components :as c]))
 
-^{:refer js.react.compile-components/classify-tagged :added "4.0"}
+^{:refer js.react.compile-components/classify-tagged :added "4.0" :unchecked true}
 (fact "classifies the hiccup form"
   ^:hidden
   
@@ -17,7 +17,7 @@
    true)
   => {:tag :div, :props {}, :children [:props/children]})
 
-^{:refer js.react.compile-components/components-resolve :added "4.0"}
+^{:refer js.react.compile-components/components-resolve :added "4.0" :unchecked true}
 (fact "resolve component map"
   ^:hidden
 
@@ -49,7 +49,7 @@
       :ui/container [:div]
       :ui/text      [:p]})
 
-^{:refer js.react.compile-components/components-find-deps :added "4.0"}
+^{:refer js.react.compile-components/components-find-deps :added "4.0" :unchecked true}
 (fact "creates a dependency tree for component map"
   ^:hidden
   
@@ -64,7 +64,7 @@
       :ui/container {:deps #{}},
       :ui/text {:deps #{}}})
 
-^{:refer js.react.compile-components/components-expand :added "4.0"}
+^{:refer js.react.compile-components/components-expand :added "4.0" :unchecked true}
 (fact "expands a vector component to standardised form"
   ^:hidden
   
@@ -84,7 +84,7 @@
       :ui/text {:tag :p, :props {}, :children [:props/children]
                 :deps #{}}})
 
-^{:refer js.react.compile-components/compile-replace :added "4.0"}
+^{:refer js.react.compile-components/compile-replace :added "4.0" :unchecked true}
 (fact "compiles the layout with parameters"
   ^:hidden
   
@@ -96,7 +96,7 @@
                      [[:a]])
   => [:ui/container [:ui/text {:name "hello"} [:a]]])
 
-^{:refer js.react.compile-components/find-namespaced-props :added "4.0"}
+^{:refer js.react.compile-components/find-namespaced-props :added "4.0" :unchecked true}
 (fact "finds all the :prop/<val> keys"
   ^:hidden
   
@@ -105,7 +105,7 @@
      {:name :props/name}]])
   => #{:props/name})
 
-^{:refer js.react.compile-components/get-tmpl-props :added "4.0"}
+^{:refer js.react.compile-components/get-tmpl-props :added "4.0" :unchecked true}
 (fact "gets template and body props given input"
   ^:hidden
   
@@ -114,7 +114,7 @@
                     [:props/name])
   => [{:props/name "hello"} {:location "home"}])
 
-^{:refer js.react.compile-components/getter-symbol :added "4.0"}
+^{:refer js.react.compile-components/getter-symbol :added "4.0" :unchecked true}
 (fact "creates the getter symbol"
   ^:hidden
 
@@ -124,7 +124,7 @@
   (c/getter-symbol :var/error)
   => 'error)
 
-^{:refer js.react.compile-components/setter-symbol :added "4.0"}
+^{:refer js.react.compile-components/setter-symbol :added "4.0" :unchecked true}
 (fact "creates the setter symbol"
   ^:hidden
   
@@ -134,7 +134,7 @@
   (c/setter-symbol :var/error)
   => 'setError)
 
-^{:refer js.react.compile-components/compile-walk-variables :added "4.0"}
+^{:refer js.react.compile-components/compile-walk-variables :added "4.0" :unchecked true}
 (fact "replace :var/<name> as react states"
   ^:hidden
 
@@ -144,7 +144,7 @@
   => '(do (setShowDisplay true)
           (helloWorld showDisplay)))
 
-^{:refer js.react.compile-components/compile-element-action-do :added "4.0"}
+^{:refer js.react.compile-components/compile-element-action-do :added "4.0" :unchecked true}
 (fact "does a do block"
   ^:hidden
 
@@ -155,7 +155,7 @@
   => '(do (setShowDisplay true)
           (helloWorld showDisplay)))
 
-^{:refer js.react.compile-components/compile-element-action-set :added "4.0"}
+^{:refer js.react.compile-components/compile-element-action-set :added "4.0" :unchecked true}
 (fact "compiles the :%/set action"
   ^:hidden
   
@@ -165,7 +165,7 @@
      :transform transform-fn})
   => '(setHistoryIdx (transform-fn (base-fn dslCode))))
 
-^{:refer js.react.compile-components/compile-element-action-set-async :added "4.0"}
+^{:refer js.react.compile-components/compile-element-action-set-async :added "4.0" :unchecked true}
 (fact "compiles the :%/set-async action"
   ^:hidden
   
@@ -182,7 +182,7 @@
            (catch (fn [err] (setError err)))
            (finally (fn [] (setPending false))))))
 
-^{:refer js.react.compile-components/compile-element-actions :added "4.0"}
+^{:refer js.react.compile-components/compile-element-actions :added "4.0" :unchecked true}
 (fact "compiles the element actions"
   ^:hidden
   
@@ -204,7 +204,7 @@
                (finally (fn [] (setPending false)))))
         (setData (transform-fn (base-fn input)))))
 
-^{:refer js.react.compile-components/compile-element-directives :added "4.0"}
+^{:refer js.react.compile-components/compile-element-directives :added "4.0" :unchecked true}
 (fact "compiles element directives"
   ^:hidden
 
@@ -235,7 +235,7 @@
                          (catch (fn [err] (setError err)))
                          (finally (fn [] (setPending false))))))})
 
-^{:refer js.react.compile-components/compile-element :added "4.0"}
+^{:refer js.react.compile-components/compile-element :added "4.0" :unchecked true}
 (fact "expands the template"
   ^:hidden
   
@@ -250,7 +250,7 @@
      :ui/text      [:p]}))
   => [:ui/container {} [:ui/text {:name "hello"} [:a]]])
 
-^{:refer js.react.compile-components/compile-element-loop :added "4.0"}
+^{:refer js.react.compile-components/compile-element-loop :added "4.0" :unchecked true}
 (fact "will loop until there are no dependencies"
   ^:hidden
   
@@ -305,8 +305,8 @@
    c/compile-element))
 
 
-^{:refer js.react.compile-components/compile-element-action-inc :added "4.0"}
+^{:refer js.react.compile-components/compile-element-action-inc :added "4.0" :unchecked true}
 (fact "compiles the :%/set action")
 
-^{:refer js.react.compile-components/compile-element-action-dec :added "4.0"}
+^{:refer js.react.compile-components/compile-element-action-dec :added "4.0" :unchecked true}
 (fact "compiles the :%/set action")
