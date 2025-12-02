@@ -1,9 +1,9 @@
 (ns std.lang.model.spec-haskell-test
+  (:use code.test)
   (:require [std.lang :as l]
             [std.lib :as h]
             [std.lang.base.script :as script]
-            [std.lang.model.spec-haskell :as spec-haskell]
-            [code.test :as t]))
+            [std.lang.model.spec-haskell :as spec-haskell]))
 
 (script/install spec-haskell/+book+)
 
@@ -11,7 +11,7 @@
   {:runtime :default
    :config {:book spec-haskell/+book+}})
 
-(t/fact "basic emit"
+(fact "basic emit"
   (l/emit-script '(defn hello [x] x) {:lang :haskell})
   => "hello x = x"
 
@@ -41,15 +41,14 @@
   (l/emit-as :haskell ['[1 2 3]])
   => "[1,2,3]")
 
-(t/fact "types emit"
+(fact "types emit"
   (l/emit-as :haskell ['[:> List Int]])
   => "List Int"
 
   (l/emit-as :haskell ['[:> Map String Int]])
-  => "Map String Int"
-  )
+  => "Map String Int")
 
-(t/fact "defn with type hint"
+(fact "defn with type hint"
   (l/emit-script '(defn ^Int add [^Int x ^Int y] (+ x y)) {:lang :haskell})
   => "add :: Int -> Int -> Int\nadd x y = x + y")
 

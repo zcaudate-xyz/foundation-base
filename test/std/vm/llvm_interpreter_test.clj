@@ -6,7 +6,6 @@
             [std.lib :as h]
             [std.string :as str]))
 
-
 ^{:refer std.vm.llvm-interpreter/block-zip :added "4.0"}
 (fact "creates a zipper for the block"
   (llvm/block-zip (parse/parse-string "(a b c)"))

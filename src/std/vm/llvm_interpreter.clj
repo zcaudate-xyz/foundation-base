@@ -1,5 +1,6 @@
 (ns std.vm.llvm-interpreter
   (:require [std.block.base :as base]
+            [std.block.type :as type]
             [std.block.construct :as construct]
             [std.block.check :as check]
             [std.block.parse :as parse]

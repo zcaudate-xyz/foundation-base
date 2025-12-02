@@ -100,7 +100,7 @@
    (def foo [x]
      (+ x 1)))
   => "def foo(x): x + 1;"
-
+  
   (!.jq
    (| . foo))
   => ". | foo"

@@ -10,7 +10,9 @@
             [std.lang.base.script-control :as control]
             [std.lang.base.script-lint :as lint]
             [std.lang.base.pointer :as ptr]
-	    [std.lib :as h]))
+            [std.lang.base.runtime :as rt]
+            [std.protocol.context :as protocol.context]
+            [std.lib :as h]))
 
 (def +form-allow+ [:line :column :file :name :ns])
 
@@ -138,7 +140,10 @@
   "interns a free pointer macro"
   {:added "4.0"}
   [lang args {:keys [input raw debug clip] :as meta}]
-  (let [{:keys [module] :as rt} (ut/lang-rt lang)]
+  (let [rt (ut/lang-rt lang)
+        {:keys [module] :as rt} (if (satisfies? protocol.context/IContext rt)
+                                  rt
+                                  (rt/rt-default rt))]
     (call-thunk meta
                 (fn []
                   (h/p:rt-invoke-ptr
@@ -213,6 +218,9 @@
                                                       smeta))
                                 entry)
          rt     (ut/lang-rt-default @var)
+         rt     (if (satisfies? protocol.context/IContext rt)
+                  rt
+                  (rt/rt-default rt))
          _      (lib/add-entry-single! lib entry)
          _      (comment "TODO: USE BULK ENTRY ADD"
                   (if (= :single (:lang/add-entry rt))
