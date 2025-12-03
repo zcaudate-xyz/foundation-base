@@ -79,14 +79,14 @@
   "calculates the sha1"
   {:added "4.0"}
   ([text]
-   (list 'encode (list 'digest (:bytea text) "sha1") "hex")))
+   (list 'encode (list 'public.digest (:bytea text) "sha1") "hex")))
 
 (defmacro.pg ^{:- [:block]}
   client-list
   "gets the client list for pg"
   {:added "4.0"}
   []
-  [:select * :from 'pg_stat_activity])
+  [:select '* :from 'pg_stat_activity])
 
 ;;
 ;; time

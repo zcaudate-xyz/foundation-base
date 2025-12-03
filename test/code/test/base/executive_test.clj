@@ -85,7 +85,7 @@
                 executive/interim (fn [_] {})
                 rt/get-global (fn [& _] nil)]
     (executive/test-namespace 'my.ns {} (fn [_] "path") {:root "."}))
-  => {})
+  => '{:queued ()})
 
 ^{:refer code.test.base.executive/run-namespace :added "3.0"}
 (fact "loads and run the namespace"

@@ -74,7 +74,9 @@
 ;; 
 
 (def +client-basic+
-  '[(:- :import net :from "'net'")
+  '[(:- :import #{createRequire} :from "'module'")
+    (var require (createRequire (. import.meta url)))
+    (:- :import net :from "'net'")
     (:- :import rl :from "'readline'")
     (defn client-basic
       [host port opts]
