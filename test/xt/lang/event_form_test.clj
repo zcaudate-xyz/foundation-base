@@ -349,13 +349,13 @@
 (fact "gets the data")
 
 ^{:refer xt.lang.event-form/set-data :added "4.0"
-  :setup (def +out+
-           {"type" "form.data",
-            "fields" ["login"],
-            "meta"
-            {"listener/id" "a1",
-             "form/fields" ["login"],
-             "listener/type" "form"}})}
+  :setup [(def +out+
+            {"type" "form.data",
+             "fields" ["login"],
+             "meta"
+             {"listener/id" "a1",
+              "form/fields" ["login"],
+              "listener/type" "form"}})]}
 (fact "sets the data directly"
   ^:hidden
   

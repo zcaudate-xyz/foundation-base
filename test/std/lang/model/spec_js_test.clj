@@ -23,10 +23,10 @@
   ^:hidden
   
   (js-map-key 'hello +grammar+ {})
-  => "hello"
-
-  (js-map-key '[hello] +grammar+ {})
   => "[hello]"
+
+  (js-map-key '(+ hello world) +grammar+ {})
+  => "[(+ hello world)]"
 
   (js-map-key :hello +grammar+ {})
   => "\"hello\""
@@ -59,10 +59,10 @@
 (fact "emits a js set"
   ^:hidden
 
-  (js-set '#{...x y {a 1 :b 2}} +grammar+ {})
-  => "{...x,y,a:1,\"b\":2}"
+  (js-set '#{...x y {:a 1 :b 2}} +grammar+ {})
+  => "{...x,y,\"a\":1,\"b\":2}"
   
-  (js-set '#{...x y {[a] 1 :b 2}} +grammar+ {})
+  (js-set '#{...x y {a 1 :b 2}} +grammar+ {})
   => "{...x,y,[a]:1,\"b\":2}"
 
   (js-set '#{[...x y (% a) 1 :b 2]} +grammar+ {})

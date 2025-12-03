@@ -25,10 +25,7 @@
              [xt.db.sample-test :as sample]]})
 
 (fact:global
- {:setup    [(l/rt:restart)
-             (l/rt:scaffold :js)
-             (l/rt:scaffold :lua)
-             (l/rt:scaffold :python)]
+ {:setup    [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
 
 ^{:refer xt.db.base-flatten/flatten-get-links :added "4.0"}
@@ -36,7 +33,7 @@
   ^:hidden
   
   (!.js
-   (f/flatten-get-links {:currencies [{:id "hello"}]}))
+    (f/flatten-get-links {:currencies [{:id "hello"}]}))
   => {"currencies" {"hello" true}}
 
   (!.lua
@@ -86,12 +83,12 @@
   ^:hidden
 
   (set (!.js
-       (var out (f/flatten-node sample/Schema
-                                "UserAccount"
-                                sample/RootUserFull
-                                {}
-                                {}))
-       (k/obj-keys out)))
+           (var out (f/flatten-node sample/Schema
+                                    "UserAccount"
+                                    sample/RootUserFull
+                                    {}
+                                    {}))
+           (k/obj-keys out)))
   => #{"table_map" "data_obj" "ref_obj" "rev_obj"}
 
   (set (!.lua

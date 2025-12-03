@@ -37,7 +37,11 @@
   "emits a map key"
   {:added "4.0"}
   ([key grammar mopts]
-   (data/default-map-key key grammar mopts)))
+   (cond (keyword? key)
+         (data/default-map-key key grammar mopts)
+
+         :else
+         (str "[" (common/*emit-fn* key grammar mopts) "]"))))
 
 (defn js-vector
   "emits a js vector"

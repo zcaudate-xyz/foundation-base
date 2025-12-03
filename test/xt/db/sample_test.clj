@@ -7,8 +7,7 @@
             [rt.postgres :as pg]))
 
 (l/script :xtalk
-  {:require [[xt.lang.base-lib :as k]]
-   :export [MODULE]})
+  {:require [[xt.lang.base-lib :as k]]})
 
 (def +currency+
   [{:description "Default Currency for Statstrade",
@@ -65,7 +64,7 @@
     :decimal -1,
     :id "XLM"}])
 
-(defglobal.xt RootUser
+(def.xt RootUser
   {:is-super true,
    :is-suspended false,
    :is-official false,
@@ -100,7 +99,7 @@
      :about nil
      :detail {:hello "world"}}]})
 
-(defglobal.xt RootUserFull
+(def.xt RootUserFull
   {:is-super true,
    :is-suspended false,
    :notification
@@ -196,16 +195,14 @@
 (def +tree+
   (pg/bind-schema (:schema +app+)))
 
-(defglobal.xt Schema
+(def.xt Schema
   (@! +tree+))
 
-(defglobal.xt SchemaCurrency
+(def.xt SchemaCurrency
   (@! {"Currency" (get-in +tree+ ["Currency"])}))
 
-(defglobal.xt SchemaLookup
+(def.xt SchemaLookup
   (@! (pg/bind-app +app+)))
-
-(def.xt MODULE (!:module))
 
 (comment
   (keys +app+)

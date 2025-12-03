@@ -30,11 +30,11 @@
 ^{:refer xt.lang.event-route/interim-from-url :added "4.0"}
 (fact "creates interim from url"
   ^:hidden
-  
+
   (!.js
-   [(route/interim-from-url "hello/world?id=1&type=name")
-    (route/interim-from-url "?id=1")
-    (route/interim-from-url "hello?")])
+    [(route/interim-from-url "hello/world?id=1&type=name")
+     (route/interim-from-url "?id=1")
+     (route/interim-from-url "hello?")])
   => [{"params" {"[\"hello\",\"world\"]" {"id" "1", "type" "name"}},
        "path" ["hello" "world"]}
       {"params" {"[]" {"id" "1"}}, "path" []}
