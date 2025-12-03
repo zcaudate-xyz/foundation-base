@@ -3,7 +3,7 @@
             [std.lib :as h]
             [std.lang :as l]
             [std.fs :as fs]
-            [code.heal :as heal]
+            [std.block.heal.core :as heal]
             [std.text.diff :as diff]))
 
 (def.make CODE_DEV

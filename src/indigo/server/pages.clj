@@ -9,7 +9,18 @@
             [indigo.client.page-tasks :as page-tasks]
             [std.lang.base.runtime :as default]))
 
-
+(defn emit-main
+  [main-ns]
+  (l/emit-script
+   (list (symbol (str main-ns "/main")))
+   {:lang :js
+    :library (l/default-library)
+    :module  (l/get-module (l/default-library)
+                           :js
+                           main-ns)
+    :emit { ;;:native {:suppress true}
+           :lang/jsx false}
+    :layout :full}))
 
 
 (defn make-page
