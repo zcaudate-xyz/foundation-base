@@ -187,19 +187,19 @@
   => [true false false false]
 
   (!.js
-   (var eq-fn (fn:> [a b] (== a b)))
-   [(it/iter-eq (it/iter [1 2 4 4])
-                (it/iter [1 2 4 4])
-                eq-fn)
-    (it/iter-eq (it/iter [1 2 4 4])
-                (it/iter [1 2 3 4])
-                eq-fn)
-    (it/iter-eq (it/iter [1 2 4])
-                (it/iter [1 2 4 4])
-                eq-fn)
-    (it/iter-eq (it/iter [1 2 4 4])
-                (it/iter [1 2 4])
-                eq-fn)])
+      (var eq-fn (fn:> [a b] (== a b)))
+      [(it/iter-eq (it/iter [1 2 4 4])
+                   (it/iter [1 2 4 4])
+                   eq-fn)
+       (it/iter-eq (it/iter [1 2 4 4])
+                   (it/iter [1 2 3 4])
+                   eq-fn)
+       (it/iter-eq (it/iter [1 2 4])
+                   (it/iter [1 2 4 4])
+                   eq-fn)
+       (it/iter-eq (it/iter [1 2 4 4])
+                   (it/iter [1 2 4])
+                   eq-fn)])
   => [true false false false]
   
   (!.py

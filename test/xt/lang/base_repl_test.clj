@@ -236,7 +236,7 @@
             nil
             {}))))
   => "hello"
-
+  
   (notify/wait-on-call
    (fn [] (!.lua
            (k/notify-socket-http
@@ -260,15 +260,15 @@
 ^{:refer xt.lang.base-repl/notify-http :added "4.0"}
 (fact "call a http notify function."
   ^:hidden
-  
+
   (notify/wait-on-call
    (fn [] (!.js
-           (:= (!:G fetch) (require "node-fetch"))
-           (k/notify-http "127.0.0.1" (@! (:http-port (l/default-notify)))
-                          "hello"
-                          (@! notify/*override-id*)
-                          nil
-                          {}))))
+            (:= (!:G fetch) (. (require "node-fetch") default))
+            (k/notify-http "127.0.0.1" (@! (:http-port (l/default-notify)))
+                           "hello"
+                           (@! notify/*override-id*)
+                           nil
+                           {}))))
   => "hello"
 
   (notify/wait-on-call
@@ -302,7 +302,7 @@
 ^{:refer xt.lang.base-repl/notify :added "4.0"}
 (fact "sends a message to the notify server"
   ^:hidden
-  
+
   (notify/wait-on :js
     (k/notify 1))
   => 1

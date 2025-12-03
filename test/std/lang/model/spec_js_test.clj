@@ -29,7 +29,10 @@
   => "[hello]"
 
   (js-map-key :hello +grammar+ {})
-  => "\"hello\"")
+  => "\"hello\""
+
+  (js-map-key :hello-world +grammar+ {})
+  => "\"hello_world\"")
 
 ^{:refer std.lang.model.spec-js/js-vector :added "4.0"}
 (fact "emits a js vector"
@@ -40,6 +43,17 @@
 
   (js-vector [:div {} "hello"] +grammar+ {})
   => "(\n  <div>hello</div>)")
+
+^{:refer std.lang.model.spec-js/js-map :added "4.0"}
+(fact "emits a js map"
+  ^:hidden
+
+  (js-map {:hello-world "hello"} +grammar+ {})
+  => "{\"hello_world\":\"hello\"}"
+
+  (l/emit-as :js
+             '[{:# [hello-world]}])
+  => "{hello_world}")
 
 ^{:refer std.lang.model.spec-js/js-set :added "4.0"}
 (fact "emits a js set"
@@ -53,7 +67,6 @@
 
   (js-set '#{[...x y (% a) 1 :b 2]} +grammar+ {})
   => "(tab ...x y (% a) 1 :b 2)")
-
 
 ^{:refer std.lang.model.spec-js/js-defclass :added "4.0"}
 (fact "creates a defclass function"
@@ -171,7 +184,3 @@
          (then (fn [ok] (return ok)))
          (catch (fn [err] (return err)))
          (finally (fn [] (return true)))))
-
-
-^{:refer std.lang.model.spec-js/js-map :added "4.0"}
-(fact "emits a js map")

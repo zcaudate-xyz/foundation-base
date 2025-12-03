@@ -58,7 +58,8 @@
         syms (get m ':#)
         out-syms  (map #(common/*emit-fn* % grammar mopts)
                        syms)
-        out-keys  (map #(data/emit-data :map-entry % grammar mopts)
+        out-keys  (map (fn [pair]
+                         (data/emit-map-entry pair grammar mopts))
                        (dissoc m :# :..))
         out-rest  (if rest
                     (map #(str "..."
@@ -71,18 +72,6 @@
     (data/emit-coll-layout :map common/*indent*
                            (concat out-syms out-keys out-rest)
                            grammar mopts)))
-
-(comment
-  (std.lang/emit-script
-   '{:# [hello]
-     :c d
-     :.. hello}
-   {:lang :js})
-
-  (comment
-
-    '{:# [className]
-      :.. props}))
 
 (defn js-set
   "emits a js set"
@@ -284,7 +273,8 @@
         :block    {:for       {:parameter {:sep ";"}}}
         :data     {:vector    {:custom #'js-vector}
                    :set       {:custom #'js-set}
-                   :map       {:custom #'js-map}}
+                   :map       {:custom #'js-map}
+                   :map-entry {:key-fn #'js-map-key}}
         :function {:defgen    {:raw "function*"}
                    :fn.inner  {:raw ""}}
         :define   {:defglobal {:raw ""}

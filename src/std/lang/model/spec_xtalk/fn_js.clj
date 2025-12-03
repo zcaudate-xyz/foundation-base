@@ -192,7 +192,7 @@
   "converts map to array"
   {:added "4.0"}
   ([[_ lu obj]]
-   (h/$ (. ~lu (del ~obj)))))
+   (h/$ (. ~lu (delete ~obj)))))
 
 (def +js-lu+
   {:x-lu-create      {:default '(new WeakMap)}
@@ -479,7 +479,7 @@
 
 (defn js-tf-x-iter-eq
   ([[_ it0 it1 eq-fn]]
-   (h/$ (do (for [x0 :of ~it0]
+   (h/$ (do (for [:let x0 :of ~it0]
               (var r1 (. ~it1 (next)))
               (cond (. r1 done)
                     (return false)

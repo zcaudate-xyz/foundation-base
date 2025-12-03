@@ -14,7 +14,7 @@
   {:require-impl [js.core.impl
                   js.core.fetch]
    :import [["util"   :as NodeUtil]
-            ["node-fetch" :as NodeFetch]
+            ["node-fetch" :as [* NodeFetch]]
             ["uuid" :as [* UUID]]]})
 
 (h/intern-all js.core.impl)
@@ -26,7 +26,7 @@
              js.core.fetch/toPrint)
 
 (def$.js NodeUtil NodeUtil)
-(def$.js NodeFetch NodeFetch)
+(def$.js NodeFetch NodeFetch.default)
 
 ;;
 ;; node
