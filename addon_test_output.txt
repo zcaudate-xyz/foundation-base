@@ -1,0 +1,162 @@
+Reflection warning, /private/var/folders/1t/81x6sszx3tl2q7kz2g1681c80000gn/T/form-init1314914279708995235.clj:1:1001 - call to static method invokeStaticMethod on clojure.lang.Reflector can't be resolved (argument types: unknown, java.lang.String, unknown).
+Reflection warning, clojure/tools/reader.clj:1025:74 - call to method setLength can't be resolved (target class is unknown).
+Reflection warning, clojure/tools/reader.clj:1030:74 - call to method setLength can't be resolved (target class is unknown).
+[1;31m  FAILED[0m[1;31m  L:68 @ test/rt/postgres/script/addon_test.clj[0m
+[31m   Desc:[0m  [m"calculates the sha1"[0m
+[31m   Form:[0m  [34m([0maddon/sha1 "hello"[34m)[0m
+[31m  Check:[0m  aaf4c61ddcc5e8a2dabede0f3b482cd9aea9434d
+[1;31m  OUTPUT[0m  nil
+[1;31m     ###[0m  [1;31mrt.postgres.script.addon/sha1[0m
+
+[1;31m  FAILED[0m[1;31m  L:75 @ test/rt/postgres/script/addon_test.clj[0m
+[31m   Desc:[0m  [m"gets the client list for pg"[0m
+[31m   Form:[0m  [34m([0mcount [35m([0maddon/client-list[35m)[0m[34m)[0m
+[31m  Check:[0m  pos?
+[1;31m  OUTPUT[0m  #error {
+           :cause "Not Valid"
+           :data {:input #object[clojure.core$_STAR_ 0x4c9f442e "clojure.core$_STAR_@4c9f442e"], :type clojure.core$_STAR_}
+           :via
+           [{:type clojure.lang.ExceptionInfo
+             :message "Not Valid"
+             :data {:input #object[clojure.core$_STAR_ 0x4c9f442e "clojure.core$_STAR_@4c9f442e"], :type clojure.core$_STAR_}
+             :at [std.lang.base.emit_helper$form_key_base invokeStatic "emit_helper.clj" 126]}]
+           :trace
+           [[std.lang.base.emit_helper$form_key_base invokeStatic "emit_helper.clj" 126]
+            [std.lang.base.emit_helper$form_key_base invoke "emit_helper.clj" 98]
+            [std.lang.base.emit_common$form_key invokeStatic "emit_common.clj" 851]
+            [std.lang.base.emit_common$form_key invoke "emit_common.clj" 847]
+            [std.lang.base.emit_common$emit_common_loop invokeStatic "emit_common.clj" 888]
+            [std.lang.base.emit_common$emit_common_loop invoke "emit_common.clj" 874]
+            [std.lang.base.emit$emit_main_loop invokeStatic "emit.clj" 40]
+            [std.lang.base.emit$emit_main_loop invoke "emit.clj" 31]
+            [rt.postgres.grammar.form_vec$pg_section_fn invokeStatic "form_vec.clj" 133]
+            [rt.postgres.grammar.form_vec$pg_section_fn invoke "form_vec.clj" 105]
+            [rt.postgres.grammar.form_vec$pg_section$fn__24153 invoke "form_vec.clj" 147]
+[1;31m     ###[0m  [1;31mrt.postgres.script.addon/client-list[0m
+
+[1;31m  FAILED[0m[1;31m  L:97 @ test/rt/postgres/script/addon_test.clj[0m
+[31m   Desc:[0m  [m"raises a json exception"[0m
+[31m   Form:[0m  [34m([0maddon/throw [35m{[0m:a 1[35m}[0m[34m)[0m
+[31m  Check:[0m  RAISE EXCEPTION USING
+  DETAIL = (jsonb_build_object('a',1))::TEXT,
+  MESSAGE = 'nil'
+[1;31m  OUTPUT[0m  "RAISE EXCEPTION USING DETAIL = (jsonb_build_object('a',1))::TEXT,MESSAGE = 'nil'"
+[1;31m     ###[0m  [1;31mrt.postgres.script.addon/throw[0m
+
+[1;31m  FAILED[0m[1;31m  L:190 @ test/rt/postgres/script/addon_test.clj[0m
+[31m   Desc:[0m  [m"gets random enum"[0m
+[31m   Form:[0m  [34m([0mkeyword
+             [35m([0maddon/random-enum
+              scratch/EnumStatus[35m)[0m[34m)[0m
+[31m  Check:[0m  #{:pending :success :error}
+[1;31m  OUTPUT[0m  #error {
+           :cause "type \"scratch.EnumStatus\" does not exist"
+           :via
+           [{:type com.impossibl.postgres.jdbc.PGSQLSimpleException
+             :message "type \"scratch.EnumStatus\" does not exist"
+             :at [com.impossibl.postgres.jdbc.ErrorUtils makeSQLException "ErrorUtils.java" 197]}]
+           :trace
+           [[com.impossibl.postgres.jdbc.ErrorUtils makeSQLException "ErrorUtils.java" 197]
+            [com.impossibl.postgres.jdbc.ErrorUtils makeSQLException "ErrorUtils.java" 174]
+            [com.impossibl.postgres.jdbc.ErrorUtils makeSQLException "ErrorUtils.java" 161]
+            [com.impossibl.postgres.jdbc.PGDirectConnection execute "PGDirectConnection.java" 514]
+            [com.impossibl.postgres.jdbc.PGPreparedStatement lambda$parseIfNeeded$3 "PGPreparedStatement.java" 289]
+            [com.impossibl.postgres.jdbc.PGDirectConnection getCachedPreparedStatement "PGDirectConnection.java" 1608]
+            [com.impossibl.postgres.jdbc.PGPreparedStatement parseIfNeeded "PGPreparedStatement.java" 284]
+            [com.impossibl.postgres.jdbc.PGPreparedStatement execute "PGPreparedStatement.java" 329]
+            [com.impossibl.postgres.jdbc.PGPreparedStatement executeQuery "PGPreparedStatement.java" 357]
+            [com.impossibl.postgres.jdbc.PGPreparedStatement executeQuery "PGPreparedStatement.java" 106]
+            [com.impossibl.postgres.jdbc.PGPreparedStatementDelegator executeQuery "PGPreparedStatementDelegator.java" 135]
+            [lib.jdbc.impl$eval27676$fn__27677 invoke "impl.clj" 147]
+            [lib.jdbc.protocol$eval27386$fn__27387$G__27377__27396 invoke "protocol.clj" 15]
+[1;31m     ###[0m  [1;31mrt.postgres.script.addon/random-enum[0m
+
+DEBUG: coord result: ["scratch" "Task" "id"]
+[1;31m  FAILED[0m[1;31m  L:216 @ test/rt/postgres/script/addon_test.clj[0m
+[31m   Desc:[0m  [m"gets the coordinate of a row"[0m
+[31m   Form:[0m  [34m([0mlet [35m[[0mres [32m([0mmapv str
+                            [31m([0maddon/coord scratch/Task
+                                         "id"[31m)[0m[32m)[0m[35m][0m
+              [35m([0mprintln "DEBUG: coord result:"
+                [32m([0mpr-str res[32m)[0m[35m)[0m
+              res[34m)[0m
+[31m  Check:[0m  ["jsonb-build-array" "scratch" "Task" "id"]
+[1;31m   Diff:[0m      [31m-[0m at 0: 1 items
+[1;31m     ###[0m  [1;31mrt.postgres.script.addon/coord[0m
+
+[1;31m  FAILED[0m[1;31m  L:68 @ test/rt/postgres/script/addon_test.clj[0m
+[31m   Desc:[0m  [m"calculates the sha1"[0m
+[31m   Form:[0m  [34m([0maddon/sha1 "hello"[34m)[0m
+[31m  Check:[0m  aaf4c61ddcc5e8a2dabede0f3b482cd9aea9434d
+[1;31m  OUTPUT[0m  nil
+[1;31m     ###[0m  [1;31mrt.postgres.script.addon/sha1[0m
+
+[1;31m  FAILED[0m[1;31m  L:75 @ test/rt/postgres/script/addon_test.clj[0m
+[31m   Desc:[0m  [m"gets the client list for pg"[0m
+[31m   Form:[0m  [34m([0mcount [35m([0maddon/client-list[35m)[0m[34m)[0m
+[31m  Check:[0m  pos?
+[1;31m  OUTPUT[0m  #error {
+           :cause "Not Valid"
+           :data {:input #object[clojure.core$_STAR_ 0x4c9f442e "clojure.core$_STAR_@4c9f442e"], :type clojure.core$_STAR_}
+           :via
+           [{:type clojure.lang.ExceptionInfo
+             :message "Not Valid"
+             :data {:input #object[clojure.core$_STAR_ 0x4c9f442e "clojure.core$_STAR_@4c9f442e"], :type clojure.core$_STAR_}
+             :at [std.lang.base.emit_helper$form_key_base invokeStatic "emit_helper.clj" 126]}]
+           :trace
+           [[std.lang.base.emit_helper$form_key_base invokeStatic "emit_helper.clj" 126]
+            [std.lang.base.emit_helper$form_key_base invoke "emit_helper.clj" 98]
+            [std.lang.base.emit_common$form_key invokeStatic "emit_common.clj" 851]
+            [std.lang.base.emit_common$form_key invoke "emit_common.clj" 847]
+            [std.lang.base.emit_common$emit_common_loop invokeStatic "emit_common.clj" 888]
+            [std.lang.base.emit_common$emit_common_loop invoke "emit_common.clj" 874]
+            [std.lang.base.emit$emit_main_loop invokeStatic "emit.clj" 40]
+            [std.lang.base.emit$emit_main_loop invoke "emit.clj" 31]
+            [rt.postgres.grammar.form_vec$pg_section_fn invokeStatic "form_vec.clj" 133]
+            [rt.postgres.grammar.form_vec$pg_section_fn invoke "form_vec.clj" 105]
+            [rt.postgres.grammar.form_vec$pg_section$fn__24153 invoke "form_vec.clj" 147]
+[1;31m     ###[0m  [1;31mrt.postgres.script.addon/client-list[0m
+
+[1;31m  FAILED[0m[1;31m  L:97 @ test/rt/postgres/script/addon_test.clj[0m
+[31m   Desc:[0m  [m"raises a json exception"[0m
+[31m   Form:[0m  [34m([0maddon/throw [35m{[0m:a 1[35m}[0m[34m)[0m
+[31m  Check:[0m  RAISE EXCEPTION USING
+  DETAIL = (jsonb_build_object('a',1))::TEXT,
+  MESSAGE = 'nil'
+[1;31m  OUTPUT[0m  "RAISE EXCEPTION USING DETAIL = (jsonb_build_object('a',1))::TEXT,MESSAGE = 'nil'"
+[1;31m     ###[0m  [1;31mrt.postgres.script.addon/throw[0m
+
+[1;31m  FAILED[0m[1;31m  L:216 @ test/rt/postgres/script/addon_test.clj[0m
+[31m   Desc:[0m  [m"gets the coordinate of a row"[0m
+[31m   Form:[0m  [34m([0mlet [35m[[0mres [32m([0mmapv str
+                            [31m([0maddon/coord scratch/Task
+                                         "id"[31m)[0m[32m)[0m[35m][0m
+              [35m([0mprintln "DEBUG: coord result:"
+                [32m([0mpr-str res[32m)[0m[35m)[0m
+              res[34m)[0m
+[31m  Check:[0m  ["jsonb-build-array" "scratch" "Task" "id"]
+[1;31m   Diff:[0m      [31m-[0m at 0: 1 items
+[1;31m     ###[0m  [1;31mrt.postgres.script.addon/coord[0m
+
+[1;33m   THROW[0m[1;33m  L:75 @ test/rt/postgres/script/addon_test.clj[0m
+[33m   Desc:[0m  [m"gets the client list for pg"[0m
+[33m   Form:[0m  [34m([0mcount [35m([0maddon/client-list[35m)[0m[34m)[0m
+[1;33m   ERROR[0m  nil
+[1;33m     ###[0m  [1;33mrt.postgres.script.addon/client-list[0m
+
+[1;33m   THROW[0m[1;33m  L:190 @ test/rt/postgres/script/addon_test.clj[0m
+[33m   Desc:[0m  [m"gets random enum"[0m
+[33m   Form:[0m  [34m([0mkeyword
+             [35m([0maddon/random-enum
+              scratch/EnumStatus[35m)[0m[34m)[0m
+[1;33m   ERROR[0m  nil
+[1;33m     ###[0m  [1;33mrt.postgres.script.addon/random-enum[0m
+
+[1;34mSummary (1)[0m
+[37m  Files:[0m  [34m1[0m
+[37m  Facts:[0m  [34m30[0m
+[37m Thrown:[0m  [33m2[0m
+[37m Failed:[0m  [31m4[0m
+[1mSuccess:[0m  [1;31m26 of 31[0m 
+
+

@@ -1,0 +1,46 @@
+Reflection warning, /private/var/folders/1t/81x6sszx3tl2q7kz2g1681c80000gn/T/form-init11852063109662187124.clj:1:994 - call to static method invokeStaticMethod on clojure.lang.Reflector can't be resolved (argument types: unknown, java.lang.String, unknown).
+Reflection warning, clojure/tools/reader.clj:1025:74 - call to method setLength can't be resolved (target class is unknown).
+Reflection warning, clojure/tools/reader.clj:1030:74 - call to method setLength can't be resolved (target class is unknown).
+lib.redis.bench (68:64)
+{:exit 1, :out "95464:C 03 Dec 2025 22:45:15.672 # oO0OoO0OoO0Oo Redis is starting oO0OoO0OoO0Oo\n95464:C 03 Dec 2025 22:45:15.672 # Redis version=7.0.11, bits=64, commit=00000000, modified=0, pid=95464, just started\n95464:C 03 Dec 2025 22:45:15.672 # Configuration loaded\n95464:M 03 Dec 2025 22:45:15.672 * monotonic clock: POSIX clock_gettime\n95464:M 03 Dec 2025 22:45:15.672 # Warning: Could not create server TCP listening socket *:17001: bind: Address already in use\n95464:M 03 Dec 2025 22:45:15.672 # Failed listening on port 17001 (TCP), aborting.\n", :err ""} 
+
+DEBUG: MOCK CALLED
+DEBUG: raw-compile res: {:body "return 1", :sha "e0e1f9fabfc9d4800c877a703b823ac0578ff8db"}
+DEBUG: body bytes: (114 101 116 117 114 110 32 49)
+[1;31m  FAILED[0m[1;31m  L:26 @ test/rt/redis/eval_script_test.clj[0m
+[31m   Desc:[0m  [m"compiles a function as body and sha"[0m
+[31m   Form:[0m  [34m([0mwith-redefs [35m[[0mraw-compile-form [32m([0mfn [31m[[0m_[31m][0m [31m([0mquote [36m([0mreturn 1[36m)[0m[31m)[0m[32m)[0m
+                          impl/emit-script [32m([0mfn [31m[[0m& _[31m][0m
+                                               [31m([0mprintln "DEBUG: MOCK CALLED"[31m)[0m "return 1"[32m)[0m[35m][0m
+              [35m([0mlet [32m[[0mres [31m([0mraw-compile [36m([0mquote ptr-unique-2[36m)[0m[31m)[0m[32m][0m
+                [32m([0mprintln "DEBUG: raw-compile res:"
+                  [31m([0mpr-str res[31m)[0m[32m)[0m
+                [32m([0mprintln "DEBUG: body bytes:"
+                  [31m([0mmap int [36m([0m:body res[36m)[0m[31m)[0m[32m)[0m
+                res[35m)[0m[34m)[0m
+[31m  Check:[0m  {:body "return 1", :sha "e95b5d8294339e7c23973902f50464772228717d"}
+[1;31m   Diff:[0m      [33m> [0m:sha "e95b5d8294339e7c23973902f50464772228717d"
+[1;31m     ###[0m  [1;31mrt.redis.eval-script/raw-compile[0m
+
+[1;31m  FAILED[0m[1;31m  L:26 @ test/rt/redis/eval_script_test.clj[0m
+[31m   Desc:[0m  [m"compiles a function as body and sha"[0m
+[31m   Form:[0m  [34m([0mwith-redefs [35m[[0mraw-compile-form [32m([0mfn [31m[[0m_[31m][0m [31m([0mquote [36m([0mreturn 1[36m)[0m[31m)[0m[32m)[0m
+                          impl/emit-script [32m([0mfn [31m[[0m& _[31m][0m
+                                               [31m([0mprintln "DEBUG: MOCK CALLED"[31m)[0m "return 1"[32m)[0m[35m][0m
+              [35m([0mlet [32m[[0mres [31m([0mraw-compile [36m([0mquote ptr-unique-2[36m)[0m[31m)[0m[32m][0m
+                [32m([0mprintln "DEBUG: raw-compile res:"
+                  [31m([0mpr-str res[31m)[0m[32m)[0m
+                [32m([0mprintln "DEBUG: body bytes:"
+                  [31m([0mmap int [36m([0m:body res[36m)[0m[31m)[0m[32m)[0m
+                res[35m)[0m[34m)[0m
+[31m  Check:[0m  {:body "return 1", :sha "e95b5d8294339e7c23973902f50464772228717d"}
+[1;31m   Diff:[0m      [33m> [0m:sha "e95b5d8294339e7c23973902f50464772228717d"
+[1;31m     ###[0m  [1;31mrt.redis.eval-script/raw-compile[0m
+
+[1;34mSummary (1)[0m
+[37m  Files:[0m  [34m1[0m
+[37m  Facts:[0m  [34m6[0m
+[37m Failed:[0m  [31m1[0m
+[1mSuccess:[0m  [1;31m5 of 6[0m 
+
+

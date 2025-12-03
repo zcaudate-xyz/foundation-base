@@ -221,11 +221,16 @@
   (require-file 'code.manage)
   => (contains ['analyse 'extract 'vars] :in-any-order :gaps-ok))
 
-^{:refer code.manage/-main :added "4.0"}
+^{:refer code.manage/-main :added "4.0"
+  :timeout 1000}
 (fact "main entry point for code.manage"
   ^:hidden
-  
-  (code.manage/-main "vars" ":with" "[code.manage]" ":no-exit" "true")
+
+  (std.lib/with-out-str
+    (code.manage/-main))
+  => string?
+
+  (code.manage/-main "vars" ":with" "code.manage" ":no-exit" "true")
   => anything)
 
 

@@ -1,0 +1,7 @@
+START DEBUG
+DEBUG: rt is rt.postgres{:instance 1597504794, :layout :module, :lifecycle #:rt{:setup {:export {:suppress true}, :code {:label true}}, :teardown {:code {:suppress true}}}, :dbname "test-scratch", :module rt.postgres.script.addon-test, :lang :postgres, :module/internal {rt.postgres pg, rt.postgres.script.scratch scratch, rt.postgres.client-impl client-impl, rt.postgres.script.addon-test -}, :emit {}, :context :lang/postgres, :module/primary #{}, :tag :postgres}
+DEBUG: instance is clojure.lang.Atom@97de6ca
+DEBUG: instance deref is com.impossibl.postgres.jdbc.PGPooledConnection@5f37fd1a
+DEBUG: SELECT 1 failed: java.sql.BatchUpdateException: SELECT in executeBatch
+DEBUG: Cause: 
+DEBUG: Message: SELECT in executeBatch

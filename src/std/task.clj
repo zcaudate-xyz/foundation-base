@@ -4,9 +4,7 @@
             [std.lib :as h :refer [defimpl definvoke]]))
 
 (defmulti task-defaults
-  "creates default settings for task groups
- 
-   (task-defaults :namespace)"
+  "creates default settings for task groups"
   {:added "3.0"}
   identity)
 
@@ -38,10 +36,7 @@
    {:fn (symbol (.name task))}))
 
 (defn single-function-print
-  "if not `:bulk`, then print function output
- 
-   (single-function-print {})
-   => {:print {:function true}}"
+  "if not `:bulk`, then print function output"
   {:added "3.0"}
   ([params]
    (if (and (not (:bulk params))
@@ -50,13 +45,7 @@
      params)))
 
 (defn task
-  "creates a task
- 
-   (task :namespace \"list-interns\" ns-interns)
- 
-   (task :namespace
-         \"list-interns\"
-         {:main {:fn clojure.core/ns-interns}})"
+  "creates a task"
   {:added "3.0"}
   ([m]
    (map->Task m))
@@ -76,20 +65,13 @@
                             :type type})))))
 
 (defn task?
-  "check if object is a task
- 
-   (-> (task :namespace \"list-interns\" ns-interns)
-       (task?))
-   => true"
+  "check if object is a task"
   {:added "3.0"}
   ([x]
    (instance? Task x)))
 
 (definvoke invoke-intern-task
-  "creates a form defining a task
- 
-   (invoke-intern-task '-task- '{:template :namespace
-                                 :main {:fn clojure.core/ns-aliases}})"
+  "creates a form defining a task"
   {:added "3.0"}
   [:method {:multi protocol.invoke/-invoke-intern
             :val :task}]
@@ -107,21 +89,17 @@
      (list 'def name body))))
 
 (defmacro deftask
-  "defines a top level task
- 
-   (deftask -list-aliases-
-     {:template :namespace
-     :main clojure.core/ns-aliases
-      :item {:post (comp vec sort keys)}
-      :doc  \"returns all aliases\"})"
+  "defines a top level task"
   {:added "3.0"}
   ([name config & body]
    (invoke-intern-task :task name config body)))
 
 (defn process-ns-args
+  "processes arguments for tasks"
+  {:added "4.0"}
   [args]
   (loop [m     {}
-         [k v]  args]
+         [k v :as args]  args]
     (if (not k)
       m
       (let [k (try (read-string k)
@@ -132,7 +110,8 @@
               (recur m (rest args))
 
 
-              (keyword? v)
+              (or (keyword? v)
+                  (= 1 (count args)))
               (recur (assoc m k true)
                      (rest args))
               
