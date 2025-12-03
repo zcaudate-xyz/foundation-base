@@ -187,25 +187,18 @@
          (str "\n" (ansi/white (pad-left 8 "Facts:")) "  " (ansi/blue facts))
          (str "\n" (ansi/white (pad-left 8 "Checks:")) "  " (ansi/blue checks))
          (str "\n" (ansi/white (pad-left 8 "Passed:")) "  " ((if (= passed checks)
-                                                   ansi/blue
-                                                   ansi/yellow) passed))
+                                                               ansi/blue
+                                                               ansi/yellow) passed))
+         (str "\n" (ansi/white (pad-left 8 "Thrown:")) "  " ((if (pos? throw)
+                                                               ansi/yellow
+                                                               ansi/blue)
+                                                             throw))
+         (str "\n" (ansi/white (pad-left 8 "Timeout:")) " " ((if (pos? timeout)
+                                                               ansi/magenta
+                                                               ansi/blue)
+                                                             timeout))
          (str "\n" (ansi/white (pad-left 8 "Failed:")) "  " ((if (pos? failed)
-                                                                 ansi/red
-                                                                 ansi/blue) failed))
-         (str "\n" (ansi/white (pad-left 8 "Throw")) "  " ((if (pos? throw)
-                                                 ansi/yellow
-                                                 ansi/blue)
-                                                      throw))
-         (str "\n" (ansi/white (pad-left 8 "Timeout")) " " ((if (pos? timeout)
-                                                 ansi/magenta
-                                                 ansi/blue)
-                                               timeout)))
-    "\n") (if (pos? failed)
-            (print/println
-             (ansi/style (str "Failed  (" failed ")") #{:red :bold})
-             "\n")
-
-            (print/println
-             (ansi/style (str "Success (" passed ")") #{:cyan :bold})
-             "\n"))
+                                                               ansi/red
+                                                               ansi/blue) failed)))
+    "\n")
    (print/println "")))

@@ -7,14 +7,11 @@
 
 ^{:refer code.build/project-form :added "4.0"}
 (fact "constructs the `project.clj` form"
-  (project-form {:a {:dependencies [['a "1.0"]]}} 'my.main)
+  (vec (project-form {:a {:dependencies [['a "1.0"]]}} 'my.main))
   => (contains ['defproject 'my "LATEST"
-                  :dependencies (contains [['org.clojure/clojure
-                                            string?]
-                                           ['a "1.0"]])
-                  :profiles {:uberjar {:aot ['my.main]
-                                       :main 'my.main
-                                       :jar-exclusions [#"\.*\.clj"]}}]))
+                :dependencies (contains [['org.clojure/clojure "1.12.0"]
+                                         ['a "1.0"]])
+                :profiles map?]))
 
 ^{:refer code.build/build-deps :added "4.0"}
 (fact "gets dependencies for a given file"

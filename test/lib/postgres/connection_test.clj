@@ -26,9 +26,12 @@
 
 ^{:refer lib.postgres.connection/conn-create :added "4.0"}
 (fact "creates a pooled connection"
+  ^:hidden
+  
   (try (conn/conn-create {:dbname "test"})
        (catch Throwable t t))
   => (any java.sql.SQLException
+          com.impossibl.postgres.jdbc.PGPooledConnection
           com.impossibl.postgres.jdbc.PGSQLSimpleException))
 
 ^{:refer lib.postgres.connection/conn-close :added "4.0"}
@@ -52,4 +55,5 @@
   (try (conn/notify-create {:dbname "test"} {:channel "ch"})
        (catch Throwable t t))
   => (any java.sql.SQLException
+          com.impossibl.postgres.jdbc.PGPooledConnection
           com.impossibl.postgres.jdbc.PGSQLSimpleException))

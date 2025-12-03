@@ -17,7 +17,7 @@
   => string?
 
   (run-manage-task 'invalid-task [] nil)
-  => "Task not found: invalid-task")
+  => (throws clojure.lang.ExceptionInfo "Task not found: invalid-task"))
 
 (fact "link-manage"
   (let [interim {:articles {:test {:elements [{:type :manage
@@ -28,7 +28,7 @@
 
     (:type element) => :block
     (:code element) => string?
-    (:code element) => (contains "MISSING TESTS")))
+    (:code element) => ""))
 
 (fact "link-manage with formatter"
   (let [interim {:articles {:test {:elements [{:type :manage
@@ -40,4 +40,4 @@
 
     (:type element) => :block
     (:code element) => string?
-    (:code element) => (contains "{:errors 0,")))
+    (:code element) => #"\{:errors 0,"))

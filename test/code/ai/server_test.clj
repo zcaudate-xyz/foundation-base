@@ -1,32 +1,34 @@
 (ns code.ai.server-test
   (:use code.test)
   (:require [code.ai.server :as server]
+            [code.ai.server.tool.basic :as basic]
+            [code.ai.server.tool.std-lang :as std-lang]
             [std.lang :as l]
             [mcp-clj.mcp-server.core :as mcp-server]))
 
-^{:refer code.ai.server/echo-fn :added "4.0"}
+^{:refer code.ai.server.tool.basic/echo-fn :added "4.0"}
 (fact "echoes input text"
-  (server/echo-fn nil {:text "hello"})
+  (basic/echo-fn nil {:text "hello"})
   => {:content [{:type "text" :text "hello"}]
       :isError false})
 
-^{:refer code.ai.server/ping-fn :added "4.0"}
+^{:refer code.ai.server.tool.basic/ping-fn :added "4.0"}
 (fact "returns ping"
-  (server/ping-fn nil nil)
+  (basic/ping-fn nil nil)
   => {:content [{:type "text" :text "ping"}]
       :isError false})
 
-^{:refer code.ai.server/lang-emit-as-safe :added "4.0"}
+^{:refer code.ai.server.tool.std-lang/lang-emit-as-safe :added "4.0"}
 (fact "safely emits code"
-  (server/lang-emit-as-safe :lua "(+ 1 2)")
+  (std-lang/lang-emit-as-safe :lua "(+ 1 2)")
   => "1 + 2"
 
-  (server/lang-emit-as-safe :js "(+ 1 2)")
+  (std-lang/lang-emit-as-safe :js "(+ 1 2)")
   => "1 + 2")
 
-^{:refer code.ai.server/lang-emit-as-fn :added "4.0"}
+^{:refer code.ai.server.tool.std-lang/lang-emit-as-fn :added "4.0"}
 (fact "tool wrapper for emit"
-  (server/lang-emit-as-fn nil {:type "lua" :code "(+ 1 2)"})
+  (std-lang/lang-emit-as-fn nil {:type "lua" :code "(+ 1 2)"})
   => {:content [{:type "text" :text "1 + 2"}]
       :isError false})
 

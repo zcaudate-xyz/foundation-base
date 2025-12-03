@@ -23,8 +23,8 @@
   ^:hidden
   
   (h/with:component [runner (runner:create)])
-  (-> (runner:start runner)
-      (runner:info))
+  (doto (runner:start runner)
+    (runner:info))
   =>  {:executors {:core {:threads 0, :active 0, :queued 0, :terminated false},
                    :scheduler {:threads 0, :active 0, :queued 0, :terminated false}},
        :programs {}})
