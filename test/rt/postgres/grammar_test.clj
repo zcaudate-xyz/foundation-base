@@ -22,7 +22,7 @@
 (fact "stops the postgres runtime"
   
   (try
-    (scratch/addf 1M 2M)
+    (scratch/addf 1.0 2.0)
     (catch Throwable t
       (spit "/tmp/debug_canary.txt" (str "DEBUG: CANARY failed: " (.getMessage t) "\n") :append true)
       (when (instance? java.sql.SQLException t)

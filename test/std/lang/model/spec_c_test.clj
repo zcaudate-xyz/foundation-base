@@ -65,7 +65,7 @@
   
   (l/emit-as :c '[(defn main [[:int argc] [:char** argv]]
                     (return 0))])
-  => "void main (int argc, char** argv) { \n  return 0; \n}")
+  => "void main (int argc, char** argv) {\n\n  return 0;\n}")
 
 (fact "emit arrow"
   (l/emit-as :c '[(arrow ptr field)])
