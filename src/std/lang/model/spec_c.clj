@@ -52,6 +52,24 @@
   (let [alias-str (ut/sym-default-str alias)]
     (list :- "typedef" type (str alias-str ";"))))
 
+(defn to-c-type
+  "converts to c type"
+  {:added "4.0"}
+  [t]
+  (cond (keyword? t) (name t)
+        (symbol? t) (name t)
+        (vector? t) (str/join " " (map to-c-type t))
+        :else (str t)))
+
+(defn c-sanitize
+  "sanitizes a symbol for c"
+  {:added "4.0"}
+  [s]
+  (-> (str s)
+      (str/replace "-" "_")
+      (str/replace "." "_")
+      (str/replace "/" "____")))
+
 (defn c-fn-args
   "custom C function arguments emission"
   {:added "4.0"}
@@ -59,32 +77,45 @@
   (let [args (if (and (list? args) (= 'quote (first args)))
                (second args)
                args)
-        args (if (vector? args) args [args])]
+        args (if (vector? args)
+               (if (vector? (first args))
+                 args
+                 (partition 2 args))
+               [args])]
     (str "("
          (str/join ", "
                    (map (fn [arg]
-                          (if (vector? arg)
+                          (if (sequential? arg)
                             (let [[type name] arg]
-                              (str (ut/sym-default-str type)
+                              (str (c-sanitize (to-c-type type))
                                    " "
                                    (emit/emit-main name grammar mopts)))
                             (emit/emit-main arg grammar mopts)))
                         args))
          ")")))
 
-(defn tf-defn
+
+
+(defn emit-defn
   "custom defn for C"
   {:added "4.0"}
-  [[_ sym args & body]]
-  (let [ret-type (or (-> sym meta :tag) "void")
-        sym      (if (string? sym) (symbol sym) sym)]
-    (list :- ret-type
-          sym
-          (list :c-args (list 'quote args))
-          (list :- "{"
-                (list \\
-                      \\ (list \| (apply list 'do body)))
-                (list :- "\n}")))))
+  [[_ sym args & body] grammar mopts]
+  (let [ret-type (or (-> sym meta :tag) (-> sym meta :-) "void")
+        ret-type (to-c-type ret-type)
+        
+        module (:module mopts)
+        sym-str (if (and module (symbol? sym) (not (namespace sym)))
+                  (c-sanitize (symbol (name (:id module)) (name sym)))
+                  (c-sanitize sym))
+        
+        args-str (c-fn-args [:c-args args] grammar mopts)
+        
+        body-str (emit/emit-main (list \\ \\ (list \| (apply list 'do body))) grammar mopts)]
+    
+    (str ret-type " " sym-str " " args-str " "
+         "{\n"
+         body-str
+         "\n}")))
 
 (defn tf-arrow
   "transforms arrow ->"
@@ -104,7 +135,7 @@
                                :class
                                :macro-arrow])
       (grammar/build:override
-       {:defn    {:macro #'tf-defn :emit :macro}})
+       {:defn    {:emit #'emit-defn}})
       (grammar/build:extend
        {:c-args  {:op :c-args :symbol #{:c-args} :emit #'c-fn-args}
         :define  {:op :define  :symbol '#{define}  :macro #'tf-define

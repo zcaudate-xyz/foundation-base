@@ -77,9 +77,9 @@
               [(transform-form-format
                 (last forms)
                 opts)])]
-    `(:- "void main(){\n "
+    `(:- "#include <stdio.h>\nint main(){\n "
          ~body
-         "\n}")))
+         "\nreturn 0;\n}")))
 
 (def +c-oneshot-config+
   (common/set-context-options

@@ -85,4 +85,4 @@
   ^:hidden
   
   (transform-form '[(printf "hello world")] {})
-  => '(:- "void main(){\n " (do (printf "hello world")) "\n}"))
+  => '(:- "#include <stdio.h>\nint main(){\n " (do (printf "hello world")) "\nreturn 0;\n}"))
