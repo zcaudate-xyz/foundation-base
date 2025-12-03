@@ -135,7 +135,8 @@
               :lang   :js
               :target "src"
               :main   'component.web-native-index
-              :emit   {:code   {:label true}}}]})
+              :emit   {:code   {:label true
+                                :link {:path-suffix ".js"}}}}]})
 
 (def +init+
   (make/triggers-set
