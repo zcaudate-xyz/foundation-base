@@ -227,5 +227,5 @@
   ([artifact]
    (let [{:keys [group artifact] :as m} (artifact/artifact-default artifact)
          version (or ((version-map) (symbol group artifact))
-                     (throw (ex-info "Cannot find the version of artifact." {:artifact artifact})))]
-     version)))
+                     (throw (ex-info (str "Cannot find the version of artifact: " artifact) {:artifact artifact})))]
+      version)))

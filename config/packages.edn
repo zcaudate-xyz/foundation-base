@@ -274,8 +274,8 @@
             :include ["hara/lib/graal"]}]
   :dependencies [org.graalvm.sdk/graal-sdk
                  org.graalvm.js/js
-		 org.graalvm.js/js-scriptengine
-		 commons-io/commons-io]}
+                 org.graalvm.js/js-scriptengine
+		             commons-io/commons-io]}
  
  xyz.zcaudate/rt.jep
  {:description "runtime for jep" 
