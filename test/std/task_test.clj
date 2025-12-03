@@ -5,12 +5,15 @@
 
 ^{:refer std.task/task-defaults :added "3.0"}
 (fact "creates default settings for task groups"
+  ^:hidden
 
   (task-defaults :default)
   => {:main {:arglists '([] [entry])}})
 
 ^{:refer std.task/map->Task :added "3.0" :adopt true}
 (fact "constructs a invokable Task object"
+  ^:hidden
+
   (-> (map->Task {:type :namespace
                   :name "list-interns"
                   :main {:fn clojure.core/ns-interns}})
@@ -19,24 +22,30 @@
 
 ^{:refer std.task/task-status :added "3.0"}
 (fact "displays the task-status"
+  ^:hidden
+
   (-> (task :namespace "list-interns" ns-interns)
       (task-status))
   => :namespace)
 
 ^{:refer std.task/task-info :added "3.0"}
 (fact "displays the task-body"
+  ^:hidden
+
   (-> (task :namespace "list-interns" ns-interns)
       (task-info))
   => '{:fn list-interns})
 
 ^{:refer std.task/single-function-print :added "3.0"}
 (fact "if not `:bulk`, then print function output"
+  ^:hidden
 
   (single-function-print {})
   => {:print {:function true}})
 
 ^{:refer std.task/task :added "3.0"}
 (fact "creates a task"
+  ^:hidden
 
   (task? (task :namespace "list-interns" ns-interns))
   => true
@@ -48,14 +57,16 @@
 
 ^{:refer std.task/task? :added "3.0"}
 (fact "check if object is a task"
-
+  ^:hidden
+  
   (-> (task :namespace "list-interns" ns-interns)
       (task?))
   => true)
 
 ^{:refer std.task/invoke-intern-task :added "3.0"}
 (fact "creates a form defining a task"
-
+  ^:hidden
+  
   (invoke-intern-task '-task- '{:template :namespace
                                 :main {:fn clojure.core/ns-aliases}}) ^:hidden
   => '(def -task-
@@ -63,28 +74,42 @@
                        {:template :namespace, :main {:fn clojure.core/ns-aliases}})))
 
 ^{:refer std.task/deftask :added "3.0"}
-(comment "defines a top level task"
+(fact "defines a top level task"
+  ^:hidden
+  
+  (macroexpand-1
+   '(deftask -list-aliases-
+      {:template :namespace
+       :main clojure.core/ns-aliases
+       :item {:post (comp vec sort keys)}
+       :doc  "returns all aliases"}))
+  => '(def -list-aliases-
+        (std.task/task
+         :namespace "-list-aliases-"
+         {:template :namespace,
+          :main clojure.core/ns-aliases,
+          :item {:post (comp vec sort keys)},
+          :doc "returns all aliases"})))
 
-  (deftask -list-aliases-
-    {:template :namespace
-     :main clojure.core/ns-aliases
-     :item {:post (comp vec sort keys)}
-     :doc  "returns all aliases"}))
+^{:refer std.task/process-ns-args :added "4.0"}
+(fact "processes arguments for tasks"
+  ^:hidden
+  
+  (process-ns-args [":only" "foo"])
+  => {:ns 'foo}
+
+  (process-ns-args [":verbose"])
+  => {:verbose true}
+
+  (process-ns-args [":verbose" ":other"])
+  => {:verbose true :other true}
+
+  (process-ns-args [":timeout" "100"])
+  => {:timeout 100})
+
 
 (comment
 
   (deftask -inc-
     {:template :default
      :main {:fn clojure.core/inc}}))
-
-
-^{:refer std.task/process-ns-args :added "4.0"}
-(fact "processes arguments for tasks"
-  (process-ns-args [":only" "foo"])
-  => {:ns 'foo}
-  (process-ns-args [":verbose"])
-  => {:verbose nil}
-  (process-ns-args [":verbose" ":other"])
-  => {:verbose true :other nil}
-  (process-ns-args [":timeout" "100"])
-  => {:timeout 100})
