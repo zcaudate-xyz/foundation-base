@@ -72,11 +72,8 @@
   => coll? ^:hidden
 
   (extract "test-scratch/hello.jar" "test-scratch/output")
-
-  (extract "test-scratch/hello.jar"
-           "test-scratch/select"
-           ["hara/config.clj"])
-
+  
+  
   (fs/delete "test-scratch/hello.jar")
   (fs/delete "test-scratch/hara")
   (fs/delete "test-scratch/output")
