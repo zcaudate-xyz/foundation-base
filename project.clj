@@ -105,7 +105,7 @@
    [commons-io/commons-io "2.15.1"]
    
    ;; rt.jep
-   [black.ninia/jep "4.2.0"]
+   [black.ninia/jep "4.3.1"]
    
    ;; rt.libpython
    [clj-python/libpython-clj "2.026"]

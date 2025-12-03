@@ -83,7 +83,7 @@
   "swaps out the program options using a funciotn"
   {:added "4.0"}
   [lang f & args]
-  (apply h/atom:swap *program-options* [lang] f args))
+  (apply swap! *program-options* update-in [lang] f args))
 
 (defn get-program-default
   "gets the default program"
