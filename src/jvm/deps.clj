@@ -226,6 +226,11 @@
   {:added "3.0"}
   ([artifact]
    (let [{:keys [group artifact] :as m} (artifact/artifact-default artifact)
-         version (or ((version-map) (symbol group artifact))
-                     (throw (ex-info "Cannot find the version of artifact." {:artifact artifact})))]
+         sym (symbol group artifact)
+         version (or ((version-map) sym)
+                     (if (= sym 'org.clojure/clojure)
+                       (clojure-version))
+                     (throw (ex-info "Cannot find the version of artifact."
+                                     {:artifact artifact
+                                      :available (keys (version-map))})))]
      version)))

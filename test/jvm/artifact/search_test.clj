@@ -17,8 +17,10 @@
   (class-seq
    '[[org.eclipse.aether/aether-api "1.1.0"]])
   
+  ;; classifier4j is not a dependency in project.clj, so this test fails if not present in local repo
+  ;; replacing with clojure as it's guaranteed to be there
   (class-seq
-   '[[classifier4j/classifier4j "0.6"]])
+   '[[org.clojure/clojure "1.12.0"]])
   )
 
 ^{:refer jvm.artifact.search/search-match :added "3.0"}
