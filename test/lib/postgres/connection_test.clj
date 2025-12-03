@@ -1,5 +1,6 @@
 (ns lib.postgres.connection-test
   (:use code.test)
+  
   (:require [lib.postgres.connection :as conn]
             [lib.jdbc :as jdbc]
             [lib.jdbc.protocol :as protocol])
@@ -62,7 +63,5 @@
   
   (try (conn/notify-create {:dbname "test"} {:channel "ch"})
        (catch Throwable t t))
-  => (any (contains
-           [com.impossibl.postgres.jdbc.PGPooledConnection])
-          java.sql.SQLException
-          com.impossibl.postgres.jdbc.PGSQLSimpleException))
+  => (contains-in
+      [com.impossibl.postgres.jdbc.PGDirectConnection]))

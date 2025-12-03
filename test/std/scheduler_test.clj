@@ -23,9 +23,9 @@
   ^:hidden
   
   (h/with:component [runner (runner:create)]
-    (doto runner
-      (runner:start)
-      (runner:info)))
+    (-> runner
+        (runner:start)
+        (runner:info)))
   =>  {:executors {:core {:threads 0, :active 0, :queued 0, :terminated false},
                    :scheduler {:threads 0, :active 0, :queued 0, :terminated false}},
        :programs {}})
@@ -60,7 +60,8 @@
 
 ^{:refer std.scheduler/runner:stopped? :added "3.0"}
 (fact "checks if runner has stopped"
-
+  ^:hidden
+  
   (h/with:component [|run| (runner:create)]
     (-> (doto |run| (runner:kill))
         (runner:stopped?))
@@ -68,16 +69,18 @@
 
 ^{:refer std.scheduler/runner:health :added "3.0"}
 (fact "returns health of runner"
-
+  ^:hidden
+  
   (h/with:component [|run| (runner:create)]
     (runner:health |run|))
   => {:status :ok})
 
 ^{:refer std.scheduler/runner:info :added "3.0"}
 (fact "returns runner info"
-
+  ^:hidden
+  
   (h/with:component [runner (runner:create {})]
-                    (runner:info runner))
+    (runner:info runner))
   => {:executors {:core {:threads 0, :active 0, :queued 0, :terminated false},
                   :scheduler {:threads 0, :active 0, :queued 0, :terminated false}},
       :programs {}} ^:hidden
