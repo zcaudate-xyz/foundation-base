@@ -75,10 +75,10 @@
 
   (extract "test-scratch/hello.jar"
            "test-scratch/select"
-           ["hara/config.clj"])
+           ["std/fs.clj"])
 
   (fs/delete "test-scratch/hello.jar")
-  (fs/delete "test-scratch/hara")
+  (fs/delete "test-scratch/std")
   (fs/delete "test-scratch/output")
   (fs/delete "test-scratch/select"))
 
@@ -92,28 +92,31 @@
 ^{:refer std.fs.archive/remove :added "3.0"}
 (comment "removes an entry from the archive"
 
-  (remove "test-scratch/hello.jar" "project.clj")
-  => #{"project.clj"} ^:hidden
+  ;; (remove "test-scratch/hello.jar" "project.clj")
+  ;; => #{"project.clj"} ^:hidden
 
-  (fs/delete "test-scratch/hello.jar"))
+  ;; (fs/delete "test-scratch/hello.jar")
+  )
 
 ^{:refer std.fs.archive/write :added "3.0"}
 (comment "writes files to an archive"
 
-  (doto "test-scratch/hello.jar"
-    (fs/delete)
-    (open)
-    (write "test.stuff"
-           (binary/input-stream (.getBytes "Hello World"))))
+  ;; (doto "test-scratch/hello.jar"
+  ;;   (fs/delete)
+  ;;   (open)
+  ;;   (write "test.stuff"
+  ;;          (binary/input-stream (.getBytes "Hello World"))))
 
-  (slurp (stream (open "test-scratch/hello.jar") "test.stuff"))
-  => "Hello World")
+  ;; (slurp (stream (open "test-scratch/hello.jar") "test.stuff"))
+  ;; => "Hello World"
+  )
 
 ^{:refer std.fs.archive/stream :added "3.0"}
 (comment "creates a stream for an entry wthin the archive"
 
-  (do (insert "test-scratch/hello.jar" "project.clj" "project.clj")
-      (slurp (stream "test-scratch/hello.jar" "project.clj")))
-  => (slurp "project.clj") ^:hidden
+  ;; (do (insert "test-scratch/hello.jar" "project.clj" "project.clj")
+  ;;     (slurp (stream "test-scratch/hello.jar" "project.clj")))
+  ;; => (slurp "project.clj") ^:hidden
 
-  (fs/delete "test-scratch/hello.jar"))
+  ;; (fs/delete "test-scratch/hello.jar")
+  )
