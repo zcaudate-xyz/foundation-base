@@ -259,7 +259,7 @@
   {:added "3.0"}
   ([program spawn]
    (fn [_ job-id]
-     (let [job (get-job spawn job-id)]
+     (if-let [job (get-job spawn job-id)]
        (handler-run program spawn job)))))
 
 (defn create-handler-constant
