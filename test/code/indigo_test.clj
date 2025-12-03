@@ -11,6 +11,9 @@
 (fact "converts a given namespace symbol into its corresponding test file path"
 
   (to-test-path 'indigo-test)
+  => "test/indigo_test.clj"
+
+  (to-test-path 'code.dev-test)
   => "test/code/dev_test.clj")
 
 ^{:refer indigo/fix-tests :added "3.0"}

@@ -3,7 +3,8 @@
             [std.lang :as l]
             [std.fs :as fs]
             [std.string :as str]
-            [std.string.prose :as prose]))
+            [std.string.prose :as prose]
+            [std.block.layout :as layout]))
 
 (l/script :js
   {:import  [["lucide-react" :as #{Input Button}]
@@ -22,7 +23,7 @@
                            [alts? desc?])]
     {:op  :convert
      :desc desc
-     :dsl [(str (s/layout form))]
+      :dsl [(str (layout/layout-main form))]
      :js  (vec (concat [(l/emit-script form {:lang :js})]
                        alts))}))
 
@@ -32,7 +33,7 @@
   [forms & [desc?]]
   {:op  :alternate
    :desc desc?
-   :dsl (mapv (comp str s/layout) forms)
+   :dsl (mapv (comp str layout/layout-main) forms)
    :js  (vec (set (mapv #(l/emit-script % {:lang :js})
                         forms)))})
 

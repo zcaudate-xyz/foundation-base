@@ -18,7 +18,7 @@
     (def +json-file+ "test/scratch/test_ast.json")
 
     (fs/create-directory "test/scratch")
-    (fs/write-file +ts-file+ "const x: number = 1;")
+    (spit +ts-file+ "const x: number = 1;")
 
     ;; Run - paths relative to .build/code-dev-build-ast/
     ;; So ../../test/scratch/...
@@ -30,7 +30,7 @@
     ;; Verify
     (fact "output file exists and is valid json"
       (fs/exists? +json-file+) => true
-      (def res (json/read +json-file+))
+      (def res (json/read (fs/file +json-file+) json/+keyword-mapper+))
       (:type res) => "File"
       (get-in res [:program :body 0 :type]) => "VariableDeclaration")
 

@@ -3,7 +3,7 @@
             [std.lib :as h]
             [std.lang :as l]
             [std.fs :as fs]
-            [code.heal :as heal]
+            [std.block.heal.core :as heal]
             [std.text.diff :as diff]))
 
 (def +packages+
@@ -77,7 +77,7 @@
      (var moduleName (. (. process argv) [3]))
      (var outputPath (. (. process argv) [4]))
      
-     (defn ^{:- [async]} main []
+     (defn ^{:- [:async]} main []
        (if(or (not entryPath) (not moduleName))
          (do
            (console.error "Usage: node cli.js <entry_path> <module_name> [output_path]")
