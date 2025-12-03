@@ -145,11 +145,8 @@
                   (last (prep-table 'scratch/Task true (l/rt:macro-opts :postgres))))
   => '(jsonb-build-object "id" (rt.postgres/uuid-generate-v4)
                           "status" (++ a rt.postgres.script.scratch/EnumStatus)
-                          "name" (:text "hello") "cache_id" (:uuid hello)
-                          "op_created" nil
-                          "op_updated" nil
-                          "time_created" nil
-                          "time_updated" nil
+                          "name" (:text "hello")
+                          "cache_id" (:uuid hello)
                           "__deleted__" false))
 
 ^{:refer rt.postgres.script.impl-base/t-create-fn :added "4.0"}
@@ -163,11 +160,8 @@
                  {:coalesce true}))
   => '(jsonb-build-object "id" (rt.postgres/uuid-generate-v4)
                           "status" (++ a rt.postgres.script.scratch/EnumStatus)
-                          "name" (:text "hello") "cache_id" (:uuid hello)
-                          "op_created" nil
-                          "op_updated" nil
-                          "time_created" nil
-                          "time_updated" nil
+                          "name" (:text "hello")
+                          "cache_id" (:uuid hello)
                           "__deleted__" false))
 
 ^{:refer rt.postgres.script.impl-base/t-returning-cols :added "4.0"}

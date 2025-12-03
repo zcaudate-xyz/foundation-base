@@ -342,9 +342,9 @@
 (defn pg-defindex
   "defindex block"
   {:added "4.0"}
-  [[_ sym doc? attr? [table & cols] body :as form]]
+  [[_ sym doc? attr? [table & cols] :as form]]
   (let [[{:keys [doc]
-          :as mdefn} [_ sym [table & cols] body]] (grammar-spec/format-defn form)]
+          :as mdefn} [_ sym [table & cols] & body]] (grammar-spec/format-defn form)]
     (vec (concat
           [:create-index :if-not-exists
            sym

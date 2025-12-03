@@ -319,79 +319,79 @@
        :schema-primary {"type" "text", "id" "id"},
        :public true,
        :schema-update false,
-       :position 3},
+       :position 12},
       "UserProfile"
       {:schema "scratch/xt.db.sample-user-test",
        :schema-primary {"type" "uuid", "id" "id"},
        :public true,
        :schema-update false,
-       :position 5},
+       :position 1},
       "Asset"
       {:schema "scratch/xt.db.sample-user-test",
        :schema-primary {"type" "uuid", "id" "id"},
        :public true,
        :schema-update false,
-       :position 8},
+       :position 4},
       "Organisation"
       {:schema "scratch/xt.db.sample-user-test",
        :schema-primary {"type" "uuid", "id" "id"},
        :public true,
        :schema-update false,
-       :position 11},
+       :position 7},
       "OrganisationAccess"
       {:schema "scratch/xt.db.sample-user-test",
        :schema-primary {"type" "uuid", "id" "id"},
        :public nil,
        :schema-update false,
-       :position 12},
+       :position 8},
       "UserPrivilege"
       {:schema "scratch/xt.db.sample-user-test",
        :schema-primary {"type" "uuid", "id" "id"},
        :public true,
        :schema-update false,
-       :position 7},
+       :position 3},
       "RegionState"
       {:schema "scratch/xt.db.sample-data-test",
        :schema-primary {"type" "text", "id" "id"},
        :public true,
        :schema-update false,
-       :position 2},
+       :position 11},
       "UserNotification"
       {:schema "scratch/xt.db.sample-user-test",
        :schema-primary {"type" "uuid", "id" "id"},
        :public true,
        :schema-update false,
-       :position 6},
+       :position 2},
       "UserAccount"
       {:schema "scratch/xt.db.sample-user-test",
        :schema-primary {"type" "uuid", "id" "id"},
        :public true,
        :schema-update false,
-       :position 4},
+       :position 0},
       "WalletAsset"
       {:schema "scratch/xt.db.sample-user-test",
        :schema-primary {"type" "uuid", "id" "id"},
        :public true,
        :schema-update false,
-       :position 10},
+       :position 6},
       "Wallet"
       {:schema "scratch/xt.db.sample-user-test",
        :schema-primary {"type" "uuid", "id" "id"},
        :public true,
        :schema-update false,
-       :position 9},
+       :position 5},
       "Currency"
       {:schema "scratch/xt.db.sample-data-test",
        :schema-primary {"type" "citext", "id" "id"},
        :public true,
        :schema-update false,
-       :position 0},
+       :position 9},
       "RegionCountry"
       {:schema "scratch/xt.db.sample-data-test",
        :schema-primary {"type" "citext", "id" "id"},
        :public true,
        :schema-update false,
-       :position 1}})
+       :position 10}})
 
 ^{:refer rt.postgres.gen-bind/bind-schema :added "4.0"}
 (fact "binds a schema"

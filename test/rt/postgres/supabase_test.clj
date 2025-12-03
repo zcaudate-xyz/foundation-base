@@ -5,14 +5,17 @@
             [net.http :as http]
             [rt.postgres.grammar :as grammar]))
 
-;; Ensure postgres language is loaded for tests
-(l/script :postgres {:macro-only true})
-
-(def +postgres+ grammar/+grammar+)
+(l/script- :postgres
+  {:require [[rt.postgres :as pg]
+             [rt.postgres.supabase :as s]
+             [rt.postgres.script.scratch :as scratch]]})
 
 ^{:refer rt.postgres.supabase/create-role :added "4.0"}
 (fact "creates a role"
-  (l/emit-as :postgres '[(s/create-role 'anon)])
+  ^:hidden
+  
+  (l/emit-as :postgres
+             `[(s/create-role ~'anon)])
   => "DO $$\nBEGIN\n  CREATE ROLE anon;\nEXCEPTION WHEN OTHERS THEN\nEND;\n$$ LANGUAGE 'plpgsql'")
 
 ^{:refer rt.postgres.supabase/alter-role-bypassrls :added "4.0"}

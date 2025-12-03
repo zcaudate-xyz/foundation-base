@@ -40,12 +40,16 @@
 
 ^{:refer rt.postgres.grammar.common/pg-hydrate-module-static :added "4.0"}
 (fact "gets the static module"
+  ^:hidden
+
   (common/pg-hydrate-module-static
    {:static {:application "app" :all {:schema ["schema"]}}})
   => {:static/schema "schema" :static/application "app"})
 
 ^{:refer rt.postgres.grammar.common/pg-hydrate :added "4.0"}
 (fact "hydrate function for top level entries"
+  ^:hidden
+
   (common/pg-hydrate '(defn foo [] 1) {} {:module {:static {:application "app" :all {:schema ["schema"]}}}})
   => vector?)
 
@@ -193,14 +197,16 @@
 ^{:refer rt.postgres.grammar.common/pg-defindex :added "4.0"}
 (fact "defindex block"
   ^:hidden
+
   (common/pg-defindex '(defindex hello [table cols] body))
-  => vector?)
+  => '[:create-index :if-not-exists hello :on table (quote ([cols])) body \;])
 
 ^{:refer rt.postgres.grammar.common/pg-defpolicy :added "4.0"}
 (fact "defpolicy block"
   ^:hidden
+  
   (common/pg-defpolicy '(defpolicy hello [table] ()))
-  => list?)
+  => '(do [:drop-policy-if-exists #{" - hello"} :on table] [:create-policy #{" - hello"} :on table \\]))
 
 ^{:refer rt.postgres.grammar.common/pg-defblock :added "4.0"}
 (fact "creates generic defblock"
@@ -213,10 +219,14 @@
 
 ^{:refer rt.postgres.grammar.common/pg-policy-format :added "4.0"}
 (fact "formats a policy definition"
+  ^:hidden
+  
   (common/pg-policy-format '(defpolicy hello [table] ()))
-  => vector?)
+  => '[{:doc "", :static/policy-name " - hello", :static/policy-table nil, :static/policy-schema "table"} (defpolicy hello "" [table] ())])
 
 ^{:refer rt.postgres.grammar.common/pg-deftrigger :added "4.0"}
 (fact "deftrigger block"
+  ^:hidden
+  
   (common/pg-deftrigger '(deftrigger hello [table] ()))
-  => list?)
+  => '(do [:drop-trigger-if-exists hello :on table] [:create-trigger hello :on table \\]))

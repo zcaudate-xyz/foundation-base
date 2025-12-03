@@ -10,9 +10,11 @@
 
 ^{:refer rt.postgres.grammar.form-deftype/pg-deftype-enum-col :added "4.0"}
 (fact "creates the enum column"
+  ^:hidden
+  
   (with-redefs [common/pg-linked-token (fn [& _] '(:enum))]
     (pg-deftype-enum-col [:col :attr] {} {}))
-  => [:col :attr '(:enum)])
+  => '[:col (:enum)])
 
 ^{:refer rt.postgres.grammar.form-deftype/pg-deftype-ref-link :added "4.0"}
 (fact "creates the ref entry for "
@@ -21,8 +23,9 @@
 
 ^{:refer rt.postgres.grammar.form-deftype/pg-deftype-ref-current :added "4.0"}
 (fact "creates the ref entry for "
+
   (pg-deftype-ref-current :col {:current {:id "id" :schema "schema" :type :uuid}} {})
-  => vector?)
+  => '["col_id" [:uuid] [((. #{"schema"} #{"id"}) #{"id"})]])
 
 ^{:refer rt.postgres.grammar.form-deftype/pg-deftype-ref :added "4.0"}
 (fact "creates the ref entry"
@@ -42,16 +45,19 @@
 
 ^{:refer rt.postgres.grammar.form-deftype/pg-deftype-uniques :added "4.0"}
 (fact "collect unique keys on deftype"
+
   (pg-deftype-uniques [[:col {:type :text :sql {:unique true}}]])
-  => list?)
+  => '[(% [:unique (quote (#{"col"}))])])
 
 ^{:refer rt.postgres.grammar.form-deftype/pg-deftype-indexes :added "4.0"}
 (fact "create index statements"
+
   (pg-deftype-indexes [[:col {:type :text :sql {:index true}}]] "table")
-  => vector?)
+  => '[(% [:create-index :on "table" (quote (#{"col"}))])])
 
 ^{:refer rt.postgres.grammar.form-deftype/pg-deftype :added "4.0"}
 (fact "creates a deftype statement"
+
   (with-redefs [common/pg-full-token (fn [s sch] (str sch "." s))]
     (pg-deftype '(deftype ^{:static/schema "s"} t [] {})))
   => list?)
