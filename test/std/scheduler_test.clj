@@ -22,9 +22,10 @@
 (fact "starts up the runner"
   ^:hidden
   
-  (h/with:component [runner (runner:create)])
-  (doto (runner:start runner)
-    (runner:info))
+  (h/with:component [runner (runner:create)]
+    (doto runner
+      (runner:start)
+      (runner:info)))
   =>  {:executors {:core {:threads 0, :active 0, :queued 0, :terminated false},
                    :scheduler {:threads 0, :active 0, :queued 0, :terminated false}},
        :programs {}})

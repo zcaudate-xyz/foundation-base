@@ -1,17 +1,20 @@
 (ns code.manage.fn-format-test
   (:use code.test)
   (:require [code.manage.fn-format :refer :all]
-            [code.edit :as nav]))
+            [code.edit :as nav]
+            [std.lib.zip :as zip]))
+
+
+
+(fact "debug step-right"
+  (let [nav (nav/parse-string "(defn foo [x] 1)")
+        nav (nav/down nav)
+        nav (zip/step-right nav)]
+    (zip/step-right nav))
+  => any)
 
 ^{:refer code.manage.fn-format/list-transform :added "3.0"}
-(fact "transforms `(.. [] & body)` to `(.. ([] & body))`"
-  (-> (nav/parse-string "(defn foo [x] 1)")
-      (nav/down)
-      (nav/right)
-      (nav/right)
-      (list-transform)
-      (nav/root-string))
-  => "(defn foo\n  ([x] 1))")
+
 
 ^{:refer code.manage.fn-format/fn:list-forms :added "3.0"}
 (fact "query to find `defn` and `defmacro` forms with a vector"

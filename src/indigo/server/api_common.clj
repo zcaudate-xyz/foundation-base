@@ -1,6 +1,5 @@
 (ns indigo.server.api-common
-  (:require [code.heal :as heal]
-            [std.json :as json]
+  (:require [std.json :as json]
             [std.block :as block]
             [std.lib :as h]
             [std.lang :as l]

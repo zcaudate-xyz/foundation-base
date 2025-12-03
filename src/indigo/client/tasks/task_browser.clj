@@ -5,9 +5,9 @@
 (l/script :js
   {:require [[xt.lang.base-lib :as k]
              [js.react :as r]
-             [js.react.ext-monaco :as monaco]
+             #_[js.react.ext-monaco :as monaco]
              [js.react.ext-box :as box]
-             [js.react.ext-live :as live]
+             #_[js.react.ext-live :as live]
              [indigo.client.ui-global :as global]
              [indigo.client.ui-common :as ui]]})
 

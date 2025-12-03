@@ -1,6 +1,5 @@
 (ns indigo.server.api-task
-  (:require [code.heal :as heal]
-            [std.json :as json]
+  (:require [std.json :as json]
             [std.block :as block]
             [std.lib :as h]
             [std.html :as html]
@@ -42,7 +41,7 @@
 
 (defn to-heal
   [body]
-  (heal/heal body))
+  (block/heal body))
 
 (defn to-plpgsql-dsl
   [body]

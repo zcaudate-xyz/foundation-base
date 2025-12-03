@@ -183,22 +183,20 @@
   ([{:keys [files throw facts checks passed failed timeout] :as result}]
    (print/println
     (str (ansi/style (str "Summary (" files ")") #{:blue :bold})
-         (str "\n" (ansi/white (pad-left 8 "Files:")) "  " (ansi/blue files))
-         (str "\n" (ansi/white (pad-left 8 "Facts:")) "  " (ansi/blue facts))
-         (str "\n" (ansi/white (pad-left 8 "Checks:")) "  " (ansi/blue checks))
-         (str "\n" (ansi/white (pad-left 8 "Passed:")) "  " ((if (= passed checks)
-                                                               ansi/blue
-                                                               ansi/yellow) passed))
-         (str "\n" (ansi/white (pad-left 8 "Thrown:")) "  " ((if (pos? throw)
-                                                               ansi/yellow
-                                                               ansi/blue)
-                                                             throw))
-         (str "\n" (ansi/white (pad-left 8 "Timeout:")) " " ((if (pos? timeout)
-                                                               ansi/magenta
-                                                               ansi/blue)
-                                                             timeout))
-         (str "\n" (ansi/white (pad-left 8 "Failed:")) "  " ((if (pos? failed)
-                                                               ansi/red
-                                                               ansi/blue) failed)))
+         (str "\n" (ansi/white (pad-left 8 "Files:"))   "  " (ansi/blue files))
+         (str "\n" (ansi/white (pad-left 8 "Facts:"))   "  " (ansi/blue facts))
+         (if (pos? throw)
+           (str "\n" (ansi/white (pad-left 8 "Thrown:"))  "  " (ansi/yellow throw)))
+         (if (pos? timeout)
+           (str "\n" (ansi/white (pad-left 8 "Timeout:")) "  " (ansi/magenta timeout)))
+         (if (pos? failed)
+           (str "\n" (ansi/white (pad-left 8 "Failed:"))  "  " (ansi/red failed)))
+         (str "\n" (ansi/style (pad-left 8 "Success:")
+                               #{:bold}) "  " (ansi/style
+                                               (str passed " of " checks)
+                                               #{:bold
+                                                 (if (= passed checks)
+                                                   :green
+                                                   :red)})))
     "\n")
    (print/println "")))

@@ -25,11 +25,7 @@
              [indigo.client.app.components.inputs-panel :as ip]
              [indigo.client.app.components.properties-panel :as pp]
              [indigo.client.app.components.system-browser :as sb]
-             [indigo.client.app :as app]
-             #_#_#_[indigo.webapp.layout-top-bar :as top-bar]
-             [indigo.webapp.layout-hierarchy-tree :as hierarchy-tree]
-             [indigo.webapp.layout-library-browser :as library-browser]
-             ]})
+             [indigo.client.app :as app]]})
 
 
 (defn.js AppIndex

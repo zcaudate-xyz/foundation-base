@@ -8,7 +8,8 @@
    :require [[js.react :as r]
              [xt.lang.base-lib :as k]
              [xt.lang.base-client :as client]
-             [indigo.client.browser.browser-main :as browser-main]
+             [indigo.client.app :as app]
+             #_[indigo.client.browser.browser-main :as browser-main]
              [indigo.client.ui-common :as ui]]})
 
 (defn.js AppIndex
@@ -22,7 +23,7 @@
                     {:class ["flex flex-col w-full" "bg-green-200"]
                      :style {:top 0 :bottom 0}}]
       
-      :app/body    [:% browser-main/BrowserMain]})))
+      :app/body    [:% app/App]})))
 
 (defn.js main
   "TODO"

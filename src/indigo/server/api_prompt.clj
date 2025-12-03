@@ -1,7 +1,7 @@
 (ns indigo.server.api-prompt
   (:require [std.lib :as h]
             [std.string :as str]
-            [code.heal :as heal]))
+            [std.block :as block]))
 
 (defn with-prompt-fn
   [prompt-fn body]
@@ -11,7 +11,7 @@
          (filter (fn [line]
                    (not (str/starts-with? line "```"))))
          (str/join-lines)
-         (heal/heal))))
+         (block/heal))))
 
 (defn to-js-prompt
   [body]
