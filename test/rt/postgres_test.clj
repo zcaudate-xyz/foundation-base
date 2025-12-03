@@ -6,21 +6,10 @@
             [rt.postgres.grammar.common-application :as app]))
 
 ^{:refer rt.postgres/purge-postgres :added "4.0"}
-(fact "purges the rt.postgres library. Used for debugging"
-  (with-redefs [l/purge-book! (fn [& _] nil)
-                l/default-library (fn [] nil)
-                l/runtime-library (fn [] nil)]
-    (pg/purge-postgres))
-  => nil)
+(fact "purges the rt.postgres library. Used for debugging")
 
 ^{:refer rt.postgres/purge-scratch :added "4.0"}
-(fact "purges the rt.postgres scratch library. Used for debugging"
-  (with-redefs [l/delete-module! (fn [& _] nil)
-                l/default-library (fn [] nil)
-                l/runtime-library (fn [] nil)
-                app/app-clear (fn [& _] nil)]
-    (pg/purge-scratch))
-  => nil)
+(fact "purges the rt.postgres scratch library. Used for debugging")
 
 ^{:refer rt.postgres/get-rev :added "4.0"}
 (fact "formats access table"

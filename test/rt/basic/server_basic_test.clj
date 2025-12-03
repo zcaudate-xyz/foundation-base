@@ -18,6 +18,13 @@
     (start-server "test-wait" :lua nil)
     ;; Ensure start-server populated the env
     (get-in @rt.basic.server-basic/*env* [:lua "test-wait"]) => map?
+    
+    (future
+      (Thread/sleep 100)
+      (let [port (get-port {:lang :lua :id "test-wait"})]
+        (try (java.net.Socket. "localhost" port)
+             (catch Exception e))))
+    
     (wait-ready :lua "test-wait")
     => true
     (stop-server "test-wait" :lua)))

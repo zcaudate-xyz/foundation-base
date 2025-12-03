@@ -121,7 +121,7 @@
 
   (client-impl/invoke-ptr-pg-transform-try-fn
    'form)
-  => '[:DO :$$ form :$$ :LANGUAGE "plpgsql"])
+  => [:DO :$$ :DECLARE '(\| (do [e_code text] [e_msg text] [e_detail text] [e_hint text] [e_context text])) 'form :$$ :LANGUAGE "plpgsql"])
 
 ^{:refer rt.postgres.client-impl/invoke-ptr-pg-transform-prep :added "4.0"}
 (fact "transforms a form"
@@ -148,6 +148,8 @@
   => '[[[:select (set-config "temp.out" nil false)] false]
        [[:DO
          :$$
+         :DECLARE
+         (\| (do [e_code text] [e_msg text] [e_detail text] [e_hint text] [e_context text]))
          (try
            (do [:perform (set_config "temp.out" (:text (+ a b c)) false)])
            (catch

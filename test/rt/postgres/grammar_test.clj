@@ -1,6 +1,8 @@
 (ns rt.postgres.grammar-test
   (:use code.test)
   (:require [rt.postgres.grammar :refer :all]
+            [rt.postgres :as pg]
+            [rt.postgres.script.scratch :as scratch]
             [std.lang :as l]))
 
 (l/script- :postgres
@@ -12,13 +14,21 @@
 
 (fact:global
  {:setup    [(l/rt:restart)
+             (rt.postgres/exec [:create-schema :if-not-exists :scratch])
              (l/rt:setup :postgres)]
   :teardown [(l/rt:stop)]})
 
 ^{:refer rt.postgres.grammar/CANARY :adopt true :added "4.0"}
 (fact "stops the postgres runtime"
   
-  (scratch/addf 1 2)
+  (try
+    (scratch/addf 1M 2M)
+    (catch Throwable t
+      (spit "/tmp/debug_canary.txt" (str "DEBUG: CANARY failed: " (.getMessage t) "\n") :append true)
+      (when (instance? java.sql.SQLException t)
+        (spit "/tmp/debug_canary.txt" (str "DEBUG: Next Exception: " (.getNextException t) "\n") :append true))
+      (spit "/tmp/debug_canary.txt" (with-out-str (.printStackTrace t)) :append true)
+      (throw t)))
   => 3M)
 
 ^{:refer rt.postgres.grammar/CANARY.select :adopt true :added "4.0"}

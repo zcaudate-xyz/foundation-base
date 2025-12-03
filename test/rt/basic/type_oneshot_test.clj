@@ -74,8 +74,6 @@
                        :layout :full})
         (p/invoke-ptr-oneshot +ptr+ [1 2])))
   => (std.string/|
-   "local cjson = require('cjson')"
-   ""
    "local function L_core___identity_fn(x)"
    "  return x"
    "end"

@@ -13,7 +13,8 @@
   (with-redefs [server/start-server (fn [& _] {:port 1234})
                 server/wait-ready (fn [& _] true)
                 container/start-container (fn [& _] {})
-                bench/start-bench (fn [& _] {})]
+                bench/start-bench (fn [& _] {})
+                rt.basic.type-common/get-options (fn [& _] {})]
     (start-basic (rt-basic:create {:lang :test :id "test-start" :program nil :make nil :exec nil})))
   => map?)
 
@@ -24,7 +25,8 @@
                 server/stop-server (fn [& _] {})
                 container/stop-container (fn [& _] {})
                 bench/stop-bench (fn [& _] {})
-                bench/get-bench (fn [& _] {})]
+                bench/get-bench (fn [& _] {})
+                rt.basic.type-common/get-options (fn [& _] {})]
     (start-basic (rt-basic:create {:lang :test :id "test-stop" :program nil :make nil :exec nil}))
     (stop-basic {:id "test-stop" :lang :test}))
   => map?)
@@ -54,7 +56,8 @@
 
 ^{:refer rt.basic.type-basic/rt-basic:create :added "4.0"}
 (fact "creates a basic rt"
-  (rt-basic:create {:lang :test})
+  (with-redefs [rt.basic.type-common/get-options (fn [& _] {})]
+    (rt-basic:create {:lang :test}))
   => map?)
 
 ^{:refer rt.basic.type-basic/rt-basic :added "4.0"}
