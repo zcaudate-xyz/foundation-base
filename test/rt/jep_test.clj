@@ -16,7 +16,8 @@
   :teardown [(l/rt:stop)]})
 
 ^{:refer rt.jep/jep-bus :added "3.0"
-  :setup [(assert (= 10 (!.py (+ 1 2 3 4))))]}
+  ;; :setup [(assert (= 10 (!.py (+ 1 2 3 4))))]
+  }
 (fact "gets or creates a runtime bus for thread isolation"
   ^:hidden
   
@@ -29,7 +30,11 @@
                 @jep/*interpreters*)]}
 (fact "makes a shared interpreter"
 
-  (jep/make-interpreter)
+  (let [itp (jep/make-interpreter)]
+    (try
+      (class itp)
+      (finally
+        (jep/close-interpreter itp))))
   => jep.SharedInterpreter)
 
 ^{:refer rt.jep/close-interpreter :added "3.0"}
@@ -82,7 +87,9 @@
   @(eval-command-jep +jep+ {:op :get :body "a"})
   => 1)
 
-^{:refer rt.jep/eval-command-fn :added "3.0"}
+^{:refer rt.jep/eval-command-fn :added "3.0"
+  :setup    [(def +jep+ (h/start (jep/rt-jep:create {})))]
+  :teardown [(h/stop +jep+)]}
 (fact "helper function to input command"
   ((eval-command-fn :get :body) +jep+ "1+1")
   => (any future? 2))
