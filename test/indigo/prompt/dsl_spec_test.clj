@@ -14,7 +14,7 @@
   => {:op :convert,
       :desc nil,
       :dsl
-      ["(cond (== x 1)\n      (do (:= a 1))\n      :else\n      (do (:= b 1)))"],
+      ["(cond (== x 1) (do (:= a 1))\n      :else    (do (:= b 1)))"],
       :js ["if(x == 1){\n  a = 1;\n}\nelse{\n  b = 1;\n}"]})
 
 ^{:refer indigo.prompt.dsl-spec/construct-alts :added "4.0"}

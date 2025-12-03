@@ -123,53 +123,53 @@
 
 
 
+(comment
+  and
+  await
+  b:&
+  b:<<
+  b:>>
+  b:xor
+  b:|
+  br*
+  break
+  case
 
-and
- await
- b:&
- b:<<
- b:>>
- b:xor
- b:|
- br*
- break
- case
- 
- cond
- 
- del
- do
- fn
+  cond
 
-
- for  
- if
- instanceof
- let
- mod
- new
- not
- not=
- or
- pow
- return
- super
- switch
- tab
- this
- throw
- try
- typeof
- undefined
-
- when
- while
- xor
- yield
- 
+  del
+  do
+  fn
 
 
-(sort-by str (keys (:reserved (l/grammar :js))))
+  for
+  if
+  instanceof
+  let
+  mod
+  new
+  not
+  not=
+  or
+  pow
+  return
+  super
+  switch
+  tab
+  this
+  throw
+  try
+  typeof
+  undefined
+
+  when
+  while
+  xor
+  yield
+
+
+
+  (sort-by str (keys (:reserved (l/grammar :js)))))
 
 
 (defmacro defrule
@@ -189,7 +189,7 @@ and
 (defrule :alts
   ;; When refering to a previously defined <element> in the same namespace,
   ;; explicity link to it with -/<element>, using '-' for the current namespace.
-  {:from           
+  {:from           nil
    :correct        (defn.js HelloFn [] (return -/Hello))})
 
 (defrule :correction
