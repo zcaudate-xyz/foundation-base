@@ -201,7 +201,8 @@
                                      output)))
                                run-id)
            _       (rt/get-global ns :teardown)
-           results (interim facts)]
+           results (-> (interim facts)
+                       (assoc :queued (repeat (count tests) true)))]
        results))))
 
 (defn run-namespace

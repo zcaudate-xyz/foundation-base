@@ -180,11 +180,14 @@
 (defn print-summary
   "outputs the description for an entire test run"
   {:added "3.0"}
-  ([{:keys [files throw facts checks passed failed timeout] :as result}]
+  ([{:keys [files throw facts checks passed failed timeout queued] :as result}]
    (print/println
     (str (ansi/style (str "Summary (" files ")") #{:blue :bold})
          (str "\n" (ansi/white (pad-left 8 "Files:"))   "  " (ansi/blue files))
-         (str "\n" (ansi/white (pad-left 8 "Facts:"))   "  " (ansi/blue facts))
+         (str "\n" (ansi/white (pad-left 8 "Facts:"))   "  "
+              (if (and queued (> queued facts))
+                (str (ansi/blue facts) " of " (ansi/blue queued))
+                (ansi/blue facts)))
          (if (pos? throw)
            (str "\n" (ansi/white (pad-left 8 "Thrown:"))  "  " (ansi/yellow throw)))
          (if (pos? timeout)
