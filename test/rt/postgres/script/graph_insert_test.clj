@@ -105,6 +105,8 @@
 
 ^{:refer rt.postgres.script.graph-insert/insert-fn-raw :added "4.0"}
 (fact "constructs insert form with prep"
+  ^:hidden
+  
   (insert/insert-fn-raw
    (impl/prep-table 'scratch/TaskCache true (l/rt:macro-opts :postgres))
    {:id "hello"}
@@ -123,7 +125,7 @@
                                {:name "task2"
                                 :status "pending"}]}
                       {:track 'o-op}))
-  => list?)
+  => h/form?)
     
 
 ^{:refer rt.postgres.script.graph-insert/insert-fn.assign :adopt true :added "4.0"}
@@ -141,4 +143,4 @@
        meta
        :assign/fn)
    'o-output)
-  => list?)
+  => h/form?)

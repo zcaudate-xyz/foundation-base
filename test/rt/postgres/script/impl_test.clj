@@ -47,7 +47,7 @@
   (pg/t:select scratch/Task
     {:returning #{:name}
      :as :raw})
-  => list?
+  => h/form?
   
   (pg/t:select scratch/Task {:single true
                              :returning #{:-/data}

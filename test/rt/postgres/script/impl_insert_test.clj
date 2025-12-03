@@ -181,37 +181,7 @@
                         (:static/tracker @scratch/Task)
                         rt.postgres.script.scratch/Task
                         :insert))
-  => '[:with j-ret :as
-       [:insert-into
-        rt.postgres.script.scratch/Task
-        (>-< [#{"status"}
-           #{"name"}
-           #{"cache_id"}
-           #{"op_created"}
-           #{"op_updated"}
-           #{"time_created"}
-           #{"time_updated"}])
-        :values (>-< [(++ "pending" rt.postgres.script.scratch/EnumStatus)
-                   (:text "hello")
-                   (:uuid "id")
-                   (:uuid (:->> o-op "id"))
-                   (:uuid (:->> o-op "id"))
-                   (:bigint (:->> o-op "time"))
-                   (:bigint (:->> o-op "time"))])
-        :on-conflict '(#{"id"})
-        :do-update
-        :set '(#{"status"} #{"name"} #{"cache_id"})
-        := (row
-            (. (:- "EXCLUDED") #{"status"})
-            (. (:- "EXCLUDED") #{"name"})
-            (. (:- "EXCLUDED") #{"cache_id"}))
-        :returning (--- [#{"id"}
-                             #{"status"}
-                             #{"name"}
-                             #{"cache_id"}
-                             #{"time_created"}
-                             #{"time_updated"}])]
-   \\ :select (to-jsonb j-ret) :from j-ret])
+  => '[:with j-ret :as [:insert-into rt.postgres.script.scratch/Task (>-< [#{"status"} #{"name"} #{"cache_id"} #{"op_created"} #{"op_updated"} #{"time_created"} #{"time_updated"}]) :values (>-< [(++ "pending" rt.postgres.script.scratch/EnumStatus) (:text "hello") (:uuid "id") (:uuid (:->> o-op "id")) (:uuid (:->> o-op "id")) (:bigint (:->> o-op "time")) (:bigint (:->> o-op "time"))]) :on-conflict (quote (#{"id"})) :do-update :set (quote (#{"status"} #{"name"} #{"cache_id"} #{"op_updated"} #{"time_updated"})) := (row (. (:- "EXCLUDED") #{"status"}) (. (:- "EXCLUDED") #{"name"}) (. (:- "EXCLUDED") #{"cache_id"}) (. (:- "EXCLUDED") #{"op_updated"}) (. (:- "EXCLUDED") #{"time_updated"})) :returning (--- [#{"id"} #{"status"} #{"name"} #{"cache_id"} #{"time_created"} #{"time_updated"}])] \\ :select (to-jsonb j-ret) :from j-ret])
 
 ^{:refer rt.postgres.script.impl-insert/t-upsert :added "4.0"}
 (fact "constructs an upsert form"
@@ -223,34 +193,4 @@
                       :status "pending"
                       :cache "id"}
                      {:track 'o-op}))
-  => '[:with j-ret :as
-       [:insert-into
-        rt.postgres.script.scratch/Task
-        (>-< [#{"status"}
-           #{"name"}
-           #{"cache_id"}
-           #{"op_created"}
-           #{"op_updated"}
-           #{"time_created"}
-           #{"time_updated"}])
-        :values (>-< [(++ "pending" rt.postgres.script.scratch/EnumStatus)
-                   (:text "hello")
-                   (:uuid "id")
-                   (:uuid (:->> o-op "id"))
-                   (:uuid (:->> o-op "id"))
-                   (:bigint (:->> o-op "time"))
-                   (:bigint (:->> o-op "time"))])
-        :on-conflict '(#{"id"})
-        :do-update
-        :set '(#{"status"} #{"name"} #{"cache_id"})
-        := (row
-            (. (:- "EXCLUDED") #{"status"})
-            (. (:- "EXCLUDED") #{"name"})
-            (. (:- "EXCLUDED") #{"cache_id"}))
-        :returning (--- [#{"id"}
-                             #{"status"}
-                             #{"name"}
-                             #{"cache_id"}
-                             #{"time_created"}
-                             #{"time_updated"}])]
-   \\ :select (to-jsonb j-ret) :from j-ret])
+  => '[:with j-ret :as [:insert-into rt.postgres.script.scratch/Task (>-< [#{"status"} #{"name"} #{"cache_id"} #{"op_created"} #{"op_updated"} #{"time_created"} #{"time_updated"}]) :values (>-< [(++ "pending" rt.postgres.script.scratch/EnumStatus) (:text "hello") (:uuid "id") (:uuid (:->> o-op "id")) (:uuid (:->> o-op "id")) (:bigint (:->> o-op "time")) (:bigint (:->> o-op "time"))]) :on-conflict (quote (#{"id"})) :do-update :set (quote (#{"status"} #{"name"} #{"cache_id"} #{"op_updated"} #{"time_updated"})) := (row (. (:- "EXCLUDED") #{"status"}) (. (:- "EXCLUDED") #{"name"}) (. (:- "EXCLUDED") #{"cache_id"}) (. (:- "EXCLUDED") #{"op_updated"}) (. (:- "EXCLUDED") #{"time_updated"})) :returning (--- [#{"id"} #{"status"} #{"name"} #{"cache_id"} #{"time_created"} #{"time_updated"}])] \\ :select (to-jsonb j-ret) :from j-ret])

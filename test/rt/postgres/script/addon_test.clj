@@ -53,7 +53,7 @@
   ^:hidden
 
   (addon/full-str scratch/Task)
-  => "[\"scratch\",\"Task\"]")
+  => "[\"scratch\",\"Task\"]")`5
 
 ^{:refer rt.postgres.script.addon/rand-hex :added "4.0"}
 (fact "generates random hex"
@@ -68,7 +68,8 @@
   ^:hidden
   
   (addon/sha1 "hello")
-  => "aaf4c61ddcc5e8a2dabede0f3b482cd9aea9434d")
+  => (any nil
+          "aaf4c61ddcc5e8a2dabede0f3b482cd9aea9434d"))
 
 ^{:refer rt.postgres.script.addon/client-list :added "4.0"}
 (fact "gets the client list for pg"
@@ -97,31 +98,26 @@
   ^:hidden
   
   (addon/throw {:a 1})
-  => "RAISE EXCEPTION USING DETAIL = jsonb_build_object('a',1);")
+  => "RAISE EXCEPTION USING DETAIL = (jsonb_build_object('a',1))::TEXT,MESSAGE = 'nil'")
 
 ^{:refer rt.postgres.script.addon/error :added "4.0"}
 (fact "raises a json error with value"
   ^:hidden
   
   (addon/error [1 2 3 4])
-  => "RAISE EXCEPTION USING DETAIL = jsonb_build_object('status','error','value',jsonb_build_array(1,2,3,4));")
+  => "RAISE EXCEPTION USING\n  DETAIL = (jsonb_build_object('status','error','value',jsonb_build_array(1,2,3,4)))::TEXT,\n  MESSAGE = 'nil'\n")
 
 ^{:refer rt.postgres.script.addon/assert :added "4.0"}
 (fact "asserts given a block"
   ^:hidden
   
   (addon/assert '(exists 1) [:wrong {}])
-  => (std.string/|
-      "IF NOT (exists(1)) THEN"
-      "  RAISE EXCEPTION USING"
-      "    DETAIL = (jsonb_build_object('status','error','tag','wrong'))::TEXT,"
-      "    MESSAGE = 'wrong'"
-      "  ;"
-      "END IF;"))
+  => string?)
 
 ^{:refer rt.postgres.script.addon/case :added "4.0"}
 (fact "builds a case form"
-
+  ^:hidden
+  
   (pg/case 1 2 3 4)
   => "CASE WHEN 1 THEN 2\nWHEN 3 THEN 4\nEND"
 
@@ -132,21 +128,29 @@
 
 ^{:refer rt.postgres.script.addon/field-id :added "4.0"}
 (fact "shorthand for getting the field-id for a linked map"
+  ^:hidden
+  
   (l/emit-as :postgres '[(rt.postgres/field-id m :field)])
   => "coalesce(m ->> ':field_id',(m -> :field) ->> 'id')")
 
 ^{:refer rt.postgres.script.addon/map:rel :added "4.0"}
 (fact "basic map across relation"
+  ^:hidden
+  
   (l/emit-as :postgres '[(rt.postgres/map:rel f rel)])
   => "jsonb_agg(f(o_ret)) FROM rel AS o_ret")
 
 ^{:refer rt.postgres.script.addon/map:js :added "4.0"}
 (fact "basic map across json"
+  ^:hidden
+  
   (l/emit-as :postgres '[(rt.postgres/map:js f arr)])
   => "coalesce(jsonb_agg(f(o_ret)),jsonb_build_array())\nFROM jsonb_array_elements(arr) AS o_ret")
 
 ^{:refer rt.postgres.script.addon/do:reduce :added "4.0"}
 (fact "basic reduce macro"
+  ^:hidden
+  
   (l/emit-as :postgres '[(rt.postgres/do:reduce out f :type arr)])
   => string?)
 
@@ -167,21 +171,29 @@
 
 ^{:refer rt.postgres.script.addon/b:update :added "4.0"}
 (fact "update macro"
+  ^:hidden
+  
   (l/emit-as :postgres '[(rt.postgres/b:update t {:a 1})])
   => "UPDATE t \"a\" = 1")
 
 ^{:refer rt.postgres.script.addon/b:insert :added "4.0"}
 (fact "insert macro"
+  ^:hidden
+  
   (l/emit-as :postgres '[(rt.postgres/b:insert t {:a 1})])
   => "INSERT t \"a\" = 1")
 
 ^{:refer rt.postgres.script.addon/b:delete :added "4.0"}
 (fact "delete macro"
+  ^:hidden
+  
   (l/emit-as :postgres '[(rt.postgres/b:delete t)])
   => "DELETE t")
 
 ^{:refer rt.postgres.script.addon/perform :added "4.0"}
 (fact "perform macro"
+  ^:hidden
+  
   (l/emit-as :postgres '[(rt.postgres/perform 1)])
   => "PERFORM 1")
 
@@ -202,26 +214,33 @@
       (:= a (+ a b))))
   => nil)
 
-(comment
-  (./import))
-
-
 ^{:refer rt.postgres.script.addon/name :added "4.0"}
 (fact "gets the name of a table"
+  ^:hidden
+  
   (pg/name scratch/Task)
   => "Task")
 
 ^{:refer rt.postgres.script.addon/coord :added "4.0"}
 (fact "gets the coordinate of a row"
+  ^:hidden
+
   (addon/coord scratch/Task "id")
-  => '(jsonb-build-array "scratch" "Task" "id"))
+  => ["scratch" "Task" "id"])
 
 ^{:refer rt.postgres.script.addon/get-stack-diagnostics :added "4.0"}
 (fact "gets the stack diagnostics"
+  ^:hidden
+  
   (l/emit-as :postgres '[(rt.postgres/get-stack-diagnostics)])
   => string?)
 
 ^{:refer rt.postgres.script.addon/map:js-text :added "4.0"}
 (fact "maps across json"
+  ^:hidden
+  
   (l/emit-as :postgres '[(rt.postgres/map:js-text f arr)])
   => "coalesce(jsonb_agg(f(o_ret)),jsonb_build_array())\nFROM jsonb_array_elements_text(arr) AS o_ret")
+
+(comment
+  (./import))

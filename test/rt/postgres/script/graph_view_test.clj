@@ -33,33 +33,50 @@
                                            {:id <%>}]
                                 :roles #{:task}})
   => '{:symbol rt.postgres.script.graph-view-test/cache-is-member,
-       :forward {:table rt.postgres.script.scratch/Task,
-                 :clause {:cache <%>},
-                 :form [:with j-ret :as
-                        [:select (---
-                                  [#{"id"}
-                                   #{"status"}
-                                   #{"name"}
-                                   #{"cache_id"}
-                                   #{"op_created"}
-                                   #{"op_updated"}
-                                   #{"time_created"}
-                                   #{"time_updated"}])
-                         :from rt.postgres.script.scratch/Task
-                         \\ :where {"cache_id" [:eq <%>]}]
-                        \\ :select (jsonb-agg j-ret) :from j-ret]},
-       :reverse    {:table rt.postgres.script.scratch/TaskCache,
-                    :clause {:id <%>},
-                    :form [:with j-ret :as
-                           [:select
-                            (--- [#{"id"}
-                                  #{"op_created"}
-                                  #{"op_updated"}
-                                  #{"time_created"}
-                                  #{"time_updated"}])
-                            :from rt.postgres.script.scratch/TaskCache
-                            \\ :where {"id" [:eq <%>]}]
-                           \\ :select (jsonb-agg j-ret) :from j-ret]},
+       :forward
+       {:table rt.postgres.script.scratch/Task,
+        :clause {:cache <%>},
+        :form
+        [:with
+         j-ret
+         :as
+         [:select
+          (---
+           [#{"id"}
+            #{"status"}
+            #{"name"}
+            #{"cache_id"}
+            #{"time_created"}
+            #{"time_updated"}])
+          :from
+          rt.postgres.script.scratch/Task
+          \\
+          :where
+          {"cache_id" [:eq <%>]}]
+         \\
+         :select
+         (jsonb-agg j-ret)
+         :from
+         j-ret]},
+       :reverse
+       {:table rt.postgres.script.scratch/TaskCache,
+        :clause {:id <%>},
+        :form
+        [:with
+         j-ret
+         :as
+         [:select
+          (--- [#{"id"} #{"time_created"} #{"time_updated"}])
+          :from
+          rt.postgres.script.scratch/TaskCache
+          \\
+          :where
+          {"id" [:eq <%>]}]
+         \\
+         :select
+         (jsonb-agg j-ret)
+         :from
+         j-ret]},
        :roles #{:task}})
 
 ^{:refer rt.postgres.script.graph-view/defaccess.pg :added "4.0"}

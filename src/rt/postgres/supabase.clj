@@ -19,7 +19,7 @@
         [:create-role role \;])))
 
 (defmacro.pg alter-role-bypassrls
-  "TODO"
+  "alters role to bypass rls"
   {:added "4.0"}
   [role]
   (pop (common/block-do-suppress
@@ -155,7 +155,7 @@
                           "anon")])
 
 (defn process-return
-  "TODO"
+  "processes the return value"
   {:added "4.0"}
   [ret]
   (if (= ret "")
@@ -207,7 +207,7 @@
                  {:form form})))
 
 (defmacro with-role-single
-  "TODO"
+  "executes a statement with role (single)"
   {:added "4.0"}
   [[role type] form]
   (let [role (case role
@@ -231,14 +231,7 @@
                                            :message 'e_msg})))))))
 
 (defmacro with-role
-  "executes a statement with role
-  (macroexpand-1 ' (s/with-role [anon :integer] (+ 1 2 3)))
-  => '(!.pg
-       (try
-         [:set-local-role anon]
-         (let [(:integer out) (+ 1 2 3)]
-           (return out))
-        (catch others (return {:code SQLSTATE, :message SQLERRM}))))"
+  "executes a statement with role"
   {:added "4.0"}
   [[role type] & forms]
   (let [res (mapv (fn [form]
@@ -253,7 +246,7 @@
           res)))
 
 (defmacro with-auth-single
-  "TODO"
+  "executes a statement with auth (single)"
   {:added "4.0"}
   [[user-id type] form]
   (let [type (or type (get-form-type form))]
@@ -272,23 +265,7 @@
                                            :message 'SQLERRM})))))))
 
 (defmacro with-auth
-  "TODO
- 
-   (macroexpand-1
-    '(s/with-auth [\"00000000-0000-0000-0000-000000000000\"
-                   :integer]
-       (+ 1 2 3)))
-   => '(!.pg
-        (try
-          [:set-local-role authenticated]
-          [:perform
-          (set-config
-            \"request.jwt.claim.sub\"
-            \"00000000-0000-0000-0000-000000000000\"
-            true)]
-          (let [(:integer out) (+ 1 2 3)]
-            (return out))
-          (catch others (return {:code SQLSTATE, :message SQLERRM}))))"
+  "executes a statement with auth"
   {:added "4.0"}
   [[user-id type] & forms]
   (let [res (mapv (fn [form]
@@ -303,7 +280,7 @@
           res)))
 
 (defmacro with-super-single
-  "TODO"
+  "executes a statement with super (single)"
   {:added "4.0"}
   [[user-id type] form]
   (let [type (or type (get-form-type form))]
@@ -327,7 +304,7 @@
                                            :message 'SQLERRM})))))))
 
 (defmacro with-super
-  "TODO"
+  "executes a statement with super"
   {:added "4.0"}
   [[user-id type] & forms]
   (let [res (mapv (fn [form]
@@ -542,7 +519,7 @@
             body))
 
 (defn api-signup-create
-  "TODO"
+  "create user via supabase api"
   {:added "4.0"}
   [{:keys [email
            password

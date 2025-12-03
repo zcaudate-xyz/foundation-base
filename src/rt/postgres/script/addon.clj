@@ -33,7 +33,7 @@
 
 (defmacro.pg ^{:- [:text]}
   name
-  "TODO"
+  "gets the name of a table"
   {:added "4.0"}
   ([table]
    (let [entry (deref (deref (resolve table)))]
@@ -58,7 +58,7 @@
 
 (defmacro.pg ^{:- [:jsonb]}
   coord
-  "TODO"
+  "gets the coordinate of a row"
   {:added "4.0"}
   ([table row-id]
    (let [entry (deref (deref (resolve table)))]
@@ -79,7 +79,7 @@
   "calculates the sha1"
   {:added "4.0"}
   ([text]
-   (list 'encode (list 'public.digest (:bytea text) "sha1") "hex")))
+   (list 'encode (list 'digest (:bytea text) "sha1") "hex")))
 
 (defmacro.pg ^{:- [:block]}
   client-list
@@ -131,15 +131,7 @@
 
 (defmacro.pg ^{:style/indent 0}
   case
-  "builds a case form
- 
-   (pg/case 1 2 3 4)
-   => \"CASE WHEN 1 THEN 2\\nWHEN 3 THEN 4\\nEND\"
- 
-   ((:template @pg/case) 1 2 3 4)
-   => '(% [:case :when (:% 1) :then (:% 2)
-           \\ :when (:% 3) :then (:% 4)
-           \\ :end])"
+  "builds a case form"
   {:added "4.0"}
   ([& args]
    (let [args  (partition 2 args)
@@ -154,7 +146,7 @@
 
 (defmacro.pg ^{:- [:block]}
   get-stack-diagnostics
-  "TODO"
+  "gets the stack diagnostics"
   {:added "4.0"}
   []
   [:get-stacked-diagnostics
@@ -185,7 +177,7 @@
 
 (defmacro.pg ^{:- [:jsonb]}
   map:js-text
-  "TODO"
+  "maps across json"
   {:added "4.0"}
   ([f arr & args]
    (h/$ (% [(coalesce (jsonb-agg (~f o-ret ~@args))

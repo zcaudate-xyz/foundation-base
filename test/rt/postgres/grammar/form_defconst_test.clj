@@ -33,22 +33,48 @@
   
   (form/pg-defconst
    (second -out-))
-  => '(do:block (let [o-track {}]
-                  [:insert-into rt.postgres.script.scratch/Task
-                   (>-< [#{"id"} #{"status"} #{"name"} #{"cache_id"} #{"op_created"}
-                          #{"op_updated"} #{"time_created"} #{"time_updated"}])
-                   :values (>-< [(:uuid "hello-0")
-                                  (++ "ok" rt.postgres.script.scratch/EnumStatus)
-                                  (:text "hello")
-                                  (:uuid "cache-001")
-                                  (:uuid (:->> o-track "id"))
-                                  (:uuid (:->> o-track "id"))
-                                  (:bigint (:->> o-track "time"))
-                                  (:bigint (:->> o-track "time"))])
-                   :on-conflict (quote (#{"id"})) :do-update :set
-                   (quote (#{"id"} #{"status"} #{"name"} #{"cache_id"}))
-                   := (row (. (:- "EXCLUDED") #{"id"}) (. (:- "EXCLUDED") #{"status"})
-                           (. (:- "EXCLUDED") #{"name"}) (. (:- "EXCLUDED") #{"cache_id"}))])))
+  => '(do:block
+       (let
+           [o-track {}]
+         [:insert-into
+          rt.postgres.script.scratch/Task
+          (>-<
+           [#{"id"}
+            #{"status"}
+            #{"name"}
+            #{"cache_id"}
+            #{"op_created"}
+            #{"op_updated"}
+            #{"time_created"}
+            #{"time_updated"}])
+          :values
+          (>-<
+           [(:uuid "hello-0")
+            (++ "ok" rt.postgres.script.scratch/EnumStatus)
+            (:text "hello")
+            (:uuid "cache-001")
+            (:uuid (:->> o-track "id"))
+            (:uuid (:->> o-track "id"))
+            (:bigint (:->> o-track "time"))
+            (:bigint (:->> o-track "time"))])
+          :on-conflict
+          '(#{"id"})
+          :do-update
+          :set
+          '(#{"id"}
+            #{"status"}
+            #{"name"}
+            #{"cache_id"}
+            #{"op_updated"}
+            #{"time_updated"})
+          :=
+          (row
+           (. (:- "EXCLUDED") #{"id"})
+           (. (:- "EXCLUDED") #{"status"})
+           (. (:- "EXCLUDED") #{"name"})
+           (. (:- "EXCLUDED") #{"cache_id"})
+           (. (:- "EXCLUDED") #{"op_updated"})
+           (. (:- "EXCLUDED") #{"time_updated"}))])))
   
   
   

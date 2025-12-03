@@ -49,14 +49,14 @@
   ^:hidden
   
   (pg-tf-throw '(throw {}))
-  => '[:raise-exception :using-detail := (% {})])
+  => '[:raise-exception :using (quote [[:detail := (:text (% {}))] [:message := "nil"]])])
 
 ^{:refer rt.postgres.grammar.tf/pg-tf-error :added "4.0"}
 (fact "creates error transform"
   ^:hidden
   
   (pg-tf-error '(error {}))
-  => '[:raise-exception :using-detail := (% {:status "error"})])
+  => '[:raise-exception :using (quote [[:detail := (:text (% {:status "error"}))] [:message := "nil"]])])
 
 ^{:refer rt.postgres.grammar.tf/pg-tf-assert :added "4.0"}
 (fact "creates assert transform"
@@ -64,4 +64,6 @@
   
   (pg-tf-assert '(assert (= 1 1)
                          [:tag {}]))
-  => '(if [:NOT (quote ((= 1 1)))] [:raise-exception :using-detail := (% {:status "error", :tag :tag})]))
+  => '(if [:NOT (quote ((= 1 1)))] [:raise-exception :using (quote [[:detail := (:text (% {:status "error", :tag :tag}))]
+                                                                    [:message := "tag"]])]))
+
