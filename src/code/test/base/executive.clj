@@ -66,7 +66,8 @@
   {:added "3.0"}
   ([key results]
    (let [items (or (get-in results [:data key])
-                   (get results key))]
+                   (get results key)
+                   (get-in (meta results) [:data key]))]
      (->> (mapv (fn [result]
                   (let [refer (-> result :meta :refer)
                         line (-> result :meta :line)]
@@ -102,7 +103,7 @@
             :failed  (:failed items)
             :throw   (:throw items)
             :timeout (:timeout items))
-     (assoc summary :data items))))
+     (with-meta summary {:data items}))))
 
 (defn save-report
   "saves the report to .hara/runs"
