@@ -373,6 +373,8 @@
                (assoc :right (cons elem right))
                (h/call (:update-step-left context) elem)))))
   ([zip n]
+
+ 
    (nth (iterate step-left zip) n)))
 
 (defn step-right
@@ -385,11 +387,12 @@
            zip)
 
          :else
-         (let [elem (first right)]
-           (-> zip
-               (assoc :left  (cons elem left))
-               (assoc :right (rest right))
-               (h/call (:update-step-right context) elem)))))
+         (let [elem (first right)
+               res (-> zip
+                       (assoc :left  (cons elem left))
+                       (assoc :right (rest right))
+                       (h/call (:update-step-right context) elem))]
+           res)))
   ([zip n]
    (nth (iterate step-right zip) n)))
 

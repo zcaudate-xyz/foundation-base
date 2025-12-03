@@ -22,7 +22,8 @@
 
          (or (symbol? x)
              (string? x)
-             (keyword? x))
+             (keyword? x)
+             (number? x))
          x
 
          :else

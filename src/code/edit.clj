@@ -322,8 +322,9 @@
   "navigates into the form"
   {:added "3.0"}
   ([nav]
-   (if (zip/can-step-inside? nav)
-     (zip/step-inside nav))))
+   (let [can (zip/can-step-inside? nav)]
+     (if can
+       (zip/step-inside nav)))))
 
 (defn right*
   "navigates to right element, including whitespace"

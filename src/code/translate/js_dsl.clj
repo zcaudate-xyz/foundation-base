@@ -56,7 +56,9 @@
       "CallExpression"
       (let [callee (translate-node (:callee node))
             args   (translate-args (:arguments node))]
-        (apply list callee args))
+        (if (and (seq? callee) (= '. (first callee)))
+          (apply list (concat callee args))
+          (apply list callee args)))
 
       "MemberExpression"
       (let [obj (translate-node (:object node))

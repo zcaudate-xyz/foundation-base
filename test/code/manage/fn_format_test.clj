@@ -13,6 +13,22 @@
     (zip/step-right nav))
   => any)
 
+
+
+(fact "reproduce step-right failure"
+  (let [nav (nav/parse-string "(defn foo [x] 1)")
+        nav (nav/down nav)
+        nav (nav/right nav) ;; foo
+        nav (nav/right nav) ;; [x]
+        nav (nav/left nav) ;; foo
+        ;; Simulate list-transform logic
+        new-list (construct/block (list 'foo))
+        nav (assoc nav :right '())
+        nav (zip/insert-right nav new-list)]
+    (println "DEBUG: nav after insert-right:" nav)
+    (zip/step-right nav))
+  => any)
+
 ^{:refer code.manage.fn-format/list-transform :added "3.0"}
 
 

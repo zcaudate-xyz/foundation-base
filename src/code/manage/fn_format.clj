@@ -22,11 +22,22 @@
   "transforms `(.. [] & body)` to `(.. ([] & body))`"
   {:added "3.0"}
   ([nav]
-   (println "DEBUG: nav node:" (block/block-string (zip/node nav)))
-   (let [nav (-> nav nav/left)
-         [nav right-blocks] (if (#{:space :newline} (block/block-tag (zip/right-element nav)))
-                              [(nav/left nav) (rest (zip/right-elements (nav/left nav)))]
-                              [nav (zip/right-elements nav)])
+   (let [nav (loop [n nav]
+               (let [node (zip/get n)]
+                 (if (and (block/container? node)
+                          (= :vector (block/block-tag node)))
+                   n
+                   (if (zip/at-right-most? n)
+                     n
+                     (recur (zip/step-right n))))))
+         nav (loop [n nav]
+               (if (zip/at-left-most? n)
+                 n
+                 (let [l (zip/step-left n)]
+                   (if (#{:space :newline :linespace} (block/block-tag (zip/get l)))
+                     (recur l)
+                     n))))
+         right-blocks (zip/right-elements nav)
          exprs (filter block/expression? right-blocks)
          head (take 2 exprs)
          tail (vec (drop 2 exprs))
@@ -34,12 +45,8 @@
          nav (assoc nav :right '())]
      (let [nav (-> nav
                    (zip/insert-right new-list)
-                   (as-> n (reduce zip/insert-right n (reverse (construct/spaces 2))))
-                   (zip/insert-right (construct/newline))
-                   (manual-step-right) ;; newline
-                   (manual-step-right) ;; space 1
-                   (manual-step-right) ;; space 2
-                   (manual-step-right))] ;; new-list
+                   (zip/insert-left (construct/newline))
+                   (as-> n (reduce zip/insert-left n (construct/spaces 2))))]
        (if (seq tail)
          (-> nav
              (nav/down)
@@ -48,8 +55,7 @@
              (nav/insert-space 3)
              (nav/insert-all tail)
              (nav/up))
-         (do (println "DEBUG: left:" (map block/block-string (:left nav)))
-             nav))))))
+         nav)))))
 
 (defn fn:list-forms
   "query to find `defn` and `defmacro` forms with a vector"
