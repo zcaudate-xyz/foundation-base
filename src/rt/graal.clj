@@ -88,6 +88,16 @@
    (let [lang (raw-lang ctx)]
      (.eval ^Context ctx (name lang) string))))
 
+(defn unwrap
+  "unwraps a polyglot value"
+  {:added "4.0"}
+  [^Value v]
+  (cond (.isString v) (.asString v)
+        (.isNumber v) (if (.fitsInLong v) (.asLong v) (.asDouble v))
+        (.isBoolean v) (.asBoolean v)
+        (.isNull v)   nil
+        :else v))
+
 (defn eval-graal
   "evals body in the runtime
  
@@ -96,15 +106,16 @@
    => \"2\""
   {:added "4.0"}
   ([{:keys [raw]} string]
-   (eval-raw @raw string)))
+   (unwrap (eval-raw @raw string))))
 
 (def +options+
   (delay
     {:js      {:bootstrap (impl/emit-entry-deps
                            k/return-eval
                            {:lang :js
-                            :layout :flat})
-               :main  {:out   str}
+                            :layout :flat
+                            :emit {:lang/format :commonjs}})
+               :json   false
                :emit  {:body  {:transform #'default/return-transform}}}
      :python  {:bootstrap  (impl/emit-entry-deps
                             k/return-eval
@@ -126,12 +137,12 @@
    => -1"
   {:added "4.0"}
   ([{:keys [state lang layout] :as rt} ptr args]
-   (let [{:keys [main emit]} (get @+options+ lang)]
+   (let [{:keys [main emit json]} (get @+options+ lang)]
      (default/default-invoke-script
       rt ptr args eval-graal
       {:main main
        :emit emit
-       :json :full}))))
+       :json (if (nil? json) :full json)}))))
 
 (defn start-graal
   "starts the graal runtime"

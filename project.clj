@@ -100,10 +100,8 @@
    [http-kit "2.8.0"]
    
    ;; rt.graal
-   [org.graalvm.sdk/graal-sdk "21.2.0"]
-   [org.graalvm.truffle/truffle-api "21.2.0"]
-   [org.graalvm.js/js "21.2.0"]
-   [org.graalvm.js/js-scriptengine "21.2.0"]
+   [org.graalvm.polyglot/polyglot "24.1.0"]
+   [org.graalvm.js/js-language "24.1.0"]
    [commons-io/commons-io "2.15.1"]
    
    ;; rt.jep
