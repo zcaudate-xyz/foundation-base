@@ -16,7 +16,8 @@
                                  stderr
                                  raw
                                  root
-                                 extension]
+                                 extension
+                                 output-flag]
                           :as opts
                           :or {trim str/trim-newlines}}]
   (let [tmp-exec (java.io.File/createTempFile "tmp" "")
@@ -26,7 +27,9 @@
                           (h/error "Requires File Extension"
                                    opts)))
         _   (spit tmp-file input-body)
-        _   (h/sh {:args (conj input-args (str tmp-file))
+        _   (h/sh {:args (if output-flag
+                           (vec (concat input-args [output-flag (str tmp-exec) (str tmp-file)]))
+                           (conj input-args (str tmp-file)))
                    :root (str (fs/parent tmp-file))})]
     (str (h/sh {:args [(str "./" (fs/file-name tmp-exec))]
                 :root (str (fs/parent tmp-file))
@@ -37,7 +40,7 @@
   {:added "4.0"}
   ([{:keys [exec
             process] :as rt} body]
-   (sh-exec exec body process)))
+   ((or (:exec-fn process) sh-exec) exec body process)))
 
 (defn invoke-ptr-twostep
   "invokes twostep pointer"
