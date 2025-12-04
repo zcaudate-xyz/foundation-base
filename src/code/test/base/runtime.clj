@@ -1,36 +1,7 @@
 (ns code.test.base.runtime
   (:require [std.lib :as h]
-            [std.string :as str]))
-
-(defonce ^:dynamic *eval-fact* false)
-
-(defonce ^:dynamic *eval-mode* true)
-
-(defonce ^:dynamic *eval-meta* nil)
-
-(defonce ^:dynamic *eval-global* nil)
-
-(defonce ^:dynamic *eval-check* nil)
-
-(defonce ^:dynamic *eval-current-ns* nil)
-
-(defonce ^:dynamic *run-id* true)
-
-(defonce ^:dynamic *registry* (atom {}))
-
-(defonce ^:dynamic *accumulator* (atom nil))
-
-(defonce ^:dynamic *errors* nil)
-
-(defonce ^:dynamic *settings* {:test-paths ["test"]})
-
-(defonce ^:dynamic *root* ".")
-
-(defonce ^:dynamic *results* nil)
-
-(defonce ^:dynamic *timeout-global* 20000)
-
-(defonce ^:dynamic *timeout* nil)
+            [std.string :as str]
+            [code.test.base.context :as context]))
 
 ;; When a namespace is run:
 ;; - *eval* is set to false
@@ -38,47 +9,13 @@
 ;; - the file is reloaded (forms are compiled)
 ;; - all the loaded tests are then run
 
-(defn new-context
-  []
-  {:eval-fact false
-   :eval-mode false
-   :eval-meta  nil
-   :eval-global nil
-   :eval-check nil
-   :eval-current-ns nil
-   :run-id true
-   :registry    (atom {})
-   :accumulator (atom {})
-   :errors nil
-   :results nil
-   :timeout 60000})
-
-(defmacro with-new-context
-  [m & body]
-  `(let [ctx# (merge (new-context)
-                     ~m)]
-     (binding [*eval-fact*       (:eval-fact ctx#)
-               *eval-mode*       (:eval-mode ctx#)
-               *eval-meta*       (:eval-meta ctx#)
-               *eval-global*     (:eval-global ctx#)
-               *eval-check*      (:eval-check ctx#)
-               *eval-current-ns* (:eval-current-ns ctx#)
-               *run-id*          (:run-id ctx#)
-               *registry*        (:registry ctx#)
-               *accumulator*     (:accumulator ctx#)
-               *errors*          (:errors ctx#)
-               *settings*        (:settings ctx#)
-               *root*            (:root ctx#)
-               *results*         (:results ctx#)]
-       ~@body)))
-
 (defn purge-all
   "purges all facts from namespace"
   {:added "3.0"}
   ([]
    (purge-all (h/ns-sym)))
   ([ns]
-   (swap! *registry* dissoc ns)
+   (swap! context/*registry* dissoc ns)
    ns))
 
 (defn get-global
@@ -89,8 +26,8 @@
   ([]
    (get-global (h/ns-sym)))
   ([ns]
-   (or *eval-global*
-       (get-in @*registry* [ns :global])))
+   (or context/*eval-global*
+       (get-in @context/*registry* [ns :global])))
   ([ns k & more]
    (-> (get-global ns)
        (get-in (vec (cons k more))))))
@@ -104,7 +41,7 @@
   ([m]
    (set-global (h/ns-sym) m))
   ([ns m]
-   (-> (swap! *registry* assoc-in [ns :global] m)
+   (-> (swap! context/*registry* assoc-in [ns :global] m)
        (get-in [ns :global]))))
 
 (defn update-global
@@ -113,7 +50,7 @@
   ([f]
    (update-global (h/ns-sym) f))
   ([ns f & args]
-   (-> (apply swap! *registry* update-in [ns :global] f args)
+   (-> (apply swap! context/*registry* update-in [ns :global] f args)
        (get-in [ns :global]))))
 
 (defn list-links
@@ -121,14 +58,14 @@
   {:added "3.0"}
   ([] (list-links (h/ns-sym)))
   ([ns]
-   (get-in @*registry* [ns :links])))
+   (get-in @context/*registry* [ns :links])))
 
 (defn clear-links
   "clear ns links"
   {:added "3.0"}
   ([] (clear-links (h/ns-sym)))
   ([ns]
-   (-> (swap! *registry* assoc-in [ns :links] nil)
+   (-> (swap! context/*registry* assoc-in [ns :links] nil)
        (get-in [ns :links]))))
 
 (defn add-link
@@ -136,7 +73,7 @@
   {:added "3.0"}
   ([link] (add-link (h/ns-sym) link))
   ([ns link]
-   (-> (swap! *registry* update-in [ns :links] (fnil #(conj % link) #{}))
+   (-> (swap! context/*registry* update-in [ns :links] (fnil #(conj % link) #{}))
        (get-in [ns :links]))))
 
 (defn remove-link
@@ -144,7 +81,7 @@
   {:added "3.0"}
   ([link] (remove-link (h/ns-sym) link))
   ([ns link]
-   (-> (swap! *registry* update-in [ns :links] disj link)
+   (-> (swap! context/*registry* update-in [ns :links] disj link)
        (get-in [ns :links]))))
 
 (defn all-facts
@@ -155,7 +92,7 @@
   ([]
    (all-facts (h/ns-sym)))
   ([ns]
-   (get-in @*registry* [ns :facts])))
+   (get-in @context/*registry* [ns :facts])))
 
 (defn list-facts
   "lists all facts in current namespace
@@ -181,7 +118,7 @@
   ([]
    (purge-facts (h/ns-sym)))
   ([ns]
-   (swap! *registry* update ns dissoc :facts :flags)
+   (swap! context/*registry* update ns dissoc :facts :flags)
    ns))
 
 (defn parse-args
@@ -204,7 +141,7 @@
    (get-fact (h/ns-sym) id))
   ([ns id]
    (if (symbol? id)
-     (get-in @*registry* [ns :facts id])
+     (get-in @context/*registry* [ns :facts id])
      (get-fact (h/ns-sym) ns id)))
   ([ns id k & more]
    (let [[ns id ks] (parse-args ns id k more)]
@@ -217,7 +154,7 @@
   ([id data]
    (set-fact (h/ns-sym) id data))
   ([ns id data]
-   (swap! *registry* assoc-in [ns :facts id] data)
+   (swap! context/*registry* assoc-in [ns :facts id] data)
    [ns id]))
 
 (defn set-in-fact
@@ -228,7 +165,7 @@
   ([id ks data]
    (set-in-fact (h/ns-sym) id ks data))
   ([ns id ks data]
-   (swap! *registry* assoc-in (concat [ns :facts id] ks) data)
+   (swap! context/*registry* assoc-in (concat [ns :facts id] ks) data)
    [ns id]))
 
 (defn get-flag
@@ -239,7 +176,7 @@
   ([id flag]
    (get-flag (h/ns-sym) id flag))
   ([ns id flag]
-   (boolean (get-in @*registry* [ns :flags id flag]))))
+   (boolean (get-in @context/*registry* [ns :flags id flag]))))
 
 (defn set-flag
   "sets the setup flag
@@ -249,7 +186,7 @@
   ([id flag val]
    (set-flag (h/ns-sym) id flag val))
   ([ns id flag ^Boolean val]
-   (swap! *registry* assoc-in [ns :flags id flag] val)
+   (swap! context/*registry* assoc-in [ns :flags id flag] val)
    [ns id]))
 
 (defn update-fact
@@ -257,7 +194,7 @@
   {:added "3.0"}
   ([ns id f & args]
    (let [[ns id [f & args]] (parse-args ns id f args)]
-     (apply swap! *registry* update-in [ns :facts id] f args)
+     (apply swap! context/*registry* update-in [ns :facts id] f args)
      [ns id])))
 
 (defn remove-fact
@@ -266,7 +203,7 @@
   ([id]
    (remove-fact (h/ns-sym) id))
   ([ns id]
-   (swap! *registry* (fn [m]
+   (swap! context/*registry* (fn [m]
                        (-> m
                            (update-in [ns :facts] dissoc id)
                            (update-in [ns :flags] dissoc id))))

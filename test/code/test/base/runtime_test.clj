@@ -1,19 +1,20 @@
 (ns code.test.base.runtime-test
   (:use code.test)
   (:require [code.test.base.runtime :as rt]
+            [code.test.base.context :as context]
             [std.lib :as h]))
 
-^{:refer code.test.base.runtime/new-context :added "4.1"}
+^{:refer code.test.base.context/new-context :added "4.1"}
 (fact "creates a new context"
 
-  (rt/new-context)
+  (context/new-context)
   => map?)
 
-^{:refer code.test.base.runtime/with-new-context :added "4.1"}
+^{:refer code.test.base.context/with-new-context :added "4.1"}
 (fact "override functions with new context"
   ^:hidden
   
-  (rt/with-new-context {:registry (atom {'my.ns {:facts {:a 1} :flags {:b 2}}})}
+  (context/with-new-context {:registry (atom {'my.ns {:facts {:a 1} :flags {:b 2}}})}
     (rt/purge-all 'my.ns))
   => 'my.ns)
 
@@ -21,7 +22,7 @@
 (fact "purges all facts from namespace"
   ^:hidden
   
-  (rt/with-new-context {:registry (atom {'my.ns {:facts {:a 1} :flags {:b 2}}})}
+  (context/with-new-context {:registry (atom {'my.ns {:facts {:a 1} :flags {:b 2}}})}
     (rt/purge-all 'my.ns)
     (rt/all-facts 'my.ns))
   => nil)
@@ -30,11 +31,11 @@
 (fact "gets the global settings for namespace"
   ^:hidden
   
-  (rt/with-new-context {:registry (atom {'my.ns {:global {:a 1}}})}
+  (context/with-new-context {:registry (atom {'my.ns {:global {:a 1}}})}
     (rt/get-global 'my.ns))
   => {:a 1}
 
-  (rt/with-new-context {:registry (atom {'my.ns {:global {:a {:b 2}}}})}
+  (context/with-new-context {:registry (atom {'my.ns {:global {:a {:b 2}}}})}
     (rt/get-global 'my.ns :a :b))
   => 2)
 
@@ -42,7 +43,7 @@
 (fact "sets the global settings for namespace"
   ^:hidden
   
-  (rt/with-new-context {:registry (atom {})}
+  (context/with-new-context {:registry (atom {})}
     (rt/set-global 'my.ns {:check {:setup '[(prn "hello")]}})
     (rt/get-global 'my.ns))
   => {:check {:setup '[(prn "hello")]}})
@@ -51,7 +52,7 @@
 (fact "updates global data"
   ^:hidden
   
-  (rt/with-new-context {:registry (atom {'my.ns {:global {:a 1}}})}
+  (context/with-new-context {:registry (atom {'my.ns {:global {:a 1}}})}
     (rt/update-global 'my.ns assoc :b 2)
     (rt/get-global 'my.ns))
   => {:a 1 :b 2})
@@ -60,7 +61,7 @@
 (fact "lists ns links"
   ^:hidden
   
-  (rt/with-new-context {:registry (atom {'my.ns {:links #{'other.ns}}})}
+  (context/with-new-context {:registry (atom {'my.ns {:links #{'other.ns}}})}
     (rt/list-links 'my.ns))
   => #{'other.ns})
 
@@ -68,7 +69,7 @@
 (fact "clear ns links"
   ^:hidden
   
-  (rt/with-new-context {:registry (atom {'my.ns {:links #{'other.ns}}})}
+  (context/with-new-context {:registry (atom {'my.ns {:links #{'other.ns}}})}
     (rt/clear-links 'my.ns)
     (rt/list-links 'my.ns))
   => nil)
@@ -77,7 +78,7 @@
 (fact "add ns link"
   ^:hidden
   
-  (rt/with-new-context {:registry (atom {})}
+  (context/with-new-context {:registry (atom {})}
     (rt/add-link 'my.ns 'other.ns)
     (rt/list-links 'my.ns))
   => #{'other.ns})
@@ -86,7 +87,7 @@
 (fact "remove ms link"
   ^:hidden
   
-  (rt/with-new-context {:registry (atom {'my.ns {:links #{'other.ns}}})}
+  (context/with-new-context {:registry (atom {'my.ns {:links #{'other.ns}}})}
     (rt/remove-link 'my.ns 'other.ns)
     (rt/list-links 'my.ns))
   => #{})
@@ -95,7 +96,7 @@
 (fact "retrieves a list of all the facts in a namespace"
   ^:hidden
   
-  (rt/with-new-context {:registry (atom {'my.ns {:facts {:f1 1}}})}
+  (context/with-new-context {:registry (atom {'my.ns {:facts {:f1 1}}})}
     (keys (rt/all-facts 'my.ns)))
   => '(:f1))
 
@@ -103,7 +104,7 @@
 (fact "lists all facts in current namespace"
   ^:hidden
   
-  (rt/with-new-context {:registry (atom {'my.ns {:facts {'test-f1 {:id 'test-f1 :line 10}
+  (context/with-new-context {:registry (atom {'my.ns {:facts {'test-f1 {:id 'test-f1 :line 10}
                                                          'test-f2 {:id 'test-f2 :line 20}}}})}
     (rt/list-facts 'my.ns))
   => '(test-f1 test-f2))
@@ -112,7 +113,7 @@
 (fact "purges all facts in the namespace (for reload)"
   ^:hidden
   
-  (rt/with-new-context {:registry (atom {'my.ns {:facts {:a 1} :flags {:b 2}}})}
+  (context/with-new-context {:registry (atom {'my.ns {:facts {:a 1} :flags {:b 2}}})}
     (rt/purge-facts 'my.ns)
     (rt/list-facts 'my.ns))
   => [])
@@ -128,7 +129,7 @@
 (fact "gets a fact"
   ^:hidden
   
-  (rt/with-new-context {:registry (atom {'my.ns {:facts {'f1 {:data "hello"}}}})}
+  (context/with-new-context {:registry (atom {'my.ns {:facts {'f1 {:data "hello"}}}})}
     (rt/get-fact 'my.ns 'f1 :data))
   => "hello")
 
@@ -136,7 +137,7 @@
 (fact "sets the entire data on a fact"
   ^:hidden
   
-  (rt/with-new-context {:registry (atom {})}
+  (context/with-new-context {:registry (atom {})}
     (rt/set-fact 'my.ns 'f1 {:data "hello"})
     (rt/get-fact 'my.ns 'f1))
   => {:data "hello"})
@@ -145,7 +146,7 @@
 (fact "sets the property on a fact"
   ^:hidden
   
-  (rt/with-new-context {:registry (atom {})}
+  (context/with-new-context {:registry (atom {})}
     (rt/set-in-fact 'my.ns 'f1 [:data] "hello")
     (rt/get-fact 'my.ns 'f1 :data))
   => "hello")
@@ -154,7 +155,7 @@
 (fact "checks if the setup flag has been set"
   ^:hidden
   
-  (rt/with-new-context {:registry (atom {'my.ns {:flags {'f1 {:setup true}}}})}
+  (context/with-new-context {:registry (atom {'my.ns {:flags {'f1 {:setup true}}}})}
     (rt/get-flag 'my.ns 'f1 :setup))
   => true)
 
@@ -162,7 +163,7 @@
 (fact "sets the setup flag"
   ^:hidden
   
-  (rt/with-new-context {:registry (atom {})}
+  (context/with-new-context {:registry (atom {})}
     (rt/set-flag 'my.ns 'f1 :setup true)
     (rt/get-flag 'my.ns 'f1 :setup))
   => true)
@@ -171,7 +172,7 @@
 (fact "updates a fact given a function"
   ^:hidden
   
-  (rt/with-new-context {:registry (atom {'my.ns {:facts {'f1 {:count 1}}}})}
+  (context/with-new-context {:registry (atom {'my.ns {:facts {'f1 {:count 1}}}})}
     (rt/update-fact 'my.ns 'f1 update-in [:count] inc)
     (rt/get-fact 'my.ns 'f1 :count))
   => 2)
@@ -180,7 +181,7 @@
 (fact "removes a fact from namespace"
   ^:hidden
   
-  (rt/with-new-context {:registry (atom {'my.ns {:facts {'f1 {}}}})}
+  (context/with-new-context {:registry (atom {'my.ns {:facts {'f1 {}}}})}
     (rt/remove-fact 'my.ns 'f1)
     (rt/get-fact 'my.ns 'f1))
   => nil)
@@ -189,7 +190,7 @@
 (fact "runs the teardown hook"
   ^:hidden
   
-  (rt/with-new-context {:registry (atom {'my.ns {:facts {'f1 {:function {:teardown (fn [] 6)}}}}})}
+  (context/with-new-context {:registry (atom {'my.ns {:facts {'f1 {:function {:teardown (fn [] 6)}}}}})}
     (rt/teardown-fact 'my.ns 'f1))
   => 6)
 
@@ -197,7 +198,7 @@
 (fact "runs the setup hook"
   ^:hidden
   
-  (rt/with-new-context {:registry (atom {'my.ns {:facts {'f1 {:function {:setup (fn [] 6)}}}}})}
+  (context/with-new-context {:registry (atom {'my.ns {:facts {'f1 {:function {:setup (fn [] 6)}}}}})}
     (rt/setup-fact 'my.ns 'f1))
   => 6)
 
@@ -233,7 +234,7 @@
 (fact "the fact that is associated with a given line"
   ^:hidden
   
-  (rt/with-new-context {:registry (atom {'my.ns {:facts {'f1 {:id 'f1 :line 10 :type :core}
+  (context/with-new-context {:registry (atom {'my.ns {:facts {'f1 {:id 'f1 :line 10 :type :core}
                                                          'f2 {:id 'f2 :line 20 :type :core}}}})}
     (:id (rt/find-fact 'my.ns {:line 15})))
   => 'f1)
@@ -242,7 +243,7 @@
 (fact "common runtime functions for easy access"
   ^:hidden
   
-  (rt/with-new-context {:registry (atom {'my.ns {:facts {'f1 {:id 'f1 :line 10 :type :core}}
+  (context/with-new-context {:registry (atom {'my.ns {:facts {'f1 {:id 'f1 :line 10 :type :core}}
                                                  :flags {'f1 {:setup true}}}})}
     (with-redefs [h/ns-sym (constantly 'my.ns)]
       (rt/run-op {:line 10} :setup?)))

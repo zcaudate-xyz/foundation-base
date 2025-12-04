@@ -1,5 +1,6 @@
 (ns code.test.base.listener
-  (:require [code.test.base.runtime :as rt]
+  (:require [code.test.base.context :as context]
+            [code.test.base.runtime :as rt]
             [code.test.base.print :as print]
             [std.lib :as h]))
 
@@ -49,12 +50,12 @@
   ([{:keys [result]}]
    (let [summary (summarise-evaluate result)]
      (cond (-> result :status (= :exception))
-           (when (print/*options* :print-throw)
+           (when (context/*print* :print-throw)
              (h/beep)
              (print/print-throw summary))
 
            (-> result :status (= :timeout))
-           (when (print/*options* :print-timeout)
+           (when (context/*print* :print-timeout)
              (h/beep)
              (print/print-timeout summary))))))
 
@@ -64,48 +65,48 @@
   ([{:keys [result]}]
    (let [summary (summarise-verify result)]
      (cond (= :timeout (-> result :actual :status))
-           (when (print/*options* :print-timeout)
+           (when (context/*print* :print-timeout)
              (h/beep)
              (print/print-timeout summary))
            
            (or (and (-> result :status (= :exception)))
                (and (-> result :data (= false))))
-           (when (print/*options* :print-failed)
+           (when (context/*print* :print-failed)
              (h/beep)
              (print/print-failed (summarise-verify result)))
 
            (and (-> result :data (= true))
-                (print/*options* :print-success))
+                (context/*print* :print-success))
            (print/print-success (summarise-verify result))))))
 
 (defn form-error-accumulator
   "accumulator for thrown errors"
   {:added "3.0"}
   ([{:keys [result]}]
-   (when rt/*errors*
+   (when context/*errors*
      (if (-> result :status (= :exception))
-       (swap! rt/*errors* update-in [:exception] conj result))
+       (swap! context/*errors* update-in [:exception] conj result))
 
      (if (-> result :status (= :timeout))
-       (swap! rt/*errors* update-in [:timeout] conj result)))))
+       (swap! context/*errors* update-in [:timeout] conj result)))))
 
 (defn check-error-accumulator
   "accumulator for errors on checks"
   {:added "3.0"}
   ([{:keys [result]}]
-   (when rt/*errors*
+   (when context/*errors*
      (if (or (-> result :status (= :exception))
              (-> result :data (= false)))
-       (swap! rt/*errors* update-in [:failed] conj result))
+       (swap! context/*errors* update-in [:failed] conj result))
 
      (if (= :timeout (-> result :actual :status))
-       (swap! rt/*errors* update-in [:timeout] conj result)))))
+       (swap! context/*errors* update-in [:timeout] conj result)))))
 
 (defn fact-printer
   "prints out results after every fact"
   {:added "3.0"}
   ([{:keys [meta results skipped]}]
-   (if (and (print/*options* :print-facts)
+   (if (and (context/*print* :print-facts)
             (not skipped))
      (print/print-fact meta results))))
 
@@ -113,22 +114,22 @@
   "accumulator for fact results"
   {:added "3.0"}
   ([{:keys [id meta results]}]
-   (reset! rt/*accumulator* {:id id :meta meta :results results})))
+   (reset! context/*accumulator* {:id id :meta meta :results results})))
 
 (defn bulk-printer
   "prints out the end summary"
   {:added "3.0"}
   ([{:keys [results]}]
-   (if (print/*options* :print-bulk)
-     (print/print-summary results)) (when rt/*errors*
+   (if (context/*print* :print-bulk)
+     (print/print-summary results)) (when context/*errors*
                                       (h/local :println "-------------------------")
-                                      (when-let [failed (:failed @rt/*errors*)]
+                                      (when-let [failed (:failed @context/*errors*)]
                                         (doseq [result failed]
                                           (print/print-failed (summarise-verify result))))
-                                      (when-let [exceptions (:exception @rt/*errors*)]
+                                      (when-let [exceptions (:exception @context/*errors*)]
                                         (doseq [result exceptions]
                                           (print/print-throw (summarise-evaluate result))))
-                                      (when-let [timeouts (:timeout @rt/*errors*)]
+                                      (when-let [timeouts (:timeout @context/*errors*)]
                                         (doseq [result timeouts]
                                           (if (= :timeout (:status result))
                                             (print/print-throw (summarise-evaluate result))

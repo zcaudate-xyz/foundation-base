@@ -1,5 +1,5 @@
 (ns code.test.compile.snippet
-  (:require [code.test.base.runtime :as rt]
+  (:require [code.test.base.context :as context]
             [std.lib :as h]))
 
 (defn fact-setup
@@ -39,8 +39,8 @@
    (let [{:keys [before after]} check]
      `(fn [~'thunk]
         (fn []
-          (binding [rt/*results* (atom [])
-                    rt/*eval-check* {:guard  ~guard
+          (binding [context/*results* (atom [])
+                    context/*eval-check* {:guard  ~guard
                                      :before (fn []
                                                ~@(h/seqify before))
                                      :after  (fn []
