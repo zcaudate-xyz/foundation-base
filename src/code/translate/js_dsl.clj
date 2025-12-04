@@ -151,6 +151,11 @@
     (list 'return (translate-node (:argument node)))
     (list 'return)))
 
+(defmethod translate-node "BreakStatement" [node]
+  (if (:label node)
+    (list 'break (translate-node (:label node)))
+    '(break)))
+
 (defmethod translate-node "AwaitExpression" [node]
   (list 'await (translate-node (:argument node))))
 
