@@ -162,7 +162,7 @@
 
 (def +template+
   (->> {:banned #{:set :map :regex}
-        :highlight '#{case if then else let in module where import qualified as type data newtype class instance deriving do return}
+        :highlight '#{in module where qualified as data newtype instance deriving return}
         :default {:comment   {:prefix "--"}
                   :common    {:statement ""
                               :namespace-full "."
@@ -183,7 +183,7 @@
        (h/merge-nested (emit/default-grammar))))
 
 (def +grammar+
-  (grammar/grammar :haskell
+  (grammar/grammar :hs
     (grammar/to-reserved +features+)
     +template+))
 

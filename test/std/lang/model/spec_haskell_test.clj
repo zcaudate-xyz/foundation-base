@@ -5,13 +5,15 @@
             [std.lang.base.script :as script]
             [std.lang.model.spec-haskell :as spec-haskell]))
 
-(script/install spec-haskell/+book+)
+(l/script- :haskell
+  {:config {:book spec-haskell/+book+}})
 
-(l/script :haskell
-  {:runtime :default
-   :config {:book spec-haskell/+book+}})
+(!.hs
+  [1 2 4])
 
+^{:refer std.lang.model.spec-haskell/CANARY :adopt true :added "4.1"}
 (fact "basic emit"
+
   (l/emit-script '(defn hello [x] x) {:lang :haskell})
   => "hello x = x"
 
@@ -22,8 +24,8 @@
   => "if true then 1 else 2"
 
   (l/emit-as :haskell ['(case x
-                         1 "one"
-                         2 "two")])
+                          1 "one"
+                          2 "two")])
   => "case x of\n  1 -> \"one\"\n  2 -> \"two\""
 
   (l/emit-as :haskell ['(fn [x] (+ x 1))])
@@ -48,13 +50,13 @@
   (l/emit-as :haskell ['[:> Map String Int]])
   => "Map String Int")
 
+^{:refer std.lang.model.spec-haskell/haskell-typesystem :added "4.1"}
 (fact "defn with type hint"
+
   (l/emit-script '(defn ^Int add [^Int x ^Int y] (+ x y)) {:lang :haskell})
   => "add :: Int -> Int -> Int\nadd x y = x + y")
 
 
-^{:refer std.lang.model.spec-haskell/haskell-typesystem :added "4.1"}
-(fact "TODO")
 
 ^{:refer std.lang.model.spec-haskell/haskell-vector :added "4.1"}
 (fact "TODO")

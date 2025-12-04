@@ -8,7 +8,6 @@
             [std.lib :as h]
             [std.string :as str]
             [rt.basic.type-common :as common]
-            #_[rt.basic.type-compile :as compile]
             [rt.basic.type-twostep :as twostep]))
 
 (def +program-init+
