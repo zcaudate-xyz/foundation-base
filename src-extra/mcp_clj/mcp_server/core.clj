@@ -42,7 +42,12 @@
   [request]
   (cond
     ;; For HTTP/SSE transports: request is a map with :query-params
-    (map? request) (get (:query-params request) "session_id")
+    (map? request)
+    (let [qp (:query-params request)
+          qp-map (if (fn? qp) (qp) qp)]
+      (or (get (:headers request) "x-session-id")
+          (get qp-map "session_id")
+          "default"))  ;; Default session ID when none provided
     ;; For STDIO transport: request is just the method string
     :else "stdio"))
 
@@ -559,6 +564,11 @@
             (let [default-session (->Session "stdio" false nil nil nil nil)]
               (swap! session-id->session assoc "stdio" default-session)
               (log/info :server/stdio-session-created {:session-id "stdio"})))
+        ;; For HTTP/SSE transports, create a default session for clients that don't provide session_id
+        _ (when (#{:http :sse} (:type transport))
+            (let [default-session (->Session "default" false nil nil nil nil)]
+              (swap! session-id->session assoc "default" default-session)
+              (log/info :server/default-session-created {:session-id "default"})))
         tool-registry (atom tools)
         prompt-registry (atom prompts)
         resource-registry (atom resources)

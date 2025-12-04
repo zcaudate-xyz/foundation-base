@@ -1,0 +1,740 @@
+{
+  "type": "File",
+  "start": 0,
+  "end": 290,
+  "loc": {
+    "start": {
+      "line": 1,
+      "column": 0,
+      "index": 0
+    },
+    "end": {
+      "line": 12,
+      "column": 0,
+      "index": 290
+    }
+  },
+  "errors": [],
+  "program": {
+    "type": "Program",
+    "start": 0,
+    "end": 290,
+    "loc": {
+      "start": {
+        "line": 1,
+        "column": 0,
+        "index": 0
+      },
+      "end": {
+        "line": 12,
+        "column": 0,
+        "index": 290
+      }
+    },
+    "sourceType": "module",
+    "interpreter": null,
+    "body": [
+      {
+        "type": "ImportDeclaration",
+        "start": 15,
+        "end": 90,
+        "loc": {
+          "start": {
+            "line": 3,
+            "column": 0,
+            "index": 15
+          },
+          "end": {
+            "line": 3,
+            "column": 75,
+            "index": 90
+          }
+        },
+        "importKind": "value",
+        "specifiers": [
+          {
+            "type": "ImportNamespaceSpecifier",
+            "start": 22,
+            "end": 47,
+            "loc": {
+              "start": {
+                "line": 3,
+                "column": 7,
+                "index": 22
+              },
+              "end": {
+                "line": 3,
+                "column": 32,
+                "index": 47
+              }
+            },
+            "local": {
+              "type": "Identifier",
+              "start": 27,
+              "end": 47,
+              "loc": {
+                "start": {
+                  "line": 3,
+                  "column": 12,
+                  "index": 27
+                },
+                "end": {
+                  "line": 3,
+                  "column": 32,
+                  "index": 47
+                },
+                "identifierName": "AspectRatioPrimitive"
+              },
+              "name": "AspectRatioPrimitive"
+            }
+          }
+        ],
+        "source": {
+          "type": "StringLiteral",
+          "start": 53,
+          "end": 89,
+          "loc": {
+            "start": {
+              "line": 3,
+              "column": 38,
+              "index": 53
+            },
+            "end": {
+              "line": 3,
+              "column": 74,
+              "index": 89
+            }
+          },
+          "extra": {
+            "rawValue": "@radix-ui/react-aspect-ratio@1.1.2",
+            "raw": "\"@radix-ui/react-aspect-ratio@1.1.2\""
+          },
+          "value": "@radix-ui/react-aspect-ratio@1.1.2"
+        },
+        "attributes": []
+      },
+      {
+        "type": "FunctionDeclaration",
+        "start": 92,
+        "end": 264,
+        "loc": {
+          "start": {
+            "line": 5,
+            "column": 0,
+            "index": 92
+          },
+          "end": {
+            "line": 9,
+            "column": 1,
+            "index": 264
+          }
+        },
+        "id": {
+          "type": "Identifier",
+          "start": 101,
+          "end": 112,
+          "loc": {
+            "start": {
+              "line": 5,
+              "column": 9,
+              "index": 101
+            },
+            "end": {
+              "line": 5,
+              "column": 20,
+              "index": 112
+            },
+            "identifierName": "AspectRatio"
+          },
+          "name": "AspectRatio"
+        },
+        "generator": false,
+        "async": false,
+        "params": [
+          {
+            "type": "ObjectPattern",
+            "start": 113,
+            "end": 183,
+            "loc": {
+              "start": {
+                "line": 5,
+                "column": 21,
+                "index": 113
+              },
+              "end": {
+                "line": 7,
+                "column": 57,
+                "index": 183
+              }
+            },
+            "properties": [
+              {
+                "type": "RestElement",
+                "start": 117,
+                "end": 125,
+                "loc": {
+                  "start": {
+                    "line": 6,
+                    "column": 2,
+                    "index": 117
+                  },
+                  "end": {
+                    "line": 6,
+                    "column": 10,
+                    "index": 125
+                  }
+                },
+                "argument": {
+                  "type": "Identifier",
+                  "start": 120,
+                  "end": 125,
+                  "loc": {
+                    "start": {
+                      "line": 6,
+                      "column": 5,
+                      "index": 120
+                    },
+                    "end": {
+                      "line": 6,
+                      "column": 10,
+                      "index": 125
+                    },
+                    "identifierName": "props"
+                  },
+                  "name": "props"
+                }
+              }
+            ],
+            "typeAnnotation": {
+              "type": "TSTypeAnnotation",
+              "start": 127,
+              "end": 183,
+              "loc": {
+                "start": {
+                  "line": 7,
+                  "column": 1,
+                  "index": 127
+                },
+                "end": {
+                  "line": 7,
+                  "column": 57,
+                  "index": 183
+                }
+              },
+              "typeAnnotation": {
+                "type": "TSTypeReference",
+                "start": 129,
+                "end": 183,
+                "loc": {
+                  "start": {
+                    "line": 7,
+                    "column": 3,
+                    "index": 129
+                  },
+                  "end": {
+                    "line": 7,
+                    "column": 57,
+                    "index": 183
+                  }
+                },
+                "typeName": {
+                  "type": "TSQualifiedName",
+                  "start": 129,
+                  "end": 149,
+                  "loc": {
+                    "start": {
+                      "line": 7,
+                      "column": 3,
+                      "index": 129
+                    },
+                    "end": {
+                      "line": 7,
+                      "column": 23,
+                      "index": 149
+                    }
+                  },
+                  "left": {
+                    "type": "Identifier",
+                    "start": 129,
+                    "end": 134,
+                    "loc": {
+                      "start": {
+                        "line": 7,
+                        "column": 3,
+                        "index": 129
+                      },
+                      "end": {
+                        "line": 7,
+                        "column": 8,
+                        "index": 134
+                      },
+                      "identifierName": "React"
+                    },
+                    "name": "React"
+                  },
+                  "right": {
+                    "type": "Identifier",
+                    "start": 135,
+                    "end": 149,
+                    "loc": {
+                      "start": {
+                        "line": 7,
+                        "column": 9,
+                        "index": 135
+                      },
+                      "end": {
+                        "line": 7,
+                        "column": 23,
+                        "index": 149
+                      },
+                      "identifierName": "ComponentProps"
+                    },
+                    "name": "ComponentProps"
+                  }
+                },
+                "typeParameters": {
+                  "type": "TSTypeParameterInstantiation",
+                  "start": 149,
+                  "end": 183,
+                  "loc": {
+                    "start": {
+                      "line": 7,
+                      "column": 23,
+                      "index": 149
+                    },
+                    "end": {
+                      "line": 7,
+                      "column": 57,
+                      "index": 183
+                    }
+                  },
+                  "params": [
+                    {
+                      "type": "TSTypeQuery",
+                      "start": 150,
+                      "end": 182,
+                      "loc": {
+                        "start": {
+                          "line": 7,
+                          "column": 24,
+                          "index": 150
+                        },
+                        "end": {
+                          "line": 7,
+                          "column": 56,
+                          "index": 182
+                        }
+                      },
+                      "exprName": {
+                        "type": "TSQualifiedName",
+                        "start": 157,
+                        "end": 182,
+                        "loc": {
+                          "start": {
+                            "line": 7,
+                            "column": 31,
+                            "index": 157
+                          },
+                          "end": {
+                            "line": 7,
+                            "column": 56,
+                            "index": 182
+                          }
+                        },
+                        "left": {
+                          "type": "Identifier",
+                          "start": 157,
+                          "end": 177,
+                          "loc": {
+                            "start": {
+                              "line": 7,
+                              "column": 31,
+                              "index": 157
+                            },
+                            "end": {
+                              "line": 7,
+                              "column": 51,
+                              "index": 177
+                            },
+                            "identifierName": "AspectRatioPrimitive"
+                          },
+                          "name": "AspectRatioPrimitive"
+                        },
+                        "right": {
+                          "type": "Identifier",
+                          "start": 178,
+                          "end": 182,
+                          "loc": {
+                            "start": {
+                              "line": 7,
+                              "column": 52,
+                              "index": 178
+                            },
+                            "end": {
+                              "line": 7,
+                              "column": 56,
+                              "index": 182
+                            },
+                            "identifierName": "Root"
+                          },
+                          "name": "Root"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        ],
+        "body": {
+          "type": "BlockStatement",
+          "start": 185,
+          "end": 264,
+          "loc": {
+            "start": {
+              "line": 7,
+              "column": 59,
+              "index": 185
+            },
+            "end": {
+              "line": 9,
+              "column": 1,
+              "index": 264
+            }
+          },
+          "body": [
+            {
+              "type": "ReturnStatement",
+              "start": 189,
+              "end": 262,
+              "loc": {
+                "start": {
+                  "line": 8,
+                  "column": 2,
+                  "index": 189
+                },
+                "end": {
+                  "line": 8,
+                  "column": 75,
+                  "index": 262
+                }
+              },
+              "argument": {
+                "type": "JSXElement",
+                "start": 196,
+                "end": 261,
+                "loc": {
+                  "start": {
+                    "line": 8,
+                    "column": 9,
+                    "index": 196
+                  },
+                  "end": {
+                    "line": 8,
+                    "column": 74,
+                    "index": 261
+                  }
+                },
+                "openingElement": {
+                  "type": "JSXOpeningElement",
+                  "start": 196,
+                  "end": 261,
+                  "loc": {
+                    "start": {
+                      "line": 8,
+                      "column": 9,
+                      "index": 196
+                    },
+                    "end": {
+                      "line": 8,
+                      "column": 74,
+                      "index": 261
+                    }
+                  },
+                  "name": {
+                    "type": "JSXMemberExpression",
+                    "start": 197,
+                    "end": 222,
+                    "loc": {
+                      "start": {
+                        "line": 8,
+                        "column": 10,
+                        "index": 197
+                      },
+                      "end": {
+                        "line": 8,
+                        "column": 35,
+                        "index": 222
+                      }
+                    },
+                    "object": {
+                      "type": "JSXIdentifier",
+                      "start": 197,
+                      "end": 217,
+                      "loc": {
+                        "start": {
+                          "line": 8,
+                          "column": 10,
+                          "index": 197
+                        },
+                        "end": {
+                          "line": 8,
+                          "column": 30,
+                          "index": 217
+                        }
+                      },
+                      "name": "AspectRatioPrimitive"
+                    },
+                    "property": {
+                      "type": "JSXIdentifier",
+                      "start": 218,
+                      "end": 222,
+                      "loc": {
+                        "start": {
+                          "line": 8,
+                          "column": 31,
+                          "index": 218
+                        },
+                        "end": {
+                          "line": 8,
+                          "column": 35,
+                          "index": 222
+                        }
+                      },
+                      "name": "Root"
+                    }
+                  },
+                  "attributes": [
+                    {
+                      "type": "JSXAttribute",
+                      "start": 223,
+                      "end": 247,
+                      "loc": {
+                        "start": {
+                          "line": 8,
+                          "column": 36,
+                          "index": 223
+                        },
+                        "end": {
+                          "line": 8,
+                          "column": 60,
+                          "index": 247
+                        }
+                      },
+                      "name": {
+                        "type": "JSXIdentifier",
+                        "start": 223,
+                        "end": 232,
+                        "loc": {
+                          "start": {
+                            "line": 8,
+                            "column": 36,
+                            "index": 223
+                          },
+                          "end": {
+                            "line": 8,
+                            "column": 45,
+                            "index": 232
+                          }
+                        },
+                        "name": "data-slot"
+                      },
+                      "value": {
+                        "type": "StringLiteral",
+                        "start": 233,
+                        "end": 247,
+                        "loc": {
+                          "start": {
+                            "line": 8,
+                            "column": 46,
+                            "index": 233
+                          },
+                          "end": {
+                            "line": 8,
+                            "column": 60,
+                            "index": 247
+                          }
+                        },
+                        "extra": {
+                          "rawValue": "aspect-ratio",
+                          "raw": "\"aspect-ratio\""
+                        },
+                        "value": "aspect-ratio"
+                      }
+                    },
+                    {
+                      "type": "JSXSpreadAttribute",
+                      "start": 248,
+                      "end": 258,
+                      "loc": {
+                        "start": {
+                          "line": 8,
+                          "column": 61,
+                          "index": 248
+                        },
+                        "end": {
+                          "line": 8,
+                          "column": 71,
+                          "index": 258
+                        }
+                      },
+                      "argument": {
+                        "type": "Identifier",
+                        "start": 252,
+                        "end": 257,
+                        "loc": {
+                          "start": {
+                            "line": 8,
+                            "column": 65,
+                            "index": 252
+                          },
+                          "end": {
+                            "line": 8,
+                            "column": 70,
+                            "index": 257
+                          },
+                          "identifierName": "props"
+                        },
+                        "name": "props"
+                      }
+                    }
+                  ],
+                  "selfClosing": true
+                },
+                "closingElement": null,
+                "children": []
+              }
+            }
+          ],
+          "directives": []
+        }
+      },
+      {
+        "type": "ExportNamedDeclaration",
+        "start": 266,
+        "end": 289,
+        "loc": {
+          "start": {
+            "line": 11,
+            "column": 0,
+            "index": 266
+          },
+          "end": {
+            "line": 11,
+            "column": 23,
+            "index": 289
+          }
+        },
+        "exportKind": "value",
+        "specifiers": [
+          {
+            "type": "ExportSpecifier",
+            "start": 275,
+            "end": 286,
+            "loc": {
+              "start": {
+                "line": 11,
+                "column": 9,
+                "index": 275
+              },
+              "end": {
+                "line": 11,
+                "column": 20,
+                "index": 286
+              }
+            },
+            "local": {
+              "type": "Identifier",
+              "start": 275,
+              "end": 286,
+              "loc": {
+                "start": {
+                  "line": 11,
+                  "column": 9,
+                  "index": 275
+                },
+                "end": {
+                  "line": 11,
+                  "column": 20,
+                  "index": 286
+                },
+                "identifierName": "AspectRatio"
+              },
+              "name": "AspectRatio"
+            },
+            "exportKind": "value",
+            "exported": {
+              "type": "Identifier",
+              "start": 275,
+              "end": 286,
+              "loc": {
+                "start": {
+                  "line": 11,
+                  "column": 9,
+                  "index": 275
+                },
+                "end": {
+                  "line": 11,
+                  "column": 20,
+                  "index": 286
+                },
+                "identifierName": "AspectRatio"
+              },
+              "name": "AspectRatio"
+            }
+          }
+        ],
+        "source": null,
+        "attributes": [],
+        "declaration": null
+      }
+    ],
+    "directives": [
+      {
+        "type": "Directive",
+        "start": 0,
+        "end": 13,
+        "loc": {
+          "start": {
+            "line": 1,
+            "column": 0,
+            "index": 0
+          },
+          "end": {
+            "line": 1,
+            "column": 13,
+            "index": 13
+          }
+        },
+        "value": {
+          "type": "DirectiveLiteral",
+          "start": 0,
+          "end": 12,
+          "loc": {
+            "start": {
+              "line": 1,
+              "column": 0,
+              "index": 0
+            },
+            "end": {
+              "line": 1,
+              "column": 12,
+              "index": 12
+            }
+          },
+          "extra": {
+            "rawValue": "use client",
+            "raw": "\"use client\"",
+            "expressionValue": "use client"
+          },
+          "value": "use client"
+        }
+      }
+    ],
+    "extra": {
+      "topLevelAwait": false
+    }
+  },
+  "comments": []
+}
