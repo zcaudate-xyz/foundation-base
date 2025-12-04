@@ -133,5 +133,5 @@
                                      :declarations [{:type "VariableDeclarator"
                                                      :id {:type "Identifier" :name "x"}
                                                      :init {:type "NumericLiteral" :value 1}}]}})
-  => '(export (var* :const x 1)))
+  => '(export (var (x 1))))
 
