@@ -184,9 +184,9 @@
   {:added "3.0"}
   ([& args]
    (let [opts (task/process-ns-args args)
-         {:keys [thrown failed timeout] :as stats} (run (or (:ns opts) :all)
-                                                         (dissoc opts :ns))
-         res (+ (or thrown 0) (or failed 0) (or timeout 0))]
+         {:keys [throw failed timeout] :as stats} (run (or (:ns opts) :all)
+                                                       (dissoc opts :ns))
+         res (+ (or throw 0) (or failed 0) (or timeout 0))]
      (if (get opts :no-exit)
        res
        (System/exit res)))))
