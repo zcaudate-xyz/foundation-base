@@ -302,6 +302,40 @@
   {:x-json-encode      {:macro #'julia-tf-x-json-encode      :emit :macro}
    :x-json-decode      {:macro #'julia-tf-x-json-decode      :emit :macro}})
 
+;;
+;; RETURN
+;;
+
+(defn julia-tf-x-return-encode
+  ([[_ out id key]]
+   (list '. 'JSON (list 'json (list 'Dict
+                                   "id" id
+                                   "key" key
+                                   "type" "data"
+                                   "value" out)))))
+
+(defn julia-tf-x-return-wrap
+  ([[_ f encode-fn]]
+   (list 'try
+         (list 'let
+               (list 'out (list f))
+               (list encode-fn 'out nil nil))
+         (list 'catch 'e
+               (list '. 'JSON (list 'json (list 'Dict
+                                               "type" "error"
+                                               "value" (list 'string 'e))))))))
+
+(defn julia-tf-x-return-eval
+  ([[_ s wrap-fn]]
+   (list wrap-fn
+         (list 'fn []
+               (list 'include_string 'Main s)))))
+
+(def +julia-return+
+  {:x-return-encode  {:macro #'julia-tf-x-return-encode   :emit :macro}
+   :x-return-wrap    {:macro #'julia-tf-x-return-wrap     :emit :macro}
+   :x-return-eval    {:macro #'julia-tf-x-return-eval     :emit :macro}})
+
 (def +julia+
   (merge +julia-core+
          +julia-global+
@@ -310,4 +344,5 @@
          +julia-obj+
          +julia-arr+
          +julia-str+
-         +julia-js+))
+         +julia-js+
+         +julia-return+))
