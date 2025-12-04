@@ -5,6 +5,7 @@
             [code.test.checker.common]
             [code.test.checker.collection]
             [code.test.checker.logic]
+            [code.test.base.context :as context]
             [code.test.base.runtime :as rt]
             [code.test.base.listener :as listener]
             [code.test.base.print :as print]
@@ -151,20 +152,20 @@
   ([] (print-options :help))
   ([opts]
    (cond (set? opts)
-         (alter-var-root #'print/*options*
+         (alter-var-root #'context/*print*
                          (constantly opts))
 
          (= :help opts)
          #{:help :current :default :disable :all}
 
-         (= :current opts) print/*options*
+         (= :current opts) context/*print*
 
          (= :default opts)
-         (alter-var-root #'print/*options*
+         (alter-var-root #'context/*print*
                          (constantly #{:print-throw :print-failed :print-timeout :print-bulk}))
 
          (= :disable opts)
-         (alter-var-root #'print/*options* (constantly #{}))
+         (alter-var-root #'context/*print* (constantly #{}))
 
          (= :all opts)
          #{:print-throw

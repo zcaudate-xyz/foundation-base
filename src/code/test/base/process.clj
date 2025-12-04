@@ -1,6 +1,7 @@
 (ns code.test.base.process
   (:require [code.test.checker.common :as checker]
             [code.test.base.match  :as match]
+            [code.test.base.context :as context]
             [code.test.base.runtime :as rt]
             [std.lib :as h]
             [std.lib.result :as res]))
@@ -21,7 +22,7 @@
                         (catch Throwable t
                           {:status :exception :data t})))
            f    (future (eval-fn))
-           out  (deref f rt/*timeout* {:status :timeout :data rt/*timeout*})
+           out  (deref f context/*timeout* {:status :timeout :data context/*timeout*})
            _    (when (= (:status out) :timeout)
                   (future-cancel f))]
        (res/result (assoc out :type :code/test :form form :from :evaluate))))))
@@ -65,13 +66,13 @@
          _    (intern *ns* (with-meta '*last* {:dynamic true})
                       result)]
      (h/signal {:test :form :result result})
-     (when rt/*results*
-       (swap! rt/*results* conj result))
+     (when context/*results*
+       (swap! context/*results* conj result))
      result)))
 
 (defmethod process :test-equal
   ([{:keys [input output meta] :as op}]
-   (let [{:keys [guard before after]} rt/*eval-check*
+   (let [{:keys [guard before after]} context/*eval-check*
          _ (before)
          actual   (evaluate input)
          expected (evaluate output)
@@ -83,8 +84,8 @@
                       (:data actual))
          _    (after)]
      (h/signal {:test :check :result result})
-     (when rt/*results*
-       (swap! rt/*results* conj result))
+     (when context/*results*
+       (swap! context/*results* conj result))
      (if (and guard (not (:data result)))
        (h/error "Guard failed" {}))
      result)))
@@ -98,8 +99,8 @@
    => true"
   {:added "3.0"}
   ([meta results]
-   (let [results (if rt/*results* @rt/*results* results)]
-     (h/signal {:id rt/*run-id* :test :fact :meta meta :results results})
+   (let [results (if context/*results* @context/*results* results)]
+     (h/signal {:id context/*run-id* :test :fact :meta meta :results results})
      (and (->> results
                (filter #(-> % :from (= :verify)))
                (mapv :data)
@@ -114,20 +115,20 @@
   "returns the form with no ops evaluated"
   {:added "3.0"}
   ([meta]
-   (h/signal {:id rt/*run-id* :test :fact :meta meta :results [] :skipped true}) :skipped))
+   (h/signal {:id context/*run-id* :test :fact :meta meta :results [] :skipped true}) :skipped))
 
 (defn run-check
   "runs a single check form"
   {:added "3.0"}
   ([{:keys [unit refer] :as meta} body]
-   (let [timeout (or (:timeout meta) rt/*timeout-global*)]
-     (binding [rt/*timeout* timeout
-               rt/*results* (atom [])]
+   (let [timeout (or (:timeout meta) context/*timeout-global*)]
+     (binding [context/*timeout* timeout
+               context/*results* (atom [])]
        (if (or (match/match-options {:unit unit
                                      :refer refer}
-                                    rt/*settings*)
-               (not rt/*run-id*)
-               rt/*eval-mode*)
+                                    context/*settings*)
+               (not context/*run-id*)
+               context/*eval-mode*)
          (->> (mapv process body)
               (collect meta))
          (skip-check meta))))))

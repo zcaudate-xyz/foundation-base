@@ -4,6 +4,7 @@
             [std.fs :as fs]
             [code.test.checker.common :as checker]
             [code.test.base.runtime :as rt]
+            [code.test.base.context :as context]
             [code.test.diff :as diff]
             [std.lib.walk :as walk]
             [std.lib.result :as res]
@@ -11,12 +12,10 @@
             [std.print :as print]
             [std.pretty :as pretty]))
 
-(defonce ^:dynamic *options* #{:print-throw :print-failed :print-timeout :print-bulk})
-
 (defn- rel
   [path]
-  (cond (and rt/*root* path)
-        (fs/relativize rt/*root* path)
+  (cond (and context/*root* path)
+        (fs/relativize context/*root* path)
 
         :else path))
 
@@ -157,7 +156,7 @@
          errors  (->> ops (filter #(-> % :status (= :exception))))
          timeout (->> ops (filter #(-> % :status (= :timeout))) count)
          throw  (count errors)]
-     (if (or (*options* :print-facts-success)
+     (if (or (context/*print* :print-facts-success)
              (not (and (= num total)
                        (pos? throw))))
        (print/println

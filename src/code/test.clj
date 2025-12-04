@@ -2,6 +2,7 @@
   (:require [code.test.checker.common :as common]
             [code.test.checker.collection :as coll]
             [code.test.checker.logic :as logic]
+            [code.test.base.context :as context]
             [code.test.base.runtime :as rt]
             [code.test.base.listener :as listener]
             [code.test.base.print :as print]
@@ -29,7 +30,7 @@
               logic/is-not
 
 
-              rt/with-new-context
+              context/with-new-context
               
               manage/fact:global
               manage/fact:ns

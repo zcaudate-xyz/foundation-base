@@ -5,6 +5,7 @@
             [std.task :as task]
             [code.project :as project]
             [code.test.checker.common :as checker]
+            [code.test.base.context :as context]
             [code.test.base.runtime :as rt]
             [code.test.base.listener :as listener]
             [code.test.base.print :as print]))
@@ -16,11 +17,11 @@
   {:added "3.0"}
   ([func id]
    (let [sink (atom [])
-         source rt/*accumulator*]
+         source context/*accumulator*]
      (add-watch source id (fn [_ _ _ n]
                             (if (= (:id n) id)
                               (swap! sink conj n))))
-     (binding [rt/*run-id* id]
+     (binding [context/*run-id* id]
        (func))
      (remove-watch source id)
      @sink)))
@@ -80,7 +81,7 @@
   ([items]
    (let [summary (h/map-vals count items)
          summary (merge {:failed 0 :throw 0 :timeout 0} summary)]
-     (when (:print-bulk print/*options*)
+     (when (:print-bulk context/*print*)
        (doseq [item  (:failed items)]
          (-> item
              (listener/summarise-verify)
@@ -124,7 +125,7 @@
                           {}
                           [:failed :throw :timeout])]
      (when (seq failures)
-       (let [dir  (str (fs/path rt/*root* ".hara/runs"))
+       (let [dir  (str (fs/path context/*root* ".hara/runs"))
              _    (fs/create-directory dir)
              file (str (fs/path dir (str "run-" (t/system-ms) ".edn")))]
          (spit file (with-out-str (clojure.pprint/pprint failures)))
@@ -166,7 +167,7 @@
   {:added "3.0"}
   ([ns _ lookup project]
    (binding [*warn-on-reflection* false
-             rt/*eval-mode* false]
+             context/*eval-mode* false]
      (let [test-ns (unload-namespace ns nil lookup project)
            _       (when-let [path (or (lookup test-ns)
                                        (lookup ns))]
@@ -177,11 +178,11 @@
   "runs a loaded namespace"
   {:added "3.0"}
   ([ns {:keys [run-id test] :as params} lookup project]
-   (binding [rt/*root*     (:root project)
-             rt/*errors*   (atom {})
-             rt/*settings* (merge rt/*settings* params)]
+   (binding [context/*root*     (:root project)
+             context/*errors*   (atom {})
+             context/*settings* (merge context/*settings* params)]
      (let [run-id  (or run-id (h/uuid))
-           test-ns (if rt/*eval-current-ns*
+           test-ns (if context/*eval-current-ns*
                      ns
                      (project/test-ns ns))
            sort-fn (case (:order test)
@@ -220,7 +221,7 @@
   "runs the current namespace (which can be a non test namespace)"
   {:added "4.0"}
   ([ns params lookup project]
-   (binding [rt/*eval-current-ns* true]
+   (binding [context/*eval-current-ns* true]
      (test-namespace ns params lookup project))))
 
 (defn eval-namespace
@@ -228,11 +229,11 @@
   {:added "3.0"}
   ([ns {:keys [run-id] :as params} lookup project]
    (binding [*warn-on-reflection* false
-             rt/*root*     (:root project)
-             rt/*errors*   (atom {})
-             rt/*settings* (merge rt/*settings* params)]
+             context/*root*     (:root project)
+             context/*errors*   (atom {})
+             context/*settings* (merge context/*settings* params)]
      (let [run-id (or run-id (h/uuid))
-           test-ns (if rt/*eval-current-ns*
+           test-ns (if context/*eval-current-ns*
                      ns
                      (project/test-ns ns))
            facts   (accumulate (fn []

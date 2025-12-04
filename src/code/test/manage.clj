@@ -1,5 +1,6 @@
 (ns code.test.manage
-  (:require [code.test.base.runtime :as rt]
+  (:require [code.test.base.context :as context]
+            [code.test.base.runtime :as rt]
             [code.test.base.executive :as executive]
             [code.test.compile.snippet :as snippet]
             [code.project :as project]
@@ -68,11 +69,11 @@
              :remove   (rt/update-global ns
                                          (fn [m]
                                            (h/dissoc-nested m (first args))))
-             :prelim   (if rt/*eval-mode*
+             :prelim   (if context/*eval-mode*
                          (eval (h/seqify (rt/get-global ns :prelim))))
-             :setup    (if rt/*eval-mode*
+             :setup    (if context/*eval-mode*
                          (eval (h/seqify (rt/get-global ns :setup))))
-             :teardown (if rt/*eval-mode*
+             :teardown (if context/*eval-mode*
                          (eval (h/seqify (rt/get-global ns :teardown))))
              :list     (keys (rt/get-global ns :component))
              (eval (h/seqify (rt/get-global ns cmd))))))))

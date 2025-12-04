@@ -3,6 +3,7 @@
             [code.project :as project]
             [std.string :as str]
             [code.test.base.process :as process]
+            [code.test.base.context :as context]
             [code.test.base.runtime :as rt]
             [code.test.compile.snippet :as snippet]
             [code.test.compile.types :as types]
@@ -175,7 +176,7 @@
   ([fpkg]
    (fact:compile fpkg nil))
   ([fpkg global]
-   (binding [rt/*eval-global* global]
+   (binding [context/*eval-global* global]
      (let [meta (select-keys fpkg [:use :setup :teardown])
            code {:setup    (snippet/fact-setup meta)
                  :teardown (snippet/fact-teardown meta)
@@ -195,9 +196,9 @@
   "creates the forms in eval mode"
   {:added "3.0"}
   ([{:keys [ns id] :as fpkg}]
-   `(binding [rt/*eval-fact* true]
+   `(binding [context/*eval-fact* true]
       (let [fact# (or (rt/get-fact (quote ~ns) (quote ~id))
-                      (get-in @(.getRawRoot #'rt/*registry*) [(quote ~ns) :facts (quote ~id)]))]
+                      (get-in @(.getRawRoot #'context/*registry*) [(quote ~ns) :facts (quote ~id)]))]
         (when (and fact# (nil? (rt/get-fact (quote ~ns) (quote ~id))))
           (rt/set-fact (quote ~ns) (quote ~id) fact#))
         ((rt/get-fact (quote ~ns) (quote ~id)))))))
@@ -211,7 +212,7 @@
          fpkg (install-fact meta body)]
      (if id
        (intern (:ns fpkg) id fpkg))
-     (if (and rt/*eval-mode*
+     (if (and context/*eval-mode*
               (not (false? eval)))
        (fact-eval fpkg)))))
 
@@ -219,7 +220,7 @@
   "adds a template to the file"
   {:added "3.0" :style/indent 1}
   ([desc & body]
-   `(binding [rt/*eval-mode* false]
+   `(binding [context/*eval-mode* false]
       ~(with-meta
          `(fact ~desc ~@body)
          (assoc (meta &form) :eval false)))))
