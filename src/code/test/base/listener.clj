@@ -27,6 +27,7 @@
     :check    (-> result :checker :form)
     :checker  (-> result :checker)
     :actual   (-> result :actual)
+    :data     (-> result :actual :data)
     :parent   (-> result :meta :parent-form)}))
 
 (defn summarise-evaluate

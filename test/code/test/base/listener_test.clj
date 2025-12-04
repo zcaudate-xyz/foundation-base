@@ -23,6 +23,7 @@
       :check "check"
       :checker {:form "check"}
       :actual {:form "actual"}
+      :data nil
       :parent "parent"})
 
 ^{:refer code.test.base.listener/summarise-evaluate :added "3.0"}
