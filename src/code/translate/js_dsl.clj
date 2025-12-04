@@ -1,5 +1,6 @@
 (ns code.translate.js-dsl
-  (:require [std.lib :as h]))
+  (:require [std.lib :as h]
+            [clojure.string :as str]))
 
 (declare translate-node)
 
@@ -71,13 +72,27 @@
       "VariableDeclaration"
       (let [declarations (:declarations node)
             kind (:kind node)] ;; var, let, const
-        (cons (symbol kind)
-              (mapv (fn [d]
-                      (let [id (translate-node (:id d))]
-                        (if (:init d)
-                          (list id (translate-node (:init d)))
-                          id)))
-                    declarations)))
+        (if (and (= kind "const")
+                 (= 1 (count declarations))
+                 (#{ "ArrowFunctionExpression" "FunctionExpression"} (:type (:init (first declarations)))))
+          (let [d (first declarations)
+                id (translate-node (:id d))
+                init (:init d)
+                params (translate-args (:params init))
+                body-node (:body init)
+                body (translate-node body-node)
+                async (:async init)]
+            (cond-> (if (= "BlockStatement" (:type body-node))
+                      (list 'defn.js id params body)
+                      (list 'defn.js id params (list 'return body)))
+              async (with-meta {:async true})))
+          (cons 'var
+                (mapv (fn [d]
+                        (let [id (translate-node (:id d))]
+                          (if (:init d)
+                            (list id (translate-node (:init d)))
+                            id)))
+                      declarations))))
 
       "FunctionDeclaration"
       (let [id (translate-node (:id node))
@@ -143,6 +158,107 @@
       (let [callee (translate-node (:callee node))
             args   (translate-args (:arguments node))]
         (apply list 'new callee args))
+
+      "TemplateLiteral"
+      (let [quasis (:quasis node)
+            expressions (:expressions node)
+            parts (interleave (map (comp :raw :value) quasis)
+                              (concat (map translate-node expressions) [nil]))]
+        (apply list 'str (remove nil? parts)))
+
+      "ClassDeclaration"
+      (let [id (translate-node (:id node))
+            super-class (if (:superClass node) (translate-node (:superClass node)) nil)
+            body (:body (:body node))
+            methods (mapv (fn [m]
+                            (let [kind (:kind m)
+                                  key (translate-node (:key m))
+                                  params (translate-args (:params m))
+                                  body (translate-node (:body m))]
+                              (list key params body)))
+                          body)]
+        (concat (list 'defclass id (if super-class [super-class] []))
+                methods))
+
+      "TryStatement"
+      (let [block (translate-node (:block node))
+            handler (:handler node)
+            finalizer (:finalizer node)]
+        (concat (list 'try block)
+                (if handler
+                  (list (list 'catch (translate-node (:param handler))
+                              (translate-node (:body handler))))
+                  nil)
+                (if finalizer
+                  (list (list 'finally (translate-node finalizer)))
+                  nil)))
+
+      "ThrowStatement"
+      (list 'throw (translate-node (:argument node)))
+
+      "UpdateExpression"
+      (let [op (:operator node)
+            arg (translate-node (:argument node))
+            prefix (:prefix node)]
+        (list (keyword op) arg))
+
+      "ImportDeclaration"
+      (let [source (:value (:source node))
+            specifiers (:specifiers node)
+            default-spec (first (filter #(= "ImportDefaultSpecifier" (:type %)) specifiers))
+            named-specs (filter #(= "ImportSpecifier" (:type %)) specifiers)
+            ns-spec (first (filter #(= "ImportNamespaceSpecifier" (:type %)) specifiers))]
+        (concat (list 'import source)
+                (if default-spec
+                  [:default (translate-node (:local default-spec))]
+                  [])
+                (if (seq named-specs)
+                  [:named (apply hash-map (mapcat (fn [s]
+                                                    [(translate-node (:imported s))
+                                                     (translate-node (:local s))])
+                                                  named-specs))]
+                  [])
+                (if ns-spec
+                  [:as (translate-node (:local ns-spec))]
+                  [])))
+
+      "ExportNamedDeclaration"
+      (let [declaration (:declaration node)]
+        (if declaration
+          (list 'export (translate-node declaration))
+          (list 'export (mapv translate-node (:specifiers node)))))
+
+      "ArrayPattern"
+      (mapv translate-node (:elements node))
+
+      "JSXElement"
+      (let [opening (:openingElement node)
+            tag (translate-node (:name opening))
+            attrs (reduce (fn [m attr]
+                            (assoc m
+                                   (keyword (:name (:name attr)))
+                                   (if (:value attr)
+                                     (translate-node (:value attr))
+                                     true)))
+                          {}
+                          (:attributes opening))
+            children (->> (:children node)
+                          (mapv translate-node)
+                          (remove (fn [n] (and (string? n) (str/blank? n))))
+                          (vec))]
+        (apply list 'React.createElement tag attrs children))
+
+      "JSXText"
+      (:value node)
+
+      "JSXExpressionContainer"
+      (translate-node (:expression node))
+
+      "JSXIdentifier"
+      (:name node)
+
+      "ThisExpression"
+      'this
 
       ;; Fallback
       (h/error "Unknown node type" {:type type :node node}))))

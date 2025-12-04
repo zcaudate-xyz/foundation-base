@@ -8,11 +8,15 @@
 (defn parse-args
   "Parse command line arguments for SSE server"
   [args]
-  (let [port-idx (.indexOf args "--port")
+  (let [args (vec args)
+        port-idx (.indexOf args "--port")
         port (if (and (not= port-idx -1)
                       (< (inc port-idx) (count args)))
                (Integer/parseInt (nth args (inc port-idx)))
-               3001)]
+               (if (first args)
+                 (try (Integer/parseInt (first args))
+                      (catch NumberFormatException _ 3001))
+                 3001))]
     {:port port}))
 
 (defn -main
