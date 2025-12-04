@@ -39,8 +39,10 @@
                  (str (apply str (repeat indent " ")) (ansi/green "+ ") (pr-str k) " " (pr-str v)))
                (for [[k v] extra]
                  (str (apply str (repeat indent " ")) (ansi/red "- ") (pr-str k) " " (pr-str v)))
-               (for [[k v] changed]
-                 (str (apply str (repeat indent " ")) (ansi/yellow "> ") (pr-str k) " " (pr-str v)))))))
+               (for [[k {:keys [expect actual]}] changed]
+                 (str (apply str (repeat indent " ")) (ansi/yellow "> ") (pr-str k)
+                      "\n" (apply str (repeat (+ indent 4) " ")) (ansi/yellow "exp: ") (pr-str expect)
+                      "\n" (apply str (repeat (+ indent 4) " ")) (ansi/yellow "got: ") (pr-str actual)))))))
 
 (defn format-diff-seq
   "formats a seq diff"

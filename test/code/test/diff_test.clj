@@ -12,11 +12,11 @@
 
 (fact "diff-map"
   (diff-map {:a 1} {:a 1}) => nil
-  (diff-map {:a 1} {:a 2}) => {:> {:a 1}}
-  (diff-map {:a 1} {}) => {:+ {:a 1}}
-  (diff-map {} {:a 1}) => {:- {:a 1}}
+  (diff-map {:a 1} {:a 2}) => {:> {[:a] {:expect 1 :actual 2}}}
+  (diff-map {:a 1} {}) => {:+ {[:a] 1}}
+  (diff-map {} {:a 1}) => {:- {[:a] 1}}
   (diff-map {:a even?} {:a 2}) => nil
-  (diff-map {:a even?} {:a 1}) => {:> {:a even?}})
+  (diff-map {:a even?} {:a 1}) => {:> {[:a] {:expect even? :actual 1}}})
 
 (fact "diff-seq"
   (diff-seq [1 2 3] [1 2 3]) => nil
@@ -29,14 +29,14 @@
   => [:>]
 
   (keys (:> (diff (coll/contains {:a 1}) {:a 2 :b 2})))
-  => [:a]
+  => [[:a]]
 
   (diff (coll/contains {:a 1}) {:a 1 :b 2})
   => nil)
 
 (fact "diff just"
   (diff (coll/just {:a 1}) {:a 1 :b 2})
-  => {:- {:b 2}})
+  => {:- {[:b] 2}})
 
 (fact "diff large seq"
   (let [v1 (vec (range 20))
