@@ -6,6 +6,7 @@
             [code.ai.server.tool.code-test :as code-test]
             [code.ai.server.tool.code-doc :as code-doc]
             [code.ai.server.tool.code-manage :as code-manage]
+            [code.ai.server.patch :as patch]
             [std.lib :as h]
             [std.lang :as l]
             [rt.basic.impl.process-lua :as lua]
@@ -15,6 +16,9 @@
 (defonce *server* (atom nil))
 
 (defonce *rt* (atom nil))
+
+;; Apply patch for Antigravity compatibility
+(patch/apply-patch)
 
 ;; Server with custom tools
 (defn create-server
