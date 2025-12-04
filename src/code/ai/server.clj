@@ -20,7 +20,7 @@
 (defn create-server
   []
   (mcp-clj.mcp-server.core/create-server
-   {:transport {:type :sse :port 3001}
+   {:transport {:type :http :port 3001}
     :tools {"echo" basic/echo-tool
             "ping" basic/ping-tool
 
