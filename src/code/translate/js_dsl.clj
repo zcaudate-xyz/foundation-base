@@ -2,10 +2,12 @@
   (:require [std.lib :as h]
             [clojure.string :as str]))
 
-(defmulti translate-node :type)
+(defmulti translate-node (fn [node] (if (nil? node) :nil (:type node))))
 
 (defn translate-args [args]
   (mapv translate-node args))
+
+(defmethod translate-node :nil [_] nil)
 
 (defmethod translate-node :default [node]
   (h/error "Unknown node type" {:type (:type node) :node node}))
@@ -21,6 +23,9 @@
 
 (defmethod translate-node "NumericLiteral" [node]
   (:value node))
+
+(defmethod translate-node "RegExpLiteral" [node]
+  (list 'new 'RegExp (:pattern node) (:flags node)))
 
 (defmethod translate-node "StringLiteral" [node]
   (:value node))
@@ -51,6 +56,11 @@
               (translate-node (:right node))
               nil)))))
 
+(defmethod translate-node "AssignmentPattern" [node]
+  (list 'default
+        (translate-node (:left node))
+        (translate-node (:right node))))
+
 (defmethod translate-node "LogicalExpression" [node]
   (list (symbol (:operator node))
         (translate-node (:left node))
@@ -70,7 +80,9 @@
   (let [callee (translate-node (:callee node))
         args   (translate-args (:arguments node))]
     (if (and (seq? callee) (= '. (first callee)))
-      (apply list (concat callee args))
+      (if (= callee '(. React createElement))
+        (apply list args)
+        (apply list (concat callee args)))
       (apply list callee args))))
 
 (defmethod translate-node "MemberExpression" [node]
@@ -80,6 +92,19 @@
     (if computed
       (list 'get obj prop)
       (list '. obj (if (symbol? prop) prop (list 'quote prop))))))
+
+(defmethod translate-node "OptionalMemberExpression" [node]
+  (let [obj (translate-node (:object node))
+        prop (translate-node (:property node))
+        computed (:computed node)]
+    (if computed
+      (list 'get? obj prop)
+      (list '?. obj (if (symbol? prop) prop (list 'quote prop))))))
+
+(defmethod translate-node "OptionalCallExpression" [node]
+  (let [callee (translate-node (:callee node))
+        args   (translate-args (:arguments node))]
+    (apply list '?. callee args)))
 
 (defmethod translate-node "VariableDeclaration" [node]
   (let [declarations (:declarations node)
@@ -122,7 +147,17 @@
       async (with-meta {:async true}))))
 
 (defmethod translate-node "ReturnStatement" [node]
-  (list 'return (translate-node (:argument node))))
+  (if (:argument node)
+    (list 'return (translate-node (:argument node)))
+    (list 'return)))
+
+(defmethod translate-node "BreakStatement" [node]
+  (if (:label node)
+    (list 'break (translate-node (:label node)))
+    '(break)))
+
+(defmethod translate-node "AwaitExpression" [node]
+  (list 'await (translate-node (:argument node))))
 
 (defmethod translate-node "BlockStatement" [node]
   (cons 'do (translate-args (:body node))))
@@ -153,14 +188,16 @@
   (let [props (:properties node)]
     (apply hash-map
            (mapcat (fn [p]
-                     [(if (:computed p)
-                        (translate-node (:key p))
-                        (let [key-node (:key p)
-                              key-val (or (:name key-node) (:value key-node))]
-                          (if (number? key-val)
-                            key-val
-                            (keyword key-val))))
-                      (translate-node (:value p))])
+                     (if (= "SpreadElement" (:type p))
+                       [:& (translate-node (:argument p))]
+                       [(if (:computed p)
+                          (translate-node (:key p))
+                          (let [key-node (:key p)
+                                key-val (or (:name key-node) (:value key-node))]
+                            (if (number? key-val)
+                              key-val
+                              (keyword key-val))))
+                        (translate-node (:value p))]))
                    props))))
 
 (defmethod translate-node "ArrayExpression" [node]
@@ -183,11 +220,16 @@
         super-class (if (:superClass node) (translate-node (:superClass node)) nil)
         body (:body (:body node))
         methods (mapv (fn [m]
-                        (let [kind (:kind m)
-                              key (translate-node (:key m))
-                              params (translate-args (:params m))
-                              body (translate-node (:body m))]
-                          (list key params body)))
+                        (if (= "PropertyDefinition" (:type m))
+                          (let [key (translate-node (:key m))
+                                value (if (:value m) (translate-node (:value m)) nil)]
+                            (list 'var key value))
+                          (let [kind (:kind m)
+                                key (translate-node (:key m))
+                                value (:value m)
+                                params (translate-args (:params value))
+                                body (translate-node (:body value))]
+                            (list key params body))))
                       body)]
     (concat (list 'defclass id (if super-class [super-class] []))
             methods)))
@@ -240,25 +282,97 @@
       (list 'export (translate-node declaration))
       (list 'export (mapv translate-node (:specifiers node))))))
 
+(defmethod translate-node "ExportSpecifier" [node]
+  [(translate-node (:local node)) (translate-node (:exported node))])
+
 (defmethod translate-node "ArrayPattern" [node]
   (mapv translate-node (:elements node)))
+
+(defmethod translate-node "ObjectPattern" [node]
+  (let [props (:properties node)
+        rest-prop (first (filter #(= "RestElement" (:type %)) props))
+        other-props (remove #(= "RestElement" (:type %)) props)
+        map-form (apply hash-map (mapcat translate-node other-props))]
+    (if rest-prop
+      (assoc map-form :& (translate-node (:argument rest-prop)))
+      map-form)))
+
+(defmethod translate-node "ObjectProperty" [node]
+  (let [key (translate-node (:key node))
+        value (translate-node (:value node))]
+    [key value]))
+
+(defmethod translate-node "SwitchStatement" [node]
+  (let [disc (translate-node (:discriminant node))
+        cases (mapcat translate-node (:cases node))]
+    (apply list 'case disc cases)))
+
+(defmethod translate-node "SwitchCase" [node]
+  (let [test (if (:test node) (translate-node (:test node)) 'default)
+        cons (cons 'do (mapv translate-node (:consequent node)))]
+    [test cons]))
+
+(defmethod translate-node "TSInterfaceDeclaration" [_] nil)
+(defmethod translate-node "TSTypeAliasDeclaration" [_] nil)
+(defmethod translate-node "TSTypeAnnotation" [_] nil)
+(defmethod translate-node "TSTypeParameterInstantiation" [_] nil)
+
+(defmethod translate-node "TSAsExpression" [node]
+  (translate-node (:expression node)))
+
+(defmethod translate-node "TSTypeAssertion" [node]
+  (translate-node (:expression node)))
+
+(defmethod translate-node "TSNonNullExpression" [node]
+  (translate-node (:expression node)))
+
+(defmethod translate-node "TSQualifiedName" [node]
+  (symbol (str (translate-node (:left node)) "." (translate-node (:right node)))))
+
+(defmethod translate-node "SpreadElement" [node]
+  (list '... (translate-node (:argument node))))
 
 (defmethod translate-node "JSXElement" [node]
   (let [opening (:openingElement node)
         tag (translate-node (:name opening))
-        attrs (reduce (fn [m attr]
-                        (assoc m
-                               (keyword (:name (:name attr)))
-                               (if (:value attr)
-                                 (translate-node (:value attr))
-                                 true)))
-                      {}
-                      (:attributes opening))
+
+        process-attr (fn [attr]
+                       (if (= "JSXSpreadAttribute" (:type attr))
+                         {:spread (translate-node (:argument attr))}
+                         {:name (keyword (:name (:name attr)))
+                          :value (if (:value attr)
+                                   (translate-node (:value attr))
+                                   true)}))
+
+        raw-attrs (map process-attr (:attributes opening))
+        regular-attrs (filter :name raw-attrs)
+        spreads (map :spread (filter :spread raw-attrs))
+
+        attrs-map (reduce (fn [m item]
+                            (assoc m (:name item) (:value item)))
+                          {}
+                          regular-attrs)
+
+        final-attrs (if (seq spreads)
+                      (assoc attrs-map :& (if (= 1 (count spreads))
+                                            (first spreads)
+                                            (vec spreads)))
+                      attrs-map)
+
         children (->> (:children node)
                       (mapv translate-node)
-                      (remove (fn [n] (and (string? n) (str/blank? n))))
+                      (remove (fn [n] (or (nil? n) (and (string? n) (str/blank? n)))))
                       (vec))]
-    (apply list 'React.createElement tag attrs children)))
+    (apply list tag final-attrs children)))
+
+(defmethod translate-node "JSXFragment" [node]
+  (let [children (->> (:children node)
+                      (mapv translate-node)
+                      (remove (fn [n] (or (nil? n) (and (string? n) (str/blank? n)))))
+                      (vec))]
+    (apply list 'React.Fragment {} children)))
+
+(defmethod translate-node "JSXEmptyExpression" [_] nil)
 
 (defmethod translate-node "JSXText" [node]
   (:value node))
@@ -268,6 +382,9 @@
 
 (defmethod translate-node "JSXIdentifier" [node]
   (:name node))
+
+(defmethod translate-node "JSXMemberExpression" [node]
+  (list '. (translate-node (:object node)) (translate-node (:property node))))
 
 (defmethod translate-node "ThisExpression" [_]
   'this)
