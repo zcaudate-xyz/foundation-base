@@ -18,7 +18,6 @@
 
 (defmethod translate-node "FunctionDecl" [node]
   (let [name (:name node)
-        ret-type (get-in node [:type :qualType]) ;; Simplified
         inner (:inner node)
         params (filter #(= "ParmVarDecl" (:kind %)) inner)
         body (first (filter #(= "CompoundStmt" (:kind %)) inner))]
@@ -44,7 +43,6 @@
 
 (defmethod translate-node "VarDecl" [node]
   (let [name (:name node)
-        type (get-in node [:type :qualType])
         init (:inner node)]
     (if (seq init)
       (list 'var (symbol name) (translate-node (first init))) ;; Assuming init is the first child
