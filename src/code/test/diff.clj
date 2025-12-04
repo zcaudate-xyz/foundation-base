@@ -27,17 +27,18 @@
 
         ;; If something is marked as changed, we check if it actually satisfies the checker.
         ;; If it does, we remove it from changed.
+        ;; We now return path -> {:expect v :actual v-actual}
         real-changes (reduce-kv (fn [out k v]
                                   (let [v-actual (get-in actual k)]
                                     (if (checker-equal? v v-actual)
                                       out
-                                      (assoc-in out k v))))
+                                      (assoc out k {:expect v :actual v-actual}))))
                                 {}
                                 changed)
 
-        ;; Unwrap keys for + and - as well
-        missing (unflatten (:+ diff))
-        extra   (unflatten (:- diff))
+        ;; Don't unflatten anymore. Keep paths.
+        missing (:+ diff)
+        extra   (:- diff)
 
         final-diff (cond-> {}
                      (not-empty missing) (assoc :+ missing)
