@@ -56,6 +56,12 @@
          [:r      :oneshot]            'rt.basic.impl.process-r
          [:r      :basic]              'rt.basic.impl.process-r
 
+         [:julia  :oneshot]            'rt.basic.impl.process-julia
+         [:julia  :basic]              'rt.basic.impl.process-julia
+
+         [:erlang :oneshot]            'rt.basic.impl.process-erlang
+         [:erlang :basic]              'rt.basic.impl.process-erlang
+
          [:rust   :twostep]            'rt.basic.impl.process-rust
          
          [:c      :jocl]               'rt.jocl
