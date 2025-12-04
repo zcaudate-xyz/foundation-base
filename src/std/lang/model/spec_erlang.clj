@@ -6,6 +6,8 @@
             [std.lang.base.util :as ut]
             [std.lang.base.book :as book]
             [std.lang.base.script :as script]
+            [std.lang.model.spec-xtalk]
+            [std.lang.model.spec-xtalk.fn-erlang :as fn]
             [std.lib :as h]
             [std.string :as str]))
 
@@ -98,6 +100,7 @@
 
 (def +features+
   (-> (grammar/build :include [:builtin :math :compare :logic :control-base])
+      (merge (grammar/build-xtalk))
       (grammar/build:extend
        {:erl-raw {:op :erl-raw :symbol #{'erl-raw} :type :token}
         :defn   {:macro #'tf-erlang-defn :emit :macro :type :macro :symbol #{'defn}}
@@ -109,6 +112,7 @@
         :case* {:op :case* :symbol #{'case*} :emit :macro :macro #'emit-erlang-case :type :macro}
         :tuple* {:op :tuple* :symbol #{'tuple*} :emit :macro :macro #'emit-erlang-tuple :type :macro}
         :send  {:op :send :symbol #{'send '!} :raw "!" :emit :infix}})
+      (grammar/build:override fn/+erlang+)
       (grammar/build:override
        {:and    {:raw "and"}
         :or     {:raw "or"}
@@ -150,6 +154,7 @@
 
 (def +book+
   (book/book {:lang :erlang
+              :parent :xtalk
               :meta +meta+
               :grammar +grammar+}))
 

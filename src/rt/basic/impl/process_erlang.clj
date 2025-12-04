@@ -2,6 +2,7 @@
   (:require [rt.basic.type-common :as common]
             [rt.basic.type-oneshot :as oneshot]
             [rt.basic.type-basic :as basic]
+            [xt.lang.base-repl :as k]
             [std.lang.model.spec-erlang :as spec]
             [std.lang.base.impl :as impl]
             [std.lang.base.runtime :as rt]
@@ -12,9 +13,9 @@
   (common/put-program-options
    :erlang {:default  {:oneshot     :erlang
                        :basic       :erlang}
-            :env      {:erlang    {:exec    "erl"
-                                   :flags   {:oneshot   ["-noshell" "-eval"]
-                                             :basic     ["-noshell" "-eval"]}}}}))
+            :env      {:erlang    {:exec    "escript"
+                                   :flags   {:oneshot   []
+                                             :basic     []}}}}))
 
 ;;
 ;; EVAL
@@ -39,7 +40,7 @@
   default-oneshot-wrap
   (fn [body]
     (let [code (impl/emit-as :erlang body)]
-      (str "io:format(\"~p~n\", [begin " code " end]), init:stop()."))))
+      (str "main(_) -> io:format(\"~p~n\", [begin " code " end])."))))
 
 (def +erlang-oneshot-config+
   (common/set-context-options
@@ -58,37 +59,59 @@
 ;; BASIC
 ;;
 
-(def +client-basic+
+(def +client-basic-baked+
   "
-(fun() ->
-    Loop = fun(Sock, Rec) ->
-        case gen_tcp:recv(Sock, 0) of
-            {ok, Packet} ->
-                S = string:trim(Packet),
-                if
-                    S == \"<PING>\" ->
-                        gen_tcp:send(Sock, \"<PONG>\\n\"),
-                        Rec(Sock, Rec);
-                    true ->
-                        Resp = \"{\\\"status\\\": \\\"return\\\", \\\"data\\\": \\\"Erlang Exec Placeholder\\\"}\\n\",
-                        gen_tcp:send(Sock, Resp),
-                        Rec(Sock, Rec)
-                end;
-            {error, closed} ->
-                ok
-        end
-    end,
-    Start = fun(Port) ->
-        {ok, Sock} = gen_tcp:connect(\"localhost\", Port, [{active, false}, {packet, line}]),
-        Loop(Sock, Loop)
-    end,
-    Start(PORT)
-end)().")
+main(_) ->
+    Port = PORT_PLACEHOLDER,
+    {ok, Sock} = gen_tcp:connect(\"localhost\", Port, [{active, false}, {packet, line}, {binary, true}]),
+    loop(Sock).
+
+loop(Sock) ->
+    case gen_tcp:recv(Sock, 0) of
+        {ok, Packet} ->
+            S = string:trim(Packet),
+            if
+                S == <<\"<PING>\">> ->
+                    gen_tcp:send(Sock, \"<PONG>\\n\"),
+                    loop(Sock);
+                true ->
+                    Input = json:decode(S),
+                    WrapFn = fun(F) ->
+                        try
+                            V = F(),
+                            json:encode(#{
+                                <<\"id\">> => maps:get(<<\"id\">>, Input),
+                                <<\"key\">> => maps:get(<<\"key\">>, Input),
+                                <<\"type\">> => <<\"data\">>,
+                                <<\"value\">> => V
+                            })
+                        catch error:E ->
+                            json:encode(#{
+                                <<\"type\">> => <<\"error\">>,
+                                <<\"value\">> => list_to_binary(io_lib:format(\"~p\", [E]))
+                            })
+                        end
+                    end,
+                    Out = eval_helper(maps:get(<<\"body\">>, Input), WrapFn),
+                    gen_tcp:send(Sock, [Out, \"\\n\"]),
+                    loop(Sock)
+            end;
+        {error, closed} ->
+            ok
+    end.
+
+eval_helper(S, WrapFn) ->
+    {ok, Tokens, _} = erl_scan:string(binary_to_list(S)),
+    {ok, Exprs} = erl_parse:parse_exprs(Tokens),
+    Bindings = [{'EvalHelper', fun eval_helper/2}],
+    {value, Val, _} = erl_eval:exprs(Exprs, Bindings),
+    WrapFn(fun() -> Val end).
+")
 
 (def ^{:arglists '([port & [{:keys [host]}]])}
   default-basic-client
   (fn [port & [{:keys [host]}]]
-    (str/replace +client-basic+ "PORT" (str port))))
+    (str/replace +client-basic-baked+ "PORT_PLACEHOLDER" (str port))))
 
 (def +erlang-basic-config+
   (common/set-context-options
