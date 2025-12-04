@@ -226,7 +226,7 @@
          end   (if (< max end) max end)]
      (->> (map (fn [i text]
                  (format (str " %0" pad-h "d  %s") i text))
-               (range (inc start)  max)
+               (range (inc start) (inc max))
                (subvec lines start end))
           (str/join (apply str "\n" (repeat pad-v "\n")))))))
 
@@ -242,7 +242,7 @@
                                   ~line
                                   ~column))
           (local :println
-                 (pl-add-lines (with-out-str (println ~body))
+                 (pl-add-lines (with-out-str (print ~body))
                                ~range)
                  "\n")))))
 

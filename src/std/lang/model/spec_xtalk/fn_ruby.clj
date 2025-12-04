@@ -135,25 +135,25 @@
 (defn ruby-tf-x-return-encode
   ([[_ out id key]]
    (h/$ (do (:- "require 'json'")
-            (begin
+            (try
               (return (JSON.generate {:id  ~id
                                       :key ~key
                                       :type  "data"
                                       :value  ~out}))
-              (rescue Exception
-                      (return (JSON.generate {:id ~id
-                                              :key ~key
-                                              :type  "raw"
-                                              :value (. ~out (to_s))}))))))))
+              (catch e
+                  (return (JSON.generate {:id ~id
+                                          :key ~key
+                                          :type  "raw"
+                                          :value (. e (to_s))}))))))))
 
 (defn ruby-tf-x-return-wrap
   ([[_ f encode-fn]]
    (h/$ (do (:- "require 'json'")
-            (begin
-              (:= out (~f))
-              (rescue Exception
-                      (return (JSON.generate {:type "error"
-                                              :value (. $! (to_s))}))))
+            (try
+              (:= out (. ~f (call)))
+              (catch e
+                (return (JSON.generate {:type "error"
+                                        :value (. e (to_s))}))))
             (return (~encode-fn out nil nil))))))
 
 (defn ruby-tf-x-return-eval

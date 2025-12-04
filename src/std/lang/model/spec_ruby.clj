@@ -15,7 +15,12 @@
             [std.lib :as h]))
 
 (defn ruby-symbol
-  "emit ruby symbol"
+  "emit ruby symbol
+   (spec-ruby/ruby-symbol :a spec-ruby/+grammar+ {})
+   => \":a\"
+   (spec-ruby/ruby-symbol 'a spec-ruby/+grammar+ {})
+   => \"a\""
+  {:added "4.1"}
   [sym grammar mopts]
   (cond (keyword? sym)
         (str ":" (name sym))
@@ -23,37 +28,19 @@
         :else
         (common/emit-symbol sym grammar mopts)))
 
-(defn ruby-fn
-  "basic transform for ruby blocks"
-  ([[_ & args]]
-   (cond (symbol? (first args))
-         (apply list 'fn.inner (with-meta (first args)
-                                 {:inner true})
-                (rest args))
-
-         :else
-         (let [[args & body] args]
-           (apply list 'fn.inner args body)))))
-
-(defn ruby-defn
-  "emit ruby function definition"
-  [[_ sym args & body]]
-  (let [grammar preprocess/*macro-grammar*
-        mopts   preprocess/*macro-opts*
-        sym-str (common/emit-symbol sym grammar mopts)
-        args-str (str/join ", " (common/emit-invoke-args args grammar mopts))
-        body-str (common/*emit-fn* (cons 'do body) grammar mopts)]
-    (list :- (str "def " sym-str (if (not-empty args-str) (str "(" args-str ")") "") "\n"
-                  body-str "\n"
-                  "end"))))
-
 (defn ruby-var
-  "emit ruby variable"
+  "emit ruby variable
+   (spec-ruby/ruby-var '(var a 1))
+   => '(:= a 1)"
+  {:added "4.1"}
   [[_ sym & args]]
   (list ':= sym (last args)))
 
 (defn ruby-map
-  "emit ruby hash"
+  "emit ruby hash
+   (l/emit-as :ruby '[{:a 1 :b 2}])
+   => \"{:a => 1, :b => 2}\""
+  {:added "4.1"}
   [m grammar mopts]
   (let [entries (map (fn [[k v]]
                        (str (common/*emit-fn* k grammar mopts)
@@ -62,48 +49,91 @@
                      m)]
     (str "{" (str/join ", " entries) "}")))
 
+(defn ruby-fn
+  "basic transform for ruby blocks
+   (spec-ruby/ruby-fn '(fn [a] (+ a 1)))
+   => '(fn.inner [a] (+ a 1))"
+  {:added "4.1"}
+  ([[_ & args]]
+   (let [[args & body] args]
+     (apply list :- :lambda
+            (concat (if (not-empty args)
+                      [(list 'quote args) "{"]
+                      ["{"])
+                    body
+                    ["}"])))))
+
 (def +features+
   (-> (grammar/build :exclude [:pointer :block :data-range])
       (grammar/build:override
        {:var        {:macro #'ruby-var :emit :macro}
-        :defn       {:macro #'ruby-defn :emit :macro}
-        :fn         {:macro #'ruby-fn   :emit :macro}
         :and        {:raw "&&"}
         :or         {:raw "||"}
         :not        {:raw "!" :emit :prefix}
         :eq         {:raw "=="}
+        :fn         {:macro  #'ruby-fn   :type :macro}
         :neq        {:raw "!="}
         :gt         {:raw ">"}
         :lt         {:raw "<"}
         :gte        {:raw ">="}
         :lte        {:raw "<="}})
-       (grammar/build:override fn/+ruby+)
-       (grammar/build:extend
-        {:assign     {:op :assign :symbol #{':=} :raw "=" :emit :infix}
-         :puts       {:op :puts :symbol #{'puts} :raw "puts" :emit :prefix}
-         :nil?       {:op :nil? :symbol #{'nil?} :raw "nil?" :emit :postfix}
-         :attr       {:op :attr :symbol #{'attr_accessor} :raw "attr_accessor" :emit :prefix}
-         :end        {:op :end  :symbol #{'end}  :raw "end"  :emit :token}})))
+      (grammar/build:override fn/+ruby+)
+      (grammar/build:extend
+       {:assign     {:op :assign :symbol #{':=} :raw "=" :emit :infix}
+        :puts       {:op :puts :symbol #{'puts} :raw "puts" :emit :prefix}
+        :nil?       {:op :nil? :symbol #{'nil?} :raw "nil?" :emit :postfix}
+        :attr       {:op :attr :symbol #{'attr_accessor} :raw "attr_accessor" :emit :prefix}
+        :end        {:op :end  :symbol #{'end}  :raw "end"  :emit :token}})))
 
 (def +template+
   (->> {:banned #{}
         :allow   {:assign  #{:symbol}}
-        :default {:common    {:statement "\n"}
+        :default {:common    {:statement ""}
                   :block     {:parameter {:start " " :end ""}
                               :body      {:start "" :end "end" :append false}}
-                  :function  {:raw "lambda"
-                              :args      {:start " { |" :end "| " :space ""}
-                              :body      {:start "" :end "}"}}
-                  :invoke    {:reversed true}}
+                  :invoke    {:start "("}
+                  :function  {:raw "def"
+                              :body      {:start "" :end "end"}}}
+        :block   {:try      {:raw  "begin"
+                             :wrap {:start "" :end "end"}
+                             :body {:start "" :end ""}
+                             :control {:catch  {:raw  "rescue Exception =>"
+                                                :body {:start "" :end ""}}}}}
         :token   {:nil       {:as "nil"}
                   :boolean   {:as (fn [b] (if b "true" "false"))}
                   :string    {:quote :double}
                   :symbol    {:custom #'ruby-symbol}}
         :data    {:vector    {:start "[" :end "]" :space ""}
                   :map       {:custom #'ruby-map}}
-        :define  {:def       {:raw ""}
-                  :defglobal {:raw ""}}}
+        :function {:defn      {:raw "def"
+                               :body      {:start "" :end "end"}}}
+        :define   {:def       {:raw "def"}
+                   :defglobal {:raw "def"}}}
        (h/merge-nested (emit/default-grammar))))
+
+
+(comment
+  :try     {:raw "BEGIN"
+            :wrap    {:start "" :end "END;"}
+            :body    {:start "" :end "EXCEPTION"}
+            :control {:default {:parameter  {:start "" :end ""}
+                                :body {:append true
+                                       :start "" :end ""}}
+                      :catch   {:raw "WHEN"
+                                :parameter  {:start " " :end " THEN"}}}}
+
+  :default {:comment   {:prefix "--"}
+            :common    {:apply ":" :statement ""
+                        :namespace-full "___"
+                        :namespace-sep  "_"}
+            :index     {:offset 1  :end-inclusive true}
+            :return    {:multi true}
+            :block     {:parameter {:start " " :end " "}
+                        :body      {:start "" :end ""}}
+            :function  {:raw "function"
+                        :body      {:start "" :end "end"}}
+            :infix     {:if  {:check "and" :then "or"}}
+            :global    {:reference nil}})
 
 (def +grammar+
   (grammar/grammar :rb

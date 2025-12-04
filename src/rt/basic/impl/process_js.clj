@@ -74,31 +74,13 @@
 ;; 
 
 (def +client-basic+
-  '[(:- :import #{createRequire} :from "'module'")
-    (var require (createRequire (. import.meta url)))
-    (:- :import net :from "'net'")
+  '[(:- :import net :from "'net'")
     (:- :import rl :from "'readline'")
+    (:- :import #{createRequire} :from "'module'")
+    (var require (createRequire (. import.meta url)))
     (defn client-basic
       [host port opts]
-      (let [#_#_#_#_
-            net (require "net")
-            rl  (require "readline")
-            #_#__      (. (require "process") (on "unhandledRejection" (fn:>)))
-            conn (new net.Socket)
-            _      (conn.connect port host)
-            stream (rl.createInterface conn conn)]
-        (stream.on "line" (fn [line]
-                            (conn.write (+ (return-eval (JSON.parse line))
-                                           "\n"))))))])
-
-#_
-(def +client-basic+
-  '[(defn client-basic
-      [host port opts]
-      (let [net (require "net")
-            rl  (require "readline")
-            #_#__      (. (require "process") (on "unhandledRejection" (fn:>)))
-            conn (new net.Socket)
+      (let [conn (new net.Socket)
             _      (conn.connect port host)
             stream (rl.createInterface conn conn)]
         (stream.on "line" (fn [line]

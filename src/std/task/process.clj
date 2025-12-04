@@ -7,13 +7,9 @@
 
 (defn main-function
   "creates a main function to be used for execution
- 
    (main-function ns-aliases 1)
-   => (contains [h/vargs? false])
- 
-   (main-function ns-unmap 1)
-   => (contains [h/vargs? true])"
-  {:added "3.0"}
+   => (contains [h/vargs? false])"
+  {:added "4.0"}
   ([func count]
    (let [fcounts (h/arg-count func)
          fcount  (if-not (empty? fcounts)
@@ -32,17 +28,7 @@
      [main args?])))
 
 (defn select-filter
-  "matches given a range of filters
- 
-   (select-filter #\"ello\" 'hello)
-   => true
- 
-   (select-filter #\"^ello\" 'hello)
-   => false
- 
-   (select-filter 'code 'code.test) => true
- 
-   (select-filter 'hara 'spirit.common) => false"
+  "matches given a range of filters"
   {:added "4.0"}
   [selector id]
   (cond (or (fn?  selector)
@@ -70,14 +56,8 @@
         (throw (ex-info "Selector not valid" {:selector selector}))))
 
 (defn select-inputs
-  "selects inputs based on matches
- 
-   (select-inputs {:item {:list (fn [_ _] ['code.test 'spirit.common])}}
-                  {}
-                  {}
-                  ['code])
-   => ['code.test]"
-  {:added "3.0"}
+  "selects inputs based on matches"
+  {:added "4.0"}
   ([task lookup env selector]
    (let [list-fn    (or (-> task :item :list)
                         (throw (ex-info "No `:list` function defined" {:key [:item :list]})))]
@@ -89,7 +69,11 @@
                 (filter #(select-filter selector %)))))))
 
 (defn wrap-execute
-  "enables execution of task with transformations"
+  "enables execution of task with transformations
+   
+   ((wrap-execute process-test-fn +task+)
+    1 {} {} {})
+   => 3"
   {:added "3.0"}
   ([f task]
    (fn [input params lookup env & args]
@@ -104,7 +88,17 @@
          (output-fn result))))))
 
 (defn wrap-input
-  "enables execution of task with single or multiple inputs"
+  "enables execution of task with single or multiple inputs
+   ((wrap-input process-test-fn +task+)
+    1 {} {} {})
+   => 2
+ 
+   (let [task (assoc-in +task+ [:item :list] (constantly [1 2 3]))
+         f    (wrap-execute process-test-fn task)
+         res  ((wrap-input f task) :all {} {} {})]
+     (get res 2) => 3
+     (get res 3) => 5
+     (get res 4) => 7)"
   {:added "3.0"}
   ([f task]
    (fn [input params lookup env & args]
@@ -124,16 +118,8 @@
            (apply f input params lookup env args)))))
 
 (defn task-inputs
-  "constructs inputs to the task given a set of parameters
- 
-   (task-inputs (task/task :namespace \"ns-interns\" ns-interns)
-                'std.task)
-   => '[std.task {} {} {}]
- 
-   (task-inputs (task/task :namespace \"ns-interns\" ns-interns)
-                {:bulk true})
-   => '[std.task.process-test {:bulk true} {} {}]"
-  {:added "3.0"}
+  "constructs inputs to the task given a set of parameters"
+  {:added "4.0"}
   ([task]
    (let [input-fn (-> task :construct :input)]
      (task-inputs task (input-fn task) task)))
@@ -154,14 +140,8 @@
    [input params lookup env]))
 
 (defn invoke
-  "executes the task, given functions and parameters
- 
-   (def world nil)
- 
-   (invoke (task/task :namespace \"ns-interns\" ns-interns))
-   => {'world #'std.task.process-test/world,
-       '*last* #'std.task.process-test/*last*}"
-  {:added "3.0"}
+  "executes the task, given functions and parameters"
+  {:added "4.0"}
   ([task & args]
    (let [idx (h/index-at #{:args} args)
          _    (if (and (neg? idx) (-> task :main :args?))

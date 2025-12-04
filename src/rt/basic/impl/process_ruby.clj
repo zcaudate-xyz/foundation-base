@@ -22,6 +22,21 @@
 ;; ONESHOT
 ;;
 
+
+(defn return-wrap-invoke
+  "wraps forms to be invoked"
+  {:added "4.0"}
+  [forms]
+  (h/$ (. (fn [] ~@forms) (call))))
+
+(defn default-body-transform
+  "standard python transforms"
+  {:added "4.0"}
+  [input mopts]
+  (rt/return-transform
+   input mopts
+   {:wrap-fn return-wrap-invoke}))
+
 (def ^{:arglists '([body])}
   default-oneshot-wrap
   (let [bootstrap  (impl/emit-entry-deps
@@ -38,7 +53,7 @@
   (common/set-context-options
    [:ruby :oneshot :default]
    {:main  {:in    #'default-oneshot-wrap}
-    :emit  {:body  {:transform #'rt/return-transform}}
+    :emit  {:body  {:transform #'default-body-transform}}
     :json :full}))
 
 (def +ruby-oneshot+
@@ -58,10 +73,10 @@
       (:- "require 'json'")
       (let [conn (TCPSocket.new host port)]
          (while true
-            (let [line (. conn (gets))
-                  input (JSON.parse line)
-                  out   (return-eval input)]
-               (. conn (puts (JSON.generate out)))))))])
+            (let [line   (. conn (gets))
+                  input  (JSON.parse line)
+                  out    (return-eval input)]
+              (. conn (puts out))))))])
 
 (def ^{:arglists '([port & [{:keys [host]}]])}
   default-basic-client
@@ -83,10 +98,10 @@
 
 (def +default-basic-config+
   {:bootstrap #'default-basic-client
-    :main   {}
-   :emit   {:body  {:transform #'rt/return-transform}
+   :main   {}
+   :emit   {:body  {:transform #'default-body-transform}
             :lang/format :global}
-   :json   :full
+   :json :full
    :encode :json ;; default
    :timeout 2000})
 
@@ -101,3 +116,6 @@
     {:type :hara/rt.basic
      :instance {:create #'basic/rt-basic:create}
      :config {:layout :full}})])
+
+(comment
+  )
