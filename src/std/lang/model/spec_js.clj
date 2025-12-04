@@ -37,7 +37,8 @@
   "emits a map key"
   {:added "4.0"}
   ([key grammar mopts]
-   (cond (keyword? key)
+   (cond (or (keyword? key)
+             (string? key))
          (data/default-map-key key grammar mopts)
 
          :else
