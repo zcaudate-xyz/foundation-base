@@ -8,11 +8,13 @@
             [std.lib :as h]
             [std.string :as str]
             [rt.basic.type-common :as common]
-            [rt.basic.type-oneshot :as oneshot]))
+            [rt.basic.type-oneshot :as oneshot]
+            [rt.basic.type-twostep :as twostep]))
 
 (def +program-init+
   (common/put-program-options
    :c  {:default  {:oneshot     :tcc
+                   :twostep     :gcc
                    :interactive false
                    :ws-client   false}
         :env      {:tcc    {:exec "tcc"
@@ -21,7 +23,15 @@
                             :flags  {:oneshot ["-run" "-"]
                                      :interactive false
                                      :json false
-                                     :ws-client false}}}}))
+                                     :ws-client false}}
+                   :gcc    {:exec "gcc"
+                            :extension   "c"
+                            :stderr true
+                            :flags  {:twostep []
+                                     :interactive false
+                                     :json false
+                                     :ws-client false}
+                            :output-flag "-o"}}}))
 
 (def FORMAT
   {[:char]   "%c"
@@ -92,6 +102,19 @@
     :c :oneshot
     {:type :hara/rt.oneshot
      :instance {:create oneshot/rt-oneshot:create}})])
+
+(def +c-twostep-config+
+  (common/set-context-options
+   [:c :twostep :default]
+   {:emit  {:body  {:transform #'transform-form}}
+    #_#_
+    :json :string}))
+
+(def +c-twostep+
+  [(rt/install-type!
+    :c :twostep
+    {:type :hara/rt.twostep
+     :instance {:create twostep/rt-twostep:create}})])
   
 (comment
   (./create-tests))
