@@ -139,7 +139,8 @@
                              (reduce (fn [out [k data]]
                                        (update-in out [k] concat data))
                                      out
-                                     (:data item)))
+                                     (or (:data item)
+                                         (:data (meta item)))))
                            {}
                            (remove (fn [[ns item]]
                                      (when (= :error (:status item))
