@@ -20,6 +20,20 @@
 - **Macro Expansion**: `defstruct.rs` and other macros in `std.lang.model.spec-rust` work correctly in isolation, suggesting previous "Syntax error macroexpanding" issues might have been context-dependent or transient.
 - **R Integration**: `std.lang.model.spec-r-test` uses a guard `std.lang.spec.r/CANARY`. If this guard fails (returns false), the tests in that fact are skipped or fail with "Guard failed".
 
+## Foundation MCP Server
+
+- **Server Location**: The foundation MCP server is defined in `code.ai.server` within `foundation-base`.
+- **Transport**: By default, `code.ai.server/create-server` configures the server to use SSE transport on port 3001.
+- **Tools**:
+    - `echo`, `ping`: Basic connectivity tests.
+    - `lang-emit-as`: Transpiles Clojure DSL code to target languages (e.g., JS, Lua).
+    - `std-lang-list`, `std-lang-modules`: Introspection for `std.lang` languages and modules.
+    - `clj-eval`: Evaluates arbitrary Clojure code.
+    - `code-test`: Runs tests using `code.test.task/run`.
+    - `code-doc-init`, `code-doc-deploy`, `code-doc-publish`: Manages documentation sites.
+    - `code-manage`: Executes management tasks defined in `code.manage`.
+- **Stdio Support**: While `mcp-clj` supports stdio transport (as seen in `mcp-clj.stdio-server.main`), `code.ai.server` currently hardcodes SSE. To use it via stdio, a custom entry point or modification to `create-server` would be required.
+
 # Exported Memories
 
 - **Grammar Retrieval**: To programmatically retrieve the grammar for a `std.lang` language, use `(:grammar (l/get-book (l/default-library) :<lang-keyword>))`. The grammar is not exposed as a public var.

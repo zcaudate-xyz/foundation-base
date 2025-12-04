@@ -194,10 +194,11 @@
                               (fn [f]
                                 (fn [& args]
                                   (log/info :rpc/on-sse-connect {})
-                                  (apply f args)
-                                  (reply!
-                                    {:event "endpoint" :data uri})
-                                  (on-sse-connect id)))))
+                                  (future
+                                    (reply!
+                                      {:event "endpoint" :data uri})
+                                    (on-sse-connect id))
+                                  (apply f args)))))
                     (do
                       (log/warn :rpc/invalid {:method request-method :uri uri})
                       (http/text-response "Not Found" http/NotFound))))

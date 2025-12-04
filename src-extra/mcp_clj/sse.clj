@@ -37,7 +37,8 @@
         response-headers  {"Cache-Control" "no-cache"
                            "Connection"    "keep-alive"
                            "Content-Type"  "text/event-stream"}
-        initialised       (promise)]
+        initialised       (promise)
+        closed            (promise)]
     {:reply!   (fn reply!
                  [response]
                  (log/info :sse/reply! response)
@@ -53,12 +54,14 @@
                        (on-response-error)
                        (on-response-done)
                        (.close ^Closeable output-stream)
+                       (deliver closed true)
                        (throw e)))))
      :close!   (fn close
                  []
                  (log/info :sse/close!)
                  (try
                    (on-response-done)
+                   (deliver closed true)
                    (catch Exception e
                      (binding [*out* *err*]
                        (on-response-error)
@@ -66,7 +69,10 @@
                        (println "Unexpected error closing SSE session")
                        (println (ex-message e) (ex-data e))
                        (.printStackTrace e)
+                       (deliver closed true)
                        (throw e)))))
      :response {:status  200
                 :headers response-headers
-                :body    (fn [& _] (deliver initialised :initialised))}}))
+                :body    (fn [& _]
+                           (deliver initialised :initialised)
+                           @closed)}}))
