@@ -163,6 +163,17 @@
                       (translate-node (:value p))])
                    props))))
 
+(defmethod translate-node "ObjectPattern" [node]
+  (let [props (:properties node)
+        shorthand? (every? :shorthand props)]
+    (if shorthand?
+      (set (map #(translate-node (:key %)) props))
+      (apply hash-map
+             (mapcat (fn [p]
+                       [(translate-node (:key p))
+                        (translate-node (:value p))])
+                     props)))))
+
 (defmethod translate-node "ArrayExpression" [node]
   (mapv translate-node (:elements node)))
 
@@ -258,7 +269,7 @@
                       (mapv translate-node)
                       (remove (fn [n] (and (string? n) (str/blank? n))))
                       (vec))]
-    (apply list 'React.createElement tag attrs children)))
+    (apply vector :% tag attrs children)))
 
 (defmethod translate-node "JSXText" [node]
   (:value node))
@@ -268,6 +279,11 @@
 
 (defmethod translate-node "JSXIdentifier" [node]
   (:name node))
+
+(defmethod translate-node "JSXMemberExpression" [node]
+  (let [obj (translate-node (:object node))
+        prop (translate-node (:property node))]
+    (symbol (str obj "/" prop))))
 
 (defmethod translate-node "ThisExpression" [_]
   'this)
