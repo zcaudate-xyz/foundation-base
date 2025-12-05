@@ -51,7 +51,7 @@
   ;; Init - load namespaces
   (r/useEffect
    (fn []
-     (. (global/api-post "/api/translate/browser/namespaces" {:lang "js"})
+     (. (global/api-post "/api/browse/lang/namespaces" {:lang "js"})
         (then (fn [result] (setNamespaces result))))
      (return undefined))
    [])
@@ -60,7 +60,7 @@
   (r/useEffect
    (fn []
      (when selectedNs
-       (. (global/api-post "/api/translate/browser/components"
+       (. (global/api-post "/api/browse/lang/components"
                           {:lang "js"
                            :ns selectedNs})
           (then (fn [result] (setComponents result)))))
@@ -71,7 +71,7 @@
   (r/useEffect
    (fn []
      (when (and selectedNs selectedComp)
-       (. (global/api-post "/api/translate/browser/component"
+       (. (global/api-post "/api/browse/lang/component"
                           {:lang "js"
                            :ns selectedNs
                            :component selectedComp})
