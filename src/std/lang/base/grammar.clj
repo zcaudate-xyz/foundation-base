@@ -244,6 +244,12 @@
              (h/error "Keys in original map: " {:keys ks}))]
     (merge build m)))
 
+(defn build:remove
+  "removes ops from the map"
+  {:added "4.0"}
+  [build m]
+  (apply dissoc build (keys m)))
+
 (defn to-reserved
   "convert op map to symbol map"
   {:added "3.0"}
@@ -305,4 +311,3 @@
               :macros    (grammar-macros reserved)
               :structure (grammar-structure reserved))
        (map->Grammer))))
-

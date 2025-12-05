@@ -7,6 +7,7 @@
             [std.lang.base.book :as book]
             [std.lang.base.book-module :as module]
             [std.lang.base.script :as script]
+            [std.lang.base.emit-preprocess :as preprocess]
             [std.lang.model.spec-xtalk]
             [std.lang.model.spec-xtalk.fn-julia :as fn]
             [std.string :as str]
@@ -16,6 +17,11 @@
 ;;
 ;; LANG
 ;;
+
+(defn emit-ast [form]
+  (common/*emit-fn* form
+                    preprocess/*macro-grammar*
+                    preprocess/*macro-opts*))
 
 (defn tf-local
   "a more flexible `var` replacement"
@@ -214,6 +220,8 @@
   (book/book {:lang :julia
               :parent :xtalk
               :meta +meta+
+              :modules {'JSON {:code {'parse {:op :invoke} 'print {:op :invoke}}}
+                        'Base64 {:code {'base64encode {:op :invoke} 'base64decode {:op :invoke}}}}
               :grammar +grammar+}))
 
 (def +init+

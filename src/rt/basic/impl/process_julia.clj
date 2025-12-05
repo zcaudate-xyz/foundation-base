@@ -2,10 +2,10 @@
   (:require [rt.basic.type-common :as common]
             [rt.basic.type-oneshot :as oneshot]
             [rt.basic.type-basic :as basic]
-            [xt.lang.base-repl :as k]
-            [std.lang.model.spec-julia :as spec]
+            [std.lang.model.spec-julia :as julia]
             [std.lang.base.impl :as impl]
             [std.lang.base.runtime :as rt]
+            [std.lang :as l]
             [std.lib :as h]
             [std.string :as str]
             [std.json :as json]))
@@ -50,16 +50,11 @@
 
 (def ^{:arglists '([body])}
   default-oneshot-wrap
-  (let [bootstrap (impl/emit-entry-deps
-                   k/return-eval
-                   {:lang :julia
-                    :layout :flat})]
-    (fn [body]
-      (str "import Pkg; Pkg.add(\"JSON\"); using JSON;\n\n"
-           bootstrap
-           "\n\n"
-           (impl/emit-as
-            :julia [(list 'println (list 'return-eval body))])))))
+  (fn [body]
+    (str "import Pkg; Pkg.add(\"JSON\"); using JSON;\n\n"
+         "\n\n"
+         (impl/emit-as
+          :julia [(list 'println body)]))))
 
 (def +julia-oneshot-config+
   (common/set-context-options
@@ -78,40 +73,44 @@
 ;; BASIC
 ;;
 
-(def +client-basic+
-  '[(defn client-basic
-      [host port opts]
-      (let [conn   (connect host port)]
-        (while true
-          (let [line  (readline conn)]
-            (cond (== line "<PING>")
-                  (do (write conn "<PONG>\n")
-                      (flush conn))
+(def +client-basic-ast+
+  '[(using Sockets)
+    (using JSON)
+    (using Base64)
 
-                  :else
-                  (let [input (x-json-decode line)
-                        out   (return-eval input)]
-                    (write conn (string (x-json-encode out) "\n"))
-                    (flush conn)))))))])
+    (defn main []
+      (local client := (connect "localhost" "PORT_PLACEHOLDER"))
+      (while true
+        (local line := (readline client))
+        (if (== line "<PING>")
+          (do (println client "<PONG>"))
+          (do (local input := (JSON.parse line))
+              (local wrap_fn := (fn [f]
+                                  (try
+                                    (do (local v := (f))
+                                        (JSON.print client {:id (get input "id")
+                                                            :key (get input "key")
+                                                            :type "data"
+                                                            :value v})
+                                        (println client))
+                                    (catch Exception e
+                                      (JSON.print client {:type "error"
+                                                          :value (string e)})
+                                      (println client)))))
+              (local out := (include_string Main (get input "body")))
+              (out wrap_fn)))))
+
+    (main)])
+
+(def +client-basic+
+  (l/emit-as :julia +client-basic-ast+))
 
 (def ^{:arglists '([port & [{:keys [host]}]])}
   default-basic-client
-  (let [bootstrap (->> [(impl/emit-entry-deps
-                         k/return-eval
-                         {:lang :julia
-                          :layout :flat})
-                        (impl/emit-as
-                         :julia +client-basic+)]
-                       (str/join "\n\n"))]
-    (fn [port & [{:keys [host]}]]
-      (str "import Pkg; Pkg.add(\"JSON\"); using JSON; using Sockets;\n\n"
-           bootstrap
-           "\n\n"
-           (impl/emit-as
-            :julia [(list 'client-basic
-                          (or host "127.0.0.1")
-                          port
-                          {})])))))
+  (fn [port & [{:keys [host]}]]
+    (str "import Pkg; Pkg.add(\"JSON\"); using JSON; using Sockets;\n\n"
+         (str/replace +client-basic+
+                      "\"PORT_PLACEHOLDER\"" (str port)))))
 
 (def +julia-basic-config+
   (common/set-context-options
