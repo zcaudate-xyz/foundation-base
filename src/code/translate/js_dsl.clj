@@ -135,7 +135,7 @@
   (let [id (translate-node (:id node))
         params (translate-args (:params node))
         body (translate-node (:body node))]
-    (list 'defn id params body)))
+    (list 'defn.js id params body)))
 
 (defmethod translate-node "ArrowFunctionExpression" [node]
   (let [params (translate-args (:params node))
@@ -388,3 +388,44 @@
 
 (defmethod translate-node "ThisExpression" [_]
   'this)
+
+(defn translate-import-entry [node]
+  (let [source (:value (:source node))
+        specifiers (:specifiers node)
+        default-spec (first (filter #(= "ImportDefaultSpecifier" (:type %)) specifiers))
+        named-specs (filter #(= "ImportSpecifier" (:type %)) specifiers)
+        ns-spec (first (filter #(= "ImportNamespaceSpecifier" (:type %)) specifiers))]
+    (vec
+     (concat [source]
+             (if ns-spec
+               [:as (translate-node (:local ns-spec))]
+               [])
+             (if default-spec
+               [:default (translate-node (:local default-spec))]
+               [])
+             (if (seq named-specs)
+               [:named (apply hash-map (mapcat (fn [s]
+                                                 [(translate-node (:imported s))
+                                                  (translate-node (:local s))])
+                                               named-specs))]
+               [])))))
+
+(defn translate-file [node ns-name]
+  (let [program (if (= "File" (:type node)) (:program node) node)
+        body (:body program)
+        imports (filter #(= "ImportDeclaration" (:type %)) body)
+        others (remove #(= "ImportDeclaration" (:type %)) body)
+
+        import-entries (mapv translate-import-entry imports)
+        other-forms (mapv translate-node others)
+
+        script-config (cond-> {}
+                        (seq import-entries) (assoc :import import-entries))]
+
+    (list (list 'ns ns-name
+                '(:require [std.lang :as l]
+                           [std.lib :as h]))
+
+          (apply list 'l/script :js
+                 script-config
+                 other-forms))))
