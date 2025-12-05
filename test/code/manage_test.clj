@@ -291,3 +291,7 @@
                   {:var 'hara.data.base.seq/object-of
                    :new 'element-at}))
 
+
+
+^{:refer code.manage/heal-code :added "4.1"}
+(fact "TODO")
