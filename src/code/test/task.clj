@@ -2,6 +2,7 @@
   (:require [std.string :as str]
             [code.project :as project]
             [std.task :as task]
+            [clojure.java.io :as io]
             [code.test.checker.common]
             [code.test.checker.collection]
             [code.test.checker.logic]
@@ -140,6 +141,49 @@
                   (set (map (comp :ns :meta) (:timeout latest))))
          (run)))))
 
+(defn run:watch
+  "runs tests in watch mode
+
+   (task/run:watch)"
+  {:added "3.0"}
+  ([]
+   (run:watch :all {}))
+  ([ns]
+   (run:watch ns {}))
+  ([ns params]
+   (let [project (project/project)
+         paths (concat (or (:test-paths project) ["test"])
+                       (or (:source-paths project) ["src"]))
+         dirty (atom #{})
+         running (atom false)
+         run-tests (fn []
+                     (when (compare-and-set! running false true)
+                       (try
+                         (h/sh "clear")
+                         (println "Running tests...")
+                         (let [to-run (if (= ns :all)
+                                        :all
+                                        ns)]
+                           (run to-run params))
+                         (println "\nWaiting for changes...")
+                         (catch Exception e
+                           (println "Error running tests:" e))
+                         (finally
+                           (reset! running false)))))]
+     (println "Starting watch mode on" paths)
+     (run-tests)
+     (doseq [path paths]
+       (let [f (io/file path)]
+         (when (.exists f)
+           (h/watch:add f :test-watcher
+                        (fn [_ _ _ [_ file]]
+                          (when (str/ends-with? (.getName ^java.io.File file) ".clj")
+                            (println "File changed:" (.getName ^java.io.File file))
+                            (future (run-tests))))
+                        {:recursive true
+                         :types #{:modify :create}}))))
+     (deref (promise))))) ;; block forever
+
 (defn print-options
   "output options for test results
  
@@ -185,12 +229,18 @@
   {:added "3.0"}
   ([& args]
    (let [opts (task/process-ns-args args)
-         {:keys [throw failed timeout] :as stats} (run (or (:ns opts) :all)
-                                                       (dissoc opts :ns))
-         res (+ (or throw 0) (or failed 0) (or timeout 0))]
-     (if (get opts :no-exit)
-       res
-       (System/exit res)))))
+         cmd (:cmd opts)]
+     (cond
+       (= cmd "watch")
+       (run:watch (or (:ns opts) :all) (dissoc opts :ns :cmd))
+
+       :else
+       (let [{:keys [throw failed timeout] :as stats} (run (or (:ns opts) :all)
+                                                           (dissoc opts :ns :cmd))
+             res (+ (or throw 0) (or failed 0) (or timeout 0))]
+         (if (get opts :no-exit)
+           res
+           (System/exit res)))))))
 
 (comment
   (run '[platform])

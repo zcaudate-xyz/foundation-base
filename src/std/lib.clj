@@ -32,6 +32,7 @@
             [std.lib.time :as time]
             [std.lib.trace :as trace]
             [std.lib.walk :as walk]
+            [std.lib.watch :as watch]
             [clojure.set :as set])
   (:refer-clojure :exclude [-> ->> keyword swap! reset! aget fn
                             ns require pr prn memoize set! future future?
@@ -49,7 +50,8 @@
               std.lib.os
               std.lib.protocol
               std.lib.time
-              std.lib.walk)
+              std.lib.walk
+              std.lib.watch)
  
 (f/intern-in apply/apply-as
              apply/apply-in
