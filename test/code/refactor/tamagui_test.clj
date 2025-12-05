@@ -1,0 +1,58 @@
+(ns code.refactor.tamagui-test
+  (:require [code.refactor.tamagui :as sut]
+            [code.test :refer :all]
+            [code.edit :as edit]
+            [code.query :as query]
+            [std.lib.zip :as zip]
+            [std.block.base :as base]))
+
+(fact "refactor-string with wildcard match"
+  (-> (edit/parse-root
+       "(l/script :js
+          {:require [[js.tamagui :as tm]]}
+          (defn.js MyComp []
+            (return
+             [:% tm/YStack {:p \"$4\" :bg \"red\" :ai \"center\"}
+              [:% tm/Text {:color \"white\"} \"Hello\"]
+              [:% tm/Button {:size \"$4\"} \"Click Me\"]])))")
+      (query/modify '[_]
+                    (fn [zloc]
+                      (sut/transform-zipper zloc)))
+      (sut/replace-require)
+      (edit/root-string))
+  =>
+  "(l/script :js
+          {:require [[js.lib.figma :as fg]]}
+          (defn.js MyComp []
+            (return
+             [:div {:className \"flex flex-col items-center bg-red p-4\"} [:span {:className \"text-white\"} \"Hello\"] [:% fg/Button {:size \"$4\"} \"Click Me\"]])))")
+
+(fact "refactor-string with vector className"
+  (-> (edit/parse-root
+       "(l/script :js
+          {:require [[js.tamagui :as tm]]}
+          (defn.js MyComp []
+            (return
+             [:% tm/YStack {:className [\"existing\" \"classes\"] :p \"$4\"}
+              \"Content\"])))")
+      (query/modify '[_]
+                    (fn [zloc]
+                      (sut/transform-zipper zloc)))
+      (sut/replace-require)
+      (edit/root-string))
+  =>
+  "(l/script :js
+          {:require [[js.lib.figma :as fg]]}
+          (defn.js MyComp []
+            (return
+             [:div {:className [\"existing\" \"classes\" \"flex flex-col p-4\"]} \"Content\"])))")
+
+(fact "token conversion"
+  (-> (edit/parse-root
+       "[:% tm/Stack {:bg \"$red10\" :color \"$blue5\" :br \"$4\"}]")
+      (query/modify '[_]
+                    (fn [zloc]
+                      (sut/transform-zipper zloc)))
+      (edit/root-string))
+  =>
+  "[:div {:className \"text-blue-400 rounded-xl bg-red-800\"}]")
