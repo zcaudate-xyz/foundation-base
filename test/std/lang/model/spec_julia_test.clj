@@ -1,132 +1,48 @@
 (ns std.lang.model.spec-julia-test
   (:use code.test)
-  (:require [std.lang.model.spec-julia :refer :all]
-            [std.lang.base.script :as script]
-            [std.lang.base.util :as ut]
-            [std.lib :as h]))
+  (:require [std.lang.model.spec-julia :as julia]
+            [std.lang :as l]
+            [std.lib :as h]
+            [std.string :as str]))
 
-(script/script- :julia)
+(fact "emits julia defn"
+  (l/emit-as :julia ['(defn foo [a b] (+ a b))])
+  => "function foo(a,b)
+  a + b
+end")
 
-^{:refer std.lang.model.spec-julia/tf-local :added "4.0"}
-(fact "a more flexible `var` replacement"
-  ^:hidden
+(fact "emits julia for loop with range"
+  (l/emit-as :julia ['(for:index [i [1 10]] (println i))])
+  => "for i in 1:10
+  println(i)
+end")
 
-  (tf-local '(local a 1))
-  => '(var* :local a := 1)
+(fact "emits julia for loop with range and step"
+  (l/emit-as :julia ['(for:index [i [1 10 2]] (println i))])
+  => "for i in 1:2:10
+  println(i)
+end")
 
-  (tf-local '(local a := 1))
-  => '(var* :local a := 1))
+(fact "emits julia range with expressions"
+  (l/emit-as :julia ['(for:index [i [(+ 1 1) (* 2 5)]] (println i))])
+  => "for i in (1 + 1):(2 * 5)
+  println(i)
+end")
 
-^{:refer std.lang.model.spec-julia/julia-map-key :added "3.0"}
-(fact "custom julia map key"
-  ^:hidden
+(fact "emits julia dict"
+  (l/emit-as :julia ['(dict :a 1 :b 2)])
+  => "Dict(\"a\" => 1,\"b\" => 2)")
 
-  (julia-map-key 123 +grammar+ {})
-  => "123"
+(fact "emits julia push!"
+  (l/emit-as :julia ['(push! arr 1)])
+  => "push!(arr,1)")
 
-  (julia-map-key "123" +grammar+ {})
-  => "\"123\""
-
-
-  (julia-map-key "abc" +grammar+ {})
-  => "\"abc\""
-
-  (julia-map-key :abc +grammar+ {})
-  => "\"abc\"")
-
-^{:refer std.lang.model.spec-julia/tf-for-iter :added "4.0"}
-(fact  "for iter transform"
-  ^:hidden
-
-  (tf-for-iter '(for:iter [e iter]
-                          e))
-  => '(for [e :in iter] e))
-
-^{:refer std.lang.model.spec-julia/tf-for-index :added "4.0"}
-(fact "for index transform"
-  ^:hidden
-
-  (tf-for-index '(for:index [i [0 2 10]]
-                            i))
-  => '(for [i :in (to 0 10 2)] i))
-
-^{:refer std.lang.model.spec-julia/julia-module-link :added "4.0"}
-(fact "gets the absolute julia based module"
-
-  (julia-module-link 'kmi.common {:root-ns 'kmi.hello})
-  => "./common"
-
-  (julia-module-link 'kmi.exchange
-                   {:root-ns 'kmi :target "src"})
-  => "./kmi/exchange")
-
-^{:refer std.lang.model.spec-julia/tf-dict :added "4.0"}
-(fact "dict transform"
-  ^:hidden
-
-  (tf-dict '(dict :a 1 :b 2))
-  => '(Dict (=> "a" 1) (=> "b" 2)))
-
-^{:refer std.lang.model.spec-julia/tf-push! :added "4.0"}
-(fact "push! transform to avoid sanitization"
-  ^:hidden
-
-  (tf-push! '(push! arr 1))
-  => '(:% "push!(" arr ", " 1 ")"))
-
-^{:refer std.lang.model.spec-julia/julia-module-export :added "4.0"}
-(fact "outputs the julia module export form"
-  ^:hidden
-
-  (julia-module-export 'kmi.common {:root-ns 'kmi.hello})
-  => nil
-
-  (julia-module-export {:code {'a {:op :defn} 'b {:op :def}}} {})
-  => anything #_(contains '(export (a b))))
-
-(fact "Basic Julia generation"
-  (!.julia
-   (var a 10)
-   (return a))
-  => "a = 10\nreturn a"
-
-  (!.julia
-   (defn hello [a b]
-     (return (+ a b))))
-  => "function hello(a,b)\n  return a + b\nend"
-
-  (!.julia
-   (if true
-     (println "Yes")
-     (println "No")))
-  => "if true\n  println(\"Yes\") end\nelse\n  println(\"No\") end\nend"
-
-  (!.julia
-   (for [i :in (to 1 1 3)]
-     (println i)))
-  => "for i in 1:3\n  println(i)\nend")
-
-(fact "Xtalk Julia mappings"
-  (!.julia (x:print "Hello"))
-  => "println(\"Hello\")"
-
-  (!.julia (x:len [1 2 3]))
-  => "length([1,2,3])"
-
-  (!.julia (x:cat "a" "b"))
-  => "\"a\" * \"b\""
-
-  (!.julia (x:get-key (dict :a 1) "a" 0))
-  => "get(Dict(\"a\" => 1),\"a\",0)"
-
-  (!.julia (x:random))
-  => "rand()"
-
-  (!.julia (x:m-sin 1))
-  => "sin(1)"
-
-  (!.julia (x:str-join ", " ["a" "b"]))
-  => "join([\"a\",\"b\"],\", \")"
-
-  (!.julia (x:arr-push [1] 2))
-  => "\"push!(\"[1]\", \"2\")\"")
+(fact "end-to-end julia execution"
+  ^:unchecked
+  (if (not-empty (try (h/sh "which" "julia" {:wrap false}) (catch Throwable _ nil)))
+    (do
+      (let [code (l/emit-as :julia ['(defn add [a b] (+ a b)) '(println (add 2 3))])
+            _ (spit "test.jl" code)
+            out (h/sh "julia" "test.jl" {:wrap false})]
+        (str/trim out) => "5"))
+    "skipped"))

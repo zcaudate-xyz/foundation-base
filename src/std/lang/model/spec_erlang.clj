@@ -44,73 +44,53 @@
 ;; LANG
 ;;
 
-(defn tf-erlang-defn
-  "transforms defn to erlang function definition"
-  [[_ sym args & body]]
-  (let [name (ut/sym-default-str sym)
-        locals (set (filter symbol? args))
-        erl-args (map to-erlang-var args)
-        erl-body (map #(capitalize-locals % locals) body)]
-    (list 'defn- sym (vec erl-args) erl-body)))
-
 (defn emit-erlang-defn
   "emits erlang function"
-  [[_ sym params body]]
-  (wrap-raw
-   (str (ut/sym-default-str sym)
-        "("
-        (str/join ", " (map emit-ast params))
-        ") -> "
-        (str/join ", " (map emit-ast body))
-        ".")))
-
-(defn tf-erlang-case
-  "transforms case"
-  [[_ expr & clauses]]
-  (let [pairs (partition 2 clauses)]
-    (list 'case* expr pairs)))
+  [[_ sym args & body] grammar mopts]
+  (let [locals (set (filter symbol? args))
+        erl-args (map to-erlang-var args)
+        erl-body (map #(capitalize-locals % locals) body)]
+    (str (ut/sym-default-str sym)
+         "("
+         (str/join ", " (map #(common/*emit-fn* % grammar mopts) erl-args))
+         ") -> "
+         (str/join ", " (map #(common/*emit-fn* % grammar mopts) erl-body))
+         ".")))
 
 (defn emit-erlang-case
   "emits erlang case"
-  [[_ expr clauses]]
-  (wrap-raw
-   (str "case " (emit-ast expr) " of "
-        (str/join "; "
-                  (map (fn [[pat body]]
-                         (str (emit-ast pat) " -> " (emit-ast body)))
-                       clauses))
-        " end")))
-
-(defn tf-erlang-tuple
-  "transforms tuple"
-  [[_ & elements]]
-  (cons 'tuple* elements))
+  [[_ expr & clauses] grammar mopts]
+  (let [pairs (partition 2 clauses)]
+    (str "case " (common/*emit-fn* expr grammar mopts) " of "
+         (str/join "; "
+                   (map (fn [[pat body]]
+                          (str (common/*emit-fn* pat grammar mopts) " -> "
+                               (common/*emit-fn* body grammar mopts)))
+                        pairs))
+         " end")))
 
 (defn emit-erlang-tuple
   "emits erlang tuple"
-  [[_ & elements]]
-  (wrap-raw
-   (str "{" (str/join ", " (map emit-ast elements)) "}")))
+  [[_ & elements] grammar mopts]
+  (str "{" (str/join ", " (map #(common/*emit-fn* % grammar mopts) elements)) "}"))
 
 (defn emit-erlang-var
   "emits var assignment"
-  [[_ sym _ val]]
-  (wrap-raw
-   (str (emit-ast (to-erlang-var sym)) " = " (emit-ast val))))
+  [[_ sym val] grammar mopts]
+  (str (common/*emit-fn* (to-erlang-var sym) grammar mopts)
+       " = "
+       (common/*emit-fn* val grammar mopts)))
 
 (def +features+
   (-> (grammar/build :include [:builtin :math :compare :logic :control-base])
       (merge (grammar/build-xtalk))
       (grammar/build:extend
        {:erl-raw {:op :erl-raw :symbol #{'erl-raw} :type :token}
-        :defn   {:macro #'tf-erlang-defn :emit :macro :type :macro :symbol #{'defn}}
-        :case   {:macro #'tf-erlang-case :emit :macro :type :macro :symbol #{'case}}
-        :tuple  {:macro #'tf-erlang-tuple :emit :macro :type :macro :symbol #{'tuple}}
-        :var    {:symbol #{'var} :emit :macro :macro #'emit-erlang-var :type :macro}
+        :defn   {:emit #'emit-erlang-defn :symbol #{'defn}}
+        :case   {:emit #'emit-erlang-case :symbol #{'case}}
+        :tuple  {:emit #'emit-erlang-tuple :symbol #{'tuple}}
+        :var    {:emit #'emit-erlang-var :symbol #{'var}}
         :eq-exact {:raw "=:="}
-        :defn- {:op :defn- :symbol #{'defn-} :emit :macro :macro #'emit-erlang-defn :type :macro}
-        :case* {:op :case* :symbol #{'case*} :emit :macro :macro #'emit-erlang-case :type :macro}
-        :tuple* {:op :tuple* :symbol #{'tuple*} :emit :macro :macro #'emit-erlang-tuple :type :macro}
         :send  {:op :send :symbol #{'send '!} :raw "!" :emit :infix}})
       (grammar/build:override fn/+erlang+)
       (grammar/build:override
@@ -126,7 +106,7 @@
   [key grammar mopts]
   (cond (keyword? key) (name key)
         (string? key) (str "\"" key "\"")
-        :else (common/emit-common key grammar mopts)))
+        :else (common/*emit-fn* key grammar mopts)))
 
 (def +template+
   (->> {:default {:comment   {:prefix "%"}
