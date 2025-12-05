@@ -7,7 +7,8 @@
             [std.print :as print]
             [std.string :as str]
             [std.pipe.util :as ut]
-            [std.pipe.display :as display]))
+            [std.pipe.display :as display]
+            [std.pipe.monitor :as monitor]))
 
 (declare pipe)
 
@@ -37,8 +38,9 @@
 ;;
 
 (defn- exec-item
-  [f {:keys [idx total display display-fn]} {:keys [print] :as params} lookup env args]
+  [f {:keys [idx total display display-fn monitor]} {:keys [print] :as params} lookup env args]
   (fn [input]
+    (when monitor (monitor/update-monitor monitor input :start))
     (let [start        (System/currentTimeMillis)
           [key result] (try (apply f input params lookup env args)
                             (catch Exception e
@@ -52,6 +54,11 @@
           end    (System/currentTimeMillis)
           result (assoc result :time (- end start) :start start :end end)
           {:keys [status data time]} result]
+      (when monitor
+        (if (or (= status :error)
+                (= status :critical))
+          (monitor/update-monitor monitor input :fail result)
+          (monitor/update-monitor monitor input :complete result)))
       (when (:item print)
         (let [index (format "%s/%s" (inc idx) total)
               item  (if (= status :return)
@@ -85,7 +92,13 @@
            [input params lookup env] (apply ut/task-inputs task task-args)
 
            ;; Setup Main Function
-           f  (let [[main _] (ut/main-function (-> task :main :fn) (or (-> task :main :argcount) 3))]
+           fn-obj (-> task :main :fn)
+           argcount (or (-> task :main :argcount)
+                        (let [fcounts (h/arg-count fn-obj)]
+                          (cond (empty? fcounts) 4
+                                (seq fcounts) (apply min fcounts)
+                                :else 3)))
+           f  (let [[main _] (ut/main-function fn-obj argcount)]
                 (ut/wrap-execute main task))
            params (h/merge-nested (:params task) params)]
 
@@ -123,9 +136,14 @@
                input-len  (->> inputs (map (comp count str)) (apply max) (+ 2))
                display-fn (or (-> task :item :display) identity)
                display    (display/bulk-display index-len input-len)
+               monitor    (when (:monitor params)
+                            (monitor/create-monitor inputs display-fn))
+               _          (when monitor
+                            (monitor/monitor-loop monitor 100))
                context    {:total  total
                            :display display
-                           :display-fn display-fn}
+                           :display-fn display-fn
+                           :monitor monitor}
 
                _ (if (:item (:print params)) (print/print "\n"))
 
