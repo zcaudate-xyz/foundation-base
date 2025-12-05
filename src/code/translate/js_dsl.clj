@@ -135,7 +135,21 @@
   (let [id (translate-node (:id node))
         params (translate-args (:params node))
         body (translate-node (:body node))]
-    (list 'defn id params body)))
+    (list 'defn.js id params body)))
+
+(defmethod translate-node "FunctionExpression" [node]
+  (let [id (if (:id node) (translate-node (:id node)) nil)
+        params (translate-args (:params node))
+        body (translate-node (:body node))
+        async (:async node)]
+    (cond-> (if (= "BlockStatement" (:type (:body node)))
+              (if id
+                (list 'fn id params (translate-node (:body node)))
+                (list 'fn params (translate-node (:body node))))
+              (if id
+                (list 'fn id params (list 'return body))
+                (list 'fn params (list 'return body))))
+      async (with-meta {:async true}))))
 
 (defmethod translate-node "ArrowFunctionExpression" [node]
   (let [params (translate-args (:params node))
@@ -179,6 +193,18 @@
         body (translate-node (:body node))]
     (list 'for (vector init test update) body)))
 
+(defmethod translate-node "ForOfStatement" [node]
+  (let [left-node (:left node)
+        left (if (= "VariableDeclaration" (:type left-node))
+               (translate-node (:id (first (:declarations left-node))))
+               (translate-node left-node))
+        right (translate-node (:right node))
+        body (translate-node (:body node))
+        is-await (:await node)]
+    (if is-await
+      (list 'for:await [left right] body)
+      (list 'for:of [left right] body))))
+
 (defmethod translate-node "WhileStatement" [node]
   (let [test (translate-node (:test node))
         body (translate-node (:body node))]
@@ -220,16 +246,24 @@
         super-class (if (:superClass node) (translate-node (:superClass node)) nil)
         body (:body (:body node))
         methods (mapv (fn [m]
-                        (if (= "PropertyDefinition" (:type m))
-                          (let [key (translate-node (:key m))
-                                value (if (:value m) (translate-node (:value m)) nil)]
-                            (list 'var key value))
-                          (let [kind (:kind m)
-                                key (translate-node (:key m))
-                                value (:value m)
-                                params (translate-args (:params value))
-                                body (translate-node (:body value))]
-                            (list key params body))))
+                        (cond (= "PropertyDefinition" (:type m))
+                              (let [key (translate-node (:key m))
+                                    value (if (:value m) (translate-node (:value m)) nil)]
+                                (list 'var key value))
+
+                              (= "ClassMethod" (:type m))
+                              (let [key (translate-node (:key m))
+                                    params (translate-args (:params m))
+                                    body (translate-node (:body m))]
+                                (list key params body))
+
+                              :else
+                              (let [kind (:kind m)
+                                    key (translate-node (:key m))
+                                    value (:value m)
+                                    params (translate-args (:params value))
+                                    body (translate-node (:body value))]
+                                (list key params body))))
                       body)]
     (concat (list 'defclass id (if super-class [super-class] []))
             methods)))
@@ -276,11 +310,23 @@
               [:as (translate-node (:local ns-spec))]
               []))))
 
+(defmethod translate-node "ExportAllDeclaration" [node]
+  (if (= "type" (:exportKind node))
+    nil
+    (list 'export :all (:value (:source node)))))
+
+(defmethod translate-node "ExportDefaultDeclaration" [node]
+  (list 'export :default (translate-node (:declaration node))))
+
 (defmethod translate-node "ExportNamedDeclaration" [node]
-  (let [declaration (:declaration node)]
-    (if declaration
-      (list 'export (translate-node declaration))
-      (list 'export (mapv translate-node (:specifiers node))))))
+  (if (= "type" (:exportKind node))
+    nil
+    (let [declaration (:declaration node)]
+      (if declaration
+        (if-let [trans (translate-node declaration)]
+          (list 'export trans)
+          nil)
+        (list 'export (mapv translate-node (:specifiers node)))))))
 
 (defmethod translate-node "ExportSpecifier" [node]
   [(translate-node (:local node)) (translate-node (:exported node))])
@@ -388,3 +434,46 @@
 
 (defmethod translate-node "ThisExpression" [_]
   'this)
+
+(defn translate-import-entry [node]
+  (let [source (:value (:source node))
+        specifiers (:specifiers node)
+        default-spec (first (filter #(= "ImportDefaultSpecifier" (:type %)) specifiers))
+        named-specs (filter #(= "ImportSpecifier" (:type %)) specifiers)
+        ns-spec (first (filter #(= "ImportNamespaceSpecifier" (:type %)) specifiers))]
+    (vec
+     (concat [source]
+             (if ns-spec
+               [:as (translate-node (:local ns-spec))]
+               [])
+             (if default-spec
+               [:default (translate-node (:local default-spec))]
+               [])
+             (if (seq named-specs)
+               [:named (apply hash-map (mapcat (fn [s]
+                                                 [(translate-node (:imported s))
+                                                  (translate-node (:local s))])
+                                               named-specs))]
+               [])))))
+
+(defn translate-file [node ns-name]
+  (let [program (if (= "File" (:type node)) (:program node) node)
+        body (:body program)
+        imports (filter #(= "ImportDeclaration" (:type %)) body)
+        others (remove #(= "ImportDeclaration" (:type %)) body)
+
+        import-entries (mapv translate-import-entry imports)
+        other-forms (->> (mapv translate-node others)
+                         (remove nil?)
+                         vec)
+
+        script-config (cond-> {}
+                        (seq import-entries) (assoc :import import-entries))]
+
+    (list (list 'ns ns-name
+                '(:require [std.lang :as l]
+                           [std.lib :as h]))
+
+          (apply list 'l/script :js
+                 script-config
+                 other-forms))))
