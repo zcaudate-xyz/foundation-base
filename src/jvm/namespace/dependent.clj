@@ -1,7 +1,7 @@
 (ns jvm.namespace.dependent
   (:require [std.protocol.deps :as protocol.deps]
             [jvm.namespace.common :as common]
-            [std.task.process :as process]
+            [std.pipe.util :as ut]
             [std.lib :as h]))
 
 (defn ns-select
@@ -13,10 +13,10 @@
   ([input]
    (ns-select input (common/ns-list)))
   ([input nss]
-   (process/select-inputs {:item {:list (fn [_ _] nss)}}
-                          {}
-                          {}
-                          input)))
+   (ut/select-inputs {:item {:list (fn [_ _] nss)}}
+                     {}
+                     {}
+                     input)))
 
 (defn ns-has-deps
   "checks if current namespace depends on `test`
