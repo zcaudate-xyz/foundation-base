@@ -70,19 +70,13 @@
                    pairs)]
     (apply list 'Dict args)))
 
-(defn tf-push!
-  "push! transform to avoid sanitization"
-  {:added "4.0"}
-  [[_ arr item]]
-  (list :% "push!(" arr ", " item ")"))
-
 (defn emit-to
   "emits the range"
   {:added "4.0"}
   [[_ start step end] grammar mopts]
   (if (= step 1)
-    (str start ":" end)
-    (str start ":" step ":" end)))
+    (str (common/emit-wrapping start grammar mopts) ":" (common/emit-wrapping end grammar mopts))
+    (str (common/emit-wrapping start grammar mopts) ":" (common/emit-wrapping step grammar mopts) ":" (common/emit-wrapping end grammar mopts))))
 
 (def +features+
   (-> (grammar/build :include [:builtin
@@ -127,7 +121,7 @@
         :local  {:op :local  :symbol '#{local var} :macro  #'tf-local :type :macro}
         :pair   {:op :pair   :symbol '#{=>}        :raw "=>"        :emit :infix}
         :dict   {:op :dict   :symbol '#{dict}      :macro #'tf-dict :emit :macro}
-        :push!  {:op :push!  :symbol '#{push!}     :macro #'tf-push! :emit :macro}
+        :push!  {:op :push!  :symbol '#{push!}     :raw "push!" :emit :invoke}
         :%      {:op :%      :symbol #{:%}         :emit :squash}
         :to     {:op :to     :symbol #{'to}        :emit #'emit-to}})))
 
@@ -151,7 +145,7 @@
                  :string    {:quote :double}}
         :data   {:map-entry {:start ""  :end ""  :space "" :assign " => " :keyword :string
                              :key-fn #'julia-map-key}
-                 :map       {:start "Dict(" :end ")"}
+                 :map       {:start "Dict(" :end ")" :space ", "}
                  :vector    {:start "[" :end "]" :space ", "}}
         :block  {:for       {:body    {:start "" :end "end"}
                              :parameter {:start " " :end "" :space " "}}
