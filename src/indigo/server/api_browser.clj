@@ -2,7 +2,10 @@
   (:require [std.lang :as l]
             [std.lang.base.book :as book]
             [std.lib :as h]
-            [std.string :as str]))
+            [std.string :as str]
+            [code.test.base.context :as context]
+            [code.test.base.runtime :as rt]
+            [clojure.repl :as repl]))
 
 ;; Existing endpoints -------------------------------------------------------
 
@@ -38,6 +41,75 @@
     (if entry
       (str (:form entry))
       "")))
+
+;; Clojure Runtime Endpoints ------------------------------------------------
+
+(defn list-clj-namespaces
+  "lists all loaded clojure namespaces"
+  {:added "4.0"}
+  []
+  (->> (all-ns)
+       (map (comp str ns-name))
+       (sort)))
+
+(defn list-clj-vars
+  "lists all public vars for a clojure namespace"
+  {:added "4.0"}
+  [ns-str]
+  (let [ns-sym (symbol ns-str)]
+    (if (find-ns ns-sym)
+      (->> (ns-publics ns-sym)
+           (keys)
+           (map str)
+           (sort))
+      [])))
+
+(defn get-clj-var-source
+  "gets the source code for a clojure var"
+  {:added "4.0"}
+  [ns-str var-str]
+  (try
+    (let [sym (symbol ns-str var-str)]
+      (or (repl/source-fn sym)
+          (str ";; Source not found for " sym)))
+    (catch Throwable _
+      (str ";; Error retrieving source for " ns-str "/" var-str))))
+
+;; Test Registry Endpoints ------------------------------------------------
+
+(defn list-test-namespaces
+  "lists all namespaces with tests in the registry"
+  {:added "4.0"}
+  []
+  (->> (keys @context/*registry*)
+       (map str)
+       (sort)))
+
+(defn list-test-facts
+  "lists all facts for a test namespace"
+  {:added "4.0"}
+  [ns-str]
+  (let [ns-sym (symbol ns-str)]
+    (if (get @context/*registry* ns-sym)
+      (->> (get-in @context/*registry* [ns-sym :facts])
+           (keys)
+           (map str)
+           (sort))
+      [])))
+
+(defn get-test-fact-source
+  "gets the source code for a test fact"
+  {:added "4.0"}
+  [ns-str fact-id]
+  (let [ns-sym (symbol ns-str)
+        fact-sym (symbol fact-id)
+        fact (get-in @context/*registry* [ns-sym :facts fact-sym])]
+    (if fact
+      (try
+        (h/pp-str (:full fact))
+        (catch Throwable t
+          (str ";; Error formatting source: " (.getMessage t))))
+      (str ";; Fact not found: " ns-str "/" fact-id))))
 
 ;; New endpoints -----------------------------------------------------------
 
