@@ -83,7 +83,7 @@
                                  "slug" "js-web-components"
                                  "version" "1.0.0",
                                  "orientation" "portrait",
-                                 "entryPoint" "./src/App.js",
+                                 "entryPoint" "./src/web-native-index.js",
                                  "splash"
                                  {"resizeMode" "contain",
                                   "backgroundColor" "#ffffff"}
