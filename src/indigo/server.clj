@@ -1,5 +1,6 @@
 (ns indigo.server
   (:require [org.httpkit.server :as http]
+            [org.httpkit.client :as client]
             [net.http.router :as router]
             [indigo.server.api-common :as api]
             [indigo.server.api-task :as api-task]
@@ -15,10 +16,54 @@
 
 (def ^:dynamic *port* 1311)
 
-(defonce *instance* (atom nil))
+(defonce ^:dynamic *instance* (atom nil))
 
 (def ^:dynamic *public-path* "assets/indigo/public")
 
+(def vite-port 5173)
+
+(defonce ^:dynamic *vite-process* (atom nil))
+
+(defn start-vite! []
+  (swap! *vite-process*
+         (fn [p]
+           (if p
+             p
+             (do
+               (println "Starting Vite server...")
+               (try
+                 (let [proc (h/sh {:root ".build/indigo"
+                                   :args ["npm" "run" "dev"]
+                                   :inherit true
+                                   :wait false})]
+                   (println "Vite server started.")
+                   proc)
+                 (catch Throwable t
+                   (println "Failed to start Vite:" t)
+                   nil)))))))
+
+(defn stop-vite! []
+  (swap! *vite-process*
+         (fn [p]
+           (when p
+             (println "Stopping Vite server...")
+             (h/sh-kill p)
+             nil))))
+
+(defn proxy-vite [req]
+  (let [url (str "http://localhost:" vite-port (:uri req) (if (:query-string req) (str "?" (:query-string req)) ""))
+        options {:method (:request-method req)
+                 :headers (dissoc (:headers req) "host" "content-length")
+                 :body (:body req)
+                 :url url
+                 :as :stream
+                 :follow-redirects false}
+        resp @(client/request options)]
+    (if (:error resp)
+      {:status 404 :body "Not Found (Vite Proxy)"}
+      {:status (:status resp)
+       :headers (:headers resp)
+       :body (:body resp)})))
 
 (defn wrap-browser-call
   [f]
@@ -103,9 +148,9 @@
     {"/"             (api/page-handler "Dev Index" page-index/main)
      "/pages/tasks"  (api/page-handler "Dev Tasks" page-tasks/main)
      "/pages/demo"   (api/page-handler "Dev Demo"  page-demo/main)
-     "*"             (fn [{:keys [uri]}]
+     "*"             (fn [{:keys [uri] :as req}]
                        (or (router/serve-resource uri *public-path*)
-                           {:status 404 :body "Not Found"}))})))
+                           (proxy-vite req)))})))
 
 (defn dev-handler
   [req]
@@ -119,6 +164,7 @@
 
 (defn server-start
   []
+  (start-vite!)
   (swap! *instance*
          (fn [stop-fn]
            (when (not stop-fn)
@@ -128,6 +174,7 @@
   "Stops the HTTP server"
   {:added "4.0"}
   ([]
+   (stop-vite!)
    (swap! *instance*
           (fn [stop-fn]
             (when stop-fn (stop-fn :timeout 100))
