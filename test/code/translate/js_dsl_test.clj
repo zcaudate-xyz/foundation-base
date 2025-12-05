@@ -40,7 +40,7 @@
                        :body {:type "BlockStatement"
                               :body [{:type "ReturnStatement"
                                       :argument {:type "Identifier" :name "a"}}]}})
-  => '(defn foo [a] (do (return a))))
+  => '(defn.js foo [a] (do (return a))))
 
 (fact "translates call expression"
   (sut/translate-node {:type "CallExpression"

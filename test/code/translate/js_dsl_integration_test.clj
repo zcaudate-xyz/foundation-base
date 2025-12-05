@@ -50,9 +50,9 @@
         ['(import "react" :default React)
          '(export (defn.js MyComponent [props]
                     (do (var ([count setCount] (. React useState 0)))
-                        (return (React.createElement "div" {:className "container"}
-                                                     (React.createElement "h1" {} "Count: " count)
-                                                     (React.createElement "button" {:onClick (fn [] (return (setCount (+ count 1))))} "Increment"))))))
+                        (return ("div" {:className "container"}
+                                       ("h1" {} "Count: " count)
+                                       ("button" {:onClick (fn [] (return (setCount (+ count 1))))} "Increment"))))))
          '(defclass Helper []
             (constructor [] (do (:= (. this value) 1)))
             (getValue [] (do (return (. this value)))))])))

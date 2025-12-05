@@ -47,3 +47,4 @@ pom.xml.asc
 /prompt/aaa
 *_temp
 *.~undo-tree~
+node_modules/
