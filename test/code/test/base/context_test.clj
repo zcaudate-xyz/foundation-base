@@ -2,6 +2,7 @@
   (:require [code.test.base.context :as context]
             [code.test :refer :all]))
 
+^{:refer code.test.base.context/new-context :added "4.1"}
 (fact "new-context returns a map with expected keys"
   (context/new-context)
   => (contains {:eval-fact false
@@ -18,6 +19,7 @@
                 :timeout 60000
                 :print #{:print-throw :print-failed :print-timeout :print-bulk}}))
 
+^{:refer code.test.base.context/with-new-context :added "4.1"}
 (fact "with-new-context binds dynamic variables"
   (context/with-new-context {:eval-mode true}
     context/*eval-mode*) => true
@@ -29,10 +31,3 @@
   context/*eval-fact* => false
   context/*eval-mode* => true ;; defonce value
   context/*print* => #{:print-throw :print-failed :print-timeout :print-bulk})
-
-
-^{:refer code.test.base.context/new-context :added "4.1"}
-(fact "TODO")
-
-^{:refer code.test.base.context/with-new-context :added "4.1"}
-(fact "TODO")
