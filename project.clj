@@ -38,10 +38,10 @@
 
    ;; code.doc
    [markdown-clj/markdown-clj "1.11.8"] ;; not mustache
-   
+
    ;; code.tool.java.compile
    [org.ow2.asm/asm "9.7.1"]
-   
+
    ;; code.manage
    [org.clojure/tools.reader "1.3.7"]
 
@@ -56,23 +56,21 @@
    [org.eclipse.aether/aether-transport-file "1.1.0"]
    [org.eclipse.aether/aether-transport-classpath "1.1.0"]
    [org.apache.maven/maven-aether-provider "3.3.9"]
-   
+
    ;; lib.javaosc
-   #_
-   [com.illposed.osc/javaosc-core "0.8"]
-   #_#_#_#_#_
-   [org.clojars.technomancy/jmdns "3.2.1"]
-   [commons-net "3.0.1"]
-   [org.jmdns/jmdns "3.5.1"]
-   [commons-net/commons-net "3.9.0"]
-   [overtone/at-at "1.2.0"]
-   
+   #_[com.illposed.osc/javaosc-core "0.8"]
+   #_#_#_#_#_[org.clojars.technomancy/jmdns "3.2.1"]
+           [commons-net "3.0.1"]
+         [org.jmdns/jmdns "3.5.1"]
+       [commons-net/commons-net "3.9.0"]
+     [overtone/at-at "1.2.0"]
+
    ;; lib.lucene
    [org.apache.lucene/lucene-core "9.9.2"]
    [org.apache.lucene/lucene-queryparser "9.9.2"]
    [org.apache.lucene/lucene-analyzers-common "8.11.2"]
    [org.apache.lucene/lucene-suggest "9.9.2"]
-   
+
    ;; lib.openpgp
    [org.bouncycastle/bcprov-jdk15on "1.65"]
    [org.bouncycastle/bcpg-jdk15on "1.65"]
@@ -86,44 +84,44 @@
                  io.netty/netty-handler
                  io.netty/netty-transport-native-unix-common]]
    [io.netty/netty-all "4.1.118.Final"]
-   
+
    ;; lib.oshi
    [com.github.oshi/oshi-core "6.4.11"]
-   
+
    ;; math.stat
    [net.sourceforge.jdistlib/jdistlib "0.4.5"]
-   
+
    ;; math.infix
    [org.scijava/parsington "3.1.0"]
-   
+
    ;; rt.basic
    [http-kit "2.8.0"]
-   
+
    ;; rt.graal
    [org.graalvm.polyglot/polyglot "24.1.0"]
    [org.graalvm.js/js-language "24.1.0"]
    [commons-io/commons-io "2.15.1"]
-   
+
    ;; rt.jep
    [black.ninia/jep "4.3.1"]
-   
+
    ;; rt.libpython
    [clj-python/libpython-clj "2.026"]
-   
-   
+
+
    ;; std.pretty
    [org.clojure/core.rrb-vector "0.1.2"]
 
    ;; script.css
    [garden "1.3.10"]
    [net.sourceforge.cssparser/cssparser "0.9.30"]
-   
+
    ;; script.graphql
    [district0x/graphql-query "1.0.6"]
 
    ;; script.toml
    [com.moandjiezana.toml/toml4j "0.7.2"]
-   
+
    ;; script.yaml
    [org.yaml/snakeyaml "1.33" #_"2.0" ;; needed by markdown-clj
     ]
@@ -136,7 +134,7 @@
 
    ;; std.contract
    [metosin/malli "0.17.0"]
-   
+
    ;; std.html
    [org.jsoup/jsoup "1.17.2"]
 
@@ -155,8 +153,8 @@
    [org.apache.commons/commons-math3 "3.6.1"]
 
    ;; std.text.diff
-   [com.googlecode.java-diff-utils/diffutils "1.3.0"]   
-   
+   [com.googlecode.java-diff-utils/diffutils "1.3.0"]
+
    ;; MCP
    [org.hugoduncan/mcp-clj-server "0.1.60"]
    [org.clojure/core.async "1.6.681"]
@@ -167,7 +165,7 @@
    [org.clojure/tools.logging "1.3.0"]
    [ch.qos.logback/logback-classic "1.5.6"]
    [org.clojure/data.json "2.5.1"]
-   
+
    ;; TESTS - std.object
    [org.eclipse.jgit/org.eclipse.jgit "5.13.0.202109080827-r"]]
   :global-vars {*warn-on-reflection* true}
@@ -193,7 +191,7 @@
    "-Xmx2048m"
    "-XX:MaxMetaspaceSize=1048m"
    "-XX:-OmitStackTraceInFastThrow"
-   
+
    ;;
    ;; GC FLAGS
    ;;
@@ -217,7 +215,7 @@
    ;; Truffle
    ;;
    "-Dpolyglot.engine.WarnInterpreterOnly=false"
-   
+
    ;;
    ;; JVM
    ;;
@@ -287,5 +285,4 @@
    "--add-opens" "java.desktop/java.awt.im.spi=ALL-UNNAMED"
    "--add-opens" "java.desktop/java.awt.image=ALL-UNNAMED"
    "--add-opens" "java.desktop/java.awt.image.renderable=ALL-UNNAMED"
-   "--add-opens" "java.desktop/java.awt.print=ALL-UNNAMED"
-   ])
+   "--add-opens" "java.desktop/java.awt.print=ALL-UNNAMED"])

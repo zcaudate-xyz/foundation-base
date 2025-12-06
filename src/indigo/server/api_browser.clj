@@ -3,6 +3,7 @@
             [std.lang.base.book :as book]
             [std.lib :as h]
             [std.string :as str]
+            [code.project :as project]
             [code.test.base.context :as context]
             [code.test.base.runtime :as rt]
             [clojure.repl :as repl]))
@@ -48,9 +49,13 @@
   "lists all loaded clojure namespaces"
   {:added "4.0"}
   []
-  (->> (all-ns)
-       (map (comp str ns-name))
-       (sort)))
+  (let [files (project/all-files
+               (:source-paths (project/project)))
+        namespaces (->> (keys files)
+                        (map str)
+                        (sort)
+                        (vec))]
+    namespaces))
 
 (defn list-clj-vars
   "lists all public vars for a clojure namespace"
@@ -74,6 +79,21 @@
           (str ";; Source not found for " sym)))
     (catch Throwable _
       (str ";; Error retrieving source for " ns-str "/" var-str))))
+
+(defn get-namespace-source
+  "gets the source code for a clojure namespace"
+  {:added "4.0"}
+  [ns-str]
+  (try
+    (let [files (project/all-files
+                 (:source-paths (project/project)))
+          ns-sym (symbol ns-str)
+          file   (get files ns-sym)]
+      (if file
+        (slurp file)
+        (str ";; File not found for namespace: " ns-str)))
+    (catch Throwable t
+      (str ";; Error retrieving source for " ns-str ": " (.getMessage t)))))
 
 ;; Test Registry Endpoints ------------------------------------------------
 
@@ -110,6 +130,22 @@
         (catch Throwable t
           (str ";; Error formatting source: " (.getMessage t))))
       (str ";; Fact not found: " ns-str "/" fact-id))))
+
+(defn list-tests-for-var
+  "lists all tests that refer to a specific var"
+  {:added "4.0"}
+  [ns-str var-str]
+  (let [test-ns-sym (symbol (str ns-str "-test"))
+        var-sym     (symbol var-str)]
+    (if (get @context/*registry* test-ns-sym)
+      (->> (get-in @context/*registry* [test-ns-sym :facts])
+           (vals)
+           (filter (fn [fact]
+                     (= (:refer fact) var-sym)))
+           (map :id)
+           (map str)
+           (sort))
+      [])))
 
 ;; New endpoints -----------------------------------------------------------
 

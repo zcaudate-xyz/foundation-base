@@ -1,69 +1,23 @@
 (ns indigo.server
-  (:require [org.httpkit.server :as http]
+  (:require [clojure.string :as string]
+            [org.httpkit.server :as http]
             [org.httpkit.client :as client]
             [net.http.router :as router]
             [indigo.server.api-common :as api]
-            [indigo.server.api-task :as api-task]
-            [indigo.server.api-prompt :as api-prompt]
-            [indigo.client.page-index :as page-index]
-            [indigo.client.page-tasks :as page-tasks]
-            [indigo.client.page-demo :as page-demo]
             [std.lib :as h]
             [std.string :as str]
-            [std.json :as json])
+            [std.json :as json]
+            [code.project :as project])
   (:import (java.awt Desktop)
            (java.net URI)))
 
+(defonce *instance* (atom nil))
+
 (def ^:dynamic *port* 1311)
 
-(defonce ^:dynamic *instance* (atom nil))
+(def ^:dynamic *public-path* "src-js/indigo/dist")
 
-(def ^:dynamic *public-path* "assets/indigo/public")
 
-(def vite-port 5173)
-
-(defonce ^:dynamic *vite-process* (atom nil))
-
-(defn start-vite! []
-  (swap! *vite-process*
-         (fn [p]
-           (if p
-             p
-             (do
-               (println "Starting Vite server...")
-               (try
-                 (let [proc (h/sh {:root ".build/indigo"
-                                   :args ["npm" "run" "dev"]
-                                   :inherit true
-                                   :wait false})]
-                   (println "Vite server started.")
-                   proc)
-                 (catch Throwable t
-                   (println "Failed to start Vite:" t)
-                   nil)))))))
-
-(defn stop-vite! []
-  (swap! *vite-process*
-         (fn [p]
-           (when p
-             (println "Stopping Vite server...")
-             (h/sh-kill p)
-             nil))))
-
-(defn proxy-vite [req]
-  (let [url (str "http://localhost:" vite-port (:uri req) (if (:query-string req) (str "?" (:query-string req)) ""))
-        options {:method (:request-method req)
-                 :headers (dissoc (:headers req) "host" "content-length")
-                 :body (:body req)
-                 :url url
-                 :as :stream
-                 :follow-redirects false}
-        resp @(client/request options)]
-    (if (:error resp)
-      {:status 404 :body "Not Found (Vite Proxy)"}
-      {:status (:status resp)
-       :headers (:headers resp)
-       :body (:body resp)})))
 
 (defn wrap-browser-call
   [f]
@@ -79,15 +33,6 @@
 (def api-routes
   (router/router
    (merge
-    (api/create-prompt-routes
-     "POST /api/translate/"
-     {"from-html"       api-task/from-html
-      "to-html"         api-task/to-html
-      "to-heal"         api-task/to-heal
-      "to-js-dsl"       api-task/to-js-dsl
-      "to-jsxc-dsl"     api-task/to-jsxc-dsl
-      "to-python-dsl"   api-task/to-python-dsl
-      "to-plpgsql-dsl"  api-task/to-plpgsql-dsl})
     (api/create-routes
      "POST /api/browse/"
      {"lang/namespaces" (wrap-browser-call
@@ -113,11 +58,23 @@
                          (fn [req]
                            (require 'indigo.server.api-browser)
                            ((resolve 'indigo.server.api-browser/list-clj-namespaces))))
+      "clj/namespace-source" (wrap-browser-call
+                              (fn [req]
+                                (let [ns (get-in req [:params :ns])]
+                                  (require 'indigo.server.api-browser)
+                                  ((resolve 'indigo.server.api-browser/get-namespace-source) ns))))
       "clj/components"  (wrap-browser-call
                          (fn [req]
                            (let [ns (get-in req [:params :ns])]
                              (require 'indigo.server.api-browser)
                              ((resolve 'indigo.server.api-browser/list-clj-vars) ns))))
+                             ((resolve 'indigo.server.api-browser/list-clj-vars) ns))))
+      "clj/var-tests"   (wrap-browser-call
+                         (fn [req]
+                           (let [ns   (get-in req [:params :ns])
+                                 var  (get-in req [:params :var])]
+                             (require 'indigo.server.api-browser)
+                             ((resolve 'indigo.server.api-browser/list-tests-for-var) ns var))))
       "clj/component"   (wrap-browser-call
                          (fn [req]
                            (let [ns   (get-in req [:params :ns])
@@ -145,12 +102,9 @@
   (router/router
    (api/create-routes
     "GET "           
-    {"/"             (api/page-handler "Dev Index" page-index/main)
-     "/pages/tasks"  (api/page-handler "Dev Tasks" page-tasks/main)
-     "/pages/demo"   (api/page-handler "Dev Demo"  page-demo/main)
+    {#_#_"/pages/demo"   (api/page-handler "Dev Demo"  page-demo/main)
      "*"             (fn [{:keys [uri] :as req}]
-                       (or (router/serve-resource uri *public-path*)
-                           (proxy-vite req)))})))
+                       (router/serve-resource uri *public-path*)) })))
 
 (defn dev-handler
   [req]
@@ -162,29 +116,33 @@
         (#'page-routes req)
         {:status 404 :body "Not Found"})))
 
-(defn server-start
-  []
-  (start-vite!)
-  (swap! *instance*
-         (fn [stop-fn]
-           (when (not stop-fn)
-             (http/run-server #'dev-handler {:port *port*})))))
-
 (defn server-stop
   "Stops the HTTP server"
   {:added "4.0"}
   ([]
-   (stop-vite!)
    (swap! *instance*
           (fn [stop-fn]
             (when stop-fn (stop-fn :timeout 100))
             nil))))
+
+(defn server-start
+  []
+  (swap! *instance*
+         (fn [stop-fn]
+           (when (not stop-fn)
+             (http/run-server #'dev-handler {:port *port*})))))
 
 (defn server-toggle
   []
   (if @*instance*
     (server-stop)
     (server-start)))
+    
+(defn server-restart
+  []
+  (if @*instance*
+    (server-stop))
+  (server-start))
 
 (defn open-client
   []
@@ -195,6 +153,7 @@
   (h/sh "curl" "-X" "POST" (str "http://localhost:" *port*
                                 "/api/translate/to-heal")
         "-d" "(+ 1 2 3))")
+  (server-restart)
   (server-toggle)
   (open-client)
   )
