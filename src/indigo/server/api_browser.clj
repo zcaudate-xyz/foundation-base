@@ -223,3 +223,40 @@
                       :when (str/includes? (str/lower-case cname) q)]
                   {:ns ns :component cname})]
     (vec matches)))
+
+(defn save-namespace-source
+  "saves the source code for a clojure namespace"
+  {:added "4.0"}
+  [ns-str source]
+  (try
+    (let [files (project/all-files
+                 (:source-paths (project/project)))
+          ns-sym (symbol ns-str)
+          file   (get files ns-sym)]
+      (if file
+        (do
+          (spit file source)
+          {:status "ok" :message (str "Saved " ns-str)})
+        (throw (Exception. (str "File not found for namespace: " ns-str)))))
+    (catch Throwable t
+      (throw (Exception. (str "Error saving source for " ns-str ": " (.getMessage t)))))))
+
+(defn get-completions
+  "gets completion suggestions for a prefix in a namespace"
+  {:added "4.0"}
+  [ns-str prefix]
+  (try
+    (let [ns-sym (symbol ns-str)
+          _ (try (require ns-sym) (catch Throwable _))
+          all-vars (concat (keys (ns-publics ns-sym))
+                           (keys (ns-publics 'clojure.core))
+                           (keys (ns-refers (find-ns ns-sym))))
+          matches (->> all-vars
+                       (map str)
+                       (filter #(str/starts-with? % prefix))
+                       (sort)
+                       (distinct)
+                       (take 50))]
+      matches)
+    (catch Throwable t
+      [])))

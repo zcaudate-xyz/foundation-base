@@ -61,7 +61,7 @@
                                  ns   (get-in req [:params :ns])
                                  comp (get-in req [:params :component])]
                              (#'indigo.server.api-browser/get-component lang ns comp))))
-      
+
       "clj/namespaces"  (wrap-browser-call
                          (fn [req]
                            (#'indigo.server.api-browser/list-clj-namespaces)))
@@ -73,7 +73,7 @@
                          (fn [req]
                            (let [ns (get-in req [:params :ns])]
                              (#'indigo.server.api-browser/list-clj-vars ns))))
-      
+
       "clj/var-tests"   (wrap-browser-call
                          (fn [req]
                            (let [ns   (get-in req [:params :ns])
@@ -96,7 +96,19 @@
                          (fn [req]
                            (let [ns   (get-in req [:params :ns])
                                  comp (get-in req [:params :component])]
-                             (#'indigo.server.api-browser/get-test-fact-source ns comp))))}))))
+                             (#'indigo.server.api-browser/get-test-fact-source ns comp))))
+
+      "clj/save-namespace-source" (wrap-browser-call
+                                   (fn [req]
+                                     (let [ns     (get-in req [:params :ns])
+                                           source (get-in req [:params :source])]
+                                       (#'indigo.server.api-browser/save-namespace-source ns source))))
+
+      "clj/completions" (wrap-browser-call
+                         (fn [req]
+                           (let [ns     (get-in req [:params :ns])
+                                 prefix (get-in req [:params :prefix])]
+                             (#'indigo.server.api-browser/get-completions ns prefix))))}))))
 
 (def page-routes
   (router/router
@@ -106,15 +118,41 @@
      "*"             (fn [{:keys [uri] :as req}]
                        (router/serve-resource uri *public-path*))})))
 
+(defonce repl-clients (atom #{}))
+
+(defn repl-handler [req]
+  (http/with-channel req channel
+    (http/on-close channel (fn [status]
+                             (swap! repl-clients disj channel)
+                             (println "REPL Client disconnected" status)))
+    (http/on-receive channel (fn [data]
+                               (if (= data "ping")
+                                 (http/send! channel "pong")
+                                 (do
+                                   (println "REPL Received:" data)
+                                   (try
+                                     (let [form (read-string data)
+                                           result (with-out-str
+                                                    (binding [*out* *out*]
+                                                      (let [res (eval form)]
+                                                        (println res))))]
+                                       (http/send! channel result))
+                                     (catch Throwable t
+                                       (http/send! channel (str "Error: " (.getMessage t)))))))))
+    (swap! repl-clients conj channel)
+    (println "REPL Client connected")))
+
 (defn dev-handler
   [req]
-  (let [{:keys [uri request-method ^org.httpkit.BytesInputStream body]} req
-        body (if body
-               (String. (. body (readAllBytes))))
-        req  (assoc req :body body)]
-    (or (#'api-routes  req)
-        (#'page-routes req)
-        {:status 404 :body "Not Found"})))
+  (if (= (:uri req) "/repl")
+    (repl-handler req)
+    (let [{:keys [uri request-method ^org.httpkit.BytesInputStream body]} req
+          body (if body
+                 (String. (. body (readAllBytes))))
+          req  (assoc req :body body)]
+      (or (#'api-routes  req)
+          (#'page-routes req)
+          {:status 404 :body "Not Found"}))))
 
 (defn server-stop
   "Stops the HTTP server"
