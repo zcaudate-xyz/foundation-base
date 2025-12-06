@@ -8,7 +8,7 @@
 
 (def.make CODE_DEV
   {:tag      "indigo"
-   :build    ".build/indigo/src"
+   :build    ".build/code.dev/src"
    :default  [{:type   :module.root
                :target "."
                :lang   :js
