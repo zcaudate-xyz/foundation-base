@@ -84,12 +84,7 @@ export function App() {
               )}
               {activeTab === "library" && (
                 <div className="flex-1 m-0 overflow-hidden">
-                  <lb.LibraryBrowser
-                    onImportComponent={function (comp) {
-                      return importComponent(comp);
-                    }}
-                    onImportAndEdit={importAndEditComponent}>
-                  </lb.LibraryBrowser>
+                  <lb.LibraryBrowser />
                 </div>
               )}
             </div>
@@ -99,10 +94,7 @@ export function App() {
             <FigmaUi.ResizablePanelGroup direction="vertical">
               <FigmaUi.ResizablePanel defaultSize={70} minSize={40}>
                 {selectedNamespace ? (
-                  <nv.NamespaceViewer
-                    namespace={selectedNamespace}
-                    selectedVar={selectedVar}
-                  />
+                  <nv.NamespaceViewer />
                 ) : (
                   <vc.ViewportCanvas
                     components={components}
@@ -123,18 +115,7 @@ export function App() {
           </FigmaUi.ResizablePanel>
           <FigmaUi.ResizableHandle className="w-[1px] bg-[#323232]"></FigmaUi.ResizableHandle>
           <FigmaUi.ResizablePanel defaultSize={30} minSize={20} maxSize={40}>
-            <pp.PropertiesPanel
-              component={selectedComponentData}
-              selectedNamespace={selectedNamespace}
-              onSelectVar={setSelectedVar}
-              onUpdateProperty={updateComponentProperty}
-              onDeleteComponent={deleteComponent}
-              onUpdateInputs={updateComponentInputs}
-              onUpdateInputValues={updateComponentInputValues}
-              onUpdateStates={updateComponentStates}
-              onUpdateTriggers={updateComponentTriggers}
-              onUpdateActions={updateComponentActions}>
-            </pp.PropertiesPanel>
+            <pp.PropertiesPanel />
           </FigmaUi.ResizablePanel>
         </FigmaUi.ResizablePanelGroup>
       </div>

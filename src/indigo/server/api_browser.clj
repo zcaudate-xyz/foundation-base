@@ -6,7 +6,8 @@
             [std.string :as str]
             [code.project :as project]
             [code.test.base.runtime :as rt]
-            [clojure.repl :as repl]))
+            [clojure.repl :as repl]
+            [code.framework :as framework]))
 
 ;; Existing endpoints -------------------------------------------------------
 
@@ -343,3 +344,42 @@
         (str ";; File not found: " path)))
     (catch Throwable t
       (str ";; Error reading file: " (.getMessage t)))))
+
+(defn get-namespace-entries
+  "gets the entries (source and test) for a namespace"
+  {:added "4.0"}
+  [ns-str]
+  (try
+    (let [project (project/project)
+          ns-sym (symbol ns-str)
+
+          ;; Resolve source file
+          source-path (or (get (project/all-files (:source-paths project)) ns-sym)
+                          (get (project/all-files (:test-paths project)) ns-sym))
+
+          ;; Resolve test file
+          test-ns-sym (project/test-ns ns-sym)
+          test-path   (get (project/all-files (:test-paths project)) test-ns-sym)
+
+          ;; Analyse
+          source-analysis (when source-path
+                            (framework/analyse-source-code (slurp source-path)))
+          test-analysis   (when test-path
+                            (framework/analyse-test-code (slurp test-path)))
+
+          ;; Merge
+          source-entries (get source-analysis ns-sym {})
+          test-entries   (or (get test-analysis ns-sym)
+                             (get test-analysis test-ns-sym)
+                             {})
+
+          all-vars (sort (into (set (keys source-entries)) (keys test-entries)))
+
+          entries (map (fn [v]
+                         {:var (str v)
+                          :source (get source-entries v)
+                          :test   (get test-entries v)})
+                       all-vars)]
+      {:entries entries})
+    (catch Throwable t
+      {:error (.getMessage t)})))

@@ -1,5 +1,6 @@
 import React from 'react'
 import * as te from '@/client/app/components/editor/theme-editor'
+import { fetchNamespaceSource, fetchDocPath, fetchFileContent, fetchNamespaceEntries, scanNamespaces } from '../api'
 
 // code.dev.client.app/defaultComponents [18] 
 export var defaultComponents = [
@@ -106,114 +107,11 @@ export var defaultComponents = [
     }
 ];
 
-// code.dev.client.app/defaultHistory [80] 
-export var defaultHistory = [
-    [
-        {
-            "properties": { "padding": "$4", "backgroundColor": "$background" },
-            "children": [
-                {
-                    "inputValues": {
-                        "description": "This card demonstrates how inputs work. Edit the input values in the Inputs tab to see changes.",
-                        "title": "Welcome to Input Binding!",
-                        "buttonText": "Click Me",
-                        "count": 42
-                    },
-                    "properties": {
-                        "className": "p-6 bg-white rounded-lg shadow-md max-w-md mx-auto mt-8"
-                    },
-                    "children": [
-                        {
-                            "properties": {
-                                "children": "{input.title}",
-                                "className": "text-2xl font-bold text-gray-900 mb-4"
-                            },
-                            "children": [],
-                            "type": "Heading",
-                            "label": "Card Title",
-                            "id": "example-heading-1"
-                        },
-                        {
-                            "properties": {
-                                "children": "{input.description}",
-                                "className": "text-gray-600 mb-4"
-                            },
-                            "children": [],
-                            "type": "Text",
-                            "label": "Card Description",
-                            "id": "example-text-1"
-                        },
-                        {
-                            "properties": {
-                                "children": "Clicks: {state.clickCount}",
-                                "className": "text-sm text-gray-500 mb-4"
-                            },
-                            "children": [],
-                            "type": "Text",
-                            "label": "Counter Display",
-                            "id": "example-text-2"
-                        },
-                        {
-                            "properties": {
-                                "children": "{input.buttonText}",
-                                "className": "px-6 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
-                            },
-                            "children": [],
-                            "type": "Button",
-                            "label": "Action Button",
-                            "id": "example-button-1"
-                        }
-                    ],
-                    "states": {
-                        "clickCount": {
-                            "description": "Number of button clicks",
-                            "default": 0,
-                            "type": "number"
-                        },
-                        "isVisible": {
-                            "description": "Controls visibility of description",
-                            "default": true,
-                            "type": "boolean"
-                        }
-                    },
-                    "type": "Card",
-                    "triggers": {
-                        "onButtonClick": {
-                            "description": "Increment counter when button is clicked",
-                            "event": "click",
-                            "action": "incrementClicks"
-                        }
-                    },
-                    "actions": {
-                        "incrementClicks": {
-                            "description": "Increment click counter",
-                            "type": "incrementState",
-                            "target": "clickCount"
-                        },
-                        "toggleVisibility": {
-                            "description": "Toggle description visibility",
-                            "type": "toggleState",
-                            "target": "isVisible"
-                        }
-                    },
-                    "inputs": {
-                        "description": { "description": "Card description", "type": "string" },
-                        "title": { "description": "Card title text", "type": "string" },
-                        "buttonText": { "description": "Button label", "type": "string" },
-                        "count": { "description": "Counter value", "type": "number" }
-                    },
-                    "label": "Example Card",
-                    "id": "example-card-1"
-                }
-            ],
-            "type": "View",
-            "label": "Scene",
-            "id": "root"
-        }
-    ]
-];
+import { useStateHistory } from './state-history'
 
-export function useAppState() {
+const AppStateContext = React.createContext(null);
+
+export function AppStateProvider({ children }) {
     let [components, setComponents] = React.useState(() => {
         try {
             const saved = localStorage.getItem("indigo-components");
@@ -266,9 +164,8 @@ export function useAppState() {
 
     let [viewMode, setViewMode] = React.useState("design");
     let [theme, setTheme] = React.useState(te.defaultTheme);
-    let [history, setHistory] = React.useState(defaultHistory);
-    let [historyIndex, setHistoryIndex] = React.useState(0);
-    let isUndoRedoAction = React.useRef(false);
+
+    const { history, historyIndex, undo, redo } = useStateHistory(components, setComponents);
 
     let [activeTab, setActiveTab] = React.useState(() => {
         return localStorage.getItem("indigo-active-tab") || "env";
@@ -277,63 +174,6 @@ export function useAppState() {
     React.useEffect(() => {
         localStorage.setItem("indigo-active-tab", activeTab);
     }, [activeTab]);
-
-    React.useEffect(function () {
-        if (isUndoRedoAction.current) {
-            isUndoRedoAction.current = false;
-            return;
-        }
-        let newState = JSON.parse(JSON.stringify(components));
-        setHistory(function (prev) {
-            let newHistory = prev.slice(0, historyIndex + 1);
-            newHistory.push(newState);
-            if (newHistory.length > 50) {
-                newHistory.shift();
-            }
-            return newHistory;
-        });
-        setHistoryIndex(function (prev) {
-            let newIndex = prev + 1;
-            return (newIndex >= 50) ? 49 : newIndex;
-        });
-    }, [components]);
-
-    let undo = function () {
-        if (historyIndex > 0) {
-            isUndoRedoAction.current = true;
-            let newIndex = historyIndex - 1;
-            setHistoryIndex(newIndex);
-            setComponents(JSON.parse(JSON.stringify(history[newIndex])));
-        }
-    };
-
-    let redo = function () {
-        if (historyIndex < (history.length - 1)) {
-            isUndoRedoAction.current = true;
-            let newIndex = historyIndex + 1;
-            setHistoryIndex(newIndex);
-            setComponents(JSON.parse(JSON.stringify(history[newIndex])));
-        }
-    };
-
-    React.useEffect(function () {
-        let handleKeyDown = function (e) {
-            if ((e.ctrlKey || e.metaKey) && !e.shiftKey && (e.key == "z")) {
-                e.preventDefault();
-                undo();
-            }
-            else {
-                if ((e.ctrlKey || e.metaKey) && ((e.shiftKey && (e.key == "z")) || (e.key == "y"))) {
-                    e.preventDefault();
-                    redo();
-                }
-            }
-        };
-        window.addEventListener("keydown", handleKeyDown);
-        return function () {
-            window.removeEventListener("keydown", handleKeyDown);
-        };
-    }, [historyIndex, history]);
 
     let findComponentById = function (components, id) {
         for (let component of components) {
@@ -570,7 +410,150 @@ export function useAppState() {
 
     let selectedComponentData = findComponentById(components, selectedComponent);
 
-    return {
+    // Namespace View State
+    let [namespaceViewType, setNamespaceViewType] = React.useState(() => {
+        return localStorage.getItem("indigo-ns-view-type") || "file";
+    });
+
+    React.useEffect(() => {
+        localStorage.setItem("indigo-ns-view-type", namespaceViewType);
+    }, [namespaceViewType]);
+
+    let [namespaceFileViewMode, setNamespaceFileViewMode] = React.useState(() => {
+        return localStorage.getItem("indigo-ns-file-view-mode") || "source";
+    });
+
+    React.useEffect(() => {
+        localStorage.setItem("indigo-ns-file-view-mode", namespaceFileViewMode);
+    }, [namespaceFileViewMode]);
+
+    let [namespaceEntries, setNamespaceEntries] = React.useState([]);
+    let [namespaceEntriesLoading, setNamespaceEntriesLoading] = React.useState(false);
+    let [namespaceCode, setNamespaceCode] = React.useState("");
+    let [namespaceLoading, setNamespaceLoading] = React.useState(false);
+    let [namespaceError, setNamespaceError] = React.useState(null);
+    let [runningTest, setRunningTest] = React.useState(null);
+
+    // Library State
+    let [libraryExpandedNodes, setLibraryExpandedNodes] = React.useState(() => {
+        try {
+            const saved = localStorage.getItem("indigo-library-expanded");
+            return saved ? new Set(JSON.parse(saved)) : new Set();
+        } catch (e) {
+            console.error("Failed to load expanded state", e);
+            return new Set();
+        }
+    });
+
+    React.useEffect(() => {
+        try {
+            localStorage.setItem("indigo-library-expanded", JSON.stringify(Array.from(libraryExpandedNodes)));
+        } catch (e) {
+            console.error("Failed to save expanded state", e);
+        }
+    }, [libraryExpandedNodes]);
+
+    let [librarySearch, setLibrarySearch] = React.useState("");
+    let [libraryData, setLibraryData] = React.useState([]);
+    let [libraryLoading, setLibraryLoading] = React.useState(false);
+    let [libraryError, setLibraryError] = React.useState(null);
+
+    // Fetch Library Data
+    React.useEffect(() => {
+        async function loadLibrary() {
+            if (libraryData.length > 0) return; // Already loaded
+            setLibraryLoading(true);
+            try {
+                const scanned = await scanNamespaces();
+                if (scanned.error) {
+                    console.error("Scan failed:", scanned.error);
+                    setLibraryError(scanned.error);
+                } else {
+                    const data = Object.entries(scanned)
+                        .filter(([lang, namespaces]) => Array.isArray(namespaces))
+                        .map(([lang, namespaces]) => ({
+                            language: lang,
+                            namespaces: namespaces
+                        }));
+                    setLibraryData(data);
+                }
+            } catch (err) {
+                console.error("Failed to fetch library", err);
+                setLibraryError(err.message);
+            } finally {
+                setLibraryLoading(false);
+            }
+        }
+        loadLibrary();
+    }, []); // Run once on mount
+
+    // Fetch Namespace Entries
+    const refreshNamespaceEntries = React.useCallback(async () => {
+        if (!selectedNamespace) {
+            setNamespaceEntries([]);
+            return;
+        }
+        setNamespaceEntriesLoading(true);
+        try {
+            const data = await fetchNamespaceEntries(selectedNamespace);
+            setNamespaceEntries(data.entries || []);
+        } catch (err) {
+            console.error("Failed to load entries", err);
+        } finally {
+            setNamespaceEntriesLoading(false);
+        }
+    }, [selectedNamespace]);
+
+    React.useEffect(() => {
+        refreshNamespaceEntries();
+    }, [refreshNamespaceEntries]);
+
+    // Fetch Namespace Code (File View)
+    const refreshNamespaceCode = React.useCallback(async () => {
+        if (!selectedNamespace || namespaceViewType !== "file") return;
+
+        setNamespaceLoading(true);
+        setNamespaceError(null);
+        setNamespaceCode("");
+
+        try {
+            let content = "";
+            if (namespaceFileViewMode === "source") {
+                content = await fetchNamespaceSource(selectedNamespace);
+            } else if (namespaceFileViewMode === "test") {
+                const testNs = selectedNamespace + "-test";
+                content = await fetchNamespaceSource(testNs);
+                if (content.startsWith(";; File not found")) {
+                    setNamespaceError("Test file not found");
+                    setNamespaceCode("");
+                    setNamespaceLoading(false);
+                    return;
+                }
+            } else if (namespaceFileViewMode === "doc") {
+                const docInfo = await fetchDocPath(selectedNamespace);
+                if (docInfo.found) {
+                    content = await fetchFileContent(docInfo.path);
+                } else {
+                    setNamespaceError(docInfo.message || "Documentation not found");
+                    setNamespaceCode("");
+                    setNamespaceLoading(false);
+                    return;
+                }
+            }
+            setNamespaceCode(content);
+        } catch (err) {
+            console.error("Failed to load source", err);
+            setNamespaceError(err.message);
+        } finally {
+            setNamespaceLoading(false);
+        }
+    }, [selectedNamespace, namespaceViewType, namespaceFileViewMode]);
+
+    React.useEffect(() => {
+        refreshNamespaceCode();
+    }, [refreshNamespaceCode]);
+
+    const value = {
         components,
         selectedComponent,
         selectedNamespace,
@@ -581,6 +564,40 @@ export function useAppState() {
         historyIndex,
         activeTab,
         selectedComponentData,
+
+        // Namespace View
+        namespaceViewType,
+        namespaceFileViewMode,
+        namespaceEntries,
+        namespaceEntriesLoading,
+        namespaceCode,
+        namespaceLoading,
+        namespaceError,
+        runningTest,
+        setNamespaceViewType,
+        setNamespaceFileViewMode,
+        setNamespaceEntries,
+        setNamespaceEntriesLoading,
+        setNamespaceCode,
+        setNamespaceLoading,
+        setNamespaceError,
+        setRunningTest,
+        setNamespaceCode, // Added setter for code (e.g. for editor changes)
+        refreshNamespaceCode,
+        refreshNamespaceEntries,
+
+        // Library
+        libraryExpandedNodes,
+        librarySearch,
+        libraryData,
+        libraryLoading,
+        libraryError,
+        setLibraryExpandedNodes,
+        setLibrarySearch,
+        setLibraryData,
+        setLibraryLoading,
+        setLibraryError,
+
         setComponents,
         setSelectedComponent,
         setSelectedNamespace,
@@ -602,4 +619,18 @@ export function useAppState() {
         importComponent,
         importAndEditComponent
     };
+
+    return (
+        <AppStateContext.Provider value={value}>
+            {children}
+        </AppStateContext.Provider>
+    );
+}
+
+export function useAppState() {
+    const context = React.useContext(AppStateContext);
+    if (!context) {
+        throw new Error("useAppState must be used within an AppStateProvider");
+    }
+    return context;
 }

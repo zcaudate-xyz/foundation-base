@@ -6,13 +6,17 @@ import * as r from '@/libs/js/react'
 import * as repl from '@/client/repl-client'
 import * as app from '@/client/app'
 
+import { AppStateProvider } from '@/client/app/state'
+
 // code.dev.index-main/AppIndex [35] 
 export function AppIndex() {
   React.useEffect(function () {
     repl.connect("localhost", 1311, { path: "repl" });
   }, []);
   return (
-    <app.App></app.App>);
+    <AppStateProvider>
+      <app.App></app.App>
+    </AppStateProvider>);
 }
 
 // code.dev.index-main/main [77] 

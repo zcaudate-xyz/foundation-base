@@ -181,7 +181,7 @@ export function runTestNs(ns) {
 }
 
 export async function scaffoldTest(ns) {
-    const res = await fetch(`${API_BASE}/clj/scaffold-test`, {
+    const res = await fetch(`/api/browse/clj/scaffold-test`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -218,6 +218,34 @@ export async function fetchFileContent(path) {
     });
     if (!res.ok) {
         throw new Error(`Failed to fetch file content: ${res.statusText}`);
+    }
+    return res.json();
+}
+
+export async function fetchNamespaceEntries(ns) {
+    const res = await fetch(`/api/browse/clj/namespace-entries`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ ns }),
+    });
+    if (!res.ok) {
+        throw new Error(`Failed to fetch namespace entries: ${res.statusText}`);
+    }
+    return res.json();
+}
+
+export async function runTest(ns, varName) {
+    const res = await fetch(`/api/browse/test/run-var`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ ns, var: varName }),
+    });
+    if (!res.ok) {
+        throw new Error(`Failed to run test: ${res.statusText}`);
     }
     return res.json();
 }

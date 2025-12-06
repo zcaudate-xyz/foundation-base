@@ -44,9 +44,12 @@
      {"libraries"       (wrap-browser-call
                          (fn [req]
                            (#'api-browser/list-libraries)))
-      "scan"            (wrap-browser-call
+      "file-content"    (wrap-browser-call
                          (fn [req]
-                           (#'api-browser/scan-namespaces)))
+                           (#'api-browser/get-file-content (get-in req [:params :path]))))
+      "clj/namespace-entries" (wrap-browser-call
+                               (fn [req]
+                                 (#'api-browser/get-namespace-entries (get-in req [:params :ns]))))
       "lang/namespaces" (wrap-browser-call
                          (fn [req]
                            (let [lang (or (get-in req [:params :lang]) "js")]
