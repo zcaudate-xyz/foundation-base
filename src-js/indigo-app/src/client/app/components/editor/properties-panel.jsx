@@ -1,11 +1,11 @@
 import React from 'react'
 import * as FigmaUi from '@xtalk/figma-ui'
 import * as Lucide from 'lucide-react'
-import * as ip from '@/client/app/components/inputs-panel'
-import * as stp from '@/client/app/components/states-triggers-panel'
-import * as vp from '@/client/app/components/vars-panel'
+import * as ip from '@/client/app/components/editor/inputs-panel'
+import * as stp from '@/client/app/components/editor/states-triggers-panel'
+import * as vp from '@/client/app/components/editor/vars-panel'
 
-import { fetchCljVars, fetchTestFacts } from '../../api'
+import { fetchCljVars, fetchTestFacts } from '../../../api'
 
 export function PropertyInput({ componentId, propertyKey, value, onUpdateProperty }) {
   if (typeof value === "boolean") {

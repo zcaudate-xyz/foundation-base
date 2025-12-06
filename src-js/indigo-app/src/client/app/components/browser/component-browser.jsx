@@ -1,8 +1,8 @@
 import * as Lucide from 'lucide-react'
 import * as FigmaUi from '@xtalk/figma-ui'
 import React from 'react'
-import { fetchNamespaces } from '../../api'
-import { fuzzyMatch } from '../utils/search'
+import { fetchNamespaces } from '../../../api'
+import { fuzzyMatch } from '../../utils/search'
 
 export function buildNamespaceTree(namespaces) {
   let root = {

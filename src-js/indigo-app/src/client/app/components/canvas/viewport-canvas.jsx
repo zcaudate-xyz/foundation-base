@@ -1,6 +1,6 @@
 import React from 'react'
-import * as cr from '@/client/app/components/component-renderer'
-import * as et from '@/client/app/components/editing-toolbar'
+import * as cr from '@/client/app/components/canvas/component-renderer'
+import * as et from '@/client/app/components/canvas/editing-toolbar'
 
 // code.dev.client.app.components.viewport-canvas/countComponents
 export function countComponents(comp) {

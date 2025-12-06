@@ -7,21 +7,19 @@ import * as FigmaUi from '@xtalk/figma-ui'
 import React from 'react'
 
 
-import * as te from '@/client/app/components/theme-editor'
+import * as te from '@/client/app/components/editor/theme-editor'
 
-import * as pp from '@/client/app/components/properties-panel'
+import * as pp from '@/client/app/components/editor/properties-panel'
 
-import * as vc from '@/client/app/components/viewport-canvas'
+import * as vc from '@/client/app/components/canvas/viewport-canvas'
 
-import * as cb from '@/client/app/components/component-browser'
+import * as cb from '@/client/app/components/browser/component-browser'
 
-import * as lb from '@/client/app/components/library-browser'
+import * as lb from '@/client/app/components/browser/library-browser'
 
-import * as op from '@/client/app/components/outliner-panel'
+import * as rp from '@/client/app/components/repl/repl-panel'
 
-import * as rp from '@/client/app/components/repl-panel'
-
-import * as nv from '@/client/app/components/namespace-viewer'
+import * as nv from '@/client/app/components/browser/namespace-viewer'
 
 // code.dev.client.app/defaultTheme [16] 
 export var defaultTheme = te.defaultTheme;
