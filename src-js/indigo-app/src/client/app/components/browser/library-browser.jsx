@@ -47,38 +47,50 @@ export function buildLibraryTree(libraryData) {
 }
 
 export function LibraryBrowser({ onImportComponent, onImportAndEdit }) {
-  const [libraries, setLibraries] = React.useState({});
-  const [expanded, setExpanded] = React.useState(() => {
+  const [libraryData, setLibraryData] = React.useState([]);
+
+  const [expandedNodes, setExpandedNodes] = React.useState(() => {
     try {
       const saved = localStorage.getItem("indigo-library-expanded");
-      return saved ? JSON.parse(saved) : {};
+      return saved ? new Set(JSON.parse(saved)) : new Set();
     } catch (e) {
       console.error("Failed to load expanded state", e);
-      return {};
+      return new Set();
     }
   });
 
   React.useEffect(() => {
     try {
-      localStorage.setItem("indigo-library-expanded", JSON.stringify(expanded));
+      localStorage.setItem("indigo-library-expanded", JSON.stringify(Array.from(expandedNodes)));
     } catch (e) {
       console.error("Failed to save expanded state", e);
     }
-  }, [expanded]);
+  }, [expandedNodes]);
 
+  const [error, setError] = React.useState(null);
   const [loading, setLoading] = React.useState(false);
-  const [expandedNodes, setExpandedNodes] = React.useState(new Set());
   const [search, setSearch] = React.useState("");
 
   React.useEffect(() => {
     async function loadLibrary() {
+      setLoading(true);
       try {
         const scanned = await scanNamespaces();
+
+        if (scanned.error) {
+          console.error("Scan failed:", scanned.error);
+          setError(scanned.error);
+          setLoading(false);
+          return;
+        }
+
         // scanned is { "js": ["ns1", "ns2"], "lua": [...] }
-        const data = Object.entries(scanned).map(([lang, namespaces]) => ({
-          language: lang,
-          namespaces: namespaces
-        }));
+        const data = Object.entries(scanned)
+          .filter(([lang, namespaces]) => Array.isArray(namespaces))
+          .map(([lang, namespaces]) => ({
+            language: lang,
+            namespaces: namespaces
+          }));
         setLibraryData(data);
         setLoading(false);
       } catch (err) {
@@ -92,12 +104,18 @@ export function LibraryBrowser({ onImportComponent, onImportAndEdit }) {
 
   const [loadedComponents, setLoadedComponents] = React.useState(new Map()); // Map<ns, components[]>
 
-  const fetchNamespaceComponents = async (lang, ns) => {
+  const fetchNamespaceComponents = React.useCallback(async (lang, ns) => {
     console.log("Fetching components for", lang, ns);
-    if (loadedComponents.has(ns)) {
-      console.log("Already loaded", ns);
-      return;
-    }
+    setLoadedComponents(prev => {
+      if (prev.has(ns)) return prev; // Already loaded or loading (optimistic check?)
+      // Actually, we can't check 'prev' synchronously here for the async call below.
+      // But the check inside the function body (before setLoadedComponents) uses the closure value.
+      return prev;
+    });
+
+    // Better to check current state ref or just rely on the fact that we won't call this excessively.
+    // But to be safe against double-firing from effect + toggle:
+
     try {
       const comps = await import('../../../api').then(m => m.fetchComponents(lang, ns));
       console.log("Fetched components", ns, comps);
@@ -105,14 +123,23 @@ export function LibraryBrowser({ onImportComponent, onImportAndEdit }) {
     } catch (err) {
       console.error("Failed to fetch components for", ns, err);
     }
-  };
+  }, []);
+
+  // We need a ref to track what we've requested to avoid loops if we add it to deps
+  const requestedRef = React.useRef(new Set());
+
+  const safeFetch = React.useCallback((lang, ns) => {
+    if (requestedRef.current.has(ns)) return;
+    requestedRef.current.add(ns);
+    fetchNamespaceComponents(lang, ns);
+  }, [fetchNamespaceComponents]);
 
   const toggleNode = (node) => {
     const path = node.fullPath;
     console.log("Toggling node", path, node.type, expandedNodes.has(path));
     if (node.type === "namespace" && !expandedNodes.has(path)) {
       console.log("Fetching for", node.language, node.originalNs);
-      fetchNamespaceComponents(node.language, node.originalNs);
+      safeFetch(node.language, node.originalNs);
     }
 
     setExpandedNodes(prev => {
@@ -134,7 +161,24 @@ export function LibraryBrowser({ onImportComponent, onImportAndEdit }) {
     })).filter(lib => lib.namespaces.length > 0);
   }, [libraryData, search]);
 
-  const tree = React.useMemo(() => buildLibraryTree(filteredData), [filteredData]);
+  const tree = React.useMemo(() => {
+    console.log("Building tree with data:", filteredData);
+    return buildLibraryTree(filteredData);
+  }, [filteredData]);
+
+  // Restore components for expanded nodes on load
+  React.useEffect(() => {
+    console.log("Restoration effect running. Tree:", !!tree, "Expanded:", expandedNodes.size);
+    if (!tree) return;
+    const traverse = (node) => {
+      if (node.type === "namespace" && expandedNodes.has(node.fullPath)) {
+        console.log("Restoring expanded node:", node.fullPath);
+        safeFetch(node.language, node.originalNs);
+      }
+      node.children.forEach(traverse);
+    };
+    traverse(tree);
+  }, [tree, safeFetch]); // expandedNodes is stable-ish, but we only want this on tree rebuild (initial load)
 
   // Auto-expand if searching
   React.useEffect(() => {

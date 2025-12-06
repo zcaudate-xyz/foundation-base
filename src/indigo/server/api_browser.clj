@@ -114,10 +114,11 @@
   {:added "4.0"}
   [ns-str]
   (try
-    (let [files (project/all-files
-                 (:source-paths (project/project)))
-          ns-sym (symbol ns-str)
-          file   (get files ns-sym)]
+    (let [project (project/project)
+          paths   (concat (:source-paths project) (:test-paths project))
+          files   (project/all-files paths)
+          ns-sym  (symbol ns-str)
+          file    (get files ns-sym)]
       (if file
         (slurp file)
         (str ";; File not found for namespace: " ns-str)))
@@ -299,3 +300,46 @@
         (throw (Exception. "code.manage/scaffold not found"))))
     (catch Throwable t
       {:status "error" :message (.getMessage t)})))
+
+(defn get-doc-path
+  "gets the documentation path for a namespace"
+  {:added "4.0"}
+  [ns-str]
+  (try
+    (require 'code.doc.executive)
+    (let [all-pages-fn (resolve 'code.doc.executive/all-pages)
+          make-project-fn (resolve 'code.doc/make-project)
+
+          ;; Get all doc pages
+          doc-project (make-project-fn)
+          pages (all-pages-fn doc-project)
+
+          ;; Heuristic: match namespace to page key suffix
+          ;; e.g. code.doc -> code-doc, matches core/code-doc
+          ns-slug (str/replace ns-str "." "-")
+          page (some (fn [[k p]]
+                       (let [k-str (str k)]
+                         (when (or (= k-str ns-slug)
+                                   (str/ends-with? k-str (str "/" ns-slug)))
+                           p)))
+                     pages)]
+      (if page
+        {:path (:input page)
+         :found true}
+        {:found false
+         :message (str "No documentation found for " ns-str)}))
+    (catch Throwable t
+      {:found false
+       :error (.getMessage t)})))
+
+(defn get-file-content
+  "gets the content of a file by path"
+  {:added "4.0"}
+  [path]
+  (try
+    (let [f (java.io.File. ^String path)]
+      (if (.exists f)
+        (slurp f)
+        (str ";; File not found: " path)))
+    (catch Throwable t
+      (str ";; Error reading file: " (.getMessage t)))))

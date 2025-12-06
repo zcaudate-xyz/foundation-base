@@ -1,48 +1,59 @@
 import React from 'react'
 import Editor from '@monaco-editor/react'
-import { fetchNamespaceSource, saveNamespaceSource, fetchCompletions, scaffoldTest } from '../../../api'
+import { fetchNamespaceSource, saveNamespaceSource, fetchCompletions, scaffoldTest, fetchDocPath, fetchFileContent } from '../../../api'
 import { slurpForward, barfForward, getSexpBeforeCursor } from '../../utils/paredit'
 import { send, addMessageListener } from '../../../repl-client'
 
 export function NamespaceViewer({ namespace, selectedVar }) {
-    const [source, setSource] = React.useState("");
+    const [code, setCode] = React.useState("");
     const [loading, setLoading] = React.useState(false);
     const [error, setError] = React.useState(null);
-    const [viewMode, setViewMode] = React.useState("source"); // "source" | "test"
+    const [viewMode, setViewMode] = React.useState("source"); // "source" | "test" | "doc"
+    const [scaffoldLoading, setScaffoldLoading] = React.useState(false);
+
     const editorRef = React.useRef(null);
     const monacoRef = React.useRef(null);
     const completionProviderRef = React.useRef(null);
     const decorationsRef = React.useRef(null);
 
-    const loadSource = React.useCallback(() => {
-        if (namespace) {
-            setLoading(true);
-            setError(null);
-            setSource("");
+    const loadSource = React.useCallback(async () => {
+        if (!namespace) return;
+        setLoading(true);
+        setError(null);
+        setCode("");
 
-            const targetNs = viewMode === "test" ? (namespace + "-test") : namespace;
+        try {
+            let content = "";
 
-            // Fetch source
-            fetchNamespaceSource(targetNs)
-                .then(data => {
-                    if (data.startsWith(";; File not found")) {
-                        if (viewMode === "test") {
-                            setError("Test file not found");
-                        } else {
-                            setError(data);
-                        }
-                    } else {
-                        setSource(data);
-                    }
+            if (viewMode === "source") {
+                content = await fetchNamespaceSource(namespace);
+            } else if (viewMode === "test") {
+                const testNs = namespace + "-test";
+                content = await fetchNamespaceSource(testNs);
+                if (content.startsWith(";; File not found")) {
+                    setError("Test file not found");
+                    setCode("");
                     setLoading(false);
-                })
-                .catch(err => {
-                    console.error("Failed to fetch namespace source", err);
-                    setError(err.message);
+                    return;
+                }
+            } else if (viewMode === "doc") {
+                const docInfo = await fetchDocPath(namespace);
+                if (docInfo.found) {
+                    content = await fetchFileContent(docInfo.path);
+                } else {
+                    setError(docInfo.message || "Documentation not found");
+                    setCode("");
                     setLoading(false);
-                });
-        } else {
-            setSource("");
+                    return;
+                }
+            }
+
+            setCode(content);
+        } catch (err) {
+            console.error("Failed to load source", err);
+            setError(err.message);
+        } finally {
+            setLoading(false);
         }
     }, [namespace, viewMode]);
 
@@ -78,28 +89,38 @@ export function NamespaceViewer({ namespace, selectedVar }) {
 
     const handleSave = async () => {
         if (!namespace || !editorRef.current) return;
+
+        if (viewMode === "doc") {
+            alert("Saving documentation is not yet supported via this view.");
+            return;
+        }
+
         const currentSource = editorRef.current.getValue();
         const targetNs = viewMode === "test" ? (namespace + "-test") : namespace;
+
         try {
             await saveNamespaceSource(targetNs, currentSource);
             console.log("Saved namespace:", targetNs);
             // Optional: Show success feedback
         } catch (err) {
             console.error("Failed to save namespace", err);
-            // Optional: Show error feedback
+            alert("Failed to save: " + err.message);
         }
     };
 
     const handleScaffold = async () => {
-        setLoading(true);
+        setScaffoldLoading(true);
         try {
             await scaffoldTest(namespace);
+            // Wait a bit for file system
+            await new Promise(r => setTimeout(r, 1000));
             // Reload source to show the new test file
             loadSource();
         } catch (err) {
             console.error("Failed to scaffold test", err);
             setError(err.message);
-            setLoading(false);
+        } finally {
+            setScaffoldLoading(false);
         }
     };
 
@@ -128,6 +149,12 @@ export function NamespaceViewer({ namespace, selectedVar }) {
                     >
                         Test
                     </button>
+                    <button
+                        onClick={() => setViewMode("doc")}
+                        className={`px-3 py-1 text-xs rounded ${viewMode === "doc" ? "bg-[#323232] text-gray-200" : "text-gray-500 hover:text-gray-300"}`}
+                    >
+                        Doc
+                    </button>
                 </div>
             </div>
             <div className="flex-1 overflow-hidden relative">
@@ -139,27 +166,28 @@ export function NamespaceViewer({ namespace, selectedVar }) {
                         {viewMode === "test" && error === "Test file not found" && (
                             <button
                                 onClick={handleScaffold}
-                                className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs rounded shadow-sm transition-colors"
+                                disabled={scaffoldLoading}
+                                className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs rounded shadow-sm transition-colors disabled:opacity-50"
                             >
-                                Scaffold Test
+                                {scaffoldLoading ? "Scaffolding..." : "Scaffold Test"}
                             </button>
                         )}
                     </div>
                 ) : (
                     <Editor
                         height="100%"
-                        defaultLanguage="clojure"
-                        value={source}
+                        language="clojure"
                         theme="vs-dark"
+                        value={code}
                         options={{
                             minimap: { enabled: false },
-                            fontSize: 12,
+                            fontSize: 14,
                             lineNumbers: 'on',
                             scrollBeyondLastLine: false,
                             automaticLayout: true,
                             autoClosingBrackets: 'always',
                             matchBrackets: 'always',
-                            readOnly: false
+                            readOnly: viewMode === "doc"
                         }}
                         onMount={(editor, monaco) => {
                             editorRef.current = editor;
@@ -167,11 +195,9 @@ export function NamespaceViewer({ namespace, selectedVar }) {
                             decorationsRef.current = editor.createDecorationsCollection();
 
                             // Register Completion Provider
-                            // Dispose previous if exists (though useEffect handles unmount, this handles re-mounts if any)
                             if (completionProviderRef.current) {
                                 completionProviderRef.current.dispose();
                             }
-
                             completionProviderRef.current = monaco.languages.registerCompletionItemProvider('clojure', {
                                 provideCompletionItems: async (model, position) => {
                                     const word = model.getWordUntilPosition(position);
@@ -227,16 +253,14 @@ export function NamespaceViewer({ namespace, selectedVar }) {
                                         console.log("Evaluating:", sexp);
                                         const id = "eval-" + Date.now() + "-" + Math.random();
 
-                                        // Add listener for result
                                         const removeListener = addMessageListener((msg) => {
                                             if (msg.id === id) {
                                                 console.log("Eval Result:", msg);
                                                 removeListener();
 
                                                 const resultText = msg.error ? ("Error: " + msg.error) : msg.result;
-                                                const color = msg.error ? "red" : "#888888"; // Gray for result
+                                                const color = msg.error ? "red" : "#888888";
 
-                                                // Show result inline
                                                 decorationsRef.current.set([
                                                     {
                                                         range: new monaco.Range(position.lineNumber, position.column, position.lineNumber, position.column),
@@ -250,7 +274,6 @@ export function NamespaceViewer({ namespace, selectedVar }) {
                                                     }
                                                 ]);
 
-                                                // Clear after 5 seconds
                                                 setTimeout(() => {
                                                     decorationsRef.current.clear();
                                                 }, 5000);
@@ -268,6 +291,7 @@ export function NamespaceViewer({ namespace, selectedVar }) {
                                 }
                             });
 
+                            // Paredit Actions
                             editor.addAction({
                                 id: 'paredit-slurp-forward',
                                 label: 'Paredit Slurp Forward',
@@ -280,7 +304,6 @@ export function NamespaceViewer({ namespace, selectedVar }) {
                                     const position = ed.getPosition();
                                     const offset = model.getOffsetAt(position);
                                     const text = model.getValue();
-
                                     const result = slurpForward(text, offset);
                                     if (result) {
                                         ed.executeEdits('paredit', [{
@@ -304,7 +327,6 @@ export function NamespaceViewer({ namespace, selectedVar }) {
                                     const position = ed.getPosition();
                                     const offset = model.getOffsetAt(position);
                                     const text = model.getValue();
-
                                     const result = barfForward(text, offset);
                                     if (result) {
                                         ed.executeEdits('paredit', [{
@@ -316,7 +338,7 @@ export function NamespaceViewer({ namespace, selectedVar }) {
                                 }
                             });
                         }}
-                        onChange={(value) => setSource(value)}
+                        onChange={(value) => setCode(value)}
                     />
                 )}
             </div>

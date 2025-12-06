@@ -181,15 +181,43 @@ export function runTestNs(ns) {
 }
 
 export async function scaffoldTest(ns) {
-    const response = await fetch(`/api/browse/clj/scaffold-test`, {
+    const res = await fetch(`${API_BASE}/clj/scaffold-test`, {
         method: 'POST',
         headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ ns })
+        body: JSON.stringify({ ns }),
     });
-    if (!response.ok) {
-        throw new Error(`Failed to scaffold test: ${response.statusText}`);
+    if (!res.ok) {
+        throw new Error(`Failed to scaffold test: ${res.statusText}`);
     }
-    return response.json();
+    return res.json();
+}
+
+export async function fetchDocPath(ns) {
+    const res = await fetch(`/api/browse/clj/doc-path`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ ns }),
+    });
+    if (!res.ok) {
+        throw new Error(`Failed to fetch doc path: ${res.statusText}`);
+    }
+    return res.json();
+}
+
+export async function fetchFileContent(path) {
+    const res = await fetch(`/api/browse/clj/file-content`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ path }),
+    });
+    if (!res.ok) {
+        throw new Error(`Failed to fetch file content: ${res.statusText}`);
+    }
+    return res.json();
 }

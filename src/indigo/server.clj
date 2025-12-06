@@ -129,6 +129,16 @@
                              (let [ns (get-in req [:params :ns])]
                                (#'indigo.server.api-browser/scaffold-test ns))))
 
+      "clj/doc-path"      (wrap-browser-call
+                           (fn [req]
+                             (let [ns (get-in req [:params :ns])]
+                               (#'indigo.server.api-browser/get-doc-path ns))))
+
+      "clj/file-content"  (wrap-browser-call
+                           (fn [req]
+                             (let [path (get-in req [:params :path])]
+                               (#'indigo.server.api-browser/get-file-content path))))
+
       "test/run-var"    (wrap-browser-call
                          (fn [req]
                            (let [ns   (get-in req [:params :ns])

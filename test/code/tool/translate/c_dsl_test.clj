@@ -1,9 +1,9 @@
 (ns code.tool.translate.c-dsl-test
+  (:use code.test)
   (:require [code.tool.translate.c-dsl :as c-dsl]
             [std.lib :as h]
             [std.lang :as l]
-            [std.lang.model.spec-c :as c]
-            [code.test :refer :all]))
+            [std.lang.model.spec-c :as c]))
 
 (fact "Translate basic function declaration"
   (let [ast {:kind "TranslationUnitDecl"
@@ -94,7 +94,40 @@
 
 
 ^{:refer code.tool.translate.c-dsl/translate-node :added "4.1"}
-(fact "TODO")
+(fact "translates various C AST nodes to DSL"
+  (c-dsl/translate-node {:kind "IntegerLiteral" :value "123"})
+  => 123
+  
+  (c-dsl/translate-node {:kind "FloatingLiteral" :value "12.34"})
+  => 12.34
+  
+  (c-dsl/translate-node {:kind "StringLiteral" :value "\"hello\""})
+  => "\"hello\""
+
+  (c-dsl/translate-node {:kind "ReturnStmt" :inner []})
+  => '(return)
+
+  (c-dsl/translate-node {:kind "UnaryOperator" :opcode "-" :inner [{:kind "IntegerLiteral" :value "1"}]})
+  => '(- 1)
+
+  (c-dsl/translate-node {:kind "UnaryOperator" :opcode "++" :isPostfix true :inner [{:kind "DeclRefExpr" :referencedDecl {:name "i"}}]})
+  => '(:++ i)
+  
+  (c-dsl/translate-node {:kind "WhileStmt" :inner [{:kind "IntegerLiteral" :value "1"}
+                                                  {:kind "CompoundStmt" :inner []}]})
+  => '(while 1 [])
+
+  (c-dsl/translate-node {:kind "CallExpr" :inner [{:kind "DeclRefExpr" :referencedDecl {:name "foo"}}
+                                                 {:kind "IntegerLiteral" :value "1"}
+                                                 {:kind "IntegerLiteral" :value "2"}]})
+  => '(foo 1 2)
+
+  (c-dsl/translate-node {:kind "ArraySubscriptExpr" :inner [{:kind "DeclRefExpr" :referencedDecl {:name "arr"}}
+                                                           {:kind "IntegerLiteral" :value "0"}]})
+  => '(get arr 0))
 
 ^{:refer code.tool.translate.c-dsl/translate-args :added "4.1"}
-(fact "TODO")
+(fact "translates a list of arguments/nodes"
+  (c-dsl/translate-args [{:kind "IntegerLiteral" :value "1"}
+                         {:kind "IntegerLiteral" :value "2"}])
+  => [1 2])
