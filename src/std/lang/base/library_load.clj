@@ -42,7 +42,14 @@
 
 (defn load-string-into-library
   "Loads code from a string into a specific library instance.
-   Tracks namespace changes via `ns` forms."
+   Tracks namespace changes via `ns` forms.
+
+   Note: This function performs standard entry hydration (via `create-code-hydrate`)
+   which resolves links and adds metadata as defined by the language grammar.
+   However, it does NOT:
+   1. Recursively load required files (file-level hydration).
+   2. Initialize language runtimes (runtime hydration).
+   3. Execute side effects outside of the library structure."
   [content lib-instance initial-ns-sym]
   ;; Create namespace if it doesn't exist
   (when-not (find-ns initial-ns-sym)
