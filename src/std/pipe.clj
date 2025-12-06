@@ -42,12 +42,13 @@
   ([tasks]
    (let [comp-fn (fn [input params lookup env & args]
                    (reduce (fn [val task]
-                             (let [[f _] (ut/main-function (-> task :main :fn) (or (-> task :main :argcount) 3))]
-                               (apply f val params lookup env args)))
+                             (let [task (if (map? task) task (std.pipe/task :default "step" task))]
+                               (apply task val (dissoc params :bulk) lookup env args)))
                            input
                            tasks))
-         base-task (first tasks)]
-     (assoc base-task :main {:fn comp-fn}))))
+         base-task (first tasks)
+         base-props (if (map? base-task) base-task {:name "chain" :template :default})]
+     (task :default (:name base-props) (assoc base-props :main {:fn comp-fn})))))
 
 (defn task
   "creates a pipe task"
@@ -71,6 +72,15 @@
                                    :args? args?}
                             :name name
                             :template template})))))
+
+(defn pipe
+  "creates a pipe from tasks and executes it"
+  {:added "4.0"}
+  ([tasks input]
+   (pipe tasks input {}))
+  ([tasks input opts]
+   (let [p-task (chain tasks)]
+     (p-task input opts))))
 
 (definvoke invoke-intern-pipe
   "creates a pipe task"
