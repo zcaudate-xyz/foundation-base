@@ -30,7 +30,11 @@
 (defn perl-symbol
   "emit perl symbol with $ prefix if it's a variable"
   [sym grammar mopts]
-  (let [s (str sym)]
+  (let [s0 (name sym)
+        s  (if (or (str/includes? s0 "::")
+                   (str/includes? s0 "->"))
+             s0
+             (str/replace s0 "-" "_"))]
     (cond (:perl/func mopts)
           s
 
@@ -69,6 +73,12 @@
                     "")
                   body-str "\n}"))))
 
+(defn perl-eval
+  "emit perl eval block"
+  [[_ & args] grammar mopts]
+  (let [body    (common/*emit-fn* (cons 'do args) grammar mopts)]
+    (str "eval {\n" body "\n}")))
+
 (defn perl-array
   "emit perl array reference"
   [arr grammar mopts]
@@ -78,7 +88,9 @@
   "emit perl hash reference"
   [m grammar mopts]
   (let [entries (map (fn [[k v]]
-                       (str (common/*emit-fn* k grammar mopts)
+                       (str (if (keyword? k)
+                              (common/*emit-fn* (h/strn k) grammar mopts)
+                              (common/*emit-fn* k grammar mopts))
                             " => "
                             (common/*emit-fn* v grammar mopts)))
                      m)]
@@ -106,7 +118,8 @@
         (grammar/build:override fn-override)
         (grammar/build:extend fn-extend)
         (grammar/build:extend
-         {:concat     {:op :concat :symbol #{'concat} :raw "." :emit :infix}
+         {:concat     {:op :concat :symbol #{'concat} :raw "." :emit :infix :value true}
+          :eval       {:emit #'perl-eval :symbol #{'eval} :value true}
           :die        {:op :die   :symbol #{'die}   :raw "die"   :emit :prefix}}))))
 
 (def +template+
@@ -117,7 +130,8 @@
                               :end    ""}
                   :block     {:parameter {:start "(" :end ")"}
                               :body      {:start "{" :end "}"}}
-                  :invoke    {:custom #'perl-invoke}}
+                  :invoke    {:custom #'perl-invoke}
+                  :function  {:raw "sub"}}
         :token   {:nil       {:as "undef"}
                   :boolean   {:as (fn [b] (if b "1" "0"))}
                   :string    {:quote :double}
