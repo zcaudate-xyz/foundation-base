@@ -32,6 +32,18 @@
   '#{case cond-> cond->> some-> some->>
      as-> })
 
+(defn- is-def?
+  [x]
+  (or (+defs+ x)
+      (and (symbol? x)
+           (str/starts-with? (name x) "def"))))
+
+(defn- is-binding?
+  [x]
+  (or (+bindings+ x)
+      (and (symbol? x)
+           (str/includes? (name x) "with"))))
+
 (defn layout-hiccup-like
   "checks if form is hiccup structure"
   {:added "4.0"}
@@ -77,11 +89,11 @@
                 {:columns 2
                  :col-from 0}                
                 
-                (+bindings+ (first form))
+                (is-binding? (first form))
                 {:col-from 1
                  :col-start 2}
 
-                (+defs+ (first form))
+                (is-def? (first form))
                 {:col-from 1
                  :col-start 2}
 
@@ -109,7 +121,7 @@
                                      :spec {:columns 1}})
 
                     (map? x)
-                    (c/merge-meta x {:readable-len 10})
+                    (c/merge-meta x {:readable-len 30})
 
                     :else
                     x))
@@ -132,7 +144,7 @@
                                                 :spec {:columns 1}})
 
                                (map? x)
-                               (c/merge-meta x {:readable-len 10})
+                               (c/merge-meta x {:readable-len 30})
 
                                :else
                                x))
@@ -157,13 +169,15 @@
              (concat (take top-index form)
                      [(layout-annotate-arglist (nth form top-index))]
                      (drop (inc top-index) form)))
-      (apply list
-             (concat (take list-index form)
-                     (->> (drop list-index form)
-                          (map (fn [[args & rest]]
-                                 (apply list
-                                        (layout-annotate-arglist args)
-                                        rest)))))))))
+      (if list-index
+        (apply list
+               (concat (take list-index form)
+                       (->> (drop list-index form)
+                            (map (fn [[args & rest]]
+                                   (apply list
+                                          (layout-annotate-arglist args)
+                                          rest))))))
+        form))))
 
 (defn layout-annotate-fn-anon
   "adds layout metadata to `fn` calls"
@@ -203,10 +217,10 @@
         (cond ('#{fn} (first form))
               (layout-annotate-fn-anon form)
 
-              ('#{defn- defn defmacro} (first form))
+              (is-def? (first form))
               (layout-annotate-fn-named form)
               
-              (+bindings+ (first form))
+              (is-binding? (first form))
               (let [[sym bindings & more] form]
                 (apply list
                        sym
