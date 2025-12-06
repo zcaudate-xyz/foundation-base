@@ -155,8 +155,7 @@
    [org.apache.commons/commons-math3 "3.6.1"]
 
    ;; std.text.diff
-   [com.googlecode.tool.java-diff-utils/diffutils "1.3.0"]
-   
+   [com.googlecode.java-diff-utils/diffutils "1.3.0"]   
    
    ;; MCP
    [org.hugoduncan/mcp-clj-server "0.1.60"]
