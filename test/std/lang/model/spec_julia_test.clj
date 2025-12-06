@@ -130,7 +130,3 @@
 
   (!.julia (x:arr-push [1] 2))
   => "\"push!(\"[1]\", \"2\")\"")
-
-
-^{:refer std.lang.model.spec-julia/emit-to :added "4.1"}
-(fact "TODO")

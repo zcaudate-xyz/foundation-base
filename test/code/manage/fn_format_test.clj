@@ -55,10 +55,3 @@
                nil
                nil))
   => {:updated true})
-
-
-^{:refer code.manage.fn-format/manual-step-right :added "4.1"}
-(fact "TODO")
-
-^{:refer code.manage.fn-format/list-transform :added "4.1"}
-(fact "TODO")

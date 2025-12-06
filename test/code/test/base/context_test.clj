@@ -29,10 +29,3 @@
   context/*eval-fact* => false
   context/*eval-mode* => true ;; defonce value
   context/*print* => #{:print-throw :print-failed :print-timeout :print-bulk})
-
-
-^{:refer code.test.base.context/new-context :added "4.1"}
-(fact "TODO")
-
-^{:refer code.test.base.context/with-new-context :added "4.1"}
-(fact "TODO")

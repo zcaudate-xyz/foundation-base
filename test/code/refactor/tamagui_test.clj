@@ -69,37 +69,3 @@
       (edit/root-string))
   =>
   "[:div {} [:span {:className \"sr-only\"} \"Hidden\"] [:div {:className \"flex-1\"}] [:div {:className \"rounded-full flex items-center justify-center\" :size \"$4\"}]]")
-
-
-^{:refer code.refactor.tamagui/convert-color :added "4.1"}
-(fact "TODO")
-
-^{:refer code.refactor.tamagui/convert-value :added "4.1"}
-(fact "TODO")
-
-^{:refer code.refactor.tamagui/convert-flex :added "4.1"}
-(fact "TODO")
-
-^{:refer code.refactor.tamagui/convert-justify :added "4.1"}
-(fact "TODO")
-
-^{:refer code.refactor.tamagui/convert-align :added "4.1"}
-(fact "TODO")
-
-^{:refer code.refactor.tamagui/process-props :added "4.1"}
-(fact "TODO")
-
-^{:refer code.refactor.tamagui/refactor-element :added "4.1"}
-(fact "TODO")
-
-^{:refer code.refactor.tamagui/transform-zipper :added "4.1"}
-(fact "TODO")
-
-^{:refer code.refactor.tamagui/replace-require :added "4.1"}
-(fact "TODO")
-
-^{:refer code.refactor.tamagui/refactor-string :added "4.1"}
-(fact "TODO")
-
-^{:refer code.refactor.tamagui/refactor-file :added "4.1"}
-(fact "TODO")

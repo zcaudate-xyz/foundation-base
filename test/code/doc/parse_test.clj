@@ -191,7 +191,3 @@
                 {:type :paragraph :text "Text"}
                 {:type :section :title "Section"}
                 {:type :paragraph :text "More text"}]))
-
-
-^{:refer code.doc.parse/parse-header :added "4.1"}
-(fact "TODO")

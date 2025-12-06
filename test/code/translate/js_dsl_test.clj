@@ -135,16 +135,3 @@
                                                      :init {:type "NumericLiteral" :value 1}}]}})
   => '(export (var (x 1))))
 
-
-
-^{:refer code.translate.js-dsl/translate-node :added "4.1"}
-(fact "TODO")
-
-^{:refer code.translate.js-dsl/translate-args :added "4.1"}
-(fact "TODO")
-
-^{:refer code.translate.js-dsl/translate-import-entry :added "4.1"}
-(fact "TODO")
-
-^{:refer code.translate.js-dsl/translate-file :added "4.1"}
-(fact "TODO")

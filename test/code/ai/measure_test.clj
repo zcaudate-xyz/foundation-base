@@ -50,25 +50,3 @@
         m-large (clj/generate-metrics code-large)]
 
     (> (:surface m-large) (:surface m-small)) => true))
-
-
-^{:refer code.ai.measure/generate-score :added "4.1"}
-(fact "TODO")
-
-^{:refer code.ai.measure/generate-metrics :added "4.1"}
-(fact "TODO")
-
-^{:refer code.ai.measure/detect-type :added "4.1"}
-(fact "TODO")
-
-^{:refer code.ai.measure/filter-supported-files :added "4.1"}
-(fact "TODO")
-
-^{:refer code.ai.measure/analyse-file :added "4.1"}
-(fact "TODO")
-
-^{:refer code.ai.measure/analyse-commit :added "4.1"}
-(fact "TODO")
-
-^{:refer code.ai.measure/measure-history :added "4.1"}
-(fact "TODO")

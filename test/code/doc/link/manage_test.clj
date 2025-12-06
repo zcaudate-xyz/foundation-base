@@ -41,13 +41,3 @@
     (:type element) => :block
     (:code element) => string?
     (:code element) => #"\{:errors 0,"))
-
-
-^{:refer code.doc.link.manage/format-manage-output :added "4.1"}
-(fact "TODO")
-
-^{:refer code.doc.link.manage/run-manage-task :added "4.1"}
-(fact "TODO")
-
-^{:refer code.doc.link.manage/link-manage :added "4.1"}
-(fact "TODO")

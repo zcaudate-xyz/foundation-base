@@ -91,10 +91,3 @@
              :inner [{:kind "IntegerLiteral" :value "1"}]}]
     (c-dsl/translate-node ast)
     => '(cast double 1)))
-
-
-^{:refer code.translate.c-dsl/translate-node :added "4.1"}
-(fact "TODO")
-
-^{:refer code.translate.c-dsl/translate-args :added "4.1"}
-(fact "TODO")
