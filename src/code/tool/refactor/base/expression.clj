@@ -1,6 +1,6 @@
 (ns code.tool.refactor.base.expression
   (:require [code.query :as q]
-            [code.edit :as nav]))
+            [std.block.navigate :as nav]))
 
 (defn rewrite-if-not
   "rewrites (if (not ...) ...)

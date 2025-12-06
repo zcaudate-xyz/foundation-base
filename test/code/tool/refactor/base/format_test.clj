@@ -1,6 +1,6 @@
 (ns code.tool.refactor.base.format-test
   (:require [code.tool.refactor.base.format :refer :all]
-            [code.edit :as nav]
+            [std.block.navigate :as nav]
             [code.test :refer :all]))
 
 ^{:refer code.tool.refactor.base.format/remove-surrounding-whitespace :added "3.0"}

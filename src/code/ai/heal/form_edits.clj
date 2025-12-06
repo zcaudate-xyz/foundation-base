@@ -1,5 +1,5 @@
 (ns code.ai.heal.form-edits
-  (:require [code.edit :as edit]
+  (:require [std.block.navigate :as edit]
             [code.query :as query]
             [std.lib :as h]
             [std.block :as b]
@@ -14,11 +14,11 @@
            (namespace form)
            (.contains (name form) ".")))]
    (fn [nav] 
-     (let [form      (code.edit/value nav)
+     (let [form      (std.block.navigate/value nav)
            sym-ns    (namespace form)
            sym-name  (name form)
            sym-parts (std.string/split sym-name #"\.")]
-       (code.edit/replace
+       (std.block.navigate/replace
         nav
         (apply list '. (symbol sym-ns (first sym-parts))
                (map symbol (rest sym-parts))))))))
@@ -34,8 +34,8 @@
                 (not (str/starts-with? (str (last form))
                                        "-/")))))]
    (fn [nav] 
-     (let [form      (code.edit/value nav)]
-       (code.edit/replace
+     (let [form      (std.block.navigate/value nav)]
+       (std.block.navigate/replace
         nav
         (concat (butlast form)
                 [(symbol (subs (str (last form))
@@ -50,8 +50,8 @@
         (and (set? form)
              (:# form))))]
    (fn [nav] 
-     (let [val    (code.edit/value nav)]
-       (code.edit/replace
+     (let [val    (std.block.navigate/value nav)]
+       (std.block.navigate/replace
         nav
         (b/block {:# (first (filter vector? (disj val :#)))}))))))
 
@@ -76,8 +76,8 @@
            (or (= (namespace form) "imf")
                (= (namespace form) "snr"))))]
    (fn [nav] 
-     (let [form      (code.edit/value nav)]
-       (code.edit/replace
+     (let [form      (std.block.navigate/value nav)]
+       (std.block.navigate/replace
         nav
         (symbol "fg" (name form)))))))
 

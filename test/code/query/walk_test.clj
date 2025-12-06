@@ -2,7 +2,7 @@
   (:use code.test)
   (:require [code.query.walk :refer :all]
             [code.query.match :as match]
-            [code.edit :as nav]))
+            [std.block.navigate :as nav]))
 
 ^{:refer code.query.walk/wrap-meta :added "3.0"}
 (fact "allows matchwalk to handle meta tags"

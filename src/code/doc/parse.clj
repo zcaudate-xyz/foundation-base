@@ -2,7 +2,7 @@
   (:require [clojure.java.io :as io]
             [clojure.string :as str]
             [code.query :as query]
-            [code.edit :as nav]
+            [std.block.navigate :as nav]
             [code.doc.parse.check :as checks]
             [std.block :as block]))
 

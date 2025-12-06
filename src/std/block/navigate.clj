@@ -1,4 +1,4 @@
-(ns code.edit
+(ns std.block.navigate
   (:require [std.block.base :as base]
             [std.block.construct :as construct]
             [std.block.type :as type]

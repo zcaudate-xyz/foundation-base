@@ -1,7 +1,7 @@
 (ns code.framework-test
   (:use code.test)
   (:require [code.framework :refer :all]
-            [code.edit :as nav]
+            [std.block.navigate :as nav]
             [code.framework.common :as common]
             [code.framework.docstring :as docstring]
             [code.project :as project]))
@@ -23,9 +23,9 @@
 ^{:refer code.framework/analyse-source-function :added "3.0"}
 (fact "analyzes a single function definition within a source file, used as a helper for `analyse-source-code`"
 
-  (second (analyse-source-function 'foo (-> (code.edit/parse-string "(defn foo [] 1)")
-                                            (code.edit/down)
-                                            (code.edit/right))))
+  (second (analyse-source-function 'foo (-> (std.block.navigate/parse-string "(defn foo [] 1)")
+                                            (std.block.navigate/down)
+                                            (std.block.navigate/right))))
   => (contains {:var 'foo
                 :source (contains {:code "(defn foo [] 1)"})}))
 

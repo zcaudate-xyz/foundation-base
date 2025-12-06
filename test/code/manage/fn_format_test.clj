@@ -1,7 +1,7 @@
 (ns code.manage.fn-format-test
   (:use code.test)
   (:require [code.manage.fn-format :refer :all]
-            [code.edit :as nav]
+            [std.block.navigate :as nav]
             [std.lib.zip :as zip]))
 
 

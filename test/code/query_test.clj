@@ -1,7 +1,7 @@
 (ns code.query-test
   (:use code.test)
   (:require [code.query :refer :all]
-            [code.edit :as nav]))
+            [std.block.navigate :as nav]))
 
 ^{:refer code.query/match :added "3.0"}
 (fact "matches the source code"

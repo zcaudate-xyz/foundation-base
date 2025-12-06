@@ -2,7 +2,7 @@
   (:require [code.framework.common :as common]
             [code.query :as query]
             [std.block :as block]
-            [code.edit :as nav]))
+            [std.block.navigate :as nav]))
 
 (defn gather-is-form
   "Make docstring notation out of is form

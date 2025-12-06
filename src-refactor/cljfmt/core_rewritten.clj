@@ -1,7 +1,7 @@
 (ns cljfmt.core-rewritten
   (:require [clojure.string :as str]
             [std.block.construct :as construct]
-            [code.edit :as e]
+            [std.block.navigate :as e]
             [std.lib.zip :as zl]
             [std.block.base :as base]
             [clojure.java.io :as io]))
@@ -11,7 +11,7 @@
 
 ;; --- Stage 1.2: Adapted transform function ---
 (defn transform [form zf & args]
-  (let [initial-nav (e/navigator form) ; Convert Clojure form to code.edit navigator
+  (let [initial-nav (e/navigator form) ; Convert Clojure form to std.block.navigate navigator
         transformed-nav (apply zf initial-nav args)]
     (read-string (e/root-string transformed-nav))))
 
@@ -25,7 +25,7 @@
        (recur (f next-match-nav))
        current-nav))))
 
-;; --- Stage 1.3: Basic helper predicates for std.lib.zip/code.edit ---
+;; --- Stage 1.3: Basic helper predicates for std.lib.zip/std.block.navigate ---
 (defn- clojure-whitespace? [nav]
   (e/space? (e/block nav)))
 

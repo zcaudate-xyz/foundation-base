@@ -542,7 +542,7 @@
                 [narrow]
                 (fn [nav]
                   (-> nav
-                      (code.edit/swap update-fn)))))]}
+                      (std.block.navigate/swap update-fn)))))]}
     params)))
 
 (comment

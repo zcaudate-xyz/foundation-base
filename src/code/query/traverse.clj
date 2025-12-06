@@ -2,7 +2,7 @@
   (:require [code.query.common :as common]
             [code.query.match.optional :as optional]
             [code.query.match.pattern :as pattern]
-            [code.edit :as nav]
+            [std.block.navigate :as nav]
             [std.lib.zip :as zip]
             [std.lib :as h]))
 

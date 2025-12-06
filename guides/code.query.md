@@ -61,7 +61,7 @@ We need to match `defn` forms that *don't* have a string as the third element.
 
          ;; Transformation function: insert docstring before args
          (fn [zloc]
-           (code.edit/insert-left zloc "Added docstring")))
+           (std.block.navigate/insert-left zloc "Added docstring")))
 ;; => "(defn my-fn \"Added docstring\" [x] x)"
 ```
 
@@ -78,7 +78,7 @@ This often requires a multi-step approach or using `|` to position the cursor ex
          ;; Match `let` block, then find `x` inside the vector, position cursor (|) on it
          '[(let [| x _] & _)]
          (fn [zloc]
-           (code.edit/set-value zloc 'y)))
+           (std.block.navigate/set-value zloc 'y)))
 ;; => "(let [y 1] (+ x 1))"
 ;; Note: This only changed the binding name. A full refactor would need to traverse the body too.
 ```

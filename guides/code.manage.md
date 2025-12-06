@@ -99,7 +99,7 @@ You can use `refactor-code` with a custom edit function that operates on the zip
 
 ```clojure
 (require '[code.query :as query]
-         '[code.edit :as edit])
+         '[std.block.navigate :as edit])
 
 (manage/refactor-code ['my.project]
   {:edits [(fn [zloc]

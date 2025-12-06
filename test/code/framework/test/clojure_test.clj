@@ -2,7 +2,7 @@
   (:use code.test)
   (:require [code.framework.test.clojure :refer :all]
             [code.framework.docstring :as docstring]
-            [code.edit :as nav]))
+            [std.block.navigate :as nav]))
 
 ^{:refer code.framework.test.clojure/gather-is-form :added "3.0"}
 (fact "Make docstring notation out of is form"

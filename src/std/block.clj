@@ -1,7 +1,6 @@
 (ns std.block
   (:require [std.block.base :as base]
             [std.block.construct :as construct]
-            [std.block.grid :as grid]
             [std.block.parse :as parse]
             [std.block.type :as type]
             [std.block.heal :as heal]

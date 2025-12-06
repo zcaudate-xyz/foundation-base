@@ -2,7 +2,7 @@
   (:require [code.framework :as base]
             [code.query :as query]
             [std.block :as block]
-            [code.edit :as nav]
+            [std.block.navigate :as nav]
             [std.lib.zip :as zip]
             [std.lib :as h]
             [std.string :as str]))

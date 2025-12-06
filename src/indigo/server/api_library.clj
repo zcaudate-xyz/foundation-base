@@ -5,4 +5,4 @@
             [std.lang :as l]
             [std.html :as html]
             [std.string :as str]
-            [code.edit :as edit]))
+            [std.block.navigate :as edit]))

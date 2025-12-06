@@ -1,6 +1,6 @@
 (ns code.query.match
   (:require [code.query.match.pattern :as pattern]
-            [code.edit :as nav]
+            [std.block.navigate :as nav]
             [std.block.base :as base]
             [std.lib.zip :as zip]
             [std.lib :as h]))

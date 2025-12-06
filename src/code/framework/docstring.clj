@@ -1,6 +1,6 @@
 (ns code.framework.docstring
   (:require [std.string :as str]
-            [code.edit :as nav]
+            [std.block.navigate :as nav]
             [std.block :as block]
             [std.lib.zip :as zip]))
 

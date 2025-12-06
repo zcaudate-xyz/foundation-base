@@ -2,7 +2,7 @@
   (:use code.test)
   (:require [code.framework.docstring :refer :all]
             [std.block :as block]
-            [code.edit :as nav]
+            [std.block.navigate :as nav]
             [std.lib.zip :as zip]))
 
 ^{:refer code.framework.docstring/strip-quotes :added "3.0"}

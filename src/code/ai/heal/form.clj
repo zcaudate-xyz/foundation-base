@@ -1,6 +1,6 @@
 (ns code.ai.heal.form
   (:require [code.manage :as manage]
-            [code.edit :as edit]
+            [std.block.navigate :as edit]
             [code.query :as query]
             [std.block.heal.core :as heal]
             [code.ai.heal.form-edits :as form-edits]

@@ -1,7 +1,7 @@
 (ns refactor.id-001-2025-12-05
   (:require [std.lib :as h]
             [std.block :as b]
-            [code.edit :as e]
+            [std.block.navigate :as e]
             [code.manage :as manage]
             [code.query :as q]))
 

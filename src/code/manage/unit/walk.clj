@@ -3,7 +3,7 @@
             [code.framework :as base]
             [code.query :as query]
             [std.block :as block]
-            [code.edit :as nav]))
+            [std.block.navigate :as nav]))
 
 (defn walk-string
   "helper function for file manipulation for string output"

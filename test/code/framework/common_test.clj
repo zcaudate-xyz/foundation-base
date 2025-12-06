@@ -3,7 +3,7 @@
   (:require [code.framework.common :refer :all]
             [code.framework.test.clojure]
             [code.framework.test.fact]
-            [code.edit :as nav]
+            [std.block.navigate :as nav]
             [code.query :as query]
             [std.block :as block]))
 

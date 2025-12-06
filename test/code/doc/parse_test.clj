@@ -1,7 +1,7 @@
 (ns code.doc.parse-test
   (:use code.test)
   (:require [code.doc.parse :refer :all]
-            [code.edit :as nav]
+            [std.block.navigate :as nav]
             [clojure.java.io :as io]
             [markdown.core :as md]))
 

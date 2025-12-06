@@ -1,5 +1,5 @@
 (ns code.tool.refactor.base.format
-  (:require [code.edit :as nav]
+  (:require [std.block.navigate :as nav]
             [code.query.walk :as walk]
             [std.lib.zip :as zip]
             [std.block.base :as base]

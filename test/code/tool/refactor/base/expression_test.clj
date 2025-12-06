@@ -1,6 +1,6 @@
 (ns code.tool.refactor.base.expression-test
   (:require [code.tool.refactor.base.expression :refer :all]
-            [code.edit :as nav]
+            [std.block.navigate :as nav]
             [code.test :refer :all]))
 
 ^{:refer code.tool.refactor.base.expression/rewrite-if-not :added "3.0"}

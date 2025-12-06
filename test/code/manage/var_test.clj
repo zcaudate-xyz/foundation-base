@@ -1,7 +1,7 @@
 (ns code.manage.var-test
   (:use code.test)
   (:require [code.manage.var :refer :all]
-            [code.edit :as nav]
+            [std.block.navigate :as nav]
             [code.framework :as base]))
 
 ^{:refer code.manage.var/create-candidates :added "3.0"}

@@ -1,6 +1,6 @@
 (ns refactor.id-001-2025-12-05
   (:require [std.lib :as h]
-            [code.edit :as e]))
+            [std.block.navigate :as e]))
 
 (comment
 
@@ -16,7 +16,7 @@
                    [(fn [form]
                       (= form '(def.js MODULE (!:module))))]
                    (fn [nav]
-                     (code.edit/delete nav))))]})
+                     (std.block.navigate/delete nav))))]})
       
       
       (code.manage/refactor-code
@@ -29,7 +29,7 @@
                    [(fn [form]
                       (= form '(def.xt MODULE (!:module))))]
                    (fn [nav]
-                     (code.edit/delete nav))))]})
+                     (std.block.navigate/delete nav))))]})
       
       (code.manage/refactor-code
        '[lua]
@@ -41,7 +41,7 @@
                    [(fn [form]
                       (= form '(def.lua MODULE (!:module))))]
                    (fn [nav]
-                     (code.edit/delete nav))))]}))
+                     (std.block.navigate/delete nav))))]}))
 
 
   ;; Get rid of the :export [MODULE] entry
@@ -56,9 +56,9 @@
                   (= form '[MODULE]))]
                (fn [nav]
                  (-> nav
-                     (code.edit/delete)
-                     (code.edit/delete-left)
-                     (code.edit/delete-spaces-left)))))]})
+                     (std.block.navigate/delete)
+                     (std.block.navigate/delete-left)
+                     (std.block.navigate/delete-spaces-left)))))]})
 
   ;; Get rid of the :macro-only true entry
   (code.manage/refactor-code
@@ -74,9 +74,9 @@
                   (= :macro-only form))]
                (fn [nav]
                  (-> nav
-                     (code.edit/delete)
-                     (code.edit/delete)
-                     (code.edit/delete-spaces-right)))))]})
+                     (std.block.navigate/delete)
+                     (std.block.navigate/delete)
+                     (std.block.navigate/delete-spaces-right)))))]})
   
   ;; Rewrite the bundle tag
   (code.manage/refactor-code
@@ -90,12 +90,12 @@
                   (and (map? form)
                        (map? (:bundle form))))]
                (fn [nav]
-                 (let [form (code.edit/value nav)
+                 (let [form (std.block.navigate/value nav)
                        {:keys [bundle
                                import]} form
                        bimports (mapcat identity (vals bundle))]
                    (-> nav
-                       (code.edit/replace
+                       (std.block.navigate/replace
                         (std.block/layout
                          (-> form
                              (dissoc :bundle)
@@ -121,13 +121,13 @@
                        (map? (:bundle form))))]
                
                (fn [nav]
-                 (let [form (code.edit/value nav)
+                 (let [form (std.block.navigate/value nav)
                        {:keys [bundle
                                require
                                import]} form
                        bimports (mapcat identity (vals bundle))]
                    (-> nav
-                       (code.edit/replace
+                       (std.block.navigate/replace
                         (std.block/layout
                          (cond-> form
                            :then (dissoc :bundle)
@@ -170,12 +170,12 @@
                          (:require form)))]
                (fn [nav]
                  (let [cnav    (h/suppress (-> nav
-                                               (code.edit/find-next-token :require)
-                                               (code.edit/right)))
-                       require (if cnav (code.edit/value cnav))]
+                                               (std.block.navigate/find-next-token :require)
+                                               (std.block.navigate/right)))
+                       require (if cnav (std.block.navigate/value cnav))]
                    (if (not require)
                      nav
-                     (code.edit/replace
+                     (std.block.navigate/replace
                       cnav
                       (std.block/layout
                        (with-meta

@@ -1,7 +1,7 @@
 (ns code.tool.refactor.tamagui-test
   (:require [code.tool.refactor.tamagui :as sut]
             [code.test :refer :all]
-            [code.edit :as edit]
+            [std.block.navigate :as edit]
             [code.query :as query]
             [std.lib.zip :as zip]
             [std.block.base :as base]))

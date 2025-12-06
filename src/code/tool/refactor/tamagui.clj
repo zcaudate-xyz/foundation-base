@@ -1,5 +1,5 @@
 (ns code.tool.refactor.tamagui
-  (:require [code.edit :as edit]
+  (:require [std.block.navigate :as edit]
             [code.query :as query]
             [std.lib :as h]
             [std.string :as str]))

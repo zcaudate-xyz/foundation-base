@@ -1,5 +1,5 @@
 (ns code.framework.generate
-  (:require [code.edit :as nav]
+  (:require [std.block.navigate :as nav]
             [std.block :as b]
             [clojure.set :as set]
             [std.lib :as h]))

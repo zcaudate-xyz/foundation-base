@@ -1,7 +1,7 @@
 (ns code.ai.heal.form-edits-test
   (:use code.test)
   (:require [code.ai.heal.form-edits :refer :all]
-            [code.edit :as nav]))
+            [std.block.navigate :as nav]))
 
 ^{:refer code.ai.heal.form-edits/fix:namespaced-symbol-no-dot :added "4.1"}
 (fact "fixes namespaced symbols without dot"
