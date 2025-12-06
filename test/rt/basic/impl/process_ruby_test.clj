@@ -32,3 +32,10 @@
     (return (+ 1 2 3)))
   
   (default-basic-client 1000 {:host "localhost"}))
+
+
+^{:refer rt.basic.impl.process-ruby/return-wrap-invoke :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.basic.impl.process-ruby/default-body-transform :added "4.1"}
+(fact "TODO")

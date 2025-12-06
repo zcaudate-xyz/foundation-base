@@ -13,3 +13,6 @@
 
 ^{:refer indigo.server.pages/demo-page :added "4.0"}
 (fact "TODO")
+
+^{:refer indigo.server.pages/emit-main :added "4.1"}
+(fact "TODO")

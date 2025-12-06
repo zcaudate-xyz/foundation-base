@@ -5,7 +5,7 @@
             [code.test.checker.common :as checker]
             [code.test.base.runtime :as rt]
             [code.test.base.context :as context]
-            [code.test.diff :as diff]
+            [code.test.checker.diff :as diff]
             [std.lib.walk :as walk]
             [std.lib.result :as res]
             [std.lib.time :as t]

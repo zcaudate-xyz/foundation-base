@@ -1,9 +1,8 @@
 (ns code.tool.measure
   (:require [std.lib :as h]
             [code.tool.measure.common :as common]
-            [code.tool.measure.js :as js]
-            [code.tool.measure.clj :as clj]
-            [indigo.build.build-ast :as build-ast]))
+            [code.tool.measure.algo-js :as js]
+            [code.tool.measure.algo-clojure :as clj]))
 
 (defn generate-score
   "Legacy wrapper for generate-metrics (JS), returns complexity score."
@@ -63,7 +62,6 @@
   ([repo-path]
    (measure-history repo-path {}))
   ([repo-path {:keys [limit sample-rate] :or {limit 50 sample-rate 1}}]
-   (build-ast/initialise) ;; Run npm install once
    (let [commits (->> (common/list-commits repo-path)
                       (take limit)
                       (reverse) ;; Start from oldest

@@ -1,6 +1,6 @@
-(ns code.test.diff-test
+(ns code.test.checker.diff-test
   (:use code.test)
-  (:require [code.test.diff :refer :all]
+  (:require [code.test.checker.diff :refer :all]
             [code.test.checker.common :as common]
             [code.test.checker.collection :as coll]))
 
@@ -45,14 +45,14 @@
   => [[:- 19 1] [:+ 19 [99]]])
 
 
-^{:refer code.test.diff/checker-equal? :added "4.0"}
+^{:refer code.test.checker.diff/checker-equal? :added "4.0"}
 (fact "TODO")
 
-^{:refer code.test.diff/diff-map :added "4.0"}
+^{:refer code.test.checker.diff/diff-map :added "4.0"}
 (fact "TODO")
 
-^{:refer code.test.diff/diff-seq :added "4.0"}
+^{:refer code.test.checker.diff/diff-seq :added "4.0"}
 (fact "TODO")
 
-^{:refer code.test.diff/diff :added "4.0"}
+^{:refer code.test.checker.diff/diff :added "4.0"}
 (fact "TODO")

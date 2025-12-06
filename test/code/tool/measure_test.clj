@@ -2,7 +2,7 @@
   (:use code.test)
   (:require [code.tool.measure :as measure]
             [code.tool.measure.clj :as clj]
-            [indigo.build.build-ast :as build-ast]
+            [code.tool.translate.js-ast :as build-ast]
             [std.lib :as h]))
 
 (fact "should score code structure invariantly (JS)"

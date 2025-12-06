@@ -129,3 +129,13 @@
   
   (tf-sizeof '(sizeof x))
   => '(:- "sizeof" x))
+
+
+^{:refer std.lang.model.spec-c/to-c-type :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-c/c-sanitize :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-c/emit-defn :added "4.1"}
+(fact "TODO")

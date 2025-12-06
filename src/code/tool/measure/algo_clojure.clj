@@ -1,4 +1,4 @@
-(ns code.tool.measure.clj
+(ns code.tool.measure.algo-clojure
   (:require [std.lib :as h]
             [std.fs :as fs]
             [code.tool.measure.common :as common])

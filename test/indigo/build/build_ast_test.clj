@@ -1,5 +1,5 @@
-(ns indigo.build.build-ast-test
-  (:require [indigo.build.build-ast :as build-ast]
+(ns code.tool.translate.js-ast-test
+  (:require [code.tool.translate.js-ast :as build-ast]
             [std.lib :as h]
             [std.fs :as fs]
             [std.json :as json]
@@ -39,8 +39,8 @@
     (fs/delete +json-file+)))
 
 
-^{:refer indigo.build.build-ast/initialise :added "4.0"}
+^{:refer code.tool.translate.js-ast/initialise :added "4.0"}
 (fact "TODO")
 
-^{:refer indigo.build.build-ast/generate-ast :added "4.0"}
+^{:refer code.tool.translate.js-ast/generate-ast :added "4.0"}
 (fact "TODO")

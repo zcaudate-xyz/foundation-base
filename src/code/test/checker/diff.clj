@@ -1,4 +1,4 @@
-(ns code.test.diff
+(ns code.test.checker.diff
   (:require [std.lib.collection :as coll]
             [std.lib.diff.seq :as seq]
             [code.test.checker.common :as common]))

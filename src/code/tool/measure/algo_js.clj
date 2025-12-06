@@ -1,8 +1,8 @@
-(ns code.tool.measure.js
+(ns code.tool.measure.algo-js
   (:require [std.lib :as h]
             [std.fs :as fs]
             [std.json :as json]
-            [indigo.build.build-ast :as build-ast]
+            [code.tool.translate.js-ast :as js-ast]
             [code.tool.measure.common :as common]))
 
 ;; JS Specific Configuration
@@ -76,7 +76,7 @@
         tmp-out (fs/create-tmpfile)]
     (try
       ;; Ensure environment is ready (idempotent-ish)
-      (build-ast/generate-ast (str tmp-in) (str tmp-out))
+      (js-ast/translate-ast (str tmp-in) (str tmp-out))
       (let [ast (json/read tmp-out)
             complexity (score-ast ast *js-config*)
             base (count-nodes ast *js-config*)

@@ -4,6 +4,9 @@
             [std.lang :as l]
             [std.fs :as fs]))
 
+(def +root-dir+
+  ".build/code.tool.js-ast")
+
 (def INDEXJS
   (l/emit-as
    :js
@@ -28,21 +31,20 @@
              (. fs (writeFileSync outputFile (JSON.stringify ast nil 2)))
              (console.log (JSON.stringify ast nil 2))))
          (catch error
-           (do
-             (console.error (+ "Error parsing file: " (. error message)))
-             (process.exit 1)))))
-
+             (do
+               (console.error (+ "Error parsing file: " (. error message)))
+               (process.exit 1)))))
      (main)]))
 
-(def.make BUILD_AST
-  {:tag       "indigo.build-ast"
-   :build     ".build/code-dev-build-ast"
+(def.make JS_AST
+  {:tag       "code.tool.js-ast"
+   :build     +root-dir+
    :hooks    {}
    :default  [{:type   :package.json
-               :main   {"name" "indigo.build-ast",
-                        "version" "1.0.0",
-                        "description" "Utility to parse TypeScript files to AST",
-                        "main" "index.js",
+               :main   {"name" "code.tool.js-ast"
+                        "version" "1.0.0"
+                        "description" "translate js files to ast"
+                        "main" "index.js"
                         "dependencies" {"@babel/parser" "^7.24.0"}}}
               {:type :raw
                :file "index.js"
@@ -50,15 +52,15 @@
 
 (defn initialise
   []
-  (h/p (h/sh {:root ".build/code-dev-build-ast"
+  (h/p (h/sh {:root +root-dir+
               :args ["npm" "install"]})))
 
-(defn generate-ast
+(defn translate-ast
   ([input-file]
-   (generate-ast input-file nil))
+   (translate-ast input-file nil))
   ([input-file output-file]
-   (make/build-all BUILD_AST) ;; Ensure build is ready
+   (make/build-all JS_AST) ;; Ensure build is ready
    (let [args (cond-> ["node" "index.js" input-file]
                 output-file (conj output-file))]
-     (h/sh {:root ".build/code-dev-build-ast"
+     (h/sh {:root +root-dir+
             :args args}))))

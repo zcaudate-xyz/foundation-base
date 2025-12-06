@@ -3,7 +3,6 @@
             [mcp-clj.tools.clj-eval :as clj-eval]
             [code.ai.server.tool.basic :as basic]
             [code.ai.server.tool.std-lang :as std-lang]
-            [code.ai.server.tool.code-test :as code-test]
             [code.ai.server.tool.code-doc :as code-doc]
             [code.ai.server.tool.code-manage :as code-manage]
             [std.lib :as h]
@@ -29,7 +28,6 @@
             "std-lang-modules" std-lang/list-modules-tool
 
             "clj-eval" clj-eval/clj-eval-tool
-            "code-test" code-test/run-tests-tool
             "code-doc-init" code-doc/init-template-tool
             "code-doc-deploy" code-doc/deploy-template-tool
             "code-doc-publish" code-doc/publish-tool

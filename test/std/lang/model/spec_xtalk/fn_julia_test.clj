@@ -319,3 +319,13 @@
 (fact "transforms x:json-decode"
   (fn/julia-tf-x-json-decode '(x:json-decode s))
   => '(. JSON (parse s)))
+
+
+^{:refer std.lang.model.spec-xtalk.fn-julia/julia-tf-x-return-encode :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-julia/julia-tf-x-return-wrap :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-julia/julia-tf-x-return-eval :added "4.1"}
+(fact "TODO")
