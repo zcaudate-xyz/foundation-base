@@ -2,8 +2,8 @@ import * as ReactDnd from 'react-dnd'
 import * as Lucide from 'lucide-react'
 import * as FigmaUi from '@xtalk/figma-ui'
 import React from 'react'
-import { scanNamespaces } from '../../api'
-import { fuzzyMatch } from '../utils/search'
+import { scanNamespaces } from '../../../api'
+import { fuzzyMatch } from '../../utils/search'
 
 export function buildLibraryTree(libraryData) {
   // libraryData is [{ language: "js", namespaces: [...] }, ...]

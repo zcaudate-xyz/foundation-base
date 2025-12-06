@@ -1,7 +1,7 @@
 import React from 'react'
 import * as FigmaUi from '@xtalk/figma-ui'
 import * as Lucide from 'lucide-react'
-import { fetchVarTests } from '../../api'
+import { fetchVarTests } from '../../../api'
 
 export function VarsPanel({ component }) {
     const [tests, setTests] = React.useState([]);

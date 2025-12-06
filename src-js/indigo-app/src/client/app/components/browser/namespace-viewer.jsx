@@ -1,8 +1,8 @@
 import React from 'react'
 import Editor from '@monaco-editor/react'
-import { fetchNamespaceSource, saveNamespaceSource, fetchCompletions } from '../../api'
-import { slurpForward, barfForward, getSexpBeforeCursor } from '../utils/paredit'
-import { send } from '../../repl-client'
+import { fetchNamespaceSource, saveNamespaceSource, fetchCompletions } from '../../../api'
+import { slurpForward, barfForward, getSexpBeforeCursor } from '../../utils/paredit'
+import { send } from '../../../repl-client'
 
 export function NamespaceViewer({ namespace, selectedVar }) {
     const [source, setSource] = React.useState("");

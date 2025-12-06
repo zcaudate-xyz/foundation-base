@@ -1,6 +1,6 @@
 import React from 'react'
 import * as FigmaUi from '@xtalk/figma-ui'
-import { MousePointer2, Hand, Plus, Minus } from './icons'
+import { MousePointer2, Hand, Plus, Minus } from '../common/icons'
 
 export function EditingToolbar({ onToolChange, currentTool = 'select' }) {
     return (
