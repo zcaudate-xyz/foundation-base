@@ -2,6 +2,7 @@
   (:require [code.test.manage :refer :all]
             [code.test :refer [fact contains]]
             [code.test.base.runtime :as rt]
+            [code.test.base.context :as ctx]
             [code.project :as project]
             [code.test.base.executive :as executive]))
 
@@ -9,7 +10,7 @@
 (fact "sets and gets the global map"
   ^:hidden
   
-  (rt/with-new-context {}
+  (ctx/with-new-context {}
     (fact:global-map *ns* {:a 1})
     (rt/get-global *ns*))
   => (contains {:a 1}))
@@ -18,7 +19,7 @@
 (fact "global getter and setter"
   ^:hidden
   
-  (rt/with-new-context {}
+  (ctx/with-new-context {}
     (fact:global-fn :set {:a 1})
     (fact:global-fn :get))
   => {:a 1})
@@ -27,7 +28,7 @@
 (fact "fact global getter and setter"
   ^:hidden
   
-  (rt/with-new-context {}
+  (ctx/with-new-context {}
     (fact:global :set {:a 1})
     (fact:global :get))
   => {:a 1})

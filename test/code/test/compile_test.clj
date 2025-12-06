@@ -2,6 +2,7 @@
   (:require [code.test.compile :as compile :refer :all :exclude [=> *last*]]
             [code.test.base.process :as process]
             [code.test.base.runtime :as rt]
+            [code.test.base.context :as ctx]
             [std.lib :as h]
             [code.test :refer [contains-in contains]]))
 
@@ -60,20 +61,20 @@
 
 ^{:refer code.test.compile/create-fact :added "3.0"}
 (fact "creates a fact given meta and body"
-  (rt/with-new-context {}
+  (ctx/with-new-context {}
     (create-fact {:ns 'my.ns :id 'test-fact} '[(+ 1 1) => 2]))
   => map?)
 
 ^{:refer code.test.compile/install-fact :added "3.0"}
 (fact "installs the current fact"
-  (rt/with-new-context {}
+  (ctx/with-new-context {}
     (install-fact {:ns 'my.ns :id 'test-fact} '[(+ 1 1) => 2])
     (rt/get-fact 'my.ns 'test-fact))
   => map?)
 
 ^{:refer code.test.compile/fact:compile :added "3.0"}
 (fact "recompiles fact with a different global"
-  (rt/with-new-context {}
+  (ctx/with-new-context {}
     (let [fact (install-fact {:ns 'my.ns :id 'test-fact} '[(+ 1 1) => 2])]
       (fact:compile fact {:a 1})))
   => map?)
@@ -94,7 +95,7 @@
 ^{:refer code.test.compile/fact:purge :added "3.0"
   :style/indent 1}
 (fact "purges all facts in namespace"
-  (rt/with-new-context {:registry (atom {'my.ns {:facts {:a 1}}})}
+  (ctx/with-new-context {:registry (atom {'my.ns {:facts {:a 1}}})}
     (binding [*ns* (create-ns 'my.ns)]
       (fact:purge)
       (rt/all-facts 'my.ns)))
@@ -103,7 +104,9 @@
 ^{:refer code.test.compile/fact:list :added "3.0"
   :style/indent 1}
 (fact "lists all facts in namespace"
-  (rt/with-new-context {:registry (atom {'my.ns {:facts {'a {:id 'a :line 1}}}})}
+  ^:hidden
+  
+  (ctx/with-new-context {:registry (atom {'my.ns {:facts {'a {:id 'a :line 1}}}})}
     (binding [*ns* (create-ns 'my.ns)]
       (fact:list)))
   => '(a))

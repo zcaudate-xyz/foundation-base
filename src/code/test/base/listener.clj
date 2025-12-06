@@ -52,12 +52,14 @@
    (let [summary (summarise-evaluate result)]
      (cond (-> result :status (= :exception))
            (when (context/*print* :print-throw)
-             (h/beep)
+             (when (not (context/*print* :no-beep))
+               (h/beep))
              (print/print-throw summary))
 
            (-> result :status (= :timeout))
            (when (context/*print* :print-timeout)
-             (h/beep)
+             (when (not (context/*print* :no-beep))
+               (h/beep))
              (print/print-timeout summary))))))
 
 (defn check-printer
@@ -67,13 +69,15 @@
    (let [summary (summarise-verify result)]
      (cond (= :timeout (-> result :actual :status))
            (when (context/*print* :print-timeout)
-             (h/beep)
+             (when (not (context/*print* :no-beep))
+               (h/beep))
              (print/print-timeout summary))
            
            (or (and (-> result :status (= :exception)))
                (and (-> result :data (= false))))
            (when (context/*print* :print-failed)
-             (h/beep)
+             (when (not (context/*print* :no-beep))
+               (h/beep))
              (print/print-failed (summarise-verify result)))
 
            (and (-> result :data (= true))

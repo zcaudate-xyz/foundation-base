@@ -13,19 +13,16 @@
 
 (fact:global
  {:setup [(bench/start-redis-array [17001])]
-  :component
-  {|client|   {:create   (r/client:create {:port 17001})
-               :setup    h/start
-               :teardown h/stop}}
   :teardown [(bench/stop-redis-array [17001])]})
 
-^{:refer std.lang.base.runtime-h/wrap-start :adopt true :added "3.0"
-  :use [|client|]}
-(fact "install setup steps for keys" ^:hidden
+^{:refer std.lang.base.runtime-h/wrap-start :adopt true :added "3.0"}
+(fact "install setup steps for keys"
+  ^:hidden
 
-  (-> ((h/wrap-start identity [{:key :events  :start event/start:events-redis}])
-       (assoc |client| :reset true :events event/+default+))
-      ((comp event/events-string event/config:get)))
+  (h/with:component [|client| (r/client:create {:port 17001})]
+    (-> ((h/wrap-start identity [{:key :events  :start event/start:events-redis}])
+         (assoc |client| :reset true :events event/+default+))
+        ((comp event/events-string event/config:get))))
   => "h$tlgx")
 
 ^{:refer rt.redis.client/client-steps :added "3.0"}
@@ -36,44 +33,51 @@
 
 ^{:refer rt.redis.client/client:create :added "3.0"}
 (fact "creates a redis client"
-
+  ^:hidden
+  
   (r/client:create {:id "localhost"
                     :port 17001})
   => r/client?)
 
-^{:refer rt.redis.client/client :added "3.0"
-  :use [|client|]}
-(fact "creates and starts a redis client" ^:hidden
-  (cc/pool:with-resource [conn (:pool |client|)]
+^{:refer rt.redis.client/client :added "3.0"}
+(fact "creates and starts a redis client"
+  ^:hidden
 
-                         (->> (conn/connection:request-bulk conn [["SET" "A" "0"]
-                                                                  ["INCR" "A"]
-                                                                  ["INCR" "A"]
-                                                                  ["INCR" "A"]])
-                              (map h/string)))
+  (h/with:component [|client| (r/client:create {:port 17001})]
+    (cc/pool:with-resource [conn (:pool |client|)]
+      (->> (conn/connection:request-bulk conn [["SET" "A" "0"]
+                                               ["INCR" "A"]
+                                               ["INCR" "A"]
+                                               ["INCR" "A"]])
+           (map h/string))))
   => ["OK" "1" "2" "3"])
 
 ^{:refer rt.redis.client/test:client :added "3.0"}
 (fact "creates a test client on docker"
-  (with-redefs [conn/test:config (fn [] {:port 17001})]
-    (r/test:client))
+  ^:hidden
+  
+  (h/with:component [|client| (r/client:create {:port 17001})]
+    (with-redefs [conn/test:config (fn [] {:port 17001})]
+      (r/test:client)))
   => r/client?)
 
 ^{:refer rt.redis.client/invoke-ptr-redis :added "4.0"}
-(fact "invokes the pointer in the redis context"
-  (with-redefs [eval-basic/redis-invoke-ptr-basic (fn [_ _ _] :basic)
-                eval-script/redis-invoke-sha (fn [_ _ _ _] :script)]
-    (r/invoke-ptr-redis {:mode :eval} nil nil)
-    => :basic
-    (r/invoke-ptr-redis {:mode :prod} nil nil)
-    => :script))
+(fact "invokes the pointer in the redis context")
 
 ^{:refer rt.redis.client/client? :added "3.0"}
 (fact "checks that instance is a client"
+  
   (r/client? (r/client:create {}))
   => true)
 
 (comment
 
+  (h/with:component [|client| (r/client:create {:port 17001})]
+    (with-redefs [eval-basic/redis-invoke-ptr-basic (fn [_ _ _] :basic)
+                  eval-script/redis-invoke-sha (fn [_ _ _ _] :script)]
+      (r/invoke-ptr-redis {:mode :eval} nil nil)
+      => :basic
+      (r/invoke-ptr-redis {:mode :prod} nil nil)
+      => :script))
   (./import)
   (h/tracked:all [:redis]))

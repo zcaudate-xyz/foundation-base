@@ -4,6 +4,7 @@
             [std.lib :as h]
             [std.string :as str]
             [code.test.base.runtime :as rt]
+            [code.test.base.context :as ctx]
             [code.test.base.print :as print]))
 
 ^{:refer code.test.base.listener/summarise-verify :added "3.0"}
@@ -45,17 +46,18 @@
 ^{:refer code.test.base.listener/form-printer :added "3.0"}
 (fact "prints out result for each form"
   ^:hidden
-  
-  (str/includes? (h/with-out-str
-                   (form-printer {:result {:status :exception :data (ex-info "error" {})}}))
-                 "THROW")
+
+  (binding [ctx/*print* #{:print-throw :no-beep}]
+    (str/includes? (h/with-out-str
+                     (form-printer {:result {:status :exception :data (ex-info "error" {})}}))
+                   "THROW"))
   => true)
 
 ^{:refer code.test.base.listener/check-printer :added "3.0"}
 (fact "prints out result per check"
   ^:hidden
   
-  (binding [print/*options* #{:print-success}]
+  (binding [ctx/*print* #{:print-success}]
     (str/includes? (h/with-out-str
                      (check-printer {:result {:status :success :data true :meta {:path "path" :refer "refer" :ns "ns" :line 1 :desc "desc"} :checker {:form "check"} :actual {:form "actual"}}}))
                    "SUCCESS"))
@@ -66,7 +68,7 @@
   ^:hidden
   
   (let [errors (atom {})]
-    (binding [rt/*errors* errors]
+    (binding [ctx/*errors* errors]
       (form-error-accumulator {:result {:status :exception :data (ex-info "error" {})}})
       (first (:exception @errors))))
   => (contains {:status :exception}))
@@ -76,7 +78,7 @@
   ^:hidden
   
   (let [errors (atom {})]
-    (binding [rt/*errors* errors]
+    (binding [ctx/*errors* errors]
       (check-error-accumulator {:result {:status :failure :data false}})
       (first (:failed @errors))))
   => (contains {:status :failure}))
@@ -85,7 +87,7 @@
 (fact "prints out results after every fact"
   ^:hidden
   
-  (binding [print/*options* #{:print-facts}]
+  (binding [ctx/*print* #{:print-facts}]
     (str/includes?
      (h/with-out-str
        (fact-printer {:meta {:path "path" :refer "refer" :ns "ns" :line 1 :desc "desc"} :results []}))
@@ -97,7 +99,7 @@
   ^:hidden
   
   (let [acc (atom nil)]
-    (binding [rt/*accumulator* acc]
+    (binding [ctx/*accumulator* acc]
       (fact-accumulator {:id :id :meta :meta :results :results})
       @acc))
   => {:id :id :meta :meta :results :results})

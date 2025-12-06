@@ -12,7 +12,7 @@
 ^{:refer code.framework.link/file-linkage :added "3.0"}
 (fact "returns the exports and imports of a given file"
 
-  (file-linkage "src/code/link/common.clj")
+  (file-linkage "src/code/framework/link/common.clj")
   => '{:exports #{[:class code.framework.link.common.FileInfo]
                   [:clj code.framework.link.common]},
        :imports #{[:clj std.fs]

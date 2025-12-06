@@ -2,6 +2,7 @@
   (:use code.test)
   (:require [code.test.base.process :refer :all]
             [code.test.base.runtime :as rt]
+            [code.test.base.context :as ctx]
             [code.test.checker.common :as base]
             [code.test.compile :as compile]
             [std.lib :as h]))
@@ -61,7 +62,7 @@
 ^{:refer code.test.base.process/run-check :added "3.0"}
 (fact "runs a single check form"
 
-  (binding [rt/*eval-mode* false]
+  (binding [ctx/*eval-mode* false]
     (run-check {:unit #{:foo}} []))
   => :skipped
 
