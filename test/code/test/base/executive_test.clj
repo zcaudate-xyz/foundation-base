@@ -5,16 +5,17 @@
             [code.project :as project]
             [std.string :as str]
             [std.lib :as h]
-            [code.test.base.runtime :as rt]))
+            [code.test.base.runtime :as rt]
+            [code.test.base.context :as context]))
 
 (defn notify [data]
-  (reset! rt/*accumulator* data))
+  (reset! context/*accumulator* data))
                      
 ^{:refer code.test.base.executive/accumulate :added "3.0"}
 (fact "accumulates test results from various facts and files into a single data structure"
   ^:hidden
   
-  (let [result (rt/with-new-context {:accumulator (atom nil)}
+  (let [result (context/with-new-context {:accumulator (atom nil)}
                  (executive/accumulate (fn []
                                          (notify {:id :my-test :data 1})
                                          (notify {:id :my-test :data 2}))
@@ -41,7 +42,7 @@
 (fact "creates a summary of given results"
   ^:hidden
   
-  (binding [print/*options* #{:print-bulk}]
+  (binding [context/*print* #{:print-bulk}]
     (str/includes? (h/with-out-str
                      (executive/summarise {:passed [] :failed [] :throw [] :timeout []}))
                    "Summary"))
@@ -51,11 +52,25 @@
 (fact "creates a summary of all bulk results"
   ^:hidden
   
-  (binding [print/*options* #{:print-bulk}]
+  (binding [context/*print* #{:print-bulk}]
     (str/includes? (h/with-out-str
                      (executive/summarise-bulk nil {:id {:data {:passed [] :failed [] :throw [] :timeout []}}} nil))
                    "Summary"))
   => true)
+
+^{:refer code.test.base.executive/save-report :added "4.1"}
+(fact "saves the report to .hara/runs"
+  (with-redefs [std.fs/create-directory (fn [_] :created)
+                clojure.core/spit (fn [_ _] :spit)
+                clojure.core/println (fn [_] :printed)]
+    (executive/save-report {:failed [{:from :verify :data 1}]}))
+  => :printed
+
+  (with-redefs [std.fs/create-directory (fn [_] :created)
+                clojure.core/spit (fn [_ _] :spit)
+                clojure.core/println (fn [_] :printed)]
+    (executive/save-report {:passed []}))
+  => nil)
 
 ^{:refer code.test.base.executive/unload-namespace :added "3.0"}
 (fact "unloads a given namespace for testing"
@@ -136,7 +151,3 @@
                                                                  }})))
           nil))
   (project/in-context (run 'platform.storage)))
-
-
-^{:refer code.test.base.executive/save-report :added "4.1"}
-(fact "TODO")
