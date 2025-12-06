@@ -1,5 +1,6 @@
 (ns std.pipe
-  (:require [std.lib :as h]
+  (:require [std.protocol.invoke :as protocol.invoke]
+            [std.lib :as h]
             [std.lib.stream :as s]
             [std.lib.stream.iter :as i]
             [std.lib.stream.async :as s.async]
@@ -11,6 +12,43 @@
             [std.pipe.monitor :as monitor]))
 
 (declare pipe)
+
+(defmulti pipe-defaults
+  "creates default settings for pipe task groups"
+  {:added "4.0"}
+  identity)
+
+(defmethod pipe-defaults :default
+  ([_]
+   {:main {:arglists '([] [entry])}}))
+
+(h/definvoke invoke-intern-pipe
+  "creates a pipe task"
+  {:added "4.0"}
+  [:method {:multi protocol.invoke/-invoke-intern
+            :val :pipe}]
+  ([_ name config body]
+   (let [template (:template config)
+         ;; Try to get arglists from defaults if possible, but handle failure safely
+         defaults (try (pipe-defaults template) (catch Throwable _ {}))
+
+         arglists (or (:arglists config)
+                      (:arglists defaults)
+                      '([& args]))
+
+         doc      (:doc config)
+
+         meta-map (merge (meta name)
+                         {:doc doc
+                          :arglists (list 'quote arglists)})]
+      `(def ~name
+         (with-meta
+           (fn [& args#]
+             (let [defaults# (pipe-defaults ~template)
+                   task#     (h/merge-nested defaults# ~config)
+                   task#     (assoc task# :name ~(str name))]
+               (apply std.pipe/pipe task# args#)))
+           ~meta-map)))))
 
 (defn wrap-input
   "enables execution of task with single or multiple inputs"
@@ -122,18 +160,25 @@
 
                             :else input)
 
+               ;; Ensure input count for display calculation doesn't fail on empty input
                inputs (if (:random params) (shuffle inputs) inputs)
+               total      (count inputs)
+
                _      (when (:item (:print params))
                         (print/print "\n")
-                        (print/print-subtitle (format "ITEMS (%s)" (count inputs))))
+                        (print/print-subtitle (format "ITEMS (%s)" total)))
 
                ;; Setup Display
-               total      (count inputs)
                index-len  (let [digits (if (pos? total)
                                          (inc (long (Math/log10 total)))
                                          1)]
                             (+ 2 (* 2 digits)))
-               input-len  (->> inputs (map (comp count str)) (apply max) (+ 2))
+
+               ;; FIX: Avoid (apply max) on empty sequence
+               input-len  (if (empty? inputs)
+                            2
+                            (->> inputs (map (comp count str)) (apply max) (+ 2)))
+
                display-fn (or (-> task :item :display) identity)
                display    (display/bulk-display index-len input-len)
                monitor    (when (:monitor params)

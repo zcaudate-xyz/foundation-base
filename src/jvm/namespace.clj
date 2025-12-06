@@ -1,5 +1,5 @@
 (ns jvm.namespace
-  (:require [std.task :as task]
+  (:require [std.pipe :as pipe]
             [jvm.namespace.common :as common]
             [jvm.namespace.eval :as eval]
             [jvm.namespace.context :as context]
@@ -50,11 +50,11 @@
                           :color  #{:bold}}]}
    :summary   {:aggregate {:total [:count + 0]}}})
 
-(defmethod task/task-defaults :namespace
+(defmethod pipe/pipe-defaults :namespace
   ([_]
    namespace-template))
 
-(defmethod task/task-defaults :namespace.memory
+(defmethod pipe/pipe-defaults :namespace.memory
   ([_]
    (-> namespace-template
        (update-in [:item] merge {:output  common/group-in-memory
@@ -80,7 +80,7 @@
               :summary   {:aggregate {:objects [:count + 0]
                                       :functions [:functions #(+ %1 (count %2)) 0]}}))))
 
-(defmethod task/task-defaults :namespace.count
+(defmethod pipe/pipe-defaults :namespace.count
   ([_]
    (-> namespace-template
        (assoc :result  {:output  identity
@@ -99,7 +99,7 @@
  
    (ns/list-aliases '[jvm.namespace])"
   {:added "3.0"}
-  [:task {:template :namespace
+  [:pipe {:template :namespace
           :params {:title "NAMESPACE ALIASES"
                    :parallel true}
           :main   {:fn clojure.core/ns-aliases}
@@ -108,7 +108,7 @@
 (definvoke clear-aliases
   "removes all namespace aliases"
   {:added "3.0"}
-  [:task {:template :namespace
+  [:pipe {:template :namespace
           :params {:title "CLEAR NAMESPACE ALIASES"
                    :parallel true}
           :main {:fn common/ns-clear-aliases}}])
@@ -120,7 +120,7 @@
    ;;{:errors 0, :warnings 0, :items 5, :results 5, :total 482}
    => map?"
   {:added "3.0"}
-  [:task {:template :namespace
+  [:pipe {:template :namespace
           :params {:title "NAMESPACE IMPORTS"}
           :main {:fn clojure.core/ns-imports}
           :item {:post return-keys}}])
@@ -128,7 +128,7 @@
 (definvoke list-external-imports
   "lists all external imports"
   {:added "3.0"}
-  [:task {:template :namespace
+  [:pipe {:template :namespace
           :params {:title "NAMESPACE IMPORTS"
                    :parallel true}
           :main {:fn common/ns-list-external-imports}
@@ -137,7 +137,7 @@
 (definvoke clear-external-imports
   "clears all external imports"
   {:added "3.0"}
-  [:task {:template :namespace
+  [:pipe {:template :namespace
           :params {:title "CLEAR NAMESPACE ALIASES"
                    :parallel true}
           :main {:fn common/ns-clear-external-imports}}])
@@ -149,7 +149,7 @@
    ;;{:errors 0, :warnings 0, :items 5, :results 5, :total 3674}
    => map?"
   {:added "3.0"}
-  [:task {:template :namespace
+  [:pipe {:template :namespace
           :params {:title "NAMESPACE MAPPINGS"
                    :parallel true}
           :main {:fn clojure.core/ns-map}
@@ -158,7 +158,7 @@
 (definvoke clear-mappings
   "removes all mapped vars in the namespace"
   {:added "3.0"}
-  [:task {:template :namespace
+  [:pipe {:template :namespace
           :params {:title "CLEAR NAMESPACE MAPPINGS"
                    :parallel true}
           :main {:fn common/ns-clear-mappings}}])
@@ -170,7 +170,7 @@
    ;;{:errors 0, :warnings 0, :items 5, :results 5, :total 43}
    => map?"
   {:added "3.0"}
-  [:task {:template :namespace
+  [:pipe {:template :namespace
           :params {:title "NAMESPACE INTERNS"
                    :parallel true}
           :main {:fn clojure.core/ns-interns}
@@ -183,7 +183,7 @@
    ;;{:errors 0, :warnings 0, :items 5, :results 5, :total 3149}
    => map?"
   {:added "3.0"}
-  [:task {:template :namespace
+  [:pipe {:template :namespace
           :params {:title "NAMESPACE REFERS"
                    :parallel true}
           :main {:fn clojure.core/ns-refers}
@@ -194,7 +194,7 @@
  
    (ns/clear-interns)"
   {:added "3.0"}
-  [:task {:template :namespace
+  [:pipe {:template :namespace
           :params {:title "CLEAR NAMESPACE INTERNS"
                    :parallel true}
           :main {:fn common/ns-clear-interns}}])
@@ -202,7 +202,7 @@
 (definvoke clear-refers
   "clears all refers in a namespace"
   {:added "3.0"}
-  [:task {:template :namespace
+  [:pipe {:template :namespace
           :params {:title "CLEAR NAMESPACE refers"
                    :parallel true}
           :main {:fn common/ns-clear-refers}}])
@@ -214,23 +214,10 @@
    ;;{:errors 0, :warnings 0, :items 5, :results 5, :total 43}
    => map?"
   {:added "3.0"}
-  [:task {:template :namespace
+  [:pipe {:template :namespace
           :params {:title "NAMESPACE PUBLICS"
                    :parallel true}
           :main {:fn clojure.core/ns-publics}
-          :item {:post return-keys}}])
-
-(definvoke list-refers
-  "namespace list all refers task
- 
-   (ns/list-refers '[jvm.namespace] {:return :summary})
-   ;;{:errors 0, :warnings 0, :items 5, :results 5, :total 3149}
-   => map?"
-  {:added "3.0"}
-  [:task {:template :namespace
-          :params {:title "NAMESPACE REFERS"
-                   :parallel true}
-          :main {:fn clojure.core/ns-refers}
           :item {:post return-keys}}])
 
 (definvoke clear
@@ -240,7 +227,7 @@
    ;; { .... }
    => map?"
   {:added "3.0"}
-  [:task {:template :namespace
+  [:pipe {:template :namespace
           :params {:title "CLEAR NAMESPACE ALIASES AND MAPPINGS"
                    :parallel true}
           :main {:fn common/ns-clear}}])
@@ -255,7 +242,7 @@
    ;;{:errors 0, :warnings 0, :items 5, :results 5, :objects 306, :functions 22}
    => map?"
   {:added "3.0"}
-  [:task {:template :namespace.memory
+  [:pipe {:template :namespace.memory
           :params {:title "NAMESPACE MEMORY OBJECTS"
                    :parallel true}
           :main   {:fn common/raw-in-memory}}])
@@ -268,7 +255,7 @@
    (ns/loaded? '[jvm.namespace])
    => map?"
   {:added "3.0"}
-  [:task {:template :namespace.count
+  [:pipe {:template :namespace.count
           :params {:title "NAMESPACE LOADED?"
                    :parallel true}
           :main {:fn common/ns-loaded?}}])
@@ -276,7 +263,7 @@
 (definvoke reset
   "deletes all namespaces under the root namespace"
   {:added "3.0"}
-  [:task {:template :namespace.memory
+  [:pipe {:template :namespace.memory
           :params {:title "RESET NAMESPACE"
                    :parallel true
                    :print {:item true
@@ -290,7 +277,7 @@
  
    (ns/unmap 'jvm.namespace :args '[something more])"
   {:added "3.0"}
-  [:task {:template :namespace
+  [:pipe {:template :namespace
           :params {:title "UNMAP NAMESPACE SYMBOL"
                    :parallel true}
           :arglists '([:args syms] [<ns> :args syms])
@@ -303,7 +290,7 @@
  
    (ns/unalias 'jvm.namespace :args '[something more])"
   {:added "3.0"}
-  [:task {:template :namespace
+  [:pipe {:template :namespace
           :params {:title "UNALIAS NAMESPACE SYMBOL"
                    :parallel true
                    :print {:result false
@@ -316,7 +303,7 @@
  
    (ns/reload)"
   {:added "3.0"}
-  [:task {:template :namespace
+  [:pipe {:template :namespace
           :params {:title "RELOADS NAMESPACE"
                    :parallel true}
           :main {:fn common/ns-reload}}])
@@ -326,7 +313,7 @@
  
    (ns/reload-all)"
   {:added "3.0"}
-  [:task {:template :namespace
+  [:pipe {:template :namespace
           :params {:title "RELOADS NAMESPACE AND DEPENDENCIES"
                    :parallel true}
           :main {:fn common/ns-reload-all}}])
@@ -357,4 +344,3 @@
   (random-test '[hara])
   (check '[*ns*])
   (code.manage/scaffold))
-

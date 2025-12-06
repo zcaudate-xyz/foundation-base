@@ -7,7 +7,8 @@
 ^{:refer jvm.namespace/list-aliases :added "3.0"}
 (fact "namespace list all aliases task"
 
-  (ns/list-aliases '[jvm.namespace]))
+  (ns/list-aliases '[jvm.namespace])
+  => map?)
 
 ^{:refer jvm.namespace/clear-aliases :added "3.0"}
 (comment "removes all namespace aliases" ^:hidden
@@ -146,7 +147,7 @@
 (definvoke check
   "check for namespace task group"
   {:added "3.0"}
-  [:task {:template :namespace
+  [:pipe {:template :namespace
           :main {:fn (fn [input] (res/result {:status :return
                                               :data [:ok]}))}
           :params {:title "CHECK (task::namespace)"
@@ -167,7 +168,7 @@
 (definvoke random-test
   "check for namespace task group"
   {:added "3.0"}
-  [:task {:template :namespace
+  [:pipe {:template :namespace
           :params {:title "RANDOM TEST (task::namespace)"
                    :print {:item true
                            :result true
@@ -197,6 +198,3 @@
 
   (random-test '[hara])
   (check '[hara]))
-
-
-
