@@ -42,11 +42,14 @@
   [form opts]
   (estimate-multiline-basic form opts))
 
+(declare estimate-multiline)
+
 (defn estimate-multiline-list
   "estimates if special forms are multilined"
   {:added "4.0"}
   [form opts]
-  (estimate-multiline-basic form opts))
+  (or (estimate-multiline-basic form opts)
+      (some #(estimate-multiline % opts) form)))
 
 (defn estimate-multiline
   "creates multiline function"
