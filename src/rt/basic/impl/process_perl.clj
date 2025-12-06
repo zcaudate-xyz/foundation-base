@@ -31,13 +31,12 @@
       (str bootstrap
            "\n\n"
            (impl/emit-as
-            :perl [(list 'print (list 'return-eval body))])))))
+            :perl [(list 'print (list 'return-eval (cons 'eval body)))])))))
 
 (def +perl-oneshot-config+
   (common/set-context-options
    [:perl :oneshot :default]
    {:main  {:in    #'default-oneshot-wrap}
-    :emit  {:body  {:transform #'rt/return-transform}}
     :json :full}))
 
 (def +perl-oneshot+
@@ -51,18 +50,19 @@
 ;;
 
 (def +client-basic+
-  '[(defn client-basic
-      [host port opts]
-      (:- "use IO::Socket::INET;")
-      (:- "use JSON::PP;")
-      (let [conn (IO::Socket::INET->new
-                   {:PeerHost host
-                    :PeerPort port
-                    :Proto "tcp"})]
-         (while (my $line = (<$conn>))
-            (let [input (decode_json $line)
-                  out   (return-eval input)]
-               (print $conn (encode_json out) "\n")))))])
+  (let [io-socket (symbol "IO::Socket::INET->new")]
+    [(list 'defn 'client-basic
+           ['host 'port 'opts]
+           '(:- "use IO::Socket::INET;")
+           '(:- "use JSON::PP;")
+           (list 'let ['conn (list io-socket
+                                   {:PeerHost 'host
+                                    :PeerPort 'port
+                                    :Proto "tcp"})]
+                 '(while (my $line = (<$conn>))
+                    (let [input (decode_json $line)
+                          out   (return-eval input)]
+                      (print $conn (encode_json out) "\n")))))]))
 
 (def ^{:arglists '([port & [{:keys [host]}]])}
   default-basic-client

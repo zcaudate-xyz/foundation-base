@@ -108,32 +108,44 @@
    :x-str-to-lower    {:macro #'perl-tf-x-str-to-lower   :emit :macro :symbol #{'x:str-to-lower}}})
 
 ;;
+;; TYPE
+;;
+
+(def +perl-type+
+  {:x-to-string {:emit :macro
+                 :macro (fn [[_ s]] (list '. "\"\"" s))
+                 :symbol #{'x:to-string}}})
+
+;;
 ;; RETURN
 ;;
 
 (defn perl-tf-x-return-encode
   ([[_ out id key]]
-   (h/$ (do (:- "use JSON::PP")
-            (eval
-             (return (encode_json {:id  ~id
+   (h/$ (do (:- "use JSON::PP;")
+            (var res (eval
+                      (return (encode_json {:id  ~id
                                    :key ~key
                                    :type  "data"
-                                   :value  ~out})))
+                                   :value  ~out}))))
             (if ~(symbol "$@")
               (return (encode_json {:id  ~id
                                     :key ~key
                                     :type  "raw"
-                                    :value (str ~out)})))))))
+                                    :value (x:to-string ~out)})))
+            (return res)))))
 
 (defn perl-tf-x-return-wrap
   ([[_ f encode-fn]]
-   (h/$ (do (:- "use JSON::PP")
-            (eval
-             (:= out (~f)))
-            (if ~(symbol "$@")
-              (return (encode_json {:type "error"
-                                    :value (str ~(symbol "$@"))})))
-            (return (~encode-fn out nil nil))))))
+   (let [f-var (symbol (str "$" (h/strn f) "->"))]
+     (h/$ (do (:- "use JSON::PP;")
+              (var out)
+              (eval
+               (:= out (~f-var)))
+              (if ~(symbol "$@")
+                (return (encode_json {:type "error"
+                                      :value (x:to-string ~(symbol "$@"))})))
+              (return (~encode-fn out nil nil)))))))
 
 (defn perl-tf-x-return-eval
   ([[_ s wrap-fn]]
@@ -150,4 +162,5 @@
          +perl-math+
          +perl-arr+
          +perl-str+
+         +perl-type+
          +perl-return+))
