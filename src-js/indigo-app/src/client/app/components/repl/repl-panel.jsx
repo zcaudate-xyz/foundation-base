@@ -43,6 +43,24 @@ export function ReplPanel() {
                 ref={scrollRef}
             >
                 {messages.map((msg, i) => {
+                    if (msg && msg.type === 'test-result') {
+                        const { status, name, ns, data } = msg.data;
+                        const isSuccess = status === 'success';
+                        const color = isSuccess ? 'text-green-400' : 'text-red-400';
+                        return (
+                            <div key={i} className="mb-1 border-b border-[#323232] pb-1 last:border-0">
+                                <div className={`flex items-center gap-2 ${color}`}>
+                                    <span className="font-bold">{isSuccess ? 'PASS' : 'FAIL'}</span>
+                                    <span className="text-gray-400">{ns}/{name}</span>
+                                </div>
+                                {!isSuccess && (
+                                    <pre className="mt-1 text-gray-500 whitespace-pre-wrap">
+                                        {JSON.stringify(data, null, 2)}
+                                    </pre>
+                                )}
+                            </div>
+                        );
+                    }
                     const content = typeof msg === 'object' ? JSON.stringify(msg, null, 2) : msg;
                     return (
                         <div

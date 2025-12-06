@@ -42,12 +42,12 @@ export async function scanNamespaces() {
 }
 
 export async function fetchComponents(type, ns) {
-    const response = await fetch(`/api/browse/${type}/components`, {
+    const response = await fetch(`/api/browse/lang/components`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ ns })
+        body: JSON.stringify({ lang: type, ns })
     });
     if (!response.ok) {
         throw new Error(`Failed to fetch components: ${response.statusText}`);
@@ -138,7 +138,6 @@ export async function saveNamespaceSource(ns, source) {
     }
     return response.json();
 }
-
 export async function fetchCompletions(ns, prefix) {
     const response = await fetch(`/api/browse/clj/completions`, {
         method: 'POST',
@@ -151,4 +150,32 @@ export async function fetchCompletions(ns, prefix) {
         throw new Error(`Failed to fetch completions: ${response.statusText}`);
     }
     return response.json();
+}
+
+export async function emitComponent(lang, ns, component) {
+    const response = await fetch(`/api/browse/lang/emit-component`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ lang, ns, component })
+    });
+    if (!response.ok) {
+        throw new Error(`Failed to emit component: ${response.statusText}`);
+    }
+    return response.text();
+}
+
+export function runTestVar(ns, varName) {
+    return fetch('/api/browse/test/run-var', {
+        method: 'POST',
+        body: JSON.stringify({ ns, var: varName })
+    }).then(res => res.json())
+}
+
+export function runTestNs(ns) {
+    return fetch('/api/browse/test/run-ns', {
+        method: 'POST',
+        body: JSON.stringify({ ns })
+    }).then(res => res.json())
 }

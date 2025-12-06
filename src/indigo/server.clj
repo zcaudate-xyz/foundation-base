@@ -5,6 +5,8 @@
             [net.http.router :as router]
             [indigo.server.api-common :as api]
             [indigo.server.api-browser :as api-browser]
+            [indigo.server.test-runner :as test-runner]
+            [indigo.server.context :as context]
             [std.lib :as h]
             [std.string :as str]
             [std.json :as json]
@@ -18,7 +20,6 @@
 (def ^:dynamic *port* 1311)
 
 (def ^:dynamic *public-path* "src-js/indigo/dist")
-
 
 (defn wrap-browser-call
   [f]
@@ -55,6 +56,19 @@
                            (let [lang (or (get-in req [:params :lang]) "js")
                                  ns   (get-in req [:params :ns])]
                              (#'api-browser/list-components lang ns))))
+      "lang/component-preview" (wrap-browser-call
+                                (fn [req]
+                                  (let [lang (or (get-in req [:params :lang]) "js")
+                                        ns   (get-in req [:params :ns])
+                                        comp (get-in req [:params :component])]
+                                    (#'api-browser/component-preview lang ns comp))))
+      "lang/emit-component"    (wrap-browser-call
+                                (fn [req]
+                                  (let [lang (or (get-in req [:params :lang]) "js")
+                                        ns   (get-in req [:params :ns])
+                                        comp (get-in req [:params :component])]
+                                    (#'api-browser/emit-component lang ns comp))))
+
       "lang/component"  (wrap-browser-call
                          (fn [req]
                            (let [lang (or (get-in req [:params :lang]) "js")
@@ -108,7 +122,18 @@
                          (fn [req]
                            (let [ns     (get-in req [:params :ns])
                                  prefix (get-in req [:params :prefix])]
-                             (#'indigo.server.api-browser/get-completions ns prefix))))}))))
+                             (#'indigo.server.api-browser/get-completions ns prefix))))
+
+      "test/run-var"    (wrap-browser-call
+                         (fn [req]
+                           (let [ns   (get-in req [:params :ns])
+                                 var  (get-in req [:params :var])]
+                             (#'indigo.server.test-runner/run-test ns var))))
+
+      "test/run-ns"     (wrap-browser-call
+                         (fn [req]
+                           (let [ns (get-in req [:params :ns])]
+                             (#'indigo.server.test-runner/run-ns-tests ns))))}))))
 
 (def page-routes
   (router/router
@@ -118,12 +143,10 @@
      "*"             (fn [{:keys [uri] :as req}]
                        (router/serve-resource uri *public-path*))})))
 
-(defonce repl-clients (atom #{}))
-
 (defn repl-handler [req]
   (http/with-channel req channel
     (http/on-close channel (fn [status]
-                             (swap! repl-clients disj channel)
+                             (swap! context/repl-clients disj channel)
                              (println "REPL Client disconnected" status)))
     (http/on-receive channel (fn [data]
                                (if (= data "ping")
@@ -139,7 +162,7 @@
                                        (http/send! channel result))
                                      (catch Throwable t
                                        (http/send! channel (str "Error: " (.getMessage t)))))))))
-    (swap! repl-clients conj channel)
+    (swap! context/repl-clients conj channel)
     (println "REPL Client connected")))
 
 (defn dev-handler

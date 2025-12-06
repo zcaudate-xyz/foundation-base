@@ -1,10 +1,10 @@
 (ns indigo.server.api-browser
   (:require [std.lang :as l]
             [std.lang.base.book :as book]
+            [code.test.base.context :as context]
             [std.lib :as h]
             [std.string :as str]
             [code.project :as project]
-            [code.test.base.context :as context]
             [code.test.base.runtime :as rt]
             [clojure.repl :as repl]))
 
@@ -28,9 +28,11 @@
         entry (book/get-module book (symbol ns))]
     (if entry
       (->> (:code entry)
-           (keys)
-           (map str)
-           (sort))
+           (map (fn [[k v]]
+                  {:name (str k)
+                   :type (if (= (:op v) 'deffrag) "fragment" "form")
+                   :meta (:meta v)}))
+           (sort-by :name))
       [])))
 
 (defn get-component
@@ -137,6 +139,10 @@
   {:added "4.0"}
   [ns-str]
   (let [ns-sym (symbol ns-str)]
+    (try
+      (binding [context/*eval-mode* false]
+        (require ns-sym))
+      (catch Throwable _))
     (if (get @context/*registry* ns-sym)
       (->> (get-in @context/*registry* [ns-sym :facts])
            (keys)
@@ -164,6 +170,10 @@
   [ns-str var-str]
   (let [test-ns-sym (symbol (str ns-str "-test"))
         var-sym     (symbol var-str)]
+    (try
+      (binding [context/*eval-mode* false]
+        (require test-ns-sym))
+      (catch Throwable _))
     (if (get @context/*registry* test-ns-sym)
       (->> (get-in @context/*registry* [test-ns-sym :facts])
            (vals)
@@ -197,13 +207,23 @@
       {})))
 
 (defn component-preview
-  "returns the compiled JavaScript source for a component, suitable for live rendering.
-   For now it simply returns the DSL source (same as get-component) – the client can evaluate it.
-   In the future this could invoke the std.lang compiler.
-  "
+  "returns the compiled JavaScript source for a component"
   {:added "4.0"}
   [lang ns component]
   (get-component lang ns component))
+
+(defn emit-component
+  "emits the component source code as the target language"
+  {:added "4.0"}
+  [lang ns component]
+  (let [book (l/get-book (l/default-library) (keyword lang))
+        entry (book/get-code-entry book (symbol (str ns "/" component)))]
+    (if entry
+      (try
+        (l/emit-as (keyword lang) (:form entry))
+        (catch Throwable t
+          (str "// Error emitting code: " (.getMessage t))))
+      "// Component not found")))
 
 (defn search-components
   "searches component names across all namespaces for a given language.
@@ -260,3 +280,4 @@
       matches)
     (catch Throwable t
       [])))
+

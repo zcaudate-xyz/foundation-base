@@ -177,26 +177,6 @@ export function ViewportCanvas({
           })}
         </div>
       </div>
-      <div
-        className="h-10 bg-[#2b2b2b] border-t border-[#323232] flex items-center px-3 justify-between">
-        <div className="flex items-center gap-2">
-          <button
-            className="px-3 py-1 text-xs bg-[#323232] text-gray-300 rounded hover:bg-[#3a3a3a]"
-            onClick={function () {
-              let codeView = document.getElementById("code-view");
-              if (codeView) {
-                codeView.style.display = ((codeView.style.display === "none") ? "block" : "none");
-              }
-            }}>Toggle Code
-          </button>
-        </div>
-        <span className="text-xs text-gray-600">{countComponents(components[0]) + " components"}</span>
-      </div>
-      <div
-        id="code-view"
-        style={{ "display": "none" }}
-        className="h-64 bg-[#1e1e1e] border-t border-[#323232] overflow-auto">
-        <pre className="p-4 text-xs text-gray-300 font-mono">{JSON.stringify(componentToJSON(components[0]), null, 2)}</pre>
-      </div>
+
     </div>);
 }

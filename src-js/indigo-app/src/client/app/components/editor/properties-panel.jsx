@@ -1,11 +1,8 @@
 import React from 'react'
 import * as FigmaUi from '@xtalk/figma-ui'
 import * as Lucide from 'lucide-react'
-import * as ip from '@/client/app/components/editor/inputs-panel'
-import * as stp from '@/client/app/components/editor/states-triggers-panel'
-import * as vp from '@/client/app/components/editor/vars-panel'
 
-import { fetchCljVars, fetchTestFacts } from '../../../api'
+import { fetchCljVars, fetchTestFacts, runTestVar, runTestNs } from '../../../api'
 
 export function PropertyInput({ componentId, propertyKey, value, onUpdateProperty }) {
   if (typeof value === "boolean") {
@@ -120,8 +117,15 @@ export function PropertiesPanel({
 
         {/* Tests Section */}
         <div className="flex-1 flex flex-col min-h-0">
-          <div className="h-10 bg-[#2b2b2b] border-b border-[#323232] flex items-center px-3">
+          <div className="h-10 bg-[#2b2b2b] border-b border-[#323232] flex items-center px-3 justify-between">
             <span className="text-xs text-gray-400 font-medium uppercase">Tests</span>
+            <button
+              className="p-1 hover:bg-[#3a3a3a] rounded text-gray-400 hover:text-white"
+              onClick={() => runTestNs(selectedNamespace)}
+              title="Run All Tests"
+            >
+              <Lucide.Play size={12} />
+            </button>
           </div>
           <div className="flex-1 overflow-y-auto p-2">
             {loadingTests ? (
@@ -131,10 +135,24 @@ export function PropertiesPanel({
                 {tests.map(t => (
                   <div
                     key={t}
-                    className="text-xs text-gray-400 hover:text-green-400 cursor-pointer truncate px-2 py-1 hover:bg-[#323232] rounded"
-                    title={t}
+                    className="flex items-center justify-between group px-2 py-1 hover:bg-[#323232] rounded"
                   >
-                    {t}
+                    <div
+                      className="text-xs text-gray-400 hover:text-green-400 cursor-pointer truncate flex-1"
+                      title={t}
+                    >
+                      {t}
+                    </div>
+                    <button
+                      className="opacity-0 group-hover:opacity-100 p-1 hover:bg-[#3a3a3a] rounded text-gray-400 hover:text-white"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        runTestVar(selectedNamespace, t);
+                      }}
+                      title="Run Test"
+                    >
+                      <Lucide.Play size={10} />
+                    </button>
                   </div>
                 ))}
                 {tests.length === 0 && !loadingTests && (

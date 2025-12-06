@@ -238,7 +238,24 @@ export var defaultHistory = [
 
 // code.dev.client.app/App [140] 
 export function App() {
-  let [components, setComponents] = React.useState(defaultComponents);
+  let [components, setComponents] = React.useState(() => {
+    try {
+      const saved = localStorage.getItem("indigo-components");
+      return saved ? JSON.parse(saved) : defaultComponents;
+    } catch (e) {
+      console.error("Failed to load components from localStorage", e);
+      return defaultComponents;
+    }
+  });
+
+  React.useEffect(() => {
+    try {
+      localStorage.setItem("indigo-components", JSON.stringify(components));
+    } catch (e) {
+      console.error("Failed to save components to localStorage", e);
+    }
+  }, [components]);
+
   let [selectedComponent, setSelectedComponent] = React.useState("example-card-1");
   let [selectedNamespace, setSelectedNamespace] = React.useState(null);
   let [selectedVar, setSelectedVar] = React.useState(null);
@@ -520,41 +537,56 @@ export function App() {
     setSelectedComponent(newId);
   };
   let selectedComponentData = findComponentById(components, selectedComponent);
+  let [activeTab, setActiveTab] = React.useState(() => {
+    return localStorage.getItem("indigo-active-tab") || "env";
+  });
+
+  React.useEffect(() => {
+    localStorage.setItem("indigo-active-tab", activeTab);
+  }, [activeTab]);
+
   return (
     <ReactDnd.DndProvider backend={ReactDndHtml5Backend.HTML5Backend}>
       <div className="flex flex-col h-screen bg-[#1e1e1e]">
         <FigmaUi.ResizablePanelGroup direction="horizontal" className="flex-1">
           <FigmaUi.ResizablePanel defaultSize={20} minSize={15} maxSize={30}>
-            <FigmaUi.Tabs defaultValue="env" className="flex-1 flex flex-col h-full">
+            <div className="flex-1 flex flex-col h-full">
               <div className="bg-[#252525] border-b border-[#323232]">
-                <FigmaUi.TabsList
-                  className="w-full justify-start rounded-none bg-transparent border-b-0 h-10">
-                  <FigmaUi.TabsTrigger
-                    value="env"
-                    className="rounded-none data-[state=active]:bg-[#323232] text-xs text-gray-400 data-[state=active]:text-gray-200">Env
-                  </FigmaUi.TabsTrigger>
-                  <FigmaUi.TabsTrigger
-                    value="library"
-                    className="rounded-none data-[state=active]:bg-[#323232] text-xs text-gray-400 data-[state=active]:text-gray-200">Library
-                  </FigmaUi.TabsTrigger>
-                </FigmaUi.TabsList>
+                <div className="flex w-full h-10">
+                  <button
+                    onClick={() => setActiveTab("env")}
+                    className={`flex-1 text-xs ${activeTab === "env" ? "text-gray-200 bg-[#323232]" : "text-gray-400 hover:text-gray-300"}`}
+                  >
+                    Env
+                  </button>
+                  <button
+                    onClick={() => setActiveTab("library")}
+                    className={`flex-1 text-xs ${activeTab === "library" ? "text-gray-200 bg-[#323232]" : "text-gray-400 hover:text-gray-300"}`}
+                  >
+                    Library
+                  </button>
+                </div>
               </div>
-              <FigmaUi.TabsContent value="env" className="flex-1 m-0">
-                <cb.ComponentBrowser
-                  onAddComponent={addComponent}
-                  selectedNamespace={selectedNamespace}
-                  onSelectNamespace={setSelectedNamespace}>
-                </cb.ComponentBrowser>
-              </FigmaUi.TabsContent>
-              <FigmaUi.TabsContent value="library" className="flex-1 m-0">
-                <lb.LibraryBrowser
-                  onImportComponent={function (comp) {
-                    return importComponent(comp);
-                  }}
-                  onImportAndEdit={importAndEditComponent}>
-                </lb.LibraryBrowser>
-              </FigmaUi.TabsContent>
-            </FigmaUi.Tabs>
+              {activeTab === "env" && (
+                <div className="flex-1 m-0 overflow-hidden">
+                  <cb.ComponentBrowser
+                    onAddComponent={addComponent}
+                    selectedNamespace={selectedNamespace}
+                    onSelectNamespace={setSelectedNamespace}>
+                  </cb.ComponentBrowser>
+                </div>
+              )}
+              {activeTab === "library" && (
+                <div className="flex-1 m-0 overflow-hidden">
+                  <lb.LibraryBrowser
+                    onImportComponent={function (comp) {
+                      return importComponent(comp);
+                    }}
+                    onImportAndEdit={importAndEditComponent}>
+                  </lb.LibraryBrowser>
+                </div>
+              )}
+            </div>
           </FigmaUi.ResizablePanel>
           <FigmaUi.ResizableHandle className="w-[1px] bg-[#323232]"></FigmaUi.ResizableHandle>
           <FigmaUi.ResizablePanel defaultSize={50} minSize={30}>

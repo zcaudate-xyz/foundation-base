@@ -73,7 +73,31 @@ export function LibraryBrowser({ onImportComponent, onImportAndEdit }) {
     loadLibrary();
   }, []);
 
-  const toggleNode = (path) => {
+  const [loadedComponents, setLoadedComponents] = React.useState(new Map()); // Map<ns, components[]>
+
+  const fetchNamespaceComponents = async (lang, ns) => {
+    console.log("Fetching components for", lang, ns);
+    if (loadedComponents.has(ns)) {
+      console.log("Already loaded", ns);
+      return;
+    }
+    try {
+      const comps = await import('../../../api').then(m => m.fetchComponents(lang, ns));
+      console.log("Fetched components", ns, comps);
+      setLoadedComponents(prev => new Map(prev).set(ns, comps));
+    } catch (err) {
+      console.error("Failed to fetch components for", ns, err);
+    }
+  };
+
+  const toggleNode = (node) => {
+    const path = node.fullPath;
+    console.log("Toggling node", path, node.type, expandedNodes.has(path));
+    if (node.type === "namespace" && !expandedNodes.has(path)) {
+      console.log("Fetching for", node.language, node.originalNs);
+      fetchNamespaceComponents(node.language, node.originalNs);
+    }
+
     setExpandedNodes(prev => {
       const next = new Set(prev);
       if (next.has(path)) {
@@ -108,16 +132,110 @@ export function LibraryBrowser({ onImportComponent, onImportAndEdit }) {
     }
   }, [search, tree]);
 
+  const [previewComponent, setPreviewComponent] = React.useState(null); // { ns, name, ... }
+  const [previewCode, setPreviewCode] = React.useState("");
+
+  React.useEffect(() => {
+    if (previewComponent) {
+      setPreviewCode("Loading...");
+      import('../../../api').then(m => m.emitComponent(previewComponent.language, previewComponent.ns, previewComponent.name))
+        .then(code => setPreviewCode(code))
+        .catch(err => setPreviewCode(`Error: ${err.message}`));
+    } else {
+      setPreviewCode("");
+    }
+  }, [previewComponent]);
+
+  const renderComponents = (ns, components, lang) => {
+    const fragments = components.filter(c => c.type === 'fragment');
+    const forms = components.filter(c => c.type === 'form');
+
+    const renderItem = (c) => {
+      const isPreviewing = previewComponent?.ns === ns && previewComponent?.name === c.name;
+
+      return (
+        <div key={c.name} className="mb-1">
+          <div
+            className={`text-xs text-gray-400 hover:text-blue-400 cursor-pointer py-0.5 px-2 hover:bg-[#323232] rounded flex items-center justify-between group ${isPreviewing ? 'bg-[#323232]' : ''}`}
+            onClick={() => onImportAndEdit({ ...c, libraryRef: c.name })}
+          >
+            <span>{c.name}</span>
+            <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100">
+              <button
+                className="p-1 hover:bg-[#404040] rounded text-gray-400 hover:text-white"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setPreviewComponent(isPreviewing ? null : { ...c, ns, language: lang });
+                }}
+                title="Preview & Metadata"
+              >
+                <Lucide.Eye size={12} />
+              </button>
+              <button
+                className="p-1 hover:bg-[#404040] rounded text-gray-400 hover:text-white"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onImportAndEdit({ ...c, libraryRef: c.name });
+                }}
+                title="Import"
+              >
+                <Lucide.Plus size={12} />
+              </button>
+            </div>
+          </div>
+          {isPreviewing && (
+            <div className="ml-2 mt-1 p-2 bg-[#1e1e1e] rounded border border-[#323232] text-[10px]">
+              <div className="mb-2">
+                <div className="font-bold text-gray-500 mb-0.5">METADATA</div>
+                <pre className="text-gray-400 whitespace-pre-wrap font-mono max-h-32 overflow-auto">
+                  {JSON.stringify(c.meta || {}, null, 2)}
+                </pre>
+              </div>
+              <div>
+                <div className="font-bold text-gray-500 mb-0.5">GENERATED OUTPUT</div>
+                <pre className="text-gray-400 whitespace-pre-wrap font-mono max-h-64 overflow-auto">
+                  {previewCode}
+                </pre>
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    };
+
+    return (
+      <div className="pl-4 border-l border-[#323232] ml-2 mt-1">
+        {fragments.length > 0 && (
+          <div className="mb-2">
+            <div className="text-[10px] uppercase text-gray-500 font-bold mb-1">Fragments</div>
+            {fragments.map(renderItem)}
+          </div>
+        )}
+        {forms.length > 0 && (
+          <div>
+            <div className="text-[10px] uppercase text-gray-500 font-bold mb-1">Forms</div>
+            {forms.map(renderItem)}
+          </div>
+        )}
+      </div>
+    );
+  };
+
   const renderTree = (node, depth = 0) => {
     const children = Array.from(node.children.values());
-    if (children.length === 0) return null;
+    // If it's a namespace and expanded, we might have components to show
+    const isNamespace = node.type === "namespace";
+    const isExpanded = expandedNodes.has(node.fullPath);
+    const components = isNamespace && isExpanded ? loadedComponents.get(node.originalNs) : null;
+
+    if (children.length === 0 && !isNamespace) return null;
 
     return (
       <React.Fragment>
         {children.map(child => {
-          const isExpanded = expandedNodes.has(child.fullPath);
+          const isChildExpanded = expandedNodes.has(child.fullPath);
+          const isChildNamespace = child.type === "namespace";
           const isLanguage = child.type === "language";
-          const isNamespace = child.type === "namespace";
 
           let Icon = Lucide.Folder;
           let colorClass = "text-gray-500";
@@ -125,7 +243,7 @@ export function LibraryBrowser({ onImportComponent, onImportAndEdit }) {
           if (isLanguage) {
             Icon = Lucide.Languages;
             colorClass = "text-orange-400";
-          } else if (isNamespace) {
+          } else if (isChildNamespace) {
             Icon = Lucide.Book;
             colorClass = "text-purple-400";
           }
@@ -135,15 +253,22 @@ export function LibraryBrowser({ onImportComponent, onImportAndEdit }) {
               <div
                 className="flex items-center gap-1 py-1 px-2 hover:bg-[#323232] cursor-pointer text-xs text-gray-300"
                 style={{ paddingLeft: `${depth * 12 + 8}px` }}
-                onClick={() => toggleNode(child.fullPath)}
+                onClick={() => toggleNode(child)}
               >
-                {child.children.size > 0 ? (
-                  isExpanded ? <Lucide.ChevronDown className="w-3 h-3 text-gray-500" /> : <Lucide.ChevronRight className="w-3 h-3 text-gray-500" />
+                {(child.children.size > 0 || isChildNamespace) ? (
+                  isChildExpanded ? <Lucide.ChevronDown className="w-3 h-3 text-gray-500" /> : <Lucide.ChevronRight className="w-3 h-3 text-gray-500" />
                 ) : <div className="w-3" />}
                 <Icon className={`w-3 h-3 ${colorClass}`} />
                 <span>{child.name}</span>
               </div>
-              {isExpanded && renderTree(child, depth + 1)}
+              {isChildExpanded && (
+                <>
+                  {renderTree(child, depth + 1)}
+                  {isChildNamespace && loadedComponents.get(child.originalNs) && (
+                    renderComponents(child.originalNs, loadedComponents.get(child.originalNs), child.language)
+                  )}
+                </>
+              )}
             </div>
           );
         })}
