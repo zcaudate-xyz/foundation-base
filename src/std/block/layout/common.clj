@@ -454,8 +454,8 @@
          arg-spacing  (concat  [(construct/newline)]
                                (repeat nindents (construct/space)))
          nopts       (-> opts
-                         (assoc :indents nindents
-                                :spec spec))
+                         (assoc :indents nindents)
+                         (dissoc :spec))
          row-blocks  (cond (== columns 1)
                            (layout-one-column   (seq arr) nopts)
 

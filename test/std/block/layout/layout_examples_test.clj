@@ -1,196 +1,103 @@
+(ns std.block.layout.layout-examples-test
+  (:use code.test)
+  (:require [std.block.layout :as layout]
+            [std.block.construct :as construct]
+            [std.block.base :as base]
+            [std.string :as str]
+            [std.lib :as h]))
 
+(defn split-block [form]
+  (str/split-lines (base/block-string (layout/layout-main form))))
 
-(comment
-  (h/p
-   (layout-main
-    '[:p {:hello world
-          :hello1 world}
-      [:% -/hoeuoeu
-       {:hello world
-        :hello1 world}]
-      [:% -/hoeuoeu
-       {:a 1 :b 2}]
-      [:a 
-       [:y {:hello world
-            :hello1 world}
-        [:hello]]]]
-    
-    ))
-  
-  
-  (h/p
-   (layout-main
-    '(case a
-       (:text :hold :bull :bilu) (oeuo)
-       2 (oeuoeuoeu)
-       oeuoeu)))
+^{:refer std.block.layout/layout-examples :added "4.0"}
+(fact "Default Formatting Examples"
 
-  (h/p
-   (layout-main
-    '(cond-> a
-       pred (oeueo :assoc ue)
-       2 (oeuoeuoeu))))
-  
-  (h/p
-   (layout-main
-    '(let [a 1 b 2]
-       (+ a ))))
-  
-  (h/p
-   (layout-main
-    '((form {:keys [indents]
-             :or {indents 0}
-             :as opts}))))
-  
-  (h/p
-   (layout-main
-    '(form {:keys [indents]
-            :or {indents 0}
-            :as opts})))
-  
-  (h/p
-   (layout-main
-    '((((form {:keys [indents]
-               :or {indents 0}
-               :as opts}))))))
-  
-  (h/p
-   (layout-main
-    '(form {:keys [indents]
-            :or {indents 0}
-            :as opts})))
-  
-  (h/p
-   (layout-main
-    '(([form {:keys [indents]
-              :or {indents 0}
-              :as opts}]))))
-  
-  (h/p
-   (layout-main
-    '[[form hello {:keys [indents]
-                   :or {indents 0}
-                   :as opts}]]))
-  
-  (h/p
-   (layout-main
-    '(({:keys [indents]
-        :or {indents 0}
-        :as opts}))))
-  
-  (h/p
-   (layout-main
-    
-    (quote
-     (#^{:spec {:col-break true}}
-      ((apply aonther
-              t
-              t
-              oeuo)
-       (let [a (let [a 1 b 2]
-                 (+ a b))
-             (let [a 1 b 2]
-               (+ a b))
-             2]
-         (+ a b))
-       (let [a 1 b 2]
-         (+ a b)))))))
+  (split-block '(defn calculate-sum
+                  "Calculates the sum of two numbers."
+                  [a b]
+                  (+ a b)))
+  => ["(defn calculate-sum"
+      "  \"Calculates the sum of two numbers.\""
+      "  [a b]"
+      "  (+ a b))"]
 
-  (h/p
-   (layout-main
-    
-    (quote
-     (#^{:spec {:col-break true}}
-      ((apply aonther
-              t
-              t
-              oeuo)
-       (let [^{:spec {:col-align true
-                      :columns 1}}
-             #{a (let [a 1 b 2]
-                   (+ a b))
-               (let [a 1 b 2]
-                 (+ a b c))
-               2}
-             (let [a 1 b 2]
-               (+ a b))]
-         (+ a b))
-       (let [a 1 b 2]
-         (+ a b)))))))
-  
-  (h/p
-   (layout-main
-    
-    (quote
-     (#^{:spec {:col-compact true
-                :col-break true}}
-      ((((apply aonther
-                t
-                t
-                oeuo)
-         (let [a (let [a 1 b 2]
-                   (+ a b)) b 2]
-           (+ a b))
-         (let [a 1 b 2]
-           (+ a b))))))))))
+  (split-block '(defn.pg create-user
+                  "Creates a user in Postgres."
+                  [db user-data]
+                  (pg/insert! db :users user-data)))
+  => ["(defn.pg create-user"
+      "  \"Creates a user in Postgres.\""
+      "  [db user-data]"
+      "  (pg/insert! db"
+      "    :users"
+      "    user-data))"]
 
+  (split-block '(let [a 10
+                      b 20]
+                  (println (+ a b))))
+  => ["(let [a 10 b 20]"
+      "  (println (+ a b)))"]
 
+  (split-block '(h/with:component [sys system]
+                  (start sys)
+                  (run sys)))
+  => ["(h/with:component [sys system]"
+      "  (start sys)"
+      "  (run sys))"]
 
-(comment
-  (h/p 
-   (layout-main '[{:keys [col-align
-                          columns]
-                   :as spec}  (merge {:columns 2
-                                      :col-align false}
-                   spec)]
-                {}))
+  (split-block '(defn configure
+                  [{:keys [host port] :as opts}]
+                  (connect host port)))
+  => ["(defn configure"
+      "  [{:as opts :keys [host port]}]"
+      "  (connect host port))"]
 
-  (h/p 
-   (layout-main '^{:spec {:col-compact true}}
-                [{:keys [col-align
-                         columns]
-                  :as spec}  (merge {:columns 2
-                                     :col-align false}
-                  spec)]
-                ))
-  (h/p 
-   (layout-main '[[{:keys [col-align
-                           columns]
-                    :as spec}  (merge {:a {:columns 2
-                                           :col-align false}
-                                       :b {:columns 2
-                                           :col-align false}}
-                    spec)]]
-                {}))
-  
-  (h/p 
-   (layout-main '[[[[[{:keys [col-align
-                              columns]
-                       :as spec}  (merge {:columns 2
-                                          :col-align false}
-                       spec)]]]]]
-                {}))
-  
-  (h/p 
-   (layout-main '(let [allowable   {:allowable 1 :b 2}
-                       b   {:a 1 :botherable 2}]
-                   (+ a 2))
-                {}))
-  
-  (h/p
-   (layout-main '(let ^{:spec {:col-align true}}
-                     [{:keys [col-align
-                              columns]
-                       :as spec}  (merge {:columns 2
-                                          :col-align false}
-                       spec)])
-                {}))
-  
-  (h/p
-   (layout-main '(let ^{:spec {:col-align true}}
-                     [{:keys [col-align
-                              columns]
-                       :as spec}  (merge {:columns 2
-                                          :col-align false}
-                       spec)])
-                {})))
+  (split-block '(def config
+                  {:server {:host "localhost"
+                            :port 8080}
+                   :db     {:type "postgres"
+                            :url  "jdbc:postgresql://..."}}))
+  => ["(def config"
+      "  {:server {:host \"localhost\""
+      "            :port 8080}"
+      "   :db     {:type \"postgres\""
+      "            :url  \"jdbc:postgresql://...\"}})"]
+
+  (split-block '(do-things
+                 (first-step a b c)
+                 (second-step d e f)))
+  => ["(do-things (first-step a b c)"
+      "           (second-step d e f))"]
+
+  (split-block '(do-things
+                 (first-step-complex
+                  (sub-step-1 a)
+                  (sub-step-2 b))))
+  => ["(do-things"
+      " (first-step-complex"
+      "  (sub-step-1 a)"
+      "  (sub-step-2 b)))"]
+
+  ;; Long map destructuring (Pairing Test)
+  (split-block '(defn foo
+                  [{:keys [a b c d e f g h i j k l m n o p] :as opts}]
+                  (println a)))
+  => ["(defn foo"
+      "  [{:keys [a"
+      "           b"
+      "           c"
+      "           d"
+      "           e"
+      "           f"
+      "           g"
+      "           h"
+      "           i"
+      "           j"
+      "           k"
+      "           l"
+      "           m"
+      "           n"
+      "           o"
+      "           p]"
+      "    :as opts}]"
+      "  (println a))"])
