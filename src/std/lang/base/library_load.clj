@@ -85,3 +85,58 @@
   (let [lib (impl/clone-default-library)]
     (load-file-into-library filepath lib)
     lib))
+
+(defn analyze-string
+  "Analyzes code string to find namespace and dependencies.
+   Returns a map with :ns, :requires (Clojure), and :std-requires (std.lang)."
+  [content]
+  (let [reader (readers/push-back-reader (java.io.StringReader. content))
+        eof    (Object.)
+        info   (atom {:ns nil :requires #{} :std-requires #{}})]
+    (loop []
+      (let [form (try (reader/read reader false eof)
+                      (catch Exception e nil))]
+        (when (and form (not= form eof))
+          (cond
+            ;; Handle (ns ...)
+            (and (seq? form) (= 'ns (first form)))
+            (let [ns-name (second form)
+                  deps    (->> (rest form)
+                               (filter #(and (seq? %) (= :require (first %))))
+                               (mapcat rest)
+                               (map #(if (vector? %) (first %) %))
+                               set)]
+              (swap! info assoc :ns ns-name)
+              (swap! info update :requires into deps))
+
+            ;; Handle (l/script ...) or (std.lang/script ...)
+            (and (seq? form) (or (= 'l/script (first form))
+                                 (= 'std.lang/script (first form))))
+            (let [[_ _ config] form
+                  script-deps (if (map? config)
+                                (->> (:require config)
+                                     (map #(if (vector? %) (first %) %))
+                                     set)
+                                #{})]
+              (swap! info update :std-requires into script-deps)))
+          (recur))))
+    @info))
+
+(defn analyze-file
+  "Analyzes a file to find namespace and dependencies."
+  [filepath]
+  (assoc (analyze-string (slurp filepath))
+         :file filepath))
+
+(defn create-dependency-graph
+  "Creates a dependency graph from a list of files.
+   Returns a map where keys are namespaces and values are sets of dependencies."
+  [files]
+  (reduce (fn [graph file]
+            (let [{:keys [ns requires std-requires]} (analyze-file file)
+                  all-deps (into requires std-requires)]
+              (if ns
+                (assoc graph ns all-deps)
+                graph)))
+          {}
+          files))

@@ -28,3 +28,9 @@
 
 ^{:refer indigo.server/open-client :added "4.1"}
 (fact "TODO")
+
+^{:refer indigo.server/repl-handler :added "4.1"}
+(fact "TODO")
+
+^{:refer indigo.server/server-restart :added "4.1"}
+(fact "TODO")
