@@ -6,7 +6,8 @@
             [clojure.core :as core]
             [std.lib :as h]
             [clojure.tools.reader :as reader]
-            [clojure.tools.reader.reader-types :as readers]))
+            [clojure.tools.reader.reader-types :as readers]
+            [code.project :as project]))
 
 (defn eval-in-library
   "Evaluates a form within the context of a specific library instance.
@@ -75,8 +76,11 @@
 (defn load-file-into-library
   "Loads a file into a specific library instance."
   [filepath lib-instance]
-  (let [content (slurp filepath)]
-    (load-string-into-library content lib-instance (h/ns-sym))))
+  (let [content (slurp filepath)
+        ;; Heuristic: if we can read the ns from the file, use it as initial.
+        ;; Otherwise use current ns.
+        initial-ns (or (h/suppress (second (read-string content))) (h/ns-sym))]
+    (load-string-into-library content lib-instance initial-ns)))
 
 (defn clone-and-load
   "Clones the default library and loads the given file into it.
@@ -140,3 +144,31 @@
                 graph)))
           {}
           files))
+
+(defn load-namespace
+  "Recursively loads a namespace and its dependencies into the library.
+
+   args:
+     lib-instance - The library to load into.
+     root-ns      - The root namespace symbol to start loading from.
+     opts         - Options map.
+       :loaded    - Atom containing a set of already loaded namespaces.
+       :project   - Project map for resolving paths (defaults to code.project/project).
+
+   Returns the library instance."
+  [lib-instance root-ns & [opts]]
+  (let [loaded (get opts :loaded (atom #{}))
+        project (get opts :project (project/project))]
+    (when-not (contains? @loaded root-ns)
+      (let [filepath (project/get-path root-ns project)]
+        (when filepath
+          (let [{:keys [requires std-requires]} (analyze-file filepath)
+                all-deps (into requires std-requires)]
+            ;; Recursively load dependencies
+            (doseq [dep all-deps]
+              (load-namespace lib-instance dep {:loaded loaded :project project}))
+
+            ;; Load the current file
+            (load-file-into-library filepath lib-instance)
+            (swap! loaded conj root-ns)))))
+    lib-instance))
