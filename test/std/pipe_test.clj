@@ -1,135 +1,45 @@
 (ns std.pipe-test
   (:use code.test)
-  (:require [std.pipe :refer :all]
-            [std.pipe.util :as ut]
-            [std.lib.result :as res]
-            [std.task :as task]
-            [std.lib :as h]
-            [std.lib.signal :as signal]))
+  (:require [std.pipe :refer :all]))
 
-(defn- process-test-fn
-  ([input params lookup env & args]
-   (* 2 input)))
+^{:refer std.pipe/pipe-defaults :added "4.0"}
+(fact "creates default settings for pipe task groups"
+  ^:hidden
+  (pipe-defaults :default)
+  => {:main {:arglists '([] [entry])}})
 
-(def +task+
-  {:item {:pre inc :post dec}
-   :main {:fn process-test-fn}
-   :result {:keys [[:data identity]]
-            :columns [{:key :data}]}})
+^{:refer std.pipe/task-status :added "3.0"}
+(fact "displays the task-status"
+  ^:hidden
+  (task-status (task {}))
+  => nil)
 
-^{:refer std.pipe.util/main-function :added "4.0"}
-(fact "creates a main function to be used for execution"
+^{:refer std.pipe/task-info :added "3.0"}
+(fact "displays the task-body"
+  ^:hidden
+  (task-info (task {:name "hello"}))
+  => {:fn 'hello})
+
+^{:refer std.pipe/chain :added "4.0"}
+(fact "chains multiple tasks together"
+
+  ((task [(task {:main {:fn inc :argcount 1}})
+          (task {:main {:fn str :argcount 1}})])
+   1)
+  => "2")
+
+^{:refer std.pipe/task :added "4.0"}
+(fact "creates a pipe task"
+
+  (def +task+ (task {:main {:fn (fn [x] (inc x)) :argcount 1}}))
+
+  (+task+ 1) => 2)
+
+^{:refer std.pipe/invoke-intern-pipe :added "4.0"}
+(fact "creates a pipe task"
   ^:hidden
 
-  (let [[main args?] (ut/main-function ns-aliases 1)]
-    (fn? main) => true
-    args? => false))
-
-^{:refer std.pipe.util/select-filter :added "4.0"}
-(fact "matches given a range of filters"
-  ^:hidden
-
-  (ut/select-filter #"ello" 'hello)
-  => true
-  (ut/select-filter #"^ello" 'hello)
-  => false)
-
-^{:refer std.pipe.util/select-inputs :added "4.0"}
-(fact "selects inputs based on matches"
-  ^:hidden
-
-  (ut/select-inputs {:item {:list (fn [_ _] ['code.test 'spirit.common])}}
-                 {}
-                 {}
-                 ['code])
-  => ['code.test])
-
-^{:refer std.pipe.util/wrap-execute :added "3.0"}
-(fact "enables execution of task with transformations"
-
-  ((ut/wrap-execute process-test-fn +task+)
-   1 {} {} {})
-  => 3)
-
-^{:refer std.pipe/pipe :added "4.0"}
-(fact "executes the task, given functions and parameters"
-  ^:hidden
-
-  (keys (pipe (task/task :default "ns-interns"
-                         {:construct {:env (fn [_] {})
-                                      :lookup (fn [_ _] '{std.task []})}
-                          :main {:fn (fn [ns _ _ & _]
-                                       (ns-interns ns))
-                                 :argcount 4}}) ;; Explicitly set argcount 4
-              'std.pipe-test))
-  => (contains '[process-test-fn] :in-any-order :gaps-ok)
-
-  (pipe (task/task :default "bulk-test"
-                   {:item {:list (constantly [1 2 3 4])}
-                    :main {:fn (fn [x _ _ & _] (* x 10))
-                           :argcount 4} ;; Explicitly set argcount 4
-                    :result {:keys [[:val identity]]}})
-        :list
-        {:bulk true})
-  => (contains {1 10
-                2 20
-                3 30
-                4 40})
-
-  (pipe (task/task :default "bulk-test-parallel"
-                   {:item {:list (constantly [1 2 3 4])}
-                    :main {:fn (fn [x _ _ & _] (* x 10))
-                           :argcount 4}}) ;; Explicitly set argcount 4
-        :list
-        {:bulk true :parallel true})
-  => (contains {1 10 2 20 3 30 4 40})
-
-  (pipe (task/task :default "bulk-test-fifo"
-                   {:item {:list (constantly [1 2 3 4])}
-                    :main {:fn (fn [x _ _ & _] (* x 10))
-                           :argcount 4}}) ;; Explicitly set argcount 4
-        :list
-        {:bulk true :mode :fifo})
-  => (contains {1 10 2 20 3 30 4 40})
-
-  (pipe [(task/task :default "chain-1"
-                    {:main {:fn (fn [x _ _ & _] (+ x 1))
-                            :argcount 4}}) ;; Explicitly set argcount 4
-         (task/task :default "chain-2"
-                    {:main {:fn (fn [x _ _ & _] (* x 2))
-                            :argcount 4}})] ;; Explicitly set argcount 4
-        1)
-  => 4)
-
-^{:refer std.pipe/pipe-signal :added "4.0"}
-(fact "executes with signal reporting"
-  (let [signals (atom [])]
-    (signal/signal:with-temp
-      [{:type :task} (fn [data] (swap! signals conj data))]
-      (pipe (task/task :default "bulk-signal-test"
-                       {:item {:list (constantly [1])}
-                        :main {:fn (fn [x _ _ & _] (* x 10))
-                               :argcount 4}}) ;; Explicitly set argcount 4
-            :list
-            {:bulk true}))
-    (count @signals) => 2
-    (-> @signals first :status) => :start
-    (-> @signals second :status) => :return
-    (-> @signals first :context) => nil))
-
-^{:refer std.pipe/pipe-context :added "4.0"}
-(fact "executes with context passing"
-  (let [signals (atom [])]
-    (signal/signal:with-temp
-      [{:type :task} (fn [data] (swap! signals conj data))]
-      (pipe (task/task :default "bulk-context-test"
-                       {:item {:list (constantly [1])}
-                        :main {:fn (fn [x _ _ & _] (* x 10))
-                               :argcount 4}}) ;; Explicitly set argcount 4
-            :list
-            {:bulk true :context {:foo :bar}}))
-    (-> @signals first :context :foo) => :bar
-    (-> @signals second :context :foo) => :bar))
-
-^{:refer std.pipe/wrap-input :added "4.1"}
-(fact "TODO")
+  (invoke-intern-pipe nil '-task- {:main {:fn 'inc :argcount 1}} nil)
+  => '(def -task- (clojure.core/with-meta
+                    (std.pipe/task nil "-task-" {:main {:fn inc, :argcount 1}})
+                    {:doc nil, :arglists (quote ([& args]))})))
