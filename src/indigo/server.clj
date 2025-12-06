@@ -4,9 +4,11 @@
             [org.httpkit.client :as client]
             [net.http.router :as router]
             [indigo.server.api-common :as api]
+            [indigo.server.api-browser :as api-browser]
             [std.lib :as h]
             [std.string :as str]
             [std.json :as json]
+            [cheshire.core :as cheshire]
             [code.project :as project])
   (:import (java.awt Desktop)
            (java.net URI)))
@@ -18,12 +20,15 @@
 (def ^:dynamic *public-path* "src-js/indigo/dist")
 
 
-
 (defn wrap-browser-call
   [f]
   (fn [req]
-    (let [params (try (json/read (:body req))
-                      (catch Throwable _ {}))
+    (let [params (try (cheshire/parse-string (:body req) true)
+                      (catch Throwable t
+                        (println "JSON Parse Error:" (.getMessage t))
+                        {}))
+          _ (println "Request Body:" (:body req))
+          _ (println "Parsed Params:" params)
           req    (assoc req :params params)
           res    (f req)]
       {:status 200
@@ -35,76 +40,71 @@
    (merge
     (api/create-routes
      "POST /api/browse/"
-     {"lang/namespaces" (wrap-browser-call
+     {"libraries"       (wrap-browser-call
+                         (fn [req]
+                           (#'api-browser/list-libraries)))
+      "scan"            (wrap-browser-call
+                         (fn [req]
+                           (#'api-browser/scan-namespaces)))
+      "lang/namespaces" (wrap-browser-call
                          (fn [req]
                            (let [lang (or (get-in req [:params :lang]) "js")]
-                             (require 'indigo.server.api-browser)
-                             ((resolve 'indigo.server.api-browser/list-namespaces) lang))))
+                             (#'api-browser/list-namespaces lang))))
       "lang/components" (wrap-browser-call
                          (fn [req]
                            (let [lang (or (get-in req [:params :lang]) "js")
                                  ns   (get-in req [:params :ns])]
-                             (require 'indigo.server.api-browser)
-                             ((resolve 'indigo.server.api-browser/list-components) lang ns))))
+                             (#'api-browser/list-components lang ns))))
       "lang/component"  (wrap-browser-call
                          (fn [req]
                            (let [lang (or (get-in req [:params :lang]) "js")
                                  ns   (get-in req [:params :ns])
                                  comp (get-in req [:params :component])]
-                             (require 'indigo.server.api-browser)
-                             ((resolve 'indigo.server.api-browser/get-component) lang ns comp))))
-
+                             (#'indigo.server.api-browser/get-component lang ns comp))))
+      
       "clj/namespaces"  (wrap-browser-call
                          (fn [req]
-                           (require 'indigo.server.api-browser)
-                           ((resolve 'indigo.server.api-browser/list-clj-namespaces))))
+                           (#'indigo.server.api-browser/list-clj-namespaces)))
       "clj/namespace-source" (wrap-browser-call
                               (fn [req]
                                 (let [ns (get-in req [:params :ns])]
-                                  (require 'indigo.server.api-browser)
-                                  ((resolve 'indigo.server.api-browser/get-namespace-source) ns))))
+                                  (#'indigo.server.api-browser/get-namespace-source ns))))
       "clj/components"  (wrap-browser-call
                          (fn [req]
                            (let [ns (get-in req [:params :ns])]
-                             (require 'indigo.server.api-browser)
-                             ((resolve 'indigo.server.api-browser/list-clj-vars) ns))))
-                             ((resolve 'indigo.server.api-browser/list-clj-vars) ns))))
+                             (#'indigo.server.api-browser/list-clj-vars ns))))
+      
       "clj/var-tests"   (wrap-browser-call
                          (fn [req]
                            (let [ns   (get-in req [:params :ns])
                                  var  (get-in req [:params :var])]
-                             (require 'indigo.server.api-browser)
-                             ((resolve 'indigo.server.api-browser/list-tests-for-var) ns var))))
+                             (#'indigo.server.api-browser/list-tests-for-var ns var))))
       "clj/component"   (wrap-browser-call
                          (fn [req]
                            (let [ns   (get-in req [:params :ns])
                                  comp (get-in req [:params :component])]
-                             (require 'indigo.server.api-browser)
-                             ((resolve 'indigo.server.api-browser/get-clj-var-source) ns comp))))
+                             (#'indigo.server.api-browser/get-clj-var-source ns comp))))
 
       "test/namespaces" (wrap-browser-call
                          (fn [req]
-                           (require 'indigo.server.api-browser)
-                           ((resolve 'indigo.server.api-browser/list-test-namespaces))))
+                           (#'indigo.server.api-browser/list-test-namespaces)))
       "test/components" (wrap-browser-call
                          (fn [req]
                            (let [ns (get-in req [:params :ns])]
-                             (require 'indigo.server.api-browser)
-                             ((resolve 'indigo.server.api-browser/list-test-facts) ns))))
+                             (#'indigo.server.api-browser/list-test-facts ns))))
       "test/component"  (wrap-browser-call
                          (fn [req]
                            (let [ns   (get-in req [:params :ns])
                                  comp (get-in req [:params :component])]
-                             (require 'indigo.server.api-browser)
-                             ((resolve 'indigo.server.api-browser/get-test-fact-source) ns comp))))}))))
+                             (#'indigo.server.api-browser/get-test-fact-source ns comp))))}))))
 
 (def page-routes
   (router/router
    (api/create-routes
-    "GET "           
+    "GET "
     {#_#_"/pages/demo"   (api/page-handler "Dev Demo"  page-demo/main)
      "*"             (fn [{:keys [uri] :as req}]
-                       (router/serve-resource uri *public-path*)) })))
+                       (router/serve-resource uri *public-path*))})))
 
 (defn dev-handler
   [req]
@@ -137,7 +137,7 @@
   (if @*instance*
     (server-stop)
     (server-start)))
-    
+
 (defn server-restart
   []
   (if @*instance*
@@ -155,5 +155,4 @@
         "-d" "(+ 1 2 3))")
   (server-restart)
   (server-toggle)
-  (open-client)
-  )
+  (open-client))

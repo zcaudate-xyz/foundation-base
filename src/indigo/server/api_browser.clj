@@ -45,6 +45,30 @@
 
 ;; Clojure Runtime Endpoints ------------------------------------------------
 
+(defn scan-namespaces
+  "scans all project files for l/script forms and returns a map of {language [namespaces]}"
+  {:added "4.0"}
+  []
+  (try
+    (let [files (project/all-files (:source-paths (project/project)))
+          results (atom {})]
+      (doseq [[ns-sym file-path] files]
+        (try
+          (let [content (slurp file-path)
+                ;; Regex to find (l/script :<lang> ...)
+                matches (re-seq #"\(\s*l/script\s+:([a-zA-Z0-9\-\.]+)" content)]
+            (doseq [m matches]
+              (let [lang (keyword (second m))
+                    ns-str (str ns-sym)]
+                (swap! results update lang (fnil conj []) ns-str))))
+          (catch Throwable t
+            (println "Error scanning file:" file-path (.getMessage t)))))
+
+      ;; Sort namespaces for each language
+      (reduce-kv (fn [m k v] (assoc m k (sort v))) {} @results))
+    (catch Throwable t
+      {:error (str "Scan failed: " (.getMessage t))})))
+
 (defn list-clj-namespaces
   "lists all loaded clojure namespaces"
   {:added "4.0"}
@@ -61,13 +85,16 @@
   "lists all public vars for a clojure namespace"
   {:added "4.0"}
   [ns-str]
-  (let [ns-sym (symbol ns-str)]
-    (if (find-ns ns-sym)
-      (->> (ns-publics ns-sym)
-           (keys)
-           (map str)
-           (sort))
-      [])))
+  (if (empty? ns-str)
+    []
+    (let [ns-sym (symbol ns-str)]
+      (try (require ns-sym) (catch Throwable t))
+      (if (find-ns ns-sym)
+        (->> (ns-publics ns-sym)
+             (keys)
+             (map str)
+             (sort))
+        []))))
 
 (defn get-clj-var-source
   "gets the source code for a clojure var"
