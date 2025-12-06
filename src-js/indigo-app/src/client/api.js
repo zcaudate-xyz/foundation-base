@@ -179,3 +179,17 @@ export function runTestNs(ns) {
         body: JSON.stringify({ ns })
     }).then(res => res.json())
 }
+
+export async function scaffoldTest(ns) {
+    const response = await fetch(`/api/browse/clj/scaffold-test`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ ns })
+    });
+    if (!response.ok) {
+        throw new Error(`Failed to scaffold test: ${response.statusText}`);
+    }
+    return response.json();
+}

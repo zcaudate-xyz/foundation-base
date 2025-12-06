@@ -124,6 +124,11 @@
                                  prefix (get-in req [:params :prefix])]
                              (#'indigo.server.api-browser/get-completions ns prefix))))
 
+      "clj/scaffold-test" (wrap-browser-call
+                           (fn [req]
+                             (let [ns (get-in req [:params :ns])]
+                               (#'indigo.server.api-browser/scaffold-test ns))))
+
       "test/run-var"    (wrap-browser-call
                          (fn [req]
                            (let [ns   (get-in req [:params :ns])
@@ -153,15 +158,33 @@
                                  (http/send! channel "pong")
                                  (do
                                    (println "REPL Received:" data)
-                                   (try
-                                     (let [form (read-string data)
-                                           result (with-out-str
-                                                    (binding [*out* *out*]
-                                                      (let [res (eval form)]
-                                                        (println res))))]
-                                       (http/send! channel result))
-                                     (catch Throwable t
-                                       (http/send! channel (str "Error: " (.getMessage t)))))))))
+                                   (let [json-data (try (cheshire/parse-string data true)
+                                                        (catch Throwable _ nil))]
+                                     (if (and json-data (:id json-data) (:code json-data))
+                                       ;; Handle JSON request with ID
+                                       (try
+                                         (let [form (read-string (:code json-data))
+                                               result (with-out-str
+                                                        (binding [*out* *out*]
+                                                          (let [res (eval form)]
+                                                            (print res))))] ;; Use print to avoid newline
+                                           (http/send! channel (cheshire/generate-string {:id (:id json-data)
+                                                                                          :result result
+                                                                                          :type "eval-result"})))
+                                         (catch Throwable t
+                                           (http/send! channel (cheshire/generate-string {:id (:id json-data)
+                                                                                          :error (.getMessage t)
+                                                                                          :type "eval-error"}))))
+                                       ;; Handle legacy raw string request
+                                       (try
+                                         (let [form (read-string data)
+                                               result (with-out-str
+                                                        (binding [*out* *out*]
+                                                          (let [res (eval form)]
+                                                            (println res))))]
+                                           (http/send! channel result))
+                                         (catch Throwable t
+                                           (http/send! channel (str "Error: " (.getMessage t)))))))))))
     (swap! context/repl-clients conj channel)
     (println "REPL Client connected")))
 

@@ -281,3 +281,21 @@
     (catch Throwable t
       [])))
 
+(defn scaffold-test
+  "scaffolds a test for a namespace"
+  {:added "4.0"}
+  [ns-str]
+  (try
+    (let [ns-sym (symbol ns-str)
+          ;; Use code.manage to scaffold
+          ;; We need to dynamically require code.manage to avoid circular deps if any,
+          ;; or just require it at top level.
+          _ (require 'code.manage)
+          scaffold-fn (resolve 'code.manage/scaffold)]
+      (if scaffold-fn
+        (do
+          (scaffold-fn ns-sym {:write true})
+          {:status "ok" :message (str "Scaffolded test for " ns-str)})
+        (throw (Exception. "code.manage/scaffold not found"))))
+    (catch Throwable t
+      {:status "error" :message (.getMessage t)})))

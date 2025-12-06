@@ -47,9 +47,26 @@ export function buildLibraryTree(libraryData) {
 }
 
 export function LibraryBrowser({ onImportComponent, onImportAndEdit }) {
-  const [libraryData, setLibraryData] = React.useState([]);
-  const [loading, setLoading] = React.useState(true);
-  const [error, setError] = React.useState(null);
+  const [libraries, setLibraries] = React.useState({});
+  const [expanded, setExpanded] = React.useState(() => {
+    try {
+      const saved = localStorage.getItem("indigo-library-expanded");
+      return saved ? JSON.parse(saved) : {};
+    } catch (e) {
+      console.error("Failed to load expanded state", e);
+      return {};
+    }
+  });
+
+  React.useEffect(() => {
+    try {
+      localStorage.setItem("indigo-library-expanded", JSON.stringify(expanded));
+    } catch (e) {
+      console.error("Failed to save expanded state", e);
+    }
+  }, [expanded]);
+
+  const [loading, setLoading] = React.useState(false);
   const [expandedNodes, setExpandedNodes] = React.useState(new Set());
   const [search, setSearch] = React.useState("");
 
