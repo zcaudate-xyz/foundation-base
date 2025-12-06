@@ -79,7 +79,7 @@
           code.test/run:load
           code.test/run:test
           code.test/run-errored
-          code.java.compile/javac
+          code.tool.java.compile/javac
 
           indigo/test:all
           indigo/test:app
@@ -90,11 +90,11 @@
           indigo/test:infra
           indigo/fix-tests
 
-          code.maven/linkage
-          code.maven/package
-          code.maven/install
-          code.maven/deploy
-          code.maven/deploy-lein
+          code.tool.maven/linkage
+          code.tool.maven/package
+          code.tool.maven/install
+          code.tool.maven/deploy
+          code.tool.maven/deploy-lein
           code.manage/vars
           code.manage/locate-code
           code.manage/grep

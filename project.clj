@@ -9,9 +9,9 @@
    #_#_"test-unit"   ["run" "-m" "code.test" "exit"]
    "publish"     ["exec" "-ep" "(use 'code.doc)     (deploy-template :all) (publish :all)"]
    "incomplete"  ["exec" "-ep" "(use 'code.manage)  (incomplete :all) (System/exit 0)"]
-   "install"     ["exec" "-ep" "(use 'code.maven)   (install :all {:tag :all}) (System/exit 0)"]
-   "deploy"      ["exec" "-ep" "(use 'code.maven)   (deploy :all {:tag :all}) (System/exit 0)"]
-   "deploy-lein" ["exec" "-ep" "(use 'code.maven)   (deploy-lein :all {:tag :all}) (System/exit 0)"]
+   "install"     ["exec" "-ep" "(use 'code.tool.maven)   (install :all {:tag :all}) (System/exit 0)"]
+   "deploy"      ["exec" "-ep" "(use 'code.tool.maven)   (deploy :all {:tag :all}) (System/exit 0)"]
+   "deploy-lein" ["exec" "-ep" "(use 'code.tool.maven)   (deploy-lein :all {:tag :all}) (System/exit 0)"]
    "push-native-code"  ["run" "-m" "component.task-native-index"]
    "push-c-000-pthreads"        ["run" "-m" "play.c-000-pthreads-hello.build"]
    "push-ngx-000-hello"         ["run" "-m" "play.ngx-000-hello.build"]
@@ -39,7 +39,7 @@
    ;; code.doc
    [markdown-clj/markdown-clj "1.11.8"] ;; not mustache
    
-   ;; code.java.compile
+   ;; code.tool.java.compile
    [org.ow2.asm/asm "9.7.1"]
    
    ;; code.manage
@@ -155,7 +155,7 @@
    [org.apache.commons/commons-math3 "3.6.1"]
 
    ;; std.text.diff
-   [com.googlecode.java-diff-utils/diffutils "1.3.0"]
+   [com.googlecode.tool.java-diff-utils/diffutils "1.3.0"]
    
    
    ;; MCP
