@@ -19,14 +19,14 @@
 (fact "converts a ptr into a form"
   (with-redefs [ptr/get-entry (fn [_] {:form '(defn foo [x] x) :id 'foo :module 'mod :rt/redis {:nkeys 0}})]
     (raw-compile-form 'ptr))
-  => '(return (mod/foo (unpack ARGV))))
+  => '(return (mod/foo (. ARGV [1]))))
 
 ^{:refer rt.redis.eval-script/raw-compile :added "4.0"}
 (fact "compiles a function as body and sha"
   (with-redefs [raw-compile-form (fn [_] '(return 1))
                 impl/emit-script (fn [& _] "return 1")]
     (raw-compile 'ptr))
-  => {:body "return 1", :sha "e95b5d8294339e7c23973902f50464772228717d"})
+  => {:body "return 1", :sha "e0e1f9fabfc9d4800c877a703b823ac0578ff8db"})
 
 ^{:refer rt.redis.eval-script/raw-prep-in-fn :added "4.0"}
 (fact "prepares the arguments for entry"

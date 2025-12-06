@@ -54,29 +54,32 @@
                        "\nprotected-mode no"
                        (if (map? init)
                          (str "\n" (config-to-args init))))))]
-    (-> (if (not (get @*active* port))
-          (swap! *active*
-                 (fn [m]
-                   (let [process (h/sh
-                                  {:args ["redis-server" (str "./" redis-conf)]
-                                   :wait false
-                                   :root root-dir})
-                         thread  (-> (h/future (h/sh-wait process))
-                                     (h/on:complete (fn [_ _]
-                                                      (try (let [out (h/sh-output process)]
-                                                             (when (not= 0 (:exit out))
-                                                               (h/prn out)))
-                                                           (catch Throwable t))
-                                                      (swap! *active* dissoc port))))]
-                     (h/wait-for-port "localhost" port
-                                      {:timeout 1000})
-                     (assoc m port {:type type
-                                    :port port
-                                    :root root-dir
-                                    :process process
-                                    :thread thread}))))
-          @*active*)
-        (get port))))
+    (let [cmd (if (fs/exists? "bin/redis-server")
+                (str (.toAbsolutePath (fs/path "bin/redis-server")))
+                "redis-server")]
+      (-> (if (not (get @*active* port))
+            (swap! *active*
+                   (fn [m]
+                     (let [process (h/sh
+                                    {:args [cmd (str "./" redis-conf)]
+                                     :wait false
+                                     :root root-dir})
+                           thread  (-> (h/future (h/sh-wait process))
+                                       (h/on:complete (fn [_ _]
+                                                        (try (let [out (h/sh-output process)]
+                                                               (when (not= 0 (:exit out))
+                                                                 (h/prn out)))
+                                                             (catch Throwable t))
+                                                        (swap! *active* dissoc port))))]
+                       (h/wait-for-port "localhost" port
+                                        {:timeout 1000})
+                       (assoc m port {:type type
+                                      :port port
+                                      :root root-dir
+                                      :process process
+                                      :thread thread}))))
+            @*active*)
+          (get port)))))
 
 (defn stop-redis-server
   "stop the redis server"
@@ -127,4 +130,3 @@
   (map (fn [port]
          (stop-redis-server port :array))
        ports))
-

@@ -4,7 +4,12 @@
             [lib.redis.bench :as bench]
             [std.lang :as l]
             [xt.lang.base-lib :as k]
-            [lib.redis.script :as script]))
+            [lib.redis.script :as script]
+            [rt.redis.client :as client]))
+
+;; Force registration of redis runtime
+(defonce +setup+
+  client/+redis-oneshot+)
 
 (l/script- :lua
   {:runtime :redis.client

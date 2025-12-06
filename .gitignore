@@ -47,3 +47,5 @@ pom.xml.asc
 /prompt/aaa
 *_temp
 *.~undo-tree~
+/bin/
+/redis-stable/
