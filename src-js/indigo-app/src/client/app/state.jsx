@@ -434,6 +434,25 @@ export function AppStateProvider({ children }) {
     let [namespaceError, setNamespaceError] = React.useState(null);
     let [runningTest, setRunningTest] = React.useState(null);
 
+    // Env Browser State
+    let [envExpandedNodes, setEnvExpandedNodes] = React.useState(() => {
+        try {
+            const saved = localStorage.getItem("indigo-env-expanded");
+            return saved ? new Set(JSON.parse(saved)) : new Set();
+        } catch (e) {
+            console.error("Failed to load env expanded state", e);
+            return new Set();
+        }
+    });
+
+    React.useEffect(() => {
+        try {
+            localStorage.setItem("indigo-env-expanded", JSON.stringify(Array.from(envExpandedNodes)));
+        } catch (e) {
+            console.error("Failed to save env expanded state", e);
+        }
+    }, [envExpandedNodes]);
+
     // Library State
     let [libraryExpandedNodes, setLibraryExpandedNodes] = React.useState(() => {
         try {
@@ -606,6 +625,10 @@ export function AppStateProvider({ children }) {
         setNamespaceCode, // Added setter for code (e.g. for editor changes)
         refreshNamespaceCode,
         refreshNamespaceEntries,
+
+        // Env Browser
+        envExpandedNodes,
+        setEnvExpandedNodes,
 
         // Library
         libraryExpandedNodes,

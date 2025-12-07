@@ -67,6 +67,11 @@ export default defineConfig({
         target: 'http://localhost:1311',
         changeOrigin: true,
       },
+      '/repl': {
+        target: 'ws://localhost:1311',
+        ws: true,
+        changeOrigin: true,
+      },
     },
   },
 })

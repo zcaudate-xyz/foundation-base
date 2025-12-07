@@ -180,8 +180,13 @@
                                        ;; Handle JSON request with ID
                                        (try
                                          (let [form (read-string (:code json-data))
+                                               ns-str (:ns json-data)
+                                               target-ns (if ns-str (symbol ns-str) 'user)
+                                               _ (when ns-str (require target-ns)) ;; Ensure NS is loaded
+                                               _ (h/prn form ns-str)
                                                result (with-out-str
-                                                        (binding [*out* *out*]
+                                                        (binding [*out* *out*
+                                                                  *ns* (or (find-ns target-ns) (create-ns target-ns))]
                                                           (let [res (eval form)]
                                                             (print res))))] ;; Use print to avoid newline
                                            (http/send! channel (cheshire/generate-string {:id (:id json-data)

@@ -104,26 +104,54 @@ export function PropertiesPanel() {
                 >
                   <div className="flex items-center gap-2 overflow-hidden">
                     <span className={`w-2 h-2 rounded-full shrink-0 ${entry.type === ':fragment' ? 'bg-green-400' :
-                        entry.op === 'defn' || entry.type === 'function' ? 'bg-blue-400' :
-                          entry.op === 'defmacro' || entry.type === 'macro' ? 'bg-purple-400' :
-                            'bg-yellow-400'
+                      entry.op === 'defn' || entry.type === 'function' ? 'bg-blue-400' :
+                        entry.op === 'defmacro' || entry.type === 'macro' ? 'bg-purple-400' :
+                          'bg-yellow-400'
                       }`} />
                     <span className="truncate" title={entry.var}>{entry.var}</span>
                   </div>
 
-                  {entry.test && (
+                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                     <button
-                      onClick={(e) => handleRunTest(e, entry.var)}
-                      className="p-1 hover:bg-[#444] rounded group relative"
-                      title="Run Test"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedVar(entry.var);
+                        setNamespaceViewType("file");
+                        setNamespaceFileViewMode("source");
+                      }}
+                      className="px-1.5 py-0.5 text-[10px] bg-[#323232] hover:bg-[#444] text-gray-400 hover:text-gray-200 rounded border border-[#444]"
+                      title="View Source"
                     >
-                      {runningTest === entry.var ? (
-                        <div className="w-2 h-2 rounded-full bg-yellow-500 animate-pulse" />
-                      ) : (
-                        <div className="w-2 h-2 rounded-full bg-gray-600 group-hover:bg-green-500 transition-colors" />
-                      )}
+                      src
                     </button>
-                  )}
+                    {entry.test && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedVar(entry.var);
+                          setNamespaceViewType("file");
+                          setNamespaceFileViewMode("test");
+                        }}
+                        className="px-1.5 py-0.5 text-[10px] bg-[#323232] hover:bg-[#444] text-gray-400 hover:text-gray-200 rounded border border-[#444]"
+                        title="View Test"
+                      >
+                        test
+                      </button>
+                    )}
+                    {entry.test && (
+                      <button
+                        onClick={(e) => handleRunTest(e, entry.var)}
+                        className="p-1 hover:bg-[#444] rounded relative"
+                        title="Run Test"
+                      >
+                        {runningTest === entry.var ? (
+                          <div className="w-2 h-2 rounded-full bg-yellow-500 animate-pulse" />
+                        ) : (
+                          <Lucide.Play size={10} className="text-gray-500 hover:text-green-500" />
+                        )}
+                      </button>
+                    )}
+                  </div>
                 </div>
               ))}
               {entries.length === 0 && (

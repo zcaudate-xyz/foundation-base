@@ -7,6 +7,7 @@ import * as r from '@/libs/js/react'
 import * as repl from '@/client/repl-client'
 import * as app from '@/client/app'
 
+import { EventsProvider } from '@/client/app/events-context'
 import { AppStateProvider } from '@/client/app/state'
 
 // code.dev.index-main/AppIndex [35] 
@@ -16,7 +17,9 @@ export function AppIndex() {
   }, []);
   return (
     <AppStateProvider>
-      <app.App></app.App>
+      <EventsProvider>
+        <app.App></app.App>
+      </EventsProvider>
     </AppStateProvider>);
 }
 

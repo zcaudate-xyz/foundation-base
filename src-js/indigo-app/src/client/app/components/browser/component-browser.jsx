@@ -1,6 +1,7 @@
 import * as Lucide from 'lucide-react'
 import React from 'react'
 import { fetchNamespaces } from '../../../api'
+import { useAppState } from '../../state'
 import { fuzzyMatch } from '../../utils/search'
 import { BrowserPanel, BrowserTree } from './common'
 
@@ -56,10 +57,10 @@ export function buildNamespaceTree(namespaces) {
 }
 
 export function EnvBrowser({ onAddComponent, selectedNamespace, onSelectNamespace }) {
+  const { envExpandedNodes: expandedNodes, setEnvExpandedNodes: setExpandedNodes } = useAppState();
   const [namespaces, setNamespaces] = React.useState([]);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState(null);
-  const [expandedNodes, setExpandedNodes] = React.useState(new Set());
   const [search, setSearch] = React.useState("");
 
   React.useEffect(() => {

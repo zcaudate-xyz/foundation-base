@@ -117,7 +117,6 @@ export function App() {
           <FigmaUi.ResizableHandle className="w-[1px] bg-[#323232]"></FigmaUi.ResizableHandle>
           <FigmaUi.ResizablePanel defaultSize={30} minSize={20} maxSize={40}>
             <FigmaUi.ResizablePanelGroup direction="vertical">
-              {/* // ... (inside App component) */}
               <FigmaUi.ResizablePanel defaultSize={70} minSize={30}>
                 {activeTab === "library" ? (
                   <bv.BookView />
