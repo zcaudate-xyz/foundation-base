@@ -62,45 +62,28 @@ export function App() {
     <ReactDnd.DndProvider backend={ReactDndHtml5Backend.HTML5Backend}>
       <div className="flex flex-col h-screen bg-[#1e1e1e]">
         <FigmaUi.ResizablePanelGroup direction="horizontal" className="flex-1">
-          <FigmaUi.ResizablePanel defaultSize={20} minSize={15} maxSize={30}>
-            <div className="flex-1 flex flex-col h-full">
-              <div className="bg-[#252526] border-b border-[#323232]">
-                <div className="flex w-full h-8">
-                  <button
-                    onClick={() => setActiveTab("env")}
-                    className={`flex-1 text-xs font-medium uppercase tracking-wide ${activeTab === "env" ? "text-gray-200 bg-[#323232]" : "text-gray-500 hover:text-gray-300 hover:bg-[#2a2d2e]"}`}
-                  >
-                    Env
-                  </button>
-                  <button
-                    onClick={() => setActiveTab("library")}
-                    className={`flex-1 text-xs font-medium uppercase tracking-wide ${activeTab === "library" ? "text-gray-200 bg-[#323232]" : "text-gray-500 hover:text-gray-300 hover:bg-[#2a2d2e]"}`}
-                  >
-                    Library
-                  </button>
+          <FigmaUi.ResizablePanel defaultSize={20} minSize={15}>
+            <FigmaUi.ResizablePanelGroup direction="vertical">
+              <FigmaUi.ResizablePanel defaultSize={70} minSize={30}>
+                <div className="flex-1 flex flex-col h-full">
+                  <div className="flex-1 m-0 overflow-hidden">
+                    <cb.ComponentBrowser
+                      onAddComponent={addComponent}
+                      selectedNamespace={selectedNamespace}
+                      onSelectNamespace={setSelectedNamespace}>
+                    </cb.ComponentBrowser>
+                  </div>
                 </div>
-              </div>
-              {activeTab === "env" && (
-                <div className="flex-1 m-0 overflow-hidden">
-                  <cb.ComponentBrowser
-                    onAddComponent={addComponent}
-                    selectedNamespace={selectedNamespace}
-                    onSelectNamespace={setSelectedNamespace}>
-                  </cb.ComponentBrowser>
-                </div>
-              )}
-              {activeTab === "library" && (
-                <div className="flex-1 m-0 overflow-hidden">
-                  <lb.LibraryBrowser />
-                </div>
-              )}
-            </div>
+              </FigmaUi.ResizablePanel>
+              <FigmaUi.ResizableHandle className="h-1 bg-[#252526] hover:bg-blue-500 transition-colors"></FigmaUi.ResizableHandle>
+              <FigmaUi.ResizablePanel defaultSize={30} minSize={20}>
+                <rp.ReplPanel />
+              </FigmaUi.ResizablePanel>
+            </FigmaUi.ResizablePanelGroup>
           </FigmaUi.ResizablePanel>
-          <FigmaUi.ResizableHandle className="w-[1px] bg-[#323232]"></FigmaUi.ResizableHandle>
+          <FigmaUi.ResizableHandle className="w-1 bg-[#252526] hover:bg-blue-500 transition-colors"></FigmaUi.ResizableHandle>
           <FigmaUi.ResizablePanel defaultSize={50} minSize={30}>
-            {activeTab === "library" ? (
-              <llv.LibraryLiveView />
-            ) : selectedNamespace ? (
+            {selectedNamespace ? (
               <nv.NamespaceViewer />
             ) : (
               <vc.ViewportCanvas
@@ -114,21 +97,9 @@ export function App() {
               </vc.ViewportCanvas>
             )}
           </FigmaUi.ResizablePanel>
-          <FigmaUi.ResizableHandle className="w-[1px] bg-[#323232]"></FigmaUi.ResizableHandle>
+          <FigmaUi.ResizableHandle className="w-1 bg-[#252526] hover:bg-blue-500 transition-colors"></FigmaUi.ResizableHandle>
           <FigmaUi.ResizablePanel defaultSize={30} minSize={20} maxSize={40}>
-            <FigmaUi.ResizablePanelGroup direction="vertical">
-              <FigmaUi.ResizablePanel defaultSize={70} minSize={30}>
-                {activeTab === "library" ? (
-                  <bv.BookView />
-                ) : (
-                  <pp.PropertiesPanel />
-                )}
-              </FigmaUi.ResizablePanel>
-              <FigmaUi.ResizableHandle className="h-[1px] bg-[#323232]"></FigmaUi.ResizableHandle>
-              <FigmaUi.ResizablePanel defaultSize={30} minSize={20}>
-                <rp.ReplPanel />
-              </FigmaUi.ResizablePanel>
-            </FigmaUi.ResizablePanelGroup>
+            <pp.PropertiesPanel />
           </FigmaUi.ResizablePanel>
         </FigmaUi.ResizablePanelGroup>
       </div>

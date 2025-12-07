@@ -9,9 +9,9 @@ export function BrowserPanel({ title, search, onSearchChange, children, loading,
 
     return (
         <MenuContainer>
-            <div className="h-8 bg-[#252525] border-b border-[#323232] flex items-center px-3 justify-between shrink-0">
+            <div className="h-8 bg-[#252525] border-b border-[#323232] flex items-center px-3 gap-2 shrink-0">
                 {title && <span className="text-xs font-medium text-gray-300 uppercase tracking-wide">{title}</span>}
-                <div className="relative flex-1 ml-2">
+                <div className="relative flex-1">
                     <Lucide.Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-gray-500" />
                     <FigmaUi.Input
                         value={search}
@@ -21,11 +21,11 @@ export function BrowserPanel({ title, search, onSearchChange, children, loading,
                     />
                 </div>
             </div>
-            <FigmaUi.ScrollArea className="flex-1">
+            <div className="flex-1 overflow-y-auto">
                 <div className="py-2">
                     {children}
                 </div>
-            </FigmaUi.ScrollArea>
+            </div>
         </MenuContainer>
     );
 }

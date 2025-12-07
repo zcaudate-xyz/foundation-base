@@ -18,7 +18,7 @@ export function ReplPanel() {
         loading: sessionsLoading
     } = useEvents();
 
-    const [logs, setLogs] = React.useState([]);
+    const [logsMap, setLogsMap] = React.useState({});
     const [status, setStatus] = React.useState('disconnected');
     const [activeTab, setActiveTab] = React.useState('console'); // 'console' | 'events'
     const [isRenaming, setIsRenaming] = React.useState(false);
@@ -62,6 +62,10 @@ export function ReplPanel() {
         };
     }, []);
 
+    // Track sessions for log correlation without re-subscribing
+    const sessionsRef = React.useRef(sessions);
+    React.useEffect(() => { sessionsRef.current = sessions; }, [sessions]);
+
     React.useEffect(() => {
         const unsubscribeMsg = repl.addMessageListener((msg) => {
             if (msg && msg.id && typeof msg.id === 'string' && msg.id.startsWith('eval-')) return;
@@ -71,12 +75,34 @@ export function ReplPanel() {
         });
 
         const unsubscribeLog = repl.addLogListener((entry) => {
-            setLogs((prev) => {
-                const newLogs = prev.concat([entry]);
-                if (newLogs.length > 200) {
-                    return newLogs.slice(newLogs.length - 200);
+            setLogsMap((prev) => {
+                let targetNs = 'user';
+                const msg = entry.message;
+
+                if (msg && typeof msg === 'object') {
+                    // 1. Check explicit NS in message (outgoing)
+                    if (msg.ns) {
+                        targetNs = msg.ns;
+                    }
+                    // 2. Check via Request ID -> Session ID -> Session Name (incoming)
+                    else if (msg.id && requestSessionMap.current[msg.id]) {
+                        const sessionId = requestSessionMap.current[msg.id];
+                        const session = sessionsRef.current[sessionId];
+                        if (session) {
+                            targetNs = session.type === 'namespace' ? session.name : 'user';
+                        }
+                    }
                 }
-                return newLogs;
+
+                const prevLogs = prev[targetNs] || [];
+                const newLogs = prevLogs.concat([entry]);
+
+                if (newLogs.length > 200) newLogs.shift();
+
+                return {
+                    ...prev,
+                    [targetNs]: newLogs
+                };
             });
         });
 
@@ -117,7 +143,7 @@ export function ReplPanel() {
         if (logScrollRef.current && activeTab === 'events') {
             logScrollRef.current.scrollTop = logScrollRef.current.scrollHeight;
         }
-    }, [logs, activeTab]);
+    }, [logsMap, activeTab, activeSessionId]);
 
     const handleCreateGlobal = () => {
         const id = createSession('global', `Global ${Object.values(sessions).filter(s => s.type === 'global').length + 1}`);
@@ -305,7 +331,13 @@ export function ReplPanel() {
                             if (activeTab === 'console') {
                                 clearSession(activeSessionId);
                             } else {
-                                setLogs([]);
+                                setLogsMap(prev => {
+                                    const targetNs = activeSession?.type === 'namespace' ? activeSession.name : 'user';
+                                    return {
+                                        ...prev,
+                                        [targetNs]: []
+                                    };
+                                });
                             }
                         }}
                         className="text-[10px] text-gray-500 hover:text-gray-300"
@@ -432,7 +464,7 @@ export function ReplPanel() {
                     className="flex-1 overflow-y-auto p-2 font-mono text-xs"
                     ref={logScrollRef}
                 >
-                    {logs.map((entry, i) => {
+                    {(logsMap[activeSessionId === `console-${selectedNamespace}` ? selectedNamespace : 'user'] || []).map((entry, i) => {
                         const isOut = entry.direction === 'out';
                         const time = new Date(entry.timestamp).toLocaleTimeString();
                         const content = typeof entry.message === 'object' ? JSON.stringify(entry.message, null, 2) : entry.message;
@@ -451,8 +483,12 @@ export function ReplPanel() {
                             </div>
                         );
                     })}
+                    {(!logsMap[activeSessionId === `console-${selectedNamespace}` ? selectedNamespace : 'user'] || logsMap[activeSessionId === `console-${selectedNamespace}` ? selectedNamespace : 'user'].length === 0) && (
+                        <div className="text-gray-500 italic text-center mt-4">No events for this session.</div>
+                    )}
                 </div>
-            )}
-        </div>
+            )
+            }
+        </div >
     );
 }

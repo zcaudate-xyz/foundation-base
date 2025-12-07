@@ -233,3 +233,53 @@ export function getSexpBeforeCursor(text, offset) {
     }
     return null;
 }
+
+export function getSexpRangeBeforeCursor(text, offset) {
+    // 1. Skip whitespace backwards
+    let i = offset - 1;
+    while (i >= 0 && /\s/.test(text[i])) i--;
+    if (i < 0) return null;
+
+    const end = i + 1;
+    const char = text[i];
+
+    let start = -1;
+
+    if (char === ')' || char === '}' || char === ']') {
+        // List: find matching open
+        let balance = 0;
+        for (let j = i; j >= 0; j--) {
+            const c = text[j];
+            if (c === ')' || c === '}' || c === ']') balance++;
+            else if (c === '(' || c === '{' || c === '[') {
+                balance--;
+                if (balance === 0) {
+                    start = j;
+                    break;
+                }
+            }
+        }
+    } else if (char === '"') {
+        // String: find matching open quote
+        for (let j = i - 1; j >= 0; j--) {
+            if (text[j] === '"' && text[j - 1] !== '\\') {
+                start = j;
+                break;
+            }
+        }
+    } else {
+        // Atom: read backwards until whitespace or delimiter
+        start = i;
+        while (start >= 0 && !/[\s\(\)\[\]\{\}"]/.test(text[start])) start--;
+        start++; // The first char of the atom
+    }
+
+    if (start !== -1) {
+        return {
+            text: text.substring(start, end),
+            start: start,
+            end: end
+        };
+    }
+    return null;
+}

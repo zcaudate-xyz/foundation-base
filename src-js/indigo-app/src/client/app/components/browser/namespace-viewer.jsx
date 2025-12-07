@@ -1,7 +1,7 @@
 import React from 'react'
 import Editor from '@monaco-editor/react'
 import { saveNamespaceSource, fetchCompletions, scaffoldTest } from '../../../api'
-import { slurpForward, barfForward, getSexpBeforeCursor } from '../../utils/paredit'
+import { slurpForward, barfForward, getSexpBeforeCursor, getSexpRangeBeforeCursor } from '../../utils/paredit'
 import { send, addMessageListener } from '../../../repl-client'
 import * as FigmaUi from '@xtalk/figma-ui'
 import * as Lucide from 'lucide-react'
@@ -13,19 +13,15 @@ export function NamespaceViewer() {
     const {
         selectedNamespace: namespace,
         selectedVar,
-        namespaceViewType: viewType,
         namespaceFileViewMode: fileViewMode,
-        namespaceEntries: entries,
         namespaceCode: code,
         namespaceLoading: loading,
         namespaceError: error,
-        setNamespaceViewType: setViewType,
         setNamespaceFileViewMode: setFileViewMode,
         setNamespaceCode: setCode,
         setNamespaceLoading: setLoading,
         setNamespaceError: setError,
-        refreshNamespaceCode,
-        refreshNamespaceEntries
+        refreshNamespaceCode
     } = useAppState();
 
     const [scaffoldLoading, setScaffoldLoading] = React.useState(false);
@@ -33,26 +29,21 @@ export function NamespaceViewer() {
 
     // Refs for editors
     const fileEditorRef = React.useRef(null);
-    const sourceEditorRef = React.useRef(null);
     const testEditorRef = React.useRef(null);
 
     // Global Monaco refs
     const monacoRef = React.useRef(null);
     const completionProviderRef = React.useRef(null);
 
-    // Effect to load content based on view type
+    // Effect to load content
     React.useEffect(() => {
         if (!namespace) return;
-        if (viewType === "file") {
-            refreshNamespaceCode();
-        } else {
-            refreshNamespaceEntries();
-        }
-    }, [viewType, namespace, refreshNamespaceCode, refreshNamespaceEntries]);
+        refreshNamespaceCode();
+    }, [namespace, refreshNamespaceCode]);
 
     // Effect to handle external selection (scroll to var in file view)
     React.useEffect(() => {
-        if (selectedVar && viewType === "file" && fileEditorRef.current) {
+        if (selectedVar && fileEditorRef.current) {
             const model = fileEditorRef.current.getModel();
             if (model) {
                 const text = model.getValue();
@@ -74,23 +65,25 @@ export function NamespaceViewer() {
                         fileEditorRef.current.focus();
 
                         // Flash decoration
-                        const range = new monaco.Range(position.lineNumber, 1, position.lineNumber + 1, 1);
-                        const flashDecoration = {
-                            range: range,
-                            options: {
-                                className: 'eval-flash-decoration',
-                                isWholeLine: true
-                            }
-                        };
-                        const collection = fileEditorRef.current.createDecorationsCollection([flashDecoration]);
-                        setTimeout(() => {
-                            collection.clear();
-                        }, 500);
+                        if (monacoRef.current) {
+                            const range = new monacoRef.current.Range(position.lineNumber, 1, position.lineNumber + 1, 1);
+                            const flashDecoration = {
+                                range: range,
+                                options: {
+                                    className: 'eval-flash-decoration',
+                                    isWholeLine: true
+                                }
+                            };
+                            const collection = fileEditorRef.current.createDecorationsCollection([flashDecoration]);
+                            setTimeout(() => {
+                                collection.clear();
+                            }, 500);
+                        }
                     }
                 }
             }
         }
-    }, [selectedVar, viewType, fileViewMode]);
+    }, [selectedVar, fileViewMode]);
 
     // Register Completion Provider (Global)
     React.useEffect(() => {
@@ -147,9 +140,9 @@ export function NamespaceViewer() {
         try {
             await saveNamespaceSource(targetNs, currentSource);
             console.log("Saved namespace:", targetNs);
-            if (viewType === "file") {
-                setCode(currentSource);
-            }
+            await saveNamespaceSource(targetNs, currentSource);
+            console.log("Saved namespace:", targetNs);
+            setCode(currentSource);
             toast.success(`Saved ${targetNs}`);
         } catch (err) {
             console.error("Failed to save namespace", err);
@@ -192,9 +185,7 @@ export function NamespaceViewer() {
     };
 
     const getActiveEditor = () => {
-        if (viewType === "file") return fileEditorRef.current;
-        if (viewType === "entry") return sourceEditorRef.current;
-        return null;
+        return fileEditorRef.current;
     };
 
     const handleEval = () => {
@@ -284,9 +275,31 @@ export function NamespaceViewer() {
         const position = editor.getPosition();
         const offset = model.getOffsetAt(position);
         const text = model.getValue();
-        const code = getSexpBeforeCursor(text, offset);
 
-        if (code) {
+        const result = getSexpRangeBeforeCursor(text, offset);
+
+        if (result) {
+            const code = result.text;
+
+            // Highlight
+            if (monacoRef.current) {
+                const startPos = model.getPositionAt(result.start);
+                const endPos = model.getPositionAt(result.end);
+                const range = new monacoRef.current.Range(startPos.lineNumber, startPos.column, endPos.lineNumber, endPos.column);
+
+                const flashDecoration = {
+                    range: range,
+                    options: {
+                        className: 'eval-flash-decoration',
+                        isWholeLine: false
+                    }
+                };
+                const collection = editor.createDecorationsCollection([flashDecoration]);
+                setTimeout(() => {
+                    collection.clear();
+                }, 300);
+            }
+
             const id = "eval-" + Date.now();
             toast.promise(
                 new Promise((resolve, reject) => {
@@ -317,7 +330,9 @@ export function NamespaceViewer() {
         try {
             await scaffoldTest(namespace);
             await new Promise(r => setTimeout(r, 1000));
-            if (viewType === "file" && fileViewMode === "test") {
+            await scaffoldTest(namespace);
+            await new Promise(r => setTimeout(r, 1000));
+            if (fileViewMode === "test") {
                 refreshNamespaceCode();
             }
         } catch (err) {
@@ -340,7 +355,6 @@ export function NamespaceViewer() {
         registerCompletion(monaco);
 
         if (type === "file") fileEditorRef.current = editor;
-        if (type === "source") sourceEditorRef.current = editor;
         if (type === "test") testEditorRef.current = editor;
 
         const decorationsCollection = editor.createDecorationsCollection();
@@ -353,13 +367,7 @@ export function NamespaceViewer() {
             run: () => {
                 let targetNs = namespaceRef.current;
                 if (type === "file" && fileViewMode === "test") targetNs = targetNs + "-test";
-                // For entry view, we might want to save the whole file? 
-                // But we are viewing a snippet. Saving snippet is hard.
-                if (type === "file") {
-                    handleSave(editor, targetNs);
-                } else {
-                    toast.info("Saving individual entries is not yet supported.");
-                }
+                handleSave(editor, targetNs);
             }
         });
 
@@ -387,29 +395,32 @@ export function NamespaceViewer() {
                     const position = ed.getPosition();
                     const offset = model.getOffsetAt(position);
                     const text = model.getValue();
-                    code = getSexpBeforeCursor(text, offset);
-                    // We need to calculate the range for the s-expression to highlight it
-                    // This is a bit tricky without a proper parser, but we can approximate or skip for now
-                    // For now, let's just highlight the current line or cursor position if it's not a selection
-                    range = new monaco.Range(position.lineNumber, position.column, position.lineNumber, position.column);
+
+                    // Use the new range-aware function
+                    const result = getSexpRangeBeforeCursor(text, offset);
+                    if (result) {
+                        code = result.text;
+                        const startPos = model.getPositionAt(result.start);
+                        const endPos = model.getPositionAt(result.end);
+                        range = new monaco.Range(startPos.lineNumber, startPos.column, endPos.lineNumber, endPos.column);
+                    }
                 }
 
                 console.log("Code to eval:", code);
                 if (code) {
                     // Visual Indicator: Flash the code
-                    if (isSelection) {
-                        const flashDecoration = {
-                            range: range,
-                            options: {
-                                className: 'eval-flash-decoration', // We need to define this CSS class
-                                isWholeLine: false
-                            }
-                        };
-                        const collection = ed.createDecorationsCollection([flashDecoration]);
-                        setTimeout(() => {
-                            collection.clear();
-                        }, 300);
-                    }
+                    // We always have a range now if we have code
+                    const flashDecoration = {
+                        range: range,
+                        options: {
+                            className: 'eval-flash-decoration',
+                            isWholeLine: false
+                        }
+                    };
+                    const collection = ed.createDecorationsCollection([flashDecoration]);
+                    setTimeout(() => {
+                        collection.clear();
+                    }, 300);
 
                     console.log("Evaluating:", code);
                     const id = "eval-" + Date.now() + "-" + Math.random();
@@ -419,6 +430,7 @@ export function NamespaceViewer() {
                             const resultText = msg.error ? ("Error: " + msg.error) : msg.result;
                             const color = msg.error ? "red" : "#888888";
 
+                            const decorationsCollection = ed.createDecorationsCollection();
                             decorationsCollection.set([{
                                 range: range,
                                 options: {
@@ -505,14 +517,7 @@ export function NamespaceViewer() {
     };
 
 
-    const selectedEntry = React.useMemo(() => {
-        return entries.find(e => e.var === selectedVar);
-    }, [entries, selectedVar]);
 
-    const entryCode = React.useMemo(() => {
-        if (!selectedEntry) return "";
-        return selectedEntry.source?.source?.code || ";; No source code found";
-    }, [selectedEntry]);
 
     const handleEditorWillMount = (monaco) => {
         monaco.editor.defineTheme('indigo-dark', {
@@ -539,20 +544,7 @@ export function NamespaceViewer() {
             <MenuToolbar className="justify-between px-3 h-8">
                 <div className="flex items-center gap-3">
                     {/* View Toggle */}
-                    <div className="flex bg-[#1e1e1e] rounded p-0.5 border border-[#323232]">
-                        <button
-                            onClick={() => setViewType("file")}
-                            className={`px - 2 py - 0.5 text - [10px] rounded ${viewType === "file" ? "bg-[#323232] text-gray-200" : "text-gray-500 hover:text-gray-300"} `}
-                        >
-                            File
-                        </button>
-                        <button
-                            onClick={() => setViewType("entry")}
-                            className={`px - 2 py - 0.5 text - [10px] rounded ${viewType === "entry" ? "bg-[#323232] text-gray-200" : "text-gray-500 hover:text-gray-300"} `}
-                        >
-                            Entry
-                        </button>
-                    </div>
+                    {/* View Toggle Removed */}
 
                     {/* Code Manage Buttons (Icons) */}
                     <div className="flex items-center gap-1">
@@ -603,105 +595,68 @@ export function NamespaceViewer() {
             </MenuToolbar >
 
             {/* Content Area */}
-            < div className="flex-1 overflow-hidden relative flex" >
-                {viewType === "file" ? (
-                    // File View
-                    <div className="flex-1 relative">
-                        {/* Floating File View Mode Toggles */}
-                        <div className="absolute bottom-4 right-4 flex bg-[#252526] rounded-md p-1 shadow-lg border border-[#323232] z-10">
-                            <button
-                                onClick={() => setFileViewMode("source")}
-                                className={`px-3 py-1 text-xs rounded ${fileViewMode === "source" ? "bg-[#37373d] text-white shadow-sm" : "text-gray-400 hover:text-gray-200 hover:bg-[#2a2d2e]"}`}
-                            >
-                                Source
-                            </button>
-                            <button
-                                onClick={() => setFileViewMode("test")}
-                                className={`px-3 py-1 text-xs rounded ${fileViewMode === "test" ? "bg-[#37373d] text-white shadow-sm" : "text-gray-400 hover:text-gray-200 hover:bg-[#2a2d2e]"}`}
-                            >
-                                Test
-                            </button>
-                            <button
-                                onClick={() => setFileViewMode("doc")}
-                                className={`px-3 py-1 text-xs rounded ${fileViewMode === "doc" ? "bg-[#37373d] text-white shadow-sm" : "text-gray-400 hover:text-gray-200 hover:bg-[#2a2d2e]"}`}
-                            >
-                                Doc
-                            </button>
-                        </div>
-
-                        {loading ? (
-                            <div className="absolute inset-0 flex items-center justify-center text-xs text-gray-500">Loading...</div>
-                        ) : error ? (
-                            <div className="absolute inset-0 flex flex-col items-center justify-center gap-4">
-                                <div className="text-xs text-red-500">Error: {error}</div>
-                                {fileViewMode === "test" && error === "Test file not found" && (
-                                    <button
-                                        onClick={handleScaffold}
-                                        disabled={scaffoldLoading}
-                                        className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs rounded shadow-sm transition-colors disabled:opacity-50"
-                                    >
-                                        {scaffoldLoading ? "Scaffolding..." : "Scaffold Test"}
-                                    </button>
-                                )}
-                            </div>
-                        ) : (
-                            <Editor
-                                height="100%"
-                                language="clojure"
-                                theme="vs-dark"
-                                beforeMount={handleEditorWillMount}
-                                value={code || ""}
-                                options={{
-                                    minimap: { enabled: false },
-                                    fontSize: 11,
-                                    lineNumbers: 'on',
-                                    scrollBeyondLastLine: false,
-                                    automaticLayout: true,
-                                    autoClosingBrackets: 'always',
-                                    matchBrackets: 'always',
-                                    readOnly: fileViewMode === "doc"
-                                }}
-                                onMount={(editor, monaco) => setupEditor(editor, monaco, "file")}
-                                onChange={(value) => setCode(value)}
-                            />
-                        )}
-                    </div>
-                ) : (
-                    // Entry View
-                    <div className="flex flex-1 h-full relative">
-                        <div className="absolute top-0 left-0 right-0 h-6 bg-[#252526] border-b border-[#323232] flex items-center px-2 text-xs text-gray-400 select-none z-10">
+            <div className="flex-1 overflow-hidden relative flex">
+                <div className="flex-1 relative">
+                    {/* Floating File View Mode Toggles */}
+                    <div className="absolute bottom-4 right-4 flex bg-[#252526] rounded-md p-1 shadow-lg border border-[#323232] z-10">
+                        <button
+                            onClick={() => setFileViewMode("source")}
+                            className={`px-3 py-1 text-xs rounded ${fileViewMode === "source" ? "bg-[#37373d] text-white shadow-sm" : "text-gray-400 hover:text-gray-200 hover:bg-[#2a2d2e]"}`}
+                        >
                             Source
-                        </div>
-                        <div className="absolute top-6 left-0 right-0 bottom-0">
-                            {selectedEntry ? (
-                                <Editor
-                                    key={`source-${selectedEntry.var}`}
-                                    path={`file:///source/${namespace.replace(/[^a-zA-Z0-9]/g, '_')}/${selectedEntry.var.replace(/[^a-zA-Z0-9]/g, '_')}.clj`}
-                                    height="100%"
-                                    language="clojure"
-                                    theme="vs-dark"
-                                    beforeMount={handleEditorWillMount}
-                                    value={entryCode || ""}
-                                    options={{
-                                        minimap: { enabled: false },
-                                        fontSize: 11,
-                                        lineNumbers: 'on',
-                                        scrollBeyondLastLine: false,
-                                        automaticLayout: true,
-                                        readOnly: true
-                                    }}
-                                    onMount={(editor, monaco) => setupEditor(editor, monaco, "source")}
-                                />
-                            ) : (
-                                <div className="absolute inset-0 flex items-center justify-center text-xs text-gray-500">
-                                    Select an entry
-                                </div>
+                        </button>
+                        <button
+                            onClick={() => setFileViewMode("test")}
+                            className={`px-3 py-1 text-xs rounded ${fileViewMode === "test" ? "bg-[#37373d] text-white shadow-sm" : "text-gray-400 hover:text-gray-200 hover:bg-[#2a2d2e]"}`}
+                        >
+                            Test
+                        </button>
+                        <button
+                            onClick={() => setFileViewMode("doc")}
+                            className={`px-3 py-1 text-xs rounded ${fileViewMode === "doc" ? "bg-[#37373d] text-white shadow-sm" : "text-gray-400 hover:text-gray-200 hover:bg-[#2a2d2e]"}`}
+                        >
+                            Doc
+                        </button>
+                    </div>
+
+                    {loading ? (
+                        <div className="absolute inset-0 flex items-center justify-center text-xs text-gray-500">Loading...</div>
+                    ) : error ? (
+                        <div className="absolute inset-0 flex flex-col items-center justify-center gap-4">
+                            <div className="text-xs text-red-500">Error: {error}</div>
+                            {fileViewMode === "test" && error === "Test file not found" && (
+                                <button
+                                    onClick={handleScaffold}
+                                    disabled={scaffoldLoading}
+                                    className="px-4 py-2 bg-blue-600 hover:bg-blue-500 text-white text-xs rounded shadow-sm transition-colors disabled:opacity-50"
+                                >
+                                    {scaffoldLoading ? "Scaffolding..." : "Scaffold Test"}
+                                </button>
                             )}
                         </div>
-                    </div>
-                )
-                }
-            </div >
-        </MenuContainer >
+                    ) : (
+                        <Editor
+                            height="100%"
+                            language="clojure"
+                            theme="vs-dark"
+                            beforeMount={handleEditorWillMount}
+                            value={code || ""}
+                            options={{
+                                minimap: { enabled: false },
+                                fontSize: 11,
+                                lineNumbers: 'on',
+                                scrollBeyondLastLine: false,
+                                automaticLayout: true,
+                                autoClosingBrackets: 'always',
+                                matchBrackets: 'always',
+                                readOnly: fileViewMode === "doc"
+                            }}
+                            onMount={(editor, monaco) => setupEditor(editor, monaco, "file")}
+                            onChange={(value) => setCode(value)}
+                        />
+                    )}
+                </div>
+            </div>
+        </MenuContainer>
     );
 }
