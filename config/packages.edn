@@ -1,4 +1,10 @@
-{xyz.zcaudate/code.dev
+{xyz.zcaudate/code.ai
+ {:description "ai client and server"
+  :include [[code.ai.heal :complete]
+            [code.ai.server :complete]]
+  :dependencies [org.hugoduncan/mcp-clj-server]}
+
+ xyz.zcaudate/code.dev
  {:description "generate documentation from code"
   :include [[code.dev :complete]]}
  
@@ -29,7 +35,7 @@
  xyz.zcaudate/code.maven
  {:description "code packaging and distribution"
   :include [[code.maven :complete]]}
- 
+
  xyz.zcaudate/code.project
  {:description "working with projects"
   :include [[code.project :complete]]}
@@ -41,6 +47,35 @@
  xyz.zcaudate/code.test
  {:description "easy test framework"
   :include [[code.test :complete]]} 
+
+ xyz.zcaudate/code.tool.build
+ {:description "tool for building projects"
+  :include [[code.tool.build :complete]]}
+
+ xyz.zcaudate/code.tool.java
+ {:description "tool for java development"
+  :include [[code.tool.java :complete]]}
+
+ xyz.zcaudate/code.tool.maven
+ {:description "maven deployment tool"
+  :include [[code.tool.maven :complete]]}
+
+ xyz.zcaudate/code.tool.measure
+ {:description "code measurement tools"
+  :include [[code.tool.measure :complete]]}
+
+ xyz.zcaudate/code.tool.refactor
+ {:description "code refactoring tools"
+  :include [[code.tool.refactor :complete]]}
+
+ xyz.zcaudate/code.tool.translate
+ {:description "code translation tools"
+  :include [[code.tool.translate :complete]]}
+
+ xyz.zcaudate/indigo
+ {:description "application logic for indigo"
+  :include [[indigo :complete]]}
+
  xyz.zcaudate/jvm
  {:description "jvm library"
   :include [[jvm :complete]]}
@@ -58,6 +93,16 @@
   :include [[js.core :complete]
             [js.webpack :complete]]}
 
+ xyz.zcaudate/js.gh-primer
+ {:description "github primer react components"
+  :include [[js.gh-primer :complete]
+            [js.gh-primer-brand :complete]
+            [js.gh-primer-icons :complete]]}
+
+ xyz.zcaudate/js.i18next
+ {:description "js internationalization"
+  :include [[js.i18next :complete]]}
+
  xyz.zcaudate/js.lib.bitcoin
  {:description "js bitcoin libraries" 
   :include [[js.lib.bitcoin :complete]]}
@@ -65,6 +110,10 @@
  xyz.zcaudate/js.lib.chalk
  {:description "js util libraries" 
   :include [[js.lib.chalk :complete]]}
+
+ xyz.zcaudate/js.lib.color
+ {:description "js color manipulation"
+  :include [[js.lib.color :complete]]}
 
  xyz.zcaudate/js.lib.d3
  {:description "js util libraries" 
@@ -90,9 +139,33 @@
  {:description "js ethereum and solc" 
   :include [[js.lib.fastify :complete]]}
 
+ xyz.zcaudate/js.lib.figma
+ {:description "js figma integration"
+  :include [[js.lib.figma :complete]]}
+
+ xyz.zcaudate/js.lib.i18next
+ {:description "js i18next library"
+  :include [[js.lib.i18next :complete]]}
+
+ xyz.zcaudate/js.lib.jotai
+ {:description "js jotai state management"
+  :include [[js.lib.jotai :complete]]}
+
+ xyz.zcaudate/js.lib.lucide
+ {:description "js lucide icons"
+  :include [[js.lib.lucide :complete]]}
+
  xyz.zcaudate/js.lib.lw-charts
  {:description "js util libraries" 
   :include [[js.lib.lw-charts :complete]]}
+
+ xyz.zcaudate/js.lib.mustache
+ {:description "js mustache templates"
+  :include [[js.lib.mustache :complete]]}
+
+ xyz.zcaudate/js.lib.optics
+ {:description "js optics library"
+  :include [[js.lib.optics :complete]]}
 
  xyz.zcaudate/js.lib.osc
  {:description "open sound control" 
@@ -102,12 +175,42 @@
  {:description "processing library" 
   :include [[js.lib.p5 :complete]]}
  
+ xyz.zcaudate/js.lib.puck
+ {:description "js puck editor"
+  :include [[js.lib.puck :complete]]}
+
+ xyz.zcaudate/js.lib.radix
+ {:description "js radix ui primitives"
+  :include [[js.lib.radix :complete]]}
+
+ xyz.zcaudate/js.lib.react-dnd
+ {:description "js react drag and drop"
+  :include [[js.lib.react-dnd :complete]]}
+
+ xyz.zcaudate/js.lib.react-hook-form
+ {:description "js react hook form"
+  :include [[js.lib.react-hook-form :complete]]}
+
+ xyz.zcaudate/js.lib.react-query
+ {:description "js react query"
+  :include [[js.lib.react-query :complete]]}
+
+ xyz.zcaudate/js.lib.recharts
+ {:description "js recharts library"
+  :include [[js.lib.recharts :complete]]}
+
  xyz.zcaudate/js.lib.rn
  {:description "js util libraries" 
-  :include [[js.lib.rn-expo :base]
+  :include [[js.lib.rn-async-storage :base]
+            [js.lib.rn-expo :base]
             [js.lib.rn-gesture :base]
             [js.lib.rn-paper :base]]}
-  
+
+ xyz.zcaudate/js.lib.supabase
+ {:description "js supabase client"
+  :include [[js.lib.supabase :complete]
+            [js.lib.supabase-ssr :complete]]}
+
  xyz.zcaudate/js.lib.three
  {:description "js core libraries" 
   :include [[js.lib.three :complete]
@@ -118,6 +221,10 @@
             [js.lib.r3-flex :complete]
             [js.lib.r3-postprocessing :complete]
             [js.lib.react-spring :complete]]}
+
+ xyz.zcaudate/js.lib.tree-sitter
+ {:description "js tree-sitter bindings"
+  :include [[js.lib.tree-sitter :complete]]}
 
  xyz.zcaudate/js.lib.ua-parser
  {:description "user agent parser" 
@@ -130,7 +237,13 @@
  xyz.zcaudate/js.react
  {:description "js react libraries" 
   :include [[js.react :base]
-            [js.react.helper-portal :base]]}
+            [js.react.compile :base]
+            [js.react.compile-components :base]
+            [js.react.compile-directives :base]
+            [js.react.compile-states :base]
+            [js.react.helper-data :base]
+            [js.react.helper-portal :base]
+            [js.react.layout :base]]}
  
  xyz.zcaudate/js.react-ext
  {:description "js core libraries" 
@@ -182,6 +295,7 @@
    
  xyz.zcaudate/lib.lucene
  {:description "wrapper for lucene"
+  :include [[lib.lucene :complete]]
   :dependencies
   [org.apache.lucene/lucene-core
    org.apache.lucene/lucene-queryparser
@@ -251,6 +365,10 @@
  xyz.zcaudate/net.http
  {:description "network and http programming"
   :include [[net.http :complete]]}
+
+ xyz.zcaudate/net.openapi
+ {:description "openapi tools"
+  :include [[net.openapi :complete]]}
   
  xyz.zcaudate/net.resp
  {:description "rpc based on the redis protocol"
@@ -262,10 +380,22 @@
  {:description "python libs and helpers"
   :include [[python :complete]]} 
  
+ xyz.zcaudate/rt.base
+ {:description "base runtimes"
+  :include [[rt.base :complete]]}
+
  xyz.zcaudate/rt.basic
  {:description "wrapper for nginx" 
   :include [[rt.basic :complete]]
   :dependencies [http-kit]}
+
+ xyz.zcaudate/rt.circom
+ {:description "runtime for circom"
+  :include [[rt.circom :complete]]}
+
+ xyz.zcaudate/rt.fortran
+ {:description "runtime for fortran"
+  :include [[rt.fortran :complete]]}
  
  xyz.zcaudate/rt.graal
  {:description "runtime for graal contexts"
@@ -286,10 +416,18 @@
  {:description "runtime for libpython" 
   :include [[rt.libpython :complete]]
   :dependencies [clj-python/libpython-clj]} 
+
+ xyz.zcaudate/rt.llvm
+ {:description "runtime for llvm"
+  :include [[rt.llvm :complete]]}
  
  xyz.zcaudate/rt.nginx
  {:description "runtime for nginx" 
   :include [[rt.nginx :complete]]}
+
+ xyz.zcaudate/rt.nix
+ {:description "runtime for nix"
+  :include [[rt.nix :complete]]}
   
  xyz.zcaudate/rt.postgres
  {:description "runtime for postgres" 
@@ -307,10 +445,14 @@
  xyz.zcaudate/rt.solidity
  {:description "shell runtime"
   :include [[rt.solidity :complete]]}
+
+ xyz.zcaudate/rt.verilog
+ {:description "runtime for verilog"
+  :include [[rt.verilog :complete]]}
  
  xyz.zcaudate/script.css
  {:description "read and write css using clojure"
-  :include [[lib.css :complete]]
+  :include [[script.css :complete]]
   :dependencies [garden/garden 
                  net.sourceforge.cssparser/cssparser]}
   
@@ -428,6 +570,10 @@
  {:description "foundation reflection library"
   :include [[std.object :complete]]}
  
+ xyz.zcaudate/std.pipe
+ {:description "data piping library"
+  :include [[std.pipe :complete]]}
+
  xyz.zcaudate/std.pretty
  {:description "pretty print library"
   :include [[std.pretty :complete]]
@@ -436,6 +582,10 @@
  xyz.zcaudate/std.scheduler
  {:description "scheduled runner for timebound execution"
   :include [[std.scheduler :complete]]}
+
+ xyz.zcaudate/std.tailwind
+ {:description "tailwind css utilities"
+  :include [[std.tailwind :complete]]}
  
  xyz.zcaudate/std.text
  {:description "text diffing and search"
@@ -449,10 +599,25 @@
  xyz.zcaudate/std.timeseries
  {:description "timeseries manipulation"
   :include [[std.timeseries :complete]]}
+
+ xyz.zcaudate/std.vm
+ {:description "virtual machine interpreters"
+  :include [[std.vm :complete]]}
   
+ xyz.zcaudate/web3.lib.example
+ {:description "web3 example libraries"
+  :include [[web3.lib.example-bookstore :complete]
+            [web3.lib.example-counter :complete]
+            [web3.lib.example-erc20 :complete]
+            [web3.lib.example-erc20-source :complete]]}
+
  xyz.zcaudate/xtalk.db
  {:description "xtalk language"
   :include [[xt.db     :complete]]}
+
+ xyz.zcaudate/xtalk.evm
+ {:description "xtalk evm"
+  :include [[xt.evm :complete]]}
   
  xyz.zcaudate/xtalk.lang
  {:description "xtalk language"
