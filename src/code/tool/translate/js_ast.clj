@@ -52,8 +52,8 @@
 
 (defn initialise
   []
-  (h/p (h/sh {:root +root-dir+
-              :args ["npm" "install"]})))
+  (h/sh {:root +root-dir+
+         :args ["npm" "install"]}))
 
 (defn translate-ast
   ([input-file]

@@ -16,11 +16,13 @@ import * as vc from '@/client/app/components/canvas/viewport-canvas'
 import * as cb from '@/client/app/components/browser/component-browser'
 
 import * as lb from '@/client/app/components/browser/library-browser'
+import * as llv from '@/client/app/components/browser/library-live-view'
 
 import * as rp from '@/client/app/components/repl/repl-panel'
 
 import * as nv from '@/client/app/components/browser/namespace-viewer'
 
+import { Toaster } from 'sonner'
 import { useAppState } from '@/client/app/state'
 
 // code.dev.client.app/App [140] 
@@ -57,17 +59,17 @@ export function App() {
         <FigmaUi.ResizablePanelGroup direction="horizontal" className="flex-1">
           <FigmaUi.ResizablePanel defaultSize={20} minSize={15} maxSize={30}>
             <div className="flex-1 flex flex-col h-full">
-              <div className="bg-[#252525] border-b border-[#323232]">
-                <div className="flex w-full h-10">
+              <div className="bg-[#252526] border-b border-[#323232]">
+                <div className="flex w-full h-8">
                   <button
                     onClick={() => setActiveTab("env")}
-                    className={`flex-1 text-xs ${activeTab === "env" ? "text-gray-200 bg-[#323232]" : "text-gray-400 hover:text-gray-300"}`}
+                    className={`flex-1 text-xs font-medium uppercase tracking-wide ${activeTab === "env" ? "text-gray-200 bg-[#323232]" : "text-gray-500 hover:text-gray-300 hover:bg-[#2a2d2e]"}`}
                   >
                     Env
                   </button>
                   <button
                     onClick={() => setActiveTab("library")}
-                    className={`flex-1 text-xs ${activeTab === "library" ? "text-gray-200 bg-[#323232]" : "text-gray-400 hover:text-gray-300"}`}
+                    className={`flex-1 text-xs font-medium uppercase tracking-wide ${activeTab === "library" ? "text-gray-200 bg-[#323232]" : "text-gray-500 hover:text-gray-300 hover:bg-[#2a2d2e]"}`}
                   >
                     Library
                   </button>
@@ -91,33 +93,36 @@ export function App() {
           </FigmaUi.ResizablePanel>
           <FigmaUi.ResizableHandle className="w-[1px] bg-[#323232]"></FigmaUi.ResizableHandle>
           <FigmaUi.ResizablePanel defaultSize={50} minSize={30}>
+            {activeTab === "library" ? (
+              <llv.LibraryLiveView />
+            ) : selectedNamespace ? (
+              <nv.NamespaceViewer />
+            ) : (
+              <vc.ViewportCanvas
+                components={components}
+                selectedComponent={selectedComponent}
+                onSelectComponent={setSelectedComponent}
+                onAddComponent={addComponent}
+                onMoveComponent={moveComponent}
+                viewMode={viewMode}
+                theme={theme}>
+              </vc.ViewportCanvas>
+            )}
+          </FigmaUi.ResizablePanel>
+          <FigmaUi.ResizableHandle className="w-[1px] bg-[#323232]"></FigmaUi.ResizableHandle>
+          <FigmaUi.ResizablePanel defaultSize={30} minSize={20} maxSize={40}>
             <FigmaUi.ResizablePanelGroup direction="vertical">
-              <FigmaUi.ResizablePanel defaultSize={70} minSize={40}>
-                {selectedNamespace ? (
-                  <nv.NamespaceViewer />
-                ) : (
-                  <vc.ViewportCanvas
-                    components={components}
-                    selectedComponent={selectedComponent}
-                    onSelectComponent={setSelectedComponent}
-                    onAddComponent={addComponent}
-                    onMoveComponent={moveComponent}
-                    viewMode={viewMode}
-                    theme={theme}>
-                  </vc.ViewportCanvas>
-                )}
+              <FigmaUi.ResizablePanel defaultSize={70} minSize={30}>
+                <pp.PropertiesPanel />
               </FigmaUi.ResizablePanel>
               <FigmaUi.ResizableHandle className="h-[1px] bg-[#323232]"></FigmaUi.ResizableHandle>
-              <FigmaUi.ResizablePanel defaultSize={30} minSize={15}>
+              <FigmaUi.ResizablePanel defaultSize={30} minSize={20}>
                 <rp.ReplPanel />
               </FigmaUi.ResizablePanel>
             </FigmaUi.ResizablePanelGroup>
           </FigmaUi.ResizablePanel>
-          <FigmaUi.ResizableHandle className="w-[1px] bg-[#323232]"></FigmaUi.ResizableHandle>
-          <FigmaUi.ResizablePanel defaultSize={30} minSize={20} maxSize={40}>
-            <pp.PropertiesPanel />
-          </FigmaUi.ResizablePanel>
         </FigmaUi.ResizablePanelGroup>
       </div>
-    </ReactDnd.DndProvider>);
+      <Toaster position="top-right" theme="dark" />
+    </ReactDnd.DndProvider >);
 }

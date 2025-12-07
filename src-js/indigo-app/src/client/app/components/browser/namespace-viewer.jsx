@@ -6,6 +6,7 @@ import { send, addMessageListener } from '../../../repl-client'
 import * as FigmaUi from '@xtalk/figma-ui'
 import * as Lucide from 'lucide-react'
 import { useAppState } from '../../state'
+import { toast } from 'sonner'
 
 export function NamespaceViewer() {
     const {
@@ -122,9 +123,10 @@ export function NamespaceViewer() {
             console.log("Saved namespace:", targetNs);
             // Update global state with new code (though editor already has it)
             setCode(currentSource);
+            toast.success(`Saved ${targetNs}`);
         } catch (err) {
             console.error("Failed to save namespace", err);
-            alert("Failed to save: " + err.message);
+            toast.error("Failed to save: " + err.message);
         }
     };
 
@@ -156,7 +158,7 @@ export function NamespaceViewer() {
         // Prioritize source code, maybe show test code below or in a separate tab?
         // User said "Entry View only displays the code for each entry".
         // Let's show source.
-        return selectedEntry.source?.code || ";; No source code found";
+        return selectedEntry.source?.source?.code || ";; No source code found";
     }, [selectedEntry]);
 
     if (!namespace) {
@@ -170,40 +172,40 @@ export function NamespaceViewer() {
     return (
         <div className="flex flex-col h-full bg-[#1e1e1e]">
             {/* Toolbar */}
-            <div className="h-10 bg-[#2b2b2b] border-b border-[#323232] flex items-center px-4 justify-between shrink-0">
+            <div className="h-8 bg-[#252526] border-b border-[#323232] flex items-center px-3 justify-between shrink-0">
                 {/* Left: Code Manage Buttons (Icons) */}
                 <div className="flex items-center gap-1">
                     <button
                         title="Scaffold Test"
                         onClick={handleScaffold}
                         disabled={scaffoldLoading}
-                        className={`text-gray-400 hover:text-gray-200 p-1.5 rounded hover:bg-[#323232] ${scaffoldLoading ? "opacity-50 cursor-not-allowed" : ""}`}
+                        className={`text-gray-400 hover:text-gray-200 p-1 rounded hover:bg-[#323232] ${scaffoldLoading ? "opacity-50 cursor-not-allowed" : ""}`}
                     >
                         <Lucide.Hammer size={14} />
                     </button>
-                    <button title="Import" className="text-gray-400 hover:text-gray-200 p-1.5 rounded hover:bg-[#323232]">
+                    <button title="Import" className="text-gray-400 hover:text-gray-200 p-1 rounded hover:bg-[#323232]">
                         <Lucide.Import size={14} />
                     </button>
-                    <button title="Find Incomplete" className="text-gray-400 hover:text-gray-200 p-1.5 rounded hover:bg-[#323232]">
+                    <button title="Find Incomplete" className="text-gray-400 hover:text-gray-200 p-1 rounded hover:bg-[#323232]">
                         <Lucide.AlertCircle size={14} />
                     </button>
                 </div>
 
                 {/* Right: Namespace & View Toggle */}
-                <div className="flex items-center gap-4">
+                <div className="flex items-center gap-3">
                     <span className="text-xs text-gray-400 font-mono">{namespace}</span>
 
                     {/* View Toggle */}
-                    <div className="flex bg-[#1e1e1e] rounded p-0.5">
+                    <div className="flex bg-[#1e1e1e] rounded p-0.5 border border-[#323232]">
                         <button
                             onClick={() => setViewType("file")}
-                            className={`px-3 py-1 text-xs rounded ${viewType === "file" ? "bg-[#323232] text-gray-200" : "text-gray-500 hover:text-gray-300"}`}
+                            className={`px-2 py-0.5 text-[10px] rounded ${viewType === "file" ? "bg-[#323232] text-gray-200" : "text-gray-500 hover:text-gray-300"}`}
                         >
                             File
                         </button>
                         <button
                             onClick={() => setViewType("entry")}
-                            className={`px-3 py-1 text-xs rounded ${viewType === "entry" ? "bg-[#323232] text-gray-200" : "text-gray-500 hover:text-gray-300"}`}
+                            className={`px-2 py-0.5 text-[10px] rounded ${viewType === "entry" ? "bg-[#323232] text-gray-200" : "text-gray-500 hover:text-gray-300"}`}
                         >
                             Entry
                         </button>
@@ -395,28 +397,66 @@ export function NamespaceViewer() {
                 ) : (
                     // Entry View
                     <div className="flex flex-1 h-full">
-                        {/* Entry Code */}
+                        {/* Source Code */}
+                        <div className="flex-1 relative border-r border-[#323232]">
+                            <div className="absolute top-0 left-0 right-0 h-6 bg-[#252526] border-b border-[#323232] flex items-center px-2 text-xs text-gray-400 select-none z-10">
+                                Source
+                            </div>
+                            <div className="absolute top-6 left-0 right-0 bottom-0">
+                                {selectedEntry ? (
+                                    <Editor
+                                        key={`source-${selectedEntry.var}`}
+                                        path={`source-${selectedEntry.var}`}
+                                        height="100%"
+                                        language="clojure"
+                                        theme="vs-dark"
+                                        value={entryCode}
+                                        options={{
+                                            minimap: { enabled: false },
+                                            fontSize: 11,
+                                            lineNumbers: 'on',
+                                            scrollBeyondLastLine: false,
+                                            automaticLayout: true,
+                                            readOnly: true
+                                        }}
+                                    />
+                                ) : (
+                                    <div className="absolute inset-0 flex items-center justify-center text-xs text-gray-500">
+                                        Select an entry
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Test Code */}
                         <div className="flex-1 relative">
-                            {selectedEntry ? (
-                                <Editor
-                                    height="100%"
-                                    language="clojure"
-                                    theme="vs-dark"
-                                    value={entryCode}
-                                    options={{
-                                        minimap: { enabled: false },
-                                        fontSize: 11, // 80% smaller
-                                        lineNumbers: 'on',
-                                        scrollBeyondLastLine: false,
-                                        automaticLayout: true,
-                                        readOnly: true // Entries are read-only for now
-                                    }}
-                                />
-                            ) : (
-                                <div className="absolute inset-0 flex items-center justify-center text-xs text-gray-500">
-                                    Select an entry from the right panel to view code
-                                </div>
-                            )}
+                            <div className="absolute top-0 left-0 right-0 h-6 bg-[#252526] border-b border-[#323232] flex items-center px-2 text-xs text-gray-400 select-none z-10">
+                                Test
+                            </div>
+                            <div className="absolute top-6 left-0 right-0 bottom-0">
+                                {selectedEntry ? (
+                                    <Editor
+                                        key={`test-${selectedEntry.var}`}
+                                        path={`test-${selectedEntry.var}`}
+                                        height="100%"
+                                        language="clojure"
+                                        theme="vs-dark"
+                                        value={selectedEntry.test?.test?.code || ";; No test code found"}
+                                        options={{
+                                            minimap: { enabled: false },
+                                            fontSize: 11,
+                                            lineNumbers: 'on',
+                                            scrollBeyondLastLine: false,
+                                            automaticLayout: true,
+                                            readOnly: true
+                                        }}
+                                    />
+                                ) : (
+                                    <div className="absolute inset-0 flex items-center justify-center text-xs text-gray-500">
+                                        Select an entry
+                                    </div>
+                                )}
+                            </div>
                         </div>
                     </div>
                 )

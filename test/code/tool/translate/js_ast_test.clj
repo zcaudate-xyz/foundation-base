@@ -6,32 +6,11 @@
             [std.lib :as h]
             [std.make :as make]))
 
-(defn- mock-sh [opts]
-  (cond
-    (= (get opts :args) ["npm" "install"])
-    {:exit 0 :out "installed"}
-
-    (and (= (first (get opts :args)) "node")
-         (= (second (get opts :args)) "index.js"))
-    (let [[_ _ input output] (get opts :args)
-          content (slurp input)
-          ast {:type "File" :program {:type "Program" :body []} :comments []}]
-      (if output
-        (spit output (json/write ast))
-        {:exit 0 :out (json/write ast)}))
-    
-    :else
-    {:exit 1 :err "Unknown command"}))
-
-(defn- mock-build-all [target]
-  nil)
-
 ^{:refer code.tool.translate.js-ast/initialise :added "4.1"}
 (fact "initialises the npm project"
   ^:hidden
   
-  (with-redefs [h/sh mock-sh]
-    (js-ast/initialise))
+  (js-ast/initialise)
   => {:exit 0 :out "installed"})
 
 ^{:refer code.tool.translate.js-ast/generate-ast :added "4.1"}

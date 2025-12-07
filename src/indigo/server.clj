@@ -44,6 +44,9 @@
      {"libraries"       (wrap-browser-call
                          (fn [req]
                            (#'api-browser/list-libraries)))
+      "scan"            (wrap-browser-call
+                         (fn [req]
+                           (#'api-browser/scan-namespaces)))
       "file-content"    (wrap-browser-call
                          (fn [req]
                            (#'api-browser/get-file-content (get-in req [:params :path]))))
