@@ -31,14 +31,22 @@ export function BrowserPanel({ title, search, onSearchChange, children, loading,
 }
 
 export function ContextMenu({ x, y, items, onClose }) {
+    const menuRef = React.useRef(null);
+
     React.useEffect(() => {
-        const handleClick = () => onClose();
-        window.addEventListener('click', handleClick);
-        return () => window.removeEventListener('click', handleClick);
+        const handleClick = (e) => {
+            if (menuRef.current && !menuRef.current.contains(e.target)) {
+                onClose();
+            }
+        };
+        // Use capture phase to handle cases where other components stop propagation
+        window.addEventListener('mousedown', handleClick, true);
+        return () => window.removeEventListener('mousedown', handleClick, true);
     }, [onClose]);
 
     return (
         <div
+            ref={menuRef}
             className="fixed z-50 bg-[#252526] border border-[#323232] shadow-lg rounded-md py-1 min-w-[160px]"
             style={{ top: y, left: x }}
             onClick={(e) => e.stopPropagation()}
@@ -46,7 +54,7 @@ export function ContextMenu({ x, y, items, onClose }) {
             {items.map((item, index) => (
                 <div
                     key={index}
-                    className="px-3 py-1.5 text-xs text-gray-300 hover:bg-[#094771] hover:text-white cursor-pointer flex items-center gap-2"
+                    className="px-3 py-1.5 text-xs text-gray-300 hover:bg-indigo-600 hover:text-white cursor-pointer flex items-center gap-2"
                     onClick={() => {
                         item.action();
                         onClose();
@@ -74,21 +82,26 @@ export function BrowserTree({ nodes, selectedId, onSelect, onDoubleClick, expand
         return (
             <div key={node.id}>
                 <div
-                    className={`flex items-center gap-1 py-1 px-2 hover:bg-[#323232] cursor-pointer text-xs group ${isSelected ? "bg-[#37373d] text-white" : "text-gray-300"}`}
+                    className={`flex items-center gap-1 py-1 px-2 hover:bg-[#323232] cursor-pointer text-xs group select-none ${isSelected ? "bg-[#37373d] text-white" : "text-gray-300"}`}
                     style={{ paddingLeft }}
                     onClick={(e) => {
                         e.stopPropagation();
-                        if (hasChildren) {
+                        // If it's a selectable node (file or package), select it.
+                        // If it's a pure folder (not selectable), toggle expand.
+                        if (node.isSelectable && onSelect) {
+                            onSelect(node.id);
+                        } else if (hasChildren) {
                             onToggleExpand(node.id);
-                        } else {
-                            if (onSelect) {
-                                onSelect(node.id);
-                            }
                         }
                     }}
                     onDoubleClick={(e) => {
                         e.stopPropagation();
-                        if (!hasChildren && onDoubleClick) {
+                        // Double click always toggles expand for folders/packages, 
+                        // and might open editor for files.
+                        // Ideally: Packages -> Toggle Expand. Files -> Open.
+                        if (hasChildren) {
+                            onToggleExpand(node.id);
+                        } else if (onDoubleClick) {
                             onDoubleClick(node.id);
                         }
                     }}
@@ -100,7 +113,13 @@ export function BrowserTree({ nodes, selectedId, onSelect, onDoubleClick, expand
                         }
                     }}
                 >
-                    <span className="text-gray-500 group-hover:text-gray-300 flex-shrink-0">
+                    <span
+                        className="text-gray-500 group-hover:text-gray-300 flex-shrink-0 cursor-pointer"
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            if (hasChildren) onToggleExpand(node.id);
+                        }}
+                    >
                         {hasChildren ? (
                             isExpanded ? <Lucide.ChevronDown size={12} /> : <Lucide.ChevronRight size={12} />
                         ) : <div className="w-3" />}

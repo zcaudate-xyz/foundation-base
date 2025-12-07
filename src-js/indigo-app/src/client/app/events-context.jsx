@@ -14,6 +14,32 @@ export function EventsProvider({ children }) {
     const [logs, setLogs] = React.useState({});
     const [loading, setLoading] = React.useState(true);
 
+    const subscribersRef = React.useRef({});
+
+    const subscribe = React.useCallback((event, callback) => {
+        if (!subscribersRef.current[event]) {
+            subscribersRef.current[event] = new Set();
+        }
+        subscribersRef.current[event].add(callback);
+        return () => {
+            if (subscribersRef.current[event]) {
+                subscribersRef.current[event].delete(callback);
+            }
+        };
+    }, []);
+
+    const emit = React.useCallback((event, data) => {
+        if (subscribersRef.current[event]) {
+            subscribersRef.current[event].forEach(cb => {
+                try {
+                    cb(data);
+                } catch (e) {
+                    console.error(`Error in event handler for ${event}:`, e);
+                }
+            });
+        }
+    }, []);
+
     // Load from DB on mount
     React.useEffect(() => {
         get(STORAGE_KEY).then((val) => {
@@ -124,7 +150,9 @@ export function EventsProvider({ children }) {
         renameSession,
         logs,
         addLog,
-        loading
+        loading,
+        emit,
+        subscribe
     };
 
     return (

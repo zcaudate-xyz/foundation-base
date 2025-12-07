@@ -8,7 +8,7 @@ import * as Lucide from 'lucide-react'
 import { useAppState } from '../../state'
 import { toast } from 'sonner'
 import { MenuContainer, MenuToolbar, MenuButton } from '../common/common-menu.jsx'
-import { BookView } from './book-view'
+import { useEvents } from '../../events-context.jsx'
 
 export function NamespaceViewer() {
     const {
@@ -199,25 +199,43 @@ export function NamespaceViewer() {
         const model = editor.getModel();
         const selection = editor.getSelection();
         let code = "";
+        let range = null;
 
         if (selection && !selection.isEmpty()) {
             code = model.getValueInRange(selection);
+            range = selection;
         } else {
             const position = editor.getPosition();
             const offset = model.getOffsetAt(position);
             const text = model.getValue();
-            code = getSexpBeforeCursor(text, offset);
+            const result = getSexpRangeBeforeCursor(text, offset);
+            if (result) {
+                code = result.text;
+                const startPos = model.getPositionAt(result.start);
+                const endPos = model.getPositionAt(result.end);
+                range = new monacoRef.current.Range(startPos.lineNumber, startPos.column, endPos.lineNumber, endPos.column);
+            }
         }
 
         if (code) {
-            const id = "eval-" + Date.now();
-            // Reuse the decoration logic from the editor action if possible, 
-            // but for now just sending to REPL and showing toast/console.
-            // Actually, let's try to trigger the editor action if it exists?
-            // Triggering action is cleaner for UI feedback (decorations).
-            // But if we want a button, we can just run the logic.
+            // Flash Decoration
+            if (monacoRef.current && range) {
+                const flashDecoration = {
+                    range: range,
+                    options: {
+                        className: 'eval-flash-decoration',
+                        isWholeLine: false // Flash only the specific code
+                    }
+                };
+                const collection = editor.createDecorationsCollection([flashDecoration]);
+                setTimeout(() => {
+                    collection.clear();
+                }, 500);
+            }
 
-            // Let's replicate the send logic with toast feedback for the button
+            const id = "eval-" + Date.now();
+            const targetNs = fileViewMode === 'test' ? namespace + '-test' : namespace;
+
             toast.promise(
                 new Promise((resolve, reject) => {
                     const removeListener = addMessageListener((msg) => {
@@ -230,7 +248,7 @@ export function NamespaceViewer() {
                             }
                         }
                     });
-                    send({ op: "eval", id: id, code: code, ns: namespace });
+                    send({ op: "eval", id: id, code: code, ns: targetNs });
                 }),
                 {
                     loading: 'Evaluating...',
@@ -245,9 +263,28 @@ export function NamespaceViewer() {
         const editor = getActiveEditor();
         if (!editor) return;
 
+        const model = editor.getModel();
         const code = editor.getValue();
         if (code) {
+            // Flash whole file
+            if (monacoRef.current) {
+                const range = model.getFullModelRange();
+                const flashDecoration = {
+                    range: range,
+                    options: {
+                        className: 'eval-flash-decoration',
+                        isWholeLine: true
+                    }
+                };
+                const collection = editor.createDecorationsCollection([flashDecoration]);
+                setTimeout(() => {
+                    collection.clear();
+                }, 500);
+            }
+
             const id = "eval-file-" + Date.now();
+            const targetNs = fileViewMode === 'test' ? namespace + '-test' : namespace;
+
             toast.promise(
                 new Promise((resolve, reject) => {
                     const removeListener = addMessageListener((msg) => {
@@ -260,7 +297,7 @@ export function NamespaceViewer() {
                             }
                         }
                     });
-                    send({ op: "eval", id: id, code: code, ns: namespace });
+                    send({ op: "eval", id: id, code: code, ns: targetNs });
                 }),
                 {
                     loading: 'Evaluating file...',
@@ -284,6 +321,7 @@ export function NamespaceViewer() {
 
         if (result) {
             const code = result.text;
+            const targetNs = fileViewMode === 'test' ? namespace + '-test' : namespace;
 
             // Highlight
             if (monacoRef.current) {
@@ -301,10 +339,10 @@ export function NamespaceViewer() {
                 const collection = editor.createDecorationsCollection([flashDecoration]);
                 setTimeout(() => {
                     collection.clear();
-                }, 300);
+                }, 500);
             }
 
-            const id = "eval-" + Date.now();
+            const id = "eval-last-" + Date.now();
             toast.promise(
                 new Promise((resolve, reject) => {
                     const removeListener = addMessageListener((msg) => {
@@ -317,7 +355,7 @@ export function NamespaceViewer() {
                             }
                         }
                     });
-                    send({ op: "eval", id: id, code: code, ns: namespace });
+                    send({ op: "eval", id: id, code: code, ns: targetNs });
                 }),
                 {
                     loading: 'Evaluating last sexp...',
@@ -534,6 +572,21 @@ export function NamespaceViewer() {
         });
     };
 
+    const { subscribe } = useEvents();
+
+    // Subscribe to events from PropertiesPanel (or other sources)
+    React.useEffect(() => {
+        const unsubEval = subscribe('editor:eval', handleEval);
+        const unsubEvalLast = subscribe('editor:eval-last-sexp', handleEvalLastSexp);
+        const unsubEvalFile = subscribe('editor:eval-file', handleEvalFile);
+
+        return () => {
+            unsubEval();
+            unsubEvalLast();
+            unsubEvalFile();
+        };
+    }, [subscribe, handleEval, handleEvalLastSexp, handleEvalFile]);
+
     if (!namespace) {
         return (
             <div className="flex flex-col h-full bg-[#1a1a1a] items-center justify-center text-gray-500 text-xs">
@@ -565,33 +618,35 @@ export function NamespaceViewer() {
                         </button>
                     </div>
                 ))}
+
+                {/* View Mode Toggles (In Tab Bar) */}
+                <div className="flex-1" /> {/* Spacer */}
+                <div className="flex items-center gap-1 px-2 border-l border-[#323232]">
+                    <button
+                        onClick={() => setFileViewMode("source")}
+                        className={`px-2 py-0.5 text-[10px] rounded ${fileViewMode === "source" ? "bg-[#37373d] text-white" : "text-gray-400 hover:text-gray-200 hover:bg-[#323232]"}`}
+                    >
+                        Source
+                    </button>
+                    <button
+                        onClick={() => setFileViewMode("test")}
+                        className={`px-2 py-0.5 text-[10px] rounded ${fileViewMode === "test" ? "bg-[#37373d] text-white" : "text-gray-400 hover:text-gray-200 hover:bg-[#323232]"}`}
+                    >
+                        Test
+                    </button>
+                    <button
+                        onClick={() => setFileViewMode("doc")}
+                        className={`px-2 py-0.5 text-[10px] rounded ${fileViewMode === "doc" ? "bg-[#37373d] text-white" : "text-gray-400 hover:text-gray-200 hover:bg-[#323232]"}`}
+                    >
+                        Doc
+                    </button>
+                </div>
             </div>
 
-            {/* Content Area with Right Sidebar */}
+            {/* Content Area */}
             <div className="flex-1 overflow-hidden relative flex">
-                {/* Editor Area */}
                 <div className="flex-1 relative">
-                    {/* Floating File View Mode Toggles */}
-                    <div className="absolute bottom-4 right-4 flex bg-[#252526] rounded-md p-1 shadow-lg border border-[#323232] z-10">
-                        <button
-                            onClick={() => setFileViewMode("source")}
-                            className={`px-3 py-1 text-xs rounded ${fileViewMode === "source" ? "bg-[#37373d] text-white shadow-sm" : "text-gray-400 hover:text-gray-200 hover:bg-[#2a2d2e]"}`}
-                        >
-                            Source
-                        </button>
-                        <button
-                            onClick={() => setFileViewMode("test")}
-                            className={`px-3 py-1 text-xs rounded ${fileViewMode === "test" ? "bg-[#37373d] text-white shadow-sm" : "text-gray-400 hover:text-gray-200 hover:bg-[#2a2d2e]"}`}
-                        >
-                            Test
-                        </button>
-                        <button
-                            onClick={() => setFileViewMode("doc")}
-                            className={`px-3 py-1 text-xs rounded ${fileViewMode === "doc" ? "bg-[#37373d] text-white shadow-sm" : "text-gray-400 hover:text-gray-200 hover:bg-[#2a2d2e]"}`}
-                        >
-                            Doc
-                        </button>
-                    </div>
+                    {/* Floating File View Mode Toggles - REMOVED */}
 
                     {loading ? (
                         <div className="absolute inset-0 flex items-center justify-center text-xs text-gray-500">Loading...</div>
@@ -629,61 +684,6 @@ export function NamespaceViewer() {
                             onChange={(value) => setCode(value)}
                         />
                     )}
-                </div>
-
-                {/* Right Sidebar (BookView with Toolbar) */}
-                <div className="w-[300px] border-l border-[#323232] flex flex-col">
-                    <BookView
-                        toolbar={
-                            <div className="flex flex-col gap-2 p-2">
-                                {/* Eval Actions */}
-                                <div className="flex items-center gap-1 justify-center">
-                                    <MenuButton
-                                        title="Eval (Ctrl+E)"
-                                        onClick={handleEval}
-                                        icon={Lucide.Play}
-                                    />
-                                    <MenuButton
-                                        title="Eval Last Sexp"
-                                        onClick={handleEvalLastSexp}
-                                        icon={Lucide.Code}
-                                    />
-                                    <MenuButton
-                                        title="Eval File"
-                                        onClick={handleEvalFile}
-                                        icon={Lucide.FileCode}
-                                    />
-                                </div>
-
-                                <div className="h-px bg-gray-700 w-full" />
-
-                                {/* Manage Actions */}
-                                <div className="flex items-center gap-1 justify-center">
-                                    <MenuButton
-                                        title="Scaffold Test"
-                                        onClick={() => handleManageTask("scaffold", `['${namespace}, {:write true}]`)}
-                                        disabled={scaffoldLoading}
-                                        icon={Lucide.Hammer}
-                                    />
-                                    <MenuButton
-                                        title="Import"
-                                        onClick={() => handleManageTask("import", `['${namespace}, {:write true}]`)}
-                                        icon={Lucide.Import}
-                                    />
-                                    <MenuButton
-                                        title="Purge"
-                                        onClick={() => handleManageTask("purge", `['${namespace}, {:write true}]`)}
-                                        icon={Lucide.Trash2}
-                                    />
-                                    <MenuButton
-                                        title="Find Incomplete"
-                                        onClick={() => handleManageTask("incomplete", `['${namespace}]`)}
-                                        icon={Lucide.AlertCircle}
-                                    />
-                                </div>
-                            </div>
-                        }
-                    />
                 </div>
             </div>
         </MenuContainer>

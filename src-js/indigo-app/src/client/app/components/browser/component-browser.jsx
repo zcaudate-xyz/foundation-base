@@ -7,32 +7,18 @@ import { BrowserPanel, BrowserTree, ContextMenu } from './common'
 import { toast } from 'sonner'
 
 // Helper to convert raw namespace tree to standardized nodes
-// Helper to convert raw namespace tree to standardized nodes
 function convertToStandardNodes(node) {
   const children = Array.from(node.children.values()).map(convertToStandardNodes);
   children.sort((a, b) => a.label.localeCompare(b.label));
 
-  // If this node is a namespace AND has children, it's a "package" (Folder + File)
+  // If this node is a namespace AND has children, it's a "package" (Folder + File in one)
   if (node.isNamespace && children.length > 0) {
-    // Create a separate node for the file itself
-    const fileNode = {
-      id: node.fullPath,
-      label: node.name, // Display name same as folder? Or maybe distinct?
-      children: null,
-      isNamespace: true,
-      isSelectable: true
-    };
-
-    // Add file node to children (at the top)
-    children.unshift(fileNode);
-
-    // Return the folder node
     return {
-      id: node.fullPath + ":folder", // Distinguish ID for the folder
+      id: node.fullPath, // Use the namespace path directly
       label: node.name,
       children: children,
-      isNamespace: false, // It acts as a folder now
-      isSelectable: false // Folders are not selectable for editing
+      isNamespace: true, // It is a namespace
+      isSelectable: true // And it is selectable
     };
   }
 
@@ -173,6 +159,15 @@ export function EnvBrowser() {
         refreshNamespaces();
         toast.success("Reloaded namespaces");
         break;
+      case 'eval':
+        toast.info(`Eval ${node.label} (Not implemented)`);
+        break;
+      case 'new-folder':
+        toast.info(`New Folder in ${node.label} (Not implemented)`);
+        break;
+      case 'new-namespace':
+        toast.info(`New Namespace in ${node.label} (Not implemented)`);
+        break;
       case 'delete':
         toast.info(`Delete ${node.label} (Not implemented)`);
         break;
@@ -182,21 +177,36 @@ export function EnvBrowser() {
       case 'move':
         toast.info(`Move ${node.label} (Not implemented)`);
         break;
-      case 'create':
-        toast.info(`Create New in ${node.label} (Not implemented)`);
-        break;
       default:
         break;
     }
   };
 
-  const contextMenuItems = [
-    { label: 'Reload', icon: Lucide.RefreshCw, action: () => handleAction('reload', contextMenu?.node) },
-    { label: 'Create New', icon: Lucide.Plus, action: () => handleAction('create', contextMenu?.node) },
-    { label: 'Rename', icon: Lucide.Edit2, action: () => handleAction('rename', contextMenu?.node) },
-    { label: 'Move', icon: Lucide.Move, action: () => handleAction('move', contextMenu?.node) },
-    { label: 'Delete', icon: Lucide.Trash2, action: () => handleAction('delete', contextMenu?.node) }
-  ];
+  const getContextMenuItems = (node) => {
+    if (!node) return [];
+
+    // File / Namespace Menu
+    if (node.isNamespace) {
+      return [
+        { label: 'Reload', icon: Lucide.RefreshCw, action: () => handleAction('reload', node) },
+        { label: 'Eval', icon: Lucide.Play, action: () => handleAction('eval', node) },
+        { label: 'Rename', icon: Lucide.Edit2, action: () => handleAction('rename', node) },
+        { label: 'Move', icon: Lucide.Move, action: () => handleAction('move', node) },
+        { label: 'Delete', icon: Lucide.Trash2, action: () => handleAction('delete', node) }
+      ];
+    }
+
+    // Folder Menu
+    return [
+      { label: 'New Folder', icon: Lucide.FolderPlus, action: () => handleAction('new-folder', node) },
+      { label: 'New Namespace', icon: Lucide.FilePlus, action: () => handleAction('new-namespace', node) },
+      { label: 'Rename', icon: Lucide.Edit2, action: () => handleAction('rename', node) },
+      { label: 'Move', icon: Lucide.Move, action: () => handleAction('move', node) },
+      { label: 'Delete', icon: Lucide.Trash2, action: () => handleAction('delete', node) }
+    ];
+  };
+
+  const contextMenuItems = getContextMenuItems(contextMenu?.node);
 
   return (
     <BrowserPanel

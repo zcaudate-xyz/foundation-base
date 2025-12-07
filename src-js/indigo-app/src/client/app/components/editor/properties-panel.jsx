@@ -4,6 +4,10 @@ import * as Lucide from 'lucide-react'
 
 import { fetchCljVars, fetchTestFacts, runTestVar, runTestNs, fetchNamespaceEntries, runTest } from '../../../api'
 import { useAppState } from '../../state'
+import { useEvents } from '../../events-context'
+import { MenuButton } from '../common/common-menu'
+import { toast } from 'sonner'
+import { send, addMessageListener } from '../../../repl-client'
 
 export function PropertyInput({ componentId, propertyKey, value, onUpdateProperty }) {
   if (typeof value === "boolean") {
@@ -79,86 +83,154 @@ export function PropertiesPanel() {
     }
   };
 
+  const { emit } = useEvents();
+  const [manageLoading, setManageLoading] = React.useState(false);
+
+  const handleManageTask = (task, args) => {
+    // args is a string representing a Clojure vector, e.g. "['ns', {:write true}]"
+    const code = `(do (require 'code.manage) (apply code.manage/${task} ${args}))`;
+    console.log("Running manage task:", code);
+    const id = "manage-" + Date.now();
+
+    // We just fire and forget here? Or promise?
+    // Use toast promise similar to original implementation
+    setManageLoading(true);
+    toast.promise(
+      new Promise((resolve, reject) => {
+        const removeListener = addMessageListener((msg) => {
+          if (msg.id === id) {
+            removeListener();
+            if (msg.error) {
+              reject(new Error(msg.error));
+            } else {
+              resolve(msg.result);
+            }
+          }
+        });
+        send({ op: "eval", id: id, code: code, ns: selectedNamespace });
+      }).finally(() => setManageLoading(false)),
+      {
+        loading: `Running ${task}...`,
+        success: (data) => `${task} completed: ${data}`,
+        error: (err) => `${task} failed: ${err.message}`
+      }
+    );
+  };
+
   if (selectedNamespace) {
     return (
-      <div className="flex flex-col h-full bg-[#1e1e1e] text-gray-300 text-xs">
-        <div className="h-8 bg-[#252526] flex items-center px-4 font-bold border-b border-[#323232] justify-between shrink-0">
-          <span>Entries</span>
-          <button
-            onClick={handleRunAllTests}
-            className="text-[10px] bg-[#323232] hover:bg-[#3e3e3e] px-2 py-0.5 rounded text-gray-300"
-          >
-            Run All Tests
-          </button>
-        </div>
-        <div className="flex-1 overflow-y-auto">
-          {loading ? (
-            <div className="p-4 text-gray-500 text-center">Loading entries...</div>
-          ) : (
-            <div className="flex flex-col">
-              {entries.map((entry) => (
-                <div
-                  key={entry.var}
-                  className={`flex items-center justify-between px-4 py-2 cursor-pointer hover:bg-[#2a2d2e] ${selectedVar === entry.var ? "bg-[#37373d] text-white" : ""}`}
-                  onClick={() => setSelectedVar(entry.var)}
-                >
-                  <div className="flex items-center gap-2 overflow-hidden">
-                    <span className={`w-2 h-2 rounded-full shrink-0 ${entry.type === ':fragment' ? 'bg-green-400' :
-                      entry.op === 'defn' || entry.type === 'function' ? 'bg-blue-400' :
-                        entry.op === 'defmacro' || entry.type === 'macro' ? 'bg-purple-400' :
-                          'bg-yellow-400'
-                      }`} />
-                    <span className="truncate" title={entry.var}>{entry.var}</span>
-                  </div>
+      <div className="flex h-full bg-[#1e1e1e] text-gray-300 text-xs">
+        {/* Main Content (Entries List) */}
+        <div className="flex-1 flex flex-col min-w-0">
+          <div className="h-8 bg-[#252526] flex items-center px-4 font-bold border-b border-[#323232] justify-between shrink-0">
+            <span>Entries</span>
+            <button
+              onClick={handleRunAllTests}
+              className="text-[10px] bg-[#323232] hover:bg-[#3e3e3e] px-2 py-0.5 rounded text-gray-300"
+            >
+              Run All Tests
+            </button>
+          </div>
+          <div className="flex-1 overflow-y-auto">
+            {loading ? (
+              <div className="p-4 text-gray-500 text-center">Loading entries...</div>
+            ) : (
+              <div className="flex flex-col">
+                {entries.map((entry) => (
+                  <div
+                    key={entry.var}
+                    className={`flex items-center justify-between px-4 py-2 cursor-pointer hover:bg-[#2a2d2e] ${selectedVar === entry.var ? "bg-[#37373d] text-white" : ""}`}
+                    onClick={() => setSelectedVar(entry.var)}
+                  >
+                    <div className="flex items-center gap-2 overflow-hidden">
+                      <span className={`w-2 h-2 rounded-full shrink-0 ${entry.type === ':fragment' ? 'bg-green-400' :
+                        entry.op === 'defn' || entry.type === 'function' ? 'bg-blue-400' :
+                          entry.op === 'defmacro' || entry.type === 'macro' ? 'bg-purple-400' :
+                            'bg-yellow-400'
+                        }`} />
+                      <span className="truncate" title={entry.var}>{entry.var}</span>
+                    </div>
 
-                  <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setSelectedVar(entry.var);
-                        setNamespaceViewType("file");
-                        setNamespaceFileViewMode("source");
-                      }}
-                      className="px-1.5 py-0.5 text-[10px] bg-[#323232] hover:bg-[#444] text-gray-400 hover:text-gray-200 rounded border border-[#444]"
-                      title="View Source"
-                    >
-                      src
-                    </button>
-                    {entry.test && (
+                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
                           setSelectedVar(entry.var);
                           setNamespaceViewType("file");
-                          setNamespaceFileViewMode("test");
+                          setNamespaceFileViewMode("source");
                         }}
                         className="px-1.5 py-0.5 text-[10px] bg-[#323232] hover:bg-[#444] text-gray-400 hover:text-gray-200 rounded border border-[#444]"
-                        title="View Test"
+                        title="View Source"
                       >
-                        test
+                        src
                       </button>
-                    )}
-                    {entry.test && (
-                      <button
-                        onClick={(e) => handleRunTest(e, entry.var)}
-                        className="p-1 hover:bg-[#444] rounded relative"
-                        title="Run Test"
-                      >
-                        {runningTest === entry.var ? (
-                          <div className="w-2 h-2 rounded-full bg-yellow-500 animate-pulse" />
-                        ) : (
-                          <Lucide.Play size={10} className="text-gray-500 hover:text-green-500" />
-                        )}
-                      </button>
-                    )}
+                      {entry.test && (
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedVar(entry.var);
+                            setNamespaceViewType("file");
+                            setNamespaceFileViewMode("test");
+                          }}
+                          className="px-1.5 py-0.5 text-[10px] bg-[#323232] hover:bg-[#444] text-gray-400 hover:text-gray-200 rounded border border-[#444]"
+                          title="View Test"
+                        >
+                          test
+                        </button>
+                      )}
+                      {entry.test && (
+                        <button
+                          onClick={(e) => handleRunTest(e, entry.var)}
+                          className="p-1 hover:bg-[#444] rounded relative"
+                          title="Run Test"
+                        >
+                          {runningTest === entry.var ? (
+                            <div className="w-2 h-2 rounded-full bg-yellow-500 animate-pulse" />
+                          ) : (
+                            <Lucide.Play size={10} className="text-gray-500 hover:text-green-500" />
+                          )}
+                        </button>
+                      )}
+                    </div>
                   </div>
-                </div>
-              ))}
-              {entries.length === 0 && (
-                <div className="p-4 text-gray-500 text-center">No entries found.</div>
-              )}
-            </div>
-          )}
+                ))}
+                {entries.length === 0 && (
+                  <div className="p-4 text-gray-500 text-center">No entries found.</div>
+                )}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Tools Sidebar */}
+        <div className="w-[40px] border-l border-[#323232] bg-[#252526] flex flex-col items-center gap-2 py-2 shrink-0">
+          <MenuButton title="Eval (Ctrl+E)" onClick={() => emit('editor:eval')} icon={Lucide.Play} />
+          <MenuButton title="Eval Last Sexp" onClick={() => emit('editor:eval-last-sexp')} icon={Lucide.Code} />
+          <MenuButton title="Eval File" onClick={() => emit('editor:eval-file')} icon={Lucide.FileCode} />
+
+          <div className="h-px bg-gray-700 w-6 my-1" />
+
+          <MenuButton
+            title="Scaffold Test"
+            onClick={() => handleManageTask("scaffold", `['${selectedNamespace}, {:write true}]`)}
+            disabled={manageLoading}
+            icon={Lucide.Hammer}
+          />
+          <MenuButton
+            title="Import"
+            onClick={() => handleManageTask("import", `['${selectedNamespace}, {:write true}]`)}
+            icon={Lucide.Import}
+          />
+          <MenuButton
+            title="Purge"
+            onClick={() => handleManageTask("purge", `['${selectedNamespace}, {:write true}]`)}
+            icon={Lucide.Trash2}
+          />
+          <MenuButton
+            title="Find Incomplete"
+            onClick={() => handleManageTask("incomplete", `['${selectedNamespace}]`)}
+            icon={Lucide.AlertCircle}
+          />
         </div>
       </div>
     );

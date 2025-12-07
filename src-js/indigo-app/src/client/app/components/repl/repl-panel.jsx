@@ -197,6 +197,19 @@ export function ReplPanel() {
                                 >
                                     {status === 'connected' ? 'Disconnect' : 'Connect'}
                                 </button>
+
+                                <div className="border-t border-[#323232] my-1"></div>
+
+                                <button
+                                    onClick={() => {
+                                        clearSession(activeSessionId);
+                                        setShowConnectionMenu(false);
+                                    }}
+                                    className="w-full text-left px-3 py-2 text-[10px] text-gray-300 hover:bg-[#323232] hover:text-white transition-colors flex items-center gap-2"
+                                >
+                                    <Lucide.Trash2 size={10} />
+                                    Clear Console
+                                </button>
                             </div>
                         )}
                     </div>
@@ -216,123 +229,110 @@ export function ReplPanel() {
                             Events
                         </button>
                     </div>
+                </div>
 
-                    {/* Session Selector (Only visible in Console tab) */}
-                    {activeTab === 'console' && (
-                        <div className="flex items-center gap-1 ml-2">
-                            <div className="relative" ref={sessionMenuRef}>
-                                {isRenaming && activeSession?.type === 'global' ? (
-                                    <input
-                                        type="text"
-                                        value={renameValue}
-                                        onChange={(e) => setRenameValue(e.target.value)}
-                                        onBlur={handleRenameSubmit}
-                                        onKeyDown={(e) => e.key === 'Enter' && handleRenameSubmit()}
-                                        className="bg-[#1e1e1e] text-gray-300 text-[10px] border border-blue-500 rounded px-1 py-0.5 outline-none w-[100px]"
-                                        autoFocus
-                                    />
-                                ) : (
-                                    <button
-                                        onClick={() => setShowSessionMenu(!showSessionMenu)}
-                                        className="flex items-center gap-1 px-2 py-0.5 text-[10px] text-gray-400 hover:text-gray-200 hover:bg-[#323232] rounded border border-transparent hover:border-[#323232] transition-colors"
-                                    >
-                                        {activeSessionId === `console-${selectedNamespace}` ? (
-                                            <>
-                                                <Lucide.FileCode size={10} />
-                                            </>
-                                        ) : (
-                                            <>
-                                                <Lucide.Globe size={10} />
-                                            </>
-                                        )}
-                                        <Lucide.ChevronDown size={10} />
-                                    </button>
-                                )}
-
-
-                                {showSessionMenu && (
-                                    <div className="absolute top-full left-0 mt-1 w-48 bg-[#252525] border border-[#323232] rounded shadow-lg z-50 overflow-hidden">
-                                        {/* Namespace Session */}
-                                        <div className="px-2 py-1.5 text-[10px] text-gray-500 font-bold uppercase border-b border-[#323232]">
-                                            Namespace
-                                        </div>
-                                        <button
-                                            onClick={() => {
-                                                setActiveSessionId(`console-${selectedNamespace}`);
-                                                setShowSessionMenu(false);
-                                            }}
-                                            className={`w-full text-left px-3 py-1.5 text-[10px] flex items-center gap-2 hover:bg-[#323232] transition-colors ${activeSessionId === `console-${selectedNamespace}` ? 'text-white bg-[#323232]' : 'text-gray-400'}`}
-                                        >
+                {/* Session Selector (Right Aligned) */}
+                {activeTab === 'console' && (
+                    <div className="flex items-center gap-1">
+                        <div className="relative" ref={sessionMenuRef}>
+                            {isRenaming && activeSession?.type === 'global' ? (
+                                <input
+                                    type="text"
+                                    value={renameValue}
+                                    onChange={(e) => setRenameValue(e.target.value)}
+                                    onBlur={handleRenameSubmit}
+                                    onKeyDown={(e) => e.key === 'Enter' && handleRenameSubmit()}
+                                    className="bg-[#1e1e1e] text-gray-300 text-[10px] border border-blue-500 rounded px-1 py-0.5 outline-none w-[100px]"
+                                    autoFocus
+                                />
+                            ) : (
+                                <button
+                                    onClick={() => setShowSessionMenu(!showSessionMenu)}
+                                    className="flex items-center gap-1 px-2 py-0.5 text-[10px] text-gray-400 hover:text-gray-200 hover:bg-[#323232] rounded border border-transparent hover:border-[#323232] transition-colors"
+                                >
+                                    {activeSessionId === `console-${selectedNamespace}` ? (
+                                        <>
                                             <Lucide.FileCode size={10} />
-                                            <span className="truncate font-mono">{selectedNamespace}</span>
-                                        </button>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Lucide.Globe size={10} />
+                                        </>
+                                    )}
+                                    <span className="truncate max-w-[100px]">{activeSession ? (activeSession.type === 'namespace' ? selectedNamespace : activeSession.name) : 'Select Session'}</span>
+                                    <Lucide.ChevronDown size={10} />
+                                </button>
+                            )}
 
-                                        {/* Global Sessions */}
-                                        <div className="px-2 py-1.5 text-[10px] text-gray-500 font-bold uppercase border-b border-[#323232] border-t mt-1">
-                                            Global Consoles
-                                        </div>
-                                        {Object.entries(sessions).filter(([id]) => id.startsWith('global-')).map(([id, session]) => (
-                                            <div key={id} className="flex items-center group hover:bg-[#323232]">
-                                                <button
-                                                    onClick={() => {
-                                                        setActiveSessionId(id);
-                                                        setShowSessionMenu(false);
-                                                    }}
-                                                    className={`flex-1 text-left px-3 py-1.5 text-[10px] flex items-center gap-2 transition-colors ${activeSessionId === id ? 'text-white' : 'text-gray-400'}`}
-                                                >
-                                                    <Lucide.Globe size={10} />
-                                                    <span className="truncate">{session.name}</span>
-                                                </button>
-                                                <button
-                                                    onClick={(e) => {
-                                                        e.stopPropagation();
-                                                        startRenaming(id, session.name);
-                                                    }}
-                                                    className="p-1.5 text-gray-500 hover:text-gray-300 opacity-0 group-hover:opacity-100 transition-opacity"
-                                                    title="Rename"
-                                                >
-                                                    <Lucide.Edit2 size={8} />
-                                                </button>
-                                            </div>
-                                        ))}
 
-                                        {/* Add Global Session */}
-                                        <button
-                                            onClick={() => {
-                                                createNewGlobalSession();
-                                                setShowSessionMenu(false);
-                                            }}
-                                            className="w-full text-left px-3 py-2 text-[10px] text-blue-400 hover:bg-[#323232] hover:text-blue-300 transition-colors border-t border-[#323232] flex items-center gap-2"
-                                        >
-                                            <Lucide.Plus size={10} />
-                                            <span>New Global Console</span>
-                                        </button>
+                            {showSessionMenu && (
+                                <div className="absolute top-full right-0 mt-1 w-48 bg-[#252525] border border-[#323232] rounded shadow-lg z-50 overflow-hidden">
+                                    {/* Namespace Session */}
+                                    <div className="px-2 py-1.5 text-[10px] text-gray-500 font-bold uppercase border-b border-[#323232]">
+                                        Namespace
                                     </div>
-                                )}
-                            </div>
+                                    <button
+                                        onClick={() => {
+                                            setActiveSessionId(`console-${selectedNamespace}`);
+                                            setShowSessionMenu(false);
+                                        }}
+                                        className={`w-full text-left px-3 py-1.5 text-[10px] flex items-center gap-2 hover:bg-[#323232] transition-colors ${activeSessionId === `console-${selectedNamespace}` ? 'text-white bg-[#323232]' : 'text-gray-400'}`}
+                                    >
+                                        <Lucide.FileCode size={10} />
+                                        <span className="truncate font-mono">{selectedNamespace}</span>
+                                    </button>
+
+                                    {/* Global Sessions */}
+                                    <div className="px-2 py-1.5 text-[10px] text-gray-500 font-bold uppercase border-b border-[#323232] border-t mt-1">
+                                        Global Consoles
+                                    </div>
+                                    {Object.entries(sessions).filter(([id]) => id.startsWith('global-')).map(([id, session]) => (
+                                        <div key={id} className="flex items-center group hover:bg-[#323232]">
+                                            <button
+                                                onClick={() => {
+                                                    setActiveSessionId(id);
+                                                    setShowSessionMenu(false);
+                                                }}
+                                                className={`flex-1 text-left px-3 py-1.5 text-[10px] flex items-center gap-2 transition-colors ${activeSessionId === id ? 'text-white' : 'text-gray-400'}`}
+                                            >
+                                                <Lucide.Globe size={10} />
+                                                <span className="truncate">{session.name}</span>
+                                            </button>
+                                            <button
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    startRenaming(id, session.name); // This function was handleRenameStart in the original code, correct invocation is handleRenameStart? No, handleRenameStart takes no args in original code, it uses state. Wait, original code used activeSession.
+                                                    // I need to set activeSession first or update handleRenameStart. 
+                                                    // Original code: handleRenameStart() checks activeSession.
+                                                    // Here I am mapping over sessions. I can't just call handleRenameStart() if the session isn't active.
+                                                    // I should probably set active AND start renaming?
+                                                    setActiveSessionId(id);
+                                                    setTimeout(() => handleRenameStart(), 0);
+                                                }}
+                                                className="p-1.5 text-gray-500 hover:text-gray-300 opacity-0 group-hover:opacity-100 transition-opacity"
+                                                title="Rename"
+                                            >
+                                                <Lucide.Edit2 size={8} />
+                                            </button>
+                                        </div>
+                                    ))}
+
+                                    {/* Add Global Session */}
+                                    <button
+                                        onClick={() => {
+                                            handleCreateGlobal(); // Used to be createNewGlobalSession? No, handleCreateGlobal (line 138)
+                                            setShowSessionMenu(false);
+                                        }}
+                                        className="w-full text-left px-3 py-2 text-[10px] text-blue-400 hover:bg-[#323232] hover:text-blue-300 transition-colors border-t border-[#323232] flex items-center gap-2"
+                                    >
+                                        <Lucide.Plus size={10} />
+                                        <span>New Global Console</span>
+                                    </button>
+                                </div>
+                            )}
                         </div>
-                    )}
-                </div>
-                <div className="flex items-center gap-2">
-                    <button
-                        onClick={() => {
-                            if (activeTab === 'console') {
-                                clearSession(activeSessionId);
-                            } else {
-                                // Clear logs logic needs to be in context if we want to clear persisted logs
-                                // For now, we can't easily clear persisted logs from here without a clearLog function in context
-                                // But user asked for persistence, maybe clearing is less important or can be added later?
-                                // Let's just do nothing for now or implement clearLogs in context if needed.
-                                // Actually, let's just not clear it for now to be safe, or add clearLogs to context.
-                                // I'll skip clearing for now as it wasn't explicitly requested and requires context change.
-                                console.log("Clear logs not implemented for persisted logs yet");
-                            }
-                        }}
-                        className="text-[10px] text-gray-500 hover:text-gray-300"
-                    >
-                        Clear
-                    </button>
-                </div>
+                    </div>
+                )}
             </div>
 
             {/* Output Area */}

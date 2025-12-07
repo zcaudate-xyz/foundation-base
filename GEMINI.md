@@ -324,3 +324,11 @@
 - **Trace Lib**: The `std.lib.trace` namespace provides runtime tracing. `trace-ns` instruments all functions in a namespace, and `get-trace` retrieves the call history (a list of maps with `:in` and `:out` keys) from a function var's metadata.
 - **Emit As Regex**: The `std.lang/emit-as` function returns the transpiled source code string; tests should use regex (via `h/match?` or implied by `=>`) to verify the presence of expected tokens rather than relying on exact string equality.
 - **Library Isolation**: To test destructive `std.lang` library operations safely (like `default-library:reset`), use `std.lang.base.impl/with:library` with a fresh library instance (e.g., `(with:library [(lib/library {})] ...)`), avoiding interference with the global `:hara/lang.library` resource.
+
+## Indigo App Development
+
+- **React Resizable Panels**: When using `react-resizable-panels` (or wrappers like `FigmaUi.ResizablePanel`), avoid mixing large pixel values with percentages for `defaultSize`. It is best practice to use percentage values that sum to 100 for `defaultSize` to ensure consistent layout and resizing behavior.
+- **Tree View Structure**: For file explorers where a node can represent both a directory and a file (e.g., Clojure namespaces), splitting the node into a distinct "Folder" node and a child "File" node improves UX. This separates the concerns of navigation (expanding folders) and action (opening files).
+- **Interaction Patterns**: Implementing "Single Click to Select/Expand" and "Double Click to Open" is a standard pattern that users expect. This can be achieved by handling `onClick` for selection/expansion and `onDoubleClick` for opening, ensuring `stopPropagation` is used to prevent conflicts.
+- **State Persistence**: Persisting UI state (like active tabs, selected namespace, and view modes) to `localStorage` significantly improves the developer experience by restoring the context after page reloads.
+- **Conditional Layouts**: When conditionally hiding panels in a resizable layout, ensure that the associated splitters (`ResizableHandle`) are also conditionally rendered to prevent visual glitches or broken layout logic.
