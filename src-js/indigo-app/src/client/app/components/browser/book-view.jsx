@@ -3,7 +3,7 @@ import * as FigmaUi from '@xtalk/figma-ui'
 import * as Lucide from 'lucide-react'
 import { useAppState } from '../../state'
 
-export function BookView() {
+export function BookView({ toolbar }) {
     const {
         selectedNamespace,
         selectedVar,
@@ -65,6 +65,11 @@ export function BookView() {
                 </div>
                 <span className="text-[10px] text-gray-500 font-mono">{selectedNamespace}</span>
             </div>
+            {toolbar && (
+                <div className="border-b border-[#323232] bg-[#252526] py-1">
+                    {toolbar}
+                </div>
+            )}
 
             <div className="flex-1 overflow-y-auto">
                 {loading ? (

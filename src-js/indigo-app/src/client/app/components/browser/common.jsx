@@ -9,7 +9,7 @@ export function BrowserPanel({ title, search, onSearchChange, children, loading,
 
     return (
         <MenuContainer>
-            <div className="h-8 bg-[#252525] border-b border-[#323232] flex items-center px-3 gap-2 shrink-0">
+            <div className="h-8 bg-[#252525] border-b border-[#323232] flex items-center shrink-0">
                 {title && <span className="text-xs font-medium text-gray-300 uppercase tracking-wide">{title}</span>}
                 <div className="relative flex-1">
                     <Lucide.Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-gray-500" />
@@ -17,7 +17,7 @@ export function BrowserPanel({ title, search, onSearchChange, children, loading,
                         value={search}
                         onChange={(e) => onSearchChange(e.target.value)}
                         placeholder="Search..."
-                        className="h-6 pl-7 bg-[#1e1e1e] border-[#323232] text-gray-300 text-xs placeholder:text-gray-600 w-full rounded-sm focus:border-blue-500"
+                        className="h-8 pl-7 bg-transparent border-none text-gray-300 text-xs placeholder:text-gray-600 w-full rounded-none focus:ring-0 outline-none"
                     />
                 </div>
             </div>
@@ -30,7 +30,37 @@ export function BrowserPanel({ title, search, onSearchChange, children, loading,
     );
 }
 
-export function BrowserTree({ nodes, selectedId, onSelect, expandedIds, onToggleExpand, getIcon }) {
+export function ContextMenu({ x, y, items, onClose }) {
+    React.useEffect(() => {
+        const handleClick = () => onClose();
+        window.addEventListener('click', handleClick);
+        return () => window.removeEventListener('click', handleClick);
+    }, [onClose]);
+
+    return (
+        <div
+            className="fixed z-50 bg-[#252526] border border-[#323232] shadow-lg rounded-md py-1 min-w-[160px]"
+            style={{ top: y, left: x }}
+            onClick={(e) => e.stopPropagation()}
+        >
+            {items.map((item, index) => (
+                <div
+                    key={index}
+                    className="px-3 py-1.5 text-xs text-gray-300 hover:bg-[#094771] hover:text-white cursor-pointer flex items-center gap-2"
+                    onClick={() => {
+                        item.action();
+                        onClose();
+                    }}
+                >
+                    {item.icon && <item.icon size={12} />}
+                    {item.label}
+                </div>
+            ))}
+        </div>
+    );
+}
+
+export function BrowserTree({ nodes, selectedId, onSelect, onDoubleClick, expandedIds, onToggleExpand, getIcon, onNodeContextMenu }) {
     if (!nodes || nodes.length === 0) {
         return <div className="p-4 text-xs text-gray-500 text-center">No results found</div>;
     }
@@ -51,11 +81,22 @@ export function BrowserTree({ nodes, selectedId, onSelect, expandedIds, onToggle
                         if (hasChildren) {
                             onToggleExpand(node.id);
                         } else {
-                            onSelect(node.id);
+                            if (onSelect) {
+                                onSelect(node.id);
+                            }
                         }
-                        // Allow selecting folders if needed, but usually we select leaves
-                        if (node.isSelectable && onSelect) {
-                            onSelect(node.id);
+                    }}
+                    onDoubleClick={(e) => {
+                        e.stopPropagation();
+                        if (!hasChildren && onDoubleClick) {
+                            onDoubleClick(node.id);
+                        }
+                    }}
+                    onContextMenu={(e) => {
+                        if (onNodeContextMenu) {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            onNodeContextMenu(e, node);
                         }
                     }}
                 >

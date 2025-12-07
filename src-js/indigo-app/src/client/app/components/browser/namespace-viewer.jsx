@@ -8,6 +8,7 @@ import * as Lucide from 'lucide-react'
 import { useAppState } from '../../state'
 import { toast } from 'sonner'
 import { MenuContainer, MenuToolbar, MenuButton } from '../common/common-menu.jsx'
+import { BookView } from './book-view'
 
 export function NamespaceViewer() {
     const {
@@ -21,7 +22,10 @@ export function NamespaceViewer() {
         setNamespaceCode: setCode,
         setNamespaceLoading: setLoading,
         setNamespaceError: setError,
-        refreshNamespaceCode
+        refreshNamespaceCode,
+        editorTabs,
+        openEditorTab,
+        closeEditorTab
     } = useAppState();
 
     const [scaffoldLoading, setScaffoldLoading] = React.useState(false);
@@ -540,62 +544,32 @@ export function NamespaceViewer() {
 
     return (
         <MenuContainer>
-            {/* Toolbar */}
-            <MenuToolbar className="justify-between px-3 h-8">
-                <div className="flex items-center gap-3">
-                    {/* View Toggle */}
-                    {/* View Toggle Removed */}
-
-                    {/* Code Manage Buttons (Icons) */}
-                    <div className="flex items-center gap-1">
-                        <MenuButton
-                            title="Eval (Ctrl+E)"
-                            onClick={handleEval}
-                            icon={Lucide.Play}
-                        />
-                        <MenuButton
-                            title="Eval Last Sexp"
-                            onClick={handleEvalLastSexp}
-                            icon={Lucide.Code}
-                        />
-                        <MenuButton
-                            title="Eval File"
-                            onClick={handleEvalFile}
-                            icon={Lucide.FileCode}
-                        />
+            {/* Tab Bar */}
+            <div className="flex items-center bg-[#252526] border-b border-[#323232] overflow-x-auto no-scrollbar">
+                {editorTabs.map(tab => (
+                    <div
+                        key={tab}
+                        className={`group flex items-center gap-2 px-3 py-1.5 text-xs cursor-pointer border-r border-[#323232] min-w-[100px] max-w-[200px] ${tab === namespace ? 'bg-[#1e1e1e] text-white border-t-2 border-t-blue-500' : 'text-gray-400 hover:bg-[#2a2d2e]'}`}
+                        onClick={() => openEditorTab(tab)}
+                    >
+                        <Lucide.FileCode size={12} className={tab === namespace ? 'text-blue-400' : 'text-gray-500'} />
+                        <span className="truncate flex-1">{tab}</span>
+                        <button
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                closeEditorTab(tab);
+                            }}
+                            className={`p-0.5 rounded hover:bg-[#323232] ${tab === namespace ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}
+                        >
+                            <Lucide.X size={10} />
+                        </button>
                     </div>
-                    <div className="w-px h-4 bg-gray-700 mx-1" />
-                    <div className="flex items-center gap-1">
-                        <MenuButton
-                            title="Scaffold Test"
-                            onClick={() => handleManageTask("scaffold", `['${namespace}, {:write true}]`)}
-                            disabled={scaffoldLoading}
-                            icon={Lucide.Hammer}
-                        />
-                        <MenuButton
-                            title="Import"
-                            onClick={() => handleManageTask("import", `['${namespace}, {:write true}]`)}
-                            icon={Lucide.Import}
-                        />
-                        <MenuButton
-                            title="Purge"
-                            onClick={() => handleManageTask("purge", `['${namespace}, {:write true}]`)}
-                            icon={Lucide.Trash2}
-                        />
-                        <MenuButton
-                            title="Find Incomplete"
-                            onClick={() => handleManageTask("incomplete", `['${namespace}]`)}
-                            icon={Lucide.AlertCircle}
-                        />
-                    </div >
-                </div >
+                ))}
+            </div>
 
-                {/* Right: Namespace */}
-                < span className="text-xs text-gray-400 font-mono" > {namespace}</span >
-            </MenuToolbar >
-
-            {/* Content Area */}
+            {/* Content Area with Right Sidebar */}
             <div className="flex-1 overflow-hidden relative flex">
+                {/* Editor Area */}
                 <div className="flex-1 relative">
                     {/* Floating File View Mode Toggles */}
                     <div className="absolute bottom-4 right-4 flex bg-[#252526] rounded-md p-1 shadow-lg border border-[#323232] z-10">
@@ -655,6 +629,61 @@ export function NamespaceViewer() {
                             onChange={(value) => setCode(value)}
                         />
                     )}
+                </div>
+
+                {/* Right Sidebar (BookView with Toolbar) */}
+                <div className="w-[300px] border-l border-[#323232] flex flex-col">
+                    <BookView
+                        toolbar={
+                            <div className="flex flex-col gap-2 p-2">
+                                {/* Eval Actions */}
+                                <div className="flex items-center gap-1 justify-center">
+                                    <MenuButton
+                                        title="Eval (Ctrl+E)"
+                                        onClick={handleEval}
+                                        icon={Lucide.Play}
+                                    />
+                                    <MenuButton
+                                        title="Eval Last Sexp"
+                                        onClick={handleEvalLastSexp}
+                                        icon={Lucide.Code}
+                                    />
+                                    <MenuButton
+                                        title="Eval File"
+                                        onClick={handleEvalFile}
+                                        icon={Lucide.FileCode}
+                                    />
+                                </div>
+
+                                <div className="h-px bg-gray-700 w-full" />
+
+                                {/* Manage Actions */}
+                                <div className="flex items-center gap-1 justify-center">
+                                    <MenuButton
+                                        title="Scaffold Test"
+                                        onClick={() => handleManageTask("scaffold", `['${namespace}, {:write true}]`)}
+                                        disabled={scaffoldLoading}
+                                        icon={Lucide.Hammer}
+                                    />
+                                    <MenuButton
+                                        title="Import"
+                                        onClick={() => handleManageTask("import", `['${namespace}, {:write true}]`)}
+                                        icon={Lucide.Import}
+                                    />
+                                    <MenuButton
+                                        title="Purge"
+                                        onClick={() => handleManageTask("purge", `['${namespace}, {:write true}]`)}
+                                        icon={Lucide.Trash2}
+                                    />
+                                    <MenuButton
+                                        title="Find Incomplete"
+                                        onClick={() => handleManageTask("incomplete", `['${namespace}]`)}
+                                        icon={Lucide.AlertCircle}
+                                    />
+                                </div>
+                            </div>
+                        }
+                    />
                 </div>
             </div>
         </MenuContainer>

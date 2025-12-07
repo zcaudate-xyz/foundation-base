@@ -12,7 +12,9 @@ import * as te from '@/client/app/components/editor/theme-editor'
 import * as rp from '@/client/app/components/repl/repl-panel'
 import * as pp from '@/client/app/components/editor/properties-panel'
 
-import * as vc from '@/client/app/components/canvas/viewport-canvas'
+import { ViewportCanvas } from '@/client/app/components/canvas/viewport-canvas'
+import { GettingStarted } from '@/client/app/components/common/getting-started'
+import { ReplPanel } from '@/client/app/components/repl/repl-panel'
 
 import * as cb from '@/client/app/components/browser/component-browser'
 
@@ -67,40 +69,39 @@ export function App() {
               <FigmaUi.ResizablePanel defaultSize={70} minSize={30}>
                 <div className="flex-1 flex flex-col h-full">
                   <div className="flex-1 m-0 overflow-hidden">
-                    <cb.ComponentBrowser
-                      onAddComponent={addComponent}
-                      selectedNamespace={selectedNamespace}
-                      onSelectNamespace={setSelectedNamespace}>
-                    </cb.ComponentBrowser>
+                    <cb.ComponentBrowser />
                   </div>
                 </div>
               </FigmaUi.ResizablePanel>
-              <FigmaUi.ResizableHandle className="h-1 bg-[#252526] hover:bg-blue-500 transition-colors"></FigmaUi.ResizableHandle>
+              <FigmaUi.ResizableHandle className="h-3 bg-[#404040] hover:bg-blue-500 transition-colors"></FigmaUi.ResizableHandle>
               <FigmaUi.ResizablePanel defaultSize={30} minSize={20}>
-                <rp.ReplPanel />
+                <div className="flex-1 flex flex-col h-full">
+                  <ReplPanel />
+                </div>
               </FigmaUi.ResizablePanel>
             </FigmaUi.ResizablePanelGroup>
           </FigmaUi.ResizablePanel>
-          <FigmaUi.ResizableHandle className="w-1 bg-[#252526] hover:bg-blue-500 transition-colors"></FigmaUi.ResizableHandle>
-          <FigmaUi.ResizablePanel defaultSize={50} minSize={30}>
+          <FigmaUi.ResizableHandle className="w-1 bg-[#404040] hover:bg-blue-500 transition-colors"></FigmaUi.ResizableHandle>
+          {/* Main Content Area */}
+          <FigmaUi.ResizablePanel minSize={30} defaultSize={50} className="flex flex-col relative bg-[#1e1e1e]">
             {selectedNamespace ? (
-              <nv.NamespaceViewer />
+              viewMode === 'canvas' ? (
+                <ViewportCanvas />
+              ) : (
+                <nv.NamespaceViewer />
+              )
             ) : (
-              <vc.ViewportCanvas
-                components={components}
-                selectedComponent={selectedComponent}
-                onSelectComponent={setSelectedComponent}
-                onAddComponent={addComponent}
-                onMoveComponent={moveComponent}
-                viewMode={viewMode}
-                theme={theme}>
-              </vc.ViewportCanvas>
+              <GettingStarted />
             )}
           </FigmaUi.ResizablePanel>
-          <FigmaUi.ResizableHandle className="w-1 bg-[#252526] hover:bg-blue-500 transition-colors"></FigmaUi.ResizableHandle>
-          <FigmaUi.ResizablePanel defaultSize={30} minSize={20} maxSize={40}>
-            <pp.PropertiesPanel />
-          </FigmaUi.ResizablePanel>
+          {selectedNamespace && (
+            <>
+              <FigmaUi.ResizableHandle className="w-1 bg-[#404040] hover:bg-blue-500 transition-colors"></FigmaUi.ResizableHandle>
+              <FigmaUi.ResizablePanel defaultSize={30} minSize={20} maxSize={40}>
+                <pp.PropertiesPanel />
+              </FigmaUi.ResizablePanel>
+            </>
+          )}
         </FigmaUi.ResizablePanelGroup>
       </div>
       <Toaster position="top-right" theme="dark" />

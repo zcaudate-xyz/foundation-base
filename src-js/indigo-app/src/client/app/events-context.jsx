@@ -11,13 +11,16 @@ export function EventsProvider({ children }) {
         'global-main': { id: 'global-main', type: 'global', name: 'Main', messages: [] }
     });
     const [activeSessionId, setActiveSessionId] = React.useState('global-main');
+    const [logs, setLogs] = React.useState({});
     const [loading, setLoading] = React.useState(true);
 
     // Load from DB on mount
     React.useEffect(() => {
         get(STORAGE_KEY).then((val) => {
             if (val) {
-                setSessions(val);
+                if (val.sessions) setSessions(val.sessions);
+                if (val.activeSessionId) setActiveSessionId(val.activeSessionId);
+                if (val.logs) setLogs(val.logs);
             }
             setLoading(false);
         }).catch(err => {
@@ -29,9 +32,9 @@ export function EventsProvider({ children }) {
     // Save to DB on change (debounced or immediate? immediate for now, maybe optimize later)
     React.useEffect(() => {
         if (!loading) {
-            set(STORAGE_KEY, sessions).catch(err => console.error("Failed to save sessions to DB", err));
+            set(STORAGE_KEY, { sessions, activeSessionId, logs }).catch(err => console.error("Failed to save sessions to DB", err));
         }
-    }, [sessions, loading]);
+    }, [sessions, activeSessionId, logs, loading]);
 
     const addMessage = React.useCallback((sessionId, message) => {
         setSessions(prev => {
@@ -97,6 +100,18 @@ export function EventsProvider({ children }) {
         });
     }, []);
 
+    const addLog = React.useCallback((namespace, entry) => {
+        setLogs(prev => {
+            const prevLogs = prev[namespace] || [];
+            const newLogs = prevLogs.concat([entry]);
+            const limitedLogs = newLogs.length > 200 ? newLogs.slice(newLogs.length - 200) : newLogs;
+            return {
+                ...prev,
+                [namespace]: limitedLogs
+            };
+        });
+    }, []);
+
     const value = {
         sessions,
         activeSessionId,
@@ -106,6 +121,9 @@ export function EventsProvider({ children }) {
         clearSession,
         ensureNamespaceSession,
         renameSession,
+        renameSession,
+        logs,
+        addLog,
         loading
     };
 

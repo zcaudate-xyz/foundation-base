@@ -150,6 +150,53 @@ export function AppStateProvider({ children }) {
         }
     }, [selectedNamespace]);
 
+    let [treeSelectedId, setTreeSelectedId] = React.useState(null);
+
+    let [editorTabs, setEditorTabs] = React.useState(() => {
+        try {
+            const saved = localStorage.getItem("indigo-editor-tabs");
+            return saved ? JSON.parse(saved) : [];
+        } catch (e) {
+            return [];
+        }
+    });
+
+    React.useEffect(() => {
+        localStorage.setItem("indigo-editor-tabs", JSON.stringify(editorTabs));
+    }, [editorTabs]);
+
+    const openEditorTab = React.useCallback((ns) => {
+        setEditorTabs(prev => {
+            if (!prev.includes(ns)) {
+                return [...prev, ns];
+            }
+            return prev;
+        });
+        setSelectedNamespace(ns);
+    }, []);
+
+    const closeEditorTab = React.useCallback((ns) => {
+        setEditorTabs(prev => {
+            const newTabs = prev.filter(t => t !== ns);
+            return newTabs;
+        });
+        // If closing active tab, switch to another
+        if (selectedNamespace === ns) {
+            setEditorTabs(prev => {
+                const index = prev.indexOf(ns);
+                const newTabs = prev.filter(t => t !== ns);
+                if (newTabs.length > 0) {
+                    // Try to go to left, else right
+                    const nextIndex = Math.max(0, index - 1);
+                    setSelectedNamespace(newTabs[nextIndex]);
+                } else {
+                    setSelectedNamespace(null);
+                }
+                return newTabs;
+            });
+        }
+    }, [selectedNamespace]);
+
     let [selectedVar, setSelectedVar] = React.useState(() => {
         return localStorage.getItem("indigo-selected-var") || null;
     });
@@ -419,13 +466,34 @@ export function AppStateProvider({ children }) {
         localStorage.setItem("indigo-ns-view-type", namespaceViewType);
     }, [namespaceViewType]);
 
-    let [namespaceFileViewMode, setNamespaceFileViewMode] = React.useState(() => {
-        return localStorage.getItem("indigo-ns-file-view-mode") || "source";
+    let [tabStates, setTabStates] = React.useState(() => {
+        try {
+            const saved = localStorage.getItem("indigo-tab-states");
+            return saved ? JSON.parse(saved) : {};
+        } catch (e) {
+            return {};
+        }
     });
 
     React.useEffect(() => {
-        localStorage.setItem("indigo-ns-file-view-mode", namespaceFileViewMode);
-    }, [namespaceFileViewMode]);
+        localStorage.setItem("indigo-tab-states", JSON.stringify(tabStates));
+    }, [tabStates]);
+
+    // Derived view mode for current tab
+    let namespaceFileViewMode = React.useMemo(() => {
+        return (selectedNamespace && tabStates[selectedNamespace]?.viewMode) || "source";
+    }, [selectedNamespace, tabStates]);
+
+    const setNamespaceFileViewMode = React.useCallback((mode) => {
+        if (!selectedNamespace) return;
+        setTabStates(prev => ({
+            ...prev,
+            [selectedNamespace]: {
+                ...prev[selectedNamespace],
+                viewMode: mode
+            }
+        }));
+    }, [selectedNamespace]);
 
     let [namespaceEntries, setNamespaceEntries] = React.useState([]);
     let [namespaceEntriesLoading, setNamespaceEntriesLoading] = React.useState(false);
@@ -661,7 +729,12 @@ export function AppStateProvider({ children }) {
         updateComponentActions,
         deleteComponent,
         importComponent,
-        importAndEditComponent
+        importAndEditComponent,
+        editorTabs,
+        openEditorTab,
+        closeEditorTab,
+        treeSelectedId,
+        setTreeSelectedId
     };
 
     return (

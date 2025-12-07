@@ -3,14 +3,38 @@ import React from 'react'
 import { fetchNamespaces } from '../../../api'
 import { useAppState } from '../../state'
 import { fuzzyMatch } from '../../utils/search'
-import { BrowserPanel, BrowserTree } from './common'
+import { BrowserPanel, BrowserTree, ContextMenu } from './common'
+import { toast } from 'sonner'
 
+// Helper to convert raw namespace tree to standardized nodes
 // Helper to convert raw namespace tree to standardized nodes
 function convertToStandardNodes(node) {
   const children = Array.from(node.children.values()).map(convertToStandardNodes);
-  // Sort children: folders first, then files? Or just alphabetical?
-  // Original was just map, but let's sort alphabetically for consistency
   children.sort((a, b) => a.label.localeCompare(b.label));
+
+  // If this node is a namespace AND has children, it's a "package" (Folder + File)
+  if (node.isNamespace && children.length > 0) {
+    // Create a separate node for the file itself
+    const fileNode = {
+      id: node.fullPath,
+      label: node.name, // Display name same as folder? Or maybe distinct?
+      children: null,
+      isNamespace: true,
+      isSelectable: true
+    };
+
+    // Add file node to children (at the top)
+    children.unshift(fileNode);
+
+    // Return the folder node
+    return {
+      id: node.fullPath + ":folder", // Distinguish ID for the folder
+      label: node.name,
+      children: children,
+      isNamespace: false, // It acts as a folder now
+      isSelectable: false // Folders are not selectable for editing
+    };
+  }
 
   return {
     id: node.fullPath,
@@ -56,14 +80,25 @@ export function buildNamespaceTree(namespaces) {
   return root;
 }
 
-export function EnvBrowser({ onAddComponent, selectedNamespace, onSelectNamespace }) {
-  const { envExpandedNodes: expandedNodes, setEnvExpandedNodes: setExpandedNodes } = useAppState();
+export function EnvBrowser() {
+  const {
+    envExpandedNodes: expandedNodes,
+    setEnvExpandedNodes: setExpandedNodes,
+    selectedNamespace,
+    setSelectedNamespace,
+    openEditorTab,
+    treeSelectedId,
+    setTreeSelectedId,
+    addComponent
+  } = useAppState();
   const [namespaces, setNamespaces] = React.useState([]);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState(null);
   const [search, setSearch] = React.useState("");
+  const [contextMenu, setContextMenu] = React.useState(null);
 
-  React.useEffect(() => {
+  const refreshNamespaces = React.useCallback(() => {
+    setLoading(true);
     fetchNamespaces('clj')
       .then(data => {
         setNamespaces(data);
@@ -75,6 +110,10 @@ export function EnvBrowser({ onAddComponent, selectedNamespace, onSelectNamespac
         setLoading(false);
       });
   }, []);
+
+  React.useEffect(() => {
+    refreshNamespaces();
+  }, [refreshNamespaces]);
 
   const toggleNode = (path) => {
     setExpandedNodes(prev => {
@@ -119,6 +158,46 @@ export function EnvBrowser({ onAddComponent, selectedNamespace, onSelectNamespac
     return <Lucide.Folder className="w-3 h-3 text-gray-500" />;
   };
 
+  const handleNodeContextMenu = (e, node) => {
+    setContextMenu({
+      x: e.clientX,
+      y: e.clientY,
+      node: node
+    });
+  };
+
+  const handleAction = (action, node) => {
+    console.log(`Action: ${action} on ${node.label}`);
+    switch (action) {
+      case 'reload':
+        refreshNamespaces();
+        toast.success("Reloaded namespaces");
+        break;
+      case 'delete':
+        toast.info(`Delete ${node.label} (Not implemented)`);
+        break;
+      case 'rename':
+        toast.info(`Rename ${node.label} (Not implemented)`);
+        break;
+      case 'move':
+        toast.info(`Move ${node.label} (Not implemented)`);
+        break;
+      case 'create':
+        toast.info(`Create New in ${node.label} (Not implemented)`);
+        break;
+      default:
+        break;
+    }
+  };
+
+  const contextMenuItems = [
+    { label: 'Reload', icon: Lucide.RefreshCw, action: () => handleAction('reload', contextMenu?.node) },
+    { label: 'Create New', icon: Lucide.Plus, action: () => handleAction('create', contextMenu?.node) },
+    { label: 'Rename', icon: Lucide.Edit2, action: () => handleAction('rename', contextMenu?.node) },
+    { label: 'Move', icon: Lucide.Move, action: () => handleAction('move', contextMenu?.node) },
+    { label: 'Delete', icon: Lucide.Trash2, action: () => handleAction('delete', contextMenu?.node) }
+  ];
+
   return (
     <BrowserPanel
       search={search}
@@ -128,12 +207,22 @@ export function EnvBrowser({ onAddComponent, selectedNamespace, onSelectNamespac
     >
       <BrowserTree
         nodes={treeNodes}
-        selectedId={selectedNamespace}
-        onSelect={onSelectNamespace}
+        selectedId={treeSelectedId}
+        onSelect={setTreeSelectedId}
+        onDoubleClick={openEditorTab}
         expandedIds={expandedNodes}
         onToggleExpand={toggleNode}
         getIcon={getIcon}
+        onNodeContextMenu={handleNodeContextMenu}
       />
+      {contextMenu && (
+        <ContextMenu
+          x={contextMenu.x}
+          y={contextMenu.y}
+          items={contextMenuItems}
+          onClose={() => setContextMenu(null)}
+        />
+      )}
     </BrowserPanel>
   );
 }

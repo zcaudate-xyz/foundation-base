@@ -1,6 +1,7 @@
 import React from 'react'
 import * as cr from '@/client/app/components/canvas/component-renderer'
 import * as et from '@/client/app/components/canvas/editing-toolbar'
+import { useAppState } from '../../state'
 
 // code.dev.client.app.components.viewport-canvas/countComponents
 export function countComponents(comp) {
@@ -46,15 +47,16 @@ export function componentToJSON(component) {
 }
 
 // code.dev.client.app.components.viewport-canvas/ViewportCanvas
-export function ViewportCanvas({
-  components = 0,
-  selectedComponent,
-  onSelectComponent,
-  onAddComponent,
-  onMoveComponent,
-  viewMode,
-  theme
-}) {
+export function ViewportCanvas() {
+  const {
+    components,
+    selectedComponent,
+    setSelectedComponent: onSelectComponent,
+    addComponent: onAddComponent,
+    moveComponent: onMoveComponent,
+    viewMode,
+    theme
+  } = useAppState();
   let [componentStates, setComponentStates] = React.useState({});
   let [currentTool, setCurrentTool] = React.useState('select');
 
