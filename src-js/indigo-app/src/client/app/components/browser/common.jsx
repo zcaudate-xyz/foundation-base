@@ -1,14 +1,15 @@
 import React from 'react'
 import * as Lucide from 'lucide-react'
 import * as FigmaUi from '@xtalk/figma-ui'
+import { MenuContainer } from '../common/common-menu.jsx'
 
 export function BrowserPanel({ title, search, onSearchChange, children, loading, error }) {
     if (loading) return <div className="p-4 text-xs text-gray-400">Loading...</div>;
     if (error) return <div className="p-4 text-xs text-red-400">Error: {error}</div>;
 
     return (
-        <div className="flex flex-col h-full bg-[#252525]">
-            <div className="h-8 bg-[#252526] border-b border-[#323232] flex items-center px-3 justify-between shrink-0">
+        <MenuContainer>
+            <div className="h-8 bg-[#252525] border-b border-[#323232] flex items-center px-3 justify-between shrink-0">
                 {title && <span className="text-xs font-medium text-gray-300 uppercase tracking-wide">{title}</span>}
                 <div className="relative flex-1 ml-2">
                     <Lucide.Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-gray-500" />
@@ -25,7 +26,7 @@ export function BrowserPanel({ title, search, onSearchChange, children, loading,
                     {children}
                 </div>
             </FigmaUi.ScrollArea>
-        </div>
+        </MenuContainer>
     );
 }
 

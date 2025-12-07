@@ -7,6 +7,7 @@ import * as FigmaUi from '@xtalk/figma-ui'
 import * as Lucide from 'lucide-react'
 import { useAppState } from '../../state'
 import { toast } from 'sonner'
+import { MenuContainer, MenuToolbar, MenuButton } from '../common/common-menu.jsx'
 
 export function NamespaceViewer() {
     const {
@@ -259,6 +260,17 @@ export function NamespaceViewer() {
         return selectedEntry.source?.source?.code || ";; No source code found";
     }, [selectedEntry]);
 
+    const handleEditorWillMount = (monaco) => {
+        monaco.editor.defineTheme('indigo-dark', {
+            base: 'vs-dark',
+            inherit: true,
+            rules: [],
+            colors: {
+                'editor.background': '#000000',
+            }
+        });
+    };
+
     if (!namespace) {
         return (
             <div className="flex flex-col h-full bg-[#1a1a1a] items-center justify-center text-gray-500 text-xs">
@@ -268,9 +280,9 @@ export function NamespaceViewer() {
     }
 
     return (
-        <div className="flex flex-col h-full bg-[#1e1e1e]">
+        <MenuContainer>
             {/* Toolbar */}
-            <div className="h-8 bg-[#252526] border-b border-[#323232] flex items-center px-3 justify-between shrink-0">
+            <MenuToolbar className="justify-between px-3 h-8">
                 <div className="flex items-center gap-3">
                     {/* View Toggle */}
                     <div className="flex bg-[#1e1e1e] rounded p-0.5 border border-[#323232]">
@@ -290,26 +302,26 @@ export function NamespaceViewer() {
 
                     {/* Code Manage Buttons (Icons) */}
                     <div className="flex items-center gap-1">
-                        <button
+                        <MenuButton
                             title="Scaffold Test"
                             onClick={handleScaffold}
                             disabled={scaffoldLoading}
-                            className={`text-gray-400 hover:text-gray-200 p-1 rounded hover:bg-[#323232] ${scaffoldLoading ? "opacity-50 cursor-not-allowed" : ""}`}
-                        >
-                            <Lucide.Hammer size={14} />
-                        </button>
-                        <button title="Import" className="text-gray-400 hover:text-gray-200 p-1 rounded hover:bg-[#323232]">
-                            <Lucide.Import size={14} />
-                        </button>
-                        <button title="Find Incomplete" className="text-gray-400 hover:text-gray-200 p-1 rounded hover:bg-[#323232]">
-                            <Lucide.AlertCircle size={14} />
-                        </button>
+                            icon={Lucide.Hammer}
+                        />
+                        <MenuButton
+                            title="Import"
+                            icon={Lucide.Import}
+                        />
+                        <MenuButton
+                            title="Find Incomplete"
+                            icon={Lucide.AlertCircle}
+                        />
                     </div>
                 </div>
 
                 {/* Right: Namespace */}
                 <span className="text-xs text-gray-400 font-mono">{namespace}</span>
-            </div>
+            </MenuToolbar>
 
             {/* Content Area */}
             <div className="flex-1 overflow-hidden relative flex">
@@ -358,6 +370,7 @@ export function NamespaceViewer() {
                                 height="100%"
                                 language="clojure"
                                 theme="vs-dark"
+                                beforeMount={handleEditorWillMount}
                                 value={code || ""}
                                 options={{
                                     minimap: { enabled: false },
@@ -388,6 +401,7 @@ export function NamespaceViewer() {
                                     height="100%"
                                     language="clojure"
                                     theme="vs-dark"
+                                    beforeMount={handleEditorWillMount}
                                     value={entryCode || ""}
                                     options={{
                                         minimap: { enabled: false },
@@ -408,7 +422,7 @@ export function NamespaceViewer() {
                     </div>
                 )
                 }
-            </div >
-        </div >
+            </div>
+        </MenuContainer>
     );
 }

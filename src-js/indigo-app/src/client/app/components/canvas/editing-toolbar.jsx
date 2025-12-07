@@ -1,35 +1,68 @@
 import React from 'react'
-import * as FigmaUi from '@xtalk/figma-ui'
 import { MousePointer2, Hand, Plus, Minus } from '../common/icons'
+import * as Lucide from 'lucide-react'
+import { MenuToolbar, MenuButton } from '../common/common-menu.jsx'
+import { useAppState } from '../../state'
 
 export function EditingToolbar({ onToolChange, currentTool = 'select' }) {
+    const { history, historyIndex, undo, redo } = useAppState();
+
+    const canUndo = historyIndex > 0;
+    const canRedo = historyIndex < history.length - 1;
+    const hasHistory = history.length > 0;
+
     return (
-        <div className="h-10 bg-[#2b2b2b] border-b border-[#323232] flex items-center px-2 gap-1">
-            <button
+        <MenuToolbar className="gap-1 px-2 h-10">
+            {/* Tools */}
+            <MenuButton
                 onClick={() => onToolChange && onToolChange('select')}
-                className={`h-8 w-8 flex items-center justify-center rounded hover:bg-[#3a3a3a] ${currentTool === 'select' ? 'bg-[#3a3a3a] text-blue-400' : 'text-gray-400'}`}
-            >
-                <MousePointer2 className="w-4 h-4" />
-            </button>
-            <button
+                active={currentTool === 'select'}
+                icon={MousePointer2}
+                title="Select"
+            />
+            <MenuButton
                 onClick={() => onToolChange && onToolChange('hand')}
-                className={`h-8 w-8 flex items-center justify-center rounded hover:bg-[#3a3a3a] ${currentTool === 'hand' ? 'bg-[#3a3a3a] text-blue-400' : 'text-gray-400'}`}
-            >
-                <Hand className="w-4 h-4" />
-            </button>
+                active={currentTool === 'hand'}
+                icon={Hand}
+                title="Hand Tool"
+            />
+
             <div className="w-[1px] h-4 bg-[#3e3e3e] mx-1" />
-            <button
+
+            {/* Zoom Controls */}
+            <MenuButton
                 onClick={() => onToolChange && onToolChange('zoom-in')}
-                className={`h-8 w-8 flex items-center justify-center rounded hover:bg-[#3a3a3a] ${currentTool === 'zoom-in' ? 'bg-[#3a3a3a] text-blue-400' : 'text-gray-400'}`}
-            >
-                <Plus className="w-4 h-4" />
-            </button>
-            <button
+                active={currentTool === 'zoom-in'}
+                icon={Plus}
+                title="Zoom In"
+            />
+            <MenuButton
                 onClick={() => onToolChange && onToolChange('zoom-out')}
-                className={`h-8 w-8 flex items-center justify-center rounded hover:bg-[#3a3a3a] ${currentTool === 'zoom-out' ? 'bg-[#3a3a3a] text-blue-400' : 'text-gray-400'}`}
-            >
-                <Minus className="w-4 h-4" />
-            </button>
-        </div>
+                active={currentTool === 'zoom-out'}
+                icon={Minus}
+                title="Zoom Out"
+            />
+
+            <div className="w-[1px] h-4 bg-[#3e3e3e] mx-1" />
+
+            {/* History Controls */}
+            <MenuButton
+                onClick={undo}
+                disabled={!canUndo}
+                icon={Lucide.ChevronLeft}
+                title="Undo"
+            />
+
+            <div className="flex items-center justify-center px-2 text-[10px] text-gray-500 min-w-[60px] select-none">
+                {hasHistory ? `${historyIndex + 1} / ${history.length}` : "No History"}
+            </div>
+
+            <MenuButton
+                onClick={redo}
+                disabled={!canRedo}
+                icon={Lucide.ChevronRight}
+                title="Redo"
+            />
+        </MenuToolbar>
     )
 }
