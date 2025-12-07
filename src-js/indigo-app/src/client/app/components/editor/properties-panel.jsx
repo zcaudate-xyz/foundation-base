@@ -103,7 +103,11 @@ export function PropertiesPanel() {
                   onClick={() => setSelectedVar(entry.var)}
                 >
                   <div className="flex items-center gap-2 overflow-hidden">
-                    <span className={`w-2 h-2 rounded-full shrink-0 ${entry.type === 'function' ? 'bg-blue-400' : entry.type === 'macro' ? 'bg-purple-400' : 'bg-yellow-400'}`} />
+                    <span className={`w-2 h-2 rounded-full shrink-0 ${entry.type === ':fragment' ? 'bg-green-400' :
+                        entry.op === 'defn' || entry.type === 'function' ? 'bg-blue-400' :
+                          entry.op === 'defmacro' || entry.type === 'macro' ? 'bg-purple-400' :
+                            'bg-yellow-400'
+                      }`} />
                     <span className="truncate" title={entry.var}>{entry.var}</span>
                   </div>
 

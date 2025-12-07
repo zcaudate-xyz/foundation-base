@@ -1,6 +1,6 @@
 import React from 'react'
 import * as te from '@/client/app/components/editor/theme-editor'
-import { fetchNamespaceSource, fetchDocPath, fetchFileContent, fetchNamespaceEntries, scanNamespaces } from '../api'
+import { fetchNamespaceSource, fetchDocPath, fetchFileContent, fetchNamespaceEntries, scanNamespaces, fetchComponents } from '../api'
 
 // code.dev.client.app/defaultComponents [18] 
 export var defaultComponents = [
@@ -495,14 +495,35 @@ export function AppStateProvider({ children }) {
         }
         setNamespaceEntriesLoading(true);
         try {
-            const data = await fetchNamespaceEntries(selectedNamespace);
-            setNamespaceEntries(data.entries || []);
+            if (activeTab === "library") {
+                // Find language for selected namespace
+                let lang = 'clj'; // Default
+                for (const group of libraryData) {
+                    if (group.namespaces.some(n => n.fullName === selectedNamespace || n === selectedNamespace)) {
+                        lang = group.language;
+                        break;
+                    }
+                }
+
+                const components = await fetchComponents(lang, selectedNamespace);
+                const entries = components.map(c => ({
+                    var: c.name,
+                    type: c.type, // :fragment or :code
+                    op: c.op,     // defn, def, etc.
+                    meta: c.meta,
+                    test: null    // No tests for library entries yet
+                }));
+                setNamespaceEntries(entries);
+            } else {
+                const data = await fetchNamespaceEntries(selectedNamespace);
+                setNamespaceEntries(data.entries || []);
+            }
         } catch (err) {
             console.error("Failed to load entries", err);
         } finally {
             setNamespaceEntriesLoading(false);
         }
-    }, [selectedNamespace]);
+    }, [selectedNamespace, activeTab, libraryData]);
 
     React.useEffect(() => {
         refreshNamespaceEntries();

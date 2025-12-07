@@ -28,20 +28,31 @@
   (let [book (l/get-book (l/default-library) (keyword lang))
         entry (book/get-module book (symbol ns))]
     (if entry
-      (->> (:code entry)
-           (map (fn [[k v]]
-                  {:name (str k)
-                   :type (if (= (:op v) 'deffrag) "fragment" "form")
-                   :meta (:meta v)}))
+      (->> (concat (map (fn [[k v]] [k v :code]) (:code entry))
+                   (map (fn [[k v]] [k v :fragment]) (:fragment entry)))
+           (map (fn [[k v type]]
+                  (let [op (:op v)]
+                    {:name (str k)
+                     :type type
+                     :op   (str op)
+                     :meta (:meta v)})))
            (sort-by :name))
       [])))
+
+(defn get-any-entry
+  "helper to get either code or fragment entry"
+  [book ns component]
+  (let [ns-sym (symbol ns)
+        comp-sym (symbol component)]
+    (or (book/get-base-entry book ns-sym comp-sym :code)
+        (book/get-base-entry book ns-sym comp-sym :fragment))))
 
 (defn get-component
   "gets the component source code"
   {:added "4.0"}
   [lang ns component]
   (let [book (l/get-book (l/default-library) (keyword lang))
-        entry (book/get-code-entry book (symbol (str ns "/" component)))]
+        entry (get-any-entry book ns component)]
     (if entry
       (str (:form entry))
       "")))
@@ -203,7 +214,7 @@
   {:added "4.0"}
   [lang ns component]
   (let [book (l/get-book (l/default-library) (keyword lang))
-        entry (book/get-code-entry book (symbol (str ns "/" component)))]
+        entry (get-any-entry book ns component)]
     (if entry
       (select-keys entry [:doc :meta :type :form])
       {})))
@@ -219,10 +230,10 @@
   {:added "4.0"}
   [lang ns component]
   (let [book (l/get-book (l/default-library) (keyword lang))
-        entry (book/get-code-entry book (symbol (str ns "/" component)))]
+        entry (get-any-entry book ns component)]
     (if entry
       (try
-        (l/emit-as (keyword lang) (:form entry))
+        (l/emit-as (keyword lang) (list (:form entry)))
         (catch Throwable t
           (str "// Error emitting code: " (.getMessage t))))
       "// Component not found")))
