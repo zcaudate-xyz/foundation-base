@@ -40,3 +40,18 @@
 
 ^{:refer indigo.server.api-browser/get-test-fact-source :added "4.1"}
 (fact "TODO")
+
+^{:refer indigo.server.api-browser/scan-namespaces :added "4.1"}
+(fact "TODO")
+
+^{:refer indigo.server.api-browser/get-namespace-source :added "4.1"}
+(fact "TODO")
+
+^{:refer indigo.server.api-browser/list-tests-for-var :added "4.1"}
+(fact "TODO")
+
+^{:refer indigo.server.api-browser/save-namespace-source :added "4.1"}
+(fact "TODO")
+
+^{:refer indigo.server.api-browser/get-completions :added "4.1"}
+(fact "TODO")
