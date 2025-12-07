@@ -9,6 +9,7 @@ import React from 'react'
 
 import * as te from '@/client/app/components/editor/theme-editor'
 
+import * as rp from '@/client/app/components/repl/repl-panel'
 import * as pp from '@/client/app/components/editor/properties-panel'
 
 import * as vc from '@/client/app/components/canvas/viewport-canvas'
@@ -18,7 +19,11 @@ import * as cb from '@/client/app/components/browser/component-browser'
 import * as lb from '@/client/app/components/browser/library-browser'
 import * as llv from '@/client/app/components/browser/library-live-view'
 
-import * as rp from '@/client/app/components/repl/repl-panel'
+import * as bv from '@/client/app/components/browser/book-view'
+
+// ... existing imports ...
+
+
 
 import * as nv from '@/client/app/components/browser/namespace-viewer'
 
@@ -112,8 +117,13 @@ export function App() {
           <FigmaUi.ResizableHandle className="w-[1px] bg-[#323232]"></FigmaUi.ResizableHandle>
           <FigmaUi.ResizablePanel defaultSize={30} minSize={20} maxSize={40}>
             <FigmaUi.ResizablePanelGroup direction="vertical">
+              {/* // ... (inside App component) */}
               <FigmaUi.ResizablePanel defaultSize={70} minSize={30}>
-                <pp.PropertiesPanel />
+                {activeTab === "library" ? (
+                  <bv.BookView />
+                ) : (
+                  <pp.PropertiesPanel />
+                )}
               </FigmaUi.ResizablePanel>
               <FigmaUi.ResizableHandle className="h-[1px] bg-[#323232]"></FigmaUi.ResizableHandle>
               <FigmaUi.ResizablePanel defaultSize={30} minSize={20}>

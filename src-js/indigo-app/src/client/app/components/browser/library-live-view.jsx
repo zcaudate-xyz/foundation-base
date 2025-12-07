@@ -84,6 +84,7 @@ export function LibraryLiveView() {
                             <div className="absolute top-6 left-0 right-0 bottom-0">
                                 <Editor
                                     key={`preview-source-${selectedVar}`}
+                                    path={`file:///preview/source/${selectedNamespace.replace(/[^a-zA-Z0-9]/g, '_')}/${selectedVar.replace(/[^a-zA-Z0-9]/g, '_')}.clj`}
                                     height="100%"
                                     language="clojure"
                                     theme="vs-dark"
@@ -105,6 +106,7 @@ export function LibraryLiveView() {
                             <div className="absolute top-6 left-0 right-0 bottom-0">
                                 <Editor
                                     key={`preview-emit-${selectedVar}`}
+                                    path={`file:///preview/emit/${selectedNamespace.replace(/[^a-zA-Z0-9]/g, '_')}/${selectedVar.replace(/[^a-zA-Z0-9]/g, '_')}.js`}
                                     height="100%"
                                     language="javascript"
                                     theme="vs-dark"

@@ -1,4 +1,5 @@
 import React from 'react'
+import '@/client/monaco-init'
 
 import './index.css'
 import * as r from '@/libs/js/react'

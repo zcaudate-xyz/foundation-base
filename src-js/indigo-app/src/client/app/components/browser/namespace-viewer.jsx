@@ -28,38 +28,16 @@ export function NamespaceViewer() {
     } = useAppState();
 
     const [scaffoldLoading, setScaffoldLoading] = React.useState(false);
-    const [runningTest, setRunningTest] = React.useState(null); // Still local, as it's UI specific
+    const [runningTest, setRunningTest] = React.useState(null);
 
-    const handleRunTest = async (e, entryVar) => {
-        e.stopPropagation();
-        setRunningTest(entryVar);
-        try {
-            // Assuming runTest is still directly called here, not via app state
-            // If runTest also needs to update global state, it should be moved to app state actions
-            // For now, keeping it as is, but removing the import as it's not in the provided snippet.
-            // await runTest(namespace, entryVar);
-            console.log(`Running test for ${entryVar} in ${namespace}`);
-            // Optionally show feedback or update status
-        } catch (err) {
-            console.error("Failed to run test", err);
-            alert("Failed to run test: " + err.message);
-        } finally {
-            setRunningTest(null);
-        }
-    };
+    // Refs for editors
+    const fileEditorRef = React.useRef(null);
+    const sourceEditorRef = React.useRef(null);
+    const testEditorRef = React.useRef(null);
 
-    const editorRef = React.useRef(null);
+    // Global Monaco refs
     const monacoRef = React.useRef(null);
     const completionProviderRef = React.useRef(null);
-    const decorationsRef = React.useRef(null);
-
-    // Load Source/Test/Doc content for File View
-    // This logic is now encapsulated within refreshNamespaceCode in useAppState
-    // const loadFileContent = React.useCallback(async () => { /* ... */ }, [namespace, fileViewMode, setLoading, setError, setCode]);
-
-    // Load Entries for Entry View (to get code for selected var)
-    // This logic is now encapsulated within refreshNamespaceEntries in useAppState
-    // const loadEntries = React.useCallback(async () => { /* ... */ }, [namespace]);
 
     // Effect to load content based on view type
     React.useEffect(() => {
@@ -71,30 +49,32 @@ export function NamespaceViewer() {
         }
     }, [viewType, namespace, refreshNamespaceCode, refreshNamespaceEntries]);
 
-    // Effect to handle external selection (e.g. from tree or properties panel)
+    // Effect to handle external selection (scroll to var in file view)
     React.useEffect(() => {
-        if (selectedVar) {
-            // In file mode, scroll to var
-            if (viewType === "file" && editorRef.current) {
-                const model = editorRef.current.getModel();
-                if (model) {
-                    const text = model.getValue();
-                    const regex = new RegExp(`\\(def(n|macro)?\\s+${selectedVar}[\\s\\n]`);
-                    const match = text.match(regex);
+        if (selectedVar && viewType === "file" && fileEditorRef.current) {
+            const model = fileEditorRef.current.getModel();
+            if (model) {
+                const text = model.getValue();
+                const regex = new RegExp(`\\(def(n|macro)?\\s+${selectedVar}[\\s\\n]`);
+                const match = text.match(regex);
 
-                    if (match) {
-                        const position = model.getPositionAt(match.index);
-                        editorRef.current.revealPositionInCenter(position);
-                        editorRef.current.setPosition(position);
-                        editorRef.current.focus();
-                    }
+                if (match) {
+                    const position = model.getPositionAt(match.index);
+                    fileEditorRef.current.revealPositionInCenter(position);
+                    fileEditorRef.current.setPosition(position);
+                    fileEditorRef.current.focus();
                 }
             }
         }
     }, [selectedVar, viewType]);
 
-    // Cleanup completion provider on unmount
+    // Register Completion Provider (Global)
     React.useEffect(() => {
+        // We need monaco instance to register provider. 
+        // We can capture it from the first editor mount.
+        // Or we can use the `beforeMount` prop of Editor to get monaco instance?
+        // But `onMount` gives us `monaco`.
+
         return () => {
             if (completionProviderRef.current) {
                 completionProviderRef.current.dispose();
@@ -102,27 +82,50 @@ export function NamespaceViewer() {
         };
     }, []);
 
-    const handleSave = async () => {
-        if (!namespace || !editorRef.current) return;
+    const registerCompletion = (monaco) => {
+        if (!monaco || completionProviderRef.current) return;
 
-        if (viewType === "entry") {
-            alert("Saving individual entries is not yet supported.");
-            return;
-        }
+        completionProviderRef.current = monaco.languages.registerCompletionItemProvider('clojure', {
+            provideCompletionItems: async (model, position) => {
+                const word = model.getWordUntilPosition(position);
+                const range = {
+                    startLineNumber: position.lineNumber,
+                    endLineNumber: position.lineNumber,
+                    startColumn: word.startColumn,
+                    endColumn: word.endColumn
+                };
+                try {
+                    // Use current namespace from state (might be stale in callback?)
+                    // Better to use the model's content or context if possible.
+                    // For now, using `namespace` from closure.
+                    const suggestions = await fetchCompletions(namespace, word.word);
+                    return {
+                        suggestions: suggestions.map(s => ({
+                            label: s,
+                            kind: monaco.languages.CompletionItemKind.Function,
+                            insertText: s,
+                            range: range
+                        }))
+                    };
+                } catch (err) {
+                    console.error("Completion error", err);
+                    return { suggestions: [] };
+                }
+            }
+        });
+    };
 
-        if (fileViewMode === "doc") {
-            alert("Saving documentation is not yet supported via this view.");
-            return;
-        }
+    const handleSave = async (editorInstance, targetNs) => {
+        if (!namespace || !editorInstance) return;
 
-        const currentSource = editorRef.current.getValue();
-        const targetNs = fileViewMode === "test" ? (namespace + "-test") : namespace;
+        const currentSource = editorInstance.getValue();
 
         try {
             await saveNamespaceSource(targetNs, currentSource);
             console.log("Saved namespace:", targetNs);
-            // Update global state with new code (though editor already has it)
-            setCode(currentSource);
+            if (viewType === "file") {
+                setCode(currentSource);
+            }
             toast.success(`Saved ${targetNs}`);
         } catch (err) {
             console.error("Failed to save namespace", err);
@@ -140,14 +143,112 @@ export function NamespaceViewer() {
             }
         } catch (err) {
             console.error("Failed to scaffold test", err);
-            // setError(err.message); // Don't set global error for scaffold failure?
-            alert("Scaffold failed: " + err.message);
+            toast.error("Scaffold failed: " + err.message);
         } finally {
             setScaffoldLoading(false);
         }
     };
 
+    const setupEditor = (editor, monaco, type) => {
+        monacoRef.current = monaco;
+        registerCompletion(monaco);
 
+        if (type === "file") fileEditorRef.current = editor;
+        if (type === "source") sourceEditorRef.current = editor;
+        if (type === "test") testEditorRef.current = editor;
+
+        const decorationsCollection = editor.createDecorationsCollection();
+
+        // Add Save Action
+        editor.addAction({
+            id: 'save-namespace',
+            label: 'Save Namespace',
+            keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.KEY_S],
+            run: () => {
+                let targetNs = namespace;
+                if (type === "file" && fileViewMode === "test") targetNs = namespace + "-test";
+                // For entry view, we might want to save the whole file? 
+                // But we are viewing a snippet. Saving snippet is hard.
+                if (type === "file") {
+                    handleSave(editor, targetNs);
+                } else {
+                    toast.info("Saving individual entries is not yet supported.");
+                }
+            }
+        });
+
+        // Add Eval Last Sexp Action
+        editor.addAction({
+            id: 'eval-last-sexp',
+            label: 'Eval Last Sexp',
+            keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.KEY_E],
+            run: (ed) => {
+                const model = ed.getModel();
+                const position = ed.getPosition();
+                const offset = model.getOffsetAt(position);
+                const text = model.getValue();
+                const sexp = getSexpBeforeCursor(text, offset);
+                if (sexp) {
+                    console.log("Evaluating:", sexp);
+                    const id = "eval-" + Date.now() + "-" + Math.random();
+                    const removeListener = addMessageListener((msg) => {
+                        if (msg.id === id) {
+                            removeListener();
+                            const resultText = msg.error ? ("Error: " + msg.error) : msg.result;
+                            const color = msg.error ? "red" : "#888888";
+                            decorationsCollection.set([{
+                                range: new monaco.Range(position.lineNumber, position.column, position.lineNumber, position.column),
+                                options: {
+                                    after: {
+                                        content: " => " + resultText,
+                                        inlineClassName: msg.error ? "text-red-500" : "text-gray-500",
+                                        color: color
+                                    }
+                                }
+                            }]);
+                            setTimeout(() => { decorationsCollection.clear(); }, 5000);
+                        }
+                    });
+                    send({ op: "eval", id: id, code: sexp });
+                }
+            }
+        });
+
+        // Paredit Actions
+        editor.addAction({
+            id: 'paredit-slurp-forward',
+            label: 'Paredit Slurp Forward',
+            keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.RightArrow, monaco.KeyMod.Alt | monaco.KeyCode.RightArrow],
+            run: (ed) => {
+                const model = ed.getModel();
+                const position = ed.getPosition();
+                const offset = model.getOffsetAt(position);
+                const text = model.getValue();
+                const result = slurpForward(text, offset);
+                if (result) {
+                    ed.executeEdits('paredit', [{ range: model.getFullModelRange(), text: result.text }]);
+                    ed.setPosition(model.getPositionAt(result.offset));
+                }
+            }
+        });
+
+        editor.addAction({
+            id: 'paredit-barf-forward',
+            label: 'Paredit Barf Forward',
+            keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.LeftArrow, monaco.KeyMod.Alt | monaco.KeyCode.LeftArrow],
+            run: (ed) => {
+                const model = ed.getModel();
+                const position = ed.getPosition();
+                const offset = model.getOffsetAt(position);
+                const text = model.getValue();
+                const result = barfForward(text, offset);
+                if (result) {
+                    ed.executeEdits('paredit', [{ range: model.getFullModelRange(), text: result.text }]);
+                    ed.setPosition(model.getPositionAt(result.offset));
+                }
+            }
+        });
+    };
 
     const selectedEntry = React.useMemo(() => {
         return entries.find(e => e.var === selectedVar);
@@ -155,9 +256,6 @@ export function NamespaceViewer() {
 
     const entryCode = React.useMemo(() => {
         if (!selectedEntry) return "";
-        // Prioritize source code, maybe show test code below or in a separate tab?
-        // User said "Entry View only displays the code for each entry".
-        // Let's show source.
         return selectedEntry.source?.source?.code || ";; No source code found";
     }, [selectedEntry]);
 
@@ -260,10 +358,10 @@ export function NamespaceViewer() {
                                 height="100%"
                                 language="clojure"
                                 theme="vs-dark"
-                                value={code}
+                                value={code || ""}
                                 options={{
                                     minimap: { enabled: false },
-                                    fontSize: 11, // 80% smaller (approx)
+                                    fontSize: 11,
                                     lineNumbers: 'on',
                                     scrollBeyondLastLine: false,
                                     automaticLayout: true,
@@ -271,192 +369,41 @@ export function NamespaceViewer() {
                                     matchBrackets: 'always',
                                     readOnly: fileViewMode === "doc"
                                 }}
-                                onMount={(editor, monaco) => {
-                                    editorRef.current = editor;
-                                    monacoRef.current = monaco;
-                                    decorationsRef.current = editor.createDecorationsCollection();
-                                    // ... (Keep existing onMount logic for completion, save, eval, paredit)
-                                    // Re-implementing simplified version for brevity in this replacement,
-                                    // but ideally we should preserve the full logic.
-                                    // Since I'm replacing the whole file, I MUST include the logic.
-
-                                    // Register Completion Provider
-                                    if (completionProviderRef.current) {
-                                        completionProviderRef.current.dispose();
-                                    }
-                                    completionProviderRef.current = monaco.languages.registerCompletionItemProvider('clojure', {
-                                        provideCompletionItems: async (model, position) => {
-                                            const word = model.getWordUntilPosition(position);
-                                            const range = {
-                                                startLineNumber: position.lineNumber,
-                                                endLineNumber: position.lineNumber,
-                                                startColumn: word.startColumn,
-                                                endColumn: word.endColumn
-                                            };
-                                            try {
-                                                const suggestions = await fetchCompletions(namespace, word.word);
-                                                return {
-                                                    suggestions: suggestions.map(s => ({
-                                                        label: s,
-                                                        kind: monaco.languages.CompletionItemKind.Function,
-                                                        insertText: s,
-                                                        range: range
-                                                    }))
-                                                };
-                                            } catch (err) {
-                                                console.error("Completion error", err);
-                                                return { suggestions: [] };
-                                            }
-                                        }
-                                    });
-
-                                    // Add Save Action
-                                    editor.addAction({
-                                        id: 'save-namespace',
-                                        label: 'Save Namespace',
-                                        keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.KEY_S],
-                                        run: () => handleSave()
-                                    });
-
-                                    // Add Eval Last Sexp Action
-                                    editor.addAction({
-                                        id: 'eval-last-sexp',
-                                        label: 'Eval Last Sexp',
-                                        keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.KEY_E],
-                                        run: (ed) => {
-                                            const model = ed.getModel();
-                                            const position = ed.getPosition();
-                                            const offset = model.getOffsetAt(position);
-                                            const text = model.getValue();
-                                            const sexp = getSexpBeforeCursor(text, offset);
-                                            if (sexp) {
-                                                console.log("Evaluating:", sexp);
-                                                const id = "eval-" + Date.now() + "-" + Math.random();
-                                                const removeListener = addMessageListener((msg) => {
-                                                    if (msg.id === id) {
-                                                        removeListener();
-                                                        const resultText = msg.error ? ("Error: " + msg.error) : msg.result;
-                                                        const color = msg.error ? "red" : "#888888";
-                                                        decorationsRef.current.set([{
-                                                            range: new monaco.Range(position.lineNumber, position.column, position.lineNumber, position.column),
-                                                            options: {
-                                                                after: {
-                                                                    content: " => " + resultText,
-                                                                    inlineClassName: msg.error ? "text-red-500" : "text-gray-500",
-                                                                    color: color
-                                                                }
-                                                            }
-                                                        }]);
-                                                        setTimeout(() => { decorationsRef.current.clear(); }, 5000);
-                                                    }
-                                                });
-                                                send({ op: "eval", id: id, code: sexp });
-                                            }
-                                        }
-                                    });
-
-                                    // Paredit Actions (Simplified for brevity, assuming utils are imported)
-                                    editor.addAction({
-                                        id: 'paredit-slurp-forward',
-                                        label: 'Paredit Slurp Forward',
-                                        keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.RightArrow, monaco.KeyMod.Alt | monaco.KeyCode.RightArrow],
-                                        run: (ed) => {
-                                            const model = ed.getModel();
-                                            const position = ed.getPosition();
-                                            const offset = model.getOffsetAt(position);
-                                            const text = model.getValue();
-                                            const result = slurpForward(text, offset);
-                                            if (result) {
-                                                ed.executeEdits('paredit', [{ range: model.getFullModelRange(), text: result.text }]);
-                                                ed.setPosition(model.getPositionAt(result.offset));
-                                            }
-                                        }
-                                    });
-
-                                    editor.addAction({
-                                        id: 'paredit-barf-forward',
-                                        label: 'Paredit Barf Forward',
-                                        keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.LeftArrow, monaco.KeyMod.Alt | monaco.KeyCode.LeftArrow],
-                                        run: (ed) => {
-                                            const model = ed.getModel();
-                                            const position = ed.getPosition();
-                                            const offset = model.getOffsetAt(position);
-                                            const text = model.getValue();
-                                            const result = barfForward(text, offset);
-                                            if (result) {
-                                                ed.executeEdits('paredit', [{ range: model.getFullModelRange(), text: result.text }]);
-                                                ed.setPosition(model.getPositionAt(result.offset));
-                                            }
-                                        }
-                                    });
-                                }}
+                                onMount={(editor, monaco) => setupEditor(editor, monaco, "file")}
                                 onChange={(value) => setCode(value)}
                             />
                         )}
                     </div>
                 ) : (
                     // Entry View
-                    <div className="flex flex-1 h-full">
-                        {/* Source Code */}
-                        <div className="flex-1 relative border-r border-[#323232]">
-                            <div className="absolute top-0 left-0 right-0 h-6 bg-[#252526] border-b border-[#323232] flex items-center px-2 text-xs text-gray-400 select-none z-10">
-                                Source
-                            </div>
-                            <div className="absolute top-6 left-0 right-0 bottom-0">
-                                {selectedEntry ? (
-                                    <Editor
-                                        key={`source-${selectedEntry.var}`}
-                                        path={`source-${selectedEntry.var.replace(/[^a-zA-Z0-9-]/g, '_')}.clj`}
-                                        height="100%"
-                                        language="clojure"
-                                        theme="vs-dark"
-                                        value={entryCode}
-                                        options={{
-                                            minimap: { enabled: false },
-                                            fontSize: 11,
-                                            lineNumbers: 'on',
-                                            scrollBeyondLastLine: false,
-                                            automaticLayout: true,
-                                            readOnly: true
-                                        }}
-                                    />
-                                ) : (
-                                    <div className="absolute inset-0 flex items-center justify-center text-xs text-gray-500">
-                                        Select an entry
-                                    </div>
-                                )}
-                            </div>
+                    <div className="flex flex-1 h-full relative">
+                        <div className="absolute top-0 left-0 right-0 h-6 bg-[#252526] border-b border-[#323232] flex items-center px-2 text-xs text-gray-400 select-none z-10">
+                            Source
                         </div>
-
-                        {/* Test Code */}
-                        <div className="flex-1 relative">
-                            <div className="absolute top-0 left-0 right-0 h-6 bg-[#252526] border-b border-[#323232] flex items-center px-2 text-xs text-gray-400 select-none z-10">
-                                Test
-                            </div>
-                            <div className="absolute top-6 left-0 right-0 bottom-0">
-                                {selectedEntry ? (
-                                    <Editor
-                                        key={`test-${selectedEntry.var}`}
-                                        path={`test-${selectedEntry.var.replace(/[^a-zA-Z0-9-]/g, '_')}.clj`}
-                                        height="100%"
-                                        language="clojure"
-                                        theme="vs-dark"
-                                        value={selectedEntry.test?.test?.code || ";; No test code found"}
-                                        options={{
-                                            minimap: { enabled: false },
-                                            fontSize: 11,
-                                            lineNumbers: 'on',
-                                            scrollBeyondLastLine: false,
-                                            automaticLayout: true,
-                                            readOnly: true
-                                        }}
-                                    />
-                                ) : (
-                                    <div className="absolute inset-0 flex items-center justify-center text-xs text-gray-500">
-                                        Select an entry
-                                    </div>
-                                )}
-                            </div>
+                        <div className="absolute top-6 left-0 right-0 bottom-0">
+                            {selectedEntry ? (
+                                <Editor
+                                    key={`source-${selectedEntry.var}`}
+                                    path={`file:///source/${namespace.replace(/[^a-zA-Z0-9]/g, '_')}/${selectedEntry.var.replace(/[^a-zA-Z0-9]/g, '_')}.clj`}
+                                    height="100%"
+                                    language="clojure"
+                                    theme="vs-dark"
+                                    value={entryCode || ""}
+                                    options={{
+                                        minimap: { enabled: false },
+                                        fontSize: 11,
+                                        lineNumbers: 'on',
+                                        scrollBeyondLastLine: false,
+                                        automaticLayout: true,
+                                        readOnly: true
+                                    }}
+                                    onMount={(editor, monaco) => setupEditor(editor, monaco, "source")}
+                                />
+                            ) : (
+                                <div className="absolute inset-0 flex items-center justify-center text-xs text-gray-500">
+                                    Select an entry
+                                </div>
+                            )}
                         </div>
                     </div>
                 )

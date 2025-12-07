@@ -56,12 +56,20 @@ export async function fetchComponents(type, ns) {
 }
 
 export async function fetchComponent(type, ns, component) {
-    const response = await fetch(`/api/browse/${type}/component`, {
+    let url = `/api/browse/${type}/component`;
+    let body = { ns, component };
+
+    if (type !== 'clj' && type !== 'test') {
+        url = `/api/browse/lang/component`;
+        body = { lang: type, ns, component };
+    }
+
+    const response = await fetch(url, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ ns, component })
+        body: JSON.stringify(body)
     });
     if (!response.ok) {
         throw new Error(`Failed to fetch component: ${response.statusText}`);

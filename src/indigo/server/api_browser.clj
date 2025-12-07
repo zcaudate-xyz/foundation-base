@@ -7,6 +7,8 @@
             [code.project :as project]
             [code.test.base.runtime :as rt]
             [clojure.repl :as repl]
+            [std.block :as block]
+            [std.block.layout :as layout]
             [code.framework :as framework]))
 
 ;; Existing endpoints -------------------------------------------------------
@@ -25,17 +27,22 @@
   "lists all components for a given namespace and language"
   {:added "4.0"}
   [lang ns]
+  (try
+    (require (symbol ns))
+    (catch Throwable _))
   (let [book (l/get-book (l/default-library) (keyword lang))
-        entry (book/get-module book (symbol ns))]
-    (if entry
-      (->> (concat (map (fn [[k v]] [k v :code]) (:code entry))
-                   (map (fn [[k v]] [k v :fragment]) (:fragment entry)))
+        module (book/get-module book (symbol ns))]
+    (if module
+      (->> (concat (map (fn [[k v]] [k v :code]) (:code module))
+                   (map (fn [[k v]] [k v :fragment]) (:fragment module)))
+           (h/do:prn)
            (map (fn [[k v type]]
                   (let [op (:op v)]
                     {:name (str k)
                      :type type
                      :op   (str op)
                      :meta (:meta v)})))
+           (h/do:prn)
            (sort-by :name))
       [])))
 
@@ -54,7 +61,7 @@
   (let [book (l/get-book (l/default-library) (keyword lang))
         entry (get-any-entry book ns component)]
     (if entry
-      (str (:form entry))
+      (block/string (block/layout (:form entry)))
       "")))
 
 ;; Clojure Runtime Endpoints ------------------------------------------------
@@ -233,7 +240,20 @@
         entry (get-any-entry book ns component)]
     (if entry
       (try
-        (l/emit-as (keyword lang) (list (:form entry)))
+        (let [res (l/emit-as (keyword lang) (list (:form entry)))
+              res (if (string? res) (str/trim res) res)
+              unquote (fn unquote [s]
+                        (if (and (string? s)
+                                 (str/starts-with? s "\"")
+                                 (str/ends-with? s "\""))
+                          (try
+                            (let [v (read-string s)]
+                              (if (string? v)
+                                (unquote v)
+                                (str v)))
+                            (catch Throwable _ s))
+                          s))]
+          (unquote res))
         (catch Throwable t
           (str "// Error emitting code: " (.getMessage t))))
       "// Component not found")))
