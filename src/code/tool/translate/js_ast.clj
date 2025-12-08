@@ -36,7 +36,7 @@
                (process.exit 1)))))
      (main)]))
 
-(def.make JS_AST
+(def.make BUILD_AST
   {:tag       "code.tool.js-ast"
    :build     +root-dir+
    :hooks    {}
@@ -59,7 +59,7 @@
   ([input-file]
    (translate-ast input-file nil))
   ([input-file output-file]
-   (make/build-all JS_AST) ;; Ensure build is ready
+   (make/build-all BUILD_AST) ;; Ensure build is ready
    (let [args (cond-> ["node" "index.js" input-file]
                 output-file (conj output-file))]
      (h/sh {:root +root-dir+
