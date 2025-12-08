@@ -12,14 +12,16 @@
    {:status    (cond (and (= :success (-> result :status))
                           (= true (-> result :data)))
                      :success
-                     
+
                      (= :timeout (-> result :actual :status))
                      :timeout
-                     
+
                      :else
                      :failed)
     :path     (-> result :meta :path)
-    :name     (-> result :meta :refer)
+    :name     (str (or (-> result :meta :refer)
+                       (-> result :meta :desc)
+                       (-> result :meta :id)))
     :ns       (-> result :meta :ns)
     :line     (-> result :meta :line)
     :desc     (-> result :meta :desc)
@@ -37,7 +39,9 @@
    #_(h/prfn :EVAL result)
    {:status   (-> result :status)
     :path     (-> result :meta :path)
-    :name     (-> result :meta :refer)
+    :name     (str (or (-> result :meta :refer)
+                       (-> result :meta :desc)
+                       (-> result :meta :id)))
     :ns       (-> result :meta :ns)
     :line     (-> result :meta :line)
     :desc     (-> result :meta :desc)
@@ -72,7 +76,7 @@
              (when (not (context/*print* :no-beep))
                (h/beep))
              (print/print-timeout summary))
-           
+
            (or (and (-> result :status (= :exception)))
                (and (-> result :data (= false))))
            (when (context/*print* :print-failed)
@@ -139,7 +143,7 @@
                                           (if (= :timeout (:status result))
                                             (print/print-throw (summarise-evaluate result))
                                             (print/print-throw (summarise-verify result)))))
-                                      
+
                                       (h/local :println ""))))
 
 (defn install-listeners

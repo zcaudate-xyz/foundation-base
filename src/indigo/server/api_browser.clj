@@ -282,8 +282,9 @@
   {:added "4.0"}
   [ns-str source]
   (try
-    (let [files (project/all-files
-                 (:source-paths (project/project)))
+    (let [project (project/project)
+          paths   (concat (:source-paths project) (:test-paths project))
+          files   (project/all-files paths)
           ns-sym (symbol ns-str)
           file   (get files ns-sym)]
       (if file

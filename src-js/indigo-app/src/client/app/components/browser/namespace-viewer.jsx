@@ -144,8 +144,7 @@ export function NamespaceViewer() {
         try {
             await saveNamespaceSource(targetNs, currentSource);
             console.log("Saved namespace:", targetNs);
-            await saveNamespaceSource(targetNs, currentSource);
-            console.log("Saved namespace:", targetNs);
+
             setCode(currentSource);
             toast.success(`Saved ${targetNs}`);
         } catch (err) {

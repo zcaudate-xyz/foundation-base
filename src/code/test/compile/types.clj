@@ -24,8 +24,7 @@
   "displays a fact"
   {:added "4.0"}
   ([m]
-   (dissoc m :path :eval :full :code :wrap
-                     :function :setup :let :teardown :use)))
+   (dissoc m :path :eval :full :code :wrap :function :setup :teardown)))
 
 (defn fact-display
   "displays a fact"
@@ -64,11 +63,10 @@
 
 (comment
   f       (-> (f/future:call (fn []
-                             (h/prn "RUN TEST: " (Thread/currentThread))
-                                      (execution-fn)))
-                     (f/future:timeout timeout
-                                       ))
-  
+                               (h/prn "RUN TEST: " (Thread/currentThread))
+                               (execution-fn)))
+              (f/future:timeout timeout))
+
   (-> (h/future (Thread/sleep 1000))
       (h/do:prn)
       (h/future:timeout 10)

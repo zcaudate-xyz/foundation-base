@@ -2,26 +2,6 @@
   (:require [std.fs.archive :as archive]
             [jvm.artifact :as artifact]))
 
-(defn match-jars
-  "matches jars from any representation
- 
-   (match-jars '[org.eclipse.aether/aether-api \"1.1.0\"])
-   => (\"<.m2>/org/eclipse/aether/aether-api/1.1.0/aether-api-1.1.0.jar\")"
-  {:added "3.0"}
-  ([names] (match-jars names []))
-  ([names coords]
-   (let [patterns (map (fn [name]
-                         (->> [name ".*"]
-                              (artifact/artifact :path)
-                              (re-pattern)))
-                       names)]
-     (-> coords
-         (map #(artifact/artifact :path %))
-         (filter (fn [path]
-                   (some (fn [pattern]
-                           (re-find pattern path))
-                         patterns)))))))
-
 (defn class-seq
   "creates a sequence of class names
  
