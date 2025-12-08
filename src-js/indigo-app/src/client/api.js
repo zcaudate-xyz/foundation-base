@@ -230,6 +230,20 @@ export async function fetchFileContent(path) {
     return res.json();
 }
 
+export async function deletePath(path) {
+    const res = await fetch(`/api/browse/clj/delete-path`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ path }),
+    });
+    if (!res.ok) {
+        throw new Error(`Failed to delete path: ${res.statusText}`);
+    }
+    return res.json();
+}
+
 export async function fetchNamespaceEntries(ns) {
     const res = await fetch(`/api/browse/clj/namespace-entries`, {
         method: 'POST',

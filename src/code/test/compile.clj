@@ -160,7 +160,6 @@
                           :wrap wrap
                           :function function)
                    (types/map->Fact))]
-     (h/prn fpkg)
      fpkg)))
 
 (defn install-fact
@@ -223,27 +222,6 @@
    `(rt/all-facts))
   ([ns]
    `(rt/all-facts (quote ~ns))))
-
-(defn fact:rerun
-  "reruns all facts along with filter and compile options"
-  {:added "3.0"}
-  ([facts]
-   (fact:rerun facts {}))
-  ([facts filters]
-   (fact:rerun facts filters nil))
-  ([facts filters global]
-   (let [results (->> facts
-                      (vals)
-                      (sort-by :line)
-                      (filter :refer)
-                      (filter (fn [m]
-                                (every? (fn [[k v]]
-                                          (let [f (if (fn? v) v (partial = v))]
-                                            (f (get m k))))
-                                        filters)))
-                      (mapv #(fact:compile % (merge (rt/get-global) global)))
-                      (mapv #(%)))]
-     [(every? true? results) (count results)])))
 
 (defn fact:missing
   "returns all missing facts for a given namespace"

@@ -6,6 +6,7 @@
             [indigo.server.api-common :as api]
             [indigo.server.api-browser :as api-browser]
             [indigo.server.test-runner :as test-runner]
+            [indigo.server.watcher :as watcher]
             [indigo.server.context :as context]
             [std.lib :as h]
             [std.string :as str]
@@ -28,8 +29,8 @@
                       (catch Throwable t
                         (println "JSON Parse Error:" (.getMessage t))
                         {}))
-          _ (println "Request Body:" (:body req))
-          _ (println "Parsed Params:" params)
+          ;; _ (println "Request Body:" (:body req))
+          ;; _ (println "Parsed Params:" params)
           req    (assoc req :params params)
           res    (f req)]
       {:status 200
@@ -145,6 +146,11 @@
                              (let [path (get-in req [:params :path])]
                                (#'indigo.server.api-browser/get-file-content path))))
 
+      "clj/delete-path"   (wrap-browser-call
+                           (fn [req]
+                             (let [path (get-in req [:params :path])]
+                               (#'indigo.server.api-browser/delete-path path))))
+
       "test/run-var"    (wrap-browser-call
                          (fn [req]
                            (let [ns   (get-in req [:params :ns])
@@ -228,10 +234,12 @@
    (swap! *instance*
           (fn [stop-fn]
             (when stop-fn (stop-fn :timeout 100))
-            nil))))
+            nil))
+   (watcher/stop-watcher)))
 
 (defn server-start
   []
+  (watcher/start-watcher)
   (swap! *instance*
          (fn [stop-fn]
            (when (not stop-fn)
@@ -254,7 +262,17 @@
   (. (Desktop/getDesktop)
      (browse (URI. (str "http://localhost:" *port*)))))
 
+
 (comment
+  (require 'std.fs.watch)
+ 
+  
+  (into {} +watch+)
+  (std.fs.watch/start-watcher +watch+)
+  (std.fs.watch/stop-watcher +watch+)
+  (h/stop +watch+)
+
+  (def watch *1)
   (h/sh "curl" "-X" "POST" (str "http://localhost:" *port*
                                 "/api/translate/to-heal")
         "-d" "(+ 1 2 3))")

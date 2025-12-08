@@ -35,14 +35,12 @@
     (if module
       (->> (concat (map (fn [[k v]] [k v :code]) (:code module))
                    (map (fn [[k v]] [k v :fragment]) (:fragment module)))
-           (h/do:prn)
            (map (fn [[k v type]]
                   (let [op (:op v)]
                     {:name (str k)
                      :type type
                      :op   (str op)
                      :meta (:meta v)})))
-           (h/do:prn)
            (sort-by :name))
       [])))
 
@@ -372,46 +370,96 @@
   (try
     (let [f (java.io.File. ^String path)]
       (if (.exists f)
-        (slurp f)
-        (str ";; File not found: " path)))
-    (catch Throwable t
-      (str ";; Error reading file: " (.getMessage t)))))
+        (catch Throwable t
+          (str ";; Error reading file: " (.getMessage t)))))
 
-(defn get-namespace-entries
-  "gets the entries (source and test) for a namespace"
-  {:added "4.0"}
-  [ns-str]
-  (try
-    (let [project (project/project)
-          ns-sym (symbol ns-str)
+    (defn resolve-paths
+      "resolves a path or namespace to a list of java.io.File objects (source + test)"
+      [path-or-ns]
+      (let [f (java.io.File. ^String path-or-ns)]
+        (if (.exists f)
+          [f]
+          ;; Try resolving as namespace
+          (try
+            (let [project (project/project)
+                  ns-sym  (symbol path-or-ns)
 
-          ;; Resolve source file
-          source-path (or (get (project/all-files (:source-paths project)) ns-sym)
-                          (get (project/all-files (:test-paths project)) ns-sym))
+                  ;; Resolve Source
+                  source-path (or (get (project/all-files (:source-paths project)) ns-sym)
+                                  (get (project/all-files (:test-paths project)) ns-sym))
 
-          ;; Resolve test file
-          test-ns-sym (project/test-ns ns-sym)
-          test-path   (get (project/all-files (:test-paths project)) test-ns-sym)
+                  ;; Resolve Test (if any)
+                  test-ns-sym (project/test-ns ns-sym)
+                  test-path   (get (project/all-files (:test-paths project)) test-ns-sym)]
 
-          ;; Analyse
-          source-analysis (when source-path
-                            (framework/analyse-source-code (slurp source-path)))
-          test-analysis   (when test-path
-                            (framework/analyse-test-code (slurp test-path)))
+              (->> [source-path test-path]
+                   (remove nil?)
+                   (map #(java.io.File. %))))
+            (catch Throwable _ [])))))
 
-          ;; Merge
-          source-entries (get source-analysis ns-sym {})
-          test-entries   (or (get test-analysis ns-sym)
-                             (get test-analysis test-ns-sym)
-                             {})
+    (defn delete-path
+      "deletes a file or directory, and test file if applicable"
+      {:added "4.0"}
+      [path]
+      (try
+        (let [files (resolve-paths path)]
+          (if (seq files)
+            (let [deleted (atom [])]
+              (doseq [f files]
+                (when (.exists f)
+                  (if (.isDirectory f)
+                    (let [delete-recursive (fn delete-recursive [^java.io.File file]
+                                             (if (.isDirectory file)
+                                               (doseq [child (.listFiles file)]
+                                                 (delete-recursive child)))
+                                             (.delete file))]
+                      (delete-recursive f)
+                      (swap! deleted conj (str f)))
+                    (do
+                      (.delete f)
+                      (swap! deleted conj (str f))))))
+              (if (seq @deleted)
+                {:status "ok" :message (str "Deleted " (str/join ", " @deleted))}
+                {:status "error" :message (str "File(s) not found for: " path)}))
+            {:status "error" :message (str "File not found: " path)}))
+        (catch Throwable t
+          {:status "error" :message (str "Error deleting path: " (.getMessage t))})))
 
-          all-vars (sort (into (set (keys source-entries)) (keys test-entries)))
+    (defn get-namespace-entries
+      "gets the entries (source and test) for a namespace"
+      {:added "4.0"}
+      [ns-str]
+      (try
+        (let [project (project/project)
+              ns-sym (symbol ns-str)
 
-          entries (map (fn [v]
-                         {:var (str v)
-                          :source (get source-entries v)
-                          :test   (get test-entries v)})
-                       all-vars)]
-      {:entries entries})
-    (catch Throwable t
-      {:error (.getMessage t)})))
+              ;; Resolve source file
+              source-path (or (get (project/all-files (:source-paths project)) ns-sym)
+                              (get (project/all-files (:test-paths project)) ns-sym))
+
+              ;; Resolve test file
+              test-ns-sym (project/test-ns ns-sym)
+              test-path   (get (project/all-files (:test-paths project)) test-ns-sym)
+
+              ;; Analyse
+              source-analysis (when source-path
+                                (framework/analyse-source-code (slurp source-path)))
+              test-analysis   (when test-path
+                                (framework/analyse-test-code (slurp test-path)))
+
+              ;; Merge
+              source-entries (get source-analysis ns-sym {})
+              test-entries   (or (get test-analysis ns-sym)
+                                 (get test-analysis test-ns-sym)
+                                 {})
+
+              all-vars (sort (into (set (keys source-entries)) (keys test-entries)))
+
+              entries (map (fn [v]
+                             {:var (str v)
+                              :source (get source-entries v)
+                              :test   (get test-entries v)})
+                           all-vars)]
+          {:entries entries})
+        (catch Throwable t
+          {:error (.getMessage t)})))

@@ -8,8 +8,7 @@
 
 (def ^:dynamic *defaults* {:recursive true
                            :types :all
-                           :mode :sync
-                           :exclude [".*"]})
+                           :mode :sync})
 
 (defonce ^:dynamic *filewatchers* (atom {}))
 
@@ -86,9 +85,12 @@
    (let [{:keys [options callback excludes filters kinds]} watcher
          filepath (.getPath file)
          filename (.getName file)]
-     (if (and (get kinds kind)
-              (or  (empty? filters)
-                   (some #(re-find % filename) filters)))
+     (when (and (get kinds kind)
+                (or  (empty? filters)
+                     (some #(re-find % filename) filters))
+                (or  (empty? excludes)
+                     (not (some #(re-find % filename) excludes))))
+       
        (case (:mode options)
          :async (future (callback (kind-lookup kind) file))
          :sync  (callback (kind-lookup kind) file))))))
@@ -144,7 +146,8 @@
   "stops the watcher"
   {:added "3.0"}
   ([watcher]
-   (.close ^java.nio.file.WatchService (:service watcher)) (future-cancel (:running watcher)) (dissoc watcher :running :service :seen)))
+   (.close ^java.nio.file.WatchService (:service watcher))
+   (future-cancel (:running watcher)) (dissoc watcher :running :service :seen)))
 
 (defrecord Watcher [paths callback options]
   Object

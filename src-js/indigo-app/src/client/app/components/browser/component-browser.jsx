@@ -1,18 +1,42 @@
 import * as Lucide from 'lucide-react'
 import React from 'react'
-import { fetchNamespaces } from '../../../api'
+import { fetchNamespaces, deletePath } from '../../../api'
 import { useAppState } from '../../state'
 import { fuzzyMatch } from '../../utils/search'
 import { BrowserPanel, BrowserTree, ContextMenu } from './common'
+import { addMessageListener } from '../../../repl-client'
 import { toast } from 'sonner'
 
 // Helper to convert raw namespace tree to standardized nodes
 function convertToStandardNodes(node) {
-  const children = Array.from(node.children.values()).map(convertToStandardNodes);
-  children.sort((a, b) => a.label.localeCompare(b.label));
+  // Recursively process children
+  const children = Array.from(node.children.values()).flatMap(convertToStandardNodes);
 
-  // If this node is a namespace AND has children, we want to show BOTH the folder and the file
+  // Sort: Folders first, then Files. Within type, alphabetical.
+  children.sort((a, b) => {
+    // Heuristic: isNamespace=false usually implies folder in this view (except leaf packages? No, leaf packages have isNs=true)
+    // Actually our node structure: 
+    // - Folders: isNamespace=false, children!=null
+    // - Files: isNamespace=true
+
+    // Let's rely on isNamespace. Files (isNamespace=true) come AFTER Folders (isNamespace=false)
+    if (a.isNamespace !== b.isNamespace) {
+      return a.isNamespace ? 1 : -1;
+    }
+    return a.label.localeCompare(b.label);
+  });
+
+  // Collision case: It is a namespace AND has children
+  // We want to return TWO nodes: one for the folder, one for the file.
   if (node.isNamespace && children.length > 0) {
+    const folderNode = {
+      id: node.fullPath + "-folder", // Distinct ID for folder
+      label: node.name,
+      children: children,
+      isNamespace: false, // Acts as folder
+      isSelectable: false // Just expands
+    };
+
     const fileNode = {
       id: node.fullPath,
       label: node.name,
@@ -21,22 +45,20 @@ function convertToStandardNodes(node) {
       isSelectable: true
     };
 
-    return {
-      id: node.fullPath + "-folder", // Distinct ID for folder
-      label: node.name,
-      children: [fileNode, ...children], // File at top
-      isNamespace: false, // Acts as folder
-      isSelectable: false // Just expands
-    };
+    return [folderNode, fileNode];
   }
 
-  return {
-    id: node.fullPath,
+  // Standard case
+  const standardNode = {
+    id: node.fullPath || "root", // Fallback for root
     label: node.name,
     children: children.length > 0 ? children : null,
     isNamespace: node.isNamespace,
-    isSelectable: node.isNamespace // Only namespaces are selectable in this view
+    isSelectable: node.isNamespace
   };
+
+  // Only return this node if it's relevant (root usually skipped by caller)
+  return [standardNode];
 }
 
 export function buildNamespaceTree(namespaces) {
@@ -129,7 +151,18 @@ export function EnvBrowser() {
   const treeNodes = React.useMemo(() => {
     const rawRoot = buildNamespaceTree(filteredNamespaces);
     // The root itself isn't a node we want to show, we want its children
-    return Array.from(rawRoot.children.values()).map(convertToStandardNodes).sort((a, b) => a.label.localeCompare(b.label));
+    // Use flatMap to flatten the array of arrays returned by convertToStandardNodes
+    const nodes = Array.from(rawRoot.children.values()).flatMap(convertToStandardNodes);
+
+    // Sort top-level nodes as well
+    nodes.sort((a, b) => {
+      if (a.isNamespace !== b.isNamespace) {
+        return a.isNamespace ? 1 : -1;
+      }
+      return a.label.localeCompare(b.label);
+    });
+
+    return nodes;
   }, [filteredNamespaces]);
 
   // Auto-expand if searching
@@ -160,7 +193,34 @@ export function EnvBrowser() {
     });
   };
 
-  const handleAction = (action, node) => {
+  // File Watcher Listener
+  React.useEffect(() => {
+    // We can listen to log messages which include broadcasted messages
+    // Ideally we should have a specific listener for file changes in repl-client
+    // But broadcastLog handles 'in' messages which are what we get from server (JSON parsed)
+    // Actually, repl-client `listeners` set is better.
+    const removeListener = addMessageListener((msg) => {
+      if (msg.type === "file-change") {
+        const { kind, path } = msg;
+        const filename = path.split("/").pop();
+        toast(`File ${kind}: ${filename}`, {
+          description: path,
+          duration: 3000,
+          action: {
+            label: 'Reload',
+            onClick: () => refreshNamespaces()
+          }
+        });
+        // Auto-refresh if it looks like a namespace we care about
+        if (path.endsWith(".clj") || path.endsWith(".cljs")) {
+          refreshNamespaces(); // Less intrusive refresh
+        }
+      }
+    });
+    return removeListener;
+  }, [refreshNamespaces]);
+
+  const handleAction = async (action, node) => {
     console.log(`Action: ${action} on ${node.label}`);
     switch (action) {
       case 'reload':
@@ -170,14 +230,44 @@ export function EnvBrowser() {
       case 'eval':
         toast.info(`Eval ${node.label} (Not implemented)`);
         break;
+      case 'delete':
+        if (confirm(`Are you sure you want to delete ${node.label}?`)) {
+          try {
+            // node.id is the full path for namespaces/files
+            // for folders created by convertToStandardNodes, id has "-folder" suffix, we need to handle that
+            // Actually convertToStandardNodes uses node.fullPath as id for files.
+            // For folders it appends "-folder". But we want the real path.
+            // Let's modify convertToStandardNodes to pass real path in data or similar?
+            // Or just strip suffix if present? 
+            // Wait, buildNamespaceTree puts fullPath in the node object.
+            // But handleAction receives the *tree node*, which is from convertToStandardNodes.
+            // The tree node has `id` which IS the path for files.
+            // For folders: `id: node.fullPath + "-folder"`.
+            // So we need to strip "-folder" for folders.
+
+            let path = node.id;
+            if (path.endsWith("-folder") && !node.isNamespace) { // Heuristic
+              path = path.substring(0, path.length - 7);
+            }
+
+            // Actually, a better way is to pass the real path as a custom prop in tree node
+            // But since I can't easily change that without reading the file again contextually...
+            // Let's rely on the ID convention I just added in previous step.
+
+            await deletePath(path);
+            toast.success(`Deleted ${node.label}`);
+            refreshNamespaces();
+          } catch (e) {
+            console.error(e);
+            toast.error(`Failed to delete: ${e.message}`);
+          }
+        }
+        break;
       case 'new-folder':
         toast.info(`New Folder in ${node.label} (Not implemented)`);
         break;
       case 'new-namespace':
         toast.info(`New Namespace in ${node.label} (Not implemented)`);
-        break;
-      case 'delete':
-        toast.info(`Delete ${node.label} (Not implemented)`);
         break;
       case 'rename':
         toast.info(`Rename ${node.label} (Not implemented)`);

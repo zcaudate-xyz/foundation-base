@@ -48,7 +48,6 @@
 
               compile/fact
               compile/fact:all
-              compile/fact:rerun
               compile/fact:purge
               compile/fact:list
               compile/fact:symbol
