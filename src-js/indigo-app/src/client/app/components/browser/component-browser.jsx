@@ -4,8 +4,8 @@ import { fetchNamespaces, deletePath } from '../../../api'
 import { useAppState } from '../../state'
 import { fuzzyMatch } from '../../utils/search'
 import { BrowserPanel, BrowserTree, ContextMenu } from './common'
-import { addMessageListener } from '../../../repl-client'
 import { toast } from 'sonner'
+import { useServerEvent } from '../../events-context'
 
 // Helper to convert raw namespace tree to standardized nodes
 function convertToStandardNodes(node) {
@@ -194,31 +194,22 @@ export function EnvBrowser() {
   };
 
   // File Watcher Listener
-  React.useEffect(() => {
-    // We can listen to log messages which include broadcasted messages
-    // Ideally we should have a specific listener for file changes in repl-client
-    // But broadcastLog handles 'in' messages which are what we get from server (JSON parsed)
-    // Actually, repl-client `listeners` set is better.
-    const removeListener = addMessageListener((msg) => {
-      if (msg.type === "file-change") {
-        const { kind, path } = msg;
-        const filename = path.split("/").pop();
-        toast(`File ${kind}: ${filename}`, {
-          description: path,
-          duration: 3000,
-          action: {
-            label: 'Reload',
-            onClick: () => refreshNamespaces()
-          }
-        });
-        // Auto-refresh if it looks like a namespace we care about
-        if (path.endsWith(".clj") || path.endsWith(".cljs")) {
-          refreshNamespaces(); // Less intrusive refresh
-        }
+  useServerEvent('file-change', (msg) => {
+    const { kind, path } = msg;
+    const filename = path.split("/").pop();
+    toast(`File ${kind}: ${filename}`, {
+      description: path,
+      duration: 3000,
+      action: {
+        label: 'Reload',
+        onClick: () => refreshNamespaces()
       }
     });
-    return removeListener;
-  }, [refreshNamespaces]);
+    // Auto-refresh if it looks like a namespace we care about
+    if (path.endsWith(".clj") || path.endsWith(".cljs")) {
+      refreshNamespaces(); // Less intrusive refresh
+    }
+  });
 
   const handleAction = async (action, node) => {
     console.log(`Action: ${action} on ${node.label}`);

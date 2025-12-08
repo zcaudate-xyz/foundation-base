@@ -28,6 +28,9 @@ export function NamespaceViewer() {
 
     const [scaffoldLoading, setScaffoldLoading] = React.useState(false);
 
+    // Get events context
+    const { subscribe, evalRequest } = useEvents();
+
     // Refs for editors
     const fileEditorRef = React.useRef(null);
     const testEditorRef = React.useRef(null);
@@ -107,18 +110,16 @@ export function NamespaceViewer() {
 
     // Actions Wrappers
     const handleEval = () => {
-        Actions.evalCode(fileEditorRef.current, monacoRef.current, namespace, fileViewMode);
+        Actions.evalCode(fileEditorRef.current, monacoRef.current, namespace, fileViewMode, evalRequest);
     };
 
     const handleEvalLastSexp = () => {
-        Actions.evalLastSexp(fileEditorRef.current, monacoRef.current, namespace, fileViewMode);
+        Actions.evalLastSexp(fileEditorRef.current, monacoRef.current, namespace, fileViewMode, evalRequest);
     };
 
     const handleScaffold = () => {
         Actions.scaffoldNamespaceTest(namespace, fileViewMode, refreshNamespaceCode, setScaffoldLoading);
     };
-
-    const { subscribe } = useEvents();
 
     React.useEffect(() => {
         handlersRef.current = {

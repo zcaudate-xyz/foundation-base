@@ -3,7 +3,7 @@
             [std.lib :as h]
             [std.string :as str]
             [std.fs :as fs]
-            [indigo.server.context :as context]
+            [indigo.server.dispatch :as dispatch]
             [org.httpkit.server :as http]
             [code.project :as project]
             [cheshire.core :as cheshire]))
@@ -11,13 +11,11 @@
 (defonce ^:dynamic *watcher* (atom nil))
 
 (defn broadcast-change [kind file]
-  (let [msg (cheshire/generate-string
-             {:type "file-change"
-              :path (str file)
-              :kind (name kind)})]
-    (h/prn msg)
-    (doseq [channel @context/repl-clients]
-      (http/send! channel msg))))
+  (let [msg {:type "file-change"
+             :path (str file)
+             :kind (name kind)}]
+    (h/prn "File Change:" msg)
+    (dispatch/broadcast! msg)))
 
 (defn start-watcher []
   (when-not @*watcher*

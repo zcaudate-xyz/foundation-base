@@ -7,7 +7,7 @@
             [indigo.server.api-browser :as api-browser]
             [indigo.server.test-runner :as test-runner]
             [indigo.server.watcher :as watcher]
-            [indigo.server.context :as context]
+            [indigo.server.dispatch :as dispatch]
             [std.lib :as h]
             [std.string :as str]
             [std.json :as json]
@@ -96,11 +96,11 @@
 (defn repl-handler [req]
   (http/with-channel req channel
     (http/on-close channel (fn [status]
-                             (swap! context/repl-clients disj channel)
+                             (dispatch/remove-client! channel)
                              (println "REPL Client disconnected" status)))
     (http/on-receive channel (fn [data]
                                (if (= data "ping")
-                                 (http/send! channel "pong")
+                                 (dispatch/send! channel "pong")
                                  (do
                                    (println "REPL Received:" data)
                                    (let [json-data (try (cheshire/parse-string data true)
@@ -118,13 +118,13 @@
                                                                   *ns* (or (find-ns target-ns) (create-ns target-ns))]
                                                           (let [res (eval form)]
                                                             (print res))))] ;; Use print to avoid newline
-                                           (http/send! channel (cheshire/generate-string {:id (:id json-data)
-                                                                                          :result result
-                                                                                          :type "eval-result"})))
+                                           (dispatch/send! channel {:id (:id json-data)
+                                                                    :result result
+                                                                    :type "eval-result"}))
                                          (catch Throwable t
-                                           (http/send! channel (cheshire/generate-string {:id (:id json-data)
-                                                                                          :error (.getMessage t)
-                                                                                          :type "eval-error"}))))
+                                           (dispatch/send! channel {:id (:id json-data)
+                                                                    :error (.getMessage t)
+                                                                    :type "eval-error"})))
                                        ;; Handle legacy raw string request
                                        (try
                                          (let [form (read-string data)
@@ -132,10 +132,10 @@
                                                         (binding [*out* *out*]
                                                           (let [res (eval form)]
                                                             (println res))))]
-                                           (http/send! channel result))
+                                           (dispatch/send! channel result))
                                          (catch Throwable t
-                                           (http/send! channel (str "Error: " (.getMessage t)))))))))))
-    (swap! context/repl-clients conj channel)
+                                           (dispatch/send! channel (str "Error: " (.getMessage t)))))))))))
+    (dispatch/add-client! channel)
     (println "REPL Client connected")))
 
 (defn dev-handler

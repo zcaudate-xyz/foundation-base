@@ -7,7 +7,6 @@ import { useAppState } from '../../state'
 import { useEvents } from '../../events-context'
 import { MenuButton } from '../common/common-menu'
 import { toast } from 'sonner'
-import { send, addMessageListener } from '../../../repl-client'
 
 export function PropertyInput({ componentId, propertyKey, value, onUpdateProperty }) {
   if (typeof value === "boolean") {
@@ -85,32 +84,18 @@ export function PropertiesPanel() {
     }
   };
 
-  const { emit } = useEvents();
+  const { emit, evalRequest } = useEvents();
   const [manageLoading, setManageLoading] = React.useState(false);
 
   const handleManageTask = (task, args) => {
     // args is a string representing a Clojure vector, e.g. "['ns', {:write true}]"
     const code = `(do (require 'code.manage) (apply code.manage/${task} ${args}))`;
     console.log("Running manage task:", code);
-    const id = "manage-" + Date.now();
 
-    // We just fire and forget here? Or promise?
-    // Use toast promise similar to original implementation
     setManageLoading(true);
     toast.promise(
-      new Promise((resolve, reject) => {
-        const removeListener = addMessageListener((msg) => {
-          if (msg.id === id) {
-            removeListener();
-            if (msg.error) {
-              reject(new Error(msg.error));
-            } else {
-              resolve(msg.result);
-            }
-          }
-        });
-        send({ op: "eval", id: id, code: code, ns: selectedNamespace });
-      }).finally(() => setManageLoading(false)),
+      evalRequest(code, selectedNamespace)
+        .finally(() => setManageLoading(false)),
       {
         loading: `Running ${task}...`,
         success: (data) => `${task} completed: ${data}`,

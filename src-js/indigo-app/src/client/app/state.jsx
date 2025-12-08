@@ -1,6 +1,7 @@
 import React from 'react'
 import * as te from '@/client/app/components/editor/theme-editor'
 import { fetchNamespaceSource, fetchDocPath, fetchFileContent, fetchNamespaceEntries, scanNamespaces, fetchComponents } from '../api'
+import { useServerEvent } from './events-context'
 
 // code.dev.client.app/defaultComponents [18] 
 export var defaultComponents = [
@@ -618,6 +619,11 @@ export function AppStateProvider({ children }) {
 
     // File Buffers (Cache for tab content)
     let [fileBuffers, setFileBuffers] = React.useState({});
+
+    // Invalidate cache on file change from server
+    useServerEvent('file-change', (msg) => {
+        setFileBuffers({});
+    });
 
     const getBufferKey = (ns, mode) => `${ns}:${mode}`;
 

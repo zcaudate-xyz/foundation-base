@@ -1,6 +1,5 @@
 import { saveNamespaceSource, fetchCompletions, scaffoldTest } from '../../../api'
 import { slurpForward, barfForward, getSexpRangeBeforeCursor } from '../../utils/paredit'
-import { send, addMessageListener } from '../../../repl-client'
 import { toast } from 'sonner'
 
 export const registerCompletion = (monaco, completionProviderRef, namespace) => {
@@ -66,7 +65,7 @@ const flashDecoration = (editor, monaco, range, isWholeLine) => {
     }, 500);
 };
 
-export const evalCode = (editor, monaco, namespace, fileViewMode) => {
+export const evalCode = (editor, monaco, namespace, fileViewMode, evalFn) => {
     if (!editor) return;
 
     const model = editor.getModel();
@@ -89,11 +88,6 @@ export const evalCode = (editor, monaco, namespace, fileViewMode) => {
             const startPos = model.getPositionAt(result.start);
             const endPos = model.getPositionAt(result.end);
             range = new monaco.Range(startPos.lineNumber, startPos.column, endPos.lineNumber, endPos.column);
-            // Although original code set isWholeLine: true for some reason in one branch? 
-            // Ah, for "eval file" or something else maybe? 
-            // Original eval logic for getting sexp used isWholeLine: false.
-            // Wait, I see lines 72-85 in original code had isWholeLine: true. That was for *external selection* highlight.
-            // The eval handler (lines 175-183) has isWholeLine: false.
             isWholeLine = false;
         }
     }
@@ -101,23 +95,10 @@ export const evalCode = (editor, monaco, namespace, fileViewMode) => {
     if (code) {
         flashDecoration(editor, monaco, range, isWholeLine);
 
-        const id = "eval-" + Date.now();
         const targetNs = fileViewMode === 'test' ? namespace + '-test' : namespace;
 
         toast.promise(
-            new Promise((resolve, reject) => {
-                const removeListener = addMessageListener((msg) => {
-                    if (msg.id === id) {
-                        removeListener();
-                        if (msg.error) {
-                            reject(new Error(msg.error));
-                        } else {
-                            resolve(msg.result);
-                        }
-                    }
-                });
-                send({ op: "eval", id: id, code: code, ns: targetNs });
-            }),
+            evalFn(code, targetNs),
             {
                 loading: 'Evaluating...',
                 success: (data) => `Result: ${data}`,
@@ -127,7 +108,7 @@ export const evalCode = (editor, monaco, namespace, fileViewMode) => {
     }
 };
 
-export const evalLastSexp = (editor, monaco, namespace, fileViewMode) => {
+export const evalLastSexp = (editor, monaco, namespace, fileViewMode, evalFn) => {
     if (!editor) return;
 
     const model = editor.getModel();
@@ -149,21 +130,8 @@ export const evalLastSexp = (editor, monaco, namespace, fileViewMode) => {
             flashDecoration(editor, monaco, range, false);
         }
 
-        const id = "eval-last-" + Date.now();
         toast.promise(
-            new Promise((resolve, reject) => {
-                const removeListener = addMessageListener((msg) => {
-                    if (msg.id === id) {
-                        removeListener();
-                        if (msg.error) {
-                            reject(new Error(msg.error));
-                        } else {
-                            resolve(msg.result);
-                        }
-                    }
-                });
-                send({ op: "eval", id: id, code: code, ns: targetNs });
-            }),
+            evalFn(code, targetNs),
             {
                 loading: 'Evaluating last sexp...',
                 success: (data) => `Result: ${data}`,

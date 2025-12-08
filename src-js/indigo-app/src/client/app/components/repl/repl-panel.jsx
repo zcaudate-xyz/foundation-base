@@ -1,5 +1,4 @@
 import React from 'react'
-import * as repl from '@/client/repl-client'
 import { useAppState } from '../../state'
 import { useEvents } from '../../events-context'
 import * as Lucide from 'lucide-react'
@@ -16,11 +15,13 @@ export function ReplPanel() {
         ensureNamespaceSession,
         renameSession,
         logs: logsMap,
-        addLog,
-        loading: sessionsLoading
+        loading: sessionsLoading,
+        connectionStatus: status, // mapped to status for convenience
+        connect,
+        disconnect,
+        sendCommand
     } = useEvents();
 
-    const [status, setStatus] = React.useState('disconnected');
     const [activeTab, setActiveTab] = React.useState('console'); // 'console' | 'events'
     const [isRenaming, setIsRenaming] = React.useState(false);
     const [renameValue, setRenameValue] = React.useState("");
@@ -29,7 +30,6 @@ export function ReplPanel() {
 
     const scrollRef = React.useRef(null);
     const logScrollRef = React.useRef(null);
-    const requestSessionMap = React.useRef({}); // msgId -> sessionId
     const menuRef = React.useRef(null);
     const sessionMenuRef = React.useRef(null);
 
@@ -42,10 +42,6 @@ export function ReplPanel() {
             }
         }
     }, [selectedNamespace, ensureNamespaceSession, setActiveSessionId]);
-
-    // Track active session ID for message routing fallback
-    const activeSessionIdRef = React.useRef(activeSessionId);
-    React.useEffect(() => { activeSessionIdRef.current = activeSessionId; }, [activeSessionId]);
 
     // Close menu when clicking outside
     React.useEffect(() => {
@@ -63,60 +59,11 @@ export function ReplPanel() {
         };
     }, []);
 
-    // Track sessions for log correlation without re-subscribing
-    const sessionsRef = React.useRef(sessions);
-    React.useEffect(() => { sessionsRef.current = sessions; }, [sessions]);
-
-    React.useEffect(() => {
-        const unsubscribeMsg = repl.addMessageListener((msg) => {
-            if (msg && msg.id && typeof msg.id === 'string' && msg.id.startsWith('eval-')) return;
-
-            const targetId = (msg.id && requestSessionMap.current[msg.id]) || activeSessionIdRef.current;
-            addMessage(targetId, msg);
-        });
-
-        const unsubscribeLog = repl.addLogListener((entry) => {
-            let targetNs = 'user';
-            const msg = entry.message;
-
-            if (msg && typeof msg === 'object') {
-                // 1. Check explicit NS in message (outgoing)
-                if (msg.ns) {
-                    targetNs = msg.ns;
-                }
-                // 2. Check via Request ID -> Session ID -> Session Name (incoming)
-                else if (msg.id && requestSessionMap.current[msg.id]) {
-                    const sessionId = requestSessionMap.current[msg.id];
-                    const session = sessionsRef.current[sessionId];
-                    if (session) {
-                        targetNs = session.type === 'namespace' ? session.name : 'user';
-                    }
-                }
-            }
-            addLog(targetNs, entry);
-        });
-
-        const unsubscribeStatus = repl.addStatusListener((s) => {
-            setStatus(s);
-        });
-
-        // Auto-connect
-        if (repl.getStatus() === 'disconnected') {
-            repl.connect(window.location.hostname, '1311', { path: 'repl' });
-        }
-
-        return () => {
-            unsubscribeMsg();
-            unsubscribeLog();
-            unsubscribeStatus();
-        };
-    }, [addMessage, addLog]);
-
     const toggleConnection = () => {
         if (status === 'connected' || status === 'connecting') {
-            repl.disconnect();
+            disconnect();
         } else {
-            repl.connect(window.location.hostname, '1311', { path: 'repl' });
+            connect(window.location.hostname, '1311', { path: 'repl' });
         }
         setShowConnectionMenu(false);
     };
@@ -417,23 +364,13 @@ export function ReplPanel() {
                                 if (e.key === 'Enter') {
                                     const cmd = e.target.value;
                                     if (cmd.trim()) {
-                                        const id = "console-" + Date.now();
-
-                                        // Map request ID to current session
-                                        requestSessionMap.current[id] = activeSessionId;
-
-                                        // Determine NS: specific for namespace sessions, 'user' (default) for global
+                                        // Use sendCommand from context
                                         const ns = activeSession.type === 'namespace' ? activeSession.name : 'user';
+                                        sendCommand(cmd, ns, activeSessionId);
 
-                                        const payload = {
-                                            op: "eval",
-                                            id: id,
-                                            code: cmd,
-                                            ns: ns
-                                        };
-                                        repl.send(payload);
-
-                                        // Add command to current session history immediately
+                                        // Add to history (sendCommand sends it, but echo is handled by addMessage in context listener? 
+                                        // Wait, ReplPanel original code added echo manually: `addMessage(activeSessionId, '> ' + cmd)`.
+                                        // EventsContext handles msg.id filtering, but echo is local.
                                         addMessage(activeSessionId, `> ${cmd}`);
 
                                         e.target.value = '';
