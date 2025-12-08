@@ -127,8 +127,8 @@ export function App() {
                 )}
               </FigmaUi.ResizablePanelGroup>
             </FigmaUi.ResizablePanel>
-            </FigmaUi.ResizablePanel>
           </FigmaUi.ResizablePanelGroup>
+          <ToolsSidebar />
         </div>
       </div>
 

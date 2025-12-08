@@ -230,13 +230,13 @@ export function SplitPane({ left, right }) {
   return (
     <div
       ref={containerRef}
-      className="flex w-full overflow-hidden bg-muted">
-      <div className={"bg-background overflow-y-auto"} style={{ width: leftWidth || '50%' }}>{left}</div>
+      className="flex w-full h-full overflow-hidden bg-muted">
+      <div className={"bg-background h-full overflow-hidden flex flex-col"} style={{ width: leftWidth || '50%' }}>{left}</div>
       <div
         onMouseDown={handleMouseDown}
-        className="w-1 bg-border cursor-col-resize hover:bg-primary transition-colors">
+        className="w-1 bg-border cursor-col-resize hover:bg-primary transition-colors h-full">
       </div>
-      <div className="flex-1 grow bg-background overflow-y-auto">{right}</div>
+      <div className="flex-1 grow bg-background h-full overflow-hidden flex flex-col">{right}</div>
     </div>);
 }
 

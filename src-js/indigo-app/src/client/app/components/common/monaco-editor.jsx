@@ -21,12 +21,12 @@ export function MonacoEditor({ value, onChange, language = "javascript", readOnl
             onChange={handleEditorChange}
             options={{
                 readOnly: readOnly,
-                minimap: { enabled: true },
-                stickyScroll: { enabled: false },
                 scrollBeyondLastLine: false,
-                fontSize: 13,
+                fontSize: 14,
                 automaticLayout: true,
-                ...options
+                ...options,
+                minimap: { enabled: false },
+                stickyScroll: { enabled: false },
             }}
             {...props}
         />
