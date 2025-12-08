@@ -95,6 +95,14 @@
                        entries))
            (:id module)))))
 
+(defn module-deps-all
+  "gets dependencies for a given module (including explicit links)"
+  {:added "4.0"}
+  ([module]
+   (disj (h/union (module-deps-code module)
+                  (set (vals (:link module))))
+         (:id module))))
+
 (defn module-deps-native
   "gets dependencies for a given module"
   {:added "4.0"}
@@ -125,6 +133,8 @@
                  [(list :% \" id \")
                   (symbol (str (:id module))
                           (name id))])))))
+
+
 
 (comment
   h/atom:get

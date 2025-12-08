@@ -91,8 +91,10 @@
           (merge native native-bundled))))
 
 (defn emit-module-setup-link-import
-  [type curr-ns link-ns links module {:keys [root-prefix
-                                             path-separator]}]
+  [type curr-ns link-ns links module
+   {:keys [root-prefix
+           path-separator]
+    :or {path-separator "/"}}]
   (let [link-as (get (:internal module) link-ns)]
     (case type
       :graph
@@ -104,7 +106,7 @@
                   label)
          :suffix suffix
          :as link-as})
-
+      
       (let [{:keys [rel label suffix]} (get links link-ns)]
         {:ns (str root-prefix path-separator rel path-separator label)
          :suffix suffix

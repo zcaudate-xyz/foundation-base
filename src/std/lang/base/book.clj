@@ -76,7 +76,7 @@
                                 mopts {:modules modules
                                        :grammar grammar
                                        :entry entry}
-                                
+
                                 [form deps] (preprocess/to-staging input grammar modules mopts)]
                             (assoc-in m [lang :deps]  deps)))))
                [lang :deps])))))
@@ -87,7 +87,7 @@
   ([{:keys [modules] :as book} id]
    (if (namespace id)
      (get-code-deps book id)
-     (module/module-deps-code (get modules id)))))
+     (module/module-deps-all (get modules id)))))
 
 (defn get-deps-native
   "get dependencies for a given id"
@@ -369,7 +369,7 @@
          _          (if (not *skip-check*) (module-create-check book module-id link))]
      (module/book-module {:lang lang
                           :id module-id
-                          
+
                           ;; link 
                           :alias      alias
                           :link       link
@@ -377,25 +377,23 @@
                           :native     native
                           :native-lu  native-lu
                           :require-impl require-impl
-                          
+
                           :static static}))))
 
 
 
 
 (comment
-  
+
   (dissoc (std.lang/get-module
            (std.lang/default-library)
            :js
            'js.lib.puck)
           :fragment)
-  
+
   (dissoc (std.lang/get-module
            (std.lang/default-library)
            :js
            'js.core)
           #_:fragment
-          :code
-          )
-  )
+          :code))

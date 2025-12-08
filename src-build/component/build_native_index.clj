@@ -56,7 +56,7 @@
 
 (def.make COMPONENT-NATIVE
   {:tag      "native"
-   :build    ".build/native"
+   :build    ".build/native-index"
    :github   {:repo   "zcaudate-xyz/demo.foundation-base"
               :description "Js Web Components"}
    :sections {:common [+expo-makefile+
@@ -136,7 +136,8 @@
               :target "src"
               :main   'component.web-native-index
               :emit   {:code   {:label true
-                                :link {:path-suffix ".js"}}}}]})
+                                :link    {:path-suffix ".js"
+                                          :path-separator "/"}}}}]})
 
 (def +init+
   (make/triggers-set

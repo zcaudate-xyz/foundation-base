@@ -38,7 +38,8 @@
                :emit   {:code   {:label true}}}]})
 
 (def +init+
-  (do (make/triggers-set PROJECT '#{play.tui-002-game-of-life.main})))
+  (do (make/triggers-set PROJECT_COMMONJS '#{play.tui-002-game-of-life.main})
+      (make/triggers-set PROJECT_ESM '#{play.tui-002-game-of-life.main})))
 
 (defn -main
   []

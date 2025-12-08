@@ -6,8 +6,15 @@
             [rt.postgres.script.scratch :as scratch]))
 
 (l/script- :postgres
-  {:require [[rt.postgres.script.scratch :as scratch]
+  {:runtime :jdbc.client
+   :require [[rt.postgres.script.scratch :as scratch]
              [rt.postgres :as pg]]})
+
+(fact:global
+ {:setup    [(l/rt:restart)
+             (l/rt:setup :postgres)]
+  :teardown [(l/rt:teardown :postgres)
+             (l/rt:stop)]})
 
 ^{:refer rt.postgres.script.scratch/as-array :added "4.0"}
 (fact "returns a jsonb array"
