@@ -49,7 +49,7 @@
   {:added "4.0"}
   [form opts]
   (or (estimate-multiline-basic form opts)
-      (some #(estimate-multiline % opts) form)))
+      (boolean (some #(estimate-multiline % opts) form))))
 
 (defn estimate-multiline
   "creates multiline function"
@@ -70,4 +70,4 @@
         (estimate-multiline-data form opts)        
         
         :else
-        (estimate-multiline-basic form opts)))
+        (boolean (estimate-multiline-basic form opts))))
