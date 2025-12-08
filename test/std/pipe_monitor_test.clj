@@ -6,11 +6,11 @@
             [std.lib :as h]))
 
 (fact "monitor test"
-  (pipe/pipe (task/task :default "monitor-test"
-                   {:item {:list (constantly (range 10))}
-                    :main {:fn (fn [x _ _ _]
-                                 (Thread/sleep 50)
-                                 (* x 10))}})
+  (pipe/pipe [(task/task :default "monitor-test"
+                        {:item {:list (constantly (range 10))}
+                         :main {:fn (fn [x _ _ _]
+                                      (Thread/sleep 50)
+                                      (* x 10))}})]
         :list
         {:bulk true
          :monitor true})

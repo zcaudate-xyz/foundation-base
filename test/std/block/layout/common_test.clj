@@ -504,7 +504,7 @@
         (str/split-lines)))
   => ["[{:keys [col-align"
       "         columns]"
-      "  :as   spec}      (merge {:col-align false :columns 2}"
+      "  :as spec}        (merge {:col-align false :columns 2}"
       "                          spec)"
       " hello             world]"]
   
@@ -521,7 +521,7 @@
         (str/split-lines)))
   => ["(let [{:keys [col-align"
       "              columns]"
-      "       :as   spec}      (merge {:col-align false :columns 2}"
+      "       :as spec}        (merge {:col-align false :columns 2}"
       "                               spec)"
       "      hello             world])"])
 
