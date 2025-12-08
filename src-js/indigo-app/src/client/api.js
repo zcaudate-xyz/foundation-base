@@ -271,3 +271,45 @@ export async function runTest(ns, varName) {
     }
     return res.json();
 }
+
+export async function translateToHeal(source) {
+    const res = await fetch('/api/translate/to-heal', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ source })
+    });
+    if (!res.ok) {
+        throw new Error(`Failed to heal code: ${res.statusText}`);
+    }
+    return res.json();
+}
+
+export async function translateFromHtml(html) {
+    const res = await fetch('/api/translate/from-html', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ html })
+    });
+    if (!res.ok) {
+        throw new Error(`Failed to translate from html: ${res.statusText}`);
+    }
+    return res.json();
+}
+
+export async function translateToHtml(dsl) {
+    const res = await fetch('/api/translate/to-html', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ dsl })
+    });
+    if (!res.ok) {
+        throw new Error(`Failed to translate to html: ${res.statusText}`);
+    }
+    return res.json();
+}

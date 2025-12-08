@@ -7,7 +7,9 @@
             [indigo.server.api-browser :as api-browser]
             [indigo.server.test-runner :as test-runner]
             [indigo.server.watcher :as watcher]
+            [indigo.server.watcher :as watcher]
             [indigo.server.dispatch :as dispatch]
+            [indigo.server.api-translate :as api-translate]
             [std.lib :as h]
             [std.string :as str]
             [std.json :as json]
@@ -83,7 +85,12 @@
       "test/components"           (endpoint #'api-browser/list-test-facts :ns)
       "test/component"            (endpoint #'api-browser/get-test-fact-source :ns :component)
       "test/run-var"              (endpoint #'test-runner/run-test :ns :var)
-      "test/run-ns"               (endpoint #'test-runner/run-ns-tests :ns)}))))
+      "test/run-ns"               (endpoint #'test-runner/run-ns-tests :ns)
+
+      ;; Translate
+      "translate/to-heal"         (endpoint #'api-translate/to-heal :source)
+      "translate/from-html"       (endpoint #'api-translate/from-html :html)
+      "translate/to-html"         (endpoint #'api-translate/to-html :dsl)}))))
 
 (def page-routes
   (router/router
@@ -96,7 +103,7 @@
 (defn repl-handler [req]
   (http/with-channel req channel
     (http/on-close channel (fn [status]
-                             (dispatch/remove-client! channel)
+                             (dispatch/unregister! channel)
                              (println "REPL Client disconnected" status)))
     (http/on-receive channel (fn [data]
                                (if (= data "ping")
@@ -135,8 +142,9 @@
                                            (dispatch/send! channel result))
                                          (catch Throwable t
                                            (dispatch/send! channel (str "Error: " (.getMessage t)))))))))))
-    (dispatch/add-client! channel)
+    (dispatch/register! channel)
     (println "REPL Client connected")))
+
 
 (defn dev-handler
   [req]

@@ -3,26 +3,23 @@
             [std.lib :as h]
             [org.httpkit.server :as http]))
 
-(defonce ^:dynamic *clients* (atom {}))
+(defonce ^:dynamic *clients* (atom #{}))
 
 (defn register! [channel]
-  (let [id (str (h/uuid))]
-    (swap! *clients* assoc id channel)
-    id))
+  (swap! *clients* conj channel))
 
-(defn unregister! [id]
-  (swap! *clients* dissoc id))
+(defn unregister! [channel]
+  (swap! *clients* disj channel))
 
-(defn send! [client-id message]
-  (when-let [ch (get @*clients* client-id)]
-    (let [message (if (string? message)
-                    message
-                    (json/generate-string message))]
-      (http/send! ch message))))
+(defn send! [ch message]
+  (let [message (if (string? message)
+                  message
+                  (json/generate-string message))]
+    (http/send! ch message)))
 
 (defn broadcast! [message]
   (let [json-msg (if (string? message)
                    message
                    (json/generate-string message))]
-    (doseq [ch (vals @*clients*)]
+    (doseq [ch @*clients*]
       (http/send! ch json-msg))))

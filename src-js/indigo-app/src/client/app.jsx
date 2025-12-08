@@ -7,7 +7,6 @@ import * as Lucide from 'lucide-react'
 
 import React from 'react'
 
-
 import * as te from '@/client/app/components/editor/theme-editor'
 
 import * as rp from '@/client/app/components/repl/repl-panel'
@@ -32,6 +31,9 @@ import * as nv from '@/client/app/components/browser/namespace-viewer'
 
 import { Toaster } from 'sonner'
 import { useAppState } from '@/client/app/state'
+import { TaskModalContent } from '@/client/app/components/tasks/task-main'
+import { Modal } from '@/client/app/components/common/modal'
+import { ToolsSidebar } from '@/client/app/components/sidebar/tools-sidebar'
 
 // code.dev.client.app/App [140] 
 export function App() {
@@ -59,7 +61,9 @@ export function App() {
     deleteComponent,
     importComponent,
     importAndEditComponent,
-    setTheme // Destructure setTheme
+    setTheme,
+    activeModal,
+    setActiveModal
   } = useAppState();
 
   // Theme Effect
@@ -71,51 +75,71 @@ export function App() {
     }
   }, [theme]);
 
+  const getModalTitle = () => {
+    switch (activeModal) {
+      case 'heal-code': return 'Heal Code';
+      case 'translate-html': return 'Translate HTML';
+      default: return 'Task';
+    }
+  };
+
   return (
     <ReactDnd.DndProvider backend={ReactDndHtml5Backend.HTML5Backend}>
       <div className="flex flex-col h-screen bg-background text-foreground">
-        <FigmaUi.ResizablePanelGroup direction="horizontal" className="flex-1">
-          <FigmaUi.ResizablePanel defaultSize={20} minSize={10} className="bg-muted/30">
-            <FigmaUi.ResizablePanelGroup direction="vertical">
-              <FigmaUi.ResizablePanel defaultSize={70} minSize={5}>
-                <div className="flex-1 flex flex-col h-full">
-                  <div className="flex-1 m-0 overflow-hidden">
-                    <cb.ComponentBrowser />
+        <div className="flex-1 flex flex-row overflow-hidden">
+          <FigmaUi.ResizablePanelGroup direction="horizontal" className="flex-1">
+            <FigmaUi.ResizablePanel defaultSize={20} minSize={10} className="bg-muted/30">
+              <FigmaUi.ResizablePanelGroup direction="vertical">
+                <FigmaUi.ResizablePanel defaultSize={70} minSize={5}>
+                  <div className="flex-1 flex flex-col h-full">
+                    <div className="flex-1 m-0 overflow-hidden">
+                      <cb.ComponentBrowser />
+                    </div>
                   </div>
-                </div>
-              </FigmaUi.ResizablePanel>
-              <FigmaUi.ResizableHandle className="h-[1px] bg-border hover:bg-primary/50 transition-colors" />
-              <FigmaUi.ResizablePanel defaultSize={30} minSize={5}>
-                <div className="flex-1 flex flex-col h-full bg-background">
-                  <ReplPanel />
-                </div>
-              </FigmaUi.ResizablePanel>
-            </FigmaUi.ResizablePanelGroup>
-          </FigmaUi.ResizablePanel>
-          <FigmaUi.ResizableHandle className="w-[1px] bg-border hover:bg-primary/50 transition-colors" />
-          {/* Work Area Wrapper */}
-          <FigmaUi.ResizablePanel defaultSize={80} minSize={30}>
-            <FigmaUi.ResizablePanelGroup direction="horizontal">
-              {/* Main Content Area */}
-              <FigmaUi.ResizablePanel minSize={10} defaultSize={70} className="flex flex-col relative bg-background">
-                {selectedNamespace ? (
-                  <nv.NamespaceViewer />
-                ) : (
-                  <GettingStarted />
+                </FigmaUi.ResizablePanel>
+                <FigmaUi.ResizableHandle className="h-[1px] bg-border hover:bg-primary/50 transition-colors" />
+                <FigmaUi.ResizablePanel defaultSize={30} minSize={5}>
+                  <div className="flex-1 flex flex-col h-full bg-background">
+                    <ReplPanel />
+                  </div>
+                </FigmaUi.ResizablePanel>
+              </FigmaUi.ResizablePanelGroup>
+            </FigmaUi.ResizablePanel>
+            <FigmaUi.ResizableHandle className="w-[1px] bg-border hover:bg-primary/50 transition-colors" />
+            {/* Work Area Wrapper */}
+            <FigmaUi.ResizablePanel defaultSize={80} minSize={30} className="relative">
+              <FigmaUi.ResizablePanelGroup direction="horizontal">
+                {/* Main Content Area */}
+                <FigmaUi.ResizablePanel minSize={10} defaultSize={70} className="flex flex-col relative bg-background">
+                  {selectedNamespace ? (
+                    <nv.NamespaceViewer />
+                  ) : (
+                    <GettingStarted />
+                  )}
+                </FigmaUi.ResizablePanel>
+                {selectedNamespace && (
+                  <>
+                    <FigmaUi.ResizableHandle className="w-[1px] bg-border hover:bg-primary/50 transition-colors" />
+                    <FigmaUi.ResizablePanel defaultSize={30} minSize={20} maxSize={40}>
+                      <pp.PropertiesPanel />
+                    </FigmaUi.ResizablePanel>
+                  </>
                 )}
-              </FigmaUi.ResizablePanel>
-              {selectedNamespace && (
-                <>
-                  <FigmaUi.ResizableHandle className="w-[1px] bg-border hover:bg-primary/50 transition-colors" />
-                  <FigmaUi.ResizablePanel defaultSize={30} minSize={20} maxSize={40}>
-                    <pp.PropertiesPanel />
-                  </FigmaUi.ResizablePanel>
-                </>
-              )}
-            </FigmaUi.ResizablePanelGroup>
-          </FigmaUi.ResizablePanel>
-        </FigmaUi.ResizablePanelGroup>
+              </FigmaUi.ResizablePanelGroup>
+            </FigmaUi.ResizablePanel>
+            </FigmaUi.ResizablePanel>
+          </FigmaUi.ResizablePanelGroup>
+        </div>
       </div>
+
+      <Modal
+        isOpen={!!activeModal}
+        onClose={() => setActiveModal(null)}
+        title={getModalTitle()}
+      >
+        <TaskModalContent />
+      </Modal>
+
       <Toaster position="top-right" theme={theme} />
     </ReactDnd.DndProvider >);
 }

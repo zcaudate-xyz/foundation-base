@@ -39,7 +39,10 @@
   => map?)
 
 ^{:refer jvm.namespace/list-external-imports :added "3.0"}
-(fact "lists all external imports")
+(fact "lists all external imports"
+
+  (ns/list-external-imports '[jvm.namespace] {:return :summary})
+  => map?)
 
 ^{:refer jvm.namespace/clear-external-imports :added "3.0"}
 (fact "clears all external imports")

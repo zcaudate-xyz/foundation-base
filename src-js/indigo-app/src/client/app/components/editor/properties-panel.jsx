@@ -54,7 +54,9 @@ export function PropertiesPanel() {
     setRunningTest,
     updateComponentInputValues,
     theme,
-    setTheme
+    setTheme,
+    activeModal,
+    setActiveModal
   } = useAppState();
 
   const handleRunTest = async (e, entryVar) => {
@@ -185,6 +187,19 @@ export function PropertiesPanel() {
 
         {/* Tools Sidebar */}
         <div className="w-[40px] border-l border-border bg-muted/10 flex flex-col items-center gap-2 py-2 shrink-0">
+          {/* New Tasks */}
+          <MenuButton title="Heal Code"
+            onClick={() => setActiveModal('heal-code')}
+            active={activeModal === 'heal-code'}
+            icon={Lucide.Bandage}
+          />
+          <MenuButton title="Translate HTML"
+            onClick={() => setActiveModal('translate-html')}
+            active={activeModal === 'translate-html'}
+            icon={Lucide.Code}
+          />
+          <div className="h-px bg-border w-6 my-1" />
+
           <MenuButton title="Eval (Ctrl+E)" onClick={() => emit('editor:eval')} icon={Lucide.Play} />
           <MenuButton title="Eval Last Sexp" onClick={() => emit('editor:eval-last-sexp')} icon={Lucide.Code} />
           <MenuButton title="Eval File" onClick={() => emit('editor:eval-file')} icon={Lucide.FileCode} />

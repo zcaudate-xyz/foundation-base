@@ -223,6 +223,8 @@ export function AppStateProvider({ children }) {
         localStorage.setItem("indigo-active-tab", activeTab);
     }, [activeTab]);
 
+    let [activeModal, setActiveModal] = React.useState(null);
+
     let findComponentById = function (components, id) {
         for (let component of components) {
             if (component.id == id) {
@@ -712,6 +714,7 @@ export function AppStateProvider({ children }) {
         selectedVar,
         viewMode,
         theme,
+        activeModal,
         history,
         historyIndex,
         activeTab,
@@ -759,6 +762,7 @@ export function AppStateProvider({ children }) {
         setSelectedVar,
         setViewMode,
         setTheme,
+        setActiveModal,
         setActiveTab,
         undo,
         redo,
