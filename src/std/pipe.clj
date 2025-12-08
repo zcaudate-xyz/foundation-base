@@ -64,7 +64,7 @@
          defaults     (pipe-defaults template)
          params       (h/merge-nested defaults params)
          count        (or (-> params :main :argcount) 4)
-         [main args?] (ut/main-function main count)]
+         [_ args?] (ut/main-function main count)]
      (task (h/merge-nested defaults
                            params
                            {:main {:fn main
