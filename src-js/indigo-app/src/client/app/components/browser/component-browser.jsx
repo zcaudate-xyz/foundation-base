@@ -180,9 +180,9 @@ export function EnvBrowser() {
 
   const getIcon = (node, isExpanded, isSelected) => {
     if (node.isNamespace) {
-      return <Lucide.Box className={`w-3 h-3 ${isSelected ? "text-blue-300" : "text-blue-400"}`} />;
+      return <Lucide.Box className={`w-3 h-3 ${isSelected ? "text-blue-500 dark:text-blue-300" : "text-blue-600 dark:text-blue-400"}`} />;
     }
-    return <Lucide.Folder className="w-3 h-3 text-gray-500" />;
+    return <Lucide.Folder className="w-3 h-3 text-muted-foreground" />;
   };
 
   const handleNodeContextMenu = (e, node) => {

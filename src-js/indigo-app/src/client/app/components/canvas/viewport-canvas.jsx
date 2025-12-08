@@ -141,28 +141,18 @@ export function ViewportCanvas() {
     }
   };
 
-  let generateThemeStyles = function () {
-    if (!theme) {
-      return {};
-    }
-    return {
-      "--color-primary": theme.colors.primary,
-      "--color-secondary": theme.colors.secondary,
-      "--color-accent": theme.colors.accent,
-      "--color-background": theme.colors.background,
-      "--color-text": theme.colors.text
-    };
-  };
+  // Removed legacy generateThemeStyles as we use global CSS variables now.
 
   return (
-    <div className="flex flex-col h-full bg-[#1a1a1a]">
+    <div className="flex flex-col h-full bg-background/50">
       <et.EditingToolbar currentTool={currentTool} onToolChange={setCurrentTool} />
       <div
         className="flex-1 overflow-auto p-8"
-        style={Object.assign({
-          "background": "radial-gradient(circle at 20px 20px, #2a2a2a 1px, transparent 1px)",
-          "backgroundSize": "40px 40px"
-        }, generateThemeStyles())}>
+        style={{
+          "backgroundImage": "radial-gradient(circle at 1px 1px, hsl(var(--muted-foreground) / 0.2) 1px, transparent 0)",
+          "backgroundSize": "40px 40px",
+          "backgroundPosition": "20px 20px"
+        }}>
         <div className="min-h-full">
           {components.map(function (component) {
             return (

@@ -4,20 +4,20 @@ import * as FigmaUi from '@xtalk/figma-ui'
 import { MenuContainer } from '../common/common-menu.jsx'
 
 export function BrowserPanel({ title, search, onSearchChange, children, loading, error }) {
-    if (loading) return <div className="p-4 text-xs text-gray-400">Loading...</div>;
+    if (loading) return <div className="p-4 text-xs text-muted-foreground">Loading...</div>;
     if (error) return <div className="p-4 text-xs text-red-400">Error: {error}</div>;
 
     return (
         <MenuContainer>
-            <div className="h-8 bg-[#252525] border-b border-[#323232] flex items-center shrink-0">
-                {title && <span className="text-xs font-medium text-gray-300 uppercase tracking-wide">{title}</span>}
+            <div className="h-8 bg-muted/30 border-b border-border flex items-center shrink-0">
+                {title && <span className="text-xs font-semibold text-foreground/80 uppercase tracking-wide pl-2">{title}</span>}
                 <div className="relative flex-1">
-                    <Lucide.Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-gray-500" />
+                    <Lucide.Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-muted-foreground" />
                     <FigmaUi.Input
                         value={search}
                         onChange={(e) => onSearchChange(e.target.value)}
                         placeholder="Search..."
-                        className="h-8 pl-7 bg-transparent border-none text-gray-300 text-xs placeholder:text-gray-600 w-full rounded-none focus:ring-0 outline-none"
+                        className="h-8 pl-7 bg-transparent border-none text-foreground text-xs placeholder:text-muted-foreground w-full rounded-none focus:ring-0 outline-none"
                     />
                 </div>
             </div>
@@ -47,14 +47,14 @@ export function ContextMenu({ x, y, items, onClose }) {
     return (
         <div
             ref={menuRef}
-            className="fixed z-50 bg-[#252526] border border-[#323232] shadow-lg rounded-md py-1 min-w-[160px]"
+            className="fixed z-50 bg-background border border-border shadow-lg rounded-md py-1 min-w-[160px]"
             style={{ top: y, left: x }}
             onClick={(e) => e.stopPropagation()}
         >
             {items.map((item, index) => (
                 <div
                     key={index}
-                    className="px-3 py-1.5 text-xs text-gray-300 hover:bg-indigo-600 hover:text-white cursor-pointer flex items-center gap-2"
+                    className="px-3 py-1.5 text-xs text-muted-foreground hover:bg-primary hover:text-primary-foreground cursor-pointer flex items-center gap-2 transition-colors"
                     onClick={() => {
                         item.action();
                         onClose();
@@ -70,7 +70,7 @@ export function ContextMenu({ x, y, items, onClose }) {
 
 export function BrowserTree({ nodes, selectedId, onSelect, onDoubleClick, expandedIds, onToggleExpand, getIcon, onNodeContextMenu }) {
     if (!nodes || nodes.length === 0) {
-        return <div className="p-4 text-xs text-gray-500 text-center">No results found</div>;
+        return <div className="p-4 text-xs text-muted-foreground text-center">No results found</div>;
     }
 
     const renderNode = (node, depth = 0) => {
@@ -82,7 +82,7 @@ export function BrowserTree({ nodes, selectedId, onSelect, onDoubleClick, expand
         return (
             <div key={node.id}>
                 <div
-                    className={`flex items-center gap-1 py-1 px-2 hover:bg-[#323232] cursor-pointer text-xs group select-none ${isSelected ? "bg-[#37373d] text-white" : "text-gray-300"}`}
+                    className={`flex items-center gap-1 py-1 px-2 hover:bg-muted/50 cursor-pointer text-xs group select-none transition-colors ${isSelected ? "bg-accent text-accent-foreground font-medium" : "text-foreground/80"}`}
                     style={{ paddingLeft }}
                     onClick={(e) => {
                         e.stopPropagation();
@@ -114,7 +114,7 @@ export function BrowserTree({ nodes, selectedId, onSelect, onDoubleClick, expand
                     }}
                 >
                     <span
-                        className="text-gray-500 group-hover:text-gray-300 flex-shrink-0 cursor-pointer"
+                        className="text-foreground/70 group-hover:text-foreground flex-shrink-0 cursor-pointer transition-colors"
                         onClick={(e) => {
                             e.stopPropagation();
                             if (hasChildren) onToggleExpand(node.id);
@@ -127,11 +127,11 @@ export function BrowserTree({ nodes, selectedId, onSelect, onDoubleClick, expand
 
                     <span className="flex-shrink-0">
                         {getIcon ? getIcon(node, isExpanded, isSelected) : (
-                            hasChildren ? <Lucide.Folder size={12} className="text-gray-500" /> : <Lucide.File size={12} className="text-gray-400" />
+                            hasChildren ? <Lucide.Folder size={12} className="text-foreground/70" /> : <Lucide.File size={12} className="text-foreground/70" />
                         )}
                     </span>
 
-                    <span className={`truncate ${isSelected ? "font-medium" : ""}`}>{node.label}</span>
+                    <span className="truncate">{node.label}</span>
                 </div>
                 {isExpanded && hasChildren && (
                     <div>

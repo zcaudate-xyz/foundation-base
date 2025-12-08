@@ -75,26 +75,16 @@ export function App() {
     <ReactDnd.DndProvider backend={ReactDndHtml5Backend.HTML5Backend}>
       <div className="flex flex-col h-screen bg-background text-foreground">
         <FigmaUi.ResizablePanelGroup direction="horizontal" className="flex-1">
-          <FigmaUi.ResizablePanel defaultSize={20} minSize={10}>
+          <FigmaUi.ResizablePanel defaultSize={20} minSize={10} className="bg-muted/30">
             <FigmaUi.ResizablePanelGroup direction="vertical">
               <FigmaUi.ResizablePanel defaultSize={70} minSize={5}>
-                <div className="flex-1 flex flex-col h-full bg-muted/30">
+                <div className="flex-1 flex flex-col h-full">
                   <div className="flex-1 m-0 overflow-hidden">
                     <cb.ComponentBrowser />
                   </div>
-                  {/* Theme Toggle in Sidebar Footer */}
-                  <div className="p-2 border-t border-border flex justify-end">
-                    <button
-                      onClick={() => setTheme(prev => prev === 'dark' ? 'light' : 'dark')}
-                      className="p-2 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
-                      title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
-                    >
-                      {theme === 'dark' ? <Lucide.Sun className="w-4 h-4" /> : <Lucide.Moon className="w-4 h-4" />}
-                    </button>
-                  </div>
                 </div>
               </FigmaUi.ResizablePanel>
-              <FigmaUi.ResizableHandle className="h-[2px] bg-border hover:bg-primary/50 transition-colors"></FigmaUi.ResizableHandle>
+              <FigmaUi.ResizableHandle className="h-[1px] bg-border hover:bg-primary/50 transition-colors" />
               <FigmaUi.ResizablePanel defaultSize={30} minSize={5}>
                 <div className="flex-1 flex flex-col h-full bg-background">
                   <ReplPanel />
@@ -102,7 +92,7 @@ export function App() {
               </FigmaUi.ResizablePanel>
             </FigmaUi.ResizablePanelGroup>
           </FigmaUi.ResizablePanel>
-          <FigmaUi.ResizableHandle className="w-[2px] bg-border hover:bg-primary/50 transition-colors"></FigmaUi.ResizableHandle>
+          <FigmaUi.ResizableHandle className="w-[1px] bg-border hover:bg-primary/50 transition-colors" />
           {/* Work Area Wrapper */}
           <FigmaUi.ResizablePanel defaultSize={80} minSize={30}>
             <FigmaUi.ResizablePanelGroup direction="horizontal">
@@ -116,7 +106,7 @@ export function App() {
               </FigmaUi.ResizablePanel>
               {selectedNamespace && (
                 <>
-                  <FigmaUi.ResizableHandle className="w-[2px] bg-border hover:bg-primary/50 transition-colors"></FigmaUi.ResizableHandle>
+                  <FigmaUi.ResizableHandle className="w-[1px] bg-border hover:bg-primary/50 transition-colors" />
                   <FigmaUi.ResizablePanel defaultSize={30} minSize={20} maxSize={40}>
                     <pp.PropertiesPanel />
                   </FigmaUi.ResizablePanel>

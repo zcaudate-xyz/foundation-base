@@ -53,7 +53,9 @@ export function PropertiesPanel() {
     namespaceEntriesLoading: loading,
     runningTest,
     setRunningTest,
-    updateComponentInputValues
+    updateComponentInputValues,
+    theme,
+    setTheme
   } = useAppState();
 
   const handleRunTest = async (e, entryVar) => {
@@ -119,27 +121,21 @@ export function PropertiesPanel() {
 
   if (selectedNamespace) {
     return (
-      <div className="flex h-full bg-[#1e1e1e] text-gray-300 text-xs">
+      <div className="flex h-full bg-background text-muted-foreground text-xs">
         {/* Main Content (Entries List) */}
         <div className="flex-1 flex flex-col min-w-0">
-          <div className="h-8 bg-[#252526] flex items-center px-4 font-bold border-b border-[#323232] justify-between shrink-0">
+          <div className="h-8 bg-muted/30 flex items-center px-4 font-bold border-b border-border justify-between shrink-0">
             <span>Entries</span>
-            <button
-              onClick={handleRunAllTests}
-              className="text-[10px] bg-[#323232] hover:bg-[#3e3e3e] px-2 py-0.5 rounded text-gray-300"
-            >
-              Run All Tests
-            </button>
           </div>
           <div className="flex-1 overflow-y-auto">
             {loading ? (
-              <div className="p-4 text-gray-500 text-center">Loading entries...</div>
+              <div className="p-4 text-muted-foreground text-center">Loading entries...</div>
             ) : (
               <div className="flex flex-col">
                 {entries.map((entry) => (
                   <div
                     key={entry.var}
-                    className={`flex items-center justify-between px-4 py-2 cursor-pointer hover:bg-[#2a2d2e] ${selectedVar === entry.var ? "bg-[#37373d] text-white" : ""}`}
+                    className={`flex items-center justify-between px-4 py-2 cursor-pointer hover:bg-muted/50 transition-colors ${selectedVar === entry.var ? "bg-muted text-foreground" : ""}`}
                     onClick={() => setSelectedVar(entry.var)}
                   >
                     <div className="flex items-center gap-2 overflow-hidden">
@@ -159,7 +155,7 @@ export function PropertiesPanel() {
                           setNamespaceViewType("file");
                           setNamespaceFileViewMode("source");
                         }}
-                        className="px-1.5 py-0.5 text-[10px] bg-[#323232] hover:bg-[#444] text-gray-400 hover:text-gray-200 rounded border border-[#444]"
+                        className="px-1.5 py-0.5 text-[10px] bg-muted hover:bg-primary/20 text-muted-foreground hover:text-foreground rounded border border-border transition-colors"
                         title="View Source"
                       >
                         src
@@ -172,7 +168,7 @@ export function PropertiesPanel() {
                             setNamespaceViewType("file");
                             setNamespaceFileViewMode("test");
                           }}
-                          className="px-1.5 py-0.5 text-[10px] bg-[#323232] hover:bg-[#444] text-gray-400 hover:text-gray-200 rounded border border-[#444]"
+                          className="px-1.5 py-0.5 text-[10px] bg-muted hover:bg-primary/20 text-muted-foreground hover:text-foreground rounded border border-border transition-colors"
                           title="View Test"
                         >
                           test
@@ -181,13 +177,13 @@ export function PropertiesPanel() {
                       {entry.test && (
                         <button
                           onClick={(e) => handleRunTest(e, entry.var)}
-                          className="p-1 hover:bg-[#444] rounded relative"
+                          className="p-1 hover:bg-muted rounded relative transition-colors"
                           title="Run Test"
                         >
                           {runningTest === entry.var ? (
                             <div className="w-2 h-2 rounded-full bg-yellow-500 animate-pulse" />
                           ) : (
-                            <Lucide.Play size={10} className="text-gray-500 hover:text-green-500" />
+                            <Lucide.Play size={10} className="text-muted-foreground hover:text-green-500 transition-colors" />
                           )}
                         </button>
                       )}
@@ -195,7 +191,7 @@ export function PropertiesPanel() {
                   </div>
                 ))}
                 {entries.length === 0 && (
-                  <div className="p-4 text-gray-500 text-center">No entries found.</div>
+                  <div className="p-4 text-muted-foreground text-center">No entries found.</div>
                 )}
               </div>
             )}
@@ -203,12 +199,18 @@ export function PropertiesPanel() {
         </div>
 
         {/* Tools Sidebar */}
-        <div className="w-[40px] border-l border-[#323232] bg-[#252526] flex flex-col items-center gap-2 py-2 shrink-0">
+        <div className="w-[40px] border-l border-border bg-muted/10 flex flex-col items-center gap-2 py-2 shrink-0">
           <MenuButton title="Eval (Ctrl+E)" onClick={() => emit('editor:eval')} icon={Lucide.Play} />
           <MenuButton title="Eval Last Sexp" onClick={() => emit('editor:eval-last-sexp')} icon={Lucide.Code} />
           <MenuButton title="Eval File" onClick={() => emit('editor:eval-file')} icon={Lucide.FileCode} />
 
-          <div className="h-px bg-gray-700 w-6 my-1" />
+          <div className="h-px bg-border w-6 my-1" />
+
+          <MenuButton
+            title="Run All Tests"
+            onClick={handleRunAllTests}
+            icon={Lucide.FlaskConical}
+          />
 
           <MenuButton
             title="Scaffold Test"
@@ -231,6 +233,17 @@ export function PropertiesPanel() {
             onClick={() => handleManageTask("incomplete", `['${selectedNamespace}]`)}
             icon={Lucide.AlertCircle}
           />
+
+          <div className="flex-1" />
+
+          {/* Theme Toggle */}
+          <button
+            onClick={() => setTheme(prev => prev === 'dark' ? 'light' : 'dark')}
+            className="p-2 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+            title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+          >
+            {theme === 'dark' ? <Lucide.Sun className="w-4 h-4" /> : <Lucide.Moon className="w-4 h-4" />}
+          </button>
         </div>
       </div>
     );
@@ -239,7 +252,7 @@ export function PropertiesPanel() {
   // ... (Keep existing component properties logic)
   if (!selectedComponentData) {
     return (
-      <div className="p-4 text-gray-500 text-xs">
+      <div className="p-4 text-muted-foreground text-xs">
         Select a component to view properties.
       </div>
     );
@@ -250,43 +263,43 @@ export function PropertiesPanel() {
   const inputValues = selectedComponentData.inputValues || {};
 
   return (
-    <div className="flex flex-col h-full bg-[#1e1e1e] text-gray-300 text-xs overflow-y-auto">
-      <div className="h-8 bg-[#252526] flex items-center px-4 font-bold border-b border-[#323232] shrink-0">
+    <div className="flex flex-col h-full bg-background text-muted-foreground text-xs overflow-y-auto">
+      <div className="h-8 bg-muted/30 flex items-center px-4 font-bold border-b border-border shrink-0">
         Properties
       </div>
 
       <div className="p-4 space-y-6">
         {/* ID (Read-only) */}
         <div className="space-y-2">
-          <label className="block text-gray-500 font-medium">ID</label>
-          <div className="px-2 py-1 bg-[#252526] rounded text-gray-400 font-mono select-all">
+          <label className="block text-muted-foreground font-medium">ID</label>
+          <div className="px-2 py-1 bg-muted rounded text-foreground font-mono select-all">
             {selectedComponentData.id}
           </div>
         </div>
 
         {/* Label */}
         <div className="space-y-2">
-          <label className="block text-gray-500 font-medium">Label</label>
+          <label className="block text-muted-foreground font-medium">Label</label>
           <input
             type="text"
             value={selectedComponentData.label}
             onChange={(e) => updateComponentProperty(selectedComponentData.id, "label", e.target.value)}
-            className="w-full bg-[#252526] border border-[#323232] rounded px-2 py-1 text-gray-200 focus:border-blue-500 outline-none"
+            className="w-full bg-muted border border-border rounded px-2 py-1 text-foreground focus:border-primary outline-none"
           />
         </div>
 
         {/* Component Properties */}
         {Object.keys(properties).length > 0 && (
           <div className="space-y-4">
-            <div className="text-gray-500 font-bold border-b border-[#323232] pb-1">Component Props</div>
+            <div className="text-muted-foreground font-bold border-b border-border pb-1">Component Props</div>
             {Object.entries(properties).map(([key, value]) => (
               <div key={key} className="space-y-1">
-                <label className="block text-gray-500">{key}</label>
+                <label className="block text-muted-foreground">{key}</label>
                 <input
                   type="text"
                   value={value}
                   onChange={(e) => updateComponentProperty(selectedComponentData.id, key, e.target.value)}
-                  className="w-full bg-[#252526] border border-[#323232] rounded px-2 py-1 text-gray-200 focus:border-blue-500 outline-none font-mono"
+                  className="w-full bg-muted border border-border rounded px-2 py-1 text-foreground focus:border-primary outline-none font-mono"
                 />
               </div>
             ))}
@@ -297,8 +310,8 @@ export function PropertiesPanel() {
         {/* Simplified for now, just showing existence */}
         {Object.keys(inputs).length > 0 && (
           <div className="space-y-2">
-            <div className="text-gray-500 font-bold border-b border-[#323232] pb-1">Inputs Defined</div>
-            <div className="text-gray-500 italic">
+            <div className="text-muted-foreground font-bold border-b border-border pb-1">Inputs Defined</div>
+            <div className="text-muted-foreground italic">
               {Object.keys(inputs).join(", ")}
             </div>
           </div>
@@ -307,17 +320,17 @@ export function PropertiesPanel() {
         {/* Input Values (For Instances) */}
         {Object.keys(inputValues).length > 0 && (
           <div className="space-y-4">
-            <div className="text-gray-500 font-bold border-b border-[#323232] pb-1">Input Values</div>
+            <div className="text-muted-foreground font-bold border-b border-border pb-1">Input Values</div>
             {Object.entries(inputValues).map(([key, value]) => (
               <div key={key} className="space-y-1">
-                <label className="block text-gray-500">{key}</label>
+                <label className="block text-muted-foreground">{key}</label>
                 <input
                   type="text"
                   value={value}
                   onChange={(e) => {
                     updateComponentInputValues(selectedComponentData.id, { ...inputValues, [key]: e.target.value });
                   }}
-                  className="w-full bg-[#252526] border border-[#323232] rounded px-2 py-1 text-gray-200 focus:border-blue-500 outline-none"
+                  className="w-full bg-muted border border-border rounded px-2 py-1 text-foreground focus:border-primary outline-none"
                 />
               </div>
             ))}

@@ -169,43 +169,43 @@ export function ReplPanel() {
         return 'bg-red-500';
     };
 
-    if (sessionsLoading) return <div className="p-2 text-xs text-gray-500">Loading sessions...</div>;
+    if (sessionsLoading) return <div className="p-2 text-xs text-muted-foreground">Loading sessions...</div>;
 
     return (
-        <div className="flex flex-col h-full bg-[#1e1e1e] border-t border-[#323232]">
+        <div className="flex flex-col h-full bg-background border-t border-border">
             {/* Header */}
-            <div className="h-8 bg-[#252525] border-b border-[#323232] flex items-center px-3 justify-between">
+            <div className="h-8 bg-muted/30 border-b border-border flex items-center px-3 justify-between">
                 <div className="flex items-center gap-4">
                     {/* Connection Status Menu */}
                     <div className="relative" ref={menuRef}>
                         <button
                             onClick={() => setShowConnectionMenu(!showConnectionMenu)}
-                            className="flex items-center gap-2 hover:bg-[#323232] px-1.5 py-1 rounded transition-colors"
+                            className="flex items-center gap-2 hover:bg-muted px-1.5 py-1 rounded transition-colors"
                             title="Connection Status"
                         >
                             <div className={`w-2 h-2 rounded-full ${getStatusColor()}`}></div>
                         </button>
 
                         {showConnectionMenu && (
-                            <div className="absolute top-full left-0 mt-1 w-32 bg-[#252525] border border-[#323232] rounded shadow-lg z-50 overflow-hidden">
-                                <div className="px-3 py-2 border-b border-[#323232] text-[10px] text-gray-500 uppercase font-bold">
+                            <div className="absolute top-full left-0 mt-1 w-32 bg-background border border-border rounded shadow-lg z-50 overflow-hidden">
+                                <div className="px-3 py-2 border-b border-border text-[10px] text-muted-foreground uppercase font-bold">
                                     {status}
                                 </div>
                                 <button
                                     onClick={toggleConnection}
-                                    className="w-full text-left px-3 py-2 text-[10px] text-gray-300 hover:bg-[#323232] hover:text-white transition-colors"
+                                    className="w-full text-left px-3 py-2 text-[10px] text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
                                 >
                                     {status === 'connected' ? 'Disconnect' : 'Connect'}
                                 </button>
 
-                                <div className="border-t border-[#323232] my-1"></div>
+                                <div className="border-t border-border my-1"></div>
 
                                 <button
                                     onClick={() => {
                                         clearSession(activeSessionId);
                                         setShowConnectionMenu(false);
                                     }}
-                                    className="w-full text-left px-3 py-2 text-[10px] text-gray-300 hover:bg-[#323232] hover:text-white transition-colors flex items-center gap-2"
+                                    className="w-full text-left px-3 py-2 text-[10px] text-muted-foreground hover:bg-muted hover:text-foreground transition-colors flex items-center gap-2"
                                 >
                                     <Lucide.Trash2 size={10} />
                                     Clear Console
@@ -218,13 +218,13 @@ export function ReplPanel() {
                     <div className="flex gap-1">
                         <button
                             onClick={() => setActiveTab('console')}
-                            className={`px-2 py-0.5 text-[10px] rounded ${activeTab === 'console' ? 'bg-[#323232] text-gray-200' : 'text-gray-500 hover:text-gray-300'}`}
+                            className={`px-2 py-0.5 text-[10px] rounded transition-colors ${activeTab === 'console' ? 'bg-muted text-foreground' : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'}`}
                         >
                             Console
                         </button>
                         <button
                             onClick={() => setActiveTab('events')}
-                            className={`px-2 py-0.5 text-[10px] rounded ${activeTab === 'events' ? 'bg-[#323232] text-gray-200' : 'text-gray-500 hover:text-gray-300'}`}
+                            className={`px-2 py-0.5 text-[10px] rounded transition-colors ${activeTab === 'events' ? 'bg-muted text-foreground' : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'}`}
                         >
                             Events
                         </button>
@@ -242,13 +242,13 @@ export function ReplPanel() {
                                     onChange={(e) => setRenameValue(e.target.value)}
                                     onBlur={handleRenameSubmit}
                                     onKeyDown={(e) => e.key === 'Enter' && handleRenameSubmit()}
-                                    className="bg-[#1e1e1e] text-gray-300 text-[10px] border border-blue-500 rounded px-1 py-0.5 outline-none w-[100px]"
+                                    className="bg-background text-foreground text-[10px] border border-blue-500 rounded px-1 py-0.5 outline-none w-[100px]"
                                     autoFocus
                                 />
                             ) : (
                                 <button
                                     onClick={() => setShowSessionMenu(!showSessionMenu)}
-                                    className="flex items-center gap-1 px-2 py-0.5 text-[10px] text-gray-400 hover:text-gray-200 hover:bg-[#323232] rounded border border-transparent hover:border-[#323232] transition-colors"
+                                    className="flex items-center gap-1 px-2 py-0.5 text-[10px] text-muted-foreground hover:text-foreground hover:bg-muted rounded border border-transparent hover:border-border transition-colors"
                                 >
                                     {activeSessionId === `console-${selectedNamespace}` ? (
                                         <>
@@ -266,9 +266,9 @@ export function ReplPanel() {
 
 
                             {showSessionMenu && (
-                                <div className="absolute top-full right-0 mt-1 w-48 bg-[#252525] border border-[#323232] rounded shadow-lg z-50 overflow-hidden">
+                                <div className="absolute top-full right-0 mt-1 w-48 bg-background border border-border rounded shadow-lg z-50 overflow-hidden">
                                     {/* Namespace Session */}
-                                    <div className="px-2 py-1.5 text-[10px] text-gray-500 font-bold uppercase border-b border-[#323232]">
+                                    <div className="px-2 py-1.5 text-[10px] text-muted-foreground font-bold uppercase border-b border-border">
                                         Namespace
                                     </div>
                                     <button
@@ -276,24 +276,24 @@ export function ReplPanel() {
                                             setActiveSessionId(`console-${selectedNamespace}`);
                                             setShowSessionMenu(false);
                                         }}
-                                        className={`w-full text-left px-3 py-1.5 text-[10px] flex items-center gap-2 hover:bg-[#323232] transition-colors ${activeSessionId === `console-${selectedNamespace}` ? 'text-white bg-[#323232]' : 'text-gray-400'}`}
+                                        className={`w-full text-left px-3 py-1.5 text-[10px] flex items-center gap-2 hover:bg-muted transition-colors ${activeSessionId === `console-${selectedNamespace}` ? 'text-foreground bg-muted' : 'text-muted-foreground'}`}
                                     >
                                         <Lucide.FileCode size={10} />
                                         <span className="truncate font-mono">{selectedNamespace}</span>
                                     </button>
 
                                     {/* Global Sessions */}
-                                    <div className="px-2 py-1.5 text-[10px] text-gray-500 font-bold uppercase border-b border-[#323232] border-t mt-1">
+                                    <div className="px-2 py-1.5 text-[10px] text-muted-foreground font-bold uppercase border-b border-border border-t mt-1">
                                         Global Consoles
                                     </div>
                                     {Object.entries(sessions).filter(([id]) => id.startsWith('global-')).map(([id, session]) => (
-                                        <div key={id} className="flex items-center group hover:bg-[#323232]">
+                                        <div key={id} className="flex items-center group hover:bg-muted">
                                             <button
                                                 onClick={() => {
                                                     setActiveSessionId(id);
                                                     setShowSessionMenu(false);
                                                 }}
-                                                className={`flex-1 text-left px-3 py-1.5 text-[10px] flex items-center gap-2 transition-colors ${activeSessionId === id ? 'text-white' : 'text-gray-400'}`}
+                                                className={`flex-1 text-left px-3 py-1.5 text-[10px] flex items-center gap-2 transition-colors ${activeSessionId === id ? 'text-foreground' : 'text-muted-foreground'}`}
                                             >
                                                 <Lucide.Globe size={10} />
                                                 <span className="truncate">{session.name}</span>
@@ -301,15 +301,10 @@ export function ReplPanel() {
                                             <button
                                                 onClick={(e) => {
                                                     e.stopPropagation();
-                                                    startRenaming(id, session.name); // This function was handleRenameStart in the original code, correct invocation is handleRenameStart? No, handleRenameStart takes no args in original code, it uses state. Wait, original code used activeSession.
-                                                    // I need to set activeSession first or update handleRenameStart. 
-                                                    // Original code: handleRenameStart() checks activeSession.
-                                                    // Here I am mapping over sessions. I can't just call handleRenameStart() if the session isn't active.
-                                                    // I should probably set active AND start renaming?
                                                     setActiveSessionId(id);
                                                     setTimeout(() => handleRenameStart(), 0);
                                                 }}
-                                                className="p-1.5 text-gray-500 hover:text-gray-300 opacity-0 group-hover:opacity-100 transition-opacity"
+                                                className="p-1.5 text-muted-foreground hover:text-foreground opacity-0 group-hover:opacity-100 transition-opacity"
                                                 title="Rename"
                                             >
                                                 <Lucide.Edit2 size={8} />
@@ -323,7 +318,7 @@ export function ReplPanel() {
                                             handleCreateGlobal(); // Used to be createNewGlobalSession? No, handleCreateGlobal (line 138)
                                             setShowSessionMenu(false);
                                         }}
-                                        className="w-full text-left px-3 py-2 text-[10px] text-blue-400 hover:bg-[#323232] hover:text-blue-300 transition-colors border-t border-[#323232] flex items-center gap-2"
+                                        className="w-full text-left px-3 py-2 text-[10px] text-blue-400 hover:bg-muted hover:text-blue-300 transition-colors border-t border-border flex items-center gap-2"
                                     >
                                         <Lucide.Plus size={10} />
                                         <span>New Global Console</span>
@@ -339,7 +334,7 @@ export function ReplPanel() {
             {activeTab === 'console' ? (
                 <>
                     <div
-                        className="flex-1 overflow-y-auto p-2 font-mono text-xs"
+                        className="flex-1 overflow-y-auto p-2 font-mono text-xs text-foreground"
                         ref={scrollRef}
                     >
                         {activeSession && activeSession.messages.map((msg, i) => {
@@ -350,13 +345,13 @@ export function ReplPanel() {
                                 const color = isError ? 'text-red-400' : 'text-green-400';
 
                                 return (
-                                    <div key={i} className="mb-1 border-b border-[#323232] pb-1 last:border-0 group relative">
+                                    <div key={i} className="mb-1 border-b border-border pb-1 last:border-0 group relative">
                                         <div className={`whitespace-pre-wrap break-all ${color} pr-6`}>
                                             {result}
                                         </div>
                                         <button
                                             onClick={() => navigator.clipboard.writeText(result)}
-                                            className="absolute top-0 right-0 p-1 text-gray-500 hover:text-gray-300 opacity-0 group-hover:opacity-100 transition-opacity"
+                                            className="absolute top-0 right-0 p-1 text-muted-foreground hover:text-foreground opacity-0 group-hover:opacity-100 transition-opacity"
                                             title="Copy result"
                                         >
                                             <Lucide.Copy size={10} />
@@ -371,15 +366,15 @@ export function ReplPanel() {
                                 const isSuccess = status === 'success';
                                 const color = isSuccess ? 'text-green-400' : 'text-red-400';
                                 return (
-                                    <div key={i} className="mb-1 border-b border-[#323232] pb-1 last:border-0">
+                                    <div key={i} className="mb-1 border-b border-border pb-1 last:border-0">
                                         <div className={`flex items-center gap-2 ${color}`}>
                                             <span className="font-bold">{isSuccess ? 'PASS' : 'FAIL'}</span>
-                                            <span className="text-gray-400">
+                                            <span className="text-muted-foreground">
                                                 {name && name.includes('/') ? name : `${ns}/${name}`}
                                             </span>
                                         </div>
                                         {!isSuccess && (
-                                            <pre className="mt-1 text-gray-500 whitespace-pre-wrap">
+                                            <pre className="mt-1 text-muted-foreground whitespace-pre-wrap">
                                                 {JSON.stringify(data, null, 2)}
                                             </pre>
                                         )}
@@ -392,7 +387,7 @@ export function ReplPanel() {
                                 return (
                                     <div
                                         key={i}
-                                        className="mb-1 whitespace-pre-wrap break-all text-gray-300 border-b border-[#323232] pb-1 last:border-0"
+                                        className="mb-1 whitespace-pre-wrap break-all text-muted-foreground border-b border-border pb-1 last:border-0"
                                     >
                                         {msg}
                                     </div>
@@ -404,7 +399,7 @@ export function ReplPanel() {
                             return (
                                 <div
                                     key={i}
-                                    className="mb-1 whitespace-pre-wrap break-all text-gray-300 border-b border-[#323232] pb-1 last:border-0"
+                                    className="mb-1 whitespace-pre-wrap break-all text-muted-foreground border-b border-border pb-1 last:border-0"
                                 >
                                     {content}
                                 </div>
@@ -413,11 +408,11 @@ export function ReplPanel() {
                     </div>
 
                     {/* Input Area */}
-                    <div className="h-8 bg-[#252525] border-t border-[#323232] flex items-center px-2">
-                        <span className="text-gray-500 mr-2">›</span>
+                    <div className="h-8 bg-muted/30 border-t border-border flex items-center px-2">
+                        <span className="text-muted-foreground mr-2">›</span>
                         <input
                             type="text"
-                            className="flex-1 bg-transparent border-none outline-none text-xs text-gray-300 font-mono"
+                            className="flex-1 bg-transparent border-none outline-none text-xs text-foreground font-mono placeholder:text-muted-foreground"
                             onKeyDown={(e) => {
                                 if (e.key === 'Enter') {
                                     const cmd = e.target.value;
@@ -450,7 +445,7 @@ export function ReplPanel() {
                 </>
             ) : (
                 <div
-                    className="flex-1 overflow-y-auto p-2 font-mono text-xs"
+                    className="flex-1 overflow-y-auto p-2 font-mono text-xs text-foreground"
                     ref={logScrollRef}
                 >
                     {(logsMap[activeSessionId === `console-${selectedNamespace}` ? selectedNamespace : 'user'] || []).map((entry, i) => {
@@ -459,21 +454,21 @@ export function ReplPanel() {
                         const content = typeof entry.message === 'object' ? JSON.stringify(entry.message, null, 2) : entry.message;
 
                         return (
-                            <div key={i} className="mb-2 border-b border-[#323232] pb-2 last:border-0">
+                            <div key={i} className="mb-2 border-b border-border pb-2 last:border-0">
                                 <div className="flex items-center gap-2 mb-1 opacity-50">
                                     <span className={`text-[10px] uppercase font-bold ${isOut ? 'text-blue-400' : 'text-purple-400'}`}>
                                         {isOut ? 'OUT' : 'IN'}
                                     </span>
-                                    <span className="text-[10px] text-gray-500">{time}</span>
+                                    <span className="text-[10px] text-muted-foreground">{time}</span>
                                 </div>
-                                <div className="text-gray-300 whitespace-pre-wrap break-all pl-4 border-l-2 border-[#323232]">
+                                <div className="text-muted-foreground whitespace-pre-wrap break-all pl-4 border-l-2 border-border">
                                     {content}
                                 </div>
                             </div>
                         );
                     })}
                     {(!logsMap[activeSessionId === `console-${selectedNamespace}` ? selectedNamespace : 'user'] || logsMap[activeSessionId === `console-${selectedNamespace}` ? selectedNamespace : 'user'].length === 0) && (
-                        <div className="text-gray-500 italic text-center mt-4">No events for this session.</div>
+                        <div className="text-muted-foreground italic text-center mt-4">No events for this session.</div>
                     )}
                 </div>
             )

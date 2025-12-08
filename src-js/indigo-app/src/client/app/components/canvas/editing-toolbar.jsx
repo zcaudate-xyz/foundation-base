@@ -27,7 +27,7 @@ export function EditingToolbar({ onToolChange, currentTool = 'select' }) {
                 title="Hand Tool"
             />
 
-            <div className="w-[1px] h-4 bg-[#3e3e3e] mx-1" />
+            <div className="w-[1px] h-4 bg-border mx-1" />
 
             {/* Zoom Controls */}
             <MenuButton
@@ -43,7 +43,7 @@ export function EditingToolbar({ onToolChange, currentTool = 'select' }) {
                 title="Zoom Out"
             />
 
-            <div className="w-[1px] h-4 bg-[#3e3e3e] mx-1" />
+            <div className="w-[1px] h-4 bg-border mx-1" />
 
             {/* History Controls */}
             <MenuButton
@@ -53,7 +53,7 @@ export function EditingToolbar({ onToolChange, currentTool = 'select' }) {
                 title="Undo"
             />
 
-            <div className="flex items-center justify-center px-2 text-[10px] text-gray-500 min-w-[60px] select-none">
+            <div className="flex items-center justify-center px-2 text-[10px] text-muted-foreground min-w-[60px] select-none">
                 {hasHistory ? `${historyIndex + 1} / ${history.length}` : "No History"}
             </div>
 

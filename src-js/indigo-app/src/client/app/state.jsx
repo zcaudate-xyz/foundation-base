@@ -210,7 +210,7 @@ export function AppStateProvider({ children }) {
     }, [selectedVar]);
 
     let [viewMode, setViewMode] = React.useState("design");
-    let [theme, setTheme] = React.useState(te.defaultTheme);
+    let [theme, setTheme] = React.useState("dark");
 
     const { history, historyIndex, undo, redo } = useStateHistory(components, setComponents);
 
