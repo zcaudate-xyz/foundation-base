@@ -384,11 +384,22 @@ export function NamespaceViewer() {
         }
     };
 
-    // Ref to track current namespace for editor actions
-    const namespaceRef = React.useRef(namespace);
+    const { subscribe } = useEvents();
+
+    // Latest handlers ref to avoid stale closures in editor callbacks
+    const handlersRef = React.useRef({ handleSave: () => { }, handleEval: () => { } });
     React.useEffect(() => {
-        namespaceRef.current = namespace;
-    }, [namespace]);
+        handlersRef.current = {
+            handleSave: (editor) => {
+                let targetNs = namespace;
+                if (fileViewMode === "test") targetNs = targetNs + "-test";
+                handleSave(editor, targetNs);
+            },
+            handleEval: handleEval,
+            handleEvalLastSexp: handleEvalLastSexp
+        };
+    }, [namespace, fileViewMode, handleSave, handleEval, handleEvalLastSexp]);
+
 
     const setupEditor = (editor, monaco, type) => {
         console.log(`Setting up editor: ${type}`);
@@ -405,11 +416,7 @@ export function NamespaceViewer() {
             id: 'save-namespace',
             label: 'Save Namespace',
             keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.KEY_S],
-            run: () => {
-                let targetNs = namespaceRef.current;
-                if (type === "file" && fileViewMode === "test") targetNs = targetNs + "-test";
-                handleSave(editor, targetNs);
-            }
+            run: () => handlersRef.current.handleSave(editor)
         });
 
         // Add Eval Last Sexp Action (Ctrl+E)
@@ -420,77 +427,10 @@ export function NamespaceViewer() {
                 monaco.KeyMod.CtrlCmd | monaco.KeyCode.KEY_E,
                 monaco.KeyMod.WinCtrl | monaco.KeyCode.KEY_E
             ],
-            run: (ed) => {
-                console.log("Eval action triggered (Ctrl+E)");
-                const model = ed.getModel();
-                const selection = ed.getSelection();
-                let code = "";
-                let isSelection = false;
-                let range;
-
-                if (selection && !selection.isEmpty()) {
-                    code = model.getValueInRange(selection);
-                    isSelection = true;
-                    range = selection;
-                } else {
-                    const position = ed.getPosition();
-                    const offset = model.getOffsetAt(position);
-                    const text = model.getValue();
-
-                    // Use the new range-aware function
-                    const result = getSexpRangeBeforeCursor(text, offset);
-                    if (result) {
-                        code = result.text;
-                        const startPos = model.getPositionAt(result.start);
-                        const endPos = model.getPositionAt(result.end);
-                        range = new monaco.Range(startPos.lineNumber, startPos.column, endPos.lineNumber, endPos.column);
-                    }
-                }
-
-                console.log("Code to eval:", code);
-                if (code) {
-                    // Visual Indicator: Flash the code
-                    // We always have a range now if we have code
-                    const flashDecoration = {
-                        range: range,
-                        options: {
-                            className: 'eval-flash-decoration',
-                            isWholeLine: false
-                        }
-                    };
-                    const collection = ed.createDecorationsCollection([flashDecoration]);
-                    setTimeout(() => {
-                        collection.clear();
-                    }, 300);
-
-                    console.log("Evaluating:", code);
-                    const id = "eval-" + Date.now() + "-" + Math.random();
-                    const removeListener = addMessageListener((msg) => {
-                        if (msg.id === id) {
-                            removeListener();
-                            const resultText = msg.error ? ("Error: " + msg.error) : msg.result;
-                            const color = msg.error ? "red" : "#888888";
-
-                            const decorationsCollection = ed.createDecorationsCollection();
-                            decorationsCollection.set([{
-                                range: range,
-                                options: {
-                                    after: {
-                                        content: " => " + resultText,
-                                        inlineClassName: msg.error ? "text-red-500" : "text-gray-500",
-                                        color: color
-                                    }
-                                }
-                            }]);
-                            setTimeout(() => { decorationsCollection.clear(); }, 5000);
-                        }
-                    });
-                    send({ op: "eval", id: id, code: code, ns: namespaceRef.current });
-                }
-            }
+            run: () => handlersRef.current.handleEval()
         });
 
-        // Paredit Actions
+        // Paredit Actions (No changes needed for stateless actions, but keeping consistency)
         editor.addAction({
             id: 'paredit-slurp-forward',
             label: 'Paredit Slurp Forward',
@@ -533,18 +473,24 @@ export function NamespaceViewer() {
             }
         });
 
-        // Manual handling for Dvorak/Layout compatibility
-        // We check the produced character key, not the physical code
+        // Manual handling for Dvorak/Layout compatibility and browser override
         editor.onKeyDown((e) => {
             const key = e.browserEvent.key.toLowerCase();
             const isCtrlOrCmd = e.ctrlKey || e.metaKey;
             const isAlt = e.altKey;
 
+            // Ctrl+S (Save)
+            if (isCtrlOrCmd && !isAlt && key === 's') {
+                e.preventDefault();
+                e.stopPropagation();
+                handlersRef.current.handleSave(editor);
+            }
+
             // Ctrl+E (Eval)
             if (isCtrlOrCmd && !isAlt && key === 'e') {
                 e.preventDefault();
                 e.stopPropagation();
-                handleEval();
+                handlersRef.current.handleEval();
             }
 
             // Ctrl+Alt+T (Test Shortcut)
@@ -557,9 +503,6 @@ export function NamespaceViewer() {
         });
     };
 
-
-
-
     const handleEditorWillMount = (monaco) => {
         monaco.editor.defineTheme('indigo-dark', {
             base: 'vs-dark',
@@ -571,12 +514,29 @@ export function NamespaceViewer() {
         });
     };
 
-    const { subscribe } = useEvents();
-
-    // Subscribe to events from PropertiesPanel (or other sources)
+    // Global Event Subscriptions
     React.useEffect(() => {
-        const unsubEval = subscribe('editor:eval', handleEval);
-        const unsubEvalLast = subscribe('editor:eval-last-sexp', handleEvalLastSexp);
+        const unsubEval = subscribe('editor:eval', () => handlersRef.current.handleEval());
+        const unsubEvalLast = subscribe('editor:eval-last-sexp', () => handlersRef.current.handleEvalLastSexp());
+        // For eval file, we can probably just use the fresh handler directly or via ref if needed
+        // but let's be consistent
+        // const unsubEvalFile = subscribe('editor:eval-file', handleEvalFile); 
+        // handleEvalFile is not packed in handlersRef yet, adding it.
+        // Actually for simplicity, just letting handleEvalFile be called directly if not used in shortcuts.
+        // But wait, subscribe callback is also a closure?
+        // Yes, useEffect runs on mount (or dep change).
+        // If dependencies are [subscribe, handleEval], it re-runs when handleEval changes.
+        // handleEval changes every render.
+        // So global subscriptions are re-subscribing every render?
+        // That's acceptable but maybe inefficient.
+        // Using handlersRef allows stable subscription.
+
+    }, [subscribe]); // Empty deps if using handlersRef
+
+    // Extended useEffect for subscriptions with stable ref
+    React.useEffect(() => {
+        const unsubEval = subscribe('editor:eval', () => handlersRef.current.handleEval());
+        const unsubEvalLast = subscribe('editor:eval-last-sexp', () => handlersRef.current.handleEvalLastSexp());
         const unsubEvalFile = subscribe('editor:eval-file', handleEvalFile);
 
         return () => {
@@ -584,7 +544,7 @@ export function NamespaceViewer() {
             unsubEvalLast();
             unsubEvalFile();
         };
-    }, [subscribe, handleEval, handleEvalLastSexp, handleEvalFile]);
+    }, [subscribe, handleEvalFile]); // dependent on handleEvalFile only if not in ref
 
     if (!namespace) {
         return (

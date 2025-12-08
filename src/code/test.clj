@@ -60,7 +60,6 @@
               compile/fact:teardown
               compile/fact:remove
               compile/fact:template
-              compile/fact:compile
               compile/=>)
 
 (def +listeners+

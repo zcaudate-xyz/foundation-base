@@ -160,6 +160,7 @@
                           :wrap wrap
                           :function function)
                    (types/map->Fact))]
+     (h/prn fpkg)
      fpkg)))
 
 (defn install-fact
@@ -169,28 +170,6 @@
    (let [{:keys [ns id] :as fpkg} (create-fact meta body)
          _ (rt/set-fact ns id fpkg)]
      fpkg)))
-
-(defn fact:compile
-  "recompiles fact with a different global"
-  {:added "3.0"}
-  ([fpkg]
-   (fact:compile fpkg nil))
-  ([fpkg global]
-   (binding [context/*eval-global* global]
-     (let [meta (select-keys fpkg [:use :setup :teardown])
-           code {:setup    (snippet/fact-setup meta)
-                 :teardown (snippet/fact-teardown meta)
-                 :ceremony (snippet/fact-wrap-ceremony meta)
-                 :check    (snippet/fact-wrap-check meta)}
-           wrap {:ceremony     (eval (:ceremony code))
-                 :bindings     (eval (:bindings code))
-                 :check        (eval (:check code))}
-           function {:setup    (eval (:setup code))
-                     :teardown (eval (:teardown code))}]
-       (-> fpkg
-           (update :code merge code)
-           (update :function merge function)
-           (assoc  :wrap wrap))))))
 
 (defn fact-eval
   "creates the forms in eval mode"

@@ -20,11 +20,11 @@
   (install-browser-listener)
   (let [ns-sym (symbol ns)
         var-sym (symbol var-name)]
-    (require ns-sym)
+    (task/run:load ns-sym)
     (task/run:test ns-sym var-sym)))
 
 (defn run-ns-tests [ns]
   (install-browser-listener)
   (let [ns-sym (symbol ns)]
-    (require ns-sym)
+    (task/run:load ns-sym)
     (task/run:test ns-sym)))

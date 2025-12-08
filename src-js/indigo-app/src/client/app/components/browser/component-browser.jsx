@@ -11,14 +11,22 @@ function convertToStandardNodes(node) {
   const children = Array.from(node.children.values()).map(convertToStandardNodes);
   children.sort((a, b) => a.label.localeCompare(b.label));
 
-  // If this node is a namespace AND has children, it's a "package" (Folder + File in one)
+  // If this node is a namespace AND has children, we want to show BOTH the folder and the file
   if (node.isNamespace && children.length > 0) {
-    return {
-      id: node.fullPath, // Use the namespace path directly
+    const fileNode = {
+      id: node.fullPath,
       label: node.name,
-      children: children,
-      isNamespace: true, // It is a namespace
-      isSelectable: true // And it is selectable
+      children: null,
+      isNamespace: true,
+      isSelectable: true
+    };
+
+    return {
+      id: node.fullPath + "-folder", // Distinct ID for folder
+      label: node.name,
+      children: [fileNode, ...children], // File at top
+      isNamespace: false, // Acts as folder
+      isSelectable: false // Just expands
     };
   }
 

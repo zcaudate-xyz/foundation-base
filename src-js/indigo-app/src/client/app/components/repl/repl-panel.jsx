@@ -374,7 +374,9 @@ export function ReplPanel() {
                                     <div key={i} className="mb-1 border-b border-[#323232] pb-1 last:border-0">
                                         <div className={`flex items-center gap-2 ${color}`}>
                                             <span className="font-bold">{isSuccess ? 'PASS' : 'FAIL'}</span>
-                                            <span className="text-gray-400">{ns}/{name}</span>
+                                            <span className="text-gray-400">
+                                                {name && name.includes('/') ? name : `${ns}/${name}`}
+                                            </span>
                                         </div>
                                         {!isSuccess && (
                                             <pre className="mt-1 text-gray-500 whitespace-pre-wrap">
