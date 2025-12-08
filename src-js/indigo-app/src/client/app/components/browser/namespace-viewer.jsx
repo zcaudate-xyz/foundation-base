@@ -1,14 +1,11 @@
 import React from 'react'
 import Editor from '@monaco-editor/react'
-import { saveNamespaceSource, fetchCompletions, scaffoldTest } from '../../../api'
-import { slurpForward, barfForward, getSexpBeforeCursor, getSexpRangeBeforeCursor } from '../../utils/paredit'
-import { send, addMessageListener } from '../../../repl-client'
 import * as FigmaUi from '@xtalk/figma-ui'
 import * as Lucide from 'lucide-react'
 import { useAppState } from '../../state'
-import { toast } from 'sonner'
 import { MenuContainer, MenuToolbar, MenuButton } from '../common/common-menu.jsx'
 import { useEvents } from '../../events-context.jsx'
+import * as Actions from './namespace-actions'
 
 export function NamespaceViewer() {
     const {
@@ -56,7 +53,15 @@ export function NamespaceViewer() {
                 if (fileViewMode === "source") {
                     regex = new RegExp(`\\(def(n|macro)?\\s+${selectedVar}[\\s\\n]`);
                 } else if (fileViewMode === "test") {
-                    regex = new RegExp(`\\(deftest\\s+${selectedVar}(-test)?[\\s\\n]`);
+                    // escape selectedVar for regex
+                    const escapedVar = selectedVar.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
+                    const patterns = [
+                        `\\(deftest\\s+${escapedVar}(-test)?[\\s\\n]`,         // (deftest var ...)
+                        `\\(def\\s+${escapedVar}(-test)?[\\s\\n]`,             // (def var ...)
+                        `\\(fact\\s+"${escapedVar}"`,                          // (fact "var" ...)
+                        `:refer\\s+([^\\s\\/]+\\/)?${escapedVar}[\\s\\}]`      // :refer ns/var or :refer var
+                    ];
+                    regex = new RegExp(patterns.join("|"));
                 }
 
                 if (regex) {
@@ -98,194 +103,19 @@ export function NamespaceViewer() {
         };
     }, []);
 
-    const registerCompletion = (monaco) => {
-        if (!monaco || completionProviderRef.current) return;
-
-        completionProviderRef.current = monaco.languages.registerCompletionItemProvider('clojure', {
-            provideCompletionItems: async (model, position) => {
-                const word = model.getWordUntilPosition(position);
-                const range = {
-                    startLineNumber: position.lineNumber,
-                    endLineNumber: position.lineNumber,
-                    startColumn: word.startColumn,
-                    endColumn: word.endColumn
-                };
-                try {
-                    const suggestions = await fetchCompletions(namespace, word.word);
-                    return {
-                        suggestions: suggestions.map(s => ({
-                            label: s,
-                            kind: monaco.languages.CompletionItemKind.Function,
-                            insertText: s,
-                            range: range
-                        }))
-                    };
-                } catch (err) {
-                    console.error("Completion error", err);
-                    return { suggestions: [] };
-                }
-            }
-        });
-    };
-
-    const handleSave = async (editorInstance, targetNs) => {
-        if (!namespace || !editorInstance) return;
-
-        const currentSource = editorInstance.getValue();
-
-        try {
-            await saveNamespaceSource(targetNs, currentSource);
-            console.log("Saved namespace:", targetNs);
-
-            setCode(currentSource);
-            toast.success(`Saved ${targetNs}`);
-        } catch (err) {
-            console.error("Failed to save namespace", err);
-            toast.error("Failed to save: " + err.message);
-        }
-    };
-
     const handlersRef = React.useRef({ handleSave: () => { }, handleEval: () => { } });
 
+    // Actions Wrappers
     const handleEval = () => {
-        const editor = fileEditorRef.current;
-        if (!editor) return;
-
-        const model = editor.getModel();
-        const selection = editor.getSelection();
-        let code = "";
-        let range = null;
-
-        if (selection && !selection.isEmpty()) {
-            code = model.getValueInRange(selection);
-            range = selection;
-        } else {
-            const position = editor.getPosition();
-            const offset = model.getOffsetAt(position);
-            const text = model.getValue();
-            const result = getSexpRangeBeforeCursor(text, offset);
-            if (result) {
-                code = result.text;
-                const startPos = model.getPositionAt(result.start);
-                const endPos = model.getPositionAt(result.end);
-                range = new monacoRef.current.Range(startPos.lineNumber, startPos.column, endPos.lineNumber, endPos.column);
-            }
-        }
-
-        if (code) {
-            if (monacoRef.current && range) {
-                const flashDecoration = {
-                    range: range,
-                    options: {
-                        className: 'eval-flash-decoration',
-                        isWholeLine: false
-                    }
-                };
-                const collection = editor.createDecorationsCollection([flashDecoration]);
-                setTimeout(() => {
-                    collection.clear();
-                }, 500);
-            }
-
-            const id = "eval-" + Date.now();
-            const targetNs = fileViewMode === 'test' ? namespace + '-test' : namespace;
-
-            toast.promise(
-                new Promise((resolve, reject) => {
-                    const removeListener = addMessageListener((msg) => {
-                        if (msg.id === id) {
-                            removeListener();
-                            if (msg.error) {
-                                reject(new Error(msg.error));
-                            } else {
-                                resolve(msg.result);
-                            }
-                        }
-                    });
-                    send({ op: "eval", id: id, code: code, ns: targetNs });
-                }),
-                {
-                    loading: 'Evaluating...',
-                    success: (data) => `Result: ${data}`,
-                    error: (err) => `Eval failed: ${err.message}`
-                }
-            );
-        }
+        Actions.evalCode(fileEditorRef.current, monacoRef.current, namespace, fileViewMode);
     };
 
     const handleEvalLastSexp = () => {
-        const editor = fileEditorRef.current;
-        if (!editor) return;
-
-        const model = editor.getModel();
-        const position = editor.getPosition();
-        const offset = model.getOffsetAt(position);
-        const text = model.getValue();
-
-        const result = getSexpRangeBeforeCursor(text, offset);
-
-        if (result) {
-            const code = result.text;
-            const targetNs = fileViewMode === 'test' ? namespace + '-test' : namespace;
-
-            if (monacoRef.current) {
-                const startPos = model.getPositionAt(result.start);
-                const endPos = model.getPositionAt(result.end);
-                const range = new monacoRef.current.Range(startPos.lineNumber, startPos.column, endPos.lineNumber, endPos.column);
-
-                const flashDecoration = {
-                    range: range,
-                    options: {
-                        className: 'eval-flash-decoration',
-                        isWholeLine: false
-                    }
-                };
-                const collection = editor.createDecorationsCollection([flashDecoration]);
-                setTimeout(() => {
-                    collection.clear();
-                }, 500);
-            }
-
-            const id = "eval-last-" + Date.now();
-            toast.promise(
-                new Promise((resolve, reject) => {
-                    const removeListener = addMessageListener((msg) => {
-                        if (msg.id === id) {
-                            removeListener();
-                            if (msg.error) {
-                                reject(new Error(msg.error));
-                            } else {
-                                resolve(msg.result);
-                            }
-                        }
-                    });
-                    send({ op: "eval", id: id, code: code, ns: targetNs });
-                }),
-                {
-                    loading: 'Evaluating last sexp...',
-                    success: (data) => `Result: ${data}`,
-                    error: (err) => `Eval failed: ${err.message}`
-                }
-            );
-        }
+        Actions.evalLastSexp(fileEditorRef.current, monacoRef.current, namespace, fileViewMode);
     };
 
-    const handleScaffold = async () => {
-        setScaffoldLoading(true);
-        try {
-            await scaffoldTest(namespace);
-            await new Promise(r => setTimeout(r, 1000));
-            await scaffoldTest(namespace);
-            await new Promise(r => setTimeout(r, 1000));
-            if (fileViewMode === "test") {
-                refreshNamespaceCode();
-            }
-        } catch (err) {
-            console.error("Failed to scaffold test", err);
-            toast.error("Scaffold failed: " + err.message);
-        } finally {
-            setScaffoldLoading(false);
-        }
+    const handleScaffold = () => {
+        Actions.scaffoldNamespaceTest(namespace, fileViewMode, refreshNamespaceCode, setScaffoldLoading);
     };
 
     const { subscribe } = useEvents();
@@ -295,17 +125,17 @@ export function NamespaceViewer() {
             handleSave: (editor) => {
                 let targetNs = namespace;
                 if (fileViewMode === "test") targetNs = targetNs + "-test";
-                handleSave(editor, targetNs);
+                Actions.saveNamespace(editor, targetNs, setCode);
             },
             handleEval: handleEval,
             handleEvalLastSexp: handleEvalLastSexp
         };
-    }, [namespace, fileViewMode]); // Cleaned up deps
+    }, [namespace, fileViewMode, setCode]);
 
     const setupEditor = (editor, monaco, type) => {
         console.log(`Setting up editor: ${type}`);
         monacoRef.current = monaco;
-        registerCompletion(monaco);
+        Actions.registerCompletion(monaco, completionProviderRef, namespace);
 
         if (type === "file") fileEditorRef.current = editor;
         if (type === "test") testEditorRef.current = editor;
@@ -329,48 +159,7 @@ export function NamespaceViewer() {
             run: () => handlersRef.current.handleEval()
         });
 
-        // Paredit Actions
-        editor.addAction({
-            id: 'paredit-slurp-forward',
-            label: 'Paredit Slurp Forward',
-            keybindings: [
-                monaco.KeyMod.CtrlCmd | monaco.KeyCode.RightArrow,
-                monaco.KeyMod.Alt | monaco.KeyCode.RightArrow,
-                monaco.KeyMod.WinCtrl | monaco.KeyCode.RightArrow
-            ],
-            run: (ed) => {
-                const model = ed.getModel();
-                const position = ed.getPosition();
-                const offset = model.getOffsetAt(position);
-                const text = model.getValue();
-                const result = slurpForward(text, offset);
-                if (result) {
-                    ed.executeEdits('paredit', [{ range: model.getFullModelRange(), text: result.text }]);
-                    ed.setPosition(model.getPositionAt(result.offset));
-                }
-            }
-        });
-
-        editor.addAction({
-            id: 'paredit-barf-forward',
-            label: 'Paredit Barf Forward',
-            keybindings: [
-                monaco.KeyMod.CtrlCmd | monaco.KeyCode.LeftArrow,
-                monaco.KeyMod.Alt | monaco.KeyCode.LeftArrow,
-                monaco.KeyMod.WinCtrl | monaco.KeyCode.LeftArrow
-            ],
-            run: (ed) => {
-                const model = ed.getModel();
-                const position = ed.getPosition();
-                const offset = model.getOffsetAt(position);
-                const text = model.getValue();
-                const result = barfForward(text, offset);
-                if (result) {
-                    ed.executeEdits('paredit', [{ range: model.getFullModelRange(), text: result.text }]);
-                    ed.setPosition(model.getPositionAt(result.offset));
-                }
-            }
-        });
+        Actions.setupPareditActions(editor, monaco);
 
         editor.onKeyDown((e) => {
             const key = e.browserEvent.key.toLowerCase();

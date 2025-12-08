@@ -616,19 +616,50 @@ export function AppStateProvider({ children }) {
         refreshNamespaceEntries();
     }, [refreshNamespaceEntries]);
 
+    // File Buffers (Cache for tab content)
+    let [fileBuffers, setFileBuffers] = React.useState({});
+
+    const getBufferKey = (ns, mode) => `${ns}:${mode}`;
+
+    // Update code both in current state and buffer
+    const updateNamespaceCode = React.useCallback((newCode) => {
+        setNamespaceCode(newCode);
+        if (selectedNamespace) {
+            const key = getBufferKey(selectedNamespace, namespaceFileViewMode);
+            setFileBuffers(prev => ({
+                ...prev,
+                [key]: newCode
+            }));
+        }
+    }, [selectedNamespace, namespaceFileViewMode]);
+
     // Fetch Namespace Code (File View)
-    const refreshNamespaceCode = React.useCallback(async () => {
+    const refreshNamespaceCode = React.useCallback(async (force = false) => {
         if (!selectedNamespace || namespaceViewType !== "file") return;
+
+        const key = getBufferKey(selectedNamespace, namespaceFileViewMode);
+
+        // Use buffer if available and not forcing reload
+        if (!force && fileBuffers.hasOwnProperty(key)) {
+            setNamespaceCode(fileBuffers[key]);
+            return;
+        }
 
         setNamespaceLoading(true);
         setNamespaceError(null);
-        setNamespaceCode("");
+        // Don't clear code immediately if we are reloading? Maybe nice to keep old code visible?
+        // But for now follow existing pattern or clean it.
+        // setNamespaceCode(""); // If we clear it, it flashes. Better to keep stale until load?
+        // Existing behavior was setNamespaceCode("")
+        if (!fileBuffers[key]) setNamespaceCode("");
 
         try {
             let content = "";
-            if (namespaceFileViewMode === "source") {
+            let mode = namespaceFileViewMode; // Capture for closure consistency if needed
+
+            if (mode === "source") {
                 content = await fetchNamespaceSource(selectedNamespace);
-            } else if (namespaceFileViewMode === "test") {
+            } else if (mode === "test") {
                 const testNs = selectedNamespace + "-test";
                 content = await fetchNamespaceSource(testNs);
                 if (content.startsWith(";; File not found")) {
@@ -637,7 +668,7 @@ export function AppStateProvider({ children }) {
                     setNamespaceLoading(false);
                     return;
                 }
-            } else if (namespaceFileViewMode === "doc") {
+            } else if (mode === "doc") {
                 const docInfo = await fetchDocPath(selectedNamespace);
                 if (docInfo.found) {
                     content = await fetchFileContent(docInfo.path);
@@ -648,14 +679,21 @@ export function AppStateProvider({ children }) {
                     return;
                 }
             }
+
+            // Update state and buffer
             setNamespaceCode(content);
+            setFileBuffers(prev => ({
+                ...prev,
+                [key]: content
+            }));
+
         } catch (err) {
             console.error("Failed to load source", err);
             setNamespaceError(err.message);
         } finally {
             setNamespaceLoading(false);
         }
-    }, [selectedNamespace, namespaceViewType, namespaceFileViewMode]);
+    }, [selectedNamespace, namespaceViewType, namespaceFileViewMode, fileBuffers]);
 
     React.useEffect(() => {
         refreshNamespaceCode();
@@ -686,11 +724,10 @@ export function AppStateProvider({ children }) {
         setNamespaceFileViewMode,
         setNamespaceEntries,
         setNamespaceEntriesLoading,
-        setNamespaceCode,
+        setNamespaceCode: updateNamespaceCode, // Use wrapper
         setNamespaceLoading,
         setNamespaceError,
         setRunningTest,
-        setNamespaceCode, // Added setter for code (e.g. for editor changes)
         refreshNamespaceCode,
         refreshNamespaceEntries,
 

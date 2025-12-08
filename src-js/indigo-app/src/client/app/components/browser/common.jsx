@@ -82,8 +82,9 @@ export function BrowserTree({ nodes, selectedId, onSelect, onDoubleClick, expand
         return (
             <div key={node.id}>
                 <div
-                    className={`flex items-center gap-1 py-1 px-2 hover:bg-muted/50 cursor-pointer text-xs group select-none transition-colors ${isSelected ? "bg-accent text-accent-foreground font-medium" : "text-foreground/80"}`}
+                    className={`flex items-center gap-1 py-1 px-2 hover:bg-accent hover:text-accent-foreground cursor-pointer text-xs group select-none transition-colors ${isSelected ? "bg-accent text-accent-foreground font-medium" : "text-foreground/80"}`}
                     style={{ paddingLeft }}
+                    title={node.label}
                     onClick={(e) => {
                         e.stopPropagation();
                         // If it's a selectable node (file or package), select it.

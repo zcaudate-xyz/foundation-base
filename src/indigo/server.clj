@@ -37,130 +37,53 @@
        :headers {"Content-Type" "application/json"}
        :body    (json/write res)})))
 
+(defn- extract [req param]
+  (if (vector? param)
+    (let [[key default] param]
+      (or (get-in req [:params key]) default))
+    (get-in req [:params param])))
+
+(defn- endpoint [f & params]
+  (wrap-browser-call
+   (fn [req]
+     (apply f (map #(extract req %) params)))))
+
 (def api-routes
   (router/router
    (merge
     (api/create-routes
      "POST /api/browse/"
-     {"libraries"       (wrap-browser-call
-                         (fn [req]
-                           (#'api-browser/list-libraries)))
-      "scan"            (wrap-browser-call
-                         (fn [req]
-                           (#'api-browser/scan-namespaces)))
-      "file-content"    (wrap-browser-call
-                         (fn [req]
-                           (#'api-browser/get-file-content (get-in req [:params :path]))))
-      "clj/namespace-entries" (wrap-browser-call
-                               (fn [req]
-                                 (#'api-browser/get-namespace-entries (get-in req [:params :ns]))))
-      "lang/namespaces" (wrap-browser-call
-                         (fn [req]
-                           (let [lang (or (get-in req [:params :lang]) "js")]
-                             (#'api-browser/list-namespaces lang))))
-      "lang/components" (wrap-browser-call
-                         (fn [req]
-                           (let [lang (or (get-in req [:params :lang]) "js")
-                                 ns   (get-in req [:params :ns])]
-                             (#'api-browser/list-components lang ns))))
-      "lang/component-preview" (wrap-browser-call
-                                (fn [req]
-                                  (let [lang (or (get-in req [:params :lang]) "js")
-                                        ns   (get-in req [:params :ns])
-                                        comp (get-in req [:params :component])]
-                                    (#'api-browser/component-preview lang ns comp))))
-      "lang/emit-component"    (wrap-browser-call
-                                (fn [req]
-                                  (let [lang (or (get-in req [:params :lang]) "js")
-                                        ns   (get-in req [:params :ns])
-                                        comp (get-in req [:params :component])]
-                                    (#'api-browser/emit-component lang ns comp))))
+     {"libraries"                 (endpoint #'api-browser/list-libraries)
+      "scan"                      (endpoint #'api-browser/scan-namespaces)
+      "file-content"              (endpoint #'api-browser/get-file-content :path)
 
-      "lang/component"  (wrap-browser-call
-                         (fn [req]
-                           (let [lang (or (get-in req [:params :lang]) "js")
-                                 ns   (get-in req [:params :ns])
-                                 comp (get-in req [:params :component])]
-                             (#'indigo.server.api-browser/get-component lang ns comp))))
+      ;; Clojure Lang
+      "clj/namespace-entries"     (endpoint #'api-browser/get-namespace-entries :ns)
+      "clj/namespaces"            (endpoint #'api-browser/list-clj-namespaces)
+      "clj/namespace-source"      (endpoint #'api-browser/get-namespace-source :ns)
+      "clj/components"            (endpoint #'api-browser/list-clj-vars :ns)
+      "clj/component"             (endpoint #'api-browser/get-clj-var-source :ns :component)
+      "clj/var-tests"             (endpoint #'api-browser/list-tests-for-var :ns :var)
+      "clj/save-namespace-source" (endpoint #'api-browser/save-namespace-source :ns :source)
+      "clj/completions"           (endpoint #'api-browser/get-completions :ns :prefix)
+      "clj/scaffold-test"         (endpoint #'api-browser/scaffold-test :ns)
+      "clj/doc-path"              (endpoint #'api-browser/get-doc-path :ns)
+      "clj/file-content"          (endpoint #'api-browser/get-file-content :path)
+      "clj/delete-path"           (endpoint #'api-browser/delete-path :path)
 
-      "clj/namespaces"  (wrap-browser-call
-                         (fn [req]
-                           (#'indigo.server.api-browser/list-clj-namespaces)))
-      "clj/namespace-source" (wrap-browser-call
-                              (fn [req]
-                                (let [ns (get-in req [:params :ns])]
-                                  (#'indigo.server.api-browser/get-namespace-source ns))))
-      "clj/components"  (wrap-browser-call
-                         (fn [req]
-                           (let [ns (get-in req [:params :ns])]
-                             (#'indigo.server.api-browser/list-clj-vars ns))))
+      ;; Std Lang
+      "lang/namespaces"           (endpoint #'api-browser/list-namespaces [:lang "js"])
+      "lang/components"           (endpoint #'api-browser/list-components [:lang "js"] :ns)
+      "lang/component-preview"    (endpoint #'api-browser/component-preview [:lang "js"] :ns :component)
+      "lang/emit-component"       (endpoint #'api-browser/emit-component [:lang "js"] :ns :component)
+      "lang/component"            (endpoint #'api-browser/get-component [:lang "js"] :ns :component)
 
-      "clj/var-tests"   (wrap-browser-call
-                         (fn [req]
-                           (let [ns   (get-in req [:params :ns])
-                                 var  (get-in req [:params :var])]
-                             (#'indigo.server.api-browser/list-tests-for-var ns var))))
-      "clj/component"   (wrap-browser-call
-                         (fn [req]
-                           (let [ns   (get-in req [:params :ns])
-                                 comp (get-in req [:params :component])]
-                             (#'indigo.server.api-browser/get-clj-var-source ns comp))))
-
-      "test/namespaces" (wrap-browser-call
-                         (fn [req]
-                           (#'indigo.server.api-browser/list-test-namespaces)))
-      "test/components" (wrap-browser-call
-                         (fn [req]
-                           (let [ns (get-in req [:params :ns])]
-                             (#'indigo.server.api-browser/list-test-facts ns))))
-      "test/component"  (wrap-browser-call
-                         (fn [req]
-                           (let [ns   (get-in req [:params :ns])
-                                 comp (get-in req [:params :component])]
-                             (#'indigo.server.api-browser/get-test-fact-source ns comp))))
-
-      "clj/save-namespace-source" (wrap-browser-call
-                                   (fn [req]
-                                     (let [ns     (get-in req [:params :ns])
-                                           source (get-in req [:params :source])]
-                                       (#'indigo.server.api-browser/save-namespace-source ns source))))
-
-      "clj/completions" (wrap-browser-call
-                         (fn [req]
-                           (let [ns     (get-in req [:params :ns])
-                                 prefix (get-in req [:params :prefix])]
-                             (#'indigo.server.api-browser/get-completions ns prefix))))
-
-      "clj/scaffold-test" (wrap-browser-call
-                           (fn [req]
-                             (let [ns (get-in req [:params :ns])]
-                               (#'indigo.server.api-browser/scaffold-test ns))))
-
-      "clj/doc-path"      (wrap-browser-call
-                           (fn [req]
-                             (let [ns (get-in req [:params :ns])]
-                               (#'indigo.server.api-browser/get-doc-path ns))))
-
-      "clj/file-content"  (wrap-browser-call
-                           (fn [req]
-                             (let [path (get-in req [:params :path])]
-                               (#'indigo.server.api-browser/get-file-content path))))
-
-      "clj/delete-path"   (wrap-browser-call
-                           (fn [req]
-                             (let [path (get-in req [:params :path])]
-                               (#'indigo.server.api-browser/delete-path path))))
-
-      "test/run-var"    (wrap-browser-call
-                         (fn [req]
-                           (let [ns   (get-in req [:params :ns])
-                                 var  (get-in req [:params :var])]
-                             (#'indigo.server.test-runner/run-test ns var))))
-
-      "test/run-ns"     (wrap-browser-call
-                         (fn [req]
-                           (let [ns (get-in req [:params :ns])]
-                             (#'indigo.server.test-runner/run-ns-tests ns))))}))))
+      ;; Tests
+      "test/namespaces"           (endpoint #'api-browser/list-test-namespaces)
+      "test/components"           (endpoint #'api-browser/list-test-facts :ns)
+      "test/component"            (endpoint #'api-browser/get-test-fact-source :ns :component)
+      "test/run-var"              (endpoint #'test-runner/run-test :ns :var)
+      "test/run-ns"               (endpoint #'test-runner/run-ns-tests :ns)}))))
 
 (def page-routes
   (router/router
@@ -265,8 +188,8 @@
 
 (comment
   (require 'std.fs.watch)
- 
-  
+
+
   (into {} +watch+)
   (std.fs.watch/start-watcher +watch+)
   (std.fs.watch/stop-watcher +watch+)
