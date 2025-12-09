@@ -344,25 +344,13 @@
   {:added "4.0"}
   [[_ sym doc? attr? [table & cols] :as form]]
   (let [[{:keys [doc]
-          :as mdefn} [_ sym [table & cols] & body]] (grammar-spec/format-defn form)]
+          :as mdefn} [_ sym [table & cols] body]] (grammar-spec/format-defn form)]
     (vec (concat
           [:create-index :if-not-exists
            sym
            :on table (list 'quote (list  (vec cols)))]
           body
           [\;]))))
-
-
-#_#_
-(defrun.pg AccessRequestPending
-  [:create-index AccessRequest-status-pending
-   :on -/AccessRequest '(#{"status"}) :where #{"status"} := "pending"])
-
-
-(defindex.pg AccessRequest-status-pending
-  [-/AccessRequest #{"status"}]
-  [:where {:status "pending"}])
-
 
 ;;
 ;; defpolicy
