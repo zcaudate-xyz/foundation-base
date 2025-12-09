@@ -9,6 +9,20 @@
             [std.lang.base.impl :as impl]
             [std.lib :as h :refer [defimpl]]))
 
+(def +pg-defaults+
+  {:host   (or (System/getenv "DEFAULT_RT_POSTGRES_HOST")
+              "127.0.0.1")
+   :port   (h/parse-long
+           (or (System/getenv "DEFAULT_RT_POSTGRES_PORT")
+               "5432"))
+   :user   (or (System/getenv "DEFAULT_RT_POSTGRES_USER")
+              "postgres")
+   :pass   (or (System/getenv "DEFAULT_RT_POSTGRES_PASS")
+              "postgres")
+   :dbname (or (System/getenv "DEFAULT_RT_POSTGRES_DBNAME")
+               "postgres")
+   :vendor :postgresql})
+
 (defn- rt-pg-string [pg]
   (str "rt.postgres" (into {} (-> pg
                                   (update :notifications (comp keys deref))
@@ -34,7 +48,8 @@
   "creates a postgres runtime"
   {:added "4.0"}
   ([m]
-   (map->RuntimePostgres (assoc m
+   (map->RuntimePostgres (assoc (merge +pg-defaults+
+                                       m)
                                 :lang :postgres
                                 :tag  :postgres
                                 :instance       (atom nil)

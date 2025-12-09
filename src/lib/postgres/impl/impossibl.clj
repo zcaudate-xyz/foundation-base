@@ -37,15 +37,6 @@
 
 (defn create-pool
   [{:keys [host port user pass dbname]
-    :or {host (or (System/getenv "DEFAULT_RT_POSTGRES_HOST")
-                  "127.0.0.1")
-         port (h/parse-long
-               (or (System/getenv "DEFAULT_RT_POSTGRES_PORT")
-                   "5432"))
-         user (or (System/getenv "DEFAULT_RT_POSTGRES_USER")
-                  "postgres")
-         pass (or (System/getenv "DEFAULT_RT_POSTGRES_PASS")
-                  "postgres")}
     :as m}]
   (let [ds (doto (PGConnectionPoolDataSource.)
              (.setHost host)
