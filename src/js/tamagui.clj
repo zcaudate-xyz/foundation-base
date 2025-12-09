@@ -392,24 +392,3 @@
    variableToString
    withStaticProperties
    wrapChildrenInText])
-
-(defn generate-blocks
-  []
-  (block/layout
-   (vec (mapcat (fn [[k]]
-                  [(keyword "rx" (str/spear-case (str k)))
-                   {:tag (symbol "-" (str k))}])
-                (sort (ns-publics *ns*))))))
-
-
-(defn init-components
-  []
-  (compile/add-registry :radix +components+)
-  true)
-
-(def +init+
-  (init-components))
-
-
-
-

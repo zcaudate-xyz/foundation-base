@@ -1,6 +1,5 @@
 (ns std.block.reader
   (:require [clojure.tools.reader.reader-types :as types]
-
             [std.block.base :as base]
             [std.block.check :as check]
             [std.protocol.block :as protocol.block]

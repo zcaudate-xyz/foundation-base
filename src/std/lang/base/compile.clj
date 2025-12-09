@@ -105,11 +105,11 @@
                             ns-extras)
                     main
                     (:link (:code emit)))
-        
+
         root-path  (if (empty? target)
                      root
                      (str root "/" target))
-        
+
         compile-fn (fn [ns]
                      (let [emit-opts
                            {:static  (:static (book/get-module book ns))
@@ -120,7 +120,7 @@
                             (assoc :layout :module
                                    :main ns
                                    :snapshot snapshot
-                                   :output (str (fs/path (str root-path "/"(get-in links [ns :path])))))
+                                   :output (str (fs/path (str root-path "/" (get-in links [ns :path])))))
                             (update :emit merge emit-opts)))))
         ;; generate for all namespaces
         files  (mapv compile-fn (concat ns-selected ns-extras))]
@@ -134,7 +134,13 @@
                           (map #(fs/path %))
                           (mapcat #(fs/select % {:include [".clj$"]})))
          ns-all      (pmap fs/file-namespace all-paths)]
-     (compile-module-directory-selected :directory ns-all opts))))
+     (doseq [[path ns] (map vector all-paths ns-all)]
+       (if ns
+         (try (require ns)
+              (catch Throwable t
+                (println "WARN: Failed to load" ns "from" path (.getMessage t))))
+         (println "WARN: Could not determine namespace for file:" path)))
+     (compile-module-directory-selected :directory (filter identity ns-all) opts))))
 
 (def +install-module-directory-fn+
   (compile/types-add :module.directory #'compile-module-directory))
@@ -149,7 +155,7 @@
   {:added "4.0"}
   [{:keys [lang main] :as opts}]
   (let [lib         (impl/runtime-library)
-         snapshot    (lib/get-snapshot lib)
+        snapshot    (lib/get-snapshot lib)
         book        (snap/get-book snapshot lang)
         parent (->> (str/split (str main) #"\.")
                     (butlast)
@@ -170,7 +176,7 @@
      (compile-module-directory-selected :directory selected opts))))
 
 (def +install-module-root-fn+
-  (compile/types-add :module.root #'compile-module-root)) 
+  (compile/types-add :module.root #'compile-module-root))
 
 ;;
 ;; GRAPH
