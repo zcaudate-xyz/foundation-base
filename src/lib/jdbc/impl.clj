@@ -11,7 +11,8 @@
            (java.util Properties)
            (java.sql Connection
                      DriverManager
-                     PreparedStatement)))
+                     PreparedStatement
+                     Statement)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Connection constructors implementation
@@ -84,14 +85,14 @@
         scheme (.getScheme uri)
         userinfo (.getUserInfo uri)]
     (merge
-      {:subname (if (pos? port)
+     {:subname (if (pos? port)
                  (str "//" host ":" port path)
                  (str "//" host path))
-       :subprotocol scheme}
-      (when userinfo
-        (let [[user password] (str/split userinfo #":")]
-          {:user user :password password}))
-      (querystring->map uri))))
+      :subprotocol scheme}
+     (when userinfo
+       (let [[user password] (str/split userinfo #":")]
+         {:user user :password password}))
+     (querystring->map uri))))
 
 (defn- querystring->map
   "Given a URI instance, return its querystring as
@@ -99,9 +100,9 @@
   [^URI uri]
   (when-let [^String query (.getQuery uri)]
     (when-not (str/blank? query)
-     (->> (for [^String kvs (.split query "&")] (into [] (.split kvs "=")))
-          (into {})
-          (walk/keywordize-keys)))))
+      (->> (for [^String kvs (.split query "&")] (into [] (.split kvs "=")))
+           (into {})
+           (walk/keywordize-keys)))))
 
 (defn- map->properties
   "Convert hash-map to java.utils.Properties instance. This method is used
@@ -119,9 +120,14 @@
 (extend-protocol protocol/IExecute
   java.lang.String
   (-execute [sql conn opts]
-    (with-open [^PreparedStatement stmt (.createStatement ^Connection conn)]
-      (.addBatch stmt ^String sql)
-      (seq (.executeBatch stmt))))
+    (with-open [^Statement stmt (.createStatement ^Connection conn)]
+      (.execute stmt ^String sql)
+      (loop [counts []]
+        (let [uc (.getUpdateCount stmt)
+              counts (if (>= uc 0) (conj counts uc) counts)]
+          (if (and (not (.getMoreResults stmt)) (= -1 (.getUpdateCount stmt)))
+            (seq counts)
+            (recur counts))))))
 
   clojure.lang.IPersistentVector
   (-execute [sqlvec conn opts]
@@ -190,21 +196,21 @@
 
          ^PreparedStatement
          stmt (cond
-               returning
-               (if (or (= :all returning) (true? returning))
-                 (.prepareStatement conn sql java.sql.Statement/RETURN_GENERATED_KEYS)
-                 (.prepareStatement conn sql
-                                    #^"[Ljava.lang.String;" (into-array String (mapv name returning))))
+                returning
+                (if (or (= :all returning) (true? returning))
+                  (.prepareStatement conn sql java.sql.Statement/RETURN_GENERATED_KEYS)
+                  (.prepareStatement conn sql
+                                     #^"[Ljava.lang.String;" (into-array String (mapv name returning))))
 
-               holdability
-               (.prepareStatement conn sql
-                                  (result-type constants/resultset-options)
-                                  (result-concurency constants/resultset-options)
-                                  (holdability constants/resultset-options))
-               :else
-               (.prepareStatement conn sql
-                                  (result-type constants/resultset-options)
-                                  (result-concurency constants/resultset-options)))]
+                holdability
+                (.prepareStatement conn sql
+                                   (result-type constants/resultset-options)
+                                   (result-concurency constants/resultset-options)
+                                   (holdability constants/resultset-options))
+                :else
+                (.prepareStatement conn sql
+                                   (result-type constants/resultset-options)
+                                   (result-concurency constants/resultset-options)))]
 
      ;; Set fetch-size and max-rows if provided by user
      (when fetch-size (.setFetchSize stmt fetch-size))
@@ -224,7 +230,7 @@
   (-as-sql-type [this conn] this)
   (-set-stmt-parameter! [this conn ^PreparedStatement stmt ^Long index]
     (.setObject stmt index (protocol/-as-sql-type this conn)))
-  
+
   nil
   (-as-sql-type [this conn] nil)
   (-set-stmt-parameter! [this conn ^PreparedStatement stmt index]
