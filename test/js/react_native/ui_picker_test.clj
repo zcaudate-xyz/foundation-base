@@ -15,7 +15,7 @@
              [js.react-native.physical-addon :as physical-addon]
              [js.react-native.ui-picker :as ui-picker]
              ]
-   :export [MODULE]})
+   })
 
 ^{:refer js.react-native.ui-picker/pickerTheme :added "4.0" :unchecked true}
 (fact "creates the picker theme")
@@ -81,6 +81,6 @@
        [:% n/Text
         (n/format-entry #{first disabled highlighted})]])))
   
-  (def.js MODULE (!:module))
+  
   
   )

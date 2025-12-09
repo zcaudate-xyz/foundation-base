@@ -16,7 +16,7 @@
              [js.react-native.ui-check-box :as ui-check-box]
              [js.react-native.physical-addon :as physical-addon]
              ]
-   :export [MODULE]})
+   })
 
 ^{:refer js.react-native.ui-check-box/CheckBoxSimple
   :adopt true
@@ -129,6 +129,6 @@
                  :bgHighlighted "red"}
          :outlined true}]])))
 
-  (def.js MODULE (!:module))
+  
   
   )

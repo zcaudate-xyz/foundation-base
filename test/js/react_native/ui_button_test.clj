@@ -14,7 +14,7 @@
              [js.react-native :as n :include [:fn]]
              [js.react-native.physical-addon :as physical-addon]
              [js.react-native.ui-button :as ui-button]]
-   :export [MODULE]})
+   })
 
 ^{:refer js.react-native.ui-button-test/ButtonOpacity
   :adopt true
@@ -199,6 +199,6 @@
         :style {:marginTop 10}}])))
 
   
-  (def.js MODULE (!:module))
+  
   
   )

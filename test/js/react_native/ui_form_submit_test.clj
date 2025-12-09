@@ -17,7 +17,7 @@
              [js.react-native.ui-button :as ui-button]
              [js.react-native.ui-input :as ui-input]
              [xt.lang.base-lib :as k]]
-   :export [MODULE]})
+   })
 
 ^{:refer js.react-native.ui-form/FavoriteFormSubmit
   :adopt true
@@ -223,7 +223,7 @@
                                 expected})
         :style {:marginTop 10}}])))
   
-  (def.js MODULE (!:module))
+  
   
   )
 

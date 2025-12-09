@@ -14,7 +14,7 @@
              [js.react :as r]
              [js.react-native :as n :include [:fn]]
              [xt.lang.base-lib :as k]]
-   :export [MODULE]})
+   })
 
 (defn.js nest-tree
   [obj prefix]

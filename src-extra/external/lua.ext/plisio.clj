@@ -5,7 +5,7 @@
 (l/script :lua
   {:require [[lua.nginx.http-client :as http]
              [xt.lang.base-lib :as k]]
-   :export [MODULE]})
+   })
 
 (def.lua ROOT_API_URL
   "https://plisio.net/api/v1/")

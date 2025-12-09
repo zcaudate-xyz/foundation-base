@@ -15,7 +15,7 @@
    :require [[js.react :as r :include [:fn]]
              [js.react-native :as n :include [:fn]]
              [xt.lang.base-lib :as k]]
-   :export [MODULE]})
+   })
 
 ^{:refer js.react/useRefresh :adopt true :added "4.0" :unchecked true}
 (fact "performs refresh function"

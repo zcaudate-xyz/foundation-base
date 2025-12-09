@@ -84,7 +84,7 @@
   (:= code (+ code "  {:runtime :websocket\n"))
   (:= code (+ code "   :require [[js.react :as r]\n"))
   (:= code (+ code "             [xt.lang.base-lib :as k]]\n"))
-  (:= code (+ code "   :export [MODULE]}))\n\n"))
+  (:= code (+ code "   }))\n\n"))
 
   ;; Component definition
 
@@ -124,7 +124,7 @@
   (:= code (+ code "       }}))\n\n"))
 
   ;; Module export
-  (:= code (+ code "(def.js MODULE (!:module))\n"))
+  (:= code (+ code "\n"))
 
   (return code))
 

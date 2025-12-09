@@ -15,7 +15,7 @@
              [js.react-native.physical-addon :as physical-addon]
              [js.react-native.ui-radio-box :as ui-radio-box]
              ]
-   :export [MODULE]})
+   })
 
 ^{:refer js.react-native.ui-radio-box/RadioBoxSimple
   :adopt true
@@ -164,6 +164,6 @@
          :innerStyle {:borderRadius 0}
          :sizeInner 12}]])))
 
-  (def.js MODULE (!:module))
+  
   
   )

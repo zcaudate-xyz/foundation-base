@@ -16,7 +16,7 @@
              [js.react-native :as n :include [:fn]]
              [js.react.ext-box :as ext-box]
              [xt.lang.event-box :as event-box]]
-   :export [MODULE]})
+   })
 
 ^{:refer js.react.ext-box/useBox :adopt true :added "4.0" :unchecked true}
 (fact "uses an async entry"
@@ -63,5 +63,5 @@
                                   :value value
                                   :counter (getCount)})}])))
   
-  (def.js MODULE (!:module)))
+  )
   

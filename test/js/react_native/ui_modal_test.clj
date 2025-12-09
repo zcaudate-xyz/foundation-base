@@ -14,7 +14,7 @@
              [js.react-native :as n :include [:fn]]
              [js.react-native.ui-modal :as ui-modal]
              ]
-   :export [MODULE]})
+   })
 
 ^{:refer js.react-native.ui-modal/ModalBackdrop :added "4.0" :unchecked true}
 (fact "constructs the modal backdrop")
@@ -85,4 +85,4 @@
        {:text (n/format-obj #{visible})
         :style {:marginTop 10}}])))
   
-  (def.js MODULE (!:module)))
+  )

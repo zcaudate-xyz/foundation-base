@@ -18,7 +18,7 @@
              [xt.lang.event-log :as event-log]
              [xt.lang.base-lib :as k]
              ]
-   :export [MODULE]})
+   })
 
 ^{:refer js.react.ext-log/listenLogLatest :adopt true :added "4.0" :unchecked true}
 (fact "uses an async entry"
@@ -50,5 +50,5 @@
                                   :count (event-log/get-count log)
                                   :tail (event-log/get-tail log 5)})}])))
   
-  (def.js MODULE (!:module))
+  
   )

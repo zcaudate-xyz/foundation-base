@@ -15,7 +15,7 @@
              [js.react-native.physical-addon :as physical-addon]
              [js.react-native.ui-toggle-switch :as ui-toggle-switch]
              ]
-   :export [MODULE]})
+   })
 
 ^{:refer js.react-native.ui-toggle-switch/ToggleSwitchSimple
   :adopt true
@@ -199,6 +199,6 @@
                      :marginVertical 0}}]
        [:% n/Padding {:style {:width 20}}]])))
 
-  (def.js MODULE (!:module))
+  
 
   )

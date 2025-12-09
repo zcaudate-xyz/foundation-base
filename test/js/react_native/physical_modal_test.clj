@@ -14,7 +14,7 @@
              [js.react :as r]
              [js.react-native :as n :include [:fn]]
              ]
-   :export [MODULE]})
+   })
 
 ^{:refer js.react-native.physical-modal/getPosition :adopt true :added "4.0" :unchecked true}
 (fact "gets the position of a component"
@@ -126,6 +126,6 @@
            {:title "MODAL"
             :onPress (fn:>)}]]]]])))
   
-  (def.js MODULE (!:module))
+  
 
   )

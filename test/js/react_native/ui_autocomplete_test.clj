@@ -18,7 +18,7 @@
              [js.react-native.ui-autocomplete :as ui-autocomplete]
              [js.react-native.ui-input :as ui-input]
              [xt.lang.base-lib :as k]]
-   :export [MODULE]})
+   })
 
 ^{:refer js.react-native.ui-autocomplete/AutocompleteModal :added "4.0" :unchecked true}
 (fact "creates the autocomplete modal display"
@@ -111,4 +111,4 @@
            :sourceInput [value]
            :styleContainer {:backgroundColor "red"}]}]])))
   
-  (def.js MODULE (!:module)))
+  )

@@ -386,7 +386,7 @@
                   :alt     {:items -/AltItems
                             :label "Alt"}}}]))
   
-  (def.js MODULE (!:module)))
+  )
 
 (comment
   (./import))

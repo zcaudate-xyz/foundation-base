@@ -6849,10 +6849,10 @@
                                   }
                                 },
                                 "extra": {
-                                  "rawValue": "   :export [MODULE]})\n\n",
-                                  "raw": "'   :export [MODULE]})\\n\\n'"
+                                  "rawValue": "   })\n\n",
+                                  "raw": "'   })\\n\\n'"
                                 },
-                                "value": "   :export [MODULE]})\n\n"
+                                "value": "   })\n\n"
                               }
                             },
                             "trailingComments": [

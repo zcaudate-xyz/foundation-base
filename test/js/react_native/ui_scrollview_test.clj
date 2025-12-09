@@ -13,7 +13,7 @@
    :require [[js.react-native :as n :include [:fn]]
              [js.react-native.ui-scrollview :as ui-scrollview]
              ]
-   :export [MODULE]})
+   })
 
 ^{:refer js.react-native.ui-scrollview/ScrollViewImpl :added "4.0" :unchecked true}
 (fact "creates a non global enhanced scrollview")
@@ -34,4 +34,4 @@
         {:style {:height 500
                  :backgroundColor "yellow"}}]])))
   
-  (def.js MODULE (!:module)))
+  )

@@ -16,7 +16,7 @@
              [js.react.ext-form :as ext-form]
              [xt.lang.base-lib :as k]
              [xt.lang.event-form :as event-form]]
-   :export [MODULE]})
+   })
 
 ^{:refer js.react-native.ext-form-test/RegistrationForm
   :adopt true

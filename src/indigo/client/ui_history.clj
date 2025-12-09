@@ -6,7 +6,7 @@
   {:require [[js.react :as r]
              [xt.lang.base-lib :as k]
              [indigo.client.ui-common :as ui]]
-   :export [MODULE]})
+   })
 
 (defn.js pushHistory
   [history item]

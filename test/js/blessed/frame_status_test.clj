@@ -60,4 +60,4 @@
                  :content (+ " Busy: " busy)
                  :onClick (fn:> (setBusy (not busy)))}]]]))
   
-  (def.js MODULE (!:module)))
+  )

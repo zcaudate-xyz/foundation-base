@@ -17,7 +17,7 @@
              [js.react-native.animate :as a]
              [xt.lang.event-animate :as event-animate]
              [xt.lang.base-lib :as k]]
-   :export [MODULE]})
+   })
 
 ^{:refer js.react-native.animate/val :added "4.0" :unchecked true}
 (fact "shortcut for Animated.Value"
@@ -1121,7 +1121,7 @@
                                 :textAlign "right"}}]] 
 [:% n/Text (k/json-encode #{visible showing})])))
 
-  (def.js MODULE (!:module)))
+  )
 
 (comment
   (!.js

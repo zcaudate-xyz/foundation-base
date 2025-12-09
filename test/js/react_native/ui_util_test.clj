@@ -15,7 +15,7 @@
              [js.react-native.animate :as a]
              [js.react-native.ui-util :as ui-util]
              ]
-   :export [MODULE]})
+   })
 
 ^{:refer js.react-native.ui-util/Page :added "4.0" :unchecked true}
 (fact "creates a Page"
@@ -143,13 +143,13 @@
                   :width size
                   :backgroundColor "blue"}}]]])))
   
-  (def.js MODULE (!:module))
+  
 
   )
 
 (comment
 
   
-  (def.js MODULE (!:module))
+  
   
   )

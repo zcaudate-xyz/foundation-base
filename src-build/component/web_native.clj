@@ -41,7 +41,7 @@
              [js.react-native.ui-toggle-switch-test :as ui-toggle-switch-test]
              [js.react-native.ui-tooltip-test :as ui-tooltip-test]
              [js.react-native.ui-util-test :as ui-util-test]]
-   :export [MODULE]})
+   })
 
 (defn.js ReactExamples
   []
@@ -444,4 +444,4 @@
         ["06-ui-tooltip"       -/UiTooltipExamples]
         ["06-ui-util"          -/UiUtilExamples])))
 
-(def.js MODULE (!:module))
+

@@ -6,7 +6,7 @@
   {:require [[js.react :as r]
              [xt.lang.base-lib :as k]
              [xt.lang.base-client :as client]]
-   :export [MODULE]})
+   })
 
 (def$.js ReactDiffViewer
   window.ReactDiffViewer)
@@ -378,7 +378,7 @@
 
 
 
-(def.js MODULE (!:module))
+
 
 
 (def +snippets+

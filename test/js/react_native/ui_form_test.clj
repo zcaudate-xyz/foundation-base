@@ -16,7 +16,7 @@
              [js.react-native :as n :include [:fn]]
              [js.react-native.ui-input :as ui-input]
              [xt.lang.base-lib :as k]]
-   :export [MODULE]})
+   })
 
 ^{:refer js.react-native.ui-form-test/LoginForm
   :adopt true
@@ -222,7 +222,7 @@
        {:text (n/format-entry #{password})
         :style {:marginTop 10}}])))
 
-  (def.js MODULE (!:module))
+  
   
   )
 

@@ -8,7 +8,7 @@
 
 (l/script :xtalk
   {:require [[xt.lang.base-lib :as k]]
-   :export [MODULE]})
+   })
 
 (def +app+ (pg/app "scratch"))
 

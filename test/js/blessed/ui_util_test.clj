@@ -104,4 +104,4 @@
         :left 0
         :message "HELLO WORLD"}]]))
   
-  (def.js MODULE (!:module)))
+  )

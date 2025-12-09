@@ -71,7 +71,7 @@
       [:box {:left 20 :shrink true
              :content (+ day "/" month "/" year)}]]))
 
-  (def.js MODULE (!:module)))
+  )
 
 ^{:refer js.blessed.ui-date/DurationPicker :added "4.0" :unchecked true}
 (fact "Constructs a DurationPicker"

@@ -7,7 +7,7 @@
 (l/script :solidity
   rt.solidity
   {:require [[rt.solidity.script.builtin :as s]]
-   :export [MODULE]})
+   })
 
 (l/intern-macros :solidity
                  'rt.solidity.script.builtin

@@ -14,7 +14,7 @@
              [js.react-native :as n :include [:fn]]
              [js.react-native.ui-router :as ui-router]
              [js.core :as j]]
-   :export [MODULE]})
+   })
 
 ^{:refer js.react-native.ui-router/useTransition :added "4.0" :unchecked true}
 (fact "creates all props involved with transition"
@@ -89,5 +89,5 @@
           :style {:height 200
                   :width 350}}}])))
   
-  (def.js MODULE (!:module))
+  
   )

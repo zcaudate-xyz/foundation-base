@@ -17,7 +17,7 @@
              [js.react-native.physical-base :as physical-base]
              [js.react-native.physical-edit :as physical-edit]
              ]
-   :export [MODULE]})
+   })
 
 ^{:refer js.react-native.physical-edit/createPan :added "4.0" :unchecked true}
 (fact "creates a PanResponder"
@@ -202,7 +202,7 @@
 (fact "creates a pan touchable responder for slider, picker and spinner"
   ^:hidden
   
-  (def.js MODULE (!:module))
+  
   
   )
 

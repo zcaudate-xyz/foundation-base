@@ -19,7 +19,7 @@
              [xt.lang.base-client :as client]
              [xt.lang.event-box :as base-box]
              [component.web-native :as web-native]]
-   :export [MODULE]
+   
    :file   "App.js"})
 
 (defrun.js __import__

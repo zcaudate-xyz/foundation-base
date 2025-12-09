@@ -14,7 +14,7 @@
              [js.react-native :as n :include [:fn]]
              [js.react-native.ui-spinner :as ui-spinner]
              ]
-   :export [MODULE]})
+   })
 
 ^{:refer js.react-native.ui-spinner/spinnerTheme :added "4.0" :unchecked true}
 (fact "creates the spinner theme")
@@ -117,6 +117,6 @@
          {:title "-1"
           :onPress (fn:> (setValue (- value 1)))}]]])))
   
-  (def.js MODULE (!:module))
+  
   
   )

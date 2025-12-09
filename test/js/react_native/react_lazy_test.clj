@@ -17,7 +17,7 @@
              [js.core :as j]
              [js.react-native.ui-button :as ui-button]]
    :static {:import/async #{js.react-native.ui-button}}
-   :export [MODULE]})
+   })
 
 ^{:refer js.react/useLazy :adopt true :added "4.0" :unchecked true}
 (fact "various lays of loading lazy function"
@@ -56,4 +56,4 @@
 [:% n/TextDisplay
        {:count (getCount)}])))
   
-  (def.js MODULE (!:module)))
+  )

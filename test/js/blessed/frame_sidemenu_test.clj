@@ -62,4 +62,4 @@
                    {:label "Foo"}
                    {:label "Bar"}]}}]]]))
 
-  (def.js MODULE (!:module)))
+  )
