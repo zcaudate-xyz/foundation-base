@@ -165,7 +165,7 @@
   (var queries (-/useApiQueriesBase api))
   (return (-/useApiQueriesWire api queries)))
 
-(defn.js  ^{:- [:export]}
+(defn.js  
   useApi
   "A central hook for interacting with the API, providing access to both queries and mutations."
   {:added "0.1"}
