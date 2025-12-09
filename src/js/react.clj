@@ -10,8 +10,7 @@
 (l/script :js
   {:import [["react" :as React]
             ["react-dom/client" :as ReactDOM]
-            ["react-nil" :as ReactNIL]
-            ["react" :as React]]
+            ["react-nil" :as ReactNIL]]
    :require [[js.core :as j]
              [xt.lang.base-lib :as k]]})
 
