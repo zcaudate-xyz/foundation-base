@@ -68,17 +68,26 @@
    (let [{:keys [emit]} mopts
          {:lang/keys [format
                       export]} emit
-         table  (->> (module/module-entries module
-                                            #{:defn
-                                              :def
-                                              :defclass})
-                     (cons 'tab))]
+         static-export (-> module :static :export)
+         table  (if static-export
+                  (->> static-export
+                       (map (fn [sym]
+                              [(list :% (name sym)) sym]))
+                       (cons 'tab))
+                  (->> (module/module-entries module
+                                              #{:defn
+                                                :def
+                                                :defclass})
+                       (cons 'tab)))]
      (case format
        (:none
         :global)  nil
        :commonjs  (list := 'module.exports table)
        (if export
-         (list :- :export :default table))))))
+         (if (and (vector? static-export)
+                  (= 1 (count static-export)))
+           (list :- :export :default (first static-export))
+           (list :- :export :default table)))))))
 
 (defn js-module-link
   "gets the relative js based module"
