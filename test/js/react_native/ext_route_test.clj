@@ -15,7 +15,7 @@
              [js.react-native :as n :include [:fn]]
              [js.react.ext-route :as ext-route]
              [xt.lang.event-route :as event-route]]
-   :export [MODULE]})
+   })
 
 ^{:refer js.react.ext-route/useRouteSegment :adopt true :added "4.0" :unchecked true}
 (fact "uses an async entry"
@@ -62,4 +62,4 @@
                                   :value value
                                   :count (getCount)})}])))
 
-  (def.js MODULE (!:module)))
+  )

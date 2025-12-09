@@ -15,7 +15,7 @@
              [js.react-native.physical-addon :as physical-addon]
              [js.react-native.ui-swiper :as ui-swiper]
              ]
-   :export [MODULE]})
+   })
 
 ^{:refer js.react-native.ui-swiper/swiperTransform :added "4.0" :unchecked true}
 (fact "transforms swiper position to screen")
@@ -96,6 +96,6 @@
        [:% n/Text
         (n/format-entry #{first disabled highlighted})]])))
   
-  (def.js MODULE (!:module))
+  
   
   )

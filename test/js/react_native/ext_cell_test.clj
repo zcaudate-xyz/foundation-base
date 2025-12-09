@@ -21,7 +21,7 @@
              [js.react.ext-cell :as cr]
              [xt.lang.base-lib :as k]
              ]
-   :export [MODULE]})
+   })
 
 ^{:refer js.react-native.ext-cell-test/SimpleCell :adopt true :added "0.1"}
 (fact "creates a  Tree Pane"
@@ -191,6 +191,6 @@
        {:text (k/json-encode #{initial})
         :style {:marginTop 10}}])))
   
-  (def.js MODULE (!:module))
+  
   
   )

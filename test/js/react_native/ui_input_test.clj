@@ -15,7 +15,7 @@
              [js.react-native.physical-addon :as physical-addon]
              [js.react-native.ui-input :as ui-input]
              ]
-   :export [MODULE]})
+   })
 
 ^{:refer js.react-native.ui-input/InputSimple
   :adopt true
@@ -115,6 +115,6 @@
        {:text (n/format-obj #{first last})
         :style {:marginTop 10}}])))
 
-  (def.js MODULE (!:module))
+  
   
   )

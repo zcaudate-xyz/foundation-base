@@ -397,4 +397,4 @@
         [:box {:left 25 :shrink true
                :content (+ "" value)}]])))
 
-  (def.js MODULE (!:module)))
+  )

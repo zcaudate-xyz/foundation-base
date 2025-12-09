@@ -17,7 +17,7 @@
              [js.react-native.physical-base :as physical-base]
              [js.react-native.model-roller :as model-roller]
              [xt.lang.base-lib :as k]]
-   :export [MODULE]})
+   })
 
 ^{:refer js.react-native.physical-carosel/DigitCaroselManual
   :adopt true
@@ -126,6 +126,6 @@
        [:% n/Text " "]
        [:% n/Fill]])))
 
-  (def.js MODULE (!:module))
+  
   
   )

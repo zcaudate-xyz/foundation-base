@@ -93,7 +93,7 @@
         :color "yellow"
         :content (j/inspect dims)}]]))
   
-  (def.js MODULE (!:module)))
+  )
 
 (comment
 

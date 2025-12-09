@@ -16,7 +16,7 @@
              [js.react-native.physical-addon :as physical-addon]
              [js.react-native.ui-toggle-button :as ui-toggle-button]
              ]
-   :export [MODULE]})
+   })
 
 ^{:refer js.react-native.ui-toggle-button/toggleButtonTheme :added "4.0" :unchecked true}
 (fact "creates the toggle button theme")
@@ -100,7 +100,7 @@
         :style {:marginTop 10}}])))
   
 
-  (def.js MODULE (!:module))
+  
   
   )
 

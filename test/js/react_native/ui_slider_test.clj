@@ -15,7 +15,7 @@
              [js.react-native.physical-addon :as physical-addon]
              [js.react-native.ui-slider :as ui-slider]
              ]
-   :export [MODULE]})
+   })
 
 ^{:refer js.react-native.ui-slider/sliderTheme :added "4.0" :unchecked true}
 (fact "creates the slider theme")
@@ -125,6 +125,6 @@
        [:% n/Text
         (n/format-entry #{first})]])))
   
-  (def.js MODULE (!:module))
+  
   
   )

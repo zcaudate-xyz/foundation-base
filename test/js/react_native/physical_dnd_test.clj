@@ -17,7 +17,7 @@
              [js.react-native.physical-base :as physical-base]
              [js.react-native.physical-edit :as physical-edit]
              ]
-   :export [MODULE]})
+   })
 
 ^{:refer js.react-native.physical-dnd/DragAndDropDemo
   :adopt true
@@ -110,6 +110,6 @@
          [:% physical-base/Tag
           {:indicator position}]]))))
   
-  (def.js MODULE (!:module))
+  
   
   )

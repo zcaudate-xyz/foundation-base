@@ -383,4 +383,4 @@
 (fact "helper function for display"
   ^:hidden
   
-  (def.js MODULE (!:module)))
+  )

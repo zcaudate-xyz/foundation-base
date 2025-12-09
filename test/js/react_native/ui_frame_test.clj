@@ -15,7 +15,7 @@
              [js.react-native.animate :as a]
              [js.react-native.ui-frame :as ui-frame]
              ]
-   :export [MODULE]})
+   })
 
 ^{:refer js.react-native.ui-frame/translationOffset :added "4.0" :unchecked true}
 (fact "creates the offset translation")
@@ -119,6 +119,6 @@
                                    leftVisible
                                    rightVisible})}])))
   
-  (def.js MODULE (!:module))
+  
   
   )

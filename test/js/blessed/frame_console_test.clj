@@ -57,4 +57,4 @@
                      :B2 (fn:> [:box "B2"])
                      :C3 (fn:> [:box "C3"])}]}]]]))
 
-  (def.js MODULE (!:module)))
+  )

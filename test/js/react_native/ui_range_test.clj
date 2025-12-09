@@ -15,7 +15,7 @@
              [js.react-native.physical-addon :as physical-addon]
              [js.react-native.ui-range :as ui-range]
              ]
-   :export [MODULE]})
+   })
 
 ^{:refer js.react-native.ui-range/rangeTheme :added "4.0" :unchecked true}
 (fact "creates the range theme")
@@ -131,6 +131,6 @@
        [:% n/Text
         (n/format-entry #{lower upper})]])))
   
-  (def.js MODULE (!:module))
+  
   
   )

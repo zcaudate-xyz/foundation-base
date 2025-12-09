@@ -17,7 +17,7 @@
              [js.react-native.animate :as a]
              [js.react-native.physical-base :as ui]
              ]
-   :export [MODULE]})
+   })
 
 ^{:refer js.react-native.physical-base/Tag :added "4.0" :unchecked true}
 (fact "listens to a single indicator to set ref"

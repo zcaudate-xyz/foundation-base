@@ -14,7 +14,7 @@
              [js.react-native :as n :include [:fn]]
              [js.react-native.ui-tooltip :as ui-tooltip]
              [js.react-native.ui-button :as ui-button]]
-   :export [MODULE]})
+   })
 
 ^{:refer js.react-native.ui-tooltip/tooltipPortalOffset :added "4.0" :unchecked true}
 (fact "calculates the portal offset")
@@ -123,6 +123,6 @@
          {:style {:flex 1}}
          [:% -/TooltipPane]]]])))
   
-  (def.js MODULE (!:module))
+  
 
   )

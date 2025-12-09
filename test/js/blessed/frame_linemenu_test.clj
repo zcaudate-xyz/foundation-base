@@ -62,4 +62,4 @@
           setRoute
           {:entries entries}}]]]))
   
-  (def.js MODULE (!:module)))
+  )

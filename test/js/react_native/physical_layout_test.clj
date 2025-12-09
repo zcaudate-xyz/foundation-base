@@ -16,7 +16,7 @@
              [js.react-native.animate :as a]
              [js.react-native.physical-base :as physical-base]
              ]
-   :export [MODULE]})
+   })
 
 ^{:refer js.react-native.physical-layout/Grid
   :adopt true
@@ -79,7 +79,7 @@
          [:% physical-base/Tag
           {:indicator ind}]]))))
 
-  (def.js MODULE (!:module))
+  
   
   )
 

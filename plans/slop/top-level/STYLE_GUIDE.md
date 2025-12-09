@@ -131,7 +131,7 @@ The `foundation-base` project heavily leverages a custom DSL provided by `std.la
 ```clojure
 (l/script :js
   {:require [[xt.lang.base-lib :as k]]
-   :export [MODULE]})
+   })
 
 (l/script :lua
   {:runtime :basic

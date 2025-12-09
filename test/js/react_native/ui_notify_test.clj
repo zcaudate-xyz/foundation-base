@@ -14,7 +14,7 @@
              [js.react-native :as n :include [:fn]]
              [js.react-native.ui-notify :as ui-notify]
              ]
-   :export [MODULE]})
+   })
 
 ^{:refer js.react-native.ui-notify/NotifyInner :added "4.0" :unchecked true}
 (fact "creates the inner notification element")

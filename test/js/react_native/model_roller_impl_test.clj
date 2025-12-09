@@ -18,7 +18,7 @@
              [js.react-native.model-roller :as model-roller]
              [js.react-native.physical-edit :as physical-edit]
              [xt.lang.base-lib :as k]]
-   :export [MODULE]})
+   })
 
 ^{:refer js.react-native.model-roller/DigitRollerManual
   :adopt true
@@ -250,7 +250,7 @@
         {:indicator position}]
        ])))
   
-  (def.js MODULE (!:module))
+  
   
   )
 

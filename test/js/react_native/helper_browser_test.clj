@@ -8,7 +8,7 @@
              [js.react-native :as n :include [:fn]]
              [js.react.ext-route :as ext-route]
              [js.react-native.helper-browser :as helper-browser]]
-   :export [MODULE]})
+   })
 
 ^{:refer js.react-native.helper-browser/getHash :added "4.0" :unchecked true}
 (fact "gets the window location hash")
@@ -43,4 +43,4 @@
 (fact "sets the hash param"
   ^:hidden
   
-  (def.js MODULE (!:module)))
+  )

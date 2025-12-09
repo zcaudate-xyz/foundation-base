@@ -15,7 +15,7 @@
               [xt.lang.event-form :as base-form]]
    :export  [MODULE]})
 
-(def.js MODULE (!:module))
+
 
 ^{:refer js.blessed.form/FormWrapper :added "4.0" :unchecked true}
 (fact "addes `width`, `offset` and `label`")
