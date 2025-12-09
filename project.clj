@@ -76,6 +76,7 @@
    [org.bouncycastle/bcpg-jdk15on "1.65"]
 
    ;; lib.postgres
+   [org.postgresql/postgresql "42.7.2"]
    [com.impossibl.pgjdbc-ng/pgjdbc-ng "0.8.9"
     :exclusions [io.netty/netty-common
                  io.netty/netty-buffer
