@@ -9,15 +9,17 @@
            (javax.sql PooledConnection)
            (java.net InetSocketAddress)
            (com.impossibl.postgres.system Settings)
-           (com.impossibl.postgres.jdbc PGConnectionPoolDataSource
-                                        PGDirectConnection
+           (com.impossibl.postgres.jdbc PGDirectConnection
                                         PGDataSource
                                         PGArray
                                         PGBuffersArray
                                         PGBuffersStruct$Binary
                                         PGSQLSimpleException)
            (com.impossibl.postgres.api.data InetAddr)
-           (com.impossibl.postgres.api.jdbc PGNotificationListener)))
+           (com.impossibl.postgres.api.jdbc PGNotificationListener)
+           (org.postgresql.jdbc PgConnection
+                                PgArray)
+           (org.postgresql.util PGobject)))
 
 
 
@@ -51,7 +53,15 @@
   
   PGBuffersStruct$Binary
   (-from-sql-type [this conn metadata i]
-    (seq (.getAttributes this))))
+    (seq (.getAttributes this)))
+
+  PgArray
+  (-from-sql-type [this conn metadata i]
+    (seq (.getArray this)))
+
+  PGobject
+  (-from-sql-type [this conn metadata i]
+    (.getValue this)))
 
 
 (extend-type com.impossibl.postgres.api.data.InetAddr
@@ -62,7 +72,7 @@
 (defn ^PooledConnection conn-create
   "creates a pooled connection"
   {:added "4.0"}
-  ([{:keys [host port user pass dbname]
+  ([{:keys [host port user pass dbname vendor]
      :or {host (or (System/getenv "DEFAULT_RT_POSTGRES_HOST")
                    "127.0.0.1")
           port (h/parse-long
@@ -71,16 +81,26 @@
           user (or (System/getenv "DEFAULT_RT_POSTGRES_USER")
                    "postgres")
           pass (or (System/getenv "DEFAULT_RT_POSTGRES_PASS")
-                   "postgres")}
+                   "postgres")
+          vendor :impossibl}
      :as m}]
-   (let [ds (doto (PGConnectionPoolDataSource.)
-              (.setHost host)
-              (.setPort port)
-              (cond-> dbname (.setDatabaseName dbname)))
-         ds (cond-> ds
-              user (doto (.setUser user))
-              pass (doto (.setPassword pass)))]
-     (.getPooledConnection ds))))
+   (if (= vendor :postgresql)
+     (let [ds (doto (org.postgresql.ds.PGConnectionPoolDataSource.)
+                (.setServerName host)
+                (.setPortNumber port)
+                (cond-> dbname (.setDatabaseName dbname)))
+           ds (cond-> ds
+                user (doto (.setUser user))
+                pass (doto (.setPassword pass)))]
+       (.getPooledConnection ds))
+     (let [ds (doto (com.impossibl.postgres.jdbc.PGConnectionPoolDataSource.)
+                (.setHost host)
+                (.setPort port)
+                (cond-> dbname (.setDatabaseName dbname)))
+           ds (cond-> ds
+                user (doto (.setUser user))
+                pass (doto (.setPassword pass)))]
+       (.getPooledConnection ds)))))
 
 (defn conn-close
   "closes a connection"

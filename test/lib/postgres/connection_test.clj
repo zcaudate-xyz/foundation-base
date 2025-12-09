@@ -33,7 +33,13 @@
        (catch Throwable t t))
   => (any java.sql.SQLException
           com.impossibl.postgres.jdbc.PGPooledConnection
-          com.impossibl.postgres.jdbc.PGSQLSimpleException))
+          com.impossibl.postgres.jdbc.PGSQLSimpleException)
+
+  (try (conn/conn-create {:dbname "test" :vendor :postgresql})
+       (catch Throwable t t))
+  => (any java.sql.SQLException
+          org.postgresql.ds.PGPooledConnection
+          org.postgresql.util.PSQLException))
 
 ^{:refer lib.postgres.connection/conn-close :added "4.0"}
 (fact "closes a connection"
