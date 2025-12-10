@@ -72,7 +72,29 @@
                  [:p '(hello 1 2 3)]]
                 js/+grammar+
                 {})
-  => "(\n  <div className={a}><p>{hello(1,2,3)}</p></div>)")
+  => "(\n  <div className={a}><p>{hello(1,2,3)}</p></div>)"
+
+  (emit-jsx-raw '[:div {:# [a b c]
+                        :.. props}
+                  [:p (hello 1 2 3)]]
+                js/+grammar+
+                {})
+  => "(\n  <div a={a} b={b} c={c} {...props}><p>{hello(1,2,3)}</p></div>)"
+
+  (emit-jsx-raw '[:div {:# [(:= a "hello") b c]
+                        :.. props}
+                  [:p (hello 1 2 3)]]
+                js/+grammar+
+                {})
+  => "(\n  <div a=\"hello\" b={b} c={c} {...props}><p>{hello(1,2,3)}</p></div>)"
+
+  (emit-jsx-raw '[:div {:# [(:= a "hello") b c]
+                        :d "hello"
+                        :.. props}
+                  [:p (hello 1 2 3)]]
+                js/+grammar+
+                {})
+  => "(\n  <div d=\"hello\" a=\"hello\" b={b} c={c} {...props}><p>{hello(1,2,3)}</p></div>)")
 
 ^{:refer std.lang.model.spec-js.jsx/emit-jsx :added "4.0"}
 (fact "can perform addition transformation if [:grammar :jsx] is false"

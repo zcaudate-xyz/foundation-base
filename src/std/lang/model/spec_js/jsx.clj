@@ -6,6 +6,7 @@
             [std.string :as str]))
 
 (declare emit-jsx)
+(declare emit-jsx-set-params)
 
 (defn jsx-key-fn
   "converts jsx key"
@@ -35,7 +36,7 @@
 
          (= :<> (first arr))
          (cons :React.Fragment (rest arr))
-         
+
          :else
          arr)))
 
@@ -66,7 +67,7 @@
                                                         (h/map-keys jsx-key-fn)
                                                         (jsx-standardise-params))]
                                        [tag params (rest children)])
-                                     
+
                                      (set? params?)
                                      [tag params? (rest children)]
 
@@ -86,8 +87,8 @@
    (binding [common/*indent* (+ common/*indent* 2)]
      (cond-> (mapv (fn [[k v]]
                      (let [vstr (cond (string? v)
-                                      (pr-str v)
-                                      
+                                      (emit/emit-main v grammar mopts)
+
                                       :else
                                       (let [body (emit/emit-main v grammar mopts)
                                             body (if (str/multi-line? body)
@@ -95,7 +96,9 @@
                                                    body)]
                                         (str "{" body "}")))]
                        (str (name k) "=" vstr)))
-                   (dissoc params :..))
+                   (dissoc params :.. :#))
+       (:# params) (into (flatten (emit-jsx-set-params #{(:# params)} grammar mopts)))
+
        (:.. params) (conj (str "{..." (emit/emit-main (if (vector?  (:.. params))
                                                         (first (:.. params))
                                                         (:.. params))
@@ -131,6 +134,11 @@
      (cond (and (= 1 (count params))
                 (vector? (first params)))
            (let [groups (data/emit-table-group (first params))
+                 groups (map (fn [x]
+                               (if (and (seq? x) (= := (first x)))
+                                 [(second x) (nth x 2)]
+                                 x))
+                             groups)
                  svar   (filter is-sym groups)
                  mvar   (->> (filter vector? groups)
                              (into {})
@@ -140,7 +148,7 @@
                                       (is-sym x)))
                                 groups)]
              (emit-fn svar mvar fvar))
-           
+
            :else
            (let [svar (filter is-sym params)
                  mvar (apply merge (filter map? params))
@@ -168,14 +176,14 @@
 
                         (set? params)
                         (flatten (emit-jsx-set-params params grammar mopts))
-                        
+
                         (map? params)
                         (emit-jsx-map-params params grammar mopts)
-                        
-                              :else (h/error "Not valid input." {:input params}))]
+
+                        :else (h/error "Not valid input." {:input params}))]
      (cond (empty? body-arr)
            ["" ""]
-           
+
            (data/emit-singleline-array? body-arr)
            [" "  (str/join " " body-arr)]
 
@@ -190,7 +198,7 @@
    (let [[tag params children] (-> arr
                                    (jsx-arr-prep grammar mopts)
                                    (jsx-arr-norm))
-         
+
          ntag   (name tag)
          ntag   (cond-> ntag
                   (.startsWith ntag "<") (subs 1)
@@ -238,7 +246,7 @@
    (binding [common/*indent* (+ common/*indent* 2)]
      (str "("
           (common/newline-indent)
-          (emit-jsx-inner arr grammar mopts)")"))))
+          (emit-jsx-inner arr grammar mopts) ")"))))
 
 (defn emit-jsx
   "can perform addition transformation if [:grammar :jsx] is false
@@ -261,14 +269,14 @@
                                 (map? (first children))
                                 (set? (first children)))
                             children
-                            
+
                             :else (cons {} children)))
            tf-fn (fn tf-fn
                    [form]
                    (let [tag (first form)]
                      (cond (= :<> tag)
                            (tf-fn (cons 'React.Fragment (rest form)))
-                           
+
                            (= :% tag)
                            (apply list 'React.createElement (second form)
                                   (child-fn (drop 2 form)))
@@ -276,14 +284,14 @@
                            (re-find #"^[a-z]" (name tag))
                            (apply list 'React.createElement (name tag)
                                   (child-fn (rest form)))
-                           
+
                            :else
                            (apply list 'React.createElement (symbol (name tag))
                                   (child-fn (rest form))))))
            arr (->> arr
                     (clojure.walk/prewalk
                      (fn walk-fn [form]
-                       (try 
+                       (try
                          (cond (and (vector? form)
                                     (keyword? (first form)))
                                (tf-fn form)
@@ -291,7 +299,7 @@
                                (and (set? form)
                                     (vector? (first form)))
                                (volatile! form)
-                               
+
                                (map? form)
                                (->> form
                                     (jsx-standardise-params)
@@ -313,23 +321,22 @@
 
 (comment
   (./create-tests)
-  
+
   (emit/emit-main (:form (std.lang/ptr-entry js.ext.react/createStoreProvider))
-             (std.lang/grammar:js)
-             )
-  
+                  (std.lang/grammar:js))
+
   (emit-jsx [:h1 "hello"]
             (std.lang/grammar:js)
             {:grammar {:jsx false}})
-  
+
 
   (emit-jsx
    '[:div
      (js/write [(S.group {"test/FooHello" {:a 10 :b 20}})])]
    (std.lang/grammar:js)
    {:grammar {:jsx false}})
-  
-  
+
+
   (emit-jsx
    '[:div
      [:h1 (+ "HELLO " val)]
@@ -337,7 +344,7 @@
                       (setVal (Math.random {rt.javafx.test/BarHello 1})))}]]
    (std.lang/grammar:js)
    {:grammar {:jsx false}})
-  
+
   (emit/emit-main '(React.createElement "h1" {} "hello")
                   (std.lang/grammar:js)
                   {:grammar {:jsx false}}))
