@@ -203,6 +203,7 @@
   "compiles all namespaces into a single file (for sql)"
   {:added "4.0"}
   ([{:keys [header footer lang main root target] :as opts}]
+   (require main)
    (let [mopts   (last (impl/emit-options opts))
          lib         (impl/runtime-library)
          snapshot    (lib/get-snapshot lib)
