@@ -3,17 +3,14 @@
             [org.httpkit.server :as http]
             [org.httpkit.client :as client]
             [net.http.router :as router]
-            [indigo.server.api-common :as api]
             [indigo.server.api-browser :as api-browser]
             [indigo.server.test-runner :as test-runner]
-            [indigo.server.watcher :as watcher]
             [indigo.server.watcher :as watcher]
             [indigo.server.dispatch :as dispatch]
             [indigo.server.api-translate :as api-translate]
             [std.lib :as h]
             [std.string :as str]
             [std.json :as json]
-            [cheshire.core :as cheshire]
             [code.project :as project])
   (:import (java.awt Desktop)
            (java.net URI)))
@@ -27,7 +24,7 @@
 (defn wrap-browser-call
   [f]
   (fn [req]
-    (let [params (try (cheshire/parse-string (:body req) true)
+    (let [params (try (json/read (:body req) json/+keyword-case-mapper+)
                       (catch Throwable t
                         (println "JSON Parse Error:" (.getMessage t))
                         {}))
@@ -86,7 +83,7 @@
       "test/component"            (endpoint #'api-browser/get-test-fact-source :ns :component)
       "test/run-var"              (endpoint #'test-runner/run-test :ns :var)
       "test/run-ns"               (endpoint #'test-runner/run-ns-tests :ns)
-
+      
       ;; Translate
       "translate/to-heal"         (endpoint #'api-translate/to-heal :source)
       "translate/from-html"       (endpoint #'api-translate/from-html :html)
@@ -110,7 +107,7 @@
                                  (dispatch/send! channel "pong")
                                  (do
                                    (println "REPL Received:" data)
-                                   (let [json-data (try (cheshire/parse-string data true)
+                                   (let [json-data (try (json/read data json/+keyword-case-mapper+)
                                                         (catch Throwable _ nil))]
                                      (if (and json-data (:id json-data) (:code json-data))
                                        ;; Handle JSON request with ID
@@ -193,20 +190,4 @@
   (. (Desktop/getDesktop)
      (browse (URI. (str "http://localhost:" *port*)))))
 
-
-(comment
-  (require 'std.fs.watch)
-
-
-  (into {} +watch+)
-  (std.fs.watch/start-watcher +watch+)
-  (std.fs.watch/stop-watcher +watch+)
-  (h/stop +watch+)
-
-  (def watch *1)
-  (h/sh "curl" "-X" "POST" (str "http://localhost:" *port*
-                                "/api/translate/to-heal")
-        "-d" "(+ 1 2 3))")
-  (server-restart)
-  (server-toggle)
-  (open-client))
+(comment)

@@ -7,8 +7,7 @@
   {:require [[xt.lang.event-route :as event-route]
              [js.react-native :as n :include [:fn]]
              [js.react.ext-route :as ext-route]
-             [js.react-native.helper-browser :as helper-browser]]
-   })
+             [js.react-native.helper-browser :as helper-browser]]})
 
 ^{:refer js.react-native.helper-browser/getHash :added "4.0" :unchecked true}
 (fact "gets the window location hash")
@@ -27,8 +26,8 @@
     (helper-browser/useHashRoute route)
     (return
      (n/EnclosedCode 
-{:label "js.react-native.helper-browser/useHashRoute"} 
-[:% n/Row
+      {:label "js.react-native.helper-browser/useHashRoute"} 
+      [:% n/Row
        [:% n/Button
         {:title   "A"
          :onPress (fn:> (event-route/set-url route "hello/a"))}]
@@ -40,7 +39,4 @@
        [:% n/Text (+ "route: " url)]]))))
 
 ^{:refer js.react-native.helper-browser/setHashParam :added "4.0" :unchecked true}
-(fact "sets the hash param"
-  ^:hidden
-  
-  )
+(fact "sets the hash param")

@@ -1,12 +1,9 @@
 (ns indigo.server.watcher
   (:require [std.fs.watch :as watch]
-            [std.lib :as h]
             [std.string :as str]
             [std.fs :as fs]
-            [indigo.server.dispatch :as dispatch]
-            [org.httpkit.server :as http]
-            [code.project :as project]
-            [cheshire.core :as cheshire]))
+            [std.json :as json]
+            [indigo.server.dispatch :as dispatch]))
 
 (defonce ^:dynamic *watcher* (atom nil))
 

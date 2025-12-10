@@ -16,8 +16,7 @@
              [js.react-native.animate :as a]
              [js.react-native.physical-base :as physical-base]
              [js.react-native.model-roller :as model-roller]
-             [xt.lang.base-lib :as k]]
-   })
+             [xt.lang.base-lib :as k]]})
 
 ^{:refer js.react-native.physical-carosel/DigitCaroselManual
   :adopt true
@@ -51,8 +50,8 @@
     
     (return
      (n/EnclosedCode 
-{:label "js.react-native.physical-carosel/DigitCaroselManual"} 
-[:% n/Row
+      {:label "js.react-native.physical-carosel/DigitCaroselManual"} 
+      [:% n/Row
        [:% n/View
         {:style {:flex 1
                  :height 200
@@ -114,7 +113,7 @@
                                                 (k/sign translate)
                                                 translate translate)}
                                 #_{:translateY (* 0.5 (j/abs translate))}]}}))}]))]] 
-[:% n/Row
+      [:% n/Row
        
        [:% n/Button
         {:title "-1"
@@ -124,8 +123,4 @@
         {:title "+1"
          :onPress (fn:> (setOffset0 (+ offset0 1)))}]
        [:% n/Text " "]
-       [:% n/Fill]])))
-
-  
-  
-  )
+       [:% n/Fill]]))))
