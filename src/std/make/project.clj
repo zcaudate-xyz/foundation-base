@@ -4,6 +4,7 @@
             [std.make.common :as common]
             [std.make.compile :as compile]
             [std.make.readme :as readme]
+            [std.block :as block]
             [std.fs :as fs]
             [std.fs.watch :as watch]))
 
@@ -96,7 +97,7 @@
   ([ns]
    (let [mcfgs (common/get-triggered ns)]
      (compile/with:compile-filter #{ns}
-       (mapv build-default mcfgs)))))
+                                  (mapv build-default mcfgs)))))
 
 (defn file-watcher-handler
   "handler for file changes"
@@ -108,12 +109,15 @@
       (let [ns (fs/file-namespace path-str)]
         (when ns
           (try
-            (h/prn "Detected change in:" ns)
+            (h/p "\nChange:" ns)
             (require ns :reload)
-            (build-triggered ns)
+            (let [results (build-triggered ns)
+                  files   (changed-files results)]
+              (when (seq files)
+                (h/p "Compiled:" files)))
             (catch Throwable t
-              (h/prn "Build failed for:" ns)
-              (h/prn (.getMessage t)))))))))
+              (h/p "Build failed for:" ns)
+              (h/p (.getMessage t)))))))))
 
 (defn watch
   "starts watching a directory"
