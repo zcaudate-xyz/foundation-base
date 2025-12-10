@@ -30,6 +30,10 @@
 ^{:refer std.make.project/build-triggered :added "4.0"}
 (fact "builds for a triggering namespace")
 
+(fact "check watch functionality"
+  (fn? watch) => true
+  (fn? file-watcher-handler) => true)
+
 (comment
   
   (defn add [x y]

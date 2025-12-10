@@ -150,20 +150,6 @@
 (def +install-module-directory-fn+
   (compile/types-add :module.directory #'compile-module-directory))
 
-(defn compile-module-directory-partial
-  "partially compiles a directory"
-  {:added "4.0"}
-  [ns-changed opts]
-  (compile/with:compile-filter (if (set? ns-changed) ns-changed #{ns-changed})
-    (compile-module-directory opts)))
-
-(defn compile-module-directory-selected-partial
-  "partially compiles a directory"
-  {:added "4.0"}
-  [ns-changed type ns-all opts]
-  (compile/with:compile-filter (if (set? ns-changed) ns-changed #{ns-changed})
-    (compile-module-directory-selected type ns-all opts)))
-
 
 ;;
 ;; ROOT

@@ -6,9 +6,7 @@
             [std.lib :as h]
             [std.make :as make]
             [std.string :as str]
-            [clojure.pprint :as pprint]
-            [std.fs.watch :as watch]
-            [std.make.project :as make.project]))
+            [clojure.pprint :as pprint]))
 
 (defn project-form
   "constructs the `project.clj` form"
@@ -95,32 +93,6 @@
          prep (build-prep ns)
          _    (build-copy prep conf)]
      (fs/list (str root "/" build)))))
-
-(defn file-watcher-handler
-  "handler for file changes"
-  [path _]
-  (let [path-str (str path)]
-    (when (and (or (str/ends-with? path-str ".clj")
-                   (str/ends-with? path-str ".cljc"))
-               (not (str/includes? path-str ".#"))) ;; Emacs lock files
-      (let [ns (fs/file-namespace path-str)]
-        (when ns
-          (try
-            (println "Detected change in:" ns)
-            (make.project/build-triggered ns)
-            (catch Throwable t
-              (println "Build failed for:" ns)
-              (println (.getMessage t)))))))))
-
-(defn watch
-  "starts watching a directory"
-  ([path]
-   (println "Starting build watcher on:" path)
-   (let [cb (fn [type file]
-              (when (= type :modify)
-                (file-watcher-handler (.getPath file) nil)))]
-     (watch/start-watcher (watch/watcher path cb {:recursive true
-                                                  :types :all})))))
 
 
 (comment
