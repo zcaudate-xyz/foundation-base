@@ -108,18 +108,19 @@
       (let [ns (fs/file-namespace path-str)]
         (when ns
           (try
-            (println "Detected change in:" ns)
+            (h/prn "Detected change in:" ns)
+            (require ns :reload)
             (build-triggered ns)
             (catch Throwable t
-              (println "Build failed for:" ns)
-              (println (.getMessage t)))))))))
+              (h/prn "Build failed for:" ns)
+              (h/prn (.getMessage t)))))))))
 
 (defn watch
   "starts watching a directory"
   ([path]
-   (println "Starting build watcher on:" path)
+   (h/prn "Starting build watcher on:" path)
    (let [cb (fn [type file]
               (when (= type :modify)
-                (file-watcher-handler (.getPath file) nil)))]
+                (#'file-watcher-handler (.getPath file) nil)))]
      (watch/start-watcher (watch/watcher path cb {:recursive true
                                                   :types :all})))))
