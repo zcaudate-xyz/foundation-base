@@ -3,6 +3,7 @@
             [std.string :as str]
             [std.fs :as fs]
             [std.json :as json]
+            [std.lib :as h]
             [indigo.server.dispatch :as dispatch]))
 
 (defonce ^:dynamic *watcher* (atom nil))

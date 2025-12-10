@@ -1,5 +1,5 @@
 (ns indigo.server.dispatch
-  (:require [cheshire.core :as json]
+  (:require [std.json :as json]
             [std.lib :as h]
             [org.httpkit.server :as http]))
 
@@ -14,12 +14,12 @@
 (defn send! [ch message]
   (let [message (if (string? message)
                   message
-                  (json/generate-string message))]
+                  (json/write message))]
     (http/send! ch message)))
 
 (defn broadcast! [message]
   (let [json-msg (if (string? message)
                    message
-                   (json/generate-string message))]
+                   (json/write message))]
     (doseq [ch @*clients*]
       (http/send! ch json-msg))))

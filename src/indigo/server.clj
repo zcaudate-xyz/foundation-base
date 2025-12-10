@@ -36,6 +36,12 @@
        :headers {"Content-Type" "application/json"}
        :body    (json/write res)})))
 
+(defn create-routes
+  [prefix routes]
+  (h/map-keys (fn [k]
+                (str prefix k))
+              routes))
+
 (defn- extract [req param]
   (if (vector? param)
     (let [[key default] param]
@@ -50,7 +56,7 @@
 (def api-routes
   (router/router
    (merge
-    (api/create-routes
+    (create-routes
      "POST /api/browse/"
      {"libraries"                 (endpoint #'api-browser/list-libraries)
       "scan"                      (endpoint #'api-browser/scan-namespaces)
@@ -91,7 +97,7 @@
 
 (def page-routes
   (router/router
-   (api/create-routes
+   (create-routes
     "GET "
     {#_#_"/pages/demo"   (api/page-handler "Dev Demo"  page-demo/main)
      "*"             (fn [{:keys [uri] :as req}]

@@ -54,7 +54,8 @@
 
  xyz.zcaudate/code.tool.java
  {:description "tool for java development"
-  :include [[code.tool.java :complete]]}
+  :include [[code.tool.java :complete]]
+  :dependencies [org.ow2.asm/asm]}
 
  xyz.zcaudate/code.tool.maven
  {:description "maven deployment tool"
@@ -321,8 +322,8 @@
  {:description "wrapper for postgres" 
   :include [[lib.postgres :complete]]
   :dependencies
-  [com.impossibl.pgjdbc-ng/pgjdbc-ng]}
-
+  [com.impossibl.pgjdbc-ng/pgjdbc-ng]} 
+ 
  xyz.zcaudate/lib.redis
  {:description "wrapper for redis" 
   :include [[lib.redis :complete]]

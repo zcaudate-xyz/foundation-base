@@ -15,8 +15,7 @@
                         JavaFileObject$Kind
                         SimpleJavaFileObject
                         ToolProvider)
-           (org.objectweb.asm ClassReader)
-           #_(clojure.asm ClassReader))
+           (org.objectweb.asm ClassReader))
   (:refer-clojure :exclude [supers]))
 
 (defn path->class
