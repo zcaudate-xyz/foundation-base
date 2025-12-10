@@ -47,8 +47,11 @@
                       (str/join path-separator (drop (count root-ns-arr)
                                                      (butlast link-ns-arr))))
         link-suffix (or (get-link-lookup link-ns ns-suffix)
-                        path-suffix)
-        
+                        (if (map? path-suffix)
+                          (or (get-link-lookup link-ns (dissoc path-suffix :default))
+                              (:default path-suffix))
+                          path-suffix))
+
         link-label  (or (get-link-lookup link-ns ns-label)
                         (last link-ns-arr))
         link-path   (reduce (fn [s [pat sub]]

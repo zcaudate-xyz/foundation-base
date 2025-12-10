@@ -8,7 +8,8 @@
             [std.lang.base.impl-entry :as entry]
             [std.string :as str]
             [std.fs :as fs]
-            [std.lib :as h]))
+            [std.lib :as h]
+            [std.lang.base.compile-links :as links]))
 
 (defn emit-module-prep
   "prepares the module for emit"
@@ -81,7 +82,7 @@
                  []
                  native)
         native-bundled  (apply merge (map :bundle (vals native)))]
-    
+
     (keep (fn [[name module]]
             (if-let [form (deps/module-import-form book name module native-opts)]
               (impl/emit-direct grammar
@@ -94,21 +95,38 @@
   [type curr-ns link-ns links module
    {:keys [root-prefix
            path-separator]
-    :or {path-separator "/"}}]
+    :or {path-separator "/"}
+    :as link-opts}
+   root-ns]
   (let [link-as (get (:internal module) link-ns)]
     (case type
       :graph
-      (let [{:keys [rel label suffix]} (get links link-ns)
-            curr (get links curr-ns)]
+      (let [entry (get links link-ns)
+            {:keys [rel label suffix]} (if (and (:rel entry) (:label entry))
+                                         entry
+                                         (links/link-attributes root-ns link-ns link-opts))
+            curr (get links curr-ns)
+            curr (if (and (:rel curr) (:label curr))
+                   curr
+                   (links/link-attributes root-ns curr-ns link-opts))]
         {:ns (str (fs/relativize (:rel curr)
                                  rel)
                   path-separator
                   label)
          :suffix suffix
          :as link-as})
-      
-      (let [{:keys [rel label suffix]} (get links link-ns)]
-        {:ns (str root-prefix path-separator rel path-separator label)
+
+      (let [entry (get links link-ns)
+            {:keys [rel label suffix]} (if (and (:rel entry) (:label entry))
+                                         entry
+                                         (links/link-attributes root-ns link-ns link-opts))
+            root-prefix (if (map? root-prefix)
+                          (or (links/get-link-lookup link-ns (dissoc root-prefix :default))
+                              (:default root-prefix))
+                          root-prefix)]
+        {:ns (->> [root-prefix rel label]
+                  (filter (fn [s] (and s (not= s ""))))
+                  (str/join path-separator))
          :suffix suffix
          :as link-as}))))
 
@@ -121,7 +139,7 @@
    prep]
   (let [[[_ grammar book namespace mopts]
          {:keys [direct]}]  prep
-        {:keys [links type]} (:compile emit)
+        {:keys [links type root-ns]} (:compile emit)
         {:keys [module]} mopts]
     (keep (fn [ns]
             (let [import  (emit-module-setup-link-import
@@ -130,7 +148,8 @@
                            ns
                            links
                            module
-                           (:link (:code emit)))
+                           (:link (:code emit))
+                           root-ns)
                   form (deps/module-import-form book
                                                 (:ns import)
                                                 import
@@ -168,7 +187,7 @@
    {:keys [library
            lang
            emit] :as meta}]
-  (let [prep   (emit-module-prep module-id meta) 
+  (let [prep   (emit-module-prep module-id meta)
         [[stage grammar book namespace mopts]
          {:keys [setup
                  native
@@ -182,7 +201,7 @@
                                          setup
                                          namespace
                                          (update mopts :emit merge (:setup emit))))
-        
+
         native-arr   (emit-module-setup-native-arr meta prep)
         link-arr     (emit-module-setup-link-arr meta prep)
         header-arr   (if (not (-> emit :header :suppress))
@@ -307,25 +326,25 @@
 (comment
 
   #_(when (and (= :module (:layout mopts))
-                     (-> mopts :module :export :as)
-                     (not (-> emit :export :suppress)))
-            (when-not (:as export)
-              (h/prn   "Missing export `:as` field" {:input export
-                                                     :module module-id})
-              (h/error "Missing export `:as` field" {:input export
-                                                     :module module-id}))
-            (when-not (:entry export)
-              (h/prn   "Missing export `:entry` field" {:input export
-                                                        :module module-id})
-              (h/error "Missing export `:entry` field" {:input export
-                                                        :module module-id}))
-            (str (entry/emit-entry grammar (:entry export)
-                                   (update mopts :emit merge (:export emit)))
-                 "\n\n"
-                 (impl/emit-direct
-                  grammar
-                  (deps/module-export-form book
-                                           (-> mopts :module :export)
-                                           mopts)
-                  namespace
-                  mopts))))
+               (-> mopts :module :export :as)
+               (not (-> emit :export :suppress)))
+      (when-not (:as export)
+        (h/prn   "Missing export `:as` field" {:input export
+                                               :module module-id})
+        (h/error "Missing export `:as` field" {:input export
+                                               :module module-id}))
+      (when-not (:entry export)
+        (h/prn   "Missing export `:entry` field" {:input export
+                                                  :module module-id})
+        (h/error "Missing export `:entry` field" {:input export
+                                                  :module module-id}))
+      (str (entry/emit-entry grammar (:entry export)
+                             (update mopts :emit merge (:export emit)))
+           "\n\n"
+           (impl/emit-direct
+            grammar
+            (deps/module-export-form book
+                                     (-> mopts :module :export)
+                                     mopts)
+            namespace
+            mopts))))
