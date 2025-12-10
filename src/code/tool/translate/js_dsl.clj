@@ -427,7 +427,7 @@
   (translate-node (:expression node)))
 
 (defmethod translate-node "JSXIdentifier" [node]
-  (:name node))
+  (symbol (:name node)))
 
 (defmethod translate-node "JSXMemberExpression" [node]
   (list '. (translate-node (:object node)) (translate-node (:property node))))

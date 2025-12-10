@@ -122,8 +122,13 @@
                                    :snapshot snapshot
                                    :output (str (fs/path (str root-path "/" (get-in links [ns :path])))))
                             (update :emit merge emit-opts)))))
+
+        ns-compile (if compile/*compile-filter*
+                     (filter compile/*compile-filter* (concat ns-selected ns-extras))
+                     (concat ns-selected ns-extras))
+
         ;; generate for all namespaces
-        files  (mapv compile-fn (concat ns-selected ns-extras))]
+        files  (mapv compile-fn ns-compile)]
     (compile/compile-summarise files)))
 
 (defn compile-module-directory
@@ -173,7 +178,7 @@
   ([{:keys [lang main] :as opts}]
    (require main)
    (let [[selected opts] (compile-module-prep opts)]
-     (compile-module-directory-selected :directory selected opts))))
+     (compile-module-directory-selected :graph selected opts))))
 
 (def +install-module-root-fn+
   (compile/types-add :module.root #'compile-module-root))

@@ -170,6 +170,18 @@
          _ (rt/set-fact ns id fpkg)]
      fpkg)))
 
+(defn fact:compile
+  "recompiles fact with a different global"
+  {:added "3.0"}
+  ([fpkg meta]
+   (let [body (mapcat (fn [m]
+                        (case (:type m)
+                          :form [(:original m)]
+                          :test-equal [(:form (:input m)) '=> (:form (:output m))]
+                          []))
+                      (:full fpkg))]
+     (create-fact (merge fpkg meta) body))))
+
 (defn fact-eval
   "creates the forms in eval mode"
   {:added "3.0"}

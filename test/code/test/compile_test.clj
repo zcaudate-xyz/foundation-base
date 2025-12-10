@@ -76,7 +76,7 @@
 (fact "recompiles fact with a different global"
   (ctx/with-new-context {}
     (let [fact (install-fact {:ns 'my.ns :id 'test-fact} '[(+ 1 1) => 2])]
-      (fact:compile fact {:a 1})))
+      (compile/fact:compile fact {:a 1})))
   => map?)
 
 ^{:refer code.test.compile/fact-eval :added "3.0"}
