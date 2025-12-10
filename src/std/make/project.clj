@@ -99,6 +99,14 @@
      (compile/with:compile-filter #{ns}
                                   (mapv build-default mcfgs)))))
 
+(defn file-watcher-heal
+  [path ns]
+  (let [content (slurp path)
+        healed  (block/heal content)]
+    (when (not= content healed)
+      (h/p "\nHealed:" ns)
+      (spit path healed))))
+
 (defn file-watcher-handler
   "handler for file changes"
   [path _]
@@ -110,6 +118,7 @@
         (when ns
           (try
             (h/p "\nChange:" ns)
+            (file-watcher-heal path ns)
             (require ns :reload)
             (let [results (build-triggered ns)
                   files   (changed-files results)]
@@ -128,3 +137,12 @@
                 (#'file-watcher-handler (.getPath file) nil)))]
      (watch/start-watcher (watch/watcher path cb {:recursive true
                                                   :types :all})))))
+
+
+
+(comment
+  
+  (code.manage/heal-code 'sznui.v1.screens.onboarding.onboarding-step-2-profile
+                         {:write true})
+  
+  )
