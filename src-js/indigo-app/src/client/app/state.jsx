@@ -643,7 +643,7 @@ export function AppStateProvider({ children }) {
 
     // Fetch Namespace Code (File View)
     const refreshNamespaceCode = React.useCallback(async (force = false) => {
-        if (!selectedNamespace || namespaceViewType !== "file") return;
+        if (!selectedNamespace) return;
 
         const key = getBufferKey(selectedNamespace, namespaceFileViewMode);
 

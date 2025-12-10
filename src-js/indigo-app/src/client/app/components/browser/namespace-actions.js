@@ -141,6 +141,29 @@ export const evalLastSexp = (editor, monaco, namespace, fileViewMode, evalFn) =>
     }
 };
 
+export const evalFile = (editor, monaco, namespace, fileViewMode, evalFn) => {
+    if (!editor) return;
+
+    const model = editor.getModel();
+    const code = model.getValue();
+    const range = model.getFullModelRange();
+
+    const targetNs = fileViewMode === 'test' ? namespace + '-test' : namespace;
+
+    if (monaco) {
+        flashDecoration(editor, monaco, range, false);
+    }
+
+    toast.promise(
+        evalFn(code, targetNs),
+        {
+            loading: 'Evaluating file...',
+            success: (data) => `File Evaluated: ${data}`,
+            error: (err) => `Eval File failed: ${err.message}`
+        }
+    );
+};
+
 export const scaffoldNamespaceTest = async (namespace, fileViewMode, refreshNamespaceCode, setScaffoldLoading) => {
     setScaffoldLoading(true);
     try {

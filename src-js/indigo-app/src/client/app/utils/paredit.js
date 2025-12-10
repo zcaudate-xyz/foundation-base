@@ -177,7 +177,17 @@ function findLastChild(text, parentStart, parentEnd) {
     return last;
 }
 
+// Helper for token chars
+const isTokenChar = (char) => !/[\s\(\)\[\]\{\}"]/.test(char);
+
 export function getSexpBeforeCursor(text, offset) {
+    // 0. If cursor is in the middle of a token, move offset to the end of it.
+    if (offset > 0 && offset < text.length && isTokenChar(text[offset]) && isTokenChar(text[offset - 1])) {
+        while (offset < text.length && isTokenChar(text[offset])) {
+            offset++;
+        }
+    }
+
     // 1. Skip whitespace backwards
     let i = offset - 1;
     while (i >= 0 && /\s/.test(text[i])) i--;
@@ -235,6 +245,13 @@ export function getSexpBeforeCursor(text, offset) {
 }
 
 export function getSexpRangeBeforeCursor(text, offset) {
+    // 0. If cursor is in the middle of a token, move offset to the end of it.
+    if (offset > 0 && offset < text.length && isTokenChar(text[offset]) && isTokenChar(text[offset - 1])) {
+        while (offset < text.length && isTokenChar(text[offset])) {
+            offset++;
+        }
+    }
+
     // 1. Skip whitespace backwards
     let i = offset - 1;
     while (i >= 0 && /\s/.test(text[i])) i--;

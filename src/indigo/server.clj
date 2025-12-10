@@ -60,8 +60,6 @@
      "POST /api/browse/"
      {"libraries"                 (endpoint #'api-browser/list-libraries)
       "scan"                      (endpoint #'api-browser/scan-namespaces)
-      "file-content"              (endpoint #'api-browser/get-file-content :path)
-
       ;; Clojure Lang
       "clj/namespace-entries"     (endpoint #'api-browser/get-namespace-entries :ns)
       "clj/namespaces"            (endpoint #'api-browser/list-clj-namespaces)
@@ -89,7 +87,7 @@
       "test/component"            (endpoint #'api-browser/get-test-fact-source :ns :component)
       "test/run-var"              (endpoint #'test-runner/run-test :ns :var)
       "test/run-ns"               (endpoint #'test-runner/run-ns-tests :ns)
-      
+
       ;; Translate
       "translate/to-heal"         (endpoint #'api-translate/to-heal :source)
       "translate/from-html"       (endpoint #'api-translate/from-html :html)
@@ -106,13 +104,11 @@
 (defn repl-handler [req]
   (http/with-channel req channel
     (http/on-close channel (fn [status]
-                             (dispatch/unregister! channel)
-                             (println "REPL Client disconnected" status)))
+                             (dispatch/unregister! channel)))
     (http/on-receive channel (fn [data]
                                (if (= data "ping")
                                  (dispatch/send! channel "pong")
                                  (do
-                                   (println "REPL Received:" data)
                                    (let [json-data (try (json/read data json/+keyword-case-mapper+)
                                                         (catch Throwable _ nil))]
                                      (if (and json-data (:id json-data) (:code json-data))
@@ -122,7 +118,6 @@
                                                ns-str (:ns json-data)
                                                target-ns (if ns-str (symbol ns-str) 'user)
                                                _ (when ns-str (require target-ns)) ;; Ensure NS is loaded
-                                               _ (h/prn form ns-str)
                                                result (with-out-str
                                                         (binding [*out* *out*
                                                                   *ns* (or (find-ns target-ns) (create-ns target-ns))]
@@ -145,9 +140,7 @@
                                            (dispatch/send! channel result))
                                          (catch Throwable t
                                            (dispatch/send! channel (str "Error: " (.getMessage t)))))))))))
-    (dispatch/register! channel)
-    (println "REPL Client connected")))
-
+    (dispatch/register! channel)))
 
 (defn dev-handler
   [req]
@@ -196,4 +189,7 @@
   (. (Desktop/getDesktop)
      (browse (URI. (str "http://localhost:" *port*)))))
 
-(comment)
+(comment
+  (server-restart)
+  
+  )

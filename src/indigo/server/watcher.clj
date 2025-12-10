@@ -12,12 +12,10 @@
   (let [msg {:type "file-change"
              :path (str file)
              :kind (name kind)}]
-    (h/prn "File Change:" msg)
     (dispatch/broadcast! msg)))
 
 (defn start-watcher []
   (when-not @*watcher*
-    (h/prn "Starting File Watcher on .")
     (let [w (watch/watcher ["src"]
                            #'broadcast-change
                            {:recursive true
@@ -28,6 +26,5 @@
 
 (defn stop-watcher []
   (when @*watcher*
-    (h/prn "Stopping File Watcher")
     (watch/stop-watcher @*watcher*)
     (reset! *watcher* nil)))

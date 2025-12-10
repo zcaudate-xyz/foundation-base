@@ -367,13 +367,15 @@
   "gets the content of a file by path"
   {:added "4.0"}
   [path]
-  (try
-    (let [f (java.io.File. ^String path)]
-      (if (.exists f)
-        (slurp f)
-        (str ";; File not found: " path)))
-    (catch Throwable t
-      (str ";; Error reading file: " (.getMessage t)))))
+  (if (empty? path)
+    ";; File path is empty"
+    (try
+      (let [f (java.io.File. ^String path)]
+        (if (.exists f)
+          (slurp f)
+          (str ";; File not found: " path)))
+      (catch Throwable t
+        (str ";; Error reading file: " (.getMessage t))))))
 
 (defn resolve-paths
   "resolves a path or namespace to a list of java.io.File objects (source + test)"

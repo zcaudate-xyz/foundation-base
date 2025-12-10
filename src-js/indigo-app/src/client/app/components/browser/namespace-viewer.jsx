@@ -23,6 +23,7 @@ export function NamespaceViewer() {
         editorTabs,
         openEditorTab,
         closeEditorTab,
+        namespaceEntries,
         theme // Added theme
     } = useAppState();
 
@@ -48,13 +49,55 @@ export function NamespaceViewer() {
     // Effect to handle external selection (scroll to var in file view)
     React.useEffect(() => {
         if (selectedVar && fileEditorRef.current) {
+            const entry = namespaceEntries.find(e => e.var === selectedVar);
+
+            if (entry) {
+                let lineInfo;
+                if (fileViewMode === "source" && entry.source?.source?.line) {
+                    lineInfo = entry.source.source.line;
+                } else if (fileViewMode === "test" && entry.test?.test?.line) {
+                    lineInfo = entry.test.test.line;
+                }
+
+                if (lineInfo) {
+                    const position = { lineNumber: lineInfo.row, column: lineInfo.col };
+                    fileEditorRef.current.revealPositionInCenter(position);
+                    fileEditorRef.current.setPosition(position);
+                    fileEditorRef.current.focus();
+
+                    // Flash decoration
+                    if (monacoRef.current) {
+                        const range = new monacoRef.current.Range(
+                            lineInfo.row,
+                            lineInfo.col,
+                            lineInfo['end-row'],
+                            lineInfo['end-col']
+                        );
+                        const flashDecoration = {
+                            range: range,
+                            options: {
+                                className: 'eval-flash-decoration',
+                                isWholeLine: false
+                            }
+                        };
+                        const collection = fileEditorRef.current.createDecorationsCollection([flashDecoration]);
+                        setTimeout(() => {
+                            collection.clear();
+                        }, 500);
+                    }
+                    return; // Found and scrolled, exit
+                }
+            }
+
+            // Fallback to Regex if no metadata
             const model = fileEditorRef.current.getModel();
             if (model) {
                 const text = model.getValue();
                 let regex;
 
                 if (fileViewMode === "source") {
-                    regex = new RegExp(`\\(def(n|macro)?\\s+${selectedVar}[\\s\\n]`);
+                    // Match (defn...), (defn.pg...), (defmacro...), (def...), etc.
+                    regex = new RegExp(`\\(def[\\w\\.-]*\\s+${selectedVar}[\\s\\n]`);
                 } else if (fileViewMode === "test") {
                     // escape selectedVar for regex
                     const escapedVar = selectedVar.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&');
@@ -95,7 +138,7 @@ export function NamespaceViewer() {
                 }
             }
         }
-    }, [selectedVar, fileViewMode]);
+    }, [selectedVar, fileViewMode, namespaceEntries]);
 
     // Register Completion Provider (Global)
     React.useEffect(() => {
@@ -117,6 +160,10 @@ export function NamespaceViewer() {
         Actions.evalLastSexp(fileEditorRef.current, monacoRef.current, namespace, fileViewMode, evalRequest);
     };
 
+    const handleEvalFile = () => {
+        Actions.evalFile(fileEditorRef.current, monacoRef.current, namespace, fileViewMode, evalRequest);
+    };
+
     const handleScaffold = () => {
         Actions.scaffoldNamespaceTest(namespace, fileViewMode, refreshNamespaceCode, setScaffoldLoading);
     };
@@ -129,7 +176,8 @@ export function NamespaceViewer() {
                 Actions.saveNamespace(editor, targetNs, setCode);
             },
             handleEval: handleEval,
-            handleEvalLastSexp: handleEvalLastSexp
+            handleEvalLastSexp: handleEvalLastSexp,
+            handleEvalFile: handleEvalFile
         };
     }, [namespace, fileViewMode, setCode]);
 
@@ -196,10 +244,12 @@ export function NamespaceViewer() {
     React.useEffect(() => {
         const unsubEval = subscribe('editor:eval', () => handlersRef.current.handleEval());
         const unsubEvalLast = subscribe('editor:eval-last-sexp', () => handlersRef.current.handleEvalLastSexp());
+        const unsubEvalFile = subscribe('editor:eval-file', () => handlersRef.current.handleEvalFile());
 
         return () => {
             unsubEval();
             unsubEvalLast();
+            unsubEvalFile();
         };
     }, [subscribe]);
 
