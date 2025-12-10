@@ -94,4 +94,5 @@
    (build-triggered (h/ns-sym)))
   ([ns]
    (let [mcfgs (common/get-triggered ns)]
-     (mapv build-default mcfgs))))
+     (compile/with:compile-filter #{ns}
+       (mapv build-default mcfgs)))))

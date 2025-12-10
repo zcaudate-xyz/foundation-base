@@ -122,8 +122,13 @@
                                    :snapshot snapshot
                                    :output (str (fs/path (str root-path "/" (get-in links [ns :path])))))
                             (update :emit merge emit-opts)))))
+
+        ns-compile (if compile/*compile-filter*
+                     (filter compile/*compile-filter* (concat ns-selected ns-extras))
+                     (concat ns-selected ns-extras))
+
         ;; generate for all namespaces
-        files  (mapv compile-fn (concat ns-selected ns-extras))]
+        files  (mapv compile-fn ns-compile)]
     (compile/compile-summarise files)))
 
 (defn compile-module-directory
@@ -144,6 +149,20 @@
 
 (def +install-module-directory-fn+
   (compile/types-add :module.directory #'compile-module-directory))
+
+(defn compile-module-directory-partial
+  "partially compiles a directory"
+  {:added "4.0"}
+  [ns-changed opts]
+  (compile/with:compile-filter (if (set? ns-changed) ns-changed #{ns-changed})
+    (compile-module-directory opts)))
+
+(defn compile-module-directory-selected-partial
+  "partially compiles a directory"
+  {:added "4.0"}
+  [ns-changed type ns-all opts]
+  (compile/with:compile-filter (if (set? ns-changed) ns-changed #{ns-changed})
+    (compile-module-directory-selected type ns-all opts)))
 
 
 ;;
@@ -173,7 +192,7 @@
   ([{:keys [lang main] :as opts}]
    (require main)
    (let [[selected opts] (compile-module-prep opts)]
-     (compile-module-directory-selected :directory selected opts))))
+     (compile-module-directory-selected :graph selected opts))))
 
 (def +install-module-root-fn+
   (compile/types-add :module.root #'compile-module-root))
