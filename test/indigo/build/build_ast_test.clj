@@ -25,7 +25,7 @@
     (def +input-rel+ (str "../../" +ts-file+))
     (def +output-rel+ (str "../../" +json-file+))
 
-    (build-ast/generate-ast +input-rel+ +output-rel+)
+    (build-ast/translate-ast +input-rel+ +output-rel+)
 
     ;; Verify
     (fact "output file exists and is valid json"

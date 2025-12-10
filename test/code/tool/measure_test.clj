@@ -3,10 +3,11 @@
   (:require [code.tool.measure :as measure]
             [code.tool.measure.algo-clojure :as clj]
             [code.tool.translate.js-ast :as build-ast]
+            [std.make :as make]
             [std.lib :as h]))
 
 (fact "should score code structure invariantly (JS)"
-  ;; :setup [(build-ast/initialise)] ;; Skipped to avoid npm path issues in test runner
+  :setup [(make/build-all build-ast/BUILD_AST) (build-ast/initialise)] ;; Skipped to avoid npm path issues in test runner
   (let [code-original "function add(a, b) { return a + b; }"
         code-renamed  "function sum(x, y) { return x + y; }"
         code-spaced   "function  add  ( a ,  b )  { \n return a + b ; \n }"
@@ -19,7 +20,7 @@
     score-orig => score-spaced))
 
 (fact "should score control flow higher (JS)"
-  ;; :setup [(build-ast/initialise)]
+  :setup [(make/build-all build-ast/BUILD_AST) (build-ast/initialise)]
   (let [code-linear "function f() { var a = 1; var b = 2; }"
         code-branch "function f() { if (true) { var a = 1; } else { var b = 2; } }"
         score-linear (measure/generate-score code-linear)

@@ -54,7 +54,7 @@
   ^:hidden
   
   (prepare-artifacts {:pom "test-data/code.tool.maven/sample.pom"
-                      :jar "test-data/code.tool.maven/sample.jar"
+                      :jar "test-data/code.tool.maven/sample.pom"
                       :interim ""}
                      {:secure true :digest true}
                      {:deploy {:signing {:key -key-}}})
