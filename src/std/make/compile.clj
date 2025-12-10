@@ -13,6 +13,15 @@
   `(binding [*mock-compile* true]
      ~@body))
 
+(def ^:dynamic *compile-filter* nil)
+
+(defmacro with:compile-filter
+  "sets the compile filter"
+  {:added "4.0"}
+  [filter & body]
+  `(binding [*compile-filter* ~filter]
+     ~@body))
+
 (defn compile-fullbody
   "helper function for compile methods"
   {:added "4.0"}

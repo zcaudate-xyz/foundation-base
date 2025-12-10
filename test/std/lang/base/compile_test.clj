@@ -8,7 +8,8 @@
             [xt.lang.base-lib :as k]
             [xt.lang.base-iter :as it]
             [rt.postgres.script.scratch :as scratch]
-            [std.fs :as fs]))
+            [std.fs :as fs]
+            [std.make.compile :as compile]))
 
 ^{:refer std.lang.base.compile/compile-script :added "4.0"}
 (fact "compiles a script"
@@ -99,7 +100,15 @@
       :directory
       ['xt.lang.base-lib]
       {:lang :lua :main 'xt.lang.base-lib :root ".build" :target "src"}))
-  => (contains {:files pos-int?}))
+  => (contains {:files pos-int?})
+
+  (compile/with:mock-compile
+    (compile/with:compile-filter #{'xt.lang.base-lib}
+      (compile-module-directory-selected
+       :directory
+       ['xt.lang.base-lib 'xt.lang.base-iter]
+       {:lang :lua :main 'xt.lang.base-lib :root ".build" :target "src"})))
+  => (contains {:files 1}))
 
 ^{:refer std.lang.base.compile/compile-module-prep :added "4.0"}
 (fact "precs the single entry point setup"

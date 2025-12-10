@@ -4,7 +4,8 @@
             [std.make.common :as common]
             [std.make.compile :as compile]
             [std.make.readme :as readme]
-            [std.fs :as fs]))
+            [std.fs :as fs]
+            [std.fs.watch :as watch]))
 
 (defn makefile-parse
   "parses a makefile for it's sections"
@@ -94,4 +95,31 @@
    (build-triggered (h/ns-sym)))
   ([ns]
    (let [mcfgs (common/get-triggered ns)]
-     (mapv build-default mcfgs))))
+     (compile/with:compile-filter #{ns}
+       (mapv build-default mcfgs)))))
+
+(defn file-watcher-handler
+  "handler for file changes"
+  [path _]
+  (let [path-str (str path)]
+    (when (and (or (str/ends-with? path-str ".clj")
+                   (str/ends-with? path-str ".cljc"))
+               (not (str/includes? path-str ".#"))) ;; Emacs lock files
+      (let [ns (fs/file-namespace path-str)]
+        (when ns
+          (try
+            (println "Detected change in:" ns)
+            (build-triggered ns)
+            (catch Throwable t
+              (println "Build failed for:" ns)
+              (println (.getMessage t)))))))))
+
+(defn watch
+  "starts watching a directory"
+  ([path]
+   (println "Starting build watcher on:" path)
+   (let [cb (fn [type file]
+              (when (= type :modify)
+                (file-watcher-handler (.getPath file) nil)))]
+     (watch/start-watcher (watch/watcher path cb {:recursive true
+                                                  :types :all})))))
