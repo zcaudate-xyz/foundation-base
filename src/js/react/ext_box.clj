@@ -54,7 +54,8 @@
   {:added "4.0"}
   [storage-key box listener-id path]
   (var initial (event-box/get-data box path))
-  (when (not= (typeof localStorage) "undefined")
+  (when (and (not= (typeof localStorage) "undefined")
+             localStorage.getItem)
     (var stored (. localStorage (getItem storage-key)))
     (when stored
       (try
