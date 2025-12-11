@@ -34,6 +34,13 @@
                 path-replace
                 ns-suffix
                 ns-label]}  (merge *link-defaults* link-options)
+        
+        apply-replace (fn [s]
+                        (reduce (fn [s [pat sub]]
+                                  (str/replace s pat sub))
+                                s
+                                path-replace))
+        
         link-ns-str   (str link-ns)
         link-ns-arr   (str/split link-ns-str #"\.")
         root-ns-str   (str root-ns)
@@ -41,23 +48,22 @@
         is-lib?       (not (.startsWith ^String
                                         link-ns-str
                                         root-ns-str))
-        link-rel    (if is-lib?
-                      (str/join path-separator (cons root-libs
-                                                     (butlast link-ns-arr)))
-                      (str/join path-separator (drop (count root-ns-arr)
-                                                     (butlast link-ns-arr))))
+        
+        rel-segments  (if is-lib?
+                        (cons root-libs (butlast link-ns-arr))
+                        (drop (count root-ns-arr) (butlast link-ns-arr)))
+        
+        link-rel      (str/join path-separator (map apply-replace rel-segments))
+        
         link-suffix (or (get-link-lookup link-ns ns-suffix)
                         (if (map? path-suffix)
                           (or (get-link-lookup link-ns (dissoc path-suffix :default))
                               (:default path-suffix))
                           path-suffix))
 
-        link-label  (or (get-link-lookup link-ns ns-label)
-                        (last link-ns-arr))
-        link-path   (reduce (fn [s [pat sub]]
-                              (str/replace s pat sub))
-                            (str link-rel path-separator link-label link-suffix)
-                            path-replace)]
+        link-label  (apply-replace (or (get-link-lookup link-ns ns-label)
+                                       (last link-ns-arr)))
+        link-path   (apply-replace (str link-rel path-separator link-label link-suffix))]
     {:is-lib? is-lib?
      :rel    link-rel
      :suffix link-suffix
