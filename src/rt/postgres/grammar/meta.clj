@@ -1,5 +1,6 @@
 (ns rt.postgres.grammar.meta
-  (:require [std.lang.base.pointer :as ptr]
+  (:require [rt.postgres.grammar.common-application :as app]
+            [std.lang.base.pointer :as ptr]
             [std.lang.base.util :as ut]
             [std.string :as str]
             [std.lib :as h]))
@@ -60,6 +61,38 @@
                                                  [:select #{'oid}
                                                   :from  'pg_catalog.pg_namespace
                                                   :where {:nspname schema}]]}]]}]]}])]))
+
+(defn has-trigger
+  "checks for the existence of a trigger"
+  {:added "4.0"}
+  ([name schema table]
+   [:select
+    (list 'exists
+          [:select '*
+           :from 'information_schema.triggers
+           :where {:trigger_name name
+                   :event_object_schema schema
+                   :event_object_table table}])]))
+
+(defn has-const
+  "checks for the existence of a const"
+  {:added "4.0"}
+  ([ptr]
+   (let [entry (ptr/get-entry ptr)
+         {ptr-id :id form :form} entry
+         [_ _ _ data] form]
+     (if-let [data-id (:id data)]
+       (let [{:static/keys [table]} entry
+             {table-id :id module :module} table
+             t-entry (ptr/get-entry (ut/lang-pointer :postgres
+                                                     {:module module
+                                                      :id table-id}))
+             {:static/keys [schema]} t-entry]
+         [:select
+          (list 'exists
+                [:select 1
+                 :from (list '. #{(or schema "public")} #{table-id})
+                 :where {:id data-id}])])))))
 
 (defn get-extensions
   "gets import forms"
@@ -176,7 +209,14 @@
                            :enum     (has-enum name sch)
                            :index    (has-index name sch)
                            :function (has-function name sch)
-                           :policy   (has-policy (ptr/get-entry ptr)))))
+                           :policy   (has-policy (ptr/get-entry ptr))
+                           :trigger  (let [entry (ptr/get-entry ptr)
+                                           [_ _ _ [table]] (:form entry)
+                                           table (if (symbol? table)
+                                                   (name table)
+                                                   (str table))]
+                                       (has-trigger name sch table))
+                           :const    (has-const ptr))))
    :setup-ptr        (fn [ptr]
                        (:form (ptr/get-entry ptr)))
    :teardown-ptr     (fn [ptr]
@@ -187,6 +227,28 @@
                                         :else dbtype)]
                          (cond (= dbtype :policy)
                                (drop-policy (ptr/get-entry ptr))
+
+                               (= dbtype :trigger)
+                               (let [entry (ptr/get-entry ptr)
+                                     [_ _ _ [table]] (:form entry)
+                                     table (if (symbol? table)
+                                             (name table)
+                                             (str table))]
+                                 [:drop-trigger :if-exists #{name} :on table :cascade])
+
+                               (= dbtype :const)
+                               (let [entry (ptr/get-entry ptr)
+                                     {ptr-id :id form :form} entry
+                                     [_ _ _ data] form]
+                                 (if-let [data-id (:id data)]
+                                   (let [{:static/keys [table]} entry
+                                         {table-id :id module :module} table
+                                         t-entry (ptr/get-entry (ut/lang-pointer :postgres
+                                                                                 {:module module
+                                                                                  :id table-id}))
+                                         {:static/keys [schema]} t-entry]
+                                     [:delete-from (list '. #{(or schema "public")} #{table-id})
+                                      :where {:id data-id}])))
 
                                (and type
                                     (not existing))
