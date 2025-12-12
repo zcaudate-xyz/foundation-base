@@ -2,7 +2,8 @@
   (:use code.test)
   (:require [rt.postgres.grammar.meta :refer :all]
             [rt.postgres.script.builtin :as builtin]
-            [std.lang :as l]))
+            [std.lang :as l]
+            [std.lang.base.pointer :as ptr]))
 
 (l/script- :postgres
   {:static {:application ["test.postgres"]
@@ -54,6 +55,46 @@
 (fact "cheks for the existence of an index"
   (has-index "idx" "schema")
   => vector?)
+
+^{:refer rt.postgres.grammar.meta/has-trigger :added "4.0"}
+(fact "checks for the existence of a trigger"
+  (has-trigger "trigger" "schema" "table")
+  => '[:select
+       (exists
+        [:select * :from information_schema.triggers
+         :where {:trigger_name "trigger",
+                 :event_object_schema "schema",
+                 :event_object_table "table"}])])
+
+^{:refer rt.postgres.grammar.meta/has-const :added "4.0"}
+(fact "checks for the existence of a const"
+  (with-redefs [ptr/get-entry (fn [ptr]
+                                (cond (= (:id ptr) 'ConstVal)
+                                      {:id 'ConstVal
+                                       :form '(defconst ConstVal [ConstTable] {:id "hello"})
+                                       :static/table {:id 'ConstTable :module 'test.postgres}}
+
+                                      (= (:id ptr) 'ConstTable)
+                                      {:static/schema "test/meta"}))]
+    (has-const {:id 'ConstVal}))
+  => '[:select
+       (exists
+        [:select 1 :from (. #{"test/meta"} #{ConstTable})
+         :where {:id "hello"}])])
+
+^{:refer rt.postgres.grammar.meta/teardown-ptr :added "4.0"}
+(fact "teardowns a const"
+  (with-redefs [ptr/get-entry (fn [ptr]
+                                (cond (= (:id ptr) 'ConstVal)
+                                      {:id 'ConstVal
+                                       :static/dbtype :const
+                                       :form '(defconst ConstVal [ConstTable] {:id "hello"})
+                                       :static/table {:id 'ConstTable :module 'test.postgres}}
+
+                                      (= (:id ptr) 'ConstTable)
+                                      {:static/schema "test/meta"}))]
+    ((:teardown-ptr +fn+) {:id 'ConstVal}))
+  => '[:delete-from (. #{"test/meta"} #{ConstTable}) :where {:id "hello"}])
 
 ^{:refer rt.postgres.grammar.meta/get-extensions :added "4.0"}
 (fact "gets import forms"
