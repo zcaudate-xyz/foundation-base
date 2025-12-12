@@ -52,19 +52,7 @@
    (fn [input params lookup env & func-args]
      (if-not (:bulk params)
        (apply f input params lookup env func-args)
-       (let [inputs (cond (= :list input)
-                          (let [list-fn (or (-> task :item :list)
-                                            (throw (ex-info "No `:list` function defined" {:key [:item :list]})))]
-                            (list-fn lookup env))
-
-                          (and (or (keyword? input)
-                                   (vector? input)
-                                   (set? input)
-                                   (h/form? input))
-                               (-> task :item :list))
-                          (ut/select-inputs task lookup env input)
-
-                          :else input)
+       (let [inputs input ;; Input is assumed to be resolved collection if :bulk is true
 
              ;; Ensure input count for display calculation doesn't fail on empty input
              inputs (if (:random params) (shuffle inputs) inputs)
@@ -147,27 +135,6 @@
                        (or (:return params) :results)
                        (:package params)))))))
 
-(defn wrap-input
-  "enables execution of task with single or multiple inputs"
-  {:added "3.0"}
-  ([f task]
-   (fn [input params lookup env & args]
-     (cond (= :list input)
-           (let [list-fn  (or (-> task :item :list)
-                              (throw (ex-info "No `:list` function defined" {:key [:item :list]})))]
-             (apply invoke task (list-fn lookup env) (assoc params :bulk true) lookup env args))
-
-           (and (or (keyword? input)
-                    (vector? input)
-                    (set? input)
-                    (h/form? input))
-                (-> task :item :list))
-           (let [inputs (ut/select-inputs task lookup env input)]
-             (apply invoke task inputs (assoc params :bulk true) lookup env args))
-
-           :else
-           (apply f input params lookup env args)))))
-
 (defn wrap-main
   "wraps the main function for the task"
   {:added "4.0"}
@@ -182,8 +149,26 @@
          [main _] (ut/main-function fn-obj argcount)
          f (ut/wrap-execute main task)]
      (-> f
-         (wrap-input task)
          (wrap-bulk task)))))
+
+(defn resolve-input
+  "resolves inputs for bulk execution"
+  {:added "4.0"}
+  [task input params lookup env]
+  (cond (= :list input)
+        (let [list-fn (or (-> task :item :list)
+                          (throw (ex-info "No `:list` function defined" {:key [:item :list]})))]
+          [(list-fn lookup env) (assoc params :bulk true)])
+
+        (and (or (keyword? input)
+                 (vector? input)
+                 (set? input)
+                 (h/form? input))
+             (-> task :item :list))
+        [(ut/select-inputs task lookup env input) (assoc params :bulk true)]
+
+        :else
+        [input params]))
 
 (defn invoke
   "executes the task"
@@ -198,6 +183,12 @@
                                  [(take idx args) (drop (inc idx) args)])
          [input params lookup env] (apply ut/task-inputs task task-args)
          params (h/merge-nested (:params task) params)
+
+         ;; Resolve inputs if needed (handles selector logic)
+         [input params] (if (:bulk params)
+                          [input params] ;; Trust existing bulk flag (input is data)
+                          (resolve-input task input params lookup env))
+
          f      (wrap-main task)]
      
      (apply f input params lookup env func-args))))
