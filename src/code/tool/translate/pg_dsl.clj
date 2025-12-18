@@ -14,6 +14,13 @@
 (defn translate-list [nodes]
   (mapv translate-node nodes))
 
+(defn intersperse-comma [nodes]
+  (if (empty? nodes)
+    []
+    (->> (translate-list nodes)
+         (interpose (symbol ","))
+         vec)))
+
 (defmethod translate-node :default [node]
   (if (map? node)
     (h/error "Unknown node type" {:type (get-type node) :node node})
@@ -55,17 +62,17 @@
         out (cond-> [:select]
               distinctClause (conj :distinct)
 
-              targetList (into (translate-list targetList))
+              targetList (into (intersperse-comma targetList))
 
-              fromClause (into [:from (translate-list fromClause)])
+              fromClause (into (vec (cons :from (intersperse-comma fromClause))))
 
               whereClause (into [:where (translate-node whereClause)])
 
-              groupClause (into [:group :by (translate-list groupClause)])
+              groupClause (into (vec (concat [:group :by] (intersperse-comma groupClause))))
 
               havingClause (into [:having (translate-node havingClause)])
 
-              sortClause (into [:order :by (translate-list sortClause)])
+              sortClause (into (vec (concat [:order :by] (intersperse-comma sortClause))))
 
               limitCount (into [:limit (translate-node limitCount)])
 
@@ -78,7 +85,7 @@
                  (if if_not_exists [:if :not :exists] [])
                  [(translate-node relation)]
                  (if (seq tableElts)
-                   (translate-list tableElts)
+                   (intersperse-comma tableElts)
                    [])))))
 
 ;;
@@ -111,9 +118,32 @@
         type-sym (translate-node typeName)]
     [(symbol colname) type-sym]))
 
+(defmethod translate-node "SortBy" [node]
+  (let [{:keys [node sortby_dir sortby_nulls]} (unwrap node)
+        base (translate-node node)
+        dir (case sortby_dir
+              1 :asc
+              2 :desc
+              nil)
+        nulls (case sortby_nulls
+                1 :first
+                2 :last
+                nil)]
+    (cond-> base
+      dir (list dir)
+      nulls (list :nulls nulls))))
+
 ;;
 ;; Expressions
 ;;
+
+(def op-mapping
+  {"~"  're
+   "~*" 're:*
+   "||" '||
+   "->" :->
+   "->>" :->>
+   "#>>" :#>>})
 
 (defmethod translate-node "A_Const" [node]
   (let [val (:val (unwrap node))]
@@ -121,7 +151,6 @@
 
 (defmethod translate-node "ColumnRef" [node]
   (let [{:keys [fields]} (unwrap node)
-        ;; fields is a list of nodes (String or A_Star)
         parts (mapv translate-node fields)]
     (symbol (str/join "." parts))))
 
@@ -130,11 +159,11 @@
 
 (defmethod translate-node "A_Expr" [node]
   (let [{:keys [kind name lexpr rexpr]} (unwrap node)
-        ;; name is list of String nodes
-        op (translate-node (first name))
+        raw-op (translate-node (first name))
+        op (get op-mapping raw-op (symbol raw-op))
         l (translate-node lexpr)
         r (translate-node rexpr)]
-    (list (symbol op) l r)))
+    (list op l r)))
 
 (defmethod translate-node "BoolExpr" [node]
   (let [{:keys [boolop args]} (unwrap node)
@@ -143,6 +172,27 @@
              "OR_EXPR" 'or
              "NOT_EXPR" 'not)]
     (apply list op (translate-list args))))
+
+(defmethod translate-node "NullTest" [node]
+  (let [{:keys [arg nulltesttype]} (unwrap node)
+        arg-trans (translate-node arg)]
+    (case nulltesttype
+      0 (list 'is arg-trans nil)
+      1 (list 'is :not arg-trans nil))))
+
+(defmethod translate-node "CaseExpr" [node]
+  (let [{:keys [arg args defresult]} (unwrap node)
+        implicit-arg (if arg (translate-node arg) nil)
+        clauses (mapcat translate-node args)
+        else-clause (if defresult [:else (translate-node defresult)] [])]
+    (apply list 'case
+           (concat (if implicit-arg [implicit-arg] [])
+                   clauses
+                   else-clause))))
+
+(defmethod translate-node "CaseWhen" [node]
+  (let [{:keys [expr result]} (unwrap node)]
+    [(translate-node expr) (translate-node result)]))
 
 (defmethod translate-node "FuncCall" [node]
   (let [{:keys [funcname args]} (unwrap node)
@@ -158,6 +208,34 @@
                      (keyword (str type-sym))
                      type-sym)]
     (list '++ (translate-node arg) final-type)))
+
+(defmethod translate-node "JoinExpr" [node]
+  (let [{:keys [jointype isNatural larg rarg usingClause quals]} (unwrap node)
+        join-kw (case jointype
+                  0 :join
+                  1 :left-join
+                  2 :full-join
+                  3 :right-join
+                  :join)
+
+        l (translate-node larg)
+        r (translate-node rarg)
+
+        on-part (cond quals [:on (translate-node quals)]
+                      usingClause [:using (translate-list usingClause)]
+                      :else [])]
+    (vec (concat [l join-kw r] on-part))))
+
+(defmethod translate-node "SubLink" [node]
+  (let [{:keys [subLinkType testexpr subselect]} (unwrap node)
+        sub (translate-node subselect)
+        test (if testexpr (translate-node testexpr) nil)]
+    (case subLinkType
+      "EXISTS_SUBLINK" (list 'exists sub)
+      "ALL_SUBLINK"    (list (symbol "all") sub)
+      "ANY_SUBLINK"    (list (symbol "any") sub)
+      "EXPR_SUBLINK"   sub
+      (list 'sublink subLinkType sub))))
 
 ;;
 ;; Entry Point
