@@ -162,6 +162,7 @@
                   :vector    {:custom #'pg-vector}}
         :token   {:nil       {:as "null"}
                   :string    {:custom #'common/pg-string}
+                  :uuid      {:custom #'common/pg-uuid}
                   :symbol    {:replace {\- "_" \: "." \? "p_"}
                              :link-fn #'common/pg-linked-token}}
         :block   {:branch  {:wrap    {:start "" :end "END IF;"}
