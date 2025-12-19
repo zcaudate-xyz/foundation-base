@@ -121,6 +121,12 @@
        (str/replace #"\\\"" "\"")
        (str/replace #"\\\\" "\\\\"))))
 
+(defn pg-uuid
+  "constructs a pg uuid"
+  {:added "4.0"}
+  ([u]
+   (str "'" (str u) "'::uuid")))
+
 (defn pg-map
   "creates a postgres json object"
   {:added "4.0"}
