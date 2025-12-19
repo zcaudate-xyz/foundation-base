@@ -43,15 +43,24 @@
           (swap! +impls+ assoc-in [vendor :status] :error)
           (h/error "Implementation not found" {:vendor vendor}))))))
 
+(defn- get-env [k]
+  (System/getenv k))
+
+(defn default-vendor []
+  (let [val (get-env "DEFAULT_RT_POSTGRES_IMPL")]
+    (case val
+      "lib.postgres.impl.postgresql" :postgresql
+      "lib.postgres.impl.impossibl" :impossibl
+      :impossibl)))
+
 (defn ^PooledConnection conn-create
   "creates a pooled connection"
   {:added "4.0"}
-  ([{:keys [vendor]
-     :or {vendor :impossibl}
-     :as m}]
-   (let [{:keys [ns]} (load-impl vendor)
+  ([m]
+   (let [vendor (or (:vendor m) (default-vendor))
+         {:keys [ns]} (load-impl vendor)
          create-pool (ns-resolve ns 'create-pool)]
-     (create-pool m))))
+     (create-pool (assoc m :vendor vendor)))))
 
 (defn conn-close
   "closes a connection"
