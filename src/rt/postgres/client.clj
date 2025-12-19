@@ -9,13 +9,6 @@
             [std.lang.base.impl :as impl]
             [std.lib :as h :refer [defimpl]]))
 
-            (defn default-vendor []
-              (let [val (get-env "DEFAULT_RT_POSTGRES_IMPL")]
-                (case val
-                  "lib.postgres.impl.postgresql" :postgresql
-                  "lib.postgres.impl.impossibl" :impossibl
-                  :impossibl)))
-
 (def +pg-defaults+
   {:host   (or (System/getenv "DEFAULT_RT_POSTGRES_HOST")
               "127.0.0.1")
@@ -28,11 +21,11 @@
               "postgres")
    :dbname (or (System/getenv "DEFAULT_RT_POSTGRES_DBNAME")
                "postgres")
-   :vendor (let [val (get-env "DEFAULT_RT_POSTGRES_VENDOR")]
-                (case val
-                  "lib.postgres.impl.postgresql" :postgresql
-                  "lib.postgres.impl.impossibl" :impossibl
-                  :postgresql))})
+   :vendor (let [val (System/getenv "DEFAULT_RT_POSTGRES_VENDOR")]
+             (case val
+               "lib.postgres.impl.postgresql" :postgresql
+               "lib.postgres.impl.impossibl"  :impossibl
+               :postgresql))})
 
 (defn- rt-pg-string [pg]
   (str "rt.postgres" (into {} (-> pg
