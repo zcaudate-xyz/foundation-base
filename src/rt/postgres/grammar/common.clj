@@ -121,6 +121,12 @@
        (str/replace #"\\\"" "\"")
        (str/replace #"\\\\" "\\\\"))))
 
+(defn pg-uuid
+  "constructs a pg uuid"
+  {:added "4.0"}
+  ([u]
+   (str "'" (str u) "'::uuid")))
+
 (defn pg-map
   "creates a postgres json object"
   {:added "4.0"}
@@ -244,7 +250,8 @@
                             defn     (symbol (str id))
                             deftype  #{(str id)}
                             defenum  #{(str id)}
-                            defrole  #{(str id)})
+                            defrole  #{(str id)}
+                            (symbol (str id)))
                           schema)))))
 
 (defn pg-linked-token
@@ -365,8 +372,8 @@
           :as mdefn} [_ sym [table] body]] (grammar-spec/format-defn form)]
     (list
      'do
-     [:drop-policy-if-exists #{(str doc " - " sym)} :on table]
-     (vec (concat [:create-policy #{(str doc " - " sym)} :on table \\]
+     [:drop-policy-if-exists #{(str sym " - " doc)} :on table]
+     (vec (concat [:create-policy #{(str sym " - " doc)} :on table \\]
                   body)))))
 
 ;;

@@ -117,6 +117,7 @@
         
         (string? form)    [:string :token]
         (nil? form)       [:nil :token]
+        (uuid? form)      [:uuid :token]
         
         (map? form)       [:map :data]
         (map-entry? form) [:map-entry :data]
