@@ -161,6 +161,7 @@
                   :set       {:custom #'common/pg-set}
                   :vector    {:custom #'pg-vector}}
         :token   {:nil       {:as "null"}
+                  :uuid      {:custom #'common/pg-uuid}
                   :string    {:custom #'common/pg-string}
                   :symbol    {:replace {\- "_" \: "." \? "p_"}
                              :link-fn #'common/pg-linked-token}}
