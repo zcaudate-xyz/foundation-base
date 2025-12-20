@@ -3,6 +3,7 @@
             [jvm.namespace.common :as common]
             [jvm.namespace.eval :as eval]
             [jvm.namespace.context :as context]
+            [jvm.namespace.dependent :as dependent]
             [std.lib :as h :refer [definvoke]]))
 
 (h/intern-in eval/eval-ns
@@ -298,15 +299,23 @@
           :arglists '([:args syms] [<ns> :args syms])
           :main {:fn common/ns-unalias}}])
 
-(definvoke reload
+(definvoke reload-task
+  "reloads all listed namespace aliases"
+  {:added "3.0"}
+  [:pipe {:template :namespace
+          :params {:title "RELOADS NAMESPACE"
+                   :parallel false}
+          :main {:fn common/ns-reload}}])
+
+(defn reload
   "reloads all listed namespace aliases
  
    (ns/reload)"
   {:added "3.0"}
-  [:pipe {:template :namespace
-          :params {:title "RELOADS NAMESPACE"
-                   :parallel true}
-          :main {:fn common/ns-reload}}])
+  ([]
+   (reload-task))
+  ([inputs]
+   (reload-task (dependent/sort-topo inputs))))
 
 (definvoke reload-all
   "reloads all listed namespaces and dependents

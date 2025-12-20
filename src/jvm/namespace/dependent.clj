@@ -118,3 +118,20 @@
                        '[hara])
 
   (common/+namespaces+))
+(defn sort-topo
+  "topologically sorts a collection of namespaces
+   
+   (sort-topo '[jvm.namespace.dependent std.lib])
+   => '[std.lib jvm.namespace.dependent]"
+  {:added "3.0"}
+  [nss]
+  (let [nss (set (map symbol nss))
+        graph (reduce (fn [acc ns]
+                        (let [deps (->> (vals (ns-aliases ns))
+                                        (map #(.getName ^clojure.lang.Namespace %))
+                                        (filter nss)
+                                        set)]
+                          (assoc acc ns deps)))
+                      {}
+                      nss)]
+    (h/topological-sort graph)))
