@@ -73,6 +73,7 @@
         stop     (atom nil)
         ready    (promise)
         handler  (create-websocket-handler channel return ready)
+        port     (if (boolean? port) 0 port)
         stop-fn  (server/run-server handler {:port port})
         _ (reset! stop stop-fn)]
     (basic/map->RuntimeServer
