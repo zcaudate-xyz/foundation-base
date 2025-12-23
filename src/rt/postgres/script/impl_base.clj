@@ -146,7 +146,11 @@
                          (list (:type rattrs) v))))
                    
                    (= :enum type)
-                   (enum-fn v attrs)
+                   (let [out (enum-fn v attrs)]
+                     (if (and (not (nil? (:default sql)))
+                              coalesce)
+                       (list 'coalesce out (:default sql))
+                       out))
                    
                    :else
                    (let [type (common/pg-type-alias type)]
