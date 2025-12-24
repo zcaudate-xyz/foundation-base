@@ -97,35 +97,42 @@
    (let [not-checked (volatile! #{})
          _ (if *input-syms*
              (vswap! *input-syms* h/union dsyms))
-         _ (h/prewalk (fn [x]
-                        (cond (h/form? x)
-                              (cond (= 'let
-                                       (first x))
-                                    (binding [*input-syms* (volatile! @not-checked)]
-                                      (apply list
-                                             (atom (first x))
-                                             (rest x)))
-                                    
-                                    :else
-                                    (apply list
-                                             (atom (first x))
-                                             (rest x)))
+         collect-syms (fn [form]
+                        (h/walk:find
+                         (fn [x]
+                           (and (symbol? x)
+                                (nil? (namespace x))))
+                         form))
+         check-fn (fn check-fn [csyms x]
+                    (cond (h/form? x)
+                          (let [f (first x)]
+                            (cond (= 'let f)
+                                  (let [bindings   (second x)
+                                        inner-body (drop 2 x)
+                                        pairs      (partition 2 bindings)
+                                        inner-syms (reduce (fn [acc [b v]]
+                                                             (check-fn csyms v)
+                                                             (h/union acc (collect-syms b)))
+                                                           csyms
+                                                           pairs)]
+                                    (run! (fn [v] (check-fn inner-syms v)) inner-body))
+                                  
+                                  :else
+                                  (run! (fn [v] (check-fn csyms v)) x)))
+                          
+                          (vector? x)
+                          (run! (fn [v] (check-fn csyms v)) x)
 
-                              (and (set? x)
-                                   (vector? (first x)))
-                              (atom x)
-                              
-                              (and (symbol? x)
-                                   (re-find #"^\w-\w+"  (str x))
+                          (symbol? x)
+                          (if (and (re-find #"^\w-\w+" (str x))
                                    (not (re-find #"^\w-ret$" (str x)))
-                                   (not (get dsyms x))
-                                   (not (if *input-syms*
-                                          (get @*input-syms* x))))
-                              (do (vswap! not-checked conj x)
-                                  x)
-                              
-                              :else x))
-                      body)]
+                                   (not (get csyms x))
+                                   (not (if *input-syms* (get @*input-syms* x))))
+                            (vswap! not-checked conj x))
+                          
+                          (coll? x)
+                          (run! (fn [v] (check-fn csyms v)) x)))]
+     (run! (fn [v] (check-fn dsyms v)) body)
      (if (not-empty @not-checked)
        (h/error "Unknown symbols in form" {:symbols @not-checked
                                            :dsyms dsyms})))))
