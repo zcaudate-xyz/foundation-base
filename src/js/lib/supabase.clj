@@ -6,13 +6,13 @@
             [net.http :as http]))
 
 (l/script :js
-  {:import [["@supabase/supabase-js" :as [* SupabaseClient]]
-            ["@supabase/supabase-js" :as [* SupabaseClient]]]})
+  {:import [["@supabase/supabase-js" :as [* SupabaseClient]]]})
 
 (h/template-entries [l/tmpl-entry {:type :fragment
                                    :base "SupabaseClient"
                                    :tag "js"}]
   [SupabaseClient
+   createClient
    [createSupabaseClient createClient]])
 
 (h/template-entries [l/tmpl-macro {:base "SupabaseClient"
