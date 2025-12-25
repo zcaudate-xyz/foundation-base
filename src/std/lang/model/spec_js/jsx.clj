@@ -214,9 +214,7 @@
              body-arr (binding [common/*indent* 0]
                         (->> children
                              (mapv (fn [form]
-                                     (cond (string? form) form
-
-                                           (and (vector? form)
+                                     (cond (and (vector? form)
                                                 (keyword? (first form)))
                                            (emit-jsx-inner form grammar mopts)
 
