@@ -133,7 +133,8 @@
   ([path]
    (h/prn "Starting build watcher on:" path)
    (let [cb (fn [type file]
-              (when (= type :modify)
+              (when (or (= type :modify)
+                        (= type :create))
                 (#'file-watcher-handler (.getPath file) nil)))]
      (watch/start-watcher (watch/watcher path cb {:recursive true
                                                   :types :all})))))
