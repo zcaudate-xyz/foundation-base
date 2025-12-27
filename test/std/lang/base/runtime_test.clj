@@ -105,6 +105,21 @@
 (fact "checks if object is default runtime"
   (rt/rt-default? (rt/rt-default {:lang :lua})) => true)
 
+^{:refer std.lang.base.runtime/rt-null :added "4.0"}
+(fact "creates a null runtime"
+
+  (rt/rt-null {:lang :lua})
+  => rt/rt-null?)
+
+^{:refer std.lang.base.runtime/rt-null? :added "4.0"}
+(fact "checks if object is null runtime"
+
+  (rt/rt-null? (rt/rt-null {:lang :lua}))
+  => true
+
+  (h/p:rt-raw-eval (rt/rt-null {:lang :lua}) "1 + 1")
+  => nil)
+
 ^{:refer std.lang.base.runtime/install-lang! :added "4.0"}
 (fact "installs a language within `std.lib.context`"
   (rt/install-lang! :lua) => (any map? vector?))

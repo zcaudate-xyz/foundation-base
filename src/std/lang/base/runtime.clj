@@ -158,6 +158,48 @@
   {:added "4.0"}
   ([obj]
    (instance? RuntimeDefault obj)))
+
+(defn- rt-null-string [{:keys [lang]}]
+  (str "#rt:null" [lang]))
+
+(defimpl RuntimeNull [lang]
+  :string rt-null-string
+  :protocols
+  [protocol.context/IContext
+   :body
+   {-raw-eval      nil
+    -init-ptr      nil
+    -tags-ptr      nil
+    -deref-ptr     nil
+    -display-ptr   nil
+    -invoke-ptr    nil
+    -transform-in-ptr   args
+    -transform-out-ptr  return}
+   protocol.component/IComponent
+   :body
+   {-start   component
+    -stop    component
+    -kill    component}
+
+   protocol.component/IComponentQuery
+   :body
+   {-started?      true
+    -stopped?      true
+    -info          {}
+    -remote?       false
+    -health        true}])
+
+(defn rt-null
+  "creates a null runtime"
+  {:added "4.0"}
+  ([{:keys [lang] :as m}]
+   (map->RuntimeNull (merge m {:runtime :null}))))
+
+(defn rt-null?
+  "checks if object is null runtime"
+  {:added "4.0"}
+  ([obj]
+   (instance? RuntimeNull obj)))
   
 (h/res:spec-add
  {:type :hara/lang.rt
