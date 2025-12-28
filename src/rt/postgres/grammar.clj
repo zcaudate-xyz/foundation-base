@@ -45,7 +45,7 @@
                                :vars
                                :block
                                :control-base
-                               [:control-general :include [:for :branch]]
+                               [:control-general :include [:branch]]
                                #_:control-try-catch
                                :top-base
                                :macro])
@@ -59,7 +59,7 @@
         :or        {:raw "OR" :wrap true}
         :and       {:raw "AND" :wrap true}
         :seteq     {:raw ":=" :value true}
-        :ret       {:raw "RETURN"}
+        :ret       {:raw "RETURN" :emit :prefix :type :statement}
         :defrun    {:hydrate #'common/pg-hydrate
                     :static/return [:block]}
         :defn      {:hydrate #'common/pg-hydrate
@@ -69,14 +69,19 @@
         :def       {:emit :macro
                     :format  #'common/pg-format
                     :hydrate #'common/pg-hydrate
-                    :macro   #'common/pg-defblock}
-        :for       {:macro #'tf/pg-tf-for  :emit :macro}})
+                    :macro   #'common/pg-defblock}})
       
       ;;
       ;; OPS
       ;;
       (grammar/build:extend
-       {:try     {:op :try         :symbol #{'try}
+       {:FOR     {:op :FOR :raw "FOR" :type :block :emit :block}
+        :IN      {:op :IN  :raw "IN"}
+        :LOOP    {:op :LOOP :raw "LOOP"}
+        :END-LOOP {:op :END-LOOP :raw "END LOOP"}
+        :return  {:op :return :raw "RETURN" :emit :prefix :type :statement}
+
+        :try     {:op :try         :symbol #{'try}
                   :type :block     :block  {:main #{:body}
                                             :control [[:catch   {:required true
                                                                  :main #{:parameter :body}}]]}}

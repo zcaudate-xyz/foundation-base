@@ -1,5 +1,6 @@
 (ns rt.postgres.script.impl-main
   (:require [std.lib :as h]
+            [clojure.walk :as walk]
             [std.string :as str]
             [std.lib.schema :as schema]
             [std.lang :as l]
@@ -199,3 +200,37 @@
                                          (namespace spec-sym)))]
     (let [[entry tsch mopts] (base/prep-table spec-sym false (l/macro-opts))]
       (t-fields-raw [entry tsch mopts] params))))
+
+;;
+;; for
+;;
+
+(defn t-for-raw
+  "constructs a for loop with prep"
+  {:added "4.0"}
+  ([[entry tsch mopts] [target & [{:keys [where returning into as args single order-by limit] :as params}]] body]
+   (let [query (t-select-raw [entry tsch mopts] (merge {:as :raw} params))
+         body  (mapcat (fn [x]
+                         (if (and (seq? x)
+                                  (symbol? (first x))
+                                  (#{"return" "ret"} (name (first x))))
+                           [(apply vector (keyword (name (first x))) (rest x))
+                            \;]
+                           [x]))
+                       body)]
+     (apply vector
+            :FOR target :IN query :LOOP
+            '\\
+            (concat
+             body
+             ['\\ :END-LOOP \;])))))
+
+(defn t-for
+  "constructs a for loop"
+  {:added "4.0"}
+  ([bindings body]
+   (let [[target spec-sym params] bindings]
+     (binding [base/*skip-checks* (not (and (symbol? spec-sym)
+                                            (namespace spec-sym)))]
+       (let [[entry tsch mopts] (base/prep-table spec-sym false (l/macro-opts))]
+         (t-for-raw [entry tsch mopts] [target params] body))))))

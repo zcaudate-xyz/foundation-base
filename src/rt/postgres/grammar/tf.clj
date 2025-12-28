@@ -59,25 +59,25 @@
   "creates for loop"
   {:added "4.0"}
   ([[_ args & body]]
-   `[:FOR ~@args :LOOP
+   `["FOR" ~@args "LOOP"
      \\ (\| (do ~@body))
-     \\ :END-LOOP \;]))
+     \\ "END LOOP" \;]))
 
 (defn pg-tf-foreach
   "creates foreach loop"
   {:added "4.0"}
   ([[_ args & body]]
-   `[:FOREACH ~@args :LOOP
+   `["FOREACH" ~@args "LOOP"
      \\ (\| (do ~@body))
-     \\ :END-LOOP \;]))
+     \\ "END LOOP" \;]))
 
 (defn pg-tf-loop
   "creates loop"
   {:added "4.0"}
   ([[_ & body]]
-   `[:LOOP
+   `["LOOP"
     \\ (\| (do ~@body))
-    \\ :END-LOOP \;]))
+    \\ "END LOOP" \;]))
 
 ;;
 ;; js basic
@@ -115,8 +115,3 @@
                _  (do:reduce out || :jsonb arr)]
            (return out))))
   (h/pl (std.lang/pg (do:reduce out || :json [{} {}]))))
-
-
-
-
-

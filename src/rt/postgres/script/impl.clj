@@ -144,3 +144,10 @@
 
 (comment
   (./create-tests))
+(defmacro.pg ^{:- [:block]
+               :style/indent 1}
+  t:for
+  "iterator for loop"
+  {:added "4.0"}
+  ([bindings & body]
+   (main/t-for bindings body)))
