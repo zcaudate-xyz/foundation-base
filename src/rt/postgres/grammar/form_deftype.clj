@@ -137,6 +137,19 @@
                               (symbol (str/snake-case (name id)))))
                           schema-primary))])]))))
 
+(defn pg-deftype-partition
+  "creates the partition clause"
+  {:added "4.0"}
+  ([params]
+   (if-let [[method & args] (:partition params)]
+     [:partition-by method
+      (list 'quote
+            (cond (vector? (first args))
+                  (apply list (first args))
+
+                  :else
+                  (apply list args)))])))
+
 (defn pg-deftype-indexes
   "create index statements"
   {:added "4.0"}
@@ -182,17 +195,19 @@
          tconstraints (->> (:constraints params)
                            (mapv (fn [[k val]]
                                    (list '% [:constraint (symbol (h/strn k))
-                                             :check (list 'quote (list val))]))))]
+                                             :check (list 'quote (list val))]))))
+         tpartition (pg-deftype-partition params)]
      (if (not existing)
        `(do ~@(if-not final [[:drop-table :if-exists ttok :cascade]] [])
-            [:create-table :if-not-exists ~ttok \(
-             \\ (\|  ~(vec (interpose
-                            (list :- ",\n")
-                            (concat cols
-                                    tprimaries
-                                    tuniques
-                                    tconstraints))))
-             \\ \)]
+            ~(cond-> [:create-table :if-not-exists ttok \(
+                      \\ (list \| (vec (interpose
+                                        (list :- ",\n")
+                                        (concat cols
+                                                tprimaries
+                                                tuniques
+                                                tconstraints))))
+                      \\ \)]
+               tpartition (into tpartition))
             ~@tindexes)
        ""))))
 

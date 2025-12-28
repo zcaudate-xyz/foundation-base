@@ -106,3 +106,13 @@
   
   (pg-deftype-primaries [{:id "a" :type :uuid} {:id "b" :type :uuid}])
   => '[(:- [:primary-key (quote (a b))])])
+
+^{:refer rt.postgres.grammar.form-deftype/pg-deftype-partition :added "4.0"}
+(fact "creates the partition clause"
+  ^:hidden
+
+  (pg-deftype-partition {:partition [:list :symbol]})
+  => (list :partition-by :list (list 'quote '(:symbol)))
+
+  (pg-deftype-partition {:partition [:list [:a :b]]})
+  => (list :partition-by :list (list 'quote '(:a :b))))
