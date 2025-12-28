@@ -3,7 +3,8 @@
             [std.lib :as h]
             [std.string :as str]
             [std.json :as json]
-            [net.http :as http]))
+            [net.http :as http])
+  (:refer-clojure :exclude [not or range]))
 
 (l/script :js
   {:import [["@supabase/supabase-js" :as [* SupabaseClient]]]})
