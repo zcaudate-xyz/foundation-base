@@ -166,6 +166,14 @@
          _ (if (not-empty g-indexes) (h/error "TODO"))]
      s-indexes)))
 
+(defn pg-deftype-partition
+  "creates partition by statement"
+  {:added "4.0"}
+  ([params]
+   (if-let [partition (:partition-by params)]
+     (let [[method & cols] partition]
+       (list :partition-by method (list 'quote cols))))))
+
 (defn pg-deftype
   "creates a deftype statement"
   {:added "4.0"}
@@ -178,7 +186,9 @@
          ttok     (common/pg-full-token sym schema)
          tuniques (pg-deftype-uniques col-spec)
          tprimaries (pg-deftype-primaries schema-primary)
-         tindexes (pg-deftype-indexes col-spec ttok)
+         tindexes   (pg-deftype-indexes col-spec ttok)
+         tpartition (pg-deftype-partition params)
+         tcustom      (:custom params)
          tconstraints (->> (:constraints params)
                            (mapv (fn [[k val]]
                                    (list '% [:constraint (symbol (h/strn k))
@@ -191,8 +201,10 @@
                             (concat cols
                                     tprimaries
                                     tuniques
-                                    tconstraints))))
-             \\ \)]
+                                    tconstraints
+                                    tcustom))))
+             \\ \)
+             ~@tpartition]
             ~@tindexes)
        ""))))
 
