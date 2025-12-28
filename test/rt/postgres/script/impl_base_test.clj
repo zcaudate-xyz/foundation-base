@@ -94,7 +94,19 @@
   (t-val-fn -tsch-
             :cache 'a {}
             (last (prep-table 'scratch/Task true (l/rt:macro-opts :postgres))))
-  => '(:uuid a))
+  => '(:uuid a)
+
+  (fact "t-val-fn handles composite primary key reference"
+    (with-redefs [book/get-base-entry (fn [_ _ _ _]
+                                        {:static/schema-primary [{:id :id :type :uuid}
+                                                                 {:id :prospect_id :type :ref}]})
+                  prep-table (fn [& _] [nil {:k [{:type :ref :ref {:link {:id :tbl}}}]} {}])]
+      (t-val-fn {:k [{:type :ref :ref {:link {:id :tbl}}}]}
+                :k
+                "some-uuid"
+                {}
+                {:book {}}))
+    => '(:uuid "some-uuid")))
 
 ^{:refer rt.postgres.script.impl-base/t-key-attrs-fn :added "4.0"}
 (fact "builds a js key"

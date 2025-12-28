@@ -80,7 +80,19 @@
                        (last (base/prep-table 'scratch/Task false (l/rt:macro-opts :postgres))))
   => '(--- [(== #{"status"} (++ "error" rt.postgres.script.scratch/EnumStatus))
              (== #{"op_updated"} (:uuid (:->> o-op "id")))
-             (== #{"time_updated"} (:bigint (:->> o-op "time")))]))
+             (== #{"time_updated"} (:bigint (:->> o-op "time")))])
+
+  (fact "t-update-map handles composite primary key reference"
+    (with-redefs [book/get-base-entry (fn [_ _ _ _]
+                                        {:static/schema-primary [{:id :id :type :uuid}
+                                                                 {:id :prospect_id :type :ref}]})
+                  base/prep-table (fn [& _] [nil {:k [{:type :ref :ref {:link {:id :tbl}}}]} {}])
+                  base/t-key-fn (fn [_ k] k)]
+      (update/t-update-map {:k [{:type :ref :ref {:link {:id :tbl}} :order 1}]}
+                           {:k "some-uuid"}
+                           {}
+                           {:book {}}))
+    => (list '--- [(list '== #{:k} '(:uuid "some-uuid"))])))
 
 ^{:refer rt.postgres.script.impl-update/t-update-raw :added "4.0"}
 (fact "contructs an update form with prep"

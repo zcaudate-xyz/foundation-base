@@ -137,7 +137,11 @@
                                                      (:module link)
                                                      (:id link)
                                                      :code)
-                         rattrs (:static/schema-primary entry)]
+                         rattrs (:static/schema-primary entry)
+                         rattrs (if (vector? rattrs)
+                                  (or (first (filter #(= (:id %) :id) rattrs))
+                                      (first rattrs))
+                                  rattrs)]
                      (if (= :enum (:type rattrs))
                        (enum-fn v rattrs)
                        (if (and (list? v)
