@@ -133,7 +133,9 @@
       (str (print-preliminary "FAILED" :red summary)
            (if parent  (str "\n" (ansi/style  (pad-left 8 "Parent")
                                               #{:red}) "  " (str/indent-rest (pretty/pprint-str parent) 12)))
-           (str "\n"  (ansi/style (pad-left 8  "Check:") #{:red}) "  " check)
+           (if diff
+             (str "\n"  (ansi/style (pad-left 8  "Actual:") #{:red}) "  " (str/indent-rest (pretty/pprint-str result) 12))
+             (str "\n"  (ansi/style (pad-left 8  "Check:") #{:red}) "  " check))
            (if diff
              (str "\n" (ansi/style (pad-left 8 "Diff:") #{:red :bold}) "  " (str/indent-rest (format-diff diff) 10))
              (str "\n"  (ansi/style (pad-left 8 "OUTPUT") #{:red :bold}) "  " (str/indent-rest
