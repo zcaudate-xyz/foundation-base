@@ -13,6 +13,7 @@
             [std.lang.base.util :as ut]
             [std.json :as json]
             [std.lib :as h :refer [defimpl]]
+            [std.lib.context.registry :as reg]
             [std.string :as str]))
 
 ;;
@@ -163,6 +164,20 @@
  {:type :hara/lang.rt
   :config {:bootstrap false}
   :instance {:create rt-default}})
+
+(defn rt-null
+  "creates a default null runtime"
+  {:added "4.0"}
+  ([m]
+   (rt-default (assoc m :lang :null))))
+
+(h/res:spec-add
+ {:type :hara/context.rt.null
+  :instance {:create rt-null}})
+
+(alter-var-root #'reg/+rt-null+
+                (fn [_]
+                  (rt-null reg/+null+)))
 
 ;;
 ;;
