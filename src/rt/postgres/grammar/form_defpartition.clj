@@ -30,28 +30,33 @@
           :keys [existing]} (meta sym)
          ttok     (common/pg-full-token sym schema)
 
-         ;; Extract :of and :for from spec/params or spec
-         ;; Usually specs are odd, so it might be [:of parent :for values]
-         ;; But grammar-spec/format-defn splits it into spec and params.
-         ;; Let's assume the user writes (defpartition.pg my-part [:of parent :for values] ...)
+         ;; New syntax: (defpartition.pg Sym [Parent] {:for ... :partition-by ...})
+         parent-sym (first spec)
+         _ (when-not parent-sym (h/error "Partition must have a parent table in spec vector"))
 
-         ;; If spec is a vector, we process it.
-         args (apply hash-map spec)
-         parent (:of args)
-         for-values (:for args)
+         ;; Handle -/ namespace for parent
+         parent-schema (let [ns (namespace parent-sym)]
+                         (if (= ns "-")
+                           schema ;; Use current schema if -/
+                           ns))   ;; Otherwise use explicit namespace or nil
 
-         parent-tok (if parent
-                      (common/pg-full-token parent (:static/schema (meta parent)))
-                      (h/error "Partition must have an :of parent table"))
+         parent-tok (common/pg-full-token (symbol (name parent-sym)) parent-schema)
 
+         for-values (:for params)
          for-clause (if for-values
                       (if (vector? for-values)
                          (list :for :values :in (list 'quote for-values)) ;; List partition
-                         (list :for :values :from (list 'quote (first for-values)) :to (list 'quote (second for-values)))) ;; Range partition
-                      (h/error "Partition must have :for values"))]
+                         (list :for :values
+                               :from (list 'quote (list (first for-values)))
+                               :to   (list 'quote (list (second for-values))))) ;; Range partition
+                      (h/error "Partition must have :for values"))
+
+         partition-by-clause (if-let [pb (:partition-by params)]
+                               (list :partition-by (first pb) (list 'quote (second pb))))]
 
      (if (not existing)
        `(do [:create-table :if-not-exists ~ttok
              :partition-of ~parent-tok
-             ~@for-clause])
+             ~@for-clause
+             ~@partition-by-clause])
        ""))))
