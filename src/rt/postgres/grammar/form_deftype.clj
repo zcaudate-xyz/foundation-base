@@ -25,11 +25,16 @@
 ;;
 ;;
 
+(defn pg-deftype-ref-name
+  "gets the ref name"
+  {:added "4.0"}
+  ([col {:keys [raw]}]
+   (if raw raw (str/snake-case (str (h/strn col) "_id")))))
 
 (defn pg-deftype-ref-link
   "creates the ref entry for"
   {:added "4.0"}
-  ([col {:keys [ns link current column] :or {column :id}} {:keys [snapshot] :as mopts}]
+  ([col {:keys [ns link current column] :as m :or {column :id}} {:keys [snapshot] :as mopts}]
    (let [{:keys [lang module section id]} link
          book   (snap/get-book snapshot lang)
          r-en   (book/get-base-entry book module id section)
@@ -38,7 +43,7 @@
           (apply hash-map %)
           (get column)
           (or {:type :uuid}))]
-     [(str/snake-case (str (h/strn col) "_id"))
+     [(pg-deftype-ref-name col m)
       [(common/pg-type-alias type)]
       [(list (common/pg-base-token #{(name ns)} (:static/schema r-en))
              #{(name column)})]])))
@@ -46,9 +51,9 @@
 (defn pg-deftype-ref-current
   "creates the ref entry for"
   {:added "4.0"}
-  ([col {:keys [current column] :or {column :id}} {:keys [snapshot] :as mopts}]
+  ([col {:keys [current column] :as m :or {column :id}} {:keys [snapshot] :as mopts}]
    (let [{:keys [id schema type]}  current]
-     [(str/snake-case (str (h/strn col) "_id"))
+     [(pg-deftype-ref-name col m)
       [(common/pg-type-alias type)]
       [(list (list '. #{schema} #{id})
              #{(name column)})]])))
@@ -82,7 +87,7 @@
 (defn pg-deftype-col-fn
   "formats the column on deftype"
   {:added "4.0"}
-  ([[col {:keys [type primary scope sql required unique enum] :as m}] mopts]
+  ([[col {:keys [type primary scope sql required unique enum ref] :as m}] mopts]
    (let [[col-name col-attrs ref-toks]
          (if (= type :ref)
            (pg-deftype-ref col (:ref m) mopts)
@@ -93,7 +98,9 @@
                      (true? primary)  (conj :primary-key)
                      required (conj :not-null)
                      unique   (conj :unique)
-                     (and (= type :ref) (not (:partition sql)))     (conj :references ref-toks)
+                     (and (= type :ref)
+                          (not (:partition sql))
+                          (not (:group ref)))     (conj :references ref-toks)
                      sql (pg-deftype-col-sql (cond-> sql
                                                (and (= type :ref) (:partition sql))
                                                (dissoc :cascade))))]
@@ -103,21 +110,21 @@
   "collect unique keys on deftype"
   {:added "4.0"}
   ([cols]
-   (let [groups (->> (keep (fn [[k {:keys [type sql]}]]
+   (let [groups (->> (keep (fn [[k {:keys [type sql ref]}]]
                              (if (:unique sql)
                                (if (vector? (:unique sql))
                                  (mapv (fn [s]
-                                         [s {:key  k :type type}])
+                                         [s {:key  k :type type :ref ref}])
                                        (:unique sql))
-                                 [[(:unique sql) {:key  k :type type}]])))
+                                 [[(:unique sql) {:key  k :type type :ref ref}]])))
                            cols)
                      (mapcat identity)
                      (group-by first)
                      (h/map-vals (partial map second)))]
      (mapv (fn [keys]
-             (let [kcols (map (fn [{:keys [key type]}]
+             (let [kcols (map (fn [{:keys [key type ref]}]
                                 (if (= :ref type)
-                                  #{(str (str/snake-case (name key)) "_id")}
+                                  #{(pg-deftype-ref-name key ref)}
                                   #{(str/snake-case (name key))}))
                               keys)]
                (list '% [:unique (list 'quote kcols)])))
@@ -134,9 +141,9 @@
        [(list :-
               [:primary-key
                (list 'quote
-                     (map (fn [{:keys [id type]}]
+                     (map (fn [{:keys [id type ref]}]
                             (if (= :ref type)
-                              (symbol (str (str/snake-case (name id)) "_id"))
+                              (symbol (pg-deftype-ref-name id ref))
                               (symbol (str/snake-case (name id)))))
                           schema-primary))])]))))
 
@@ -144,17 +151,17 @@
   "create index statements"
   {:added "4.0"}
   ([cols ttok]
-   (let [c-indexes (keep (fn [[k {:keys [type sql]}]]
+   (let [c-indexes (keep (fn [[k {:keys [type sql ref]}]]
                            (let [{:keys [index]} sql]
                              (if index
                                (merge (if (true? index)
                                         {}
                                         index)
-                                      {:key k :type type}))))
+                                      {:key k :type type :ref ref}))))
                          cols)
-         key-fn    (fn [{:keys [key type]}]
+         key-fn    (fn [{:keys [key type ref]}]
                      (if (= :ref type)
-                       #{(str (str/snake-case (name key)) "_id")}
+                       #{(pg-deftype-ref-name key ref)}
                        #{(str/snake-case (name key))}))
          g-indexes (group-by :group c-indexes)
          s-indexes (->> (get g-indexes nil)
@@ -227,6 +234,56 @@
                                                 [:on-delete-cascade]))))))))
             vec)))))
 
+(defn pg-deftype-foreigns
+  "creates foreign key constraints"
+  {:added "4.0"}
+  ([sym col-spec mopts]
+   (let [groups (->> col-spec
+                     (mapcat (fn [[col {:keys [type ref foreign]}]]
+                               (concat
+                                (when (and (= :ref type) (:group ref))
+                                  [[(:group ref)
+                                    {:local-col (pg-deftype-ref-name col ref)
+                                     :remote-col (or (:column ref) :id)
+                                     :ns (:ns ref)
+                                     :link (:link ref)}]])
+                                (when foreign
+                                  (for [[group f-spec] foreign]
+                                    [group
+                                     {:local-col (if (= type :ref)
+                                                   (pg-deftype-ref-name col ref)
+                                                   (str/snake-case (name col)))
+                                      :remote-col (:column f-spec)
+                                      :ns (:ns f-spec)
+                                      :link (:link f-spec)}])))))
+                     (group-by first)
+                     (h/map-vals (partial map second)))]
+     (mapv (fn [[group entries]]
+             (let [table-name (str/snake-case (name sym))
+                   c-name (str "fk_" table-name "_" (name group))
+
+                   sample (first entries)
+                   _ (when (not (apply = (map :ns entries)))
+                       (h/error "All entries in a foreign group must point to same namespace" {:group group :entries entries}))
+
+                   {:keys [link]} sample
+                   book (if (and link (:snapshot mopts))
+                          (snap/get-book (:snapshot mopts) (:lang link)))
+                   r-en (if book
+                          (book/get-base-entry book (:module link) (:id link) (:section link)))
+
+                   remote-schema (:static/schema r-en)
+                   remote-table (name (:id link))
+
+                   local-cols (map (comp symbol :local-col) entries)
+                   remote-cols (map (comp symbol name :remote-col) entries)]
+
+               (list '% [:constraint (symbol c-name)
+                         :foreign-key (list 'quote local-cols)
+                         :references (list (common/pg-base-token #{remote-table} remote-schema)
+                                           (list 'quote remote-cols))])))
+           groups))))
+
 (defn pg-deftype
   "creates a deftype statement"
   {:added "4.0"}
@@ -240,6 +297,7 @@
          tuniques (pg-deftype-uniques col-spec)
          tprimaries (pg-deftype-primaries schema-primary)
          tindexes   (pg-deftype-indexes col-spec ttok)
+         tforeigns  (pg-deftype-foreigns sym col-spec mopts)
          tpartition (pg-deftype-partition params)
          tpartition-constraints (pg-deftype-partition-constraints sym col-spec params mopts)
          tcustom      (:custom params)
@@ -257,6 +315,7 @@
                                     tuniques
                                     tconstraints
                                     tcustom
+                                    tforeigns
                                     tpartition-constraints))))
              \\ \)
              ~@tpartition]
@@ -339,9 +398,20 @@
                                          book
                                          snapshot]
                                   :as mopts}]
-   (let [capture (volatile! [])
+   (let [resolve-link-fn (fn [ref]
+                           (if (and (= "-" (namespace (:ns ref)))
+                                    (= (name sym) (name (:ns ref))))
+                             [{:section :code
+                               :lang  :postgres
+                               :module (:id module)
+                               :id (symbol (name sym))} false]
+                             [(select-keys @(or (resolve (:ns ref))
+                                                (h/error "Not found" {:input ref}))
+                                           [:id :module :lang :section])
+                              true]))
+         capture (volatile! [])
          spec  (->> (partition 2 spec)
-                    (mapcat (fn [[k {:keys [type primary ref sql scope] :as attrs}]]
+                    (mapcat (fn [[k {:keys [type primary ref sql scope foreign] :as attrs}]]
                               (let [sql   (cond-> sql
                                             (:process sql) (assoc :process
                                                                   (h/prewalk
@@ -355,7 +425,17 @@
                                                                        x))
                                                                    (:process sql))))
                                     attrs (cond-> attrs
-                                            sql (assoc :sql sql))]
+                                            sql (assoc :sql sql)
+                                            foreign (update :foreign
+                                                            (fn [f-map]
+                                                              (h/map-vals (fn [f-spec]
+                                                                            (if (:ns f-spec)
+                                                                              (let [[link check] (resolve-link-fn f-spec)]
+                                                                                (when check (pg-deftype-hydrate-check-link snapshot link :table))
+                                                                                (merge f-spec {:ns (keyword (name (:ns f-spec)))
+                                                                                               :link link}))
+                                                                              f-spec))
+                                                                          f-map))))]
                                 (if primary
                                   (vswap! capture conj (assoc (select-keys attrs [:type :enum :ref])
                                                               :id k)))
@@ -371,16 +451,7 @@
                                           :scope :-/ref}]
                                       
                                       (= :ref type)
-                                      (let [[link check] (if (and (= "-" (namespace (:ns ref)))
-                                                                  (= (name sym) (name (:ns ref))))
-                                                           [{:section :code
-                                                             :lang  :postgres
-                                                             :module (:id module)
-                                                             :id (symbol (name sym))} false]
-                                                           [(select-keys @(or (resolve (:ns ref))
-                                                                              (h/error "Not found" {:input ref}))
-                                                                         [:id :module :lang :section])
-                                                            true])
+                                      (let [[link check] (resolve-link-fn ref)
                                             attrs (update attrs :ref
                                                           merge {:ns   (keyword (name (:ns ref)))
                                                                  :link link})
