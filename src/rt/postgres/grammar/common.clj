@@ -73,7 +73,7 @@
   {:added "4.0"}
   ([form]
    (let [[mdefn [op sym [table] policy]] (grammar-spec/format-defn form)
-         mname    (str (:doc mdefn) " - " sym)
+         mname    (str sym " - " (:doc mdefn))
          [mschema
           mtable] (if-let [v (resolve table)]
                     [nil (str (:id @v))]
@@ -405,7 +405,6 @@
         ttok  (pg-full-token sym schema)]
     `(~'do [:create ~@return ~ttok ~@array])))
 
-
 ;;
 ;; defpartition
 ;;
@@ -451,12 +450,14 @@
       (let [new-name (str table-name "_default")
             full-new (if parent-ns
                        (str parent-ns "." (pg-partition-quote-id new-name))
-                       (pg-partition-full-name schema-prefix new-name))
-            stmt (str "CREATE TABLE IF NOT EXISTS " full-new " PARTITION OF " full-parent " DEFAULT")]
-         (list
-          (list 'raw (if next-col
-                       (str stmt " PARTITION BY LIST (" next-col ");")
-                       (str stmt ";")))))
+                       (pg-partition-full-name schema-prefix new-name))]
+        (list
+         (vec (concat [:create-table :if-not-exists (list 'raw full-new)
+                       :partition-of (list 'raw full-parent) :default]
+                      (if next-col
+                        [:partition-by :list (list 'quote (list (symbol next-col)))]
+                        [])
+                      #_[\;]))))
       
       (mapcat (fn [val]
                 (let [new-name (pg-partition-name table-name val stack)
@@ -465,15 +466,16 @@
                                      :else (symbol new-name))
                       full-new (if parent-ns
                                  (str parent-ns "." (pg-partition-quote-id new-name))
-                                 (pg-partition-full-name schema-prefix new-name))
-                      
-                      val-lit  (pg-string val)
-                      stmt (str "CREATE TABLE IF NOT EXISTS " full-new " PARTITION OF " full-parent " FOR VALUES IN (" val-lit ")")]
+                                 (pg-partition-full-name schema-prefix new-name))]
                   
                   (concat
-                   [(list 'raw (if next-col
-                                 (str stmt " PARTITION BY LIST (" next-col ");")
-                                 (str stmt ";")))]
+                   [(vec (concat [:create-table :if-not-exists (list 'raw full-new)
+                                  :partition-of (list 'raw full-parent)
+                                  :for :values :in (list 'quote (list val))]
+                                 (if next-col
+                                   [:partition-by :list (list 'quote (list (symbol next-col)))]
+                                   [])
+                                 #_[\;]))]
                    (if (seq remaining-specs)
                      (pg-partition-def new-sym table-name next-spec (rest remaining-specs) (cons val stack))
                      nil))))
@@ -485,4 +487,4 @@
   [[_ sym [parent] specs]]
   (let [base-name (name parent)
         statements (pg-partition-def parent base-name (first specs) (rest specs) [])]
-     (vec (cons 'do statements))))
+     (apply list 'do statements)))

@@ -206,7 +206,7 @@
   ^:hidden
   
   (common/pg-defpolicy '(defpolicy hello [table] ()))
-  => '(do [:drop-policy-if-exists #{" - hello"} :on table] [:create-policy #{" - hello"} :on table \\]))
+  => '(do [:drop-policy-if-exists #{"hello - "} :on table] [:create-policy #{"hello - "} :on table \\]))
 
 ^{:refer rt.postgres.grammar.common/pg-defblock :added "4.0"}
 (fact "creates generic defblock"
@@ -216,13 +216,13 @@
                               :static/schema "scratch"} hello []))
   => '(do [:create :index (. #{"scratch"} #{"hello"})]))
 
-
 ^{:refer rt.postgres.grammar.common/pg-policy-format :added "4.0"}
 (fact "formats a policy definition"
   ^:hidden
   
   (common/pg-policy-format '(defpolicy hello [table] ()))
-  => '[{:doc "", :static/policy-name " - hello", :static/policy-table nil, :static/policy-schema "table"} (defpolicy hello "" [table] ())])
+  => '[{:doc "", :static/policy-name "hello - ", :static/policy-table nil, :static/policy-schema "table"}
+       (defpolicy hello "" [table] ())])
 
 ^{:refer rt.postgres.grammar.common/pg-deftrigger :added "4.0"}
 (fact "deftrigger block"
@@ -231,21 +231,47 @@
   (common/pg-deftrigger '(deftrigger hello [table] ()))
   => '(do [:drop-trigger-if-exists hello :on table] [:create-trigger hello :on table \\]))
 
-
 ^{:refer rt.postgres.grammar.common/pg-uuid :added "4.1"}
-(fact "TODO")
+(fact "constructs a pg uuid"
+  ^:hidden
+
+  (common/pg-uuid "123")
+  => "'123'::uuid")
 
 ^{:refer rt.postgres.grammar.common/pg-partition-name :added "4.1"}
-(fact "TODO")
+(fact "constructs partition name"
+  ^:hidden
+  
+  (common/pg-partition-name "table" "val" ["stack"])
+  => "table_val_stack")
 
 ^{:refer rt.postgres.grammar.common/pg-partition-quote-id :added "4.1"}
-(fact "TODO")
+(fact "quotes an identifier if needed"
+  ^:hidden
+  
+  (common/pg-partition-quote-id "id")
+  => "\"id\"")
 
 ^{:refer rt.postgres.grammar.common/pg-partition-full-name :added "4.1"}
-(fact "TODO")
+(fact "constructs partition full name"
+  ^:hidden
+  
+  (common/pg-partition-full-name "schema" "table")
+  => "schema.\"table\""
+
+  (common/pg-partition-full-name nil "table")
+  => "\"table\"")
 
 ^{:refer rt.postgres.grammar.common/pg-partition-def :added "4.1"}
-(fact "TODO")
+(fact "recursive definition for partition"
+  ^:hidden
+  
+  (common/pg-partition-def 'parent "base" {:use :col :in ["a"]} [] [])
+  => '([:create-table :if-not-exists (raw "\"base_a\"") :partition-of (raw "\"base\"") :for :values :in (quote ("a"))]))
 
 ^{:refer rt.postgres.grammar.common/pg-defpartition :added "4.1"}
-(fact "TODO")
+(fact "defpartition block"
+  ^:hidden
+
+  (common/pg-defpartition '(defpartition part [parent] [{:use :col :in ["a"]}]))
+  => '(do [:create-table :if-not-exists (raw "\"parent_a\"") :partition-of (raw "\"parent\"") :for :values :in (quote ("a"))]))
