@@ -109,19 +109,49 @@
 
 
 ^{:refer rt.postgres.grammar.form-deftype/pg-deftype-partition :added "4.1"}
-(fact "TODO")
+(fact "creates partition by statement"
+  (pg-deftype-partition {:partition-by [:range :created_at]})
+  => '(:partition-by :range (quote (:created_at))))
 
 ^{:refer rt.postgres.grammar.form-deftype/pg-deftype-partition-constraints :added "4.1"}
 (fact "TODO")
 
 ^{:refer rt.postgres.grammar.form-deftype/pg-deftype-ref-name :added "4.1"}
-(fact "TODO")
+(fact "gets the ref name"
+  (pg-deftype-ref-name :user {})
+  => "user_id"
+
+  (pg-deftype-ref-name :user_account {})
+  => "user_account_id"
+
+  (pg-deftype-ref-name :user {:raw "custom_id"})
+  => "custom_id")
 
 ^{:refer rt.postgres.grammar.form-deftype/pg-deftype-foreign-groups :added "4.1"}
-(fact "TODO")
+(fact "collects foreign key groups"
+  (pg-deftype-foreign-groups
+   [[:u {:type :ref :ref {:group :g1 :ns :user :link {:id :user}}}]
+    [:a {:type :text :foreign {:g1 {:column :uid :ns :user :link {:id :user}}}}]])
+  => {:g1 '({:local-col "u_id" :remote-col :id :ns :user :link {:id :user}}
+            {:local-col "a"    :remote-col :uid :ns :user :link {:id :user}})})
 
 ^{:refer rt.postgres.grammar.form-deftype/pg-deftype-gen-constraint :added "4.1"}
-(fact "TODO")
+(fact "generates a foreign key constraint"
+  (pg-deftype-gen-constraint
+   'mytable
+   [:g1 [{:local-col "u_id" :remote-col :id :ns :user :link {:id :users}}]]
+   {})
+  => '(% [:constraint fk_mytable_g1
+          :foreign-key (quote (u_id))
+          :references (#{"users"} (quote (id)))]))
 
 ^{:refer rt.postgres.grammar.form-deftype/pg-deftype-foreigns :added "4.1"}
-(fact "TODO")
+(fact "creates foreign key constraints"
+  (pg-deftype-foreigns
+   'mytable
+   [[:u {:type :ref :ref {:group :g1 :ns :user :link {:id :users}}}]
+    [:a {:type :text :foreign {:g1 {:column :uid :ns :user :link {:id :users}}}}]]
+   {})
+  => '[(% [:constraint fk_mytable_g1
+           :foreign-key (quote (u_id a))
+           :references (#{"users"} (quote (id uid)))])])
