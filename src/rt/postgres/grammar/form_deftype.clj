@@ -196,8 +196,29 @@
                             
                             c-name (str "fk_" table-name "_" (str/snake-case (name col)))
                             extract-fn (fn [x] (symbol (if (set? x) (first x) (str x))))
-                            local-cols (list 'quote (cons (symbol local-col) (map extract-fn p-cols)))
-                            remote-cols (list 'quote (cons (symbol remote-col) (map extract-fn p-cols)))]
+
+                            p-cols-syms (map extract-fn p-cols)
+                            {:keys [link]} ref-spec
+                            book (if (and link (:snapshot mopts))
+                                   (snap/get-book (:snapshot mopts) (:lang link)))
+                            target-entry (if book
+                                           (book/get-base-entry book (:module link) (:id link) (:section link)))
+                            target-primary (if target-entry (:static/schema-primary target-entry))
+
+                            target-p-cols (if target-primary
+                                            (map (comp symbol name :id) target-primary))
+
+                            extra-cols (cond
+                                         (:columns ref-spec) (map symbol (:columns ref-spec))
+
+                                         target-p-cols
+                                         (remove #(= % (symbol remote-col)) target-p-cols)
+
+                                         :else
+                                         p-cols-syms)
+
+                            local-cols (list 'quote (cons (symbol local-col) extra-cols))
+                            remote-cols (list 'quote (cons (symbol remote-col) extra-cols))]
                         (list '% (vec (concat [:constraint (symbol c-name)
                                                :foreign-key local-cols
                                                :references remote-table remote-cols]
