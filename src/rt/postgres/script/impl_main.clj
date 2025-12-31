@@ -15,7 +15,7 @@
   "contructs an select form with prep"
   {:added "4.0"}
   ([[entry tsch mopts]
-    {:keys [where where-args returning into field
+    {:keys [join where where-args having returning into field
             as args single order-by order-sort group-by limit offset key-fn]
      :as params
      :or {as :json}}]
@@ -35,11 +35,15 @@
          js-out  (if single 'to-jsonb 'jsonb-agg)
          limit   (if single 1 limit)]
      (-> select
+         (base/t-wrap-join join {:newline true})
          (base/t-wrap-where where tsch
                             {:newline true
                              :where-args where-args}
                             mopts)
          (base/t-wrap-group-by group-by {:newline true})
+         (base/t-wrap-having having tsch
+                             {:newline true}
+                             mopts)
          (base/t-wrap-order-by order-by tsch {:newline true})
          (base/t-wrap-order-sort order-sort tsch {})
          (base/t-wrap-limit limit {:newline true})

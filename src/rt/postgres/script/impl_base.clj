@@ -395,6 +395,14 @@
          :else
          form)))
 
+(defn t-wrap-join
+  "adds a `join` clause"
+  {:added "4.0"}
+  ([form join {:keys [newline]}]
+   (cond-> form
+     (and join newline) (conj \\)
+     join (into join))))
+
 (defn t-wrap-where
   "adds a `where` clause"
   {:added "4.0"}
@@ -465,6 +473,14 @@
    (cond-> form
      (and group-by newline) (conj \\)
      group-by (conj :group-by group-by))))
+
+(defn t-wrap-having
+  "adds a `having` clause"
+  {:added "4.0"}
+  ([form having tsch {:keys [newline]} mopts]
+   (cond-> form
+     (and having newline) (conj \\)
+     having (conj :having (t-where-transform tsch having mopts)))))
 
 (defn t-wrap-args
   "adds `additional` args"

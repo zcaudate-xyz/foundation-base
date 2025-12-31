@@ -43,7 +43,54 @@
   => '[:with j-ret :as [:select (--- [(count *)
                                       (count abc)])
                         :from rt.postgres.script.scratch/Task]
-       \\ :select (jsonb-agg j-ret) :from j-ret])
+       \\ :select (jsonb-agg j-ret) :from j-ret]
+
+  (main/t-select-raw (base/prep-table 'scratch/Task false (l/rt:macro-opts :postgres))
+                     {:join [[:inner-join 'rt.postgres.script.scratch/Project
+                              {:on [:= 'rt.postgres.script.scratch/Task.id 'rt.postgres.script.scratch/Project.id]}]]})
+  => '[:with j-ret :as
+       [:select
+        (--- [#{"id"}
+              #{"status"}
+              #{"name"}
+              #{"cache_id"}
+              #{"time_created"}
+              #{"time_updated"}])
+        :from
+        rt.postgres.script.scratch/Task
+        \\
+        [:inner-join
+         rt.postgres.script.scratch/Project
+         {:on
+          [:=
+           rt.postgres.script.scratch/Task.id
+           rt.postgres.script.scratch/Project.id]}]]
+       \\
+       :select
+       (jsonb-agg j-ret)
+       :from
+       j-ret]
+
+  (main/t-select-raw (base/prep-table 'scratch/Task false (l/rt:macro-opts :postgres))
+                     {:having {:id 1}})
+  => '[:with j-ret :as
+       [:select
+        (--- [#{"id"}
+              #{"status"}
+              #{"name"}
+              #{"cache_id"}
+              #{"time_created"}
+              #{"time_updated"}])
+        :from
+        rt.postgres.script.scratch/Task
+        \\
+        :having
+        {"id" [:eq 1]}]
+       \\
+       :select
+       (jsonb-agg j-ret)
+       :from
+       j-ret])
 
 ^{:refer rt.postgres.script.impl-main/t-select :added "4.0"}
 (fact "contructs an select form with prep"
