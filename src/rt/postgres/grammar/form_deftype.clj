@@ -93,7 +93,9 @@
                      (true? primary)  (conj :primary-key)
                      required (conj :not-null)
                      unique   (conj :unique)
-                     (and (= type :ref) (not (:partition sql)))     (conj :references ref-toks)
+
+                     ;; CHANGE: Removed inline :references. All handled by table constraints now.
+
                      sql (pg-deftype-col-sql (cond-> sql
                                                (and (= type :ref) (:partition sql))
                                                (dissoc :cascade))))]
@@ -169,6 +171,78 @@
          _ (if (not-empty g-indexes) (h/error "TODO"))]
      s-indexes)))
 
+(defn pg-deftype-foreign-keys
+  "collect foreign keys on deftype with grouping and validation"
+  {:added "4.0"}
+  ([cols mopts]
+   (let [groups (->> (keep (fn [[k {:keys [type ref] :as attrs}]]
+                             (if (= :ref type)
+                               (let [grp (get ref :group :default) ;; Default group to :default
+                                     ;; Also group by target namespace to keep distinct tables separate
+                                     target-ns (:ns ref)]
+                                 [k (assoc-in attrs [:ref :group] grp)])))
+                           cols)
+                     ;; Group by [GroupName TargetNamespace]
+                     (group-by (fn [[_ attrs]]
+                                 [(get-in attrs [:ref :group])
+                                  (get-in attrs [:ref :ns])])))]
+     (mapv (fn [[grp-key grp-cols]]
+             (let [;; 1. Resolve Columns (Local Names & Refs)
+                   processed (map (fn [[col attrs]]
+                                    (pg-deftype-ref col (:ref attrs) mopts))
+                                  grp-cols)
+
+                   local-cols (map (comp symbol first) processed)
+
+                   ;; Extract table token from first column in group
+                   [[table-token _]] (nth (first processed) 2)
+
+                   ;; 2. Validation: Check Target Primary Keys
+                   first-ref (-> grp-cols first second :ref)
+                   {:keys [link]} first-ref
+
+                   book   (snap/get-book (:snapshot mopts) (:lang link))
+                   target (if book
+                            (book/get-base-entry book (:module link) (:id link) (:section link)))
+
+                   ;; Extract Target PKs as simple symbols (e.g., #{id} or #{class id})
+                   target-pks (if target
+                                (into #{}
+                                      (map (comp symbol name :id))
+                                      (let [sp (:static/schema-primary target)]
+                                        (if (map? sp) [sp] sp)))
+                                #{})
+
+                   ;; Extract the Remote Columns we are pointing to (via :column DSL)
+                   defined-remote-cols (set (map (fn [[_ attrs]]
+                                                   (symbol (name (get-in attrs [:ref :column]))))
+                                                 grp-cols))]
+
+               ;; Error if mismatch (e.g. Target has (id, class) but we only link (id))
+               (when (and target (not-empty target-pks)
+                          (not (every? defined-remote-cols target-pks)))
+                 (h/error "Foreign Key Group does not cover all target Primary Keys"
+                          {:group (first grp-key)
+                           :target (:id link)
+                           :required target-pks
+                           :provided defined-remote-cols}))
+
+               ;; 3. Generate Constraint
+               (let [remote-cols (map (fn [[_ _ [[_ col-set]]]]
+                                        (symbol (first col-set)))
+                                      processed)
+
+                     ;; Naming: fk_table_groupname OR fk_table_col1_col2 for default group
+                     constraint-name (if (= (first grp-key) :default)
+                                       (str "fk_" (str/snake-case (name (second grp-key))) "_"
+                                            (str/join "_" (map name local-cols)))
+                                       (str "fk_" (str/snake-case (name (first grp-key)))))]
+
+                 (list '% [:constraint (symbol constraint-name)
+                           :foreign-key (list 'quote local-cols)
+                           :references table-token (list 'quote remote-cols)]))))
+           groups))))
+
 (defn pg-deftype-partition
   "creates partition by statement"
   {:added "4.0"}
@@ -176,56 +250,6 @@
    (if-let [partition (:partition-by params)]
      (let [[method & cols] partition]
        (list :partition-by method (list 'quote cols))))))
-
-(defn pg-deftype-partition-constraints
-  "creates partition constraints"
-  {:added "4.0"}
-  ([sym col-spec params mopts]
-   (if-let [partition-by (:partition-by params)]
-     (let [p-cols (vec (rest partition-by))
-           table-name (str/snake-case (name sym))]
-       (->> col-spec
-            (keep (fn [[col props]]
-                    (when (get-in props [:sql :partition])
-                      (let [ref-spec (:ref props)
-                            [local-col _ third-elem] (pg-deftype-ref col ref-spec mopts)
-                            ;; third-elem is [ (remote-table remote-col-set) ]
-                            [ref-list] third-elem 
-                            ;; ref-list is (remote-table remote-col-set)
-                            [remote-table remote-col-set] ref-list
-                            remote-col (first remote-col-set)
-                            
-                            c-name (str "fk_" table-name "_" (str/snake-case (name col)))
-                            extract-fn (fn [x] (symbol (if (set? x) (first x) (str x))))
-
-                            p-cols-syms (map extract-fn p-cols)
-                            {:keys [link]} ref-spec
-                            book (if (and link (:snapshot mopts))
-                                   (snap/get-book (:snapshot mopts) (:lang link)))
-                            target-entry (if book
-                                           (book/get-base-entry book (:module link) (:id link) (:section link)))
-                            target-primary (if target-entry (:static/schema-primary target-entry))
-
-                            target-p-cols (if target-primary
-                                            (map (comp symbol name :id) target-primary))
-
-                            extra-cols (cond
-                                         (:columns ref-spec) (map symbol (:columns ref-spec))
-
-                                         target-p-cols
-                                         (remove #(= % (symbol remote-col)) target-p-cols)
-
-                                         :else
-                                         p-cols-syms)
-
-                            local-cols (list 'quote (cons (symbol local-col) extra-cols))
-                            remote-cols (list 'quote (cons (symbol remote-col) extra-cols))]
-                        (list '% (vec (concat [:constraint (symbol c-name)
-                                               :foreign-key local-cols
-                                               :references remote-table remote-cols]
-                                              (if (get-in props [:sql :cascade])
-                                                [:on-delete-cascade]))))))))
-            vec)))))
 
 (defn pg-deftype
   "creates a deftype statement"
@@ -240,9 +264,14 @@
          tuniques (pg-deftype-uniques col-spec)
          tprimaries (pg-deftype-primaries schema-primary)
          tindexes   (pg-deftype-indexes col-spec ttok)
+
+         ;; ADDED: Grouped Foreign Keys
+         tfks       (pg-deftype-foreign-keys col-spec mopts)
+
          tpartition (pg-deftype-partition params)
-         tpartition-constraints (pg-deftype-partition-constraints sym col-spec params mopts)
-         tcustom      (:custom params)
+         ;; REMOVED: tpartition-constraints
+
+         tcustom    (:custom params)
          tconstraints (->> (:constraints params)
                            (mapv (fn [[k val]]
                                    (list '% [:constraint (symbol (h/strn k))
@@ -250,14 +279,15 @@
      (if (not existing)
        `(do ~@(if-not final [[:drop-table :if-exists ttok :cascade]] [])
             [:create-table :if-not-exists ~ttok \(
-             \\ (\|  ~(vec (interpose
+             \\ (\| ~(vec (interpose
                             (list :- ",\n")
                             (concat cols
                                     tprimaries
                                     tuniques
                                     tconstraints
+                                    tfks ;; Inject FKs here
                                     tcustom
-                                    tpartition-constraints))))
+                                    ))))
              \\ \)
              ~@tpartition]
             ~@tindexes)
@@ -359,6 +389,7 @@
                                 (if primary
                                   (vswap! capture conj (assoc (select-keys attrs [:type :enum :ref])
                                                               :id k)))
+
                                 (cond (and (= :ref type)
                                            (vector? ref))
                                       [k {:type :ref,
@@ -371,7 +402,15 @@
                                           :scope :-/ref}]
                                       
                                       (= :ref type)
-                                      (let [[link check] (if (and (= "-" (namespace (:ns ref)))
+                                      (let [;; NEW: Default :column to :id
+                                            attrs (update-in attrs [:ref]
+                                                             (fn [r]
+                                                               (assoc r :column (or (:column r) :id))))
+
+                                            ;; Re-bind ref from updated attrs
+                                            ref   (:ref attrs)
+
+                                            [link check] (if (and (= "-" (namespace (:ns ref)))
                                                                   (= (name sym) (name (:ns ref))))
                                                            [{:section :code
                                                              :lang  :postgres
