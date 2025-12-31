@@ -198,7 +198,7 @@
 (fact "defindex block"
   ^:hidden
 
-  (common/pg-defindex '(defindex hello [table cols] body))
+  (common/pg-defindex '(defindex hello [table cols] (body)))
   => '[:create-index :if-not-exists hello :on table (quote ([cols])) body \;])
 
 ^{:refer rt.postgres.grammar.common/pg-defpolicy :added "4.0"}
@@ -206,7 +206,7 @@
   ^:hidden
   
   (common/pg-defpolicy '(defpolicy hello [table] ()))
-  => '(do [:drop-policy-if-exists #{" - hello"} :on table] [:create-policy #{" - hello"} :on table \\]))
+  => '(do [:drop-policy-if-exists #{"hello - "} :on table] [:create-policy #{"hello - "} :on table \\]))
 
 ^{:refer rt.postgres.grammar.common/pg-defblock :added "4.0"}
 (fact "creates generic defblock"
@@ -233,19 +233,49 @@
 
 
 ^{:refer rt.postgres.grammar.common/pg-uuid :added "4.1"}
-(fact "TODO")
+(fact "constructs a pg uuid"
+  ^:hidden
+
+  (common/pg-uuid "123")
+  => "'123'::uuid")
 
 ^{:refer rt.postgres.grammar.common/pg-partition-name :added "4.1"}
-(fact "TODO")
+(fact "constructs partition name"
+  ^:hidden
+
+  (common/pg-partition-name "tbl" "val" ["stack"])
+  => "tbl_val_stack")
 
 ^{:refer rt.postgres.grammar.common/pg-partition-quote-id :added "4.1"}
-(fact "TODO")
+(fact "quotes an identifier if needed"
+  ^:hidden
+
+  (common/pg-partition-quote-id "id")
+  => "\"id\"")
 
 ^{:refer rt.postgres.grammar.common/pg-partition-full-name :added "4.1"}
-(fact "TODO")
+(fact "constructs full partition name"
+  ^:hidden
+
+  (common/pg-partition-full-name "schema" "table")
+  => "schema.\"table\""
+
+  (common/pg-partition-full-name nil "table")
+  => "\"table\"")
 
 ^{:refer rt.postgres.grammar.common/pg-partition-def :added "4.1"}
-(fact "TODO")
+(fact "recursive definition for partition"
+  ^:hidden
+
+  (common/pg-partition-def 'tbl "tbl"
+                           {:use :type :in ["a"]}
+                           nil [])
+  => '((raw "CREATE TABLE IF NOT EXISTS \"tbl_a\" PARTITION OF \"tbl\" FOR VALUES IN ('a');")))
 
 ^{:refer rt.postgres.grammar.common/pg-defpartition :added "4.1"}
-(fact "TODO")
+(fact "defpartition block"
+  ^:hidden
+
+  (common/pg-defpartition '(defpartition part [tbl]
+                             ({:use :type :in ["a"]})))
+  => '[do (raw "CREATE TABLE IF NOT EXISTS \"tbl_a\" PARTITION OF \"tbl\" FOR VALUES IN ('a');")])

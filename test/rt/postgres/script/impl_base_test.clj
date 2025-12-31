@@ -351,7 +351,21 @@
 
 
 ^{:refer rt.postgres.script.impl-base/t-wrap-join :added "4.1"}
-(fact "TODO")
+(fact "adds a `join` clause"
+  ^:hidden
+
+  (t-wrap-join [] [:join :foo] {})
+  => [:join :foo]
+
+  (t-wrap-join [] [:join :foo] {:newline true})
+  => [\\ :join :foo])
 
 ^{:refer rt.postgres.script.impl-base/t-wrap-having :added "4.1"}
-(fact "TODO")
+(fact "adds a `having` clause"
+  ^:hidden
+
+  (t-wrap-having [] {:id 1} -tsch- {} {})
+  => '[:having {"id" [:eq 1]}]
+
+  (t-wrap-having [] {:id 1} -tsch- {:newline true} {})
+  => '[\\ :having {"id" [:eq 1]}])

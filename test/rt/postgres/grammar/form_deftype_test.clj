@@ -109,7 +109,21 @@
 
 
 ^{:refer rt.postgres.grammar.form-deftype/pg-deftype-partition :added "4.1"}
-(fact "TODO")
+(fact "creates partition by statement"
+  ^:hidden
+
+  (pg-deftype-partition {:partition-by [:list :col]})
+  => '(:partition-by :list (quote (:col))))
 
 ^{:refer rt.postgres.grammar.form-deftype/pg-deftype-partition-constraints :added "4.1"}
-(fact "TODO")
+(fact "creates partition constraints"
+  ^:hidden
+
+  (pg-deftype-partition-constraints
+   'sym
+   [[:col {:ref {:link {:lang :postgres :module :m :id :t}
+                 :ns "m.t"}
+           :sql {:partition true}}]]
+   {:partition-by [:list :col]}
+   {:snapshot {:postgres {:m {:t {:code {:static/schema-primary [{:id :id}]}}}}}})
+  => (contains [(contains ['% (contains [:constraint 'fk_sym_col :foreign-key])])]))
