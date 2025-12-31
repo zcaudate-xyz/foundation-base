@@ -67,7 +67,7 @@
   "formats the sql on deftype"
   {:added "4.0"}
   ([form sql]
-   (let [{:keys [cascade default constraint]} sql
+   (let [{:keys [cascade default constraint raw]} sql
          cargs (cond (nil? constraint) []
                      (map? constraint) [:constraint (symbol (h/strn (:name constraint)))
                                         :check (list 'quote (list (:check constraint)))]
@@ -75,6 +75,7 @@
      (cond-> form
        cascade (conj :on-delete-cascade)
        (not (nil? default)) (conj :default default)
+       raw   (concat raw)
        :then (concat cargs)
        :then vec))))
 
