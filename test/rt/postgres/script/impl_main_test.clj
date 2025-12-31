@@ -34,7 +34,8 @@
               #{"time_created"}
               #{"time_updated"}])
         :from
-        rt.postgres.script.scratch/Task]
+        rt.postgres.script.scratch/Task
+        \\]
        \\ :select (jsonb-agg j-ret) :from j-ret]
 
   (main/t-select-raw (base/prep-table 'scratch/Task false (l/rt:macro-opts :postgres))
@@ -42,7 +43,8 @@
                                    {:expr '(count abc)}}})
   => '[:with j-ret :as [:select (--- [(count *)
                                       (count abc)])
-                        :from rt.postgres.script.scratch/Task]
+                        :from rt.postgres.script.scratch/Task
+                        \\]
        \\ :select (jsonb-agg j-ret) :from j-ret]
 
   (main/t-select-raw (base/prep-table 'scratch/Task false (l/rt:macro-opts :postgres))
@@ -84,6 +86,7 @@
         :from
         rt.postgres.script.scratch/Task
         \\
+        \\
         :having
         {"id" [:eq 1]}]
        \\
@@ -99,7 +102,7 @@
   (l/with:macro-opts [(l/rt:macro-opts :postgres)]
     (main/t-select 'scratch/Task
                    {:as :raw}))
-  => '[:select * :from rt.postgres.script.scratch/Task]
+  => '[:select * :from rt.postgres.script.scratch/Task \\]
   
   (l/with:macro-opts [(l/rt:macro-opts :postgres)]
     (main/t-select 'scratch/Task
@@ -112,7 +115,8 @@
              #{"time_created"}
              #{"time_updated"}])
        :from
-       rt.postgres.script.scratch/Task])
+       rt.postgres.script.scratch/Task
+       \\])
 
 ^{:refer rt.postgres.script.impl-main/t-id-raw :added "4.0"}
 (fact  "contructs an id form with prep"
@@ -121,7 +125,20 @@
   (main/t-id-raw (base/prep-table 'scratch/Task false (l/rt:macro-opts :postgres))
                  {})
   => '[:select (--- [#{"id"}]) :from rt.postgres.script.scratch/Task
-       \\ :limit 1])
+       \\
+       \\ :limit 1]
+
+  ^:hidden
+  (main/t-id-raw (base/prep-table 'scratch/Task false (l/rt:macro-opts :postgres))
+                 {})
+  => '[:select
+       (--- [#{"id"}])
+       :from
+       rt.postgres.script.scratch/Task
+       \\
+       \\
+       :limit
+       1])
 
 ^{:refer rt.postgres.script.impl-main/t-id :added "4.0"}
 (fact "contructs an id form"
@@ -131,6 +148,7 @@
     (main/t-id 'scratch/Task
                {}))
   => '[:select (--- [#{"id"}]) :from rt.postgres.script.scratch/Task
+       \\
        \\ :limit 1])
 
 ^{:refer rt.postgres.script.impl-main/t-count-raw :added "4.0"}
@@ -139,7 +157,7 @@
   
   (main/t-count-raw (base/prep-table 'scratch/Task false (l/rt:macro-opts :postgres))
                     {})
-  => '[:select (count *) :from rt.postgres.script.scratch/Task])
+  => '[:select (count *) :from rt.postgres.script.scratch/Task \\])
 
 ^{:refer rt.postgres.script.impl-main/t-count :added "4.0"}
 (fact "create count statement"
@@ -148,7 +166,7 @@
   (l/with:macro-opts [(l/rt:macro-opts :postgres)]
     (main/t-count 'scratch/Task
                   {}))
-  => '[:select (count *) :from rt.postgres.script.scratch/Task])
+  => '[:select (count *) :from rt.postgres.script.scratch/Task \\])
 
 ^{:refer rt.postgres.script.impl-main/t-exists-raw :added "4.0"}
 (fact "constructs a exists form with prep"
@@ -156,7 +174,7 @@
   
   (main/t-exists-raw (base/prep-table 'scratch/Task false (l/rt:macro-opts :postgres))
                     {})
-  => '[:select (exists [:select 1 :from rt.postgres.script.scratch/Task])])
+  => '[:select (exists [:select 1 :from rt.postgres.script.scratch/Task \\])])
 
 ^{:refer rt.postgres.script.impl-main/t-exists :added "4.0"}
 (fact "create exists statement"
@@ -165,7 +183,7 @@
   (l/with:macro-opts [(l/rt:macro-opts :postgres)]
     (main/t-exists 'scratch/Task
                   {}))
-  => '[:select (exists [:select 1 :from rt.postgres.script.scratch/Task])])
+  => '[:select (exists [:select 1 :from rt.postgres.script.scratch/Task \\])])
 
 ^{:refer rt.postgres.script.impl-main/t-delete-raw :added "4.0"}
 (fact  "contructs a delete form with prep"

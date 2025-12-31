@@ -35,7 +35,7 @@
          js-out  (if single 'to-jsonb 'jsonb-agg)
          limit   (if single 1 limit)]
      (-> select
-         (base/t-wrap-join join {:newline true})
+         (base/t-wrap-join (base/t-join-transform tsch join table-sym mopts) {:newline true})
          (base/t-wrap-where where tsch
                             {:newline true
                              :where-args where-args}
@@ -50,7 +50,7 @@
          (base/t-wrap-offset offset {})
          (base/t-wrap-args args {})
          (base/t-wrap-json as js-out into field)
-         (base/t-wrap-into into {})
+         (base/t-wrap-into into {:newline true})
          (with-meta {:op/type :select})))))
 
 (defn t-select
