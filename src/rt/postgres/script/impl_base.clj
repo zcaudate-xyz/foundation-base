@@ -78,8 +78,9 @@
                     (schema/check-missing-columns
                      tsch
                      cols
-                     (fn [{:keys [primary required sql]}]
-                       (and (or required primary)
+                     (fn [{:keys [primary required sql ignore]}]
+                       (and (not ignore)
+                            (or required primary)
                             (nil? (:default sql))))))
          _ (and err  (h/error "Missing keys." (assoc err :data m)))
          err (if format
