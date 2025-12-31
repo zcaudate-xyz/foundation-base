@@ -55,3 +55,27 @@
 
 ^{:refer indigo.server.api-browser/get-completions :added "4.1"}
 (fact "TODO")
+
+^{:refer indigo.server.api-browser/get-any-entry :added "4.1"}
+(fact "TODO")
+
+^{:refer indigo.server.api-browser/emit-component :added "4.1"}
+(fact "TODO")
+
+^{:refer indigo.server.api-browser/scaffold-test :added "4.1"}
+(fact "TODO")
+
+^{:refer indigo.server.api-browser/get-doc-path :added "4.1"}
+(fact "TODO")
+
+^{:refer indigo.server.api-browser/get-file-content :added "4.1"}
+(fact "TODO")
+
+^{:refer indigo.server.api-browser/resolve-paths :added "4.1"}
+(fact "TODO")
+
+^{:refer indigo.server.api-browser/delete-path :added "4.1"}
+(fact "TODO")
+
+^{:refer indigo.server.api-browser/get-namespace-entries :added "4.1"}
+(fact "TODO")

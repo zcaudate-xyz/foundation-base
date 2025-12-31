@@ -348,3 +348,10 @@
 (fact "formats returning cols default"
   (t-returning-cols-default [:id] t-key-attrs-fn)
   => vector?)
+
+
+^{:refer rt.postgres.script.impl-base/t-wrap-join :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.postgres.script.impl-base/t-wrap-having :added "4.1"}
+(fact "TODO")

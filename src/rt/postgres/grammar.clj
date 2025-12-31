@@ -101,6 +101,7 @@
         :remc    {:op :remc    :symbol #{'re}          :raw "~"    :emit :bi}  
         :remi    {:op :remi    :symbol #{'re:*}        :raw "~*"   :emit :bi}  
         :array   {:op :array   :symbol #{'array}       :emit  #'common/pg-array}
+        :raw     {:op :raw     :symbol #{'raw}         :emit  identity :type :op}
         :js      {:op :js      :symbol #{'js}          :macro #'tf/pg-tf-js :type :macro}})
       
       ;;
@@ -141,7 +142,12 @@
                       :format       #'common/pg-format
                       :hydrate      #'common/pg-hydrate
                       :macro        #'common/pg-deftrigger
-                      :static/dbtype :trigger}})))
+                      :static/dbtype :trigger}
+        :defpartition   {:op :defpartition :symbol '#{defpartition}
+                         :type :def :section :code :emit :macro
+                         :hydrate #'common/pg-hydrate
+                         :macro   #'common/pg-defpartition
+                         :static/dbtype :partition}})))
 
 (def +template+
   (->> {:banned #{}

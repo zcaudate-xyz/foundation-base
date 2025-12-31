@@ -106,3 +106,10 @@
   
   (pg-deftype-primaries [{:id "a" :type :uuid} {:id "b" :type :uuid}])
   => '[(:- [:primary-key (quote (a b))])])
+
+
+^{:refer rt.postgres.grammar.form-deftype/pg-deftype-partition :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.postgres.grammar.form-deftype/pg-deftype-partition-constraints :added "4.1"}
+(fact "TODO")

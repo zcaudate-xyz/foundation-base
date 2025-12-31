@@ -230,3 +230,22 @@
   
   (common/pg-deftrigger '(deftrigger hello [table] ()))
   => '(do [:drop-trigger-if-exists hello :on table] [:create-trigger hello :on table \\]))
+
+
+^{:refer rt.postgres.grammar.common/pg-uuid :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.postgres.grammar.common/pg-partition-name :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.postgres.grammar.common/pg-partition-quote-id :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.postgres.grammar.common/pg-partition-full-name :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.postgres.grammar.common/pg-partition-def :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.postgres.grammar.common/pg-defpartition :added "4.1"}
+(fact "TODO")

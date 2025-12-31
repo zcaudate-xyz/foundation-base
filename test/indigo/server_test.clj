@@ -34,3 +34,6 @@
 
 ^{:refer indigo.server/server-restart :added "4.1"}
 (fact "TODO")
+
+^{:refer indigo.server/create-routes :added "4.1"}
+(fact "TODO")
