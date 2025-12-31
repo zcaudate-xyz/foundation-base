@@ -337,20 +337,25 @@
                        snapshot]
                 :as mopts}]
    (let [val-fn   (fn [k v op]
-                    (cond (nil? v)
-                          [k [:is-null]]
+                    (let [[{:keys [type ref enum] :as attr}] (get tsch k)]
+                      (cond (nil? v)
+                            [k [:is-null]]
 
-                          (or (map? v) (ut/hashvec? v))
-                          (let [[{:keys [type ref] :as attr}] (get tsch k)
-                                _  (if (not= type :ref) (h/error "Not of type :ref" {:keys k
-                                                                                     :attribute attr}))
-                                rtsch (get-in schema
-                                              [:tree
-                                               (:ns ref)])]
-                            [k [op [:select #{"id"} :from (ut/sym-full (:link ref))
-                                    \\ :where (t-where-transform rtsch v mopts)]]])
-                          
-                          :else [k [op v]]))
+                            (and (= :enum type)
+                                 (not (and (h/form? v)
+                                           (= (first v) '++))))
+                            [k [op (list '++ v (:ns enum))]]
+
+                            (or (map? v) (ut/hashvec? v))
+                            (let [_  (if (not= type :ref) (h/error "Not of type :ref" {:keys k
+                                                                                       :attribute attr}))
+                                  rtsch (get-in schema
+                                                [:tree
+                                                 (:ns ref)])]
+                              [k [op [:select #{"id"} :from (ut/sym-full (:link ref))
+                                      \\ :where (t-where-transform rtsch v mopts)]]])
+
+                            :else [k [op v]])))
          entry-fn (fn [[k v]]
                     
                     (if (vector? v)
