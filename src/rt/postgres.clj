@@ -8,6 +8,7 @@
             [rt.postgres.client :as client]
             [rt.postgres.grammar.common-application :as app]
             [rt.postgres.script.graph-view :as graph-view]
+            [rt.postgres.script.partition :as partition]
             [std.string :as str]
             [std.lang :as l]
             [std.lib :as h])
@@ -41,7 +42,8 @@
              
              graph-view/defaccess.pg
              graph-view/defret.pg
-             graph-view/defsel.pg)
+             graph-view/defsel.pg
+             partition/defpartitions.pg)
 
 (defn purge-postgres
   "purges the rt.postgres library. Used for debugging"
