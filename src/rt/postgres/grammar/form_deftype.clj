@@ -29,7 +29,7 @@
 (defn pg-deftype-ref-link
   "creates the ref entry for"
   {:added "4.0"}
-  ([col {:keys [ns link current column] :or {column :id}} {:keys [snapshot] :as mopts}]
+  ([col {:keys [ns link current column as] :or {column :id}} {:keys [snapshot] :as mopts}]
    (let [{:keys [lang module section id]} link
          book   (snap/get-book snapshot lang)
          r-en   (book/get-base-entry book module id section)
@@ -38,7 +38,9 @@
           (apply hash-map %)
           (get column)
           (or {:type :uuid}))]
-     [(str/snake-case (str (h/strn col) "_id"))
+     [(if as
+        as
+        (str/snake-case (str (h/strn col) "_id")))
       [(common/pg-type-alias type)]
       [(list (common/pg-base-token #{(name ns)} (:static/schema r-en))
              #{(name column)})]])))
@@ -46,9 +48,11 @@
 (defn pg-deftype-ref-current
   "creates the ref entry for"
   {:added "4.0"}
-  ([col {:keys [current column] :or {column :id}} {:keys [snapshot] :as mopts}]
+  ([col {:keys [current column as] :or {column :id}} {:keys [snapshot] :as mopts}]
    (let [{:keys [id schema type]}  current]
-     [(str/snake-case (str (h/strn col) "_id"))
+     [(if as
+        as
+        (str/snake-case (str (h/strn col) "_id")))
       [(common/pg-type-alias type)]
       [(list (list '. #{schema} #{id})
              #{(name column)})]])))
@@ -103,21 +107,21 @@
   "collect unique keys on deftype"
   {:added "4.0"}
   ([cols]
-   (let [groups (->> (keep (fn [[k {:keys [type sql]}]]
+   (let [groups (->> (keep (fn [[k {:keys [type sql]} :as attrs]]
                              (if (:unique sql)
                                (if (vector? (:unique sql))
                                  (mapv (fn [s]
-                                         [s {:key  k :type type}])
+                                         [s {:key  k :type type :ref (:ref (second attrs))}])
                                        (:unique sql))
-                                 [[(:unique sql) {:key  k :type type}]])))
+                                 [[(:unique sql) {:key  k :type type :ref (:ref (second attrs))}]])))
                            cols)
                      (mapcat identity)
                      (group-by first)
                      (h/map-vals (partial map second)))]
      (mapv (fn [keys]
-             (let [kcols (map (fn [{:keys [key type]}]
+             (let [kcols (map (fn [{:keys [key type ref]}]
                                 (if (= :ref type)
-                                  #{(str (str/snake-case (name key)) "_id")}
+                                  #{(or (:as ref) (str (str/snake-case (name key)) "_id"))}
                                   #{(str/snake-case (name key))}))
                               keys)]
                (list '% [:unique (list 'quote kcols)])))
@@ -134,9 +138,9 @@
        [(list :-
               [:primary-key
                (list 'quote
-                     (map (fn [{:keys [id type]}]
+                     (map (fn [{:keys [id type ref] :as m}]
                             (if (= :ref type)
-                              (symbol (str (str/snake-case (name id)) "_id"))
+                              (symbol (or (:as ref) (str (str/snake-case (name id)) "_id")))
                               (symbol (str/snake-case (name id)))))
                           schema-primary))])]))))
 
@@ -144,17 +148,17 @@
   "create index statements"
   {:added "4.0"}
   ([cols ttok]
-   (let [c-indexes (keep (fn [[k {:keys [type sql]}]]
+   (let [c-indexes (keep (fn [[k {:keys [type sql] :as attrs}]]
                            (let [{:keys [index]} sql]
                              (if index
                                (merge (if (true? index)
                                         {}
                                         index)
-                                      {:key k :type type}))))
+                                      {:key k :type type :ref (:ref attrs)}))))
                          cols)
-         key-fn    (fn [{:keys [key type]}]
+         key-fn    (fn [{:keys [key type ref]}]
                      (if (= :ref type)
-                       #{(str (str/snake-case (name key)) "_id")}
+                       #{(or (:as ref) (str (str/snake-case (name key)) "_id"))}
                        #{(str/snake-case (name key))}))
          g-indexes (group-by :group c-indexes)
          s-indexes (->> (get g-indexes nil)
