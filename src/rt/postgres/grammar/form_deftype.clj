@@ -99,11 +99,8 @@
                      required (conj :not-null)
                      unique   (conj :unique)
                      (and (= type :ref)
-                          (not (:partition sql))
                           (not (:group ref)))     (conj :references ref-toks)
-                     sql (pg-deftype-col-sql (cond-> sql
-                                               (and (= type :ref) (:partition sql))
-                                               (dissoc :cascade))))]
+                     sql (pg-deftype-col-sql sql))]
      (vec (concat [#{col-name}] col-attrs)))))
 
 (defn pg-deftype-uniques
@@ -184,104 +181,66 @@
      (let [[method & cols] partition]
        (list :partition-by method (list 'quote cols))))))
 
-(defn pg-deftype-partition-constraints
-  "creates partition constraints"
+(defn pg-deftype-foreign-groups
+  "collects foreign key groups"
   {:added "4.0"}
-  ([sym col-spec params mopts]
-   (if-let [partition-by (:partition-by params)]
-     (let [p-cols (vec (rest partition-by))
-           table-name (str/snake-case (name sym))]
-       (->> col-spec
-            (keep (fn [[col props]]
-                    (when (get-in props [:sql :partition])
-                      (let [ref-spec (:ref props)
-                            [local-col _ third-elem] (pg-deftype-ref col ref-spec mopts)
-                            ;; third-elem is [ (remote-table remote-col-set) ]
-                            [ref-list] third-elem 
-                            ;; ref-list is (remote-table remote-col-set)
-                            [remote-table remote-col-set] ref-list
-                            remote-col (first remote-col-set)
-                            
-                            c-name (str "fk_" table-name "_" (str/snake-case (name col)))
-                            extract-fn (fn [x] (symbol (if (set? x) (first x) (str x))))
+  ([col-spec]
+   (->> col-spec
+        (mapcat (fn [[col {:keys [type ref foreign]}]]
+                  (concat
+                   (when (and (= :ref type) (:group ref))
+                     [[(:group ref)
+                       {:local-col (pg-deftype-ref-name col ref)
+                        :remote-col (or (:column ref) :id)
+                        :ns (:ns ref)
+                        :link (:link ref)}]])
+                   (when foreign
+                     (for [[group f-spec] foreign]
+                       [group
+                        {:local-col (if (= type :ref)
+                                      (pg-deftype-ref-name col ref)
+                                      (str/snake-case (name col)))
+                         :remote-col (:column f-spec)
+                         :ns (:ns f-spec)
+                         :link (:link f-spec)}])))))
+        (group-by first)
+        (h/map-vals (partial map second)))))
 
-                            p-cols-syms (map extract-fn p-cols)
-                            {:keys [link]} ref-spec
-                            book (if (and link (:snapshot mopts))
-                                   (snap/get-book (:snapshot mopts) (:lang link)))
-                            target-entry (if book
-                                           (book/get-base-entry book (:module link) (:id link) (:section link)))
-                            target-primary (if target-entry (:static/schema-primary target-entry))
+(defn pg-deftype-gen-constraint
+  "generates a foreign key constraint"
+  {:added "4.0"}
+  ([sym [group entries] mopts]
+   (let [table-name (str/snake-case (name sym))
+         c-name (str "fk_" table-name "_" (name group))
 
-                            target-p-cols (if target-primary
-                                            (map (comp symbol name :id) target-primary))
+         sample (first entries)
+         _ (when (not (apply = (map :ns entries)))
+             (h/error "All entries in a foreign group must point to same namespace" {:group group :entries entries}))
 
-                            extra-cols (cond
-                                         (:columns ref-spec) (map symbol (:columns ref-spec))
+         {:keys [link]} sample
+         book (if (and link (:snapshot mopts))
+                (snap/get-book (:snapshot mopts) (:lang link)))
+         r-en (if book
+                (book/get-base-entry book (:module link) (:id link) (:section link)))
 
-                                         target-p-cols
-                                         (remove #(= % (symbol remote-col)) target-p-cols)
+         remote-schema (:static/schema r-en)
+         remote-table (name (:id link))
 
-                                         :else
-                                         p-cols-syms)
+         local-cols (map (comp symbol :local-col) entries)
+         remote-cols (map (comp symbol name :remote-col) entries)]
 
-                            local-cols (list 'quote (cons (symbol local-col) extra-cols))
-                            remote-cols (list 'quote (cons (symbol remote-col) extra-cols))]
-                        (list '% (vec (concat [:constraint (symbol c-name)
-                                               :foreign-key local-cols
-                                               :references remote-table remote-cols]
-                                              (if (get-in props [:sql :cascade])
-                                                [:on-delete-cascade]))))))))
-            vec)))))
+     (list '% [:constraint (symbol c-name)
+               :foreign-key (list 'quote local-cols)
+               :references (list (common/pg-base-token #{remote-table} remote-schema)
+                                 (list 'quote remote-cols))]))))
 
 (defn pg-deftype-foreigns
   "creates foreign key constraints"
   {:added "4.0"}
   ([sym col-spec mopts]
-   (let [groups (->> col-spec
-                     (mapcat (fn [[col {:keys [type ref foreign]}]]
-                               (concat
-                                (when (and (= :ref type) (:group ref))
-                                  [[(:group ref)
-                                    {:local-col (pg-deftype-ref-name col ref)
-                                     :remote-col (or (:column ref) :id)
-                                     :ns (:ns ref)
-                                     :link (:link ref)}]])
-                                (when foreign
-                                  (for [[group f-spec] foreign]
-                                    [group
-                                     {:local-col (if (= type :ref)
-                                                   (pg-deftype-ref-name col ref)
-                                                   (str/snake-case (name col)))
-                                      :remote-col (:column f-spec)
-                                      :ns (:ns f-spec)
-                                      :link (:link f-spec)}])))))
-                     (group-by first)
-                     (h/map-vals (partial map second)))]
-     (mapv (fn [[group entries]]
-             (let [table-name (str/snake-case (name sym))
-                   c-name (str "fk_" table-name "_" (name group))
-
-                   sample (first entries)
-                   _ (when (not (apply = (map :ns entries)))
-                       (h/error "All entries in a foreign group must point to same namespace" {:group group :entries entries}))
-
-                   {:keys [link]} sample
-                   book (if (and link (:snapshot mopts))
-                          (snap/get-book (:snapshot mopts) (:lang link)))
-                   r-en (if book
-                          (book/get-base-entry book (:module link) (:id link) (:section link)))
-
-                   remote-schema (:static/schema r-en)
-                   remote-table (name (:id link))
-
-                   local-cols (map (comp symbol :local-col) entries)
-                   remote-cols (map (comp symbol name :remote-col) entries)]
-
-               (list '% [:constraint (symbol c-name)
-                         :foreign-key (list 'quote local-cols)
-                         :references (list (common/pg-base-token #{remote-table} remote-schema)
-                                           (list 'quote remote-cols))])))
+   (let [groups (pg-deftype-foreign-groups col-spec)]
+     (mapv (fn [entry]
+             (pg-deftype-gen-constraint sym entry mopts))
            groups))))
 
 (defn pg-deftype
@@ -299,7 +258,6 @@
          tindexes   (pg-deftype-indexes col-spec ttok)
          tforeigns  (pg-deftype-foreigns sym col-spec mopts)
          tpartition (pg-deftype-partition params)
-         tpartition-constraints (pg-deftype-partition-constraints sym col-spec params mopts)
          tcustom      (:custom params)
          tconstraints (->> (:constraints params)
                            (mapv (fn [[k val]]
@@ -315,8 +273,7 @@
                                     tuniques
                                     tconstraints
                                     tcustom
-                                    tforeigns
-                                    tpartition-constraints))))
+                                    tforeigns))))
              \\ \)
              ~@tpartition]
             ~@tindexes)
