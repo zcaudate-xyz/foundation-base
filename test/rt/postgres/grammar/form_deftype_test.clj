@@ -46,7 +46,7 @@
   
   (with-redefs [common/pg-type-alias (fn [x] x)]
     (pg-deftype-col-fn [:col {:type :uuid :primary true}] {}))
-  => (contains [:uuid :primary-key]))
+  => (contains [(contains [:uuid :primary-key])]))
 
 ^{:refer rt.postgres.grammar.form-deftype/pg-deftype-uniques :added "4.0"}
 (fact "collect unique keys on deftype"

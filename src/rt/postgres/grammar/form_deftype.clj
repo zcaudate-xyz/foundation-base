@@ -63,6 +63,39 @@
          :else
          (pg-deftype-ref-link col m mopts))))
 
+(defn pg-deftype-ref-expand
+  "expands a ref column into multiple columns if the target has a composite primary key"
+  {:added "4.0"}
+  [col {:keys [ns link current column] :or {column :id} :as m} {:keys [snapshot] :as mopts}]
+  (if current
+    [(pg-deftype-ref-current col m mopts)]
+    (let [{:keys [lang module section id]} link
+          book   (snap/get-book snapshot lang)
+          r-en   (book/get-base-entry book module id section)
+          primary (:static/schema-primary r-en)]
+      (if (and primary (> (count primary) 1))
+        ;; Multi-column Primary Key Case
+        (mapv (fn [{:keys [id type]}]
+                (let [col-suffix (str/snake-case (name id))
+                      new-col-name (str/snake-case (str (h/strn col) "_" col-suffix))]
+                  [new-col-name
+                   [(common/pg-type-alias type)]
+                   ;; Note: Inline REFERENCES constraints don't support composite keys well.
+                   ;; We usually omit the inline reference here and rely on a table-level constraint
+                   ;; (like pg-deftype-partition-constraints) or assume a separate constraint def.
+                   nil]))
+              primary)
+
+        ;; Single Primary Key Case (Fallback to existing logic)
+        (let [{:keys [type]} (h/-> (nth (:form r-en) 2)
+                                   (apply hash-map %)
+                                   (get column)
+                                   (or {:type :uuid}))]
+          [[(str/snake-case (str (h/strn col) "_id"))
+            [(common/pg-type-alias type)]
+            [(list (common/pg-base-token #{(name ns)} (:static/schema r-en))
+                   #{(name column)})]]])))))
+
 (defn pg-deftype-col-sql
   "formats the sql on deftype"
   {:added "4.0"}
@@ -83,21 +116,24 @@
   "formats the column on deftype"
   {:added "4.0"}
   ([[col {:keys [type primary scope sql required unique enum] :as m}] mopts]
-   (let [[col-name col-attrs ref-toks]
-         (if (= type :ref)
-           (pg-deftype-ref col (:ref m) mopts)
-           [(str/snake-case (h/strn col))
-            [(common/pg-type-alias type)]])
-         col-attrs (cond-> col-attrs
-                     (= type :enum) (pg-deftype-enum-col enum mopts)
-                     (true? primary)  (conj :primary-key)
-                     required (conj :not-null)
-                     unique   (conj :unique)
-                     (and (= type :ref) (not (:partition sql)))     (conj :references ref-toks)
-                     sql (pg-deftype-col-sql (cond-> sql
-                                               (and (= type :ref) (:partition sql))
-                                               (dissoc :cascade))))]
-     (vec (concat [#{col-name}] col-attrs)))))
+   (let [cols-data (if (= type :ref)
+                     (pg-deftype-ref-expand col (:ref m) mopts)
+                     ;; Standard column: Wrap in a vector of vector to match expansion structure
+                     [[(str/snake-case (h/strn col))
+                       [(common/pg-type-alias type)]]])]
+     (mapv (fn [[col-name base-attrs ref-toks]]
+             (let [col-attrs base-attrs
+                   col-attrs (cond-> col-attrs
+                               (= type :enum) (pg-deftype-enum-col enum mopts)
+                               (true? primary)  (conj :primary-key)
+                               required (conj :not-null)
+                               unique   (conj :unique)
+                               (and ref-toks (not (:partition sql)))     (conj :references ref-toks)
+                               sql (pg-deftype-col-sql (cond-> sql
+                                                         (and (= type :ref) (:partition sql))
+                                                         (dissoc :cascade))))]
+               (vec (concat [#{col-name}] col-attrs))))
+           cols-data))))
 
 (defn pg-deftype-uniques
   "collect unique keys on deftype"
@@ -235,7 +271,7 @@
          {:static/keys [schema schema-primary]
           :keys [final existing]} (meta sym)
          col-spec (mapv vec (partition 2 spec))
-         cols     (mapv #(pg-deftype-col-fn % mopts) col-spec)
+         cols     (into [] (mapcat #(pg-deftype-col-fn % mopts)) col-spec)
          ttok     (common/pg-full-token sym schema)
          tuniques (pg-deftype-uniques col-spec)
          tprimaries (pg-deftype-primaries schema-primary)
