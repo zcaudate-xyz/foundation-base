@@ -113,3 +113,15 @@
 
 ^{:refer rt.postgres.grammar.form-deftype/pg-deftype-partition-constraints :added "4.1"}
 (fact "TODO")
+
+^{:refer rt.postgres.grammar.form-deftype/pg-deftype-ref-name :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.postgres.grammar.form-deftype/pg-deftype-foreign-groups :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.postgres.grammar.form-deftype/pg-deftype-gen-constraint :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.postgres.grammar.form-deftype/pg-deftype-foreigns :added "4.1"}
+(fact "TODO")
