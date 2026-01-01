@@ -432,7 +432,7 @@
   {:added "4.0"}
   ([form join {:keys [newline]}]
    (cond-> form
-     (and join newline) (conj \\)
+     (and (seq join) newline) (conj \\)
      join (into join))))
 
 (defn t-wrap-where

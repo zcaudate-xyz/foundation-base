@@ -85,35 +85,3 @@
         base-name (name parent)
         statements (pg-partition-def parent base-name (first specs) (rest specs) [])]
      (apply list 'do statements)))
-
-(defn pg-deftype-partition
-  "creates partition by statement"
-  {:added "4.0"}
-  ([params]
-   (pg-deftype-partition params []))
-  ([params col-spec]
-   (if-let [partition (:partition-by params)]
-     (let [[method cols] (cond (map? partition)
-                               [(:strategy partition) (:columns partition)]
-
-                               (vector? partition)
-                               [(first partition) (rest partition)]
-
-                               :else
-                               (h/error "Not Valid Definition" {:partition partition
-                                                                :col-spec col-spec}))
-           col-map (into {} col-spec)
-           cols (doall (map (fn [col]
-                              (let [col-key (if (set? col) (first col) col)
-                                    attrs (get col-map col-key)]
-                                (if (and (not attrs)
-                                         (not (set? col)))
-                                  (h/error "Partition Column Not Found" {:column col
-                                                                         :available (keys col-map)}))
-                                (if attrs
-                                  (if (= (:type attrs) :ref)
-                                    (common/pg-deftype-ref-name col-key (:ref attrs))
-                                    (str/snake-case (name col-key)))
-                                  (str/snake-case (name col-key)))))
-                            cols))]
-       (list :partition-by method (list 'quote cols))))))
