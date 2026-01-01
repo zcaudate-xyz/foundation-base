@@ -329,7 +329,17 @@
                            (if-let [doc (get-in attrs [:sql :comment])]
                              [:comment :on :column (list '. ttok #{(str/snake-case (name col))})
                               :is doc]))
-                         col-spec)]
+                         col-spec)
+
+         tpartition-default (if-let [default-part (get-in params [:partition-by :default])]
+                              (let [{:keys [in]} default-part
+                                    def-sym (symbol (str (name sym) "PartitionDefault"))
+                                    parent-ref (symbol (str "-/" (name sym)))
+                                    spec (cond-> {:default true}
+                                           in (assoc :schema in))]
+                                (list 'defpartition.pg def-sym
+                                      [parent-ref]
+                                      [spec])))]
      (if (not existing)
        `(do ~@(if-not final [[:drop-table :if-exists ttok :cascade]] [])
             [:create-table :if-not-exists ~ttok \(
@@ -345,7 +355,8 @@
              ~@tpartition]
             ~@tindexes
             ~@tcomment
-            ~@ccomments)
+            ~@ccomments
+            ~@(if tpartition-default [tpartition-default] []))
        ""))))
 
 (defn pg-deftype-fragment
