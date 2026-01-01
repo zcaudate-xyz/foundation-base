@@ -84,9 +84,8 @@
                                                      :name "$DEFAULT"}}})
             res (pg-deftype form)]
         (last res)))
-    => (list 'defpartition.pg 'tPartitionDefault
-             '[-/t]
-             '[{:default true :schema "schema_type_impl"}])))
+    => [:create-table :if-not-exists '(. #{"schema_type_impl"} #{"t__$DEFAULT"})
+        :partition-of "s.t" :default]))
 
 ^{:refer rt.postgres.grammar.form-deftype/pg-deftype-fragment :added "4.0"}
 (fact "parses the fragment contained by the symbol"
