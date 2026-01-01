@@ -73,7 +73,19 @@
 
   (with-redefs [common/pg-full-token (fn [s sch] (str sch "." s))]
     (pg-deftype '(deftype ^{:static/schema "s"} t [] {})))
-  => '(do [:drop-table :if-exists "s.t" :cascade] [:create-table :if-not-exists "s.t" \( \\ (\| []) \\ \)]))
+  => '(do [:drop-table :if-exists "s.t" :cascade] [:create-table :if-not-exists "s.t" \( \\ (\| []) \\ \)])
+
+  (fact "pg-deftype renders partition logic"
+    (with-redefs [common/pg-full-token (fn [s sch] (str sch "." s))]
+      (let [form '(deftype ^{:static/schema "s"} t 
+                           [[:class {:type :text}]]
+                           {:partition-by {:strategy :list :columns [:class]
+                                           :default {:in "schema_type_impl"
+                                                     :name "$DEFAULT"}}})
+            res (pg-deftype form)]
+        (last res)))
+    => [:create-table :if-not-exists '(. #{"schema_type_impl"} #{"t__$DEFAULT"})
+        :partition-of "s.t" :default]))
 
 ^{:refer rt.postgres.grammar.form-deftype/pg-deftype-fragment :added "4.0"}
 (fact "parses the fragment contained by the symbol"

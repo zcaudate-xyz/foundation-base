@@ -329,7 +329,18 @@
                            (if-let [doc (get-in attrs [:sql :comment])]
                              [:comment :on :column (list '. ttok #{(str/snake-case (name col))})
                               :is doc]))
-                         col-spec)]
+                         col-spec)
+
+         tpartition-default (if-let [default-part (get-in params [:partition-by :default])]
+                              (let [{:keys [in name]} default-part
+                                    suffix (or name "$DEFAULT")
+                                    base-name (clojure.core/name sym)
+                                    part-name (form-defpartition/pg-partition-name base-name suffix [])
+                                    part-token (if in
+                                                 (list '. #{in} #{part-name})
+                                                 #{part-name})]
+                                [:create-table :if-not-exists part-token
+                                 :partition-of ttok :default]))]
      (if (not existing)
        `(do ~@(if-not final [[:drop-table :if-exists ttok :cascade]] [])
             [:create-table :if-not-exists ~ttok \(
@@ -345,7 +356,8 @@
              ~@tpartition]
             ~@tindexes
             ~@tcomment
-            ~@ccomments)
+            ~@ccomments
+            ~@(if tpartition-default [tpartition-default] []))
        ""))))
 
 (defn pg-deftype-fragment
