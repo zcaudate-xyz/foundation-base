@@ -15,6 +15,7 @@ form-init*
 .#*
 .DS_Store
 .hara
+.env
 .clj-kondo/.cache
 .calva
 .prompts

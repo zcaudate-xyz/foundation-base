@@ -13,14 +13,16 @@
             [std.lib :as h]))
 
 ;;
+
 ;; deftype
+
 ;;
 
-(defn pg-deftype-ref-name
-  "gets the ref name"
-  {:added "4.0"}
-  ([col {:keys [raw]}]
-   (if raw raw (str/snake-case (str (h/strn col) "_id")))))
+
+
+(def pg-deftype-ref-name common/pg-deftype-ref-name)
+
+
 
 (defn pg-deftype-enum-col
   "creates the enum column"

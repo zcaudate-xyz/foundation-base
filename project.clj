@@ -177,7 +177,8 @@
                      comment [[:inner 0]]}}
   :profiles {:dev {:plugins [[lein-ancient "0.6.15"]
                              [lein-exec "0.3.7"]
-                             [cider/cider-nrepl "0.58.0"]]}
+                             [cider/cider-nrepl "0.58.0"]
+                             [lein-dotenv "RELEASE"]]}
              :repl {:injections [(try (require 'jvm.tool)
                                       (require '[std.lib :as h])
                                       (catch Throwable t (.printStackTrace t)))]}}

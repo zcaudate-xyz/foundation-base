@@ -239,3 +239,7 @@
   => "'123'::uuid")
 
 
+
+
+^{:refer rt.postgres.grammar.common/pg-deftype-ref-name :added "4.1"}
+(fact "TODO")

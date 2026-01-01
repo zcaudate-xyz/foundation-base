@@ -43,6 +43,12 @@
    (or (get +pg-type-alias+ type)
        type)))
 
+(defn pg-deftype-ref-name
+  "gets the ref name"
+  {:added "4.0"}
+  ([col {:keys [raw]}]
+   (if raw raw (str/snake-case (str (h/strn col) "_id")))))
+
 (defn pg-sym-meta
   "returns the sym meta"
   {:added "4.0"}
