@@ -77,6 +77,8 @@
 
 ^{:refer rt.postgres.grammar.form-deftype/pg-deftype-format :added "4.0"}
 (fact "formats an input form"
+  ^:hidden
+  
   (pg-deftype-format '(deftype t [:a {:type :int}] {}))
   => vector?)
 
@@ -91,22 +93,30 @@
 
 ^{:refer rt.postgres.grammar.form-deftype/pg-deftype-hydrate-link :added "4.0"}
 (fact "resolves the link for hydration"
+  ^:hidden
+  
   (pg-deftype-hydrate-link 'sym {:id :mod} {:ns '-/sym})
   => [{:section :code, :lang :postgres, :module :mod, :id 'sym} false])
 
 ^{:refer rt.postgres.grammar.form-deftype/pg-deftype-hydrate-process-sql :added "4.0"}
 (fact "processes the sql attribute"
+  ^:hidden
+  
   (pg-deftype-hydrate-process-sql {:process 's} :k {})
   => (throws))
 
 ^{:refer rt.postgres.grammar.form-deftype/pg-deftype-hydrate-process-foreign :added "4.0"}
 (fact "processes the foreign attribute"
+  ^:hidden
+  
   (with-redefs [pg-deftype-hydrate-check-link (fn [_ _ _])]
     (pg-deftype-hydrate-process-foreign {:a {:ns :n}} (fn [_] [{:id :i} true]) nil))
   => (contains {:a (contains {:link {:id :i}})}))
 
 ^{:refer rt.postgres.grammar.form-deftype/pg-deftype-hydrate-process-ref :added "4.0"}
 (fact "processes the ref type"
+  ^:hidden
+  
   (pg-deftype-hydrate-process-ref :k {:ref [:s :i :t {}]} nil nil)
   => (just [:k (contains {:type :ref, :required true})])
 
@@ -116,6 +126,8 @@
 
 ^{:refer rt.postgres.grammar.form-deftype/pg-deftype-hydrate-process-enum :added "4.0"}
 (fact "processes the enum type"
+  ^:hidden
+  
   (with-redefs [pg-deftype-hydrate-check-link (fn [_ _ _])
                 resolve (constantly (atom {:id :i :module :m :lang :l :section :s}))]
     (pg-deftype-hydrate-process-enum :k {:enum {:ns 'foo}} nil))
@@ -128,14 +140,10 @@
 (fact "hydrates the spec")
 
 ^{:refer rt.postgres.grammar.form-deftype/pg-deftype-hydrate :added "4.0"}
-(fact "hydrates the form with linked ref information"
-  ;; Complex
-  )
+(fact "hydrates the form with linked ref information")
 
 ^{:refer rt.postgres.grammar.form-deftype/pg-deftype-hydrate-hook :added "4.0"}
-(fact "updates the application schema"
-  ;; side effect on atom
-  )
+(fact "updates the application schema")
 
 
 ^{:refer rt.postgres.grammar.form-deftype/pg-deftype-primaries :added "4.0"}
@@ -148,13 +156,25 @@
 
 ^{:refer rt.postgres.grammar.form-deftype/pg-deftype-partition :added "4.1"}
 (fact "creates partition by statement"
-  (pg-deftype-partition {:partition-by [:range :created_at]}
-                        [[:created_at {:type :long}]])
-  => '(:partition-by :range (quote ("created_at")))
+  ^:hidden
+  
+  (pg-deftype-partition {:partition-by [:range :abc-def]}
+                        [[:abc-def {:type :time}]])
+  => '(:partition-by :range (quote ("abc_def")))
 
-  (pg-deftype-partition {:partition-by [:range :user]}
-                        [[:user {:type :ref :ref {:ns :user :link {:id :user}}}]])
-  => '(:partition-by :range (quote ("user_id"))))
+  (let [colspec [[:id {:type :uuid, :primary "default", :sql {:default '(uuid-generate-v4)}, :scope :-/id}]
+                 [:class {:type :enum, :required true, :scope :-/info, :primary "default", :enum {:ns 'szndb.core.type-seed/EnumClassType}, :sql {:unique ["class"]}}]
+                 [:class-table {:type :enum, :required true, :scope :-/info, :primary "primary", :enum {:ns 'szndb.core.type-seed/EnumTableType}, :sql {:unique ["class"]}}]
+                 [:class-ref {:type :uuid, :required true, :sql {:unique ["class"]}, :scope :-/data}]
+                 [:index {:type :integer, :required true, :scope :-/info, :sql {:default 0}}]
+                 [:current {:type :map, :sql {:default "{}"}, :scope :-/data}]
+                 [:op-created {:type :uuid, :scope :-/data}]
+                 [:op-updated {:type :uuid, :scope :-/data}]
+                 [:time-created {:type :time, :scope :-/data}]
+                 [:time-updated {:type :time, :scope :-/data}]]]
+    (pg-deftype-partition {:partition-by {:strategy :list :columns [:class]}}
+                          colspec))
+  => '(:partition-by :list (quote ("class"))))
 
 ^{:refer rt.postgres.grammar.form-deftype/pg-deftype-partition-constraints :added "4.1"}
 (fact "TODO")
@@ -192,7 +212,7 @@
    {})
   => '(% [:constraint fk_mytable_g1
           :foreign-key (quote (u_id))
-          :references (#{"users"} (quote (id)))]))
+          :references #{"users"} (quote (id))]))
 
 ^{:refer rt.postgres.grammar.form-deftype/pg-deftype-foreigns :added "4.1"}
 (fact "creates foreign key constraints"
@@ -205,4 +225,4 @@
    {})
   => '[(% [:constraint fk_mytable_g1
            :foreign-key (quote (u_id a))
-           :references (#{"users"} (quote (id uid)))])])
+           :references #{"users"} (quote (id uid))])])

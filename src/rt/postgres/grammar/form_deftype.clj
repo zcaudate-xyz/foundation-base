@@ -180,16 +180,31 @@
    (pg-deftype-partition params []))
   ([params col-spec]
    (if-let [partition (:partition-by params)]
-     (let [[method & cols] partition
+     (let [[method cols] (cond (map? partition)
+                               [(:strategy partition) (:columns partition)]
+
+                               (vector? partition)
+                               [(first partition) (rest partition)]
+
+                               :else
+                               (h/error "Not Valid Definition" {:partition partition
+                                                                :col-spec col-spec}))
            col-map (into {} col-spec)
-           cols (map (fn [col]
-                       (let [attrs (get col-map col)]
-                         (if attrs
-                           (if (= (:type attrs) :ref)
-                             (pg-deftype-ref-name col (:ref attrs))
-                             (str/snake-case (name col)))
-                           (str/snake-case (name col)))))
-                     cols)]
+           cols    (apply list
+                          (map (fn [col]
+                                 (let [col-key (if (set? col) (first col) col)
+                                       attrs (get col-map col-key)
+                                       _  (when (and (not attrs)
+                                                     (not (set? col)))
+                                            (h/error "Partition Column Not Found" {:column col
+                                                                                   :available (keys col-map)}))]
+                                   (hash-set
+                                    (if attrs
+                                      (if (= (:type attrs) :ref)
+                                        (pg-deftype-ref-name col-key (:ref attrs))
+                                        (str/snake-case (name col-key)))
+                                      (str/snake-case (name col-key))))))
+                               cols))]
        (list :partition-by method (list 'quote cols))))))
 
 (defn pg-deftype-foreign-groups
@@ -242,8 +257,8 @@
 
      (list '% [:constraint (symbol c-name)
                :foreign-key (list 'quote local-cols)
-               :references (list (common/pg-base-token #{remote-table} remote-schema)
-                                 (list 'quote remote-cols))]))))
+               :references (common/pg-base-token #{remote-table} remote-schema)
+               (list 'quote remote-cols)]))))
 
 (defn pg-deftype-foreigns
   "creates foreign key constraints"
