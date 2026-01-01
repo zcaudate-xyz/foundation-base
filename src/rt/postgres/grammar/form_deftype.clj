@@ -72,7 +72,7 @@
   "formats the sql on deftype"
   {:added "4.0"}
   ([form sql]
-   (let [{:keys [cascade default constraint raw]} sql
+   (let [{:keys [cascade default constraint generated identity raw]} sql
          cargs (cond (nil? constraint) []
                      (map? constraint) [:constraint (symbol (h/strn (:name constraint)))
                                         :check (list 'quote (list (:check constraint)))]
@@ -80,6 +80,8 @@
      (cond-> form
        cascade (conj :on-delete-cascade)
        (not (nil? default)) (conj :default default)
+       generated (conj :generated :always :as (list 'quote (list generated)) :stored)
+       identity  (conj :generated :by :default :as :identity)
        raw   (concat raw)
        :then (concat cargs)
        :then vec))))
@@ -87,9 +89,8 @@
 (defn pg-deftype-col-fn
   "formats the column on deftype"
   {:added "4.0"}
-  ([[col {:keys [type primary scope sql required unique enum ref identity generated] :as m}] mopts]
-   (let [is-identity identity
-         [col-name col-attrs ref-toks]
+  ([[col {:keys [type primary scope sql required unique enum ref] :as m}] mopts]
+   (let [[col-name col-attrs ref-toks]
          (if (= type :ref)
            (pg-deftype-ref col (:ref m) mopts)
            [(str/snake-case (h/strn col))
@@ -101,8 +102,6 @@
                      unique   (conj :unique)
                      (and (= type :ref)
                           (not (:group ref)))     (conj :references ref-toks)
-                     is-identity (conj :generated :by :default :as :identity)
-                     generated  (conj :generated :always :as (list 'quote (list generated)) :stored)
                      sql (pg-deftype-col-sql sql))]
      (vec (concat [#{col-name}] col-attrs)))))
 
@@ -301,7 +300,7 @@
                     [[:comment :on :table ttok :is (:doc mdefn)]])
 
          ccomments (keep (fn [[col attrs]]
-                           (if-let [doc (:comment attrs)]
+                           (if-let [doc (get-in attrs [:sql :comment])]
                              [:comment :on :column (list '. ttok #{(str/snake-case (name col))})
                               :is doc]))
                          col-spec)]
