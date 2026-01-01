@@ -11,17 +11,6 @@
   (let [parts (cons base (cons val stack))]
     (clojure.string/join "_" (map h/strn parts))))
 
-(defn pg-partition-quote-id
-  "quotes an identifier if needed"
-  [s]
-  (str "\"" s "\""))
-
-(defn pg-partition-full-name
-  [schema table]
-  (if schema
-    (str schema "." (pg-partition-quote-id table))
-    (pg-partition-quote-id table)))
-
 (defn pg-partition-def
   "recursive definition for partition"
   {:added "4.0"}
@@ -37,18 +26,19 @@
                                          [(first parts) (last parts)]
                                          [nil base-name])))
         
-        full-parent (if parent-ns
-                      (str parent-ns "." (pg-partition-quote-id table-name))
-                      (pg-partition-full-name schema-prefix table-name))]
+        schema (or parent-ns schema-prefix)
+        full-parent (if schema
+                      (list '. #{schema} #{table-name})
+                      #{table-name})]
     
     (if default
       (let [new-name (str table-name "_default")
-            full-new (if parent-ns
-                       (str parent-ns "." (pg-partition-quote-id new-name))
-                       (pg-partition-full-name schema-prefix new-name))]
+            full-new (if schema
+                       (list '. #{schema} #{new-name})
+                       #{new-name})]
         (list
-         (vec (concat [:create-table :if-not-exists (list 'raw full-new)
-                       :partition-of (list 'raw full-parent) :default]
+         (vec (concat [:create-table :if-not-exists full-new
+                       :partition-of full-parent :default]
                       (if next-col
                         [:partition-by :list (list 'quote (list (symbol next-col)))]
                         [])
@@ -59,13 +49,13 @@
                       new-sym  (cond parent-ns (symbol parent-ns new-name)
                                      schema-prefix (symbol (str schema-prefix "." new-name))
                                      :else (symbol new-name))
-                      full-new (if parent-ns
-                                 (str parent-ns "." (pg-partition-quote-id new-name))
-                                 (pg-partition-full-name schema-prefix new-name))]
+                      full-new (if schema
+                                 (list '. #{schema} #{new-name})
+                                 #{new-name})]
                   
                   (concat
-                   [(vec (concat [:create-table :if-not-exists (list 'raw full-new)
-                                  :partition-of (list 'raw full-parent)
+                   [(vec (concat [:create-table :if-not-exists full-new
+                                  :partition-of full-parent
                                   :for :values :in (list 'quote (list val))]
                                  (if next-col
                                    [:partition-by :list (list 'quote (list (symbol next-col)))]

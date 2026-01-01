@@ -294,8 +294,8 @@
                                             (if (= (:type attrs) :ref)
                                               (pg-deftype-ref-name col-key (:ref attrs))
                                               (str/snake-case (name col-key)))
-                                            (str/snake-case (name col-key)))))
-                              cols)))]
+                                            (str/snake-case (name col-key))))))
+                              cols))]
        (list :partition-by method (list 'quote cols))))))
 
 (defn pg-deftype

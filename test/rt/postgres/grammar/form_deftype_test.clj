@@ -7,6 +7,7 @@
             [std.lang :as l]
             [rt.postgres.grammar.common :as common]
             [std.lang.base.library-snapshot :as snap]
+            [std.lang.base.book :as book]
             [std.lib :as h]))
 
 ^{:refer rt.postgres.grammar.form-deftype/pg-deftype-enum-col :added "4.0"}
@@ -90,9 +91,9 @@
 (fact "creates partition by statement"
   ^:hidden
   
-  (form-defpartition/pg-deftype-partition {:partition-by [:range :abc-def]}
+  (pg-deftype-partition {:partition-by [:range :abc-def]}
                                           [[:abc-def {:type :time}]])
-  => '(:partition-by :range (quote ("abc_def")))
+  => '(:partition-by :range (quote (#{"abc_def"})))
 
   (let [colspec [[:id {:type :uuid, :primary "default", :sql {:default '(uuid-generate-v4)}, :scope :-/id}]
                  [:class {:type :enum, :required true, :scope :-/info, :primary "default", :enum {:ns 'szndb.core.type-seed/EnumClassType}, :sql {:unique ["class"]}}]
@@ -104,20 +105,20 @@
                  [:op-updated {:type :uuid, :scope :-/data}]
                  [:time-created {:type :time, :scope :-/data}]
                  [:time-updated {:type :time, :scope :-/data}]]]
-    (form-defpartition/pg-deftype-partition {:partition-by {:strategy :list :columns [:class]}}
+    (pg-deftype-partition {:partition-by {:strategy :list :columns [:class]}}
                                             colspec))
-  => '(:partition-by :list (quote ("class")))
+  => '(:partition-by :list (quote (#{"class"})))
 
   (fact "pg-deftype-partition handles sets in column list"
-    (form-defpartition/pg-deftype-partition {:partition-by [:list #{"class"}]} [])
-    => '(:partition-by :list (quote ("class"))))
+    (pg-deftype-partition {:partition-by [:list #{"class"}]} [])
+    => '(:partition-by :list (quote (#{"class"}))))
 
   (fact "pg-deftype-partition handles map format"
-    (form-defpartition/pg-deftype-partition {:partition-by {:strategy :list :columns [:class]}} [])
-    => '(:partition-by :list (quote ("class"))))
+    (pg-deftype-partition {:partition-by {:strategy :list :columns [:class]}} [])
+    => '(:partition-by :list (quote (#{"class"}))))
 
   (fact "pg-deftype-partition should error if column is not found"
-    (form-defpartition/pg-deftype-partition {:partition-by {:strategy :list :columns [:wrong-column]}} 
+    (pg-deftype-partition {:partition-by {:strategy :list :columns [:wrong-column]}} 
                                             [[:class {:type :text}]])
     => (throws)))
 

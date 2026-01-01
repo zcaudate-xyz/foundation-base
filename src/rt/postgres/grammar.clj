@@ -103,7 +103,6 @@
         :remc    {:op :remc    :symbol #{'re}          :raw "~"    :emit :bi}  
         :remi    {:op :remi    :symbol #{'re:*}        :raw "~*"   :emit :bi}  
         :array   {:op :array   :symbol #{'array}       :emit  #'common/pg-array}
-        :raw     {:op :raw     :symbol #{'raw}         :emit  identity :type :op}
         :js      {:op :js      :symbol #{'js}          :macro #'tf/pg-tf-js :type :macro}})
       
       ;;
