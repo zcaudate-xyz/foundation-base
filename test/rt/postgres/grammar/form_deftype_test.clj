@@ -110,6 +110,8 @@
 
 ^{:refer rt.postgres.grammar.form-deftype/pg-deftype-partition :added "4.1"}
 (fact "creates partition by statement"
+  ^:hidden
+  
   (pg-deftype-partition {:partition-by [:range :created_at]})
   => '(:partition-by :range (quote (:created_at))))
 
@@ -118,6 +120,8 @@
 
 ^{:refer rt.postgres.grammar.form-deftype/pg-deftype-ref-name :added "4.1"}
 (fact "gets the ref name"
+  ^:hidden
+  
   (pg-deftype-ref-name :user {})
   => "user_id"
 
@@ -129,6 +133,8 @@
 
 ^{:refer rt.postgres.grammar.form-deftype/pg-deftype-foreign-groups :added "4.1"}
 (fact "collects foreign key groups"
+  ^:hidden
+  
   (pg-deftype-foreign-groups
    [[:u {:type :ref :ref {:group :g1 :ns :user :link {:id :user}}}]
     [:a {:type :text :foreign {:g1 {:column :uid :ns :user :link {:id :user}}}}]])
@@ -137,6 +143,8 @@
 
 ^{:refer rt.postgres.grammar.form-deftype/pg-deftype-gen-constraint :added "4.1"}
 (fact "generates a foreign key constraint"
+  ^:hidden
+  
   (pg-deftype-gen-constraint
    'mytable
    [:g1 [{:local-col "u_id" :remote-col :id :ns :user :link {:id :users}}]]
@@ -147,6 +155,8 @@
 
 ^{:refer rt.postgres.grammar.form-deftype/pg-deftype-foreigns :added "4.1"}
 (fact "creates foreign key constraints"
+  ^:hidden
+  
   (pg-deftype-foreigns
    'mytable
    [[:u {:type :ref :ref {:group :g1 :ns :user :link {:id :users}}}]

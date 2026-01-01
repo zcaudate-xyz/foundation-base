@@ -351,7 +351,25 @@
 
 
 ^{:refer rt.postgres.script.impl-base/t-wrap-join :added "4.1"}
-(fact "TODO")
+(fact "adds a `join` clause"
+  ^:hidden
+  
+  (t-wrap-join [] [[:left-join "target" :on [:= "s.id" "t.id"]]] {})
+  => [[:left-join "target" :on [:= "s.id" "t.id"]]])
 
 ^{:refer rt.postgres.script.impl-base/t-wrap-having :added "4.1"}
-(fact "TODO")
+(fact "adds a `having` clause"
+  ^:hidden
+  
+  (t-wrap-having [] {:id 1} -tsch- {} {})
+  => '[:having {"id" [:eq 1]}])
+
+^{:refer rt.postgres.script.impl-base/t-join-transform :added "4.1"}
+(fact "transforms join entries"
+  ^:hidden
+  
+  (t-join-transform {:task [{:type :ref :ref {:link {:ns "scratch" :id "Task"}}}]}
+                    [:task]
+                    "Hello"
+                    {})
+  => [[:left-join scratch/Task :on [:= (. #{"Hello"} #{"task_id"}) (. scratch/Task #{"id"})]]])
