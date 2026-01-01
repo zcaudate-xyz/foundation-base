@@ -116,7 +116,7 @@
                     :macro   #'common/pg-defenum
                     :static/dbtype :enum}
 
-        :deftype   {:op :deftype :symbol '#{deftype}
+        :deftype   {:op :deftype :symbol '#{deftype deftype.pg}
                     :type :def :section :code :emit :macro
                     :format       #'form-deftype/pg-deftype-format
                     :hydrate      #'form-deftype-hydrate/pg-deftype-hydrate

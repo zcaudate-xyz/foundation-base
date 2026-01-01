@@ -404,3 +404,9 @@
                        return]} (meta sym)
         ttok  (pg-full-token sym schema)]
     `(~'do [:create ~@return ~ttok ~@array])))
+
+(defn pg-deftype-ref-name
+  "gets the ref name"
+  {:added "4.0"}
+  ([col {:keys [raw]}]
+   (if raw raw (str/snake-case (str (h/strn col) "_id")))))

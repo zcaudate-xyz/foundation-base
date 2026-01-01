@@ -16,12 +16,6 @@
 ;; deftype
 ;;
 
-(defn pg-deftype-ref-name
-  "gets the ref name"
-  {:added "4.0"}
-  ([col {:keys [raw]}]
-   (if raw raw (str/snake-case (str (h/strn col) "_id")))))
-
 (defn pg-deftype-enum-col
   "creates the enum column"
   {:added "4.0"}
@@ -45,7 +39,7 @@
           (apply hash-map %)
           (get column)
           (or {:type :uuid}))]
-     [(pg-deftype-ref-name col m)
+     [(common/pg-deftype-ref-name col m)
       [(common/pg-type-alias type)]
       [(list (common/pg-base-token #{(name ns)} (:static/schema r-en))
              #{(name column)})]])))
@@ -55,7 +49,7 @@
   {:added "4.0"}
   ([col {:keys [current column] :as m :or {column :id}} {:keys [snapshot] :as mopts}]
    (let [{:keys [id schema type]}  current]
-     [(pg-deftype-ref-name col m)
+     [(common/pg-deftype-ref-name col m)
       [(common/pg-type-alias type)]
       [(list (list '. #{schema} #{id})
              #{(name column)})]])))
@@ -126,7 +120,7 @@
      (mapv (fn [keys]
              (let [kcols (map (fn [{:keys [key type ref]}]
                                 (if (= :ref type)
-                                  #{(pg-deftype-ref-name key ref)}
+                                  #{(common/pg-deftype-ref-name key ref)}
                                   #{(str/snake-case (name key))}))
                               keys)]
                (list '% [:unique (list 'quote kcols)])))
@@ -145,7 +139,7 @@
                (list 'quote
                      (map (fn [{:keys [id type ref]}]
                             (if (= :ref type)
-                              (symbol (pg-deftype-ref-name id ref))
+                              (symbol (common/pg-deftype-ref-name id ref))
                               (symbol (str/snake-case (name id)))))
                           schema-primary))])]))))
 
@@ -153,6 +147,8 @@
   "create index statements"
   {:added "4.0"}
   ([cols ttok]
+   (pg-deftype-indexes cols ttok {}))
+  ([cols ttok params]
    (let [c-indexes (keep (fn [[k {:keys [type sql ref]}]]
                            (let [{:keys [index]} sql]
                              (if index
@@ -163,7 +159,7 @@
                          cols)
          key-fn    (fn [{:keys [key type ref]}]
                      (if (= :ref type)
-                       #{(pg-deftype-ref-name key ref)}
+                       #{(common/pg-deftype-ref-name key ref)}
                        #{(str/snake-case (name key))}))
          g-indexes (group-by :group c-indexes)
          s-indexes (->> (get g-indexes nil)
@@ -175,8 +171,24 @@
                                        ~(list 'quote (list (key-fn m)))
                                        ~@(if where [\\ :where where])]))))
          g-indexes (dissoc g-indexes nil)
-         _ (if (not-empty g-indexes) (h/error "TODO"))]
-     s-indexes)))
+         _ (if (not-empty g-indexes) (h/error "TODO"))
+
+         p-indexes (if-let [indexes (:index params)]
+                     (mapv (fn [[k v]]
+                             (let [idx-name (symbol (str (first ttok) "_" (name k)))
+                                   [cols opts] (if (vector? v)
+                                                 [v {}]
+                                                 [(:columns v) (dissoc v :columns)])
+                                   {:keys [method where]} opts]
+                               `(~'% [:create-index
+                                      ~idx-name
+                                      :on
+                                      ~ttok
+                                      ~@(if method [:using method])
+                                      ~(list 'quote (apply list (map (fn [c] (symbol (name c))) cols)))
+                                      ~@(if where [\\ :where where])])))
+                           indexes))]
+     (vec (concat s-indexes p-indexes)))))
 
 
 
@@ -189,7 +201,7 @@
                   (concat
                    (when (and (= :ref type) (:group ref))
                      [[(:group ref)
-                       {:local-col (pg-deftype-ref-name col ref)
+                       {:local-col (common/pg-deftype-ref-name col ref)
                         :remote-col (or (:column ref) :id)
                         :ns (:ns ref)
                         :link (:link ref)
@@ -198,7 +210,7 @@
                      (for [[group f-spec] foreign]
                        [group
                         {:local-col (if (= type :ref)
-                                      (pg-deftype-ref-name col ref)
+                                      (common/pg-deftype-ref-name col ref)
                                       (str/snake-case (name col)))
                          :remote-col (:column f-spec)
                          :ns (:ns f-spec)
@@ -289,7 +301,7 @@
                                                                          :available (keys col-map)}))
                                 (hash-set (if attrs
                                             (if (= (:type attrs) :ref)
-                                              (pg-deftype-ref-name col-key (:ref attrs))
+                                              (common/pg-deftype-ref-name col-key (:ref attrs))
                                               (str/snake-case (name col-key)))
                                             (str/snake-case (name col-key)))))
                               cols)))]
@@ -308,7 +320,7 @@
          ttok     (common/pg-full-token sym schema)
          tuniques (pg-deftype-uniques col-spec)
          tprimaries (pg-deftype-primaries schema-primary)
-         tindexes   (pg-deftype-indexes col-spec ttok)
+         tindexes   (pg-deftype-indexes col-spec ttok params)
          tforeigns  (pg-deftype-foreigns sym col-spec mopts)
          tpartition (pg-deftype-partition params col-spec)
          tcustom      (:custom params)
@@ -383,3 +395,10 @@
            params)]))
 
 
+;; Memory Recording
+;; Pattern: Expanding Grammar Macros
+;; When adding new options to a std.lang grammar macro (like deftype.pg), ensure:
+;; 1. The option is parsed in the macro implementation (e.g., pg-deftype).
+;; 2. Helper functions (e.g., pg-deftype-indexes) are updated to accept the new params.
+;; 3. If the macro symbol has a suffix (e.g., .pg), verify it's registered in the grammar definition (:symbol #{deftype deftype.pg}).
+;; 4. Use quote wrapping correctly for emitting lists vs function calls in the target language.
