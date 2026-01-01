@@ -74,7 +74,7 @@
   "formats the sql on deftype"
   {:added "4.0"}
   ([form sql]
-   (let [{:keys [cascade default constraint raw]} sql
+   (let [{:keys [cascade default constraint generated raw]} sql
          cargs (cond (nil? constraint) []
                      (map? constraint) [:constraint (symbol (h/strn (:name constraint)))
                                         :check (list 'quote (list (:check constraint)))]
@@ -82,6 +82,7 @@
      (cond-> form
        cascade (conj :on-delete-cascade)
        (not (nil? default)) (conj :default default)
+       generated (conj :generated :always :as (list 'quote (list generated)) :stored)
        raw   (concat raw)
        :then (concat cargs)
        :then vec))))
@@ -298,8 +299,10 @@
 (defn pg-deftype
   "creates a deftype statement"
   {:added "4.0"}
-  ([[_ sym spec params]]
+  ([form]
    (let [mopts (preprocess/macro-opts)
+         [mdefn [_ sym spec params]] (grammar-spec/format-defn form)
+         params (if (seq? params) (first params) params)
          {:static/keys [schema schema-primary]
           :keys [final existing]} (meta sym)
          col-spec (mapv vec (partition 2 spec))
@@ -315,7 +318,16 @@
          tconstraints (->> (:constraints params)
                            (mapv (fn [[k val]]
                                    (list '% [:constraint (symbol (h/strn k))
-                                             :check (list 'quote (list val))]))))]
+                                             :check (list 'quote (list val))]))))
+
+         tcomment (if (and (:doc mdefn) (not (str/blank? (:doc mdefn))))
+                    [[:comment :on :table ttok :is (:doc mdefn)]])
+
+         ccomments (keep (fn [[col attrs]]
+                           (if-let [doc (get-in attrs [:sql :comment])]
+                             [:comment :on :column (list '. ttok #{(str/snake-case (name col))})
+                              :is doc]))
+                         col-spec)]
      (if (not existing)
        `(do ~@(if-not final [[:drop-table :if-exists ttok :cascade]] [])
             [:create-table :if-not-exists ~ttok \(
@@ -329,7 +341,9 @@
                                     tforeigns))))
              \\ \)
              ~@tpartition]
-            ~@tindexes)
+            ~@tindexes
+            ~@tcomment
+            ~@ccomments)
        ""))))
 
 (defn pg-deftype-fragment
