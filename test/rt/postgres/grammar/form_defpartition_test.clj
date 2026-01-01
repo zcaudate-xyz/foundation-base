@@ -37,4 +37,25 @@
              :partition-by :list (quote (class_table))]
             [:create-table :if-not-exists (. #{"szn_type_rev"} #{"Rev_Default_Feed"})
              :partition-of (. #{"szn_type"} #{"Rev_Default"})
-             :for :values :in (quote ("Feed"))])))
+             :for :values :in (quote ("Feed"))]))
+
+  (fact "defpartition handles :on and :for keywords"
+    (form-defpartition/pg-defpartition
+     '(defpartition.pg RevPartitionGlobal
+        [szn_type/Rev]
+        [{:on   :class
+          :for  ["Global"]
+          :schema "szn_type"}
+         {:on   :class
+          :for  ["Token" "Commodity"]
+          :schema "szn_type_rev"}]))
+    => '(do [:create-table :if-not-exists (. #{"szn_type"} #{"Rev_Global"})
+             :partition-of (. #{"szn_type"} #{"Rev"})
+             :for :values :in (quote ("Global"))
+             :partition-by :list (quote (class))]
+            [:create-table :if-not-exists (. #{"szn_type_rev"} #{"Rev_Global_Token"})
+             :partition-of (. #{"szn_type"} #{"Rev_Global"})
+             :for :values :in (quote ("Token"))]
+            [:create-table :if-not-exists (. #{"szn_type_rev"} #{"Rev_Global_Commodity"})
+             :partition-of (. #{"szn_type"} #{"Rev_Global"})
+             :for :values :in (quote ("Commodity"))])))

@@ -12,15 +12,18 @@
   {:added "4.0"}
   [base val stack]
   (let [parts (concat [base] (reverse stack) [val])]
-    (clojure.string/join "_" (map h/strn parts))))
+    (clojure.string/join "__" (map h/strn parts))))
 
 (defn pg-partition-def
   "recursive definition for partition"
   {:added "4.0"}
   [parent-sym base-name current-spec remaining-specs stack]
-  (let [{:keys [use in default schema]} current-spec
+  (let [use  (or (:use current-spec) (:on current-spec))
+        in   (or (:in current-spec)  (:for current-spec))
+        {:keys [default schema]} current-spec
         next-spec (first remaining-specs)
-        next-col  (when-let [u (:use next-spec)] (clojure.string/replace (name u) "-" "_"))
+        next-col  (when-let [u (or (:use next-spec) (:on next-spec))]
+                    (clojure.string/replace (name u) "-" "_"))
         
         ;; Parent info
         p-ns (namespace parent-sym)
@@ -39,7 +42,7 @@
         curr-sch (or schema p-sch)]
     
     (if default
-      (let [new-name (pg-partition-name base-name "default" stack)
+      (let [new-name (pg-partition-name base-name "$DEFAULT" stack)
             new-sym  (if curr-sch (symbol curr-sch new-name) (symbol new-name))
             full-new (if curr-sch (list '. #{curr-sch} #{new-name}) #{new-name})]
         (list
