@@ -89,6 +89,44 @@
     (pg-deftype-hydrate-check-link nil {} :table))
   => true)
 
+^{:refer rt.postgres.grammar.form-deftype/pg-deftype-hydrate-link :added "4.0"}
+(fact "resolves the link for hydration"
+  (pg-deftype-hydrate-link 'sym {:id :mod} {:ns '-/sym})
+  => [{:section :code, :lang :postgres, :module :mod, :id 'sym} false])
+
+^{:refer rt.postgres.grammar.form-deftype/pg-deftype-hydrate-process-sql :added "4.0"}
+(fact "processes the sql attribute"
+  (pg-deftype-hydrate-process-sql {:process 's} :k {})
+  => (throws))
+
+^{:refer rt.postgres.grammar.form-deftype/pg-deftype-hydrate-process-foreign :added "4.0"}
+(fact "processes the foreign attribute"
+  (with-redefs [pg-deftype-hydrate-check-link (fn [_ _ _])]
+    (pg-deftype-hydrate-process-foreign {:a {:ns :n}} (fn [_] [{:id :i} true]) nil))
+  => (contains {:a (contains {:link {:id :i}})}))
+
+^{:refer rt.postgres.grammar.form-deftype/pg-deftype-hydrate-process-ref :added "4.0"}
+(fact "processes the ref type"
+  (pg-deftype-hydrate-process-ref :k {:ref [:s :i :t {}]} nil nil)
+  => (just [:k (contains {:type :ref, :required true})])
+
+  (with-redefs [pg-deftype-hydrate-check-link (fn [_ _ _])]
+    (pg-deftype-hydrate-process-ref :k {:ref {:ns :n}} (fn [_] [{:id :i} true]) nil))
+  => (just [:k (contains {:ref (contains {:link {:id :i}})})]))
+
+^{:refer rt.postgres.grammar.form-deftype/pg-deftype-hydrate-process-enum :added "4.0"}
+(fact "processes the enum type"
+  (with-redefs [pg-deftype-hydrate-check-link (fn [_ _ _])
+                resolve (constantly (atom {:id :i :module :m :lang :l :section :s}))]
+    (pg-deftype-hydrate-process-enum :k {:enum {:ns 'foo}} nil))
+  => (just [:k (contains {:enum (contains {:ns 'm/i})})]))
+
+^{:refer rt.postgres.grammar.form-deftype/pg-deftype-hydrate-attr :added "4.0"}
+(fact "hydrates a single attribute")
+
+^{:refer rt.postgres.grammar.form-deftype/pg-deftype-hydrate-spec :added "4.0"}
+(fact "hydrates the spec")
+
 ^{:refer rt.postgres.grammar.form-deftype/pg-deftype-hydrate :added "4.0"}
 (fact "hydrates the form with linked ref information"
   ;; Complex
@@ -123,6 +161,8 @@
 
 ^{:refer rt.postgres.grammar.form-deftype/pg-deftype-ref-name :added "4.1"}
 (fact "gets the ref name"
+  ^:hidden
+  
   (pg-deftype-ref-name :user {})
   => "user_id"
 
@@ -134,6 +174,8 @@
 
 ^{:refer rt.postgres.grammar.form-deftype/pg-deftype-foreign-groups :added "4.1"}
 (fact "collects foreign key groups"
+  ^:hidden
+  
   (pg-deftype-foreign-groups
    [[:u {:type :ref :ref {:group :g1 :ns :user :link {:id :user}}}]
     [:a {:type :text :foreign {:g1 {:column :uid :ns :user :link {:id :user}}}}]])
@@ -142,6 +184,8 @@
 
 ^{:refer rt.postgres.grammar.form-deftype/pg-deftype-gen-constraint :added "4.1"}
 (fact "generates a foreign key constraint"
+  ^:hidden
+  
   (pg-deftype-gen-constraint
    'mytable
    [:g1 [{:local-col "u_id" :remote-col :id :ns :user :link {:id :users}}]]
@@ -152,6 +196,8 @@
 
 ^{:refer rt.postgres.grammar.form-deftype/pg-deftype-foreigns :added "4.1"}
 (fact "creates foreign key constraints"
+  ^:hidden
+  
   (pg-deftype-foreigns
    'mytable
    [[:u {:type :ref :ref {:group :g1 :ns :user :link {:id :users}}}]
