@@ -50,8 +50,7 @@
                        :partition-of full-parent :default]
                       (if next-col
                         [:partition-by :list (list 'quote (list (symbol next-col)))]
-                        [])
-                      #_[\;]))))
+                        [])))))
       
       (mapcat (fn [val]
                 (let [new-name (pg-partition-name base-name val stack)
@@ -64,8 +63,7 @@
                                   :for :values :in (list 'quote (list val))]
                                  (if next-col
                                    [:partition-by :list (list 'quote (list (symbol next-col)))]
-                                   [])
-                                 #_[\;]))]
+                                   [])))]
                    (if (seq remaining-specs)
                      (pg-partition-def new-sym base-name next-spec (rest remaining-specs) (cons val stack))
                      nil))))
@@ -76,27 +74,31 @@
   {:added "4.0"}
   ([form]
    (let [mopts (preprocess/macro-opts)
-         [mdefn [_ sym [parent] specs]] (grammar-spec/format-defn form)
+         [mdefn [_ sym parents specs]] (grammar-spec/format-defn form)
          
-         parent-sym (if (vector? parent) (first parent) parent)
+         parents (if (vector? parents) parents [parents])
          
-         ;; Try to find schema from parent entry
-         p-en  (if (symbol? parent-sym)
-                 (let [snapshot (:snapshot mopts)
-                       lang     (:lang mopts)
-                       book     (if snapshot (snap/get-book snapshot lang))
-                       module-id (or (namespace parent-sym) (:module mopts))
-                       entry-id  (name parent-sym)]
-                   (if book
-                     (book/get-base-entry book (symbol module-id) (symbol entry-id) :code))))
-         
-         parent-schema (or (:static/schema p-en) (namespace parent-sym))
-         base-name     (name parent-sym)
-         
-         ;; Update parent with found schema for SQL generation
-         parent-sql-sym (if parent-schema
-                          (symbol parent-schema base-name)
-                          (symbol base-name))
-         
-         statements (pg-partition-def parent-sql-sym base-name (first specs) (rest specs) [])]
-     (apply list 'do statements))))
+         all-statements
+         (mapcat (fn [parent-sym]
+                   (let [parent-sym (if (vector? parent-sym) (first parent-sym) parent-sym)
+                         
+                         ;; Try to find schema from parent entry
+                         p-en  (if (symbol? parent-sym)
+                                 (let [snapshot (:snapshot mopts)
+                                       lang     (:lang mopts)
+                                       book     (if snapshot (snap/get-book snapshot lang))
+                                       module-id (or (namespace parent-sym) (:module mopts))
+                                       entry-id  (name parent-sym)]
+                                   (if book
+                                     (book/get-base-entry book (symbol module-id) (symbol entry-id) :code))))
+                         
+                         parent-schema (or (:static/schema p-en) (namespace parent-sym))
+                         base-name     (name parent-sym)
+                         
+                         ;; Update parent with found schema for SQL generation
+                         parent-sql-sym (if parent-schema
+                                          (symbol parent-schema base-name)
+                                          (symbol base-name))]
+                     (pg-partition-def parent-sql-sym base-name (first specs) (rest specs) [])))
+                 parents)]
+     (apply list 'do all-statements))))
