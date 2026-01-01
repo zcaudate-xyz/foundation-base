@@ -243,6 +243,22 @@
              (pg-deftype-gen-constraint sym entry mopts))
            groups))))
 
+(defn pg-deftype-spec-normalize
+  "normalizes the spec, inferring groups"
+  {:added "4.0"}
+  [col-spec]
+  (let [foreign-groups (->> col-spec
+                            (mapcat (fn [[_ {:keys [foreign]}]]
+                                      (keys foreign)))
+                            set)]
+    (mapv (fn [[k {:keys [type ref foreign] :as attrs}]]
+            (if (and (= :ref type)
+                     (not (:group ref))
+                     (contains? foreign-groups k))
+              [k (assoc-in attrs [:ref :group] k)]
+              [k attrs]))
+          col-spec)))
+
 (defn pg-deftype
   "creates a deftype statement"
   {:added "4.0"}
@@ -251,6 +267,7 @@
          {:static/keys [schema schema-primary]
           :keys [final existing]} (meta sym)
          col-spec (mapv vec (partition 2 spec))
+         col-spec (pg-deftype-spec-normalize col-spec)
          cols     (mapv #(pg-deftype-col-fn % mopts) col-spec)
          ttok     (common/pg-full-token sym schema)
          tuniques (pg-deftype-uniques col-spec)
