@@ -87,8 +87,9 @@
 (defn pg-deftype-col-fn
   "formats the column on deftype"
   {:added "4.0"}
-  ([[col {:keys [type primary scope sql required unique enum ref] :as m}] mopts]
-   (let [[col-name col-attrs ref-toks]
+  ([[col {:keys [type primary scope sql required unique enum ref identity generated] :as m}] mopts]
+   (let [is-identity identity
+         [col-name col-attrs ref-toks]
          (if (= type :ref)
            (pg-deftype-ref col (:ref m) mopts)
            [(str/snake-case (h/strn col))
@@ -100,6 +101,8 @@
                      unique   (conj :unique)
                      (and (= type :ref)
                           (not (:group ref)))     (conj :references ref-toks)
+                     is-identity (conj :generated :by :default :as :identity)
+                     generated  (conj :generated :always :as (list 'quote (list generated)) :stored)
                      sql (pg-deftype-col-sql sql))]
      (vec (concat [#{col-name}] col-attrs)))))
 
@@ -273,8 +276,10 @@
 (defn pg-deftype
   "creates a deftype statement"
   {:added "4.0"}
-  ([[_ sym spec params]]
+  ([form]
    (let [mopts (preprocess/macro-opts)
+         [mdefn [_ sym spec params]] (grammar-spec/format-defn form)
+         params (if (seq? params) (first params) params)
          {:static/keys [schema schema-primary]
           :keys [final existing]} (meta sym)
          col-spec (mapv vec (partition 2 spec))
@@ -290,7 +295,16 @@
          tconstraints (->> (:constraints params)
                            (mapv (fn [[k val]]
                                    (list '% [:constraint (symbol (h/strn k))
-                                             :check (list 'quote (list val))]))))]
+                                             :check (list 'quote (list val))]))))
+
+         tcomment (if (and (:doc mdefn) (not (str/blank? (:doc mdefn))))
+                    [[:comment :on :table ttok :is (:doc mdefn)]])
+
+         ccomments (keep (fn [[col attrs]]
+                           (if-let [doc (:comment attrs)]
+                             [:comment :on :column (list '. ttok #{(str/snake-case (name col))})
+                              :is doc]))
+                         col-spec)]
      (if (not existing)
        `(do ~@(if-not final [[:drop-table :if-exists ttok :cascade]] [])
             [:create-table :if-not-exists ~ttok \(
@@ -304,7 +318,9 @@
                                     tforeigns))))
              \\ \)
              ~@tpartition]
-            ~@tindexes)
+            ~@tindexes
+            ~@tcomment
+            ~@ccomments)
        ""))))
 
 (defn pg-deftype-fragment
