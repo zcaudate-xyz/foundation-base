@@ -88,7 +88,10 @@
   "formats the column on deftype"
   {:added "4.0"}
   ([[col {:keys [type primary scope sql required unique enum ref] :as m}] mopts]
-   (let [[col-name col-attrs ref-toks]
+   (let [sql (if (and (= type :ref) (:group ref))
+               (dissoc sql :cascade)
+               sql)
+         [col-name col-attrs ref-toks]
          (if (= type :ref)
            (pg-deftype-ref col (:ref m) mopts)
            [(str/snake-case (h/strn col))
@@ -212,14 +215,15 @@
   {:added "4.0"}
   ([col-spec]
    (->> col-spec
-        (mapcat (fn [[col {:keys [type ref foreign]}]]
+        (mapcat (fn [[col {:keys [type ref foreign sql]}]]
                   (concat
                    (when (and (= :ref type) (:group ref))
                      [[(:group ref)
                        {:local-col (pg-deftype-ref-name col ref)
                         :remote-col (or (:column ref) :id)
                         :ns (:ns ref)
-                        :link (:link ref)}]])
+                        :link (:link ref)
+                        :cascade (-> sql :cascade)}]])
                    (when foreign
                      (for [[group f-spec] foreign]
                        [group
@@ -228,7 +232,8 @@
                                       (str/snake-case (name col)))
                          :remote-col (:column f-spec)
                          :ns (:ns f-spec)
-                         :link (:link f-spec)}])))))
+                         :link (:link f-spec)
+                         :cascade (-> sql :cascade)}])))))
         (group-by first)
         (h/map-vals (partial map second)))))
 
@@ -253,12 +258,15 @@
          remote-table (name (:id link))
 
          local-cols (map (comp symbol :local-col) entries)
-         remote-cols (map (comp symbol name :remote-col) entries)]
+         remote-cols (map (comp symbol name :remote-col) entries)
+         
+         cascade (some :cascade entries)]
 
-     (list '% [:constraint (symbol c-name)
-               :foreign-key (list 'quote local-cols)
-               :references (common/pg-base-token #{remote-table} remote-schema)
-               (list 'quote remote-cols)]))))
+     (list '% (cond-> [:constraint (symbol c-name)
+                       :foreign-key (list 'quote local-cols)
+                       :references (common/pg-base-token #{remote-table} remote-schema)
+                       (list 'quote remote-cols)]
+                cascade (conj :on-delete-cascade))))))
 
 (defn pg-deftype-foreigns
   "creates foreign key constraints"

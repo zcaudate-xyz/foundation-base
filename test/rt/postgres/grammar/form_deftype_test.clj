@@ -160,7 +160,7 @@
   
   (pg-deftype-partition {:partition-by [:range :abc-def]}
                         [[:abc-def {:type :time}]])
-  => '(:partition-by :range (quote ("abc_def")))
+  => '(:partition-by :range (quote (#{"abc_def"})))
 
   (let [colspec [[:id {:type :uuid, :primary "default", :sql {:default '(uuid-generate-v4)}, :scope :-/id}]
                  [:class {:type :enum, :required true, :scope :-/info, :primary "default", :enum {:ns 'szndb.core.type-seed/EnumClassType}, :sql {:unique ["class"]}}]
@@ -174,23 +174,57 @@
                  [:time-updated {:type :time, :scope :-/data}]]]
     (pg-deftype-partition {:partition-by {:strategy :list :columns [:class]}}
                           colspec))
-  => '(:partition-by :list (quote ("class"))))
+  => '(:partition-by :list (quote (#{"class"})))
+
+  (fact "pg-deftype-partition handles sets in column list"
+    (pg-deftype-partition {:partition-by [:list #{"class"}]} [])
+    => '(:partition-by :list (quote (#{"class"}))))
+
+  (fact "pg-deftype-partition handles map format"
+    (pg-deftype-partition {:partition-by {:strategy :list :columns [:class]}} [])
+    => '(:partition-by :list (quote (#{"class"}))))
+
+  (fact "pg-deftype-partition should error if column is not found"
+    (pg-deftype-partition {:partition-by {:strategy :list :columns [:wrong-column]}} 
+                          [[:class {:type :text}]])
+    => (throws)))
 
 ^{:refer rt.postgres.grammar.form-deftype/pg-deftype-partition-constraints :added "4.1"}
 (fact "TODO")
 
-^{:refer rt.postgres.grammar.form-deftype/pg-deftype-ref-name :added "4.1"}
-(fact "gets the ref name"
+^{:refer rt.postgres.grammar.form-deftype/pg-deftype-spec-normalize :added "4.1"}
+(fact "normalizes the spec, inferring groups"
+  (let [spec [[:class       {:foreign {:rev {:ns :Rev :column :class :link {:id :Rev}}}}]
+              [:class-table {:foreign {:rev {:ns :Rev :column :class-table :link {:id :Rev}}}}]
+              [:rev         {:type :ref :ref {:ns :Rev :link {:id :Rev}}}]]]
+    (second (last (pg-deftype-spec-normalize spec))))
+  => (contains {:ref (contains {:group :rev})}))
+
+^{:refer rt.postgres.grammar.form-deftype/pg-deftype-col-fn :added "4.0"}
+(fact "formats the column on deftype"
   ^:hidden
   
-  (pg-deftype-ref-name :user {})
-  => "user_id"
+  (with-redefs [common/pg-type-alias (fn [x] x)]
+    (pg-deftype-col-fn [:col {:type :uuid :primary true}] {}))
+  => (contains [:uuid :primary-key])
 
-  (pg-deftype-ref-name :user_account {})
-  => "user_account_id"
+  (fact "pg-deftype-col-fn suppresses inline cascade if in group"
+    (with-redefs [snap/get-book (constantly {})
+                  book/get-base-entry (constantly {:form [nil nil [:id {:type :uuid}]]
+                                                   :static/schema "schema"})]
+      (set (pg-deftype-col-fn 
+            [:rev {:type :ref :ref {:group :rev :ns :Rev} :sql {:cascade true}}]
+            {})))
+    => (fn [s] (not (contains? s :on-delete-cascade))))
 
-  (pg-deftype-ref-name :user {:raw "custom_id"})
-  => "custom_id")
+  (fact "pg-deftype-col-fn keeps inline cascade if NOT in group"
+    (with-redefs [snap/get-book (constantly {})
+                  book/get-base-entry (constantly {:form [nil nil [:id {:type :uuid}]]
+                                                   :static/schema "schema"})]
+      (set (pg-deftype-col-fn 
+            [:rev {:type :ref :ref {:ns :Rev} :sql {:cascade true}}]
+            {})))
+    => (fn [s] (contains? s :on-delete-cascade))))
 
 ^{:refer rt.postgres.grammar.form-deftype/pg-deftype-foreign-groups :added "4.1"}
 (fact "collects foreign key groups"
@@ -199,8 +233,14 @@
   (pg-deftype-foreign-groups
    [[:u {:type :ref :ref {:group :g1 :ns :user :link {:id :user}}}]
     [:a {:type :text :foreign {:g1 {:column :uid :ns :user :link {:id :user}}}}]])
-  => {:g1 '({:local-col "u_id" :remote-col :id :ns :user :link {:id :user}}
-            {:local-col "a"    :remote-col :uid :ns :user :link {:id :user}})})
+  => {:g1 '({:local-col "u_id" :remote-col :id :ns :user :link {:id :user} :cascade nil}
+            {:local-col "a"    :remote-col :uid :ns :user :link {:id :user} :cascade nil})}
+
+  (fact "pg-deftype-foreign-groups captures cascade"
+    (pg-deftype-foreign-groups
+     [[:rev {:type :ref :ref {:group :rev :ns :Rev :link {:id :Rev}}
+             :sql {:cascade true}}]])
+    => (contains {:rev (contains [(contains {:cascade true})])})))
 
 ^{:refer rt.postgres.grammar.form-deftype/pg-deftype-gen-constraint :added "4.1"}
 (fact "generates a foreign key constraint"
@@ -212,17 +252,12 @@
    {})
   => '(% [:constraint fk_mytable_g1
           :foreign-key (quote (u_id))
-          :references #{"users"} (quote (id))]))
+          :references #{"users"} (quote (id))])
 
-^{:refer rt.postgres.grammar.form-deftype/pg-deftype-foreigns :added "4.1"}
-(fact "creates foreign key constraints"
-  ^:hidden
-  
-  (pg-deftype-foreigns
-   'mytable
-   [[:u {:type :ref :ref {:group :g1 :ns :user :link {:id :users}}}]
-    [:a {:type :text :foreign {:g1 {:column :uid :ns :user :link {:id :users}}}}]]
-   {})
-  => '[(% [:constraint fk_mytable_g1
-           :foreign-key (quote (u_id a))
-           :references #{"users"} (quote (id uid))])])
+  (fact "pg-deftype-gen-constraint appends on delete cascade"
+    (let [res (pg-deftype-gen-constraint
+               'RevLog
+               [:rev [{:local-col "rev_id" :remote-col :id :ns :Rev :link {:id :Rev} :cascade true}]]
+               {})]
+      (some #{:on-delete-cascade} (second res)))
+    => :on-delete-cascade))
