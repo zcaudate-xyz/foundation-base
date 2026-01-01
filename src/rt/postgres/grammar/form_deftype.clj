@@ -254,15 +254,22 @@
   "normalizes the spec, inferring groups"
   {:added "4.0"}
   [col-spec]
-  (let [foreign-groups (->> col-spec
-                            (mapcat (fn [[_ {:keys [foreign]}]]
-                                      (keys foreign)))
-                            set)]
+  (let [foreign-refs (->> col-spec
+                          (mapcat (fn [[_ {:keys [foreign]}]]
+                                    foreign))
+                          (into {}))]
     (mapv (fn [[k {:keys [type ref foreign] :as attrs}]]
             (if (and (= :ref type)
-                     (not (:group ref))
-                     (contains? foreign-groups k))
-              [k (assoc-in attrs [:ref :group] k)]
+                     (not (:group ref)))
+              (let [target-ns (:ns ref)
+                    matches (keep (fn [[g-key g-spec]]
+                                    (if (= (:ns g-spec) target-ns) g-key))
+                                  foreign-refs)]
+                (if (seq matches)
+                  (let [g-key (or (first (filter #{k} matches))
+                                  (first matches))]
+                    [k (assoc-in attrs [:ref :group] g-key)])
+                  [k attrs]))
               [k attrs]))
           col-spec)))
 
@@ -397,5 +404,3 @@
      (list op (with-meta sym (merge msym fmeta))
            spec
            params)]))
-
-
