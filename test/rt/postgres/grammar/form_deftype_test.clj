@@ -1,6 +1,7 @@
 (ns rt.postgres.grammar.form-deftype-test
   (:use code.test)
   (:require [rt.postgres.grammar.form-deftype :refer :all]
+            [rt.postgres.grammar.form-deftype-hydrate :as hydrate]
             [rt.postgres.grammar :as g]
             [rt.postgres.script.scratch :as scratch]
             [std.lang :as l]
@@ -82,113 +83,6 @@
   (pg-deftype-format '(deftype t [:a {:type :int}] {}))
   => vector?)
 
-^{:refer rt.postgres.grammar.form-deftype/pg-deftype-hydrate-check-link :added "4.0"}
-(fact "checks a link making sure it exists and is correct type"
-  ^:hidden
-  
-  (with-redefs [snap/get-book (fn [& _] nil)
-                std.lang.base.book/get-base-entry (fn [& _] {:static/dbtype :table})]
-    (pg-deftype-hydrate-check-link nil {} :table))
-  => true)
-
-^{:refer rt.postgres.grammar.form-deftype/pg-deftype-hydrate-link :added "4.0"}
-(fact "resolves the link for hydration"
-  ^:hidden
-  
-  (pg-deftype-hydrate-link 'sym {:id :mod} {:ns '-/sym})
-  => [{:section :code, :lang :postgres, :module :mod, :id 'sym} false])
-
-^{:refer rt.postgres.grammar.form-deftype/pg-deftype-hydrate-process-sql :added "4.0"}
-(fact "processes the sql attribute"
-  ^:hidden
-  
-  (pg-deftype-hydrate-process-sql {:process 's} :k {})
-  => (throws))
-
-^{:refer rt.postgres.grammar.form-deftype/pg-deftype-hydrate-process-foreign :added "4.0"}
-(fact "processes the foreign attribute"
-  ^:hidden
-  
-  (with-redefs [pg-deftype-hydrate-check-link (fn [_ _ _])]
-    (pg-deftype-hydrate-process-foreign {:a {:ns :n}} (fn [_] [{:id :i} true]) nil))
-  => (contains {:a (contains {:link {:id :i}})}))
-
-^{:refer rt.postgres.grammar.form-deftype/pg-deftype-hydrate-process-ref :added "4.0"}
-(fact "processes the ref type"
-  ^:hidden
-  
-  (pg-deftype-hydrate-process-ref :k {:ref [:s :i :t {}]} nil nil)
-  => (just [:k (contains {:type :ref, :required true})])
-
-  (with-redefs [pg-deftype-hydrate-check-link (fn [_ _ _])]
-    (pg-deftype-hydrate-process-ref :k {:ref {:ns :n}} (fn [_] [{:id :i} true]) nil))
-  => (just [:k (contains {:ref (contains {:link {:id :i}})})]))
-
-^{:refer rt.postgres.grammar.form-deftype/pg-deftype-hydrate-process-enum :added "4.0"}
-(fact "processes the enum type"
-  ^:hidden
-  
-  (with-redefs [pg-deftype-hydrate-check-link (fn [_ _ _])
-                resolve (constantly (atom {:id :i :module :m :lang :l :section :s}))]
-    (pg-deftype-hydrate-process-enum :k {:enum {:ns 'foo}} nil))
-  => (just [:k (contains {:enum (contains {:ns 'm/i})})]))
-
-^{:refer rt.postgres.grammar.form-deftype/pg-deftype-hydrate-attr :added "4.0"}
-(fact "hydrates a single attribute")
-
-^{:refer rt.postgres.grammar.form-deftype/pg-deftype-hydrate-spec :added "4.0"}
-(fact "hydrates the spec")
-
-^{:refer rt.postgres.grammar.form-deftype/pg-deftype-hydrate :added "4.0"}
-(fact "hydrates the form with linked ref information")
-
-^{:refer rt.postgres.grammar.form-deftype/pg-deftype-hydrate-hook :added "4.0"}
-(fact "updates the application schema")
-
-
-^{:refer rt.postgres.grammar.form-deftype/pg-deftype-primaries :added "4.0"}
-(fact "gets the primary keys for deftype"
-  ^:hidden
-  
-  (pg-deftype-primaries [{:id "a" :type :uuid} {:id "b" :type :uuid}])
-  => '[(:- [:primary-key (quote (a b))])])
-
-
-^{:refer rt.postgres.grammar.form-deftype/pg-deftype-partition :added "4.1"}
-(fact "creates partition by statement"
-  ^:hidden
-  
-  (pg-deftype-partition {:partition-by [:range :abc-def]}
-                        [[:abc-def {:type :time}]])
-  => '(:partition-by :range (quote (#{"abc_def"})))
-
-  (let [colspec [[:id {:type :uuid, :primary "default", :sql {:default '(uuid-generate-v4)}, :scope :-/id}]
-                 [:class {:type :enum, :required true, :scope :-/info, :primary "default", :enum {:ns 'szndb.core.type-seed/EnumClassType}, :sql {:unique ["class"]}}]
-                 [:class-table {:type :enum, :required true, :scope :-/info, :primary "primary", :enum {:ns 'szndb.core.type-seed/EnumTableType}, :sql {:unique ["class"]}}]
-                 [:class-ref {:type :uuid, :required true, :sql {:unique ["class"]}, :scope :-/data}]
-                 [:index {:type :integer, :required true, :scope :-/info, :sql {:default 0}}]
-                 [:current {:type :map, :sql {:default "{}"}, :scope :-/data}]
-                 [:op-created {:type :uuid, :scope :-/data}]
-                 [:op-updated {:type :uuid, :scope :-/data}]
-                 [:time-created {:type :time, :scope :-/data}]
-                 [:time-updated {:type :time, :scope :-/data}]]]
-    (pg-deftype-partition {:partition-by {:strategy :list :columns [:class]}}
-                          colspec))
-  => '(:partition-by :list (quote (#{"class"})))
-
-  (fact "pg-deftype-partition handles sets in column list"
-    (pg-deftype-partition {:partition-by [:list #{"class"}]} [])
-    => '(:partition-by :list (quote (#{"class"}))))
-
-  (fact "pg-deftype-partition handles map format"
-    (pg-deftype-partition {:partition-by {:strategy :list :columns [:class]}} [])
-    => '(:partition-by :list (quote (#{"class"}))))
-
-  (fact "pg-deftype-partition should error if column is not found"
-    (pg-deftype-partition {:partition-by {:strategy :list :columns [:wrong-column]}} 
-                          [[:class {:type :text}]])
-    => (throws)))
-
 ^{:refer rt.postgres.grammar.form-deftype/pg-deftype-partition-constraints :added "4.1"}
 (fact "TODO")
 
@@ -208,23 +102,22 @@
     (pg-deftype-col-fn [:col {:type :uuid :primary true}] {}))
   => (contains [:uuid :primary-key])
 
-  (fact "pg-deftype-col-fn suppresses inline cascade if in group"
-    (with-redefs [snap/get-book (constantly {})
-                  book/get-base-entry (constantly {:form [nil nil [:id {:type :uuid}]]
-                                                   :static/schema "schema"})]
-      (set (pg-deftype-col-fn 
-            [:rev {:type :ref :ref {:group :rev :ns :Rev} :sql {:cascade true}}]
-            {})))
-    => (fn [s] (not (contains? s :on-delete-cascade))))
+  (with-redefs [snap/get-book (constantly {})
+                book/get-base-entry (constantly {:form [nil nil [:id {:type :uuid}]]
+                                                 :static/schema "schema"})]
+    (set (pg-deftype-col-fn 
+          [:rev {:type :ref :ref {:group :rev :ns :Rev} :sql {:cascade true}}]
+          {})))
+  => (fn [s] (not (contains? s :on-delete-cascade)))
 
-  (fact "pg-deftype-col-fn keeps inline cascade if NOT in group"
-    (with-redefs [snap/get-book (constantly {})
-                  book/get-base-entry (constantly {:form [nil nil [:id {:type :uuid}]]
-                                                   :static/schema "schema"})]
-      (set (pg-deftype-col-fn 
-            [:rev {:type :ref :ref {:ns :Rev} :sql {:cascade true}}]
-            {})))
-    => (fn [s] (contains? s :on-delete-cascade))))
+  
+  (with-redefs [snap/get-book (constantly {})
+                book/get-base-entry (constantly {:form [nil nil [:id {:type :uuid}]]
+                                                 :static/schema "schema"})]
+    (set (pg-deftype-col-fn 
+          [:rev {:type :ref :ref {:ns :Rev} :sql {:cascade true}}]
+          {})))
+  => (fn [s] (contains? s :on-delete-cascade)))
 
 ^{:refer rt.postgres.grammar.form-deftype/pg-deftype-foreign-groups :added "4.1"}
 (fact "collects foreign key groups"
@@ -236,11 +129,10 @@
   => {:g1 '({:local-col "u_id" :remote-col :id :ns :user :link {:id :user} :cascade nil}
             {:local-col "a"    :remote-col :uid :ns :user :link {:id :user} :cascade nil})}
 
-  (fact "pg-deftype-foreign-groups captures cascade"
-    (pg-deftype-foreign-groups
-     [[:rev {:type :ref :ref {:group :rev :ns :Rev :link {:id :Rev}}
-             :sql {:cascade true}}]])
-    => (contains {:rev (contains [(contains {:cascade true})])})))
+  (pg-deftype-foreign-groups
+   [[:rev {:type :ref :ref {:group :rev :ns :Rev :link {:id :Rev}}
+           :sql {:cascade true}}]])
+  => (contains {:rev (contains [(contains {:cascade true})])}))
 
 ^{:refer rt.postgres.grammar.form-deftype/pg-deftype-gen-constraint :added "4.1"}
 (fact "generates a foreign key constraint"
@@ -254,10 +146,22 @@
           :foreign-key (quote (u_id))
           :references #{"users"} (quote (id))])
 
-  (fact "pg-deftype-gen-constraint appends on delete cascade"
-    (let [res (pg-deftype-gen-constraint
-               'RevLog
-               [:rev [{:local-col "rev_id" :remote-col :id :ns :Rev :link {:id :Rev} :cascade true}]]
-               {})]
-      (some #{:on-delete-cascade} (second res)))
-    => :on-delete-cascade))
+  (let [res (pg-deftype-gen-constraint
+             'RevLog
+             [:rev [{:local-col "rev_id" :remote-col :id :ns :Rev :link {:id :Rev} :cascade true}]]
+             {})]
+    (some #{:on-delete-cascade} (second res)))
+  => :on-delete-cascade)
+
+
+^{:refer rt.postgres.grammar.form-deftype/pg-deftype-ref-name :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.postgres.grammar.form-deftype/pg-deftype-primaries :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.postgres.grammar.form-deftype/pg-deftype-foreigns :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.postgres.grammar.form-deftype/pg-deftype-partition :added "4.1"}
+(fact "TODO")
