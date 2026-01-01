@@ -59,7 +59,7 @@
 (fact "create index statements"
   ^:hidden
   
-  (pg-deftype-indexes [[:col {:type :text :sql {:index true}}]] "table")
+  (pg-deftype-indexes "t" [[:col {:type :text :sql {:index true}}]] {} "table")
   => '[(% [:create-index :on "table" (quote (#{"col"}))])])
 
 ^{:refer rt.postgres.grammar.form-deftype/pg-deftype :added "4.0"}
@@ -113,3 +113,31 @@
 
 ^{:refer rt.postgres.grammar.form-deftype/pg-deftype-partition-constraints :added "4.1"}
 (fact "TODO")
+(defn get-indexes [res]
+  (->> res
+       (filter (fn [x] (and (seq? x) (= (first x) '%))))
+       (map second)))
+
+(fact "pg-deftype with :index option"
+  (let [res (with-redefs [common/pg-full-token (fn [s sch] (str sch "." s))]
+              (pg-deftype '(deftype ^{:static/schema "s"} t
+                             [:c1 {:type :text}
+                              :c2 {:type :text}]
+                             {:index {:idx_c1 [:c1]
+                                      :idx_c2 [:c2]}})))]
+    (set (get-indexes res)))
+  => #{[:create-index 't_idx_c1 :on "s.t" (list 'quote '("c1"))]
+       [:create-index 't_idx_c2 :on "s.t" (list 'quote '("c2"))]})
+
+(fact "pg-deftype with :index option complex"
+  (let [res (with-redefs [common/pg-full-token (fn [s sch] (str sch "." s))]
+              (pg-deftype '(deftype ^{:static/schema "s"} t
+                             [:c1 {:type :text}
+                              :c2 {:type :text}]
+                             {:index {:idx_c1 {:columns [:c1]
+                                               :using :hash
+                                               :where "c1 IS NOT NULL"}
+                                      :idx_c2 [:c2]}})))]
+    (set (get-indexes res)))
+  => #{[:create-index 't_idx_c2 :on "s.t" (list 'quote '("c2"))]
+       [:create-index 't_idx_c1 :on "s.t" :using :hash (list 'quote '("c1")) \\ :where "c1 IS NOT NULL"]})

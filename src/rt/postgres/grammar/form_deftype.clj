@@ -143,7 +143,7 @@
 (defn pg-deftype-indexes
   "create index statements"
   {:added "4.0"}
-  ([cols ttok]
+  ([sym cols params ttok]
    (let [c-indexes (keep (fn [[k {:keys [type sql]}]]
                            (let [{:keys [index]} sql]
                              (if index
@@ -166,8 +166,21 @@
                                        ~(list 'quote (list (key-fn m)))
                                        ~@(if where [\\ :where where])]))))
          g-indexes (dissoc g-indexes nil)
-         _ (if (not-empty g-indexes) (h/error "TODO"))]
-     s-indexes)))
+         _ (if (not-empty g-indexes) (h/error "TODO"))
+
+         param-indexes (mapv (fn [[k v]]
+                               (let [cols (if (vector? v) v (:columns v))
+                                     {:keys [using where]} (if (map? v) v)
+                                     iname (symbol (str (str/snake-case (name sym)) "_" (name k)))]
+                                 `(~'% [:create-index
+                                        ~iname
+                                        :on
+                                        ~ttok
+                                        ~@(if using [:using using])
+                                        ~(list 'quote (map (comp str/snake-case name) cols))
+                                        ~@(if where [\\ :where where])])))
+                             (:index params))]
+     (concat s-indexes param-indexes))))
 
 (defn pg-deftype-partition
   "creates partition by statement"
@@ -239,7 +252,7 @@
          ttok     (common/pg-full-token sym schema)
          tuniques (pg-deftype-uniques col-spec)
          tprimaries (pg-deftype-primaries schema-primary)
-         tindexes   (pg-deftype-indexes col-spec ttok)
+         tindexes   (pg-deftype-indexes sym col-spec params ttok)
          tpartition (pg-deftype-partition params)
          tpartition-constraints (pg-deftype-partition-constraints sym col-spec params mopts)
          tcustom      (:custom params)
