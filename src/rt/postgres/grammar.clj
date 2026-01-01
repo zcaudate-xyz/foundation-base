@@ -7,6 +7,7 @@
             [rt.postgres.grammar.form-defconst :as form-defconst]
             [rt.postgres.grammar.form-defrole :as form-defrole]
             [rt.postgres.grammar.form-deftype :as form-deftype]
+            [rt.postgres.grammar.form-defpartition :as form-defpartition]
             [rt.postgres.grammar.form-vec :as form-vec]
             [std.lang.base.emit :as emit]
             [std.lang.base.emit-common :as emit-common]
@@ -145,8 +146,8 @@
                       :static/dbtype :trigger}
         :defpartition   {:op :defpartition :symbol '#{defpartition}
                          :type :def :section :code :emit :macro
-                         :hydrate #'common/pg-hydrate
-                         :macro   #'common/pg-defpartition
+                         :hydrate #'form-defpartition/pg-partition-hydrate
+                         :macro   #'form-defpartition/pg-defpartition
                          :static/dbtype :partition}})))
 
 (def +template+
