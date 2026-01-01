@@ -177,8 +177,19 @@
   "creates partition by statement"
   {:added "4.0"}
   ([params]
+   (pg-deftype-partition params []))
+  ([params col-spec]
    (if-let [partition (:partition-by params)]
-     (let [[method & cols] partition]
+     (let [[method & cols] partition
+           col-map (into {} col-spec)
+           cols (map (fn [col]
+                       (let [attrs (get col-map col)]
+                         (if attrs
+                           (if (= (:type attrs) :ref)
+                             (pg-deftype-ref-name col (:ref attrs))
+                             (str/snake-case (name col)))
+                           (str/snake-case (name col)))))
+                     cols)]
        (list :partition-by method (list 'quote cols))))))
 
 (defn pg-deftype-foreign-groups
@@ -257,7 +268,7 @@
          tprimaries (pg-deftype-primaries schema-primary)
          tindexes   (pg-deftype-indexes col-spec ttok)
          tforeigns  (pg-deftype-foreigns sym col-spec mopts)
-         tpartition (pg-deftype-partition params)
+         tpartition (pg-deftype-partition params col-spec)
          tcustom      (:custom params)
          tconstraints (->> (:constraints params)
                            (mapv (fn [[k val]]
