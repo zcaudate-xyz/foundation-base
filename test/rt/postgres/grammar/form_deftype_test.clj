@@ -148,10 +148,13 @@
 
 ^{:refer rt.postgres.grammar.form-deftype/pg-deftype-partition :added "4.1"}
 (fact "creates partition by statement"
-  ^:hidden
-  
-  (pg-deftype-partition {:partition-by [:range :created_at]})
-  => '(:partition-by :range (quote (:created_at))))
+  (pg-deftype-partition {:partition-by [:range :created_at]}
+                        [[:created_at {:type :long}]])
+  => '(:partition-by :range (quote ("created_at")))
+
+  (pg-deftype-partition {:partition-by [:range :user]}
+                        [[:user {:type :ref :ref {:ns :user :link {:id :user}}}]])
+  => '(:partition-by :range (quote ("user_id"))))
 
 ^{:refer rt.postgres.grammar.form-deftype/pg-deftype-partition-constraints :added "4.1"}
 (fact "TODO")
