@@ -7,6 +7,8 @@
             [rt.postgres.grammar.form-defconst :as form-defconst]
             [rt.postgres.grammar.form-defrole :as form-defrole]
             [rt.postgres.grammar.form-deftype :as form-deftype]
+            [rt.postgres.grammar.form-deftype-hydrate :as form-deftype-hydrate]
+            [rt.postgres.grammar.form-defpartition :as form-defpartition]
             [rt.postgres.grammar.form-vec :as form-vec]
             [std.lang.base.emit :as emit]
             [std.lang.base.emit-common :as emit-common]
@@ -117,8 +119,8 @@
         :deftype   {:op :deftype :symbol '#{deftype}
                     :type :def :section :code :emit :macro
                     :format       #'form-deftype/pg-deftype-format
-                    :hydrate      #'form-deftype/pg-deftype-hydrate
-                    :hydrate-hook #'form-deftype/pg-deftype-hydrate-hook
+                    :hydrate      #'form-deftype-hydrate/pg-deftype-hydrate
+                    :hydrate-hook #'form-deftype-hydrate/pg-deftype-hydrate-hook
                     :macro        #'form-deftype/pg-deftype
                     :static/dbtype :table}
         :defconst  {:op :defconst :symbol '#{defconst}
@@ -146,7 +148,7 @@
         :defpartition   {:op :defpartition :symbol '#{defpartition}
                          :type :def :section :code :emit :macro
                          :hydrate #'common/pg-hydrate
-                         :macro   #'common/pg-defpartition
+                         :macro   #'form-defpartition/pg-defpartition
                          :static/dbtype :partition}})))
 
 (def +template+
