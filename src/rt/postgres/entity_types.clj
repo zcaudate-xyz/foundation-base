@@ -6,15 +6,16 @@
 (defonce +app+
   (atom {}))
 
-(defonce ^:dynamic *ns-str* "-")
+(def ^:dynamic *ns-str* "-")
 
 (defn get-app
   [& [ns]]
   (let [ns (or ns (h/ns-sym))]
-    (first (:application
-            (:static (h/suppress
-                      (l/rt:module
-                       (l/rt ns :postgres))))))))
+    (or (first (:application
+                (:static (h/suppress
+                          (l/rt:module
+                           (l/rt ns :postgres))))))
+        *ns-str*)))
 
 (defn get-app-ns-str
   [& [ns]]
@@ -24,7 +25,8 @@
   [& [ns schema]]
   (let [ns  (or ns (h/ns-sym))
         app (get-app ns)]
-    (swap! +app+ assoc app (name ns))))
+    (when app
+      (swap! +app+ assoc app (name ns)))))
 
 
 ;;
