@@ -432,9 +432,10 @@
                  track)
         fmeta {:static/tracker (if track (tracker/map->Tracker track))
                :static/public public
-               :static/dbtype :table}]
-    [fmeta
-     (list op (with-meta sym (merge msym fmeta))
+               :static/dbtype :table}
+        qmeta (h/qualified-keys msym)]
+    [(merge fmeta qmeta)
+     (list op (with-meta sym (merge msym fmeta qmeta))
            spec
            params)]))
 

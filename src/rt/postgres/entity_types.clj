@@ -3,7 +3,29 @@
             [std.lang :as l]
             [rt.postgres :as pg]))
 
+(defonce +app+
+  (atom {}))
+
 (defonce ^:dynamic *ns-str* "-")
+
+(defn get-app
+  [& [ns]]
+  (let [ns (or ns (h/ns-sym))]
+    (first (:application
+            (:static (h/suppress
+                      (l/rt:module
+                       (l/rt ns :postgres))))))))
+
+(defn get-app-ns-str
+  [& [ns]]
+  (get @+app+ (get-app ns)))
+
+(defn init-app
+  [& [ns schema]]
+  (let [ns  (or ns (h/ns-sym))
+        app (get-app ns)]
+    (swap! +app+ assoc app (name ns))))
+
 
 ;;
 ;; Default Types
@@ -187,22 +209,21 @@
 
     :track/none     []))
 
-(defn config-api-meta
-  [api]
-  (if (not= api :none)
-    {:api/meta
-     {:sb/rls true
-      :sb/access {:admin :all
-                  :auth  (case api
-                           (:api/hidden) :none
-                           (:api/system
-                            :api/auth
-                            :api/public)  :select)
-                  :anon  (case api
-                           (:api/hidden
-                            :api/system)  :none
-                           (:api/auth
-                            :api/public)  :select)}}}))
+(defn config-access
+  [access]
+  (if (not= access :none)
+    {:sb/rls true
+     :sb/access {:admin :all
+                 :auth  (case access
+                          (:access/hidden) :none
+                          (:access/system
+                           :access/auth
+                           :access/public)  :select)
+                 :anon  (case access
+                          (:access/hidden
+                           :access/system)  :none
+                          (:access/auth
+                           :access/public)  :select)}}))
 
 (defn with-priority
   [arr priority]
@@ -227,19 +248,46 @@
                :track/log
                :track/record
                :track/time}
-   :api      #{:api/public
-               :api/auth
-               :api/system
+   :access   #{:access/public
+               :access/auth
+               :access/system
+               :access/hidden
                :none}
    :addons   #{:name}})
 
-
+(defn check-E
+  [m]
+  (let [errors (reduce-kv (fn [acc k allowed]
+                            (if (contains? m k)
+                              (let [v (get m k)]
+                                (cond
+                                  (= k :addons)
+                                  (let [vs (if (coll? v) v [v])
+                                        bad (remove allowed vs)]
+                                    (if (seq bad)
+                                      (assoc acc k {:invalid bad :allowed allowed})
+                                      acc))
+                                  
+                                  :else
+                                  (let [preds (filter fn? allowed)
+                                        lits  (set (remove fn? allowed))]
+                                    (if (or (contains? lits v)
+                                            (some #(% v) preds))
+                                      acc
+                                      (assoc acc k {:value v :allowed allowed})))))
+                              acc))
+                          {}
+                          ESpec)]
+    (if (seq errors)
+      (throw (ex-info "Invalid inputs for E" {:errors errors :input m}))
+      m)))
 
 (defn E
-  [{:keys [id class track api columns fields addons ns-str]
-    :or {ns-str  *ns-str*
+  [{:keys [id class track access columns fields addons ns-str]
+    :or {ns-str  (or *ns-str* (get-app-ns-str)
+                     (h/error "No ns-str found." {:ns (h/ns-sym)}))
          class   :none
-         api     :none
+         access  :access/auth
          columns []}
     :as m}]
   (let [[id-in
@@ -255,100 +303,89 @@
                            :id/text (type-id-text ns-str)
                            :id/none nil))
         
-        api-meta-val (config-api-meta api)
+        access-val   (config-access access)
         track-val    (config-tracking track)
         track-cols   (config-tracking-columns track)
         class-cols   []]
-    {:api/meta api-meta-val
-     :public (if (#{:none :api/hidden} api)
+    {:api/meta access-val
+     :public (if (#{:none :access/hidden} access)
                false true)
      :track track-val
      :columns [(vec (concat
-                     (with-priority track-cols 200)
-                     (if id (with-priority [:id id] 0))))]}))
+                     (if id (with-priority [:id id] 0))
+                     (with-priority track-cols 200)))]}))
+
+
+(comment
+  
+  ;; having
+  {:class  :0d/entity
+   :entity {:table   "Global"
+            :context "Global"}}
+
+  ;; created 
+  :class-table    {:type :enum
+                   :enum {:ns -/EnumClassTableType}
+                   :generated "Global"}
+  :class-context {:type :enum
+                  :enum {:ns -/EnumClassTableType}
+                  :generated "Global"})
+
+;;
+
+
+
 
 (comment
 
   
+  (deftype.pg ^{:! (et/E {:id  :id/v1
+                          :access :access/system})}
+    Op
+    [:time         {:type :time    :required true
+                    :sql {:default (pg/time-us)}}
+     :tag          {:type :citext  :required true}
+     :data         {:type :map
+                    :web {:example {:email "test@test.com"
+                                    :password "password"}}}
+     :user-id      {:type :uuid}])
+
+  (deftype.pg ^{:! (et/E {:id       :id/none
+                          :track    :track/data
+                          :access   :access/auth})}
+    Metadata
+    {:added "0.1"}
+    [:id        {:type :jsonb :primary "default"}
+     :entry     {:type :jsonb :required true}])
+
+
+  (deftype.pg ^{:! (et/E {:class  :2d/entity
+                          :access :access/system
+                          :fields []})}
+    Rev
+    {:added "0.1"}
+    [])
+
+  (deftype.pg ^{:! (et/E {:class  :2d/log
+                          :entity {:in -/Rev}
+                          :access :access/system})}
+    RevLog
+    {:added "0.1"}
+    []
+    {:partition-by [:list :class-table]})
+
+  (deftype.pg ^{:! (et/E {:class  :0d/entity
+                          :entity {:table   "Global"
+                                   :context "Global"}
+                          :fields []
+                          :addons {:rev -/Rev}})}
+    Global
+    {:added "0.1"}
+    [:value    {:type :text   :required true}])
+
   
-  {:id        #{:id/none :id/v4 :id/v1 type}
-   :class     #{:0d/entity :0d/log
-                :1d/entity :1d/log
-                :2d/entity :2d/log}
-   :track    #{:track/data
-               :track/log
-               :track/record
-               :track/time}
-   :api      #{:api/visible
-               :api/public
-               :api/user
-               :api/hidden
-               :api/system}
-   :addons   #{:name}}
-  
-  (comment
-    (Type {:meta     [:id/none
-                      :0d/entity
-                      :track/record]
-           :class    {:table   "User"
-                      :context "Global"}
-           :include  [:name :color]}))
-
-  (:static/typespec    )
-
   
 
-  (def DeltasPart
-    [:deltas       {:type :jsonb :required true}])
-  
-  (def BalancePart
-    [:balance      {:type :numeric :required true
-                    :sql {:default 0}}])
 
 
-  (def IdClass
-    [:id  {:type :uuid :primary "default"
-           :sql {:default '(rt.postgres/uuid-generate-v4)}}])
-
-  (def Id
-    [:id  {:type :uuid :primary true
-           :sql {:default '(rt.postgres/uuid-generate-v4)}}])
-
-
-
-  (def IdLog
-    [:id  {:type :uuid :primary true
-           :sql {:default '(rt.postgres/uuid-generate-v1)}}])
-
-  (defn IdText
-    [ns-str]
-    [:id  {:type :citext :primary true
-           :sql {:process [[(symbol ns-str "as-upper-formatted")]
-                           [(symbol ns-str "as-upper-limit-length") 50]]}}])
-
-
-
-  (defenum.pg 
-    ["Token"
-     "Commodity"
-     "Publisher"
-     "Feed"
-     "Chat"
-     "ChatChannel"
-     "User"
-     "UserProfile"
-     "Organisation"
-     "Campaign"
-     "Topic"
-     "Wallet"
-     "Prospect"
-     "Task"])
-
-  (defenum.pg EnumClassContextType
-    ["Global"
-     "User"
-     "Organisation"
-     "Campaign"
-     "Topic"
-     "Token"
-     "Commodity"]))
+  )
