@@ -84,6 +84,7 @@
   {:added "4.0"}
   [ptr]
   (impl-entry/with:cache-force
+   (h/p)
    (h/p (h/pl-add-lines (ptr-display-str ptr)))))
 
 (defn ptr-setup

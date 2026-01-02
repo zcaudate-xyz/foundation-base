@@ -228,3 +228,31 @@
 
 ^{:refer rt.postgres.grammar.form-deftype/pg-deftype-foreigns :added "4.1"}
 (fact "TODO")
+
+
+^{:refer rt.postgres.grammar.form-deftype/pg-deftype-uniques :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.postgres.grammar.form-deftype/pg-deftype-indexes :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.postgres.grammar.form-deftype/pg-deftype-spec-normalize :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.postgres.grammar.form-deftype/pg-deftype-partition :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.postgres.grammar.form-deftype/pg-deftype :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.postgres.grammar.form-deftype/pg-deftype-fragment :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.postgres.grammar.form-deftype/pg-deftype-process-generated :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.postgres.grammar.form-deftype/pg-deftype-process-type :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.postgres.grammar.form-deftype/pg-deftype-format :added "4.1"}
+(fact "TODO")

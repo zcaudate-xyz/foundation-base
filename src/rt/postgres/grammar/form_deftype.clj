@@ -362,6 +362,38 @@
 
 
 
+
+(defn pg-deftype-fragment
+  "parses the fragment contained by the symbol"
+  {:added "4.0"}
+  ([esym]
+   (let [[esym & extras] (if (vector? esym) esym [esym])
+         
+         extras (apply hash-map extras)
+         form @(or (resolve esym)
+                   (h/error "Cannot resolve symbol." {:input esym}))]
+     
+     (->> (partition 2 form)
+          (mapcat (fn [[k attr]]
+                    [k (if-let [m (get extras k)]
+                         (h/merge-nested attr m)
+                         attr)]))))))
+
+(defn pg-deftype-process-generated
+  "processes generated columns"
+  {:added "4.0"}
+  [{:keys [type generated] :as attrs}]
+  (if generated
+    (let [raw-val (if (= type :enum)
+                    (list '++ generated (get-in attrs [:enum :ns]))
+                    generated)]
+      (-> attrs
+          (dissoc :generated)
+          (assoc :ignore true)
+          (assoc-in [:sql :raw]
+                    [:generated :always :as (list 'quote (list raw-val)) :stored])))
+    attrs))
+
 (defn pg-deftype-process-type
   "processes the type definition"
   {:added "4.0"}
@@ -384,28 +416,16 @@
                          (mapcat identity))]
     [sorted-spec msym]))
 
-(defn pg-deftype-process-generated
-  "processes generated columns"
-  {:added "4.0"}
-  [{:keys [type generated] :as attrs}]
-  (if generated
-    (let [raw-val (if (= type :enum)
-                    (list '++ generated (get-in attrs [:enum :ns]))
-                    generated)]
-      (-> attrs
-          (dissoc :generated)
-          (assoc :ignore true)
-          (assoc-in [:sql :raw]
-                    [:generated :always :as (list 'quote (list raw-val)) :stored])))
-    attrs))
-
 (defn pg-deftype-format
   "formats an input form"
   {:added "4.0"}
   [form]
   (let [[mdefn [op sym spec params]] (grammar-spec/format-defn form)
-        [spec {:keys [track public] :as msym}] (pg-deftype-process-type spec (meta sym))
-        spec (->> spec
+        [spec {:keys [prepend append track public] :as msym}] (pg-deftype-process-type spec (meta sym))
+        spec (->> (concat
+                   (mapcat pg-deftype-fragment prepend)
+                   spec
+                   (mapcat pg-deftype-fragment append))
                   (partition 2)
                   (map vec)
                   (mapcat (fn [[k {:keys [type primary ref sql scope generated] :as attrs}]]

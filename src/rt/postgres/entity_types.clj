@@ -111,6 +111,24 @@
   []
   {:type :uuid :required true})
 
+(defn type-class-key
+  [ns-str]
+  {:type :citext :required true
+   :sql {:process [[(symbol ns-str "as-upper-formatted")]
+                   [(symbol ns-str "as-upper-limit-length") 100]]}})
+
+
+(defn normalise-ref
+  [ptr]
+  (cond (h/pointer? ptr)
+        (symbol (name (:module ptr))
+                (name (:id ptr)))
+
+        (symbol? ptr) ptr
+
+        (var? ptr) (symbol (name (.getName (.ns ptr)))
+                           (name (.sym ptr)))))
+
 (defonce +fields+
   (atom {}))
 
@@ -119,6 +137,7 @@
   {:id            {:priority     0  :field    (type-id-v4)}
    :class-table   {:priority     1  :field    (type-class-table ns-str)}
    :class-context {:priority     2  :field    (type-class-context ns-str)}
+   :class-ref     {:priority     3  :field    (type-class-ref)}
    :name          {:priority     5  :field    (type-name  ns-str)}
    :icon          {:priority    10  :field    (type-image ns-str)}
    :picture       {:priority    11  :field    (type-image ns-str)}
@@ -129,7 +148,6 @@
    :is-public     {:priority    31  :field    (type-boolean true)}
    :is-official   {:priority    80  :field    (type-boolean false)}
    :is-onboarded  {:priority    81  :field    (type-boolean false)}
-   :rev           {:priority    99  :field    (type-ref ns-str "Rev")  :type :2d/entity}
    :log           {:priority   100  :field    (type-log   ns-str)}})
 
 ;;
@@ -145,8 +163,9 @@
                               (default-fields ns-str)))))
 
 (defn addons-add
-  [field addon]
-  (swap! +addons+ assoc field addon))
+  [key field priority]
+  (swap! +addons+ assoc key {:field field
+                             :priority priority}))
 
 (defn addons-remove
   [field]
@@ -227,11 +246,12 @@
 
 (defn with-priority
   [arr priority]
-  (mapv (fn [m]
-          (if (map? m)
-            (assoc m :priority priority)
-            m))
-        arr))
+  (let [curr (volatile! -1)]
+    (mapv (fn [m]
+            (if (map? m)
+              (assoc m :priority priority :priority-index (vswap! curr inc))
+              m))
+          arr)))
 
 ;;
 ;; E
@@ -240,9 +260,9 @@
 (def ESpec
   {:id        #{:id/none :id/v4 :id/v1  :id/text map?}
    :class     #{:none
-                :0d/entity :0d/log
-                :1d/entity :1d/log
-                :2d/entity :2d/log}
+                :0d/entry :0d/log
+                :1d/base :1d/entry :1d/log
+                :2d/base :2d/entry :2d/log}
    :track    #{:track/none
                :track/data
                :track/log
@@ -282,8 +302,50 @@
       (throw (ex-info "Invalid inputs for E" {:errors errors :input m}))
       m)))
 
+
+;;
+;; 
+;;
+
+(defn E-process-class-columns
+  [{:keys [tablename class entity ns-str]
+    :or {ns-str *ns-str*
+         class   :none
+         tablename "Global"}
+    :as m}]
+  (let [{:keys [context for]
+         :or {context "Global"}} entity
+        _    (if (#{:1d/entry
+                    :1d/log
+                    :2d/entry
+                    :2d/log} class)
+               (or for (h/error "Need a :for keyword" {:input m})))
+        base (cond-> {:class-table   (assoc (type-class-table ns-str)   :priority 2)
+                      :class-context (assoc (type-class-context ns-str) :priority 3)}
+               (#{:1d/base
+                  :2d/base} class)  (assoc :class-ref  (assoc (type-class-ref)
+                                                              :priority 4
+                                                              :sql {:unique ["class"]})))]
+    (case (namespace class)
+      "0d" (h/merge-nested base
+                           {:class-table   {:generated tablename}
+                            :class-context {:generated context}})
+      "1d" (h/merge-nested base
+                           {:class-table   {:primary "default"}
+                            :class-context {:generated  context}}
+                           (if (= class :1d/base)
+                             {:class-table   {:sql {:unique ["class"]}}}))
+      
+      "2d"  (h/merge-nested base
+                            {:class-table   {:primary "default"}
+                             :class-context {:primary "default"}}
+                            (if (= class :2d/base)
+                              {:class-table   {:sql {:unique ["class"]}}
+                               :class-context {:sql {:unique ["class"]}}}))
+      {})))
+
 (defn E
-  [{:keys [id class track access columns fields addons ns-str]
+  [{:keys [tablename id class entity track access columns fields addons ns-str]
     :or {ns-str  (or *ns-str* (get-app-ns-str)
                      (h/error "No ns-str found." {:ns (h/ns-sym)}))
          class   :none
@@ -292,9 +354,10 @@
     :as m}]
   (let [[id-in
          track-in] (case (name class)
-                     "log"    [:id/v1   :track/log]
-                     "entity" [:id/v4   :track/data]
-                     "none"   [:id/none :track/none])
+         "log"    [:id/v1   :track/log]
+         "base"   [:id/v4   :track/log]
+         "entry"  [:id/v4   :track/data]
+         "none"   [:id/none :track/none])
         [id track] [(or id id-in) (or track track-in)]
         id   (cond (map? id) id
                    :else (case id
@@ -306,20 +369,32 @@
         access-val   (config-access access)
         track-val    (config-tracking track)
         track-cols   (config-tracking-columns track)
-        class-cols   []]
+        class-cols   (E-process-class-columns m)
+        all-cols     (h/merge-nested
+                      (merge (if id {:id (assoc id :priority 0)})
+                             (apply hash-map (with-priority track-cols 200))
+                             class-cols)
+                      fields)]
     {:api/meta access-val
      :public (if (#{:none :access/hidden} access)
                false true)
      :track track-val
-     :columns [(vec (concat
-                     (if id (with-priority [:id id] 0))
-                     (with-priority track-cols 200)))]}))
+     :columns (->> all-cols
+                   (sort-by (fn [[k v]]
+                              [(or (:priority v) 50)
+                               (or (:priority-index v) 0)]))
+                   vec)}))
 
 
 (comment
   
+  (comment
+    (normalise-ref #'szndb.core.type-core-system/RevLog)
+    (name (.getName (.ns #'szndb.core.type-core-system/RevLog)))
+    (name (.sym #'szndb.core.type-core-system/RevLog)))
+  
   ;; having
-  {:class  :0d/entity
+  {:class  :0d/entry
    :entity {:table   "Global"
             :context "Global"}}
 
@@ -359,7 +434,7 @@
      :entry     {:type :jsonb :required true}])
 
 
-  (deftype.pg ^{:! (et/E {:class  :2d/entity
+  (deftype.pg ^{:! (et/E {:class  :2d/entry
                           :access :access/system
                           :fields []})}
     Rev
@@ -374,7 +449,7 @@
     []
     {:partition-by [:list :class-table]})
 
-  (deftype.pg ^{:! (et/E {:class  :0d/entity
+  (deftype.pg ^{:! (et/E {:class  :0d/entry
                           :entity {:table   "Global"
                                    :context "Global"}
                           :fields []
@@ -389,3 +464,23 @@
 
 
   )
+
+
+(comment
+
+  (def Class2DType
+  [:class-table       {:type :enum :required true  :scope :-/info :primary "default"
+                       :enum {:ns `-/EnumClassTableType}
+                       :sql  {:unique ["class"]}}
+   :class-context     {:type :enum :required true :scope :-/info :primary "default"
+                       :enum {:ns `-/EnumClassContextType}
+                       :sql  {:unique ["class"]}}
+   :class-ref         {:type :uuid :required true
+                       :sql  {:unique ["class"]}}])
+
+
+(def Class2DEntryType
+  [:class-table          {:type :enum :required true  :scope :-/info :primary "default"
+                          :enum {:ns `-/EnumClassTableType}}
+   :class-context        {:type :enum :required true :scope :-/info  :primary "default"
+                          :enum {:ns `-/EnumClassContextType}}]))
