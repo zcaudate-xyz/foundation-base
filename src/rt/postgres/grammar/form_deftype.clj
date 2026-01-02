@@ -388,8 +388,23 @@
                    (mapcat pg-deftype-fragment append))
                   (partition 2)
                   (map vec)
-                  (mapcat (fn [[k {:keys [type primary ref sql scope] :as attrs}]]
-                            (let [_     (or type (h/error "type cannot be null" {:attrs attrs}))
+                  (mapcat (fn [[k {:keys [type primary ref sql scope generated] :as attrs}]]
+                            (let [attrs (if generated
+                                          (if (list? generated)
+                                            (let [raw-val [:generated :always :as (list 'quote (list generated)) :stored]]
+                                              (-> attrs
+                                                  (dissoc :generated)
+                                                  (assoc :ignore true)
+                                                  (update-in [:sql :raw] (fn [r] (vec (concat r raw-val))))))
+                                            (let [gen-type (common/pg-type-alias (if (true? generated) type generated))
+                                                  raw-val  [:generated :always :as (list 'quote (list (list '++ "Global" gen-type))) :stored]]
+                                              (-> attrs
+                                                  (dissoc :generated)
+                                                  (assoc :ignore true)
+                                                  (update-in [:sql :raw] (fn [r] (vec (concat r raw-val)))))))
+                                          attrs)
+                                  {:keys [type primary ref sql scope]} attrs
+                                  _     (or type (h/error "type cannot be null" {:attrs attrs}))
                                   _     (if scope (schema/check-scope scope))
                                   scope (or scope (cond primary
                                                         :-/id
