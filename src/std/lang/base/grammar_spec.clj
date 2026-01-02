@@ -25,13 +25,42 @@
                     :else (h/error "Invalid body" {:body body}))]
      [doc attr body])))
 
+(defn format-defn-mixins
+  "applies all mixins in order"
+  {:added "4.0"}
+  [m mixins]
+  (reduce (fn [m entry]
+            (cond (symbol? entry)
+                  ((resolve entry) m)
+
+                  (h/form? entry)
+                  (eval entry)
+
+                  (map? entry)
+                  (merge m (eval entry))
+                  
+                  :else m))
+          m
+          (h/do:prn mixins)))
+
 (defn format-defn
   "standardize defn forms"
   {:added "3.0"}
   ([[op sym & args]]
-   (let [[doc attr body] (format-fargs args)]
-     [(merge attr {:doc doc})
-      `(~op ~sym ~@body)])))
+   (let [[doc attr body] (format-fargs args)
+         attr (merge attr {:doc doc})
+         {mixins :!
+          :as sym-meta} (meta sym)
+         mixed (if (not (nil? mixins))
+                 (format-defn-mixins (merge attr sym-meta)
+                                     (if (vector?  mixins)
+                                       mixins
+                                       [mixins])))]
+     (h/prn (meta sym) mixed)
+     [attr
+      (concat (list op (with-meta sym
+                         (dissoc (merge sym-meta mixed) :!)))
+              body)])))
 
 (defn tf-for-index
   "default for-index transform
