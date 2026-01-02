@@ -41,7 +41,7 @@
                   
                   :else m))
           m
-          (h/do:prn mixins)))
+          mixins))
 
 (defn format-defn
   "standardize defn forms"
@@ -56,7 +56,6 @@
                                      (if (vector?  mixins)
                                        mixins
                                        [mixins])))]
-     (h/prn (meta sym) mixed)
      [attr
       (concat (list op (with-meta sym
                          (dissoc (merge sym-meta mixed) :!)))

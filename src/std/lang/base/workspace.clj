@@ -84,7 +84,7 @@
   {:added "4.0"}
   [ptr]
   (impl-entry/with:cache-force
-   (h/pl (ptr-display-str ptr))))
+   (h/p (h/pl-add-lines (ptr-display-str ptr)))))
 
 (defn ptr-setup
   "calls setup on a pointer"

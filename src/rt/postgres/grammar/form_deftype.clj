@@ -384,6 +384,21 @@
                          (mapcat identity))]
     [sorted-spec msym]))
 
+(defn pg-deftype-process-generated
+  "processes generated columns"
+  {:added "4.0"}
+  [{:keys [type generated] :as attrs}]
+  (if generated
+    (let [raw-val (if (= type :enum)
+                    (list '++ generated (get-in attrs [:enum :ns]))
+                    generated)]
+      (-> attrs
+          (dissoc :generated)
+          (assoc :ignore true)
+          (assoc-in [:sql :raw]
+                    [:generated :always :as (list 'quote (list raw-val)) :stored])))
+    attrs))
+
 (defn pg-deftype-format
   "formats an input form"
   {:added "4.0"}
@@ -394,20 +409,7 @@
                   (partition 2)
                   (map vec)
                   (mapcat (fn [[k {:keys [type primary ref sql scope generated] :as attrs}]]
-                            (let [attrs (if generated
-                                          (if (list? generated)
-                                            (let [raw-val [:generated :always :as (list 'quote (list generated)) :stored]]
-                                              (-> attrs
-                                                  (dissoc :generated)
-                                                  (assoc :ignore true)
-                                                  (update-in [:sql :raw] (fn [r] (vec (concat r raw-val))))))
-                                            (let [gen-type (common/pg-type-alias (if (true? generated) type generated))
-                                                  raw-val  [:generated :always :as (list 'quote (list (list '++ "Global" gen-type))) :stored]]
-                                              (-> attrs
-                                                  (dissoc :generated)
-                                                  (assoc :ignore true)
-                                                  (update-in [:sql :raw] (fn [r] (vec (concat r raw-val)))))))
-                                          attrs)
+                            (let [attrs (pg-deftype-process-generated attrs)
                                   {:keys [type primary ref sql scope]} attrs
                                   _     (or type (h/error "type cannot be null" {:attrs attrs}))
                                   _     (if scope (schema/check-scope scope))
@@ -422,10 +424,13 @@
                                   attrs (assoc attrs :scope scope)]
                               [k attrs])))
                   vec)
-        fmeta {:static/tracker (if track (tracker/map->Tracker 
-                                                   (if (symbol? (first track))
-                                                     @(resolve (first track))
-                                                     (first track))))
+        track (if (vector? track)
+                (first track)
+                track)
+        track  (if (symbol? track)
+                 @(resolve track)
+                 track)
+        fmeta {:static/tracker (if track (tracker/map->Tracker track))
                :static/public public
                :static/dbtype :table}]
     [fmeta
