@@ -405,9 +405,7 @@
                                :else       [e]))
                        columns))
         
-        raw-spec (concat
-                  (if cols (apply concat cols))
-                  spec)
+        raw-spec (concat cols spec)
         
         sorted-spec (->> (partition 2 raw-spec)
                          (map vec)
