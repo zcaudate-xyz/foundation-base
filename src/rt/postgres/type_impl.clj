@@ -83,6 +83,10 @@
   {:type :ref :required true
    :ref {:ns (symbol ns-str table-str)}})
 
+(defn type-class-ref
+  []
+  {:type :uuid :required true})
+
 (defn default-fields
   [ns-str]
   {:id            {:priority     0  :field    (type-id-v4)}
@@ -190,61 +194,110 @@
 
 
 
+(defn order-by-priority
+  [])
 
 
 
 
 
-(comment
-  :rev          {:priority 99
-                 :field {:type :ref :required true
-                         :ref {:ns `-/Rev}
-                         :sql {:unique ["rev"]
-                               :cascade true}}
-                 :type :1d/entity}
+(defn- -process-id
+  [meta-set ns-str]
+  (cond (meta-set :id/none) []
+        (meta-set :id/v1)   [[:id (type-id-v1)]]
+        (meta-set :id/text) [[:id (type-id-text ns-str)]]
+        :else               [[:id (type-id-v4)]]))
 
-  (defn Type
-  [config]
-  config)
-  
-  (def RevPart
-    [])
-  
-  [:class-table          {:type :enum :scope :-/info
-                          :ignore true
-                          :enum {:ns `-/EnumClassTableType}}
-   :class-context        {:type :enum :scope :-/info
-                          :ignore true
-                          :sql {:raw [:generated-always-as '((++ "Global" -/EnumClassContextType)) :stored]}
-                          :enum {:ns `-/EnumClassContextType}}]
-  
-  [:class-table          {:type :enum :scope :-/info
-                          :ignore true
-                          :enum {:ns `-/EnumClassTableType}}
-   :class-context        {:type :enum :scope :-/info
-                          :ignore true
-                          :sql {:raw [:generated-always-as '((++ "Global" -/EnumClassContextType)) :stored]}
-                          :enum {:ns `-/EnumClassContextType}}]
-  
-  {:class-table    {}
-   :class-context  {}}
-  
-  {:public true
-   :track    [-/TrackingMin]
-   :prepend  [-/IdClass
-              [-/Class0DType
-               :class-table {:ignore true:generated "Global"
-                             :foreign   {:rev       {:ns -/Rev :column :class-context}}}]]
-   :append  [-/DataType
-             -/RevPart]
-   :api/meta {:sb/rls true
-              :sb/access {:admin :all
-                          :auth  :select
-                          :anon  :select}}}
+(defn- -process-entity
+  [meta-set ns-str]
+  (cond (meta-set :0d/entity)
+        [[:class-table   (assoc (type-class-table ns-str)   :ignore true)]
+         [:class-context (assoc (type-class-context ns-str) :ignore true
+                                :sql {:raw [:generated-always-as
+                                            (list (list '++ "Global" (symbol ns-str "EnumClassContextType")))
+                                            :stored]})]]
+        
+        (meta-set :1d/entity)
+        [[:class-table    (assoc (type-class-table ns-str)
+                                 :primary "default"
+                                 :required true
+                                 :sql {:unique ["class"]})]
+         [:class-context  (assoc (type-class-context ns-str)
+                                 :ignore true
+                                 :sql {:raw [:generated-always-as
+                                            (list (list '++ "Global" (symbol ns-str "EnumClassContextType")))
+                                            :stored]})]
+         [:class-ref      (assoc (type-class-ref)
+                                 :required true
+                                 :sql {:unique ["class"]})]]
 
-  {:public true
-   :track  (config-tracking)
-   :prepend [[:id (type-id-v1)]]})
+        (meta-set :2d/entity)
+        [[:class-table    (assoc (type-class-table ns-str)
+                                 :primary "default"
+                                 :required true
+                                 :sql {:unique ["class"]})]
+         [:class-context  (assoc (type-class-context ns-str)
+                                 :primary "default"
+                                 :required true
+                                 :sql {:unique ["class"]})]
+         [:class-ref      (assoc (type-class-ref)
+                                 :required true
+                                 :sql {:unique ["class"]})]]
+
+        :else []))
+
+(defn- -process-track
+  [meta-set]
+  (cond (meta-set :track/record) (config-tracking :track/record)
+        (meta-set :track/data)   (config-tracking :track/data)
+        (meta-set :track/log)    (config-tracking :track/log)
+        (meta-set :track/temp)   (config-tracking :track/temp)
+        :else nil))
+
+(defn- -process-track-fields
+  [meta-set]
+  (cond (meta-set :track/record) (config-tracking-fields :track/record)
+        (meta-set :track/data)   (config-tracking-fields :track/data)
+        (meta-set :track/log)    (config-tracking-fields :track/log)
+        (meta-set :track/temp)   (config-tracking-fields :track/temp)
+        :else []))
+
+(defn Type
+  [{:keys [meta class include api public ns] :as m}]
+  (let [ns-str (or ns "szn_type")
+        meta-set (set meta)
+        
+        prepend (concat (-process-id meta-set ns-str)
+                        (-process-entity meta-set ns-str))
+        
+        track-conf (-process-track meta-set)
+        
+        include-map (default-fields ns-str)
+        include-fields (mapcat (fn [k]
+                                 (if-let [{:keys [field priority]} (get include-map k)]
+                                   [[k (assoc field :priority (or priority 50))]]
+                                   (if (not= k :rev)
+                                     [[k {:type :unknown}]]))) 
+                               include)
+        
+        track-fields (->> (-process-track-fields meta-set)
+                          (partition 2)
+                          (map vec)
+                          (map (fn [[k v]] [k (assoc v :priority 100)])))
+        
+        all-cols (concat prepend include-fields track-fields)
+        
+        sorted-cols (sort-by (fn [[k {:keys [priority]}]] (or priority 50)) all-cols)
+        
+        api-meta (if api (config-api-meta api)
+                     (if (meta-set :api/system) (config-api-meta :api/system)
+                         (config-api-meta :api/auth)))]
+    
+    (with-meta (vec sorted-cols)
+      (cond-> {}
+        public (assoc :public true)
+        track-conf (assoc :track [track-conf])
+        api-meta (assoc :api/meta api-meta)))))
 
 (comment
 

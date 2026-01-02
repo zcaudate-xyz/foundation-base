@@ -360,32 +360,37 @@
             ~@(if tpartition-default [tpartition-default] []))
        ""))))
 
-(defn pg-deftype-fragment
-  "parses the fragment contained by the symbol"
+
+
+(defn pg-deftype-process-type
+  "processes the type definition"
   {:added "4.0"}
-  ([esym]
-   (let [[esym & extras] (if (vector? esym) esym [esym])
-         
-         extras (apply hash-map extras)
-         form @(or (resolve esym)
-                   (h/error "Cannot resolve symbol." {:input esym}))]
-     
-     (->> (partition 2 form)
-          (mapcat (fn [[k attr]]
-                    [k (if-let [m (get extras k)]
-                         (h/merge-nested attr m)
-                         attr)]))))))
+  [spec {:keys [columns] :as msym}]
+  (let [cols (if (vector? columns)
+               (mapcat (fn [e]
+                         (cond (symbol? e) @(resolve e)
+                               (list? e)   (eval e)
+                               :else       [e]))
+                       columns))
+        
+        raw-spec (concat
+                  (if cols (apply concat cols))
+                  spec)
+        
+        sorted-spec (->> (partition 2 raw-spec)
+                         (map vec)
+                         (sort-by (fn [[k {:keys [priority]}]]
+                                    (or priority 50)))
+                         (mapcat identity))]
+    [sorted-spec msym]))
 
 (defn pg-deftype-format
   "formats an input form"
   {:added "4.0"}
   [form]
   (let [[mdefn [op sym spec params]] (grammar-spec/format-defn form)
-        {:keys [prepend append track public] :as msym} (meta sym)
-        spec (->> (concat
-                   (mapcat pg-deftype-fragment prepend)
-                   spec
-                   (mapcat pg-deftype-fragment append))
+        [spec {:keys [track public] :as msym}] (pg-deftype-process-type spec (meta sym))
+        spec (->> spec
                   (partition 2)
                   (map vec)
                   (mapcat (fn [[k {:keys [type primary ref sql scope generated] :as attrs}]]
@@ -417,7 +422,10 @@
                                   attrs (assoc attrs :scope scope)]
                               [k attrs])))
                   vec)
-        fmeta {:static/tracker (if track (tracker/map->Tracker @(resolve (first track))))
+        fmeta {:static/tracker (if track (tracker/map->Tracker 
+                                                   (if (symbol? (first track))
+                                                     @(resolve (first track))
+                                                     (first track))))
                :static/public public
                :static/dbtype :table}]
     [fmeta
