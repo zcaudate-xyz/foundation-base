@@ -43,7 +43,7 @@
   => [:on-delete-cascade :default 1]
 
   (pg-deftype-col-sql [] {:generated '(* w h)})
-  => [:generated :always :as ''(* w h) :stored])
+  => [:generated :always :as (list 'quote (list '(* w h))) :stored])
 
 ^{:refer rt.postgres.grammar.form-deftype/pg-deftype-col-fn :added "4.0"}
 (fact "formats the column on deftype"
@@ -51,7 +51,15 @@
 
   (with-redefs [common/pg-type-alias (fn [x] x)]
     (pg-deftype-col-fn [:col {:type :uuid :primary true}] {}))
-  => (contains [:uuid :primary-key]))
+  => (contains [:uuid :primary-key])
+
+  (with-redefs [snap/get-book (constantly {})
+                book/get-base-entry (constantly {:form [nil nil [:id {:type :uuid}]]
+                                                 :static/schema "schema"})]
+    (set (pg-deftype-col-fn
+          [:rev {:type :ref :ref {:group :rev :ns :Rev} :sql {:cascade true}}]
+          {})))
+  => (fn [s] (not (contains? s :on-delete-cascade)))
 
 ^{:refer rt.postgres.grammar.form-deftype/pg-deftype-uniques :added "4.0"}
 (fact "collect unique keys on deftype"
@@ -97,7 +105,14 @@
   ^:hidden
   
   (pg-deftype-format '(deftype t [:a {:type :int}] {}))
-  => vector?)
+  => vector?
+
+  (with-redefs [common/pg-type-alias (fn [x] x)]
+    (let [[_ form] (pg-deftype-format '(deftype t [:a {:type :int :generated true}] {}))]
+      (nth (nth form 2) 1)))
+  => (contains {:type :int
+                :ignore true
+                :sql (contains {:raw [:generated :always :as ''((++ "Global" :int)) :stored]})}))
 
 ^{:refer rt.postgres.grammar.form-defpartition/pg-deftype-partition :added "4.1"}
 (fact "creates partition by statement"
@@ -150,6 +165,14 @@
     (pg-deftype-col-fn [:col {:type :uuid :primary true}] {}))
   => (contains [:uuid :primary-key])
 
+  (with-redefs [common/pg-type-alias (fn [x] x)]
+    (pg-deftype-col-fn [:col {:type :uuid :generated true}] {}))
+  => (contains [:uuid :generated :always :as (list 'quote (list (list '++ "Global" :uuid))) :stored])
+
+  (with-redefs [common/pg-type-alias (fn [x] x)]
+    (pg-deftype-col-fn [:col {:type :uuid :generated :int}] {}))
+  => (contains [:uuid :generated :always :as (list 'quote (list (list '++ "Global" :int))) :stored])
+
   (with-redefs [snap/get-book (constantly {})
                 book/get-base-entry (constantly {:form [nil nil [:id {:type :uuid}]]
                                                  :static/schema "schema"})]
@@ -158,14 +181,13 @@
           {})))
   => (fn [s] (not (contains? s :on-delete-cascade)))
 
-  
   (with-redefs [snap/get-book (constantly {})
                 book/get-base-entry (constantly {:form [nil nil [:id {:type :uuid}]]
                                                  :static/schema "schema"})]
     (set (pg-deftype-col-fn 
           [:rev {:type :ref :ref {:ns :Rev} :sql {:cascade true}}]
           {})))
-  => (fn [s] (contains? s :on-delete-cascade)))
+  => (fn [s] (contains? s :on-delete-cascade))))
 
 ^{:refer rt.postgres.grammar.form-deftype/pg-deftype-foreign-groups :added "4.1"}
 (fact "collects foreign key groups"
