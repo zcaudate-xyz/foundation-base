@@ -103,7 +103,6 @@
             [(common/pg-type-alias type)]])
          col-attrs (cond-> col-attrs
                      (= type :enum) (pg-deftype-enum-col enum mopts)
-                     (true? primary)  (conj :primary-key)
                      required (conj :not-null)
                      unique   (conj :unique)
                      (and (= type :ref)
@@ -142,7 +141,7 @@
    (let [schema-primary (if (map? schema-primary)
                           [schema-primary]
                           schema-primary)]
-     (if (< 1 (count schema-primary))
+     (if (seq schema-primary)
        [(list :-
               [:primary-key
                (list 'quote
@@ -363,7 +362,7 @@
 
 
 
-(defn pg-deftype-fragment
+(defn pg-deftype-format-fragment
   "parses the fragment contained by the symbol"
   {:added "4.0"}
   ([esym]
@@ -379,7 +378,7 @@
                          (h/merge-nested attr m)
                          attr)]))))))
 
-(defn pg-deftype-process-generated
+(defn pg-deftype-format-generated
   "processes generated columns"
   {:added "4.0"}
   [{:keys [type generated] :as attrs}]
@@ -394,16 +393,16 @@
                     [:generated :always :as (list 'quote (list raw-val)) :stored])))
     attrs))
 
-(defn pg-deftype-process-type
+(defn pg-deftype-format-raw
   "processes the type definition"
   {:added "4.0"}
-  [spec {:keys [columns] :as msym}]
-  (let [cols (if (vector? columns)
+  [spec {:keys [raw] :as msym}]
+  (let [cols (if (vector? raw)
                (mapcat (fn [e]
                          (cond (symbol? e) @(resolve e)
                                (list? e)   (eval e)
                                :else       [e]))
-                       columns))
+                       raw))
         
         raw-spec (concat cols spec)
         
@@ -419,15 +418,15 @@
   {:added "4.0"}
   [form]
   (let [[mdefn [op sym spec params]] (grammar-spec/format-defn form)
-        [spec {:keys [prepend append track public] :as msym}] (pg-deftype-process-type spec (meta sym))
+        [spec {:keys [prepend append track public] :as msym}] (pg-deftype-format-raw spec (meta sym))
         spec (->> (concat
-                   (mapcat pg-deftype-fragment prepend)
+                   (mapcat pg-deftype-format-fragment prepend)
                    spec
-                   (mapcat pg-deftype-fragment append))
+                   (mapcat pg-deftype-format-fragment append))
                   (partition 2)
                   (map vec)
                   (mapcat (fn [[k {:keys [type primary ref sql scope generated] :as attrs}]]
-                            (let [attrs (pg-deftype-process-generated attrs)
+                            (let [attrs (pg-deftype-format-generated attrs)
                                   {:keys [type primary ref sql scope]} attrs
                                   _     (or type (h/error "type cannot be null" {:attrs attrs}))
                                   _     (if scope (schema/check-scope scope))

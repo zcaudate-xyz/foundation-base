@@ -1,7 +1,9 @@
 (ns std.lang.base.grammar-spec
   (:require [std.lib :as h :refer [defimpl]]
             [std.string :as str]))
-	   
+
+(def ^:dynamic *symbol* nil)
+
 (defn get-comment
   "gets the comment access prefix for a language
  
@@ -52,10 +54,11 @@
          {mixins :!
           :as sym-meta} (meta sym)
          mixed (if (not (nil? mixins))
-                 (format-defn-mixins (merge attr sym-meta)
-                                     (if (vector?  mixins)
-                                       mixins
-                                       [mixins])))]
+                 (binding [*symbol* sym]
+                   (format-defn-mixins (merge attr sym-meta)
+                                       (if (vector?  mixins)
+                                         mixins
+                                         [mixins]))))]
      [attr
       (concat (list op (with-meta sym
                          (dissoc (merge sym-meta mixed) :!)))
