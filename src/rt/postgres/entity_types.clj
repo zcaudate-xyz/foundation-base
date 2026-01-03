@@ -334,16 +334,22 @@
                     for
                     [(keyword (str/spear-case (name (normalise-ref for)))) for])
         ref (normalise-ref ref)
-        unique (or unique [(str/snake-case (name key))])]
+        unique (or unique
+                   (if (not= "log" (name class))
+                     [(str/snake-case (name key))]))]
     (merge
-     (if (not= class :1d/log)
+     (if (not (#{:1d/log
+                 :1d/entry}
+               class))
        {:class-context {:foreign {key {:ns ref :column :class-context}}}})
      {:class-table   {:foreign {key {:ns ref :column :class-table}}}
-      key {:type :ref
-           :required true
-           :ref {:ns ref}
-           :sql {:cascade true
-                 :unique unique}}})))
+      key (merge {:type :ref
+                  :required true
+                  :ref {:ns ref}
+                  :sql {:cascade true
+                        :unique unique}}
+                 (if (= class :2d/log)
+                   {:primary "default"}))})))
 
 (defn E-addon-columns-single
   [v]
@@ -429,8 +435,7 @@
       "1d" (h/merge-nested base
                            {:class-table   {:primary "default"}}
                            (if (not= class :1d/log)
-                             {:class-context {:primary "default"
-                                              :generated  context}})
+                             {:class-context {:generated  context}})
                            (if (= class :1d/base)
                              {:class-table   {:sql {:unique ["class"]}}}))
       
