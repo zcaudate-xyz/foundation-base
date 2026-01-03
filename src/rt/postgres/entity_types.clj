@@ -161,7 +161,7 @@
 ;; Default Addons
 ;;
 
-(def +addons+
+(defonce +addons+
   (atom {}))
 
 (defn init-addons
@@ -171,11 +171,16 @@
     (when application 
       (swap! +addons+ assoc application (merge m (default-fields ns-str))))))
 
+(defn get-addon
+  [key]
+  (get-in @+addons+ [(default-application (h/ns-sym))
+                     key]))
+
 (defn add-addon
   [key field priority]
   (let [application (default-application (h/ns-sym))]
     (swap! +addons+ assoc-in [application key] {:field field
-                                           :priority priority})))
+                                                :priority priority})))
 
 (defn addons-remove
   [key]
