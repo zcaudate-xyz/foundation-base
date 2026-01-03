@@ -333,14 +333,17 @@
         [key ref] (if (vector? for)
                     for
                     [(keyword (str/spear-case (name (normalise-ref for)))) for])
-        ref (normalise-ref ref)]
-    {:class-table   {:foreign {key {:ns ref :column :class-table}}}
-     :class-context {:foreign {key {:ns ref :column :class-context}}}
-     key {:type :ref :primary "default"
-          :required true
-          :ref {:ns ref}
-          :sql (cond-> {:cascade true}
-                 unique (assoc :unique unique))}}))
+        ref (normalise-ref ref)
+        unique (or unique [(str/snake-case (name key))])]
+    (merge
+     (if (not= class :1d/log)
+       {:class-context {:foreign {key {:ns ref :column :class-context}}}})
+     {:class-table   {:foreign {key {:ns ref :column :class-table}}}
+      key {:type :ref
+           :required true
+           :ref {:ns ref}
+           :sql {:cascade true
+                 :unique unique}}})))
 
 (defn E-addon-columns-single
   [v]
@@ -372,14 +375,30 @@
 (defn E-addon-columns
   [{:keys [addons]
     :as m}]
-  (let [addons  (map E-addon-columns-single addons)
+  (let [addons     (map E-addon-columns-single addons)
         addon-cols (reduce (fn [out {:keys [field unique priority key]}]
-                             (assoc out key (cond-> field
-                                              :then  (assoc :priority priority)
-                                              unique (assoc-in [:sql :unique] unique))))
+                             (let [is-ref (-> field :type (= :ref))
+                                   unique (or unique
+                                              (if is-ref
+                                                [(str/snake-case (name key))]))]
+                               (assoc out key (cond-> field
+                                                :then  (assoc :priority priority)
+                                                unique (assoc-in [:sql :unique] unique)))))
                            {}
-                           addons)]
-    addon-cols))
+                           addons)
+        addon-class-cols (->> addons
+                              (filter (fn [{:keys [field]}]
+                                        (if (= (:type field) :ref)
+                                          [])))
+                              (reduce (fn [out {:keys [key field]}]
+                                        (h/merge-nested
+                                         out
+                                         (if (not= class :1d/log)
+                                           {:class-context {:foreign {key {:ns (-> field :ref :ns) :column :class-context}}}})
+                                         {:class-table   {:foreign {key {:ns (-> field :ref :ns) :column :class-table}}}}))
+                                      {}))]
+    [addon-cols
+     addon-class-cols]))
 
 (defn E-class-columns
   [{:keys [symname class entity ns-str]
@@ -394,8 +413,10 @@
                             :2d/entry
                             :2d/log} class)
                        (E-class-entry-fields m))
-        base (cond-> {:class-table   (assoc (type-class-table ns-str)   :priority 2)
-                      :class-context (assoc (type-class-context ns-str) :priority 3)}
+        base (cond-> (merge
+                      {:class-table   (assoc (type-class-table ns-str)   :priority 2)}
+                      (if (not= class :1d/log)
+                        {:class-context (assoc (type-class-context ns-str) :priority 3)}))
                :then (h/merge-nested entry-fields)
                (#{:1d/base
                   :2d/base} class)  (assoc :class-ref  (assoc (type-class-ref)
@@ -406,8 +427,10 @@
                            {:class-table   {:generated symname}
                             :class-context {:generated context}})
       "1d" (h/merge-nested base
-                           {:class-table   {:primary "default"}
-                            :class-context {:generated  context}}
+                           {:class-table   {:primary "default"}}
+                           (if (not= class :1d/log)
+                             {:class-context {:primary "default"
+                                              :generated  context}})
                            (if (= class :1d/base)
                              {:class-table   {:sql {:unique ["class"]}}}))
       
@@ -421,7 +444,22 @@
 
 (defn E-class-merge
   [m id-cols track-cols class-cols addon-cols]
-  (merge id-cols track-cols class-cols addon-cols))
+  (let [{:keys [class columns]} m
+        final-cols    (merge id-cols track-cols class-cols addon-cols)
+        class-uniques (case (namespace class)
+                        ("1d" "2d") (->> final-cols
+                                         (vals)
+                                         (keep (fn [{:keys [sql]}]
+                                                 (:unique sql)))
+                                         (mapcat h/seqify)
+                                         (set)
+                                                  (vec))
+                        nil)]
+    (cond-> final-cols 
+      class-uniques (h/merge-nested
+                     {:class-table   {:sql {:unique class-uniques}}}
+                     (if (not= class :1d/log)
+                       {:class-context {:sql {:unique class-uniques}}})))))
 
 (defn E-main
   [{:keys [id class entity track access raw ns-str application]
@@ -429,10 +467,10 @@
   (let [
         [id-in
          track-in] (case (name class)
-         "log"    [:id/none   :track/log]
-         "base"   [:id/v4     :track/log]
-         "entry"  [:id/v4     :track/data]
-         "none"   [:id/none   :track/none])
+                     "log"    [:id/v1   :track/log]
+                     "base"   [:id/v4     :track/log]
+                     "entry"  [:id/v4     :track/data]
+                     "none"   [:id/none   :track/none])
         [id track] [(or id id-in) (or track track-in)]
         id   (cond (map? id) id
                    :else (case id
@@ -447,8 +485,12 @@
         
         id-cols      (if id {:id (assoc id :priority 0)})
         class-cols   (E-class-columns m)
-        addon-cols   (E-addon-columns m)
-        final-cols   (E-class-merge m id-cols track-cols class-cols addon-cols)]
+        [addon-cols
+         addon-class-cols]  (E-addon-columns m)
+        final-cols   (E-class-merge m id-cols track-cols
+                                    (h/merge-nested class-cols
+                                                    addon-class-cols)
+                                    addon-cols)]
     {:api/meta   access-val
      :api/input (dissoc m :ns-str :application)
      :public (if (#{:none :access/hidden} access)
