@@ -2,7 +2,8 @@
   (:require [std.lib :as h]
             [std.lang :as l]
             [std.string :as str]
-            [rt.postgres :as pg]))
+            [rt.postgres :as pg]
+            [std.lang.base.grammar-spec :as grammar-spec]))
 
 (defonce +app+
   (atom {}))
@@ -281,8 +282,7 @@
                :access/auth
                :access/system
                :access/hidden
-               :none}
-   :addons   #{:name}})
+               :none}})
 
 (defn E-check-input
   [m]
@@ -317,15 +317,15 @@
 ;;
 
 (defn E-class-entry-fields
-  [{:keys [tablename class entity ns-str]
-    :or {tablename "Global"}
+  [{:keys [symname class entity ns-str]
+    :or {symname "Global"}
     :as m}]
   (let [{:keys [for]} entity
         _    (when-not for
                (h/error "Need a :for keyword" {:input m}))
         [key ref] (if (vector? for)
                     for
-                    [(keyword (str/lower-case tablename)) for])
+                    [(keyword (str/lower-case symname)) for])
         ref (normalise-ref ref)]
     {:class-table   {:foreign {key {:ns ref :column :class-table}}}
      :class-context {:foreign {key {:ns ref :column :class-context}}}
@@ -335,10 +335,10 @@
           :sql {:cascade true}}}))
 
 (defn E-class-columns
-  [{:keys [tablename class entity ns-str]
+  [{:keys [symname class entity ns-str]
     :or {ns-str *ns-str*
          class   :none
-         tablename "Global"}
+         symname "Global"}
     :as m}]
   (let [{:keys [context]
          :or {context "Global"}} entity
@@ -356,7 +356,7 @@
                   :sql {:unique ["class"]})))]
     (case (namespace class)
       "0d" (h/merge-nested base
-                           {:class-table   {:generated tablename}
+                           {:class-table   {:generated symname}
                             :class-context {:generated context}})
       "1d" (h/merge-nested base
                            {:class-table   {:primary "default"}
@@ -372,15 +372,10 @@
                                :class-context {:sql {:unique ["class"]}}}))
       {})))
 
-(defn E
-  [{:keys [tablename id class entity track access raw columns ns-str application]
-    :or {ns-str  (or *ns-str* (default-ns-str application)
-                     (h/error "No ns-str found." {:ns (h/ns-sym)}))
-         class   :none
-         access  :access/auth
-         columns []}
+(defn E-main
+  [{:keys [id class entity track access raw columns ns-str application]
     :as m}]
-  (let [_ (E-check-input m)
+  (let [
         [id-in
          track-in] (case (name class)
          "log"    [:id/none   :track/log]
@@ -402,7 +397,8 @@
         all-cols     (merge (if id {:id (assoc id :priority 0)})
                             (apply hash-map (with-priority track-cols 200))
                             class-cols)]
-    {:api/meta access-val
+    {:api/meta   access-val
+     :api/input (dissoc m :ns-str :application)
      :public (if (#{:none :access/hidden} access)
                false true)
      :track track-val
@@ -411,6 +407,20 @@
                           [(or (:priority v) 50)
                            (or (:priority-index v) 0)]))
                vec)}))
+
+(defn E
+  [{:keys [id class entity track access raw columns ns-str application]
+    :as m}]
+  (let [m (merge {:symname  (if grammar-spec/*symbol* (name grammar-spec/*symbol*))
+                  :class   :none
+                  :access  :access/auth
+                  :columns []
+                  :ns-str  (or (default-ns-str application)
+                               *ns-str* 
+                               (h/error "No ns-str found." {:ns (h/ns-sym)}))}
+                 m)
+        _ (E-check-input m)]
+    (E-main m)))
 
 
 (comment
