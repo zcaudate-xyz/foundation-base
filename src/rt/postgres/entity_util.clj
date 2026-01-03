@@ -123,7 +123,7 @@
 
 (defn type-ref
   [ns-str table-str & [priority]]
-  {:type :ref :required true
+  {:type :ref :required true :priority priority
    :ref {:ns (symbol ns-str table-str)}})
 
 (defn type-class-ref

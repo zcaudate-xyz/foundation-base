@@ -9,7 +9,8 @@
 
 (h/intern-in ut/init-addons
              ut/init-default-ns-str
-             ut/get-addon)
+             ut/get-addon
+             ut/add-addon)
 
 ;;
 ;; E
@@ -252,12 +253,12 @@
     (h/merge-nested base-class
                     base-link)))
 
-
-
 (defn E-class-merge
   [m id-cols track-cols class-cols addon-cols]
   (let [{:keys [class columns]} m
-        final-cols    (merge id-cols track-cols class-cols addon-cols)
+        final-cols    (h/merge-nested
+                       (merge id-cols track-cols class-cols addon-cols)
+                       columns)
         class-uniques (case (namespace class)
                         ("1d" "2d") (->> final-cols
                                          (vals)
@@ -273,8 +274,7 @@
     (h/merge-nested final-cols
                     (case class
                       :1d/log    (dissoc col-uniques :class-context)
-                      col-uniques)
-                    columns)))
+                      col-uniques))))
 
 (defn E-main-track
   [{:keys [id class track ns-str]
@@ -322,6 +322,16 @@
                            (or (:priority-index v) 0)]))
                vec)}))
 
+(defn E-main-spec
+  [{:spec/keys [addon]}]
+  (if (and addon grammar-spec/*symbol*)
+    (let [{:keys [key priority]} addon]
+      (ut/add-addon key
+                    (ut/type-ref (namespace grammar-spec/*symbol*)
+                                 (name grammar-spec/*symbol*)
+                                 priority)
+                    priority))))
+
 (defn E
   [{:keys [id link addons track access raw columns ns-str application]
     :as m}]
@@ -342,7 +352,9 @@
                  {:addons (normalise-fn addons)
                   :link (normalise-fn link)})
         
-        _ (E-check-input m)]
-    (E-main m)))
+        _   (E-check-input m)
+        out (E-main m)
+        _   (E-main-spec m)]
+    out))
 
 
