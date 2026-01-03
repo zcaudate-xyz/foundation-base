@@ -1,6 +1,7 @@
 (ns rt.postgres.entity-types
   (:require [std.lib :as h]
             [std.lang :as l]
+            [std.string :as str]
             [rt.postgres :as pg]))
 
 (defonce +app+
@@ -309,25 +310,44 @@
 ;; 
 ;;
 
+(defn E-process-class-entry-fields
+  [{:keys [tablename class entity ns-str]
+    :or {tablename "Global"}
+    :as m}]
+  (let [{:keys [for]} entity
+        _    (when-not for
+               (h/error "Need a :for keyword" {:input m}))
+        [key ref] (if (vector? for)
+                    for
+                    [(keyword (str/lower-case tablename)) for])
+        ref (normalise-ref ref)]
+    {:class-table   {:foreign {key {:ns ref :column :class-table}}}
+     :class-context {:foreign {key {:ns ref :column :class-context}}}
+     key {:type :ref :primary "default"
+          :required true
+          :ref {:ns ref}
+          :sql {:cascade true}}}))
+
 (defn E-process-class-columns
   [{:keys [tablename class entity ns-str]
     :or {ns-str *ns-str*
          class   :none
          tablename "Global"}
     :as m}]
-  (let [{:keys [context for]
+  (let [{:keys [context]
          :or {context "Global"}} entity
-        _    (if (#{:1d/entry
-                    :1d/log
-                    :2d/entry
-                    :2d/log} class)
-               (or for (h/error "Need a :for keyword" {:input m})))
+        entry-fields (if (#{:1d/entry
+                            :1d/log
+                            :2d/entry
+                          :2d/log} class)
+                       (E-process-class-entry-fields m))
         base (cond-> {:class-table   (assoc (type-class-table ns-str)   :priority 2)
                       :class-context (assoc (type-class-context ns-str) :priority 3)}
+               :then (h/merge-nested entry-fields)
                (#{:1d/base
                   :2d/base} class)  (assoc :class-ref  (assoc (type-class-ref)
-                                                              :priority 4
-                                                              :sql {:unique ["class"]})))]
+                  :priority 4
+                  :sql {:unique ["class"]})))]
     (case (namespace class)
       "0d" (h/merge-nested base
                            {:class-table   {:generated tablename}
@@ -346,6 +366,8 @@
                                :class-context {:sql {:unique ["class"]}}}))
       {})))
 
+
+
 (defn E
   [{:keys [tablename id class entity track access columns fields addons ns-str]
     :or {ns-str  (or *ns-str* (get-app-ns-str)
@@ -356,10 +378,10 @@
     :as m}]
   (let [[id-in
          track-in] (case (name class)
-         "log"    [:id/v1   :track/log]
-         "base"   [:id/v4   :track/log]
-         "entry"  [:id/v4   :track/data]
-         "none"   [:id/none :track/none])
+         "log"    [:id/none   :track/log]
+         "base"   [:id/v4     :track/log]
+         "entry"  [:id/v4     :track/data]
+         "none"   [:id/none   :track/none])
         [id track] [(or id id-in) (or track track-in)]
         id   (cond (map? id) id
                    :else (case id
