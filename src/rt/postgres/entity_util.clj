@@ -40,53 +40,53 @@
 
 (defn type-id-v1
   []
-  {:type :uuid :primary "default"
+  {:type :uuid :primary "default" :priority 0
    :sql {:default '(rt.postgres/uuid-generate-v1)}})
 
 (defn type-id-v4
   []
-  {:type :uuid :primary "default"
+  {:type :uuid :primary "default" :priority 0
    :sql {:default '(rt.postgres/uuid-generate-v4)}})
 
 (defn type-id-text
   [ns-str]
-  {:type :citext :primary "default"
+  {:type :citext :primary "default" :priority 0
    :sql {:process [[(symbol ns-str "as-upper-formatted")]
                    [(symbol ns-str "as-upper-limit-length") 100]]}})
 
 (defn type-name
-  [ns-str]
-  {:type :citext :required true :scope :-/info
+  [ns-str & [priority]]
+  {:type :citext :required true :scope :-/info  :priority (or priority 7)
    :sql  {:process [[(symbol ns-str "as-upper-formatted")]
                    [(symbol ns-str "as-upper-limit-length") 36]]
           :unique ["name"]}})
 
 (defn type-image
-  [ns-str]
-  {:type :image
+  [ns-str & [priority]]
+  {:type :image :priority (or priority 10)
    :sql  {:process [[(symbol ns-str "as-jsonb")]]
           :default "{}"}
    :profiles {:web {:type "image"}}})
 
 (defn type-color
-  [ns-str]
-  {:type :citext :required true :scope :-/info
+  [ns-str & [priority]]
+  {:type :citext :required true :scope :-/info :priority (or priority 20)
    :sql {:default    (list (symbol ns-str "color-rand"))
          :constraint (list (symbol ns-str "color-check") #{"color"})}
    :profile {:web {:edit #{:create :modify}
                    :type "color"}}})
 
 (defn type-tags
-  [ns-str]
-  {:type :array :scope :-/info
+  [ns-str & [priority]]
+  {:type :array :scope :-/info :priority (or priority 25)
    :sql {:process [[(symbol ns-str "as-jsonb-array")]]
          :default "[]"}
    :profile {:web {:edit #{:create :modify}
                    :type "chip"}}})
 
 (defn type-log
-  [ns-str]
-  {:type :array :required true
+  [ns-str & [priority]]
+  {:type :array :required true :priority (or priority 90)
    :scope :-/detail
    :sql  {:process [[(symbol ns-str "as-jsonb-array")]]
           :default "[]"}
@@ -94,36 +94,42 @@
           :message {:type :text}
           :error   {:type :text}}})
 
+(defn type-log-entry
+  [ns-str & [priority]]
+  {:type :map :required true :priority (or priority 80)
+   :scope :-/detail
+   :sql  {:process [[(symbol ns-str "as-jsonb")]]
+          :default "{}"}
+   :map  {:status  {:type :text}
+          :message {:type :text}
+          :error   {:type :text}}})
+
+(defn type-detail
+  [ns-str & [priority]]
+  {:type :map :required true :priority (or priority 50)
+   :scope :-/detail
+   :sql  {:process [[(symbol ns-str "as-jsonb")]]
+          :default "{}"}})
+
 (defn type-boolean
-  [& [default]]
-  {:type :boolean :required true
+  [& [default priority]]
+  {:type :boolean :required true :priority priority
    :sql {:default (not (not default))}})
 
-(defn type-class-table
-  [ns-str]
-  {:type :enum :scope :-/system
-   :enum {:ns (symbol ns-str "EnumClassTableType")}})
-
-(defn type-class-context
-  [ns-str]
-  {:type :enum :scope :-/system
-   :enum {:ns  (symbol ns-str "EnumClassContextType")}})
+(defn type-class
+  [ns-str & [priority]]
+  {:type :enum :scope :-/hidden :priority (or priority 1)
+   :enum {:ns (symbol ns-str "EnumClassType")}})
 
 (defn type-ref
-  [ns-str table-str]
+  [ns-str table-str & [priority]]
   {:type :ref :required true
    :ref {:ns (symbol ns-str table-str)}})
 
 (defn type-class-ref
-  []
-  {:type :uuid :required true})
-
-(defn type-class-key
-  [ns-str]
-  {:type :citext :required true
-   :sql {:process [[(symbol ns-str "as-upper-formatted")]
-                   [(symbol ns-str "as-upper-limit-length") 100]]}})
-
+  [& [m priority]]
+  (merge m
+         {:type :uuid :required true :priority (or priority 5)}))
 
 (defn normalise-ref
   [ptr]
@@ -136,26 +142,24 @@
         (var? ptr) (symbol (name (.getName (.ns ptr)))
                            (name (.sym ptr)))))
 
-(defonce +fields+
-  (atom {}))
-
 (defn default-fields
   [ns-str]
-  {:id            {:priority     0  :field    (type-id-v4)}
-   :class-table   {:priority     1  :field    (type-class-table ns-str)}
-   :class-context {:priority     2  :field    (type-class-context ns-str)}
-   :class-ref     {:priority     3  :field    (type-class-ref)}
-   :name          {:priority     5  :field    (type-name  ns-str)}
+  {:name          {:priority     7  :field    (type-name  ns-str)}
    :icon          {:priority    10  :field    (type-image ns-str)}
    :picture       {:priority    11  :field    (type-image ns-str)}
    :background    {:priority    12  :field    (type-image ns-str)}
    :color         {:priority    20  :field    (type-color ns-str)}
    :tags          {:priority    25  :field    (type-tags  ns-str)}
+   
+   
    :is-active     {:priority    30  :field    (type-boolean true)}
    :is-public     {:priority    31  :field    (type-boolean true)}
+   :detail        {:priority    50  :field    (type-detail  ns-str)}
+   
    :is-official   {:priority    80  :field    (type-boolean false)}
    :is-onboarded  {:priority    81  :field    (type-boolean false)}
-   :log           {:priority   100  :field    (type-log   ns-str)}})
+   :log           {:priority    90  :field    (type-log   ns-str)}
+   :entry         {:priority    95  :field    (type-log-entry  ns-str)}})
 
 ;;
 ;; Default Addons

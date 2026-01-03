@@ -6,6 +6,11 @@
             [std.lang.base.grammar-spec :as grammar-spec]
             [rt.postgres.entity-util :as ut]))
 
+
+(h/intern-in ut/init-addons
+             ut/init-default-ns-str
+             ut/get-addon)
+
 ;;
 ;; E
 ;;
@@ -64,13 +69,6 @@
 
 
 
-;;
-;;  :2d/base :2d/log will always have  :class-context and :class-table 
-;;  :0d/entry will also always have :class-context and :class-table
-;;  :1d/base  will also always have :class-context and :class-table
-;;  we need to 
-
-
 ;; 
 
 (defn E-entity-class-fields
@@ -101,13 +99,15 @@
                  (if (= class :2d/log)
                    {:primary "default"}))})))
 
+
+
 (defn E-addon-columns-single
   [v]
   (let [ref-fn (fn [key ref]
                  {:key key
                   :field 
                   {:type :ref :required true
-                   :ref {:ns (ut/normalise-ref ref)}}})
+                   :ref {:ns ref}}})
         addon  (cond (vector? v)
                      (let [[key ref priority custom] v]
                        (h/merge-nested
@@ -128,8 +128,25 @@
                      :else (h/error "Addon Not Valid" {:input v}))]
     addon))
 
+(defn E-addon-columns-match
+  [class {:keys [key field] :as addon}]
+  (let [ref-class    (:class (:api/input @@(resolve (-> field :ref :ns))))
+        _ (if-not (contains? (set (get (:addons LinkSpec)
+                                       class))
+                             ref-class)
+            (h/error "Not a valid addon:" {:class class
+                                           :ref   ref-class
+                                           :addon addon}))
+        base  {:class-table   {:foreign {key {:ns (-> field :ref :ns) :column :class-table}}}
+               :class-context {:foreign {key {:ns (-> field :ref :ns) :column :class-context}}}}]
+    (case [class ref-class]
+      [:1d/entry :2d/base]   {:class-table   {:foreign {key {:ns (-> field :ref :ns) :column :class-context}}}
+                              :class-link    {:foreign {key {:ns (-> field :ref :ns) :column :class-table}}}} 
+      [:0d/entry :2d/base]   base  
+      [:0d/entry :1d/base]   (dissoc base :class-context))))
+
 (defn E-addon-columns
-  [{:keys [addons]
+  [{:keys [class addons]
     :as m}]
   (let [addons     (map E-addon-columns-single addons)
         addon-cols (reduce (fn [out {:keys [field unique priority key]}]
@@ -146,27 +163,48 @@
                               (filter (fn [{:keys [field]}]
                                         (if (= (:type field) :ref)
                                           [])))
-                              (reduce (fn [out {:keys [key field]}]
+                              (reduce (fn [out addon]
                                         (h/merge-nested
                                          out
-                                         (if (not= class :1d/log)
-                                           {:class-context {:foreign {key {:ns (-> field :ref :ns) :column :class-context}}}})
-                                         {:class-table   {:foreign {key {:ns (-> field :ref :ns) :column :class-table}}}}))
+                                         (E-addon-columns-match class addon)))
                                       {}))]
     [addon-cols
      addon-class-cols]))
+
+(defn E-class-link-columns
+  [{:keys [class link]
+    :as m}]
+  (let [{:keys [for unique]} link
+        _    (when-not for
+               (h/error "Need a :for keyword" {:input m}))
+        [key ref] (if (vector? for)
+                    for
+                    [(keyword (str/spear-case (name (ut/normalise-ref for)))) for])
+        ref (ut/normalise-ref ref)
+        unique     (or unique (if (= :1d/entry class)
+                                [(str/snake-case (name key))]))
+        table-base {:class-table   {:foreign {key {:ns ref :column :class-table}}}
+                    key  {:type :ref
+                          :required true
+                          :ref {:ns ref}
+                          :sql (cond-> {:cascade true}
+                                 unique (assoc :unique unique))}}]
+    (case class
+      :1d/entry   table-base
+      :1d/log     table-base
+      :2d/log     (h/merge-nested
+                   table-base
+                   {key   {:primary "default"}
+                    :class-context {:foreign {key {:ns ref :column :class-context}}}}))))
 
 
 
 ;;
 ;;  :2d/base :2d/log will always have  :class-context and :class-table 
 ;;  :0d/entry will also always have :class-context and :class-table
-;;  :1d/base  will also always have :class-context and :class-table, so will :1d/entry
-;;  all :0d/entry :1d/entry need to interact with :2d/base
-;;  :2d/log interacots with :2d/base so does need :class-context
-;;  :1d/log only interacts with :1d/entry so does not need :class-context
-
-;; 
+;;  :1d/base  will also always have :class-context and :class-table
+;;  
+;;  we need to 
 
 (defn E-class-columns
   [{:keys [symname class entity ns-str]
@@ -176,39 +214,44 @@
     :as m}]
   (let [{:keys [context]
          :or {context "Global"}} entity
-        entry-fields (if (#{:1d/entry
-                            :1d/log
-                            :2d/entry
-                            :2d/log} class)
-                       (E-entity-class-fields m))
-        base (cond-> (merge
-                      {:class-table   (assoc (ut/type-class-table ns-str)   :priority 2)}
-                      (if (not= class :1d/log)
-                        {:class-context (assoc (ut/type-class-context ns-str) :priority 3)}))
-               :then (h/merge-nested entry-fields)
-               (#{:1d/base
-                  :2d/base} class)  (assoc :class-ref
-                                           (assoc (ut/type-class-ref)
-                                                  :priority 4
-                                                  :sql {:unique ["class"]})))]
-    (case (namespace class)
-      "0d" (h/merge-nested base
-                           {:class-table   {:generated symname}
-                            :class-context {:generated context}})
-      "1d" (h/merge-nested base
-                           {:class-table   {:primary "default"}}
-                           (if (not= class :1d/log)
-                             {:class-context {:generated  context}})
-                           (if (= class :1d/base)
-                             {:class-table   {:sql {:unique ["class"]}}}))
-      
-      "2d"  (h/merge-nested base
-                            {:class-table   {:primary "default"}
-                             :class-context {:primary "default"}}
-                            (if (= class :2d/base)
-                              {:class-table   {:sql {:unique ["class"]}}
-                               :class-context {:sql {:unique ["class"]}}}))
-      {})))
+        base {:class-table    (ut/type-class ns-str 1)
+              :class-link     (ut/type-class ns-str 2)
+              :class-context  (ut/type-class ns-str 3)
+              :class-ref      (ut/type-class-ref {:sql {:unique ["class"]}}
+                                                 4)}
+        base-select (case class
+                      :0d/entry  {:class-table   {:generated symname}
+                                  :class-context {:generated context}}
+                      
+                      :1d/base    {:class-table   {:primary "default"
+                                                   :sql {:unique ["class"]}}
+                                   :class-context {:generated  context}
+                                   :class-ref     {}}
+                      
+                      :1d/entry   {:class-table   {:primary "default"}
+                                   :class-link    {:generated symname}
+                                   :class-context {:generated  context}}
+                      
+                      :1d/log     {:class-table   {:primary "default"}}
+                      
+                      :2d/base    {:class-table   {:primary "default"
+                                                   :sql {:unique ["class"]}}
+                                   :class-context {:primary "default"
+                                                   :sql {:unique ["class"]}}
+                                   :class-ref     {}}
+                      :2d/log     {:class-table   {:primary "default"}
+                                   :class-context {:primary "default"}}
+                      {})
+        base-class (h/merge-nested
+                    base-select
+                    (select-keys base (keys base-select)))
+        base-link  (if (#{:1d/entry
+                          :1d/log
+                          :2d/log} class)
+                     (E-class-link-columns m))]
+    (h/merge-nested base-class
+                    base-link)))
+
 
 
 (defn E-class-merge
@@ -223,23 +266,25 @@
                                          (mapcat h/seqify)
                                          (set)
                                          (vec))
-                        nil)]
-    (cond-> final-cols 
-      class-uniques (h/merge-nested
-                     {:class-table   {:sql {:unique class-uniques}}}
-                     (if (not= class :1d/log)
-                       {:class-context {:sql {:unique class-uniques}}})))))
+                        nil)
+        col-uniques   (if (seq class-uniques)
+                        {:class-table   {:sql {:unique class-uniques}}
+                         :class-context {:sql {:unique class-uniques}}})]
+    (h/merge-nested final-cols
+                    (case class
+                      :1d/log    (dissoc col-uniques :class-context)
+                      col-uniques)
+                    columns)))
 
-(defn E-main
-  [{:keys [id class entity track access raw ns-str application]
+(defn E-main-track
+  [{:keys [id class track ns-str]
     :as m}]
-  (let [
-        [id-in
+  (let [[id-in
          track-in] (case (name class)
-                     "log"    [:id/v1   :track/log]
-                     "base"   [:id/v4     :track/log]
-                     "entry"  [:id/v4     :track/data]
-                     "none"   [:id/none   :track/none])
+         "log"    [:id/v1   :track/log]
+         "base"   [:id/v4     :track/log]
+         "entry"  [:id/v4     :track/data]
+         "none"   [:id/none   :track/none])
         [id track] [(or id id-in) (or track track-in)]
         id   (cond (map? id) id
                    :else (case id
@@ -247,12 +292,18 @@
                            :id/v4   (ut/type-id-v4)
                            :id/text (ut/type-id-text ns-str)
                            :id/none nil))
-        
-        access-val   (ut/get-access access)
         track-val    (ut/get-tracking track)
         track-cols   (apply hash-map (ut/fill-priority (ut/get-tracking-columns track) 200))
-        
-        id-cols      (if id {:id (assoc id :priority 0)})
+        id-cols      (if id {:id (assoc id :priority 0)})]
+    [id-cols track-cols track-val]))
+
+(defn E-main
+  [{:keys [id class entity track access raw ns-str application]
+    :as m}]
+  (let [[id-cols
+         track-cols
+         track-val]   (E-main-track m)
+        access-val    (ut/get-access access)
         class-cols   (E-class-columns m)
         [addon-cols
          addon-class-cols]  (E-addon-columns m)
@@ -271,19 +322,26 @@
                            (or (:priority-index v) 0)]))
                vec)}))
 
-
-
 (defn E
-  [{:keys [id class entity track access raw columns ns-str application]
+  [{:keys [id link addons track access raw columns ns-str application]
     :as m}]
-  (let [m (merge {:symname  (if grammar-spec/*symbol* (name grammar-spec/*symbol*))
+  (let [normalise-fn (fn [m]
+                       (h/prewalk (fn [m]
+                                    (if (h/pointer? m)
+                                      (ut/normalise-ref m)
+                                      m))
+                                  m))
+        m (merge {:symname  (if grammar-spec/*symbol* (name grammar-spec/*symbol*))
                   :class   :none
                   :access  :access/auth
                   :columns []
                   :ns-str  (or (ut/default-ns-str application)
                                ut/*ns-str* 
                                (h/error "No ns-str found." {:ns (h/ns-sym)}))}
-                 m)
+                 m
+                 {:addons (normalise-fn addons)
+                  :link (normalise-fn link)})
+        
         _ (E-check-input m)]
     (E-main m)))
 
