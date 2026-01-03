@@ -2,25 +2,25 @@
   (:use code.test)
   (:require [rt.postgres.entity-types :as et]))
 
-^{:refer rt.postgres.entity-types/get-app :added "4.1"}
+^{:refer rt.postgres.entity-types/default-application :added "4.1"}
 (fact "gets the app"
   ^:hidden
   
-  (et/get-app)
+  (et/default-application)
   => "-")
 
-^{:refer rt.postgres.entity-types/get-app-ns-str :added "4.1"}
+^{:refer rt.postgres.entity-types/default-ns-str :added "4.1"}
 (fact "gets the app ns string"
   ^:hidden
   
-  (et/get-app-ns-str)
+  (et/default-ns-str)
   => (any nil? string?))
 
-^{:refer rt.postgres.entity-types/init-app :added "4.1"}
+^{:refer rt.postgres.entity-types/init-default-ns-str :added "4.1"}
 (fact "initializes the app"
   ^:hidden
   
-  (et/init-app)
+  (et/init-default-ns-str)
   => (any nil? map?))
 
 ^{:refer rt.postgres.entity-types/type-id-v1 :added "4.1"}
@@ -174,28 +174,28 @@
   (et/addons-remove :test)
   => map?)
 
-^{:refer rt.postgres.entity-types/config-tracking :added "4.1"}
+^{:refer rt.postgres.entity-types/get-tracking :added "4.1"}
 (fact "configures tracking"
   ^:hidden
   
-  (et/config-tracking :track/record)
+  (et/get-tracking :track/record)
   => {:name "data",
       :in {:create {:time-created :time, :time-updated :time, :op-created :id, :op-updated :id},
            :modify {:time-updated :time, :op-updated :id}},
       :ignore #{:delete}})
 
-^{:refer rt.postgres.entity-types/config-tracking-columns :added "4.1"}
+^{:refer rt.postgres.entity-types/get-tracking-columns :added "4.1"}
 (fact "configures tracking columns"
   ^:hidden
   
-  (et/config-tracking-columns :track/record)
+  (et/get-tracking-columns :track/record)
   => [:op-created {:type :uuid} :op-updated {:type :uuid} :time-created {:type :time} :time-updated {:type :time} :__deleted__ {:type :boolean, :scope :-/hidden, :sql {:default false}}])
 
-^{:refer rt.postgres.entity-types/config-access :added "4.1"}
+^{:refer rt.postgres.entity-types/get-access :added "4.1"}
 (fact "configures access"
   ^:hidden
   
-  (et/config-access :access/auth)
+  (et/get-access :access/auth)
   => {:sb/rls true, :sb/access {:admin :all, :auth :select, :anon :select}})
 
 ^{:refer rt.postgres.entity-types/with-priority :added "4.1"}
@@ -205,36 +205,36 @@
   (et/with-priority [{:type :text}] 10)
   => [{:type :text, :priority 10, :priority-index 0}])
 
-^{:refer rt.postgres.entity-types/check-E :added "4.1"}
+^{:refer rt.postgres.entity-types/E-check-input :added "4.1"}
 (fact "validates E inputs"
   ^:hidden
   
-  (et/check-E {:id :id/v4}) => {:id :id/v4}
+  (et/E-check-input {:id :id/v4}) => {:id :id/v4}
   
-  (et/check-E {:id :id/invalid})
+  (et/E-check-input {:id :id/invalid})
   => (throws clojure.lang.ExceptionInfo)
 
-  (et/check-E {:access :access/auth}) => {:access :access/auth}
+  (et/E-check-input {:access :access/auth}) => {:access :access/auth}
   
-  (et/check-E {:access :invalid})
+  (et/E-check-input {:access :invalid})
   => (throws clojure.lang.ExceptionInfo))
 
-^{:refer rt.postgres.entity-types/E-process-class-columns :added "4.1"}
+^{:refer rt.postgres.entity-types/E-class-columns :added "4.1"}
 (fact "processes class columns"
   ^:hidden
   
-  (et/E-process-class-columns
+  (et/E-class-columns
    {:class :0d/entry
     :entity {:table "Global" :context "Global"}})
   => (contains {:class-table {:type :enum, :scope :-/system, :enum {:ns '-/EnumClassTableType}, :priority 2, :generated "Global"}
                 :class-context {:type :enum, :scope :-/system, :enum {:ns '-/EnumClassContextType}, :priority 3, :generated "Global"}})
 
-  (et/E-process-class-columns
+  (et/E-class-columns
    {:class :1d/base
     :entity {:for :user}})
   => (contains-in {:class-ref {:type :uuid, :required true, :priority 4}})
   
-  (et/E-process-class-columns
+  (et/E-class-columns
    {:class :2d/base
     :entity {:for :user}})
   => (contains-in {:class-ref {:type :uuid, :required true, :priority 4}}))

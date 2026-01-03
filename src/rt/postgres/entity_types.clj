@@ -9,25 +9,28 @@
 
 (def ^:dynamic *ns-str* "-")
 
-(defn get-app
-  [& [ns]]
-  (let [ns (or ns (h/ns-sym))]
-    (or (first (:application
-                (:static (h/suppress
-                          (l/rt:module
-                           (l/rt ns :postgres))))))
-        *ns-str*)))
+(defn default-application
+  [& [module]]
+  (first (:application
+          (:static (h/suppress
+                    (l/rt:module
+                     (l/rt (or module
+                               (h/ns-sym))
+                           :postgres)))))))
 
-(defn get-app-ns-str
-  [& [ns]]
-  (get @+app+ (get-app ns)))
+(defn default-ns-str
+  [& [application]]
+  (get @+app+ (or application
+                  (default-application (h/ns-sym)))))
 
-(defn init-app
-  [& [ns schema]]
-  (let [ns  (or ns (h/ns-sym))
-        app (get-app ns)]
-    (when app
-      (swap! +app+ assoc app (name ns)))))
+(defn init-default-ns-str
+  [& [application ns-str]]
+  (let [ns-str (or ns-str (name (h/ns-sym)))
+        application (or application (default-application (h/ns-sym)))]
+    (when application 
+      (swap! +app+ assoc application ns-str))))
+
+
 
 
 ;;
@@ -157,29 +160,32 @@
 ;; Default Addons
 ;;
 
-(defonce +addons+
+(def +addons+
   (atom {}))
 
-(defn addons-init
-  [& [m ns-str]]
-  (reset! +addons+ (merge m (if ns-str
-                              (default-fields ns-str)))))
+(defn init-addons
+  [& [m application]]
+  (let [application   (or application (default-application (h/ns-sym)))
+        ns-str   (default-ns-str application)]
+    (when application 
+      (swap! +addons+ assoc application (merge m (default-fields ns-str))))))
 
-(defn addons-add
+(defn add-addon
   [key field priority]
-  (swap! +addons+ assoc key {:field field
-                             :priority priority}))
+  (let [application (default-application (h/ns-sym))]
+    (swap! +addons+ assoc-in [application key] {:field field
+                                           :priority priority})))
 
 (defn addons-remove
-  [field]
-  (swap! +addons+ dissoc field))
+  [key]
+  (swap! +addons+ update-in [(default-application (h/ns-sym))] dissoc key))
 
 
 ;;
 ;; Default Tracking
 ;;
 
-(defn config-tracking
+(defn get-tracking
   [track]
   (case track
     (:track/record :track/data)
@@ -207,7 +213,7 @@
 
     :track/none {}))
 
-(defn config-tracking-columns
+(defn get-tracking-columns
   [track]
   (case track
     :track/record [:op-created   {:type :uuid}
@@ -231,7 +237,7 @@
 
     :track/none     []))
 
-(defn config-access
+(defn get-access
   [access]
   (if (not= access :none)
     {:sb/rls true
@@ -278,7 +284,7 @@
                :none}
    :addons   #{:name}})
 
-(defn check-E
+(defn E-check-input
   [m]
   (let [errors (reduce-kv (fn [acc k allowed]
                             (if (contains? m k)
@@ -310,7 +316,7 @@
 ;; 
 ;;
 
-(defn E-process-class-entry-fields
+(defn E-class-entry-fields
   [{:keys [tablename class entity ns-str]
     :or {tablename "Global"}
     :as m}]
@@ -328,7 +334,7 @@
           :ref {:ns ref}
           :sql {:cascade true}}}))
 
-(defn E-process-class-columns
+(defn E-class-columns
   [{:keys [tablename class entity ns-str]
     :or {ns-str *ns-str*
          class   :none
@@ -340,7 +346,7 @@
                             :1d/log
                             :2d/entry
                           :2d/log} class)
-                       (E-process-class-entry-fields m))
+                       (E-class-entry-fields m))
         base (cond-> {:class-table   (assoc (type-class-table ns-str)   :priority 2)
                       :class-context (assoc (type-class-context ns-str) :priority 3)}
                :then (h/merge-nested entry-fields)
@@ -366,17 +372,16 @@
                                :class-context {:sql {:unique ["class"]}}}))
       {})))
 
-
-
 (defn E
-  [{:keys [tablename id class entity track access columns fields addons ns-str]
-    :or {ns-str  (or *ns-str* (get-app-ns-str)
+  [{:keys [tablename id class entity track access raw columns ns-str application]
+    :or {ns-str  (or *ns-str* (default-ns-str application)
                      (h/error "No ns-str found." {:ns (h/ns-sym)}))
          class   :none
          access  :access/auth
          columns []}
     :as m}]
-  (let [[id-in
+  (let [_ (E-check-input m)
+        [id-in
          track-in] (case (name class)
          "log"    [:id/none   :track/log]
          "base"   [:id/v4     :track/log]
@@ -390,49 +395,22 @@
                            :id/text (type-id-text ns-str)
                            :id/none nil))
         
-        access-val   (config-access access)
-        track-val    (config-tracking track)
-        track-cols   (config-tracking-columns track)
-        class-cols   (E-process-class-columns m)
-        all-cols     (h/merge-nested
-                      (merge (if id {:id (assoc id :priority 0)})
-                             (apply hash-map (with-priority track-cols 200))
-                             class-cols)
-                      fields)]
+        access-val   (get-access access)
+        track-val    (get-tracking track)
+        track-cols   (get-tracking-columns track)
+        class-cols   (E-class-columns m)
+        all-cols     (merge (if id {:id (assoc id :priority 0)})
+                            (apply hash-map (with-priority track-cols 200))
+                            class-cols)]
     {:api/meta access-val
      :public (if (#{:none :access/hidden} access)
                false true)
      :track track-val
-     :columns (->> all-cols
-                   (sort-by (fn [[k v]]
-                              [(or (:priority v) 50)
-                               (or (:priority-index v) 0)]))
-                   vec)}))
-
-
-(comment
-  
-  (comment
-    (normalise-ref #'szndb.core.type-core-system/RevLog)
-    (name (.getName (.ns #'szndb.core.type-core-system/RevLog)))
-    (name (.sym #'szndb.core.type-core-system/RevLog)))
-  
-  ;; having
-  {:class  :0d/entry
-   :entity {:table   "Global"
-            :context "Global"}}
-
-  ;; created 
-  :class-table    {:type :enum
-                   :enum {:ns -/EnumClassTableType}
-                   :generated "Global"}
-  :class-context {:type :enum
-                  :enum {:ns -/EnumClassTableType}
-                  :generated "Global"})
-
-;;
-
-
+     :raw (->> all-cols
+               (sort-by (fn [[k v]]
+                          [(or (:priority v) 50)
+                           (or (:priority-index v) 0)]))
+               vec)}))
 
 
 (comment
