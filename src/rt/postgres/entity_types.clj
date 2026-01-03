@@ -319,15 +319,18 @@
 
 
 ;;
-;; 
-;;
+;;  :2d/base :2d/log will always have  :class-context and :class-table 
+;;  :0d/entry will also always have :class-context and :class-table
+;;  :1d/base  will also always have :class-context and :class-table
+;;  we need to 
 
-(defn E-class-entry-fields
-  [{:keys [symname class entity ns-str]
-    :or {symname "Global"}
+
+;; 
+
+(defn E-entity-class-fields
+  [{:keys [class entity ns-str]
     :as m}]
-  (let [{:keys [for
-                unique]} entity
+  (let [{:keys [for unique]} entity
         _    (when-not for
                (h/error "Need a :for keyword" {:input m}))
         [key ref] (if (vector? for)
@@ -336,18 +339,19 @@
         ref (normalise-ref ref)
         unique (or unique
                    (if (not= "log" (name class))
-                     [(str/snake-case (name key))]))]
+                     [(str/snake-case (name key))]))
+        ref-field-base {:type :ref
+                        :required true
+                        :ref {:ns ref}
+                        :sql {:cascade true
+                              :unique unique}}]
     (merge
      (if (not (#{:1d/log
                  :1d/entry}
                class))
        {:class-context {:foreign {key {:ns ref :column :class-context}}}})
      {:class-table   {:foreign {key {:ns ref :column :class-table}}}
-      key (merge {:type :ref
-                  :required true
-                  :ref {:ns ref}
-                  :sql {:cascade true
-                        :unique unique}}
+      key (merge ref-field-base
                  (if (= class :2d/log)
                    {:primary "default"}))})))
 
@@ -406,6 +410,18 @@
     [addon-cols
      addon-class-cols]))
 
+
+
+;;
+;;  :2d/base :2d/log will always have  :class-context and :class-table 
+;;  :0d/entry will also always have :class-context and :class-table
+;;  :1d/base  will also always have :class-context and :class-table, so will :1d/entry
+;;  all :0d/entry :1d/entry need to interact with :2d/base
+;;  :2d/log interacots with :2d/base so does need :class-context
+;;  :1d/log only interacts with :1d/entry so does not need :class-context
+
+;; 
+
 (defn E-class-columns
   [{:keys [symname class entity ns-str]
     :or {ns-str *ns-str*
@@ -418,16 +434,17 @@
                             :1d/log
                             :2d/entry
                             :2d/log} class)
-                       (E-class-entry-fields m))
+                       (E-entity-class-fields m))
         base (cond-> (merge
                       {:class-table   (assoc (type-class-table ns-str)   :priority 2)}
                       (if (not= class :1d/log)
                         {:class-context (assoc (type-class-context ns-str) :priority 3)}))
                :then (h/merge-nested entry-fields)
                (#{:1d/base
-                  :2d/base} class)  (assoc :class-ref  (assoc (type-class-ref)
-                  :priority 4
-                  :sql {:unique ["class"]})))]
+                  :2d/base} class)  (assoc :class-ref
+                                           (assoc (type-class-ref)
+                                                  :priority 4
+                                                  :sql {:unique ["class"]})))]
     (case (namespace class)
       "0d" (h/merge-nested base
                            {:class-table   {:generated symname}
@@ -508,7 +525,7 @@
                vec)}))
 
 (defn E
-  [{:keys [id class entity track access raw columns addons ns-str application]
+  [{:keys [id class entity track access raw columns ns-str application]
     :as m}]
   (let [m (merge {:symname  (if grammar-spec/*symbol* (name grammar-spec/*symbol*))
                   :class   :none
@@ -518,14 +535,7 @@
                                *ns-str* 
                                (h/error "No ns-str found." {:ns (h/ns-sym)}))}
                  m)
-        normalise-fn (fn [x]
-                       (cond (h/pointer? x)
-                             (normalise-ref x)
-                             
-                             :else x))
         _ (E-check-input m)]
-    (E-main (assoc m
-                   :entity (h/prewalk normalise-fn entity)
-                   :addons (h/prewalk normalise-fn addons)))))
+    (E-main m)))
 
 

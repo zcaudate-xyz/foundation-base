@@ -332,7 +332,7 @@
                 entry
                 mopts]
          :as env}]
-  (let [{:sb/keys [grant]} (:api/meta (meta (:id entry)))
+  (let [{:sb/keys [grant]} (:api/meta entry)
         function-form (list '.
                             #{(:static/schema entry)}
                             (apply list
@@ -369,7 +369,7 @@
                 mopts]
          :as env}]
   (let [{:sb/keys [rls
-                   access]} (:api/meta (meta (:id entry)))
+                   access]} (:api/meta entry)
         table-form (list '.
                          #{(:static/schema entry)}
                          #{(str (:id entry))})

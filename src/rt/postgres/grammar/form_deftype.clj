@@ -103,7 +103,6 @@
             [(common/pg-type-alias type)]])
          col-attrs (cond-> col-attrs
                      (= type :enum) (pg-deftype-enum-col enum mopts)
-                     (true? primary)  (conj :primary-key)
                      required (conj :not-null)
                      unique   (conj :unique)
                      (and (= type :ref)
@@ -142,7 +141,7 @@
    (let [schema-primary (if (map? schema-primary)
                           [schema-primary]
                           schema-primary)]
-     (if (< 1 (count schema-primary))
+     (if (seq schema-primary)
        [(list :-
               [:primary-key
                (list 'quote
