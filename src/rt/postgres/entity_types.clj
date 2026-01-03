@@ -40,26 +40,26 @@
 
 (defn type-id-v1
   []
-  {:type :uuid :primary "primary"
+  {:type :uuid :primary "default"
    :sql {:default '(rt.postgres/uuid-generate-v1)}})
 
 (defn type-id-v4
   []
-  {:type :uuid :primary "primary"
+  {:type :uuid :primary "default"
    :sql {:default '(rt.postgres/uuid-generate-v4)}})
 
 (defn type-id-text
   [ns-str]
-  {:type :citext :primary "primary"
+  {:type :citext :primary "default"
    :sql {:process [[(symbol ns-str "as-upper-formatted")]
                    [(symbol ns-str "as-upper-limit-length") 100]]}})
 
 (defn type-name
   [ns-str]
   {:type :citext :required true :scope :-/info
-   :sql {:process [[(symbol ns-str "as-upper-formatted")]
+   :sql  {:process [[(symbol ns-str "as-upper-formatted")]
                    [(symbol ns-str "as-upper-limit-length") 36]]
-         :unique ["name"]}})
+          :unique ["name"]}})
 
 (defn type-image
   [ns-str]
@@ -173,8 +173,9 @@
 
 (defn get-addon
   [key]
-  (get-in @+addons+ [(default-application (h/ns-sym))
-                     key]))
+  (assoc (get-in @+addons+ [(default-application (h/ns-sym))
+                            key])
+         :key key))
 
 (defn add-addon
   [key field priority]
@@ -259,7 +260,7 @@
                           (:access/auth
                            :access/public)  :select)}}))
 
-(defn with-priority
+(defn fill-priority
   [arr priority]
   (let [curr (volatile! -1)]
     (mapv (fn [m]
@@ -325,19 +326,60 @@
   [{:keys [symname class entity ns-str]
     :or {symname "Global"}
     :as m}]
-  (let [{:keys [for]} entity
+  (let [{:keys [for
+                unique]} entity
         _    (when-not for
                (h/error "Need a :for keyword" {:input m}))
         [key ref] (if (vector? for)
                     for
-                    [(keyword (str/lower-case symname)) for])
+                    [(keyword (str/spear-case (name (normalise-ref for)))) for])
         ref (normalise-ref ref)]
     {:class-table   {:foreign {key {:ns ref :column :class-table}}}
      :class-context {:foreign {key {:ns ref :column :class-context}}}
      key {:type :ref :primary "default"
           :required true
           :ref {:ns ref}
-          :sql {:cascade true}}}))
+          :sql (cond-> {:cascade true}
+                 unique (assoc :unique unique))}}))
+
+(defn E-addon-columns-single
+  [v]
+  (let [ref-fn (fn [key ref]
+                 {:key key
+                  :field 
+                  {:type :ref :required true
+                   :ref {:ns (normalise-ref ref)}}})
+        addon  (cond (vector? v)
+                     (let [[key ref priority custom] v]
+                       (h/merge-nested
+                        (ref-fn key ref)
+                        {:priority priority}
+                        custom))
+
+                     (keyword? v)
+                     (get-addon v)
+                     
+                     (map? v)
+                     (let [addon  (get-addon (:key v))]
+                       (merge addon
+                              (dissoc v :ref)
+                              (if (:ref v)
+                                (ref-fn (:key v) (:ref v)))))
+                     
+                     :else (h/error "Addon Not Valid" {:input v}))]
+    addon))
+
+(defn E-addon-columns
+  [{:keys [addons]
+    :as m}]
+  (let [addons  (map E-addon-columns-single addons)
+        addon-cols (reduce (fn [out {:keys [field unique priority key]}]
+                             (assoc out key (cond-> field
+                                              :then  (assoc :priority priority)
+                                              unique (assoc-in [:sql :unique] unique))))
+                           {}
+                           addons)]
+    addon-cols))
 
 (defn E-class-columns
   [{:keys [symname class entity ns-str]
@@ -350,7 +392,7 @@
         entry-fields (if (#{:1d/entry
                             :1d/log
                             :2d/entry
-                          :2d/log} class)
+                            :2d/log} class)
                        (E-class-entry-fields m))
         base (cond-> {:class-table   (assoc (type-class-table ns-str)   :priority 2)
                       :class-context (assoc (type-class-context ns-str) :priority 3)}
@@ -377,8 +419,12 @@
                                :class-context {:sql {:unique ["class"]}}}))
       {})))
 
+(defn E-class-merge
+  [m id-cols track-cols class-cols addon-cols]
+  (merge id-cols track-cols class-cols addon-cols))
+
 (defn E-main
-  [{:keys [id class entity track access raw columns ns-str application]
+  [{:keys [id class entity track access raw ns-str application]
     :as m}]
   (let [
         [id-in
@@ -397,24 +443,25 @@
         
         access-val   (get-access access)
         track-val    (get-tracking track)
-        track-cols   (get-tracking-columns track)
+        track-cols   (apply hash-map (fill-priority (get-tracking-columns track) 200))
+        
+        id-cols      (if id {:id (assoc id :priority 0)})
         class-cols   (E-class-columns m)
-        all-cols     (merge (if id {:id (assoc id :priority 0)})
-                            (apply hash-map (with-priority track-cols 200))
-                            class-cols)]
+        addon-cols   (E-addon-columns m)
+        final-cols   (E-class-merge m id-cols track-cols class-cols addon-cols)]
     {:api/meta   access-val
      :api/input (dissoc m :ns-str :application)
      :public (if (#{:none :access/hidden} access)
                false true)
      :track track-val
-     :raw (->> all-cols
+     :raw (->> final-cols
                (sort-by (fn [[k v]]
                           [(or (:priority v) 50)
                            (or (:priority-index v) 0)]))
                vec)}))
 
 (defn E
-  [{:keys [id class entity track access raw columns ns-str application]
+  [{:keys [id class entity track access raw columns addons ns-str application]
     :as m}]
   (let [m (merge {:symname  (if grammar-spec/*symbol* (name grammar-spec/*symbol*))
                   :class   :none
@@ -424,80 +471,14 @@
                                *ns-str* 
                                (h/error "No ns-str found." {:ns (h/ns-sym)}))}
                  m)
+        normalise-fn (fn [x]
+                       (cond (h/pointer? x)
+                             (normalise-ref x)
+                             
+                             :else x))
         _ (E-check-input m)]
-    (E-main m)))
+    (E-main (assoc m
+                   :entity (h/prewalk normalise-fn entity)
+                   :addons (h/prewalk normalise-fn addons)))))
 
 
-(comment
-
-  
-  (deftype.pg ^{:! (et/E {:id  :id/v1
-                          :access :access/system})}
-    Op
-    [:time         {:type :time    :required true
-                    :sql {:default (pg/time-us)}}
-     :tag          {:type :citext  :required true}
-     :data         {:type :map
-                    :web {:example {:email "test@test.com"
-                                    :password "password"}}}
-     :user-id      {:type :uuid}])
-
-  (deftype.pg ^{:! (et/E {:id       :id/none
-                          :track    :track/data
-                          :access   :access/auth})}
-    Metadata
-    {:added "0.1"}
-    [:id        {:type :jsonb :primary "default"}
-     :entry     {:type :jsonb :required true}])
-
-
-  (deftype.pg ^{:! (et/E {:class  :2d/entry
-                          :access :access/system
-                          :fields []})}
-    Rev
-    {:added "0.1"}
-    [])
-
-  (deftype.pg ^{:! (et/E {:class  :2d/log
-                          :entity {:in -/Rev}
-                          :access :access/system})}
-    RevLog
-    {:added "0.1"}
-    []
-    {:partition-by [:list :class-table]})
-
-  (deftype.pg ^{:! (et/E {:class  :0d/entry
-                          :entity {:table   "Global"
-                                   :context "Global"}
-                          :fields []
-                          :addons {:rev -/Rev}})}
-    Global
-    {:added "0.1"}
-    [:value    {:type :text   :required true}])
-
-  
-  
-
-
-
-  )
-
-
-(comment
-
-  (def Class2DType
-  [:class-table       {:type :enum :required true  :scope :-/info :primary "default"
-                       :enum {:ns `-/EnumClassTableType}
-                       :sql  {:unique ["class"]}}
-   :class-context     {:type :enum :required true :scope :-/info :primary "default"
-                       :enum {:ns `-/EnumClassContextType}
-                       :sql  {:unique ["class"]}}
-   :class-ref         {:type :uuid :required true
-                       :sql  {:unique ["class"]}}])
-
-
-(def Class2DEntryType
-  [:class-table          {:type :enum :required true  :scope :-/info :primary "default"
-                          :enum {:ns `-/EnumClassTableType}}
-   :class-context        {:type :enum :required true :scope :-/info  :primary "default"
-                          :enum {:ns `-/EnumClassContextType}}]))
