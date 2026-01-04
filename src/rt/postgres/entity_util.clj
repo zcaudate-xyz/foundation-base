@@ -148,8 +148,10 @@
    :icon          {:priority    10  :field    (type-image ns-str)}
    :picture       {:priority    11  :field    (type-image ns-str)}
    :background    {:priority    12  :field    (type-image ns-str)}
+   :balance       {:priority    25  :field    (type-numeric  ns-str)}
    :color         {:priority    20  :field    (type-color ns-str)}
    :tags          {:priority    25  :field    (type-tags  ns-str)}
+   
    
    
    :is-active     {:priority    30  :field    (type-boolean true)}

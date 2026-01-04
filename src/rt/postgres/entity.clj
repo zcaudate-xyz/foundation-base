@@ -18,17 +18,18 @@
 
 (def LinkSpec
   {:entity   {:2d/log   #{:2d/base}
-              :1d/log   #{:1d/entry}
-              :1d/entry #{:1d/base}}
+              :1d/log   #{:1d/entry :1d/simple :1d/data}
+              :1d/entry #{:1d/base}
+              :1d/data  #{:1d/simple}}
    :addons   {:1d/entry #{:2d/base}
-              :0d/entry #{:2d/base :1d/base}}})
+              :0d/entry #{:2d/base :1d/base :1d/simple}}})
 
 (def ESpec
   {:id        #{:id/none :id/v4 :id/v1  :id/text map?}
    :class     #{:none
-                :0d/entry :0d/log
-                :1d/base :1d/entry :1d/log
-                :2d/base :2d/entry :2d/log}
+                :0d/entry :0d/data
+                :1d/base  :1d/entry :1d/log :1d/simple :1d/data
+                :2d/base  :2d/entry :2d/log}
    :track    #{:track/none
                :track/data
                :track/log
@@ -67,11 +68,6 @@
       (throw (ex-info "Invalid inputs for E" {:errors errors :input m}))
       m)))
 
-
-
-
-;; 
-
 (defn E-entity-class-fields
   [{:keys [class entity ns-str]
     :as m}]
@@ -99,8 +95,6 @@
       key (merge ref-field-base
                  (if (= class :2d/log)
                    {:primary "default"}))})))
-
-
 
 (defn E-addon-columns-single
   [v]
@@ -144,7 +138,9 @@
       [:1d/entry :2d/base]   {:class-table   {:foreign {key {:ns (-> field :ref :ns) :column :class-context}}}
                               :class-link    {:foreign {key {:ns (-> field :ref :ns) :column :class-table}}}} 
       [:0d/entry :2d/base]   base  
-      [:0d/entry :1d/base]   (dissoc base :class-context))))
+      [:0d/entry :1d/base]   (dissoc base :class-context)
+      [:0d/entry :1d/simple] (dissoc base :class-context)
+      [:0d/data  :1d/simple] (dissoc base :class-context))))
 
 (defn E-addon-columns
   [{:keys [class addons]
@@ -192,13 +188,12 @@
                                  unique (assoc :unique unique))}}]
     (case class
       :1d/entry   table-base
+      :1d/data    table-base
       :1d/log     table-base
       :2d/log     (h/merge-nested
                    table-base
                    {key   {:primary "default"}
                     :class-context {:foreign {key {:ns ref :column :class-context}}}}))))
-
-
 
 ;;
 ;;  :2d/base :2d/log will always have  :class-context and :class-table 
@@ -221,8 +216,12 @@
               :class-ref      (ut/type-class-ref {:sql {:unique ["class"]}}
                                                  4)}
         base-select (case class
-                      :0d/entry  {:class-table   {:generated symname}
-                                  :class-context {:generated context}}
+                      :0d/simple  {}
+                      :0d/entry   {:class-table   {:generated symname}
+                                   :class-context {:generated context}}
+                      
+                      :1d/simple  {:class-table   {:primary "default"}
+                                   :class-ref     {}}
                       
                       :1d/base    {:class-table   {:primary "default"
                                                    :sql {:unique ["class"]}}
@@ -234,6 +233,8 @@
                                    :class-context {:generated  context}}
                       
                       :1d/log     {:class-table   {:primary "default"}}
+
+                      :1d/data    {:class-table   {:primary "default"}}
                       
                       :2d/base    {:class-table   {:primary "default"
                                                    :sql {:unique ["class"]}}
@@ -248,6 +249,7 @@
                     (select-keys base (keys base-select)))
         base-link  (if (#{:1d/entry
                           :1d/log
+                          :1d/data
                           :2d/log} class)
                      (E-class-link-columns m))]
     (h/merge-nested base-class
@@ -259,21 +261,20 @@
         final-cols    (h/merge-nested
                        (merge id-cols track-cols class-cols addon-cols)
                        columns)
-        class-uniques (case (namespace class)
-                        ("1d" "2d") (->> final-cols
-                                         (vals)
-                                         (keep (fn [{:keys [sql]}]
-                                                 (:unique sql)))
-                                         (mapcat h/seqify)
-                                         (set)
-                                         (vec))
-                        nil)
+        class-uniques (->> final-cols
+                           (vals)
+                           (keep (fn [{:keys [sql]}]
+                                   (:unique sql)))
+                           (mapcat h/seqify)
+                           (set)
+                           (vec))
         col-uniques   (if (seq class-uniques)
                         {:class-table   {:sql {:unique class-uniques}}
                          :class-context {:sql {:unique class-uniques}}})]
     (h/merge-nested final-cols
                     (case class
-                      :1d/log    (dissoc col-uniques :class-context)
+                      (:1d/log :1d/simple :1d/data)  (dissoc col-uniques :class-context)
+                      :0d/simple {}
                       col-uniques))))
 
 (defn E-main-track
@@ -281,10 +282,12 @@
     :as m}]
   (let [[id-in
          track-in] (case (name class)
-         "log"    [:id/v1   :track/log]
-         "base"   [:id/v4     :track/log]
-         "entry"  [:id/v4     :track/data]
-         "none"   [:id/none   :track/none])
+                     "log"    [:id/v1     :track/log]
+                     "simple" [:id/v4     :track/log]
+                     "data"   [:id/v4     :track/data]
+                     "base"   [:id/v4     :track/log]
+                     "entry"  [:id/v4     :track/data]
+                     "none"   [:id/none   :track/none])
         [id track] [(or id id-in) (or track track-in)]
         id   (cond (map? id) id
                    :else (case id
