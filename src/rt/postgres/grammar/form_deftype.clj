@@ -401,11 +401,10 @@
                (mapcat (fn [e]
                          (cond (symbol? e) @(resolve e)
                                (list? e)   (eval e)
-                               :else       [e]))
+                               :else       e))
                        raw))
         
         raw-spec (concat cols spec)
-        
         sorted-spec (->> (partition 2 raw-spec)
                          (map vec)
                          (sort-by (fn [[k {:keys [priority]}]]
