@@ -27,6 +27,7 @@
          all-columns (vec (h/union columns (set (keys trkm))))
          [_ err]  (schema/check-valid-columns tsch all-columns)
          _  (if err (h/error "Not Valid." (assoc err :data all-columns)))
+         all-columns (filter #(not (-> % tsch first :ignore)) all-columns)
          ks   (schema/order-keys tsch all-columns)
          body (mapv (fn [k]
                       (let [trkv    (get trkm k)
@@ -65,6 +66,7 @@
          m       (h/map-entries (fn [[k v]]
                                   [k (base/t-val-fn tsch k v params mopts)])
                                 m)
+         m       (h/filter-keys #(not (-> % tsch first :ignore)) m)
          ks      (sort-by (fn [k] (-> (get tsch k)
                                       first
                                       :order))

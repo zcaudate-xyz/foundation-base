@@ -28,6 +28,7 @@
          [_ err]  (schema/check-valid-columns tsch cols)
          _ (if err (h/error "Invalid columns." (assoc err :data cols)))
          cols (filter #(-> % tsch first :order) cols)
+         cols (filter #(not (-> % tsch first :ignore)) cols)
          ks   (schema/order-keys tsch cols)
          vs   (map (fn [k]
                      (or (get trkm k)
@@ -46,6 +47,7 @@
      (let [m  (merge (tracker/tracker-map-in params) m)
            _  (base/t-input-check tsch m)
            ks (schema/order-keys tsch (keys m))
+           ks (filter #(not (-> % tsch first :ignore)) ks)
            vs (map (fn [k]
                      (base/t-val-fn tsch k (get m k) params mopts))
                    ks)]
@@ -132,6 +134,7 @@
                                (symbol? data) (keys tsch)
                                :else (h/error "Invalid data type." {:input data}))
                          (keys utrkm)))
+         ckeys      (filter #(not (-> % tsch first :ignore)) ckeys)
          ckeys      (map first (schema/get-returning tsch ckeys))
          [_ ccols]  (base/t-returning tsch (set ckeys))
          ;;_ (h/prn ccols ckeys)
