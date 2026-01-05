@@ -58,8 +58,15 @@
   [ns-str & [priority]]
   {:type :citext :required true :scope :-/info  :priority (or priority 7)
    :sql  {:process [[(symbol ns-str "as-upper-formatted")]
-                   [(symbol ns-str "as-upper-limit-length") 36]]
+                    [(symbol ns-str "as-upper-limit-length") 36]]
           :unique ["name"]}})
+
+(defn type-code
+  [ns-str & [priority]]
+  {:type :citext :scope :-/info  :priority (or priority 7)
+   :sql  {:process [[(symbol ns-str "as-upper-formatted")]
+                    [(symbol ns-str "as-upper-limit-length") 36]]
+          :unique ["code"]}})
 
 (defn type-image
   [ns-str & [priority]]
@@ -145,18 +152,23 @@
 (defn default-fields
   [ns-str]
   {:name          {:priority     7  :field    (type-name  ns-str)}
-   :icon          {:priority    10  :field    (type-image ns-str)}
-   :picture       {:priority    11  :field    (type-image ns-str)}
-   :background    {:priority    12  :field    (type-image ns-str)}
-   :balance       {:priority    25  :field    (type-numeric  ns-str)}
-   :color         {:priority    20  :field    (type-color ns-str)}
-   :tags          {:priority    25  :field    (type-tags  ns-str)}
+   :code          {:priority     8  :field    (type-code  ns-str)}
+   :color         {:priority     9  :field    (type-color ns-str)}
+   :title         {:priority    10  :field    {:type :text :required true}}
+   :description   {:priority    11  :field    {:type :text}}
+   
+   :icon          {:priority    20  :field    (type-image ns-str)}
+   :picture       {:priority    21  :field    (type-image ns-str)}
+   :background    {:priority    22  :field    (type-image ns-str)}
+   
+   
    
    
    
    :is-active     {:priority    30  :field    (type-boolean true)}
    :is-public     {:priority    31  :field    (type-boolean true)}
-   :detail        {:priority    50  :field    (type-detail  ns-str)}
+   :detail        {:priority    51  :field    (type-detail  ns-str)}
+   :tags          {:priority    52  :field    (type-tags  ns-str)}
    
    :is-official   {:priority    80  :field    (type-boolean false)}
    :is-onboarded  {:priority    81  :field    (type-boolean false)}

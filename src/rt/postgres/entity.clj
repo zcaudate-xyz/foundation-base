@@ -6,7 +6,6 @@
             [std.lang.base.grammar-spec :as grammar-spec]
             [rt.postgres.entity-util :as ut]))
 
-
 (h/intern-in ut/init-addons
              ut/init-default-ns-str
              ut/get-addon
@@ -19,15 +18,17 @@
 (def LinkSpec
   {:entity   {:2d/log   #{:2d/base}
               :1d/log   #{:1d/entry :1d/simple :1d/data}
+              :2d/entry #{:2d/base}
               :1d/entry #{:1d/base}
               :1d/data  #{:1d/simple}}
    :addons   {:1d/entry #{:2d/base}
-              :0d/entry #{:2d/base :1d/base :1d/simple}}})
+              :0d/entry #{:0d/base :2d/base :1d/base :1d/simple}
+              :0d/data  #{:0d/base}}})
 
 (def ESpec
   {:id        #{:id/none :id/v4 :id/v1  :id/text map?}
    :class     #{:none
-                :0d/entry :0d/data
+                :0d/base  :0d/entry :0d/data
                 :1d/base  :1d/entry :1d/log :1d/simple :1d/data
                 :2d/base  :2d/entry :2d/log}
    :track    #{:track/none
@@ -140,7 +141,8 @@
       [:0d/entry :2d/base]   base  
       [:0d/entry :1d/base]   (dissoc base :class-context)
       [:0d/entry :1d/simple] (dissoc base :class-context)
-      [:0d/data  :1d/simple] (dissoc base :class-context))))
+      [:0d/data  :1d/simple] (dissoc base :class-context)
+      [:0d/entry :0d/base]   (dissoc base :class-table :class-context))))
 
 (defn E-addon-columns
   [{:keys [class addons]
@@ -171,14 +173,16 @@
 (defn E-class-link-columns
   [{:keys [class link]
     :as m}]
-  (let [{:keys [for unique]} link
+  (let [{:keys [for as-key unique]} link
         _    (when-not for
                (h/error "Need a :for keyword" {:input m}))
         [key ref] (if (vector? for)
                     for
-                    [(keyword (str/spear-case (name (ut/normalise-ref for)))) for])
+                    [(or as-key (keyword (str/spear-case (name (ut/normalise-ref for)))))
+                     for])
         ref (ut/normalise-ref ref)
-        unique     (or unique (if (= :1d/entry class)
+        unique     (or unique (if (or (= :1d/entry class)
+                                      (= :1d/data class))
                                 [(str/snake-case (name key))]))
         table-base {:class-table   {:foreign {key {:ns ref :column :class-table}}}
                     key  {:type :ref
@@ -187,13 +191,14 @@
                           :sql (cond-> {:cascade true}
                                  unique (assoc :unique unique))}}]
     (case class
-      :1d/entry   table-base
-      :1d/data    table-base
-      :1d/log     table-base
-      :2d/log     (h/merge-nested
-                   table-base
-                   {key   {:primary "default"}
-                    :class-context {:foreign {key {:ns ref :column :class-context}}}}))))
+      :1d/entry    table-base
+      :1d/data     table-base
+      :1d/log      table-base
+      (:2d/log
+       :2d/entry)  (h/merge-nested
+                    table-base
+                    {key   {:primary "default"}
+                     :class-context {:foreign {key {:ns ref :column :class-context}}}}))))
 
 ;;
 ;;  :2d/base :2d/log will always have  :class-context and :class-table 
@@ -216,7 +221,8 @@
               :class-ref      (ut/type-class-ref {:sql {:unique ["class"]}}
                                                  4)}
         base-select (case class
-                      :0d/simple  {}
+                      (:0d/base
+                       :0d/data)  {}
                       :0d/entry   {:class-table   {:generated symname}
                                    :class-context {:generated context}}
                       
@@ -241,6 +247,8 @@
                                    :class-context {:primary "default"
                                                    :sql {:unique ["class"]}}
                                    :class-ref     {}}
+                      :2d/entry   {:class-table   {:primary "default"}
+                                   :class-context {:primary "default"}}
                       :2d/log     {:class-table   {:primary "default"}
                                    :class-context {:primary "default"}}
                       {})
@@ -250,7 +258,8 @@
         base-link  (if (#{:1d/entry
                           :1d/log
                           :1d/data
-                          :2d/log} class)
+                          :2d/log
+                          :2d/entry} class)
                      (E-class-link-columns m))]
     (h/merge-nested base-class
                     base-link)))
@@ -274,7 +283,7 @@
     (h/merge-nested final-cols
                     (case class
                       (:1d/log :1d/simple :1d/data)  (dissoc col-uniques :class-context)
-                      :0d/simple {}
+                      (:0d/entry :0d/data :0d/base) {}
                       col-uniques))))
 
 (defn E-main-track
