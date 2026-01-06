@@ -22,8 +22,9 @@
               :1d/entry #{:1d/base}
               :1d/data  #{:1d/simple}}
    :addons   {:1d/entry #{:2d/base}
-              :0d/entry #{:0d/base :2d/base :1d/base :1d/simple}
-              :0d/data  #{:0d/base}}})
+              :0d/entry #{:0d/base :0d/entry :0d/data :2d/base :1d/base :1d/simple}
+              :0d/data  #{:0d/base :0d/entry :0d/data}
+              :0d/base  #{:0d/base :0d/entry :0d/data}}})
 
 (def ESpec
   {:id        #{:id/none :id/v4 :id/v1  :id/text map?}
@@ -135,14 +136,19 @@
                                            :addon addon}))
         base  {:class-table   {:foreign {key {:ns (-> field :ref :ns) :column :class-table}}}
                :class-context {:foreign {key {:ns (-> field :ref :ns) :column :class-context}}}}]
-    (case [class ref-class]
-      [:1d/entry :2d/base]   {:class-table   {:foreign {key {:ns (-> field :ref :ns) :column :class-context}}}
-                              :class-link    {:foreign {key {:ns (-> field :ref :ns) :column :class-table}}}} 
-      [:0d/entry :2d/base]   base  
-      [:0d/entry :1d/base]   (dissoc base :class-context)
-      [:0d/entry :1d/simple] (dissoc base :class-context)
-      [:0d/data  :1d/simple] (dissoc base :class-context)
-      [:0d/entry :0d/base]   (dissoc base :class-table :class-context))))
+    (cond (= "0d"
+             (namespace class)
+             (namespace ref-class))
+          {}
+
+          :else
+          (case [class ref-class]
+            [:1d/entry :2d/base]   {:class-table   {:foreign {key {:ns (-> field :ref :ns) :column :class-context}}}
+                                    :class-link    {:foreign {key {:ns (-> field :ref :ns) :column :class-table}}}} 
+            [:0d/entry :2d/base]   base  
+            [:0d/entry :1d/base]   (dissoc base :class-context)
+            [:0d/entry :1d/simple] (dissoc base :class-context)
+            [:0d/data  :1d/simple] (dissoc base :class-context)))))
 
 (defn E-addon-columns
   [{:keys [class addons]
@@ -173,32 +179,34 @@
 (defn E-class-link-columns
   [{:keys [class link]
     :as m}]
-  (let [{:keys [for as-key unique]} link
-        _    (when-not for
-               (h/error "Need a :for keyword" {:input m}))
-        [key ref] (if (vector? for)
-                    for
-                    [(or as-key (keyword (str/spear-case (name (ut/normalise-ref for)))))
-                     for])
-        ref (ut/normalise-ref ref)
-        unique     (or unique (if (or (= :1d/entry class)
-                                      (= :1d/data class))
-                                [(str/snake-case (name key))]))
-        table-base {:class-table   {:foreign {key {:ns ref :column :class-table}}}
-                    key  {:type :ref
-                          :required true
-                          :ref {:ns ref}
-                          :sql (cond-> {:cascade true}
-                                 unique (assoc :unique unique))}}]
-    (case class
-      :1d/entry    table-base
-      :1d/data     table-base
-      :1d/log      table-base
-      (:2d/log
-       :2d/entry)  (h/merge-nested
-                    table-base
-                    {key   {:primary "default"}
-                     :class-context {:foreign {key {:ns ref :column :class-context}}}}))))
+  (if (not link)
+    {}
+    (let [{:keys [for as-key unique]} link
+          _    (when-not for
+                 (h/error "Need a :for keyword" {:input m}))
+          [key ref] (if (vector? for)
+                      for
+                      [(or as-key (keyword (str/spear-case (name (ut/normalise-ref for)))))
+                       for])
+          ref (ut/normalise-ref ref)
+          unique     (or unique (if (or (= :1d/entry class)
+                                        (= :1d/data class))
+                                  [(str/snake-case (name key))]))
+          table-base {:class-table   {:foreign {key {:ns ref :column :class-table}}}
+                      key  {:type :ref
+                            :required true
+                            :ref {:ns ref}
+                            :sql (cond-> {:cascade true}
+                                   unique (assoc :unique unique))}}]
+      (case class
+        :1d/entry    table-base
+        :1d/data     table-base
+        :1d/log      table-base
+        (:2d/log
+         :2d/entry)  (h/merge-nested
+         table-base
+         {key   {:primary "default"}
+          :class-context {:foreign {key {:ns ref :column :class-context}}}})))))
 
 ;;
 ;;  :2d/base :2d/log will always have  :class-context and :class-table 
