@@ -66,7 +66,9 @@
    (h/map-vals (fn [f-spec]
                  (if (:ns f-spec)
                    (let [[link check] (resolve-link-fn f-spec)]
-                     (when check (pg-deftype-hydrate-check-link snapshot link :table))
+                     (when (and check
+                                (not (:self f-spec)))
+                       (pg-deftype-hydrate-check-link snapshot link :table))
                      (merge f-spec {:ns (keyword (name (:ns f-spec)))
                                     :link link}))
                    f-spec))
