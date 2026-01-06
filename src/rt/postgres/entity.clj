@@ -21,7 +21,7 @@
               :2d/entry #{:2d/base}
               :1d/entry #{:1d/base}
               :1d/data  #{:1d/simple}}
-   :addons   {:1d/entry #{:2d/base}
+   :addons   {:1d/entry #{:2d/base :1d/base :1d/simple}
               :0d/entry #{:0d/base :0d/entry :0d/data :2d/base :1d/base :1d/simple}
               :0d/data  #{:0d/base :0d/entry :0d/data}
               :0d/base  #{:0d/base :0d/entry :0d/data}}})
@@ -140,6 +140,11 @@
              (namespace class)
              (namespace ref-class))
           {}
+
+          (= "1d"
+             (namespace class)
+             (namespace ref-class))
+          (dissoc base :class-context)
 
           :else
           (case [class ref-class]
