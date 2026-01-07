@@ -357,7 +357,6 @@
                     (ut/type-ref (or (namespace grammar-spec/*symbol*)
                                      (name (h/ns-sym)))
                                  (name grammar-spec/*symbol*))
-                    priority
                     priority))))
 
 (defn E
