@@ -21,7 +21,8 @@
               :2d/entry #{:2d/base}
               :1d/entry #{:1d/base}
               :1d/data  #{:1d/simple}}
-   :addons   {:1d/entry #{:2d/base :1d/base :1d/simple}
+   :addons   {:1d/data  #{:1d/simple}
+              :1d/entry #{:2d/base :1d/base :1d/simple}
               :0d/entry #{:0d/base :0d/entry :0d/data :2d/base :1d/base :1d/simple}
               :0d/data  #{:0d/base :0d/entry :0d/data}
               :0d/base  #{:0d/base :0d/entry :0d/data}}})
@@ -29,7 +30,7 @@
 (def ESpec
   {:id        #{:id/none :id/v4 :id/v1  :id/text map?}
    :class     #{:none
-                :0d/base  :0d/entry :0d/data
+                :0d/base  :0d/entry :0d/data :0d/log
                 :1d/base  :1d/entry :1d/log :1d/simple :1d/data
                 :2d/base  :2d/entry :2d/log}
    :track    #{:track/none
@@ -116,7 +117,7 @@
                      (ut/get-addon v)
                      
                      (map? v)
-                     (let [addon  (ut/get-addon (:key v))]
+                     (let [addon  (ut/get-addon (or (:type v) (:key v)))]
                        (merge addon
                               (dissoc v :ref)
                               (if (:ref v)
@@ -235,7 +236,8 @@
                                                  4)}
         base-select (case class
                       (:0d/base
-                       :0d/data)  {}
+                       :0d/data
+                       :0d/log)  {}
                       :0d/entry   {:class-table   {:generated symname}
                                    :class-context {:generated context}}
                       
@@ -352,9 +354,10 @@
   (if (and addon grammar-spec/*symbol*)
     (let [{:keys [key priority]} addon]
       (ut/add-addon key
-                    (ut/type-ref (namespace grammar-spec/*symbol*)
-                                 (name grammar-spec/*symbol*)
-                                 priority)
+                    (ut/type-ref (or (namespace grammar-spec/*symbol*)
+                                     (name (h/ns-sym)))
+                                 (name grammar-spec/*symbol*))
+                    priority
                     priority))))
 
 (defn E
