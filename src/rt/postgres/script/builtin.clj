@@ -48,6 +48,7 @@
     to-ascii
     to-hex
     translate
+    trim
     upper
     lower
     position
