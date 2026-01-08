@@ -130,21 +130,7 @@
   {:added "3.0"}
   ([{:keys [results]}]
    (if (context/*print* :print-bulk)
-     (print/print-summary results)) (when context/*errors*
-                                      (h/local :println "-------------------------")
-                                      (when-let [failed (:failed @context/*errors*)]
-                                        (doseq [result failed]
-                                          (print/print-failed (summarise-verify result))))
-                                      (when-let [exceptions (:exception @context/*errors*)]
-                                        (doseq [result exceptions]
-                                          (print/print-throw (summarise-evaluate result))))
-                                      (when-let [timeouts (:timeout @context/*errors*)]
-                                        (doseq [result timeouts]
-                                          (if (= :timeout (:status result))
-                                            (print/print-throw (summarise-evaluate result))
-                                            (print/print-throw (summarise-verify result)))))
-
-                                      (h/local :println ""))))
+     (print/print-summary results))))
 
 (defn install-listeners
   "installs all listeners"
