@@ -172,7 +172,9 @@
    
    :is-official   {:priority    80  :field    (type-boolean false)}
    :is-onboarded  {:priority    81  :field    (type-boolean false)}
+   :is-archived   {:priority    89  :field    (type-boolean false)}
    :log           {:priority    90  :field    (type-log   ns-str)}
+   
    :entry         {:priority    95  :field    (type-log-entry  ns-str)}})
 
 ;;

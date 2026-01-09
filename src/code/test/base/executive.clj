@@ -81,7 +81,7 @@
   ([items]
    (let [summary (h/map-vals count items)
          summary (merge {:failed 0 :throw 0 :timeout 0} summary)]
-     (when (:print-bulk context/*print*)
+     #_(when (:print-bulk context/*print*)
        (doseq [item  (:failed items)]
          (-> item
              (listener/summarise-verify)
