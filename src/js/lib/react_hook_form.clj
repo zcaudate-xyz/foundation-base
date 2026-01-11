@@ -3,7 +3,73 @@
             [std.lib :as h]))
 
 (l/script :js
-  {:require [[js.react :as r]
-             [xt.lang.base-lib :as k]]
-   :import [["react-hook-form" :as [* ReactHookForm]]
-            ["react-hook-form" :as [* ReactHookForm]]]})
+  {:require [[xt.lang.base-lib :as k]
+             [js.react :as r]]
+   :import  [["react-hook-form" :as #{useForm Controller}]
+             ["@hookform/resolvers/zod" :as #{zodResolver}]
+             ["zod" :as #{z}]
+             ["i18next" :as I18n]]})
+
+(def.js useFormBase useForm)
+
+(def.js FormController Controller)
+
+(def.js ZodResolver zodResolver)
+
+(def.js Z z)
+
+(def.js t
+  (fn [x] (return x))
+  #_(. I18n t))
+
+
+(defn.js useFormState
+  [{:# [defaultValues
+        schema]
+    :.. props}]
+  (var rprops (k/obj-assign
+               (:? schema {:resolver (-/ZodResolver schema)}
+                   {})
+               props))
+  (return
+   (-/useFormBase
+    {:defaultValues defaultValues
+     :mode "onChange"
+     :reValidateMode "onChange"
+     :.. rprops})))
+
+
+(defn.js useControls
+  [(:= keys [])]
+  (var arr      (r/useMemo
+                 (. keys (map (fn [k]
+                                (return (:? (k/is-string? k)
+                                            [k nil]
+                                            k)))))))
+  (var mgetters (r/useMemo
+                 (. arr (reduce (fn [out [k init]]
+                                  (:= (. out [k])
+                                      (:? (k/is-function? init)
+                                          (init)
+                                          init))
+                                  (return out))
+                                {}))
+                 []))
+  
+  (var [state setState] (r/useState mgetters))
+  
+  (var msetters (r/useMemo
+                 (. arr (reduce (fn [out [k init]]
+                                  (:= (. out [(+ "set" (k/capitalize k))])
+                                      (fn [val]
+                                        (setState (fn [prev] 
+                                                    (return (Object.assign
+                                                             {}
+                                                             prev
+                                                             {k val}))))))
+                                  (return out))
+                                {}))
+                 []))
+  
+  (return (Object.assign {} setters state)))
+
