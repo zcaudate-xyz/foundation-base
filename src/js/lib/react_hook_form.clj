@@ -71,5 +71,5 @@
                                 {}))
                  []))
   
-  (return (Object.assign {} setters state)))
+  (return (Object.assign {} msetters state)))
 

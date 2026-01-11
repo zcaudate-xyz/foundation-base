@@ -23,6 +23,18 @@
               nil
               ns-lookup)))
 
+(defn get-link-match
+  "gets a lookup match"
+  {:added "4.0"}
+  [link-ns ns-lookup]
+  (or (if-let [v (get ns-lookup link-ns)]
+        [link-ns v])
+      (reduce (fn [_ [pattern v]]
+                (if (h/match-filter pattern link-ns)
+                  (reduced [pattern v])))
+              nil
+              ns-lookup)))
+
 (defn link-attributes
   "gets link attributes"
   {:added "4.0"}
@@ -45,13 +57,28 @@
         link-ns-arr   (str/split link-ns-str #"\.")
         root-ns-str   (str root-ns)
         root-ns-arr   (str/split root-ns-str #"\.")
-        is-lib?       (not (.startsWith ^String
-                                        link-ns-str
-                                        root-ns-str))
         
-        rel-segments  (if is-lib?
-                        (cons root-libs (butlast link-ns-arr))
-                        (drop (count root-ns-arr) (butlast link-ns-arr)))
+        prefix-match  (if (map? root-prefix)
+                        (get-link-match link-ns (dissoc root-prefix :default)))
+        
+        [prefix-key _] prefix-match
+        
+        is-lib?       (or (nil? root-ns)
+                          (not (.startsWith ^String
+                                            link-ns-str
+                                            root-ns-str)))
+        
+        rel-segments  (if (and prefix-key
+                               (or (string? prefix-key)
+                                   (symbol? prefix-key)))
+                        (let [p-arr (str/split (str prefix-key) #"\.")]
+                          (drop (count p-arr) (butlast link-ns-arr)))
+                        
+                        (if is-lib?
+                          (if (map? root-prefix)
+                            (butlast link-ns-arr)
+                            (cons root-libs (butlast link-ns-arr)))
+                          (drop (count root-ns-arr) (butlast link-ns-arr))))
         
         link-rel      (str/join path-separator (map apply-replace rel-segments))
         

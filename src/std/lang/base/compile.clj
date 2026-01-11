@@ -105,7 +105,6 @@
                             ns-extras)
                     main
                     (:link (:code emit)))
-
         root-path  (if (empty? target)
                      root
                      (str root "/" target))
