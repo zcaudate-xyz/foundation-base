@@ -3,7 +3,7 @@
             [std.lib :as h]))
 
 (l/script :js
-  {:import [["vitest" :as vitest]]})
+  {:import [["vitest" :as [* vitest]]]})
 
 (h/template-entries [l/tmpl-entry {:type :fragment
                                    :base "vitest"
