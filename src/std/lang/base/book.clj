@@ -366,6 +366,9 @@
                               (map :as)
                               (keep (fn [x] (if (vector? x) (last x) x)))
                               (h/map-juxt [identity identity])))
+         includes   (->> requires
+                         (keep (fn [[k v]] (if (:include v) k)))
+                         (set))
          _          (if (not *skip-check*) (module-create-check book module-id link))]
      (module/book-module {:lang lang
                           :id module-id
@@ -377,6 +380,7 @@
                           :native     native
                           :native-lu  native-lu
                           :require-impl require-impl
+                          :includes   includes
 
                           :static static}))))
 
