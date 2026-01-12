@@ -38,6 +38,10 @@
      :reValidateMode "onChange"
      :.. rprops})))
 
+(defn.js useFormStateMap
+  [m]
+  (return
+   (k/obj-map m -/useFormState)))
 
 (defn.js useControls
   [(:= keys [])]
