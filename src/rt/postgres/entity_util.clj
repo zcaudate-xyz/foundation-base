@@ -167,6 +167,7 @@
    
    :is-active     {:priority    30  :field    (type-boolean true)}
    :is-public     {:priority    31  :field    (type-boolean true)}
+   :is-draft      {:priority    32  :field    (type-boolean true)}
    :detail        {:priority    51  :field    (type-detail  ns-str)}
    :tags          {:priority    52  :field    (type-tags  ns-str)}
    
