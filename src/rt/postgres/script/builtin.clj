@@ -60,6 +60,7 @@
     to-date
     to-number
     to-timestamp
+    extract
     
     ;; checks
     exists
@@ -144,6 +145,8 @@
     ;; time
     now
     timeofday
+    make-time
+    make-timestamp
     
     ;; uuid
     gen-random-uuid
