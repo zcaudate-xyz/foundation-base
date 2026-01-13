@@ -95,6 +95,12 @@
     (pg-loop-block '(loop [] (let [a 1] (return a))) nil nil))
   => "block")
 
+^{:refer rt.postgres.grammar.form-let/pg-while-block :added "4.0"}
+(fact "creates a while block"
+  (with-redefs [emit-common/*emit-fn* (fn [& _] "block")]
+    (pg-while-block '(while (true) (let [a 1] (return a))) nil nil))
+  => "block")
+
 ^{:refer rt.postgres.grammar.form-let/pg-case-block :added "4.0"}
 (fact "creates a case block"
   (with-redefs [emit-common/*emit-fn* (fn [& _] "block")]

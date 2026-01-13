@@ -88,6 +88,7 @@
         
         :letblk  {:op :letblk  :symbol #{'let:block}   :macro #'form-let/pg-tf-let-block :emit :macro :type :block}
         :let     {:op :let     :symbol #{'let}         :macro #'form-let/pg-tf-let :emit :macro :type :block}
+        :while   {:op :while   :symbol #{'while}       :emit  #'form-let/pg-while-block :type :block}
         :loop    {:op :loop    :symbol #{'loop}        :emit  #'form-let/pg-loop-block :type :block}
         :case    {:op :case    :symbol #{'case}        :emit  #'form-let/pg-case-block :type :block}
         :forech  {:op :forech  :symbol #{'for:each}    :macro #'tf/pg-tf-foreach :emit :macro :type :block}

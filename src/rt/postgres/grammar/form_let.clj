@@ -213,6 +213,16 @@
       grammar
       mopts))))
 
+(defn pg-while-block
+  "creates a while block"
+  {:added "4.0"}
+  ([[_ condition & forms] grammar mopts]
+   (binding [*input-syms* (or *input-syms* (volatile! #{}))]
+     (emit-common/*emit-fn*
+      (apply common/block-while-block condition forms)
+      grammar
+      mopts))))
+
 (defn pg-case-block
   "creates a case block"
   {:added "4.0"}
