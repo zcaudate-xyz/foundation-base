@@ -315,6 +315,14 @@
      \\ (\| (~'do ~@forms))
      \\ :end-loop]))
 
+(defn block-while-block
+  "emits while block"
+  {:added "4.0"}
+  ([condition & forms]
+   `[:while ~condition :loop
+     \\ (\| (~'do ~@forms))
+     \\ :end-loop \;]))
+
 (defn block-case-block
   "emits case block"
   {:added "4.0"}
