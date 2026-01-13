@@ -58,7 +58,7 @@
 
         (coll? form)
         (if (map? form)
-          (into {} (mapv (fn [[k v]] [(rewrite-nested-checks k) (rewrite-nested-checks v)]) form))
+          (with-meta (into {} (mapv (fn [[k v]] [(rewrite-nested-checks k) (rewrite-nested-checks v)]) form)) (meta form))
           (into (empty form) (mapv rewrite-nested-checks form)))
 
         :else form))
