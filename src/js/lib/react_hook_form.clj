@@ -46,34 +46,41 @@
 (defn.js useControls
   [(:= keys [])]
   (var arr      (r/useMemo
-                 (. keys (map (fn [k]
-                                (return (:? (k/is-string? k)
-                                            [k nil]
-                                            k)))))))
+                 (fn []
+                   (return
+                    (. keys (map (fn [x]
+                                   (return (:? (k/is-string? x)
+                                               [x nil]
+                                               x)))))))
+                 [keys]))
   (var mgetters (r/useMemo
-                 (. arr (reduce (fn [out [k init]]
-                                  (:= (. out [k])
-                                      (:? (k/is-function? init)
-                                          (init)
-                                          init))
-                                  (return out))
-                                {}))
-                 []))
+                 (fn []
+                   (return
+                    (. arr (reduce (fn [out [x init]]
+                                     (:= (. out [x])
+                                         (:? (k/is-function? init)
+                                             (init)
+                                             init))
+                                     (return out))
+                                   {}))))
+                 [arr]))
   
   (var [state setState] (r/useState mgetters))
   
   (var msetters (r/useMemo
-                 (. arr (reduce (fn [out [k init]]
-                                  (:= (. out [(+ "set" (k/capitalize k))])
-                                      (fn [val]
-                                        (setState (fn [prev] 
-                                                    (return (Object.assign
-                                                             {}
-                                                             prev
-                                                             {k val}))))))
-                                  (return out))
-                                {}))
-                 []))
+                 (fn []
+                   (return
+                    (. arr (reduce (fn [out [x init]]
+                                     (:= (. out [(+ "set" (k/capitalize x))])
+                                         (fn [val]
+                                           (setState (fn [prev] 
+                                                       (return (Object.assign
+                                                                {}
+                                                                prev
+                                                                {x val}))))))
+                                     (return out))
+                                   {}))))
+                 [arr]))
   
   (return (Object.assign {} msetters state)))
 
