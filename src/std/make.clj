@@ -20,7 +20,6 @@
  common/triggers-get
  common/triggers-list
  common/triggers-purge
- common/triggers-set
  common/get-triggered
  common/make-config
  

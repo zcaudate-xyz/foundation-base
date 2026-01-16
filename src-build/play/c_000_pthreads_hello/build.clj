@@ -21,6 +21,7 @@
   {:github   {:repo "zcaudate/play.c-000-pthreads-hello"
               :description "Simple Posix Threads Example"}
    :orgfile  "Main.org"
+   :triggers '#{play.c-000-pthreads-hello.main}
    :sections {:setup  [{:type :gitignore
                         :main ["bin" "out"]}
                        {:type :makefile
@@ -32,7 +33,7 @@
                :target "src"}]})
 
 (def +init+
-  (do (make/triggers-set PROJECT '#{play.c-000-pthreads-hello.main})))
+  nil)
 
 (defn -main
   []

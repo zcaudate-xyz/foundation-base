@@ -7,23 +7,22 @@
             [play.tui-001-fetch.main :as main]))
 
 (def.make PROJECT
-  {:tag      "tui-001-fetch"
-   :build    ".build/tui-001-fetch"
-   :github   {:repo "zcaudate/play.tui-001-fetch"}
+  {:github   {:repo "zcaudate/play.tui-001-fetch"
+              :description "Simple Blessed TUI Fetch Example"}
    :orgfile  "Main.org"
-   :sections {:setup  [webpack/+node-basic+
-                       webpack/+node-makefile+
-                       webpack/+node-gitignore+]}
-   :default  [{:type   :module.single
-               :lang   :js
-               :main   'play.tui-001-fetch.main
-               :file   "src/main.js"
-               :emit   {:code   {:label true}
-                        :export {:suppress true}
-                        :link   {:suppress true}}}]})
+   :triggers '#{play.tui-001-fetch.main}
+   :sections {:setup  [{:type :gitignore
+                        :main ["bin" "out"]}
+                       {:type :makefile
+                        :main +makefile+}]}
+   :default  [{:type :module.single
+               :lang :js
+               :main 'play.tui-001-fetch.main
+               :file "index.js"
+               :target "src"}]})
 
 (def +init+
-  (do (make/triggers-set PROJECT '#{play.tui-001-fetch.main})))
+  nil)
 
 (defn -main
   []

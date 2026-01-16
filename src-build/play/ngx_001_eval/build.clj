@@ -9,27 +9,21 @@
 
 (def.make PROJECT
   {:github   {:repo "zcaudate/play.ngx-001-eval"
-              :description "Example Openresty Evaluation Server"}
+              :description "Simple OpenResty Eval Example"}
    :orgfile  "Main.org"
-   :sections
-   {:setup  [{:type :gitignore
-              :main ["*_temp" "runtime"]}
-             {:type :makefile
-              :main [[:dev     ["ls nginx.conf | entr -r make restart"]]
-                     [:start   ["nginx" "-p" "runtime" "-c" "../nginx.conf"]]
-                     [:stop    ["nginx" "-s" "stop"]]
-                     [:refresh ["nginx" "-s" "reload"]]
-                     [:restart
-                      ["@nginx" "-s" "stop"]
-                      ["nginx" "-p" "runtime" "-c" "../nginx.conf"]
-                      ["@alerter" "-message" "'NGINX RESTARTED'" "-title" "'STATSNET'" "-timeout" "2" ">" "/dev/null"]]]}
-             {:type :blank
-              :file "runtime/logs/error.log"}]}
-   :default  [{:type :nginx.conf
-               :main #'main/+nginx-conf+}]})
+   :triggers '#{play.ngx-001-eval.main}
+   :sections {:setup  [{:type :gitignore
+                        :main ["bin" "out"]}
+                       {:type :makefile
+                        :main +makefile+}]}
+   :default  [{:type :module.single
+               :lang :lua
+               :main 'play.ngx-001-eval.main
+               :file "eval.lua"
+               :target "lua"}]})
 
 (def +init+
-  (do (make/triggers-set PROJECT '#{play.ngx-001-eval.main})))
+  nil)
 
 (defn -main
   []

@@ -8,6 +8,7 @@
 (def.make PROJECT
   {:tag       "indigo.server"
    :build     ".build/code-dev-server"
+   :triggers #{"indigo"}
    :hooks    {:post [{:id :inject-ui
                       :fn (fn [& _]
                             #_(binding [*ns* (the-ns 'indigo.client.page-index)]
@@ -20,9 +21,7 @@
 
 
 (def +init+
-  (make/triggers-set
-   PROJECT
-   #{"indigo"}))
+  nil)
 
 (comment
 

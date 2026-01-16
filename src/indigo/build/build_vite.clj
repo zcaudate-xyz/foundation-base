@@ -9,6 +9,7 @@
 (def.make CODE_DEV
   {:tag      "indigo"
    :build    ".build/code.dev/src"
+   :triggers #{"indigo"}
    :default  [{:type   :module.root
                :target "."
                :lang   :js
@@ -21,9 +22,7 @@
                                          :ns-suffix {#"^xt" ".js"}}}}}]})
 
 (def +init+
-  (make/triggers-set
-   CODE_DEV
-   #{"indigo"}))
+  nil)
 
 
 

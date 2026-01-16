@@ -59,6 +59,7 @@
    :build    ".build/web-debug"
    :github   {:repo   "zcaudate-xyz/demo.web-debug"
               :description "Web Debug"}
+   :triggers #{"js" "playground.web-debug"}
    :sections {:common [+expo-makefile+
                        +github-workflows-build+
                        {:type :raw
@@ -134,10 +135,7 @@
               :emit   {:code   {:label true}}}]})
 
 (def +init+
-  (make/triggers-set
-   PLAYGROUND-WEB-DEBUG
-   #{"js"
-     "playground.web-debug"}))
+  nil)
 
 (comment
 

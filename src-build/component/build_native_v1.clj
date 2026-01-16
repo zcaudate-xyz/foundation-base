@@ -59,6 +59,7 @@
    :build    ".build/native-v1"
    :github   {:repo   "zcaudate-xyz/demo.foundation-base"
               :description "Js Web Components"}
+   :triggers #{"js" "component.web-native"}
    :sections {:common [+expo-makefile+
                        +github-workflows-build+
                        {:type :raw
@@ -165,10 +166,7 @@
               :emit   {:code   {:label true}}}]})
 
 (def +init+
-  (make/triggers-set
-   COMPONENT-NATIVE
-   #{"js"
-     "component.web-native"}))
+  nil)
 
 (comment
 
