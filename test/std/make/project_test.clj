@@ -25,7 +25,17 @@
 (fact "def.make implemention")
 
 ^{:refer std.make.project/def.make :added "4.0"}
-(fact "macro to instantiate a section")
+(fact "macro to instantiate a section"
+  ^:hidden
+  
+  (require '[std.make.common :as common])
+  (def.make TEST_MAKE
+    {:tag "test.make"
+     :default [{:type :raw :file "hello.txt" :main "hello"}]
+     :triggers #{"test.trigger"}})
+  
+  (common/triggers-get TEST_MAKE)
+  => #{"test.trigger"})
 
 ^{:refer std.make.project/build-triggered :added "4.0"}
 (fact "builds for a triggering namespace")

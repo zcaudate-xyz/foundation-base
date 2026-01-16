@@ -7,18 +7,21 @@
 
 (def.make PROJECT
   {:github   {:repo "zcaudate/play.ngx-000-hello"
-              :description "Simple Openresty Nxg Threads Example"}
+              :description "Simple OpenResty Example"}
    :orgfile  "Main.org"
-   :sections {:setup  [{:type :makefile
-                        :main [[:run ["resty main.lua"]]
-                               [:dev ["echo main.lua | entr -r resty main.lua"]]]}]}
-   :default  [{:type   :module.graph
-               :lang   :lua
-               :main   'play.ngx-000-hello.main
-               :emit   {:code   {:label true}}}]})
+   :triggers '#{play.ngx-000-hello.main}
+   :sections {:setup  [{:type :gitignore
+                        :main ["bin" "out"]}
+                       {:type :makefile
+                        :main +makefile+}]}
+   :default  [{:type :module.single
+               :lang :lua
+               :main 'play.ngx-000-hello.main
+               :file "hello.lua"
+               :target "lua"}]})
 
 (def +init+
-  (do (make/triggers-set PROJECT '#{play.ngx-000-hello.main})))
+  nil)
 
 (defn -main
   []

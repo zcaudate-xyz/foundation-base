@@ -7,24 +7,22 @@
             [play.tui-000-counter.main :as main]))
 
 (def.make PROJECT
-  {:tag      "tui-000-counter"
-   :build    ".build/tui-000-counter"
-   :github   {:repo "zcaudate/play.tui-000-counter"}
+  {:github   {:repo "zcaudate/play.tui-000-counter"
+              :description "Simple Blessed TUI Example"}
    :orgfile  "Main.org"
-   :sections {:setup  [webpack/+node-basic+
-                       webpack/+node-makefile+
-                       webpack/+node-gitignore+]}
-   :default  [{:type   :module.single
-               :name   "tui-000-counter"
-               :lang   :js
-               :main   'play.tui-000-counter.main
-               :file   "src/main.js"
-               :emit   {:code   {:label true}
-                        #_#_:export {:suppress true}
-                        #_#_:link   {:suppress true}}}]})
+   :triggers '#{play.tui-000-counter.main}
+   :sections {:setup  [{:type :gitignore
+                        :main ["bin" "out"]}
+                       {:type :makefile
+                        :main +makefile+}]}
+   :default  [{:type :module.single
+               :lang :js
+               :main 'play.tui-000-counter.main
+               :file "index.js"
+               :target "src"}]})
 
 (def +init+
-  (do (make/triggers-set PROJECT '#{play.tui-000-counter.main})))
+  nil)
 
 (defn -main
   []

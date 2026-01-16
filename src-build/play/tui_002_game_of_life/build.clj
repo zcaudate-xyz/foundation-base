@@ -7,39 +7,38 @@
             [play.tui-002-game-of-life.main :as main]))
 
 (def.make PROJECT_COMMONJS
-  {:tag      "tui-002-game-of-life-commonjs"
-   :build    ".build/tui-002-game-of-life-commonjs"
-   :github   {:repo "zcaudate/play.tui-002-game-of-life"
-              :description "Conway's Game of Life for React Blessed"}
+  {:github   {:repo "zcaudate/play.tui-002-game-of-life"
+              :description "Simple Blessed TUI Game of Life Example"}
    :orgfile  "Main.org"
-   :sections {:setup  [webpack/+node-basic+
-                       webpack/+node-makefile+
-                       webpack/+node-gitignore+]}
-   :default  [{:type   :module.graph
-               :lang   :js
-               :target "src"
-               :main   'play.tui-002-game-of-life.main
-               :emit   {:lang/format :commonjs
-                        :code   {:label true}}}]})
+   :triggers '#{play.tui-002-game-of-life.main}
+   :sections {:setup  [{:type :gitignore
+                        :main ["bin" "out"]}
+                       {:type :makefile
+                        :main +makefile+}]}
+   :default  [{:type :module.single
+               :lang :js
+               :main 'play.tui-002-game-of-life.main
+               :file "index.js"
+               :target "src"}]})
 
 (def.make PROJECT_ESM
-  {:tag      "tui-002-game-of-life-esm"
-   :build    ".build/tui-002-game-of-life-esm"
-   :github   {:repo "zcaudate/play.tui-002-game-of-life"
-              :description "Conway's Game of Life for React Blessed"}
+  {:github   {:repo "zcaudate/play.tui-002-game-of-life"
+              :description "Simple Blessed TUI Game of Life Example"}
    :orgfile  "Main.org"
-   :sections {:setup  [webpack/+node-basic+
-                       webpack/+node-makefile+
-                       webpack/+node-gitignore+]}
-   :default  [{:type   :module.graph
-               :lang   :js
+   :triggers '#{play.tui-002-game-of-life.main}
+   :sections {:setup  [{:type :gitignore
+                        :main ["bin" "out"]}
+                       {:type :makefile
+                        :main +makefile+}]}
+   :default  [{:type :module.single
+               :lang :js
+               :main 'play.tui-002-game-of-life.main
+               :file "index.mjs"
                :target "src"
-               :main   'play.tui-002-game-of-life.main
-               :emit   {:code   {:label true}}}]})
+               :emit {:code {:transforms {:full [inject-esm]}}}}]})
 
 (def +init+
-  (do (make/triggers-set PROJECT_COMMONJS '#{play.tui-002-game-of-life.main})
-      (make/triggers-set PROJECT_ESM '#{play.tui-002-game-of-life.main})))
+  nil)
 
 (defn -main
   []
