@@ -141,6 +141,19 @@
 
 
 
+(defn watch-project
+  "watches a project"
+  {:added "4.0"}
+  [mcfg]
+  (let [{:keys [default sections]} @(:instance mcfg)
+        tasks (concat default (mapcat val sections))
+        paths (->> tasks
+                   (mapcat :search)
+                   (filter identity)
+                   (set)
+                   (sort))]
+    (mapv watch paths)))
+
 (comment
   
   (code.manage/heal-code 'sznui.v1.screens.onboarding.onboarding-step-2-profile

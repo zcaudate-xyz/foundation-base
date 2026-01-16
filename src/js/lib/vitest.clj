@@ -1,7 +1,7 @@
 (ns js.lib.vitest
   (:require [std.lang :as l]
             [std.lib :as h])
-  (:refer-clojure :exclude [test]))
+  (:refer-clojure :exclude [test assert]))
 
 (l/script :js
   {:import [["vitest" :as [* vitest]]]})

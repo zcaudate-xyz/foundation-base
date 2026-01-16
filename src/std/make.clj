@@ -66,6 +66,7 @@
  project/build-default
  project/build-triggered
  project/is-changed?
+ [watch-project project/watch-project]
  
  [bulk-container-build bulk/make-bulk-container-build]
  [bulk-container-filter bulk/make-bulk-container-filter]
