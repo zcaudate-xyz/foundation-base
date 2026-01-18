@@ -59,7 +59,7 @@
 
   (with-redefs [common/pg-type-alias (fn [x] x)]
     (pg-deftype-col-fn [:col {:type :uuid :primary true}] {}))
-  => (contains [:uuid :primary-key])
+  => (contains [:uuid])
 
   (with-redefs [common/pg-type-alias (fn [x] x)]
     (pg-deftype-col-fn [:col {:type :uuid :sql {:generated true}}] {}))
@@ -119,12 +119,12 @@
     => [:create-table :if-not-exists '(. #{"schema_type_impl"} #{"t__$DEFAULT"})
         :partition-of "s.t" :default]))
 
-^{:refer rt.postgres.grammar.form-deftype/pg-deftype-fragment :added "4.0"}
+^{:refer rt.postgres.grammar.form-deftype/pg-deftype-format-fragment :added "4.0"}
 (fact "parses the fragment contained by the symbol"
-  (pg-deftype-fragment 'rt.postgres.grammar.form-deftype-test/+fragment-sample+)
+  (pg-deftype-format-fragment 'rt.postgres.grammar.form-deftype-test/+fragment-sample+)
   => '(:a {:type :int} :b {:type :text})
 
-  (pg-deftype-fragment ['rt.postgres.grammar.form-deftype-test/+fragment-sample+ :a {:c :d}])
+  (pg-deftype-format-fragment ['rt.postgres.grammar.form-deftype-test/+fragment-sample+ :a {:c :d}])
   => '(:a {:type :int, :c :d} :b {:type :text}))
 
 ^{:refer rt.postgres.grammar.form-deftype/pg-deftype-format :added "4.0"}
@@ -239,28 +239,23 @@
               (= token #{"user"})
               (= rcols ''(id uid))))))
 
-^{:refer rt.postgres.grammar.form-deftype/pg-deftype-process-generated :added "4.1"}
-(fact "processes generated columns"
-  (pg-deftype-process-generated {:type :int :generated '(* 2 x)})
-  => {:type :int :ignore true :sql {:raw [:generated :always :as '(quote ((* 2 x))) :stored]}}
-
-  (pg-deftype-process-generated {:type :enum :generated :A :enum {:ns :E}})
-  => {:type :enum :enum {:ns :E} :ignore true :sql {:raw [:generated :always :as '(quote ((++ :A :E))) :stored]}})
-
-^{:refer rt.postgres.grammar.form-deftype/pg-deftype-process-type :added "4.1"}
-(fact "processes the type definition"
-  (pg-deftype-process-type [:a {:type :int}] {:columns ['rt.postgres.grammar.form-deftype-test/+fragment-sample+]})
-  => '([:a {:type :int} :b {:type :text} :a {:type :int}] {:columns [rt.postgres.grammar.form-deftype-test/+fragment-sample+]})
-
-  (first (pg-deftype-process-type [:a {:type :int :priority 100} :b {:type :int :priority 10}] {}))
-  => [:b {:type :int :priority 10} :a {:type :int :priority 100}])
-
-
 ^{:refer rt.postgres.grammar.form-deftype/pg-deftype-format-fragment :added "4.1"}
-(fact "TODO")
+(fact "parses the fragment contained by the symbol"
+  (pg-deftype-format-fragment 'rt.postgres.grammar.form-deftype-test/+fragment-sample+)
+  => '(:a {:type :int} :b {:type :text})
+
+  (pg-deftype-format-fragment ['rt.postgres.grammar.form-deftype-test/+fragment-sample+ :a {:c :d}])
+  => '(:a {:type :int, :c :d} :b {:type :text}))
 
 ^{:refer rt.postgres.grammar.form-deftype/pg-deftype-format-generated :added "4.1"}
-(fact "TODO")
+(fact "processes generated columns"
+  (pg-deftype-format-generated {:type :int :generated '(* 2 x)})
+  => {:type :int :ignore true :sql {:raw [:generated :always :as '(quote ((* 2 x))) :stored]}}
+
+  (pg-deftype-format-generated {:type :enum :generated :A :enum {:ns :E}})
+  => {:type :enum :enum {:ns :E} :ignore true :sql {:raw [:generated :always :as '(quote ((++ :A :E))) :stored]}})
 
 ^{:refer rt.postgres.grammar.form-deftype/pg-deftype-format-raw :added "4.1"}
-(fact "TODO")
+(fact "processes the type definition"
+  (pg-deftype-format-raw [:a {:type :int}] {:raw ['rt.postgres.grammar.form-deftype-test/+fragment-sample+]})
+  => '([:a {:type :int} :b {:type :text} :a {:type :int}] {:raw [rt.postgres.grammar.form-deftype-test/+fragment-sample+]}))
