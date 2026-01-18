@@ -391,6 +391,58 @@
                   body)))))
 
 ;;
+;; defpublication
+;;
+
+(defn pg-publication-format
+  "formats publication"
+  {:added "4.0"}
+  ([form]
+   (let [[mdefn [op sym args body]] (grammar-spec/format-defn form)]
+     [(merge mdefn (meta sym))
+      (list op (with-meta sym (meta sym)) (:doc mdefn) args body)])))
+
+(defn pg-defpublication
+  "defpublication block"
+  {:added "4.0"}
+  [[_ sym doc? attr? args body :as form]]
+  (let [[{:keys [doc] :as mdefn} [_ sym args body]] (grammar-spec/format-defn form)]
+    (list 'do
+          [:drop-publication-if-exists sym]
+          (vec (concat [:create-publication sym]
+                       (cond (or (empty? args)
+                                 (= args [:all]))
+                             [:for :all :tables]
+
+                             :else
+                             [:for :table (list 'quote args)])
+                       body)))))
+
+;;
+;; defsubscription
+;;
+
+(defn pg-subscription-format
+  "formats subscription"
+  {:added "4.0"}
+  ([form]
+   (let [[mdefn [op sym args body]] (grammar-spec/format-defn form)]
+     [(merge mdefn (meta sym))
+      (list op (with-meta sym (meta sym)) (:doc mdefn) args body)])))
+
+(defn pg-defsubscription
+  "defsubscription block"
+  {:added "4.0"}
+  [[_ sym doc? attr? [conn pub] body :as form]]
+  (let [[{:keys [doc] :as mdefn} [_ sym [conn pub] body]] (grammar-spec/format-defn form)]
+    (list 'do
+          [:drop-subscription-if-exists sym]
+          (vec (concat [:create-subscription sym
+                        :connection conn
+                        :publication pub]
+                       body)))))
+
+;;
 ;; deftrigger
 ;;
 

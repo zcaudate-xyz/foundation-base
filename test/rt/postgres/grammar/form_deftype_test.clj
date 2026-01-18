@@ -254,3 +254,13 @@
 
   (first (pg-deftype-process-type [:a {:type :int :priority 100} :b {:type :int :priority 10}] {}))
   => [:b {:type :int :priority 10} :a {:type :int :priority 100}])
+
+
+^{:refer rt.postgres.grammar.form-deftype/pg-deftype-format-fragment :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.postgres.grammar.form-deftype/pg-deftype-format-generated :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.postgres.grammar.form-deftype/pg-deftype-format-raw :added "4.1"}
+(fact "TODO")

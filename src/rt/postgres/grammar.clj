@@ -139,6 +139,18 @@
                      :hydrate      #'common/pg-hydrate
                      :macro        #'common/pg-defpolicy
                      :static/dbtype :policy}
+        :defpublication {:op :defpublication :symbol '#{defpublication}
+                         :type :def :section :code :emit :macro
+                         :format       #'common/pg-publication-format
+                         :hydrate      #'common/pg-hydrate
+                         :macro        #'common/pg-defpublication
+                         :static/dbtype :publication}
+        :defsubscription {:op :defsubscription :symbol '#{defsubscription}
+                          :type :def :section :code :emit :macro
+                          :format       #'common/pg-subscription-format
+                          :hydrate      #'common/pg-hydrate
+                          :macro        #'common/pg-defsubscription
+                          :static/dbtype :subscription}
         :deftrigger  {:op :deftrigger :symbol '#{deftrigger}
                       :type :def :section :code :emit :macro
                       :format       #'common/pg-format

@@ -243,3 +243,18 @@
 
 ^{:refer rt.postgres.grammar.common/pg-deftype-ref-name :added "4.1"}
 (fact "TODO")
+
+^{:refer rt.postgres.grammar.common/block-while-block :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.postgres.grammar.common/pg-publication-format :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.postgres.grammar.common/pg-defpublication :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.postgres.grammar.common/pg-subscription-format :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.postgres.grammar.common/pg-defsubscription :added "4.1"}
+(fact "TODO")
