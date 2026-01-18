@@ -132,10 +132,12 @@
   "creates a thunk form"
   {:added "3.0"}
   ([{:keys [full] :as fpkg}]
-   (let [meta (into {} (dissoc fpkg :setup :teardown :let :use))]
+   (let [meta (into {} (dissoc fpkg :setup :teardown :let :use :full))]
      `(fn []
-        (process/run-check (quote ~meta)
-                           (quote ~full))))))
+        (let [fpkg# (rt/get-fact (quote ~(:ns meta)) (quote ~(:id meta)))
+              full# (:full fpkg#)]
+          (process/run-check (quote ~meta)
+                             full#))))))
 
 (defn create-fact
   "creates a fact given meta and body"
