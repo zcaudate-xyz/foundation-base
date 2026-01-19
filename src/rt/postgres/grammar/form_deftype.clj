@@ -101,7 +101,6 @@
             [(common/pg-type-alias type)]])
          col-attrs (cond-> col-attrs
                      (= type :enum) (pg-deftype-enum-col enum mopts)
-                     (true? primary)  (conj :primary-key)
                      required (conj :not-null)
                      unique   (conj :unique)
                      (and (= type :ref)
