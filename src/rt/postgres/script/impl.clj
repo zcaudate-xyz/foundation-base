@@ -16,7 +16,9 @@
   t:select
   "flat select"
   {:added "4.0"}
-  ([spec-sym & [{:keys [where returning into as args single order-by limit] :as params
+  ([spec-sym & [{:keys [where returning into as args single order-by limit]
+                 for-lock :for
+                 :as params
                  :or {as :json}}]]
    (main/t-select spec-sym params)))
 
@@ -25,7 +27,9 @@
   t:get-field
   "gets single field"
   {:added "4.0"}
-  ([spec-sym & [{:keys [where returning into as args order-by] :as params
+  ([spec-sym & [{:keys [where returning into as args order-by]
+                 for-lock :for
+                 :as params
                  :or {as :json}}]]
    (or where (h/error "No WHERE clause" params))
    (-> (main/t-select spec-sym (merge {:single true
@@ -38,7 +42,9 @@
   t:get
   "get single entry"
   {:added "4.0"}
-  ([spec-sym & [{:keys [where returning into as args order-by] :as params
+  ([spec-sym & [{:keys [where returning into as args order-by]
+                 for-lock :for
+                 :as params
                  :or {as :json}}]]
    (or where (h/error "No WHERE clause" params))
    (-> (main/t-select spec-sym (merge {:single true} params))
@@ -49,7 +55,9 @@
   t:id
   "get id entry"
   {:added "4.0"}
-  ([spec-sym & [{:keys [where returning into as args single order-by limit] :as params
+  ([spec-sym & [{:keys [where returning into as args single order-by limit]
+                 for-lock :for
+                 :as params
                  :or {as :json}}]]
    (or where (h/error "No WHERE clause" params))
    (main/t-id spec-sym params)))
@@ -60,7 +68,9 @@
   t:count
   "get count entry"
   {:added "4.0"}
-  ([spec-sym & [{:keys [where returning into as args single order-by limit] :as params
+  ([spec-sym & [{:keys [where returning into as args single order-by limit]
+                 for-lock :for
+                 :as params
                  :or {as :json}}]]
    (main/t-count spec-sym params)))
 
@@ -70,7 +80,9 @@
   t:exists
   "TODO"
   {:added "4.0"}
-  ([spec-sym & [{:keys [where returning into as args single order-by limit] :as params
+  ([spec-sym & [{:keys [where returning into as args single order-by limit]
+                 for-lock :for
+                 :as params
                  :or {as :json}}]]
    (main/t-exists spec-sym params)))
 

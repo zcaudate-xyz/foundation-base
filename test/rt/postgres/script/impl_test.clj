@@ -68,7 +68,17 @@
      :where #{[:name "002"
                :or
                :name "001"]}})
-  => vector?)
+  => vector?
+  
+  (l/with:emit
+    (l/emit-as :postgres
+               `[(pg/t:select scratch/Task {:for [:update]})]))
+  => "WITH j_ret AS (  \n  SELECT \"id\",\"status\",\"name\",\"cache_id\",\"time_created\",\"time_updated\" FROM \"scratch\".\"Task\"\n  FOR UPDATE)\nSELECT jsonb_agg(j_ret) FROM j_ret"
+  
+  (l/with:emit
+    (l/emit-as :postgres
+               `[(pg/t:select scratch/Task {:for [:update :skip-locked]})]))
+  => "WITH j_ret AS (  \n  SELECT \"id\",\"status\",\"name\",\"cache_id\",\"time_created\",\"time_updated\" FROM \"scratch\".\"Task\"\n  FOR UPDATE SKIP LOCKED)\nSELECT jsonb_agg(j_ret) FROM j_ret")
 
 ^{:refer rt.postgres.script.impl/t:get-field :added "4.0"}
 (fact "gets single field"

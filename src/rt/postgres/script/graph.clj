@@ -26,7 +26,9 @@
   g:id
   "gets only id"
   {:added "4.0"}
-  ([spec-sym & [{:keys [where returning into as args single order-by limit] :as params
+  ([spec-sym & [{:keys [where returning into as args single order-by limit]
+                 for-lock :for
+                 :as params
                  :or {as :json}}]]
    (or where (h/error "No WHERE clause" params))
    (base/id-fn spec-sym params)))
@@ -36,7 +38,9 @@
   g:count
   "gets only count"
   {:added "4.0"}
-  ([spec-sym & [{:keys [where returning into as args single order-by limit] :as params
+  ([spec-sym & [{:keys [where returning into as args single order-by limit]
+                 for-lock :for
+                 :as params
                  :or {as :json}}]]
    (base/count-fn spec-sym params)))
 
@@ -45,7 +49,9 @@
   g:exists
   "TODO"
   {:added "4.0"}
-  ([spec-sym & [{:keys [where returning into as args single order-by limit] :as params
+  ([spec-sym & [{:keys [where returning into as args single order-by limit]
+                 for-lock :for
+                 :as params
              :or {as :json}}]]
    (base/exists-fn spec-sym params)))
 
@@ -54,7 +60,9 @@
   g:select
   "returns matching entries"
   {:added "4.0"}
-  ([spec-sym & [{:keys [where returning into as args single order-by limit] :as params
+  ([spec-sym & [{:keys [where returning into as args single order-by limit]
+                 for-lock :for
+                 :as params
                  :or {as :json}}]]
    (base/select-fn spec-sym params)))
 
@@ -63,7 +71,9 @@
   g:get
   "gets a single entry"
   {:added "4.0"}
-  ([spec-sym & [{:keys [where returning into as args single order-by limit] :as params
+  ([spec-sym & [{:keys [where returning into as args single order-by limit]
+                 for-lock :for
+                 :as params
                  :or {as :json}}]]
    (or where (h/error "No WHERE clause" params))
    (-> (base/select-fn spec-sym (merge {:single true} params))
@@ -109,7 +119,9 @@
   q
   "constructs a query form"
   {:added "4.0"}
-  ([spec-sym & [{:keys [where returning into as args single order-by limit] :as params
+  ([spec-sym & [{:keys [where returning into as args single order-by limit]
+                 for-lock :for
+                 :as params
                  :or {as :json}}]]
    (query/query-fn spec-sym params)))
 
@@ -118,7 +130,9 @@
   q:get
   "constructs a single query form"
   {:added "4.0"}
-  ([spec-sym & [{:keys [where returning into as args order-by limit] :as params
+  ([spec-sym & [{:keys [where returning into as args order-by limit]
+                 for-lock :for
+                 :as params
                  :or {as :json}}]]
    (-> (query/query-fn spec-sym (merge params {:single true}))
        (with-meta {:op/type :get}))))

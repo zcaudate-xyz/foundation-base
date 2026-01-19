@@ -523,4 +523,30 @@
      args (concat args)
      :then vec)))
 
+(defn t-wrap-lock
+  "adds a `lock` clause"
+  {:added "4.0"}
+  ([form lock {:keys [newline]}]
+   (if-not lock
+     form
+     (let [_ (if (not (vector? lock))
+               (h/error "Lock must be a vector" {:input lock}))
+           modes {:update [:for :update]
+                  :share  [:for :share]
+                  :key-share [:for :key :share]
+                  :no-key-update [:for :no :key :update]}
+           options {:skip-locked [:skip :locked]
+                    :nowait      [:nowait]}
+           
+           [mode option] lock
+           
+           clause (or (modes mode)
+                      (h/error "Invalid lock mode" {:input mode :allowed (keys modes)}))
+           
+           clause (cond-> clause
+                    (options option) (into (options option)))]
+       (cond-> form
+         newline (conj \\)
+         clause  (into clause))))))
+
 

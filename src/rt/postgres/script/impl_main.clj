@@ -17,6 +17,7 @@
   ([[entry tsch mopts]
     {:keys [join where where-args having returning into field
             as args single order-by order-sort group-by limit offset key-fn]
+     for-lock :for
      :as params
      :or {as :json}}]
    (let [table-sym (if base/*skip-checks*
@@ -48,6 +49,7 @@
          (base/t-wrap-order-sort order-sort tsch {})
          (base/t-wrap-limit limit {:newline true})
          (base/t-wrap-offset offset {})
+         (base/t-wrap-lock for-lock {:newline true})
          (base/t-wrap-args args {})
          (base/t-wrap-json as js-out into field)
          (base/t-wrap-into into {})
