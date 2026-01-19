@@ -13,9 +13,7 @@
             [std.lib :as h]))
 
 ;;
-
 ;; deftype
-
 ;;
 
 
@@ -103,7 +101,7 @@
             [(common/pg-type-alias type)]])
          col-attrs (cond-> col-attrs
                      (= type :enum) (pg-deftype-enum-col enum mopts)
-                     primary  (conj :primary-key)
+                     (true? primary)  (conj :primary-key)
                      required (conj :not-null)
                      unique   (conj :unique)
                      (and (= type :ref)
