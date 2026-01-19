@@ -103,6 +103,7 @@
             [(common/pg-type-alias type)]])
          col-attrs (cond-> col-attrs
                      (= type :enum) (pg-deftype-enum-col enum mopts)
+                     primary  (conj :primary-key)
                      required (conj :not-null)
                      unique   (conj :unique)
                      (and (= type :ref)
@@ -338,11 +339,13 @@
                                     part-token (if in
                                                  (list '. #{in} #{part-name})
                                                  #{part-name})]
-                                [:create-table :if-not-exists part-token
+                                [(if (:unlogged params) :create-unlogged-table :create-table)
+                                 :if-not-exists part-token
                                  :partition-of ttok :default]))]
      (if (not existing)
        `(do ~@(if-not final [[:drop-table :if-exists ttok :cascade]] [])
-            [:create-table :if-not-exists ~ttok \(
+            [~(if (:unlogged params) :create-unlogged-table :create-table)
+             :if-not-exists ~ttok \(
              \\ (\|  ~(vec (interpose
                             (list :- ",\n")
                             (concat cols

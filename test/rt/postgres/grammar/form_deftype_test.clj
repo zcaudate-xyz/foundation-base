@@ -107,6 +107,11 @@
     (pg-deftype '(deftype ^{:static/schema "s"} t [] {})))
   => '(do [:drop-table :if-exists "s.t" :cascade] [:create-table :if-not-exists "s.t" \( \\ (\| []) \\ \)])
 
+  (fact "pg-deftype supports unlogged option"
+    (with-redefs [common/pg-full-token (fn [s sch] (str sch "." s))]
+      (pg-deftype '(deftype ^{:static/schema "s"} t [] {:unlogged true})))
+    => '(do [:drop-table :if-exists "s.t" :cascade] [:create-unlogged-table :if-not-exists "s.t" \( \\ (\| []) \\ \)]))
+
   (fact "pg-deftype renders partition logic"
     (with-redefs [common/pg-full-token (fn [s sch] (str sch "." s))]
       (let [form '(deftype ^{:static/schema "s"} t
