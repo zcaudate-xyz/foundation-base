@@ -242,19 +242,36 @@
 
 
 ^{:refer rt.postgres.grammar.common/pg-deftype-ref-name :added "4.1"}
-(fact "TODO")
+(fact "gets the ref name"
+  (common/pg-deftype-ref-name :user {:raw "user_id"})
+  => "user_id"
+
+  (common/pg-deftype-ref-name :user {})
+  => "user_id")
 
 ^{:refer rt.postgres.grammar.common/block-while-block :added "4.1"}
-(fact "TODO")
+(fact "emits while block"
+  (common/block-while-block '(= 1 1) '(do-something))
+  => '[:while (= 1 1) :loop \\ (\| (do (do-something))) \\ :end-loop \;])
 
 ^{:refer rt.postgres.grammar.common/pg-publication-format :added "4.1"}
-(fact "TODO")
+(fact "formats publication"
+  (common/pg-publication-format '(defpublication pub [:all]))
+  => vector?)
 
 ^{:refer rt.postgres.grammar.common/pg-defpublication :added "4.1"}
-(fact "TODO")
+(fact "defpublication block"
+  (common/pg-defpublication '(defpublication pub [:all]))
+  => '(do [:drop-publication-if-exists pub]
+          [:create-publication pub :for :all :tables]))
 
 ^{:refer rt.postgres.grammar.common/pg-subscription-format :added "4.1"}
-(fact "TODO")
+(fact "formats subscription"
+  (common/pg-subscription-format '(defsubscription sub [conn pub] {}))
+  => vector?)
 
 ^{:refer rt.postgres.grammar.common/pg-defsubscription :added "4.1"}
-(fact "TODO")
+(fact "defsubscription block"
+  (common/pg-defsubscription '(defsubscription sub ["conn" "pub"] {}))
+  => '(do [:drop-subscription-if-exists sub]
+          [:create-subscription sub :connection "conn" :publication "pub"]))
