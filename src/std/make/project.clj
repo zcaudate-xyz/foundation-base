@@ -97,10 +97,11 @@
    (build-triggered (h/ns-sym)))
   ([ns]
    (let [mcfgs (common/get-triggered ns)]
-     (mapv (juxt (fn [{:keys [instance]}]
-                   (:id @instance))
-                 build-default) mcfgs)
-     #_(compile/with:compile-filter #{ns} (mapv build-default mcfgs)))))
+     (compile/with:compile-filter
+      #{ns}
+      (mapv (juxt (fn [{:keys [instance]}]
+                    (:id @instance))
+                  build-default) mcfgs)))))
 
 (defn file-watcher-heal
   [path ns]
@@ -112,7 +113,7 @@
 
 (defn file-watcher-handler
   "handler for file changes"
-  [path _]
+  [path & [{:keys [prehooks]}]]
   (let [path-str (str path)]
     (when (and (or (str/ends-with? path-str ".clj")
                    (str/ends-with? path-str ".cljc"))
@@ -122,9 +123,9 @@
           (try
             (h/p "\n\nNamespace:" ns)
             (file-watcher-heal path ns)
-            (std.lang/rt:module-purge
-             (std.lang/rt:list ns))
-            (jvm.namespace.common/ns-clear ns)
+            (h/map-vals (fn [f]
+                          (f ns))
+                        prehooks)
             (require ns :reload)
             (let [results (build-triggered ns)
                   files   (changed-files results)]
@@ -136,16 +137,14 @@
 
 (defn watch
   "starts watching a directory"
-  ([path]
+  ([path & [{:keys [prehooks]}]]
    (h/prn "Starting build watcher on:" path)
    (let [cb (fn [type file]
               (when (or (= type :modify)
                         (= type :create))
-                (#'file-watcher-handler (.getPath file) nil)))]
+                (#'file-watcher-handler (.getPath file) {:prehooks prehooks})))]
      (watch/start-watcher (watch/watcher path cb {:recursive true
                                                   :types :all})))))
-
-
 
 (defn watch-project
   "watches a project"
