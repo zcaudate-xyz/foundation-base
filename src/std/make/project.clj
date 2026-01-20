@@ -69,10 +69,11 @@
         curr (if cvar
                (if (common/make-config? @cvar)
                  @cvar))
+        cfg  (assoc cfg :id (symbol (name (.getName *ns*)) (name sym)))
         out  (if curr
                (do (common/make-config-update curr cfg)
                    curr)
-               (common/make-config (assoc cfg :id (symbol (name (.getName *ns*)) (name sym)))))
+               (common/make-config cfg))
         cvar (if (not curr)
                (intern *ns* sym out)
                cvar)
@@ -96,15 +97,17 @@
    (build-triggered (h/ns-sym)))
   ([ns]
    (let [mcfgs (common/get-triggered ns)]
-     (compile/with:compile-filter #{ns}
-                                  (mapv build-default mcfgs)))))
+     (mapv (juxt (fn [{:keys [instance]}]
+                   (:id @instance))
+                 build-default) mcfgs)
+     #_(compile/with:compile-filter #{ns} (mapv build-default mcfgs)))))
 
 (defn file-watcher-heal
   [path ns]
   (let [content (slurp path)
         healed  (block/heal content)]
     (when (not= content healed)
-      (h/p "\nHealed:" ns)
+      (h/p "Healed:" ns)
       (spit path healed))))
 
 (defn file-watcher-handler
@@ -117,13 +120,16 @@
       (let [ns (fs/file-namespace path-str)]
         (when ns
           (try
-            (h/p "\nChange:" ns)
+            (h/p "\n\nNamespace:" ns)
             (file-watcher-heal path ns)
+            (std.lang/rt:module-purge
+             (std.lang/rt:list ns))
+            (jvm.namespace.common/ns-clear ns)
             (require ns :reload)
             (let [results (build-triggered ns)
                   files   (changed-files results)]
               (when (seq files)
-                (h/p "Compiled:" files)))
+                (h/p "Changed:" files)))
             (catch Throwable t
               (h/p "Build failed for:" ns)
               (h/p (.getMessage t)))))))))

@@ -94,9 +94,9 @@
   ([{:keys [instance]}]
    (let [{:keys [sections
                  triggers] :as m} @instance]
-     (str "#make.config " (assoc (select-keys m [:id :container :build :root :params])
-                                 :sections (conj (keys sections) :default)
-                                 :triggers (keys triggers))))))
+     (str "#make.config " (-> (select-keys m [:id :tag :container :build :root :params])
+                              (assoc :sections (conj (keys sections) :default)
+                                     :triggers triggers))))))
 
 (defimpl MakeConfig [instance]
   :final true
