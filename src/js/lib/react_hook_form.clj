@@ -84,8 +84,8 @@
   
   (return (Object.assign {} msetters state)))
 
-(defn.js contextMerge
-  [& contexts]
+(defn.js mergeContexts
+  [...contexts]
   (return
    (. contexts
       (reduce
