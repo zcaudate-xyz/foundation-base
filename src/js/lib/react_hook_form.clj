@@ -90,22 +90,21 @@
    (. contexts
       (reduce
        (fn [acc ctx]
-         (var next
-              {:api (k/obj-assign {}
-                                  acc.api
-                                  ctx.api
-                                  {:mutations (k/obj-assign {}
-                                                            (and acc.api acc.api.mutations)
-                                                            (and ctx.api ctx.api.mutations))
-                                   :queries   (k/obj-assign {}
-                                                            (and acc.api acc.api.queries)
-                                                            (and ctx.api ctx.api.queries))})
-               :forms (k/obj-assign {}
-                                    acc.forms
-                                    ctx.forms)
-               :controls (k/obj-assign {}
-                                       acc.controls
-                                       ctx.controls)})
-         (return (k/obj-assign {} acc ctx next)))
+         (var next {:api (Object.assign {}
+                                        acc.api
+                                        ctx.api
+                                        {:mutations (Object.assign {}
+                                                                   (and acc.api acc.api.mutations)
+                                                                   (and ctx.api ctx.api.mutations))
+                                         :queries   (Object.assign {}
+                                                                   (and acc.api acc.api.queries)
+                                                                   (and ctx.api ctx.api.queries))})
+                    :forms (Object.assign {}
+                                          acc.forms
+                                          ctx.forms)
+                    :controls (Object.assign {}
+                                             acc.controls
+                                             ctx.controls)})
+         (return (Object.assign {} acc ctx next)))
        {}))))
 
