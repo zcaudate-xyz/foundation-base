@@ -1,6 +1,8 @@
 (ns std.block.heal.parse
   (:require [std.lib :as h]
-            [std.string :as str]))
+            [std.string :as str])
+  (:import [java.io StringReader]
+           [clojure.lang LineNumberingPushbackReader]))
 
 (def lu-close
   {"(" ")"
@@ -24,60 +26,117 @@
 
 ;; PARSE
 
+(defn find-offset [s end-line end-col]
+  (loop [chars (seq s)
+         l 1
+         c 1
+         idx 0]
+    (cond (and (= l end-line) (= c end-col))
+          idx
+
+          (not (seq chars))
+          idx ;; EOF reached
+
+          :else
+          (let [ch (first chars)]
+             (if (= ch \newline)
+               (recur (rest chars) (inc l) 1 (inc idx))
+               (recur (rest chars) l (inc c) (inc idx)))))))
+
+(defn skip-next-form-length [^String content idx]
+  (let [start-skip-idx (+ idx 2)
+        remaining-str (subs content start-skip-idx)
+        pbr (LineNumberingPushbackReader. (StringReader. remaining-str))]
+    (try
+      (read pbr)
+      (let [end-line (.getLineNumber pbr)
+            end-col  (.getColumnNumber pbr)]
+        (find-offset remaining-str end-line end-col))
+      (catch Throwable _
+        ;; On error (e.g. unmatched delimiter), use the position where the reader stopped
+        (let [end-line (.getLineNumber pbr)
+              end-col  (.getColumnNumber pbr)]
+          (find-offset remaining-str end-line end-col))))))
+
+(defn count-lines-cols [s start-line start-col]
+  (loop [chars (seq s)
+         l (long start-line)
+         c (long start-col)]
+    (if-not (seq chars)
+      [l c]
+      (let [ch (first chars)]
+        (if (= ch \newline)
+          (recur (rest chars) (inc l) 1)
+          (recur (rest chars) l (inc c)))))))
+
 (defn parse-delimiters
   "gets all the delimiters in the file"
   {:added "4.0"}
-  [content]
-  (loop [chars (seq content)
-         line-num 1
-         col-num 1
-         in-comment? false
-         in-string? false
-         escaped? false
-         delimiters []]
-    (if-not (seq chars)
-      delimiters
-      (let [char (first chars)
-            rest-chars (rest chars)]
-        (cond (= char \newline)
-              (recur rest-chars (inc line-num) 1 false in-string? false delimiters)
+  [^String content]
+  (let [len (count content)]
+    (loop [idx (long 0)
+           line-num (long 1)
+           col-num (long 1)
+           in-comment? false
+           in-string? false
+           escaped? false
+           delimiters []]
+      (if (>= idx len)
+        delimiters
+        (let [char (.charAt content idx)]
+          (cond (= char \newline)
+                (recur (inc idx) (inc line-num) 1 false in-string? false delimiters)
 
-              ;; Previous character was an escape character
-              escaped?
-              (recur rest-chars line-num (inc col-num) in-comment? in-string? false delimiters)
+                ;; Previous character was an escape character
+                escaped?
+                (recur (inc idx) line-num (inc col-num) in-comment? in-string? false delimiters)
 
-              ;; Current character is an escape character
-              (= char \\)
-              (recur rest-chars line-num (inc col-num) in-comment? in-string? true delimiters)
+                ;; Current character is an escape character
+                (= char \\)
+                (recur (inc idx) line-num (inc col-num) in-comment? in-string? true delimiters)
 
-              ;; Inside a single-line comment
-              in-comment?
-              (recur rest-chars line-num (inc col-num) true in-string? false delimiters)
+                ;; Inside a single-line comment
+                in-comment?
+                (recur (inc idx) line-num (inc col-num) true in-string? false delimiters)
 
-              ;; Inside a string
-              in-string?
-              (cond (= char \")
-                    (recur rest-chars line-num (inc col-num) false false false delimiters)
+                ;; Inside a string
+                in-string?
+                (cond (= char \")
+                      (recur (inc idx) line-num (inc col-num) false false false delimiters)
 
-                    :else
-                    (recur rest-chars line-num (inc col-num) false true false delimiters))
-
-              ;; Not in a comment or string
-              :else
-              (let [info (delimiter-info char)]
-                (cond (= char \;)
-                      (recur rest-chars line-num (inc col-num) true false false delimiters)
-
-                      (= char \")
-                      (recur rest-chars line-num (inc col-num) false true false delimiters)
-
-                      info
-                      (recur rest-chars line-num (inc col-num) false false false
-                             (conj delimiters (merge {:char (str char)
-                                                      :line line-num
-                                                      :col col-num} info)))
                       :else
-                      (recur rest-chars line-num (inc col-num) false false false delimiters))))))))
+                      (recur (inc idx) line-num (inc col-num) false true false delimiters))
+
+                ;; Not in a comment or string
+                :else
+                (let [info (delimiter-info char)]
+                  (cond (= char \;)
+                        (recur (inc idx) line-num (inc col-num) true false false delimiters)
+
+                        (= char \")
+                        (recur (inc idx) line-num (inc col-num) false true false delimiters)
+
+                        ;; Handle #_ reader discard
+                        (and (= char \#)
+                             (< (inc idx) len)
+                             (= (.charAt content (inc idx)) \_))
+                        (let [skipped-len (skip-next-form-length content idx)]
+                          (if skipped-len
+                            (let [start-skip-idx (+ idx 2)
+                                  skipped-str (subs content start-skip-idx (+ start-skip-idx (long skipped-len)))
+                                  [new-line new-col] (count-lines-cols skipped-str line-num (+ col-num 2))]
+                              (recur (+ idx 2 (long skipped-len)) (long new-line) (long new-col) false false false delimiters))
+
+                            ;; Fallback if skipped-len is nil (should not happen with new catch block)
+                            (recur (inc idx) line-num (inc col-num) false false false delimiters)))
+
+                        info
+                        (recur (inc idx) line-num (inc col-num) false false false
+                               (conj delimiters (merge {:char (str char)
+                                                        :line line-num
+                                                        :col col-num} info)))
+                        :else
+                        (recur (inc idx) line-num (inc col-num) false false false delimiters)))))))))
 
 (defn pair-delimiters
   "pairs the delimiters and annotates whether it's erroring"
@@ -297,4 +356,3 @@
   (h/map-juxt [:index
                identity]
               delimiters))
-
