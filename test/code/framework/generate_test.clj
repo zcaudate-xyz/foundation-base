@@ -1,122 +1,44 @@
 (ns code.framework.generate-test
-  (:use code.test)
-  (:require [code.framework.generate :as gen]
-            [std.block :as b]
-            [std.string :as str]))
+  (:require [code.framework.generate :refer :all]
+            [code.test :refer :all]))
 
-(def PUBLIC_QUERY
-  (str/join-lines
-   ["(defn.pg ^{:%% :sql"
-    "           :- :json"
-    "           :api/meta {:sb/grant :all}}"
-    "  hello"
-    "  []"
-    "  (hello-name (szndb.core.fn-util/auth-uid) 1 2 3))"]))
+(fact "get-template"
+  (:params (get-template "(+ 1 ~a)"))
+  => '[(unquote a)]
 
-(def TEMPLATE_QUERY
-  (str/join-lines
-   ["(defn.pg ^{:%% :sql"
-    "           :- ~return"
-    "           :api/meta ~meta-entry}"
-    "  ~sym"
-    "  []"
-    "  (~name (szndb.core.fn-util/auth-uid) ~@hello))"]))
+  (:params (get-template "(+ 1 ~@a)"))
+  => '[(unquote-splicing a)])
 
-^{:refer code.framework.generate/get-template-params :added "4.0"}
-(fact "gets the template params in the query"
-  ^:hidden
-  
-  (gen/get-template-params
-   (b/parse-first TEMPLATE_QUERY))
-  => '((unquote return)
-       (unquote meta-entry)
-       (unquote sym)
-       (unquote name)
-       (unquote-splicing hello)))
+(fact "fill-template"
+  (fill-template (get-template "(+ 1 ~a)")
+                 {'a 2})
+  => "(+ 1 2)"
 
-^{:refer code.framework.generate/get-template :added "4.0"}
-(fact "gets the template"
+  (fill-template (get-template "(+ 1 ~@a)")
+                 {'a [2 3]})
+  => "(+ 1 2 3)")
 
-  (gen/get-template TEMPLATE_QUERY)
-  => map?)
+(def Audit
+  '(deftype.pg ^{:track {:key :audit}} Audit
+     [:class-table {:type :text}
+      :class-context {:type :text}
+      :class-ref {:type :uuid}]
+     {:partition-by {:strategy :list :columns [:class-table] :default {:in "szn_type_impl"}}}))
 
-^{:refer code.framework.generate/fill-template :added "4.0"}
-(fact "fills out the template"
-  ^:hidden
-  
-  (str/split-lines
-   (gen/fill-template
-    (gen/get-template TEMPLATE_QUERY)
-    '{return :json
-      meta-entry {:sb/grant :all}
-      sym hello
-      name hello-name
-      hello (1 2 3)}))
-  => ["(defn.pg ^{:%% :sql"
-      "           :- :json"
-      "           :api/meta {:sb/grant :all}}"
-      "  hello"
-      "  []"
-      "  (hello-name (szndb.core.fn-util/auth-uid) 1 2 3))"])
+(fact "create-insert"
+  (create-insert '-/Audit)
+  => '(defn.pg ^{:%% :sql} create-audit "Creates a new audit entry to record system events or changes." {:added "0.1"}
+        [:text i-class_table :text i-class_context :uuid i-class_ref :jsonb o-op]
+        (rt.postgres.script.impl/t:insert -/Audit {:class-table i-class_table :class-context i-class_context :class-ref i-class_ref} {:track o-op})))
 
+(fact "create-update"
+  (create-update '-/Audit)
+  => '(defn.pg ^{:%% :sql} create-audit-update "Updates the audit entry." {:added "0.1"}
+        [:uuid id :text i-class_table :text i-class_context :uuid i-class_ref :jsonb o-op]
+        (rt.postgres.script.impl/t:update -/Audit (clojure.core/merge {:set {:class-table i-class_table :class-context i-class_context :class-ref i-class_ref} :where {:id id}} {:track o-op}))))
 
-(comment
-  (-> (nav/parse-first
-       PUBLIC_QUERY)
-      (nav/find-next-token (list 'unquote 'name))
-      (nav/replace 'hello-world)
-      zip/step-outside-most
-      zip/step-inside
-      (nav/string))
-  
-  (-> (nav/parse-first
-       PUBLIC_QUERY)
-      (nav/find-next-token 'unquote)
-      )
-
-
-  (comment
-    (->> (nav/parse-first PUBLIC_QUERY)
-         (iterate (fn [nav]
-                    (nav/find-next nav
-                                   (fn [block]
-                                     (= :unquote (:tag (std.block/info block)))))))
-         (drop 1)
-         (take-while identity)
-         (map (comp nav/value nav/down))))
-  
-  
-  
-  (-> (nav/parse-first
-       PUBLIC_QUERY)
-      (nav/find-next (fn [block]
-                       (= :unquote (:tag (std.block/info block)))))
-      (nav/find-next (fn [block]
-                       (= :unquote (:tag (std.block/info block)))))
-      (nav/find-next (fn [block]
-                       (= :unquote (:tag (std.block/info block)))))
-      (nav/find-next (fn [block]
-                       (= :unquote (:tag (std.block/info block)))))
-      (nav/find-next (fn [block]
-                       (= :unquote (:tag (std.block/info block))))))
-
-  (nav/root-string)
-  (nav/parse-string
-   PUBLIC_QUERY)
-
-  (def PUBLIC_QUERY
-    "
-(defn.pg ^{:%% :sql
-           :- ~return
-           :api/meta ~meta-entry}
-  ~sym 
-  [] 
-  (~name (szndb.core.fn-util/auth-uid)))")
-
-
-
-
-  (second
-   (b/children
-    (b/parse-root PUBLIC_QUERY)))
-)
+(fact "create-purge"
+  (create-purge '-/Audit)
+  => '(defn.pg ^{:%% :sql} create-audit-purge "Purges the audit entry." {:added "0.1"}
+        [:uuid id]
+        (rt.postgres.script.impl/t:delete -/Audit {:where {:id id}})))
