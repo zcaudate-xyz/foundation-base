@@ -38,6 +38,113 @@ Tests use the `fact` macro and `=>` arrow assertions:
   => expected-result)
 ```
 
+## code.doc - Documentation System
+
+`code.doc` is the documentation generation system. It generates HTML documentation from Clojure source files.
+
+### Architecture
+
+```
+config/publish.edn          # Main config, lists sites
+config/publish/std.lib.edn  # Site config (pages, theme, output)
+src-doc/documentation/*.clj # Documentation source files
+public/                     # Generated HTML output
+```
+
+### Configuration Files
+
+**Main Config** (`config/publish.edn`):
+```clojure
+{:template {...}
+ :snippets "config/snippets"
+ :sites {:core    [:include "config/publish/foundation.core.edn"]
+         :std.lib [:include "config/publish/std.lib.edn"]}}
+```
+
+**Site Config** (`config/publish/std.lib.edn`):
+```clojure
+{:theme  "bolton"    ; Theme name (bolton/stark)
+ :output "public"    ; Output directory
+ :pages  {page-key   ; Page identifier
+          {:input    "src-doc/documentation/file.clj"
+           :title    "Page Title"
+           :subtitle "Description"}}}
+```
+
+### Documentation Source Syntax
+
+Documentation files are Clojure files in `src-doc/documentation/`:
+
+```clojure
+(ns documentation.my-page
+  (:use code.test))
+
+;; Chapter/Section headers
+[[:chapter {:title "Introduction"}]]
+[[:section {:title "Subsection"}]]
+
+;; Markdown paragraphs (just strings)
+"This is **markdown** text."
+
+;; API documentation - auto-generated from namespace
+[[:api {:namespace "std.lib.collection"}]]
+
+;; API with filters
+[[:api {:namespace "std.lib.collection"
+        :only ["map-keys" "map-vals"]
+        :exclude ["internal-fn"]}]]
+
+;; Code examples (using fact macro)
+(fact "map-keys example"
+  (map-keys inc {0 :a 1 :b})
+  => {1 :a 2 :b})
+
+;; Non-running code examples
+(comment
+  (this-wont-run-but-will-be-displayed))
+
+;; Reference source code
+[[:reference {:refer "std.lib.collection/map-keys"}]]
+
+;; Reference tests
+[[:reference {:refer "std.lib.collection/map-keys" :mode :test}]]
+```
+
+### Generating Documentation
+
+```bash
+# Generate all docs for a site
+lein exec -ep "(use 'code.doc) (publish '[std.lib] {:write true})"
+
+# Generate specific page
+lein exec -ep "(use 'code.doc) (publish '[std.lib/my-page] {:write true})"
+
+# Generate without writing (dry run)
+lein exec -ep "(use 'code.doc) (publish '[std.lib])"
+```
+
+Note: The page key uses the format `[site-key/page-key]` where page-key matches
+the key defined in the site config (with hyphens instead of underscores).
+
+### Available Elements
+
+| Element | Purpose |
+|---------|---------|
+| `[[:chapter {:title "..."}]]` | Top-level section |
+| `[[:section {:title "..."}]]` | Subsection |
+| `[[:subsection {:title "..."}]]` | Lower-level section |
+| `[[:api {:namespace "..."}]]` | Auto-generate API docs |
+| `[[:reference {:refer "ns/fn"}]]` | Include source code |
+| `[[:image {:src "..." :title "..."}]]` | Embed image |
+| `[[:file {:src "..."}]]` | Include another file |
+| `[[:code {:lang "python"} "..."]]` | Code in other languages |
+
+### Page Key Mapping
+
+In config: `:my-page` → In command: `[site/my-page]`
+
+Example: `std-lib-collection` key in config → `[std.lib/std-lib-collection]` in command.
+
 ## Key Project Conventions
 
 ### Namespaces

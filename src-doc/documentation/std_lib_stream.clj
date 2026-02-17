@@ -59,6 +59,4 @@ input types:"
 
 [[:api {:namespace "std.lib.stream"}]]
 
-[[:chapter {:title "xform api" :link "std.lib.stream.xform"}]]
 
-[[:api {:namespace "std.lib.stream.xform"}]] 
