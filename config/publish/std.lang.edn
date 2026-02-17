@@ -39,6 +39,21 @@
              :title "std.lib.foundation"
              :subtitle "basic functionality for foundation"}
             
+            std-lib-collection
+            {:input "src-doc/documentation/std_lib_collection.clj"
+             :title "std.lib.collection"
+             :subtitle "collection utilities"}
+            
+            std-lib-atom
+            {:input "src-doc/documentation/std_lib_atom.clj"
+             :title "std.lib.atom"
+             :subtitle "atom utilities"}
+            
+            std-lib-env
+            {:input "src-doc/documentation/std_lib_env.clj"
+             :title "std.lib.env"
+             :subtitle "environment utilities"}
+            
             #_#_
             std-lib-link
             {:input "src-doc/documentation/std_lib_foundation.clj"

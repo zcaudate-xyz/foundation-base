@@ -1,6 +1,32 @@
 {:theme    "bolton"
  :output   "public"
- :pages    {std-lib-stream
+ :pages    {index
+            {:base  "home.html"
+             :input "src-doc/documentation/main_index.clj"
+             :title "foundation"
+             :subtitle "core libs"}
+            
+            std-lib-stream
             {:input "src-doc/documentation/std_lib_stream.clj"
              :title "std.lib.stream"
-             :subtitle "streams and transducers"}}}
+             :subtitle "streams and transducers"}
+            
+            std-lib-foundation
+            {:input "src-doc/documentation/std_lib_foundation.clj"
+             :title "std.lib.foundation"
+             :subtitle "basic functionality for foundation"}
+            
+            std-lib-collection
+            {:input "src-doc/documentation/std_lib_collection.clj"
+             :title "std.lib.collection"
+             :subtitle "collection utilities"}
+            
+            std-lib-atom
+            {:input "src-doc/documentation/std_lib_atom.clj"
+             :title "std.lib.atom"
+             :subtitle "atom utilities"}
+            
+            std-lib-env
+            {:input "src-doc/documentation/std_lib_env.clj"
+             :title "std.lib.env"
+             :subtitle "environment utilities"}}}

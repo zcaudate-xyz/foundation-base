@@ -95,9 +95,9 @@ The project uses a custom testing framework, `code.test`. **Do not use `clojure.
     lein test :only std.lib.collection-test
     ```
 
-*   **Run tests in a directory:**
+*   **Run tests matching a pattern:**
     ```bash
-    lein test :in std.lib
+    lein test :with std.lib
     ```
 
 ### Project Structure
