@@ -78,18 +78,21 @@
       nil)))
 
 (defn- kind-from-defined-by
-  "Map clj-kondo defined-by to our kind categories"
+  "Map clj-kondo defined-by to our kind categories.
+   Note: clj-kondo returns symbols, not strings!"
   [defined-by]
-  (case defined-by
-    ("clojure.core/defn" "clojure.core/defn-") "function"
-    "clojure.core/def" "var"
-    "clojure.core/defmacro" "macro"
-    "clojure.core/deftype" "type"
-    "clojure.core/defrecord" "type"
-    "clojure.core/defprotocol" "protocol"
-    "clojure.core/defmulti" "multimethod"
-    "clojure.core/defmethod" "method"
-    "var"))  ; default
+  (let [db-str (str defined-by)]  ; Convert symbol to string
+    (case db-str
+      "clojure.core/defn" "function"
+      "clojure.core/defn-" "function"
+      "clojure.core/def" "var"
+      "clojure.core/defmacro" "macro"
+      "clojure.core/deftype" "type"
+      "clojure.core/defrecord" "type"
+      "clojure.core/defprotocol" "protocol"
+      "clojure.core/defmulti" "multimethod"
+      "clojure.core/defmethod" "method"
+      "var")))  ; default
 
 ;; ============================================================================
 ;; Simple Fallback Parser (for when clj-kondo fails)

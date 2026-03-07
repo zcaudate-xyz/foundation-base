@@ -8,25 +8,46 @@
     [java.sql DriverManager]))
 
 ;; ============================================================================
-;; Helper Functions
+;; Configuration
 ;; ============================================================================
 
-(defn- db-row->sym
-  "Convert database row (snake_case) to symbol map (kebab-case)"
-  [row]
-  (when row
-    (-> (into {} (map (fn [[k v]] [(keyword (str/replace (name k) #"_" "-")) v])) row)
-        (update :arglists #(when % (try (json/read-str %) (catch Exception _ %))))
-        (update :meta #(when % (try (json/read-str %) (catch Exception _ %)))))))
+(def ^:private db-path 
+  (or (System/getenv "CLOJURE_INDEX_DB")
+      ;; Use cache/foundation's database if it exists, otherwise local
+      (if (.exists (java.io.File. "cache/foundation/.clojure-mcp/symbol-index.db"))
+        "cache/foundation/.clojure-mcp/symbol-index.db"
+        ".clojure-mcp/symbol-index.db")))
+
+;; ============================================================================
+;; Connection Management
+;; ============================================================================
+
+(def ^:private db-connection (atom nil))
+
+(defn- ensure-dir [path]
+  (let [file (java.io.File. path)]
+    (.mkdirs (.getParentFile file))
+    path))
+
+(defn get-connection
+  "Get or create database connection"
+  []
+  (or @db-connection
+      (let [path (ensure-dir db-path)
+            db-spec {:classname "org.sqlite.JDBC"
+                    :subprotocol "sqlite"
+                    :subname path}]
+        (Class/forName "org.sqlite.JDBC")
+        (reset! db-connection db-spec)
+        db-spec)))
 
 ;; ============================================================================
 ;; Schema
 ;; ============================================================================
 
-(def db-schema
-  "SQLite schema for symbol index"
+(def ^:private db-schema
   [
-   ;; Files table - tracks indexed files and their hashes
+   ;; Files table
    "CREATE TABLE IF NOT EXISTS files (
      path TEXT PRIMARY KEY,
      hash TEXT NOT NULL,
@@ -35,7 +56,7 @@
      symbol_count INTEGER DEFAULT 0
    )"
    
-   ;; Symbols table - all Clojure symbols
+   ;; Symbols table
    "CREATE TABLE IF NOT EXISTS symbols (
      id INTEGER PRIMARY KEY AUTOINCREMENT,
      name TEXT NOT NULL,
@@ -52,81 +73,14 @@
      private BOOLEAN DEFAULT 0,
      deprecated BOOLEAN DEFAULT 0,
      added TEXT,
-     meta TEXT,
-     FOREIGN KEY (file) REFERENCES files(path)
+     meta TEXT
    )"
    
-   ;; FTS5 virtual table for full-text search
-   "CREATE VIRTUAL TABLE IF NOT EXISTS symbols_fts USING fts5(
-     name, docstring, namespace,
-     content='symbols',
-     content_rowid='id'
-   )"
-   
-   ;; References table - cross-references between symbols
-   "CREATE TABLE IF NOT EXISTS symbol_refs (
-     id INTEGER PRIMARY KEY AUTOINCREMENT,
-     from_symbol TEXT NOT NULL,
-     to_symbol TEXT NOT NULL,
-     file TEXT NOT NULL,
-     line INTEGER,
-     column INTEGER,
-     context TEXT,
-     FOREIGN KEY (file) REFERENCES files(path)
-   )"
-   
-   ;; Namespaces table - namespace metadata
-   "CREATE TABLE IF NOT EXISTS namespaces (
-     name TEXT PRIMARY KEY,
-     file TEXT NOT NULL,
-     docstring TEXT,
-     author TEXT,
-     added TEXT,
-     FOREIGN KEY (file) REFERENCES files(path)
-   )"
-   
-   ;; Index metadata
-   "CREATE TABLE IF NOT EXISTS index_meta (
-     key TEXT PRIMARY KEY,
-     value TEXT,
-     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-   )"
-   
-   ;; Indexes for performance
+   ;; Indexes
    "CREATE INDEX IF NOT EXISTS idx_symbols_ns ON symbols(namespace)"
    "CREATE INDEX IF NOT EXISTS idx_symbols_file ON symbols(file)"
    "CREATE INDEX IF NOT EXISTS idx_symbols_kind ON symbols(kind)"
-   "CREATE INDEX IF NOT EXISTS idx_refs_from ON symbol_refs(from_symbol)"
-   "CREATE INDEX IF NOT EXISTS idx_refs_to ON symbol_refs(to_symbol)"
    ])
-
-;; ============================================================================
-;; Connection Management
-;; ============================================================================
-
-(def ^:private db-connection (atom nil))
-
-(defn- db-path []
-  (or (System/getenv "CLOJURE_INDEX_DB")
-      ".clojure-mcp/symbol-index.db"))
-
-(defn- ensure-dir [path]
-  (let [file (java.io.File. path)]
-    (.mkdirs (.getParentFile file))
-    path))
-
-(defn get-connection
-  "Get or create database connection"
-  []
-  (or @db-connection
-      (let [path (ensure-dir (db-path))
-            db-spec {:classname "org.sqlite.JDBC"
-                    :subprotocol "sqlite"
-                    :subname path}]
-        (Class/forName "org.sqlite.JDBC")
-        (let [conn db-spec]
-          (reset! db-connection conn)
-          conn))))
 
 (defn init-database!
   "Initialize database with schema"
@@ -134,46 +88,20 @@
   (let [conn (get-connection)]
     (doseq [ddl db-schema]
       (jdbc/execute! conn [ddl]))
-    (jdbc/execute! conn 
-      ["INSERT OR REPLACE INTO index_meta (key, value) VALUES (?, ?)"
-       "version" "1.0"])
-    {:initialized true :path (db-path)}))
-
-(defn close-connection!
-  "Close database connection"
-  []
-  (when-let [conn @db-connection]
-    (reset! db-connection nil)
-    {:closed true}))
+    {:initialized true :path db-path}))
 
 ;; ============================================================================
 ;; File Operations
 ;; ============================================================================
 
-(defn file-hash-exists?
-  "Check if file with given hash is already indexed"
-  [file-path hash]
-  (let [conn (get-connection)
-        result (jdbc/query conn
-                 ["SELECT 1 FROM files WHERE path = ? AND hash = ?"
-                  file-path hash])]
-    (boolean (seq result))))
-
 (defn get-file-hash
   "Get stored hash for a file"
   [file-path]
-  (let [conn (get-connection)
-        result (jdbc/query conn
-                 ["SELECT hash FROM files WHERE path = ?"
-                  file-path]
-                 {:result-set-fn first})]
-    (:hash result)))
-
-(defn get-indexed-files
-  "Get all indexed files"
-  []
   (let [conn (get-connection)]
-    (jdbc/query conn ["SELECT * FROM files ORDER BY path"])))
+    (-> (jdbc/query conn
+          ["SELECT hash FROM files WHERE path = ?" file-path]
+          {:result-set-fn first})
+        :hash)))
 
 (defn upsert-file!
   "Insert or update file record"
@@ -191,33 +119,29 @@
        path hash namespace (or symbol_count 0)])))
 
 (defn delete-file-symbols!
-  "Delete all symbols for a file (for re-indexing)"
+  "Delete all symbols for a file"
   [file-path]
   (let [conn (get-connection)]
-    ;; Delete from FTS first (maintains consistency)
-    (jdbc/execute! conn
-      ["DELETE FROM symbols_fts WHERE rowid IN 
-        (SELECT id FROM symbols WHERE file = ?)"
-       file-path])
-    ;; Delete symbols
-    (jdbc/execute! conn
-      ["DELETE FROM symbols WHERE file = ?" file-path])
-    ;; Delete references
-    (jdbc/execute! conn
-      ["DELETE FROM symbol_refs WHERE file = ?" file-path])
-    ;; Delete file record
-    (jdbc/execute! conn
-      ["DELETE FROM files WHERE path = ?" file-path])))
+    (jdbc/execute! conn ["DELETE FROM symbols WHERE file = ?" file-path])
+    (jdbc/execute! conn ["DELETE FROM files WHERE path = ?" file-path])))
 
 ;; ============================================================================
 ;; Symbol Operations
 ;; ============================================================================
 
+(defn- db-row->sym
+  "Convert database row (snake_case) to symbol map (kebab-case)"
+  [row]
+  (when row
+    (-> (into {} (map (fn [[k v]] [(keyword (str/replace (name k) #"_" "-")) v])) row)
+        (update :arglists #(when % (try (json/read-str %) (catch Exception _ %))))
+        (update :meta #(when % (try (json/read-str %) (catch Exception _ %)))))))
+
 (defn insert-symbol!
   "Insert a symbol into the database"
   [symbol-data]
   (let [conn (get-connection)
-        ;; Convert kebab-case keys to snake_case for database
+        ;; Convert kebab-case to snake_case for DB
         sym (into {} (map (fn [[k v]] [(keyword (str/replace (name k) #"-" "_")) v])) symbol-data)
         {:keys [name qualified_name kind namespace file line column
                 end_line end_column docstring arglists private
@@ -225,25 +149,18 @@
         arglists-json (when arglists (json/write-str arglists))
         meta-json (when meta (json/write-str meta))]
     (try
-      (let [result (jdbc/execute! conn
-                     ["INSERT INTO symbols 
-                       (name, qualified_name, kind, namespace, file, 
-                        line, column, end_line, end_column,
-                        docstring, arglists, private, deprecated, added, meta)
-                       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
-                       name qualified_name kind namespace file
-                       line column end_line end_column
-                       docstring arglists-json private deprecated added meta-json]
-                     {:return-keys true})
-            row-id (-> result first :id (or 1))]
-        ;; Insert into FTS
-        (jdbc/execute! conn
-          ["INSERT INTO symbols_fts (rowid, name, docstring, namespace)
-            VALUES (?, ?, ?, ?)"
-           row-id name (or docstring "") namespace])
-        {:inserted true :id row-id})
+      (jdbc/execute! conn
+        ["INSERT INTO symbols 
+          (name, qualified_name, kind, namespace, file, 
+           line, column, end_line, end_column,
+           docstring, arglists, private, deprecated, added, meta)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+         name qualified_name kind namespace file
+         line column end_line end_column
+         docstring arglists-json private deprecated added meta-json])
+      {:inserted true}
       (catch Exception e
-        ;; Symbol might already exist, update it
+        ;; Update existing
         (jdbc/execute! conn
           ["UPDATE symbols SET
              name = ?, kind = ?, namespace = ?, file = ?,
@@ -257,8 +174,12 @@
            deprecated added meta-json qualified_name])
         {:updated true}))))
 
+;; ============================================================================
+;; Search
+;; ============================================================================
+
 (defn search-symbols
-  "Search symbols with filters"
+  "Search symbols using LIKE pattern matching"
   [{:keys [query kind namespace file exact? limit offset]
     :or {limit 50 offset 0}}]
   (let [conn (get-connection)
@@ -270,29 +191,26 @@
                    ORDER BY qualified_name
                    LIMIT ? OFFSET ?"
                   query limit offset])
-               ;; Full-text search
-               (let [fts-query (if (str/includes? query " ")
-                                (str "\"" query "\"")  ; phrase search
-                                (str query "*"))       ; prefix search
-                     base-sql (str "SELECT s.* FROM symbols s
-                                   JOIN symbols_fts fts ON s.id = fts.rowid
-                                   WHERE symbols_fts MATCH ?")
+               ;; Substring search with LIKE
+               (let [pattern (str "%" query "%")
+                     base-sql "SELECT * FROM symbols 
+                               WHERE (name LIKE ? OR namespace LIKE ? OR docstring LIKE ?)"
                      filters (cond-> []
-                               kind (conj (str "AND s.kind = '" kind "'"))
-                               namespace (conj (str "AND s.namespace = '" namespace "'"))
-                               file (conj (str "AND s.file LIKE '%" file "%'")))
+                               kind (conj (str "AND kind = '" kind "'"))
+                               namespace (conj (str "AND namespace = '" namespace "'"))
+                               file (conj (str "AND file LIKE '%" file "%'")))
                      sql (str base-sql " " (str/join " " filters)
-                             " LIMIT ? OFFSET ?")]
-                 (jdbc/query conn [sql fts-query limit offset])))]
+                             " ORDER BY qualified_name
+                             LIMIT ? OFFSET ?")]
+                 (jdbc/query conn [sql pattern pattern pattern limit offset])))]
     (map db-row->sym rows)))
 
 (defn get-symbol-by-qualified-name
-  "Get full symbol details"
+  "Get symbol by qualified name"
   [qualified-name]
   (let [conn (get-connection)
         result (jdbc/query conn
-                 ["SELECT * FROM symbols WHERE qualified_name = ?"
-                  qualified-name]
+                 ["SELECT * FROM symbols WHERE qualified_name = ?" qualified-name]
                  {:result-set-fn first})]
     (db-row->sym result)))
 
@@ -314,10 +232,6 @@
                 ns-name])]
     (map db-row->sym rows)))
 
-;; ============================================================================
-;; Namespace Operations
-;; ============================================================================
-
 (defn list-namespaces
   "List all indexed namespaces"
   []
@@ -334,14 +248,11 @@
   []
   (let [conn (get-connection)
         file-count (-> (jdbc/query conn ["SELECT COUNT(*) as c FROM files"]
-                                   {:result-set-fn first})
-                      :c)
+                                   {:result-set-fn first}) :c)
         symbol-count (-> (jdbc/query conn ["SELECT COUNT(*) as c FROM symbols"]
-                                     {:result-set-fn first})
-                        :c)
+                                     {:result-set-fn first}) :c)
         ns-count (-> (jdbc/query conn ["SELECT COUNT(DISTINCT namespace) as c FROM symbols"]
-                                 {:result-set-fn first})
-                    :c)
+                                 {:result-set-fn first}) :c)
         kinds (jdbc/query conn ["SELECT kind, COUNT(*) as count FROM symbols GROUP BY kind"])]
     {:files file-count
      :symbols symbol-count
@@ -352,10 +263,6 @@
   "Clear all index data"
   []
   (let [conn (get-connection)]
-    (jdbc/execute! conn ["DELETE FROM symbols_fts"])
-    (jdbc/execute! conn ["DELETE FROM symbol_refs"])
     (jdbc/execute! conn ["DELETE FROM symbols"])
-    (jdbc/execute! conn ["DELETE FROM namespaces"])
     (jdbc/execute! conn ["DELETE FROM files"])
-    (jdbc/execute! conn ["DELETE FROM index_meta"])
     {:cleared true}))

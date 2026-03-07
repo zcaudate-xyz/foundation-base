@@ -27,6 +27,11 @@
    [com.sun.xml.bind/jaxb-core "4.0.3"]
    [com.sun.xml.bind/jaxb-impl "4.0.3"]
    [clj-kondo "2025.02.20"]
+   
+   ;; foundation-index
+   [org.clojure/java.jdbc "0.7.12"]
+   [org.clojure/data.json "2.4.0"]
+   [org.xerial/sqlite-jdbc "3.36.0.3"]
 
    ;; code.ai
    [org.apache.opennlp/opennlp-tools "2.4.0"]
@@ -189,6 +194,7 @@
                                       (require '[std.lib :as h])
                                       (catch Throwable t (.printStackTrace t)))]}}
   #_#_:repositories [["atlassian" "https://maven.artifacts.atlassian.com/"]]
+  :source-paths      ["src" "src-extra/mcp-clj"]
   :resource-paths    ["resources" "src-build" "src-extra" "src-doc" "test-data" "test-code"]
   :java-source-paths ["src-java" "test-java"]
   :java-output-path  "target/classes"
