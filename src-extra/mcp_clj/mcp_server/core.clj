@@ -32,7 +32,8 @@
    prompt-registry
    resource-registry
    resource-subscriptions
-   capabilities]
+   capabilities
+   server-info]
 
   AutoCloseable
 
@@ -42,12 +43,7 @@
   [request]
   (cond
     ;; For HTTP/SSE transports: request is a map with :query-params
-    (map? request)
-    (let [qp (:query-params request)
-          qp-map (if (fn? qp) (qp) qp)]
-      (or (get (:headers request) "x-session-id")
-          (get qp-map "session_id")
-          "default"))  ;; Default session ID when none provided
+    (map? request) (get (:query-params request) "session_id")
     ;; For STDIO transport: request is just the method string
     :else "stdio"))
 
@@ -164,9 +160,10 @@
 
 (defn- negotiate-initialization
   "Negotiate initialization request according to MCP specification.
-  
-  server-capabilities should contain capability configs like {:logging {}}"
-  [server-capabilities {:keys [protocolVersion capabilities clientInfo] :as params}]
+
+  server-capabilities should contain capability configs like {:logging {}}
+  server-info is optional map with :name, :version, :title keys"
+  [server-capabilities server-info {:keys [protocolVersion capabilities clientInfo] :as params}]
   (let [negotiation (version/negotiate-version protocolVersion)
         {:keys [negotiated-version client-was-supported? supported-versions]} negotiation
         warnings (when-not client-was-supported?
@@ -185,10 +182,11 @@
                                negotiated-version
                                :capabilities
                                {:capabilities base-capabilities})
-        ;; Create base server info
-        base-server-info {:name "mcp-clj"
-                          :version "0.1.0"
-                          :title "MCP Clojure Server"}
+        ;; Use provided server-info or default to mcp-clj
+        base-server-info (or server-info
+                             {:name "mcp-clj"
+                              :version "0.1.0"
+                              :title "MCP Clojure Server"})
         ;; Apply version-specific server info formatting
         version-server-info (version/handle-version-specific-behavior
                               negotiated-version
@@ -211,6 +209,7 @@
   (log/info :server/initialize params)
   (let [{:keys [negotiation client-info response]} (negotiate-initialization
                                                      (:capabilities server)
+                                                     (:server-info server)
                                                      params)
         {:keys [negotiated-version]} negotiation]
     (when-not (:client-was-supported? negotiation)
@@ -271,8 +270,13 @@
         (catch Throwable e
           {:content [(text-map (str "Error: " (.getMessage e)))]
            :isError true}))
-      {:content [(text-map (str "Tool not found: " name))]
-       :isError true})))
+      ;; Use -32602 (INVALID_PARAMS) per MCP spec for unknown tools.
+      ;; The JSON-RPC method "tools/call" exists, but the tool name parameter is invalid.
+      ;; -32601 (METHOD_NOT_FOUND) would indicate the JSON-RPC method itself doesn't exist.
+      (throw (ex-info "Unknown tool"
+                      {:code -32602
+                       :message (str "Unknown tool: " name)
+                       :data {:name name}})))))
 
 (defn- version-aware-handle-call-tool
   "Version-aware wrapper for handle-call-tool"
@@ -492,8 +496,8 @@
     ;; Close individual sessions only for SSE servers
     (when (contains? rpc-server :session-id->session)
       ;; We need to dynamically require sse-server when needed
-      (require 'mcp-clj.json-rpc.sse-server)
-      (let [close! (ns-resolve 'mcp-clj.json-rpc.sse-server 'close!)]
+      (require 'mcp-clj.json-rpc-server.sse)
+      (let [close! (ns-resolve 'mcp-clj.json-rpc-server.sse 'close!)]
         (doseq [session (vals @(:session-id->session server))]
           (close! rpc-server (:session-id session)))))))
 
@@ -524,6 +528,7 @@
   - :prompts - Map of prompt name to prompt definition
   - :resources - Map of resource name to resource definition
   - :capabilities - Map of capability configs (e.g., {:logging {}})
+  - :server-info - Optional map with :name, :version, :title keys (defaults to mcp-clj)
 
   Transport configuration:
   - {:type :stdio :num-threads N} - Standard input/output
@@ -535,9 +540,10 @@
                     :tools {...}})
     (create-server {:transport {:type :http :port 3001}
                     :prompts {...}
-                    :capabilities {:logging {}}})"
+                    :capabilities {:logging {}}
+                    :server-info {:name \"my-server\" :version \"1.0.0\"}})"
   ^MCPServer
-  [{:keys [transport tools prompts resources capabilities]
+  [{:keys [transport tools prompts resources capabilities server-info]
     :or {tools tools/default-tools
          prompts prompts/default-prompts
          resources resources/default-resources
@@ -564,11 +570,6 @@
             (let [default-session (->Session "stdio" false nil nil nil nil)]
               (swap! session-id->session assoc "stdio" default-session)
               (log/info :server/stdio-session-created {:session-id "stdio"})))
-        ;; For HTTP/SSE transports, create a default session for clients that don't provide session_id
-        _ (when (#{:http :sse} (:type transport))
-            (let [default-session (->Session "default" false nil nil nil nil)]
-              (swap! session-id->session assoc "default" default-session)
-              (log/info :server/default-session-created {:session-id "default"})))
         tool-registry (atom tools)
         prompt-registry (atom prompts)
         resource-registry (atom resources)
@@ -580,7 +581,8 @@
                  prompt-registry
                  resource-registry
                  (atom {})
-                 capabilities)
+                 capabilities
+                 server-info)
         ;; Create handlers before creating the JSON-RPC server to avoid race
         ;; conditions
         handlers (create-handlers server)

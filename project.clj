@@ -155,18 +155,24 @@
 
    ;; std.text.diff
    [com.googlecode.java-diff-utils/diffutils "1.3.0"]
-
-   ;; MCP
-   [org.hugoduncan/mcp-clj-server "0.1.60"]
-   [org.clojure/core.async "1.6.681"]
-   [http-kit "2.8.0"]
+   
+   ;; mcp server
    [cheshire "5.13.0"]
-   [com.cognitect/transit-clj "1.0.333"]
-   [medley "1.4.0"]
-   [org.clojure/tools.logging "1.3.0"]
-   [ch.qos.logback/logback-classic "1.5.6"]
-   [org.clojure/data.json "2.5.1"]
-
+   [com.fasterxml.jackson.core/jackson-core "2.20.0"]
+   [com.fasterxml.jackson.core/jackson-databind "2.15.2"]
+   [io.modelcontextprotocol.sdk/mcp "0.11.2"]
+   [io.modelcontextprotocol.sdk/mcp-spring-webflux "0.11.2"]
+   [org.springframework/spring-webflux "6.0.11"]
+   [org.springframework/spring-context "6.0.11"]
+   [io.projectreactor.netty/reactor-netty "1.1.9"]
+   [hato/hato "1.0.0"]
+   [org.slf4j/slf4j-simple "2.0.13"]
+   ;; -- end mcp
+   
+   [org.clojure/java.jdbc    "0.7.12"]
+   [org.clojure/data.json    "2.4.0"]
+   [clj-kondo/clj-kondo      "2024.09.27"]
+   
    ;; TESTS - std.object
    [org.eclipse.jgit/org.eclipse.jgit "5.13.0.202109080827-r"]]
   :global-vars {*warn-on-reflection* true}

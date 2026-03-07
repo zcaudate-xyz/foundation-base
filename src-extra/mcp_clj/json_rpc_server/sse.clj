@@ -1,4 +1,4 @@
-(ns mcp-clj.json-rpc.sse-server
+(ns mcp-clj.json-rpc-server.sse
   "JSON-RPC 2.0 server with Server-Sent Events (SSE) support"
   (:require
     [mcp-clj.http :as http]
@@ -43,21 +43,12 @@
       (log/info :server/handler-response response)
       (reply!-fn (json-protocol/json-rpc-result response id)))
     (catch clojure.lang.ExceptionInfo e
-      (let [data (ex-data e)]
+      (let [data (ex-data e)
+            error-response (json-protocol/exception-info->error-response e id)]
         (if (and (:code data) (:message data))
-          (do
-            (log/info :rpc/handler-json-rpc-error {:error data})
-            (reply!-fn (json-protocol/json-rpc-error
-                         (:code data)
-                         (:message data)
-                         id
-                         (:data data))))
-          (do
-            (log/error :rpc/handler-error {:error e})
-            (reply!-fn (json-protocol/json-rpc-error
-                         :internal-error
-                         (.getMessage e)
-                         id))))))
+          (log/info :rpc/handler-json-rpc-error {:error data})
+          (log/error :rpc/handler-error {:error e}))
+        (reply!-fn error-response)))
     (catch Throwable e
       (log/error :rpc/handler-error {:error e})
       (reply!-fn (json-protocol/json-rpc-error
@@ -194,11 +185,10 @@
                               (fn [f]
                                 (fn [& args]
                                   (log/info :rpc/on-sse-connect {})
-                                  (future
-                                    (reply!
-                                      {:event "endpoint" :data uri})
-                                    (on-sse-connect id))
-                                  (apply f args)))))
+                                  (apply f args)
+                                  (reply!
+                                    {:event "endpoint" :data uri})
+                                  (on-sse-connect id)))))
                     (do
                       (log/warn :rpc/invalid {:method request-method :uri uri})
                       (http/text-response "Not Found" http/NotFound))))

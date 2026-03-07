@@ -1,4 +1,4 @@
-(ns mcp-clj.json-rpc.stdio-server
+(ns mcp-clj.json-rpc-server.stdio
   "JSON-RPC 2.0 server over stdio"
   (:require
     [mcp-clj.json :as json]
@@ -60,6 +60,11 @@
       #(try
          (binding [*out* out]
            (handle-json-rpc handler rpc-call))
+         (catch clojure.lang.ExceptionInfo e
+           (log/error :rpc/handler-error {:error e})
+           (write-json!
+             out
+             (json-protocol/exception-info->error-response e (:id rpc-call))))
          (catch Throwable e
            (log/error :rpc/handler-error {:error e})
            (write-json!
@@ -71,17 +76,20 @@
       request-timeout-ms)))
 
 (defn- handle-request
-  "Handle a JSON-RPC request"
+  "Handle a JSON-RPC request.
+  Returns a future for async handler execution, or nil for sync responses."
   [executor handlers rpc-call]
   (try
     (log/info :rpc/json-request {:json-request rpc-call})
     (if-let [validation-error (json-protocol/validate-request rpc-call)]
-      (write-json!
-        *out*
-        (json-protocol/json-rpc-error
-          (:code (:error validation-error))
-          (:message (:error validation-error))
-          (:id rpc-call)))
+      (do
+        (write-json!
+          *out*
+          (json-protocol/json-rpc-error
+            (:code (:error validation-error))
+            (:message (:error validation-error))
+            (:id rpc-call)))
+        nil)
       (if-let [handler (get handlers (:method rpc-call))]
         (dispatch-rpc-call executor handler rpc-call)
         (do
@@ -93,12 +101,14 @@
             (json-protocol/json-rpc-error
               :method-not-found
               (str "Method not found: " (:method rpc-call))
-              (:id rpc-call))))))
+              (:id rpc-call)))
+          nil)))
     (catch RejectedExecutionException _
       (log/warn :rpc/overload-rejection)
       (write-json!
         *out*
-        (json-protocol/json-rpc-error :overloaded "Server overloaded")))
+        (json-protocol/json-rpc-error :overloaded "Server overloaded"))
+      nil)
     (catch Exception e
       (log/error :rpc/error {:error e})
       (write-json!
@@ -106,9 +116,34 @@
         (json-protocol/json-rpc-error
           :internal-error
           (.getMessage e)
-          (:id rpc-call))))))
+          (:id rpc-call)))
+      nil)))
 
 ;; Server
+
+(defn- remove-completed-futures
+  "Remove completed futures from the pending set"
+  [pending-futures]
+  (swap! pending-futures (fn [futures]
+                           (into #{} (filter #(not (future-done? %)) futures)))))
+
+(defn- add-pending-future
+  "Add a future to pending set and clean up completed ones"
+  [pending-futures fut]
+  (when fut
+    (remove-completed-futures pending-futures)
+    (swap! pending-futures conj fut)))
+
+(defn- wait-for-pending-futures
+  "Wait for all pending futures to complete with timeout"
+  [pending-futures timeout-ms]
+  (let [deadline (+ (System/currentTimeMillis) timeout-ms)]
+    (loop []
+      (remove-completed-futures pending-futures)
+      (when (and (seq @pending-futures)
+                 (< (System/currentTimeMillis) deadline))
+        (Thread/sleep 10)
+        (recur)))))
 
 (defrecord StdioServer
   [executor
@@ -131,6 +166,7 @@
   (let [executor (executor/create-executor num-threads)
         handlers (atom handlers)
         running (atom true)
+        pending-futures (atom #{})
         out *out*
         in (input-reader)
         #_(PushbackReader.
@@ -158,9 +194,12 @@
                             (println "JSON parse error:" (ex-message ex)))
 
                           :else
-                          (handle-request executor @handlers rpc-call))]
+                          (let [fut (handle-request executor @handlers rpc-call)]
+                            (add-pending-future pending-futures fut)
+                            fut))]
                     (when (not= ::eof v)
                       (recur)))))
+              (wait-for-pending-futures pending-futures request-timeout-ms)
               (catch Throwable t
                 (binding [*out* *err*]
                   (println t))))))

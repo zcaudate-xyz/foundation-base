@@ -1,4 +1,4 @@
-(ns mcp-clj.json-rpc.http-server
+(ns mcp-clj.json-rpc-server.http
   "JSON-RPC 2.0 server with MCP Streamable HTTP transport (2025-03-26 spec)"
   (:require
     [clojure.string :as str]
@@ -60,6 +60,9 @@
                   (when-let [response (handler request (:params rpc-call))]
                     (log/info :server/handler-response response)
                     (json-protocol/json-rpc-result response (:id rpc-call)))
+                  (catch clojure.lang.ExceptionInfo e
+                    (log/error :rpc/handler-error {:method (:method rpc-call) :error (.getMessage e)})
+                    (json-protocol/exception-info->error-response e (:id rpc-call)))
                   (catch Exception e
                     (log/error :rpc/handler-error {:method (:method rpc-call) :error (.getMessage e)})
                     (json-protocol/json-rpc-error
