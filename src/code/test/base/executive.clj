@@ -213,9 +213,10 @@
   ([ns params lookup project]
    (when (not std.task.process/*interrupt*)
      (load-namespace ns params lookup project)
-     (let [results (test-namespace ns params lookup project)]
-       (unload-namespace ns params lookup project)
-       results))))
+     (binding [context/*print* (conj context/*print* :no-beep)]
+       (let [results (test-namespace ns params lookup project)]
+         (unload-namespace ns params lookup project)
+         results)))))
 
 (defn run-current
   "runs the current namespace (which can be a non test namespace)"
