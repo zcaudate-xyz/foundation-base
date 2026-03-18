@@ -81,24 +81,32 @@
       "Converts a TableDef to a JsonbShape. SINGLE SOURCE OF TRUTH.
    Guarantees:
    - Ref fields get -id suffix (e.g., :org -> :org-id)
-   - Standard fields always present: :id, :time-created, :time-updated, etc."
+   - Standard fields always present: :id (if applicable), :time-created, :time-updated, etc.
+   - Primary keys are always non-nullable."
       [table-def]
       {:pre [(types/table-def? table-def)]}
       (let [cols (:columns table-def)
+            pks (let [pk (:primary-key table-def)]
+                     (if (vector? pk) (set pk) #{pk}))
             explicit-fields (into {}
                                   (map (fn [col]
                                            (let [is-ref? (= :ref (get-in col [:type :kind]))
                                                  col-name (keyword (str (name (:name col)) (when is-ref? "-id")))
+                                                 is-pk? (contains? pks (:name col))
                                                  field-type (assoc (resolve-column-type col)
                                                                    :is-ref? is-ref?
+                                                                   :nullable? (if is-pk? false (not (:required col)))
                                                                    :source (str (:name table-def) "." (:name col)))]
                                                 [col-name field-type]))
                                        cols))
-            standard-fields {:id {:type :uuid :nullable? false :source (str (:name table-def) ".id")}
-                             :time-created {:type :bigint :nullable? true :source (str (:name table-def) ".time_created")}
-                             :time-updated {:type :bigint :nullable? true :source (str (:name table-def) ".time_updated")}
-                             :op-created {:type :uuid :nullable? true :source (str (:name table-def) ".op_created")}
-                             :op-updated {:type :uuid :nullable? true :source (str (:name table-def) ".op_updated")}}]
+            standard-fields (cond-> {:time-created {:type :bigint :nullable? true :source (str (:name table-def) ".time_created")}
+                                     :time-updated {:type :bigint :nullable? true :source (str (:name table-def) ".time_updated")}
+                                     :op-created {:type :uuid :nullable? true :source (str (:name table-def) ".op_created")}
+                                     :op-updated {:type :uuid :nullable? true :source (str (:name table-def) ".op_updated")}}
+                                    
+                                    (or (contains? pks :id)
+                                        (not (contains? (set (map :name cols)) :id)))
+                                    (assoc :id {:type :uuid :nullable? (not (contains? pks :id)) :source (str (:name table-def) ".id")}))]
            (types/make-jsonb-shape (merge standard-fields explicit-fields) (:name table-def) :high false)))
 
 ;; ─────────────────────────────────────────────────────────────────────────────

@@ -100,11 +100,11 @@
 ;; ─────────────────────────────────────────────────────────────────────────────
 
 (defrecord TypeRef [kind ns name constraints])
-(defrecord EnumDef [ns name values])
+(defrecord EnumDef [ns name values schema])
 (defrecord ColumnDef [name type required default constraints enum-ref
                       scope foreign map-schema ref-info])
-(defrecord TableDef [ns name columns primary-key addons entity-meta])
-(defrecord FnDef [ns name inputs output body-meta])
+(defrecord TableDef [ns name columns primary-key addons entity-meta schema])
+(defrecord FnDef [ns name inputs output body-meta schema])
 (defrecord FnArg [name type modifiers])
 
 (defrecord JsonbShape
@@ -167,20 +167,20 @@
   ([kind ns name] (make-type-ref kind ns name nil))
   ([kind ns name constraints] (->TypeRef kind ns name constraints)))
 
-(defn make-enum-def [ns name values]
-  (->EnumDef ns name (set values)))
+(defn make-enum-def [ns name values schema]
+  (->EnumDef ns name (set values) schema))
 
 (defn make-column-def
   ([name type] (make-column-def name type {}))
   ([name type opts] (map->ColumnDef (assoc opts :name name :type type))))
 
 (defn make-table-def
-  ([ns name columns primary-key] (make-table-def ns name columns primary-key nil nil))
-  ([ns name columns primary-key addons entity-meta]
-   (->TableDef ns name columns primary-key addons entity-meta)))
+  ([ns name columns primary-key] (make-table-def ns name columns primary-key nil nil nil))
+  ([ns name columns primary-key addons entity-meta schema]
+   (->TableDef ns name columns primary-key addons entity-meta schema)))
 
-(defn make-fn-def [ns name inputs output body-meta]
-  (->FnDef ns name inputs output body-meta))
+(defn make-fn-def [ns name inputs output body-meta schema]
+  (->FnDef ns name inputs output body-meta schema))
 
 (defn make-jsonb-shape
   ([fields] (make-jsonb-shape fields nil :medium false))

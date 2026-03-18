@@ -220,15 +220,35 @@
                              (get-in types/+type-formats+ [(first output) :openapi])
 
                           ;; Default fallback
-                             :else {:type "object"})]
+                             :else {:type "object"})
+            
+            ;; Supabase/PostgREST headers
+            schema-name (:schema fn-def)
+            parameters (cond-> []
+                         true (conj {:name "apikey"
+                                     :in "header"
+                                     :required true
+                                     :schema {:type "string"}
+                                     :description "Supabase API key"})
+                         schema-name (conj {:name "Accept-Profile"
+                                            :in "header"
+                                            :required false
+                                            :schema {:type "string" :default schema-name}
+                                            :description "Database schema for the response"})
+                         (and schema-name request-body) (conj {:name "Content-Profile"
+                                                               :in "header"
+                                                               :required false
+                                                               :schema {:type "string" :default schema-name}
+                                                               :description "Database schema for the request body"}))]
            {:operationId (types/normalize-key fn-name)
-            :tags [(or (:ns fn-def) "default")]
+            :tags [(or schema-name (:ns fn-def) "default")]
             :summary (get-in fn-def [:body-meta :docstring])
             :security (when (and expose (not= :sb/query expose))
                             (case expose
                                   :sb/auth [{"bearerAuth" []}]
                                   :sb/super [{"bearerAuth" ["super"]}]
                                   []))
+            :parameters parameters
             :requestBody request-body
             :responses {"200" {:description "Successful response" :content {"application/json" {:schema response-schema}}}
                         "400" {:description "Bad request"}
@@ -236,19 +256,26 @@
                         "500" {:description "Internal server error"}}}))
 
 (defn- unique-defs
-       "Filters registry values to unique definitions by ns/name."
+       "Filters registry values to unique definitions by name."
        [defs]
        (->> defs
-            (group-by (fn [d] [(:ns d) (:name d)]))
+            (group-by :name)
             (map (fn [[_ v]] (first v)))))
 
 (defn generate-openapi
       "Generates complete OpenAPI 3.0 spec."
       [root-ns fn-filter]
-      (let [all (unique-defs (vals @types/*type-registry*))
-            fns (filter #(and (types/fn-def? %) (fn-filter %)) all)
-            tables (filter types/table-def? all)
-            enums (filter types/enum-def? all)]
+      (let [all-vals (vals @types/*type-registry*)
+            fns (->> all-vals
+                     (filter types/fn-def?)
+                     (filter fn-filter)
+                     (unique-defs))
+            tables (->> all-vals
+                        (filter types/table-def?)
+                        (unique-defs))
+            enums (->> all-vals
+                       (filter types/enum-def?)
+                       (unique-defs))]
            {:openapi "3.0.3"
             :info {:title (str root-ns " API") :version "0.1.0"}
             :paths (into (sorted-map)
