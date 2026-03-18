@@ -74,7 +74,9 @@
                 (let [shape (shape/shape-for-table-op (:op op-info) table-def {})]
                      (case (:returns op-info)
                            :table-instance {:kind :shaped :shape shape :table (:name table-def)}
-                           :array {:kind :array :element-type shape}
+                           :array (if (types/jsonb-array? shape)
+                                      {:kind :array :element-type (:element-type shape) :table (:name table-def)}
+                                      {:kind :array :element-type shape :table (:name table-def)})
                            :uuid {:kind :primitive :type :uuid}
                            :boolean {:kind :primitive :type :boolean}
                            :integer {:kind :primitive :type :integer}

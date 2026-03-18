@@ -146,7 +146,7 @@
        "Converts a function argument to OpenAPI parameter schema.
    For :jsonb types that map to table inputs, uses the table's shape."
        [arg fn-def]
-       (let [param-name (str/replace (name (:name arg)) #"^i-" "")
+       (let [param-name (types/normalize-key (str/replace (name (:name arg)) #"^i-" ""))
              arg-type (:type arg)
              meta-cols (get-in fn-def [:body-meta :api/meta :columns])]
             [param-name
@@ -196,8 +196,27 @@
                              table-name
                              {:$ref (str "#/components/schemas/" table-name)}
 
+                             ;; Handle inferred array response
+                             (= :array (:kind inferred))
+                             (let [elem (:element-type inferred)]
+                               {:type "array"
+                                :items (cond
+                                        (and (:table inferred) (not (types/jsonb-shape? elem)))
+                                        {:$ref (str "#/components/schemas/" (name (:table inferred)))}
+
+                                        (types/jsonb-shape? elem)
+                                        (if-let [source (:source-table elem)]
+                                          {:$ref (str "#/components/schemas/" (name source))}
+                                          (shape->openapi elem))
+
+                                        (keyword? elem)
+                                        (get-in types/+type-formats+ [elem :openapi])
+
+                                        :else {:type "object"})})
+
                           ;; Vector of primitives like [:uuid]
-                             (and (vector? output) (seq output))
+                             (and (vector? output) (seq output)
+                                  (get-in types/+type-formats+ [(first output) :openapi]))
                              (get-in types/+type-formats+ [(first output) :openapi])
 
                           ;; Default fallback
@@ -205,12 +224,11 @@
            {:operationId (types/normalize-key fn-name)
             :tags [(or (:ns fn-def) "default")]
             :summary (get-in fn-def [:body-meta :docstring])
-            :security (when expose
-                            [(case expose
-                                   :sb/auth [{"bearerAuth" []}]
-                                   :sb/super [{"bearerAuth" ["super"]}]
-                                   :sb/query []
-                                   [])])
+            :security (when (and expose (not= :sb/query expose))
+                            (case expose
+                                  :sb/auth [{"bearerAuth" []}]
+                                  :sb/super [{"bearerAuth" ["super"]}]
+                                  []))
             :requestBody request-body
             :responses {"200" {:description "Successful response" :content {"application/json" {:schema response-schema}}}
                         "400" {:description "Bad request"}
