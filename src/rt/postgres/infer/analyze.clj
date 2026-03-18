@@ -220,13 +220,22 @@
 ;; ─────────────────────────────────────────────────────────────────────────────
 
 (def ^:dynamic *infer-cache* (atom {}))
+(def ^:dynamic *visiting* #{})
 
 (defn reset-cache! []
       (reset! *infer-cache* {}))
 
 (defn cached-infer [fn-def]
-      (let [key (:name fn-def)]
-           (or (get @*infer-cache* key)
-               (let [result (infer-return-type fn-def)]
-                    (swap! *infer-cache* assoc key result)
-                    result))))
+      (let [key (symbol (or (:ns fn-def) "") (:name fn-def))]
+           (cond
+            (get @*infer-cache* key)
+            (get @*infer-cache* key)
+
+            (contains? *visiting* key)
+            {:kind :unknown :recursion key}
+
+            :else
+            (binding [*visiting* (conj *visiting* key)]
+                     (let [result (infer-return-type fn-def)]
+                          (swap! *infer-cache* assoc key result)
+                          result)))))
