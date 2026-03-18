@@ -3,7 +3,7 @@
    Tests end-to-end OpenAPI generation from namespace analysis."
   (:use code.test)
   (:require [rt.postgres.infer :as core]
-            [rt.postgres.v2.infer.types :as types]
+            [rt.postgres.infer.types :as types]
             [rt.postgres.script.test.scratch-v2 :as scratch]))
 
 ;; -----------------------------------------------------------------------------

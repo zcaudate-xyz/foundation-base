@@ -60,7 +60,7 @@
                   [:jsonb m :jsonb o-op]
                   (let [o-out (pg/t:insert Task m {:track o-op})]
                     (return o-out)))
-          fn-def (parse/parse-defn form "test.ns")
+          fn-def (parse/parse-defn form "test.ns" nil)
           _ (types/register-type! (symbol "test.ns" "insert-task-raw") fn-def)
           openapi (generate/fn->openapi fn-def)
           request-schema (get-in openapi [:requestBody :content "application/json" :schema])
@@ -78,7 +78,7 @@
                 "inserts an entry"
                 [:text i-name :jsonb i-tags]
                 (pg/t:insert Entry {:name i-name :tags i-tags}))
-        fn-def (parse/parse-defn form "test.ns")
+        fn-def (parse/parse-defn form "test.ns" nil)
         openapi (generate/fn->openapi fn-def)
         response-schema (get-in openapi [:responses "200" :content "application/json" :schema])]
     ;; Returns reference to Entry schema
@@ -92,7 +92,7 @@
                 [:text i-name :jsonb o-op]
                 (let [o-out (pg/t:insert Task {:name i-name} {:track o-op})]
                   (return o-op)))
-        fn-def (parse/parse-defn form "test.ns")
+        fn-def (parse/parse-defn form "test.ns" nil)
         openapi (generate/fn->openapi fn-def)
         request-schema (get-in openapi [:requestBody :content "application/json" :schema])]
     ;; o-op should NOT appear in inputs (stripped prefix becomes "op")

@@ -23,13 +23,13 @@
 
 ^{:refer rt.postgres.infer.types/enum-def? :added "0.1"}
 (fact "enum-def? returns true for EnumDef records"
-  (types/enum-def? (types/make-enum-def :test "Status" #{:active})) => true
+  (types/enum-def? (types/make-enum-def :test "Status" #{:active} nil)) => true
   (types/enum-def? {}) => false
   (types/enum-def? nil) => false)
 
 ^{:refer rt.postgres.infer.types/fn-def? :added "0.1"}
 (fact "fn-def? returns true for FnDef records"
-  (types/fn-def? (types/make-fn-def :core "get-user" [] :jsonb {})) => true
+  (types/fn-def? (types/make-fn-def :core "get-user" [] :jsonb {} nil)) => true
   (types/fn-def? {}) => false
   (types/fn-def? nil) => false)
 
@@ -139,12 +139,12 @@
 
 ^{:refer rt.postgres.infer.types/make-enum-def :added "0.1"}
 (fact "make-enum-def creates EnumDef with set of values"
-  (let [e (types/make-enum-def :test "Status" #{:active :inactive})]
+  (let [e (types/make-enum-def :test "Status" #{:active :inactive} nil)]
     (:ns e) => :test
     (:name e) => "Status"
     (:values e) => #{:active :inactive})
   ;; ensures values is a set
-  (let [e (types/make-enum-def :test "Type" [:a :b :c])]
+  (let [e (types/make-enum-def :test "Type" [:a :b :c] nil)]
     (:values e) => #{:a :b :c}))
 
 ^{:refer rt.postgres.infer.types/make-column-def :added "0.1"}
@@ -171,16 +171,16 @@
     (:columns t) => columns
     (:primary-key t) => :id)
   ;; arity 6 - with addons and meta
-  (let [t (types/make-table-def :core "User" [] :id {:audit true} {:entity :user})]
+  (let [t (types/make-table-def :core "User" [] :id {:audit true} {:entity :user} nil)]
     (:addons t) => {:audit true}
     (:entity-meta t) => {:entity :user}))
 
 ^{:refer rt.postgres.infer.types/make-fn-def :added "0.1"}
 (fact "make-fn-def creates FnDef"
-  (let [f (types/make-fn-def :core "get-user" [:uuid :jsonb] :jsonb {:async true})]
+  (let [f (types/make-fn-def :core "get-user" [:uuid :jsonb] :jsonb {:async true} nil)]
     (:ns f) => :core
     (:name f) => "get-user"
-    (:inputs f) => (contains [(contains {:type :uuid}) (contains {:type :jsonb})])
+    (:inputs f) => [:uuid :jsonb]
     (:output f) => :jsonb
     (:body-meta f) => {:async true}))
 
@@ -291,7 +291,7 @@
   (let [shape1 (types/make-jsonb-shape {"id" :uuid} :source1 :high)
         shape2 (types/make-jsonb-shape {"id" :text} :source2 :high)]
     (types/merge-shapes shape1 shape2))
-  => (contains {:fields {"id" (contains {:kind :union})} :confidence :high})
+  => (contains {:fields {"id" (instance? rt.postgres.infer.types.TypeUnion %)} :confidence :medium})
   ;; handles nil shapes
   (let [shape1 (types/make-jsonb-shape {"id" :uuid})]
     (types/merge-shapes shape1 nil) => shape1

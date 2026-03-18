@@ -69,9 +69,7 @@
 ^{:refer rt.postgres.infer.analyze/analyze-function-body :added "0.1"}
 (fact "analyze-function-body analyzes simple function"
   (let [fn-def (types/make-fn-def "test" "simple-fn"
-                                  [(types/make-fn-arg 'i-id :uuid {})]
-                                  [:jsonb]
-                                  {:raw-body ['(return {:id i-id})]})]
+                                  [(types/->FnArg 'i-id :uuid {})] [:jsonb] {:raw-body ['(return {:id i-id})]} nil)]
     (let [result (analyze/analyze-function-body fn-def)]
       result =not=> nil
       (:fn result) => "simple-fn"
@@ -81,10 +79,8 @@
 ^{:refer rt.postgres.infer.analyze/analyze-function-body :added "0.1"}
 (fact "analyze-function-body handles let bindings"
   (let [fn-def (types/make-fn-def "test" "let-fn"
-                                  [(types/make-fn-arg 'i-data :jsonb {})]
-                                  [:jsonb]
-                                  {:raw-body ['(let [x i-data]
-                                                (return x))]})]
+                                  [(types/->FnArg 'i-data :jsonb {})] [:jsonb] {:raw-body ['(let [x i-data]
+                                                (return x))]} nil)]
     (let [result (analyze/analyze-function-body fn-def)]
       (not (nil? result)) => true
       (not (empty? (:body-analysis result))) => true)))
@@ -95,17 +91,14 @@
 
 ^{:refer rt.postgres.infer.analyze/infer-return-type :added "0.1"}
 (fact "infer-return-type returns void for empty body"
-  (let [fn-def (types/make-fn-def "test" "empty-fn" [] [:void]
-                                  {:raw-body []})]
+  (let [fn-def (types/make-fn-def "test" "empty-fn" [] [:void] {:raw-body []} nil)]
     (let [result (analyze/infer-return-type fn-def)]
       (:kind result) => :void)))
 
 ^{:refer rt.postgres.infer.analyze/infer-return-type :added "0.1"}
 (fact "infer-return-type infers from return statement"
   (let [fn-def (types/make-fn-def "test" "return-fn"
-                                  [(types/make-fn-arg 'i-id :uuid {})]
-                                  [:jsonb]
-                                  {:raw-body ['(return {:id i-id})]})]
+                                  [(types/->FnArg 'i-id :uuid {})] [:jsonb] {:raw-body ['(return {:id i-id})]} nil)]
     (let [result (analyze/infer-return-type fn-def)]
       (not (nil? (:kind result))) => true)))
 
@@ -123,9 +116,7 @@
 (fact "cached-infer caches inference results"
   (analyze/reset-cache!)
   (let [fn-def (types/make-fn-def "test" "cached-fn"
-                                  [(types/make-fn-arg 'i-id :uuid {})]
-                                  [:jsonb]
-                                  {:raw-body ['(return {:id i-id})]})]
+                                  [(types/->FnArg 'i-id :uuid {})] [:jsonb] {:raw-body ['(return {:id i-id})]} nil)]
     ;; First call should compute and cache
     (let [result1 (analyze/cached-infer fn-def)]
       (not (nil? result1)) => true)

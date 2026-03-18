@@ -74,7 +74,7 @@
   (let [form '(deftype.pg User
                 [:id {:type :uuid :primary true}
                  :handle {:type :citext :required true}])
-        table (parse/parse-deftype form "test.ns")]
+        table (parse/parse-deftype form "test.ns" nil)]
     (:name table) => "User"
     (:ns table) => "test.ns"
     (count (:columns table)) => 2
@@ -85,7 +85,7 @@
   (let [form '(deftype.pg ^{:! (et/E {})} User "A user"
                 {:added "0.1"}
                 [:id {:type :uuid}])
-        table (parse/parse-deftype form "test.ns")]
+        table (parse/parse-deftype form "test.ns" nil)]
     (:name table) => "User"
     (count (:columns table)) => 1))
 
@@ -93,7 +93,7 @@
 (fact "parse-deftype handles addons"
   (let [form '(deftype.pg ^{:! (et/E {:addons [:feed]})} Organisation
                 [:id {:type :uuid}])
-        table (parse/parse-deftype form "test.ns")]
+        table (parse/parse-deftype form "test.ns" nil)]
     (:name table) => "Organisation"
     (:addons table) => [:feed]))
 
@@ -104,7 +104,7 @@
 ^{:refer rt.postgres.infer.parse/parse-defenum :added "0.1"}
 (fact "parse-defenum extracts enum definition"
   (let [form '(defenum.pg Status [:active :inactive :pending])
-        enum (parse/parse-defenum form "test.ns")]
+        enum (parse/parse-defenum form "test.ns" nil)]
     (:name enum) => "Status"
     (:ns enum) => "test.ns"
     (set (:values enum)) => #{:active :inactive :pending}))
@@ -112,7 +112,7 @@
 ^{:refer rt.postgres.infer.parse/parse-defenum :added "0.1"}
 (fact "parse-defenum handles docstrings"
   (let [form '(defenum.pg Priority "Priority levels" [:low :medium :high])
-        enum (parse/parse-defenum form "test.ns")]
+        enum (parse/parse-defenum form "test.ns" nil)]
     (:name enum) => "Priority"
     (set (:values enum)) => #{:low :medium :high}))
 
@@ -133,7 +133,7 @@
 ^{:refer rt.postgres.infer.parse/parse-defn :added "0.1"}
 (fact "parse-defn extracts function definition"
   (let [form '(defn.pg test-fn [:uuid i-id] (return i-id))
-        fn-def (parse/parse-defn form "test.ns")]
+        fn-def (parse/parse-defn form "test.ns" nil)]
     (:name fn-def) => "test-fn"
     (:ns fn-def) => "test.ns"
     (count (:inputs fn-def)) => 1))
@@ -141,14 +141,14 @@
 ^{:refer rt.postgres.infer.parse/parse-defn :added "0.1"}
 (fact "parse-defn handles metadata"
   (let [form '(defn.pg ^{:%% :sql :- [:jsonb]} test-fn [:uuid i-id] (return {}))
-        fn-def (parse/parse-defn form "test.ns")]
+        fn-def (parse/parse-defn form "test.ns" nil)]
     (:name fn-def) => "test-fn"
     (get-in fn-def [:body-meta :lang]) => :sql))
 
 ^{:refer rt.postgres.infer.parse/parse-defn :added "0.1"}
 (fact "parse-defn handles docstrings"
   (let [form '(defn.pg test-fn "Test function" [:uuid i-id] (return i-id))
-        fn-def (parse/parse-defn form "test.ns")]
+        fn-def (parse/parse-defn form "test.ns" nil)]
     (:name fn-def) => "test-fn"
     (get-in fn-def [:body-meta :docstring]) => "Test function"))
 
@@ -159,7 +159,7 @@
                 "inserts an entry"
                 [:text i-name :jsonb i-tags]
                 (pg/t:insert Entry {:name i-name :tags i-tags}))
-        fn-def (parse/parse-defn form "test.ns")]
+        fn-def (parse/parse-defn form "test.ns" nil)]
     ;; The output field contains the return type
     (:output fn-def) => 'Entry))
 
@@ -195,8 +195,8 @@
 (fact "register-types! adds types to registry"
   (types/clear-registry!)
   (let [analysis {:tables [(types/make-table-def "ns" "TestTable" [] :id)]
-                  :enums [(types/make-enum-def "ns" "TestEnum" #{:a :b})]
-                  :functions [(types/make-fn-def "ns" "testFn" [] [:jsonb] {})]}]
+                  :enums [(types/make-enum-def "ns" "TestEnum" #{:a :b} nil)]
+                  :functions [(types/make-fn-def "ns" "testFn" [] [:jsonb] {} nil)]}]
     (parse/register-types! analysis)
     (some? (types/get-type 'TestTable)) => true
     (some? (types/get-type 'TestEnum)) => true
