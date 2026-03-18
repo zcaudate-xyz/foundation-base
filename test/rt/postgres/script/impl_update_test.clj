@@ -9,7 +9,7 @@
             [std.lang.base.book :as book]))
 
 (l/script- :postgres
-  {:require [[rt.postgres.script.scratch :as scratch]]
+  {:require [[rt.postgres.script.test.scratch-v1 :as scratch]]
    :static {:application ["scratch"]
             :seed        ["scratch"]
             :all    {:schema   ["scratch"]}}})
@@ -29,12 +29,12 @@
                                                 :columns [:id :status :name :cache]
                                                 :track 'o-op}
                                                (:static/tracker @scratch/Task)
-                                               rt.postgres.script.scratch/Task
+                                               rt.postgres.script.test.scratch-v1/Task
                                                :insert)
                           (last (base/prep-table 'scratch/Task false (l/rt:macro-opts :postgres))))
   => '(--- [(== #{"id"} (coalesce (:uuid (:->> e "id")) #{"id"}))
             (== #{"status"} (coalesce (++ (:->> e "status")
-                                          rt.postgres.script.scratch/EnumStatus)
+                                          rt.postgres.script.test.scratch-v1/EnumStatus)
                                       #{"status"}))
             (== #{"name"} (coalesce (:text (:->> e "name")) #{"name"}))
             (== #{"cache_id"} (coalesce (:uuid (coalesce (:->> e "cache_id")
@@ -49,11 +49,11 @@
                           (tracker/add-tracker {:set {:status "error"}
                                                 :track 'o-op}
                                                (:static/tracker @scratch/Task)
-                                               rt.postgres.script.scratch/Task
+                                               rt.postgres.script.test.scratch-v1/Task
                                                :insert)
                           (last (base/prep-table 'scratch/Task false (l/rt:macro-opts :postgres))))
   => '(--- [(== #{"status"} (coalesce (++ (:->> e "status")
-                                          rt.postgres.script.scratch/EnumStatus)
+                                          rt.postgres.script.test.scratch-v1/EnumStatus)
                                       #{"status"}))
             (== #{"name"} (coalesce (:text (:->> e "name")) #{"name"}))
             (== #{"cache_id"} (coalesce (:uuid (coalesce (:->> e "cache_id")
@@ -75,10 +75,10 @@
                        {:status "error"}
                        (tracker/add-tracker {:track 'o-op}
                                             (:static/tracker @scratch/Task)
-                                            rt.postgres.script.scratch/Task
+                                            rt.postgres.script.test.scratch-v1/Task
                                             :insert)
                        (last (base/prep-table 'scratch/Task false (l/rt:macro-opts :postgres))))
-  => '(--- [(== #{"status"} (++ "error" rt.postgres.script.scratch/EnumStatus))
+  => '(--- [(== #{"status"} (++ "error" rt.postgres.script.test.scratch-v1/EnumStatus))
              (== #{"op_updated"} (:uuid (:->> o-op "id")))
              (== #{"time_updated"} (:bigint (:->> o-op "time")))])
 
@@ -103,13 +103,13 @@
    (tracker/add-tracker {:set {:status "error"}
                          :track 'o-op}
                         (:static/tracker @scratch/Task)
-                        rt.postgres.script.scratch/Task
+                        rt.postgres.script.test.scratch-v1/Task
                         :insert))
   => '[:with j-ret
        :as [:update
-            rt.postgres.script.scratch/Task
+            rt.postgres.script.test.scratch-v1/Task
             :set
-            (--- [(== #{"status"} (++ "error" rt.postgres.script.scratch/EnumStatus))
+            (--- [(== #{"status"} (++ "error" rt.postgres.script.test.scratch-v1/EnumStatus))
                    (== #{"op_updated"} (:uuid (:->> o-op "id")))
                    (== #{"time_updated"} (:bigint (:->> o-op "time")))])
             \\
@@ -132,9 +132,9 @@
                      {:set {:status "error"}
                       :track 'o-op}))
   => '[:with j-ret :as
-       [:update rt.postgres.script.scratch/Task
+       [:update rt.postgres.script.test.scratch-v1/Task
         :set
-        (--- [(== #{"status"} (++ "error" rt.postgres.script.scratch/EnumStatus))
+        (--- [(== #{"status"} (++ "error" rt.postgres.script.test.scratch-v1/EnumStatus))
               (== #{"op_updated"} (:uuid (:->> o-op "id")))
               (== #{"time_updated"} (:bigint (:->> o-op "time")))])
         \\ :returning (--- [#{"id"} #{"status"} #{"name"} #{"cache_id"}
@@ -149,10 +149,10 @@
                       :track 'o-op}))
 
   => '[:with j-ret :as
-       [:update rt.postgres.script.scratch/Task
+       [:update rt.postgres.script.test.scratch-v1/Task
         :set
         (--- [(== #{"status"} (coalesce (++ (:->> e "status")
-                                            rt.postgres.script.scratch/EnumStatus)
+                                            rt.postgres.script.test.scratch-v1/EnumStatus)
                                         #{"status"}))
               (== #{"name"} (coalesce (:text (:->> e "name")) #{"name"}))
               (== #{"cache_id"} (coalesce (:uuid (coalesce (:->> e "cache_id")
@@ -172,10 +172,10 @@
                       :columns [:status :name :cache]
                       :track 'o-op}))
   => '[:with j-ret :as
-       [:update rt.postgres.script.scratch/Task
+       [:update rt.postgres.script.test.scratch-v1/Task
         :set
         (--- [(== #{"status"} (++ (:->> e "status")
-                                  rt.postgres.script.scratch/EnumStatus))
+                                  rt.postgres.script.test.scratch-v1/EnumStatus))
               (== #{"name"} (:text (:->> e "name")))
               (== #{"cache_id"} (:uuid (coalesce (:->> e "cache_id")
                                                  (:->> (:-> e "cache") "id"))))
@@ -195,14 +195,14 @@
                          :where {:id "A"}
                          :track 'o-op}
                         (:static/tracker @scratch/Task)
-                        rt.postgres.script.scratch/Task
+                        rt.postgres.script.test.scratch-v1/Task
                         :insert))
-  => '(let [(++ u-ret rt.postgres.script.scratch/Task)
-            [:update rt.postgres.script.scratch/Task
+  => '(let [(++ u-ret rt.postgres.script.test.scratch-v1/Task)
+            [:update rt.postgres.script.test.scratch-v1/Task
                                                         :set
              (--- [(==
                     #{"status"}
-                    (++ "error" rt.postgres.script.scratch/EnumStatus))
+                    (++ "error" rt.postgres.script.test.scratch-v1/EnumStatus))
                    (== #{"op_updated"} (:uuid (:->> o-op "id")))
                    (== #{"time_updated"} (:bigint (:->> o-op "time")))])
                                                         :where {"id" [:eq "A"]}
@@ -219,14 +219,14 @@
                      {:set {:status "error"}
                       :where {:id "A"}
                       :track 'o-op}))
-  => '(let [(++ u-ret rt.postgres.script.scratch/Task)
-            [:update rt.postgres.script.scratch/Task
+  => '(let [(++ u-ret rt.postgres.script.test.scratch-v1/Task)
+            [:update rt.postgres.script.test.scratch-v1/Task
              :set
              
              (---
               [(==
                 #{"status"}
-                (++ "error" rt.postgres.script.scratch/EnumStatus))
+                (++ "error" rt.postgres.script.test.scratch-v1/EnumStatus))
                (== #{"op_updated"} (:uuid (:->> o-op "id")))
                (== #{"time_updated"} (:bigint (:->> o-op "time")))])
              :where {"id" [:eq "A"]}
@@ -244,12 +244,12 @@
        meta
        :assign/fn)
    'o-task)
-  => '(let [(++ u-ret rt.postgres.script.scratch/Task)
-            [:update rt.postgres.script.scratch/Task
+  => '(let [(++ u-ret rt.postgres.script.test.scratch-v1/Task)
+            [:update rt.postgres.script.test.scratch-v1/Task
              :set
              (--- [(==
                      #{"status"}
-                     (++ "error" rt.postgres.script.scratch/EnumStatus))
+                     (++ "error" rt.postgres.script.test.scratch-v1/EnumStatus))
                     (== #{"op_updated"} (:uuid (:->> o-op "id")))
                     (== #{"time_updated"} (:bigint (:->> o-op "time")))])
              :where {"id" [:eq "A"]}

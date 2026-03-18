@@ -2,7 +2,7 @@
   (:use code.test)
   (:require [rt.postgres.grammar.common :as common]
             [rt.postgres.grammar :as g]
-            [rt.postgres.script.scratch :as scratch]
+            [rt.postgres.script.test.scratch-v1 :as scratch]
             [rt.postgres.script.builtin :as builtin]
             [std.lang :as l]
             [std.lib :as h]

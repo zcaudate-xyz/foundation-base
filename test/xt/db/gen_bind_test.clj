@@ -3,7 +3,7 @@
   (:require [xt.db.gen-bind :as bind]
             [xt.db.sample-user-test :as sample-user]
             [xt.db.sample-data-test :as sample-data]
-            [rt.postgres.script.scratch :as scratch]))
+            [rt.postgres.script.test.scratch-v1 :as scratch]))
 
 ^{:refer xt.db.gen-bind/tmpl-route :added "4.0"}
 (fact "creates a route template"

@@ -7,7 +7,7 @@
             [std.make :as make]
             [xt.lang.base-lib :as k]
             [xt.lang.base-iter :as it]
-            [rt.postgres.script.scratch :as scratch]
+            [rt.postgres.script.test.scratch-v1 :as scratch]
             [std.fs :as fs]
             [std.make.compile :as compile]))
 
@@ -86,7 +86,7 @@
       :root   ".build"
       :target "src"
       :file   "pkg/schema.sql"
-      :main   'rt.postgres.script.scratch
+      :main   'rt.postgres.script.test.scratch-v1
       :layout :flat
       :entry {:label true}}))
   => (contains-in [".build/src/pkg/schema.sql"

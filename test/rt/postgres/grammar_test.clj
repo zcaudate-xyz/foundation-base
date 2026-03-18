@@ -2,7 +2,7 @@
   (:use code.test)
   (:require [rt.postgres.grammar :refer :all]
             [rt.postgres :as pg]
-            [rt.postgres.script.scratch :as scratch]
+            [rt.postgres.script.test.scratch-v1 :as scratch]
             [std.lang :as l]))
 
 (l/script- :postgres
@@ -10,7 +10,7 @@
    :config  {:dbname "test-scratch"}
    :require [[rt.postgres :as pg]
              [rt.postgres.system :as sys]
-             [rt.postgres.script.scratch :as scratch]]})
+             [rt.postgres.script.test.scratch-v1 :as scratch]]})
 
 (fact:global
  {:setup    [(l/rt:restart)

@@ -3,13 +3,13 @@
   (:require [rt.postgres.script.graph-view :as view]
             [rt.postgres.script.impl-base :as impl]
             [rt.postgres.grammar.common-application :as app]
-            [rt.postgres.script.scratch :as scratch]
+            [rt.postgres.script.test.scratch-v1 :as scratch]
             [std.lib.schema :as schema]
             [std.lang :as l]
             [std.lib :as h]))
 
 (l/script- :postgres
-  {:require [[rt.postgres.script.scratch :as scratch]]
+  {:require [[rt.postgres.script.test.scratch-v1 :as scratch]]
    :static {:application ["scratch"]
             :seed        ["scratch"]
             :all    {:schema   ["scratch"]}}})
@@ -34,7 +34,7 @@
                                 :roles #{:task}})
   => '{:symbol rt.postgres.script.graph-view-test/cache-is-member,
        :forward
-       {:table rt.postgres.script.scratch/Task,
+       {:table rt.postgres.script.test.scratch-v1/Task,
         :clause {:cache <%>},
         :form
         [:with
@@ -49,7 +49,7 @@
             #{"time_created"}
             #{"time_updated"}])
           :from
-          rt.postgres.script.scratch/Task
+          rt.postgres.script.test.scratch-v1/Task
           \\
           :where
           {"cache_id" [:eq <%>]}]
@@ -59,7 +59,7 @@
          :from
          j-ret]},
        :reverse
-       {:table rt.postgres.script.scratch/TaskCache,
+       {:table rt.postgres.script.test.scratch-v1/TaskCache,
         :clause {:id <%>},
         :form
         [:with
@@ -68,7 +68,7 @@
          [:select
           (--- [#{"id"} #{"time_created"} #{"time_updated"}])
           :from
-          rt.postgres.script.scratch/TaskCache
+          rt.postgres.script.test.scratch-v1/TaskCache
           \\
           :where
           {"id" [:eq <%>]}]
@@ -125,7 +125,7 @@
   
   (:static/view @rt.postgres.script.graph-view-test/task-by-name)
   => '{:args [:name i-name],
-      :table rt.postgres.script.scratch/Task,
+      :table rt.postgres.script.test.scratch-v1/Task,
       :key :Task,
       :type :select,
       :scope #{:public},
@@ -151,7 +151,7 @@
 
   (:static/view @rt.postgres.script.graph-view-test/task-basic)
   => '{:args [:uuid i-task-id],
-       :table rt.postgres.script.scratch/Task,
+       :table rt.postgres.script.test.scratch-v1/Task,
        :key :Task,
        :type :return,
        :scope nil,
@@ -168,7 +168,7 @@
   (view/view-fn '[-/task-basic]
                 '[-/task-by-name "hello"]
                 {:limit 10})
-  => '[rt.postgres.script.scratch/Task
+  => '[rt.postgres.script.test.scratch-v1/Task
        {:where {"name" [:eq "hello"]},
         :returning #{:*/data},
         :limit 10}])
@@ -183,7 +183,7 @@
      [-/task-by-name "hello"]
      {:limit 10}))
   => '[:with j-ret :as [:select (--- [#{"id"} #{"status"} #{"name"} #{"time_created"} #{"time_updated"}])
-                        :from rt.postgres.script.scratch/Task \\ :where {"name" [:eq "hello"]}
+                        :from rt.postgres.script.test.scratch-v1/Task \\ :where {"name" [:eq "hello"]}
                         \\ :limit 10]
        \\ :select (jsonb-agg j-ret) :from j-ret])
 

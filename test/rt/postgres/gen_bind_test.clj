@@ -3,7 +3,7 @@
   (:require [std.lang :as l]
             [rt.postgres :as pg]
             [rt.postgres.gen-bind :as gen]
-            [rt.postgres.script.scratch :as scratch]
+            [rt.postgres.script.test.scratch-v1 :as scratch]
             [xt.db.sample-data-test :as data]
             [xt.db.sample-user-test :as user]))
 
@@ -416,41 +416,41 @@
 (fact "lists all apis"
   ^:hidden
   
-  (gen/list-api 'rt.postgres.script.scratch)
-  => '[[ping rt.postgres.script.scratch/ping]
-       [ping-ok rt.postgres.script.scratch/ping-ok]
-       [echo rt.postgres.script.scratch/echo]])
+  (gen/list-api 'rt.postgres.script.test.scratch-v1)
+  => '[[ping rt.postgres.script.test.scratch-v1/ping]
+       [ping-ok rt.postgres.script.test.scratch-v1/ping-ok]
+       [echo rt.postgres.script.test.scratch-v1/echo]])
 
 ^{:refer rt.postgres.gen-bind/list-debug :added "4.0"}
 (fact  "lists all debug apis"
   ^:hidden
 
-  (gen/list-debug 'rt.postgres.script.scratch)
-  => '[[as-array rt.postgres.script.scratch/as-array]
-       [as-upper rt.postgres.script.scratch/as-upper]
-       [addf rt.postgres.script.scratch/addf]
-       [subf rt.postgres.script.scratch/subf]
-       [mulf rt.postgres.script.scratch/mulf]
-       [divf rt.postgres.script.scratch/divf]
-       [insert-task rt.postgres.script.scratch/insert-task]
-       [insert-entry rt.postgres.script.scratch/insert-entry]])
+  (gen/list-debug 'rt.postgres.script.test.scratch-v1)
+  => '[[as-array rt.postgres.script.test.scratch-v1/as-array]
+       [as-upper rt.postgres.script.test.scratch-v1/as-upper]
+       [addf rt.postgres.script.test.scratch-v1/addf]
+       [subf rt.postgres.script.test.scratch-v1/subf]
+       [mulf rt.postgres.script.test.scratch-v1/mulf]
+       [divf rt.postgres.script.test.scratch-v1/divf]
+       [insert-task rt.postgres.script.test.scratch-v1/insert-task]
+       [insert-entry rt.postgres.script.test.scratch-v1/insert-entry]])
 
 ^{:refer rt.postgres.gen-bind/list-all :added "4.0"}
 (fact "lists all function forms"
   ^:hidden
   
-  (gen/list-all 'rt.postgres.script.scratch)
-  => '[[as-array rt.postgres.script.scratch/as-array]
-       [entry-all rt.postgres.script.scratch/entry-all]
-       [entry-by-name rt.postgres.script.scratch/entry-by-name]
-       [entry-default rt.postgres.script.scratch/entry-default]
-       [as-upper rt.postgres.script.scratch/as-upper]
-       [ping rt.postgres.script.scratch/ping]
-       [ping-ok rt.postgres.script.scratch/ping-ok]
-       [echo rt.postgres.script.scratch/echo]
-       [addf rt.postgres.script.scratch/addf]
-       [subf rt.postgres.script.scratch/subf]
-       [mulf rt.postgres.script.scratch/mulf]
-       [divf rt.postgres.script.scratch/divf]
-       [insert-task rt.postgres.script.scratch/insert-task]
-       [insert-entry rt.postgres.script.scratch/insert-entry]])
+  (gen/list-all 'rt.postgres.script.test.scratch-v1)
+  => '[[as-array rt.postgres.script.test.scratch-v1/as-array]
+       [entry-all rt.postgres.script.test.scratch-v1/entry-all]
+       [entry-by-name rt.postgres.script.test.scratch-v1/entry-by-name]
+       [entry-default rt.postgres.script.test.scratch-v1/entry-default]
+       [as-upper rt.postgres.script.test.scratch-v1/as-upper]
+       [ping rt.postgres.script.test.scratch-v1/ping]
+       [ping-ok rt.postgres.script.test.scratch-v1/ping-ok]
+       [echo rt.postgres.script.test.scratch-v1/echo]
+       [addf rt.postgres.script.test.scratch-v1/addf]
+       [subf rt.postgres.script.test.scratch-v1/subf]
+       [mulf rt.postgres.script.test.scratch-v1/mulf]
+       [divf rt.postgres.script.test.scratch-v1/divf]
+       [insert-task rt.postgres.script.test.scratch-v1/insert-task]
+       [insert-entry rt.postgres.script.test.scratch-v1/insert-entry]])

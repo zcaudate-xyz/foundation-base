@@ -2,7 +2,7 @@
   (:use code.test)
   (:require [rt.postgres.grammar.form-defconst :as form]
             [rt.postgres.grammar :as g]
-            [rt.postgres.script.scratch :as scratch]
+            [rt.postgres.script.test.scratch-v1 :as scratch]
             [std.lang :as l]))
 
 ^{:refer rt.postgres.grammar.form-defconst/pg-defconst-hydrate :added "4.0"}
@@ -22,7 +22,7 @@
                                :module  (l/get-module
                                          (l/runtime-library)
                                          :postgres
-                                         'rt.postgres.script.scratch)
+                                         'rt.postgres.script.test.scratch-v1)
                                :snapshot (l/get-snapshot (l/runtime-library))}))
   -out-
   => vector?)
@@ -37,7 +37,7 @@
        (let
            [o-track {}]
          [:insert-into
-          rt.postgres.script.scratch/Task
+          rt.postgres.script.test.scratch-v1/Task
           (>-<
            [#{"id"}
             #{"status"}
@@ -50,7 +50,7 @@
           :values
           (>-<
            [(:uuid "hello-0")
-            (++ "ok" rt.postgres.script.scratch/EnumStatus)
+            (++ "ok" rt.postgres.script.test.scratch-v1/EnumStatus)
             (:text "hello")
             (:uuid "cache-001")
             (:uuid (:->> o-track "id"))

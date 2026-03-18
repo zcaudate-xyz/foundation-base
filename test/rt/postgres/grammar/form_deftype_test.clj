@@ -3,7 +3,7 @@
   (:require [rt.postgres.grammar.form-deftype :refer :all]
             [rt.postgres.grammar.form-deftype-hydrate :as hydrate]
             [rt.postgres.grammar :as g]
-            [rt.postgres.script.scratch :as scratch]
+            [rt.postgres.script.test.scratch-v1 :as scratch]
             [std.lang :as l]
             [rt.postgres.grammar.common :as common]
             [std.lang.base.library-snapshot :as snap]

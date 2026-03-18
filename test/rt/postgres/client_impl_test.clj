@@ -6,7 +6,7 @@
             [rt.postgres.client :as client]
             [rt.postgres.script.builtin :as builtin]
             [rt.postgres.script.addon :as addon]
-            [rt.postgres.script.scratch :as scratch]
+            [rt.postgres.script.test.scratch-v1 :as scratch]
             [std.lang.base.util :as ut]
             [lib.jdbc :as jdbc]
             [std.lib :as h]))

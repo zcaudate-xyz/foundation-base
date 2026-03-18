@@ -57,12 +57,12 @@
   {:added "4.0"}
   []
   (do (l/delete-module! (l/default-library) {:lang :postgres
-                                             :id 'rt.postgres.script.scratch})
+                                             :id 'rt.postgres.script.test.scratch-v1})
       (l/delete-module! (l/runtime-library) {:lang :postgres
-                                             :id 'rt.postgres.script.scratch})
+                                             :id 'rt.postgres.script.test.scratch-v1})
       (app/app-clear "scratch")
       (require 'jvm.namespace)
-      (eval '(jvm.namespace/reset '[rt.postgres.script.scratch]))))
+      (eval '(jvm.namespace/reset '[rt.postgres.script.test.scratch-v1]))))
 
 (defn get-rev
   "formats access table"

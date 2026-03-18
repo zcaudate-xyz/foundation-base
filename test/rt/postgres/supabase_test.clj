@@ -8,7 +8,7 @@
 (l/script- :postgres
   {:require [[rt.postgres :as pg]
              [rt.postgres.supabase :as s]
-             [rt.postgres.script.scratch :as scratch]]})
+             [rt.postgres.script.test.scratch-v1 :as scratch]]})
 
 ^{:refer rt.postgres.supabase/create-role :added "4.0"}
 (fact "creates a role"

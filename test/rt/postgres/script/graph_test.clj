@@ -4,13 +4,13 @@
             [rt.postgres.script.graph-view :as view]
             [rt.postgres.script.impl-base :as impl]
             [rt.postgres.grammar.common-application :as app]
-            [rt.postgres.script.scratch :as scratch]
+            [rt.postgres.script.test.scratch-v1 :as scratch]
             [std.lib.schema :as schema]
             [std.lang :as l]
             [std.lib :as h]))
 
 (l/script- :postgres
-  {:require [[rt.postgres.script.scratch :as scratch]
+  {:require [[rt.postgres.script.test.scratch-v1 :as scratch]
              [rt.postgres :as pg]]
    :static {:application ["scratch"]
             :seed        ["scratch"]

@@ -1,7 +1,7 @@
 (ns rt.postgres.grammar.common-tracker-test
   (:use code.test)
   (:require [rt.postgres.grammar.common-tracker :as tracker]
-            [rt.postgres.script.scratch :as scratch]))
+            [rt.postgres.script.test.scratch-v1 :as scratch]))
 
 ^{:refer rt.postgres.grammar.common-tracker/add-tracker :added "4.0"}
 (fact "call to adjust data to that of the tracker"

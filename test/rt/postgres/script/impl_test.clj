@@ -8,13 +8,13 @@
             [std.lang.base.book :as book]
             [std.lib :as h]
             [rt.postgres :as pg]
-            [rt.postgres.script.scratch :as scratch]))
+            [rt.postgres.script.test.scratch-v1 :as scratch]))
 
 (l/script- :postgres
   {:runtime :jdbc.client
    :config  {:dbname "test-scratch"}
    :require [[rt.postgres :as pg]
-             [rt.postgres.script.scratch :as scratch]]})
+             [rt.postgres.script.test.scratch-v1 :as scratch]]})
 
 ;; Removed global setup to avoid connection attempt
 

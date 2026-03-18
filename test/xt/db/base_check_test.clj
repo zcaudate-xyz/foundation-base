@@ -2,7 +2,7 @@
   (:use code.test)
   (:require [std.lang :as l]
             [rt.postgres :as pg]
-            [rt.postgres.script.scratch :as scratch]))
+            [rt.postgres.script.test.scratch-v1 :as scratch]))
 
 (l/script- :js
   {:runtime :oneshot

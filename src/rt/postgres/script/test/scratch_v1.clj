@@ -1,4 +1,4 @@
-(ns rt.postgres.script.scratch
+(ns rt.postgres.script.test.scratch-v1
   (:require [std.lib :as h]
             [std.lang :as l]
             [rt.postgres.grammar.common-application :as app]
