@@ -109,23 +109,23 @@
   ;; Valid namespaced symbols should work
   (types/register-type! 'test/ValidType (types/make-type-ref :primitive nil :test))
   => anything
-  
+
   ;; Non-symbol keys should throw
   (types/register-type! :keyword-key (types/make-type-ref :primitive nil :test))
   => (throws clojure.lang.ExceptionInfo)
-  
+
   ;; Unqualified symbols should throw
   (types/register-type! 'unqualified (types/make-type-ref :primitive nil :test))
   => (throws clojure.lang.ExceptionInfo)
-  
+
   ;; String keys should throw
   (types/register-type! "string-key" (types/make-type-ref :primitive nil :test))
   => (throws clojure.lang.ExceptionInfo)
-  
+
   ;; Empty namespace should throw
   (types/register-type! (symbol "" "name") (types/make-type-ref :primitive nil :test))
   => (throws clojure.lang.ExceptionInfo)
-  
+
   ;; Cleanup
   (types/clear-registry!))
 
@@ -137,9 +137,9 @@
 ^{:refer rt.postgres.infer.types/clear-registry! :added "0.1"}
 (fact "clear-registry! empties the type registry"
   (types/clear-registry!)
-  (types/register-type! 'TestType (types/make-type-ref :primitive nil :test))
+  (types/register-type! 'test/TestType (types/make-type-ref :primitive nil :test))
   (types/clear-registry!)
-  (types/get-type 'TestType) => nil)
+  (types/get-type 'test/TestType) => nil)
 
 ;; -----------------------------------------------------------------------------
 ;; Type Constructors
@@ -314,9 +314,10 @@
   => (contains {:fields {"id" :uuid "name" :text} :confidence :medium})
   ;; merging with type conflict creates union
   (let [shape1 (types/make-jsonb-shape {"id" :uuid} :source1 :high)
-        shape2 (types/make-jsonb-shape {"id" :text} :source2 :high)]
-    (types/merge-shapes shape1 shape2))
-  => (contains {:fields {"id" (instance? rt.postgres.infer.types.TypeUnion %)} :confidence :medium})
+        shape2 (types/make-jsonb-shape {"id" :text} :source2 :high)
+        merged (types/merge-shapes shape1 shape2)]
+    (types/type-union? (get-in merged [:fields "id"])) => true
+    (:confidence merged) => :medium)
   ;; handles nil shapes
   (let [shape1 (types/make-jsonb-shape {"id" :uuid})]
     (types/merge-shapes shape1 nil) => shape1
