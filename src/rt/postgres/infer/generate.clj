@@ -10,7 +10,7 @@
               [clojure.string :as str]
               [clojure.walk :as walk]))
 
-(declare shape->openapi shape->jschema shape->ts-interface)
+(declare shape->openapi shape->jschema shape->ts-interface resolve-table-def infer-jsonb-arg-shape*)
 
 ;; ─────────────────────────────────────────────────────────────────────────────
 ;; Type Resolution
@@ -63,22 +63,90 @@
              body)
             @found))
 
+(defn- apply-columns-filter
+       [base-shape cols]
+       (if (and (map? base-shape) (:properties base-shape) (seq cols))
+         (let [snake-cols (set (map types/normalize-key cols))]
+           (update base-shape :properties (fn [props] (select-keys props snake-cols))))
+         base-shape))
+
+(defn- resolve-called-fn
+       [op aliases]
+       (let [op-name (name op)
+             op-str (str op)
+             resolved-op (if (str/includes? op-str "/")
+                           (let [[alias-part fn-part] (str/split op-str #"/")
+                                 alias-sym (symbol alias-part)]
+                             (if-let [full-ns (get aliases alias-sym)]
+                               (symbol (str full-ns "/" fn-part))
+                               op))
+                           op)]
+         (or (types/get-type resolved-op)
+             (types/get-type op)
+             (types/get-type (symbol op-name))
+             (first (filter (fn [f]
+                              (and (types/fn-def? f)
+                                   (= op-name (:name f))))
+                            (vals @types/*type-registry*))))))
+
 (defn- infer-jsonb-arg-shape
        "Infers shape for a :jsonb argument when used with table operations.
    Returns shape->openapi result or nil if can't infer."
        [arg-name fn-def]
-       (when-let [body (get-in fn-def [:body-meta :raw-body])]
-                 (when-let [table-sym (find-table-op-in-body body arg-name)]
-      ;; Try multiple lookup strategies for the table
-                           (let [table-def (or (types/get-type table-sym)
-                                               (types/get-type (symbol (name table-sym)))
-                          ;; Try with dash prefix
-                                               (types/get-type (symbol (str "-/" (name table-sym))))
-                          ;; Try lookup in registry by string name
-                                               (first (filter #(= (name table-sym) (:name %))
-                                                              (vals @types/*type-registry*))))]
-                                (when (types/table-def? table-def)
-                                      (shape->openapi (shape/table->shape table-def)))))))
+       (infer-jsonb-arg-shape* arg-name fn-def #{}))
+
+(defn- infer-jsonb-arg-shape*
+       [arg-name fn-def visited]
+       (let [fn-key (symbol (or (:ns fn-def) "") (:name fn-def))
+             meta-table (get-in fn-def [:body-meta :api/meta :table])
+             meta-cols (get-in fn-def [:body-meta :api/meta :columns])
+             aliases (get-in fn-def [:body-meta :aliases] {})
+             body (get-in fn-def [:body-meta :raw-body])]
+         (or
+          (when-let [table-def (resolve-table-def meta-table)]
+            (apply-columns-filter
+             (shape->openapi (shape/table->shape table-def))
+             meta-cols))
+
+          (when-let [table-sym (and body (find-table-op-in-body body arg-name))]
+            (let [table-def (or (types/get-type table-sym)
+                                (types/get-type (symbol (name table-sym)))
+                                (types/get-type (symbol (str "-/" (name table-sym))))
+                                (first (filter #(= (name table-sym) (:name %))
+                                               (vals @types/*type-registry*))))]
+              (when (types/table-def? table-def)
+                (shape->openapi (shape/table->shape table-def)))))
+
+          (when (and body (not (contains? visited fn-key)))
+            (let [forms (tree-seq coll? seq body)]
+              (some
+               (fn [form]
+                 (when (seq? form)
+                   (let [op (first form)
+                         args (vec (rest form))
+                         arg-pos (first (keep-indexed (fn [idx itm]
+                                                        (when (= arg-name itm) idx))
+                                                      args))]
+                     (when arg-pos
+                       (when-let [called-fn (resolve-called-fn op aliases)]
+                         (when-let [target-arg (nth (:inputs called-fn) arg-pos nil)]
+                           (when (= :jsonb (:type target-arg))
+                             (infer-jsonb-arg-shape* (:name target-arg)
+                                                     called-fn
+                                                     (conj visited fn-key)))))))))
+               forms))))))
+
+(defn- resolve-table-def
+       "Resolves a table symbol from the type registry."
+       [table-sym]
+       (when table-sym
+             (or (types/get-type table-sym)
+                 (types/get-type (symbol (name table-sym)))
+                 (types/get-type (keyword (name table-sym)))
+                 (first (filter (fn [t]
+                                    (and (types/table-def? t)
+                                         (= (name table-sym) (:name t))))
+                                (vals @types/*type-registry*))))))
 
 (defn- resolve-type
        "Resolves any type to the target format using +type-formats+."
@@ -148,18 +216,18 @@
        [arg fn-def]
        (let [param-name (types/normalize-key (str/replace (name (:name arg)) #"^i-" ""))
              arg-type (:type arg)
+             meta-table (get-in fn-def [:body-meta :api/meta :table])
              meta-cols (get-in fn-def [:body-meta :api/meta :columns])]
             [param-name
              (cond
        ;; :jsonb arg used with table insert - infer from body
               (and (= :jsonb arg-type)
                    (types/fn-def? fn-def))
-              (let [base-shape (or (infer-jsonb-arg-shape (:name arg) fn-def)
+              (let [base-shape (or (when-let [table-def (resolve-table-def meta-table)]
+                                     (shape->openapi (shape/table->shape table-def)))
+                                   (infer-jsonb-arg-shape (:name arg) fn-def)
                                    (resolve-type arg-type :openapi))]
-                   (if (and (map? base-shape) (:properties base-shape) (seq meta-cols))
-                       (let [snake-cols (set (map types/normalize-key meta-cols))]
-                            (update base-shape :properties (fn [props] (select-keys props snake-cols))))
-                       base-shape))
+                   (apply-columns-filter base-shape meta-cols))
 
        ;; Standard type resolution
               :else (resolve-type arg-type :openapi))]))
@@ -183,7 +251,7 @@
         ;; Determine table name for $ref
             table-name (cond
                         meta-table (name meta-table)
-                        
+
                         ;; Inferred is {:kind :shaped, :shape #JsonbShape...}
                         ;; Extract shape and check if it's a JsonbShape
                         (= :shaped (:kind inferred))
@@ -225,6 +293,16 @@
                                         (get-in types/+type-formats+ [elem :openapi])
 
                                         :else {:type "object"})})
+
+                             ;; Inline traced shape when it isn't tied to a single table
+                             (= :shaped (:kind inferred))
+                             (if-let [shape (:shape inferred)]
+                               (when (types/jsonb-shape? shape)
+                                 (shape->openapi shape))
+                               {:type "object"})
+
+                             (types/jsonb-shape? inferred)
+                             (shape->openapi inferred)
 
                           ;; Vector of primitives like [:uuid]
                              (and (vector? output) (seq output)
