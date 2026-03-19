@@ -212,18 +212,7 @@
 
         ;; Function call tracing
         (symbol? op)
-        (let [;; Resolve alias to full namespace if possible
-              aliases (:aliases ctx {})
-              op-str (str op)
-              resolved-op (if (clojure.string/includes? op-str "/")
-                            (let [[alias-part fn-part] (clojure.string/split op-str #"/")
-                                  alias-sym (symbol alias-part)]
-                              (if-let [full-ns (get aliases alias-sym)]
-                                (symbol (str full-ns "/" fn-part))
-                                op))
-                            op)
-              fn-def (or (types/get-type resolved-op)
-                         (types/get-type op)
+        (let [fn-def (or (types/get-type op)
                          (types/get-type (symbol op-name))
                          (first (filter (fn [f] (and (types/fn-def? f) (= op-name (:name f))))
                                         (vals @types/*type-registry*))))]
