@@ -103,7 +103,7 @@
       :map-schema (get opts :map)
       :ref-info ref-info})))
 
-(defn parse-deftype [form ns-name schema]
+(defn parse-deftype [form ns-name dbschema]
   (let [rest-form (rest form)
         meta-data (meta (first form))
         [type-sym & after-name] rest-form
@@ -124,14 +124,14 @@
                             (= 1 (count primary-keys)) (first primary-keys)
                             :else primary-keys)
                           addons entity-meta
-                          (or (:static/schema combined-meta) schema))))
+                          (or (:static/schema combined-meta) dbschema))))
 
-(defn parse-defenum [form ns-name schema]
+(defn parse-defenum [form ns-name dbschema]
   (let [enum-sym (second form)
         enum-name (name enum-sym)
         remaining (drop 2 form)
         values-vec (first (filter vector? remaining))]
-    (types/->EnumDef ns-name enum-name (set (map keyword values-vec)) schema)))
+    (types/->EnumDef ns-name enum-name (set (map keyword values-vec)) dbschema)))
 
 (defn parse-fn-inputs [args-form]
   (when (sequential? args-form)
@@ -143,7 +143,7 @@
             (symbol? item) (recur (conj result (types/->FnArg item (or current-type :unknown) (when current-type [current-type]))) (next items) nil)
             :else (recur result (next items) current-type)))))))
 
-(defn parse-defn [form ns-name schema]
+(defn parse-defn [form ns-name dbschema]
   (let [fn-sym (second form)
         fn-name (name fn-sym)
         remaining (drop 2 form)
@@ -158,7 +158,7 @@
                               {:raw-body (vec body)
                                :expose (get-in combined-meta [:api/flags :expose])
                                :docstring docstring})
-                       (or (:static/schema combined-meta) schema))))
+                       (or (:static/schema combined-meta) dbschema))))
 
 ;; ─────────────────────────────────────────────────────────────────────────────
 ;; Analysis API
@@ -168,14 +168,14 @@
   (let [forms (read-forms file-path)
         ns-name (-> (str file-path) (str/replace #"^.*src/" "") (str/replace #"\.clj$" "") (str/replace #"/" ".") (str/replace #"_" "-"))
         script-form (some #(when (script? %) %) forms)
-        schema (when script-form (parse-schema script-form))
+        dbschema (when script-form (parse-schema script-form))
         aliases (when script-form (parse-aliases script-form))]
     (reduce (fn [acc form]
               (cond
-                (deftype? form) (update acc :tables conj (parse-deftype form ns-name schema))
-                (defenum? form) (update acc :enums conj (parse-defenum form ns-name schema))
+                (deftype? form) (update acc :tables conj (parse-deftype form ns-name dbschema))
+                (defenum? form) (update acc :enums conj (parse-defenum form ns-name dbschema))
                 (defn? form) (update acc :functions conj
-                                     (assoc-in (parse-defn form ns-name schema)
+                                     (assoc-in (parse-defn form ns-name dbschema)
                                                [:body-meta :aliases] aliases))
                 :else acc))
             {:enums [] :tables [] :functions []}

@@ -223,7 +223,7 @@
                              :else {:type "object"})
             
             ;; Supabase/PostgREST headers
-            schema-name (:schema fn-def)
+            schema-name (:dbschema fn-def)
             parameters (cond-> []
                          true (conj {:name "apikey"
                                      :in "header"

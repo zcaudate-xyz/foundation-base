@@ -100,11 +100,11 @@
 ;; ─────────────────────────────────────────────────────────────────────────────
 
 (defrecord TypeRef [kind ns name constraints])
-(defrecord EnumDef [ns name values schema])
+(defrecord EnumDef [ns name values dbschema])
 (defrecord ColumnDef [name type required default constraints enum-ref
                       scope foreign map-schema ref-info])
-(defrecord TableDef [ns name columns primary-key addons entity-meta schema])
-(defrecord FnDef [ns name inputs output body-meta schema])
+(defrecord TableDef [ns name columns primary-key addons entity-meta dbschema])
+(defrecord FnDef [ns name inputs output body-meta dbschema])
 (defrecord FnArg [name type modifiers])
 
 (defrecord JsonbShape
@@ -149,7 +149,22 @@
 
 (defonce ^:dynamic *type-registry* (atom {}))
 
-(defn register-type! [key type-def]
+(defn- valid-key?
+  "Validates that a key is a namespaced symbol (e.g., 'ns/name)."
+  [key]
+  (and (symbol? key)
+       (namespace key)
+       (seq (namespace key))
+       (seq (name key))))
+
+(defn register-type!
+  "Registers a type definition. Requires a namespaced symbol key."
+  [key type-def]
+  (when-not (valid-key? key)
+    (throw (ex-info "Invalid registry key. Must be a namespaced symbol like 'ns/name"
+                    {:key key
+                     :type (type key)
+                     :help "Use (symbol \"namespace\" \"name\") to construct valid keys"})))
   (swap! *type-registry* assoc key type-def))
 
 (defn get-type [key]
@@ -167,8 +182,8 @@
   ([kind ns name] (make-type-ref kind ns name nil))
   ([kind ns name constraints] (->TypeRef kind ns name constraints)))
 
-(defn make-enum-def [ns name values schema]
-  (->EnumDef ns name (set values) schema))
+(defn make-enum-def [ns name values dbschema]
+  (->EnumDef ns name (set values) dbschema))
 
 (defn make-column-def
   ([name type] (make-column-def name type {}))
@@ -176,11 +191,11 @@
 
 (defn make-table-def
   ([ns name columns primary-key] (make-table-def ns name columns primary-key nil nil nil))
-  ([ns name columns primary-key addons entity-meta schema]
-   (->TableDef ns name columns primary-key addons entity-meta schema)))
+  ([ns name columns primary-key addons entity-meta dbschema]
+   (->TableDef ns name columns primary-key addons entity-meta dbschema)))
 
-(defn make-fn-def [ns name inputs output body-meta schema]
-  (->FnDef ns name inputs output body-meta schema))
+(defn make-fn-def [ns name inputs output body-meta dbschema]
+  (->FnDef ns name inputs output body-meta dbschema))
 
 (defn make-jsonb-shape
   ([fields] (make-jsonb-shape fields nil :medium false))

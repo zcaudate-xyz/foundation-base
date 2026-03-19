@@ -97,11 +97,36 @@
 ;; -----------------------------------------------------------------------------
 
 ^{:refer rt.postgres.infer.types/register-type! :added "0.1"}
-(fact "register-type! and get-type manage the type registry"
+(fact "register-type! and get-type manage the type registry with namespaced keys"
   (types/clear-registry!)
   (let [t (types/make-type-ref :table :core "User")]
-    (types/register-type! 'User t)
-    (types/get-type 'User) => t)
+    (types/register-type! 'core/User t)
+    (types/get-type 'core/User) => t)
+  (types/clear-registry!))
+
+^{:refer rt.postgres.infer.types/register-type! :added "0.1"}
+(fact "register-type! validates that keys are namespaced symbols"
+  ;; Valid namespaced symbols should work
+  (types/register-type! 'test/ValidType (types/make-type-ref :primitive nil :test))
+  => anything
+  
+  ;; Non-symbol keys should throw
+  (types/register-type! :keyword-key (types/make-type-ref :primitive nil :test))
+  => (throws clojure.lang.ExceptionInfo)
+  
+  ;; Unqualified symbols should throw
+  (types/register-type! 'unqualified (types/make-type-ref :primitive nil :test))
+  => (throws clojure.lang.ExceptionInfo)
+  
+  ;; String keys should throw
+  (types/register-type! "string-key" (types/make-type-ref :primitive nil :test))
+  => (throws clojure.lang.ExceptionInfo)
+  
+  ;; Empty namespace should throw
+  (types/register-type! (symbol "" "name") (types/make-type-ref :primitive nil :test))
+  => (throws clojure.lang.ExceptionInfo)
+  
+  ;; Cleanup
   (types/clear-registry!))
 
 ^{:refer rt.postgres.infer.types/get-type :added "0.1"}
