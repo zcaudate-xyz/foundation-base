@@ -183,8 +183,20 @@
         ;; Determine table name for $ref
             table-name (cond
                         meta-table (name meta-table)
-                        (and (types/jsonb-shape? inferred) (:source-table inferred))
-                        (name (:source-table inferred))
+                        
+                        ;; Inferred is {:kind :shaped, :shape #JsonbShape...}
+                        ;; Extract shape and check if it's a JsonbShape
+                        (= :shaped (:kind inferred))
+                        (if-let [shape (:shape inferred)]
+                          (when (types/jsonb-shape? shape)
+                            (when-let [source (:source-table shape)]
+                              (name source)))
+                          nil)
+
+                        ;; Inferred is a raw JsonbShape (from let bindings returning shapes)
+                        (types/jsonb-shape? inferred)
+                        (when-let [source (:source-table inferred)]
+                          (name source))
 
                         (and (= :shaped (:kind inferred)) (:table inferred))
                         (name (:table inferred))

@@ -210,6 +210,10 @@
         (keyword? op)
         {:kind :cast :type op :expr (analyze-expr (first args) ctx)}
 
+        ;; Built-in SQL functions
+        (= "coalesce" op-name)
+        (analyze-expr (first args) ctx)
+
         ;; Function call tracing
         (symbol? op)
         (let [;; Resolve alias to full namespace if possible
