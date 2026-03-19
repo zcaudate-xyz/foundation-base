@@ -100,7 +100,7 @@
 
 ^{:refer rt.postgres.infer.generate/generate-openapi :added "0.1"}
 (fact "generate-openapi creates full OpenAPI spec from namespace"
-  (let [spec (generate/generate-openapi 'rt.postgres.infer.types-test)]
+  (let [spec (generate/generate-openapi 'rt.postgres.infer.types-test (constantly true))]
     (contains? spec :openapi) => true
     (contains? spec :paths) => true
     (contains? spec :components) => true))
@@ -121,7 +121,7 @@
 
 ^{:refer rt.postgres.infer.generate/generate-jschema :added "0.1"}
 (fact "generate-jschema creates JSON Schema for all types"
-  (let [schemas (generate/generate-jschema 'rt.postgres.infer.types-test)]
+  (let [schemas (generate/generate-jschema)]
     (map? schemas) => true))
 
 ;; -----------------------------------------------------------------------------
@@ -164,7 +164,7 @@
 
 ^{:refer rt.postgres.infer.generate/generate-typescript :added "0.1"}
 (fact "generate-typescript creates TypeScript interfaces for all types"
-  (let [ts-code (generate/generate-typescript 'rt.postgres.infer.types-test)]
+  (let [ts-code (generate/generate-typescript)]
     (string? ts-code) => true))
 
 ;; -----------------------------------------------------------------------------

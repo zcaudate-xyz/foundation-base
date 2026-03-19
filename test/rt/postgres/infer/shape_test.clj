@@ -145,7 +145,7 @@
   (let [shape (types/make-jsonb-shape {:id {:type :uuid :nullable? false}
                                         :name {:type :text :nullable? true}}
                                         :User)
-        result (; shape/shape->json-schema shape)]
+        result (comment shape/shape->json-schema shape))]
     (:type result) => "object"
     (contains? (:properties result) "id") => true
     (contains? (:properties result) "name") => true
@@ -157,7 +157,7 @@
                                         :created {:type :timestamp}
                                         :amount {:type :numeric}}
                                         :Test)
-        result (; shape/shape->json-schema shape)]
+        result (comment shape/shape->json-schema shape))]
     (get-in result [:properties "id" :format]) => "uuid"
     (get-in result [:properties "created" :format]) => "date-time"
     (get-in result [:properties "amount" :type]) => "number"))
@@ -166,7 +166,7 @@
 (fact "shape->json-schema handles enum types"
   (let [shape (types/make-jsonb-shape {:status {:type :enum :enum-ref {:ns :test}}}
                                         :Test)
-        result (; shape/shape->json-schema shape)]
+        result (comment shape/shape->json-schema shape))]
     (get-in result [:properties "status" :type]) => "string"
     (clojure.string/includes? (get-in result [:properties "status" :description]) "enum") => true))
 
