@@ -52,13 +52,17 @@
                         (types/get-type (symbol table-name))
                         (types/get-type (keyword table-name))
                         ;; Search registry for any table with matching name
-                        (first (filter (fn [t] (and (types/table-def? t) (= table-name (:name t))))
+                        (first (filter (fn [t]
+                                         (and (types/table-def? t)
+                                              (= table-name (name (:name t)))))
                                        (vals @types/*type-registry*))))]
       (when (types/table-def? table-def) table-def))
 
     (keyword? table-expr)
     (let [table-def (or (types/get-type (symbol (name table-expr)))
-                        (first (filter (fn [t] (and (types/table-def? t) (= (name table-expr) (:name t))))
+                        (first (filter (fn [t]
+                                         (and (types/table-def? t)
+                                              (= (name table-expr) (name (:name t)))))
                                        (vals @types/*type-registry*))))]
       (when (types/table-def? table-def) table-def))
 
@@ -70,6 +74,15 @@
 ;; ─────────────────────────────────────────────────────────────────────────────
 
 (declare analyze-expr cached-infer)
+
+(defn- merge-analyzed-shapes
+  [analyzed]
+  (let [shapes (keep (fn [v]
+                       (let [shape (or (:shape v) v)]
+                         (when (types/jsonb-shape? shape) shape)))
+                     analyzed)]
+    (when (seq shapes)
+      (reduce types/merge-shapes (types/empty-jsonb-shape) shapes))))
 
 (defn- analyze-table-op [op-sym args ctx]
   (let [op-info (get +pg-operations+ op-sym)
@@ -151,6 +164,14 @@
              (into {} (map (fn [[k v]] [(keyword (name k)) (analyze-expr v ctx)]) expr))
              nil :high false)}
 
+    ;; Set literal used as merged JSONB/object return
+    (set? expr)
+    (if-let [merged (merge-analyzed-shapes (map #(analyze-expr % ctx) expr))]
+      {:kind :shaped
+       :shape merged
+       :op :set-merge}
+      {:kind :unknown :expr expr})
+
     ;; Symbol lookup
     (symbol? expr)
     (or (types/get-var-shape ctx expr)
@@ -210,6 +231,10 @@
         (keyword? op)
         {:kind :cast :type op :expr (analyze-expr (first args) ctx)}
 
+        ;; Built-in SQL functions
+        (= "coalesce" op-name)
+        (analyze-expr (first args) ctx)
+
         ;; Function call tracing
         (symbol? op)
         (let [;; Resolve alias to full namespace if possible
@@ -229,7 +254,7 @@
                                         (vals @types/*type-registry*))))]
           (if fn-def
             (cached-infer fn-def)
-            {:kind :unknown :op op}))
+            {:kind :unknown :op resolved-op}))
 
         ;; Unknown
         :else {:kind :unknown :op op}))

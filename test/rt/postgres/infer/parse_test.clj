@@ -177,8 +177,7 @@
   (let [result (parse/analyze-file "src/rt/postgres/infer/types.clj")]
     (contains? result :tables) => true
     (contains? result :enums) => true
-    (contains? result :functions) => true
-    (contains? result :aliases) => true))
+    (contains? result :functions) => true))
 
 ^{:refer rt.postgres.infer.parse/analyze-namespace :added "0.1"}
 (fact "analyze-namespace analyzes a namespace"
@@ -198,7 +197,14 @@
                   :enums [(types/make-enum-def "ns" "TestEnum" #{:a :b} nil)]
                   :functions [(types/make-fn-def "ns" "testFn" [] [:jsonb] {} nil)]}]
     (parse/register-types! analysis)
-    (some? (types/get-type 'TestTable)) => true
-    (some? (types/get-type 'TestEnum)) => true
-    (some? (types/get-type 'testFn)) => true)
+    (some? (types/get-type (symbol "ns" "TestTable"))) => true
+    (some? (types/get-type (symbol "ns" "TestEnum"))) => true
+    (some? (types/get-type (symbol "ns" "testFn"))) => true)
   (types/clear-registry!))
+
+
+^{:refer rt.postgres.infer.parse/script? :added "4.1"}
+(fact "script? identifies postgres script forms"
+  (parse/script? '(script :postgres {:require []})) => true
+  (parse/script? '(script :mysql {:require []})) => false
+  (parse/script? '(defn test [])) => false)

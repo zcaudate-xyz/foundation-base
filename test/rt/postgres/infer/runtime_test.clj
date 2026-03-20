@@ -72,8 +72,9 @@
   (let [tables-map {:Table1 [:id {:type :uuid}]
                     :Table2 [:id {:type :uuid}]}
         loaded (runtime/load-runtime-tables tables-map)]
-    (:ns (:Table1 loaded)) => "gwdb.core"
-    (:ns (:Table2 loaded)) => "gwdb.core"))
+    ;; When tables have no namespace, ns will be nil
+    (:ns (:Table1 loaded)) => nil
+    (:ns (:Table2 loaded)) => nil))
 
 ;; -----------------------------------------------------------------------------
 ;; Register Runtime Tables Tests
@@ -83,11 +84,11 @@
 (fact "register-runtime-tables! registers tables in global registry"
   (types/clear-registry!)
   (let [tables {:User (types/make-table-def "gwdb.core" "User"
-                                             [{:name :id :type {:name :uuid}}]
-                                             :id)
+                                            [{:name :id :type {:name :uuid}}]
+                                            :id)
                 :Organisation (types/make-table-def "gwdb.core" "Organisation"
-                                                     [{:name :id :type {:name :uuid}}]
-                                                     :id)}]
+                                                    [{:name :id :type {:name :uuid}}]
+                                                    :id)}]
     (runtime/register-runtime-tables! tables)
     (types/get-type :User) => (:User tables)
     (types/get-type :Organisation) => (:Organisation tables)))
@@ -96,8 +97,8 @@
 (fact "register-runtime-tables! registers both keyword and symbol keys"
   (types/clear-registry!)
   (let [tables {:TestTable (types/make-table-def "gwdb.core" "TestTable"
-                                                [{:name :id :type {:name :uuid}}]
-                                                :id)}]
+                                                 [{:name :id :type {:name :uuid}}]
+                                                 :id)}]
     (runtime/register-runtime-tables! tables)
     ;; Should be registered under both :TestTable (keyword) and TestTable (symbol)
     (types/get-type :TestTable) => (:TestTable tables)
@@ -106,5 +107,5 @@
 ^{:refer rt.postgres.infer.runtime/register-runtime-tables! :added "0.1"}
 (fact "register-runtime-tables! handles empty table map"
   (types/clear-registry!)
-  (runtime/register-runtime-tables! {}) 
+  (runtime/register-runtime-tables! {})
   => nil)

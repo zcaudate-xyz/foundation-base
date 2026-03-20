@@ -282,7 +282,13 @@
                              :else (make-type-union [t1 t2])))
                          (:fields shape1)
                          (:fields shape2))
-          source-table (or (:source-table shape1) (:source-table shape2))]
+          source1 (:source-table shape1)
+          source2 (:source-table shape2)
+          source-table (cond
+                         (= source1 source2) source1
+                         (nil? source1) source2
+                         (nil? source2) source1
+                         :else nil)]
       (->JsonbShape merged-fields source-table :medium
                     (or (:nullable? shape1) (:nullable? shape2))))))
 

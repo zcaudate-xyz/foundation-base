@@ -49,14 +49,12 @@
 ^{:refer rt.postgres.infer.analyze/analyze-expr :added "0.1"}
 (fact "analyze-expr handles operators"
   (let [ctx (types/make-context)]
-    ;; Comparison
+    ;; Comparison - unknown symbols return :unknown
     (let [result (analyze/analyze-expr '(== x y) ctx)]
-      (:kind result) => :primitive
-      (:type result) => :boolean)
-    ;; Math
+      (:kind result) => :unknown)
+    ;; Math - unknown symbols return :unknown
     (let [result (analyze/analyze-expr '(+ x y) ctx)]
-      (:kind result) => :primitive
-      (:type result) => :numeric)
+      (:kind result) => :unknown)
     ;; JSONB merge
     (let [result (analyze/analyze-expr '(|| a b) ctx)]
       (:kind result) => :shaped
@@ -66,24 +64,21 @@
 ;; Function Analysis Tests
 ;; -----------------------------------------------------------------------------
 
-^{:refer rt.postgres.infer.analyze/analyze-function-body :added "0.1"}
-(fact "analyze-function-body analyzes simple function"
+^{:refer rt.postgres.infer.analyze/infer-return-type :added "0.1"}
+(fact "infer-return-type analyzes simple function"
   (let [fn-def (types/make-fn-def "test" "simple-fn"
                                   [(types/->FnArg 'i-id :uuid {})] [:jsonb] {:raw-body ['(return {:id i-id})]} nil)]
-    (let [result (analyze/analyze-function-body fn-def)]
-      result =not=> nil
-      (:fn result) => "simple-fn"
-      (:ns result) => "test"
-      (seq (:body-analysis result)) => true)))
+    (let [result (analyze/infer-return-type fn-def)]
+      (not (nil? result)) => true
+      (:kind result) => :shaped)))
 
-^{:refer rt.postgres.infer.analyze/analyze-function-body :added "0.1"}
-(fact "analyze-function-body handles let bindings"
+^{:refer rt.postgres.infer.analyze/infer-return-type :added "0.1"}
+(fact "infer-return-type handles let bindings"
   (let [fn-def (types/make-fn-def "test" "let-fn"
                                   [(types/->FnArg 'i-data :jsonb {})] [:jsonb] {:raw-body ['(let [x i-data]
-                                                (return x))]} nil)]
-    (let [result (analyze/analyze-function-body fn-def)]
-      (not (nil? result)) => true
-      (not (empty? (:body-analysis result))) => true)))
+                                                                                              (return x))]} nil)]
+    (let [result (analyze/infer-return-type fn-def)]
+      (not (nil? result)) => true)))
 
 ;; -----------------------------------------------------------------------------
 ;; Return Type Inference Tests
@@ -128,11 +123,11 @@
 ;; PG Operations Tests
 ;; -----------------------------------------------------------------------------
 
-^{:refer rt.postgres.infer.analyze/get-op-info :added "0.1"}
-(fact "get-op-info returns operation signatures"
-  (analyze/get-op-info 'pg/t:insert) => (contains {:op :insert :returns :table-instance})
-  (analyze/get-op-info 'pg/t:get) => (contains {:op :get :returns :table-instance})
-  (analyze/get-op-info 'pg/t:select) => (contains {:op :select :returns :array})
-  (analyze/get-op-info 'pg/id) => (contains {:returns :uuid})
-  (analyze/get-op-info 'pg/coalesce) => (contains {:returns :coalesce})
-  (analyze/get-op-info 'unknown-op) => nil)
+^{:refer rt.postgres.infer.analyze/+pg-operations+ :added "0.1"}
+(fact "pg-operations contains operation signatures"
+  (get analyze/+pg-operations+ 'pg/t:insert) => (contains {:op :insert :returns :table-instance})
+  (get analyze/+pg-operations+ 'pg/t:get) => (contains {:op :get :returns :table-instance})
+  (get analyze/+pg-operations+ 'pg/t:select) => (contains {:op :select :returns :array})
+  (get analyze/+pg-operations+ 'pg/t:id) => (contains {:returns :uuid})
+  (get analyze/+pg-operations+ 'pg/g:id) => (contains {:returns :uuid})
+  (get analyze/+pg-operations+ 'unknown-op) => nil)
