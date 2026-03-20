@@ -5,6 +5,12 @@
 Define a thin authoring model for `defentity.pg` that stays close to PG
 semantics while enabling output-file based generation.
 
+This model should work with the existing backbone:
+
+- `rt.postgres`
+- `xt.db`
+- `l/script :xtalk` `.clj` modules
+
 
 ## Design Constraints
 
@@ -28,7 +34,7 @@ semantics while enabling output-file based generation.
 
 ### 2. Normalized Entity Spec
 
-The true IR for generation should be plain data, not macro expansion.
+The true generation spec should be plain data, not macro expansion.
 
 The normalized entity spec should include:
 
@@ -59,7 +65,7 @@ flowchart LR
   AUTHOR["defentity.pg"]
   SPEC["normalized entity spec"]
   HELPER["helper generator"]
-  QUERY["query generator"]
+  QUERY["query/xt.db generator"]
   POLICY["policy generator"]
   TEST["test generator"]
   FILES["real output files"]
@@ -151,6 +157,16 @@ These should not be forced into `defentity.pg` yet:
 - client hook behavior
 - edge cache semantics
 - full sync runtime contracts
+
+### Explicit Backbone Constraint
+
+`defentity.pg` generation should not bypass `xt.db`.
+
+Later generation stages should be able to emit or support:
+
+- PG helper code
+- `xt.db`-compatible schema/query support
+- `l/script :xtalk` `.clj` operational modules that compose those pieces
 
 
 ## Near-Term Implementation Steps

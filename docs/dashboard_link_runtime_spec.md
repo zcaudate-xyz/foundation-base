@@ -8,6 +8,12 @@ Define the smallest useful client-facing contract for a Dashboard page that is:
 - refreshed only by server-originated `:db/sync`
 - testable before full UI implementation
 
+This link contract should sit on top of the real backbone:
+
+- `rt.postgres`
+- `xt.db`
+- `l/script :xtalk` `.clj` modules
+
 
 ## Core Rule
 
@@ -112,6 +118,9 @@ The page should not:
 - subscribe to raw `:db/sync` directly
 - manage query refresh logic
 - know transport details
+
+The page/link layer should consume an operational layer that can be implemented
+through `l/script :xtalk` `.clj` modules.
 
 
 ## Dashboard Test Model

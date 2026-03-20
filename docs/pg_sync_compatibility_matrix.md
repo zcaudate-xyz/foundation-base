@@ -12,10 +12,10 @@ architecture.
 | --- | --- | --- | --- | --- | --- |
 | `rt.postgres` grammar/runtime | Canonical implementation | Consumed | Consumed | Consumed | Strong |
 | `defpolicy.pg` / RLS | Canonical implementation | Mostly absent in old design | Active usage | Active usage | Strong outside `-core` |
-| `xt.db` graph query and sync layer | Canonical implementation | Heavy usage | Minimal | Minimal | Strong but aging |
+| `xt.db` graph query and sync layer | Canonical implementation and backbone | Heavy usage and reference architecture | Minimal | Minimal | Strong but aging |
 | `:db/sync` client convergence model | Partial primitives | Strong historical reference | Indirect | Indirect | Needs recovery |
 | sqlite client projection pattern | Driver + backend primitives | SQL/cache split present | Not central | Not central | Needs reconnection |
-| page-level data link model | Not defined | Implicit server contract | Not primary | Not primary | Missing in canonical form |
+| page-level data link model | Not defined as a stable product yet | Implicit server contract over `xt.db` patterns | Not primary | Not primary | Missing in canonical form |
 | helper function generation from entities | Partial | Macro-heavy legacy patterns | Strong | Strong | Good reference outside foundation |
 | code generation via output files | Emerging | Weak | Good | Good | Directionally correct |
 | infer/openapi/runtime type extraction | Strong and growing | Minimal | Minimal | Strong | Strong in foundation/gw-v2 |
@@ -39,12 +39,14 @@ Current role:
 - canonical home of `xt.db`
 - canonical location for driver contracts and SQL graph generation
 - best place to define the normalized spec used by generators
+- home of the most important backbone pieces
 
 Gaps:
 
 - no thin `defentity.pg` authoring model yet
 - no canonical page/link runtime contract yet
 - no explicit dashboard link test model yet
+- `xt.db` is not emphasized strongly enough as the preserved backbone in plans
 
 ### statstrade-core
 
@@ -58,7 +60,7 @@ Current role:
 
 - best reference for the old end-to-end architecture
 - strongest example of server query graph -> sqlite/cache -> page flow
-- strongest reference for where `xt.db` needs to be recovered
+- strongest reference for where `xt.db` needs to be recovered and preserved
 
 Gaps:
 
@@ -115,6 +117,7 @@ Gaps:
 - server-side policy and RLS
 - generated helper functions as normal output code
 - DB-first source of truth
+- `xt.db` as a major part of the query/sync backbone
 
 ### What must be rebuilt explicitly
 
@@ -136,4 +139,5 @@ Gaps:
 1. `foundation-base` should own the new normalized authoring/generation contract.
 2. `statstrade-core` should provide the first recovered vertical slice.
 3. `statstrade-v1` and `gw-v2` should inform helper generation and policy generation.
-4. The first client-facing target should be a minimal Dashboard/List link contract driven by `:db/sync`.
+4. `xt.db` should be treated as a preserved backbone subsystem, not a temporary bridge.
+5. The first client-facing target should be a minimal Dashboard/List link contract driven by `:db/sync`.

@@ -71,6 +71,25 @@ while also preserving newer work in:
 - Macros should stay thin.
 - Generated artifacts should be diffable and reviewable.
 
+### 7. `xt.db` Is Part Of The Backbone
+
+- `xt.db` is a major part of the architecture, not a side utility.
+- `xt.db` already carries graph query, sql/cache, pull, and sync-oriented
+  behavior.
+- Any revived end-to-end system should treat `rt.postgres` and `xt.db` as the
+  core pair.
+
+### 8. `l/script :xtalk` `.clj` Files Are The Shared Operational Layer
+
+- The shared intermediate/operational layer already exists in normal `.clj`
+  files.
+- The key marker is the presence of `l/script :xtalk`.
+- These modules already join:
+  - PG declarations
+  - `xt.db`
+  - Lua/server behavior
+  - JS/client behavior
+
 
 ## Repo Roles
 
@@ -83,6 +102,13 @@ Canonical substrate for:
 - DB driver contracts
 - SQL generation
 - sync architecture primitives
+
+Important shared-layer examples:
+
+- [src/xt/db.clj](/Users/chris/Development/greenways/foundation-base/src/xt/db.clj)
+- [src/xt/db/impl_sql.clj](/Users/chris/Development/greenways/foundation-base/src/xt/db/impl_sql.clj)
+- [src/statsapi/list/db_view_sql.clj](/Users/chris/Development/greenways/statstrade-core/src/statsapi/list/db_view_sql.clj)
+- [src/statsapi/list/db_view_cache.clj](/Users/chris/Development/greenways/statstrade-core/src/statsapi/list/db_view_cache.clj)
 
 ### statstrade-core
 
@@ -113,25 +139,32 @@ Reference for:
 
 ```mermaid
 flowchart LR
-  UI["UI"] --> PAGE["Page declaration"]
-  PAGE --> LINK["Dashboard/List link"]
-  LINK --> CALL["Server call layer"]
-  CALL --> DB["Postgres"]
-  DB --> SYNC[":db/sync"]
-  SYNC --> LINK
-  LINK --> PROJ["Client sqlite / local projection"]
-  PROJ --> UI
+  PG["rt.postgres<br/>entities, functions, policies"]
+  XDB["xt.db<br/>graph query, pull, sql/cache, sync"]
+  XT["xtalk .clj modules<br/>shared operational layer"]
+  LUA["Lua/server output"]
+  JS["JS/client output"]
+  PAGE["Page declaration"]
+  LINK["Dashboard/List link"]
+  PROJ["Client sqlite / local projection"]
+
+  PG --> XDB
+  PG --> XT
+  XDB --> XT
+  XT --> LUA
+  XT --> JS
+  JS --> LINK
+  PAGE --> LINK
+  LINK --> PROJ
 ```
 
 ### Meaning
 
-- UI renders current page state.
-- Page declaration describes what data/actions the page uses.
-- Link object coordinates queries, actions, and sync.
-- Server calls perform mutations or fetches.
-- Postgres commits canonical state.
-- Postgres emits `:db/sync`.
-- Link consumes `:db/sync` and refreshes local projection/state.
+- `rt.postgres` defines canonical database structures and commands.
+- `xt.db` defines a large part of query, pull, and sync behavior.
+- `l/script :xtalk` `.clj` files are the operational layer that connects these
+  pieces to Lua and JS.
+- Page/link code should sit above this backbone, not replace it.
 
 
 ## Authoring Direction
@@ -147,6 +180,12 @@ Primary authoring forms should remain close to:
 - `defpolicy.pg`
 
 The database layer remains the hard truth.
+
+The initial language should work with the existing backbone:
+
+- `rt.postgres`
+- `xt.db`
+- `l/script :xtalk` `.clj` modules
 
 ### defentity.pg
 
@@ -170,6 +209,11 @@ From entity specs, generators should emit normal source files for:
 - page data contracts
 - tests
 
+Later stages should also be able to emit or support:
+
+- `xt.db`-compatible schema/query layers
+- `l/script :xtalk` `.clj` operational modules
+
 
 ## Minimal Page Data Model
 
@@ -182,6 +226,8 @@ describe:
 - actions it can call
 - `:db/sync` tables/topics it listens to
 - filters/params
+
+This page layer should remain above the `rt.postgres` + `xt.db` backbone.
 
 Example conceptual form:
 
@@ -209,6 +255,9 @@ A compiled link spec should know:
 - named actions
 - listened `:db/sync` tables/topics
 - params and filters
+
+This can later be implemented over `l/script :xtalk` `.clj` modules rather
+than ad hoc UI glue.
 
 ### Live Link Instance
 
@@ -349,3 +398,5 @@ The current direction is:
 - simple declarative page data contracts
 - code generation through real output files
 - testing centered on data convergence before UI rendering
+- `xt.db` as a major part of the backbone
+- `l/script :xtalk` `.clj` modules as the shared operational layer
