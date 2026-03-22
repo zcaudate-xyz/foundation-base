@@ -240,12 +240,11 @@
         (symbol? op)
         (let [;; Resolve alias to full namespace if possible
               aliases (:aliases ctx {})
-              op-str (str op)
-              resolved-op (if (clojure.string/includes? op-str "/")
-                            (let [[alias-part fn-part] (clojure.string/split op-str #"/")
-                                  alias-sym (symbol alias-part)]
+              op-ns (namespace op)
+              resolved-op (if op-ns
+                            (let [alias-sym (symbol op-ns)]
                               (if-let [full-ns (get aliases alias-sym)]
-                                (symbol (str full-ns "/" fn-part))
+                                (symbol (str full-ns) op-name)
                                 op))
                             op)
               fn-def (or (types/get-type resolved-op)

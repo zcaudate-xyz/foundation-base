@@ -2,6 +2,7 @@
   (:use code.test)
   (:require [rt.postgres.grammar.typed-parse :as parse]
             [rt.postgres.grammar.typed-analyze :as analyze]
+            [rt.postgres.grammar.typed-common :as types]
             [clojure.string :as str]))
 
 (defn- get-scratch-fn
@@ -41,16 +42,62 @@
 
 
 ^{:refer rt.postgres.grammar.typed-analyze/analyze-expr :added "4.1"}
-(fact "TODO")
+(fact "analyze-expr infers map literals and table operations"
+  (types/clear-registry!)
+  (-> 'rt.postgres.script.test.scratch-v2
+      parse/analyze-namespace
+      parse/register-types!)
+  (let [ctx (types/make-context)]
+    (get-in (analyze/analyze-expr {:id 1 :name "x"} ctx)
+            [:shape :fields :id :type])
+    => :integer
+
+    (select-keys (analyze/analyze-expr '(pg/g:insert -/Entry {:name i-name :tags i-tags} {:track o-op})
+                                       ctx)
+                 [:kind :table])
+    => {:kind :shaped
+        :table "Entry"}))
 
 ^{:refer rt.postgres.grammar.typed-analyze/infer-return-type :added "4.1"}
-(fact "TODO")
+(fact "infer-return-type analyzes the last form in the function body"
+  (types/clear-registry!)
+  (let [analysis (-> 'rt.postgres.script.test.scratch-v2
+                     parse/analyze-namespace
+                     parse/register-types!)
+        fn-def (some #(when (= "insert-entry" (:name %)) %)
+                     (:functions analysis))]
+    (select-keys (analyze/infer-return-type fn-def)
+                 [:source-table :confidence]))
+  => {:source-table "Entry"
+      :confidence :high})
 
 ^{:refer rt.postgres.grammar.typed-analyze/reset-cache! :added "4.1"}
-(fact "TODO")
+(fact "reset-cache! clears the infer cache"
+  (reset! analyze/*infer-cache* {'demo/test {:kind :primitive}})
+  (analyze/reset-cache!)
+  @analyze/*infer-cache*
+  => {})
 
 ^{:refer rt.postgres.grammar.typed-analyze/cached-infer :added "4.1"}
-(fact "TODO")
+(fact "cached-infer memoizes function inference by namespace and name"
+  (types/clear-registry!)
+  (let [analysis (-> 'rt.postgres.script.test.scratch-v2
+                     parse/analyze-namespace
+                     parse/register-types!)
+        fn-def (some #(when (= "insert-entry" (:name %)) %)
+                     (:functions analysis))]
+    (analyze/reset-cache!)
+    (analyze/cached-infer fn-def)
+    (keys @analyze/*infer-cache*))
+  => ['rt.postgres.script.test.scratch-v2/insert-entry])
 
 ^{:refer rt.postgres.grammar.typed-analyze/json-safe :added "4.1"}
-(fact "TODO")
+(fact "json-safe normalizes nested keywords, symbols, and sets"
+  (analyze/json-safe {:a :kw
+                      :b 'sym
+                      :c #{2 1}
+                      :d {'inner :v}})
+  => {:a "kw"
+      :b "sym"
+      :c [1 2]
+      :d {"inner" "v"}})

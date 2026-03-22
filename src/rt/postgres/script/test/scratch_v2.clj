@@ -7,7 +7,8 @@
    :import [["citext"]
             ["uuid-ossp"]]
    :config {:dbname "test-scratch"}
-   :static {:application ["scratch"]
+   :static {:application ["scratch-v2"]
+            :seed        ["scratch-v2"]
             :all {:schema ["scratch-v2"]}}})
 
 (defn.pg as-array

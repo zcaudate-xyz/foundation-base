@@ -272,10 +272,10 @@
   {:added "4.0"}
   [app & [update-key]]
   (let [{:keys [pointers]} app
-        module-lu    (zipmap (h/deps:ordered
-                              (l/get-book (l/default-library)
-                                          :postgres)
-                              (dedupe (map :module (vals pointers))))
+        module-lu    (zipmap (reverse (h/deps:ordered
+                                       (l/get-book (l/default-library)
+                                                   :postgres)
+                                       (dedupe (map :module (vals pointers)))))
                              (range))
         entries (->> (mapv l/get-entry (vals pointers))
                      (sort-by (fn [{:keys [module line]}]
@@ -342,4 +342,3 @@
 
 (comment
   (./create-tests))
-

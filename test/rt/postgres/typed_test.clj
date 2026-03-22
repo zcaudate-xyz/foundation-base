@@ -186,10 +186,26 @@
 
 
 ^{:refer rt.postgres.typed/make-function-report :added "4.1"}
-(fact "TODO")
+(fact "make-function-report returns a function-level infer report"
+  (let [report (typed/make-function-report 'rt.postgres.script.test.scratch-v2
+                                           'insert-entry)]
+    (get-in report [:function :name]) => "insert-entry"
+    (get-in report [:analysis :mutating]) => true
+    (get-in report [:analysis :source-tables]) => ["Entry"]))
 
 ^{:refer rt.postgres.typed/report-json :added "4.1"}
-(fact "TODO")
+(fact "report-json serializes reports"
+  (let [report (typed/make-function-report 'rt.postgres.script.test.scratch-v2
+                                           'insert-entry)
+        output (typed/report-json report true)]
+    (string? output) => true
+    (clojure.string/includes? output "\"insert-entry\"") => true))
 
 ^{:refer rt.postgres.typed/make-function-json :added "4.1"}
-(fact "TODO")
+(fact "make-function-json returns serialized analysis for a function"
+  (let [output (typed/make-function-json 'rt.postgres.script.test.scratch-v2
+                                         'insert-entry
+                                         true)]
+    (string? output) => true
+    (clojure.string/includes? output "\"function\"") => true
+    (clojure.string/includes? output "\"Entry\"") => true))

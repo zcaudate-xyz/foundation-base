@@ -433,4 +433,10 @@
 
 
 ^{:refer rt.postgres.grammar.typed-common/add-typed :added "4.1"}
-(fact "TODO")
+(fact "add-typed stores table, enum, and function defs by stable key"
+  (let [table (types/make-table-def "demo" "User" [] :id)
+        enum (types/make-enum-def "demo" "Status" #{:active} nil)
+        fn-def (types/make-fn-def "demo" "get-user" [] [:jsonb] {} nil)]
+    (keys (:tables (types/add-typed (types/empty-typed) table))) => ['demo/User]
+    (keys (:enums (types/add-typed (types/empty-typed) enum))) => ['demo/Status]
+    (keys (:functions (types/add-typed (types/empty-typed) fn-def))) => ['demo/get-user]))

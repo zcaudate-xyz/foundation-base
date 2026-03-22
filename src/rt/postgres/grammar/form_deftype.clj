@@ -100,6 +100,7 @@
            [(str/snake-case (h/strn col))
             [(common/pg-type-alias type)]])
          col-attrs (cond-> col-attrs
+                     primary  (conj :primary-key)
                      (= type :enum) (pg-deftype-enum-col enum mopts)
                      required (conj :not-null)
                      unique   (conj :unique)
@@ -139,7 +140,7 @@
    (let [schema-primary (if (map? schema-primary)
                           [schema-primary]
                           schema-primary)]
-     (if (seq schema-primary)
+     (if (< 1 (count schema-primary))
        [(list :-
               [:primary-key
                (list 'quote
@@ -229,14 +230,20 @@
 
          local-cols (map (comp symbol :local-col) entries)
          remote-cols (map (comp symbol name :remote-col) entries)
+         remote-token (common/pg-base-token #{remote-table} remote-schema)
+         remote-refs  (list 'quote remote-cols)
+         refs-form    (if (seq? remote-token)
+                        [(list remote-token remote-refs)]
+                        [remote-token remote-refs])
          
          cascade (some :cascade entries)]
 
-     (list '% (cond-> [:constraint (symbol c-name)
-                       :foreign-key (list 'quote local-cols)
-                       :references (common/pg-base-token #{remote-table} remote-schema)
-                       (list 'quote remote-cols)]
-                cascade (conj :on-delete-cascade))))))
+     (list '%
+           (cond-> (vec (concat [:constraint (symbol c-name)
+                                 :foreign-key (list 'quote local-cols)
+                                 :references]
+                                refs-form))
+             cascade (conj :on-delete-cascade))))))
 
 (defn pg-deftype-foreigns
   "creates foreign key constraints"
@@ -454,5 +461,3 @@
      (list op (with-meta sym (merge msym fmeta qmeta))
            spec
            params)]))
-
-

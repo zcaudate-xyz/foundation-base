@@ -47,8 +47,8 @@
                    :time-updated :time}}
    :ignore #{:delete}})
 
-(deftype.pg ^{:track  [TrackingMin]
-              :append [RecordType]
+(deftype.pg ^{:track  [-/TrackingMin]
+              :append [-/RecordType]
               :public true}
   TaskCache
   "constructs a task cache"
@@ -57,9 +57,9 @@
                :web {:example "AUD"}
                :sql {:default (rt.postgres/uuid-generate-v4)}}])
 
-(deftype.pg ^{:track   [TrackingMin]
-              :prepend [[Id :id {:web {:example "00000000-0000-0000-0000-000000000000"}}]]
-              :append  [RecordType]
+(deftype.pg ^{:track   [-/TrackingMin]
+              :prepend [[-/Id :id {:web {:example "00000000-0000-0000-0000-000000000000"}}]]
+              :append  [-/RecordType]
               :public true}
   Task
   "constructs a task"
@@ -73,9 +73,9 @@
    :cache    {:type :ref :required true
               :ref {:ns -/TaskCache}}])
 
-(deftype.pg ^{:track   [TrackingMin]
-              :prepend [[Id :id {:web {:example "00000000-0000-0000-0000-000000000000"}}]]
-              :append  [RecordType]
+(deftype.pg ^{:track   [-/TrackingMin]
+              :prepend [[-/Id :id {:web {:example "00000000-0000-0000-0000-000000000000"}}]]
+              :append  [-/RecordType]
               :public true}
   Entry
   "construcs an entry"

@@ -53,7 +53,7 @@
   ^:hidden
 
   (addon/full-str scratch/Task)
-  => "[\"scratch\",\"Task\"]")`5
+  => "[\"scratch\",\"Task\"]")
 
 ^{:refer rt.postgres.script.addon/rand-hex :added "4.0"}
 (fact "generates random hex"
@@ -212,7 +212,7 @@
    '(let [(:integer a) 1
           (:integer b) 1]
       (:= a (+ a b))))
-  => nil)
+  => 0)
 
 ^{:refer rt.postgres.script.addon/name :added "4.0"}
 (fact "gets the name of a table"

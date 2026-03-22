@@ -254,6 +254,14 @@
   [returning key-fn]
   (mapv (comp hash-set ut/sym-default-str) returning))
 
+(defn- t-join-target-sym
+  [link]
+  (let [module (or (:module link) (:ns link))
+        id     (:id link)]
+    (when (and module id)
+      (ut/sym-full (symbol (name module))
+                   (symbol (name id))))))
+
 (defn t-returning-cols
   "formats returning cols given"
   {:added "4.0"}
@@ -408,24 +416,25 @@
                     (let [[{:keys [type ref] :as attr}] (get tsch k)]
                       (cond (= :ref type)
                             (let [{:keys [link]} ref
-                                  target-sym (ut/sym-full link)
+                                  target-sym (t-join-target-sym link)
                                   source-col (t-key-fn tsch k)
                                   target-col "id"]
-                              [:left-join target-sym :on [:= (list '. source-sym source-col)
-                                                             (list '. target-sym target-col)]])
+                              [:left-join target-sym :on [:= (list '. #{source-sym} #{source-col})
+                                                             (list '. target-sym #{target-col})]])
                              
                             :else
                             (h/error "Key is not a ref." {:key k :attr attr}))))]
-     (mapcat (fn [x]
-               (cond (keyword? x)
-                     [(entry-fn x)]
-                     
-                     (vector? x)
-                     [x]
-                     
-                     :else
-                     [x]))
-             join))))
+     (vec
+      (mapcat (fn [x]
+                (cond (keyword? x)
+                      [(entry-fn x)]
+                      
+                      (vector? x)
+                      [x]
+                      
+                      :else
+                      [x]))
+              join)))))
 
 (defn t-wrap-join
   "adds a `join` clause"
@@ -548,5 +557,3 @@
        (cond-> form
          newline (conj \\)
          clause  (into clause))))))
-
-

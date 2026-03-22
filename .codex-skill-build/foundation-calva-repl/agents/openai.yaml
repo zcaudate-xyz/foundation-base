@@ -1,0 +1,4 @@
+interface:
+  display_name: "Foundation Calva REPL"
+  short_description: "Calva MCP workflow for foundation-base"
+  default_prompt: "Use $foundation-calva-repl to drive a foundation-base Clojure change through Calva MCP, REPL checks, structural edits, and targeted code.test validation."

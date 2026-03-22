@@ -12,6 +12,10 @@
 
 (declare shape->openapi shape->jschema shape->ts-interface resolve-table-def infer-jsonb-arg-shape*)
 
+(defn- def-name
+  [x]
+  (some-> x :name name))
+
 ;; ─────────────────────────────────────────────────────────────────────────────
 ;; Type Resolution
 ;; Uses centralized +type-formats+ registry
@@ -349,7 +353,7 @@
        "Filters registry values to unique definitions by name."
        [defs]
        (->> defs
-            (group-by :name)
+            (group-by def-name)
             (map (fn [[_ v]] (first v)))))
 
 (defn generate-openapi
@@ -374,8 +378,8 @@
             :components
             {:schemas (into (sorted-map)
                             (concat
-                             (map (fn [t] [(:name t) (shape->openapi (shape/table->shape t))]) tables)
-                             (map (fn [e] [(:name e) {:type "string" :enum (mapv name (:values e))}]) enums)))}
+                             (map (fn [t] [(def-name t) (shape->openapi (shape/table->shape t))]) tables)
+                             (map (fn [e] [(def-name e) {:type "string" :enum (mapv name (:values e))}]) enums)))}
             :security [{"bearerAuth" []}]
             :securityDefinitions {"bearerAuth" {:type "http" :scheme "bearer" :bearerFormat "JWT"}}}))
 
@@ -421,8 +425,8 @@
            {:$schema "http://json-schema.org/draft-07/schema#"
             :definitions (into (sorted-map)
                                (concat
-                                (map (fn [t] [(:name t) (shape->jschema (shape/table->shape t))]) tables)
-                                (map (fn [e] [(:name e) {:type "string" :enum (mapv name (:values e))}]) enums)))}))
+                                (map (fn [t] [(def-name t) (shape->jschema (shape/table->shape t))]) tables)
+                                (map (fn [e] [(def-name e) {:type "string" :enum (mapv name (:values e))}]) enums)))}))
 
 ;; ─────────────────────────────────────────────────────────────────────────────
 ;; TypeScript Generation
@@ -474,10 +478,10 @@
             tables (filter types/table-def? all)
             enums (filter types/enum-def? all)
             enum-types (map (fn [e]
-                                (str "export type " (:name e) " = "
+                                (str "export type " (def-name e) " = "
                                      (str/join " | " (sort (map #(str "\"" (name %) "\"") (:values e)))) ";"))
                             enums)
-            table-interfaces (map (fn [t] (shape->ts-interface (shape/table->shape t) (:name t))) tables)]
+            table-interfaces (map (fn [t] (shape->ts-interface (shape/table->shape t) (def-name t))) tables)]
            (str/join "\n\n" (concat enum-types table-interfaces))))
 
 ;; ─────────────────────────────────────────────────────────────────────────────

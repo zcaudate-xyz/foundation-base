@@ -39,9 +39,10 @@
    [:select (pg/jsonb-agg '("A" "B"))])
   => [{:f1 "A", :f2 "B"}]
   
-  (!.pg
-   [:select (pg/array-agg '("A" "B"))])
-  => '(("A" "B"))
+  (mapv str
+        (!.pg
+         [:select (pg/array-agg '("A" "B"))]))
+  => ["(A,B)"]
 
   (!.pg
    [:select * :from '("A" "B")])
@@ -49,7 +50,7 @@
   
   (!.pg
    '("A" "B"))
-  => '("A" "B")
+  => "(A,B)"
 
   (!.pg
    (array "A" "B"))
@@ -63,7 +64,7 @@
    [:select '(a b)
     :from (unnest (array "A" "B")) a
     :cross-join (unnest (array "X" "Y")) b])
-  => '(("A" "X") ("A" "Y") ("B" "X") ("B" "Y")))
+  => '("(A,X)" "(A,Y)" "(B,X)" "(B,Y)"))
 
 ^{:refer rt.postgres.grammar/CANARY.json :adopt true :added "4.0"}
 (fact "BASIC JSON SELECT"

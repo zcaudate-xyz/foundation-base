@@ -1,5 +1,6 @@
 (ns rt.postgres.client-impl
-  (:require [std.lang.base.pointer :as ptr]
+  (:require [clojure.string :as str]
+            [std.lang.base.pointer :as ptr]
             [std.lang.base.util :as ut]
             [std.lang.base.impl :as impl]
             [std.lang.base.library :as lib]
@@ -105,9 +106,27 @@
                                        forms
                                        (if add-select
                                          (first forms)
-                                         (apply list 'do forms))))}})]
-      (binding [conn/*execute* (if (and bulk
-                                        (not add-select))
+                                         (apply list 'do forms))))}})
+          stmt (some-> body str/trim str/upper-case)
+          execute-only? (some #(str/starts-with? stmt %)
+                              ["DO "
+                               "BEGIN "
+                               "DECLARE "
+                               "INSERT "
+                               "UPDATE "
+                               "DELETE "
+                               "CREATE "
+                               "CREATE SCHEMA "
+                               "DROP "
+                               "ALTER "
+                               "GRANT "
+                               "REVOKE "
+                               "TRUNCATE "
+                               "COMMENT "
+                               "VACUUM "])]
+      (binding [conn/*execute* (if (or execute-only?
+                                        (and bulk
+                                             (not add-select)))
                                  jdbc/execute
                                  jdbc/fetch)]
         (ptr/ptr-invoke pg

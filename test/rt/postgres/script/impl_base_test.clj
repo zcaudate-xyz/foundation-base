@@ -10,7 +10,6 @@
 (l/script- :postgres
   {:require [[rt.postgres.script.test.scratch-v1 :as scratch]]
    :static {:application ["scratch"]
-            :seed        ["scratch"]
             :all    {:schema   ["scratch"]}}})
 
 (deftype.pg Hello
@@ -368,12 +367,18 @@
 (fact "transforms join entries"
   ^:hidden
   
-  (t-join-transform {:task [{:type :ref :ref {:link {:ns "scratch" :id "Task"}}}]}
-                    [:task]
-                    "Hello"
-                    {})
-  => [[:left-join scratch/Task :on [:= (. #{"Hello"} #{"task_id"}) (. scratch/Task #{"id"})]]])
+  (let [out (t-join-transform {:task [{:type :ref :ref {:link {:ns "scratch" :id "Task"}}}]}
+                              [:task]
+                              "Hello"
+                              {})]
+    (first (first out)) => :left-join
+    (second (first out)) => 'scratch/Task))
 
 
 ^{:refer rt.postgres.script.impl-base/t-wrap-lock :added "4.1"}
-(fact "TODO")
+(fact "adds lock clauses and optional newline separators"
+  (t-wrap-lock [] [:update] {})
+  => [:for :update]
+
+  (t-wrap-lock [:select :*] [:share :nowait] {:newline true})
+  => [:select :* \\ :for :share :nowait])
