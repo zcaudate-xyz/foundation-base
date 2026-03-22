@@ -1,0 +1,23 @@
+#!/bin/bash
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+
+get_classpath() {
+    local cp_file="${PROJECT_ROOT}/.cpcache/classpath"
+    if [[ -f "$cp_file" && "$cp_file" -nt "${PROJECT_ROOT}/project.clj" ]]; then
+        cat "$cp_file"
+    else
+        mkdir -p "${PROJECT_ROOT}/.cpcache"
+        (
+            cd "$PROJECT_ROOT"
+            lein classpath > "$cp_file"
+        )
+        cat "$cp_file"
+    fi
+}
+
+cd "$PROJECT_ROOT"
+java -cp "$(get_classpath)" clojure.main scripts/replace_std_aggregate_refs.clj "$@"

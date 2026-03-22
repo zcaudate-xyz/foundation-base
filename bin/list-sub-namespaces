@@ -1,0 +1,81 @@
+#!/bin/bash
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+
+get_classpath() {
+    local cp_file="${PROJECT_ROOT}/.cpcache/classpath"
+    if [[ -f "$cp_file" && "$cp_file" -nt "${PROJECT_ROOT}/project.clj" ]]; then
+        cat "$cp_file"
+    else
+        mkdir -p "${PROJECT_ROOT}/.cpcache"
+        (
+            cd "$PROJECT_ROOT"
+            lein classpath > "$cp_file"
+        )
+        cat "$cp_file"
+    fi
+}
+
+run_clojure() {
+    local prefixes_edn="$1"
+    (
+        cd "$PROJECT_ROOT"
+        java -cp "$(get_classpath)" clojure.main -e "
+(do
+  (require '[clojure.java.io :as io]
+           '[clojure.string :as str]
+           '[clojure.tools.reader :as tr])
+
+  (def prefixes ${prefixes_edn})
+
+  (defn read-ns-form [file]
+    (with-open [reader (java.io.PushbackReader. (io/reader file))]
+      (tr/read {:read-cond :allow} reader)))
+
+  (defn namespace-from-file [file]
+    (try
+      (let [form (read-ns-form file)]
+        (when (and (seq? form)
+                   (= 'ns (first form)))
+          (str (second form))))
+      (catch Throwable _
+        nil)))
+
+  (defn clj-source-files [root]
+    (->> (file-seq (io/file root))
+         (filter #(.isFile %))
+         (filter #(str/ends-with? (.getName %) \".clj\"))))
+
+  (defn sub-namespaces [prefix]
+    (let [prefix-text (str prefix)]
+      (->> (clj-source-files \"src\")
+           (keep namespace-from-file)
+           distinct
+           sort
+           (filter #(str/starts-with? % (str prefix-text \".\"))))))
+
+  (doseq [prefix prefixes]
+    (println prefix)
+    (doseq [ns-name (sub-namespaces prefix)]
+      (println (str \"  \" ns-name)))
+    (println)))
+"
+    )
+}
+
+if [[ $# -eq 0 ]]; then
+    prefixes=("std.lib" "std.string")
+else
+    prefixes=("$@")
+fi
+
+prefixes_edn="["
+for prefix in "${prefixes[@]}"; do
+    prefixes_edn+="\"${prefix}\" "
+done
+prefixes_edn+="]"
+
+run_clojure "$prefixes_edn"

@@ -45,7 +45,7 @@
 (fact "transforms string to seperated newlines"
 
   (lines "abc\ndef")
-  => '(std.string/| "abc" "def"))
+  => '(std.string.prose/| "abc" "def"))
 
 (fact "replace-at"
   (replace-at "abcde" 2 "X")

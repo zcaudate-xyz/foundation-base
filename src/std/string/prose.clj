@@ -96,6 +96,24 @@
   [arr]
   (common/join "\n" arr))
 
+(defn |
+  "shortcut for join lines
+ 
+   (| \"abc\" \"def\")
+   => \"abc\\ndef\""
+  {:added "3.0"}
+  [& args]
+  (common/join "\n" args))
+
+(defn lines
+  "transforms string to seperated newlines
+ 
+   (lines \"abc\\ndef\")
+   => '(std.string.prose/| \"abc\" \"def\")"
+  {:added "3.0"}
+  [s]
+  (cons `| (common/split-lines s)))
+
 (defn spaces
   "create `n` spaces
  

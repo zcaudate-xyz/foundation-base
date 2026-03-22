@@ -15,21 +15,3 @@
               std.string.prose)
 
 (h/intern-in wrap/wrap)
-
-(defn |
-  "shortcut for join lines
- 
-   (| \"abc\" \"def\")
-   => \"abc\\ndef\""
-  {:added "3.0"}
-  [& args]
-  (join "\n" args))
-
-(defn lines
-  "transforms string to seperated newlines
- 
-   (lines \"abc\\ndef\")
-   => '(std.string/| \"abc\" \"def\")"
-  {:added "3.0"}
-  [s]
-  (cons `| (split-lines s)))

@@ -63,6 +63,18 @@
   (join-lines ["hello" "world"])
   => "hello\nworld")
 
+^{:refer std.string.prose/| :added "3.0"}
+(fact "joins args with newlines"
+
+  (| "abc" "def")
+  => "abc\ndef")
+
+^{:refer std.string.prose/lines :added "3.0"}
+(fact "transforms a string to newline separated forms"
+
+  (lines "abc\ndef")
+  => '(std.string.prose/| "abc" "def"))
+
 ^{:refer std.string.prose/spaces :added "4.0"}
 (fact "create `n` spaces"
 
