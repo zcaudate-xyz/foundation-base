@@ -1,6 +1,6 @@
 (ns std.image.awt.rendering-test
-  (:use code.test)
   (:require [std.image.awt.rendering :refer :all])
+  (:use code.test)
   (:import java.awt.RenderingHints))
 
 ^{:refer std.image.awt.rendering/hint-options :added "3.0"}

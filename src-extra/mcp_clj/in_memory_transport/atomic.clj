@@ -1,9 +1,6 @@
 (ns mcp-clj.in-memory-transport.atomic
   "Type-hinted wrapper functions for Java atomic operations"
-  (:import
-    (java.util.concurrent.atomic
-      AtomicBoolean
-      AtomicLong)))
+  (:import (java.util.concurrent.atomic AtomicBoolean AtomicLong)))
 
 ;; AtomicBoolean operations
 

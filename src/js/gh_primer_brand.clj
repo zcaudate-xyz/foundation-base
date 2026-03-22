@@ -1,12 +1,12 @@
 (ns js.gh-primer-brand
   (:require [std.lang :as l]
-            [std.lib :as h]))
+            [std.lib.foundation :as f]))
 
 (l/script :js
   {:import [["@primer/react-brand" :as PrimerBrand]
             ["@primer/react-brand" :as PrimerBrand]]})
 
-(h/template-entries [l/tmpl-entry {:type :fragment
+(f/template-entries [l/tmpl-entry {:type :fragment
                                    :base "PrimerBrand"
                                    :tag "js"}]
   [Accordion

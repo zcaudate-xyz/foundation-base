@@ -1,8 +1,9 @@
 (ns lib.docker.common
-  (:require [std.lib :as h]
+  (:require [clojure.string]
             [std.concurrent :as cc]
             [std.json :as json]
-            [std.string :as str]))
+            [std.lib.foundation :as f]
+            [std.lib.os :as os]))
 
 (defonce ^:dynamic *host* (System/getenv "DOCKER_HOST"))
 
@@ -12,9 +13,9 @@
   "executes a shell command"
   {:added "4.0" :guard true}
   [args opts]
-  (let [lines (->> @(apply h/sh args)
-                   (str/trim)
-                   (str/split-lines)
+  (let [lines (->> @(apply os/sh args)
+                   (clojure.string/trim)
+                   (clojure.string/split-lines)
                    (filter not-empty))]
     (cond->> lines
       (:json opts) (mapv #(json/read % json/+keyword-mapper+)))))
@@ -90,26 +91,26 @@
          args (reduce (fn [args ports]
                         (conj args "-p"
                               (if (vector? ports)
-                                (str/join ":" ports)
+                                (clojure.string/join ":" ports)
                                 ports)))
                       args
                       expose)
          args (if (not no-host)
                 (conj args "--add-host=host.docker.internal:host-gateway")
                 args)
-         name (str group "_" (or id (h/error "Id required")))
+         name (str group "_" (or id (f/error "Id required")))
          args (apply conj args "--name" name image cmd)
          cid  (cond (has-container? m)
                     nil
                     
                     :else
-                    @(apply h/sh (concat ["docker" "run"]
+                    @(apply os/sh (concat ["docker" "run"]
                                          (when *host* ["--host" *host*])
                                          (if detached ["-d"])
                                          (if remove ["--rm"])
                                          flags args)))
          cid   (if (empty? cid)
-                 @(h/sh {:args (concat ["docker" "ps"]
+                 @(os/sh {:args (concat ["docker" "ps"]
                                        (when *host* ["--host" *host*])
                                        ["-aqf" (str "name=^" name "$")])})
                  cid)
@@ -126,6 +127,6 @@
   ([{:keys [group id] :as m
      :or {group "testing"}}]
    (when (has-container? m)
-     @(h/sh {:args (concat ["docker" "kill"]
+     @(os/sh {:args (concat ["docker" "kill"]
                            (when *host* ["--host" *host*])
-                           [(str group "_" (or id (h/error "Id required")))])}))))
+                           [(str group "_" (or id (f/error "Id required")))])}))))

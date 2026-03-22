@@ -1,10 +1,10 @@
 (ns xt.db.sample-test
-  (:use code.test)
-  (:require [std.lib :as h]
+  (:require [rt.postgres :as pg]
             [std.lang :as l]
-            [xt.db.sample-user-test :as user]
+            [std.lib.collection :as collection]
             [xt.db.sample-data-test :as data]
-            [rt.postgres :as pg]))
+            [xt.db.sample-user-test :as user])
+  (:use code.test))
 
 (l/script :xtalk
   {:require [[xt.lang.base-lib :as k]]})
@@ -206,13 +206,13 @@
 
 (comment
   (keys +app+)
-  (h/qualified-keys @(get (:pointers +app+)
+  (collection/qualified-keys @(get (:pointers +app+)
                           'UserNotification)
                     
                     
                     :static)
   
-  (h/qualified-keys @(get (:pointers +app+)
+  (collection/qualified-keys @(get (:pointers +app+)
                           'UserNotification)
                     
                     

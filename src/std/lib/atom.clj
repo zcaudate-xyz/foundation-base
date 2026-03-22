@@ -1,6 +1,6 @@
 (ns std.lib.atom
-  (:require [std.lib.foundation :as h]
-            [std.lib.collection :as c]))
+  (:require [std.lib.collection :as c]
+            [std.lib.foundation :as h]))
 
 (defn update-diff
   "updates a diff in a sub nesting"

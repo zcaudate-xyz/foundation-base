@@ -1,7 +1,9 @@
 (ns std.task
-  (:require [std.protocol.invoke :as protocol.invoke]
-            [std.task.process :as process]
-            [std.lib :as h :refer [defimpl definvoke]]))
+  (:require [std.lib.collection :as collection]
+            [std.lib.impl :as impl]
+            [std.lib.invoke :as invoke]
+            [std.protocol.invoke :as protocol.invoke]
+            [std.task.process :as process]))
 
 (defmulti task-defaults
   "creates default settings for task groups"
@@ -18,7 +20,7 @@
   ([task]
    (str "#task" (task-status task) " " (task-info task))))
 
-(defimpl Task [type name main construct arglists item result summary]
+(impl/defimpl Task [type name main construct arglists item result summary]
   :invoke process/invoke
   :string task-string
   :final true)
@@ -54,10 +56,10 @@
                          [arg (-> arg :main :fn)]
                          [{} arg])
          defaults     (task-defaults type)
-         params       (h/merge-nested defaults params)
+         params       (collection/merge-nested defaults params)
          count        (or (-> params :main :argcount) 4)
          [main args?] (process/main-function main count)]
-     (task (h/merge-nested defaults
+     (task (collection/merge-nested defaults
                            params
                            {:main {:fn main
                                    :args? args?}
@@ -70,7 +72,7 @@
   ([x]
    (instance? Task x)))
 
-(definvoke invoke-intern-task
+(invoke/definvoke invoke-intern-task
   "creates a form defining a task"
   {:added "3.0"}
   [:method {:multi protocol.invoke/-invoke-intern

@@ -1,6 +1,6 @@
 (ns std.lib.schema.impl-test
-  (:use code.test)
-  (:require [std.lib.schema.impl :refer :all]))
+  (:require [std.lib.schema.impl :refer :all])
+  (:use code.test))
 
 ^{:refer std.lib.schema.impl/simplify :added "3.0"}
 (fact "helper function for easier display of spirit schema"

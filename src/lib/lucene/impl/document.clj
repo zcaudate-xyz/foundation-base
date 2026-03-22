@@ -1,13 +1,10 @@
 (ns lib.lucene.impl.document
-  (:require [std.object :as object]
+  (:require [std.lib.collection :as collection]
+            [std.lib.foundation :as f]
+            [std.object :as object]
             [std.object.framework.read :as read]
-            [std.object.framework.write :as write]
-            [std.lib :as h])
-  (:import (org.apache.lucene.document FieldType
-                                       Field
-                                       Document)
-           (org.apache.lucene.index DocValuesType
-                                    IndexOptions)))
+            [std.object.framework.write :as write])
+  (:import (org.apache.lucene.document FieldType Field Document) (org.apache.lucene.index DocValuesType IndexOptions)))
 
 (defonce +getter-opts+
   (assoc read/+read-get-opts+ :prefix ""))
@@ -46,7 +43,7 @@
    #{:doc :freq :position :offset} IndexOptions/DOCS_AND_FREQS_AND_POSITIONS_AND_OFFSETS})
 
 (def +field-type-rlu+
-  (h/transpose +field-type-lu+))
+  (collection/transpose +field-type-lu+))
 
 (defn field-type-set-index
   "sets the field type index value
@@ -209,7 +206,7 @@
   ([m template]
    (let [fields (mapv (fn [[k v]]
                         {:name  (name k)
-                         :value (h/strn v)
+                         :value (f/strn v)
                          :type  (merge +field-type+ (get template k))})
                       m)]
      (document {:fields fields}))))

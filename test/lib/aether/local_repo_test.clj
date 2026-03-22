@@ -1,7 +1,7 @@
 (ns lib.aether.local-repo-test
-  (:use code.test)
   (:require [lib.aether.local-repo :refer :all]
             [std.object :as object])
+  (:use code.test)
   (:import [org.eclipse.aether.repository LocalRepository]))
 
 ^{:refer lib.aether.local-repo/local-repo :added "3.0"}

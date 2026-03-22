@@ -1,10 +1,10 @@
 (ns code.tool.translate.js-dsl-integration-test
-  (:use code.test)
   (:require [code.tool.translate.js-dsl :as sut]
-            [std.lib :as h]
-            [std.json :as json]
             [std.fs :as fs]
-            [std.lang :as l]))
+            [std.json :as json]
+            [std.lang :as l]
+            [std.lib.env :as env])
+  (:use code.test))
 
 (l/script- :js
   {:runtime :basic
@@ -53,5 +53,5 @@
       (let [ast  (std.json/read
                   (slurp f)
                   std.json/+keyword-mapper+)]
-        (std.lib/prn f)
+        (env/prn f)
         (code.tool.translate.js-dsl/translate-node ast)))))

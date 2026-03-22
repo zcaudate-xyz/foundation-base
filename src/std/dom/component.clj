@@ -6,7 +6,9 @@
             [std.dom.react :as react]
             [std.dom.type :as type]
             [std.dom.update :as update]
-            [std.lib :as h :refer [definvoke]]
+            [std.lib.collection :as collection]
+            [std.lib.function :as fn]
+            [std.lib.invoke :as invoke]
             [std.lib.mutable :as mut]))
 
 (defonce +init+ (type/metaclass-add :dom/component {:metatype :dom/component}))
@@ -52,7 +54,7 @@
                                 {}))
          {:keys [wrap-template]} collected
          template (reduce #(%2 %1) template wrap-template)
-         options  (-> (h/map-vals (fn [fns]
+         options  (-> (collection/map-vals (fn [fns]
                                     (fn [dom] (doseq [f fns] (f dom))))
                                   (dissoc collected :wrap-template))
                       (assoc :template template))]
@@ -78,11 +80,11 @@
   {:added "3.0"}
   ([tag doc? attr? & [bindings & body]] 
    (let [[doc attr [class params] & body]
-        (h/fn:create-args (apply vector doc? attr? bindings body))]
+        (fn/fn:create-args (apply vector doc? attr? bindings body))]
     `(let [~'template (fn ~@body)]
        (component-install ~tag ~class ~'template ~params)))))
 
-(definvoke dom-render-component
+(invoke/definvoke dom-render-component
   "component dom element rendering function
    
    (-> (base/dom-compile [:mock/pane-static
@@ -129,7 +131,7 @@
                         :else nil))
                 (:props dom)))))
 
-(definvoke dom-remove-component
+(invoke/definvoke dom-remove-component
   "removes rendered component from dom"
   {:added "3.0"}
   [:method {:multi impl/dom-remove
@@ -148,7 +150,7 @@
        (mut/mutable:set dom :shadow nil))
      dom)))
 
-(definvoke dom-ops-component
+(invoke/definvoke dom-ops-component
   "constructs transform operations for component dom"
   {:added "3.0"}
   [:method {:multi diff/dom-ops
@@ -162,7 +164,7 @@
        :local     (local/dom-ops-local props-old props-new)
        [[:refresh (base/dom-new tag props-new)]]))))
 
-(definvoke dom-apply-component
+(invoke/definvoke dom-apply-component
   "applies operations to component dom"
   {:added "3.0"}
   [:method {:multi update/dom-apply
@@ -180,7 +182,7 @@
                                                 :op op}))))))
    dom))
 
-(definvoke dom-replace-component
+(invoke/definvoke dom-replace-component
   "default replace operation for components"
   {:added "3.0"}
   [:method {:multi impl/dom-replace

@@ -1,8 +1,9 @@
 (ns std.task.bulk
-  (:require [std.print :as print]
-            [std.string :as str]
-            [std.lib :as h]
-            [std.lib.result :as res]))
+  (:require [std.lib.collection :as collection]
+            [std.lib.env :as env]
+            [std.lib.result :as res]
+            [std.lib.time :as time]
+            [std.print :as print]))
 
 (defn bulk-display
   "constructs bulk display options"
@@ -50,7 +51,7 @@
   ([f inputs {:keys [idxs] :as context} params lookup env args]
    (->> (pmap (fn [idx input]
                 (let [output  (volatile! nil)
-                      out-str (h/with-out-str
+                      out-str (env/with-out-str
                                 (bulk-process-item f (assoc context
                                                             :idx idx
                                                             :input input
@@ -209,7 +210,7 @@
                          :items     (count items)
                          :results   (count results)}
                         (->> aggregate-fns
-                             (h/map-vals (fn [[sel acc init]]
+                             (collection/map-vals (fn [[sel acc init]]
                                            (reduce (fn [out v]
                                                      (let [sv (sel v)]
                                                        (if (nil? sv)
@@ -229,8 +230,8 @@
                    (print/print "\n")
                    (print/print-subtitle (format "SUMMARY %s"
                                                  (str (assoc display
-                                                             :cumulative (h/format-ms cumulative)
-                                                             :elapsed (h/format-ms elapsed)))))
+                                                             :cumulative (time/format-ms cumulative)
+                                                             :elapsed (time/format-ms elapsed)))))
                    (print/println))]
      (assoc summary :cumulative cumulative :elapsed elapsed))))
 
@@ -277,9 +278,9 @@
                       (print/print-title (if (fn? title)
                                            (title params env)
                                            title)))
-         start     (h/time-ms)
+         start     (time/time-ms)
          items     (bulk-items task f inputs params lookup env args)
-         elapsed   (h/elapsed-ms start)
+         elapsed   (time/elapsed-ms start)
          warnings  (bulk-warnings params items)
          errors    (bulk-errors params items)
          results   (bulk-results task params items)

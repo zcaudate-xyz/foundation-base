@@ -1,10 +1,10 @@
 (ns std.config.resolve-test
-  (:use code.test)
-  (:require [std.config.resolve :refer :all]
+  (:require [std.config.ext.gpg]
+            [std.config.resolve :refer :all]
             [std.config.secure :as secure]
             [std.lib.encode :as encode]
-            [std.lib.security :as security]
-            [std.config.ext.gpg])
+            [std.lib.security :as security])
+  (:use code.test)
   (:refer-clojure :exclude [resolve load]))
 
 (def -key- (secure/resolve-key "3YO19A4QAlRLDc8qmhLD7A=="))

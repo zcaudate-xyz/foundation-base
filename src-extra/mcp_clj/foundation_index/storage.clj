@@ -1,11 +1,9 @@
 (ns mcp-clj.foundation-index.storage
+  (:require [clojure.data.json :as json]
+            [clojure.java.jdbc :as jdbc]
+            [clojure.string :as str])
   "SQLite storage layer for Clojure symbol index"
-  (:require
-    [clojure.java.jdbc :as jdbc]
-    [clojure.string :as str]
-    [clojure.data.json :as json])
-  (:import
-    [java.sql DriverManager]))
+  (:import [java.sql DriverManager]))
 
 ;; ============================================================================
 ;; Configuration

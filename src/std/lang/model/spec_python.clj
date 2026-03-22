@@ -1,19 +1,20 @@
 (ns std.lang.model.spec-python
-  (:require [std.lang.base.emit :as emit]
+  (:require [std.lang.base.book :as book]
+            [std.lang.base.emit :as emit]
+            [std.lang.base.emit-common :as common]
+            [std.lang.base.emit-data :as data]
+            [std.lang.base.emit-helper :as helper]
+            [std.lang.base.emit-preprocess :as preprocess]
+            [std.lang.base.emit-top-level :as top]
             [std.lang.base.grammar :as grammar]
             [std.lang.base.grammar-spec :as spec]
-            [std.lang.base.emit-preprocess :as preprocess]
-            [std.lang.base.emit-common :as common]
-            [std.lang.base.emit-helper :as helper]
-            [std.lang.base.emit-top-level :as top]
-            [std.lang.base.emit-data :as data]
-            [std.lang.base.util :as ut]
-	    [std.lang.base.book :as book]
             [std.lang.base.script :as script]
+            [std.lang.base.util :as ut]
             [std.lang.model.spec-xtalk]
             [std.lang.model.spec-xtalk.fn-python :as fn]
-            [std.string :as str]
-            [std.lib :as h])
+            [std.lib.collection :as collection]
+            [std.lib.foundation :as f]
+            [std.lib.template :as template])
   (:refer-clojure :exclude [await]))
 
 ;;
@@ -49,7 +50,7 @@
                                  [\\ (list :%
                                            (list :- "@")
                                            (if (keyword? d)
-                                             (list :- (h/strn d))
+                                             (list :- (f/strn d))
                                              d))])
                                decorators))
          \\ ~body)))))
@@ -69,7 +70,7 @@
                   (concat (if (not-empty args)
                             [(list 'quote args) ":"]
                             [":"])
-                          [(if (and (h/form? body)
+                          [(if (and (collection/form? body)
                                     (= 'return (first body)))
                              (second body)
                              body)]))))))
@@ -92,7 +93,7 @@
   {:added "4.0"}
   ([[_ sym & args]]
    (let [bound (last args)]
-     (cond (and (h/form? bound)
+     (cond (and (collection/form? bound)
                 (= 'fn  (first bound)))
            (apply list 'fn.inner (with-meta sym {:inner true})
                   (rest bound))
@@ -154,7 +155,7 @@
   "for return transform"
   {:added "4.0"}
   [[_ [[res err] statement] {:keys [success error]}]]
-   (h/$ (try (var ~res ~statement)
+   (template/$ (try (var ~res ~statement)
              ~success
              (catch [Exception :as ~err] ~error))))
 
@@ -226,7 +227,7 @@
                                  :args   {:start "(" :end "):" :space ""}}}
         :define   {:defglobal  {:raw ""}
                    :def        {:raw ""}}}
-       (h/merge-nested (emit/default-grammar))))
+       (collection/merge-nested (emit/default-grammar))))
 
 (def +grammar+
   (grammar/grammar :py
@@ -236,15 +237,15 @@
 (def +meta+
   (book/book-meta
    {:module-current (fn []
-                      (h/$ (list (b:& (set [(str x) :for x :in (locals)])
+                      (template/$ (list (b:& (set [(str x) :for x :in (locals)])
                                       (set [(str m) :for m :in sys.modules])))))
     :module-export  (fn [{:keys [as refer]} opts])
     :module-import  (fn [name {:keys [as refer]} opts]  
                       (if as
-                        (h/$ (:- :import ~name :as ~as))
-                        (h/$ (:- :import ~name))))
+                        (template/$ (:- :import ~name :as ~as))
+                        (template/$ (:- :import ~name))))
     :module-unload  (fn [name as]
-                      (h/$ (do (del (. sys.modules [~name]))
+                      (template/$ (do (del (. sys.modules [~name]))
                                (del ~(symbol name)))))}))
 
 (def +book+

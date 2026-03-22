@@ -1,7 +1,8 @@
 (ns std.make.project-test
-  (:use code.test)
-  (:require [std.make.project :refer :all]
-            [std.lib :as h]))
+  (:require [std.lib.env :as env]
+            [std.lib.trace :as trace]
+            [std.make.project :refer :all])
+  (:use code.test))
 
 ^{:refer std.make.project/makefile-parse :added "4.0"}
 (fact "parses a makefile for it's sections")
@@ -56,11 +57,11 @@
 
 
   (comment
-    (keys (get-in @code.test.base.runtime/*registry* [(h/ns-sym)]))
-    (keys (into {} (first (vals (get-in @code.test.base.runtime/*registry* [(h/ns-sym) :facts])))))
+    (keys (get-in @code.test.base.runtime/*registry* [(env/ns-sym)]))
+    (keys (into {} (first (vals (get-in @code.test.base.runtime/*registry* [(env/ns-sym) :facts])))))
     (:path :wrap :desc :full :global :added :ns :type :source :function :column :line :id :code :refer)
 
-    (map resolve (map :refer (vals (get-in @code.test.base.runtime/*registry* [(h/ns-sym) :facts]))))
+    (map resolve (map :refer (vals (get-in @code.test.base.runtime/*registry* [(env/ns-sym) :facts]))))
     (#'std.make.project/makefile-parse #'std.make.project/build-all #'std.make.project/def-make-fn #'std.make.project/def.make)
     
     
@@ -70,28 +71,28 @@
 
   (defn vars-list
     ([]
-     (vars-list (h/ns-sym)))
+     (vars-list (env/ns-sym)))
     ([ns]
      (let [tns  (code.project/test-ns ns)]
        (keep (comp resolve :refer) (vals (get-in @rt/*registry* [tns :facts]))))))
 
   (defn vars-trace
     ([]
-     (vars-trace (h/ns-sym)))
+     (vars-trace (env/ns-sym)))
     ([ns]
-     (mapv (juxt identity  h/add-trace) (vars-list ns))))
+     (mapv (juxt identity  trace/add-base-trace) (vars-list ns))))
 
   (defn vars-trace-check
     ([]
-     (vars-trace-check (h/ns-sym)))
+     (vars-trace-check (env/ns-sym)))
     ([ns]
-     (mapv h/has-trace? (vars-list ns))))
+     (mapv trace/has-trace? (vars-list ns))))
 
   (defn vars-untrace
     ([]
-     (vars-untrace (h/ns-sym)))
+     (vars-untrace (env/ns-sym)))
     ([ns]
-     (mapv (juxt identity h/remove-trace) (vars-list ns))))
+     (mapv (juxt identity trace/remove-trace) (vars-list ns))))
 
   (comment
 
@@ -109,9 +110,9 @@
       (rt/find-fact ns {:line line}) #_(let [{:keys [refer]} (rt/find-fact {:line line})]
                                          refer))
     
-    (rt/find-fact (h/ns-sym)
+    (rt/find-fact (env/ns-sym)
                   {:line 10})
-    (create-form-fn (h/ns-sym)
+    (create-form-fn (env/ns-sym)
                     {:line 10})
     
     
@@ -120,23 +121,23 @@
     
     (defmacro create-form
       []
-      `(create-form-fn (h/ns-sym) ~(meta &form)))
+      `(create-form-fn (env/ns-sym) ~(meta &form)))
     
     
 
 
-    (trace-install (h/ns-sym))
+    (trace-install (env/ns-sym))
 
     (defn add [x y]
       (+ x y))
 
-    (h/add-trace #'add))
+    (trace/add-base-trace #'add))
 
   (comment
     
     (meta #'add)
-    (h/add-trace #'add)
-    (h/get-trace #'add)
-    (h/remove-trace #'add)
+    (trace/add-base-trace #'add)
+    (trace/get-trace #'add)
+    (trace/remove-trace #'add)
     
     (add 1 2)))

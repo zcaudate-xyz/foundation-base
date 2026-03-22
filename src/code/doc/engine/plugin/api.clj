@@ -1,7 +1,7 @@
 (ns code.doc.engine.plugin.api
-  (:require [std.string :as str]
-            [code.doc.render.util :as util]
-            [std.lib :as h]))
+  (:require [clojure.set]
+            [clojure.string]
+            [code.doc.render.util :as util]))
 
 (defn entry-tag
   "helper for formating vars
@@ -33,7 +33,7 @@
    (let [code (-> (-> entry :test :code)
                   (or "")
                   (util/adjust-indent 2)
-                  (str/trim))]
+                  (clojure.string/trim))]
      (if (-> entry :test :code)
        [:pre
         [:h6 [:i [:a {:href (format "%s/blob/master/%s#L%d-L%d"
@@ -104,7 +104,7 @@
          entries (if class
                    (filter (fn [k]
                              (when-let [kcls (get-in table [k :class])]
-                               (seq (h/intersection (set kcls) (set class)))))
+                               (seq (clojure.set/intersection (set kcls) (set class)))))
                            entries)
                    entries)
          entries (if only

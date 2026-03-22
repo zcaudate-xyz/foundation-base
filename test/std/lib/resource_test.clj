@@ -1,6 +1,6 @@
 (ns std.lib.resource-test
-  (:use code.test)
-  (:require [std.lib.resource :refer :all]))
+  (:require [std.lib.resource :refer :all])
+  (:use code.test))
 
 ^{:refer std.lib.resource/res:spec-list :added "3.0"}
 (fact "lists all available specs"

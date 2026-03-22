@@ -1,9 +1,7 @@
 (ns code.test.checker.common-test
-  (:use [code.test :exclude [satisfies anything approx throws exactly stores capture]])
-  (:require [code.test.checker.common :refer :all]
-            [code.test.checker.common :as common]
-            [std.lib :as h]
-            [std.lib.result :as res]))
+  (:require [code.test.checker.common :as common :refer :all]
+            [std.lib.result :as res])
+  (:use [code.test :exclude [satisfies anything approx throws exactly stores capture]]))
 
 ^{:refer code.test.checker.common/function-string :added "3.0"}
 (fact "returns the string representation of a function"

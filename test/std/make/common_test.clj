@@ -1,7 +1,7 @@
 (ns std.make.common-test
-  (:use code.test)
   (:require [std.make.common :as common]
-            [std.make.compile :as compile]))
+            [std.make.compile :as compile])
+  (:use code.test))
 
 (def +demo-config+
   (common/make-config

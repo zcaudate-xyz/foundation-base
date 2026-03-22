@@ -1,6 +1,6 @@
 (ns std.object.element.common-test
-  (:use code.test)
-  (:require [std.object.element.common :refer :all]))
+  (:require [std.object.element.common :refer :all])
+  (:use code.test))
 
 ^{:refer std.object.element.common/context-class :added "3.0"}
 (fact "If x is a class, return x otherwise return the class of x"

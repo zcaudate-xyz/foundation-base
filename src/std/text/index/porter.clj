@@ -2,7 +2,8 @@
 ;; <http://tartarus.org/~martin/PorterStemmer/>
 
 (ns std.text.index.porter
-  (:require [std.string.common :as str]))
+  (:require [clojure.string]
+            [std.string.common :as str]))
 
 (def stem
   ^String
@@ -20,8 +21,8 @@
 
         step1a (fn [w]
                  (cond
-                   (re-find step1a-re1 w) (str/replace w step1a-re1 "$1$2")
-                   (re-find step1a-re2 w) (str/replace w step1a-re2 "$1$2")
+                   (re-find step1a-re1 w) (clojure.string/replace w step1a-re1 "$1$2")
+                   (re-find step1a-re2 w) (clojure.string/replace w step1a-re2 "$1$2")
                    :else w))
 
         step1b-re1 #"^(.+?)eed$"

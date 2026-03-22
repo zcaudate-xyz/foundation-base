@@ -1,6 +1,6 @@
 (ns std.fs-test
-  (:use code.test)
   (:require [std.fs :refer :all])
+  (:use code.test)
   (:refer-clojure :exclude [list resolve]))
 
 ^{:refer clojure.core/slurp :added "3.0" :adopt true :class [:file]}

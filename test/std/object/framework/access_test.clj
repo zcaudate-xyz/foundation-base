@@ -1,9 +1,9 @@
 (ns std.object.framework.access-test
+  (:require [std.object.framework :as framework]
+            [std.object.framework.access :as access :refer :all]
+            [std.object.framework.base-test]
+            [std.object.framework.write :as write])
   (:use code.test)
-  (:require [std.object.framework.access :refer :all :as access]
-            [std.object.framework.write :as write]
-            [std.object.framework :as framework]
-            [std.object.framework.base-test])
   (:refer-clojure :exclude [get set get-in keys]))
 
 ^{:refer std.object.framework.access/meta-clear :added "3.0"}

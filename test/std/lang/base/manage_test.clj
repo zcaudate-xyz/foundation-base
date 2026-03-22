@@ -1,12 +1,12 @@
 (ns std.lang.base.manage-test
-  (:use code.test)
-  (:require [std.lang.base.manage :refer :all]
-            [std.lang.base.library :as lib]
-            [std.lang.base.library-snapshot :as snap]
+  (:require [std.lang :as l]
             [std.lang.base.emit-prep-lua-test :as prep-lua]
             [std.lang.base.impl :as impl]
-            [std.lang :as l]
-            [xt.lang.base-lib :as k]))
+            [std.lang.base.library :as lib]
+            [std.lang.base.library-snapshot :as snap]
+            [std.lang.base.manage :refer :all]
+            [xt.lang.base-lib :as k])
+  (:use code.test))
 
 (def +library+
   (lib/library {:snapshot (snap/snapshot {:lua {:id :lua

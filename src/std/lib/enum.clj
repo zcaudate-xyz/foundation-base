@@ -1,9 +1,9 @@
 (ns std.lib.enum
-  (:require [std.string.case :as case]
-            [std.string.coerce :as coerce]
-            [std.lib.class :as cls]
+  (:require [std.lib.class :as cls]
             [std.lib.collection :as coll]
-            [std.lib.invoke :refer [definvoke]]))
+            [std.lib.invoke :refer [definvoke]]
+            [std.string.case :as case]
+            [std.string.coerce :as coerce]))
 
 (defn enum?
   "check to see if class is an enum type

@@ -1,7 +1,7 @@
 (ns code.doc.link.test
   (:require [code.test.base.executive :as executive]
             [std.fs :as fs]
-            [std.lib :as h]))
+            [std.lib.collection :as collection]))
 
 (def ^:dynamic *run-tests* nil)
 
@@ -50,7 +50,7 @@
            fails  (->> (fn [id sink] (load-file path))
                        executive/accumulate
                        failed-tests
-                       (h/map-juxt [:line identity]))]
+                       (collection/map-juxt [:line identity]))]
        (update-in interim [:articles name :elements]
                   (fn [elements]
                     (map (fn [{:keys [type] :as elem}]

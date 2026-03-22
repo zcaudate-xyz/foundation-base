@@ -1,10 +1,10 @@
 (ns std.lib.security
-  (:require [std.lib.security.cipher :as cipher]
+  (:require [std.lib.encode :as encode]
+            [std.lib.foundation :as h]
+            [std.lib.security.cipher :as cipher]
             [std.lib.security.key :as key]
             [std.lib.security.provider :as provider]
-            [std.lib.security.verify :as verify]
-            [std.lib.encode :as encode]
-            [std.lib.foundation :as h])
+            [std.lib.security.verify :as verify])
   (:import (java.security Security)))
 
 (h/intern-in cipher/encrypt

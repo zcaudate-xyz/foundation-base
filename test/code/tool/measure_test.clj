@@ -1,10 +1,9 @@
 (ns code.tool.measure-test
-  (:use code.test)
   (:require [code.tool.measure :as measure]
             [code.tool.measure.algo-clojure :as clj]
             [code.tool.translate.js-ast :as build-ast]
-            [std.make :as make]
-            [std.lib :as h]))
+            [std.make :as make])
+  (:use code.test))
 
 (fact "should score code structure invariantly (JS)"
   :setup [(make/build-all build-ast/BUILD_AST) (build-ast/initialise)] ;; Skipped to avoid npm path issues in test runner

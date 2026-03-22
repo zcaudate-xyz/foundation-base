@@ -1,12 +1,14 @@
 (ns std.timeseries.journal
-  (:require [std.lib :as h :refer [defimpl]]
+  (:require [std.lib.collection :as collection]
+            [std.lib.foundation :as f]
+            [std.lib.impl :as impl]
+            [std.lib.time :as time]
+            [std.print.format :as format]
             [std.timeseries.common :as common]
-            [std.timeseries.types :as types]
             [std.timeseries.process :as process]
-            [std.print.format :as format])
+            [std.timeseries.types :as types])
   (:refer-clojure :exclude [merge derive])
-  (:import (java.text SimpleDateFormat)
-           (java.util Date)))
+  (:import (java.text SimpleDateFormat) (java.util Date)))
 
 (defn format-time
   "output the time according to format and time unit
@@ -167,7 +169,7 @@
   ([journal]
    (str "#jnl " (journal-info journal))))
 
-(defimpl Journal [id meta template entries limit previous]
+(impl/defimpl Journal [id meta template entries limit previous]
   :string  journal-string
   :invoke  journal-invoke
   :final   true
@@ -175,7 +177,7 @@
   clojure.lang.IDeref
   (deref [journal] (:entries journal)))
 
-(h/suppress
+(f/suppress
  (prefer-method clojure.pprint/simple-dispatch
                 clojure.lang.IPersistentMap
                 clojure.lang.IDeref))
@@ -190,8 +192,8 @@
   ([]
    (journal {}))
   ([{:keys [id meta entries previous] :as m
-     :or {id (h/sid)}}]
-   (let [{:keys [time] :as meta} (h/merge-nested (:meta +defaults+) meta)
+     :or {id (f/sid)}}]
+   (let [{:keys [time] :as meta} (collection/merge-nested (:meta +defaults+) meta)
          entries-fn (case (:order time)
                       :desc  #(apply list %)
                       :asc #(apply vector %))]
@@ -212,7 +214,7 @@
   {:added "3.0"}
   ([entry key unit]
    (if-not (get entry key)
-     (let [t (common/from-ns (h/time-ns) unit)]
+     (let [t (common/from-ns (time/time-ns) unit)]
        (assoc entry key t))
      entry)))
 
@@ -292,7 +294,7 @@
   "updates journal meta. used for display"
   {:added "3.0"}
   ([journal meta]
-   (update journal :meta h/merge-nested meta)))
+   (update journal :meta collection/merge-nested meta)))
 
 (defn select-series
   "select data from the series"
@@ -311,7 +313,7 @@
          (map? series)
          (let [{:s/keys [meta]} series
                series (dissoc series :s/meta)]
-           (clojure.core/merge meta (h/map-vals #(select-series entries %) series))))))
+           (clojure.core/merge meta (collection/map-vals #(select-series entries %) series))))))
 
 (defn select
   "selects data ferom the journal
@@ -391,7 +393,7 @@
   ([coll key-fn comp-fn]
    (->> coll
         (filter seq)
-        (h/unfold (fn [s]
+        (collection/unfold (fn [s]
                     (if (seq s)
                       (let [[[mf & mn] r]
                             (reduce (fn [[m r] x]

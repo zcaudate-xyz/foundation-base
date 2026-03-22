@@ -1,6 +1,6 @@
 (ns std.math.random-test
-  (:use code.test)
   (:require [std.math.random :refer :all])
+  (:use code.test)
   (:refer-clojure :exclude [rand rand-nth rand-int]))
 
 ^{:refer std.math.random/rand-gen :added "3.0"}

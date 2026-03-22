@@ -1,28 +1,28 @@
 (ns code.doc.link.stencil
-  (:require [std.string :as str]
-            [std.lib.mustache :as mustache]))
+  (:require [std.lib.mustache :as mustache]
+            [std.string.common :as common]))
 
 (def full-citation-pattern
-  (str/joinl ["\\[\\["
+  (common/joinl ["\\[\\["
               "([^/^\\.^\\{^\\}^\\[^\\]]+)"
               "/"
               "([^/^\\.^\\{^\\}^\\[^\\]]+)"
               "\\]\\]"]))
 
 (def short-citation-pattern
-  (str/joinl ["\\[\\["
+  (common/joinl ["\\[\\["
               "([^/^\\.^\\{^\\}^\\[^\\]]+)"
               "\\]\\]"]))
 
 (def full-pattern
-  (str/joinl ["\\{\\{"
+  (common/joinl ["\\{\\{"
               "([^/^\\.^\\{^\\}]+)"
               "/"
               "([^/^\\.^\\{^\\}]+)"
               "\\}\\}"]))
 
 (def short-pattern
-  (str/joinl ["\\{\\{"
+  (common/joinl ["\\{\\{"
               "([^/^\\.^\\{^\\}]+)"
               "\\}\\}"]))
 

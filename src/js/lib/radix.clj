@@ -1,15 +1,15 @@
 (ns js.lib.radix
-  (:require [std.string :as str]
+  (:require [js.react.compile :as compile]
             [std.block :as block]
-            [std.lib :as h]
             [std.lang :as l]
-            [js.react.compile :as compile]))
+            [std.lib.foundation :as f]
+            [std.string.case :as case]))
 
 (l/script :js
   {:import [["@radix-ui/themes" :as [* RadixMain]
              :bundle [["@radix-ui/themes/styles.css"]]]]})
 
-(h/template-entries [l/tmpl-entry {:type :fragment
+(f/template-entries [l/tmpl-entry {:type :fragment
                                    :base "RadixMain"
                                    :tag "js"}]
   [AccqessibleIcon
@@ -325,7 +325,7 @@
   []
   (block/layout
    (vec (mapcat (fn [[k]]
-                  [(keyword "rx" (str/spear-case (str k)))
+                  [(keyword "rx" (case/spear-case (str k)))
                    {:tag (symbol "-" (str k))}])
                 (sort (ns-publics *ns*))))))
 

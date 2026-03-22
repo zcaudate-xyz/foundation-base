@@ -1,14 +1,14 @@
 (ns std.block.heal.print-test
-  (:use code.test)
-  (:require [std.block.heal.print :as print]
-            [std.block.heal.parse :as parse]
-            [std.lib :as h]))
+  (:require [std.block.heal.parse :as parse]
+            [std.block.heal.print :as print]
+            [std.lib.env :as env])
+  (:use code.test))
 
 ^{:refer std.block.heal.print/print-rainbow :added "4.0"}
 (fact "prints out the "
   ^:hidden
 
-  (h/with-out-str
+  (env/with-out-str
     (print/print-rainbow
      (slurp "test-data/std.block.heal/cases/002_complex.block")
      (parse/pair-delimiters
@@ -18,7 +18,7 @@
 (comment
   (binding [*ns* (the-ns 'std.block.heal.print-test)]
     (std.block.heal.parse/pair-delimiters
-     (std.block.heal.parse/parse-delimiters (std.lib/sys:resource-content "code/heal/cases/002_complex.block"))))
+     (std.block.heal.parse/parse-delimiters (env/sys:resource-content "code/heal/cases/002_complex.block"))))
   (print/print-rainbow
    "[[[]"
    (parse/pair-delimiters

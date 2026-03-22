@@ -1,6 +1,6 @@
 (ns std.block.layout.estimate-test
-  (:use code.test)
-  (:require [std.block.layout.estimate :as est]))
+  (:require [std.block.layout.estimate :as est])
+  (:use code.test))
 
 ^{:refer std.block.layout.estimate/get-max-width :added "4.0"}
 (fact "gets the max width of whole form"

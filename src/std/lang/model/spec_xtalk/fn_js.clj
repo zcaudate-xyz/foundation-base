@@ -1,5 +1,6 @@
 (ns std.lang.model.spec-xtalk.fn-js
-  (:require [std.lib :as h]))
+  (:require [std.lib.foundation :as f]
+            [std.lib.template :as template]))
 
 ;;
 ;; CORE
@@ -19,7 +20,7 @@
 
 (defn js-tf-x-shell
   ([[_ s opts]]
-   (h/$ (do (var p (require "child_process"))
+   (template/$ (do (var p (require "child_process"))
             (p.exec ~s (fn [err res]
                          (if err
                            (if (. ~opts ["error"])
@@ -34,7 +35,7 @@
 
 (defn js-tf-x-type-native
   [[_ obj]]
-  (h/$ (do (when (== ~obj nil)
+  (template/$ (do (when (== ~obj nil)
              (return nil))
            (var t := (typeof ~obj))
            (if (== t "object")
@@ -73,7 +74,7 @@
 
 (defn js-tf-x-proto-create
   [[_ m]]
-  (h/$
+  (template/$
    (do (var out {})
        (for:object
         [[k f] ~m]
@@ -180,19 +181,19 @@
   "converts map to array"
   {:added "4.0"}
   ([[_ lu obj]]
-   (h/$ (. ~lu (get ~obj)))))
+   (template/$ (. ~lu (get ~obj)))))
 
 (defn js-tf-x-lu-set
   "converts map to array"
   {:added "4.0"}
   ([[_ lu obj gid]]
-   (h/$ (. ~lu (set ~obj ~gid)))))
+   (template/$ (. ~lu (set ~obj ~gid)))))
 
 (defn js-tf-x-lu-del
   "converts map to array"
   {:added "4.0"}
   ([[_ lu obj]]
-   (h/$ (. ~lu (delete ~obj)))))
+   (template/$ (. ~lu (delete ~obj)))))
 
 (def +js-lu+
   {:x-lu-create      {:default '(new WeakMap)}
@@ -271,7 +272,7 @@
 (defn js-tf-x-arr-sort
   [[_ arr key-fn comp-fn]]
   (list '. arr (list 'sort
-                     (h/$ (fn [a b]
+                     (template/$ (fn [a b]
                             (return (:? (~comp-fn
                                          (~key-fn a)
                                          (~key-fn b))
@@ -374,7 +375,7 @@
 
 (defn js-tf-x-return-encode
   ([[_ out id key]]
-   (h/$ (do (var type-fn (fn [x]
+   (template/$ (do (var type-fn (fn [x]
                            (let [name (typeof x)]
                              (return (:? (== name "object") (:? x x.constructor.name name) name)))))
             (var tb (typeof ~out))
@@ -422,7 +423,7 @@
 
 (defn js-tf-x-return-wrap
   ([[_ f encode-fn]]
-   (h/$ (try (var out := (~f))
+   (template/$ (try (var out := (~f))
              (return (~encode-fn  out))
              (catch e (let [err (:? (== "string" (typeof e)) e {:message (. e ["message"]) :stack (. e ["stack"])})]
                         (return (JSON.stringify {:type "error"
@@ -430,7 +431,7 @@
 
 (defn js-tf-x-return-eval
   ([[_ s wrap-fn]]
-   (h/$ (return (~wrap-fn
+   (template/$ (return (~wrap-fn
                  (fn []
                    (return (eval ~s))))))))
 
@@ -441,7 +442,7 @@
 
 (defn js-tf-x-socket-connect
   ([[_ host port opts cb]]
-   (h/$ (do* (var net (eval "require('net')"))
+   (template/$ (do* (var net (eval "require('net')"))
              (var rl  (eval  "require('readline')"))
              (var conn (new net.Socket))
              (return (conn.connect
@@ -450,11 +451,11 @@
 
 (defn js-tf-x-socket-send
   ([[_ conn s]]
-   (h/$ (. ~conn (write ~s)))))
+   (template/$ (. ~conn (write ~s)))))
 
 (defn js-tf-x-socket-close
   ([[_ conn]]
-   (h/$ (. ~conn (end)))))
+   (template/$ (. ~conn (end)))))
 
 (def +js-socket+
   {:x-socket-connect      {:macro #'js-tf-x-socket-connect      :emit :macro}
@@ -479,7 +480,7 @@
 
 (defn js-tf-x-iter-eq
   ([[_ it0 it1 eq-fn]]
-   (h/$ (do (for [:let x0 :of ~it0]
+   (template/$ (do (for [:let x0 :of ~it0]
               (var r1 (. ~it1 (next)))
               (cond (. r1 done)
                     (return false)
@@ -515,7 +516,7 @@
 
 (defn js-tf-x-cache
   ([[_ name]]
-   (if (= (h/strn name) "GLOBAL")
+   (if (= (f/strn name) "GLOBAL")
      'window.localStorage
      'window.sessionStorage)))
 
@@ -543,7 +544,7 @@
 
 (defn js-tf-x-cache-incr
   ([[_ cache key num]]
-   (h/$ (do:> (var prev (Number (. ~cache (getItem ~key))))
+   (template/$ (do:> (var prev (Number (. ~cache (getItem ~key))))
               (var curr (+ prev ~num))
               (. ~cache (setItem ~key curr))
               (return curr)))))
@@ -577,7 +578,7 @@
 
 (defn js-tf-x-thread-spawn
   ([[_ thunk]]
-   (h/$ (new Promise (fn [resolve reject]
+   (template/$ (new Promise (fn [resolve reject]
                        (resolve (~thunk)))))))
 
 (defn js-tf-x-thread-join
@@ -586,21 +587,21 @@
 
 (defn js-tf-x-with-delay
   ([[_ thunk ms]]
-   (h/$ (setTimeout (fn []
+   (template/$ (setTimeout (fn []
                       (new Promise (fn [resolve reject]
                                      (resolve (~thunk)))))
                     ~ms))))
 
 (defn js-tf-x-start-interval
   ([[_ thunk ms]]
-   (h/$ (setInterval (fn []
+   (template/$ (setInterval (fn []
                       (new Promise (fn [resolve reject]
                                      (resolve (~thunk)))))
                     ~ms))))
 
 (defn js-tf-x-stop-interval
   ([[_ instance]]
-   (h/$ (clearInterval instance))))
+   (template/$ (clearInterval instance))))
 
 (def +js-thread+
   {:x-thread-spawn   {:macro #'js-tf-x-thread-spawn   :emit :macro}
@@ -619,7 +620,7 @@
 
 (defn js-tf-x-notify-http
   ([[_ host port value id key opts]]
-   (h/$ (try
+   (template/$ (try
           (var #{path scheme} (or ~opts {}))
           (fetch (+ (or scheme "http") "://" ~host ":" ~port "/" (or path ""))
                  {:method "POST"

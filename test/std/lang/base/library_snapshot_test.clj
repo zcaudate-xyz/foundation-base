@@ -1,14 +1,15 @@
 (ns std.lang.base.library-snapshot-test
-  (:use code.test)
-  (:require [std.lang.base.library-snapshot :as snap]
-            [std.lang.base.library-snapshot-prep-test :as prep]
-            [std.lang.base.impl-entry :as entry]
-            [std.lang.model.spec-lua :as lua]
-            [std.lang.base.book-module :as m]
+  (:require [std.lang.base.book :as b]
             [std.lang.base.book-entry :as e]
-            [std.lang.base.book :as b]
             [std.lang.base.book-meta :as meta]
-            [std.lib :as h]))
+            [std.lang.base.book-module :as m]
+            [std.lang.base.impl-entry :as entry]
+            [std.lang.base.library-snapshot :as snap]
+            [std.lang.base.library-snapshot-prep-test :as prep]
+            [std.lang.model.spec-lua :as lua]
+            [std.lib.deps :as deps]
+            [std.lib.env :as env])
+  (:use code.test))
 
 ^{:refer std.lang.base.library-snapshot/get-deps :added "4.0"}
 (fact "gets a dependency chain"
@@ -20,10 +21,10 @@
   (snap/get-deps prep/+snap+ :x)
   => #{}
   
-  (h/deps:ordered prep/+snap+ [:redis])
+  (deps/deps-ordered prep/+snap+ [:redis])
   => '(:x :lua :redis)
 
-  (h/deps:ordered prep/+snap+ [:lua])
+  (deps/deps-ordered prep/+snap+ [:lua])
   => '(:x :lua))
 
 ^{:refer std.lang.base.library-snapshot/snapshot-string :added "4.0"}
@@ -181,14 +182,14 @@
                 (snap/set-entries [(entry/create-fragment
                                     '(def$ G G)
                                     {:lang :lua
-                                     :namespace (h/ns-sym)
+                                     :namespace (env/ns-sym)
                                      :module 'L.core})
                                    (entry/create-code-base
                                     '(defn sub-g
                                        [a]
                                        (return (- a -/G)))
                                     {:lang :lua
-                                     :namespace (h/ns-sym)
+                                     :namespace (env/ns-sym)
                                      :module 'L.core}
                                     {})])
                 second
@@ -206,7 +207,7 @@
                              []
                              (return u/G))
                           {:lang :redis
-                           :namespace (h/ns-sym)
+                           :namespace (env/ns-sym)
                            :module 'L.redis}
                           {})])
       second
@@ -222,7 +223,7 @@
                          [a]
                          (return (- a -/G)))
                       {:lang :lua
-                       :namespace (h/ns-sym)
+                       :namespace (env/ns-sym)
                        :module 'L.core}
                       {})])
   => (throws))

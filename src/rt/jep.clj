@@ -1,33 +1,34 @@
 (ns rt.jep
-  (:require [std.protocol.component :as protocol.component]
-            [std.protocol.context :as protocol.context]
+  (:require [rt.basic.impl.process-python :as python]
             [rt.jep.bootstrap :as bootstrap]
-            [rt.basic.impl.process-python :as python]
-            [std.lang.base.runtime :as default]
-            [std.lang.base.pointer :as ptr]
-            [std.lang.base.impl :as impl]
             [std.concurrent :as cc]
             [std.lang :as l]
-            [std.lib :as h :refer [defimpl]]
-            [std.string :as str]
+            [std.lang.base.impl :as impl]
+            [std.lang.base.pointer :as ptr]
+            [std.lang.base.runtime :as default]
+            [std.lib.atom :as atom]
+            [std.lib.component :as component]
+            [std.lib.foundation :as f]
+            [std.lib.future :as future]
+            [std.lib.impl]
+            [std.lib.resource :as resource]
+            [std.protocol.component :as protocol.component]
+            [std.protocol.context :as protocol.context]
             [xt.lang.base-repl :as k])
-  (:import (jep SharedInterpreter
-                Interpreter)
-           (jep.python PyObject
-                       PyCallable)))
+  (:import (jep SharedInterpreter Interpreter) (jep.python PyObject PyCallable)))
 
 (defonce ^:dynamic *interpreters* (atom #{}))
 
 (defonce ^:dynamic *bus* nil)
 
 (def +init+
-  (h/res:variant-add
+  (resource/res:variant-add
    :hara/concurrent.bus
    {:id    :rt.jep/bus
     :alias :hara/jep.bus
     :mode {:allow #{:global} :default :global}
-    :instance {:setup    (fn [bus] (h/set! *bus* bus) (h/start bus))
-               :teardown (fn [bus] (h/set! *bus* nil) (h/stop bus))}}))
+    :instance {:setup    (fn [bus] (f/set! *bus* bus) (component/start bus))
+               :teardown (fn [bus] (f/set! *bus* nil) (component/stop bus))}}))
 
 (def +startup+
   (impl/emit-entry-deps
@@ -40,7 +41,7 @@
   {:added "3.0"}
   []
   (or *bus*
-      (h/res :hara/jep.bus)))
+      (resource/res :hara/jep.bus)))
 
 ;;
 ;; Interpreter
@@ -124,7 +125,7 @@
   {:added "3.0"}
   ([{:keys [id bus]} command]
    (-> (cc/bus:send bus id command)
-       (h/on:success identity))))
+       (future/on:success identity))))
 
 (defn eval-command-fn
   "helper function to input command"
@@ -151,7 +152,7 @@
                                (let [itp (make-interpreter)]
                                  (.exec itp +startup+)
                                  (reset! interpreter itp)))
-                   :on-stop  (fn [] (h/swap-return! interpreter
+                   :on-stop  (fn [] (atom/swap-return! interpreter
                                                     (fn [itp]
                                                       [(close-interpreter itp) nil])))}
                   (cc/bus:open bus (jep-handler interpreter)))]
@@ -163,7 +164,7 @@
   {:added "3.0"}
   ([{:keys [id bus state interpreter stop-fn] :as jep}]
    (if (not-empty @state)
-     (let [stopped (h/swap-return! state
+     (let [stopped (atom/swap-return! state
                                    (fn [{:keys [stopped]}]
                                      [stopped nil]))
            _ ((or stop-fn cc/bus:close) bus id)]
@@ -193,7 +194,7 @@
   ([jep]
    (str "#rt.jep" (into {} jep))))
 
-(defimpl RuntimeJep [lang raw]
+(std.lib.impl/defimpl RuntimeJep [lang raw]
   :string rt-jep-string
   :protocols [std.protocol.component/IComponent
               :exclude [-kill]
@@ -208,7 +209,7 @@
   {:added "3.0"}
   ([{:keys [id bus] :as m
      :or {bus (jep-bus)
-          id  (h/sid)}}]
+          id  (f/sid)}}]
    (map->RuntimeJep (assoc m
                            :id id
                            :bus bus
@@ -223,7 +224,7 @@
    (rt-jep {}))
   ([m]
    (-> (rt-jep:create m)
-       (h/start))))
+       (component/start))))
 
 (defn rt-jep?
   "checks that object is a jep runtime"

@@ -1,6 +1,6 @@
 (ns std.lib.transform.base.combine-test
-  (:use code.test)
-  (:require [std.lib.transform.base.combine :refer :all]))
+  (:require [std.lib.transform.base.combine :refer :all])
+  (:use code.test))
 
 ^{:refer std.lib.transform.base.combine/combine-select :added "3.0"}
 (fact "selects an element out of the set that matches sel when it is applied"

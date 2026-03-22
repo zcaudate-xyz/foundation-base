@@ -1,17 +1,11 @@
 (ns lib.aether.result
-  (:require [lib.aether.artifact]
-            [jvm.artifact :as jvm.artifact]
+  (:require [jvm.artifact :as jvm.artifact]
+            [lib.aether.artifact]
             [std.lib.version :as version]
             [std.object :as object]
             [std.print :as print]
-            [std.string :as str]
             [std.print.ansi :as ansi])
-  (:import (org.eclipse.aether.collection CollectResult)
-           (org.eclipse.aether.deployment DeployResult)
-           (org.eclipse.aether.graph DependencyNode)
-           (org.eclipse.aether.installation InstallResult)
-           (org.eclipse.aether.resolution ArtifactDescriptorResult ArtifactResult
-                                          DependencyResult MetadataResult VersionRangeResult VersionResult)))
+  (:import (org.eclipse.aether.collection CollectResult) (org.eclipse.aether.deployment DeployResult) (org.eclipse.aether.graph DependencyNode) (org.eclipse.aether.installation InstallResult) (org.eclipse.aether.resolution ArtifactDescriptorResult ArtifactResult DependencyResult MetadataResult VersionRangeResult VersionResult)))
 
 (defn clojure-core?
   "checks if artifact represents clojure.core

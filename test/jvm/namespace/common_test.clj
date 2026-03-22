@@ -1,6 +1,6 @@
 (ns jvm.namespace.common-test
-  (:use code.test)
   (:require [jvm.namespace.common :refer :all])
+  (:use code.test)
   (:refer-clojure :exclude [ns-unmap ns-unalias]))
 
 ^{:refer jvm.namespace.common/ns-unalias :added "3.0"}

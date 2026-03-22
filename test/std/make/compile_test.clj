@@ -1,7 +1,8 @@
 (ns std.make.compile-test
+  (:require [std.lang :as l]
+            [std.make.compile :refer :all]
+            [std.string.prose :as prose])
   (:use code.test)
-  (:require [std.make.compile :refer :all]
-            [std.lang :as l])
   (:refer-clojure :exclude [compile]))
 
 ^{:refer std.make.compile/with:mock-compile :added "4.0"}
@@ -101,7 +102,7 @@
                           [:package [yarn package]]
                           [:release {:- [package]} [yarn release]]]}))
   => [".build/Makefile"
-      (std.string/|
+      (prose/|
        "init:"
        "\tpnpm install --shamefully-hoist"
        ""

@@ -1,7 +1,5 @@
 (ns std.lib.security.provider
-  (:import (java.security AlgorithmParameters KeyFactory KeyPairGenerator KeyStore MessageDigest
-                          Provider Provider$Service Security Signature)
-           (javax.crypto Cipher KeyGenerator Mac)))
+  (:import (java.security AlgorithmParameters KeyFactory KeyPairGenerator KeyStore MessageDigest Provider Provider$Service Security Signature) (javax.crypto Cipher KeyGenerator Mac)))
 
 (defn list-providers
   "list all security providers

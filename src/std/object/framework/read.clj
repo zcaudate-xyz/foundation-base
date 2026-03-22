@@ -1,8 +1,10 @@
 (ns std.object.framework.read
-  (:require [std.protocol.object :as protocol.object]
+  (:require [std.lib.class :as class]
+            [std.lib.collection :as collection]
+            [std.lib.invoke :as invoke]
             [std.object.query :as query]
-            [std.string :as str]
-            [std.lib :as h :refer [definvoke]]))
+            [std.protocol.object :as protocol.object]
+            [std.string.case :as case]))
 
 (defn meta-read
   "access read attributes
@@ -15,7 +17,7 @@
   ([^Class cls]
    (assoc (protocol.object/-meta-read cls) :class cls)))
 
-(definvoke meta-read-exact
+(invoke/definvoke meta-read-exact
   "access read attributes for the exact class
  
    (read/meta-read-exact Object)
@@ -23,7 +25,7 @@
   {:added "3.0"}
   [:memoize]
   ([^Class cls]
-   (let [table (h/multi:list protocol.object/-meta-read)]
+   (let [table (invoke/multi:list protocol.object/-meta-read)]
      (if-let [f (get table cls)]
        (assoc (f cls) :class cls)))))
 
@@ -34,7 +36,7 @@
    => false"
   {:added "3.0"}
   ([^Class cls]
-   (boolean (get (h/multi:list protocol.object/-meta-read) cls))))
+   (boolean (get (invoke/multi:list protocol.object/-meta-read) cls))))
 
 (defn read-fields
   "fields of an object from reflection
@@ -46,7 +48,7 @@
    (read-fields cls query/query-class))
   ([cls query-fn]
    (->> (query-fn cls [:field])
-        (h/map-juxt [(comp keyword str/spear-case :name)
+        (collection/map-juxt [(comp keyword case/spear-case :name)
                      (fn [ele]
                        {:type (:type ele)
                         :fn ele})]))))
@@ -90,12 +92,12 @@
   ([ele prefix template extra]
    (let [name  (-> (:name ele)
                    (subs (count prefix))
-                   str/spear-case
+                   case/spear-case
                    (str (or extra ""))
                    keyword)
          ^Class cls  (:type ele)
          clsname  (.getName cls)
-         clssym   (or (h/primitive clsname :clssym)
+         clssym   (or (class/primitive clsname :clssym)
                       (if (or (.isPrimitive cls)
                               (.isArray cls))
                         `(Class/forName ~clsname))

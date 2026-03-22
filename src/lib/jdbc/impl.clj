@@ -1,18 +1,12 @@
 (ns lib.jdbc.impl
-  "Protocol implementations. Mainly private api"
   (:require [clojure.string :as str]
             [clojure.walk :as walk]
+            [lib.jdbc.constants :as constants]
             [lib.jdbc.protocol :as protocol]
-            [lib.jdbc.types :as types]
             [lib.jdbc.resultset :refer [result-set->lazyseq result-set->vector]]
-            [lib.jdbc.constants :as constants])
-  (:import (lib.jdbc.types Cursor)
-           (java.net URI)
-           (java.util Properties)
-           (java.sql Connection
-                     DriverManager
-                     PreparedStatement
-                     Statement)))
+            [lib.jdbc.types :as types])
+  "Protocol implementations. Mainly private api"
+  (:import (lib.jdbc.types Cursor) (java.net URI) (java.util Properties) (java.sql Connection DriverManager PreparedStatement Statement)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Connection constructors implementation

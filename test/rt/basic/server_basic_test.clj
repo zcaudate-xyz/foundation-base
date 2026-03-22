@@ -1,8 +1,7 @@
 (ns rt.basic.server-basic-test
-  (:use code.test)
   (:require [rt.basic.server-basic :refer :all]
-            [std.lib :as h]
-            [std.concurrent :as cc]))
+            [std.concurrent :as cc])
+  (:use code.test))
 
 ^{:refer rt.basic.server-basic/get-port :added "4.0"}
 (fact "gets the port given lang and id"

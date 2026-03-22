@@ -1,5 +1,5 @@
 (ns std.print.format.time
-  (:require [std.lib :as h]
+  (:require [std.lib.time :as time]
             [std.print.ansi :as ansi])
   (:import (java.text SimpleDateFormat)))
 
@@ -37,8 +37,8 @@
    (let [full   (str ns)
          len    (count full)]
      (if (and (< len 12))
-       (h/format-ns ns digits)
-       (h/format-ms (quot ns 1000000))))))
+       (time/format-ns ns digits)
+       (time/format-ms (quot ns 1000000))))))
 
 (defn t:text
   "formats ns to string

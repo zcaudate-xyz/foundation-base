@@ -1,6 +1,6 @@
 (ns std.pretty.compare-test
-  (:use code.test)
   (:require [std.pretty.compare :refer :all])
+  (:use code.test)
   (:refer-clojure :exclude [compare]))
 
 ^{:refer std.pretty.compare/type-priority :added "3.0"}

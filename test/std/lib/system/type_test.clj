@@ -1,12 +1,13 @@
 (ns std.lib.system.type-test
-  (:use code.test)
-  (:require [std.lib.system.type :refer :all]
+  (:require [std.lib.collection :as collection]
+            [std.lib.component :as component]
+            [std.lib.component-test :refer [map->Database]]
+            [std.lib.component.track :as track]
             [std.lib.system.array :as array]
             [std.lib.system.topology :as topology]
-            [std.lib.component.track :as track]
-            [std.protocol.component :as protocol.component]
-            [std.lib.component-test :refer [map->Database]]
-            [std.lib :as h]))
+            [std.lib.system.type :refer :all]
+            [std.protocol.component :as protocol.component])
+  (:use code.test))
 
 (defrecord Filesystem []
   protocol.component/IComponent
@@ -69,7 +70,7 @@
               {:database {}
                :watchmen [{:id 1} {:id 2}]
                :cameras  ^{:hello "world"} [{:id 1} {:id 2 :hello "again"}]})
-      (h/start)
+      (component/start)
       (update :cameras seq))
   => (contains-in {:database {:status "started"}
                    :cameras
@@ -85,7 +86,7 @@
 
   (-> (system topology
               {:database {:status "stopped"}})
-      (h/start))
+      (component/start))
   => (contains {:database {:status "started"}
                 :status   "started"}))
 
@@ -105,7 +106,7 @@
   (-> (system topology
               {:database {:status "stopped"}})
       (assoc :schema "Hello")
-      (h/start)
+      (component/start)
       :database)
   => (contains {:status "started"
                 :schema "Hello"}))
@@ -124,7 +125,7 @@
               {:database {}
                :watchmen [{:id 1} {:id 2}]
                :cameras  ^{:hello "world"} [{:id 1} {:id 2 :hello "again"}]})
-      (h/start)
+      (component/start)
       (info-system))
   => any?)
 
@@ -141,7 +142,7 @@
               {:database {}
                :watchmen [{:id 1} {:id 2}]
                :cameras  ^{:hello "world"} [{:id 1} {:id 2 :hello "again"}]})
-      (h/start)
+      (component/start)
       (health-system))
   => {:status :ok})
 
@@ -158,7 +159,7 @@
               {:database {}
                :watchmen [{:id 1} {:id 2}]
                :cameras  ^{:hello "world"} [{:id 1} {:id 2 :hello "again"}]})
-      (h/start)
+      (component/start)
       (remote?-system))
   => false)
 
@@ -185,7 +186,7 @@
                         {:id 2}]})
 
   ;; `system` will build it and calling `start` initiates it
-  (def sys (-> (system topo cfg) h/start))
+  (def sys (-> (system topo cfg) component/start))
 
   ;; Check that the `:db` entry has started
   (:db sys)
@@ -224,7 +225,7 @@
                 :files  [{:id 1} {:id 2}]})
        start-system
        (into {})
-       (h/map-vals seq))
+       (collection/map-vals seq))
   => (contains-in {:models [{:m 1,
                              :fs {:id 1}}
                             {:m 2,
@@ -250,7 +251,7 @@
                 :entry {}})
        (start-system)
        (stop-system)
-       (h/map-vals (fn [v] (if (array/array? v)
+       (collection/map-vals (fn [v] (if (array/array? v)
                              (seq v)
                              v))))
   =>  {:model {:tag :barbie}, :ids [1 2 3 4 5], :traps [{} {} {} {} {}], :entry {}})

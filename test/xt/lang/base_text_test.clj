@@ -1,7 +1,6 @@
 (ns xt.lang.base-text-test
-  (:use code.test)
-  (:require [std.lang :as l]
-            [std.lib :as h]))
+  (:require [std.lang :as l])
+  (:use code.test))
 
 (do 
   (l/script- :js

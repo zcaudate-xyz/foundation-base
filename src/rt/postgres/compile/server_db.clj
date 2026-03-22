@@ -1,9 +1,9 @@
 (ns rt.postgres.compile.server-db
-  "Generation helpers for DB-facing server targets."
   (:require [clojure.walk :as walk]
             [code.framework.generate :as gen]
             [rt.postgres.grammar.typed-analyze :as analyze]
-            [rt.postgres.grammar.typed-common :as types]))
+            [rt.postgres.grammar.typed-common :as types])
+  "Generation helpers for DB-facing server targets.")
 
 (def ^:private +default-targets+
   [:supabase-db])

@@ -1,10 +1,8 @@
 (ns lib.aether.result-test
+  (:require [jvm.artifact :as artifact]
+            [lib.aether.result :refer :all])
   (:use code.test)
-  (:require [lib.aether.result :refer :all]
-            [std.string :as str]
-            [jvm.artifact :as artifact])
-  (:import (org.eclipse.aether.graph DependencyNode DefaultDependencyNode)
-           (org.eclipse.aether.artifact DefaultArtifact)))
+  (:import (org.eclipse.aether.graph DependencyNode DefaultDependencyNode) (org.eclipse.aether.artifact DefaultArtifact)))
 
 ^{:refer lib.aether.result/clojure-core? :added "3.0"}
 (fact "checks if artifact represents clojure.core"

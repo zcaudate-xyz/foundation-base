@@ -1,7 +1,7 @@
 (ns std.object.element.impl.type-test
-  (:use code.test)
   (:require [std.object.element.impl.type :as common]
-            [std.object.query :as query]))
+            [std.object.query :as query])
+  (:use code.test))
 
 ^{:refer std.object.element.impl.type/set-accessible :added "3.0"}
 (fact "sets the accessible flag in the class to be true"

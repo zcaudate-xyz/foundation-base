@@ -1,6 +1,6 @@
 (ns std.lang.base.grammar-xtalk-test
-  (:use code.test)
-  (:require [std.lang.base.grammar-xtalk :refer :all]))
+  (:require [std.lang.base.grammar-xtalk :refer :all])
+  (:use code.test))
 
 ^{:refer std.lang.base.grammar-xtalk/tf-throw :added "4.0"}
 (fact "wrapper for throw transform"

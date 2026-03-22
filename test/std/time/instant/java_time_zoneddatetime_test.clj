@@ -1,7 +1,7 @@
 (ns std.time.instant.java-time-zoneddatetime-test
-  (:use code.test)
   (:require [std.lib.version :as version]
-            [std.time :as t]))
+            [std.time :as t])
+  (:use code.test))
 
 ^{:refer std.time.instant.java-time-zoneddatetime/from-map :added "3.0"}
 (comment "creates a ZonedDateTime object from a map"

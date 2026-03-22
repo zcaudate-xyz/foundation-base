@@ -1,6 +1,5 @@
 (ns test-site.index
-  (:use code.test)
-  (:require [std.lib :as h]))
+  (:use code.test))
 
 [[:chapter {:title "Welcome to Test Site"}
   [:section {:title "Introduction"}

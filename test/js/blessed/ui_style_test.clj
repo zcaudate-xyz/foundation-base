@@ -1,6 +1,6 @@
 (ns js.blessed.ui-style-test
-  (:use code.test)
-  (:require [js.blessed.ui-style :refer :all]))
+  (:require [js.blessed.ui-style :refer :all])
+  (:use code.test))
 
 ^{:refer js.blessed.ui-style/getColor :added "4.0" :unchecked true}
 (fact "helper function to get color props")

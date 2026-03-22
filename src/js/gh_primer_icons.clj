@@ -1,13 +1,13 @@
 (ns js.gh-primer-icons
-  (:require [std.lang :as l]
-            [std.lib :as h]
-            [std.html :as html]))
+  (:require [std.html :as html]
+            [std.lang :as l]
+            [std.lib.foundation :as f]))
 
 (l/script :js
   {:import [["@primer/octicons-react" :as [* ReactOcticons]]
             ["@primer/octicons-react" :as [* ReactOcticons]]]})
 
-(h/template-entries [l/tmpl-entry {:type :fragment
+(f/template-entries [l/tmpl-entry {:type :fragment
                                    :base "ReactOcticons"
                                    :tag "js"}]
   [AccessibilityIcon

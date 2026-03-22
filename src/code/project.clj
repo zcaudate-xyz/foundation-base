@@ -1,9 +1,10 @@
 (ns code.project
-  (:require [std.fs :as fs]
-            [code.project.common :as common]
+  (:require [code.project.common :as common]
             [code.project.lein :as lein]
             [code.project.shadow :as shadow]
-            [std.lib :as h :refer [definvoke]]))
+            [std.fs :as fs]
+            [std.lib.invoke :as invoke]
+            [std.lib.io :as io]))
 
 (def ^:dynamic *include* [".clj$"])
 
@@ -23,7 +24,7 @@
         (filter fs/exists?)
         (first))))
 
-(definvoke project-map
+(invoke/definvoke project-map
   "returns the project map
  
    (project-map (fs/path \"project.clj\"))"
@@ -45,7 +46,7 @@
    (cond (nil? path)
          (throw (ex-info "Cannot find project" {:path nil}))
 
-         (h/input-stream? path)
+         (io/input-stream? path)
          (lein/project path)
 
          :else
@@ -84,7 +85,7 @@
 
               lookup)))
 
-(definvoke lookup-ns
+(invoke/definvoke lookup-ns
   "fast lookup for all-files function
  
    (first (lookup-ns (lookup-path (h/ns-sym))))

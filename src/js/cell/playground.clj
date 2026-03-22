@@ -1,12 +1,15 @@
 (ns js.cell.playground
-  (:require [std.lib :as h]
-            [std.lang :as l]
+  (:require [clojure.string]
+            [js.cell :as cl]
+            [js.cell.base-internal]
+            [js.core :as j]
             [std.fs :as fs]
             [std.html :as html]
-            [std.string :as str]
-            [js.core :as j]
-            [js.cell :as cl]
-            [js.cell.base-internal]))
+            [std.lang :as l]
+            [std.lib.atom :as atom]
+            [std.lib.network :as network]
+            [std.lib.os :as os]
+            [std.lib.security :as security]))
 
 (defonce ^:dynamic *current* (atom nil))
 
@@ -14,7 +17,7 @@
   (html/html [:html
               [:head
                [:meta {:http-equiv "Content-Security-Policy"
-                       :content (str/join ";"
+                       :content (clojure.string/join ";"
                                           ["default-src * 'unsafe-eval'"
                                            "connect-src * 'unsafe-eval'"
                                            "script-src  'self' 'unsafe-eval' 'unsafe-inline"
@@ -28,10 +31,10 @@
       (reset! *current*
               (let [root (str (fs/create-tmpdir))
                     _    (spit (str root "/index.html") +index+)
-                    port (h/port:check-available 0)
-                    process (h/sh "http-server" "-p" (str port) {:root root
+                    port (network/port:check-available 0)
+                    process (os/sh "http-server" "-p" (str port) {:root root
                                                                  :wait false})
-                    _ (h/wait-for-port "localhost" port)]
+                    _ (network/wait-for-port "localhost" port)]
                 {:root root
                  :port port
                  :process process}))))
@@ -41,16 +44,16 @@
   {:added "4.0"}
   []
   (when @*current*
-    (h/swap-return! *current*
+    (atom/swap-return! *current*
       (fn [{:keys [process] :as m}]
-        (h/sh-close process)
+        (os/sh-close process)
         [m nil]))))
 
 (defn play-file
   "gets the file path in playground"
   {:added "4.0"}
   [& paths]
-  (str/join "/" (cons (:root (start-playground)) paths)))
+  (clojure.string/join "/" (cons (:root (start-playground)) paths)))
 
 (defn play-url
   "gets the playground url"
@@ -69,7 +72,7 @@
         :else
         (let [script (l/emit-script (cons 'do forms) {:lang :js
                                                       :layout (or layout :flat)})
-              sha (h/sha1 script)
+              sha (security/sha1 script)
               {:keys [root]} (start-playground)
               filename (str root "/" sha ".js")
               _ (when (not (fs/exists? filename))

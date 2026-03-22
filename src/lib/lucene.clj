@@ -1,8 +1,8 @@
 (ns lib.lucene
-  (:require [std.protocol.component :as protocol.component]
-            [std.lib.component :as component]
+  (:require [lib.lucene.impl :as impl]
             [lib.lucene.protocol :as protocol.search]
-            [lib.lucene.impl :as impl]))
+            [std.lib.component :as component]
+            [std.protocol.component :as protocol.component]))
 
 (defrecord LuceneSearch [type instance]
 

@@ -1,7 +1,8 @@
 (ns js.lib.rn-gesture
-  (:require [std.lang :as l]
-            [std.lib :as h]
-            [std.json :as json]))
+  (:require [std.json :as json]
+            [std.lang :as l]
+            [std.lib.env :as env]
+            [std.lib.foundation :as f]))
 
 (l/script :js
   {:import [["react-native-gesture-handler" :as [* rnGesture]]]})
@@ -13,7 +14,7 @@
 
 (defn- get-gesture-symbols
   ([]
-   (let [all (json/read (h/sys:resource-content "assets/js.core/react-native-gesture-handler.json"))]
+   (let [all (json/read (env/sys:resource-content "assets/js.core/react-native-gesture-handler.json"))]
      (vec (sort (map symbol (keys all)))))))
 
 (def +gesture+
@@ -25,18 +26,18 @@
     TouchableNativeFeedback TouchableOpacity TouchableWithoutFeedback
     createNativeWrapper gestureHandlerRootHOC])
 
-(h/template-entries [l/tmpl-entry {:type :fragment
+(f/template-entries [l/tmpl-entry {:type :fragment
                                    :base "rnGesture"
                                    :tag "js"}]
   
   +gesture+)
 
-(h/template-entries [l/tmpl-entry {:type :fragment
+(f/template-entries [l/tmpl-entry {:type :fragment
                                    :base "rnGesture.Directions"
                                    :tag "js"}]
   [DOWN LEFT RIGHT UP])
 
-(h/template-entries [l/tmpl-entry {:type :fragment
+(f/template-entries [l/tmpl-entry {:type :fragment
                                    :base "rnGesture.State"
                                    :tag "js"}]
   [ACTIVE BEGAN CANCELLED END FAILED UNDETERMINED])

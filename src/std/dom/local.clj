@@ -1,11 +1,12 @@
 (ns std.dom.local
-  (:require [std.lib :as h]
+  (:require [clojure.set]
             [std.dom.common :as base]
             [std.dom.diff :as diff]
             [std.dom.impl :as impl]
             [std.dom.react :as react]
             [std.dom.type :as type]
             [std.dom.update :as update]
+            [std.lib.collection :as collection]
             [std.lib.mutable :as mut]
             [std.lib.watch :as watch]))
 
@@ -159,7 +160,7 @@
    => [{:on/color :event} {:on/top :trigger}]"
   {:added "3.0"}
   ([{:keys [props trigger]} on-props] 
-   (let [watch-props   (h/filter-keys #(contains? props (keyword (name %))) on-props)
+   (let [watch-props   (collection/filter-keys #(contains? props (keyword (name %))) on-props)
         trigger-props (apply dissoc on-props (concat (keys watch-props)))]
     [watch-props trigger-props])))
 
@@ -263,7 +264,7 @@
    => fn?"
   {:added "3.0"}
   ([{:keys [props handle trigger]}] 
-   (let [props-map  (-> (h/difference (set (keys props)) (set (keys handle)))
+   (let [props-map  (-> (clojure.set/difference (set (keys props)) (set (keys handle)))
                        (zipmap (repeat dom-set-local)))
         handle-map (merge handle props-map)]
     (fn [dom {:keys [id] :as m}]

@@ -1,6 +1,8 @@
 (ns js.blessed.project
   (:require [js.webpack :as webpack]
-            [std.lib :as h]))
+            [std.lib.collection :as collection]
+            [std.lib.env :as env]
+            [std.lib.foundation :as f]))
 
 ;;
 ;; Packaging
@@ -14,7 +16,7 @@
   {:added "4.0"}
   ([name & [m]]
    {:type :package.json
-    :main (h/merge-nested
+    :main (collection/merge-nested
            {"name" name
             "main" "src/main.js",
             
@@ -122,10 +124,10 @@
     :setup  [(or config webpack/+node-basic+)
              webpack/+node-makefile+
              webpack/+node-gitignore+
-             (module-package-json (or name (h/error "Name is required for project"))
+             (module-package-json (or name (f/error "Name is required for project"))
                                   (or m {"dependencies" (clojure.core/merge +state-proxy+
                                                                             +ui+)}))]
     :output [{:type :graph
               :lang :js
-              :main  (h/ns-sym)
+              :main  (env/ns-sym)
               :target "src"}]}))

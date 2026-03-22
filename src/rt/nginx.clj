@@ -1,19 +1,25 @@
 (ns rt.nginx
-  (:require [rt.nginx.script :as script]
-            [rt.nginx.config :as config]
-            [rt.basic.impl.process-lua :as lua]
+  (:require [clojure.string]
             [lib.docker :as docker]
-            [net.http :as http]
             [lua.nginx]
-            [std.protocol.context :as protocol.context]
+            [net.http :as http]
+            [rt.basic.impl.process-lua :as lua]
+            [rt.nginx.config :as config]
+            [rt.nginx.script :as script]
+            [std.fs :as fs]
+            [std.json :as json]
+            [std.lang :as l]
             [std.lang.base.pointer :as ptr]
             [std.lang.base.runtime :as default]
             [std.lang.interface.type-shared :as shared]
-            [std.lib :as h :refer [defimpl]]
-            [std.json :as json]
-            [std.string :as str]
-            [std.lang :as l]
-            [std.fs :as fs]))
+            [std.lib.collection :as collection]
+            [std.lib.component :as component]
+            [std.lib.env :as env]
+            [std.lib.foundation :as f]
+            [std.lib.impl :as impl]
+            [std.lib.network :as network]
+            [std.lib.os :as os]
+            [std.protocol.context :as protocol.context]))
 
 (defn error-logs
   "gets the running nginx error log"
@@ -52,15 +58,15 @@
   "gets all nginx ports on the system"
   {:added "4.0"}
   ([]
-   (->> (h/sh "lsof" "-i" "-P" "-n" {:wrap false})
-        (str/split-lines)
+   (->> (os/sh "lsof" "-i" "-P" "-n" {:wrap false})
+        (clojure.string/split-lines)
         (drop 1)
-        (filter #(str/starts-with? % "nginx"))
+        (filter #(clojure.string/starts-with? % "nginx"))
         (keep #(re-find #"^nginx\s*(\d+).*\:(\d+) \(LISTEN\)$" %))
         (map (fn [arr]
-               (mapv h/parse-long (drop 1 arr))))
+               (mapv f/parse-long (drop 1 arr))))
         (group-by second)
-        (h/map-vals (comp set (partial map first))))))
+        (collection/map-vals (comp set (partial map first))))))
 
 (defn all-nginx-active
   "gets all active nginx processes for a port"
@@ -80,7 +86,7 @@
                   conf-fn)
         conf (script/write (conf-fn rt))
         _    (if (not-empty ptr/*print*)
-               (h/pl conf))]
+               (env/pl conf))]
     conf))
 
 (defn make-temp
@@ -100,14 +106,14 @@
     :as rt}]
   (let [[tmp-dir tmp-file] (make-temp rt)
         sh-args  ["nginx" "-p" tmp-dir "-c" tmp-file]
-        sh-err   (h/with-thrown
-                   (h/sh {:args sh-args})
+        sh-err   (f/with-thrown
+                   (os/sh {:args sh-args})
                    nil)
-        wait-err (h/with-thrown
-                   (h/wait-for-port "localhost" port {:timeout 2000})
+        wait-err (f/with-thrown
+                   (network/wait-for-port "localhost" port {:timeout 2000})
                    nil)]
     (cond wait-err
-          (do (h/p (str/join " " sh-args))
+          (do (env/p (clojure.string/join " " sh-args))
               #_(throw (or sh-err
                            wait-err))
               [:errored tmp-dir])
@@ -128,19 +134,19 @@
                    "-p" (str port ":" port) 
                    "-v" (str tmp-dir ":" tmp-dir)
                    "-v" (str tmp-file ":" tmp-file)
-                   (or image (h/error "No image found" {:image image}))
-                   (or exec  (h/error "No exec found"  {:exec exec}))
+                   (or image (f/error "No image found" {:image image}))
+                   (or exec  (f/error "No exec found"  {:exec exec}))
                    "-g" "daemon off;"
                    "-p" tmp-dir "-c" tmp-file]
-         sh-err   (h/with-thrown
-                    (h/sh {:args sh-args})
+         sh-err   (f/with-thrown
+                    (os/sh {:args sh-args})
                     nil)
-         wait-err (h/with-thrown
-                    (h/wait-for-port "localhost" port {:timeout 2000})
+         wait-err (f/with-thrown
+                    (network/wait-for-port "localhost" port {:timeout 2000})
                     (Thread/sleep 1000)
                     nil)]
      (cond wait-err
-           (do (h/p (str/join " " sh-args))
+           (do (env/p (clojure.string/join " " sh-args))
                #_(throw (or sh-err
                             wait-err))
                [:errored tmp-dir])
@@ -153,16 +159,16 @@
   {:added "4.0"}
   ([{:keys [port container]
      :as rt}]
-   (let [available  (h/port:check-available port)
+   (let [available  (network/port:check-available port)
          ports (all-nginx-ports)
-         arch  (keyword (h/os-arch))]
-     #_(h/prn {:container container
+         arch  (keyword (os/os-arch))]
+     #_(env/prn {:container container
                :port port})
      (cond (get ports port)
            [:running]
 
            (not available)
-           (h/error "Port not available" {:port port})
+           (f/error "Port not available" {:port port})
            
            (and container
                 (contains? (:only container) arch))
@@ -181,7 +187,7 @@
           []
 
           :else
-          (let [exec (h/sh "bash" "-c" (str "kill " (str/join " " active))
+          (let [exec (os/sh "bash" "-c" (str "kill " (clojure.string/join " " active))
                            {:wait false})]
             [active exec]))))
 
@@ -190,8 +196,8 @@
   {:added "4.0"}
   []
   (let [ports (all-nginx-ports)
-        exec  (h/sh {:args ["bash" "-c"
-                            (str/join
+        exec  (os/sh {:args ["bash" "-c"
+                            (clojure.string/join
                              " | "
                              ["ps aux"
                               "grep '[n]ginx: .* process'"
@@ -207,10 +213,10 @@
    (let [ports     (all-nginx-ports)
          processes (get ports port)]
      (if processes
-       (do (apply h/sh "kill" "-9" (map str processes))
+       (do (apply os/sh "kill" "-9" (map str processes))
            [:stopped processes])
-       (if (and (= "Linux" (h/os))
-                (not= "root" @(h/sh "whoami")))
+       (if (and (= "Linux" (os/os))
+                (not= "root" @(os/sh "whoami")))
          (kill-all-nginx)
          [:stopped])))))
 
@@ -244,7 +250,7 @@
 
 (def ^{:arglists '([pg])}
   stop-nginx
-  (h/wrap-stop stop-nginx-raw
+  (component/wrap-stop stop-nginx-raw
                [{:key :container
                  :teardown  docker/stop-runtime}]))
 
@@ -260,10 +266,10 @@
            (:body res)
 
            (= 451 (:status res))
-           (h/error "ERROR MESSAGE" res)
+           (f/error "ERROR MESSAGE" res)
 
            :else
-           (h/error "NOT OK" res)))))
+           (f/error "NOT OK" res)))))
 
 (defn invoke-ptr-nginx
   "evaluates lua ptr and arguments"
@@ -278,7 +284,7 @@
 (defn- rt-nginx-string [{:keys [host port eval-path]}]
   (str "#rt.nginx" [host port eval-path]))
 
-(defimpl NginxRuntime [id state]
+(impl/defimpl NginxRuntime [id state]
   :string rt-nginx-string
   :protocols [std.protocol.component/IComponent
               :suffix "-nginx"
@@ -291,8 +297,8 @@
   "creates a dev nginx runtime"
   {:added "4.0"}
   [{:keys [id port] :as m
-    :or {id   (h/sid)
-         port (h/port:check-available 0)}}]
+    :or {id   (f/sid)
+         port (network/port:check-available 0)}}]
   (map->NginxRuntime (merge
                       {:id id
                        :tag :nginx
@@ -313,7 +319,7 @@
    (nginx {}))
   ([m]
    (-> (nginx:create m)
-       (h/start))))
+       (component/start))))
 
 (def +init+
   [(default/install-type!

@@ -1,6 +1,6 @@
 (ns std.object.element.modifier-test
-  (:use code.test)
-  (:require [std.object.element.modifier :refer :all]))
+  (:require [std.object.element.modifier :refer :all])
+  (:use code.test))
 
 ^{:refer std.object.element.modifier/int-to-modifiers :added "3.0"}
 (fact "converts the modifier integer into human readable represenation"

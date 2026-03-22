@@ -1,9 +1,9 @@
 (ns std.lib.transform.convert-test
-  (:use code.test)
   (:require [example.data :as examples]
             [std.lib.schema :as schema]
             [std.lib.transform :as graph]
-            [std.lib.transform.convert :as convert]))
+            [std.lib.transform.convert :as convert])
+  (:use code.test))
 
 (def ^:dynamic *wrappers*
   {:normalise        [graph/wrap-plus]

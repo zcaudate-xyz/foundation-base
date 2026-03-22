@@ -1,10 +1,11 @@
 (ns std.lib.os
-  (:require [std.lib.impl :refer [defimpl]]
-            [std.lib.foundation :as h]
+  (:require [clojure.string]
             [std.lib.env :as env]
-            [std.string.common :as str]
+            [std.lib.foundation :as h]
+            [std.lib.future :as f]
+            [std.lib.impl :refer [defimpl]]
             [std.protocol.component :as protocol.component]
-            [std.lib.future :as f])
+            [std.string.common :as str])
   (:import (java.io File)))
 
 (def ^:dynamic *native-compile* false)
@@ -169,7 +170,7 @@
 
                                         :else
                                         (cond-> out
-                                          trim    str/trim
+                                          trim    clojure.string/trim
                                           wrap    (h/wrapped identity)))))]
                    (cond-> process
                      wait    (doto (.waitFor))
@@ -217,7 +218,7 @@
    (cond-> cmd
      root (conj "-c" root)
      env  (concat (mapcat (fn [[k v]]
-                            ["-e" (str (str/upper-case (h/strn k))
+                            ["-e" (str (clojure.string/upper-case (h/strn k))
                                        "="
                                        v)])
                           env))
@@ -234,7 +235,7 @@
   {:added "4.0"}
   ([]
    (-> (sh "tmux" "list-sessions" "-F" "#{session_name}" {:wrap false})
-       (str/split-lines))))
+       (clojure.string/split-lines))))
 
 (defn tmux:has-session?
   "checks if tmux session exists"
@@ -267,7 +268,7 @@
   ([session]
    (-> (sh "tmux" "list-windows" "-t" (str session)
            "-F" "#{window_name}" {:wrap false})
-       (str/split-lines))))
+       (clojure.string/split-lines))))
 
 (defn tmux:has-window?
   "checks if window exists in a session"
@@ -282,7 +283,7 @@
   ([session key cmd]
    (let [cmd (if (string? cmd)
                cmd
-               (str/join " " cmd))]
+               (clojure.string/join " " cmd))]
      (sh-output (sh "tmux" "send-keys" "-t" (str session ":" key)
                     cmd "C-m" {:wrap false
                                :output false})))))

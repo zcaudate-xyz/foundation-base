@@ -1,6 +1,6 @@
 (ns code.doc.render.structure-test
-  (:use code.test)
-  (:require [code.doc.render.structure :refer :all]))
+  (:require [code.doc.render.structure :refer :all])
+  (:use code.test))
 
 ^{:refer code.doc.render.structure/inclusive :added "3.0"}
 (fact "checks is a section is within another"

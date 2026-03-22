@@ -1,15 +1,7 @@
 (ns mcp-clj.json-rpc.executor
+  (:require [mcp-clj.log :as log])
   "Executor service utilities for JSON-RPC servers"
-  (:require
-    [mcp-clj.log :as log])
-  (:import
-    (java.util.concurrent
-      Callable
-      ExecutorService
-      Executors
-      ScheduledExecutorService
-      ThreadPoolExecutor
-      TimeUnit)))
+  (:import (java.util.concurrent Callable ExecutorService Executors ScheduledExecutorService ThreadPoolExecutor TimeUnit)))
 
 (defn- wrap-log-throwables
   "Wrap a function to log any exceptions"

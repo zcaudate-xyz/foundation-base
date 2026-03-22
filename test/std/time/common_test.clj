@@ -1,7 +1,7 @@
 (ns std.time.common-test
+  (:require [std.protocol.time :as time]
+            [std.time.common :refer :all])
   (:use code.test)
-  (:require [std.time.common :refer :all]
-            [std.protocol.time :as time])
   (:import [java.util Date TimeZone Calendar]))
 
 ^{:refer std.time.common/calendar :added "3.0" :class [:time/general]}

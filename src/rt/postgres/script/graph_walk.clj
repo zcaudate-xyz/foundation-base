@@ -1,9 +1,10 @@
 (ns rt.postgres.script.graph-walk
-  (:require [std.lib.transform :as transform]
-            [std.lib.transform.link :as link]
-            [std.lib.transform.base.ref :as ref]
+  (:require [std.lib.collection :as collection]
+            [std.lib.foundation :as f]
             [std.lib.schema :as schema]
-            [std.lib :as h])
+            [std.lib.transform :as transform]
+            [std.lib.transform.base.ref :as ref]
+            [std.lib.transform.link :as link])
   (:refer-clojure :exclude [flatten]))
 
 ;;
@@ -21,7 +22,7 @@
                                         tsch))
              tdata (if (get tdata pkey)
                      tdata
-                     (let [psym (symbol (format "?id-%02d" (h/inc! (:counter pipeline))))]
+                     (let [psym (symbol (format "?id-%02d" (f/inc! (:counter pipeline))))]
                        (assoc tdata pkey (with-meta psym pmeta))))]
          (f tdata tsch nsv interim fns datasource))
        (f tdata tsch nsv interim fns datasource)))))
@@ -34,7 +35,7 @@
      (if (and (= (:type attr) :ref)
               (or (symbol? subdata)
                   (string? subdata)
-                  (h/form? subdata)))
+                  (collection/form? subdata)))
        subdata
        (f subdata [attr] nsv interim fns datasource)))))
 
@@ -71,7 +72,7 @@
   "adds missing ids to tree"
   {:added "4.0"}
   ([data schema]
-   (let [counter    (h/counter)
+   (let [counter    (f/counter)
          wrap-main  [link/wrap-link-current wrap-seed-id]
          result     (transform/normalise-base data
                                               {:schema schema

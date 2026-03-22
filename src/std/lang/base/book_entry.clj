@@ -1,6 +1,7 @@
 (ns std.lang.base.book-entry
-  (:require [std.lib :as h :refer [defimpl]]
-            [std.lang.base.util :as ut]))
+  (:require [std.lang.base.util :as ut]
+            [std.lib.collection :as collection]
+            [std.lib.impl :as impl]))
 
 (defn- book-entry-string
   ([{:keys [id lang module section display] :as entry}]
@@ -10,7 +11,7 @@
           (if (= display :brief)
             ""
             (str " "
-                 (h/filter-vals identity
+                 (collection/filter-vals identity
                                 (dissoc entry
                                         :section
                                         :id
@@ -25,7 +26,7 @@
                                         :priority
                                         :display))))))))
 
-(defimpl BookEntry [;; required
+(impl/defimpl BookEntry [;; required
                     lang
                     id
                     module

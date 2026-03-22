@@ -1,6 +1,6 @@
 (ns js.react.compile-directives-test
-  (:use code.test)
-  (:require [js.react.compile-directives :as d]))
+  (:require [js.react.compile-directives :as d])
+  (:use code.test))
 
 ^{:refer js.react.compile-directives/compile-ui-tailwind :added "4.0" :unchecked true}
 (fact "templates the layout controls"

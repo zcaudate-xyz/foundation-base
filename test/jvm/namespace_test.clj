@@ -1,8 +1,8 @@
 (ns jvm.namespace-test
-  (:use code.test)
   (:require [jvm.namespace :as ns]
-            [std.lib :refer [definvoke] :as h]
-            [std.lib.result :as res]))
+            [std.lib.invoke :as invoke]
+            [std.lib.result :as res])
+  (:use code.test))
 
 ^{:refer jvm.namespace/list-aliases :added "3.0"}
 (fact "namespace list all aliases task"
@@ -147,7 +147,7 @@
 
   (ns/unalias 'jvm.namespace :args '[something more]))
 
-(definvoke check
+(invoke/definvoke check
   "check for namespace task group"
   {:added "3.0"}
   [:pipe {:template :namespace
@@ -168,7 +168,7 @@
                               :color  #{:yellow}}]}
           :summary nil}])
 
-(definvoke random-test
+(invoke/definvoke random-test
   "check for namespace task group"
   {:added "3.0"}
   [:pipe {:template :namespace

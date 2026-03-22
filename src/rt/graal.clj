@@ -1,25 +1,20 @@
 (ns rt.graal
-  (:require [std.protocol.component :as protocol.component]
-            [std.protocol.context :as protocol.context]
-            [rt.basic.impl.process-js :as js]
+  (:require [rt.basic.impl.process-js :as js]
             [rt.basic.impl.process-python :as python]
-            [std.lang.base.impl :as impl]
-            [std.lang.base.runtime :as default]
-            [std.lang.base.pointer :as ptr]
+            [std.fs :as fs]
             [std.json :as json]
             [std.lang :as l]
-            [std.lib :as h :refer [defimpl]]
-            [std.fs :as fs]
+            [std.lang.base.impl :as impl]
+            [std.lang.base.pointer :as ptr]
+            [std.lang.base.runtime :as default]
+            [std.lib.atom :as atom]
+            [std.lib.component :as component]
+            [std.lib.foundation :as f]
+            [std.lib.impl]
+            [std.protocol.component :as protocol.component]
+            [std.protocol.context :as protocol.context]
             [xt.lang.base-repl :as k])
-  (:import (org.graalvm.polyglot Context
-                                 Context$Builder
-                                 Engine
-                                 Value
-                                 Source)
-           (org.graalvm.polyglot.io ByteSequence)
-           (hara.lib.graal Require
-                           ResourceFolder
-                           FilesystemFolder)))
+  (:import (org.graalvm.polyglot Context Context$Builder Engine Value Source) (org.graalvm.polyglot.io ByteSequence) (hara.lib.graal Require ResourceFolder FilesystemFolder)))
 
 (def ^:dynamic *lang* nil)
 
@@ -31,7 +26,7 @@
    (add-resource-path +js+ \"assets\")"
   {:added "3.0"}
   ([raw path]
-   (h/-> (.getContextClassLoader (Thread/currentThread))
+   (f/-> (.getContextClassLoader (Thread/currentThread))
          (ResourceFolder/create path "UTF-8")
          (Require/enable raw %))
    raw))
@@ -42,7 +37,7 @@
    (add-system-path +js+ \".\")"
   {:added "3.0"}
   ([raw path]
-   (h/-> (fs/file path)
+   (f/-> (fs/file path)
          (FilesystemFolder/create "UTF-8")
          (Require/enable raw %))
    raw))
@@ -54,7 +49,7 @@
    => \"2\""
   {:added "3.0"}
   ([{:keys [lang resource system]}]
-   (let [ctx (h/-> (Context/newBuilder (into-array [(name lang)]))
+   (let [ctx (f/-> (Context/newBuilder (into-array [(name lang)]))
                    (.allowAllAccess true)
                    (.build)
                    (if resource (reduce add-resource-path % resource) %)
@@ -160,7 +155,7 @@
   {:added "3.0"}
   ([{:keys [lang raw] :as graal}]
    (if-not (nil? @raw)
-     (h/swap-return! raw
+     (atom/swap-return! raw
                      (fn [ctx]
                        (close-raw ctx)
                        [ctx nil])))
@@ -170,7 +165,7 @@
   ([graal]
    (str "#rt.graal" (into {} graal))))
 
-(defimpl RuntimeGraal [lang raw]
+(std.lib.impl/defimpl RuntimeGraal [lang raw]
   :string rt-graal-string
   :protocols [std.protocol.component/IComponent
               :exclude [-kill]
@@ -189,7 +184,7 @@
    => rt-graal?"
   {:added "4.0"}
   [{:keys [id]
-    :or {id (h/sid)}
+    :or {id (f/sid)}
     :as m}]
   (map->RuntimeGraal (assoc m
                             :id id
@@ -200,7 +195,7 @@
   {:added "3.0"}
   ([m]
    (-> (rt-graal:create m)
-       (h/start))))
+       (component/start))))
 
 (defn rt-graal?
   "checks that object is a graal runtime"

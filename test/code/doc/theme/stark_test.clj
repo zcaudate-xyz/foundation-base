@@ -1,6 +1,6 @@
 (ns code.doc.theme.stark-test
-  (:use code.test)
-  (:require [code.doc.theme.stark :refer :all]))
+  (:require [code.doc.theme.stark :refer :all])
+  (:use code.test))
 
 ^{:refer code.doc.theme.stark/render-top-level :added "3.0"}
 (fact "renders the top-level (cover page) for the stark theme"

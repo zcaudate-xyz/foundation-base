@@ -1,7 +1,7 @@
 (ns code.framework.link.java-test
-  (:use code.test)
-  (:require [code.framework.link.java :refer :all]
-            [clojure.java.io :as io]))
+  (:require [clojure.java.io :as io]
+            [code.framework.link.java :refer :all])
+  (:use code.test))
 
 ^{:refer code.framework.link.java/get-class :added "3.0"}
 (fact "grabs the symbol of the class in the java file"

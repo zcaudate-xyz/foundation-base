@@ -1,12 +1,13 @@
 (ns code.ai.heal.form
-  (:require [code.manage :as manage]
-            [std.block.navigate :as edit]
+  (:require [code.ai.heal.form-edits :as form-edits]
+            [code.manage :as manage]
             [code.query :as query]
-            [std.block.heal.core :as heal]
-            [code.ai.heal.form-edits :as form-edits]
             [std.block :as b]
+            [std.block.heal.core :as heal]
+            [std.block.navigate :as edit]
             [std.fs :as fs]
-            [std.lib :as h]))
+            [std.lib.collection :as collection]
+            [std.lib.sort :as sort]))
 
 (defn get-dsl-deps-fn
   [content]
@@ -34,19 +35,19 @@
   [input-deps]
   (let [all-deps   (apply clojure.set/union
                           (map :deps (vals input-deps)))
-        lu-ns      (h/map-vals :ns input-deps)
-        lu-path    (h/transpose lu-ns)
+        lu-ns      (collection/map-vals :ns input-deps)
+        lu-path    (collection/transpose lu-ns)
         load-deps  (set (keys lu-path))
         sys-deps   (clojure.set/difference
                     all-deps load-deps)
-        mdeps      (h/map-entries
+        mdeps      (collection/map-entries
                     (fn [[path {:keys [ns deps]}]]
                       [ns (clojure.set/difference
                            deps sys-deps)])
                     input-deps)
-        ordered    (h/topological-sort-order-by-deps
+        ordered    (sort/topological-sort-order-by-deps
                     mdeps
-                    (h/topological-sort mdeps))]
+                    (sort/topological-sort mdeps))]
     (mapv lu-path ordered)))
 
 (defn heal-directory
@@ -56,7 +57,7 @@
        :as params}]]
   (manage/transform-code
    :all
-   (h/merge-nested
+   (collection/merge-nested
     {:title (fn [params env]
               (str "HEAL DIRECTORY" " - " (fs/path (:root env))))
      :transform heal/heal-content
@@ -75,7 +76,7 @@
        :as params}]]
   (manage/refactor-code
    :all
-   (h/merge-nested
+   (collection/merge-nested
     {:title (fn [params env]
               (str "REFACTOR DIRECTORY" " - " (fs/path (:root env))))
      :edits  edits
@@ -93,7 +94,7 @@
        :as params}]]
   (manage/extract
    :all
-   (h/merge-nested
+   (collection/merge-nested
     {:title (fn [params env]
               (str "GET DSL DEPS" " - " (fs/path (:root env))))
      :process get-dsl-deps-fn}
@@ -113,7 +114,7 @@
                          (get-load-order deps)))]
     (task-fn
      :all
-     (h/merge-nested
+     (collection/merge-nested
       {:parallel false
        :print {:item true :result true :summary true}
        :title (fn [params env]

@@ -1,6 +1,5 @@
 (ns mcp-clj.log
-  (:require
-    [clojure.string :as str]))
+  (:require [clojure.string :as str]))
 
 (def ^:private levels #{:error :warn :info :debug :trace})
 

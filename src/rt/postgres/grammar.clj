@@ -1,25 +1,24 @@
 (ns rt.postgres.grammar
-  (:require [rt.postgres.grammar.meta :as meta]
-            [rt.postgres.grammar.common :as common]
-            [rt.postgres.grammar.tf :as tf]
-            [rt.postgres.grammar.form-let :as form-let]
+  (:require [rt.postgres.grammar.common :as common]
+            [rt.postgres.grammar.form-defconst :as form-defconst]
             [rt.postgres.grammar.form-defn :as form-defn]
             [rt.postgres.grammar.form-defn-hydrate :as form-defn-hydrate]
-            [rt.postgres.grammar.form-defconst :as form-defconst]
+            [rt.postgres.grammar.form-defpartition :as form-defpartition]
             [rt.postgres.grammar.form-defrole :as form-defrole]
             [rt.postgres.grammar.form-deftype :as form-deftype]
             [rt.postgres.grammar.form-deftype-hydrate :as form-deftype-hydrate]
-            [rt.postgres.grammar.form-defpartition :as form-defpartition]
+            [rt.postgres.grammar.form-let :as form-let]
             [rt.postgres.grammar.form-vec :as form-vec]
+            [rt.postgres.grammar.meta :as meta]
+            [rt.postgres.grammar.tf :as tf]
+            [std.lang.base.book :as book]
             [std.lang.base.emit :as emit]
             [std.lang.base.emit-common :as emit-common]
             [std.lang.base.emit-fn :as emit-fn]
             [std.lang.base.grammar :as grammar]
-            [std.lang.base.util :as ut]
-            [std.lang.base.book :as book]
             [std.lang.base.script :as script]
-            [std.string :as str]
-            [std.lib :as h]))
+            [std.lang.base.util :as ut]
+            [std.lib.collection :as collection]))
 
 (defn- pg-tf-free-data
   [[_ data]]
@@ -203,7 +202,7 @@
                                       :catch   {:raw "WHEN"
                                                 :parameter  {:start " " :end " THEN"}}}}}
         :function {:defn    {:args  {:assign "DEFAULT"}}}}
-       (h/merge-nested (emit/default-grammar))))
+       (collection/merge-nested (emit/default-grammar))))
 
 (def +grammar+
   (grammar/grammar :pg

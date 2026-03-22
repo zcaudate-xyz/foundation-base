@@ -1,5 +1,5 @@
 (ns std.image.base.display.gradient
-  (:require [std.string :as str]))
+  (:require [std.string.common :as common]))
 
 (def ^:dynamic *default-ratio* 0.4)
 (def ^:dynamic *default-total* 256)
@@ -9,13 +9,13 @@
                      "ÐêqÛŠÕÔA€ßpmãâG¶øðé8ÚÜ$ëdÙýèÓÞ"
                      "ÖåÿÒb¥FDñáZPäšÇàhû§ÝkŸ®S9žUTe6"
                      "µOyxÎ¾f4õ5ôú&aü2ùçw©Y£0VÍL±3ÏÌ"]
-                    (str/joinl)))
+                    (common/joinl)))
 
 (def ramp-light (->>  ["óC@nöòs¢u‰½¼‡zJƒ%¤Itocîrjv1lí="
                        "ïì<>i7†[¿?×}*{+()\\/»«•¬|!¡÷¦¯—"
                        "^ª„”“~³º²–°­¹‹›;:’‘‚’˜ˆ¸…·¨´`."
                        "                  "]
-                      (str/joinl)))
+                      (common/joinl)))
 
 (defn create-lookup
   "creates a lookup based on the range

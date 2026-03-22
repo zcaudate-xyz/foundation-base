@@ -1,21 +1,13 @@
 (ns rt.postgres.typed
-  "Public API for rt.postgres typed analysis and compile targets.
-   
-   Consolidated, non-redundant interface for schema inference.
-   
-   Addresses all critique issues:
-   1. Single table->shape (no table-instance-shape)
-   2. Centralized +type-formats+ (no duplicate type mappings)
-   3. Single normalize-key (no scattered key conversion)
-   4. Analysis delegates to shape/merge-shapes (no local merge duplication)"
-  (:require [rt.postgres.grammar.typed-common :as types]
-            [rt.postgres.grammar.typed-parse :as parse]
-            [rt.postgres.grammar.typed-shape :as shape]
-            [rt.postgres.grammar.typed-analyze :as analyze]
+  (:require [clojure.string :as str]
             [rt.postgres.compile.json-openapi :as compile.json-openapi]
             [rt.postgres.compile.json-schema :as compile.json-schema]
             [rt.postgres.compile.ts-schema :as compile.ts-schema]
-            [clojure.string :as str]))
+            [rt.postgres.grammar.typed-analyze :as analyze]
+            [rt.postgres.grammar.typed-common :as types]
+            [rt.postgres.grammar.typed-parse :as parse]
+            [rt.postgres.grammar.typed-shape :as shape])
+  "Public API for rt.postgres typed analysis and compile targets.\n   \n   Consolidated, non-redundant interface for schema inference.\n   \n   Addresses all critique issues:\n   1. Single table->shape (no table-instance-shape)\n   2. Centralized +type-formats+ (no duplicate type mappings)\n   3. Single normalize-key (no scattered key conversion)\n   4. Analysis delegates to shape/merge-shapes (no local merge duplication)")
 
 ;; ─────────────────────────────────────────────────────────────────────────────
 ;; Type Registry API

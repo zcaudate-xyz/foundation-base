@@ -1,6 +1,6 @@
 (ns rt.postgres.grammar.form-defn-hydrate
-  (:require [rt.postgres.grammar.typed-parse :as parse]
-            [rt.postgres.grammar.typed-analyze :as analyze]
+  (:require [rt.postgres.grammar.typed-analyze :as analyze]
+            [rt.postgres.grammar.typed-parse :as parse]
             [std.json :as json]))
 
 (defn- infer-entry-namespace

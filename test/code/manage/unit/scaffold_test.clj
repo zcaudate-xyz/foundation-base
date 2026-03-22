@@ -1,8 +1,8 @@
 (ns code.manage.unit.scaffold-test
-  (:use code.test)
   (:require [code.manage.unit.scaffold :refer :all]
             [code.project :as project]
-            [std.fs :as fs]))
+            [std.fs :as fs])
+  (:use code.test))
 
 ^{:refer code.manage.unit.scaffold/test-fact-form :added "1.2"}
 (fact "creates a fact form for the namespace"

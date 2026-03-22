@@ -1,6 +1,6 @@
 (ns std.scheduler.types
-  (:require [std.contract :refer [defspec] :as c]
-            [std.lib :as h]))
+  (:require [std.contract :as c :refer [defspec]]
+            [std.lib.foundation :as f]))
 
 (def +runtime+
   (-> {:type        '(:basic :constant)
@@ -16,7 +16,7 @@
 (def +program+
   (c/lax {:full        boolean?
           :global      boolean?
-          :state       h/atom?
+          :state       f/atom?
           :args-fn     (c/fn [])
           :create-fn   (c/fn [])
           :time-fn     (c/fn [t])

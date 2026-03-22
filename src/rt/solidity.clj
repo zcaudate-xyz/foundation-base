@@ -1,21 +1,21 @@
 (ns rt.solidity
-  (:require [std.lib :as h]
-            [std.lang :as l]
-            [std.string :as str]
-            [rt.solidity.env-ganache :as env-ganache]
-            [rt.solidity.client :as client]
+  (:require [rt.solidity.client :as client]
             [rt.solidity.compile-common :as compile-common]
+            [rt.solidity.compile-deploy :as compile-deploy]
             [rt.solidity.compile-node :as compile-node]
             [rt.solidity.compile-solc :as compile-solc]
-            [rt.solidity.compile-deploy :as compile-deploy]
+            [rt.solidity.env-ganache :as env-ganache]
             [rt.solidity.grammar :as grammar]
             [rt.solidity.script.builtin :as builtin]
-            [rt.solidity.script.util :as util])
+            [rt.solidity.script.util :as util]
+            [std.lang :as l]
+            [std.lib.env :as env]
+            [std.lib.foundation :as f])
   (:refer-clojure :exclude [assert require bytes]))
 
-(h/intern-all rt.solidity.script.util)
+(f/intern-all rt.solidity.script.util)
 
-(h/intern-in [rt:start-ganache-server env-ganache/start-ganache-server]
+(f/intern-in [rt:start-ganache-server env-ganache/start-ganache-server]
              [rt:stop-ganache-server env-ganache/stop-ganache-server]
 
              compile-common/with:caller-address
@@ -85,8 +85,8 @@
                (compile-solc/compile-ptr-code m)
                (compile-solc/compile-module-code m))]
     (if (or no-lines (:no-lines m))
-      (h/p  code)
-      (h/pl code))))
+      (env/p  code)
+      (env/pl code))))
 
 (defn rt:deploy-ptr
   "deploys a ptr a contract"

@@ -1,10 +1,10 @@
 (ns std.log.form-test
-  (:use code.test)
   (:require [std.log.common :as common]
-            [std.log.form :refer :all]
-            [std.log.core :as core]
             [std.log.console :as console]
-            [std.protocol.log :as protocol.log]))
+            [std.log.core :as core]
+            [std.log.form :refer :all]
+            [std.protocol.log :as protocol.log])
+  (:use code.test))
 
 ^{:refer std.log.form/log-meta :added "3.0"}
 (fact "gets the metadata information on macroexpand")

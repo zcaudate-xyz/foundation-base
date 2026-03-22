@@ -1,6 +1,6 @@
 (ns code.ai.server.tool.std-lang-test
-  (:require [code.test :refer :all]
-            [code.ai.server.tool.std-lang :as std-lang]
+  (:require [code.ai.server.tool.std-lang :as std-lang]
+            [code.test :refer :all]
             [std.lang :as l]
             [std.lang.base.library :as lib]))
 

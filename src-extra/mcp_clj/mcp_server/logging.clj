@@ -1,13 +1,6 @@
 (ns mcp-clj.mcp-server.logging
-  "MCP server logging utility for sending structured log messages to clients.
-
-  This component provides the public API for MCP server authors to send log
-  messages to their clients using the MCP logging utility protocol.
-
-  This is separate from the internal mcp-clj.log component which is used for
-  debugging the mcp-clj framework itself."
-  (:require
-    [mcp-clj.json-rpc.protocols :as json-rpc-protocols]))
+  (:require [mcp-clj.json-rpc.protocols :as json-rpc-protocols])
+  "MCP server logging utility for sending structured log messages to clients.\n\n  This component provides the public API for MCP server authors to send log\n  messages to their clients using the MCP logging utility protocol.\n\n  This is separate from the internal mcp-clj.log component which is used for\n  debugging the mcp-clj framework itself.")
 
 ;; Log level constants and utilities
 

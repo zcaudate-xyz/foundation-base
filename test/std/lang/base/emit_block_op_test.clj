@@ -1,10 +1,10 @@
 (ns std.lang.base.emit-block-op-test
-  (:use code.test)
-  (:require [std.lang.base.emit-common :as common]
+  (:require [std.lang.base.emit-block :as block]
+            [std.lang.base.emit-common :as common]
             [std.lang.base.emit-helper :as helper]
-            [std.lang.base.emit-block :as block]
             [std.lang.base.grammar :as grammar]
-            [std.lib :as h]))
+            [std.string.prose :as prose])
+  (:use code.test))
 
 (def +reserved+
   (-> (grammar/build)
@@ -60,7 +60,7 @@
                                +grammar+
                                {})
 
-  =>  (std.string/|
+  =>  (prose/|
        "for((:= i 0), (<= i 10), (:++ i)){"
        "  (print (:float i));"
        "}")
@@ -70,7 +70,7 @@
                               (print (:float i)))
                            +grammar+
                            {})
-  => (std.string/|
+  => (prose/|
       "for(i = 0, i <= 10, ++i){"
       "  print(((float)i));"
       "}"))
@@ -101,7 +101,7 @@
                               (:= x 1))
                            +grammar+
                            {})
-  =>  (std.string/|
+  =>  (prose/|
        "if(i < 1){"
        "  return y;"
        "}"
@@ -124,7 +124,7 @@
                               (return y))
                            +grammar+
                            {})
-  => (std.string/|
+  => (prose/|
       "if(i < 1){"
       "  x = 1;"
       "  return y;"
@@ -147,7 +147,7 @@
                               3)
                            +grammar+
                            {})
-  (std.string/|
+  (prose/|
    "switch(hello){"
    "  case \"A\":"
    "    1;"
@@ -174,7 +174,7 @@
                            +grammar+
                            {})
   
-  => (std.string/|
+  => (prose/|
       "{"
       "  {"
       "    1 + 2 + 3;"
@@ -189,7 +189,7 @@
                                   (catch e (return e)))
                                +grammar+
                                {})
-  => (std.string/|
+  => (prose/|
       "try{"
       "  (block (+ 1 2 3))"
       "}"
@@ -203,7 +203,7 @@
                            +grammar+
                            {})
   
-  => (std.string/|
+  => (prose/|
       "try{"
       "  {"
       "    1 + 2 + 3;"

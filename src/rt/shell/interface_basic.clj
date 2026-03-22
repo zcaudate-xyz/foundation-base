@@ -1,12 +1,14 @@
 ^{:no-test true}
 (ns rt.shell.interface-basic
-  (:require [std.protocol.component :as protocol.component]
-            [std.protocol.context :as protocol.context]
+  (:require [clojure.string]
+            [rt.basic.impl.process-bash :as process]
             [std.concurrent :as cc]
-            [std.string :as str]
-            [std.lib :as h :refer [defimpl]]
             [std.lang.base.runtime :as default]
-            [rt.basic.impl.process-bash :as process]))
+            [std.lib.collection :as collection]
+            [std.lib.component :as component]
+            [std.lib.impl :as impl]
+            [std.protocol.component :as protocol.component]
+            [std.protocol.context :as protocol.context]))
 
 (def ^:dynamic *single-line* false)
 
@@ -21,7 +23,7 @@
   "basic evaluation for the bash runtime"
   {:added "4.0"}
   ([{:keys [relay] :as shell} body]
-   (str/trim-right (:output @(cc/send relay
+   (clojure.string/trimr (:output @(cc/send relay
                                       (if (nil? body)
                                         {:op (if *single-line*
                                                :line
@@ -44,13 +46,13 @@
   [{:keys [id lang]}]
   (str "#shell.basic" [id]))
 
-(defimpl ShellBasic [relay error]
+(impl/defimpl ShellBasic [relay error]
   :string shell-basic-string
   :protocols [protocol.component/IComponent
-              :body   {-start  (do (h/comp:start relay)
+              :body   {-start  (do (component/start relay)
                                    component)
-                       -stop   (h/comp:stop relay)
-                       -kill   (h/comp:kill relay)}
+                       -stop   (component/stop relay)
+                       -kill   (component/kill relay)}
               protocol.context/IContext
               :prefix "default/default-"
               :method {-raw-eval    raw-eval-basic
@@ -68,7 +70,7 @@
                                      :options {:in  {:quiet true}
                                                :err {:return :passive
                                                      :watch  err}}}
-                                    (h/merge-nested process)))]
+                                    (collection/merge-nested process)))]
      (map->ShellBasic (merge (dissoc m :process)
                              {:relay relay :error err})))))
 
@@ -80,7 +82,7 @@
    (shell-basic {}))
   ([m]
    (-> (shell-basic:create m)
-       (h/start))))
+       (component/start))))
 
 (def +bash-basic+
   [(default/install-type!
@@ -93,11 +95,11 @@
   (./import)
   (shell-basic)
   (./create-tests)
-  (def )(h/start (create-relay))
+  (def )(component/start (create-relay))
   (def -sh- (create-shell ["lua" "-i"]))
   
-  (h/start (:shell -sh-))
-  (h/stop (:shell -sh-))
+  (component/start (:shell -sh-))
+  (component/stop (:shell -sh-))
 
   (cmd-exists? "lua")
   (cmd-exists? "lua -i"))

@@ -1,23 +1,24 @@
 (ns std.lib
-  (:require [std.lib.atom :as atom]
+  (:require [clojure.set :as set]
             [std.lib.apply :as apply]
+            [std.lib.atom :as atom]
             [std.lib.class :as class]
             [std.lib.collection :as collection]
-            [std.lib.context.registry :as reg]
-            [std.lib.context.pointer :as ptr]
-            [std.lib.context.space :as space]
             [std.lib.component :as component]
             [std.lib.component.track :as track]
-            [std.lib.foundation :as f]
+            [std.lib.context.pointer :as ptr]
+            [std.lib.context.registry :as reg]
+            [std.lib.context.space :as space]
             [std.lib.deps :as deps]
             [std.lib.enum :as enum]
             [std.lib.env :as env]
             [std.lib.extend :as extend]
+            [std.lib.foundation :as f]
             [std.lib.function :as fn]
             [std.lib.future :as future]
             [std.lib.impl :as impl]
-            [std.lib.io :as io]
             [std.lib.invoke :as invoke]
+            [std.lib.io :as io]
             [std.lib.memoize :as memoize]
             [std.lib.network :as network]
             [std.lib.origin :as origin]
@@ -31,11 +32,8 @@
             [std.lib.template :as template]
             [std.lib.time :as time]
             [std.lib.trace :as trace]
-            [std.lib.walk :as walk]
-            [clojure.set :as set])
-  (:refer-clojure :exclude [-> ->> keyword swap! reset! aget fn
-                            ns require pr prn memoize set! future future?
-                            parse-long parse-double with-out-str]))
+            [std.lib.walk :as walk])
+  (:refer-clojure :exclude [-> ->> keyword swap! reset! aget fn ns require pr prn memoize set! future future? parse-long parse-double with-out-str]))
 
 (f/intern-all std.lib.atom
               std.lib.collection

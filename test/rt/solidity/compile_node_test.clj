@@ -1,12 +1,12 @@
 (ns rt.solidity.compile-node-test
-  (:use code.test)
-  (:require [rt.solidity.client :as client]
+  (:require [rt.solidity :as s]
+            [rt.solidity.client :as client]
             [rt.solidity.compile-common :as compile-common]
             [rt.solidity.compile-node :as compile-node]
             [rt.solidity.env-ganache :as env]
-            [rt.solidity :as s]
             [std.lang :as l]
-            [std.lib :as h]))
+            [std.lib.context.pointer :as ptr])
+  (:use code.test))
 
 (l/script- :solidity
   {:runtime :web3
@@ -76,7 +76,7 @@
 ^{:refer rt.solidity.compile-node/rt:node-ping :added "4.0"}
 (fact "pings the node"
   (with-redefs [compile-node/rt-get-node (fn [& _] {})
-                h/p:rt-invoke-ptr (fn [_ _ _] "pong")]
+                ptr/rt-invoke-ptr (fn [_ _ _] "pong")]
     (compile-node/rt:node-ping))
   => "pong")
 

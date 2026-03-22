@@ -1,10 +1,7 @@
 (ns mcp-clj.mcp-client.session
+  (:require [mcp-clj.log :as log])
   "MCP client session state management"
-  (:require
-    [mcp-clj.log :as log])
-  (:import
-    (java.util.concurrent
-      CompletableFuture)))
+  (:import (java.util.concurrent CompletableFuture)))
 
 ;; Session States
 

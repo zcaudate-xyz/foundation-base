@@ -1,7 +1,5 @@
 (ns rt.solidity.script.util
-  (:require [std.lib :as h]
-            [std.lang :as l]
-            [std.string :as str])
+  (:require [std.lang :as l])
   (:refer-clojure :exclude [assert require bytes]))
 
 (l/script :solidity

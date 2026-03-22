@@ -1,10 +1,9 @@
 (ns std.timeseries.compute
-  (:require [std.math :as math]
+  (:require [std.lib.collection :as collection]
             [std.lib.sort :as sort]
-            [std.lib :as h]
-            [std.timeseries.common :as core]
-            [std.string :as str]
-            [std.lib.walk :as walk])
+            [std.lib.walk :as walk]
+            [std.math :as math]
+            [std.timeseries.common :as core])
   (:refer-clojure :exclude [compile]))
 
 (defn max-fn
@@ -47,7 +46,7 @@
        (apply f args)))))
 
 (def +aggregations+
-  (h/map-vals wrap-not-nil
+  (collection/map-vals wrap-not-nil
               {:first    first
                :last     last
                :middle   middle-fn
@@ -64,7 +63,7 @@
                :random   rand-nth}))
 
 (def +aggregation-forms+
-  (h/map-entries (fn [[k _]]
+  (collection/map-entries (fn [[k _]]
                    [(keyword "s" (name k)) (list k `+aggregations+)])
                  +aggregations+))
 
@@ -107,7 +106,7 @@
   {:added "3.0"}
   ([m]
    (let [ks (set (keys m))]
-     (h/map-vals (fn [form]
+     (collection/map-vals (fn [form]
                    (let [store (volatile! #{})]
                      (walk/postwalk (fn [x]
                                       (if (and (keyword? x)
@@ -199,7 +198,7 @@
                        [:s/norm :bench.stats.lag])})"
   {:added "3.0"}
   ([m]
-   (h/map-vals (comp eval compile-single) m)))
+   (collection/map-vals (comp eval compile-single) m)))
 
 (defn compute
   "computes additional values given array

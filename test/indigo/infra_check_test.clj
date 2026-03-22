@@ -1,6 +1,6 @@
 (ns indigo.infra-check-test
-  (:use code.test)
-  (:require [indigo.infra-check :refer :all]))
+  (:require [indigo.infra-check :refer :all])
+  (:use code.test))
 
 ^{:refer indigo.infra-check/tests-in-wrong-file :added "4.1"}
 (fact "TODO")

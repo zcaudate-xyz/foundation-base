@@ -1,13 +1,14 @@
 (ns std.lib.git
-  (:require [std.lib.os :as os]
-            [std.string.common :as str]
-            [std.lib.foundation :as h]))
+  (:require [clojure.string]
+            [std.lib.foundation :as h]
+            [std.lib.os :as os]
+            [std.string.common :as str]))
 
 (defn git-result
   "helper to get result from process"
   [process]
   (let [res (os/sh-output process)]
-    (assoc res :out (str/trim (:out res)))))
+    (assoc res :out (clojure.string/trim (:out res)))))
 
 (defn git-run
   "base function for running git commands"
@@ -71,20 +72,20 @@
    (status {}))
   ([opts]
    (let [{:keys [out]} (git ["status" "--porcelain" "-b"] opts)
-         lines (str/split-lines out)]
+         lines (clojure.string/split-lines out)]
      (if (empty? lines)
        {:branch "HEAD" :changed [] :staged [] :untracked []}
        (reduce (fn [acc line]
                  (let [code (subs line 0 2)
-                       path (str/trim (subs line 3))]
+                       path (clojure.string/trim (subs line 3))]
                    (cond
                      (= "##" code)
                      (let [branch-info (subs line 3)
                            ;; Handle "No commits yet on main"
-                           branch (if (str/starts-with? branch-info "No commits yet on ")
+                           branch (if (clojure.string/starts-with? branch-info "No commits yet on ")
                                     (subs branch-info (count "No commits yet on "))
                                     ;; Handle "main...origin/main"
-                                    (first (str/split branch-info #"\.\.\.")))]
+                                    (first (clojure.string/split branch-info #"\.\.\.")))]
                        (assoc acc :branch branch))
 
                      (= "??" code)
@@ -157,16 +158,16 @@
                 (conj args (str "-" n))
                 args)
          {:keys [out]} (git args opts)]
-     (->> (str/split-lines out)
+     (->> (clojure.string/split-lines out)
           (map (fn [line]
-                 (let [parts (str/split line #"\|")]
+                 (let [parts (clojure.string/split line #"\|")]
                    (if (>= (count parts) 5)
                      (let [[hash author email time subject] parts]
                        {:hash hash
                         :author author
                         :email email
                         :time (try (Long/parseLong time) (catch Exception _ 0))
-                        :subject (str/join "|" (subvec parts 4))}) ;; rejoin subject in case it has pipes
+                        :subject (clojure.string/join "|" (subvec parts 4))}) ;; rejoin subject in case it has pipes
                      {:raw line}))))))))
 
 (defn branch
@@ -183,8 +184,8 @@
    (cond
      (nil? name)
      (let [{:keys [out]} (git ["branch"] opts)]
-       (->> (str/split-lines out)
-            (map (fn [s] (str/trim (str/replace s #"\*" ""))))))
+       (->> (clojure.string/split-lines out)
+            (map (fn [s] (clojure.string/trim (clojure.string/replace s #"\*" ""))))))
 
      (:delete opts)
      (git ["branch" "-D" name] opts)
@@ -284,7 +285,7 @@
   ([ref opts]
    (-> (git ["rev-parse" ref] opts)
        :out
-       (str/trim))))
+       (clojure.string/trim))))
 
 ;; Complex / Safe Operations
 

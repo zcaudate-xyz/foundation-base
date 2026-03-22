@@ -1,6 +1,6 @@
 (ns std.concurrent.print-test
-  (:use code.test)
-  (:require [std.concurrent.print :as print]))
+  (:require [std.concurrent.print :as print])
+  (:use code.test))
 
 ^{:refer std.concurrent.print/print-handler :added "3.0"}
 (fact "handler for local print"

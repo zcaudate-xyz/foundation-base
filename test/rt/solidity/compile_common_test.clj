@@ -1,7 +1,7 @@
 (ns rt.solidity.compile-common-test
-  (:use code.test)
   (:require [rt.solidity.compile-common :refer :all]
-            [std.lang :as l]))
+            [std.lang :as l])
+  (:use code.test))
 
 ^{:refer rt.solidity.compile-common/clear-compiled :added "4.0"}
 (fact "clears all compiled entries"

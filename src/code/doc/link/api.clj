@@ -1,8 +1,8 @@
 (ns code.doc.link.api
-  (:require [code.framework.docstring :as docstring]
-            [code.framework.common :as common]
-            [std.lib :as h]
-            [std.fs :as fs]))
+  (:require [code.framework.common :as common]
+            [code.framework.docstring :as docstring]
+            [std.fs :as fs]
+            [std.lib.collection :as collection]))
 
 (defn external-vars
   "grabs external vars from the `module/include` form
@@ -23,7 +23,7 @@
           (mapcat #(->> % rest (remove map?)))
           (map (juxt first rest))
           (group-by first)
-          (h/map-vals (comp flatten #(map rest %)))))))
+          (collection/map-vals (comp flatten #(map rest %)))))))
 
 (defn create-api-table
   "creates a api table for publishing"

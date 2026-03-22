@@ -1,6 +1,6 @@
 (ns std.lib.security.key-test
-  (:use code.test)
-  (:require [std.lib.security.key :refer :all]))
+  (:require [std.lib.security.key :refer :all])
+  (:use code.test))
 
 ^{:refer std.lib.security.key/init-key-generator :added "3.0"}
 (comment "initializes a `KeyGenerator` object")

@@ -1,9 +1,8 @@
 (ns std.dom.sync
   (:require [std.dom.common :as base]
             [std.dom.diff :as diff]
-            [std.dom.update :as update]
             [std.dom.event :as event]
-            [std.lib :as h]))
+            [std.dom.update :as update]))
 
 (defprotocol ISyncClient
   (apply-patch [client ops] "Applies patch ops from server")

@@ -1,6 +1,6 @@
 (ns lib.aether-test
-  (:use code.test)
-  (:require [lib.aether :refer :all]))
+  (:require [lib.aether :refer :all])
+  (:use code.test))
 
 ^{:refer lib.aether/artifact->dependency :added "3.0"}
 (fact "converts an artifact to a dependency"

@@ -1,6 +1,6 @@
 (ns std.lib.zip-test
-  (:use code.test)
   (:require [std.lib.zip :refer :all])
+  (:use code.test)
   (:refer-clojure :exclude [find get]))
 
 ^{:refer std.lib.zip/register-type :added "4.0"}

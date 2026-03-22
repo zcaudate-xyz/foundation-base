@@ -1,9 +1,13 @@
 (ns rt.postgres.gen-bind
-  (:require [std.lang :as l]
-            [std.lib :as h]
-            [std.string :as str]
+  (:require [clojure.string]
+            [rt.postgres.grammar.common :as common]
             [rt.postgres.grammar.common-application :as app]
-            [rt.postgres.grammar.common :as common]))
+            [std.lang :as l]
+            [std.lib.collection :as collection]
+            [std.lib.deps :as deps]
+            [std.lib.foundation :as f]
+            [std.lib.walk :as walk]
+            [std.string.case :as case]))
 
 (defn- to-lookup
   [arr]
@@ -34,7 +38,7 @@
               (l/sym-default-str (name x)))
 
         (keyword? x)
-        (l/sym-default-str (h/strn x))
+        (l/sym-default-str (f/strn x))
 
         :else x))
 
@@ -84,7 +88,7 @@
                              
                              :else
                              form))]
-    (cond (h/form? form)
+    (cond (collection/form? form)
           (cond (= 'quote (first form))
                 (vector (vec (second form)))
 
@@ -125,13 +129,13 @@
   [query & [sym-pred]]
   (let [sym-pred (or sym-pred plain-symbol?)]
     (->> query
-         (h/prewalk  transform-query-or)
-         (h/postwalk (fn [form]
+         (walk/prewalk  transform-query-or)
+         (walk/postwalk (fn [form]
                        (if (sym-pred form)
                          (str "{{" (l/sym-default-str form) "}}")
                          form)))
-         (h/prewalk  transform-query-classify)
-         (h/postwalk (fn [form]
+         (walk/prewalk  transform-query-classify)
+         (walk/postwalk (fn [form]
                        (cond (set? form)
                              (vec (map transform-to-str form))
                              
@@ -144,7 +148,7 @@
   "transforms the schema"
   {:added "4.0"}
   [schema]
-  (h/postwalk (fn [x]
+  (walk/postwalk (fn [x]
                 (cond (keyword? x)
                       (.replaceAll (name x) "-" "_")
                       
@@ -159,7 +163,7 @@
                             {:strs [default unique]} sql]
                         (cond-> (dissoc x "web" "sql")
                           (not (or (nil? default)
-                                   (h/form? default)))
+                                   (collection/form? default)))
                           (assoc "sql" {"default" default})))
                       
                       :else x))
@@ -178,9 +182,9 @@
                       :static/schema
                       :id
                       :api/flags])
-        (h/unqualify-keys)
+        (collection/unqualify-keys)
         (update-in [:flags] to-lookup)
-        (update-in [:flags] merge (h/unqualify-keys events))
+        (update-in [:flags] merge (collection/unqualify-keys events))
         (update-in [:id] l/sym-default-str)
         (update-in [:return] (comp name first))
         (update-in [:input]  (fn [input] (mapv l/emit-type-record input))))))
@@ -215,9 +219,9 @@
         {:keys [id] :as m} (bind-function ptr)
         
         table     (name table)
-        tag-table (str/snake-case table)
-        tag    (if (not (str/starts-with? id tag-table))
-                 (h/error "View should start with table name"
+        tag-table (case/snake-case table)
+        tag    (if (not (clojure.string/starts-with? id tag-table))
+                 (f/error "View should start with table name"
                           {:id id
                            :table table
                            :assert tag-table})
@@ -263,7 +267,7 @@
                      [:static/schema
                       :static/schema-primary
                       :static/public])
-        (h/unqualify-keys)
+        (collection/unqualify-keys)
         (assoc  :schema-update  schema-update)
         (update :schema-primary transform-query))))
 
@@ -272,7 +276,7 @@
   {:added "4.0"}
   [app & [update-key]]
   (let [{:keys [pointers]} app
-        module-lu    (zipmap (reverse (h/deps:ordered
+        module-lu    (zipmap (reverse (deps/deps-ordered
                                        (l/get-book (l/default-library)
                                                    :postgres)
                                        (dedupe (map :module (vals pointers)))))
@@ -292,10 +296,10 @@
   {:added "4.0"}
   [schema & [excluded]]
   (transform-schema
-   (h/map-vals (fn [m]
+   (collection/map-vals (fn [m]
                  (cond->>  m
-                   excluded (h/filter-keys (comp not excluded))
-                   :then (h/map-vals first)))
+                   excluded (collection/filter-keys (comp not excluded))
+                   :then (collection/map-vals first)))
                (:tree schema))))
 
 (defn list-view

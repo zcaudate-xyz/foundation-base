@@ -1,6 +1,6 @@
 (ns python.test
-  (:require [std.lib :as h]
-            [std.lang :as l]))
+  (:require [std.lang :as l]
+            [std.lib.env :as env]))
 
 (l/script :python
   {:runtime :remote-port
@@ -37,7 +37,7 @@
   @(std.concurrent/send +r+ "<PING>")
   
   @(std.concurrent/send +r+
-                        (h/do:pp
+                        (env/do:pp
                          (std.json/write
                           (std.lang/emit-script
                            (rt.basic.impl.process-python/default-body-wrap

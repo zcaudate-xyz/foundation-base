@@ -1,7 +1,7 @@
 (ns lib.jdbc.resultset-test
+  (:require [lib.jdbc.impl :as impl]
+            [lib.jdbc.resultset :refer :all])
   (:use code.test)
-  (:require [lib.jdbc.resultset :refer :all]
-            [lib.jdbc.impl :as impl])
   (:import (java.sql ResultSet ResultSetMetaData Connection)))
 
 (defn mock-result-set []

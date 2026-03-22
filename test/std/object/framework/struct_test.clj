@@ -1,6 +1,6 @@
 (ns std.object.framework.struct-test
-  (:use code.test)
-  (:require [std.object.framework.struct :refer :all]))
+  (:require [std.object.framework.struct :refer :all])
+  (:use code.test))
 
 ^{:refer std.object.framework.struct/getter-function :added "3.0"}
 (fact "creates a getter function for a keyword"

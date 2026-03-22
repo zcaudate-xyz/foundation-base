@@ -1,5 +1,6 @@
 (ns std.lib.collection
-  (:require [std.lib.foundation :as h]
+  (:require [clojure.string]
+            [std.lib.foundation :as h]
             [std.string.common :as str]))
 
 (defn hash-map?
@@ -378,7 +379,7 @@
                           (not-empty v))
                     [(->> (conj path k)
                           (map h/strn)
-                          (str/join sep)
+                          (clojure.string/join sep)
                           keyword) v])))
               m)
         (into {}))))
@@ -400,7 +401,7 @@
   ([m sep f]
    (let [pattern (re-create sep)]
      (reduce-kv (fn [m k v]
-                  (let [path (->> (str/split (h/strn k) pattern)
+                  (let [path (->> (clojure.string/split (h/strn k) pattern)
                                   (map keyword))
                         v  (f v)]
                     (update-in m path

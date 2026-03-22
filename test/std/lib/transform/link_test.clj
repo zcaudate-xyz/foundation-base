@@ -1,7 +1,7 @@
 (ns std.lib.transform.link-test
-  (:use code.test)
-  (:require [std.lib.transform.link :refer :all]
-            [std.lib.transform :as graph]))
+  (:require [std.lib.transform :as graph]
+            [std.lib.transform.link :refer :all])
+  (:use code.test))
 
 ^{:refer std.lib.transform.link/wrap-link-current :added "3.0"}
 (fact "adds the current ref to `:link :current`"

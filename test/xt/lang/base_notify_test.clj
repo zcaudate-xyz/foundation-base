@@ -1,11 +1,10 @@
 (ns xt.lang.base-notify-test
-  (:use code.test)
-  (:require [std.lang :as l]
-            [std.lib :as h]
+  (:require [net.http :as http]
             [std.json :as json]
-            [net.http :as http]
-            [xt.lang.base-notify :as notify]
-            [std.lang.interface.type-notify :as interface]))
+            [std.lang :as l]
+            [std.lang.interface.type-notify :as interface]
+            [xt.lang.base-notify :as notify])
+  (:use code.test))
 
 (l/script- :js
   {:runtime :basic

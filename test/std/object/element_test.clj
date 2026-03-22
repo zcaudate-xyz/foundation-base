@@ -1,6 +1,6 @@
 (ns std.object.element-test
-  (:use code.test)
   (:require [std.object.element :as element])
+  (:use code.test)
   (:refer-clojure :exclude [instance?]))
 
 ^{:refer std.object.element/to-element :added "3.0"}

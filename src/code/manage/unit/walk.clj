@@ -1,6 +1,5 @@
 (ns code.manage.unit.walk
-  (:require [std.string :as str]
-            [code.framework :as base]
+  (:require [code.framework :as base]
             [code.query :as query]
             [std.block :as block]
             [std.block.navigate :as nav]))

@@ -1,8 +1,8 @@
 (ns code.doc.theme.stark
-  (:require [std.string :as str]
+  (:require [code.doc.engine.winterfell :as engine]
+            [code.doc.render.structure :as structure]
             [std.html :as html]
-            [code.doc.engine.winterfell :as engine]
-            [code.doc.render.structure :as structure]))
+            [std.string.common :as common]))
 
 (def settings
   {:engine    "winterfell"
@@ -45,7 +45,7 @@
                                                " active"))
                                  :href (str key ".html")}
                              title])))
-          (str/joinl)))))
+          (common/joinl)))))
 
 (defn render-article
   "renders the individual page for the stark theme"
@@ -55,7 +55,7 @@
      (->> (get-in interim [:articles name :elements])
           (map engine/page-element)
           (map (fn [ele] (html/html ele)))
-          (str/joinl)))))
+          (common/joinl)))))
 
 (defn render-outline
   "renders the navigation outline for the stark theme"
@@ -68,4 +68,4 @@
           :elements
           (map engine/render-chapter)
           (map (fn [ele] (html/html ele)))
-          str/joinl))))
+          common/joinl))))

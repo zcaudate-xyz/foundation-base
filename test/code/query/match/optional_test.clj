@@ -1,6 +1,6 @@
 (ns code.query.match.optional-test
-  (:use code.test)
-  (:require [code.query.match.optional :refer :all]))
+  (:require [code.query.match.optional :refer :all])
+  (:use code.test))
 
 ^{:refer code.query.match.optional/tag-meta :added "3.0"}
 (fact "increment a counter everytime a `:?` element is seen"

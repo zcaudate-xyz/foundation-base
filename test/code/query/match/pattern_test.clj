@@ -1,8 +1,8 @@
 (ns code.query.match.pattern-test
-  (:use code.test)
-  (:require [std.protocol.match :as protocol]
-            [code.query.match.impl :as match]
-            [code.query.match.pattern :refer :all]))
+  (:require [code.query.match.impl :as match]
+            [code.query.match.pattern :refer :all]
+            [std.protocol.match :as protocol])
+  (:use code.test))
 
 ^{:refer code.query.match.pattern/transform-pattern :added "3.0"}
 (fact "converts an input into an actual matchable pattern"

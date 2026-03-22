@@ -1,10 +1,10 @@
 (ns std.log.console-test
-  (:use code.test)
-  (:require [std.log.console :as console :refer :all]
-            [std.lib :as h]
+  (:require [std.lib.env :as env]
+            [std.log.common :as common]
+            [std.log.console :as console :refer :all]
             [std.log.element :as element]
-            [std.print.ansi :as ansi]
-            [std.log.common :as common]))
+            [std.print.ansi :as ansi])
+  (:use code.test))
 
 ^{:refer std.log.console/style-default :added "3.0"}
 (fact "gets default style"
@@ -196,7 +196,7 @@
 ^{:refer std.log.console/console-write :added "3.0"}
 (fact "write function for the console logger"
 
-  (h/with-out-str
+  (env/with-out-str
     (console-write {:log/value "HELLO" :log/raw "RAW"}))
   => "RAW")
 

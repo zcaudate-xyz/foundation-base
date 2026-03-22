@@ -1,13 +1,13 @@
 (ns script.sql.table.compile
   (:require [std.json :as json]
-            [std.string :as str]
-            [std.lib :as h :refer [definvoke]]))
+            [std.lib.collection :as collection]
+            [std.lib.invoke :as invoke]))
 
 (def ^:dynamic *skip* nil)
 
 (def ^:dynamic *enum->str* nil)
 
-(definvoke in:fn-map
+(invoke/definvoke in:fn-map
   "constructs an function map for sql input"
   {:added "3.0"}
   [:memoize]
@@ -34,7 +34,7 @@
               {}
               (get (:tree schema) table))))
 
-(definvoke out:fn-map
+(invoke/definvoke out:fn-map
   "constructs a function map for sql output"
   {:added "3.0"}
   [:memoize]
@@ -66,7 +66,7 @@
      (fn [data]
        (if *skip*
          data
-         (h/map-entries (fn [[k v]]
+         (collection/map-entries (fn [[k v]]
                           (if-let [f (get m k)]
                             (f v)
                             [k v]))

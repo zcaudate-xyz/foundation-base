@@ -1,6 +1,6 @@
 (ns indigo.client.app.components.library-browser-test
-  (:use code.test)
-  (:require [indigo.client.app.components.library-browser :refer :all]))
+  (:require [indigo.client.app.components.library-browser :refer :all])
+  (:use code.test))
 
 ^{:refer indigo.client.app.components.library-browser/buildNamespaceTree :added "4.0"}
 (fact "TODO")

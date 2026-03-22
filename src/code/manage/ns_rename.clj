@@ -1,10 +1,10 @@
 (ns code.manage.ns-rename
   (:require [code.framework :as base]
-            [std.print.ansi :as ansi]
-            [std.print :as print]
-            [std.text.diff :as text.diff]
+            [code.project :as project]
             [std.fs :as fs]
-            [code.project :as project]))
+            [std.print :as print]
+            [std.print.ansi :as ansi]
+            [std.text.diff :as text.diff]))
 
 (defn- subs-trim
   ([s end]

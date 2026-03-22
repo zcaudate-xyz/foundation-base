@@ -1,20 +1,12 @@
 (ns mcp-clj.json-rpc.http-client
+  (:require [clojure.string :as str]
+            [mcp-clj.http-client.core :as http-client]
+            [mcp-clj.json :as json]
+            [mcp-clj.json-rpc.executor :as executor]
+            [mcp-clj.json-rpc.protocols :as protocols]
+            [mcp-clj.log :as log])
   "JSON-RPC client for HTTP transport with SSE support"
-  (:require
-    [clojure.string :as str]
-    [mcp-clj.http-client.core :as http-client]
-    [mcp-clj.json :as json]
-    [mcp-clj.json-rpc.executor :as executor]
-    [mcp-clj.json-rpc.protocols :as protocols]
-    [mcp-clj.log :as log])
-  (:import
-    (java.io
-      BufferedReader
-      InputStreamReader)
-    (java.util.concurrent
-      CompletableFuture
-      ConcurrentHashMap
-      TimeUnit)))
+  (:import (java.io BufferedReader InputStreamReader) (java.util.concurrent CompletableFuture ConcurrentHashMap TimeUnit)))
 
 ;; Forward declarations
 (declare http-send-request! http-send-notification! close-http-json-rpc-client!)

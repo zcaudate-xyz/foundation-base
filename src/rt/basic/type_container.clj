@@ -1,12 +1,11 @@
 (ns rt.basic.type-container
-  (:require [std.lib :as h :refer [defimpl]]
-            [std.json :as json]
-            [std.fs :as fs]
-            [std.string :as str]
-            [std.make :as make]
-            [lib.docker :as docker]
+  (:require [lib.docker :as docker]
             [rt.basic.type-common :as common]
-            [rt.basic.type-oneshot :as oneshot]))
+            [rt.basic.type-oneshot :as oneshot]
+            [std.fs :as fs]
+            [std.json :as json]
+            [std.lib.foundation :as f]
+            [std.make :as make]))
 
 (def ^:dynamic *container* nil)
 
@@ -19,7 +18,7 @@
    port
    {:keys [host] :as rt}]
   (let [script (bootstrap port {:host (or host "host.docker.internal")})
-        container {:id (or id (h/sid))
+        container {:id (or id (f/sid))
                    :suffix suffix
                    :group (or group "testing")
                    :image image

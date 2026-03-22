@@ -1,11 +1,12 @@
 (ns std.print.format.chart-test
-  (:use code.test)
-  (:require [std.print.format.chart :refer :all]
-            [std.string :as str]))
+  (:require [clojure.string]
+            [std.print.format.chart :refer :all]
+            [std.string.common :as common])
+  (:use code.test))
 
 (defn ascii
   [vs]
-  (str/joinl vs "\n"))
+  (common/joinl vs "\n"))
 
 ^{:refer std.print.format.chart/lines:bar-graph :added "3.0"}
 (fact "formats an ascii bar graph for output"
@@ -19,7 +20,7 @@
 (fact "constructs a bar graph"
 
   (-> (bar-graph (range 10) 6)
-      (str/split-lines))
+      (clojure.string/split-lines))
   => ["    ▟"
       "  ▗██"
       " ▟███"])
@@ -40,7 +41,7 @@
                     [{b "1.2"}
                      [{c "1.3"}
                       {d "1.4"}]]])
-      (str/split-lines))
+      (clojure.string/split-lines))
   => ["{a \"1.1\"}"
       " {b \"1.2\"}"
       "  {c \"1.3\"}"

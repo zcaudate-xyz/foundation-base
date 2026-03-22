@@ -1,13 +1,12 @@
 (ns std.lang.base.library-snapshot-prep-test
-  (:use code.test)
-  (:require [std.lang.base.library-snapshot :as snap]
-            [std.lang.base.emit-prep-lua-test :as prep]
-            [std.lang.base.book :as b]
-            [std.lang.base.grammar :as grammar]
+  (:require [std.lang.base.book :as b]
             [std.lang.base.emit-common :as common]
-	    [std.lang.base.emit-helper :as helper]
-            [std.lang.base.util :as ut]
-            [std.lib :as h]))
+            [std.lang.base.emit-helper :as helper]
+            [std.lang.base.emit-prep-lua-test :as prep]
+            [std.lang.base.grammar :as grammar]
+            [std.lang.base.library-snapshot :as snap]
+            [std.lang.base.util :as ut])
+  (:use code.test))
 
 (def +book-x-empty+
   (b/book {:lang :x

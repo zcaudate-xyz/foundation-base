@@ -1,13 +1,13 @@
 (ns std.dom.item-test
-  (:use code.test)
-  (:require [std.lib.mutable :as mut]
-            [std.dom.item :refer :all]
-            [std.dom.common :as base]
+  (:require [std.dom.common :as base]
             [std.dom.diff :as diff]
             [std.dom.impl :as impl]
+            [std.dom.item :refer :all]
             [std.dom.mock :as mock]
+            [std.dom.type :as type]
             [std.dom.update :as update]
-            [std.dom.type :as type]))
+            [std.lib.mutable :as mut])
+  (:use code.test))
 
 (def +init-date+
   (do (type/metaclass-add :test/value {:metatype :dom/value})

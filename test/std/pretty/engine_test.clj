@@ -1,6 +1,6 @@
 (ns std.pretty.engine-test
-  (:use code.test)
-  (:require [std.pretty.engine :refer :all]))
+  (:require [std.pretty.engine :refer :all])
+  (:use code.test))
 
 ^{:refer std.pretty.engine/serialize :added "3.0"}
 (fact "main serialize method, converts input into a set of operations"

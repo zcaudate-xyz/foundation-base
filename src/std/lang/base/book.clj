@@ -1,15 +1,18 @@
 (ns std.lang.base.book
-  (:require [std.protocol.deps :as protocol.deps]
-            [std.lang.base.book-module :as module]
+  (:require [clojure.set]
+            [clojure.string]
             [std.lang.base.book-entry :as entry]
             [std.lang.base.book-meta :as meta]
-            [std.lang.base.util :as ut]
+            [std.lang.base.book-module :as module]
             [std.lang.base.emit-preprocess :as preprocess]
-            [std.string :as str]
+            [std.lang.base.util :as ut]
             [std.lib.atom :as atom]
-            [std.lib :as h :refer [defimpl]]))
+            [std.lib.collection :as collection]
+            [std.lib.foundation :as f]
+            [std.lib.impl :as impl]
+            [std.protocol.deps :as protocol.deps]))
 
-(h/intern-in module/book-module
+(f/intern-in module/book-module
              module/book-module?
              entry/book-entry
              entry/book-entry?
@@ -33,7 +36,7 @@
    (let [[mid sid] (ut/sym-pair id)]
      (or (get-base-entry book mid sid :code)
          (get-base-entry book mid sid :header)
-         (h/error "ENTRY NOT FOUND"
+         (f/error "ENTRY NOT FOUND"
                   {:module mid
                    :symbol sid})))))
 
@@ -43,7 +46,7 @@
   ([{:keys [modules] :as book} id]
    (let [[mid sid] (ut/sym-pair id)]
      (or (get-base-entry book mid sid :fragment)
-         (h/error "ENTRY NOT FOUND"
+         (f/error "ENTRY NOT FOUND"
                   {:module mid
                    :symbol sid})))))
 
@@ -119,12 +122,12 @@
             parent
             scope]}]
    (str "#book " [lang] " "
-        (h/map-vals (fn [module]
+        (collection/map-vals (fn [module]
                       (->> (select-keys module [:code :fragment])
-                           (h/map-vals count)))
+                           (collection/map-vals count)))
                     modules))))
 
-(defimpl Book [lang
+(impl/defimpl Book [lang
                meta
                grammar
                modules
@@ -162,7 +165,7 @@
   [book parent]
   (let [_  (or (= (:parent book)
                   (:lang parent))
-               (h/error "Not mergable" {:book   (select-keys book   [:lang :parent :merged])
+               (f/error "Not mergable" {:book   (select-keys book   [:lang :parent :merged])
                                         :parent (select-keys parent [:lang :parent :merged])}))]
     (-> book
         (update :merged  conj (:lang parent))
@@ -203,7 +206,7 @@
   {:added "4.0"}
   [book lang]
   (or (check-compatible-lang book lang)
-      (h/error "Not compatible" {:book (select-keys book   [:lang :parent :merged])
+      (f/error "Not compatible" {:book (select-keys book   [:lang :parent :merged])
                                  :lang lang})))
 
 (defn set-module
@@ -220,7 +223,7 @@
   [book module]
   (let [_ (assert-compatible-lang book (:lang module))
         {:keys [id]} module]
-    (atom/atom-put-fn book [:modules id] (h/filter-vals identity module))))
+    (atom/atom-put-fn book [:modules id] (collection/filter-vals identity module))))
 
 (defn delete-module
   "deletes a module given a book"
@@ -247,7 +250,7 @@
   {:added "4.0"}
   [book module-id]
   (or (has-module? book module-id)
-      (h/error "No module found." {:available (set (list-entries book :module))
+      (f/error "No module found." {:available (set (list-entries book :module))
                                    :module module-id})))
 
 (defn set-entry
@@ -266,7 +269,7 @@
   (let [_ (assert-compatible-lang book (:lang entry))
         _ (assert-module book (:module entry))
         {:keys [id module section]} entry]
-    (atom/atom-put-fn book [:modules module section id] (h/filter-vals identity entry))))
+    (atom/atom-put-fn book [:modules module section id] (collection/filter-vals identity entry))))
 
 (defn has-entry?
   "checks that book has an entry"
@@ -280,7 +283,7 @@
   [book module-id section symbol-id]
   (or (has-entry? book module-id section symbol-id)
       (and (assert-module book module-id)
-           (h/error "No entry found." {:available (set (keys (get (get-entry book module-id)
+           (f/error "No entry found." {:available (set (keys (get (get-entry book module-id)
                                                                   section)))
                                        :section section
                                        :module module-id}))))
@@ -298,18 +301,18 @@
   [book module-id]
   (let [suffix   (or (get-in book [:file :suffix])
                      (name (get-in book [:grammar :tag])))]
-    (str (last (str/split (name module-id) #"\."))
+    (str (last (clojure.string/split (name module-id) #"\."))
          "." suffix)))
 
 (defn module-create-check
   "checks that bundles are available"
   {:added "4.0"}
   [{:keys [modules] :as book} module-id link]
-  (let [missing (h/difference (set (vals link))
+  (let [missing (clojure.set/difference (set (vals link))
                               (set (conj (keys modules)
                                          module-id)))]
     (if (not-empty missing)
-      (h/error "Missing namespaces" {:ns missing
+      (f/error "Missing namespaces" {:ns missing
                                      :link link
                                      :all (keys modules)})
       true)))
@@ -318,15 +321,15 @@
   "creates a map for the requires"
   {:added "4.0"}
   [require]
-  (h/map-juxt [first #(apply hash-map (cons :id %))] require))
+  (collection/map-juxt [first #(apply hash-map (cons :id %))] require))
 
 (defn module-create
   "creates a module given book and options"
   {:added "4.0"}
   ([{:keys [lang] :as book} module-id options]
-   (let [_ (or book      (h/error "Book is required." {:lang lang
+   (let [_ (or book      (f/error "Book is required." {:lang lang
                                                        :module module-id}))
-         _ (or module-id (h/error "Module id is required." {:lang lang
+         _ (or module-id (f/error "Module id is required." {:lang lang
                                                             :book book
                                                             :module module-id}))
          {:keys [require
@@ -335,37 +338,37 @@
                  export file
                  static]} options
          requires  (module-create-requires require)
-         internal (-> (h/map-entries (fn [[id {:keys [as]}]] [id (or as id)])
+         internal (-> (collection/map-entries (fn [[id {:keys [as]}]] [id (or as id)])
                                      requires)
                       (assoc module-id '-))
-         link     (-> (h/map-entries (fn [[id {:keys [as]}]]
+         link     (-> (collection/map-entries (fn [[id {:keys [as]}]]
                                        [(if (vector? as)
                                           (last as)
                                           (or as id))
                                         id])
                                      requires)
                       (assoc '- module-id))
-         internal   (h/transpose link)
-         native     (h/map-juxt [first (fn [[_ & args]]
+         internal   (collection/transpose link)
+         native     (collection/map-juxt [first (fn [[_ & args]]
                                          (let [{:keys [bundle]
                                                 :as opts} (apply hash-map args)
                                                bundle (if bundle
-                                                        (h/map-juxt [first #(apply hash-map (rest %))]
+                                                        (collection/map-juxt [first #(apply hash-map (rest %))]
                                                                     bundle))]
                                            (cond-> opts
                                              bundle (assoc :bundle bundle))))]
                                 import)
          native-lu  (->> native
                          (mapcat (fn [[import {:keys [as]}]]
-                                   (->> (disj (set (flatten (seq (h/seqify as)))) '*)
+                                   (->> (disj (set (flatten (seq (collection/seqify as)))) '*)
                                         (filter symbol?)
                                         (map (fn [sym] [sym import])))))
                          (into {}))
-         alias    (merge (h/map-juxt [#(nth % 2) first] alias)
+         alias    (merge (collection/map-juxt [#(nth % 2) first] alias)
                          (->> (vals native)
                               (map :as)
                               (keep (fn [x] (if (vector? x) (last x) x)))
-                              (h/map-juxt [identity identity])))
+                              (collection/map-juxt [identity identity])))
          includes   (->> requires
                          (keep (fn [[k v]] (if (:include v) k)))
                          (set))

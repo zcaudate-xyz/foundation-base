@@ -1,14 +1,14 @@
 (ns std.lib.system.type
-  (:require [std.protocol.component :as protocol.component]
-            [std.protocol.track :as protocol.track]
-            [std.lib.system.common :as common]
-            [std.lib.system.array :as array]
-            [std.lib.system.topology :as topology]
+  (:require [std.lib.collection :as coll]
             [std.lib.component :as component]
             [std.lib.foundation :as h]
+            [std.lib.impl :refer [defimpl]]
             [std.lib.sort :as sort]
-            [std.lib.collection :as coll]
-            [std.lib.impl :refer [defimpl]]))
+            [std.lib.system.array :as array]
+            [std.lib.system.common :as common]
+            [std.lib.system.topology :as topology]
+            [std.protocol.component :as protocol.component]
+            [std.protocol.track :as protocol.track]))
 
 (declare start-system stop-system kill-system info-system health-system)
 

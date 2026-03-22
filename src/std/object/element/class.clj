@@ -1,7 +1,6 @@
 (ns std.object.element.class
-  (:require [std.string :as str]
-            [std.lib :as h]
-            [std.lib.class :as class]))
+  (:require [std.lib.class :as class]
+            [std.string.coerce :as coerce]))
 
 (defn type->raw
   "converts to the raw representation
@@ -10,8 +9,8 @@
    (type->raw 'byte) => \"B\""
   {:added "3.0"}
   ([v]
-   (let [raw (str/to-string v)]
-     (or (h/primitive raw :raw)
+   (let [raw (coerce/to-string v)]
+     (or (class/primitive raw :raw)
          raw))))
 
 (declare raw->string)
@@ -36,7 +35,7 @@
   ([^String v]
    (if (.startsWith v "[")
      (str (raw-array->string (subs v 1)) "[]")
-     (or (h/primitive v :string)
+     (or (class/primitive v :string)
          v))))
 
 (defn string-array->raw
@@ -50,7 +49,7 @@
      (str "[" (string-array->raw
                (subs s 0 (- (.length s) 2)) true))
      (if arr
-       (or (h/primitive s :raw)
+       (or (class/primitive s :raw)
            (str "L" s ";"))
        s))))
 
@@ -62,7 +61,7 @@
    (string->raw \"int[][][]\") => \"[[[I\""
   {:added "3.0"}
   ([v]
-   (or (h/primitive v :raw)
+   (or (class/primitive v :raw)
        (string-array->raw v))))
 
 (declare class-convert)
@@ -86,10 +85,10 @@
   ([^Class v to]
    (condp = to
      :container (if (class/+primitive-lookup+ v)
-                  (h/primitive v :container)
+                  (class/primitive v :container)
                   v)
      :class    (if (class/+primitive-lookup+ v)
-                 (h/primitive v :class)
+                 (class/primitive v :class)
                  v)
      :symbol (class-convert (.getName v) to)
      :raw (type->raw v)
@@ -98,9 +97,9 @@
 (defmethod -class-convert clojure.lang.Symbol
   ([v to]
    (condp = to
-     :container (or (h/primitive v :container)
+     :container (or (class/primitive v :container)
                     (eval v))
-     :class (or (h/primitive v :class)
+     :class (or (class/primitive v :class)
                 (eval v))
      :symbol v
      :raw (string->raw (name v))
@@ -109,11 +108,11 @@
 (defmethod -class-convert String
   ([v to]
    (condp = to
-     :container (or (h/primitive v :container)
+     :container (or (class/primitive v :container)
                     (Class/forName (string->raw v)))
-     :class (or (h/primitive v :class)
+     :class (or (class/primitive v :class)
                 (Class/forName (string->raw v)))
-     :symbol (or (h/primitive v :symbol)
+     :symbol (or (class/primitive v :symbol)
                  (symbol (string->raw v)))
      :raw (string->raw v)
      :string (raw->string v))))

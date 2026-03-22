@@ -1,6 +1,6 @@
 (ns js.core.style-test
-  (:use code.test)
-  (:require [js.core.style :refer :all]))
+  (:require [js.core.style :refer :all])
+  (:use code.test))
 
 ^{:refer js.core.style/rect :added "4.0" :unchecked true}
 (fact "creates a rect"

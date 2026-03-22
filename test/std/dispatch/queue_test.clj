@@ -1,9 +1,11 @@
 (ns std.dispatch.queue-test
-  (:use code.test)
-  (:require [std.dispatch.queue :refer :all]
+  (:require [std.concurrent :as cc]
             [std.dispatch.common :as common]
-            [std.concurrent :as cc]
-            [std.lib :as h]))
+            [std.dispatch.queue :refer :all]
+            [std.lib.component :as component]
+            [std.lib.component.track :as track]
+            [std.lib.env :as env])
+  (:use code.test))
 
 (defonce ^:dynamic *batches*  (atom []))
 
@@ -23,7 +25,7 @@
                      :delay 10}}})
 
 (defn test-scaffold [config]
-  (h/with:component [queue-fn (create-dispatch config)]
+  (component/with [queue-fn (create-dispatch config)]
                     (reset! *executor* queue-fn)
                     (do (dotimes [i 1000]
                           (queue-fn i))
@@ -36,7 +38,7 @@
 
   (-> (create-dispatch +test-config+)
       (start-dispatch)
-      (h/stop)))
+      (component/stop)))
 
 ^{:refer std.dispatch.queue/handler-fn :added "3.0"}
 (fact "creates a queue handler function"
@@ -79,9 +81,9 @@
 (comment
 
   (reset! *executor* -q-)
-  (def -q- (h/start (create-dispatch +test-config+)))
+  (def -q- (component/start (create-dispatch +test-config+)))
 
-  (h/tracked [:raw])
+  (track/tracked [:raw])
   (set (map first (doall (for [i (range 10)]
                            (do (Thread/sleep 30)
                                (-q- 1)))))))
@@ -92,12 +94,12 @@
     {:type :queue
      :handler (fn [_ entries]
                 (Thread/sleep 1000)
-                (h/prn entries))
+                (env/prn entries))
      :options {:queue {:max-batch 300
                        :interval 100
                        :delay 10}}})
   
-  (def -q- (h/start (create-dispatch +test-config+)))
+  (def -q- (component/start (create-dispatch +test-config+)))
   (do (dotimes [i 100]
         (-q- i))
       (cc/hub:wait (:queue (:runtime -q-))))

@@ -1,8 +1,7 @@
 (ns std.image.awt.rendering
   (:require [std.object.query :as reflect]
-            [std.string :as str])
-  (:import
-   (java.awt Graphics2D RenderingHints)))
+            [std.string.case :as case])
+  (:import (java.awt Graphics2D RenderingHints)))
 
 (def hint-lookup
   {"FRACTIONALMETRICS" :fractionalmetrics,
@@ -22,7 +21,7 @@
         ks    (map (fn [elem] (-> (:name elem)
                                   (subs 4)
                                   (.toLowerCase)
-                                  (str/spear-case)
+                                  (case/spear-case)
                                   (keyword)))
                    elems)]
     (zipmap ks elems)))
@@ -41,7 +40,7 @@
                                         (let [vk (-> (:name elem)
                                                      (subs (+ 7 (count n)))
                                                      (.toLowerCase)
-                                                     (str/spear-case)
+                                                     (case/spear-case)
                                                      (keyword))]
                                           (assoc out vk elem)))
                                       {}

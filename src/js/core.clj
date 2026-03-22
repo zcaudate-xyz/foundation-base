@@ -1,14 +1,16 @@
 (ns js.core
-  (:require [std.lang :as l]
-            [std.lib :as h]
-            [std.string :as str]
-            [std.lang.base.util :as ut]
+  (:require [clojure.string]
+            [std.lang :as l]
             [std.lang.base.impl-deps :as impl-deps]
             [std.lang.base.pointer :as pointer]
-            [xt.module :as module]
-            [xt.lang.base-repl])
-  (:refer-clojure :exclude [abs identity reduce map reverse sort eval find min read replace
-                            future concat pop name some keys filter max]))
+            [std.lang.base.util :as ut]
+            [std.lib.collection :as collection]
+            [std.lib.env :as env]
+            [std.lib.foundation :as f]
+            [std.lib.template :as template]
+            [xt.lang.base-repl]
+            [xt.module :as module])
+  (:refer-clojure :exclude [abs identity reduce map reverse sort eval find min read replace future concat pop name some keys filter max]))
 
 (l/script :js
   {:require-impl [js.core.impl
@@ -17,8 +19,8 @@
             ["node-fetch" :as [* NodeFetch]]
             ["uuid" :as [* UUID]]]})
 
-(h/intern-all js.core.impl)
-(h/intern-in js.core.fetch/fetch
+(f/intern-all js.core.impl)
+(f/intern-in js.core.fetch/fetch
              js.core.fetch/fetch-api
              js.core.fetch/toBlob
              js.core.fetch/toJson
@@ -38,7 +40,7 @@
 ;; uuid
 ;;
 
-(h/template-entries [l/tmpl-entry {:type :fragment
+(f/template-entries [l/tmpl-entry {:type :fragment
                                    :base "UUID"
                                    :tag "js"}]
   [[uuidNIL NIL]
@@ -64,7 +66,7 @@
   {:added "4.0"}
   ([& body]
    (cond (not-empty body)
-         (h/$ (new Promise (fn [resolve reject]
+         (template/$ (new Promise (fn [resolve reject]
                              (try
                                (resolve
                                 ('((fn [] ~@body))))
@@ -78,7 +80,7 @@
   "creates a future delayed call"
   {:added "4.0"}
   ([[ms] & body]
-   (h/$ (new Promise (fn [resolve reject]
+   (template/$ (new Promise (fn [resolve reject]
                        (setTimeout
                         (fn []
                           (try
@@ -91,7 +93,7 @@
   "creates a timeout call"
   {:added "4.0"}
   [ms]
-  (h/$ (new Promise (fn [resolve]
+  (template/$ (new Promise (fn [resolve]
                       (setTimeout resolve ~ms)))))
 
 (defmacro.js ^{:standalone true}
@@ -118,7 +120,7 @@
   "creates a random id"
   {:added "4.0"}
   [n]
-  (h/$ (. (Math.random)
+  (template/$ (. (Math.random)
           (toString 36)
           (substr 2 (or ~n 4)))))
 
@@ -234,20 +236,20 @@
                         (clojure.core/concat (apply list 'fn [] (clojure.core/butlast statement))
                                              [(list 'return (clojure.core/last statement))]))
                   
-                  :else (h/error "Not valid" {:input statement}))
+                  :else (f/error "Not valid" {:input statement}))
             
-            (or (h/form? statement)
+            (or (collection/form? statement)
                 (symbol? statement))
             (list 'then (list 'fn [] (list 'return statement)))
             
-            :else (h/error "Not valid" {:input statement})))
+            :else (f/error "Not valid" {:input statement})))
     (clojure.core/rest body))))
 
 (defmacro.js wrap:print
   "wraps a form in a print statement"
   {:added "4.0"}
   [f]
-  (h/$ (fn [...args]
+  (template/$ (fn [...args]
          (console.log "INPUT" args)
          (var out (~f ...args))
          (console.log "OUTPUT" out)
@@ -258,7 +260,7 @@
   "notify on future"
   {:added "4.0"}
   [f val]
-  (h/$ (do:>
+  (template/$ (do:>
         (var out ~val)
         (if (and (not= nil out)
                  (== "Promise" (. out ["constructor"] ["name"])))
@@ -270,7 +272,7 @@
   "notify on future"
   {:added "4.0"}
   [val & [f]]
-  (h/$ (do:>
+  (template/$ (do:>
         (var out ~val)
         (if (and (not= nil out)
                  (== "Promise" (. out ["constructor"] ["name"])))
@@ -284,7 +286,7 @@
   "notify on api return"
   {:added "4.0"}
   [val]
-  (h/$ (do:>
+  (template/$ (do:>
         (var out ~val)
         (if (== "Promise" (. out ["constructor"] ["name"]))
           (return (. out
@@ -299,7 +301,7 @@
   "Adds a trace entry with stack infomation"
   {:added "4.0"}
   [msg & [tag]]
-  (h/$ (try
+  (template/$ (try
          (throw (new Error ~msg))
          (catch e (xt.lang.base-lib/TRACE! (. e ["stack"]) ~tag)))))
 
@@ -311,9 +313,9 @@
   (let [{:keys [line]} (meta (l/macro-form))
         {:keys [namespace id]} (:entry (l/macro-opts))
         label (clojure.core/str (str (or namespace
-                                         (h/ns-sym))
+                                         (env/ns-sym))
                                      "/" id))]
-    (h/$ (do:>
+    (template/$ (do:>
           (var out ~body)
           (if (== "Promise" (. out ["constructor"] ["name"]))
             (return (. out
@@ -345,7 +347,7 @@
   "wraps an esm import to split out components"
   {:added "4.0"}
   [module]
-  (h/$ (new Proxy
+  (template/$ (new Proxy
             ~module
             {:get (fn [esm key]
                     (return (. esm
@@ -360,7 +362,7 @@
   (apply vector :<> 
          (->> (ns-interns ns)
               (clojure.core/filter
-               (fn [[k v]] (str/ends-with? (str k) "Demo")))
+               (fn [[k v]] (clojure.string/ends-with? (str k) "Demo")))
               (clojure.core/sort-by
                (fn [[_ v]] (:line (meta v))))
               (clojure.core/map (fn [[k _]]

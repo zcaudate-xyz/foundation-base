@@ -1,6 +1,6 @@
 (ns jvm.namespace.context-test
-  (:use code.test)
-  (:require [jvm.namespace.context :refer :all]))
+  (:require [jvm.namespace.context :refer :all])
+  (:use code.test))
 
 ^{:refer jvm.namespace.context/resolve-ns :added "3.0"}
 (fact "resolves the namespace or else returns nil if it does not exist"

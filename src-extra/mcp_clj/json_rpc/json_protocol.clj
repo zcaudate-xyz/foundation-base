@@ -1,7 +1,6 @@
 (ns mcp-clj.json-rpc.json-protocol
-  "JSON-RPC 2.0 protocol constants and utilities"
-  (:require
-    [mcp-clj.json :as json]))
+  (:require [mcp-clj.json :as json])
+  "JSON-RPC 2.0 protocol constants and utilities")
 
 ;; Protocol version
 (def ^:const version "2.0")

@@ -1,6 +1,5 @@
 (ns js.lib.mustache
-  (:require [std.lang :as l]
-            [std.lib :as h])
+  (:require [std.lang :as l])
   (:refer-clojure :exclude [keyword]))
 
 (l/script :js

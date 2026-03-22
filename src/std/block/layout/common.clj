@@ -1,12 +1,12 @@
 (ns std.block.layout.common
-  (:require [std.lib.foundation :as h]
-            [std.lib.collection :as c]
+  (:require [clojure.string]
+            [std.block.base :as base]
+            [std.block.check :as check]
             [std.block.construct :as construct]
             [std.block.layout.estimate :as est]
-            [std.block.check :as check]
             [std.block.type :as type]
-            [std.block.base :as base]
-            [std.string :as str]))
+            [std.lib.collection :as c]
+            [std.lib.foundation :as h]))
 
 (def ^:dynamic *layout-fn*
   (fn [form _]
@@ -39,7 +39,7 @@
   {:added "4.0"}
   [s]
   (list 'String/join "\\n"
-        (str/split-lines s)))
+        (clojure.string/split-lines s)))
 
 (defn layout-single-row
   "layouts a row"

@@ -1,7 +1,7 @@
 (ns xt.db.sql-table-test
-  (:use code.test)
   (:require [std.lang :as l]
-            [std.lib :as h]))
+            [std.string.prose :as prose])
+  (:use code.test))
 
 (l/script- :js
   {:runtime :basic
@@ -82,7 +82,7 @@
                               "UserAccount"
                               {:id "AAA" :password-hash "HELLO"}
                               {}))
-  => (std.string/|
+  => (prose/|
       "INSERT INTO UserAccount"
       " (id, password_hash)"
       " VALUES"
@@ -101,12 +101,12 @@
 
 ^{:refer xt.db.sql-table/table-insert :added "4.0"
   :setup [(def +inserts+
-            [(std.string/|
+            [(prose/|
               "INSERT INTO UserAccount"
               " (id, nickname, password_hash, password_salt, password_updated, is_super, is_suspended, is_official)"
               " VALUES"
               " ('00000000-0000-0000-0000-000000000000','root',NULL,NULL,'1630408723423619',TRUE,FALSE,FALSE);")
-             (std.string/|
+             (prose/|
               "INSERT INTO UserProfile"
               " (id, account_id, first_name, last_name, city, state_id, country_id, about, language, detail)"
               " VALUES"
@@ -142,7 +142,7 @@
 
 ^{:refer xt.db.sql-table/table-upsert :added "4.0"
   :setup [(def +upserts+
-            [(std.string/|
+            [(prose/|
               "INSERT INTO UserAccount"
               " (id, nickname, password_hash, password_salt, password_updated, is_super, is_suspended, is_official)"
               " VALUES"
@@ -155,7 +155,7 @@
               "is_super=coalesce(\"excluded\".is_super,is_super),"
               "is_suspended=coalesce(\"excluded\".is_suspended,is_suspended),"
               "is_official=coalesce(\"excluded\".is_official,is_official);")
-             (std.string/|
+             (prose/|
               "INSERT INTO UserProfile"
               " (id, account_id, first_name, last_name, city, state_id, country_id, about, language, detail)"
               " VALUES"

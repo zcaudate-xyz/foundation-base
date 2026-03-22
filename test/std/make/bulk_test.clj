@@ -1,8 +1,8 @@
 (ns std.make.bulk-test
-  (:use code.test)
-  (:require [std.make.bulk :as bulk]
-            [std.make :as make]
-            [std.make.project :as project]))
+  (:require [std.make :as make]
+            [std.make.bulk :as bulk]
+            [std.make.project :as project])
+  (:use code.test))
 
 ^{:refer std.make.bulk/make-bulk-filter :added "4.0"}
 (fact "bulk filter by containers")

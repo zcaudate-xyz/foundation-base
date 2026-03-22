@@ -1,14 +1,13 @@
 (ns rt.basic.impl.process-js
-  (:require [rt.basic.type-common :as common]
-            [rt.basic.type-oneshot :as oneshot]
+  (:require [clojure.string]
             [rt.basic.type-basic :as basic]
+            [rt.basic.type-common :as common]
+            [rt.basic.type-oneshot :as oneshot]
             [rt.basic.type-websocket :as websocket]
-            [xt.lang.base-repl :as k]
-            [std.lang.interface.type-notify :as notify]
             [std.lang.base.impl :as impl]
             [std.lang.base.runtime :as rt]
-            [std.lib :as h]
-            [std.string :as str]))
+            [std.lang.interface.type-notify :as notify]
+            [xt.lang.base-repl :as k]))
 
 (def +program-init+
   (common/put-program-options
@@ -89,7 +88,7 @@
 
 (def make-bootstrap
   (fn []
-    (str/join "\n\n"
+    (clojure.string/join "\n\n"
               [(impl/emit-entry-deps
                 k/return-eval
                 {:lang :js
@@ -162,7 +161,7 @@
                           :layout :flat})
                         (impl/emit-as
                          :js +client-ws+)]
-                       (str/join "\n\n"))]
+                       (clojure.string/join "\n\n"))]
     (fn [port & [{:keys [host]}]]
       (str bootstrap
            "\n\n"

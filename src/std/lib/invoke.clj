@@ -1,8 +1,8 @@
 (ns std.lib.invoke
-  (:require [std.protocol.invoke :as protocol.invoke]
+  (:require [clojure.core :as clojure]
+            [clojure.set :as set]
             [std.lib.function :as fn]
-            [clojure.core :as clojure]
-            [clojure.set :as set])
+            [std.protocol.invoke :as protocol.invoke])
   (:import (clojure.lang MultiFn))
   (:refer-clojure :exclude [fn]))
 

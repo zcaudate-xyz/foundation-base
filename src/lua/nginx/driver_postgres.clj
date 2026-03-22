@@ -1,6 +1,5 @@
 (ns lua.nginx.driver-postgres
   (:require [std.lang :as l]
-            [std.lib :as h]
             [xt.sys.conn-dbsql :as dbsql]))
 
 (l/script :lua

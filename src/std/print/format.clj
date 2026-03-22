@@ -1,11 +1,11 @@
 (ns std.print.format
-  (:require [std.print.format.common :as common]
+  (:require [std.lib.foundation :as f]
             [std.print.format.chart :as chart]
+            [std.print.format.common :as common]
             [std.print.format.report :as report]
-            [std.print.format.time :as time]
-            [std.lib :as h]))
+            [std.print.format.time :as time]))
 
-(h/intern-in chart/bar-graph
+(f/intern-in chart/bar-graph
              chart/tree-graph
              chart/sparkline
              chart/table

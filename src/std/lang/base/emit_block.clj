@@ -1,7 +1,8 @@
 (ns std.lang.base.emit-block
-  (:require [std.string :as str]
-            [std.lib :as h]
-            [std.lang.base.emit-common :as common]))
+  (:require [clojure.string]
+            [std.lang.base.emit-common :as common]
+            [std.lib.collection :as collection]
+            [std.lib.foundation :as f]))
 
 ;;
 ;; BLOCK BODY
@@ -25,7 +26,7 @@
    (let [spacing (or (get-in grammar [:default :common :line-spacing]) 1)
          cols    (repeat spacing (common/newline-indent))
          lines   (apply str cols)]
-     (str/join lines
+     (clojure.string/join lines
                (filter (comp not empty?)
                        (map (fn [form] (emit-statement form grammar mopts))
                             args))))))
@@ -36,8 +37,8 @@
   ([args grammar mopts]
    (let [out (emit-do args grammar mopts)
          statement (get-in grammar [:default :common :statement])]
-     (if (str/ends-with? out statement)
-       (h/lsubs out (count statement))
+     (if (clojure.string/ends-with? out statement)
+       (f/lsubs out (count statement))
        out))))
 
 (defn block-options
@@ -90,13 +91,13 @@
                      :else (recur acc (conj curr x) more)))
          acc (remove empty? acc)
          {:keys [sep space]} (block-options key block :parameter grammar)]
-     (str/join space (map (fn [[k & more]]
+     (clojure.string/join space (map (fn [[k & more]]
                             (let [[k args] (if (keyword? k)
-                                             [(.replaceAll (h/strn k) "-" " ") more]
+                                             [(.replaceAll (f/strn k) "-" " ") more]
                                              [nil (cons k more)])]
                               (cond->> (common/emit-array args grammar mopts)
-                                :then (map str/trim-right)
-                                :then (str/join (str sep space))
+                                :then (map clojure.string/trimr)
+                                :then (clojure.string/join (str sep space))
                                 k  (str k space))))
                           acc)))))
 
@@ -109,7 +110,7 @@
          pstr (case (first parsed)
                 :raw (common/*emit-fn*  (second parsed) grammar mopts)
                 :statement (emit-params-statement key block (second parsed) grammar mopts)
-                (str/join (str statement space)
+                (clojure.string/join (str statement space)
                           (map #(emit-params-statement key block % grammar mopts)
                                (map second parsed))))]
      (str start pstr end))))
@@ -126,7 +127,7 @@
          [params body] (if (:parameter main)
                          [(first args) (rest args)]
                          [nil args])
-         cblock (h/merge-nested cblock opts)]
+         cblock (collection/merge-nested cblock opts)]
      (str (or (:raw opts) tag)
           (if (:parameter main)
             (emit-params ck cblock params grammar mopts))
@@ -144,7 +145,7 @@
      (->> (mapcat (fn [[ck {:keys [required] :as cblock}]]
                     (let [margs (get ctl-args ck)
                           _     (if (and required (empty? margs))
-                                  (h/error "Form is required in body" {:main key :control ck}))
+                                  (f/error "Form is required in body" {:main key :control ck}))
                           opts  (merge (get-in grammar [:default :block])
                                        (get-in grammar [:block key :control :default])
                                        (get-in grammar [:block key :control ck]))]
@@ -152,7 +153,7 @@
                              (emit-block-control ck cblock opts args grammar mopts))
                            margs)))
                   control)
-          (str/join sep)
+          (clojure.string/join sep)
           (str (if (empty? main) "" sep))))))
 
 ;;
@@ -167,8 +168,8 @@
          [params args] (if (:parameter main)
                          [(first args) (rest args)]
                          [nil args])
-         ctl       (h/map-juxt [(comp symbol name) identity] (map first control))
-         ctl-fn    (fn [form] (and (h/form? form) (ctl (first form))))
+         ctl       (collection/map-juxt [(comp symbol name) identity] (map first control))
+         ctl-fn    (fn [form] (and (collection/form? form) (ctl (first form))))
          ctl-args  (->> (filter ctl-fn args)
                         (group-by (comp ctl first)))
          args      (remove ctl-fn args)
@@ -189,7 +190,7 @@
           (if (:parameter main)
             (emit-params key block params grammar mopts))
           start
-          (str/trim-right
+          (clojure.string/trimr
            (common/with-indent [(get-in grammar [:default :common :indent])]
              (emit-block-controls key block control ctl-args grammar mopts)))
           (common/newline-indent)

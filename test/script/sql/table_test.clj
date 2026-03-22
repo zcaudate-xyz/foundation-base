@@ -1,11 +1,11 @@
 (ns script.sql.table-test
-  (:use code.test)
-  (:require [script.sql.table :refer :all]
+  (:require [script.sql.common :as common]
             [script.sql.expr :as builder]
-            [script.sql.common :as common]
+            [script.sql.table :refer :all]
+            [script.sql.table.compile :as compile]
             [std.lib.schema :as schema]
-            [std.string :as str]
-            [script.sql.table.compile :as compile]))
+            [std.string.prose :as prose])
+  (:use code.test))
 
 (def |schema|
   (schema/schema
@@ -98,7 +98,7 @@
                        {:id "b0" :type :pork :amount 10  :grade :bad}]}
                (merge {:schema |schema|}
                       common/*options*))
-  => [[:meat (str/| "INSERT INTO \"meat\""
+  => [[:meat (prose/| "INSERT INTO \"meat\""
                     " (\"id\", \"type\", \"amount\", \"grade\")"
                     " VALUES" " ('a0', ':beef', '100', 'good'),"
                     " ('b0', ':pork', '10', 'bad')")]])
@@ -111,7 +111,7 @@
                            {:id "b0" :type :pork :amount 10  :grade :bad}
                            {:id "c0" :type :fish :amount 1   :grade :nasty}]}
                    {:schema |schema|})
-  => [[:meat (str/|
+  => [[:meat (prose/|
               "INSERT INTO \"meat\""
               " (\"id\", \"type\", \"amount\", \"grade\")"
               " VALUES"
@@ -128,7 +128,7 @@
 
   (table:put:single :meat {:id "a0" :type :chicken :amount 100 :grade :good}
                     {:schema |schema|})
-  => (str/|
+  => (prose/|
       "INSERT INTO \"meat\""
       " (\"id\", \"type\", \"amount\", \"grade\")"
       " VALUES ('a0', ':chicken', '100', 'good')"
@@ -144,7 +144,7 @@
                            {:id "b0" :type :pork :amount 10  :grade :bad}
                            {:id "c0" :type :fish :amount 1   :grade :nasty}]}
                    {:schema |schema|})
-  => [[:meat (str/|
+  => [[:meat (prose/|
               "INSERT INTO \"meat\""
               " (\"id\", \"type\", \"amount\", \"grade\")"
               " VALUES"
@@ -158,7 +158,7 @@
 
   (table:set:single :meat {:id "a0" :type :chicken :amount 100 :grade :good}
                     {:schema |schema|})
-  => (str/|
+  => (prose/|
       "INSERT INTO \"meat\""
       " (\"id\", \"type\", \"amount\", \"grade\")"
       " VALUES"
@@ -218,7 +218,7 @@
              {:id "i0" :amount 100}
              {:id "i0" :amount 200}
              {:schema |schema|})
-  => (str/|
+  => (prose/|
       "DO $$"
       " DECLARE v_id TEXT;"
       " BEGIN"

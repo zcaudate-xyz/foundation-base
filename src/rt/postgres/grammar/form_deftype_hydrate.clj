@@ -1,11 +1,13 @@
 (ns rt.postgres.grammar.form-deftype-hydrate
-  (:require [rt.postgres.grammar.common-application :as app]
-            [rt.postgres.grammar.common :as common]
-            [std.lang.base.library-snapshot :as snap]
+  (:require [rt.postgres.grammar.common :as common]
+            [rt.postgres.grammar.common-application :as app]
             [std.lang.base.book :as book]
+            [std.lang.base.library-snapshot :as snap]
             [std.lang.base.util :as ut]
+            [std.lib.collection :as collection]
+            [std.lib.foundation :as f]
             [std.lib.schema :as schema]
-            [std.lib :as h]))
+            [std.lib.walk :as walk]))
 
 (defn pg-deftype-hydrate-check-link
   "checks a link making sure it exists and is correct type"
@@ -18,10 +20,10 @@
                                           (:id link)
                                           (:section link))]
     (cond (not entry)
-          (h/error "Entry not found." {:input link})
+          (f/error "Entry not found." {:input link})
 
           (not= dbtype type)
-          (h/error "Entry type not correct." {:type type
+          (f/error "Entry type not correct." {:type type
                                               :input entry})
 
           :else true)))
@@ -37,7 +39,7 @@
        :module (:id module)
        :id (symbol (name sym))} false]
      [(select-keys @(or (resolve ns)
-                        (h/error "Not found" {:input ref}))
+                        (f/error "Not found" {:input ref}))
                    [:id :module :lang :section])
       true])))
 
@@ -47,11 +49,11 @@
   ([sql k attrs]
    (if (:process sql)
      (assoc sql :process
-            (h/prewalk
+            (walk/prewalk
              (fn [x]
                (if (symbol? x)
-                 (h/var-sym (or (resolve x)
-                                (h/error "Cannot resolve symbol"
+                 (f/var-sym (or (resolve x)
+                                (f/error "Cannot resolve symbol"
                                          {:symbol x
                                           :col k
                                           :attrs attrs})))
@@ -63,7 +65,7 @@
   "processes the foreign attribute"
   {:added "4.0"}
   ([foreign resolve-link-fn snapshot]
-   (h/map-vals (fn [f-spec]
+   (collection/map-vals (fn [f-spec]
                  (if (:ns f-spec)
                    (let [[link check] (resolve-link-fn f-spec)]
                      (when (and check
@@ -101,7 +103,7 @@
   {:added "4.0"}
   ([k attrs snapshot]
    (let [enum-var  (or (resolve (-> attrs :enum :ns))
-                       (h/error "Not found" {:input (:enum attrs)}))
+                       (f/error "Not found" {:input (:enum attrs)}))
          link      (select-keys @enum-var
                                 [:id :module :lang :section])
          _ (pg-deftype-hydrate-check-link snapshot link :enum)
@@ -155,7 +157,7 @@
          hmeta   (assoc (common/pg-hydrate-module-static module)
                         :static/schema-seed presch
                         :static/schema-primary (cond (empty? @capture)
-                                                     (h/error "Primary not available")
+                                                     (f/error "Primary not available")
 
                                                      (= 1 (count @capture))
                                                      (first @capture)

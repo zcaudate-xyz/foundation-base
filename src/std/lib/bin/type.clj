@@ -1,27 +1,7 @@
 (ns std.lib.bin.type
   (:require [std.lib.invoke :refer [definvoke]]
             [std.protocol.binary :as protocol.binary])
-  (:import (hara.lib.bin ByteBufferInputStream
-                         ByteBufferOutputStream)
-           (java.io InputStream
-                    OutputStream
-                    FileInputStream
-                    FileOutputStream
-                    PipedInputStream
-                    PipedOutputStream
-                    ByteArrayInputStream
-                    ByteArrayOutputStream
-                    InputStreamReader
-                    OutputStreamWriter)
-           (java.util BitSet)
-           (java.net URL URI)
-           (java.io File)
-           (java.nio ByteBuffer
-                     ByteOrder)
-           (java.nio.file Path)
-           (java.nio.channels ByteChannel
-                              FileChannel
-                              Channels))
+  (:import (hara.lib.bin ByteBufferInputStream ByteBufferOutputStream) (java.io InputStream OutputStream FileInputStream FileOutputStream PipedInputStream PipedOutputStream ByteArrayInputStream ByteArrayOutputStream InputStreamReader OutputStreamWriter) (java.util BitSet) (java.net URL URI) (java.io File) (java.nio ByteBuffer ByteOrder) (java.nio.file Path) (java.nio.channels ByteChannel FileChannel Channels))
   (:refer-clojure :exclude [bytes]))
 
 (def +native+ (ByteOrder/nativeOrder))

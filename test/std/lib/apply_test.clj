@@ -1,6 +1,6 @@
 (ns std.lib.apply-test
-  (:use code.test)
-  (:require [std.lib.apply :refer :all]))
+  (:require [std.lib.apply :refer :all])
+  (:use code.test))
 
 ^{:refer std.lib.apply/apply-in :added "3.0"}
 (fact "runs the applicative within a context"

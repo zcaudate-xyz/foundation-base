@@ -1,6 +1,6 @@
 (ns std.lib.env-test
-  (:use code.test)
   (:require [std.lib.env :refer :all])
+  (:use code.test)
   (:refer-clojure :exclude [*ns* prn require ns pr with-out-str]))
 
 ^{:refer std.lib.env/ns-sym :added "3.0"}

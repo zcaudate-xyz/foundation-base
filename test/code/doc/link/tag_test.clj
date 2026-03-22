@@ -1,6 +1,6 @@
 (ns code.doc.link.tag-test
-  (:use code.test)
-  (:require [code.doc.link.tag :refer :all]))
+  (:require [code.doc.link.tag :refer :all])
+  (:use code.test))
 
 ^{:refer code.doc.link.tag/inc-candidate :added "3.0"}
 (fact "creates additional candidates"

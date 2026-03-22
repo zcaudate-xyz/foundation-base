@@ -1,19 +1,16 @@
 (ns mcp-clj.mcp-server.core
+  (:require [clojure.set :as set]
+            [mcp-clj.json-rpc.protocols :as json-rpc-protocols]
+            [mcp-clj.log :as log]
+            [mcp-clj.mcp-server.logging :as logging]
+            [mcp-clj.mcp-server.prompts :as prompts]
+            [mcp-clj.mcp-server.resources :as resources]
+            [mcp-clj.mcp-server.subscriptions :as subscriptions]
+            [mcp-clj.mcp-server.version :as version]
+            [mcp-clj.server-transport.factory :as transport-factory]
+            [mcp-clj.tools.core :as tools])
   "MCP server implementation supporting the Anthropic Model Context Protocol"
-  (:require
-    [clojure.set :as set]
-    [mcp-clj.json-rpc.protocols :as json-rpc-protocols]
-    [mcp-clj.log :as log]
-    [mcp-clj.mcp-server.logging :as logging]
-    [mcp-clj.mcp-server.prompts :as prompts]
-    [mcp-clj.mcp-server.resources :as resources]
-    [mcp-clj.mcp-server.subscriptions :as subscriptions]
-    [mcp-clj.mcp-server.version :as version]
-    [mcp-clj.server-transport.factory :as transport-factory]
-    [mcp-clj.tools.core :as tools])
-  (:import
-    (java.lang
-      AutoCloseable)))
+  (:import (java.lang AutoCloseable)))
 
 (declare stop!)
 

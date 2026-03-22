@@ -1,6 +1,5 @@
 (ns js.lib.three-extra
-  (:require [std.lang :as l]
-            [std.lib :as h]))
+  (:require [std.lang :as l]))
 
 (l/script :js
   {:import [["three/addons/controls/OrbitControls.js" :as [* ThreeOrbitControl]]

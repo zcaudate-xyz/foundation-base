@@ -1,9 +1,9 @@
 (ns lib.docker
-  (:require [std.lib :as h]
-            [lib.docker.common :as common]
-            [lib.docker.ryuk :as ryuk]))
+  (:require [lib.docker.common :as common]
+            [lib.docker.ryuk :as ryuk]
+            [std.lib.foundation :as f]))
 
-(h/intern-in
+(f/intern-in
  common/get-ip
  common/has-container?
  common/list-containers

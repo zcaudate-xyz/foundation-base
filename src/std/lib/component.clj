@@ -1,8 +1,8 @@
 (ns std.lib.component
-  (:require [std.protocol.component :as protocol.component]
-            [std.lib.collection :as c]
+  (:require [std.lib.collection :as c]
+            [std.lib.component.track :as track]
             [std.lib.foundation :as h]
-            [std.lib.component.track :as track]))
+            [std.protocol.component :as protocol.component]))
 
 (def ^:dynamic *kill* false)
 

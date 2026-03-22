@@ -1,7 +1,7 @@
 (ns code.doc.link.api-test
-  (:use code.test)
   (:require [code.doc.link.api :refer :all]
-            [code.project :as project]))
+            [code.project :as project])
+  (:use code.test))
 
 ^{:refer code.doc.link.api/external-vars :added "3.0"}
 (fact "grabs external vars from the `module/include` form"

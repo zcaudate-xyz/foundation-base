@@ -1,9 +1,9 @@
 ^{:no-test true}
 (ns js.core.dom
-  (:require [std.lang :as l]
-            [std.lib :as h]
+  (:require [clojure.string]
             [std.html :as html]
-            [std.string :as str])
+            [std.lang :as l]
+            [std.lib.template :as template])
   (:refer-clojure :exclude [remove val]))
 
 (l/script :js)
@@ -24,7 +24,7 @@
    (let [[elem id] (if id
                     [elem? id]
                     ['document elem?])]
-     (h/$ (. ~elem (getElementById ~id))))))
+     (template/$ (. ~elem (getElementById ~id))))))
 
 (defmacro.js text
   "gets the text of a given root"
@@ -33,7 +33,7 @@
    (let [[elem id] (if id
                     [elem? id]
                     ['document elem?])]
-     (h/$ (. (. ~elem (getElementById ~id))
+     (template/$ (. (. ~elem (getElementById ~id))
              textContent)))))
 
 (defmacro.js val
@@ -41,7 +41,7 @@
    (let [[elem id] (if id
                     [elem? id]
                     ['document elem?])]
-     (h/$ (JSON.parse (. (. ~elem (getElementById ~id))
+     (template/$ (JSON.parse (. (. ~elem (getElementById ~id))
                          textContent))))))
 
 (defmacro.js click
@@ -49,9 +49,9 @@
   {:added "4.0"}
   ([elem]
    (if (string? elem)
-     (h/$ (. (document.getElementById ~elem)
+     (template/$ (. (document.getElementById ~elem)
              (click)))
-     (h/$ (. ~elem (click))))))
+     (template/$ (. ~elem (click))))))
 
 (defmacro.js sel
   "selects an element based on id"
@@ -60,7 +60,7 @@
    (let [[elem sel] (if sel
                       [elem? sel]
                       ['document elem?])]
-     (h/$ (. ~elem (querySelector ~sel))))))
+     (template/$ (. ~elem (querySelector ~sel))))))
 
 (defmacro.js q
   "gets elements given query"
@@ -69,7 +69,7 @@
    (let [[elem sel] (if sel
                       [elem? sel]
                     ['document elem?])]
-     (h/$ (. ~elem (querySelectorAll ~sel))))))
+     (template/$ (. ~elem (querySelectorAll ~sel))))))
 
 (def$.js createElement
   document.createElement)
@@ -78,8 +78,8 @@
   "creates an element from tree form"
   {:added "4.0"}
   [tree]
-  (let [html (str/trim (html/html (eval tree)))]
-    (h/$ (do:> (let [elem (document.createElement "template")
+  (let [html (clojure.string/trim (html/html (eval tree)))]
+    (template/$ (do:> (let [elem (document.createElement "template")
                     _ (:= (. elem innerHTML) ~html)]
                 (return elem.content.firstChild))))))
 
@@ -90,55 +90,55 @@
    (let [[elem child] (if child
                         [elem? child]
                         ['document elem?])]
-     (h/$ (. ~elem (appendChild ~child))))))
+     (template/$ (. ~elem (appendChild ~child))))))
 
 (defmacro.js removeChild
   "removes a child from the dom"
   {:added "4.0"}
   ([elem child]
-   (h/$ (. ~elem (removeChild ~child)))))
+   (template/$ (. ~elem (removeChild ~child)))))
 
 (defmacro.js remove
   "removes node from the dom"
   {:added "4.0"}
   ([elem]
-   (h/$ (. ~elem (remove)))))
+   (template/$ (. ~elem (remove)))))
 
 (defmacro.js setAttribute
   "sets attribute of an element"
   {:added "4.0"}
   ([elem key val]
-   (h/$ (. ~elem (setAttribute ~key ~val)))))
+   (template/$ (. ~elem (setAttribute ~key ~val)))))
 
 (defmacro.js getAttribute
   "gets the attribute of an element"
   {:added "4.0"}
   ([elem key]
-   (h/$ (. ~elem (getAttribute ~key)))))
+   (template/$ (. ~elem (getAttribute ~key)))))
 
 (defmacro.js classList
   "returns the class list"
   {:added "4.0"}
   ([elem]
-   (h/$ (. ~elem classList))))
+   (template/$ (. ~elem classList))))
 
 (defmacro.js className
   "returns the class name"
   {:added "4.0"}
   ([elem]
-   (h/$ (. ~elem className))))
+   (template/$ (. ~elem className))))
 
 (defmacro.js outer
   "gets the outer html of an element"
   {:added "4.0"}
   ([elem]
-   (h/$ (. ~elem outerHTML))))
+   (template/$ (. ~elem outerHTML))))
 
 (defmacro.js inner
   "gets the inner httml of an element"
   {:added "4.0"}
   ([elem]
-   (h/$ (. ~elem innerHTML))))
+   (template/$ (. ~elem innerHTML))))
 
 (comment
   (./create-tests))

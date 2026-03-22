@@ -1,7 +1,7 @@
 (ns std.object.framework.string-like-test
-  (:use code.test)
-  (:require [std.object.framework.string-like :refer :all]
-            [std.object :as object]))
+  (:require [std.object :as object]
+            [std.object.framework.string-like :refer :all])
+  (:use code.test))
 
 ^{:refer std.object.framework.string-like/extend-string-like :added "3.0"}
 (fact "creates an entry for string-like classes"

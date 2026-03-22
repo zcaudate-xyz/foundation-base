@@ -1,6 +1,6 @@
 (ns std.lib.result-test
-  (:use code.test)
-  (:require [std.lib.result :refer :all]))
+  (:require [std.lib.result :refer :all])
+  (:use code.test))
 
 ^{:refer std.lib.result/result :added "3.0"}
 (fact "creates a result used for printing"

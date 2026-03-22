@@ -1,6 +1,6 @@
 (ns std.lib.class-test
-  (:use code.test)
-  (:require [std.lib.class :refer :all]))
+  (:require [std.lib.class :refer :all])
+  (:use code.test))
 
 ^{:refer std.lib.class/class:array? :added "3.0"}
 (fact "checks if a class is an array class"

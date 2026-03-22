@@ -1,8 +1,9 @@
 (ns std.lang.model.spec-js.qml
-  (:require [std.lang.base.emit-common :as common]
+  (:require [clojure.string]
+            [std.lang.base.emit-common :as common]
             [std.lang.base.util :as ut]
-            [std.string :as str]
-            [std.lib :as h]))
+            [std.lib.collection :as collection]
+            [std.lib.foundation :as f]))
 
 ;;
 ;; nodes start with :qml/<NAME>, else will be inlined as a statement
@@ -40,7 +41,7 @@
                     (->> (first props)
                          (partition 2))
 
-                    :else (h/error "Not Allowed" {:input props}))]
+                    :else (f/error "Not Allowed" {:input props}))]
     (mapv (fn [[k prop]]
             [k (classify-fn prop)])
           pairs)))
@@ -51,7 +52,7 @@
   [[tag props & children] classify-fn]
   (let [title (if (= "qml" (namespace tag))
                 (name tag)
-                (h/error "Not a valid qml tag: " tag))
+                (f/error "Not a valid qml tag: " tag))
         [props children] (if (qml-props? props)
                            [props children]
                            [{} children])]
@@ -80,7 +81,7 @@
   "emits a value string"
   {:added "4.0"}
   [{:keys [value]} grammar mopts]
-  (cond (h/form? value)
+  (cond (collection/form? value)
         (case (first value)
           %  (str " {"
                   (common/with-indent [2]
@@ -113,10 +114,10 @@
        (common/with-indent [2]
          (str (common/newline-indent)
               (->> (concat (mapv (fn [[k node]]
-                                   (str (h/strn k) ": " (emit-node node grammar mopts)))
+                                   (str (f/strn k) ": " (emit-node node grammar mopts)))
                                  props)
                            (mapv #(emit-node %  grammar mopts) children))
-                   (str/join (common/newline-indent)))))
+                   (clojure.string/join (common/newline-indent)))))
        (common/newline-indent)
        "}"))
 

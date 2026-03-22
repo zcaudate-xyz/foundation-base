@@ -1,13 +1,16 @@
 (ns std.lang.base.emit-assign
-  (:require [std.string :as str]
-            [std.lib :as h]
-            [std.lang.base.util :as ut]
-            [std.lang.base.emit-common :as common]
-            [std.lang.base.emit-preprocess :as preprocess]
-            [std.lang.base.emit-helper :as helper]
-            [std.lang.base.emit-data :as data]
+  (:require [clojure.string]
             [std.lang.base.emit-block :as block]
-            [std.lang.base.emit-fn :as fn]))
+            [std.lang.base.emit-common :as common]
+            [std.lang.base.emit-data :as data]
+            [std.lang.base.emit-fn :as fn]
+            [std.lang.base.emit-helper :as helper]
+            [std.lang.base.emit-preprocess :as preprocess]
+            [std.lang.base.util :as ut]
+            [std.lib.collection :as collection]
+            [std.lib.env :as env]
+            [std.lib.foundation :as f]
+            [std.lib.walk :as walk]))
 
 (def +assign-types+
   #{:assign/inline
@@ -36,18 +39,18 @@
   (let [[link-module link-id] (ut/sym-pair link)
         book     (or book (get-in snapshot [lang :book]))
         entry    (or (get-in book [:modules link-module :code link-id])
-                     (h/error "Cannot find entry" {:lang  lang
+                     (f/error "Cannot find entry" {:lang  lang
                                                    :input link}))
         _        (or (empty? (:deps entry))
-                     (h/error "Inline cannot have additional dependencies." {:lang  lang
+                     (f/error "Inline cannot have additional dependencies." {:lang  lang
                                                                              :input link}))
         [_ _ args & body] (:form entry)
         return-ref (volatile! nil)
-        body       (h/postwalk (fn [form]
-                                 (if (h/form? form)
+        body       (walk/postwalk (fn [form]
+                                 (if (collection/form? form)
                                    (cond (= 'return (first form))
                                          (if @return-ref
-                                           (h/error "Inline cannot have multiple returns." {:input @return-ref})
+                                           (f/error "Inline cannot have multiple returns." {:input @return-ref})
                                            (do (vreset! return-ref (second form))
                                                '<RETURN>))
                                          
@@ -58,14 +61,14 @@
                                    form))
                                body)
         _          (or (not (coll? @return-ref))
-                       (h/error "Return should be a token." {:input @return-ref}))
+                       (f/error "Return should be a token." {:input @return-ref}))
         assign-ref (volatile! nil)
-        -          (h/postwalk (fn [form]
-                                 (do (when (and (h/form? form)
+        -          (walk/postwalk (fn [form]
+                                 (do (when (and (collection/form? form)
                                                 (= 'var (first form)))
                                        (let [asym (first (filter symbol? (rest form)))]
                                          (or (= @return-ref asym)
-                                             (h/error "Inlined with unaccounted for declarations"
+                                             (f/error "Inlined with unaccounted for declarations"
                                                       {:link link
                                                        :form body}))
                                          (vreset! assign-ref asym)))
@@ -75,9 +78,9 @@
         rsym?      (symbol? @return-ref) 
         smap       (cond-> (zipmap args input)
                      (and rsym? asym?) (assoc @return-ref sym))
-        body       (h/prewalk-replace smap body)
+        body       (walk/prewalk-replace smap body)
         #_#_
-        _          (h/prn smap @assign-ref @return-ref
+        _          (env/prn smap @assign-ref @return-ref
                           body)]
     (if (and rsym? asym?)
       (apply list 'do* body)
@@ -95,7 +98,7 @@
          argstrs  (map (fn [{:keys [value symbol] :as arg}]
                          (let [{:assign/keys [inline template] :as aopts} (meta value)
                                custom (cond (:assign/fn aopts) [:raw  ((:assign/fn aopts) symbol)]
-                                            template [:template (h/prewalk-replace {template symbol} value)]
+                                            template [:template (walk/prewalk-replace {template symbol} value)]
                                             inline   [:inline   (emit-def-assign-inline symbol
                                                                                         value
                                                                                         grammar
@@ -104,7 +107,7 @@
                              (common/*emit-fn* (second custom) grammar mopts)
                              (fn/emit-input-default arg assign grammar mopts))))
                        args)
-         vstr    (str/join (str sep space) argstrs)
+         vstr    (clojure.string/join (str sep space) argstrs)
          rawstr  (if (not-empty raw) (str raw space))]
      (str rawstr vstr))))
 

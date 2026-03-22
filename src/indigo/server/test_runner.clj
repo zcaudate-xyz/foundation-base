@@ -1,9 +1,9 @@
 (ns indigo.server.test-runner
-  (:require [indigo.server.dispatch :as dispatch]
-            [code.test.base.listener :as listener]
-            [code.test.task :as task]
+  (:require [code.test.base.listener :as listener]
             [code.test.compile :as compile]
-            [std.lib :as h]))
+            [code.test.task :as task]
+            [indigo.server.dispatch :as dispatch]
+            [std.lib.signal :as signal]))
 
 (defn browser-test-listener
   [{:keys [result] :as data}]
@@ -13,7 +13,7 @@
     (dispatch/broadcast! msg)))
 
 (defn install-browser-listener []
-  (h/signal:install :test/browser-listener {:test :check} #'browser-test-listener))
+  (signal/signal:install :test/browser-listener {:test :check} #'browser-test-listener))
 
 (defn run-test [ns var-name]
   (install-browser-listener)

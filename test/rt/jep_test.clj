@@ -1,9 +1,10 @@
 (ns rt.jep-test
-  (:use code.test)
   (:require [rt.jep :as jep :refer :all]
-            [std.lib :as h]
+            [std.concurrent :as cc]
             [std.lang :as l]
-            [std.concurrent :as cc]))
+            [std.lib.component :as component]
+            [std.lib.foundation :as f])
+  (:use code.test))
 
 (l/script- :python
   {:runtime :jep
@@ -26,7 +27,7 @@
 
 ^{:refer rt.jep/make-interpreter :added "3.0"
   :setup [(mapv (fn [itp]
-                  (h/suppress (jep/close-interpreter itp)))
+                  (f/suppress (jep/close-interpreter itp)))
                 @jep/*interpreters*)]}
 (fact "makes a shared interpreter"
 
@@ -45,7 +46,7 @@
 
 ^{:refer rt.jep/eval-exec-interpreter :added "3.0"
   :setup [(mapv (fn [itp]
-                  (h/suppress (jep/close-interpreter itp)))
+                  (f/suppress (jep/close-interpreter itp)))
                 @jep/*interpreters*)]}
 (fact "executes script on the interpreter"
   ^:hidden
@@ -77,8 +78,8 @@
   => 1)
 
 ^{:refer rt.jep/eval-command-jep :added "3.0"
-  :setup    [(def +jep+ (h/start (jep/rt-jep:create {})))]
-  :teardown [(h/stop +jep+)]}
+  :setup    [(def +jep+ (component/start (jep/rt-jep:create {})))]
+  :teardown [(component/stop +jep+)]}
 (fact "inputs command input jep context"
 
   @(eval-command-jep +jep+ {:op :exec :body "a = 1"})
@@ -88,8 +89,8 @@
   => 1)
 
 ^{:refer rt.jep/eval-command-fn :added "3.0"
-  :setup    [(def +jep+ (h/start (jep/rt-jep:create {})))]
-  :teardown [(h/stop +jep+)]}
+  :setup    [(def +jep+ (component/start (jep/rt-jep:create {})))]
+  :teardown [(component/stop +jep+)]}
 (fact "helper function to input command"
   ((eval-command-fn :get :body) +jep+ "1+1")
   => (any future? 2))
@@ -104,14 +105,14 @@
 
 ^{:refer rt.jep/stop-jep :added "3.0"}
 (fact "stops the jep runtime"
-  (let [jep (h/start (rt-jep:create {}))]
+  (let [jep (component/start (rt-jep:create {}))]
     (stop-jep jep)
     ;; check if stopped?
     ))
 
 ^{:refer rt.jep/kill-jep :added "3.0"}
 (fact "kills the jep runtime"
-  (let [jep (h/start (rt-jep:create {}))]
+  (let [jep (component/start (rt-jep:create {}))]
     (kill-jep jep)))
 
 ^{:refer rt.jep/invoke-ptr-jep :added "4.0"}

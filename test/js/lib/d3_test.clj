@@ -1,6 +1,6 @@
 (ns js.lib.d3-test
-  (:use code.test)
-  (:require [js.lib.d3 :as d3]))
+  (:require [js.lib.d3 :as d3])
+  (:use code.test))
 
 ^{:refer js.lib.d3/d3-macro-fn :added "4.0" :unchecked true}
 (fact "rewrite function"

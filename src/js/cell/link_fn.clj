@@ -1,8 +1,8 @@
 (ns js.cell.link-fn
-  (:require [std.lang :as l]
-            [std.lib :as h]
-            [std.string :as str]
-            [js.cell.base-fn :as base-fn]))
+  (:require [js.cell.base-fn :as base-fn]
+            [std.lang :as l]
+            [std.lib.foundation :as f]
+            [std.string.wrap]))
 
 (l/script :js
   {:require [[js.cell.link-raw :as link-raw]]})
@@ -15,7 +15,7 @@
          :as entry} @@(resolve src)
         args   (cond-> (nth (:form entry) 2)
                  (not static) rest)]
-    (list 'defn.js (with-meta sym (h/template-meta))
+    (list 'defn.js (with-meta sym (f/template-meta))
           (vec (cons 'link args)) 
           (list 'return (list `link-raw/call
                               'link
@@ -23,13 +23,13 @@
                                :route route
                                :body (vec args)})))))
 
-(h/template-ensure
+(f/template-ensure
  (mapv (juxt (fn [{:keys [id]}]
-               ((str/wrap subs) id 3))
+               ((std.string.wrap/wrap subs) id 3))
              l/sym-full)
        (l/module-entries :js 'js.cell.base-fn
                          :api/route))
- (h/template-entries [tmpl-link-route]
+ (f/template-entries [tmpl-link-route]
    [[trigger base-fn/fn-trigger]
     [trigger-async base-fn/fn-trigger-async]
     [final-set base-fn/fn-final-set]

@@ -1,5 +1,5 @@
 (ns code.framework.link.java
-  (:require [std.string :as str]
+  (:require [clojure.string]
             [code.framework.link.common :as common])
   (:import (java.io File)))
 
@@ -11,10 +11,10 @@
   {:added "3.0"}
   ([^File file]
    (let [pkg (-> (->> (slurp file)
-                      (str/split-lines)
+                      (clojure.string/split-lines)
                       (filter #(.startsWith ^String % "package"))
                       (first))
-                 (str/split #"[ ;]")
+                 (clojure.string/split #"[ ;]")
                  (second))
          nm  (let [nm (.getName file)]
                (subs nm 0 (- (count nm) 5)))]
@@ -28,9 +28,9 @@
   {:added "3.0"}
   ([file]
    (->> (slurp file)
-        (str/split-lines)
+        (clojure.string/split-lines)
         (filter #(.startsWith ^String % "import"))
-        (map #(str/split % #"[ ;]"))
+        (map #(clojure.string/split % #"[ ;]"))
         (map second)
         (map symbol))))
 

@@ -1,7 +1,7 @@
 (ns rt.postgres.grammar.form-defn-hydrate-test
-  (:use code.test)
   (:require [rt.postgres.grammar.form-defn-hydrate :as hydrate]
-            [std.lang.base.book-entry :as book]))
+            [std.lang.base.book-entry :as book])
+  (:use code.test))
 
 ^{:refer rt.postgres.grammar.form-defn-hydrate/pg-defn-hydrate-hook :added "4.1"}
 (fact "pg-defn-hydrate-hook attaches infer metadata to a postgres function entry"

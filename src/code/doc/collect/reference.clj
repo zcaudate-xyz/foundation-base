@@ -2,7 +2,7 @@
   (:require [code.framework :as code.framework]
             [code.framework.common :as common]
             [std.fs :as fs]
-            [std.lib :as h]))
+            [std.lib.collection :as collection]))
 
 (defn find-import-namespaces
   "finds forms with `(module/include ...)`
@@ -43,7 +43,7 @@
                (binding [common/*test-full* true]
                  (if-let [file (lookup ns)]
                    (->> (code.framework/analyse-file [tag file])
-                        (h/merge-nested references))
+                        (collection/merge-nested references))
                    references)))
              references
              (concat  (map vector (repeat :source) sources)

@@ -1,13 +1,13 @@
 (ns std.lang.base.emit-prep-js-test
-  (:use code.test)
   (:require [std.lang.base.book :as b]
-            [std.lang.base.grammar :as grammar]
             [std.lang.base.emit-common :as common]
             [std.lang.base.emit-helper :as helper]
+            [std.lang.base.grammar :as grammar]
             [std.lang.base.util :as ut]
             [std.lang.model.spec-js :as js]
             [std.lang.model.spec-js.meta :as js-meta]
-            [std.lib :as h]))
+            [std.lib.env :as env])
+  (:use code.test))
 
 (def +book-empty+
   (b/book {:lang :js
@@ -30,7 +30,7 @@
                  :form       '(fn [x y] (list '+ x y))
                  :template   (fn [x y] (list '+ x y))
                  :standalone true
-                 :namespace (h/ns-sym)}))
+                 :namespace (env/ns-sym)}))
 
 (def +core-code-identity-fn+
   (b/book-entry {:lang :js
@@ -40,7 +40,7 @@
                  :form '(defn identity-fn [x] (return x))
                  :form-input '(defn identity-fn [x] (return x))
                  :deps #{}
-                 :namespace (h/ns-sym)
+                 :namespace (env/ns-sym)
                  :declared false}))
 
 (def +book-min+

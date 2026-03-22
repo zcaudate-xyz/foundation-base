@@ -1,9 +1,8 @@
 (ns std.tailwind.analysis-test
-  (:require [std.tailwind.analysis :refer :all]
-            [std.lib :as h]
-            [std.string :as str]
+  (:require [clojure.string]
+            [code.test :refer :all]
             [std.lang.base.book :as book]
-            [code.test :refer :all]))
+            [std.tailwind.analysis :refer :all]))
 
 (fact "find-returns"
   (find-returns '(defn.js Foo [] (return (div "hello"))))
@@ -20,8 +19,8 @@
   (let [code '(defn.js MyComp []
                 (return (div {:className "w-10 h-10 border"} "Hi")))
         [layout] (estimate-layout code)]
-    (str/includes? layout "+--------+") => true
-    (str/includes? layout "|Hi      |") => true))
+    (clojure.string/includes? layout "+--------+") => true
+    (clojure.string/includes? layout "|Hi      |") => true))
 
 (def +mock-book+
   {:modules
@@ -43,9 +42,9 @@
     (let [code '(defn.js MyComp []
                   (return (T/Stack {:class "w-10 h-10 border"} "C")))
           [layout] (estimate-layout code {:module 'my.module :book +mock-book+})]
-      (str/includes? layout "+--------+") => true
-      (str/includes? layout "+---+") => true
-      (str/includes? layout "|S  |") => true)))
+      (clojure.string/includes? layout "+--------+") => true
+      (clojure.string/includes? layout "+---+") => true
+      (clojure.string/includes? layout "|S  |") => true)))
 
 
 ^{:refer std.tailwind.analysis/find-returns :added "4.0"}

@@ -2,8 +2,7 @@
   (:require [clojure.tools.reader.reader-types :as types]
             [std.block.base :as base]
             [std.block.check :as check]
-            [std.protocol.block :as protocol.block]
-            [std.string :as str])
+            [std.protocol.block :as protocol.block])
   (:refer-clojure :exclude [peek next slurp]))
 
 (defn create

@@ -1,8 +1,8 @@
 (ns lib.jdbc-test
-  (:use code.test)
   (:require [lib.jdbc :refer :all]
             [lib.jdbc.protocol :as protocol]
             [lib.jdbc.types :as types])
+  (:use code.test)
   (:import (java.sql Connection PreparedStatement ResultSet)))
 
 (defn mock-conn []

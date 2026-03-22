@@ -1,6 +1,6 @@
 (ns code.test.base.context-test
-  (:require [code.test.base.context :as context]
-            [code.test :refer :all]))
+  (:require [code.test :refer :all]
+            [code.test.base.context :as context]))
 
 ^{:refer code.test.base.context/new-context :added "4.1"}
 (fact "new-context returns a map with expected keys"

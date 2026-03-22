@@ -1,12 +1,10 @@
 (ns std.fs.api
-  (:require [std.fs.common :as common]
-            [std.fs.attribute :as attr]
-            [std.fs.walk :as walk]
-            [std.fs.path :as path])
+  (:require [std.fs.attribute :as attr]
+            [std.fs.common :as common]
+            [std.fs.path :as path]
+            [std.fs.walk :as walk])
   (:refer-clojure :exclude [list])
-  (:import (java.nio.file Files Path CopyOption
-                          DirectoryNotEmptyException)
-           (java.nio.file.attribute FileAttribute)))
+  (:import (java.nio.file Files Path CopyOption DirectoryNotEmptyException) (java.nio.file.attribute FileAttribute)))
 
 
 (defn create-directory

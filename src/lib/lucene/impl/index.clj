@@ -1,18 +1,11 @@
 (ns lib.lucene.impl.index
-  (:require [std.fs :as fs]
-            [std.lib :as h :refer [definvoke]]
+  (:require [lib.lucene.impl.analyzer :as analyzer]
             [lib.lucene.impl.document :as doc]
             [lib.lucene.impl.query :as query]
-            [lib.lucene.impl.analyzer :as analyzer])
-  (:import (org.apache.lucene.analysis Analyzer)
-           (org.apache.lucene.store NIOFSDirectory ByteBuffersDirectory Directory)
-           (org.apache.lucene.search Query)
-           (org.apache.lucene.index Term IndexWriter IndexWriterConfig IndexReader DirectoryReader)
-           (org.apache.lucene.analysis.standard StandardAnalyzer)
-           (org.apache.lucene.analysis.core KeywordAnalyzer)
-           (org.apache.lucene.analysis CharArraySet)
-           (org.apache.lucene.analysis.miscellaneous PerFieldAnalyzerWrapper)
-           (org.apache.lucene.search IndexSearcher ScoreDoc TopDocs)))
+            [std.fs :as fs]
+            [std.lib.foundation :as f]
+            [std.lib.invoke :as invoke])
+  (:import (org.apache.lucene.analysis Analyzer) (org.apache.lucene.store NIOFSDirectory ByteBuffersDirectory Directory) (org.apache.lucene.search Query) (org.apache.lucene.index Term IndexWriter IndexWriterConfig IndexReader DirectoryReader) (org.apache.lucene.analysis.standard StandardAnalyzer) (org.apache.lucene.analysis.core KeywordAnalyzer) (org.apache.lucene.analysis CharArraySet) (org.apache.lucene.analysis.miscellaneous PerFieldAnalyzerWrapper) (org.apache.lucene.search IndexSearcher ScoreDoc TopDocs)))
 
 (defmulti directory
   "creates a lucene directory (store
@@ -22,7 +15,7 @@
   {:added "3.0"}
   :store)
 
-(definvoke directory-memory
+(invoke/definvoke directory-memory
   "creates a ram directory
  
    (directory-memory {})
@@ -33,7 +26,7 @@
   ([_]
    (ByteBuffersDirectory.)))
 
-(definvoke directory-disk
+(invoke/definvoke directory-disk
   "creates a disk based directory
  
    (directory-disk {:path \"test-scratch/lib.lucene/index\"})
@@ -82,7 +75,7 @@
   {:added "3.0"}
   (fn [store analyser template entry opts] (type store)))
 
-(definvoke add-entry-writer
+(invoke/definvoke add-entry-writer
   "adds an entry given writer"
   {:added "3.0"}
   [:method {:multi add-entry
@@ -95,7 +88,7 @@
          (map? entry)
          (.addDocument writer ^Document (doc/from-map entry template)))))
 
-(definvoke add-entry-directory
+(invoke/definvoke add-entry-directory
   "adds an entry given directory"
   {:added "3.0"}
   [:method {:multi add-entry
@@ -112,14 +105,14 @@
   {:added "3.0"}
   ([terms]
    (let [[k v] (first terms)]
-     (Term. (h/strn k) (h/strn v)))))
+     (Term. (f/strn k) (f/strn v)))))
 
 (defmulti update-entry
   "updates an entry to the index"
   {:added "3.0"}
   (fn [store analyser template terms entry opts] (type store)))
 
-(definvoke update-entry-writer
+(invoke/definvoke update-entry-writer
   "updates an entry given writer"
   {:added "3.0"}
   [:method {:multi update-entry
@@ -129,7 +122,7 @@
                     (query-term terms)
                     (doc/from-map entry template))))
 
-(definvoke update-entry-directory
+(invoke/definvoke update-entry-directory
   "updates an entry given directory"
   {:added "3.0"}
   [:method {:multi update-entry
@@ -143,7 +136,7 @@
   {:added "3.0"}
   (fn [store analyzer terms opts] (type store)))
 
-(definvoke remove-entry-writer
+(invoke/definvoke remove-entry-writer
   "removes an entry given writer"
   {:added "3.0"}
   [:method {:multi remove-entry
@@ -153,7 +146,7 @@
                      ^"[Lorg.apache.lucene.search.Query;"
                      (into-array [(query/query terms {:analyzer analyzer})]))))
 
-(definvoke remove-entry-directory
+(invoke/definvoke remove-entry-directory
   "removes an entry given directory"
   {:added "3.0"}
   [:method {:multi remove-entry
@@ -167,7 +160,7 @@
   {:added "3.0"}
   (fn [store analyzer terms opts] (type store)))
 
-(definvoke search-reader
+(invoke/definvoke search-reader
   "search using the reader"
   {:added "3.0"}
   [:method {:multi search
@@ -189,7 +182,7 @@
             (with-meta m {:score score :doc-id doc-id}))))
        {:total-hits (.totalHits hits)}))))
 
-(definvoke search-directory
+(invoke/definvoke search-directory
   "search using the directory"
   {:added "3.0"}
   [:method {:multi search

@@ -1,7 +1,7 @@
 
 (ns std.image.base.util-test
-  (:use code.test)
-  (:require [std.image.base.util :refer :all]))
+  (:require [std.image.base.util :refer :all])
+  (:use code.test))
 
 ^{:refer std.image.base.util/int->bytes :added "3.0"}
 (fact "returns bytes value given an integer"

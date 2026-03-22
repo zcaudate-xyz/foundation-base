@@ -1,6 +1,6 @@
 (ns js.blessed-test
-  (:use code.test)
-  (:require [js.blessed :as b]))
+  (:require [js.blessed :as b])
+  (:use code.test))
 
 ^{:refer js.blessed/canvas :added "4.0" :unchecked true}
 (fact "creates a drawille canvas")

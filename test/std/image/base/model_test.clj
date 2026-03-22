@@ -1,6 +1,6 @@
 (ns std.image.base.model-test
-  (:use code.test)
-  (:require [std.image.base.model :refer :all]))
+  (:require [std.image.base.model :refer :all])
+  (:use code.test))
 
 ^{:refer std.image.base.model/create-model :added "3.0"}
 (fact "creates a predefined image model given a label"

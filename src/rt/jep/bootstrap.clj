@@ -1,11 +1,9 @@
 (ns rt.jep.bootstrap
-  (:require [std.fs :as fs]
+  (:require [clojure.string]
             [std.concurrent :as cc]
-            [std.string :as str]
-            [std.lib :as h])
-  (:import jep.MainInterpreter
-           jep.Interpreter
-           jep.SharedInterpreter))
+            [std.fs :as fs]
+            [std.lib.os :as os])
+  (:import jep.MainInterpreter jep.Interpreter jep.SharedInterpreter))
 
 (def ^:dynamic *python* (or (System/getenv "JEP_PYTHON") "python3"))
 
@@ -45,11 +43,11 @@
            throws)"
   {:added "3.0"}
   ([]
-   (let [path (fs/create-tmpfile (str/join "\n" (bootstrap-code)))
-         process  (h/sh *python* (str path) {:wait true :output false :inherit false})
-         {:keys [exit out err]} (h/sh-output process)]
+   (let [path (fs/create-tmpfile (clojure.string/join "\n" (bootstrap-code)))
+         process  (os/sh *python* (str path) {:wait true :output false :inherit false})
+         {:keys [exit out err]} (os/sh-output process)]
      (if (zero? exit)
-       (last (str/split-lines (str/trim out)))
+       (last (clojure.string/split-lines (clojure.string/trim out)))
        (throw (ex-info out {:status :failed :message out}))))))
 
 (defn init-paths
@@ -57,7 +55,7 @@
   {:added "3.0"}
   ([]
    (let [jep  (jep-bootstrap)
-         root (str/replace jep #"/jep/libjep.*" "")]
+         root (clojure.string/replace jep #"/jep/libjep.*" "")]
      (MainInterpreter/setJepLibraryPath jep)
      (SharedInterpreter/setConfig
       (-> (jep.JepConfig.)

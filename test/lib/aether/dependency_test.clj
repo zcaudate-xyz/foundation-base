@@ -1,7 +1,7 @@
 (ns lib.aether.dependency-test
-  (:use code.test)
   (:require [lib.aether.dependency :refer :all])
-  (:import (org.eclipse.aether.graph  Exclusion)))
+  (:use code.test)
+  (:import (org.eclipse.aether.graph Exclusion)))
 
 ^{:refer lib.aether.dependency/rep-exclusion :added "3.0"}
 (fact "creates a rep from an exclusion"

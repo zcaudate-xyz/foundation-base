@@ -1,5 +1,5 @@
 (ns std.lang.model.spec-xtalk.fn-python
-  (:require [std.lib :as h]))
+  (:require [std.lib.template :as template]))
 
 (defn python-tf-x-del
   [[_ obj]]
@@ -43,7 +43,7 @@
 
 (defn python-tf-x-shell
   ([[_ s cm]]
-   (h/$ (do (var res (. (__import__ "os") (system ~s)))
+   (template/$ (do (var res (. (__import__ "os") (system ~s)))
             (var f (. ~cm (get "success")))
             (if f
               (return (f res))
@@ -51,7 +51,7 @@
 
 (defn python-tf-x-type-native
   [[_ obj]]
-  (h/$ (cond (isinstance ~obj '(dict))
+  (template/$ (cond (isinstance ~obj '(dict))
              (return "object")
              
              (isinstance ~obj '(list))
@@ -240,19 +240,19 @@
   "converts map to array"
   {:added "4.0"}
   ([[_ lu obj]]
-   (h/$ (. ~lu (get (id ~obj))))))
+   (template/$ (. ~lu (get (id ~obj))))))
 
 (defn python-tf-x-lu-set
   "converts map to array"
   {:added "4.0"}
   ([[_ lu obj gid]]
-   (h/$ (:= (. ~lu [(id ~obj)]) ~gid))))
+   (template/$ (:= (. ~lu [(id ~obj)]) ~gid))))
 
 (defn python-tf-x-lu-del
   "converts map to array"
   {:added "4.0"}
   ([[_ lu obj]]
-   (h/$ (del (. ~lu [(id ~obj)])))))
+   (template/$ (del (. ~lu [(id ~obj)])))))
 
 (def +python-lu+
   {;;:x-lu-create      {:macro #'python-tf-x-lu-create  :emit :macro}
@@ -330,7 +330,7 @@
 (defn python-tf-x-arr-sort
   [[_ arr key-fn compare-fn]]
   (list '. arr (list 'sort :key #_key-fn
-                     (h/$ (. (__import__ "functools")
+                     (template/$ (. (__import__ "functools")
                              (cmp_to_key
                               (fn:> [a b]
                                     (:? (~compare-fn
@@ -377,7 +377,7 @@
 
 (defn python-tf-x-str-substring
   ([[_ s start & [end]]]
-   (h/$ (. ~s [~(list :to start (or end \0))]))))
+   (template/$ (. ~s [~(list :to start (or end \0))]))))
 
 (defn python-tf-x-str-to-upper
   ([[_ s]]
@@ -425,7 +425,7 @@
 
 (defn python-tf-x-return-encode
   ([[_ out id key]]
-   (h/$ (do (:- :import json)
+   (template/$ (do (:- :import json)
             (try
               (return (json.dumps {:id  ~id
                                    :key ~key
@@ -439,7 +439,7 @@
 
 (defn python-tf-x-return-wrap
   ([[_ f encode-fn]]
-   (h/$ (do (:- :import json)
+   (template/$ (do (:- :import json)
             (try (:= out (~f))
                  (catch [Exception :as e]
                      (return (json.dumps {:type "error"
@@ -448,7 +448,7 @@
 
 (defn python-tf-x-return-eval
   ([[_ s wrap-fn]]
-   (h/$ (do (fn thunk []
+   (template/$ (do (fn thunk []
               (let [g   (globals)]
                 (exec ~s g g)
                 (return (g.get "OUT"))))
@@ -465,18 +465,18 @@
 
 (defn python-tf-x-socket-connect
   ([[_ host port opts]]
-   (h/$ (do (:- :import socket)
+   (template/$ (do (:- :import socket)
             (var conn   (socket.socket))
             (conn.connect '(host port))
             (return conn)))))
 
 (defn python-tf-x-socket-send
   ([[_ conn s]]
-   (h/$ (. ~conn (sendall (. ~s (encode)))))))
+   (template/$ (. ~conn (sendall (. ~s (encode)))))))
 
 (defn python-tf-x-socket-close
   ([[_ conn]]
-   (h/$ (. ~conn (close)))))
+   (template/$ (. ~conn (close)))))
 
 (def +python-socket+
   {:x-socket-connect      {:macro #'python-tf-x-socket-connect      :emit :macro}
@@ -502,7 +502,7 @@
 
 (defn python-tf-x-iter-eq
   ([[_ it0 it1 eq-fn]]
-   (h/$ (do (for [x0 :in ~it0]
+   (template/$ (do (for [x0 :in ~it0]
               (try
                 (var x1 (next ~it1))
                 (if (not (~eq-fn x0 x1))
@@ -541,14 +541,14 @@
 
 (defn python-tf-x-thread-spawn
   ([[_ thunk]]
-   (h/$ (. (__import__ "threading")
+   (template/$ (. (__import__ "threading")
            (Thread :target ~thunk)
            (start)))))
 
 (defn python-tf-x-thread-spawn
   ([[_ thunk]]
    (with-meta
-     (h/$ (do (var threading  (__import__ "threading"))
+     (template/$ (do (var threading  (__import__ "threading"))
               (var thread := (threading.Thread :target ~thunk))
               (. thread (start))))
      {:assign/template 'thread})))
@@ -559,7 +559,7 @@
 
 (defn python-tf-x-with-delay
   ([[_ thunk ms]]
-   (h/$ (x:thread-spawn
+   (template/$ (x:thread-spawn
          (fn []
            (return [(. (__import__ "time")
                        (sleep (/ ~ms 1000)))
@@ -633,20 +633,20 @@
 
   (defn python-tf-x-fn-every
     [[_ arr pred]]
-    (h/$ (return (all (map pred arr)))))
+    (template/$ (return (all (map pred arr)))))
 
   (defn python-tf-x-fn-some
     [[_ arr pred]]
-    (h/$ (return (any (map pred arr)))))
+    (template/$ (return (any (map pred arr)))))
 
   (defn python-tf-x-fn-foldl
     [[_ arr f init]]
-    (h/$ (do (:- :import functools)
+    (template/$ (do (:- :import functools)
              (return (functools.reduce ~f ~arr ~init)))))
 
   (defn python-tf-x-fn-foldr
     [[_ arr f init]]
-    (h/$ (do (:- :import functools)
+    (template/$ (do (:- :import functools)
              (return (functools.reduce ~f
                                        (:% ~arr [(:- "::-1")])
                                        ~init)))))

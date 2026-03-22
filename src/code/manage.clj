@@ -1,21 +1,24 @@
 (ns code.manage
   (:require [code.framework :as base]
             [code.manage.fn-format :as fn-format]
-            [code.manage.ns-rename :as ns-rename]
             [code.manage.ns-format :as ns-format]
-            [code.manage.var :as var]
-            [code.manage.unit.template :as template]
+            [code.manage.ns-rename :as ns-rename]
             [code.manage.unit :as unit]
             [code.manage.unit.require :as unit.require]
+            [code.manage.unit.template :as template]
+            [code.manage.var :as var]
             [code.project :as project]
             [std.block :as block]
-            [std.task :as task]
-            [std.lib :as h :refer [definvoke]]
-            [std.lib.result :as res])
+            [std.lib.collection :as collection]
+            [std.lib.env :as env]
+            [std.lib.foundation :as f]
+            [std.lib.invoke :as invoke]
+            [std.lib.result :as res]
+            [std.task :as task])
   (:refer-clojure :exclude [import])
   (:gen-class))
 
-(h/intern-in ns-rename/ns-rename)
+(f/intern-in ns-rename/ns-rename)
 
 (defmethod task/task-defaults :code
   ([_]
@@ -29,7 +32,7 @@
   ([_]
    template/code-locate))
 
-(definvoke analyse
+(invoke/definvoke analyse
   "analyse either a source or test file
  
    (analyse 'code.manage)
@@ -54,7 +57,7 @@
 
 (comment (code.manage/analyse ['code.format] {:print {:item true :result true :summary true}}))
 
-(definvoke extract
+(invoke/definvoke extract
   "returns the list of vars in a namespace
  
    (vars 'code.manage)
@@ -79,7 +82,7 @@
           :item {:display identity}
           :result {:columns (template/code-default-columns :data #{:bold})}}])
 
-(definvoke vars
+(invoke/definvoke vars
   "returns the list of vars in a namespace
  
    (vars 'code.manage)
@@ -105,7 +108,7 @@
 
 (comment (code.manage/vars ['code.format] {:print {:item true :result true :summary true}}))
 
-(definvoke docstrings
+(invoke/definvoke docstrings
   "returns docstrings
  
    (docstrings '#{code.manage.unit} {:return :results})
@@ -124,7 +127,7 @@
 
 (comment (code.manage/docstrings ['code.format] {:print {:item true :result true :summary true}}))
 
-(definvoke transform-code
+(invoke/definvoke transform-code
   "helper function for any arbitrary transformation of text
  
    (transform-code {:transform #(str % \"\\n\\n\\n\\nhello world\")})
@@ -148,7 +151,7 @@
                   {:transform #(str % "\n\n\n\nhello world")
                    :print {:summary true :result true :item true :function true}}))
 
-(definvoke heal-code
+(invoke/definvoke heal-code
   "helper function for any arbitrary transformation of text
  
    (transform-code {:transform #(str % \"\\n\\n\\n\\nhello world\")})
@@ -170,7 +173,7 @@
           :result template/base-transform-result}])
 
 
-(definvoke import
+(invoke/definvoke import
   "import docstrings from tests
  
    (import {:write false})
@@ -193,7 +196,7 @@
 
 (comment (code.manage/import ['code.framework] {:print {:item true :result true :summary true}}))
 
-(definvoke purge
+(invoke/definvoke purge
   "removes docstrings from source code
  
    (purge {:write false})
@@ -214,7 +217,7 @@
 
 (comment (code.manage/purge ['code.manage] {:print {:item true :result true :summary true}}))
 
-(definvoke missing
+(invoke/definvoke missing
   "checks for functions with missing tests
  
    (missing)
@@ -230,7 +233,7 @@
 
 (comment (code.manage/missing ['code.manage] {:print {:item true :result true :summary true}}))
 
-(definvoke todos
+(invoke/definvoke todos
   "checks for tests with `TODO` as docstring
  
    (todos)
@@ -246,7 +249,7 @@
 
 (comment (code.manage/todos ['code.manage] {:print {:item true :result true :summary true}}))
 
-(definvoke incomplete
+(invoke/definvoke incomplete
   "both functions missing tests or tests with todos
  
    (incomplete)
@@ -263,7 +266,7 @@
 
 (comment (code.manage/incomplete ['code.manage] {:print {:item true :result true :summary true}}))
 
-(definvoke orphaned
+(invoke/definvoke orphaned
   "tests without corresponding source code
  
    (orphaned)
@@ -279,7 +282,7 @@
 
 (comment (code.manage/orphaned ['code.manage] {:print {:item true :result true :summary true}}))
 
-(definvoke scaffold
+(invoke/definvoke scaffold
   "creates a scaffold for a new or existing set of tests
  
    (scaffold {:write false})
@@ -298,7 +301,7 @@
 
 (comment (code.manage/scaffold ['code.framework] {:print {:function true :item true :result true :summary true}}))
 
-(definvoke create-tests
+(invoke/definvoke create-tests
   "creates and arranges the tests"
   {:added "3.0"}
   [:task {:template :code.transform
@@ -336,7 +339,7 @@
     :length 60
     :color  compare}])
 
-(definvoke in-order?
+(invoke/definvoke in-order?
   "checks if tests are in order
  
    (in-order?)
@@ -356,7 +359,7 @@
 
 (comment (code.manage/in-order? ['code.framework] {:print {:function true :item true :result true :summary true}}))
 
-(definvoke arrange
+(invoke/definvoke arrange
   "arranges the test corresponding to function order
  
    (arrange {:print {:function false}
@@ -375,7 +378,7 @@
 
 (comment (code.manage/arrange ['code.framework] {:print {:function true :item true :result true :summary true}}))
 
-(definvoke locate-code
+(invoke/definvoke locate-code
   "locates code base upon query"
   {:added "3.0"}
   [:task {:template :code.locate
@@ -391,7 +394,7 @@
                            {:query [(list '#{defn defmacro} '_ '^:%?- string? '^:%?- map? 'vector? '& '_)]
                             :print {:function true :item true :result true :summary true}}))
 
-(definvoke locate-test
+(invoke/definvoke locate-test
   "locates test based upon query"
   {:added "4.0"}
   [:task {:template :code.locate
@@ -401,7 +404,7 @@
           :main {:fn #'base/locate-code}}])
 
 
-(definvoke grep
+(invoke/definvoke grep
   "finds a string or regular expression in files
  
    (grep '[code.manage] {:query \"hello\"})"
@@ -416,7 +419,7 @@
                            {:query "comment"
                             :print {:function true :result true}}))
 
-(definvoke grep-replace
+(invoke/definvoke grep-replace
   "grep and replaces in files
  
    (grep-replace '[code.manage] {:query \"hello\"
@@ -434,7 +437,7 @@
                                     :replace "comment 111111"
                                     :print {:function true :result true :write false}}))
 
-(definvoke unclean
+(invoke/definvoke unclean
   "finds source code that has top-level comments
  
    (unclean 'code.manage)
@@ -451,7 +454,7 @@
 (comment
   (code.manage/unclean '[code.framework] {:print {:function true :item true :result true :summary true}}))
 
-(definvoke unchecked
+(invoke/definvoke unchecked
   "returns tests without `=>` checks
  
    (unchecked)
@@ -465,7 +468,7 @@
           :item {:list template/source-namespaces}
           :result {:columns (template/code-info-columns #{:magenta :bold})}}])
 
-(definvoke commented
+(invoke/definvoke commented
   "returns tests that are in comment blocks
  
    (commented)
@@ -479,7 +482,7 @@
           :item {:list template/source-namespaces}
           :result {:columns (template/code-info-columns #{:white :bold})}}])
 
-(definvoke pedantic
+(invoke/definvoke pedantic
   "returns tests that may be improved
  
    (pedantic)
@@ -504,7 +507,7 @@
                                     (sort-by first)
                                     (vec))))}}])
 
-(definvoke refactor-code
+(invoke/definvoke refactor-code
   "refactors code based on given `:edits`
  
    (refactor-code '[code.manage]
@@ -517,7 +520,7 @@
           :main   {:fn #'base/refactor-code}
           :result template/base-transform-result}])
 
-(definvoke refactor-test
+(invoke/definvoke refactor-test
   "refactors code tests based on given `:edits`"
   {:added "4.0"}
   [:task {:template :code.transform
@@ -534,7 +537,7 @@
   [ns params narrow update-fn]
   (refactor-code
    ns
-   (std.lib/merge-nested
+   (collection/merge-nested
     {:print {:function true}
      :edits [(fn [nav]
                (code.query/modify
@@ -554,7 +557,7 @@
                  {:edits [fn-format/fn:defmethod-forms]
                   :write true}))
 
-(definvoke ns-format
+(invoke/definvoke ns-format
   "formats ns forms"
   {:added "3.0"}
   [:task {:template :code.transform
@@ -564,7 +567,7 @@
           :main   {:fn #'ns-format/ns-format}
           :result template/base-transform-result}])
 
-(definvoke find-usages
+(invoke/definvoke find-usages
   "find usages of a var
  
    (find-usages '[code.manage]
@@ -578,7 +581,7 @@
 
 (comment (find-usages '[code.manage] {:print {:item true} :var 'code.framework/analyse}))
 
-(definvoke require-file
+(invoke/definvoke require-file
   "requires the file and returns public vars
 
    (require-file 'code.manage)
@@ -629,9 +632,9 @@
   {:added "3.0"}
   [& [cmd & args]]
   (let [print-fn (fn []
-                   (do (h/p "Available Tasks:")
+                   (do (env/p "Available Tasks:")
                        (doseq [cmd  (map name (sort (keys +tasks+)))]
-                         (h/p (str "  - " cmd)))))]
+                         (env/p (str "  - " cmd)))))]
     (if (not cmd)
       (print-fn)
       
@@ -653,7 +656,7 @@
 
 (comment
 
-  (definvoke replace-usages
+  (invoke/definvoke replace-usages
     "replace usages of a var
  
    (replace-usages '[code.manage]
@@ -667,7 +670,7 @@
             :main   {:fn #'var/replace-usages}
             :result (template/code-transform-result :changed)}])
   
-  (definvoke replace-refers
+  (invoke/definvoke replace-refers
     "TODO"
     {:added "3.0"}
     [:task {:template :code.transform
@@ -677,7 +680,7 @@
             :main   {:fn #'var/replace-refers}
             :result (template/code-transform-result :changed)}])
   
-  (definvoke replace-errors
+  (invoke/definvoke replace-errors
     "TODO"
     {:added "3.0"}
     [:task {:template :code.transform
@@ -687,7 +690,7 @@
             :main   {:fn #'var/replace-errors}
             :result (template/code-transform-result :changed)}])
   
-  (definvoke list-ns-unused
+  (invoke/definvoke list-ns-unused
     "TODO"
     {:added "3.0"}
     [:task {:template :code
@@ -696,7 +699,7 @@
             :item {:list template/source-namespaces}
             :main   {:fn #'var/list-ns-unused}}])
   
-  (definvoke remove-ns-unused
+  (invoke/definvoke remove-ns-unused
     "TODO"
     {:added "3.0"}
     [:task {:template :code.transform
@@ -705,7 +708,7 @@
             :main   {:fn #'var/remove-ns-unused}
             :result template/base-transform-result}])
 
-  (definvoke rename-ns-abbrevs
+  (invoke/definvoke rename-ns-abbrevs
     "TODO"
     {:added "3.0"}
     [:task {:template :code.transform
@@ -714,7 +717,7 @@
             :main {:fn #'var/rename-ns-abbrevs}
             :result template/base-transform-result}])
 
-  (definvoke refactor-ns-forms
+  (invoke/definvoke refactor-ns-forms
     "refactors and reorganises ns forms
  
    (refactor-ns-forms '[code.manage])"
@@ -728,7 +731,7 @@
   (comment
     (code.manage/refactor-ns-forms '[code.manage] {:write true}))
 
-  (definvoke lint
+  (invoke/definvoke lint
     [:task {:template :code.transform
             :params {:title "LINTING CODE"
                      :print {:function true}}
@@ -738,7 +741,7 @@
   (comment
     (code.manage/lint 'code.manage {:write true}))
 
-  (definvoke line-limit
+  (invoke/definvoke line-limit
     [:task {:template :code
             :params {:title "LINES EXCEEDING LIMIT"
                      :print {:function true}}

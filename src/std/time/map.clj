@@ -1,9 +1,7 @@
 (ns std.time.map
   (:require [std.protocol.time :as protocol.time]
             [std.time.common :as common])
-  (:import (clojure.lang PersistentArrayMap PersistentHashMap)
-           (java.text SimpleDateFormat)
-           (java.util Calendar Date TimeZone)))
+  (:import (clojure.lang PersistentArrayMap PersistentHashMap) (java.text SimpleDateFormat) (java.util Calendar Date TimeZone)))
 
 (defn to-map
   "converts an instant to a map

@@ -1,10 +1,9 @@
 (ns mcp-clj.client-transport.http
-  "HTTP transport implementation for MCP client"
-  (:require
-    [mcp-clj.client-transport.protocol :as transport-protocol]
-    [mcp-clj.json-rpc.http-client :as http-client]
-    [mcp-clj.json-rpc.protocols :as json-rpc-protocol]
-    [mcp-clj.log :as log]))
+  (:require [mcp-clj.client-transport.protocol :as transport-protocol]
+            [mcp-clj.json-rpc.http-client :as http-client]
+            [mcp-clj.json-rpc.protocols :as json-rpc-protocol]
+            [mcp-clj.log :as log])
+  "HTTP transport implementation for MCP client")
 
 ;; Transport Implementation
 

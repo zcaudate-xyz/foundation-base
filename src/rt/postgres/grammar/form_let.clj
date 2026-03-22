@@ -1,12 +1,15 @@
 (ns rt.postgres.grammar.form-let
-  (:require [std.string :as str]
-            [std.lib :as h]
+  (:require [clojure.set]
+            [rt.postgres.grammar.common :as common]
+            [rt.postgres.grammar.tf :as tf]
             [std.lang :as l]
+            [std.lang.base.emit-common :as emit-common]
             [std.lang.base.emit-preprocess :as preprocess]
             [std.lang.base.library-snapshot :as snap]
-            [rt.postgres.grammar.tf :as tf]
-            [rt.postgres.grammar.common :as common]
-            [std.lang.base.emit-common :as emit-common]))
+            [std.lib.collection :as collection]
+            [std.lib.foundation :as f]
+            [std.lib.walk :as walk]
+            [std.string.case :as case]))
 
 (def ^:dynamic *input-syms* nil)
 
@@ -63,32 +66,32 @@
                           estr (if (re-find #"^\w-\w+" estr)
                                  (subs 2 estr)
                                  estr)]
-                      (str/snake-case estr)))]
+                      (case/snake-case estr)))]
     (cond (= '_ e)    [v]
           (symbol? e) (data-fn e)
-          (h/form? e) (data-fn (last e))
+          (collection/form? e) (data-fn (last e))
           (set? e)    (mapv (fn [ei]
                               (cond (symbol? ei)
                                     `(:= ~ei (:-> ~v ~(tf/pg-js-idx ei)))
                                     
-                                    (h/form? ei)
+                                    (collection/form? ei)
                                     `(:= ~(last ei) (~@(butlast ei)
                                                      (:->> ~v ~(tf/pg-js-idx (last ei)))))
                                     
-                                    :else (h/error "Not Allowed" {:value ei})))
+                                    :else (f/error "Not Allowed" {:value ei})))
                             e)
           (vector? e)  (vec
                         (map-indexed (fn [i ei]
                                        (cond (symbol? ei)
                                              `(:= ~ei (:-> ~v ~i))
                                              
-                                             (h/form? ei)
+                                             (collection/form? ei)
                                              `(:= ~(last ei) (~@(butlast ei)
                                                               (:->> ~v ~i)))
                                                  
-                                             :else (h/error "Not Allowed" {:value ei})))
+                                             :else (f/error "Not Allowed" {:value ei})))
                                      e))
-          :else (h/error "Not Allowed" {:value e}))))
+          :else (f/error "Not Allowed" {:value e}))))
 
 (defn pg-tf-let-check-body
   "checks if variables are in scope"
@@ -96,15 +99,15 @@
   ([dsyms body]
    (let [not-checked (volatile! #{})
          _ (if *input-syms*
-             (vswap! *input-syms* h/union dsyms))
+             (vswap! *input-syms* clojure.set/union dsyms))
          collect-syms (fn [form]
-                        (h/walk:find
+                        (walk/walk:find
                          (fn [x]
                            (and (symbol? x)
                                 (nil? (namespace x))))
                          form))
          check-fn (fn check-fn [csyms x]
-                    (cond (h/form? x)
+                    (cond (collection/form? x)
                           (let [f (first x)]
                             (cond (= 'let f)
                                   (let [bindings   (second x)
@@ -112,7 +115,7 @@
                                         pairs      (partition 2 bindings)
                                         inner-syms (reduce (fn [acc [b v]]
                                                              (check-fn csyms v)
-                                                             (h/union acc (collect-syms b)))
+                                                             (clojure.set/union acc (collect-syms b)))
                                                            csyms
                                                            pairs)]
                                     (run! (fn [v] (check-fn inner-syms v)) inner-body))
@@ -134,7 +137,7 @@
                           (run! (fn [v] (check-fn csyms v)) x)))]
      (run! (fn [v] (check-fn dsyms v)) body)
      (if (not-empty @not-checked)
-       (h/error "Unknown symbols in form" {:symbols @not-checked
+       (f/error "Unknown symbols in form" {:symbols @not-checked
                                            :dsyms dsyms})))))
 
 (defn pg-tf-let
@@ -149,12 +152,12 @@
                          
                          (if (empty? forms)
                            [out dsyms]
-                           (let [csyms (h/walk:find
+                           (let [csyms (walk/walk:find
                                         (fn [x]
                                           (and (symbol? x)
                                                (nil? (namespace x))))
                                         form)]
-                             (recur (h/union dsyms csyms)
+                             (recur (clojure.set/union dsyms csyms)
                                     more
                                     (if (and (symbol? form)
                                              (get dsyms form))
@@ -164,7 +167,7 @@
          decl  (mapcat (fn dec-fn [e]
                          (cond (= '_ e)    []
                                (symbol? e) [(list :jsonb e)]
-                               (h/form? e) [(if (= '++ (first e))
+                               (collection/form? e) [(if (= '++ (first e))
                                               (apply list :% (concat (drop 2 e) [(second e)]))
                                               (apply list
                                                      (reduce (fn [acc ei]
@@ -176,7 +179,7 @@
                                                              e)))]
                                (set? e)    (mapcat dec-fn e)
                                (vector? e) (mapcat dec-fn e)
-                               :else (h/error "Not Allowed" {:value e})))
+                               :else (f/error "Not Allowed" {:value e})))
                        declu)
          deqs  (mapcat pg-tf-let-assign pairs)]
      (pg-tf-let-block (concat [nil {:declare (sort-by last decl)}]

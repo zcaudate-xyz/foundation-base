@@ -1,8 +1,8 @@
 (ns std.lib.watch
-  (:require [std.protocol.watch :as protocol.watch]
-            [std.lib.collection :as c]
+  (:require [std.lib.collection :as c]
             [std.lib.foundation :as h]
-            [std.lib.function :as fn])
+            [std.lib.function :as fn]
+            [std.protocol.watch :as protocol.watch])
   (:refer-clojure :exclude [list remove set]))
 
 (defn wrap-select

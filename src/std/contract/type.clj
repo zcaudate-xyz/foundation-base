@@ -1,9 +1,12 @@
 (ns std.contract.type
-  (:require [std.contract.sketch :as sketch]
-            [std.lib :as h :refer [defimpl]]
-            [malli.core :as mc]
+  (:require [malli.core :as mc]
             [malli.error :as me]
-            [malli.util :as mu]))
+            [malli.util :as mu]
+            [std.contract.sketch :as sketch]
+            [std.lib.atom :as atom]
+            [std.lib.collection :as collection]
+            [std.lib.foundation :as f]
+            [std.lib.impl :as impl]))
 
 (defn check
   "checks that data fits the spec"
@@ -14,7 +17,7 @@
     (let [raw (mc/explain schema data)
           err (-> (me/with-spell-checking raw)
                   (me/humanize))]
-      (h/error (str err) {:error err
+      (f/error (str err) {:error err
                           :raw raw}))))
 
 (declare common-spec-string
@@ -23,7 +26,7 @@
          multi-spec-invoke
          spec?)
 
-(defimpl CommonSpec [schema]
+(impl/defimpl CommonSpec [schema]
   :type   deftype
   :string common-spec-string
   :invoke common-spec-invoke)
@@ -65,7 +68,7 @@
   ([sym sketch & more]
    `(def ~sym (common-spec ~sketch ~@more))))
 
-(defimpl MultiSpec [state dispatch]
+(impl/defimpl MultiSpec [state dispatch]
   :type   deftype
   :string multi-spec-string
   :invoke multi-spec-invoke)
@@ -81,7 +84,7 @@
   "displays the multi spec"
   {:added "3.0"}
   ([^MultiSpec spec]
-   (str "#spec.multi " (h/map-vals sketch/from-schema (:options @(.state spec))))))
+   (str "#spec.multi " (collection/map-vals sketch/from-schema (:options @(.state spec))))))
 
 (defmethod sketch/to-schema-extend MultiSpec
   [^MultiSpec c]
@@ -98,7 +101,7 @@
   "adds additional types to the multi spec"
   {:added "3.0"}
   ([^MultiSpec spec dispatch-val schema]
-   (h/swap-return! (.state spec)
+   (atom/swap-return! (.state spec)
                    (fn [{:keys [options] :as m}]
                      (let [options (assoc options dispatch-val (sketch/to-schema schema))
                            final (multi-gen-final (.dispatch spec) options)]
@@ -108,7 +111,7 @@
   "removes additional types from the multi spec"
   {:added "3.0"}
   ([^MultiSpec spec dispatch-val]
-   (h/swap-return! (.state spec)
+   (atom/swap-return! (.state spec)
                    (fn [{:keys [options] :as m}]
                      (let [options (dissoc options dispatch-val)
                            final  (multi-gen-final (.dispatch spec) options)]
@@ -119,7 +122,7 @@
   "creates a multi spec"
   {:added "3.0"}
   ([dispatch options]
-   (let [options (h/map-vals (fn [s]
+   (let [options (collection/map-vals (fn [s]
                                (if (spec? s)
                                  [:fn s]
                                  (sketch/to-schema s)))

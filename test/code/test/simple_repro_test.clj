@@ -1,6 +1,6 @@
 (ns code.test.simple-repro-test
-  (:use code.test)
-  (:require [code.test.base.context :as ctx]))
+  (:require [code.test.base.context :as ctx])
+  (:use code.test))
 
 ^{:refer code.test/any.checker :added "3.0"
   :adopt true}

@@ -1,6 +1,6 @@
 (ns std.print.format.chart
-  (:require [std.print.format.common :as common]
-            [std.string :as str]))
+  (:require [clojure.string]
+            [std.print.format.common :as common]))
 
 (defn lines:bar-graph
   "formats an ascii bar graph for output
@@ -40,7 +40,7 @@
   ([xs]
    (bar-graph xs 30))
   ([xs height]
-   (str/join "\n" (lines:bar-graph xs height))))
+   (clojure.string/join "\n" (lines:bar-graph xs height))))
 
 (defn sparkline
   "formats a sparkline
@@ -114,7 +114,7 @@
             (concat
              [(fmt-row "| " " | " " |" (zipmap ks ks))
               (fmt-row "|-" "-+-" "-|" (zipmap ks spacers))])
-            (str/join "\n")))))
+            (clojure.string/join "\n")))))
   ([rows] (table-basic:format (keys (first rows)) rows)))
 
 (defn table-basic:parse
@@ -130,17 +130,17 @@
               {:id 2 :value \"b\"}]}"
   {:added "3.0"}
   ([s]
-   (let [[h _ & vs] (-> (str/trim-newlines s)
-                        (str/split-lines))
-         headers    (->> (str/split h #"\|")
+   (let [[h _ & vs] (-> (clojure.string/trim-newline s)
+                        (clojure.string/split-lines))
+         headers    (->> (clojure.string/split h #"\|")
                          (remove empty?)
-                         (map str/trim)
+                         (map clojure.string/trim)
                          (map #(subs % 1))
                          (map keyword))
          data-fn    (fn [v]
-                      (->> (str/split v #"\|")
+                      (->> (clojure.string/split v #"\|")
                            (remove empty?)
-                           (map str/trim)
+                           (map clojure.string/trim)
                            (map read-string)
                            (zipmap headers)))
          data       (map data-fn vs)]

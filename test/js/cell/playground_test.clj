@@ -1,6 +1,6 @@
 (ns js.cell.playground-test
-  (:use code.test)
-  (:require [js.cell.playground :as play]))
+  (:require [js.cell.playground :as play])
+  (:use code.test))
 
 ^{:refer js.cell.playground/start-playground :added "4.0" :unchecked true}
 (fact "starts the playground"

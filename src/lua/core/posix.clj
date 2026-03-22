@@ -1,7 +1,6 @@
 (ns lua.core.posix
-  (:require [std.lib :as h]
-            [std.lang :as l]
-            [std.string :as str]
+  (:require [std.lang :as l]
+            [std.lib.foundation :as f]
             [xt.lang.base-repl :as repl])
   (:refer-clojure :exclude [print flush time re-find read send sync]))
 
@@ -182,7 +181,7 @@
     wait
     write])
 
-(h/template-entries [l/tmpl-entry {:type :fragment
+(f/template-entries [l/tmpl-entry {:type :fragment
                                    :base "posix"
                                    :tag "lua"}]
   +methods+)

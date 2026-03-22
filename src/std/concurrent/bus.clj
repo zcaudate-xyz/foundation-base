@@ -1,11 +1,15 @@
 (ns std.concurrent.bus
-  (:require [std.protocol.component :as protocol.component]
+  (:require [std.concurrent.queue :as queue]
             [std.concurrent.thread :as thread]
-            [std.concurrent.queue :as queue]
-            [std.lib.future :as f]
-            [std.lib.resource :as res]
+            [std.lib.atom :as atom]
+            [std.lib.collection :as collection]
             [std.lib.component :as component]
-            [std.lib :as h :refer [defimpl]])
+            [std.lib.foundation]
+            [std.lib.future :as f]
+            [std.lib.impl :as impl]
+            [std.lib.resource :as res]
+            [std.lib.time :as time]
+            [std.protocol.component :as protocol.component])
   (:refer-clojure :exclude [send]))
 
 (def +keys+
@@ -80,7 +84,7 @@
   {:added "3.0"}
   ([{:keys [state] :as bus}]
    (let [{:keys [threads]} @state]
-     (h/map-vals :thread threads))))
+     (collection/map-vals :thread threads))))
 
 (defn bus:get-count
   "returns the number of threads registered"
@@ -92,7 +96,7 @@
   "registers a thread to the bus"
   {:added "3.0"}
   ([bus]
-   (bus:register bus (h/sid)))
+   (bus:register bus (std.lib.foundation/sid)))
   ([bus id]
    (bus:register bus id (thread/thread:current)))
   ([{:keys [state] :as bus} id thread]
@@ -121,7 +125,7 @@
   {:added "3.0"}
   ([{:keys [results counters] :as bus} id msg]
    (if-let [queue  (bus:get-queue bus id)]
-     (let [msg-id (or (:id msg) (h/sid))
+     (let [msg-id (or (:id msg) (std.lib.foundation/sid))
            return (f/incomplete)]
        (swap! results assoc msg-id return)
        (queue/put queue (assoc msg :id msg-id))
@@ -181,8 +185,8 @@
   ([bus handler {:keys [id started stopped on-start on-stop] :as opts}]
    (try
      (let [thunk (handler-thunk bus handler opts)
-           id (or id (h/sid))
-           start (h/time-ns)
+           id (or id (std.lib.foundation/sid))
+           start (time/time-ns)
            thread (thread/thread:current)
            _ (bus:register bus id thread)
            _ (f/future:force started {:id id :thread thread :stopped stopped})
@@ -190,7 +194,7 @@
            output (thunk)
            _ (if on-stop (on-stop))
            _ (bus:deregister bus id)
-           end (h/time-ns)
+           end (time/time-ns)
            output (assoc output :start start :end end)
            _ (f/future:force stopped output)]
        output)
@@ -201,7 +205,7 @@
   "bus:sends message to all thread queues"
   {:added "3.0"}
   ([bus msg]
-   (h/map-entries (fn [id] [id (bus:send bus id msg)]) (bus:all-ids bus))))
+   (collection/map-entries (fn [id] [id (bus:send bus id msg)]) (bus:all-ids bus))))
 
 (defn bus:open
   "bus:opens a new handler loop given function
@@ -216,8 +220,8 @@
   ([bus handler]
    (bus:open bus handler {}))
   ([bus handler {:keys [id] :as opts
-                 :or {id (h/sid)}}]
-   (if-not (h/started? bus) (h/error "Bus not started" {:bus bus}))
+                 :or {id (std.lib.foundation/sid)}}]
+   (if-not (component/started? bus) (std.lib.foundation/error "Bus not started" {:bus bus}))
    
    (let [started  (f/incomplete)
          opts     (assoc opts :id id :started started :stopped (f/incomplete))
@@ -248,7 +252,7 @@
   "stops all thread loops"
   {:added "3.0"}
   ([bus]
-   (h/map-entries (fn [id]
+   (collection/map-entries (fn [id]
                     [id (bus:close bus id)])
                   (bus:all-ids bus))))
 
@@ -265,7 +269,7 @@
   "stops all thread loops"
   {:added "3.0"}
   ([bus]
-   (h/map-entries (fn [id]
+   (collection/map-entries (fn [id]
                     [id (bus:kill bus id)])
                   (bus:all-ids bus))))
 
@@ -333,7 +337,7 @@
    {:running  (started?-bus bus)
     :threads  (count (bus:all-ids bus))
     :waiting  (count @results)
-    :queued   (h/map-vals (comp count :queue) (:threads @state))
+    :queued   (collection/map-vals (comp count :queue) (:threads @state))
     :sent     @(:sent counters)
     :received @(:received counters)}))
 
@@ -341,7 +345,7 @@
   ([bus]
    (str "#bus" (info-bus bus))))
 
-(defimpl Bus [state results output counters]
+(impl/defimpl Bus [state results output counters]
   :suffix "-bus"
   :string string-bus
   :protocols [std.protocol.component/IComponent
@@ -387,10 +391,10 @@
   "resets the counters for a bus"
   {:added "4.0"}
   [bus]
-  (h/map-vals #(h/swap-return! % (fn [v] [v 0]))
+  (collection/map-vals #(atom/swap-return! % (fn [v] [v 0]))
               (:counters bus)))
 
 (def +resource+
-  (h/res:spec-add
+  (res/res:spec-add
    {:type :hara/concurrent.bus
     :instance {:create bus:create}}))

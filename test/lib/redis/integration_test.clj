@@ -1,12 +1,12 @@
 ^{:no-test true}
 (ns lib.redis.integration-test
-  (:use code.test)
-  (:require [lib.redis.bench :as bench]
+  (:require [lib.redis :as r]
+            [lib.redis.bench :as bench]
             [lib.redis.event :as event]
-            [lib.redis :as r]
             [net.resp.pool :as pool]
             [std.concurrent :as cc]
-            [std.lib :as h]))
+            [std.lib.component :as component])
+  (:use code.test))
 
 (defn blank
   ([client]
@@ -22,6 +22,6 @@
 
 (fact "creates a redis client and pings"
   ^:hidden
-  (cc/req (h/start (r/client-create {:id "localhost"
+  (cc/req (component/start (r/client-create {:id "localhost"
                                      :port 17001}))
           ["PING"]))

@@ -1,12 +1,12 @@
 (ns js.lib.vitest
   (:require [std.lang :as l]
-            [std.lib :as h])
+            [std.lib.foundation :as f])
   (:refer-clojure :exclude [test assert]))
 
 (l/script :js
   {:import [["vitest" :as [* vitest]]]})
 
-(h/template-entries [l/tmpl-entry {:type :fragment
+(f/template-entries [l/tmpl-entry {:type :fragment
                                    :base "vitest"
                                    :tag "js"}]
   [suite

@@ -1,12 +1,11 @@
 (ns code.tool.maven.command
-  (:require [std.lib.encode :as encode]
-            [code.tool.maven.package :as package]
-            [std.fs.archive :as archive]
-            [std.fs :as fs]
-            [std.lib.security :as security]
-            [std.lib :as h]
+  (:require [code.tool.maven.package :as package]
             [lib.aether :as aether]
-            [lib.openpgp :as openpgp]))
+            [lib.openpgp :as openpgp]
+            [std.fs :as fs]
+            [std.fs.archive :as archive]
+            [std.lib.encode :as encode]
+            [std.lib.security :as security]))
 
 (defn sign-file
   "signs a file with gpg

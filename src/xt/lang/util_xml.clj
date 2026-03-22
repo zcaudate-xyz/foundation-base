@@ -1,6 +1,5 @@
 (ns xt.lang.util-xml
-  (:require [std.lib :as h]
-            [std.lang :as l]))
+  (:require [std.lang :as l]))
 
 ;;
 ;; LUA

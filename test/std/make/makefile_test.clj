@@ -1,6 +1,6 @@
 (ns std.make.makefile-test
-  (:use code.test)
-  (:require [std.make.makefile :refer :all]))
+  (:require [std.make.makefile :refer :all])
+  (:use code.test))
 
 ^{:refer std.make.makefile/emit-headers :added "4.0"}
 (fact "emits makefile headers"

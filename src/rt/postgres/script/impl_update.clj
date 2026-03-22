@@ -1,12 +1,13 @@
 (ns rt.postgres.script.impl-update
-  (:require [std.lib :as h]
-            [std.string :as str]
-            [std.lib.schema :as schema]
-            [std.lang :as l]
-            [std.lang.base.util :as ut]
+  (:require [clojure.set]
+            [rt.postgres.grammar.common :as common]
             [rt.postgres.grammar.common-tracker :as tracker]
             [rt.postgres.script.impl-base :as base]
-            [rt.postgres.grammar.common :as common]))
+            [std.lang :as l]
+            [std.lang.base.util :as ut]
+            [std.lib.collection :as collection]
+            [std.lib.foundation :as f]
+            [std.lib.schema :as schema]))
 
 ;;
 ;; Symbol update
@@ -24,9 +25,9 @@
                                        (if (and (not (or primary #_unique))
                                                 order)
                                          k))))))
-         all-columns (vec (h/union columns (set (keys trkm))))
+         all-columns (vec (clojure.set/union columns (set (keys trkm))))
          [_ err]  (schema/check-valid-columns tsch all-columns)
-         _  (if err (h/error "Not Valid." (assoc err :data all-columns)))
+         _  (if err (f/error "Not Valid." (assoc err :data all-columns)))
          all-columns (filter #(not (-> % tsch first :ignore)) all-columns)
          ks   (schema/order-keys tsch all-columns)
          body (mapv (fn [k]
@@ -43,7 +44,7 @@
                                       (false? coalesce)
                                       (first inputs)
                                       
-                                    (and (h/form? (first inputs))
+                                    (and (collection/form? (first inputs))
                                          (= (ffirst inputs) 'coalesce))
                                     (concat (first inputs) (rest inputs))
                                     
@@ -61,12 +62,12 @@
   ([tsch m params mopts]
    (let [m  (merge (tracker/tracker-map-modify params) m)
          [_ err]  (schema/check-valid-columns tsch (keys m))
-         _  (if err (h/error "Not Valid." (assoc err :data m)))
+         _  (if err (f/error "Not Valid." (assoc err :data m)))
          entry-fn  (fn [_ k] (get m k))
-         m       (h/map-entries (fn [[k v]]
+         m       (collection/map-entries (fn [[k v]]
                                   [k (base/t-val-fn tsch k v params mopts)])
                                 m)
-         m       (h/filter-keys #(not (-> % tsch first :ignore)) m)
+         m       (collection/filter-keys #(not (-> % tsch first :ignore)) m)
          ks      (sort-by (fn [k] (-> (get tsch k)
                                       first
                                       :order))

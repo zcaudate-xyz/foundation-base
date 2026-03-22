@@ -1,11 +1,15 @@
 (ns replace-std-aggregate-refs
-  (:require [clojure.java.io :as io]
+  (:require [clojure.edn :as edn]
+            [clojure.java.io :as io]
             [clojure.set :as set]
             [clojure.string :as str]
             [clojure.tools.reader :as tr]))
 
 (def project-root
   (.getCanonicalPath (io/file ".")))
+
+(def alias-config-path
+  "config/std-rewrite-aliases.edn")
 
 (def aggregate-sources
   {'std.lib    "src/std/lib.clj"
@@ -18,6 +22,9 @@
 
 (defn path-in-project [path]
   (.getPath (io/file project-root path)))
+
+(def alias-config
+  (edn/read-string (slurp (path-in-project alias-config-path))))
 
 (defn read-all-forms [path]
   (with-open [reader (java.io.PushbackReader. (io/reader path))]
@@ -262,6 +269,28 @@
   (or (nil? ch)
       (contains? delimiter-chars ch)))
 
+(defn ns->alias-map [alias-map]
+  (->> alias-map
+       (map (fn [[alias ns-sym]] [ns-sym alias]))
+       (into {})))
+
+(defn preferred-alias [source-ns full-alias-map]
+  (let [existing (get (ns->alias-map full-alias-map) source-ns)
+        configured (get alias-config source-ns)
+        occupied (get full-alias-map configured)]
+    (cond
+      existing existing
+      (and configured
+           (or (nil? occupied)
+               (= occupied source-ns)))
+      configured
+      :else nil)))
+
+(defn render-target-token [{:keys [source-ns source-name]} full-alias-map]
+  (if-let [alias (preferred-alias source-ns full-alias-map)]
+    (str alias "/" source-name)
+    (str source-ns "/" source-name)))
+
 (defn read-token [text start]
   (loop [i start]
     (if (or (>= i (count text))
@@ -338,10 +367,14 @@
 (defn qualify-token [token rel-path full-alias-map aggregate-alias-map refer-rewrites]
   (or
    (when-let [{:keys [source-ns source-name]} (get refer-rewrites token)]
-     {:token (str source-ns "/" source-name)
+     {:token (render-target-token {:source-ns source-ns
+                                   :source-name source-name}
+                                  full-alias-map)
       :source-ns source-ns})
    (when-let [{:keys [source-ns source-name]} (lookup-legacy-prefixed-token rel-path token)]
-     {:token (str source-ns "/" source-name)
+     {:token (render-target-token {:source-ns source-ns
+                                   :source-name source-name}
+                                  full-alias-map)
       :source-ns source-ns})
    (when-let [[lhs rhs] (and (str/includes? token "/")
                              (let [[a b] (str/split token #"/" 2)]
@@ -350,7 +383,9 @@
            aggregate-ns (token-aggregate-ns lhs-sym full-alias-map aggregate-alias-map)]
        (when aggregate-ns
          (when-let [{:keys [source-ns source-name]} (lookup-target rel-path aggregate-ns rhs)]
-           {:token (str source-ns "/" source-name)
+           {:token (render-target-token {:source-ns source-ns
+                                         :source-name source-name}
+                                        full-alias-map)
             :source-ns source-ns}))))))
 
 (defn remaining-aggregate-token [token full-alias-map aggregate-alias-map]
@@ -419,11 +454,9 @@
       (reduce
        (fn [acc sym]
          (if-let [{:keys [source-ns source-name]} (lookup-target rel-path (:ns aggregate-spec) (str sym))]
-           (if (= (name sym) (name source-name))
-             (update-in acc [:refer source-ns] (fnil conj #{}) sym)
-             (assoc-in acc [:rewrite (str sym)]
-                       {:source-ns source-ns
-                        :source-name source-name}))
+           (assoc-in acc [:rewrite (str sym)]
+                     {:source-ns source-ns
+                      :source-name source-name})
            (update acc :keep conj sym)))
        {:refer {}
         :rewrite {}
@@ -531,7 +564,11 @@
                                {}
                                (concat
                                 (non-aggregate-specs original-specs)
-                                (map (fn [ns-sym] {:ns ns-sym}) used-ns)
+                                (map (fn [ns-sym]
+                                       (cond-> {:ns ns-sym}
+                                         (preferred-alias ns-sym full-alias-map)
+                                         (assoc :as (preferred-alias ns-sym full-alias-map))))
+                                     used-ns)
                                 (for [[ns-sym syms] (:refer refer-plan)]
                                   {:ns ns-sym
                                    :refer (vec (sort syms))})))

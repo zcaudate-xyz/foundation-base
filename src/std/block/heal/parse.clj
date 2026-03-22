@@ -1,6 +1,7 @@
 (ns std.block.heal.parse
-  (:require [std.lib :as h]
-            [std.string :as str]))
+  (:require [clojure.string]
+            [std.lib.collection :as collection]
+            [std.lib.env :as env]))
 
 (def lu-close
   {"(" ")"
@@ -148,7 +149,7 @@
             line-prefix (if line-numbers
                           (format "%4d " line-num)
                           "")]
-        (h/p (str line-prefix line-content))
+        (env/p (str line-prefix line-content))
         (let [line-delimiters (get delimiters-by-line line-num)]
           (when (or line-delimiters print-blank-carets)
             (let [caret-chars (char-array (count line-content) \space)]
@@ -156,8 +157,8 @@
                 (doseq [delim line-delimiters]
                   (when (>= (dec (:col delim)) 0)
                     (aset caret-chars (dec (:col delim)) \^))))
-              (h/p (str (apply str (repeat (count line-prefix) " "))
-                        (String. caret-chars))))))))))
+              (env/p (str (apply str (repeat (count line-prefix) " "))
+                          (String. caret-chars))))))))))
 
 ;;
 ;; Lines
@@ -200,14 +201,14 @@
     (if (empty? lines)
       output
       (let [current-line (first lines)
-            trimmed-line (str/trim-left current-line)
+            trimmed-line (std.string.common/trim-left current-line)
             indent (- (count current-line)
                       (count trimmed-line))
             char  (str (first trimmed-line))
             dinfo (if (#{"[" "{" "("}
                            char)
-                    (h/rename-keys (delimiter-info (first char))
-                                   {:type :action}))
+                    (collection/rename-keys (delimiter-info (first char))
+                                            {:type :action}))
             
             ;; Determine if a string starts or ends on this line
             quote-count (count-unescaped-quotes current-line)
@@ -218,15 +219,15 @@
                                   :else false)
             
             line-type (cond next-multiline? :string
-                            (str/blank? current-line) :blank
-                            (str/includes? current-line ";") :commented
+                            (std.string.common/blank? current-line) :blank
+                            (std.string.common/includes? current-line ";") :commented
                             :else :code)
 
             has-code  (and (not= char ";")
                            (or (= line-type :code)
                                (= line-type :commented)))
             
-            last-idx  (let [r-trimmed (str/trim-right current-line)]
+            last-idx  (let [r-trimmed (clojure.string/trimr current-line)]
                         (if (not-empty r-trimmed)
                          (dec (count r-trimmed))))]
         (recur (rest lines)
@@ -243,7 +244,7 @@
   "parse lines"
   {:added "4.0"}
   [content]
-  (parse-lines-raw (str/split-lines content)))
+  (parse-lines-raw (clojure.string/split-lines content)))
 
 ;; Predicates
 
@@ -294,7 +295,7 @@
   "creates the index lookup"
   {:added "4.0"}
   [delimiters]
-  (h/map-juxt [:index
+  (collection/map-juxt [:index
                identity]
               delimiters))
 

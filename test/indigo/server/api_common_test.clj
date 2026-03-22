@@ -1,6 +1,6 @@
 (ns indigo.server.api-common-test
-  (:use code.test)
-  (:require [indigo.server.api-common :refer :all]))
+  (:require [indigo.server.api-common :refer :all])
+  (:use code.test))
 
 ^{:refer indigo.server.api-common/wrap-api-log :added "4.0"}
 (fact "TODO")

@@ -1,8 +1,9 @@
 (ns std.lang.model.spec-js.qml-test
-  (:use code.test)
-  (:require [std.lang.model.spec-js.qml :as qml]
+  (:require [std.lang :as l]
             [std.lang.model.spec-js :as js]
-            [std.lang :as l]))
+            [std.lang.model.spec-js.qml :as qml]
+            [std.string.prose :as prose])
+  (:use code.test))
 
 ^{:refer std.lang.model.spec-js.qml/qml-props? :added "4.0"}
 (fact "checks if data is a qml prop"
@@ -141,7 +142,7 @@
                            :value (fn _test_overlap [] (:+= circle.x 20))}]}
                        js/+grammar+
                        {}))
-  => (std.string/|
+  => (prose/|
       "MouseAria {"
       "  id: bg"
       "  onClicked:  {"
@@ -192,7 +193,7 @@
                         :value (fn _test_overlap [] (:+= circle.x 20))}]}]}
                   js/+grammar+
                   {}))
-  => (std.string/|
+  => (prose/|
       "Item {"
       "  width: bg.width"
       "  height: bg.height"
@@ -225,7 +226,7 @@
                   '(fn hello [] (+ 1 2))]
                  js/+grammar+
                  {}))
-  (std.string/|
+  (prose/|
    "Window {"
    "  a: 1"
    "  b: Item {"

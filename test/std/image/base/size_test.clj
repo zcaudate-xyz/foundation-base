@@ -1,6 +1,6 @@
 (ns std.image.base.size-test
-  (:use code.test)
-  (:require [std.image.base.size :refer :all]))
+  (:require [std.image.base.size :refer :all])
+  (:use code.test))
 
 ^{:refer std.image.base.size/size->map :added "3.0"}
 (fact "converts a size to a map"

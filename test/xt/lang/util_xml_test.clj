@@ -1,7 +1,7 @@
 (ns xt.lang.util-xml-test
-  (:use code.test)
   (:require [std.lang :as l]
-            [std.lib :as h]))
+            [std.string.prose :as prose])
+  (:use code.test))
 
 (l/script- :lua
   {:runtime :basic
@@ -162,7 +162,7 @@
   (!.lua
    (xml/to-tree
     (xml/parse-xml
-     (@! (std.string/|
+     (@! (prose/|
           "<helo:test>"
           "   <ErrorCode>ESB-00-000</ErrorCode>"
           "   <A>"
@@ -229,7 +229,7 @@
   (!.lua
    (xml/to-brief
     (xml/parse-xml
-     (@! (std.string/|
+     (@! (prose/|
           "<helo:test>"
           "   <ErrorCode>ESB-00-000</ErrorCode>"
           "   <A>"

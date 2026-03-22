@@ -1,9 +1,9 @@
 (ns std.lib.git-test
-  (:use code.test)
-  (:require [std.lib.git :as git]
-            [std.fs :as fs]
+  (:require [std.fs :as fs]
             [std.lib.foundation :as h]
-            [std.lib.os :as os]))
+            [std.lib.git :as git]
+            [std.lib.os :as os])
+  (:use code.test))
 
 ^{:refer std.lib.git/git-result :added "4.1"}
 (fact "helper to get result from process"

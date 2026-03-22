@@ -1,8 +1,8 @@
 (ns script.sql.table.select-test
-  (:use code.test)
-  (:require [script.sql.table.select :refer :all]
+  (:require [clojure.string]
             [script.sql.common :as common]
-            [std.string :as str]))
+            [script.sql.table.select :refer :all])
+  (:use code.test))
 
 ^{:refer script.sql.table.select/build-query-columns :added "3.0"}
 (fact "build column string"
@@ -76,4 +76,4 @@
   => (->> ["SELECT \"id\", \"name\", \"country_id\""
            "FROM \"region_city\" WHERE \"state_id\" = '1' OR \"country_id\" = 'AU'"
            "ORDER BY \"name\" ASC LIMIT 10 OFFSET 10"]
-          (str/join " ")))
+          (clojure.string/join " ")))

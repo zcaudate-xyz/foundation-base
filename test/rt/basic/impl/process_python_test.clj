@@ -1,8 +1,8 @@
 (ns rt.basic.impl.process-python-test
-  (:use code.test)
   (:require [rt.basic.impl.process-python :refer :all]
-            [std.lang :as l]
-            [std.concurrent :as cc]))
+            [std.concurrent :as cc]
+            [std.lang :as l])
+  (:use code.test))
 
 (l/script- :python
   {:runtime :oneshot})

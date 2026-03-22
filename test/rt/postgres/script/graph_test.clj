@@ -1,13 +1,13 @@
 (ns rt.postgres.script.graph-test
-  (:use code.test)
-  (:require [rt.postgres.script.graph :refer :all]
+  (:require [rt.postgres.grammar.common-application :as app]
+            [rt.postgres.script.graph :refer :all]
             [rt.postgres.script.graph-view :as view]
             [rt.postgres.script.impl-base :as impl]
-            [rt.postgres.grammar.common-application :as app]
             [rt.postgres.script.test.scratch-v1 :as scratch]
-            [std.lib.schema :as schema]
             [std.lang :as l]
-            [std.lib :as h]))
+            [std.lib.foundation :as f]
+            [std.lib.schema :as schema])
+  (:use code.test))
 
 (l/script- :postgres
   {:require [[rt.postgres.script.test.scratch-v1 :as scratch]
@@ -52,7 +52,7 @@
   
   (pg/g:update scratch/Task
     {:set {:name "name"}
-     :where {:id (str (h/uuid-nil))}
+     :where {:id (str (f/uuid-nil))}
      :track 'o-op})
   => string?)
 
@@ -63,7 +63,7 @@
   (binding [rt.postgres.grammar.form-let/*input-syms* (volatile! #{'o-op})]
     (pg/g:modify scratch/Task
       {:set {:name "name"}
-       :where {:id (str (h/uuid-nil))}
+       :where {:id (str (f/uuid-nil))}
        :track 'o-op}))
   => string?)
 
@@ -82,7 +82,7 @@
     (pg/g:insert scratch/Task
       {:name "name"
        :status "pending"
-       :cache (str (h/uuid-nil))}
+       :cache (str (f/uuid-nil))}
       {:track 'o-op}))
   => string?)
 

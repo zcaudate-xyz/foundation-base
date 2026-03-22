@@ -1,6 +1,6 @@
 (ns documentation.std-lib-stream
-  (:use code.test)
-  (:require [std.lib.stream :as s]))
+  (:require [std.lib.stream :as s])
+  (:use code.test))
 
 [[:chapter {:title "Introduction"}]]
 

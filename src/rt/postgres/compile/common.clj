@@ -1,14 +1,10 @@
 (ns rt.postgres.compile.common
-    "Unified schema compilation for JSON/OpenAPI/TypeScript targets.
-   
-   CRITIQUE FIX #3: Single generation file with format dispatch.
-   Uses types/+type-formats+ for all type mappings.
-   Uses types/normalize-key for all key conversion."
-    (:require [rt.postgres.grammar.typed-common :as types]
-              [rt.postgres.grammar.typed-shape :as shape]
-              [rt.postgres.grammar.typed-analyze :as analyze]
-              [clojure.string :as str]
-              [clojure.walk :as walk]))
+  (:require [clojure.string :as str]
+            [clojure.walk :as walk]
+            [rt.postgres.grammar.typed-analyze :as analyze]
+            [rt.postgres.grammar.typed-common :as types]
+            [rt.postgres.grammar.typed-shape :as shape])
+  "Unified schema compilation for JSON/OpenAPI/TypeScript targets.\n   \n   CRITIQUE FIX #3: Single generation file with format dispatch.\n   Uses types/+type-formats+ for all type mappings.\n   Uses types/normalize-key for all key conversion.")
 
 (declare shape->openapi shape->jschema shape->ts-interface resolve-table-def infer-jsonb-arg-shape*)
 

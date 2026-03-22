@@ -1,6 +1,6 @@
 (ns std.lib.transform.require
-  (:require [std.lib.foundation :as h]
-            [std.lib.collection :as coll]))
+  (:require [std.lib.collection :as coll]
+            [std.lib.foundation :as h]))
 
 (defn process-require
   "Checks for correct entry

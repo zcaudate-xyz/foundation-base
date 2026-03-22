@@ -1,7 +1,7 @@
 (ns lib.aether.listener-test
-  (:use code.test)
-  (:require [lib.aether.listener :refer :all]
-            [jvm.artifact :as artifact]))
+  (:require [jvm.artifact :as artifact]
+            [lib.aether.listener :refer :all])
+  (:use code.test))
 
 ^{:refer lib.aether.listener/event->rep :added "3.0"}
 (fact "converts the event to a map representation"

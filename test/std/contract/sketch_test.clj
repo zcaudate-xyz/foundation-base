@@ -1,8 +1,8 @@
 (ns std.contract.sketch-test
+  (:require [malli.core :as mc]
+            [malli.util :as mu]
+            [std.contract.sketch :as s])
   (:use code.test)
-  (:require [std.contract.sketch :as s]
-            [malli.core :as mc]
-            [malli.util :as mu])
   (:refer-clojure :exclude [remove]))
 
 ^{:refer std.contract.sketch/optional-string :added "3.0"}

@@ -1,8 +1,8 @@
 (ns lib.docker.ryuk-test
-  (:use code.test)
-  (:require [lib.docker.ryuk :refer :all]
-            [lib.docker.common :as common]
-            [std.lib :as h]))
+  (:require [lib.docker.common :as common]
+            [lib.docker.ryuk :refer :all]
+            [std.lib.foundation :as f])
+  (:use code.test))
 
 ^{:refer lib.docker.common/CANARY :guard true :adopt true :added "4.0"}
 (fact "executes a shell command"
@@ -43,4 +43,4 @@
   ^:hidden
   
   (stop-all-reaped)
-  => (any nil? h/wrapped?))
+  => (any nil? f/wrapped?))

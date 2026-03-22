@@ -1,9 +1,9 @@
 (ns code.doc
-  (:require [code.project :as project]
-            [code.doc.executive :as executive]
+  (:require [code.doc.executive :as executive]
+            [code.project :as project]
             [std.config :as config]
-            [std.task :as task]
-            [std.lib :refer [definvoke]]))
+            [std.lib.invoke :as invoke]
+            [std.task :as task]))
 
 (def +config+ "config/publish.edn")
 
@@ -50,7 +50,7 @@
                            :color  #{:green}}]}
     :summary  {:written   [:updated #(if %2 (inc %1) %1) 0]}}))
 
-(definvoke publish
+(invoke/definvoke publish
   "main publish method
  
    (publish 'hara/hara-code {})"
@@ -83,7 +83,7 @@
                            :color  #{:bold}}]}
     :summary  {:aggregate {:total [:files + 0]}}}))
 
-(definvoke init-template
+(invoke/definvoke init-template
   "initialises the theme template for a given site
  
    (init-template \"hara\")"
@@ -92,7 +92,7 @@
           :params {:title "INITIALISE TEMPLATE"}
           :main {:fn #'executive/init-template}}])
 
-(definvoke deploy-template
+(invoke/definvoke deploy-template
   "deploys the theme for a given site
  
    (deploy-template \"hara\")"

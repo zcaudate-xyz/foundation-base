@@ -1,6 +1,6 @@
 (ns rt.nginx.script-test
-  (:use code.test)
-  (:require [rt.nginx.script :refer :all]))
+  (:require [rt.nginx.script :refer :all])
+  (:use code.test))
 
 ^{:refer rt.nginx.script/emit-block :added "4.0"}
 (fact  "emits a block"

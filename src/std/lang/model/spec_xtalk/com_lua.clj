@@ -1,6 +1,6 @@
 ^{:no-test true}
 (ns std.lang.model.spec-xtalk.com-lua
-  (:require [std.lib :as h]))
+  (:require [std.lib.template :as template]))
 
 ;;
 ;; COM
@@ -8,7 +8,7 @@
 
 (defn lua-tf-x-return-encode
   ([[_ out id key]]
-   (h/$ (do (do (local ret nil)
+   (template/$ (do (do (local ret nil)
                 (local [r-ok r-err]
                        (pcall (fn []
                                 (cond (== nil ~out)
@@ -34,7 +34,7 @@
 
 (defn lua-tf-x-return-wrap
   ([[_ f encode-fn]]
-   (h/$ (do (local out)
+   (template/$ (do (local out)
             (local [o-ok o-err] (pcall (fn [] (:= out (~f)))))
             (cond o-err
                   (return (cjson.encode {:type "error"
@@ -45,7 +45,7 @@
 
 (defn lua-tf-x-return-eval
   ([[_ s wrap-fn]]
-   (h/$ (return (~wrap-fn
+   (template/$ (return (~wrap-fn
                  (fn []
                    (local load-fn (or loadstring load))
                    (local [f err] (load-fn ~s))
@@ -60,7 +60,7 @@
 
 (defn lua-tf-x-socket-connect
   ([[_ host port opts]]
-   (h/$ (do* (local [conn err])
+   (template/$ (do* (local [conn err])
              (if ngx
                (do (:= conn (ngx.socket.tcp))
                    (:= '[_ err]  (conn:connect ~host ~port)))
@@ -70,11 +70,11 @@
 
 (defn lua-tf-x-socket-send
   ([[_ conn s]]
-   (h/$ (. ~conn (send ~s)))))
+   (template/$ (. ~conn (send ~s)))))
 
 (defn lua-tf-x-socket-close
   ([[_ conn]]
-   (h/$ (. ~conn (close)))))
+   (template/$ (. ~conn (close)))))
 
 (def +lua-socket+
   {:x-socket-connect      {:macro #'lua-tf-x-socket-connect      :emit :macro}
@@ -83,7 +83,7 @@
 
 (defn lua-tf-x-ws-connect
   ([[_ host port opts]]
-   (h/$ (do* (var client := (require "resty.websocket.client"))
+   (template/$ (do* (var client := (require "resty.websocket.client"))
              (var [wb err] (client:new))
              (var uri (cat (or (. ~opts ["schema"])
                                "ws")
@@ -99,11 +99,11 @@
 
 (defn lua-tf-x-ws-send
   ([[_ wb s]]
-   (h/$ (. ~wb (send-text ~s)))))
+   (template/$ (. ~wb (send-text ~s)))))
 
 (defn lua-tf-x-ws-close
   ([[_ wb]]
-   (h/$ (. ~wb (close)))))
+   (template/$ (. ~wb (close)))))
 
 (def +lua-ws+
   {:x-ws-connect      {:macro #'lua-tf-x-ws-connect      :emit :macro}
@@ -115,7 +115,7 @@
 
 (defn lua-tf-x-client-basic
   ([[_ host port connect-fn eval-fn]]
-   (h/$ (do* (while true
+   (template/$ (do* (while true
                (var '[ok conn] := (unpack (~connect-fn ~host ~port {})))
                (when (not ok)
                  (return))
@@ -127,7 +127,7 @@
 
 (defn lua-tf-x-client-ws
   ([[_ host port opts connect-fn eval-fn]]
-   (h/$ (do* (var '[ok conn] := (unpack (~connect-fn ~host ~port ~opts)))
+   (template/$ (do* (var '[ok conn] := (unpack (~connect-fn ~host ~port ~opts)))
              (while true
                (local [raw type err] (conn:recv-frame))
                (when err
@@ -147,7 +147,7 @@
 
 (defn lua-tf-x-shell
   ([[_ s cm]]
-   (h/$ (do* (var handle (io.popen ~s))
+   (template/$ (do* (var handle (io.popen ~s))
              (var res (handle:read "*a"))
              (var f (. ~cm ["success"]))
              (if f
@@ -171,7 +171,7 @@
 
   (defn lua-tf-x-socket-server
     ([[_ port handle-line]]
-     (h/$ (do* (var socket (require "socket"))
+     (template/$ (do* (var socket (require "socket"))
                (var server (assert (socket.bind "*" ~port)))
                (. server (settimeout 0))
                (var connections {})

@@ -1,13 +1,19 @@
 (ns std.lang.base.library
-  (:require [std.lib :as h :refer [defimpl]]
-            [std.protocol.component :as protocol.component]
-            [std.lang.base.library-snapshot :as snap]
-            [std.lang.base.impl-entry :as entry]
-            [std.lang.base.book-module :as m]
-            [std.lang.base.book-entry :as e]
+  (:require [std.concurrent :as cc]
             [std.lang.base.book :as b]
+            [std.lang.base.book-entry :as e]
+            [std.lang.base.book-module :as m]
+            [std.lang.base.impl-entry :as entry]
+            [std.lang.base.library-snapshot :as snap]
             [std.lang.base.util :as ut]
-            [std.concurrent :as cc]))
+            [std.lib.atom :as atom]
+            [std.lib.collection :as collection]
+            [std.lib.component :as component]
+            [std.lib.env :as env]
+            [std.lib.foundation :as f]
+            [std.lib.impl :as impl]
+            [std.lib.os :as os]
+            [std.protocol.component :as protocol.component]))
 
 (def ^:dynamic *strict* false)
 
@@ -50,12 +56,12 @@
   {:added "4.0"}
   [lib f & args]
   (let [{:keys [parent]} (meta (wait-snapshot lib))]
-    (h/swap-return! (:instance lib)
+    (atom/swap-return! (:instance lib)
       (fn [snapshot]
         (binding [snap/*parent* parent]
           (let [out (apply f snapshot args)
                 _   (when *strict*
-                      (h/map-vals (comp snap/install-check-merged :book) (second out)))]
+                      (collection/map-vals (comp snap/install-check-merged :book) (second out)))]
             out))))))
 
 (defn get-snapshot
@@ -175,16 +181,16 @@
   ([{:keys [id parent instance]}]
    (str "#lib " (vec (sort (keys @instance))))))
 
-(defimpl Library [id instance]
+(impl/defimpl Library [id instance]
   :final true
   :string library-string
   #_#_
   :protocols [protocol.component/IComponent
-              :body {-start (do (h/start (:dispatch component))
+              :body {-start (do (component/start (:dispatch component))
                                 component)
-                     -stop  (do (h/stop (:dispatch component))
+                     -stop  (do (component/stop (:dispatch component))
                                 component)
-                     -kill  (do (h/comp:kill (:dispatch component))
+                     -kill  (do (component/kill (:dispatch component))
                                 component)}])
 
 (defn library?
@@ -212,7 +218,7 @@
   {:added "4.0"}
   [{:keys [id parent snapshot] :as m}]
   (-> (library:create m)
-      (h/start)))
+      (component/start)))
 
 (defn add-entry!
   "adds the entry with the bulk dispatcher"
@@ -261,7 +267,7 @@
   (wait-mutate! lib
                 (fn [snapshot]
                   (let [book (assoc (or (snap/get-book-raw snapshot lang)
-                                        (h/error "Book not found" {:lang lang}))
+                                        (f/error "Book not found" {:lang lang}))
                                     :modules {})]
                     [book (snap/add-book snapshot book)]))))
 
@@ -276,8 +282,8 @@
       (try
         (wait-mutate! library snap/set-entries entries (dissoc opts :library))
         (catch Throwable t
-          (h/beep)
-          (h/prn t)))))
+          (os/beep)
+          (env/prn t)))))
 
   (defn create-dispatch
     "creates the dispatch for adding entries in bulk"

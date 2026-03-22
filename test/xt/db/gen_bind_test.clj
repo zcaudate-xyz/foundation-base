@@ -1,9 +1,9 @@
 (ns xt.db.gen-bind-test
-  (:use code.test)
-  (:require [xt.db.gen-bind :as bind]
-            [xt.db.sample-user-test :as sample-user]
+  (:require [rt.postgres.script.test.scratch-v1 :as scratch]
+            [xt.db.gen-bind :as bind]
             [xt.db.sample-data-test :as sample-data]
-            [rt.postgres.script.test.scratch-v1 :as scratch]))
+            [xt.db.sample-user-test :as sample-user])
+  (:use code.test))
 
 ^{:refer xt.db.gen-bind/tmpl-route :added "4.0"}
 (fact "creates a route template"

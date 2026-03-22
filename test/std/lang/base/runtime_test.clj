@@ -1,17 +1,17 @@
 (ns std.lang.base.runtime-test
-  (:use code.test)
-  (:require [std.lang.base.pointer :refer :all]
-            [std.lang.base.util :as ut]
-            [std.lang.base.impl-entry :as entry]
-            [std.lang.base.impl-deps :as deps]
+  (:require [std.json :as json]
             [std.lang.base.book :as book]
-            [std.lang.base.pointer :as ptr]
+            [std.lang.base.emit-prep-lua-test :as prep]
+            [std.lang.base.impl-deps :as deps]
+            [std.lang.base.impl-entry :as entry]
             [std.lang.base.library :as lib]
             [std.lang.base.library-snapshot :as snap]
-            [std.lang.base.emit-prep-lua-test :as prep]
+            [std.lang.base.pointer :as ptr :refer :all]
             [std.lang.base.runtime :as rt]
-            [std.json :as json]
-            [std.lib :as h]))
+            [std.lang.base.util :as ut]
+            [std.lib.deps]
+            [std.lib.env :as env])
+  (:use code.test))
 
 (def +library-ext+
   (doto (lib/library:create
@@ -26,7 +26,7 @@
          [a b]
          (return ((u/identity-fn u/sub) a b)))
       {:lang :lua
-       :namespace (h/ns-sym)
+       :namespace (env/ns-sym)
        :module 'L.util}
       {}))
     (lib/add-entry-single!
@@ -35,7 +35,7 @@
          [a b]
          (return ((u/identity-fn u/add) a (-/sub-fn b 0))))
       {:lang :lua
-       :namespace (h/ns-sym)
+       :namespace (env/ns-sym)
        :module 'L.util}
       {}))))
 
@@ -232,7 +232,7 @@
    (rt/map->RuntimeDefault
     {:library +library-ext+
      :lang :lua
-     :namespace (h/ns-sym)
+     :namespace (env/ns-sym)
      :module 'L.core
      :layout :full})
    'L.util)
@@ -299,7 +299,7 @@
    'L.util
    (fn [_ _ _] nil)
    (fn [book module-id]
-     (h/deps:ordered book [module-id])))
+     (std.lib.deps/deps-ordered book [module-id])))
   => '[[L.core nil] [L.util nil]])
 
 ^{:refer std.lang.base.runtime/multistage-setup-for :added "4.0"}

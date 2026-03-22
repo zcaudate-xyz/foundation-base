@@ -1,11 +1,10 @@
 (ns rt.postgres.grammar.form-let-test
-  (:use code.test)
-  (:require [rt.postgres.grammar.form-let :refer :all]
-            [std.string :as str]
-            [std.lib :as h]
-            [std.lang :as l]
+  (:require [clojure.string]
             [rt.postgres.grammar.common :as common]
-            [std.lang.base.emit-common :as emit-common]))
+            [rt.postgres.grammar.form-let :refer :all]
+            [std.lang :as l]
+            [std.lang.base.emit-common :as emit-common])
+  (:use code.test))
 
 ^{:refer rt.postgres.grammar.form-let/pg-tf-let-block :added "4.0"}
 (fact "transforms a let block call"
@@ -50,7 +49,7 @@
   ;; This should fail because 'v-c' is truly unknown
   (try
     (pg-tf-let-check-body '#{v-a} '[(let [v-b 2] (:= v-c (+ v-a v-b)))])
-    (catch Throwable e (str/includes? (str e) "Unknown symbols in form")))
+    (catch Throwable e (clojure.string/includes? (str e) "Unknown symbols in form")))
   => true)
 
 ^{:refer rt.postgres.grammar.form-let/pg-tf-let :added "4.0"}

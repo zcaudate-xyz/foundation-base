@@ -1,6 +1,6 @@
 (ns jvm.namespace.eval-test
-  (:use code.test)
-  (:require [jvm.namespace.eval :refer :all]))
+  (:require [jvm.namespace.eval :refer :all])
+  (:use code.test))
 
 ^{:refer jvm.namespace.eval/eval-ns :added "3.0"}
 (fact "Evaluates a list of forms in an existing namespace"

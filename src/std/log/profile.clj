@@ -1,10 +1,12 @@
 (ns std.log.profile
-  (:require [std.log.form :as form]
-            [std.log.core :as core]
+  (:require [std.lib.collection :as collection]
+            [std.lib.foundation :as f]
+            [std.lib.time :as time]
             [std.log.common :as common]
+            [std.log.core :as core]
+            [std.log.form :as form]
             [std.print.format.common :as format.common]
-            [std.protocol.log :as protocol.log]
-            [std.lib :as h]))
+            [std.protocol.log :as protocol.log]))
 
 (defn- wrap-indent
   ([thunk]
@@ -21,9 +23,9 @@
   ([logger thunk level context]
    (spy-fn logger thunk level context {}))
   ([logger thunk level context {:keys [start-fn wrap-fn write-fn end-fn error-fn] :as hooks}]
-   (let [context (h/merge-nested common/*context* context)
+   (let [context (collection/merge-nested common/*context* context)
          {:log/keys [indent trace label pipe return throw]} context
-         start-time  (h/time-ns)
+         start-time  (time/time-ns)
          start-context {:log/type :start
                         :log/label (or label "SPY")
                         :log/timestamp start-time
@@ -43,7 +45,7 @@
                         indent (wrap-indent)
                         wrap-fn (wrap-fn))
              data     (thunk)
-             end-time (h/time-ns)
+             end-time (time/time-ns)
              end-context (context-fn end-time)
              _        (if end-fn (end-fn end-context data))
              entry    (core/logger-message level (merge context
@@ -56,7 +58,7 @@
            data
            output))
        (catch Throwable t
-         (let [end-time (h/time-ns)
+         (let [end-time (time/time-ns)
                error-context (context-fn end-time)
                _        (if error-fn (error-fn error-context t))
                entry    (core/logger-message level (merge context error-context) t)]
@@ -69,7 +71,7 @@
   {:added "3.0"}
   ([trace thunk]
    (if (or trace common/*trace*)
-     (let [trace-id (h/flake)
+     (let [trace-id (f/flake)
            {:trace/keys [id root]} common/*context*]
        (binding [common/*context* (merge common/*context*
                                          {:trace/id trace-id
@@ -86,14 +88,14 @@
          form
 
          :else
-         (let [id        (h/flake)
+         (let [id        (f/flake)
                meta      (form/log-meta form)
                thunk     `(fn [] ~body)]
            `(binding [common/*context* (merge common/*context*
                                               ~meta
                                               (form/log-runtime ~id ~(:log/namespace meta))
                                               {:console/indent format.common/*indent*})]
-              (let [~'context  (h/merge-nested ~preset
+              (let [~'context  (collection/merge-nested ~preset
                                                {:meter/form (quote ~body)}
                                                (form/to-context ~context))]
                 (bind-trace (:log/trace ~'context)
@@ -205,7 +207,7 @@
   "constructs a meter function"
   {:added "3.0"}
   ([logger thunk level {:console/keys [style] :as context}]
-   (let [style     (h/merge-nested (:console/style common/*context*) style)
+   (let [style     (collection/merge-nested (:console/style common/*context*) style)
          ncontext  (merge common/*context* context)
          {:log/keys [label]
           :or {label "METER"}} ncontext
@@ -215,7 +217,7 @@
                                         ocontext context
                                         {:log/label label
                                          :log/indent true
-                                         :console/style (h/merge-nested-new
+                                         :console/style (collection/merge-nested-new
                                                          style
                                                          {:status {:component {:display {:default false}}}
                                                           :meter  {:form      {:display {:default true}}
@@ -224,7 +226,7 @@
                      (->> (-> entry
                               (assoc :log/label label)
                               (merge context)
-                              (update :console/style h/merge-nested-new
+                              (update :console/style collection/merge-nested-new
                                       {:header  {:component {:display {:default false}
                                                              :position :bottom}
                                                  :position  {:display {:default false}}
@@ -247,14 +249,14 @@
          form
 
          :else
-         (let [id        (h/flake)
+         (let [id        (f/flake)
                meta      (form/log-meta form)
                thunk     `(fn [] ~body)]
            `(binding [common/*context* (merge common/*context*
                                               ~meta
                                               (form/log-runtime ~id ~(:log/namespace meta))
                                               {:meter/form (quote ~body)})]
-              (let [~'context (h/merge-nested ~preset
+              (let [~'context (collection/merge-nested ~preset
                                               (form/to-context ~context))]
                 (bind-trace (:log/trace ~'context)
                             (fn []

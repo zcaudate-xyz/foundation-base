@@ -1,7 +1,6 @@
 (ns mcp-clj.mcp-server.resources
-  "MCP resource endpoints"
-  (:require
-    [mcp-clj.log :as log]))
+  (:require [mcp-clj.log :as log])
+  "MCP resource endpoints")
 
 (defn- valid-string?
   [x]

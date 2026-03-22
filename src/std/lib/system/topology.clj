@@ -1,6 +1,6 @@
 (ns std.lib.system.topology
-  (:require [std.lib.foundation :as h]
-            [std.lib.collection :as coll]
+  (:require [std.lib.collection :as coll]
+            [std.lib.foundation :as h]
             [std.lib.sort :as sort]))
 
 (defn long-form-imports

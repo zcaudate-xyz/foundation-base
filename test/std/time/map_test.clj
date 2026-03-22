@@ -1,11 +1,10 @@
 (ns std.time.map-test
-  (:use code.test)
-  (:require [std.protocol.time :as time]
+  (:require [std.lib.version :as version]
+            [std.protocol.time :as time]
             [std.time.common :as common]
-            [std.time.map :refer :all]
-            [std.lib.version :as version])
-  (:import (java.util Date Calendar TimeZone)
-           (java.time Instant Clock ZonedDateTime ZoneId)))
+            [std.time.map :refer :all])
+  (:use code.test)
+  (:import (java.util Date Calendar TimeZone) (java.time Instant Clock ZonedDateTime ZoneId)))
 
 ^{:refer std.time.map/to-map :added "3.0"}
 (fact "converts an instant to a map"

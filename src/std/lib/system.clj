@@ -1,11 +1,11 @@
 (ns std.lib.system
-  (:require [std.lib.system.common :as common]
+  (:require [std.lib.foundation :as h]
             [std.lib.system.array :as array]
-            [std.lib.system.partial :as partial]
+            [std.lib.system.common :as common]
             [std.lib.system.display :as display]
+            [std.lib.system.partial :as partial]
             [std.lib.system.scaffold :as scaffold]
-            [std.lib.system.type :as type]
-            [std.lib.foundation :as h]))
+            [std.lib.system.type :as type]))
 
 (h/intern-in   common/primitive?
                common/system?

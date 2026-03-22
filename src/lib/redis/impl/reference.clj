@@ -1,7 +1,10 @@
 (ns lib.redis.impl.reference
-  (:require [std.json :as json]
-            [std.string :as str]
-            [std.lib :as h :refer [definvoke]]))
+  (:require [clojure.string]
+            [std.json :as json]
+            [std.lib.collection :as collection]
+            [std.lib.env :as env]
+            [std.lib.invoke :as invoke]
+            [std.string.case :as case]))
 
 (def +main-path+
   "assets/lib.redis/commands.json")
@@ -28,10 +31,10 @@
                      s (if (:multiple a) (str s " [" s " ..]") s)
                      s (if (:optional a) (str "[" s "]") s)]
                  s))]
-     (str (str/join " " prefix) " "
+     (str (clojure.string/join " " prefix) " "
           (apply str (interpose " " (map fmt arguments)))))))
 
-(definvoke parse-main
+(invoke/definvoke parse-main
   "parses file for main reference"
   {:added "3.0"}
   [:memoize]
@@ -39,15 +42,15 @@
    (let [struct (json/read content json/+keyword-case-mapper+)
          prep   (fn [{:keys [id] :as m}]
                   (-> m
-                      (update :group (comp keyword str/spear-case))
+                      (update :group (comp keyword case/spear-case))
                       (assoc  :summary (command-doc m))
-                      (assoc  :prefix (->> (str/split (name id) #"-")
-                                           (map str/upper-case)))))]
-     (h/map-entries (fn [[id m]]
+                      (assoc  :prefix (->> (clojure.string/split (name id) #"-")
+                                           (map clojure.string/upper-case)))))]
+     (collection/map-entries (fn [[id m]]
                       [id (prep (assoc m :id id))])
                     struct))))
 
-(definvoke parse-supplements
+(invoke/definvoke parse-supplements
   "parses file for supplement reference"
   {:added "3.0"}
   [:memoize]
@@ -61,11 +64,11 @@
                      :flags (into (set (map keyword flags))
                                   (map (comp keyword #(subs % 1)) xflags))})]
      (->> struct
-          (map (juxt (comp keyword str/lower-case first)
+          (map (juxt (comp keyword clojure.string/lower-case first)
                      (comp parse-fn rest)))
           (into {})))))
 
-(definvoke parse-commands
+(invoke/definvoke parse-commands
   "returns all commands
  
    (parse-commands)
@@ -75,9 +78,9 @@
   ([]
    (parse-commands +main-path+ +supplement-path+))
   ([main-path supplement-path]
-   (let [main (parse-main (h/sys:resource-content main-path))
-         supplement (parse-supplements (h/sys:resource-content supplement-path))]
-     (h/map-vals (fn [{:keys [id] :as m}]
+   (let [main (parse-main (env/sys:resource-content main-path))
+         supplement (parse-supplements (env/sys:resource-content supplement-path))]
+     (collection/map-vals (fn [{:keys [id] :as m}]
                    (merge m (get supplement id)))
                  main))))
 
@@ -91,7 +94,7 @@
   ([]
    (sort (keys (parse-commands))))
   ([group]
-   (sort (keys (h/filter-vals (comp #{group} :group) (parse-commands))))))
+   (sort (keys (collection/filter-vals (comp #{group} :group) (parse-commands))))))
 
 (defn command
   "gets the command info
@@ -102,7 +105,7 @@
   ([k]
    (get (parse-commands) k)))
 
-(definvoke command-groups
+(invoke/definvoke command-groups
   "lists all command group types
  
    (command-groups)

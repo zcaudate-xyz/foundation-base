@@ -1,8 +1,5 @@
 (ns std.lib.security.shamir
-  (:import (hara.lib.security.shamir Shamir
-                                     SecretShare)
-           (java.security SecureRandom)
-           (java.math BigInteger)))
+  (:import (hara.lib.security.shamir Shamir SecretShare) (java.security SecureRandom) (java.math BigInteger)))
 
 (comment
   (def -r- (SecureRandom.))

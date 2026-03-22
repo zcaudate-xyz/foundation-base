@@ -1,16 +1,18 @@
 ^{:no-test true}
 (ns net.http
-  (:require [net.http.client :as client]
-	    [net.http.websocket :as ws]
-            [std.object :as obj]
+  (:require [clojure.string]
+            [net.http.client :as client]
+            [net.http.websocket :as ws]
             [std.json :as json]
-            [std.string :as str]
+            [std.lib.collection :as collection]
             [std.lib.encode :as enc]
-            [std.lib :as h])
+            [std.lib.foundation :as f]
+            [std.lib.function :as fn]
+            [std.object :as obj])
   (:import java.net.URLEncoder)
   (:refer-clojure :exclude [get]))
 
-(h/intern-in client/request
+(f/intern-in client/request
              client/get
              client/post
              client/put
@@ -34,7 +36,7 @@
 
 (defn decode-jwt
   [^String jwt]
-  (->> (str/split
+  (->> (clojure.string/split
         jwt
         #"\.")
        (take 2)
@@ -52,13 +54,13 @@
                      (vector? v)
                      (->> (map-indexed
                            (fn [i x]
-                             (str (url-encode (h/strn k)) "[" (+ i 1) "]" "=" (url-encode (h/strn x))))
+                             (str (url-encode (f/strn k)) "[" (+ i 1) "]" "=" (url-encode (f/strn x))))
                            v)
                           (interpose "&")
                           (apply str))
                      
                      :else
-                     (str (url-encode (h/strn k)) "=" (url-encode (h/strn v))))))
+                     (str (url-encode (f/strn k)) "=" (url-encode (f/strn v))))))
        (interpose "&")
        (apply str)))
 
@@ -68,7 +70,7 @@
   ([url & [opts]]
    (let [events (atom [])
          lines  (-> (client/get url
-                                (h/merge-nested
+                                (collection/merge-nested
                                  opts
                                  {:headers {"Accept" "text/event-stream"}
                                   :as :lines}))
@@ -77,7 +79,7 @@
          thread (future
                   (foreach-fn
                    lines
-                   (h/fn:consumer [e]
+                   (fn/fn:consumer [e]
                                   (let [out (re-find #"data: (.*)" e)]
                                     (if out
                                       (swap! events conj (nth out 1)))))))]

@@ -1,10 +1,7 @@
 (ns std.block.base
-  (:require [std.protocol.block :as protocol.block]
-            [std.block.check :as check])
-  (:import (std.protocol.block IBlock
-                               IBlockModifier
-                               IBlockExpression
-                               IBlockContainer)))
+  (:require [std.block.check :as check]
+            [std.protocol.block :as protocol.block])
+  (:import (std.protocol.block IBlock IBlockModifier IBlockExpression IBlockContainer)))
 
 (def ^:dynamic *block-types*
   #{:void

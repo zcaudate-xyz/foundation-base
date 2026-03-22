@@ -1,6 +1,6 @@
 (ns lib.redis.extension-test
-  (:use code.test)
-  (:require [lib.redis.extension :refer :all]))
+  (:require [lib.redis.extension :refer :all])
+  (:use code.test))
 
 ^{:refer lib.redis.extension/optional:set :added "4.0"}
 (fact "optional parameters for `set` command"

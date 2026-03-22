@@ -1,13 +1,13 @@
 (ns std.object.element
-  (:require [std.object.element.common :as common]
+  (:require [std.lib.class :as class]
+            [std.lib.invoke :refer [definvoke]]
             [std.object.element.class :deps true]
+            [std.object.element.common :as common]
             [std.object.element.impl.constructor :deps true]
             [std.object.element.impl.field :deps true]
             [std.object.element.impl.method :deps true]
             [std.object.element.impl.multi :deps true]
-            [std.object.element.impl.type :as type]
-            [std.lib.invoke :refer [definvoke]]
-            [std.lib.class :as class])
+            [std.object.element.impl.type :as type])
   (:refer-clojure :exclude [instance?]))
 
 (definvoke to-element

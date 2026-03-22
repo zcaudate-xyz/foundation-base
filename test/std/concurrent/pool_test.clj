@@ -1,8 +1,9 @@
 (ns std.concurrent.pool-test
-  (:use code.test)
   (:require [std.concurrent.pool :refer :all]
-            [std.lib.component.track :as track ]
-            [std.lib :as h]))
+            [std.lib.component :as component]
+            [std.lib.component.track :as track]
+            [std.lib.foundation :as f])
+  (:use code.test))
 
 (defn create-pool
   []
@@ -18,7 +19,7 @@
 (fact "returns info about the pool resource"
   ^:hidden
   
-  (h/with:component [|pool| (create-pool)]
+  (component/with [|pool| (create-pool)]
     (->  (pool-resource "hello" |pool|)
          (resource-info :full)))
   => (contains {:total number?,
@@ -47,7 +48,7 @@
 (fact "acquires a resource from the pool"
   ^:hidden
   
-  (h/with:component [|pool| (create-pool)]
+  (component/with [|pool| (create-pool)]
     (pool:acquire |pool|))
   => (contains [string? '<RESOURCE>]))
 
@@ -58,14 +59,14 @@
 (fact "disposes an idle object"
   ^:hidden
 
-  (h/with:component [|pool| (create-pool)]
+  (component/with [|pool| (create-pool)]
     (pool:dispose |pool| (first (keys (pool:resources:idle |pool|))))))
 
 ^{:refer std.concurrent.pool/pool:dispose-over :added "3.0"}
 (fact "disposes if idle and busy are over size limit"
   ^:hidden
   
-  (h/with:component [|pool| (create-pool)]
+  (component/with [|pool| (create-pool)]
     (let [[id _] (pool:acquire |pool|)]
       (pool:release |pool| id)
       (pool:dispose-over |pool| id)))
@@ -75,7 +76,7 @@
 (fact "releases a resource back to the pool"
   ^:hidden
 
-  (h/with:component [|pool| (create-pool)]
+  (component/with [|pool| (create-pool)]
     (let [[id _] (pool:acquire |pool|)]
       (pool:release |pool| id)))
   => string?)
@@ -84,7 +85,7 @@
 (fact "runs cleanup on the pool" ^:hidden
   ^:hidden
 
-  (h/with:component [|pool| (create-pool)]
+  (component/with [|pool| (create-pool)]
     (def -ids- (->> (for [i (range 8)]
                       (pool:acquire |pool|))
                     (mapv first)))
@@ -115,7 +116,7 @@
 (fact "checks if pool has started"
   ^:hidden
 
-  (h/with:component [|pool| (create-pool)]
+  (component/with [|pool| (create-pool)]
     (pool:started? |pool|))
   => true)
 
@@ -123,7 +124,7 @@
 (fact "checks if pool has stopped"
   ^:hidden
   
-  (h/with:component [|pool| (create-pool)]
+  (component/with [|pool| (create-pool)]
     (pool:stopped? |pool|))
   => false)
 
@@ -131,7 +132,7 @@
 (fact "starts the pool"
   ^:hidden
   
-  (h/with:component [|pool| (create-pool)]
+  (component/with [|pool| (create-pool)]
     (pool:start |pool|)
     => pool:started?))
 
@@ -139,7 +140,7 @@
 (fact "stops the pool"
   ^:hidden
   
-  (h/with:component [|pool| (create-pool)]
+  (component/with [|pool| (create-pool)]
     (pool:stop |pool|)
     => pool:stopped?))
 
@@ -147,7 +148,7 @@
 (fact "kills the pool"
   ^:hidden
   
-  (h/with:component [|pool| (create-pool)]
+  (component/with [|pool| (create-pool)]
     (pool:kill |pool|)
     => pool:stopped?))
 
@@ -155,7 +156,7 @@
 (fact "returns information about the pool"
   ^:hidden
   
-  (h/with:component [|pool| (create-pool)]
+  (component/with [|pool| (create-pool)]
     (pool:info |pool|))
   => (contains-in {:running true,
                    :idle 2, :busy 0,
@@ -167,7 +168,7 @@
 (fact "gets props for the pool"
   ^:hidden
   
-  (h/with:component [|pool| (create-pool)]
+  (component/with [|pool| (create-pool)]
     (keys (pool:props |pool|)))
   => (contains [:size :max :keep-alive :poll]))
 
@@ -175,7 +176,7 @@
 (fact "returns health of the pool"
   ^:hidden
   
-  (h/with:component [|pool| (create-pool)]
+  (component/with [|pool| (create-pool)]
     (pool:health |pool|))
   => {:status :ok})
 
@@ -183,7 +184,7 @@
 (fact "gets props for the pool"
   ^:hidden
   
-  (h/with:component [|pool| (create-pool)]
+  (component/with [|pool| (create-pool)]
     (pool:track-path |pool|))
   => [:raw :pool])
 
@@ -191,7 +192,7 @@
 (fact "checks that object is a pool"
   ^:hidden
   
-  (h/with:component [|pool| (create-pool)]
+  (component/with [|pool| (create-pool)]
     (pool? |pool|))
   => true)
 
@@ -211,7 +212,7 @@
 (fact "creates and starts the pool"
   ^:hidden
   
-  (h/with:component [p (pool {:size 2
+  (component/with [p (pool {:size 2
                               :max 10
                               :keep-alive 10000
                               :poll 20000
@@ -224,7 +225,7 @@
 (fact "returns acquired resources for a given thread"
   ^:hidden
 
-  (h/with:component [|pool| (create-pool)]
+  (component/with [|pool| (create-pool)]
     (-> (doto |pool|
           (pool:acquire)
           (pool:acquire))
@@ -235,11 +236,11 @@
 ^{:refer std.concurrent.pool/pool:resources:busy :added "3.0"}
 (fact "returns all the busy resources" ^:hidden
 
-  (h/with:component [|pool| (create-pool)]
+  (component/with [|pool| (create-pool)]
     (pool:resources:busy |pool|))
   => {}
 
-  (h/with:component [|pool| (create-pool)]
+  (component/with [|pool| (create-pool)]
     (-> (doto |pool|
           (pool:acquire)
           (pool:acquire))
@@ -250,11 +251,11 @@
 ^{:refer std.concurrent.pool/pool:resources:idle :added "3.0"}
 (fact "returns all the idle resources" ^:hidden
 
-  (h/with:component [|pool| (create-pool)]
+  (component/with [|pool| (create-pool)]
     (count (pool:resources:idle |pool|)))
   => 2
 
-  (h/with:component [|pool| (create-pool)]
+  (component/with [|pool| (create-pool)]
     (-> (doto |pool|
           (pool:acquire)
           (pool:acquire))
@@ -264,7 +265,7 @@
 ^{:refer std.concurrent.pool/pool:dispose:mark :added "3.0"}
 (fact "marks the current resource for dispose" ^:hidden
   
-  (h/with:component [|pool| (create-pool)]
+  (component/with [|pool| (create-pool)]
     (dotimes [i 2]
       ((wrap-pool-resource
         (fn [pool]
@@ -277,7 +278,7 @@
 ^{:refer std.concurrent.pool/pool:dispose:unmark :added "3.0"}
 (fact "unmarks the current resource for dispose" ^:hidden
 
-  (h/with:component [|pool| (create-pool)]
+  (component/with [|pool| (create-pool)]
     (dotimes [i 2]
       ((wrap-pool-resource
         (fn [pool]
@@ -291,7 +292,7 @@
 ^{:refer std.concurrent.pool/wrap-pool-resource :added "3.0"}
 (fact "wraps a function to operate on a pool resource" ^:hidden
 
-  (h/with:component [|pool| (create-pool)]
+  (component/with [|pool| (create-pool)]
     ((wrap-pool-resource (fn [obj]
                            (str obj))
                          |pool|)))
@@ -302,7 +303,7 @@
   :teardown [(track/tracked:list [] {:namespace (.getName *ns*)} :stop)]}
 (fact "takes an object from the pool, performs operation then returns it" ^:hidden
 
-  (h/with:component [|pool| (create-pool)]
+  (component/with [|pool| (create-pool)]
     (pool:with-resource [obj |pool|]
       (str obj))
     => "<RESOURCE>"))
@@ -316,9 +317,9 @@
 
   (./create-tests)
   (-p-)
-  (h/info -p-)
+  (std.concurrent.pool/pool:info -p-)
 
-  (h/hash-id -p-)
+  (f/hash-id -p-)
   (def -p- (pool {:size 2
                   :max 10
                   :keep-alive 10000

@@ -1,5 +1,6 @@
 (ns std.lib.generate
-  (:require [std.lib.walk :as walk]))
+  (:require [std.lib.generate]
+            [std.lib.walk :as walk]))
 
 (defn- quoted? [x] (boolean (and (seq? x) ('#{quote clojure.core/quote} (first x)))))
 
@@ -44,9 +45,8 @@
   (if (symbol? x)
     (let [v   (resolve x)
           sym (if v (.toSymbol ^clojure.lang.Var v))]
-      (if (#{`yield `yield-all
-             'std.lib/yield
-             'std.lib/yield-all} sym)
+      (if (#{'std.lib.generate/yield
+             'std.lib.generate/yield-all} sym)
         (symbol (name sym))
         x))
     x))

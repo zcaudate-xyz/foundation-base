@@ -1,13 +1,13 @@
 (ns code.tool.maven.command-test
-  (:use code.test)
-  (:require [std.config :as config]
-            [std.config.ext.gpg :as gpg]
+  (:require [code.framework.link :as linkage]
+            [code.project :as project]
             [code.tool.maven.command :refer :all]
             [code.tool.maven.package :as package]
-            [code.framework.link :as linkage]
-            [code.project :as project]
+            [jvm.artifact :as artifact]
             [lib.aether :as aether]
-            [jvm.artifact :as artifact]))
+            [std.config :as config]
+            [std.config.ext.gpg :as gpg])
+  (:use code.test))
 
 (def -key- (config/resolve [:include "config/keys/test@test.com" {:type :gpg}]))
 

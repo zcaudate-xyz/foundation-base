@@ -1,10 +1,9 @@
 (ns code.tool.translate.js-ast-test
-  (:require [code.tool.translate.js-ast :as build-ast]
-            [std.lib :as h]
+  (:require [code.test :refer [fact]]
+            [code.tool.translate.js-ast :as build-ast]
             [std.fs :as fs]
             [std.json :as json]
-            [std.make :as make]
-            [code.test :refer [fact]]))
+            [std.make :as make]))
 
 (fact "build-ast workflow"
   (do

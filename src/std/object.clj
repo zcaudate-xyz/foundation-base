@@ -1,17 +1,17 @@
 (ns std.object
-  (:require [std.object.element.common :as common]
-            [std.object.element.class :as class]
+  (:require [std.lib.foundation :as f]
             [std.object.element :as element]
-            [std.object.query :as query]
+            [std.object.element.class :as class]
+            [std.object.element.common :as common]
             [std.object.framework :as framework]
             [std.object.framework.access :as access]
             [std.object.framework.read :as read]
             [std.object.framework.struct :as struct]
             [std.object.framework.write :as write]
-            [std.lib :as h])
+            [std.object.query :as query])
   (:refer-clojure :exclude [get get-in set keys instance?]))
 
-(h/intern-in class/class-convert
+(f/intern-in class/class-convert
 
              common/element?
              common/element

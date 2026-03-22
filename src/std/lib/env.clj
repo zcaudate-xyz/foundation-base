@@ -1,12 +1,12 @@
 (ns std.lib.env
   (:require [clojure.pprint :as pprint]
+            [clojure.string]
             [std.lib.atom :as at]
-            [std.lib.time :as t]
             [std.lib.foundation :as f]
+            [std.lib.time :as t]
             [std.string.common :as str])
   (:refer-clojure :exclude [prn require pr with-out-str])
-  (:import (java.io StringWriter
-                    PrintWriter)))
+  (:import (java.io StringWriter PrintWriter)))
 
 (def ^:dynamic *debug* false)
 
@@ -180,7 +180,7 @@
   "pretty prints a string"
   {:added "4.0"}
   [& args]
-  (str/join "\n" (map #(local :pprint-str %) args)))
+  (clojure.string/join "\n" (map #(local :pprint-str %) args)))
 
 (defn pp-fn
   "the pp print function"
@@ -218,7 +218,7 @@
   ([body [start end]]
    (pl-add-lines body [start end] [2 0]))
   ([body [start end] [pad-h pad-v]]
-   (let [lines (vec (str/split-lines body))
+   (let [lines (vec (clojure.string/split-lines body))
          max   (count lines)
          start (dec (or start 1))
          start (if (neg? start) 0 start)
@@ -228,7 +228,7 @@
                  (format (str " %0" pad-h "d  %s") i text))
                (range (inc start) (inc max))
                (subvec lines start end))
-          (str/join (apply str "\n" (repeat pad-v "\n")))))))
+          (clojure.string/join (apply str "\n" (repeat pad-v "\n")))))))
 
 (defmacro pl
   "print with lines"

@@ -1,6 +1,7 @@
 (ns std.concurrent.request-command
   (:require [std.concurrent.request :as r]
-            [std.lib :as h :refer [defimpl]]))
+            [std.lib.foundation :as f]
+            [std.lib.impl :as impl]))
 
 (defn format-input
   "helper for formatting command input"
@@ -62,8 +63,8 @@
   ([command client args]
    (req:run command client args {}))
   ([{:keys [options process] :as command} client args opts]
-   (let [input-fn  (or (:input options) h/NIL)
-         output-fn (or (:output options) h/NIL)
+   (let [input-fn  (or (:input options) f/NIL)
+         output-fn (or (:output options) f/NIL)
          input     (format-input command args (merge (input-fn args) opts))
          out-fn    #(format-output command % (merge (output-fn args) opts))
          opts (-> (merge (:default options) opts)
@@ -71,7 +72,7 @@
                   (r/req:opts {:post [out-fn]}))]
      (run-request command client input opts))))
 
-(defimpl Command [type name arguments function options format process])
+(impl/defimpl Command [type name arguments function options format process])
 
 (defn req:command
   "constructs a command"

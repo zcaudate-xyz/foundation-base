@@ -1,9 +1,9 @@
 (ns std.print.format.report
-  (:require [std.print.format.common :as common]
-            [std.string :as str]
+  (:require [clojure.string]
+            [std.lib.foundation :as f]
+            [std.lib.result :as res]
             [std.print.ansi :as ansi]
-            [std.lib :as h]
-            [std.lib.result :as res]))
+            [std.print.format.common :as common]))
 
 (defn lines:elements
   "layout an array of elements as a series of rows of a given length
@@ -77,7 +77,7 @@
                            (string? row-item)
                            (mapv (fn [s]
                                    (common/justify align (str pad s) length))
-                                 (str/split-lines row-item))
+                                 (clojure.string/split-lines row-item))
 
                            :else
                            [(common/justify align (str pad row-item) length)])))]
@@ -136,7 +136,7 @@
   {:added "3.0"}
   ([keys {:keys [padding columns] :as params}]
    (let [pad    (common/pad padding)
-         header (h/-> keys
+         header (f/-> keys
                       (mapv (fn [title {:keys [align length]}]
                               (str pad
                                    (common/justify align
@@ -164,8 +164,8 @@
   ([row params]
    (->> (lines:row row params)
         (apply map vector)
-        (map (partial str/join " "))
-        (str/join "\n"))))
+        (map (partial clojure.string/join " "))
+        (clojure.string/join "\n"))))
 
 (defn report:title
   "prints the title
@@ -205,4 +205,4 @@
                      items)]
      ;;lines
      (->> (cons header lines)
-          (str/join "\n")))))
+          (clojure.string/join "\n")))))

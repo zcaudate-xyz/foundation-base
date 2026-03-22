@@ -1,11 +1,11 @@
 (ns std.lang.model.spec-glsl
-  (:require [std.lang.base.emit :as emit]
+  (:require [std.lang.base.book :as book]
+            [std.lang.base.emit :as emit]
             [std.lang.base.grammar :as grammar]
-            [std.lang.base.util :as ut]
-            [std.lang.base.book :as book]
             [std.lang.base.script :as script]
-            [std.string :as str]
-            [std.lib :as h]))
+            [std.lang.base.util :as ut]
+            [std.lib.collection :as collection]
+            [std.lib.template :as template]))
 
 (def +types+
   [:bool :int :float :double :uint
@@ -24,7 +24,7 @@
    :dmat4x2 :dmat4x3])
 
 (def +typeops+
-  (h/map-juxt [identity
+  (collection/map-juxt [identity
                (fn [k]
                  {:op k    :symbol #{k}  :raw (name k) :emit :invoke})]
               +types+))
@@ -43,7 +43,7 @@
                   :tuple     {:start "(" :end ")" :space ""}}
         :block  {:for       {:parameter {:sep ","}}}
         :define {:def       {:raw ""}}}
-       (h/merge-nested (emit/default-grammar))))
+       (collection/merge-nested (emit/default-grammar))))
 
 (def +grammar+
   (grammar/grammar :gl
@@ -53,7 +53,7 @@
 (def +meta+
   (book/book-meta
    {:module-import    (fn [name _ opts]  
-                        (h/$ (:- "#include" ~name)))}))
+                        (template/$ (:- "#include" ~name)))}))
 
 (def +book+
   (book/book {:lang :glsl

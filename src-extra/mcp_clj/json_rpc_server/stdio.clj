@@ -1,18 +1,12 @@
 (ns mcp-clj.json-rpc-server.stdio
+  (:require [mcp-clj.json :as json]
+            [mcp-clj.json-rpc.executor :as executor]
+            [mcp-clj.json-rpc.json-protocol :as json-protocol]
+            [mcp-clj.json-rpc.protocols :as protocols]
+            [mcp-clj.json-rpc.stdio :as stdio]
+            [mcp-clj.log :as log])
   "JSON-RPC 2.0 server over stdio"
-  (:require
-    [mcp-clj.json :as json]
-    [mcp-clj.json-rpc.executor :as executor]
-    [mcp-clj.json-rpc.json-protocol :as json-protocol]
-    [mcp-clj.json-rpc.protocols :as protocols]
-    [mcp-clj.json-rpc.stdio :as stdio]
-    [mcp-clj.log :as log])
-  (:import
-    (java.io
-      BufferedReader
-      InputStreamReader)
-    (java.util.concurrent
-      RejectedExecutionException)))
+  (:import (java.io BufferedReader InputStreamReader) (java.util.concurrent RejectedExecutionException)))
 
 ;; Configuration
 

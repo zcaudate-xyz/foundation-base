@@ -1,6 +1,6 @@
 (ns code.framework.link.common
   (:require [std.fs :as fs]
-            [std.lib :refer [definvoke]]))
+            [std.lib.invoke :as invoke]))
 
 (defmulti -file-linkage
   "extendable function for `file-linkage`"
@@ -21,7 +21,7 @@
   ([v ^java.io.Writer w]
    (.write w (str v))))
 
-(definvoke file-linkage-fn
+(invoke/definvoke file-linkage-fn
   "memoized function for `file-linkage` based on time"
   {:added "3.0"}
   [:memoize]

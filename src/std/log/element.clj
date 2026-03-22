@@ -1,7 +1,7 @@
 (ns std.log.element
-  (:require [std.print.format.time :as time]
+  (:require [std.lib.foundation :as f]
             [std.print.ansi :as ansi]
-            [std.lib :as h]))
+            [std.print.format.time :as time]))
 
 (defn style-ansi
   "constructs the style used in console
@@ -75,7 +75,7 @@
                      namespace)
          pos-label (format "%s%s @ %d,%d"
                            (if tag
-                             (str (h/strn tag) " :: ")
+                             (str (f/strn tag) " :: ")
                              "")
                            fn-label line column)]
      (ansi/white "[" (ansi/style pos-label ansi) "]"))))

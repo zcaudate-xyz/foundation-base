@@ -1,6 +1,5 @@
 (ns xt.db.cache-util
-  (:require [std.lang :as l]
-            [std.lib :as h]))
+  (:require [std.lang :as l]))
 
 (l/script :xtalk
   {:require [[xt.lang.base-lib :as k]]})

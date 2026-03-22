@@ -1,12 +1,12 @@
 (ns js.lib.rn-async-storage
   (:require [std.lang :as l]
-            [std.lib :as h]))
+            [std.lib.foundation :as f]))
 
 (l/script :js
   {:require  [[xt.lang.base-lib :as k]]
    :import   [["@react-native-async-storage/async-storage" :as RNAsyncStorage]]})
 
-(h/template-entries [l/tmpl-entry {:type :fragment
+(f/template-entries [l/tmpl-entry {:type :fragment
                                    :base "RNAsyncStorage.default"
                                    :tag "js"}]
   [getItem

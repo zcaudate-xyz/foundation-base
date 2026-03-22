@@ -1,8 +1,8 @@
 (ns js.lib.ua-parser-test
-  (:use code.test)
-  (:require [std.lang :as l]
-            [std.string :as str]
-            [xt.lang.base-notify :as notify]))
+  (:require [clojure.string]
+            [std.lang :as l]
+            [xt.lang.base-notify :as notify])
+  (:use code.test))
 
 (l/script- :js
   {:runtime :basic
@@ -22,7 +22,7 @@
 
   (!.js
    (ua/parseString
-    (@! (str/join
+    (@! (clojure.string/join
          "; "
          ["Mozilla/5.0 (Mobile"
           "Windows Phone 8.1"

@@ -1,6 +1,6 @@
 (ns std.make.github-test
-  (:use code.test)
-  (:require [std.make.github :refer :all]))
+  (:require [std.make.github :refer :all])
+  (:use code.test))
 
 ^{:refer std.make.github/with-verbose :added "4.0"}
 (fact "with verbose github messages")

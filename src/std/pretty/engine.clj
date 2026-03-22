@@ -1,6 +1,5 @@
 (ns std.pretty.engine
-  (:require [std.string :as str]
-            [std.lib :refer [definvoke]]
+  (:require [std.lib.invoke :as invoke]
             [std.pretty.deque :as deque]
             [std.pretty.protocol :as protocol.pretty]))
 
@@ -23,7 +22,7 @@
          (vector? input)  (vec (protocol.pretty/-serialize-node input))
          :else (throw (ex-info "Unexpected class for input" {:node input})))))
 
-(definvoke serialize-node-text
+(invoke/definvoke serialize-node-text
   "creates a :text operation
  
    (serialize-node-text [:text \"apple\" \"ball\"])
@@ -34,7 +33,7 @@
   ([[_ & text]]
    [{:op :text, :text (apply str text)}]))
 
-(definvoke serialize-node-pass
+(invoke/definvoke serialize-node-pass
   "creates a :pass operation
  
    (serialize-node-pass [:pass \"apple\" \"ball\"])
@@ -45,7 +44,7 @@
   ([[_ & text]]
    [{:op :pass, :text (apply str text)}]))
 
-(definvoke serialize-node-escaped
+(invoke/definvoke serialize-node-escaped
   "creates an :escaped operation
  
    (serialize-node-escaped [:escaped \"apple\"])
@@ -57,7 +56,7 @@
    (assert (string? text))
    [{:op :escaped, :text text}]))
 
-(definvoke serialize-node-span
+(invoke/definvoke serialize-node-span
   "creates a :span operation
  
    (serialize-node-span [:span \"apple\" \"ball\"])
@@ -69,7 +68,7 @@
   ([[_ & children]]
    (serialize children)))
 
-(definvoke serialize-node-line
+(invoke/definvoke serialize-node-line
   "creates a :line operation
  
    (serialize-node-line [:line])
@@ -85,7 +84,7 @@
      (assert (string? terminate))
      [{:op :line, :inline inline, :terminate terminate}])))
 
-(definvoke serialize-node-break
+(invoke/definvoke serialize-node-break
   "creates a :break operation
  
    (serialize-node-break [:break])
@@ -96,7 +95,7 @@
   ([& _]
    [{:op :break}]))
 
-(definvoke serialize-node-group
+(invoke/definvoke serialize-node-group
   "creates a :group operation
  
    (serialize-node-group [:group \"apple\" \"ball\"])
@@ -110,7 +109,7 @@
   ([[_ & children]]
    (vec (concat [{:op :begin}] (serialize children) [{:op :end}]))))
 
-(definvoke serialize-node-nest
+(invoke/definvoke serialize-node-nest
   "creates a :nest operation
  
    (serialize-node-nest [:nest 2 \"apple\" \"ball\"])
@@ -129,7 +128,7 @@
                   (serialize children)
                   [{:op :outdent}])))))
 
-(definvoke serialize-node-align
+(invoke/definvoke serialize-node-align
   "creates an :align operation
  
    (serialize-node-align [:align 2 \"apple\" \"ball\"])

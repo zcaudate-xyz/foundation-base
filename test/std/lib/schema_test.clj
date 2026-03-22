@@ -1,6 +1,6 @@
 (ns std.lib.schema-test
-  (:use code.test)
-  (:require [std.lib.schema :as schema]))
+  (:require [std.lib.schema :as schema])
+  (:use code.test))
 
 
 (comment

@@ -1,6 +1,6 @@
 (ns std.lib.io-test
-  (:use code.test)
-  (:require [std.lib.io :refer :all]))
+  (:require [std.lib.io :refer :all])
+  (:use code.test))
 
 ^{:refer std.lib.io/charset:default :added "3.0"}
 (fact "returns the default charset"

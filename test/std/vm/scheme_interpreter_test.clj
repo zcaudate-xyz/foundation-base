@@ -1,10 +1,10 @@
 (ns std.vm.scheme-interpreter-test
-  (:use code.test)
-  (:require [std.vm.scheme-interpreter :as scheme]
-            [std.block.parse :as parse]
+  (:require [std.block.base :as base]
             [std.block.construct :as construct]
-            [std.block.base :as base]
-            [std.lib.zip :as zip]))
+            [std.block.parse :as parse]
+            [std.lib.zip :as zip]
+            [std.vm.scheme-interpreter :as scheme])
+  (:use code.test))
 
 (defn test-fact []
   (println "\n=== Factorial (Recursive) ===")

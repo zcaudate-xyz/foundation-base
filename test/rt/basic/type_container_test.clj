@@ -1,9 +1,8 @@
 (ns rt.basic.type-container-test
-  (:use code.test)
-  (:require [rt.basic.type-container :refer :all]
-            [std.lib :as h]
-            [std.lang :as l]
-            [lib.docker :as docker]))
+  (:require [lib.docker :as docker]
+            [rt.basic.type-container :refer :all]
+            [std.lang :as l])
+  (:use code.test))
 
 ^{:refer rt.basic.type-container/start-container-process :added "4.0"}
 (fact "starts the container"

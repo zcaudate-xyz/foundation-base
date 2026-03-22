@@ -1,6 +1,6 @@
 (ns lib.lucene-test
-  (:use code.test)
-  (:require [lib.lucene :refer :all]))
+  (:require [lib.lucene :refer :all])
+  (:use code.test))
 
 ^{:refer lib.lucene/lucene :added "3.0"}
 (fact "constructs a lucene engine"

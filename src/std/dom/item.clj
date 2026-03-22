@@ -1,7 +1,8 @@
 (ns std.dom.item
-  (:require [std.dom.type :as type]
-            [std.dom.common :as base]
-            [std.lib :as h :refer [definvoke]]))
+  (:require [std.dom.common :as base]
+            [std.dom.type :as type]
+            [std.lib.collection :as collection]
+            [std.lib.invoke :as invoke]))
 
 (defmulti item-constructor
   "returns the given constructor for the tag
@@ -89,7 +90,7 @@
   {:added "3.0"}
   (fn [tag item ops] (:metaclass (type/metaprops tag))))
 
-(definvoke item-props-update-default
+(invoke/definvoke item-props-update-default
   "default implementation of item-prop-update. does nothing.
  
    (item-props-update-default :test/cat
@@ -124,7 +125,7 @@
   {:added "3.0"}
   (fn [tag item props] (:metaclass (type/metaprops tag))))
 
-(definvoke item-props-set-default
+(invoke/definvoke item-props-set-default
   "default implementation of item-prop-set. throws exception"
   {:added "3.0"}
   [:method {:multi item-props-set
@@ -151,7 +152,7 @@
   {:added "3.0"}
   (fn [tag item props] (:metaclass (type/metaprops tag))))
 
-(definvoke item-props-delete-default
+(invoke/definvoke item-props-delete-default
   "default implementation of item-prop-set. returns item"
   {:added "3.0"}
   [:method {:multi item-props-delete
@@ -174,7 +175,7 @@
                       (->> ops
                            (filter (comp #{prefix} first))
                            (map (comp vec rest))
-                           (h/map-vals (fn [v] (cond-> v (base/dom? v) base/dom-item)))))
+                           (collection/map-vals (fn [v] (cond-> v (base/dom? v) base/dom-item)))))
         set-props    (filter-fn ops :set)
         update-props (filter-fn ops :update)
         delete-props (filter-fn ops :delete)]
@@ -196,7 +197,7 @@
   {:added "3.0"}
   (fn [tag item k vlist] (:metaclass (type/metaprops tag))))
 
-(definvoke item-set-list-default
+(invoke/definvoke item-set-list-default
   "default implementation of item-set-list. throws exception
  
    (item-set-list-default :mock/pane
@@ -226,7 +227,7 @@
   {:added "3.0"}
   (fn [tag item] (:metaclass (type/metaprops tag))))
 
-(definvoke item-cleanup-default
+(invoke/definvoke item-cleanup-default
   "default implementation of item-prop-update. does nothing."
   {:added "3.0"}
   [:method {:multi item-cleanup

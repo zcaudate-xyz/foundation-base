@@ -1,6 +1,6 @@
 (ns web3.lib.example-bookstore
   (:require [std.lang :as l]
-            [std.lib :as h]))
+            [std.lib.env :as env]))
 
 (l/script :solidity
   {:require [[rt.solidity :as s]]})
@@ -160,6 +160,6 @@
   (return true))
 
 (def +default-contract+
-  {:ns   (h/ns-sym)
+  {:ns   (env/ns-sym)
    :name "Bookstore"
    :args [10]})

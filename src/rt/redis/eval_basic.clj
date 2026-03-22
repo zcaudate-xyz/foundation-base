@@ -1,23 +1,23 @@
 (ns rt.redis.eval-basic
   (:require [lib.redis.script :as script]
             [rt.basic.impl.process-lua :as lua]
-            [xt.lang.base-repl :as k]
-            [std.lang.base.emit-common :as common]
-            [std.lang.base.pointer :as ptr]
-            [std.lang.base.impl :as impl]
-            [std.lang.base.runtime :as default]
+            [std.concurrent :as cc]
             [std.json :as json]
             [std.lang :as l]
-            [std.concurrent :as cc]
-            [std.string :as str]
-            [std.lib :as h]))
+            [std.lang.base.emit-common :as common]
+            [std.lang.base.impl :as impl]
+            [std.lang.base.pointer :as ptr]
+            [std.lang.base.runtime :as default]
+            [std.lib.env :as env]
+            [std.lib.foundation :as f]
+            [xt.lang.base-repl :as k]))
 
 (def ^:dynamic *runtime-opts* {})
 
 (defn- rt-return
   ([f]
    (fn [res]
-     (if (h/throwable? res)
+     (if (f/throwable? res)
        (throw res)
        (f res)))))
 
@@ -31,13 +31,13 @@
                (.contains msg "ERR Error compiling script"))
            (let [[start end] (->> (concat (re-seq #"user_script:(\d+)" msg)
                                           (re-seq #"line (\d+)" msg))
-                                  (map (comp h/parse-long second))
+                                  (map (comp f/parse-long second))
                                   (sort)
                                   ((juxt first last)))
-                 section (h/pl-add-lines body [(dec start) (inc end)] [2 1])
+                 section (env/pl-add-lines body [(dec start) (inc end)] [2 1])
                  ex (ex-info (str msg "\n\n" section) {:type (type e)})]
              (when common/*explode*
-               (h/pl body))
+               (env/pl body))
              (throw (doto ^Throwable ex
                       (.setStackTrace (.getStackTrace e)))))
            :else (throw e)))))

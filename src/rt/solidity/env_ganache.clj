@@ -1,11 +1,13 @@
 (ns rt.solidity.env-ganache
-  (:require [std.lib :as h :refer [defimpl]]
-            [std.lib.network :as network]
-            [std.json :as json]
-            [std.string :as str]
-            [std.lang :as l]
+  (:require [rt.basic.impl.process-js :as process-js]
             [std.fs :as fs]
-            [rt.basic.impl.process-js :as process-js]))
+            [std.json :as json]
+            [std.lang :as l]
+            [std.lib.env :as env]
+            [std.lib.foundation :as f]
+            [std.lib.future :as future]
+            [std.lib.network :as network]
+            [std.lib.os :as os]))
 
 (defonce +contracts+ (atom {}))
 
@@ -75,28 +77,28 @@
   {:added "4.0"}
   []
   (or @*server*
-      (when (not (h/suppress
-                  (h/wait-for-port "127.0.0.1" +default-port+
+      (when (not (f/suppress
+                  (network/wait-for-port "127.0.0.1" +default-port+
                                    {:timeout 1000})))
         (let [_    (fs/create-directory +default-dir+)
               _    (clear-contracts)]
           (-> (if (not @*server*)
                 (swap! *server*
                        (fn [m]
-                         (let [process (h/sh {:args ["/bin/bash" "-c"
+                         (let [process (os/sh {:args ["/bin/bash" "-c"
                                                      "ganache --wallet.seed 'test' --host '0.0.0.0'"]
                                               :wait false
                                               :root +default-dir+})
-                               thread  (-> (h/future
-                                             (h/sh-wait process))
-                                           (h/on:complete
+                               thread  (-> (future/future
+                                             (os/sh-wait process))
+                                           (future/on:complete
                                             (fn [_ _]
-                                              (try (let [out (h/sh-output process)]
+                                              (try (let [out (os/sh-output process)]
                                                      (when (not= 0 (:exit out))
-                                                       (h/prn out)))
+                                                       (env/prn out)))
                                                    (catch Throwable t))
                                               (reset! *server* nil))))]
-                           (h/wait-for-port (network/local-ip) +default-port+
+                           (network/wait-for-port (network/local-ip) +default-port+
                                             {:timeout 10000})
                            {:type "ganache"
                             :port +default-port+
@@ -112,7 +114,7 @@
   (let [{:keys [type process] :as entry} @*server*]
     (when process
       (doto process
-        (h/sh-close)
-        (h/sh-exit)
-        (h/sh-wait)))
+        (os/sh-close)
+        (os/sh-exit)
+        (os/sh-wait)))
     entry))

@@ -1,8 +1,8 @@
 (ns rt.solidity.compile-common
-  (:require [std.lib :as h :refer [defimpl]]
+  (:require [rt.solidity.env-ganache :as env-ganache]
             [std.lang :as l]
-            [std.lib.network :as network]
-            [rt.solidity.env-ganache :as env-ganache]))
+            [std.lib.impl :as impl]
+            [std.lib.network :as network]))
 
 ;;
 ;; TYPES
@@ -13,7 +13,7 @@
    (str "#contract" {:id id
                      :sha sha})))
 
-(defimpl Contract [type id abi sha bytecode]
+(impl/defimpl Contract [type id abi sha bytecode]
   :prefix "contract:"
   :string contract-string)
 

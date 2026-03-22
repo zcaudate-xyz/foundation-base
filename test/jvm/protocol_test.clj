@@ -1,6 +1,6 @@
 (ns jvm.protocol-test
-  (:use code.test)
-  (:require [jvm.protocol :refer :all]))
+  (:require [jvm.protocol :refer :all])
+  (:use code.test))
 
 ^{:refer jvm.protocol/-load-class :added "4.0"}
 (fact  "loads a class from various sources")

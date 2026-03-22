@@ -1,6 +1,6 @@
 (ns script.sql.common-test
-  (:use code.test)
-  (:require [script.sql.common :refer :all]))
+  (:require [script.sql.common :refer :all])
+  (:use code.test))
 
 ^{:refer script.sql.common/sql:type :added "3.0"}
 (fact "constructs sql type from `std.lib.schema` type"

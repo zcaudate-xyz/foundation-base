@@ -1,7 +1,6 @@
 (ns rt.postgres.grammar.typed-shape
-    "JSONB shape inference with single source of truth.
-   CRITIQUE FIX #1: Single table->shape function."
-    (:require [rt.postgres.grammar.typed-common :as types]))
+  (:require [rt.postgres.grammar.typed-common :as types])
+  "JSONB shape inference with single source of truth.\n   CRITIQUE FIX #1: Single table->shape function.")
 
 ;; ─────────────────────────────────────────────────────────────────────────────
 ;; Column Type Mapping (internal use only)

@@ -1,6 +1,7 @@
 (ns std.timeseries.range-test
+  (:require [std.lib.time :as time]
+            [std.timeseries.range :refer :all])
   (:use code.test)
-  (:require [std.timeseries.range :refer :all])
   (:import (java.util Date)))
 
 ^{:refer std.timeseries.range/parse-range-unit :added "3.0"}
@@ -140,7 +141,7 @@
                                        :skip true
                                        :time {:aggregate identity :sample [3]}}}))
 
-  (h/parse-ms "0m")
+  (time/parse-ms "0m")
   (range (clojure.core/range 100)
          (parse-range [0.1 :for :0.08ms] (assoc (:time +default+)
                                                 :unit :us)))

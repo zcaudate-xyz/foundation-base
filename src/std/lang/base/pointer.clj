@@ -1,16 +1,19 @@
 (ns std.lang.base.pointer
-  (:require [std.lang.base.emit :as emit]
+  (:require [clojure.string]
+            [std.json :as json]
+            [std.lang.base.book :as book]
+            [std.lang.base.book-entry :as e]
+            [std.lang.base.emit :as emit]
             [std.lang.base.emit-common :as common]
             [std.lang.base.impl :as impl]
             [std.lang.base.impl-deps :as deps]
             [std.lang.base.library :as lib]
             [std.lang.base.library-snapshot :as snap]
-            [std.lang.base.book :as book]
-            [std.lang.base.book-entry :as e]
             [std.lang.base.util :as ut]
-            [std.string :as str]
-            [std.json :as json]
-            [std.lib :as h]))
+            [std.lib.collection :as collection]
+            [std.lib.env :as env]
+            [std.lib.foundation :as f]
+            [std.lib.os :as os]))
 
 (defn- default-rt-wrap [f]
   (fn [rt input]
@@ -142,16 +145,16 @@
                    
                    (= :fragment section)
                    (let [{:keys [form standalone template]} entry]
-                     (cond (h/form? standalone)
-                           (str/trim (with-out-str (clojure.pprint/pprint (second standalone))))
+                     (cond (collection/form? standalone)
+                           (clojure.string/trim (with-out-str (clojure.pprint/pprint (second standalone))))
                            
                            (not template)
                            (impl/emit-str form meta)
                            
                            :else
                            (let [args (second form)]
-                             (str/trim (with-out-str (clojure.pprint/pprint
-                                                      (or (h/suppress (list 'fn:> args (apply template args)))
+                             (clojure.string/trim (with-out-str (clojure.pprint/pprint
+                                                      (or (f/suppress (list 'fn:> args (apply template args)))
                                                           form)))))))
                    :else
                    (impl/emit-entry entry meta)))))))
@@ -173,7 +176,7 @@
         
         module   (if-let [internal (-> emit :runtime :module/internal)]
                    (assoc module
-                          :link (h/transpose internal)
+                          :link (collection/transpose internal)
                           :internal internal)
                    module)]
     (assoc meta
@@ -247,17 +250,17 @@
   {:added "4.0"}
   [out]
   (let [{:strs [type value return]} out
-        type (h/unseqify type)
+        type (collection/unseqify type)
         out (case type
               "data"    value
-              "raw"     (h/wrapped value identity return)
+              "raw"     (f/wrapped value identity return)
               "error"   (throw (if (map? value)
                                  (ex-info "" value)
                                  (ex-info "" {:err (vec (filter not-empty
-                                                                (str/split-lines (str value))))})))
+                                                                (clojure.string/split-lines (str value))))})))
               out)
         _    (when (:output *print*)
-               (h/pl out))]
+               (env/pl out))]
     out))
 
 (defn ptr-output
@@ -278,11 +281,11 @@
             
             (let [out (try (json/read out)
                            (catch Throwable t
-                             (h/wrapped out)))]
+                             (f/wrapped out)))]
               (if (:json *output*)
                 out
                 (if (and (= json :full)
-                         (not (h/wrapped? out)))
+                         (not (f/wrapped? out)))
                   (ptr-output-json out)
                   out)))
             
@@ -297,9 +300,9 @@
         out-fn  (fn [body]
                   (cond-> body (:out main) ((:out main))))
         _    (when *clip*
-               (h/clip body))
+               (os/clip body))
         _    (when (:input *print*)
-               (h/pl body))]
+               (env/pl body))]
     (cond (not-empty *input*)
           (cond-> body
             (:raw *input*) in-fn)
@@ -307,9 +310,9 @@
           :else
           (let [input (in-fn body)
                 _    (when (:raw-input *print*)
-                       (h/local :println
+                       (env/local :println
                                 "\n"
-                                (h/pl-add-lines input)
+                                (env/pl-add-lines input)
                                 "\n"))
                 raw-eval (if *rt-wrap*
                            (*rt-wrap* raw-eval)
@@ -317,16 +320,16 @@
                 raw   (try (out-fn (raw-eval rt input))
                            (catch Throwable t
                              (when common/*explode*
-                               (h/prn :OUTPUT-ERROR t))
+                               (env/prn :OUTPUT-ERROR t))
                              (throw t)))
                 _    (when (:raw-output *print*)
                        (try (let [data (json/read raw)
                                   {:strs [type value]}  data]
                               (cond (= type "error")
                                     (doseq [[k v] value]
-                                      (h/pl (str k ":\n" v)))))
+                                      (env/pl (str k ":\n" v)))))
                             (catch Throwable t
-                              (h/pl raw))))
+                              (env/pl raw))))
                 output (ptr-output raw json)]
             output))))
 

@@ -1,7 +1,7 @@
 (ns code.tool.measure.algo-clojure
-  (:require [std.lib :as h]
+  (:require [code.tool.measure.common :as common]
             [std.fs :as fs]
-            [code.tool.measure.common :as common])
+            [std.lib.env :as env])
   (:import (java.io PushbackReader StringReader)))
 
 ;; Clojure Specific Configuration
@@ -94,5 +94,5 @@
       {:complexity complexity
        :surface    surface})
     (catch Throwable e
-      (h/local :println "Error generating CLJ metrics:" (.getMessage e))
+      (env/local :println "Error generating CLJ metrics:" (.getMessage e))
       {:complexity 0 :surface 0})))

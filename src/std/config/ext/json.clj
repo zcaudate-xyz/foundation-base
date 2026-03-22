@@ -1,9 +1,9 @@
 (ns std.config.ext.json
-  (:require [std.json :as json]
-            [std.config.common :as common]
-            [std.lib :refer [definvoke]]))
+  (:require [std.config.common :as common]
+            [std.json :as json]
+            [std.lib.invoke :as invoke]))
 
-(definvoke resolve-type-json
+(invoke/definvoke resolve-type-json
   "resolves json config
  
    (resolve-type-json nil (json/write {:a 1 :b 2}))

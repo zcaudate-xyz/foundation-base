@@ -1,6 +1,6 @@
 (ns indigo.client.ui-common-test
-  (:use code.test)
-  (:require [indigo.client.ui-common :refer :all]))
+  (:require [indigo.client.ui-common :refer :all])
+  (:use code.test))
 
 ^{:refer indigo.client.ui-common/isReactRoot :added "4.0"}
 (fact "TODO")

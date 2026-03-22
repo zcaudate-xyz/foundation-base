@@ -1,6 +1,6 @@
 (ns script.toml-test
-  (:use code.test)
   (:require [script.toml :refer :all])
+  (:use code.test)
   (:refer-clojure :exclude [read]))
 
 ^{:refer script.toml/java->clojure :added "3.0"}

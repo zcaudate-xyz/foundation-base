@@ -1,11 +1,9 @@
 (ns xt.lang.base-lib
   (:require [std.lang :as l]
-            [std.lib :as h])
-  (:refer-clojure :exclude 
-                  [abs bit-and bit-or bit-xor type get-in
-                   identity inc dec zero? pos? neg? even? odd?
-                   max min mod quot cat eval apply print
-                   nil? fn? first second nth replace fn? last sort sort-by throw]))
+            [std.lib.env :as env]
+            [std.lib.foundation :as f]
+            [std.lib.template :as template])
+  (:refer-clojure :exclude [abs bit-and bit-or bit-xor type get-in identity inc dec zero? pos? neg? even? odd? max min mod quot cat eval apply print nil? fn? first second nth replace fn? last sort sort-by throw]))
 
 (l/script :xtalk
   {:require [[xt.lang.base-macro :as k]]})
@@ -1699,7 +1697,7 @@
   (let [{:keys [namespace id]} (:entry (l/macro-opts))
         {:keys [line]} (meta (l/macro-form))]
     (merge
-     {:meta/fn    (str (or namespace (h/ns-sym)) "/" id)
+     {:meta/fn    (str (or namespace (env/ns-sym)) "/" id)
       :meta/line  line}
      m)))
 
@@ -1787,10 +1785,10 @@
   {:added "4.0"}
   [data & [tag]]
   (let [pos   (meta (l/macro-form))
-        ns    (h/ns-sym)
+        ns    (env/ns-sym)
         opts  (assoc (select-keys pos [:line :column])
                      :ns (str ns))]
-    (list `trace-log-add data (or tag (h/sid)) opts)))
+    (list `trace-log-add data (or tag (f/sid)) opts)))
 
 (defn.xt trace-run
   "run helper for `RUN!` macro"
@@ -1804,5 +1802,5 @@
   "runs a form, saving trace forms"
   {:added "4.0"}
   [& body]
-  (h/$ (do (var f (fn [] ~@body))
+  (template/$ (do (var f (fn [] ~@body))
            (return (xt.lang.base-lib/trace-run f)))))

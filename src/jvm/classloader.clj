@@ -1,15 +1,14 @@
 (ns jvm.classloader
   (:require [clojure.java.io :as io]
-            [std.lib :refer [definvoke]]
-            [jvm.protocol :as protocol.classloader]
-            [jvm.classloader.base-classloader :deps true]
-            [jvm.classloader.url-classloader :deps true]
-            [jvm.classloader.common :as common]
             [jvm.artifact :as artifact]
             [jvm.artifact.common :as base]
+            [jvm.classloader.base-classloader :deps true]
+            [jvm.classloader.common :as common]
+            [jvm.classloader.url-classloader :deps true]
+            [jvm.protocol :as protocol.classloader]
+            [std.lib.invoke :as invoke]
             [std.object.query :as query])
-  (:import (clojure.lang DynamicClassLoader RT)
-           (java.net URL URLClassLoader)))
+  (:import (clojure.lang DynamicClassLoader RT) (java.net URL URLClassLoader)))
 
 (defonce +base+ (ClassLoader/getSystemClassLoader))
 
@@ -169,7 +168,7 @@
   ([path]
    (to-bytes (io/input-stream path))))
 
-(definvoke any-load-class
+(invoke/definvoke any-load-class
   "loads a class, storing class into the global cache"
   {:added "3.0"}
   [:method {:multi protocol.classloader/-load-class
@@ -179,7 +178,7 @@
      (.put +class-cache+ (.getName cls) ref))
    cls))
 
-(definvoke dynamic-load-bytes
+(invoke/definvoke dynamic-load-bytes
   "loads a class from bytes"
   {:added "3.0"}
   [:method {:multi protocol.classloader/-load-class
@@ -189,7 +188,7 @@
          cls (.defineClass loader name bytes source)]
      (any-load-class cls loader opts))))
 
-(definvoke dynamic-load-string
+(invoke/definvoke dynamic-load-string
   "loads a class from a path string"
   {:added "3.0"}
   [:method {:multi protocol.classloader/-load-class
@@ -209,7 +208,7 @@
                (to-bytes)
                (dynamic-load-bytes loader opts))))))
 
-(definvoke dynamic-load-coords
+(invoke/definvoke dynamic-load-coords
   "loads a class from a coordinate"
   {:added "3.0"}
   [:method {:multi protocol.classloader/-load-class

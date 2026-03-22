@@ -1,7 +1,8 @@
 (ns std.lib.context.space-test
-  (:use code.test)
-  (:require [std.lib.context.space :refer :all]
-            [std.lib.context.registry :as reg]))
+  (:require [std.lib.context.registry :as reg]
+            [std.lib.context.space :refer :all]
+            [std.lib.foundation :as f])
+  (:use code.test))
 
 (fact:global
  {:component
@@ -136,9 +137,9 @@
   (res/res-stop :hara/context.space)
   
   
-  (h/hash-code (res/res :hara/context.space))
-  (h/hash-code (res/res :hara/context.space {:namespace 'std.lib.context.pointer}))
-  (h/hash-code (res/res :hara/context.space {:namespace (the-ns 'std.lib.context.pointer)}))
+  (f/hash-code (res/res :hara/context.space))
+  (f/hash-code (res/res :hara/context.space {:namespace 'std.lib.context.pointer}))
+  (f/hash-code (res/res :hara/context.space {:namespace (the-ns 'std.lib.context.pointer)}))
   
 
   (space-create )

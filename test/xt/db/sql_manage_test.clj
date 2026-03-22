@@ -1,8 +1,8 @@
 (ns xt.db.sql-manage-test
-  (:use code.test)
   (:require [std.lang :as l]
-            [std.lib :as h]
-            [xt.lang.base-notify :as notify]))
+            [std.string.prose :as prose]
+            [xt.lang.base-notify :as notify])
+  (:use code.test))
 
 (l/script- :js
   {:runtime :basic
@@ -291,7 +291,7 @@
 
 ^{:refer xt.db.sql-manage/table-create :added "4.0"
   :setup [(def +currency-table+
-            (std.string/|
+            (prose/|
              "CREATE TABLE IF NOT EXISTS \"Currency\" ("
              "  \"id\" text PRIMARY KEY,"
              "  \"type\" text,"
@@ -303,7 +303,7 @@
              "  \"description\" text"
              ");"))
           (def +profile-table+
-            (std.string/|
+            (prose/|
              "CREATE TABLE IF NOT EXISTS \"UserProfile\" ("
              "  \"id\" text PRIMARY KEY,"
              "  \"account_id\" text REFERENCES \"UserAccount\","

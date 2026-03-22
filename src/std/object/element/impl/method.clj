@@ -1,7 +1,7 @@
 (ns std.object.element.impl.method
   (:require [std.object.element.common :as common]
-            [std.object.element.impl.type :as type]
             [std.object.element.impl.hierarchy :as hierarchy]
+            [std.object.element.impl.type :as type]
             [std.object.element.util :as util]))
 
 (defn invoke-static-method

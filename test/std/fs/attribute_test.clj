@@ -1,6 +1,6 @@
 (ns std.fs.attribute-test
-  (:use code.test)
   (:require [std.fs.attribute :refer :all])
+  (:use code.test)
   (:import (java.nio.file.attribute FileAttribute FileTime)))
 
 ^{:refer std.fs.attribute/to-mode-string :added "3.0"}

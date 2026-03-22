@@ -1,8 +1,8 @@
 (ns std.text.index
-  (:require [clojure.java.io :as io]
-            [clojure.edn :as edn]
-            [std.text.index.stemmer :as stemmer]
-            [std.text.index.porter :as porter]))
+  (:require [clojure.edn :as edn]
+            [clojure.java.io :as io]
+            [std.text.index.porter :as porter]
+            [std.text.index.stemmer :as stemmer]))
 
 (defrecord Index [data stemmer])
 

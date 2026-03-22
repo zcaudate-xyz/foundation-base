@@ -1,7 +1,8 @@
 (ns lua.aws.common-test
-  (:use code.test)
-  (:require [std.lang :as l]
-            [std.lib :as h]))
+  (:require [clojure.string]
+            [std.lang :as l]
+            [std.string.prose :as prose])
+  (:use code.test))
 
 (l/script- :lua
   {:runtime :basic
@@ -116,7 +117,7 @@
                                ["A" "hello   2"]
                                ["Content-Type" "hello"]))
                          "SHA"))
-  => (std.string/|
+  => (prose/|
       "PUT"
       "/hello"
       "a=&b=&c="
@@ -136,7 +137,7 @@
           ["x-ams-content-sha256" "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"]
           ["x-amz-date" "20220704T091001Z"]))
     "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"))
-  => (std.string/|
+  => (prose/|
       "PUT"
       "/europeteuri"
       ""
@@ -170,7 +171,7 @@
      "x-amz-date" (common/get-date-long (. aws t))}
     hash))
   => string?
-  #_(std.string/join
+  #_(clojure.string/join
       ", "
       ["AWS4-HMAC-SHA256 Credential=admin/20220704/us-east-1/s3/aws4_request"
        "SignedHeaders=host;x-amz-content-sha256;x-amz-date"

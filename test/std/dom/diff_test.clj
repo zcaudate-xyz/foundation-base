@@ -1,7 +1,7 @@
 (ns std.dom.diff-test
-  (:use code.test)
   (:require [std.dom.common :as base]
-            [std.dom.diff :refer :all]))
+            [std.dom.diff :refer :all])
+  (:use code.test))
 
 ^{:refer std.dom.diff/dom-ops :added "3.0"}
 (fact "converts a set of props into operations"

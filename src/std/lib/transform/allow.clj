@@ -1,9 +1,9 @@
 (ns std.lib.transform.allow
-  (:require [std.string.common :as str]
-            [std.string.wrap :as wrap]
+  (:require [std.lib.collection :as coll]
+            [std.lib.foundation :as h]
+            [std.string.common :as str]
             [std.string.path :as path]
-            [std.lib.collection :as coll]
-            [std.lib.foundation :as h]))
+            [std.string.wrap :as wrap]))
 
 (defn wrap-branch-model-allow
   "Works together with wrap-attr-model-allow to control access to data

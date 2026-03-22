@@ -1,8 +1,8 @@
 (ns std.lib.origin
-  (:require [std.lib.foundation :as h]
-            [std.lib.function :as fn]
+  (:require [clojure.set :as set]
             [std.lib.atom :as atm]
-            [clojure.set :as set]))
+            [std.lib.foundation :as h]
+            [std.lib.function :as fn]))
 
 (def ^:dynamic *origin*
   (atom {}))

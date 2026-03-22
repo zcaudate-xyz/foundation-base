@@ -1,12 +1,11 @@
 (ns rt.postgres.script.impl-insert
-  (:require [std.lib :as h]
-            [std.string :as str]
-            [std.lib.schema :as schema]
+  (:require [rt.postgres.grammar.common-tracker :as tracker]
+            [rt.postgres.script.impl-base :as base]
             [std.lang :as l]
-            [std.lang.base.util :as ut]
             [std.lang.base.emit-preprocess :as preprocess]
-            [rt.postgres.grammar.common-tracker :as tracker]
-            [rt.postgres.script.impl-base :as base]))
+            [std.lang.base.util :as ut]
+            [std.lib.foundation :as f]
+            [std.lib.schema :as schema]))
 
 (defn t-insert-form
   "insert form"
@@ -26,7 +25,7 @@
          cols (or cols  (keys tsch))
          cols (vec (set (concat cols (keys trkm))))
          [_ err]  (schema/check-valid-columns tsch cols)
-         _ (if err (h/error "Invalid columns." (assoc err :data cols)))
+         _ (if err (f/error "Invalid columns." (assoc err :data cols)))
          cols (filter #(-> % tsch first :order) cols)
          cols (filter #(not (-> % tsch first :ignore)) cols)
          ks   (schema/order-keys tsch cols)
@@ -84,7 +83,7 @@
                                ['to-jsonb (t-insert-record table-sym data params)]
                                ['to-jsonb (t-insert-symbol tsch data (:columns params) params mopts)])
 
-                             :else (h/error "Invalid data type." {:input data}))
+                             :else (f/error "Invalid data type." {:input data}))
          insert  `[:insert-into ~table-sym ~@body]]
      (-> insert
          (base/t-wrap-args args {})
@@ -132,7 +131,7 @@
          ckeys  (set
                  (concat (cond (map? data) (keys data)
                                (symbol? data) (keys tsch)
-                               :else (h/error "Invalid data type." {:input data}))
+                               :else (f/error "Invalid data type." {:input data}))
                          (keys utrkm)))
          ckeys      (filter #(not (-> % tsch first :ignore)) ckeys)
          ckeys      (map first (schema/get-returning tsch ckeys))

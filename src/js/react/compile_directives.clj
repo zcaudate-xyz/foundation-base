@@ -1,8 +1,10 @@
 (ns js.react.compile-directives
-  (:require [std.lib.walk :as walk]
-            [std.lib :as h]
-            [std.string :as str]
-            [js.react.compile-components :as c]))
+  (:require [clojure.string]
+            [js.react.compile-components :as c]
+            [std.lib.collection :as collection]
+            [std.lib.foundation :as f]
+            [std.lib.template :as template]
+            [std.lib.walk :as walk]))
 
 (defn compile-ui-tailwind
   "templates the layout controls"
@@ -12,15 +14,15 @@
                 props
                 children]} (c/classify-tagged elem false)
         pclasses (if (string? (:class props))
-                   (str/split (:class props) #" ")
+                   (clojure.string/split (:class props) #" ")
                    (:class props))
         tclasses (map (fn [[k v]]
                         (cond (boolean? v)
                               (name k)
                               
                               :else
-                              (str (name k) "-" (h/strn v))))
-                      (dissoc (h/unqualified-keys props) :style :class))
+                              (str (name k) "-" (f/strn v))))
+                      (dissoc (collection/unqualified-keys props) :style :class))
         ;; media query classes
         qclasses []]
     (apply vector :div (merge {:class (vec (concat classes
@@ -39,7 +41,7 @@
       "v"   (compile-ui-tailwind elem ["flex" "flex-col"])
       "h"   (compile-ui-tailwind elem ["flex" "flex-row"])
       "for" (let [[[idx val] array]  control]
-              (h/$
+              (template/$
                (. ~array (map (fn [~val ~idx]
                                 (return
                                  [:<>

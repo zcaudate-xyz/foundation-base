@@ -1,15 +1,16 @@
 (ns rt.redis.eval-script-test
-  (:use code.test)
-  (:require [rt.redis.eval-script :refer :all]
-            [rt.redis.client :as r]
+  (:require [kmi.redis :as redis]
             [lib.redis.bench :as bench]
-            [kmi.redis :as redis]
+            [lib.redis.script :as script]
+            [rt.redis.client :as r]
+            [rt.redis.eval-script :refer :all]
             [std.concurrent :as cc]
-            [std.lib :as h]
             [std.lang :as l]
-            [std.lang.base.pointer :as ptr]
             [std.lang.base.impl :as impl]
-            [lib.redis.script :as script]))
+            [std.lang.base.pointer :as ptr]
+            [std.lib.component :as component]
+            [std.string.prose :as prose])
+  (:use code.test))
 
 (fact:global
  {:setup [(bench/start-redis-array [17001])]
@@ -28,7 +29,7 @@
   
   (raw-compile redis/scan-sub)
   => {:body
-      (std.string/join-lines
+      (prose/join-lines
        ["local function arr_map(arr,f)"
         "  local out = {}"
         "  for _, e in  ipairs(arr) do"
@@ -100,7 +101,7 @@
   :setup    [(def -client- (r/client {:port 17001}))
              (cc/req -client- ["FLUSHDB"])
              (cc/req -client- ["SCRIPT" "FLUSH"])]
-  :teardown [(h/stop -client-)]}
+  :teardown [(component/stop -client-)]}
 (fact "creates a sha call"
   ^:hidden
   

@@ -1,11 +1,11 @@
 (ns js.react-native.expo-router
   (:require [std.lang :as l]
-            [std.lib :as h]))
+            [std.lib.foundation :as f]))
 
 (l/script :js
   {:import [["expo-router" :as [* ExpoRouter]]]})
 
-(h/template-entries [l/tmpl-entry {:type :fragment
+(f/template-entries [l/tmpl-entry {:type :fragment
                                    :base "ExpoRouter"
                                    :tag "js"}]
   [Stack

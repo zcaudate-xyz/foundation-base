@@ -1,7 +1,7 @@
 (ns code.query.match-test
-  (:use code.test)
   (:require [code.query.match :refer :all]
-            [std.block.navigate :as nav]))
+            [std.block.navigate :as nav])
+  (:use code.test))
 
 ^{:refer code.query.match/matcher :added "3.0"}
 (fact "creates a predicate function that can be used to match against values"

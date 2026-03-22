@@ -1,7 +1,7 @@
 (ns std.dom.signal-test
-  (:use code.test)
   (:require [std.dom.signal :refer :all]
-            [std.dom.sync :as sync]))
+            [std.dom.sync :as sync])
+  (:use code.test))
 
 ^{:refer std.dom.signal/process-signal :added "4.0"}
 (fact "processes a signal (delta or event)"

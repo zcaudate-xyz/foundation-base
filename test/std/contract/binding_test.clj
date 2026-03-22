@@ -1,7 +1,7 @@
 (ns std.contract.binding-test
-  (:use code.test)
   (:require [std.contract.binding :refer :all]
             [std.contract.type :as type])
+  (:use code.test)
   (:refer-clojure :exclude [bound?]))
 
 (defn -add-

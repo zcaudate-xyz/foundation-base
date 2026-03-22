@@ -1,8 +1,8 @@
 (ns script.sql.table.manage-test
-  (:use code.test)
   (:require [script.sql.table.manage :refer :all]
             [std.lib.schema :as schema]
-            [std.string :as str]))
+            [std.string.prose :as prose])
+  (:use code.test))
 
 (def -schema-
   (schema/schema
@@ -21,7 +21,7 @@
   ^:hidden
   
   (table-create :user-access [[:id :text "PRIMARY KEY"]])
-  => (str/|
+  => (prose/|
       "CREATE TABLE IF NOT EXISTS \"user_access\" ("
       " \"id\" text PRIMARY KEY"
       ")"))
@@ -39,7 +39,7 @@
   
   (single-enum {:ns :user.plan :values #{:free :pro}})
   => ["CREATE TABLE IF NOT EXISTS \"user_plan\" (value text PRIMARY KEY, comment text)"
-      (str/|
+      (prose/|
        "INSERT INTO \"user_plan\""
        " (value, comment)"
        " VALUES"
@@ -74,7 +74,7 @@
   (single-table
    [:user [:id      {:required true :unique true}
            :profile {:type :ref :ref {:ns :profile}}]])
-  => (str/|
+  => (prose/|
       "CREATE TABLE IF NOT EXISTS \"user\" ("
       " \"id\" text NOT NULL UNIQUE,"
       " \"profile_id\" text references \"profile\"(\"id\")"
@@ -86,7 +86,7 @@
                   :sql {:composite true}}
      :account    {:type :ref :ref {:ns :account}
                   :sql {:composite true}}]])
-  => (str/|
+  => (prose/|
       "CREATE TABLE IF NOT EXISTS \"wallet_access\" ("
       " \"wallet_id\" text references \"wallet\"(\"id\"),"
       " \"account_id\" text references \"account\"(\"id\"), CONSTRAINT \"wallet_access_pkey\" PRIMARY KEY (\"wallet_id\", \"account_id\")"
@@ -150,7 +150,7 @@
        first)
   => (contains
       ["CREATE TABLE IF NOT EXISTS \"meat_grade\" (value text PRIMARY KEY, comment text)"
-       (str/|
+       (prose/|
         "INSERT INTO \"meat_grade\""
         " (value, comment)"
         " VALUES"
@@ -175,7 +175,7 @@
   
   (->> (create:tables -schema-)
        (map second))
-  => [(std.string/|
+  => [(prose/|
        "CREATE TABLE IF NOT EXISTS \"meat\" ("
        " \"id\" text PRIMARY KEY,"
        " \"type\" text,"
@@ -183,7 +183,7 @@
        " \"grade\" text references \"meat_grade\"(\"value\")"
        ")")       
       
-      (std.string/|
+      (prose/|
        "CREATE TABLE IF NOT EXISTS \"vegetable\" ("
        " \"id\" text PRIMARY KEY,"
        " \"cost\" int,"

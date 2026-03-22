@@ -1,6 +1,6 @@
 (ns std.lib.enum-test
-  (:use code.test)
   (:require [std.lib.enum :refer :all])
+  (:use code.test)
   (:import java.lang.annotation.ElementType))
 
 ^{:refer std.lib.enum/enum? :added "3.0"}

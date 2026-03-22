@@ -1,9 +1,9 @@
 (ns std.lib.transform.fill-empty-test
-  (:use code.test)
-  (:require [std.lib.transform.fill-empty :refer :all]
-            [std.lib.transform :as graph]
+  (:require [example.data :as examples]
             [std.lib.schema :as schema]
-            [example.data :as examples]))
+            [std.lib.transform :as graph]
+            [std.lib.transform.fill-empty :refer :all])
+  (:use code.test))
 
 ^{:refer std.lib.transform.fill-empty/process-fill-empty :added "3.0"}
 (fact "helper functio for wrap-model-fill-empty"

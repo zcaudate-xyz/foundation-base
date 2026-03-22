@@ -1,8 +1,8 @@
 (ns std.string.coerce
-  (:require [std.protocol.string :as protocol.string]
-            [std.lib.foundation :as h]
+  (:require [std.lib.foundation :as h]
+            [std.lib.invoke :refer [definvoke]]
             [std.lib.memoize :as memoize]
-            [std.lib.invoke :refer [definvoke]]))
+            [std.protocol.string :as protocol.string]))
 
 (defn from-string
   "converts a string to an object

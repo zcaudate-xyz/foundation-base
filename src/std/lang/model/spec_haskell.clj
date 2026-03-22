@@ -1,21 +1,23 @@
 (ns std.lang.model.spec-haskell
-  (:require [std.lang.base.emit :as emit]
-            [std.lang.base.emit-fn :as emit-fn]
+  (:require [clojure.string]
+            [std.lang.base.book :as book]
+            [std.lang.base.emit :as emit]
             [std.lang.base.emit-data :as data]
+            [std.lang.base.emit-fn :as emit-fn]
             [std.lang.base.emit-helper :as helper]
             [std.lang.base.grammar :as grammar]
-            [std.lang.base.util :as ut]
-            [std.lang.base.book :as book]
             [std.lang.base.script :as script]
-            [std.string :as str]
-            [std.lib :as h]))
+            [std.lang.base.util :as ut]
+            [std.lib.collection :as collection]
+            [std.lib.template :as template]
+            [std.string.prose :as prose]))
 
 (defn haskell-typesystem
   "emit haskell types"
   {:added "4.0"}
   [arr grammar mopts]
   (let [[sym & more] (rest arr)]
-    (str sym " " (str/join " "
+    (str sym " " (clojure.string/join " "
                            (map (fn [input]
                                   (cond (string? input)
                                         input
@@ -46,7 +48,7 @@
   {:added "4.0"}
   [[_ form] grammar mopts]
   (let [s (emit/emit-main form grammar mopts)]
-    (str/indent s 2)))
+    (prose/indent s 2)))
 
 (defn tf-defn
   "custom defn for Haskell"
@@ -68,7 +70,7 @@
                                        (first arg)
                                        (or (-> arg meta :tag) "Object")))
                                    args)]
-                (str (ut/sym-default-str sym) " :: " (str/join " -> " (map str arg-types)) " -> " ret-type))
+                (str (ut/sym-default-str sym) " :: " (clojure.string/join " -> " (map str arg-types)) " -> " ret-type))
               nil)]
     (if sig
         (list :lines (list :- sig) (list :- sym (list :h-args args-emit) "=" body-emit))
@@ -128,7 +130,7 @@
                    (coll? args) args
 
                    :else [args])]
-    (str/join " "
+    (clojure.string/join " "
               (map (fn [arg]
                      (emit/emit-main arg grammar mopts))
                    args))))
@@ -180,7 +182,7 @@
         :function {:defn      {:raw ""}
                    :lambda    {:raw "\\" :args {:start "" :end " -> "}}}
         :define   {:def       {:raw ""}}}
-       (h/merge-nested (emit/default-grammar))))
+       (collection/merge-nested (emit/default-grammar))))
 
 (def +grammar+
   (grammar/grammar :hs
@@ -195,7 +197,7 @@
                               parts (if qualified (conj parts "qualified") parts)
                               parts (conj parts (str name))
                               parts (if as (conj parts "as" (str as)) parts)]
-                          (h/$ (:- ~@parts))))
+                          (template/$ (:- ~@parts))))
     :module-export    (fn [{:keys [as refer]} opts])}))
 
 (def +book+

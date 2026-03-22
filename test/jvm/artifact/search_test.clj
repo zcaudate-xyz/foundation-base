@@ -1,8 +1,8 @@
 (ns jvm.artifact.search-test
-  (:use code.test)
   (:require [jvm.artifact.search :refer :all]
             [jvm.classloader :as cls]
-            [std.fs.archive :as archive]))
+            [std.fs.archive :as archive])
+  (:use code.test))
 
 ^{:refer jvm.artifact.search/class-seq :added "3.0"}
 (fact "creates a sequence of class names"

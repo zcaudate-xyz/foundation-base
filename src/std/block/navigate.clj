@@ -1,11 +1,10 @@
 (ns std.block.navigate
   (:require [std.block.base :as base]
             [std.block.construct :as construct]
-            [std.block.type :as type]
             [std.block.parse :as parse]
-            [std.lib.zip :as zip]
-            [std.string :as str]
-            [std.lib :as h])
+            [std.block.type :as type]
+            [std.lib.foundation :as f]
+            [std.lib.zip :as zip])
   (:refer-clojure :exclude [next replace type]))
 
 (defn nav-template
@@ -17,9 +16,9 @@
        (~sym ~'zip :right))
       ([~'zip ~'step]
        (if-let [~'elem (zip/get ~'zip)]
-         (~(h/var-sym var) ~'elem))))))
+         (~(f/var-sym var) ~'elem))))))
 
-(h/template-vars [nav-template]
+(f/template-vars [nav-template]
   (block?       base/block?)
   (expression?  base/expression?)
   (type         base/block-type)

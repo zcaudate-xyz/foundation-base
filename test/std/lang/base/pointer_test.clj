@@ -1,14 +1,15 @@
 (ns std.lang.base.pointer-test
-  (:use code.test)
-  (:require [std.lang.base.pointer :refer :all]
-            [std.lang.base.util :as ut]
-            [std.lang.base.impl-entry :as entry]
+  (:require [std.json :as json]
             [std.lang.base.book :as book]
+            [std.lang.base.emit-prep-lua-test :as prep]
+            [std.lang.base.impl-entry :as entry]
             [std.lang.base.library :as lib]
             [std.lang.base.library-snapshot :as snap]
-            [std.lang.base.emit-prep-lua-test :as prep]
-            [std.json :as json]
-            [std.lib :as h]))
+            [std.lang.base.pointer :refer :all]
+            [std.lang.base.util :as ut]
+            [std.lib.foundation :as f]
+            [std.string.prose :as prose])
+  (:use code.test))
 
 (def +library-ext+
   (doto (lib/library:create
@@ -147,7 +148,7 @@
                      [1] {:layout :full
                           :emit {:body {:transform (fn [x _]
                                                      (list 'print x))}}})
-  => (std.string/|
+  => (prose/|
       "function L_core____identity_fn(x){"
       "  return x;"
       "}"
@@ -170,7 +171,7 @@
               false)
   => "[1,2,3]"
 
-  (ptr-output (h/wrapped "[1,2,3]")
+  (ptr-output (f/wrapped "[1,2,3]")
               :string)
   => [1 2 3]
   

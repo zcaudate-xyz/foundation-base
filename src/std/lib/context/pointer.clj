@@ -1,16 +1,16 @@
 (ns std.lib.context.pointer
-  (:require [std.protocol.apply :as protocol.apply]
-            [std.protocol.context :as protocol.context]
-            [std.protocol.component :as protocol.component]
-            [std.lib.apply :as apply]
+  (:require [std.lib.apply :as apply]
             [std.lib.atom :as at]
             [std.lib.collection :as c]
-            [std.lib.env :as env]
-            [std.lib.impl :as impl :refer [defimpl]]
-            [std.lib.foundation :as h]
-            [std.lib.resource :as res]
+            [std.lib.context.registry :as reg]
             [std.lib.context.space :as space]
-            [std.lib.context.registry :as reg]))
+            [std.lib.env :as env]
+            [std.lib.foundation :as h]
+            [std.lib.impl :as impl :refer [defimpl]]
+            [std.lib.resource :as res]
+            [std.protocol.apply :as protocol.apply]
+            [std.protocol.component :as protocol.component]
+            [std.protocol.context :as protocol.context]))
 
 (defonce ^:dynamic *runtime* nil)
 

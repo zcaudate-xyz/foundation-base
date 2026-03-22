@@ -1,6 +1,6 @@
 (ns std.string.prose
-  (:require [std.string.common :as common]
-            [std.lib.foundation :as h]))
+  (:require [std.lib.foundation :as h]
+            [std.string.common :as common]))
 
 (defn has-quotes?
   "checks if a string has quotes

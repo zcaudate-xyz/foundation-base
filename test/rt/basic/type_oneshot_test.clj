@@ -1,23 +1,24 @@
 (ns rt.basic.type-oneshot-test
-  (:use code.test)
-  (:require [rt.basic.type-oneshot :as p]
-            [std.lang.model.spec-lua :as spec-lua]
-            [std.lang.model.spec-r :as spec-r]
-            [std.lang.model.spec-js :as spec-js]
-            [std.lang.model.spec-python :as spec-py]
+  (:require [rt.basic.impl.process-js :as js]
             [rt.basic.impl.process-lua :as lua]
-            [rt.basic.impl.process-r :as r]
-            [rt.basic.impl.process-js :as js]
             [rt.basic.impl.process-python :as py]
-            [std.lang.base.pointer :as ptr]
-            [std.lang.base.library :as lib]
-            [std.lang.base.util :as ut]
-            [std.lang.base.emit-prep-lua-test :as prep]
-            [std.lang.base.library-snapshot :as snap]
-            [std.lang.base.impl-entry :as entry]
-            [std.lang.base.book :as book]
+            [rt.basic.impl.process-r :as r]
+            [rt.basic.type-oneshot :as p]
             [std.json :as json]
-            [std.lib :as h]))
+            [std.lang.base.book :as book]
+            [std.lang.base.emit-prep-lua-test :as prep]
+            [std.lang.base.impl-entry :as entry]
+            [std.lang.base.library :as lib]
+            [std.lang.base.library-snapshot :as snap]
+            [std.lang.base.pointer :as ptr]
+            [std.lang.base.util :as ut]
+            [std.lang.model.spec-js :as spec-js]
+            [std.lang.model.spec-lua :as spec-lua]
+            [std.lang.model.spec-python :as spec-py]
+            [std.lang.model.spec-r :as spec-r]
+            [std.lib.env :as env]
+            [std.string.prose :as prose])
+  (:use code.test))
 
 (def +library-ext+
   (doto (lib/library:create
@@ -36,7 +37,7 @@
          [a b]
          (return ((u/identity-fn u/sub) a b)))
       {:lang :lua
-       :namespace (h/ns-sym)
+       :namespace (env/ns-sym)
        :module 'L.util
        :line 1}
       {}))
@@ -46,7 +47,7 @@
          [a b]
          (return ((u/identity-fn u/add) a (-/sub-fn b 0))))
       {:lang :lua
-       :namespace (h/ns-sym)
+       :namespace (env/ns-sym)
        :module 'L.util
        :line 2}
       {}))))
@@ -73,7 +74,7 @@
     (-> (p/rt-oneshot {:lang :lua
                        :layout :full})
         (p/invoke-ptr-oneshot +ptr+ [1 2])))
-  => (std.string/|
+  => (prose/|
    "local function L_core___identity_fn(x)"
    "  return x"
    "end"
@@ -206,7 +207,7 @@
       10]
 
   (rt-oneshot :python)
-  => [(std.string/|
+  => [(prose/|
        "def OUT_FN():"
        "  import traceback"
        "  err = None"

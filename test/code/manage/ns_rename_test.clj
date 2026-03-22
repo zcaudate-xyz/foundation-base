@@ -1,6 +1,6 @@
 (ns code.manage.ns-rename-test
-  (:use code.test)
-  (:require [code.manage.ns-rename :refer :all]))
+  (:require [code.manage.ns-rename :refer :all])
+  (:use code.test))
 
 ^{:refer code.manage.ns-rename/move-list :added "3.0"}
 (fact "compiles a list of file movements"

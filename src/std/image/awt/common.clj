@@ -1,24 +1,24 @@
 (ns std.image.awt.common
   (:require [std.image.base.common :as base]
-            [std.image.base.size :deps true]
             [std.image.base.model :as model]
+            [std.image.base.size :deps true]
             [std.image.protocol :as protocol.image]
+            [std.lib.collection :as collection]
             [std.object.query :as reflect]
-            [std.string :as str]
-            [std.lib :as h])
+            [std.string.case :as case])
   (:import (java.awt.image BufferedImage)))
 
 (defonce type-lookup
   (->> (reflect/query-class java.awt.image.BufferedImage [#"TYPE"])
        (map (juxt (comp keyword
                         #(subs % 5)
-                        str/spear-case
+                        case/spear-case
                         :name)
                   #(% java.awt.image.BufferedImage)))
        (into {})))
 
 (defonce name-lookup
-  (h/transpose type-lookup))
+  (collection/transpose type-lookup))
 
 (defn image-size
   "returns the size of the BufferedImage

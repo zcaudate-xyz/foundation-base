@@ -1,10 +1,6 @@
 (ns mcp-clj.mcp-client.subscriptions
-  "Subscription management for MCP client notifications.
-
-  Manages tracking of subscriptions to server notifications and dispatches
-  incoming notifications to registered callbacks."
-  (:require
-    [mcp-clj.log :as log]))
+  (:require [mcp-clj.log :as log])
+  "Subscription management for MCP client notifications.\n\n  Manages tracking of subscriptions to server notifications and dispatches\n  incoming notifications to registered callbacks.")
 
 (defn create-registry
   "Create a new subscription registry.

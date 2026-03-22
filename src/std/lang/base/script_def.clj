@@ -1,14 +1,14 @@
 (ns std.lang.base.script-def
-  (:require [std.lib :as h]
-            [std.string :as str]
-            [std.lang.base.util :as ut]))
+  (:require [clojure.string]
+            [std.lang.base.util :as ut]
+            [std.lib.foundation :as f]))
 
 (defn tmpl-entry
   "forms for various argument types"
   {:added "4.0"}
   [s]
   (let [{:keys [tag type base prefix shrink]
-         :or {base []}} (h/template-meta)
+         :or {base []}} (f/template-meta)
         base (if (vector? base) base [base])
         dsym (case type
                :fragment (symbol (str "def$." tag))
@@ -23,7 +23,7 @@
                prefix ((fn [s]
                          (str prefix s))))
         
-        mrep (symbol (str/join "." (conj base msym)))]
+        mrep (symbol (clojure.string/join "." (conj base msym)))]
     (list dsym (symbol sym) mrep)))
 
 (defn tmpl-macro
@@ -31,7 +31,7 @@
   {:added "4.0"}
   [[s args {:keys [property optional vargs empty]}]]
   (let [{:keys [tag inst prefix subtree]
-         :or {inst "obj"}} (h/template-meta)
+         :or {inst "obj"}} (f/template-meta)
         
         inst (symbol (str inst))
         [sym msym] (if (vector? s)

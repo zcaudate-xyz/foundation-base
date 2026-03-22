@@ -1,11 +1,12 @@
 (ns code.framework.common-test
-  (:use code.test)
-  (:require [code.framework.common :refer :all]
+  (:require [clojure.string]
+            [code.framework.common :refer :all]
             [code.framework.test.clojure]
             [code.framework.test.fact]
-            [std.block.navigate :as nav]
             [code.query :as query]
-            [std.block :as block]))
+            [std.block :as block]
+            [std.block.navigate :as nav])
+  (:use code.test))
 
 (require 'code.framework.test.fact :reload)
 
@@ -95,7 +96,7 @@
 
   (block/string (block/block "\\n"))
 
-  (seq (std.string/split-lines "\n\n"))
+  (seq (clojure.string/split-lines "\n\n"))
   (block/value (nav/block a))
   (block/string (nav/block a))
   "\"hello\\n\""

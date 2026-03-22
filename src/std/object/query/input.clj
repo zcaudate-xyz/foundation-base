@@ -1,6 +1,8 @@
 (ns std.object.query.input
-  (:require [std.object.element.class :as element.class]
-            [std.lib :as h]))
+  (:require [std.lib.class :as class]
+            [std.lib.collection :as collection]
+            [std.lib.foundation :as f]
+            [std.object.element.class :as element.class]))
 
 (def sort-terms #{:by-name :by-params :by-modifiers :by-type})
 
@@ -45,7 +47,7 @@
          (= :first arg)                   :first
          (or (= :# arg) (= :merge arg))   :merge
 
-         (or (string? arg) (h/regexp? arg))  :name
+         (or (string? arg) (f/regexp? arg))  :name
          (fn? arg)                        :predicate
          (set? arg)                       :origins
          (and (vector? arg)
@@ -58,7 +60,7 @@
          (or (class? arg) (symbol? arg))  :type
 
          (keyword? arg)                   :modifiers
-         (h/hash-map? arg)            :attribute)))
+         (collection/hash-map? arg)            :attribute)))
 
 (defn args-convert
   "converts any symbol in `args` to its primitive class
@@ -77,7 +79,7 @@
                    (set (map single-fn v))
 
                    (symbol? v)
-                   (or (h/primitive v :class)
+                   (or (class/primitive v :class)
                        v)
                    :else v))
            args))))

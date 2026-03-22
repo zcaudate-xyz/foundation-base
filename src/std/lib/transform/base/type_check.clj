@@ -1,7 +1,6 @@
 (ns std.lib.transform.base.type-check
-  (:require [std.lib.transform.coerce :as coerce]
-            ;;[std.lib.schema.base :as base]
-            [std.lib.foundation :as h]))
+  (:require [std.lib.foundation :as h]
+            [std.lib.transform.coerce :as coerce]))
 
 (defn wrap-single-type-check
   "wraps normalise to type check inputs as well as to coerce incorrect inputs"

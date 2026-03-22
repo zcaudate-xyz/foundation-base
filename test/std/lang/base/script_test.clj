@@ -1,16 +1,16 @@
 (ns std.lang.base.script-test
-  (:use code.test)
-  (:require [std.lang.base.script :as script]
-            [std.lang.model.spec-lua :as lua]
+  (:require [lua.core]
+            [std.lang :as l]
             [std.lang.base.book :as book]
-            [std.lang.base.library :as lib]
-            [std.lang.base.library-snapshot :as snap]
             [std.lang.base.emit-prep-lua-test :as prep-lua]
             [std.lang.base.impl :as impl]
-            [std.lang :as l]
+            [std.lang.base.library :as lib]
+            [std.lang.base.library-snapshot :as snap]
             [std.lang.base.runtime :as rt]
-            [lua.core]
-            [std.lib :as h]))
+            [std.lang.base.script :as script]
+            [std.lang.model.spec-lua :as lua]
+            [std.lib.env :as env])
+  (:use code.test))
 
 (def +library+
   (impl/clone-default-library))
@@ -110,7 +110,7 @@
 
 ^{:refer std.lang.base.script/script-ext-run :added "4.0"}
 (fact "function to call with the `!` macro"
-  (script/script-ext-run (h/ns-sym) :LUA.0 '(return 1) {})
+  (script/script-ext-run (env/ns-sym) :LUA.0 '(return 1) {})
   => 1)
 
 ^{:refer std.lang.base.script/! :added "4.0"}

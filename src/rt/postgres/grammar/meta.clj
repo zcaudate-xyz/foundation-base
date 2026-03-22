@@ -1,8 +1,6 @@
 (ns rt.postgres.grammar.meta
   (:require [std.lang.base.pointer :as ptr]
-            [std.lang.base.util :as ut]
-            [std.string :as str]
-            [std.lib :as h]))
+            [std.lang.base.util :as ut]))
 
 (defn has-function
   "checks for existence of a function"

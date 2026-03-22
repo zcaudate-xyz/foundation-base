@@ -1,7 +1,5 @@
 (ns js.blessed.frame-sidemenu
-  (:require [std.lang :as l]
-            [std.lib :as h]
-            [std.string :as str]))
+  (:require [std.lang :as l]))
 
 (l/script :js
   {:require [[xt.lang.base-lib :as k]

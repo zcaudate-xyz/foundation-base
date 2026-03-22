@@ -1,8 +1,6 @@
 (ns lua.ext.sochain
-  (:require [std.lang :as l]
-            [std.lib :as h]
-            [std.string :as str]
-            [std.json :as json]))
+  (:require [std.json :as json]
+            [std.lang :as l]))
 
 (l/script :lua
   {:require [[xt.lang.base-lib :as k]

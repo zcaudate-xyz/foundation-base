@@ -1,6 +1,6 @@
 (ns indigo.server.watcher-test
-  (:use code.test)
-  (:require [indigo.server.watcher :refer :all]))
+  (:require [indigo.server.watcher :refer :all])
+  (:use code.test))
 
 ^{:refer indigo.server.watcher/broadcast-change :added "4.1"}
 (fact "TODO")

@@ -1,7 +1,7 @@
 (ns lib.aether.base-test
-  (:use code.test)
-  (:require [lib.aether.base :refer :all]
-            [lib.aether :as aether]))
+  (:require [lib.aether :as aether]
+            [lib.aether.base :refer :all])
+  (:use code.test))
 
 ^{:refer lib.aether.base/aether :added "3.0"}
 (fact "creates an `Aether` object"

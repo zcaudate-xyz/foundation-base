@@ -1,5 +1,5 @@
 (ns code.doc.engine
-  (:require [std.lib :as h])
+  (:require [std.lib.invoke :as invoke])
   (:import (clojure.lang MultiFn)))
 
 (defn wrap-hidden
@@ -25,9 +25,9 @@
      (require ns)
      (reduce-kv (fn [out k ref]
                   (let [v @ref]
-                    (cond (h/multi? v)
+                    (cond (invoke/multi? v)
                           (assoc out (keyword k)
-                                 (wrap-hidden (h/multi:clone v (str k))))
+                                 (wrap-hidden (invoke/multi:clone v (str k))))
 
                           (fn? v)
                           (assoc out (keyword k) v)

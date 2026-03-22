@@ -1,7 +1,5 @@
 (ns js.blessed.ui-group
-  (:require [std.lang :as l]
-            [std.lib :as h]
-            [std.string :as str]))
+  (:require [std.lang :as l]))
 
 (l/script :js
   {:runtime :basic

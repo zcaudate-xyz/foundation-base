@@ -1,8 +1,8 @@
 (ns std.lib.impl
-  (:require [std.lib.foundation :as h]
+  (:require [clojure.set :as set]
             [std.lib.collection :as c]
-            [std.lib.walk :as walk]
-            [clojure.set :as set]))
+            [std.lib.foundation :as h]
+            [std.lib.walk :as walk]))
 
 (def ^:dynamic *self* false)
 

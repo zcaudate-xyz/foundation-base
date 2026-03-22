@@ -1,12 +1,11 @@
 (ns rt.basic.impl.process-xtalk
-  (:require [std.lang.base.runtime :as default]
+  (:require [clojure.string]
             [rt.basic.type-common :as common]
             [rt.basic.type-oneshot :as oneshot]
-            [std.lang.model.spec-xtalk :as spec]
             [std.lang.base.impl :as impl]
             [std.lang.base.runtime :as rt]
-            [std.lib :as h]
-            [std.string :as str]))
+            [std.lang.model.spec-xtalk :as spec]
+            [std.lib.foundation :as f]))
 
 (def +program-init+
   (common/put-program-options
@@ -26,13 +25,13 @@
   {:added "4.0"}
   [{:keys [exit out err]}]
   (if (not-empty err)
-    (h/error err)
+    (f/error err)
     (let [out (-> out
-                  (str/replace #"#t" "true")
-                  (str/replace #"#f" "false"))]
+                  (clojure.string/replace #"#t" "true")
+                  (clojure.string/replace #"#f" "false"))]
       (try (read-string out)
            (catch Throwable t
-             (h/wrapped out))))))
+             (f/wrapped out))))))
 
 (defn transform-form
   "transforms output from shell"

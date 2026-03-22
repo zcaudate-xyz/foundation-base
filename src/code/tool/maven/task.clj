@@ -1,10 +1,9 @@
 (ns code.tool.maven.task
-  (:require [std.config :as config]
+  (:require [code.framework.link :as link]
+            [lib.aether :as aether]
+            [std.config :as config]
             [std.config.ext.gpg :deps true]
-            [std.lib :as h]
-            [std.task :as task]
-            [code.framework.link :as link]
-            [lib.aether :as aether]))
+            [std.task :as task]))
 
 (defn make-project
   "makes a maven compatible project

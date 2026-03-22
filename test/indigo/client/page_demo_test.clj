@@ -1,6 +1,6 @@
 (ns indigo.client.page-demo-test
-  (:use code.test)
-  (:require [indigo.client.page-demo :refer :all]))
+  (:require [indigo.client.page-demo :refer :all])
+  (:use code.test))
 
 ^{:refer indigo.client.page-demo/Greeter :added "4.0"}
 (fact "TODO")

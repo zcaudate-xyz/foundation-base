@@ -1,7 +1,7 @@
 (ns lib.jdbc.meta
-  "Connection metadata access methods."
-  (:require [lib.jdbc.types :as types]
-            [lib.jdbc.protocol :as protocol]))
+  (:require [lib.jdbc.protocol :as protocol]
+            [lib.jdbc.types :as types])
+  "Connection metadata access methods.")
 
 (defn vendor-name
   "Get connection vendor name."

@@ -1,34 +1,37 @@
 (ns std.concurrent.relay
-  (:require [std.protocol.component :as protocol.component]
-            [std.concurrent.bus :as bus]
+  (:require [std.concurrent.bus :as bus]
             [std.concurrent.queue :as q]
             [std.concurrent.relay.transport :as transport]
-            [std.lib :as h :refer [defimpl]]
-            [std.string :as str])
+            [std.lib.component :as component]
+            [std.lib.env :as env]
+            [std.lib.foundation :as f]
+            [std.lib.future :as future]
+            [std.lib.impl :as impl]
+            [std.lib.network :as network]
+            [std.lib.os :as os]
+            [std.lib.resource :as resource]
+            [std.lib.time :as time]
+            [std.protocol.component :as protocol.component])
   (:refer-clojure :exclude [send])
-  (:import (java.io InputStream
-                    OutputStream
-                    InputStreamReader
-                    BufferedReader
-                    ByteArrayOutputStream)))
+  (:import (java.io InputStream OutputStream InputStreamReader BufferedReader ByteArrayOutputStream)))
 
 (defonce ^:dynamic *bus* nil)
 
 (def +init+
-  (h/res:variant-add
+  (resource/res:variant-add
    :hara/concurrent.bus
    {:id    :relay
     :alias :hara/relay
     :mode {:allow #{:global} :default :global}
-    :instance {:setup    (fn [bus] (h/start bus) (h/set! *bus* bus) bus)
-               :teardown (fn [bus] (h/set! *bus* nil) (h/stop bus) bus)}}))
+    :instance {:setup    (fn [bus] (component/start bus) (f/set! *bus* bus) bus)
+               :teardown (fn [bus] (f/set! *bus* nil) (component/stop bus) bus)}}))
 
 (defn get-bus
   "gets the common stream bus"
   {:added "3.0"}
   []
   (or *bus*
-      (h/res :hara/relay)))
+      (resource/res :hara/relay)))
 
 (defmacro with:bus
   "sets the default relay bus"
@@ -41,10 +44,10 @@
   "attaches a passive process to an input stream"
   {:added "4.0"}
   ([{:keys [raw return result final] :as istream} {:keys [op handler] :as message}]
-   (h/future:run
+   (future/future:run
     (bound-fn []
-      (let [return    (h/explode (transport/process-op istream op message))
-            _         (if final (h/future:force final return))]
+      (let [return    (env/explode (transport/process-op istream op message))
+            _         (if final (future/future:force final return))]
         return)))))
 
 (defn attach-interactive
@@ -62,7 +65,7 @@
   [{:keys [type id raw bus history format]}]
   (str "#relay.stream" [type id (count history)]))
 
-(defimpl RelayStream [type id raw bus history format]
+(impl/defimpl RelayStream [type id raw bus history format]
   :string relay-stream-string)
 
 (defn relay-stream
@@ -92,7 +95,7 @@
     (merge {:id  id
             :in  istream
             :out ostream
-            :started (h/time-ns)}
+            :started (time/time-ns)}
            m)))
 
 (defn make-socket-instance
@@ -111,13 +114,13 @@
   ([^Process process id options]
    (let [estream    (relay-stream id :error
                                   (.getErrorStream process)
-                                  (merge {:final (h/incomplete)}
+                                  (merge {:final (future/incomplete)}
                                          (:error options)))
          thread      (attach-read-passive estream (or (-> options :error :custom)
                                                       {:op :custom-line
                                                        :handler (fn [line estream]
                                                                   ;; look at saving to history, displaying, etc.
-                                                                  (h/prn line))}))]
+                                                                  (env/prn line))}))]
      (instance-map id [(.getInputStream process)
                        (.getOutputStream process)]
                    options
@@ -129,7 +132,7 @@
   "creates an instance"
   {:added "4.0"}
   ([obj]
-   (make-instance obj (h/sid) {}))
+   (make-instance obj (f/sid) {}))
   ([obj id options]
    (cond (instance? java.net.Socket obj)
          (make-socket-instance obj id options)
@@ -137,7 +140,7 @@
          (instance? Process obj)
          (make-process-instance obj id options)
 
-         :else (h/error "Unsupported type: " 
+         :else (f/error "Unsupported type: " 
                         {:require [java.net.Socket Process]}))))
 
 (extend-protocol protocol.component/IComponent
@@ -174,8 +177,8 @@
      relay
      (let [obj (or attached
                    (case type
-                     :socket  (h/socket (:host relay) (:port relay))
-                     :process (h/sh (merge (select-keys relay [:root :env :args])
+                     :socket  (network/socket (:host relay) (:port relay))
+                     :process (os/sh (merge (select-keys relay [:root :env :args])
                                            {:wait false
                                             :inherit false
                                             :wrap false
@@ -199,8 +202,8 @@
     relay
     (let [{:keys [in type]} @instance
           {:keys [bus id]} in
-          _  (and bus (h/explode (bus/bus:kill bus id)))
-          _  (h/stop (get @instance type))
+          _  (and bus (env/explode (bus/bus:kill bus id)))
+          _  (component/stop (get @instance type))
           _  (reset! instance nil)
           {:keys [teardown]} hooks
            _   (if teardown (teardown relay))]
@@ -209,7 +212,7 @@
 (defn- relay-string [{:keys [type options instance]}]
   (str "#relay" [type (or options {}) @instance]))
 
-(defimpl Relay [type options instance]           
+(impl/defimpl Relay [type options instance]           
   :string relay-string
   :prefix "relay-"                               
   :protocols [protocol.component/IComponent
@@ -222,7 +225,7 @@
   {:added "4.0"}
   ([{:keys [id type] :as m}]
    (map->Relay (assoc m
-                      :id (or id (h/sid))
+                      :id (or id (f/sid))
                       :instance (atom nil)))))
 
 (defn relay
@@ -230,7 +233,7 @@
   {:added "3.0"}
   ([{:keys [type] :as m}]
    (-> (relay:create m)
-       (h/start))))
+       (component/start))))
 
 (def +read-ops+
   #{:count        
@@ -257,7 +260,7 @@
   {:added "3.0"}
   ([{:keys [instance] :as relay} msg]
    (let [{:keys [in out]}  (or @instance
-                               (h/error "Relay not started"
+                               (f/error "Relay not started"
                                         {:relay relay :msg msg}))
          {:keys [op line]
           :as msg}    (if (string? msg)
@@ -267,7 +270,7 @@
          op  (or (transport/+read-alias+ op)
                  (+read-ops+ op)
                  (+control-ops+ op)
-                 (h/error "Op not valid." {:input op
+                 (f/error "Op not valid." {:input op
                                            :available (set (concat +control-ops+
                                                                    +read-ops+))
                                            :alias transport/+read-alias+}))]

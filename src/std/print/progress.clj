@@ -1,6 +1,6 @@
 (ns std.print.progress
-  (:require [std.print.format.common :as common]
-            [std.lib :as h]))
+  (:require [std.lib.env :as env]
+            [std.print.format.common :as common]))
 
 (def +progress-defaults+
   {:throttle          20
@@ -135,11 +135,11 @@
   {:added "3.0"}
   ([]
    (let [prog (progress {:total 100})]
-     (h/local :println)
+     (env/local :println)
      (dotimes [i 100]
        (Thread/sleep 10)
        (progress-update prog)
-       (h/local :println common/+up+ common/+clearline+ (progress-string prog))))))
+       (env/local :println common/+up+ common/+clearline+ (progress-string prog))))))
 
 (comment
 

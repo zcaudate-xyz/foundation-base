@@ -1,6 +1,6 @@
 (ns std.object.framework.vector-like-test
-  (:use code.test)
-  (:require [std.object.framework.vector-like :refer :all]))
+  (:require [std.object.framework.vector-like :refer :all])
+  (:use code.test))
 
 ^{:refer std.object.framework.vector-like/extend-vector-like :added "3.0"}
 (comment "sets the fields of an object with keyword"

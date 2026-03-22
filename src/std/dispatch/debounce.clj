@@ -1,10 +1,14 @@
 (ns std.dispatch.debounce
-  (:require [std.protocol.dispatch :as protocol.dispatch]
-            [std.protocol.component :as protocol.component]
-            [std.concurrent :as cc]
+  (:require [std.concurrent :as cc]
             [std.dispatch.common :as common]
             [std.dispatch.hooks :as hooks]
-            [std.lib :as h :refer [defimpl]]))
+            [std.lib.atom :as atom]
+            [std.lib.env :as env]
+            [std.lib.future :as future]
+            [std.lib.impl :as impl]
+            [std.lib.time :as time]
+            [std.protocol.component :as protocol.component]
+            [std.protocol.dispatch :as protocol.dispatch]))
 
 ;; There are three types of debouncers
 ;;
@@ -21,7 +25,7 @@
                                (handler dispatch entry))
                              interval delay))
           (catch Throwable t
-            (h/prn t))))))
+            (env/prn t))))))
 
 (defn submit-eager
   "submits and executes eagerly
@@ -42,7 +46,7 @@
                             
                             :else
                             [false m])))
-         submit? (h/swap-return! counter check-fn)]
+         submit? (atom/swap-return! counter check-fn)]
      (cond submit?
            (let [handler     (wrap-min-time handler interval delay)
                  main-thunk  (-> (assoc dispatch :handler handler)
@@ -76,13 +80,13 @@
          group    (group-fn dispatch entry)
          handler  (wrap-min-time handler 0 delay)
          main-fn  (fn [ret]
-                    (h/fulfil ret (-> (assoc dispatch :handler handler)
+                    (future/fulfil ret (-> (assoc dispatch :handler handler)
                                       (common/handle-fn entry))))
-         start (h/time-ms)
+         start (time/time-ms)
          _   (swap! counter (fn [m] (assoc m group start)))
          debounce-fn (fn [ret]
                        (let [start (get @counter group)
-                             current (h/time-ms)
+                             current (time/time-ms)
                              diff (long (- (+ start interval) current))]
                          (if (pos? diff)
                            (do (Thread/sleep diff)
@@ -92,8 +96,8 @@
          check-fn (fn [m]
                     (if (get m group)
                       [false m]
-                      [true (assoc m group (h/incomplete))]))
-         [submit? out] (h/swap-return! waiting check-fn true)
+                      [true (assoc m group (future/incomplete))]))
+         [submit? out] (atom/swap-return! waiting check-fn true)
          ret  (get out group)]
      (cond submit?
            (try (cc/submit @(:executor runtime) #(debounce-fn ret))
@@ -122,12 +126,12 @@
                             [[false true] (update m group inc)]
 
                             :else [[false false] m])))
-         [submit? wait?] (h/swap-return! counter check-fn)]
+         [submit? wait?] (atom/swap-return! counter check-fn)]
      (cond (or submit? wait?)
-           (let [ret         (h/incomplete)
+           (let [ret         (future/incomplete)
                  handler     (wrap-min-time handler interval delay)
                  main-thunk   (fn []
-                                (h/fulfil ret (-> (assoc dispatch :handler handler)
+                                (future/fulfil ret (-> (assoc dispatch :handler handler)
                                                   (common/handle-fn entry))))
                  debounce-fn (fn []
                                (try
@@ -182,7 +186,7 @@
        (update :runtime dissoc :debounce)
        (common/stop-dispatch))))
 
-(defimpl DebounceDispatch [type runtime handler]
+(impl/defimpl DebounceDispatch [type runtime handler]
   :prefix "common/"
   :suffix "-dispatch"
   :string common/to-string

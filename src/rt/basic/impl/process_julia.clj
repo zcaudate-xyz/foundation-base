@@ -1,14 +1,13 @@
 (ns rt.basic.impl.process-julia
-  (:require [rt.basic.type-common :as common]
-            [rt.basic.type-oneshot :as oneshot]
+  (:require [clojure.string]
             [rt.basic.type-basic :as basic]
-            [xt.lang.base-repl :as k]
-            [std.lang.model.spec-julia :as spec]
+            [rt.basic.type-common :as common]
+            [rt.basic.type-oneshot :as oneshot]
+            [std.json :as json]
             [std.lang.base.impl :as impl]
             [std.lang.base.runtime :as rt]
-            [std.lib :as h]
-            [std.string :as str]
-            [std.json :as json]))
+            [std.lang.model.spec-julia :as spec]
+            [xt.lang.base-repl :as k]))
 
 (def +julia-init+
   (common/put-program-options
@@ -102,7 +101,7 @@
                           :layout :flat})
                         (impl/emit-as
                          :julia +client-basic+)]
-                       (str/join "\n\n"))]
+                       (clojure.string/join "\n\n"))]
     (fn [port & [{:keys [host]}]]
       (str "import Pkg; Pkg.add(\"JSON\"); using JSON; using Sockets;\n\n"
            bootstrap

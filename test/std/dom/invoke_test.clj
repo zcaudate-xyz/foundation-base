@@ -1,8 +1,7 @@
 (ns std.dom.invoke-test
-  (:use code.test)
   (:require [std.dom.invoke :refer :all]
-            [std.dom.type :as type]
-            [std.lib :refer [definvoke]]))
+            [std.dom.type :as type])
+  (:use code.test))
 
 ^{:refer std.dom.invoke/invoke-intern-dom :added "3.0"}
 (fact "constructor for dom"

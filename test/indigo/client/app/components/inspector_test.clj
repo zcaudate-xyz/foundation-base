@@ -1,6 +1,6 @@
 (ns indigo.client.app.components.inspector-test
-  (:use code.test)
-  (:require [indigo.client.app.components.inspector :refer :all]))
+  (:require [indigo.client.app.components.inspector :refer :all])
+  (:use code.test))
 
 ^{:refer indigo.client.app.components.inspector/Inspector :added "4.0"}
 (fact "TODO")

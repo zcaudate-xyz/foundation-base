@@ -1,15 +1,15 @@
 (ns rt.postgres.client-impl-test
-  (:use code.test)
-  (:require [lib.postgres :as base]
+  (:require [lib.jdbc :as jdbc]
+            [lib.postgres :as base]
             [lib.postgres.connection :as conn]
-            [rt.postgres.client-impl :as client-impl]
             [rt.postgres.client :as client]
-            [rt.postgres.script.builtin :as builtin]
+            [rt.postgres.client-impl :as client-impl]
             [rt.postgres.script.addon :as addon]
+            [rt.postgres.script.builtin :as builtin]
             [rt.postgres.script.test.scratch-v1 :as scratch]
             [std.lang.base.util :as ut]
-            [lib.jdbc :as jdbc]
-            [std.lib :as h]))
+            [std.lib.component :as component])
+  (:use code.test))
 
 ^{:refer rt.postgres.client-impl/raw-eval-pg-return :added "4.0"}
 (fact "returns a regularised result"
@@ -24,7 +24,7 @@
 ^{:refer rt.postgres.client-impl/raw-eval-pg :added "4.0"
   :setup [(def -pg- (client/rt-postgres {:dbname "test-scratch"
                                          :temp :create}))]
-  :teardown (h/stop -pg-)}
+  :teardown (component/stop -pg-)}
 (fact "executes a raw value"
   ^:hidden
   
@@ -35,7 +35,7 @@
 ^{:refer rt.postgres.client-impl/init-ptr-pg :added "4.0"
   :setup [(def -pg- (client/rt-postgres {:dbname "test-scratch"
                                          :mode :dev}))]
-  :teardown (h/stop -pg-)}
+  :teardown (component/stop -pg-)}
 (fact "initiates a pointer in the runtime"
 
   (do (client-impl/init-ptr-pg -pg- scratch/addf))
@@ -98,7 +98,7 @@
 
 ^{:refer rt.postgres.client-impl/invoke-ptr-pg-single :added "4.0"
   :setup [(def -pg- (client/rt-postgres {:dbname "test-scratch"}))]
-  :teardown (h/stop -pg-)}
+  :teardown (component/stop -pg-)}
 (fact "invokes single "
   ^:hidden
   
@@ -195,7 +195,7 @@
 
 ^{:refer rt.postgres.client-impl/invoke-ptr-pg-block :added "4.0"
   :setup [(def -pg- (client/rt-postgres {:dbname "test-scratch"}))]
-  :teardown (h/stop -pg-)}
+  :teardown (component/stop -pg-)}
 (fact "invokes a block"
   ^:hidden
   
@@ -208,7 +208,7 @@
 
 ^{:refer rt.postgres.client-impl/invoke-ptr-pg :added "4.0"
   :setup [(def -pg- (client/rt-postgres {:dbname "test-scratch"}))]
-  :teardown (h/stop -pg-)}
+  :teardown (component/stop -pg-)}
 (fact "invokes a pointer in runtime"
   ^:hidden
   

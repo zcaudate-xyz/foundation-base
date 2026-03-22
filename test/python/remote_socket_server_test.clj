@@ -1,6 +1,6 @@
 (ns python.remote-socket-server-test
-  (:use code.test)
-  (:require [python.remote-socket-server :refer :all]))
+  (:require [python.remote-socket-server :refer :all])
+  (:use code.test))
 
 ^{:refer python.remote-socket-server/handle-connection :added "4.0"}
 (fact "handles the connection")

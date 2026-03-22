@@ -1,9 +1,9 @@
 (ns std.lib.transform.ignore-test
-  (:use code.test)
-  (:require [std.lib.transform :as graph]
-            [std.lib.transform.ignore :as ignore]
+  (:require [example.data :as examples]
             [std.lib.schema :as schema]
-            [example.data :as examples]))
+            [std.lib.transform :as graph]
+            [std.lib.transform.ignore :as ignore])
+  (:use code.test))
 
 ^{:refer std.lib.transform.ignore/wrap-nil-model-ignore :added "3.0"}
 (fact "wraps the normalise-nil function such that any unknown keys are ignored"

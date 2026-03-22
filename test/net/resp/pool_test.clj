@@ -1,11 +1,12 @@
 (ns net.resp.pool-test
-  (:use code.test)
-  (:require [net.resp.pool :refer :all]
+  (:require [net.resp.connection :as conn]
             [net.resp.node :as node]
-            [net.resp.connection :as conn]
+            [net.resp.pool :refer :all]
             [net.resp.wire :as wire]
             [std.concurrent :as cc]
-            [std.lib :as h]))
+            [std.lib.component :as component]
+            [std.lib.foundation :as f])
+  (:use code.test))
 
 (defn create-node
   []
@@ -30,18 +31,18 @@
 (fact "applys a function to connection arguments" ^:hidden
   ^:hidden
   
-  (h/with:lifecycle [|node| {:start  (create-node)
+  (component/with-lifecycle [|node| {:start  (create-node)
                              :stop   node/stop-node}]
-    (h/with:component [|pool| (create-pool)]
+    (component/with [|pool| (create-pool)]
       (pool:apply |pool| cc/req-fn [["PING"]])
       => "PONG")))
 
 ^{:refer net.resp.pool/wrap-pool :added "3.0"}
 (fact "wraps a function taking pool" ^:hidden
 
-  (h/with:component [|pool| (create-pool)]
+  (component/with [|pool| (create-pool)]
     ((wrap-pool (fn [pool]
-                  (h/started? pool)))
+                  (component/started? pool)))
      {:pool |pool|}))
   => true)
 
@@ -49,11 +50,11 @@
 (fact "wraps a function taking pool resource"
    ^:hidden
   
-  (h/with:lifecycle [|node| {:start  (create-node)
+  (component/with-lifecycle [|node| {:start  (create-node)
                              :stop   node/stop-node}]
-    (h/with:component [|pool| (create-pool)]
+    (component/with [|pool| (create-pool)]
       ((wrap-connection
         (fn [connection]
-          (h/string (conn/connection:request-single connection ["PING"]))))
+          (f/string (conn/connection:request-single connection ["PING"]))))
        {:pool |pool|})))
    => "PONG")

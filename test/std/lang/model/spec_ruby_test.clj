@@ -1,8 +1,7 @@
 (ns std.lang.model.spec-ruby-test
-  (:use code.test)
-  (:require [std.lang.model.spec-ruby :as spec-ruby]
-            [std.lang :as l]
-            [std.lib :as h]))
+  (:require [std.lang :as l]
+            [std.lang.model.spec-ruby :as spec-ruby])
+  (:use code.test))
 
 (fact "Ruby Basic Emit"
   (l/emit-as :ruby

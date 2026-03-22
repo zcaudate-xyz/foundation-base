@@ -1,11 +1,10 @@
 (ns rt.basic.server-websocket-test
-  (:use code.test)
-  (:require [rt.basic.server-websocket :refer :all]
+  (:require [org.httpkit.server :as server]
+            [rt.basic.server-websocket :refer :all]
             [rt.basic.type-bench :as bench]
-            [std.lang :as l]
             [std.json :as json]
-            [org.httpkit.server :as server]
-            [std.lib :as h]))
+            [std.lang :as l])
+  (:use code.test))
 
 (l/script- :js
   {:runtime :websocket

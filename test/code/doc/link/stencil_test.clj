@@ -1,6 +1,6 @@
 (ns code.doc.link.stencil-test
-  (:use code.test)
-  (:require [code.doc.link.stencil :refer :all]))
+  (:require [code.doc.link.stencil :refer :all])
+  (:use code.test))
 
 ^{:refer code.doc.link.stencil/transform-stencil :added "3.0"}
 (fact "creates a link to the given tags"

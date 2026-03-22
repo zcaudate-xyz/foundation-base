@@ -1,6 +1,6 @@
 (ns code.test.checker.logic-test
-  (:use [code.test :exclude [any all is-not]])
-  (:require [code.test.checker.logic :refer :all]))
+  (:require [code.test.checker.logic :refer :all])
+  (:use [code.test :exclude [any all is-not]]))
 
 ^{:refer code.test.checker.logic/is-not :added "3.0" :class [:test/checker]}
 (fact "checker that allows negative composition of checkers"

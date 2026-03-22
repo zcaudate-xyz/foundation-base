@@ -1,8 +1,8 @@
 (ns std.dom.find-test
-  (:use code.test)
-  (:require [std.dom.find :refer :all]
-            [std.dom.mock]
-            [std.dom :as dom]))
+  (:require [std.dom :as dom]
+            [std.dom.find :refer :all]
+            [std.dom.mock])
+  (:use code.test))
 
 ^{:refer std.dom.find/dom-match? :added "3.0"}
 (fact "tests dom to match on either function or value"

@@ -1,8 +1,8 @@
 (ns std.block.construct-test
-  (:use code.test)
-  (:require [std.block.construct :refer :all]
-            [std.block.base :as base]
+  (:require [std.block.base :as base]
+            [std.block.construct :refer :all]
             [std.block.parse :as parse])
+  (:use code.test)
   (:refer-clojure :exclude [comment newline empty]))
 
 ^{:refer std.block.construct/void :added "3.0"}

@@ -1,10 +1,9 @@
 (ns std.lang.base.emit-common-grammar-test
-  (:use code.test)
   (:require [std.lang.base.emit-common :as common :refer :all]
             [std.lang.base.emit-data :as data :refer :all]
             [std.lang.base.emit-helper :as helper]
-            [std.lang.base.grammar :as grammar]
-            [std.lib :as h]))
+            [std.lang.base.grammar :as grammar])
+  (:use code.test))
 
 (def +reserved+
   (-> (grammar/build)

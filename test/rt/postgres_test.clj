@@ -1,9 +1,8 @@
 (ns rt.postgres-test
-  (:use code.test)
   (:require [rt.postgres :as pg]
-            [std.lang :as l]
-            [std.lib :as h]
-            [rt.postgres.grammar.common-application :as app]))
+            [rt.postgres.grammar.common-application :as app]
+            [std.lang :as l])
+  (:use code.test))
 
 ^{:refer rt.postgres/purge-postgres :added "4.0"}
 (fact "purges the rt.postgres library. Used for debugging")

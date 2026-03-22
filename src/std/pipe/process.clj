@@ -1,14 +1,15 @@
 (ns std.pipe.process
-  (:require [std.lib :as h]
-            [std.lib.stream :as s]
-            [std.lib.stream.iter :as i]
-            [std.lib.stream.async :as s.async]
+  (:require [std.lib.collection :as collection]
+            [std.lib.function :as fn]
             [std.lib.result :as res]
-            [std.print :as print]
-            [std.string :as str]
-            [std.pipe.util :as ut]
+            [std.lib.stream :as s]
+            [std.lib.stream.async :as s.async]
+            [std.lib.stream.iter :as i]
+            [std.lib.time :as time]
             [std.pipe.display :as display]
-            [std.pipe.monitor :as monitor]))
+            [std.pipe.monitor :as monitor]
+            [std.pipe.util :as ut]
+            [std.print :as print]))
 
 (def ^:dynamic *interrupt* false)
 
@@ -97,7 +98,7 @@
                                       (title params env)
                                       title)))
 
-             start (h/time-ms)
+             start (time/time-ms)
 
              ;; Pipeline Construction
              pipeline-fn (fn [[idx input]]
@@ -120,7 +121,7 @@
                                   (java.util.ArrayList.))
                         (vec))
 
-             elapsed   (h/elapsed-ms start)
+             elapsed   (time/elapsed-ms start)
              warnings  (display/bulk-warnings params items)
              errors    (display/bulk-errors params items)
              results   (display/bulk-results task params items)
@@ -142,7 +143,7 @@
    (let [;; Setup Main Function
          fn-obj (-> task :main :fn)
          argcount (or (-> task :main :argcount)
-                      (let [fcounts (h/arg-count fn-obj)]
+                      (let [fcounts (fn/arg-count fn-obj)]
                         (cond (empty? fcounts) 4
                               (seq fcounts) (apply min fcounts)
                               :else 3)))
@@ -163,7 +164,7 @@
         (and (or (keyword? input)
                  (vector? input)
                  (set? input)
-                 (h/form? input))
+                 (collection/form? input))
              (-> task :item :list))
         [(ut/select-inputs task lookup env input) (assoc params :bulk true)]
 
@@ -174,7 +175,7 @@
   "executes the task"
   {:added "4.0"}
   ([task & args]
-   (let [idx (h/index-at #{:args} args)
+   (let [idx (collection/index-at #{:args} args)
          _    (if (and (neg? idx) (-> task :main :args?))
                 (throw (ex-info "Require `:args` keyword to specify additional arguments"
                                 {:input args})))
@@ -182,7 +183,7 @@
                                  [args []]
                                  [(take idx args) (drop (inc idx) args)])
          [input params lookup env] (apply ut/task-inputs task task-args)
-         params (h/merge-nested (:params task) params)
+         params (collection/merge-nested (:params task) params)
 
          ;; Resolve inputs if needed (handles selector logic)
          [input params] (if (:bulk params)

@@ -1,6 +1,6 @@
 (ns code.doc.collect.base-test
-  (:use code.test)
-  (:require [code.doc.collect.base :refer :all]))
+  (:require [code.doc.collect.base :refer :all])
+  (:use code.test))
 
 ^{:refer code.doc.collect.base/collect-namespaces :added "3.0"}
 (fact "combines `:ns-form` directives into a namespace map for easy referral"

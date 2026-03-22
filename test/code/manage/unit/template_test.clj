@@ -1,7 +1,7 @@
 (ns code.manage.unit.template-test
-  (:use code.test)
   (:require [code.manage.unit.template :refer :all]
-            [code.project :as project]))
+            [code.project :as project])
+  (:use code.test))
 
 ^{:refer code.manage.unit.template/source-namespaces :added "3.0"}
 (fact "returns all source namespaces"

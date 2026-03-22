@@ -1,8 +1,7 @@
 (ns xt.db.impl-cache-test
-  (:use code.test)
   (:require [std.lang :as l]
-            [std.lib :as h]
-            [xt.lang.base-notify :as notify]))
+            [xt.lang.base-notify :as notify])
+  (:use code.test))
 
 (l/script- :lua
   {:runtime :basic

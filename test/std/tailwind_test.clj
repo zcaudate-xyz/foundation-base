@@ -1,8 +1,7 @@
 (ns std.tailwind-test
-  (:require [std.tailwind :refer :all]
-            [std.string :as str]
-            [std.lib :as h]
-            [code.test :refer :all]))
+  (:require [clojure.string]
+            [code.test :refer :all]
+            [std.tailwind :refer :all]))
 
 (def +class-str+ "flex flex-col items-center w-full md:w-1/2")
 
@@ -70,14 +69,14 @@
 
 (fact "render ascii"
   (let [output (render [:div {:class "w-20 h-5 border"} "hello"])]
-    (str/includes? output "+------------------+") => true
-    (str/includes? output "|hello             |") => true))
+    (clojure.string/includes? output "+------------------+") => true
+    (clojure.string/includes? output "|hello             |") => true))
 
 (fact "render nested flex"
   (let [output (render [:div {:class "flex border w-30 h-5"}
                         [:div {:class "w-10 border"} "A"]
                         [:div {:class "w-10 border"} "B"]])]
-    (str/includes? output "|+--------++--------+        |") => true))
+    (clojure.string/includes? output "|+--------++--------+        |") => true))
 
 (fact "render complex layout: sidebar"
   (let [layout [:div {:class "flex w-40 h-10 border"}
@@ -85,9 +84,9 @@
                 [:div {:class "w-20 h-full border"} "Main"]]
         output (render layout)]
     ;; Check structure: Sidebar box and Main box side-by-side
-    (str/includes? output "+--------++------------------+") => true
-    (str/includes? output "||Side") => true
-    (str/includes? output "||Main") => true))
+    (clojure.string/includes? output "+--------++------------------+") => true
+    (clojure.string/includes? output "||Side") => true
+    (clojure.string/includes? output "||Main") => true))
 
 (fact "render complex layout: card"
   (let [card [:div {:class "flex flex-col w-30 h-12 border"}
@@ -95,9 +94,9 @@
               [:div {:class "h-4 w-full border-b"} "Title"]
               [:div {:class "h-4 w-full"} "Desc"]]
         output (render card)]
-    (str/includes? output "+--------------------------+") => true ;; Top border of image
-    (str/includes? output "||Img") => true
-    (str/includes? output "||Title") => true))
+    (clojure.string/includes? output "+--------------------------+") => true ;; Top border of image
+    (clojure.string/includes? output "||Img") => true
+    (clojure.string/includes? output "||Title") => true))
 
 
 ^{:refer std.tailwind/resolve-value :added "4.0"}

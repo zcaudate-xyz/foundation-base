@@ -1,12 +1,9 @@
 (ns mcp-clj.foundation-index.parser
+  (:require [clj-kondo.core :as kondo]
+            [clojure.java.io :as io]
+            [clojure.string :as str])
   "Clojure code parsing using clj-kondo analysis"
-  (:require
-    [clojure.java.io :as io]
-    [clojure.string :as str]
-    [clj-kondo.core :as kondo])
-  (:import
-    [java.io File]
-    [java.security MessageDigest]))
+  (:import [java.io File] [java.security MessageDigest]))
 
 ;; ============================================================================
 ;; File Discovery

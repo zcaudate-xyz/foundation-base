@@ -1,8 +1,9 @@
 (ns python.core.meta
-  (:require [std.fs :as fs]
-            [std.lib :as h]
-            [std.string :as str]
-            [std.html :as html]))
+  (:require [clojure.string]
+            [std.fs :as fs]
+            [std.html :as html]
+            [std.lib.env :as env]
+            [std.lib.os :as os]))
 
 
 (def +root+ "assets/python.core")
@@ -15,14 +16,14 @@
   "fetches the doc containing builtin descriptions"
   {:added "3.0"}
   []
-  (h/sh "wget" +html-url+ "-O" "builtins.html"
+  (os/sh "wget" +html-url+ "-O" "builtins.html"
         {:root (str "resources/" +root+)}))
 
 (defn get-html
   "gets from file or fetch from source"
   {:added "3.0"}
   ([]
-   (or (if-let [res (h/sys:resource +html-path+)]
+   (or (if-let [res (env/sys:resource +html-path+)]
          (slurp res))
        (do (fetch-html)
            (get-html)))))
@@ -43,7 +44,7 @@
   {:added "3.0"}
   ([]
    (let [html (get-html)
-         outline  (html/parse (str/trim html))
+         outline  (html/parse (clojure.string/trim html))
          functions (html/select outline "dl.function")
          props (mapv build-props functions)]
      props)))
@@ -52,7 +53,7 @@
   "gets the builtin map"
   {:added "3.0"}
   ([]
-   (let [builtins (or (if-let [edn (h/sys:resource +edn-path+)]
+   (let [builtins (or (if-let [edn (env/sys:resource +edn-path+)]
                         (read-string edn))
                       (build-builtins))]
      builtins)))

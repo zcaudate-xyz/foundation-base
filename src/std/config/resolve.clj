@@ -1,12 +1,16 @@
 (ns std.config.resolve
-  (:require [std.config.common :as common]
+  (:require [clojure.string]
+            [code.project :as project]
+            [edamame.core :as edn]
+            [std.config.common :as common]
             [std.config.global :as global]
             [std.config.secure :as secure]
-            [std.lib :as h :refer [definvoke]]
-            [std.string :as str]
             [std.fs :as fs]
-            [code.project :as project]
-            [edamame.core :as edn])
+            [std.lib.collection :as collection]
+            [std.lib.env :as env]
+            [std.lib.invoke :as invoke]
+            [std.string.common]
+            [std.string.wrap])
   (:refer-clojure :exclude [resolve load]))
 
 (def +config+  "config.edn")
@@ -174,7 +178,7 @@
      (cond-> (resolve-type type content)
        select (resolve-select select)))))
 
-(definvoke resolve-directive-properties
+(invoke/definvoke resolve-directive-properties
   "reads from system properties
  
    (resolve-directive-properties [:properties \"user.name\"])
@@ -188,7 +192,7 @@
      (resolve-content (System/getProperty property)
                       opts))))
 
-(definvoke resolve-directive-env
+(invoke/definvoke resolve-directive-env
   "reads from system env
  
    (resolve-directive-env [:env \"HOME\"])
@@ -202,7 +206,7 @@
      (resolve-content (System/getenv (or env ""))
                       opts))))
 
-(definvoke resolve-directive-project
+(invoke/definvoke resolve-directive-project
   "reads form the project
  
    (resolve-directive-project [:project :name])
@@ -211,11 +215,11 @@
   [:method {:multi common/-resolve-directive
             :val :project}]
   ([[_ proj opts]]
-   (let [arr ((str/wrap str/split) proj #"\.")]
+   (let [arr ((std.string.wrap/wrap clojure.string/split) proj #"\.")]
      (resolve-content (get-in (global/global :project) arr)
                       opts))))
 
-(definvoke resolve-directive-format
+(invoke/definvoke resolve-directive-format
   "formats values to form a string
  
    (resolve-directive-format [:format [\"http://%s:%s\" \"localhost\" \"8080\"]])
@@ -228,7 +232,7 @@
      (resolve-content (apply format args)
                       opts))))
 
-(definvoke resolve-directive-str
+(invoke/definvoke resolve-directive-str
   "joins values to form a string
  
    (resolve-directive-str [:str [\"hello\"
@@ -240,10 +244,10 @@
             :val :str}]
   ([[_ args opts]]
    (let [args (map resolve args)]
-     (resolve-content ((str/wrap str/joinl) args)
+     (resolve-content ((std.string.wrap/wrap std.string.common/joinl) args)
                       opts))))
 
-(definvoke resolve-directive-or
+(invoke/definvoke resolve-directive-or
   "reads from the first non-nil value
  
    (resolve-directive-or [:or [:env \"SERVER\"] \"<server>\"])
@@ -261,7 +265,7 @@
              out
              (recur (rest args)))))))
 
-(definvoke resolve-directive-case
+(invoke/definvoke resolve-directive-case
   "switches from the selected element
  
    (System/setProperty \"std.config.profile\" \"dev\")
@@ -287,7 +291,7 @@
                  (resolve val)
                  (recur (rest pairs)))))))))
 
-(definvoke resolve-directive-error
+(invoke/definvoke resolve-directive-error
   "throws an error with message
  
    (resolve-directive-error [:error \"errored\" {}])
@@ -298,7 +302,7 @@
   ([[_ msg error]]
    (throw (ex-config msg {}))))
 
-(definvoke resolve-directive-merge
+(invoke/definvoke resolve-directive-merge
   "merges two entries together
  
    (resolve-directive-merge [:merge
@@ -315,11 +319,11 @@
                     nil merge
                     :default merge
                     :nil (fn [& args] (apply merge (reverse args)))
-                    :nested h/merge-nested
-                    :nested-nil h/merge-nested-new)]
+                    :nested collection/merge-nested
+                    :nested-nil collection/merge-nested-new)]
      (apply merge-fn (map resolve args)))))
 
-(definvoke resolve-directive-eval
+(invoke/definvoke resolve-directive-eval
   "evaluates a config form
  
    (System/setProperty \"std.config.items\" \"3\")
@@ -368,7 +372,7 @@
                    input
                    form)))))
 
-(definvoke resolve-directive-root
+(invoke/definvoke resolve-directive-root
   "resolves a directive from the config root
  
    (binding [*current* [{:a {:b [:eval \"hello\"]}}]]
@@ -381,7 +385,7 @@
    (resolve-content (resolve-map (first *current*) val)
                     opts)))
 
-(definvoke resolve-directive-parent
+(invoke/definvoke resolve-directive-parent
   "resolves a directive from the map parent
  
    (binding [*current* [{:a {:b [:eval \"hello\"]}}
@@ -392,11 +396,11 @@
   [:method {:multi common/-resolve-directive
             :val :parent}]
   ([[_ val opts]]
-   (let [arr ((str/wrap str/split) val #"\.")]
+   (let [arr ((std.string.wrap/wrap clojure.string/split) val #"\.")]
      (resolve-content (resolve-map (last (filter map? *current*)) arr)
                       opts))))
 
-(definvoke resolve-directive-global
+(invoke/definvoke resolve-directive-global
   "resolves a directive form the global map
  
    (resolve-directive-global [:global :user.name])
@@ -405,7 +409,7 @@
   [:method {:multi common/-resolve-directive
             :val :global}]
   ([[_ val opts]]
-   (let [arr ((str/wrap str/split) val #"\.")]
+   (let [arr ((std.string.wrap/wrap clojure.string/split) val #"\.")]
      (resolve-content (resolve-map (global/global :all) arr)
                       opts))))
 
@@ -422,7 +426,7 @@
                      :else (throw (ex-config "Not supported" {:input path})))]
      path)))
 
-(definvoke resolve-directive-file
+(invoke/definvoke resolve-directive-file
   "resolves to file content
  
    (resolve-directive-file
@@ -441,7 +445,7 @@
        (resolve-directive output)
        output))))
 
-(definvoke resolve-directive-resource
+(invoke/definvoke resolve-directive-resource
   "resolves to resource content
  
    (resolve-directive-resource
@@ -451,14 +455,14 @@
   [:method {:multi common/-resolve-directive
             :val :resource}]
   ([[_ path opts]]
-   (let [url  (h/sys:resource path)]
+   (let [url  (env/sys:resource path)]
      (let [output (if url
                     (resolve-content (slurp url) opts))]
        (if (directive? output)
          (resolve-directive output)
          output)))))
 
-(definvoke resolve-directive-include
+(invoke/definvoke resolve-directive-include
   "resolves to either current project or config directory
  
    (resolve-directive-include
@@ -471,7 +475,7 @@
    (let [path  (resolve-path path)
          path  (or (first (filter fs/exists? [(fs/path path)
                                               (fs/path @+user-dir+ path)]))
-                   (h/sys:resource path)
+                   (env/sys:resource path)
                    (first (filter fs/exists?
                                   [(fs/path @+hara-dir+ path)])))
          output (if path

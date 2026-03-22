@@ -1,8 +1,9 @@
 (ns code.tool.translate.python-ast
-  (:require [std.make :as make :refer [def.make]]
-            [std.lib :as h]
+  (:require [std.fs :as fs]
             [std.lang :as l]
-            [std.fs :as fs]))
+            [std.lib.env :as env]
+            [std.lib.os :as os]
+            [std.make :as make :refer [def.make]]))
 
 (def +root-dir+
   ".build/code.tool.python-ast")
@@ -75,7 +76,7 @@
 (defn initialise
   []
   (make/build-all PYTHON_AST)
-  (h/p (h/sh {:root +root-dir+
+  (env/p (os/sh {:root +root-dir+
               :env {"PATH" (System/getenv "PATH")}
               :args ["pip3" "install" "ast2json" "--target" "."]})))
 
@@ -86,7 +87,7 @@
    (make/build-all PYTHON_AST) ;; Ensure build is ready
    (let [args (cond-> ["python3" "index.py" input-file]
                 output-file (conj output-file))]
-     (h/sh {:root +root-dir+
+     (os/sh {:root +root-dir+
             :env {"PYTHONPATH" "."
                   "PATH" (System/getenv "PATH")}
             :args args}))))

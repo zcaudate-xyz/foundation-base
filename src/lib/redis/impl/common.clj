@@ -1,7 +1,8 @@
 (ns lib.redis.impl.common
   (:require [net.resp.wire :as wire]
             [std.concurrent :as cc]
-            [std.lib :as h]))
+            [std.lib.foundation :as f]
+            [std.lib.future :as future]))
 
 (defonce ^:dynamic *rt* (atom {}))
 
@@ -19,8 +20,8 @@
   {:added "3.0"}
   ([ns key]
    (if (nil? ns)
-     (h/strn key)
-     (str (h/strn ns) ":" (h/strn key)))))
+     (f/strn key)
+     (str (f/strn ns) ":" (f/strn key)))))
 
 (defn unmake-key
   "removes the namespaced portion
@@ -43,10 +44,10 @@
   "return for default values"
   {:added "3.0"}
   ([val {:keys [async chain post]}]
-   (cond-> (reduce h/call val post)
-     async (-> (h/completed)
-               (h/future:chain chain))
-     (not async) (h/-> (reduce h/call % chain)))))
+   (cond-> (reduce f/call val post)
+     async (-> (future/completed)
+               (future/future:chain chain))
+     (not async) (f/-> (reduce f/call % chain)))))
 
 (defn return:format
   "constructs a return function"

@@ -1,8 +1,8 @@
 (ns jvm.artifact
-  (:require [std.string :as str]
-            [std.lib :refer [definvoke]]
+  (:require [clojure.string]
+            [jvm.artifact.common :as base]
             [jvm.protocol :as protocol.classloader]
-            [jvm.artifact.common :as base]))
+            [std.lib.invoke :as invoke]))
 
 (defn rep->coord
   "encodes the rep to a coordinate
@@ -26,7 +26,7 @@
    => #\"/hara/hara/2.4.0/hara-2.4.0.jar\""
   {:added "3.0"}
   ([{:keys [group artifact version extension]}]
-   (str/join base/*sep*
+   (clojure.string/join base/*sep*
              [base/*local-repo* (.replaceAll ^String group "\\." base/*sep*)
               artifact version (str artifact "-" version "." (or extension "jar"))])))
 
@@ -39,7 +39,7 @@
    => \"hara:hara:2.4.0\""
   {:added "3.0"}
   ([{:keys [group artifact extension version]}]
-   (str/join ":" [group
+   (clojure.string/join ":" [group
                   artifact
                   (if extension
                     (str extension ":" version)
@@ -71,7 +71,7 @@
                  :version \"2.4.0\"})"
   {:added "3.0"}
   ([[name version & {:keys [scope exclusions]}]]
-   (let [[group artifact] (str/split (str name) #"/")
+   (let [[group artifact] (clojure.string/split (str name) #"/")
          artifact (or artifact
                       group)]
      (Rep. group artifact "jar" nil version {} nil scope exclusions))))
@@ -86,14 +86,14 @@
   {:added "3.0"}
   ([x]
    (let [arr (->> (re-pattern base/*sep*)
-                  (str/split (.replaceAll ^String x base/*local-repo* ""))
+                  (clojure.string/split (.replaceAll ^String x base/*local-repo* ""))
                   (remove empty?))
          extension (-> (last arr)
-                       (str/split #"\.")
+                       (clojure.string/split #"\.")
                        last)
          version   (last (butlast arr))
          artifact  (last (butlast (butlast arr)))
-         group     (str/join "." (butlast (butlast (butlast arr))))]
+         group     (clojure.string/join "." (butlast (butlast (butlast arr))))]
      (Rep. group artifact extension nil version {} x nil nil nil nil))))
 
 (defn string->rep
@@ -105,7 +105,7 @@
                  :version \"2.4.0\"})"
   {:added "3.0"}
   ([s]
-   (let [[group artifact extension? classifer? version :as array] (str/split s #":")]
+   (let [[group artifact extension? classifer? version :as array] (clojure.string/split s #":")]
      (case (count array)
        1 (path->rep s)
        2 (Rep. group artifact "jar" nil nil {} nil nil nil)
@@ -137,7 +137,7 @@
   ([obj]
    (protocol.classloader/-rep obj)))
 
-(definvoke rep-default
+(invoke/definvoke rep-default
   "creates the default representation of a artifact
  
    (into {} (rep-default \"hara:hara:2.4.0\"))
@@ -186,7 +186,7 @@
   ([type x]
    (protocol.classloader/-artifact type x)))
 
-(definvoke artifact-default
+(invoke/definvoke artifact-default
   "converts an artifact in any format to the default representation
  
    (artifact-default '[hara/hara \"2.4.0\"])
@@ -199,7 +199,7 @@
   ([_ x]
    (rep x)))
 
-(definvoke artifact-string
+(invoke/definvoke artifact-string
   "converts an artifact in any format to the string representation
  
    (artifact-string '[hara/hara \"2.4.0\"])
@@ -212,7 +212,7 @@
   ([_ x]
    (-> (rep x) rep->string)))
 
-(definvoke artifact-symbol
+(invoke/definvoke artifact-symbol
   "converts an artifact in any format to the symbol representation
  
    (artifact-symbol '[hara/hara \"2.4.0\"])
@@ -225,7 +225,7 @@
   ([_ x]
    (-> (rep x) rep->coord first)))
 
-(definvoke artifact-path
+(invoke/definvoke artifact-path
   "converts an artifact in any format to the path representation
  
    (artifact-path '[hara/hara \"2.4.0\"])
@@ -242,7 +242,7 @@
      (-> (rep x)
          rep->path))))
 
-(definvoke artifact-coord
+(invoke/definvoke artifact-coord
   "converts an artifact in any format to the coord representation
  
    (artifact-coord \"hara:hara:jar:2.4.0\")

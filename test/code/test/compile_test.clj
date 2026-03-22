@@ -1,10 +1,9 @@
 (ns code.test.compile-test
-  (:require [code.test.compile :as compile :refer :all :exclude [=> *last*]]
+  (:require [code.test :refer [contains-in contains]]
+            [code.test.base.context :as ctx]
             [code.test.base.process :as process]
             [code.test.base.runtime :as rt]
-            [code.test.base.context :as ctx]
-            [std.lib :as h]
-            [code.test :refer [contains-in contains]]))
+            [code.test.compile :as compile :refer :all :exclude [=> *last*]]))
 
 ^{:refer code.test.compile/arrow? :added "3.0"}
 (fact "checks if form is an arrow"

@@ -1,6 +1,6 @@
 (ns std.lib.future-test
-  (:use code.test)
   (:require [std.lib.future :as f :refer :all])
+  (:use code.test)
   (:refer-clojure :exclude [future future? catch]))
 
 ^{:refer std.lib.future/completed :added "3.0"}

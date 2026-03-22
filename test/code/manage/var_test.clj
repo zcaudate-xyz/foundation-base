@@ -1,8 +1,8 @@
 (ns code.manage.var-test
-  (:use code.test)
-  (:require [code.manage.var :refer :all]
-            [std.block.navigate :as nav]
-            [code.framework :as base]))
+  (:require [code.framework :as base]
+            [code.manage.var :refer :all]
+            [std.block.navigate :as nav])
+  (:use code.test))
 
 ^{:refer code.manage.var/create-candidates :added "3.0"}
 (fact "creates candidates for search"

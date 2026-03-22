@@ -1,9 +1,9 @@
 (ns code.tool.translate.js-ast-test
-  (:require [code.tool.translate.js-ast :as js-ast]
-            [code.test :refer :all]
+  (:require [code.test :refer :all]
+            [code.tool.translate.js-ast :as js-ast]
             [std.fs :as fs]
             [std.json :as json]
-            [std.lib :as h]
+            [std.lib.os :as os]
             [std.make :as make]))
 
 ^{:refer code.tool.translate.js-ast/initialise :added "4.1"}
@@ -17,7 +17,7 @@
 (fact "generates ast from js file"
   ^:hidden
   
-  (with-redefs [h/sh mock-sh
+  (with-redefs [os/sh mock-sh
                 make/build-all mock-build-all
                 js-ast/+root-dir+ (str (fs/create-tmpdir "js-ast-test"))]
     
@@ -34,10 +34,10 @@
       
       ;; Test with output file
       (js-ast/translate-ast (str tmp-input) tmp-output)
-      (h/json-load (slurp tmp-output))
+      (json/read (slurp tmp-output))
       => {:type "File" :program {:type "Program" :body []} :comments []}
       
       ;; Test without output file (returns sh result)
       (let [res (js-ast/translate-ast (str tmp-input))]
-        (h/json-load (:out res))
+        (json/read (:out res))
         => {:type "File" :program {:type "Program" :body []} :comments []}))))

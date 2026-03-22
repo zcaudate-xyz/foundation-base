@@ -1,5 +1,5 @@
 (ns code.query.common
-  (:require [std.string :as str]
+  (:require [clojure.string]
             [std.lib.walk :as walk]))
 
 (defn any
@@ -32,7 +32,7 @@
         (keys)
         (map name)
         (apply str)
-        (#(str/split % #""))
+        (#(clojure.string/split % #""))
         (map keyword)
         (set)
         (#(-> %

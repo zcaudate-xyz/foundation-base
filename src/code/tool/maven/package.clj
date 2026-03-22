@@ -1,12 +1,11 @@
 (ns code.tool.maven.package
-  (:require [std.fs :as fs]
-            [std.html :as html]
-            [std.string :as str]
-            [jvm.artifact :as artifact]
+  (:require [clojure.string]
             [code.framework.link :as linkage]
-            [std.fs.archive :as archive]
+            [code.project :as project]
+            [jvm.artifact :as artifact]
             [std.fs :as fs]
-            [code.project :as project]))
+            [std.fs.archive :as archive]
+            [std.html :as html]))
 
 (def +interim+ "target/interim")
 
@@ -145,7 +144,7 @@
                           (let [{:keys [group artifact version exclusions scope]}
                                 (artifact/artifact :rep coord)]
                             (str "[" group "/" artifact " " (pr-str version) "]"))))
-                   (str/join "\n   ")) "]\n"
+                   (clojure.string/join "\n   ")) "]\n"
         "  :deploy-repositories [[\"clojars\"\n"
         "                         {:url  \"https://clojars.org/repo\"\n"
         "                          :sign-releases false}]])")))

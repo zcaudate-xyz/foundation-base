@@ -1,14 +1,14 @@
 (ns std.lang.base.emit
-  (:require [std.string :as str]
-            [std.lib :as h]
+  (:require [std.lang.base.emit-block :as block]
             [std.lang.base.emit-common :as common]
-            [std.lang.base.emit-helper :as helper]
-            [std.lang.base.emit-block :as block]
-            [std.lang.base.emit-top-level :as top]
-            [std.lang.base.emit-preprocess :as preprocess]
             [std.lang.base.emit-fn :as fn]
+            [std.lang.base.emit-helper :as helper]
+            [std.lang.base.emit-preprocess :as preprocess]
+            [std.lang.base.emit-top-level :as top]
             [std.lang.base.grammar :as grammar]
-            [std.lang.base.util :as ut]))
+            [std.lang.base.util :as ut]
+            [std.lib.collection :as collection]
+            [std.lib.env :as env]))
 
 (defn default-grammar
   "returns the default grammar
@@ -17,7 +17,7 @@
    => map?"
   {:added "4.0"}
   [& [m]]
-  (h/merge-nested helper/+default+ m))
+  (collection/merge-nested helper/+default+ m))
 
 (def +option-keys+
   [:lang
@@ -104,7 +104,7 @@
                    :staging
                    :input))
         namespace (or namespace
-                      (h/ns-sym))
+                      (env/ns-sym))
         book     (or (if (symbol? book)
                        @(resolve book)
                        book)

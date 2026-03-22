@@ -1,7 +1,6 @@
 (ns std.lang.model.spec-xtalk.fn-ruby-test
-  (:use code.test)
-  (:require [std.lang.model.spec-xtalk.fn-ruby :refer :all]
-            [std.lib :as h]))
+  (:require [std.lang.model.spec-xtalk.fn-ruby :refer :all])
+  (:use code.test))
 
 ^{:refer std.lang.model.spec-xtalk.fn-ruby/ruby-tf-x-len :added "4.1"}
 (fact "ruby-tf-x-len"

@@ -1,8 +1,8 @@
 (ns std.object.element.impl.multi
-  (:require [std.object.element.common :as common]
+  (:require [clojure.string]
             [std.object.element.class :as class]
-            [std.object.element.util :as util]
-            [std.string :as str]))
+            [std.object.element.common :as common]
+            [std.object.element.util :as util]))
 
 (defn get-name
   "all elements in the array have to have the same name
@@ -83,7 +83,7 @@
                 (map common/-element-params)
                 (map (fn [params] (if (empty? params) [] (apply list params))))
                 (sort (fn [x y] (compare (count x) (count y))))
-                (str/join ", ")))))
+                (clojure.string/join ", ")))))
 
 (defmethod common/-element-params :multi
   ([mele]

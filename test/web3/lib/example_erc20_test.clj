@@ -1,6 +1,6 @@
 (ns web3.lib.example-erc20-test
-  (:use code.test)
-  (:require [web3.lib.example-erc20 :refer :all]))
+  (:require [web3.lib.example-erc20 :refer :all])
+  (:use code.test))
 
 ^{:refer web3.lib.example-erc20/make-payment-erc20 :added "4.0"}
 (fact "makes a payment")

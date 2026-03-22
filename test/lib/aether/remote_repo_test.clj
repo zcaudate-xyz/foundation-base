@@ -1,10 +1,8 @@
 (ns lib.aether.remote-repo-test
+  (:require [lib.aether.remote-repo]
+            [std.object :as object])
   (:use code.test)
-  (:require [std.object :as object]
-            [lib.aether.remote-repo])
-  (:import (org.eclipse.aether.repository RemoteRepository
-                                          RemoteRepository$Builder
-                                          RepositoryPolicy)))
+  (:import (org.eclipse.aether.repository RemoteRepository RemoteRepository$Builder RepositoryPolicy)))
 
 ^{:added "3.0"}
 (fact "creates a `RepositoryPolicy` from map"

@@ -1,6 +1,5 @@
 (ns rt.postgres.script.test.scratch-v2
-    (:require [std.lib :as h]
-              [std.lang :as l]))
+  (:require [std.lang :as l]))
 
 (l/script :postgres
   {:require [[rt.postgres :as pg]]

@@ -1,10 +1,7 @@
 (ns jvm.monitor
-  (:require [std.object :as object]
-            [std.lib :as h])
-  (:import (java.lang.management ClassLoadingMXBean CompilationMXBean GarbageCollectorMXBean
-                                 ManagementFactory MemoryMXBean MemoryManagerMXBean
-                                 MemoryPoolMXBean MemoryUsage OperatingSystemMXBean
-                                 RuntimeMXBean ThreadMXBean)))
+  (:require [std.lib.collection :as collection]
+            [std.object :as object])
+  (:import (java.lang.management ClassLoadingMXBean CompilationMXBean GarbageCollectorMXBean ManagementFactory MemoryMXBean MemoryManagerMXBean MemoryPoolMXBean MemoryUsage OperatingSystemMXBean RuntimeMXBean ThreadMXBean)))
 
 (object/map-like
 
@@ -169,7 +166,7 @@
   ([k]
    (cond (= k :all)
          (->> jvm-map
-              (h/map-vals (fn [f]
+              (collection/map-vals (fn [f]
                             (object/to-data (f)))))
 
          (jvm-map k)

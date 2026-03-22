@@ -1,7 +1,7 @@
 (ns std.lib.network-test
-  (:use code.test)
-  (:require [std.lib.network :refer :all]
-            [std.lib.foundation :as h]))
+  (:require [std.lib.foundation :as h]
+            [std.lib.network :refer :all])
+  (:use code.test))
 
 ^{:refer std.lib.network/local-host :added "3.0"}
 (fact "returns the current host"

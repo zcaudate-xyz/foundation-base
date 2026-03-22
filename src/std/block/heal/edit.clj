@@ -1,7 +1,7 @@
 (ns std.block.heal.edit
-  (:require [std.lib :as h]
-            [std.string :as str]
-            [std.block.heal.parse :as parse]))
+  (:require [clojure.string]
+            [std.block.heal.parse :as parse]
+            [std.string.common :as common]))
 
 (defn update-content
   "performs the necessary edits to a string"
@@ -11,7 +11,7 @@
         content
 
         :else
-        (let [lines (str/split-lines content)]
+        (let [lines (clojure.string/split-lines content)]
           (->> edits
                (reduce (fn [lines edit]
                          (let [{:keys [action new-char]} edit
@@ -19,21 +19,21 @@
                                               (dec (:line edit)))
                                new-line  (case action
                                            :replace
-                                           (str/replace-at old-line
+                                           (common/replace-at old-line
                                                            (dec (:col edit))
                                                            new-char)
                                            :insert
-                                           (str/insert-at old-line
+                                           (common/insert-at old-line
                                                           (:col edit)
                                                           new-char)
 
                                            :remove
-                                           (str/replace-at old-line
+                                           (common/replace-at old-line
                                                            (dec (:col edit))
                                                            ""))]
                            (assoc lines (dec (:line edit)) new-line)))
                        lines)
-               (str/join "\n")))))
+               (clojure.string/join "\n")))))
  
 (defn create-mismatch-edits
   "find the actions required to edit the content"

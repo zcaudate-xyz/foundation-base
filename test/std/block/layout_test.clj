@@ -1,8 +1,7 @@
 (ns std.block.layout-test
-  (:use code.test)
-  (:require [std.block.layout :as bind]
-            [std.block.construct :as construct]
-            [std.lib :as h]))
+  (:require [std.block.construct :as construct]
+            [std.block.layout :as bind])
+  (:use code.test))
 
 ^{:refer std.block.layout/layout-hiccup-like :added "4.0"}
 (fact "checks if form is hiccup structure"

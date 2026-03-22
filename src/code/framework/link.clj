@@ -1,17 +1,18 @@
 (ns code.framework.link
-  (:require [std.lib.sort :as sort]
-            [std.lib :as h]
-            [std.fs :as fs]
-            [std.config :as config]
-            [std.config.ext.gpg :deps true]
-            [std.print :as print]
-            [code.project :as project]
-            [code.framework.link.common :as common]
+  (:require [clojure.set]
             [code.framework.link.clj]
             [code.framework.link.cljs]
+            [code.framework.link.common :as common]
             [code.framework.link.java]
+            [code.project :as project]
             [jvm.artifact :as artifact]
-            [jvm.deps :as deps]))
+            [jvm.deps :as deps]
+            [std.config :as config]
+            [std.config.ext.gpg :deps true]
+            [std.fs :as fs]
+            [std.lib.collection :as collection]
+            [std.lib.sort :as sort]
+            [std.print :as print]))
 
 ;; Linkage takes
 ;; - read, where an .edn file consisting of 
@@ -59,7 +60,7 @@
    (let [path   (fs/path root file)]
      (if (fs/exists? path)
        (->> (read-string (slurp path))
-            (h/map-entries (fn [[k entry]]
+            (collection/map-entries (fn [[k entry]]
                              [k (assoc entry :name k)])))
        (throw (ex-info "Path does not exist" {:path path
                                               :input input}))))))
@@ -72,7 +73,7 @@
    => (str (fs/path \"src/std/lib/version.clj\"))"
   {:added "3.0"}
   ([project]
-   (h/pmap-vals (fn [suffix]
+   (collection/pmap-vals (fn [suffix]
                   (project/all-files (:source-paths project)
                                      {:include [suffix]}
                                      project))
@@ -117,7 +118,7 @@
    => coll?"
   {:added "3.0"}
   ([packages lookups]
-   (h/pmap-vals (fn [pkg]
+   (collection/pmap-vals (fn [pkg]
                   (->> lookups
                        (mapcat (fn [[suffix lookup]]
                                  (->> (collect-entries-single pkg lookup)
@@ -137,7 +138,7 @@
   {:added "3.0"}
   ([x heap]
    (keep (fn [{:keys [name entries]}]
-           (let [ol (h/intersection (:entries x)
+           (let [ol (clojure.set/intersection (:entries x)
                                     entries)]
              (if (seq ol)
                [#{name (:name x)} ol])))
@@ -178,7 +179,7 @@
   ([packages lookups]
    (reduce (fn [lookups {:keys [entries]}]
              (reduce (fn [lookups entry]
-                       (h/dissoc-nested lookups entry))
+                       (collection/dissoc-nested lookups entry))
                      lookups
                      entries))
            (reduce-kv (fn [out k v]
@@ -194,7 +195,7 @@
    => (contains-in {:a {:dependencies [['org.clojure/clojure string?]]}})"
   {:added "3.0"}
   ([packages]
-   (h/pmap-vals (fn [{:keys [dependencies] :as package}]
+   (collection/pmap-vals (fn [{:keys [dependencies] :as package}]
                   (->> dependencies
                        (map (fn [artifact]
                               (let [rep     (artifact/artifact :rep artifact)
@@ -209,11 +210,11 @@
   "collects all imports and exports of a package"
   {:added "3.0"}
   ([packages lookups]
-   (h/pmap-vals (fn [{:keys [entries] :as package}]
+   (collection/pmap-vals (fn [{:keys [entries] :as package}]
                   (->> entries
                        (map (fn [entry]
                               (file-linkage (get-in lookups entry))))
-                       (apply merge-with h/union)
+                       (apply merge-with clojure.set/union)
                        (merge package)))
                 packages)))
 
@@ -221,23 +222,23 @@
   "collects all internal dependencies"
   {:added "3.0"}
   ([packages]
-   (let [packages (h/pmap-vals (fn [{:keys [name imports] :as package}]
+   (let [packages (collection/pmap-vals (fn [{:keys [name imports] :as package}]
                                  (->> (dissoc packages name)
                                       (keep (fn [[k {:keys [exports]}]]
-                                              (if-not (empty? (h/intersection imports exports))
+                                              (if-not (empty? (clojure.set/intersection imports exports))
                                                 k)))
                                       (set)
                                       (assoc package :internal)))
                                packages)
         ;; CHECKS FOR CONSISTENCY
-         _  (sort/topological-sort (h/pmap-vals :internal packages))]
+         _  (sort/topological-sort (collection/pmap-vals :internal packages))]
      packages)))
 
 (defn collect-transfers
   "collects all files that are packaged"
   {:added "3.0"}
   ([packages lookups project]
-   (h/pmap-vals (fn [{:keys [entries bundle] :as package}]
+   (collection/pmap-vals (fn [{:keys [entries bundle] :as package}]
                   (let [efiles (map    (fn [[suffix ns :as entry]]
                                          (let [file (get-in lookups entry)]
                                            [file (str (-> (str ns)
@@ -327,7 +328,7 @@
                          (doseq [e (get lookup entry)]
                            (find-deps lookup deps e))))
            deps   (atom #{})
-           lookup (h/map-vals :internal packages)
+           lookup (collection/map-vals :internal packages)
            _  (doseq [entry manifest]
                 (find-deps lookup deps entry))]
        (select-keys packages @deps)))))
@@ -344,7 +345,7 @@
   ([tag project {:keys [packages] :as deploy}]
    (let [tag    (or tag :public)
          {:keys [type repository collect]} (get-in deploy [:releases tag])
-         packages (h/map-entries (fn [[k entry]]
+         packages (collection/map-entries (fn [[k entry]]
                                    [k (assoc entry :name k)])
                                  packages)
          lookups  (create-file-lookups project)]

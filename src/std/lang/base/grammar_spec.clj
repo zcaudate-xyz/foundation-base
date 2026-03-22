@@ -1,6 +1,7 @@
 (ns std.lang.base.grammar-spec
-  (:require [std.lib :as h :refer [defimpl]]
-            [std.string :as str]))
+  (:require [std.lib.collection :as collection]
+            [std.lib.foundation :as f]
+            [std.lib.function :as fn]))
 
 (def ^:dynamic *symbol* nil)
 
@@ -17,14 +18,14 @@
   "formats function inputs"
   {:added "3.0"}
   ([[doc? attr? & body]]
-   (let [[doc attr body] (h/fn:init-args doc? attr? body)
+   (let [[doc attr body] (fn/fn:init-args doc? attr? body)
          body (cond (vector? (first body))
                     body
 
                     (vector? (ffirst body))
                     (first body)
 
-                    :else (h/error "Invalid body" {:body body}))]
+                    :else (f/error "Invalid body" {:body body}))]
      [doc attr body])))
 
 (defn format-defn-mixins
@@ -35,7 +36,7 @@
             (cond (symbol? entry)
                   ((resolve entry) m)
 
-                  (h/form? entry)
+                  (collection/form? entry)
                   (eval entry)
 
                   (map? entry)

@@ -1,15 +1,15 @@
 (ns rt.solidity.client-test
-  (:use code.test)
-  (:require [rt.solidity.client :as client]
-            [rt.solidity.compile-common :as compile-common]
-            [rt.solidity.compile-node :as compile-node]
-            [std.lang :as l]
-            [std.lib :as h]
-            [rt.basic :as basic]
+  (:require [rt.basic :as basic]
             [rt.basic.server-basic :as server]
+            [rt.solidity.client :as client]
+            [rt.solidity.compile-common :as compile-common]
+            [rt.solidity.compile-deploy :as deploy]
+            [rt.solidity.compile-node :as compile-node]
             [rt.solidity.compile-solc :as solc]
             [rt.solidity.env-ganache :as env]
-            [rt.solidity.compile-deploy :as deploy]))
+            [std.lang :as l]
+            [std.lib.component :as component])
+  (:use code.test))
 
 (l/script- :solidity
   {:runtime :web3
@@ -45,7 +45,7 @@
 
 ^{:refer rt.solidity.client/stop-web3 :added "4.0"}
 (fact "stops the solidity rt"
-  (with-redefs [h/stop (fn [_] nil)
+  (with-redefs [component/stop (fn [_] nil)
                 compile-common/set-rt-settings (fn [& _] nil)]
     (client/stop-web3 {:node {}}))
   => {})
@@ -95,7 +95,7 @@
 ^{:refer rt.solidity.client/rt-web3 :added "4.0"}
 (fact "creates an starts a runtime"
   (with-redefs [client/rt-web3:create (fn [m] m)
-                h/start (fn [m] (assoc m :started true))]
+                component/start (fn [m] (assoc m :started true))]
     (client/rt-web3 {}))
   => {:started true})
 

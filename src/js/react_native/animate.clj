@@ -1,6 +1,7 @@
 (ns js.react-native.animate
   (:require [std.lang :as l]
-            [std.lib :as h])
+            [std.lib.foundation :as f]
+            [std.lib.template :as template])
   (:refer-clojure :exclude [delay sequence loop val derive]))
 
 (l/script :js
@@ -11,7 +12,7 @@
              [xt.lang.event-animate :as event-animate]]
    :import [["react-native" :as [* ReactNative]]]})
 
-(h/template-entries [l/tmpl-entry {:type :fragment
+(f/template-entries [l/tmpl-entry {:type :fragment
                                    :base "ReactNative.Animated"
                                    :tag "js"}]
   [decay
@@ -46,7 +47,7 @@
    FlatList
    SectionList])
 
-(h/template-entries [l/tmpl-entry {:type :fragment
+(f/template-entries [l/tmpl-entry {:type :fragment
                                    :base "ReactNative.Easing"
                                    :tag "js"}]
   [step0
@@ -67,7 +68,7 @@
    [easeOut out]
    [easeInOut inOut]])
 
-(h/template-entries [l/tmpl-macro {:base "ReactNative.Animated.Value"
+(f/template-entries [l/tmpl-macro {:base "ReactNative.Animated.Value"
                                    :inst "val"
                                    :tag "js"}]
   [[start [] {:optional [cb]}]
@@ -93,7 +94,7 @@
   "shortcut for Animated.Value"
   {:added "4.0"}
   ([init]
-   (h/$ (React.useCallback (new ReactNative.Animated.Value ~init) []))))
+   (template/$ (React.useCallback (new ReactNative.Animated.Value ~init) []))))
 
 (defn.js isAnimatedValue
   "checks that value is animated"

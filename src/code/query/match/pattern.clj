@@ -1,8 +1,8 @@
 (ns code.query.match.pattern
-  (:require [std.protocol.match :as protocol.match]
+  (:require [code.query.match.impl :as match]
             [code.query.match.optional :as optional]
-            [code.query.match.impl :as match]
-            [std.lib :as h]))
+            [std.lib.collection :as collection]
+            [std.protocol.match :as protocol.match]))
 
 (defn transform-pattern
   "converts an input into an actual matchable pattern
@@ -28,11 +28,11 @@
   ([pattern]
    (cond (:& (meta pattern)) (match/actual-pattern pattern)
          (:% (meta pattern)) (match/eval-pattern pattern)
-         (or (h/lazy-seq? pattern)
+         (or (collection/lazy-seq? pattern)
              (list? pattern))      (apply list (map transform-pattern pattern))
          (vector? pattern)         (vec (map transform-pattern pattern))
          (set? pattern)            (set (map transform-pattern pattern))
-         (h/hash-map? pattern)  (->> pattern
+         (collection/hash-map? pattern)  (->> pattern
                                      (map (fn [[k v]]
                                             [k (transform-pattern v)]))
                                      (into {}))

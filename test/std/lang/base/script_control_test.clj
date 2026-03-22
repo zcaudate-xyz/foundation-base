@@ -1,11 +1,12 @@
 (ns std.lang.base.script-control-test
-  (:use code.test)
-  (:require [std.lang.base.script-control :refer :all]
+  (:require [std.lang :as l]
             [std.lang.base.runtime :as rt]
-            [std.lib :as h]
+            [std.lang.base.script-control :refer :all]
             [std.lang.base.util :as ut]
             [std.lang.model.spec-lua]
-            [std.lang :as l]))
+            [std.lib.context.registry :as reg]
+            [std.lib.context.space :as space])
+  (:use code.test))
 
 ^{:refer std.lang.base.script-control/script-rt-get :added "4.0"}
 (fact "gets the current runtime"
@@ -14,15 +15,15 @@
   (script-rt-get :lua :default {})
   => map?
 
-  (h/p:space-context-list)
+  (space/space:context-list)
   => (contains '[:lang/lua])
 
-  (h/p:registry-rt-list :lang/lua)
+  (reg/registry-rt-list :lang/lua)
   => (contains '(:default))
 
   
   (do (script-rt-stop :lua)
-      (h/p:space-rt-active))
+      (space/space:rt-active))
   => [])
 
 ^{:refer std.lang.base.script-control/script-rt-stop :added "4.0"}

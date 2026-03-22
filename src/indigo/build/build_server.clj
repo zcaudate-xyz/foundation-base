@@ -1,9 +1,8 @@
 (ns indigo.build.build-server
-  (:require [std.make :as make :refer [def.make]]
-            [std.lib :as h]
-            [std.lang :as l]
+  (:require [indigo.client.page-index :as index]
             [indigo.server.pages :as pages]
-            [indigo.client.page-index :as index]))
+            [std.lang :as l]
+            [std.make :as make :refer [def.make]]))
 
 (def.make PROJECT
   {:tag       "indigo.server"

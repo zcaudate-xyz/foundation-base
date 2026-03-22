@@ -1,12 +1,11 @@
 (ns std.block.heal.filename
-  (:require [std.lib :as h]
-            [std.fs :as fs]
-            [std.string :as str]
+  (:require [std.fs :as fs]
+            [std.string.case :as case]
             [std.string.prose :as prose]))
 
 (defn heal-snake-case-filenames
   [root]
-  (doall (for [[orig dir new] (map (juxt identity fs/parent (comp str/snake-case str fs/file-name))
+  (doall (for [[orig dir new] (map (juxt identity fs/parent (comp case/snake-case str fs/file-name))
                                    (keys (fs/list root
                                                   {:recursive true
                                                    :include [".clj$"]})))]

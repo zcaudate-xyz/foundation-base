@@ -1,14 +1,13 @@
 (ns code.ai.server
-  (:require [mcp-clj.mcp-server.core :as mcp-server]
-            [mcp-clj.tools.clj-eval :as clj-eval]
-            [code.ai.server.tool.basic :as basic]
-            [code.ai.server.tool.std-lang :as std-lang]
+  (:require [code.ai.server.tool.basic :as basic]
             [code.ai.server.tool.code-doc :as code-doc]
             [code.ai.server.tool.code-manage :as code-manage]
-            [std.lib :as h]
-            [std.lang :as l]
+            [code.ai.server.tool.std-lang :as std-lang]
+            [mcp-clj.mcp-server.core :as mcp-server]
+            [mcp-clj.tools.clj-eval :as clj-eval]
+            [rt.basic.impl.process-js :as js]
             [rt.basic.impl.process-lua :as lua]
-            [rt.basic.impl.process-js :as js])
+            [std.lang :as l])
   (:import [java.io StringWriter]))
 
 (defonce *server* (atom nil))

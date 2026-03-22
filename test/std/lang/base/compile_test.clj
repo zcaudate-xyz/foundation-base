@@ -1,15 +1,15 @@
 (ns std.lang.base.compile-test
-  (:use code.test)
-  (:require [std.lang.base.compile :refer :all]
+  (:require [rt.postgres.script.test.scratch-v1 :as scratch]
+            [std.fs :as fs]
+            [std.lang.base.compile :refer :all]
             [std.lang.base.impl :as impl]
             [std.lang.base.library :as lib]
             [std.lang.base.library-snapshot :as snap]
             [std.make :as make]
-            [xt.lang.base-lib :as k]
+            [std.make.compile :as compile]
             [xt.lang.base-iter :as it]
-            [rt.postgres.script.test.scratch-v1 :as scratch]
-            [std.fs :as fs]
-            [std.make.compile :as compile]))
+            [xt.lang.base-lib :as k])
+  (:use code.test))
 
 ^{:refer std.lang.base.compile/compile-script :added "4.0"}
 (fact "compiles a script"

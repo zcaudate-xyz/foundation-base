@@ -1,9 +1,8 @@
 (ns std.lang.base.runtime-proxy
-  (:require [std.protocol.context :as protocol.context]
-            [std.protocol.component :as protocol.component]
+  (:require [std.lang.base.util :as ut]
             [std.lib.context.space :as space]
-            [std.lang.base.util :as ut]
-            [std.string :as str]))
+            [std.protocol.component :as protocol.component]
+            [std.protocol.context :as protocol.context]))
 
 (defn- rt-proxy-string
   ([{:keys [namespace redirect lang]}]

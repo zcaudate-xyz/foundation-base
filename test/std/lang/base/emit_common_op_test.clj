@@ -1,9 +1,8 @@
 (ns std.lang.base.emit-common-op-test
-  (:use code.test)
   (:require [std.lang.base.emit-common :as common :refer :all]
             [std.lang.base.emit-helper :as helper]
-            [std.lang.base.grammar :as grammar]
-            [std.lib :as h]))
+            [std.lang.base.grammar :as grammar])
+  (:use code.test))
 
 (def +reserved+
   (-> (grammar/build)

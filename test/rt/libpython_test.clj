@@ -1,10 +1,9 @@
 (ns rt.libpython-test
-  (:use code.test)
-  (:require [rt.libpython :as lp]
-            [std.lib :as h]
-            [std.lang :as l]
+  (:require [libpython-clj2.python :as python]
+            [rt.libpython :as lp]
             [std.concurrent :as cc]
-            [libpython-clj2.python :as python]))
+            [std.lang :as l])
+  (:use code.test))
 
 (l/script- :python
   {:runtime :libpython

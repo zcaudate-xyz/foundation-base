@@ -1,9 +1,9 @@
 (ns std.fs.archive-test
-  (:use code.test)
-  (:require [std.fs.archive :refer :all]
+  (:require [std.fs :as fs]
+            [std.fs.archive :refer :all]
             [std.lib.bin :as binary]
-            [std.fs :as fs]
-            [std.protocol.archive  :as protocol.archive])
+            [std.protocol.archive :as protocol.archive])
+  (:use code.test)
   (:refer-clojure :exclude [list remove]))
 
 ^{:refer std.fs.archive/zip-system? :added "3.0"}

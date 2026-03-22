@@ -1,6 +1,5 @@
 (ns js.lib.datetime
-  (:require [std.lang :as l]
-            [std.lib :as h])
+  (:require [std.lang :as l])
   (:refer-clojure :exclude [print send]))
 
 (l/script :js

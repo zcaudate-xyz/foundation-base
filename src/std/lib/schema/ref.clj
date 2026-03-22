@@ -1,11 +1,11 @@
 (ns std.lib.schema.ref
-  (:require [std.string.common :as str]
-            [std.string.wrap :as wrap]
-            [std.string.path :as path]
-            [std.string.case :as case]
-            [std.string.plural :as plural]
+  (:require [std.lib.foundation :as h]
             [std.lib.schema.find :as find]
-            [std.lib.foundation :as h]))
+            [std.string.case :as case]
+            [std.string.common :as str]
+            [std.string.path :as path]
+            [std.string.plural :as plural]
+            [std.string.wrap :as wrap]))
 
 (def ^:dynamic *ref-fn* nil)
 

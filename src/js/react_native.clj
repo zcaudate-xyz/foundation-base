@@ -1,6 +1,6 @@
 (ns js.react-native
   (:require [std.lang :as l]
-            [std.lib :as h]))
+            [std.lib.foundation :as f]))
 
 (l/script :js
   {:require [[js.core :as j]
@@ -264,24 +264,24 @@
     ActionSheetIOS
     DynamicColorIOS])
 
-(h/template-entries [l/tmpl-entry {:type :fragment
+(f/template-entries [l/tmpl-entry {:type :fragment
                                    :base "ReactNative"
                                    :tag "js"}]
   +rn-component+
   +rn-api+)
 
-(h/template-entries [l/tmpl-entry {:type :fragment
+(f/template-entries [l/tmpl-entry {:type :fragment
                                    :base "ReactNative.Alert"
                                    :tag "js"}]
   [alert
    prompt])
 
-(h/template-entries [l/tmpl-entry {:type :fragment
+(f/template-entries [l/tmpl-entry {:type :fragment
                                    :base "ReactNative.Appearance"
                                    :tag "js"}]
   [getColorScheme])
 
-(h/template-entries [l/tmpl-entry {:type :fragment
+(f/template-entries [l/tmpl-entry {:type :fragment
                                    :base "ReactNative.Vibration"
                                    :tag "js"}]
   [vibrate 
@@ -349,7 +349,7 @@
     RNSVGSvg
     RNSVGForeignObject])
 
-(h/template-entries [l/tmpl-entry {:type :fragment
+(f/template-entries [l/tmpl-entry {:type :fragment
                                    :base "RNSvg"
                                    :tag "js"}]
   +svg+)
@@ -378,7 +378,7 @@
     CommonActions
     TabActions])
 
-(h/template-entries [l/tmpl-entry {:type :fragment
+(f/template-entries [l/tmpl-entry {:type :fragment
                                    :base "RNNav"
                                    :tag "js"}]
   +nav+)
@@ -389,7 +389,7 @@
 
 (def$.js createBottomTabNavigator RNNavTabs.createBottomTabNavigator)
 
-(h/template-entries [l/tmpl-macro {:base "RNNav"
+(f/template-entries [l/tmpl-macro {:base "RNNav"
                                    :inst "nav"
                                    :tag "js"}]
   [[[navAddListener addListener] [type cb]]
@@ -432,7 +432,7 @@
 ;;
 
 
-(h/template-entries [l/tmpl-entry {:type :fragment
+(f/template-entries [l/tmpl-entry {:type :fragment
                                      :base "RNGestureHandler"
                                      :tag "js"}]
   [Swipeable
@@ -443,7 +443,7 @@
    FlingGestureHandler
    PinchGestureHandler])
 
-(h/template-entries [l/tmpl-entry {:type :fragment
+(f/template-entries [l/tmpl-entry {:type :fragment
                                      :base "RNSafeArea"
                                      :tag "js"}]
   [SafeAreaView

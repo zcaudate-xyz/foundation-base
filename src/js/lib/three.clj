@@ -1,11 +1,11 @@
 (ns js.lib.three
   (:require [std.lang :as l]
-            [std.lib :as h]))
+            [std.lib.foundation :as f]))
 
 (l/script :js
   {:import [["three" :as [* Three]]]})
 
-(h/template-entries [l/tmpl-entry {:type :fragment
+(f/template-entries [l/tmpl-entry {:type :fragment
                                    :base "Three"
                                    :tag "js"}]
   [ACESFilmicToneMapping

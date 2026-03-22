@@ -1,12 +1,15 @@
 (ns rt.basic.type-twostep
-  (:require [std.protocol.context :as protocol.context]
+  (:require [clojure.string]
+            [rt.basic.type-common :as common]
+            [std.fs :as fs]
+            [std.json :as json]
             [std.lang.base.pointer :as ptr]
             [std.lang.base.runtime :as default]
-            [std.lib :as h :refer [defimpl]]
-            [std.json :as json]
-            [std.string :as str]
-            [std.fs :as fs]
-            [rt.basic.type-common :as common]))
+            [std.lib.collection :as collection]
+            [std.lib.foundation :as f]
+            [std.lib.impl :as impl]
+            [std.lib.os :as os]
+            [std.protocol.context :as protocol.context]))
 
 (defn sh-exec
   "basic function for executing the compile and run process"
@@ -19,19 +22,19 @@
                                  extension
                                  output-flag]
                           :as opts
-                          :or {trim str/trim-newlines}}]
+                          :or {trim clojure.string/trim-newline}}]
   (let [tmp-exec (java.io.File/createTempFile "tmp" "")
         tmp-file (str tmp-exec
                       "."
                       (or extension
-                          (h/error "Requires File Extension"
+                          (f/error "Requires File Extension"
                                    opts)))
         _   (spit tmp-file input-body)
-        _   (h/sh {:args (if output-flag
+        _   (os/sh {:args (if output-flag
                            (vec (concat input-args [output-flag (str tmp-exec) (str tmp-file)]))
                            (conj input-args (str tmp-file)))
                    :root (str (fs/parent tmp-file))})]
-    (str (h/sh {:args [(str "./" (fs/file-name tmp-exec))]
+    (str (os/sh {:args [(str "./" (fs/file-name tmp-exec))]
                 :root (str (fs/parent tmp-file))
                 }))))
 
@@ -53,7 +56,7 @@
 (defn- rt-twostep-string [{:keys [lang runtime program]}]
   (str "#rt.twostep" [lang runtime program]))
 
-(defimpl RuntimeTwostep [id]
+(impl/defimpl RuntimeTwostep [id]
   :string rt-twostep-string
   :protocols [protocol.context/IContext
               :prefix "default/default-"
@@ -67,7 +70,7 @@
    (rt-twostep-setup lang program process exec :twostep))
   ([lang program process exec context]
    (let [program (common/get-program-default lang context program)
-         process (h/merge-nested (common/get-options lang context program)
+         process (collection/merge-nested (common/get-options lang context program)
                                  process)
          exec    (or exec
                      (common/get-program-exec lang context program))]
@@ -86,10 +89,10 @@
   (let [[program process exec] (rt-twostep-setup lang program process exec :twostep)
         flags   (common/get-program-flags lang program)
         _   (cond (not (:twostep flags))
-                  (h/error "Twostep not available" {:flags flags
+                  (f/error "Twostep not available" {:flags flags
                                                     :program program}))]
     (map->RuntimeTwostep (assoc m
-                                :id (or id (h/sid))
+                                :id (or id (f/sid))
                                 :runtime runtime
                                 :program program
                                 :exec exec
@@ -113,16 +116,16 @@
   (try (let [args (if pipe
                     input-args
                     (conj input-args input-body))
-             proc (h/sh {:wait false
+             proc (os/sh {:wait false
                          :args args
                          :root root})
              _    (cond-> proc
-                    pipe  (doto (h/sh-write input-body) (h/sh-close))
-                    :then (h/sh-wait))
-             {:keys [err out exit] :as ret} (h/sh-output proc)]
+                    pipe  (doto (os/sh-write input-body) (os/sh-close))
+                    :then (os/sh-wait))
+             {:keys [err out exit] :as ret} (os/sh-output proc)]
          (cond raw
-               [exit (or (not-empty (str/split-lines (trim out)))
-                         (str/split-lines (trim err)))]
+               [exit (or (not-empty (clojure.string/split-lines (trim out)))
+                         (clojure.string/split-lines (trim err)))]
 
                :else
                (trim out)))

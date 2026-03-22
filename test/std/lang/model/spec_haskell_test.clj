@@ -1,9 +1,8 @@
 (ns std.lang.model.spec-haskell-test
-  (:use code.test)
   (:require [std.lang :as l]
-            [std.lib :as h]
             [std.lang.base.script :as script]
-            [std.lang.model.spec-haskell :as spec-haskell]))
+            [std.lang.model.spec-haskell :as spec-haskell])
+  (:use code.test))
 
 (l/script- :haskell
   {:config {:book spec-haskell/+book+}})

@@ -1,13 +1,12 @@
 (ns std.block.layout
-  (:require [std.block.layout.common :as common]
-            [std.block.layout.estimate :as est]
-            [std.block.construct :as construct]
+  (:require [clojure.string]
             [std.block.base :as base]
-            [std.string :as str]
-            [std.lib.function :as f]
+            [std.block.construct :as construct]
+            [std.block.layout.common :as common]
+            [std.block.layout.estimate :as est]
             [std.lib.collection :as c]
-            [std.lib.walk :as walk]
-            [std.lib :as h]))
+            [std.lib.function :as f]
+            [std.lib.walk :as walk]))
 
 (def +bindings+
   '#{if let while ns 
@@ -36,13 +35,13 @@
   [x]
   (or (+defs+ x)
       (and (symbol? x)
-           (str/starts-with? (name x) "def"))))
+           (clojure.string/starts-with? (name x) "def"))))
 
 (defn- is-binding?
   [x]
   (or (+bindings+ x)
       (and (symbol? x)
-           (str/includes? (name x) "with"))))
+           (clojure.string/includes? (name x) "with"))))
 
 (defn layout-hiccup-like
   "checks if form is hiccup structure"
@@ -64,7 +63,7 @@
   {:added "4.0"}
   [form is-multiline]
   (if is-multiline
-    (cond (h/form? form)
+    (cond (c/form? form)
           (cond (coll? (first form))
                 {:col-from  0
                  :col-start 1
@@ -161,9 +160,9 @@
   (let [top-index  (or (if (vector? doc?) 2)
                        (if (vector? attr?) 3)
                        (if (vector? (first body)) 4))
-        list-index (or (if (h/form? doc?) 2)
-                       (if (h/form? attr?) 3)
-                       (if (h/form? (first body)) 4))]
+        list-index (or (if (c/form? doc?) 2)
+                       (if (c/form? attr?) 3)
+                       (if (c/form? (first body)) 4))]
     (if top-index
       (apply list
              (concat (take top-index form)
@@ -185,8 +184,8 @@
   [[_ sym? & body :as form]]
   (let [top-index  (or (if (vector? sym?) 1)
                        (if (vector? (first body)) 2))
-        list-index (or (if (h/form? sym?) 1)
-                       (if (h/form? (first body)) 2))]
+        list-index (or (if (c/form? sym?) 1)
+                       (if (c/form? (first body)) 2))]
     (if top-index
       (apply list
              (concat (take top-index form)
@@ -203,7 +202,7 @@
 (defn layout-annotate-svg-path
   [[tag attrs & more :as form]]
   (let [path   (with-meta
-                 (str/split (:d attrs)
+                 (clojure.string/split (:d attrs)
                             #" ")
                  {:tag :vector
                   :spec {:columns 5}})]
@@ -213,7 +212,7 @@
   "adds metadata annotation to form"
   {:added "4.0"}
   [form]
-  (cond (h/form? form)
+  (cond (c/form? form)
         (cond ('#{fn} (first form))
               (layout-annotate-fn-anon form)
 
@@ -256,7 +255,7 @@
                            (common/layout-multiline-hiccup form nopts)
                            (common/layout-multiline-vector form nopts))
 
-          (h/form? form) (common/layout-multiline-list form nopts)
+          (c/form? form) (common/layout-multiline-list form nopts)
           
           :else (construct/block form))))
 

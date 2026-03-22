@@ -1,14 +1,13 @@
 (ns std.dom.local-test
-  (:use code.test)
-  (:require [std.lib :as h]
-            [std.lib.mutable :as mut]
-            [std.dom.local :refer :all]
-            [std.dom.common :as base]
+  (:require [std.dom.common :as base]
+            [std.dom.common-test]
             [std.dom.component :refer [defcomp]]
             [std.dom.impl :as impl]
+            [std.dom.local :refer :all]
             [std.dom.react :as react]
             [std.dom.type :as type]
-            [std.dom.common-test]))
+            [std.lib.mutable :as mut])
+  (:use code.test))
 
 (defcomp :test/carrot
   [:local {:handler  prn

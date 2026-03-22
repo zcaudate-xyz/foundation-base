@@ -1,10 +1,8 @@
 (ns lib.jdbc.resultset
-  "ResultSet conversion functions."
   (:require [clojure.string :as str]
             [lib.jdbc.protocol :as protocol])
-  (:import java.sql.PreparedStatement
-           java.sql.ResultSetMetaData
-           java.sql.ResultSet))
+  "ResultSet conversion functions."
+  (:import java.sql.PreparedStatement java.sql.ResultSetMetaData java.sql.ResultSet))
 
 (defn result-set->lazyseq
   "Function that wraps result in a lazy seq. This function

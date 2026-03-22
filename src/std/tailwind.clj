@@ -1,6 +1,6 @@
 (ns std.tailwind
-  (:require [std.string :as str]
-            [std.lib :as h]))
+  (:require [clojure.string]
+            [std.lib.foundation :as f]))
 
 (def +media+
   {:sm "640px"
@@ -152,7 +152,7 @@
    {:regex #"^object-(contain|cover|fill|none|scale-down)$"
     :fn (fn [[_ v]] {:object-fit (keyword v)})}
    {:regex #"^object-(.+)$"
-    :fn (fn [[_ v]] {:object-position (str/replace v "-" " ")})}
+    :fn (fn [[_ v]] {:object-position (clojure.string/replace v "-" " ")})}
 
    ;; Overflow
    {:regex #"^overflow-(auto|hidden|clip|visible|scroll)$"
@@ -207,16 +207,16 @@
     :fn (fn [[_ v]] {:grid-template-rows (if (= v "none") "none" (if (re-matches #"\d+" v) (str "repeat(" v ", minmax(0, 1fr))") (resolve-value v nil)))})}
    {:regex #"^col-(auto|span-.+|start-.+|end-.+)$"
     :fn (fn [[_ v]] {:grid-column (cond (= v "auto") "auto"
-                                       (str/starts-with? v "span-") (let [n (subs v 5)] (if (= n "full") "1 / -1" (str "span " n " / span " n)))
-                                       (str/starts-with? v "start-") (subs v 6)
-                                       (str/starts-with? v "end-") (subs v 4))})}
+                                       (clojure.string/starts-with? v "span-") (let [n (subs v 5)] (if (= n "full") "1 / -1" (str "span " n " / span " n)))
+                                       (clojure.string/starts-with? v "start-") (subs v 6)
+                                       (clojure.string/starts-with? v "end-") (subs v 4))})}
    {:regex #"^row-(auto|span-.+|start-.+|end-.+)$"
     :fn (fn [[_ v]] {:grid-row (cond (= v "auto") "auto"
-                                    (str/starts-with? v "span-") (let [n (subs v 5)] (if (= n "full") "1 / -1" (str "span " n " / span " n)))
-                                    (str/starts-with? v "start-") (subs v 6)
-                                    (str/starts-with? v "end-") (subs v 4))})}
+                                    (clojure.string/starts-with? v "span-") (let [n (subs v 5)] (if (= n "full") "1 / -1" (str "span " n " / span " n)))
+                                    (clojure.string/starts-with? v "start-") (subs v 6)
+                                    (clojure.string/starts-with? v "end-") (subs v 4))})}
    {:regex #"^grid-flow-(.+)$"
-    :fn (fn [[_ v]] {:grid-auto-flow (str/replace v "-" " ")})}
+    :fn (fn [[_ v]] {:grid-auto-flow (clojure.string/replace v "-" " ")})}
    {:regex #"^auto-cols-(.+)$"
     :fn (fn [[_ v]] {:grid-auto-columns (resolve-value v {"auto" "auto" "min" "min-content" "max" "max-content" "fr" "minmax(0, 1fr)"})})}
    {:regex #"^auto-rows-(.+)$"
@@ -242,11 +242,11 @@
    {:regex #"^self-(auto|start|end|center|stretch|baseline)$"
     :fn (fn [[_ v]] {:align-self (if (contains? #{"start" "end"} v) (str "flex-" v) v)})}
    {:regex #"^place-content-(.+)$"
-    :fn (fn [[_ v]] {:place-content (str/replace v "-" " ")})}
+    :fn (fn [[_ v]] {:place-content (clojure.string/replace v "-" " ")})}
    {:regex #"^place-items-(.+)$"
-    :fn (fn [[_ v]] {:place-items (str/replace v "-" " ")})}
+    :fn (fn [[_ v]] {:place-items (clojure.string/replace v "-" " ")})}
    {:regex #"^place-self-(.+)$"
-    :fn (fn [[_ v]] {:place-self (str/replace v "-" " ")})}
+    :fn (fn [[_ v]] {:place-self (clojure.string/replace v "-" " ")})}
 
    ;; Sizing
    {:regex #"^w-(.+)$"
@@ -295,7 +295,7 @@
 
 (defn parse-token [token]
   (let [[_ mod base] (re-find #"(?:(sm|md|lg|xl|2xl):)?(.+)" token)]
-    (if (and base (not (str/blank? base)))
+    (if (and base (not (clojure.string/blank? base)))
       (if-let [props (match-class base)]
         (if mod
           {:media {(keyword mod) props}}
@@ -311,7 +311,7 @@
 (defn parse
   "Parses a string of Tailwind classes and returns a layout map."
   [class-str]
-  (let [tokens (-> class-str str/trim (str/split #"\s+"))]
+  (let [tokens (-> class-str clojure.string/trim (clojure.string/split #"\s+"))]
     (reduce (fn [acc token]
               (if-let [res (parse-token token)]
                 (deep-merge acc res)
@@ -361,21 +361,21 @@
         (draw-point x2 y2 (:br +border-chars+)))))
 
 (defn render-canvas-str [canvas]
-  (str/join "\n" (map #(apply str %) canvas)))
+  (clojure.string/join "\n" (map #(apply str %) canvas)))
 
 (defn parse-unit [v parent-dim]
   (cond (nil? v) nil
         (number? v) v
         (string? v)
-        (cond (str/ends-with? v "%")
+        (cond (clojure.string/ends-with? v "%")
               (int (* (/ (Double/parseDouble (subs v 0 (dec (count v)))) 100.0) parent-dim))
-              (str/ends-with? v "rem")
+              (clojure.string/ends-with? v "rem")
               (int (* (Double/parseDouble (subs v 0 (- (count v) 3))) 4)) ;; 1rem = 4 chars
-              (str/ends-with? v "px")
+              (clojure.string/ends-with? v "px")
               1 ;; 1px = 1 char
               (= v "full") parent-dim
               (re-matches #"\d+" v) (Integer/parseInt v)
-              :else (or (h/parse-long v) 0))
+              :else (or (f/parse-long v) 0))
         :else 0))
 
 (defn measure-node [node parent-w]
@@ -392,7 +392,7 @@
               is-col (or (= (:flex-direction props) :column)
                          (= (:flex-direction props) :column-reverse))
 
-              has-border (or (str/includes? (:class attrs "") "border") (boolean (:border props)))
+              has-border (or (clojure.string/includes? (:class attrs "") "border") (boolean (:border props)))
 
               avail-w (let [base (or fixed-w parent-w 80)]
                         (if has-border (- base 2) base))

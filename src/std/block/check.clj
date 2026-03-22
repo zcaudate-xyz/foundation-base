@@ -1,6 +1,6 @@
 (ns std.block.check
-  (:require [std.lib.foundation :as h]
-            [std.lib.collection :as c]))
+  (:require [std.lib.collection :as c]
+            [std.lib.foundation :as h]))
 
 (def ^:dynamic *boundaries*
   #{\" \: \; \' \@ \^ \` \~ \( \) \[ \] \{ \} \\ nil})

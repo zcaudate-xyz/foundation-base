@@ -1,7 +1,7 @@
 (ns std.image.awt.common-test
-  (:use code.test)
   (:require [std.image.awt.common :refer :all]
-            [std.image.base.util :as util]))
+            [std.image.base.util :as util])
+  (:use code.test))
 
 ^{:refer std.image.awt.common/image-size :added "3.0"}
 (fact "returns the size of the BufferedImage"

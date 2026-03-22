@@ -1,6 +1,5 @@
 (ns js.cell.base-internal
-  (:require [std.lang :as l]
-            [std.lib :as h]))
+  (:require [std.lang :as l]))
 
 (l/script :js
   {:require [[js.core :as j]

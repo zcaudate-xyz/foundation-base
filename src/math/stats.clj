@@ -1,10 +1,10 @@
 (ns math.stats
   (:require [math.stats.distribution :as distribution]
             [math.stats.normality :as normality]
-            [std.lib :as h])
+            [std.lib.foundation :as f])
   (:refer-clojure :exclude [random-sample]))
 
-(h/intern-in distribution/random-sample
+(f/intern-in distribution/random-sample
              distribution/probability
              distribution/cumulative
 

@@ -1,11 +1,8 @@
 (ns mcp-clj.in-memory-transport.shared
+  (:require [mcp-clj.in-memory-transport.atomic :as atomic]
+            [mcp-clj.in-memory-transport.queue :as queue])
   "Shared transport state for in-memory MCP client/server communication"
-  (:require
-    [mcp-clj.in-memory-transport.atomic :as atomic]
-    [mcp-clj.in-memory-transport.queue :as queue])
-  (:import
-    (java.util.concurrent
-      CompletableFuture)))
+  (:import (java.util.concurrent CompletableFuture)))
 
 (defrecord SharedTransport
   [client-to-server-queue ; LinkedBlockingQueue for client->server messages

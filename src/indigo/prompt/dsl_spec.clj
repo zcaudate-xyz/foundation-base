@@ -1,10 +1,10 @@
 (ns indigo.prompt.dsl-spec
-  (:require [std.lib :as h]
-            [std.lang :as l]
+  (:require [clojure.string]
+            [std.block.layout :as layout]
             [std.fs :as fs]
-            [std.string :as str]
-            [std.string.prose :as prose]
-            [std.block.layout :as layout]))
+            [std.lang :as l]
+            [std.string.common :as common]
+            [std.string.prose :as prose]))
 
 (l/script :js
   {:import  [["lucide-react" :as #{Input Button}]
@@ -41,12 +41,12 @@
   [{:keys [dsl js desc op]}]
   (str (if desc (str desc "\n"))
        "%JS\n"
-       (str/join ""
+       (clojure.string/join ""
                  (map (fn [val]
                         (str ": " (prose/indent-rest val 2) "\n"))
                       js))
        "%DSL\n"
-       (str/join ""
+       (clojure.string/join ""
                  (map (fn [val]
                         (str ": " (prose/indent-rest val 2) "\n"))
                       dsl))))
@@ -58,19 +58,19 @@
        
        (->> (partition 2 example-forms)
             (map (fn [[k arr]]
-                   (str "### " (str/capital-case (name k))
+                   (str "### " (common/capital-case (name k))
                         "\n\n"
-                        (str/join "\n\n"
+                        (clojure.string/join "\n\n"
                                   (map create-spec-description arr)))))
-            (str/join "\n\n"))
+            (clojure.string/join "\n\n"))
 
        "\n\n"
-       (str/join "\n\n" (map slurp inputs))
+       (clojure.string/join "\n\n" (map slurp inputs))
        "\n\n"
        (->> example-files
             (map (fn [[k [clj-file
                           js-file]]]
-                   (str "### Example - " (str/capital-case (name k)) "\n"
+                   (str "### Example - " (common/capital-case (name k)) "\n"
                         "```clojure\n"
                         clj-file
                         "```\n"
@@ -78,7 +78,7 @@
                         "```javascript\n"
                         js-file
                         "```\n")))
-            (str/join "\n\n"))))
+            (clojure.string/join "\n\n"))))
 
 
 (def +meta+
@@ -266,7 +266,7 @@
   "creates the actual spec"
   {:added "4.0"}
   []
-  (create-spec-main (str/join-lines +meta+)
+  (create-spec-main (prose/join-lines +meta+)
                     (spec-example-forms)
                     ["resources/assets/indigo/prompts/js_dsl_ns_spec.md"
                      "resources/assets/indigo/prompts/js_dsl_figma_amendments.md"

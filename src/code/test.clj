@@ -1,17 +1,17 @@
 (ns code.test
-  (:require [code.test.checker.common :as common]
-            [code.test.checker.collection :as coll]
-            [code.test.checker.logic :as logic]
-            [code.test.base.context :as context]
-            [code.test.base.runtime :as rt]
+  (:require [code.test.base.context :as context]
             [code.test.base.listener :as listener]
             [code.test.base.print :as print]
+            [code.test.base.runtime :as rt]
+            [code.test.checker.collection :as coll]
+            [code.test.checker.common :as common]
+            [code.test.checker.logic :as logic]
             [code.test.compile :as compile]
             [code.test.manage :as manage]
             [code.test.task :as task]
-            [std.lib :as h :refer [definvoke]]))
+            [std.lib.foundation :as f]))
 
-(h/intern-in  common/throws
+(f/intern-in  common/throws
               common/exactly
               common/approx
               common/satisfies

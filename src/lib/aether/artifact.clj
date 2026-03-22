@@ -1,13 +1,11 @@
 (ns lib.aether.artifact
   (:require [jvm.artifact :as artifact]
             [jvm.protocol :as protocol.classloader]
-            [std.lib :refer [definvoke]]
+            [std.lib.invoke :as invoke]
             [std.object :as object])
-  (:import (org.eclipse.aether.artifact Artifact DefaultArtifact)
-           (org.eclipse.aether.metadata Metadata Metadata$Nature DefaultMetadata)
-           (org.eclipse.aether.graph Exclusion)))
+  (:import (org.eclipse.aether.artifact Artifact DefaultArtifact) (org.eclipse.aether.metadata Metadata Metadata$Nature DefaultMetadata) (org.eclipse.aether.graph Exclusion)))
 
-(definvoke rep-eclipse
+(invoke/definvoke rep-eclipse
   "creates a rep from eclipse artifact
  
    (str (rep-eclipse (object/from-data \"hara:hara:2.8.4\" DefaultArtifact)))
@@ -26,7 +24,7 @@
                    nil
                    nil)))
 
-(definvoke artifact-eclipse
+(invoke/definvoke artifact-eclipse
   "creates an eclipse artifact
  
    (artifact-eclipse \"hara:hara:jar:2.8.4\")
@@ -62,7 +60,7 @@
 
 (defonce +metadata-nature+ Metadata$Nature/RELEASE)
 
-(definvoke rep-eclipse-metadata
+(invoke/definvoke rep-eclipse-metadata
   "creates a rep from an eclipse metadata instance
  
    (str (rep-eclipse-metadata (object/from-data \"hara:hara:2.8.4\" DefaultMetadata)))
@@ -81,7 +79,7 @@
                    nil
                    nil)))
 
-(definvoke artifact-eclipse-metadata
+(invoke/definvoke artifact-eclipse-metadata
   "creates an eclipse metadata instance
  
    (artifact-eclipse-metadata \"hara:hara:jar:2.8.4\")

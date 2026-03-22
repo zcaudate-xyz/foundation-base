@@ -5,8 +5,9 @@
             [std.dom.item :as item]
             [std.dom.type :as type]
             [std.dom.update :as update]
-            [std.lib.mutable :as mut :refer [defmutable]]
-            [std.lib :as h :refer [definvoke]]))
+            [std.lib.collection :as collection]
+            [std.lib.invoke :as invoke]
+            [std.lib.mutable :as mut :refer [defmutable]]))
 
 (declare mock-format)
 
@@ -54,7 +55,7 @@
   ([{:keys [tag props] :as item}] 
    (let [fmt-fn  (fn [obj] (if (mock? obj) (mock-format obj) obj))
         {:keys [key children]} (base/dom-children item)
-        props  (h/map-vals (fn [p]
+        props  (collection/map-vals (fn [p]
                              (cond (sequential? p)
                                    (mapv fmt-fn p)
                                    
@@ -64,7 +65,7 @@
       (apply vector tag children)
       (apply vector tag props children)))))
 
-(definvoke item-props-delete-mock
+(invoke/definvoke item-props-delete-mock
   "custom props delete function for mock item
  
    (-> (item-props-delete-mock :mock/pane
@@ -78,7 +79,7 @@
   ([tag item props]
    (apply mut/mutable:update item :props dissoc (keys props))))
 
-(definvoke item-props-set-mock
+(invoke/definvoke item-props-set-mock
   "custom props update function for mock item
  
    (-> (item-props-set-mock :mock/pane
@@ -92,7 +93,7 @@
   ([tag item props]
    (mut/mutable:update item :props merge props)))
 
-(definvoke item-set-list-mock
+(invoke/definvoke item-set-list-mock
   "custom props set list function for mock item
  
    (-> (item-set-list-mock :mock/pane

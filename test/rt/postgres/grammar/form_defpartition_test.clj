@@ -1,8 +1,7 @@
 (ns rt.postgres.grammar.form-defpartition-test
-  (:use code.test)
-  (:require [rt.postgres.grammar.form-defpartition :as form-defpartition]
-            [rt.postgres.grammar.common :as common] ;; for pg-deftype-ref-name used inside
-            [std.lib :as h]))
+  (:require [rt.postgres.grammar.common :as common]
+            [rt.postgres.grammar.form-defpartition :as form-defpartition])
+  (:use code.test))
 
 ^{:refer rt.postgres.grammar.form-defpartition/pg-partition-name :added "4.1"}
 (fact "constructs partition name"

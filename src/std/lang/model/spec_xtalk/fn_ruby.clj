@@ -1,5 +1,5 @@
 (ns std.lang.model.spec-xtalk.fn-ruby
-  (:require [std.lib :as h]))
+  (:require [std.lib.template :as template]))
 
 ;;
 ;; CORE
@@ -134,7 +134,7 @@
 
 (defn ruby-tf-x-return-encode
   ([[_ out id key]]
-   (h/$ (do (:- "require 'json'")
+   (template/$ (do (:- "require 'json'")
             (try
               (return (JSON.generate {:id  ~id
                                       :key ~key
@@ -148,7 +148,7 @@
 
 (defn ruby-tf-x-return-wrap
   ([[_ f encode-fn]]
-   (h/$ (do (:- "require 'json'")
+   (template/$ (do (:- "require 'json'")
             (try
               (:= out (. ~f (call)))
               (catch e
@@ -158,7 +158,7 @@
 
 (defn ruby-tf-x-return-eval
   ([[_ s wrap-fn]]
-   (h/$ (return (~wrap-fn (fn []
+   (template/$ (return (~wrap-fn (fn []
                             (return (eval ~s))))))))
 
 (def +ruby-return+

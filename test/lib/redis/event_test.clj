@@ -1,13 +1,14 @@
 (ns lib.redis.event-test
-  (:use code.test)
-  (:require [lib.redis.event :refer :all]
-            [lib.redis :as r]
+  (:require [lib.redis :as r]
             [lib.redis.bench :as bench]
-            [net.resp.pool :as pool]
+            [lib.redis.event :refer :all]
             [net.resp.connection :as conn]
+            [net.resp.pool :as pool]
             [net.resp.wire :as wire]
             [std.concurrent :as cc]
-            [std.lib :as h]))
+            [std.lib.foundation :as f]
+            [std.lib.future :as future])
+  (:use code.test))
 
 (def |client|
   {:pool :pool
@@ -49,7 +50,7 @@
   (with-redefs [cc/pool:acquire (constantly [:raw-id :raw])
                 action:get (constantly {:args (constantly []) :subscribe "SUB" :wrap (constantly identity)})
                 wire/call (constantly nil)
-                h/future (constantly :future)]
+                future/future (constantly :future)]
     (listener:create |client| :test :id "in" identity))
   => listener?)
 
@@ -57,7 +58,7 @@
 (fact "tears down the listener"
   (with-redefs [action:get (constantly {:unsubscribe "UNSUB"})
                 wire/write (constantly nil)
-                h/future:cancel (constantly nil)
+                future/future:cancel (constantly nil)
                 cc/pool:release (constantly nil)]
     (listener:teardown {:type :test :connection {:id :id :args [] :pool :pool :thread :thread :raw :raw}}))
   => :id)
@@ -65,7 +66,7 @@
 ^{:refer lib.redis.event/listener:add :added "3.0"}
 (fact "adds a listener to the redis client"
   (with-redefs [listener:create (constantly {:id :id :type :test})
-                h/sid (constantly "sid")]
+                f/sid (constantly "sid")]
     (listener:add :test |client| :id "in" identity))
   => map?)
 

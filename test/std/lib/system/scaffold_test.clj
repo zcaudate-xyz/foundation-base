@@ -1,6 +1,6 @@
 (ns std.lib.system.scaffold-test
-  (:use code.test)
-  (:require [std.lib.system.scaffold :refer :all]))
+  (:require [std.lib.system.scaffold :refer :all])
+  (:use code.test))
 
 ^{:refer std.lib.system.scaffold/scaffold:register :added "3.0"}
 (fact "registers a scaffold in the namespace"

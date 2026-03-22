@@ -1,13 +1,13 @@
 (ns std.block.heal.indent
   (:require [std.block.heal.parse :as parse]
-            [std.lib :as h]
-            [std.string :as str]))
+            [std.lib.collection :as collection]
+            [std.lib.env :as env]))
 
 (defn flag-close-heavy-function
   "flags a function if at a different index"
   {:added "4.0"}
   [current {:keys [depth col index]}]
-  #_(h/prn [:depth  [(:depth current) depth]
+  #_(env/prn [:depth  [(:depth current) depth]
           :col    [(:col current)   col]
           :idx    index
           :current current])
@@ -71,7 +71,7 @@
   "flags the delimiter if there are any discrepancies"
   {:added "4.0"}
   [current {:keys [depth col index]}]
-  #_(h/prn [:depth  [(:depth current) depth]
+  #_(env/prn [:depth  [(:depth current) depth]
             :col    [(:col current)   col]
             :idx    index
             :current current])
@@ -161,7 +161,7 @@
                              locs))
                    {}
                    candidates)]
-    (h/map-vals #(apply min %) lu)))
+    (collection/map-vals #(apply min %) lu)))
 
 (defn flag-open-heavy
   "combines discrepancies that are the same"
@@ -173,7 +173,7 @@
         candidates  (flagged-candidates-merge-common candidates)
         inv-lu      (flagged-candidates-invert-lookup candidates)
         lu          (->> (group-by second inv-lu)
-                         (h/map-vals
+                         (collection/map-vals
                           (fn [idxs]
                             (->> idxs
                                  (map first)
@@ -255,7 +255,7 @@
   
   (def ^:dynamic *dlm4*
     (parse/pair-delimiters
-     (parse/parse-delimiters (h/sys:resource-content "code/heal/cases/004_shorten.block"))))
+     (parse/parse-delimiters (env/sys:resource-content "code/heal/cases/004_shorten.block"))))
   
   (build-insert-edits
    *dlm4*

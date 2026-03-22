@@ -1,6 +1,6 @@
 (ns std.concurrent.request-command-test
-  (:use [code.test :exclude [run]])
-  (:require [std.concurrent.request-command :refer :all]))
+  (:require [std.concurrent.request-command :refer :all])
+  (:use [code.test :exclude [run]]))
 
 ^{:refer std.concurrent.request-command/format-input :added "3.0"}
 (fact "helper for formatting command input")

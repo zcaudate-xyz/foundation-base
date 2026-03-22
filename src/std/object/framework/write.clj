@@ -1,11 +1,13 @@
 (ns std.object.framework.write
-  (:require [std.protocol.object :as protocol.object]
+  (:require [std.lib.class :as class]
+            [std.lib.collection :as collection]
             [std.lib.enum :as enum]
+            [std.lib.invoke :as invoke]
             [std.object.element.util :as element.util]
             [std.object.framework.read :as read]
             [std.object.query :as query]
-            [std.string :as str]
-            [std.lib :as h :refer [definvoke]])
+            [std.protocol.object :as protocol.object]
+            [std.string.case :as case])
   (:import (java.lang.reflect Field)))
 
 (def ^:dynamic *transform* nil)
@@ -29,7 +31,7 @@
   ([^Class cls]
    (assoc (protocol.object/-meta-write cls) :class cls)))
 
-(definvoke meta-write-exact
+(invoke/definvoke meta-write-exact
   "access write attributes for the exact class
  
    (write/meta-write-exact Object)
@@ -37,7 +39,7 @@
   {:added "3.0"}
   [:memoize]
   ([^Class cls]
-   (let [table (h/multi:list protocol.object/-meta-write)]
+   (let [table (invoke/multi:list protocol.object/-meta-write)]
      (if-let [f (get table cls)]
        (assoc (f cls) :class cls)))))
 
@@ -48,7 +50,7 @@
    => false"
   {:added "3.0"}
   ([^Class cls]
-   (boolean (get (h/multi:list protocol.object/-meta-write) cls))))
+   (boolean (get (invoke/multi:list protocol.object/-meta-write) cls))))
 
 (declare from-data)
 
@@ -64,7 +66,7 @@
   ([cls query-fn]
    (->> (query-fn cls [:field :instance])
         (reduce (fn [out ele]
-                  (let [k (-> ele :name str/spear-case keyword)
+                  (let [k (-> ele :name case/spear-case keyword)
                         cls (.getType ^Field (get-in ele [:all :delegate]))]
                     (assoc out k {:type cls :fn ele})))
                 {}))))
@@ -93,17 +95,17 @@
   => \"fluffy\""
   {:added "3.0"}
   ([ele prefix template select]
-   (let [name  (-> (:name ele) (subs (count prefix)) str/spear-case keyword)
+   (let [name  (-> (:name ele) (subs (count prefix)) case/spear-case keyword)
          ^Class cls (second (:params ele))
          clsname    (.getName cls)
-         clssym     (or (h/primitive clsname :clssym)
+         clssym     (or (class/primitive clsname :clssym)
                         (if (or (.isPrimitive cls)
                                 (.isArray cls))
                           `(Class/forName ~clsname))
                         (symbol clsname))
          clstag     (or (if (.isArray cls)
                           clsname)
-                        (if-let [^Class boxed (h/primitive clsname :container)]
+                        (if-let [^Class boxed (class/primitive clsname :container)]
                           (symbol (.getName boxed)))
                         (symbol clsname))
          tag    (symbol (.getName ^Class (:container ele)))
@@ -284,7 +286,7 @@
   {:added "3.0"}
   ([m ^Class cls]
    (let [m (if-let [rels (get *transform* type)]
-             (h/transform m rels)
+             (collection/transform m rels)
              m)
          {:keys [construct empty methods from-map] :as mobj} (meta-write-exact cls)]
      (cond from-map

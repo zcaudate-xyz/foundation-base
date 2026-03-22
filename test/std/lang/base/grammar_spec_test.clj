@@ -1,8 +1,8 @@
 (ns std.lang.base.grammar-spec-test
-  (:use code.test)
-  (:require [std.lang.base.grammar-spec :refer :all]
-            [std.lang.base.emit-common :as common]
-	    [std.lang.base.emit-helper :as helper]))
+  (:require [std.lang.base.emit-common :as common]
+            [std.lang.base.emit-helper :as helper]
+            [std.lang.base.grammar-spec :refer :all])
+  (:use code.test))
 
 ^{:refer std.lang.base.grammar-spec/get-comment :added "4.0"}
 (fact "gets the comment access prefix for a language"

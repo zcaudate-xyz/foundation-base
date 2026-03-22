@@ -1,10 +1,6 @@
 (ns lib.lucene.impl.analyzer
-  (:require [std.lib :refer [definvoke]])
-  (:import (org.apache.lucene.analysis Analyzer)
-           (org.apache.lucene.analysis.standard StandardAnalyzer)
-           (org.apache.lucene.analysis.core KeywordAnalyzer)
-           (org.apache.lucene.analysis CharArraySet)
-           (org.apache.lucene.analysis.miscellaneous PerFieldAnalyzerWrapper)))
+  (:require [std.lib.invoke :as invoke])
+  (:import (org.apache.lucene.analysis Analyzer) (org.apache.lucene.analysis.standard StandardAnalyzer) (org.apache.lucene.analysis.core KeywordAnalyzer) (org.apache.lucene.analysis CharArraySet) (org.apache.lucene.analysis.miscellaneous PerFieldAnalyzerWrapper)))
 
 (defn analyzer-char-set
   "creates an analyzer char set
@@ -25,7 +21,7 @@
   {:added "3.0"}
   :type)
 
-(definvoke analyzer-standard
+(invoke/definvoke analyzer-standard
   "creates a standard analyzer
  
    (analyzer-standard {:stop-words [\"and\"]
@@ -39,7 +35,7 @@
      (StandardAnalyzer. (analyzer-char-set stop-words (or ignore-case false)))
      (StandardAnalyzer.))))
 
-(definvoke analyzer-keyword
+(invoke/definvoke analyzer-keyword
   "creates a keyword analyzer
  
    (analyzer-keyword {})
@@ -50,7 +46,7 @@
   ([_]
    (KeywordAnalyzer.)))
 
-(definvoke analyzer-field
+(invoke/definvoke analyzer-field
   "creates a field analyzer
  
    (analyzer-field {:type :field

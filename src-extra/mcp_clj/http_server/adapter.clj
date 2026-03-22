@@ -1,16 +1,8 @@
 (ns mcp-clj.http-server.adapter
+  (:require [clojure.string :as str]
+            [mcp-clj.log :as log])
   "Adapter for Java's com.sun.net.httpserver.HttpServer with SSE support"
-  (:require
-    [clojure.string :as str]
-    [mcp-clj.log :as log])
-  (:import
-    (com.sun.net.httpserver
-      HttpExchange
-      HttpHandler
-      HttpServer)
-    (java.net
-      InetSocketAddress
-      URLDecoder)))
+  (:import (com.sun.net.httpserver HttpExchange HttpHandler HttpServer) (java.net InetSocketAddress URLDecoder)))
 
 (defn- set-response-header!
   [^HttpExchange exchange k v]

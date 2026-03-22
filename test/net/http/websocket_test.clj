@@ -1,6 +1,6 @@
 (ns net.http.websocket-test
-  (:use code.test)
-  (:require [net.http.websocket :refer :all]))
+  (:require [net.http.websocket :refer :all])
+  (:use code.test))
 
 ^{:refer net.http.websocket/request->WebSocketListener :added "3.0"}
 (fact "Constructs a new WebSocket listener to receive events for a given WebSocket connection.

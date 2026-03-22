@@ -1,8 +1,8 @@
 (ns std.object.element.impl.multi-test
-  (:use code.test)
   (:require [std.lib.version :as version]
             [std.object.element.impl.multi :as multi]
             [std.object.query :as query])
+  (:use code.test)
   (:refer-clojure :exclude [chars]))
 
 (defn chars [s]

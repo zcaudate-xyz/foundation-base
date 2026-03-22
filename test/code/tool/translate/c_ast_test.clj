@@ -1,6 +1,6 @@
 (ns code.tool.translate.c-ast-test
-  (:use code.test)
-  (:require [code.tool.translate.c-ast :refer :all]))
+  (:require [code.tool.translate.c-ast :refer :all])
+  (:use code.test))
 
 ^{:refer code.tool.translate.c-ast/initialise :added "4.1"}
 (fact "TODO")

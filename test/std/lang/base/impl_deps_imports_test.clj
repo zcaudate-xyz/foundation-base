@@ -1,17 +1,17 @@
 (ns std.lang.base.impl-deps-imports-test
-  (:use code.test)
-  (:require [std.lang.base.impl-deps :as deps]
-            [std.lang.base.impl-deps-imports :as deps-imports]
-            [std.lang.base.emit-prep-lua-test :as prep-lua]
-            [std.lang.base.emit-prep-js-test :as prep-js]
-            [std.lang.model.spec-lua :as lua]
-            [std.lang.base.library :as lib]
-            [std.lang.base.book :as b]
-            [std.lang.base.impl :as impl]
-            [std.lang.base.library-snapshot :as snap]
-            [std.lang.base.impl-entry :as entry]
+  (:require [js.blessed]
             [js.react]
-            [js.blessed]))
+            [std.lang.base.book :as b]
+            [std.lang.base.emit-prep-js-test :as prep-js]
+            [std.lang.base.emit-prep-lua-test :as prep-lua]
+            [std.lang.base.impl :as impl]
+            [std.lang.base.impl-deps :as deps]
+            [std.lang.base.impl-deps-imports :as deps-imports]
+            [std.lang.base.impl-entry :as entry]
+            [std.lang.base.library :as lib]
+            [std.lang.base.library-snapshot :as snap]
+            [std.lang.model.spec-lua :as lua])
+  (:use code.test))
 
 (def +library-js-cloned+
   (let [lib (impl/clone-default-library)]

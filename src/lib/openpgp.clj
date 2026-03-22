@@ -1,42 +1,10 @@
 (ns lib.openpgp
-  (:require [std.lib.encode :as encode]
-            [std.lib :refer [definvoke]]
-            [std.lib.bin :as binary]
+  (:require [clojure.string]
             [std.fs :as fs]
-            [std.string :as str])
-  (:import (org.bouncycastle.openpgp PGPPublicKey
-                                     PGPPrivateKey
-                                     PGPSecretKey
-                                     PGPPublicKeyRing
-                                     PGPSecretKeyRing
-                                     PGPObjectFactory
-                                     PGPUtil
-                                     PGPEncryptedDataGenerator
-                                     PGPEncryptedData
-                                     PGPLiteralDataGenerator
-                                     PGPLiteralData
-                                     PGPSignatureGenerator
-                                     PGPSignature
-                                     PGPSignatureList
-                                     PGPEncryptedDataList
-                                     PGPPublicKeyEncryptedData
-                                     PGPCompressedData
-                                     PGPLiteralData)
-           (org.bouncycastle.bcpg CRC24
-                                  BCPGInputStream)
-           (org.bouncycastle.openpgp.jcajce JcaPGPObjectFactory)
-           (org.bouncycastle.openpgp.operator.jcajce JcePBESecretKeyDecryptorBuilder
-                                                     JcaKeyFingerprintCalculator
-                                                     JcaPGPKeyConverter)
-           (org.bouncycastle.openpgp.operator.bc BcKeyFingerprintCalculator
-                                                 BcPublicKeyDataDecryptorFactory
-                                                 BcPublicKeyKeyEncryptionMethodGenerator
-                                                 BcPGPDataEncryptorBuilder
-                                                 BcPGPContentSignerBuilder
-                                                 BcPGPContentVerifierBuilderProvider)
-           (java.io ByteArrayOutputStream)
-           (java.security SecureRandom)
-           (java.util Collections)))
+            [std.lib.bin :as binary]
+            [std.lib.encode :as encode]
+            [std.lib.env :as env])
+  (:import (org.bouncycastle.openpgp PGPPublicKey PGPPrivateKey PGPSecretKey PGPPublicKeyRing PGPSecretKeyRing PGPObjectFactory PGPUtil PGPEncryptedDataGenerator PGPEncryptedData PGPLiteralDataGenerator PGPLiteralData PGPSignatureGenerator PGPSignature PGPSignatureList PGPEncryptedDataList PGPPublicKeyEncryptedData PGPCompressedData PGPLiteralData) (org.bouncycastle.bcpg CRC24 BCPGInputStream) (org.bouncycastle.openpgp.jcajce JcaPGPObjectFactory) (org.bouncycastle.openpgp.operator.jcajce JcePBESecretKeyDecryptorBuilder JcaKeyFingerprintCalculator JcaPGPKeyConverter) (org.bouncycastle.openpgp.operator.bc BcKeyFingerprintCalculator BcPublicKeyDataDecryptorFactory BcPublicKeyKeyEncryptionMethodGenerator BcPGPDataEncryptorBuilder BcPGPContentSignerBuilder BcPGPContentVerifierBuilderProvider) (java.io ByteArrayOutputStream) (java.security SecureRandom) (java.util Collections)))
 
 
 
@@ -272,7 +240,7 @@
                      (map #(apply str %)))
                 [(first (crc-24 bytes))
                  "-----END PGP SIGNATURE-----"])
-        (str/join "\n")
+        (clojure.string/join "\n")
         (spit sig-file))))
 
 (defn read-sig-file
@@ -283,7 +251,7 @@
   {:added "3.0"}
   ([sig-file]
    (->> (slurp sig-file)
-        (str/split-lines)
+        (clojure.string/split-lines)
         (reverse)
         (drop-while (fn [^String input]
                       (not (and (.startsWith input "=")
@@ -291,7 +259,7 @@
         (rest)
         (take 6)
         (reverse)
-        (str/join "")
+        (clojure.string/join "")
         (encode/from-base64))))
 
 (defn sign
@@ -304,7 +272,7 @@
    => bytes?"
   {:added "3.0"}
   ([input sig-file {:keys [public private] :as opts}]
-   (std.lib/prn opts)
+   (env/prn opts)
    (let [input-bytes (fs/read-all-bytes input)
          sig-bytes  (-> (generate-signature input-bytes opts)
                         (.getEncoded))]

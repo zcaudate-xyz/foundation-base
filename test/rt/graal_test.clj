@@ -1,8 +1,9 @@
 (ns rt.graal-test
-  (:use code.test)
   (:require [rt.graal :refer :all]
-            [std.lang :as  l]
-            [std.lib :as h])
+            [std.lang :as l]
+            [std.lib.component :as component]
+            [std.lib.foundation :as f])
+  (:use code.test)
   (:import (org.graalvm.polyglot Context)))
 
 (l/script- :js
@@ -102,9 +103,9 @@
 ^{:refer rt.graal/rt-graal:create :added "4.0"}
 (fact "creates a graal runtime"
 
-  (h/-> (rt-graal:create {:lang :js})
-        (h/start)
-        (h/stop))
+  (f/-> (rt-graal:create {:lang :js})
+        (component/start)
+        (component/stop))
   => rt-graal?)
 
 ^{:refer rt.graal/rt-graal :added "3.0"}

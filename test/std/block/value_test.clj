@@ -1,9 +1,9 @@
 (ns std.block.value-test
-  (:use code.test)
-  (:require [std.block.value :refer :all]
-            [std.block.base :as base]
+  (:require [std.block.base :as base]
             [std.block.construct :as construct]
-            [std.block.parse :as parse]))
+            [std.block.parse :as parse]
+            [std.block.value :refer :all])
+  (:use code.test))
 
 ^{:refer std.block.value/apply-modifiers :added "3.0"}
 (fact "applys the modifiers within a container"

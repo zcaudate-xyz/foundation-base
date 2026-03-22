@@ -1,6 +1,6 @@
 (ns code.test.compile.rewrite-test
-  (:use code.test)
-  (:require [code.test.compile.rewrite :refer :all]))
+  (:require [code.test.compile.rewrite :refer :all])
+  (:use code.test))
 
 (defn is-check? [form val]
   (let [is-seq (sequential? form)

@@ -1,6 +1,6 @@
 (ns js.lib.chalk
   (:require [std.lang :as l]
-            [std.lib :as h])
+            [std.lib.foundation :as f])
   (:refer-clojure :exclude [keyword]))
 
 (l/script :js
@@ -12,7 +12,7 @@
 
 (def$.js chalk chalk)
 
-(h/template-entries [l/tmpl-entry {:type :fragment
+(f/template-entries [l/tmpl-entry {:type :fragment
                                    :base "chalk"
                                    :tag "js"}]
   [black
@@ -49,7 +49,7 @@
    bgCyanBright
    bgWhiteBright])
 
-(h/template-entries [l/tmpl-entry {:type :fragment
+(f/template-entries [l/tmpl-entry {:type :fragment
                                    :base "chalk"
                                    :tag "js"}]
   [reset
@@ -62,7 +62,7 @@
    strikethrough
    visible])
 
-(h/template-entries [l/tmpl-entry  {:type :fragment
+(f/template-entries [l/tmpl-entry  {:type :fragment
                                     :base "chalk"
                                     :tag "js"}]
   [supportsColor

@@ -1,10 +1,9 @@
 (ns rt.postgres.grammar.form-deftype-composite-test
-  (:use code.test)
-  (:require [rt.postgres.grammar.form-deftype :as sut]
-            [std.lib :as h]
-            [std.lang.base.library-snapshot :as snap]
+  (:require [rt.postgres.grammar.common :as common]
+            [rt.postgres.grammar.form-deftype :as sut]
             [std.lang.base.book :as book]
-            [rt.postgres.grammar.common :as common]))
+            [std.lang.base.library-snapshot :as snap])
+  (:use code.test))
 
 (def mock-book
   {})

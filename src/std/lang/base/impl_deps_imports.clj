@@ -1,11 +1,10 @@
 (ns std.lang.base.impl-deps-imports
-  (:require [std.lang.base.util :as ut]
-            [std.lang.base.impl-entry :as entry]
+  (:require [clojure.set :as set]
             [std.lang.base.book :as b]
             [std.lang.base.book-module :as module]
-            [std.string :as str]
-            [std.lib :as h]
-            [clojure.set :as set]))
+            [std.lang.base.impl-entry :as entry]
+            [std.lang.base.util :as ut]
+            [std.lib.collection :as collection]))
 
 (defn get-entry-imports
   "gets all fragment imports from code entries"
@@ -92,7 +91,7 @@
   ([book module-ids]
    (module-code-deps book module-ids {:all #{} :graph {}}))
   ([book module-ids deps]
-   (let [submap (h/map-juxt [identity
+   (let [submap (collection/map-juxt [identity
                              (comp set
                                    module/module-deps-code
                                    (partial b/get-module book))]

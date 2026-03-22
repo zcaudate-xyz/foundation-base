@@ -1,7 +1,7 @@
 (ns code.test.compile.snippet-test
-  (:require [code.test.compile.snippet :refer :all :exclude [=> *last*]]
+  (:require [code.test :refer [fact fact:global contains-in]]
             [code.test.base.process :as process]
-            [code.test :refer [fact fact:global contains-in]]))
+            [code.test.compile.snippet :refer :all :exclude [=> *last*]]))
 
 ^{:refer code.test.compile.snippet/fact-setup :added "3.0"}
 (fact "creates a setup hook"

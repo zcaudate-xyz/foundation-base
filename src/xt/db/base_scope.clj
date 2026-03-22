@@ -1,15 +1,16 @@
 (ns xt.db.base-scope
   (:require [std.lang :as l]
-            [std.lib :as h]
+            [std.lib.collection :as collection]
+            [std.lib.foundation :as f]
             [std.lib.schema.base :as base]))
 
 (l/script :xtalk
   {:require [[xt.lang.base-lib :as k]]})
 
-(def +scope+ (h/map-entries
+(def +scope+ (collection/map-entries
               (fn [[k v]]
-                [(h/strn k)
-                 (zipmap (map h/strn v)
+                [(f/strn k)
+                 (zipmap (map f/strn v)
                          (repeat true))])
               base/+scope+))
 

@@ -1,6 +1,6 @@
 (ns rt.postgres.compile.json-schema
-  "Canonical JSON Schema compile target."
-  (:require [rt.postgres.compile.common :as compile.common]))
+  (:require [rt.postgres.compile.common :as compile.common])
+  "Canonical JSON Schema compile target.")
 
 (def shape->json-schema compile.common/shape->jschema)
 (def generate-json-schema compile.common/generate-jschema)

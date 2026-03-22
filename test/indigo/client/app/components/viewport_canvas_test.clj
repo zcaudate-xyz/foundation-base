@@ -1,6 +1,6 @@
 (ns indigo.client.app.components.viewport-canvas-test
-  (:use code.test)
-  (:require [indigo.client.app.components.viewport-canvas :refer :all]))
+  (:require [indigo.client.app.components.viewport-canvas :refer :all])
+  (:use code.test))
 
 ^{:refer indigo.client.app.components.viewport-canvas/countComponents :added "4.0"}
 (fact "TODO")

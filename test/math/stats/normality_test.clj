@@ -1,6 +1,6 @@
 (ns math.stats.normality-test
-  (:use code.test)
-  (:require [math.stats.normality :refer :all]))
+  (:require [math.stats.normality :refer :all])
+  (:use code.test))
 
 ^{:refer math.stats.normality/anderson-darling :added "3.0"}
 (fact "Performs the Anderson-Darling test for normality"

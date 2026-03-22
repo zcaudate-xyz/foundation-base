@@ -1,13 +1,14 @@
 (ns std.lang.base.library-load
-  (:require [std.lang.base.library :as lib]
-            [std.lang.base.impl :as impl]
-            [std.lang.base.script :as script]
-            [std.lang :as l]
-            [clojure.core :as core]
-            [std.lib :as h]
+  (:require [clojure.core :as core]
             [clojure.tools.reader :as reader]
             [clojure.tools.reader.reader-types :as readers]
-            [code.project :as project]))
+            [code.project :as project]
+            [std.lang :as l]
+            [std.lang.base.impl :as impl]
+            [std.lang.base.library :as lib]
+            [std.lang.base.script :as script]
+            [std.lib.env :as env]
+            [std.lib.foundation :as f]))
 
 (defn eval-in-library
   "Evaluates a form within the context of a specific library instance.
@@ -79,7 +80,7 @@
   (let [content (slurp filepath)
         ;; Heuristic: if we can read the ns from the file, use it as initial.
         ;; Otherwise use current ns.
-        initial-ns (or (h/suppress (second (read-string content))) (h/ns-sym))]
+        initial-ns (or (f/suppress (second (read-string content))) (env/ns-sym))]
     (load-string-into-library content lib-instance initial-ns)))
 
 (defn clone-and-load

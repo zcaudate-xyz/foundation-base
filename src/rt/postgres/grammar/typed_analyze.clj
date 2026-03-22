@@ -1,12 +1,10 @@
 (ns rt.postgres.grammar.typed-analyze
-  "AST analysis and type inference.
-   
-   CRITIQUE FIX #4: Uses shape/merge-shapes - no local duplication of merge logic."
-  (:require [rt.postgres.grammar.typed-common :as types]
-            [rt.postgres.grammar.typed-shape :as shape]
-            [std.json :as json]
+  (:require [clojure.string :as str]
             [clojure.walk :as walk]
-            [clojure.string :as str]))
+            [rt.postgres.grammar.typed-common :as types]
+            [rt.postgres.grammar.typed-shape :as shape]
+            [std.json :as json])
+  "AST analysis and type inference.\n   \n   CRITIQUE FIX #4: Uses shape/merge-shapes - no local duplication of merge logic.")
 
 ;; ─────────────────────────────────────────────────────────────────────────────
 ;; PG Operation Signatures

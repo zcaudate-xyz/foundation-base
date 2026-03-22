@@ -1,6 +1,6 @@
 (ns xt.db.base-util-test
-  (:use code.test)
-  (:require [std.lang :as l]))
+  (:require [std.lang :as l])
+  (:use code.test))
 
 (l/script- :js
   {:runtime :oneshot

@@ -1,8 +1,7 @@
 (ns std.time.instant.java-time-instant
   (:require [std.protocol.time :as protocol.time]
             [std.time.coerce :as coerce])
-  (:import (java.time Clock Instant ZoneId ZonedDateTime)
-           (java.time.format DateTimeFormatter)))
+  (:import (java.time Clock Instant ZoneId ZonedDateTime) (java.time.format DateTimeFormatter)))
 
 (defmethod protocol.time/-time-meta Instant
   ([_]

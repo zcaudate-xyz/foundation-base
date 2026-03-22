@@ -1,8 +1,8 @@
 (ns std.lib.transform.base.ref-test
-  (:use code.test)
-  (:require [std.lib.transform.base.ref :refer :all]
+  (:require [std.lib.schema :as schema]
             [std.lib.transform :as graph]
-            [std.lib.schema :as schema]))
+            [std.lib.transform.base.ref :refer :all])
+  (:use code.test))
 
 (def -schema- (schema/schema
                [:profile  [:id    {:type :text}

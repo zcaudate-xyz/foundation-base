@@ -1,18 +1,18 @@
 (ns std.lang.model.spec-php
-  (:require [std.lang.base.emit :as emit]
-            [std.lang.base.grammar :as grammar]
+  (:require [clojure.string]
+            [std.lang.base.book :as book]
+            [std.lang.base.emit :as emit]
             [std.lang.base.emit-common :as common]
+            [std.lang.base.emit-data :as data]
             [std.lang.base.emit-helper :as helper]
             [std.lang.base.emit-preprocess :as preprocess]
             [std.lang.base.emit-top-level :as top]
-            [std.lang.base.emit-data :as data]
-            [std.lang.base.book :as book]
+            [std.lang.base.grammar :as grammar]
             [std.lang.base.script :as script]
             [std.lang.base.util :as ut]
             [std.lang.model.spec-xtalk]
             [std.lang.model.spec-xtalk.fn-php :as fn]
-            [std.string :as str]
-            [std.lib :as h]))
+            [std.lib.collection :as collection]))
 
 (defn is-capitalized?
   "checks if string is capitalized"
@@ -32,14 +32,14 @@
         (namespace sym)
         (let [ns (namespace sym)
               nm (name sym)]
-          (str (str/replace ns "." "\\") "::" nm))
+          (str (clojure.string/replace ns "." "\\") "::" nm))
 
         :else
         (str "$" (common/emit-symbol sym grammar mopts))))
 
 (defn php-invoke-args
   [args grammar mopts]
-  (str/join ", " (common/emit-invoke-args args grammar mopts)))
+  (clojure.string/join ", " (common/emit-invoke-args args grammar mopts)))
 
 (defn php-invoke
   "emit php function call"
@@ -76,7 +76,7 @@
 (defn php-array
   "emit php array"
   [arr grammar mopts]
-  (str "[" (str/join ", " (common/emit-array arr grammar mopts)) "]"))
+  (str "[" (clojure.string/join ", " (common/emit-array arr grammar mopts)) "]"))
 
 (defn php-map
   "emit php associative array"
@@ -86,7 +86,7 @@
                             " => "
                             (common/*emit-fn* v grammar mopts)))
                      m)]
-    (str "[" (str/join ", " entries) "]")))
+    (str "[" (clojure.string/join ", " entries) "]")))
 
 (defn php-dot-string
   [obj props grammar mopts]
@@ -162,7 +162,7 @@
                   :map       {:custom #'php-map}}
         :define  {:def       {:raw ""}
                   :defglobal {:raw ""}}}
-       (h/merge-nested (emit/default-grammar))))
+       (collection/merge-nested (emit/default-grammar))))
 
 (def +grammar+
   (grammar/grammar :php

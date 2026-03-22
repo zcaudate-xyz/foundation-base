@@ -12,8 +12,7 @@
             [code.doc.link.stencil :as link.stencil]
             [code.doc.link.tag :as link.tag]
             [code.doc.link.test :as link.test]
-            [code.doc.parse :as parse]
-            [std.lib :as h]))
+            [code.doc.parse :as parse]))
 
 (defn prepare
   "processes a single meta to generate an interim structure

@@ -1,6 +1,6 @@
 (ns std.timeseries.process-test
-  (:use code.test)
-  (:require [std.timeseries.process :refer :all]))
+  (:require [std.timeseries.process :refer :all])
+  (:use code.test))
 
 ^{:refer std.timeseries.process/prep-merge :added "3.0"}
 (fact "prepares the merge functions and options"

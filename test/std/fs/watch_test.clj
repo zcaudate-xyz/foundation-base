@@ -1,10 +1,8 @@
 (ns std.fs.watch-test
+  (:require [clojure.java.io :as io]
+            [std.fs.watch :refer :all])
   (:use code.test)
-  (:require [std.fs.watch :refer :all]
-            [std.lib :as h]
-            [clojure.java.io :as io])
-  (:import (java.nio.file WatchService Paths FileSystems)
-           (java.io File)))
+  (:import (java.nio.file WatchService Paths FileSystems) (java.io File)))
 
 ^{:refer std.fs.watch/pattern :added "3.0"}
 (fact "creates a regex pattern from the string representation"
@@ -49,9 +47,9 @@
 
   (def ^:dynamic *happy* (promise))
 
-  (h/watch:add (io/file ".") :save
+  (std.fs.watch/add-io-watch (io/file ".") :save
                (fn [f k _ [cmd file]]
-                 (h/watch:remove f k)
+                 (std.fs.watch/remove-io-watch f k)
                  (.delete ^File file)
                  (deliver *happy* [cmd (.getName ^File file)]))
                {:types #{:create :modify}
@@ -59,7 +57,7 @@
                 :filter  [".hara"]
                 :exclude [".git" "target"]})
 
-  (h/watch:list (io/file "."))
+  (std.fs.watch/list-io-watch (io/file "."))
   => (contains {:save fn?})
 
   (spit "happy.hara" "hello")
@@ -67,7 +65,7 @@
   (deref *happy*)
   => [:create "happy.hara"]
 
-  (h/watch:list (io/file "."))
+  (std.fs.watch/list-io-watch (io/file "."))
   => {})
 
 ^{:refer std.fs.watch/watch-callback :added "3.0"}

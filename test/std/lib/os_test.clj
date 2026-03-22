@@ -1,7 +1,7 @@
 (ns std.lib.os-test
-  (:use code.test)
-  (:require [std.lib.os :refer :all]
-            [std.lib.foundation :as h]))
+  (:require [std.lib.foundation :as h]
+            [std.lib.os :refer :all])
+  (:use code.test))
 
 ^{:refer std.lib.os/native? :added "3.0"}
 (fact "checks if execution is in graal"

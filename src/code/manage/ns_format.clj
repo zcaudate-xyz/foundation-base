@@ -1,11 +1,11 @@
 (ns code.manage.ns-format
-  (:require [code.framework :as base]
+  (:require [clojure.string]
+            [code.framework :as base]
             [code.query :as query]
             [std.block :as block]
             [std.block.navigate :as nav]
-            [std.lib.zip :as zip]
-            [std.lib :as h]
-            [std.string :as str]))
+            [std.lib.collection :as collection]
+            [std.lib.zip :as zip]))
 
 (defonce +key-order+
   {:use 0
@@ -112,7 +112,7 @@
                                         (group-by (comp first-element block/value))
                                         (filterv (fn [[_ v]]
                                                    (> (count v) 1)))
-                                        (h/map-vals merge-eligible))
+                                        (collection/map-vals merge-eligible))
                          move-right (fn [nav]
                                       (if-let [nav (nav/right nav)]
                                         nav
@@ -242,12 +242,12 @@
                  (fn [nav]
                    (let [form (nav/value nav)]
                      (cond (symbol? form)
-                           (let [arr (str/split (str form) #"\.")
+                           (let [arr (clojure.string/split (str form) #"\.")
                                  cls (last arr)
                                  nsp (butlast arr)]
 
                              (nav/replace nav
-                                          (list (symbol (str/join "." nsp))
+                                          (list (symbol (clojure.string/join "." nsp))
                                                 (symbol cls))))
 
                            (vector? form)

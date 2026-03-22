@@ -1,5 +1,6 @@
 (ns xt.db.sql-call
-  (:require [std.lang :as l]))
+  (:require [std.lang :as l]
+            [std.lib.foundation :as f]))
 
 (l/script :xtalk
   {:require [[xt.lang.base-lib :as k]
@@ -114,7 +115,7 @@
 (comment
   (./create-tests)
   
-  (h/template-entries [l/tmpl-macro {:base "pgmoon"
+  (f/template-entries [l/tmpl-macro {:base "pgmoon"
                                      :inst "pg"
                                      :tag "lua"}]
                       [[connect           []]

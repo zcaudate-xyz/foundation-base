@@ -1,12 +1,11 @@
 (ns js.lib.eth-lib-test
-  (:use code.test)
-  (:require [std.lib :as h]
-            [std.lang :as l]
-            [xt.lang.base-notify :as notify]
-            [rt.solidity :as s]
-            [rt.solidity.env-ganache :as env-ganache]
+  (:require [rt.solidity :as s]
             [rt.solidity.compile-solc :as compile-solc]
-            [web3.lib.example-counter :as example-counter]))
+            [rt.solidity.env-ganache :as env-ganache]
+            [std.lang :as l]
+            [web3.lib.example-counter :as example-counter]
+            [xt.lang.base-notify :as notify])
+  (:use code.test))
 
 (l/script- :js
   {:runtime :basic

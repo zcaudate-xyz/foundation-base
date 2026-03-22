@@ -1,7 +1,6 @@
 (ns std.lang.model.spec-xtalk.fn-perl-test
-  (:use code.test)
-  (:require [std.lang.model.spec-xtalk.fn-perl :refer :all]
-            [std.lib :as h]))
+  (:require [std.lang.model.spec-xtalk.fn-perl :refer :all])
+  (:use code.test))
 
 ^{:refer std.lang.model.spec-xtalk.fn-perl/perl-tf-x-len :added "4.1"}
 (fact "perl-tf-x-len"

@@ -1,9 +1,9 @@
 (ns rt.postgres.grammar.typed-analyze-test
-  (:use code.test)
-  (:require [rt.postgres.grammar.typed-parse :as parse]
+  (:require [clojure.string :as str]
             [rt.postgres.grammar.typed-analyze :as analyze]
             [rt.postgres.grammar.typed-common :as types]
-            [clojure.string :as str]))
+            [rt.postgres.grammar.typed-parse :as parse])
+  (:use code.test))
 
 (defn- get-scratch-fn
   [sym]

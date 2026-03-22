@@ -1,6 +1,6 @@
 (ns script.sql.common
-  (:require [std.string :as str]
-            [std.lib :as h])
+  (:require [clojure.string]
+            [std.lib.foundation :as f])
   (:import (java.util ArrayList)))
 
 (defn- ansi-quote [s] (str \" s \"))
@@ -49,7 +49,7 @@
    => [\"SELECT \" \" FROM \" \"\"]"
   {:added "3.0"}
   ([sql]
-   (let [sql (str/trim sql)
+   (let [sql (clojure.string/trim sql)
          len (count sql)
          v   (ArrayList.)]
      (loop [i        0
@@ -90,7 +90,7 @@
   ([input]
    (if (nil? input)
      "NULL"
-     (h/-> (str input)
+     (f/-> (str input)
            (sql:escape)
            (str \' % \')))))
 
@@ -106,4 +106,4 @@
          _ (assert (= (dec (count entries)) (count args)))
          args    (map sql:entry args)]
      (->> (interleave entries (concat args [""]))
-          (str/join)))))
+          (clojure.string/join)))))

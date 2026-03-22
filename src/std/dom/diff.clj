@@ -1,8 +1,10 @@
 (ns std.dom.diff
-  (:require [std.lib.diff.seq :as diff.seq]
-            [std.dom.type :as type]
+  (:require [clojure.set]
             [std.dom.common :as base]
-            [std.lib :refer [definvoke] :as h]))
+            [std.dom.type :as type]
+            [std.lib.collection :as collection]
+            [std.lib.diff.seq :as diff.seq]
+            [std.lib.invoke :as invoke]))
 
 (defmulti dom-ops
   "converts a set of props into operations
@@ -69,9 +71,9 @@
    (let [key-fn   (fn [dom] (-> dom :extra :dom/key))
         keys-old (map key-fn list-old)
         keys-new (map key-fn list-new)
-         _        (assert (and (h/deduped? keys-old)
-                               (h/deduped? keys-new)))
-        added    (h/difference (set keys-new)
+         _        (assert (and (collection/deduped? keys-old)
+                               (collection/deduped? keys-new)))
+        added    (clojure.set/difference (set keys-new)
                                  (set keys-old))
         lu       (merge (zipmap keys-old list-old)
                         (select-keys (zipmap keys-new list-new) added))
@@ -167,7 +169,7 @@
         props-changed (vec (concat props-added props-removed))]
     props-changed)))
 
-(definvoke dom-ops-default
+(invoke/definvoke dom-ops-default
   "default implementation for diff-ops
    
    (dom-ops-default :mock/pane

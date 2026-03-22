@@ -1,12 +1,12 @@
 (ns std.lang.model.spec-scheme
-  (:require [std.lang.base.emit :as emit]
+  (:require [std.lang.base.book :as book]
+            [std.lang.base.emit :as emit]
             [std.lang.base.grammar :as grammar]
-            [std.lang.base.util :as ut]
-            [std.lang.base.book :as book]
             [std.lang.base.script :as script]
-            [std.string :as str]
-            [std.lib :as h]
-            [std.lang.model.spec-xtalk :as xtalk]))
+            [std.lang.base.util :as ut]
+            [std.lang.model.spec-xtalk :as xtalk]
+            [std.lib.collection :as collection]
+            [std.lib.walk :as walk]))
 
 (def +replace+
   '{==    =
@@ -37,8 +37,8 @@
   {:added "4.0"}
   [form mopts]
   (pr-str
-   (h/prewalk (fn [x]
-                (if (h/form? x)
+   (walk/prewalk (fn [x]
+                (if (collection/form? x)
                   (or (if-let [f (get +transform+ (first x))]
                         (f x))
                       (if-let [v (get +replace+ (first x))]

@@ -1,9 +1,9 @@
 (ns rt.postgres.grammar.form-defconst-test
-  (:use code.test)
-  (:require [rt.postgres.grammar.form-defconst :as form]
-            [rt.postgres.grammar :as g]
+  (:require [rt.postgres.grammar :as g]
+            [rt.postgres.grammar.form-defconst :as form]
             [rt.postgres.script.test.scratch-v1 :as scratch]
-            [std.lang :as l]))
+            [std.lang :as l])
+  (:use code.test))
 
 ^{:refer rt.postgres.grammar.form-defconst/pg-defconst-hydrate :added "4.0"}
 (fact "creates the "

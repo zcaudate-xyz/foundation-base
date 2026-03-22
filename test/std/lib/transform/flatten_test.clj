@@ -1,8 +1,8 @@
 (ns std.lib.transform.flatten-test
+  (:require [std.lib.schema :as schema]
+            [std.lib.transform :as graph]
+            [std.lib.transform.flatten :refer :all])
   (:use code.test)
-  (:require [std.lib.transform.flatten :refer :all]
-            [std.lib.schema :as schema]
-            [std.lib.transform :as graph])
   (:refer-clojure :exclude [flatten]))
 
 (def -schema- (schema/schema

@@ -1,15 +1,16 @@
 (ns std.lang.base.impl-lifecycle
-  (:require [std.lang.base.util :as ut]
-            [std.lang.base.emit :as emit]
+  (:require [clojure.string]
+            [std.fs :as fs]
             [std.lang.base.book :as book]
             [std.lang.base.book-module :as module]
+            [std.lang.base.compile-links :as links]
+            [std.lang.base.emit :as emit]
             [std.lang.base.impl :as impl]
             [std.lang.base.impl-deps :as deps]
             [std.lang.base.impl-entry :as entry]
-            [std.string :as str]
-            [std.fs :as fs]
-            [std.lib :as h]
-            [std.lang.base.compile-links :as links]))
+            [std.lang.base.util :as ut]
+            [std.lib.env :as env]
+            [std.lib.foundation :as f]))
 
 (defn emit-module-prep
   "prepares the module for emit"
@@ -58,13 +59,13 @@
            export-body]
     :as raw}]
   (->> [setup-body
-        (str/join "\n\n" native-arr)
-        (str/join "\n\n" link-arr)
-        (str/join "\n\n" header-arr)
-        (str/join "\n\n" code-arr)
+        (clojure.string/join "\n\n" native-arr)
+        (clojure.string/join "\n\n" link-arr)
+        (clojure.string/join "\n\n" header-arr)
+        (clojure.string/join "\n\n" code-arr)
         export-body]
        (filter not-empty)
-       (str/join "\n\n")))
+       (clojure.string/join "\n\n")))
 
 (defn emit-module-setup-native-arr
   "creates the setup code for native imports"
@@ -126,7 +127,7 @@
                           root-prefix)]
         {:ns (->> [root-prefix rel label]
                   (filter (fn [s] (and s (not= s ""))))
-                  (str/join path-separator))
+                  (clojure.string/join path-separator))
          :suffix suffix
          :as link-as}))))
 
@@ -267,11 +268,11 @@
            code-arr
            native-arr]
     :as raw}]
-  (->> [(str/join "\n\n" code-arr)
-        (str/join "\n\n" native-arr)
+  (->> [(clojure.string/join "\n\n" code-arr)
+        (clojure.string/join "\n\n" native-arr)
         teardown-body]
        (filter not-empty)
-       (str/join "\n\n")))
+       (clojure.string/join "\n\n")))
 
 (defn emit-module-teardown-raw
   "creates module teardown map of array strings"
@@ -329,14 +330,14 @@
                (-> mopts :module :export :as)
                (not (-> emit :export :suppress)))
       (when-not (:as export)
-        (h/prn   "Missing export `:as` field" {:input export
+        (env/prn   "Missing export `:as` field" {:input export
                                                :module module-id})
-        (h/error "Missing export `:as` field" {:input export
+        (f/error "Missing export `:as` field" {:input export
                                                :module module-id}))
       (when-not (:entry export)
-        (h/prn   "Missing export `:entry` field" {:input export
+        (env/prn   "Missing export `:entry` field" {:input export
                                                   :module module-id})
-        (h/error "Missing export `:entry` field" {:input export
+        (f/error "Missing export `:entry` field" {:input export
                                                   :module module-id}))
       (str (entry/emit-entry grammar (:entry export)
                              (update mopts :emit merge (:export emit)))

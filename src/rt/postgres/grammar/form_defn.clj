@@ -1,14 +1,14 @@
 (ns rt.postgres.grammar.form-defn
-  (:require [rt.postgres.grammar.meta :as meta]
-            [rt.postgres.grammar.common :as common]
+  (:require [rt.postgres.grammar.common :as common]
             [rt.postgres.grammar.form-let :as form-let]
+            [rt.postgres.grammar.meta :as meta]
             [std.lang.base.emit-common :as emit-common]
-            [std.lang.base.emit-helper :as helper]
             [std.lang.base.emit-fn :as fn]
+            [std.lang.base.emit-helper :as helper]
             [std.lang.base.grammar-spec :as grammar-spec]
             [std.lang.base.util :as ut]
-            [std.string :as str]
-            [std.lib :as h]))
+            [std.lib.collection :as collection]
+            [std.lib.foundation :as f]))
 
 (defn pg-defn-format
   "formats a defn form"
@@ -55,13 +55,13 @@
                    (if (vector? (last body))
                      body
                      [[:select (last body)]])
-                   (h/error "Not an sql expression" {:value body}))
+                   (f/error "Not an sql expression" {:value body}))
                  body)
         
         ;; -- PLPGSQL formatting
         bfull  (if (or (not (= language :default))
                        (and (= 1 (count body))
-                            (h/form? (first body))
+                            (collection/form? (first body))
                             ('#{let let:block} (ffirst body))))
                  [\\
                   \\ (list \| (list '!:lang {:lang lang}

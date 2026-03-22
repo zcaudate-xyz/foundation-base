@@ -1,6 +1,6 @@
 (ns std.lib.transform.apply
-  (:require [std.lib.foundation :as h]
-            [std.lib.collection :as coll]))
+  (:require [std.lib.collection :as coll]
+            [std.lib.foundation :as h]))
 
 (defn wrap-hash-set
   "allows operations to be performed on sets

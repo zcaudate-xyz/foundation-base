@@ -1,6 +1,6 @@
 (ns js.lib.react-query-test
-  (:use code.test)
-  (:require [js.lib.react-query :refer :all]))
+  (:require [js.lib.react-query :refer :all])
+  (:use code.test))
 
 ^{:refer js.lib.react-query/useApiQueriesSingle :added "4.0" :unchecked true}
 (fact "TODO")

@@ -1,6 +1,6 @@
 (ns indigo.server.api-prompt-test
-  (:use code.test)
-  (:require [indigo.server.api-prompt :refer :all]))
+  (:require [indigo.server.api-prompt :refer :all])
+  (:use code.test))
 
 ^{:refer indigo.server.api-prompt/with-prompt-fn :added "4.0"}
 (fact "TODO")

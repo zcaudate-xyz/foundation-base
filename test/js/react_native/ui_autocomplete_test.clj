@@ -1,7 +1,8 @@
 (ns js.react-native.ui-autocomplete-test
-  (:use code.test)
-  (:require [std.lang :as  l]
-            [std.lib :as h]))
+  (:require [clojure.string]
+            [std.lang :as l]
+            [std.lib.env :as env])
+  (:use code.test))
 
 (l/script :js
   {:runtime :websocket
@@ -59,9 +60,9 @@
   ^:hidden
 
   (def.js NAMES
-    (@! (->> (h/sys:resource-content "js.react-native/girl-names.json")
+    (@! (->> (env/sys:resource-content "js.react-native/girl-names.json")
              (std.json/read)
-             (mapv std.string/upper-case))))
+             (mapv clojure.string/upper-case))))
   
   (defn.js get-names
     [filt]

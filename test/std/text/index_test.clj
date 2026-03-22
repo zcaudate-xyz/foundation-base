@@ -1,6 +1,6 @@
 (ns std.text.index-test
-  (:use code.test)
-  (:require [std.text.index :refer :all]))
+  (:require [std.text.index :refer :all])
+  (:use code.test))
 
 (def +index+
   (let [idx (make-index)]

@@ -1,6 +1,6 @@
 (ns code.test.base.match-test
-  (:use code.test)
-  (:require [code.test.base.match :refer :all]))
+  (:require [code.test.base.match :refer :all])
+  (:use code.test))
 
 ^{:refer code.test.base.match/match-base :added "3.0"}
 (fact "determines whether a term matches with a filter"

@@ -1,7 +1,6 @@
 (ns std.print.format.time-test
-  (:use code.test)
-  (:require [std.print.format.time :refer :all]
-            [std.lib :as h]))
+  (:require [std.print.format.time :refer :all])
+  (:use code.test))
 
 ^{:refer std.print.format.time/t:time :added "3.0"}
 (fact "only returns the time (not day) of an instant"

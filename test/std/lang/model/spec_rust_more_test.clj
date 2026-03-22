@@ -1,12 +1,10 @@
 (ns std.lang.model.spec-rust-more-test
-  (:use code.test)
-  (:require [std.lang.model.spec-rust :refer :all]
+  (:require [std.fs :as fs]
+            [std.lang :as l]
             [std.lang.base.script :as script]
             [std.lang.base.util :as ut]
-            [std.lang :as l]
-            [std.lib :as h]
-            [std.fs :as fs]
-            [std.string]))
+            [std.lang.model.spec-rust :refer :all])
+  (:use code.test))
 
 (script/script- :rust
   {;;:require [[std :as h]]

@@ -1,5 +1,5 @@
 (ns std.lang.model.spec-xtalk.fn-php
-  (:require [std.lib :as h]))
+  (:require [std.lib.template :as template]))
 
 ;;
 ;; CORE
@@ -226,7 +226,7 @@
 
 (defn php-tf-x-return-encode
   ([[_ out id key]]
-   (h/$ (do (try
+   (template/$ (do (try
               (return (json_encode {:id  ~id
                                     :key ~key
                                     :type  "data"
@@ -239,7 +239,7 @@
 
 (defn php-tf-x-return-wrap
   ([[_ f encode-fn]]
-   (h/$ (do (try
+   (template/$ (do (try
               (:= out (~f))
               (catch Exception $e
                 (return (json_encode {:type "error"
@@ -248,7 +248,7 @@
 
 (defn php-tf-x-return-eval
   ([[_ s wrap-fn]]
-   (h/$ (return (~wrap-fn (function []
+   (template/$ (return (~wrap-fn (function []
                             (return (eval ~s))))))))
 
 (def +php-return+

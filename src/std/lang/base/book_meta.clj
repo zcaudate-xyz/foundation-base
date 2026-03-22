@@ -1,13 +1,14 @@
 (ns std.lang.base.book-meta
-  (:require [std.lib :as h :refer [defimpl]]))
+  (:require [std.lib.collection :as collection]
+            [std.lib.impl :as impl]))
 
 (defn- book-meta-string
   ([{:keys [lang] :as m}]
    (str "#book.meta "
         " "
-        (vec (sort (keys (h/filter-vals boolean m)))))))
+        (vec (sort (keys (collection/filter-vals boolean m)))))))
 
-(defimpl BookMeta [bootstrap 
+(impl/defimpl BookMeta [bootstrap 
 		   
                    module-import
                    module-export

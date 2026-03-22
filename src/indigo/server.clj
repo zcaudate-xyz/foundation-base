@@ -1,19 +1,17 @@
 (ns indigo.server
   (:require [clojure.string :as string]
-            [org.httpkit.server :as http]
-            [org.httpkit.client :as client]
-            [net.http.router :as router]
+            [code.project :as project]
             [indigo.server.api-browser :as api-browser]
+            [indigo.server.api-translate :as api-translate]
+            [indigo.server.dispatch :as dispatch]
             [indigo.server.test-runner :as test-runner]
             [indigo.server.watcher :as watcher]
-            [indigo.server.dispatch :as dispatch]
-            [indigo.server.api-translate :as api-translate]
-            [std.lib :as h]
-            [std.string :as str]
+            [net.http.router :as router]
+            [org.httpkit.client :as client]
+            [org.httpkit.server :as http]
             [std.json :as json]
-            [code.project :as project])
-  (:import (java.awt Desktop)
-           (java.net URI)))
+            [std.lib.collection :as collection])
+  (:import (java.awt Desktop) (java.net URI)))
 
 (defonce *instance* (atom nil))
 
@@ -38,7 +36,7 @@
 
 (defn create-routes
   [prefix routes]
-  (h/map-keys (fn [k]
+  (collection/map-keys (fn [k]
                 (str prefix k))
               routes))
 

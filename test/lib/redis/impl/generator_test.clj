@@ -1,8 +1,10 @@
 (ns lib.redis.impl.generator-test
-  (:use code.test)
-  (:require [lib.redis.impl.common :as common]
+  (:require [clojure.string]
+            [lib.redis.impl.common :as common]
             [lib.redis.impl.generator :refer :all]
-            [lib.redis.impl.reference :as ref]))
+            [lib.redis.impl.reference :as ref]
+            [std.lib.foundation :as f])
+  (:use code.test))
 
 ^{:refer lib.redis.impl.generator/expand-process :added "3.0"}
 (fact "expands the argument for the `:process` keys"
@@ -68,7 +70,7 @@
   (command-step {:type :enum :values #{:yes :no}
                  :sym 'async})
   => `[~'async (conj (if (get #{:yes :no} ~'async)
-                       (std.string/upper-case (std.lib/strn ~'async))
+                       (clojure.string/upper-case (f/strn ~'async))
                        (throw (ex-info "Invalid input" {:arg (quote ~'async),
                                                         :options #{:yes :no}}))))])
 

@@ -1,7 +1,7 @@
 (ns xt.lang.base-lib-test
-  (:use code.test)
   (:require [std.lang :as l]
-            [std.lib :as h]))
+            [std.string.prose :as prose])
+  (:use code.test))
 
 (do 
   (l/script- :js
@@ -396,7 +396,7 @@
                          "world"])
                 2
                 " "))
-  => (std.string/|
+  => (prose/|
       "  hello"
       "  world")
 
@@ -406,7 +406,7 @@
                          "world"])
                 2
                 " "))
-  => (std.string/|
+  => (prose/|
       "  hello"
       "  world")
 
@@ -416,7 +416,7 @@
                          "world"])
                 2
                 " "))
-  => (std.string/|
+  => (prose/|
       "  hello"
       "  world")
 
@@ -426,7 +426,7 @@
                          "world"])
                 2
                 " "))
-  => (std.string/|
+  => (prose/|
       ""
       "  hello"
       "  world"))

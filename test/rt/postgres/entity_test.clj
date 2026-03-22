@@ -1,10 +1,10 @@
 (ns rt.postgres.entity-test
-  (:use code.test)
   (:require [rt.postgres.entity :refer :all]
             [rt.postgres.entity-util :as ut]
-            [std.lib :as h]
             [std.lang :as l]
-            [std.lang.base.grammar-spec :as grammar-spec]))
+            [std.lang.base.grammar-spec :as grammar-spec]
+            [std.lib.env :as env])
+  (:use code.test))
 
 (def +dummy-atom+ (atom {:api/input {:class :1d/base}}))
 
@@ -99,7 +99,7 @@
 ^{:refer rt.postgres.entity/E-main-spec :added "4.1"}
 (fact "handles main spec"
   (with-redefs [grammar-spec/*symbol* 'Sym
-                h/ns-sym (constantly 'ns)
+                env/ns-sym (constantly 'ns)
                 ut/add-addon (fn [k ref p] [k ref p])]
     (E-main-spec {:spec/addon {:key :k :priority 10}})
     => [:k {:type :ref :required true :priority nil :ref {:ns 'ns/Sym}} 10]))

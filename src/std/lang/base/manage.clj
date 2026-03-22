@@ -1,13 +1,17 @@
 (ns std.lang.base.manage
-  (:require [std.task :as task]
+  (:require [clojure.string]
             [std.lang.base.impl :as impl]
             [std.lang.base.library :as lib]
             [std.lang.base.util :as ut]
             [std.lang.base.workspace :as workspace]
-            [std.string :as str]
-            [std.lib :as h :refer [definvoke]]
+            [std.lib.collection :as collection]
+            [std.lib.env :as env]
+            [std.lib.invoke :as invoke]
+            [std.lib.walk :as walk]
+            [std.print.ansi :as ansi]
             [std.print.format.common :as common]
-            [std.print.ansi :as ansi]))
+            [std.string.prose :as prose]
+            [std.task :as task]))
 
 (def ^:dynamic *current-lang* nil)
 
@@ -53,7 +57,7 @@
                         (ansi/style (str id) #{:bold :white})
                         50)
                        (common/pad:left
-                        (str/join
+                        (clojure.string/join
                          (map (fn [[d style]]
                                 (if (pos? d)
                                   (ansi/style (common/pad:left (str d) 6) style)
@@ -62,9 +66,9 @@
                                [(count (:fragment module)) #{:magenta}]
                                [(dec (count (:link module))) #{:blue}]]))
                         18)))))
-         (str/join "\n"))))
+         (clojure.string/join "\n"))))
 
-(definvoke ^{:arglists '([] [lang])}
+(invoke/definvoke ^{:arglists '([] [lang])}
   lib-overview
   "specifies lib overview task"
   {:added "4.0"}
@@ -115,14 +119,14 @@
   {:added "4.0"}
   [module-id {:keys [lang]} modules _]
   (if-let [module (get modules (or module-id
-                                   (h/ns-sym)))]
+                                   (env/ns-sym)))]
     (if (or (not lang)
             (= lang (:lang module))) 
       module)))
 
 (defmethod task/task-defaults :lang.module
   ([_]
-   (h/merge-nested library-template
+   (collection/merge-nested library-template
                    {:construct {:env      #'lib-module-env
                                 :input    (fn [_] *current-lang*)
                                 :lookup   (fn [_ {:keys [modules]}] modules)}
@@ -144,7 +148,7 @@
   {:added "4.0"}
   [{:keys [lang id code fragment link native suppress export] :as module} & [{:keys [counts
                                                                                      deps]}]]
-  (str/join-lines
+  (prose/join-lines
     [(if (not (false? counts))
        (str (ansi/style (common/pad:left (name lang) 10) #{:yellow :bold})
             "  "
@@ -155,14 +159,14 @@
             "  "
             (:as export)))
      (if deps
-       (str/indent  (str/join-lines
+       (prose/indent  (prose/join-lines
                      (concat (map #(ansi/style (str %) #{:blue})
                                   (vals (dissoc link '-)))
                              (map #(ansi/style (str %) #{:cyan :bold})
                                   (keys native))))
                     12))]))
 
-(definvoke ^{:arglists '([] [module-id] [module-id {:keys [lang entry]}])}
+(invoke/definvoke ^{:arglists '([] [module-id] [module-id {:keys [lang entry]}])}
   lib-module-overview
   "lists all modules"
   {:added "4.0"}
@@ -204,27 +208,27 @@
                                       :macro
                                       :fragment))))
                     12))))
-       (str/join "\n")))
+       (clojure.string/join "\n")))
 
 (defn lib-module-entries-format
   "formats the entries of a module"
   {:added "4.0"}
   [{:keys [lang code fragment export] :as module} & [params]]
-  (str (str/join "\n--------------------------------------------------------------\n"
+  (str (clojure.string/join "\n--------------------------------------------------------------\n"
          [(str (ansi/style (name lang) #{:yellow :bold}) " " (:as export))
           (->> (lib-module-overview-format module {:counts false
                                                    :deps true})
-               (str/split-lines)
-               (map str/trim-left)
-               (str/join "\n"))
-          (str/join "\n--------------------------------------------------------------\n"
+               (clojure.string/split-lines)
+               (map clojure.string/triml)
+               (clojure.string/join "\n"))
+          (clojure.string/join "\n--------------------------------------------------------------\n"
             [(if (not (false? (:code params)))
                (lib-module-entries-format-section module :code #{:green :bold} true))
              (if (not (false? (:fragment params)))
                (lib-module-entries-format-section module :fragment #{:magenta} true))])])
        "\n"))
 
-(definvoke ^{:arglists '([] [module-id] [module-id {:keys [lang entry]}])}
+(invoke/definvoke ^{:arglists '([] [module-id] [module-id {:keys [lang entry]}])}
   lib-module-entries
   "outputs module entries"
   {:added "4.0"}
@@ -254,7 +258,7 @@
                                        (:lang module)
                                        module-id)))))
 
-(definvoke ^{:arglists '([] [module-id] [module-id {:keys [lang]}])}
+(invoke/definvoke ^{:arglists '([] [module-id] [module-id {:keys [lang]}])}
   lib-module-purge
   "purges modules"
   {:added "4.0"}
@@ -287,14 +291,14 @@
   (if-let [{:keys [code link] :as module}
            (lib-module-filter module-id params modules env)]
     (let [{:keys [ignore]} params
-          lookup (h/transpose link)
+          lookup (collection/transpose link)
           unused (volatile! (apply dissoc link '-
                                    (mapcat (fn [ns]
                                              [ns (lookup ns)])
                                            ignore)))]
       (doseq [entry (vals code)]
         (let [{:keys [form-input]} entry]
-          (h/prewalk (fn [form]
+          (walk/prewalk (fn [form]
                        (if-let [ns (and (symbol? form)
                                         (namespace form))]
                          (let [ns (symbol ns)] 
@@ -304,22 +308,22 @@
       (vec (sort (vals @unused))))
     []))
 
-(definvoke ^{:arglists '([] [module-id] [module-id {:keys [lang]}])}
+(invoke/definvoke ^{:arglists '([] [module-id] [module-id {:keys [lang]}])}
   lib-module-unused
   "lists unused modules"
   {:added "4.0"}
   [:task {:template :lang.module
           :params {:title "UNUSED DEPENDENCIES"}
           :result  {:format  {:data  (fn [result _]
-                                       (str/join "\n" result))}}
+                                       (clojure.string/join "\n" result))}}
           :main    {:fn  #'lib-module-unused-fn}}])
 
 (comment (comment
            (lib-module-unused [(fn [s]
-                                 (str/ends-with? s "test"))])
+                                 (clojure.string/ends-with? s "test"))])
            
            (lib-module-unused [(fn [s]
-                                 (not (str/ends-with? s "test")))]
+                                 (not (clojure.string/ends-with? s "test")))]
                               {:ignore '[xt.lang.base-lib
                                          js.react
                                          js.core]})
@@ -342,7 +346,7 @@
     (if (some (comp nil? :line) (vals code))
       module)))
 
-(definvoke ^{:arglists '([] [module-id] [module-id {:keys [lang]}])}
+(invoke/definvoke ^{:arglists '([] [module-id] [module-id {:keys [lang]}])}
   lib-module-missing-line-number
   "lists modules with entries that are missing line numbers (due to inproper macros)"
   {:added "4.0"}
@@ -369,22 +373,22 @@
            (lib-module-filter module-id params modules env)]
     (let [all (filter (fn [[id ns]]
                         (when (and (< 3 (count (str id)))
-                                   (str/includes? (str id) "-")
-                                   (not (str/ends-with? (str ns)
+                                   (clojure.string/includes? (str id) "-")
+                                   (not (clojure.string/ends-with? (str ns)
                                                         (str id))))
                           [id ns]))
                       link)]
       (when (not-empty all)
         all))))
 
-(definvoke ^{:arglists '([] [module-id] [module-id {:keys [lang]}])}
+(invoke/definvoke ^{:arglists '([] [module-id] [module-id {:keys [lang]}])}
   lib-module-incorrect-alias
   "lists modules that have an incorrect alias"
   {:added "4.0"}
   [:task {:template :lang.module
           :params {:title "INCORRECT ALIASES"}
           :result  {:format  {:data  (fn [result _]
-                                       (str/join "\n" result))}}
+                                       (clojure.string/join "\n" result))}}
           :main    {:fn  #'lib-module-incorrect-alias-fn}}])
 
 

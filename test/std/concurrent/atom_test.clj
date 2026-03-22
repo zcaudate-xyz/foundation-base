@@ -1,9 +1,8 @@
 (ns std.concurrent.atom-test
-  (:use code.test)
   (:require [std.concurrent.atom :refer :all]
             [std.concurrent.executor :as executor]
-            [std.lib.future :as f]
-            [std.lib :as h]))
+            [std.lib.future :as f])
+  (:use code.test))
 
 ^{:refer std.concurrent.atom/aq:new :added "3.0"}
 (fact "creates an atom with a vec as queue"

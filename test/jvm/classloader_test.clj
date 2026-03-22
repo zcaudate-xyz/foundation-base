@@ -1,10 +1,10 @@
 (ns jvm.classloader-test
-  (:use code.test)
-  (:require [jvm.classloader :refer :all]
-            [jvm.classloader.common :as common]
+  (:require [clojure.java.io :as io]
             [jvm.artifact :as artifact]
-            [std.fs :as fs]
-            [clojure.java.io :as io]))
+            [jvm.classloader :refer :all]
+            [jvm.classloader.common :as common]
+            [std.fs :as fs])
+  (:use code.test))
 
 ^{:refer jvm.classloader/has-url? :added "3.0"}
 (fact "checks whether the classloader has the following url"

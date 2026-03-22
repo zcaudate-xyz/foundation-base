@@ -1,14 +1,12 @@
 (ns std.timeseries.process
-  (:require [std.lib :as h]
+  (:require [std.lib.collection :as collection]
+            [std.lib.walk :as walk]
+            [std.math :as math]
+            [std.string.path :as path]
             [std.timeseries.common :as common]
             [std.timeseries.compute :as compute]
-            [std.timeseries.types :as types]
             [std.timeseries.range :as range]
-
-            [std.string :as str]
-            [std.string.path :as path]
-            [std.math :as math]
-            [std.lib.walk :as walk]))
+            [std.timeseries.types :as types]))
 
 (defn prep-merge
   "prepares the merge functions and options
@@ -91,7 +89,7 @@
                                  (assoc m k (default-fn (map k arr))))
                                {}
                                mkeys))
-             cdata   (h/map-entries (fn [[k f]]
+             cdata   (collection/map-entries (fn [[k f]]
                                       [k (f (map k arr))])
                                     custom-fns)
              tdata   {time-key (time-fn (map time-key arr))}]

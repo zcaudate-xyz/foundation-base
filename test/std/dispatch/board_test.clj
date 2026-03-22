@@ -1,8 +1,9 @@
 (ns std.dispatch.board-test
-  (:use code.test)
-  (:require [std.dispatch.board :refer :all]
-            [std.concurrent :as cc]
-            [std.lib :as h]))
+  (:require [std.concurrent :as cc]
+            [std.dispatch.board :refer :all]
+            [std.lib.component :as component]
+            [std.lib.future :as future])
+  (:use code.test))
 
 (defonce ^:dynamic *output*  (atom []))
 
@@ -26,7 +27,7 @@
                 (fn [_ entry] (:groups entry)))))
 
 (defn test-scaffold [config groups]
-  (h/with:component [board-fn (create-dispatch config)]
+  (component/with [board-fn (create-dispatch config)]
                     (reset! *executor* board-fn)
                     (doall (map-indexed (fn [id groups]
                                           (Thread/sleep 1)
@@ -61,7 +62,7 @@
 
   (-> -ex-
       (submit-board {:id "a"} "t0"))
-  => (contains ["t0" ["a"] h/future?]) ^:hidden
+  => (contains ["t0" ["a"] future/future?]) ^:hidden
 
   (update @(:board (:runtime -ex-)) :submitted seq)
   => (contains {:lookup {"t0" {:id "a"}},
@@ -108,12 +109,12 @@
   (def -ex- (doto (create-dispatch +test-config+)
               (start-dispatch)
               (submit-board {:id "a"} "t0")))
-  (poll-dispatch -ex- ["a"]) => (contains [h/future?]))
+  (poll-dispatch -ex- ["a"]) => (contains [future/future?]))
 
 ^{:refer std.dispatch.board/submit-dispatch :added "3.0"}
 (fact "submits to the board executor"
   (def -ex- (doto (create-dispatch +test-config+) (start-dispatch)))
-  (submit-dispatch -ex- {:id "a"}) => h/future?)
+  (submit-dispatch -ex- {:id "a"}) => future/future?)
 
 ^{:refer std.dispatch.board/start-dispatch :added "3.0"}
 (fact "starts the board executor"

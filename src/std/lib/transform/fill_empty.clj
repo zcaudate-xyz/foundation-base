@@ -1,6 +1,6 @@
 (ns std.lib.transform.fill-empty
-  (:require [std.lib.foundation :as h]
-            [std.lib.collection :as coll]))
+  (:require [std.lib.collection :as coll]
+            [std.lib.foundation :as h]))
 
 (defn process-fill-empty
   "helper functio for wrap-model-fill-empty

@@ -1,12 +1,13 @@
 (ns std.dom.invoke
-  (:require [std.protocol.invoke :as protocol.invoke]
-            [std.dom.common :as base]
+  (:require [std.dom.common :as base]
             [std.dom.component :as component]
             [std.dom.impl :as impl]
             [std.dom.type :as type]
-            [std.lib :as h :refer [definvoke]]))
+            [std.lib.function :as fn]
+            [std.lib.invoke :as invoke]
+            [std.protocol.invoke :as protocol.invoke]))
 
-(definvoke invoke-intern-dom
+(invoke/definvoke invoke-intern-dom
   "constructor for dom
  
    (invoke-intern-dom nil 'hello {:class :react
@@ -34,7 +35,7 @@
                        ([~'props] (base/dom-compile [~tag ~'props])))]
      (cond (= class :value)
            `(let [~'construct (fn ~@body)]
-              (h/arg-check ~'construct 1 "value class takes 1 argument")
+              (fn/arg-check ~'construct 1 "value class takes 1 argument")
               (type/metaprops-add :dom/value (assoc ~params :construct ~'construct))
               ~definition)
 
@@ -45,6 +46,6 @@
            
            :else
            `(let [~'template (fn ~@body)]
-              (h/arg-check ~'template 2 "template class takes 2 arguments")
+              (fn/arg-check ~'template 2 "template class takes 2 arguments")
               (component/component-install ~tag ~class ~'template ~params)
               ~definition)))))

@@ -1,22 +1,26 @@
 (ns rt.solidity.client
-  (:require [std.protocol.component :as protocol.component]
-            [std.protocol.context :as protocol.context]
-            [std.lang.base.runtime :as default]
-            [std.lib :as h :refer [defimpl]]
-            [std.json :as json]
-            [std.string :as str]
-            [std.lang :as l]
-            [std.fs :as fs]
-            [std.lang.interface.type-shared :as shared]
+  (:require [clojure.string]
             [js.lib.eth-bench :as eth-bench]
-            [xt.lang.base-notify :as notify]
-            [xt.lang.base-repl :as base-repl]
             [rt.basic :as basic]
             [rt.basic.server-basic :as server]
             [rt.solidity.compile-common :as common]
+            [rt.solidity.compile-deploy :as deploy]
             [rt.solidity.compile-node :as node]
             [rt.solidity.compile-solc :as solc]
-            [rt.solidity.compile-deploy :as deploy]))
+            [std.fs :as fs]
+            [std.json :as json]
+            [std.lang :as l]
+            [std.lang.base.runtime :as default]
+            [std.lang.interface.type-shared :as shared]
+            [std.lib.component :as component]
+            [std.lib.env :as env]
+            [std.lib.foundation :as f]
+            [std.lib.impl :as impl]
+            [std.lib.template :as template]
+            [std.protocol.component :as protocol.component]
+            [std.protocol.context :as protocol.context]
+            [xt.lang.base-notify :as notify]
+            [xt.lang.base-repl :as base-repl]))
 
 ;;
 ;;
@@ -29,14 +33,14 @@
   [{:keys [node] :as rt}]
   (or (server/get-relay
        (server/get-server (:id node) :js))
-      (h/error "Not Connected")))
+      (f/error "Not Connected")))
 
 (defn contract-fn-name
   "gets the name of a pointer"
   {:added "4.0"}
   [ptr]
   (let [fn-name  (str (or (:id ptr)
-                          (h/error "Free pointers not supported")))]
+                          (f/error "Free pointers not supported")))]
     (l/emit-symbol :solidity (symbol fn-name))))
 
 ;;
@@ -48,12 +52,12 @@
   {:added "4.0"}
   [{:keys [id lang url] :as rt}]
   (let [rt-node (basic/rt-basic
-                 {:id (h/sid)
+                 {:id (f/sid)
                   :lang :js
                   :runtime :basic
                   :layout :full})
         url     (common/get-url rt)
-        form  (h/$ [(:= solc (require "solc"))])
+        form  (template/$ [(:= solc (require "solc"))])
         _     (notify/wait-on-fn rt-node form 5000)]
     rt-node))
 
@@ -69,7 +73,7 @@
   "stops the solidity rt"
   {:added "4.0"}
   [{:keys [id lang bench container] :as rt}]
-  (let [_ (h/stop (:node rt))
+  (let [_ (component/stop (:node rt))
         _ (common/set-rt-settings id nil)]
     (dissoc rt :node)))
 
@@ -77,7 +81,7 @@
   "disables raw-eval for solidity"
   {:added "4.0"}
   ([{:keys [id lang] :as rt} body]
-   (h/error "NOT AVAILABLE" {})))
+   (f/error "NOT AVAILABLE" {})))
 
 
 ;;
@@ -96,14 +100,14 @@
         retype (or (get-in spec ["outputs" 0 "type"])
                    "")]
     (when (not spec)
-      (h/error "No spec found: " {:name fn-name
+      (f/error "No spec found: " {:name fn-name
                                   :options (map #(get % "name") (:abi contract))}))
     (when (not= (count args)
                 (count types))
-      (h/error "Args not the same: " {:args args
+      (f/error "Args not the same: " {:args args
                                       :types types}))
-    (and (str/starts-with? retype "uint")
-         (not (str/ends-with? retype "[]")))))
+    (and (clojure.string/starts-with? retype "uint")
+         (not (clojure.string/ends-with? retype "[]")))))
 
 (defn invoke-ptr-web3-call
   "invokes a deployed method"
@@ -177,7 +181,7 @@
                       [(:id node) (:port server) @(:count server)]
                       :no-server)}])))
 
-(defimpl RuntimeWeb3 [id]
+(impl/defimpl RuntimeWeb3 [id]
   :string rt-web3-string
   :protocols [std.protocol.component/IComponent
               :suffix "-web3"
@@ -193,7 +197,7 @@
   [{:keys [id
            lang] :as m}]
   (map->RuntimeWeb3 (merge  m
-                            {:id (or id (h/sid))
+                            {:id (or id (f/sid))
                              :tag :web3
                              :runtime :web3})))
 
@@ -203,7 +207,7 @@
   [{:keys [id
            lang] :as m}]
   (-> (rt-web3:create m)
-      (h/start)))
+      (component/start)))
 
 (def +init+
   [(default/install-type!
@@ -238,14 +242,14 @@
              no-wrap] :as opts}]
     (let [prefix (if (empty? interfaces)
                    ""
-                   (str/join
+                   (clojure.string/join
                     "\n\n"
                     (conj (mapv l/emit-ptr interfaces) "")))
           form   (list `web3/contract-test-prep
                        'web3
                        (list `xt.lang.base-lib/join
                              "\n"
-                             (str/split-lines code))
+                             (clojure.string/split-lines code))
                        (common/get-caller-private-key id)
                        {:args args :file file :name name
                         :no-wrap no-wrap :prefix prefix})
@@ -264,8 +268,8 @@
                   contractAddress]} result
           _ (cond (not status)
                   (do (when (not compile/*suppress-errors*)
-                        (h/pl (str "//\n\n\n\n" prefix code)))
-                      (h/error "Compilation Error"
+                        (env/pl (str "//\n\n\n\n" prefix code)))
+                      (f/error "Compilation Error"
                                {:data result}))
                   
                   set-address

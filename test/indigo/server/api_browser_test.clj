@@ -1,6 +1,6 @@
 (ns indigo.server.api-browser-test
-  (:use code.test)
-  (:require [indigo.server.api-browser :refer :all]))
+  (:require [indigo.server.api-browser :refer :all])
+  (:use code.test))
 
 ^{:refer indigo.server.api-browser/list-namespaces :added "4.0"}
 (fact "TODO")

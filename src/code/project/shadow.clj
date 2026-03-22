@@ -1,6 +1,6 @@
 (ns code.project.shadow
-  (:require [std.fs :as fs]
-            [code.project.common :as common]))
+  (:require [code.project.common :as common]
+            [std.fs :as fs]))
 
 (def ^:dynamic *shadow-file* "shadow-cljs.edn")
 

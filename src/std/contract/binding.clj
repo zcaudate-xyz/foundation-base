@@ -1,6 +1,7 @@
 (ns std.contract.binding
-  (:require [std.lib :as h :refer [defimpl]]
-            [std.contract.type :as type])
+  (:require [std.contract.type :as type]
+            [std.lib.collection :as collection]
+            [std.lib.impl :as impl])
   (:refer-clojure :exclude [bound?]))
 
 (defn contract-info
@@ -39,7 +40,7 @@
   ([contract]
    (str "#contract" (contract-info contract))))
 
-(defimpl Contract [var function specs]
+(impl/defimpl Contract [var function specs]
   :string contract-string
   :invoke  contract-invoke
   :final true)
@@ -127,7 +128,7 @@
   {:added "3.0"}
   ([obj]
    (if obj
-     (let [[obj opts] (cond (h/hash-map? obj)
+     (let [[obj opts] (cond (collection/hash-map? obj)
                             (first obj)
 
                             :else [obj nil])

@@ -1,24 +1,26 @@
 (ns std.make.project
-  (:require [std.lib :as h]
-            [std.string :as str]
-            [std.make.common :as common]
-            [std.make.compile :as compile]
-            [std.make.readme :as readme]
+  (:require [clojure.string]
             [std.block :as block]
             [std.fs :as fs]
-            [std.fs.watch :as watch]))
+            [std.fs.watch :as watch]
+            [std.lib.collection :as collection]
+            [std.lib.env :as env]
+            [std.lib.os :as os]
+            [std.make.common :as common]
+            [std.make.compile :as compile]
+            [std.make.readme :as readme]))
 
 (defn makefile-parse
   "parses a makefile for it's sections"
   {:added "4.0"}
   ([mcfg]
    (let [out-dir (common/make-dir mcfg)]
-     (-> (h/sh "/bin/bash" "-c"
+     (-> (os/sh "/bin/bash" "-c"
                "grep -oE '^[a-zA-Z0-9_-]+:([^=]|$)' Makefile | sed 's/[^a-zA-Z0-9_-]*$//'"
                {:root (str out-dir)
                 :wrap false})
-         (str/trim)
-         (str/split-lines)))))
+         (clojure.string/trim)
+         (clojure.string/split-lines)))))
 
 (defn build-default
   "builds the default section"
@@ -30,13 +32,13 @@
   "gets changed files from result"
   {:added "4.0"}
   [build-result]
-  (vec (filter string? (h/flatten-nested build-result))))
+  (vec (filter string? (collection/flatten-nested build-result))))
 
 (defn is-changed?
   "checks that project result is changed"
   {:added "4.0"}
   [build-result]
-  (not (empty? (filter string? (h/flatten-nested build-result)))))
+  (not (empty? (filter string? (collection/flatten-nested build-result)))))
 
 (defn build-all
   "builds all sections in a make config"
@@ -94,7 +96,7 @@
   "builds for a triggering namespace"
   {:added "4.0"}
   ([]
-   (build-triggered (h/ns-sym)))
+   (build-triggered (env/ns-sym)))
   ([ns]
    (let [mcfgs (common/get-triggered ns)]
      (compile/with:compile-filter
@@ -108,37 +110,37 @@
   (let [content (slurp path)
         healed  (block/heal content)]
     (when (not= content healed)
-      (h/p "Healed:" ns)
+      (env/p "Healed:" ns)
       (spit path healed))))
 
 (defn file-watcher-handler
   "handler for file changes"
   [path & [{:keys [prehooks]}]]
   (let [path-str (str path)]
-    (when (and (or (str/ends-with? path-str ".clj")
-                   (str/ends-with? path-str ".cljc"))
-               (not (str/includes? path-str ".#"))) ;; Emacs lock files
+    (when (and (or (clojure.string/ends-with? path-str ".clj")
+                   (clojure.string/ends-with? path-str ".cljc"))
+               (not (clojure.string/includes? path-str ".#"))) ;; Emacs lock files
       (let [ns (fs/file-namespace path-str)]
         (when ns
           (try
-            (h/p "\n\nNamespace:" ns)
+            (env/p "\n\nNamespace:" ns)
             (file-watcher-heal path ns)
-            (h/map-vals (fn [f]
+            (collection/map-vals (fn [f]
                           (f ns))
                         prehooks)
             (require ns :reload)
             (let [results (build-triggered ns)
                   files   (changed-files results)]
               (when (seq files)
-                (h/p "Changed:" files)))
+                (env/p "Changed:" files)))
             (catch Throwable t
-              (h/p "Build failed for:" ns)
-              (h/p (.getMessage t)))))))))
+              (env/p "Build failed for:" ns)
+              (env/p (.getMessage t)))))))))
 
 (defn watch
   "starts watching a directory"
   ([path & [{:keys [prehooks]}]]
-   (h/prn "Starting build watcher on:" path)
+   (env/prn "Starting build watcher on:" path)
    (let [cb (fn [type file]
               (when (or (= type :modify)
                         (= type :create))

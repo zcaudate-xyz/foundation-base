@@ -1,6 +1,6 @@
 (ns std.lib.system.topology-test
-  (:use code.test)
-  (:require [std.lib.system.topology :refer :all]))
+  (:require [std.lib.system.topology :refer :all])
+  (:use code.test))
 
 ^{:refer std.lib.system.topology/long-form-imports :added "3.0"}
 (fact "converts short form imports to long form"

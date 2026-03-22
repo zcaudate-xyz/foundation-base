@@ -1,7 +1,10 @@
 (ns js.react.compile-components
-  (:require [std.lib.walk :as walk]
-            [std.lib :as h]
-            [std.string :as str]))
+  (:require [std.lib.collection :as collection]
+            [std.lib.context.pointer :as ptr]
+            [std.lib.foundation :as f]
+            [std.lib.template :as template]
+            [std.lib.walk :as walk]
+            [std.string.case :as case]))
 
 (defn classify-tagged
   "classifies the hiccup form"
@@ -42,7 +45,7 @@
   {:added "4.0"}
   [inputs]
   (let [ks    (set (keys inputs))]
-    (h/map-vals
+    (collection/map-vals
      (fn [{:keys [tag props children]}]
        (let [deps (volatile! #{})
              _    (walk/postwalk
@@ -64,7 +67,7 @@
   "expands a vector component to standardised form"
   {:added "4.0"}
   [inputs]
-  (let [inputs (h/map-vals
+  (let [inputs (collection/map-vals
                 (fn [tmpl]
                   (cond (vector? tmpl)
                         (classify-tagged tmpl true)
@@ -75,7 +78,7 @@
                                tmpl)))
                 inputs)
         deps   (components-find-deps inputs)]
-    (h/merge-nested inputs deps)))
+    (collection/merge-nested inputs deps)))
 
 ;;
 ;;
@@ -140,13 +143,13 @@
   "creates the getter symbol"
   {:added "4.0"}
   [kw]
-  (symbol (str/camel-case (name kw))))
+  (symbol (case/camel-case (name kw))))
 
 (defn setter-symbol
   "creates the setter symbol"
   {:added "4.0"}
   [kw]
-  (symbol (str/camel-case (str "set-" (name kw)))))
+  (symbol (case/camel-case (str "set-" (name kw)))))
 
 (defn compile-walk-variables
   "replace :var/<name> as react states"
@@ -190,7 +193,7 @@
   (list (setter-symbol var)
         (cond->> (list '+  (getter-symbol var)
                        (or val 1))
-          mod (list (h/$
+          mod (list (template/$
                       (fn [val]
                         (return (:? (<= 0 val)
                                     (mod val ~mod)
@@ -203,7 +206,7 @@
   (list (setter-symbol var)
         (cond->> (list '-  (getter-symbol var)
                        (or val 1))
-          mod (list (h/$
+          mod (list (template/$
                       (fn [val]
                         (return (:? (<= 0 val)
                                     (mod val ~mod)
@@ -220,18 +223,18 @@
         form-pending-start (if pending
                              (list (js.react.compile-components/setter-symbol pending) true))
         form-pending-end   (if pending
-                             (h/$ (finally (fn []
+                             (template/$ (finally (fn []
                                              (~(js.react.compile-components/setter-symbol pending) false)))))
         form-error         (if error
-                             (h/$ (catch (fn [err]
+                             (template/$ (catch (fn [err]
                                            (~(js.react.compile-components/setter-symbol error) err)))))
         form-transform     (if transform
-                             (h/$ (then (fn [res]
+                             (template/$ (then (fn [res]
                                           (return
                                            (~transform res))))))
-        form-set           (h/$ (then (fn [res]
+        form-set           (template/$ (then (fn [res]
                                         (~(js.react.compile-components/setter-symbol var) res))))]
-    (h/$ (do ~@(if pending
+    (template/$ (do ~@(if pending
                  [form-pending-start])
              (. ~to
                 ~@(if transform
@@ -290,7 +293,7 @@
                                                          (:transform get) (list (compile-walk-variables (:transform get))))
                                             (:key set) (let [set-fn  (setter-symbol (:%/value props))]
                                                          (if (:transform set)
-                                                           (h/$ (fn [input]
+                                                           (template/$ (fn [input]
                                                                   (~set-fn (~(:transform set)
                                                                             input))))
                                                            set-fn))))
@@ -327,7 +330,7 @@
                    (compile-replace (:children tmpl)
                                     tmpl-props
                                     children))]
-    (cond (h/pointer? (:tag tmpl))
+    (cond (ptr/pointer? (:tag tmpl))
           (apply vector :% (symbol (name (:module (:tag tmpl)))
                                    (name (:id (:tag tmpl))))
                  body)
@@ -344,7 +347,7 @@
   [elem components layout-fn]
   (let [[tag] elem
         tmpl  (or (get components tag)
-                  (h/error "Tag not found: "
+                  (f/error "Tag not found: "
                            {:tag tag
                             :element elem
                             :components

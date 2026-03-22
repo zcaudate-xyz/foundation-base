@@ -1,8 +1,7 @@
 (ns std.lang.model.spec-jq-test
-  (:use code.test)
-  (:require [std.lang.model.spec-jq :refer :all]
-            [std.lang.base.script :as script]
-            [std.lib :as h]))
+  (:require [std.lang.base.script :as script]
+            [std.lang.model.spec-jq :refer :all])
+  (:use code.test))
 
 (script/script- :jq)
 

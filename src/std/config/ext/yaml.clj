@@ -1,9 +1,9 @@
 (ns std.config.ext.yaml
   (:require [script.yaml :as yaml]
             [std.config.common :as common]
-            [std.lib :refer [definvoke]]))
+            [std.lib.invoke :as invoke]))
 
-(definvoke resolve-type-yaml
+(invoke/definvoke resolve-type-yaml
   "resolves yaml config
  
    (resolve-type-yaml nil (yaml/write {:a 1 :b 2}))

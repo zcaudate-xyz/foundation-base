@@ -1,6 +1,6 @@
 (ns js.react.ext-log-test
-  (:use code.test)
-  (:require [js.react.ext-log :refer :all]))
+  (:require [js.react.ext-log :refer :all])
+  (:use code.test))
 
 ^{:refer js.react.ext-log/makeLog :added "4.0" :unchecked true}
 (fact "creates a log for react")

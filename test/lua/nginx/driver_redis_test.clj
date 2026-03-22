@@ -1,9 +1,8 @@
 (ns lua.nginx.driver-redis-test
-  (:use code.test)
-  (:require [std.lang :as l]
-            [std.lib :as h]
-            [xt.lang.base-notify :as notify]
-            [lib.redis.bench :as bench]))
+  (:require [lib.redis.bench :as bench]
+            [std.lang :as l]
+            [xt.lang.base-notify :as notify])
+  (:use code.test))
 
 (l/script- :lua
   {:runtime :basic

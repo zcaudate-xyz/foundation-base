@@ -1,7 +1,6 @@
 (ns std.lang.model.spec-xtalk.fn-php-test
-  (:use code.test)
-  (:require [std.lang.model.spec-xtalk.fn-php :refer :all]
-            [std.lib :as h]))
+  (:require [std.lang.model.spec-xtalk.fn-php :refer :all])
+  (:use code.test))
 
 ^{:refer std.lang.model.spec-xtalk.fn-php/php-tf-x-len :added "4.1"}
 (fact "php-tf-x-len"

@@ -1,15 +1,15 @@
 (ns js.lib.puck
-  (:require [std.string :as str]
+  (:require [js.react.compile :as compile]
             [std.block :as block]
-            [std.lib :as h]
             [std.lang :as l]
-            [js.react.compile :as compile]))
+            [std.lib.foundation :as f]
+            [std.string.case :as case]))
 
 (l/script :js
   {:import  [["@measured/puck" :as [* Puck]
               :bundle [["@measured/puck/puck.css"]]]]})
 
-(h/template-entries [l/tmpl-entry {:type :fragment
+(f/template-entries [l/tmpl-entry {:type :fragment
                                    :base "Puck"
                                    :tag "js"}]
   [Action
@@ -102,6 +102,6 @@
   []
   (block/layout
    (vec (mapcat (fn [[k]]
-                  [(keyword "puck" (str/spear-case (str k)))
+                  [(keyword "puck" (case/spear-case (str k)))
                    {:tag (symbol "-" (str k))}])
                 (sort (ns-publics *ns*))))))

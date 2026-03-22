@@ -1,6 +1,6 @@
 (ns indigo-test
-  (:use code.test)
-  (:require [indigo :refer :all]))
+  (:require [indigo :refer :all])
+  (:use code.test))
 
 ^{:refer indigo/tests-in-wrong-file :added "3.0"}
 (fact "checks for tests in the wrong file"

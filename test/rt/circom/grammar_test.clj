@@ -1,8 +1,7 @@
 (ns rt.circom.grammar-test
-  (:use code.test)
   (:require [rt.circom.grammar :refer :all]
-            [std.lang :as l]
-            [std.lib :as h]))
+            [std.lang :as l])
+  (:use code.test))
 
 ^{:refer rt.circom.grammar/format-string :added "4.1"}
 (fact "formats a string for circom"

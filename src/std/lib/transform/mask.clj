@@ -1,6 +1,6 @@
 (ns std.lib.transform.mask
-  (:require [std.lib.foundation :as h]
-            [std.lib.collection :as coll]))
+  (:require [std.lib.collection :as coll]
+            [std.lib.foundation :as h]))
 
 (defn process-mask
   "Determines correct output given data and mask

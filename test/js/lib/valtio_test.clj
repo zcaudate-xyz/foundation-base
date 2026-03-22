@@ -1,7 +1,7 @@
 (ns js.lib.valtio-test
-  (:use code.test)
   (:require [std.lang :as l]
             [xt.lang.base-notify :as notify])
+  (:use code.test)
   (:refer-clojure :exclude [use val proxy]))
 
 (l/script- :js

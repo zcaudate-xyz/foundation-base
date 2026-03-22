@@ -1,10 +1,12 @@
 (ns std.dispatch.core
-  (:require [std.protocol.dispatch :as protocol.dispatch]
-            [std.protocol.component :as protocol.component]
-            [std.concurrent :as cc]
+  (:require [std.concurrent :as cc]
             [std.dispatch.common :as common]
             [std.dispatch.hooks :as hooks]
-            [std.lib :as h :refer [defimpl]]))
+            [std.lib.foundation :as f]
+            [std.lib.future :as future]
+            [std.lib.impl :as impl]
+            [std.protocol.component :as protocol.component]
+            [std.protocol.dispatch :as protocol.dispatch]))
 
 (defn submit-dispatch
   "submits to the core dispatch"
@@ -15,12 +17,12 @@
          executor  @(:executor runtime)]
      (if executor
        (try (hooks/on-queued dispatch entry)
-            (h/future:run task-fn {:pool executor})
+            (future/future:run task-fn {:pool executor})
             (catch Throwable t
               (hooks/on-error dispatch entry t)))
-       (h/error  "No executor dispatch present")))))
+       (f/error  "No executor dispatch present")))))
 
-(defimpl CoreDispatch [type runtime handler]
+(impl/defimpl CoreDispatch [type runtime handler]
   :prefix "common/"
   :suffix "-dispatch"
   :string common/to-string

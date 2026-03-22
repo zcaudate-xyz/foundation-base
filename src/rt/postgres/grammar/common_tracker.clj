@@ -1,6 +1,8 @@
 (ns rt.postgres.grammar.common-tracker
-  (:require [std.string :as str]
-            [std.lib :as h :refer [defimpl]]))
+  (:require [std.lib.collection :as collection]
+            [std.lib.foundation :as f]
+            [std.lib.impl :as impl]
+            [std.string.case :as case]))
 
 (defn- tracker-string
   ([{:keys [name disable in out] :as tracker}]
@@ -10,7 +12,7 @@
           in   (assoc :in true)
           out  (assoc :out true)))))
 
-(defimpl Tracker []
+(impl/defimpl Tracker []
   :string tracker-string)
 
 (defn add-tracker
@@ -18,7 +20,7 @@
   {:added "4.0"}
   ([params tracker spec op]
    (let [_ (if (get (:disable tracker) op)
-             (h/error (str op " disabled for spec" {:op op
+             (f/error (str op " disabled for spec" {:op op
                                                     :spec spec})))]
      (cond (= :ignore (:track params))
            params
@@ -26,7 +28,7 @@
            (and (:in tracker)
                 (not (:track params))
                 (not (get (:ignore tracker) op)))
-           (h/error (str "`:track` key required for spec") {:spec spec})
+           (f/error (str "`:track` key required for spec") {:spec spec})
 
            :else
            (assoc params :static/tracker tracker)))))
@@ -37,8 +39,8 @@
   ([{:static/keys [tracker]
      :keys [track]:as params}]
    (if-let [kmp (:create (:in tracker))]
-     (h/map-vals (fn [k]
-                   (list :->> track (str/snake-case (name k))))
+     (collection/map-vals (fn [k]
+                   (list :->> track (case/snake-case (name k))))
                  kmp))))
 
 (defn tracker-map-modify
@@ -47,6 +49,6 @@
   ([{:static/keys [tracker]
      :keys [track]:as params}]
    (if-let [kmp (:modify (:in tracker))]
-     (h/map-vals (fn [k]
-                   (list :->> track (str/snake-case (name k))))
+     (collection/map-vals (fn [k]
+                   (list :->> track (case/snake-case (name k))))
                  kmp))))

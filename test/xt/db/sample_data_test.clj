@@ -1,9 +1,7 @@
 (ns xt.db.sample-data-test
-  (:require [std.lib :as h]
+  (:require [rt.postgres :as pg :refer [defsel.pg defret.pg defaccess.pg]]
             [std.lang :as l]
-            [rt.postgres :as pg :refer [defsel.pg
-                                        defret.pg
-                                        defaccess.pg]]))
+            [std.lib.foundation :as f]))
 
 (l/script :postgres
   {:require [[rt.postgres :as pg]]
@@ -308,7 +306,7 @@
             [(symbol (str "lua-route-" (name source-sym))) db-sym])
           +db-entries+))
    
-  (h/template-entries [bind-route]
+  (f/template-entries [bind-route]
     +route-entries+))
 
 

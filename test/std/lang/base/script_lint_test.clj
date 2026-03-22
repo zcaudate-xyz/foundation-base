@@ -1,12 +1,11 @@
 (ns std.lang.base.script-lint-test
-  (:use code.test)
-  (:require [std.lang.base.script-lint :refer :all]
-            [std.lang.base.library :as lib]
-            [std.lang.base.impl :as impl]
+  (:require [js.blessed]
             [std.lang :as l]
+            [std.lang.base.impl :as impl]
+            [std.lang.base.library :as lib]
             [std.lang.base.runtime :as rt]
-            [std.lib :as h]
-            [js.blessed]))
+            [std.lang.base.script-lint :refer :all])
+  (:use code.test))
 
 (def +library+
   (let [lib (impl/clone-default-library)]

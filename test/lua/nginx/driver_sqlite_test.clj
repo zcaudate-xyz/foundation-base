@@ -1,8 +1,7 @@
 (ns lua.nginx.driver-sqlite-test
-  (:use code.test)
-  (:require [std.lang :as l]
-            [std.lib :as h]
-            [std.json :as json]))
+  (:require [std.json :as json]
+            [std.lang :as l])
+  (:use code.test))
 
 (l/script- :lua
   {:runtime :basic

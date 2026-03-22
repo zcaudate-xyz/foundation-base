@@ -1,19 +1,25 @@
 (ns std.lang.base.script
-  (:require [std.lang.base.emit :as emit]
+  (:require [clojure.set]
+            [std.json :as json]
             [std.lang.base.book :as book]
+            [std.lang.base.book-entry :as e]
+            [std.lang.base.emit :as emit]
             [std.lang.base.impl :as impl]
             [std.lang.base.library :as lib]
             [std.lang.base.library-snapshot :as snap]
-            [std.lang.base.runtime :as rt]
-            [std.lang.base.book-entry :as e]
-            [std.lang.base.util :as ut]
-            [std.string :as str]
-            [std.json :as json]
-            [std.lib :as h]
             [std.lang.base.registry :as reg]
+            [std.lang.base.runtime :as rt]
             [std.lang.base.script-annex :as annex]
             [std.lang.base.script-control :as control]
-            [std.lang.base.script-macro :as macro]))
+            [std.lang.base.script-macro :as macro]
+            [std.lang.base.util :as ut]
+            [std.lib.atom :as atom]
+            [std.lib.collection :as collection]
+            [std.lib.component :as component]
+            [std.lib.context.pointer :as ptr]
+            [std.lib.env :as env]
+            [std.lib.foundation :as f]
+            [std.lib.future :as future]))
 
 (defn install
   "installs a language"
@@ -58,7 +64,7 @@
   "imports the namespace and sets a primary flag"
   {:added "4.0"}
   ([{:keys [require require-impl] :as config}]
-   (let [current (h/ns-sym)]
+   (let [current (env/ns-sym)]
      (alias '- current)
      (->> require-impl
           (mapv (fn [ns] (clojure.core/require ns :reload))))
@@ -82,14 +88,14 @@
    (let [macros (->> (flatten (:macros book))
                      (filter restrict)
                      (concat (:highlights book)))
-         syms   (map h/var-sym macros)
+         syms   (map f/var-sym macros)
          mns    (ut/sym-module (first syms))
          ids    (set (map ut/sym-id syms))
-         curr   (h/ns-sym)
-         ignore (h/intersection ids
+         curr   (env/ns-sym)
+         ignore (clojure.set/intersection ids
                                 (set (concat (keys (ns-refers curr))
                                              (keys (ns-interns curr)))))
-         refers (h/difference ids ignore)]
+         refers (clojure.set/difference ids ignore)]
      (refer mns :only (vec refers))
      [refers ids])))
 
@@ -135,10 +141,10 @@
   "calls the regular setup script for the namespace"
   {:added "4.0"}
   ([lang]
-   (script-fn lang (h/ns-sym) {}))
+   (script-fn lang (env/ns-sym) {}))
   ([lang module]
    (if (map? module)
-     (script-fn lang (h/ns-sym) module)
+     (script-fn lang (env/ns-sym) module)
      (script-fn lang  module {})))
   ([lang module config]
    (let [;; loading runtime
@@ -166,7 +172,7 @@
   "preps the current namespace"
   {:added "4.0"}
   ([lang config]
-   (let [module-id (h/ns-sym)
+   (let [module-id (env/ns-sym)
          book      (annex/get-annex-book module-id lang)
          lib       (annex/get-annex-library module-id)]
      (binding [book/*skip-check* true]
@@ -234,12 +240,12 @@
   ([ns tag body meta]
    (let [{:keys [lang module]
           :as rt}    (or (annex/get-annex-runtime ns tag)
-                         (h/error "Annex Not found"
+                         (f/error "Annex Not found"
                                   {:available [(keys @(:runtimes (annex/get-annex)))]}))]
      (macro/call-thunk
       meta
       (fn []
-        (h/p:rt-invoke-ptr
+        (ptr/rt-invoke-ptr
          rt
          (ut/lang-pointer lang {:module module})
          [body]))))))
@@ -250,7 +256,7 @@
   {:added "4.0"}
   ([tag body]
    (if (vector? tag)
-     `(script-ext-run (quote ~(h/ns-sym))
+     `(script-ext-run (quote ~(env/ns-sym))
                       ~(first tag)
                       (quote ~body)
                       ~(meta &form)))))
@@ -263,10 +269,10 @@
     "switch between defined annex envs"
     {:added "4.0"}
     ([tag body]
-     `(h/future:run
+     `(future/future:run
        (bound-fn
          []
-         (script-ext-run (quote ~(h/ns-sym))
+         (script-ext-run (quote ~(env/ns-sym))
                          ~tag
                          (quote ~body)
                          ~(meta &form))))))
@@ -285,7 +291,7 @@
   "starts an annex tag"
   {:added "4.0"}
   ([tag]
-   (annex:start tag (h/ns-sym)))
+   (annex:start tag (env/ns-sym)))
   ([tag ns]
    (let [{:keys [registry
                  runtimes]} (annex/get-annex ns)]
@@ -298,7 +304,7 @@
   "gets the runtime associated with an annex"
   {:added "4.0"}
   ([tag]
-   (annex:get tag (h/ns-sym)))
+   (annex:get tag (env/ns-sym)))
   ([tag ns]
    (get @(:runtimes (annex/get-annex ns))
         tag)))
@@ -307,22 +313,22 @@
   "stops an annex tag"
   {:added "4.0"}
   ([tag]
-   (annex:stop tag (h/ns-sym)))
+   (annex:stop tag (env/ns-sym)))
   ([tag ns]
    (let [{:keys [runtimes]} (annex/get-annex ns)]
-     (h/swap-return! runtimes
+     (atom/swap-return! runtimes
        (fn [m]
          (if-let [rt (get m tag)]
-           [(h/stop rt) (dissoc m tag)]))))))
+           [(component/stop rt) (dissoc m tag)]))))))
 
 (defn annex:start-all
   "starts all the annex tags"
   {:added "4.0"}
   ([]
-   (annex:start-all (h/ns-sym)))
+   (annex:start-all (env/ns-sym)))
   ([ns]
    (let [{:keys [registry]} (annex/get-annex ns)]
-     (h/map-entries (fn [[tag {:keys [lang
+     (collection/map-entries (fn [[tag {:keys [lang
                                       runtime
                                       config]}]]
                       [tag (script-ext [tag lang] config)])
@@ -332,7 +338,7 @@
   "stops all annexs"
   {:added "4.0"}
   ([]
-   (annex:stop-all (h/ns-sym)))
+   (annex:stop-all (env/ns-sym)))
   ([ns]
    (annex/clear-annex ns)))
 
@@ -340,7 +346,7 @@
   "stops and starts all annex runtimes"
   {:added "4.0"}
   ([]
-   (annex:restart-all (h/ns-sym)))
+   (annex:restart-all (env/ns-sym)))
   ([ns]
    (annex:stop-all ns)
    (annex:start-all ns)))
@@ -349,7 +355,7 @@
   "lists all annexs"
   {:added "4.0"}
   ([]
-   (annex:list (h/ns-sym)))
+   (annex:list (env/ns-sym)))
   ([ns]
    (let [{:keys [runtimes
                  registry]} (annex/get-annex ns)]

@@ -1,13 +1,14 @@
 (ns std.lang.model.spec-c
-  (:require [std.lang.base.emit :as emit]
+  (:require [clojure.string]
+            [std.lang.base.book :as book]
+            [std.lang.base.emit :as emit]
             [std.lang.base.emit-fn :as emit-fn]
             [std.lang.base.emit-helper :as helper]
             [std.lang.base.grammar :as grammar]
-            [std.lang.base.util :as ut]
-            [std.lang.base.book :as book]
             [std.lang.base.script :as script]
-            [std.string :as str]
-            [std.lib :as h]))
+            [std.lang.base.util :as ut]
+            [std.lib.collection :as collection]
+            [std.lib.template :as template]))
 
 (defn tf-define
   "not sure if this is needed (due to defmacro) but may be good for source to source"
@@ -58,7 +59,7 @@
   [t]
   (cond (keyword? t) (name t)
         (symbol? t) (name t)
-        (vector? t) (str/join " " (map to-c-type t))
+        (vector? t) (clojure.string/join " " (map to-c-type t))
         :else (str t)))
 
 (defn c-sanitize
@@ -66,9 +67,9 @@
   {:added "4.0"}
   [s]
   (-> (str s)
-      (str/replace "-" "_")
-      (str/replace "." "_")
-      (str/replace "/" "____")))
+      (clojure.string/replace "-" "_")
+      (clojure.string/replace "." "_")
+      (clojure.string/replace "/" "____")))
 
 (defn c-fn-args
   "custom C function arguments emission"
@@ -83,7 +84,7 @@
                  (partition 2 args))
                [args])]
     (str "("
-         (str/join ", "
+         (clojure.string/join ", "
                    (map (fn [arg]
                           (if (sequential? arg)
                             (let [[type name] arg]
@@ -156,7 +157,7 @@
         :block  {:for       {:parameter {:sep ","}}
                  :script    {:start "" :end ""}}
         :define {:def       {:raw ""}}}
-       (h/merge-nested (emit/default-grammar))))
+       (collection/merge-nested (emit/default-grammar))))
 
 (def +grammar+
   (grammar/grammar :c
@@ -167,7 +168,7 @@
   (book/book-meta
    {:module-current   (fn [])
     :module-import    (fn [name _ opts]  
-                        (h/$ (:- "#include" ~name)))
+                        (template/$ (:- "#include" ~name)))
     :module-export    (fn [{:keys [as refer]} opts])}))
 
 (def +book+

@@ -1,6 +1,6 @@
 (ns js.lib.jotai
   (:require [std.lang :as l]
-            [std.lib :as h])
+            [std.lib.foundation :as f])
   (:refer-clojure :exclude [use val proxy]))
 
 (l/script :js
@@ -11,7 +11,7 @@
             ["jotai" :as [* Jotai]]
             ["jotai/utils" :as [* JotaiUtils]]]})
 
-(h/template-entries [l/tmpl-entry {:type :fragment
+(f/template-entries [l/tmpl-entry {:type :fragment
                                    :base "JotaiUtils"
                                    :tag "js"}]
   [RESET
@@ -36,7 +36,7 @@
    useReducerAtom
    useResetAtom])
 
-(h/template-entries [l/tmpl-entry {:type :fragment
+(f/template-entries [l/tmpl-entry {:type :fragment
                                    :base "Jotai"
                                    :tag "js"}]
   [atom

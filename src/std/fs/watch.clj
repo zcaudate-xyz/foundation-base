@@ -1,10 +1,9 @@
 (ns std.fs.watch
   (:require [clojure.java.io :as io]
-            [std.string :as str]
-            [std.lib :as h]
+            [clojure.string]
+            [std.lib.collection :as collection]
             [std.protocol.watch :as protocol.watch])
-  (:import (java.nio.file FileSystems Paths StandardWatchEventKinds WatchService)
-           (java.util.concurrent TimeUnit)))
+  (:import (java.nio.file FileSystems Paths StandardWatchEventKinds WatchService) (java.util.concurrent TimeUnit)))
 
 (def ^:dynamic *defaults* {:recursive true
                            :types :all
@@ -28,8 +27,8 @@
   {:added "3.0"}
   ([s]
    (-> s
-       (str/replace #"\." "\\\\\\Q.\\\\\\E")
-       (str/replace #"\*" ".+")
+       (clojure.string/replace #"\." "\\\\\\Q.\\\\\\E")
+       (clojure.string/replace #"\*" ".+")
        (re-pattern))))
 
 (defn register-entry
@@ -55,7 +54,7 @@
                     (empty? includes)
                     (some #(re-find % (subs dir-path (-> root count inc))) includes))
                 (not (or (and seen (get @seen dir-path))
-                         (some #(re-find % (last (str/split dir-path #"/"))) excludes))))
+                         (some #(re-find % (last (clojure.string/split dir-path #"/"))) excludes))))
        (register-entry service dir-path)
        (if seen (swap! seen conj dir-path))
        (if (:recursive options)
@@ -214,7 +213,7 @@
   ([obj _]
    (let [path (.getCanonicalPath ^java.io.File  obj)]
      (->> (get @*filewatchers* path)
-          (h/map-vals :function)))))
+          (collection/map-vals :function)))))
 
 (defn remove-io-watch
   "removes the watcher with the given key"

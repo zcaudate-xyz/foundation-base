@@ -1,6 +1,5 @@
 (ns js.lib.tree-sitter
-  (:require [std.lang :as l]
-            [std.lib :as h]))
+  (:require [std.lang :as l]))
 
 (l/script :js
   {:runtime :basic

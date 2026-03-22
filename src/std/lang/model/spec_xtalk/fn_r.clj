@@ -1,7 +1,7 @@
 ^{:no-test true}
 (ns std.lang.model.spec-xtalk.fn-r
-  (:require [std.lib :as h]
-            [std.lang.base.grammar-xtalk :as default]))
+  (:require [std.lang.base.grammar-xtalk :as default]
+            [std.lib.template :as template]))
 
 ;;
 ;; CORE
@@ -37,7 +37,7 @@
 
 (defn r-tf-x-shell
   ([[_ s cm]]
-   (h/$ (system ~s))))
+   (template/$ (system ~s))))
 
 (defn r-tf-x-random
   [_]
@@ -45,7 +45,7 @@
 
 (defn r-tf-x-type-native
   [[_ obj]]
-  (h/$ (do (var t := (typeof ~obj))
+  (template/$ (do (var t := (typeof ~obj))
            (cond (== t "list")
                  (if (not (is.null (names ~obj)))
                    (return "object")
@@ -214,12 +214,12 @@
 
 (defn r-tf-x-is-object?
   [[_ e]]
-  (h/$ (and (== "list" (typeof ~e))
+  (template/$ (and (== "list" (typeof ~e))
             (not (is.null (names ~e))))))
 
 (defn r-tf-x-is-array?
   [[_ e]]
-  (h/$ (and (== "list" (typeof ~e))
+  (template/$ (and (== "list" (typeof ~e))
             (is.null (names ~e)))))
 
 (def +r-type+
@@ -246,19 +246,19 @@
   "converts map to array"
   {:added "4.0"}
   ([[_ lu obj]]
-   (h/$ (. ~lu [(tracemem ~obj)]))))
+   (template/$ (. ~lu [(tracemem ~obj)]))))
 
 (defn r-tf-x-lu-set
   "converts map to array"
   {:added "4.0"}
   ([[_ lu obj gid]]
-   (h/$ (:= (. ~lu [(tracemem ~obj)]) ~gid))))
+   (template/$ (:= (. ~lu [(tracemem ~obj)]) ~gid))))
 
 (defn r-tf-x-lu-del
   "converts map to array"
   {:added "4.0"}
   ([[_ lu obj]]
-   (h/$ (:= (. ~lu [(tracemem ~obj)])
+   (template/$ (:= (. ~lu [(tracemem ~obj)])
             nil))))
 
 (def +r-lu+
@@ -273,7 +273,7 @@
 
 (defn r-tf-x-arr-push
   [[_ arr item]]
-  (h/$ (:= (. ~arr [(+ (length ~arr) 1)])
+  (template/$ (:= (. ~arr [(+ (length ~arr) 1)])
             ~item)))
 
 (defn r-tf-x-arr-pop
@@ -367,7 +367,7 @@
 
 (defn r-tf-x-return-encode
   ([[_ out id key]]
-   (h/$ (do* (library "jsonlite")
+   (template/$ (do* (library "jsonlite")
              (tryCatch (block (toJSON {:type "data"
                                        :value ~out
                                        :id ~id
@@ -382,7 +382,7 @@
 
 (defn r-tf-x-return-wrap
   ([[_ f encode-fn]]
-   (h/$ (do* (library "jsonlite")
+   (template/$ (do* (library "jsonlite")
              (tryCatch
               (block
                (:= out (~f))
@@ -394,7 +394,7 @@
 
 (defn r-tf-x-return-eval
   ([[_ s wrap-fn]]
-   (h/$ (return (~wrap-fn
+   (template/$ (return (~wrap-fn
                  (fn []
                    (eval (parse :text ~s))))))))
 
@@ -405,15 +405,15 @@
 
 (defn r-tf-x-socket-connect
   ([[_ host port opts]]
-   (h/$ (do* (return (socketConnection :port ~port :blocking true))))))
+   (template/$ (do* (return (socketConnection :port ~port :blocking true))))))
 
 (defn r-tf-x-socket-send
   ([[_ conn s]]
-   (h/$ (writeLines ~s ~conn :sep "\n"))))
+   (template/$ (writeLines ~s ~conn :sep "\n"))))
 
 (defn r-tf-x-socket-close
   ([[_ conn]]
-   (h/$ (close ~conn))))
+   (template/$ (close ~conn))))
 
 (def +r-socket+
   {:x-socket-connect      {:macro #'r-tf-x-socket-connect      :emit :macro}

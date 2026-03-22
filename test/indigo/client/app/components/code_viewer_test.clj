@@ -1,6 +1,6 @@
 (ns indigo.client.app.components.code-viewer-test
-  (:use code.test)
-  (:require [indigo.client.app.components.code-viewer :refer :all]))
+  (:require [indigo.client.app.components.code-viewer :refer :all])
+  (:use code.test))
 
 ^{:refer indigo.client.app.components.code-viewer/generateLayout :added "4.0"}
 (fact "TODO")

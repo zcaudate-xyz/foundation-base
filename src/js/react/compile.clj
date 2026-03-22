@@ -1,10 +1,12 @@
 (ns js.react.compile
-  (:require [std.lib.walk :as walk]
-            [std.string :as str]
-            [std.lib :as h :refer [definvoke]]
+  (:require [js.react.compile-components :as c]
+            [js.react.compile-directives :as d]
             [std.lang :as l]
-            [js.react.compile-components :as c]
-            [js.react.compile-directives :as d]))
+            [std.lib.collection :as collection]
+            [std.lib.foundation :as f]
+            [std.lib.invoke :as invoke]
+            [std.lib.sort :as sort]
+            [std.lib.walk :as walk]))
 
 (defonce +registry+
   (atom {}))
@@ -21,7 +23,7 @@
   [group]
   (swap! +registry+ dissoc group))
 
-(definvoke get-default-components
+(invoke/definvoke get-default-components
   "emits using a potentially cached entry"
   {:added "4.0"}
   [:recent {:key (fn [_] :default)
@@ -38,7 +40,7 @@
               (if-let [ns (namespace x)]
                 (= "var" ns))
               (not (get states x)))
-       (h/error "Invalid variable"
+       (f/error "Invalid variable"
                 {:keyword x
                  :valid (sort (keys states))}))
      x)
@@ -49,7 +51,7 @@
   {:added "4.0"}
   [states]
   (let [ks    (set (keys states))]
-    (h/map-vals
+    (collection/map-vals
      (fn [state]
        (let [deps (volatile! #{})
              _    (walk/postwalk
@@ -68,8 +70,8 @@
   {:added "4.0"}
   [states]
   (let [deps  (compile-states-deps states)
-        deps-order (h/topological-sort deps)
-        forms (h/map-entries
+        deps-order (sort/topological-sort deps)
+        forms (collection/map-entries
                (fn [[k e]]
                  [k (cond (and (map? e)
                                (:% e))
@@ -124,7 +126,7 @@
               (if-let [ns (namespace x)]
                 (= "action" ns)))
        (or (get actions x)
-           (h/error "Invalid variable"
+           (f/error "Invalid variable"
                     {:keyword x
                      :valid (sort (keys actions))}))
        x))

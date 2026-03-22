@@ -1,12 +1,12 @@
 (ns script.sql.expr
-  (:require [std.string :as str]))
+  (:require [clojure.string]))
 
 (defn as-?
   "Given a hash map of column names and values, or a vector of column names,
    return a string of `?` placeholders for them."
   {:added "3.0"}
   ([key-map _]
-   (str/join ", " (repeat (count key-map) "?"))))
+   (clojure.string/join ", " (repeat (count key-map) "?"))))
 
 (defn as-cols
   "Given a sequence of raw column names, return a string of all the
@@ -26,7 +26,7 @@
   {:added "3.0"}
   ([cols opts]
    (let [col-fn (:column-fn opts identity)]
-     (str/join ", " (map (fn [raw]
+     (clojure.string/join ", " (map (fn [raw]
                            (if (vector? raw)
                              (if (keyword? (first raw))
                                (str (col-fn (name (first raw)))
@@ -63,8 +63,8 @@
                                    [[] []]
                                    key-map)]
      (assert (seq where) "key-map may not be empty")
-     (into [(str (str/upper-case (name clause)) " "
-                 (str/join (if (= :where clause) " AND " ", ") where))]
+     (into [(str (clojure.string/upper-case (name clause)) " "
+                 (clojure.string/join (if (= :where clause) " AND " ", ") where))]
            params))))
 
 (defn for-delete
@@ -129,12 +129,12 @@
    (assert (seq rows) "rows may not be empty")
    (let [table-fn  (:table-fn opts identity)
          column-fn (:column-fn opts identity)
-         params    (str/join ", " (map (comp column-fn name) cols))
+         params    (clojure.string/join ", " (map (comp column-fn name) cols))
          places    (as-? (first rows) opts)]
      (into [(str "INSERT INTO " (table-fn (name table))
                  "\n (" params ")"
                  "\n VALUES\n "
-                 (str/join ",\n " (repeat (count rows) (str "(" places ")")))
+                 (clojure.string/join ",\n " (repeat (count rows) (str "(" places ")")))
                  (when-let [suffix (:suffix opts)]
                    (str " " suffix)))]
            cat
@@ -183,7 +183,7 @@
      (into [(str "INSERT INTO " (table-fn (name table))
                  "\n (" params ")"
                  "\n VALUES (" places ")"
-                 "\n ON CONFLICT (" (str/join "," (map (comp column-fn name) pkeys)) ")"
+                 "\n ON CONFLICT (" (clojure.string/join "," (map (comp column-fn name) pkeys)) ")"
                  "\n DO UPDATE SET (" up-arr ")"
                  "\n = ROW(" up-fin ")")]
            (vals key-map)))))
@@ -199,7 +199,7 @@
    (let [table-fn  (:table-fn opts identity)
          column-fn (:column-fn opts identity)
          columns   (map (comp column-fn name) cols)
-         params    (str/join ", " columns)
+         params    (clojure.string/join ", " columns)
          places    (as-? (first rows) opts)
          pkeys     (map (comp column-fn name) (:primary-keys opts [:id]))
          up-arr    (remove #((set pkeys) %) columns)
@@ -207,10 +207,10 @@
      (into [(str "INSERT INTO " (table-fn (name table))
                  "\n (" params ")"
                  "\n VALUES\n "
-                 (str/join ",\n " (repeat (count rows) (str "(" places ")")))
-                 "\n ON CONFLICT (" (str/join "," pkeys) ")"
-                 "\n DO UPDATE SET (" (str/join ", " up-arr) ")"
-                 "\n = ROW(" (str/join ", " up-fin) ")")]
+                 (clojure.string/join ",\n " (repeat (count rows) (str "(" places ")")))
+                 "\n ON CONFLICT (" (clojure.string/join "," pkeys) ")"
+                 "\n DO UPDATE SET (" (clojure.string/join ", " up-arr) ")"
+                 "\n = ROW(" (clojure.string/join ", " up-fin) ")")]
            cat
            rows))))
 

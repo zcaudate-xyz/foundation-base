@@ -1,8 +1,8 @@
 (ns rt.postgres.grammar.form-defrole-test
-  (:use code.test)
-  (:require [rt.postgres.grammar.form-defrole :refer :all]
-            [std.lang :as l]
-            [rt.postgres.grammar.common :as common]))
+  (:require [rt.postgres.grammar.common :as common]
+            [rt.postgres.grammar.form-defrole :refer :all]
+            [std.lang :as l])
+  (:use code.test))
 
 ^{:refer rt.postgres.grammar.form-defrole/pg-defrole-access :added "4.0"}
 (fact "creates defrole access form"

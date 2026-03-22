@@ -1,10 +1,10 @@
 (ns std.vm.toy-interpreter-test
-  (:use code.test)
-  (:require [std.vm.toy-interpreter :as toy]
+  (:require [std.block.base :as base]
             [std.block.construct :as construct]
             [std.block.parse :as parse]
-            [std.block.base :as base]
-            [std.lib.zip :as zip]))
+            [std.lib.zip :as zip]
+            [std.vm.toy-interpreter :as toy])
+  (:use code.test))
 
 (defn test-math []
   (println "\n=== Math Test ===")

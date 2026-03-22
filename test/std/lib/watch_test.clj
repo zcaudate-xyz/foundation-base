@@ -1,6 +1,6 @@
 (ns std.lib.watch-test
-  (:use code.test)
-  (:require [std.lib.watch :as watch :refer :all]))
+  (:require [std.lib.watch :as watch :refer :all])
+  (:use code.test))
 
 ^{:refer std.lib.watch/wrap-select :added "3.0"}
 (fact "enables operating on a given key"

@@ -1,7 +1,9 @@
 (ns kmi.redis.compile
-  (:require [std.lib :as h]
-            [std.string :as str]
-            [kmi.redis :as r]
+  (:require [kmi.redis :as r]
+            [std.lib.collection :as collection]
+            [std.lib.foundation :as f]
+            [std.lib.walk :as walk]
+            [std.string.case :as case]
             [xt.lang.base-lib :as k])
   (:refer-clojure :exclude [compile]))
 
@@ -14,10 +16,10 @@
          type (cond (set? rec) :enum
                     (map? rec) (or (:impl rec) (:type rec))
                     :else (or rec
-                              (h/error "Path not valid" {:path k})))
+                              (f/error "Path not valid" {:path k})))
          _    (if (= type :key)
                 (or (= (:impl spec) :key)
-                    (h/error "Can only nest within :keys")))]
+                    (f/error "Can only nest within :keys")))]
      (merge {:type type} (if (map? rec) (select-keys rec [:name]))))))
 
 (defn parse-coll
@@ -38,7 +40,7 @@
   ([spec path]
    (let [{:keys [impl type]} spec
          impl (cond (= type :map)
-                    (or impl (h/error "No implementation" {:spec spec}))
+                    (or impl (f/error "No implementation" {:spec spec}))
 
                     :else type)]
      (if (empty? path)
@@ -61,7 +63,7 @@
   [{:keys [path]}]
   (if (symbol? path)
     path
-    (str/snake-case (h/strn path))))
+    (case/snake-case (f/strn path))))
 
 (defn to:array
   "creates a form for arrays"
@@ -72,7 +74,7 @@
                         (mapv (fn [s]
                                 (if (symbol? s)
                                   s
-                                  (h/strn s)))
+                                  (f/strn s)))
                               form)
                         `(k/to-flat ~form)))
                     body)]
@@ -90,7 +92,7 @@
         kform  (cond (= 1 (count kpath))
                      (first kpath)
 
-                     (every? (comp not h/form?) kpath)
+                     (every? (comp not collection/form?) kpath)
                      (apply list 'cat (interpose ":" kpath))
                      
                      :else
@@ -388,7 +390,7 @@
                      (reverse rpath) parent))
 
            :else
-           (h/error "Need to be an Integer")))))
+           (f/error "Need to be an Integer")))))
 
 (defn decr-command
   "command for decr"
@@ -413,7 +415,7 @@
                      (reverse rpath) parent))
 
            :else
-           (h/error "Need to be an Integer")))))
+           (f/error "Need to be an Integer")))))
 
 ;;
 ;; ADD
@@ -430,9 +432,9 @@
    (let [cmd  (case (:type e)
                 :list   {:prefix ["RPUSH"] :suffix [(list 'cjson.encode entry)]}
                 :stream (let [entries (cond (map? entry)
-                                            (mapcat (fn [[k v]] [(h/strn k) v]) entry)
+                                            (mapcat (fn [[k v]] [(f/strn k) v]) entry)
                                             
-                                            :else (h/error "Not Supported"))]
+                                            :else (f/error "Not Supported"))]
                           {:prefix ["XADD"] :suffix (cons "*" entries)}))]
      (build-command cmd (reverse (cons e rpath)) parent))))
 
@@ -445,7 +447,7 @@
   "compiles the command"
   {:added "3.0"}
   ([spec f body]
-   (let [parent (h/seqify (first body))
+   (let [parent (collection/seqify (first body))
          path   (second body)
          body   (drop 2 body)]
      (-> (compile-path spec path)
@@ -475,10 +477,10 @@
                           :HAS    (compile-cmd spec has-command body)
                           :INCR   (compile-cmd spec incr-command body)
                           :DECR   (compile-cmd spec decr-command body)
-                          :EXP    (h/postwalk-replace {'% acc} (first body))
+                          :EXP    (walk/postwalk-replace {'% acc} (first body))
                           :RET    (if (empty? body)
                                     (list 'return acc)
-                                    (list 'return (h/postwalk-replace {'% acc} (first body))))))
+                                    (list 'return (walk/postwalk-replace {'% acc} (first body))))))
                       nil
                       statements)]
      body)))

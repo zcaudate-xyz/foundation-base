@@ -1,8 +1,8 @@
 (ns rt.postgres.compile.server-api-test
-  (:use code.test)
-  (:require [rt.postgres.compile.server-api :refer :all]
-            [rt.postgres.compile.server-db :as server-db]
-            [rt.postgres.compile-test :as fixtures]))
+  (:require [rt.postgres.compile-test :as fixtures]
+            [rt.postgres.compile.server-api :refer :all]
+            [rt.postgres.compile.server-db :as server-db])
+  (:use code.test))
 
 ^{:refer rt.postgres.compile.server-api/xtalk-contract-input :added "4.1"}
 (fact "xtalk-contract-input normalizes the template payload"

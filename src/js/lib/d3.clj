@@ -1,9 +1,8 @@
 (ns js.lib.d3
   (:require [std.lang :as l]
-            [std.lib :as h])
-  (:refer-clojure :exclude [count filter force format map max
-                            merge min namespace partition range
-                            reduce reverse shuffle some sort]))
+            [std.lib.foundation :as f]
+            [std.lib.template :as template])
+  (:refer-clojure :exclude [count filter force format map max merge min namespace partition range reduce reverse shuffle some sort]))
 
 (l/script :js {})
 
@@ -31,7 +30,7 @@
   {:added "4.0"}
   ([[s props]]
    (with-meta
-     (h/$ (defmacro.js ~s
+     (template/$ (defmacro.js ~s
             ([& [m]]
              (d3-macro-fn ~(clojure.core/str "d3." s)
                           m))))
@@ -49,9 +48,9 @@
   ([s]
    (if (vector? s)
      (d3-macro s)
-     (h/$ (def$.js ~s ~(clojure.core/symbol (clojure.core/str "d3." s)))))))
+     (template/$ (def$.js ~s ~(clojure.core/symbol (clojure.core/str "d3." s)))))))
 
-(h/template-entries [d3-tmpl {:category "stats"}]
+(f/template-entries [d3-tmpl {:category "stats"}]
   [min
    minIndex
    max
@@ -69,7 +68,7 @@
    fsum
    Adder])
 
-(h/template-entries [d3-tmpl {:category "search"} ] 
+(f/template-entries [d3-tmpl {:category "search"} ] 
   [least
     leastIndex
     greatest
@@ -83,7 +82,7 @@
     ascending
    descending])
 
-(h/template-entries [d3-tmpl {:category "transform"}]
+(f/template-entries [d3-tmpl {:category "transform"}]
   [group
    groups
    index
@@ -106,7 +105,7 @@
    transpose
    zip])
 
-(h/template-entries [d3-tmpl {:category "iterable"}]
+(f/template-entries [d3-tmpl {:category "iterable"}]
   [every
    some
    filter
@@ -115,7 +114,7 @@
    reverse
    sort])
 
-(h/template-entries [d3-tmpl {:category "set"}]
+(f/template-entries [d3-tmpl {:category "set"}]
   [difference
    disjoint
    intersection
@@ -123,17 +122,17 @@
    subset
    union])
 
-(h/template-entries [d3-tmpl {:category "histogram"}]
+(f/template-entries [d3-tmpl {:category "histogram"}]
   [[bin #{value domain  thresholds}]
     thresholdFreedmanDiaconis
     thresholdScott
     thresholdSturges])
 
-(h/template-entries [d3-tmpl {:category "interning"}]
+(f/template-entries [d3-tmpl {:category "interning"}]
   [InternMap
    InternSet])
 
-(h/template-entries [d3-tmpl {:category "axis"}]
+(f/template-entries [d3-tmpl {:category "axis"}]
   [axisTop
    axisRight
    axisBottom
@@ -147,14 +146,14 @@
            tickSizeOuter
            tickPadding}]])
 
-(h/template-entries [d3-tmpl {:category "brush"}]
+(f/template-entries [d3-tmpl {:category "brush"}]
   [brushX
    brushY
    brushSelection
    [brush #{move clear extent filter
             touchable keyModifiers handleSize on}]])
 
-(h/template-entries [d3-tmpl {:category "chord"}]
+(f/template-entries [d3-tmpl {:category "chord"}]
   [[chord #{padAngle
             sortGroups
             sortSubgroups
@@ -164,7 +163,7 @@
    [ribbon #{source target radius sourceRadius targetRadius startAgle endAngle padAngle context}]
    [ribbonArrow #{headRadius}]])
 
-(h/template-entries [d3-tmpl {:category "color"}]
+(f/template-entries [d3-tmpl {:category "color"}]
   [[color #{opacity rgb copy brighter darker displayable formatHex formatRgb toString}]
    rgb
    hsl
@@ -174,7 +173,7 @@
    lch
    cubehelix])
 
-(h/template-entries [d3-tmpl {:category "scale-chromatic"
+(f/template-entries [d3-tmpl {:category "scale-chromatic"
                               :tag "categorical"}]
   [schemeCategory10
    schemeAccent
@@ -188,7 +187,7 @@
    schemeTableau10])
 
 
-(h/template-entries [d3-tmpl {:category "scale-chromatic"
+(f/template-entries [d3-tmpl {:category "scale-chromatic"
                               :tag "diverging"}]
   [interpolateBrBG
    interpolatePiYG
@@ -209,7 +208,7 @@
    schemeRdYlGn
    schemeSpectral])
 
-(h/template-entries [d3-tmpl {:category "scale-chromatic"
+(f/template-entries [d3-tmpl {:category "scale-chromatic"
                               :tag "single-hue"}]
   [interpolateBlues
    interpolateGreens
@@ -224,7 +223,7 @@
    schemePurples
    schemeReds])
 
-(h/template-entries [d3-tmpl {:category "scale-chromatic"
+(f/template-entries [d3-tmpl {:category "scale-chromatic"
                               :tag "multi-hue"}]
   [interpolateBuGn
    interpolateBuPu
@@ -260,32 +259,32 @@
    schemeYlOrBr
    schemeYlOrRd])
 
-(h/template-entries [d3-tmpl {:category "scale-chromatic"
+(f/template-entries [d3-tmpl {:category "scale-chromatic"
                               :tag "cyclical"}]
   [interpolateRainbow
    interpolateSinebow])
 
-(h/template-entries [d3-tmpl {:category "contour"}]
+(f/template-entries [d3-tmpl {:category "contour"}]
   [[contours #{contour size smooth thresholds}]
    contourDensity
    [density #{x y weight size cellSize thresholds bandwidth}]])
 
-(h/template-entries [d3-tmpl {:category "delaunay"}]
+(f/template-entries [d3-tmpl {:category "delaunay"}]
   [[Delaunay #{from points halfedges hull triangles inedges find
                neighbors render renderHull renderTriangle renderPoints
                hullPolygon trianglePolygons trianglePolygon update voronoi}]
    [voronoi #{delaunay circumcenters vectors xmin ymin xmax ymax
               contains neighbors render renderBounds renderCell cellPolygons cellPolygon update}]])
 
-(h/template-entries [d3-tmpl {:category "dispatch"}]
+(f/template-entries [d3-tmpl {:category "dispatch"}]
   [[dispatch #{on copy call apply}]])
 
-(h/template-entries [d3-tmpl {:category "drag"}]
+(f/template-entries [d3-tmpl {:category "drag"}]
   [[drag #{container filter touchable subject clickDistance on}]
    dragDisable
    dragEnable])
 
-(h/template-entries [d3-tmpl {:category "csv"}]
+(f/template-entries [d3-tmpl {:category "csv"}]
   [csvParse
    csvParseRows
    csvFormat
@@ -302,7 +301,7 @@
    tsvFormatValue
    autoType])
 
-(h/template-entries [d3-tmpl {:category "ease"}]
+(f/template-entries [d3-tmpl {:category "ease"}]
   [easeLinear
    [easePolyIn #{exponent}]
    [easePolyOut #{exponent}]
@@ -341,7 +340,7 @@
    easeBounceOut
    easeBounceInOut])
 
-(h/template-entries [d3-tmpl {:category "fetch"}]
+(f/template-entries [d3-tmpl {:category "fetch"}]
   [blob
    buffer
    csv
@@ -354,7 +353,7 @@
    tsv
    xml])
 
-(h/template-entries [d3-tmpl {:category "force"}]
+(f/template-entries [d3-tmpl {:category "force"}]
   [[forceSimulation #{restart stop tick nodes alpha alphaMin
                       alphaDecay alphaTarget velocityDecay
                       force find randomSource on}]
@@ -367,7 +366,7 @@
    [forceY #{strength y}]
    [forceRadial #{strength radius x y}]])
 
-(h/template-entries [d3-tmpl {:category "format"}]
+(f/template-entries [d3-tmpl {:category "format"}]
   [format
    formatPrefix
    formatSpecifier
@@ -377,7 +376,7 @@
    formatLocale
    formatDefaultLocale])
 
-(h/template-entries [d3-tmpl {:category "geo"}]
+(f/template-entries [d3-tmpl {:category "geo"}]
   [[geoPath #{area bounds centroid measure projection context pointRadius}]
    [projection #{invert stream preclip postclip clipAngle clipExtent
                  scale translate center angle reflectX reflectY
@@ -412,7 +411,7 @@
    geoNaturalEarth1
    geoNaturalEarth1Raw])
 
-(h/template-entries [d3-tmpl {:category "geo"}]
+(f/template-entries [d3-tmpl {:category "geo"}]
   [geoProjection
    geoProjectionMutator
    geoArea
@@ -424,12 +423,12 @@
    geoContains
    [geoRotation #{invert}]])
 
-(h/template-entries [d3-tmpl {:category "geo"}]
+(f/template-entries [d3-tmpl {:category "geo"}]
   [[geoCircle #{center radius precision}]
    [geoGraticule #{lines outline extent extentMajor extentMinor step stepMajor stepMinor precision}]
    geoGraticule10])
 
-(h/template-entries [d3-tmpl {:category "geo"}]
+(f/template-entries [d3-tmpl {:category "geo"}]
   [[geoStream #{point lineStart lineEnd polygonStart polygonEnd sphere}]
    geoTransform
    geoIdentity
@@ -438,7 +437,7 @@
    geoClipRectangle])
 
 
-(h/template-entries [d3-tmpl {:category "hierarchy"}]
+(f/template-entries [d3-tmpl {:category "hierarchy"}]
   [[hierarchy #{ancestors descendants leaves find path links sum count
                 sort each eachAfter eachBefore copy}]
    [stratify #{id parentId}]
@@ -457,7 +456,7 @@
    packSiblings
    packEnclose])
 
-(h/template-entries [d3-tmpl {:category "interpolate"}]
+(f/template-entries [d3-tmpl {:category "interpolate"}]
   [interpolate
    interpolateNumber
    interpolateRound
@@ -486,20 +485,20 @@
    interpolateBasisClosed
    piecewise])
 
-(h/template-entries [d3-tmpl {:category "path"}]
+(f/template-entries [d3-tmpl {:category "path"}]
   [[path #{moveTo closePath lineTo quadraticCurveTo bezierCurveTo arcTo arc rect toString}]])
 
-(h/template-entries [d3-tmpl {:category "polygon"}]
+(f/template-entries [d3-tmpl {:category "polygon"}]
   [polygonArea
    polygonCentroid
    polygonHull
    polygonContains
    polygonLength])
 
-(h/template-entries [d3-tmpl {:category "quadtree"}]
+(f/template-entries [d3-tmpl {:category "quadtree"}]
   [[quadtree #{x y extent cover add addAll remove removeAll copy root data size find visit visitAfter}]])
 
-(h/template-entries [d3-tmpl {:category "random"}]
+(f/template-entries [d3-tmpl {:category "random"}]
   [randomUniform
    randomInt
    randomNormal
@@ -519,7 +518,7 @@
    randomPoisson
    randomLcg])
 
-(h/template-entries [d3-tmpl {:category "axis"
+(f/template-entries [d3-tmpl {:category "axis"
                               :tag "continuous"}]
   [tickFormat
    [scaleLinear #{invert domain range rangeRound clamp unknown interpolate ticks tickFormat nice copy}]
@@ -532,7 +531,7 @@
    [scaleTime #{invert domain range rangeRound clamp unknown interpolate ticks tickFormat nice copy}]
    [scaleUtc #{invert domain range rangeRound clamp unknown interpolate ticks tickFormat nice copy}]])
 
-(h/template-entries [d3-tmpl {:category "axis"
+(f/template-entries [d3-tmpl {:category "axis"
                               :tag "sequential"}]
   [[scaleSequential #{domain clamp interpolator range rangeRound copy}]
    [scaleSequentialLog #{domain clamp interpolator range rangeRound copy}]
@@ -541,7 +540,7 @@
    [scaleSequentialSymlog #{domain clamp interpolator range rangeRound copy}]
    [scaleSequentialQuantile #{domain clamp interpolator range rangeRound copy}]])
 
-(h/template-entries [d3-tmpl {:category "axis"
+(f/template-entries [d3-tmpl {:category "axis"
                               :tag "diverging"}]
   [[scaleDiverging #{domain clamp interpolator range rangeRound copy unknown}]
    [scaleDivergingLog #{domain clamp interpolator range rangeRound copy unknown}]
@@ -549,13 +548,13 @@
    [scaleDivergingSqrt #{domain clamp interpolator range rangeRound copy unknown}]
    [scaleDivergingSymlog #{domain clamp interpolator range rangeRound copy unknown}]])
 
-(h/template-entries [d3-tmpl {:category "axis"
+(f/template-entries [d3-tmpl {:category "axis"
                               :tag "quantize"}]
   [[scaleQuantize  #{invertExtent domain range ticks tickFormat nice thresholds copy}]
    [scaleQuantile  #{invertExtent domain range quantiles copy}]
    [scaleThreshold #{invertExtent domain range copy}]])
 
-(h/template-entries [d3-tmpl {:category "axis"
+(f/template-entries [d3-tmpl {:category "axis"
                               :tag "ordinal"}]
   [[scaleOrdinal #{domain range unknown copy}]
    scaleImplicit
@@ -563,7 +562,7 @@
                 padding align bandwidth step copy}]
    [scalePoint #{domain range rangeRound round padding align bandwidth step copy}]])
 
-(h/template-entries [d3-tmpl {:category "selection"}]
+(f/template-entries [d3-tmpl {:category "selection"}]
   [selection
    select
    selectAll
@@ -580,7 +579,7 @@
    namespace
    namespaces])
 
-(h/template-entries [d3-tmpl {:category "shape"}]
+(f/template-entries [d3-tmpl {:category "shape"}]
   [[arc #{centroid innerRadius outerRadius cornerRadius startAngle endAngle padAngle padRadius context}]
    [pie #{value sort sortValues startAngle endAngle padAngle}]
    [line #{x y defined curve context}]
@@ -589,7 +588,7 @@
    [areaRadial #{angle startAngle endAngle radius innerRadius outerRadius
                  defined curve context lineStartAngle lineInnerRadius lineEndAngle lineOuterRadius}]])
 
-(h/template-entries [d3-tmpl {:category "shape"
+(f/template-entries [d3-tmpl {:category "shape"
                               :tag "curve"}]
   [curveBasis
    curveBasisClosed
@@ -612,13 +611,13 @@
    curveStepAfter
    curveStepBefore])
 
-(h/template-entries [d3-tmpl {:category "shape"
+(f/template-entries [d3-tmpl {:category "shape"
                               :tag "link"}]
   [[linkVertical #{source target x y content}]
    [linkHorizontal #{source target x y context}]
    [linkRadial #{angle radius}]])
 
-(h/template-entries [d3-tmpl {:category "shape"
+(f/template-entries [d3-tmpl {:category "shape"
                               :tag "link"}]
   [;;[symbol #{type size context}]
    symbols
@@ -630,7 +629,7 @@
    symbolTriangle
    symbolWye])
 
-(h/template-entries [d3-tmpl {:category "shape"
+(f/template-entries [d3-tmpl {:category "shape"
                               :tag "stack"}]
   [[stack #{keys value order offset}]
    stackOrderAppearance
@@ -645,7 +644,7 @@
    stackOffsetSilhouette
    stackOffsetWiggle])
 
-(h/template-entries [d3-tmpl {:category "time"
+(f/template-entries [d3-tmpl {:category "time"
                               :tag "format"}]
   [timeFormat
    timeParse
@@ -656,7 +655,7 @@
    timeFormatLocale
    timeFormatDefaultLocale])
 
-(h/template-entries [d3-tmpl {:category "time"
+(f/template-entries [d3-tmpl {:category "time"
                               :tag "interval"}]
   [[timeInterval #{floor round ceil offset range filter every count}]
    timeMillisecond
@@ -690,7 +689,7 @@
    timeYear
    timeYears])
 
-(h/template-entries [d3-tmpl {:category "time"
+(f/template-entries [d3-tmpl {:category "time"
                               :tag "timer"}]
   [now
    timer
@@ -698,13 +697,13 @@
    timeout
    interval])
 
-(h/template-entries [d3-tmpl {:category "transition"}]
+(f/template-entries [d3-tmpl {:category "transition"}]
   [interrupt
    [transition #{select selectAll filter merge transition selection}]
    [active #{attr attrTween style styleTween text textTween remove tween
              delay duration ease easeVarying end on each call empty nodes node size}]])
 
-(h/template-entries [d3-tmpl {:category "transition"}]
+(f/template-entries [d3-tmpl {:category "transition"}]
   [[zoom #{transform translateBy translateTo scaleBy scaleTo constrain
            filter touchable wheelDelta extent scaleExtent translateExtent
            clickDistance tapDistance duration interpolate on}]

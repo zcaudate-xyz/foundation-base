@@ -1,14 +1,12 @@
 (ns rt.basic.impl.process-r
-  (:require [std.lang.base.runtime :as default]
+  (:require [clojure.string]
+            [rt.basic.type-basic :as basic]
             [rt.basic.type-common :as common]
             [rt.basic.type-oneshot :as oneshot]
-            [rt.basic.type-basic :as basic]
-            [std.lang.model.spec-r :as spec]
+            [std.json :as json]
             [std.lang.base.impl :as impl]
             [std.lang.base.runtime :as rt]
-            [std.json :as json]
-            [std.lib :as h]
-            [std.string :as str]
+            [std.lang.model.spec-r :as spec]
             [xt.lang.base-repl :as k]))
 
 (def +program-init+
@@ -30,7 +28,7 @@
                          k/return-eval
                          {:lang :r
                           :layout :flat})]
-                       (str/join "\n\n"))]
+                       (clojure.string/join "\n\n"))]
     (fn [body]
       (str bootstrap
            "\n\n"
@@ -90,7 +88,7 @@
                           :layout :flat})
                         (impl/emit-as
                          :r +client-basic+)]
-                       (str/join "\n\n"))]
+                       (clojure.string/join "\n\n"))]
     (fn [port & [{:keys [host]}]]
       (str bootstrap
            "\n\n"

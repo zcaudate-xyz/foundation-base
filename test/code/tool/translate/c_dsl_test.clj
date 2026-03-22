@@ -1,9 +1,8 @@
 (ns code.tool.translate.c-dsl-test
-  (:use code.test)
   (:require [code.tool.translate.c-dsl :as c-dsl]
-            [std.lib :as h]
             [std.lang :as l]
-            [std.lang.model.spec-c :as c]))
+            [std.lang.model.spec-c :as c])
+  (:use code.test))
 
 (fact "Translate basic function declaration"
   (let [ast {:kind "TranslationUnitDecl"

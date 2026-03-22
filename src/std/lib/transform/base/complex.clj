@@ -1,7 +1,7 @@
 (ns std.lib.transform.base.complex
-  (:require [std.lib.transform.base.combine :as combine]
-            [std.lib.collection :as coll]
-            [std.lib.foundation :as h]))
+  (:require [std.lib.collection :as coll]
+            [std.lib.foundation :as h]
+            [std.lib.transform.base.combine :as combine]))
 
 (defn assocs
   "Similar to `assoc` but conditions of association is specified

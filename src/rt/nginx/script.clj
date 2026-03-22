@@ -1,6 +1,9 @@
 (ns rt.nginx.script
-  (:require [std.string :as str]
-            [std.lib :as h]))
+  (:require [clojure.string]
+            [std.lib.env :as env]
+            [std.lib.foundation :as f]
+            [std.string.case :as case]
+            [std.string.prose :as prose]))
 
 (def ^:dynamic *indent* 0)
 
@@ -24,7 +27,7 @@
        (= :- (ffirst v))))
 
 (defn- ngx-key [k]
-  (str/snake-case (h/strn k)))
+  (case/snake-case (f/strn k)))
 
 (defn emit-block
   "emits a block"
@@ -38,27 +41,27 @@
                              (binding [*indent* (+ *indent* *space*)]
                                (emit-fn v))
                              "\n"
-                             (str/spaces *indent*)
+                             (prose/spaces *indent*)
                              "}")))
         prose-fn (fn [vs]
                    (->> (map (fn [v]
                                (if (string? v)
-                                 (str/indent v *indent*)
-                                 (str (str/spaces *indent*)
-                                      (str/write-line v))))
+                                 (prose/indent v *indent*)
+                                 (str (prose/spaces *indent*)
+                                      (prose/write-line v))))
                              vs)
-                        (str/join "\n")))
+                        (clojure.string/join "\n")))
         loop-fn  (fn [[k v & more]]
                    (cond  (block? v)
                           (let [extended (vec (apply concat v (filter identity more)))]
                             (str (ngx-key k) (inner-fn extended)))
                           
                           (nested-block? v)
-                          (str (ngx-key k) " " (str/join " " (map h/strn (butlast v)))
+                          (str (ngx-key k) " " (clojure.string/join " " (map f/strn (butlast v)))
                                (inner-fn (last v)))
                           
                           (vector? v)
-                          (str (ngx-key k) " " (str/join " " (map h/strn v)) ";")
+                          (str (ngx-key k) " " (clojure.string/join " " (map f/strn v)) ";")
                           
                           :else
                           (str (ngx-key k) " " v ";")))
@@ -69,8 +72,8 @@
                          :else
                          (->> (filter identity m)
                               (mapv loop-fn)
-                              (str/join (str "\n" (str/spaces *indent*)))
-                              (str (str/spaces *indent*)))))]
+                              (clojure.string/join (str "\n" (prose/spaces *indent*)))
+                              (str (prose/spaces *indent*)))))]
     (emit-fn m)))
 
 (defn write
@@ -82,5 +85,5 @@
 (comment
   (./create-tests)
   (./import)
-  (h/pl (write [[:- "hello \nwhere"]]))
+  (env/pl (write [[:- "hello \nwhere"]]))
   (prose-block? ))

@@ -1,6 +1,6 @@
 (ns std.pretty.edn
-  (:require [std.pretty.protocol :as protocol.pretty]
-            [std.lib :as h]))
+  (:require [std.lib.foundation :as f]
+            [std.pretty.protocol :as protocol.pretty]))
 
 (defn override?
   "implements `std.pretty.protocol/IOverride`"
@@ -68,7 +68,7 @@
 
   java.lang.Object
   (-edn [x]
-    (if (h/edn? x)
+    (if (f/edn? x)
       x
       (tagged-object x (str x))))
 
@@ -187,7 +187,7 @@
          (set? x) (protocol.pretty/-visit-set visitor x)
          (tagged-literal? x) (protocol.pretty/-visit-tagged visitor x)
          (var? x) (protocol.pretty/-visit-var visitor x)
-         (h/regexp? x) (protocol.pretty/-visit-pattern visitor x)
+         (f/regexp? x) (protocol.pretty/-visit-pattern visitor x)
          (satisfies? protocol.pretty/IEdn x) (visit-edn visitor (edn x))
          :else (protocol.pretty/-visit-unknown visitor x))))
 
@@ -199,6 +199,6 @@
    => (contains-in [:span \"#object\" \" \" [:group \"[\" [:align coll?] \"]\"]])"
   {:added "3.0"}
   ([visitor x]
-   (if-let [mta (and (h/iobj? x) (meta x))]
+   (if-let [mta (and (f/iobj? x) (meta x))]
      (protocol.pretty/-visit-meta visitor mta x)
      (visit-edn visitor x))))

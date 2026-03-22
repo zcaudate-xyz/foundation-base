@@ -1,6 +1,6 @@
 (ns std.lib.walk-test
-  (:use code.test)
-  (:require [std.lib.walk :refer :all]))
+  (:require [std.lib.walk :refer :all])
+  (:use code.test))
 
 ^{:refer std.lib.walk/walk :added "3.0"}
 (fact "Traverses form, an arbitrary data structure"

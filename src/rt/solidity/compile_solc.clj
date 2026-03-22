@@ -1,13 +1,18 @@
 (ns rt.solidity.compile-solc
-  (:require [std.lib :as h]
-            [std.lang :as l]
-            [std.string :as str]
-            [std.make.compile :as compile]
+  (:require [clojure.string]
+            [js.core :as j]
+            [js.lib.eth-solc :as eth-solc]
+            [rt.basic :as basic]
             [rt.solidity.compile-common :as common]
             [rt.solidity.env-ganache :as env]
-            [rt.basic :as basic]
-            [js.lib.eth-solc :as eth-solc]
-            [js.core :as j]
+            [std.lang :as l]
+            [std.lib.component :as component]
+            [std.lib.env]
+            [std.lib.foundation :as f]
+            [std.lib.security :as security]
+            [std.lib.template :as template]
+            [std.make.compile :as compile]
+            [std.string.prose :as prose]
             [xt.lang.base-notify :as notify]
             [xt.lang.base-repl :as repl]))
 
@@ -20,10 +25,10 @@
         emit-fn    (fn [entry]
                      (binding [std.lang.base.impl-entry/*cache-none* true]
                        (l/emit-entry grammar entry {:layout :flat})))
-        body       (str/join
+        body       (clojure.string/join
                     "\n\n"
                     (map emit-fn entries))
-        prefix     (str/join
+        prefix     (clojure.string/join
                     "\n\n"
                     (map emit-fn interfaces))]
     [body prefix]))
@@ -41,14 +46,14 @@
                        "pragma solidity >=0.7.0 <0.9.0;"]}} opts]
     (cond raw body
           :else
-          (str/join
+          (clojure.string/join
            "\n"
            (concat headers
                    [""]
                    (if (not-empty prefix)
                      [prefix ""])
                    [(str "contract " name " {\n"
-                         (str/indent body 2)
+                         (prose/indent body 2)
                          "\n}")])))))
 
 ;;
@@ -169,7 +174,7 @@
                  {:lang :js
                   :runtime :basic
                   :layout :full})
-        form (h/$ [(xt.lang.base-repl/notify
+        form (template/$ [(xt.lang.base-repl/notify
                     (:= (!:G solc) (require "solc")))])
         _    (notify/wait-on-fn
               rt-node
@@ -201,7 +206,7 @@
         form   (list `eth-solc/contract-compile code file)
         result (try (compile-rt-eval rt form)
                     (catch clojure.lang.ExceptionInfo ex
-                      (do (h/prn ex)
+                      (do (std.lib.env/prn ex)
                           {:status false
                            :error (or (try
                                         (std.json/read
@@ -213,8 +218,8 @@
         contracts (get-in result ["contracts" file])
         _      (when (not contracts)
                  (when (nil? common/*suppress-errors*)
-                   (h/pl code))
-                 (h/error "Compilation Error"
+                   (std.lib.env/pl code))
+                 (f/error "Compilation Error"
                           result))]
     contracts))
 
@@ -235,7 +240,7 @@
                                                  (compile-module-code single))]
                                   (map abi-fn contracts)))
                               main))
-         _  (h/stop rt)]
+         _  (component/stop rt)]
      (compile/compile-summarise files))))
 
 (def +install-contract-all-abi+
@@ -247,7 +252,7 @@
   [rt f input path name & [refresh]]
   (let [[body opts] (f input)
         code  (compile-base-code body opts)
-        sha   (h/sha1 code)
+        sha   (security/sha1 code)
         [type id] path  
         contract (get-in @common/+compiled+ path)]
     (cond (and (= (:sha contract) sha)

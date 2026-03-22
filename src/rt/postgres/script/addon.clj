@@ -1,10 +1,9 @@
 (ns rt.postgres.script.addon
-  (:require [std.lib :as h]
-            [std.lang :as l]
-            [std.string :as str]
-            [std.json :as json]
+  (:require [rt.postgres.grammar.common :as common]
             [rt.postgres.grammar.tf :as tf]
-            [rt.postgres.grammar.common :as common])
+            [std.json :as json]
+            [std.lang :as l]
+            [std.lib.template :as template])
   (:refer-clojure :exclude [case update assert throw name]))
 
 (l/script :postgres
@@ -161,7 +160,7 @@
   "shorthand for getting the field-id for a linked map"
   {:added "4.0"}
   [m field]
-  (h/$ (coalesce (:->> ~m ~(str field "_id"))
+  (template/$ (coalesce (:->> ~m ~(str field "_id"))
                  (:->> (:-> ~m ~field) "id"))))
 
 ;;
@@ -180,7 +179,7 @@
   "maps across json"
   {:added "4.0"}
   ([f arr & args]
-   (h/$ (% [(coalesce (jsonb-agg (~f o-ret ~@args))
+   (template/$ (% [(coalesce (jsonb-agg (~f o-ret ~@args))
                       (js []))
             \\ :from (jsonb-array-elements-text ~arr) :as o-ret]))))
 
@@ -189,7 +188,7 @@
   "basic map across json"
   {:added "4.0"}
   ([f arr & args]
-   (h/$ (% [(coalesce (jsonb-agg (~f o-ret ~@args))
+   (template/$ (% [(coalesce (jsonb-agg (~f o-ret ~@args))
                       (js []))
             \\ :from (jsonb-array-elements ~arr) :as o-ret]))))
 
@@ -250,7 +249,7 @@
   "gets random enum"
   {:added "4.0"}
   [enum]
-  (h/$ [:select p :from (unnest (enum-range (++ nil ~enum))) :as p :order-by (random) :limit 1]))
+  (template/$ [:select p :from (unnest (enum-range (++ nil ~enum))) :as p :order-by (random) :limit 1]))
 
 (defmacro.pg ^{:- [:block]}
   do:plpgsql

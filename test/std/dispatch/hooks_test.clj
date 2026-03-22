@@ -1,14 +1,14 @@
 (ns std.dispatch.hooks-test
-  (:use code.test)
-  (:require [std.dispatch.hooks :refer :all]
-            [std.concurrent :as cc]
-            [std.lib :as h]))
+  (:require [std.concurrent :as cc]
+            [std.dispatch.hooks :refer :all]
+            [std.lib.foundation :as f])
+  (:use code.test))
 
 ^{:refer std.dispatch.hooks/counter :added "3.0"}
 (fact "creates the executor counter"
 
   (counter)
-  => (contains {:submit h/atom? :error h/atom?}))
+  => (contains {:submit f/atom? :error f/atom?}))
 
 ^{:refer std.dispatch.hooks/inc-counter :added "3.0"}
 (fact "increment the executor counter"

@@ -1,9 +1,8 @@
 (ns std.lang.model.spec-lua-test
-  (:use code.test)
-  (:require [std.lang.model.spec-lua :refer :all]
-            [std.lang.base.script :as script]
+  (:require [std.lang.base.script :as script]
             [std.lang.base.util :as ut]
-            [std.lib :as h]))
+            [std.lang.model.spec-lua :refer :all])
+  (:use code.test))
 
 (script/script- :lua)
 

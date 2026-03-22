@@ -1,13 +1,13 @@
 (ns js.lib.driver-redis
   (:require [std.lang :as l]
-            [std.lib :as h])
+            [std.lib.foundation :as f])
   (:refer-clojure :exclude [print send]))
 
 (l/script :js
   {:require [[js.core.util :as ut]]
    :import  [["redis" :as [* Redis]]]})
 
-(h/template-entries [l/tmpl-entry {:type :fragment
+(f/template-entries [l/tmpl-entry {:type :fragment
                                    :base "Redis"
                                    :tag "js"}]
   [createClient

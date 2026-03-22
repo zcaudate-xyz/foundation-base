@@ -1,10 +1,5 @@
 (ns net.http.websocket
-  (:import (java.net.http WebSocket$Listener WebSocket$Builder HttpClient WebSocket)
-           (java.time Duration)
-           (java.net URI)
-           (java.util.concurrent CompletableFuture)
-           (java.nio ByteBuffer)
-           (java.util.function Function)))
+  (:import (java.net.http WebSocket$Listener WebSocket$Builder HttpClient WebSocket) (java.time Duration) (java.net URI) (java.util.concurrent CompletableFuture) (java.nio ByteBuffer) (java.util.function Function)))
 
 (defn request->WebSocketListener
   "Constructs a new WebSocket listener to receive events for a given WebSocket connection.

@@ -1,18 +1,18 @@
 (ns std.dispatch
-  (:require [std.protocol.dispatch :as protocol.dispatch]
-            [std.protocol.component :as protocol.component]
-            [std.lib.component :as component]
-            [std.concurrent :as cc]
-            [std.dispatch.common]
+  (:require [std.concurrent :as cc]
             [std.dispatch.board]
+            [std.dispatch.common]
             [std.dispatch.core]
             [std.dispatch.debounce]
             [std.dispatch.hub]
             [std.dispatch.queue]
             [std.dispatch.types :as types]
-            [std.lib :as h]))
+            [std.lib.component :as component]
+            [std.lib.impl :as impl]
+            [std.protocol.component :as protocol.component]
+            [std.protocol.dispatch :as protocol.dispatch]))
 
-(h/build-impl {}
+(impl/build-impl {}
               protocol.dispatch/IDispatch
               :include    [-bulk?]
 

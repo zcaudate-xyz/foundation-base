@@ -1,6 +1,6 @@
 (ns std.log.match-test
-  (:use code.test)
-  (:require [std.log.match :refer :all]))
+  (:require [std.log.match :refer :all])
+  (:use code.test))
 
 ^{:refer std.log.match/filter-base :added "3.0"}
 (fact "matches based on input and filter"

@@ -1,20 +1,20 @@
 (ns code.test.compile.snippet
   (:require [code.test.base.context :as context]
-            [std.lib :as h]))
+            [std.lib.collection :as collection]))
 
 (defn fact-setup
   "creates a setup hook"
   {:added "3.0"}
   ([m]
    `(fn []
-      ~@(h/seqify (:setup m)))))
+      ~@(collection/seqify (:setup m)))))
 
 (defn fact-teardown
   "creates a teardown hook"
   {:added "3.0"}
   ([m]
    `(fn []
-      ~@(h/seqify (:teardown m)))))
+      ~@(collection/seqify (:teardown m)))))
 
 (defn fact-wrap-ceremony
   "creates the setup/teardown wrapper
@@ -42,9 +42,9 @@
           (binding [context/*results* (atom [])
                     context/*eval-check* {:guard  ~guard
                                      :before (fn []
-                                               ~@(h/seqify before))
+                                               ~@(collection/seqify before))
                                      :after  (fn []
-                                               ~@(h/seqify after))}]
+                                               ~@(collection/seqify after))}]
             (~'thunk)))))))
 
 (defn fact-slim

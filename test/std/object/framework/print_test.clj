@@ -1,6 +1,6 @@
 (ns std.object.framework.print-test
-  (:use code.test)
-  (:require [std.object.framework.print :as print]))
+  (:require [std.object.framework.print :as print])
+  (:use code.test))
 
 ^{:refer std.object.framework.print/assoc-print-vars :added "3.0"}
 (fact "helper to assoc print vars in options"

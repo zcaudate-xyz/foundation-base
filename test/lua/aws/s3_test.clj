@@ -1,8 +1,7 @@
 (ns lua.aws.s3-test
-  (:use code.test)
-  (:require [std.lang :as l]
-            [std.lib :as h]
-            [lib.minio :as minio]))
+  (:require [lib.minio :as minio]
+            [std.lang :as l])
+  (:use code.test))
 
 (l/script- :lua
   {:runtime :basic

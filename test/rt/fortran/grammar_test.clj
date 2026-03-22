@@ -1,8 +1,7 @@
 (ns rt.fortran.grammar-test
-  (:use code.test)
   (:require [rt.fortran.grammar :refer :all]
-            [std.lang :as l]
-            [std.lib :as h]))
+            [std.lang :as l])
+  (:use code.test))
 
 (defn emit [form]
   (let [lib (std.lang.base.library/library:create

@@ -1,8 +1,6 @@
 (ns net.openapi.params
-  (:require [std.string :as str])
-  (:import (java.io File)
-           (java.util Date TimeZone)
-           (java.text SimpleDateFormat)))
+  (:require [clojure.string])
+  (:import (java.io File) (java.util Date TimeZone) (java.text SimpleDateFormat)))
 
 (defn- ^SimpleDateFormat make-date-format
   ([^String format-str] (make-date-format format-str nil))
@@ -34,7 +32,7 @@
   [param date-format]
   (cond
     (instance? Date param) (format-date param date-format)
-    (sequential? param) (str/join "," param)
+    (sequential? param) (clojure.string/join "," param)
     :else (str param)))
 
 (declare normalize-param)
@@ -49,10 +47,10 @@
   (if (some (partial instance? File) xs)
     (map normalize-param xs)
     (case (-> (meta xs) :collection-format (or :csv))
-      :csv (str/join "," (map normalize-param xs))
-      :ssv (str/join " " (map normalize-param xs))
-      :tsv (str/join "\t" (map normalize-param xs))
-      :pipes (str/join "|" (map normalize-param xs))
+      :csv (clojure.string/join "," (map normalize-param xs))
+      :ssv (clojure.string/join " " (map normalize-param xs))
+      :tsv (clojure.string/join "\t" (map normalize-param xs))
+      :pipes (clojure.string/join "|" (map normalize-param xs))
       :multi (map normalize-param xs))))
 
 (defn normalize-param
@@ -81,7 +79,7 @@
   {:added "4.0"}
   [base-url path path-params]
   (let [path (reduce (fn [p [k v]]
-                       (str/replace p (re-pattern (str "\\{" k "\\}")) (normalize-param v)))
+                       (clojure.string/replace p (re-pattern (str "\\{" k "\\}")) (normalize-param v)))
                      path
                      path-params)]
     (str base-url path)))

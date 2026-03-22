@@ -1,7 +1,7 @@
 (ns kmi.redis
   (:require [std.lang :as l]
-            [std.lib :as h]
-            [std.string :as str])
+            [std.lib.foundation :as f]
+            [std.lib.template :as template])
   (:refer-clojure :exclude [eval sort sync keys get set type time]))
 
 (l/script :lua
@@ -78,7 +78,7 @@
 
 (defn- z-tmpl
   ([{:keys [name check param] :as m}]
-   (h/$ (defn.lua ~(with-meta name {:rt/redis {:nkeys 1}})
+   (template/$ (defn.lua ~(with-meta name {:rt/redis {:nkeys 1}})
           {:added "3.0"}
           ([...]
            (local arg (tab ...))
@@ -98,7 +98,7 @@
                  (table.insert reply e))))
            (return reply))))))
 
-(h/template-entries [z-tmpl]
+(f/template-entries [z-tmpl]
   [{:name zintersect :check (not score) :param exists}
    {:name zdiff :check score  :param not-exists}])
 
@@ -110,7 +110,7 @@
   "compares and swap for keys and hashs"
   {:added "3.0"}
   [{:keys [name args prefix]}]
-  (h/$ (defn.lua ~(with-meta name {:rt/redis {:nkeys 1}})
+  (template/$ (defn.lua ~(with-meta name {:rt/redis {:nkeys 1}})
          (~(vec (concat args '[old new]))
           (local val (-/call ~(str prefix "GET") ~@args))
           (if (or (== val old)
@@ -123,7 +123,7 @@
                   (return ["OK"])))
             (return ["NEW" val]))))))
 
-(h/template-entries [cas-tmpl]
+(f/template-entries [cas-tmpl]
   [{:name cas-set  :args [key] :prefix ""}
    {:name cas-hset :args [key field] :prefix "H"}])
 

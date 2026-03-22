@@ -1,10 +1,11 @@
 (ns code.manage.unit.scaffold
-  (:require [std.fs :as fs]
+  (:require [clojure.string]
             [code.project :as project]
-            [std.block.navigate :as nav]
             [std.block :as block]
-            [std.string :as str]
-            [std.lib :as h]))
+            [std.block.navigate :as nav]
+            [std.fs :as fs]
+            [std.lib.collection :as collection]
+            [std.string.common :as common]))
 
 (def ^:dynamic *ns-form* 'code.test)
 
@@ -25,7 +26,7 @@
    (-> [(format "^{:refer %s/%s :added \"%s\"}"
                 ns var version)
         (format "(fact \"TODO\")")]
-       (str/joinl "\n"))))
+       (common/joinl "\n"))))
 
 (defn new-filename
   "creates a new file based on test namespace
@@ -49,7 +50,7 @@
   ([source-ns test-ns vars version]
    (->> (map #(test-fact-form source-ns % version) vars)
         (cons (*ns-form-fn* source-ns test-ns *ns-form*))
-        (str/join "\n\n"))))
+        (clojure.string/join "\n\n"))))
 
 (defn scaffold-append
   "creates a scaffold for an already existing file"
@@ -58,7 +59,7 @@
    (if new-vars
      (->> new-vars
           (map #(test-fact-form source-ns % version))
-          (str/join "\n\n")
+          (clojure.string/join "\n\n")
           (str original "\n\n"))
      original)))
 
@@ -80,11 +81,11 @@
          ns-nodes    (->> all-nodes (filter is-ns?))
          var-table   (->> all-nodes
                           (filter is-var?)
-                          (h/map-juxt [key-var identity]))
+                          (collection/map-juxt [key-var identity]))
          var-nodes   (keep var-table source-vars)
          other-nodes (->> all-nodes (remove is-ns?) (remove is-var?))
          start-nodes (remove is-comment? other-nodes)
          end-nodes   (filter is-comment? other-nodes)]
      (->> (concat ns-nodes start-nodes var-nodes end-nodes)
           (map block/string)
-          (str/join "\n\n")))))
+          (clojure.string/join "\n\n")))))

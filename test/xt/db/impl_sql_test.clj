@@ -1,8 +1,8 @@
 (ns xt.db.impl-sql-test
-  (:use code.test)
   (:require [std.lang :as l]
-            [std.lib :as h]
-            [xt.lang.base-notify :as notify]))
+            [std.string.prose :as prose]
+            [xt.lang.base-notify :as notify])
+  (:use code.test))
 
 (l/script- :lua
   {:runtime :basic
@@ -143,7 +143,7 @@
     sample/Schema
     sample/SchemaLookup
     (ut/sqlite-opts nil)))
-  => (std.string/|
+  => (prose/|
       "DELETE FROM \"UserAccount\" WHERE \"id\" = '00000000-0000-0000-0000-000000000000';"
       ""
       "DELETE FROM \"UserProfile\" WHERE \"id\" = 'c4643895-b0ce-44cc-b07b-2386bf18d43b';")
@@ -220,7 +220,7 @@
     sample/Schema
     sample/SchemaLookup
     (ut/sqlite-opts nil)))
-  => (std.string/|
+  => (prose/|
       "DELETE FROM \"UserAccount\" WHERE \"id\" = '00000000-0000-0000-0000-000000000000';"
       ""
       "DELETE FROM \"UserProfile\" WHERE \"id\" = 'c4643895-b0ce-44cc-b07b-2386bf18d43b';")

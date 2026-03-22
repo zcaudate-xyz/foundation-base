@@ -1,10 +1,9 @@
 (ns lib.aether.artifact-test
-  (:use code.test)
-  (:require [lib.aether.artifact :refer :all]
-            [jvm.artifact :as artifact]
+  (:require [jvm.artifact :as artifact]
+            [lib.aether.artifact :refer :all]
             [std.object :as object])
-  (:import (org.eclipse.aether.artifact Artifact DefaultArtifact)
-           (org.eclipse.aether.metadata DefaultMetadata)))
+  (:use code.test)
+  (:import (org.eclipse.aether.artifact Artifact DefaultArtifact) (org.eclipse.aether.metadata DefaultMetadata)))
 
 (fact "added `:eclipse` keyword for `Artifact` creation"
 

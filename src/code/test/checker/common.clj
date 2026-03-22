@@ -1,6 +1,6 @@
 (ns code.test.checker.common
-  (:require [std.lib :as h]
-            [std.string :as str]
+  (:require [clojure.string]
+            [std.lib.foundation :as f]
             [std.lib.result :as res])
   (:import (java.util.regex Pattern)))
 
@@ -14,9 +14,9 @@
   ([func]
    (-> (type func)
        str
-       (str/split #"\$")
+       (clojure.string/split #"\$")
        last
-       h/demunge)))
+       f/demunge)))
 
 (defrecord Checker [fn]
   Object
@@ -184,7 +184,7 @@
 
                    (class? v) (instance? v data)
 
-                   (and (h/comparable? v data)
+                   (and (f/comparable? v data)
                         (zero? (compare v data)))
                    true
 
@@ -194,8 +194,8 @@
 
                    (ifn? v) (boolean (v data))
 
-                   (h/regexp? v)
-                   (cond (h/regexp? data)
+                   (f/regexp? v)
+                   (cond (f/regexp? data)
                          (= (.pattern ^Pattern v)
                             (.pattern ^Pattern data))
 
@@ -219,7 +219,7 @@
     {:tag :stores
      :doc "Checks if the result is a ref with "
      :fn (fn [res]
-           (if (h/ideref? res)
+           (if (f/ideref? res)
              ((satisfies v) (deref res))
              false))
      :expect v})))
@@ -232,7 +232,7 @@
    (anything [:hello :world]) => true"
   {:added "3.0"}
   ([x]
-   ((satisfies h/T) x)))
+   ((satisfies f/T) x)))
 
 (defn ->checker
   "creates a 'satisfies' checker if not already a checker

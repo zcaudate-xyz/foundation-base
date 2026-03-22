@@ -1,6 +1,6 @@
 (ns script.yaml-test
-  (:use code.test)
   (:require [script.yaml :refer :all])
+  (:use code.test)
   (:refer-clojure :exclude [read]))
 
 ^{:refer script.yaml/make-dumper-options :added "3.0"}

@@ -1,6 +1,6 @@
 (ns std.object.element.util
   (:require [std.object.element.class :as class]
-            [std.string :as str])
+            [std.string.common :as common])
   (:import (java.lang.reflect Field)))
 
 (defn box-arg
@@ -214,7 +214,7 @@
    (let [params (map #(class/class-convert % :string) (:params ele))]
      (format "[%s :: (%s) -> %s]"
              (:name ele)
-             (str/joinl params ", ")
+             (common/joinl params ", ")
              (class/class-convert (:type ele) :string)))))
 
 (defn element-params-method

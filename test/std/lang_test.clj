@@ -1,25 +1,25 @@
 (ns std.lang-test
-  (:use code.test)
   (:require [std.lang :as l]
-            [std.lang.base.pointer :as ptr]
-            [std.lang.base.util :as ut]
-            [std.lang.base.impl-entry :as entry]
             [std.lang.base.book :as book]
+            [std.lang.base.book-meta :as meta]
+            [std.lang.base.emit-helper :as helper]
+            [std.lang.base.grammar :as grammar]
+            [std.lang.base.impl-entry :as entry]
             [std.lang.base.library :as lib]
             [std.lang.base.library-snapshot :as snap]
-            [std.lang.base.book-meta :as meta]
-            [std.lang.base.grammar :as grammar]
-            [std.lang.base.emit-helper :as helper]
+            [std.lang.base.pointer :as ptr]
             [std.lang.base.runtime :as rt]
+            [std.lang.base.util :as ut]
             [std.lib.context.space :as space]
-            [std.lib :as h]))
+            [std.lib.template :as template])
+  (:use code.test))
 
 (def +book+
   (book/book {:lang :lua
               :meta (meta/book-meta {:module-export  (fn [{:keys [as]} opts]
-                                                       (h/$ (return ~as)))
+                                                       (template/$ (return ~as)))
                                      :module-import  (fn [name {:keys [as]} opts]
-                                                       (h/$ (var ~as := (require ~(str name)))))
+                                                       (template/$ (var ~as := (require ~(str name)))))
                                      :has-ptr        (fn [ptr]
                                                        (list 'not= (ut/sym-full ptr) nil))
                                      :teardown-ptr   (fn [ptr]

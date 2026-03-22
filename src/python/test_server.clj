@@ -1,6 +1,6 @@
 (ns python.test-server
-  (:require [std.lib :as h]
-            [std.lang :as l]))
+  (:require [std.lang :as l]
+            [std.lib.env :as env]))
 
 (l/script :python
   {:runtime :basic
@@ -11,7 +11,7 @@
 (comment
   (!.py
    (+ 1 2 3))
-  (h/pp {:a 1})
+  (env/pp {:a 1})
   ^*(!.py
      (ss/start-async 12677))
   

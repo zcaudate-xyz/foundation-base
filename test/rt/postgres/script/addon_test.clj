@@ -1,10 +1,9 @@
 (ns rt.postgres.script.addon-test
-  (:use code.test)
-  (:require [rt.postgres.script.addon :as addon]
+  (:require [rt.postgres :as pg]
+            [rt.postgres.script.addon :as addon]
             [rt.postgres.script.test.scratch-v1 :as scratch]
-            [rt.postgres :as pg]
-            [std.lang :as l]
-            [std.lib :as h]))
+            [std.lang :as l])
+  (:use code.test))
 
 (l/script- :postgres
   {:runtime :jdbc.client

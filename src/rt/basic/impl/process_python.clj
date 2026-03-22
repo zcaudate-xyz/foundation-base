@@ -1,16 +1,16 @@
 (ns rt.basic.impl.process-python
-  (:require [rt.basic.type-common :as common]
-            [rt.basic.type-oneshot :as oneshot]
+  (:require [clojure.string]
             [rt.basic.type-basic :as basic]
-            [rt.basic.type-websocket :as websocket]
+            [rt.basic.type-common :as common]
+            [rt.basic.type-oneshot :as oneshot]
             [rt.basic.type-remote-port :as remote-port]
-            [xt.lang.base-repl :as k]
-            [std.lang.model.spec-python :as spec]
+            [rt.basic.type-websocket :as websocket]
+            [std.json :as json]
             [std.lang.base.impl :as impl]
             [std.lang.base.runtime :as rt]
-            [std.lib :as h]
-            [std.string :as str]
-            [std.json :as json]))
+            [std.lang.model.spec-python :as spec]
+            [std.lib.os :as os]
+            [xt.lang.base-repl :as k]))
 
 (def +python-init+
   (common/put-program-options
@@ -135,7 +135,7 @@
                           :layout :flat})
                         (impl/emit-as
                          :python +client-basic+)]
-                       (str/join "\n\n"))]
+                       (clojure.string/join "\n\n"))]
     (fn [port & [{:keys [host]}]]
       (str bootstrap
            "\n\n"
@@ -196,7 +196,7 @@
                           :layout :flat})
                         (impl/emit-as
                          :python +client-ws+)]
-                       (str/join "\n\n"))]
+                       (clojure.string/join "\n\n"))]
     (fn [port & [{:keys [host]}]]
       (str bootstrap
            "\n\n"
@@ -246,12 +246,12 @@
 
 
 (comment
-  (h/clip:nil (default-basic-client 62691))
-  (def +sh+ (h/sh {:args ["python3" "-c"
+  (os/clip:nil (default-basic-client 62691))
+  (def +sh+ (os/sh {:args ["python3" "-c"
                           (default-websocket-client 53644 )]
                    :wait false}))
 
-  (def +sh+ (h/sh {:args ["python3" "-c"
+  (def +sh+ (os/sh {:args ["python3" "-c"
                           (default-basic-client 62535)]
                    :wait false}))
   
@@ -264,7 +264,7 @@
            :layout :flat})
          (impl/emit-as
           :python +client-basic+)]
-        (str/join "\n\n")))
+        (clojure.string/join "\n\n")))
   
-  (h/sh-output +sh+))
+  (os/sh-output +sh+))
 

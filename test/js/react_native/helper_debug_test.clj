@@ -1,6 +1,6 @@
 (ns js.react-native.helper-debug-test
-  (:use code.test)
-  (:require [js.react-native.helper-debug :refer :all]))
+  (:require [js.react-native.helper-debug :refer :all])
+  (:use code.test))
 
 ^{:refer js.react-native.helper-debug/create-client :added "4.0" :unchecked true}
 (fact "creates the debug client ws")

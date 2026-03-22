@@ -1,7 +1,9 @@
 (ns std.lang.interface.type-shared
-  (:require [std.protocol.component :as protocol.component]
-            [std.protocol.context :as protocol.context]
-            [std.lib :as h :refer [defimpl]]))
+  (:require [std.lib.collection :as collection]
+            [std.lib.component :as component]
+            [std.lib.impl :as impl]
+            [std.protocol.component :as protocol.component]
+            [std.protocol.context :as protocol.context]))
 
 (defonce ^:dynamic *groups*
   (atom {}))
@@ -24,7 +26,7 @@
    => map?"
   {:added "4.0"}
   ([]
-   (h/map-juxt [identity
+   (collection/map-juxt [identity
                 get-group-count]
                (get-groups)))
   ([type & [id]]
@@ -32,7 +34,7 @@
      (or (get-in @*groups*
                  [type id :count])
          0)
-     (h/map-vals :count
+     (collection/map-vals :count
                  (get @*groups* type)))))
 
 ;(:hara/rt.postgres :hara/rt.redis :hara/rt.nginx :hara/rt.cpython.shared :hara/rt.luajit.shared)
@@ -84,9 +86,9 @@
              (fn [m]
                (let [{:keys [config client instance]} (get-in m [type id])]
                  (if instance
-                   (h/stop instance))
+                   (component/stop instance))
                  (assoc-in m [type id :instance]
-                           (h/start ((:constructor client)
+                           (component/start ((:constructor client)
                                      config))))))
       (get-in [type id :instance])))
 
@@ -106,7 +108,7 @@
   (let [{:keys [type constructor]} client
         instance (get-group-instance type id)]
     (cond (not instance)
-          (set-group-instance type id (h/start (constructor config))
+          (set-group-instance type id (component/start (constructor config))
                               1
                               config
                               client)
@@ -127,7 +129,7 @@
           (and (or temp
                    (= id :default))
                (<= cnt 1))
-          (do (h/stop instance)
+          (do (component/stop instance)
               (remove-group-instance type id))
           
           :else
@@ -151,7 +153,7 @@
                                               (-> rt :id)))
        [lang]))
 
-(defimpl SharedRuntime
+(impl/defimpl SharedRuntime
   [id client temp config]
   :suffix "-shared"
   :string rt-shared-string
@@ -179,19 +181,19 @@
   "creates a shared runtime client"
   {:added "4.0"}
   [{:rt/keys [id client temp] :as m}]
-  (let [rtks   (h/qualified-keys m :rt)
+  (let [rtks   (collection/qualified-keys m :rt)
         config (apply dissoc m (keys rtks))]
     (map->SharedRuntime (merge m
                                 {:id (or id :default)
                                  :config config}
-                                (h/unqualify-keys rtks)))))
+                                (collection/unqualify-keys rtks)))))
 
 (defn rt-shared
   "creates and starts and shared runtime client"
   {:added "4.0"}
   ([m]
    (-> (rt-shared:create m)
-       (h/start))))
+       (component/start))))
 
 (defn rt-is-shared?
   "checks if a runtime is shared"

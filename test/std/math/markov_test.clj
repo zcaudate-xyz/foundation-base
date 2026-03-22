@@ -1,6 +1,6 @@
 (ns std.math.markov-test
-  (:use code.test)
-  (:require [std.math.markov :refer :all]))
+  (:require [std.math.markov :refer :all])
+  (:use code.test))
 
 ^{:refer std.math.markov/cumulative :added "3.0"}
 (fact "Reassemble the map of probabilities in cumulative order")

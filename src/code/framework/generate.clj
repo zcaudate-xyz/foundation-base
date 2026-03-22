@@ -1,8 +1,8 @@
 (ns code.framework.generate
-  (:require [std.block.navigate :as nav]
+  (:require [clojure.set :as set]
             [std.block :as b]
-            [clojure.set :as set]
-            [std.lib :as h]))
+            [std.block.navigate :as nav]
+            [std.lib.foundation :as f]))
 
 (defn get-template-params
   [code]
@@ -36,7 +36,7 @@
         missing  (set/difference (set (map second params))
                                  (set (keys input)))
         _ (when (not-empty missing)
-            (h/error "Missing params: " {:missing missing
+            (f/error "Missing params: " {:missing missing
                                          :input input}))]
     (nav/root-string
      (reduce (fn [nav param]

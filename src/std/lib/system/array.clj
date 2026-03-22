@@ -1,10 +1,10 @@
 (ns std.lib.system.array
-  (:require [std.protocol.component :as protocol.component]
-            [std.lib.system.common :as common]
+  (:require [std.lib.collection :as coll]
             [std.lib.component :as comp]
-            [std.lib.collection :as coll]
             [std.lib.foundation :as h]
-            [std.lib.impl :refer [defimpl]]))
+            [std.lib.impl :refer [defimpl]]
+            [std.lib.system.common :as common]
+            [std.protocol.component :as protocol.component]))
 
 (declare array? start-array stop-array)
 

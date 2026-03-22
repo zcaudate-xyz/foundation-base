@@ -1,7 +1,7 @@
 (ns std.pretty.dispatch-test
-  (:use code.test)
-  (:require [std.pretty.dispatch :refer :all]
-            [std.pretty :as printer]))
+  (:require [std.pretty :as printer]
+            [std.pretty.dispatch :refer :all])
+  (:use code.test))
 
 ^{:refer std.pretty.dispatch/chained-lookup :added "3.0"}
 (fact "chains two or more lookups together"

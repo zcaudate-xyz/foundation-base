@@ -1,7 +1,8 @@
 (ns code.manage-test
-  (:use code.test)
   (:require [code.manage :refer :all]
-            [code.project :as project])
+            [code.project :as project]
+            [std.lib.env :as env])
+  (:use code.test)
   (:refer-clojure :exclude [import]))
 
 ^{:refer code.manage/analyse :added "3.0"}
@@ -226,7 +227,7 @@
 (fact "main entry point for code.manage"
   ^:hidden
 
-  (std.lib/with-out-str
+  (env/with-out-str
     (code.manage/-main))
   => string?
 

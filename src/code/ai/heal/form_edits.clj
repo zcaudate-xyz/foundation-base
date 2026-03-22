@@ -1,9 +1,9 @@
 (ns code.ai.heal.form-edits
-  (:require [std.block.navigate :as edit]
+  (:require [clojure.string]
             [code.query :as query]
-            [std.lib :as h]
             [std.block :as b]
-            [std.string :as str]))
+            [std.block.navigate :as edit]
+            [std.lib.collection :as collection]))
 
 (defn fix:namespaced-symbol-no-dot
   [nav]
@@ -17,7 +17,7 @@
      (let [form      (std.block.navigate/value nav)
            sym-ns    (namespace form)
            sym-name  (name form)
-           sym-parts (std.string/split sym-name #"\.")]
+           sym-parts (clojure.string/split sym-name #"\.")]
        (std.block.navigate/replace
         nav
         (apply list '. (symbol sym-ns (first sym-parts))
@@ -28,10 +28,10 @@
   (query/modify
    nav
    [(fn [form]
-      (and (h/form? form)
-           (and (str/starts-with? (str (last form))
+      (and (collection/form? form)
+           (and (clojure.string/starts-with? (str (last form))
                                   "-")
-                (not (str/starts-with? (str (last form))
+                (not (clojure.string/starts-with? (str (last form))
                                        "-/")))))]
    (fn [nav] 
      (let [form      (std.block.navigate/value nav)]
@@ -61,7 +61,7 @@
    nav
    [(fn [form]
       (and (vector? form)
-           (or (str/ends-with? (str (first form))
+           (or (clojure.string/ends-with? (str (first form))
                                "components.figma.image-with-fallback")
                (= (first form)
                   'js.lib.sonner))))]

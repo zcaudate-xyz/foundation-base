@@ -1,7 +1,7 @@
 (ns std.lang.interface.type-shared-test
-  (:use code.test)
-  (:require [std.lang.interface.type-shared :as shared]
-            [std.lang :as l]))
+  (:require [std.lang :as l]
+            [std.lang.interface.type-shared :as shared])
+  (:use code.test))
 
 ^{:refer std.lang.interface.type-shared/get-groups :added "4.0"}
 (fact "gets all shared groups"

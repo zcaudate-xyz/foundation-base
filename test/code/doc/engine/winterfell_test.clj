@@ -1,6 +1,6 @@
 (ns code.doc.engine.winterfell-test
-  (:use code.test)
-  (:require [code.doc.engine.winterfell :refer :all]))
+  (:require [code.doc.engine.winterfell :refer :all])
+  (:use code.test))
 
 ^{:refer code.doc.engine.winterfell/page-element
   :added "3.0"}

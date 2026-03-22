@@ -1,7 +1,5 @@
 (ns lua.nginx.crypt
-  (:require [std.lib :as h]
-            [std.lang :as l]
-            [std.string :as str])
+  (:require [std.lang :as l])
   (:refer-clojure :exclude [print flush time re-find]))
 
 (l/script :lua

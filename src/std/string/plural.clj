@@ -1,7 +1,8 @@
 (ns std.string.plural
-  (:require [std.string.common :as str]
+  (:require [clojure.string]
+            [std.lib.collection :as coll]
             [std.lib.foundation :as h]
-            [std.lib.collection :as coll]))
+            [std.string.common :as str]))
 
 (def ^:dynamic *uncountable* (atom #{}))
 
@@ -131,7 +132,7 @@
 
                       :else
                       (if (re-find pattern word)
-                        (str/replace word pattern replacement)))))
+                        (clojure.string/replace word pattern replacement)))))
         (first))))
 
 (defn singular

@@ -1,20 +1,20 @@
 (ns js.tamagui
-  (:require [std.lang :as l]
-            [std.lib :as h]
-            [js.react.compile :as compile]))
+  (:require [js.react.compile :as compile]
+            [std.lang :as l]
+            [std.lib.foundation :as f]))
 
 (l/script :js
   {:import [["tamagui" :as [* T]]
             ["@tamagui/toast" :as [* TToast]]
             ["@tamagui/get-token" :as [* TToken]]]})
 
-(h/template-entries [l/tmpl-entry {:type :fragment
+(f/template-entries [l/tmpl-entry {:type :fragment
                                    :base "TToken"
                                    :tag "js"}]
 
   [getSize])
 
-(h/template-entries [l/tmpl-entry {:type :fragment
+(f/template-entries [l/tmpl-entry {:type :fragment
                                    :base "TToast"
                                    :tag "js"}]
 
@@ -28,7 +28,7 @@
    [ToastClose Toast.Close]
    [ToastAction Toast.Action]])
 
-(h/template-entries [l/tmpl-entry {:type :fragment
+(f/template-entries [l/tmpl-entry {:type :fragment
                                    :base "T"
                                    :tag "js"}]
   [Accordion
@@ -126,7 +126,7 @@
    Nav
    Overlay])
 
-(h/template-entries [l/tmpl-entry {:type :fragment
+(f/template-entries [l/tmpl-entry {:type :fragment
                                    :base "T"
                                    :tag "js"}]
   [Paragraph
@@ -249,7 +249,7 @@
    YStack
    ZStack])
 
-(h/template-entries [l/tmpl-entry {:type :fragment
+(f/template-entries [l/tmpl-entry {:type :fragment
                                    :base "T"
                                    :tag "js"}]
 

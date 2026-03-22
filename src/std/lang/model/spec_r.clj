@@ -1,16 +1,16 @@
 (ns std.lang.model.spec-r
-  (:require [std.lang.base.emit :as emit]
+  (:require [std.lang.base.book :as book]
+            [std.lang.base.emit :as emit]
             [std.lang.base.emit-common :as common]
             [std.lang.base.emit-top-level :as top]
             [std.lang.base.grammar :as grammar]
             [std.lang.base.grammar-spec :as spec]
-            [std.lang.base.util :as ut]
-	    [std.lang.base.book :as book]
             [std.lang.base.script :as script]
+            [std.lang.base.util :as ut]
             [std.lang.model.spec-xtalk]
             [std.lang.model.spec-xtalk.fn-r :as fn]
-            [std.string :as str]
-            [std.lib :as h]))
+            [std.lib.collection :as collection]
+            [std.lib.template :as template]))
 
 (defn tf-defn
   "function declaration for python
@@ -62,7 +62,7 @@
   [[_ [e arr] & body]]
   (if (vector? e)
     (let [[i e] e]
-      (h/$ (do (var ~i := 0)
+      (template/$ (do (var ~i := 0)
                (for [~e :in (% ~arr)]
                  (:= ~i (+ ~i 1))
                  ~@body))))
@@ -73,14 +73,14 @@
   "transform for `for:iter`"
   {:added "4.0"}
   [[_ [e it] & body]]
-  (h/$ (for [~e :in (% ~it)]
+  (template/$ (for [~e :in (% ~it)]
          ~@body)))
 
 (defn tf-for-index
   "transform for `for:index`"
   {:added "4.0"}
   [[_ [i [start end step]] & body]]
-  (h/$ (for [~i :in (seq ~start
+  (template/$ (for [~i :in (seq ~start
                          ~end
                          ~(or step 1))]
          ~@body)))
@@ -89,7 +89,7 @@
   "transform for `for:return`"
   {:added "4.0"}
   [[_ [[res err] statement] {:keys [success error]}]]
-  (h/$ (tryCatch
+  (template/$ (tryCatch
         (block
          (var ~res ~statement)
          ~success)
@@ -166,7 +166,7 @@
                  :map-entry {:start ""  :end ""  :space "" :assign "=" :keyword :symbol}}
         :define {:def       {:raw ""}
                  :defn      {:raw ""}}}
-       (h/merge-nested (emit/default-grammar))))
+       (collection/merge-nested (emit/default-grammar))))
 
 (def +grammar+
   (grammar/grammar :R
@@ -211,7 +211,7 @@
                                :infix
                                [:return :exclude [:ret]]
                                [:bit :exclude [:bitsl :bitsr]]])
-        (h/merge-nested
+        (collection/merge-nested
          {:new    {:value true}
           :setrq  {:op :setrq :symbol '#{:>} :raw "->"}
           :neg    {:emit :invoke}

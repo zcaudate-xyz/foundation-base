@@ -1,21 +1,21 @@
 (ns std.lang.base.book-test
-  (:use code.test)
   (:require [std.lang.base.book :as b]
+            [std.lang.base.book-entry :as entry]
             [std.lang.base.book-meta :as meta]
             [std.lang.base.book-module :as module]
-            [std.lang.base.book-entry :as entry]
-            [std.lang.base.grammar :as grammar]
             [std.lang.base.emit-common :as common]
-	    [std.lang.base.emit-helper :as helper]
+            [std.lang.base.emit-helper :as helper]
+            [std.lang.base.grammar :as grammar]
             [std.lang.base.util :as ut]
-            [std.lib :as h]))
+            [std.lib.template :as template])
+  (:use code.test))
 
 (def +book+
   (b/book {:lang :lua
            :meta (meta/book-meta {:module-export  (fn [{:keys [as]} opts]
-                                                    (h/$ (return ~as)))
+                                                    (template/$ (return ~as)))
                                   :module-import  (fn [name {:keys [as]} opts]  
-                                                    (h/$ (var ~as := (require ~(str name)))))
+                                                    (template/$ (var ~as := (require ~(str name)))))
                                   :has-ptr        (fn [ptr]
                                                     (list 'not= (ut/sym-full ptr) nil))
                                   :teardown-ptr   (fn [ptr]

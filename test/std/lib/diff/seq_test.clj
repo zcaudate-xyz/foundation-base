@@ -1,6 +1,6 @@
 (ns std.lib.diff.seq-test
-  (:use code.test)
-  (:require [std.lib.diff.seq :refer :all]))
+  (:require [std.lib.diff.seq :refer :all])
+  (:use code.test))
 
 ^{:refer std.lib.diff.seq/diff :added "3.0"}
 (fact "creates a diff of two sequences"

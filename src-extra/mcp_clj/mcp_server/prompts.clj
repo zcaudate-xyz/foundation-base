@@ -1,8 +1,7 @@
 (ns mcp-clj.mcp-server.prompts
-  "MCP prompt endpoints"
-  (:require
-    [clojure.string :as str]
-    [mcp-clj.log :as log]))
+  (:require [clojure.string :as str]
+            [mcp-clj.log :as log])
+  "MCP prompt endpoints")
 
 (defn- validate-argument
   "Validate a prompt argument definition"

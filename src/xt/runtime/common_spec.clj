@@ -1,6 +1,5 @@
 (ns xt.runtime.common-spec
-  (:require [std.lib :as h]
-            [std.lang :as l]))
+  (:require [std.lang :as l]))
 
 (l/script :xtalk
   {:require [[xt.lang.base-lib :as k]]})

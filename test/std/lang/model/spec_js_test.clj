@@ -1,8 +1,8 @@
 (ns std.lang.model.spec-js-test
-  (:use code.test)
-  (:require [std.lang.model.spec-js :refer :all]
-            [std.lang :as l]
-            [std.lib :as h]))
+  (:require [std.lang :as l]
+            [std.lang.model.spec-js :refer :all]
+            [std.string.prose :as prose])
+  (:use code.test))
 
 ^{:refer std.lang.model.spec-js/emit-html :added "4.0"}
 (fact "emits html"
@@ -90,7 +90,7 @@
                             (return (. this props fallback))
                             (return (. this props children)))))
                      )])
-  => (std.string/|
+  => (prose/|
       "class Try extends React.Component{"
       "  static getDerivedStateFromError(error){"
       "    return {error,\"hasError\":true};"

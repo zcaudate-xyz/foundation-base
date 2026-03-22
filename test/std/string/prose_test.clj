@@ -1,7 +1,7 @@
 (ns std.string.prose-test
-  (:use code.test)
-  (:require [std.string.prose :refer :all]
-            [std.string.common :as common]))
+  (:require [std.string.common :as common]
+            [std.string.prose :refer :all])
+  (:use code.test))
 
 ^{:refer std.string.prose/has-quotes? :added "3.0"}
 (fact "checks if a string has quotes"

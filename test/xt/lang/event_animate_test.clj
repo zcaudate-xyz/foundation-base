@@ -1,9 +1,8 @@
 (ns xt.lang.event-animate-test
-  (:use code.test)
-  (:require [std.lib :as h]
+  (:require [std.json :as json]
             [std.lang :as l]
-            [std.json :as json]
-            [xt.lang.base-notify :as notify]))
+            [xt.lang.base-notify :as notify])
+  (:use code.test))
 
 (l/script- :js
   {:runtime :basic

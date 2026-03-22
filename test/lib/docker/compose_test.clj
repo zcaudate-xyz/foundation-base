@@ -1,7 +1,7 @@
 (ns lib.docker.compose-test
-  (:use code.test)
   (:require [lib.docker.compose :as compose]
-            [std.lib :as h]))
+            [std.lib.foundation :as f])
+  (:use code.test))
 
 (defn entry-redis-mq
   [{:keys [name image ip]}]
@@ -13,7 +13,7 @@
                [:healthcheck
                 {:test ["CMD" "redis-cli" "ping"]
                  :interval "1m"}]]
-   :export    {:APP_EV_HOST (or ip (h/strn name))
+   :export    {:APP_EV_HOST (or ip (f/strn name))
                :APP_EV_PORT 6379}})
 
 (defn entry-minio
@@ -32,7 +32,7 @@
                {:test ["CMD" "curl" "-f" (format "http://%s:9000/minio/health/live"
                                                  name)]
                 :interval "1m"}]]
-   :export   {:APP_MINIO_HOST  (or ip (h/strn name))
+   :export   {:APP_MINIO_HOST  (or ip (f/strn name))
               :APP_MINIO_PORT  9000
               :APP_MINIO_USER  "minioadmin"
               :APP_MINIO_PASS  "minioadmin"
@@ -45,7 +45,7 @@
                [:healthcheck
                 {:test ["CMD" "curl" "-f" (str "http://" name)]
                  :interval "1m"}]]
-   :export    {:APP_WEB_HOST  (or ip (h/strn name))
+   :export    {:APP_WEB_HOST  (or ip (f/strn name))
                :APP_WEB_PORT  80
                :APP_WEB_SECURED  "no"}})
 

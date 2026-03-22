@@ -1,6 +1,6 @@
 (ns std.lib.extend-test
-  (:use code.test)
-  (:require [std.lib.extend :refer :all]))
+  (:require [std.lib.extend :refer :all])
+  (:use code.test))
 
 ^{:refer std.lib.extend/extend-single :added "3.0"}
 (fact "Transforms a protocol template into an extend-type expression"

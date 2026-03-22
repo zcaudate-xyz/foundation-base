@@ -1,9 +1,8 @@
 (ns code.manage.unit.template
   (:require [code.framework :as base]
             [code.project :as project]
-            [std.task :as task]
-            [std.lib :as h]
-            [std.lib.result :as res]))
+            [std.lib.result :as res]
+            [std.task :as task]))
 
 (defn source-namespaces
   "returns all source namespaces

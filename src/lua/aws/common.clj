@@ -1,6 +1,5 @@
 (ns lua.aws.common
-  (:require [std.lib :as h]
-            [std.lang :as l]))
+  (:require [std.lang :as l]))
 
 (l/script :lua
   {:require [[lua.nginx.openssl :as ssl]

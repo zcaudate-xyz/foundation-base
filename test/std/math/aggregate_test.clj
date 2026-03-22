@@ -1,6 +1,6 @@
 (ns std.math.aggregate-test
-  (:use code.test)
-  (:require [std.math.aggregate :refer :all]))
+  (:require [std.math.aggregate :refer :all])
+  (:use code.test))
 
 ^{:refer std.math.aggregate/max-fn :added "3.0"}
 (fact "max taking an array as input"

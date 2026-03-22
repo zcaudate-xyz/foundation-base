@@ -1,8 +1,8 @@
 (ns code.doc.executive-test
-  (:use code.test)
-  (:require [std.config :as config]
-            [code.doc :as publish]
-            [code.doc.executive :refer :all]))
+  (:require [code.doc :as publish]
+            [code.doc.executive :refer :all]
+            [std.config :as config])
+  (:use code.test))
 
 ^{:refer code.doc.executive/all-pages :added "3.0"}
 (fact "finds and creates entries for all documents"

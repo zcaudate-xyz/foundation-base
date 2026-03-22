@@ -1,12 +1,12 @@
 (ns code.test.base.executive-test
-  (:use [code.test :exclude [run]])
-  (:require [code.test.base.executive :as executive]
-            [code.test.base.print :as print]
+  (:require [clojure.string]
             [code.project :as project]
-            [std.string :as str]
-            [std.lib :as h]
+            [code.test.base.context :as context]
+            [code.test.base.executive :as executive]
+            [code.test.base.print :as print]
             [code.test.base.runtime :as rt]
-            [code.test.base.context :as context]))
+            [std.lib.env :as env])
+  (:use [code.test :exclude [run]]))
 
 (defn notify [data]
   (reset! context/*accumulator* data))
@@ -43,7 +43,7 @@
   ^:hidden
   
   (binding [context/*print* #{:print-bulk}]
-    (str/includes? (h/with-out-str
+    (clojure.string/includes? (env/with-out-str
                      (executive/summarise {:passed [] :failed [] :throw [] :timeout []}))
                    "Summary"))
   => true)
@@ -53,7 +53,7 @@
   ^:hidden
   
   (binding [context/*print* #{:print-bulk}]
-    (str/includes? (h/with-out-str
+    (clojure.string/includes? (env/with-out-str
                      (executive/summarise-bulk nil {:id {:data {:passed [] :failed [] :throw [] :timeout []}}} nil))
                    "Summary"))
   => true)

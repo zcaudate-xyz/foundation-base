@@ -3,11 +3,10 @@
             [std.image.awt.io :as io]
             [std.image.base.common :as common]
             [std.image.base.display :as display]
-            [std.image.base.size :as size]
             [std.image.base.model :as model]
+            [std.image.base.size :as size]
             [std.image.protocol :as protocol.image])
-  (:import
-   (clojure.lang IPersistentMap PersistentArrayMap)))
+  (:import (clojure.lang IPersistentMap PersistentArrayMap)))
 
 (defrecord Image [model size data]
   Object

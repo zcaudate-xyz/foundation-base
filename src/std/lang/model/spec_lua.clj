@@ -1,19 +1,20 @@
 (ns std.lang.model.spec-lua
-  (:require [std.lang.model.spec-xtalk]
-            [std.lang.base.emit-common :as common]
+  (:require [clojure.string]
+            [std.fs :as fs]
+            [std.lang.base.book :as book]
+            [std.lang.base.book-module :as module]
             [std.lang.base.emit :as emit]
+            [std.lang.base.emit-common :as common]
             [std.lang.base.grammar :as grammar]
             [std.lang.base.grammar-spec :as spec]
             [std.lang.base.impl :as impl]
-            [std.lang.base.util :as ut]
-            [std.lang.base.book :as book]
-            [std.lang.base.book-module :as module]
             [std.lang.base.script :as script]
+            [std.lang.base.util :as ut]
             [std.lang.model.spec-xtalk]
             [std.lang.model.spec-xtalk.fn-lua :as fn]
-            [std.string :as str]
-            [std.lib :as h]
-            [std.fs :as fs]))
+            [std.lib.collection :as collection]
+            [std.lib.foundation :as f]
+            [std.lib.template :as template]))
 
 ;;
 ;; LANG
@@ -26,7 +27,7 @@
   (if (empty? args)
     (list 'var* :local decl)
     (let [bound (last args)]
-      (cond (and (h/form? bound)
+      (cond (and (collection/form? bound)
                  (= 'fn (first bound)))
             (apply list 'defn (with-meta decl {:inner true})
                    (rest bound))
@@ -57,7 +58,7 @@
   "custom lua map key"
   {:added "3.0"}
   ([key grammar mopts]
-   (cond (not (or (h/form? key)
+   (cond (not (or (collection/form? key)
                   (symbol? key)
                   (number? key)))
          (let [key-str (cond (string? key)
@@ -116,7 +117,7 @@
   "for return transform"
   {:added "4.0"}
   [[_ [[res err] statement] {:keys [success error]}]]
-  (h/$ (do (var '[~res ~err] ~statement)
+  (template/$ (do (var '[~res ~err] ~statement)
            (if (not ~err)
              ~success
              ~error))))
@@ -125,7 +126,7 @@
   "for try transform"
   {:added "4.0"}
   [[_ [[res err] statement] {:keys [success error]}]]
-  (h/$ (do (var '[ok out] (pcall (fn []
+  (template/$ (do (var '[ok out] (pcall (fn []
                                    (return ~statement))))
            (if ok
              (do* (var ~res := out)
@@ -137,7 +138,7 @@
   "for async transform"
   {:added "4.0"}
   [[_ [[res err] statement] {:keys [success error finally]}]]
-  (h/$ (ngx.thread.spawn
+  (template/$ (ngx.thread.spawn
         (fn []
           (for:try [[~res ~err] ~statement]
                    {:success ~success
@@ -247,7 +248,7 @@
         :define   {:def       {:raw "local"}
                    :defglobal {:raw ""}
                    :declare   {:raw "local"}}}
-       (h/merge-nested (emit/default-grammar))))
+       (collection/merge-nested (emit/default-grammar))))
 
 (defn lua-module-link
   "gets the absolute lua based module
@@ -261,13 +262,13 @@
   {:added "4.0"}
   ([ns graph]
    (let [{:keys [target root-ns]} graph
-         root-path (->> (str/split (name root-ns) #"\.")
+         root-path (->> (clojure.string/split (name root-ns) #"\.")
                         (butlast)
-                        (str/join "/"))
+                        (clojure.string/join "/"))
          
-         ns-path   (str/replace (name ns) #"\." "/")]
-     (if (str/starts-with? ns-path (str root-path))
-       (h/->> (fs/relativize root-path ns-path)
+         ns-path   (clojure.string/replace (name ns) #"\." "/")]
+     (if (clojure.string/starts-with? ns-path (str root-path))
+       (f/->> (fs/relativize root-path ns-path)
               (str)
               (str "./"))
        (str "./" ns-path)))))
@@ -285,11 +286,11 @@
 
 (def +meta+
   (book/book-meta
-   {:module-current h/NIL
+   {:module-current f/NIL
     :module-link    #'lua-module-link
     :module-export  #'lua-module-export
     :module-import  (fn [name {:keys [as]} opts]  
-                      (h/$ (var* :local ~as := (require ~(str name)))))
+                      (template/$ (var* :local ~as := (require ~(str name)))))
     :has-ptr        (fn [ptr] (list 'not= (ut/sym-full ptr) nil))
     :teardown-ptr   (fn [ptr] (list := (ut/sym-full ptr) nil))}))
 

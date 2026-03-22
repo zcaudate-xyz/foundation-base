@@ -1,10 +1,11 @@
 (ns code.test.base.process
-  (:require [code.test.checker.common :as checker]
-            [code.test.base.match  :as match]
-            [code.test.base.context :as context]
+  (:require [code.test.base.context :as context]
+            [code.test.base.match :as match]
             [code.test.base.runtime :as rt]
-            [std.lib :as h]
-            [std.lib.result :as res]))
+            [code.test.checker.common :as checker]
+            [std.lib.foundation :as f]
+            [std.lib.result :as res]
+            [std.lib.signal :as signal]))
 
 (defn evaluate
   "converts a form to a result
@@ -65,7 +66,7 @@
                            :original original))
          _    (intern *ns* (with-meta '*last* {:dynamic true})
                       result)]
-     (h/signal {:test :form :result result})
+     (signal/signal {:test :form :result result})
      (when context/*results*
        (swap! context/*results* conj result))
      result)))
@@ -83,11 +84,11 @@
          _    (intern *ns* (with-meta '*last* {:dynamic true})
                       (:data actual))
          _    (after)]
-     (h/signal {:test :check :result result})
+     (signal/signal {:test :check :result result})
      (when context/*results*
        (swap! context/*results* conj result))
      (if (and guard (not (:data result)))
-       (h/error "Guard failed" {}))
+       (f/error "Guard failed" {}))
      result)))
 
 (defn collect
@@ -100,7 +101,7 @@
   {:added "3.0"}
   ([meta results]
    (let [results (if context/*results* @context/*results* results)]
-     (h/signal {:id context/*run-id* :test :fact :meta meta :results results})
+     (signal/signal {:id context/*run-id* :test :fact :meta meta :results results})
      (and (->> results
                (filter #(-> % :from (= :verify)))
                (mapv :data)
@@ -115,7 +116,7 @@
   "returns the form with no ops evaluated"
   {:added "3.0"}
   ([meta]
-   (h/signal {:id context/*run-id* :test :fact :meta meta :results [] :skipped true}) :skipped))
+   (signal/signal {:id context/*run-id* :test :fact :meta meta :results [] :skipped true}) :skipped))
 
 (defn run-check
   "runs a single check form"

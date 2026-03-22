@@ -1,8 +1,12 @@
 (ns js.react.layout
-  (:require [std.lib.walk :as walk]
-            [std.string :as str]
-            [std.lib :as h]
-            [std.lang :as l]))
+  (:require [clojure.string]
+            [std.lang :as l]
+            [std.lib.collection :as collection]
+            [std.lib.context.pointer :as ptr]
+            [std.lib.foundation :as f]
+            [std.lib.sort :as sort]
+            [std.lib.template :as template]
+            [std.lib.walk :as walk]))
 
 (defn ui-template-classify
   [elem fill-empty]
@@ -27,14 +31,14 @@
                 props
                 children]} (ui-template-classify elem false)
         pclasses (if (string? (:class props))
-                  (str/split (:class props) #" ")
+                  (clojure.string/split (:class props) #" ")
                   (:class props))
         tclasses (map (fn [[k v]]
                         (cond (boolean? v)
                               (name k)
                               
                               :else
-                              (str (name k) "-" (h/strn v))))
+                              (str (name k) "-" (f/strn v))))
                       (dissoc props :style :class))
         ;; media query classes
         qclasses []]
@@ -51,7 +55,7 @@
       "v"   (ui-template-controls-layout elem ["flex" "flex-col" "grow"])
       "h"   (ui-template-controls-layout elem ["flex" "flex-row" "grow"])
       "for" (let [[[idx val] array]  control]
-              (h/$
+              (template/$
                (. ~array (map (fn [~val ~idx]
                                 (return
                                  [:<>
@@ -77,14 +81,14 @@
                 props
                 children]} (ui-template-classify elem false)
         tmpl (or (get components tag)
-                 (h/error "Tag not found: "
+                 (f/error "Tag not found: "
                           {:tag tag
                            :element elem
                            :components components}))
         body (cons (merge (:props tmpl) props)
                    (ui-template-replace (:children tmpl)
                                         children))]
-    (cond (h/pointer? (:tag tmpl))
+    (cond (ptr/pointer? (:tag tmpl))
           (apply vector :% (l/sym-full (:tag tmpl)) body)
 
           (symbol? (:tag tmpl))
@@ -109,7 +113,7 @@
 (defn ui-template-components-classify
   [components]
   (let [ks    (set (keys components))
-        deps  (h/map-vals
+        deps  (collection/map-vals
                (fn [form]
                  (let [deps (volatile! #{})
                        _    (walk/postwalk
@@ -121,7 +125,7 @@
                                x))]
                    deps))
                components)]
-    (h/topological-sort deps)))
+    (sort/topological-sort deps)))
 
 (defn ui-template-components-expand
   [components]
@@ -132,7 +136,7 @@
 (defn ui-template
   [input components]
   (let [components (ui-template-components-resolve components)
-        components (h/map-vals
+        components (collection/map-vals
                   (fn [tmpl]
                     (if (vector? tmpl)
                       (ui-template-classify tmpl true)

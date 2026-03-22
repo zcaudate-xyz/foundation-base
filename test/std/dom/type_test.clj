@@ -1,6 +1,6 @@
 (ns std.dom.type-test
-  (:use code.test)
-  (:require [std.dom.type :refer :all]))
+  (:require [std.dom.type :refer :all])
+  (:use code.test))
 
 ^{:refer std.dom.type/metaclass :added "3.0"}
 (fact "returns info associated with given metaclass"

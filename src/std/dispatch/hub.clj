@@ -1,11 +1,13 @@
 (ns std.dispatch.hub
-  (:require [std.protocol.dispatch :as protocol.dispatch]
-            [std.protocol.component :as protocol.component]
-            [std.concurrent :as cc]
+  (:require [std.concurrent :as cc]
             [std.dispatch.common :as common]
-            [std.dispatch.hooks :as hooks]
             [std.dispatch.debounce :as debounce]
-            [std.lib :as h :refer [defimpl]]))
+            [std.dispatch.hooks :as hooks]
+            [std.lib.atom :as atom]
+            [std.lib.collection :as collection]
+            [std.lib.impl :as impl]
+            [std.protocol.component :as protocol.component]
+            [std.protocol.dispatch :as protocol.dispatch]))
 
 (def +defaults+ {:group-fn (fn [_ entry] entry)
                  :interval  1000
@@ -30,7 +32,7 @@
   {:added "3.0"}
   ([{:keys [runtime options] :as dispatch} group entry]
    (let [{:keys [groups]} runtime
-         hub  (h/swap-return! groups
+         hub  (atom/swap-return! groups
                               (fn [m]
                                 (if-let [hub (get m group)]
                                   [hub m]
@@ -151,7 +153,7 @@
    (if-let [debouncer @(-> dispatch :runtime :debouncer)]
      (common/props-dispatch debouncer))))
 
-(defimpl HubDispatch [type runtime handler]
+(impl/defimpl HubDispatch [type runtime handler]
   :suffix "-dispatch"
   :string common/to-string
   :protocols  [std.protocol.component/IComponent
@@ -181,7 +183,7 @@
   {:added "3.0"}
   ([{:keys [hooks options] :as m}]
    (let [{:keys [hub]} options
-         options (assoc options :hub (h/merge-nested +defaults+ hub))
+         options (assoc options :hub (collection/merge-nested +defaults+ hub))
          runtime (-> {:debouncer (volatile! nil)
                       :groups (atom {})
                       :counter (hooks/counter)}

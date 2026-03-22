@@ -1,14 +1,12 @@
 (ns lib.jdbc
-  "Alternative implementation of jdbc wrapper for clojure."
   (:require [clojure.string :as str]
-            [lib.jdbc.types :as types]
+            [lib.jdbc.constants :as constants]
             [lib.jdbc.impl :as impl]
             [lib.jdbc.protocol :as protocol]
             [lib.jdbc.resultset :refer [result-set->lazyseq result-set->vector]]
-            [lib.jdbc.constants :as constants])
-  (:import (java.sql PreparedStatement
-                     ResultSet
-                     Connection)))
+            [lib.jdbc.types :as types])
+  "Alternative implementation of jdbc wrapper for clojure."
+  (:import (java.sql PreparedStatement ResultSet Connection)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Main public api.

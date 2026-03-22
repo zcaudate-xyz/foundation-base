@@ -1,6 +1,6 @@
 (ns jvm.reflect.print-test
-  (:use code.test)
-  (:require [jvm.reflect.print :refer :all]))
+  (:require [jvm.reflect.print :refer :all])
+  (:use code.test))
 
 ^{:refer jvm.reflect.print/format-type :added "3.0"}
 (fact "returns a nice looking version of the class"

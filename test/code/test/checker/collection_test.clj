@@ -1,8 +1,8 @@
 (ns code.test.checker.collection-test
-  (:use [code.test :only [fact]])
-  (:require [code.test.checker.collection :refer :all]
-            [code.test.checker.common :as base]
-            [code.test.base.process :as process]))
+  (:require [code.test.base.process :as process]
+            [code.test.checker.collection :refer :all]
+            [code.test.checker.common :as base])
+  (:use [code.test :only [fact]]))
 
 ^{:refer code.test.checker.collection/verify-map :added "3.0"}
 (fact "takes two maps and determines if they fit"

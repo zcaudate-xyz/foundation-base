@@ -1,9 +1,10 @@
 (ns net.resp.node
   (:require [net.resp.connection :as conn]
             [std.concurrent :as cc]
-            [std.lib :as h])
-  (:import (java.net ServerSocket)
-           (hara.net.resp SocketConnection)))
+            [std.lib.atom :as atom]
+            [std.lib.env :as env]
+            [std.lib.foundation :as f])
+  (:import (java.net ServerSocket) (hara.net.resp SocketConnection)))
 
 (defonce ^:dynamic *active* (atom #{}))
 
@@ -20,9 +21,9 @@
   {:added "3.0"}
   ([handler [cmd & args]]
    (let [action (case cmd
-                  "PING"  [:string (h/string (or (first args) "PONG"))]
+                  "PING"  [:string (f/string (or (first args) "PONG"))]
                   "ECHO"  [:write (first args)]
-                  "THROW" [:throw (ex-info (h/string (first args) {}))]
+                  "THROW" [:throw (ex-info (f/string (first args) {}))]
                   (try (handler cmd args)
                        (catch Throwable t [:throw t])))]
      action)))
@@ -64,7 +65,7 @@
 
                            :else
                            [[:string "OK"] (assoc m :enabled true)]))
-         action (h/swap-return! transact handle-fn)]
+         action (atom/swap-return! transact handle-fn)]
      (action-write conn action))))
 
 (defn handle-exec
@@ -79,7 +80,7 @@
                            :else
                            [[[:string "OK"] queue]
                             {:enabled false :queue []}]))
-         [action queue] (h/swap-return! transact handle-fn)
+         [action queue] (atom/swap-return! transact handle-fn)
          outputs (mapv (comp second #(action-eval handler %)) queue)]
      (action-write conn [:write outputs]))))
 
@@ -93,7 +94,7 @@
 
                            :else
                            [true m]))
-         out? (h/swap-return! transact handle-fn)]
+         out? (atom/swap-return! transact handle-fn)]
      (if out?
        (action-write conn (action-eval handler input))
        (action-write conn [:string "QUEUED"])))))
@@ -106,16 +107,16 @@
   ([^SocketConnection conn transact handler close]
    (try
      (if-let [[cmd & args :as input] (conn/connection:read conn)]
-       (case (h/string cmd)
+       (case (f/string cmd)
          "QUIT"  (System/exit 0)
-         "EXIT"  (h/close conn)
+         "EXIT"  (env/close conn)
          "MULTI" (handle-multi conn transact)
          "EXEC"  (handle-exec conn transact handler)
-         (handle-command conn transact handler (cons (h/string cmd) args)))
-       (h/close conn))
+         (handle-command conn transact handler (cons (f/string cmd) args)))
+       (env/close conn))
      (catch Throwable t
        (conn/connection:throw conn t))
-     (finally (if close (h/close conn))))))
+     (finally (if close (env/close conn))))))
 
 (defn handle-loop
   "performs a loop call"
@@ -162,7 +163,7 @@
    (swap! *active* disj node)
    (cc/thread:interrupt thread)
    (cc/executor:stop executor)
-   (h/close server)
+   (env/close server)
    (Thread/sleep 100)))
 
 (comment
@@ -173,16 +174,16 @@
        (impl/exec conn command))))
 
   (def -s- (start-node (fn [& args]
-                         (h/prn args))
+                         (env/prn args))
                        4567))
 
   (def -t- (start-node (fn [& args]
-                         (h/prn args))
+                         (env/prn args))
                        4568))
   (stop-node -s-)
   (def -c- (conn/connection {:port 4568}))
   (def -f- (future (def -c- (conn/connection {:port 4567}))
-                   (h/req -c- ["PING"])))
+                   (cc/req -c- ["PING"])))
 
   (impl/exec -c- ["ECHO" "ABC"])
   (impl/exec -c- ["THROW" "ABC"])

@@ -1,8 +1,7 @@
 (ns std.lang.model.spec-xtalk.com-r-test
-  (:use code.test)
-  (:require [std.lang.model.spec-xtalk.com-r :refer :all]
-            [std.lang :as l]
-            [std.lib :as h]))
+  (:require [std.lang :as l]
+            [std.lang.model.spec-xtalk.com-r :refer :all])
+  (:use code.test))
 
 ^{:refer std.lang.model.spec-xtalk.com-r/r-tf-x-return-encode :added "4.0"}
 (fact "encodes return value"

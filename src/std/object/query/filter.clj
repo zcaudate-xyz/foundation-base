@@ -1,8 +1,8 @@
 (ns std.object.query.filter
-  (:require
-   [std.lib :as h]
-   [std.object.element.common :as common]
-   [std.object.element.class :as class]))
+  (:require [clojure.set]
+            [std.lib.foundation :as f]
+            [std.object.element.class :as class]
+            [std.object.element.common :as common]))
 
 (defn- has-predicate?
   [f value]
@@ -10,7 +10,7 @@
 
 (defn- has-name?
   [name value]
-  (cond (h/regexp? name)
+  (cond (f/regexp? name)
         (not (nil? (re-find name value)))
 
         (string? name)
@@ -44,7 +44,7 @@
 
 (defn- has-origins?
   [origins value]
-  (if (empty? (h/intersection origins (set value)))
+  (if (empty? (clojure.set/intersection origins (set value)))
     false true))
 
 (defn- filter-by

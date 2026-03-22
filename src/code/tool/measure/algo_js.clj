@@ -1,9 +1,9 @@
 (ns code.tool.measure.algo-js
-  (:require [std.lib :as h]
+  (:require [code.tool.measure.common :as common]
+            [code.tool.translate.js-ast :as js-ast]
             [std.fs :as fs]
             [std.json :as json]
-            [code.tool.translate.js-ast :as js-ast]
-            [code.tool.measure.common :as common]))
+            [std.lib.env :as env]))
 
 ;; JS Specific Configuration
 (def ^:dynamic *js-config*
@@ -84,7 +84,7 @@
         {:complexity complexity
          :surface    surface})
       (catch Throwable e
-        (h/local :println "Error generating JS AST metrics:" (.getMessage e))
+        (env/local :println "Error generating JS AST metrics:" (.getMessage e))
         {:complexity 0 :surface 0})
       (finally
         (fs/delete tmp-in)

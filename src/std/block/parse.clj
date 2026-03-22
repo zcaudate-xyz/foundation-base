@@ -1,12 +1,12 @@
 (ns std.block.parse
-  (:require [std.block.base :as base]
+  (:require [clojure.tools.reader :as tools.reader]
+            [clojure.string :as str]
+            [std.block.base :as base]
             [std.block.check :as check]
             [std.block.construct :as construct]
             [std.block.reader :as reader]
             [std.block.type :as type]
-            [std.protocol.block :as protocol.block]
-            [std.string :as str]
-            [clojure.tools.reader :as tools.reader]))
+            [std.protocol.block :as protocol.block]))
 
 (def ^:dynamic *end-delimiter* nil)
 
@@ -193,44 +193,7 @@
                                          (= ch \\))
                                     lines)))
                    (reader/throw-reader reader "Unexpected EOF while reading string.")))]
-     (str/joinl lines "\n"))))
-
-(comment
-  (defn read-string-data
-  "reads string data from the reader
- 
-   (read-string-data (reader/create \"\\\"hello\\\"\"))
-   => \"hello\""
-  {:added "3.0"}
-  ([reader]
-   (let [reader (reader/step-char reader) ; Consume opening quote
-         sb (StringBuilder.)]
-     (loop [escape? false]
-       (if-let [ch (reader/read-char reader)]
-         (cond
-           escape?
-           (let [ch* (case ch
-                       \t \tab
-                       \r \return
-                       \n \newline
-                       \b \backspace
-                       \f \formfeed
-                       ch)]
-             (.append sb ch*)
-             (recur false))
-
-           (= ch \\)
-           (recur true)
-
-           (= ch \")
-           (str sb)
-
-           :else
-           (do (.append sb ch)
-               (recur false)))
-         (reader/throw-reader reader "Unexpected EOF while reading string."))))))
-
-  )
+     (str/join "\n" lines))))
 
 (defmethod -parse :token
   ([reader]

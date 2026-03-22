@@ -1,9 +1,9 @@
 (ns code.framework.docstring-test
-  (:use code.test)
   (:require [code.framework.docstring :refer :all]
             [std.block :as block]
             [std.block.navigate :as nav]
-            [std.lib.zip :as zip]))
+            [std.lib.zip :as zip])
+  (:use code.test))
 
 ^{:refer code.framework.docstring/strip-quotes :added "3.0"}
 (fact "utility that strips quotes when not the result of a fact"

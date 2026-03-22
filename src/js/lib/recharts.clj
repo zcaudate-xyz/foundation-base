@@ -1,11 +1,11 @@
 (ns js.lib.recharts
-  (:require [std.lib :as h]
-            [std.lang :as l]))
+  (:require [std.lang :as l]
+            [std.lib.foundation :as f]))
 
 (l/script :js
   {:import [["recharts" :as [* Recharts]]]})
 
-(h/template-entries [l/tmpl-entry {:type :fragment
+(f/template-entries [l/tmpl-entry {:type :fragment
                                    :base "Recharts"
                                    :tag "js"}]
   [Area

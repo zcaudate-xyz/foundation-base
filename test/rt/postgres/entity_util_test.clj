@@ -1,6 +1,6 @@
 (ns rt.postgres.entity-util-test
-  (:use code.test)
-  (:require [rt.postgres.entity-util :refer :all]))
+  (:require [rt.postgres.entity-util :refer :all])
+  (:use code.test))
 
 (defn with-demo-app
   [f]

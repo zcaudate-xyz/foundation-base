@@ -1,6 +1,6 @@
 (ns code.doc.theme.mormont-test
-  (:use code.test)
-  (:require [code.doc.theme.mormont :refer :all]))
+  (:require [code.doc.theme.mormont :refer :all])
+  (:use code.test))
 
 ^{:refer code.doc.theme.mormont/render-top-level :added "3.0"}
 (fact "renders the top-level (cover page) for the mormont theme"

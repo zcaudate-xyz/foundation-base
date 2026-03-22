@@ -2,8 +2,7 @@
   (:require [std.protocol.time :as protocol.time]
             [std.time.coerce :as coerce]
             [std.time.zone :as zone])
-  (:import (java.time Clock Instant LocalDate LocalDateTime LocalTime ZoneId ZonedDateTime)
-           (java.time.format DateTimeFormatter ResolverStyle)))
+  (:import (java.time Clock Instant LocalDate LocalDateTime LocalTime ZoneId ZonedDateTime) (java.time.format DateTimeFormatter ResolverStyle)))
 
 (defmethod protocol.time/-formatter DateTimeFormatter
   ([pattern {:keys [timezone] :as opts}]

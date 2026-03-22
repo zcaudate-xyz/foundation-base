@@ -1,5 +1,5 @@
 (ns std.object.element.common
-  (:require [std.lib :refer [defimpl]]))
+  (:require [std.lib.impl :as impl]))
 
 (defn context-class
   "If x is a class, return x otherwise return the class of x
@@ -58,7 +58,7 @@
   ([element]
    (str "#elem " (-format-element element))))
 
-(defimpl Element [body]
+(impl/defimpl Element [body]
   :type deftype
   :invoke -invoke-element
   :string element-string

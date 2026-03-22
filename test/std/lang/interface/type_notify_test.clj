@@ -1,20 +1,22 @@
 (ns std.lang.interface.type-notify-test
-  (:use code.test)
-  (:require [std.lang.interface.type-notify :as notify]
-            [rt.basic.impl.process-lua :as lua]
+  (:require [clojure.string]
             [net.http :as http]
-            [std.lib :as h]
+            [rt.basic.impl.process-lua :as lua]
             [std.concurrent :as cc]
             [std.json :as json]
-            [std.json :as json]
             [std.lang :as l]
-            [std.string :as str]))
+            [std.lang.interface.type-notify :as notify]
+            [std.lib.component :as component]
+            [std.lib.env :as env]
+            [std.lib.foundation :as f]
+            [std.lib.future :as future])
+  (:use code.test))
 
 (defonce +server+ (notify/notify-server {}))
 
 (fact:global
- {:setup [(h/start +server+)]
-  :teardown [(h/stop +server+)]})
+ {:setup [(component/start +server+)]
+  :teardown [(component/stop +server+)]})
 
 ^{:refer std.lang.interface.type-notify/has-sink? :added "4.0"
   :setup [(notify/get-sink +server+ "abc")]}
@@ -31,7 +33,7 @@
   ^:hidden
   
   (notify/get-sink +server+ "abc")
-  => h/atom?)
+  => f/atom?)
 
 ^{:refer std.lang.interface.type-notify/clear-sink :added "4.0"
   :setup [(notify/get-sink +server+ "abc")]}
@@ -39,7 +41,7 @@
   ^:hidden
   
   (notify/clear-sink +server+ "abc")
-  => h/atom?)
+  => f/atom?)
 
 ^{:refer std.lang.interface.type-notify/add-listener :added "4.0"}
 (fact "adds a listener to the sink"
@@ -86,9 +88,9 @@
 
 ^{:refer std.lang.interface.type-notify/process-print :added "4.0"}
 (fact "processes `print` id option"
-  (h/with-out-str
+  (env/with-out-str
     (notify/process-print {"value" "hello" "key" ["type" {"data" "world"}]}))
-  => (fn [s] (str/includes? s "world")))
+  => (fn [s] (clojure.string/includes? s "world")))
 
 
 ^{:refer std.lang.interface.type-notify/process-capture :added "4.0"}
@@ -113,7 +115,7 @@
 (fact "starts http server"
   ^:hidden
   
-  (do (def +value+ (h/sid))
+  (do (def +value+ (f/sid))
       (http/post (str "http://127.0.0.1:" (:http-port +server+) "/")
                  {:body (json/write {:id "hello"
                                      :data +value+})})
@@ -160,7 +162,7 @@
 
 ^{:refer std.lang.interface.type-notify/notify-server :added "4.0"}
 (fact "create and start notify server"
-  (h/stop (notify/notify-server {}))
+  (component/stop (notify/notify-server {}))
   => map?)
 
 ^{:refer std.lang.interface.type-notify/default-notify :added "4.0"}
@@ -179,7 +181,7 @@
 
   (notify/watch-oneshot +server+
                         10)
-  => (contains [string? h/future?]))
+  => (contains [string? future/future?]))
 
 (comment
   (./import))

@@ -1,6 +1,6 @@
 (ns lib.aether.remote-repo
-  (:require [std.object :as object]
-            [lib.aether.authentication])
+  (:require [lib.aether.authentication]
+            [std.object :as object])
   (:import (org.eclipse.aether.repository RemoteRepository RemoteRepository$Builder RepositoryPolicy)))
 
 (object/map-like

@@ -1,10 +1,11 @@
 (ns code.test.manage-test
-  (:require [code.test.manage :refer :all]
+  (:require [code.project :as project]
             [code.test :refer [fact contains]]
-            [code.test.base.runtime :as rt]
             [code.test.base.context :as ctx]
-            [code.project :as project]
-            [code.test.base.executive :as executive]))
+            [code.test.base.executive :as executive]
+            [code.test.base.runtime :as rt]
+            [code.test.manage :refer :all]
+            [std.lib.foundation :as f]))
 
 ^{:refer code.test.manage/fact:global-map :added "3.0"}
 (fact "sets and gets the global map"
@@ -74,7 +75,7 @@
   ^:hidden
   
   (with-redefs [ns-interns (fn [_] {'sym #'print})
-                std.lib/intern-var (fn [& _] nil)]
+                f/intern-var (fn [& _] nil)]
     (fact:ns-intern *ns*))
   => [nil])
 

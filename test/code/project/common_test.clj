@@ -1,6 +1,6 @@
 (ns code.project.common-test
-  (:use code.test)
-  (:require [code.project.common :refer :all]))
+  (:require [code.project.common :refer :all])
+  (:use code.test))
 
 ^{:refer code.project.common/artifact :added "3.0"}
 (fact "returns the artifact map given a symbol"

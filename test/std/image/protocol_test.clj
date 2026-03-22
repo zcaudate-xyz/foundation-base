@@ -1,6 +1,6 @@
 (ns std.image.protocol-test
-  (:use code.test)
-  (:require [std.image.protocol :refer :all]))
+  (:require [std.image.protocol :refer :all])
+  (:use code.test))
 
 ^{:refer std.image.protocol/-image-meta :added "3.0"}
 (comment "additional information about the image")

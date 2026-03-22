@@ -1,6 +1,6 @@
 (ns math.parse-test
-  (:use code.test)
-  (:require [math.parse :refer :all]))
+  (:require [math.parse :refer :all])
+  (:use code.test))
 
 ^{:refer math.parse/parse-expr :added "3.0"}
 (fact "parses string into SyntaxTree"

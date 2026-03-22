@@ -1,7 +1,10 @@
 (ns std.make.compile
-  (:require [std.lib :as h]
-            [std.string :as str]
-            [std.fs :as fs])
+  (:require [clojure.string]
+            [std.fs :as fs]
+            [std.lib.context.pointer :as ptr]
+            [std.lib.env :as env]
+            [std.lib.foundation :as f]
+            [std.string.prose :as prose])
   (:refer-clojure :exclude [compile]))
 
 (def ^:dynamic *mock-compile* false)
@@ -30,7 +33,7 @@
          (if header [header])
          [body]
          (if footer [footer]))
-        (str/join "\n\n"))))
+        (clojure.string/join "\n\n"))))
 
 (defn compile-out-path
   "creates the output path for file"
@@ -96,8 +99,8 @@
   ([{:keys [main root] :as opts}]
    (mapv (fn [[input file]]
            (let [out-path (compile-out-path (assoc opts :file file))
-                 in-path  (or (h/sys:resource input)
-                              (h/error "Resource not found:" {:value input}))]
+                 in-path  (or (env/sys:resource input)
+                              (f/error "Resource not found:" {:value input}))]
              (if *mock-compile*
                [in-path out-path]
                (if (not (fs/exists? out-path))
@@ -184,7 +187,7 @@
 
 (defmethod compile-ext-fn :raw
   [_]
-  {:fn 'std.string/write-lines})
+  {:fn 'prose/write-lines})
 
 (defmethod compile-ext-fn :edn
   [_]
@@ -242,7 +245,7 @@
 
 (defmethod compile-ext-fn :gitignore
   [_]
-  {:fn 'std.string/write-lines
+  {:fn 'prose/write-lines
    :file ".gitignore"})
 
 (defmethod compile-ext-fn :nginx.conf
@@ -252,12 +255,12 @@
 
 (defmethod compile-ext-fn :dockerfile
   [_]
-  {:fn 'std.string/write-lines
+  {:fn 'prose/write-lines
    :file "Dockerfile"})
 
 (defmethod compile-ext-fn :readme.md
   [_]
-  {:fn 'std.string/write-lines
+  {:fn 'prose/write-lines
    :file "README.md"})
 
 (defmethod compile-ext-fn :makefile
@@ -276,7 +279,7 @@
   [x]
   (loop [x x]
     (cond (or (var? x)
-              (h/pointer? x))
+              (ptr/pointer? x))
           (recur @x)
           
           (symbol? x)
@@ -296,15 +299,15 @@
          main   (compile-resolve main)
          f      (:fn m)
          f      (if (symbol? f)
-                  (do (h/require (symbol (namespace f)))
+                  (do (env/require (symbol (namespace f)))
                       @(resolve f))
                   f)
          body   (f main)
          full   ((wrapper compile-fullbody sopts) body sopts)
          file   (or file
-                    (if name (str name "." (h/strn (or suffix format))))
+                    (if name (str name "." (f/strn (or suffix format))))
                     (:file m)
-                    (h/error (str "Need a :file or :name entry for "
+                    (f/error (str "Need a :file or :name entry for "
                                   (dissoc sopts :root :main))))
          output (compile-out-path (assoc sopts :file file))]
      (compile-write output full))))
@@ -349,7 +352,7 @@
   [m sections directive]
   (let [glob-fn (fn [patterns sopts]
                   (some (fn match-fn [pattern]
-                          (cond (or (h/regexp? pattern)
+                          (cond (or (f/regexp? pattern)
                                     (string? pattern))
                                 (match-fn {:name pattern})
 
@@ -360,14 +363,14 @@
                                 (every? (fn [[k comp]]
                                           
                                           (let [v (get sopts k)]
-                                            (h/suppress (cond (h/regexp? comp) (re-find comp v)
+                                            (f/suppress (cond (f/regexp? comp) (re-find comp v)
                                                               (or (fn? comp)
                                                                   (var? comp)
                                                                   (set? comp)) (comp v)
                                                               :else (= comp v)))))
                                         pattern)
 
-                                :else (h/error "Not valid" {:pattern pattern})))
+                                :else (f/error "Not valid" {:pattern pattern})))
                         patterns))]
     (cond (keyword? directive)
           (if-let [section (get sections directive)]
@@ -398,5 +401,5 @@
             (doseq [hook (:post hooks)]
               (try ((:fn hook) m)
                    (catch Throwable t
-                     (h/p "Hook " (:id hook) " failed to run")))))]
+                     (env/p "Hook " (:id hook) " failed to run")))))]
     output))

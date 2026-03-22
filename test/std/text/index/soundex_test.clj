@@ -1,6 +1,6 @@
 (ns std.text.index.soundex-test
-  (:use code.test)
-  (:require [std.text.index.soundex :refer :all]))
+  (:require [std.text.index.soundex :refer :all])
+  (:use code.test))
 
 ^{:refer std.text.index.soundex/stem :added "3.0"}
 (fact "classifies a word based on its stem"

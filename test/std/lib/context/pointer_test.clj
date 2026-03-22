@@ -1,6 +1,6 @@
 (ns std.lib.context.pointer-test
-  (:use code.test)
-  (:require [std.lib.context.pointer :refer :all]))
+  (:require [std.lib.context.pointer :refer :all])
+  (:use code.test))
 
 ^{:refer std.lib.context.pointer/pointer-deref :added "3.0"}
 (fact "derefs a pointer"

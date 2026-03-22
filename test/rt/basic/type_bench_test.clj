@@ -1,9 +1,9 @@
 (ns rt.basic.type-bench-test
-  (:use code.test)
   (:require [rt.basic.type-bench :refer :all]
-            [std.lib :as h]
+            [rt.basic.type-oneshot :as oneshot]
             [std.fs :as fs]
-            [rt.basic.type-oneshot :as oneshot]))
+            [std.lib.network :as network])
+  (:use code.test))
 
 ^{:refer rt.basic.type-bench/bench? :added "4.0"}
 (fact "checks if object is a bench"
@@ -19,7 +19,7 @@
 ^{:refer rt.basic.type-bench/create-bench-process :added "4.0"}
 (fact "creates the bench process"
   ^:hidden
-  (let [port (h/port:check-available 0)
+  (let [port (network/port:check-available 0)
         p (create-bench-process
            :python port
            {:root-dir (str (fs/create-tmpdir))}

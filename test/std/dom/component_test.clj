@@ -1,12 +1,12 @@
 (ns std.dom.component-test
-  (:use code.test)
-  (:require [std.dom.component :refer :all]
-            [std.dom.common :as base]
-            [std.dom.react :as react]
-            [std.dom.local :as local]
+  (:require [std.dom.common :as base]
+            [std.dom.component :refer :all]
             [std.dom.impl :as impl]
-            [std.dom.type :as type]
-            [std.dom.mock :as mock]))
+            [std.dom.local :as local]
+            [std.dom.mock :as mock]
+            [std.dom.react :as react]
+            [std.dom.type :as type])
+  (:use code.test))
 
 (defcomp :mock/pane-static
   [:static]

@@ -1,12 +1,12 @@
 (ns js.lib.optics
   (:require [std.lang :as l]
-            [std.lib :as h])
+            [std.lib.foundation :as f])
   (:refer-clojure :exclude [get set remove chars filter finnd nth]))
 
 (l/script :js
   {:import [["optics-ts/standalone" :as [* Optics]]]})
 
-(h/template-entries [l/tmpl-entry {:type :fragment
+(f/template-entries [l/tmpl-entry {:type :fragment
                                    :base "Optics"
                                    :tag "js"}]
   [compose

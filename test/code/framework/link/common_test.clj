@@ -1,6 +1,6 @@
 (ns code.framework.link.common-test
-  (:use code.test)
-  (:require [code.framework.link.common :refer :all]))
+  (:require [code.framework.link.common :refer :all])
+  (:use code.test))
 
 ^{:refer code.framework.link.common/-file-linkage :added "3.0"}
 (fact "extendable function for `file-linkage`"

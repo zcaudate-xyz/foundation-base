@@ -1,6 +1,6 @@
 (ns documentation.code-doc
-  (:use code.test)
-  (:require [code.doc :as publish]))
+  (:require [code.doc :as publish])
+  (:use code.test))
 
 [[:chapter {:title "Introduction"}]]
 

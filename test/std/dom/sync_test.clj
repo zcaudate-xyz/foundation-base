@@ -1,10 +1,10 @@
 (ns std.dom.sync-test
-  (:use code.test)
-  (:require [std.dom.sync :refer :all]
-            [std.dom.common :as base]
-            [std.dom.update :as update]
+  (:require [std.dom.common :as base]
+            [std.dom.diff :as diff]
             [std.dom.mock :as mock]
-            [std.dom.diff :as diff]))
+            [std.dom.sync :refer :all]
+            [std.dom.update :as update])
+  (:use code.test))
 
 ^{:refer std.dom.sync/sync-step :added "4.0"}
 (fact "Performs one sync cycle"

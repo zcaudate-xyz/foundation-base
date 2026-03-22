@@ -1,6 +1,6 @@
 (ns js.react-native.animate-transition-test
-  (:use code.test)
-  (:require [js.react-native.animate-transition :refer :all]))
+  (:require [js.react-native.animate-transition :refer :all])
+  (:use code.test))
 
 ^{:refer js.react-native.animate-transition/unit :added "4.0" :unchecked true}
 (fact "gets the unit transform")

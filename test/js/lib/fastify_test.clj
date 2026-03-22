@@ -1,7 +1,8 @@
 (ns js.lib.fastify-test
-  (:use code.test)
-  (:require [std.lib :as h]
-            [std.lang :as l]))
+  (:require [std.lang :as l]
+            [std.lib.network :as network]
+            [std.lib.os :as os])
+  (:use code.test))
 
 (l/script- :js
   {:runtime :basic
@@ -53,7 +54,7 @@
 
 ^{:refer js.lib.fastify/start-server :added "4.0" :unchecked true
   :setup [(def +port+
-            (h/port:check-available 0))
+            (network/port:check-available 0))
           (http/stop-server +port+)]
   :teardown [(http/stop-server +port+)]}
 (fact "starts a fastify server"
@@ -65,7 +66,7 @@
   -server-
   => map?
 
-  (std.json/read (str (h/sh {:args ["curl" (str "http://localhost:" +port+ "/euoeu/oue?a=2")]})))
+  (std.json/read (str (os/sh {:args ["curl" (str "http://localhost:" +port+ "/euoeu/oue?a=2")]})))
   => (contains-in
       {"url" "/euoeu/oue?a=2", "method" "GET", "query" {"a" "2"},
        "path" "/euoeu/oue", "headers" {"Accept" "*/*",

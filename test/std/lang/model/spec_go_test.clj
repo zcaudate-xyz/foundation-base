@@ -1,10 +1,9 @@
 (ns std.lang.model.spec-go-test
-  (:use code.test)
-  (:require [std.lang.model.spec-go :as spec-go]
+  (:require [code.test :as t]
             [std.lang :as l]
-            [std.lib :as h]
             [std.lang.base.emit :as emit]
-            [code.test :as t]))
+            [std.lang.model.spec-go :as spec-go])
+  (:use code.test))
 
 (fact "test go emission"
   (l/emit-as :go ['(var a 1)])

@@ -1,11 +1,12 @@
 (ns rt.circom.grammar
-  (:require [std.lang.base.emit :as emit]
-            [std.lang.base.grammar :as grammar]
-            [std.lang.base.util :as ut]
+  (:require [clojure.string]
             [std.lang.base.book :as book]
+            [std.lang.base.emit :as emit]
+            [std.lang.base.grammar :as grammar]
             [std.lang.base.script :as script]
-            [std.string :as str]
-            [std.lib :as h]))
+            [std.lang.base.util :as ut]
+            [std.lib.collection :as collection]
+            [std.lib.template :as template]))
 
 (defn format-string [x]
   (if (string? x) (pr-str x) x))
@@ -20,7 +21,7 @@
   [[_ sym args & body]]
   (let [args (if (vector? args) args [args])
         args-str (str "("
-                      (str/join ", " (map ut/sym-default-str args))
+                      (clojure.string/join ", " (map ut/sym-default-str args))
                       ")")]
     (list :- (str "template " (ut/sym-default-str sym) args-str)
           (list :- "{"
@@ -70,7 +71,7 @@
   [[_ opts tmpl-call]]
   (let [public-args (get opts :public)
         public-str (if public-args
-                     (str "{public [" (str/join "," (map ut/sym-default-str public-args)) "]}")
+                     (str "{public [" (clojure.string/join "," (map ut/sym-default-str public-args)) "]}")
                      "")
         call (if (seq? tmpl-call) tmpl-call (list tmpl-call))]
     (list :% (list :- "component" "main" public-str "=" call) (list :- ";"))))
@@ -133,7 +134,7 @@
         :block  {:for       {:parameter {:sep ";"}}
                  :script    {:start "" :end ""}}
         :define {:def       {:raw ""}}}
-       (h/merge-nested (emit/default-grammar))))
+       (collection/merge-nested (emit/default-grammar))))
 
 (def +grammar+
   (grammar/grammar :circom
@@ -144,7 +145,7 @@
   (book/book-meta
    {:module-current   (fn [])
     :module-import    (fn [name _ opts]
-                        (h/$ (include ~name)))
+                        (template/$ (include ~name)))
     :module-export    (fn [{:keys [as refer]} opts])}))
 
 (def +book+

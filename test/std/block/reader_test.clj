@@ -1,7 +1,7 @@
 (ns std.block.reader-test
+  (:require [std.block.check :as check]
+            [std.block.reader :as reader :refer :all])
   (:use code.test)
-  (:require [std.block.reader :refer :all :as reader]
-            [std.block.check :as check])
   (:refer-clojure :exclude [slurp]))
 
 ^{:refer std.block.reader/create :added "3.0"}

@@ -1,6 +1,5 @@
 (ns xt.lang.base-interval
-  (:require [std.lang :as l]
-            [std.lib :as h]))
+  (:require [std.lang :as l]))
 
 (l/script :xtalk
   {})

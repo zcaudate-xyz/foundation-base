@@ -1,14 +1,14 @@
 (ns rt.solidity.compile-deploy
-  (:require [std.lib :as h]
-            [std.lang :as l]
-            [std.string :as str]
-            [std.make.compile :as compile]
+  (:require [js.core :as j]
+            [js.lib.eth-bench :as eth-bench]
+            [rt.basic :as basic]
             [rt.solidity.compile-common :as common]
             [rt.solidity.compile-solc :as solc]
             [rt.solidity.env-ganache :as env]
-            [rt.basic :as basic]
-            [js.lib.eth-bench :as eth-bench]
-            [js.core :as j]
+            [std.lang :as l]
+            [std.lib.env]
+            [std.lib.foundation :as f]
+            [std.make.compile :as compile]
             [xt.lang.base-notify :as notify]))
 
 ;;
@@ -42,10 +42,10 @@
                   contractAddress]} result
         _ (cond (not status)
                 (do (not common/*suppress-errors*)
-                    (h/pl url)
-                    (h/pl code)
-                    (h/pl result)
-                    (h/error "Compilation Error"
+                    (std.lib.env/pl url)
+                    (std.lib.env/pl code)
+                    (std.lib.env/pl result)
+                    (f/error "Compilation Error"
                              {:data result}))
                 
                 :else

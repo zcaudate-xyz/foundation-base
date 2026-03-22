@@ -1,11 +1,12 @@
 (ns lib.redis.impl.generator
-  (:require [lib.redis.impl.reference :as ref]
+  (:require [clojure.string]
             [lib.redis.impl.common :as common]
+            [lib.redis.impl.reference :as ref]
             [net.resp.wire :as wire]
-            [std.string :as str]
-            [std.string.plural :as plural]
             [std.concurrent :as cc]
-            [std.lib :as h :refer [definvoke]]))
+            [std.lib.foundation :as f]
+            [std.string.case :as case]
+            [std.string.plural :as plural]))
 
 (def ^:dynamic *command-id* nil)
 
@@ -45,8 +46,8 @@
   ([{:keys [type display sym name command enum multiple optional process] :as arg}]
    (let [type    (or type :custom)
          name    (if (string? name)
-                   (-> (str/escape name {\/ "-" \: "-"})
-                       (str/lower-case))
+                   (-> (clojure.string/escape name {\/ "-" \: "-"})
+                       (clojure.string/lower-case))
                    name)
          sym     (or sym
                      (cond-> (or name (clojure.core/name type))
@@ -70,22 +71,22 @@
   {:added "3.0"}
   ([{:keys [enum name command]}]
    (cond  command
-          (let [cstr (str/spear-case command)]
+          (let [cstr (case/spear-case command)]
             {:type :command
              :command command
              :sym (symbol cstr)
              :name cstr
-             :values (set (map (comp keyword str/spear-case) enum))})
+             :values (set (map (comp keyword case/spear-case) enum))})
 
           (= 1 (count enum))
-          (let [estr (str/spear-case (first enum))]
+          (let [estr (case/spear-case (first enum))]
             {:type :flag :sym (symbol estr) :name estr})
 
           :else
           {:type :enum
            :sym (symbol name)
            :name name
-           :values (set (map (comp keyword str/spear-case) enum))})))
+           :values (set (map (comp keyword case/spear-case) enum))})))
 
 (defn expand-argument
   "expands an argument"
@@ -101,7 +102,7 @@
   {:added "3.0"}
   ([{:keys [sym process]}]
    (cond (vector? process)
-         [sym `(map h/call ~sym ~process (repeat ~'opts))]
+         [sym `(map f/call ~sym ~process (repeat ~'opts))]
 
          (symbol? process)
          [sym `(~process ~sym ~'opts)]
@@ -114,14 +115,14 @@
   {:added "3.0"}
   [{:keys [type sym name multiple command values]}]
   (case type
-    :flag    [sym `(conj ~(str/upper-case name))]
+    :flag    [sym `(conj ~(clojure.string/upper-case name))]
     :enum    [sym `(conj (if (get ~values ~sym)
-                           (str/upper-case (h/strn ~sym))
+                           (clojure.string/upper-case (f/strn ~sym))
                            (throw (ex-info "Invalid input" {:arg (quote ~sym)
                                                             :options ~values}))))]
     :command [sym `(conj ~command
                          (if (get ~values ~sym)
-                           (str/upper-case (h/strn ~sym))
+                           (clojure.string/upper-case (f/strn ~sym))
                            (throw (ex-info "Invalid input" {:arg (quote ~sym)
                                                             :options ~values}))))]
     :optional [sym `(into ~sym)]
@@ -141,7 +142,7 @@
    (let [fsym  (symbol (str "in:" (name id)))
          command  (if prefix
                     (vec prefix)
-                    [(str/upper-sep-case (name id))])
+                    [(case/upper-sep-case (name id))])
          fargs (map :sym arguments)
          dargs (map #(or %1 %2)
                     (map :display arguments)
@@ -225,7 +226,7 @@
                      :ack
                      :data)]
      (binding [*command-id* id]
-       (h/-> (select-keys m [:id :arguments :prefix])
+       (f/-> (select-keys m [:id :arguments :prefix])
              (assoc :return return)
              (cond-> %
                replace  (assoc :arguments (:arguments custom)))

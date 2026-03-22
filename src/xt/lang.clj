@@ -1,6 +1,7 @@
 (ns xt.lang
   (:require [std.lang :as l]
-            [std.lib :as h]))
+            [std.lib.collection :as collection]
+            [std.lib.env :as env]))
 
 (l/script :xtalk
   {:require  [[xt.lang.base-macro :as macro]
@@ -23,13 +24,13 @@
     (let [library (or library (l/default-library))
           [to from] (if (vector? ns)
                       ns
-                      [(h/ns-sym) ns])]
+                      [(env/ns-sym) ns])]
       (std.lang.base.library/wait-mutate!
        library
        (fn [snap]
          (let [book (std.lang.base.library-snapshot/get-book snap lang)
                imports (->> (get-in book [:modules from :fragment])
-                            (h/map-vals (fn [e]
+                            (collection/map-vals (fn [e]
                                           (assoc e :module to))))
                new-book (update-in book [:modules to :fragment]
                                    (fn [m]
@@ -44,7 +45,7 @@
                           :xtalk))
 
   (def +imports+
-    (h/map-vals
+    (collection/map-vals
      (fn [e]
        (assoc e :module 'xt.lang))
      (get-in +book+ [:modules 'xt.lang.base-macro :fragment])))

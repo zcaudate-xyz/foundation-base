@@ -1,8 +1,5 @@
 (ns mcp-clj.mcp-server.subscriptions
-  "Subscription management for MCP resources.
-
-  Manages tracking of which sessions are subscribed to which resources.
-  Used for sending notifications when resources change.")
+  "Subscription management for MCP resources.\n\n  Manages tracking of which sessions are subscribed to which resources.\n  Used for sending notifications when resources change.")
 
 (defn subscribe!
   "Add a subscription for session-id to uri.

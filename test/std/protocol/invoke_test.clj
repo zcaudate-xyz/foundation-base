@@ -1,7 +1,7 @@
 (ns std.protocol.invoke-test
-  (:use code.test)
-  (:require [std.protocol.invoke :refer :all]
-            [std.lib.invoke]))
+  (:require [std.lib.invoke]
+            [std.protocol.invoke :refer :all])
+  (:use code.test))
 
 ^{:refer std.protocol.invoke/-invoke-intern :added "3.0"}
 (fact "extendable function for loading invoke form constructors"

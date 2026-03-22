@@ -1,6 +1,6 @@
 (ns std.pipe.process-test
-  (:use code.test)
-  (:require [std.pipe.process :refer :all]))
+  (:require [std.pipe.process :refer :all])
+  (:use code.test))
 
 ^{:refer std.pipe.process/wrap-bulk :added "4.1"}
 (fact "TODO")

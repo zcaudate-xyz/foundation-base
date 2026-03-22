@@ -1,11 +1,11 @@
 (ns rt.basic.server-websocket
-  (:require [std.lib :as h :refer [defimpl]]
-            [std.json :as json]
-            [std.string :as str]
-            [std.lang :as l]
+  (:require [org.httpkit.server :as server]
+            [rt.basic.server-basic :as basic]
             [std.fs :as fs]
-            [org.httpkit.server :as server]
-            [rt.basic.server-basic :as basic]))
+            [std.json :as json]
+            [std.lang :as l]
+            [std.lib.foundation :as f]
+            [std.lib.network :as network]))
 
 (def +pre-arranged+
   {:dev/web-main 29001})
@@ -19,7 +19,7 @@
            {:status "not-connected"}
            
            :else 
-           (let [msg-id  (str (h/uuid))
+           (let [msg-id  (str (f/uuid))
                  p   (promise)
                  _   (swap! return assoc msg-id p)
                  _   (server/send! @channel
@@ -64,7 +64,7 @@
   "creates the websocket server"
   {:added "4.0"}
   [id lang port _]
-  (let [port     (h/port:check-available (or (+pre-arranged+ id)
+  (let [port     (network/port:check-available (or (+pre-arranged+ id)
                                              port
                                              0))
         count    (atom 0)

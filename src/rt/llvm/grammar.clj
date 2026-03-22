@@ -1,13 +1,13 @@
 (ns rt.llvm.grammar
-  (:require [std.lang.base.emit :as emit]
+  (:require [clojure.string]
+            [std.lang.base.book :as book]
+            [std.lang.base.emit :as emit]
             [std.lang.base.emit-common :as common]
             [std.lang.base.emit-preprocess :as preprocess]
             [std.lang.base.grammar :as grammar]
-            [std.lang.base.book :as book]
             [std.lang.base.script :as script]
             [std.lang.base.util :as ut]
-            [std.lib :as h]
-            [std.string :as str]))
+            [std.lib.collection :as collection]))
 
 (defn tf-define
   "transforms llvm define"
@@ -15,7 +15,7 @@
   [[_ ret-type name args & body]]
   (let [args-str (if (vector? args)
                    (str "("
-                        (str/join ", " (map (fn [[t n]]
+                        (clojure.string/join ", " (map (fn [[t n]]
                                               (str (common/emit-common t preprocess/*macro-grammar* {})
                                                    " "
                                                    (common/emit-common n preprocess/*macro-grammar* {})))
@@ -35,7 +35,7 @@
   [[_ ret-type name args]]
   (let [args-str (if (vector? args)
                    (str "("
-                        (str/join ", " (map (fn [x]
+                        (clojure.string/join ", " (map (fn [x]
                                               (common/emit-common x preprocess/*macro-grammar* {}))
                                             args))
                         ")")
@@ -93,7 +93,7 @@
   {:added "4.0"}
   [[_ ret-type name args]]
   (let [args-str (str "("
-                      (str/join ", " (map (fn [arg]
+                      (clojure.string/join ", " (map (fn [arg]
                                             (if (vector? arg)
                                               (let [[t v] arg]
                                                 (str (common/emit-common t preprocess/*macro-grammar* {})
@@ -158,7 +158,7 @@
                   :define    {:raw ""}
                   :function  {:raw ""}}
         :token   {:symbol    {:replace {\- "_"}}}}
-       (h/merge-nested (emit/default-grammar))))
+       (collection/merge-nested (emit/default-grammar))))
 
 (def +grammar+
   (grammar/grammar :llvm

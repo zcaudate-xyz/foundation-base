@@ -1,7 +1,8 @@
 (ns std.fs.walk
   (:require [std.fs.common :as common]
             [std.fs.path :as path]
-            [std.lib :as h])
+            [std.lib.foundation :as f]
+            [std.lib.time :as time])
   (:import (java.nio.file FileVisitor Files)))
 
 (defn match-single
@@ -60,10 +61,10 @@
   ([{:keys [path attrs root include exclude with] :as m}]
    (or (and (get with :root) (= (str root) (str path)))
        (let [include (if (empty? include)
-                       [{:tag :fn :fn h/T}]
+                       [{:tag :fn :fn f/T}]
                        include)
              exclude (if (empty? exclude)
-                       [{:tag :fn :fn h/F}]
+                       [{:tag :fn :fn f/F}]
                        exclude)]
          (and (some #(match-single m %) include)
               (not (some #(match-single m %) exclude)))))))
@@ -156,13 +157,13 @@
                  accumulator accumulate with]
           :as m}]
    (let [directory (cond (nil? directory)
-                         {:pre h/F}
+                         {:pre f/F}
 
                          (fn? directory)
                          {:pre directory}
 
                          :else directory)
-         file      (cond (nil? file) h/F
+         file      (cond (nil? file) f/F
 
                          :else directory)
          options   (-> (map common/+file-visit-options+ options) (set) (disj nil))
@@ -194,11 +195,11 @@
 
 (comment
 
-  (h/bench-ms (count (walk ["src"] {;;:recursive false
+  (time/bench-ms (count (walk ["src"] {;;:recursive false
                                     })))
 
-  (h/bench-ms (count (walk "." {;;:recursive false
+  (time/bench-ms (count (walk "." {;;:recursive false
                                 :include ["src" "test"]})))
 
-  (h/bench-ms (count (walk "." {;;:recursive false
+  (time/bench-ms (count (walk "." {;;:recursive false
                                 :include ["src"]}))))

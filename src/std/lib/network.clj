@@ -1,12 +1,11 @@
 (ns std.lib.network
-  (:require [std.lib.env :as env]
+  (:require [clojure.string]
+            [std.lib.env :as env]
             [std.lib.foundation :as h]
             [std.lib.time :as time]
-            [std.string.common :as str]
-            [std.protocol.component :as protocol.component])
-  (:import (java.net Socket
-                     ServerSocket
-                     ConnectException)))
+            [std.protocol.component :as protocol.component]
+            [std.string.common :as str])
+  (:import (java.net Socket ServerSocket ConnectException)))
 
 (defn ^java.net.Inet4Address local-host
   "returns the current host
@@ -47,7 +46,7 @@
   {:added "3.0"}
   ([]
    (-> (local-hostname)
-       (str/split #"\.")
+       (clojure.string/split #"\.")
        first)))
 
 (defn ^Socket socket

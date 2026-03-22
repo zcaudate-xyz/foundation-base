@@ -1,6 +1,5 @@
 (ns js.lib.ua-parser
-  (:require [std.lang :as l]
-            [std.lib :as h]))
+  (:require [std.lang :as l]))
 
 (l/script :js
   {:import [["ua-parser-js" :as UAParser]

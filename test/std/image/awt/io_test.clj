@@ -1,6 +1,6 @@
 (ns std.image.awt.io-test
-  (:use code.test)
   (:require [std.image.awt.io :refer :all])
+  (:use code.test)
   (:refer-clojure :exclude [read])
   (:import javax.imageio.ImageIO))
 

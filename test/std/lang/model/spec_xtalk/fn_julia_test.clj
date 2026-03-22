@@ -1,6 +1,6 @@
 (ns std.lang.model.spec-xtalk.fn-julia-test
-  (:use code.test)
-  (:require [std.lang.model.spec-xtalk.fn-julia :as fn]))
+  (:require [std.lang.model.spec-xtalk.fn-julia :as fn])
+  (:use code.test))
 
 ^{:refer std.lang.model.spec-xtalk.fn-julia/julia-tf-x-del :added "4.0"}
 (fact "transforms x:del"

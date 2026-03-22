@@ -1,8 +1,8 @@
 (ns code.project-test
-  (:use code.test)
   (:require [code.project :refer :all]
             [std.fs :as fs]
-            [std.lib :as h]))
+            [std.lib.env :as env])
+  (:use code.test))
 
 ^{:refer code.project/project-file :added "3.0"}
 (fact "returns the current project file"
@@ -41,13 +41,13 @@
 ^{:refer code.project/lookup-ns :added "3.0"}
 (fact "fast lookup for all-files function"
 
-  (first (lookup-ns (get-path (h/ns-sym))))
+  (first (lookup-ns (get-path (env/ns-sym))))
   => 'code.project-test)
 
 ^{:refer code.project/lookup-path :added "3.0"}
 (fact "looks up the path given the `ns`"
 
-  (str (lookup-path (h/ns-sym)))
+  (str (lookup-path (env/ns-sym)))
   => string?)
 
 ^{:refer code.project/get-path :added "4.0"
@@ -55,7 +55,7 @@
 (fact "gets the path given the `ns`"
   ^:hidden
   
-  (get-path (h/ns-sym))
+  (get-path (env/ns-sym))
   => "test/code/project_test.clj")
 
 ^{:refer code.project/all-files :added "3.0"}
@@ -133,7 +133,7 @@
 ^{:refer code.project/code-path :added "3.0"}
 (fact "returns the path of the code"
 
-  (str (code-path (h/ns-sym) true))
+  (str (code-path (env/ns-sym) true))
   => "test/code/project_test.clj")
 
 (comment

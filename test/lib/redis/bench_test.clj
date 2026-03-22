@@ -1,12 +1,13 @@
 (ns lib.redis.bench-test
-  (:use code.test)
   (:require [lib.redis.bench :as bench]
-            [std.lib :as h]
-            [std.fs :as fs]))
+            [std.fs :as fs]
+            [std.lib.network :as network]
+            [std.lib.os :as os])
+  (:use code.test))
 
 ^{:refer lib.redis.bench/all-redis-ports :added "4.0"}
 (fact "gets all active redis ports"
-  (with-redefs [h/sh (constantly "redis-server 1234 *:6379 (LISTEN)")]
+  (with-redefs [os/sh (constantly "redis-server 1234 *:6379 (LISTEN)")]
     (bench/all-redis-ports))
   => map?)
 
@@ -18,20 +19,20 @@
 
 ^{:refer lib.redis.bench/start-redis-server :added "4.0"}
 (fact "starts the redis server in a given directory"
-  (with-redefs [h/port:check-available (constantly 17001)
+  (with-redefs [network/port:check-available (constantly 17001)
                 fs/create-directory (constantly nil)
                 fs/exists? (constantly true)
-                h/sh (constantly (delay "process"))
-                h/sh-wait (constantly nil)
-                h/wait-for-port (constantly true)]
+                os/sh (constantly (delay "process"))
+                os/sh-wait (constantly nil)
+                network/wait-for-port (constantly true)]
     (bench/start-redis-server {:port 17001} :test "root"))
   => (contains {:port 17001 :type :test :process any}))
 
 ^{:refer lib.redis.bench/stop-redis-server :added "4.0"}
 (fact "stop the redis server"
-  (with-redefs [h/sh-close (constantly nil)
-                h/sh-exit (constantly nil)
-                h/sh-wait (constantly nil)]
+  (with-redefs [os/sh-close (constantly nil)
+                os/sh-exit (constantly nil)
+                os/sh-wait (constantly nil)]
     (bench/stop-redis-server 17001 :test))
   => (any nil? map?))
 

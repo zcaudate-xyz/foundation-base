@@ -1,12 +1,13 @@
 (ns std.block.heal-test
-  (:use code.test)
-  (:require [std.block.heal :refer :all]))
+  (:require [std.block.heal :refer :all]
+            [std.lib.env :as env])
+  (:use code.test))
 
 ^{:refer std.block.heal/print-rainbow :added "4.1"}
 (fact "prints the content with rainbow parens"
   ^:hidden
   
-  (std.lib/with-out-str
+  (env/with-out-str
     (print-rainbow "(+ 12 3)"))
   => "[34m([0m+ 12 3[34m)[0m")
 
@@ -85,10 +86,10 @@
                  ((level/wrap-print-diff level/heal-content)
                   (slurp f))
                  "]"))
-           (h/p f :SUCCESS)
+           (env/p f :SUCCESS)
            (catch Throwable t
              
-             (h/p f :FAILED))))))
+             (env/p f :FAILED))))))
 
 
 (comment

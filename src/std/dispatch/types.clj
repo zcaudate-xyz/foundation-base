@@ -1,6 +1,6 @@
 (ns std.dispatch.types
-  (:require [std.contract :refer [defspec defmultispec defcase defcontract] :as c]
-            [std.concurrent :as cc]))
+  (:require [std.concurrent :as cc]
+            [std.contract :as c :refer [defspec defmultispec defcase defcontract]]))
 
 ;;; contracts for pool and queue
 

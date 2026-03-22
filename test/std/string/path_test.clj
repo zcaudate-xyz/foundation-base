@@ -1,8 +1,7 @@
 (ns std.string.path-test
-  (:use code.test)
   (:require [std.string.path :as path]
-            [std.string.wrap :refer [wrap]]
-            [std.lib :as h]))
+            [std.string.wrap :refer [wrap]])
+  (:use code.test))
 
 ^{:refer std.string.path/path-join :added "3.0"}
 (fact "joins a sequence of elements into a path separated value"

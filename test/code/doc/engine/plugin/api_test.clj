@@ -1,6 +1,6 @@
 (ns code.doc.engine.plugin.api-test
-  (:use code.test)
-  (:require [code.doc.engine.plugin.api :refer :all]))
+  (:require [code.doc.engine.plugin.api :refer :all])
+  (:use code.test))
 
 ^{:refer code.doc.engine.plugin.api/entry-tag :added "3.0"}
 (fact "helper for formating vars"

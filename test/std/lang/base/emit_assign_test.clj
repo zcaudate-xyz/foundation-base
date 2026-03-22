@@ -1,13 +1,12 @@
 (ns std.lang.base.emit-assign-test
-  (:use code.test)
-  (:require [std.lang.base.emit-assign :refer :all :as assign]
+  (:require [std.lang.base.book :as b]
+            [std.lang.base.emit-assign :as assign :refer :all]
             [std.lang.base.emit-common :as common]
             [std.lang.base.emit-helper :as helper]
-            [std.lang.base.library-snapshot :as snap]
-            [std.lang.base.book :as b]
             [std.lang.base.grammar :as grammar]
-            [std.lang.base.library-snapshot-prep-test :as prep]
-            [std.lib :as h]))
+            [std.lang.base.library-snapshot :as snap]
+            [std.lang.base.library-snapshot-prep-test :as prep])
+  (:use code.test))
 
 (def +reserved+
   (-> (grammar/build)

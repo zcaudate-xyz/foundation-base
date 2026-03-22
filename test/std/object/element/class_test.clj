@@ -1,6 +1,6 @@
 (ns std.object.element.class-test
-  (:use code.test)
-  (:require [std.object.element.class :refer :all]))
+  (:require [std.object.element.class :refer :all])
+  (:use code.test))
 
 ^{:refer std.object.element.class/type->raw :added "3.0"}
 (fact "converts to the raw representation"

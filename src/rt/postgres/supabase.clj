@@ -1,12 +1,14 @@
 (ns rt.postgres.supabase
-  (:require [net.http :as http]
-            [std.lib :as h]
+  (:require [clojure.string]
+            [net.http :as http]
+            [rt.postgres.grammar.common :as common]
+            [rt.postgres.script.addon :as addon]
             [std.json :as json]
-            [std.string :as str]
             [std.lang :as l]
             [std.lang.base.impl :as impl]
-            [rt.postgres.grammar.common :as common]
-            [rt.postgres.script.addon :as addon]))
+            [std.lib.context.pointer :as ptr]
+            [std.lib.foundation :as f]
+            [std.string.case :as case]))
 
 (l/script :postgres
   {:macro-only true})
@@ -188,22 +190,22 @@
 
                 (symbol? fsym)
                 (let [fvar (resolve fsym)]
-                  (cond (h/pointer? (deref fvar))
+                  (cond (ptr/pointer? (deref fvar))
                         (let [ret  (or (:static/type @@fvar)
                                        (:static/return @@fvar))]
                           (if (or (nil? ret)
                                   (= ret [:block]))
-                            (h/error "Cannot determine type"
+                            (f/error "Cannot determine type"
                                      {:form form})
                             (first ret)))
                         
                         :else
-                        (h/error "Cannot determine type"
+                        (f/error "Cannot determine type"
                                  {:form form})))))
         
         
         :else
-        (h/error "Cannot determine type"
+        (f/error "Cannot determine type"
                  {:form form})))
 
 (defmacro with-role-single
@@ -385,7 +387,7 @@
                       (apply list 'do
                              (keep (fn [[role operations]]
                                     (let [operations (cond (vector? operations)
-                                                           (list 'quote (mapv (comp symbol h/strn) operations))
+                                                           (list 'quote (mapv (comp symbol f/strn) operations))
 
                                                            (= :all operations)
                                                            ''[select update delete insert]
@@ -405,7 +407,7 @@
                       mopts))]
     (->> [body rls-str access-str]
          (filter identity)
-         (str/join "\n"))))
+         (clojure.string/join "\n"))))
 
 (defn transform-entry
   "transforms a book entry"
@@ -475,7 +477,7 @@
          :static/keys [schema]} (deref fn)
         headers (if schema
                   {"Content-Profile" schema})
-        route  (str "/rest/v1/rpc/" (str/snake-case (str id)))
+        route  (str "/rest/v1/rpc/" (case/snake-case (str id)))
         opts (merge opts
                     {:headers headers
                      :route route})]

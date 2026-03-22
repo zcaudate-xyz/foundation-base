@@ -1,5 +1,6 @@
 (ns std.lang.model.spec-xtalk.fn-lua
-  (:require [std.lib :as h]))
+  (:require [std.lib.foundation :as f]
+            [std.lib.template :as template]))
 
 ;;
 ;; CORE
@@ -24,12 +25,12 @@
 (defn lua-tf-x-err
   [[_ s & [data]]]
   (if data
-    (h/$ (error (cjson.encode ~[s data])))
-    (h/$ (error ~s))))
+    (template/$ (error (cjson.encode ~[s data])))
+    (template/$ (error ~s))))
 
 (defn lua-tf-x-shell
   ([[_ s cm]]
-   (h/$ (do* (var handle (io.popen ~s))
+   (template/$ (do* (var handle (io.popen ~s))
              (var res (handle:read "*a"))
              (var f (. ~cm ["success"]))
              (if f
@@ -38,11 +39,11 @@
 
 (defn lua-tf-x-hash-id
   [[_ obj]]
-  (h/$ (return nil)))
+  (template/$ (return nil)))
 
 (defn lua-tf-x-type-native
   [[_ obj]]
-  (h/$ (do (local t := (type ~obj))
+  (template/$ (do (local t := (type ~obj))
            (if (== t "table")
              (if (== nil (. '(~obj) [1]))
                (return "object")
@@ -66,7 +67,7 @@
 
 (defn lua-tf-x-proto-create
   [[_ m]]
-  (h/$
+  (template/$
    (do (var mt ~m)
        (:= (. mt __index) mt)
        (return mt))))
@@ -163,13 +164,13 @@
 
 (defn lua-tf-x-is-object?
   [[_ e]]
-  (h/$ (or (and (== "table" (type ~e))
+  (template/$ (or (and (== "table" (type ~e))
                 (== nil (. '(~e) [1])))
            (== "object" (type ~e)))))
 
 (defn lua-tf-x-is-array?
   [[_ e]]
-  (h/$ (or (and (== "table" (type ~e))
+  (template/$ (or (and (== "table" (type ~e))
                 (not= nil (. '(~e) [1])))
            (== "array" (type ~e)))))
 
@@ -194,15 +195,15 @@
 
 (defn lua-tf-x-lu-get
   ([[_ lu obj]]
-   (h/$ (. ~lu [(tostring ~obj)]))))
+   (template/$ (. ~lu [(tostring ~obj)]))))
 
 (defn lua-tf-x-lu-set
   ([[_ lu obj gid]]
-   (h/$ (:= (. ~lu [(tostring ~obj)]) ~gid))))
+   (template/$ (:= (. ~lu [(tostring ~obj)]) ~gid))))
 
 (defn lua-tf-x-lu-del
   ([[_ lu obj]]
-   (h/$ (:= (. ~lu [(tostring ~obj)]) nil))))
+   (template/$ (:= (. ~lu [(tostring ~obj)]) nil))))
 
 (def +lua-lu+
   {:x-lu-create      {:macro #'lua-tf-x-lu-create :emit :macro}
@@ -290,7 +291,7 @@
 (defn lua-tf-x-arr-sort
   [[_ arr key-fn comp-fn]]
   (list 'table.sort arr
-        (h/$ (fn [a b]
+        (template/$ (fn [a b]
                (return (~comp-fn
                         (~key-fn a)
                         (~key-fn b)))))))
@@ -314,7 +315,7 @@
 
 (defn lua-tf-x-str-split
   ([[_ s tok]]
-   (h/$ ('((fn [s tok]
+   (template/$ ('((fn [s tok]
              (var out := {})
              (string.gsub s
                           (string.format "([^%s]+)" tok)
@@ -379,7 +380,7 @@
 
 (defn lua-tf-x-return-encode
   ([[_ out id key]]
-   (h/$ (do (do (local ret nil)
+   (template/$ (do (do (local ret nil)
                 (local '[r-ok r-err]
                        (pcall (fn []
                                 (cond (== nil ~out)
@@ -405,7 +406,7 @@
 
 (defn lua-tf-x-return-wrap
   ([[_ f encode-fn]]
-   (h/$ (do (local out)
+   (template/$ (do (local out)
             (local '[o-ok o-err] (pcall (fn [] (:= out (~f)))))
             (cond o-err
                   (return (cjson.encode {:type "error"
@@ -416,7 +417,7 @@
 
 (defn lua-tf-x-return-eval
   ([[_ s wrap-fn]]
-   (h/$ (return (~wrap-fn
+   (template/$ (return (~wrap-fn
                  (fn []
                    (local load-fn (or loadstring load))
                    (local '[f err] (load-fn ~s))
@@ -435,7 +436,7 @@
 
 (defn lua-tf-x-socket-connect
   ([[_ host port opts]]
-   (h/$ (do* (local '[conn err])
+   (template/$ (do* (local '[conn err])
              (local '[ok res] (pcall (fn:> [] (not= nil ngx))))
              (when (== ~host "host.docker.internal")
                (local handle (io.popen
@@ -455,11 +456,11 @@
 
 (defn lua-tf-x-socket-send
   ([[_ conn s]]
-   (h/$ (. ~conn (send ~s)))))
+   (template/$ (. ~conn (send ~s)))))
 
 (defn lua-tf-x-socket-close
   ([[_ conn]]
-   (h/$ (. ~conn (close)))))
+   (template/$ (. ~conn (close)))))
 
 (def +lua-socket+
   {:x-socket-connect      {:macro #'lua-tf-x-socket-connect      :emit :macro}
@@ -473,25 +474,25 @@
 
 (defn lua-tf-x-iter-from-obj
   ([[_ obj]]
-   (h/$ (coroutine.wrap
+   (template/$ (coroutine.wrap
          (fn [] (for [k v :in (pairs ~obj)]
                   (coroutine.yield [k v])))))))
 
 (defn lua-tf-x-iter-from-arr
   ([[_ arr]]
-   (h/$ (coroutine.wrap
+   (template/$ (coroutine.wrap
           (fn [] (for [_ v :in (ipairs ~arr)]
                    (coroutine.yield v)))))))
 
 (defn lua-tf-x-iter-from
   ([[_ obj]]
-   (h/$ (coroutine.wrap
+   (template/$ (coroutine.wrap
          (fn [] (for [e :in (. ~obj ["iterator"])]
                   (coroutine.yield v)))))))
 
 (defn lua-tf-x-iter-eq
   ([[_ it0 it1 eq-fn]]
-   (h/$ (do (for [x0 :in ~it0]
+   (template/$ (do (for [x0 :in ~it0]
               (var x1 (~it1))
               (when (not (~eq-fn x0 x1))
                 (return false)))
@@ -503,7 +504,7 @@
 
 (defn lua-tf-x-iter-has?
   ([[_ obj]]
-   (h/$ (and (== "table" (type ~obj))
+   (template/$ (and (== "table" (type ~obj))
              (== "function" (. '(~obj) ["iterator"]))))))
 
 (defn lua-tf-x-iter-native?
@@ -527,7 +528,7 @@
   ([[_ key]]
    (list '. 'ngx.shared [(if (symbol? key)
                            key
-                           (h/strn key))])))
+                           (f/strn key))])))
 
 (defn lua-tf-x-cache-list
   ([[_ cache]]

@@ -1,8 +1,7 @@
 (ns rt.postgres.script.test.scratch-v1
-  (:require [std.lib :as h]
-            [std.lang :as l]
+  (:require [rt.postgres :refer [defret.pg defsel.pg]]
             [rt.postgres.grammar.common-application :as app]
-            [rt.postgres :refer [defret.pg defsel.pg]]))
+            [std.lang :as l]))
 
 (l/script :postgres
   {:require [[rt.postgres :as pg]]

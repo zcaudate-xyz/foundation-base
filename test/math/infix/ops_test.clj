@@ -1,6 +1,6 @@
 (ns math.infix.ops-test
-  (:use code.test)
-  (:require [math.infix.ops :as ops]))
+  (:require [math.infix.ops :as ops])
+  (:use code.test))
 
 ^{:refer math.infix.ops/defunary :added "3.0"}
 (fact "helper for `java.lang.Math` unary functions")

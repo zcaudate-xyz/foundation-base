@@ -1,8 +1,7 @@
 (ns lib.jdbc.impl-test
-  (:use code.test)
   (:require [lib.jdbc.impl :refer :all])
-  (:import (java.net URI)
-           (lib.jdbc.types Cursor)))
+  (:use code.test)
+  (:import (java.net URI) (lib.jdbc.types Cursor)))
 
 ^{:refer lib.jdbc.impl/uri->dbspec :added "4.0"}
 (fact 

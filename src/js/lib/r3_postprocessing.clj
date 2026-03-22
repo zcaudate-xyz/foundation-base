@@ -1,11 +1,11 @@
 (ns js.lib.r3-postprocessing
   (:require [std.lang :as l]
-            [std.lib :as h]))
+            [std.lib.foundation :as f]))
 
 (l/script :js
   {:import [["@react-three/postprocessing" :as [* ReactThreePp]]]})
 
-(h/template-entries [l/tmpl-entry {:type :fragment
+(f/template-entries [l/tmpl-entry {:type :fragment
                                    :base "ReactThreePp"
                                    :tag "js"}]
   [ASCII

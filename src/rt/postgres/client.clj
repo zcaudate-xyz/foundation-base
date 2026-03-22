@@ -1,18 +1,21 @@
 (ns rt.postgres.client
-  (:require [std.protocol.component :as protocol.component]
-            [std.protocol.context :as protocol.context]
+  (:require [lib.postgres :as base]
             [lib.postgres.connection :as conn]
-            [lib.postgres :as base]
             [rt.postgres.client-impl :as client-impl]
+            [std.lang.base.impl :as impl]
             [std.lang.base.runtime :as default]
             [std.lang.interface.type-shared :as shared]
-            [std.lang.base.impl :as impl]
-            [std.lib :as h :refer [defimpl]]))
+            [std.lib.collection :as collection]
+            [std.lib.component :as component]
+            [std.lib.foundation :as f]
+            [std.lib.impl]
+            [std.protocol.component :as protocol.component]
+            [std.protocol.context :as protocol.context]))
 
 (def +pg-defaults+
   {:host   (or (System/getenv "DEFAULT_RT_POSTGRES_HOST")
               "127.0.0.1")
-   :port   (h/parse-long
+   :port   (f/parse-long
            (or (System/getenv "DEFAULT_RT_POSTGRES_PORT")
                "5432"))
    :user   (or (System/getenv "DEFAULT_RT_POSTGRES_USER")
@@ -30,10 +33,10 @@
 (defn- rt-pg-string [pg]
   (str "rt.postgres" (into {} (-> pg
                                   (update :notifications (comp keys deref))
-                                  (update :instance (comp h/hash-id deref))
-                                  (->> (h/filter-vals identity))))))
+                                  (update :instance (comp f/hash-id deref))
+                                  (->> (collection/filter-vals identity))))))
 
-(defimpl RuntimePostgres [instance notifications]
+(std.lib.impl/defimpl RuntimePostgres [instance notifications]
   :string rt-pg-string
   :protocols [std.protocol.component/IComponent
               :method {-kill  base/stop-pg
@@ -69,7 +72,7 @@
    (rt-postgres {}))
   ([m]
    (-> (rt-postgres:create m)
-       (h/start))))
+       (component/start))))
 
 (defn rt-add-notify
   "adds a notification channel"

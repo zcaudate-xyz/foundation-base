@@ -1,9 +1,8 @@
 (ns js.cell.link-fn-test
-  (:use code.test)
-  (:require [std.lib :as h]
+  (:require [js.cell.playground :as browser]
             [std.lang :as l]
-            [js.cell.playground :as browser]
-            [xt.lang.base-notify :as notify]))
+            [xt.lang.base-notify :as notify])
+  (:use code.test))
 
 (l/script- :js
   {:runtime :basic

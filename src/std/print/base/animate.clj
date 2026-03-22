@@ -1,7 +1,7 @@
 (ns std.print.base.animate
-  (:require [std.concurrent.print :as print]
-            [std.print.format.common :as common]
-            [std.string :as str])
+  (:require [clojure.string]
+            [std.concurrent.print :as print]
+            [std.print.format.common :as common])
   (:refer-clojure :exclude [format]))
 
 (defn print-animation
@@ -10,7 +10,7 @@
    (print-animation \"test-data/std.print/plane.ascii\")"
   {:added "3.0"}
   ([file]
-   (let [lines (str/split-lines (slurp file))
+   (let [lines (clojure.string/split-lines (slurp file))
          x (Integer/parseInt (subs (first lines) 2))
          y (Integer/parseInt (subs (second lines) 2))
          frames (->> (drop 2 lines)

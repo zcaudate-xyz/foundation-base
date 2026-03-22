@@ -1,10 +1,10 @@
 (ns std.lang.base.workspace-test
-  (:use code.test)
-  (:require [std.lang.base.workspace :as w]
-            [std.lang :as l]
-            [std.lib :as h]
-            [xt.lang.base-lib :as k]
-            [std.string :as str]))
+  (:require [std.lang :as l]
+            [std.lang.base.workspace :as w]
+            [std.lib.env :as env]
+            [std.lib.os :as os]
+            [xt.lang.base-lib :as k])
+  (:use code.test))
 
 ^{:refer std.lang.base.workspace/sym-entry :added "4.0"}
 (fact "gets the entry using a symbol"
@@ -41,7 +41,7 @@
   ^:hidden
   
   (do (w/ptr-clip k/arr-map)
-      (h/paste))
+      (os/paste))
   => "function arr_map(arr,f){\n  out = [];\n  for:array([e,arr],x:arr_push(out,f(e)));\n  return out;\n}")
 
 ^{:refer std.lang.base.workspace/ptr-print :added "4.0"}
@@ -49,7 +49,7 @@
   ^:hidden
   
   (-> (w/ptr-print k/arr-map)
-      (h/with-out-str))
+      (env/with-out-str))
   => string?)
 
 ^{:refer std.lang.base.workspace/ptr-setup :added "4.0"}
@@ -88,7 +88,7 @@
 ^{:refer std.lang.base.workspace/print-module :added "4.0"}
 (fact "emits and prints out the module"
 
-  (h/with-out-str
+  (env/with-out-str
     (w/print-module (l/rt 'xt.lang.base-lib :xtalk)))
   => string?)
 

@@ -1,6 +1,7 @@
 (ns lua.ext.plisio-test
-  (:use code.test)
-  (:require [lua.ext.plisio :refer :all]))
+  (:require [lua.ext.plisio :refer :all]
+            [std.lib.foundation :as f])
+  (:use code.test))
 
 ^{:refer lua.ext.plisio/plisio-query :added "4.0"}
 (fact "performs a plisio query")
@@ -124,7 +125,7 @@
                                              "currency" "DOGE"
                                              "email" "zcaudate@outlook.com"
                                              "order_name" "test_order"
-                                             "order_number" (@! (str (h/uuid)))})
+                                             "order_number" (@! (str (f/uuid)))})
 
 
 
@@ -150,7 +151,7 @@
                                                                "currency" "DOGE"
                                                                "email" "zcaudate@outlook.com"
                                                                "order_name" "test_order"
-                                                               "order_number" (@! (str (h/uuid)))}
+                                                               "order_number" (@! (str (f/uuid)))}
                                                        :ssl-verify false}))
                     
                     (repl/notify (k/obj-pick res ["body" "status"]))))
@@ -167,7 +168,7 @@
                                                 "currency" "DOGE"
                                                 "email" "zcaudate@outlook.com"
                                                 "order_name" "test_order"
-                                                "order_number" (@! (str (h/uuid)))}
+                                                "order_number" (@! (str (f/uuid)))}
                                         :ssl-verify false}))
      (k/obj-pick res ["body" "status"])))
 

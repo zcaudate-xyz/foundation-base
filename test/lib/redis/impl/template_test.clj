@@ -1,7 +1,7 @@
 (ns lib.redis.impl.template-test
-  (:use code.test)
   (:require [lib.redis.impl.template :refer :all]
-            [lib.redis.script :as script]))
+            [lib.redis.script :as script])
+  (:use code.test))
 
 ^{:refer lib.redis.impl.template/redis-pipeline :added "3.0"}
 (fact "constructs a pipeline for `opts`"

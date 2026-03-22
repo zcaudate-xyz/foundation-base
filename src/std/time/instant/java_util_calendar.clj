@@ -3,8 +3,7 @@
             [std.protocol.time :as protocol.time]
             [std.time.coerce :as coerce]
             [std.time.common :as common])
-  (:import (java.text SimpleDateFormat)
-           (java.util Calendar Date GregorianCalendar TimeZone)))
+  (:import (java.text SimpleDateFormat) (java.util Calendar Date GregorianCalendar TimeZone)))
 
 (defn from-map
   "creates a Calendar object from a map

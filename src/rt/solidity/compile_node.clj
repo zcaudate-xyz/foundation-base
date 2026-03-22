@@ -1,10 +1,10 @@
 (ns rt.solidity.compile-node
-  (:require [rt.solidity.compile-common :as compile-common]
+  (:require [js.lib.eth-bench :as eth-bench]
+            [js.lib.eth-lib :as eth-lib]
+            [rt.solidity.compile-common :as compile-common]
             [rt.solidity.compile-solc :as compile-solc]
-            [std.lib :as h]
             [std.lang :as l]
-            [js.lib.eth-bench :as eth-bench]
-            [js.lib.eth-lib :as eth-lib]))
+            [std.lib.context.pointer :as ptr]))
 
 (defn rt-get-id
   "gets the rt node id"
@@ -99,7 +99,7 @@
   "pings the node"
   {:added "4.0"}
   [& [rt]]
-  (h/p:rt-invoke-ptr (rt-get-node rt)
+  (ptr/rt-invoke-ptr (rt-get-node rt)
                      {:form "pong"}
                      []))
 
@@ -158,7 +158,7 @@
     "clears node history"
     {:added "4.0"}
     [& [rt]]
-    (h/p:rt-invoke-ptr (rt-get-node rt)
+    (ptr/rt-invoke-ptr (rt-get-node rt)
                        eth/history-clear
                        []))
 
@@ -166,7 +166,7 @@
     "counts node history"
     {:added "4.0"}
     [& [rt]]
-    (h/p:rt-invoke-ptr (rt-get-node rt)
+    (ptr/rt-invoke-ptr (rt-get-node rt)
                        eth/history-count
                        []))
 
@@ -174,7 +174,7 @@
     "gets latest history"
     {:added "4.0"}
     [& [rt]]
-    (h/p:rt-invoke-ptr (rt-get-node rt)
+    (ptr/rt-invoke-ptr (rt-get-node rt)
                        eth/history-latest
                        []))
 
@@ -182,6 +182,6 @@
     "gets history at index"
     {:added "4.0"}
     [& [rt]]
-    (h/p:rt-invoke-ptr (rt-get-node rt)
+    (ptr/rt-invoke-ptr (rt-get-node rt)
                        eth/history-at
                        [])))

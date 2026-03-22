@@ -1,16 +1,17 @@
 (ns std.lang.base.book-module
-  (:require [std.lib :as h :refer [defimpl]]
-            [clojure.set :as set]))
+  (:require [clojure.set :as set]
+            [std.lib.collection :as collection]
+            [std.lib.impl :as impl]))
 
 (defn- book-module-string
   ([{:keys [lang id display] :as module}]
    (let [meta (->> (dissoc module :id :lang :code :fragment :display)
-                   (h/filter-vals (fn [e]
+                   (collection/filter-vals (fn [e]
                                     (if (coll? e)
                                       (not-empty e)
                                       e))))
          entries (->> (select-keys module [:code :fragment])
-                      (h/map-vals (comp sort keys)))]
+                      (collection/map-vals (comp sort keys)))]
      (str "#book.module " [lang id] 
           (if (= :brief display)
             ""
@@ -22,7 +23,7 @@
 ;; 
 ;;
 
-(defimpl BookModule [;; required
+(impl/defimpl BookModule [;; required
                      lang
                      id
                      
@@ -102,7 +103,7 @@
   "gets dependencies for a given module (including explicit links)"
   {:added "4.0"}
   ([module]
-   (disj (h/union (module-deps-code module)
+   (disj (set/union (module-deps-code module)
                   (set (vals (:link module))))
          (:id module))))
 

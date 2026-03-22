@@ -1,9 +1,10 @@
 (ns code.framework.link-test
-  (:use code.test)
-  (:require [code.framework.link.common :as common]
-            [code.framework.link :refer :all]
+  (:require [code.framework.link :refer :all]
+            [code.framework.link.common :as common]
+            [code.project :as project]
             [std.fs :as fs]
-            [code.project :as project]))
+            [std.lib.collection :as collection])
+  (:use code.test))
 
 (def -lookups-   (create-file-lookups (project/project)))
 
@@ -109,7 +110,7 @@
       (collect-entries -lookups-)
       (collect-linkages -lookups-)
       (collect-internal-deps)
-      (->> (std.lib/map-vals :internal))))
+      (->> (collection/map-vals :internal))))
 
 ^{:refer code.framework.link/collect-transfers :added "3.0"}
 (fact "collects all files that are packaged"

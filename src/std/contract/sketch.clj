@@ -1,7 +1,11 @@
 (ns std.contract.sketch
-  (:require [std.lib :refer [defimpl] :as h]
-            [malli.core :as mc]
-            [malli.util :as mu])
+  (:require [malli.core :as mc]
+            [malli.util :as mu]
+            [std.lib.collection :as collection]
+            [std.lib.foundation :as f]
+            [std.lib.function :as fn]
+            [std.lib.impl :as impl]
+            [std.lib.os :as os])
   (:refer-clojure :exclude [remove]))
 
 (defn optional-string
@@ -10,7 +14,7 @@
   [m]
   (str (:v m) "@?"))
 
-(defimpl Optional [v]
+(impl/defimpl Optional [v]
   :string optional-string)
 
 (defn maybe-string
@@ -19,7 +23,7 @@
   [m]
   (str "?@" (:v m)))
 
-(defimpl Maybe [v]
+(impl/defimpl Maybe [v]
   :string maybe-string)
 
 (defn as:optional
@@ -49,7 +53,7 @@
 (declare func-string
          func-invoke)
 
-(defimpl Func [form pred]
+(impl/defimpl Func [form pred]
   :type  deftype
   :string func-string
   :invoke func-invoke)
@@ -70,7 +74,7 @@
   "gets function symbol"
   {:added "3.0"}
   ([f]
-   (h/-> (re-find #"#(function|object)\[(.*?)(--\d+)?\]"
+   (f/-> (re-find #"#(function|object)\[(.*?)(--\d+)?\]"
                   (prn-str f))
          (nth 2)
          (if % (symbol %)))))
@@ -88,9 +92,9 @@
          num (count args)
          form (list 'fn args)
          pred (fn [f]
-                (if (h/native?)
+                (if (os/native?)
                   true
-                  (try (h/arg-check f num) (catch Throwable t false))))]
+                  (try (fn/arg-check f num) (catch Throwable t false))))]
      (Func. form pred))))
 
 (defmacro func
@@ -131,7 +135,7 @@
 
        (if (keyword? type)
          (with-meta (apply vector type (map from-schema-map children)) properties)
-         (if (h/iobj? type)
+         (if (f/iobj? type)
            (with-meta type properties)
            type))))))
 
@@ -188,7 +192,7 @@
          (vector? x)
          (mc/schema x)
 
-         (h/hash-map? x)
+         (collection/hash-map? x)
          (mc/schema (apply vector
                            :map
                            (or (meta x) {})
@@ -207,7 +211,7 @@
    (let [m (from-schema schema)]
      (if (map? m)
        (lax schema (keys m))
-       (h/error "Not Supported" {:input schema}))))
+       (f/error "Not Supported" {:input schema}))))
   ([schema ks]
    (let [schema (to-schema schema)
          vs     (mapv (fn [v]
@@ -232,7 +236,7 @@
                              (:v k)
                              k))
                          (keys m)))
-       (h/error "Not Supported" {:input schema}))))
+       (f/error "Not Supported" {:input schema}))))
   ([schema ks]
    (let [schema (to-schema schema)]
      (mu/required-keys schema ks))))
@@ -263,7 +267,7 @@
                          (:v k)
                          k))
                      (keys m)))
-       (h/error "Not Supported" {:input schema}))))
+       (f/error "Not Supported" {:input schema}))))
   ([schema ks]
    (let [schema (to-schema schema)
          vs     (mapv (fn [v]

@@ -1,6 +1,5 @@
 (ns xt.runtime.common-eq
-  (:require [std.lib :as h]
-            [std.lang :as l]))
+  (:require [std.lang :as l]))
 
 ;;
 ;; JS

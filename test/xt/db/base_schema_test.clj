@@ -1,8 +1,7 @@
 (ns xt.db.base-schema-test
-  (:use code.test)
-  (:require [std.lib :as h]
-            [std.lang :as l]
-            [std.json :as json]))
+  (:require [std.json :as json]
+            [std.lang :as l])
+  (:use code.test))
 
 (l/script- :js
   {:runtime :basic

@@ -1,10 +1,10 @@
 (ns std.print
   (:require [std.concurrent.print :as print]
-            [std.print.base.report :as report]
-            [std.lib :as h])
+            [std.lib.foundation :as f]
+            [std.print.base.report :as report])
   (:refer-clojure :exclude [print println with-out-str prn]))
 
-(h/intern-in print/print
+(f/intern-in print/print
              print/println
              print/prn
 

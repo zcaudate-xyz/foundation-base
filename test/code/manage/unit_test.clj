@@ -1,7 +1,7 @@
 (ns code.manage.unit-test
-  (:use code.test)
   (:require [code.manage.unit :refer :all]
-            [code.project :as project]))
+            [code.project :as project])
+  (:use code.test))
 
 ^{:refer code.manage.unit/import :added "3.0"}
 (fact "imports unit tests as docstrings"

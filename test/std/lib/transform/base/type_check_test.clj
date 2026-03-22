@@ -1,9 +1,9 @@
 (ns std.lib.transform.base.type-check-test
-  (:use code.test)
-  (:require [std.lib.transform :as graph]
-            [std.lib.transform.base.type-check :refer :all]
+  (:require [example.data :as examples]
             [std.lib.schema :as schema]
-            [example.data :as examples]))
+            [std.lib.transform :as graph]
+            [std.lib.transform.base.type-check :refer :all])
+  (:use code.test))
 
 ^{:refer std.lib.transform.base.type-check/wrap-single-type-check :added "3.0"}
 (fact "wraps normalise to type check inputs as well as to coerce incorrect inputs"

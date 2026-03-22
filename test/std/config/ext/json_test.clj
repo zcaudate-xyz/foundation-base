@@ -1,7 +1,7 @@
 (ns std.config.ext.json-test
-  (:use code.test)
   (:require [std.config.ext.json :refer :all]
-            [std.json :as json]))
+            [std.json :as json])
+  (:use code.test))
 
 ^{:refer std.config.ext.json/resolve-type-json :added "3.0"}
 (fact "resolves json config"

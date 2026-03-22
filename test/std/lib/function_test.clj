@@ -1,6 +1,6 @@
 (ns std.lib.function-test
-  (:use code.test)
-  (:require [std.lib.function :refer :all]))
+  (:require [std.lib.function :refer :all])
+  (:use code.test))
 
 ^{:refer std.lib.function/fn-form :added "3.0"}
 (fact "creates a lambda form"

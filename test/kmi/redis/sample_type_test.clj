@@ -1,6 +1,6 @@
 (ns kmi.redis.sample-type-test
-  (:use code.test)
-  (:require [kmi.redis.sample-type :as type]))
+  (:require [kmi.redis.sample-type :as type])
+  (:use code.test))
 
 ^{:refer kmi.redis.sample-type/> :added "4.0"}
 (fact "shortcut for data access"

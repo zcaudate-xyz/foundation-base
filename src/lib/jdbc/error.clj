@@ -1,5 +1,4 @@
-(ns lib.jdbc.error
-  (:require [std.string :as str]))
+(ns lib.jdbc.error)
 
 (def +codes+
   (->> [["02" :no-data]

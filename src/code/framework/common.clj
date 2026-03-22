@@ -1,5 +1,5 @@
 (ns code.framework.common
-  (:require [std.string :as str]
+  (:require [clojure.string]
             [code.project :as project]
             [std.block :as block]
             [std.block.navigate :as nav]))
@@ -109,11 +109,11 @@
   {:added "3.0"}
   ([nav]
    (block/block (->> (nav/value nav)
-                     (str/split-lines)
+                     (clojure.string/split-lines)
                      (map-indexed (fn [i s]
                                     (str (if (zero? i) "" "  ")
-                                         (str/trim-left s))))
-                     (str/join "\n")))))
+                                         (clojure.string/triml s))))
+                     (clojure.string/join "\n")))))
 
 (defn line-lookup
   "creates a function lookup for the project"

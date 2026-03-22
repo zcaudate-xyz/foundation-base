@@ -1,9 +1,10 @@
 (ns std.block.heal.core
-  (:require [std.lib :as h]
-            [std.string :as str]
-            [std.block.heal.parse :as parse]
-            [std.block.heal.indent :as indent]
+  (:require [clojure.string]
             [std.block.heal.edit :as edit]
+            [std.block.heal.indent :as indent]
+            [std.block.heal.parse :as parse]
+            [std.lib.env :as env]
+            [std.string.prose :as prose]
             [std.text.diff :as diff]))
 
 (defn group-min-col
@@ -100,7 +101,7 @@
   {:added "4.0"}
   [content]
   (let [delimiters  (parse/parse-delimiters content)
-        lines       (str/split-lines content)
+        lines       (clojure.string/split-lines content)
         starts      (parse/parse-lines-raw lines)
         entries     (group-blocks-prep-entries delimiters starts)]
     {:lines lines
@@ -119,12 +120,12 @@
   "gets the block lines"
   {:added "4.0"}
   [lines [start end] start-col & [end-col]]
-  #_(h/prn {:start start
+  #_(env/prn {:start start
             :end end
             :start-col start-col
             :end-col end-col})
   (cond (= start end)
-        (let [line (str (str/spaces (dec start-col))
+        (let [line (str (prose/spaces (dec start-col))
                         (-> (get lines (dec start))
                             (subs (dec start-col))))]
           (if end-col
@@ -137,13 +138,13 @@
               end-line    (try (cond-> (get lines (dec end))
                                  end-col (subs 0 end-col))
                                (catch Throwable t
-                                 (h/prn {:count (count lines)
+                                 (env/prn {:count (count lines)
                                          :end end
                                          :start start
                                          :start-col start-col
                                          :end-col end-col})
                                  (throw t)))]
-          (vec (concat [(str (str/spaces (dec start-col))
+          (vec (concat [(str (prose/spaces (dec start-col))
                              start-line)]
                        (subvec lines
                                start
@@ -161,10 +162,10 @@
                 (:col block)
                 (dec col)]        
         #_#_#_#_#_#_
-        _ (h/prn args)
-        _ (h/prn (dissoc block :children))
-        _ (h/prn error)
-        snippet       (str/join-lines
+        _ (env/prn args)
+        _ (env/prn (dissoc block :children))
+        _ (env/prn error)
+        snippet       (prose/join-lines
                        (apply get-block-lines lines args))]
     (try
       (let [forms (read-string (str "[" snippet "]"))]
@@ -207,7 +208,7 @@
                                       type]}]
                            (and (not pair-id)
                                 (= type :close)))
-        snippet          (str/join-lines
+        snippet          (prose/join-lines
                           (get-block-lines lines
                                            (:line block)
                                            (:col block)))
@@ -223,12 +224,12 @@
 
         block-error      (if (seq all-errors)
                            {:errors (mapv #(update % :line + (dec (first (:line block)))) all-errors)
-                            :lines  (str/split-lines snippet)
+                            :lines  (clojure.string/split-lines snippet)
                             :at     (dissoc block :children)})
         #_#_
-        _                (h/pl snippet)
+        _                (env/pl snippet)
         #_#_
-        _                (h/prf {:is-suspect is-suspect
+        _                (env/prf {:is-suspect is-suspect
                                  :child child-error
                                  :block   (dissoc block :children)
                                  #_#_:interim interim-errors
@@ -282,8 +283,8 @@
       (edit/create-mismatch-edits errors)      
       
       :else
-      (do (h/prn)
-          (h/prf info) 
+      (do (env/prn)
+          (env/prf info) 
           (throw
            (ex-info "Not Supported"
                     {:info info}))))))
@@ -341,7 +342,7 @@
                           (catch Throwable t
                             (mapv (fn [{:keys [at]
                                         :as info}]
-                                    (h/prn info)
+                                    (env/prn info)
                                     (throw
                                      (ex-info "Not Supported"
                                               {:info info})))
@@ -370,7 +371,7 @@
   (fn [content]
     (let [new-content (print-fn content)
           deltas (diff/diff content new-content)
-          _ (h/p (diff/->string deltas))]
+          _ (env/p (diff/->string deltas))]
       new-content)))
 
 (defn wrap-diff

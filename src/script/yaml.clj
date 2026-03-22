@@ -1,10 +1,5 @@
 (ns script.yaml
-  (:import (org.yaml.snakeyaml Yaml DumperOptions DumperOptions$FlowStyle)
-           (org.yaml.snakeyaml.constructor Constructor SafeConstructor BaseConstructor)
-           (org.yaml.snakeyaml.representer Representer)
-           (org.yaml.snakeyaml.error Mark)
-           (hara.lib.snakeyaml MarkedConstructor)
-           (java.util LinkedHashMap))
+  (:import (org.yaml.snakeyaml Yaml DumperOptions DumperOptions$FlowStyle) (org.yaml.snakeyaml.constructor Constructor SafeConstructor BaseConstructor) (org.yaml.snakeyaml.representer Representer) (org.yaml.snakeyaml.error Mark) (hara.lib.snakeyaml MarkedConstructor) (java.util LinkedHashMap))
   (:refer-clojure :exclude [read]))
 
 (def flow-styles

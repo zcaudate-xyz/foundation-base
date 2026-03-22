@@ -1,9 +1,9 @@
 (ns code.tool.translate.js-dsl-integration-test
-  (:use code.test)
   (:require [code.tool.translate.js-dsl :as sut]
-            [std.lib :as h]
+            [std.fs :as fs]
             [std.json :as json]
-            [std.fs :as fs]))
+            [std.lib.os :as os])
+  (:use code.test))
 
 (def +sample-js+
   "
@@ -33,9 +33,9 @@
 
 (defn parse-js [js-code]
   (let [tmp-file (fs/create-tmpfile js-code)
-        proc (h/sh "node" "scripts/js_parser/parse.js" (str tmp-file) {:wait false})
-        _    (h/sh-wait proc)
-        res  (h/sh-output proc)]
+        proc (os/sh "node" "scripts/js_parser/parse.js" (str tmp-file) {:wait false})
+        _    (os/sh-wait proc)
+        res  (os/sh-output proc)]
     (if (zero? (:exit res))
       (json/read (:out res) json/+keyword-mapper+)
       (throw (ex-info "Failed to parse JS" {:error (:err res)})))))

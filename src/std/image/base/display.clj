@@ -1,9 +1,9 @@
 (ns std.image.base.display
-  (:require [std.string :as str]
+  (:require [clojure.string]
             [std.image.base.common :as common]
             [std.image.base.display.gradient :as gradient]
-            [std.image.base.util :as util]
             [std.image.base.model :as model]
+            [std.image.base.util :as util]
             [std.image.protocol :as protocol.image]))
 
 (defn render-string
@@ -27,7 +27,7 @@
                  (->> (interleave row avg)
                       (map (fn [n] (gradient/lookup-char table len n)))
                       (apply str)))))
-        (str/join "\n"))))
+        (clojure.string/join "\n"))))
 
 (defn byte-gray->rows
   "creates rows from byte-gray array

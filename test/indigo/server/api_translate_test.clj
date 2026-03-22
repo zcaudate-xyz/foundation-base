@@ -1,6 +1,6 @@
 (ns indigo.server.api-translate-test
-  (:use code.test)
-  (:require [indigo.server.api-translate :refer :all]))
+  (:require [indigo.server.api-translate :refer :all])
+  (:use code.test))
 
 ^{:refer indigo.server.api-translate/to-layout :added "4.1"}
 (fact "TODO")

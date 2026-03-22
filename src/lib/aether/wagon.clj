@@ -1,10 +1,6 @@
 (ns lib.aether.wagon
   (:require [std.object.query :as reflect])
-  (:import (org.apache.maven.wagon AbstractWagon Wagon)
-           (org.apache.maven.wagon.authentication AuthenticationInfo)
-           (org.apache.maven.wagon.proxy ProxyInfo)
-           (org.apache.maven.wagon.repository Repository)
-           (org.eclipse.aether.transport.wagon WagonProvider WagonTransporterFactory)))
+  (:import (org.apache.maven.wagon AbstractWagon Wagon) (org.apache.maven.wagon.authentication AuthenticationInfo) (org.apache.maven.wagon.proxy ProxyInfo) (org.apache.maven.wagon.repository Repository) (org.eclipse.aether.transport.wagon WagonProvider WagonTransporterFactory)))
 
 (def ^:dynamic *wagon-factories*
   (atom {;;:https org.apache.maven.wagon.providers.webdav.WebDavWagon

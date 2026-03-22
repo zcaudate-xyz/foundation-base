@@ -1,11 +1,11 @@
 (ns std.vm.jvm-interpreter
-  (:require [std.block.base :as base]
-            [std.block.construct :as construct]
+  (:require [clojure.string]
+            [std.block.base :as base]
             [std.block.check :as check]
+            [std.block.construct :as construct]
             [std.block.parse :as parse]
             [std.lib.zip :as zip]
-            [std.print.ansi :as ansi]
-            [std.string :as str])
+            [std.print.ansi :as ansi])
   (:import (std.protocol.block IBlock)))
 
 ;; --- Context & Zip ---
@@ -209,8 +209,8 @@
         (println "---------------------------------------------------")
         (println (base/block-string root))
         (println "---------------------------------------------------")
-        (println (ansi/style "Operand Stack:   " [:bold]) (str/join " " (:stack frame)))
-        (println (ansi/style "Local Variables: " [:bold]) (str/join " " (:locals frame)))))))
+        (println (ansi/style "Operand Stack:   " [:bold]) (clojure.string/join " " (:stack frame)))
+        (println (ansi/style "Local Variables: " [:bold]) (clojure.string/join " " (:locals frame)))))))
 
 (defn animate [code-str delay]
   (let [root (parse/parse-string code-str)

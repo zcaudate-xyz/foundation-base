@@ -1,8 +1,8 @@
 (ns code.tool.translate.js-ast
-  (:require [std.make :as make :refer [def.make]]
-            [std.lib :as h]
+  (:require [std.fs :as fs]
             [std.lang :as l]
-            [std.fs :as fs]))
+            [std.lib.os :as os]
+            [std.make :as make :refer [def.make]]))
 
 (def +root-dir+
   ".build/code.tool.js-ast")
@@ -52,7 +52,7 @@
 
 (defn initialise
   []
-  (h/sh {:root +root-dir+
+  (os/sh {:root +root-dir+
          :args ["npm" "install"]}))
 
 (defn translate-ast
@@ -62,5 +62,5 @@
    (make/build-all BUILD_AST) ;; Ensure build is ready
    (let [args (cond-> ["node" "index.js" input-file]
                 output-file (conj output-file))]
-     (h/sh {:root +root-dir+
+     (os/sh {:root +root-dir+
             :args args}))))

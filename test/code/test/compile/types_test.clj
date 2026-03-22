@@ -1,7 +1,7 @@
 (ns code.test.compile.types-test
-  (:use code.test)
-  (:require [code.test.compile.types :refer :all]
-            [code.test.base.runtime :as rt]))
+  (:require [code.test.base.runtime :as rt]
+            [code.test.compile.types :refer :all])
+  (:use code.test))
 
 ^{:refer code.test.compile.types/map->Fact :added "3.0" :adopt true}
 (fact "creates a fact object")

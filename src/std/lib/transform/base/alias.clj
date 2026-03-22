@@ -3,8 +3,8 @@
             [std.lib.transform.base.complex :as complex]
             [std.lib.walk :as walk]
             [std.string.common :as str]
-            [std.string.wrap :as wrap]
-            [std.string.path :as path]))
+            [std.string.path :as path]
+            [std.string.wrap :as wrap]))
 
 (defn find-aliases
   "finds necessary aliases

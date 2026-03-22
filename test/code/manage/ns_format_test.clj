@@ -1,7 +1,7 @@
 (ns code.manage.ns-format-test
-  (:use code.test)
   (:require [code.manage.ns-format :refer :all]
-            [std.block.navigate :as nav]))
+            [std.block.navigate :as nav])
+  (:use code.test))
 
 ^{:refer code.manage.ns-format/first-element :added "3.0"}
 (fact "returns first element of list"

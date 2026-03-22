@@ -1,14 +1,13 @@
 (ns rt.postgres.grammar.form-deftype-test
-  (:use code.test)
-  (:require [rt.postgres.grammar.form-deftype :refer :all]
+  (:require [rt.postgres.grammar :as g]
+            [rt.postgres.grammar.common :as common]
+            [rt.postgres.grammar.form-deftype :refer :all]
             [rt.postgres.grammar.form-deftype-hydrate :as hydrate]
-            [rt.postgres.grammar :as g]
             [rt.postgres.script.test.scratch-v1 :as scratch]
             [std.lang :as l]
-            [rt.postgres.grammar.common :as common]
-            [std.lang.base.library-snapshot :as snap]
             [std.lang.base.book :as book]
-            [std.lib :as h]))
+            [std.lang.base.library-snapshot :as snap])
+  (:use code.test))
 
 (def +fragment-sample+
   [:a {:type :int} :b {:type :text}])

@@ -1,28 +1,8 @@
 (ns std.json
-  (:require [std.string :as str]
+  (:require [std.lib.atom :as at]
             [std.lib.env :as env]
-            [std.lib.atom :as at])
-  (:import (hara.lib.json DateSerializer
-                          FunctionalKeyDeserializer
-                          FunctionalSerializer
-                          KeywordSerializer
-                          KeywordKeyDeserializer
-                          PersistentHashMapDeserializer
-                          PersistentVectorDeserializer
-                          SymbolSerializer
-                          VarSerializer
-                          RatioSerializer FunctionalKeywordSerializer)
-           (com.fasterxml.jackson.core JsonGenerator$Feature
-                                       JsonParser
-                                       JsonParser$Feature)
-           (com.fasterxml.jackson.databind JsonSerializer
-                                           ObjectMapper
-                                           SerializationFeature
-                                           DeserializationFeature)
-           (com.fasterxml.jackson.databind.module SimpleModule)
-           (java.io InputStream Writer File OutputStream DataOutput Reader)
-           (java.net URL)
-           (com.fasterxml.jackson.datatype.jsr310 JavaTimeModule))
+            [std.string.case :as case])
+  (:import (hara.lib.json DateSerializer FunctionalKeyDeserializer FunctionalSerializer KeywordSerializer KeywordKeyDeserializer PersistentHashMapDeserializer PersistentVectorDeserializer SymbolSerializer VarSerializer RatioSerializer FunctionalKeywordSerializer) (com.fasterxml.jackson.core JsonGenerator$Feature JsonParser JsonParser$Feature) (com.fasterxml.jackson.databind JsonSerializer ObjectMapper SerializationFeature DeserializationFeature) (com.fasterxml.jackson.databind.module SimpleModule) (java.io InputStream Writer File OutputStream DataOutput Reader) (java.net URL) (com.fasterxml.jackson.datatype.jsr310 JavaTimeModule))
   (:refer-clojure :exclude [read]))
 
 (defn clojure-module
@@ -84,7 +64,7 @@
   (object-mapper {:decode-key-fn keyword}))
 
 (def ^ObjectMapper +keyword-case-mapper+
-  (object-mapper {:decode-key-fn (comp keyword str/spear-case)}))
+  (object-mapper {:decode-key-fn (comp keyword case/spear-case)}))
 
 (def ^ObjectMapper +keyword-js-mapper+
   (object-mapper {:decode-key-fn (comp keyword #(.replaceAll ^String % "_" "-"))}))

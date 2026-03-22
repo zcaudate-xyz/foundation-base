@@ -1,10 +1,10 @@
 (ns std.text.diff
-  (:require [std.string :as str]
-            [std.print.ansi :as ansi]
+  (:require [clojure.string]
             [std.lib.enum :as enum]
-            [std.object :as object])
-  (:import (difflib ChangeDelta Chunk DeleteDelta Delta
-                    Delta$TYPE DiffUtils InsertDelta Patch)))
+            [std.object :as object]
+            [std.print.ansi :as ansi]
+            [std.string.common :as common])
+  (:import (difflib ChangeDelta Chunk DeleteDelta Delta Delta$TYPE DiffUtils InsertDelta Patch)))
 
 (defn ^Patch create-patch
   "creates a Patch object
@@ -108,8 +108,8 @@
                   :lines [\"19\"]}}]"
   {:added "3.0"}
   ([original revised]
-   (-> (DiffUtils/diff (str/split-lines original)
-                       (str/split-lines revised))
+   (-> (DiffUtils/diff (clojure.string/split-lines original)
+                       (clojure.string/split-lines revised))
        (object/to-data))))
 
 (defn patch
@@ -134,8 +134,8 @@
   {:added "3.0"}
   ([original diff]
    (let [p  (create-patch diff)
-         revised   (.applyTo p (str/split-lines original))]
-     (str/joinl revised "\n"))))
+         revised   (.applyTo p (clojure.string/split-lines original))]
+     (common/joinl revised "\n"))))
 
 (defn unpatch
   "takes a series of deltas and restores the original result
@@ -159,8 +159,8 @@
   {:added "3.0"}
   ([revised diff]
    (let [p  (create-patch diff)
-         revised   (.restore p (str/split-lines revised))]
-     (str/joinl revised "\n"))))
+         revised   (.restore p (clojure.string/split-lines revised))]
+     (common/joinl revised "\n"))))
 
 (defn ->string
   "returns a human readable output of the diffs
@@ -184,7 +184,7 @@
                        (:lines revised))
                   [""]))
                deltas)
-       (str/joinl "\n"))))
+       (common/joinl "\n"))))
 
 (defn summary
   "creates a summary of the various diffs

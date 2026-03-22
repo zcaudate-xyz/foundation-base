@@ -1,16 +1,17 @@
 (ns std.lang.model.spec-bash
-  (:require [std.lang.base.emit :as emit]
+  (:require [clojure.string]
+            [std.lang.base.book :as book]
+            [std.lang.base.emit :as emit]
             [std.lang.base.emit-common :as common]
             [std.lang.base.emit-data :as data]
             [std.lang.base.emit-fn :as fn]
             [std.lang.base.emit-top-level :as top]
             [std.lang.base.grammar :as grammar]
-            [std.lang.base.util :as ut]
-            [std.lang.base.book :as book]
             [std.lang.base.script :as script]
-            [std.string :as str]
-            [std.lib :as h]
-            [std.lang.model.spec-xtalk]))
+            [std.lang.base.util :as ut]
+            [std.lang.model.spec-xtalk]
+            [std.lib.collection :as collection]
+            [std.lib.foundation :as f]))
 
 (defn bash-quote-item
   "quotes an item"
@@ -51,23 +52,23 @@
                            (not (boolean? v)) (conj v)))
                         []
                         form)]
-    (str/join " " (common/emit-array arr grammar mopts))))
+    (clojure.string/join " " (common/emit-array arr grammar mopts))))
 
 (defn bash-invoke
   "outputs an invocation (same as vector)"
   {:added "4.0"}
   [[f & args] grammar mopts]
   (let [args (map (fn [x]
-                    (if (and (h/form? x)
+                    (if (and (collection/form? x)
                              (not (get-in grammar [:reserved (first x)])))
                       (list '$ x)
                       x))
                   args)]
-    (str/join " " (common/emit-array (cons f args) grammar mopts))))
+    (clojure.string/join " " (common/emit-array (cons f args) grammar mopts))))
 
 (defn- bash-vector
   [arr grammar mopts]
-  (str/join " " (common/emit-array arr grammar mopts)))
+  (clojure.string/join " " (common/emit-array arr grammar mopts)))
 
 (defn bash-assign
   "outputs an assignment"
@@ -240,7 +241,7 @@
                               :body      {:start "; do" :end "done"}}}
         :token   {:nil       {:as "''"}
                   :string    {:custom #'identity}
-                  :keyword   {:custom #'h/strn}}
+                  :keyword   {:custom #'f/strn}}
         :data    {:map       {:custom #'bash-map}
                   :set       {:custom #'bash-set}
                   :vector    {:custom #'bash-vector}
@@ -254,7 +255,7 @@
                               :control {:default {:raw ""
                                                   :parameter {:start "" :end ""}
                                                   :body      {:start ")" :end ";;"}}}}}}
-       (h/merge-nested (update-in (emit/default-grammar)
+       (collection/merge-nested (update-in (emit/default-grammar)
                                   [:token :symbol]
                                   dissoc :replace))))
 

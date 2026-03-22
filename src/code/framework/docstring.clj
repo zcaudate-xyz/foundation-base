@@ -1,8 +1,10 @@
 (ns code.framework.docstring
-  (:require [std.string :as str]
-            [std.block.navigate :as nav]
+  (:require [clojure.string]
             [std.block :as block]
-            [std.lib.zip :as zip]))
+            [std.block.navigate :as nav]
+            [std.lib.zip :as zip]
+            [std.string.common :as common]
+            [std.string.prose :as prose]))
 
 (defn strip-quotes
   "utility that strips quotes when not the result of a fact
@@ -20,10 +22,10 @@
 
          :else
          (recur more x p1 (conj out (if (= p2 "=>")
-                                      (if (str/has-quotes? x)
-                                        (str/escape-newlines x)
+                                      (if (prose/has-quotes? x)
+                                        (prose/escape-newlines x)
                                         x)
-                                      (str/strip-quotes x)))))))
+                                      (prose/strip-quotes x)))))))
 
 (defn ->refstring
   "creates a refstring for use in html blocks
@@ -42,10 +44,10 @@
                  (cond (and (not (block/void? node))
                             (not (block/comment? node))
                             (string? (block/value node)))
-                       (str/escape-newlines res)
+                       (prose/escape-newlines res)
 
                        :else res))))
-        (str/joinl))))
+        (common/joinl))))
 
 (defn ->docstring-tag
   "converts a string representation of block
@@ -81,10 +83,10 @@
    (->> nodes
         (mapv (fn [block]
                 (-> (->docstring-tag block)
-                    (str/escape-escapes)
-                    (str/escape-quotes))))
+                    (prose/escape-escapes)
+                    (prose/escape-quotes))))
         (strip-quotes)
-        (str/joinl))))
+        (common/joinl))))
 
 (defn append-node
   "Adds node as well as whitespace and newline on right
@@ -122,15 +124,15 @@
   ([intro nodes]
    (let [docstring  (->docstring nodes)
          docstring  (-> (str intro docstring)
-                        (str/trim))
-         docstring  (str/split-lines docstring)]
+                        (clojure.string/trim))
+         docstring  (clojure.string/split-lines docstring)]
      (->> docstring
           (map-indexed (fn [i s]
                          (str (if-not (or (zero? i)
                                           (= i (dec (count nodes))))
                                 " ")
                               s)))
-          (str/join "\n")
+          (clojure.string/join "\n")
           (block/block)))))
 
 (defn insert-docstring

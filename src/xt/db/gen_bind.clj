@@ -1,15 +1,16 @@
 (ns xt.db.gen-bind
-  (:require [std.lang :as l]
-            [std.lib :as h]
-            [std.string :as str]
-            [rt.postgres :as pg]))
+  (:require [rt.postgres :as pg]
+            [std.lang :as l]
+            [std.lib.env :as env]
+            [std.lib.foundation :as f]
+            [std.string.case :as case]))
 
 (defn tmpl-route
   "creates a route template"
   {:added "4.0"}
   [[sym src tmeta]]
   (let [{:keys [root] :as tmeta} (merge tmeta
-                                        (h/template-meta))
+                                        (f/template-meta))
         url (str root "/" (name src))]
     (with-meta
       (list 'def.xt (with-meta sym {:api/type :route
@@ -23,7 +24,7 @@
   {:added "4.0"}
   [[sym src tmeta]]
   (let [{:keys [view] :as tmeta} (merge tmeta
-                                        (h/template-meta))]
+                                        (f/template-meta))]
     
     (with-meta
       (list 'def.xt (with-meta sym {:api/type :view})
@@ -35,10 +36,10 @@
   {:added "4.0"}
   [& [ns]]
   (into {}
-        (mapv (juxt (comp str/snake-case str :id)
+        (mapv (juxt (comp case/snake-case str :id)
                     l/sym-full)
               (l/module-entries :xtalk
-                                (or ns (h/ns-sym))
+                                (or ns (env/ns-sym))
                                 (fn [e] (= :route (:api/type e)))))))
 
 (defn route-list
@@ -47,7 +48,7 @@
   [& [ns]]
   (mapv l/sym-full
         (l/module-entries :xtalk
-                          (or ns (h/ns-sym))
+                          (or ns (env/ns-sym))
                           (fn [e] (= :route (:api/type e))))))
 
 (defn view-list
@@ -56,7 +57,7 @@
   [& [ns]]
   (mapv l/sym-full
         (l/module-entries :xtalk
-                          (or ns (h/ns-sym))
+                          (or ns (env/ns-sym))
                           (fn [e] (= :view (:api/type e))))))
 
 

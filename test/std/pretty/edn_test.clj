@@ -1,7 +1,7 @@
 (ns std.pretty.edn-test
-  (:use code.test)
-  (:require [std.pretty.edn :refer :all]
-            [std.pretty :as printer]))
+  (:require [std.pretty :as printer]
+            [std.pretty.edn :refer :all])
+  (:use code.test))
 
 ^{:refer std.pretty.edn/override? :added "3.0"}
 (fact "implements `std.pretty.protocol/IOverride`")

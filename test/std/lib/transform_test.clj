@@ -1,8 +1,8 @@
 (ns std.lib.transform-test
-  (:use code.test)
-  (:require [std.lib.transform :refer :all]
+  (:require [example.data :as examples]
             [std.lib.schema :as schema]
-            [example.data :as examples]))
+            [std.lib.transform :refer :all])
+  (:use code.test))
 
 ^{:refer std.lib.transform/submaps :added "3.0"}
 (fact "creates a submap based upon a lookup subkey"

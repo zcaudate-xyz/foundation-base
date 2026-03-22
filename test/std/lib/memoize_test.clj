@@ -1,7 +1,6 @@
 (ns std.lib.memoize-test
+  (:require [std.lib.memoize :refer :all])
   (:use code.test)
-  (:require [std.lib.memoize :refer :all]
-            [std.lib :as h])
   (:refer-clojure :exclude [memoize]))
 
 ^{:refer std.lib.memoize/map->Memoize :added "3.0"  :adopt true}

@@ -1,16 +1,16 @@
 (ns std.lang.base.script-macro-test
-  (:use code.test)
-  (:require [std.lang.base.script-macro :as macro]
-            [std.lang.base.impl :as impl]
+  (:require [clojure.string]
             [std.lang.base.book :as book]
+            [std.lang.base.impl :as impl]
             [std.lang.base.library :as lib]
-            [std.lang.base.pointer :as ptr]
             [std.lang.base.library-snapshot-prep-test :as prep]
+            [std.lang.base.pointer :as ptr]
+            [std.lang.base.runtime :as rt]
+            [std.lang.base.script-macro :as macro]
             [std.lang.model.spec-js :as js]
             [std.lang.model.spec-lua :as lua]
-            [std.lang.base.runtime :as rt]
-            [std.string :as str]
-            [std.lib :as h]))
+            [std.lib.collection :as collection])
+  (:use code.test))
 
 (def +library+ (lib/library {:snapshot prep/+snap+}))
 
@@ -60,7 +60,7 @@
   => #'std.lang.base.script-macro-test/hello
 
   (impl/with:library [+library+]
-    (h/filter-vals identity @hello))
+    (collection/filter-vals identity @hello))
   => (contains {:section :fragment,
                 :time 1,
                 :op 'def$,
@@ -93,7 +93,7 @@
     (def$.hello x x))
 
   (impl/with:library [+library+]
-    (h/filter-vals identity (ptr/ptr-deref x)))
+    (collection/filter-vals identity (ptr/ptr-deref x)))
   => (contains {:section :fragment,
                 :time number?
                 :op 'def$,
@@ -185,7 +185,7 @@
   ^:hidden
   
   (-> (macro/intern-!-fn :lua [1 2 3] {})
-      (str/replace ";" ""))
+      (clojure.string/replace ";" ""))
   => "1\n2\n3"
 
   (macro/intern-!-fn :js [1 2 3] {})
@@ -199,7 +199,7 @@
   => #'std.lang.base.script-macro-test/!.hello
 
   (-> (!.hello 1 2 3 4 5)
-      (str/replace ";" ""))
+      (clojure.string/replace ";" ""))
   => "1\n2\n3\n4\n5")
 
 ^{:refer std.lang.base.script-macro/intern-free-fn :added "4.0"}

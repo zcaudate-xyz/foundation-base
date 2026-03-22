@@ -1,9 +1,8 @@
 (ns js.react.ext-form-test
-  (:use code.test)
-  (:require [std.lang :as  l]
-            [std.lib :as h]
-            [std.fs :as fs]
-            [xt.lang.base-notify :as notify]))
+  (:require [std.fs :as fs]
+            [std.lang :as l]
+            [xt.lang.base-notify :as notify])
+  (:use code.test))
 
 (l/script- :js
   {:runtime :basic

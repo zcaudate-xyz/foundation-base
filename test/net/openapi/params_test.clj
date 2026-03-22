@@ -1,6 +1,6 @@
 (ns net.openapi.params-test
-  (:use code.test)
-  (:require [net.openapi.params :as params]))
+  (:require [net.openapi.params :as params])
+  (:use code.test))
 
 ^{:refer net.openapi.params/format-date :added "4.0"}
 (fact "Format the given Date object with the :date-format defined in *api-options*.

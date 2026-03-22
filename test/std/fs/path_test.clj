@@ -1,9 +1,9 @@
 (ns std.fs.path-test
-  (:use code.test)
-  (:require [std.fs.path :refer :all]
+  (:require [clojure.string]
             [std.fs.api :as api]
             [std.fs.common :as common]
-            [std.string :as str])
+            [std.fs.path :refer :all])
+  (:use code.test)
   (:refer-clojure :exclude [resolve])
   (:import (java.io InputStream OutputStream File)))
 
@@ -15,9 +15,9 @@
 
   (str (path "~/../shared/data"))
   => (str (->> (re-pattern common/*sep*)
-               (str/split common/*home*)
+               (clojure.string/split common/*home*)
                (butlast)
-               (str/join "/"))
+               (clojure.string/join "/"))
           "/shared/data")
 
   (str (path ["hello" "world.txt"]))

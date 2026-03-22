@@ -1,11 +1,10 @@
 (ns std.lang.base.emit-top-level-op-test
-  (:use code.test)
-  (:require [std.lang.base.emit-common :as common]
-            [std.lang.base.emit-top-level :as top-level]
+  (:require [std.lang.base.emit :as emit]
+            [std.lang.base.emit-common :as common]
             [std.lang.base.emit-helper :as helper]
-            [std.lang.base.emit :as emit]
-            [std.lang.base.grammar :as grammar]
-            [std.lib :as h]))
+            [std.lang.base.emit-top-level :as top-level]
+            [std.lang.base.grammar :as grammar])
+  (:use code.test))
 
 (def +reserved+
   (-> (grammar/build)

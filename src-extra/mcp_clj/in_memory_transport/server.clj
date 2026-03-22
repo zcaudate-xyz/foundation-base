@@ -1,14 +1,11 @@
 (ns mcp-clj.in-memory-transport.server
+  (:require [mcp-clj.in-memory-transport.atomic :as atomic]
+            [mcp-clj.in-memory-transport.shared :as shared]
+            [mcp-clj.json-rpc.json-protocol :as json-protocol]
+            [mcp-clj.json-rpc.protocols :as json-rpc-protocols]
+            [mcp-clj.log :as log])
   "In-memory server transport for unit testing MCP communication"
-  (:require
-    [mcp-clj.in-memory-transport.atomic :as atomic]
-    [mcp-clj.in-memory-transport.shared :as shared]
-    [mcp-clj.json-rpc.json-protocol :as json-protocol]
-    [mcp-clj.json-rpc.protocols :as json-rpc-protocols]
-    [mcp-clj.log :as log])
-  (:import
-    (java.util.concurrent
-      Executors)))
+  (:import (java.util.concurrent Executors)))
 
 (defrecord InMemoryServer
   [shared-transport server-alive? handlers])

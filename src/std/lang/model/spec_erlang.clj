@@ -1,15 +1,16 @@
 (ns std.lang.model.spec-erlang
-  (:require [std.lang.base.emit :as emit]
-            [std.lang.base.grammar :as grammar]
+  (:require [clojure.string]
+            [std.lang.base.book :as book]
+            [std.lang.base.emit :as emit]
             [std.lang.base.emit-common :as common]
             [std.lang.base.emit-preprocess :as preprocess]
-            [std.lang.base.util :as ut]
-            [std.lang.base.book :as book]
+            [std.lang.base.grammar :as grammar]
             [std.lang.base.script :as script]
+            [std.lang.base.util :as ut]
             [std.lang.model.spec-xtalk]
             [std.lang.model.spec-xtalk.fn-erlang :as fn]
-            [std.lib :as h]
-            [std.string :as str]))
+            [std.lib.collection :as collection]
+            [std.lib.walk :as walk]))
 
 ;;
 ;; UTILS
@@ -19,14 +20,14 @@
   (if (symbol? sym)
     (let [s (name sym)]
       (if (re-find #"^[a-z]" s)
-        (symbol (str (str/upper-case (subs s 0 1)) (subs s 1)))
+        (symbol (str (clojure.string/upper-case (subs s 0 1)) (subs s 1)))
         sym))
     sym))
 
 (defn capitalize-locals [form locals]
   (if (empty? locals)
     form
-    (h/postwalk (fn [x]
+    (walk/postwalk (fn [x]
                   (if (and (symbol? x) (locals x))
                     (to-erlang-var x)
                     x))
@@ -59,9 +60,9 @@
   (wrap-raw
    (str (ut/sym-default-str sym)
         "("
-        (str/join ", " (map emit-ast params))
+        (clojure.string/join ", " (map emit-ast params))
         ") -> "
-        (str/join ", " (map emit-ast body))
+        (clojure.string/join ", " (map emit-ast body))
         ".")))
 
 (defn tf-erlang-case
@@ -75,7 +76,7 @@
   [[_ expr clauses]]
   (wrap-raw
    (str "case " (emit-ast expr) " of "
-        (str/join "; "
+        (clojure.string/join "; "
                   (map (fn [[pat body]]
                          (str (emit-ast pat) " -> " (emit-ast body)))
                        clauses))
@@ -90,7 +91,7 @@
   "emits erlang tuple"
   [[_ & elements]]
   (wrap-raw
-   (str "{" (str/join ", " (map emit-ast elements)) "}")))
+   (str "{" (clojure.string/join ", " (map emit-ast elements)) "}")))
 
 (defn emit-erlang-var
   "emits var assignment"
@@ -142,7 +143,7 @@
                   :map-entry {:start "" :end "" :space "" :assign " => " :key-fn #'erlang-map-key}
                   :set       {:start "#{" :end "}" :space "" :assign " => "}}
         :function {:defn     {:raw ""}}}
-       (h/merge-nested (emit/default-grammar))))
+       (collection/merge-nested (emit/default-grammar))))
 
 (def +grammar+
   (grammar/grammar :erlang

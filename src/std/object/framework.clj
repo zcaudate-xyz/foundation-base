@@ -1,15 +1,14 @@
 (ns std.object.framework
-  (:require [std.string :as str]
-            [std.protocol.invoke :as protocol.invoke]
-            [std.protocol.object :as protocol.object]
-            [std.object.query :as query]
+  (:require [std.lib.invoke :as invoke]
             [std.object.framework.map-like :as map-like]
             [std.object.framework.read :as read]
             [std.object.framework.string-like :as string-like]
-            [std.object.framework.vector-like :as vector-like]
             [std.object.framework.struct :as struct]
+            [std.object.framework.vector-like :as vector-like]
             [std.object.framework.write :as write]
-            [std.lib :as h :refer [definvoke]])
+            [std.object.query :as query]
+            [std.protocol.invoke :as protocol.invoke]
+            [std.protocol.object :as protocol.object])
   (:refer-clojure :exclude [get set get-in keys]))
 
 (defmacro string-like
@@ -89,11 +88,11 @@
    ;;=> [[#multifn[-meta-read 0x4ead3109] nil #multifn[print-method 0xcd219d4]]]"
   {:added "3.0"}
   ([cls]
-   [(h/multi:remove protocol.object/-meta-read cls)
-    (h/multi:remove protocol.object/-meta-write cls)
-    (h/multi:remove print-method cls)]))
+   [(invoke/multi:remove protocol.object/-meta-read cls)
+    (invoke/multi:remove protocol.object/-meta-write cls)
+    (invoke/multi:remove print-method cls)]))
 
-(definvoke invoke-intern-object
+(invoke/definvoke invoke-intern-object
   "creates an invoke form for an object
  
    (framework/invoke-intern-object
@@ -109,7 +108,7 @@
    (invoke-intern-object :object name config body))
   ([_ name {:keys [type extend tag read write display] :as config} body]
    (let [arglists (if (seq body)
-                    (h/invoke:arglists body)
+                    (invoke/invoke:arglists body)
                     (or (:arglists config) ()))
 
          object-fn (case extend

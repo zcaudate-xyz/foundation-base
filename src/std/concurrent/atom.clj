@@ -1,9 +1,9 @@
 (ns std.concurrent.atom
   (:require [std.concurrent.executor :as exe]
             [std.lib.atom :as at]
+            [std.lib.env :as env]
             [std.lib.future :as f]
-            [std.lib.resource :as res]
-            [std.lib :as h]))
+            [std.lib.resource :as res]))
 
 (defn aq:new
   "creates an atom with a vec as queue"
@@ -36,7 +36,7 @@
    (let [bulk-fn (fn []
                    (aq:process (fn [items]
                                  (-> (handler target items)
-                                     (h/explode)))
+                                     (env/explode)))
                                queue
                                max-batch))]
      (fn [& entries]
@@ -58,7 +58,7 @@
       :submit submit
       :options opts})))
 
-(h/res:spec-add
+(res/res:spec-add
  {:type :hara/concurrent.atom.executor
   :config   {:interval 50 :max-batch 1000}
   :instance {:create   aq:executor}})
@@ -96,7 +96,7 @@
    => [[1 2 3] [4 5]]"
   {:added "3.0"}
   ([f hub max-batch]
-   (let [[ticket queue] (h/swap-return! hub
+   (let [[ticket queue] (at/swap-return! hub
                                         (fn [{:keys [ticket queue]}]
                                           [[ticket queue] (hub-state [])]))]
      (->> (partition-all max-batch queue)
@@ -110,7 +110,7 @@
    => (contains [f/future? 0 5])"
   {:added "3.0"}
   ([hub entries]
-   (h/swap-return! hub
+   (at/swap-return! hub
                    (fn [{:keys [ticket queue] :as m}]
                      (let [start (count queue)]
                        [[ticket start (count entries)] {:ticket ticket

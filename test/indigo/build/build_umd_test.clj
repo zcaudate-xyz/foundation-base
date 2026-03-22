@@ -1,6 +1,6 @@
 (ns indigo.build.build-umd-test
-  (:use code.test)
-  (:require [indigo.build.build-umd :refer :all]))
+  (:require [indigo.build.build-umd :refer :all])
+  (:use code.test))
 
 ^{:refer indigo.build.build-umd/initialise :added "4.0"}
 (fact "TODO")

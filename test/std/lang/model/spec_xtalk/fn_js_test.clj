@@ -1,8 +1,7 @@
 (ns std.lang.model.spec-xtalk.fn-js-test
-  (:use code.test)
-  (:require [std.lang.model.spec-xtalk.fn-js :refer :all]
-            [std.lang :as l]
-            [std.lib :as h]))
+  (:require [std.lang :as l]
+            [std.lang.model.spec-xtalk.fn-js :refer :all])
+  (:use code.test))
 
 ^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-len :added "4.0"}
 (fact "gets length"

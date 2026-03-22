@@ -1,6 +1,6 @@
 (ns indigo.server.dispatch-test
-  (:use code.test)
-  (:require [indigo.server.dispatch :refer :all]))
+  (:require [indigo.server.dispatch :refer :all])
+  (:use code.test))
 
 ^{:refer indigo.server.dispatch/register! :added "4.1"}
 (fact "TODO")

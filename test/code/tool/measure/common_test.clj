@@ -1,6 +1,7 @@
 (ns code.tool.measure.common-test
-  (:use code.test)
-  (:require [code.tool.measure.common :as sut]))
+  (:require [code.tool.measure.common :as sut]
+            [std.lib.os :as os])
+  (:use code.test))
 
 ^{:refer code.tool.measure.common/calculate-surface :added "4.1"}
 (fact "calculate-surface"
@@ -9,7 +10,7 @@
 
 ^{:refer code.tool.measure.common/sh-git :added "4.1"}
 (fact "sh-git"
-  (with-redefs [std.lib/sh (constantly {:exit 0 :out " ok "})]
+  (with-redefs [os/sh (constantly {:exit 0 :out " ok "})]
     (sut/sh-git ["status"] ".")) => "ok")
 
 ^{:refer code.tool.measure.common/list-commits :added "4.1"}

@@ -1,8 +1,8 @@
 (ns std.dom.mock-test
-  (:use code.test)
-  (:require [std.dom.mock :refer :all]
-            [std.dom.common :as base]
-            [std.dom.item :as item]))
+  (:require [std.dom.common :as base]
+            [std.dom.item :as item]
+            [std.dom.mock :refer :all])
+  (:use code.test))
 
 ^{:refer std.dom.mock/mock? :added "3.0"}
 (fact "checks if object is a mock item"

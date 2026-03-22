@@ -1,6 +1,5 @@
 (ns xt.runtime.type-symbol
-  (:require [std.lang :as l]
-            [std.lib :as h])
+  (:require [std.lang :as l])
   (:refer-clojure :exclude [symbol]))
 
 (l/script :xtalk

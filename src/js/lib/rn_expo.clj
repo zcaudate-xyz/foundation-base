@@ -1,6 +1,6 @@
 (ns js.lib.rn-expo
   (:require [std.lang :as l]
-            [std.lib :as h]))
+            [std.lib.foundation :as f]))
 
 (l/script :js
   {:import [["expo-image-picker" :as [* ExpoImagePicker]]
@@ -15,7 +15,7 @@
             ["expo" :as [* Expo]]
             ["expo-media-library" :as [* ExpoMedia]]]})
 
-(h/template-entries [l/tmpl-entry {:type :fragment
+(f/template-entries [l/tmpl-entry {:type :fragment
                                    :base "Expo"
 				   :tag "js"}]
                     [registerRootComponent])
@@ -24,7 +24,7 @@
   ;; Auth
   ;;
 
-(h/template-entries [l/tmpl-entry {:type :fragment
+(f/template-entries [l/tmpl-entry {:type :fragment
                                    :base "ExpoAuth"
 				   :tag "js"}]
                     [useAuthRequest
@@ -39,7 +39,7 @@
                      [authGetRedirectUrl getRedirectUrl]
                      [authLoad loadAsync]])
 
-(h/template-entries [l/tmpl-entry {:type :fragment
+(f/template-entries [l/tmpl-entry {:type :fragment
                                    :base "ExpoAuthQueryParams"
 				   :tag "js"}]
                     [buildQueryString
@@ -49,7 +49,7 @@
   ;; Browser
   ;;
 
-(h/template-entries [l/tmpl-entry {:type :fragment
+(f/template-entries [l/tmpl-entry {:type :fragment
                                    :base "ExpoBrowser"
 				   :tag "js"}]
 
@@ -67,7 +67,7 @@
   ;;
 
 
-(h/template-entries [l/tmpl-entry {:type :fragment
+(f/template-entries [l/tmpl-entry {:type :fragment
                                    :base "ExpoClipboard"
 				   :tag "js"}]
                     [[clipGetString getStringAsync]
@@ -80,7 +80,7 @@
   ;;
 
 
-(h/template-entries [l/tmpl-entry {:type :fragment
+(f/template-entries [l/tmpl-entry {:type :fragment
                                    :base "ExpoContacts"
 				   :tag "js"}]
                     [contactsIsAvailable    isAvailableAsync]
@@ -101,7 +101,7 @@
 
 
 
-(h/template-entries [l/tmpl-entry {:type :fragment
+(f/template-entries [l/tmpl-entry {:type :fragment
                                    :base "ExpoFont"
 				   :tag "js"}]
                     [useFonts
@@ -114,7 +114,7 @@
   ;;
 
 
-(h/template-entries [l/tmpl-entry {:type :fragment
+(f/template-entries [l/tmpl-entry {:type :fragment
                                    :base "ExpoFacebook"
 				   :tag "js"}]
                     [[fbInitialize initializeAsync]
@@ -125,7 +125,7 @@
                      [fbLogout logOutAsync]
                      [fbGetAuthenticationCredential getAuthenticationCredentialAsync]])
 
-(h/template-entries [l/tmpl-entry {:type :fragment
+(f/template-entries [l/tmpl-entry {:type :fragment
                                    :base "ExpoImagePicker"
 				   :tag "js"}]
                     [[imageCameraRequest requestCameraPermissionsAsync]
@@ -142,7 +142,7 @@
 
 
 
-(h/template-entries [l/tmpl-entry {:type :fragment
+(f/template-entries [l/tmpl-entry {:type :fragment
                                    :base "ExpoMedia"
 				   :tag "js"}]
                     [[mediaRequestPermissions requestPermissionsAsync]
@@ -170,7 +170,7 @@
   ;;
 
 
-(h/template-entries [l/tmpl-entry {:type :fragment
+(f/template-entries [l/tmpl-entry {:type :fragment
                                    :base "ExpoReview"
 				   :tag "js"}]
                     [[reviewHasAction hasAction]
@@ -183,7 +183,7 @@
   ;;
 
 
-(h/template-entries [l/tmpl-entry {:type :fragment
+(f/template-entries [l/tmpl-entry {:type :fragment
                                    :base "ExpoSplash"
 				   :tag "js"}]
                     [[splashHide hideAsync]

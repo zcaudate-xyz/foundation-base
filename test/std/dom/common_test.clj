@@ -1,8 +1,8 @@
 (ns std.dom.common-test
-  (:use code.test)
   (:require [std.dom.common :refer :all]
             [std.dom.impl :as impl]
-            [std.dom.mock :as mock]))
+            [std.dom.mock :as mock])
+  (:use code.test))
 
 ^{:refer std.dom.common/dom? :added "3.0"}
 (fact "checks if object is an dom"

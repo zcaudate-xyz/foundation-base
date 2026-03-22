@@ -1,13 +1,12 @@
 (ns lib.aether.dependency
-  (:require [jvm.protocol :as protocol.classloader]
-            [jvm.artifact :as jvm.artifact]
+  (:require [jvm.artifact :as jvm.artifact]
+            [jvm.protocol :as protocol.classloader]
             [lib.aether.artifact :as artifact]
-            [std.lib :refer [definvoke]]
+            [std.lib.invoke :as invoke]
             [std.object :as object])
-  (:import (org.eclipse.aether.graph DefaultDependencyNode Dependency DependencyNode Exclusion)
-           (org.eclipse.aether.artifact Artifact DefaultArtifact)))
+  (:import (org.eclipse.aether.graph DefaultDependencyNode Dependency DependencyNode Exclusion) (org.eclipse.aether.artifact Artifact DefaultArtifact)))
 
-(definvoke rep-exclusion
+(invoke/definvoke rep-exclusion
   "creates a rep from an exclusion
  
    (str (rep-exclusion (artifact-exclusion \"hara:hara\")))
@@ -26,7 +25,7 @@
                        nil
                        nil)))
 
-(definvoke artifact-exclusion
+(invoke/definvoke artifact-exclusion
   "creates an artifact exclusion
  
    (artifact-exclusion \"hara:hara:jar:2.8.4\")

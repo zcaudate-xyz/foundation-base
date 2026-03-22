@@ -1,6 +1,6 @@
 (ns code.framework.text-test
-  (:use code.test)
-  (:require [code.framework.text :refer :all]))
+  (:require [code.framework.text :refer :all])
+  (:use code.test))
 
 ^{:refer code.framework.text/summarise-deltas :added "3.0"}
 (fact "summary of what changes have been made"

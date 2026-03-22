@@ -1,6 +1,6 @@
 (ns std.protocol.object-test
-  (:use code.test)
-  (:require [std.protocol.object :refer :all]))
+  (:require [std.protocol.object :refer :all])
+  (:use code.test))
 
 ^{:refer std.protocol.object/-meta-read :added "3.0"}
 (comment "accesses class meta information for reading from object")

@@ -1,14 +1,12 @@
 (ns rt.basic.impl.process-haskell
-  (:require [std.lang.model.spec-haskell :as spec]
-            [std.lang.base.impl :as impl]
-            [std.lang.base.util :as ut]
+  (:require [rt.basic.type-common :as common]
+            [rt.basic.type-twostep :as twostep]
             [std.lang.base.book :as book]
-            [std.lang.base.runtime :as rt]
+            [std.lang.base.impl :as impl]
             [std.lang.base.pointer :as ptr]
-            [std.lib :as h]
-            [std.string :as str]
-            [rt.basic.type-common :as common]
-            [rt.basic.type-twostep :as twostep]))
+            [std.lang.base.runtime :as rt]
+            [std.lang.base.util :as ut]
+            [std.lang.model.spec-haskell :as spec]))
 
 (def +program-init+
   (common/put-program-options

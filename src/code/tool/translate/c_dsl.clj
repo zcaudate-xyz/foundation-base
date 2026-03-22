@@ -1,6 +1,6 @@
 (ns code.tool.translate.c-dsl
-  (:require [std.lib :as h]
-            [clojure.string :as str]))
+  (:require [clojure.string :as str]
+            [std.lib.foundation :as f]))
 
 (defmulti translate-node :kind)
 
@@ -8,7 +8,7 @@
   (mapv translate-node args))
 
 (defmethod translate-node :default [node]
-  (h/error "Unknown node type" {:type (:kind node) :node node}))
+  (f/error "Unknown node type" {:type (:kind node) :node node}))
 
 (defmethod translate-node nil [_]
   nil)

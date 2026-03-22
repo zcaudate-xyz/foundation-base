@@ -1,7 +1,7 @@
 (ns rt.postgres.script.test.scratch-v2-test
-  (:use code.test)
-  (:require [rt.postgres.script.test.scratch-v2 :refer :all]
-            [rt.postgres.grammar.typed-parse :as parse]))
+  (:require [rt.postgres.grammar.typed-parse :as parse]
+            [rt.postgres.script.test.scratch-v2 :refer :all])
+  (:use code.test))
 
 (defn scratch-analysis
   []

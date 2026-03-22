@@ -1,8 +1,7 @@
 (ns js.react-native.react-test
-  (:use code.test)
-  (:require [std.lang :as  l]
-            [std.lib :as h]
-            [js.cell.playground :as browser]))
+  (:require [js.cell.playground :as browser]
+            [std.lang :as l])
+  (:use code.test))
 
 (l/script :js
   {:runtime :websocket

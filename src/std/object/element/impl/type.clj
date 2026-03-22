@@ -1,8 +1,8 @@
 (ns std.object.element.impl.type
-  (:require [std.protocol.string :as protocol.string]
+  (:require [std.object.element.class :as class]
             [std.object.element.modifier :as modifier]
-            [std.object.element.class :as class]
-            [std.string :as str]))
+            [std.protocol.string :as protocol.string]
+            [std.string.coerce :as coerce]))
 
 (defonce +override+ 
   (try
@@ -100,7 +100,7 @@
                      modifiers
                      (conj modifiers :instance))
          _ (if (not= tag :class) (set-accessible obj true))]
-     (-> {:name (str/to-string obj)
+     (-> {:name (coerce/to-string obj)
           :tag  tag
           :hash (.hashCode ^Object obj)
           :container (get-declaring-class obj)

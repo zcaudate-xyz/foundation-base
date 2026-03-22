@@ -1,10 +1,10 @@
 (ns std.lang.base.emit-fn-op-test
-  (:use code.test)
   (:require [std.lang.base.emit-common :as common]
-            [std.lang.base.emit-helper :as helper]
             [std.lang.base.emit-fn :as fn]
+            [std.lang.base.emit-helper :as helper]
             [std.lang.base.grammar :as grammar]
-            [std.lib :as h]))
+            [std.string.prose :as prose])
+  (:use code.test))
 
 (def +reserved+
   (-> (grammar/build)
@@ -19,7 +19,7 @@
   (fn/test-fn-loop '(fn [] (return (+ a 1)))
                    +grammar+
                    {})
-  => (std.string/|
+  => (prose/|
       "function (){"
       "  (return (+ a 1));"
       "}")
@@ -32,7 +32,7 @@
   (fn/test-fn-emit '(fn [] (return (+ a 1)))
                    +grammar+
                    {})
-  => (std.string/|
+  => (prose/|
       "function (){"
       "  return a + 1;"
       "}")  
@@ -40,7 +40,7 @@
   (fn/test-fn-emit '(fn:> (+ a 1))
                          +grammar+
                          {})
-  => (std.string/|
+  => (prose/|
       "function (){"
       "  return a + 1;"
       "}"))
@@ -53,7 +53,7 @@
                             (return (+ a 1)))
                          +grammar+
                          {})
-  => (std.string/|
+  => (prose/|
       "function hello(a = 1,b = (+ 1 2)){"
       "  (return (+ a 1));"
       "}")
@@ -64,7 +64,7 @@
                      +grammar+
                      {})
   
-  => (std.string/| "function hello(a = 1,b = 1 + 2){"
+  => (prose/| "function hello(a = 1,b = 1 + 2){"
                    "  return a + 1;"
                    "}"))
 

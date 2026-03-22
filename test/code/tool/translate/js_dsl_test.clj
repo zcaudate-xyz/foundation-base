@@ -1,7 +1,6 @@
 (ns code.tool.translate.js-dsl-test
-  (:use code.test)
-  (:require [code.tool.translate.js-dsl :as js-dsl]
-            [std.lib :as h]))
+  (:require [code.tool.translate.js-dsl :as js-dsl])
+  (:use code.test))
 
 (fact "translate-node basics"
   (js-dsl/translate-node {:type "Identifier" :name "foo"})

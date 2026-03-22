@@ -1,5 +1,5 @@
 (ns jvm.artifact.common
-  (:require [std.string :as str])
+  (:require [clojure.string])
   (:import (clojure.lang Symbol)))
 
 (defonce ^:dynamic *sep*
@@ -10,7 +10,7 @@
       (str *sep* ".m2" *sep* "repository")))
 
 (defonce ^:dynamic *java-class-path*
-  (->> (str/split (System/getProperty "java.class.path") #":")
+  (->> (clojure.string/split (System/getProperty "java.class.path") #":")
        (filter (fn [^String x] (.endsWith x ".jar")))))
 
 (defonce ^:dynamic *java-home*
@@ -32,7 +32,7 @@
    (let [sym-str (-> (str sym)
                      (.replaceAll "\\." *sep*)
                      (.replaceAll "-" "_"))
-         f-char (-> sym-str (str/split (re-pattern *sep*)) last first)]
+         f-char (-> sym-str (clojure.string/split (re-pattern *sep*)) last first)]
 
      (str sym-str
           (if (<= (int \A) (int f-char) (int \Z))

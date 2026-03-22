@@ -1,6 +1,6 @@
 (ns std.config.common-test
-  (:use code.test)
-  (:require [std.config.common :refer :all]))
+  (:require [std.config.common :refer :all])
+  (:use code.test))
 
 ^{:refer std.config.common/-resolve-directive :added "3.0"}
 (fact "multimethod for resolving directives"

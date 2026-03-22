@@ -1,6 +1,6 @@
 (ns std.block.check-test
-  (:use code.test)
-  (:require [std.block.check :refer :all]))
+  (:require [std.block.check :refer :all])
+  (:use code.test))
 
 ^{:refer std.block.check/boundary? :added "3.0"}
 (fact "returns whether a char is of a boundary type"

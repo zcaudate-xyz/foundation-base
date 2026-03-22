@@ -1,5 +1,4 @@
-(ns std.lang.model.spec-xtalk.fn-julia
-  (:require [std.lib :as h]))
+(ns std.lang.model.spec-xtalk.fn-julia)
 
 (defn julia-tf-x-del
   [[_ obj]]

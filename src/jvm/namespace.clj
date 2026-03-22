@@ -1,12 +1,13 @@
 (ns jvm.namespace
-  (:require [std.pipe :as pipe]
-            [jvm.namespace.common :as common]
-            [jvm.namespace.eval :as eval]
+  (:require [jvm.namespace.common :as common]
             [jvm.namespace.context :as context]
             [jvm.namespace.dependent :as dependent]
-            [std.lib :as h :refer [definvoke]]))
+            [jvm.namespace.eval :as eval]
+            [std.lib.foundation :as f]
+            [std.lib.invoke :as invoke]
+            [std.pipe :as pipe]))
 
-(h/intern-in eval/eval-ns
+(f/intern-in eval/eval-ns
              eval/with-ns
              eval/eval-temp-ns
              context/resolve-ns
@@ -95,7 +96,7 @@
 
 (def return-keys (comp vec sort keys))
 
-(definvoke list-aliases
+(invoke/definvoke list-aliases
   "namespace list all aliases task
  
    (ns/list-aliases '[jvm.namespace])"
@@ -106,7 +107,7 @@
           :main   {:fn clojure.core/ns-aliases}
           :item   {:post return-keys}}])
 
-(definvoke clear-aliases
+(invoke/definvoke clear-aliases
   "removes all namespace aliases"
   {:added "3.0"}
   [:pipe {:template :namespace
@@ -114,7 +115,7 @@
                    :parallel true}
           :main {:fn common/ns-clear-aliases}}])
 
-(definvoke list-imports
+(invoke/definvoke list-imports
   "namespace list all imports task
  
    (ns/list-imports '[jvm.namespace] {:return :summary})
@@ -126,7 +127,7 @@
           :main {:fn clojure.core/ns-imports}
           :item {:post return-keys}}])
 
-(definvoke list-external-imports
+(invoke/definvoke list-external-imports
   "lists all external imports"
   {:added "3.0"}
   [:pipe {:template :namespace
@@ -135,7 +136,7 @@
           :main {:fn common/ns-list-external-imports}
           :item {:post return-keys}}])
 
-(definvoke clear-external-imports
+(invoke/definvoke clear-external-imports
   "clears all external imports"
   {:added "3.0"}
   [:pipe {:template :namespace
@@ -143,7 +144,7 @@
                    :parallel true}
           :main {:fn common/ns-clear-external-imports}}])
 
-(definvoke list-mappings
+(invoke/definvoke list-mappings
   "namespace list all mappings task
  
    (ns/list-mappings '[jvm.namespace] {:return :summary})
@@ -156,7 +157,7 @@
           :main {:fn clojure.core/ns-map}
           :item {:post return-keys}}])
 
-(definvoke clear-mappings
+(invoke/definvoke clear-mappings
   "removes all mapped vars in the namespace"
   {:added "3.0"}
   [:pipe {:template :namespace
@@ -164,7 +165,7 @@
                    :parallel true}
           :main {:fn common/ns-clear-mappings}}])
 
-(definvoke list-interns
+(invoke/definvoke list-interns
   "namespace list all interns task
  
    (ns/list-interns '[jvm.namespace] {:return :summary})
@@ -177,7 +178,7 @@
           :main {:fn clojure.core/ns-interns}
           :item {:post return-keys}}])
 
-(definvoke list-refers
+(invoke/definvoke list-refers
   "namespace list all refers task
  
    (ns/list-refers '[jvm.namespace] {:return :summary})
@@ -190,7 +191,7 @@
           :main {:fn clojure.core/ns-refers}
           :item {:post return-keys}}])
 
-(definvoke clear-interns
+(invoke/definvoke clear-interns
   "clears all interned vars in the namespace
  
    (ns/clear-interns)"
@@ -200,7 +201,7 @@
                    :parallel true}
           :main {:fn common/ns-clear-interns}}])
 
-(definvoke clear-refers
+(invoke/definvoke clear-refers
   "clears all refers in a namespace"
   {:added "3.0"}
   [:pipe {:template :namespace
@@ -208,7 +209,7 @@
                    :parallel true}
           :main {:fn common/ns-clear-refers}}])
 
-(definvoke list-publics
+(invoke/definvoke list-publics
   "namespace list all publics task
  
    (ns/list-publics '[jvm.namespace] {:return :summary})
@@ -221,7 +222,7 @@
           :main {:fn clojure.core/ns-publics}
           :item {:post return-keys}}])
 
-(definvoke clear
+(invoke/definvoke clear
   "namespace clear all mappings and aliases task
  
    (ns/clear #{*ns*})
@@ -233,7 +234,7 @@
                    :parallel true}
           :main {:fn common/ns-clear}}])
 
-(definvoke list-in-memory
+(invoke/definvoke list-in-memory
   "namespace list all objects in memory task
  
    (ns/list-in-memory 'jvm.namespace)
@@ -248,7 +249,7 @@
                    :parallel true}
           :main   {:fn common/raw-in-memory}}])
 
-(definvoke loaded?
+(invoke/definvoke loaded?
   "namespace check if namespace is loaded task
  
    (ns/loaded? 'jvm.namespace) => true
@@ -261,7 +262,7 @@
                    :parallel true}
           :main {:fn common/ns-loaded?}}])
 
-(definvoke reset
+(invoke/definvoke reset
   "deletes all namespaces under the root namespace"
   {:added "3.0"}
   [:pipe {:template :namespace.memory
@@ -271,7 +272,7 @@
                            :summary true}}
           :main {:fn common/ns-delete}}])
 
-(definvoke unmap
+(invoke/definvoke unmap
   "namespace unmap task
  
    (ns/unmap :args 'something)
@@ -284,7 +285,7 @@
           :arglists '([:args syms] [<ns> :args syms])
           :main {:fn common/ns-unmap}}])
 
-(definvoke unalias
+(invoke/definvoke unalias
   "namespace unalias task
  
    (ns/unalias :args 'something)
@@ -299,7 +300,7 @@
           :arglists '([:args syms] [<ns> :args syms])
           :main {:fn common/ns-unalias}}])
 
-(definvoke reload-task
+(invoke/definvoke reload-task
   "reloads all listed namespace aliases"
   {:added "3.0"}
   [:pipe {:template :namespace
@@ -317,7 +318,7 @@
   ([inputs]
    (reload-task (dependent/sort-topo inputs))))
 
-(definvoke reload-all
+(invoke/definvoke reload-all
   "reloads all listed namespaces and dependents
  
    (ns/reload-all)"

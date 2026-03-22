@@ -1,7 +1,7 @@
 (ns std.dispatch-test
-  (:use code.test)
   (:require [std.dispatch :refer :all]
-            [std.lib.component :as component]))
+            [std.lib.component :as component])
+  (:use code.test))
 
 ^{:refer std.dispatch/dispatch? :added "3.0"}
 (fact "checks if object is an dispatch"

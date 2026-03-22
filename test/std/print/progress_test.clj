@@ -1,6 +1,6 @@
 (ns std.print.progress-test
-  (:use code.test)
-  (:require [std.print.progress :refer :all]))
+  (:require [std.print.progress :refer :all])
+  (:use code.test))
 
 ^{:refer std.print.progress/replace-center :added "3.0"}
 (fact "replaces the center of the background with text"

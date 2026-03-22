@@ -1,14 +1,14 @@
 (ns std.image
-  (:require [std.lib :refer [definvoke]]
-            [std.image.awt]
+  (:require [std.image.awt]
             [std.image.base]
             [std.image.base.common :as common]
             [std.image.base.model :as model]
-            [std.image.protocol :as protocol.image])
+            [std.image.protocol :as protocol.image]
+            [std.lib.invoke :as invoke])
   (:import (java.awt.image BufferedImage))
   (:refer-clojure :exclude [read]))
 
-(definvoke default-type
+(invoke/definvoke default-type
   "displays and sets the default type
  
    (default-type std.image.base.Image)
@@ -20,7 +20,7 @@
   {:added "3.0"}
   [:dynamic {:val BufferedImage}])
 
-(definvoke default-model
+(invoke/definvoke default-model
   "displays and set the default model
  
    (:label (default-model))
@@ -28,7 +28,7 @@
   {:added "3.0"}
   [:dynamic {:val (model/model :int-argb)}])
 
-(definvoke default-view
+(invoke/definvoke default-view
   "displays and set the default view
  
    (default-view)

@@ -1,13 +1,13 @@
 (ns rt.redis
-  (:require [rt.redis.client :as client]
-            [rt.redis.eval-script :as script]
-            [lib.redis.bench :as bench]
+  (:require [lib.redis.bench :as bench]
             [lib.redis.event :as event]
             [net.resp.connection :as conn]
+            [rt.redis.client :as client]
+            [rt.redis.eval-script :as script]
             [std.concurrent :as cc]
-            [std.lib :as h]))
+            [std.lib.foundation :as f]))
 
-(h/intern-in client/client
+(f/intern-in client/client
              client/client?
              client/client:create
              client/test:client

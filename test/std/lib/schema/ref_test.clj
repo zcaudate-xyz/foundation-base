@@ -1,6 +1,6 @@
 (ns std.lib.schema.ref-test
-  (:use code.test)
-  (:require [std.lib.schema.ref :refer :all]))
+  (:require [std.lib.schema.ref :refer :all])
+  (:use code.test))
 
 ^{:refer std.lib.schema.ref/with:ref-fn :added "4.0"}
 (fact "passes a function for use in `reverse-ref-attr` method to add additional params to schema"

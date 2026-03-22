@@ -1,14 +1,15 @@
 (ns std.make.common
-  (:require [std.lib.collection :as c]
+  (:require [clojure.string]
+            [std.fs :as fs]
             [std.lib.atom :as atom]
-            [std.lib.os :as os]
-            [std.lib.impl :refer [defimpl]]
+            [std.lib.collection :as c]
             [std.lib.env :as env]
             [std.lib.foundation :as h]
             [std.lib.future :as f]
+            [std.lib.impl :refer [defimpl]]
+            [std.lib.os :as os]
             [std.lib.time :as time]
-            [std.string.common :as str]
-            [std.fs :as fs]))
+            [std.string.common :as str]))
 
 (defonce ^:dynamic *triggers* (atom {}))
 
@@ -66,7 +67,7 @@
    (keep (fn [[mcfg triggers]]
            (if (some (fn [tns]
                        (if (string? tns)
-                         (str/starts-with? (str ns)
+                         (clojure.string/starts-with? (str ns)
                                            tns)
                          (= tns ns)))
                      triggers)
@@ -180,7 +181,7 @@
            (apply os/os-run (conj cmd {:root out-dir}))
 
            :else
-           (let [tns  (-> (str (str/upper-case (h/strn command))
+           (let [tns  (-> (str (clojure.string/upper-case (h/strn command))
                                (if tag (str "-" tag)))
                           (.replaceAll "\\." "-"))]
              (do (os/tmux:new-session "DEV")
@@ -194,7 +195,7 @@
   ([{:keys [instance] :as mcfg} & [command]]
    (let [command (or command :build)
          {:keys [tag ns]} @instance
-         tns  (-> (str (str/upper-case (h/strn command))
+         tns  (-> (str (clojure.string/upper-case (h/strn command))
                        (if tag (str "-" tag)))
                   (.replaceAll "\\." "-"))]
      (os/tmux:kill-window  "DEV" tns))))

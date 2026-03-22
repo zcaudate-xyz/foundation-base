@@ -1,8 +1,8 @@
 (ns code.framework.link.cljs
-  (:require [code.framework.link.clj :as clj]
+  (:require [clojure.set]
+            [code.framework.link.clj :as clj]
             [code.framework.link.common :as common]
-            [std.print :as print]
-            [std.lib :as h]))
+            [std.print :as print]))
 
 (defmethod common/-file-linkage :cljs
   ([file]
@@ -10,7 +10,7 @@
      (let [[[_ ns & body] & forms]
            (read-string (str "[" (slurp file) "]"))]
        {:exports #{[:cljs ns]}
-        :imports (h/union
+        :imports (clojure.set/union
                   (->> body
                        (mapcat #(clj/get-namespaces % [:use :require]))
                        (map (fn [clj] [:cljs clj]))
@@ -30,7 +30,7 @@
            (catch Throwable t
              (throw (ex-info "Read failed." {:file file}))))]
      {:exports #{[:cljs ns] [:clj ns]}
-      :imports (h/union
+      :imports (clojure.set/union
                 (->> body
                      (mapcat #(clj/get-namespaces % [:require]))
                      (mapcat (fn [clj] [[:cljs clj] [:clj clj]]))

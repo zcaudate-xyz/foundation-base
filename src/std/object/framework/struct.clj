@@ -1,12 +1,12 @@
 (ns std.object.framework.struct
-  (:require [std.lib :refer [definvoke]]
-            [std.object.query :as reflect]
+  (:require [std.lib.invoke :as invoke]
             [std.object.element :as element]
-            [std.string :as str]))
+            [std.object.query :as reflect]
+            [std.string.case :as case]))
 
 (def ^:dynamic *lead-class* nil)
 
-(definvoke getter-function
+(invoke/definvoke getter-function
   "creates a getter function for a keyword
  
    (getter-function :class 'Class)
@@ -18,12 +18,12 @@
          [prefix label] (if (.endsWith label "?")
                           ["is-" (subs label 0 (dec (count label)))]
                           ["get-" label])
-         label   (str/camel-case (str prefix label))]
+         label   (case/camel-case (str prefix label))]
      (eval `(fn ~(symbol label) [~(with-meta 'obj {:tag cls})]
               (and ~'obj
                    (~(symbol (str "." label)) ~'obj)))))))
 
-(definvoke field-function
+(invoke/definvoke field-function
   "creates a field access function
  
    ((field-function :value String) \"hello\")
@@ -31,7 +31,7 @@
   {:added "3.0"}
   [:memoize]
   ([k ^Class cls]
-   (or (try (element/to-element (.getDeclaredField cls (str/camel-case (name k))))
+   (or (try (element/to-element (.getDeclaredField cls (case/camel-case (name k))))
             (catch NoSuchFieldException e))
        (if-let [super (.getSuperclass cls)]
          (binding [*lead-class* (or *lead-class*

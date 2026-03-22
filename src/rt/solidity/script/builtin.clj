@@ -1,7 +1,10 @@
 (ns rt.solidity.script.builtin
-  (:require [std.lib :as h]
+  (:require [clojure.string]
             [std.lang :as l]
-            [std.string :as str])
+            [std.lib.foundation :as f]
+            [std.lib.template :as template]
+            [std.string.case :as case]
+            [std.string.wrap])
   (:refer-clojure :exclude [assert require bytes]))
 
 (l/script :solidity
@@ -50,15 +53,15 @@
 
 (defn- sol-fn-name-raw
   [name]
-  (str/join "-" (map str/spear-case (str/split name #"\."))))
+  (clojure.string/join "-" (map case/spear-case (clojure.string/split name #"\."))))
 
-(def sol-fn-name (str/wrap sol-fn-name-raw))
+(def sol-fn-name (std.string.wrap/wrap sol-fn-name-raw))
 
 (defn- sol-tmpl
   "creates fragments in builtin"
   {:added "4.0"}
   [sym]
-  (h/$ (def$.sol ~(sol-fn-name sym) ~sym)))
+  (template/$ (def$.sol ~(sol-fn-name sym) ~sym)))
 
-(h/template-entries [sol-tmpl]
+(f/template-entries [sol-tmpl]
   +globals+)

@@ -1,9 +1,9 @@
 (ns rt.postgres.compile-test
-  (:use code.test)
   (:require [rt.postgres.compile :as compile]
-            [rt.postgres.compile.server-db :as server-db]
             [rt.postgres.compile.server-api :as server-api]
-            [rt.postgres.grammar.typed-common :as types]))
+            [rt.postgres.compile.server-db :as server-db]
+            [rt.postgres.grammar.typed-common :as types])
+  (:use code.test))
 
 (def +shape-fn+
   (types/make-fn-def

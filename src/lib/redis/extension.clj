@@ -1,12 +1,11 @@
 (ns lib.redis.extension
-  (:require [lib.redis.impl.reference :as ref]
-            [lib.redis.impl.common :as common]
+  (:require [lib.redis.impl.common :as common]
+            [lib.redis.impl.generator :as gen]
+            [lib.redis.impl.reference :as ref]
             [net.resp.wire :as wire]
-            [std.string :as str]
-            [std.string.plural :as plural]
             [std.concurrent :as cc]
-            [std.lib :as h :refer [definvoke]]
-            [lib.redis.impl.generator :as gen]))
+            [std.lib.foundation :as f]
+            [std.string.plural :as plural]))
 
 (defn optional:set
   "optional parameters for `set` command"
@@ -95,9 +94,9 @@
                    +data+
                    +additional+))
 
-(h/template-entries [gen/optional-tmpl]
+(f/template-entries [gen/optional-tmpl]
                     (->> +all+
                          (filter :optionals)
                          (remove (comp #{:set} :id))))
 
-(h/template-entries [gen/command-tmpl] +all+)
+(f/template-entries [gen/command-tmpl] +all+)

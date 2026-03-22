@@ -1,8 +1,8 @@
 (ns std.lang.model.spec-bash-test
-  (:use code.test)
-  (:require [std.lang.model.spec-bash :refer :all]
-            [std.lang :as l]
-            [std.lib :as h]))
+  (:require [std.lang :as l]
+            [std.lang.model.spec-bash :refer :all]
+            [std.string.prose :as prose])
+  (:use code.test))
 
 (l/script- :bash
   {:runtime :oneshot
@@ -211,7 +211,7 @@
              (var a 1)
              (echo (:$ a)))
            (hello)])
-  => (std.string/|
+  => (prose/|
       "function hello(){"
       "  local a=1"
       "  echo ${a}"
@@ -241,7 +241,7 @@
              (echo (:$ a) (:$ b)))
            (hello (expr (+ 1 2))
                   2)])
-  (std.string/|
+  (prose/|
    "function hello(){"
    "  local a=${1}"
    "  local b=${2}"
@@ -337,7 +337,7 @@
    :bash '[(cat (<< :EOF
                     ["input"
                      "on multiple lines"]))])
-  => (std.string/|
+  => (prose/|
       "cat <<EOF"
       "input"
       "on multiple lines"
@@ -402,7 +402,7 @@
 
                  :else
                  (echo "again"))])
-  => (std.string/|
+  => (prose/|
       "if [[ 1 -ne 1 ]]; then"
       "  echo hello"
       "elif [[ 2 -ne 2 ]]; then"

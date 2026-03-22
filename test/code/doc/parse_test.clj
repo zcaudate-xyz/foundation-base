@@ -1,9 +1,9 @@
 (ns code.doc.parse-test
-  (:use code.test)
-  (:require [code.doc.parse :refer :all]
-            [std.block.navigate :as nav]
-            [clojure.java.io :as io]
-            [markdown.core :as md]))
+  (:require [clojure.java.io :as io]
+            [code.doc.parse :refer :all]
+            [markdown.core :as md]
+            [std.block.navigate :as nav])
+  (:use code.test))
 
 ^{:refer code.doc.parse/parse-ns-form :added "3.0"}
 (fact "converts a ns zipper into an element"

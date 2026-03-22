@@ -1,10 +1,8 @@
 (ns lua.ext.sochain-test
-  (:use code.test)
-  (:require [std.lang :as l]
-            [std.lib :as h]
-            [std.string :as str]
-            [std.json :as json]
-            [xt.lang.base-notify :as notify]))
+  (:require [std.json :as json]
+            [std.lang :as l]
+            [xt.lang.base-notify :as notify])
+  (:use code.test))
 
 (l/script- :lua
   {:runtime :basic

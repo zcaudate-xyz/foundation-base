@@ -1,9 +1,10 @@
 (ns rt.postgres.entity-util
-  (:require [std.lib :as h]
+  (:require [rt.postgres :as pg]
             [std.lang :as l]
-            [std.string :as str]
-            [rt.postgres :as pg]
-            [std.lang.base.grammar-spec :as grammar-spec]))
+            [std.lang.base.grammar-spec :as grammar-spec]
+            [std.lib.context.pointer :as ptr]
+            [std.lib.env :as env]
+            [std.lib.foundation :as f]))
 
 (defonce +app+
   (atom {}))
@@ -13,21 +14,21 @@
 (defn default-application
   [& [module]]
   (first (:application
-          (:static (h/suppress
+          (:static (f/suppress
                     (l/rt:module
                      (l/rt (or module
-                               (h/ns-sym))
+                               (env/ns-sym))
                            :postgres)))))))
 
 (defn default-ns-str
   [& [application]]
   (get @+app+ (or application
-                  (default-application (h/ns-sym)))))
+                  (default-application (env/ns-sym)))))
 
 (defn init-default-ns-str
   [& [application ns-str]]
-  (let [ns-str (or ns-str (name (h/ns-sym)))
-        application (or application (default-application (h/ns-sym)))]
+  (let [ns-str (or ns-str (name (env/ns-sym)))
+        application (or application (default-application (env/ns-sym)))]
     (when application 
       (swap! +app+ assoc application ns-str))))
 
@@ -140,7 +141,7 @@
 
 (defn normalise-ref
   [ptr]
-  (cond (h/pointer? ptr)
+  (cond (ptr/pointer? ptr)
         (symbol (name (:module ptr))
                 (name (:id ptr)))
 
@@ -187,26 +188,26 @@
 
 (defn init-addons
   [& [m application]]
-  (let [application   (or application (default-application (h/ns-sym)))
+  (let [application   (or application (default-application (env/ns-sym)))
         ns-str   (default-ns-str application)]
     (when application 
       (swap! +addons+ assoc application (merge m (default-fields ns-str))))))
 
 (defn get-addon
   [key]
-  (assoc (get-in @+addons+ [(default-application (h/ns-sym))
+  (assoc (get-in @+addons+ [(default-application (env/ns-sym))
                             key])
          :key key))
 
 (defn add-addon
   [key field priority]
-  (let [application (default-application (h/ns-sym))]
+  (let [application (default-application (env/ns-sym))]
     (swap! +addons+ assoc-in [application key] {:field field
                                                 :priority priority})))
 
 (defn addons-remove
   [key]
-  (swap! +addons+ update-in [(default-application (h/ns-sym))] dissoc key))
+  (swap! +addons+ update-in [(default-application (env/ns-sym))] dissoc key))
 
 
 ;;

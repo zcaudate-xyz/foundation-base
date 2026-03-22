@@ -1,10 +1,12 @@
 (ns std.block.heal
   (:require [std.block.heal.core :as core]
-            [std.block.heal.print :as print]
             [std.block.heal.parse :as parse]
-            [std.lib :as h :refer [definvoke]]))
+            [std.block.heal.print :as print]
+            [std.lib.env :as env]
+            [std.lib.foundation :as f]
+            [std.lib.invoke :as invoke]))
 
-(h/intern-in [heal core/heal-content])
+(f/intern-in [heal core/heal-content])
 
 (defn print-rainbow
   "prints out the code in rainbow"
@@ -19,7 +21,7 @@
   "prints out the code in rainbow"
   {:added "4.0"}
   [content]
-  (h/with-out-str
+  (env/with-out-str
     (print-rainbow content)))
 
 (comment
@@ -35,7 +37,7 @@
    (let [params (assoc params :transform core/heal-content)]
      (framework/transform-code ns params lookup project))))
 
-  (definvoke heal-code
+  (invoke/definvoke heal-code
     "helper function to fix parents"
     {:added "4.0"}
     [:task {:construct {:input    (fn [_] *ns*)

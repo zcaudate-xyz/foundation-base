@@ -1,8 +1,8 @@
 (ns kmi.queue.common-test
-  (:use code.test)
-  (:require [std.lang :as  l]
-            [std.lib :as h]
-            [rt.redis]))
+  (:require [rt.redis]
+            [std.lang :as l]
+            [std.lib.network :as network])
+  (:use code.test))
 
 (l/script- :lua
   {:runtime :redis.client
@@ -15,7 +15,7 @@
 
 (fact:global
  {:setup  [(l/rt:restart)
-           (h/wait-for-port "localhost" 17003
+           (network/wait-for-port "localhost" 17003
                             {:timeout 500})]
   :teardown [(l/rt:stop)]})
 

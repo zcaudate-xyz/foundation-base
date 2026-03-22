@@ -1,6 +1,7 @@
 (ns web3.lib.example-erc20
-  (:require [std.lang :as l]
-            [std.lib :as h]))
+  (:require [clojure.string]
+            [std.lang :as l]
+            [std.lib.env :as env]))
 
 (l/script :solidity
   {:require [[rt.solidity :as s]]
@@ -81,14 +82,14 @@
   (return s/msg-sender))
 
 (def +default-contract+
-  {:ns   (h/ns-sym)
+  {:ns   (env/ns-sym)
    :name "ExampleSample"
    :args []
    :interfaces [-/IERC20]})
 
 (comment
 
-  (std.string/join
+  (clojure.string/join
    "\n"
    ["// SPDX-License-Identifier: GPL-3.0"
     "pragma solidity >=0.7.0 <0.9.0;"

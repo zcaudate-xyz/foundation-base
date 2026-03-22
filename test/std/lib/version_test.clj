@@ -1,6 +1,6 @@
 (ns std.lib.version-test
-  (:use [code.test :exclude [run]])
   (:require [std.lib.version :as version :refer :all])
+  (:use [code.test :exclude [run]])
   (:refer-clojure :exclude [clojure-version]))
 
 ^{:refer std.lib.version/parse-number :added "3.0"}

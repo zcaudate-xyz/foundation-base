@@ -1,44 +1,49 @@
 (ns std.lang
-  (:require [std.lang.base.pointer :as ptr]
+  (:require [clojure.string]
+            [std.lang.base.book :as book]
             [std.lang.base.compile :as compile]
-            [std.lang.base.impl-lifecycle :as lifecycle]
-            [std.lang.base.impl-entry :as entry]
-            [std.lang.base.impl :as impl]
-            [std.lang.base.library :as lib]
-            [std.lang.base.manage :as manage]
-            [std.lang.base.registry :as registry]
-            [std.lang.base.runtime :as runtime]
             [std.lang.base.emit :as emit]
-            [std.lang.base.emit-preprocess :as preprocess]
             [std.lang.base.emit-common :as common]
             [std.lang.base.emit-helper :as helper]
-            [std.lang.base.util :as ut]
-            [std.lang.base.book :as book]
-            [std.lang.base.script-def :as script-def]
-            [std.lang.base.script-control :as script-control]
-            [std.lang.base.script-lint :as lint]
-            [std.lang.base.script-annex :as annex]
-            [std.lang.base.script-macro :as macro]
+            [std.lang.base.emit-preprocess :as preprocess]
+            [std.lang.base.impl :as impl]
+            [std.lang.base.impl-entry :as entry]
+            [std.lang.base.impl-lifecycle :as lifecycle]
+            [std.lang.base.library :as lib]
+            [std.lang.base.manage :as manage]
+            [std.lang.base.pointer :as ptr]
+            [std.lang.base.registry :as registry]
+            [std.lang.base.runtime :as runtime]
             [std.lang.base.script :as script]
+            [std.lang.base.script-annex :as annex]
+            [std.lang.base.script-control :as script-control]
+            [std.lang.base.script-def :as script-def]
+            [std.lang.base.script-lint :as lint]
+            [std.lang.base.script-macro :as macro]
+            [std.lang.base.util :as ut]
             [std.lang.base.workspace :as workspace]
             [std.lang.interface.type-notify :as notify]
-            [std.lang.model.spec-c]
+            [std.lang.interface.type-shared :as shared]
             [std.lang.model.spec-bash]
+            [std.lang.model.spec-c]
             [std.lang.model.spec-glsl]
             [std.lang.model.spec-js]
             [std.lang.model.spec-lua]
-            [std.lang.model.spec-python]
             [std.lang.model.spec-perl]
             [std.lang.model.spec-php]
+            [std.lang.model.spec-python]
             [std.lang.model.spec-r]
             [std.lang.model.spec-ruby]
             [std.lang.model.spec-rust]
             [std.lang.model.spec-xtalk]
-            [std.lang.interface.type-shared :as shared]
-            [std.lib :as h])
+            [std.lib.context.pointer]
+            [std.lib.deps :as deps]
+            [std.lib.env :as env]
+            [std.lib.foundation :as f]
+            [std.lib.walk :as walk])
   (:refer-clojure :exclude [test]))
 
-(h/intern-in
+(f/intern-in
  ut/sym-full
  ut/sym-id
  ut/sym-module
@@ -186,7 +191,7 @@
   "change `[]` to `{}`"
   {:added "4.0"}
   [input]
-  (h/prewalk (fn [form]
+  (walk/prewalk (fn [form]
                (if (and (vector? form)
                         (empty? form))
                  {}
@@ -197,7 +202,7 @@
   "invokes code in the given namespace"
   {:added "4.0"}
   [ns lang code]
-  (h/p:rt-invoke-ptr
+  (std.lib.context.pointer/rt-invoke-ptr
    (ut/lang-rt ns lang)
    (ptr lang {:module ns})
    code))
@@ -206,13 +211,13 @@
   "forces reloading of all dependent namespaces"
   {:added "4.0"}
   ([ns lang]
-   (doseq [ns (h/deps:ordered (get-book (default-library)
+   (doseq [ns (deps/deps-ordered (get-book (default-library)
                                         lang)
                              [ns])]
      (lib:purge ns)
      (eval (list 'jvm.namespace/clear ns))
      (require ns :reload)
-     (h/p :RELOADED ns))))
+     (env/p :RELOADED ns))))
 
 
 (comment
@@ -230,7 +235,7 @@
                                   ))
             (keys)
             (filter (fn [n]
-                      (std.string/starts-with? (str n) "stats")))))
+                      (clojure.string/starts-with? (str n) "stats")))))
       (require ['statsdb.core.execute])
       (std.make/build play.tui-counter-basic.main/PROJECT
                       :statsdb))

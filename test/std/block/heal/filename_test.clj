@@ -1,8 +1,7 @@
 (ns std.block.heal.filename-test
-  (:use code.test)
   (:require [std.block.heal.filename :refer :all]
-            [std.fs :as fs]
-            [std.lib :as h]))
+            [std.fs :as fs])
+  (:use code.test))
 
 ^{:refer std.block.heal.filename/heal-snake-case-filenames :added "4.0"}
 (fact "renames files to snake case recursively"

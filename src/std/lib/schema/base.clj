@@ -1,6 +1,6 @@
 (ns std.lib.schema.base
-  (:require [std.lib.foundation :as h]
-            [std.lib.collection :as coll]))
+  (:require [std.lib.collection :as coll]
+            [std.lib.foundation :as h]))
 
 (defonce +scope-brief+
   {:*/min        #{:-/id       :-/key}

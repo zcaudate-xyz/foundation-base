@@ -1,13 +1,13 @@
 (ns std.lib.context.space
-  (:require [std.protocol.context :as protocol.context]
-            [std.protocol.component :as protocol.component]
-            [std.lib.atom :as at]
+  (:require [std.lib.atom :as at]
             [std.lib.collection :as c]
+            [std.lib.context.registry :as reg]
             [std.lib.env :as env]
             [std.lib.foundation :as h]
             [std.lib.impl :as impl :refer [defimpl]]
             [std.lib.resource :as res]
-            [std.lib.context.registry :as reg])
+            [std.protocol.component :as protocol.component]
+            [std.protocol.context :as protocol.context])
   (:import (clojure.lang Namespace)))
 
 (defonce ^:dynamic *namespace* nil)

@@ -1,6 +1,6 @@
 (ns js.i18next
   (:require [std.lang :as l]
-            [std.lib :as h]))
+            [std.lib.foundation :as f]))
 
 (l/script :js
   {:import [["react-i18next" :as [* ReactI18n]]
@@ -8,7 +8,7 @@
             ["react-i18next" :as [* ReactI18next]]
             ["i18next" :as [* I18next]]]})
 
-(h/template-entries [l/tmpl-entry {:type :fragment
+(f/template-entries [l/tmpl-entry {:type :fragment
                                    :base "ReactI18next"
                                    :tag "js"}]
   [I18nContext
@@ -34,7 +34,7 @@
    withSSR
    withTranslation])
 
-(h/template-entries [l/tmpl-entry {:type :fragment
+(f/template-entries [l/tmpl-entry {:type :fragment
                                    :base "I18next"
                                    :tag "js"}]
   [changeLanguage

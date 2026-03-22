@@ -1,11 +1,13 @@
 (ns std.object.query
-  (:require [std.protocol.invoke :as protocol.invoke]
+  (:require [std.lib.class]
+            [std.lib.collection :as collection]
+            [std.lib.invoke :as invoke]
             [std.object.element :as element]
             [std.object.element.class :as class]
             [std.object.element.common :as common]
             [std.object.query.input :as input]
             [std.object.query.order :as order]
-            [std.lib :refer [definvoke] :as h]))
+            [std.protocol.invoke :as protocol.invoke]))
 
 (defn all-class-members
   "returns the raw reflected methods, fields and constructors
@@ -18,7 +20,7 @@
     (seq (.getDeclaredConstructors class))
     (seq (.getDeclaredFields class)))))
 
-(definvoke all-class-elements
+(invoke/definvoke all-class-elements
   "returns elements 
  
    (all-class-elements String)"
@@ -28,7 +30,7 @@
    (->> (all-class-members class)
         (mapv element/to-element))))
 
-(definvoke select-class-elements
+(invoke/definvoke select-class-elements
   "returns the processed reflected methods, fields and constructors
  
    (select-class-elements String [#\"^c\" :name])"
@@ -50,7 +52,7 @@
   ([obj selectors]
    (select-class-elements (common/context-class obj) selectors)))
 
-(definvoke select-supers-elements
+(invoke/definvoke select-supers-elements
   "returns the elements related to the type's super classes
  
    (select-supers-elements String [])"
@@ -58,7 +60,7 @@
   [:memoize]
   ([class selectors]
    (let [grp    (input/args-group selectors)
-         supers (h/flatten-nested (h/ancestor:tree class))
+         supers (collection/flatten-nested (std.lib.class/ancestor:tree class))
          elems  (mapcat #(select-class-elements % selectors) supers)]
      (if (and (seq elems)
               (common/element? (first elems)))
@@ -90,19 +92,19 @@
        (order/order grp elems)
        (sort (set elems))))))
 
-(definvoke all-instance-elements
+(invoke/definvoke all-instance-elements
   "returns the hierarchy of elements corresponding to a class
  
    (all-instance-elements String nil)"
   {:added "3.0"}
   [:memoize]
   ([tcls icls]
-   (let [supers (reverse (h/ancestor:list tcls))
+   (let [supers (reverse (std.lib.class/ancestor:list tcls))
          eles   (mapcat #(select-class-elements % [:instance]) supers)]
      (concat eles
              (if icls (concat eles (select-class-elements icls [:static])))))))
 
-(definvoke select-instance-elements
+(invoke/definvoke select-instance-elements
   "returns the hierarchy of elements corresponding to a class
  
    (select-instance-elements String nil [#\"^c\" :name])"
@@ -203,7 +205,7 @@
    -a- => \"world\""
   {:added "3.0"}
   ([obj]
-   (let [fields (h/map-juxt [(comp keyword :name) identity]
+   (let [fields (collection/map-juxt [(comp keyword :name) identity]
                             (query-instance obj [:field]))]
      (Delegate. obj fields))))
 
@@ -214,7 +216,7 @@
    :hierarchy query-hierarchy
    :ihierarchy query-instance-hierarchy})
 
-(definvoke invoke-intern-element
+(invoke/definvoke invoke-intern-element
   "creates the form for `element` for definvoke
  
    (invoke-intern-element :element '-foo- {:class String

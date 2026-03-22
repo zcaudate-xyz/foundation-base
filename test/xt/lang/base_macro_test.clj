@@ -1,8 +1,8 @@
 (ns xt.lang.base-macro-test
-  (:use code.test)
-  (:require [std.lang :as l]
-            [std.lib :as h]
-            [std.json :as json]))
+  (:require [std.json :as json]
+            [std.lang :as l]
+            [std.string.prose :as prose])
+  (:use code.test))
 
 (l/script- :js
   {:runtime :basic
@@ -248,7 +248,7 @@
      (k/for:async [[ret err] (+ 1 2 3)]
        {:success (:= out ret)
         :error (:= out err)})))
-  => (std.string/|
+  => (prose/|
       "(function (){"
       "  let out = null;"
       "  return new Promise(function (resolve,reject){"
@@ -266,7 +266,7 @@
      (k/for:async [[ret err] (+ 1 2 3)]
        {:success (:= out ret)
         :error (:= out err)})))
-  => (std.string/|
+  => (prose/|
    "local out = nil"
    "return ngx.thread.spawn(function ()"
    "  local ok,out = pcall(function ()"

@@ -1,22 +1,4 @@
 (ns std.pretty.color
-  "Coloring multimethods to format text by adding markup.
-
-  #### Color Options
-
-  `:print-color`
-
-  When true, ouptut colored text from print functions.
-
-  `:color-markup`
-
-  - `:ansi` for color terminal text (default)
-  - `:html-inline` for inline-styled html
-  - `:html-classes` for html with semantic classes
-
-  `:color-scheme`
-
-  Map of syntax element keywords to color codes.
-  "
   (:require [std.print.ansi :as ansi]))
 
 ;; ## Coloring Multimethods

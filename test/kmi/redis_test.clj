@@ -1,9 +1,8 @@
 (ns kmi.redis-test
-  (:use code.test)
-  (:require [std.lang :as  l]
-            [std.lib :as h]
+  (:require [lib.redis.bench :as bench]
             [rt.redis]
-            [lib.redis.bench :as bench]))
+            [std.lang :as l])
+  (:use code.test))
 
 (l/script- :lua
   {:runtime :redis.client

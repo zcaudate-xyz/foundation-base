@@ -1,8 +1,8 @@
 (ns lib.lucene.impl-test
-  (:use code.test)
   (:require [lib.lucene.impl :refer :all]
-            [lib.lucene.impl.index :as index]
-            [lib.lucene.impl.analyzer :as analyzer]))
+            [lib.lucene.impl.analyzer :as analyzer]
+            [lib.lucene.impl.index :as index])
+  (:use code.test))
 
 ^{:refer lib.lucene.impl/create-directories :added "3.0"}
 (fact "create multiple lucene directories"

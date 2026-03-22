@@ -1,12 +1,16 @@
 (ns rt.postgres.entity
-  (:require [std.lib :as h]
+  (:require [rt.postgres :as pg]
+            [rt.postgres.entity-util :as ut]
             [std.lang :as l]
-            [std.string :as str]
-            [rt.postgres :as pg]
             [std.lang.base.grammar-spec :as grammar-spec]
-            [rt.postgres.entity-util :as ut]))
+            [std.lib.collection :as collection]
+            [std.lib.context.pointer :as ptr]
+            [std.lib.env :as env]
+            [std.lib.foundation :as f]
+            [std.lib.walk :as walk]
+            [std.string.case :as case]))
 
-(h/intern-in ut/init-addons
+(f/intern-in ut/init-addons
              ut/init-default-ns-str
              ut/get-addon
              ut/add-addon)
@@ -76,14 +80,14 @@
     :as m}]
   (let [{:keys [for unique]} entity
         _    (when-not for
-               (h/error "Need a :for keyword" {:input m}))
+               (f/error "Need a :for keyword" {:input m}))
         [key ref] (if (vector? for)
                     for
-                    [(keyword (str/spear-case (name (ut/normalise-ref for)))) for])
+                    [(keyword (case/spear-case (name (ut/normalise-ref for)))) for])
         ref (ut/normalise-ref ref)
         unique (or unique
                    (if (not= "log" (name class))
-                     [(str/snake-case (name key))]))
+                     [(case/snake-case (name key))]))
         ref-field-base {:type :ref
                         :required true
                         :ref {:ns ref}
@@ -108,7 +112,7 @@
                    :ref {:ns ref}}})
         addon  (cond (vector? v)
                      (let [[key ref priority custom] v]
-                       (h/merge-nested
+                       (collection/merge-nested
                         (ref-fn key ref)
                         {:priority priority}
                         custom))
@@ -123,7 +127,7 @@
                               (if (:ref v)
                                 (ref-fn (:key v) (:ref v)))))
                      
-                     :else (h/error "Addon Not Valid" {:input v}))]
+                     :else (f/error "Addon Not Valid" {:input v}))]
     addon))
 
 (defn E-addon-columns-match
@@ -132,7 +136,7 @@
         _ (if-not (contains? (set (get (:addons LinkSpec)
                                        class))
                              ref-class)
-            (h/error "Not a valid addon:" {:class class
+            (f/error "Not a valid addon:" {:class class
                                            :ref   ref-class
                                            :addon addon}))
         base  {:class-table   {:foreign {key {:ns (-> field :ref :ns) :column :class-table}}}
@@ -164,7 +168,7 @@
                              (let [is-ref (-> field :type (= :ref))
                                    unique (or unique
                                               (if is-ref
-                                                [(str/snake-case (name key))]))]
+                                                [(case/snake-case (name key))]))]
                                (assoc out key (cond-> field
                                                 :then  (assoc :priority priority)
                                                 unique (assoc-in [:sql :unique] unique)))))
@@ -175,7 +179,7 @@
                                         (if (= (:type field) :ref)
                                           [])))
                               (reduce (fn [out addon]
-                                        (h/merge-nested
+                                        (collection/merge-nested
                                          out
                                          (E-addon-columns-match class addon)))
                                       {}))]
@@ -189,15 +193,15 @@
     {}
     (let [{:keys [for as-key unique]} link
           _    (when-not for
-                 (h/error "Need a :for keyword" {:input m}))
+                 (f/error "Need a :for keyword" {:input m}))
           [key ref] (if (vector? for)
                       for
-                      [(or as-key (keyword (str/spear-case (name (ut/normalise-ref for)))))
+                      [(or as-key (keyword (case/spear-case (name (ut/normalise-ref for)))))
                        for])
           ref (ut/normalise-ref ref)
           unique     (or unique (if (or (= :1d/entry class)
                                         (= :1d/data class))
-                                  [(str/snake-case (name key))]))
+                                  [(case/snake-case (name key))]))
           table-base {:class-table   {:foreign {key {:ns ref :column :class-table}}}
                       key  {:type :ref
                             :required true
@@ -209,7 +213,7 @@
         :1d/data     table-base
         :1d/log      table-base
         (:2d/log
-         :2d/entry)  (h/merge-nested
+         :2d/entry)  (collection/merge-nested
          table-base
          {key   {:primary "default"}
           :class-context {:foreign {key {:ns ref :column :class-context}}}})))))
@@ -267,7 +271,7 @@
                       :2d/log     {:class-table   {:primary "default"}
                                    :class-context {:primary "default"}}
                       {})
-        base-class (h/merge-nested
+        base-class (collection/merge-nested
                     base-select
                     (select-keys base (keys base-select)))
         base-link  (if (#{:1d/entry
@@ -276,26 +280,26 @@
                           :2d/log
                           :2d/entry} class)
                      (E-class-link-columns m))]
-    (h/merge-nested base-class
+    (collection/merge-nested base-class
                     base-link)))
 
 (defn E-class-merge
   [m id-cols track-cols class-cols addon-cols]
   (let [{:keys [class columns]} m
-        final-cols    (h/merge-nested
+        final-cols    (collection/merge-nested
                        (merge id-cols track-cols class-cols addon-cols)
                        columns)
         class-uniques (->> final-cols
                            (vals)
                            (keep (fn [{:keys [sql]}]
                                    (:unique sql)))
-                           (mapcat h/seqify)
+                           (mapcat collection/seqify)
                            (set)
                            (vec))
         col-uniques   (if (seq class-uniques)
                         {:class-table   {:sql {:unique class-uniques}}
                          :class-context {:sql {:unique class-uniques}}})]
-    (h/merge-nested final-cols
+    (collection/merge-nested final-cols
                     (case class
                       (:1d/log :1d/simple :1d/data)  (dissoc col-uniques :class-context)
                       (:0d/entry :0d/data :0d/base) {}
@@ -335,7 +339,7 @@
         [addon-cols
          addon-class-cols]  (E-addon-columns m)
         final-cols   (E-class-merge m id-cols track-cols
-                                    (h/merge-nested class-cols
+                                    (collection/merge-nested class-cols
                                                     addon-class-cols)
                                     addon-cols)]
     {:api/meta   access-val
@@ -355,7 +359,7 @@
     (let [{:keys [key priority]} addon]
       (ut/add-addon key
                     (ut/type-ref (or (namespace grammar-spec/*symbol*)
-                                     (name (h/ns-sym)))
+                                     (name (env/ns-sym)))
                                  (name grammar-spec/*symbol*))
                     priority))))
 
@@ -363,8 +367,8 @@
   [{:keys [id link addons track access raw columns ns-str application]
     :as m}]
   (let [normalise-fn (fn [m]
-                       (h/prewalk (fn [m]
-                                    (if (h/pointer? m)
+                       (walk/prewalk (fn [m]
+                                    (if (ptr/pointer? m)
                                       (ut/normalise-ref m)
                                       m))
                                   m))
@@ -374,7 +378,7 @@
                   :columns []
                   :ns-str  (or (ut/default-ns-str application)
                                ut/*ns-str* 
-                               (h/error "No ns-str found." {:ns (h/ns-sym)}))}
+                               (f/error "No ns-str found." {:ns (env/ns-sym)}))}
                  m
                  {:addons (normalise-fn addons)
                   :link (normalise-fn link)})

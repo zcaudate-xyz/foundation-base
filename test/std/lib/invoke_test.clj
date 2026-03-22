@@ -1,7 +1,7 @@
 (ns std.lib.invoke-test
-  (:use code.test)
   (:require [std.lib.invoke :refer :all]
             [std.protocol.invoke :as protocol.invoke])
+  (:use code.test)
   (:import (clojure.lang MultiFn))
   (:refer-clojure :exclude [fn]))
 

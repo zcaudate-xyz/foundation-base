@@ -1,9 +1,9 @@
 (ns std.vm.forth-interpreter-test
-  (:use code.test)
-  (:require [std.vm.forth-interpreter :as forth]
+  (:require [std.block.construct :as construct]
             [std.block.parse :as parse]
-            [std.block.construct :as construct]
-            [std.lib.zip :as zip]))
+            [std.lib.zip :as zip]
+            [std.vm.forth-interpreter :as forth])
+  (:use code.test))
 
 
 ^{:refer std.vm.forth-interpreter/block-zip :added "4.0"}

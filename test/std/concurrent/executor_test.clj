@@ -1,9 +1,9 @@
 (ns std.concurrent.executor-test
-  (:use code.test)
   (:require [std.concurrent.executor :refer :all]
             [std.concurrent.queue :as q]
-            [std.lib.component.track :as track ]
-            [std.lib :as h]))
+            [std.lib.component.track :as track]
+            [std.lib.foundation :as f])
+  (:use code.test))
 
 ^{:refer std.concurrent.executor/wrap-min-time :added "3.0"}
 (fact "wraps a function with min-time and delay"
@@ -142,7 +142,7 @@
 ^{:refer std.concurrent.executor/schedule :added "3.0"}
 (fact "schedules task for execution" ^:hidden
 
-  (h/-> (doto (executor:scheduled 1)
+  (f/-> (doto (executor:scheduled 1)
           (schedule (fn [] (Thread/sleep 10)) 10)
           (schedule (fn [] (Thread/sleep 10)) 20)
           (schedule (fn [] (Thread/sleep 10)) 30)
@@ -156,7 +156,7 @@
 
   (def -counter- (atom 0))
 
-  (h/-> (doto (executor:scheduled 1)
+  (f/-> (doto (executor:scheduled 1)
           (schedule:fixed-rate (fn [] (Thread/sleep 20)) 30))
         (do (Thread/sleep 100)
             (exec:shutdown-now %)
@@ -168,7 +168,7 @@
 
   (def -counter- (atom 0))
 
-  (h/-> (doto (executor:scheduled 1)
+  (f/-> (doto (executor:scheduled 1)
           (schedule:fixed-delay (fn [] (Thread/sleep 20)) 30))
         (do (Thread/sleep 100)
             (exec:shutdown-now %)
@@ -304,7 +304,7 @@
   (def -counter- (atom 0))
   (doto (executor:single 1)
     (exec:rejected-handler (fn [_ _] (swap! -counter- inc)))
-    (h/-> (doseq [i (range 10)]
+    (f/-> (doseq [i (range 10)]
             (submit % (fn [] (Thread/sleep 1000)))))
     (exec:shutdown-now))
 

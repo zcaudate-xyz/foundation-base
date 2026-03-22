@@ -1,7 +1,7 @@
 (ns std.lib.bin.type-test
+  (:require [std.fs :as fs]
+            [std.lib.bin.type :as binary :refer :all])
   (:use code.test)
-  (:require [std.lib.bin.type :refer :all :as binary]
-            [std.fs :as fs])
   (:refer-clojure :exclude [bytes]))
 
 ^{:refer std.lib.bin.type/bitstr-to-bitseq :added "3.0"}

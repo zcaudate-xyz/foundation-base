@@ -1,16 +1,16 @@
 (ns std.lang.model.spec-go
-  (:require [std.lang.base.emit :as emit]
-            [std.lang.base.emit-fn :as fn]
+  (:require [clojure.string]
+            [std.lang.base.book :as book]
+            [std.lang.base.emit :as emit]
             [std.lang.base.emit-data :as data]
+            [std.lang.base.emit-fn :as fn]
             [std.lang.base.emit-helper :as helper]
             [std.lang.base.grammar :as grammar]
-            [std.lang.base.util :as ut]
-            [std.lang.base.book :as book]
             [std.lang.base.script :as script]
+            [std.lang.base.util :as ut]
             [std.lang.model.spec-xtalk]
             [std.lang.model.spec-xtalk.fn-go :as fn-go]
-            [std.string :as str]
-            [std.lib :as h]))
+            [std.lib.collection :as collection]))
 
 (defn go-typesystem
   "handle generic types"
@@ -26,7 +26,7 @@
 
            :else
            (str (emit/emit-main type grammar mopts)
-                "[" (str/join ", " (map #(emit/emit-main % grammar mopts) args)) "]"))))
+                "[" (clojure.string/join ", " (map #(emit/emit-main % grammar mopts) args)) "]"))))
 
 (defn go-vector
   "emit vector or slice"
@@ -38,7 +38,7 @@
 
            :else
            (str "[]interface{}{"
-                (str/join ", " (map #(emit/emit-main % grammar mopts) arr))
+                (clojure.string/join ", " (map #(emit/emit-main % grammar mopts) arr))
                 "}")))))
 
 (defn tf-go-arrow
@@ -54,12 +54,12 @@
   {:added "4.0"}
   [[_ sym fields] grammar mopts]
   (str "type " (emit/emit-main sym grammar mopts) " struct {\n"
-       (str/join "\n"
+       (clojure.string/join "\n"
                  (map (fn [field]
                         (if (vector? field)
                           (let [[n t & tags] field
                                 tag-str (if (seq tags)
-                                          (str " `" (str/join " " tags) "`")
+                                          (str " `" (clojure.string/join " " tags) "`")
                                           "")]
                             (str "  " (emit/emit-main n grammar mopts) " "
                                  (emit/emit-main t grammar mopts)
@@ -73,7 +73,7 @@
   {:added "4.0"}
   [[_ sym methods] grammar mopts]
   (str "type " (emit/emit-main sym grammar mopts) " interface {\n"
-       (str/join "\n"
+       (clojure.string/join "\n"
                  (map (fn [method]
                          (str "  " (emit/emit-main method grammar mopts)))
                       methods))
@@ -101,7 +101,7 @@
 
 (def +template+
   (-> (emit/default-grammar)
-      (h/merge-nested
+      (collection/merge-nested
        {:banned #{:set :regex}
         :highlight '#{return break continue fallthrough}
         :default {:common    {:statement ""}

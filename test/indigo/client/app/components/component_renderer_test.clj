@@ -1,6 +1,6 @@
 (ns indigo.client.app.components.component-renderer-test
-  (:use code.test)
-  (:require [indigo.client.app.components.component-renderer :refer :all]))
+  (:require [indigo.client.app.components.component-renderer :refer :all])
+  (:use code.test))
 
 ^{:refer indigo.client.app.components.component-renderer/resolveInputBindings :added "4.0"}
 (fact "TODO")

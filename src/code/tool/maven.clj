@@ -1,11 +1,11 @@
 (ns code.tool.maven
   (:require [code.tool.maven.command :as command]
+            [code.tool.maven.lein :as lein]
             [code.tool.maven.package :as package]
             [code.tool.maven.task :as deploy.task]
-            [code.tool.maven.lein :as lein]
-            [std.lib :refer [definvoke]]
-            [std.task :as task]
-            [lib.aether :as aether]))
+            [lib.aether :as aether]
+            [std.lib.invoke :as invoke]
+            [std.task :as task]))
 
 (defmethod task/task-defaults :deploy.maven
   ([_]
@@ -68,7 +68,7 @@
                                   :color  #{:bold}}]}
            :summary  {:aggregate {:packaged   [:packaged + 0]}}})))
 
-(definvoke linkage
+(invoke/definvoke linkage
   "creates linkages for project
  
    (linkage :all {:tag :all
@@ -78,7 +78,7 @@
           :params {:title "CREATES ALL LINKAGE FILES"}
           :main {:fn #'package/linkage}}])
 
-(definvoke package
+(invoke/definvoke package
   "packages files in the interim directory
  
    (package '[xyz.zcaudate]
@@ -90,7 +90,7 @@
                    :parallel true}
           :main {:fn #'package/package}}])
 
-(definvoke infer
+(invoke/definvoke infer
   "infers all variables
    
    (infer '[xyz.zcaudate]
@@ -102,7 +102,7 @@
                    :parallel true}
           :main {:fn #'package/infer}}])
 
-(definvoke clean
+(invoke/definvoke clean
   "cleans the interim directory of packages
  
    (clean :all {:tag :all
@@ -113,7 +113,7 @@
                    :parallel true}
           :main {:fn #'command/clean}}])
 
-(definvoke install
+(invoke/definvoke install
   "installs packages to the local `.m2` repository
  
    (install '[xyz.zcaudate] {:tag :all :print {:item true}})
@@ -127,7 +127,7 @@
                    :parallel true}
           :main {:fn #'command/install}}])
 
-(definvoke deploy
+(invoke/definvoke deploy
   "deploys packages to a maven repository
  
    (deploy '[xyz.zcaudate] {:tag :all})"
@@ -137,7 +137,7 @@
                    :parallel true}
           :main {:fn #'command/deploy}}])
 
-(definvoke deploy-lein
+(invoke/definvoke deploy-lein
   "deploys packages to clojars using lein
    
    (deploy-lein '[xyz.zcaudate] {:tag :all})"

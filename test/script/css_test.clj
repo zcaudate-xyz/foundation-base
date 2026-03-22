@@ -1,6 +1,6 @@
 (ns script.css-test
-  (:use code.test)
-  (:require [script.css :refer :all]))
+  (:require [script.css :refer :all])
+  (:use code.test))
 
 ^{:refer script.css/generate-style :added "3.0"}
 (fact "creates a single-line style string from a map of style attributes (e.g., {:bold true} -> 'bold: true;')"

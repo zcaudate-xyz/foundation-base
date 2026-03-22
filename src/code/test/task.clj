@@ -1,18 +1,19 @@
 (ns code.test.task
-  (:require [std.string :as str]
+  (:require [clojure.set]
             [code.project :as project]
-            [std.task :as task]
-            [code.test.checker.common]
-            [code.test.checker.collection]
-            [code.test.checker.logic]
             [code.test.base.context :as context]
-            [code.test.base.runtime :as rt]
+            [code.test.base.executive :as executive]
             [code.test.base.listener :as listener]
             [code.test.base.print :as print]
+            [code.test.base.runtime :as rt]
+            [code.test.checker.collection]
+            [code.test.checker.common]
+            [code.test.checker.logic]
             [code.test.compile]
-            [code.test.base.executive :as executive]
-            [std.lib :as h :refer [definvoke]]
-            [std.lib.result :as res]))
+            [std.lib.invoke :as invoke]
+            [std.lib.result :as res]
+            [std.string.common :as common]
+            [std.task :as task]))
 
 (defn- display-errors
   [data]
@@ -26,7 +27,7 @@
       (res/result {:status :error
                    :data (format "passed (%s), errors: #{%s}"
                                  cnt
-                                 (str/joinl ", " (mapv #(str (first %) ":" (second %))
+                                 (common/joinl ", " (mapv #(str (first %) ":" (second %))
                                                        errors)))}))))
 
 (defn- retrieve-fn [kw]
@@ -84,7 +85,7 @@
   (alter-var-root #'std.task.process/*interrupt*
                   (fn [_] true)))
 
-(definvoke run
+(invoke/definvoke run
   "runs all tests
  
    (task/run :list)
@@ -97,21 +98,21 @@
           :main   {:fn executive/run-namespace}
           :params {:title "TEST PROJECT"}}])
 
-(definvoke run:current
+(invoke/definvoke run:current
   "runs the current namespace"
   {:added "4.0"}
   [:task {:template :test
           :main   {:fn executive/run-current}
           :params {:title "TEST CURRENT"}}])
 
-(definvoke run:test
+(invoke/definvoke run:test
   "runs loaded tests"
   {:added "3.0"}
   [:task {:template :test
           :main   {:fn executive/test-namespace}
           :params {:title "TEST EVAL"}}])
 
-(definvoke run:unload
+(invoke/definvoke run:unload
   "unloads the test namespace"
   {:added "3.0"}
   [:task {:template :test
@@ -119,7 +120,7 @@
           :item   {:output identity}
           :params {:title "TEST UNLOADED"}}])
 
-(definvoke run:load
+(invoke/definvoke run:load
   "load test namespace"
   {:added "3.0"}
   [:task {:template :test
@@ -134,7 +135,7 @@
   {:added "3.0"}
   ([]
    (let [latest @executive/+latest+]
-     (-> (h/union (set (:errored latest))
+     (-> (clojure.set/union (set (:errored latest))
                   (set (map (comp :ns :meta) (:failed latest)))
                   (set (map (comp :ns :meta) (:throw latest)))
                   (set (map (comp :ns :meta) (:timeout latest))))

@@ -1,11 +1,14 @@
 (ns rt.basic.type-oneshot
-  (:require [std.protocol.context :as protocol.context]
+  (:require [clojure.string]
+            [rt.basic.type-common :as common]
+            [std.json :as json]
             [std.lang.base.pointer :as ptr]
             [std.lang.base.runtime :as default]
-            [std.lib :as h :refer [defimpl]]
-            [std.json :as json]
-            [std.string :as str]
-            [rt.basic.type-common :as common]))
+            [std.lib.collection :as collection]
+            [std.lib.foundation :as f]
+            [std.lib.impl :as impl]
+            [std.lib.os :as os]
+            [std.protocol.context :as protocol.context]))
 
 (defn sh-exec
   "basic function for executing a shell process"
@@ -15,20 +18,20 @@
                                  stderr
                                  raw
                                  root]
-                          :or {trim str/trim-newlines}}]
+                          :or {trim clojure.string/trim-newline}}]
   (try (let [args (if pipe
                     input-args
                     (conj input-args input-body))
-             proc (h/sh {:wait false
+             proc (os/sh {:wait false
                          :args args
                          :root root})
              _    (cond-> proc
-                    pipe  (doto (h/sh-write input-body) (h/sh-close))
-                    :then (h/sh-wait))
-             {:keys [err out exit] :as ret} (h/sh-output proc)]
+                    pipe  (doto (os/sh-write input-body) (os/sh-close))
+                    :then (os/sh-wait))
+             {:keys [err out exit] :as ret} (os/sh-output proc)]
          (cond raw
-               [exit (or (not-empty (str/split-lines (trim out)))
-                         (str/split-lines (trim err)))]
+               [exit (or (not-empty (clojure.string/split-lines (trim out)))
+                         (clojure.string/split-lines (trim err)))]
 
                :else
                (trim out)))
@@ -55,7 +58,7 @@
 (defn- rt-oneshot-string [{:keys [lang runtime program]}]
   (str "#rt.oneshot" [lang runtime program]))
 
-(defimpl RuntimeOneshot [id]
+(impl/defimpl RuntimeOneshot [id]
   :string rt-oneshot-string
   :protocols [protocol.context/IContext
               :prefix "default/default-"
@@ -69,7 +72,7 @@
    (rt-oneshot-setup lang program process exec :oneshot))
   ([lang program process exec context]
    (let [program (common/get-program-default lang context program)
-         process (h/merge-nested (common/get-options lang context program)
+         process (collection/merge-nested (common/get-options lang context program)
                                  process)
          exec    (or exec
                      (common/get-program-exec lang context program))]
@@ -88,10 +91,10 @@
   (let [[program process exec] (rt-oneshot-setup lang program process exec :oneshot)
         flags   (common/get-program-flags lang program)
         _   (cond (not (:oneshot flags))
-                  (h/error "Oneshot not available" {:flags flags
+                  (f/error "Oneshot not available" {:flags flags
                                                     :program program}))]
     (map->RuntimeOneshot (assoc m
-                                :id (or id (h/sid))
+                                :id (or id (f/sid))
                                 :runtime runtime
                                 :program program
                                 :exec exec

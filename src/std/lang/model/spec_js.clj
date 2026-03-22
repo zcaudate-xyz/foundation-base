@@ -1,23 +1,26 @@
 (ns std.lang.model.spec-js
-  (:require [std.lang.model.spec-js.meta :as meta]
-            [std.lang.model.spec-js.jsx :as jsx]
-            [std.lang.model.spec-js.qml :as qml]
+  (:require [clojure.string]
+            [std.html :as html]
+            [std.lang.base.book :as book]
             [std.lang.base.emit :as emit]
-            [std.lang.base.emit-data :as data]
-            [std.lang.base.emit-top-level :as top]
             [std.lang.base.emit-common :as common]
+            [std.lang.base.emit-data :as data]
             [std.lang.base.emit-helper :as helper]
             [std.lang.base.emit-preprocess :as preprocess]
+            [std.lang.base.emit-top-level :as top]
             [std.lang.base.grammar :as grammar]
             [std.lang.base.grammar-spec :as spec]
-            [std.lang.base.util :as ut]
-	    [std.lang.base.book :as book]
             [std.lang.base.script :as script]
+            [std.lang.base.util :as ut]
+            [std.lang.model.spec-js.jsx :as jsx]
+            [std.lang.model.spec-js.meta :as meta]
+            [std.lang.model.spec-js.qml :as qml]
             [std.lang.model.spec-xtalk]
             [std.lang.model.spec-xtalk.fn-js :as fn]
-            [std.html :as html]
-            [std.string :as str]
-            [std.lib :as h]))
+            [std.lib.collection :as collection]
+            [std.lib.foundation :as f]
+            [std.lib.template :as template]
+            [std.lib.walk :as walk]))
 
 (def ^:dynamic *template-fn* #'jsx/emit-jsx)
 
@@ -88,27 +91,27 @@
                            mopts)
          
          :else
-         (h/->> arr
+         (f/->> arr
                 (sort-by (fn [e]
                            (if (map? e)
-                             [1 (h/strn e)]
-                             [0 (h/strn e)])))
+                             [1 (f/strn e)]
+                             [0 (f/strn e)])))
                 (map (fn [e]
                        (cond (map? e)
                              (->> e
                                   (map (fn [pair]
                                          (data/emit-map-entry pair grammar mopts)))
-                                  (str/join ","))
+                                  (clojure.string/join ","))
                              
                              (or (symbol? e)
                                  (string? e)
-                                 (and (h/form? e)
+                                 (and (collection/form? e)
                                       (#{:..} (first e))))
                              (common/*emit-fn* e grammar mopts)
                              
                              :else
-                             (h/error "Not allowed" {:entry e}))))
-                (str/join ",")
+                             (f/error "Not allowed" {:entry e}))))
+                (clojure.string/join ",")
                 (str "{" % "}")))))
 
 (defn- js-symbol-global
@@ -174,10 +177,10 @@
   [[_ [e arr] & body]]
   (if (vector? e)
     (let [[i v] e]
-      (h/$ (for [(var* :let ~i := 0) (< ~i (. ~arr length)) (:++ ~i)]
+      (template/$ (for [(var* :let ~i := 0) (< ~i (. ~arr length)) (:++ ~i)]
              (var* :let ~v (. ~arr [~i]))
              ~@body)))
-    (h/$ (for [(var* :let ~e) :of (% ~arr)]
+    (template/$ (for [(var* :let ~e) :of (% ~arr)]
            ~@body))))
 
 (defn tf-for-iter
@@ -199,7 +202,7 @@
                  (list 'if err
                        error
                        success))
-        out (h/prewalk (fn [x]
+        out (walk/prewalk (fn [x]
                          (if (= x '(x:callback))
                            cb
                            x))
@@ -211,7 +214,7 @@
   "for try transform"
   {:added "4.0"}
   [[_ [[res err] statement] {:keys [success error]}]]
-  (h/$ (try
+  (template/$ (try
          (var ~res := ~statement)
          ~success
          (catch ~err ~error))))
@@ -220,7 +223,7 @@
   "for async transform"
   {:added "4.0"}
   [[_ [[res err] statement] {:keys [success error finally]}]]
-  (h/$ (. (new Promise (fn [resolve reject]
+  (template/$ (. (new Promise (fn [resolve reject]
                          (resolve ~statement)))
           ~@(if success
               [(list 'then
@@ -286,7 +289,7 @@
                    :def       {:raw "var"}
                    :declare   {:raw "var"}}
         :xtalk    {:notify    {:custom true}}}
-       (h/merge-nested (emit/default-grammar))))
+       (collection/merge-nested (emit/default-grammar))))
 
 (def +grammar+
   (grammar/grammar :js

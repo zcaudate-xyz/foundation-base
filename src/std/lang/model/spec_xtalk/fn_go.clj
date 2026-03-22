@@ -1,8 +1,8 @@
 (ns std.lang.model.spec-xtalk.fn-go
-  (:require [std.lib :as h]))
+  (:require [std.lib.collection :as collection]))
 
 (defn- add-sym [m]
-  (h/map-entries (fn [[k v]]
+  (collection/map-entries (fn [[k v]]
                    [k (assoc v :symbol #{(symbol (name k))})])
                  m))
 

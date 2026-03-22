@@ -1,7 +1,6 @@
 ^{:no-test true}
 (ns xt.runtime.type-hashmap
-  (:require [std.lang :as l]
-            [std.lib :as h]))
+  (:require [std.lang :as l]))
 
 (l/script :xtalk
   {:require [[xt.lang.base-lib :as k]

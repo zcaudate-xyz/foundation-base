@@ -1,14 +1,16 @@
 (ns std.lang.model.spec-rust
-  (:require [std.lang.base.emit :as emit]
-            [std.lang.base.emit-fn :as fn]
+  (:require [clojure.string]
+            [std.lang.base.book :as book]
+            [std.lang.base.emit :as emit]
             [std.lang.base.emit-data :as data]
+            [std.lang.base.emit-fn :as fn]
             [std.lang.base.emit-helper :as helper]
             [std.lang.base.grammar :as grammar]
-            [std.lang.base.util :as ut]
-            [std.lang.base.book :as book]
             [std.lang.base.script :as script]
-            [std.string :as str]
-            [std.lib :as h]))
+            [std.lang.base.util :as ut]
+            [std.lib.collection :as collection]
+            [std.lib.foundation :as f]
+            [std.lib.walk :as walk]))
 
 (defn rst-typesystem
   "TODO"
@@ -16,7 +18,7 @@
   [arr grammar mopts]
   (let [{:keys [sep] :as opts} (helper/get-options grammar [:data :vector])
         [sym & more] (rest arr)]
-    (str sym "<" (str/join ","
+    (str sym "<" (clojure.string/join ","
                            (map (fn [input]
                                   (cond (string? input)
                                         input
@@ -41,7 +43,7 @@
   {:added "4.0"}
   [sym]
   (let [lines (:% (meta sym))]
-    (str/join ""
+    (clojure.string/join ""
               (map (fn [l] (str l "\n"))
                    lines))))
 
@@ -60,7 +62,7 @@
   "TODO"
   {:added "4.0"}
   [[_ sym & body]]
-  (let [body (h/postwalk (fn [x]
+  (let [body (walk/postwalk (fn [x]
                            (if (and (list? x)
                                     (= 'fn (first x))
                                     (= 3 (count x)))
@@ -96,10 +98,10 @@
   {:added "4.0"}
   [[_ sym & args] grammar mopts]
   (let [items (map (fn [[k v]]
-                     (str (h/strn k) ": " (emit/emit-main v grammar mopts)))
+                     (str (f/strn k) ": " (emit/emit-main v grammar mopts)))
                    (partition 2 args))]
     (str (emit/emit-main sym grammar mopts)
-         "{" (str/join ", " items) "}")))
+         "{" (clojure.string/join ", " items) "}")))
 
 (defn rst-exec
   "TODO"
@@ -123,7 +125,7 @@
              (and (vector? items)
                   (symbol? (first items)))
              (str "struct " sym "[\n"
-                  (str/join "\n  " items)
+                  (clojure.string/join "\n  " items)
                   "\n]")
              
              :else
@@ -132,7 +134,7 @@
                                    :fn args
                                    grammar mopts))
                                 items)]
-               (str "struct " sym "{" (str/join ", " strs) "}")))))
+               (str "struct " sym "{" (clojure.string/join ", " strs) "}")))))
 
 (def +features+
   (-> (grammar/build)
@@ -183,7 +185,7 @@
 
 (def +template+
   (-> (emit/default-grammar)
-      (h/merge-nested
+      (collection/merge-nested
        {:banned #{:set :map :regex}
         :highlight '#{return break}
         :default {:modifier  {:vector-last false}

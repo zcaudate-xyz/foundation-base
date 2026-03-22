@@ -1,6 +1,6 @@
 (ns std.time.duration-test
-  (:use code.test)
-  (:require [std.time.duration :refer :all]))
+  (:require [std.time.duration :refer :all])
+  (:use code.test))
 
 ^{:refer std.time.duration/adjust-year-days :added "3.0"}
 (fact "calculates the number of days to be adjusted based on year"

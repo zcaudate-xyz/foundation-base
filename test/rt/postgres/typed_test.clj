@@ -1,11 +1,10 @@
 (ns rt.postgres.typed-test
-  "Integration tests for rt.postgres.typed namespace.
-   Tests end-to-end OpenAPI generation from namespace analysis."
-  (:use code.test)
-  (:require [rt.postgres.typed :as typed]
-            [rt.postgres.compile.json-openapi :as compile.json-openapi]
+  (:require [rt.postgres.compile.json-openapi :as compile.json-openapi]
             [rt.postgres.grammar.typed-common :as types]
-            [rt.postgres.script.test.scratch-v2 :as scratch]))
+            [rt.postgres.script.test.scratch-v2 :as scratch]
+            [rt.postgres.typed :as typed])
+  "Integration tests for rt.postgres.typed namespace.\n   Tests end-to-end OpenAPI generation from namespace analysis."
+  (:use code.test))
 
 ;; -----------------------------------------------------------------------------
 ;; OpenAPI Generation Tests

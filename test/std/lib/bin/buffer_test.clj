@@ -1,6 +1,6 @@
 (ns std.lib.bin.buffer-test
-  (:use code.test)
-  (:require [std.lib.bin.buffer :refer :all]))
+  (:require [std.lib.bin.buffer :refer :all])
+  (:use code.test))
 
 ^{:refer std.lib.bin.buffer/byte-buffer :added "3.0" :adopt true}
 (fact "creates a byte buffer"

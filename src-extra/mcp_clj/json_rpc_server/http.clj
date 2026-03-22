@@ -1,15 +1,14 @@
 (ns mcp-clj.json-rpc-server.http
-  "JSON-RPC 2.0 server with MCP Streamable HTTP transport (2025-03-26 spec)"
-  (:require
-    [clojure.string :as str]
-    [mcp-clj.http :as http]
-    [mcp-clj.http-server.adapter :as http-server]
-    [mcp-clj.json :as json]
-    [mcp-clj.json-rpc.executor :as executor]
-    [mcp-clj.json-rpc.json-protocol :as json-protocol]
-    [mcp-clj.json-rpc.protocols :as protocols]
-    [mcp-clj.log :as log]
-    [mcp-clj.sse :as sse]))
+  (:require [clojure.string :as str]
+            [mcp-clj.http :as http]
+            [mcp-clj.http-server.adapter :as http-server]
+            [mcp-clj.json :as json]
+            [mcp-clj.json-rpc.executor :as executor]
+            [mcp-clj.json-rpc.json-protocol :as json-protocol]
+            [mcp-clj.json-rpc.protocols :as protocols]
+            [mcp-clj.log :as log]
+            [mcp-clj.sse :as sse])
+  "JSON-RPC 2.0 server with MCP Streamable HTTP transport (2025-03-26 spec)")
 
 ;; Session Management
 

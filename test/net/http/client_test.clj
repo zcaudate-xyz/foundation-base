@@ -1,6 +1,6 @@
 (ns net.http.client-test
-  (:use code.test)
   (:require [net.http.client :refer :all])
+  (:use code.test)
   (:refer-clojure :exclude [get]))
 
 ^{:refer net.http.client/wrap-get-optional :added "3.0"}

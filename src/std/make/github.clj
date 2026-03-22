@@ -1,13 +1,13 @@
 (ns std.make.github
-  (:require [std.lib.os :as os]
-            [std.lib.impl :refer [defimpl]]
+  (:require [clojure.string]
+            [std.fs :as fs]
             [std.lib.env :as env]
             [std.lib.foundation :as h]
-            [std.string :as str]
+            [std.lib.impl :refer [defimpl]]
+            [std.lib.os :as os]
             [std.make.common :as common]
             [std.make.compile :as compile]
-            [std.make.project :as project]
-            [std.fs :as fs]))
+            [std.make.project :as project]))
 
 (def ^:dynamic *verbose* true)
 
@@ -79,7 +79,7 @@
      (-> @(os/sh "curl" "-u" (str user ":" token)
                  (str "https://api.github.com/repos/" repo)
                  {:print *verbose*})
-         (str/starts-with? "{\n  \"message\": \"Not Found\"")
+         (clojure.string/starts-with? "{\n  \"message\": \"Not Found\"")
          not))))
 
 (defn gh-setup-remote
@@ -90,7 +90,7 @@
          {:keys [repo description private]} github
          user  (gh-user)
          token (gh-token)
-         [repo-ns repo-name] (str/split repo #"/")
+         [repo-ns repo-name] (clojure.string/split repo #"/")
          is-org (not= user repo-ns)
          url  (if is-org
                 (str "https://api.github.com/orgs/" repo-ns "/repos")
@@ -180,7 +180,7 @@
       (project/build-all mcfg)
       (gh-save mcfg (or message
                            (str "SRC:"
-                                (str/trim (str (os/sh "git" "rev-parse" "HEAD"))))))
+                                (clojure.string/trim (str (os/sh "git" "rev-parse" "HEAD"))))))
       (gh-push mcfg)))
 
 (defn gh-dwim-push
@@ -191,5 +191,5 @@
       (gh-commit mcfg
                  (or message
                      (str "SRC:"
-                          (str/trim (str (os/sh "git" "rev-parse" "HEAD"))))))
+                          (clojure.string/trim (str (os/sh "git" "rev-parse" "HEAD"))))))
       (gh-push mcfg)))

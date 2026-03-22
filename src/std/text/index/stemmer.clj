@@ -5,7 +5,8 @@
 ;; words, and excluding common noisy words (see `*excluded-words*`).
 
 (ns std.text.index.stemmer
-  (:require [std.string.common :as str]
+  (:require [clojure.string]
+            [std.string.common :as str]
             [std.text.index.porter :as porter]))
 
 ;; For later (internal) use.
@@ -59,9 +60,9 @@
    => [\"lazy\" \"brown\" \"fox\" \"jumped\" \"over\"]"
   {:added "3.0"}
   ([^String txt]
-   (-> (str/replace txt #"[^-\d\w]+" " ")
+   (-> (clojure.string/replace txt #"[^-\d\w]+" " ")
        (.toLowerCase)
-       (str/split #"\s+")
+       (clojure.string/split #"\s+")
        expand-hyphenated-words
        remove-excluded-words)))
 

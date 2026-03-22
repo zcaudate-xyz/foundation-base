@@ -2,7 +2,7 @@
   (:require [std.dom.common :as base]
             [std.dom.item :as item]
             [std.dom.type :as type]
-            [std.lib :refer [definvoke] :as u]
+            [std.lib.invoke :as invoke]
             [std.lib.mutable :as mut]))
 
 (defmulti dom-render
@@ -15,7 +15,7 @@
   {:added "3.0"}
   base/dom-metaclass)
 
-(definvoke dom-render-default
+(invoke/definvoke dom-render-default
   "default implementation of dom-render. throws exception"
   {:added "3.0"}
   [:method {:multi dom-render
@@ -79,7 +79,7 @@
   {:added "3.0"}
   base/dom-metaclass)
 
-(definvoke dom-remove-default
+(invoke/definvoke dom-remove-default
   "default implementation of dom-remove."
   {:added "3.0"}
   [:method {:multi dom-remove
@@ -101,7 +101,7 @@
   {:added "3.0"}
   (fn [dom-old dom-new] (base/dom-metaclass dom-old)))
 
-(definvoke dom-replace-default
+(invoke/definvoke dom-replace-default
   "default implementation of dom-remove."
   {:added "3.0"}
   [:method {:multi dom-replace

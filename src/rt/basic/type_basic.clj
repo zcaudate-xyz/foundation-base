@@ -1,15 +1,17 @@
 (ns rt.basic.type-basic
-  (:require [std.protocol.context :as protocol.context]
+  (:require [rt.basic.server-basic :as server]
+            [rt.basic.type-bench :as bench]
+            [rt.basic.type-common :as common]
+            [rt.basic.type-container :as container]
+            [std.concurrent :as cc]
+            [std.json :as json]
             [std.lang.base.pointer :as ptr]
             [std.lang.base.runtime :as default]
-            [std.lib :as h :refer [defimpl]]
-            [std.json :as json]
-            [std.concurrent :as cc]
-            [std.string :as str]
-            [rt.basic.type-common :as common]
-            [rt.basic.server-basic :as server]
-            [rt.basic.type-bench :as bench]
-            [rt.basic.type-container :as container]))
+            [std.lib.collection :as collection]
+            [std.lib.component :as component]
+            [std.lib.foundation :as f]
+            [std.lib.impl :as impl]
+            [std.protocol.context :as protocol.context]))
 
 (defn start-basic
   "starts the basic rt"
@@ -94,7 +96,7 @@
   (let [server (server/get-server id lang)]
     (:port server)))
 
-(defimpl RuntimeBasic [id]
+(impl/defimpl RuntimeBasic [id]
   :string rt-basic-string
   :protocols [std.protocol.component/IComponent
               :suffix "-basic"
@@ -112,10 +114,10 @@
            runtime
            process] :as m
     :or {runtime :basic}}]
-  (let [process (h/merge-nested (common/get-options lang :basic :default)
+  (let [process (collection/merge-nested (common/get-options lang :basic :default)
                                 process)]
     (map->RuntimeBasic (merge  m
-                               {:id (or id (h/sid))
+                               {:id (or id (f/sid))
                                 :tag runtime
                                 :runtime runtime
                                 :process process
@@ -135,7 +137,7 @@
            program
            process] :as m}]
   (-> (rt-basic:create m)
-      (h/start)))
+      (component/start)))
 
 (comment
   (./import)

@@ -1,6 +1,6 @@
 (ns std.block.value
-  (:require [std.protocol.block :as protocol.block]
-            [std.block.base :as base]))
+  (:require [std.block.base :as base]
+            [std.protocol.block :as protocol.block]))
 
 (defn apply-modifiers
   "applys the modifiers within a container

@@ -1,6 +1,5 @@
 (ns net.openapi.util
-  (:require [std.string :as str]
-            [net.http :as http]
+  (:require [net.http :as http]
             [net.openapi.params :as params]))
 
 (defn call-api

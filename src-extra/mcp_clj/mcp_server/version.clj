@@ -1,7 +1,6 @@
 (ns mcp-clj.mcp-server.version
-  "MCP protocol version negotiation utilities"
-  (:require
-    [mcp-clj.versions :as versions]))
+  (:require [mcp-clj.versions :as versions])
+  "MCP protocol version negotiation utilities")
 
 (defn negotiate-version
   "Negotiate protocol version according to MCP specification.

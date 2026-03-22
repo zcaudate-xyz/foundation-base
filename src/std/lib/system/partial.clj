@@ -1,11 +1,11 @@
 (ns std.lib.system.partial
-  (:require [std.lib.system.topology :as topology]
-            [std.lib.system.common :as common]
-            [std.lib.system.type :as type]
+  (:require [clojure.set :as set]
             [std.lib.collection :as coll]
-            [std.lib.foundation :as h]
             [std.lib.component :as component]
-            [clojure.set :as set]))
+            [std.lib.foundation :as h]
+            [std.lib.system.common :as common]
+            [std.lib.system.topology :as topology]
+            [std.lib.system.type :as type]))
 
 (def ^:dynamic *timeout* 5000)
 

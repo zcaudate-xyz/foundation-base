@@ -1,6 +1,6 @@
 (ns code.ai.server.tool.code-manage-test
-  (:require [code.test :refer :all]
-            [code.ai.server.tool.code-manage :as manage]))
+  (:require [code.ai.server.tool.code-manage :as manage]
+            [code.test :refer :all]))
 
 ^{:refer code.ai.server.tool.code-manage/manage-fn :added "0.1"}
 (fact "executes manage task"

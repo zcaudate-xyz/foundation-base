@@ -1,7 +1,7 @@
 (ns std.time.instant.java-util-calendar-test
-  (:use code.test)
-  (:require [std.time.instant.java-util-calendar :refer :all :as cal]
-            [std.time :as t]))
+  (:require [std.time :as t]
+            [std.time.instant.java-util-calendar :as cal :refer :all])
+  (:use code.test))
 
 ^{:refer std.time.instant.java-util-calendar/from-map :added "3.0"}
 (fact "creates a Calendar object from a map"

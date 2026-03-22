@@ -1,10 +1,6 @@
 (ns xt.lang.base-macro
   (:require [std.lang :as l])
-  (:refer-clojure :exclude
-                  [abs bit-and bit-or bit-xor
-                   identity inc dec zero? pos? neg? even? odd?
-                   max min mod quot cat eval apply print
-                   nil? fn? first second nth replace last throw]))
+  (:refer-clojure :exclude [abs bit-and bit-or bit-xor identity inc dec zero? pos? neg? even? odd? max min mod quot cat eval apply print nil? fn? first second nth replace last throw]))
 
 (l/script :xtalk
   {})

@@ -1,7 +1,6 @@
 (ns lib.oshi-test
-  (:use [code.test :exclude [all]])
-  (:require [lib.oshi :refer :all]
-            [std.lib :as h]))
+  (:require [lib.oshi :refer :all])
+  (:use [code.test :exclude [all]]))
 
 ^{:refer lib.oshi/to-data :added "3.0"}
 (fact "converts the object to a map provided *raw* is false")

@@ -1,8 +1,9 @@
 (ns code.framework.cache
-  (:require [std.fs :as fs]
-            [code.framework.common :as common]
+  (:require [code.framework.common :as common]
             [std.block :as block]
-            [std.lib :as h])
+            [std.fs :as fs]
+            [std.lib.atom :as atom]
+            [std.lib.collection :as collection])
   (:refer-clojure :exclude [update]))
 
 (defonce +cache-dir+ ".hara/code/framework")
@@ -24,9 +25,9 @@
    => '{ns {var {:test {:code \"(1 2 3)\"}}}}"
   {:added "3.0"}
   ([data]
-   (h/map-vals
+   (collection/map-vals
     (fn [ns-entry]
-      (h/map-vals
+      (collection/map-vals
        (fn [entry]
          (if (-> entry :test :code)
            (update-in entry
@@ -48,9 +49,9 @@
    => '(+ 1 2 3)"
   {:added "3.0"}
   ([data]
-   (h/map-vals
+   (collection/map-vals
     (fn [ns-entry]
-      (h/map-vals
+      (collection/map-vals
        (fn [entry]
          (if (-> entry :test :code)
            (update-in entry
@@ -119,7 +120,7 @@
    (if (not (fs/exists? cache-dir))
      (fs/create-directory cache-dir))
    (let [files  (fs/select cache-dir {:include [fs/file?]})
-         [run? output] (h/swap-return!
+         [run? output] (atom/swap-return!
                         *memory-loaded*
                         (fn [v] (if (nil? v)
                                   [true (promise)]

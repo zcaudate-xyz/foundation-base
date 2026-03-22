@@ -1,6 +1,6 @@
 (ns xt.runtime.type-pair-test
-  (:use code.test)
-  (:require [xt.runtime.type-pair :refer :all]))
+  (:require [xt.runtime.type-pair :refer :all])
+  (:use code.test))
 
 ^{:refer xt.runtime.type-pair/pair-new :added "4.0"}
 (fact "creates a pair new")

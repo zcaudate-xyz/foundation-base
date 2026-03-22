@@ -1,14 +1,15 @@
 (ns rt.postgres.script.impl-test
-  (:use code.test)
-  (:require [rt.postgres.script.impl :as impl]
-            [rt.postgres.script.impl-main :as main]
+  (:require [rt.postgres :as pg]
             [rt.postgres.grammar.common-application :as app]
             [rt.postgres.grammar.common-tracker :as tracker]
+            [rt.postgres.script.impl :as impl]
+            [rt.postgres.script.impl-main :as main]
+            [rt.postgres.script.test.scratch-v1 :as scratch]
             [std.lang :as l]
             [std.lang.base.book :as book]
-            [std.lib :as h]
-            [rt.postgres :as pg]
-            [rt.postgres.script.test.scratch-v1 :as scratch]))
+            [std.lib.collection :as collection]
+            [std.lib.foundation :as f])
+  (:use code.test))
 
 (l/script- :postgres
   {:runtime :jdbc.client
@@ -22,17 +23,17 @@
   :setup [(pg/t:delete scratch/Task)
           (pg/t:delete scratch/TaskCache)
           (pg/t:insert scratch/TaskCache
-            {:id (str (h/uuid-nil))}
+            {:id (str (f/uuid-nil))}
             {:track {}})
           (pg/t:insert scratch/Task
             {:status "pending"
              :name "001"
-             :cache (str (h/uuid-nil))}
+             :cache (str (f/uuid-nil))}
             {:track {}})
           (pg/t:insert scratch/Task
             {:status "pending"
              :name "002"
-             :cache (str (h/uuid-nil))}
+             :cache (str (f/uuid-nil))}
             {:track {}})]}
 (fact "flat select"
   ^:hidden
@@ -47,7 +48,7 @@
   (pg/t:select scratch/Task
     {:returning #{:name}
      :as :raw})
-  => h/form?
+  => collection/form?
   
   (pg/t:select scratch/Task {:single true
                              :returning #{:-/data}

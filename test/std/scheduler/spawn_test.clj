@@ -1,9 +1,10 @@
 (ns std.scheduler.spawn-test
-  (:use [code.test :exclude [run]])
-  (:require [std.scheduler.spawn :refer :all]
+  (:require [std.concurrent :as cc]
+            [std.lib.future :as future]
+            [std.lib.time :as time]
             [std.scheduler.common :as common]
-            [std.concurrent :as cc]
-            [std.lib :as h]))
+            [std.scheduler.spawn :refer :all])
+  (:use [code.test :exclude [run]]))
 
 (declare |rt| |rt3|)
 
@@ -156,7 +157,7 @@
 ^{:refer std.scheduler.spawn/handler-run :added "3.0"}
 (fact "handles the "
 
-  (let [ret (h/incomplete)
+  (let [ret (future/incomplete)
         job {:id "j.0"
              :time 0
              :return ret}
@@ -201,7 +202,7 @@
 
 ^{:refer std.scheduler.spawn/wrap-schedule :added "3.0"}
 (fact "wrapper for the schedule function"
-  (with-redefs [std.lib/time-ms (constantly 0)]
+  (with-redefs [time/time-ms (constantly 0)]
     ((wrap-schedule {:type :basic} (create-spawn) (fn [s f t] t))
      nil (fn [id ret] nil) "j.1" nil 0))
   => ["j.1" 4000])

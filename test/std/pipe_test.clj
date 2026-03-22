@@ -1,6 +1,6 @@
 (ns std.pipe-test
-  (:use code.test)
-  (:require [std.pipe :refer :all]))
+  (:require [std.pipe :refer :all])
+  (:use code.test))
 
 ^{:refer std.pipe/pipe-defaults :added "4.0"}
 (fact "creates default settings for pipe task groups"

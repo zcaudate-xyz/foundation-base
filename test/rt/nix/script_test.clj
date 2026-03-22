@@ -1,6 +1,6 @@
 (ns rt.nix.script-test
-  (:use code.test)
-  (:require [rt.nix.script :refer :all]))
+  (:require [rt.nix.script :refer :all])
+  (:use code.test))
 
 ^{:refer rt.nix.script/emit-nix :added "4.0"}
 (fact "emits a nix config"

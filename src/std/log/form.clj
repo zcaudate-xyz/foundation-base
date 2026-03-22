@@ -1,10 +1,10 @@
 (ns std.log.form
-  (:require [std.protocol.log :as protocol.log]
+  (:require [clojure.string]
             [std.concurrent.thread :as thread]
-            [std.lib :as h]
-            [std.string :as str]
+            [std.lib.foundation :as f]
             [std.log.common :as common]
-            [std.log.core :as core]))
+            [std.log.core :as core]
+            [std.protocol.log :as protocol.log]))
 
 (defn log-meta
   "gets the metadata information on macroexpand"
@@ -23,9 +23,9 @@
    => \"function-name\""
   {:added "3.0"}
   ([name]
-   (-> (str/split name #"\$")
+   (-> (clojure.string/split name #"\$")
        (second)
-       (h/demunge))))
+       (f/demunge))))
 
 (defn log-runtime-raw
   "returns the runtime information of the log entry
@@ -97,7 +97,7 @@
   {:added "3.0"}
   ([level id form logger context data exception preset]
    (if (log-check level)
-     (let [id   (or id (h/flake))
+     (let [id   (or id (f/flake))
            meta (log-meta form)]
        `(binding [common/*context* (merge common/*context*
                                           {:log/pipe false}

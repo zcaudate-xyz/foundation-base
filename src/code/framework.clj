@@ -1,20 +1,24 @@
 (ns code.framework
-  (:require [std.lib.walk :as walk]
+  (:require [clojure.string]
             [code.framework.cache :as cache]
             [code.framework.common :as common]
             [code.framework.docstring :as docstring]
             [code.framework.test.clojure]
             [code.framework.test.fact]
             [code.framework.text :as text]
-            [std.block.navigate :as nav]
-            [code.query :as query]
-            [std.fs :as fs]
             [code.project :as project]
-            [std.text.diff :as text.diff]
-            [std.string :as str]
-            [std.print.ansi :as ansi]
+            [code.query :as query]
+            [std.block.navigate :as nav]
+            [std.fs :as fs]
+            [std.lib.collection :as collection]
+            [std.lib.env :as env]
+            [std.lib.foundation :as f]
+            [std.lib.invoke :as invoke]
             [std.lib.result :as res]
-            [std.lib :as h :refer [definvoke]]))
+            [std.lib.walk :as walk]
+            [std.print.ansi :as ansi]
+            [std.string.common]
+            [std.text.diff :as text.diff]))
 
 (def ^:dynamic *toplevel-forms*
   '#{defn
@@ -51,7 +55,7 @@
      defvar.xt
      defvar.js
      defcache
-     definvoke
+     invoke/definvoke
      defmemoize
      deftask})
 
@@ -161,10 +165,10 @@
          frameworks (find-test-frameworks ns-form)]
      (->> frameworks
           (map (fn [framework] (common/analyse-test framework nav)))
-          (apply h/merge-nested)
+          (apply collection/merge-nested)
           (common/entry)))))
 
-(definvoke analyse-file
+(invoke/definvoke analyse-file
   "helper function for analyse, taking a file as input
  
    (analyse-file [:source \"src/code/framework.clj\"])"
@@ -271,7 +275,7 @@
            :else
            (mapv (var-function full) analysis)))))
 
-(definvoke read-ns-form
+(invoke/definvoke read-ns-form
   "memoised version of fs/read-ns"
   {:added "4.0"}
   [:recent {:compare fs/last-modified}]
@@ -300,7 +304,7 @@
      (cond (res/result? analysis) analysis
 
            :else
-           (h/map-juxt [(var-function full)
+           (collection/map-juxt [(var-function full)
                         (comp docstring/->docstring :code :test)]
                        analysis)))))
 
@@ -335,7 +339,7 @@
                                           (f revised)
                                           nil
                                           (catch Throwable t
-                                            (h/prn t)
+                                            (env/prn t)
                                             [k false])))
                                       verify))
                               true)
@@ -347,8 +351,8 @@
                           (spit (fs/path root path) revised)
                           true)
                _        (when (and (:function print) (seq deltas))
-                          (h/local :print (str "\n" (ansi/style path #{:bold :blue :underline}) "\n\n"))
-                          (h/local :print (text.diff/->string deltas) "\n"))]
+                          (env/local :print (str "\n" (ansi/style path #{:bold :blue :underline}) "\n\n"))
+                          (env/local :print (text.diff/->string deltas) "\n"))]
            (cond-> (if no-analysis
                      (assoc (text.diff/summary deltas)
                             :changed (text.diff/get-lines deltas))
@@ -371,11 +375,11 @@
                                  {:return :zipper})
                        (mapv nav/line-info))]
      (if (seq results)
-       (let [lines (str/split-lines code)
+       (let [lines (clojure.string/split-lines code)
              path  (str (fs/relativize root path))]
          (when (:function print)
-           (h/local :print (str "\n" (ansi/style path #{:bold :blue :underline}) "\n\n"))
-           (h/local :print (text/->string results lines line-lu params) "\n"))
+           (env/local :print (str "\n" (ansi/style path #{:bold :blue :underline}) "\n\n"))
+           (env/local :print (text/->string results lines line-lu params) "\n"))
          results)))))
 
 ;; GREP
@@ -387,10 +391,10 @@
    => \"\\\\(:require\""
   {:added "3.0"}
   ([obj]
-   (cond (h/regexp? obj) obj
+   (cond (f/regexp? obj) obj
 
          (string? obj)
-         (h/-> (str obj)
+         (f/-> (str obj)
                (.replaceAll "\\(" "\\\\(")
                (.replaceAll "\\(" "\\\\(")
                (.replaceAll "\\{" "\\\\{")
@@ -427,7 +431,7 @@
          code     (slurp path)
          analysis (analyse ns params lookup project)
          line-lu  (common/line-lookup ns analysis)
-         lines    (str/split-lines code)
+         lines    (clojure.string/split-lines code)
          results  (keep (fn [[i line]]
                           (if-let [[_ start match] (re-find query line)]
                             (let [col (inc (count start))]
@@ -438,8 +442,8 @@
      (if (seq results)
        (let [path  (str (fs/relativize root path))]
          (when (:function print)
-           (h/local :print (str "\n" (ansi/style path #{:bold :blue :underline}) "\n\n"))
-           (h/local :print (text/->string results lines line-lu params) "\n"))
+           (env/local :print (str "\n" (ansi/style path #{:bold :blue :underline}) "\n\n"))
+           (env/local :print (text/->string results lines line-lu params) "\n"))
          results)))))
 
 (defn grep-replace
@@ -452,9 +456,9 @@
   ([ns {:keys [print query replace] :as params} lookup {:keys [root] :as project}]
    (let [query    (compile-regex query)
          transform-fn (fn [original]
-                        (->> (str/split-lines original)
-                             (map (fn [line] (str/replace line query replace)))
-                             (str/join "\n")))
+                        (->> (clojure.string/split-lines original)
+                             (map (fn [line] (clojure.string/replace line query replace)))
+                             (clojure.string/join "\n")))
          params (assoc params :transform transform-fn)]
      (transform-code ns params lookup project))))
 
@@ -466,9 +470,9 @@
        (take 10)
        (map #(doto % (-> nav/string prn)))
        (map nav/string)
-       (str/joinl)
+       (std.string.common/joinl)
        (println))
-  (h/error "oeoeu"))
+  (f/error "oeoeu"))
 
 (defn refactor-code
   "takes in a series of edits and performs them on the code

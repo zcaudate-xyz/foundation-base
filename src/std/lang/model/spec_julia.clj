@@ -1,17 +1,18 @@
 (ns std.lang.model.spec-julia
-  (:require [std.lang.base.emit-common :as common]
-            [std.lang.base.emit :as emit]
-            [std.lang.base.grammar :as grammar]
-            [std.lang.base.impl :as impl]
-            [std.lang.base.util :as ut]
+  (:require [clojure.string]
+            [std.fs :as fs]
             [std.lang.base.book :as book]
             [std.lang.base.book-module :as module]
+            [std.lang.base.emit :as emit]
+            [std.lang.base.emit-common :as common]
+            [std.lang.base.grammar :as grammar]
+            [std.lang.base.impl :as impl]
             [std.lang.base.script :as script]
+            [std.lang.base.util :as ut]
             [std.lang.model.spec-xtalk]
             [std.lang.model.spec-xtalk.fn-julia :as fn]
-            [std.string :as str]
-            [std.lib :as h]
-            [std.fs :as fs]))
+            [std.lib.collection :as collection]
+            [std.lib.foundation :as f]))
 
 ;;
 ;; LANG
@@ -26,7 +27,7 @@
       (list 'var* :local decl)
       (list 'var* :local decl)) ;; default declaration
     (let [bound (last args)]
-      (cond (and (h/form? bound)
+      (cond (and (collection/form? bound)
                  (= 'fn (first bound)))
             (apply list 'defn (with-meta decl {:inner true})
                    (rest bound))
@@ -166,20 +167,20 @@
         :define   {:def       {:raw ""}
                    :defglobal {:raw ""}
                    :declare   {:raw ""}}}
-       (h/merge-nested (emit/default-grammar))))
+       (collection/merge-nested (emit/default-grammar))))
 
 (defn julia-module-link
   "gets the absolute julia based module"
   {:added "4.0"}
   ([ns graph]
    (let [{:keys [target root-ns]} graph
-         root-path (->> (str/split (name root-ns) #"\.")
+         root-path (->> (clojure.string/split (name root-ns) #"\.")
                         (butlast)
-                        (str/join "/"))
+                        (clojure.string/join "/"))
 
-         ns-path   (str/replace (name ns) #"\." "/")]
-     (if (str/starts-with? ns-path (str root-path))
-       (h/->> (fs/relativize root-path ns-path)
+         ns-path   (clojure.string/replace (name ns) #"\." "/")]
+     (if (clojure.string/starts-with? ns-path (str root-path))
+       (f/->> (fs/relativize root-path ns-path)
               (str)
               (str "./"))
        (str "./" ns-path)))))
@@ -195,7 +196,7 @@
 
 (def +meta+
   (book/book-meta
-   {:module-current h/NIL
+   {:module-current f/NIL
     :module-link    #'julia-module-link
     :module-export  #'julia-module-export
     :module-import  (fn [name {:keys [as]} opts]

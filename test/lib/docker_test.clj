@@ -1,8 +1,9 @@
 (ns lib.docker-test
-  (:use code.test)
-  (:require [std.lang :as l]
-            [std.lib :as h]
-            [lib.docker :as docker]))
+  (:require [lib.docker :as docker]
+            [std.lang :as l]
+            [std.lib.env :as env]
+            [std.lib.os :as os])
+  (:use code.test))
 
 ^{:refer lib.docker/start-runtime :added "4.0"}
 (fact "starts a runtime with attached container")
@@ -43,21 +44,21 @@
 
 
   (std.json/read 
-   @(h/sh "docker" "images" "--format" "{{json .}}"))
+   @(os/sh "docker" "images" "--format" "{{json .}}"))
 
   (std.json/read 
-   @(h/sh "docker" "inspect" "--format" "{{json .}}"))
+   @(os/sh "docker" "inspect" "--format" "{{json .}}"))
 
   (std.json/read 
-   @(h/sh "docker" "ps" "--format" "{{json .}}"))
-
-
-  (std.json/read 
-   @(h/sh "docker" "ps" "--format" "{{json .}}"))
+   @(os/sh "docker" "ps" "--format" "{{json .}}"))
 
 
   (std.json/read 
-   @(h/sh "docker" "inspect" "--help"))
+   @(os/sh "docker" "ps" "--format" "{{json .}}"))
+
+
+  (std.json/read 
+   @(os/sh "docker" "inspect" "--help"))
 
 
   (docker/start-ryuk)
@@ -334,7 +335,7 @@
     {:runtime :redis.client
      :config {:host "172.17.0.3"}})
   
-  (h/pl (!.lua
+  (env/pl (!.lua
          package.path)
         "./?.lua;/usr/local/share/luajit-2.1.0-beta3/?.lua;/usr/local/share/lua/5.1/?.lua;/usr/local/share/lua/5.1/?/init.lua"
         )

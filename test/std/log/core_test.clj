@@ -1,11 +1,11 @@
 (ns std.log.core-test
-  (:use code.test)
-  (:require [std.log.core :refer :all]
+  (:require [std.lib.env :as env]
             [std.log.common :as common]
             [std.log.console :as console]
-            [std.lib :as h]
+            [std.log.core :refer :all]
             [std.print :as print]
-            [std.protocol.component :as protocol.component]))
+            [std.protocol.component :as protocol.component])
+  (:use code.test))
 
 ^{:refer std.log.core/logger-submit :added "3.0"}
 (fact "basic submit function"
@@ -106,7 +106,7 @@
 ^{:refer std.log.core/basic-write :added "3.0"}
 (fact "writes to the logger"
 
-  (h/with-out-str
+  (env/with-out-str
     (basic-write [{:a 1 :b 2}] false))
   => "[{:a 1, :b 2}]\n")
 

@@ -1,7 +1,7 @@
 (ns std.string.wrap-test
-  (:use code.test)
-  (:require [std.string.wrap :refer :all]
-            [std.string.coerce :as coerce]))
+  (:require [std.string.coerce :as coerce]
+            [std.string.wrap :refer :all])
+  (:use code.test))
 
 ^{:refer std.string.wrap/wrap-fn :added "3.0"}
 (fact "multimethod for extending wrap"

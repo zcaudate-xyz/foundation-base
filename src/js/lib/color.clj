@@ -1,12 +1,11 @@
 (ns js.lib.color
   (:require [std.lang :as l]
-            [std.lib :as h]
-            [std.string :as str]))
+            [std.lib.foundation :as f]))
 
 (l/script :js
   {:import [["@csstools/convert-colors" :as [* Colors]]]})
 
-(h/template-entries [l/tmpl-entry {:type :fragment
+(f/template-entries [l/tmpl-entry {:type :fragment
                                    :base "Colors"
                                    :tag "js"}]
   [hex2ciede

@@ -1,7 +1,7 @@
 (ns rt.postgres.system-test
-  (:use code.test)
-  (:require [std.lang :as l]
-            [rt.postgres.system :as sys]))
+  (:require [rt.postgres.system :as sys]
+            [std.lang :as l])
+  (:use code.test))
 
 (l/script- :postgres
   {:runtime :jdbc.client

@@ -1,6 +1,6 @@
 (ns lua.nginx.ws-client
   (:require [std.lang :as l]
-            [std.lib :as h]))
+            [std.lib.foundation :as f]))
 
 (l/script :lua
   {:import [["resty.websocket.client" :as ngxwsclient]
@@ -12,7 +12,7 @@
   []
   '(. ngxwsclient (new)))
 
-(h/template-entries [l/tmpl-macro {:base "websocket"
+(f/template-entries [l/tmpl-macro {:base "websocket"
                                    :inst "wb"
                                    :tag "lua"}]
   [[connect     [url] {:optional [options]}]

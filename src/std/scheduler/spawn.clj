@@ -1,6 +1,10 @@
 (ns std.scheduler.spawn
   (:require [std.concurrent :as cc]
-            [std.lib :as h :refer [defimpl]]))
+            [std.lib.atom :as atom]
+            [std.lib.foundation :as f]
+            [std.lib.future :as future]
+            [std.lib.impl :as impl]
+            [std.lib.time :as time]))
 
 (def ^:dynamic *spawn-id* nil)
 
@@ -46,7 +50,7 @@
   ([{:keys [id board props output state exit] :as spawn}]
    (let [{:keys [succeeded errored submitted completed started updated error]} @props]
      (cond-> {:status (spawn-status spawn)
-              :duration  (h/format-ms (if (and updated started)
+              :duration  (time/format-ms (if (and updated started)
                                         (quot (- updated started) 1000000)
                                         0))
               :jobs {:submitted submitted
@@ -60,7 +64,7 @@
   ([spawn]
    (str "#spawn " (spawn-info spawn))))
 
-(defimpl Spawn [id board props output state exit]
+(impl/defimpl Spawn [id board props output state exit]
   :string spawn-string)
 
 (defn spawn?
@@ -82,7 +86,7 @@
    (create-spawn *defaults* nil))
   ([{:keys [create-fn continue-fn interval
             global full state] :as program} spawn-id]
-   (let [spawn-id (or spawn-id (h/sid))]
+   (let [spawn-id (or spawn-id (f/sid))]
      (binding [*spawn-id* spawn-id]
        (map->Spawn
         {:id      spawn-id
@@ -165,7 +169,7 @@
   "removes a job given key"
   {:added "3.0"}
   ([spawn job-id]
-   (let [out (h/swap-return! (:board spawn)
+   (let [out (atom/swap-return! (:board spawn)
                              (fn [m]
                                [(get m job-id) (dissoc m job-id)]))]
      out)))
@@ -199,7 +203,7 @@
   "sends the result to spawn output"
   {:added "3.0"}
   ([{:keys [output] :as spawn} result]
-   (cond (h/atom? output)
+   (cond (f/atom? output)
          (reset! output result)
 
          (cc/queue? output)
@@ -231,13 +235,13 @@
              *spawn* spawn
              *spawn-id* (:id spawn)]
      (try
-       (let [start (h/time-ns)
+       (let [start (time/time-ns)
              args (args-fn)
-             _ (h/fulfil return (fn [] (main-fn args time)) true)
-             {:keys [status data exception] :as m} (h/future:result return)
+             _ (future/fulfil return (fn [] (main-fn args time)) true)
+             {:keys [status data exception] :as m} (future/future:result return)
              [status-key output] (cond exception [:errored  (error-fn exception)]
                                        :else     [:succeeded (success-fn data)])
-             end (h/time-ns)
+             end (time/time-ns)
              _ (binding [*timing* [start end]]
                  (swap! state merge-fn output))
              _ (remove-job spawn job-id)
@@ -292,7 +296,7 @@
    => [1500 865]"
   {:added "3.0"}
   ([type props last]
-   (schedule-timing type props last (h/time-ms)))
+   (schedule-timing type props last (time/time-ms)))
   ([type props last now]
    (let [{:keys [interval] :as m} props
          interval (or *delay*
@@ -341,8 +345,8 @@
          schedule-fn (wrap-schedule program spawn cc/schedule)
          prep-fn (fn prep-fn
                    ([loop-fn last]
-                    (let [job-id  (str (h/uuid))
-                          return  (h/incomplete)
+                    (let [job-id  (str (f/uuid))
+                          return  (future/incomplete)
                           out (schedule-fn scheduler loop-fn job-id return last)
                           _   (set-props spawn :submitted inc)]
                       out)))
@@ -357,7 +361,7 @@
                           (deliver exit true)
                           nil)))))]
      (fn []
-       (let [now (h/time-ns)]
+       (let [now (time/time-ns)]
          (set-props spawn :started now)
          (prep-fn loop-fn (time-fn (quot now 1000000))))))))
 
@@ -470,7 +474,7 @@
              _ (if scheduled (future-cancel scheduled))
              _ (if task (future-cancel task))
              _ (if return
-                 (h/future:force return :exception
+                 (future/future:force return :exception
                                  (ex-info "" {:interrupted spawn-id
                                               :id id})))]
          id))

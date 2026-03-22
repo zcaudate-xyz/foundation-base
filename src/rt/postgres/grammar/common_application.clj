@@ -1,11 +1,15 @@
 (ns rt.postgres.grammar.common-application
-  (:require [std.protocol.deps :as protocol.deps]
-            [rt.postgres.grammar.typed-common :as typed]
+  (:require [rt.postgres.grammar.typed-common :as typed]
             [rt.postgres.grammar.typed-parse :as tparse]
             [std.lang :as l]
-            [std.string :as str]
+            [std.lib.collection :as collection]
+            [std.lib.context.pointer :as ptr]
+            [std.lib.deps :as deps]
+            [std.lib.foundation :as f]
+            [std.lib.impl :as impl]
             [std.lib.schema :as schema]
-            [std.lib :as h :refer [defimpl]]))
+            [std.protocol.deps :as protocol.deps]
+            [std.string.prose :as prose]))
 
 (defonce ^:dynamic *applications*
   (atom {}))
@@ -13,7 +17,7 @@
 (defn- application-string
   ([app]
    (str "#pg.app [" (count (:tables app)) "]\n"
-        (str/layout-lines (sort (keys (:tables app))))
+        (prose/layout-lines (sort (keys (:tables app))))
         "\n")))
 
 (defn- app-list-entries
@@ -35,7 +39,7 @@
         (map (comp symbol name))
         (set))))
 
-(defimpl Application [tables schema pointers]
+(impl/defimpl Application [tables schema pointers]
   :string application-string
   :protocols [protocol.deps/IDeps
               :prefix "app-"])
@@ -65,13 +69,13 @@
                                 tables)
                         (vec)
                         (schema/schema)))
-        pointers (h/map-vals (fn [m]
-                               (if (not (h/pointer? m))
-                                 (h/pointer (assoc m :context :lang/postgres))
+        pointers (collection/map-vals (fn [m]
+                               (if (not (ptr/pointer? m))
+                                 (ptr/pointer (assoc m :context :lang/postgres))
                                  m))
                              links)
         app (->Application tables schema pointers)
-        lu  (zipmap (map (comp keyword str) (h/deps:ordered app))
+        lu  (zipmap (map (comp keyword str) (deps/deps-ordered app))
                     (range))]
     (cond-> (assoc app :lu lu)
       typed-info (assoc :typed typed-info))))
@@ -103,14 +107,14 @@
                                                (if public-only
                                                  (:static/public m)
                                                  true)))))))
-         links    (h/map-juxt [(comp keyword str :id)
+         links    (collection/map-juxt [(comp keyword str :id)
                                (fn [entry] (select-keys entry [:id :module :section :lang]))]
                               entries)
          tentries (mapcat (comp :vec :static/schema-seed) entries)
          tables   (->> tentries
                        (partition 2)
                        (map vec)
-                       (map (fn [[k v]] [(symbol (h/strn k)) v]))
+                       (map (fn [[k v]] [(symbol (f/strn k)) v]))
                        (into {}))
          typed-info (app-create-typed tables modules)]
      (app-create-raw tables links typed-info))))

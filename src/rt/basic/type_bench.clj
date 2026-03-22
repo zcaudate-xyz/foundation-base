@@ -1,11 +1,15 @@
 (ns rt.basic.type-bench
-  (:require [std.lib :as h :refer [defimpl]]
-            [std.json :as json]
+  (:require [rt.basic.type-common :as common]
+            [rt.basic.type-oneshot :as oneshot]
             [std.fs :as fs]
-            [std.string :as str]
-            [std.make :as make]
-            [rt.basic.type-common :as common]
-            [rt.basic.type-oneshot :as oneshot]))
+            [std.json :as json]
+            [std.lib.collection :as collection]
+            [std.lib.env :as env]
+            [std.lib.future :as future]
+            [std.lib.impl :as impl]
+            [std.lib.os :as os]
+            [std.lib.walk :as walk]
+            [std.make :as make]))
 
 (defonce ^:dynamic *active*
   (atom {}))
@@ -13,7 +17,7 @@
 (defn- rt-bench-string [{:keys [type lang program port]}]
   (str "#rt.bench" [type lang port]))
 
-(defimpl RuntimeBench [type lang program port]
+(impl/defimpl RuntimeBench [type lang program port]
   :string rt-bench-string)
 
 (defn bench?
@@ -39,8 +43,8 @@
                      host]
               :as opts}
    input-args input-body]
-  (let [cmd  (concat input-args (h/seqify input-body))
-        cmd  (h/postwalk (fn [x]
+  (let [cmd  (concat input-args (collection/seqify input-body))
+        cmd  (walk/postwalk (fn [x]
                            (if (keyword? x)
                              (or (get (:params opts) x)
                                  (throw (ex-info (str "Need to supply in [:config :params " x "]")
@@ -48,15 +52,15 @@
                                                   :params (:params opts)})))
                              x))
                          cmd)  
-        process (h/sh (merge (:shell opts)
+        process (os/sh (merge (:shell opts)
                              {:args cmd
                               :wait false
                               :root root-dir}))
-        thread  (-> (h/future (h/sh-wait process))
-                    (h/on:complete (fn [ret err]
-                                     (try (let [out (h/sh-output process)]
+        thread  (-> (future/future (os/sh-wait process))
+                    (future/on:complete (fn [ret err]
+                                     (try (let [out (os/sh-output process)]
                                             (when (not= 0 (:exit out))
-                                              (h/prn out)))
+                                              (env/prn out)))
                                           (catch Throwable t))
                                      (swap! *active* dissoc port))))]
     (map->RuntimeBench
@@ -90,9 +94,9 @@
   (let [{:keys [process] :as entry} (get @*active* port)]
     (when process
       (doto process
-        (h/sh-kill)
-        (h/sh-exit)
-        (h/sh-wait)))
+        (os/sh-kill)
+        (os/sh-exit)
+        (os/sh-wait)))
     entry))
 
 (defn start-bench

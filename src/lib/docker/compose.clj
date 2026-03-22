@@ -1,6 +1,7 @@
 (ns lib.docker.compose
-  (:require [std.lib :as h]
-            [std.string :as str]))
+  (:require [clojure.string]
+            [std.lib.collection :as collection]
+            [std.lib.foundation :as f]))
 
 (defn create-compose-single
   "executes a shell command"
@@ -20,7 +21,7 @@
                :then (conj :depends_on))
         override (if (map? (:ports override))
                    (assoc override :ports
-                          (str/join ","
+                          (clojure.string/join ","
                                     (map (fn [[k v]]
                                            (str k ":" v))
                                          (:ports override))))
@@ -47,26 +48,26 @@
   [{:keys [config
            network
            entries]}]
-  (let [config  (h/map-entries (fn [[k m]]
+  (let [config  (collection/map-entries (fn [[k m]]
                                  [k (assoc m :name (name k))])
                                config)
-        order   (h/map-vals (fn [{:keys [name ip]}]
+        order   (collection/map-vals (fn [{:keys [name ip]}]
                               (if ip
-                                (h/parse-long (last (str/split ip #"\.")))
+                                (f/parse-long (last (clojure.string/split ip #"\.")))
                                 name))
                             config)
-        prep    (h/map-vals (fn [{:keys [type] :as m}]
+        prep    (collection/map-vals (fn [{:keys [type] :as m}]
                               ((or (get entries type)
-                                   (h/error "NOT FOUND:" {:type type}))
+                                   (f/error "NOT FOUND:" {:type type}))
                                m))
                             config)
-        environments (h/map-vals (fn [{:keys [deps environment]}]
+        environments (collection/map-vals (fn [{:keys [deps environment]}]
                                    (->> deps
                                         (map (fn [k]
                                                (get-in prep [k :export])))
                                         (apply merge environment)))
                                  config)
-        depends-on  (h/map-vals (fn [{:keys [deps]}]
+        depends-on  (collection/map-vals (fn [{:keys [deps]}]
                                   (mapv name deps))
                                 config)]
     (->> prep

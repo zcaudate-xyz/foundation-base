@@ -1,9 +1,9 @@
 (ns std.lib.apply
-  (:require [std.protocol.apply  :as protocol.apply]
-            [std.lib.foundation :as h]
+  (:require [std.lib.foundation :as h]
             [std.lib.future :as f]
+            [std.lib.impl :as impl :refer [defimpl]]
             [std.lib.return :as r]
-            [std.lib.impl :refer [defimpl] :as impl]))
+            [std.protocol.apply :as protocol.apply]))
 
 (defn apply-in
   "runs the applicative within a context

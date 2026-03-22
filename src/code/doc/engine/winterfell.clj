@@ -1,5 +1,5 @@
 (ns code.doc.engine.winterfell
-  (:require [std.string :as str]
+  (:require [clojure.string]
             [code.doc.engine.plugin.api :as api]
             [code.doc.render.util :as util]))
 
@@ -82,7 +82,7 @@
           (util/join-string)
           (util/basic-html-escape)
           (util/adjust-indent indentation)
-          (str/trim))]]
+          (clojure.string/trim))]]
     (if failed
       (apply vector
              :div

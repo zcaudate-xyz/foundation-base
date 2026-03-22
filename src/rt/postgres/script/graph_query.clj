@@ -1,15 +1,15 @@
 (ns rt.postgres.script.graph-query
-  (:require [std.lib :as h]
-            [std.lang :as l]
-            [std.lang.base.util :as ut]
-            [std.lang.base.book :as book]
-            [std.lang.base.library-snapshot :as snap]
-            [std.string :as str]
-            [std.lib.schema :as schema]
+  (:require [clojure.set]
             [rt.postgres.grammar.common :as common]
+            [rt.postgres.script.graph-base :as base]
             [rt.postgres.script.impl-base :as impl]
             [rt.postgres.script.impl-main :as main]
-            [rt.postgres.script.graph-base :as base]))
+            [std.lang :as l]
+            [std.lang.base.book :as book]
+            [std.lang.base.library-snapshot :as snap]
+            [std.lang.base.util :as ut]
+            [std.lib.foundation :as f]
+            [std.lib.schema :as schema]))
 
 (def +t-additional-scope+
   {:*/linked     #{:-/linked}
@@ -57,7 +57,7 @@
         ntsch   (get-in schema [:tree (keyword (name (:id link)))])
         where-clause (cond (nil? where) query
 
-                           (h/intersection (set (keys where))
+                           (clojure.set/intersection (set (keys where))
                                            (set (keys query)))
                            #{(vec (concat
                                    (first query)
@@ -89,14 +89,14 @@
   ([entry tsch markers query-fn mopts]
    (let [ks   (set (map first markers))
          [_ err]    (schema/check-valid-columns tsch ks)
-         _ (if err (h/error "Not valid." (assoc err :data markers)))]
+         _ (if err (f/error "Not valid." (assoc err :data markers)))]
      (mapv (fn [[k & [where returning params] :as arr]]
              (let [[where returning params] (if (map? where)
                                               [where returning params]
                                               [{} where returning])
                    [{:keys [type ref unique] :as attrs}] (get tsch k)
                    _  (if-not (= :ref type)
-                        (h/error "Column not a ref" {:column k
+                        (f/error "Column not a ref" {:column k
                                                      :attrs attrs}))]
                {:expr (returning-block entry
                                        attrs
@@ -129,7 +129,7 @@
          custom-markers (filter (fn [x] (map? x)) returning)
          pure-ks        (set (map first (schema/get-returning tsch pure-markers)))
          rev-ks         (reverse-keys tsch)
-         linked-ks      (if (not-empty (h/intersection #{:*/everything
+         linked-ks      (if (not-empty (clojure.set/intersection #{:*/everything
                                                          :*/all
                                                          :*/linked
                                                          :-/linked}
@@ -138,7 +138,7 @@
          data-ks        (apply disj pure-ks
                                (concat (map first vec-markers)
                                        rev-ks))
-         ref-ks         (map vector (h/union (h/intersection pure-ks
+         ref-ks         (map vector (clojure.set/union (clojure.set/intersection pure-ks
                                                              rev-ks)
                                              linked-ks))
          

@@ -1,11 +1,11 @@
 (ns std.dispatch.hub-test
-  (:use code.test)
-  (:require [std.dispatch.hub :refer :all]
+  (:require [std.concurrent :as cc]
             [std.dispatch.debounce :as debounce]
             [std.dispatch.hooks :as hooks]
+            [std.dispatch.hub :refer :all]
             [std.lib.component :as component]
-            [std.concurrent :as cc]
-            [std.lib :as h]))
+            [std.lib.foundation :as f])
+  (:use code.test))
 
 (defonce ^:dynamic *output*   (atom []))
 
@@ -55,7 +55,7 @@
   (def -d- {:runtime {:groups (atom {})}})
   (put-hub -d- :g 1)
   => (contains [1])
-  (get @(:groups (:runtime -d-)) :g) => h/atom?)
+  (get @(:groups (:runtime -d-)) :g) => f/atom?)
 
 ^{:refer std.dispatch.hub/create-hub-handler :added "3.0"}
 (fact "creates the hub handler"
