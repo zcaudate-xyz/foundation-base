@@ -72,6 +72,21 @@
       :form)
   => '(defn add-fn [a b] (return (+ a (+ a 1)))))
 
+(fact "hydrate hooks can enrich the returned entry"
+  ^:hidden
+
+  (-> (entry/create-code-hydrate +entry+
+                                 (assoc (get-in @emit/+test-grammar+ [:reserved 'defn])
+                                        :hydrate-hook (fn [entry]
+                                                        (assoc entry :probe/value true)))
+                                 @emit/+test-grammar+
+                                 (:modules prep/+book-min+)
+                                 '{:id L.core
+                                   :alias {}
+                                   :link  {- L.core}})
+      :probe/value)
+  => true)
+
 ^{:refer std.lang.base.impl-entry/create-code :added "4.0"}
 (fact "creates the code entry"
   ^:hidden

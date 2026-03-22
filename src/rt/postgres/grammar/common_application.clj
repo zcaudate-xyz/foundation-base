@@ -1,5 +1,7 @@
 (ns rt.postgres.grammar.common-application
   (:require [std.protocol.deps :as protocol.deps]
+            [rt.postgres.grammar.typed-common :as typed]
+            [rt.postgres.grammar.typed-parse :as tparse]
             [std.lang :as l]
             [std.string :as str]
             [std.lib.schema :as schema]
@@ -50,7 +52,7 @@
 (defn app-create-raw
   "creates a schema from tables and links"
   {:added "4.0"}
-  [tables links]
+  [tables links & [typed-info]]
   (let [ref-fn   (fn [{:keys [ref] :as attrs}]
                    (let [rkey (symbol (namespace (:key ref)))]
                      {:link (select-keys (get links rkey)
@@ -71,13 +73,28 @@
         app (->Application tables schema pointers)
         lu  (zipmap (map (comp keyword str) (h/deps:ordered app))
                     (range))]
-    (assoc app :lu lu)))
+    (cond-> (assoc app :lu lu)
+      typed-info (assoc :typed typed-info))))
+
+(defn- module-typed
+  [modules]
+  (->> modules
+       (map (comp tparse/analyze-namespace #(symbol (str (:id %)))))
+       (map (fn [analysis] (assoc analysis :tables [])))
+       (map typed/analysis->typed)
+       (apply typed/merge-typed)))
+
+(defn- app-create-typed
+  [tables modules]
+  (typed/merge-typed (-> tables tparse/analyze-tables typed/analysis->typed)
+                     (module-typed modules)))
 
 (defn app-create
   "makes the app graph schema"
   {:added "4.0"}
   ([name & [public-only]]
-   (let [entries (->> (app-modules name)
+   (let [modules  (app-modules name)
+         entries (->> modules
                       (mapcat (fn [module]
                                 (->> (:code module)
                                      vals
@@ -94,8 +111,9 @@
                        (partition 2)
                        (map vec)
                        (map (fn [[k v]] [(symbol (h/strn k)) v]))
-                       (into {}))]
-     (app-create-raw tables links))))
+                       (into {}))
+         typed-info (app-create-typed tables modules)]
+     (app-create-raw tables links typed-info))))
 
 (defn app-clear
   "clears the entry for an app"
@@ -112,7 +130,10 @@
               (fn [m]
                 (assoc m name
                        (if-let [curr (get m name)]
-                         (app-create-raw (:tables curr) (:pointers curr))
+                         (app-create-raw (:tables curr)
+                                         (:pointers curr)
+                                         (app-create-typed (:tables curr)
+                                                           (app-modules name)))
                          (app-create name)))))
        (get name))))
 
@@ -142,3 +163,9 @@
   {:added "4.0"}
   ([name]
    (:schema (get @*applications* name))))
+
+(defn app-typed
+  "gets the app typed payload"
+  {:added "4.1"}
+  ([name]
+   (:typed (get @*applications* name))))

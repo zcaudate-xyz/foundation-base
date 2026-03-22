@@ -1,5 +1,5 @@
-(ns rt.postgres.infer
-  "Public API for rt.postgres.infer.
+(ns rt.postgres.typed
+  "Public API for rt.postgres typed analysis and compile targets.
    
    Consolidated, non-redundant interface for schema inference.
    
@@ -8,12 +8,13 @@
    2. Centralized +type-formats+ (no duplicate type mappings)
    3. Single normalize-key (no scattered key conversion)
    4. Analysis delegates to shape/merge-shapes (no local merge duplication)"
-  (:require [rt.postgres.infer.types :as types]
-            [rt.postgres.infer.parse :as parse]
-            [rt.postgres.infer.shape :as shape]
-            [rt.postgres.infer.analyze :as analyze]
-            [rt.postgres.infer.generate :as generate]
-            [rt.postgres.infer.runtime :as runtime]
+  (:require [rt.postgres.grammar.typed-common :as types]
+            [rt.postgres.grammar.typed-parse :as parse]
+            [rt.postgres.grammar.typed-shape :as shape]
+            [rt.postgres.grammar.typed-analyze :as analyze]
+            [rt.postgres.compile.json-openapi :as compile.json-openapi]
+            [rt.postgres.compile.json-schema :as compile.json-schema]
+            [rt.postgres.compile.ts-schema :as compile.ts-schema]
             [clojure.string :as str]))
 
 ;; ─────────────────────────────────────────────────────────────────────────────
@@ -56,6 +57,34 @@
     parse/analyze-namespace
     parse/register-types!))
 
+(defn make-function-report
+  "Generates a JSON-friendly infer report for one function in a namespace."
+  [ns-sym fn-sym]
+  (analyze/reset-cache!)
+  (let [analysis (-> ns-sym
+                     parse/analyze-namespace
+                     parse/register-types!)
+        fn-name (name fn-sym)]
+    (when-let [fn-def (some #(when (= fn-name (:name %)) %)
+                            (:functions analysis))]
+      (analyze/infer-report fn-def))))
+
+(defn report-json
+  "Serializes an infer report to JSON."
+  ([report]
+   (analyze/report-json report))
+  ([report pretty?]
+   (analyze/report-json report pretty?)))
+
+(defn make-function-json
+  "Generates JSON for one function infer report in a namespace."
+  ([ns-sym fn-sym]
+   (when-let [report (make-function-report ns-sym fn-sym)]
+     (report-json report)))
+  ([ns-sym fn-sym pretty?]
+   (when-let [report (make-function-report ns-sym fn-sym)]
+     (report-json report pretty?))))
+
 ;; ─────────────────────────────────────────────────────────────────────────────
 ;; Schema Generation API
 ;; ─────────────────────────────────────────────────────────────────────────────
@@ -70,17 +99,17 @@
   (types/clear-registry!)
   (analyze/reset-cache!)
   (-> root-ns parse/analyze-namespace parse/register-types!)
-  (generate/emit :openapi root-ns fn-filter))
+  (compile.json-openapi/generate-openapi root-ns fn-filter))
 
 (defn make-json-schema
   "Generates JSON Schema definitions for all tables and enums."
   []
-  (generate/emit :jschema))
+  (compile.json-schema/generate-json-schema))
 
 (defn make-typescript
   "Generates TypeScript interfaces for all tables and enums."
   []
-  (generate/emit :typescript))
+  (compile.ts-schema/generate-ts-schema))
 
 
 
@@ -114,12 +143,16 @@
   "Loads tables from (pg/app app-name) runtime output.
    Input: {:TableName [:col1 {:type :uuid} ...] ...}"
   [tables-map]
-  (runtime/load-runtime-tables tables-map))
+  (into {}
+        (map (fn [[table-name entries]]
+               [table-name (parse/parse-runtime-table table-name entries)]))
+        tables-map))
 
 (defn register-runtime-tables!
   "Registers runtime tables into the global type registry."
   [runtime-tables]
-  (runtime/register-runtime-tables! runtime-tables))
+  (doseq [[table-name table-def] runtime-tables]
+    (swap! types/*type-registry* assoc table-name table-def)))
 
 
 (comment
@@ -127,7 +160,7 @@
   
   (parse/analyze-namespace 'gwdb.test.scratch)
   
-  (#'rt.postgres.infer/make-openapi 'gwdb.test.scratch (constantly true))
+  (#'rt.postgres.typed/make-openapi 'gwdb.test.scratch (constantly true))
   (make-typescript)
   (make-json-schema)
   (make-openapi 'gwdb.test.scratch (constantly true)))

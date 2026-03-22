@@ -16,15 +16,26 @@
   ^:hidden
 
   (app-create-raw {} {})
-  => map?)
+  => map?
+  (app-create-raw {} {} {:tables {'User :table} :enums {} :functions {}})
+  => (contains {:typed {:tables {'User :table} :enums {} :functions {}}}))
 
 ^{:refer rt.postgres.grammar.common-application/app-create :added "4.0"}
 (fact "makes the app graph schema"
   ^:hidden
 
-  (with-redefs [app-modules (fn [_] [{:code {:entry {:op 'deftype :static/schema-seed []}}}])]
-    (app-create "test.postgres")
-    => map?))
+  (with-redefs [app-modules (fn [_] [{:id 'test.module
+                                      :code {:entry {:op 'deftype
+                                                     :static/schema-seed []}}}])]
+    (with-redefs-fn {#'rt.postgres.grammar.common-application/app-create-typed
+                     (fn [_ _] {:tables {'User :table}
+                                :enums {'test/Status :enum}
+                                :functions {'test/create-user :fn}})}
+      #(-> (app-create "test.postgres")
+           :typed)))
+  => {:tables {'User :table}
+      :enums {'test/Status :enum}
+      :functions {'test/create-user :fn}})
 
 ^{:refer rt.postgres.grammar.common-application/app-clear :added "4.0"}
 (fact "clears the entry for an app"
@@ -41,8 +52,10 @@
 
   (with-redefs [*applications* (atom {"test.postgres" {:tables {} :pointers {}}})
                 app-create-raw (fn [& _] {:rebuilt true})]
-    (app-rebuild "test.postgres")
-    => {:rebuilt true}))
+    (with-redefs-fn {#'rt.postgres.grammar.common-application/app-create-typed
+                     (fn [& _] {:typed true})}
+      #(app-rebuild "test.postgres")))
+  => {:rebuilt true})
 
 ^{:refer rt.postgres.grammar.common-application/app-rebuild-tables :added "4.0"}
 (fact "initiate rebuild of app schema"
@@ -76,3 +89,11 @@
   (with-redefs [*applications* (atom {"test.postgres" {:schema :schema}})]
     (app-schema "test.postgres")
     => :schema))
+
+^{:refer rt.postgres.grammar.common-application/app-typed :added "4.1"}
+(fact "gets the app typed payload"
+  ^:hidden
+
+  (with-redefs [*applications* (atom {"test.postgres" {:typed :typed}})]
+    (app-typed "test.postgres")
+    => :typed))

@@ -1,7 +1,7 @@
-(ns rt.postgres.infer.parse
+(ns rt.postgres.grammar.typed-parse
   "Parse rt.postgres DSL forms and extract type information.
    Purely static approach - no runtime evaluation required."
-  (:require [rt.postgres.infer.types :as types]
+  (:require [rt.postgres.grammar.typed-common :as types]
             [clojure.java.io :as io]
             [clojure.string :as str]))
 
@@ -159,6 +159,39 @@
                                :expose (get-in combined-meta [:api/flags :expose])
                                :docstring docstring})
                        (or (:static/schema combined-meta) dbschema))))
+
+(defn- transform-col-opts
+  "Transforms app/runtime column opts to deftype.pg-style parse input."
+  [opts]
+  (if-let [link (get-in opts [:ref :link])]
+    (assoc opts :ref {:key (keyword (str (:module link)) (name (:id link)))})
+    opts))
+
+(defn parse-runtime-table
+  "Parses a table from app/common-application table entries."
+  [table-name table-entries & [dbschema]]
+  (let [columns (->> (partition 2 table-entries)
+                     (mapv (fn [[col-name opts]]
+                             (parse-column-spec
+                              [col-name (transform-col-opts opts)]))))
+        primary-key (->> columns
+                         (filter #(get-in % [:constraints :primary]))
+                         first
+                         :name
+                         (or :id))]
+    (types/make-table-def (namespace table-name)
+                          (name table-name)
+                          columns primary-key nil nil dbschema)))
+
+(defn analyze-tables
+  "Builds typed table defs directly from common-application tables."
+  [tables-map & [dbschema]]
+  {:enums []
+   :functions []
+   :tables (->> tables-map
+                (map (fn [[table-name entries]]
+                       (parse-runtime-table table-name entries dbschema)))
+                (vec))})
 
 ;; ─────────────────────────────────────────────────────────────────────────────
 ;; Analysis API

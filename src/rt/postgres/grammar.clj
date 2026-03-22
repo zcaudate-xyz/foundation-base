@@ -4,6 +4,7 @@
             [rt.postgres.grammar.tf :as tf]
             [rt.postgres.grammar.form-let :as form-let]
             [rt.postgres.grammar.form-defn :as form-defn]
+            [rt.postgres.grammar.form-defn-hydrate :as form-defn-hydrate]
             [rt.postgres.grammar.form-defconst :as form-defconst]
             [rt.postgres.grammar.form-defrole :as form-defrole]
             [rt.postgres.grammar.form-deftype :as form-deftype]
@@ -67,6 +68,7 @@
         :defn      {:hydrate #'common/pg-hydrate
                     :format  #'form-defn/pg-defn-format
                     :emit    #'form-defn/pg-defn
+                    :hydrate-hook #'form-defn-hydrate/pg-defn-hydrate-hook
                     :static/dbtype :function}
         :def       {:emit :macro
                     :format  #'common/pg-format

@@ -1,5 +1,5 @@
-(ns rt.postgres.infer.types
-  "Unified type definitions for rt.postgres.infer.
+(ns rt.postgres.grammar.typed-common
+  "Unified type definitions for rt.postgres typed grammar.
    
    Addresses critique issues:
    1. NO table-instance-shape - use shape/table->shape everywhere
@@ -172,6 +172,60 @@
 
 (defn clear-registry! []
   (reset! *type-registry* {}))
+
+;; ─────────────────────────────────────────────────────────────────────────────
+;; App Typed Payload
+;; ─────────────────────────────────────────────────────────────────────────────
+
+(defn type-key
+  "Stable key for a typed definition. Uses a namespaced symbol when possible."
+  [type-def]
+  (let [{:keys [ns name]} type-def]
+    (if ns
+      (symbol ns name)
+      (symbol name))))
+
+(defn empty-typed
+  "Empty app-level typed payload."
+  []
+  {:tables {}
+   :enums {}
+   :functions {}})
+
+(defn add-typed
+  "Adds a table/enum/function definition to an app-level typed payload."
+  [typed type-def]
+  (cond
+    (table-def? type-def)
+    (assoc-in typed [:tables (type-key type-def)] type-def)
+
+    (enum-def? type-def)
+    (assoc-in typed [:enums (type-key type-def)] type-def)
+
+    (fn-def? type-def)
+    (assoc-in typed [:functions (type-key type-def)] type-def)
+
+    :else typed))
+
+(defn analysis->typed
+  "Converts {:tables [] :enums [] :functions []} analysis into app typed maps."
+  [analysis]
+  (reduce add-typed
+          (empty-typed)
+          (concat (:tables analysis)
+                  (:enums analysis)
+                  (:functions analysis))))
+
+(defn merge-typed
+  "Merges app-level typed payloads."
+  [& typed-maps]
+  (reduce (fn [acc m]
+            (-> acc
+                (update :tables merge (:tables m))
+                (update :enums merge (:enums m))
+                (update :functions merge (:functions m))))
+          (empty-typed)
+          typed-maps))
 
 ;; ─────────────────────────────────────────────────────────────────────────────
 ;; Constructors

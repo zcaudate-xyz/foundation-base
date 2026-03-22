@@ -49,3 +49,4 @@ pom.xml.asc
 *_temp
 *.~undo-tree~
 node_modules/
+.lsp

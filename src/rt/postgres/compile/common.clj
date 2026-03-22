@@ -1,12 +1,12 @@
-(ns rt.postgres.infer.generate
-    "Unified schema generation for all output formats.
+(ns rt.postgres.compile.common
+    "Unified schema compilation for JSON/OpenAPI/TypeScript targets.
    
    CRITIQUE FIX #3: Single generation file with format dispatch.
    Uses types/+type-formats+ for all type mappings.
    Uses types/normalize-key for all key conversion."
-    (:require [rt.postgres.infer.types :as types]
-              [rt.postgres.infer.shape :as shape]
-              [rt.postgres.infer.analyze :as analyze]
+    (:require [rt.postgres.grammar.typed-common :as types]
+              [rt.postgres.grammar.typed-shape :as shape]
+              [rt.postgres.grammar.typed-analyze :as analyze]
               [clojure.string :as str]
               [clojure.walk :as walk]))
 

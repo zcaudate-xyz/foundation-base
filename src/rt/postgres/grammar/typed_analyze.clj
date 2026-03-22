@@ -1,9 +1,10 @@
-(ns rt.postgres.infer.analyze
+(ns rt.postgres.grammar.typed-analyze
   "AST analysis and type inference.
    
    CRITIQUE FIX #4: Uses shape/merge-shapes - no local duplication of merge logic."
-  (:require [rt.postgres.infer.types :as types]
-            [rt.postgres.infer.shape :as shape]
+  (:require [rt.postgres.grammar.typed-common :as types]
+            [rt.postgres.grammar.typed-shape :as shape]
+            [std.json :as json]
             [clojure.walk :as walk]
             [clojure.string :as str]))
 
@@ -299,3 +300,144 @@
         (let [result (infer-return-type fn-def)]
           (swap! *infer-cache* assoc key result)
           result)))))
+
+;; ─────────────────────────────────────────────────────────────────────────────
+;; JSON-Friendly Reporting
+;; ─────────────────────────────────────────────────────────────────────────────
+
+(defn- normalize-table-name
+  [table-expr]
+  (cond
+    (and (seq? table-expr)
+         (= 'quote (first table-expr)))
+    (normalize-table-name (second table-expr))
+
+    (symbol? table-expr)
+    (name table-expr)
+
+    (keyword? table-expr)
+    (name table-expr)
+
+    :else nil))
+
+(defn detect-operations
+  "Returns a JSON-friendly vector of postgres operations detected in a FnDef body."
+  [fn-def]
+  (let [body (get-in fn-def [:body-meta :raw-body])
+        found (volatile! [])]
+    (walk/postwalk
+     (fn [form]
+       (when (seq? form)
+         (let [op-sym (first form)]
+           (when-let [{:keys [op returns linked?]} (get +pg-operations+ op-sym)]
+             (let [table-name (normalize-table-name (second form))]
+               (vswap! found conj
+                       (cond-> {:symbol (str op-sym)
+                                :op op
+                                :returns returns}
+                         linked? (assoc :linked true)
+                         table-name (assoc :table table-name)))))))
+       form)
+     body)
+    (->> @found
+         distinct
+         vec)))
+
+(defn json-safe
+  "Converts infer output to JSON-safe plain data."
+  [x]
+  (cond
+    (nil? x)
+    nil
+
+    (symbol? x)
+    (str x)
+
+    (keyword? x)
+    (name x)
+
+    (set? x)
+    (->> x
+         (map json-safe)
+         (sort-by pr-str)
+         vec)
+
+    (map? x)
+    (into (sorted-map)
+          (map (fn [[k v]]
+                 [(cond
+                    (symbol? k) (str k)
+                    :else k)
+                  (json-safe v)]))
+          x)
+
+    (sequential? x)
+    (mapv json-safe x)
+
+    :else
+    x))
+
+(defn- inferred->report
+  [inferred]
+  (cond
+    (nil? inferred)
+    nil
+
+    (types/jsonb-shape? inferred)
+    {:kind "shaped"
+     :shape (json-safe inferred)}
+
+    (types/jsonb-array? inferred)
+    {:kind "array"
+     :element-type (json-safe (:element-type inferred))}
+
+    (types/type-union? inferred)
+    {:kind "union"
+     :types (json-safe (:types inferred))}
+
+    :else
+    (cond-> {:kind (json-safe (:kind inferred))}
+      (:shape inferred) (assoc :shape (json-safe (:shape inferred)))
+      (:table inferred) (assoc :table (json-safe (:table inferred)))
+      (:type inferred) (assoc :type (json-safe (:type inferred)))
+      (:field inferred) (assoc :field (json-safe (:field inferred)))
+      (:element-type inferred) (assoc :element-type (json-safe (:element-type inferred)))
+      (:types inferred) (assoc :types (json-safe (:types inferred)))
+      (:op inferred) (assoc :op (json-safe (:op inferred)))
+      (:expr inferred) (assoc :expr (json-safe (:expr inferred)))
+      (:recursion inferred) (assoc :recursion (json-safe (:recursion inferred))))))
+
+(defn infer-report
+  "Returns a JSON-friendly analysis report for a parsed FnDef."
+  [fn-def]
+  (let [inferred   (cached-infer fn-def)
+        operations (detect-operations fn-def)
+        source-tables (->> (concat
+                            (keep :table operations)
+                            [(or (:table inferred)
+                                 (some-> inferred :shape :source-table name))])
+                           (remove nil?)
+                           distinct
+                           vec)
+        mutating?  (boolean (some (comp #{:insert :update :delete :upsert} :op)
+                                  operations))]
+    {:function {:ns (:ns fn-def)
+                :name (:name fn-def)
+                :dbschema (:dbschema fn-def)}
+     :declared {:inputs (json-safe (:inputs fn-def))
+                :output (json-safe (:output fn-def))
+                :docstring (get-in fn-def [:body-meta :docstring])
+                :expose (json-safe (get-in fn-def [:body-meta :expose]))}
+     :analysis {:mutating mutating?
+                :source-tables source-tables
+                :operations-detected (json-safe operations)
+                :return (inferred->report inferred)}}))
+
+(defn report-json
+  "Serializes an infer report to JSON."
+  ([report]
+   (json/write report))
+  ([report pretty?]
+   (if pretty?
+     (json/write-pp report)
+     (json/write report))))

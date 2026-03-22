@@ -102,7 +102,9 @@
                       *extra*)
          entry (cond-> entry
                  (:static/template entry) (assoc :static/template.cache (atom {})))
-         _     (if hydrate-hook (hydrate-hook entry))]
+         entry (if hydrate-hook
+                 (or (hydrate-hook entry) entry)
+                 entry)]
      entry)))
 
 (defn create-code

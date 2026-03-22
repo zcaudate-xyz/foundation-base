@@ -36,6 +36,7 @@
              app/app-list
              app/app
              app/app-schema
+             app/app-typed
              app/app-rebuild
              app/app-clear
              

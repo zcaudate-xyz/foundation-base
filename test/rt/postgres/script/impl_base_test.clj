@@ -373,3 +373,7 @@
                     "Hello"
                     {})
   => [[:left-join scratch/Task :on [:= (. #{"Hello"} #{"task_id"}) (. scratch/Task #{"id"})]]])
+
+
+^{:refer rt.postgres.script.impl-base/t-wrap-lock :added "4.1"}
+(fact "TODO")
