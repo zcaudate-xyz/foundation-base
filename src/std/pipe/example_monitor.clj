@@ -18,5 +18,3 @@
          :monitor true
          :parallel true ;; Show parallel execution in monitor
          }))
-
-(long-running-pipeline)

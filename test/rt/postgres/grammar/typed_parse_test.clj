@@ -1,7 +1,6 @@
 (ns rt.postgres.grammar.typed-parse-test
   (:require [rt.postgres.grammar.typed-common :as types]
             [rt.postgres.grammar.typed-parse :as parse])
-  "Tests for rt.postgres.grammar.typed-parse namespace.\n   Provides parsing of PostgreSQL DSL forms."
   (:use code.test))
 
 ;; -----------------------------------------------------------------------------

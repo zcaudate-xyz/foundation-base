@@ -3,8 +3,7 @@
             [clojure.walk :as walk]
             [rt.postgres.grammar.typed-analyze :as analyze]
             [rt.postgres.grammar.typed-common :as types]
-            [rt.postgres.grammar.typed-shape :as shape])
-  "Unified schema compilation for JSON/OpenAPI/TypeScript targets.\n   \n   CRITIQUE FIX #3: Single generation file with format dispatch.\n   Uses types/+type-formats+ for all type mappings.\n   Uses types/normalize-key for all key conversion.")
+            [rt.postgres.grammar.typed-shape :as shape]))
 
 (declare shape->openapi shape->jschema shape->ts-interface resolve-table-def infer-jsonb-arg-shape*)
 

@@ -93,43 +93,46 @@
           (merge native native-bundled))))
 
 (defn emit-module-setup-link-import
-  [type curr-ns link-ns links module
-   {:keys [root-prefix
-           path-separator]
-    :or {path-separator "/"}
-    :as link-opts}
-   root-ns]
-  (let [link-as (get (:internal module) link-ns)]
-    (case type
-      :graph
-      (let [entry (get links link-ns)
-            {:keys [rel label suffix]} (if (and (:rel entry) (:label entry))
-                                         entry
-                                         (links/link-attributes root-ns link-ns link-opts))
-            curr (get links curr-ns)
-            curr (if (and (:rel curr) (:label curr))
-                   curr
-                   (links/link-attributes root-ns curr-ns link-opts))]
-        {:ns (str (fs/relativize (:rel curr)
-                                 rel)
-                  path-separator
-                  label)
-         :suffix suffix
-         :as link-as})
+  ([type curr-ns link-ns links module link-opts]
+   (emit-module-setup-link-import
+    type curr-ns link-ns links module link-opts curr-ns))
+  ([type curr-ns link-ns links module
+    {:keys [root-prefix
+            path-separator]
+     :or {path-separator "/"}
+     :as link-opts}
+    root-ns]
+   (let [link-as (get (:internal module) link-ns)]
+     (case type
+       :graph
+       (let [entry (get links link-ns)
+             {:keys [rel label suffix]} (if (and (:rel entry) (:label entry))
+                                          entry
+                                          (links/link-attributes root-ns link-ns link-opts))
+             curr (get links curr-ns)
+             curr (if (and (:rel curr) (:label curr))
+                    curr
+                    (links/link-attributes root-ns curr-ns link-opts))]
+         {:ns (str (fs/relativize (:rel curr)
+                                  rel)
+                   path-separator
+                   label)
+          :suffix suffix
+          :as link-as})
 
-      (let [entry (get links link-ns)
-            {:keys [rel label suffix]} (if (and (:rel entry) (:label entry))
-                                         entry
-                                         (links/link-attributes root-ns link-ns link-opts))
-            root-prefix (if (map? root-prefix)
-                          (or (links/get-link-lookup link-ns (dissoc root-prefix :default))
-                              (:default root-prefix))
-                          root-prefix)]
-        {:ns (->> [root-prefix rel label]
-                  (filter (fn [s] (and s (not= s ""))))
-                  (clojure.string/join path-separator))
-         :suffix suffix
-         :as link-as}))))
+       (let [entry (get links link-ns)
+             {:keys [rel label suffix]} (if (and (:rel entry) (:label entry))
+                                          entry
+                                          (links/link-attributes root-ns link-ns link-opts))
+             root-prefix (if (map? root-prefix)
+                           (or (links/get-link-lookup link-ns (dissoc root-prefix :default))
+                               (:default root-prefix))
+                           root-prefix)]
+         {:ns (->> [root-prefix rel label]
+                   (filter (fn [s] (and s (not= s ""))))
+                   (clojure.string/join path-separator))
+          :suffix suffix
+          :as link-as})))))
 
 (defn emit-module-setup-link-arr
   "creates the setup code for internal links"

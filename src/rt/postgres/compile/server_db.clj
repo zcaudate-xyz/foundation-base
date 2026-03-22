@@ -2,8 +2,7 @@
   (:require [clojure.walk :as walk]
             [code.framework.generate :as gen]
             [rt.postgres.grammar.typed-analyze :as analyze]
-            [rt.postgres.grammar.typed-common :as types])
-  "Generation helpers for DB-facing server targets.")
+            [rt.postgres.grammar.typed-common :as types]))
 
 (def ^:private +default-targets+
   [:supabase-db])

@@ -52,7 +52,7 @@
   ([f task]
    (fn [input params lookup env & func-args]
      (if-not (:bulk params)
-       (apply f input params lookup env func-args)
+       (apply f (concat [input params lookup env] func-args))
        (let [inputs input ;; Input is assumed to be resolved collection if :bulk is true
 
              ;; Ensure input count for display calculation doesn't fail on empty input
@@ -186,8 +186,9 @@
          params (collection/merge-nested (:params task) params)
 
          ;; Resolve inputs if needed (handles selector logic)
-         [input params] (if (:bulk params)
-                          [input params] ;; Trust existing bulk flag (input is data)
+         [input params] (if (and (:bulk params)
+                                 (not= :list input))
+                          [input params] ;; Trust existing bulk flag when the input is already resolved data.
                           (resolve-input task input params lookup env))
 
          f      (wrap-main task)]

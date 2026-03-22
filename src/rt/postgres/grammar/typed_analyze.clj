@@ -3,8 +3,7 @@
             [clojure.walk :as walk]
             [rt.postgres.grammar.typed-common :as types]
             [rt.postgres.grammar.typed-shape :as shape]
-            [std.json :as json])
-  "AST analysis and type inference.\n   \n   CRITIQUE FIX #4: Uses shape/merge-shapes - no local duplication of merge logic.")
+            [std.json :as json]))
 
 ;; ─────────────────────────────────────────────────────────────────────────────
 ;; PG Operation Signatures

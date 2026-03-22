@@ -1,8 +1,7 @@
 (ns rt.postgres.grammar.typed-parse
   (:require [clojure.java.io :as io]
             [clojure.string :as str]
-            [rt.postgres.grammar.typed-common :as types])
-  "Parse rt.postgres DSL forms and extract type information.\n   Purely static approach - no runtime evaluation required.")
+            [rt.postgres.grammar.typed-common :as types]))
 
 ;; ─────────────────────────────────────────────────────────────────────────────
 ;; Source file reading

@@ -1,6 +1,5 @@
 (ns rt.postgres.grammar.typed-common-test
   (:require [rt.postgres.grammar.typed-common :as types])
-  "Tests for rt.postgres.grammar.typed-common namespace.\n   Provides type definitions, predicates, and registry management."
   (:use code.test))
 
 ;; -----------------------------------------------------------------------------

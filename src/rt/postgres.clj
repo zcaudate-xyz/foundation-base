@@ -58,7 +58,7 @@
                                              :id 'rt.postgres.script.test.scratch-v1})
       (l/delete-module! (l/runtime-library) {:lang :postgres
                                              :id 'rt.postgres.script.test.scratch-v1})
-      (app/app-clear "scratch")
+      (app/app-clear "scratch-v1")
       (require 'jvm.namespace)
       (eval '(jvm.namespace/reset '[rt.postgres.script.test.scratch-v1]))))
 
@@ -76,6 +76,4 @@
                                      (walk/prewalk-replace {'<%> account-sym}))
                                 opts)}))
 
-(comment
-  (bind-view )
-  (purge-postgres))
+(comment)

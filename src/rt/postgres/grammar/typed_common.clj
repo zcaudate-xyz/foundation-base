@@ -1,7 +1,6 @@
 (ns rt.postgres.grammar.typed-common
   (:require [clojure.string :as str]
-            [std.string.case :as case])
-  "Unified type definitions for rt.postgres typed grammar.\n   \n   Addresses critique issues:\n   1. NO table-instance-shape - use shape/table->shape everywhere\n   2. Centralized +type-formats+ - single source for type mappings\n   3. Single normalize-key - shared kebab->snake conversion")
+            [std.string.case :as case]))
 
 ;; ─────────────────────────────────────────────────────────────────────────────
 ;; CRITIQUE FIX #2: Centralized Type Format Registry
@@ -9,10 +8,6 @@
 ;; ─────────────────────────────────────────────────────────────────────────────
 
 (def +type-formats+
-  "Central mapping of PostgreSQL types to all output formats.
-   :openapi - OpenAPI 3.0 schema
-   :jschema - JSON Schema
-   :ts      - TypeScript type"
   {:uuid      {:openapi {:type "string" :format "uuid"}
                :jschema {:type "string" :format "uuid"}
                :ts "string"}

@@ -5,7 +5,6 @@
             [lib.jdbc.protocol :as protocol]
             [lib.jdbc.resultset :refer [result-set->lazyseq result-set->vector]]
             [lib.jdbc.types :as types])
-  "Protocol implementations. Mainly private api"
   (:import (lib.jdbc.types Cursor) (java.net URI) (java.util Properties) (java.sql Connection DriverManager PreparedStatement Statement)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

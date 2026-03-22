@@ -1,7 +1,6 @@
 (ns rt.postgres.grammar.typed-shape-test
   (:require [rt.postgres.grammar.typed-common :as types]
             [rt.postgres.grammar.typed-shape :as shape])
-  "Tests for rt.postgres.grammar.typed-shape namespace.\n   Provides shape transformations and conversions."
   (:use code.test))
 
 ;; -----------------------------------------------------------------------------

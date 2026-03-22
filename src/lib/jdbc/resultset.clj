@@ -1,7 +1,6 @@
 (ns lib.jdbc.resultset
   (:require [clojure.string :as str]
             [lib.jdbc.protocol :as protocol])
-  "ResultSet conversion functions."
   (:import java.sql.PreparedStatement java.sql.ResultSetMetaData java.sql.ResultSet))
 
 (defn result-set->lazyseq

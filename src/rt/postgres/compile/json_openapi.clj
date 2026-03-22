@@ -1,6 +1,5 @@
 (ns rt.postgres.compile.json-openapi
-  (:require [rt.postgres.compile.common :as compile.common])
-  "Canonical OpenAPI compile target.")
+  (:require [rt.postgres.compile.common :as compile.common]))
 
 (def shape->openapi compile.common/shape->openapi)
 (def fn->openapi compile.common/fn->openapi)

@@ -15,7 +15,7 @@
 
 (defn- default-body-transform
   [input mopts]
-  (default/return-transform
+  (rt/return-transform
    input mopts
    {:format-fn identity
     :wrap-fn (fn [forms]

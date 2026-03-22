@@ -5,7 +5,6 @@
             [lib.jdbc.protocol :as protocol]
             [lib.jdbc.resultset :refer [result-set->lazyseq result-set->vector]]
             [lib.jdbc.types :as types])
-  "Alternative implementation of jdbc wrapper for clojure."
   (:import (java.sql PreparedStatement ResultSet Connection)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
