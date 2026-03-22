@@ -1,8 +1,8 @@
 (ns code.tool.java.compile-test
-  (:use code.test)
-  (:require [code.tool.java.compile :refer :all]
-            [code.project :as project]
+  (:require [code.project :as project]
+            [code.tool.java.compile :refer :all]
             [std.fs :as fs])
+  (:use code.test)
   (:refer-clojure :exclude [supers]))
 
 ^{:refer code.tool.java.compile/path->class :added "3.0"}

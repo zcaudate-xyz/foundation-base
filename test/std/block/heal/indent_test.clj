@@ -1,9 +1,8 @@
 (ns std.block.heal.indent-test
-  (:use code.test)
-  (:require [std.block.heal.parse :as parse]
-            [std.block.heal.indent :as indent]
-            [std.string :as str]
-            [std.lib :as h]))
+  (:require [std.block.heal.indent :as indent]
+            [std.block.heal.parse :as parse]
+            [std.string.prose])
+  (:use code.test))
 
 ^{:refer std.block.heal.indent/flag-close-heavy-function :added "4.0"}
 (fact "flags a function if at a different index"
@@ -18,7 +17,7 @@
 ^{:refer std.block.heal.indent/flag-close-heavy-single :added "4.0"
   :setup [(def ^:dynamic *dlma*
             (parse/parse
-             (str/join-lines
+             (std.string.prose/join-lines
               [""
                "(fact )"
                " "

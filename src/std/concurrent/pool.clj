@@ -1,11 +1,15 @@
 (ns std.concurrent.pool
-  (:require [std.protocol.component :as protocol.component]
-            [std.protocol.track :as protocol.track]
+  (:require [std.concurrent.executor :as e]
             [std.concurrent.thread :as t]
-            [std.lib.future :as f]
-            [std.concurrent.executor :as e]
+            [std.lib.atom]
+            [std.lib.collection]
             [std.lib.component :as component]
-            [std.lib :as h :refer [defimpl]]))
+            [std.lib.foundation]
+            [std.lib.future :as f]
+            [std.lib.impl :refer [defimpl]]
+            [std.lib.time]
+            [std.protocol.component :as protocol.component]
+            [std.protocol.track :as protocol.track]))
 
 (def ^:dynamic *current* nil)
 
@@ -35,7 +39,7 @@
   ([res]
    (resource-info res :basic))
   ([{:keys [create-time update-time busy used status]} mode]
-   (let [current (or *current* (h/time-ns))
+   (let [current (or *current* (std.lib.time/time-ns))
          total-time   (- current create-time)
          busy-time  (case status
                       :busy (+ busy (- current update-time))
@@ -51,8 +55,8 @@
   {:added "3.0"}
   ([res]
    (str "#res" (-> (resource-info res :full)
-                   (update :total h/format-ns)
-                   (update :duration h/format-ns)))))
+                   (update :total std.lib.time/format-ns)
+                   (update :duration std.lib.time/format-ns)))))
 
 (defimpl PoolResource [id thread-id object status create-time update-time busy used]
   :stream resource-string)
@@ -72,7 +76,7 @@
   ([id {:keys [resource] :as pool}]
    (let [{:keys [create start]
           :or {start identity}} resource
-         current (h/time-ns)]
+         current (std.lib.time/time-ns)]
      (PoolResource. id
                     nil
                     (-> (create)
@@ -94,7 +98,7 @@
          resource-fn (fn [resource thread-id]
                        (-> resource
                            (update :used inc)
-                           (assoc  :update-time (h/time-ns)
+                           (assoc  :update-time (std.lib.time/time-ns)
                                    :status :busy
                                    :thread-id thread-id)))
          update-fn   (fn [m thread-id id resource]
@@ -128,9 +132,9 @@
                                 (update-in m [:stats :reject] inc)]
 
                                :else
-                               [[:success (h/sid) (f/incomplete)]
+                               [[:success (std.lib.foundation/sid) (f/incomplete)]
                                 (update-in m [:stats :create] inc)])))
-         [status id boxed] (h/swap-return! state acquire-fn)
+         [status id boxed] (std.lib.atom/swap-return! state acquire-fn)
          allocate-fn (fn [state id boxed]
                        (f/fulfil boxed
                                  (fn []
@@ -153,7 +157,7 @@
    (dispose-fn m id nil))
   ([m id stop-fn]
    (let [update-fn   (fn [m id resource]
-                       (let [current (h/time-ns)
+                       (let [current (std.lib.time/time-ns)
                              {:keys [create-time busy]} resource]
                          (-> m
                              (update :idle dissoc id)
@@ -180,7 +184,7 @@
   "disposes if idle and busy are over size limit"
   {:added "3.0"}
   ([{:keys [state resource] :as pool} id]
-   (h/swap-return! state (fn [{:keys [idle options] :as m}]
+   (std.lib.atom/swap-return! state (fn [{:keys [idle options] :as m}]
                            (if (get idle id)
                              [id  (dispose-fn m id (:stop resource))]
                              [nil m])))))
@@ -196,7 +200,7 @@
    (pool:release pool id false))
   ([{:keys [state] :as pool} id dispose?]
    (let [resource-fn (fn [{:keys [update-time busy] :as resource}]
-                       (let [current (h/time-ns)
+                       (let [current (std.lib.time/time-ns)
                              diff (- current update-time)]
                          (assoc resource
                                 :update-time current
@@ -223,7 +227,7 @@
                                :else
                                [[:success id]
                                 (update-fn m thread-id id resource)])))
-         [[status id] {:keys [idle busy options executor]}] (h/swap-return! state release-fn true)
+         [[status id] {:keys [idle busy options executor]}] (std.lib.atom/swap-return! state release-fn true)
          _  (if dispose? (pool:dispose pool id))
          _  (if (and executor
                      (< (:size options)
@@ -241,7 +245,7 @@
   "runs cleanup on the pool"
   {:added "3.0"}
   ([{:keys [state] :as pool}]
-   (let [current (h/time-ns)
+   (let [current (std.lib.time/time-ns)
          {:keys [stop]} (:resource pool)
          {:keys [health] :or {health (constantly {:status :ok})}} (:resource pool)
          {:keys [idle]} @state
@@ -268,7 +272,7 @@
                                            :else
                                            [[] m])]
                          [ids (update-in m [:stats :cleanup] inc)]))
-         ids  (h/swap-return! state cleanup-fn)]
+         ids  (std.lib.atom/swap-return! state cleanup-fn)]
      ids)))
 
 (defn pool-handler
@@ -305,7 +309,7 @@
                           idle    (->> (range (long (* size (or (:initial resource)
                                                                 0))))
                                        (map (fn [_]
-                                              (let [id (h/sid)]
+                                              (let [id (std.lib.foundation/sid)]
                                                 [id (pool-resource id pool)])))
                                        (into {}))
                           executor (e/executor:pool 2 2 1000)
@@ -357,7 +361,7 @@
   ([{:keys [state] :as pool} _]
    (let [{:keys [stats idle busy executor options]} @state
          {:keys [total-time busy-time acquire]} stats
-         util (binding [*current* (h/time-ns)]
+         util (binding [*current* (std.lib.time/time-ns)]
                 (->> (concat (vals busy) (vals idle))
                      (mapv resource-info)
                      (apply merge-with + {:total (or total-time 0)
@@ -423,7 +427,7 @@
 
 (defn- pool-string
   ([{:keys [tag] :as pool}]
-   (let [str-fn (comp h/format-ns long)]
+   (let [str-fn (comp std.lib.time/format-ns long)]
      (str "#" (or tag "pool") " "
           (-> (pool:info pool)
               (update :resource dissoc :total :busy)
@@ -497,19 +501,19 @@
    (let [thread-id (t/thread:id thread)
          {:keys [busy lookup]} @state
          ids (get lookup thread-id)]
-     (h/map-juxt [identity (comp :object #(get busy %))] ids))))
+     (std.lib.collection/map-juxt [identity (comp :object #(get busy %))] ids))))
 
 (defn pool:resources:busy
   "returns all the busy resources"
   {:added "3.0"}
   ([{:keys [state] :as pool}]
-   (h/map-vals :object (:busy @state))))
+   (std.lib.collection/map-vals :object (:busy @state))))
 
 (defn pool:resources:idle
   "returns all the idle resources"
   {:added "3.0"}
   ([{:keys [state] :as pool}]
-   (h/map-vals :object (:idle @state))))
+   (std.lib.collection/map-vals :object (:idle @state))))
 
 (defn pool:dispose:mark
   "marks the current resource for dispose"

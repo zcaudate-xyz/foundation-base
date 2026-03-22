@@ -1,9 +1,9 @@
 (ns std.lib.transform.base.keyword-test
-  (:use code.test)
-  (:require [std.lib.transform :as graph]
-            [std.lib.transform.base.keyword :refer :all]
+  (:require [example.data :as examples]
             [std.lib.schema :as schema]
-            [example.data :as examples]))
+            [std.lib.transform :as graph]
+            [std.lib.transform.base.keyword :refer :all])
+  (:use code.test))
 
 ^{:refer std.lib.transform.base.keyword/wrap-single-keyword :added "3.0"}
 (fact "removes the keyword namespace if there is one"

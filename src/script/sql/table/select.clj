@@ -1,7 +1,7 @@
 (ns script.sql.table.select
   (:require [script.sql.common :as common]
-            [std.string :as str]
-            [std.lib :as h]))
+            [std.lib.foundation]
+            [std.string.common]))
 
 (defn build-query-columns
   "build column string
@@ -16,7 +16,7 @@
                  (cond (string? arg) arg
                        (keyword? arg) (column-fn (name arg))
                        :else (throw (ex-info "Cannot build columns" {:input arg})))))
-          (str/join ", ")))))
+          (std.string.common/join ", ")))))
 
 (defn build-query-select
   "build query string
@@ -60,17 +60,17 @@
    (let [column-fn (:column-fn opts identity)]
      (cond (vector? where)
            (->> (map #(build-query-where-string % opts) where)
-                (str/join " OR "))
+                (std.string.common/join " OR "))
 
            (map? where)
            (->> (map (fn [[k value]]
                        (let [column (column-fn (name k))
                              result  (if (vector? value)
-                                       (str (h/strn (first value)) " " (str " '" (second value) "'"))
+                                       (str (std.lib.foundation/strn (first value)) " " (str " '" (second value) "'"))
                                        (str "=" (str " '" value "'")))]
                          (str column " " result)))
                      where)
-                (str/join " AND "))))))
+                (std.string.common/join " AND "))))))
 
 (defn build-query-where
   "build query where
@@ -91,7 +91,7 @@
   {:added "3.0"}
   ([q-str order-by order-type opts]
    (let [order-by (if (vector? order-by) order-by [order-by])
-         type-str (if (= (h/strn order-type) "desc") "DESC" "ASC")
+         type-str (if (= (std.lib.foundation/strn order-type) "desc") "DESC" "ASC")
          by-str   (build-query-columns order-by opts)]
      (str q-str " ORDER BY " by-str " " type-str))))
 

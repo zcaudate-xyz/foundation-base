@@ -1,8 +1,7 @@
 (ns std.lang.model.spec-erlang-test
-  (:use code.test)
-  (:require [std.lang.model.spec-erlang :refer :all]
-            [std.lang :as l]
-            [std.lib :as h]))
+  (:require [std.lang :as l]
+            [std.lang.model.spec-erlang :refer :all])
+  (:use code.test))
 
 ^{:refer std.lang.model.spec-erlang/to-erlang-var :added "4.1"}
 (fact "converts symbols to erlang vars"

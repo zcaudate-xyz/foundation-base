@@ -1,7 +1,7 @@
 (ns std.object.element.impl.method-test
-  (:use code.test)
   (:require [std.object.element.impl.method :as method]
-            [std.object.query :as query]))
+            [std.object.query :as query])
+  (:use code.test))
 
 ^{:refer std.object.element.impl.method/invoke-static-method :added "3.0"}
 (fact "invoke function for a static method"

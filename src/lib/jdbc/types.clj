@@ -1,9 +1,7 @@
 (ns lib.jdbc.types
   (:require [lib.jdbc.protocol :as protocol]
             [lib.jdbc.resultset :refer [result-set->lazyseq]])
-  (:import java.sql.Connection
-           java.sql.ResultSet
-           java.sql.PreparedStatement))
+  (:import java.sql.Connection java.sql.ResultSet java.sql.PreparedStatement))
 
 (defn ->connection
   "Create a connection wrapper.

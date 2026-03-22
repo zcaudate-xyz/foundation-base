@@ -2,11 +2,9 @@
   (:require [std.lib.env :as env]
             [std.lib.foundation :as h]
             [std.lib.time :as time]
-            [std.string.common :as str]
-            [std.protocol.component :as protocol.component])
-  (:import (java.net Socket
-                     ServerSocket
-                     ConnectException)))
+            [std.protocol.component :as protocol.component]
+            [std.string.common :as str])
+  (:import (java.net Socket ServerSocket ConnectException)))
 
 (defn ^java.net.Inet4Address local-host
   "returns the current host

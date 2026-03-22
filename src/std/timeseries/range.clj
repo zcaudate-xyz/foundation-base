@@ -1,7 +1,7 @@
 (ns std.timeseries.range
-  (:require [std.lib :as h]
-            [std.timeseries.common :as common]
-            [std.math :as math]))
+  (:require [std.lib.foundation]
+            [std.math :as math]
+            [std.timeseries.common :as common]))
 
 (defn parse-range-unit
   "categorising the unit range
@@ -113,9 +113,9 @@
                :absolute val
                :time (-> (key (first arr))
                          (op-fn val)))
-           counter (h/counter -1)
+           counter (std.lib.foundation/counter -1)
            out (doall (drop-while (fn [v]
-                                    (h/inc! counter)
+                                    (std.lib.foundation/inc! counter)
                                     (comp-fn (key v) t)) arr))]
        [@counter out]))))
 

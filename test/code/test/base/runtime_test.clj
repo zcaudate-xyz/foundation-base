@@ -1,8 +1,8 @@
 (ns code.test.base.runtime-test
-  (:use code.test)
-  (:require [code.test.base.runtime :as rt]
-            [code.test.base.context :as context]
-            [std.lib :as h]))
+  (:require [code.test.base.context :as context]
+            [code.test.base.runtime :as rt]
+            [std.lib.env])
+  (:use code.test))
 
 ^{:refer code.test.base.context/new-context :added "4.1"}
 (fact "creates a new context"
@@ -245,6 +245,6 @@
   
   (context/with-new-context {:registry (atom {'my.ns {:facts {'f1 {:id 'f1 :line 10 :type :core}}
                                                  :flags {'f1 {:setup true}}}})}
-    (with-redefs [h/ns-sym (constantly 'my.ns)]
+    (with-redefs [std.lib.env/ns-sym (constantly 'my.ns)]
       (rt/run-op {:line 10} :setup?)))
   => true)

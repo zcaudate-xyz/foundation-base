@@ -1,6 +1,6 @@
 (ns lib.minio.bench-test
-  (:use code.test)
-  (:require [lib.minio.bench :refer :all]))
+  (:require [lib.minio.bench :refer :all])
+  (:use code.test))
 
 ^{:refer lib.minio.bench/all-minio-ports :added "4.0"}
 (fact "gets all active minio ports")

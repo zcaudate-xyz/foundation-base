@@ -1,12 +1,7 @@
 (ns std.pretty.dispatch
-  "Dispatch functions take a `Class` argument and return the looked-up value.
-  This provides similar functionality to Clojure's protocols, but operates over
-  locally-constructed logic rather than using a global dispatch table.
-
-  A simple example is a map from classes to values, which can be used directly
-  as a lookup function."
-  (:require [std.string :as str]
-            [std.lib.class :as class]))
+  (:require [std.lib.class :as class]
+            [std.string.common])
+  "Dispatch functions take a `Class` argument and return the looked-up value.\n  This provides similar functionality to Clojure's protocols, but operates over\n  locally-constructed logic rather than using a global dispatch table.\n\n  A simple example is a map from classes to values, which can be used directly\n  as a lookup function.")
 
 ;; ## Logical Dispatch
 
@@ -58,7 +53,7 @@
           1 (ffirst candidates)
           (throw (RuntimeException.
                   (format "%d candidates found for interfaces on dispatch type %s: %s"
-                          (count candidates) t (str/join ", " (map second candidates)))))))
+                          (count candidates) t (std.string.common/join ", " (map second candidates)))))))
 
       ; Look up Object base class.
       (dispatch Object)))))

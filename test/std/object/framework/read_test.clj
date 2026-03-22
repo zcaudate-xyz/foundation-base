@@ -1,10 +1,10 @@
 (ns std.object.framework.read-test
-  (:use code.test)
-  (:require [std.object.framework.read :as read]
+  (:require [std.object.framework.base-test]
+            [std.object.framework.read :as read]
             [std.object.framework.write :as write]
-            [std.protocol.object :as object]
             [std.object.query :as reflect]
-            [std.object.framework.base-test])
+            [std.protocol.object :as object])
+  (:use code.test)
   (:import [test PersonBuilder Person Dog DogBuilder Cat Pet]))
 
 ^{:refer std.object.framework.read/meta-read :added "3.0"}

@@ -1,6 +1,6 @@
 (ns std.lang.model.spec-xtalk.fn-go-test
-  (:use code.test)
-  (:require [std.lang.model.spec-xtalk.fn-go :refer :all]))
+  (:require [std.lang.model.spec-xtalk.fn-go :refer :all])
+  (:use code.test))
 
 ^{:refer std.lang.model.spec-xtalk.fn-go/go-tf-x-len :added "4.1"}
 (fact "go-tf-x-len"

@@ -1,12 +1,12 @@
 (ns std.contract
-  (:require [std.contract.sketch :as sketch]
-            [std.contract.type :as type]
+  (:require [malli.core :as mc]
             [std.contract.binding :as binding]
-            [std.lib :as h]
-            [malli.core :as mc])
+            [std.contract.sketch :as sketch]
+            [std.contract.type :as type]
+            [std.lib.foundation])
   (:refer-clojure :exclude [fn remove]))
 
-(h/intern-in  [maybe sketch/as:maybe]
+(std.lib.foundation/intern-in  [maybe sketch/as:maybe]
               [opt   sketch/as:optional]
               [fn    sketch/func]
               sketch/lax

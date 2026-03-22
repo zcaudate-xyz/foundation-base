@@ -1,18 +1,18 @@
 (ns lib.aether
-  (:require [std.print :as print]
-            [jvm.artifact :as artifact]
+  (:require [jvm.artifact :as artifact]
             [jvm.classloader :as classloader]
             [jvm.deps :as deps]
-            [std.object :as object]
             [lib.aether.base :as base]
             [lib.aether.listener :as listener]
             [lib.aether.request :as request]
             [lib.aether.result :as result]
-            [std.lib :as h])
-  (:import (org.eclipse.aether.graph Dependency Exclusion)
-           (org.eclipse.aether RepositorySystem)))
+            [std.lib.collection]
+            [std.lib.foundation]
+            [std.object :as object]
+            [std.print :as print])
+  (:import (org.eclipse.aether.graph Dependency Exclusion) (org.eclipse.aether RepositorySystem)))
 
-(h/intern-in base/aether)
+(std.lib.foundation/intern-in base/aether)
 
 (defn artifact->dependency
   "converts an artifact to a dependency
@@ -77,7 +77,7 @@
   ([{:keys [^RepositorySystem system session repositories]} coords opts]
    (binding [listener/*progress* (atom [])
              listener/*pairs* (atom {})]
-     (let [opts   (h/merge-nested {:type :defalut
+     (let [opts   (std.lib.collection/merge-nested {:type :defalut
                                    :return :hierarchy
                                    :print {:hierarchy true
                                            :title true
@@ -130,7 +130,7 @@
   ([{:keys [^RepositorySystem system session repositories]} coords opts]
    (binding [listener/*progress* (atom [])
              listener/*pairs* (atom {})]
-     (let [opts   (h/merge-nested {:type :default
+     (let [opts   (std.lib.collection/merge-nested {:type :default
                                    :return :resolved
                                    :print {:hierarchy true
                                            :title true
@@ -165,7 +165,7 @@
   ([{:keys [^RepositorySystem system session]} coord {:keys [artifacts] :as opts}]
    (binding [listener/*progress* (atom [])
              listener/*pairs* (atom {})]
-     (let [opts   (h/merge-nested {:type :default
+     (let [opts   (std.lib.collection/merge-nested {:type :default
                                    :print {:title true
                                            :timing true}}
                                   opts)
@@ -202,7 +202,7 @@
     {:keys [artifacts repository] :as opts}]
    (binding [listener/*progress* (atom [])
              listener/*pairs* (atom {})]
-     (let [opts   (h/merge-nested {:type :default
+     (let [opts   (std.lib.collection/merge-nested {:type :default
                                    :print {:title true
                                            :timing true}}
                                   opts)
@@ -289,7 +289,7 @@
   ([{:keys [^RepositorySystem system session repositories]} coords opts]
    (binding [listener/*progress* (atom [])
              listener/*pairs* (atom {})]
-     (let [opts   (h/merge-nested {:type :default
+     (let [opts   (std.lib.collection/merge-nested {:type :default
                                    :print {:title true
                                            :timing true}}
                                   opts)]
@@ -316,7 +316,7 @@
   ([coords opts]
    (outdated? (base/aether) coords opts))
   ([aether coords opts]
-   (let [opts    (h/merge-nested opts {:print {:results true}})
+   (let [opts    (std.lib.collection/merge-nested opts {:print {:results true}})
          reps    (mapv artifact/artifact coords)
          inputs  (map #(assoc % :version "LATEST") reps)
          latest  (resolve-versions aether inputs opts)

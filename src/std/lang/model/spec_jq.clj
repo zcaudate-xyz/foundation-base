@@ -1,12 +1,12 @@
 (ns std.lang.model.spec-jq
-  (:require [std.lang.base.emit :as emit]
+  (:require [std.lang.base.book :as book]
+            [std.lang.base.emit :as emit]
             [std.lang.base.emit-common :as common]
             [std.lang.base.grammar :as grammar]
-            [std.lang.base.book :as book]
             [std.lang.base.script :as script]
-            [std.lib :as h]
-            [std.string :as str]
-            [std.lang.model.spec-xtalk]))
+            [std.lang.model.spec-xtalk]
+            [std.lib.collection]
+            [std.string.common]))
 
 ;;
 ;; JQ
@@ -19,7 +19,7 @@
   (let [arg-strings (map #(common/*emit-fn* % grammar mopts) args)]
     (if (empty? arg-strings)
       ""
-      (str "(" (str/join "; " arg-strings) ")"))))
+      (str "(" (std.string.common/join "; " arg-strings) ")"))))
 
 (defn jq-invoke
   "outputs an invocation (same as vector)"
@@ -201,7 +201,7 @@
                   :vector    {:start "[" :end "]" :sep ","}
                   :free      {:start "(" :end ")" :sep "; "}}
         :block   {:function  {:defn      {:raw "def" :sep "; "}}}}
-       (h/merge-nested (update-in (emit/default-grammar)
+       (std.lib.collection/merge-nested (update-in (emit/default-grammar)
                                   [:token :symbol]
                                   dissoc :replace))))
 

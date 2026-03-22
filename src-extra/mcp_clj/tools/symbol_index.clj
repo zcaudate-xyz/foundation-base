@@ -1,13 +1,9 @@
 (ns mcp-clj.tools.symbol-index
+  (:require [clojure.edn :as edn]
+            [clojure.java.io :as io]
+            [clojure.string :as str])
   "Clojure symbol indexing and search for foundation library"
-  (:require
-    [clojure.java.io :as io]
-    [clojure.string :as str]
-    [clojure.edn :as edn])
-  (:import
-    [java.io File]
-    [java.nio.file Paths Path Files FileVisitResult SimpleFileVisitor]
-    [java.nio.file.attribute BasicFileAttributes]))
+  (:import [java.io File] [java.nio.file Paths Path Files FileVisitResult SimpleFileVisitor] [java.nio.file.attribute BasicFileAttributes]))
 
 ;; Simple in-memory index
 (defonce ^:private symbol-index (atom {}))

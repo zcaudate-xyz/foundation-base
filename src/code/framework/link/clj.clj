@@ -1,7 +1,7 @@
 (ns code.framework.link.clj
-  (:require [code.framework.link.common :as common]
-            [std.print :as print]
-            [std.lib :as h]))
+  (:require [clojure.set]
+            [code.framework.link.common :as common]
+            [std.print :as print]))
 
 (defn get-namespaces
   "gets the namespaces of a clojure s declaration
@@ -97,10 +97,10 @@
               (catch Throwable t
                 (print/println  "READ FAILED" {:file file} "... SKIPPING")
                 []))]
-     {:exports (h/union #{[:clj ns]}
+     {:exports (clojure.set/union #{[:clj ns]}
                         (set (map (fn [cls] [:class cls]) (get-genclass ns body)))
                         (set (map (fn [cls] [:class cls]) (get-defclass ns forms))))
-      :imports (h/union (->> body
+      :imports (clojure.set/union (->> body
                              (mapcat #(get-namespaces % [:use :require]))
                              (map (fn [clj] [:clj clj]))
                              set)

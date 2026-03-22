@@ -1,10 +1,10 @@
 (ns std.dispatch.common-test
-  (:use code.test)
-  (:require [std.dispatch.common :refer :all]
-            [std.concurrent :as cc]
+  (:require [std.concurrent :as cc]
+            [std.dispatch.common :refer :all]
             [std.lib :as h]
             [std.lib.component :as component]
-            [std.protocol.component :as protocol.component]))
+            [std.protocol.component :as protocol.component])
+  (:use code.test))
 
 ^{:refer std.dispatch.common/to-string :added "3.0"}
 (fact "returns the executorstring"
@@ -146,4 +146,4 @@
 (comment
   (./import)
 
-  (std.lib/tracked [] :stop))
+  (std.lib.component.track/tracked [] :stop))

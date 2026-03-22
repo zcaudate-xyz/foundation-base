@@ -1,6 +1,6 @@
 (ns std.lib.schema.base-test
-  (:use code.test)
-  (:require [std.lib.schema.base :as base]))
+  (:require [std.lib.schema.base :as base])
+  (:use code.test))
 
 ^{:refer std.lib.schema.base/expand-scopes :added "4.0"}
 (fact "expand scopes for all globbed keywords"

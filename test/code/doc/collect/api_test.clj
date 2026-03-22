@@ -1,9 +1,9 @@
 (ns code.doc.collect.api-test
-  (:use code.test)
   (:require [code.doc.collect.api :refer :all]
+            [code.doc.collect.reference :as reference]
             [code.doc.parse :as parse]
-            [code.project :as project]
-            [code.doc.collect.reference :as reference]))
+            [code.project :as project])
+  (:use code.test))
 
 ^{:refer code.doc.collect.api/collect-apis :added "3.0"}
 (fact "gets all the `api` tags in the document"

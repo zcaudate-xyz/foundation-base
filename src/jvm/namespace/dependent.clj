@@ -1,8 +1,9 @@
 (ns jvm.namespace.dependent
-  (:require [std.protocol.deps :as protocol.deps]
+  (:require [clojure.set]
             [jvm.namespace.common :as common]
+            [std.lib.sort]
             [std.pipe.util :as ut]
-            [std.lib :as h]))
+            [std.protocol.deps :as protocol.deps]))
 
 (defn ns-select
   "selects a bunch of namespaces
@@ -62,8 +63,8 @@
   ([ns input]
    (loop [acc {ns (ns-dependents ns input)}]
      (let [curr (set (keys acc))
-           next (apply h/union (vals acc))
-           diff (h/difference next curr)]
+           next (apply clojure.set/union (vals acc))
+           diff (clojure.set/difference next curr)]
        (if (empty? diff)
          acc
          (recur (merge acc (ns-level-dependents diff input))))))))
@@ -81,7 +82,7 @@
    (reeval (.getName *ns*) input))
   ([ns input]
    (->> (ns-all-dependents ns input)
-        (h/topological-sort)
+        (std.lib.sort/topological-sort)
         (reverse)
         (mapv #(doto % (require :reload))))))
 
@@ -110,9 +111,9 @@
   (ns-all-dependents 'std.lib.sort '[hara])
   {std.lib.sort #{jvm.namespace.dependent}, jvm.namespace.dependent #{}}
 
-  (h/difference #{1 2} #{2 3})
+  (clojure.set/difference #{1 2} #{2 3})
 
-  (h/topological-sort)
+  (std.lib.sort/topological-sort)
 
   (ns-level-dependents (ns-dependents 'hara.data.base.map '[hara])
                        '[hara])
@@ -134,4 +135,4 @@
                           (assoc acc ns deps)))
                       {}
                       nss)]
-    (h/topological-sort graph)))
+    (std.lib.sort/topological-sort graph)))

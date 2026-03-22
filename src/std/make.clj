@@ -1,14 +1,13 @@
 (ns std.make
-  (:require [std.lib :as h]
-            [std.string :as str]
+  (:require [std.lib.foundation]
+            [std.make.bulk :as bulk]
             [std.make.common :as common]
             [std.make.compile :as compile]
             [std.make.github :as github]
             [std.make.project :as project]
-            [std.make.readme :as readme]
-            [std.make.bulk :as bulk]))
+            [std.make.readme :as readme]))
 
-(h/intern-in
+(std.lib.foundation/intern-in
  compile/with:mock-compile
  [types:add    compile/types-add]
  [types:list   compile/types-list]

@@ -1,16 +1,16 @@
 (ns code.manage.unit
-  (:require [code.framework :as base]
+  (:require [clojure.set]
+            [code.framework :as base]
             [code.framework.docstring :as docstring]
             [code.manage.unit.scaffold :as scaffold]
             [code.manage.unit.walk :as walk]
-            [std.lib.diff.seq :as diff.seq]
-            [std.fs :as fs]
             [code.project :as project]
-            [std.task :as task]
             [std.block :as block]
-            [std.lib :as h]
-            [std.string :as str]
-            [std.lib.result :as res])
+            [std.fs :as fs]
+            [std.lib.diff.seq :as diff.seq]
+            [std.lib.result :as res]
+            [std.string.common]
+            [std.task :as task])
   (:refer-clojure :exclude [import]))
 
 (defn import
@@ -77,7 +77,7 @@
            :else
            (let [source-vars (if source-file (base/vars source-ns params lookup project))
                  test-vars   (if test-file   (base/vars test-ns params lookup project))]
-             (vec (sort (h/difference (set source-vars) (set test-vars)))))))))
+             (vec (sort (clojure.set/difference (set source-vars) (set test-vars)))))))))
 
 (defn todos
   "returns all unit tests with TODOs
@@ -136,7 +136,7 @@
                      (try
                        (require (:ns m))
                        (resolve (symbol (str (:ns m))
-                                        (first (str/split (str (:var m)) #"\."))))
+                                        (first (std.string.common/split (str (:var m)) #"\."))))
                        (catch Exception e)))))))
 
 (defn orphaned
@@ -157,7 +157,7 @@
            :else
            (let [source-vars (if source-file (base/vars source-ns params lookup project))
                  test-vars   (if test-file   (base/vars test-ns params lookup project))
-                 orphaned    (h/difference (set test-vars) (set source-vars))
+                 orphaned    (clojure.set/difference (set test-vars) (set source-vars))
                  orphaned    (remove (comp (partial orphaned-meta params)
                                            meta)
                                      orphaned)]
@@ -215,7 +215,7 @@
              :else
              (let [source-vars (base/vars source-ns params lookup project)
                    test-vars   (base/vars test-ns params lookup project)
-                   orphaned    (h/difference (set test-vars) (set source-vars))
+                   orphaned    (clojure.set/difference (set test-vars) (set source-vars))
                    test-vars   (vec (remove orphaned test-vars))]
                (cond (= source-vars test-vars)
                      []
@@ -237,9 +237,9 @@
            test-ns   (project/test-ns ns)
            source-file (lookup source-ns)
            test-file   (lookup test-ns)
-           version (->> (str/split (:version project) #"\.")
+           version (->> (std.string.common/split (:version project) #"\.")
                         (take 2)
-                        (str/join "."))
+                        (std.string.common/join "."))
            source-vars (if source-file (base/vars source-ns {:sorted false} lookup project))
            test-vars   (if test-file   (base/vars test-ns {:sorted false} lookup project))
            new-vars    (seq (remove (set test-vars) source-vars))

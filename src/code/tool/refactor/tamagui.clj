@@ -1,8 +1,7 @@
 (ns code.tool.refactor.tamagui
-  (:require [std.block.navigate :as edit]
-            [code.query :as query]
-            [std.lib :as h]
-            [std.string :as str]))
+  (:require [code.query :as query]
+            [std.block.navigate :as edit]
+            [std.string.common]))
 
 (def +component-map+
   {;; Basic
@@ -211,11 +210,11 @@
 
 (defn convert-color
   [color]
-  (cond (not (str/starts-with? color "$"))
+  (cond (not (std.string.common/starts-with? color "$"))
         color
 
         :else
-        (let [base (str/replace color #"^\$" "")
+        (let [base (std.string.common/replace color #"^\$" "")
               ;; Match colorName + number (e.g. red10, blue5)
               match (re-find #"^([a-z]+)(\d+)$" base)]
           (if match
@@ -237,16 +236,16 @@
 (defn convert-value
   [val prefix]
   (cond (string? val)
-        (let [v (str/replace val #"^\$" "")]
+        (let [v (std.string.common/replace val #"^\$" "")]
           (cond
             ;; Colors (bg-, text-, border-)
-            (or (str/starts-with? prefix "bg-")
-                (str/starts-with? prefix "text-")
-                (str/starts-with? prefix "border-"))
+            (or (std.string.common/starts-with? prefix "bg-")
+                (std.string.common/starts-with? prefix "text-")
+                (std.string.common/starts-with? prefix "border-"))
             (str prefix (convert-color val))
 
             ;; Radius
-            (str/starts-with? prefix "rounded-")
+            (std.string.common/starts-with? prefix "rounded-")
             (cond (= v "true") "rounded"
                   (= v "full") "rounded-full"
                   (and (re-matches #"\d+" v) (>= (parse-long v) 4)) "rounded-xl"
@@ -342,7 +341,7 @@
 
     (let [final-props (apply dissoc props @removals)
           existing-class (:className final-props)
-          new-class (str/join " " @classes)]
+          new-class (std.string.common/join " " @classes)]
       (if (empty? new-class)
         final-props
         (assoc final-props :className

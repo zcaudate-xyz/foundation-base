@@ -1,16 +1,19 @@
 (ns rt.redis.eval-script
   (:require [lib.redis.script :as script]
-            [rt.redis.eval-basic :as eval-basic]
             [rt.basic.impl.process-lua :as lua]
-            [std.lang.base.pointer :as ptr]
-            [std.lang.base.emit :as emit]
-            [std.lang.base.impl :as impl]
-            [std.lang.base.util :as ut]
-            [std.lib :as h :refer [defimpl definvoke]]
+            [rt.redis.eval-basic :as eval-basic]
+            [std.concurrent :as cc]
             [std.json :as json]
             [std.lang :as l]
-            [std.concurrent :as cc]
-            [std.string :as str]))
+            [std.lang.base.emit :as emit]
+            [std.lang.base.impl :as impl]
+            [std.lang.base.pointer :as ptr]
+            [std.lang.base.util :as ut]
+            [std.lib.env]
+            [std.lib.foundation]
+            [std.lib.impl :refer [defimpl]]
+            [std.lib.invoke :refer [definvoke]]
+            [std.lib.security]))
 
 (defn raw-compile-form
   "converts a ptr into a form"
@@ -19,8 +22,8 @@
    (let [{:keys [form id]
           :rt/keys [redis] :as entry
           module-id :module} (ptr/get-entry ptr)
-         _ (and (or entry (h/error "Entry not found" {:input ptr}))
-                (or redis (h/error  "Needs to have a redis entry" {:input entry})))
+         _ (and (or entry (std.lib.foundation/error "Entry not found" {:input ptr}))
+                (or redis (std.lib.foundation/error  "Needs to have a redis entry" {:input entry})))
          
          {:keys [nkeys nargs vargs encode]
           :or {nkeys 0}} redis
@@ -61,7 +64,7 @@
   "compiles a function as body and sha"
   {:added "4.0"}
   [:recent {:key ut/sym-full
-            :compare h/hash-id}]
+            :compare std.lib.foundation/hash-id}]
   ([ptr]
    (let [form (raw-compile-form ptr)
          body (impl/emit-script
@@ -69,7 +72,7 @@
                {:lang :lua
                 :layout :flat})]
      {:body body
-      :sha  (h/sha1 body)})))
+      :sha  (std.lib.security/sha1 body)})))
 
 (defn raw-prep-in-fn
   "prepares the arguments for entry"
@@ -77,7 +80,7 @@
   ([{:rt/keys [redis] :as entry} args]
    (let [{:keys [nkeys encode]
           :or {nkeys 0}} (or redis
-                             (h/error "Needs to have a redis entry"))
+                             (std.lib.foundation/error "Needs to have a redis entry"))
          {enc-in :in} encode
          enc-in (set enc-in)
          args   (map-indexed (fn [i arg]
@@ -92,7 +95,7 @@
   {:added "4.0"}
   ([{:rt/keys [redis] :as entry} out]
    (let [enc-out (get-in (or redis
-                             (h/error "Needs to have a redis entry"))
+                             (std.lib.foundation/error "Needs to have a redis entry"))
                          [:encode :out])]
      (if (instance? Throwable out)
        (throw out)
@@ -134,7 +137,7 @@
          {:keys [body sha]} (raw-compile ptr)
          _  (if (or (:input ptr/*print*)
                     (:raw-input ptr/*print*))
-              (h/pl body))
+              (std.lib.env/pl body))
          [keys args] (raw-prep-in-fn entry args)
          install-fn  (if no-install
                        identity

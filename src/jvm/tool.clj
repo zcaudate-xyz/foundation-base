@@ -1,7 +1,7 @@
 (ns jvm.tool
-  (:require [std.lib :as h]
-            [std.lib.link :as l]
-            [jvm.require :as require]))
+  (:require [jvm.require :as require]
+            [std.lib.future]
+            [std.lib.link :as l]))
 
 (def hotkey-0 (fn []))
 (def hotkey-1 (fn []))
@@ -138,6 +138,6 @@
                            (inject-tools)
                            (l/link:resolve-all))
                        
-                       (h/on:success
+                       (std.lib.future/on:success
                         (fn [_]
                           ))))

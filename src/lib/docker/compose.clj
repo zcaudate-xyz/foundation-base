@@ -1,6 +1,7 @@
 (ns lib.docker.compose
-  (:require [std.lib :as h]
-            [std.string :as str]))
+  (:require [std.lib.collection]
+            [std.lib.foundation]
+            [std.string.common]))
 
 (defn create-compose-single
   "executes a shell command"
@@ -20,7 +21,7 @@
                :then (conj :depends_on))
         override (if (map? (:ports override))
                    (assoc override :ports
-                          (str/join ","
+                          (std.string.common/join ","
                                     (map (fn [[k v]]
                                            (str k ":" v))
                                          (:ports override))))
@@ -47,26 +48,26 @@
   [{:keys [config
            network
            entries]}]
-  (let [config  (h/map-entries (fn [[k m]]
+  (let [config  (std.lib.collection/map-entries (fn [[k m]]
                                  [k (assoc m :name (name k))])
                                config)
-        order   (h/map-vals (fn [{:keys [name ip]}]
+        order   (std.lib.collection/map-vals (fn [{:keys [name ip]}]
                               (if ip
-                                (h/parse-long (last (str/split ip #"\.")))
+                                (std.lib.foundation/parse-long (last (std.string.common/split ip #"\.")))
                                 name))
                             config)
-        prep    (h/map-vals (fn [{:keys [type] :as m}]
+        prep    (std.lib.collection/map-vals (fn [{:keys [type] :as m}]
                               ((or (get entries type)
-                                   (h/error "NOT FOUND:" {:type type}))
+                                   (std.lib.foundation/error "NOT FOUND:" {:type type}))
                                m))
                             config)
-        environments (h/map-vals (fn [{:keys [deps environment]}]
+        environments (std.lib.collection/map-vals (fn [{:keys [deps environment]}]
                                    (->> deps
                                         (map (fn [k]
                                                (get-in prep [k :export])))
                                         (apply merge environment)))
                                  config)
-        depends-on  (h/map-vals (fn [{:keys [deps]}]
+        depends-on  (std.lib.collection/map-vals (fn [{:keys [deps]}]
                                   (mapv name deps))
                                 config)]
     (->> prep

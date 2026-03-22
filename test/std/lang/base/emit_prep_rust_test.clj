@@ -1,12 +1,12 @@
 (ns std.lang.base.emit-prep-rust-test
-  (:use code.test)
   (:require [std.lang.base.book :as b]
-            [std.lang.base.grammar :as grammar]
             [std.lang.base.emit-common :as common]
             [std.lang.base.emit-helper :as helper]
+            [std.lang.base.grammar :as grammar]
             [std.lang.base.util :as ut]
             [std.lang.model.spec-rust :as rust]
-            [std.lib :as h]))
+            [std.lib.env])
+  (:use code.test))
 
 (def +book-empty+
   (b/book {:lang :rust
@@ -29,7 +29,7 @@
                  :form       '(fn [x y] (list '+ x y))
                  :template   (fn [x y] (list '+ x y))
                  :standalone true
-                 :namespace (h/ns-sym)}))
+                 :namespace (std.lib.env/ns-sym)}))
 
 (def +core-fragment-sub+
   (b/book-entry {:lang :rust
@@ -38,7 +38,7 @@
                  :section :fragment
                  :template    (fn [x y] (list '- x y))
                  :standalone '(fn [x y] (return (- x y)))
-                 :namespace (h/ns-sym)}))
+                 :namespace (std.lib.env/ns-sym)}))
 
 (def +core-code-identity-fn+
   (b/book-entry {:lang :rust
@@ -48,7 +48,7 @@
                  :form '(defn identity-fn [x] (return x))
                  :form-input '(defn identity-fn [x] (return x))
                  :deps #{}
-                 :namespace (h/ns-sym)
+                 :namespace (std.lib.env/ns-sym)
                  :declared false}))
 
 (def +book-min+

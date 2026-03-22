@@ -1,15 +1,18 @@
 (ns code.test.compile
-  (:require [std.lib.walk :as walk]
+  (:require [clojure.set]
             [code.project :as project]
-            [std.string :as str]
-            [code.test.base.process :as process]
             [code.test.base.context :as context]
+            [code.test.base.process :as process]
             [code.test.base.runtime :as rt]
+            [code.test.compile.rewrite :as rewrite]
             [code.test.compile.snippet :as snippet]
             [code.test.compile.types :as types]
-            [code.test.compile.rewrite :as rewrite]
+            [std.lib.env]
+            [std.lib.foundation]
+            [std.lib.walk :as walk]
             [std.math :as math]
-            [std.lib :as h]))
+            [std.string.case]
+            [std.string.common]))
 
 (def => '=>)
 
@@ -94,9 +97,9 @@
    => 'test-hello-there"
   {:added "3.0"}
   ([{:keys [id refer] :as m} desc]
-   (let [desc-fn (fn [s] (str/spear-case
+   (let [desc-fn (fn [s] (std.string.case/spear-case
                           (munge
-                           (rt/no-dots (str/truncate s 100)))))
+                           (rt/no-dots (std.string.common/truncate s 100)))))
          id    (or (rt/fact-id m)
                    (if desc  (symbol (str "test-" (desc-fn desc))))
                    (throw (ex-info "Description required" {:require [:refer :id :desc]})))]
@@ -111,8 +114,8 @@
                      '(1 => 1))"
   {:added "3.0"}
   ([id meta desc body]
-   (let [ns    (h/ns-sym)
-         path  (h/suppress (project/code-path ns true))
+   (let [ns    (std.lib.env/ns-sym)
+         path  (std.lib.foundation/suppress (project/code-path ns true))
          meta  (-> (dissoc meta :eval)
                    (assoc :path (str path) :desc desc :ns ns :id id))]
      [meta body])))
@@ -241,12 +244,12 @@
   "returns all missing facts for a given namespace"
   {:added "3.0" :style/indent 1}
   ([]
-   (let [ns (-> (str (h/ns-sym))
-                (str/replace "-test$" "")
+   (let [ns (-> (str (std.lib.env/ns-sym))
+                (std.string.common/replace "-test$" "")
                 (symbol))]
      (fact:missing ns)))
   ([ns]
-   (->> (h/difference
+   (->> (clojure.set/difference
          (set (map #(symbol (name ns) (name %))
                    (keys (ns-interns ns))))
          (set (map :refer (vals (rt/all-facts)))))
@@ -261,7 +264,7 @@
          {:keys [id]} (rt/find-fact m)]
      (rt/get-fact (quote ~id))))
   ([id]
-   `(fact:get ~(h/ns-sym) ~id))
+   `(fact:get ~(std.lib.env/ns-sym) ~id))
   ([ns id]
    (if (symbol? id)
      `(rt/get-fact (quote ~ns) (quote ~id))

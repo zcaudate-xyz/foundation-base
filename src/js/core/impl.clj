@@ -1,9 +1,8 @@
 (ns js.core.impl
   (:require [std.lang :as l]
-            [std.lib :as h]
-            [std.string :as str])
-  (:refer-clojure :exclude [abs concat eval filter find keys map
-                            max min name pop read reduce replace reverse some sort]))
+            [std.lib.foundation]
+            [std.lib.template])
+  (:refer-clojure :exclude [abs concat eval filter find keys map max min name pop read reduce replace reverse some sort]))
 
 (l/script :js js.core)
 
@@ -17,7 +16,7 @@
    => 1"
   {:added "4.0"}
   [[ms] & body]
-  (h/$ (setTimeout (fn [] (new Promise (fn []
+  (std.lib.template/$ (setTimeout (fn [] (new Promise (fn []
                                          ~@body)))
                    ~ms)))
 
@@ -30,7 +29,7 @@
    => '(setInterval (fn [] (new Promise (fn [] (doSomething)))) 10)"
   {:added "4.0"}
   [[ms] & body]
-  (h/$ (setInterval (fn [] (new Promise (fn []
+  (std.lib.template/$ (setInterval (fn [] (new Promise (fn []
                                           ~@body)))
                     ~ms)))
 
@@ -43,7 +42,7 @@
   [worker value]
   (list '. worker (list 'postMessage value)))
 
-(h/template-entries [l/tmpl-entry {:type :fragment
+(std.lib.foundation/template-entries [l/tmpl-entry {:type :fragment
                                    :tag "js"}]
   [super
    [JSGlobal globalThis]
@@ -136,7 +135,7 @@
    WebAssembly.LinkError
    WebAssembly.RuntimeError])
 
-(h/template-entries [l/tmpl-entry {:type :fragment
+(std.lib.foundation/template-entries [l/tmpl-entry {:type :fragment
                                    :tag "js"
                                    :base "Math"}]
   [E LN10 LN2 LOG10E LOG2E PI SQRT1_2 SQRT2
@@ -145,7 +144,7 @@
    log log1p log10 log2 max min pow
    random round sign sin sinh sqrt tan tanh trunc])
 
-(h/template-entries [l/tmpl-entry {:type :fragment
+(std.lib.foundation/template-entries [l/tmpl-entry {:type :fragment
                                    :tag "js"
                                    :base "Number"}]
   [EPSILON
@@ -163,7 +162,7 @@
    parseFloat
    parseInt])
 
-(h/template-entries [l/tmpl-macro {:base "Number"
+(std.lib.foundation/template-entries [l/tmpl-macro {:base "Number"
                                    :inst "num"
                                    :tag "js"}]
   [[toExponetial [d]]
@@ -171,7 +170,7 @@
    [toPrecision [d]]
    [[toRadix toString] [radix]]])
 
-(h/template-entries [l/tmpl-entry {:type :fragment
+(std.lib.foundation/template-entries [l/tmpl-entry {:type :fragment
                                    :tag "js"
                                    :base "Object"}]
   [assign
@@ -195,7 +194,7 @@
    setPrototypeOf
    values])
 
-(h/template-entries [l/tmpl-macro {:base "Object"
+(std.lib.foundation/template-entries [l/tmpl-macro {:base "Object"
                                    :inst "obj"
                                     :tag "js"}]
   [[hasOwnProperty [prop]]
@@ -207,21 +206,21 @@
    [length nil {:property true}]
    [name   nil {:property true}]])
 
-(h/template-entries [l/tmpl-macro {:base "Function"
+(std.lib.foundation/template-entries [l/tmpl-macro {:base "Function"
                                    :inst "func"
                                    :tag "js"}]
   [[applyThis [thisArg args]]
    [bind      [thisArg] {:vargs arrs}]
    [callThis  [thisArg] {:vargs arrs}]])
 
-(h/template-entries [l/tmpl-entry {:type :fragment
+(std.lib.foundation/template-entries [l/tmpl-entry {:type :fragment
                                    :tag "js"
                                    :base "Array"}]
   [[toArray from]
    isArray
    [createArray of]])
 
-(h/template-entries [l/tmpl-macro {:base "Iterable"
+(std.lib.foundation/template-entries [l/tmpl-macro {:base "Iterable"
                                    :inst "seq"
                                    :empty []
                                    :tag "js"}]
@@ -233,7 +232,7 @@
    [splice [start] {:optional [count e]
                     :vargs es}]])
 
-(h/template-entries [l/tmpl-macro {:base "Array"
+(std.lib.foundation/template-entries [l/tmpl-macro {:base "Array"
                                    :inst "arr"
                                    :empty []
                                    :tag "js"}]
@@ -254,7 +253,7 @@
    [some [f]]
    [sort []  {:optional [comp]}]])
 
-(h/template-entries [l/tmpl-macro {:base "PArray"
+(std.lib.foundation/template-entries [l/tmpl-macro {:base "PArray"
                                    :inst "arr"
                                    :empty []
                                    :tag "js"}]
@@ -263,13 +262,13 @@
    [shift []]
    [unshift [e] {:vargs es}]])
 
-(h/template-entries [l/tmpl-macro {:base "TArray"
+(std.lib.foundation/template-entries [l/tmpl-macro {:base "TArray"
                                    :inst "tarr"
                                     :tag "js"}]
   [[[setTArr set] [arr] {:optional [offset]}]
    [subarray [] {:optional [start end]}]])
 
-(h/template-entries [l/tmpl-macro {:base "String"
+(std.lib.foundation/template-entries [l/tmpl-macro {:base "String"
                                    :inst  "s"
                                    :empty ""
                                    :tag "js"}]
@@ -299,7 +298,7 @@
    [trimStart []]
    [trimEnd []]])
 
-(h/template-entries [l/tmpl-macro {:base "Map"
+(std.lib.foundation/template-entries [l/tmpl-macro {:base "Map"
                                    :inst "h"
                                    :tag "js"}]
   [[[hGet get] [key]]
@@ -308,7 +307,7 @@
    [[hAdd add] [key]]
    [[hClear clear] []]])
 
-(h/template-entries [l/tmpl-entry {:type :fragment
+(std.lib.foundation/template-entries [l/tmpl-entry {:type :fragment
                                    :tag "js"
                                    :base "Map"}]
   [[hDel prototype.delete]])
@@ -318,14 +317,14 @@
 ;;
 
 
-(h/template-entries [l/tmpl-entry {:type :fragment
+(std.lib.foundation/template-entries [l/tmpl-entry {:type :fragment
                                    :tag "js"
                                    :base "Date"}]
   [now
    [parseDate parse]
    UTC])
 
-(h/template-entries [l/tmpl-macro {:base "Date"
+(std.lib.foundation/template-entries [l/tmpl-macro {:base "Date"
                                    :inst "func"
                                     :tag "js"}]
   [[getDate []]
@@ -376,7 +375,7 @@
    [setUTCSeconds [val]]
    [setYear [val]]])
 
-(h/template-entries [l/tmpl-macro {:base "Generator"
+(std.lib.foundation/template-entries [l/tmpl-macro {:base "Generator"
                                    :inst "gen"
                                    :tag "js"}]
   [[[genNext next]  []]
@@ -387,7 +386,7 @@
 ;; Promise
 ;;
 
-(h/template-entries [l/tmpl-entry {:type :fragment
+(std.lib.foundation/template-entries [l/tmpl-entry {:type :fragment
                                    :tag "js"
                                    :base "Promise"}]
   [[onAll all]
@@ -397,14 +396,14 @@
    [onReject reject]
    [onResolve resolve]])
 
-(h/template-entries [l/tmpl-macro {:base "Promise"
+(std.lib.foundation/template-entries [l/tmpl-macro {:base "Promise"
                                    :inst "p"
                                    :tag "js"}]
   [[catch [onError]]
    [then  [onSuccess] {:optional [onError]}]
    [finally [onDone]]])
 
-(h/template-entries [l/tmpl-macro {:base "DataView"
+(std.lib.foundation/template-entries [l/tmpl-macro {:base "DataView"
                                    :inst "dv"
                                    :tag "js"}]
   [[getUint8 [idx]]
@@ -434,7 +433,7 @@
 
 (comment
   
-  (h/template-entries [l/tmpl-entry {:type :fragment
+  (std.lib.foundation/template-entries [l/tmpl-entry {:type :fragment
                                      :tag "js"
                                      :base "Atomics"
                                      :prefix "at"}]
@@ -456,7 +455,7 @@
   ;; WebAssembly
   ;;
 
-  (h/template-entries [l/tmpl-entry {:type :fragment
+  (std.lib.foundation/template-entries [l/tmpl-entry {:type :fragment
                                      :tag "js"
                                      :base "WebAssembly"
                                      :prefix "ws"}]

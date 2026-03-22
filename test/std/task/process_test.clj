@@ -1,9 +1,9 @@
 (ns std.task.process-test
-  (:use code.test)
-  (:require [std.task.process :refer :all]
+  (:require [std.lib.function]
             [std.lib.result :as res]
             [std.task :as task]
-            [std.lib :as h]))
+            [std.task.process :refer :all])
+  (:use code.test))
 
 (defn- process-test-fn
   ([input params lookup env & args]
@@ -20,7 +20,7 @@
   ^:hidden
   
   (main-function ns-aliases 1)
-  => (contains [h/vargs? false]))
+  => (contains [std.lib.function/vargs? false]))
 
 ^{:refer std.task.process/select-filter :added "4.0"}
 (fact "matches given a range of filters"

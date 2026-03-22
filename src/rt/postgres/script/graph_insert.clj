@@ -1,27 +1,30 @@
 (ns rt.postgres.script.graph-insert
-  (:require [std.lib :as h]
-            [std.lang :as l]
-            [std.lang.base.emit-preprocess :as preprocess]
-            [std.string :as str]
-            [std.lang.base.book :as book]
-            [rt.postgres.grammar.common-application :as app]
+  (:require [rt.postgres.grammar.common-application :as app]
+            [rt.postgres.script.graph-walk :as walk]
             [rt.postgres.script.impl-base :as base]
             [rt.postgres.script.impl-insert :as insert]
-            [rt.postgres.script.graph-walk :as walk]))
+            [std.lang :as l]
+            [std.lang.base.book :as book]
+            [std.lang.base.emit-preprocess :as preprocess]
+            [std.lib.collection]
+            [std.lib.foundation]
+            [std.lib.sort]
+            [std.lib.walk]
+            [std.string.common]))
 
 (defn insert-walk-ids
   "inserts walk ids to the entries"
   {:added "4.0"}
   ([data]
-   (let [cnt   (h/counter)
-         data  (h/prewalk (fn [x]
+   (let [cnt   (std.lib.foundation/counter)
+         data  (std.lib.walk/prewalk (fn [x]
                             (cond (instance? java.util.Map$Entry x) x
                                   
                                   (vector? x)
-                                  (with-meta x {:walk/id (h/inc! cnt)})
+                                  (with-meta x {:walk/id (std.lib.foundation/inc! cnt)})
                                   
                                   (map? x)
-                                  (let [i (h/inc! cnt)]
+                                  (let [i (std.lib.foundation/inc! cnt)]
                                     (if (:id x)
                                       (with-meta x {:walk/id i})
                                       (with-meta x {:walk/id i
@@ -39,7 +42,7 @@
    (let [lu-gid   (volatile! {})
          gid-fn   (comp :walk/id meta)
          gdata-fn (comp :walk/data meta)
-         data     (h/postwalk (fn [x]
+         data     (std.lib.walk/postwalk (fn [x]
                                 (cond (vector? x)
                                       (let [gid (gid-fn x)]
                                         (vswap! lu-gid assoc gid (mapv gid-fn x)))
@@ -48,13 +51,13 @@
                                       (let [gid   (gid-fn x)
                                             gdata (gdata-fn x)]
                                         (if (and gid (not gdata))
-                                          (let [x  (h/filter-vals (fn [v]
+                                          (let [x  (std.lib.collection/filter-vals (fn [v]
                                                                     (and (or (vector? v)
                                                                              (map? v))
                                                                          (not (gdata-fn v))))
                                                                   x)]
                                             (vswap! lu-gid assoc gid
-                                                    (h/map-vals gid-fn x))))))
+                                                    (std.lib.collection/map-vals gid-fn x))))))
                                 x)
                               data)
          _  (vswap! lu-gid dissoc nil)]
@@ -68,24 +71,24 @@
         gid-fn (comp :walk/id meta)
 
         ;; associate data with graph
-        data     (h/postwalk (fn [x]
+        data     (std.lib.walk/postwalk (fn [x]
                                (if (and (map? x)
                                         (:id x))
                                  (vswap! lu-data assoc (:id x) (gid-fn x)))
                                x)
                              data)
-        gid-syms  (h/map-juxt [identity
+        gid-syms  (std.lib.collection/map-juxt [identity
                                (fn [gid]
                                  (symbol (str "gid_" gid)))]
                               (keys lu-gid))
         
         ;; get deps and order for graph ids
-         gid-ordered (-> (h/map-vals  (fn [x]
+         gid-ordered (-> (std.lib.collection/map-vals  (fn [x]
                                       (if (vector? x)
                                         (set x)
                                         (set (vals x))))
                                       lu-gid)
-                         (h/topological-sort))]
+                         (std.lib.sort/topological-sort))]
     [gid-ordered gid-syms @lu-data]))
 
 (defn insert-gen-sql
@@ -102,7 +105,7 @@
          ;; generate sql forms
          pids   (filter (fn [form]
                           (and (symbol? form)
-                               (str/starts-with? (str form) "?")))
+                               (std.string.common/starts-with? (str form) "?")))
                         (keys lu-data))
          pdecl  (mapcat (fn [sym]
                           (let [{:keys [type sql]} (meta sym)]
@@ -138,7 +141,7 @@
                             (cond (empty? gdeps) []
 
                                   (map? gdeps)
-                                  ['_  (list := gsym (list '|| gsym (h/map-vals gid-syms gdeps)))]
+                                  ['_  (list := gsym (list '|| gsym (std.lib.collection/map-vals gid-syms gdeps)))]
 
                                   (vector? gdeps)
                                   [gsym  (list 'js (mapv gid-syms gdeps))])))

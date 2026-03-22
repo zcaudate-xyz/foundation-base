@@ -1,8 +1,8 @@
 (ns code.framework.test.clojure-test
-  (:use code.test)
-  (:require [code.framework.test.clojure :refer :all]
-            [code.framework.docstring :as docstring]
-            [std.block.navigate :as nav]))
+  (:require [code.framework.docstring :as docstring]
+            [code.framework.test.clojure :refer :all]
+            [std.block.navigate :as nav])
+  (:use code.test))
 
 ^{:refer code.framework.test.clojure/gather-is-form :added "3.0"}
 (fact "Make docstring notation out of is form"

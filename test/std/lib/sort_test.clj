@@ -1,6 +1,6 @@
 (ns std.lib.sort-test
-  (:use code.test)
-  (:require [std.lib.sort :refer :all]))
+  (:require [std.lib.sort :refer :all])
+  (:use code.test))
 
 ^{:refer std.lib.sort/hierarchical-top :added "3.0"}
 (fact "find the top node for the hierarchy of descendants"

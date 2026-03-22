@@ -1,7 +1,7 @@
 (ns jvm.namespace.common
-  (:require [std.string :as str]
+  (:require [std.lib.foundation]
             [std.object.query :as query]
-            [std.lib :as h])
+            [std.string.common])
   (:import (clojure.lang DynamicClassLoader Namespace))
   (:refer-clojure :exclude [ns-unalias ns-unmap]))
 
@@ -167,7 +167,7 @@
   {:added "3.0"}
   ([results]
    (let [results (->> results
-                      (map #(str/split % (re-pattern "\\$")))
+                      (map #(std.string.common/split % (re-pattern "\\$")))
                       (map rest))
          anon?  (fn [[call _]]
                   (try (re-find #"^fn__*" call)
@@ -186,7 +186,7 @@
          fks     (sort (keys funcs))]
      (cond->> (keep (fn [fk]
                       (try
-                        [(symbol (h/demunge fk)) (count (get funcs fk))]
+                        [(symbol (std.lib.foundation/demunge fk)) (count (get funcs fk))]
                         (catch Throwable t)))
                     fks)
        (pos? anons) (cons ['ANON anons])

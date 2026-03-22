@@ -1,9 +1,9 @@
 (ns code.framework.test.fact-test
-  (:use code.test)
-  (:require [code.framework.test.fact :refer :all]
-            [code.framework.docstring :as docstring]
+  (:require [code.framework.docstring :as docstring]
+            [code.framework.test.fact :refer :all]
             [std.block.navigate :as nav]
-            [std.lib :as h]))
+            [std.lib.collection])
+  (:use code.test))
 
 ^{:refer code.framework.test.fact/gather-fact-body :added "3.0"}
 (fact "extracts and formats the body of a `fact` form into docstring notation, used as a helper for `gather-fact`"
@@ -29,5 +29,5 @@
                :added "0.1",
                :line  {:row 2, :col 8, :end-row 4, :end-col 21}
                :intro "Sample test program",
-               :sexp h/form?
+               :sexp std.lib.collection/form?
                :test  "\n  (+ 1 1) => 2\n  (long? 3) => true"}))

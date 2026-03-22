@@ -1,19 +1,20 @@
 (ns std.lang.base.compile
-  (:require [std.make.compile :as compile]
-            [std.lang.base.emit :as emit]
-            [std.lang.base.util :as ut]
+  (:require [std.fs :as fs]
             [std.lang.base.book :as book]
-            [std.lang.base.pointer :as ptr]
+            [std.lang.base.compile-links :as links]
+            [std.lang.base.emit :as emit]
             [std.lang.base.impl :as impl]
             [std.lang.base.impl-deps :as deps]
             [std.lang.base.impl-deps-imports :as deps-imports]
             [std.lang.base.impl-lifecycle :as lifecycle]
             [std.lang.base.library :as lib]
             [std.lang.base.library-snapshot :as snap]
-            [std.lang.base.compile-links :as links]
-            [std.lib :as h]
-            [std.string :as str]
-            [std.fs :as fs]))
+            [std.lang.base.pointer :as ptr]
+            [std.lang.base.util :as ut]
+            [std.lib.deps]
+            [std.lib.foundation]
+            [std.make.compile :as compile]
+            [std.string.common]))
 
 
 ;;
@@ -29,7 +30,7 @@
                      opts)
         entry (compile/compile-resolve main)
         _ (if (not (book/book-entry? entry))
-            (h/error "Not a library entry" {:main main}))
+            (std.lib.foundation/error "Not a library entry" {:main main}))
         meta   (ptr/ptr-invoke-meta entry
                                     (select-keys opts [:layout
                                                        :emit]))
@@ -161,9 +162,9 @@
   (let [lib         (impl/runtime-library)
         snapshot    (lib/get-snapshot lib)
         book        (snap/get-book snapshot lang)
-        parent (->> (str/split (str main) #"\.")
+        parent (->> (std.string.common/split (str main) #"\.")
                     (butlast)
-                    (str/join ".")
+                    (std.string.common/join ".")
                     (symbol))
         selected  (->> (:all (deps-imports/module-code-deps book [main]))
                        (filter (fn [ns]
@@ -212,13 +213,13 @@
          lib         (impl/runtime-library)
          snapshot    (lib/get-snapshot lib)
          book        (snap/get-book snapshot lang)
-         deps        (h/deps:ordered book [main])
+         deps        (std.lib.deps/deps-ordered book [main])
          full-arr    (map (fn [module-id]
                             (-> (lifecycle/emit-module-setup module-id
                                                              mopts)
                                 (compile/compile-fullbody opts)))
                           deps)
-         full        (str/join "\n\n" full-arr)
+         full        (std.string.common/join "\n\n" full-arr)
          output (compile/compile-out-path opts)]
      (compile/compile-write output full))))
 

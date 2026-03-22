@@ -1,7 +1,7 @@
 (ns std.object.element.util-test
-  (:use code.test)
   (:require [std.object.element.util :refer :all]
-            [std.object.query :as query]))
+            [std.object.query :as query])
+  (:use code.test))
 
 ^{:refer std.object.element.util/box-arg :added "3.0"}
 (fact "Converts primitives to their correct data types"

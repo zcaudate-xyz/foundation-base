@@ -1,5 +1,5 @@
 (ns std.object.element.common
-  (:require [std.lib :refer [defimpl]]))
+  (:require [std.lib.impl :refer [defimpl]]))
 
 (defn context-class
   "If x is a class, return x otherwise return the class of x

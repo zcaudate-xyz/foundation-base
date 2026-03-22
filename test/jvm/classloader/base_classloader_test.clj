@@ -1,6 +1,6 @@
 (ns jvm.classloader.base-classloader-test
-  (:use code.test)
-  (:require [jvm.classloader.base-classloader :refer :all]))
+  (:require [jvm.classloader.base-classloader :refer :all])
+  (:use code.test))
 
 ^{:refer jvm.classloader.base-classloader/all-class-urls :added "4.0"}
 (fact "runs all class urls"

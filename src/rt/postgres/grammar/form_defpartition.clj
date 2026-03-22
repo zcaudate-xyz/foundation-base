@@ -1,18 +1,17 @@
 (ns rt.postgres.grammar.form-defpartition
   (:require [rt.postgres.grammar.common :as common]
-            [std.lang.base.grammar-spec :as grammar-spec]
-            [std.lang.base.emit-preprocess :as preprocess]
-            [std.lang.base.library-snapshot :as snap]
             [std.lang.base.book :as book]
-            [std.string :as str]
-            [std.lib :as h]))
+            [std.lang.base.emit-preprocess :as preprocess]
+            [std.lang.base.grammar-spec :as grammar-spec]
+            [std.lang.base.library-snapshot :as snap]
+            [std.lib.foundation]))
 
 (defn pg-partition-name
   "constructs partition name"
   {:added "4.0"}
   [base val stack]
   (let [parts (concat [base] (reverse stack) [val])]
-    (clojure.string/join "__" (map h/strn parts))))
+    (clojure.string/join "__" (map std.lib.foundation/strn parts))))
 
 (defn pg-partition-def
   "recursive definition for partition"

@@ -1,6 +1,6 @@
 (ns python.remote-socket-server
-  (:require [std.lib :as h]
-            [std.lang :as l]))
+  (:require [std.lang :as l]
+            [std.lib.network]))
 
 (l/script :python
   {:require [[xt.lang.base-repl :as repl]]
@@ -78,7 +78,7 @@
   (l/rt:scaffold :python)
   
   (def +s+
-    (h/socket "localhost" 12368))
+    (std.lib.network/socket "localhost" 12368))
   
   (def +r+
     (std.concurrent/relay
@@ -143,11 +143,11 @@
   
   
   
-  (h/port:check-available 12366)
+  (std.lib.network/port:check-available 12366)
   
-  (h/port:get-available [12366])
+  (std.lib.network/port:get-available [12366])
   
-  (h/wait-for-port "localhost" 12366 {:timeout 1000})
+  (std.lib.network/wait-for-port "localhost" 12366 {:timeout 1000})
   
   (!.py
    asyncio))

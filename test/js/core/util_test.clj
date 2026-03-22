@@ -1,6 +1,6 @@
 (ns js.core.util-test
-  (:use code.test)
-  (:require [js.core.util :refer :all]))
+  (:require [js.core.util :refer :all])
+  (:use code.test))
 
 ^{:refer js.core.util/pass-callback :added "4.0" :unchecked true}
 (fact "node style callback")

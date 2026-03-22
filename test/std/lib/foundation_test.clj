@@ -1,8 +1,7 @@
 (ns std.lib.foundation-test
-  (:use code.test)
   (:require [std.lib.foundation :refer :all])
-  (:refer-clojure :exclude [keyword -> ->> reset! aget set!
-                            parse-long parse-double]))
+  (:use code.test)
+  (:refer-clojure :exclude [keyword -> ->> reset! aget set! parse-long parse-double]))
 
 ^{:refer std.lib.foundation/T :added "3.0"}
 (fact "returns `true` for any combination of input `args`"

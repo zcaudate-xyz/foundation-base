@@ -1,6 +1,5 @@
 (ns xt.sys.cache-common
-  (:require [std.lang :as l]
-            [std.lib :as h])
+  (:require [std.lang :as l])
   (:refer-clojure :exclude [flush get set]))
 
 (l/script :xtalk

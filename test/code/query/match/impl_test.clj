@@ -1,6 +1,6 @@
 (ns code.query.match.impl-test
-  (:use code.test)
-  (:require [code.query.match.impl :refer :all]))
+  (:require [code.query.match.impl :refer :all])
+  (:use code.test))
 
 ^{:refer code.query.match.impl/actual-pattern :added "3.0"}
 (fact "constructs a pattern used for direct comparison"

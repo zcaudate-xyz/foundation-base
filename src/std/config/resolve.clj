@@ -1,12 +1,15 @@
 (ns std.config.resolve
-  (:require [std.config.common :as common]
+  (:require [code.project :as project]
+            [edamame.core :as edn]
+            [std.config.common :as common]
             [std.config.global :as global]
             [std.config.secure :as secure]
-            [std.lib :as h :refer [definvoke]]
-            [std.string :as str]
             [std.fs :as fs]
-            [code.project :as project]
-            [edamame.core :as edn])
+            [std.lib.collection]
+            [std.lib.env]
+            [std.lib.invoke :refer [definvoke]]
+            [std.string.common]
+            [std.string.wrap])
   (:refer-clojure :exclude [resolve load]))
 
 (def +config+  "config.edn")
@@ -211,7 +214,7 @@
   [:method {:multi common/-resolve-directive
             :val :project}]
   ([[_ proj opts]]
-   (let [arr ((str/wrap str/split) proj #"\.")]
+   (let [arr ((std.string.wrap/wrap std.string.common/split) proj #"\.")]
      (resolve-content (get-in (global/global :project) arr)
                       opts))))
 
@@ -240,7 +243,7 @@
             :val :str}]
   ([[_ args opts]]
    (let [args (map resolve args)]
-     (resolve-content ((str/wrap str/joinl) args)
+     (resolve-content ((std.string.wrap/wrap std.string.common/joinl) args)
                       opts))))
 
 (definvoke resolve-directive-or
@@ -315,8 +318,8 @@
                     nil merge
                     :default merge
                     :nil (fn [& args] (apply merge (reverse args)))
-                    :nested h/merge-nested
-                    :nested-nil h/merge-nested-new)]
+                    :nested std.lib.collection/merge-nested
+                    :nested-nil std.lib.collection/merge-nested-new)]
      (apply merge-fn (map resolve args)))))
 
 (definvoke resolve-directive-eval
@@ -392,7 +395,7 @@
   [:method {:multi common/-resolve-directive
             :val :parent}]
   ([[_ val opts]]
-   (let [arr ((str/wrap str/split) val #"\.")]
+   (let [arr ((std.string.wrap/wrap std.string.common/split) val #"\.")]
      (resolve-content (resolve-map (last (filter map? *current*)) arr)
                       opts))))
 
@@ -405,7 +408,7 @@
   [:method {:multi common/-resolve-directive
             :val :global}]
   ([[_ val opts]]
-   (let [arr ((str/wrap str/split) val #"\.")]
+   (let [arr ((std.string.wrap/wrap std.string.common/split) val #"\.")]
      (resolve-content (resolve-map (global/global :all) arr)
                       opts))))
 
@@ -451,7 +454,7 @@
   [:method {:multi common/-resolve-directive
             :val :resource}]
   ([[_ path opts]]
-   (let [url  (h/sys:resource path)]
+   (let [url  (std.lib.env/sys:resource path)]
      (let [output (if url
                     (resolve-content (slurp url) opts))]
        (if (directive? output)
@@ -471,7 +474,7 @@
    (let [path  (resolve-path path)
          path  (or (first (filter fs/exists? [(fs/path path)
                                               (fs/path @+user-dir+ path)]))
-                   (h/sys:resource path)
+                   (std.lib.env/sys:resource path)
                    (first (filter fs/exists?
                                   [(fs/path @+hara-dir+ path)])))
          output (if path

@@ -1,14 +1,14 @@
 (ns std.lang.base.emit-special-test
-  (:use code.test)
-  (:require [std.lang.base.emit-special :refer :all]
-            [std.lang.base.emit-common :as common]
+  (:require [std.lang.base.emit-common :as common]
             [std.lang.base.emit-helper :as helper]
             [std.lang.base.emit-prep-lua-test :as prep]
-            [std.lang.model.spec-lua :as lua]
+            [std.lang.base.emit-special :refer :all]
+            [std.lang.base.impl-entry :as entry]
             [std.lang.base.library :as lib]
             [std.lang.base.library-snapshot :as snap]
-            [std.lang.base.impl-entry :as entry]
-            [std.lib :as h]))
+            [std.lang.model.spec-lua :as lua]
+            [std.lib.env])
+  (:use code.test))
 
 (def +library-ext+
   (doto (lib/library:create
@@ -24,7 +24,7 @@
          [a b]
          (return (fn:> ((u/identity-fn u/sub) a b))))
       {:lang :lua
-       :namespace (h/ns-sym)
+       :namespace (std.lib.env/ns-sym)
        :module 'L.util}
       {}))
     (lib/add-entry-single!
@@ -33,7 +33,7 @@
          [a b]
          (return (fn:> ((u/identity-fn u/add) a (-/sub-fn b 0)))))
       {:lang :lua
-       :namespace (h/ns-sym)
+       :namespace (std.lib.env/ns-sym)
        :module 'L.util}
       {}))))
 

@@ -1,12 +1,12 @@
 (ns std.lang.model.spec-rust-test
-  (:use code.test)
-  (:require [std.lang.model.spec-rust :refer :all]
+  (:require [std.fs :as fs]
+            [std.lang :as l]
             [std.lang.base.script :as script]
             [std.lang.base.util :as ut]
-            [std.lang :as l]
-            [std.lib :as h]
-            [std.fs :as fs]
-            [std.string]))
+            [std.lang.model.spec-rust :refer :all]
+            [std.lib.os]
+            [std.string.prose])
+  (:use code.test))
 
 (script/script- :rust
   {;;:require [[std :as h]]
@@ -313,7 +313,7 @@ let a: List<i32> = List::Cons(7, Box::new(List::Cons(13, Box::new(List::Nil))));
   (!.rs
     (defn main []
       (println! "{}" 123)))
-  => (std.string/|
+  => (std.string.prose/|
       "fn main() {"
       "  println!(\"{}\",123);"
       "}")
@@ -355,7 +355,7 @@ let a: List<i32> = List::Cons(7, Box::new(List::Cons(13, Box::new(List::Nil))));
                 :object "the lazy dog"
                 :verb   "jumps over"
                 :subject "the quick brown fox")))
-  => (std.string/|
+  => (std.string.prose/|
       "fn main() {"
       "  println!("
       "    \"{subject} {verb} {object}\","
@@ -373,7 +373,7 @@ let a: List<i32> = List::Cons(7, Box::new(List::Cons(13, Box::new(List::Nil))));
       
       (return
        (== 0 (mod lhs rhs)))))
-  => (std.string/|
+  => (std.string.prose/|
       "fn is_divisible_by(lhs: u32, rhs: u32) {"
       "  if(rhs == 0){"
       "    return false;"
@@ -396,7 +396,7 @@ let a: List<i32> = List::Cons(7, Box::new(List::Cons(13, Box::new(List::Nil))));
                 :width  3)
 
       (println! "My name is {0}, {1} {0}", "Bond" "James")))
-  => (std.string/|
+  => (std.string.prose/|
       "fn main() {"
       "  println!(\"Base 10:    {}\",69420);"
       "  println!(\"Base 2:     {:b}\",69420);"
@@ -427,8 +427,8 @@ let a: List<i32> = List::Cons(7, Box::new(List::Cons(13, Box::new(List::Nil))));
                           :width  3)
 
                 (println! "My name is {0}, {1} {0}", "Bond" "James"))))
-      (h/sh {:args ["rustc" "hello.rs"]})
-      (h/sh {:args ["hello"]})))
+      (std.lib.os/sh {:args ["rustc" "hello.rs"]})
+      (std.lib.os/sh {:args ["hello"]})))
 
 (comment
 
@@ -502,8 +502,8 @@ fn main() {
     // Pretty print
     println!(\"{:#?}\", peter);
 }")
-      (h/sh {:args ["rustc" "hello.rs"]})
-      (h/sh {:args ["hello"]})))
+      (std.lib.os/sh {:args ["rustc" "hello.rs"]})
+      (std.lib.os/sh {:args ["hello"]})))
 
   
   

@@ -1,15 +1,17 @@
 (ns rt.basic.type-basic
-  (:require [std.protocol.context :as protocol.context]
+  (:require [rt.basic.server-basic :as server]
+            [rt.basic.type-bench :as bench]
+            [rt.basic.type-common :as common]
+            [rt.basic.type-container :as container]
+            [std.concurrent :as cc]
+            [std.json :as json]
             [std.lang.base.pointer :as ptr]
             [std.lang.base.runtime :as default]
-            [std.lib :as h :refer [defimpl]]
-            [std.json :as json]
-            [std.concurrent :as cc]
-            [std.string :as str]
-            [rt.basic.type-common :as common]
-            [rt.basic.server-basic :as server]
-            [rt.basic.type-bench :as bench]
-            [rt.basic.type-container :as container]))
+            [std.lib.collection]
+            [std.lib.component]
+            [std.lib.foundation]
+            [std.lib.impl :refer [defimpl]]
+            [std.protocol.context :as protocol.context]))
 
 (defn start-basic
   "starts the basic rt"
@@ -112,10 +114,10 @@
            runtime
            process] :as m
     :or {runtime :basic}}]
-  (let [process (h/merge-nested (common/get-options lang :basic :default)
+  (let [process (std.lib.collection/merge-nested (common/get-options lang :basic :default)
                                 process)]
     (map->RuntimeBasic (merge  m
-                               {:id (or id (h/sid))
+                               {:id (or id (std.lib.foundation/sid))
                                 :tag runtime
                                 :runtime runtime
                                 :process process
@@ -135,7 +137,7 @@
            program
            process] :as m}]
   (-> (rt-basic:create m)
-      (h/start)))
+      (std.lib.component/start)))
 
 (comment
   (./import)

@@ -1,8 +1,8 @@
 (ns code.doc.prepare-test
-  (:use code.test)
-  (:require [code.doc.prepare :refer :all]
+  (:require [code.doc :as publish]
             [code.doc.executive :as executive]
-            [code.doc :as publish]))
+            [code.doc.prepare :refer :all])
+  (:use code.test))
 
 ^{:refer code.doc.prepare/prepare :added "3.0"}
 (fact "processes a single meta to generate an interim structure"

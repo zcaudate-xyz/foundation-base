@@ -1,6 +1,6 @@
 (ns js.react.layout-test
-  (:use code.test)
-  (:require [js.react.layout :as layout]))
+  (:require [js.react.layout :as layout])
+  (:use code.test))
 
 ^{:refer js.react.layout/ui-template-classify :added "4.0" :unchecked true}
 (fact "classifies a hiccup element"

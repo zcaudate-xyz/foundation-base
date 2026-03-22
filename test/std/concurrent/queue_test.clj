@@ -1,6 +1,6 @@
 (ns std.concurrent.queue-test
-  (:use code.test)
-  (:require [std.concurrent.queue :as q]))
+  (:require [std.concurrent.queue :as q])
+  (:use code.test))
 
 ^{:refer std.concurrent.queue/->timeunit :added "3.0"}
 (fact "returns the timeunit"

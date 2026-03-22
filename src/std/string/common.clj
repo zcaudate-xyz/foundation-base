@@ -1,6 +1,5 @@
 (ns std.string.common
-  (:import (java.util.regex Pattern Matcher)
-           (clojure.lang LazilyPersistentVector))
+  (:import (java.util.regex Pattern Matcher) (clojure.lang LazilyPersistentVector))
   (:refer-clojure :exclude [replace reverse]))
 
 (defn blank?

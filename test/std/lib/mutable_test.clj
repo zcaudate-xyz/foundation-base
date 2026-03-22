@@ -1,6 +1,6 @@
 (ns std.lib.mutable-test
-  (:use code.test)
   (:require [std.lib.mutable :refer :all])
+  (:use code.test)
   (:refer-clojure :exclude [set update]))
 
 (defmutable Hello [name value])

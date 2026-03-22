@@ -1,8 +1,8 @@
 (ns jvm.artifact
-  (:require [std.string :as str]
-            [std.lib :refer [definvoke]]
+  (:require [jvm.artifact.common :as base]
             [jvm.protocol :as protocol.classloader]
-            [jvm.artifact.common :as base]))
+            [std.lib.invoke :refer [definvoke]]
+            [std.string.common]))
 
 (defn rep->coord
   "encodes the rep to a coordinate
@@ -26,7 +26,7 @@
    => #\"/hara/hara/2.4.0/hara-2.4.0.jar\""
   {:added "3.0"}
   ([{:keys [group artifact version extension]}]
-   (str/join base/*sep*
+   (std.string.common/join base/*sep*
              [base/*local-repo* (.replaceAll ^String group "\\." base/*sep*)
               artifact version (str artifact "-" version "." (or extension "jar"))])))
 
@@ -39,7 +39,7 @@
    => \"hara:hara:2.4.0\""
   {:added "3.0"}
   ([{:keys [group artifact extension version]}]
-   (str/join ":" [group
+   (std.string.common/join ":" [group
                   artifact
                   (if extension
                     (str extension ":" version)
@@ -71,7 +71,7 @@
                  :version \"2.4.0\"})"
   {:added "3.0"}
   ([[name version & {:keys [scope exclusions]}]]
-   (let [[group artifact] (str/split (str name) #"/")
+   (let [[group artifact] (std.string.common/split (str name) #"/")
          artifact (or artifact
                       group)]
      (Rep. group artifact "jar" nil version {} nil scope exclusions))))
@@ -86,14 +86,14 @@
   {:added "3.0"}
   ([x]
    (let [arr (->> (re-pattern base/*sep*)
-                  (str/split (.replaceAll ^String x base/*local-repo* ""))
+                  (std.string.common/split (.replaceAll ^String x base/*local-repo* ""))
                   (remove empty?))
          extension (-> (last arr)
-                       (str/split #"\.")
+                       (std.string.common/split #"\.")
                        last)
          version   (last (butlast arr))
          artifact  (last (butlast (butlast arr)))
-         group     (str/join "." (butlast (butlast (butlast arr))))]
+         group     (std.string.common/join "." (butlast (butlast (butlast arr))))]
      (Rep. group artifact extension nil version {} x nil nil nil nil))))
 
 (defn string->rep
@@ -105,7 +105,7 @@
                  :version \"2.4.0\"})"
   {:added "3.0"}
   ([s]
-   (let [[group artifact extension? classifer? version :as array] (str/split s #":")]
+   (let [[group artifact extension? classifer? version :as array] (std.string.common/split s #":")]
      (case (count array)
        1 (path->rep s)
        2 (Rep. group artifact "jar" nil nil {} nil nil nil)

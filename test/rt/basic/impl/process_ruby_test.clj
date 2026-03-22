@@ -1,7 +1,7 @@
 (ns rt.basic.impl.process-ruby-test
-  (:use code.test)
   (:require [rt.basic.impl.process-ruby :refer :all]
-            [std.lang :as l]))
+            [std.lang :as l])
+  (:use code.test))
 
 (l/script- :ruby
   {:runtime :oneshot})

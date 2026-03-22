@@ -1,9 +1,9 @@
 (ns std.dom.event-test
-  (:use code.test)
-  (:require [std.dom.event :refer :all]
-            [std.dom :as dom]
-            [std.lib.mutable :as mut]
-            [std.lib :refer [definvoke] :as u]))
+  (:require [std.dom :as dom]
+            [std.dom.event :refer :all]
+            [std.lib.invoke :refer [definvoke]]
+            [std.lib.mutable :as mut])
+  (:use code.test))
 
 (definvoke mock-pane-local
   [:dom {:tag :mock/pane-local

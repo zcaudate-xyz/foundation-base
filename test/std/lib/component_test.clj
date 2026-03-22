@@ -1,10 +1,9 @@
 (ns std.lib.component-test
-  (:use code.test)
   (:require [std.lib.component :refer :all]
             [std.lib.component.track :as track]
             [std.protocol.component :as protocol.component]
-            [std.protocol.track :as protocol.track]
-            [std.lib :as h]))
+            [std.protocol.track :as protocol.track])
+  (:use code.test))
 
 (defrecord Database []
   protocol.track/ITrack

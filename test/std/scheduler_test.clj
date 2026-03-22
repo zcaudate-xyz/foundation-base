@@ -1,15 +1,17 @@
 (ns std.scheduler-test
-  (:use code.test)
-  (:require [std.scheduler :refer :all]
-            [std.scheduler.spawn :as spawn]
-            [std.concurrent :as cc]
-            [std.lib :as h]))
+  (:require [std.concurrent :as cc]
+            [std.lib :as h]
+            [std.lib.component]
+            [std.lib.time]
+            [std.scheduler :refer :all]
+            [std.scheduler.spawn :as spawn])
+  (:use code.test))
 
 (defn test-scaffold
   ([f]
    (test-scaffold f 100))
   ([f interval]
-   (h/with:component [runner (runner:create)]
+   (std.lib.component/with [runner (runner:create)]
      (let [q (cc/queue)]
        (install runner {:id :world
                         :type :basic
@@ -22,7 +24,7 @@
 (fact "starts up the runner"
   ^:hidden
   
-  (h/with:component [runner (runner:create)]
+  (std.lib.component/with [runner (runner:create)]
     (-> runner
         (runner:start)
         (runner:info)))
@@ -54,7 +56,7 @@
 (fact "checks if runner is started"
   ^:hidden
   
-  (h/with:component [|run| (runner:create)]
+  (std.lib.component/with [|run| (runner:create)]
     (runner:started? |run|))
   => true)
 
@@ -62,7 +64,7 @@
 (fact "checks if runner has stopped"
   ^:hidden
   
-  (h/with:component [|run| (runner:create)]
+  (std.lib.component/with [|run| (runner:create)]
     (-> (doto |run| (runner:kill))
         (runner:stopped?))
     => true))
@@ -71,7 +73,7 @@
 (fact "returns health of runner"
   ^:hidden
   
-  (h/with:component [|run| (runner:create)]
+  (std.lib.component/with [|run| (runner:create)]
     (runner:health |run|))
   => {:status :ok})
 
@@ -79,7 +81,7 @@
 (fact "returns runner info"
   ^:hidden
   
-  (h/with:component [runner (runner:create {})]
+  (std.lib.component/with [runner (runner:create {})]
     (runner:info runner))
   => {:executors {:core {:threads 0, :active 0, :queued 0, :terminated false},
                   :scheduler {:threads 0, :active 0, :queued 0, :terminated false}},
@@ -117,7 +119,7 @@
   ^:hidden
   
   (-> (runner {:id "runner"})
-      (h/comp:kill))
+      (std.lib.component/kill))
   => runner?)
 
 ^{:refer std.scheduler/installed? :added "3.0"}
@@ -216,7 +218,7 @@
 (fact "manually overrides the interval for a spawn/program"
   ^:hidden
   
-  (h/bench-ms
+  (std.lib.time/bench-ms
    (test-scaffold
     (fn [runner q]
       (set-interval runner :world 10)
@@ -225,7 +227,7 @@
                (cc/take q))))))
   => number?
   
-  (h/bench-ms
+  (std.lib.time/bench-ms
    (test-scaffold
     (fn [runner q]
       (set-interval runner :world 100)
@@ -259,7 +261,7 @@
 (comment
 
   (runner {})
-  (h/tracked [] :stop)
+  (std.lib.component.track/tracked [] :stop)
   (count (test-scaffold
           (fn [runner q]
             (spawn runner :world)

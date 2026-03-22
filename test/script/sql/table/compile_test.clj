@@ -1,9 +1,9 @@
 (ns script.sql.table.compile-test
-  (:use code.test)
-  (:require [script.sql.table.compile :refer :all]
-            [std.lib.schema :as schema]
-            [std.lib :as h]
-            [script.sql.table-test :as table-test]))
+  (:require [script.sql.table-test :as table-test]
+            [script.sql.table.compile :refer :all]
+            [std.lib.foundation]
+            [std.lib.schema :as schema])
+  (:use code.test))
 
 (fact:ns
  (:clone script.sql.table-test))
@@ -17,7 +17,7 @@
 
   (-> (in:fn-map table-test/|schema| :meat)
       :grade
-      (h/invoke :bad))
+      (std.lib.foundation/invoke :bad))
   => [:grade "bad"])
 
 ^{:refer script.sql.table.compile/out:fn-map :added "3.0"}
@@ -29,7 +29,7 @@
 
   (-> (out:fn-map table-test/|schema| :meat)
       :grade
-      (h/invoke "bad"))
+      (std.lib.foundation/invoke "bad"))
   => [:grade :bad])
 
 ^{:refer script.sql.table.compile/transform:fn :added "3.0"}

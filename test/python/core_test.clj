@@ -1,8 +1,8 @@
 (ns python.core-test
-  (:use code.test)
-  (:require [std.lib :as h]
+  (:require [std.json :as json]
             [std.lang :as l]
-            [std.json :as json]))
+            [std.lib.component])
+  (:use code.test))
 
 (l/script- :python
   {:runtime :basic
@@ -47,7 +47,7 @@
   
   ^{:refer python.core/wrepl-connect :added "4.0"
     :setup [(def -w- (wrepl/wrepl-python))]
-    :teardown [(h/stop -w-)]}
+    :teardown [(std.lib.component/stop -w-)]}
   (fact "connects to an wrepl server, allows for multiple connections"
     ^:hidden
     

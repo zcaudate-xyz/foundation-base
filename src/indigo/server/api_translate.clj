@@ -1,16 +1,15 @@
 (ns indigo.server.api-translate
-  (:require [std.block :as block]
+  (:require [indigo.server.api-prompt :as prompt]
+            [std.block :as block]
             [std.html :as html]
-            [std.lib :as h]
-            [std.string :as str]
-            [indigo.server.api-prompt :as prompt]))
+            [std.string.common]))
 
 (defn to-layout [source]
   (->> (read-string (str "[" source "]"))
        (block/layout)
        (block/children)
        (map str)
-       (str/join "\n\n")))
+       (std.string.common/join "\n\n")))
 
 (defn to-heal [source]
   (block/heal source))

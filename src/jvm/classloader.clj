@@ -1,15 +1,14 @@
 (ns jvm.classloader
   (:require [clojure.java.io :as io]
-            [std.lib :refer [definvoke]]
-            [jvm.protocol :as protocol.classloader]
-            [jvm.classloader.base-classloader :deps true]
-            [jvm.classloader.url-classloader :deps true]
-            [jvm.classloader.common :as common]
             [jvm.artifact :as artifact]
             [jvm.artifact.common :as base]
+            [jvm.classloader.base-classloader :deps true]
+            [jvm.classloader.common :as common]
+            [jvm.classloader.url-classloader :deps true]
+            [jvm.protocol :as protocol.classloader]
+            [std.lib.invoke :refer [definvoke]]
             [std.object.query :as query])
-  (:import (clojure.lang DynamicClassLoader RT)
-           (java.net URL URLClassLoader)))
+  (:import (clojure.lang DynamicClassLoader RT) (java.net URL URLClassLoader)))
 
 (defonce +base+ (ClassLoader/getSystemClassLoader))
 

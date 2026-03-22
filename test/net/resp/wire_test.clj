@@ -1,7 +1,7 @@
 (ns net.resp.wire-test
-  (:use [code.test])
   (:require [net.resp.wire :refer :all]
-            [std.lib :as h])
+            [std.lib.foundation])
+  (:use [code.test])
   (:refer-clojure :exclude [read]))
 
 ^{:refer net.resp.wire/call :added "3.0"}
@@ -16,19 +16,19 @@
 ^{:refer net.resp.wire/serialize-bytes :added "3.0"}
 (fact "serializes objects (data) to bytes"
 
-  (h/string (serialize-bytes "HELLO" :string))
+  (std.lib.foundation/string (serialize-bytes "HELLO" :string))
   => "HELLO" ^:hidden
 
-  (h/string (serialize-bytes "HELLO" :edn))
+  (std.lib.foundation/string (serialize-bytes "HELLO" :edn))
   => "\"HELLO\""
 
-  (h/string (serialize-bytes {:a 1} :string))
+  (std.lib.foundation/string (serialize-bytes {:a 1} :string))
   => "{:a 1}"
 
-  (h/string (serialize-bytes {:a 1} :edn))
+  (std.lib.foundation/string (serialize-bytes {:a 1} :edn))
   => "{:a 1}"
 
-  (h/string (serialize-bytes {:a 1} :json))
+  (std.lib.foundation/string (serialize-bytes {:a 1} :json))
   => "{\"a\":1}")
 
 ^{:refer net.resp.wire/deserialize-bytes :added "3.0"}

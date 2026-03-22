@@ -1,8 +1,8 @@
 (ns rt.basic-test
-  (:use code.test)
   (:require [rt.basic :refer :all]
             [rt.basic.server-basic :as server-basic]
-            [std.concurrent :as cc]))
+            [std.concurrent :as cc])
+  (:use code.test))
 
 ^{:refer rt.basic/clean-relay :added "4.0"}
 (fact "cleans the relay on the server"

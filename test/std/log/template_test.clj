@@ -1,6 +1,6 @@
 (ns std.log.template-test
-  (:use code.test)
-  (:require [std.log.template :refer :all]))
+  (:require [std.log.template :refer :all])
+  (:use code.test))
 
 ^{:refer std.log.template/add-template :added "3.0"}
 (fact "adds a template to the registry"

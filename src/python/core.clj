@@ -1,12 +1,11 @@
 (ns python.core
-  (:require [std.lib :as h]
-            [std.lang :as l]
-            [std.string :as str]
+  (:require [python.core.builtins :as builtins]
             [python.core.system :as sys]
-            [python.core.builtins :as builtins])
+            [std.lang :as l]
+            [std.lib.foundation])
   (:refer-clojure :exclude [eval]))
 
-(h/intern-all python.core.system
+(std.lib.foundation/intern-all python.core.system
               python.core.builtins)
 
 (l/script :python

@@ -1,6 +1,6 @@
 (ns indigo.client.app.components.component-palette-test
-  (:use code.test)
-  (:require [indigo.client.app.components.component-palette :refer :all]))
+  (:require [indigo.client.app.components.component-palette :refer :all])
+  (:use code.test))
 
 ^{:refer indigo.client.app.components.component-palette/ComponentPalette :added "4.0"}
 (fact "TODO")

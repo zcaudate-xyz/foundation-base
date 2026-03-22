@@ -1,6 +1,8 @@
 (ns std.make.makefile
-  (:require [std.string :as str]
-            [std.lib :as h]))
+  (:require [std.lib.env]
+            [std.lib.foundation]
+            [std.string.common]
+            [std.string.prose]))
 
 (def ^:dynamic *indent* 0)
 
@@ -23,9 +25,9 @@
   {:added "4.0"}
   ([m]
    (->> (map (fn [[k v]]
-               (h/strn k " = " (str/write-line v)))
+               (std.lib.foundation/strn k " = " (std.string.prose/write-line v)))
              m)
-        (str/join "\n"))))
+        (std.string.common/join "\n"))))
 
 (defn emit-target
   "emits all makefile targets"
@@ -34,9 +36,9 @@
    (let [[deps commands] (if (map? (first more))
                            [(:- (first more)) (rest more)]
                            [nil more])]
-     (str (h/strn tag ":")
-          (if deps (str " " (str/write-line deps))) "\n\t"
-          (str/join "\n\t" (map str/write-line commands))))))
+     (str (std.lib.foundation/strn tag ":")
+          (if deps (str " " (std.string.prose/write-line deps))) "\n\t"
+          (std.string.common/join "\n\t" (map std.string.prose/write-line commands))))))
 
 (defn write
   "link to `std.lang.compile/compile-ext-fn`"
@@ -48,11 +50,11 @@
      (str (when headers
             (str (emit-headers headers) "\n\n"))
           (->> (map emit-target targets)
-               (str/join "\n\n"))))))
+               (std.string.common/join "\n\n"))))))
 
 (comment
 
-  (h/pl (write
+  (std.lib.env/pl (write
        [{:CC     :gcc
          :CFLAGS "-I."
          :DEPS   ["hellomake.h"]

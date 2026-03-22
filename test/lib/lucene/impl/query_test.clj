@@ -1,7 +1,7 @@
 (ns lib.lucene.impl.query-test
+  (:require [lib.lucene.impl.analyzer :as analyzer]
+            [lib.lucene.impl.query :refer :all])
   (:use code.test)
-  (:require [lib.lucene.impl.query :refer :all]
-            [lib.lucene.impl.analyzer :as analyzer])
   (:import (org.apache.lucene.util QueryBuilder)))
 
 (def -analyzer- (analyzer/analyzer-standard {}))

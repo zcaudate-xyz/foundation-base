@@ -1,13 +1,10 @@
 (ns mcp-clj.mcp-client.prompts
+  (:require [mcp-clj.log :as log]
+            [mcp-clj.mcp-client.session :as session]
+            [mcp-clj.mcp-client.subscriptions :as subscriptions]
+            [mcp-clj.mcp-client.transport :as transport])
   "Prompt calling implementation for MCP client"
-  (:require
-    [mcp-clj.log :as log]
-    [mcp-clj.mcp-client.session :as session]
-    [mcp-clj.mcp-client.subscriptions :as subscriptions]
-    [mcp-clj.mcp-client.transport :as transport])
-  (:import
-    (java.util.concurrent
-      CompletableFuture)))
+  (:import (java.util.concurrent CompletableFuture)))
 
 (defn- get-prompts-cache
   "Get or create prompts cache in client session"

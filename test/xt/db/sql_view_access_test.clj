@@ -1,9 +1,10 @@
 (ns xt.db.sql-view-access-test
-  (:use code.test)
-  (:require [std.lang :as l]
-            [rt.postgres :as pg]
-            [xt.db.sample-user-test :as user]
-            [xt.db.sample-data-test :as data]))
+  (:require [rt.postgres :as pg]
+            [std.lang :as l]
+            [std.string.prose]
+            [xt.db.sample-data-test :as data]
+            [xt.db.sample-user-test :as user])
+  (:use code.test))
 
 (l/script- :js
   {:runtime :basic
@@ -58,7 +59,7 @@
                   (@! +select-member+)
                   ["hello"]
                   {}))
-  => (std.string/|
+  => (std.string.prose/|
       "SELECT id FROM Organisation"
       "  WHERE id IN ("
       "    SELECT organisation_id FROM OrganisationAccess"
@@ -70,7 +71,7 @@
                   (@! +select-member+)
                   ["hello"]
                   {:access-id "<ACCOUNT-ID>"}))
-  => (std.string/|
+  => (std.string.prose/|
       "SELECT id FROM Organisation"
       "  WHERE id IN ("
       "    SELECT organisation_id FROM OrganisationAccess"
@@ -82,7 +83,7 @@
                   (@! +account-by-org+)
                   ["hello"]
                   {}))
-  (std.string/|
+  (std.string.prose/|
    "SELECT id FROM UserAccount"
    "  WHERE id IN ("
    "    SELECT account_id FROM OrganisationAccess"
@@ -103,7 +104,7 @@
                   "hello"
                   []
                   {}))
-  => (std.string/|
+  => (std.string.prose/|
       "SELECT id, name, title, description, tags, (SELECT id, role, (SELECT id, nickname FROM UserAccount"
       "  WHERE id = OrganisationAccess.account_id) AS account FROM OrganisationAccess"
       "  WHERE organisation_id = Organisation.id) AS access FROM Organisation"
@@ -115,7 +116,7 @@
                   "hello"
                   []
                   {:access-id "<ACCOUNT-ID>"}))
-  (std.string/|
+  (std.string.prose/|
    "SELECT id, name, title, description, (SELECT id, role, (SELECT id, nickname FROM UserAccount"
    "  WHERE id = OrganisationAccess.account_id) AS account FROM OrganisationAccess"
    "  WHERE organisation_id = Organisation.id) AS access FROM Organisation"
@@ -141,7 +142,7 @@
                      []
                      nil
                      {:access-id "<ACCESS-ID>"}))
-  => (std.string/|
+  => (std.string.prose/|
       "SELECT id, name, title, description, tags, (SELECT id, role, (SELECT id, nickname FROM UserAccount"
       "  WHERE id = OrganisationAccess.account_id) AS account FROM OrganisationAccess"
       "  WHERE organisation_id = Organisation.id) AS access FROM Organisation"
@@ -159,7 +160,7 @@
                    []
                    nil
                    {}))
-  => (std.string/|
+  => (std.string.prose/|
    "SELECT id, name, title, description, tags, (SELECT id, role, (SELECT id, nickname FROM UserAccount"
    "  WHERE id = OrganisationAccess.account_id) AS account FROM OrganisationAccess"
    "  WHERE organisation_id = Organisation.id) AS access FROM Organisation"

@@ -1,18 +1,8 @@
 (ns lib.aether.request-test
-  (:use code.test)
   (:require [lib.aether.request :refer :all]
             [std.object :as object])
-  (:import (org.eclipse.aether.graph Dependency
-                                     DependencyNode
-                                     DefaultDependencyNode)
-           (org.eclipse.aether.repository RemoteRepository
-                                          RemoteRepository$Builder
-                                          RepositoryPolicy)
-           (org.eclipse.aether.collection CollectRequest)
-           (org.eclipse.aether.deployment DeployRequest)
-           (org.eclipse.aether.installation InstallRequest)
-           (org.eclipse.aether.resolution ArtifactRequest
-                                          DependencyRequest)))
+  (:use code.test)
+  (:import (org.eclipse.aether.graph Dependency DependencyNode DefaultDependencyNode) (org.eclipse.aether.repository RemoteRepository RemoteRepository$Builder RepositoryPolicy) (org.eclipse.aether.collection CollectRequest) (org.eclipse.aether.deployment DeployRequest) (org.eclipse.aether.installation InstallRequest) (org.eclipse.aether.resolution ArtifactRequest DependencyRequest)))
 
 ^{:added "3.0"}
 (fact "creates a `Dependency` object from map"

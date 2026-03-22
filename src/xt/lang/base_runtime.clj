@@ -1,7 +1,9 @@
 (ns xt.lang.base-runtime
   (:require [std.lang :as l]
-            [std.lib :as h]
-            [std.lib.function :as f]))
+            [std.lib.env]
+            [std.lib.foundation]
+            [std.lib.function :as f]
+            [std.lib.template]))
 
 (l/script :xtalk
   {:require [[xt.lang.base-lib :as k]]})
@@ -297,17 +299,17 @@
   {:added "4.0"}
   [&form tag sym-id doc? attrs? more]
   (let [sym-ns  (or (get (meta sym-id) :ns)
-                    (str (h/ns-sym)))
+                    (str (std.lib.env/ns-sym)))
         sym-id  (if (vector? sym-id)
                   (first sym-id)
                   sym-id)
-        sym-key (h/strn sym-id)
+        sym-key (std.lib.foundation/strn sym-id)
         [doc attr more] (f/fn:init-args doc? attrs? more)
         more (if (vector? (first more))
                more
                (first more))
         def-sym (clojure.core/symbol (str "defn." tag))]
-    (h/$ [(~def-sym ~(with-meta sym-id (merge (meta &form)
+    (std.lib.template/$ [(~def-sym ~(with-meta sym-id (merge (meta &form)
                                               (meta sym-id)))
             []
             (return (xt.lang.base-runtime/xt-item-get

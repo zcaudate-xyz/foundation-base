@@ -1,18 +1,11 @@
 (ns lib.lucene.impl.index
-  (:require [std.fs :as fs]
-            [std.lib :as h :refer [definvoke]]
+  (:require [lib.lucene.impl.analyzer :as analyzer]
             [lib.lucene.impl.document :as doc]
             [lib.lucene.impl.query :as query]
-            [lib.lucene.impl.analyzer :as analyzer])
-  (:import (org.apache.lucene.analysis Analyzer)
-           (org.apache.lucene.store NIOFSDirectory ByteBuffersDirectory Directory)
-           (org.apache.lucene.search Query)
-           (org.apache.lucene.index Term IndexWriter IndexWriterConfig IndexReader DirectoryReader)
-           (org.apache.lucene.analysis.standard StandardAnalyzer)
-           (org.apache.lucene.analysis.core KeywordAnalyzer)
-           (org.apache.lucene.analysis CharArraySet)
-           (org.apache.lucene.analysis.miscellaneous PerFieldAnalyzerWrapper)
-           (org.apache.lucene.search IndexSearcher ScoreDoc TopDocs)))
+            [std.fs :as fs]
+            [std.lib.foundation]
+            [std.lib.invoke :refer [definvoke]])
+  (:import (org.apache.lucene.analysis Analyzer) (org.apache.lucene.store NIOFSDirectory ByteBuffersDirectory Directory) (org.apache.lucene.search Query) (org.apache.lucene.index Term IndexWriter IndexWriterConfig IndexReader DirectoryReader) (org.apache.lucene.analysis.standard StandardAnalyzer) (org.apache.lucene.analysis.core KeywordAnalyzer) (org.apache.lucene.analysis CharArraySet) (org.apache.lucene.analysis.miscellaneous PerFieldAnalyzerWrapper) (org.apache.lucene.search IndexSearcher ScoreDoc TopDocs)))
 
 (defmulti directory
   "creates a lucene directory (store
@@ -112,7 +105,7 @@
   {:added "3.0"}
   ([terms]
    (let [[k v] (first terms)]
-     (Term. (h/strn k) (h/strn v)))))
+     (Term. (std.lib.foundation/strn k) (std.lib.foundation/strn v)))))
 
 (defmulti update-entry
   "updates an entry to the index"

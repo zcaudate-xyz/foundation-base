@@ -1,10 +1,10 @@
 (ns std.lang.base.emit-fn-test
-  (:use code.test)
-  (:require [std.lang.base.emit-fn :refer :all]
-            [std.lang.base.emit-common :as common]
+  (:require [std.lang.base.emit-common :as common]
+            [std.lang.base.emit-fn :refer :all]
             [std.lang.base.emit-helper :as helper]
             [std.lang.base.grammar :as grammar]
-            [std.lib :as h]))
+            [std.string.prose])
+  (:use code.test))
 
 (def +reserved+
   (-> (grammar/build)
@@ -107,7 +107,7 @@
                  (return i))]
              +grammar+
              {}))
-  => (std.string/|
+  => (std.string.prose/|
       "function sym(int i = 9,const int j = 10){"
       "  for(i = 0, i < j, ++i){"
       "    return i;"

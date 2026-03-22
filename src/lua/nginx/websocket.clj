@@ -1,6 +1,6 @@
 (ns lua.nginx.websocket
   (:require [std.lang :as l]
-            [std.lib :as h]))
+            [std.lib.foundation]))
 
 (l/script :lua
   {:require [[xt.lang.base-lib :as k]
@@ -10,7 +10,7 @@
             ["cjson" :as cjson]
             ["resty.websocket.server" :as ngxwsserver]]})
 
-(h/template-entries [l/tmpl-macro {:base "websocket"
+(std.lib.foundation/template-entries [l/tmpl-macro {:base "websocket"
                                    :inst "wb"
                                    :tag "lua"}]
   [[set_timeout []]

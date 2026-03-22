@@ -1,16 +1,18 @@
 (ns std.log.console
-  (:require [std.protocol.log :as protocol.log]
-            [std.protocol.component :as protocol.component]
+  (:require [std.lib.collection]
+            [std.lib.component]
+            [std.lib.env :as env]
+            [std.lib.foundation]
             [std.log.common :as common]
             [std.log.core :as core]
             [std.log.element :as element]
             [std.log.match :as match]
             [std.log.template :as template]
-            [std.string :as str]
             [std.print.ansi :as ansi]
             [std.print.format :as format]
-            [std.lib.env :as env]
-            [std.lib :as h])
+            [std.protocol.component :as protocol.component]
+            [std.protocol.log :as protocol.log]
+            [std.string.common])
   (:import (java.text SimpleDateFormat)))
 
 (def +style+
@@ -77,17 +79,17 @@
   ([sep predicate arr]
    (->> (filter predicate arr)
         (map str)
-        (str/join sep))))
+        (std.string.common/join sep))))
 
 (defn console-pprint
   "prints the item in question"
   {:added "3.0"}
   ([data]
-   (let [data (if (h/component? data)
-                (assoc (h/comp:info data)
+   (let [data (if (std.lib.component/component? data)
+                (assoc (std.lib.component/info data)
                        :class (type data))
                 data)
-         out (h/local :pprint-str data)]
+         out (std.lib.env/local :pprint-str data)]
      out)))
 
 (defn console-format-line
@@ -95,9 +97,9 @@
   {:added "3.0"}
   ([output]
    (->> output
-        (str/split-lines)
+        (std.string.common/split-lines)
         (map (partial str "| "))
-        (str/join "\n"))))
+        (std.string.common/join "\n"))))
 
 (defn console-display?
   "check if item is displayed"
@@ -130,8 +132,8 @@
     {:keys [min-width highlight upper] :as style
      :or {min-width 3}}]
    (let [text  (cond-> (or label level)
-                 :then      (h/strn)
-                 upper      (str/upper-case))
+                 :then      (std.lib.foundation/strn)
+                 upper      (std.string.common/upper-case))
          [text len]  (element/style-heading text style)
          state  (cond (nil? state) nil
 
@@ -147,7 +149,7 @@
           (apply str (repeat (- min-width len) " "))
           (if state
             (str (ansi/white " (")
-                 (ansi/style (join-with ", " (map h/strn state))
+                 (ansi/style (join-with ", " (map std.lib.foundation/strn state))
                              #{state-color})
                  (ansi/white ")")))))))
 
@@ -155,7 +157,7 @@
   "constructs the header position"
   {:added "3.0"}
   ([{:log/keys [tag function namespace line column] :as m} style]
-   (element/elem-position (h/unqualify-keys m) style)))
+   (element/elem-position (std.lib.collection/unqualify-keys m) style)))
 
 (defn console-header-date
   "constructs the header date"
@@ -253,7 +255,7 @@
                            (ansi/red "ERROR")
 
                            :else
-                           (ansi/blue (str/upper-case (h/strn outcome))))]
+                           (ansi/blue (std.string.common/upper-case (std.lib.foundation/strn outcome))))]
        (join-with " " [label-str data-str])))))
 
 (defn console-status-duration
@@ -287,10 +289,10 @@
   ([{:meter/keys [props] :as item} style]
    (let [ansi  (element/style-ansi style)
          pairs (mapv (fn [[k v]]
-                       (let [label-str (ansi/style (str (.toUpperCase (h/strn k)) ":") ansi)
+                       (let [label-str (ansi/style (str (.toUpperCase (std.lib.foundation/strn k)) ":") ansi)
                              data-str  (if (string? v)
                                          v
-                                         (h/local :pprint-str v))]
+                                         (std.lib.env/local :pprint-str v))]
                          (str label-str " " data-str)))
                      props)]
      (join-with " " pairs))))
@@ -318,15 +320,15 @@
   {:added "3.0"}
   ([text]
    (let [text (->> text
-                   (str/split-lines)
+                   (std.string.common/split-lines)
                    (map ansi/style:remove)
                    (reverse)
                    (drop-while empty?)
                    (reverse)
                    (drop-while empty?)
-                   (str/join "\n"))
+                   (std.string.common/join "\n"))
          text (-> text
-                  (str/replace #"\n\n+" "\n\n"))]
+                  (std.string.common/replace #"\n\n+" "\n\n"))]
      (str "\n" text "\n"))))
 
 (defn console-body-console
@@ -342,7 +344,7 @@
   "remove system contexts from the log entry"
   {:added "3.0"}
   ([item]
-   (h/filter-keys (fn [k]
+   (std.lib.collection/filter-keys (fn [k]
                     (not (#{"log" "meter" "fn" "trace" "console"} (namespace k))))
                   item)))
 
@@ -423,7 +425,7 @@
                      (catch Throwable t
                        (.printStackTrace t))))
          items (keep item-fn items)]
-     (apply h/local :print items))))
+     (apply std.lib.env/local :print items))))
 
 (defn console-write
   "write function for the console logger"
@@ -436,8 +438,8 @@
 
                          :else
                          (console-format item))
-                   (h/explode))]
-     (if entry (h/local :print entry)))))
+                   (std.lib.env/explode))]
+     (if entry (std.lib.env/local :print entry)))))
 
 (defrecord ConsoleLogger [instance]
 

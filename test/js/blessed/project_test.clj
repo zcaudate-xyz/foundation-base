@@ -1,6 +1,6 @@
 (ns js.blessed.project-test
-  (:use code.test)
-  (:require [js.blessed.project :refer :all]))
+  (:require [js.blessed.project :refer :all])
+  (:use code.test))
 
 ^{:refer js.blessed.project/module-package-json :added "4.0" :unchecked true}
 (fact "creates a package json"

@@ -1,8 +1,8 @@
 (ns rt.postgres.grammar.meta-test
-  (:use code.test)
   (:require [rt.postgres.grammar.meta :refer :all]
             [rt.postgres.script.builtin :as builtin]
-            [std.lang :as l]))
+            [std.lang :as l])
+  (:use code.test))
 
 (l/script- :postgres
   {:static {:application ["test.postgres"]

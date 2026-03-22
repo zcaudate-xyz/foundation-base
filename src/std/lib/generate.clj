@@ -44,9 +44,8 @@
   (if (symbol? x)
     (let [v   (resolve x)
           sym (if v (.toSymbol ^clojure.lang.Var v))]
-      (if (#{`yield `yield-all
-             'std.lib/yield
-             'std.lib/yield-all} sym)
+      (if (#{'std.lib.generate/yield
+             'std.lib.generate/yield-all} sym)
         (symbol (name sym))
         x))
     x))
@@ -205,5 +204,4 @@
   {:added "3.0"}
   ([e]
    (throw (ex-info "Can not use yield-all outside of gen-seq form!" {:expr e}))))
-
 

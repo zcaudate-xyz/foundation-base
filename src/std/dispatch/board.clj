@@ -1,10 +1,13 @@
 (ns std.dispatch.board
-  (:require [std.protocol.dispatch :as protocol.dispatch]
-            [std.protocol.component :as protocol.component]
-            [std.concurrent :as cc]
+  (:require [std.concurrent :as cc]
             [std.dispatch.common :as common]
             [std.dispatch.hooks :as hooks]
-            [std.lib :as h :refer [defimpl]]))
+            [std.lib.atom]
+            [std.lib.collection]
+            [std.lib.future]
+            [std.lib.impl :refer [defimpl]]
+            [std.protocol.component :as protocol.component]
+            [std.protocol.dispatch :as protocol.dispatch]))
 
 (def +counter+
   (atom -1))
@@ -36,7 +39,7 @@
   {:added "3.0"}
   ([m groups ticket]
    (reduce (fn [m group]
-             (update m group (fnil #(conj % ticket) (h/queue))))
+             (update m group (fnil #(conj % ticket) (std.lib.collection/queue))))
            m
            groups)))
 
@@ -57,7 +60,7 @@
          groups (vec (set (groups-fn dispatch entry)))
          ticket (or ticket (str (get-ticket)))
          _      (cc/put (:submitted @board) ticket)
-         return (h/incomplete)
+         return (std.lib.future/incomplete)
          entry  (swap! board (fn [{:keys [queues lookup busy] :as m}]
                                (-> m
                                    (update :queues submit-ticket groups ticket)
@@ -85,7 +88,7 @@
                                   (update :busy #(apply dissoc % (get dependent group)))
                                   (update :return dissoc ticket))]
                       [out new]))
-         out (h/swap-return! board clear-fn)]
+         out (std.lib.atom/swap-return! board clear-fn)]
      out)))
 
 (defn add-dependents
@@ -133,7 +136,7 @@
                            [nil m]))
                        [nil (update-in m [:queues group] pop)])
                      [nil m]))
-         [{:keys [ticket] :as run?} state] (h/swap-return! board poll-fn true)]
+         [{:keys [ticket] :as run?} state] (std.lib.atom/swap-return! board poll-fn true)]
      (if ticket (cc/remove (:submitted state) ticket))
      run?)))
 
@@ -145,7 +148,7 @@
         (keep (fn [group]
                 (hooks/on-poll dispatch group)
                 (when-let [{:keys [entry ticket return]} (poll-board dispatch group)]
-                  (let [handle-fn (fn [] (h/fulfil return (common/handle-fn dispatch entry)))]
+                  (let [handle-fn (fn [] (std.lib.future/fulfil return (common/handle-fn dispatch entry)))]
                     (try (cc/submit @(:executor runtime) (fn []
                                                            (let [_    (handle-fn)
                                                                  next (clear-board dispatch group ticket)]

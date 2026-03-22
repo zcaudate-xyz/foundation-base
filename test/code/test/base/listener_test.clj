@@ -1,11 +1,11 @@
 (ns code.test.base.listener-test
-  (:use code.test)
-  (:require [code.test.base.listener :refer :all]
-            [std.lib :as h]
-            [std.string :as str]
+  (:require [code.test.base.context :as ctx]
+            [code.test.base.listener :refer :all]
+            [code.test.base.print :as print]
             [code.test.base.runtime :as rt]
-            [code.test.base.context :as ctx]
-            [code.test.base.print :as print]))
+            [std.lib.env]
+            [std.string.common])
+  (:use code.test))
 
 ^{:refer code.test.base.listener/summarise-verify :added "3.0"}
 (fact "extract the comparison into a valid format "
@@ -48,7 +48,7 @@
   ^:hidden
 
   (binding [ctx/*print* #{:print-throw :no-beep}]
-    (str/includes? (h/with-out-str
+    (std.string.common/includes? (std.lib.env/with-out-str
                      (form-printer {:result {:status :exception :data (ex-info "error" {})}}))
                    "THROW"))
   => true)
@@ -58,7 +58,7 @@
   ^:hidden
   
   (binding [ctx/*print* #{:print-success}]
-    (str/includes? (h/with-out-str
+    (std.string.common/includes? (std.lib.env/with-out-str
                      (check-printer {:result {:status :success :data true :meta {:path "path" :refer "refer" :ns "ns" :line 1 :desc "desc"} :checker {:form "check"} :actual {:form "actual"}}}))
                    "SUCCESS"))
   => true)
@@ -88,8 +88,8 @@
   ^:hidden
   
   (binding [ctx/*print* #{:print-facts}]
-    (str/includes?
-     (h/with-out-str
+    (std.string.common/includes?
+     (std.lib.env/with-out-str
        (fact-printer {:meta {:path "path" :refer "refer" :ns "ns" :line 1 :desc "desc"} :results []}))
                    "Fact"))
   => true)
@@ -108,7 +108,7 @@
 (fact "prints out the end summary"
   ^:hidden
   
-  (str/includes? (h/with-out-str
+  (std.string.common/includes? (std.lib.env/with-out-str
                    (bulk-printer {:results {:files 1 :facts 1 :checks 1 :passed 1 :failed 0 :throw 0 :timeout 0}}))
                  "Summary")
   => true)

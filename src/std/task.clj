@@ -1,7 +1,9 @@
 (ns std.task
-  (:require [std.protocol.invoke :as protocol.invoke]
-            [std.task.process :as process]
-            [std.lib :as h :refer [defimpl definvoke]]))
+  (:require [std.lib.collection]
+            [std.lib.impl :refer [defimpl]]
+            [std.lib.invoke :refer [definvoke]]
+            [std.protocol.invoke :as protocol.invoke]
+            [std.task.process :as process]))
 
 (defmulti task-defaults
   "creates default settings for task groups"
@@ -54,10 +56,10 @@
                          [arg (-> arg :main :fn)]
                          [{} arg])
          defaults     (task-defaults type)
-         params       (h/merge-nested defaults params)
+         params       (std.lib.collection/merge-nested defaults params)
          count        (or (-> params :main :argcount) 4)
          [main args?] (process/main-function main count)]
-     (task (h/merge-nested defaults
+     (task (std.lib.collection/merge-nested defaults
                            params
                            {:main {:fn main
                                    :args? args?}

@@ -1,6 +1,6 @@
 (ns code.ai.server.tool.basic-test
-  (:require [code.test :refer :all]
-            [code.ai.server.tool.basic :as basic]))
+  (:require [code.ai.server.tool.basic :as basic]
+            [code.test :refer :all]))
 
 ^{:refer code.ai.server.tool.basic/echo-fn :added "0.1"}
 (fact "echo function returns input text"

@@ -1,8 +1,6 @@
 (ns std.lang.base.runtime
-  (:require [std.protocol.context :as protocol.context]
-            [std.protocol.component :as protocol.component]
-            [std.lang.base.runtime-proxy :as proxy]
-            [std.lang.base.pointer :as ptr]
+  (:require [clojure.set]
+            [std.json :as json]
             [std.lang.base.emit-common :as common]
             [std.lang.base.emit-preprocess :as preprocess]
             [std.lang.base.impl :as impl]
@@ -10,11 +8,21 @@
             [std.lang.base.impl-lifecycle :as lifecycle]
             [std.lang.base.library :as lib]
             [std.lang.base.library-snapshot :as snap]
+            [std.lang.base.pointer :as ptr]
+            [std.lang.base.runtime-proxy :as proxy]
             [std.lang.base.util :as ut]
-            [std.json :as json]
-            [std.lib :as h :refer [defimpl]]
+            [std.lib.collection]
+            [std.lib.context.pointer]
             [std.lib.context.registry :as reg]
-            [std.string :as str]))
+            [std.lib.deps]
+            [std.lib.env]
+            [std.lib.foundation]
+            [std.lib.impl :refer [defimpl]]
+            [std.lib.resource]
+            [std.lib.template]
+            [std.protocol.component :as protocol.component]
+            [std.protocol.context :as protocol.context]
+            [std.string.common]))
 
 ;;
 ;; Default Runtime
@@ -47,7 +55,7 @@
                                             :runtime
                                             (assoc rt
                                                    :type (:runtime rt)
-                                                   :namespace (h/ns-sym))})})))
+                                                   :namespace (std.lib.env/ns-sym))})})))
 
 (defn default-init-ptr
   "will init pointer if there is a :rt/init key"
@@ -55,7 +63,7 @@
   [{:keys [id lang library layout module emit] :as rt} entry]
   (when (and (#{:defglobal :defrun} (:op-key entry))
              (:rt/init entry))
-    (h/p:rt-invoke-ptr rt
+    (std.lib.context.pointer/rt-invoke-ptr rt
                        (ut/lang-pointer lang
                                         {:module module})
                        [(:form-input entry)])))
@@ -68,7 +76,7 @@
          (let [body (impl/emit-as lang [(ut/sym-full ptr)] {:layout :full
                                                             :emit emit})]
            (ptr/ptr-invoke rt
-                           h/p:rt-raw-eval
+                           std.lib.context.pointer/rt-raw-eval
                            body
                            (:main emit)
                            (or (:json emit) :full)))
@@ -124,7 +132,7 @@
               (let [rt (proxy/proxy-get-rt redirect lang)
                     _   (doseq [[module shortcut] (:module/internal rt)]
                           (when (not= module redirect)
-                            (h/suppress (require [module :as shortcut]))))]
+                            (std.lib.foundation/suppress (require [module :as shortcut]))))]
                 component)
               component)
     -stop    component
@@ -160,7 +168,7 @@
   ([obj]
    (instance? RuntimeDefault obj)))
   
-(h/res:spec-add
+(std.lib.resource/res:spec-add
  {:type :hara/lang.rt
   :config {:bootstrap false}
   :instance {:create rt-default}})
@@ -171,7 +179,7 @@
   ([m]
    (rt-default (assoc m :lang :null))))
 
-(h/res:spec-add
+(std.lib.resource/res:spec-add
  {:type :hara/context.rt.null
   :instance {:create rt-null}})
 
@@ -188,7 +196,7 @@
   {:added "4.0"}
   [lang & [options]]
   (let [ctx   (ut/lang-context lang)]
-    (h/p:registry-install
+    (std.lib.context.registry/registry-install
      ctx
      {:config {:context ctx :lang lang}
       :scratch (rt-default {:context ctx :lang lang
@@ -201,8 +209,8 @@
   {:added "4.0"}
   ([lang runtime {:keys [type config] :as spec}]
    (let [ctx    (ut/lang-context lang)
-         r-spec (h/res:spec-add (dissoc spec :config))
-         r-ctx  (h/p:registry-rt-add ctx {:key runtime
+         r-spec (std.lib.resource/res:spec-add (dissoc spec :config))
+         r-ctx  (std.lib.context.registry/registry-rt-add ctx {:key runtime
                                           :config config
                                           :resource type})]
      {:spec r-spec
@@ -224,8 +232,8 @@
   {:added "4.0"}
   [forms & [opts]]
   (let [v (last forms)
-        v (if (and (h/form? v)
-                   ((h/union '#{:- := var return break throw}
+        v (if (and (std.lib.collection/form? v)
+                   ((clojure.set/union '#{:- := var return break throw}
                              opts)
                     (first v)))
             v
@@ -236,7 +244,7 @@
   "wraps forms to be invoked"
   {:added "4.0"}
   [forms]
-  (h/$ ('((fn [] ~@forms)))))
+  (std.lib.template/$ ('((fn [] ~@forms)))))
 
 (defn return-transform
   "standard return transform"
@@ -256,14 +264,14 @@
   ([{:keys [id lang library layout] :as rt} ptr args f {:keys [json main emit]
                                                         :or {json :full}
                                                         :as params}]
-   (let [emit   (h/merge-nested emit (:emit rt))
+   (let [emit   (std.lib.collection/merge-nested emit (:emit rt))
          emit   (assoc emit
                        :input   {:pointer ptr
                                  :args args}
                        :runtime (assoc rt
                                        :type (:runtime rt)
-                                       :namespace (h/ns-sym)))
-         _      (if common/*trace* (h/prn emit params))
+                                       :namespace (std.lib.env/ns-sym)))
+         _      (if common/*trace* (std.lib.env/prn emit params))
          body   (ptr/ptr-invoke-script ptr args {:emit emit
                                                  :lang lang
                                                  :layout (or (:layout params)
@@ -297,7 +305,7 @@
                           :lang   (:lang rt)
                           :type   (:runtime rt)
                           :module (:module rt)
-                          :namespace (h/ns-sym)})}
+                          :namespace (std.lib.env/ns-sym)})}
            lifecycle)))
 
 
@@ -310,7 +318,7 @@
   (reduce  (fn [acc [k body]]
              (try
                (conj acc [k (ptr/ptr-invoke rt
-                                            h/p:rt-raw-eval
+                                            std.lib.context.pointer/rt-raw-eval
                                             body
                                             (:main meta)
                                             (:json meta))])
@@ -326,7 +334,7 @@
   (let [meta (default-lifecycle-prep rt)
         body (impl/emit-scaffold-for module-id meta)]
     (ptr/ptr-invoke rt
-                    h/p:rt-raw-eval
+                    std.lib.context.pointer/rt-raw-eval
                     body
                     (:main meta)
                     (:json meta))))
@@ -338,7 +346,7 @@
   (let [meta (default-lifecycle-prep rt)
         body (impl/emit-scaffold-to module-id meta)]
     (ptr/ptr-invoke rt
-                    h/p:rt-raw-eval
+                    std.lib.context.pointer/rt-raw-eval
                     body
                     (:main meta)
                     (:json meta))))
@@ -350,7 +358,7 @@
   (let [meta (default-lifecycle-prep rt)
         body (impl/emit-scaffold-imports module-id meta)]
     (ptr/ptr-invoke rt
-                    h/p:rt-raw-eval
+                    std.lib.context.pointer/rt-raw-eval
                     body
                     (:main meta)
                     (:json meta))))
@@ -366,7 +374,7 @@
       (if form
         (let [body (impl/emit-str form meta)]
           (ptr/ptr-invoke rt
-                          h/p:rt-raw-eval
+                          std.lib.context.pointer/rt-raw-eval
                           body
                           (:main meta)
                           (:json meta)))))))
@@ -394,7 +402,7 @@
   [rt module-id]
   (let [{:keys [book] :as meta
          :rt/keys [setup]} (default-lifecycle-prep rt)]
-    (lifecycle/emit-module-setup module-id (update meta :emit h/merge-nested-new setup))))
+    (lifecycle/emit-module-setup module-id (update meta :emit std.lib.collection/merge-nested-new setup))))
 
 (defn default-setup-module-basic
   "basic setup module action"
@@ -402,9 +410,9 @@
   [rt module-id]
   (let [{:keys [book] :as meta
          :rt/keys [setup]} (default-lifecycle-prep rt)
-        body (lifecycle/emit-module-setup module-id (update meta :emit h/merge-nested-new setup))]
+        body (lifecycle/emit-module-setup module-id (update meta :emit std.lib.collection/merge-nested-new setup))]
     (ptr/ptr-invoke rt
-                    h/p:rt-raw-eval
+                    std.lib.context.pointer/rt-raw-eval
                     body
                     (:main meta)
                     (:json meta))))
@@ -415,9 +423,9 @@
   [rt module-id]
   (let [{:keys [teardown] :as meta
          :rt/keys [teardown]} (default-lifecycle-prep rt)
-        body (lifecycle/emit-module-teardown module-id (update meta :emit h/merge-nested-new teardown))]
+        body (lifecycle/emit-module-teardown module-id (update meta :emit std.lib.collection/merge-nested-new teardown))]
     (ptr/ptr-invoke rt
-                    h/p:rt-raw-eval
+                    std.lib.context.pointer/rt-raw-eval
                     body
                     (:main meta)
                     (:json meta))))
@@ -428,10 +436,10 @@
   [rt module-id & [meta]]
   (let [{:keys [book] :as meta
          :rt/keys [setup]} (or meta (default-lifecycle-prep rt))
-        raw  (lifecycle/emit-module-setup-raw module-id (update meta :emit h/merge-nested-new setup))
+        raw  (lifecycle/emit-module-setup-raw module-id (update meta :emit std.lib.collection/merge-nested-new setup))
         body (lifecycle/emit-module-setup-join raw)]
     (if (not-empty body)
-      (try (ptr/ptr-invoke rt h/p:rt-raw-eval
+      (try (ptr/ptr-invoke rt std.lib.context.pointer/rt-raw-eval
                            body
                            (:main meta)
                            (:json meta))
@@ -439,12 +447,12 @@
              (let [arr (lifecycle/emit-module-setup-concat raw)]
                (mapv (fn [part]
                        (try
-                         (ptr/ptr-invoke rt h/p:rt-raw-eval
+                         (ptr/ptr-invoke rt std.lib.context.pointer/rt-raw-eval
                                          part
                                          (:main meta)
                                          (:json meta))
                          (catch Throwable t
-                           (throw (ex-info "Error at:" {:part (vec (str/split-lines part))
+                           (throw (ex-info "Error at:" {:part (vec (std.string.common/split-lines part))
                                                         :message (loop [t t
                                                                         c (.getCause ^Throwable t)]
                                                                    (if c
@@ -458,10 +466,10 @@
   [rt module-id & [meta]]
   (let [{:keys [book] :as meta
          :rt/keys [teardown]} (or meta (default-lifecycle-prep rt))
-        raw  (lifecycle/emit-module-teardown-raw module-id (update meta :emit h/merge-nested-new teardown))
+        raw  (lifecycle/emit-module-teardown-raw module-id (update meta :emit std.lib.collection/merge-nested-new teardown))
         body (lifecycle/emit-module-teardown-join raw)]
     (if (not-empty body)
-      (try (ptr/ptr-invoke rt h/p:rt-raw-eval
+      (try (ptr/ptr-invoke rt std.lib.context.pointer/rt-raw-eval
                            body
                            (:main meta)
                            (:json meta))
@@ -469,12 +477,12 @@
              (let [arr (lifecycle/emit-module-teardown-concat raw)]
                (mapv (fn [part]
                        (try
-                         (ptr/ptr-invoke rt h/p:rt-raw-eval
+                         (ptr/ptr-invoke rt std.lib.context.pointer/rt-raw-eval
                                          part
                                          (:main meta)
                                          (:json meta))
                          (catch Throwable t
-                           (throw (ex-info "Error at:" {:part (vec (str/split-lines part))
+                           (throw (ex-info "Error at:" {:part (vec (std.string.common/split-lines part))
                                                         :message (loop [t t
                                                                         c (.getCause ^Throwable t)]
                                                                    (if c
@@ -498,7 +506,7 @@
   [rt module-id]
   (multistage-invoke rt module-id default-setup-module
                      (fn [book module-id]
-                       (h/deps:ordered book [module-id]))))
+                       (std.lib.deps/deps-ordered book [module-id]))))
 
 (defn multistage-setup-to
   "setup to a given namespcase"
@@ -506,7 +514,7 @@
   [rt module-id]
   (multistage-invoke rt module-id default-setup-module
                      (fn [book module-id]
-                       (butlast (h/deps:ordered book [module-id])))))
+                       (butlast (std.lib.deps/deps-ordered book [module-id])))))
 
 (defn multistage-teardown-for
   "teardown for a given namespace"
@@ -514,7 +522,7 @@
   [rt module-id]
   (multistage-invoke rt module-id default-teardown-module
                      (fn [book module-id]
-                       (reverse (h/deps:ordered book [module-id])))))
+                       (reverse (std.lib.deps/deps-ordered book [module-id])))))
 
 (defn multistage-teardown-at
   "teardown all dependents including this"
@@ -523,7 +531,7 @@
   (multistage-invoke rt module-id default-teardown-module
                      (fn [book module-id]
                        (binding [std.lang.base.book/*dep-types* :module]
-                         (h/dependents:ordered book module-id)))))
+                         (std.lib.deps/dependents-ordered book module-id)))))
 
 (defn multistage-teardown-to
   "teardown all dependents upto this"
@@ -532,7 +540,7 @@
   (multistage-invoke rt module-id default-teardown-module
                      (fn [book module-id]
                        (binding [std.lang.base.book/*dep-types* :module]
-                         (butlast (h/dependents:ordered book module-id))))))
+                         (butlast (std.lib.deps/dependents-ordered book module-id))))))
 
 
 (comment

@@ -1,21 +1,24 @@
 (ns code.manage
   (:require [code.framework :as base]
             [code.manage.fn-format :as fn-format]
-            [code.manage.ns-rename :as ns-rename]
             [code.manage.ns-format :as ns-format]
-            [code.manage.var :as var]
-            [code.manage.unit.template :as template]
+            [code.manage.ns-rename :as ns-rename]
             [code.manage.unit :as unit]
             [code.manage.unit.require :as unit.require]
+            [code.manage.unit.template :as template]
+            [code.manage.var :as var]
             [code.project :as project]
             [std.block :as block]
-            [std.task :as task]
-            [std.lib :as h :refer [definvoke]]
-            [std.lib.result :as res])
+            [std.lib.collection]
+            [std.lib.env]
+            [std.lib.foundation]
+            [std.lib.invoke :refer [definvoke]]
+            [std.lib.result :as res]
+            [std.task :as task])
   (:refer-clojure :exclude [import])
   (:gen-class))
 
-(h/intern-in ns-rename/ns-rename)
+(std.lib.foundation/intern-in ns-rename/ns-rename)
 
 (defmethod task/task-defaults :code
   ([_]
@@ -534,7 +537,7 @@
   [ns params narrow update-fn]
   (refactor-code
    ns
-   (std.lib/merge-nested
+   (std.lib.collection/merge-nested
     {:print {:function true}
      :edits [(fn [nav]
                (code.query/modify
@@ -629,9 +632,9 @@
   {:added "3.0"}
   [& [cmd & args]]
   (let [print-fn (fn []
-                   (do (h/p "Available Tasks:")
+                   (do (std.lib.env/p "Available Tasks:")
                        (doseq [cmd  (map name (sort (keys +tasks+)))]
-                         (h/p (str "  - " cmd)))))]
+                         (std.lib.env/p (str "  - " cmd)))))]
     (if (not cmd)
       (print-fn)
       

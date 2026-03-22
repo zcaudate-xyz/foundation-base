@@ -1,10 +1,10 @@
 (ns std.lang.base.emit-block-test
-  (:use code.test)
   (:require [std.lang.base.emit-block :refer :all]
             [std.lang.base.emit-common :as common]
             [std.lang.base.emit-helper :as helper]
             [std.lang.base.grammar :as grammar]
-            [std.lib :as h]))
+            [std.string.prose])
+  (:use code.test))
 
 (def +reserved+
   (-> (grammar/build)
@@ -65,7 +65,7 @@
                    +grammar+
                    {})
   
-  => (std.string/| "{"
+  => (std.string.prose/| "{"
                    "  (add 1 2 3);"
                    "  (add 1 2 3);"
                    "}"))
@@ -124,7 +124,7 @@
                        '{:catch [(catch e (print e))]
                          :finally [(finally print 123)]}
                        +grammar+ {})
-  => (std.string/|
+  => (std.string.prose/|
              ""
              "catch(e){"
              "  (print e);"
@@ -169,7 +169,7 @@
                       (default (return X)))
                     +grammar+
                     {})
-  => (std.string/|
+  => (std.string.prose/|
       "switch((type obj)){"
       "  case A :"
       "    (return A);"
@@ -197,7 +197,7 @@
                          +grammar+
                          {}))
   
-  => (std.string/|
+  => (std.string.prose/|
       "if(x == 1){"
       "  pr(1);"
       "  pr(2);"
@@ -227,7 +227,7 @@
                  (add 1 2 3))
               +grammar+
               {})
-  => (std.string/|
+  => (std.string.prose/|
    "while((< 1 2)){"
    "  (add 1 2 3);"
    "  (add 1 2 3);"

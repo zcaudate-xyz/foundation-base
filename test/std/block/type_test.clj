@@ -1,9 +1,9 @@
 (ns std.block.type-test
-  (:use code.test)
-  (:require [std.block.type :refer :all]
-            [std.block.base :as base]
+  (:require [std.block.base :as base]
             [std.block.construct :as construct]
-            [std.block.parse :as parse]))
+            [std.block.parse :as parse]
+            [std.block.type :refer :all])
+  (:use code.test))
 
 ^{:refer std.block.type/block-compare :added "3.0"}
 (fact "compares equality of two blocks"

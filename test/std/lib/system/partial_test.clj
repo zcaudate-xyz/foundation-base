@@ -1,8 +1,8 @@
 (ns std.lib.system.partial-test
-  (:use code.test)
   (:require [std.lib.system.partial :refer :all]
             [std.lib.system.topology :as topology]
-            [std.lib.system.type :as type]))
+            [std.lib.system.type :as type])
+  (:use code.test))
 
 (def +sys+
   (type/system

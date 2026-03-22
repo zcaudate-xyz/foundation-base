@@ -1,8 +1,8 @@
 ^{:no-test true}
 (ns script.regex
-  "Generate regular expressions from collections of strings."
-  (:require [clojure.string :as string]
-            [clojure.set :as set]))
+  (:require [clojure.set :as set]
+            [clojure.string :as string])
+  "Generate regular expressions from collections of strings.")
 
 ;;;; Trie construction
 

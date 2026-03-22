@@ -1,8 +1,8 @@
 (ns xt.db.sql-call-test
-  (:use code.test)
-  (:require [std.lang :as l]
-            [rt.postgres :as pg]
-            [xt.lang.base-notify :as notify]))
+  (:require [rt.postgres :as pg]
+            [std.lang :as l]
+            [xt.lang.base-notify :as notify])
+  (:use code.test))
 
 (l/script- :postgres
   {:runtime :jdbc.client

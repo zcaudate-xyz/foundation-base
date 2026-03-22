@@ -1,5 +1,5 @@
 (ns std.lang.model.spec-xtalk.com-js
-  (:require [std.lib :as h]))
+  (:require [std.lib.template]))
 
 ;;
 ;; COM
@@ -7,7 +7,7 @@
 
 (defn js-tf-x-return-encode
   ([[_ out id key]]
-   (h/$ (do (var type-fn (fn [x]
+   (std.lib.template/$ (do (var type-fn (fn [x]
                            (let [name (typeof x)]
                              (return (:? (== name "object") (:? x x.constructor.name name) name)))))
             (var tb (typeof ~out))
@@ -55,7 +55,7 @@
 
 (defn js-tf-x-return-wrap
   ([[_ f encode-fn]]
-   (h/$ (try (var out := (~f))
+   (std.lib.template/$ (try (var out := (~f))
              (return (~encode-fn  out))
              (catch e (let [err (:? (== "string" (typeof e)) e {:message (. e ["message"]) :stack (. e ["stack"])})]
                         (return (JSON.stringify {:type "error"
@@ -63,7 +63,7 @@
 
 (defn js-tf-x-return-eval
   ([[_ s wrap-fn]]
-   (h/$ (return (~wrap-fn
+   (std.lib.template/$ (return (~wrap-fn
                  (fn []
                    (return (eval ~s))))))))
 
@@ -74,7 +74,7 @@
 
 (defn js-tf-x-socket-connect
   ([[_ host port opts cb]]
-   (h/$ (do* (var net (eval "require('net')"))
+   (std.lib.template/$ (do* (var net (eval "require('net')"))
              (var rl  (eval  "require('readline')"))
              (var conn (new net.Socket))
              (return (conn.connect
@@ -83,11 +83,11 @@
 
 (defn js-tf-x-socket-send
   ([[_ conn s]]
-   (h/$ (. ~conn (write ~s)))))
+   (std.lib.template/$ (. ~conn (write ~s)))))
 
 (defn js-tf-x-socket-close
   ([[_ conn]]
-   (h/$ (. ~conn (end)))))
+   (std.lib.template/$ (. ~conn (end)))))
 
 (def +js-socket+
   {:x-socket-connect      {:macro #'js-tf-x-socket-connect      :emit :macro}
@@ -96,7 +96,7 @@
 
 (defn js-tf-x-ws-connect
   ([[_ host port opts]]
-   (h/$ (do (var WS := (or (!:G WebSocket)
+   (std.lib.template/$ (do (var WS := (or (!:G WebSocket)
                            (require "ws")))
             (var schema (or (. ~opts ["schema"]) "ws"))
             (var url    (or (. ~opts ["url"]) "/"))
@@ -105,11 +105,11 @@
 
 (defn js-tf-x-ws-send
   ([[_ wb s]]
-   (h/$ (. ~wb (send ~s)))))
+   (std.lib.template/$ (. ~wb (send ~s)))))
 
 (defn js-tf-x-ws-close
   ([[_ wb]]
-   (h/$ (. ~wb (close)))))
+   (std.lib.template/$ (. ~wb (close)))))
 
 (def +js-ws+
   {:x-ws-connect      {:macro #'js-tf-x-ws-connect      :emit :macro}
@@ -120,7 +120,7 @@
   ([[_ host port value id key
      connect-fn
      encode-fn]]
-   (h/$ (try
+   (std.lib.template/$ (try
           (var [ok conn] (~connect-fn host port
                           {:cb  (fn []
                                   (client.end (~encode-fn ~value ~id ~key)
@@ -130,7 +130,7 @@
 
 (defn js-tf-x-notify-http
   ([[_ host port value id key encode-fn]]
-   (h/$ (try
+   (std.lib.template/$ (try
           (fetch (+ "http://" ~host ":" ~port)
                  {:method "POST"
                   :body (~encode-fn ~value ~id ~key)})
@@ -143,7 +143,7 @@
 
 (defn js-tf-x-client-basic
   ([[_ host port connect-fn eval-fn]]
-   (h/$ (do (var [ok conn] (~connect-fn host port {}))
+   (std.lib.template/$ (do (var [ok conn] (~connect-fn host port {}))
             (var rl  (require "readline"))
             (var stream  (rl.createInterface conn
                                              conn))
@@ -151,7 +151,7 @@
 
 (defn js-tf-x-client-ws
   [[_ host port opts connect-fn eval-fn]]
-  (h/$ (do (var [ok conn] (~connect-fn ~host ~port {}))
+  (std.lib.template/$ (do (var [ok conn] (~connect-fn ~host ~port {}))
            (:=  (. conn onmessage)
                 (fn [msg]
                   (~eval-fn conn msg.data))))))
@@ -166,7 +166,7 @@
 
 (defn js-tf-x-shell
   ([[_ s cm]]
-   (h/$ (do (var p (require "child_process"))
+   (std.lib.template/$ (do (var p (require "child_process"))
             (p.exec ~s (fn [err res]
                          (if err
                            (if (. ~cm ["error"])

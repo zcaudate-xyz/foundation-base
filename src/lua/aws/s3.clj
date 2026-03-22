@@ -1,6 +1,5 @@
 (ns lua.aws.s3
-  (:require [std.lib :as h]
-            [std.lang :as l]))
+  (:require [std.lang :as l]))
 
 (l/script :lua
   {:require [[lua.aws.common :as common]

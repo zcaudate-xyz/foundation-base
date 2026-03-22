@@ -1,14 +1,7 @@
 (ns std.lib.bin.buffer
   (:require [std.lib.class :as class]
             [std.lib.invoke :refer [definvoke]])
-  (:import (java.nio ByteBuffer
-                     CharBuffer
-                     DoubleBuffer
-                     FloatBuffer
-                     IntBuffer
-                     LongBuffer
-                     ShortBuffer
-                     ByteOrder)))
+  (:import (java.nio ByteBuffer CharBuffer DoubleBuffer FloatBuffer IntBuffer LongBuffer ShortBuffer ByteOrder)))
 
 (def +endian+
   {:lookup  {:big    ByteOrder/BIG_ENDIAN

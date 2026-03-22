@@ -1,9 +1,8 @@
 (ns std.timeseries.journal-test
-  (:use code.test)
-  (:require [std.timeseries.journal :refer :all]
+  (:require [std.timeseries.common :as common]
             [std.timeseries.compute :as compute]
-            [std.timeseries.common :as common]
-            [std.lib :as h])
+            [std.timeseries.journal :refer :all])
+  (:use code.test)
   (:refer-clojure :exclude [merge derive]))
 
 ^{:refer std.timeseries.journal/format-time :added "3.0"}

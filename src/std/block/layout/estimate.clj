@@ -1,6 +1,6 @@
 (ns std.block.layout.estimate
-  (:require [std.lib.foundation :as h]
-            [std.lib.collection :as c]))
+  (:require [std.lib.collection :as c]
+            [std.lib.foundation :as h]))
 
 (def ^:dynamic *readable-len* 30)
 

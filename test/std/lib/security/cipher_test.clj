@@ -1,7 +1,7 @@
 (ns std.lib.security.cipher-test
-  (:use code.test)
-  (:require [std.lib.security.cipher :refer :all]
-            [std.lib.encode :as encode]))
+  (:require [std.lib.encode :as encode]
+            [std.lib.security.cipher :refer :all])
+  (:use code.test))
 
 ^{:refer std.lib.security.cipher/init-cipher :added "3.0"}
 (comment "initializes cipher according to options")

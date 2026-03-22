@@ -1,18 +1,19 @@
 (ns std.fs
-  (:require [std.string :as str]
+  (:require [std.fs.api :as api]
             [std.fs.attribute :as attr]
-            [std.fs.api :as api]
             [std.fs.common :as common]
             [std.fs.interop]
             [std.fs.path :as path]
-            [std.lib :as h])
+            [std.lib.collection]
+            [std.lib.env]
+            [std.lib.foundation])
   (:import (java.io PushbackReader InputStreamReader))
   (:refer-clojure :exclude [list resolve]))
 
-(h/intern-all std.fs.api
+(std.lib.foundation/intern-all std.fs.api
               std.fs.path)
 
-(h/intern-in attr/attributes
+(std.lib.foundation/intern-in attr/attributes
              attr/set-attributes
              common/option)
 
@@ -56,7 +57,7 @@
                             (catch Throwable e)))
           (take-while identity)
           f
-          (h/unlazy)))))
+          (std.lib.collection/unlazy)))))
 
 (defn get-namespace
   "gets the namespace given forms"
@@ -77,4 +78,4 @@
    (try
      (read-code path get-namespace)
      (catch Throwable t
-       (h/local :println path "Cannot be loaded")))))
+       (std.lib.env/local :println path "Cannot be loaded")))))

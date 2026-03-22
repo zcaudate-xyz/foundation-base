@@ -104,15 +104,44 @@
         ns-part
         sym)))
 
+(defn ns->relative-path [ns-sym]
+  (str "src/"
+       (-> (name ns-sym)
+           (str/replace "." "/")
+           (str/replace "-" "_"))
+       ".clj"))
+
+(defn public-def-form? [form]
+  (and (seq? form)
+       (symbol? (first form))
+       (str/starts-with? (name (first form)) "def")))
+
+(defn def-symbol [form]
+  (let [[_ maybe-name & _] form]
+    (when (symbol? maybe-name)
+      maybe-name)))
+
+(defn private-symbol? [sym]
+  (boolean (:private (meta sym))))
+
+(defn public-symbols-from-file [ns-sym]
+  (let [path (path-in-project (ns->relative-path ns-sym))]
+    (if-not (.exists (io/file path))
+      []
+      (->> (read-all-forms path)
+           (keep (fn [form]
+                   (when (public-def-form? form)
+                     (let [sym (def-symbol form)]
+                       (when (and sym (not (private-symbol? sym)))
+                         sym)))))
+           distinct
+           sort))))
+
 (defn read-aggregate-map [aggregate-ns]
   (let [path (path-in-project (get aggregate-sources aggregate-ns))
         forms (read-all-forms path)
         ns-form (first forms)
         alias-map (ns-alias-map ns-form)]
-    (doseq [ns-sym (vals alias-map)]
-      (when (and (symbol? ns-sym)
-                 (not (contains? #{'clojure.set} ns-sym)))
-        (require ns-sym)))
     (reduce
      (fn [acc form]
        (if-not (seq? form)
@@ -122,14 +151,13 @@
              (= "intern-all" op-name)
              (reduce (fn [m ns-sym]
                        (let [real-ns (resolve-source-ns alias-map ns-sym)]
-                         (require real-ns)
                          (reduce (fn [m2 public-sym]
                                    (assoc m2 (str public-sym)
                                           {:target (str public-sym)
                                            :source-ns real-ns
                                            :source-name public-sym}))
                                  m
-                                 (sort (keys (ns-publics real-ns))))))
+                                 (public-symbols-from-file real-ns))))
                      acc
                      (rest form))
 
@@ -296,19 +324,24 @@
   (remove #(contains? aggregate-maps (:ns %)) specs))
 
 (defn refer-rewrite-plan [aggregate-spec]
-  (reduce
-   (fn [acc sym]
-     (if-let [{:keys [source-ns source-name]} (get-in aggregate-maps [(:ns aggregate-spec) (str sym)])]
-       (if (= (name sym) (name source-name))
-         (update-in acc [:refer source-ns] (fnil conj #{}) sym)
-         (assoc-in acc [:rewrite (str sym)]
-                   {:source-ns source-ns
-                    :source-name source-name}))
-       (update acc :keep conj sym)))
-   {:refer {}
-    :rewrite {}
-    :keep []}
-   (or (:refer aggregate-spec) [])))
+  (let [refer-spec (:refer aggregate-spec)]
+    (if (or (nil? refer-spec) (= :all refer-spec))
+      {:refer {}
+       :rewrite {}
+       :keep (if (= :all refer-spec) [:all] [])}
+      (reduce
+       (fn [acc sym]
+         (if-let [{:keys [source-ns source-name]} (get-in aggregate-maps [(:ns aggregate-spec) (str sym)])]
+           (if (= (name sym) (name source-name))
+             (update-in acc [:refer source-ns] (fnil conj #{}) sym)
+             (assoc-in acc [:rewrite (str sym)]
+                       {:source-ns source-ns
+                        :source-name source-name}))
+           (update acc :keep conj sym)))
+       {:refer {}
+        :rewrite {}
+        :keep []}
+       refer-spec))))
 
 (defn aggregate-alias-map [aggregate-specs]
   (->> aggregate-specs
@@ -317,7 +350,8 @@
        (into {})))
 
 (defn keep-aggregate-spec? [spec remaining-tokens kept-refers]
-  (or (seq kept-refers)
+  (or (= :all kept-refers)
+      (seq kept-refers)
       (some #(let [[lhs _] (str/split % #"/" 2)]
                (or (= lhs (str (:ns spec)))
                    (= lhs (str (:as spec)))))
@@ -369,9 +403,25 @@
       (subs canonical (count prefix))
       canonical)))
 
+(defn hidden-file? [path]
+  (let [name (.getName (io/file path))]
+    (or (str/starts-with? name ".")
+        (str/starts-with? name "#")
+        (str/ends-with? name "#")
+        (str/includes? name "~undo-tree~"))))
+
 (defn process-file [file-path write? verbose?]
-  (let [text (slurp file-path)
-        [ns-start ns-end] (ns-form-span text)
+  (let [text (slurp file-path)]
+    (if-not (str/includes? text "(ns ")
+      (let [result {:path (rel-path file-path)
+                    :changed? false
+                    :unresolved-count 0
+                    :unresolved []
+                    :skipped? true}]
+        (when verbose?
+          (println (:path result) " skipped=no-ns"))
+        result)
+      (let [[ns-start ns-end] (ns-form-span text)
         ns-text (.substring text ns-start ns-end)
         ns-form (tr/read-string {:read-cond :allow} ns-text)
         original-specs (normalized-require-specs ns-form)
@@ -397,11 +447,20 @@
                                   {:ns ns-sym
                                    :refer (vec (sort syms))})))
         kept-aggregate (keep (fn [spec]
-                               (let [kept-refers (filter (set (:keep refer-plan))
-                                                         (or (:refer spec) []))]
+                               (let [kept-refers (if (= :all (:refer spec))
+                                                   :all
+                                                   (filter (set (:keep refer-plan))
+                                                           (or (:refer spec) [])))]
                                  (when (keep-aggregate-spec? spec remaining kept-refers)
-                                   (cond-> (assoc spec :refer (vec kept-refers))
-                                     (empty? kept-refers) (dissoc :refer)))))
+                                   (cond
+                                     (= :all kept-refers)
+                                     spec
+
+                                     (empty? kept-refers)
+                                     (dissoc spec :refer)
+
+                                     :else
+                                     (assoc spec :refer (vec kept-refers))))))
                              aggregate-specs)
         new-specs (->> kept-aggregate
                        (reduce add-spec concrete-specs)
@@ -415,14 +474,14 @@
                 :changed? changed?
                 :unresolved-count unresolved-count
                 :unresolved (sort remaining)}]
-    (when (and changed? write?)
-      (spit file-path new-text))
-    (when (and verbose? (or changed? (pos? unresolved-count)))
-      (println (format-summary result))
-      (when (pos? unresolved-count)
-        (doseq [token (:unresolved result)]
-          (println "  unresolved token:" token))))
-    result))
+        (when (and changed? write?)
+          (spit file-path new-text))
+        (when (and verbose? (or changed? (pos? unresolved-count)))
+          (println (format-summary result))
+          (when (pos? unresolved-count)
+            (doseq [token (:unresolved result)]
+              (println "  unresolved token:" token))))
+        result))))
 
 (defn clj-files [paths]
   (let [targets (if (seq paths)
@@ -435,10 +494,11 @@
                      (.isDirectory f)
                      (->> (file-seq f)
                           (filter #(.isFile %))
-                          (filter #(str/ends-with? (.getName %) ".clj")))
+                          (filter #(str/ends-with? (.getName %) ".clj"))
+                          (remove #(hidden-file? (.getPath %))))
 
                      (.isFile f)
-                     [f]
+                     (if (hidden-file? (.getPath f)) [] [f])
 
                      :else
                      [])))

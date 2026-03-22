@@ -1,7 +1,7 @@
 (ns lib.aether.session-test
-  (:use code.test)
   (:require [lib.aether.session :refer :all]
-            [lib.aether.system :as system]))
+            [lib.aether.system :as system])
+  (:use code.test))
 
 ^{:refer lib.aether.session/session :added "3.0"}
 (fact "creates a session from a system:"

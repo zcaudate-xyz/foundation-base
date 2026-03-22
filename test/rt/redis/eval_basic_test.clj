@@ -1,10 +1,10 @@
 (ns rt.redis.eval-basic-test
-  (:use code.test)
-  (:require [rt.redis.eval-basic :refer :all]
-            [lib.redis.bench :as bench]
+  (:require [lib.redis.bench :as bench]
+            [lib.redis.script :as script]
+            [rt.redis.eval-basic :refer :all]
             [std.lang :as l]
-            [xt.lang.base-lib :as k]
-            [lib.redis.script :as script]))
+            [xt.lang.base-lib :as k])
+  (:use code.test))
 
 (l/script- :lua
   {:runtime :redis.client

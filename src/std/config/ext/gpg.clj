@@ -1,7 +1,7 @@
 (ns std.config.ext.gpg
   (:require [lib.openpgp :as openpgp]
             [std.config.common :as common]
-            [std.lib :refer [definvoke]]))
+            [std.lib.invoke :refer [definvoke]]))
 
 (definvoke resolve-type-gpg-public
   "resolves content to a PGP public key

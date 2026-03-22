@@ -1,11 +1,11 @@
 (ns std.lib.stream.async-test
-  (:use code.test)
-  (:require [std.lib.stream.async :refer :all]
-            [std.lib.return]
-            [std.concurrent.queue :as q]
+  (:require [std.concurrent.queue :as q]
             [std.lib.future :as f]
+            [std.lib.return]
             [std.lib.stream :as s]
-            [std.lib :as h])
+            [std.lib.stream.async :refer :all]
+            [std.lib.time])
+  (:use code.test)
   (:refer-clojure :exclude [realized?]))
 
 ^{:refer std.lib.stream.async/blocking? :added "3.0"}
@@ -63,7 +63,7 @@
 
   (def -time- (promise))
   (future
-    (deliver -time- (h/bench-ms
+    (deliver -time- (std.lib.time/bench-ms
                      (into [] (take 3 (blocking-seq -q-))))))
   (doseq [i (range 4)]
     (Thread/sleep 100)

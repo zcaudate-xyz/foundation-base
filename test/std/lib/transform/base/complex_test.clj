@@ -1,6 +1,6 @@
 (ns std.lib.transform.base.complex-test
-  (:use code.test)
-  (:require [std.lib.transform.base.complex :refer :all]))
+  (:require [std.lib.transform.base.complex :refer :all])
+  (:use code.test))
 
 ^{:refer std.lib.transform.base.complex/assocs :added "3.0"}
 (fact "Similar to `assoc` but conditions of association is specified

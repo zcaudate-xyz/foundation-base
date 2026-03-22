@@ -1,9 +1,5 @@
 (ns std.lib.io
-  (:import (java.nio.charset Charset)
-           (java.io InputStream
-                    OutputStream
-                    Reader
-                    Writer)))
+  (:import (java.nio.charset Charset) (java.io InputStream OutputStream Reader Writer)))
 
 (defn charset:default
   "returns the default charset

@@ -1,6 +1,6 @@
 (ns indigo.server.api-task-test
-  (:use code.test)
-  (:require [indigo.server.api-task :refer :all]))
+  (:require [indigo.server.api-task :refer :all])
+  (:use code.test))
 
 ^{:refer indigo.server.api-task/from-html :added "4.0"}
 (fact "TODO")

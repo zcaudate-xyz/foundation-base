@@ -1,7 +1,7 @@
 (ns lib.lucene.impl.index-test
+  (:require [lib.lucene.impl.analyzer :as analyzer]
+            [lib.lucene.impl.index :refer :all])
   (:use code.test)
-  (:require [lib.lucene.impl.index :refer :all]
-            [lib.lucene.impl.analyzer :as analyzer])
   (:import (org.apache.lucene.index IndexWriter)))
 
 ^{:refer lib.lucene.impl.index/directory :added "3.0"}

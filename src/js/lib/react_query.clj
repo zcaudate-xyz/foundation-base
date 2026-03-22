@@ -1,13 +1,13 @@
 (ns js.lib.react-query
   (:require [std.lang :as l]
-            [std.lib :as h]))
+            [std.lib.foundation]))
 
 (l/script :js
   {:require [[js.react :as r]
              [xt.lang.base-lib :as k]]
    :import [["@tanstack/react-query" :as [* ReactQuery]]]})
 
-(h/template-entries [l/tmpl-entry {:type :fragment
+(std.lib.foundation/template-entries [l/tmpl-entry {:type :fragment
                                    :base "ReactQuery"
                                    :tag "js"}]
   [CancelledError

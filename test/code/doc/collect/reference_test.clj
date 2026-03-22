@@ -1,8 +1,8 @@
 (ns code.doc.collect.reference-test
-  (:use code.test)
   (:require [code.doc.collect.reference :refer :all]
             [code.doc.parse :as parse]
-            [code.project :as project]))
+            [code.project :as project])
+  (:use code.test))
 
 ^{:refer code.doc.collect.reference/find-import-namespaces :added "3.0"}
 (fact "finds forms with `(module/include ...)`"

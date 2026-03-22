@@ -1,10 +1,10 @@
 (ns std.vm.jvm-interpreter-test
-  (:use code.test)
-  (:require [std.vm.jvm-interpreter :as jvm]
-            [std.block.parse :as parse]
+  (:require [std.block.base :as base]
             [std.block.construct :as construct]
-            [std.block.base :as base]
-            [std.lib.zip :as zip]))
+            [std.block.parse :as parse]
+            [std.lib.zip :as zip]
+            [std.vm.jvm-interpreter :as jvm])
+  (:use code.test))
 
 (defn demo []
   (println "Starting JVM Demo...")

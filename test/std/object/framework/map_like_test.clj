@@ -1,7 +1,7 @@
 (ns std.object.framework.map-like-test
-  (:use code.test)
   (:require [std.object.framework.map-like :refer :all]
-            [std.object.framework.write :as write]))
+            [std.object.framework.write :as write])
+  (:use code.test))
 
 ^{:refer std.object.framework.map-like/key-selection :added "3.0"}
 (fact "selects map based on keys"

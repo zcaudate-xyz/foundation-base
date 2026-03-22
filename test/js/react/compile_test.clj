@@ -1,7 +1,7 @@
 (ns js.react.compile-test
-  (:use code.test)
   (:require [js.react.compile :as compile]
-            [js.react.compile-components :as c]))
+            [js.react.compile-components :as c])
+  (:use code.test))
 
 ^{:refer js.react.compile/check-valid-variables :added "4.0" :unchecked true}
 (fact "checks that all :var/<name> keywords have been defined"

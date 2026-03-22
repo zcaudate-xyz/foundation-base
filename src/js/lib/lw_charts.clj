@@ -1,6 +1,6 @@
 (ns js.lib.lw-charts
   (:require [std.lang :as l]
-            [std.lib :as h]))
+            [std.lib.foundation]))
 
 (l/script :js
   {:import [["lightweight-charts" :as [* LWCharts]]]})
@@ -21,7 +21,7 @@
     isUTCTimestamp
     version])
 
-(h/template-entries [l/tmpl-entry {:type :fragment
+(std.lib.foundation/template-entries [l/tmpl-entry {:type :fragment
                                    :base "LWCharts"
                                    :tag "js"
                                    :shrink true}]

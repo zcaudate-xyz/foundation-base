@@ -1,19 +1,10 @@
 (ns mcp-clj.json-rpc.stdio-client
+  (:require [mcp-clj.json-rpc.executor :as executor]
+            [mcp-clj.json-rpc.protocols :as protocols]
+            [mcp-clj.json-rpc.stdio :as stdio]
+            [mcp-clj.log :as log])
   "JSON-RPC client utilities for stdio communication"
-  (:require
-    [mcp-clj.json-rpc.executor :as executor]
-    [mcp-clj.json-rpc.protocols :as protocols]
-    [mcp-clj.json-rpc.stdio :as stdio]
-    [mcp-clj.log :as log])
-  (:import
-    (java.io
-      BufferedReader
-      BufferedWriter)
-    (java.util.concurrent
-      CompletableFuture
-      ConcurrentHashMap
-      Future
-      TimeUnit)))
+  (:import (java.io BufferedReader BufferedWriter) (java.util.concurrent CompletableFuture ConcurrentHashMap Future TimeUnit)))
 
 ;; Forward declarations
 (declare stdio-send-request! stdio-send-notification! close-json-rpc-client!)

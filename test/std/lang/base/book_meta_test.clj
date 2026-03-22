@@ -1,8 +1,8 @@
 (ns std.lang.base.book-meta-test
-  (:use code.test)
   (:require [std.lang.base.book-meta :refer :all]
             [std.lang.base.util :as ut]
-            [std.lib :as h]))
+            [std.lib.template])
+  (:use code.test))
 
 ^{:refer std.lang.base.book-meta/book-meta? :added "4.0"}
 (fact "checks if object is a book meta"
@@ -13,9 +13,9 @@
 (fact "creates a book meta"
 
   (book-meta {:module-export  (fn [{:keys [as]} opts]
-                                (h/$ (return ~as)))
+                                (std.lib.template/$ (return ~as)))
               :module-import  (fn [name {:keys [as]} opts]  
-                                (h/$ (var ~as := (require ~(str name)))))
+                                (std.lib.template/$ (var ~as := (require ~(str name)))))
               :has-ptr        (fn [ptr]
                                 (list 'not= (ut/sym-full ptr) nil))
               :teardown-ptr   (fn [ptr]

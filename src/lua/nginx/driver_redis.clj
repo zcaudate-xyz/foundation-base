@@ -1,13 +1,12 @@
 (ns lua.nginx.driver-redis
   (:require [std.lang :as l]
-            [std.lib :as h]
-            [std.string :as str]))
+            [std.lib.foundation]))
 
 (l/script :lua
   {:import [["resty.redis" :as ngxredis]
             ["resty.redis" :as ngxredis]]})
 
-(h/template-entries [l/tmpl-macro {:base "redis"
+(std.lib.foundation/template-entries [l/tmpl-macro {:base "redis"
                                    :inst "rds"
                                    :tag "lua"}]
   [[connect          [host port] {:optional [ops]}]

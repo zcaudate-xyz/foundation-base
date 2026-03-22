@@ -1,9 +1,12 @@
 (ns std.lang.base.emit-common
-  (:require [std.string :as str]
-            [std.lib :as h]
-            [std.lang.base.util :as ut]
+  (:require [std.lang.base.emit-helper :as helper]
             [std.lang.base.emit-preprocess :as preprocess]
-            [std.lang.base.emit-helper :as helper]))
+            [std.lang.base.util :as ut]
+            [std.lib.collection]
+            [std.lib.foundation]
+            [std.string.case]
+            [std.string.common]
+            [std.string.prose]))
 
 ;; controls whether to fail with a stacktrace
 (def ^:dynamic *explode* nil)
@@ -67,9 +70,9 @@
     (or (and value
              (or free
                  raw
-                 (h/error "No raw value found" props)))
+                 (std.lib.foundation/error "No raw value found" props)))
         
-        (h/error "Cannot use reserved token in body" props))))
+        (std.lib.foundation/error "Cannot use reserved token in body" props))))
 
 (defn emit-free-raw
   "emits free value"
@@ -80,7 +83,7 @@
                              [e (or (and (string? e) e)
                                     (and (keyword? e)
                                          (or (emit-reserved-value e grammar mopts)
-                                             (h/strn e)))
+                                             (std.lib.foundation/strn e)))
                                     (*emit-fn* e grammar mopts))])
                            args))]
      (loop [[prev out]   (first str-array)
@@ -104,10 +107,10 @@
    (let [{:keys [indent prefix full-body]} (meta form)
          prev    *indent*
          output  (emit-free-raw sep more grammar mopts)]
-     (if (str/multi-line? output)
+     (if (std.string.prose/multi-line? output)
        (let [indent-fn (if full-body
-                         str/indent
-                         str/indent-rest)]
+                         std.string.prose/indent
+                         std.string.prose/indent-rest)]
          (indent-fn output
                     (+ (or prev 0)
                        (or indent 0))))
@@ -125,14 +128,14 @@
          prefix  (or prefix (-> grammar :default :comment :prefix))
          prev    *indent*
          output  (emit-free-raw " " more grammar mopts)]
-     (if (str/multi-line? output)
+     (if (std.string.prose/multi-line? output)
        (let [indent-fn (if full-body
-                         str/indent
-                         str/indent-rest)]
+                         std.string.prose/indent
+                         std.string.prose/indent-rest)]
          (str prefix " "
               (indent-fn output
                          0
-                         {:custom (str (str/spaces (+ (or prev 0)
+                         {:custom (str (std.string.prose/spaces (+ (or prev 0)
                                                       (or indent 0)))
                                        prefix
                                        " ")})))
@@ -162,7 +165,7 @@
        (binding [preprocess/*macro-opts* mopts
                  preprocess/*macro-grammar* grammar]
          (*emit-fn* (macro form) grammar mopts))
-       (h/error "Not found: " {:input form})))))
+       (std.lib.foundation/error "Not found: " {:input form})))))
 
 ;;
 ;; HELPERS
@@ -180,7 +183,7 @@
   "checks if form if wrappable"
   {:added "4.0"}
   ([form grammar]
-   (if (h/form? form)
+   (if (std.lib.collection/form? form)
      (let [infix? #{:infix :infix* :infix- :infix-if
                     :assign :bi
                     :prefix :postfix}
@@ -196,7 +199,7 @@
   "emits a squashed representation"
   {:added "4.0"}
   [_ [tag & more] grammar mopts]
-  (str/join (emit-array more grammar mopts)))
+  (std.string.common/join (emit-array more grammar mopts)))
 
 (defn emit-wrapping
   "emits a potentially wrapped form"
@@ -240,7 +243,7 @@
   ([[_ value] grammar mopts]
    (binding [*emit-internal* true]
      (cond (vector? value)
-           (str/join "\n"
+           (std.string.common/join "\n"
                      (mapv #(*emit-fn* % grammar mopts)
                            value))
 
@@ -284,7 +287,7 @@
   ([raw args grammar mopts]
    (assert (pos? (count args)) (str "One or more arguments " raw))
    (let [{:keys [start end space]} (get-in grammar [:default :common])]
-     (str/join (str space raw space)
+     (std.string.common/join (str space raw space)
                (emit-array args grammar mopts emit-wrapping)))))
 
 (defn emit-infix-default
@@ -317,10 +320,10 @@
   ([[_ check then else] grammar mopts]
    (let [{:keys [start end space]} (get-in grammar [:default :common])
          inif (get-in grammar [:default :infix :if])]
-     (h/-> (emit-array [check then else] grammar mopts emit-wrapping)
+     (std.lib.foundation/-> (emit-array [check then else] grammar mopts emit-wrapping)
            (interleave [(str space (or (:check inif) "?") space)
                         (str space (or (:then inif) ":") space) ""])
-           (str/join)))))
+           (std.string.common/join)))))
 
 (defn emit-infix-if
   "emits an infix if string"
@@ -333,7 +336,7 @@
            :else
            (let [pairs (map vec (partition 2 forms))
                  _ (if (not= :else (first (last pairs)))
-                     (h/error "ternary cond has to end with :else" {:form (last pairs)}))]
+                     (std.lib.foundation/error "ternary cond has to end with :else" {:form (last pairs)}))]
              (emit-infix-if-single
               (reduce (fn [acc [q alt]]
                         (list :? q alt acc))
@@ -345,7 +348,7 @@
   "emits the raw symbol between two elems"
   {:added "3.0"}
   ([raw args grammar mopts]
-   (str/join raw (emit-array args grammar mopts emit-wrapping))))
+   (std.string.common/join raw (emit-array args grammar mopts emit-wrapping))))
 
 (defn emit-bi
   "emits infix with two args"
@@ -360,7 +363,7 @@
   ([raw args grammar mopts]
    (assert (= 2 (count args)) (str "Two arguments for assign"))
    (let [{:keys [space assign]} (get-in grammar [:default :common])]
-     (str/join (str space (or raw assign) space)
+     (std.string.common/join (str space (or raw assign) space)
                (emit-array args grammar mopts emit-wrapping)))))
 
 (defn emit-return-do
@@ -384,8 +387,8 @@
          _ (if (not multi)
              (assert (>= 2 (count args)) (str "One or Zero arguments for " raw)))
          out (->> (emit-array args grammar mopts)
-                  (str/join (str sep space)))]
-     (cond (and (h/form? (first args))
+                  (std.string.common/join (str sep space)))]
+     (cond (and (std.lib.collection/form? (first args))
                 (:return/none (meta (first args))))
            out
 
@@ -399,7 +402,7 @@
   {:added "3.0"}
   ([raw args grammar mopts]
    (let [val (first args)]
-     (cond (not (h/form? val))
+     (cond (not (std.lib.collection/form? val))
            (emit-return-base raw args grammar mopts)
            
            ('#{return} (first val))
@@ -504,7 +507,7 @@
                              :else (module-symbol sym)
 
                              #_#_
-                             :else (h/error "Not Implemented." {:input sym
+                             :else (std.lib.foundation/error "Not Implemented." {:input sym
                                                                :layout layout
                                                                 :classify [type ns]})))
          sym  (cond (= type :alias)   (str ns (:namespace dopts) (name sym))
@@ -514,7 +517,7 @@
                                                         grammar mopts)
                     
                     (= type :unknown) (if ns
-                                        (h/error "Unknown namespace."
+                                        (std.lib.foundation/error "Unknown namespace."
                                                  {:lang lang
                                                   :namespace ns
                                                   :input sym
@@ -583,9 +586,9 @@
   {:added "4.0"}
   [_ [_ & [seed0 seed1 :as seeds]] grammar mopts]
   (let [code-fn (fn [x] (cond (or (number? x) (string? x))
-                              (h/hash-code x)
+                              (std.lib.foundation/hash-code x)
 
-                              :else (h/hash-code (h/strn x))))
+                              :else (std.lib.foundation/hash-code (std.lib.foundation/strn x))))
         uuid  (str (if (not-empty seeds)
                      (java.util.UUID. (code-fn (or seed0 (rand)))
                                       (code-fn (or seed1 (rand))))
@@ -609,7 +612,7 @@
   "seperates standard and keyword arguments"
   {:added "3.0"}
   ([args]
-   (let [idx (h/index-at keyword? args)]
+   (let [idx (std.lib.collection/index-at keyword? args)]
      (if (neg? idx)
        [args []]
        [(take idx args) (partition 2 (drop idx args))]))))
@@ -619,7 +622,7 @@
   {:added "3.0"}
   ([[k v] grammar mopts]
    (let [{:keys [assign]} (helper/get-options grammar [:default :invoke])]
-     (str (str/snake-case (h/strn k)) assign (*emit-fn* v grammar mopts)))))
+     (str (std.string.case/snake-case (std.lib.foundation/strn k)) assign (*emit-fn* v grammar mopts)))))
 
 (defn emit-invoke-args
   "produces the string for invoke call"
@@ -642,19 +645,19 @@
   {:added "4.0"}
   ([str-array grammar mopts]
    (let [{:keys [sep space]} (helper/get-options grammar [:default :invoke])]
-     (cond (or (some str/multi-line? str-array)
+     (cond (or (some std.string.prose/multi-line? str-array)
                (and (not *multiline*)
                     (< (apply + (map count str-array)) *max-len*)))
-           (-> (str/join (str sep space) str-array)
+           (-> (std.string.common/join (str sep space) str-array)
                (wrapped-str [:default :invoke] grammar))
            
            :else
-           (h/-> (str/join (str sep "\n" (str/spaces 2)
+           (std.lib.foundation/-> (std.string.common/join (str sep "\n" (std.string.prose/spaces 2)
                                 )
                            str-array)
-                 (str "\n" (str/spaces 2) % "\n")
+                 (str "\n" (std.string.prose/spaces 2) % "\n")
                  (wrapped-str [:default :invoke] grammar)
-                 (str/indent-rest *indent*))))))
+                 (std.string.prose/indent-rest *indent*))))))
 
 (defn emit-invoke-raw
   "invoke call for reserved ops"
@@ -682,7 +685,7 @@
    (let [{:keys [start end]} (helper/get-options grammar [:default :invoke])
          sym   (last form)
          casts (map name (butlast form))]
-     (str start start (str/join " " casts) end (*emit-fn* sym grammar mopts) end))))
+     (str start start (std.string.common/join " " casts) end (*emit-fn* sym grammar mopts) end))))
 
 (defn emit-invoke
   "general invoke call, incorporating keywords"
@@ -742,7 +745,7 @@
          (do (assert (nil? (namespace v)) "No namespace")
              (str "." (emit-symbol v grammar mopts)))
 
-         (h/form? v)
+         (std.lib.collection/form? v)
          (let [sym  (first v)
                sym  (if (string? sym)
                       (symbol sym)
@@ -766,7 +769,7 @@
          (set? v)
          (str "." (*emit-fn* v grammar mopts))
          
-         :else (h/error "Not valid" {:input v}))))
+         :else (std.lib.foundation/error "Not valid" {:input v}))))
 
 (defn emit-index
   "creates an indexed expression"
@@ -831,12 +834,12 @@
        :with-rand     (emit-with-rand key form grammar mopts)
        
        ;; RESTRICTED SYMBOLS
-       :throw         (h/error "Not allowed as op" {:symbol sym :form form})
+       :throw         (std.lib.foundation/error "Not allowed as op" {:symbol sym :form form})
 
        ;; HANDLE ERROR
        (if-let [f (get expansion emit)]
          (f key props form grammar mopts)
-         (h/error "No matching clause"
+         (std.lib.foundation/error "No matching clause"
                   {:emit emit
                    :key key
                    :symbol sym
@@ -859,7 +862,7 @@
                                  (check-fn (first form)
                                            [:invoke :invoke]))
          _ (if (get banned key)
-             (h/error "Disallowed in form" {:form form :key key :type type}))]
+             (std.lib.foundation/error "Disallowed in form" {:form form :key key :type type}))]
      [key type check?])))
 
 ;;

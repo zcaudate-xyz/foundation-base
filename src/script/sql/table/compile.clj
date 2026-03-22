@@ -1,7 +1,7 @@
 (ns script.sql.table.compile
   (:require [std.json :as json]
-            [std.string :as str]
-            [std.lib :as h :refer [definvoke]]))
+            [std.lib.collection]
+            [std.lib.invoke :refer [definvoke]]))
 
 (def ^:dynamic *skip* nil)
 
@@ -66,7 +66,7 @@
      (fn [data]
        (if *skip*
          data
-         (h/map-entries (fn [[k v]]
+         (std.lib.collection/map-entries (fn [[k v]]
                           (if-let [f (get m k)]
                             (f v)
                             [k v]))

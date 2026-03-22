@@ -1,6 +1,6 @@
 (ns js.lib.p5
   (:require [std.lang :as l]
-            [std.lib :as h]))
+            [std.lib.foundation]))
 
 (l/script :js
   {:import [["p5" :as p5]]})
@@ -472,7 +472,7 @@
     writeFile
     year])
 
-(h/template-entries [l/tmpl-entry {:type :fragment
+(std.lib.foundation/template-entries [l/tmpl-entry {:type :fragment
                                    :base "p5"
                                    :tag "js"
                                    :shrink true}]

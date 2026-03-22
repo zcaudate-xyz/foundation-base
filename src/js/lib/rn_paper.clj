@@ -1,6 +1,6 @@
 (ns js.lib.rn-paper
   (:require [std.lang :as l]
-            [std.lib :as h]))
+            [std.lib.foundation]))
 
 (l/script :js
   {:import [["react-native-paper" :as [* RNPaper]]]})
@@ -104,13 +104,13 @@
     Headline
     Caption])
 
-(h/template-entries [l/tmpl-entry {:type :fragment
+(std.lib.foundation/template-entries [l/tmpl-entry {:type :fragment
                                    :base "RNPaper"
                                    :tag "js"
                                    :shrink true}]
   +paper+)
 
-(h/template-entries [l/tmpl-entry {:type :fragment
+(std.lib.foundation/template-entries [l/tmpl-entry {:type :fragment
                                    :base "RNPaper"
                                    :tag "js"}]
   [useTheme

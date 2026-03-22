@@ -1,9 +1,9 @@
 (ns code.doc.parse.check-test
-  (:use code.test)
   (:require [code.doc.parse.check :refer :all]
             [code.query :as query]
-            [std.block.parse :as p]
-            [std.block.navigate :as nav]))
+            [std.block.navigate :as nav]
+            [std.block.parse :as p])
+  (:use code.test))
 
 ^{:refer code.doc.parse.check/wrap-meta :added "3.0"}
 (fact "helper function for navigating `^:meta` tags"

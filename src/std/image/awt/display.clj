@@ -1,9 +1,7 @@
 (ns std.image.awt.display
   (:require [std.image.awt.common :as awt]
             [std.image.base.common :as base])
-  (:import (java.awt BorderLayout Dimension Graphics)
-           (java.awt.image BufferedImage)
-           (javax.swing JComponent JFrame WindowConstants)))
+  (:import (java.awt BorderLayout Dimension Graphics) (java.awt.image BufferedImage) (javax.swing JComponent JFrame WindowConstants)))
 
 (defn create-viewer
   "creates a viewer for the awt image

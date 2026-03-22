@@ -1,6 +1,6 @@
 (ns js.react.compile-components-test
-  (:use code.test)
-  (:require [js.react.compile-components :as c]))
+  (:require [js.react.compile-components :as c])
+  (:use code.test))
 
 ^{:refer js.react.compile-components/classify-tagged :added "4.0" :unchecked true}
 (fact "classifies the hiccup form"

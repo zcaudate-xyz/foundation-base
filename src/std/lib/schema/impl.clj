@@ -1,9 +1,9 @@
 (ns std.lib.schema.impl
-  (:require [std.lib.schema.base :as base]
+  (:require [std.lib.collection :as coll]
+            [std.lib.foundation :as h]
+            [std.lib.schema.base :as base]
             [std.lib.schema.find :as find]
-            [std.lib.schema.ref :as ref]
-            [std.lib.collection :as coll]
-            [std.lib.foundation :as h]))
+            [std.lib.schema.ref :as ref]))
 
 (defn simplify
   "helper function for easier display of spirit schema"

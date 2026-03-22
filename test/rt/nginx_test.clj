@@ -1,13 +1,16 @@
 (ns rt.nginx-test
-  (:use code.test)
-  (:require [std.lang :as l]
-            [std.lib :as h]
-            [lua.nginx :as n]
-            [rt.nginx :refer :all]
-            [std.fs :as fs]
+  (:require [lua.nginx :as n]
             [net.http :as http]
+            [rt.nginx :refer :all]
             [rt.nginx.config :as config]
-            [rt.nginx.script :as script]))
+            [rt.nginx.script :as script]
+            [std.fs :as fs]
+            [std.lang :as l]
+            [std.lib.component]
+            [std.lib.env]
+            [std.lib.network]
+            [std.lib.os])
+  (:use code.test))
 
 (l/script- :lua
   {:runtime :nginx.instance
@@ -54,7 +57,7 @@
 ^{:refer rt.nginx/all-nginx-ports :added "4.0"}
 (fact "gets all nginx ports on the system"
   ^:hidden
-  (with-redefs [h/sh (fn [& _] "COMMAND PID USER FD TYPE DEVICE SIZE/OFF NODE NAME\nnginx 123 root 6u IPv4 1234 0t0 TCP *:80 (LISTEN)")]
+  (with-redefs [std.lib.os/sh (fn [& _] "COMMAND PID USER FD TYPE DEVICE SIZE/OFF NODE NAME\nnginx 123 root 6u IPv4 1234 0t0 TCP *:80 (LISTEN)")]
     (all-nginx-ports)
     => {80 #{123}}))
 
@@ -70,7 +73,7 @@
   ^:hidden
   (with-redefs [config/create-conf (fn [_] {})
                 script/write (constantly "conf")
-                h/pl (fn [& _] nil)]
+                std.lib.env/pl (fn [& _] nil)]
     (make-conf {})
     => "conf"))
 
@@ -87,24 +90,24 @@
 ^{:refer rt.nginx/start-test-server-shell :added "4.0"}
 (fact "starts in shell"
   (with-redefs [make-temp (constantly ["tmp" "file" "conf"])
-                h/sh (fn [& _] {:exit 0})
-                h/wait-for-port (fn [_ _ _] nil)]
+                std.lib.os/sh (fn [& _] {:exit 0})
+                std.lib.network/wait-for-port (fn [_ _ _] nil)]
     (start-test-server-shell {:port 80})
     => [:started "tmp" "file"]))
 
 ^{:refer rt.nginx/start-test-server-container :added "4.0"}
 (fact "starts in container"
   (with-redefs [make-temp (constantly ["tmp" "file" "conf"])
-                h/sh (fn [& _] {:exit 0})
-                h/wait-for-port (fn [_ _ _] nil)]
+                std.lib.os/sh (fn [& _] {:exit 0})
+                std.lib.network/wait-for-port (fn [_ _ _] nil)]
     (start-test-server-container {:port 80 :container {:image "img" :exec "exec"}})
     => [:started "tmp" "file"]))
 
 ^{:refer rt.nginx/start-test-server :added "4.0"}
 (fact "starts the test server for a given port"
-  (with-redefs [h/port:check-available (constantly 80)
+  (with-redefs [std.lib.network/port:check-available (constantly 80)
                 all-nginx-ports (constantly {})
-                h/os-arch (constantly "amd64")
+                std.lib.os/os-arch (constantly "amd64")
                 start-test-server-shell (constantly :started)]
     (start-test-server {:port 80})
     => :started))
@@ -112,21 +115,21 @@
 ^{:refer rt.nginx/kill-single-nginx :added "4.0"}
 (fact "kills nginx processes for a single port"
   (with-redefs [all-nginx-ports (constantly {80 #{123}})
-                h/sh (fn [& _] :killed)]
+                std.lib.os/sh (fn [& _] :killed)]
     (kill-single-nginx 80)
     => [#{123} :killed]))
 
 ^{:refer rt.nginx/kill-all-nginx :added "4.0"}
 (fact "kills all runnig nginx processes"
   (with-redefs [all-nginx-ports (constantly {80 #{123}})
-                h/sh (fn [& _] :killed)]
+                std.lib.os/sh (fn [& _] :killed)]
     (kill-all-nginx)
     => [{80 #{123}} :killed]))
 
 ^{:refer rt.nginx/stop-test-server :added "4.0"}
 (fact "stops the nginx test server"
   (with-redefs [all-nginx-ports (constantly {80 #{123}})
-                h/sh (fn [& _] nil)]
+                std.lib.os/sh (fn [& _] nil)]
     (stop-test-server {:port 80})
     => [:stopped #{123}]))
 
@@ -144,13 +147,13 @@
 
 ^{:refer rt.nginx/nginx:create :added "4.0"}
 (fact "creates a dev nginx runtime"
-  (with-redefs [h/port:check-available (constantly 1234)]
+  (with-redefs [std.lib.network/port:check-available (constantly 1234)]
     (nginx:create {:id "test"})
     => (contains {:id "test" :port 1234})))
 
 ^{:refer rt.nginx/nginx :added "4.0"}
 (fact "creates and starts a dev nginx runtime"
   (with-redefs [nginx:create (constantly :created)
-                h/start (fn [x] [x :started])]
+                std.lib.component/start (fn [x] [x :started])]
     (nginx {})
     => [:created :started]))

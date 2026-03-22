@@ -1,20 +1,20 @@
 (ns js.lib.figma
-  (:require [std.lang :as l]
-            [std.lib :as h]
-            [std.string :as str]
+  (:require [js.react.compile :as compile]
             [std.block :as block]
-            [js.react.compile :as compile]))
+            [std.lang :as l]
+            [std.lib.foundation]
+            [std.string.case]))
 
 (l/script :js
   {:import [["@xtalk/figma-ui" :as [* FigmaUi]]
             ["sonner" :as [* Sonnar]]]})
 
-(h/template-entries [l/tmpl-entry {:type :fragment
+(std.lib.foundation/template-entries [l/tmpl-entry {:type :fragment
                                    :base "Sonner"
                                    :tag "js"}]
   [toast])
 
-(h/template-entries [l/tmpl-entry {:type :fragment
+(std.lib.foundation/template-entries [l/tmpl-entry {:type :fragment
                                    :base "FigmaUi"
                                    :tag "js"}]
   [Accordion
@@ -509,7 +509,7 @@
   []
   (block/layout
    (vec (mapcat (fn [[k]]
-                  [(keyword "fg" (str/spear-case (str k)))
+                  [(keyword "fg" (std.string.case/spear-case (str k)))
                    {:tag (symbol "-" (str k))}])
                 (sort (ns-publics *ns*))))))
 

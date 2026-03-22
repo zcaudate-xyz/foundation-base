@@ -1,8 +1,11 @@
 (ns std.config.global
-  (:require [std.string :as str]
+  (:require [code.project :as project]
             [std.fs :as fs]
-            [code.project :as project]
-            [std.lib :as h :refer [definvoke]]))
+            [std.lib.collection]
+            [std.lib.invoke :refer [definvoke]]
+            [std.string.common]
+            [std.string.path]
+            [std.string.wrap]))
 
 (def +session+ (atom {}))
 
@@ -36,7 +39,7 @@
    => global?"
   {:added "3.0"}
   ([m key-fn]
-   (->> (h/map-keys key-fn m)
+   (->> (std.lib.collection/map-keys key-fn m)
         (sort)
         (reverse)
         (reduce (fn [out [k v]]
@@ -54,7 +57,7 @@
   ([]
    (global-raw (System/getenv)
                (fn [k]
-                 ((str/wrap str/path-split) (keyword (str/lower-case k)) "_")))))
+                 ((std.string.wrap/wrap std.string.path/path-split) (keyword (std.string.common/lower-case k)) "_")))))
 
 (defn global-properties-raw
   "returns the global object for system properties
@@ -65,7 +68,7 @@
   {:added "3.0"}
   ([]
    (global-raw (System/getProperties)
-               (fn [k] ((str/wrap str/path-split) (keyword k) ".")))))
+               (fn [k] ((std.string.wrap/wrap std.string.path/path-split) (keyword k) ".")))))
 
 (defn global-project-raw
   "returns the global object for thecurrent project
@@ -112,7 +115,7 @@
    => \"xyz.zcaudate\""
   {:added "3.0"}
   ([]
-   (h/merge-nested (global-env-raw)
+   (std.lib.collection/merge-nested (global-env-raw)
                    (global-properties-raw)
                    (global-home-raw)
                    (global-project-raw)

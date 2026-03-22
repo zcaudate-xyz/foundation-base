@@ -1,7 +1,6 @@
 (ns lua.core.socket
   (:require [std.lang :as l]
-            [std.lib :as h]
-            [std.string :as str])
+            [std.lib.foundation])
   (:refer-clojure :exclude [assert byte format load max min print remove sort time type]))
 
 (l/script :lua
@@ -15,13 +14,13 @@
 
 (def$.lua dns socket.dns)
 
-(h/template-entries [l/tmpl-macro {:inst "sock"
+(std.lib.foundation/template-entries [l/tmpl-macro {:inst "sock"
                                    :prefix "t:"
                                    :tag "lua"}]
   [[start  [] {:optional [detached joinable]}]
    [join   []]])
 
-(h/template-entries [l/tmpl-entry {:type :fragment
+(std.lib.foundation/template-entries [l/tmpl-entry {:type :fragment
                                    :base "url"
                                    :prefix "url:"
                                    :tag "lua"}]
@@ -34,7 +33,7 @@
    unescape])
 
 
-(h/template-entries [l/tmpl-entry {:type :fragment
+(std.lib.foundation/template-entries [l/tmpl-entry {:type :fragment
                                    :base "socket"
                                    :prefix "sock:"
                                    :tag "lua"}]
@@ -50,13 +49,13 @@
    try
    upd])
 
-(h/template-entries [l/tmpl-entry {:type :fragment
+(std.lib.foundation/template-entries [l/tmpl-entry {:type :fragment
                                    :base "socket.dns"
                                    :prefix "dns:"
                                    :tag "lua"}]
   [toip tohostname gethostname])
 
-(h/template-entries [l/tmpl-macro {:inst "sock"
+(std.lib.foundation/template-entries [l/tmpl-macro {:inst "sock"
                                    :prefix "s:"
                                    :tag "lua"}]
   [[accept  []]

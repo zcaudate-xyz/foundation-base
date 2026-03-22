@@ -1,9 +1,8 @@
 (ns code.tool.build-test
-  (:use code.test)
   (:require [code.tool.build :refer :all]
-            [std.lang :as l]
-            [std.lib :as h]
-            [jvm.deps :as deps]))
+            [jvm.deps :as deps]
+            [std.lang :as l])
+  (:use code.test))
 
 ^{:refer code.tool.build/project-form :added "4.0"}
 (fact "constructs the `project.clj` form"

@@ -1,12 +1,8 @@
 (ns lib.aether.authentication-test
-  (:use code.test)
   (:require [lib.aether.authentication :refer :all]
             [std.object :as object])
-  (:import (org.eclipse.aether.repository Authentication)
-           (org.eclipse.aether.util.repository AuthenticationBuilder
-                                               ChainedAuthentication
-                                               StringAuthentication
-                                               SecretAuthentication)))
+  (:use code.test)
+  (:import (org.eclipse.aether.repository Authentication) (org.eclipse.aether.util.repository AuthenticationBuilder ChainedAuthentication StringAuthentication SecretAuthentication)))
 
 ^{:refer lib.aether.authentication/auth-map :added "3.0"}
 (fact "creates a map of the `:authentications` element"

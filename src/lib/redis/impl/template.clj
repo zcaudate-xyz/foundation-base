@@ -1,6 +1,8 @@
 (ns lib.redis.impl.template
   (:require [std.concurrent :as cc]
-            [std.lib :as h]))
+            [std.lib.collection]
+            [std.lib.env]
+            [std.lib.foundation]))
 
 (defn redis-pipeline
   "constructs a pipeline for `opts`"
@@ -41,7 +43,7 @@
          dargs (or (-> custom :args :display)
                    (vec (drop ilen dargs)))
          iargs (reduce-kv (fn [iargs i prepend]
-                            (update iargs i #(concat (h/seqify prepend) [%])))
+                            (update iargs i #(concat (std.lib.collection/seqify prepend) [%])))
                           fargs
                           (-> custom :args :format))
          pipeline (redis-pipeline return custom)
@@ -59,9 +61,9 @@
         ([~'redis ~@(butlast dargs) ~'opts]
          (let [~@(if (not-empty opts-pipeline)
                    ['opts `(-> ~'opts ~@opts-pipeline)])
-               ~'cmd  (~(h/var-sym var) ~@inputs ~@iargs ~'opts)]
+               ~'cmd  (~(std.lib.foundation/var-sym var) ~@inputs ~@iargs ~'opts)]
            ~@(if debug
-               [`(h/prn :REDIS
+               [`(std.lib.env/prn :REDIS
                         (quote ~fsym)
                         (quote ~pipeline)
                         ~return

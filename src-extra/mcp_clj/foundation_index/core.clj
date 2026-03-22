@@ -1,10 +1,8 @@
 (ns mcp-clj.foundation-index.core
+  (:require [mcp-clj.foundation-index.parser :as parser]
+            [mcp-clj.foundation-index.storage :as storage])
   "Main coordinator for foundation library indexing"
-  (:require
-    [mcp-clj.foundation-index.storage :as storage]
-    [mcp-clj.foundation-index.parser :as parser])
-  (:import
-    [java.util.concurrent.atomic AtomicInteger]))
+  (:import [java.util.concurrent.atomic AtomicInteger]))
 
 ;; ============================================================================
 ;; Index Management

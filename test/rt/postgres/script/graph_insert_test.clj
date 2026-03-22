@@ -1,12 +1,13 @@
 (ns rt.postgres.script.graph-insert-test
-  (:use code.test)
-  (:require [rt.postgres.script.graph-insert :as insert]
+  (:require [rt.postgres.grammar.common-application :as app]
+            [rt.postgres.script.graph-insert :as insert]
             [rt.postgres.script.impl-base :as impl]
-            [rt.postgres.grammar.common-application :as app]
             [rt.postgres.script.test.scratch-v1 :as scratch]
-            [std.lib.schema :as schema]
             [std.lang :as l]
-            [std.lib :as h]))
+            [std.lib.collection]
+            [std.lib.schema :as schema]
+            [std.lib.walk])
+  (:use code.test))
 
 (l/script- :postgres
   {:require [[rt.postgres.script.test.scratch-v1 :as scratch]]
@@ -19,7 +20,7 @@
   ^:hidden
   
   (let [output (volatile! #{})]
-    (h/postwalk
+    (std.lib.walk/postwalk
      (fn [x]
        (if (not-empty (meta x))
          (vswap! output conj (meta x)))
@@ -101,7 +102,7 @@
    {:track 'o-op}
    (assoc (last (impl/prep-table 'scratch/TaskCache true (l/rt:macro-opts :postgres)))
           :application (app/app "scratch")))
-  => h/form?)
+  => std.lib.collection/form?)
 
 ^{:refer rt.postgres.script.graph-insert/insert-fn-raw :added "4.0"}
 (fact "constructs insert form with prep"
@@ -111,7 +112,7 @@
    (impl/prep-table 'scratch/TaskCache true (l/rt:macro-opts :postgres))
    {:id "hello"}
    {:track 'o-op})
-  => h/form?)
+  => std.lib.collection/form?)
 
 ^{:refer rt.postgres.script.graph-insert/insert-fn :added "4.0"}
 (fact "constructs insert form"
@@ -125,7 +126,7 @@
                                {:name "task2"
                                 :status "pending"}]}
                       {:track 'o-op}))
-  => h/form?)
+  => std.lib.collection/form?)
     
 
 ^{:refer rt.postgres.script.graph-insert/insert-fn.assign :adopt true :added "4.0"}
@@ -143,4 +144,4 @@
        meta
        :assign/fn)
    'o-output)
-  => h/form?)
+  => std.lib.collection/form?)

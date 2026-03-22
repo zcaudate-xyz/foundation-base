@@ -1,9 +1,7 @@
 (ns std.fs.archive
-  (:require [std.protocol.archive :as protocol.archive]
-            [std.fs :as fs])
-  (:import (java.net URI)
-           (java.nio.file FileSystem FileSystems Files Paths)
-           (jdk.nio.zipfs ZipFileSystem))
+  (:require [std.fs :as fs]
+            [std.protocol.archive :as protocol.archive])
+  (:import (java.net URI) (java.nio.file FileSystem FileSystems Files Paths) (jdk.nio.zipfs ZipFileSystem))
   (:refer-clojure :exclude [list remove]))
 
 (def supported #{:zip :jar})

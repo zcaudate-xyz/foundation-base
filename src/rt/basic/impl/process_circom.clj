@@ -1,15 +1,14 @@
 (ns rt.basic.impl.process-circom
-  (:require [rt.circom.grammar :as grammar]
-            [std.lang.base.impl :as impl]
-            [std.lang.base.util :as ut]
-            [std.lang.base.book :as book]
-            [std.lang.base.runtime :as rt]
-            [std.lang.base.pointer :as ptr]
-            [std.lib :as h]
-            [std.string :as str]
+  (:require [rt.basic.type-common :as common]
+            [rt.basic.type-twostep :as twostep]
+            [rt.circom.grammar :as grammar]
             [std.fs :as fs]
-            [rt.basic.type-common :as common]
-            [rt.basic.type-twostep :as twostep]))
+            [std.lang.base.book :as book]
+            [std.lang.base.impl :as impl]
+            [std.lang.base.pointer :as ptr]
+            [std.lang.base.runtime :as rt]
+            [std.lang.base.util :as ut]
+            [std.lib.os]))
 
 (defn sh-exec-circom
   "executes the circom compile and run process"
@@ -26,15 +25,15 @@
 
         ;; Compile: circom <file> --c --output <parent>
         compile-args (vec (concat input-args [(str tmp-file) "--c" "--output" parent]))
-        _ (h/sh {:args compile-args :root parent})
+        _ (std.lib.os/sh {:args compile-args :root parent})
 
         ;; Build: make -C <cpp-dir>
-        _ (h/sh {:args ["make" "-C" cpp-dir] :root parent})
+        _ (std.lib.os/sh {:args ["make" "-C" cpp-dir] :root parent})
 
         ;; Run: ./<cpp-dir>/<basename>
         exec-path (str cpp-dir "/" basename)]
 
-    (str (h/sh {:args [exec-path] :root parent}))))
+    (str (std.lib.os/sh {:args [exec-path] :root parent}))))
 
 (def +program-init+
   (common/put-program-options

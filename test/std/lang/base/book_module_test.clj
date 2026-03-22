@@ -1,10 +1,10 @@
 (ns std.lang.base.book-module-test
-  (:use code.test)
-  (:require [std.lang.base.book-module :refer :all]
-            [std.lang.base.impl :as impl]
+  (:require [js.blessed]
+            [js.blessed.frame]
             [std.lang :as l]
-            [js.blessed]
-            [js.blessed.frame]))
+            [std.lang.base.book-module :refer :all]
+            [std.lang.base.impl :as impl])
+  (:use code.test))
 
 (def +library+ (impl/clone-default-library))
 

@@ -1,6 +1,6 @@
 (ns std.protocol.time-test
-  (:use code.test)
-  (:require [std.protocol.time :refer :all]))
+  (:require [std.protocol.time :refer :all])
+  (:use code.test))
 
 ^{:refer std.protocol.time/-time-meta :added "3.0"}
 (comment "accesses the meta properties of a class")

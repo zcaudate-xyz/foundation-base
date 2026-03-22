@@ -1,6 +1,6 @@
 (ns xt.runtime.interface-collection-test
-  (:use code.test)
-  (:require [xt.runtime.interface-collection :refer :all]))
+  (:require [xt.runtime.interface-collection :refer :all])
+  (:use code.test))
 
 ^{:refer xt.runtime.interface-collection/start-string :added "4.0"}
 (fact "gets the start string of the collection")

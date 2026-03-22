@@ -1,6 +1,5 @@
 (ns js.react-native.physical-edit
-  (:require [std.lang :as l]
-            [std.lib :as h]))
+  (:require [std.lang :as l]))
 
 (l/script :js
   {:runtime :websocket

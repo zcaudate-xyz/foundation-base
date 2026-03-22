@@ -1,13 +1,13 @@
 (ns js.gh-primer
-  (:require [std.lang :as l]
-            [std.lib :as h]
-            [std.html :as html]))
+  (:require [std.html :as html]
+            [std.lang :as l]
+            [std.lib.foundation]))
 
 (l/script :js
   {:import [["@primer/react" :as [* Primer]]
             ["@primer/react" :as [* Primer]]]})
 
-(h/template-entries [l/tmpl-entry {:type :fragment
+(std.lib.foundation/template-entries [l/tmpl-entry {:type :fragment
                                    :base "Primer"
                                    :tag "js"}]
   [ActionBar
@@ -181,7 +181,7 @@
    [UnderlinePanels:Tab UnderlinePanels.Tab]])
 
 
-(h/template-entries [l/tmpl-entry {:type :fragment
+(std.lib.foundation/template-entries [l/tmpl-entry {:type :fragment
                                    :base "Primer"
                                    :tag "js"}]
   [useColorSchemeVar

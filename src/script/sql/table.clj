@@ -1,10 +1,11 @@
 (ns script.sql.table
   (:require [script.sql.common :as common]
             [script.sql.expr :as expr]
-            [script.sql.table.select :as select]
             [script.sql.table.compile :as compile]
-            [std.string :as str]
-            [std.lib :as h :refer [definvoke]]))
+            [script.sql.table.select :as select]
+            [std.lib.foundation]
+            [std.lib.invoke :refer [definvoke]]
+            [std.string.common]))
 
 (defn sql-tmpl
   "creating sql functions"
@@ -16,10 +17,10 @@
         ([~@args]
          (~fsym ~@args common/*options*))
         ([~@args ~'opts]
-         (->> (~(h/var-sym var) ~@args ~'opts)
+         (->> (~(std.lib.foundation/var-sym var) ~@args ~'opts)
               (apply common/sql:format)))))))
 
-(h/template-vars [sql-tmpl]
+(std.lib.foundation/template-vars [sql-tmpl]
   (sql:insert expr/for-insert)
   (sql:delete expr/for-delete)
   (sql:update expr/for-update)
@@ -197,7 +198,7 @@
          [{:keys [type] :as attr}] (get-in schema [:tree table :id])
          tabstr  (table-fn (name table))
          columns (map (comp column-fn name) (schema:ids schema table))
-         colstr  (str/join "," columns)]
+         colstr  (std.string.common/join "," columns)]
      (format "SELECT %s FROM %s" colstr tabstr))))
 
 (defn table:clear

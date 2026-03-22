@@ -1,8 +1,7 @@
 (ns std.string.case-test
-  (:use code.test)
-  (:require [std.string.case :refer :all :as case]
-            [std.string.wrap :refer [wrap]]
-            [std.lib :as h]))
+  (:require [std.string.case :as case :refer :all]
+            [std.string.wrap :refer [wrap]])
+  (:use code.test))
 
 ^{:refer std.string.case/re-sub :added "3.0" :adopt true}
 (fact "substitute a pattern by applying a function"

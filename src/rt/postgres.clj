@@ -1,29 +1,26 @@
 (ns rt.postgres
-  (:require [rt.postgres.script.builtin]
-            [rt.postgres.script.addon]
-            [rt.postgres.script.impl]
-            [rt.postgres.script.graph]
-            [rt.postgres.gen-bind]
+  (:require [rt.postgres.client :as client]
             [rt.postgres.client-impl :as client-impl]
-            [rt.postgres.client :as client]
+            [rt.postgres.gen-bind]
             [rt.postgres.grammar.common-application :as app]
+            [rt.postgres.script.addon]
+            [rt.postgres.script.builtin]
+            [rt.postgres.script.graph]
             [rt.postgres.script.graph-view :as graph-view]
-            [std.string :as str]
+            [rt.postgres.script.impl]
             [std.lang :as l]
-            [std.lib :as h])
-  (:refer-clojure :exclude [abs concat replace reverse mod
-                            name
-                            case drop update 
-                            format assert repeat
-                            bit-and bit-or count max min]))
+            [std.lib.collection]
+            [std.lib.foundation]
+            [std.lib.walk])
+  (:refer-clojure :exclude [abs concat replace reverse mod name case drop update format assert repeat bit-and bit-or count max min]))
 
-(h/intern-all rt.postgres.script.builtin
+(std.lib.foundation/intern-all rt.postgres.script.builtin
               rt.postgres.script.addon
               rt.postgres.script.impl
               rt.postgres.script.graph
               rt.postgres.gen-bind)
 
-(h/intern-in client/rt-add-notify
+(std.lib.foundation/intern-in client/rt-add-notify
              client/rt-remove-notify
              client/rt-list-notify
              client/rt-postgres
@@ -73,10 +70,10 @@
         (-> access
             :reverse
             :table)
-        {:where (h/merge-nested (->> access
+        {:where (std.lib.collection/merge-nested (->> access
                                      :reverse
                                      :clause
-                                     (h/prewalk-replace {'<%> account-sym}))
+                                     (std.lib.walk/prewalk-replace {'<%> account-sym}))
                                 opts)}))
 
 (comment

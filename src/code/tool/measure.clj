@@ -1,8 +1,8 @@
 (ns code.tool.measure
-  (:require [std.lib :as h]
-            [code.tool.measure.common :as common]
+  (:require [code.tool.measure.algo-clojure :as clj]
             [code.tool.measure.algo-js :as js]
-            [code.tool.measure.algo-clojure :as clj]))
+            [code.tool.measure.common :as common]
+            [std.lib.env]))
 
 (defn generate-score
   "Legacy wrapper for generate-metrics (JS), returns complexity score."
@@ -68,6 +68,6 @@
                       (take-nth sample-rate))]
      (mapv (fn [{:keys [sha date]}]
              (let [metrics (analyse-commit repo-path sha)]
-               (h/local :println (str "Analyzed " sha " : " metrics))
+               (std.lib.env/local :println (str "Analyzed " sha " : " metrics))
                (merge {:sha sha :date date} metrics)))
            commits))))

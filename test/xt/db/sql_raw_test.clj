@@ -1,6 +1,7 @@
 (ns xt.db.sql-raw-test
-  (:use code.test)
-  (:require [std.lang :as l]))
+  (:require [std.lang :as l]
+            [std.string.prose])
+  (:use code.test))
 
 (l/script- :js
   {:runtime :basic
@@ -95,7 +96,7 @@
                    :name "XLM"
                    :type "crypto"}]
                  {}))
-  => (std.string/|
+  => (std.string.prose/|
    "INSERT INTO Currency"
    " (id, name, type)"
    " VALUES"
@@ -108,7 +109,7 @@
                    :name "XLM"
                    :type "crypto"}]
                  {}))
-  => (std.string/|
+  => (std.string.prose/|
    "INSERT INTO Currency"
    " (id, name, type)"
    " VALUES"
@@ -121,7 +122,7 @@
                    :name "XLM"
                    :type "crypto"}]
                  {}))
-  => (std.string/|
+  => (std.string.prose/|
    "INSERT INTO Currency"
    " (id, name, type)"
    " VALUES"
@@ -139,7 +140,7 @@
                      :name "XLM"
                      :type "crypto"}]
                    {}))
-  => (std.string/|
+  => (std.string.prose/|
       "INSERT INTO Currency"
       " (id, name, type)"
       " VALUES"
@@ -156,7 +157,7 @@
                      :name "XLM"
                      :type "crypto"}]
                    {}))
-  => (std.string/|
+  => (std.string.prose/|
       "INSERT INTO Currency"
       " (id, name, type)"
       " VALUES"
@@ -173,7 +174,7 @@
                      :name "XLM"
                      :type "crypto"}]
                    {}))
-  => (std.string/|
+  => (std.string.prose/|
       "INSERT INTO Currency"
       " (id, name, type)"
       " VALUES"
@@ -184,7 +185,7 @@
 
 ^{:refer xt.db.sql-raw/raw-upsert.more :adopt true :added "4.0"
   :setup [(def +input+
-            (std.string/|
+            (std.string.prose/|
              "INSERT INTO Currency"
              " (id, name, type)"
              " VALUES"

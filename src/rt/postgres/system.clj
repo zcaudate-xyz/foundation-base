@@ -1,6 +1,7 @@
 (ns rt.postgres.system
-  (:require [std.lib :as h]
-            [std.lang :as l]))
+  (:require [std.lang :as l]
+            [std.lib.foundation]
+            [std.lib.template]))
 
 (l/script :postgres)
 
@@ -12,9 +13,9 @@
   {:added "4.0"}
   [sym]
   (let [pg-sym (symbol (str "pg-" sym))]
-    (h/$ (def$.pg ~sym ~pg-sym))))
+    (std.lib.template/$ (def$.pg ~sym ~pg-sym))))
 
-(h/template-entries [pg-tmpl]
+(std.lib.foundation/template-entries [pg-tmpl]
   [advisory-lock
    advisory-lock-shared
    advisory-unlock

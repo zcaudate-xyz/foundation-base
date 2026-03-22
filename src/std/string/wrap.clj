@@ -1,10 +1,10 @@
 (ns std.string.wrap
-  (:require [std.string.coerce :as coerce]
-            [std.string.common :as common]
+  (:require [std.lib.foundation :as h]
+            [std.lib.invoke :refer [definvoke]]
             [std.string.case :as case]
-            [std.string.path :as path]
-            [std.lib.foundation :as h]
-            [std.lib.invoke :refer [definvoke]]))
+            [std.string.coerce :as coerce]
+            [std.string.common :as common]
+            [std.string.path :as path]))
 
 (defmulti wrap-fn
   "multimethod for extending wrap

@@ -1,12 +1,15 @@
 (ns rt.basic.type-remote-port
-  (:require [std.protocol.context :as protocol.context]
+  (:require [rt.basic.type-common :as common]
+            [std.concurrent :as cc]
+            [std.json :as json]
             [std.lang.base.pointer :as ptr]
             [std.lang.base.runtime :as default]
-            [std.lib :as h :refer [defimpl]]
-            [std.json :as json]
-            [std.concurrent :as cc]
-            [std.string :as str]
-            [rt.basic.type-common :as common]))
+            [std.lib.collection]
+            [std.lib.component]
+            [std.lib.env]
+            [std.lib.foundation]
+            [std.lib.impl :refer [defimpl]]
+            [std.protocol.context :as protocol.context]))
 
 (defn start-remote-port
   "starts the connection to the remote port"
@@ -15,7 +18,7 @@
    (let [relay (cc/relay
                  {:type :socket
                   :host (or host "localhost")
-                  :port (or port (h/error "Missing Port"
+                  :port (or port (std.lib.foundation/error "Missing Port"
                                           {:host host
                                            :port port}))})]
      (assoc rt :relay relay))))
@@ -26,14 +29,14 @@
   [{:keys [id lang bench container] :as rt}]
   (let [{:keys [relay]} rt
         _ (when relay
-            (h/stop relay))]
+            (std.lib.component/stop relay))]
     (dissoc rt :relay)))
 
 (defn raw-eval-remote-port-relay
   "evaluates over the remote port"
   {:added "4.0"}
   [rt body & [timeout]]
-  (h/prn body)
+  (std.lib.env/prn body)
   (let [{:keys [relay
                 encode]} rt
         {:keys [^java.net.Socket socket]} relay]
@@ -53,7 +56,7 @@
                                                  (.write (.getBytes "<PING>\n")))
                                              true
                                              (catch Throwable t
-                                               (h/stop relay)
+                                               (std.lib.component/stop relay)
                                                false))})]
                  (cond (= (get ret "type")
                           "data")
@@ -67,10 +70,10 @@
                        :else
                        ret))
                (catch com.fasterxml.jackson.databind.exc.MismatchedInputException e
-                 (h/stop relay)
+                 (std.lib.component/stop relay)
                  (if socket (.close socket)))
                (catch java.net.SocketException e
-                 (h/stop relay)
+                 (std.lib.component/stop relay)
                  (if socket (.close socket))))
           
           :else
@@ -116,13 +119,13 @@
            runtime
            process] :as m
     :or {runtime :remote-port}}]
-  (let [process (h/merge-nested {:encode :json}
+  (let [process (std.lib.collection/merge-nested {:encode :json}
                                 (common/get-options lang :remote-port :default)
                                 process)]
-    (h/prn {:lang lang
+    (std.lib.env/prn {:lang lang
             :process process})
     (map->RuntimeRemote (merge  m
-                                {:id (or id (h/sid))
+                                {:id (or id (std.lib.foundation/sid))
                                  :tag runtime
                                  :runtime runtime
                                  :process process
@@ -137,7 +140,7 @@
            program
            process] :as m}]
   (-> (rt-remote-port:create m)
-      (h/start)))
+      (std.lib.component/start)))
 
 (comment
   (./import)

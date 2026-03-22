@@ -1,20 +1,22 @@
 (ns rt.postgres.grammar.common
-  (:require [rt.postgres.grammar.meta :as meta]
-            [rt.postgres.grammar.common-application :as app]
+  (:require [rt.postgres.grammar.common-application :as app]
+            [rt.postgres.grammar.meta :as meta]
             [rt.postgres.grammar.tf :as tf]
+            [std.lang.base.book :as book]
             [std.lang.base.emit :as emit]
             [std.lang.base.emit-common :as common]
-            [std.lang.base.emit-preprocess :as preprocess]
             [std.lang.base.emit-fn :as fn]
+            [std.lang.base.emit-preprocess :as preprocess]
             [std.lang.base.grammar :as grammar]
             [std.lang.base.grammar-spec :as grammar-spec]
-            [std.lang.base.util :as ut]
-            [std.lang.base.book :as book]
             [std.lang.base.library-snapshot :as snap]
-            [std.lang.base.script :as script]
             [std.lang.base.pointer :as ptr]
-            [std.string :as str]
-            [std.lib :as h]))
+            [std.lang.base.script :as script]
+            [std.lang.base.util :as ut]
+            [std.lib.collection]
+            [std.lib.foundation]
+            [std.string.case]
+            [std.string.common]))
 
 ;;
 ;; type alias
@@ -47,7 +49,7 @@
   "gets the ref name"
   {:added "4.0"}
   ([col {:keys [raw]}]
-   (if raw raw (str/snake-case (str (h/strn col) "_id")))))
+   (if raw raw (std.string.case/snake-case (str (std.lib.foundation/strn col) "_id")))))
 
 (defn pg-sym-meta
   "returns the sym meta"
@@ -83,7 +85,7 @@
          [mschema
           mtable] (if-let [v (resolve table)]
                     [nil (str (:id @v))]
-                    (str/split (str table) #"\."))
+                    (std.string.common/split (str table) #"\."))
          msym   (assoc (meta sym)
                        :static/policy-name mname
                        :static/policy-table  mtable
@@ -109,7 +111,7 @@
   "hydrate function for top level entries"
   {:added "4.0"}
   ([[op sym & body] grammar mopts]
-   (let [reserved (h/qualified-keys (get-in grammar [:reserved op])
+   (let [reserved (std.lib.collection/qualified-keys (get-in grammar [:reserved op])
                                     :static)
          static (merge (pg-hydrate-module-static (:module mopts))
                        reserved)]
@@ -121,11 +123,11 @@
   {:added "4.0"}
   ([s]
    (-> (pr-str s)
-       (str/replace #"'" "''")
-       (str/replace #"^\"" "'")
-       (str/replace #"\"$" "'")
-       (str/replace #"\\\"" "\"")
-       (str/replace #"\\\\" "\\\\"))))
+       (std.string.common/replace #"'" "''")
+       (std.string.common/replace #"^\"" "'")
+       (std.string.common/replace #"\"$" "'")
+       (std.string.common/replace #"\\\"" "\"")
+       (std.string.common/replace #"\\\\" "\\\\"))))
 
 (defn pg-uuid
   "constructs a pg uuid"
@@ -146,7 +148,7 @@
    (cond (< 1 (count e))
          (if (every? symbol? e)
            (common/*emit-fn*  (tf/pg-tf-js [nil e]) grammar mopts)
-           (h/error "Not Allowed" {:value e}))
+           (std.lib.foundation/error "Not Allowed" {:value e}))
          
          :else
          (let [v (first e)]
@@ -158,7 +160,7 @@
                  (common/*emit-fn*  (tf/pg-tf-js [nil e]) grammar mopts)
                  
                  :else
-                 (h/error "Not Allowed" {:value e}))))))
+                 (std.lib.foundation/error "Not Allowed" {:value e}))))))
 
 (defn pg-array
   "creates an array object
@@ -170,7 +172,7 @@
   {:added "4.0"}
   ([[_ & arr] grammar mopts]
    (let [str-array (common/emit-array arr grammar mopts common/*emit-fn*)]
-     (str "ARRAY[" (str/join "," str-array) "]"))))
+     (str "ARRAY[" (std.string.common/join "," str-array) "]"))))
 
 
 (defn pg-invoke-typecast
@@ -178,14 +180,14 @@
   {:added "4.0"}
   [form grammar mopts]
   (let [val   (last form)
-        types (str/join (map (fn [v]
+        types (std.string.common/join (map (fn [v]
                                (cond (keyword? v)
-                                     (str/upper-case (h/strn v))
+                                     (std.string.common/upper-case (std.lib.foundation/strn v))
                                      
-                                     (or (and (h/form? v)
+                                     (or (and (std.lib.collection/form? v)
                                               (not= '. (first v)))
                                          (vector? v))
-                                     (h/strn v)
+                                     (std.lib.foundation/strn v)
                                      
                                      :else
                                      (common/*emit-fn* v grammar mopts)))
@@ -226,7 +228,7 @@
   "creates a full token (for types and enums)"
   {:added "4.0"}
   ([tok schtok]
-   (let [tok #{(str/replace (h/strn tok) #"\." "_")}]
+   (let [tok #{(std.string.common/replace (std.lib.foundation/strn tok) #"\." "_")}]
      (pg-base-token tok schtok))))
 
 ;;
@@ -270,7 +272,7 @@
          module (book/get-module book sym-module)
          {:keys [section] :as e} (or (get-in module [:code sym-id])
                                      (get-in module [:fragment sym-id])
-                                     (h/error "Token Not found."
+                                     (std.lib.foundation/error "Token Not found."
                                               {:input sym
                                                :module sym-module
                                                :sym-id sym-id
@@ -348,7 +350,7 @@
   [[_ sym array]]
   (let [{:static/keys [schema]} (meta sym)
         ttok  (pg-full-token sym schema)
-        vals  (list 'quote (map h/strn array))]
+        vals  (list 'quote (map std.lib.foundation/strn array))]
     `[:do :$$
       \\ :begin
       \\ (\| (~'do [:create-type ~ttok :as-enum ~vals]))

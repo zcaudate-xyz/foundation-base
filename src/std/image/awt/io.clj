@@ -1,10 +1,6 @@
 (ns std.image.awt.io
   (:require [clojure.java.io :as io])
-  (:import (java.awt.image BufferedImage)
-           (javax.imageio ImageIO)
-           (javax.imageio.spi IIORegistry ImageReaderWriterSpi
-                              ImageInputStreamSpi ImageReaderSpi
-                              ImageTranscoderSpi ImageWriterSpi))
+  (:import (java.awt.image BufferedImage) (javax.imageio ImageIO) (javax.imageio.spi IIORegistry ImageReaderWriterSpi ImageInputStreamSpi ImageReaderSpi ImageTranscoderSpi ImageWriterSpi))
   (:refer-clojure :exclude [read]))
 
 (def lookup

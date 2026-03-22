@@ -1,14 +1,14 @@
 (ns std.block
   (:require [std.block.base :as base]
             [std.block.construct :as construct]
-            [std.block.parse :as parse]
-            [std.block.type :as type]
             [std.block.heal :as heal]
             [std.block.layout :as layout]
-            [std.lib :as h])
+            [std.block.parse :as parse]
+            [std.block.type :as type]
+            [std.lib.foundation])
   (:refer-clojure :exclude [type next replace string newline comment]))
 
-(h/intern-in  base/block?
+(std.lib.foundation/intern-in  base/block?
               base/expression?
               [type           base/block-type]
               [tag            base/block-tag]

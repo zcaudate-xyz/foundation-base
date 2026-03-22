@@ -1,7 +1,6 @@
 (ns js.blessed.ui-util-test
-  (:use code.test)
-  (:require [std.lib :as h]
-            [std.lang :as l]))
+  (:require [std.lang :as l])
+  (:use code.test))
 
 (l/script :js
   {:runtime :basic

@@ -1,7 +1,5 @@
 (ns python.core.builtins
-  (:require [std.lang :as l]
-            [std.lib :as h]
-            [std.string :as str])
+  (:require [std.lang :as l])
   (:refer-clojure :exclude [eval]))
 
 (l/script :python

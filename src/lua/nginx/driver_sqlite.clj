@@ -1,13 +1,13 @@
 (ns lua.nginx.driver-sqlite
   (:require [std.lang :as l]
-            [std.lib :as h]
+            [std.lib.foundation]
             [xt.sys.conn-dbsql :as dbsql]))
 
 (l/script :lua
   {:require [[xt.lang.base-lib :as k]]
    :import [["lsqlite3" :as ngxsqlite]]})
 
-(h/template-entries [l/tmpl-entry {:type :fragment
+(std.lib.foundation/template-entries [l/tmpl-entry {:type :fragment
                                    :base "ngxsqlite"
                                    :tag "lua"}]
   [lversion

@@ -1,7 +1,8 @@
 (ns std.lang.base.emit-helper
-  (:require [std.string :as str]
-            [std.lib :as h]
-            [std.lang.base.util :as ut]))
+  (:require [std.lang.base.util :as ut]
+            [std.lib.collection]
+            [std.lib.foundation]
+            [std.string.common]))
 
 (defn default-emit-fn
   "the default emit function"
@@ -14,10 +15,10 @@
   {:added "3.0"}
   ([s]
    (-> (pr-str s)
-       (str/replace #"'" "\\\\'")
-       (str/replace #"^\"" "'")
-       (str/replace #"\"$" "'")
-       (str/replace #"\\\"" "\""))))
+       (std.string.common/replace #"'" "\\\\'")
+       (std.string.common/replace #"^\"" "'")
+       (std.string.common/replace #"\"$" "'")
+       (std.string.common/replace #"\\\"" "\""))))
 
 (def +sym-replace+
   {\- "_"
@@ -109,11 +110,11 @@
         (keyword? form)   [:keyword :token true]
         (symbol? form)    [:symbol :token true]
         
-        (h/form? form)    :expression
+        (std.lib.collection/form? form)    :expression
 
         (number? form)    [:number :token]
         (boolean? form)   [:boolean :token]
-        (h/regexp? form)  [:regex :token]
+        (std.lib.foundation/regexp? form)  [:regex :token]
         
         (string? form)    [:string :token]
         (nil? form)       [:nil :token]
@@ -124,7 +125,7 @@
         (vector? form)    [:vector :data]
         (set? form)       [:set :data]
 
-        :else (h/error "Not Valid" {:input form
+        :else (std.lib.foundation/error "Not Valid" {:input form
                                     :type (type form)})))
 
 (defn basic-typed-args
@@ -157,12 +158,12 @@
   (let [{:keys [modifiers]} curr
         arg (last modifiers)]
     (if (contains? (get-option grammar [:allow] :assign)
-                   (first (h/seqify (form-key-base arg))))
+                   (first (std.lib.collection/seqify (form-key-base arg))))
       [all (-> curr
                (assoc :symbol arg
                       :modifiers (vec (butlast modifiers))
                       :assign true))]
-      (h/error "Cannot assign to non symbol" {:curr curr :all all}))))
+      (std.lib.foundation/error "Cannot assign to non symbol" {:curr curr :all all}))))
 
 (defn emit-typed-args
   "create types args from declarationns"
@@ -194,7 +195,7 @@
            
            (and (not (:symbol curr))
                 (list? sym)
-                (not (neg? (h/index-at #{:=} sym))))
+                (not (neg? (std.lib.collection/index-at #{:=} sym))))
            (let [[symbol val] (remove #{:=} sym)]
              (recur (conj all (assoc curr :symbol symbol :value val))
                     {:modifiers []}
@@ -216,19 +217,19 @@
                         :allow
                         :assign
                         :vector))
-               (and (h/form? sym)
+               (and (std.lib.collection/form? sym)
                     (= 'quote (first sym))
                     (-> grammar
                         :allow
                         :assign
                         :quote))
-               (and (h/form? sym)
+               (and (std.lib.collection/form? sym)
                     (= := (first sym))))
            (if (:symbol curr)
              (recur (conj all curr) {:modifiers [] :symbol sym} more)
              (recur all (assoc curr :symbol sym) more))
 
-           (and (h/form? sym)
+           (and (std.lib.collection/form? sym)
                 (keyword? (first sym)))
            (if (:symbol curr)
              (recur (conj all curr) {:type   (butlast sym)
@@ -249,7 +250,7 @@
            (recur (conj all (assoc curr :value sym)) {:modifiers []} more)
            
            :else
-           (h/error "Not a valid input" {:input sym
+           (std.lib.foundation/error "Not a valid input" {:input sym
                                          :all all
                                          :curr curr})))))
 

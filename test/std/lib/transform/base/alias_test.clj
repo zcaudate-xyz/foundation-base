@@ -1,9 +1,9 @@
 (ns std.lib.transform.base.alias-test
-  (:use code.test)
-  (:require [std.lib.transform.base.alias :refer :all]
+  (:require [example.family :as family]
             [std.lib.schema :as schema]
             [std.lib.transform :as graph]
-            [example.family :as family]))
+            [std.lib.transform.base.alias :refer :all])
+  (:use code.test))
 
 (def ^:dynamic *wrappers*
   {:normalise        [wrap-alias]})

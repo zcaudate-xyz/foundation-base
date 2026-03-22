@@ -1,11 +1,11 @@
 (ns std.concurrent.relay-test
+  (:require [std.concurrent :as cc]
+            [std.concurrent.relay :refer :all]
+            [std.lib.component]
+            [std.lib.network]
+            [std.lib.os])
   (:use code.test)
-  (:require [std.concurrent.relay :refer :all]
-            [std.concurrent :as cc]
-            [std.string :as str]
-            [std.lib :as h])
-  (:import (java.net ServerSocket
-                     Socket))
+  (:import (java.net ServerSocket Socket))
   (:refer-clojure :exclude [send]))
 
 ^{:refer std.concurrent.relay/get-bus :added "3.0"}
@@ -44,8 +44,8 @@
   => true)
 
 ^{:refer std.concurrent.relay/make-socket-instance :added "4.0"
-  :setup [(def +server+ (ServerSocket. (h/port:check-available 0)))
-          (def +socket+ (h/socket (.getLocalPort ^ServerSocket +server+)))]}
+  :setup [(def +server+ (ServerSocket. (std.lib.network/port:check-available 0)))
+          (def +socket+ (std.lib.network/socket (.getLocalPort ^ServerSocket +server+)))]}
 (fact "creates a socket instance"
   ^:hidden
   
@@ -59,7 +59,7 @@
       (.close ^Socket +socket+)))
 
 ^{:refer std.concurrent.relay/make-process-instance :added "4.0"
-  :setup [(def +process+ (h/sh "ls" {:wait false}))]}
+  :setup [(def +process+ (std.lib.os/sh "ls" {:wait false}))]}
 (fact "creates a process instance"
   ^:hidden
   
@@ -75,7 +75,7 @@
 (fact "creates an instance"
   ^:hidden
   
-  (make-instance (h/sh "ls" {:wait false}))
+  (make-instance (std.lib.os/sh "ls" {:wait false}))
   => map?)
 
 ^{:refer std.concurrent.relay/relay-start :added "4.0"}
@@ -111,7 +111,7 @@
   (:dropped @(send +relay+ {:op :clean}))
   => 4
 
-  (h/stop +relay+)
+  (std.lib.component/stop +relay+)
   => map?)
 
 ^{:refer std.concurrent.relay/relay-stop :added "4.0"}
@@ -120,7 +120,7 @@
                                    :args ["bash"]})
                 (relay-start))]
     (relay-stop relay)
-    (h/stopped? relay))
+    (std.lib.component/stopped? relay))
   => true)
 
 ^{:refer std.concurrent.relay/relay:create :added "4.0"}

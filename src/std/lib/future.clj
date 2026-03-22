@@ -1,16 +1,9 @@
 (ns std.lib.future
-  (:require [std.protocol.return :as protocol.return]
-            [std.lib.function :as fn]
-            [std.lib.impl :as impl])
+  (:require [std.lib.function :as fn]
+            [std.lib.impl :as impl]
+            [std.protocol.return :as protocol.return])
   (:refer-clojure :exclude [future future? await])
-  (:import (java.util.concurrent CompletableFuture
-                                 CompletionStage
-                                 Executor
-                                 ForkJoinPool
-                                 TimeUnit
-                                 TimeoutException
-                                 CancellationException
-                                 LinkedBlockingQueue)))
+  (:import (java.util.concurrent CompletableFuture CompletionStage Executor ForkJoinPool TimeUnit TimeoutException CancellationException LinkedBlockingQueue)))
 
 ;;
 ;; future

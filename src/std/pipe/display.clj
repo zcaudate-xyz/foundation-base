@@ -1,7 +1,7 @@
 (ns std.pipe.display
-  (:require [std.lib :as h]
-            [std.print :as print]
-            [std.string :as str]))
+  (:require [std.lib.collection]
+            [std.lib.time]
+            [std.print :as print]))
 
 (defn bulk-display
   "constructs bulk display options"
@@ -113,7 +113,7 @@
                          :items     (count items)
                          :results   (count results)}
                         (->> aggregate-fns
-                             (h/map-vals (fn [[sel acc init]]
+                             (std.lib.collection/map-vals (fn [[sel acc init]]
                                            (reduce (fn [out v]
                                                      (let [sv (sel v)]
                                                        (if (nil? sv)
@@ -133,8 +133,8 @@
                    (print/print "\n")
                    (print/print-subtitle (format "SUMMARY %s"
                                                  (str (assoc display
-                                                             :cumulative (h/format-ms cumulative)
-                                                             :elapsed (h/format-ms elapsed)))))
+                                                             :cumulative (std.lib.time/format-ms cumulative)
+                                                             :elapsed (std.lib.time/format-ms elapsed)))))
                    (print/println))]
      (assoc summary :cumulative cumulative :elapsed elapsed))))
 

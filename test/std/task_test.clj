@@ -1,7 +1,7 @@
 (ns std.task-test
-  (:use code.test)
-  (:require [std.task :refer :all]
-            [jvm.namespace :as namespace]))
+  (:require [jvm.namespace :as namespace]
+            [std.task :refer :all])
+  (:use code.test))
 
 ^{:refer std.task/task-defaults :added "3.0"}
 (fact "creates default settings for task groups"

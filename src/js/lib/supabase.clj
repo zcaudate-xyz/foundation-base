@@ -1,22 +1,24 @@
 (ns js.lib.supabase
-  (:require [std.lang :as l]
-            [std.lib :as h]
-            [std.string :as str]
+  (:require [net.http :as http]
             [std.json :as json]
-            [net.http :as http])
+            [std.lang :as l]
+            [std.lib.collection]
+            [std.lib.foundation]
+            [std.lib.template]
+            [std.string.case])
   (:refer-clojure :exclude [not or range]))
 
 (l/script :js
   {:import [["@supabase/supabase-js" :as [* SupabaseClient]]]})
 
-(h/template-entries [l/tmpl-entry {:type :fragment
+(std.lib.foundation/template-entries [l/tmpl-entry {:type :fragment
                                    :base "SupabaseClient"
                                    :tag "js"}]
   [SupabaseClient
    createClient
    [createSupabaseClient createClient]])
 
-(h/template-entries [l/tmpl-macro {:base "SupabaseClient"
+(std.lib.foundation/template-entries [l/tmpl-macro {:base "SupabaseClient"
                                    :inst "supabase"
                                    :subtree []
                                    :tag "js"}]
@@ -58,7 +60,7 @@
    [then            [f]]
    [finally         [f]]])
 
-(h/template-entries [l/tmpl-macro {:base "SupabaseClient"
+(std.lib.foundation/template-entries [l/tmpl-macro {:base "SupabaseClient"
                                    :inst "supabase"
                                    :subtree ["auth"]
                                    :tag "js"}]
@@ -92,7 +94,7 @@
    [updateUser         [attr] {:optional [options]}]
    [verifyOtp          [params]]])
 
-(h/template-entries [l/tmpl-macro {:base "SupabaseClient"
+(std.lib.foundation/template-entries [l/tmpl-macro {:base "SupabaseClient"
                                    :inst "supabase"
                                    :subtree ["auth" "mfa"]
                                    :tag "js"}]
@@ -104,7 +106,7 @@
    [[mfaVerify verify]  [] {:optional [options]}]
    [[mfaChallengeAndVerify challengeAndVerify]  [] {:optional [options]}]])
 
-(h/template-entries [l/tmpl-macro {:base "SupabaseClient"
+(std.lib.foundation/template-entries [l/tmpl-macro {:base "SupabaseClient"
                                    :inst "supabase"
                                    :subtree ["auth" "admin"]
                                    :tag "js"}]
@@ -123,14 +125,14 @@
    [[adminUpdateUser
      getUserById]     [id params] {}]])
 
-(h/template-entries [l/tmpl-macro {:base "SupabaseClient"
+(std.lib.foundation/template-entries [l/tmpl-macro {:base "SupabaseClient"
                                    :inst "supabase"
                                    :subtree ["auth" "admin" "mfa"]
                                    :tag "js"}]
   [[[adminDeleteFactor
      deleteFactor]      [options] {}]])
 
-(h/template-entries [l/tmpl-macro {:base "SupabaseClient"
+(std.lib.foundation/template-entries [l/tmpl-macro {:base "SupabaseClient"
                                    :inst "supabase"
                                    :subtree ["functions"]
                                    :tag "js"}]
@@ -146,18 +148,18 @@
             key]
      :or {key  '(System/getenv "DEFAULT_SUPABASE_API_KEY_ANON")
           host '(System/getenv "DEFAULT_SUPABASE_API_ENDPOINT")}}]]
-  (let [key  (if (h/form? key)  (eval key)  key)
-        host (if (h/form? host) (eval host) host)
+  (let [key  (if (std.lib.collection/form? key)  (eval key)  key)
+        host (if (std.lib.collection/form? host) (eval host) host)
         {:keys [id]
          :static/keys [schema]} (deref (deref (resolve function)))]
-    (h/$
+    (std.lib.template/$
      (xt.lang.base-notify/wait-on :js
        (. (js.lib.supabase/rpc
            (. (js.lib.supabase/createSupabaseClient
                ~host
                ~key)
               (schema ~(or schema "public")))
-           ~(std.string/snake-case (str id))
+           ~(std.string.case/snake-case (str id))
            ~args)
           (then (xt.lang.base-repl/>notify)))))))
 

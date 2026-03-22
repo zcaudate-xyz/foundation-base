@@ -1,11 +1,13 @@
 (ns std.object.query
-  (:require [std.protocol.invoke :as protocol.invoke]
+  (:require [std.lib.class]
+            [std.lib.collection]
+            [std.lib.invoke :refer [definvoke]]
             [std.object.element :as element]
             [std.object.element.class :as class]
             [std.object.element.common :as common]
             [std.object.query.input :as input]
             [std.object.query.order :as order]
-            [std.lib :refer [definvoke] :as h]))
+            [std.protocol.invoke :as protocol.invoke]))
 
 (defn all-class-members
   "returns the raw reflected methods, fields and constructors
@@ -58,7 +60,7 @@
   [:memoize]
   ([class selectors]
    (let [grp    (input/args-group selectors)
-         supers (h/flatten-nested (h/ancestor:tree class))
+         supers (std.lib.collection/flatten-nested (std.lib.class/ancestor:tree class))
          elems  (mapcat #(select-class-elements % selectors) supers)]
      (if (and (seq elems)
               (common/element? (first elems)))
@@ -97,7 +99,7 @@
   {:added "3.0"}
   [:memoize]
   ([tcls icls]
-   (let [supers (reverse (h/ancestor:list tcls))
+   (let [supers (reverse (std.lib.class/ancestor:list tcls))
          eles   (mapcat #(select-class-elements % [:instance]) supers)]
      (concat eles
              (if icls (concat eles (select-class-elements icls [:static])))))))
@@ -203,7 +205,7 @@
    -a- => \"world\""
   {:added "3.0"}
   ([obj]
-   (let [fields (h/map-juxt [(comp keyword :name) identity]
+   (let [fields (std.lib.collection/map-juxt [(comp keyword :name) identity]
                             (query-instance obj [:field]))]
      (Delegate. obj fields))))
 

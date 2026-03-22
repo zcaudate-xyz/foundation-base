@@ -1,9 +1,8 @@
 (ns std.lib.system.common-test
-  (:use code.test)
   (:require [std.lib.system.common :refer :all]
             [std.protocol.component :as protocol.component]
-            [std.protocol.track :as protocol.track]
-            [std.lib :as h]))
+            [std.protocol.track :as protocol.track])
+  (:use code.test))
 
 ^{:refer std.lib.system.common/system? :added "3.0"}
 (fact "checks if a component extends ISystem" ^:hidden

@@ -1,11 +1,11 @@
 (ns rt.postgres.gen-bind-test
-  (:use code.test)
-  (:require [std.lang :as l]
-            [rt.postgres :as pg]
+  (:require [rt.postgres :as pg]
             [rt.postgres.gen-bind :as gen]
             [rt.postgres.script.test.scratch-v1 :as scratch]
+            [std.lang :as l]
             [xt.db.sample-data-test :as data]
-            [xt.db.sample-user-test :as user]))
+            [xt.db.sample-user-test :as user])
+  (:use code.test))
 
 (l/script- :js
   {:runtime :basic

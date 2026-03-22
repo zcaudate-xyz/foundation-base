@@ -1,12 +1,12 @@
 (ns script.sql.expr
-  (:require [std.string :as str]))
+  (:require [std.string.common]))
 
 (defn as-?
   "Given a hash map of column names and values, or a vector of column names,
    return a string of `?` placeholders for them."
   {:added "3.0"}
   ([key-map _]
-   (str/join ", " (repeat (count key-map) "?"))))
+   (std.string.common/join ", " (repeat (count key-map) "?"))))
 
 (defn as-cols
   "Given a sequence of raw column names, return a string of all the
@@ -26,7 +26,7 @@
   {:added "3.0"}
   ([cols opts]
    (let [col-fn (:column-fn opts identity)]
-     (str/join ", " (map (fn [raw]
+     (std.string.common/join ", " (map (fn [raw]
                            (if (vector? raw)
                              (if (keyword? (first raw))
                                (str (col-fn (name (first raw)))
@@ -63,8 +63,8 @@
                                    [[] []]
                                    key-map)]
      (assert (seq where) "key-map may not be empty")
-     (into [(str (str/upper-case (name clause)) " "
-                 (str/join (if (= :where clause) " AND " ", ") where))]
+     (into [(str (std.string.common/upper-case (name clause)) " "
+                 (std.string.common/join (if (= :where clause) " AND " ", ") where))]
            params))))
 
 (defn for-delete
@@ -129,12 +129,12 @@
    (assert (seq rows) "rows may not be empty")
    (let [table-fn  (:table-fn opts identity)
          column-fn (:column-fn opts identity)
-         params    (str/join ", " (map (comp column-fn name) cols))
+         params    (std.string.common/join ", " (map (comp column-fn name) cols))
          places    (as-? (first rows) opts)]
      (into [(str "INSERT INTO " (table-fn (name table))
                  "\n (" params ")"
                  "\n VALUES\n "
-                 (str/join ",\n " (repeat (count rows) (str "(" places ")")))
+                 (std.string.common/join ",\n " (repeat (count rows) (str "(" places ")")))
                  (when-let [suffix (:suffix opts)]
                    (str " " suffix)))]
            cat
@@ -183,7 +183,7 @@
      (into [(str "INSERT INTO " (table-fn (name table))
                  "\n (" params ")"
                  "\n VALUES (" places ")"
-                 "\n ON CONFLICT (" (str/join "," (map (comp column-fn name) pkeys)) ")"
+                 "\n ON CONFLICT (" (std.string.common/join "," (map (comp column-fn name) pkeys)) ")"
                  "\n DO UPDATE SET (" up-arr ")"
                  "\n = ROW(" up-fin ")")]
            (vals key-map)))))
@@ -199,7 +199,7 @@
    (let [table-fn  (:table-fn opts identity)
          column-fn (:column-fn opts identity)
          columns   (map (comp column-fn name) cols)
-         params    (str/join ", " columns)
+         params    (std.string.common/join ", " columns)
          places    (as-? (first rows) opts)
          pkeys     (map (comp column-fn name) (:primary-keys opts [:id]))
          up-arr    (remove #((set pkeys) %) columns)
@@ -207,10 +207,10 @@
      (into [(str "INSERT INTO " (table-fn (name table))
                  "\n (" params ")"
                  "\n VALUES\n "
-                 (str/join ",\n " (repeat (count rows) (str "(" places ")")))
-                 "\n ON CONFLICT (" (str/join "," pkeys) ")"
-                 "\n DO UPDATE SET (" (str/join ", " up-arr) ")"
-                 "\n = ROW(" (str/join ", " up-fin) ")")]
+                 (std.string.common/join ",\n " (repeat (count rows) (str "(" places ")")))
+                 "\n ON CONFLICT (" (std.string.common/join "," pkeys) ")"
+                 "\n DO UPDATE SET (" (std.string.common/join ", " up-arr) ")"
+                 "\n = ROW(" (std.string.common/join ", " up-fin) ")")]
            cat
            rows))))
 

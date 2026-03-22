@@ -1,16 +1,15 @@
 (ns std.tailwind.analysis
-  (:require [std.lib :as h]
-            [std.string :as str]
-            [std.tailwind :as tailwind]
-            [std.lang :as l]
+  (:require [std.lang :as l]
             [std.lang.base.book :as book]
-            [std.lang.base.library :as lib]))
+            [std.lang.base.library :as lib]
+            [std.lib.walk]
+            [std.tailwind :as tailwind]))
 
 (defn find-returns
   "Finds all return expressions in a form"
   [form]
   (let [returns (atom [])]
-    (h/postwalk (fn [x]
+    (std.lib.walk/postwalk (fn [x]
                   (when (and (seq? x) (= (first x) 'return))
                     (swap! returns conj (second x)))
                   x)

@@ -1,7 +1,10 @@
 (ns std.lang.base.emit-preprocess
-  (:require [std.string :as str]
-            [std.lib :as h]
-            [std.lang.base.util :as ut]))
+  (:require [std.lang.base.util :as ut]
+            [std.lib.collection]
+            [std.lib.context.pointer]
+            [std.lib.foundation]
+            [std.lib.walk]
+            [std.string.common]))
 
 (def ^:dynamic *macro-form* nil)
 
@@ -69,23 +72,23 @@
    => '(!:lang {:lang :lua} (do 1 2 3))"
   {:added "4.0"}
   [[tag input & more :as x]]
-  (cond (h/form? tag)
+  (cond (std.lib.collection/form? tag)
         (cond (= 'clojure.core/deref (first tag))
               (let [tok (second tag)]
                 (cond (= tok '!)
                       (list '!:template input)
 
                       (and (symbol? tok) 
-                           (str/starts-with? (str tok) "."))
+                           (std.string.common/starts-with? (str tok) "."))
                       (apply list '!:lang {:lang (keyword (subs (str tok) 1))}
                              input more)
 
-                      (and (h/form? tok)
+                      (and (std.lib.collection/form? tok)
                            (= 'var (first tok)))
                       (list '!:eval
                             (apply list
-                                   (list 'var (or (h/var-sym (resolve (second tok)))
-                                                  (h/error "Var not found" {:input (second tok)})))
+                                   (list 'var (or (std.lib.foundation/var-sym (resolve (second tok)))
+                                                  (std.lib.foundation/error "Var not found" {:input (second tok)})))
                                    (if input
                                      (cons input more)
                                      more)))
@@ -95,13 +98,13 @@
                              input more)))
               
               (= 'clojure.core/unquote (first tag))
-              (h/error "Not supported" {:input x}))
+              (std.lib.foundation/error "Not supported" {:input x}))
 
         (= 'clojure.core/deref tag)
-        (if (and (h/form? input)
+        (if (and (std.lib.collection/form? input)
                  (= 'var (first input)))
-          (list '!:deref (list 'var (or (h/var-sym (resolve (second input)))
-                                        (h/error "Var not found" {:input (second input)}))))
+          (list '!:deref (list 'var (or (std.lib.foundation/var-sym (resolve (second input)))
+                                        (std.lib.foundation/error "Var not found" {:input (second input)}))))
           (list '!:eval input))))
 
 (defn to-input
@@ -109,15 +112,15 @@
   {:added "4.0"}
   [raw]
   (let [check-fn (fn [child]
-                   (and (h/form? child)
+                   (and (std.lib.collection/form? child)
                         (= (first child) '(clojure.core/unquote !))))]
-    (h/prewalk (fn [x]
-                 (or (cond (h/pointer? x)
+    (std.lib.walk/prewalk (fn [x]
+                 (or (cond (std.lib.context.pointer/pointer? x)
                            (ut/sym-full x)
 
                            (and *macro-splice*
                                 (or (vector? x)
-                                    (h/form? x))
+                                    (std.lib.collection/form? x))
                                 (some check-fn x))
                            (-> (into (empty x) 
                                      (reduce (fn [acc child]
@@ -128,7 +131,7 @@
                                              x))
                                (with-meta (meta x)))
                            
-                           (h/form? x)
+                           (std.lib.collection/form? x)
                            (to-input-form x))
                      x))
                raw)))
@@ -165,7 +168,7 @@
                        (get (:link module) sym-ns)
                        (if (get modules sym-ns) sym-ns))]
     (cond (not sym-module)
-          (h/error "Cannot resolve Module." {:input sym
+          (std.lib.foundation/error "Cannot resolve Module." {:input sym
                                              :current module
                                              :modules (keys modules)})
           
@@ -192,7 +195,7 @@
                                    [:fragment e])
                                  (if-let [e (get-in modules [sym-module :header sym-id])]
                                    [:header e])
-                                 (h/error (str "Upstream not found: "
+                                 (std.lib.foundation/error (str "Upstream not found: "
                                                (ut/sym-full {:module sym-module
                                                              :id sym-id}))
                                           {:entry (ut/sym-full {:module sym-module
@@ -204,7 +207,7 @@
                   (:header :code)   (let [{:keys [op]} entry
                                           _  (if (and (get (:suppress module) sym-module)
                                                       (not= 'defglobal op))
-                                               (h/error "Suppressed module - macros only"
+                                               (std.lib.foundation/error "Suppressed module - macros only"
                                                         {:sym [sym-module sym-id]
                                                          :module (dissoc module :code :fragment)}))
                                           
@@ -221,12 +224,12 @@
                                (cond (not template) form
                                      
                                      (not standalone)
-                                     (h/error "Pure templates are not allowed in body"
+                                     (std.lib.foundation/error "Pure templates are not allowed in body"
                                               {:module sym-module
                                                :id sym-id
                                                :form sym})
                                      
-                                     (or (h/form? standalone)
+                                     (or (std.lib.collection/form? standalone)
                                          (symbol? standalone))
                                      (walk-fn (:standalone entry))
                                      
@@ -243,7 +246,7 @@
         [f & args] bind-form
         [f-module f-id] (process-namespaced-resolve f modules mopts)
         _  (or (get-in modules [f-module :code f-id])
-               (h/error "Code entry not found:" {:input f
+               (std.lib.foundation/error "Code entry not found:" {:input f
                                                  :form form}))]
     (concat (reverse rdecl)
             [(with-meta (cons (cond-> (ut/sym-full f-module f-id)
@@ -329,9 +332,9 @@
                     (doseq [entry (vals (:code module))]
                       (vswap! deps conj (ut/sym-full entry))))))
 
-          form  (h/prewalk
+          form  (std.lib.walk/prewalk
                  (fn walk-fn [form]
-                   (cond (h/form? form)
+                   (cond (std.lib.collection/form? form)
                          (to-staging-form form grammar modules mopts deps-fragment walk-fn)
                          
                          (and (symbol? form))
@@ -341,7 +344,7 @@
                          
                          :else form))
                  input)
-          form  (h/postwalk (fn [form] (if (volatile? form)
+          form  (std.lib.walk/postwalk (fn [form] (if (volatile? form)
                                          @form
                                          form))
                             form)]
@@ -355,10 +358,10 @@
   (binding [*macro-skip-deps* true
             *macro-grammar* grammar
             *macro-opts* mopts]
-    (let [form  (h/prewalk
+    (let [form  (std.lib.walk/prewalk
                  (fn walk-fn [form]
                    
-                   (cond  (and (h/form? form)
+                   (cond  (and (std.lib.collection/form? form)
                                (= (first form) '!:template))
                           (walk-fn (eval (second form)))
 
@@ -376,14 +379,14 @@
   [entry mopts]
   (let [deps-quoted  (volatile! [])
         deps-native  (volatile! {})
-        _    (h/postwalk
+        _    (std.lib.walk/postwalk
               (fn [form]
                 (if (and (list? form)
                          (= (first form) 'quote))
                   (vswap! deps-quoted conj (second form)))
                 form)
               (:form entry))
-        _    (h/postwalk
+        _    (std.lib.walk/postwalk
               (fn [form]
                 (cond (symbol? form)
                       (process-standard-symbol form mopts deps-native)

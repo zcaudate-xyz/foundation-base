@@ -1,13 +1,12 @@
 (ns rt.basic.impl.process-perl
-  (:require [rt.basic.type-common :as common]
+  (:require [rt.basic.type-basic :as basic]
+            [rt.basic.type-common :as common]
             [rt.basic.type-oneshot :as oneshot]
-            [rt.basic.type-basic :as basic]
-            [xt.lang.base-repl :as k]
-            [std.lang.model.spec-perl :as spec]
             [std.lang.base.impl :as impl]
             [std.lang.base.runtime :as rt]
-            [std.lib :as h]
-            [std.string :as str]))
+            [std.lang.model.spec-perl :as spec]
+            [std.string.common]
+            [xt.lang.base-repl :as k]))
 
 (def +perl-init+
   (common/put-program-options
@@ -72,7 +71,7 @@
                           :layout :flat})
                         (impl/emit-as
                          :perl +client-basic+)]
-                       (str/join "\n\n"))]
+                       (std.string.common/join "\n\n"))]
     (fn [port & [{:keys [host]}]]
       (str bootstrap
            "\n\n"

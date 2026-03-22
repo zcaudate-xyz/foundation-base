@@ -1,6 +1,6 @@
 (ns std.pipe.util-test
-  (:use code.test)
-  (:require [std.pipe.util :refer :all]))
+  (:require [std.pipe.util :refer :all])
+  (:use code.test))
 
 ^{:refer std.pipe.util/main-function :added "4.1"}
 (fact "TODO")

@@ -1,7 +1,7 @@
 (ns rt.postgres.compile.server-db-test
-  (:use code.test)
-  (:require [rt.postgres.compile.server-db :refer :all]
-            [rt.postgres.compile-test :as fixtures]))
+  (:require [rt.postgres.compile-test :as fixtures]
+            [rt.postgres.compile.server-db :refer :all])
+  (:use code.test))
 
 ^{:refer rt.postgres.compile.server-db/infer-sync-spec :added "4.1"}
 (fact "infer-sync-spec respects the manual and off sync modes"

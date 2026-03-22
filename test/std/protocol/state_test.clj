@@ -1,7 +1,6 @@
 (ns std.protocol.state-test
-  (:use code.test)
-  (:require [std.protocol.state :refer :all]
-            [std.lib :as h]))
+  (:require [std.protocol.state :refer :all])
+  (:use code.test))
 
 ^{:refer std.protocol.state/-create-state :added "3.0"}
 (fact "creates a state object")

@@ -1,8 +1,8 @@
 (ns rt.basic.impl.process-perl-test
-  (:use code.test)
   (:require [rt.basic.impl.process-perl :refer :all]
-            [std.lang :as l]
-            [std.concurrent :as cc]))
+            [std.concurrent :as cc]
+            [std.lang :as l])
+  (:use code.test))
 
 (l/script- :perl
   {:runtime :oneshot})

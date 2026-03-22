@@ -1,13 +1,12 @@
 (ns rt.basic.impl.process-erlang
-  (:require [rt.basic.type-common :as common]
+  (:require [rt.basic.type-basic :as basic]
+            [rt.basic.type-common :as common]
             [rt.basic.type-oneshot :as oneshot]
-            [rt.basic.type-basic :as basic]
-            [xt.lang.base-repl :as k]
-            [std.lang.model.spec-erlang :as spec]
             [std.lang.base.impl :as impl]
             [std.lang.base.runtime :as rt]
-            [std.lib :as h]
-            [std.string :as str]))
+            [std.lang.model.spec-erlang :as spec]
+            [std.string.common]
+            [xt.lang.base-repl :as k]))
 
 (def +erlang-init+
   (common/put-program-options
@@ -111,7 +110,7 @@ eval_helper(S, WrapFn) ->
 (def ^{:arglists '([port & [{:keys [host]}]])}
   default-basic-client
   (fn [port & [{:keys [host]}]]
-    (str/replace +client-basic-baked+ "PORT_PLACEHOLDER" (str port))))
+    (std.string.common/replace +client-basic-baked+ "PORT_PLACEHOLDER" (str port))))
 
 (def +erlang-basic-config+
   (common/set-context-options

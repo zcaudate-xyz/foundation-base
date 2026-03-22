@@ -1,12 +1,12 @@
 (ns rt.basic.type-basic-test
-  (:use code.test)
-  (:require [rt.basic.type-basic :refer :all]
-            [rt.basic.server-basic :as server]
+  (:require [rt.basic.impl.process-js :as js]
             [rt.basic.impl.process-lua :as lua]
-            [rt.basic.impl.process-js :as js]
+            [rt.basic.server-basic :as server]
+            [rt.basic.type-basic :refer :all]
             [rt.basic.type-bench :as bench]
             [rt.basic.type-container :as container]
-            [std.lib :as h]))
+            [std.lib.component])
+  (:use code.test))
 
 ^{:refer rt.basic.type-basic/start-basic :added "4.0"}
 (fact "starts the basic rt"
@@ -80,5 +80,5 @@
                 server/stop-server (fn [& _] {})]
     (def +rt+ (rt-basic {:lang :js :id "test-start" :program nil :make nil :exec nil}))
     
-    (h/stop +rt+))
+    (std.lib.component/stop +rt+))
   => map?)

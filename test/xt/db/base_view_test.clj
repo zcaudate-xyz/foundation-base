@@ -1,10 +1,10 @@
 (ns xt.db.base-view-test
-  (:use code.test)
-  (:require [std.lang :as l]
-            [rt.postgres :as pg]
+  (:require [rt.postgres :as pg]
+            [std.lang :as l]
             [xt.db.gen-bind :as bind]
-            [xt.db.sample-user-test :as user]
-            [xt.db.sample-data-test :as data]))
+            [xt.db.sample-data-test :as data]
+            [xt.db.sample-user-test :as user])
+  (:use code.test))
 
 (l/script- :js
   {:runtime :basic

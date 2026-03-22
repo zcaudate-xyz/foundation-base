@@ -1,11 +1,13 @@
 (ns net.resp.impl-test
-  (:use code.test)
-  (:require [net.resp.wire :as wire]
-            [net.resp.connection :as conn]
+  (:require [net.resp.connection :as conn]
             [net.resp.node :as node]
-            [std.lib :as h]
+            [net.resp.wire :as wire]
+            [std.concurrent :as cc]
             [std.concurrent.request :as req]
-            [std.concurrent :as cc])
+            [std.lib.component]
+            [std.lib.foundation]
+            [std.lib.future])
+  (:use code.test)
   (:refer-clojure :exclude [read]))
 
 (defn create-node
@@ -18,9 +20,9 @@
 
 (defmacro test-harness
   [& body]
-  `(h/with:lifecycle [~'|node| {:start (create-node)
+  `(std.lib.component/with-lifecycle [~'|node| {:start (create-node)
                                 :stop node/stop-node}]
-     (h/with:lifecycle [~'|conn| {:start (create-conn)
+     (std.lib.component/with-lifecycle [~'|conn| {:start (create-conn)
                                   :stop conn/connection:close}]
        ~@body)))
 
@@ -29,7 +31,7 @@
 (fact "writes a command and waits for reply"
 
   (test-harness
-    (h/string (wire/call |conn| ["PING"])))
+    (std.lib.foundation/string (wire/call |conn| ["PING"])))
   => "PONG")
 
 ^{:refer net.resp.wire/read :added "3.0"
@@ -38,7 +40,7 @@
 
   (test-harness
     (wire/write |conn| ["PING"])
-    (h/string (wire/read |conn|)))
+    (std.lib.foundation/string (wire/read |conn|)))
   => "PONG")
 
 ^{:refer net.resp.wire/write :added "3.0"
@@ -49,7 +51,7 @@
     (wire/write |conn| ["PING"])
     (wire/write |conn| ["PING"])
 
-    (mapv h/string [(wire/read |conn|)
+    (mapv std.lib.foundation/string [(wire/read |conn|)
                     (wire/read |conn|)]))
   => ["PONG" "PONG"])
 
@@ -68,7 +70,7 @@
 
   (test-harness
     (-> (std.concurrent.request/request-single |conn| ["PING"])
-        h/string))
+        std.lib.foundation/string))
   => "PONG")
 
 ^{:refer std.concurrent.request/request-bulk :added "3.0"
@@ -78,7 +80,7 @@
   (test-harness
     (->> (std.concurrent.request/request-bulk |conn| [["PING"]
                                                       ["PING"]])
-         (map h/string)))
+         (map std.lib.foundation/string)))
   => ["PONG" "PONG"])
 
 ^{:refer std.concurrent.request/req:single :added "3.0"
@@ -150,7 +152,7 @@
     (->> (std.concurrent.request/request-bulk |conn| [["ECHO" "1"]
                                                       ["ECHO" "2"]
                                                       ["ECHO" "3"]])
-         (map h/string)))
+         (map std.lib.foundation/string)))
   => ["1" "2" "3"])
 
 ^{:refer std.concurrent.request/req :added "3.0"
@@ -168,7 +170,7 @@
     => Throwable
 
     (cc/req |conn| ["ECHO" "OK"] {:async true})
-    => h/future?))
+    => std.lib.future/future?))
 
 ^{:refer std.concurrent.request/bulk :added "3.0"
   :adopt true}
@@ -185,7 +187,7 @@
       (fn []
         (cc/req |conn| ["ECHO" "1"])
         (cc/req |conn| ["ECHO" "2"]))
-      {:chain [(partial map h/parse-long)]})
+      {:chain [(partial map std.lib.foundation/parse-long)]})
     => [1 2]))
 
 ^{:refer std.concurrent.request/transact :added "3.0"

@@ -1,8 +1,8 @@
 (ns code.framework.common
-  (:require [std.string :as str]
-            [code.project :as project]
+  (:require [code.project :as project]
             [std.block :as block]
-            [std.block.navigate :as nav]))
+            [std.block.navigate :as nav]
+            [std.string.common]))
 
 (def ^:dynamic *path* nil)
 
@@ -109,11 +109,11 @@
   {:added "3.0"}
   ([nav]
    (block/block (->> (nav/value nav)
-                     (str/split-lines)
+                     (std.string.common/split-lines)
                      (map-indexed (fn [i s]
                                     (str (if (zero? i) "" "  ")
-                                         (str/trim-left s))))
-                     (str/join "\n")))))
+                                         (std.string.common/trim-left s))))
+                     (std.string.common/join "\n")))))
 
 (defn line-lookup
   "creates a function lookup for the project"

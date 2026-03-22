@@ -1,27 +1,26 @@
 (ns std.time
-  (:require [std.protocol.time :as protocol.time]
-            [std.time.format.java-text-simpledateformat]
-            [std.time.instant.java-sql-timestamp]
-            [std.time.instant.java-util-calendar]
-            [std.time.instant.java-util-date]
-            [std.time.zone.java-util-timezone]
-            [std.time.format.java-time-format-datetimeformatter]
-            [std.time.instant.java-time-clock]
-            [std.time.instant.java-time-instant]
-            [std.time.instant.java-time-zoneddatetime]
-            [std.time.zone.java-time-zoneid]
+  (:require [std.lib.foundation]
+            [std.protocol.time :as protocol.time]
             [std.time.common :as common]
             [std.time.duration :deps true]
             [std.time.format :as format]
-            [std.time.map :as map]
+            [std.time.format.java-text-simpledateformat]
+            [std.time.format.java-time-format-datetimeformatter]
+            [std.time.instant.java-sql-timestamp]
+            [std.time.instant.java-time-clock]
+            [std.time.instant.java-time-instant]
+            [std.time.instant.java-time-zoneddatetime]
+            [std.time.instant.java-util-calendar]
+            [std.time.instant.java-util-date]
             [std.time.long]
+            [std.time.map :as map]
             [std.time.vector :as vector]
-            [std.lib :as h])
-  (:import (clojure.lang PersistentArrayMap PersistentHashMap)
-           (java.util Calendar TimeZone))
+            [std.time.zone.java-time-zoneid]
+            [std.time.zone.java-util-timezone])
+  (:import (clojure.lang PersistentArrayMap PersistentHashMap) (java.util Calendar TimeZone))
   (:refer-clojure :exclude [second format]))
 
-(h/intern-in common/calendar
+(std.lib.foundation/intern-in common/calendar
              common/local-timezone
              common/default-timezone
              common/default-type

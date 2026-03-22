@@ -1,6 +1,6 @@
 (ns std.text.index.stemmer-test
-  (:use code.test)
-  (:require [std.text.index.stemmer :refer :all]))
+  (:require [std.text.index.stemmer :refer :all])
+  (:use code.test))
 
 ^{:refer std.text.index.stemmer/excluded-word? :added "3.0"}
 (fact "checks if word is excluded from indexing"

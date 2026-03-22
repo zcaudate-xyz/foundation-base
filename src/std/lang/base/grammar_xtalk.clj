@@ -1,7 +1,5 @@
 (ns std.lang.base.grammar-xtalk
-  (:require [std.string :as str]
-            [std.lang.base.emit-preprocess :as preprocess]
-            [std.lib :as h]))
+  (:require [std.lang.base.emit-preprocess :as preprocess]))
 
 (defn tf-throw
   "wrapper for throw transform"

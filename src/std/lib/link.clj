@@ -1,9 +1,10 @@
 (ns std.lib.link
-  (:require [std.lib :as h]
-            [std.lib.env :as env]
-            [std.lib.invoke :refer [definvoke]]
+  (:require [std.lib.env :as env]
+            [std.lib.foundation]
+            [std.lib.function :as fn]
+            [std.lib.future]
             [std.lib.impl :refer [defimpl]]
-            [std.lib.function :as fn])
+            [std.lib.invoke :refer [definvoke]])
   (:import (clojure.lang Symbol Var Namespace IDeref)))
 
 ;; -----------------
@@ -42,7 +43,7 @@
   ([ns]
    (-> (str ns)
        ^String (munge)
-       (.replaceAll "\\." h/*sep*)
+       (.replaceAll "\\." std.lib.foundation/*sep*)
        (str *suffix*))))
 
 (defn ns-metadata-raw
@@ -52,7 +53,7 @@
    (->> (resource-path ns)
         (env/sys:resource)
         (slurp)
-        (h/suppress)
+        (std.lib.foundation/suppress)
         (#(str "[" % "]"))
         (read-string)
         (filter (comp '#{defn
@@ -169,7 +170,7 @@
   ([]
    (link:resolve-all *registry*))
   ([registry]
-   (h/future
+   (std.lib.future/future
      (mapv (fn [v]
              (try
                (bind-resolve @v)
@@ -190,7 +191,7 @@
   ([^Link link]
    (let [{:keys [ns name]} (.source link)
          source-ns  (find-ns ns)
-         source-var (h/suppress (ns-resolve ns name))]
+         source-var (std.lib.foundation/suppress (ns-resolve ns name))]
      (cond (nil? source-ns)
            :unresolved
 
@@ -292,12 +293,12 @@
 
          :else
          (let [{:keys [ns name]} (.source link)
-               status (h/suppress (env/require ns) :source-ns-not-found)
+               status (std.lib.foundation/suppress (env/require ns) :source-ns-not-found)
                source-var (if (not= status :source-ns-not-found)
                             (ns-resolve ns name))
                source-obj (if source-var
                             (bind-source (.alias link) source-var (.transform link))
-                            (h/error "Link not found."
+                            (std.lib.foundation/error "Link not found."
                                      {:source (.source link)
                                       :status (or status
                                                   :source-var-not-found)}))]

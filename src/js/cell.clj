@@ -1,6 +1,5 @@
 (ns js.cell
-  (:require [std.lang :as l]
-            [std.lib :as h]))
+  (:require [std.lang :as l]))
 
 (l/script :js
   {:require [[xt.lang.base-runtime :as rt :with [defvar.js]]

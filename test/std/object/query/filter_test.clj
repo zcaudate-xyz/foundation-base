@@ -1,6 +1,6 @@
 (ns std.object.query.filter-test
-  (:use code.test)
-  (:require [std.object.query.filter :refer :all]))
+  (:require [std.object.query.filter :refer :all])
+  (:use code.test))
 
 ^{:refer std.object.query.filter/filter-terms-fn :added "3.0"}
 (fact "listing outputs based upon different predicate conditions"

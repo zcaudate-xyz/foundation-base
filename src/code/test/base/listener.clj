@@ -1,14 +1,16 @@
 (ns code.test.base.listener
   (:require [code.test.base.context :as context]
-            [code.test.base.runtime :as rt]
             [code.test.base.print :as print]
-            [std.lib :as h]))
+            [code.test.base.runtime :as rt]
+            [std.lib.env]
+            [std.lib.os]
+            [std.lib.signal]))
 
 (defn summarise-verify
   "extract the comparison into a valid format"
   {:added "3.0"}
   ([result]
-   #_(h/prfn :VERIFY result)
+   #_(std.lib.env/prfn :VERIFY result)
    {:status    (cond (and (= :success (-> result :status))
                           (= true (-> result :data)))
                      :success
@@ -36,7 +38,7 @@
   "extract the form into a valid format"
   {:added "3.0"}
   ([result]
-   #_(h/prfn :EVAL result)
+   #_(std.lib.env/prfn :EVAL result)
    {:status   (-> result :status)
     :path     (-> result :meta :path)
     :name     (str (or (-> result :meta :refer)
@@ -57,13 +59,13 @@
      (cond (-> result :status (= :exception))
            (when (context/*print* :print-throw)
              (when (not (context/*print* :no-beep))
-               (h/beep))
+               (std.lib.os/beep))
              (print/print-throw summary))
 
            (-> result :status (= :timeout))
            (when (context/*print* :print-timeout)
              (when (not (context/*print* :no-beep))
-               (h/beep))
+               (std.lib.os/beep))
              (print/print-timeout summary))))))
 
 (defn check-printer
@@ -74,14 +76,14 @@
      (cond (= :timeout (-> result :actual :status))
            (when (context/*print* :print-timeout)
              (when (not (context/*print* :no-beep))
-               (h/beep))
+               (std.lib.os/beep))
              (print/print-timeout summary))
 
            (or (and (-> result :status (= :exception)))
                (and (-> result :data (= false))))
            (when (context/*print* :print-failed)
              (when (not (context/*print* :no-beep))
-               (h/beep))
+               (std.lib.os/beep))
              (print/print-failed (summarise-verify result)))
 
            (and (-> result :data (= true))
@@ -136,11 +138,11 @@
   "installs all listeners"
   {:added "3.0"}
   ([]
-   (do (h/signal:install :test/form-printer  {:test :form}  #'form-printer)
-       (h/signal:install :test/check-printer {:test :check} #'check-printer)
-       (h/signal:install :test/form-error-accumulator {:test :form} #'form-error-accumulator)
-       (h/signal:install :test/check-error-accumulator {:test :check} #'check-error-accumulator)
-       (h/signal:install :test/fact-printer {:test :fact} #'fact-printer)
-       (h/signal:install :test/fact-accumulator {:test :fact} #'fact-accumulator)
-       (h/signal:install :test/bulk-printer {:test :bulk} #'bulk-printer)
+   (do (std.lib.signal/signal:install :test/form-printer  {:test :form}  #'form-printer)
+       (std.lib.signal/signal:install :test/check-printer {:test :check} #'check-printer)
+       (std.lib.signal/signal:install :test/form-error-accumulator {:test :form} #'form-error-accumulator)
+       (std.lib.signal/signal:install :test/check-error-accumulator {:test :check} #'check-error-accumulator)
+       (std.lib.signal/signal:install :test/fact-printer {:test :fact} #'fact-printer)
+       (std.lib.signal/signal:install :test/fact-accumulator {:test :fact} #'fact-accumulator)
+       (std.lib.signal/signal:install :test/bulk-printer {:test :bulk} #'bulk-printer)
        true)))

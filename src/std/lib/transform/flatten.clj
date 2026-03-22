@@ -1,7 +1,7 @@
 (ns std.lib.transform.flatten
   (:require [std.lib.transform :as graph]
-            [std.lib.transform.link :as link]
-            [std.lib.transform.base.ref :as ref])
+            [std.lib.transform.base.ref :as ref]
+            [std.lib.transform.link :as link])
   (:refer-clojure :exclude [flatten]))
 
 (defn clean-output

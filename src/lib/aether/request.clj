@@ -1,22 +1,12 @@
 (ns lib.aether.request
-  (:require [std.object :as object]
-            [lib.aether.artifact :as artifact]
+  (:require [lib.aether.artifact :as artifact]
             [lib.aether.authentication]
             [lib.aether.dependency]
             [lib.aether.local-repo]
             [lib.aether.remote-repo]
-            [std.lib :as h])
-  (:import (org.eclipse.aether.collection CollectRequest)
-           (org.eclipse.aether.deployment DeployRequest)
-           (org.eclipse.aether.graph Dependency)
-           (org.eclipse.aether.installation InstallRequest)
-           (org.eclipse.aether.metadata DefaultMetadata)
-           (org.eclipse.aether.repository RemoteRepository)
-           (org.eclipse.aether.resolution ArtifactRequest
-                                          DependencyRequest
-                                          MetadataRequest
-                                          VersionRangeRequest
-                                          VersionRequest)))
+            [std.lib.env]
+            [std.object :as object])
+  (:import (org.eclipse.aether.collection CollectRequest) (org.eclipse.aether.deployment DeployRequest) (org.eclipse.aether.graph Dependency) (org.eclipse.aether.installation InstallRequest) (org.eclipse.aether.metadata DefaultMetadata) (org.eclipse.aether.repository RemoteRepository) (org.eclipse.aether.resolution ArtifactRequest DependencyRequest MetadataRequest VersionRangeRequest VersionRequest)))
 
 (def install-map
   {:artifacts
@@ -251,7 +241,7 @@
    ;;                            :url \"https://clojars.org/repo/\"}}"
   {:added "3.0"}
   ([{:keys [artifacts repository] :as m}]
-   (h/do:prn
+   (std.lib.env/do:prn
     (object/from-data {:artifacts artifacts
                        :repository repository}
                       DeployRequest))))

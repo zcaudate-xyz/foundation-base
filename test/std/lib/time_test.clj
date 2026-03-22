@@ -1,6 +1,6 @@
 (ns std.lib.time-test
-  (:use code.test)
-  (:require [std.lib.time :refer :all]))
+  (:require [std.lib.time :refer :all])
+  (:use code.test))
 
 ^{:refer std.lib.time/system-ns :added "3.0"}
 (fact "returns the system nano time"

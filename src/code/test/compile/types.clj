@@ -1,9 +1,12 @@
 (ns code.test.compile.types
-  (:require [std.math :as math]
-            [code.test.base.runtime :as rt]
-            [std.lib :as h :refer [defimpl]]
+  (:require [code.test.base.runtime :as rt]
+            [std.lib.collection]
+            [std.lib.env]
+            [std.lib.foundation]
             [std.lib.future :as f]
-            [std.lib.time :as time]))
+            [std.lib.impl :refer [defimpl]]
+            [std.lib.time :as time]
+            [std.math :as math]))
 
 
 (def ^:dynamic *compile-meta* nil)
@@ -31,7 +34,7 @@
   {:added "3.0"}
   ([m]
    (str (->> (fact-display-info m)
-             (h/filter-vals identity)))))
+             (std.lib.collection/filter-vals identity)))))
 
 (defn- fact-string
   [m]
@@ -57,19 +60,19 @@
    (let [{:keys [ceremony check]} wrap
          result ((-> function :thunk ceremony check))]
      (if (and guard (not result))
-       (h/error "Guard failed" (fact-display-info m)))
+       (std.lib.foundation/error "Guard failed" (fact-display-info m)))
      result)))
 
 
 (comment
   f       (-> (f/future:call (fn []
-                               (h/prn "RUN TEST: " (Thread/currentThread))
+                               (std.lib.env/prn "RUN TEST: " (Thread/currentThread))
                                (execution-fn)))
               (f/future:timeout timeout))
 
-  (-> (h/future (Thread/sleep 1000))
-      (h/do:prn)
-      (h/future:timeout 10)
-      (h/do:prn)
-      (h/future:cancel)
-      (h/do:prn)))
+  (-> (std.lib.future/future (Thread/sleep 1000))
+      (std.lib.env/do:prn)
+      (std.lib.future/future:timeout 10)
+      (std.lib.env/do:prn)
+      (std.lib.future/future:cancel)
+      (std.lib.env/do:prn)))

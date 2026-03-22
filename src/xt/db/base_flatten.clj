@@ -1,6 +1,5 @@
 (ns xt.db.base-flatten
-  (:require [std.lang :as l]
-            [std.lib :as h])
+  (:require [std.lang :as l])
   (:refer-clojure :exclude [flatten]))
 
 (l/script :xtalk

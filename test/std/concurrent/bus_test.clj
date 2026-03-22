@@ -1,9 +1,9 @@
 (ns std.concurrent.bus-test
-  (:use [code.test :exclude [global]])
-  (:require [std.concurrent.bus :refer :all]
-            [std.concurrent :as cc]
+  (:require [std.concurrent :as cc]
+            [std.concurrent.bus :refer :all]
             [std.concurrent.queue :as q]
-            [std.lib.future :as f]))
+            [std.lib.future :as f])
+  (:use [code.test :exclude [global]]))
 
 ^{:refer std.concurrent.bus/bus:get-thread :added "3.0"}
 (fact "gets thread given an id"

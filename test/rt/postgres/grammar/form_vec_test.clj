@@ -1,9 +1,8 @@
 (ns rt.postgres.grammar.form-vec-test
-  (:use code.test)
-  (:require [rt.postgres.grammar.form-vec :refer :all]
-            [rt.postgres.grammar :as g]
-            [std.lib :as h]
-            [std.lang :as l]))
+  (:require [rt.postgres.grammar :as g]
+            [rt.postgres.grammar.form-vec :refer :all]
+            [std.lang :as l])
+  (:use code.test))
 
 ^{:refer rt.postgres.grammar.form-vec/pg-section-query-pair :added "4.0"}
 (fact "converts to a pair expression"

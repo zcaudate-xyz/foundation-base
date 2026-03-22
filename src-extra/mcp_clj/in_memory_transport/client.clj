@@ -1,15 +1,10 @@
 (ns mcp-clj.in-memory-transport.client
+  (:require [mcp-clj.client-transport.protocol :as transport-protocol]
+            [mcp-clj.in-memory-transport.atomic :as atomic]
+            [mcp-clj.in-memory-transport.shared :as shared]
+            [mcp-clj.log :as log])
   "In-memory client transport for unit testing MCP communication"
-  (:require
-    [mcp-clj.client-transport.protocol :as transport-protocol]
-    [mcp-clj.in-memory-transport.atomic :as atomic]
-    [mcp-clj.in-memory-transport.shared :as shared]
-    [mcp-clj.log :as log])
-  (:import
-    (java.util.concurrent
-      CompletableFuture
-      Executors
-      TimeUnit)))
+  (:import (java.util.concurrent CompletableFuture Executors TimeUnit)))
 
 (defrecord InMemoryTransport
   [shared-transport ; SharedTransport instance

@@ -1,10 +1,12 @@
 (ns std.lang.base.emit-fn
-  (:require [std.string :as str]
-            [std.lib :as h]
+  (:require [std.lang.base.emit-block :as block]
             [std.lang.base.emit-common :as common]
-            [std.lang.base.emit-helper :as helper]
             [std.lang.base.emit-data :as data]
-            [std.lang.base.emit-block :as block]))
+            [std.lang.base.emit-helper :as helper]
+            [std.lib.collection]
+            [std.lib.env]
+            [std.lib.foundation]
+            [std.string.common]))
 
 (defn emit-input-default
   "create input arg strings"
@@ -20,7 +22,7 @@
          arr-fn (fn [mod]
                   (if (keyword? mod)
                     (cond-> (name mod)
-                      uppercase (str/upper-case))
+                      uppercase (std.string.common/upper-case))
                     (common/*emit-fn* mod grammar mopts)))
          tmod   (if type
                   (vec type)
@@ -46,7 +48,7 @@
                            (if mod-rev? mod-has?))
          
          #_#_
-         _         (h/prn {:mod-rev? mod-rev?
+         _         (std.lib.env/prn {:mod-rev? mod-rev?
                            :tmodarr tmodarr
                            :kmodarr kmodarr
                            :mod-sym mod-sym
@@ -54,7 +56,7 @@
                            :mixarr  mixarr
                            :mod-has? mod-has?})
 
-         mixstr (str/join " "
+         mixstr (std.string.common/join " "
                           (filter (fn [x]
                                     (if (seq x)
                                       (not-empty x)
@@ -62,7 +64,7 @@
                                   mixarr))]
      (str mixstr
           (if (not-empty vmod)
-            (str/join
+            (std.string.common/join
              (map (fn [arr]
                     (str start
                          (if-let [n (first arr)]
@@ -80,13 +82,13 @@
                 :then vec
                 (not-empty suffix) (conj suffix))]
      
-     (str/join " " (map (fn [v]
+     (std.string.common/join " " (map (fn [v]
                           (cond (or (keyword? v)
                                     (string? v)
                                     (and (vector? v)
                                          (empty? v)))
-                                (cond-> (h/strn v)
-                                  (:uppercase type) (str/upper-case))
+                                (cond-> (std.lib.foundation/strn v)
+                                  (:uppercase type) (std.string.common/upper-case))
 
                                 :else (common/*emit-fn* v grammar mopts)))
                         arr)))))
@@ -109,7 +111,7 @@
   "gets the block options for a given grammar"
   {:added "4.0"}
   [key grammar]
-  (h/merge-nested (get-in grammar [:default :function])
+  (std.lib.collection/merge-nested (get-in grammar [:default :function])
                   (get-in grammar [:function key])))
 
 (defn emit-fn-preamble-args
@@ -118,7 +120,7 @@
   ([key args grammar mopts]
    (let [args  (helper/emit-typed-args args grammar)
          {:keys [sep space assign start end multiline]}
-         (h/merge-nested (helper/get-options grammar [:default :function :args])
+         (std.lib.collection/merge-nested (helper/get-options grammar [:default :function :args])
                          (get-in grammar [:function key :args]))]
      (map #(emit-input-default % assign grammar mopts)
           args))))
@@ -130,7 +132,7 @@
    (let [iargs (emit-fn-preamble-args key args grammar mopts)
          {:keys [prefix]} (helper/get-options grammar [:default :function])
          {:keys [sep space assign start end multiline]}
-         (h/merge-nested (helper/get-options grammar [:default :function :args])
+         (std.lib.collection/merge-nested (helper/get-options grammar [:default :function :args])
                          (get-in grammar [:function key :args]))]
      (str (if prefix (str prefix " "))
           (if name (common/*emit-fn* name grammar mopts))
@@ -141,13 +143,13 @@
                 (str start
                      (common/with-indent [2]
                        (str (common/newline-indent)
-                            (str/join (str sep (common/newline-indent))
+                            (std.string.common/join (str sep (common/newline-indent))
                                       iargs)))
                      (common/newline-indent)
                      end)
 
                 :else
-                (str start (str/join (str sep space) iargs) end))))))
+                (str start (std.string.common/join (str sep space) iargs) end))))))
 
 (defn emit-fn
   "emits a function template"
@@ -160,7 +162,7 @@
          header-only?  (:header (meta name))
          {:keys [compressed] :as block} (emit-fn-block key grammar)
          {:keys [enabled assign space after]}   (helper/get-options grammar [:default :typehint])
-         typestr   (emit-fn-type name (or (:raw block) (h/strn tag)) grammar mopts)
+         typestr   (emit-fn-type name (or (:raw block) (std.lib.foundation/strn tag)) grammar mopts)
          prestr    (emit-fn-preamble [key name args] grammar mopts)
          hintstr   (cond (or (not enabled)
                              (empty? typestr)) ""
@@ -174,11 +176,11 @@
                        (block/emit-block-body key block body grammar mopts)))]
      (cond enabled
            (cond after
-                 (str/join space (filter not-empty [prestr hintstr blockstr]))
+                 (std.string.common/join space (filter not-empty [prestr hintstr blockstr]))
                  
                  
                  :else
-                 (str/join space (filter not-empty [hintstr prestr blockstr])))
+                 (std.string.common/join space (filter not-empty [hintstr prestr blockstr])))
            
            (not-empty typestr)
            (str typestr " " prestr blockstr)

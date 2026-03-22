@@ -1,9 +1,9 @@
 (ns std.object.framework.base-test
-  (:use code.test)
   (:require [std.object.framework.read :as read]
             [std.object.framework.write :as write]
-            [std.protocol.object :as object]
-            [std.object.query :as reflect]))
+            [std.object.query :as reflect]
+            [std.protocol.object :as object])
+  (:use code.test))
 
 (defmethod object/-meta-write test.DogBuilder
   [_]

@@ -1,9 +1,9 @@
 (ns indigo.infra-check
-  (:require [code.test :as test]
-            [code.project :as project]
+  (:require [code.project :as project]
+            [code.test :as test]
             [std.fs :as fs]
-            [std.string :as str]
-            [std.lib :as h]))
+            [std.lib.foundation]
+            [std.string.common]))
 
 (def +base+
   '[std math])
@@ -43,7 +43,7 @@
                    fs/file-namespace
                    (comp symbol
                          #(apply str (replace  {\_ "-" \/ "."} %))
-                         #(str/replace % #"\.clj$" "")
+                         #(std.string.common/replace % #"\.clj$" "")
                          str
                          (partial fs/relativize (fs/path "test")))))
         (filter (fn [[_ x y]] (not= x y)))
@@ -56,7 +56,7 @@
    => \"test/code/dev_test.clj\""
   {:added "3.0"}
   ([ns]
-   (h/->> (str ns)
+   (std.lib.foundation/->> (str ns)
           (replace {\- \_ \. \/})
           (apply str)
           (str "test/" % ".clj"))))
@@ -83,7 +83,7 @@
          to-path   (fs/path (to-test-path to-ns))]
      (spit from-path
            (.replaceAll (slurp from-path)
-                        (str (h/re-create (str from)))
+                        (str (std.lib.foundation/re-create (str from)))
                         (str to)))
      (fs/move from-path to-path))))
 
@@ -97,7 +97,7 @@
    (let [ns-path (fs/path (to-test-path (str ns "-test")))]
      (spit ns-path
            (.replaceAll (slurp ns-path)
-                        (str (h/re-create (str from)))
+                        (str (std.lib.foundation/re-create (str from)))
                         (str to))))))
 
 
@@ -107,12 +107,12 @@
   (rename-tests 'hara.util.transform 'std.lib.stream.xform)
 
   (fix-tests)
-  (str (h/re-create "hara.util"))
+  (str (std.lib.foundation/re-create "hara.util"))
   
   (partial fs/relativize (fs/path "test/hara"))
   (map (comp symbol
              #(apply str (replace  {\_ "-" \/ "."} %))
-             #(str/replace % #"\.clj$" "")
+             #(std.string.common/replace % #"\.clj$" "")
              str
              (partial fs/relativize (fs/path "test"))
              first)

@@ -1,6 +1,6 @@
 (ns std.lib.transform.coerce-test
-  (:use code.test)
-  (:require [std.lib.transform.coerce :refer :all]))
+  (:require [std.lib.transform.coerce :refer :all])
+  (:use code.test))
 
 ^{:refer std.lib.transform.coerce/assoc-set :added "3.0"}
 (fact "associates a set as keys to a map"

@@ -1,6 +1,6 @@
 (ns js.lib.driver-postgres
   (:require [std.lang :as l]
-            [std.lib :as h])
+            [std.lib.foundation])
   (:refer-clojure :exclude [print send]))
 
 (l/script :js
@@ -28,7 +28,7 @@
   (rt/xt-config-set "js.lib.driver-postgres" env)
   (return env))
 
-(h/template-entries [l/tmpl-entry {:type :fragment
+(std.lib.foundation/template-entries [l/tmpl-entry {:type :fragment
                                    :base "Postgres"
                                    :tag "js"}]
   [Client])

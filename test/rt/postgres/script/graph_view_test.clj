@@ -1,12 +1,11 @@
 (ns rt.postgres.script.graph-view-test
-  (:use code.test)
-  (:require [rt.postgres.script.graph-view :as view]
+  (:require [rt.postgres.grammar.common-application :as app]
+            [rt.postgres.script.graph-view :as view]
             [rt.postgres.script.impl-base :as impl]
-            [rt.postgres.grammar.common-application :as app]
             [rt.postgres.script.test.scratch-v1 :as scratch]
-            [std.lib.schema :as schema]
             [std.lang :as l]
-            [std.lib :as h]))
+            [std.lib.schema :as schema])
+  (:use code.test))
 
 (l/script- :postgres
   {:require [[rt.postgres.script.test.scratch-v1 :as scratch]]

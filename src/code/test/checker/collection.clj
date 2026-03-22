@@ -1,7 +1,8 @@
 (ns code.test.checker.collection
   (:require [code.test.checker.common :as common]
             [code.test.checker.util :as util]
-            [std.lib :as h]
+            [std.lib.collection]
+            [std.lib.foundation]
             [std.lib.result :as res]))
 
 (defn verify-map
@@ -44,13 +45,13 @@
          (util/contains-all data ck)
 
          :else
-         (h/error  "modifiers can only be :gaps-only and :in-any-order"))))
+         (std.lib.foundation/error  "modifiers can only be :gaps-only and :in-any-order"))))
 
 (defn contains-map
   "map check helper function for `contains`"
   {:added "3.0"}
   ([x]
-   (let [ck (h/map-vals common/->checker x)]
+   (let [ck (std.lib.collection/map-vals common/->checker x)]
      (common/map->Checker
       {:tag :contains
        :doc "Checks if the result is a map having the following conditions:"
@@ -124,7 +125,7 @@
   "map check helper function for `just`"
   {:added "3.0"}
   ([x]
-   (let [ck (h/map-vals common/->checker x)]
+   (let [ck (std.lib.collection/map-vals common/->checker x)]
      (common/map->Checker
       {:tag :just
        :doc "Checks if the result is a map having strictly the following conditions:"
@@ -206,7 +207,7 @@
   {:added "3.0"}
   ([x]
    "A macro for nested checking of data in the `contains` form" (cond (map? x)
-                                                                      `(contains ~(h/map-vals (fn [v] `(contains-in ~v)) x))
+                                                                      `(contains ~(std.lib.collection/map-vals (fn [v] `(contains-in ~v)) x))
                                                                       (set? x)
                                                                       `(contains ~(mapv (fn [v] `(contains-in ~v)) x)
                                                                                  :in-any-order)
@@ -228,7 +229,7 @@
   {:added "3.0"}
   ([x]
    "A macro for nested checking of data in the `just` form" (cond (map? x)
-                                                                  `(just ~(h/map-vals (fn [v] `(just-in ~v)) x))
+                                                                  `(just ~(std.lib.collection/map-vals (fn [v] `(just-in ~v)) x))
 
                                                                   (set? x)
                                                                   `(just ~(mapv (fn [v] `(just-in ~v)) x)

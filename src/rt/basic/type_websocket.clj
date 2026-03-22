@@ -1,16 +1,19 @@
 (ns rt.basic.type-websocket
-  (:require [std.protocol.context :as protocol.context]
-            [std.lang.base.pointer :as ptr]
-            [std.lang.base.runtime :as default]
-            [rt.basic.type-common :as common]
-            [std.lib :as h :refer [defimpl]]
-            [std.json :as json]
-            [std.concurrent :as cc]
-            [std.string :as str]
-            [rt.basic.server-basic :as server]
+  (:require [rt.basic.server-basic :as server]
+            [rt.basic.server-websocket :as ws]
             [rt.basic.type-basic :as basic]
             [rt.basic.type-bench :as bench]
-            [rt.basic.server-websocket :as ws]))
+            [rt.basic.type-common :as common]
+            [std.concurrent :as cc]
+            [std.json :as json]
+            [std.lang.base.pointer :as ptr]
+            [std.lang.base.runtime :as default]
+            [std.lib.collection]
+            [std.lib.component]
+            [std.lib.foundation]
+            [std.lib.impl :refer [defimpl]]
+            [std.lib.os]
+            [std.protocol.context :as protocol.context]))
 
 (defn start-websocket
   "starts bench and server for websocket runtime"
@@ -41,9 +44,9 @@
            runtime
            process] :as m
     :or {runtime :websocket}}]
-  (let [process (h/merge-nested (common/get-options lang :websocket :default)
+  (let [process (std.lib.collection/merge-nested (common/get-options lang :websocket :default)
                                 process)]
-    (map->RuntimeWebsocket (merge  m {:id (or id (h/sid))
+    (map->RuntimeWebsocket (merge  m {:id (or id (std.lib.foundation/sid))
                                       :tag runtime
                                       :runtime runtime
                                       :process process
@@ -58,7 +61,7 @@
            program
            process] :as m}]
   (-> (rt-websocket:create m)
-      (h/start)))
+      (std.lib.component/start)))
 
 (comment
   (def rt (bench/start-bench :lua
@@ -66,6 +69,6 @@
                             49373
                             {}))
   bench/*active*
-  (h/sh-output (:process rt))
+  (std.lib.os/sh-output (:process rt))
   (bench/stop-bench rt)
   )

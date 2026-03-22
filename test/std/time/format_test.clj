@@ -1,12 +1,10 @@
 (ns std.time.format-test
-  (:use code.test)
   (:require [std.protocol.time :as time]
-            [std.time.format :as f]
             [std.time.common :as common]
+            [std.time.format :as f]
             [std.time.map :as map])
-  (:import (java.util Date Calendar TimeZone)
-           (java.sql Timestamp)
-           (java.time Instant Clock ZonedDateTime)))
+  (:use code.test)
+  (:import (java.util Date Calendar TimeZone) (java.sql Timestamp) (java.time Instant Clock ZonedDateTime)))
 
 ^{:refer std.time.format/cache :added "3.0"}
 (comment "helper function to access formatters by keyword"

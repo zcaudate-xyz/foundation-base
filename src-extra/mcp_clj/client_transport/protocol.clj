@@ -1,8 +1,6 @@
 (ns mcp-clj.client-transport.protocol
   "Transport protocol abstractions for MCP clients"
-  (:import
-    (java.util.concurrent
-      CompletableFuture)))
+  (:import (java.util.concurrent CompletableFuture)))
 
 (defprotocol Transport
   "Protocol for MCP client transport implementations"

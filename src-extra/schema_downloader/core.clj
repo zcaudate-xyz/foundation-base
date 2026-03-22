@@ -1,11 +1,9 @@
 (ns schema-downloader.core
-  (:require
-    [net.http.client :as http]
-    [clojure.data.json :as json]
-    [clojure.java.io :as io]
-    [std.lib :as h])
-  (:import
-    [java.io File])
+  (:require [clojure.data.json :as json]
+            [clojure.java.io :as io]
+            [net.http.client :as http]
+            [std.lib.env])
+  (:import [java.io File])
   (:gen-class))
 
 (def ^:const github-api-url
@@ -20,7 +18,7 @@
   "Fetches the directory listing from the GitHub API and filters for schema files."
   []
   (try
-    (h/p "Fetching file list from" github-api-url "...")
+    (std.lib.env/p "Fetching file list from" github-api-url "...")
     (let [response (http/get github-api-url
                                {:headers {"Accept" "application/vnd.github.v3+json"}})
 
@@ -31,18 +29,18 @@
                      (filter #(and (= "file" (:type %))
                                    (re-find #"\\.(json|idl)$" (:name %))))
                      (map #(select-keys % [:name :download_url])))]
-      (h/p (count files) "schema files found.")
+      (std.lib.env/p (count files) "schema files found.")
       files)
     (catch Exception e
-      (h/p "Failed to fetch or parse file list:")
-      (h/p (.getMessage e))
-      (h/p "This can happen if you are rate-limited by the GitHub API.")
+      (std.lib.env/p "Failed to fetch or parse file list:")
+      (std.lib.env/p (.getMessage e))
+      (std.lib.env/p "This can happen if you are rate-limited by the GitHub API.")
       [])))
 
 (defn download-and-save-schemas
   "Downloads each schema file from its raw URL and saves it."
   [files]
-  (h/p "Creating output directory:" output-dir)
+  (std.lib.env/p "Creating output directory:" output-dir)
   (.mkdirs (File. output-dir))
 
   (doseq [file-info files]
@@ -54,16 +52,16 @@
         ;; The download_url points to raw content, no decoding needed.
         (let [response (http/get download-url)]
           (spit output-file (:body response))
-          (h/p " done."))
+          (std.lib.env/p " done."))
         (catch Exception e
-          (h/p " failed:" (.getMessage e)))))))
+          (std.lib.env/p " failed:" (.getMessage e)))))))
 
 (defn -main
   "Main application entry point."
   [& args]
   (let [files (get-schema-files)]
     (if (empty? files)
-      (h/p "No files found to download. Exiting.")
+      (std.lib.env/p "No files found to download. Exiting.")
       (download-and-save-schemas files)))
-  (h/p "Schema download process complete.")
+  (std.lib.env/p "Schema download process complete.")
   (System/exit 0))

@@ -1,13 +1,13 @@
 (ns rt.solidity.compile-deploy-test
-  (:use code.test)
   (:require [rt.solidity.client :as client]
             [rt.solidity.compile-common :as compile-common]
-            [rt.solidity.compile-solc :as compile]
             [rt.solidity.compile-deploy :as deploy]
+            [rt.solidity.compile-solc :as compile]
             [rt.solidity.env-ganache :as env]
-            [web3.lib.example-erc20 :as example-erc20]
             [std.lang :as l]
-            [std.lib :as h]))
+            [std.lib.component]
+            [web3.lib.example-erc20 :as example-erc20])
+  (:use code.test))
 
 (l/script- :solidity
   {:config  {:mode :clean}
@@ -30,7 +30,7 @@
              (compile/compile-rt-eval
               +rt+
               '[(:= (!:G ethers) (require "ethers"))])]
-  :teardown [(h/stop +rt+)]}
+  :teardown [(std.lib.component/stop +rt+)]}
 (fact "deploy abi"
   ^:hidden
   
@@ -47,7 +47,7 @@
              (compile/compile-rt-eval
               +rt+
               '[(:= (!:G ethers) (require "ethers"))])]
-  :teardown [(h/stop +rt+)]}
+  :teardown [(std.lib.component/stop +rt+)]}
 (fact "deploys a pointer"
   ^:hidden
 

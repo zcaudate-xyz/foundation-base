@@ -1,7 +1,7 @@
 (ns rt.postgres.grammar.common-application-test
-  (:use code.test)
   (:require [rt.postgres.grammar.common-application :refer :all]
-            [std.lang :as l]))
+            [std.lang :as l])
+  (:use code.test))
 
 ^{:refer rt.postgres.grammar.common-application/app-modules :added "4.0"}
 (fact "checks for modules related to a given application"

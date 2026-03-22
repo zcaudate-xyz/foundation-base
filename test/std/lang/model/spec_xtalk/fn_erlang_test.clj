@@ -1,6 +1,6 @@
 (ns std.lang.model.spec-xtalk.fn-erlang-test
-  (:use code.test)
-  (:require [std.lang.model.spec-xtalk.fn-erlang :refer :all]))
+  (:require [std.lang.model.spec-xtalk.fn-erlang :refer :all])
+  (:use code.test))
 
 ^{:refer std.lang.model.spec-xtalk.fn-erlang/erlang-tf-x-fn :added "4.1"}
 (fact "TODO")

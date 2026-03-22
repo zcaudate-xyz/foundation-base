@@ -1,7 +1,8 @@
 (ns lua.nginx
-  (:require [std.lib :as h]
-            [std.lang :as l]
-            [std.string :as str]
+  (:require [std.lang :as l]
+            [std.lib.env]
+            [std.lib.foundation]
+            [std.lib.template]
             [xt.lang.base-repl :as repl])
   (:refer-clojure :exclude [print flush time re-find]))
 
@@ -183,7 +184,7 @@
   {:added "4.0"}
   [message data]
   (let [pos   (meta (l/macro-form))
-        nsstr (str (h/ns-sym)
+        nsstr (str (std.lib.env/ns-sym)
                    [(:line pos)
                     (:column pos)])]
     (list 'ngx.log 'ngx.ALERT
@@ -199,7 +200,7 @@
   "returns an http 200 response"
   {:added "4.0"}
   [out]
-  (h/$ (do (:= ngx.status ngx.HTTP-OK)
+  (std.lib.template/$ (do (:= ngx.status ngx.HTTP-OK)
            (ngx.say ~out)
            (return (ngx.exit ngx.HTTP-OK)))))
 
@@ -207,7 +208,7 @@
   "returns an error code"
   {:added "4.0"}
   [err code]
-  (h/$ (do (:= ngx.status ~code)
+  (std.lib.template/$ (do (:= ngx.status ~code)
            (ngx.say ~err)
            (return (ngx.exit ~code)))))
 
@@ -215,7 +216,7 @@
   "returns a message with output"
   {:added "4.0"}
   [out]
-  (h/$ (do (:= ngx.status ngx.HTTP-OK)
+  (std.lib.template/$ (do (:= ngx.status ngx.HTTP-OK)
            (ngx.say (cjson.encode ~out))
            (return (ngx.exit ngx.HTTP-OK)))))
 
@@ -300,7 +301,7 @@
   "starts a task loop (usually in `init-worker-by-lua-block`) section"
   {:added "4.0"}
   [f]
-  (h/$ (ngx.timer.at 0 (fn []
+  (std.lib.template/$ (ngx.timer.at 0 (fn []
                          (ngx.thread.spawn ~f)))))
 
 (defmacro.lua shared
@@ -308,7 +309,7 @@
   {:added "4.0"}
   ([key]
    (list '. 'ngx.shared [(if (keyword? key)
-                           (h/strn key)
+                           (std.lib.foundation/strn key)
                            key)])))
 
 (defn ngx-tmpl
@@ -319,9 +320,9 @@
                  (.replaceAll "\\." "-")
                  (.replaceAll "_" "-")
                  (symbol))]
-    (h/$ (def$.lua ~nsym ~(symbol (str "ngx." sym))))))
+    (std.lib.template/$ (def$.lua ~nsym ~(symbol (str "ngx." sym))))))
 
-(h/template-entries [ngx-tmpl]
+(std.lib.foundation/template-entries [ngx-tmpl]
   +core+
   +http-method+
   +http-status+
@@ -336,7 +337,7 @@
    => string?"
   {:added "4.0"}
   [file]
-  (h/$ (cat (ngx.config.prefix) ~file)))
+  (std.lib.template/$ (cat (ngx.config.prefix) ~file)))
 
 ;;
 ;; SHA

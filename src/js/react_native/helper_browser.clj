@@ -1,6 +1,5 @@
 (ns js.react-native.helper-browser
-  (:require [std.lang :as  l]
-            [std.lib :as h]))
+  (:require [std.lang :as l]))
 
 (l/script :js
   {:require [[xt.lang.base-lib :as k]

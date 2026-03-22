@@ -1,20 +1,8 @@
 (ns mcp-clj.http-client.core
+  (:require [clojure.string :as str]
+            [mcp-clj.json :as json])
   "HTTP client implementation using JDK HttpClient"
-  (:require
-    [clojure.string :as str]
-    [mcp-clj.json :as json])
-  (:import
-    (java.net
-      URI)
-    (java.net.http
-      HttpClient
-      HttpRequest
-      HttpRequest$BodyPublishers
-      HttpResponse
-      HttpResponse$BodyHandler
-      HttpResponse$BodyHandlers)
-    (java.time
-      Duration)))
+  (:import (java.net URI) (java.net.http HttpClient HttpRequest HttpRequest$BodyPublishers HttpResponse HttpResponse$BodyHandler HttpResponse$BodyHandlers) (java.time Duration)))
 
 ;; HTTP Client Creation
 

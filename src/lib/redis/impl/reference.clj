@@ -1,7 +1,10 @@
 (ns lib.redis.impl.reference
   (:require [std.json :as json]
-            [std.string :as str]
-            [std.lib :as h :refer [definvoke]]))
+            [std.lib.collection]
+            [std.lib.env]
+            [std.lib.invoke :refer [definvoke]]
+            [std.string.case]
+            [std.string.common]))
 
 (def +main-path+
   "assets/lib.redis/commands.json")
@@ -28,7 +31,7 @@
                      s (if (:multiple a) (str s " [" s " ..]") s)
                      s (if (:optional a) (str "[" s "]") s)]
                  s))]
-     (str (str/join " " prefix) " "
+     (str (std.string.common/join " " prefix) " "
           (apply str (interpose " " (map fmt arguments)))))))
 
 (definvoke parse-main
@@ -39,11 +42,11 @@
    (let [struct (json/read content json/+keyword-case-mapper+)
          prep   (fn [{:keys [id] :as m}]
                   (-> m
-                      (update :group (comp keyword str/spear-case))
+                      (update :group (comp keyword std.string.case/spear-case))
                       (assoc  :summary (command-doc m))
-                      (assoc  :prefix (->> (str/split (name id) #"-")
-                                           (map str/upper-case)))))]
-     (h/map-entries (fn [[id m]]
+                      (assoc  :prefix (->> (std.string.common/split (name id) #"-")
+                                           (map std.string.common/upper-case)))))]
+     (std.lib.collection/map-entries (fn [[id m]]
                       [id (prep (assoc m :id id))])
                     struct))))
 
@@ -61,7 +64,7 @@
                      :flags (into (set (map keyword flags))
                                   (map (comp keyword #(subs % 1)) xflags))})]
      (->> struct
-          (map (juxt (comp keyword str/lower-case first)
+          (map (juxt (comp keyword std.string.common/lower-case first)
                      (comp parse-fn rest)))
           (into {})))))
 
@@ -75,9 +78,9 @@
   ([]
    (parse-commands +main-path+ +supplement-path+))
   ([main-path supplement-path]
-   (let [main (parse-main (h/sys:resource-content main-path))
-         supplement (parse-supplements (h/sys:resource-content supplement-path))]
-     (h/map-vals (fn [{:keys [id] :as m}]
+   (let [main (parse-main (std.lib.env/sys:resource-content main-path))
+         supplement (parse-supplements (std.lib.env/sys:resource-content supplement-path))]
+     (std.lib.collection/map-vals (fn [{:keys [id] :as m}]
                    (merge m (get supplement id)))
                  main))))
 
@@ -91,7 +94,7 @@
   ([]
    (sort (keys (parse-commands))))
   ([group]
-   (sort (keys (h/filter-vals (comp #{group} :group) (parse-commands))))))
+   (sort (keys (std.lib.collection/filter-vals (comp #{group} :group) (parse-commands))))))
 
 (defn command
   "gets the command info

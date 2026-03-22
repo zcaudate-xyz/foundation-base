@@ -1,10 +1,9 @@
 (ns std.lang.base.emit-top-level-test
-  (:use code.test)
-  (:require [std.lang.base.emit-top-level :refer :all]
-            [std.lang.base.emit-common :as common]
+  (:require [std.lang.base.emit-common :as common]
             [std.lang.base.emit-helper :as helper]
-            [std.lang.base.grammar :as grammar]
-            [std.lib :as h]))
+            [std.lang.base.emit-top-level :refer :all]
+            [std.lang.base.grammar :as grammar])
+  (:use code.test))
 
 (def +reserved+
   (-> (grammar/build-min [:macro-case])

@@ -1,9 +1,9 @@
 (ns jvm.classloader.url-classloader
-  (:require [std.string :as str]
-            [jvm.classloader.common :as common]
+  (:require [jvm.classloader.common :as common]
             [jvm.protocol :as protocol.classloader]
+            [std.lib.collection]
             [std.object.query :as reflect]
-            [std.lib :as h])
+            [std.string.common])
   (:import (java.net URL URLClassLoader)))
 
 (defonce loader-access-ucp  (reflect/query-class URLClassLoader ["ucp" :#]))
@@ -34,15 +34,15 @@
         ^java.util.HashMap lmap (ucp-access-lmap ucp)       ;; util.HashMap
 
         ;;find entry in paths
-        paths-entry (h/element-at #(= (str %) (str entry)) paths)
+        paths-entry (std.lib.collection/element-at #(= (str %) (str entry)) paths)
         _  (if paths-entry (.remove paths paths-entry))
 
         ;;find entry in stack and delete it
-        urls-entry (h/element-at #(= (str %) (str entry)) urls)
+        urls-entry (std.lib.collection/element-at #(= (str %) (str entry)) urls)
         _ (if urls-entry (.remove urls urls-entry))
 
         ;; find loader in lookup
-        url-key (h/element-at #(= %
+        url-key (std.lib.collection/element-at #(= %
                                   (str (.getProtocol entry)
                                        "://"
                                        (.getFile entry)))
@@ -60,7 +60,7 @@
                   (.hashCode v)
                   (->> (protocol.classloader/-all-urls v)
                        (mapv #(-> (str %)
-                                  (str/split #"/")
+                                  (std.string.common/split #"/")
                                   last)))))))
 
 (extend-type (identity +ucp-type+) ;; jdk.internal.loader.URLClassPath
@@ -68,7 +68,7 @@
   (-has-url?    [ucp path]
     (boolean (protocol.classloader/-get-url ucp path)))
   (-get-url     [ucp path]
-    (h/element-at #(= (str %) (str (common/to-url path)))
+    (std.lib.collection/element-at #(= (str %) (str (common/to-url path)))
                   (ucp-access-path ucp)))
   (-all-urls    [ucp]
     (seq (ucp-get-urls ucp)))

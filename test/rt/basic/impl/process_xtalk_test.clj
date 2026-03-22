@@ -1,7 +1,6 @@
 (ns rt.basic.impl.process-xtalk-test
-  (:use code.test)
-  (:require [rt.basic.impl.process-xtalk :refer :all]
-            [std.lib :as h]))
+  (:require [rt.basic.impl.process-xtalk :refer :all])
+  (:use code.test))
 
 ^{:refer rt.basic.impl.process-xtalk/read-output :added "4.0"}
 (fact "read output for scheme"

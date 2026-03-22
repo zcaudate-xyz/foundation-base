@@ -1,6 +1,6 @@
 (ns lua.nginx.driver-postgres-test
-  (:use code.test)
-  (:require [lua.nginx.driver-postgres :refer :all]))
+  (:require [lua.nginx.driver-postgres :refer :all])
+  (:use code.test))
 
 ^{:refer lua.nginx.driver-postgres/default-env :added "4.0"}
 (fact "gets the default env")

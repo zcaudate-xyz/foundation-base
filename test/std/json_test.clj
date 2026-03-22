@@ -1,6 +1,6 @@
 (ns std.json-test
-  (:use code.test)
   (:require [std.json :refer :all])
+  (:use code.test)
   (:refer-clojure :exclude [read]))
 
 ^{:refer std.json/clojure-module :added "3.0"}

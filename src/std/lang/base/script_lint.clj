@@ -1,8 +1,13 @@
 (ns std.lang.base.script-lint
-  (:require [std.lib :as h :refer [definvoke]]
-            [std.string :as str]
+  (:require [clojure.set]
+            [std.lang.base.impl :as impl]
             [std.lang.base.library :as lib]
-            [std.lang.base.impl :as impl]))
+            [std.lib.collection]
+            [std.lib.env]
+            [std.lib.foundation]
+            [std.lib.invoke :refer [definvoke]]
+            [std.lib.walk]
+            [std.string.common]))
 
 ;;
 ;; dumb linter
@@ -21,7 +26,7 @@
   {:added "4.0"}
   [form]
   (let [vars (volatile! #{})
-        _ (h/prewalk (fn [form]
+        _ (std.lib.walk/prewalk (fn [form]
                        (cond (symbol? form)
                              (do (vswap! vars conj form)
                                  form)
@@ -34,11 +39,11 @@
   "collects global symbols from module"
   {:added "4.0"}
   [:recent {:key :id
-            :compare h/hash-code}]
+            :compare std.lib.foundation/hash-code}]
   ([module]
    (let [{:keys [native static]} module]
-     (disj (h/union
-            (set (mapcat #(mapcat h/seqify (vals %))
+     (disj (clojure.set/union
+            (set (mapcat #(mapcat std.lib.collection/seqify (vals %))
                          (vals native)))
             (:lang/lint-globals static))
            '*))))
@@ -49,7 +54,7 @@
   ([entry module]
    (collect-sym-vars entry module #{}))
   ([entry module lang-globals]
-   (let [globals  (or (h/union lang-globals
+   (let [globals  (or (clojure.set/union lang-globals
                                (collect-module-globals module)
                                (:static/lint-globals entry))
                       #{})
@@ -68,17 +73,17 @@
                   (let [[ftag] form
                         form (if (and (= ftag 'fn)
                                       (symbol? (second form)))
-                               (do (vswap! vars h/union (collect-vars (second form)))
+                               (do (vswap! vars clojure.set/union (collect-vars (second form)))
                                    (cons 'fn (drop 2 form)))
                                form)]
                     (cond (#{'var 'const 'fn:> 'fn 'local} ftag)
-                          (do (vswap! vars h/union (collect-vars (second form)))
+                          (do (vswap! vars clojure.set/union (collect-vars (second form)))
                               (drop 2 form))
 
                           (= '. ftag)
                           (let [[_ sym & body] form]
                             [sym (map (fn [form]
-                                        (cond (h/form? form)
+                                        (cond (std.lib.collection/form? form)
                                               (drop 1 form)
 
                                               (symbol? form)
@@ -87,17 +92,17 @@
                                               :else form))
                                       body)])
                           
-                          (or (str/starts-with? (str ftag) "for:")
+                          (or (std.string.common/starts-with? (str ftag) "for:")
                               (= (str ftag) "forange"))
                           (let [[_ bindings & body] form]
-                            (do (vswap! vars h/union (collect-vars (first bindings)))
+                            (do (vswap! vars clojure.set/union (collect-vars (first bindings)))
                                 [(second bindings) body]))
                           
                           (= 'let ftag)
                           (let [[_ bindings & body] form
                                 all-bindings (take-nth 2 bindings)
                                 all-bound    (take-nth 2 (drop 1 bindings))]
-                            (do (vswap! vars h/union (collect-vars all-bindings))
+                            (do (vswap! vars clojure.set/union (collect-vars all-bindings))
                                 [all-bound body]))
                           
                           ('#{!:G new} ftag)
@@ -106,13 +111,13 @@
 
                           (= 'catch ftag)
                           (let [[_ bindings & body] form]
-                            (do (vswap! vars h/union (collect-vars bindings))
+                            (do (vswap! vars clojure.set/union (collect-vars bindings))
                                 body))
                           
                           :else form)))
-         _    (h/prewalk
+         _    (std.lib.walk/prewalk
                (fn [form]
-                 (cond (h/form? form)
+                 (cond (std.lib.collection/form? form)
                        (sym-fn form)
                        
                        (symbol? form)
@@ -120,14 +125,14 @@
                                  (globals form)
                                  (reserved form)
                                  (namespace form)
-                                 (str/starts-with? (str form)
+                                 (std.string.common/starts-with? (str form)
                                                    "x:")
-                                 (str/starts-with? (str form)
+                                 (std.string.common/starts-with? (str form)
                                                    "..."))
                              form
                              
                              :else
-                             (let [s  (first (str/split (str form)
+                             (let [s  (first (std.string.common/split (str form)
                                                         #"\."))
                                    s  (if s (symbol s))]
                                (cond (or (nil? s)
@@ -158,19 +163,19 @@
            (let [{:keys [vars syms]} (collect-sym-vars entry module lang-globals)
                  internal (disj (set (vals (:internal module)))
                                 '-)
-                 unused  (h/difference (disj vars '_) syms)
-                 unknown (h/difference syms vars)
-                 unknown (h/difference unknown internal)]
+                 unused  (clojure.set/difference (disj vars '_) syms)
+                 unknown (clojure.set/difference syms vars)
+                 unknown (clojure.set/difference unknown internal)]
              (when (not-empty unused)
                (when (= :print (:unused options))
-                 (h/p (str "UNUSED VAR @ " (:module entry) "/" id)
+                 (std.lib.env/p (str "UNUSED VAR @ " (:module entry) "/" id)
                       {:unused unused})))
              (when (not-empty unknown)
                (when (= :print (:unknown options))
-                 (h/p (str "UNKNOWN VARIABLES @ " (:module entry) "/" id)
+                 (std.lib.env/p (str "UNKNOWN VARIABLES @ " (:module entry) "/" id)
                       {:unknown unknown}))
                (when (= :error (:unknown options))
-                 (h/error (str "UNKNOWN VARIABLES @ " (:module entry) "/" id)
+                 (std.lib.foundation/error (str "UNKNOWN VARIABLES @ " (:module entry) "/" id)
                           {:unknown unknown
                            :form (or (:form entry)
                                      (:form-input entry))})))

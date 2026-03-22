@@ -1,10 +1,10 @@
 (ns std.vm.llvm-interpreter-test
-  (:use code.test)
-  (:require [std.vm.llvm-interpreter :as llvm]
-            [std.block.parse :as parse]
+  (:require [std.block.parse :as parse]
+            [std.lib.env]
             [std.lib.zip :as zip]
-            [std.lib :as h]
-            [std.string :as str]))
+            [std.string.common]
+            [std.vm.llvm-interpreter :as llvm])
+  (:use code.test))
 
 ^{:refer std.vm.llvm-interpreter/block-zip :added "4.0"}
 (fact "creates a zipper for the block"
@@ -13,7 +13,7 @@
 
 ^{:refer std.vm.llvm-interpreter/clear-screen :added "4.0"}
 (fact "clears the screen"
-  (h/with-out-str
+  (std.lib.env/with-out-str
     (llvm/clear-screen))
   => "\u001b[2J\u001b[H")
 
@@ -21,7 +21,7 @@
 (fact "highlights the current node in the zipper"
   (let [z (llvm/block-zip (parse/parse-string "(a b c)"))
         z (llvm/highlight z)]
-    (pr-str (zip/right-element z)) => (fn [s] (str/includes? s "a"))))
+    (pr-str (zip/right-element z)) => (fn [s] (std.string.common/includes? s "a"))))
 
 ^{:refer std.vm.llvm-interpreter/block-val :added "4.0"}
 (fact "gets the value of a block"
@@ -136,7 +136,7 @@
                   [ret i32 0]))"
         vm (llvm/make-vm (parse/parse-string code))
         z (llvm/highlight-ip vm)]
-    (pr-str (zip/right-element z)) => (fn [s] (str/includes? s "ret"))))
+    (pr-str (zip/right-element z)) => (fn [s] (std.string.common/includes? s "ret"))))
 
 ^{:refer std.vm.llvm-interpreter/visualize :added "4.0"}
 (fact "visualizes the VM state"
@@ -144,16 +144,16 @@
                 (entry
                   [ret i32 0]))"
         vm (llvm/make-vm (parse/parse-string code))]
-    (h/with-out-str (llvm/visualize vm))
-    => (fn [s] (str/includes? s "Registers"))))
+    (std.lib.env/with-out-str (llvm/visualize vm))
+    => (fn [s] (std.string.common/includes? s "Registers"))))
 
 ^{:refer std.vm.llvm-interpreter/animate :added "4.0"}
 (fact "animates the execution"
   (let [code "(define @main (i32)
                 (entry
                   [ret i32 0]))"]
-    (h/with-out-str (llvm/animate code 0))
-    => (fn [s] (str/includes? s "Finished"))))
+    (std.lib.env/with-out-str (llvm/animate code 0))
+    => (fn [s] (std.string.common/includes? s "Finished"))))
 
 
 (comment

@@ -1,8 +1,8 @@
 (ns std.log.common-test
-  (:use code.test)
-  (:require [std.log.common :as common]
-            [std.protocol.log :as protocol.log]
-            [std.log :as log]))
+  (:require [std.log :as log]
+            [std.log.common :as common]
+            [std.protocol.log :as protocol.log])
+  (:use code.test))
 
 ^{:refer std.log.common/set-static! :added "3.0"}
 (fact "sets the global static variable"

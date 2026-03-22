@@ -1,6 +1,6 @@
 (ns std.concurrent.request-apply-test
-  (:use [code.test :exclude [run]])
-  (:require [std.concurrent.request-apply :refer :all]))
+  (:require [std.concurrent.request-apply :refer :all])
+  (:use [code.test :exclude [run]]))
 
 ^{:refer std.concurrent.request-apply/req-call :added "3.0"}
 (fact "extensible function for a request applicative")

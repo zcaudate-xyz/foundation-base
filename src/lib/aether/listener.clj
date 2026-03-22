@@ -1,10 +1,9 @@
 (ns lib.aether.listener
-  (:require [std.print :as print]
+  (:require [jvm.artifact :as artifact]
             [std.fs :as fs]
-            [jvm.artifact :as artifact]
-            [std.object :as object])
-  (:import (org.eclipse.aether RepositoryEvent RepositoryListener)
-           (org.eclipse.aether.transfer TransferEvent TransferListener TransferResource)))
+            [std.object :as object]
+            [std.print :as print])
+  (:import (org.eclipse.aether RepositoryEvent RepositoryListener) (org.eclipse.aether.transfer TransferEvent TransferListener TransferResource)))
 
 (def ^:dynamic *progress* nil)
 

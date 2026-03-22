@@ -1,7 +1,7 @@
 (ns std.lib.impl-test
-  (:use code.test)
   (:require [std.lib.impl :refer :all]
-            [std.protocol.dispatch :as protocol.dispatch]))
+            [std.protocol.dispatch :as protocol.dispatch])
+  (:use code.test))
 
 (defprotocol ITest
   (-val [obj] [obj k])

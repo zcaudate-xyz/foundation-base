@@ -1,9 +1,7 @@
 (ns rt.verilog.grammar-test
-  (:use code.test)
   (:require [rt.verilog.grammar :refer :all]
-            [std.lang :as l]
-            [std.lib :as h]
-            [std.string :as str]))
+            [std.lang :as l])
+  (:use code.test))
 
 ^{:refer rt.verilog.grammar/tf-module :added "4.1"}
 (fact "transforms module definition"

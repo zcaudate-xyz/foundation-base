@@ -1,6 +1,6 @@
 (ns js.lib.eth-lib
   (:require [std.lang :as l]
-            [std.lib :as h]
+            [std.lib.foundation]
             [xt.lang.base-notify :as notify])
   (:refer-clojure :exclude [compile]))
 
@@ -38,7 +38,7 @@
   to-bignum
   ethers.BigNumber.from)
 
-(h/template-entries [l/tmpl-macro {:base "Provider"
+(std.lib.foundation/template-entries [l/tmpl-macro {:base "Provider"
                                    :inst "p"
                                    :tag "js"}]
   [;; Accounts
@@ -83,7 +83,7 @@
    [listenerCount [name]]
    [listeners [name]]])
 
-(h/template-entries [l/tmpl-macro {:base "Signer"
+(std.lib.foundation/template-entries [l/tmpl-macro {:base "Signer"
                                    :inst "signer"
                                    :tag "js"}]
   [;; Accounts
@@ -95,7 +95,7 @@
    [checkTransaction  [tx]]
    [populateTransaction  [tx]]])
 
-(h/template-entries [l/tmpl-macro {:base "ContractFactory"
+(std.lib.foundation/template-entries [l/tmpl-macro {:base "ContractFactory"
                                    :inst "factory"
                                    :tag "js"}]
   [;; Deploy

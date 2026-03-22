@@ -1,6 +1,6 @@
 (ns indigo.server-test
-  (:use code.test)
-  (:require [indigo.server :refer :all]))
+  (:require [indigo.server :refer :all])
+  (:use code.test))
 
 ^{:refer indigo.server/start-vite! :added "4.1"}
 (fact "TODO")

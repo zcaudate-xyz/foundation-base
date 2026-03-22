@@ -1,9 +1,12 @@
 (ns std.lang.base.grammar
-  (:require [std.lib :as h :refer [defimpl]]
-            [std.string :as str]
-            [std.lang.base.grammar-spec :as spec]
+  (:require [clojure.set]
             [std.lang.base.grammar-macro :as macro]
-            [std.lang.base.grammar-xtalk :as xtalk]))
+            [std.lang.base.grammar-spec :as spec]
+            [std.lang.base.grammar-xtalk :as xtalk]
+            [std.lib.collection]
+            [std.lib.foundation]
+            [std.lib.impl :refer [defimpl]]
+            [std.string.common]))
 
 (defn gen-ops
   "generates ops
@@ -15,13 +18,13 @@
   (->> (ns-publics ns)
        (keep (fn [[k var]]
                (let [kname  (name k)]
-                 (if (str/starts-with? kname "+")
+                 (if (std.string.common/starts-with? kname "+")
                    [(keyword (subs kname 4 (dec (count kname))))
                     var]))))
        (sort-by (fn [[k var]]
                   (:line (meta var))))
        (mapv    (fn [[k var]]
-                  [k (symbol shortcut (name (h/var-sym var)))]))))
+                  [k (symbol shortcut (name (std.lib.foundation/var-sym var)))]))))
 
 (defn collect-ops
   "collects alll ops together
@@ -32,7 +35,7 @@
   [arr]
   (->> (map-indexed (fn [i [k v]]
                       [k (with-meta
-                           (h/map-juxt [:op identity]
+                           (std.lib.collection/map-juxt [:op identity]
                                        v)
                            {:order i})])
                     arr)
@@ -121,7 +124,7 @@
   {:added "4.0"}
   ([& [ks]]
    (mapv (fn [k]
-           [k (h/map-vals :symbol
+           [k (std.lib.collection/map-vals :symbol
                           (get +op-all+ k))])
          (or ks (ops-list)))))
 
@@ -228,20 +231,20 @@
   "overrides existing ops in the map"
   {:added "4.0"}
   [build m]
-  (let [ks (h/difference (set (keys m))
+  (let [ks (clojure.set/difference (set (keys m))
                          (set (keys build)))
         _  (if (not-empty ks)
-             (h/error "Keys not in original map: " {:keys ks}))]
-    (h/merge-nested build m)))
+             (std.lib.foundation/error "Keys not in original map: " {:keys ks}))]
+    (std.lib.collection/merge-nested build m)))
 
 (defn build:extend
   "adds new  ops in the map"
   {:added "4.0"}
   [build m]
-  (let [ks (h/intersection (set (keys m))
+  (let [ks (clojure.set/intersection (set (keys m))
                            (set (keys build)))
         _  (if (not-empty ks)
-             (h/error "Keys in original map: " {:keys ks}))]
+             (std.lib.foundation/error "Keys in original map: " {:keys ks}))]
     (merge build m)))
 
 (defn to-reserved
@@ -259,21 +262,21 @@
   "returns all the `:block` and `:fn` forms"
   {:added "3.0"}
   ([reserved]
-   (h/map-juxt [identity
-                (fn [k] (set (keys (h/filter-vals (comp #{k} :type) reserved))))]
+   (std.lib.collection/map-juxt [identity
+                (fn [k] (set (keys (std.lib.collection/filter-vals (comp #{k} :type) reserved))))]
                [:block :def :fn])))
 
 (defn grammar-sections
   "process sections witihin the grammar"
   {:added "3.0"}
   ([reserved]
-   (set (vals (h/keep-vals :section reserved)))))
+   (set (vals (std.lib.collection/keep-vals :section reserved)))))
 
 (defn grammar-macros
   "process macros within the grammar"
   {:added "3.0"}
   ([reserved]
-   (set (keys (h/filter-vals (comp #{:def} :type) reserved)))))
+   (set (keys (std.lib.collection/filter-vals (comp #{:def} :type) reserved)))))
 
 (defn- grammar-string
   ([{:keys [tag structure reserved banned highlight macros sections] :as grammar}]

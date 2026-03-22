@@ -1,9 +1,9 @@
 (ns js.lib.eth-solc-test
-  (:use code.test)
-  (:require [std.lib :as h]
+  (:require [rt.solidity :as s]
+            [rt.solidity.env-ganache :as env-ganache]
             [std.lang :as l]
-            [rt.solidity :as s]
-            [rt.solidity.env-ganache :as env-ganache]))
+            [std.string.prose])
+  (:use code.test))
 
 (l/script- :js
   {:runtime :basic
@@ -27,12 +27,12 @@
   ^:hidden
   
   (eth-solc/contract-wrap-body
-   (std.string/|
+   (std.string.prose/|
     "function test___hello() pure public returns(string memory) {"
     "  return \"HELLO WORLD\";"
     "}")
    "Test")
-  => (std.string/|
+  => (std.string.prose/|
    "// SPDX-License-Identifier: GPL-3.0"
    "pragma solidity >=0.7.0 <0.9.0;"
    ""
@@ -50,7 +50,7 @@
    (k/obj-keys
     (eth-solc/contract-compile
      (eth-solc/contract-wrap-body
-      (@! (std.string/|
+      (@! (std.string.prose/|
            "function test___hello() pure public returns(string memory) {"
            "  return \"HELLO WORLD\";"
            "}"))

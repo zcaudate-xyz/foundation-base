@@ -1,9 +1,8 @@
 (ns std.lib.security.verify-test
-  (:use code.test)
-  (:require [std.lib.security.verify :refer :all]
+  (:require [std.lib.encode :as encode]
             [std.lib.security.key :as key]
-            [std.lib.encode :as encode]
-            [std.string :as str]))
+            [std.lib.security.verify :refer :all])
+  (:use code.test))
 
 ^{:refer std.lib.security.verify/digest :added "3.0" :class [:security/verify]}
 (fact "creates a digest out of a byte array"

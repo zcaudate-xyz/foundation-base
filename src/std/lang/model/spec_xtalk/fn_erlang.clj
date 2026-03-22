@@ -1,6 +1,4 @@
-(ns std.lang.model.spec-xtalk.fn-erlang
-  (:require [std.lib :as h]
-            [std.string :as str]))
+(ns std.lang.model.spec-xtalk.fn-erlang)
 
 ;;
 ;; HELPER

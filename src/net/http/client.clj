@@ -1,23 +1,12 @@
 (ns net.http.client
-  (:require [std.lib.enum :as enum]
-            [std.lib :as h]
-            [net.http.common :as common]
+  (:require [net.http.common :as common]
+            [std.lib.collection]
+            [std.lib.enum :as enum]
             [std.object :as object]
             [std.object.framework.read :as read]
-            [std.string :as str])
-  (:import (java.net.http HttpRequest
-                          HttpRequest$Builder
-                          HttpRequest$BodyPublishers
-                          HttpResponse
-                          HttpResponse$BodySubscribers
-                          HttpResponse$BodyHandlers
-                          HttpClient
-                          HttpClient$Builder
-                          HttpClient$Redirect
-                          HttpClient$Version)
-           (jdk.internal.net.http HttpClientBuilderImpl)
-           (java.util.function Function Supplier)
-           (java.net URI))
+            [std.string.coerce]
+            [std.string.common])
+  (:import (java.net.http HttpRequest HttpRequest$Builder HttpRequest$BodyPublishers HttpResponse HttpResponse$BodySubscribers HttpResponse$BodyHandlers HttpClient HttpClient$Builder HttpClient$Redirect HttpClient$Version) (jdk.internal.net.http HttpClientBuilderImpl) (java.util.function Function Supplier) (java.net URI))
   (:refer-clojure :exclude [get]))
 
 (defn- ->function ^Function [f]
@@ -61,7 +50,7 @@
   ([cls]
    (->> (object/read-getters-form cls +getter-opts+ object/query-hierarchy)
         (eval)
-        (h/map-vals #(update % :fn wrap-get-optional)))))
+        (std.lib.collection/map-vals #(update % :fn wrap-get-optional)))))
 
 (object/map-like
  HttpClient
@@ -160,7 +149,7 @@
   ([headers]
    (->> headers
         (mapcat (fn [[k v :as p]]
-                  (let [k (str/to-string k)]
+                  (let [k (std.string.coerce/to-string k)]
                     (if (sequential? v)
                       (interleave (repeat k) v)
                       [k v]))))
@@ -184,7 +173,7 @@
      (cond-> (HttpRequest/newBuilder)
        (some? expect-continue?) (.expectContinue expect-continue?)
        (seq headers)            (.headers (request-headers headers))
-       method                   (.method (str/upper-case (name method))
+       method                   (.method (std.string.common/upper-case (name method))
                                          (request-body body))
        timeout                  (.timeout (ms->duration timeout))
        uri                      (.uri (URI/create uri))

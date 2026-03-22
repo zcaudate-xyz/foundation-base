@@ -1,13 +1,5 @@
 (ns std.concurrent.queue
-  (:require [std.lib :as h])
-  (:import (java.util.concurrent BlockingQueue
-                                 BlockingDeque
-                                 ArrayBlockingQueue
-                                 LinkedBlockingQueue
-                                 LinkedBlockingDeque
-                                 SynchronousQueue
-                                 TimeUnit)
-           (hara.lib.concurrent LimitedQueue))
+  (:import (java.util.concurrent BlockingQueue BlockingDeque ArrayBlockingQueue LinkedBlockingQueue LinkedBlockingDeque SynchronousQueue TimeUnit) (hara.lib.concurrent LimitedQueue))
   (:refer-clojure :exclude [take pop take-last peek remove]))
 
 (def ^:private +units+

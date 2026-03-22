@@ -1,15 +1,14 @@
 (ns std.concurrent.relay.transport
-  (:require [std.protocol.component :as protocol.component]
-            [std.concurrent.bus :as bus]
+  (:require [std.concurrent.bus :as bus]
             [std.concurrent.queue :as q]
-            [std.lib :as h :refer [defimpl]]
-            [std.string :as str])
+            [std.lib.atom]
+            [std.lib.foundation]
+            [std.lib.impl :refer [defimpl]]
+            [std.lib.time]
+            [std.protocol.component :as protocol.component]
+            [std.string.common])
   (:refer-clojure :exclude [send])
-  (:import (java.io InputStream
-                    OutputStream
-                    InputStreamReader
-                    BufferedReader
-                    ByteArrayOutputStream)))
+  (:import (java.io InputStream OutputStream InputStreamReader BufferedReader ByteArrayOutputStream)))
 
 (defn bytes-output
   "creates a byte output stream"
@@ -24,11 +23,11 @@
   (proxy [java.io.InputStream] []
     (available [] (count (first @out)))
     (readAllBytes []
-      (h/swap-return! out
+      (std.lib.atom/swap-return! out
         (fn [arr]
-          [(.getBytes (str/join arr)) []])))
+          [(.getBytes (std.string.common/join arr)) []])))
     (readNBytes [n]
-      (h/swap-return! out
+      (std.lib.atom/swap-return! out
         (fn [arr]
           (if (pos? (- (count (first arr)) n))
             [(.getBytes ^String (subs (first arr) 0 n))
@@ -40,13 +39,13 @@
   "reads a limited number of bytes from stream"
   {:added "4.0"}
   ([{:keys [^InputStream raw]} f f-timeout limit timeout interval]
-   (let [start   (h/time-ms)
+   (let [start   (std.lib.time/time-ms)
          output  (loop [line  ""
                         limit limit]
                    (cond (zero? limit)
                          (f line)
                          
-                         (< (- (h/time-ms) start)
+                         (< (- (std.lib.time/time-ms) start)
                             timeout)
                          (let [n (.available raw)]
                            (if (zero? n)
@@ -59,50 +58,50 @@
                          :else
                          (f-timeout line)))]
      {:start start
-      :end (h/time-ns)})))
+      :end (std.lib.time/time-ns)})))
 
 (defn read-bytes-line
   "reads individual lines from stream"
   {:added "4.0"}
   ([{:keys [^InputStream raw]} f f-timeout timeout interval]
-   (let [start   (h/time-ms)
+   (let [start   (std.lib.time/time-ms)
          output  (loop [line ""]
-                   (cond (< (- (h/time-ms) start)
+                   (cond (< (- (std.lib.time/time-ms) start)
                             timeout)
                          (let [n (.available raw)]
                            (if (zero? n)
                              (do (Thread/sleep ^long interval)
                                  (recur line))
                              (let [s (String. (.readNBytes raw n))]
-                               (if (str/ends-with? s "\n")
+                               (if (std.string.common/ends-with? s "\n")
                                  (f (str line s))
                                  (recur (str line s))))))
 
                          :else
                          (f-timeout line)))]
      {:start start
-      :end (h/time-ns)})))
+      :end (std.lib.time/time-ns)})))
 
 (defn read-bytes-some
   "reads until timeout"
   {:added "4.0"}
   ([{:keys [^InputStream raw]} f timeout interval]
-   (let [start   (h/time-ns)
-         counter (h/counter 0)
+   (let [start   (std.lib.time/time-ns)
+         counter (std.lib.foundation/counter 0)
          max     (inc (quot timeout interval))]
      (loop []
        (if (< @counter max)
          (let [n (.available raw)]
            (if (zero? n)
-             (do (h/inc! counter)
+             (do (std.lib.foundation/inc! counter)
                  (Thread/sleep ^long interval)
                  (recur))
-             (do (h/reset! counter 0)
+             (do (std.lib.foundation/reset! counter 0)
                  (f (.readNBytes raw n))
                  (recur))))))
      {:checks @counter
       :start start
-      :end (h/time-ns)})))
+      :end (std.lib.time/time-ns)})))
 
 ;;
 ;;
@@ -112,7 +111,7 @@
   "outputs the count in the stream"
   {:added "4.0"}
   ([{:keys [^InputStream raw] :as istream}]
-   (let [t (h/time-ns)]
+   (let [t (std.lib.time/time-ns)]
      {:start t
       :end t
       :count (.available raw)})))
@@ -123,7 +122,7 @@
   ([{:keys [^InputStream raw] :as istream}]
    (let [n (.available raw)
          _ (.readNBytes raw n)
-         t (h/time-ns)]
+         t (std.lib.time/time-ns)]
      {:start t
       :end t
       :dropped n})))
@@ -142,9 +141,9 @@
   "reads all bytes from the stream"
   {:added "4.0"}
   ([{:keys [^InputStream raw] :as istream}]
-   (let [start (h/time-ns)
+   (let [start (std.lib.time/time-ns)
          bytes (.readAllBytes raw)
-         end   (h/time-ns)]
+         end   (std.lib.time/time-ns)]
      {:output bytes :start start :end end})))
 
 (defn op-read-all
@@ -152,7 +151,7 @@
   {:added "4.0"}
   ([istream]
    (update (op-read-all-bytes istream)
-           :output h/string)))
+           :output std.lib.foundation/string)))
 
 (defn op-read-some-bytes
   "read bytes from stream until timeout"
@@ -168,7 +167,7 @@
   {:added "4.0"}
   ([istream timeout interval]
    (update (op-read-some-bytes istream timeout interval)
-           :output h/string)))
+           :output std.lib.foundation/string)))
 
 (defn op-read-line
   "read line from stream or until timeout"
@@ -192,7 +191,7 @@
   "process each line using a function"
   {:added "4.0"}
   ([{:keys [raw] :as istream} line-fn msg]
-   (let [start (h/time-ns)]
+   (let [start (std.lib.time/time-ns)]
      (with-open [reader (BufferedReader. (InputStreamReader. raw))]
        (try
          (loop [line (.readLine reader)]
@@ -200,17 +199,17 @@
              (line-fn line msg)
              (recur (.readLine reader))))
          (catch java.io.IOException e)))
-     {:start start :end (h/time-ns)})))
+     {:start start :end (std.lib.time/time-ns)})))
 
 (defn process-by-handler
   "process the input with a function"
   {:added "4.0"}
   ([{:keys [raw] :as istream} handler msg]
-   (let [start (h/time-ns)]
+   (let [start (std.lib.time/time-ns)]
      (try
        (handler raw msg)
        (catch java.io.IOException e))
-     {:start start :end (h/time-ns)})))
+     {:start start :end (std.lib.time/time-ns)})))
 
 (def +read-alias+
   {:line    :read-line

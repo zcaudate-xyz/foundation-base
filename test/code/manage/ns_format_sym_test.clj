@@ -1,6 +1,6 @@
 (ns code.manage.ns-format-sym-test
-  (:use code.test)
-  (:require [code.manage.ns-format-sym :refer :all]))
+  (:require [code.manage.ns-format-sym :refer :all])
+  (:use code.test))
 
 ^{:refer code.manage.ns-format-sym/alias:expand-tb :added "4.1"}
 (fact "TODO")

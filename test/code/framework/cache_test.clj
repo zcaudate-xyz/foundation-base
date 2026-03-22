@@ -1,8 +1,8 @@
 (ns code.framework.cache-test
-  (:use code.test)
   (:require [code.framework.cache :refer :all]
             [std.block :as block]
             [std.fs :as fs])
+  (:use code.test)
   (:refer-clojure :exclude [update]))
 
 ^{:refer code.framework.cache/prepare-out :added "3.0"}

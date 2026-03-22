@@ -1,9 +1,8 @@
 (ns xt.lang.event-box-test
-  (:use code.test)
-  (:require [std.lang :as l]
-            [std.lib :as h]
-            [xt.lang.base-notify :as notify]
-            [rt.basic :as basic]))
+  (:require [rt.basic :as basic]
+            [std.lang :as l]
+            [xt.lang.base-notify :as notify])
+  (:use code.test))
 
 (l/script- :js
   {:runtime :basic

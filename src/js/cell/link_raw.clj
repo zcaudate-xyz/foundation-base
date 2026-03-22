@@ -1,8 +1,9 @@
 (ns js.cell.link-raw
-  (:require [std.lang :as l]
-            [std.lib :as h]
-            [std.string :as str]
-            [js.cell.base-fn :as base-fn]))
+  (:require [js.cell.base-fn :as base-fn]
+            [std.lang :as l]
+            [std.lib.collection]
+            [std.lib.foundation]
+            [std.lib.walk]))
 
 (l/script :js
   {:require [[js.core :as j]
@@ -216,18 +217,18 @@
   [value]
   (list 'postMessage
         {:op "eval"
-         :id (or *temp-id* (h/error "No return id"))
+         :id (or *temp-id* (std.lib.foundation/error "No return id"))
          :status "ok"
          :body (list 'JSON.stringify {:type "data"
                                       :value value})}))
 
 (defn- async-post-transform
   [body id]
-  (h/prewalk (fn [form]
-               (cond (and (h/form? form)
+  (std.lib.walk/prewalk (fn [form]
+               (cond (and (std.lib.collection/form? form)
                           (symbol? (first form))
                           (resolve (first form))
-                          (= (h/var-sym (resolve (first form)))
+                          (= (std.lib.foundation/var-sym (resolve (first form)))
                              `async-post))
                      (list 'postMessage
                            {:op "eval"
@@ -237,7 +238,7 @@
                                                          :value (second form)})})
                      (and (symbol? form)
                           (resolve form)
-                          (= (h/var-sym (resolve form))
+                          (= (std.lib.foundation/var-sym (resolve form))
                              `async-post))
                      (list 'fn '[value]
                            (list 'postMessage

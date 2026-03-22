@@ -1,7 +1,7 @@
 (ns std.concurrent.thread-test
-  (:use [code.test :exclude [run]])
   (:require [std.concurrent.thread :refer :all]
-            [std.lib :as h]))
+            [std.lib.foundation])
+  (:use [code.test :exclude [run]]))
 
 ^{:refer std.concurrent.thread/thread:current :added "3.0"}
 (fact "returns the current thread"
@@ -22,7 +22,7 @@
   ^:hidden
 
   (doto (thread {:handler (fn []
-                            (h/suppress (Thread/sleep 100)))
+                            (std.lib.foundation/suppress (Thread/sleep 100)))
                  :start true})
     (thread:interrupt))
   => Thread)

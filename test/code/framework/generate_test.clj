@@ -1,11 +1,12 @@
 (ns code.framework.generate-test
-  (:use code.test)
   (:require [code.framework.generate :as gen]
             [std.block :as b]
-            [std.string :as str]))
+            [std.string.common]
+            [std.string.prose])
+  (:use code.test))
 
 (def PUBLIC_QUERY
-  (str/join-lines
+  (std.string.prose/join-lines
    ["(defn.pg ^{:%% :sql"
     "           :- :json"
     "           :api/meta {:sb/grant :all}}"
@@ -14,7 +15,7 @@
     "  (hello-name (szndb.core.fn-util/auth-uid) 1 2 3))"]))
 
 (def TEMPLATE_QUERY
-  (str/join-lines
+  (std.string.prose/join-lines
    ["(defn.pg ^{:%% :sql"
     "           :- ~return"
     "           :api/meta ~meta-entry}"
@@ -44,7 +45,7 @@
 (fact "fills out the template"
   ^:hidden
   
-  (str/split-lines
+  (std.string.common/split-lines
    (gen/fill-template
     (gen/get-template TEMPLATE_QUERY)
     '{return :json

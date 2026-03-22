@@ -1,6 +1,5 @@
 (ns js.react-native.animate-transition
-  (:require [std.lang :as l]
-            [std.lib :as h]))
+  (:require [std.lang :as l]))
 
 (l/script :js
   {:require [[xt.lang.base-lib :suppress true :as k]

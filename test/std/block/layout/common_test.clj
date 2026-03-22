@@ -1,10 +1,11 @@
 (ns std.block.layout.common-test
-  (:use code.test)
-  (:require [std.block.layout.common :as common]
-            [std.block.layout :as bind]
+  (:require [std.block.base :as base]
             [std.block.construct :as construct]
-            [std.block.base :as base]
-            [std.string :as str]))
+            [std.block.layout :as bind]
+            [std.block.layout.common :as common]
+            [std.lib.env]
+            [std.string.common])
+  (:use code.test))
 
 ^{:refer std.block.layout.common/join-blocks :added "4.0"}
 (fact "joins blocks together with a spacing array"
@@ -220,7 +221,7 @@
                                     {:spec {:col-from 1
                                             :col-start 2}})
       (base/block-string)
-      (str/split-lines))
+      (std.string.common/split-lines))
   => ["(defn hello"
       "  \"oeuoeu\""
       "  {:add 1}"
@@ -232,7 +233,7 @@
                                               :col-from 1
                                               :col-align true}})
       (base/block-string)
-      (str/split-lines))
+      (std.string.common/split-lines))
   => ["(assoc hello"
       "       :key1            val"
       "       :key2-oeueu-oeue val2)"]
@@ -243,7 +244,7 @@
                                               :col-from 1
                                               :col-align false}})
       (base/block-string)
-      (str/split-lines))
+      (std.string.common/split-lines))
   => ["(assoc hello"
       "       :key1 val"
       "       :key2-oeueu-oeue val2)"]
@@ -254,7 +255,7 @@
                                               :col-from 0
                                               :col-align true}})
       (base/block-string)
-      (str/split-lines))
+      (std.string.common/split-lines))
   => ["(hash-map :key1            val"
       "          :key2-oeueu-oeue val2)"]
 
@@ -263,7 +264,7 @@
                                               :col-from 0
                                               :col-align false}})
       (base/block-string)
-      (str/split-lines))
+      (std.string.common/split-lines))
   => ["(hash-map :key1 val"
       "          :key2-oeueu-oeue val2)"]
   
@@ -273,7 +274,7 @@
                                               :col-from 1
                                               :col-start 2}})
       (base/block-string)
-      (str/split-lines))
+      (std.string.common/split-lines))
   => ["(case (type)"
       "  :a 1"
       "  :b 2)"]
@@ -283,7 +284,7 @@
                                               :col-from 3
                                               :col-start 2}})
       (base/block-string)
-      (str/split-lines))
+      (std.string.common/split-lines))
   => ["(something to do (type)"
       "  :a 1"
       "  :b 2)"]
@@ -293,7 +294,7 @@
                                               :col-from 3
                                               :col-start 2}})
       (base/block-string)
-      (str/split-lines))
+      (std.string.common/split-lines))
   => ["(something to do (type)"
       "  :a 1"
       "  :b 2)"])
@@ -308,7 +309,7 @@
                                       {:spec {:col-from 1
                                               :col-start 1}})
       (base/block-string)
-      (str/split-lines))
+      (std.string.common/split-lines))
   ["[:hello {:a 1 :b 2}"
    " [:world {}]]"]
 
@@ -318,7 +319,7 @@
                                       {:spec {:col-from 0
                                               :col-start 1}})
       (base/block-string)
-      (str/split-lines))
+      (std.string.common/split-lines))
   => ["[:hello"
       " {:a 1 :b 2}"
       " [:world {}]]"])
@@ -331,7 +332,7 @@
                                       {:spec {:col-from 1
                                               :col-align true}})
       (base/block-string)
-      (str/split-lines))
+      (std.string.common/split-lines))
   => ["(assoc hello"
       "       :key1            val"
       "       :key2-oeueu-oeue val2)"]
@@ -341,7 +342,7 @@
                                       {:spec {:col-from 1
                                               :col-align false}})
       (base/block-string)
-      (str/split-lines))
+      (std.string.common/split-lines))
   => ["(assoc hello"
       "       :key1 val"
       "       :key2-oeueu-oeue val2)"]
@@ -351,7 +352,7 @@
                                       {:spec {:col-from 0
                                               :col-align true}})
       (base/block-string)
-      (str/split-lines))
+      (std.string.common/split-lines))
   => ["(hash-map :key1            val"
       "          :key2-oeueu-oeue val2)"]
 
@@ -359,7 +360,7 @@
                                       {:spec {:col-from 0
                                               :col-align false}})
       (base/block-string)
-      (str/split-lines))
+      (std.string.common/split-lines))
   => ["(hash-map :key1 val"
       "          :key2-oeueu-oeue val2)"]
   
@@ -368,7 +369,7 @@
                                       {:spec {:col-from 1
                                               :col-start 2}})
       (base/block-string)
-      (str/split-lines))
+      (std.string.common/split-lines))
   => ["(case (type)"
       "  :a 1"
       "  :b 2)"]
@@ -377,7 +378,7 @@
                                       {:spec {:col-from 3
                                               :col-start 2}})
       (base/block-string)
-      (str/split-lines))
+      (std.string.common/split-lines))
   => ["(something to do (type)"
       "  :a 1"
       "  :b 2)"]
@@ -386,7 +387,7 @@
                                       {:spec {:col-from 3
                                               :col-start 2}})
       (base/block-string)
-      (str/split-lines)))
+      (std.string.common/split-lines)))
 
 ^{:refer std.block.layout.common/layout-multiline-hashmap :added "4.0"}
 (fact "layouts the hashmap"
@@ -395,7 +396,7 @@
   (-> (common/layout-multiline-hashmap {:a 1 :b 2}
                                        {:spec {:col-align true}})
       (base/block-string)
-      (str/split-lines))
+      (std.string.common/split-lines))
   => ["{:a 1"
       " :b 2}"]
 
@@ -403,7 +404,7 @@
                                        {:spec {:col-align true}
                                         :indents 5})
       (base/block-string)
-      (str/split-lines))
+      (std.string.common/split-lines))
   => ["{:a 1"
       "      :b 2}"])
 
@@ -469,7 +470,7 @@
                                        {:spec {:columns 3
                                                :col-align true}})
       (base/block-string)
-      (str/split-lines))
+      (std.string.common/split-lines))
   => ["#{:a 1 :b"
       "  2}"])
 
@@ -480,7 +481,7 @@
   (-> (common/layout-multiline-vector [:a 1 :b 2]
                                       {:spec {:col-align true}})
       (base/block-string)
-      (str/split-lines))
+      (std.string.common/split-lines))
   => ["[:a" " 1" " :b" " 2]"]
 
 
@@ -501,7 +502,7 @@
            hello world]
          {:spec {:col-align true :columns 2}})
         (base/block-string)
-        (str/split-lines)))
+        (std.string.common/split-lines)))
   => ["[{:keys [col-align"
       "         columns]"
       "  :as spec}        (merge {:col-align false :columns 2}"
@@ -518,7 +519,7 @@
                 hello world])
          {})
         (base/block-string)
-        (str/split-lines)))
+        (std.string.common/split-lines)))
   => ["(let [{:keys [col-align"
       "              columns]"
       "       :as spec}        (merge {:col-align false :columns 2}"
@@ -535,7 +536,7 @@
                                       (+ a b))
                                    {})
       (base/block-string)
-      (str/split-lines))
+      (std.string.common/split-lines))
   => ["(let [a 1 b 2]"
       " (+ a b)"
       " (+ a b)"
@@ -545,7 +546,7 @@
                                       (do (make-something-with *ns* 1 2 3)))
                                    {})
       (base/block-string)
-      (str/split-lines))
+      (std.string.common/split-lines))
   => ["(binding [*ns* 1]"
       " (do (make-something-with *ns* 1 2 3)))"])
 
@@ -556,14 +557,14 @@
   (-> (common/layout-multiline-basic '(apply 1 2 3 4)
                                     {:indents 0})
       (base/block-string)
-      (str/split-lines))
+      (std.string.common/split-lines))
   => ["(apply 1"
       "       2"
       "       3"
       "       4)"])
 
 (comment
-  (std.lib/p
+  (std.lib.env/p
    (binding [common/*layout-fn* bind/layout-default-fn]
      (-> (common/layout-multiline-vector
           '[{:a 1}       (merge {:columns 2
@@ -579,7 +580,7 @@
     (bind/layout-default-fn form {})))
 
 (defn split-block [form]
-  (str/split-lines (base/block-string (layout-default form))))
+  (std.string.common/split-lines (base/block-string (layout-default form))))
 
 ^{:refer std.block.layout/layout-default-fn-fix :added "4.0"}
 (fact "layout standard vectors as 1 column, but bindings as 2"

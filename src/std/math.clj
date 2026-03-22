@@ -1,11 +1,11 @@
 (ns std.math
-  (:require [std.math.common :as common]
-            [std.math.random :as random]
+  (:require [std.lib.foundation]
             [std.math.aggregate :as aggregate]
-            [std.lib :as h])
+            [std.math.common :as common]
+            [std.math.random :as random])
   (:refer-clojure :exclude [abs rand rand-int rand-nth]))
 
-(h/intern-in common/abs
+(std.lib.foundation/intern-in common/abs
              common/ceil
              common/factorial
              common/floor

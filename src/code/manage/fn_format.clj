@@ -1,12 +1,11 @@
 (ns code.manage.fn-format
   (:require [code.framework :as base]
-            [std.string :as str]
+            [code.project :as project]
             [code.query :as query]
-            [std.block.navigate :as nav]
-            [std.lib.zip :as zip]
-            [std.block.construct :as construct]
             [std.block.base :as block]
-            [code.project :as project]))
+            [std.block.construct :as construct]
+            [std.block.navigate :as nav]
+            [std.lib.zip :as zip]))
 
 (defn manual-step-right
   "helper to bypass zip/step-right crash"

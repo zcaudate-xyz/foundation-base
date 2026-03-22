@@ -2,8 +2,12 @@
   (:require [std.lang.base.emit :as emit]
             [std.lang.base.emit-common :as common]
             [std.lang.base.emit-data :as data]
-            [std.lib :as h]
-            [std.string :as str]))
+            [std.lib.collection]
+            [std.lib.env]
+            [std.lib.foundation]
+            [std.string.case]
+            [std.string.common]
+            [std.string.prose]))
 
 (declare emit-jsx)
 (declare emit-jsx-set-params)
@@ -13,7 +17,7 @@
   {:added "4.0"}
   ([k]
    (if (keyword? k)
-     (keyword (str/camel-case (name k)))
+     (keyword (std.string.case/camel-case (name k)))
      k)))
 
 (defn jsx-arr-prep
@@ -32,7 +36,7 @@
                                               grammar
                                               mopts))]
              (cons tag (drop 2 arr)))
-           (h/error "MISSING TAG"))
+           (std.lib.foundation/error "MISSING TAG"))
 
          (= :<> (first arr))
          (cons :React.Fragment (rest arr))
@@ -46,7 +50,7 @@
         className (or class
                       className)
         value  (if (vector? className)
-                 (str/join " " (map h/strn className))
+                 (std.string.common/join " " (map std.lib.foundation/strn className))
                  className)
         params (if value
                  (assoc params :className value)
@@ -64,7 +68,7 @@
          params? (first children)
          [tag params children] (cond (map? params?)
                                      (let [params (->>  params?
-                                                        (h/map-keys jsx-key-fn)
+                                                        (std.lib.collection/map-keys jsx-key-fn)
                                                         (jsx-standardise-params))]
                                        [tag params (rest children)])
 
@@ -91,8 +95,8 @@
 
                                       :else
                                       (let [body (emit/emit-main v grammar mopts)
-                                            body (if (str/multi-line? body)
-                                                   (str/indent-rest body 2)
+                                            body (if (std.string.prose/multi-line? body)
+                                                   (std.string.prose/indent-rest body 2)
                                                    body)]
                                         (str "{" body "}")))]
                        (str (name k) "=" vstr)))
@@ -129,7 +133,7 @@
                      (filter identity [mstr fstr])))
          is-sym (fn [x]
                   (and (symbol? x)
-                       (not (str/starts-with? (name x)
+                       (not (std.string.common/starts-with? (name x)
                                               "..."))))]
      (cond (and (= 1 (count params))
                 (vector? (first params)))
@@ -180,16 +184,16 @@
                         (map? params)
                         (emit-jsx-map-params params grammar mopts)
 
-                        :else (h/error "Not valid input." {:input params}))]
+                        :else (std.lib.foundation/error "Not valid input." {:input params}))]
      (cond (empty? body-arr)
            ["" ""]
 
            (data/emit-singleline-array? body-arr)
-           [" "  (str/join " " body-arr)]
+           [" "  (std.string.common/join " " body-arr)]
 
            :else
            (let [spc (str (common/newline-indent) "  ")]
-             [spc (str/join spc body-arr)])))))
+             [spc (std.string.common/join spc body-arr)])))))
 
 (defn emit-jsx-inner
   "emits the inner blocks for a jsx form"
@@ -202,7 +206,7 @@
          ntag   (name tag)
          ntag   (cond-> ntag
                   (.startsWith ntag "<") (subs 1)
-                  (.endsWith ntag ">") (h/lsubs 1))
+                  (.endsWith ntag ">") (std.lib.foundation/lsubs 1))
 
          [prefix params] (emit-jsx-params params grammar mopts)]
      (if (empty? children)
@@ -221,13 +225,13 @@
                                            :else (str "{" (emit/emit-main form grammar mopts) "}"))))))
              single?  (data/emit-singleline-array? body-arr)
              body     (if single?
-                        (str/join "" body-arr)
-                        (str/indent  (str/join "\n" body-arr) (+ 2 indent)))]
+                        (std.string.common/join "" body-arr)
+                        (std.string.prose/indent  (std.string.common/join "\n" body-arr) (+ 2 indent)))]
          (str start
               (if single? "" "\n")
               body
               (if (or (not single?)
-                      (str/multi-line? start))
+                      (std.string.prose/multi-line? start))
                 (common/newline-indent))
               end))))))
 
@@ -301,13 +305,13 @@
                                (map? form)
                                (->> form
                                     (jsx-standardise-params)
-                                    (h/map-keys (fn [k]
-                                                  (h/strn (jsx-key-fn k)))))
+                                    (std.lib.collection/map-keys (fn [k]
+                                                  (std.lib.foundation/strn (jsx-key-fn k)))))
 
                                :else
                                form)
                          (catch Throwable t
-                           (h/pl form)))))
+                           (std.lib.env/pl form)))))
                     (clojure.walk/prewalk
                      (fn [form]
                        (if (volatile? form)

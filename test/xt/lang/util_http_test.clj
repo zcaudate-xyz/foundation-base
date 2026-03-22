@@ -1,10 +1,9 @@
 (ns xt.lang.util-http-test
-  (:use code.test)
-  (:require [std.lang :as l]
-            [std.lib :as h]
+  (:require [org.httpkit.server :as server]
             [rt.nginx :as nginx]
-            [xt.lang.base-notify :as notify]
-            [org.httpkit.server :as server]))
+            [std.lang :as l]
+            [xt.lang.base-notify :as notify])
+  (:use code.test))
 
 (l/script- :js
   {:runtime :basic

@@ -1,8 +1,8 @@
 (ns std.timeseries.common-test
-  (:use code.test)
-  (:require [std.timeseries.common :refer :all]
-            [std.timeseries.range :as range]
-            [std.math :as math]))
+  (:require [std.math :as math]
+            [std.timeseries.common :refer :all]
+            [std.timeseries.range :as range])
+  (:use code.test))
 
 ^{:refer std.timeseries.common/linspace :added "3.0"}
 (fact "takes the linear space of n samples"

@@ -1,6 +1,6 @@
 (ns lib.aether.wagon-test
-  (:use code.test)
   (:require [lib.aether.wagon :refer :all])
+  (:use code.test)
   (:import (org.apache.maven.wagon AbstractWagon Wagon)))
 
 ^{:refer lib.aether.wagon/add-factory :added "3.0"}

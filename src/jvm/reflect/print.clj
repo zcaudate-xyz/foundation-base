@@ -1,8 +1,9 @@
 (ns jvm.reflect.print
-  (:require [std.print :as print]
-            [std.string :as str]
+  (:require [std.lib.env]
+            [std.lib.invoke :refer [definvoke]]
             [std.object.element :as element]
-            [std.lib :as h :refer [definvoke]])
+            [std.print :as print]
+            [std.string.common])
   (:refer-clojure :exclude [instance?]))
 
 (defonce +col-lengths+
@@ -102,7 +103,7 @@
      (:final modifiers) (->> (disj modifiers :final)
                              (sort)
                              (cons :final))
-     :then (-> sort (str/joinl " ")))))
+     :then (-> sort (std.string.common/joinl " ")))))
 
 (defonce +customiser+
   {:params #(mapv format-type %)
@@ -171,9 +172,9 @@
   ([title elems col-settings {:keys [options]}]
    (let [options (merge +col-options+ options)]
      (when (seq elems)
-       (h/local :print "\n")
+       (std.lib.env/local :print "\n")
        (print/print-subtitle title)
-       (h/local :print "\n"))
+       (std.lib.env/local :print "\n"))
      (doseq [elem elems]
        (let [row (map (fn [{:keys [id]}]
                         (let [data (get elem id)
@@ -192,14 +193,14 @@
   ([ks {:keys [matrix class]}]
    (let [matrix (merge +matrix+ matrix)
          title  (-> (map (comp :title matrix) (reverse ks))
-                    (str/joinl " "))]
+                    (std.string.common/joinl " "))]
      title)))
 
 (defn print-classname
   "prints the classname with title"
   {:added "3.0"}
   ([title ^Class cls]
-   (print/print-title (str title " - " (str/upper-case (.getName cls))))))
+   (print/print-title (str title " - " (std.string.common/upper-case (.getName cls))))))
 
 (defn print-category
   "prints a given category"

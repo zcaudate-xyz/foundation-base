@@ -1,7 +1,7 @@
 (ns std.pretty.color-test
-  (:use code.test)
-  (:require [std.pretty.color :refer :all]
-            [std.pretty :as printer]))
+  (:require [std.pretty :as printer]
+            [std.pretty.color :refer :all])
+  (:use code.test))
 
 ^{:refer std.pretty.color/-document :added "3.0"}
 (fact "Constructs a pretty print document, which may be colored if `:print-color` is true."

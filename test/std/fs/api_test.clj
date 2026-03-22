@@ -1,7 +1,7 @@
 (ns std.fs.api-test
-  (:use code.test)
   (:require [std.fs.api :refer :all]
             [std.fs.path :as path])
+  (:use code.test)
   (:refer-clojure :exclude [list resolve]))
 
 ^{:refer std.fs.api/create-directory :added "3.0" :class [:operation]}

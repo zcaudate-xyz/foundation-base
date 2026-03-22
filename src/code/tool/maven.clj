@@ -1,11 +1,11 @@
 (ns code.tool.maven
   (:require [code.tool.maven.command :as command]
+            [code.tool.maven.lein :as lein]
             [code.tool.maven.package :as package]
             [code.tool.maven.task :as deploy.task]
-            [code.tool.maven.lein :as lein]
-            [std.lib :refer [definvoke]]
-            [std.task :as task]
-            [lib.aether :as aether]))
+            [lib.aether :as aether]
+            [std.lib.invoke :refer [definvoke]]
+            [std.task :as task]))
 
 (defmethod task/task-defaults :deploy.maven
   ([_]

@@ -1,6 +1,6 @@
 (ns std.object.query.input-test
-  (:use code.test)
-  (:require [std.object.query.input :refer :all]))
+  (:require [std.object.query.input :refer :all])
+  (:use code.test))
 
 ^{:refer std.object.query.input/args-classify :added "3.0"}
 (fact "classifies inputs into `.?` and `.*` macros through matching argument parameters to different inputs"

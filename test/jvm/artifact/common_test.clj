@@ -1,6 +1,6 @@
 (ns jvm.artifact.common-test
-  (:use code.test)
-  (:require [jvm.artifact.common :refer :all]))
+  (:require [jvm.artifact.common :refer :all])
+  (:use code.test))
 
 ^{:refer jvm.artifact.common/resource-entry-symbol :added "3.0"}
 (fact "creates a path based on a symbol"

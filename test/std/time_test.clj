@@ -1,8 +1,8 @@
 (ns std.time-test
-  (:use code.test)
   (:require [std.time :as t]
             [std.time.common :as common]
             [std.time.map :as map])
+  (:use code.test)
   (:import [java.util Date TimeZone Calendar]))
 
 ^{:refer std.time/representation? :added "3.0" :class [:time/general]}

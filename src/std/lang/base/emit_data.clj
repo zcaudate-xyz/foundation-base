@@ -1,10 +1,12 @@
 (ns std.lang.base.emit-data
-  (:require [std.string :as str]
-            [std.lib :as h]
+  (:require [std.lang.base.book :as book]
             [std.lang.base.emit-common :as common]
             [std.lang.base.emit-helper :as helper]
-            [std.lang.base.book :as book]
-            [std.lang.base.util :as ut]))
+            [std.lang.base.util :as ut]
+            [std.lib.collection]
+            [std.lib.foundation]
+            [std.string.common]
+            [std.string.prose]))
 
 ;;
 ;; DATA
@@ -27,8 +29,8 @@
          (let [convert (or (get-in grammar [:data :map-entry :keyword])
                            :string)
                tok (case convert
-                     :symbol  (symbol (h/strn form))
-                     :string  (h/strn form)
+                     :symbol  (symbol (std.lib.foundation/strn form))
+                     :string  (std.lib.foundation/strn form)
                      :keyword form)]
            (common/*emit-fn* tok grammar mopts))
          
@@ -43,10 +45,10 @@
           :or {key-fn emit-map-key
                val-fn common/*emit-fn*}} (helper/get-options grammar [:data :map-entry])
          val-e (val-fn v grammar mopts)
-         val-e (if (str/multi-line? val-e)
-                 (str/indent-rest val-e 2)
+         val-e (if (std.string.prose/multi-line? val-e)
+                 (std.string.prose/indent-rest val-e 2)
                  val-e)]
-     (str start (str/join (str assign space)
+     (str start (std.string.common/join (str assign space)
                           [(key-fn k grammar mopts)
                            val-e])
           end))))
@@ -61,7 +63,7 @@
    => false"
   {:added "4.0"}
   [body-arr]
-  (and (every? str/single-line? body-arr)
+  (and (every? std.string.prose/single-line? body-arr)
        (and (not common/*multiline*)
             (< (apply + (map count body-arr)) common/*max-len*))))
 
@@ -75,8 +77,8 @@
    => \"1  \\n  hello\""
   {:added "4.0"}
   [[prefix-yes prefix-no] body & [indent]]
-  (if (str/multi-line? body)
-    (str prefix-yes (str/indent body (or indent
+  (if (std.string.prose/multi-line? body)
+    (str prefix-yes (std.string.prose/indent body (or indent
                                      (+ 2 common/*indent*))))
     (str prefix-no body)))
 
@@ -86,19 +88,19 @@
   ([key indent str-array grammar mopts]
    (let [{:keys [sep space tighten] :as opts} (helper/get-options grammar [:data key])]
      (cond (emit-singleline-array? str-array)
-           (-> (str/join sep str-array)
+           (-> (std.string.common/join sep str-array)
                (common/wrapped-str [:data key] grammar))
            
            tighten
-           (-> (str/join (str sep "\n  ") str-array)
+           (-> (std.string.common/join (str sep "\n  ") str-array)
                (common/wrapped-str [:data key] grammar)
-               (str/indent indent))
+               (std.string.prose/indent indent))
            
            :else
            (-> (str "\n"
-                    (str/indent 
+                    (std.string.prose/indent 
                      (str "  "
-                          (str/join (str sep "\n  ") str-array)
+                          (std.string.common/join (str sep "\n  ") str-array)
                           "\n")
                      indent))
                (common/wrapped-str [:data key] grammar))))))
@@ -160,7 +162,7 @@
       (cond (vector? coll)
             (emit-data :free coll grammar mopts)
             
-            (h/form? coll)
+            (std.lib.collection/form? coll)
             (emit-data :tuple coll  grammar mopts)
 
             :else
@@ -174,7 +176,7 @@
   {:added "4.0"}
   ([args]
    (let [is-key (fn [x] (or (keyword? x)
-                             (and (h/form? x)
+                             (and (std.lib.collection/form? x)
                                   (= :% (first x)))))]
      (loop [[e :as args] args
             out []]
@@ -185,7 +187,7 @@
              (cond (or (is-key (second args))
                        (empty? (rest args)))
                    (recur (rest args)
-                          (conj out (symbol (h/strn e))))
+                          (conj out (symbol (std.lib.foundation/strn e))))
 
                    :else
                    (recur (drop 2 args)

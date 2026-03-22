@@ -1,9 +1,8 @@
 (ns std.lang.model.spec-julia-test
-  (:use code.test)
-  (:require [std.lang.model.spec-julia :refer :all]
-            [std.lang.base.script :as script]
+  (:require [std.lang.base.script :as script]
             [std.lang.base.util :as ut]
-            [std.lib :as h]))
+            [std.lang.model.spec-julia :refer :all])
+  (:use code.test))
 
 (script/script- :julia)
 

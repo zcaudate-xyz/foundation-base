@@ -1,6 +1,6 @@
 (ns std.string.plural-test
-  (:use code.test)
-  (:require [std.string.plural :refer :all]))
+  (:require [std.string.plural :refer :all])
+  (:use code.test))
 
 ^{:refer std.string.plural/uncountable? :added "3.0"}
 (fact "checks if a word is uncountable"

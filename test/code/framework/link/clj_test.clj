@@ -1,7 +1,7 @@
 (ns code.framework.link.clj-test
-  (:use code.test)
-  (:require [code.framework.link.clj :refer :all]
-            [clojure.java.io :as io]))
+  (:require [clojure.java.io :as io]
+            [code.framework.link.clj :refer :all])
+  (:use code.test))
 
 ^{:refer code.framework.link.clj/get-namespaces :added "3.0"}
 (fact "gets the namespaces of a clojure s declaration"

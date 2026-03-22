@@ -1,6 +1,6 @@
 (ns std.lib.encode-test
-  (:use code.test)
-  (:require [std.lib.encode :refer :all]))
+  (:require [std.lib.encode :refer :all])
+  (:use code.test))
 
 ^{:refer std.lib.encode/hex-chars :added "3.0"}
 (fact "turns a byte into two chars"

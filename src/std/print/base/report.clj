@@ -1,6 +1,6 @@
 (ns std.print.base.report
-  (:require [std.print.format :as format]
-            [std.lib :as h]))
+  (:require [std.lib.env]
+            [std.print.format :as format]))
 
 (defn print-header
   "prints a header for the row
@@ -14,7 +14,7 @@
        (print/with-out-str))"
   {:added "3.0"}
   ([keys {:keys [padding columns] :as params}]
-   (h/local :println (str (format/report:header keys params) "\n"))))
+   (std.lib.env/local :println (str (format/report:header keys params) "\n"))))
 
 (defn print-title
   "prints the title
@@ -23,7 +23,7 @@
        (print/with-out-str))"
   {:added "3.0" :tags #{:print}}
   ([title]
-   (h/local :println (format/report:title title))))
+   (std.lib.env/local :println (format/report:title title))))
 
 (defn print-subtitle
   "prints the subtitle
@@ -32,13 +32,13 @@
        (print/with-out-str))"
   {:added "3.0"}
   ([subtitle]
-   (h/local :println (format/report:bold subtitle))))
+   (std.lib.env/local :println (format/report:bold subtitle))))
 
 (defn print-row
   "prints a row to output"
   {:added "3.0" :tags #{:print}}
   ([row params]
-   (h/local :println (format/report:row row params))))
+   (std.lib.env/local :println (format/report:row row params))))
 
 (defn print-column
   "prints the column
@@ -49,7 +49,7 @@
       (print/with-out-str))"
   {:added "3.0"}
   ([items name color]
-   (h/local :println (format/report:column items name color))))
+   (std.lib.env/local :println (format/report:column items name color))))
 
 (defn print-summary
   "outputs the summary of results
@@ -58,7 +58,7 @@
        (print/with-out-str))"
   {:added "3.0" :tags #{:print}}
   ([m]
-   (h/local :println (format/report:bold (str "SUMMARY " m)))))
+   (std.lib.env/local :println (format/report:bold (str "SUMMARY " m)))))
 
 (defn print-tree-graph
   "outputs the result of `format-tree`
@@ -71,4 +71,4 @@
    => string?"
   {:added "3.0"}
   ([tree]
-   (h/local :println (format/tree-graph tree))))
+   (std.lib.env/local :println (format/tree-graph tree))))

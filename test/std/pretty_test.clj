@@ -1,6 +1,7 @@
 (ns std.pretty-test
-  (:use code.test)
-  (:require [std.pretty :refer :all]))
+  (:require [std.lib.env]
+            [std.pretty :refer :all])
+  (:use code.test))
 
 ^{:refer std.pretty/format-unknown :added "3.0"}
 (fact "custom printer for an unknown type"
@@ -79,7 +80,7 @@
 ^{:refer std.pretty/pprint-cc :added "4.0"}
 (fact "pprint with the std.concurrent.print framework"
 
-  (std.lib/with-out-str
+  (std.lib.env/with-out-str
     (pprint-cc {:a 1 :b 2 :c (range 5)}))
   => string?)
 

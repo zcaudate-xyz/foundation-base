@@ -1,6 +1,6 @@
 (ns code.query.common
-  (:require [std.string :as str]
-            [std.lib.walk :as walk]))
+  (:require [std.lib.walk :as walk]
+            [std.string.common]))
 
 (defn any
   "returns true for any value
@@ -32,7 +32,7 @@
         (keys)
         (map name)
         (apply str)
-        (#(str/split % #""))
+        (#(std.string.common/split % #""))
         (map keyword)
         (set)
         (#(-> %

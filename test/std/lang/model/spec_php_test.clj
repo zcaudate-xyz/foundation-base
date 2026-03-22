@@ -1,8 +1,7 @@
 (ns std.lang.model.spec-php-test
-  (:use [code.test])
-  (:require [std.lang.model.spec-php :as spec-php]
-            [std.lang :as l]
-            [std.lib :as h]))
+  (:require [std.lang :as l]
+            [std.lang.model.spec-php :as spec-php])
+  (:use [code.test]))
 
 (l/script :php)
 

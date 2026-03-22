@@ -1,12 +1,11 @@
 (ns std.lib.env
   (:require [clojure.pprint :as pprint]
             [std.lib.atom :as at]
-            [std.lib.time :as t]
             [std.lib.foundation :as f]
+            [std.lib.time :as t]
             [std.string.common :as str])
   (:refer-clojure :exclude [prn require pr with-out-str])
-  (:import (java.io StringWriter
-                    PrintWriter)))
+  (:import (java.io StringWriter PrintWriter)))
 
 (def ^:dynamic *debug* false)
 

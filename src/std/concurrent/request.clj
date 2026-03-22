@@ -1,11 +1,11 @@
 (ns std.concurrent.request
-  (:require [std.protocol.request :as protocol.request]
-            [std.lib.atom :as at]
+  (:require [std.lib.atom :as at]
             [std.lib.env :as env]
             [std.lib.foundation :as h]
             [std.lib.future :as f]
+            [std.lib.impl :as impl :refer [defimpl]]
             [std.lib.time :as t]
-            [std.lib.impl :as impl :refer [defimpl]]))
+            [std.protocol.request :as protocol.request]))
 
 (impl/build-impl {}
                  protocol.request/IRequest

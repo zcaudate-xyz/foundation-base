@@ -1,9 +1,12 @@
 (ns std.contract.type
-  (:require [std.contract.sketch :as sketch]
-            [std.lib :as h :refer [defimpl]]
-            [malli.core :as mc]
+  (:require [malli.core :as mc]
             [malli.error :as me]
-            [malli.util :as mu]))
+            [malli.util :as mu]
+            [std.contract.sketch :as sketch]
+            [std.lib.atom]
+            [std.lib.collection]
+            [std.lib.foundation]
+            [std.lib.impl :refer [defimpl]]))
 
 (defn check
   "checks that data fits the spec"
@@ -14,7 +17,7 @@
     (let [raw (mc/explain schema data)
           err (-> (me/with-spell-checking raw)
                   (me/humanize))]
-      (h/error (str err) {:error err
+      (std.lib.foundation/error (str err) {:error err
                           :raw raw}))))
 
 (declare common-spec-string
@@ -81,7 +84,7 @@
   "displays the multi spec"
   {:added "3.0"}
   ([^MultiSpec spec]
-   (str "#spec.multi " (h/map-vals sketch/from-schema (:options @(.state spec))))))
+   (str "#spec.multi " (std.lib.collection/map-vals sketch/from-schema (:options @(.state spec))))))
 
 (defmethod sketch/to-schema-extend MultiSpec
   [^MultiSpec c]
@@ -98,7 +101,7 @@
   "adds additional types to the multi spec"
   {:added "3.0"}
   ([^MultiSpec spec dispatch-val schema]
-   (h/swap-return! (.state spec)
+   (std.lib.atom/swap-return! (.state spec)
                    (fn [{:keys [options] :as m}]
                      (let [options (assoc options dispatch-val (sketch/to-schema schema))
                            final (multi-gen-final (.dispatch spec) options)]
@@ -108,7 +111,7 @@
   "removes additional types from the multi spec"
   {:added "3.0"}
   ([^MultiSpec spec dispatch-val]
-   (h/swap-return! (.state spec)
+   (std.lib.atom/swap-return! (.state spec)
                    (fn [{:keys [options] :as m}]
                      (let [options (dissoc options dispatch-val)
                            final  (multi-gen-final (.dispatch spec) options)]
@@ -119,7 +122,7 @@
   "creates a multi spec"
   {:added "3.0"}
   ([dispatch options]
-   (let [options (h/map-vals (fn [s]
+   (let [options (std.lib.collection/map-vals (fn [s]
                                (if (spec? s)
                                  [:fn s]
                                  (sketch/to-schema s)))

@@ -1,7 +1,7 @@
 (ns code.doc.link.manage-test
-  (:use code.test)
   (:require [code.doc.link.manage :refer :all]
-            [code.manage :as manage]))
+            [code.manage :as manage])
+  (:use code.test))
 
 (fact "format-manage-output"
   (format-manage-output {:a 1} :edn) => "{:a 1}\n"

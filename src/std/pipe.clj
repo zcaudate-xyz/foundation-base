@@ -1,8 +1,10 @@
 (ns std.pipe
-  (:require [std.protocol.invoke :as protocol.invoke]
-            [std.lib :as h :refer [defimpl definvoke]]
+  (:require [std.lib.collection]
+            [std.lib.impl :refer [defimpl]]
+            [std.lib.invoke :refer [definvoke]]
+            [std.pipe.process :as process]
             [std.pipe.util :as ut]
-            [std.pipe.process :as process]))
+            [std.protocol.invoke :as protocol.invoke]))
 
 (defmulti pipe-defaults
   "creates default settings for pipe task groups"
@@ -62,10 +64,10 @@
                          [arg (-> arg :main :fn)]
                          [{} arg])
          defaults     (pipe-defaults template)
-         params       (h/merge-nested defaults params)
+         params       (std.lib.collection/merge-nested defaults params)
          count        (or (-> params :main :argcount) 4)
          [_ args?] (ut/main-function main count)]
-     (task (h/merge-nested defaults
+     (task (std.lib.collection/merge-nested defaults
                            params
                            {:main {:fn main
                                    :argcount count

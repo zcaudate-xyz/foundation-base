@@ -1,7 +1,7 @@
 (ns std.lang.model.spec-js.meta-test
-  (:use code.test)
-  (:require [std.lang.model.spec-js.meta :refer :all]
-            [std.lang :as l]))
+  (:require [std.lang :as l]
+            [std.lang.model.spec-js.meta :refer :all])
+  (:use code.test))
 
 ^{:refer std.lang.model.spec-js.meta/js-module-import-async :added "4.0"}
 (fact "helper for import")

@@ -1,20 +1,8 @@
 (ns math.stats.distribution
-  (:require [std.string :as str]
-            [std.object.query :as query])
-  (:import net.sourceforge.jdistlib.generic.GenericDistribution
-           [net.sourceforge.jdistlib
-            Ansari Arcsine Beta BetaBinomial
-            BetaPrime Binomial Cauchy Chi ChiSquare
-            Exponential F Gamma Geometric HyperGeometric
-            InvGamma InvNormal Kendall Kumaraswamy
-            Laplace Levy LogNormal Logarithmic Logistic
-            Nakagami NegBinomial NonCentralBeta NonCentralChiSquare
-            NonCentralF NonCentralT Normal
-            Poisson SignRank SkewedT Spearman
-            T Tukey Uniform Weibull Wilcoxon Wishart Zipf]
-           [net.sourceforge.jdistlib.evd
-            Extreme Fretchet GeneralizedPareto
-            GEV Gumbel Order Rayleigh ReverseWeibull])
+  (:require [std.object.query :as query]
+            [std.string.case]
+            [std.string.common])
+  (:import net.sourceforge.jdistlib.generic.GenericDistribution [net.sourceforge.jdistlib Ansari Arcsine Beta BetaBinomial BetaPrime Binomial Cauchy Chi ChiSquare Exponential F Gamma Geometric HyperGeometric InvGamma InvNormal Kendall Kumaraswamy Laplace Levy LogNormal Logarithmic Logistic Nakagami NegBinomial NonCentralBeta NonCentralChiSquare NonCentralF NonCentralT Normal Poisson SignRank SkewedT Spearman T Tukey Uniform Weibull Wilcoxon Wishart Zipf] [net.sourceforge.jdistlib.evd Extreme Fretchet GeneralizedPareto GEV Gumbel Order Rayleigh ReverseWeibull])
   (:refer-clojure :exclude [random-sample]))
 
 (defonce +distributions-map+
@@ -74,7 +62,7 @@
    => \"order\""
   {:added "3.0"}
   ([cls]
-   (str/spear-case (last (str/split (.getName cls) #"\.")))))
+   (std.string.case/spear-case (last (std.string.common/split (.getName cls) #"\.")))))
 
 (defmethod print-method GenericDistribution
   ([v w]

@@ -1,19 +1,25 @@
 (ns rt.nginx
-  (:require [rt.nginx.script :as script]
-            [rt.nginx.config :as config]
-            [rt.basic.impl.process-lua :as lua]
-            [lib.docker :as docker]
-            [net.http :as http]
+  (:require [lib.docker :as docker]
             [lua.nginx]
-            [std.protocol.context :as protocol.context]
+            [net.http :as http]
+            [rt.basic.impl.process-lua :as lua]
+            [rt.nginx.config :as config]
+            [rt.nginx.script :as script]
+            [std.fs :as fs]
+            [std.json :as json]
+            [std.lang :as l]
             [std.lang.base.pointer :as ptr]
             [std.lang.base.runtime :as default]
             [std.lang.interface.type-shared :as shared]
-            [std.lib :as h :refer [defimpl]]
-            [std.json :as json]
-            [std.string :as str]
-            [std.lang :as l]
-            [std.fs :as fs]))
+            [std.lib.collection]
+            [std.lib.component]
+            [std.lib.env]
+            [std.lib.foundation]
+            [std.lib.impl :refer [defimpl]]
+            [std.lib.network]
+            [std.lib.os]
+            [std.protocol.context :as protocol.context]
+            [std.string.common]))
 
 (defn error-logs
   "gets the running nginx error log"
@@ -52,15 +58,15 @@
   "gets all nginx ports on the system"
   {:added "4.0"}
   ([]
-   (->> (h/sh "lsof" "-i" "-P" "-n" {:wrap false})
-        (str/split-lines)
+   (->> (std.lib.os/sh "lsof" "-i" "-P" "-n" {:wrap false})
+        (std.string.common/split-lines)
         (drop 1)
-        (filter #(str/starts-with? % "nginx"))
+        (filter #(std.string.common/starts-with? % "nginx"))
         (keep #(re-find #"^nginx\s*(\d+).*\:(\d+) \(LISTEN\)$" %))
         (map (fn [arr]
-               (mapv h/parse-long (drop 1 arr))))
+               (mapv std.lib.foundation/parse-long (drop 1 arr))))
         (group-by second)
-        (h/map-vals (comp set (partial map first))))))
+        (std.lib.collection/map-vals (comp set (partial map first))))))
 
 (defn all-nginx-active
   "gets all active nginx processes for a port"
@@ -80,7 +86,7 @@
                   conf-fn)
         conf (script/write (conf-fn rt))
         _    (if (not-empty ptr/*print*)
-               (h/pl conf))]
+               (std.lib.env/pl conf))]
     conf))
 
 (defn make-temp
@@ -100,14 +106,14 @@
     :as rt}]
   (let [[tmp-dir tmp-file] (make-temp rt)
         sh-args  ["nginx" "-p" tmp-dir "-c" tmp-file]
-        sh-err   (h/with-thrown
-                   (h/sh {:args sh-args})
+        sh-err   (std.lib.foundation/with-thrown
+                   (std.lib.os/sh {:args sh-args})
                    nil)
-        wait-err (h/with-thrown
-                   (h/wait-for-port "localhost" port {:timeout 2000})
+        wait-err (std.lib.foundation/with-thrown
+                   (std.lib.network/wait-for-port "localhost" port {:timeout 2000})
                    nil)]
     (cond wait-err
-          (do (h/p (str/join " " sh-args))
+          (do (std.lib.env/p (std.string.common/join " " sh-args))
               #_(throw (or sh-err
                            wait-err))
               [:errored tmp-dir])
@@ -128,19 +134,19 @@
                    "-p" (str port ":" port) 
                    "-v" (str tmp-dir ":" tmp-dir)
                    "-v" (str tmp-file ":" tmp-file)
-                   (or image (h/error "No image found" {:image image}))
-                   (or exec  (h/error "No exec found"  {:exec exec}))
+                   (or image (std.lib.foundation/error "No image found" {:image image}))
+                   (or exec  (std.lib.foundation/error "No exec found"  {:exec exec}))
                    "-g" "daemon off;"
                    "-p" tmp-dir "-c" tmp-file]
-         sh-err   (h/with-thrown
-                    (h/sh {:args sh-args})
+         sh-err   (std.lib.foundation/with-thrown
+                    (std.lib.os/sh {:args sh-args})
                     nil)
-         wait-err (h/with-thrown
-                    (h/wait-for-port "localhost" port {:timeout 2000})
+         wait-err (std.lib.foundation/with-thrown
+                    (std.lib.network/wait-for-port "localhost" port {:timeout 2000})
                     (Thread/sleep 1000)
                     nil)]
      (cond wait-err
-           (do (h/p (str/join " " sh-args))
+           (do (std.lib.env/p (std.string.common/join " " sh-args))
                #_(throw (or sh-err
                             wait-err))
                [:errored tmp-dir])
@@ -153,16 +159,16 @@
   {:added "4.0"}
   ([{:keys [port container]
      :as rt}]
-   (let [available  (h/port:check-available port)
+   (let [available  (std.lib.network/port:check-available port)
          ports (all-nginx-ports)
-         arch  (keyword (h/os-arch))]
-     #_(h/prn {:container container
+         arch  (keyword (std.lib.os/os-arch))]
+     #_(std.lib.env/prn {:container container
                :port port})
      (cond (get ports port)
            [:running]
 
            (not available)
-           (h/error "Port not available" {:port port})
+           (std.lib.foundation/error "Port not available" {:port port})
            
            (and container
                 (contains? (:only container) arch))
@@ -181,7 +187,7 @@
           []
 
           :else
-          (let [exec (h/sh "bash" "-c" (str "kill " (str/join " " active))
+          (let [exec (std.lib.os/sh "bash" "-c" (str "kill " (std.string.common/join " " active))
                            {:wait false})]
             [active exec]))))
 
@@ -190,8 +196,8 @@
   {:added "4.0"}
   []
   (let [ports (all-nginx-ports)
-        exec  (h/sh {:args ["bash" "-c"
-                            (str/join
+        exec  (std.lib.os/sh {:args ["bash" "-c"
+                            (std.string.common/join
                              " | "
                              ["ps aux"
                               "grep '[n]ginx: .* process'"
@@ -207,10 +213,10 @@
    (let [ports     (all-nginx-ports)
          processes (get ports port)]
      (if processes
-       (do (apply h/sh "kill" "-9" (map str processes))
+       (do (apply std.lib.os/sh "kill" "-9" (map str processes))
            [:stopped processes])
-       (if (and (= "Linux" (h/os))
-                (not= "root" @(h/sh "whoami")))
+       (if (and (= "Linux" (std.lib.os/os))
+                (not= "root" @(std.lib.os/sh "whoami")))
          (kill-all-nginx)
          [:stopped])))))
 
@@ -244,7 +250,7 @@
 
 (def ^{:arglists '([pg])}
   stop-nginx
-  (h/wrap-stop stop-nginx-raw
+  (std.lib.component/wrap-stop stop-nginx-raw
                [{:key :container
                  :teardown  docker/stop-runtime}]))
 
@@ -260,10 +266,10 @@
            (:body res)
 
            (= 451 (:status res))
-           (h/error "ERROR MESSAGE" res)
+           (std.lib.foundation/error "ERROR MESSAGE" res)
 
            :else
-           (h/error "NOT OK" res)))))
+           (std.lib.foundation/error "NOT OK" res)))))
 
 (defn invoke-ptr-nginx
   "evaluates lua ptr and arguments"
@@ -291,8 +297,8 @@
   "creates a dev nginx runtime"
   {:added "4.0"}
   [{:keys [id port] :as m
-    :or {id   (h/sid)
-         port (h/port:check-available 0)}}]
+    :or {id   (std.lib.foundation/sid)
+         port (std.lib.network/port:check-available 0)}}]
   (map->NginxRuntime (merge
                       {:id id
                        :tag :nginx
@@ -313,7 +319,7 @@
    (nginx {}))
   ([m]
    (-> (nginx:create m)
-       (h/start))))
+       (std.lib.component/start))))
 
 (def +init+
   [(default/install-type!

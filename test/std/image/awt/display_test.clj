@@ -1,7 +1,7 @@
 (ns std.image.awt.display-test
-  (:use code.test)
   (:require [std.image.awt.display :refer :all]
-            [std.image.awt.io :as io]))
+            [std.image.awt.io :as io])
+  (:use code.test))
 
 ^{:refer std.image.awt.display/create-viewer :added "3.0" :unit #{:gui}}
 (comment "creates a viewer for the awt image"

@@ -1,9 +1,6 @@
 (ns xt.lang.base-iter
-  (:require [std.lib :as h]
-            [std.lang :as l])
-  (:refer-clojure :exclude [constantly iterate repeatedly cycle range
-                            drop peek take map mapcat concat filter
-                            keep partition take-nth]))
+  (:require [std.lang :as l])
+  (:refer-clojure :exclude [constantly iterate repeatedly cycle range drop peek take map mapcat concat filter keep partition take-nth]))
 
 (l/script :xtalk
   {:require [[xt.lang.base-macro :as k]]})

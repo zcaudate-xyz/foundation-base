@@ -1,10 +1,13 @@
 (ns std.lang.base.library-snapshot
-  (:require [std.protocol.deps :as protocol.deps]
-            [std.lang.base.util :as ut]
-            [std.lang.base.book :as book]
+  (:require [std.lang.base.book :as book]
             [std.lang.base.impl-entry :as entry]
+            [std.lang.base.util :as ut]
             [std.lib.atom :as atom]
-            [std.lib :as h :refer [defimpl]]))
+            [std.lib.collection]
+            [std.lib.env]
+            [std.lib.foundation]
+            [std.lib.impl :refer [defimpl]]
+            [std.protocol.deps :as protocol.deps]))
 
 (def ^:dynamic *parent* nil)
 
@@ -54,7 +57,7 @@
    (snapshot-reset snapshot nil))
   ([snapshot ks]
    (map->Snapshot
-    (h/map-vals (fn [m]
+    (std.lib.collection/map-vals (fn [m]
                   (assoc-in m [:book :modules] {}))
                 (if ks
                   (select-keys snapshot ks)
@@ -71,7 +74,7 @@
          (reduce-kv (fn [parent lang {:keys [book]}]
                       (if (get parent lang)
                         (update-in parent [lang :book :modules] merge (:modules book))
-                        (h/error "Parent has no book" {:lang lang})))
+                        (std.lib.foundation/error "Parent has no book" {:lang lang})))
                     parent
                     child))))
 
@@ -89,7 +92,7 @@
   "gets the merged book for a given language"
   {:added "4.0"}
   [snapshot lang]
-  (or lang (h/error "Lang cannot be null." {:input lang}))
+  (or lang (std.lib.foundation/error "Lang cannot be null." {:input lang}))
   (book/book-from snapshot lang))
 
 ;;
@@ -100,7 +103,7 @@
   "adds a book to a snapshot"
   {:added "4.0"}
   [snapshot {:keys [lang] :as book}]
-  (or lang (h/error "Lang cannot be null." {:input book}))
+  (or lang (std.lib.foundation/error "Lang cannot be null." {:input book}))
   (assoc snapshot lang {:id lang
                         :book book}))
 
@@ -142,7 +145,7 @@
    (book/list-entries (get-book snapshot lang) :code))
   ([snapshot lang module-id]
    (let [book (get-book snapshot lang)]
-     (h/map-juxt [identity
+     (std.lib.collection/map-juxt [identity
                   (fn [section]
                     (keys (get-in book [:modules module-id section])))]
                  [:code :fragment])))
@@ -216,9 +219,9 @@
   {:added "4.0"}
   [book & [module-id]]
   (when (< 1 (count (:merged book)))
-    (h/prn  [module-id (:merged book)
+    (std.lib.env/prn  [module-id (:merged book)
              (sort (keys (:modules book)))])
-    (h/error "MERGED BOOK DISALLOWED")))
+    (std.lib.foundation/error "MERGED BOOK DISALLOWED")))
 
 (defn install-module-update
   "updates the book module"
@@ -282,7 +285,7 @@
   [snapshot {:keys [lang parent] :as new-book}]
   (let [_ (if parent
             (or (get-book-raw snapshot parent)
-                (h/error "Parent not installed"
+                (std.lib.foundation/error "Parent not installed"
                          {:options (keys snapshot)})))
         _ (install-check-merged new-book nil)]
     (if (not (get-book-raw snapshot lang))

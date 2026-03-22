@@ -1,18 +1,20 @@
 (ns std.object.framework.access
-  (:require [std.lib :as h]
-            [std.protocol.object :as protocol.object]
+  (:require [std.lib.collection]
+            [std.lib.invoke]
+            [std.lib.memoize]
             [std.object.framework.read :as read]
-            [std.object.framework.write :as write])
+            [std.object.framework.write :as write]
+            [std.protocol.object :as protocol.object])
   (:refer-clojure :exclude [get set get-in keys]))
 
 (defn meta-clear
   "clears all meta-read and meta-write definitions for a class"
   {:added "3.0"}
   ([class]
-   (h/multi:remove protocol.object/-meta-read class)
-   (h/multi:remove protocol.object/-meta-write class)
-   (h/memoize:remove read/meta-read-exact class)
-   (h/memoize:remove write/meta-write-exact class)))
+   (std.lib.invoke/multi:remove protocol.object/-meta-read class)
+   (std.lib.invoke/multi:remove protocol.object/-meta-write class)
+   (std.lib.memoize/memoize:remove read/meta-read-exact class)
+   (std.lib.memoize/memoize:remove write/meta-write-exact class)))
 
 (defn get-with-keyword
   "access the fields of an object with keyword
@@ -45,7 +47,7 @@
      (select-keys obj arr)
      (let [getters (-> obj type read/meta-read :methods (select-keys arr))]
        (->> getters
-            (h/map-vals #((:fn %) obj)))))))
+            (std.lib.collection/map-vals #((:fn %) obj)))))))
 
 (defn get
   "accessor with either keyword or array lookup

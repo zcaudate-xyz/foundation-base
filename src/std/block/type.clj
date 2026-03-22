@@ -1,13 +1,10 @@
 (ns std.block.type
-  (:require [std.protocol.block :as protocol.block]
-            [std.block.base :as base]
+  (:require [std.block.base :as base]
             [std.block.check :as check]
             [std.block.value :as value]
-            [std.string :as str])
-  (:import (std.protocol.block IBlock
-                               IBlockModifier
-                               IBlockExpression
-                               IBlockContainer)))
+            [std.protocol.block :as protocol.block]
+            [std.string.common])
+  (:import (std.protocol.block IBlock IBlockModifier IBlockExpression IBlockContainer)))
 
 (def ^:dynamic *tab-width* 4)
 
@@ -310,7 +307,7 @@
                                (if (base/modifier? block)
                                  (base/block-string block))))
                          children)
-                   (str/join " "))]
+                   (std.string.common/join " "))]
      (str start all end))))
 
 (defmethod container-string :root

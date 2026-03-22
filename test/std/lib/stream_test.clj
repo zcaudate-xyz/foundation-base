@@ -1,8 +1,8 @@
 (ns std.lib.stream-test
-  (:use code.test)
-  (:require [std.lib.stream :refer :all]
-            [std.lib.function :as fn]
+  (:require [std.lib.function :as fn]
+            [std.lib.stream :refer :all]
             [std.lib.stream.iter :as i])
+  (:use code.test)
   (:import (java.util.stream Collectors)))
 
 ^{:refer std.lib.stream/produce :added "3.0"}

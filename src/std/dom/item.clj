@@ -1,7 +1,8 @@
 (ns std.dom.item
-  (:require [std.dom.type :as type]
-            [std.dom.common :as base]
-            [std.lib :as h :refer [definvoke]]))
+  (:require [std.dom.common :as base]
+            [std.dom.type :as type]
+            [std.lib.collection]
+            [std.lib.invoke :refer [definvoke]]))
 
 (defmulti item-constructor
   "returns the given constructor for the tag
@@ -174,7 +175,7 @@
                       (->> ops
                            (filter (comp #{prefix} first))
                            (map (comp vec rest))
-                           (h/map-vals (fn [v] (cond-> v (base/dom? v) base/dom-item)))))
+                           (std.lib.collection/map-vals (fn [v] (cond-> v (base/dom? v) base/dom-item)))))
         set-props    (filter-fn ops :set)
         update-props (filter-fn ops :update)
         delete-props (filter-fn ops :delete)]

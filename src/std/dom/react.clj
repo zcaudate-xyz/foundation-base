@@ -1,9 +1,8 @@
 (ns std.dom.react
   (:require [std.dom.common :as base]
             [std.dom.impl :as impl]
-            [std.dom.update :as update]
             [std.dom.type :as type]
-            [std.lib :as h]
+            [std.dom.update :as update]
             [std.lib.mutable :as mut]))
 
 (def ^:dynamic *react* nil)

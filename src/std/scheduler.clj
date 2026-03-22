@@ -1,11 +1,14 @@
 (ns std.scheduler
-  (:require [std.protocol.component :as protocol.component]
+  (:require [std.concurrent :as cc]
+            [std.lib.collection]
+            [std.lib.component]
+            [std.lib.impl :refer [defimpl]]
+            [std.lib.time]
+            [std.protocol.component :as protocol.component]
             [std.protocol.track :as protocol.track]
-            [std.concurrent :as cc]
-            [std.scheduler.spawn :as spawn]
             [std.scheduler.common :as common]
-            [std.scheduler.types :as types]
-            [std.lib :as h :refer [defimpl]]))
+            [std.scheduler.spawn :as spawn]
+            [std.scheduler.types :as types]))
 
 (defonce ^:dynamic *no-limit* false)
 
@@ -107,7 +110,7 @@
          current-fn (fn [program-id]
                       (binding [spawn/*group* true]
                         (->> (get running program-id)
-                             (h/map-vals spawn/spawn-info))))
+                             (std.lib.collection/map-vals spawn/spawn-info))))
          counts-fn  (fn [program-id]
                       (->> (concat (spawn/list-spawn runtime program-id)
                                    (spawn/list-stopped runtime program-id))
@@ -173,7 +176,7 @@
    (runner {}))
   ([m]
    (-> (runner:create m)
-       (h/start))))
+       (std.lib.component/start))))
 
 (defn installed?
   "checks if program is installed
@@ -261,7 +264,7 @@
    => 2"
   {:added "3.0"}
   ([runner program-id]
-   (trigger runner program-id (h/time-ms)))
+   (trigger runner program-id (std.lib.time/time-ms)))
   ([runner program-id t]
    (let [{:keys [merge-fn main-fn args-fn state]} (get-program runner program-id)
          args (args-fn)
@@ -273,7 +276,7 @@
   "manually overrides the interval for a spawn/program"
   {:added "3.0"}
   ([{:keys [runtime] :as runner} program-id interval]
-   (h/map-vals (fn [spawn]
+   (std.lib.collection/map-vals (fn [spawn]
                  (spawn/set-props spawn :interval interval))
                (get-all-spawn runner program-id))
    (swap! runtime assoc-in [:programs program-id :interval] interval))
@@ -285,7 +288,7 @@
   "gets the current props map for the runner"
   {:added "3.0"}
   ([{:keys [runtime] :as runner} program-id]
-   (h/map-vals (fn [spawn]
+   (std.lib.collection/map-vals (fn [spawn]
                  (spawn/get-props spawn))
                (get-all-spawn runner program-id)))
   ([{:keys [runtime] :as runner} program-id spawn-id]

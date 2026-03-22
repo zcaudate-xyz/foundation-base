@@ -1,7 +1,7 @@
 (ns code.query.traverse-test
-  (:use code.test)
-  (:require [std.block.navigate :as nav]
-            [code.query.traverse :refer :all]))
+  (:require [code.query.traverse :refer :all]
+            [std.block.navigate :as nav])
+  (:use code.test))
 
 (defn source [pos]
     (-> pos :source nav/value))

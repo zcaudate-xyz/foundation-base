@@ -1,15 +1,21 @@
 (ns std.lang.base.impl
-  (:require [std.string :as str]
-            [std.lib :as h]
-            [std.lang.base.emit :as emit]
-            [std.lang.base.emit-preprocess :as preprocess]
+  (:require [std.lang.base.emit :as emit]
             [std.lang.base.emit-common :as emit-common]
-            [std.lang.base.impl-entry :as entry]
-            [std.lang.base.impl-deps :as deps]
+            [std.lang.base.emit-preprocess :as preprocess]
             [std.lang.base.grammar :as grammar]
-            [std.lang.base.library-snapshot :as snap]
+            [std.lang.base.impl-deps :as deps]
+            [std.lang.base.impl-entry :as entry]
             [std.lang.base.library :as lib]
-            [std.lang.base.util :as ut]))
+            [std.lang.base.library-snapshot :as snap]
+            [std.lang.base.util :as ut]
+            [std.lib.component]
+            [std.lib.context.space]
+            [std.lib.deps]
+            [std.lib.env]
+            [std.lib.foundation]
+            [std.lib.resource]
+            [std.lib.walk]
+            [std.string.common]))
 
 (defonce ^:dynamic *library* nil)
 
@@ -23,13 +29,13 @@
    `(binding [*library* ~lib]
       ~@body)))
 
-(h/res:spec-add
+(std.lib.resource/res:spec-add
  {:type :hara/lang.library
   :mode {:allow #{:global}
          :default :global}
   :instance {:create #'lib/library:create
-             :start h/start
-             :stop h/stop}})
+             :start std.lib.component/start
+             :stop std.lib.component/stop}})
 
 (defn default-library
   "gets the default library"
@@ -37,15 +43,15 @@
   ([& [override]]
    (or override
        *library*
-       (h/res :hara/lang.library))))
+       (std.lib.resource/res :hara/lang.library))))
 
 (defn default-library:reset
   "clears the default library, including all grammars"
   {:added "4.0"}
   ([& [override]]
    (if-let [lib (or override *library*)]
-     (h/stop lib)
-     (h/res:stop :hara/lang.library))))
+     (std.lib.component/stop lib)
+     (std.lib.resource/res:stop :hara/lang.library))))
 
 (defn clone-default-library
   "clones the default library"
@@ -62,7 +68,7 @@
   {:added "4.0"}
   []
   (or  *library*
-      (:library (h/p:space-rt-get :lang.annex))
+      (:library (std.lib.context.space/space:rt-get :lang.annex))
       (default-library)))
 
 (defn grammar
@@ -125,13 +131,13 @@
                                   emit
                                   bulk]
                            :as mopts}]
-  (or lang (h/error "Lang required." {:input (keys mopts)}))
+  (or lang (std.lib.foundation/error "Lang required." {:input (keys mopts)}))
   (binding [preprocess/*macro-grammar* grammar
             preprocess/*macro-opts* mopts]
     (if (not (:suppress emit))
       (let [{:keys [trim transform]} emit
             form (cond-> form transform (transform mopts))
-            _    (if *print-form* (h/p :FORM form))
+            _    (if *print-form* (std.lib.env/p :FORM form))
             body (emit/emit form
                             grammar
                             (the-ns namespace)
@@ -164,7 +170,7 @@
   (->> forms
        (map (fn [form] (emit-str form (merge {:lang lang}
                                              meta))))
-       (str/join "\n\n")))
+       (std.string.common/join "\n\n")))
 
 (defn emit-symbol
   "emits string given symbol and grammar"
@@ -220,7 +226,7 @@
    {:keys [library] :as meta}]
   (let [[stage grammar book namespace mopts] (emit-options meta)
         [deps] (deps/collect-script-entries book [(ut/sym-full ptr)])]
-    (str/join "\n\n"
+    (std.string.common/join "\n\n"
               (map #(emit-entry % mopts) deps))))
 
 (defn emit-script-imports
@@ -260,12 +266,12 @@
   {:added "4.0"}
   [imports-arr deps-arr body]
   (->> [(if (not-empty imports-arr)
-          (str/join "\n" imports-arr))
+          (std.string.common/join "\n" imports-arr))
         (if (not-empty deps-arr)
-          (str/join "\n\n" deps-arr))
+          (std.string.common/join "\n\n" deps-arr))
         body]
        (filter not-empty)
-       (str/join "\n\n")))
+       (std.string.common/join "\n\n")))
 
 (defn emit-script
   "emits a script with all dependencies"
@@ -306,7 +312,7 @@
            lang
            emit] :as meta}]
   (let [[stage grammar book namespace mopts] (emit-options meta)
-        module-ids   (transform (h/deps:ordered book [module-id]))
+        module-ids   (transform (std.lib.deps/deps-ordered book [module-id]))
         modules      (map (:modules book) module-ids)
         [_ imports-arr]  (emit-scaffold-raw-imports
                           modules emit
@@ -320,7 +326,7 @@
         [deps]       (deps/collect-script-entries book globals)
         deps-arr     (emit-script-deps deps emit [stage grammar book namespace mopts])
         body         (emit-direct grammar
-                                  (mapv (juxt h/strn identity)
+                                  (mapv (juxt std.lib.foundation/strn identity)
                                         globals)
                                   namespace
                                   (-> mopts
@@ -344,15 +350,15 @@
   {:added "4.0"}
   [module-id {:keys [emit] :as meta}]
   (let [[stage grammar book namespace mopts] (emit-options meta)
-        module-ids   (h/deps:ordered book [module-id])
+        module-ids   (std.lib.deps/deps-ordered book [module-id])
         modules      (map (:modules book) module-ids)
         [natives imports-arr] (emit-scaffold-raw-imports
                                modules emit
                                [stage grammar book namespace mopts])]
-    (str/join "\n" (conj (vec imports-arr)
+    (std.string.common/join "\n" (conj (vec imports-arr)
                          (emit-direct grammar
                                       (list 'do:>
-                                            (list 'return (h/postwalk (fn [x]
+                                            (list 'return (std.lib.walk/postwalk (fn [x]
                                                                         (if (or (symbol? x)
                                                                                 (keyword? x))
                                                                           (name x)

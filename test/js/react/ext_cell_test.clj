@@ -1,8 +1,7 @@
 (ns js.react.ext-cell-test
-  (:use code.test)
-  (:require [std.lang :as  l]
-            [std.lib :as h]
-            [std.fs :as fs]))
+  (:require [std.fs :as fs]
+            [std.lang :as l])
+  (:use code.test))
 
 ^{:refer js.react.ext-cell/initCellBase :added "4.0" :unchecked true}
 (fact "initialises cell listeners")

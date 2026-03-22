@@ -1,9 +1,8 @@
 (ns mcp-clj.client-transport.factory
-  "Factory for creating MCP client transports with pluggable registry"
-  (:require
-    [mcp-clj.client-transport.http :as http]
-    [mcp-clj.client-transport.protocol :as transport-protocol]
-    [mcp-clj.client-transport.stdio :as stdio]))
+  (:require [mcp-clj.client-transport.http :as http]
+            [mcp-clj.client-transport.protocol :as transport-protocol]
+            [mcp-clj.client-transport.stdio :as stdio])
+  "Factory for creating MCP client transports with pluggable registry")
 
 ;; Transport Registry
 

@@ -1,10 +1,9 @@
 (ns std.image.base.common-test
+  (:require [std.image.awt.common :as awt]
+            [std.image.base]
+            [std.image.base.common :refer :all]
+            [std.image.base.model :as model])
   (:use code.test)
-  (:require [std.image.base.common :refer :all]
-            [std.image.base.model :as model]
-            [std.image.base
-             [util :as util]]
-            [std.image.awt.common :as awt])
   (:refer-clojure :exclude [empty]))
 
 ^{:refer std.image.base.common/create-channels :added "3.0"}

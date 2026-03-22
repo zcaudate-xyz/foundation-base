@@ -1,6 +1,10 @@
 (ns std.lang.base.util
-  (:require [std.lib :as h]
-            [std.string :as str]))
+  (:require [std.lib.collection]
+            [std.lib.context.pointer]
+            [std.lib.context.space]
+            [std.lib.env]
+            [std.lib.foundation]
+            [std.string.common]))
 
 ;;
 ;; SYMBOL
@@ -42,13 +46,13 @@
   "default fast symbol conversion"
   {:added "4.0"}
   [sym]
-  (str/replace (h/strn sym) "-" "_"))
+  (std.string.common/replace (std.lib.foundation/strn sym) "-" "_"))
 
 (defn sym-default-inverse-str
   "inverses the symbol string"
   {:added "4.0"}
   [sym]
-  (str/replace (h/strn sym) "_" "-"))
+  (std.string.common/replace (std.lib.foundation/strn sym) "_" "-"))
 
 (defn hashvec?
   "checks for hash vec"
@@ -77,38 +81,38 @@
   ([lang]
    (if lang 
      (keyword "lang" (name lang))
-     (h/error "No Lang Input" {:input lang}))))
+     (std.lib.foundation/error "No Lang Input" {:input lang}))))
 
 (defn lang-rt-list
   "lists rt in a namespace"
   {:added "4.0"}
   ([]
-   (lang-rt-list (h/ns-sym)))
+   (lang-rt-list (std.lib.env/ns-sym)))
   ([ns]
-   (let [space (h/p:space ns)]
+   (let [space (std.lib.context.space/space ns)]
      (keep (fn [k]
              
              (if (= 'lang (sym-module k))
                (keyword (name k))))
-           (h/p:space-context-list space)))))
+           (std.lib.context.space/space:context-list space)))))
 
 (defn lang-rt
   "getn the runtime contexts in a map"
   {:added "4.0"}
   ([]
-   (h/map-juxt [identity
+   (std.lib.collection/map-juxt [identity
                 lang-rt]
                (lang-rt-list)))
   ([lang]
-   (h/p:space-rt-current (lang-context lang)))
+   (std.lib.context.space/space:rt-current (lang-context lang)))
   ([ns lang]
-   (h/p:space-rt-current ns (lang-context lang))))
+   (std.lib.context.space/space:rt-current ns (lang-context lang))))
 
 (defn lang-rt-default
   "gets the default runtime function"
   {:added "4.0"}
   [ptr]
-  (let [ns (h/ns-sym)
+  (let [ns (std.lib.env/ns-sym)
         active (set (lang-rt-list ns))
         {:keys [module lang]} ptr]
     (or (if (active lang) (lang-rt lang))
@@ -117,7 +121,7 @@
                              rts))
               (first (filter (fn [rt] (get-in rt [:module/internal module]))
                              rts))))
-        (h/p:space-rt-current ns (:context ptr)))))
+        (std.lib.context.space/space:rt-current ns (:context ptr)))))
 
 (defn lang-pointer
   "creates a lang pointer"
@@ -126,7 +130,7 @@
    (lang-pointer lang {}))
   ([lang {:keys [module id] :as m}]
    (let [ctx (lang-context lang)]
-     (h/pointer (assoc m
+     (std.lib.context.pointer/pointer (assoc m
                        :module module :lang lang
                        :context ctx
                        :context/fn #'lang-rt-default)))))

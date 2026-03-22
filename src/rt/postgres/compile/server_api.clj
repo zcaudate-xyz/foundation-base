@@ -1,8 +1,8 @@
 (ns rt.postgres.compile.server-api
-  "Generation helpers for API-facing server targets."
   (:require [code.framework.generate :as gen]
             [rt.postgres.compile.server-db :as server-db]
-            [rt.postgres.grammar.typed-common :as types]))
+            [rt.postgres.grammar.typed-common :as types])
+  "Generation helpers for API-facing server targets.")
 
 (def ^:private +default-targets+
   [:xtalk-contracts])

@@ -1,12 +1,14 @@
 (ns xt.lang.base-notify
-  (:require [std.protocol.context :as protocol.context]
-            [std.lib :as h]
+  (:require [clojure.set]
             [std.lang :as l]
-            [std.string :as str]
-            [std.lang.interface.type-notify :as notify]
-            [std.lang.base.script-macro :as macro]
             [std.lang.base.pointer :as ptr]
-            [std.lang.base.util :as ut]))
+            [std.lang.base.script-macro :as macro]
+            [std.lang.base.util :as ut]
+            [std.lang.interface.type-notify :as notify]
+            [std.lib.atom]
+            [std.lib.context.pointer]
+            [std.lib.foundation]
+            [std.protocol.context :as protocol.context]))
 
 (def ^:dynamic *override-id* nil)
 
@@ -47,7 +49,7 @@
   [runtime]
   (let [{:keys [id lang type container notify]} runtime]
     (if (not id)
-      (h/error "Runtime Id Required." {:runtime runtime})
+      (std.lib.foundation/error "Runtime Id Required." {:runtime runtime})
       (let [app (l/default-notify)
             notify (notify-defaults notify)
             [protocol port] (case (or type (:tag runtime))
@@ -86,10 +88,10 @@
 
         (nil? lang)
         (l/rt (or (first (l/rt:list))
-                  (h/error "No runtimes found.")))
+                  (std.lib.foundation/error "No runtimes found.")))
         
         :else
-        (h/error "Not a valid runtime.")))
+        (std.lib.foundation/error "Not a valid runtime.")))
 
 ;;
 ;; WAIT
@@ -121,7 +123,7 @@
      (wait-on-call timeout
                    (fn []
                      (let [rt (notify-ceremony-rt lang)]
-                       (h/p:rt-invoke-ptr
+                       (std.lib.context.pointer/rt-invoke-ptr
                         rt 
                         (ut/lang-pointer (:lang rt) {:module (:module rt)})
                         code)))))))
@@ -168,7 +170,7 @@
    (let [{:keys [id]} (notify-ceremony-rt lang)
          pred  (fn [{:strs [key]}]
                  (= id (first key)))]
-     (h/swap-return! notify/*notify-capture*
+     (std.lib.atom/swap-return! notify/*notify-capture*
        (fn [v]
          [(count (filter pred v))
           (vec (remove pred v))])))))
@@ -177,7 +179,7 @@
   "clears all captured items"
   {:added "4.0"}
   ([]
-   (h/swap-return! notify/*notify-capture*
+   (std.lib.atom/swap-return! notify/*notify-capture*
      (fn [v]
        [(count v) []]))))
 
@@ -193,16 +195,16 @@
   [lang gid f group]
   (let [rt    (notify-ceremony-rt lang)
         _     (or (:id rt)
-                  (h/error "Runtime Id Required." {:runtime rt}))
-        curr  (h/p:rt-invoke-ptr rt @(resolve 'xt.lang/var-get) [gid])
+                  (std.lib.foundation/error "Runtime Id Required." {:runtime rt}))
+        curr  (std.lib.context.pointer/rt-invoke-ptr rt @(resolve 'xt.lang/var-get) [gid])
         [nid port lang protocol] (notify-ceremony (assoc rt :type (:runtime rt)))
-        watch-id (keyword (str (h/strn (or group :watch))
+        watch-id (keyword (str (std.lib.foundation/strn (or group :watch))
                                "/" nid ":" gid))
         q  (notify/get-queue (l/default-notify) nid)
         _  (add-watch q watch-id (fn [_ _ _ msg]
                                    (if (= (get msg "key") gid)
                                      (f nid gid (ptr/ptr-output-json msg)))))]
-    (h/p:rt-invoke-ptr rt
+    (std.lib.context.pointer/rt-invoke-ptr rt
                        @(resolve 'xt.lang/watch-add)
                        [gid nid "127.0.0.1"
                         port
@@ -216,17 +218,17 @@
   [lang key driver group init]
   (let [rt    (notify-ceremony-rt lang)
         _     (or (:id rt)
-                  (h/error "Runtime Id Required." {:runtime rt}))
+                  (std.lib.foundation/error "Runtime Id Required." {:runtime rt}))
         _    (if init
-               (reset! driver (h/p:rt-invoke-ptr rt @(resolve 'xt.lang/var-get) [key]))
-               (h/p:rt-invoke-ptr rt @(resolve 'xt.lang/var-set) [key @driver]))
-        sync-id (keyword (str (h/strn (or group :sync))
+               (reset! driver (std.lib.context.pointer/rt-invoke-ptr rt @(resolve 'xt.lang/var-get) [key]))
+               (std.lib.context.pointer/rt-invoke-ptr rt @(resolve 'xt.lang/var-set) [key @driver]))
+        sync-id (keyword (str (std.lib.foundation/strn (or group :sync))
                               "/" id ":" key))
         q  (notify/get-queue (l/default-notify) id)
         _  (add-watch driver sync-id
                       (fn [_ _ prev curr]
                         (when (not= prev curr)
-                          (h/p:rt-invoke-ptr rt @(resolve 'xt.lang/var-set-changed) [key curr]))))]
+                          (std.lib.context.pointer/rt-invoke-ptr rt @(resolve 'xt.lang/var-set-changed) [key curr]))))]
     rt))
   
   (./create-tests)
@@ -235,7 +237,7 @@
     {:added "4.0"}
     [& code]
     (let [lang  (or (clojure.core/first
-                     (h/intersection (set (clojure.core/keys (meta &form)))
+                     (clojure.set/intersection (set (clojure.core/keys (meta &form)))
                                      (set (l/rt:list))))
                     (clojure.core/first (l/rt:list)))]
       `(wait-on-fn ~lang (quote ~code) 1000))))

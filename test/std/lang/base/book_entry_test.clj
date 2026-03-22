@@ -1,6 +1,6 @@
 (ns std.lang.base.book-entry-test
-  (:use code.test)
-  (:require [std.lang.base.book-entry :refer :all]))
+  (:require [std.lang.base.book-entry :refer :all])
+  (:use code.test))
 
 ^{:refer std.lang.base.book-entry/book-entry? :added "4.0"}
 (fact "checks if object is a book entry"

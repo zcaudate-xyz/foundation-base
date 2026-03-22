@@ -1,9 +1,8 @@
 (ns lua.core
   (:require [std.lang :as l]
-            [std.lib :as h]
-            [std.string :as str])
-  (:refer-clojure :exclude [abs assert byte format load max min
-                            print remove sort time type slurp spit]))
+            [std.lib.foundation]
+            [std.lib.template])
+  (:refer-clojure :exclude [abs assert byte format load max min print remove sort time type slurp spit]))
 
 (l/script :lua
   {:import [["cjson"  :as cjson]
@@ -12,20 +11,20 @@
 
 (def$.lua cjson cjson)
 
-(h/template-entries [l/tmpl-entry {:type :fragment
+(std.lib.foundation/template-entries [l/tmpl-entry {:type :fragment
                                    :base ["cjson"]
                                    :tag "lua"}]
   [[json-encode encode]
    [json-decode decode]])
 
-(h/template-entries [l/tmpl-entry {:type :fragment
+(std.lib.foundation/template-entries [l/tmpl-entry {:type :fragment
                                    :base ["table"]
                                    :tag "lua"}]
   [insert
    remove
    sort])
 
-(h/template-entries [l/tmpl-entry {:type :fragment
+(std.lib.foundation/template-entries [l/tmpl-entry {:type :fragment
                                    :base []
                                    :tag "lua"}]
   [assert
@@ -56,7 +55,7 @@
    _VERSION
    xpcall])
 
-(h/template-entries [l/tmpl-entry {:type :fragment
+(std.lib.foundation/template-entries [l/tmpl-entry {:type :fragment
                                    :base "coroutine"
                                    :tag "lua"}]
   [[cr-wrap   wrap]
@@ -66,7 +65,7 @@
    [cr-status status]
    [cr-running running]])
 
-(h/template-entries [l/tmpl-entry {:type :fragment
+(std.lib.foundation/template-entries [l/tmpl-entry {:type :fragment
                                    :base "os"
                                    :tag "lua"}]
   [date
@@ -82,7 +81,7 @@
    [os-remove remove]
    [os-execute execute]])
 
-(h/template-entries [l/tmpl-entry {:type :fragment
+(std.lib.foundation/template-entries [l/tmpl-entry {:type :fragment
                                    :base "io"
                                    :tag "lua"}]
   [[io-close close]
@@ -100,7 +99,7 @@
    [io-type type]
    [io-write write]])
 
-(h/template-entries [l/tmpl-entry {:type :fragment
+(std.lib.foundation/template-entries [l/tmpl-entry {:type :fragment
                                    :base "string"
                                    :tag "lua"}]
   [[substring sub]
@@ -114,7 +113,7 @@
    match
    gmatch])
 
-(h/template-entries [l/tmpl-entry {:type :fragment
+(std.lib.foundation/template-entries [l/tmpl-entry {:type :fragment
                                    :base "math"
                                    :tag "lua"}]
   [abs
@@ -150,7 +149,7 @@
 
 (def$.lua ffi ffi)
 
-(h/template-entries [l/tmpl-entry {:type :fragment
+(std.lib.foundation/template-entries [l/tmpl-entry {:type :fragment
                                    :base "ffi"
                                    :prefix "ffi-"
                                    :tag "lua"}]
@@ -177,7 +176,7 @@
   "renders a template"
   {:added "4.0"}
   [template content]
-  (h/$ (. lustache (render ~template ~content))))
+  (std.lib.template/$ (. lustache (render ~template ~content))))
 
 (def$.lua ffi:new ffi.new)
 
@@ -185,7 +184,7 @@
   "allow ffi calls"
   {:added "4.0"}
   [func & args]
-  (h/$ ((. ffi C ~(symbol (name func))) ~@args)))
+  (std.lib.template/$ ((. ffi C ~(symbol (name func))) ~@args)))
 
 (defn.lua reduce-iter
   "reduces iterate"

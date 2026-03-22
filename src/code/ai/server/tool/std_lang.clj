@@ -1,7 +1,7 @@
 (ns code.ai.server.tool.std-lang
   (:require [std.lang :as l]
-            [std.lang.base.library :as lib]
-            [std.lang.base.book :as book]))
+            [std.lang.base.book :as book]
+            [std.lang.base.library :as lib]))
 
 (defn lang-emit-as-safe
   "Safely evaluate Clojure code, returning a result string or error"

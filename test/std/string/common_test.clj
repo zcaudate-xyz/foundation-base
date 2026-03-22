@@ -1,8 +1,7 @@
 (ns std.string.common-test
-  (:use code.test)
   (:require [std.string.common :refer :all]
-            [std.string.wrap :refer [wrap]]
-            [std.lib :as h])
+            [std.string.wrap :refer [wrap]])
+  (:use code.test)
   (:refer-clojure :exclude [reverse replace]))
 
 ^{:refer std.string.common/blank? :added "3.0"}

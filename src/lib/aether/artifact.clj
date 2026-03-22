@@ -1,11 +1,9 @@
 (ns lib.aether.artifact
   (:require [jvm.artifact :as artifact]
             [jvm.protocol :as protocol.classloader]
-            [std.lib :refer [definvoke]]
+            [std.lib.invoke :refer [definvoke]]
             [std.object :as object])
-  (:import (org.eclipse.aether.artifact Artifact DefaultArtifact)
-           (org.eclipse.aether.metadata Metadata Metadata$Nature DefaultMetadata)
-           (org.eclipse.aether.graph Exclusion)))
+  (:import (org.eclipse.aether.artifact Artifact DefaultArtifact) (org.eclipse.aether.metadata Metadata Metadata$Nature DefaultMetadata) (org.eclipse.aether.graph Exclusion)))
 
 (definvoke rep-eclipse
   "creates a rep from eclipse artifact

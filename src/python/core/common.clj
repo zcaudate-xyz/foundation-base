@@ -1,13 +1,14 @@
 ^{:reference "js.core.common"
   :no-test true}
 (ns python.core.common
-  (:require [std.lib :as h]
-            [std.string :as str]))
+  (:require [std.lib.foundation]
+            [std.lib.template]
+            [std.string.common]))
 
 (defn py-tmpl
   [s]
   (let [{:keys [type base prefix]
-         :or {base []}} (h/template-meta)
+         :or {base []}} (std.lib.foundation/template-meta)
         base (if (vector? base) base [base])
         dsym (case type
                :fragment 'def$.py
@@ -21,13 +22,13 @@
                prefix ((fn [s]
                          (str prefix s))))
         
-        mrep (clojure.core/symbol (str/join "." (conj base msym)))]
-    (h/$ (~dsym ~(clojure.core/symbol sym) ~mrep))))
+        mrep (clojure.core/symbol (std.string.common/join "." (conj base msym)))]
+    (std.lib.template/$ (~dsym ~(clojure.core/symbol sym) ~mrep))))
 
 (defn py-proto-tmpl
   [[s args {:keys [property optional vargs empty]}]]
   (let [{:keys [inst  prefix]
-         :or {inst "obj"}} (h/template-meta)
+         :or {inst "obj"}} (std.lib.foundation/template-meta)
         
         inst (clojure.core/symbol (clojure.core/str inst))
         [sym msym] (if (vector? s)
@@ -51,7 +52,7 @@
                     :else
                     args)
         aform (cond (and optional vargs)
-                    (h/$ (clojure.core/apply
+                    (std.lib.template/$ (clojure.core/apply
                           list
                           (quote ~msym)
                           ~@args
@@ -63,32 +64,32 @@
                                 ~vargs))))
                     
                     optional
-                    (h/$ (clojure.core/apply
+                    (std.lib.template/$ (clojure.core/apply
                           list
                           (quote ~msym)
                           ~@args (vec (clojure.core/take
                                        (clojure.core/count oargs) ~optional))))
                     
                     vargs
-                    (h/$ (clojure.core/apply list (quote ~msym) ~@args ~vargs))
+                    (std.lib.template/$ (clojure.core/apply list (quote ~msym) ~@args ~vargs))
                     
                     :else 
-                    (h/$ (list (quote ~msym) ~@args)))
+                    (std.lib.template/$ (list (quote ~msym) ~@args)))
         standalone (let [isym (if empty
                                 (list 'or inst empty)
                                 inst)]
                      (cond property
-                           (h/$ (fn:> [~isym] (. ~isym ~msym)))
+                           (std.lib.template/$ (fn:> [~isym] (. ~isym ~msym)))
                            
                            :else
                            (let [vargs (if vargs
                                          [(symbol (str "..." vargs))]
                                          [])]
-                             (h/$ (fn:> [~isym ~@args ~@optional ~@vargs]
+                             (std.lib.template/$ (fn:> [~isym ~@args ~@optional ~@vargs]
                                       (. ~isym (~msym ~@args ~@optional ~@vargs)))))))
         sform (if property
-                (h/$ (list '. ~inst (quote ~msym)))
-                (h/$ (list '. ~inst ~aform)))]
-    (h/$ (defmacro.py ~(with-meta sym {:standalone (list 'quote standalone)})
+                (std.lib.template/$ (list '. ~inst (quote ~msym)))
+                (std.lib.template/$ (list '. ~inst ~aform)))]
+    (std.lib.template/$ (defmacro.py ~(with-meta sym {:standalone (list 'quote standalone)})
            ([~inst ~@dargs]
             ~sform)))))

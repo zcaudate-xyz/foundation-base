@@ -1,8 +1,8 @@
 (ns std.lib.transform.base.enum
-  (:require [std.string.common :as str]
-            [std.lib.foundation :as h]
-            [std.string.wrap :as wrap]
-            [std.string.path :as path]))
+  (:require [std.lib.foundation :as h]
+            [std.string.common :as str]
+            [std.string.path :as path]
+            [std.string.wrap :as wrap]))
 
 (defn wrap-single-enum
   "wraps normalise with comprehension of the enum type

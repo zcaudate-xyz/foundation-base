@@ -1,10 +1,9 @@
 (ns std.lib.system.array-test
-  (:use code.test)
-  (:require [std.lib.system.array :refer :all]
-            [std.lib.component.track :as track]
-            [std.lib.component :as common]
+  (:require [std.lib.component :as common]
             [std.lib.component-test :refer [map->Database]]
-            [std.lib :as h]))
+            [std.lib.component.track :as track]
+            [std.lib.system.array :refer :all])
+  (:use code.test))
 
 ^{:refer std.lib.system.array/info-array :added "3.0"}
 (fact "returns the info of elements within the array"

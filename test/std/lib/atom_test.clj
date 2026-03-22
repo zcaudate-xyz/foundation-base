@@ -1,6 +1,6 @@
 (ns std.lib.atom-test
-  (:use code.test)
-  (:require [std.lib.atom :refer :all]))
+  (:require [std.lib.atom :refer :all])
+  (:use code.test))
 
 ^{:refer std.lib.atom/update-diff :added "4.0"}
 (fact "updates a diff in a sub nesting"

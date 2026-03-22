@@ -1,14 +1,17 @@
 (ns rt.postgres.script.graph-base
-  (:require [std.lib :as h]
-            [std.lang :as l]
-            [std.lang.base.util :as ut]
-            [std.lang.base.book :as book]
-            [std.lang.base.library-snapshot :as snap]
-            [std.string :as str]
-            [rt.postgres.grammar.common :as common]
+  (:require [rt.postgres.grammar.common :as common]
             [rt.postgres.script.impl-base :as base]
             [rt.postgres.script.impl-main :as main]
-            [rt.postgres.script.impl-update :as update]))
+            [rt.postgres.script.impl-update :as update]
+            [std.lang :as l]
+            [std.lang.base.book :as book]
+            [std.lang.base.library-snapshot :as snap]
+            [std.lang.base.util :as ut]
+            [std.lib.collection]
+            [std.lib.foundation]
+            [std.string.case]
+            [std.string.common]
+            [std.string.wrap]))
 
 (defn where-pair-ref
   "constructs the where ref pair"
@@ -42,7 +45,7 @@
           
           :else
           (let [{:keys [ref]} attrs
-                {:keys [type link rval]} (or ref (h/error "Not found." {:attrs attrs}))
+                {:keys [type link rval]} (or ref (std.lib.foundation/error "Not found." {:attrs attrs}))
                 nspec-sym (ut/sym-full link)
                 nentry (book/get-base-entry book
                                             (:module link)
@@ -73,8 +76,8 @@
   {:added "4.0"}
   [[k v] where-fn tsch mopts]
   (let [k (cond (string? k)
-                ((str/wrap str/spear-case)
-                 (if (str/ends-with? k "_id")
+                ((std.string.wrap/wrap std.string.case/spear-case)
+                 (if (std.string.common/ends-with? k "_id")
                    (keyword (subs k 0 (- (count k) 3)))
                    (keyword k)))
                 
@@ -86,7 +89,7 @@
         (if (vector? v)
           [k v]
           [k [:eq v]]))
-      (h/error "Key not found" {:key k
+      (std.lib.foundation/error "Key not found" {:key k
                                 :allowed (keys tsch)}))))
 
 (defn where-fn
@@ -114,7 +117,7 @@
           (nil? where) nil
           
           :else
-          (h/error "Entry not valid." {:tsch (keys tsch)
+          (std.lib.foundation/error "Entry not valid." {:tsch (keys tsch)
                                        :input where}))))
 
 (defn id-where-fn
@@ -125,7 +128,7 @@
          t-key   (-> entry :static/schema-seed :vec first)
          t-spec  (-> entry :static/schema-seed :tree t-key)
          output  (where-fn tsch where mopts)]
-     [(h/map-keys (fn [k]
+     [(std.lib.collection/map-keys (fn [k]
                     (cond (-> t-spec k first :type (= :ref))
                           (keyword (str (name k) "_id"))
 

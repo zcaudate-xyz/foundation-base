@@ -1,9 +1,8 @@
 (ns std.pipe-monitor-test
-  (:use code.test)
   (:require [std.pipe :as pipe]
             [std.pipe.monitor :as monitor]
-            [std.task :as task]
-            [std.lib :as h]))
+            [std.task :as task])
+  (:use code.test))
 
 (fact "monitor test"
   (pipe/pipe [(task/task :default "monitor-test"

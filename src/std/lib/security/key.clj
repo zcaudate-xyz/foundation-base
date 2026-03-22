@@ -1,11 +1,7 @@
 (ns std.lib.security.key
   (:require [std.lib.encode :as encode]
             [std.lib.security.provider :as provider])
-  (:import (java.io Writer)
-           (java.security Key KeyFactory KeyPair KeyPairGenerator PrivateKey PublicKey SecureRandom)
-           (java.security.spec AlgorithmParameterSpec PKCS8EncodedKeySpec X509EncodedKeySpec)
-           (javax.crypto KeyGenerator)
-           (javax.crypto.spec SecretKeySpec)))
+  (:import (java.io Writer) (java.security Key KeyFactory KeyPair KeyPairGenerator PrivateKey PublicKey SecureRandom) (java.security.spec AlgorithmParameterSpec PKCS8EncodedKeySpec X509EncodedKeySpec) (javax.crypto KeyGenerator) (javax.crypto.spec SecretKeySpec)))
 
 (defn init-key-generator
   "initializes a `KeyGenerator` object"

@@ -1,6 +1,6 @@
 (ns std.object.query.order
-  (:require [std.object.element.common :as common]
-            [std.object.element :as element]
+  (:require [std.object.element :as element]
+            [std.object.element.common :as common]
             [std.object.query.filter :as filter]))
 
 (defn sort-fn

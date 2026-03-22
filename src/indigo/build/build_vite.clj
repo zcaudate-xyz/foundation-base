@@ -1,9 +1,10 @@
 (ns indigo.build.build-vite
-  (:require [std.make :as make :refer [def.make]]
-            [std.lib :as h]
-            [std.lang :as l]
+  (:require [std.block.heal.core :as heal]
             [std.fs :as fs]
-            [std.block.heal.core :as heal]
+            [std.lang :as l]
+            [std.lib.env]
+            [std.lib.os]
+            [std.make :as make :refer [def.make]]
             [std.text.diff :as diff]))
 
 (def.make CODE_DEV
@@ -35,32 +36,32 @@
   (std.make/build-all indigo.build.build-vite/CODE_DEV)
   (std.make/run:dev indigo.build.build-vite/CODE_DEV)
   
-  (h/p (h/sh {:args ["yarn" "create" "vite" "my-project" "--template" "react"]
+  (std.lib.env/p (std.lib.os/sh {:args ["yarn" "create" "vite" "my-project" "--template" "react"]
               }))
 
-  (h/p (h/sh {:root ".build"
+  (std.lib.env/p (std.lib.os/sh {:root ".build"
               :args ["yarn" "create" "vite" "indigo" "--template" "react"]}))
-  (h/p (h/sh {:root ".build/indigo"
+  (std.lib.env/p (std.lib.os/sh {:root ".build/indigo"
               :args ["pnpm" "install"]
               :inherit true}))
-  (h/p (h/sh {:root ".build/indigo"
+  (std.lib.env/p (std.lib.os/sh {:root ".build/indigo"
               :args ["npm" "install"]
               :inherit true}))
-  (h/p (h/sh {:root ".build/indigo"
+  (std.lib.env/p (std.lib.os/sh {:root ".build/indigo"
               :args ["yarn" "install"]}))
-  (h/p (h/sh {:root ".build/indigo"
+  (std.lib.env/p (std.lib.os/sh {:root ".build/indigo"
               :args ["yarn" "add" "@measured/puck"]}))
-  (h/p (h/sh {:root ".build/indigo"
+  (std.lib.env/p (std.lib.os/sh {:root ".build/indigo"
               :args ["yarn" "add" "lucide-react"]}))
-  (h/p (h/sh {:root ".build/indigo"
+  (std.lib.env/p (std.lib.os/sh {:root ".build/indigo"
               :args ["yarn" "add" "react-dnd"]}))
-  (h/p (h/sh {:root ".build/indigo"
+  (std.lib.env/p (std.lib.os/sh {:root ".build/indigo"
               :args ["yarn" "add" "@dnd-kit/core"]}))
-  (h/p (h/sh {:root ".build/indigo"
+  (std.lib.env/p (std.lib.os/sh {:root ".build/indigo"
               :args ["yarn" "add" "@radix-ui/themes"]}))
-  (h/p (h/sh {:root ".build/indigo"
+  (std.lib.env/p (std.lib.os/sh {:root ".build/indigo"
               :args ["yarn" "add" "@xtalk/figma-ui"]}))
-  (h/p (h/sh {:root ".build/indigo"
+  (std.lib.env/p (std.lib.os/sh {:root ".build/indigo"
               :args ["yarn" "add" "@nextjournal/clojure-mode"]}))
   (spit ".build/indigo/src/main.jsx"
         (emit-main))
@@ -85,7 +86,7 @@
     []
     (swap! +server+
            (fn [m]           
-             (h/sh {:root ".build/indigo"
+             (std.lib.os/sh {:root ".build/indigo"
                     :args ["npm" "run" "dev"]
                     :inherit true}))))
 
@@ -94,7 +95,7 @@
     (swap! +server+
            (fn [m]
              (when m
-               (h/sh {:root ".build/indigo"
+               (std.lib.os/sh {:root ".build/indigo"
                       :args ["yarn" "dev"]
                       :inherit true})))))
 

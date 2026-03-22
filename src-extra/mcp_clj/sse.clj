@@ -1,11 +1,6 @@
 (ns mcp-clj.sse
-  (:require
-    [mcp-clj.log :as log])
-  (:import
-    (java.io
-      Closeable
-      OutputStream
-      OutputStreamWriter)))
+  (:require [mcp-clj.log :as log])
+  (:import (java.io Closeable OutputStream OutputStreamWriter)))
 
 (defn message
   [data]

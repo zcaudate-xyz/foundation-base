@@ -1,8 +1,8 @@
 (ns std.lib.schema
-  (:require [std.lib.foundation :as h]
-            [std.lib.collection :as coll]
-            [std.lib.schema.impl :as impl]
+  (:require [std.lib.collection :as coll]
+            [std.lib.foundation :as h]
             [std.lib.schema.base :as base]
+            [std.lib.schema.impl :as impl]
             [std.lib.schema.ref :as ref])
   (:refer-clojure :exclude [flatten]))
 

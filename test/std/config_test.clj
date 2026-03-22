@@ -1,6 +1,6 @@
 (ns std.config-test
-  (:use code.test)
   (:require [std.config :refer :all])
+  (:use code.test)
   (:refer-clojure :exclude [load resolve]))
 
 ^{:refer std.config/get-session :added "3.0"}

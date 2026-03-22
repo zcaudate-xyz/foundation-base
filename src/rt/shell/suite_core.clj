@@ -1,7 +1,10 @@
 ^{:no-test true}
 (ns rt.shell.suite-core
   (:require [std.lang :as l :refer [defmacro.!]]
-            [std.lib :as h]
+            [std.lib.env]
+            [std.lib.future]
+            [std.lib.template]
+            [std.string.prose]
             [xt.lang.base-notify :as notify])
   (:refer-clojure :exclude [if cat]))
 
@@ -17,7 +20,7 @@
                  {:lang :bash}))
 
 (defmacro.! ^{:static/lang :bash
-              :static/wrap 'std.lib/pl}
+              :static/wrap 'std.lib.env/pl}
   man
   "gets the manual for a given command"
   {:added "4.0"}
@@ -25,7 +28,7 @@
   (apply list 'man args))
 
 (defmacro.! ^{:static/lang :bash
-              :static/wrap 'std.lib/pl}
+              :static/wrap 'std.lib.env/pl}
   apropos
   "gets commands for a given text"
   {:added "4.0"}
@@ -98,7 +101,7 @@
   [id port form]
   (let [address (str "/dev/tcp/127.0.0.1/" port)
         fstr  (str "'{id: \"" id  "\", type: \"raw\", value:.}'")]
-    (h/$ (do (exec (:% 3 <> ~address))
+    (std.lib.template/$ (do (exec (:% 3 <> ~address))
              [~form
               | (jq {:R true
                      :s true}
@@ -154,10 +157,10 @@
   (echo (!:uuid))
   
   
-  @(h/on:all
-    [(h/future
+  @(std.lib.future/on:all
+    [(std.lib.future/future
        (>> (echo (@.c "hello"))))
-     (h/future
+     (std.lib.future/future
        (>> (echo (@.c "hello"))))])
   
   (>> (echo '(@.c
@@ -213,7 +216,7 @@
   
   
   (!.sh
-   (-> '(@! (std.string/|
+   (-> '(@! (std.string.prose/|
              "\\# Header"
                ".nf"
                ".mk a"
@@ -238,7 +241,7 @@
 
   
 
-  (>> (echo '(@! (std.string/|
+  (>> (echo '(@! (std.string.prose/|
                   "; ----------------------------------------------------------------------------------------"
                   "; Writes \"Hello, World\" to the console using only system calls. Runs on 64-bit Linux only."
                   "; To assemble and run:"

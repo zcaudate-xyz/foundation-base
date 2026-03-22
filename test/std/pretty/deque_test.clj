@@ -1,6 +1,6 @@
 (ns std.pretty.deque-test
-  (:use code.test)
   (:require [std.pretty.deque :refer :all])
+  (:use code.test)
   (:refer-clojure :exclude [concat]))
 
 ^{:refer std.pretty.deque/pop-left :added "3.0"}

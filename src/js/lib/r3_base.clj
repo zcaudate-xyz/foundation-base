@@ -1,12 +1,12 @@
 (ns js.lib.r3-base
   (:require [std.lang :as l]
-            [std.lib :as h]))
+            [std.lib.foundation]))
 
 (l/script :js
   {:import [["@react-three/fiber" :as [* ReactThree]]
             ["leva" :as [* ReactLena]]]})
 
-(h/template-entries [l/tmpl-entry {:type :fragment
+(std.lib.foundation/template-entries [l/tmpl-entry {:type :fragment
                                    :base "ReactThree"
                                    :tag "js"}]
   [Canvas
@@ -38,7 +38,7 @@
    useStore
    useThree])
 
-(h/template-entries [l/tmpl-entry {:type :fragment
+(std.lib.foundation/template-entries [l/tmpl-entry {:type :fragment
                                    :base "ReactLena"
                                    :tag "js"}]
   [useControls])

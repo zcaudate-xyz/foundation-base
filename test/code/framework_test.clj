@@ -1,10 +1,10 @@
 (ns code.framework-test
-  (:use code.test)
   (:require [code.framework :refer :all]
-            [std.block.navigate :as nav]
             [code.framework.common :as common]
             [code.framework.docstring :as docstring]
-            [code.project :as project]))
+            [code.project :as project]
+            [std.block.navigate :as nav])
+  (:use code.test))
 
 ^{:refer code.framework/import-selector :added "3.0"}
 (fact "creates an import selector"

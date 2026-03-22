@@ -1,6 +1,6 @@
 (ns std.pipe.display-test
-  (:use code.test)
-  (:require [std.pipe.display :refer :all]))
+  (:require [std.pipe.display :refer :all])
+  (:use code.test))
 
 ^{:refer std.pipe.display/bulk-display :added "4.1"}
 (fact "TODO")

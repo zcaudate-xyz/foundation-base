@@ -1,9 +1,10 @@
 (ns indigo.build.build-umd
-  (:require [std.make :as make :refer [def.make]]
-            [std.lib :as h]
-            [std.lang :as l]
+  (:require [std.block.heal.core :as heal]
             [std.fs :as fs]
-            [std.block.heal.core :as heal]
+            [std.lang :as l]
+            [std.lib.env]
+            [std.lib.os]
+            [std.make :as make :refer [def.make]]
             [std.text.diff :as diff]))
 
 (def +packages+
@@ -120,17 +121,17 @@
 
 (defn initialise
   []
-  (h/p (h/sh {:root ".build/code-dev-build-umd"
+  (std.lib.env/p (std.lib.os/sh {:root ".build/code-dev-build-umd"
               :args ["npm" "install"]})))
 
 (defn generate-umd-install
   [package]
-  (h/p (h/sh {:root ".build/code-dev-build-umd"
+  (std.lib.env/p (std.lib.os/sh {:root ".build/code-dev-build-umd"
               :args ["npm" "install" package]})))
 
 (defn generate-umd
   [input-file umd-module umd-file]
-  (do (h/p (h/sh {:root ".build/code-dev-build-umd"
+  (do (std.lib.env/p (std.lib.os/sh {:root ".build/code-dev-build-umd"
                   :args ["node" "index.js" (str "./node_modules/" input-file) umd-module umd-file]}))
       (fs/move (str ".build/code-dev-build-umd/dist/" umd-file)
                (str "resources/assets/indigo/public/js/" umd-file))))
@@ -175,7 +176,7 @@
           (for [f  (keys
                     (fs/list "/Users/chris/Development/greenways/Szncampaigncenter/src-dsl"
                              {:include [".clj"]}))]
-            (let [_       (h/p f)
+            (let [_       (std.lib.env/p f)
                   input   (slurp f)
                   output  (heal/heal input)
                   layout  (try (std.block/parse-root output)
@@ -183,7 +184,7 @@
                                (catch Throwable t
                                  f #_[t :FAILED]))
                   ]
-              (h/p (diff/->string (diff/diff input output)))
+              (std.lib.env/p (diff/->string (diff/diff input output)))
               layout)))
   
   (std.block/parse-root
@@ -221,13 +222,13 @@
 
   
   (make/build-all BUILD_UMD)
-  (h/sh {:root ".build/code-dev-build-umd"
+  (std.lib.os/sh {:root ".build/code-dev-build-umd"
          :args ["npm" "install"]
          :inherit true})
-  (h/sh {:root ".build/code-dev-build-umd"
+  (std.lib.os/sh {:root ".build/code-dev-build-umd"
          :args ["npm" "install" "@measured/puck"]})
   
-  (h/sh {:root ".build/code-dev-build-umd"
+  (std.lib.os/sh {:root ".build/code-dev-build-umd"
          :args ["node" "index.js" "./node_modules/@measured/puck/dist/index.js" "Puck" "puck.umd.js"]})
   (fs/move ".build/code-dev-build-umd/puck.umd.js"
            "resources/assets/indigo/public/js/puck.umd.js"))

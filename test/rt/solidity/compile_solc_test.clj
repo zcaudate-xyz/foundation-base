@@ -1,13 +1,12 @@
 (ns rt.solidity.compile-solc-test
-  (:use code.test)
-  (:require [rt.solidity.client :as client]
+  (:require [rt.solidity :as s]
+            [rt.solidity.client :as client]
             [rt.solidity.compile-common :as compile-common]
             [rt.solidity.compile-solc :as compile]
             [rt.solidity.env-ganache :as env]
-            [rt.solidity :as s]
             [std.lang :as l]
-            [std.lib :as h]
-            [std.make.compile :as make-compile]))
+            [std.make.compile :as make-compile])
+  (:use code.test))
 
 (l/script- :solidity
   {:config  {:mode :clean}

@@ -1,15 +1,9 @@
 (ns mcp-clj.mcp-client.logging
-  "Logging support for MCP client.
-
-  Provides functions for setting log levels and subscribing to log messages
-  from MCP servers following the logging utility protocol."
-  (:require
-    [mcp-clj.log :as log]
-    [mcp-clj.mcp-client.subscriptions :as subscriptions]
-    [mcp-clj.mcp-client.transport :as transport])
-  (:import
-    (java.util.concurrent
-      CompletableFuture)))
+  (:require [mcp-clj.log :as log]
+            [mcp-clj.mcp-client.subscriptions :as subscriptions]
+            [mcp-clj.mcp-client.transport :as transport])
+  "Logging support for MCP client.\n\n  Provides functions for setting log levels and subscribing to log messages\n  from MCP servers following the logging utility protocol."
+  (:import (java.util.concurrent CompletableFuture)))
 
 ;; Log level constants and validation
 

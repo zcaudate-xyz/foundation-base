@@ -1,9 +1,9 @@
 (ns std.dom.update-test
-  (:use code.test)
   (:require [std.dom.common :as base]
             [std.dom.impl :as impl]
             [std.dom.mock :as mock]
-            [std.dom.update :refer :all]))
+            [std.dom.update :refer :all])
+  (:use code.test))
 
 ^{:refer std.dom.update/dom-apply :added "3.0"}
 (fact "applies operations to the dom"

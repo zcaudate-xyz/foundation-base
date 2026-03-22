@@ -1,8 +1,7 @@
 (ns kmi.redis.compile-test
-  (:use code.test)
   (:require [kmi.redis.compile :refer :all]
-            [kmi.redis.sample-type :as type]
-            [std.lib :as h])
+            [kmi.redis.sample-type :as type])
+  (:use code.test)
   (:refer-clojure :exclude [compile]))
 
 ^{:refer kmi.redis.compile/parse-map :added "3.0"}

@@ -1,9 +1,9 @@
 (ns std.lib.transform.base.enum-test
-  (:use code.test)
-  (:require [std.lib.transform :as graph]
-            [std.lib.transform.base.enum :refer :all]
+  (:require [example.data :as examples]
             [std.lib.schema :as schema]
-            [example.data :as examples]))
+            [std.lib.transform :as graph]
+            [std.lib.transform.base.enum :refer :all])
+  (:use code.test))
 
 ^{:refer std.lib.transform.base.enum/wrap-single-enum :added "3.0"}
 (fact "wraps normalise with comprehension of the enum type"

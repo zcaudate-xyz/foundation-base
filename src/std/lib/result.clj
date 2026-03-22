@@ -1,7 +1,7 @@
 (ns std.lib.result
-  (:require [std.protocol.return :as protocol.return]
-            [std.lib.impl :refer [defimpl] :as impl]
-            [std.lib.foundation :as h]))
+  (:require [std.lib.foundation :as h]
+            [std.lib.impl :as impl :refer [defimpl]]
+            [std.protocol.return :as protocol.return]))
 
 (defn- result-string
   ([{:keys [type status data] :as res}]

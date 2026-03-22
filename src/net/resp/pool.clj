@@ -1,8 +1,8 @@
 (ns net.resp.pool
   (:require [net.resp.connection :as conn]
             [std.concurrent :as cc]
-            [std.lib.component.track :as track]
-            [std.lib :as h]))
+            [std.lib.component]
+            [std.lib.component.track :as track]))
 
 (defn pool
   "creates the connection pool"
@@ -14,7 +14,7 @@
               :resource {:create (fn []
                                    (track/track:with-metadata [{:remote/client id}]
                                      (conn/connection (select-keys m [:host :port]))))
-                         :stop h/stop
+                         :stop std.lib.component/stop
                          :initial (or initial 0)})
        (cc/pool:create))))
 
@@ -59,12 +59,12 @@
      (pool:apply pool f args))))
 
 (def ^{:arglists '([remote])}       pool:health   (wrap-connection conn/connection:health))
-(def ^{:arglists '([remote])}       pool:start    (wrap-pool h/start true true))
-(def ^{:arglists '([remote])}       pool:stop     (wrap-pool h/stop true true))
-(def ^{:arglists '([remote])}       pool:kill     (wrap-pool h/comp:kill true true))
-(def ^{:arglists '([remote])}       pool:started? (wrap-pool h/started?))
-(def ^{:arglists '([remote])}       pool:stopped? (wrap-pool h/stopped?))
-(def ^{:arglists '([remote level])} pool:info     (wrap-pool h/comp:info))
+(def ^{:arglists '([remote])}       pool:start    (wrap-pool std.lib.component/start true true))
+(def ^{:arglists '([remote])}       pool:stop     (wrap-pool std.lib.component/stop true true))
+(def ^{:arglists '([remote])}       pool:kill     (wrap-pool std.lib.component/kill true true))
+(def ^{:arglists '([remote])}       pool:started? (wrap-pool std.lib.component/started?))
+(def ^{:arglists '([remote])}       pool:stopped? (wrap-pool std.lib.component/stopped?))
+(def ^{:arglists '([remote level])} pool:info     (wrap-pool std.lib.component/info))
 
 (def ^{:arglists '([remote])}           pool:read         (wrap-connection conn/connection:read))
 (def ^{:arglists '([remote command])}   pool:write        (wrap-connection conn/connection:write))

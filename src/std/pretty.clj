@@ -1,93 +1,17 @@
 (ns std.pretty
-  "Enhanced printing functions for rendering Clojure values. The following
-  options are available to control the printer:
-
-  #### General Rendering
-
-  `:width`
-
-  Number of characters to try to wrap pretty-printed forms at.
-
-  `:print-meta`
-
-  If true, metadata will be printed before values. Defaults to the value of
-  `*print-meta*` if unset.
-
-  #### Collection Options
-
-  `:sort-keys`
-
-  Print maps and sets with ordered keys. Defaults to true, which will sort all
-  collections. If a number, counted collections will be sorted up to the set
-  size. Otherwise, collections are not sorted before printing.
-
-  `:map-delimiter`
-
-  The text placed between key-value pairs in a map.
-
-  `:map-coll-separator`
-
-  The text placed between a map key and a collection value. The keyword :line
-  will cause line breaks if the whole map does not fit on a single line.
-
-  `:seq-limit`
-
-  If set to a positive number, then lists will only render at most the first n
-  elements. This can help prevent unintentional realization of infinite lazy
-  sequences.
-
-  #### Color Options
-
-  `:print-color`
-
-  When true, ouptut colored text from print functions.
-
-  `:color-markup`
-
-  :ansi for ANSI color text (the default),
-  :html-inline for inline-styled html,
-  :html-classes to use the names of the keys in the :color-scheme map
-  as class names for spans so styling can be specified via CSS.
-
-  `:color-scheme`
-
-  Map of syntax element keywords to color codes.
-
-  #### Type Handling
-
-  `:print-handlers`
-
-  A lookup function which will return a rendering function for a given class
-  type. This will be tried before the built-in type logic. See the
-  `std.pretty.dispatch` namespace for some helpful constructors. The returned
-  function should accept the current printer and the value to be rendered,
-  returning a format document.
-
-  `:print-fallback`
-
-  Keyword argument specifying how to format unknown values. Puget supports a few
-  different options:
-
-  - `:pretty` renders values with the default colored representation.
-  - `:print` defers to the standard print method by rendering unknown values
-    using `pr-str`.
-  - `:error` will throw an exception when types with no defined handler are
-    encountered.
-  - A function value will be called with the current printer options and the
-    unknown value and is expected to return a formatting document representing
-    it.
-  "
-  (:require [std.pretty.compare :as compare]
-            [std.pretty.engine :as engine]
-            [std.pretty.edn :as edn]
-            [std.pretty.color :as color]
-            [std.pretty.dispatch :as dispatch]
-            [std.pretty.protocol :as protocol.pretty]
-            [std.block :as block]
+  (:require [std.block :as block]
             [std.block.heal :as heal]
-            [std.string :as str]
             [std.concurrent.print :as print]
-            [std.lib :as h]))
+            [std.lib.env]
+            [std.lib.foundation]
+            [std.pretty.color :as color]
+            [std.pretty.compare :as compare]
+            [std.pretty.dispatch :as dispatch]
+            [std.pretty.edn :as edn]
+            [std.pretty.engine :as engine]
+            [std.pretty.protocol :as protocol.pretty]
+            [std.string.common])
+  "Enhanced printing functions for rendering Clojure values. The following\n  options are available to control the printer:\n\n  #### General Rendering\n\n  `:width`\n\n  Number of characters to try to wrap pretty-printed forms at.\n\n  `:print-meta`\n\n  If true, metadata will be printed before values. Defaults to the value of\n  `*print-meta*` if unset.\n\n  #### Collection Options\n\n  `:sort-keys`\n\n  Print maps and sets with ordered keys. Defaults to true, which will sort all\n  collections. If a number, counted collections will be sorted up to the set\n  size. Otherwise, collections are not sorted before printing.\n\n  `:map-delimiter`\n\n  The text placed between key-value pairs in a map.\n\n  `:map-coll-separator`\n\n  The text placed between a map key and a collection value. The keyword :line\n  will cause line breaks if the whole map does not fit on a single line.\n\n  `:seq-limit`\n\n  If set to a positive number, then lists will only render at most the first n\n  elements. This can help prevent unintentional realization of infinite lazy\n  sequences.\n\n  #### Color Options\n\n  `:print-color`\n\n  When true, ouptut colored text from print functions.\n\n  `:color-markup`\n\n  :ansi for ANSI color text (the default),\n  :html-inline for inline-styled html,\n  :html-classes to use the names of the keys in the :color-scheme map\n  as class names for spans so styling can be specified via CSS.\n\n  `:color-scheme`\n\n  Map of syntax element keywords to color codes.\n\n  #### Type Handling\n\n  `:print-handlers`\n\n  A lookup function which will return a rendering function for a given class\n  type. This will be tried before the built-in type logic. See the\n  `std.pretty.dispatch` namespace for some helpful constructors. The returned\n  function should accept the current printer and the value to be rendered,\n  returning a format document.\n\n  `:print-fallback`\n\n  Keyword argument specifying how to format unknown values. Puget supports a few\n  different options:\n\n  - `:pretty` renders values with the default colored representation.\n  - `:print` defers to the standard print method by rendering unknown values\n    using `pr-str`.\n  - `:error` will throw an exception when types with no defined handler are\n    encountered.\n  - A function value will be called with the current printer options and the\n    unknown value and is expected to return a formatting document representing\n    it.\n  ")
 
 ;; ## Control Vars
 
@@ -294,12 +218,12 @@
      [printer value]
      (let [doc (let [[vname & tail] (-> (.getName (class value))
                                         (.replaceFirst "$" "/")
-                                        (str/split #"\$"))]
+                                        (std.string.common/split #"\$"))]
                  (if (seq tail)
                    (str vname "["
                         (->> tail
-                             (map #(first (str/split % #"__")))
-                             (str/join "/"))
+                             (map #(first (std.string.common/split % #"__")))
+                             (std.string.common/join "/"))
                         "]")
                    vname))]
        (format-unknown printer value "Fn" doc)))})
@@ -477,12 +401,12 @@
   ;; Collection Types
   (-visit-seq
     [this value]
-    (or (h/suppress
+    (or (std.lib.foundation/suppress
          [:group [:align
                   (apply vector :span
                          (interpose [:line]
                                     (map #(vector :text %)
-                                         (str/split-lines
+                                         (std.string.common/split-lines
                                           (heal/rainbow (str (block/layout value)))))))]])
         
         (let [[values trimmed?]
@@ -648,7 +572,7 @@
   ([value]
    (pprint-str value nil))
   ([value opts]
-   (str/trim-newlines
+   (std.string.common/trim-newlines
     (with-out-str
       (render-out (pretty-printer (merge {:print-color false} opts))
                   value)))))
@@ -665,5 +589,5 @@
         (clojure.core/with-out-str)
         (print/println))))
 
-(h/local:set :pprint     pprint-cc
+(std.lib.env/local:set :pprint     pprint-cc
              :pprint-str pprint-str)

@@ -1,7 +1,7 @@
 (ns std.lib.git
-  (:require [std.lib.os :as os]
-            [std.string.common :as str]
-            [std.lib.foundation :as h]))
+  (:require [std.lib.foundation :as h]
+            [std.lib.os :as os]
+            [std.string.common :as str]))
 
 (defn git-result
   "helper to get result from process"

@@ -1,7 +1,7 @@
 (ns std.config.ext.yaml
   (:require [script.yaml :as yaml]
             [std.config.common :as common]
-            [std.lib :refer [definvoke]]))
+            [std.lib.invoke :refer [definvoke]]))
 
 (definvoke resolve-type-yaml
   "resolves yaml config

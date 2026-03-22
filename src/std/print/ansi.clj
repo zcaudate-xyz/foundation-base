@@ -1,5 +1,5 @@
 (ns std.print.ansi
-  (:require [std.string :as str]))
+  (:require [std.string.common]))
 
 (def ^:dynamic *custom*
   {:warn      :yellow
@@ -59,7 +59,7 @@
    => \"[30;20m\""
   {:added "3.0"}
   ([codes]
-   (str "\033[" (str/joinl codes ";") "m")))
+   (str "\033[" (std.string.common/joinl codes ";") "m")))
 
 (defn encode
   "encodes the ansi characters for modifiers
@@ -93,7 +93,7 @@
    => string?"
   {:added "3.0"}
   ([text]
-   (str/replace text #"^((\x1b\x5b|\x9b)[\x30-\x3f]*[\x20-\x2f]*[\x40-\x7e])*$" "")))
+   (std.string.common/replace text #"^((\x1b\x5b|\x9b)[\x30-\x3f]*[\x20-\x2f]*[\x40-\x7e])*$" "")))
 
 (defn- ansi-form [modifier]
   (let [prefix (encode modifier)
@@ -102,7 +102,7 @@
        ([& ~'args]
         (-> ~'args
             (->> (map (fn [~'x] (str ~prefix ~'x)))
-                 (str/join))
+                 (std.string.common/join))
             (str ~(encode :reset)))))))
 
 (defmacro define-ansi-forms

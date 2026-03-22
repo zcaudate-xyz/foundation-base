@@ -1,6 +1,6 @@
 (ns std.lib.trace-test
-  (:use code.test)
-  (:require [std.lib.trace :refer :all]))
+  (:require [std.lib.trace :refer :all])
+  (:use code.test))
 
 ^{:refer std.lib.trace/trace? :added "4.0"}
 (fact "checks if object is a trace"

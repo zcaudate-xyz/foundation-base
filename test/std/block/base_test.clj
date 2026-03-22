@@ -1,8 +1,8 @@
 (ns std.block.base-test
-  (:use code.test)
   (:require [std.block.base :refer :all]
             [std.block.construct :as construct]
-            [std.block.parse :as parse]))
+            [std.block.parse :as parse])
+  (:use code.test))
 
 ^{:refer std.block.base/block? :added "3.0"}
 (fact "check whether an object is a block"

@@ -1,10 +1,9 @@
 (ns xt.db.cache-view-test
-  (:use code.test)
-  (:require [std.lang :as l]
-            [std.lib :as h]
-            [rt.postgres :as pg]
-            [xt.db.sample-user-test :as user]
-            [xt.db.sample-data-test :as data]))
+  (:require [rt.postgres :as pg]
+            [std.lang :as l]
+            [xt.db.sample-data-test :as data]
+            [xt.db.sample-user-test :as user])
+  (:use code.test))
 
 (l/script- :js
   {:runtime :basic

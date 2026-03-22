@@ -1,12 +1,11 @@
 (ns js.lib.lucide
-  (:require [std.string :as str]
-            [std.lib :as h]
-            [std.lang :as l]))
+  (:require [std.lang :as l]
+            [std.lib.foundation]))
 
 (l/script :js
   {:import [["lucide-react" :as [* Lucide]]]})
 
-(h/template-bulk [l/tmpl-entry {:type :fragment
+(std.lib.foundation/template-bulk [l/tmpl-entry {:type :fragment
                                 :base "Lucide"
                                 :tag "js"}]
   '[AArrowDown

@@ -1,7 +1,6 @@
 (ns jvm.classloader.common
-  (:require [std.lib :as h])
-  (:import (java.net URL)
-           (java.io DataInputStream FileInputStream)))
+  (:require [std.lib.foundation])
+  (:import (java.net URL) (java.io DataInputStream FileInputStream)))
 
 (defn to-url
   "constructs a `java.net.URL` object from a string
@@ -10,7 +9,7 @@
    => \"file:/dev/null/\""
   {:added "3.0"}
   ([^String path]
-   (cond (h/url? path)
+   (cond (std.lib.foundation/url? path)
          path
 
          (string? path)

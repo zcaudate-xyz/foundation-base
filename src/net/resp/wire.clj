@@ -1,10 +1,11 @@
 (ns net.resp.wire
-  (:require [std.protocol.wire :as protocol.wire]
-            [std.json :as json]
-            [std.lib :as h])
+  (:require [std.json :as json]
+            [std.lib.foundation]
+            [std.lib.impl]
+            [std.protocol.wire :as protocol.wire])
   (:refer-clojure :exclude [read]))
 
-(h/build-impl {}
+(std.lib.impl/build-impl {}
               protocol.wire/IWire)
 
 (defn call
@@ -64,7 +65,7 @@
 
 (defmethod protocol.wire/-deserialize-bytes :default
   ([bytes _]
-   (h/string bytes)))
+   (std.lib.foundation/string bytes)))
 
 (defmethod protocol.wire/-deserialize-bytes :bytes
   ([bytes _]
@@ -72,17 +73,17 @@
 
 (defmethod protocol.wire/-deserialize-bytes :string
   ([bytes _]
-   (h/string bytes)))
+   (std.lib.foundation/string bytes)))
 
 (defmethod protocol.wire/-deserialize-bytes :json
   ([bytes _]
-   (let [s (h/string bytes)]
+   (let [s (std.lib.foundation/string bytes)]
      (if (not-empty s)
        (json/read s json/+keyword-mapper+)))))
 
 (defmethod protocol.wire/-deserialize-bytes :edn
   ([bytes _]
-   (let [s (h/string bytes)]
+   (let [s (std.lib.foundation/string bytes)]
      (if (not-empty s)
        (read-string s)))))
 

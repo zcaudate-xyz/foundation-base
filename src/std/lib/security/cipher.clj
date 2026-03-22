@@ -1,10 +1,7 @@
 (ns std.lib.security.cipher
   (:require [std.lib.security.key :as key]
             [std.lib.security.provider :as provider])
-  (:import (java.security Key SecureRandom)
-           (java.security.spec AlgorithmParameterSpec)
-           (javax.crypto Cipher)
-           (javax.crypto.spec IvParameterSpec)))
+  (:import (java.security Key SecureRandom) (java.security.spec AlgorithmParameterSpec) (javax.crypto Cipher) (javax.crypto.spec IvParameterSpec)))
 
 (defn init-cipher
   "initializes cipher according to options"

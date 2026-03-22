@@ -1,9 +1,8 @@
 (ns xt.db.base-check
-  (:use code.test)
-  (:require [std.lang :as l]
-            [std.lib :as h]
-            [std.string :as str]
-            [std.json :as json]))
+  (:require [std.json :as json]
+            [std.lang :as l]
+            [std.lib.foundation])
+  (:use code.test))
 
 (l/script :xtalk
   {:require [[xt.lang.base-lib :as k]]})
@@ -91,7 +90,7 @@
   (return [true]))
 
 (comment
-  (str (h/uuid))
+  (str (std.lib.foundation/uuid))
   
   #_
   (defn.xt check-args

@@ -1,7 +1,7 @@
 (ns jvm.deps-test
-  (:use code.test)
   (:require [jvm.deps :refer :all]
             [std.fs :as fs])
+  (:use code.test)
   (:refer-clojure :exclude [load resolve]))
 
 ^{:refer jvm.deps/resolve-classloader :added "3.0"}

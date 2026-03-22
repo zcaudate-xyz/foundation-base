@@ -1,7 +1,7 @@
 (ns std.lib.component.track-test
-  (:use code.test)
   (:require [std.lib.component.track :refer :all]
-            [std.protocol.track :as protocol.track]))
+            [std.protocol.track :as protocol.track])
+  (:use code.test))
 
 (defrecord Store []
   protocol.track/ITrack

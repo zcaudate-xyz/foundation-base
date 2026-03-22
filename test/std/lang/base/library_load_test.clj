@@ -1,9 +1,9 @@
 (ns std.lang.base.library-load-test
-  (:require [std.lang.base.library-load :as loader]
-            [std.lang.base.library :as lib]
+  (:require [code.test :as t]
+            [js.core]
             [std.lang.base.impl :as impl]
-            [code.test :as t]
-            [js.core]))
+            [std.lang.base.library :as lib]
+            [std.lang.base.library-load :as loader]))
 
 ^{:refer std.lang.base.library-load/eval-in-library :added "4.1"}
 (t/fact "Evaluates a form within the context of a specific library instance"

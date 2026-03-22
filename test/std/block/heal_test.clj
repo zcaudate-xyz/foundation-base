@@ -1,12 +1,13 @@
 (ns std.block.heal-test
-  (:use code.test)
-  (:require [std.block.heal :refer :all]))
+  (:require [std.block.heal :refer :all]
+            [std.lib.env])
+  (:use code.test))
 
 ^{:refer std.block.heal/print-rainbow :added "4.1"}
 (fact "prints the content with rainbow parens"
   ^:hidden
   
-  (std.lib/with-out-str
+  (std.lib.env/with-out-str
     (print-rainbow "(+ 12 3)"))
   => "[34m([0m+ 12 3[34m)[0m")
 

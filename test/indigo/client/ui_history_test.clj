@@ -1,6 +1,6 @@
 (ns indigo.client.ui-history-test
-  (:use code.test)
-  (:require [indigo.client.ui-history :refer :all]))
+  (:require [indigo.client.ui-history :refer :all])
+  (:use code.test))
 
 ^{:refer indigo.client.ui-history/pushHistory :added "4.0"}
 (fact "TODO")

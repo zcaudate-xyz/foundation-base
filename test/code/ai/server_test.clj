@@ -1,10 +1,10 @@
 (ns code.ai.server-test
-  (:use code.test)
   (:require [code.ai.server :as server]
             [code.ai.server.tool.basic :as basic]
             [code.ai.server.tool.std-lang :as std-lang]
-            [std.lang :as l]
-            [mcp-clj.mcp-server.core :as mcp-server]))
+            [mcp-clj.mcp-server.core :as mcp-server]
+            [std.lang :as l])
+  (:use code.test))
 
 ^{:refer code.ai.server.tool.basic/echo-fn :added "4.0"}
 (fact "echoes input text"

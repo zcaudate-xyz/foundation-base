@@ -1,5 +1,6 @@
 (ns std.lang.model.spec-xtalk.fn-perl
-  (:require [std.lib :as h]))
+  (:require [std.lib.foundation]
+            [std.lib.template]))
 
 ;;
 ;; CORE
@@ -122,7 +123,7 @@
 
 (defn perl-tf-x-return-encode
   ([[_ out id key]]
-   (h/$ (do (:- "use JSON::PP;")
+   (std.lib.template/$ (do (:- "use JSON::PP;")
             (var res (eval
                       (return (encode_json {:id  ~id
                                    :key ~key
@@ -137,8 +138,8 @@
 
 (defn perl-tf-x-return-wrap
   ([[_ f encode-fn]]
-   (let [f-var (symbol (str "$" (h/strn f) "->"))]
-     (h/$ (do (:- "use JSON::PP;")
+   (let [f-var (symbol (str "$" (std.lib.foundation/strn f) "->"))]
+     (std.lib.template/$ (do (:- "use JSON::PP;")
               (var out)
               (eval
                (:= out (~f-var)))
@@ -149,7 +150,7 @@
 
 (defn perl-tf-x-return-eval
   ([[_ s wrap-fn]]
-   (h/$ (return (~wrap-fn (fn []
+   (std.lib.template/$ (return (~wrap-fn (fn []
                             (return (eval ~s))))))))
 
 (def +perl-return+

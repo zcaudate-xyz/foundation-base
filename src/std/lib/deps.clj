@@ -1,10 +1,10 @@
 (ns std.lib.deps
-  (:require [std.protocol.deps :as protocol.deps]
+  (:require [clojure.set :as set]
             [std.lib.collection :as c]
             [std.lib.foundation :as h]
             [std.lib.impl :as impl]
             [std.lib.sort :as sort]
-            [clojure.set :as set]))
+            [std.protocol.deps :as protocol.deps]))
 
 (impl/build-impl {}
                  protocol.deps/IDeps

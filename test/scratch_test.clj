@@ -1,6 +1,6 @@
 (ns scratch-test
-  (:use code.test)
-  (:require [scratch :refer :all]))
+  (:require [scratch :refer :all])
+  (:use code.test))
 
 ^{:refer scratch/-main :added "4.0"}
 (fact "TODO")

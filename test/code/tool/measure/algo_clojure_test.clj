@@ -1,6 +1,6 @@
 (ns code.tool.measure.algo-clojure-test
-  (:use code.test)
-  (:require [code.tool.measure.algo-clojure :as sut]))
+  (:require [code.tool.measure.algo-clojure :as sut])
+  (:use code.test))
 
 ^{:refer code.tool.measure.algo-clojure/score-code :added "4.1"}
 (fact "score-code calculates complexity"

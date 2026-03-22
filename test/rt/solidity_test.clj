@@ -1,11 +1,10 @@
 (ns rt.solidity-test
-  (:use code.test)
-  (:require [rt.solidity.client :as client]
+  (:require [rt.solidity :as s]
+            [rt.solidity.client :as client]
             [rt.solidity.compile-common :as compile-common]
             [rt.solidity.env-ganache :as env]
-            [rt.solidity :as s]
-            [std.lang :as l]
-            [std.lib :as h]))
+            [std.lang :as l])
+  (:use code.test))
 
 (l/script- :solidity
   {:runtime :web3

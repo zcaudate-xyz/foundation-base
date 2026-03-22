@@ -1,17 +1,23 @@
 (ns std.lang.base.workspace
-  (:require [std.protocol.context :as protocol.context]
-            [std.lang.base.library :as lib]
-            [std.lang.base.library-snapshot :as snap]
-            [std.lang.base.impl :as impl]
+  (:require [std.lang.base.impl :as impl]
             [std.lang.base.impl-entry :as impl-entry]
             [std.lang.base.impl-lifecycle :as lifecycle]
-            [std.lang.base.runtime :as rt]
+            [std.lang.base.library :as lib]
+            [std.lang.base.library-snapshot :as snap]
             [std.lang.base.pointer :as ptr]
+            [std.lang.base.runtime :as rt]
+            [std.lang.base.script-control :as script-control]
             [std.lang.base.util :as ut]
             [std.lang.interface.type-shared :as shared]
-            [std.lang.base.script-control :as script-control]
-            [std.task.process :as process]
-            [std.lib :as h]))
+            [std.lib.collection]
+            [std.lib.context.pointer]
+            [std.lib.deps]
+            [std.lib.env]
+            [std.lib.foundation]
+            [std.lib.os]
+            [std.lib.template]
+            [std.protocol.context :as protocol.context]
+            [std.task.process :as process]))
 
 (defn rt-resolve
   "resolves an rt given keyword"
@@ -77,42 +83,42 @@
   "copies pointer text to clipboard"
   {:added "4.0"}
   [ptr]
-  (h/clip:nil (ptr-display-str ptr)))
+  (std.lib.os/clip:nil (ptr-display-str ptr)))
 
 (defn ptr-print
   "copies pointer text to clipboard"
   {:added "4.0"}
   [ptr]
   (impl-entry/with:cache-force
-   (h/p)
-   (h/p (h/pl-add-lines (ptr-display-str ptr)))))
+   (std.lib.env/p)
+   (std.lib.env/p (std.lib.env/pl-add-lines (ptr-display-str ptr)))))
 
 (defn ptr-setup
   "calls setup on a pointer"
   {:added "4.0"}
   [ptr]
-  (h/p:rt-setup-ptr (ut/lang-rt-default ptr)
+  (std.lib.context.pointer/rt-setup-ptr (ut/lang-rt-default ptr)
                     ptr))
 
 (defn ptr-setup
   "calls setup on a pointer"
   {:added "4.0"}
   [ptr]
-  (h/p:rt-setup-ptr (ut/lang-rt-default ptr)
+  (std.lib.context.pointer/rt-setup-ptr (ut/lang-rt-default ptr)
                     ptr))
 
 (defn ptr-teardown
   "calls teardown on a pointer"
   {:added "4.0"}
   [ptr]
-  (h/p:rt-teardown-ptr (ut/lang-rt-default ptr)
+  (std.lib.context.pointer/rt-teardown-ptr (ut/lang-rt-default ptr)
                        ptr))
 
 (defn ptr-setup-deps
   "calls setup on a pointer and all dependencies"
   {:added "4.0"}
   [ptr]
-  (let [deps (->> (h/deps:ordered (lib/get-book (impl/runtime-library)
+  (let [deps (->> (std.lib.deps/deps-ordered (lib/get-book (impl/runtime-library)
                                                 (:lang ptr))
                                   [(ut/sym-full ptr)])
                   (map #(sym-entry (:lang ptr) %))
@@ -124,7 +130,7 @@
   "calls teardown on pointer all dependencies"
   {:added "4.0"}
   [ptr]
-  (let [deps (->> (h/deps:ordered (lib/get-book (impl/runtime-library)
+  (let [deps (->> (std.lib.deps/deps-ordered (lib/get-book (impl/runtime-library)
                                                 (:lang ptr))
                                   [(ut/sym-full ptr)])
                   (map #(sym-entry (:lang ptr) %))
@@ -136,7 +142,7 @@
   "emits the entire module"
   {:added "4.0"}
   ([]
-   (h/map-juxt [identity emit-module] (ut/lang-rt-list)))
+   (std.lib.collection/map-juxt [identity emit-module] (ut/lang-rt-list)))
   ([lang-or-rt]
    (emit-module lang-or-rt nil))
   ([lang-or-rt module-id]
@@ -152,9 +158,9 @@
    => string?"
   {:added "4.0"}
   ([]
-   (h/map-juxt [identity print-module] (ut/lang-rt-list)))
+   (std.lib.collection/map-juxt [identity print-module] (ut/lang-rt-list)))
   ([lang-or-rt]
-   (h/pl (emit-module lang-or-rt))))
+   (std.lib.env/pl (emit-module lang-or-rt))))
 
 (defn rt:module
   "gets the book module for a runtime"
@@ -180,7 +186,7 @@
   "purges the current workspace"
   {:added "4.0"}
   ([]
-   (h/map-juxt [identity rt:module-purge] (ut/lang-rt-list)))
+   (std.lib.collection/map-juxt [identity rt:module-purge] (ut/lang-rt-list)))
   ([lang-or-rt]
    (let [{:keys [lang module]
           :as rt} (rt-resolve lang-or-rt)]
@@ -196,7 +202,7 @@
   "gets the inner client for a shared runtime"
   {:added "4.0"}
   ([]
-   (h/map-juxt [identity rt:inner] (ut/lang-rt-list)))
+   (std.lib.collection/map-juxt [identity rt:inner] (ut/lang-rt-list)))
   ([lang & [ns]]
    (shared/rt-get-inner (ut/lang-rt ns lang))))
 
@@ -204,7 +210,7 @@
   "restarts the shared runtime"
   {:added "4.0"}
   ([]
-   (h/map-juxt [identity
+   (std.lib.collection/map-juxt [identity
                 rt:restart]
                (ut/lang-rt-list)))
   ([lang & [ns]]
@@ -216,16 +222,16 @@
 
 (defn- multistage-tmpl
   [[sym f]]
-  (h/$ (defn ~sym
+  (std.lib.template/$ (defn ~sym
          ([lang]
           (let [rt (ut/lang-rt lang)]
             (~sym rt (:module rt))))
          ([rt module-id]
           (~f rt module-id)))))
 
-(h/template-entries [multistage-tmpl]
-  [[rt:setup-single    h/p:rt-setup-module]
-   [rt:teardown-single h/p:rt-teardown-module]
+(std.lib.foundation/template-entries [multistage-tmpl]
+  [[rt:setup-single    std.lib.context.pointer/rt-setup-module]
+   [rt:teardown-single std.lib.context.pointer/rt-teardown-module]
    [rt:setup-to  rt/multistage-setup-to]
    [rt:setup rt/multistage-setup-for]
    [rt:teardown  rt/multistage-teardown-for]
@@ -242,20 +248,20 @@
   (let [library (or library (impl/default-library))
         [to from] (if (vector? ns)
                     ns
-                    [(h/ns-sym) ns])
+                    [(std.lib.env/ns-sym) ns])
         imports (lib/wait-mutate!
                  library
                  (fn [snap]
                    (let [book (snap/get-book-raw snap lang)
                          imports (->> (get-in book [:modules from :fragment])
-                                      (h/map-vals (fn [e]
+                                      (std.lib.collection/map-vals (fn [e]
                                                     (assoc e :module (or module-id to)))))
                          new-book (update-in book [:modules (or module-id to) :fragment]
                                              (fn [m]
                                                ((or merge-op (fn [_ new] new))
                                                 m imports)))]
                      [imports (snap/add-book snap new-book)])))]
-    (h/map-vals
+    (std.lib.collection/map-vals
      (fn [e]
        (let [src-var  (resolve (symbol (str ns) (str (:id e))))]
          (intern to

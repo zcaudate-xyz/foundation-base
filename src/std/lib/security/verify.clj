@@ -1,8 +1,7 @@
 (ns std.lib.security.verify
   (:require [std.lib.security.key :as key]
             [std.lib.security.provider :as provider])
-  (:import (java.security PublicKey)
-           (javax.crypto Cipher KeyGenerator Mac)))
+  (:import (java.security PublicKey) (javax.crypto Cipher KeyGenerator Mac)))
 
 (defn digest
   "creates a digest out of a byte array

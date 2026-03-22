@@ -1,20 +1,21 @@
 (ns rt.redis.client
-  (:require [std.protocol.component :as protocol.component]
-            [std.protocol.context :as protocol.context]
-            [std.protocol.request :as protocol.request]
-            [std.protocol.log :as protocol.log]
-            [std.protocol.wire :as protocol.wire]
-            [std.lib :as h :refer [defimpl]]
+  (:require [lib.redis :as lib]
+            [lib.redis.bench :as bench]
+            [lib.redis.event :as event]
+            [net.resp.connection :as conn]
+            [net.resp.pool :as pool]
+            [rt.redis.eval-basic :as eval-basic]
+            [rt.redis.eval-script :as eval-script]
             [std.lang.base.pointer :as ptr]
             [std.lang.base.runtime :as default]
             [std.lang.interface.type-shared :as shared]
-            [net.resp.connection :as conn]
-            [net.resp.pool :as pool]
-            [lib.redis :as lib]
-            [lib.redis.bench :as bench]
-            [lib.redis.event :as event]
-            [rt.redis.eval-basic :as eval-basic]
-            [rt.redis.eval-script :as eval-script])
+            [std.lib.component]
+            [std.lib.impl :refer [defimpl]]
+            [std.protocol.component :as protocol.component]
+            [std.protocol.context :as protocol.context]
+            [std.protocol.log :as protocol.log]
+            [std.protocol.request :as protocol.request]
+            [std.protocol.wire :as protocol.wire])
   (:import (hara.net.resp SocketConnection)))
 
 (declare map->RedisClient)
@@ -35,7 +36,7 @@
   {:added "3.0"}
   ([{:keys [id env] :as m}]
    (-> (client:create m)
-       (h/start))))
+       (std.lib.component/start))))
 
 (defn test:client
   "creates a test client on docker"

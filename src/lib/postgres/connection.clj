@@ -3,11 +3,8 @@
             [lib.jdbc.protocol :as jdbc.protocol]
             [lib.jdbc.resultset :as jdbc.rs]
             [std.json :as json]
-            [std.lib :as h])
-  (:import (java.sql DriverManager
-                     ResultSet)
-           (javax.sql PooledConnection)
-           (java.net InetSocketAddress)))
+            [std.lib.foundation])
+  (:import (java.sql DriverManager ResultSet) (javax.sql PooledConnection) (java.net InetSocketAddress)))
 
 (def ^:dynamic *execute* nil)
 
@@ -41,7 +38,7 @@
         (get @+impls+ vendor)
         (catch Throwable t
           (swap! +impls+ assoc-in [vendor :status] :error)
-          (h/error "Implementation not found" {:vendor vendor}))))))
+          (std.lib.foundation/error "Implementation not found" {:vendor vendor}))))))
 
 (defn ^PooledConnection conn-create
   "creates a pooled connection"
@@ -67,7 +64,7 @@
         conn
         
         :else
-        (h/error "Not closeable." {:type (type conn)
+        (std.lib.foundation/error "Not closeable." {:type (type conn)
                                    :input conn})))
 
 (defn conn-execute
@@ -99,7 +96,7 @@
   {:added "4.0"}
   ([{:keys [vendor] :or {vendor :impossibl} :as m} config]
    (if (not= vendor :impossibl)
-     (h/error "Only impossibl driver supports notifications" {:vendor vendor})
+     (std.lib.foundation/error "Only impossibl driver supports notifications" {:vendor vendor})
      (let [{:keys [ns]} (load-impl :impossibl)
            create-notify (ns-resolve ns 'create-notify)]
        (create-notify m config)))))

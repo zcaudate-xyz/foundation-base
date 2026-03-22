@@ -1,8 +1,8 @@
 (ns xt.db.base-check-test
-  (:use code.test)
-  (:require [std.lang :as l]
-            [rt.postgres :as pg]
-            [rt.postgres.script.test.scratch-v1 :as scratch]))
+  (:require [rt.postgres :as pg]
+            [rt.postgres.script.test.scratch-v1 :as scratch]
+            [std.lang :as l])
+  (:use code.test))
 
 (l/script- :js
   {:runtime :oneshot

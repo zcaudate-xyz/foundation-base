@@ -1,7 +1,7 @@
 (ns rt.postgres.grammar.form-deftype-hydrate-test
-  (:use code.test)
-  (:require [rt.postgres.grammar.form-deftype-hydrate :refer :all]
-            [rt.postgres.grammar.common-application :as app]))
+  (:require [rt.postgres.grammar.common-application :as app]
+            [rt.postgres.grammar.form-deftype-hydrate :refer :all])
+  (:use code.test))
 
 (defn with-demo-links
   [f]

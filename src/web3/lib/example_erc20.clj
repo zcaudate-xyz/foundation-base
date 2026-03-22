@@ -1,6 +1,7 @@
 (ns web3.lib.example-erc20
   (:require [std.lang :as l]
-            [std.lib :as h]))
+            [std.lib.env]
+            [std.string.common]))
 
 (l/script :solidity
   {:require [[rt.solidity :as s]]
@@ -81,14 +82,14 @@
   (return s/msg-sender))
 
 (def +default-contract+
-  {:ns   (h/ns-sym)
+  {:ns   (std.lib.env/ns-sym)
    :name "ExampleSample"
    :args []
    :interfaces [-/IERC20]})
 
 (comment
 
-  (std.string/join
+  (std.string.common/join
    "\n"
    ["// SPDX-License-Identifier: GPL-3.0"
     "pragma solidity >=0.7.0 <0.9.0;"

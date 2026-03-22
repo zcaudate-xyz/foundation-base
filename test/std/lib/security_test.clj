@@ -1,6 +1,6 @@
 (ns std.lib.security-test
-  (:use code.test)
-  (:require [std.lib.security :refer :all]))
+  (:require [std.lib.security :refer :all])
+  (:use code.test))
 
 ^{:refer std.lib.security/sha1 :added "3.0"}
 (fact "function for sha1 hash"

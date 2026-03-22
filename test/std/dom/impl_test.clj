@@ -1,9 +1,9 @@
 (ns std.dom.impl-test
-  (:use code.test)
-  (:require [std.dom.impl :refer :all]
-            [std.dom.common :as base]
+  (:require [std.dom.common :as base]
+            [std.dom.impl :refer :all]
             [std.dom.item :as item]
-            [std.dom.mock :as mock]))
+            [std.dom.mock :as mock])
+  (:use code.test))
 
 ^{:refer std.dom.impl/dom-render :added "3.0"}
 (fact "enables rendering of dom ui"

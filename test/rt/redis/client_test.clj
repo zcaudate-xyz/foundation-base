@@ -1,14 +1,16 @@
 (ns rt.redis.client-test
-  (:use [code.test :exclude [run]])
   (:require [lib.redis.bench :as bench]
             [lib.redis.event :as event]
-            [rt.redis.client :as r]
             [net.resp.connection :as conn]
             [net.resp.wire :as wire]
+            [rt.redis.client :as r]
+            [rt.redis.eval-basic :as eval-basic]
+            [rt.redis.eval-script :as eval-script]
             [std.concurrent :as cc]
             [std.lib :as h]
-            [rt.redis.eval-script :as eval-script]
-            [rt.redis.eval-basic :as eval-basic])
+            [std.lib.component]
+            [std.lib.foundation])
+  (:use [code.test :exclude [run]])
   (:refer-clojure :exclude [read]))
 
 (fact:global
@@ -19,8 +21,8 @@
 (fact "install setup steps for keys"
   ^:hidden
 
-  (h/with:component [|client| (r/client:create {:port 17001})]
-    (-> ((h/wrap-start identity [{:key :events  :start event/start:events-redis}])
+  (std.lib.component/with [|client| (r/client:create {:port 17001})]
+    (-> ((std.lib.component/wrap-start identity [{:key :events  :start event/start:events-redis}])
          (assoc |client| :reset true :events event/+default+))
         ((comp event/events-string event/config:get))))
   => "h$tlgx")
@@ -43,20 +45,20 @@
 (fact "creates and starts a redis client"
   ^:hidden
 
-  (h/with:component [|client| (r/client:create {:port 17001})]
+  (std.lib.component/with [|client| (r/client:create {:port 17001})]
     (cc/pool:with-resource [conn (:pool |client|)]
       (->> (conn/connection:request-bulk conn [["SET" "A" "0"]
                                                ["INCR" "A"]
                                                ["INCR" "A"]
                                                ["INCR" "A"]])
-           (map h/string))))
+           (map std.lib.foundation/string))))
   => ["OK" "1" "2" "3"])
 
 ^{:refer rt.redis.client/test:client :added "3.0"}
 (fact "creates a test client on docker"
   ^:hidden
   
-  (h/with:component [|client| (r/client:create {:port 17001})]
+  (std.lib.component/with [|client| (r/client:create {:port 17001})]
     (with-redefs [conn/test:config (fn [] {:port 17001})]
       (r/test:client)))
   => r/client?)
@@ -72,7 +74,7 @@
 
 (comment
 
-  (h/with:component [|client| (r/client:create {:port 17001})]
+  (std.lib.component/with [|client| (r/client:create {:port 17001})]
     (with-redefs [eval-basic/redis-invoke-ptr-basic (fn [_ _ _] :basic)
                   eval-script/redis-invoke-sha (fn [_ _ _ _] :script)]
       (r/invoke-ptr-redis {:mode :eval} nil nil)
@@ -80,4 +82,4 @@
       (r/invoke-ptr-redis {:mode :prod} nil nil)
       => :script))
   (./import)
-  (h/tracked:all [:redis]))
+  (std.lib.component.track/tracked:all [:redis]))

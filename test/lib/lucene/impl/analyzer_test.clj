@@ -1,6 +1,6 @@
 (ns lib.lucene.impl.analyzer-test
-  (:use code.test)
-  (:require [lib.lucene.impl.analyzer :refer :all]))
+  (:require [lib.lucene.impl.analyzer :refer :all])
+  (:use code.test))
 
 ^{:refer lib.lucene.impl.analyzer/analyzer-char-set :added "3.0"}
 (fact "creates an analyzer char set"

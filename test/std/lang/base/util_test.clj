@@ -1,8 +1,6 @@
 (ns std.lang.base.util-test
-  (:use code.test)
-  (:require [std.lang.base.util :refer :all]
-            [std.string :as str]
-            [std.lib :as h]))
+  (:require [std.lang.base.util :refer :all])
+  (:use code.test))
 
 ^{:refer std.lang.base.util/sym-id :added "3.0"}
 (fact "gets the symbol id"

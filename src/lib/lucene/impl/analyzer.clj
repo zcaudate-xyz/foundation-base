@@ -1,10 +1,6 @@
 (ns lib.lucene.impl.analyzer
-  (:require [std.lib :refer [definvoke]])
-  (:import (org.apache.lucene.analysis Analyzer)
-           (org.apache.lucene.analysis.standard StandardAnalyzer)
-           (org.apache.lucene.analysis.core KeywordAnalyzer)
-           (org.apache.lucene.analysis CharArraySet)
-           (org.apache.lucene.analysis.miscellaneous PerFieldAnalyzerWrapper)))
+  (:require [std.lib.invoke :refer [definvoke]])
+  (:import (org.apache.lucene.analysis Analyzer) (org.apache.lucene.analysis.standard StandardAnalyzer) (org.apache.lucene.analysis.core KeywordAnalyzer) (org.apache.lucene.analysis CharArraySet) (org.apache.lucene.analysis.miscellaneous PerFieldAnalyzerWrapper)))
 
 (defn analyzer-char-set
   "creates an analyzer char set

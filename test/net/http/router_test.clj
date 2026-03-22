@@ -1,6 +1,6 @@
 (ns net.http.router-test
-  (:use code.test)
-  (:require [net.http.router :refer :all]))
+  (:require [net.http.router :refer :all])
+  (:use code.test))
 
 ^{:refer net.http.router/compare-masks :added "4.0"}
 (fact "compares two path masks for sorting")

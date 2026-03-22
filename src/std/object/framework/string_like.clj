@@ -1,10 +1,10 @@
 (ns std.object.framework.string-like
-  (:require [std.object.framework.print :as print]
-            [std.protocol.object :as protocol.object]
-            [std.protocol.string :as protocol.string]
+  (:require [std.lib.memoize]
+            [std.object.framework.print :as print]
             [std.object.framework.read :as read]
             [std.object.framework.write :as write]
-            [std.lib :as h]))
+            [std.protocol.object :as protocol.object]
+            [std.protocol.string :as protocol.string]))
 
 (defmacro extend-string-like
   "creates an entry for string-like classes
@@ -45,6 +45,6 @@
            ([data# type# ~'_]
             (throw (Exception. (str "Cannot create " type# " from string."))))))
 
-     (do (h/memoize:remove read/meta-read-exact ~cls)
-         (h/memoize:remove write/meta-write-exact ~cls)
+     (do (std.lib.memoize/memoize:remove read/meta-read-exact ~cls)
+         (std.lib.memoize/memoize:remove write/meta-write-exact ~cls)
          (print/extend-print ~cls)))))

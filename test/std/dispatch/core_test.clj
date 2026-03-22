@@ -1,9 +1,9 @@
 (ns std.dispatch.core-test
-  (:use code.test)
-  (:require [std.dispatch.core :refer :all]
+  (:require [std.concurrent :as cc]
             [std.dispatch.common :as common]
-            [std.concurrent :as cc]
-            [std.lib.component :as component]))
+            [std.dispatch.core :refer :all]
+            [std.lib.component :as component])
+  (:use code.test))
 
 (defonce ^:dynamic *output*  (atom []))
 

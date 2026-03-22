@@ -1,6 +1,6 @@
 (ns code.query.common-test
-  (:use [code.test :exclude [any]])
-  (:require [code.query.common :refer :all]))
+  (:require [code.query.common :refer :all])
+  (:use [code.test :exclude [any]]))
 
 ^{:refer code.query.common/any :added "3.0"}
 (fact "returns true for any value"

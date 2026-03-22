@@ -1,6 +1,6 @@
 (ns js.lib.puck-test
-  (:use code.test)
-  (:require [js.lib.puck :refer :all]))
+  (:require [js.lib.puck :refer :all])
+  (:use code.test))
 
 ^{:refer js.lib.puck/init-components :added "4.0" :unchecked true}
 (fact "TODO")

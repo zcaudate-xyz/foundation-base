@@ -2,7 +2,7 @@
   (:require [std.dom.common :as base]
             [std.dom.item :as item]
             [std.dom.type :as type]
-            [std.lib :refer [definvoke] :as u]
+            [std.lib.invoke :refer [definvoke]]
             [std.lib.mutable :as mut]))
 
 (defmulti dom-render

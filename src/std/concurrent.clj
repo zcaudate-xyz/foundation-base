@@ -9,16 +9,15 @@
             [std.concurrent.request-apply :as request-apply]
             [std.concurrent.request-command :as request-command]
             [std.concurrent.thread :as thread]
-            [std.lib :as h])
-  (:refer-clojure :exclude [take pop take-last
-                            peek remove send]))
+            [std.lib.foundation])
+  (:refer-clojure :exclude [take pop take-last peek remove send]))
 
-(h/intern-all std.concurrent.thread
+(std.lib.foundation/intern-all std.concurrent.thread
               std.concurrent.queue
               std.concurrent.executor
               std.concurrent.atom)
 
-(h/intern-in  bus/bus
+(std.lib.foundation/intern-in  bus/bus
               bus/bus?
               bus/bus:all-ids
               bus/bus:all-threads

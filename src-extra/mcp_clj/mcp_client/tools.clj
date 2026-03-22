@@ -1,14 +1,11 @@
 (ns mcp-clj.mcp-client.tools
+  (:require [mcp-clj.json :as json]
+            [mcp-clj.log :as log]
+            [mcp-clj.mcp-client.session :as session]
+            [mcp-clj.mcp-client.subscriptions :as subscriptions]
+            [mcp-clj.mcp-client.transport :as transport])
   "Tool calling implementation for MCP client"
-  (:require
-    [mcp-clj.json :as json]
-    [mcp-clj.log :as log]
-    [mcp-clj.mcp-client.session :as session]
-    [mcp-clj.mcp-client.subscriptions :as subscriptions]
-    [mcp-clj.mcp-client.transport :as transport])
-  (:import
-    (java.util.concurrent
-      CompletableFuture)))
+  (:import (java.util.concurrent CompletableFuture)))
 
 (defn- get-tools-cache
   "Get or create tools cache in client session"

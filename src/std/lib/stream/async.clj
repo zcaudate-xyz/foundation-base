@@ -1,19 +1,16 @@
 (ns std.lib.stream.async
-  (:require [std.protocol.stream :as protocol.stream]
-            [std.lib.atom :as atom]
-            [std.lib.future :as f]
+  (:require [std.lib.atom :as atom]
             [std.lib.collection :as coll]
             [std.lib.foundation :as h]
-            [std.lib.impl :refer [defimpl]]
+            [std.lib.future :as f]
             [std.lib.generate :as gen]
-            [std.lib.time :as time]
+            [std.lib.impl :refer [defimpl]]
             [std.lib.stream :as stream]
-            [std.lib.stream.iter :as i])
+            [std.lib.stream.iter :as i]
+            [std.lib.time :as time]
+            [std.protocol.stream :as protocol.stream])
   (:refer-clojure :exclude [realized?])
-  (:import (java.util.concurrent CompletableFuture
-                                 CompletionStage
-                                 BlockingQueue
-                                 LinkedBlockingQueue)))
+  (:import (java.util.concurrent CompletableFuture CompletionStage BlockingQueue LinkedBlockingQueue)))
 
 (defn blocking?
   "checks that object implements `IBLocking`

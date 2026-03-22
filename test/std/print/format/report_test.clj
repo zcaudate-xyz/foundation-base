@@ -1,9 +1,7 @@
 (ns std.print.format.report-test
-  (:use code.test)
-  (:require [std.print.format.report :refer :all]
-            [std.string :as str]
-            [std.lib :as h]
-            [std.lib.result :as res]))
+  (:require [std.lib.result :as res]
+            [std.print.format.report :refer :all])
+  (:use code.test))
 
 ^{:refer std.print.format.report/lines:elements :added "3.0"}
 (fact "layout an array of elements as a series of rows of a given length"

@@ -1,11 +1,10 @@
 (ns xt.db.sql-sqlite-test
-  (:use code.test)
-  (:require [std.lib :as h]
-            [std.lang :as l]
-            [std.json :as json]
+  (:require [lib.docker :as docker]
             [net.http :as http]
-            [lib.docker :as docker]
-            [xt.lang.base-notify :as notify]))
+            [std.json :as json]
+            [std.lang :as l]
+            [xt.lang.base-notify :as notify])
+  (:use code.test))
 
 (l/script- :js
  {:runtime :basic

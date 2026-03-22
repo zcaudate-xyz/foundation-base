@@ -1,10 +1,8 @@
 (ns jvm.classloader.base-classloader
-  (:require [std.string :as str]
-            [jvm.classloader.common :as common]
+  (:require [jvm.classloader.common :as common]
             [jvm.protocol :as protocol.classloader]
-            [std.object.query :as reflect]
-            [std.lib :as h]
-            [std.fs :as fs])
+            [std.fs :as fs]
+            [std.object.query :as reflect])
   (:import (java.net URL URLClassLoader)))
 
 (defonce +base+ (ClassLoader/getSystemClassLoader))

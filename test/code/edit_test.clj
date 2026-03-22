@@ -1,11 +1,11 @@
 (ns std.block.navigate-test
-  (:use code.test)
-  (:require [std.block.navigate :refer :all]
-            [std.block.type :as type]
+  (:require [std.block.base :as base]
             [std.block.construct :as construct]
-            [std.block.base :as base]
+            [std.block.navigate :refer :all]
             [std.block.parse :as parse]
+            [std.block.type :as type]
             [std.lib.zip :as zip])
+  (:use code.test)
   (:refer-clojure :exclude [next replace type]))
 
 ^{:refer std.block.navigate/nav-template :added "3.0"}

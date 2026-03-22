@@ -1,8 +1,7 @@
 (ns lib.docker.common-test
-  (:use code.test)
   (:require [lib.docker.common :refer :all]
-            [lib.docker.ryuk :as ryuk]
-            [std.lib :as h]))
+            [lib.docker.ryuk :as ryuk])
+  (:use code.test))
 
 ^{:refer lib.docker.common/raw-exec :guard true :added "4.0"}
 (fact "executes a shell command"

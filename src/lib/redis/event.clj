@@ -1,9 +1,15 @@
 (ns lib.redis.event
-  (:require [lib.redis.impl.common :as common]
-            [net.resp.wire :as wire]
+  (:require [clojure.set]
+            [lib.redis.impl.common :as common]
             [net.resp.pool :as pool]
+            [net.resp.wire :as wire]
             [std.concurrent :as cc]
-            [std.lib :as h :refer [defimpl]]))
+            [std.lib.collection]
+            [std.lib.component]
+            [std.lib.env]
+            [std.lib.foundation]
+            [std.lib.future]
+            [std.lib.impl :refer [defimpl]]))
 
 ;;
 ;; ACTIONS
@@ -50,8 +56,8 @@
    (let [{:keys [id args raw thread]} connection]
      (str "#" (name type) (:id listener) " "
           {:id id :args args
-           :running (and (not (h/future:complete? thread))
-                         (h/started? raw))}))))
+           :running (and (not (std.lib.future/future:complete? thread))
+                         (std.lib.component/started? raw))}))))
 
 (defimpl Listener [type id namespace handler connection]
   :string listener-string)
@@ -82,7 +88,7 @@
          connection {:id raw-id
                      :args args
                      :pool pool
-                     :thread (h/future
+                     :thread (std.lib.future/future
                                (->> ((action :wrap) handler redis)
                                     (listener-loop raw)))
                      :raw raw}]
@@ -100,7 +106,7 @@
    (let [{:keys [id args pool thread raw]} connection
          action (action:get type)
          _ (wire/write raw (into [(action :unsubscribe) args]))
-         _ (h/future:cancel thread)
+         _ (std.lib.future/future:cancel thread)
          _ (cc/pool:release pool id true)]
      id)))
 
@@ -111,7 +117,7 @@
    (listener:add type redis id input handler {}))
   ([type {:keys [namespace runtime pool] :as redis} id input handler opts]
    (let [{:keys [listeners]} @runtime
-         id (or id (keyword (h/sid)))]
+         id (or id (keyword (std.lib.foundation/sid)))]
      (when-not (get-in listeners [type id])
        (doto (-> (listener:create redis type id input handler)
                  (merge opts))
@@ -125,7 +131,7 @@
                            (get-in [type id]))]
 
      (listener:teardown listener)
-     (swap! runtime update :listeners h/dissoc-nested [type id])
+     (swap! runtime update :listeners std.lib.collection/dissoc-nested [type id])
      listener)))
 
 (defn listener:all
@@ -138,7 +144,7 @@
   "counts all listeners"
   {:added "3.0"}
   ([{:keys [runtime]}]
-   (h/map-vals count (:listeners @runtime))))
+   (std.lib.collection/map-vals count (:listeners @runtime))))
 
 (defn listener:list
   "lists all listeners
@@ -150,7 +156,7 @@
    => {:subscribe [:foo] :psubscribe [:bar]}"
   {:added "3.0"}
   ([{:keys [runtime]}]
-   (h/map-vals keys (:listeners @runtime))))
+   (std.lib.collection/map-vals keys (:listeners @runtime))))
 
 (defn listener:get
   "gets a client listener
@@ -170,7 +176,7 @@
 ;;
 
 
-(defn- identity:args [_ args] (h/seqify args))
+(defn- identity:args [_ args] (std.lib.collection/seqify args))
 
 (defn subscribe:wrap
   "wrapper for the subscribe delivery function"
@@ -247,7 +253,7 @@
   {:generic "g" :hash "h" :string "$" :list "l"
    :set "s" :sorted "z" :stream "t" :expired "x" :evicted "e"})
 
-(def +rlu+ (h/map-entries (fn [[k v]] [(first v) k]) +lu+))
+(def +rlu+ (std.lib.collection/map-entries (fn [[k v]] [(first v) k]) +lu+))
 
 (defn events-string
   "creates a string from a set of enums"
@@ -267,7 +273,7 @@
   ([redis]
    (config:get redis nil))
   ([redis opts]
-   ((comp events-parse h/strn second)
+   ((comp events-parse std.lib.foundation/strn second)
     (pool/pool:request-single redis ["CONFIG" "GET" "notify-keyspace-events"] opts))))
 
 (defn config:set
@@ -297,7 +303,7 @@
    (config:remove redis events nil))
   ([redis events opts]
    (let [current (config:get redis)]
-     (config:set redis (h/difference current (set events)))
+     (config:set redis (clojure.set/difference current (set events)))
      (config:get redis opts))))
 
 (defn notify:args
@@ -305,7 +311,7 @@
   {:added "3.0"}
   ([namespace inputs]
    (mapv #(str "__keyspace@*:" (common/make-key namespace %))
-         (h/seqify inputs))))
+         (std.lib.collection/seqify inputs))))
 
 (defn notify:wrap
   "wrapper for the notify delivery function"
@@ -316,7 +322,7 @@
        (cond (= type "pmessage")
              (let [i   (.indexOf path ":")
                    key (subs path (inc i))]
-               (h/explode
+               (std.lib.env/explode
                 (handler redis (common/unmake-key namespace key)))))))))
 
 (action:add :notify
@@ -347,7 +353,7 @@
   "lists all notify listeners for a client"
   {:added "3.0"}
   ([redis]
-   (h/map-vals #(select-keys % [:pattern :handler])
+   (std.lib.collection/map-vals #(select-keys % [:pattern :handler])
                (get-in @(:runtime redis) [:listeners :notify]))))
 
 (defn start:events-redis

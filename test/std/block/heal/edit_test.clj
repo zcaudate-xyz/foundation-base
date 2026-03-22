@@ -1,9 +1,8 @@
 (ns std.block.heal.edit-test
-  (:use code.test)
   (:require [std.block.heal.edit :as core]
             [std.block.heal.parse :as parse]
-            [std.block.heal.print :as print]
-            [std.lib :as h]))
+            [std.block.heal.print :as print])
+  (:use code.test))
 
 ^{:refer std.block.heal.edit/update-content :added "4.0"}
 (fact "performs the necessary edits to a string"

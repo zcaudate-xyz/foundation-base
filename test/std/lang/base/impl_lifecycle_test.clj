@@ -1,15 +1,14 @@
 (ns std.lang.base.impl-lifecycle-test
-  (:use code.test)
-  (:require [std.lang.base.impl-lifecycle :refer :all]
-            [std.lang.base.compile :as compile]
-            [std.lang.base.library :as lib]
-            [std.lang.base.impl :as impl]
-            [js.blessed :as blessed]
+  (:require [js.blessed :as blessed]
             [js.blessed.ui-core :as ui-core]
-            [xt.lang.base-lib :as k]
-            [xt.lang]
             [std.lang :as l]
-            [std.lib :as h]))
+            [std.lang.base.compile :as compile]
+            [std.lang.base.impl :as impl]
+            [std.lang.base.impl-lifecycle :refer :all]
+            [std.lang.base.library :as lib]
+            [xt.lang]
+            [xt.lang.base-lib :as k])
+  (:use code.test))
 
 (def +library+
   (let [lib (impl/clone-default-library)]

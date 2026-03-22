@@ -1,6 +1,6 @@
 (ns lua.ext.plisio-test
-  (:use code.test)
-  (:require [lua.ext.plisio :refer :all]))
+  (:require [lua.ext.plisio :refer :all])
+  (:use code.test))
 
 ^{:refer lua.ext.plisio/plisio-query :added "4.0"}
 (fact "performs a plisio query")

@@ -1,13 +1,13 @@
 (ns script.sql
   (:require [script.sql.common :as common]
             [script.sql.expr :as expr]
+            [script.sql.table :as table]
             [script.sql.table.compile :as compile]
             [script.sql.table.manage :as manage]
             [script.sql.table.select :as select]
-            [script.sql.table :as table]
-            [std.lib :as h]))
+            [std.lib.foundation]))
 
-(h/intern-in common/sql:compare
+(std.lib.foundation/intern-in common/sql:compare
              common/sql:type
              common/sql:format
 

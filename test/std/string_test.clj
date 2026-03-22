@@ -1,16 +1,17 @@
 (ns std.string-test
-  (:use code.test)
   (:require [std.string :refer :all]
-            [std.lib :as h])
+            [std.string.common]
+            [std.string.prose])
+  (:use code.test)
   (:refer-clojure :exclude [reverse replace]))
 
-^{:refer std.string/split :added "3.0" :adopt true}
+^{:refer std.string.common/split :added "3.0" :adopt true}
 (fact "splits a string given a regex"
 
   ((wrap split) "a b" #" ") => ["a" "b"]
   ((wrap split) " " #" ") => ["" ""])
 
-^{:refer std.string/split-lines :added "3.0" :adopt true}
+^{:refer std.string.common/split-lines :added "3.0" :adopt true}
 (fact "splits a string given newlines"
 
   ((wrap split-lines) "a\nb") => ["a" "b"]
@@ -35,13 +36,13 @@
   ((wrap format) :hello%d-world  100)
   => :hello100-world)
 
-^{:refer std.string/| :added "3.0"}
+^{:refer std.string.prose/| :added "3.0"}
 (fact "shortcut for join lines"
 
   (| "abc" "def")
   => "abc\ndef")
 
-^{:refer std.string/lines :added "3.0"}
+^{:refer std.string.prose/lines :added "3.0"}
 (fact "transforms string to seperated newlines"
 
   (lines "abc\ndef")

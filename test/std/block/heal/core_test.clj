@@ -1,9 +1,11 @@
 (ns std.block.heal.core-test
-  (:use code.test)
-  (:require [std.block.heal.core :as level]
-            [std.string :as str]
-            [std.block :as b]
-            [std.lib :as h]))
+  (:require [std.block :as b]
+            [std.block.heal.core :as level]
+            [std.lib.env]
+            [std.lib.foundation]
+            [std.string.common]
+            [std.string.prose])
+  (:use code.test))
 
 ^{:refer std.block.heal.core/group-min-col :added "4.0"}
 (fact "gets the minimum column"
@@ -92,7 +94,7 @@
     
   (level/group-blocks-single
    (:entries (level/group-blocks-prep
-              (str/join-lines
+              (std.string.prose/join-lines
                ["(:? ()"
                 "    ())"
                 "    nil {})"])))
@@ -121,7 +123,7 @@
   
   (level/group-blocks-single
    (:entries (level/group-blocks-prep
-              (str/join-lines
+              (std.string.prose/join-lines
                ["(:? ()"
                 "    ())"
                 "    nil)"])))
@@ -146,7 +148,7 @@
   
   (level/group-blocks-multi
    (:entries (level/group-blocks-prep
-              (str/join-lines
+              (std.string.prose/join-lines
                ["(:? ()"
                 "    ())"
                 "    nil {})"]))))
@@ -177,12 +179,12 @@
 
   (level/group-blocks-prep-entries
    (std.block.heal.parse/parse-delimiters
-    (str/join-lines
+    (std.string.prose/join-lines
      ["(:? ()"
       "    ())"
       "    nil {})"]))
    (std.block.heal.parse/parse-lines
-    (str/join-lines
+    (std.string.prose/join-lines
      ["(:? ()"
       "    ())"
       "    nil {})"])))
@@ -198,7 +200,7 @@
   
   
   (level/group-blocks-prep
-   (str/join-lines
+   (std.string.prose/join-lines
     ["(:? ()"
      "    ())"
      "    nil {})"]))
@@ -215,7 +217,7 @@
   ^:hidden
 
   (level/group-blocks
-   (str/join-lines
+   (std.string.prose/join-lines
     ["(  (+ a b"
      "  {} b))"]))
   => [{:lead {:char "(", :line 1, :col 1, :type :open, :style :paren},
@@ -235,7 +237,7 @@
        :last true}]
   
   (level/group-blocks
-   (str/join-lines
+   (std.string.prose/join-lines
     ["(:? ()"
      "    ())"
      "    nil)"]))
@@ -295,14 +297,14 @@
        :last true}]
   
   (level/group-blocks
-   (str/join-lines
+   (std.string.prose/join-lines
     (take 10
-          (str/split-lines
+          (std.string.common/split-lines
            (slurp "test-data/std.block.heal/cases/005_example.block")))))
   => vector?
 
   (level/group-blocks
-   (str/join-lines
+   (std.string.prose/join-lines
     [""
      "    {(stateName) (Object.assign {} (. component.states [stateName])"
      "       {:description description})}"]))
@@ -364,7 +366,7 @@
   ^:hidden
 
   (level/get-block-lines
-   (str/split-lines
+   (std.string.common/split-lines
     (slurp "test-data/std.block.heal/cases/005_example.block"))
    [2 5] 3)
   => ["  (:require [std.lang :as l]))"
@@ -373,7 +375,7 @@
       "  {:require [[js.react :as r]"]
   
   (level/get-block-lines
-   (str/split-lines
+   (std.string.common/split-lines
     (slurp "test-data/std.block.heal/cases/005_example.block"))
    [2 5] 4)
   => ["   :require [std.lang :as l]))"
@@ -387,7 +389,7 @@
 
   (level/get-errored-loop
    (nth (level/group-blocks (slurp "test-data/std.block.heal/cases/005_example.block")) 2)
-   (str/split-lines (slurp "test-data/std.block.heal/cases/005_example.block")))
+   (std.string.common/split-lines (slurp "test-data/std.block.heal/cases/005_example.block")))
   => {:errors
       [{:char "{",
         :line 12,
@@ -444,7 +446,7 @@
 (fact "helper function for get-errored"
 
   (level/get-errored
-   (str/join-lines
+   (std.string.prose/join-lines
     ["  (map"
      "    (fn "
      "      (return"
@@ -470,7 +472,7 @@
   
   
   (level/get-errored
-   (str/join-lines
+   (std.string.prose/join-lines
     ["          [:% fg/Input"
      "           {:onChange (fn [e])]"
      "            :maxLength 10}]"]))
@@ -491,7 +493,7 @@
         :col 23}}]
   
   (level/get-errored
-   (str/join-lines
+   (std.string.prose/join-lines
     [""
      "          [:% fg/Input"
      "           {:onChange (fn [e])}"
@@ -514,7 +516,7 @@
   
   
   (level/get-errored
-   (str/join-lines
+   (std.string.prose/join-lines
     [""
      "          [:% fg/Input"
      "           {:placeholder \"e.g., TBP\""
@@ -541,7 +543,7 @@
         :last true}}]
 
   (level/get-errored
-   (str/join-lines
+   (std.string.prose/join-lines
     [""
      "          [{:placeholder \"e.g., TBP\""
      "            :value tokenData.symbol"
@@ -572,7 +574,7 @@
   ^:hidden
 
   (level/get-errored
-   (str/join-lines
+   (std.string.prose/join-lines
     ["         [:div"
      "          [:% fg/Label {:className \"text-[#b4b4b4] mb-2\"} \"Token Symbol *\"]"
      "          [:% fg/Input"
@@ -602,7 +604,7 @@
   
 
   (level/get-errored
-   (str/join-lines
+   (std.string.prose/join-lines
     ["{:hello (fn [] (+ ou))}"
      " :part 1}"]))
   => [{:errors
@@ -622,13 +624,13 @@
         :col 9}}]
   
   (level/get-errored
-   (str/join-lines
+   (std.string.prose/join-lines
     ["(  (+ a b"
      "  {} b))"]))
   => []
   
   (level/get-errored
-   (str/join-lines
+   (std.string.prose/join-lines
     ["(:? ()"
      "    (+ 1) (+ 2))"
      "    nil {})"]))
@@ -651,7 +653,7 @@
   
   
   (level/get-errored
-   (str/join-lines
+   (std.string.prose/join-lines
     ["(:? ()"
      "    ())"
      "    nil {})"]))
@@ -673,7 +675,7 @@
   
   
   (level/get-errored
-   (str/join-lines
+   (std.string.prose/join-lines
     ["(:? ()"
      "    (+ 1 2) (+ 23 4))"
      "    nil {})"]))
@@ -695,14 +697,14 @@
         :last true}}]
   
   (level/get-errored
-   (str/join-lines
+   (std.string.prose/join-lines
     [""
      "    {(stateName) (Object.assign {} (. component.states [stateName])"
      "       {:description description})}"]))
   => []
 
   (level/get-errored
-   (str/join-lines
+   (std.string.prose/join-lines
     ["(:? ()"
      "    ())"
      "    nil {})"]))
@@ -871,9 +873,9 @@
 (fact "heals the content in a single pass"
   ^:hidden
   
-  (str/split-lines
+  (std.string.common/split-lines
    (level/heal-content-single-pass
-    (str/join-lines
+    (std.string.prose/join-lines
      ["(:? ()"
       "    ())"
       "    nil {})"])))
@@ -881,9 +883,9 @@
       "    ()"
       "    nil {})"]
 
-  (str/split-lines
+  (std.string.common/split-lines
    (level/heal-content-single-pass
-    (str/join-lines
+    (std.string.prose/join-lines
      ["(:? ()"
       "    ())"
       "    nil)"])))
@@ -891,9 +893,9 @@
       "    ()"
       "    nil)"]
 
-  (str/split-lines
+  (std.string.common/split-lines
    (level/heal-content-single-pass
-    (str/join-lines
+    (std.string.prose/join-lines
      ["(:? ()"
       "    (+ 1) (+ 2))"
       "    nil {})"])))
@@ -901,9 +903,9 @@
       "    (+ 1) (+ 2)"
       "    nil {})"]
 
-  (str/split-lines
+  (std.string.common/split-lines
    (level/heal-content-single-pass
-    (str/join-lines
+    (std.string.prose/join-lines
      ["(:? ()"
       "    (+ 1))) (+ 2)"
       "    nil {})"])))
@@ -912,7 +914,7 @@
       "    nil {})"]
 
   ((level/wrap-diff level/heal-content-single-pass)
-   (str/join-lines
+   (std.string.prose/join-lines
     [""
      "(:? (or (== actionDef.type \"setState\") (== actionDef.type \"toggleState\") (== actionDef.type \"incrementState\"))"
      "    [:div {:className \"mb-2\"}"
@@ -977,9 +979,9 @@
 (fact "print wrapper for the heal function"
   ^:hidden
   
-  (h/with-out-str
+  (std.lib.env/with-out-str
     ((level/wrap-print-diff level/heal-content-single-pass)
-     (str/join-lines
+     (std.string.prose/join-lines
       ["(:? ()"
        "    (+ 1))) (+ 2)"
        "    nil {})"])))
@@ -990,7 +992,7 @@
   ^:hidden
   
   ((level/wrap-diff level/heal-content-single-pass)
-   (str/join-lines
+   (std.string.prose/join-lines
     ["(:? ()"
      "    (+ 1))) (+ 2)"
      "    nil {})"]))
@@ -1002,7 +1004,7 @@
 (comment
   
   ((level/wrap-print-diff level/heal-content)
-   (str/join-lines
+   (std.string.prose/join-lines
     ["(:? ()"
      "    ())"
      "    nil)"]))
@@ -1040,7 +1042,7 @@
   
   (read-string
    (str "["
-        (h/suppress
+        (std.lib.foundation/suppress
          ((wrap-print-diff core/heal)
           ((wrap-print-diff heal-content)
            (slurp "../../buffer/Smalltalkinterfacedesign/translate/src-translated/components/states_triggers_panel.clj"))))
@@ -1066,7 +1068,7 @@
    
    )
   
-  (h/suppress
+  (std.lib.foundation/suppress
    ((wrap-print-diff core/heal)
     ((wrap-print-diff heal-content)
      (slurp "../../buffer/Smalltalkinterfacedesign/translate/src-translated/components/states_triggers_panel2.clj"))))
@@ -1078,14 +1080,14 @@
               "../../buffer/Smalltalkinterfacedesign/translate/src-translated/components/"
               {:include [".clj$"]}))]
     
-    (h/p f)
+    (std.lib.env/p f)
     (try (read-string
           (str "["
                ((level/wrap-print-diff level/heal-content)
                 (slurp f))
                "]"))
          (catch Throwable t
-           (h/p :FAILED))))
+           (std.lib.env/p :FAILED))))
   
   (doseq [f (keys
              (std.fs/list
@@ -1096,9 +1098,9 @@
                ((level/wrap-print-diff level/heal-content)
                 (slurp f))
                "]"))
-         (h/p  f :SUCCESS)
+         (std.lib.env/p  f :SUCCESS)
          (catch Throwable t
-           (h/p  f :FAILED))))
+           (std.lib.env/p  f :FAILED))))
   
   (level/heal-content
    (slurp "../../buffer/Smalltalkinterfacedesign/translate/src-translated/components/chat_input.clj"))
@@ -1113,14 +1115,14 @@
           (str "["
                (slurp f)
                "]"))
-         (h/p  f :SUCCESS)
+         (std.lib.env/p  f :SUCCESS)
          (catch Throwable t
-           (h/p  f :FAILED)))))
+           (std.lib.env/p  f :FAILED)))))
 
 
 (comment
   (count
-   (str/split-lines
+   (std.string.common/split-lines
     (slurp "../../buffer/Smalltalkinterfacedesign/translate/src-translated/components/library_browser.clj")))
   
   (level/heal-content-single-pass
@@ -1130,7 +1132,7 @@
    ((level/wrap-print-diff level/heal-content)
     (slurp "../../buffer/Smalltalkinterfacedesign/translate/src-translated/app.clj")))
   
-  (h/p (diff/->string
+  (std.lib.env/p (diff/->string
         (diff/diff
          (slurp "../../buffer/Smalltalkinterfacedesign/translate/src-translated/components/library_browser.clj")
          *new-content*
@@ -1140,7 +1142,7 @@
   (group-blocks
    (slurp "../../buffer/Smalltalkinterfacedesign/translate/src-translated/components/library_browser2.clj"))
   
-  (h/p
+  (std.lib.env/p
    (std.text.diff/->string
     (std.text.diff/diff
      (slurp "../../buffer/Smalltalkinterfacedesign/translate/src-translated/components/library_browser.clj")

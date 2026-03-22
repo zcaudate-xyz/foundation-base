@@ -1,12 +1,19 @@
 (ns std.lang.base.script-annex
-  (:require [std.lang.base.util :as ut]
+  (:require [std.json :as json]
             [std.lang.base.impl :as impl]
             [std.lang.base.library :as lib]
             [std.lang.base.library-snapshot :as snap]
             [std.lang.base.runtime :as rt]
-            [std.string :as str]
-            [std.json :as json]
-            [std.lib :as h :refer [defimpl]]))
+            [std.lang.base.util :as ut]
+            [std.lib.atom]
+            [std.lib.collection]
+            [std.lib.component]
+            [std.lib.context.registry]
+            [std.lib.context.space]
+            [std.lib.env]
+            [std.lib.foundation]
+            [std.lib.impl :refer [defimpl]]
+            [std.lib.resource]))
 
 (defn- rt-annex-string
   "returns the annex string"
@@ -42,12 +49,12 @@
                                   :runtimes runtimes})))))
 
 (def +init-annex+
-  [(h/res:spec-add
+  [(std.lib.resource/res:spec-add
     {:type :hara/lang.rt.annex
      :config {}
      :instance {:create rt-annex:create}})
 
-   (h/p:registry-install
+   (std.lib.context.registry/registry-install
     :lang.annex
     {:config {}
      :rt  {:default {:resource :hara/lang.rt.annex}}})])
@@ -61,9 +68,9 @@
    => any?"
   {:added "4.0"}
   ([]
-   (annex-current (h/ns-sym)))
+   (annex-current (std.lib.env/ns-sym)))
   ([ns]
-   (let [{:keys [state] :as sp} (h/p:space ns)
+   (let [{:keys [state] :as sp} (std.lib.context.space/space ns)
          rec (:lang.annex @state)]
      (if rec (:instance rec)))))
 
@@ -71,33 +78,33 @@
   "resets the current annex"
   {:added "4.0"}
   ([]
-   (annex-reset (h/ns-sym)))
+   (annex-reset (std.lib.env/ns-sym)))
   ([ns]
-   (let [sp (h/p:space ns)]
-     (h/p:space-rt-stop sp :lang.annex))))
+   (let [sp (std.lib.context.space/space ns)]
+     (std.lib.context.space/space:rt-stop sp :lang.annex))))
 
 (defn get-annex
   "gets the current annex in the namespace"
   {:added "4.0"}
   ([]
-   (get-annex (h/ns-sym)))
+   (get-annex (std.lib.env/ns-sym)))
   ([ns]
-   (let [{:keys [state] :as sp} (h/p:space ns)
+   (let [{:keys [state] :as sp} (std.lib.context.space/space ns)
          check  (or (:lang.annex @state)
-                    (h/p:space-context-set sp :lang.annex :default {}))]
+                    (std.lib.context.space/space:context-set sp :lang.annex :default {}))]
      
-     (h/p:space-rt-start sp :lang.annex))))
+     (std.lib.context.space/space:rt-start sp :lang.annex))))
 
 (defn clear-annex
   "clears all runtimes in the annex"
   {:added "4.0"}
   ([]
-   (clear-annex (h/ns-sym)))
+   (clear-annex (std.lib.env/ns-sym)))
   ([ns]
    (let [{:keys [runtimes]} (get-annex ns)]
-     (h/swap-return! runtimes
+     (std.lib.atom/swap-return! runtimes
        (fn [m]
-         [(h/map-vals h/stop m) {}])))))
+         [(std.lib.collection/map-vals std.lib.component/stop m) {}])))))
 
 (defn get-annex-library
   "gets the current annex library
@@ -118,7 +125,7 @@
    (let [curr (:library (get-annex ns))]
      (or (snap/get-book @(:instance curr) lang)
          (let [book   (or (lib/get-book (impl/default-library) lang)
-                          (h/error "Book not found" {:lang lang}))]
+                          (std.lib.foundation/error "Book not found" {:lang lang}))]
            (lib/add-book! curr (assoc book :modules {})))))))
 
 (defn add-annex-runtime
@@ -127,10 +134,10 @@
   [ns tag rt]
   (let [{:keys [registry
                 runtimes]} (get-annex ns)]
-    (h/swap-return! runtimes
+    (std.lib.atom/swap-return! runtimes
       (fn [m]
         (let [curr (get m tag)
-              _  (if curr (h/stop curr))]
+              _  (if curr (std.lib.component/stop curr))]
           [[curr rt] (assoc m tag rt)])))))
 
 (defn get-annex-runtime
@@ -145,10 +152,10 @@
   {:added "4.0"}
   [ns tag]
   (let [{:keys [runtimes]} (get-annex ns)]
-    (h/swap-return! runtimes
+    (std.lib.atom/swap-return! runtimes
       (fn [m]
         (let [curr (get m tag)
-              _  (if curr (h/stop curr))]
+              _  (if curr (std.lib.component/stop curr))]
           [curr (dissoc m tag)])))))
 
 (defn register-annex-tag
@@ -156,7 +163,7 @@
   {:added "4.0"}
   [ns tag lang runtime config]
   (let [{:keys [registry]} (get-annex ns)]
-    (h/swap-return! registry
+    (std.lib.atom/swap-return! registry
       (fn [m]
         [[(get m tag) lang]
          (assoc m tag {:lang lang
@@ -168,7 +175,7 @@
   {:added "4.0"}
   [ns tag]
   (let [{:keys [registry]} (get-annex ns)]
-    (h/swap-return! registry
+    (std.lib.atom/swap-return! registry
       (fn [m]
         [(get m tag) (dissoc m tag)]))))
 
@@ -177,8 +184,8 @@
   {:added "4.0"}
   [lang runtime config]
   (let [ctx (ut/lang-context lang)
-        {:keys [resource] :as reg} (h/p:registry-rt ctx runtime)
-        spec (h/res:spec-get resource)
+        {:keys [resource] :as reg} (std.lib.context.registry/registry-rt ctx runtime)
+        spec (std.lib.resource/res:spec-get resource)
         {:keys [instance]} spec]
     (-> ((:create instance) (merge (:config reg)
                                    {:lang lang
@@ -191,7 +198,7 @@
   {:added "4.0"}
   [rt lang runtime config]
   (let [ctx (ut/lang-context lang)
-        reg (h/p:registry-rt ctx runtime)
+        reg (std.lib.context.registry/registry-rt ctx runtime)
         ckeys [:lang :runtime :layout :emit]
         new-conf (-> (merge (:config reg)
                             {:lang lang

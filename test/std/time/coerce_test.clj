@@ -1,13 +1,12 @@
 (ns std.time.coerce-test
-  (:use code.test)
-  (:require [std.time]
-            [std.time.common :as common]
-            [std.time.map :as map]
+  (:require [std.protocol.string :as string]
+            [std.protocol.time :as time]
+            [std.time]
             [std.time.coerce :refer :all]
-            [std.protocol.string :as string]
-            [std.protocol.time :as time])
-  (:import (java.util Date Calendar TimeZone)
-           (java.time Instant Clock ZonedDateTime)))
+            [std.time.common :as common]
+            [std.time.map :as map])
+  (:use code.test)
+  (:import (java.util Date Calendar TimeZone) (java.time Instant Clock ZonedDateTime)))
 
 ^{:refer std.time.coerce/coerce-zone :added "3.0"}
 (fact "coercion of one zone object to another"

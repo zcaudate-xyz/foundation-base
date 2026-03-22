@@ -1,28 +1,33 @@
 (ns std.concurrent.request-test
-  (:use code.test)
-  (:require [std.protocol.request :as protocol.request]
+  (:require [std.concurrent :as cc]
             [std.concurrent.request :refer :all]
-            [std.concurrent :as cc]
-            [std.lib :as h :refer [defimpl]]))
+            [std.lib.atom]
+            [std.lib.env]
+            [std.lib.foundation]
+            [std.lib.future]
+            [std.lib.impl :refer [defimpl]]
+            [std.lib.time]
+            [std.protocol.request :as protocol.request])
+  (:use code.test))
 
 (def eval-fn (comp eval read-string pr-str))
 
 (defn eval-request-single
   ([{:keys [state]} {:keys [type form] :as input} opts]
    (case type
-     :eval           (let [form (h/swap-return! state
+     :eval           (let [form (std.lib.atom/swap-return! state
                                                 (fn [{:keys [transact] :as m}]
                                                   (if transact
                                                     [:transact/queued (update m :inputs conj input)]
                                                     [form m])))]
                        (eval-fn form))
-     :transact/start (h/swap-return! state
+     :transact/start (std.lib.atom/swap-return! state
                                      (fn [{:keys [inputs transact] :as m}]
                                        [:transact/start
                                         (if transact
                                           (throw (ex-info "Already in Transaction" {:inputs inputs}))
                                           (assoc m :transact true))]))
-     :transact/end   (let [inputs (h/swap-return! state
+     :transact/end   (let [inputs (std.lib.atom/swap-return! state
                                                   (fn [{:keys [inputs]}]
                                                     [inputs {:inputs [] :transact false}]))]
                        (mapv (comp eval-fn :form) inputs)))))
@@ -99,13 +104,13 @@
   (let [state (atom {})
         _ (req |client| {:type :eval :form 1}
                {:pre  [(fn [x]
-                         (swap! state assoc :start (h/time-ns))
+                         (swap! state assoc :start (std.lib.time/time-ns))
                          x)]
                 :post [(fn [x]
-                         (swap! state assoc :end (h/time-ns))
+                         (swap! state assoc :end (std.lib.time/time-ns))
                          x)]})
         {:keys [start end]} @state]
-    (h/format-ns (- end start)))
+    (std.lib.time/format-ns (- end start)))
   => string?
 
   ;;
@@ -139,7 +144,7 @@
                 (req + [1 2 3] {:debug true})
                 (req + [1 2 3] {:debug true})
                 (req - [4 5 6] {:debug true}))
-      (h/with-out-str))
+      (std.lib.env/with-out-str))
   => string?)
 
 ^{:refer std.concurrent.request/bulk-context :added "3.0"}
@@ -154,7 +159,7 @@
   ^:hidden
 
   (transact-context)
-  => h/atom?)
+  => std.lib.foundation/atom?)
 
 ^{:refer std.concurrent.request/req:opts-clean :added "3.0"}
 (fact "clean opts for processing inputs"
@@ -174,7 +179,7 @@
 (fact "creates the timer"
 
   (opts:timer prn)
-  => h/future?)
+  => std.lib.future/future?)
 
 ^{:refer std.concurrent.request/opts:wrap-measure :added "3.0"}
 (fact "creates the measure opts"
@@ -198,12 +203,12 @@
   (req:return 1 false)
   => 1
 
-  (req:return (h/completed 1)
+  (req:return (std.lib.future/completed 1)
               false)
   => 1
 
-  (req:return (h/completed 1) true)
-  => h/future?)
+  (req:return (std.lib.future/completed 1) true)
+  => std.lib.future/future?)
 
 ^{:refer std.concurrent.request/req:single-prep :added "3.0"}
 (fact "prepares `req:single` options"
@@ -212,7 +217,7 @@
   (req:single-prep {:async true})
   => map?
 
-  (req:single-prep {:async true :transacted (h/incomplete)})
+  (req:single-prep {:async true :transacted (std.lib.future/incomplete)})
   => map?)
 
 ^{:refer std.concurrent.request/req:single-complete :added "3.0"}
@@ -293,7 +298,7 @@
   @(bulk-process |client|
                  {:inputs [{:type :eval, :form '(+ 1 2 3)}
                            {:type :eval, :form '(+ 4 5 6)}]
-                  :received (h/incomplete)}
+                  :received (std.lib.future/incomplete)}
                  {})
   => [6 15])
 
@@ -484,7 +489,7 @@
   (-> (req:transact [|client| {:debug true}]
                     (req |client| {:type :eval :form 1} {:debug true})
                     (req |client| {:type :eval :form 2} {:debug true}))
-      (h/with-out-str))
+      (std.lib.env/with-out-str))
   => string?)
 
 ^{:refer std.concurrent.request/bulk:map :added "3.0"

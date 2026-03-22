@@ -1,8 +1,10 @@
 (ns js.react.compile-directives
-  (:require [std.lib.walk :as walk]
-            [std.lib :as h]
-            [std.string :as str]
-            [js.react.compile-components :as c]))
+  (:require [js.react.compile-components :as c]
+            [std.lib.collection]
+            [std.lib.foundation]
+            [std.lib.template]
+            [std.lib.walk :as walk]
+            [std.string.common]))
 
 (defn compile-ui-tailwind
   "templates the layout controls"
@@ -12,15 +14,15 @@
                 props
                 children]} (c/classify-tagged elem false)
         pclasses (if (string? (:class props))
-                   (str/split (:class props) #" ")
+                   (std.string.common/split (:class props) #" ")
                    (:class props))
         tclasses (map (fn [[k v]]
                         (cond (boolean? v)
                               (name k)
                               
                               :else
-                              (str (name k) "-" (h/strn v))))
-                      (dissoc (h/unqualified-keys props) :style :class))
+                              (str (name k) "-" (std.lib.foundation/strn v))))
+                      (dissoc (std.lib.collection/unqualified-keys props) :style :class))
         ;; media query classes
         qclasses []]
     (apply vector :div (merge {:class (vec (concat classes
@@ -39,7 +41,7 @@
       "v"   (compile-ui-tailwind elem ["flex" "flex-col"])
       "h"   (compile-ui-tailwind elem ["flex" "flex-row"])
       "for" (let [[[idx val] array]  control]
-              (h/$
+              (std.lib.template/$
                (. ~array (map (fn [~val ~idx]
                                 (return
                                  [:<>

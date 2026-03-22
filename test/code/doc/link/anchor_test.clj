@@ -1,6 +1,6 @@
 (ns code.doc.link.anchor-test
-  (:use code.test)
-  (:require [code.doc.link.anchor :refer :all]))
+  (:require [code.doc.link.anchor :refer :all])
+  (:use code.test))
 
 ^{:refer code.doc.link.anchor/link-anchors-lu :added "3.0"}
 (fact "adds anchor lookup table by name"

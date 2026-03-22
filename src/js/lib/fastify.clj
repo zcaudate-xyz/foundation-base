@@ -1,7 +1,6 @@
 (ns js.lib.fastify
-  (:require [std.lang :as l]
-            [std.lib :as h]
-            [net.http :as http]))
+  (:require [net.http :as http]
+            [std.lang :as l]))
 
 (l/script :js
   {:require [[js.core :as j]

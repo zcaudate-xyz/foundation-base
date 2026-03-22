@@ -1,7 +1,7 @@
 (ns std.fs.common-test
-  (:use code.test)
   (:require [std.fs.common :refer :all]
             [std.lib.enum :as enum])
+  (:use code.test)
   (:import (java.nio.file AccessMode)))
 
 ^{:refer std.fs.common/option :added "3.0" :class [:file]}

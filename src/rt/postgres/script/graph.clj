@@ -1,11 +1,10 @@
 (ns rt.postgres.script.graph
-  (:require [std.lib :as h]
-            [std.lang :as l]
-            [std.string :as str]
-            [rt.postgres.script.graph-base :as base]
+  (:require [rt.postgres.script.graph-base :as base]
             [rt.postgres.script.graph-insert :as insert]
             [rt.postgres.script.graph-query :as query]
-            [rt.postgres.script.graph-view :as view]))
+            [rt.postgres.script.graph-view :as view]
+            [std.lang :as l]
+            [std.lib.foundation]))
 
 (l/script :postgres
   rt.postgres
@@ -18,7 +17,7 @@
   {:added "4.0"}
   ([spec-sym where]
    (or (not-empty where)
-       (h/error "No WHERE clause" {:where where}))
+       (std.lib.foundation/error "No WHERE clause" {:where where}))
    (base/id-where-fn spec-sym {:where where}))) 
 
 (defmacro.pg ^{:- [:block]
@@ -30,7 +29,7 @@
                  for-lock :for
                  :as params
                  :or {as :json}}]]
-   (or where (h/error "No WHERE clause" params))
+   (or where (std.lib.foundation/error "No WHERE clause" params))
    (base/id-fn spec-sym params)))
 
 (defmacro.pg ^{:- [:block]
@@ -75,7 +74,7 @@
                  for-lock :for
                  :as params
                  :or {as :json}}]]
-   (or where (h/error "No WHERE clause" params))
+   (or where (std.lib.foundation/error "No WHERE clause" params))
    (-> (base/select-fn spec-sym (merge {:single true} params))
        (with-meta {:op/type :get}))))
 

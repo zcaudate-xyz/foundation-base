@@ -1,9 +1,10 @@
 (ns code.project
-  (:require [std.fs :as fs]
-            [code.project.common :as common]
+  (:require [code.project.common :as common]
             [code.project.lein :as lein]
             [code.project.shadow :as shadow]
-            [std.lib :as h :refer [definvoke]]))
+            [std.fs :as fs]
+            [std.lib.invoke :refer [definvoke]]
+            [std.lib.io]))
 
 (def ^:dynamic *include* [".clj$"])
 
@@ -45,7 +46,7 @@
    (cond (nil? path)
          (throw (ex-info "Cannot find project" {:path nil}))
 
-         (h/input-stream? path)
+         (std.lib.io/input-stream? path)
          (lein/project path)
 
          :else

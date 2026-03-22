@@ -1,7 +1,7 @@
 (ns js.react-native.model-geom-test
-  (:use code.test)
   (:require [std.lang :as l]
-            [xt.lang.base-notify :as notify]))
+            [xt.lang.base-notify :as notify])
+  (:use code.test))
 
 (l/script- :js
   {:runtime :basic

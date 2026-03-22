@@ -1,10 +1,12 @@
 (ns std.lang.base.impl-entry
-  (:require [std.lang.base.util :as ut]
+  (:require [std.lang.base.book :as book]
             [std.lang.base.emit :as emit]
             [std.lang.base.emit-preprocess :as preprocess]
-            [std.lang.base.book :as book]
-            [std.lib :as h :refer [definvoke]]
-            [std.string :as str]
+            [std.lang.base.util :as ut]
+            [std.lib.collection]
+            [std.lib.env]
+            [std.lib.foundation]
+            [std.lib.invoke :refer [definvoke]]
             [std.print.ansi :as ansi]))
 
 ;;;;
@@ -18,7 +20,7 @@
   "create entry common keys from metadata"
   {:added "4.0"}
   [{:keys [lang namespace module line time]
-    :or {namespace (h/ns-sym)}
+    :or {namespace (std.lib.env/ns-sym)}
     :as meta}]
   (merge
    {:lang lang
@@ -26,7 +28,7 @@
     :module (or module namespace)
     :line line
     :time time}
-   (h/qualified-keys meta [:static :rt :api])))
+   (std.lib.collection/qualified-keys meta [:static :rt :api])))
 
 (defn create-code-raw
   "creates a raw entry compatible with submit"
@@ -40,7 +42,7 @@
                         (assoc (clojure.core/meta sym)
                                :-
                                (mapv #(if (symbol? %)
-                                        (h/var-sym (resolve %))
+                                        (std.lib.foundation/var-sym (resolve %))
                                         %)
                                      modifiers)))
                       sym)
@@ -139,7 +141,7 @@
                            :section :fragment
                            :static/return return}
                           (create-common meta)
-                          (h/qualified-keys meta :rt))))
+                          (std.lib.collection/qualified-keys meta :rt))))
 
 (defn create-fragment-hydrate
   "hydrates the forms"
@@ -180,7 +182,7 @@
                              :standalone standalone
                              :static/return return}
                             (create-common meta)
-                            (h/qualified-keys meta :rt)))))
+                            (std.lib.collection/qualified-keys meta :rt)))))
 
 
 ;;;;
@@ -233,9 +235,9 @@
                     (:namespace entry)
                     mopts)
          (catch Throwable t
-           (h/p   (str (:module entry) " - [" (:line entry) "] - "
-                       (:id entry) "\n" (ansi/red (h/date))))
-           (h/pp  form)
+           (std.lib.env/p   (str (:module entry) " - [" (:line entry) "] - "
+                       (:id entry) "\n" (ansi/red (std.lib.foundation/date))))
+           (std.lib.env/pp  form)
            (throw t)))))))
 
 (def +cached-emit-keys+
@@ -253,10 +255,10 @@
                    [(ut/sym-full entry) (select-keys mopts +cached-keys+)])
             :compare (fn [{:keys [grammar entry mopts]}]
                        [(:lang mopts)
-                        (h/hash-id grammar)
-                        (h/hash-id entry)
+                        (std.lib.foundation/hash-id grammar)
+                        (std.lib.foundation/hash-id entry)
                         (select-keys mopts +cached-keys+)
-                        (h/qualified-keys mopts :lang)])}]
+                        (std.lib.collection/qualified-keys mopts :lang)])}]
   ([{:keys [grammar entry mopts]}]
    (emit-entry-raw grammar entry mopts)))
 

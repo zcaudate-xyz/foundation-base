@@ -1,9 +1,8 @@
 (ns lib.postgres.connection-test
+  (:require [lib.jdbc :as jdbc]
+            [lib.jdbc.protocol :as protocol]
+            [lib.postgres.connection :as conn])
   (:use code.test)
-  
-  (:require [lib.postgres.connection :as conn]
-            [lib.jdbc :as jdbc]
-            [lib.jdbc.protocol :as protocol])
   (:import (javax.sql PooledConnection)))
 
 (defn mock-conn []

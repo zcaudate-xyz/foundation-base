@@ -1,10 +1,10 @@
 (ns std.fs.attribute
   (:require [std.fs.common :as common]
             [std.fs.path :as path]
-            [std.string :as str]
-            [std.lib :as h])
-  (:import (java.nio.file Path FileSystems Files LinkOption)
-           (java.nio.file.attribute FileAttribute FileTime PosixFilePermissions PosixFilePermission)))
+            [std.lib.enum]
+            [std.string.case]
+            [std.string.wrap])
+  (:import (java.nio.file Path FileSystems Files LinkOption) (java.nio.file.attribute FileAttribute FileTime PosixFilePermissions PosixFilePermission)))
 
 (def ^:dynamic *empty* (make-array FileAttribute 0))
 
@@ -57,7 +57,7 @@
                             hist))))
         (apply str))))
 
-(defonce +file-permissions+ (h/enum-map> PosixFilePermission))
+(defonce +file-permissions+ (std.lib.enum/enum-map> PosixFilePermission))
 
 (defn to-permissions
   "transforms mode to permissions
@@ -72,7 +72,7 @@
   ([s]
    (->> (to-mode-string s)
         (PosixFilePermissions/fromString)
-        (map (comp keyword str/spear-case str)))))
+        (map (comp keyword std.string.case/spear-case str)))))
 
 (defn from-permissions
   "transforms permissions to mode
@@ -169,7 +169,7 @@
   ([m prefix]
    (->> m
         (reduce-kv (fn [out k v]
-                     (conj out (attr ((str/wrap str/camel-case) (name k))
+                     (conj out (attr ((std.string.wrap/wrap std.string.case/camel-case) (name k))
                                      (attr-value k v)
                                      prefix)))
                    [])
@@ -180,7 +180,7 @@
   {:added "3.0"}
   ([attrs]
    (reduce (fn [out [k v]]
-             (assoc out ((str/wrap str/spear-case) (keyword k))
+             (assoc out ((std.string.wrap/wrap std.string.case/spear-case) (keyword k))
                     (cond (= k "owner") (str v)
                           (= k "group") (str v)
                           (= k "fileKey") (str v)
@@ -230,7 +230,7 @@
    (reduce-kv (fn [_ k v]
                 (-> (path/path path)
                     (Files/setAttribute (str (name common/*system*) ":"
-                                             ((str/wrap str/camel-case) (name k)))
+                                             ((std.string.wrap/wrap std.string.case/camel-case) (name k)))
                                         (attr-value k v)
                                         common/*no-follow*)))
               nil

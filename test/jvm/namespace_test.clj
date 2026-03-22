@@ -1,8 +1,8 @@
 (ns jvm.namespace-test
-  (:use code.test)
   (:require [jvm.namespace :as ns]
-            [std.lib :refer [definvoke] :as h]
-            [std.lib.result :as res]))
+            [std.lib.invoke :refer [definvoke]]
+            [std.lib.result :as res])
+  (:use code.test))
 
 ^{:refer jvm.namespace/list-aliases :added "3.0"}
 (fact "namespace list all aliases task"

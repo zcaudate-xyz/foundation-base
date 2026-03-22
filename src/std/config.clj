@@ -1,11 +1,11 @@
 (ns std.config
-  (:require [std.config.resolve :as resolve]
-            [std.config.global :as global]
+  (:require [std.config.global :as global]
+            [std.config.resolve :as resolve]
             [std.config.secure :as secure]
-            [std.lib :as h])
+            [std.lib.foundation])
   (:refer-clojure :exclude [resolve load]))
 
-(h/intern-in global/global
+(std.lib.foundation/intern-in global/global
              resolve/load
              resolve/resolve
              secure/resolve-key

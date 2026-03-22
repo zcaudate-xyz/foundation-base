@@ -1,8 +1,8 @@
 (ns xt.db.impl-select-view-test
-  (:use code.test)
   (:require [std.lang :as l]
-            [std.lib :as h]
-            [xt.lang.base-notify :as notify]))
+            [std.string.prose]
+            [xt.lang.base-notify :as notify])
+  (:use code.test))
 
 (l/script- :postgres
   {:runtime :jdbc.client
@@ -106,7 +106,7 @@
                                            :offset 5}))
                       []
                       (ut/postgres-opts sample-scratch/SchemaLookup)))
-  => (std.string/|
+  => (std.string.prose/|
       "WITH j_ret AS ("
       "  SELECT \"id\" FROM \"scratch\".\"Entry\" ORDER BY \"name\" DESC LIMIT 7 OFFSET 5"
       ") SELECT jsonb_agg(j_ret) FROM j_ret"))

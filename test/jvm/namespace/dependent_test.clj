@@ -1,6 +1,6 @@
 (ns jvm.namespace.dependent-test
-  (:use code.test)
-  (:require [jvm.namespace.dependent :refer :all]))
+  (:require [jvm.namespace.dependent :refer :all])
+  (:use code.test))
 
 ^{:refer jvm.namespace.dependent/ns-select :added "3.0"}
 (fact "selects a bunch of namespaces"

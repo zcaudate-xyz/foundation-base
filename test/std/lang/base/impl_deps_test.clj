@@ -1,11 +1,11 @@
 (ns std.lang.base.impl-deps-test
-  (:use code.test)
-  (:require [std.lang.base.impl-deps :as deps]
-            [std.lang.base.emit-prep-lua-test :as prep]
-            [std.lang.model.spec-lua :as lua]
+  (:require [std.lang.base.emit-prep-lua-test :as prep]
+            [std.lang.base.impl-deps :as deps]
+            [std.lang.base.impl-entry :as entry]
             [std.lang.base.library :as lib]
             [std.lang.base.library-snapshot :as snap]
-            [std.lang.base.impl-entry :as entry]))
+            [std.lang.model.spec-lua :as lua])
+  (:use code.test))
 
 (def +library-ext+
   (doto (lib/library:create

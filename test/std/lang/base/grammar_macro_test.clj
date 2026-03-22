@@ -1,6 +1,6 @@
 (ns std.lang.base.grammar-macro-test
-  (:use code.test)
-  (:require [std.lang.base.grammar-macro :refer :all]))
+  (:require [std.lang.base.grammar-macro :refer :all])
+  (:use code.test))
 
 ^{:refer std.lang.base.grammar-macro/tf-macroexpand :added "3.0"}
 (fact "macroexpands the current form"

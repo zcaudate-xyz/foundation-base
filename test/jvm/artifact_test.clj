@@ -1,7 +1,7 @@
 (ns jvm.artifact-test
-  (:use code.test)
   (:require [jvm.artifact :refer :all]
-            [jvm.artifact.common :as base]))
+            [jvm.artifact.common :as base])
+  (:use code.test))
 
 ^{:refer jvm.artifact/rep->coord :added "3.0"}
 (fact "encodes the rep to a coordinate"

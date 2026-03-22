@@ -1,15 +1,7 @@
 (ns std.object.framework.proxy-test
-  (:use code.test)
   (:require [std.object :as object])
-  (:import (test.flight Airline
-                        Body
-                        Body$BodyType
-                        Plane
-                        Radar
-                        Tail
-                        Tail$TailFlap
-                        Wing)
-           (java.util List)))
+  (:use code.test)
+  (:import (test.flight Airline Body Body$BodyType Plane Radar Tail Tail$TailFlap Wing) (java.util List)))
 
 (object/map-like
  Tail

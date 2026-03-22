@@ -2,15 +2,15 @@
   (:require [lib.redis.impl.common :as common]
             [lib.redis.impl.generator :as gen]
             [lib.redis.impl.template :as t]
-            [std.lib :as h]))
+            [std.lib.foundation]))
 
 (def +scripting+
   (gen/select-commands {:group [:scripting]}))
 
-(h/template-entries [gen/command-tmpl]
+(std.lib.foundation/template-entries [gen/command-tmpl]
   +scripting+)
 
-(h/template-vars [t/redis-template]
+(std.lib.foundation/template-vars [t/redis-template]
   (script:load        in:script-load  {})
   (script:flush       in:script-flush {})
   (script:exists      in:script-exists {})

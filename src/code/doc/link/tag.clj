@@ -1,5 +1,5 @@
 (ns code.doc.link.tag
-  (:require [std.string :as str]))
+  (:require [std.string.case]))
 
 (def tag-required?
   #{:chapter :section :subsection :subsubsection :appendix :citation})
@@ -30,7 +30,7 @@
    => \"hello2-world--this-rocks\""
   {:added "3.0"}
   ([^String s]
-   (-> (str/spear-case s)
+   (-> (std.string.case/spear-case s)
        (.replaceAll "\\." "-")
        (.replaceAll "/" "--")
        (.replaceAll "[^\\d^\\w^-]" ""))))

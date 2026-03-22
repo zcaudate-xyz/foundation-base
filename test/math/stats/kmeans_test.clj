@@ -1,6 +1,6 @@
 (ns math.stats.kmeans-test
-  (:use code.test)
-  (:require [math.stats.kmeans :refer :all]))
+  (:require [math.stats.kmeans :refer :all])
+  (:use code.test))
 
 ^{:refer math.stats.kmeans/distance2 :added "3.0"}
 (fact "sum of squared distances between two points"

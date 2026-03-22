@@ -1,12 +1,14 @@
 (ns rt.postgres.supabase
   (:require [net.http :as http]
-            [std.lib :as h]
+            [rt.postgres.grammar.common :as common]
+            [rt.postgres.script.addon :as addon]
             [std.json :as json]
-            [std.string :as str]
             [std.lang :as l]
             [std.lang.base.impl :as impl]
-            [rt.postgres.grammar.common :as common]
-            [rt.postgres.script.addon :as addon]))
+            [std.lib.context.pointer]
+            [std.lib.foundation]
+            [std.string.case]
+            [std.string.common]))
 
 (l/script :postgres
   {:macro-only true})
@@ -188,22 +190,22 @@
 
                 (symbol? fsym)
                 (let [fvar (resolve fsym)]
-                  (cond (h/pointer? (deref fvar))
+                  (cond (std.lib.context.pointer/pointer? (deref fvar))
                         (let [ret  (or (:static/type @@fvar)
                                        (:static/return @@fvar))]
                           (if (or (nil? ret)
                                   (= ret [:block]))
-                            (h/error "Cannot determine type"
+                            (std.lib.foundation/error "Cannot determine type"
                                      {:form form})
                             (first ret)))
                         
                         :else
-                        (h/error "Cannot determine type"
+                        (std.lib.foundation/error "Cannot determine type"
                                  {:form form})))))
         
         
         :else
-        (h/error "Cannot determine type"
+        (std.lib.foundation/error "Cannot determine type"
                  {:form form})))
 
 (defmacro with-role-single
@@ -385,7 +387,7 @@
                       (apply list 'do
                              (keep (fn [[role operations]]
                                     (let [operations (cond (vector? operations)
-                                                           (list 'quote (mapv (comp symbol h/strn) operations))
+                                                           (list 'quote (mapv (comp symbol std.lib.foundation/strn) operations))
 
                                                            (= :all operations)
                                                            ''[select update delete insert]
@@ -405,7 +407,7 @@
                       mopts))]
     (->> [body rls-str access-str]
          (filter identity)
-         (str/join "\n"))))
+         (std.string.common/join "\n"))))
 
 (defn transform-entry
   "transforms a book entry"
@@ -475,7 +477,7 @@
          :static/keys [schema]} (deref fn)
         headers (if schema
                   {"Content-Profile" schema})
-        route  (str "/rest/v1/rpc/" (str/snake-case (str id)))
+        route  (str "/rest/v1/rpc/" (std.string.case/snake-case (str id)))
         opts (merge opts
                     {:headers headers
                      :route route})]

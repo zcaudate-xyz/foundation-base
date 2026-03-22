@@ -1,14 +1,17 @@
 (ns rt.fortran.grammar
-  (:require [std.lang.base.emit :as emit]
+  (:require [std.lang.base.book :as book]
+            [std.lang.base.emit :as emit]
             [std.lang.base.emit-common :as emit-common]
             [std.lang.base.emit-fn :as emit-fn]
             [std.lang.base.emit-helper :as helper]
             [std.lang.base.grammar :as grammar]
-            [std.lang.base.util :as ut]
-            [std.lang.base.book :as book]
             [std.lang.base.script :as script]
-            [std.string :as str]
-            [std.lib :as h]))
+            [std.lang.base.util :as ut]
+            [std.lib.collection]
+            [std.lib.foundation]
+            [std.lib.template]
+            [std.string.common]
+            [std.string.prose]))
 
 (defn fortran-type
   "formats fortran types"
@@ -22,7 +25,7 @@
       "bool" "LOGICAL"
       "str" "CHARACTER(LEN=*)"
       "void" ""
-      (str/upper-case s))))
+      (std.string.common/upper-case s))))
 
 (defn fortran-args
   "custom Fortran argument emission"
@@ -36,7 +39,7 @@
                            (emit/emit-main (second arg) grammar mopts)
                            (emit/emit-main arg grammar mopts)))
                        args)]
-    (str "(" (str/join ", " arg-names) ")")))
+    (str "(" (std.string.common/join ", " arg-names) ")")))
 
 (defn fortran-decl
   "declaration helper"
@@ -52,7 +55,7 @@
   [[_ sym args & body]]
   (let [ret-type (-> sym meta :tag)
         is-function (some? ret-type)
-        fname (h/strn sym)
+        fname (std.lib.foundation/strn sym)
         header (if is-function
                  (str (fortran-type ret-type) " FUNCTION " fname)
                  (str "SUBROUTINE " fname))
@@ -71,7 +74,7 @@
 (defn fortran-defprogram
   "transforms defprogram to PROGRAM"
   [[_ sym & body]]
-  (let [fname (h/strn sym)]
+  (let [fname (std.lib.foundation/strn sym)]
     (list :- "PROGRAM" fname
           (list :- "\n")
           (list :%
@@ -100,7 +103,7 @@
 (defn fortran-module
   "transforms module"
   [[_ sym & body]]
-  (let [fname (h/strn sym)]
+  (let [fname (std.lib.foundation/strn sym)]
     (list :- "MODULE" fname
           (list :- "\n")
           (list :%
@@ -139,7 +142,7 @@
         :control {:if {:start "IF (" :end "END IF"}
                   }
         }
-       (h/merge-nested (emit/default-grammar))))
+       (std.lib.collection/merge-nested (emit/default-grammar))))
 
 (defn fortran-emit-if
   "custom if emission"
@@ -148,9 +151,9 @@
         then-block (emit/emit-main then grammar mopts)
         else-block (if else (emit/emit-main else grammar mopts))]
     (str "IF (" test-str ") THEN\n"
-         (str/indent then-block 2)
+         (std.string.prose/indent then-block 2)
          (when else
-           (str "\nELSE\n" (str/indent else-block 2)))
+           (str "\nELSE\n" (std.string.prose/indent else-block 2)))
          "\nEND IF")))
 
 (defn fortran-emit-for
@@ -162,7 +165,7 @@
         st (if step (str ", " (emit/emit-main step grammar mopts)) "")
         b (emit/emit-main body grammar mopts)]
     (str "DO " v " = " s ", " e st "\n"
-         (str/indent b 2)
+         (std.string.prose/indent b 2)
          "\nEND DO")))
 
 ;; Patching if and for into grammar
@@ -179,7 +182,7 @@
   (book/book-meta
    {:module-current   (fn [])
     :module-import    (fn [name _ opts]
-                        (h/$ (:- "USE" ~name)))
+                        (std.lib.template/$ (:- "USE" ~name)))
     :module-export    (fn [{:keys [as refer]} opts])}))
 
 (def +book+

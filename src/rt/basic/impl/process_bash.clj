@@ -1,12 +1,9 @@
 (ns rt.basic.impl.process-bash
-  (:require [std.lang.base.runtime :as default]
-            [std.lang.model.spec-bash :as spec]
+  (:require [rt.basic.type-common :as common]
+            [rt.basic.type-oneshot :as oneshot]
             [std.lang.base.impl :as impl]
             [std.lang.base.runtime :as rt]
-            [std.lib :as h]
-            [std.string :as str]
-            [rt.basic.type-common :as common]
-            [rt.basic.type-oneshot :as oneshot]))
+            [std.lang.model.spec-bash :as spec]))
 
 (def +program-init+
   (common/put-program-options

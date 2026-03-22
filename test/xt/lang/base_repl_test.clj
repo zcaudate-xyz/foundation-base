@@ -1,8 +1,8 @@
 (ns xt.lang.base-repl-test
-  (:use code.test)
-  (:require [std.lang :as l]
-            [std.json :as json]
-            [xt.lang.base-notify :as notify]))
+  (:require [std.json :as json]
+            [std.lang :as l]
+            [xt.lang.base-notify :as notify])
+  (:use code.test))
 
 (l/script- :js
   {:runtime :basic

@@ -1,6 +1,6 @@
 (ns code.manage.unit.walk-test
-  (:use code.test)
-  (:require [code.manage.unit.walk :refer :all]))
+  (:require [code.manage.unit.walk :refer :all])
+  (:use code.test))
 
 ^{:refer code.manage.unit.walk/walk-string :added "3.0"}
 (fact "helper function for file manipulation for string output"

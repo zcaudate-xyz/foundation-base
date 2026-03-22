@@ -1,11 +1,10 @@
 (ns xt.lang.base-iter-test
-  (:use code.test)
-  (:require [std.lang :as l]
-            [std.lib :as h]
+  (:require [net.http :as http]
+            [rt.basic :as basic]
             [std.json :as json]
-            [net.http :as http]
-            [xt.lang.base-notify :as notify]
-            [rt.basic :as basic]))
+            [std.lang :as l]
+            [xt.lang.base-notify :as notify])
+  (:use code.test))
 
 (l/script- :js
   {:runtime :basic

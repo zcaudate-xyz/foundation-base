@@ -1,13 +1,13 @@
 (ns std.block.layout.layout-examples-test
-  (:use code.test)
-  (:require [std.block.layout :as layout]
+  (:require [std.block.base :as base]
             [std.block.construct :as construct]
-            [std.block.base :as base]
-            [std.string :as str]
-            [std.lib :as h]))
+            [std.block.layout :as layout]
+            [std.lib.component]
+            [std.string.common])
+  (:use code.test))
 
 (defn split-block [form]
-  (str/split-lines (base/block-string (layout/layout-main form))))
+  (std.string.common/split-lines (base/block-string (layout/layout-main form))))
 
 ^{:refer std.block.layout/layout-examples :added "4.0"}
 (fact "Default Formatting Examples"
@@ -38,7 +38,7 @@
   => ["(let [a 10 b 20]"
       "  (println (+ a b)))"]
 
-  (split-block '(h/with:component [sys system]
+  (split-block '(std.lib.component/with [sys system]
                   (start sys)
                   (run sys)))
   => ["(h/with:component [sys system]"

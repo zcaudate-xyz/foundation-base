@@ -1,15 +1,21 @@
 (ns lib.postgres
-  (:require [lib.postgres.connection :as conn]
+  (:require [lib.docker :as docker]
             [lib.jdbc :as jdbc]
+            [lib.postgres.connection :as conn]
             [std.json :as json]
-            [std.lib :as h :refer [defimpl]]
-            [lib.docker :as docker]))
+            [std.lib.atom]
+            [std.lib.collection]
+            [std.lib.component]
+            [std.lib.env]
+            [std.lib.foundation]
+            [std.lib.impl :refer [defimpl]]
+            [std.lib.network]))
 
 (defn start-pg-temp-init
   "initialises a temp database"
   {:added "4.0"}
   ([{:keys [dbname] :as pg}]
-   (when-not dbname (h/error "Missing dbname"))
+   (when-not dbname (std.lib.foundation/error "Missing dbname"))
    (with-open [conn (conn/conn-create (assoc pg :dbname "postgres"))]
      (with-open [c (.getConnection conn)]
        (let [args (jdbc/fetch c [(format "SELECT 1 FROM pg_database WHERE datname = '%s'" dbname)])]
@@ -20,7 +26,7 @@
   "waits for the postgres database to come online"
   {:added "4.0"}
   [{:keys [instance host port container temp] :as pg} limit sleep]
-  (let [_   (if (zero? limit) (h/error "Database not responsive"))
+  (let [_   (if (zero? limit) (std.lib.foundation/error "Database not responsive"))
         res (try (with-open [conn (conn/conn-create (assoc pg :dbname "postgres"))])
                  (catch com.impossibl.postgres.jdbc.PGSQLSimpleException e
                    (Thread/sleep sleep)
@@ -33,7 +39,7 @@
   {:added "4.0"}
   ([{:keys [instance host port container temp] :as pg}]
    (when container
-     (h/wait-for-port host port {:timeout 5000})
+     (std.lib.network/wait-for-port host port {:timeout 5000})
      (wait-for-pg pg 10 1000))
    (when temp
      (start-pg-temp-init pg))
@@ -41,7 +47,7 @@
      (reset! instance (conn/conn-create pg)))
    pg))
 
-(def ^{:arglists '([pg])} start-pg (h/wrap-start start-pg-raw
+(def ^{:arglists '([pg])} start-pg (std.lib.component/wrap-start start-pg-raw
                                                     [{:key :container
                                                       :setup     docker/start-runtime
                                                       :teardown  docker/stop-runtime}]))
@@ -50,7 +56,7 @@
   "tears down a temp database"
   {:added "4.0"}
   ([{:keys [dbname] :as pg}]
-   (when-not dbname (h/error "Missing dbname"))
+   (when-not dbname (std.lib.foundation/error "Missing dbname"))
    (with-open [conn (conn/conn-create (assoc pg :dbname "postgres"))]
      (with-open [c (.getConnection conn)]
        (let [args (jdbc/fetch c [(format "SELECT 1 FROM pg_database WHERE datname = '%s'" dbname)])]
@@ -62,10 +68,10 @@
   {:added "4.0"}
   ([{:keys [instance notifications temp] :as pg}]
    (if @instance
-     (h/swap-return! instance (fn [conn]
+     (std.lib.atom/swap-return! instance (fn [conn]
                                 [(doto conn (conn/conn-close)) nil])))
-   (h/map-vals (fn [{:keys [raw]}]
-                 (h/close raw))
+   (std.lib.collection/map-vals (fn [{:keys [raw]}]
+                 (std.lib.env/close raw))
                @notifications)
    (reset! notifications {})
    (when (and temp (not= temp :create))
@@ -74,7 +80,7 @@
 
 (def ^{:arglists '([pg])}
   stop-pg
-  (h/wrap-stop stop-pg-raw
+  (std.lib.component/wrap-stop stop-pg-raw
                [{:key :container
                  :setup     docker/start-runtime
                  :teardown  docker/stop-runtime}]))

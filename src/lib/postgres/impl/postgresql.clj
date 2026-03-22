@@ -1,12 +1,7 @@
 (ns lib.postgres.impl.postgresql
   (:require [lib.jdbc :as jdbc]
-            [lib.jdbc.protocol :as jdbc.protocol]
-            [std.lib :as h])
-  (:import (javax.sql PooledConnection)
-           (org.postgresql.jdbc PgConnection
-                                PgArray)
-           (org.postgresql.util PGobject)
-           (org.postgresql.ds PGConnectionPoolDataSource)))
+            [lib.jdbc.protocol :as jdbc.protocol])
+  (:import (javax.sql PooledConnection) (org.postgresql.jdbc PgConnection PgArray) (org.postgresql.util PGobject) (org.postgresql.ds PGConnectionPoolDataSource)))
 
 (extend-protocol jdbc.protocol/ISQLResultSetReadColumn
   PgArray

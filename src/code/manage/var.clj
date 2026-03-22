@@ -1,6 +1,5 @@
 (ns code.manage.var
   (:require [code.framework :as base]
-            [std.string :as str]
             [code.query :as query]
             [std.block.navigate :as nav]))
 

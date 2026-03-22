@@ -1,11 +1,11 @@
 (ns std.lang.base.emit-special
-  (:require [std.string :as str]
-            [std.lib :as h]
-            [std.lang.base.emit-preprocess :as preprocess]
+  (:require [std.lang.base.book :as book]
             [std.lang.base.emit-common :as common]
-            [std.lang.base.emit-helper :as helper]
             [std.lang.base.emit-data :as data]
-            [std.lang.base.book :as book]))
+            [std.lang.base.emit-helper :as helper]
+            [std.lang.base.emit-preprocess :as preprocess]
+            [std.lib.env]
+            [std.lib.foundation]))
 
 (defn emit-with-module-all-ids
   "emits the module given snapshot in opts"
@@ -17,7 +17,7 @@
         #_#_#_#_
         export-sym (get-in module [:export :as])
         _   (if (not export-sym)
-              (h/error "No Export for Module" {:module module-id
+              (std.lib.foundation/error "No Export for Module" {:module module-id
                                                :export (get module :export)}))
         ids (->> (:code module) 
                  (vals)
@@ -85,17 +85,17 @@
   [_ _ [_ form] grammar mopts]
   (if (= 'var (first form))
     (emit-with-preprocess (deref (eval form)) grammar mopts)
-    (h/error "Needs to be a clojure.lang.Var")))
+    (std.lib.foundation/error "Needs to be a clojure.lang.Var")))
 
 (defn emit-with-lang
   "emits an embedded eval"
   {:added "4.0"}
   [_ _ form grammar {:keys [snapshot] :as mopts}]
   (let [[_ {:keys [lang module] :as opts
-            :or {module (h/ns-sym)}}
+            :or {module (std.lib.env/ns-sym)}}
          body] form
         book   (or (book/book-from snapshot lang)
-                   (h/error "Lang not found." {:lang lang
+                   (std.lib.foundation/error "Lang not found." {:lang lang
                                                :available (keys snapshot)}))
         {:keys [grammar]} book
         module (book/get-module book module)

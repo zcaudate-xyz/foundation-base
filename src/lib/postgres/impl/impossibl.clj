@@ -2,17 +2,8 @@
   (:require [lib.jdbc :as jdbc]
             [lib.jdbc.protocol :as jdbc.protocol]
             [std.json :as json]
-            [std.lib :as h])
-  (:import (javax.sql PooledConnection)
-           (com.impossibl.postgres.jdbc PGConnectionPoolDataSource
-                                        PGDirectConnection
-                                        PGDataSource
-                                        PGArray
-                                        PGBuffersArray
-                                        PGBuffersStruct$Binary
-                                        PGSQLSimpleException)
-           (com.impossibl.postgres.api.data InetAddr)
-           (com.impossibl.postgres.api.jdbc PGNotificationListener)))
+            [std.lib.foundation])
+  (:import (javax.sql PooledConnection) (com.impossibl.postgres.jdbc PGConnectionPoolDataSource PGDirectConnection PGDataSource PGArray PGBuffersArray PGBuffersStruct$Binary PGSQLSimpleException) (com.impossibl.postgres.api.data InetAddr) (com.impossibl.postgres.api.jdbc PGNotificationListener)))
 
 (extend-protocol jdbc.protocol/ISQLResultSetReadColumn
   PGArray
@@ -88,7 +79,7 @@
   [{:keys [host port user pass dbname]
     :or {host (or (System/getenv "DEFAULT_RT_POSTGRES_HOST")
                    "127.0.0.1")
-          port (h/parse-long
+          port (std.lib.foundation/parse-long
                 (or (System/getenv "DEFAULT_RT_POSTGRES_PORT")
                     "5432"))
           user (or (System/getenv "DEFAULT_RT_POSTGRES_USER")

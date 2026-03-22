@@ -1,9 +1,9 @@
 (ns rt.postgres.supabase-test
-  (:use code.test)
-  (:require [rt.postgres.supabase :as s]
-            [std.lang :as l]
-            [net.http :as http]
-            [rt.postgres.grammar :as grammar]))
+  (:require [net.http :as http]
+            [rt.postgres.grammar :as grammar]
+            [rt.postgres.supabase :as s]
+            [std.lang :as l])
+  (:use code.test))
 
 (l/script- :postgres
   {:require [[rt.postgres :as pg]

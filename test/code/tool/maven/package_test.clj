@@ -1,10 +1,10 @@
 (ns code.tool.maven.package-test
-  (:use code.test)
-  (:require [code.tool.maven.package :refer :all]
-            [code.framework.link :as linkage]
-            [std.fs :as fs]
+  (:require [code.framework.link :as linkage]
             [code.project :as project]
-            [std.html :as html]))
+            [code.tool.maven.package :refer :all]
+            [std.fs :as fs]
+            [std.html :as html])
+  (:use code.test))
 
 (def -collected- (linkage/collect))
 

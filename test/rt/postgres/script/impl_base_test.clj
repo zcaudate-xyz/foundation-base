@@ -1,11 +1,11 @@
 (ns rt.postgres.script.impl-base-test
-  (:use code.test)
-  (:require [rt.postgres.script.impl-base :refer :all]
+  (:require [rt.postgres]
             [rt.postgres.grammar.common-application :as app]
-            [rt.postgres]
+            [rt.postgres.script.impl-base :refer :all]
+            [rt.postgres.script.test.scratch-v1 :as scratch]
             [std.lang :as l]
-            [std.lang.base.book :as book]
-            [rt.postgres.script.test.scratch-v1 :as scratch]))
+            [std.lang.base.book :as book])
+  (:use code.test))
 
 (l/script- :postgres
   {:require [[rt.postgres.script.test.scratch-v1 :as scratch]]

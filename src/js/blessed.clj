@@ -1,6 +1,6 @@
 (ns js.blessed
   (:require [std.lang :as l]
-            [std.lib :as h])
+            [std.lib.foundation])
   (:refer-clojure :exclude [merge list map]))
 
 (l/script :js
@@ -32,7 +32,7 @@
     scrollabletext sprintf stripTags table terminal text textarea
     textbox tput tryRead unicode video widget])
 
-(h/template-entries [l/tmpl-entry {:type :fragment
+(std.lib.foundation/template-entries [l/tmpl-entry {:type :fragment
                                    :base "Blessed"
                                    :tag "js"}]
   +blessed+)
@@ -46,7 +46,7 @@
     donut gauge gaugeList grid lcd line log map markdown picture
     serverError sparkline stackedBar table tree])
 
-(h/template-entries [l/tmpl-entry {:type :fragment
+(std.lib.foundation/template-entries [l/tmpl-entry {:type :fragment
                                    :base "BlessedContrib"
                                    :tag "js"}]
   +blessed-contrib+)
@@ -56,7 +56,7 @@
 ;; React Blessed
 ;;
 
-(h/template-entries [l/tmpl-entry {:type :fragment
+(std.lib.foundation/template-entries [l/tmpl-entry {:type :fragment
                                    :base "ReactBlessed"
                                    :tag "js"}]
   [createBlessedRenderer
@@ -71,7 +71,7 @@
     Lcd Line Log Map Markdown Picture Sparkline StackedBar
     Table Tree createBlessedComponent])
 
-(h/template-entries [l/tmpl-entry {:type :fragment
+(std.lib.foundation/template-entries [l/tmpl-entry {:type :fragment
                                    :base "ReactBlessedContrib"
                                    :tag "js"}]
   +react-blessed-contrib+)

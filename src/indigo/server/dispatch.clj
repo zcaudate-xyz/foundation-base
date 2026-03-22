@@ -1,7 +1,6 @@
 (ns indigo.server.dispatch
-  (:require [std.json :as json]
-            [std.lib :as h]
-            [org.httpkit.server :as http]))
+  (:require [org.httpkit.server :as http]
+            [std.json :as json]))
 
 (defonce ^:dynamic *clients* (atom #{}))
 

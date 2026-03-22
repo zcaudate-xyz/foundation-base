@@ -2,19 +2,7 @@
   (:require [std.lib.generate :as gen]
             [std.lib.stream.iter :as i]
             [std.protocol.stream :as protocol.stream])
-  (:import (clojure.lang IPersistentCollection
-                         IPersistentList
-                         ITransientCollection)
-           (java.util.function Supplier)
-           (java.util Collection
-                      Spliterator)
-           (java.util.stream Stream
-                             StreamSupport
-                             Collector
-                             Collectors)
-           (java.util.concurrent Callable
-                                 Future)
-           (hara.lib.stream ISeqSpliterator)))
+  (:import (clojure.lang IPersistentCollection IPersistentList ITransientCollection) (java.util.function Supplier) (java.util Collection Spliterator) (java.util.stream Stream StreamSupport Collector Collectors) (java.util.concurrent Callable Future) (hara.lib.stream ISeqSpliterator)))
 
 (defn produce
   "produces a seq from an object

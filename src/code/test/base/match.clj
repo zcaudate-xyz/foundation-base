@@ -1,6 +1,6 @@
 (ns code.test.base.match
-  (:require
-   [std.lib :as h]))
+  (:require [clojure.set]
+            [std.lib.foundation]))
 
 (defn match-base
   "determines whether a term matches with a filter
@@ -18,7 +18,7 @@
   ([fmeta {:keys [unit refers namespaces] :as filter} default]
    [(if-not (empty? unit)
       (->> (:unit fmeta)
-           (h/intersection unit)
+           (clojure.set/intersection unit)
            (empty?)
            (not))
       default)
@@ -37,7 +37,7 @@
                             (= (str (:ns fmeta))
                                (str namespace))
 
-                            (h/regexp? namespace)
+                            (std.lib.foundation/regexp? namespace)
                             (boolean (re-find namespace (str (:ns fmeta)))))))
                (some true?))
           false)

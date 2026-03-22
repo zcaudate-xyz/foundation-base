@@ -1,5 +1,5 @@
 (ns std.block.heal.print
-  (:require [std.lib :as h]))
+  (:require [std.lib.env]))
 
 (def +rainbow-colors+
   ["\u001b[34m"                        ; blue
@@ -39,8 +39,8 @@
         (let [char (first chars)
               color (get color-map [line-num col-num])]
           (if color
-            (h/pr (str color char +reset-color+))
-            (h/pr char))
+            (std.lib.env/pr (str color char +reset-color+))
+            (std.lib.env/pr char))
           (if (= char \newline)
             (recur (rest chars) (inc line-num) 1)
             (recur (rest chars) line-num (inc col-num))))))))

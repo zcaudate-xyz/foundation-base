@@ -1,5 +1,5 @@
 (ns std.image.base.model
-  (:require [std.lib :as h]))
+  (:require [std.lib.collection]))
 
 ;; Generated Using
 ;;
@@ -160,7 +160,7 @@
          (assoc :label label)
          (update-in [:channel] #(merge *default-channel-options* %))
          (update-in [:data] (fn [data]
-                              (h/map-vals (fn [opts]
+                              (std.lib.collection/map-vals (fn [opts]
                                             (merge *default-data-options* opts))
                                           data)))))))
 
@@ -212,4 +212,4 @@
    (let [model (cond (keyword? x) (create-model x)
                      (map? x) x
                      :else (throw (Exception. (str "Use keyword or map, not " x))))]
-     (h/merge-nested model overwrites))))
+     (std.lib.collection/merge-nested model overwrites))))

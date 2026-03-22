@@ -1,7 +1,7 @@
 (ns xt.sys.cache-throttle-test
-  (:use code.test)
-  (:require [std.lang :as l]
-            [rt.nginx.config :as config]))
+  (:require [rt.nginx.config :as config]
+            [std.lang :as l])
+  (:use code.test))
 
 (l/script- :js
   {:runtime :basic

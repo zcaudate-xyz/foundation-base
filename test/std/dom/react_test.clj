@@ -1,9 +1,9 @@
 (ns std.dom.react-test
-  (:use code.test)
   (:require [std.dom.common :as base]
             [std.dom.mock :as mock]
             [std.dom.react :refer :all]
-            [std.dom.update :as update]))
+            [std.dom.update :as update])
+  (:use code.test))
 
 ^{:refer std.dom.react/reactive-pre-render :added "3.0"}
 (fact "sets up the react key and react store"

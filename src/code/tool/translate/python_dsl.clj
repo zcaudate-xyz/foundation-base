@@ -1,10 +1,10 @@
 (ns code.tool.translate.python-dsl
-  (:require [std.lib :as h]))
+  (:require [std.lib.foundation]))
 
 (defmulti translate-node :type)
 
 (defmethod translate-node :default [node]
-  (h/error "Unknown node type" {:type (:type node) :node node}))
+  (std.lib.foundation/error "Unknown node type" {:type (:type node) :node node}))
 
 (defmethod translate-node "Module" [node]
   (mapv translate-node (:body node)))

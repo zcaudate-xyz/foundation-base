@@ -1,8 +1,8 @@
 (ns std.lib.system.scaffold
-  (:require [std.lib.system.type :as type]
+  (:require [std.lib.component :as component]
             [std.lib.env :as env]
-            [std.lib.component :as component]
-            [std.lib.foundation :as h]))
+            [std.lib.foundation :as h]
+            [std.lib.system.type :as type]))
 
 (defonce ^:dynamic *registry* (atom {}))
 

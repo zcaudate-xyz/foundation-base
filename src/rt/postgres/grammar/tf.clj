@@ -1,6 +1,7 @@
 (ns rt.postgres.grammar.tf
-  (:require [std.lib :as h]
-            [std.string :as str]))
+  (:require [std.lib.env]
+            [std.lib.foundation]
+            [std.string.case]))
 
 (def ^:dynamic *input-syms* nil)
 
@@ -12,7 +13,7 @@
          estr (if (re-find #"\w-\w+" estr)
                 (subs estr 2)
                 estr)]
-     (str/snake-case estr))))
+     (std.string.case/snake-case estr))))
 
 (defn pg-tf-js
   "converts a map to js object"
@@ -31,18 +32,18 @@
                           (apply list 'jsonb-build-array arr))
                         
                         (keyword? val)
-                        (str/snake-case (h/strn val))
+                        (std.string.case/snake-case (std.lib.foundation/strn val))
 
                         (set? val)
                         (let [pairs  (loop [acc []
                                             [x & more :as arr] (seq val)]
                                        (cond (empty? arr) acc
-                                             (keyword? x) (recur (conj acc [(str/snake-case (h/strn x))
+                                             (keyword? x) (recur (conj acc [(std.string.case/snake-case (std.lib.foundation/strn x))
                                                                             (obj-fn (first more))])
                                                                  (rest more))
                                              (symbol? x) (recur (conj acc [(pg-js-idx x) x])
                                                                 more)
-                                             :else (h/error "Not Valid" {:value x})))]
+                                             :else (std.lib.foundation/error "Not Valid" {:value x})))]
                           (apply list 'jsonb-build-object (apply concat pairs)))
                         
                         :else val))]
@@ -90,7 +91,7 @@
    [:raise-exception
     :using (list 'quote
                  [[:detail := (list :text (list '% m))]
-                  [:message := (h/strn tag)]])]))
+                  [:message := (std.lib.foundation/strn tag)]])]))
 
 (defn pg-tf-error
   "creates error transform"
@@ -110,11 +111,11 @@
 
 
 (comment
-  (h/pl (std.lang/pg
+  (std.lib.env/pl (std.lang/pg
          (let [(:jsonb out)  {}
                _  (do:reduce out || :jsonb arr)]
            (return out))))
-  (h/pl (std.lang/pg (do:reduce out || :json [{} {}]))))
+  (std.lib.env/pl (std.lang/pg (do:reduce out || :json [{} {}]))))
 
 
 

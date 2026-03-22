@@ -1,11 +1,9 @@
 (ns rt.jep.bootstrap
-  (:require [std.fs :as fs]
-            [std.concurrent :as cc]
-            [std.string :as str]
-            [std.lib :as h])
-  (:import jep.MainInterpreter
-           jep.Interpreter
-           jep.SharedInterpreter))
+  (:require [std.concurrent :as cc]
+            [std.fs :as fs]
+            [std.lib.os]
+            [std.string.common])
+  (:import jep.MainInterpreter jep.Interpreter jep.SharedInterpreter))
 
 (def ^:dynamic *python* (or (System/getenv "JEP_PYTHON") "python3"))
 
@@ -45,11 +43,11 @@
            throws)"
   {:added "3.0"}
   ([]
-   (let [path (fs/create-tmpfile (str/join "\n" (bootstrap-code)))
-         process  (h/sh *python* (str path) {:wait true :output false :inherit false})
-         {:keys [exit out err]} (h/sh-output process)]
+   (let [path (fs/create-tmpfile (std.string.common/join "\n" (bootstrap-code)))
+         process  (std.lib.os/sh *python* (str path) {:wait true :output false :inherit false})
+         {:keys [exit out err]} (std.lib.os/sh-output process)]
      (if (zero? exit)
-       (last (str/split-lines (str/trim out)))
+       (last (std.string.common/split-lines (std.string.common/trim out)))
        (throw (ex-info out {:status :failed :message out}))))))
 
 (defn init-paths
@@ -57,7 +55,7 @@
   {:added "3.0"}
   ([]
    (let [jep  (jep-bootstrap)
-         root (str/replace jep #"/jep/libjep.*" "")]
+         root (std.string.common/replace jep #"/jep/libjep.*" "")]
      (MainInterpreter/setJepLibraryPath jep)
      (SharedInterpreter/setConfig
       (-> (jep.JepConfig.)

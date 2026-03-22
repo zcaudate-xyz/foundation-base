@@ -1,9 +1,9 @@
 (ns std.log-test
-  (:use code.test)
   (:require [std.log :as log]
             [std.log.common :as common]
             [std.print.format.common :as format.common]
-            [std.protocol.log :as protocol.log]))
+            [std.protocol.log :as protocol.log])
+  (:use code.test))
 
 ^{:refer std.log/create :added "3.0"}
 (fact "creates a component compatible logger"

@@ -1,10 +1,11 @@
 (ns std.object.framework.map-like
-  (:require [std.object.framework.access :as access]
+  (:require [std.lib.collection]
+            [std.lib.memoize]
+            [std.object.framework.access :as access]
             [std.object.framework.print :as print]
             [std.object.framework.read :as read]
             [std.object.framework.write :as write]
-            [std.protocol.object :as protocol.object]
-            [std.lib :as h]))
+            [std.protocol.object :as protocol.object]))
 
 (defn key-selection
   "selects map based on keys
@@ -149,7 +150,7 @@
                read (print/assoc-print-vars read opts)
                read (update-in read [:methods] #(list 'merge % (read-proxy-functions proxy)))
                read (if custom
-                      `(update-in ~read [:methods] h/merge-nested ~custom)
+                      `(update-in ~read [:methods] std.lib.collection/merge-nested ~custom)
                       read)]
            read)))
 
@@ -161,10 +162,10 @@
             ~(let [write (extend-map-write cls opts)
                    write (update-in write [:methods] #(list 'merge % (write-proxy-functions proxy)))
                    write (if-let [custom (:custom write)]
-                           `(update-in ~(dissoc write :custom) [:methods] h/merge-nested ~custom)
+                           `(update-in ~(dissoc write :custom) [:methods] std.lib.collection/merge-nested ~custom)
                            write)]
                write))))
 
-     (do (h/memoize:remove read/meta-read-exact ~cls)
-         (h/memoize:remove write/meta-write-exact ~cls)
+     (do (std.lib.memoize/memoize:remove read/meta-read-exact ~cls)
+         (std.lib.memoize/memoize:remove write/meta-write-exact ~cls)
          (print/extend-print ~cls))]))

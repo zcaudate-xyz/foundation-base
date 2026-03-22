@@ -1,6 +1,6 @@
 (ns code.project.lein-test
-  (:use code.test)
-  (:require [code.project.lein :refer :all]))
+  (:require [code.project.lein :refer :all])
+  (:use code.test))
 
 ^{:refer code.project.lein/project :added "3.0"}
 (fact "returns the root project map"

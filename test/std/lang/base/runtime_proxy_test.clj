@@ -1,9 +1,9 @@
 (ns std.lang.base.runtime-proxy-test
-  (:use code.test)
-  (:require [std.lang.base.runtime-proxy :as p]
+  (:require [std.lang :as l]
             [std.lang.base.runtime :as rt]
-            [std.lang :as l]
-            [std.lang.base.util :as ut]))
+            [std.lang.base.runtime-proxy :as p]
+            [std.lang.base.util :as ut])
+  (:use code.test))
 
 ^{:refer std.lang.base.runtime-proxy/proxy-get-rt :added "4.0"}
 (fact "gets the redirected runtime"

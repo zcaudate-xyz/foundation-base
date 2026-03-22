@@ -1,8 +1,6 @@
 (ns xt.runtime.interface-common
-  (:require [std.lang :as l]
-            [std.lib :as h])
-  (:refer-clojure :exclude [hash count pop nth assoc dissoc to-array
-                            find empty keyword symbol vector]))
+  (:require [std.lang :as l])
+  (:refer-clojure :exclude [hash count pop nth assoc dissoc to-array find empty keyword symbol vector]))
 
 (l/script :xtalk
   {:require [[xt.lang.base-lib :as k]

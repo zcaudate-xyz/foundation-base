@@ -1,6 +1,6 @@
 (ns std.image.base.display.gradient-test
-  (:use code.test)
-  (:require [std.image.base.display.gradient :refer :all]))
+  (:require [std.image.base.display.gradient :refer :all])
+  (:use code.test))
 
 (defn str-vals [m]
   (zipmap (keys m)

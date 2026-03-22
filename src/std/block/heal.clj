@@ -1,10 +1,12 @@
 (ns std.block.heal
   (:require [std.block.heal.core :as core]
-            [std.block.heal.print :as print]
             [std.block.heal.parse :as parse]
-            [std.lib :as h :refer [definvoke]]))
+            [std.block.heal.print :as print]
+            [std.lib.env]
+            [std.lib.foundation]
+            [std.lib.invoke :refer [definvoke]]))
 
-(h/intern-in [heal core/heal-content])
+(std.lib.foundation/intern-in [heal core/heal-content])
 
 (defn print-rainbow
   "prints out the code in rainbow"
@@ -19,7 +21,7 @@
   "prints out the code in rainbow"
   {:added "4.0"}
   [content]
-  (h/with-out-str
+  (std.lib.env/with-out-str
     (print-rainbow content)))
 
 (comment

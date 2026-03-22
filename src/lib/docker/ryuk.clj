@@ -1,9 +1,11 @@
 (ns lib.docker.ryuk
-  (:require [std.lib :as h]
+  (:require [lib.docker.common :as common]
             [std.concurrent :as cc]
             [std.json :as json]
-            [std.string :as str]
-            [lib.docker.common :as common]))
+            [std.lib.component]
+            [std.lib.env]
+            [std.lib.network]
+            [std.lib.os]))
 
 ;;
 ;; Testing
@@ -25,10 +27,10 @@
   []
   (if-not (common/has-container? +ryuk+)
     (let [m (common/start-container +ryuk+)
-          _ (h/wait-for-port (:container-ip m)
+          _ (std.lib.network/wait-for-port (:container-ip m)
                              (first (:ports m))
                              {:timeout common/*timeout*})
-          s (h/socket (:container-ip m) (first (:ports m)))
+          s (std.lib.network/socket (:container-ip m) (first (:ports m)))
           r (cc/relay {:type :socket
                        :attached s})
           _ (cc/send  r "label=reaped=true")]
@@ -42,8 +44,8 @@
   []
   (common/stop-container +ryuk+)
   (if *ryuk*
-    (let [_ (h/stop  (:relay *ryuk*))
-          _ (h/close (:socket *ryuk*))]
+    (let [_ (std.lib.component/stop  (:relay *ryuk*))
+          _ (std.lib.env/close (:socket *ryuk*))]
       (alter-var-root #'*ryuk* (constantly nil)))))
 
 (defn start-reaped
@@ -66,6 +68,6 @@
                  (map :id))]
      (when (not-empty cs)
        ;;cs
-       (h/sh {:args (concat ["docker" "stop"]
+       (std.lib.os/sh {:args (concat ["docker" "stop"]
                             (when common/*host* ["--host" common/*host*])
                             cs)})))))

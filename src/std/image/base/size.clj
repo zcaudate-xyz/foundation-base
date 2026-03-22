@@ -1,6 +1,6 @@
 (ns std.image.base.size
   (:require [std.image.protocol :as protocol.image])
-  (:import  (clojure.lang IPersistentMap IPersistentVector)))
+  (:import (clojure.lang IPersistentMap IPersistentVector)))
 
 (extend-protocol protocol.image/ISize
 

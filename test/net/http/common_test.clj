@@ -1,6 +1,6 @@
 (ns net.http.common-test
-  (:use code.test)
-  (:require [net.http.common :refer :all]))
+  (:require [net.http.common :refer :all])
+  (:use code.test))
 
 ^{:refer net.http.common/-write-value :added "0.5"}
 (fact "writes the string value of the datastructure according to format"

@@ -1,5 +1,5 @@
 (ns std.lang.model.spec-xtalk.com-r
-  (:require [std.lib :as h]))
+  (:require [std.lib.template]))
 
 ;;
 ;; COM
@@ -7,7 +7,7 @@
 
 (defn r-tf-x-return-encode
   ([[_ out id key]]
-   (h/$ (do* (library "jsonlite")
+   (std.lib.template/$ (do* (library "jsonlite")
              (tryCatch (block (toJSON {:type "data"
                                        :value ~out
                                        :id ~id
@@ -22,7 +22,7 @@
 
 (defn r-tf-x-return-wrap
   ([[_ f encode-fn]]
-   (h/$ (do* (library "jsonlite")
+   (std.lib.template/$ (do* (library "jsonlite")
              (tryCatch
               (block
                (:= out (~f))
@@ -34,7 +34,7 @@
 
 (defn r-tf-x-return-eval
   ([[_ s wrap-fn]]
-   (h/$ (return (~wrap-fn
+   (std.lib.template/$ (return (~wrap-fn
                  (fn []
                    (eval (parse :text ~s))))))))
 
@@ -45,15 +45,15 @@
 
 (defn r-tf-x-socket-connect
   ([[_ host port opts]]
-   (h/$ (do* (return (socketConnection :port ~port :blocking true))))))
+   (std.lib.template/$ (do* (return (socketConnection :port ~port :blocking true))))))
 
 (defn r-tf-x-socket-send
   ([[_ conn s]]
-   (h/$ (writeLines ~s ~conn :sep "\n"))))
+   (std.lib.template/$ (writeLines ~s ~conn :sep "\n"))))
 
 (defn r-tf-x-socket-close
   ([[_ conn]]
-   (h/$ (close ~conn))))
+   (std.lib.template/$ (close ~conn))))
 
 (def +r-socket+
   {:x-socket-connect      {:macro #'r-tf-x-socket-connect      :emit :macro}
@@ -75,7 +75,7 @@
 
 (defn r-tf-x-shell
   ([[_ s cm]]
-   (h/$ (system ~s))))
+   (std.lib.template/$ (system ~s))))
 
 (def +r-shell+
   {:x-print    {:macro #'r-tf-x-print         :emit :macro}

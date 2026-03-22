@@ -1,10 +1,11 @@
 (ns std.dispatch.queue
-  (:require [std.protocol.dispatch :as protocol.dispatch]
-            [std.protocol.component :as protocol.component]
-            [std.concurrent :as cc]
+  (:require [std.concurrent :as cc]
             [std.dispatch.common :as common]
             [std.dispatch.hooks :as hooks]
-            [std.lib :as h :refer [defimpl]]))
+            [std.lib.collection]
+            [std.lib.impl :refer [defimpl]]
+            [std.protocol.component :as protocol.component]
+            [std.protocol.dispatch :as protocol.dispatch]))
 
 (def ^:dynamic *max-batch* 1000)
 
@@ -108,12 +109,12 @@
   ([{:keys [options] :as m}]
    (-> (assoc m
               :type :queue
-              :options (h/merge-nested-new (:options m) +defaults+))
+              :options (std.lib.collection/merge-nested-new (:options m) +defaults+))
        create-dispatch-typecheck
        #_(types/<dispatch:queue> :strict)
        (common/create-map)
        (update-in [:runtime :counter] dissoc :queued)
-       (h/merge-nested {:runtime {:queue   (cc/hub:new)
+       (std.lib.collection/merge-nested {:runtime {:queue   (cc/hub:new)
                                   :counter {:poll  (atom 0)
                                             :batch (atom 0)}}})
 

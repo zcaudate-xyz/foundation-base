@@ -1,10 +1,8 @@
 (ns std.fs.path
   (:require [std.fs.common :as common]
             [std.fs.path :as path]
-            [std.string :as str])
-  (:import (java.io File Writer InputStream OutputStream)
-           (java.nio.file Files Path Paths LinkOption OpenOption CopyOption)
-           (java.nio.file.attribute PosixFilePermission PosixFilePermissions))
+            [std.string.common])
+  (:import (java.io File Writer InputStream OutputStream) (java.nio.file Files Path Paths LinkOption OpenOption CopyOption) (java.nio.file.attribute PosixFilePermission PosixFilePermissions))
   (:refer-clojure :exclude [resolve]))
 
 (def ^:private +empty-string-array+
@@ -193,7 +191,7 @@
   {:added "3.0"}
   ([file]
    (-> (str file)
-       (str/split #"\.")
+       (std.string.common/split #"\.")
        last
        keyword)))
 

@@ -1,8 +1,7 @@
 (ns std.lang.model.spec-xtalk.com-python-test
-  (:use code.test)
-  (:require [std.lang.model.spec-xtalk.com-python :refer :all]
-            [std.lang :as l]
-            [std.lib :as h]))
+  (:require [std.lang :as l]
+            [std.lang.model.spec-xtalk.com-python :refer :all])
+  (:use code.test))
 
 ^{:refer std.lang.model.spec-xtalk.com-python/python-tf-x-return-encode :added "4.0"}
 (fact "encodes return value"

@@ -1,11 +1,11 @@
 (ns std.lang.base.impl-entry-test
-  (:use code.test)
-  (:require [std.lang.base.impl-entry :as entry]
+  (:require [std.lang.base.book :as b]
             [std.lang.base.book-entry :as e]
-            [std.lang.base.book :as b]
             [std.lang.base.emit :as emit]
             [std.lang.base.emit-prep-lua-test :as prep]
-            [std.lib :as h]))
+            [std.lang.base.impl-entry :as entry]
+            [std.lib.env])
+  (:use code.test))
 
 ^{:refer std.lang.base.impl-entry/create-common :added "4.0"}
 (fact "create entry common keys from metadata"
@@ -137,7 +137,7 @@
                                              [a b]
                                              (return (-/add a (-/identity-fn b))))
                                           {:lang :lua
-                                           :namespace (h/ns-sym)
+                                           :namespace (std.lib.env/ns-sym)
                                            :module 'L.core}
                                           prep/+book-min+
                                           '{:id L.util
@@ -158,7 +158,7 @@
                 (b/set-entry (entry/create-fragment
                               '(def$ G G)
                               {:lang :lua
-                               :namespace (h/ns-sym)
+                               :namespace (std.lib.env/ns-sym)
                                :module 'L.core}))
                 second
                 ((fn [book]
@@ -168,7 +168,7 @@
                                     [a b]
                                     (return (-/add -/G (-/identity-fn (-/add a b)))))
                                  {:lang :lua
-                                  :namespace (h/ns-sym)
+                                  :namespace (std.lib.env/ns-sym)
                                   :module 'L.core}
                                  book))))
                 second))]}

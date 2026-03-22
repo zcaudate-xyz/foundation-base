@@ -1,9 +1,8 @@
 (ns mcp-clj.stdio-server.main
+  (:require [mcp-clj.log :as log]
+            [mcp-clj.mcp-server.core :as mcp-server])
   "Stdio-based MCP server main entry point"
-  (:gen-class)
-  (:require
-    [mcp-clj.log :as log]
-    [mcp-clj.mcp-server.core :as mcp-server]))
+  (:gen-class))
 
 (defn start
   "Start stdio MCP server (uses stdin/stdout)"

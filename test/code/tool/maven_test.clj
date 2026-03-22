@@ -1,9 +1,9 @@
 (ns code.tool.maven-test
-  (:use code.test)
-  (:require [code.tool.maven :refer :all]
+  (:require [code.project :as project]
+            [code.tool.maven :refer :all]
             [code.tool.maven.command :as command]
-            [code.tool.maven.package :as package]
-            [code.project :as project]))
+            [code.tool.maven.package :as package])
+  (:use code.test))
 
 ^{:refer code.tool.maven/install.secure :added "3.0" :adopt true}
 (fact "installs signed packages to the local `.m2` repository"

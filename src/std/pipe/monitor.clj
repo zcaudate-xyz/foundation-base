@@ -1,8 +1,6 @@
 (ns std.pipe.monitor
-  (:require [std.lib :as h]
-            [std.lib.stream :as s]
-            [std.print :as print]
-            [std.string :as str]))
+  (:require [std.lib.stream :as s]
+            [std.print :as print]))
 
 (def ^:dynamic *monitor* nil)
 

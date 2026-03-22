@@ -1,7 +1,7 @@
 (ns code.test.checker.util-test
-  (:use code.test)
-  (:require [code.test.checker.util :refer :all]
-            [code.test.checker.common :as checker]))
+  (:require [code.test.checker.common :as checker]
+            [code.test.checker.util :refer :all])
+  (:use code.test))
 
 ^{:refer code.test.checker.util/contains-exact :added "3.0"}
 (fact "checks if a sequence matches exactly"

@@ -1,7 +1,7 @@
 (ns std.lang.base.compile-links
-  (:require [std.lib :as h]
-            [std.string :as str]
-            [std.fs :as fs]))
+  (:require [std.fs :as fs]
+            [std.lib.env]
+            [std.string.common]))
 
 (def ^:dynamic
   *link-defaults*
@@ -18,7 +18,7 @@
   [link-ns ns-lookup]
   (or (get ns-lookup link-ns)
       (reduce (fn [_ [pattern v]]
-                (if (h/match-filter pattern link-ns)
+                (if (std.lib.env/match-filter pattern link-ns)
                   (reduced v)))
               nil
               ns-lookup)))
@@ -30,7 +30,7 @@
   (or (if-let [v (get ns-lookup link-ns)]
         [link-ns v])
       (reduce (fn [_ [pattern v]]
-                (if (h/match-filter pattern link-ns)
+                (if (std.lib.env/match-filter pattern link-ns)
                   (reduced [pattern v])))
               nil
               ns-lookup)))
@@ -49,14 +49,14 @@
         
         apply-replace (fn [s]
                         (reduce (fn [s [pat sub]]
-                                  (str/replace s pat sub))
+                                  (std.string.common/replace s pat sub))
                                 s
                                 path-replace))
         
         link-ns-str   (str link-ns)
-        link-ns-arr   (str/split link-ns-str #"\.")
+        link-ns-arr   (std.string.common/split link-ns-str #"\.")
         root-ns-str   (str root-ns)
-        root-ns-arr   (str/split root-ns-str #"\.")
+        root-ns-arr   (std.string.common/split root-ns-str #"\.")
         
         prefix-match  (if (map? root-prefix)
                         (get-link-match link-ns (dissoc root-prefix :default)))
@@ -71,7 +71,7 @@
         rel-segments  (if (and prefix-key
                                (or (string? prefix-key)
                                    (symbol? prefix-key)))
-                        (let [p-arr (str/split (str prefix-key) #"\.")]
+                        (let [p-arr (std.string.common/split (str prefix-key) #"\.")]
                           (drop (count p-arr) (butlast link-ns-arr)))
                         
                         (if is-lib?
@@ -80,7 +80,7 @@
                             (cons root-libs (butlast link-ns-arr)))
                           (drop (count root-ns-arr) (butlast link-ns-arr))))
         
-        link-rel      (str/join path-separator (map apply-replace rel-segments))
+        link-rel      (std.string.common/join path-separator (map apply-replace rel-segments))
         
         link-suffix (or (get-link-lookup link-ns ns-suffix)
                         (if (map? path-suffix)

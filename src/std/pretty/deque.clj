@@ -1,9 +1,9 @@
 (ns std.pretty.deque
   (:require [clojure.core.rrb-vector :as rrb]
-            [std.lib :as h])
+            [std.lib.foundation])
   (:refer-clojure :exclude [empty concat]))
 
-(h/intern-in [create vector]
+(std.lib.foundation/intern-in [create vector]
              [pop-right pop]
              [peek-right peek]
              [concat rrb/catvec])

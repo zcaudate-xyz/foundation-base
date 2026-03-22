@@ -1,6 +1,6 @@
 (ns std.timeseries.range-test
-  (:use code.test)
   (:require [std.timeseries.range :refer :all])
+  (:use code.test)
   (:import (java.util Date)))
 
 ^{:refer std.timeseries.range/parse-range-unit :added "3.0"}

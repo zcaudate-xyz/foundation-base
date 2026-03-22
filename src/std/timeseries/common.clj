@@ -1,6 +1,7 @@
 (ns std.timeseries.common
-  (:require [std.lib :as h]
+  (:require [std.lib.collection]
             [std.lib.foundation :as core]
+            [std.lib.time]
             [std.math :as math])
   (:import (java.text SimpleDateFormat)))
 
@@ -43,7 +44,7 @@
    => {:a 0, :b \"\", :c nil}"
   {:added "3.0"}
   ([entry]
-   (h/map-vals (fn [val]
+   (std.lib.collection/map-vals (fn [val]
                  (cond (number? val) 0
                        (string? val) ""
                        :else nil))
@@ -63,11 +64,11 @@
   {:added "3.0"}
   ([entry]
    (binding [core/*sep* "."]
-     (let [dflat  (h/tree-flatten entry)
-           dtypes (h/map-vals class dflat)
-           tflat  (h/map-entries (fn [[k v]]
-                                   [k (str "{{" (h/strn k) "}}")]) dflat)
-           tnest  (h/tree-nestify tflat)]
+     (let [dflat  (std.lib.collection/tree-flatten entry)
+           dtypes (std.lib.collection/map-vals class dflat)
+           tflat  (std.lib.collection/map-entries (fn [[k v]]
+                                   [k (str "{{" (std.lib.foundation/strn k) "}}")]) dflat)
+           tnest  (std.lib.collection/tree-nestify tflat)]
        {:nest tnest :flat tflat :types dtypes :empty (make-empty dflat)}))))
 
 (defn flat-fn
@@ -79,7 +80,7 @@
    => {:a.b.c 10}"
   {:added "3.0"}
   ([template]
-   (h/transform-fn template [:nest :flat])))
+   (std.lib.collection/transform-fn template [:nest :flat])))
 
 (defn nest-fn
   "creates a nested to flat transform
@@ -90,7 +91,7 @@
    => {:a {:b {:c 10}}}"
   {:added "3.0"}
   ([template]
-   (h/transform-fn template [:flat :nest])))
+   (std.lib.collection/transform-fn template [:flat :nest])))
 
 (defn create-template
   "creates a template for entry"
@@ -216,10 +217,10 @@
   ([s]
    (parse-time s :ms))
   ([s unit]
-   (let [s (h/strn s)]
-     (from-ms (or (if-let [t (h/parse-ns s)]
+   (let [s (std.lib.foundation/strn s)]
+     (from-ms (or (if-let [t (std.lib.time/parse-ns s)]
                     (/ t 1000000))
-                  (h/parse-ms s))
+                  (std.lib.time/parse-ms s))
               unit))))
 
 (defn parse-time-expr

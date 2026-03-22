@@ -1,8 +1,8 @@
 (ns std.lib.memoize
-  (:require [std.protocol.invoke :as protocol.invoke]
+  (:require [std.lib.function :as fn]
             [std.lib.impl :refer [defimpl]]
             [std.lib.invoke :as invoke :refer [definvoke]]
-            [std.lib.function :as fn])
+            [std.protocol.invoke :as protocol.invoke])
   (:refer-clojure :exclude [memoize]))
 
 (defonce ^:dynamic *registry* (atom {}))

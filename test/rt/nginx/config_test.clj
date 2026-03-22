@@ -1,7 +1,6 @@
 (ns rt.nginx.config-test
-  (:use code.test)
-  (:require [rt.nginx.config :refer :all]
-            [std.lib :as h]))
+  (:require [rt.nginx.config :refer :all])
+  (:use code.test))
 
 ^{:refer rt.nginx.config/create-resty-params :added "4.0"}
 (fact "creates default resty params"

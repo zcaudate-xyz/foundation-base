@@ -1,6 +1,6 @@
 (ns std.lib.context.registry-test
-  (:use code.test)
-  (:require [std.lib.context.registry :refer :all]))
+  (:require [std.lib.context.registry :refer :all])
+  (:use code.test))
 
 ^{:refer std.lib.context.registry/rt-null? :added "3.0"}
 (fact "checks that object is of type NullRuntime"

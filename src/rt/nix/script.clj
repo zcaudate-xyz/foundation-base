@@ -1,6 +1,6 @@
 (ns rt.nix.script
-  (:require [std.string :as str]
-            [std.lib :as h]))
+  (:require [std.string.common]
+            [std.string.prose]))
 
 (def ^:dynamic *indent* 0)
 
@@ -29,29 +29,29 @@
 (defn- map-fn [m]
   (->> (sort-by (comp str first) m)
        (map (fn [[k v]]
-              (str (str/spaces *indent*)
+              (str (std.string.prose/spaces *indent*)
                    (emit-kv k v))))
-       (str/join "\n")))
+       (std.string.common/join "\n")))
 
 (defn- inner-fn [m]
   (str "{\n"
        (binding [*indent* (+ *indent* *space*)]
          (map-fn m))
        "\n"
-       (str/spaces *indent*)
+       (std.string.prose/spaces *indent*)
        "}"))
 
 (defn- vector-fn [v]
   (str "["
        (binding [*indent* (+ *indent* *space*)]
-         (str/join " " (map emit-nix v)))
+         (std.string.common/join " " (map emit-nix v)))
        "]"))
 
 (defn- fn-block? [v]
   (and (vector? v) (= :fn (first v))))
 
 (defn- emit-fn-block [[_ args body]]
-  (str "{ " (str/join ", " (map emit-nix args)) " }:\n\n"
+  (str "{ " (std.string.common/join ", " (map emit-nix args)) " }:\n\n"
        (emit-nix body)))
 
 (defn- path-block? [v]

@@ -1,14 +1,15 @@
 (ns rt.basic.impl.process-lua
-  (:require [rt.basic.type-common :as common]
+  (:require [rt.basic.type-basic :as basic]
+            [rt.basic.type-common :as common]
             [rt.basic.type-oneshot :as oneshot]
-            [rt.basic.type-basic :as basic]
             [rt.basic.type-websocket :as websocket]
-            [xt.lang.base-repl :as k]
-            [std.lang.model.spec-lua :as spec]
             [std.lang.base.impl :as impl]
             [std.lang.base.runtime :as rt]
-            [std.lib :as h]
-            [std.string :as str]))
+            [std.lang.model.spec-lua :as spec]
+            [std.lib.env]
+            [std.lib.os]
+            [std.string.common]
+            [xt.lang.base-repl :as k]))
 
 ;;
 ;; PROGRAM
@@ -126,7 +127,7 @@
                           :layout :flat})
                         (impl/emit-as
                          :lua +client-basic+)]
-                       (str/join "\n\n"))]
+                       (std.string.common/join "\n\n"))]
     (fn [port & [{:keys [host]}]]
       (str bootstrap
            "\n\n"
@@ -186,7 +187,7 @@
                           :layout :flat})
                         (impl/emit-as
                          :lua +client-ws+)]
-                       (str/join "\n\n"))]
+                       (std.string.common/join "\n\n"))]
     (fn [port & [{:keys [host]}]]
       (str bootstrap
            "\n\n"
@@ -214,13 +215,13 @@
      :config {:layout :full}})])
 
 (comment
-  (def +sh+ (h/sh {:args ["resty" "-e" (default-basic-client 51270)]
+  (def +sh+ (std.lib.os/sh {:args ["resty" "-e" (default-basic-client 51270)]
                    :wait false}))
 
-  (def +sh+ (h/sh {:args ["resty" "-e" (default-websocket-client 60714)]
+  (def +sh+ (std.lib.os/sh {:args ["resty" "-e" (default-websocket-client 60714)]
                    :wait false}))
   
-  (h/pl (default-websocket-client 60714))
+  (std.lib.env/pl (default-websocket-client 60714))
   
-  (h/sh-output +sh+)
+  (std.lib.os/sh-output +sh+)
   )

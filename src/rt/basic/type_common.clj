@@ -1,6 +1,8 @@
 (ns rt.basic.type-common
-  (:require [std.lib :as h]
-            [std.string :as str]))
+  (:require [std.lib.atom]
+            [std.lib.collection]
+            [std.lib.foundation]
+            [std.lib.os]))
 
 (defonce ^:dynamic *context-options* (atom {}))
 
@@ -20,17 +22,17 @@
   "clear entries from the `*context-options*` structure"
   {:added "4.0"}
   ([]
-   (h/swap-return! *context-options*
+   (std.lib.atom/swap-return! *context-options*
      (fn [m] [m {}])))
   ([lang]
-   (h/swap-return! *context-options*
+   (std.lib.atom/swap-return! *context-options*
      (fn [m] [(get m lang) (dissoc m lang)])))
   ([lang context]
-   (h/swap-return! *context-options*
+   (std.lib.atom/swap-return! *context-options*
      (fn [m] [(get-in m [lang context])
               (update-in m [lang] dissoc context)])))
   ([lang context program]
-   (h/swap-return! *context-options*
+   (std.lib.atom/swap-return! *context-options*
      (fn [m] [(get-in m [lang context program])
               (update-in m [lang context] dissoc program)]))))
 
@@ -38,7 +40,7 @@
   "puts entries into context options"
   {:added "4.0"}
   [[lang context] m]
-  (h/atom:put *context-options*
+  (std.lib.atom/atom:put *context-options*
               [lang context]
               m))
 
@@ -46,7 +48,7 @@
   "sets a entry into context options"
   {:added "4.0"}
   [[lang context program] opts]
-  (h/atom:set *context-options*
+  (std.lib.atom/atom:set *context-options*
               [lang context program]
               opts))
 
@@ -59,7 +61,7 @@
    => true"
   {:added "4.0"}
   ([exec]
-   (->> @(h/sh "which" exec {:inherit false})
+   (->> @(std.lib.os/sh "which" exec {:inherit false})
         (not= ""))))
 
 (defn get-program-options
@@ -74,10 +76,10 @@
   "puts configuration into program options"
   {:added "4.0"}
   [lang m]
-  (-> (h/atom:put *program-options*
+  (-> (std.lib.atom/atom:put *program-options*
                   [lang]
                   m)
-      (h/atom:put-changed)))
+      (std.lib.atom/atom:put-changed)))
 
 (defn swap-program-options
   "swaps out the program options using a funciotn"
@@ -92,7 +94,7 @@
   (or program
       (get-in (get-program-options lang)
               [:default context])
-      (h/error "No program found" {:input [lang context]})))
+      (std.lib.foundation/error "No program found" {:input [lang context]})))
 
 (defn get-program-flags
   "gets program flags"
@@ -119,8 +121,8 @@
         args  (get flags context)]
     (if args
       (vec (cons exec args))
-      (h/error "Cannot be nil" {:input [lang context program]
-                                :options (keys (h/filter-vals (fn [env]
+      (std.lib.foundation/error "Cannot be nil" {:input [lang context program]
+                                :options (keys (std.lib.collection/filter-vals (fn [env]
                                                                 (get-in env [:flags context]))
                                                               (get-in all [lang :env])))}))))
 
@@ -139,6 +141,6 @@
                     (str "Invalid key: " context))
         copts    (get-in @*context-options* [lang context])
         _        (assert copts (str "Should not be empty: " [lang context]))]
-    (h/merge-nested (:default copts)
+    (std.lib.collection/merge-nested (:default copts)
                     (get-in (get-program-options lang) [:env program])
                     (get copts program))))  

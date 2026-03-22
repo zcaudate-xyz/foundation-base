@@ -3,10 +3,7 @@
             [std.time.coerce :as coerce]
             [std.time.map :as map]
             [std.time.zone :as zone])
-  (:import (clojure.lang PersistentArrayMap PersistentHashMap)
-           (java.sql Timestamp)
-           (java.text SimpleDateFormat)
-           (java.util Calendar Date TimeZone)))
+  (:import (clojure.lang PersistentArrayMap PersistentHashMap) (java.sql Timestamp) (java.text SimpleDateFormat) (java.util Calendar Date TimeZone)))
 
 (defmethod protocol.time/-formatter SimpleDateFormat
   ([s {:keys [timezone] :as opts}]

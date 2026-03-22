@@ -1,15 +1,15 @@
 (ns std.lang.base.impl-test
-  (:use code.test)
-  (:require [std.lang.base.impl :refer :all]
-            [std.lang.base.impl-entry :as entry]
+  (:require [std.lang.base.book :as book]
+            [std.lang.base.emit-prep-lua-test :as prep]
+            [std.lang.base.impl :refer :all]
             [std.lang.base.impl-deps :as deps]
+            [std.lang.base.impl-entry :as entry]
             [std.lang.base.impl-lifecycle :as lifecycle]
-            [std.lang.base.book :as book]
             [std.lang.base.library :as lib]
             [std.lang.base.library-snapshot :as snap]
-            [std.lang.base.emit-prep-lua-test :as prep]
-            [std.string :as str]
-            [std.lib :as h]))
+            [std.string.common]
+            [std.string.prose])
+  (:use code.test))
 
 (def +library+
   (lib/library {:snapshot (snap/snapshot {:lua {:id :lua
@@ -137,7 +137,7 @@
   (emit-direct (:grammar prep/+book-min+)
                '(:% (:- "   ") (+ 1 2 3)  (:- "   "))
                 *ns*
-                {:emit {:trim str/trim}
+                {:emit {:trim std.string.common/trim}
                  :lang :lua})
   => "1 + 2 + 3")
 
@@ -180,7 +180,7 @@
      (+ 6 x y)
      (return (or (not (+ 1 2))
                  (not (+ 1 2))))))
-  => (std.string/|
+  => (std.string.prose/|
       "function hello(int x,int y = 0){"
       "  "
       "  if(i != y){"
@@ -197,7 +197,7 @@
    ^{:indent 5 :full-body true}
    (\\ (do (+ 1 2 3)
            (+ 1 2 3))))
-  => (std.string/| "     1 + 2 + 3;"
+  => (std.string.prose/| "     1 + 2 + 3;"
                    "     1 + 2 + 3;")
 
   ^{:lang :js}
@@ -206,7 +206,7 @@
    (\\
     \\  (do (+ 1 2 3)
             (+ 1 2 3))))
-  => (std.string/| ""
+  => (std.string.prose/| ""
                    "     1 + 2 + 3;"
                    "     1 + 2 + 3;")
 
@@ -214,7 +214,7 @@
   (%.str
    (:# (do (+ 1 2 3)
            (+ 1 2 3))))
-  => (std.string/| "// 1 + 2 + 3;"
+  => (std.string.prose/| "// 1 + 2 + 3;"
                    "// 1 + 2 + 3;")  
 
   ^{:lang :js}
@@ -222,7 +222,7 @@
    ^{:prefix "|   "}
    (:# (do (+ 1 2 3)
            (+ 1 2 3))))
-  => (std.string/|
+  => (std.string.prose/|
       "|    1 + 2 + 3;"
       "|    1 + 2 + 3;"))
 
@@ -305,7 +305,7 @@
                    {:lang :lua
                     :library +library-ext+
                     :layout :full})
-  => (std.string/|
+  => (std.string.prose/|
    "function L_core____identity_fn(x){"
    "  return x;"
    "}"
@@ -363,7 +363,7 @@
                 :library +library-ext+
                 :module (lib/get-module +library-ext+ :lua 'L.util)
                 :layout :flat})
-  => (std.string/|
+  => (std.string.prose/|
       "function identity_fn(x){"
       "  return x;"
       "}"
@@ -388,7 +388,7 @@
                 :library +library-ext+
                 :module (lib/get-module +library-ext+ :lua 'L.util)
                 :layout :full})
-  => (std.string/|
+  => (std.string.prose/|
       "function L_core____identity_fn(x){"
       "  return x;"
       "}"

@@ -1,19 +1,11 @@
 (ns mcp-clj.client-transport.stdio
+  (:require [clojure.java.process :as process]
+            [mcp-clj.client-transport.protocol :as transport-protocol]
+            [mcp-clj.json-rpc.protocols :as json-rpc-protocol]
+            [mcp-clj.json-rpc.stdio-client :as stdio-client]
+            [mcp-clj.log :as log])
   "Stdio transport implementation for MCP client"
-  (:require
-    [clojure.java.process :as process]
-    [mcp-clj.client-transport.protocol :as transport-protocol]
-    [mcp-clj.json-rpc.protocols :as json-rpc-protocol]
-    [mcp-clj.json-rpc.stdio-client :as stdio-client]
-    [mcp-clj.log :as log])
-  (:import
-    (java.io
-      BufferedReader
-      BufferedWriter
-      InputStreamReader
-      OutputStreamWriter)
-    (java.util.concurrent
-      TimeUnit)))
+  (:import (java.io BufferedReader BufferedWriter InputStreamReader OutputStreamWriter) (java.util.concurrent TimeUnit)))
 
 ;; Process Management
 

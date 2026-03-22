@@ -1,8 +1,8 @@
 (ns std.lang.model.spec-python-test
-  (:use code.test)
-  (:require [std.lang.model.spec-python :as py]
-            [std.lang :as l]
-            [std.lib :as h]))
+  (:require [std.lang :as l]
+            [std.lang.model.spec-python :as py]
+            [std.string.prose])
+  (:use code.test))
 
 ^{:refer std.lang.model.spec-python/python-defn- :added "4.0"}
 (fact "hidden function without decorators"
@@ -22,7 +22,7 @@
                       classmethod
                       (app.route "/about")]}
                hello [] (return 1))])
-  => (std.string/|
+  => (std.string.prose/|
       ""
       "@classmethod"
       "@classmethod"
@@ -85,7 +85,7 @@
                      (return #{"CANCELLED"}))
                    
                    (return #{"FINISHED"}))))])
-  => (std.string/|
+  => (std.string.prose/|
       "class ReloadScriptsOperator(bpy.types.Operator):"
       "  bl_idname = \"script\""
       "  bl_label = \"Reload code\""

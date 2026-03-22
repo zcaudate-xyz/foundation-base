@@ -1,6 +1,6 @@
 (ns jvm.artifact.search
-  (:require [std.fs.archive :as archive]
-            [jvm.artifact :as artifact]))
+  (:require [jvm.artifact :as artifact]
+            [std.fs.archive :as archive]))
 
 (defn class-seq
   "creates a sequence of class names

@@ -1,6 +1,6 @@
 (ns code.framework.link.common
   (:require [std.fs :as fs]
-            [std.lib :refer [definvoke]]))
+            [std.lib.invoke :refer [definvoke]]))
 
 (defmulti -file-linkage
   "extendable function for `file-linkage`"

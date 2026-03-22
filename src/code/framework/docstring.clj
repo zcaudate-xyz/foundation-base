@@ -1,8 +1,9 @@
 (ns code.framework.docstring
-  (:require [std.string :as str]
+  (:require [std.block :as block]
             [std.block.navigate :as nav]
-            [std.block :as block]
-            [std.lib.zip :as zip]))
+            [std.lib.zip :as zip]
+            [std.string.common]
+            [std.string.prose]))
 
 (defn strip-quotes
   "utility that strips quotes when not the result of a fact
@@ -20,10 +21,10 @@
 
          :else
          (recur more x p1 (conj out (if (= p2 "=>")
-                                      (if (str/has-quotes? x)
-                                        (str/escape-newlines x)
+                                      (if (std.string.prose/has-quotes? x)
+                                        (std.string.prose/escape-newlines x)
                                         x)
-                                      (str/strip-quotes x)))))))
+                                      (std.string.prose/strip-quotes x)))))))
 
 (defn ->refstring
   "creates a refstring for use in html blocks
@@ -42,10 +43,10 @@
                  (cond (and (not (block/void? node))
                             (not (block/comment? node))
                             (string? (block/value node)))
-                       (str/escape-newlines res)
+                       (std.string.prose/escape-newlines res)
 
                        :else res))))
-        (str/joinl))))
+        (std.string.common/joinl))))
 
 (defn ->docstring-tag
   "converts a string representation of block
@@ -81,10 +82,10 @@
    (->> nodes
         (mapv (fn [block]
                 (-> (->docstring-tag block)
-                    (str/escape-escapes)
-                    (str/escape-quotes))))
+                    (std.string.prose/escape-escapes)
+                    (std.string.prose/escape-quotes))))
         (strip-quotes)
-        (str/joinl))))
+        (std.string.common/joinl))))
 
 (defn append-node
   "Adds node as well as whitespace and newline on right
@@ -122,15 +123,15 @@
   ([intro nodes]
    (let [docstring  (->docstring nodes)
          docstring  (-> (str intro docstring)
-                        (str/trim))
-         docstring  (str/split-lines docstring)]
+                        (std.string.common/trim))
+         docstring  (std.string.common/split-lines docstring)]
      (->> docstring
           (map-indexed (fn [i s]
                          (str (if-not (or (zero? i)
                                           (= i (dec (count nodes))))
                                 " ")
                               s)))
-          (str/join "\n")
+          (std.string.common/join "\n")
           (block/block)))))
 
 (defn insert-docstring

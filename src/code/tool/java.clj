@@ -1,5 +1,5 @@
 (ns code.tool.java
-  (:require [std.lib :as h]
-            [code.tool.java.compile :as java]))
+  (:require [code.tool.java.compile :as java]
+            [std.lib.foundation]))
 
-(h/intern-in java/javac)
+(std.lib.foundation/intern-in java/javac)

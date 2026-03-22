@@ -1,8 +1,8 @@
 (ns code.query.walk-test
-  (:use code.test)
-  (:require [code.query.walk :refer :all]
-            [code.query.match :as match]
-            [std.block.navigate :as nav]))
+  (:require [code.query.match :as match]
+            [code.query.walk :refer :all]
+            [std.block.navigate :as nav])
+  (:use code.test))
 
 ^{:refer code.query.walk/wrap-meta :added "3.0"}
 (fact "allows matchwalk to handle meta tags"

@@ -1,6 +1,6 @@
 (ns std.lib.schema.find-test
-  (:use code.test)
-  (:require [std.lib.schema.find :refer :all]))
+  (:require [std.lib.schema.find :refer :all])
+  (:use code.test))
 
 ^{:refer std.lib.schema.find/all-attrs :added "3.0"}
 (fact "finds all attributes satisfying `f` in a schema"

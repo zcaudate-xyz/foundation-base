@@ -1,15 +1,15 @@
 (ns indigo.server.api-browser
-  (:require [std.lang :as l]
-            [std.lang.base.book :as book]
-            [code.test.base.context :as context]
-            [std.lib :as h]
-            [std.string :as str]
+  (:require [clojure.repl :as repl]
+            [code.framework :as framework]
             [code.project :as project]
+            [code.test.base.context :as context]
             [code.test.base.runtime :as rt]
-            [clojure.repl :as repl]
             [std.block :as block]
             [std.block.layout :as layout]
-            [code.framework :as framework]))
+            [std.lang :as l]
+            [std.lang.base.book :as book]
+            [std.lib.env]
+            [std.string.common]))
 
 ;; Existing endpoints -------------------------------------------------------
 
@@ -177,7 +177,7 @@
         fact (get-in @context/*registry* [ns-sym :facts fact-sym])]
     (if fact
       (try
-        (h/pp-str (:full fact))
+        (std.lib.env/pp-str (:full fact))
         (catch Throwable t
           (str ";; Error formatting source: " (.getMessage t))))
       (str ";; Fact not found: " ns-str "/" fact-id))))
@@ -239,11 +239,11 @@
     (if entry
       (try
         (let [res (l/emit-as (keyword lang) (list (:form entry)))
-              res (if (string? res) (str/trim res) res)
+              res (if (string? res) (std.string.common/trim res) res)
               unquote (fn unquote [s]
                         (if (and (string? s)
-                                 (str/starts-with? s "\"")
-                                 (str/ends-with? s "\""))
+                                 (std.string.common/starts-with? s "\"")
+                                 (std.string.common/ends-with? s "\""))
                           (try
                             (let [v (read-string s)]
                               (if (string? v)
@@ -264,14 +264,14 @@
   [lang query]
   (let [book (l/get-book (l/default-library) (keyword lang))
         modules (book/list-entries book :module)
-        q (str/lower-case query)
+        q (std.string.common/lower-case query)
         matches (for [mod modules
                       :let [ns (name mod)
                             entry (book/get-module book (symbol ns))
                             comps (keys (:code entry))]
                       comp comps
                       :let [cname (name comp)]
-                      :when (str/includes? (str/lower-case cname) q)]
+                      :when (std.string.common/includes? (std.string.common/lower-case cname) q)]
                   {:ns ns :component cname})]
     (vec matches)))
 
@@ -305,7 +305,7 @@
                            (keys (ns-refers (find-ns ns-sym))))
           matches (->> all-vars
                        (map str)
-                       (filter #(str/starts-with? % prefix))
+                       (filter #(std.string.common/starts-with? % prefix))
                        (sort)
                        (distinct)
                        (take 50))]
@@ -347,11 +347,11 @@
 
           ;; Heuristic: match namespace to page key suffix
           ;; e.g. code.doc -> code-doc, matches core/code-doc
-          ns-slug (str/replace ns-str "." "-")
+          ns-slug (std.string.common/replace ns-str "." "-")
           page (some (fn [[k p]]
                        (let [k-str (str k)]
                          (when (or (= k-str ns-slug)
-                                   (str/ends-with? k-str (str "/" ns-slug)))
+                                   (std.string.common/ends-with? k-str (str "/" ns-slug)))
                            p)))
                      pages)]
       (if page
@@ -423,7 +423,7 @@
                   (.delete f)
                   (swap! deleted conj (str f))))))
           (if (seq @deleted)
-            {:status "ok" :message (str "Deleted " (str/join ", " @deleted))}
+            {:status "ok" :message (str "Deleted " (std.string.common/join ", " @deleted))}
             {:status "error" :message (str "File(s) not found for: " path)}))
         {:status "error" :message (str "File not found: " path)}))
     (catch Throwable t

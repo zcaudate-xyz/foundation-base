@@ -1,7 +1,8 @@
 (ns std.concurrent.relay.transport-test
-  (:use code.test)
   (:require [std.concurrent.relay.transport :as t]
-            [std.lib :as h]))
+            [std.lib.foundation]
+            [std.lib.future])
+  (:use code.test))
 
 ^{:refer std.concurrent.relay.transport/bytes-output :added "4.0"}
 (fact "creates a byte output stream"
@@ -25,7 +26,7 @@
   (dotimes [i 2]
     (t/read-bytes-limit {:raw +stream+}
                        (fn [v]
-                         (vswap! +state+ conj (h/string v)))
+                         (vswap! +state+ conj (std.lib.foundation/string v)))
                        identity
                        2
                        10
@@ -45,7 +46,7 @@
   (dotimes [i 2]
     (t/read-bytes-line {:raw +stream+}
                        (fn [v]
-                         (vswap! +state+ conj (h/string v)))
+                         (vswap! +state+ conj (std.lib.foundation/string v)))
                        identity
                        10
                        10))
@@ -64,7 +65,7 @@
   
   (t/read-bytes-some {:raw +stream+}
                      (fn [v]
-                       (vswap! +state+ conj (h/string v)))
+                       (vswap! +state+ conj (std.lib.foundation/string v)))
                      10
                      10)
   @+state+
@@ -74,11 +75,11 @@
 
   (do (def +state+  (volatile! []))
       (def +input+ (atom ["OK " "Hello "]))
-      (def +p+ (h/future (Thread/sleep 500)
+      (def +p+ (std.lib.future/future (Thread/sleep 500)
                          (swap! +input+ conj "World ")))
       (t/read-bytes-some {:raw (t/mock-input-stream +input+)}
                          (fn [v]
-                           (vswap! +state+ conj (h/string v)))
+                           (vswap! +state+ conj (std.lib.foundation/string v)))
                          10
                          10)
       (Thread/sleep 200)
@@ -88,13 +89,13 @@
   
   (do (def +state+  (volatile! []))
       (def +input+ (atom ["OK " "Hello "]))
-      (def +p+ (h/future (Thread/sleep 50)
+      (def +p+ (std.lib.future/future (Thread/sleep 50)
                          (swap! +input+ conj "World ")
                          (Thread/sleep 50)
                          (swap! +input+ conj "Again ")))
       (t/read-bytes-some {:raw (t/mock-input-stream +input+)}
                          (fn [v]
-                           (vswap! +state+ conj (h/string v)))
+                           (vswap! +state+ conj (std.lib.foundation/string v)))
                          80
                          20)
       @+state+)
@@ -148,7 +149,7 @@
   (-> (t/op-read-all-bytes {:raw (t/mock-input-stream (atom ["OK " "Hello " "World "])
                                                       )})
       :output
-      h/string)
+      std.lib.foundation/string)
   => "OK Hello World ")
 
 ^{:refer std.concurrent.relay.transport/op-read-all :added "4.0"}
@@ -166,7 +167,7 @@
   
   (do (def +state+  (volatile! []))
       (def +input+ (atom ["OK " "Hello "]))
-      (def +p+ (h/future (Thread/sleep 50)
+      (def +p+ (std.lib.future/future (Thread/sleep 50)
                          (swap! +input+ conj "World ")
                          (Thread/sleep 50)
                         (swap! +input+ conj "Again ")))
@@ -174,7 +175,7 @@
                                 80
                                 20)
           :output
-          h/string))
+          std.lib.foundation/string))
   => "OK Hello World Again "
   @+p+)
 
@@ -184,7 +185,7 @@
   
   (do (def +state+  (volatile! []))
       (def +input+ (atom ["OK " "Hello "]))
-      (def +p+ (h/future (Thread/sleep 50)
+      (def +p+ (std.lib.future/future (Thread/sleep 50)
                          (swap! +input+ conj "World ")
                          (Thread/sleep 50)
                          (swap! +input+ conj "Again ")))
@@ -201,7 +202,7 @@
 
   (do (def +state+  (volatile! []))
       (def +input+ (atom ["OK " "Hello "]))
-      (def +p+ (h/future (Thread/sleep 50)
+      (def +p+ (std.lib.future/future (Thread/sleep 50)
                          (swap! +input+ conj "World\n")
                          (Thread/sleep 50)
                         (swap! +input+ conj "Again ")))
@@ -218,7 +219,7 @@
 
   (do (def +state+  (volatile! []))
       (def +input+ (atom ["OK " "Hello "]))
-      (def +p+ (h/future (Thread/sleep 50)
+      (def +p+ (std.lib.future/future (Thread/sleep 50)
                          (swap! +input+ conj "World\n")
                          (Thread/sleep 50)
                          (swap! +input+ conj "Again ")))
@@ -251,7 +252,7 @@
   (t/process-by-handler {:raw (java.io.ByteArrayInputStream.
                                (.getBytes "Hello\n World\n"))}
                         (fn [^java.io.InputStream is _]
-                          (vreset! +state+ (h/string (.readAllBytes is))))
+                          (vreset! +state+ (std.lib.foundation/string (.readAllBytes is))))
                         {})
 
   @+state+

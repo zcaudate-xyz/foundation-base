@@ -1,11 +1,8 @@
 (ns std.html
-  (:require [std.string :as str]
-            [std.lib :as h])
-  (:import (org.jsoup Jsoup)
-           (org.jsoup.nodes Attributes Comment DataNode Document Element Node TextNode)
-           (org.jsoup.parser Tag)
-           (org.jsoup.select Selector
-                             Elements)))
+  (:require [std.lib.collection]
+            [std.lib.foundation]
+            [std.string.common])
+  (:import (org.jsoup Jsoup) (org.jsoup.nodes Attributes Comment DataNode Document Element Node TextNode) (org.jsoup.parser Tag) (org.jsoup.select Selector Elements)))
 
 (defmulti node->tree
   "converts a Jsoup node to tree
@@ -22,7 +19,7 @@
 
 (defmethod node->tree TextNode
   ([^TextNode node]
-   (str/trim (.text node))))
+   (std.string.common/trim (.text node))))
 
 (defmethod node->tree DataNode
   ([^DataNode node]
@@ -33,10 +30,10 @@
    (let [children (->> (map node->tree (.childNodes node))
                        (remove #{" "}))
          attrs (->> (.attributes node)
-                    (h/map-keys keyword))
+                    (std.lib.collection/map-keys keyword))
          attrs (if (:class attrs)
                  (assoc attrs :class
-                        (vec (sort (filter not-empty (str/split (:class attrs) #" ")))))
+                        (vec (sort (filter not-empty (std.string.common/split (:class attrs) #" ")))))
                  attrs)
          children (if (empty? attrs)
                     children
@@ -68,7 +65,7 @@
                                                 (name k)
                                                 (str k))
                                             v (if (vector? v)
-                                                (str/join " " (map h/strn v))
+                                                (std.string.common/join " " (map std.lib.foundation/strn v))
                                                 (str v))]
                                         (.put ^Attributes out (name k) v)))
                                     (Attributes.)
@@ -98,7 +95,7 @@
    => org.jsoup.nodes.Element"
   {:added "3.0"}
   ([^String s]
-   (let [s (str/trim s)
+   (let [s (std.string.common/trim s)
          html? (or (.startsWith s "<html")
                    (.startsWith s "<!DOCTYPE")
                    (.startsWith s "<!doctype"))

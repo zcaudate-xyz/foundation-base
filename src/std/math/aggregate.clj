@@ -1,6 +1,6 @@
 (ns std.math.aggregate
-  (:require [std.math.common :as math]
-            [std.lib :as h]))
+  (:require [std.lib.collection]
+            [std.math.common :as math]))
 
 (defn max-fn
   "max taking an array as input
@@ -51,7 +51,7 @@
           (f)))))
 
 (def +aggregations+
-  (h/map-vals wrap-not-nil
+  (std.lib.collection/map-vals wrap-not-nil
               {:first    first
                :last     last
                :middle   middle-fn
@@ -81,11 +81,11 @@
    => {:sum 18, :product 360}"
   {:added "3.0"}
   ([arr]
-   (h/map-vals (fn [f] (f arr)) +aggregations+))
+   (std.lib.collection/map-vals (fn [f] (f arr)) +aggregations+))
   ([arr ks]
-   (h/map-vals (fn [f] (f arr))
+   (std.lib.collection/map-vals (fn [f] (f arr))
                (select-keys +aggregations+ ks)))
   ([arr ks m]
    (merge (aggregates arr ks)
-          (h/map-vals (fn [f] (f arr))
+          (std.lib.collection/map-vals (fn [f] (f arr))
                       m))))

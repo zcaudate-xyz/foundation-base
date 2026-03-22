@@ -1,10 +1,9 @@
 (ns std.fs.watch
   (:require [clojure.java.io :as io]
-            [std.string :as str]
-            [std.lib :as h]
-            [std.protocol.watch :as protocol.watch])
-  (:import (java.nio.file FileSystems Paths StandardWatchEventKinds WatchService)
-           (java.util.concurrent TimeUnit)))
+            [std.lib.collection]
+            [std.protocol.watch :as protocol.watch]
+            [std.string.common])
+  (:import (java.nio.file FileSystems Paths StandardWatchEventKinds WatchService) (java.util.concurrent TimeUnit)))
 
 (def ^:dynamic *defaults* {:recursive true
                            :types :all
@@ -28,8 +27,8 @@
   {:added "3.0"}
   ([s]
    (-> s
-       (str/replace #"\." "\\\\\\Q.\\\\\\E")
-       (str/replace #"\*" ".+")
+       (std.string.common/replace #"\." "\\\\\\Q.\\\\\\E")
+       (std.string.common/replace #"\*" ".+")
        (re-pattern))))
 
 (defn register-entry
@@ -55,7 +54,7 @@
                     (empty? includes)
                     (some #(re-find % (subs dir-path (-> root count inc))) includes))
                 (not (or (and seen (get @seen dir-path))
-                         (some #(re-find % (last (str/split dir-path #"/"))) excludes))))
+                         (some #(re-find % (last (std.string.common/split dir-path #"/"))) excludes))))
        (register-entry service dir-path)
        (if seen (swap! seen conj dir-path))
        (if (:recursive options)
@@ -163,9 +162,9 @@
  
    (def ^:dynamic *happy* (promise))
  
-   (h/watch:add (io/file \".\") :save
+   (std.fs.watch/add-io-watch (io/file \".\") :save
                 (fn [f k _ [cmd file]]
-                  (h/watch:remove f k)
+                  (std.fs.watch/remove-io-watch f k nil)
                   (.delete ^File file)
                   (deliver *happy* [cmd (.getName ^File file)]))
                 {:types #{:create :modify}
@@ -173,7 +172,7 @@
                  :filter  [\".hara\"]
                  :exclude [\".git\" \"target\"]})
  
-   (h/watch:list (io/file \".\"))
+   (std.fs.watch/list-io-watch (io/file \".\") nil)
    => (contains {:save fn?})
  
    (spit \"happy.hara\" \"hello\")
@@ -181,7 +180,7 @@
    (deref *happy*)
    => [:create \"happy.hara\"]
  
-   (h/watch:list (io/file \".\"))
+   (std.fs.watch/list-io-watch (io/file \".\") nil)
    => {}"
   {:added "3.0"}
   ([paths callback options]
@@ -214,7 +213,7 @@
   ([obj _]
    (let [path (.getCanonicalPath ^java.io.File  obj)]
      (->> (get @*filewatchers* path)
-          (h/map-vals :function)))))
+          (std.lib.collection/map-vals :function)))))
 
 (defn remove-io-watch
   "removes the watcher with the given key"

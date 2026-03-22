@@ -1,6 +1,6 @@
 (ns indigo.index-main-test
-  (:use code.test)
-  (:require [indigo.index-main :refer :all]))
+  (:require [indigo.index-main :refer :all])
+  (:use code.test))
 
 ^{:refer indigo.index-main/AppIndex :added "4.0"}
 (fact "TODO")

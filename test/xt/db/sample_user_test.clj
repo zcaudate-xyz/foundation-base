@@ -1,9 +1,6 @@
 (ns xt.db.sample-user-test
-  (:require [std.lib :as h]
-            [std.lang :as l]
-            [rt.postgres :as pg :refer [defsel.pg
-                                        defret.pg
-                                        defaccess.pg]]))
+  (:require [rt.postgres :as pg :refer [defsel.pg defret.pg defaccess.pg]]
+            [std.lang :as l]))
 
 (l/script :postgres
   {:require [[rt.postgres :as pg]

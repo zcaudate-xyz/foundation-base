@@ -1,16 +1,18 @@
 (ns rt.postgres.grammar.form-deftype
-  (:require [rt.postgres.grammar.common-application :as app]
+  (:require [rt.postgres.grammar.common :as common]
+            [rt.postgres.grammar.common-application :as app]
             [rt.postgres.grammar.common-tracker :as tracker]
-            [rt.postgres.grammar.common :as common]
             [rt.postgres.grammar.form-defpartition :as form-defpartition]
-            [std.lang.base.grammar-spec :as grammar-spec]
-            [std.lang.base.emit-preprocess :as preprocess]
-            [std.lang.base.library-snapshot :as snap]
             [std.lang.base.book :as book]
+            [std.lang.base.emit-preprocess :as preprocess]
+            [std.lang.base.grammar-spec :as grammar-spec]
+            [std.lang.base.library-snapshot :as snap]
             [std.lang.base.util :as ut]
+            [std.lib.collection]
+            [std.lib.foundation]
             [std.lib.schema :as schema]
-            [std.string :as str]
-            [std.lib :as h]))
+            [std.string.case]
+            [std.string.common]))
 
 ;;
 ;; deftype
@@ -41,7 +43,7 @@
          book   (snap/get-book snapshot lang)
          r-en   (book/get-base-entry book module id section)
          {:keys [type]
-          :as r-ref}  (h/-> (nth (:form r-en) 2)
+          :as r-ref}  (std.lib.foundation/-> (nth (:form r-en) 2)
           (apply hash-map %)
           (get column)
           (or {:type :uuid}))]
@@ -76,7 +78,7 @@
   ([form sql]
    (let [{:keys [cascade default constraint generated raw]} sql
          cargs (cond (nil? constraint) []
-                     (map? constraint) [:constraint (symbol (h/strn (:name constraint)))
+                     (map? constraint) [:constraint (symbol (std.lib.foundation/strn (:name constraint)))
                                         :check (list 'quote (list (:check constraint)))]
                      :else [:check (list 'quote (list constraint))])]
      (cond-> form
@@ -97,7 +99,7 @@
          [col-name col-attrs ref-toks]
          (if (= type :ref)
            (pg-deftype-ref col (:ref m) mopts)
-           [(str/snake-case (h/strn col))
+           [(std.string.case/snake-case (std.lib.foundation/strn col))
             [(common/pg-type-alias type)]])
          col-attrs (cond-> col-attrs
                      primary  (conj :primary-key)
@@ -123,12 +125,12 @@
                            cols)
                      (mapcat identity)
                      (group-by first)
-                     (h/map-vals (partial map second)))]
+                     (std.lib.collection/map-vals (partial map second)))]
      (mapv (fn [keys]
              (let [kcols (map (fn [{:keys [key type ref]}]
                                 (if (= :ref type)
                                   #{(pg-deftype-ref-name key ref)}
-                                  #{(str/snake-case (name key))}))
+                                  #{(std.string.case/snake-case (name key))}))
                               keys)]
                (list '% [:unique (list 'quote kcols)])))
            (vals groups)))))
@@ -147,7 +149,7 @@
                      (map (fn [{:keys [id type ref]}]
                             (if (= :ref type)
                               (symbol (pg-deftype-ref-name id ref))
-                              (symbol (str/snake-case (name id)))))
+                              (symbol (std.string.case/snake-case (name id)))))
                           schema-primary))])]))))
 
 (defn pg-deftype-indexes
@@ -165,7 +167,7 @@
          key-fn    (fn [{:keys [key type ref]}]
                      (if (= :ref type)
                        #{(pg-deftype-ref-name key ref)}
-                       #{(str/snake-case (name key))}))
+                       #{(std.string.case/snake-case (name key))}))
          g-indexes (group-by :group c-indexes)
          s-indexes (->> (get g-indexes nil)
                         (mapv (fn [{:keys [using where] :as m}]
@@ -176,7 +178,7 @@
                                        ~(list 'quote (list (key-fn m)))
                                        ~@(if where [\\ :where where])]))))
          g-indexes (dissoc g-indexes nil)
-         _ (if (not-empty g-indexes) (h/error "TODO"))]
+         _ (if (not-empty g-indexes) (std.lib.foundation/error "TODO"))]
      s-indexes)))
 
 
@@ -200,24 +202,24 @@
                        [group
                         {:local-col (if (= type :ref)
                                       (pg-deftype-ref-name col ref)
-                                      (str/snake-case (name col)))
+                                      (std.string.case/snake-case (name col)))
                          :remote-col (:column f-spec)
                          :ns (:ns f-spec)
                          :link (:link f-spec)
                          :cascade (-> sql :cascade)}])))))
         (group-by first)
-        (h/map-vals (partial map second)))))
+        (std.lib.collection/map-vals (partial map second)))))
 
 (defn pg-deftype-gen-constraint
   "generates a foreign key constraint"
   {:added "4.0"}
   ([sym [group entries] mopts]
-   (let [table-name (str/snake-case (name sym))
+   (let [table-name (std.string.case/snake-case (name sym))
          c-name (str "fk_" table-name "_" (name group))
 
          sample (first entries)
          _ (when (not (apply = (map :ns entries)))
-             (h/error "All entries in a foreign group must point to same namespace" {:group group :entries entries}))
+             (std.lib.foundation/error "All entries in a foreign group must point to same namespace" {:group group :entries entries}))
 
          {:keys [link]} sample
          book (if (and link (:snapshot mopts))
@@ -284,7 +286,7 @@
                                [(first partition) (rest partition)]
 
                                :else
-                               (h/error "Not Valid Definition" {:partition partition
+                               (std.lib.foundation/error "Not Valid Definition" {:partition partition
                                                                 :col-spec col-spec}))
            col-map (into {} col-spec)
            cols (doall (map (fn [col]
@@ -292,13 +294,13 @@
                                     attrs (get col-map col-key)]
                                 (if (and (not attrs)
                                          (not (set? col)))
-                                  (h/error "Partition Column Not Found" {:column col
+                                  (std.lib.foundation/error "Partition Column Not Found" {:column col
                                                                          :available (keys col-map)}))
                                 (hash-set (if attrs
                                             (if (= (:type attrs) :ref)
                                               (pg-deftype-ref-name col-key (:ref attrs))
-                                              (str/snake-case (name col-key)))
-                                            (str/snake-case (name col-key))))))
+                                              (std.string.case/snake-case (name col-key)))
+                                            (std.string.case/snake-case (name col-key))))))
                               cols))]
        (list :partition-by method (list 'quote cols))))))
 
@@ -323,15 +325,15 @@
          tcustom      (:custom params)
          tconstraints (->> (:constraints params)
                            (mapv (fn [[k val]]
-                                   (list '% [:constraint (symbol (h/strn k))
+                                   (list '% [:constraint (symbol (std.lib.foundation/strn k))
                                              :check (list 'quote (list val))]))))
 
-         tcomment (if (and (:doc mdefn) (not (str/blank? (:doc mdefn))))
+         tcomment (if (and (:doc mdefn) (not (std.string.common/blank? (:doc mdefn))))
                     [[:comment :on :table ttok :is (:doc mdefn)]])
 
          ccomments (keep (fn [[col attrs]]
                            (if-let [doc (get-in attrs [:sql :comment])]
-                             [:comment :on :column (list '. ttok #{(str/snake-case (name col))})
+                             [:comment :on :column (list '. ttok #{(std.string.case/snake-case (name col))})
                               :is doc]))
                          col-spec)
 
@@ -377,12 +379,12 @@
          
          extras (apply hash-map extras)
          form @(or (resolve esym)
-                   (h/error "Cannot resolve symbol." {:input esym}))]
+                   (std.lib.foundation/error "Cannot resolve symbol." {:input esym}))]
      
      (->> (partition 2 form)
           (mapcat (fn [[k attr]]
                     [k (if-let [m (get extras k)]
-                         (h/merge-nested attr m)
+                         (std.lib.collection/merge-nested attr m)
                          attr)]))))))
 
 (defn pg-deftype-format-generated
@@ -434,7 +436,7 @@
                   (mapcat (fn [[k {:keys [type primary ref sql scope generated] :as attrs}]]
                             (let [attrs (pg-deftype-format-generated attrs)
                                   {:keys [type primary ref sql scope]} attrs
-                                  _     (or type (h/error "type cannot be null" {:attrs attrs}))
+                                  _     (or type (std.lib.foundation/error "type cannot be null" {:attrs attrs}))
                                   _     (if scope (schema/check-scope scope))
                                   scope (or scope (cond primary
                                                         :-/id
@@ -456,7 +458,7 @@
         fmeta {:static/tracker (if track (tracker/map->Tracker track))
                :static/public public
                :static/dbtype :table}
-        qmeta (h/qualified-keys msym)]
+        qmeta (std.lib.collection/qualified-keys msym)]
     [(merge fmeta qmeta)
      (list op (with-meta sym (merge msym fmeta qmeta))
            spec

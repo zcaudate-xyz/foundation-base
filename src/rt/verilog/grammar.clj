@@ -1,13 +1,14 @@
 (ns rt.verilog.grammar
-  (:require [std.lang.base.emit :as emit]
+  (:require [std.lang.base.book :as book]
+            [std.lang.base.emit :as emit]
             [std.lang.base.emit-fn :as emit-fn]
             [std.lang.base.emit-helper :as helper]
             [std.lang.base.grammar :as grammar]
-            [std.lang.base.util :as ut]
-            [std.lang.base.book :as book]
             [std.lang.base.script :as script]
-            [std.string :as str]
-            [std.lib :as h]))
+            [std.lang.base.util :as ut]
+            [std.lib.collection]
+            [std.lib.template]
+            [std.string.common]))
 
 (defn tf-module
   "transforms module definition"
@@ -16,7 +17,7 @@
   (let [ports (if (and (list? args) (= 'quote (first args)))
                 (second args)
                 args)
-        ports-str (str "(" (str/join ", " (map ut/sym-default-str ports)) ")")]
+        ports-str (str "(" (std.string.common/join ", " (map ut/sym-default-str ports)) ")")]
     (list :- "module" sym ports-str ";"
           (list :- "\n")
           (list \\
@@ -44,7 +45,7 @@
   {:added "4.0"}
   [[_ trigger & body]]
   (let [trigger-str (if (vector? trigger)
-                      (str "(" (str/join " " (map ut/sym-default-str trigger)) ")")
+                      (str "(" (std.string.common/join " " (map ut/sym-default-str trigger)) ")")
                       (str "(" (ut/sym-default-str trigger) ")"))]
     (list :- "always" (str "@" trigger-str)
           (list :- "begin")
@@ -96,7 +97,7 @@
   "transforms concatenation {a, b}"
   {:added "4.0"}
   [[_ & args]]
-  (list :- (str "{" (str/join ", " (map ut/sym-default-str args)) "}")))
+  (list :- (str "{" (std.string.common/join ", " (map ut/sym-default-str args)) "}")))
 
 (def +features+
   (-> (grammar/build :exclude [:data-shortcuts
@@ -117,7 +118,7 @@
         :cat     {:op :cat :symbol #{'cat} :macro #'tf-concatenation :emit :macro}})))
 
 (def +template+
-  (h/merge-nested
+  (std.lib.collection/merge-nested
    helper/+default+
    {:banned #{:set :map :regex}
     :highlight '#{return break}
@@ -144,7 +145,7 @@
   (book/book-meta
    {:module-current   (fn [])
     :module-import    (fn [name _ opts]
-                        (h/$ (:- "`include" ~(str "\"" name ".v\"")))) ;; Simple include
+                        (std.lib.template/$ (:- "`include" ~(str "\"" name ".v\"")))) ;; Simple include
     :module-export    (fn [{:keys [as refer]} opts])}))
 
 (def +book+

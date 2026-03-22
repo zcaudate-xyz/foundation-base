@@ -1,9 +1,10 @@
 (ns code.query.match
   (:require [code.query.match.pattern :as pattern]
-            [std.block.navigate :as nav]
             [std.block.base :as base]
-            [std.lib.zip :as zip]
-            [std.lib :as h]))
+            [std.block.navigate :as nav]
+            [std.lib.collection]
+            [std.lib.foundation]
+            [std.lib.zip :as zip]))
 
 (defrecord Matcher [f]
   clojure.lang.IFn
@@ -186,7 +187,7 @@
   {:added "3.0"}
   ([template]
    (Matcher. (fn [nav]
-               (cond (h/regexp? template)
+               (cond (std.lib.foundation/regexp? template)
                      (if (->> nav nav/string (re-find template))
                        true false))))))
 
@@ -236,10 +237,10 @@
          (symbol? template)    (compile-matcher {:form template})
          (fn? template)        (compile-matcher {:is template})
          (list? template)      (compile-matcher {:pattern template})
-         (h/regexp? template)     (compile-matcher {:code template})
+         (std.lib.foundation/regexp? template)     (compile-matcher {:code template})
          (vector? template)    (apply p-and (map compile-matcher template))
          (set? template)       (apply p-or (map compile-matcher template))
-         (h/hash-map? template)
+         (std.lib.collection/hash-map? template)
          (apply p-and
                 (map (fn [[k v]]
                        (case k

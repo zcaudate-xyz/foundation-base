@@ -1,10 +1,10 @@
 (ns std.concurrent.print
-  (:require [std.concurrent.atom :as atom]
+  (:require [clojure.pprint :as pprint]
+            [std.concurrent.atom :as atom]
             [std.concurrent.executor :as exe]
-            [std.lib.foundation :as h]
             [std.lib.env :as env]
-            [std.lib.resource :as res]
-            [clojure.pprint :as pprint])
+            [std.lib.foundation :as h]
+            [std.lib.resource :as res])
   (:refer-clojure :exclude [print println prn with-out-str]))
 
 (defonce ^:dynamic *executor* nil)

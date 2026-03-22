@@ -1,7 +1,7 @@
 (ns lib.redis.impl.reference-test
-  (:use code.test)
   (:require [lib.redis.impl.reference :refer :all]
-            [std.lib :as h]))
+            [std.lib.env])
+  (:use code.test))
 
 ^{:refer lib.redis.impl.reference/command-doc :added "3.0"}
 (fact "converts an entry to the redis doc format"
@@ -20,7 +20,7 @@
 (fact "returns all commands"
   (with-redefs [parse-main (constantly {:set {:id :set :group :string}})
                 parse-supplements (constantly {})
-                h/sys:resource-content (constantly "{}")]
+                std.lib.env/sys:resource-content (constantly "{}")]
     (parse-commands))
   => map?)
 

@@ -1,6 +1,6 @@
 (ns js.react.ext-box-test
-  (:use code.test)
-  (:require [js.react.ext-box :refer :all]))
+  (:require [js.react.ext-box :refer :all])
+  (:use code.test))
 
 ^{:refer js.react.ext-box/createBox :added "4.0" :unchecked true}
 (fact "creates a box for react")

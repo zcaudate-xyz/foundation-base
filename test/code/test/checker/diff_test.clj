@@ -1,8 +1,8 @@
 (ns code.test.checker.diff-test
-  (:use code.test)
-  (:require [code.test.checker.diff :refer :all]
+  (:require [code.test.checker.collection :as coll]
             [code.test.checker.common :as common]
-            [code.test.checker.collection :as coll]))
+            [code.test.checker.diff :refer :all])
+  (:use code.test))
 
 ^{:refer code.test.checker.diff/checker-equal? :added "4.0"}
 (fact "checker-equal?"

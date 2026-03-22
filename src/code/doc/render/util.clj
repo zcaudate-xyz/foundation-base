@@ -1,6 +1,6 @@
 (ns code.doc.render.util
-  (:require [std.string :as str]
-            [markdown.core :as markdown]))
+  (:require [markdown.core :as markdown]
+            [std.string.common]))
 
 (defn adjust-indent
   "adjusts indents of multiple lines
@@ -10,13 +10,13 @@
    => \"\\n  a\\n  b\\n  c\""
   {:added "3.0"}
   ([s spaces]
-   (->> (str/split-lines s)
+   (->> (std.string.common/split-lines s)
         (map (fn [line]
                (if (and (< spaces (count line))
                         (re-find #"^\s+$" (subs line 0 spaces)))
                  (subs line spaces)
                  line)))
-        (str/join "\n"))))
+        (std.string.common/join "\n"))))
 
 (defn basic-html-escape
   "escape html tags for output
@@ -25,7 +25,7 @@
    => \"&lt;&gt;\""
   {:added "3.0"}
   ([data]
-   (str/escape data {\< "&lt;" \> "&gt;" \& "&amp;" \" "&quot;" \\ "&#92;"})))
+   (std.string.common/escape data {\< "&lt;" \> "&gt;" \& "&amp;" \" "&quot;" \\ "&#92;"})))
 
 (defn basic-html-unescape
   "unescape html output for rendering"
@@ -50,7 +50,7 @@
          data
 
          (vector? data)
-         (str/joinl data))))
+         (std.string.common/joinl data))))
 
 (defn markup
   "creates html from markdown script

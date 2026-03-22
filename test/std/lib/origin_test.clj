@@ -1,7 +1,7 @@
 (ns std.lib.origin-test
-  (:use code.test)
-  (:require [std.lib.origin :as ori]
-            [std.lib.foundation :as h]))
+  (:require [std.lib.foundation :as h]
+            [std.lib.origin :as ori])
+  (:use code.test))
 
 ^{:refer std.lib.origin/clear-origin :added "3.0"}
 (fact "clears the `*origin*` atom"

@@ -1,10 +1,10 @@
 (ns lib.openpgp-test
-  (:use code.test)
-  (:require [std.lib.encode :as encode]
+  (:require [lib.openpgp :refer :all]
             [std.fs :as fs]
-            [lib.openpgp :refer :all]
+            [std.lib.encode :as encode]
             [std.lib.security :as security]
-            [std.string :as str]))
+            [std.string.common])
+  (:use code.test))
 
 (def +public-key-string+
   ["-----BEGIN PGP PUBLIC KEY BLOCK-----"
@@ -95,9 +95,9 @@
    "=bA77"
    "-----END PGP PRIVATE KEY BLOCK-----"])
 
-(def +public-key+  (parse-public-key (str/joinl +public-key-string+ "\n")))
+(def +public-key+  (parse-public-key (std.string.common/joinl +public-key-string+ "\n")))
 
-(def +secret-key+  (parse-secret-key (str/joinl +secret-key-string+ "\n")))
+(def +secret-key+  (parse-secret-key (std.string.common/joinl +secret-key-string+ "\n")))
 
 (def +private-key+ (second (key-pair +secret-key+)))
 
@@ -110,14 +110,14 @@
 ^{:refer lib.openpgp/parse-public-key-ring :added "3.0"}
 (fact "parses a public key ring from string"
 
-  (-> (str/joinl +public-key-string+ "\n")
+  (-> (std.string.common/joinl +public-key-string+ "\n")
       (parse-public-key-ring))
   => org.bouncycastle.openpgp.PGPPublicKeyRing)
 
 ^{:refer lib.openpgp/parse-public-key :added "3.0"}
 (fact "parses a public key from string"
 
-  (-> (str/joinl +public-key-string+ "\n")
+  (-> (std.string.common/joinl +public-key-string+ "\n")
       (parse-public-key))
   ;; #public "E710D59C5346D3C0A1C578AE6753F8E16D35FC24"
   => org.bouncycastle.openpgp.PGPPublicKey)
@@ -125,14 +125,14 @@
 ^{:refer lib.openpgp/parse-secret-key-ring :added "3.0"}
 (fact "parses a secret key ring from string"
 
-  (-> (str/joinl +secret-key-string+ "\n")
+  (-> (std.string.common/joinl +secret-key-string+ "\n")
       (parse-secret-key-ring))
   => org.bouncycastle.openpgp.PGPSecretKeyRing)
 
 ^{:refer lib.openpgp/parse-secret-key :added "3.0"}
 (fact "parses a secret key from string"
 
-  (-> (str/joinl +secret-key-string+ "\n")
+  (-> (std.string.common/joinl +secret-key-string+ "\n")
       (parse-secret-key))
   ;; #secret "E710D59C5346D3C0A1C578AE6753F8E16D35FC24"
   => org.bouncycastle.openpgp.PGPSecretKey)

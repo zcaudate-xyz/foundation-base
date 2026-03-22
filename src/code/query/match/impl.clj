@@ -1,6 +1,6 @@
 (ns code.query.match.impl
-  (:require [std.protocol.match :as protocol.match]
-            [std.lib.collection :as c]))
+  (:require [std.lib.collection :as c]
+            [std.protocol.match :as protocol.match]))
 
 (defrecord ActualPattern [expression]
   protocol.match/ITemplate

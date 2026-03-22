@@ -1,7 +1,9 @@
 (ns jvm.namespace.context
-  (:require [std.protocol.deps :as protocol.deps]
-            [jvm.namespace.common :as common]
-            [std.lib :as h :refer [defimpl]]))
+  (:require [jvm.namespace.common :as common]
+            [std.lib.deps]
+            [std.lib.foundation]
+            [std.lib.impl :refer [defimpl]]
+            [std.protocol.deps :as protocol.deps]))
 
 (defn resolve-ns
   "resolves the namespace or else returns nil if it does not exist
@@ -18,7 +20,7 @@
                         (symbol nsp))
                    sym)]
      (if nsym
-       (h/suppress (do (require nsym) nsym))))))
+       (std.lib.foundation/suppress (do (require nsym) nsym))))))
 
 (defn ns-vars
   "lists the vars in a particular namespace
@@ -75,12 +77,12 @@
   ([]
    (reeval (.getName *ns*)))
   ([ns]
-   (h/dependents:refresh (ns-context) ns)))
+   (std.lib.deps/dependents-refresh (ns-context) ns)))
 
 (comment
   (ns-reeval)
   (require 'jvm.tool)
-  (h/dependents:ordered (ns-context) 'std.concurrent)
-  (h/deps:unload (ns-context) 'std.concurrent)
-  (h/dependents:direct (ns-context) (.getName *ns*))
-  (h/dependents:all (ns-context) (.getName *ns*)))
+  (std.lib.deps/dependents-ordered (ns-context) 'std.concurrent)
+  (std.lib.deps/unload-entry (ns-context) 'std.concurrent)
+  (std.lib.deps/dependents-direct (ns-context) (.getName *ns*))
+  (std.lib.deps/dependents-all (ns-context) (.getName *ns*)))

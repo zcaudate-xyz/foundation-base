@@ -1,6 +1,6 @@
 (ns code.tool.translate.js-dsl
-  (:require [std.lib :as h]
-            [clojure.string :as str]))
+  (:require [clojure.string :as str]
+            [std.lib.foundation]))
 
 (defmulti translate-node (fn [node] (if (nil? node) :nil (:type node))))
 
@@ -10,7 +10,7 @@
 (defmethod translate-node :nil [_] nil)
 
 (defmethod translate-node :default [node]
-  (h/error "Unknown node type" {:type (:type node) :node node}))
+  (std.lib.foundation/error "Unknown node type" {:type (:type node) :node node}))
 
 (defmethod translate-node "File" [node]
   (translate-node (:program node)))

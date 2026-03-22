@@ -1,7 +1,7 @@
 (ns std.dom.signal
-  (:require [std.dom.sync :as sync]
-            [std.dom.update :as update]
-            [std.dom.common :as base]))
+  (:require [std.dom.common :as base]
+            [std.dom.sync :as sync]
+            [std.dom.update :as update]))
 
 (defmulti process-signal
   "processes a signal (delta or event)

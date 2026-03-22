@@ -1,8 +1,8 @@
 (ns std.contract.type-test
-  (:use code.test)
-  (:require [std.contract.type :as t]
+  (:require [malli.core :as mc]
             [std.contract.sketch :as s]
-            [malli.core :as mc]))
+            [std.contract.type :as t])
+  (:use code.test))
 
 ^{:refer std.contract.type/check :added "3.0"}
 (fact "checks that data fits the spec"

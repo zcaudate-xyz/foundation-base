@@ -1,9 +1,15 @@
 (ns lib.minio.bench
-  (:require [std.lib :as h :refer [defimpl]]
+  (:require [std.fs :as fs]
             [std.json :as json]
-            [std.string :as str]
             [std.lang :as l]
-            [std.fs :as fs]))
+            [std.lib.collection]
+            [std.lib.env]
+            [std.lib.foundation]
+            [std.lib.future]
+            [std.lib.impl :refer [defimpl]]
+            [std.lib.network]
+            [std.lib.os]
+            [std.string.common]))
 
 (def +bench-path+ "test-bench/minio")
 
@@ -13,27 +19,27 @@
   "gets all active minio ports"
   {:added "4.0"}
   ([]
-   (->> (h/sh "lsof" "-i" "-P" "-n" {:wrap false})
-        (str/split-lines)
+   (->> (std.lib.os/sh "lsof" "-i" "-P" "-n" {:wrap false})
+        (std.string.common/split-lines)
         (drop 1)
-        (filter #(str/starts-with? % "minio"))
+        (filter #(std.string.common/starts-with? % "minio"))
         (keep #(re-find #"^minio\s*(\d+).*\:(\d+) \(LISTEN\)$" %))
         (map (fn [arr]
-               (mapv h/parse-long (drop 1 arr))))
+               (mapv std.lib.foundation/parse-long (drop 1 arr))))
         (group-by second)
-        (h/map-vals (comp set (partial map first))))))
+        (std.lib.collection/map-vals (comp set (partial map first))))))
 
 (defn start-minio-server
   "starts the minio server in a given directory"
   {:added "4.0"}
   [{:keys [port console init]} type root-dir]
-  (let [port (or port (h/port:check-available 0))
-        console-port (or console (h/port:check-available 0))
+  (let [port (or port (std.lib.network/port:check-available 0))
+        console-port (or console (std.lib.network/port:check-available 0))
         _ (fs/create-directory root-dir)]
     (-> (if (not (get @*active* port))
           (swap! *active*
                  (fn [m]
-                   (let [process (h/sh {:args [#_#_#_
+                   (let [process (std.lib.os/sh {:args [#_#_#_
                                                "MINIO_ROOT_USER=admin"
                                                "MINIO_ROOT_PASSWORD=password"
                                                "MINIO_BROWSER=off" 
@@ -46,13 +52,13 @@
                                                "MINIO_BROWSER" "off"}
                                         :wait false
                                         :root root-dir})
-                         thread  (-> (h/future (h/sh-wait process))
-                                     (h/on:complete (fn [_ _]
-                                                      (let [out (h/sh-output process)]
+                         thread  (-> (std.lib.future/future (std.lib.os/sh-wait process))
+                                     (std.lib.future/on:complete (fn [_ _]
+                                                      (let [out (std.lib.os/sh-output process)]
                                                         (when (not= 0 (:exit out))
-                                                          (h/prn out)))
+                                                          (std.lib.env/prn out)))
                                                       (swap! *active* dissoc port))))]
-                     (h/wait-for-port "localhost" port
+                     (std.lib.network/wait-for-port "localhost" port
                                       {:timeout 3000})
                      (assoc m port {:type type
                                     :port port
@@ -69,9 +75,9 @@
   (let [{:keys [type process] :as entry} (get @*active* port)]
     (if (= type stop-type)
       (doto process
-        (h/sh-close)
-        (h/sh-exit)
-        (h/sh-wait)))
+        (std.lib.os/sh-close)
+        (std.lib.os/sh-exit)
+        (std.lib.os/sh-wait)))
     entry))
 
 (defn bench-start
@@ -101,7 +107,7 @@
                     {:port port}
                     port)
                 out (start-minio-server m :array (str +bench-path+ "/" (:port m)))
-                _   (h/wait-for-port "127.0.0.1" (:port m))]
+                _   (std.lib.network/wait-for-port "127.0.0.1" (:port m))]
             out))
         ports))
 

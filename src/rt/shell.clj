@@ -1,12 +1,12 @@
 (ns rt.shell
-  (:require [std.lang :as l]
-            [std.lib :as h]
+  (:require [rt.shell.interface-basic :as basic]
+            [rt.shell.interface-remote :as remote]
             [rt.shell.suite-core :as suite]
-            [rt.shell.interface-basic :as basic]
-            [rt.shell.interface-remote :as remote])
+            [std.lang :as l]
+            [std.lib.foundation])
   (:refer-clojure :exclude [if cat]))
 
-(h/intern-in suite/emit
+(std.lib.foundation/intern-in suite/emit
              suite/ls
              suite/man
              suite/echo

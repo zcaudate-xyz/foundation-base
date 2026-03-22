@@ -1,10 +1,12 @@
 (ns rt.basic.server-basic
-  (:require [std.lib :as h :refer [defimpl]]
+  (:require [std.concurrent :as cc]
             [std.json :as json]
-            [std.string :as str]
-            [std.concurrent :as cc])
-  (:import (java.net Socket
-                     ServerSocket)))
+            [std.lib.component]
+            [std.lib.foundation]
+            [std.lib.future]
+            [std.lib.impl :refer [defimpl]]
+            [std.lib.network])
+  (:import (java.net Socket ServerSocket)))
 
 (defonce ^:dynamic *env*
   (atom {}))
@@ -30,7 +32,7 @@
    (let [ready (:ready (get-in @*env* [lang id]))]
      (if ready
        (deref ready 5000 {:status "timeout"})
-       (h/error "Env not found")))))
+       (std.lib.foundation/error "Env not found")))))
 
 (defn- rt-server-string-props [{:keys [type lang id port count] :as server}]
   [type lang id port @count])
@@ -52,7 +54,7 @@
                          (try
                            (let [socket   (.accept server)
                                  _        (if @state
-                                            (h/stop (:relay @state)))
+                                            (std.lib.component/stop (:relay @state)))
                                  relay    (cc/relay {:type :socket
                                                      :port port
                                                      :attached socket})
@@ -62,7 +64,7 @@
                            (catch java.net.SocketException e))
                          (recur)))
                      (swap! state (fn [{:keys [relay ^Socket socket]}]
-                                    (if relay (h/stop relay))
+                                    (if relay (std.lib.component/stop relay))
                                     (if socket (.close socket))
                                     nil)))
          thread   (cc/thread {:start true
@@ -90,13 +92,13 @@
 
         (keyword? encode)
         (or (get +encode+ encode)
-            (h/error "Encoding not available" {:input encode}))
+            (std.lib.foundation/error "Encoding not available" {:input encode}))
 
         (map? encode)
         (merge (:none +encode+)
                encode)
 
-        :else (h/error "Invalid input" {:input encode})))
+        :else (std.lib.foundation/error "Invalid input" {:input encode})))
 
 (defn get-relay
   "gets the relay associated with the server
@@ -120,7 +122,7 @@
              (.write (.getBytes "<PING>\n")))
          true
          (catch Throwable t
-           (h/stop relay)
+           (std.lib.component/stop relay)
            (reset! state nil)
            false))
     false))
@@ -131,7 +133,7 @@
   [{:keys [state encode] :as record} body & [timeout]]
   (let [disconnect-fn (fn []
                         (swap! state (fn [{:keys [relay ^Socket socket]}]
-                                       (if relay (h/stop relay))
+                                       (if relay (std.lib.component/stop relay))
                                        (if socket (.close socket))
                                        nil))
                         {:status "disconnected"})]
@@ -159,7 +161,7 @@
   {:added "4.0"}
   [id lang port encode]
   (let [encode   (get-encoding encode)
-        port     (h/port:check-available (or port 0))
+        port     (std.lib.network/port:check-available (or port 0))
         count    (atom 0)
         state    (atom nil)
         return   (atom {})
@@ -230,7 +232,7 @@
    (get-server "hello"
                :lua))
   
-  (let [p (h/future (raw-eval-basic-server (get-server "hello"
+  (let [p (std.lib.future/future (raw-eval-basic-server (get-server "hello"
                                                        :lua)
                                           (pr-str '(+ 1 2 3 4))))]
     (let [msg  @(cc/send -c1- {:op :line})
@@ -267,18 +269,18 @@
 
   (cc/relay:bus)
   
-  (h/stop -c2-)
+  (std.lib.component/stop -c2-)
 
-  (h/stop -c1-)
+  (std.lib.component/stop -c1-)
   
   (cc/bus:kill-all
    (cc/relay:bus)
    )
-  (h/error)
+  (std.lib.foundation/error)
   
   ()
 
-  (h/start -c1-)
+  (std.lib.component/start -c1-)
   
   [(do 
      (def -c1- (cc/relay {:type :socket
@@ -286,7 +288,7 @@
                                                    :lua))
                           
                           :options {:in  {:quiet true}}}))
-     (h/stop -c1-)
+     (std.lib.component/stop -c1-)
      (cc/relay:bus))
    (def -c2- (cc/relay {:type :socket
                         :port (:port (get-server "hello"
@@ -300,7 +302,7 @@
                            
                            :options {:in  {:quiet true}}}))
       
-      (h/stop -c1-))
+      (std.lib.component/stop -c1-))
   
   @(cc/send -c1- {:op :string})
   
@@ -327,7 +329,7 @@
                                  :lua)))
     "hello")
   
-  (h/stop -c1-
+  (std.lib.component/stop -c1-
           )
   ((dissoc -c1- :bus))
   

@@ -1,6 +1,6 @@
 (ns js.react-native.ui-spinner-basic-test
-  (:use code.test)
-  (:require [js.react-native.ui-spinner-basic :refer :all]))
+  (:require [js.react-native.ui-spinner-basic :refer :all])
+  (:use code.test))
 
 ^{:refer js.react-native.ui-spinner-basic/spinnerTheme :added "4.0" :unchecked true}
 (fact "creates a spinner theme")

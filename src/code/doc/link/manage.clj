@@ -1,7 +1,7 @@
 (ns code.doc.link.manage
-  (:require [code.manage :as manage]
-            [clojure.pprint :as pprint]
-            [std.lib :as h]))
+  (:require [clojure.pprint :as pprint]
+            [code.manage :as manage]
+            [std.lib.collection]))
 
 (defn format-manage-output
   "formats the output based on the formatter"
@@ -30,7 +30,7 @@
      (if task-fn
        (if formatter
          (let [args (if (map? (last args))
-                      (update args (dec (count args)) h/merge-nested {:print {:result false :summary false :item false}})
+                      (update args (dec (count args)) std.lib.collection/merge-nested {:print {:result false :summary false :item false}})
                       (concat args [{:print {:result false :summary false :item false}}]))
                result (apply task-fn args)]
            (format-manage-output result formatter))

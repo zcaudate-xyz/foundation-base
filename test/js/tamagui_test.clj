@@ -1,6 +1,6 @@
 (ns js.tamagui-test
-  (:use code.test)
-  (:require [js.tamagui :refer :all]))
+  (:require [js.tamagui :refer :all])
+  (:use code.test))
 
 ^{:refer js.tamagui/generate-blocks :added "4.0" :unchecked true}
 (fact "TODO")

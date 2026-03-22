@@ -1,6 +1,6 @@
 (ns js.lib.valtio
   (:require [std.lang :as l]
-            [std.lib :as h])
+            [std.lib.foundation])
   (:refer-clojure :exclude [use val proxy]))
 
 (l/script :js
@@ -17,7 +17,7 @@
 ;; valtio
 ;;
 
-(h/template-entries [l/tmpl-entry {:type :fragment
+(std.lib.foundation/template-entries [l/tmpl-entry {:type :fragment
                                    :base "ValtioCore"
                                    :tag "js"}]
 
@@ -27,13 +27,13 @@
    snapshot
    subscribe])
 
-(h/template-entries [l/tmpl-entry {:type :fragment
+(std.lib.foundation/template-entries [l/tmpl-entry {:type :fragment
                                    :base "ValtioUtils"
                                    :tag "js"}]
   [[proxyAddComputed addComputed]
    proxyWithComputed])
 
-(h/template-entries [l/tmpl-entry {:type :fragment
+(std.lib.foundation/template-entries [l/tmpl-entry {:type :fragment
                                    :base "Valtio"
                                    :tag "js"}]
   [useSnapshot])
@@ -89,7 +89,7 @@
   [sym & more]
   (let [more (if (or (keyword? (first more))
                      (string? (first more)))
-                 [(mapv h/strn more)]
+                 [(mapv std.lib.foundation/strn more)]
                  more)]
     (apply list `useVal sym more)))
 

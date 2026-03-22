@@ -1,15 +1,15 @@
 (ns rt.postgres.script.impl-base
-  (:require [rt.postgres.grammar.common-application :as app]
-            [rt.postgres.grammar.common :as common]
-            [std.lib :as h]
+  (:require [rt.postgres.grammar.common :as common]
+            [rt.postgres.grammar.common-application :as app]
             [std.lang :as l]
-            [std.lang.base.library-snapshot :as snap]
             [std.lang.base.book :as book]
             [std.lang.base.emit-common :as emit-common]
             [std.lang.base.emit-data :as emit-data]
+            [std.lang.base.library-snapshot :as snap]
             [std.lang.base.util :as ut]
-            [std.lib.schema :as schema]
-            [std.string :as str]))
+            [std.lib.collection]
+            [std.lib.foundation]
+            [std.lib.schema :as schema]))
 
 (def ^:dynamic *skip-checks* false)
 
@@ -22,7 +22,7 @@
   {:added "4.0"}
   [sym {:keys [lang module snapshot] :as mopts}]
   (let [[type sym-module] (emit-common/emit-symbol-classify sym mopts)
-        sym-module  (cond (not sym-module)  (h/error "No module entry for sym" {:input sym})
+        sym-module  (cond (not sym-module)  (std.lib.foundation/error "No module entry for sym" {:input sym})
                           (= '- sym-module) (:id module)
                           :else sym-module)
         sym-id (symbol (name sym))
@@ -31,7 +31,7 @@
                                         sym-module
                                         sym-id
                                         :code)
-                   (h/error "No entry found:" {:input sym-id
+                   (std.lib.foundation/error "No entry found:" {:input sym-id
                                                :type type
                                                :module sym-module}))]
     [book entry]))
@@ -73,7 +73,7 @@
                    (schema/check-valid-columns
                     tsch
                     cols))
-         _ (and err  (h/error "Invalid keys." (assoc err :data m)))
+         _ (and err  (std.lib.foundation/error "Invalid keys." (assoc err :data m)))
          [_ err]  (if missing
                     (schema/check-missing-columns
                      tsch
@@ -82,18 +82,18 @@
                        (and (not ignore)
                             (or required primary)
                             (nil? (:default sql))))))
-         _ (and err  (h/error "Missing keys." (assoc err :data m)))
+         _ (and err  (std.lib.foundation/error "Missing keys." (assoc err :data m)))
          err (if format
                (schema/check-fn-columns tsch m))
          _ (if (not-empty err)
-             (h/error "Column errors." err))]
+             (std.lib.foundation/error "Column errors." err))]
      m)))
 
 (defn t-input-collect
   "adds schema info to keys of map"
   {:added "4.0"}
   ([tsch m]
-   (h/map-entries (fn [[k v]]
+   (std.lib.collection/map-entries (fn [[k v]]
                     [k [v (first (get tsch k))]])
                   m)))
 
@@ -126,7 +126,7 @@
     {:keys [book] :as mopts}]
    (let [[{:keys [type sql] :as attrs}] (get tsch k)
          enum-fn (fn [v {:keys [enum]}]
-                   (cond (and (h/form? v)
+                   (cond (and (std.lib.collection/form? v)
                               (= (first v) '++))
                          v
                          
@@ -227,7 +227,7 @@
                 :as params} mopts]
    (let [m    (merge (if defaults
                        (schema/get-defaults tsch))
-                     (h/map-entries (fn [[k [v attrs]]]
+                     (std.lib.collection/map-entries (fn [[k [v attrs]]]
                                         [k (t-val-fn tsch k v params mopts)])
                                       input))
          ks   (schema/order-keys tsch (keys m))]
@@ -273,7 +273,7 @@
          map-ks   (filter map? returning)
          [_ err]  (schema/check-valid-columns tsch (map :as map-ks))
          _        (if err
-                    (h/error "Not valid." (assoc err :data map-ks)))
+                    (std.lib.foundation/error "Not valid." (assoc err :data map-ks)))
          sym-ks   (filter symbol? returning)
          data-entries (schema/get-returning tsch (filter keyword? returning))]
      (vec (concat (map (comp hash-set key-fn) data-entries)
@@ -289,7 +289,7 @@
    (let [key-fn (or key-fn
                     t-key-attrs-fn)]
      (cond (or (#{'*} returning)
-               (h/form? returning)
+               (std.lib.collection/form? returning)
                (number? returning)
                (nil? returning))
            returning
@@ -301,7 +301,7 @@
            (list '--- (t-returning-cols tsch #{returning} key-fn))
            
            :else
-           (h/error "Not valid" {:value returning})))))
+           (std.lib.foundation/error "Not valid" {:value returning})))))
 
 (defn t-where-hashvec-transform
   "transforms entries"
@@ -350,12 +350,12 @@
                             [k [:is-null]]
 
                             (and (= :enum type)
-                                 (not (and (h/form? v)
+                                 (not (and (std.lib.collection/form? v)
                                            (= (first v) '++))))
                             [k [op (list '++ v (:ns enum))]]
 
                             (or (map? v) (ut/hashvec? v))
-                            (let [_  (if (not= type :ref) (h/error "Not of type :ref" {:keys k
+                            (let [_  (if (not= type :ref) (std.lib.foundation/error "Not of type :ref" {:keys k
                                                                                        :attribute attr}))
                                   rtsch (get-in schema
                                                 [:tree
@@ -374,8 +374,8 @@
                       (val-fn k v :eq)))
          tf-fn   (fn [m]
                    (->> m
-                        (h/map-entries entry-fn)
-                        (h/map-keys (fn [k] (t-key-fn tsch k)))))]
+                        (std.lib.collection/map-entries entry-fn)
+                        (std.lib.collection/map-keys (fn [k] (t-key-fn tsch k)))))]
      (cond (ut/hashvec? where)
            (t-where-hashvec where tf-fn)
            
@@ -383,10 +383,10 @@
            (let [[_ err]      (schema/check-valid-columns tsch (keys where))
                  _   (if (and err
                               (not *skip-checks*))
-                       (h/error "Invalid columns." (assoc err :data where)))]
+                       (std.lib.foundation/error "Invalid columns." (assoc err :data where)))]
              (tf-fn where))
            
-           :else (h/error "Not Allowed" {:value where})))))
+           :else (std.lib.foundation/error "Not Allowed" {:value where})))))
 
 ;;
 ;; append wrappers
@@ -423,7 +423,7 @@
                                                              (list '. target-sym #{target-col})]])
                              
                             :else
-                            (h/error "Key is not a ref." {:key k :attr attr}))))]
+                            (std.lib.foundation/error "Key is not a ref." {:key k :attr attr}))))]
      (vec
       (mapcat (fn [x]
                 (cond (keyword? x)
@@ -460,7 +460,7 @@
   ([form cols tsch {:keys [newline]}]
    (let [[_ err] (if (vector? cols)
                    (schema/check-valid-columns tsch cols))
-         _ (if err (h/error "Not valid." (assoc err :data cols)))]
+         _ (if err (std.lib.foundation/error "Not valid." (assoc err :data cols)))]
      (cond-> form
        (and cols newline) (conj \\)
        cols  (conj :order-by (if (vector? cols)
@@ -539,7 +539,7 @@
    (if-not lock
      form
      (let [_ (if (not (vector? lock))
-               (h/error "Lock must be a vector" {:input lock}))
+               (std.lib.foundation/error "Lock must be a vector" {:input lock}))
            modes {:update [:for :update]
                   :share  [:for :share]
                   :key-share [:for :key :share]
@@ -550,7 +550,7 @@
            [mode option] lock
            
            clause (or (modes mode)
-                      (h/error "Invalid lock mode" {:input mode :allowed (keys modes)}))
+                      (std.lib.foundation/error "Invalid lock mode" {:input mode :allowed (keys modes)}))
            
            clause (cond-> clause
                     (options option) (into (options option)))]

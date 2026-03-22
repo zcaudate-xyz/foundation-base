@@ -1,10 +1,10 @@
 (ns std.image
-  (:require [std.lib :refer [definvoke]]
-            [std.image.awt]
+  (:require [std.image.awt]
             [std.image.base]
             [std.image.base.common :as common]
             [std.image.base.model :as model]
-            [std.image.protocol :as protocol.image])
+            [std.image.protocol :as protocol.image]
+            [std.lib.invoke :refer [definvoke]])
   (:import (java.awt.image BufferedImage))
   (:refer-clojure :exclude [read]))
 

@@ -1,8 +1,7 @@
 (ns std.lang.model.spec-xtalk.fn-lua-test
-  (:use code.test)
-  (:require [std.lang.model.spec-xtalk.fn-lua :refer :all]
-            [std.lang :as l]
-            [std.lib :as h]))
+  (:require [std.lang :as l]
+            [std.lang.model.spec-xtalk.fn-lua :refer :all])
+  (:use code.test))
 
 ^{:refer std.lang.model.spec-xtalk.fn-lua/lua-tf-x-del :added "4.0"}
 (fact "deletes object"

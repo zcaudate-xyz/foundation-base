@@ -1,6 +1,6 @@
 (ns std.scheduler.common-test
-  (:use code.test)
-  (:require [std.scheduler.common :refer :all]))
+  (:require [std.scheduler.common :refer :all])
+  (:use code.test))
 
 (defn -dummy-spawn- [runtime arg]
     (str "spawned-" arg))

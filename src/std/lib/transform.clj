@@ -1,8 +1,8 @@
 (ns std.lib.transform
-  (:require [std.string.common :as str]
-            [std.string.wrap :as wrap]
-            [std.string.path :as path]
+  (:require [std.lib.collection :as coll]
+            [std.lib.foundation :as h]
             [std.lib.transform.allow :as allow]
+            [std.lib.transform.apply :as transform]
             [std.lib.transform.base.alias :as alias]
             [std.lib.transform.base.enum :as enum]
             [std.lib.transform.base.keyword :as keyword]
@@ -13,10 +13,10 @@
             [std.lib.transform.ignore :as ignore]
             [std.lib.transform.mask :as mask]
             [std.lib.transform.require :as require]
-            [std.lib.transform.apply :as transform]
             [std.lib.transform.validate :as validate]
-            [std.lib.collection :as coll]
-            [std.lib.foundation :as h]))
+            [std.string.common :as str]
+            [std.string.path :as path]
+            [std.string.wrap :as wrap]))
 
 (def tree-directives
   #{:pre-require       ;;

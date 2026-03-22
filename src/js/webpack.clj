@@ -1,7 +1,6 @@
 ^{:no-test true}
 (ns js.webpack
-  (:require [std.lang :as l]
-            [std.lib :as h]))
+  (:require [std.lang :as l]))
 
 (l/script :js
   {:require [[js.core :as j]]

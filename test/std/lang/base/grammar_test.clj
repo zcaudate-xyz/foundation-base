@@ -1,7 +1,7 @@
 (ns std.lang.base.grammar-test
-  (:use code.test)
   (:require [std.lang.base.grammar :refer :all]
-            [std.lang.base.grammar-spec :as spec]))
+            [std.lang.base.grammar-spec :as spec])
+  (:use code.test))
 
 ^{:refer std.lang.base.grammar/gen-ops :added "4.0"}
 (fact "generates ops"

@@ -1,10 +1,9 @@
 (ns js.cell.impl-common-test
-  (:use code.test)
-  (:require [std.lang :as  l]
-            [std.lib :as h]
+  (:require [js.cell.playground :as browser]
             [std.fs :as fs]
-            [js.cell.playground :as browser]
-            [xt.lang.base-notify :as notify]))
+            [std.lang :as l]
+            [xt.lang.base-notify :as notify])
+  (:use code.test))
 
 (l/script- :js
   {:runtime :basic

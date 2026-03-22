@@ -1,12 +1,13 @@
 (ns jvm.reflect
-  (:require [std.print.format.report :as report]
-            [std.object.query :as query]
-            [std.object.query.input :as input]
+  (:require [jvm.reflect.print :as print]
+            [std.lib.env]
+            [std.lib.walk]
             [std.object.element :as element]
             [std.object.element.common :as common]
+            [std.object.query :as query]
+            [std.object.query.input :as input]
             [std.pretty :as pretty]
-            [jvm.reflect.print :as print]
-            [std.lib :as h])
+            [std.print.format.report :as report])
   (:refer-clojure :exclude [.% .%> .? .?* .?> .* .*> .&]))
 
 (defmacro .%
@@ -22,7 +23,7 @@
   "helper function to `.%>`"
   {:added "3.0"}
   ([tree]
-   (-> (h/postwalk (fn [form]
+   (-> (std.lib.walk/postwalk (fn [form]
                      (cond (class? form)
                            (.getName ^Class form)
 
@@ -57,11 +58,11 @@
   {:added "3.0"}
   ([obj]
    `(let [~'res (query/delegate ~obj)]
-      (h/local :println (str "\n#" (type ~obj)))
+      (std.lib.env/local :println (str "\n#" (type ~obj)))
       (doto ~'res
         (->> (into {})
              (pretty/pprint-str)
-             (h/local :println))))))
+             (std.lib.env/local :println))))))
 
 (defn query-printed
   "prints the output on the result to display
@@ -84,7 +85,7 @@
              (print/print-classname title cls)
              (when (or (= query-fn query/query-supers)
                        (= query-fn query/query-hierarchy))
-               (h/local :print "\n")
+               (std.lib.env/local :print "\n")
                (print-hierarchy (element/class-hierarchy cls)))
              (print/print-class elems)))
      elems)))

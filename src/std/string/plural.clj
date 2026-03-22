@@ -1,7 +1,7 @@
 (ns std.string.plural
-  (:require [std.string.common :as str]
+  (:require [std.lib.collection :as coll]
             [std.lib.foundation :as h]
-            [std.lib.collection :as coll]))
+            [std.string.common :as str]))
 
 (def ^:dynamic *uncountable* (atom #{}))
 

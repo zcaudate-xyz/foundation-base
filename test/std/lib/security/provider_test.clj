@@ -1,6 +1,6 @@
 (ns std.lib.security.provider-test
-  (:use code.test)
-  (:require [std.lib.security.provider :refer :all]))
+  (:require [std.lib.security.provider :refer :all])
+  (:use code.test))
 
 ^{:refer std.lib.security.provider/list-providers :added "3.0" :class [:security/provider]}
 (comment "list all security providers"

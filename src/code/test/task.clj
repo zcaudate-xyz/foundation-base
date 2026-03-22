@@ -1,18 +1,19 @@
 (ns code.test.task
-  (:require [std.string :as str]
+  (:require [clojure.set]
             [code.project :as project]
-            [std.task :as task]
-            [code.test.checker.common]
-            [code.test.checker.collection]
-            [code.test.checker.logic]
             [code.test.base.context :as context]
-            [code.test.base.runtime :as rt]
+            [code.test.base.executive :as executive]
             [code.test.base.listener :as listener]
             [code.test.base.print :as print]
+            [code.test.base.runtime :as rt]
+            [code.test.checker.collection]
+            [code.test.checker.common]
+            [code.test.checker.logic]
             [code.test.compile]
-            [code.test.base.executive :as executive]
-            [std.lib :as h :refer [definvoke]]
-            [std.lib.result :as res]))
+            [std.lib.invoke :refer [definvoke]]
+            [std.lib.result :as res]
+            [std.string.common]
+            [std.task :as task]))
 
 (defn- display-errors
   [data]
@@ -26,7 +27,7 @@
       (res/result {:status :error
                    :data (format "passed (%s), errors: #{%s}"
                                  cnt
-                                 (str/joinl ", " (mapv #(str (first %) ":" (second %))
+                                 (std.string.common/joinl ", " (mapv #(str (first %) ":" (second %))
                                                        errors)))}))))
 
 (defn- retrieve-fn [kw]
@@ -134,7 +135,7 @@
   {:added "3.0"}
   ([]
    (let [latest @executive/+latest+]
-     (-> (h/union (set (:errored latest))
+     (-> (clojure.set/union (set (:errored latest))
                   (set (map (comp :ns :meta) (:failed latest)))
                   (set (map (comp :ns :meta) (:throw latest)))
                   (set (map (comp :ns :meta) (:timeout latest))))

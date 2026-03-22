@@ -1,12 +1,15 @@
 (ns rt.postgres.script.graph-view
-  (:require [rt.postgres.script.graph-base :as base]
+  (:require [rt.postgres.grammar.common-application :as app]
+            [rt.postgres.script.graph-base :as base]
             [rt.postgres.script.graph-query :as query]
-            [rt.postgres.grammar.common-application :as app]
-            [std.string :as str]
+            [std.lang :as l]
             [std.lang.base.emit-preprocess :as preprocess]
             [std.lang.base.library-snapshot :as snap]
-            [std.lang :as l]
-            [std.lib :as h]))
+            [std.lib.env]
+            [std.lib.foundation]
+            [std.lib.template]
+            [std.lib.walk]
+            [std.string.case]))
 
 ;;
 ;; select
@@ -17,8 +20,8 @@
   {:added "4.0"}
   [sym access]
   (let [{:keys [roles forward reverse]} access
-        [forward-table forward-clause] (h/postwalk h/resolve-namespaced forward)
-        [reverse-table reverse-clause] (h/postwalk h/resolve-namespaced reverse)
+        [forward-table forward-clause] (std.lib.walk/postwalk std.lib.foundation/resolve-namespaced forward)
+        [reverse-table reverse-clause] (std.lib.walk/postwalk std.lib.foundation/resolve-namespaced reverse)
         module  (l/rt:module :postgres)
         mopts   (l/rt:macro-opts :postgres)
         schema  (:schema (app/app (first (:application (:static module)))))
@@ -28,7 +31,7 @@
                                                          :where forward-clause})
                           (base/select-fn reverse-table {:schema schema
                                                          :where reverse-clause})])]
-    {:symbol (symbol (name (h/ns-sym)) (name sym))
+    {:symbol (symbol (name (std.lib.env/ns-sym)) (name sym))
      :forward {:table forward-table
                :clause forward-clause
                :form forward-form}
@@ -57,9 +60,9 @@
                          [k e])))
           [rel entry] (or (query-fn :forward)
                           (query-fn :reverse)
-                          (h/error "Access not valid" {:access access
+                          (std.lib.foundation/error "Access not valid" {:access access
                                                        :table table-sym}))]
-      {:symbol   (h/var-sym access-var)
+      {:symbol   (std.lib.foundation/var-sym access-var)
        :relation rel
        :query    entry
        :roles    (:roles access-map)})))
@@ -71,13 +74,13 @@
   (let [{:keys [scope args tag access guards autos] :as msym} (meta sym)
         [table] (:- msym)
         table-key  (keyword (name table))
-        table-sym  (h/var-sym (resolve table))
-        guards     (h/postwalk h/resolve-namespaced guards)
-        autos      (h/postwalk h/resolve-namespaced autos)
+        table-sym  (std.lib.foundation/var-sym (resolve table))
+        guards     (std.lib.walk/postwalk std.lib.foundation/resolve-namespaced guards)
+        autos      (std.lib.walk/postwalk std.lib.foundation/resolve-namespaced autos)
         tag        (or tag
-                       (-> (clojure.core/subs (std.string/camel-case (str sym))
+                       (-> (clojure.core/subs (std.string.case/camel-case (str sym))
                                               (clojure.core/count (name table)))
-                           (std.string/spear-case)))]
+                           (std.string.case/spear-case)))]
     {:table  table-sym
      :key    table-key
      :scope  scope
@@ -105,7 +108,7 @@
   {:added "4.0"}
   [args]
   (or (first (filter symbol? args))
-      (h/error "No lead symbol found" {:args args})))
+      (std.lib.foundation/error "No lead symbol found" {:args args})))
 
 (defn defsel-fn
   "the defsel generator function"
@@ -117,7 +120,7 @@
         query     (or query
                       (if (and (:personal scope)
                                view-access)
-                        (h/postwalk-replace {'<%> (lead-symbol args)}
+                        (std.lib.walk/postwalk-replace {'<%> (lead-symbol args)}
                                             (:clause (:query view-access)))))
         main-query  (cond-> {:returning #{:id}
                              :as :raw}
@@ -129,7 +132,7 @@
                      (last main-form)
                      nil)]
     (with-meta
-      (h/$ (defn.pg ~(with-meta sym
+      (std.lib.template/$ (defn.pg ~(with-meta sym
                        {:%% :sql
                         :static/view (assoc view-map
                                             :type :select
@@ -163,7 +166,7 @@
                                      :returning query
                                      :single true}))]
     (with-meta
-      (h/$ (defn.pg ~(with-meta sym
+      (std.lib.template/$ (defn.pg ~(with-meta sym
                        {:%% :sql
                         :static/view (assoc view-map
                                             :type :return
@@ -195,13 +198,13 @@
         qsel-entry @@(resolve qsel-sym)
         _ (if (not= (:table (:static/view qret-entry))
                     (:table (:static/view qsel-entry)))
-            (h/error "Not the same table"))
+            (std.lib.foundation/error "Not the same table"))
         _ (if (not= (:type (:static/view qret-entry))
                     :return)
-            (h/error "Not a return type" (into {} qret-entry)))
+            (std.lib.foundation/error "Not a return type" (into {} qret-entry)))
         _ (if (not= (:type (:static/view qsel-entry))
                     :select)
-            (h/error "Not a select type" (into {} qsel-entry)))
+            (std.lib.foundation/error "Not a select type" (into {} qsel-entry)))
         
         ;;
         ;; RET
@@ -210,10 +213,10 @@
         qret-targs  (vec (drop 1 (filter symbol? (:args (:static/view qret-entry)))))
         _ (if (not= (clojure.core/count qret-args)
                     (clojure.core/count qret-targs))
-            (h/error "Args need to be the same length" {:input qret-args
+            (std.lib.foundation/error "Args need to be the same length" {:input qret-args
                                                         :template qret-targs}))
         qret-map  (zipmap qret-targs qret-args)
-        qret-query (h/prewalk (fn [x]
+        qret-query (std.lib.walk/prewalk (fn [x]
                                 (if (contains? qret-map x)
                                   (qret-map x)
                                   x))
@@ -226,10 +229,10 @@
         qsel-targs  (vec (filter symbol? (:args (:static/view qsel-entry))))
         _ (if (not= (clojure.core/count qsel-args)
                     (clojure.core/count qsel-targs))
-            (h/error "Args need to be the same length" {:input qsel-args
+            (std.lib.foundation/error "Args need to be the same length" {:input qsel-args
                                                         :template qsel-targs}))
         qsel-map  (zipmap qsel-targs qsel-args)
-        qsel-query (h/prewalk (fn [x]
+        qsel-query (std.lib.walk/prewalk (fn [x]
                                 (if (contains? qsel-map x)
                                   (qsel-map x)
                                   x))

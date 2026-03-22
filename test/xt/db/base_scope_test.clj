@@ -1,7 +1,6 @@
 (ns xt.db.base-scope-test
-  (:use code.test)
-  (:require [std.lang :as l]
-            [std.lib :as h]))
+  (:require [std.lang :as l])
+  (:use code.test))
 
 (l/script- :xtalk
   {:require [[xt.lang.base-lib :as k]

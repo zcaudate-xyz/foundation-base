@@ -1,8 +1,8 @@
 (ns js.cell.base-fn-mock-test
-  (:use code.test)
-  (:require [std.lib :as h]
-            [std.lang :as l]
-            [xt.lang.base-notify :as notify]))
+  (:require [std.lang :as l]
+            [std.lib.foundation]
+            [xt.lang.base-notify :as notify])
+  (:use code.test))
 
 (l/script- :js
   {:runtime :basic
@@ -315,7 +315,7 @@
   
   (do 
     (k/trace-log-clear)
-    (h/suppress
+    (std.lib.foundation/suppress
      (notify/wait-on :js
        (var link )
        (j/notify (link-fn/ping link))))

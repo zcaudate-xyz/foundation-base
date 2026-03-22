@@ -1,7 +1,7 @@
 (ns code.doc.engine.winterfell
-  (:require [std.string :as str]
-            [code.doc.engine.plugin.api :as api]
-            [code.doc.render.util :as util]))
+  (:require [code.doc.engine.plugin.api :as api]
+            [code.doc.render.util :as util]
+            [std.string.common]))
 
 (defmulti page-element
   "seed function for rendering a page element"
@@ -82,7 +82,7 @@
           (util/join-string)
           (util/basic-html-escape)
           (util/adjust-indent indentation)
-          (str/trim))]]
+          (std.string.common/trim))]]
     (if failed
       (apply vector
              :div

@@ -1,17 +1,8 @@
 (ns script.css
   (:require [garden.core :as garden]
-            [std.string :as str]
-            [std.object :as object])
-  (:import (com.steadystate.css.parser CSSOMParser
-                                       SelectorListImpl)
-           (com.steadystate.css.dom CSSStyleRuleImpl
-                                    CSSStyleDeclarationImpl
-                                    CSSStyleSheetImpl
-                                    CSSRuleListImpl
-                                    Property)
-           (org.w3c.dom.css CSSRule CSSStyleSheet CSSStyleRule)
-           (org.w3c.css.sac InputSource)
-           (java.io StringReader)))
+            [std.object :as object]
+            [std.string.common])
+  (:import (com.steadystate.css.parser CSSOMParser SelectorListImpl) (com.steadystate.css.dom CSSStyleRuleImpl CSSStyleDeclarationImpl CSSStyleSheetImpl CSSRuleListImpl Property) (org.w3c.dom.css CSSRule CSSStyleSheet CSSStyleRule) (org.w3c.css.sac InputSource) (java.io StringReader)))
 
 (def +parser+ (CSSOMParser.))
 
@@ -33,7 +24,7 @@
    => \"node {\\n  bold: true;\\n  color: black;\\n}\\nh1 {\\n  align: left;\\n}\""
   {:added "3.0"}
   ([v]
-   (str/joinl (map garden/css v) "\n")))
+   (std.string.common/joinl (map garden/css v) "\n")))
 
 (defn- to-string
   [s]
@@ -47,9 +38,9 @@
    => [:bold \"true\"]"
   {:added "3.0"}
   ([text]
-   (let [props (-> text to-string (str/split #": "))]
+   (let [props (-> text to-string (std.string.common/split #": "))]
      (-> props
-         (update-in [0] (comp keyword str/trim))))))
+         (update-in [0] (comp keyword std.string.common/trim))))))
 
 (defn parse-rule
   "helper function for parse-css"
@@ -60,7 +51,7 @@
                  (map str))
          k  (if (= 1 (count k))
               (-> k first keyword)
-              (str/join " " k))
+              (std.string.common/join " " k))
          v  (->> (.getProperties ^CSSStyleDeclarationImpl (.getStyle rule))
                  (map parse-pair)
                  (into {}))]

@@ -1,8 +1,8 @@
 (ns std.block.heal.parse-test
-  (:use code.test)
   (:require [std.block.heal.parse :as parse]
-            [std.string :as str]
-            [std.lib :as h]))
+            [std.lib.env]
+            [std.string.prose])
+  (:use code.test))
 
 ^{:refer std.block.heal.parse/parse-delimiters :added "4.0"}
 (fact "gets all the delimiters in the file"
@@ -113,7 +113,7 @@
 (fact "prints all the parsed carets"
   ^:hidden
 
-  (h/with-out-str
+  (std.lib.env/with-out-str
     (parse/print-delimiters
      (slurp "test-data/std.block.heal/cases/001_basic.block")
      (parse/parse-delimiters
@@ -154,7 +154,7 @@
   ^:hidden
 
   (parse/parse-lines
-   (str/join-lines
+   (std.string.prose/join-lines
     ["(:? ()"
      "    ())"
      "    nil)"]))
@@ -175,7 +175,7 @@
    {:type :code, :line 3, :last-idx 7, :col 5, :char "n"}]
 
   (parse/parse-lines
-   (str/join-lines
+   (std.string.prose/join-lines
     ["(:? ()"
      "    ())"
      "    nil {})"]))

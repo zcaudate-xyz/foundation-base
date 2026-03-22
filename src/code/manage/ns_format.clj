@@ -3,9 +3,9 @@
             [code.query :as query]
             [std.block :as block]
             [std.block.navigate :as nav]
+            [std.lib.collection]
             [std.lib.zip :as zip]
-            [std.lib :as h]
-            [std.string :as str]))
+            [std.string.common]))
 
 (defonce +key-order+
   {:use 0
@@ -112,7 +112,7 @@
                                         (group-by (comp first-element block/value))
                                         (filterv (fn [[_ v]]
                                                    (> (count v) 1)))
-                                        (h/map-vals merge-eligible))
+                                        (std.lib.collection/map-vals merge-eligible))
                          move-right (fn [nav]
                                       (if-let [nav (nav/right nav)]
                                         nav
@@ -242,12 +242,12 @@
                  (fn [nav]
                    (let [form (nav/value nav)]
                      (cond (symbol? form)
-                           (let [arr (str/split (str form) #"\.")
+                           (let [arr (std.string.common/split (str form) #"\.")
                                  cls (last arr)
                                  nsp (butlast arr)]
 
                              (nav/replace nav
-                                          (list (symbol (str/join "." nsp))
+                                          (list (symbol (std.string.common/join "." nsp))
                                                 (symbol cls))))
 
                            (vector? form)

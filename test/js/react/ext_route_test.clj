@@ -1,6 +1,6 @@
 (ns js.react.ext-route-test
-  (:use code.test)
-  (:require [js.react.ext-route :refer :all]))
+  (:require [js.react.ext-route :refer :all])
+  (:use code.test))
 
 ^{:refer js.react.ext-route/makeRoute :added "4.0" :unchecked true}
 (fact "makes a react compatible route")

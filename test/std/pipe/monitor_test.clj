@@ -1,6 +1,6 @@
 (ns std.pipe.monitor-test
-  (:use code.test)
-  (:require [std.pipe.monitor :refer :all]))
+  (:require [std.pipe.monitor :refer :all])
+  (:use code.test))
 
 ^{:refer std.pipe.monitor/create-monitor :added "4.1"}
 (fact "TODO")

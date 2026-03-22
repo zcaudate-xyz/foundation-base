@@ -1,6 +1,6 @@
 (ns code.doc.collect.base
-  (:require [std.print :as print]
-            [std.lib :as h]))
+  (:require [std.lib.collection]
+            [std.print :as print]))
 
 (defn collect-namespaces
   "combines `:ns-form` directives into a namespace map for easy referral
@@ -18,10 +18,10 @@
    (let [all    (->> (get-in articles [name :elements])
                      (filter #(-> % :type (= :ns-form))))
          meta   (-> all first :meta)
-         namespaces (h/map-juxt [:ns identity] all)]
+         namespaces (std.lib.collection/map-juxt [:ns identity] all)]
      (-> interim
-         (update-in [:articles name :meta] (fnil h/merge-nested {}) meta)
-         (update-in [:namespaces] (fnil h/merge-nested {}) namespaces)
+         (update-in [:articles name :meta] (fnil std.lib.collection/merge-nested {}) meta)
+         (update-in [:namespaces] (fnil std.lib.collection/merge-nested {}) namespaces)
          (update-in [:articles name :elements]
                     (fn [elements] (filter #(-> % :type (not= :ns-form)) elements)))))))
 
@@ -38,9 +38,9 @@
   ([{:keys [articles] :as interim} name]
    (let [articles (->> (get-in articles [name :elements])
                        (filter #(-> % :type (= :article)))
-                       (apply h/merge-nested {}))]
+                       (apply std.lib.collection/merge-nested {}))]
      (-> interim
-         (update-in [:articles name :meta] (fnil h/merge-nested {}) (dissoc articles :type))
+         (update-in [:articles name :meta] (fnil std.lib.collection/merge-nested {}) (dissoc articles :type))
          (update-in [:articles name :elements]
                     (fn [elements] (filter #(-> % :type (not= :article)) elements)))))))
 
@@ -57,9 +57,9 @@
   ([{:keys [articles] :as interim} name]
    (let [global (->> (get-in articles [name :elements])
                      (filter #(-> % :type (= :global)))
-                     (apply h/merge-nested {}))]
+                     (apply std.lib.collection/merge-nested {}))]
      (-> interim
-         (update-in [:global] (fnil h/merge-nested {}) (dissoc global :type))
+         (update-in [:global] (fnil std.lib.collection/merge-nested {}) (dissoc global :type))
          (update-in [:articles name :elements]
                     (fn [elements] (filter #(-> % :type (not= :global)) elements)))))))
 

@@ -1,8 +1,8 @@
 (ns rt.solidity.compile-common
-  (:require [std.lib :as h :refer [defimpl]]
+  (:require [rt.solidity.env-ganache :as env-ganache]
             [std.lang :as l]
-            [std.lib.network :as network]
-            [rt.solidity.env-ganache :as env-ganache]))
+            [std.lib.impl :refer [defimpl]]
+            [std.lib.network :as network]))
 
 ;;
 ;; TYPES

@@ -1,7 +1,8 @@
 (ns rt.base.suite
-  (:require [std.lang :as l]
-            [std.concurrent :as cc]
-            [std.lib :as h]))
+  (:require [std.concurrent :as cc]
+            [std.lang :as l]
+            [std.lib.component]
+            [std.string.prose]))
 
 (l/script :bash
   {:runtime :basic})
@@ -12,9 +13,9 @@
                :args ["tail" "-f" "/usr/local/var/log/rsyslog-remote.log"]}))
   @(cc/send -proc- {:op :string})
   
-  (h/stop -proc-)
+  (std.lib.component/stop -proc-)
 
-  (h/start -proc-)
+  (std.lib.component/start -proc-)
 
   (defonce -nc-
     (cc/relay {:type :process
@@ -69,7 +70,7 @@
   (l/with:print-all
    (!.sh
     (do (| (echo
-            (:Q (@! (std.string/|
+            (:Q (@! (std.string.prose/|
                      "\\# Header"
                      ".nf"
                      ".mk a"

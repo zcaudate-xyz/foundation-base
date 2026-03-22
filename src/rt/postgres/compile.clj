@@ -1,12 +1,7 @@
 (ns rt.postgres.compile
-  "Compatibility facade over the split generation namespaces.
-
-   Prefer:
-
-   - `rt.postgres.compile.server-db`
-   - `rt.postgres.compile.server-api`"
-  (:require [rt.postgres.compile.server-db :as server-db]
-            [rt.postgres.compile.server-api :as server-api]))
+  (:require [rt.postgres.compile.server-api :as server-api]
+            [rt.postgres.compile.server-db :as server-db])
+  "Compatibility facade over the split generation namespaces.\n\n   Prefer:\n\n   - `rt.postgres.compile.server-db`\n   - `rt.postgres.compile.server-api`")
 
 (def +targets+
   (merge server-db/+targets+

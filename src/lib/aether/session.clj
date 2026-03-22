@@ -1,12 +1,7 @@
 (ns lib.aether.session
   (:require [lib.aether.listener :as listener]
-            [lib.aether.local-repo :as local]
-            [std.lib :as h])
-  (:import (org.apache.maven.repository.internal MavenRepositorySystemUtils)
-           (org.eclipse.aether RepositorySystem)
-           (org.eclipse.aether.repository LocalRepository)
-           (org.eclipse.aether.util.graph.manager DependencyManagerUtils)
-           (org.eclipse.aether.util.graph.transformer ConflictResolver)))
+            [lib.aether.local-repo :as local])
+  (:import (org.apache.maven.repository.internal MavenRepositorySystemUtils) (org.eclipse.aether RepositorySystem) (org.eclipse.aether.repository LocalRepository) (org.eclipse.aether.util.graph.manager DependencyManagerUtils) (org.eclipse.aether.util.graph.transformer ConflictResolver)))
 
 (defn session
   "creates a session from a system:

@@ -1,13 +1,12 @@
 (ns js.react-native.matrix-math
   (:require [std.lang :as l]
-            [std.lib :as h]
-            ))
+            [std.lib.foundation]))
 
 (l/script :js
   {:import [["react-native/Libraries/Utilities/MatrixMath" :as MatrixMath]]})
 
 
-(h/template-entries [common/js-tmpl {:type :fragment
+(std.lib.foundation/template-entries [common/js-tmpl {:type :fragment
                                      :base "MatrixMath"}]
   [createIdentityMatrix
    createCopy

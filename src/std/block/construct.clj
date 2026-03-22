@@ -4,7 +4,7 @@
             [std.block.type :as type]
             [std.block.value :as value]
             [std.lib.collection :as c]
-            [std.string :as str])
+            [std.string.common])
   (:refer-clojure :exclude [empty newline comment]))
 
 (def ^:dynamic *tags* {:void       (set (keys check/*void-checks*))
@@ -145,7 +145,7 @@
          (throw (ex-info "Not a valid token." {:input string}))
 
          (= tag :regexp)
-         (let [lines (str/split-lines string)]
+         (let [lines (std.string.common/split-lines string)]
            [(count (last lines)) (dec (count lines))])
          
          :else
@@ -162,7 +162,7 @@
   {:added "3.0"}
   ([form]
    (let [tag     :string
-         lines   (str/split-lines form)
+         lines   (std.string.common/split-lines form)
          height  (dec (max 1 (count lines)))
          width   (cond-> (inc (count (last lines)))
                    (zero? height) inc)
@@ -400,7 +400,7 @@
          
          :else
          (let [counts (->> (base/block-string block)
-                           (str/split-lines)
+                           (std.string.common/split-lines)
                            (mapv count))
                counts (if (zero? offset)
                         counts
@@ -432,7 +432,7 @@
   {:added "4.0"}
   [block]
   (->> (base/block-string block)
-       (str/split-lines)))
+       (std.string.common/split-lines)))
 
 ;;
 ;; indentation

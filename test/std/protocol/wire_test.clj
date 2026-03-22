@@ -1,6 +1,6 @@
 (ns std.protocol.wire-test
-  (:use code.test)
-  (:require [std.protocol.wire :refer :all]))
+  (:require [std.protocol.wire :refer :all])
+  (:use code.test))
 
 ^{:refer std.protocol.wire/-as-input :added "3.0"}
 (fact "convert object to input")

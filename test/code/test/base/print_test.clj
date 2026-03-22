@@ -1,9 +1,9 @@
 (ns code.test.base.print-test
-  (:use code.test)
   (:require [code.test.base.print :refer :all]
-            [std.string :as str]
-            [std.lib :as h]
-            [std.print :as print]))
+            [std.lib.env]
+            [std.print :as print]
+            [std.string.common])
+  (:use code.test))
 
 ^{:refer code.test.base.print/pad-left :added "4.0"}
 (fact "pads a string to the left"
@@ -16,28 +16,28 @@
 (fact "formats a map diff"
   ^:hidden
   
-  (str/includes? (format-diff-map {:+ {:a 1}} 2) "+")
+  (std.string.common/includes? (format-diff-map {:+ {:a 1}} 2) "+")
   => true)
 
 ^{:refer code.test.base.print/format-diff-seq :added "4.0"}
 (fact "formats a seq diff"
   ^:hidden
   
-  (str/includes? (format-diff-seq [[:+ 0 1]] 2) "+")
+  (std.string.common/includes? (format-diff-seq [[:+ 0 1]] 2) "+")
   => true)
 
 ^{:refer code.test.base.print/format-diff :added "4.0"}
 (fact "formats a diff"
   ^:hidden
   
-  (str/includes? (format-diff {:+ {:a 1}}) "+")
+  (std.string.common/includes? (format-diff {:+ {:a 1}}) "+")
   => true)
 
 ^{:refer code.test.base.print/print-preliminary :added "4.1"}
 (fact "prints preliminary info"
   ^:hidden
   
-  (str/includes? (print-preliminary "TITLE" :red {:path "path" :line 10 :desc "desc" :form '(+ 1 1)}) "TITLE")
+  (std.string.common/includes? (print-preliminary "TITLE" :red {:path "path" :line 10 :desc "desc" :form '(+ 1 1)}) "TITLE")
   => true)
 
 ^{:refer code.test.base.print/print-success :added "3.0"}
@@ -47,7 +47,7 @@
 (fact "prints throw info"
   ^:hidden
   
-  (str/includes? (h/with-out-str
+  (std.string.common/includes? (std.lib.env/with-out-str
                    (print-throw {:name "test" :data (ex-info "error" {})}))
                  "THROW")
   => true)
@@ -56,7 +56,7 @@
 (fact "prints timeout info"
   ^:hidden
   
-  (str/includes? (h/with-out-str
+  (std.string.common/includes? (std.lib.env/with-out-str
                    (print-timeout {:name "test" :data 100 :check "check"}))
                  "TIMEOUT")
   => true)
@@ -65,7 +65,7 @@
 (fact "prints failed info"
   ^:hidden
   
-  (str/includes? (h/with-out-str
+  (std.string.common/includes? (std.lib.env/with-out-str
                    (print-failed {:name "test" :actual {:data 1} :check "check" :checker (fn [x] false)}))
                  "FAILED")
   => true)

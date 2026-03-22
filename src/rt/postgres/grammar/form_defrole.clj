@@ -1,10 +1,9 @@
 (ns rt.postgres.grammar.form-defrole
   (:require [rt.postgres.grammar.common :as common]
             [rt.postgres.script.impl-base :as base]
+            [std.lang :as l]
             [std.lang.base.util :as ut]
-            [std.string :as str]
-            [std.lib :as h]
-            [std.lang :as l]))
+            [std.lib.foundation]))
 
 (defn pg-defrole-access
   "creates defrole access form"
@@ -27,7 +26,7 @@
                                              \\ :for-select :to role
                                              :using (list 'quote (list [(base/t-where-transform tsch policy mopts)]))]]))
                                        
-                                       :else (h/error "Not Allowed" {:input sym})))
+                                       :else (std.lib.foundation/error "Not Allowed" {:input sym})))
                                select)]
      (vec select-forms))))
 

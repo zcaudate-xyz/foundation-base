@@ -1,6 +1,5 @@
 (ns js.react-native.physical-base
-  (:require [std.lang :as l]
-            [std.lib :as h]))
+  (:require [std.lang :as l]))
 
 (l/script :js
   {:runtime :websocket

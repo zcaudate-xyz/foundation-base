@@ -1,5 +1,5 @@
 (ns code.doc.link.chapter
-  (:require [std.lib :as h]))
+  (:require [std.lib.collection]))
 
 (defn link-chapters
   "links each chapter to each of the elements"
@@ -7,7 +7,7 @@
   ([interim name]
    (let [apis (->> (get-in interim [:articles name :elements])
                    (filter #(-> % :type (= :api)))
-                   (h/map-juxt [:namespace :table]))]
+                   (std.lib.collection/map-juxt [:namespace :table]))]
      (update-in interim [:articles name :elements]
                 (fn [elements]
                   (mapv (fn [{:keys [type link] :as element}]

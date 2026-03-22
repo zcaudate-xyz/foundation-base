@@ -1,12 +1,11 @@
 (ns std.lang.base.emit-test
-  (:use code.test)
-  (:require [std.lang.base.emit :as emit :refer :all]
+  (:require [std.lang.base.book-entry :as entry]
+            [std.lang.base.emit :as emit :refer :all]
             [std.lang.base.emit-common :as common]
             [std.lang.base.emit-helper :as helper]
-            [std.lang.base.grammar :as grammar]
             [std.lang.base.emit-prep-lua-test :as prep]
-            [std.lang.base.book-entry :as entry]
-            [std.lib :as h]))
+            [std.lang.base.grammar :as grammar])
+  (:use code.test))
 
 (def +reserved+
   (-> (grammar/build)

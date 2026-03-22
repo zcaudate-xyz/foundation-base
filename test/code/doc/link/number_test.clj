@@ -1,6 +1,6 @@
 (ns code.doc.link.number-test
-  (:use code.test)
-  (:require [code.doc.link.number :refer :all]))
+  (:require [code.doc.link.number :refer :all])
+  (:use code.test))
 
 ^{:refer code.doc.link.number/increment :added "3.0"}
 (fact "increment string representation"

@@ -1,9 +1,8 @@
 (ns lua.nginx.http-client-test
-  (:use code.test)
-  (:require [std.lang :as l]
-            [std.lib :as h]
+  (:require [rt.nginx]
             [std.json :as json]
-            [rt.nginx]))
+            [std.lang :as l])
+  (:use code.test))
 
 (l/script- :lua
   {:runtime :basic

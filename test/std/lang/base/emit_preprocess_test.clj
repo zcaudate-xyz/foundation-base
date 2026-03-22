@@ -1,17 +1,16 @@
 (ns std.lang.base.emit-preprocess-test
-  (:use code.test)
-  (:require [std.lang.base.emit-preprocess :refer :all]
+  (:require [std.lang.base.book :as b]
+            [std.lang.base.book-entry :as entry]
             [std.lang.base.emit-common :as common]
             [std.lang.base.emit-helper :as helper]
-            [std.lang.base.grammar :as grammar]
-            [std.lang.base.emit-prep-lua-test :as prep]
             [std.lang.base.emit-prep-js-test :as prep-js]
-            [std.lang.base.book-entry :as entry]
-            [std.lang.base.library :as lib]
-            [std.lang.base.book :as b]
-            [std.lang.base.library-snapshot :as snap]
+            [std.lang.base.emit-prep-lua-test :as prep]
+            [std.lang.base.emit-preprocess :refer :all]
+            [std.lang.base.grammar :as grammar]
             [std.lang.base.impl-entry :as impl-entry]
-            [std.lib :as h]))
+            [std.lang.base.library :as lib]
+            [std.lang.base.library-snapshot :as snap])
+  (:use code.test))
 
 (def +reserved+
   (-> (grammar/build)

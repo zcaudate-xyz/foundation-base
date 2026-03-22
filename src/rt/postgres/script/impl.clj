@@ -1,11 +1,10 @@
 (ns rt.postgres.script.impl
-  (:require [std.lib :as h]
-            [std.lang :as l]
-            [std.string :as str]
-            [rt.postgres.script.impl-base :as base]
+  (:require [rt.postgres.script.impl-base :as base]
             [rt.postgres.script.impl-insert :as insert]
             [rt.postgres.script.impl-main :as main]
-            [rt.postgres.script.impl-update :as update]))
+            [rt.postgres.script.impl-update :as update]
+            [std.lang :as l]
+            [std.lib.foundation]))
 
 (l/script :postgres
   rt.postgres
@@ -31,7 +30,7 @@
                  for-lock :for
                  :as params
                  :or {as :json}}]]
-   (or where (h/error "No WHERE clause" params))
+   (or where (std.lib.foundation/error "No WHERE clause" params))
    (-> (main/t-select spec-sym (merge {:single true
                                        :as :raw}
                                       params))
@@ -46,7 +45,7 @@
                  for-lock :for
                  :as params
                  :or {as :json}}]]
-   (or where (h/error "No WHERE clause" params))
+   (or where (std.lib.foundation/error "No WHERE clause" params))
    (-> (main/t-select spec-sym (merge {:single true} params))
        (with-meta {:op/type :get}))))
 
@@ -59,7 +58,7 @@
                  for-lock :for
                  :as params
                  :or {as :json}}]]
-   (or where (h/error "No WHERE clause" params))
+   (or where (std.lib.foundation/error "No WHERE clause" params))
    (main/t-id spec-sym params)))
 
 (defmacro.pg ^{:- [:block]

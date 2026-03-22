@@ -1,11 +1,11 @@
 (ns code.tool.refactor.tamagui-test
-  (:use code.test)
-  (:require [code.tool.refactor.tamagui :as sut]
-            [std.block.navigate :as edit]
-            [code.query :as query]
-            [std.lib.zip :as zip]
+  (:require [code.query :as query]
+            [code.tool.refactor.tamagui :as sut]
             [std.block.base :as base]
-            [std.string :as str]))
+            [std.block.navigate :as edit]
+            [std.lib.zip :as zip]
+            [std.string.common])
+  (:use code.test))
 
 ^{:refer code.tool.refactor.tamagui/convert-color :added "4.1"}
 (fact "converts color tokens to tailwind colors"
@@ -42,15 +42,15 @@
 (fact "processes component properties into className"
   (let [res (sut/process-props {:p "$4" :bg "red"} 'tm/Stack)
         cls (:className res)]
-    (str/includes? cls "bg-red") => true
-    (str/includes? cls "p-4") => true)
+    (std.string.common/includes? cls "bg-red") => true
+    (std.string.common/includes? cls "p-4") => true)
 
   (let [res (sut/process-props {:flex 1 :jc "center"} 'tm/XStack)
         cls (:className res)]
-    (str/includes? cls "flex") => true
-    (str/includes? cls "flex-row") => true
-    (str/includes? cls "justify-center") => true
-    (str/includes? cls "flex-1") => true))
+    (std.string.common/includes? cls "flex") => true
+    (std.string.common/includes? cls "flex-row") => true
+    (std.string.common/includes? cls "justify-center") => true
+    (std.string.common/includes? cls "flex-1") => true))
 
 ^{:refer code.tool.refactor.tamagui/refactor-element :added "4.1"}
 (fact "refactors tamagui element to new component and props"
@@ -59,9 +59,9 @@
 
   (let [[tag attrs & children] (sut/refactor-element [:% 'tm/YStack {:p "$4"} "Content"])]
     tag => :div
-    (str/includes? (:className attrs) "flex") => true
-    (str/includes? (:className attrs) "flex-col") => true
-    (str/includes? (:className attrs) "p-4") => true
+    (std.string.common/includes? (:className attrs) "flex") => true
+    (std.string.common/includes? (:className attrs) "flex-col") => true
+    (std.string.common/includes? (:className attrs) "p-4") => true
     children => '("Content")))
 
 ^{:refer code.tool.refactor.tamagui/transform-zipper :added "4.1"}

@@ -1,6 +1,6 @@
 (ns web3.lib.example-erc20-source
   (:require [std.lang :as l]
-            [std.lib :as h])
+            [std.lib.env])
   (:refer-clojure :exclude [name symbol]))
 
 (l/script :solidity
@@ -104,6 +104,6 @@
 ;;
 
 (def +default-contract+
-  {:ns   (h/ns-sym)
+  {:ns   (std.lib.env/ns-sym)
    :name "ERC20Basic"
    :args ["10000000000000000"]})

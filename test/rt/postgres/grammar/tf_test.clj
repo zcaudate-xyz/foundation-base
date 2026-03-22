@@ -1,6 +1,6 @@
 (ns rt.postgres.grammar.tf-test
-  (:use code.test)
-  (:require [rt.postgres.grammar.tf :refer :all]))
+  (:require [rt.postgres.grammar.tf :refer :all])
+  (:use code.test))
 
 ^{:refer rt.postgres.grammar.tf/pg-js-idx :added "4.0"}
 (fact "ignores single letter prefix"

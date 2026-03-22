@@ -1,6 +1,6 @@
 (ns std.lib.signal-test
-  (:use code.test)
-  (:require [std.lib.signal :refer :all]))
+  (:require [std.lib.signal :refer :all])
+  (:use code.test))
 
 ^{:refer std.lib.signal/new-id :added "3.0"}
 (fact "creates a random id with a keyword base"

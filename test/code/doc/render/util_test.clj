@@ -1,6 +1,6 @@
 (ns code.doc.render.util-test
-  (:use code.test)
-  (:require [code.doc.render.util :refer :all]))
+  (:require [code.doc.render.util :refer :all])
+  (:use code.test))
 
 ^{:refer code.doc.render.util/adjust-indent :added "3.0"}
 (fact "adjusts indents of multiple lines"

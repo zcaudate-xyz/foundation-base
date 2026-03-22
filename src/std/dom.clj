@@ -11,9 +11,9 @@
             [std.dom.react :as react]
             [std.dom.type :as type]
             [std.dom.update :as update]
-            [std.lib :as h]))
+            [std.lib.foundation]))
 
-(h/intern-in common/dom-attach
+(std.lib.foundation/intern-in common/dom-attach
              common/dom-children
              common/dom-compile
              common/dom-create

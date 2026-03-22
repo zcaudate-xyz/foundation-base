@@ -1,6 +1,5 @@
 (ns xt.runtime.type-list
-  (:require [std.lang :as l]
-            [std.lib :as h])
+  (:require [std.lang :as l])
   (:refer-clojure :exclude [list]))
 
 (l/script :xtalk

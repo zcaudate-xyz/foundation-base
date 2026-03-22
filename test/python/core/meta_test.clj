@@ -1,6 +1,6 @@
 (ns python.core.meta-test
-  (:use code.test)
-  (:require [python.core.meta :refer :all]))
+  (:require [python.core.meta :refer :all])
+  (:use code.test))
 
 ^{:refer python.core.meta/fetch-html :added "3.0"}
 (fact "fetches the doc containing builtin descriptions")

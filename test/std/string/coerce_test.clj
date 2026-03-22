@@ -1,6 +1,6 @@
 (ns std.string.coerce-test
-  (:use code.test)
-  (:require [std.string.coerce :refer :all]))
+  (:require [std.string.coerce :refer :all])
+  (:use code.test))
 
 ^{:refer std.string.coerce/from-string :added "3.0"}
 (fact "converts a string to an object"

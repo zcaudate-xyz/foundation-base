@@ -1,7 +1,7 @@
 (ns kmi.queue.stream-test
-  (:use code.test)
-  (:require [std.lang :as  l]
-            [rt.redis]))
+  (:require [rt.redis]
+            [std.lang :as l])
+  (:use code.test))
 
 (l/script- :lua
   {:runtime :redis.client

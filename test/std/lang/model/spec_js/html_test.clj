@@ -1,7 +1,7 @@
 (ns std.lang.model.spec-js.html-test
-  (:use code.test)
-  (:require [std.lang.model.spec-js.html :refer :all]
-            [std.html :as html]))
+  (:require [std.html :as html]
+            [std.lang.model.spec-js.html :refer :all])
+  (:use code.test))
 
 ^{:refer std.lang.model.spec-js.html/wrap-indent-inner :added "4.0"}
 (fact "increase indentation in walk inner")

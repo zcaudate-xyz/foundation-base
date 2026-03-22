@@ -1,6 +1,6 @@
 (ns std.make.readme-test
-  (:use code.test)
-  (:require [std.make.readme :refer :all]))
+  (:require [std.make.readme :refer :all])
+  (:use code.test))
 
 ^{:refer std.make.readme/has-orgfile? :added "4.0"}
 (fact "checks that an orgfile exists")

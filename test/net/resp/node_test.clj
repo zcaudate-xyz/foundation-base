@@ -1,10 +1,10 @@
 (ns net.resp.node-test
-  (:use code.test)
-  (:require [net.resp.node :refer :all :as node]
-            [net.resp.connection :as conn]
+  (:require [net.resp.connection :as conn]
+            [net.resp.node :as node :refer :all]
             [net.resp.wire :as wire]
-            [std.lib :as h]
-            [std.concurrent :as cc]))
+            [std.concurrent :as cc]
+            [std.lib.component])
+  (:use code.test))
 
 (defn create-node
   []
@@ -16,9 +16,9 @@
 
 (defmacro test-harness
   [& body]
-  `(h/with:lifecycle [~'|node| {:start (create-node)
+  `(std.lib.component/with-lifecycle [~'|node| {:start (create-node)
                                 :stop node/stop-node}]
-     (h/with:lifecycle [~'|conn| {:start (create-conn)
+     (std.lib.component/with-lifecycle [~'|conn| {:start (create-conn)
                                   :stop conn/connection:close}]
        ~@body)))
 

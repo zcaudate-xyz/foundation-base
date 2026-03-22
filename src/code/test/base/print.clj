@@ -1,16 +1,17 @@
 (ns code.test.base.print
-  (:require [std.print.ansi :as ansi]
-            [std.string :as str]
-            [std.fs :as fs]
-            [code.test.checker.common :as checker]
+  (:require [code.test.base.context :as context]
             [code.test.base.runtime :as rt]
-            [code.test.base.context :as context]
+            [code.test.checker.common :as checker]
             [code.test.checker.diff :as diff]
-            [std.lib.walk :as walk]
+            [std.fs :as fs]
             [std.lib.result :as res]
             [std.lib.time :as t]
+            [std.lib.walk :as walk]
+            [std.pretty :as pretty]
             [std.print :as print]
-            [std.pretty :as pretty]))
+            [std.print.ansi :as ansi]
+            [std.string.common]
+            [std.string.prose]))
 
 (defn- rel
   [path]
@@ -33,7 +34,7 @@
   (let [missing (:+ diff)
         extra   (:- diff)
         changed (:> diff)]
-    (str/join "\n"
+    (std.string.common/join "\n"
               (concat
                (for [[k v] missing]
                  (str (apply str (repeat indent " ")) (ansi/green "+ ") (pr-str k) " " (pr-str v)))
@@ -49,14 +50,14 @@
   {:added "4.0"}
   [diff indent]
   (if (vector? diff)
-    (str/join "\n"
+    (std.string.common/join "\n"
               (for [[op & args] diff]
                 (str (apply str (repeat indent " "))
                      (case op
                        :+ (str (ansi/green "+") " at " (first args) ": " (pr-str (second args)))
                        :- (str (ansi/red "-") " at " (first args) ": " (second args) " items")
                        (pr-str [op args])))))
-    (str/indent (pretty/pprint-str diff) indent)))
+    (std.string.prose/indent (pretty/pprint-str diff) indent)))
 
 (defn format-diff
   "formats a diff"
@@ -69,7 +70,7 @@
         (format-diff-seq diff 4)
 
         :else
-        (str/indent (pretty/pprint-str diff) 4)))
+        (std.string.prose/indent (pretty/pprint-str diff) 4)))
 
 (defn print-preliminary
   "prints preliminary info"
@@ -80,7 +81,7 @@
      (str (ansi/style (pad-left 8 title) #{color :bold})
           (ansi/style (format "  %s%s" line (or (rel path) "<current>")) #{:bold color})
           (if desc (str "\n" (ansi/style (pad-left 8 "Desc:")  #{color}) "  "  (ansi/style (str "\"" desc "\"") #{})) "")
-          (str "\n"  (ansi/style (pad-left 8 "Form:") #{color}) "  " (str/indent-rest (pretty/pprint-str (or original form)) 12))))))
+          (str "\n"  (ansi/style (pad-left 8 "Form:") #{color}) "  " (std.string.prose/indent-rest (pretty/pprint-str (or original form)) 12))))))
 
 (defn print-success
   "outputs the description for a successful test"
@@ -100,9 +101,9 @@
    (print/println
     (str (print-preliminary "THROW" :yellow summary)
          (str "\n" (ansi/style (pad-left 8 "ERROR") #{:yellow :bold})
-              "  " (str/indent-rest
-                    (str/join-lines
-                     (take 20 (str/split-lines
+              "  " (std.string.prose/indent-rest
+                    (std.string.prose/join-lines
+                     (take 20 (std.string.common/split-lines
                                (pr-str data))))
                     10))
          (if name (str "\n" (ansi/style (pad-left 8 "###") #{:yellow :bold}) "  " (ansi/style name #{:yellow  :bold})) "")
@@ -114,7 +115,7 @@
   ([{:keys [name data actual check parent] :as summary}]
    (print/println
     (str (print-preliminary "TIMEOUT" :magenta  summary)
-         (if parent (str "\n"  (ansi/style  (pad-left 8 "Parent") #{:magenta}) "  " (str/indent-rest (pretty/pprint-str parent) 12)))
+         (if parent (str "\n"  (ansi/style  (pad-left 8 "Parent") #{:magenta}) "  " (std.string.prose/indent-rest (pretty/pprint-str parent) 12)))
          (if check  (str "\n"  (ansi/style (pad-left 8  "Check:") #{:magenta}) "  " check))
          (str "\n" (ansi/style (pad-left 8 "AFTER") #{:bold :magenta}) "  " (ansi/style (str (t/format-ms (if actual
                                                                                                               (:data actual)
@@ -132,15 +133,15 @@
      (print/println
       (str (print-preliminary "FAILED" :red summary)
            (if parent  (str "\n" (ansi/style  (pad-left 8 "Parent")
-                                              #{:red}) "  " (str/indent-rest (pretty/pprint-str parent) 12)))
+                                              #{:red}) "  " (std.string.prose/indent-rest (pretty/pprint-str parent) 12)))
            (if diff
-             (str "\n"  (ansi/style (pad-left 8  "Actual:") #{:red}) "  " (str/indent-rest (pretty/pprint-str result) 12))
+             (str "\n"  (ansi/style (pad-left 8  "Actual:") #{:red}) "  " (std.string.prose/indent-rest (pretty/pprint-str result) 12))
              (str "\n"  (ansi/style (pad-left 8  "Check:") #{:red}) "  " check))
            (if diff
-             (str "\n" (ansi/style (pad-left 8 "Diff:") #{:red :bold}) "  " (str/indent-rest (format-diff diff) 10))
-             (str "\n"  (ansi/style (pad-left 8 "OUTPUT") #{:red :bold}) "  " (str/indent-rest
-                                                                               (str/join-lines
-                                                                                (take 20 (str/split-lines
+             (str "\n" (ansi/style (pad-left 8 "Diff:") #{:red :bold}) "  " (std.string.prose/indent-rest (format-diff diff) 10))
+             (str "\n"  (ansi/style (pad-left 8 "OUTPUT") #{:red :bold}) "  " (std.string.prose/indent-rest
+                                                                               (std.string.prose/join-lines
+                                                                                (take 20 (std.string.common/split-lines
                                                                                           (pr-str result))))
                                                                                10)))
            (if name (str "\n" (ansi/style (pad-left 8 "###") #{:red :bold}) "  " (ansi/style name #{:red :bold})) "")

@@ -1,7 +1,7 @@
 (ns std.config.secure-test
-  (:use code.test)
   (:require [std.config.secure :refer :all]
-            [std.lib.security :as security]))
+            [std.lib.security :as security])
+  (:use code.test))
 
 ^{:refer std.config.secure/resolve-key :added "3.0"}
 (fact "resolves the key for decryption"

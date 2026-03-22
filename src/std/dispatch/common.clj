@@ -1,9 +1,11 @@
 (ns std.dispatch.common
-  (:require [std.protocol.dispatch  :as protocol.dispatch]
-            [std.protocol.component :as protocol.component]
+  (:require [std.concurrent :as cc]
             [std.dispatch.hooks :as hooks]
-            [std.concurrent :as cc]
-            [std.lib :as h]))
+            [std.lib.collection]
+            [std.lib.function]
+            [std.lib.future]
+            [std.protocol.component :as protocol.component]
+            [std.protocol.dispatch :as protocol.dispatch]))
 
 (def +pool-defaults+
   {:keep-alive 1000})
@@ -24,7 +26,7 @@
   ([{:keys [runtime type options] :as dispatch}]
    {:type type
     :running false
-    :counter (h/map-vals deref (:counter runtime))
+    :counter (std.lib.collection/map-vals deref (:counter runtime))
     :options options}))
 
 (defn create-map
@@ -93,7 +95,7 @@
   ([{:keys [runtime options] :as dispatch} callback]
    (if (-> options :pool :type (not= :shared))
      (let [executor @(:executor runtime)]
-       (h/future (await-termination dispatch callback))
+       (std.lib.future/future (await-termination dispatch callback))
        (cc/exec:shutdown executor)))
    dispatch))
 
@@ -105,7 +107,7 @@
   ([{:keys [runtime options] :as dispatch} callback]
    (if (-> options :pool :type (not= :shared))
      (let [executor @(:executor runtime)]
-       (h/future (await-termination dispatch callback))
+       (std.lib.future/future (await-termination dispatch callback))
        (cc/exec:shutdown-now executor)))
    dispatch))
 
@@ -172,10 +174,10 @@
   {:added "3.0"}
   ([hooks]
    (->> hooks
-        (h/map-entries
+        (std.lib.collection/map-entries
          (fn [[k func]]
            (if-let [args (get +args+ k)]
-             (do (h/arg-check func (inc (count args))
+             (do (std.lib.function/arg-check func (inc (count args))
                               (str "Required inputs " k " - " (cons :dispatch args)))
                  [k func])
              (throw (ex-info "Key not available" {:key k}))))))))

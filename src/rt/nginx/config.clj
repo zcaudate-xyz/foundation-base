@@ -1,8 +1,8 @@
 (ns rt.nginx.config
   (:require [lua.nginx]
-            [std.lib :as h]
+            [rt.nginx.script :as script]
             [std.lang :as l]
-            [rt.nginx.script :as script]))
+            [std.lib.os]))
 
 ;;;;
 ;;
@@ -48,7 +48,7 @@
   ([{:keys [port
             blocks]}]
    [[:worker-processes 1]
-    (if (= (h/os) "Linux")
+    (if (= (std.lib.os/os) "Linux")
      [:user "root" "root"])
     [:error-log ["error.log" :warn]]
     [:events {:worker-connections 1024}]

@@ -1,16 +1,19 @@
 (ns rt.solidity.grammar
-  (:require [std.lang.base.emit :as emit]
+  (:require [std.lang.base.book :as book]
+            [std.lang.base.emit :as emit]
+            [std.lang.base.emit-block :as emit-block]
             [std.lang.base.emit-common :as emit-common]
             [std.lang.base.emit-fn :as emit-fn]
-            [std.lang.base.emit-block :as emit-block]
             [std.lang.base.emit-helper :as helper]
             [std.lang.base.grammar :as grammar]
             [std.lang.base.grammar-spec :as grammar-spec]
-            [std.lang.base.util :as ut]
-            [std.lang.base.book :as book]
             [std.lang.base.script :as script]
-            [std.string :as str]
-            [std.lib :as h])
+            [std.lang.base.util :as ut]
+            [std.lib.collection]
+            [std.lib.foundation]
+            [std.lib.template]
+            [std.string.common]
+            [std.string.prose])
   (:refer-clojure :exclude [require]))
 
 (def +visibility+
@@ -43,7 +46,7 @@
   (cond (or (keyword? v)
             (vector? v)
             (string? v))
-        (h/strn v)
+        (std.lib.foundation/strn v)
         
         :else v))
 
@@ -51,8 +54,8 @@
   "formats sol map key"
   {:added "4.0"}
   ([key grammar mopts]
-   (str/replace-all
-    (h/strn key)
+   (std.string.common/replace-all
+    (std.lib.foundation/strn key)
     "-"
     "_")))
 
@@ -116,8 +119,8 @@
                        modifiers]} (meta sym)
         [typestr preamble codebody] (sol-fn-elements sym args body grammar mopts)
         modstr (if modifiers
-                 (str/join " " (map h/strn modifiers)))]
-    (str/join " " (filter not-empty ["function" preamble typestr modstr
+                 (std.string.common/join " " (map std.lib.foundation/strn modifiers)))]
+    (std.string.common/join " " (filter not-empty ["function" preamble typestr modstr
                                      (if returns
                                        (sol-emit-returns [nil returns] grammar mopts))
                                      codebody]))))
@@ -127,7 +130,7 @@
   {:added "4.0"}
   [[_ sym args & body :as form] grammar mopts]
   (let [[typestr preamble codebody] (sol-fn-elements 'constructor args body grammar mopts)]
-    (str/join " " (filter not-empty [preamble typestr codebody]))))
+    (std.string.common/join " " (filter not-empty [preamble typestr codebody]))))
 
 (defn sol-defevent
   "creates an event"
@@ -197,19 +200,19 @@
   [[_ sym body] grammar mopts]
   (let [fn-stct (fn [sym args]
                   (str "struct " sym " {\n"
-                       (str/indent (str/join "\n"
+                       (std.string.prose/indent (std.string.common/join "\n"
                                              (map (fn [arr]
-                                                    (str (str/join " " (map h/strn arr))
+                                                    (str (std.string.common/join " " (map std.lib.foundation/strn arr))
                                                          ";"))
                                                   args))
                                    2)
                        "\n}"))
         fn-enum (fn [sym args]
-                  (str "enum " sym " { " (str/join ", " (map h/strn args)) " }"))
+                  (str "enum " sym " { " (std.string.common/join ", " (map std.lib.foundation/strn args)) " }"))
         fn-func (fn [sym args]
                   (let [{:static/keys [returns]} (meta sym)
                         [typestr preamble _] (sol-fn-elements sym args body grammar mopts)]
-                    (str/join " " (filter not-empty ["function" preamble typestr
+                    (std.string.common/join " " (filter not-empty ["function" preamble typestr
                                                      (str (if returns
                                                             (sol-emit-returns [nil returns] grammar mopts))
                                                           ";")]))))
@@ -219,16 +222,16 @@
                           :struct (fn-stct sym args)
                           :enum   (fn-enum sym args)
                           (fn-func sym args))))
-                 (str/join "\n"))]
+                 (std.string.common/join "\n"))]
     (str "interface " sym " {\n"
-         (str/indent fns 2)
+         (std.string.prose/indent fns 2)
          "\n}")))
 
 (defn sol-emit-body
   "emits body without extra braces"
   {:added "4.0"}
   [body grammar mopts]
-  (let [grammar (h/merge-nested grammar
+  (let [grammar (std.lib.collection/merge-nested grammar
                                 {:default {:block {:body {:start "" :end ""}}}})]
     (sol-emit-block nil nil body grammar mopts)))
 
@@ -237,7 +240,7 @@
   {:added "4.0"}
   [[_ sym & body] grammar mopts]
   (let [is-clause (if-let [is (:is (meta sym))]
-                    (str " is " (str/join ", " (map h/strn is)))
+                    (str " is " (std.string.common/join ", " (map std.lib.foundation/strn is)))
                     "")]
     (str "contract " sym is-clause " {\n"
          (sol-emit-body body grammar mopts)
@@ -278,13 +281,13 @@
   "emits a let binding"
   {:added "4.0"}
   [[_ & args] grammar mopts]
-  (str "let " (str/join " " (map #(emit-common/*emit-fn* % grammar mopts) args))))
+  (str "let " (std.string.common/join " " (map #(emit-common/*emit-fn* % grammar mopts) args))))
 
 (defn sol-assembly
   "assembly block"
   {:added "4.0"}
   [[_ & body] grammar mopts]
-  (let [grammar (h/merge-nested grammar
+  (let [grammar (std.lib.collection/merge-nested grammar
                                 {:reserved '{let {:emit #'sol-emit-let}
                                              :=  {:emit :token :raw ":="}}})]
     (str "assembly {\n"
@@ -413,14 +416,14 @@
                   :function  {:raw ""}
                   :invoke    {:keyword-fn #'sol-keyword-fn}}
         :token   {:keyword    {:custom (fn [x]
-                                         (h/strn x))}
+                                         (std.lib.foundation/strn x))}
                   :symbol     {:replace {\: "__"}}}
         :data    {:map-entry {:space " " :key-fn #'sol-map-key}
                   :free       {:start ""  :end "" :sep ", "}
                   :tuple     {:start "(" :end ")" :sep ", "}}
         :block  {:for       {:parameter {:sep ","}}}
         :define {:def       {:raw ""}}}
-       (h/merge-nested (emit/default-grammar))))
+       (std.lib.collection/merge-nested (emit/default-grammar))))
 
 (def +grammar+
   (grammar/grammar :sol
@@ -431,7 +434,7 @@
   (book/book-meta
    {:module-current   (fn [])
     :module-import    (fn [name _ opts]  
-                        (h/$ (:- "#include" ~name)))
+                        (std.lib.template/$ (:- "#include" ~name)))
     :module-export    (fn [{:keys [as refer]} opts])}))
 
 (def +book+

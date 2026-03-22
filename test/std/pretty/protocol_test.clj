@@ -1,6 +1,6 @@
 (ns std.pretty.protocol-test
-  (:use code.test)
-  (:require [std.pretty.protocol :refer :all]))
+  (:require [std.pretty.protocol :refer :all])
+  (:use code.test))
 
 ^{:refer std.pretty.protocol/-serialize-node :added "3.0"}
 (fact "an extendable method for defining serializing tags")

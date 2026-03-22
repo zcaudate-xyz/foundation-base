@@ -1,6 +1,6 @@
 (ns js.lib.figma-test
-  (:use code.test)
-  (:require [js.lib.figma :refer :all]))
+  (:require [js.lib.figma :refer :all])
+  (:use code.test))
 
 ^{:refer js.lib.figma/generate-blocks :added "4.0" :unchecked true}
 (fact "TODO")

@@ -1,8 +1,8 @@
 (ns std.object.framework-test
-  (:use code.test)
-  (:require [std.object.framework :as framework]
+  (:require [std.lib.invoke :refer [definvoke]]
             [std.object :as object]
-            [std.lib :refer [definvoke]])
+            [std.object.framework :as framework])
+  (:use code.test)
   (:refer-clojure :exclude [get set get-in keys]))
 
 ^{:refer std.object.framework/string-like :added "3.0"}

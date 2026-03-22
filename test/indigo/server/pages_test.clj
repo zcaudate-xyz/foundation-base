@@ -1,6 +1,6 @@
 (ns indigo.server.pages-test
-  (:use code.test)
-  (:require [indigo.server.pages :refer :all]))
+  (:require [indigo.server.pages :refer :all])
+  (:use code.test))
 
 ^{:refer indigo.server.pages/make-page :added "4.0"}
 (fact "TODO")

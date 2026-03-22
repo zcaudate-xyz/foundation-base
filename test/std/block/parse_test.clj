@@ -1,8 +1,8 @@
 (ns std.block.parse-test
-  (:use code.test)
-  (:require [std.block.parse :refer :all]
-            [std.block.base :as base]
-            [std.block.reader :as reader]))
+  (:require [std.block.base :as base]
+            [std.block.parse :refer :all]
+            [std.block.reader :as reader])
+  (:use code.test))
 
 ^{:refer std.block.parse/read-dispatch :added "3.0"}
 (fact "dispatches on first symbol"

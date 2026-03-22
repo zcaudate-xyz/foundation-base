@@ -1,10 +1,10 @@
 (ns code.manage.unit.scaffold
-  (:require [std.fs :as fs]
-            [code.project :as project]
-            [std.block.navigate :as nav]
+  (:require [code.project :as project]
             [std.block :as block]
-            [std.string :as str]
-            [std.lib :as h]))
+            [std.block.navigate :as nav]
+            [std.fs :as fs]
+            [std.lib.collection]
+            [std.string.common]))
 
 (def ^:dynamic *ns-form* 'code.test)
 
@@ -25,7 +25,7 @@
    (-> [(format "^{:refer %s/%s :added \"%s\"}"
                 ns var version)
         (format "(fact \"TODO\")")]
-       (str/joinl "\n"))))
+       (std.string.common/joinl "\n"))))
 
 (defn new-filename
   "creates a new file based on test namespace
@@ -49,7 +49,7 @@
   ([source-ns test-ns vars version]
    (->> (map #(test-fact-form source-ns % version) vars)
         (cons (*ns-form-fn* source-ns test-ns *ns-form*))
-        (str/join "\n\n"))))
+        (std.string.common/join "\n\n"))))
 
 (defn scaffold-append
   "creates a scaffold for an already existing file"
@@ -58,7 +58,7 @@
    (if new-vars
      (->> new-vars
           (map #(test-fact-form source-ns % version))
-          (str/join "\n\n")
+          (std.string.common/join "\n\n")
           (str original "\n\n"))
      original)))
 
@@ -80,11 +80,11 @@
          ns-nodes    (->> all-nodes (filter is-ns?))
          var-table   (->> all-nodes
                           (filter is-var?)
-                          (h/map-juxt [key-var identity]))
+                          (std.lib.collection/map-juxt [key-var identity]))
          var-nodes   (keep var-table source-vars)
          other-nodes (->> all-nodes (remove is-ns?) (remove is-var?))
          start-nodes (remove is-comment? other-nodes)
          end-nodes   (filter is-comment? other-nodes)]
      (->> (concat ns-nodes start-nodes var-nodes end-nodes)
           (map block/string)
-          (str/join "\n\n")))))
+          (std.string.common/join "\n\n")))))

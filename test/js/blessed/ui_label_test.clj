@@ -1,6 +1,6 @@
 (ns js.blessed.ui-label-test
-  (:use code.test)
-  (:require [js.blessed.ui-label :refer :all]))
+  (:require [js.blessed.ui-label :refer :all])
+  (:use code.test))
 
 ^{:refer js.blessed.ui-label/ToggleLabel :added "4.0" :unchecked true}
 (fact "toggle label `red`/`green`")

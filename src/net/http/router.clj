@@ -1,7 +1,7 @@
 (ns net.http.router
-  (:require [std.string :as str]
-            [std.lib :as h]
-            [std.lib.bin :as bin]))
+  (:require [std.lib.bin :as bin]
+            [std.lib.env]
+            [std.string.common]))
 
 (defn compare-masks [as bs]
   (let [a (first as)
@@ -21,10 +21,10 @@
 (defn split-path
   [s]
   (let [[_ method path] (re-matches #"(?:([a-zA-Z]+)\s+)?(.*)" s)]
-    (->> (str/split path #"/+")
+    (->> (std.string.common/split path #"/+")
       (cons method)
-      (remove str/blank?)
-      (map str/trim)
+      (remove std.string.common/blank?)
+      (map std.string.common/trim)
       vec)))
 
 (defn make-matcher
@@ -42,7 +42,7 @@
           p (first path)]
       (cond
         (= "**" m)        (if path
-                            (conj params (str/join "/" path))
+                            (conj params (std.string.common/join "/" path))
                             params)
         (= nil mask path) params
         (= nil mask)      nil
@@ -67,8 +67,8 @@
     (fn [req]
       (let [{:keys [request-method uri]} req
             path (cons
-                   (str/upper-case (name request-method))
-                   (remove str/blank? (str/split uri #"/+")))
+                   (std.string.common/upper-case (name request-method))
+                   (remove std.string.common/blank? (std.string.common/split uri #"/+")))
             res  (when-some [[handler params] (match-impl matcher path)]
                    (handler (assoc req :path-params params)))]
         (cond (string? res)
@@ -83,14 +83,14 @@
 ;;
 
 (defn serve-resource [uri public-path]
-  (let [res (h/sys:resource
+  (let [res (std.lib.env/sys:resource
              (str public-path uri))]
     (if res
       (let [content-type (cond
-                           (str/ends-with? uri ".html") "text/html"
-                           (str/ends-with? uri ".css") "text/css"
-                           (str/ends-with? uri ".js") "application/javascript"
-                           (str/ends-with? uri ".json") "application/json"
+                           (std.string.common/ends-with? uri ".html") "text/html"
+                           (std.string.common/ends-with? uri ".css") "text/css"
+                           (std.string.common/ends-with? uri ".js") "application/javascript"
+                           (std.string.common/ends-with? uri ".json") "application/json"
                            :else "application/octet-stream")]
         {:status 200
          :headers {"Content-Type" content-type}

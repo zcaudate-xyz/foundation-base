@@ -1,12 +1,14 @@
 (ns std.pipe.util
-  (:require [std.lib :as h]
+  (:require [std.lib.collection]
+            [std.lib.foundation]
+            [std.lib.function]
             [std.lib.result :as res]))
 
 (defn main-function
   "creates a main function to be used for execution"
   {:added "4.0"}
   ([func count]
-   (let [fcounts (h/arg-count func)
+   (let [fcounts (std.lib.function/arg-count func)
          fcount  (if-not (empty? fcounts)
                    (apply min fcounts)
                    3)
@@ -28,19 +30,19 @@
   [selector id]
   (cond (or (fn?  selector)
             (var? selector))
-        (h/suppress (selector id))
+        (std.lib.foundation/suppress (selector id))
 
         (or (string? selector)
             (symbol? selector)
             (keyword? selector))
         (.startsWith ^String (str id) (str selector))
 
-        (h/regexp? selector)
+        (std.lib.foundation/regexp? selector)
         (boolean (re-find selector (str id)))
 
         (set? selector) (selector id)
 
-        (h/form? selector)  (every? #(select-filter % id)
+        (std.lib.collection/form? selector)  (every? #(select-filter % id)
                                     selector)
 
         (vector? selector) (some #(select-filter % id)

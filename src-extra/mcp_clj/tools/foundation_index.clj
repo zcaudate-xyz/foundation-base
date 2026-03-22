@@ -1,7 +1,6 @@
 (ns mcp-clj.tools.foundation-index
-  "MCP tool implementations for foundation library indexing"
-  (:require
-    [mcp-clj.foundation-index.core :as index]))
+  (:require [mcp-clj.foundation-index.core :as index])
+  "MCP tool implementations for foundation library indexing")
 
 ;; ============================================================================
 ;; Tool Implementations

@@ -1,9 +1,9 @@
 (ns std.log.profile-test
-  (:use [code.test :exclude [run]])
-  (:require [std.log.profile :refer :all]
-            [std.log.common :as common]
+  (:require [std.log.common :as common]
+            [std.log.console :as console]
             [std.log.core :as core]
-            [std.log.console :as console]))
+            [std.log.profile :refer :all])
+  (:use [code.test :exclude [run]]))
 
 ^{:refer std.log.profile/spy-fn :added "3.0"}
 (fact "constructs a spy function with print on start and end"

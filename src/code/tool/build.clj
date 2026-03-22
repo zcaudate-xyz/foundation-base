@@ -1,12 +1,17 @@
 (ns code.tool.build
-  (:require [code.framework.link :as link]
+  (:require [clojure.pprint :as pprint]
+            [clojure.set]
+            [code.framework.link :as link]
             [code.project :as project]
             [jvm.deps :as deps]
             [std.fs :as fs]
             [std.lib :as h]
+            [std.lib.env]
+            [std.lib.foundation]
+            [std.lib.os]
+            [std.lib.template]
             [std.make :as make]
-            [std.string :as str]
-            [clojure.pprint :as pprint]))
+            [std.string.common]))
 
 (defn project-form
   "constructs the `project.clj` form"
@@ -17,12 +22,12 @@
                       (jvm.deps/current-version
                        'org.clojure/clojure)]
                      (mapcat :dependencies (vals manifest)))
-         proj (h/-> (str main)
-                    (str/split #"\.")
+         proj (std.lib.foundation/-> (str main)
+                    (std.string.common/split #"\.")
                     (butlast)
-                    (str/join "." %)
+                    (std.string.common/join "." %)
                     symbol)]
-     (h/$ (defproject ~proj "LATEST"
+     (std.lib.template/$ (defproject ~proj "LATEST"
             :dependencies ~deps
             :profiles {:uberjar {:aot [~main]
                                  :main ~main
@@ -32,9 +37,9 @@
   "gets dependencies for a given file"
   {:added "4.0"}
   ([links ns]
-   (let [{:keys [imports]} (link/file-linkage (h/sys:ns-file ns))]
+   (let [{:keys [imports]} (link/file-linkage (std.lib.env/sys:ns-file ns))]
      (keep (fn [[id {:keys [exports]}]]
-             (if-not (empty? (h/intersection exports imports))
+             (if-not (empty? (clojure.set/intersection exports imports))
                id))
            links))))
 
@@ -66,14 +71,14 @@
                       (pprint/pprint project)))
          src-dir (fs/path out-dir "/src")
          ;; Copy File
-         src-path (h/sys:ns-file ns)
-         dst-path (h/-> (fs/relativize (fs/path ".")
-                                       (h/sys:ns-file ns))
-                        (fs/subpath 1 (inc (count (str/split (name ns) #"\."))))
+         src-path (std.lib.env/sys:ns-file ns)
+         dst-path (std.lib.foundation/-> (fs/relativize (fs/path ".")
+                                       (std.lib.env/sys:ns-file ns))
+                        (fs/subpath 1 (inc (count (std.string.common/split (name ns) #"\."))))
                         (fs/path src-dir %))
          _    (fs/copy-single src-path dst-path {:options #{:replace-existing}})
          ;; Copy Deps
-         src-ns (h/sys:ns-dir)
+         src-ns (std.lib.env/sys:ns-dir)
          _   (doseq [[k m] manifest]
                (doseq [[from to] (:files m)]
                  (fs/copy-single from (fs/path src-dir to)
@@ -104,12 +109,12 @@
   
   (build-output 'app.jvm.resp-repl.main)
   (def -links- (link/all-linkages (link/make-project)))
-  (:imports (code.framework.link/file-linkage (.getFile (h/sys:ns-url))))
+  (:imports (code.framework.link/file-linkage (.getFile (std.lib.env/sys:ns-url))))
   
  
   
   
-  (h/make:config)
+  (make/make-config)
   
   
   (keys (build-service {:deps '[foundation/net.resp]}))
@@ -126,11 +131,11 @@
   
   
   _  (clean-files manifest)
-  _  (h/prn "COPY FILES")
+  _  (std.lib.env/prn "COPY FILES")
   _  (doseq [[source dest] extra]
        (fs/copy-single (fs/path source)
                        (fs/path root (str main) "src" dest)))
   _  (copy-files manifest info)
-  _  (h/prn "UBERJARRING")
-  (h/sh "lein" "uberjar" {:root (str (fs/path root (str main)))
+  _  (std.lib.env/prn "UBERJARRING")
+  (std.lib.os/sh "lein" "uberjar" {:root (str (fs/path root (str main)))
                           :inherit true}))

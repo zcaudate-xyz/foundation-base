@@ -1,8 +1,8 @@
 (ns std.image.base.display-test
-  (:use code.test)
   (:require [std.image.base.display :refer :all]
-            [std.image.base.util :as util]
-            [std.image.base.model :as model]))
+            [std.image.base.model :as model]
+            [std.image.base.util :as util])
+  (:use code.test))
 
 ^{:refer std.image.base.display/render-string :added "3.0"}
 (fact "render string based on rows containing values"

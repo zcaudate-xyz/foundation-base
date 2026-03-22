@@ -1,7 +1,7 @@
 (ns std.object.query-test
-  (:use code.test)
-  (:require [std.object.query :refer :all]
-            [std.lib.version :as version]))
+  (:require [std.lib.version :as version]
+            [std.object.query :refer :all])
+  (:use code.test))
 
 (def -world-array- (byte-array (map byte "world")))
 

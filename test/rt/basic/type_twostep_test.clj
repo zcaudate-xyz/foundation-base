@@ -1,15 +1,15 @@
 (ns rt.basic.type-twostep-test
-  (:use code.test)
-  (:require [rt.basic.type-twostep :as p]
-            [std.lib :as h]
+  (:require [rt.basic.type-common :as common]
+            [rt.basic.type-twostep :as p]
             [std.fs :as fs]
-            [rt.basic.type-common :as common]))
+            [std.lib.os])
+  (:use code.test))
 
 ^{:refer rt.basic.type-twostep/sh-exec :added "4.0"}
 (fact "basic function for executing the compile and run process"
   ^:hidden
   
-  (with-redefs [h/sh (fn [& _] {:out "ok"})
+  (with-redefs [std.lib.os/sh (fn [& _] {:out "ok"})
                 spit (fn [& _] nil)
                 fs/parent (fn [_] "/tmp")
                 fs/file-name (fn [_] "tmp")]

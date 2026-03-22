@@ -1,7 +1,7 @@
 (ns code.test.checker.diff
-  (:require [std.lib.collection :as coll]
-            [std.lib.diff.seq :as seq]
-            [code.test.checker.common :as common]))
+  (:require [code.test.checker.common :as common]
+            [std.lib.collection :as coll]
+            [std.lib.diff.seq :as seq]))
 
 (defn checker-equal?
   "custom equality check for diffing that handles checkers"

@@ -1,11 +1,10 @@
 (ns rt.postgres.compile.common-test
-  "Tests for rt.postgres.compile.common namespace.
-   Provides OpenAPI, JSON Schema, and TypeScript generation."
-  (:use code.test)
   (:require [rt.postgres.compile.common :as compile.common]
-            [rt.postgres.grammar.typed-parse :as parse]
             [rt.postgres.grammar.typed-common :as types]
-            [rt.postgres.grammar.typed-shape :as shape]))
+            [rt.postgres.grammar.typed-parse :as parse]
+            [rt.postgres.grammar.typed-shape :as shape])
+  "Tests for rt.postgres.compile.common namespace.\n   Provides OpenAPI, JSON Schema, and TypeScript generation."
+  (:use code.test))
 
 ;; -----------------------------------------------------------------------------
 ;; OpenAPI Schema Generation Tests

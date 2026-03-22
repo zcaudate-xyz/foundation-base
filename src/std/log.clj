@@ -1,13 +1,14 @@
 (ns std.log
-  (:require [std.protocol.log :as protocol.log]
-            [std.log.core :as core]
+  (:require [std.lib.component]
+            [std.lib.foundation]
             [std.log.common :as common]
             [std.log.console :as console]
+            [std.log.core :as core]
             [std.log.form :as form]
             [std.log.profile :as profile]
-            [std.lib :as h]))
+            [std.protocol.log :as protocol.log]))
 
-(h/intern-in  common/put-logger!
+(std.lib.foundation/intern-in  common/put-logger!
               common/set-logger!
               common/set-static!
               common/set-level!
@@ -61,7 +62,7 @@
   {:added "3.0"}
   ([m]
    (-> (create m)
-       (h/start))))
+       (std.lib.component/start))))
 
 (defn logger?
   "checks if the object is a logger

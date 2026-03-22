@@ -1,6 +1,5 @@
 (ns std.pretty.engine
-  (:require [std.string :as str]
-            [std.lib :refer [definvoke]]
+  (:require [std.lib.invoke :refer [definvoke]]
             [std.pretty.deque :as deque]
             [std.pretty.protocol :as protocol.pretty]))
 

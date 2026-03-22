@@ -1,6 +1,6 @@
 (ns std.block.heal.parse
-  (:require [std.lib :as h]
-            [std.string :as str]))
+  (:require [std.lib.collection]
+            [std.string.common]))
 
 (def lu-close
   {"(" ")"
@@ -226,7 +226,7 @@
                            (or (= line-type :code)
                                (= line-type :commented)))
             
-            last-idx  (let [r-trimmed (str/trim-right current-line)]
+            last-idx  (let [r-trimmed (std.string.common/trim-right current-line)]
                         (if (not-empty r-trimmed)
                          (dec (count r-trimmed))))]
         (recur (rest lines)
@@ -243,7 +243,7 @@
   "parse lines"
   {:added "4.0"}
   [content]
-  (parse-lines-raw (str/split-lines content)))
+  (parse-lines-raw (std.string.common/split-lines content)))
 
 ;; Predicates
 
@@ -294,7 +294,7 @@
   "creates the index lookup"
   {:added "4.0"}
   [delimiters]
-  (h/map-juxt [:index
+  (std.lib.collection/map-juxt [:index
                identity]
               delimiters))
 

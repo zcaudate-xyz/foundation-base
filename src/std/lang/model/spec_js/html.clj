@@ -1,10 +1,10 @@
 (ns std.lang.model.spec-js.html
-  (:require [std.lang.base.emit :as emit]
+  (:require [std.html :as html]
+            [std.lang.base.emit :as emit]
             [std.lang.base.emit-common :as common]
             [std.lang.base.util :as ut]
-            [std.html :as html]
-            [std.string :as str]
-            [std.lib :as h]))
+            [std.lib.walk]
+            [std.string.common]))
 
 (defn wrap-indent-inner
   "increase indentation in walk inner"
@@ -32,7 +32,7 @@
   "preserves indentations"
   {:added "4.0"}
   ([f form]
-   (h/walk (wrap-indent-inner (partial prewalk-indent f))
+   (std.lib.walk/walk (wrap-indent-inner (partial prewalk-indent f))
            (wrap-indent-outer identity) (f form))))
 
 (defn prepare-html
@@ -44,7 +44,7 @@
     (fn [form]
       (if (and (vector? form)
                (symbol? (first form))
-               (str/starts-with? (first form) "%"))
+               (std.string.common/starts-with? (first form) "%"))
         (let [ptr @(resolve (second form))
               {:keys [module id lang]} ptr]
           (str (common/with-indent [2]

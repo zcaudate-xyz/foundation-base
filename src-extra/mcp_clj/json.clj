@@ -1,12 +1,6 @@
 (ns mcp-clj.json
-  "JSON parsing and writing functionality.
-
-  Encapsulates the use of cheshire for JSON operations.
-
-  This component provides a centralized JSON API optimized for performance.
-  See ADR 002 (doc/adr/002-cheshire-json-library.md) for migration rationale."
-  (:require
-    [cheshire.core :as json]))
+  (:require [cheshire.core :as json])
+  "JSON parsing and writing functionality.\n\n  Encapsulates the use of cheshire for JSON operations.\n\n  This component provides a centralized JSON API optimized for performance.\n  See ADR 002 (doc/adr/002-cheshire-json-library.md) for migration rationale.")
 
 (defn parse
   "Parse JSON string to EDN with keyword keys.

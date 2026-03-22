@@ -1,6 +1,6 @@
 (ns js.react.helper-data-test
-  (:use code.test)
-  (:require [js.react.helper-data :refer :all]))
+  (:require [js.react.helper-data :refer :all])
+  (:use code.test))
 
 ^{:refer js.react.helper-data/wrapMemoize :added "4.0" :unchecked true}
 (fact "wraps a component to pass data")

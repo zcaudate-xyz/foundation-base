@@ -1,9 +1,8 @@
 (ns std.fs.walk-test
+  (:require [std.fs.path :as path]
+            [std.fs.walk :refer :all])
   (:use code.test)
-  (:require [std.fs.walk :refer :all]
-            [std.fs.path :as path])
-  (:import (java.nio.file.attribute BasicFileAttributes)
-           (java.nio.file FileVisitResult)))
+  (:import (java.nio.file.attribute BasicFileAttributes) (java.nio.file FileVisitResult)))
 
 ^{:refer std.fs.walk/match-single :added "3.0"}
 (fact "matches according to the defined filter"

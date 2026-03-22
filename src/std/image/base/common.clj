@@ -1,9 +1,9 @@
 (ns std.image.base.common
-  (:require [std.image.base.size :as size]
+  (:require [std.image.base.model :as model]
+            [std.image.base.size :as size]
             [std.image.base.util :as util]
-            [std.image.base.model :as model]
-            [std.lib :as h]
-            [std.image.protocol :as protocol.image])
+            [std.image.protocol :as protocol.image]
+            [std.lib.foundation])
   (:refer-clojure :exclude [empty]))
 
 (defn create-channels
@@ -269,7 +269,7 @@
          {:keys [unchecked-fn aset-fn]} (util/type-lookup data-type)]
      (dotimes [i length]
        (let [t (* i span)
-             v (h/aget from-selected (+ t data-index))
+             v (std.lib.foundation/aget from-selected (+ t data-index))
              v (if data-access
                  (mask-value v start mask)
                  v)
@@ -431,7 +431,7 @@
          span (:span to-channel-model)]
      (dotimes [i length]
        (let [t    (* i span)
-             data (mapv (fn [ch] (bit-and (h/aget (from-channels ch) i)
+             data (mapv (fn [ch] (bit-and (std.lib.foundation/aget (from-channels ch) i)
                                           255))
                         (range (count from-channels)))]
          (doseq [[offset entries] table]

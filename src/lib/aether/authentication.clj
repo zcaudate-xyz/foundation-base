@@ -1,9 +1,7 @@
 (ns lib.aether.authentication
   (:require [std.object :as object]
             [std.object.query :as reflect])
-  (:import (org.eclipse.aether.repository Authentication)
-           (org.eclipse.aether.util.repository AuthenticationBuilder ChainedAuthentication
-                                               SecretAuthentication StringAuthentication)))
+  (:import (org.eclipse.aether.repository Authentication) (org.eclipse.aether.util.repository AuthenticationBuilder ChainedAuthentication SecretAuthentication StringAuthentication)))
 
 (object/vector-like
 

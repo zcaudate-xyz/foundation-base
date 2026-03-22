@@ -1,9 +1,9 @@
 (ns xt.sys.conn-redis-test
-  (:use code.test)
-  (:require [std.lang :as l]
-            [std.lib :as h]
-            [lib.redis.bench :as bench]
-            [xt.lang.base-notify :as notify]))
+  (:require [lib.redis.bench :as bench]
+            [std.lang :as l]
+            [std.lib.security]
+            [xt.lang.base-notify :as notify])
+  (:use code.test))
 
 (l/script- :lua
   {:runtime :basic
@@ -225,7 +225,7 @@
                              :port 17001}
                             {}))
    [(redis/exec conn "flushdb" [])
-    (redis/eval-script conn {:sha (@! (h/sha1 "return 1"))
+    (redis/eval-script conn {:sha (@! (std.lib.security/sha1 "return 1"))
                              :body "return 1"}
                        [])])
   => ["OK" 1]
@@ -238,7 +238,7 @@
     [(notify/wait-on :js
        (redis/exec conn "flushdb" [] (repl/<!)))
      (notify/wait-on :js
-       (redis/eval-script conn {:sha (@! (h/sha1 "return 2"))
+       (redis/eval-script conn {:sha (@! (std.lib.security/sha1 "return 2"))
                                 :body "return 2"}
                           []
                           (repl/<!)))])

@@ -1,14 +1,7 @@
 (ns lib.lucene.impl.query
-  (:require [std.lib :as h]
-            [lib.lucene.impl.analyzer :as analyzer])
-  (:import (org.apache.lucene.queryparser.classic QueryParser)
-           (org.apache.lucene.analysis Analyzer)
-           (org.apache.lucene.search BooleanClause BooleanClause$Occur BooleanQuery
-                                     BooleanQuery$Builder
-                                     BoostQuery ConstantScoreQuery DisjunctionMaxQuery
-                                     Query WildcardQuery)
-           (org.apache.lucene.index Term)
-           (org.apache.lucene.util QueryBuilder)))
+  (:require [lib.lucene.impl.analyzer :as analyzer]
+            [std.lib.foundation])
+  (:import (org.apache.lucene.queryparser.classic QueryParser) (org.apache.lucene.analysis Analyzer) (org.apache.lucene.search BooleanClause BooleanClause$Occur BooleanQuery BooleanQuery$Builder BoostQuery ConstantScoreQuery DisjunctionMaxQuery Query WildcardQuery) (org.apache.lucene.index Term) (org.apache.lucene.util QueryBuilder)))
 
 (defprotocol FormParsable
   (parse-form [form opts]))
@@ -67,7 +60,7 @@
   "parses a string"
   {:added "3.0"}
   ([^String s {:keys [^QueryBuilder builder mode key] :as opts}]
-   (let [^String k (h/strn key)]
+   (let [^String k (std.lib.foundation/strn key)]
      (case mode
        :query (.createBooleanQuery builder k s)
        :phrase-query (.createPhraseQuery builder k s)

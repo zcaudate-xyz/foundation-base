@@ -1,7 +1,7 @@
 (ns std.object.query.order-test
-  (:use code.test)
-  (:require [std.object.query.order :as order]
-            [std.object.query :as query]))
+  (:require [std.object.query :as query]
+            [std.object.query.order :as order])
+  (:use code.test))
 
 ^{:refer std.object.query.order/sort-fn :added "3.0"}
 (fact "returns a function taking two inputs `x` and `y`, comparing the outputs after applying `f` to both"

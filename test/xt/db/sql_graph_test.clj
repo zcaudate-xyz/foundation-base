@@ -1,6 +1,7 @@
 (ns xt.db.sql-graph-test
-  (:use code.test)
-  (:require [std.lang :as l]))
+  (:require [std.lang :as l]
+            [std.string.prose])
+  (:use code.test))
 
 (l/script- :js
   {:runtime :basic
@@ -74,7 +75,7 @@
                    0
                    {}))
   
-  => (std.string/|
+  => (std.string.prose/|
       "SELECT id FROM UserProfile"
       "WHERE account_id IN ("
       "  SELECT id FROM UserAccount"
@@ -95,7 +96,7 @@
                             :is-official true}}
                    0
                    {}))
-  => (std.string/|
+  => (std.string.prose/|
       "SELECT id FROM Wallet"
       "WHERE owner_id IN ("
       "  SELECT id FROM UserAccount"
@@ -176,7 +177,7 @@
                         2
                         {}
                         g/select-where))
-  => (std.string/|
+  => (std.string.prose/|
       "id IN ("
       "  SELECT account_id FROM UserProfile"
       "  WHERE first_name = 'hello'"
@@ -190,7 +191,7 @@
                         2
                         {}
                         g/select-where))
-  => (std.string/|
+  => (std.string.prose/|
       "id IN ("
       "  SELECT account_id FROM UserProfile"
       "  WHERE first_name = 'hello'"
@@ -204,7 +205,7 @@
                         2
                         {}
                         g/select-where))
-  => (std.string/|
+  => (std.string.prose/|
       "id IN ("
       "  SELECT account_id FROM UserProfile"
       "  WHERE first_name = 'hello'"
@@ -222,7 +223,7 @@
                               :last-name "hello"}}
                    0
                    {}))
-  => (std.string/|
+  => (std.string.prose/|
       "SELECT id FROM UserAccount"
       "WHERE id IN ("
       "  SELECT account_id FROM UserProfile"
@@ -236,7 +237,7 @@
                    {:profile {:first-name "hello"}}
                    0
                    {}))
-  => (std.string/|
+  => (std.string.prose/|
       "SELECT id FROM UserAccount"
       "WHERE id IN ("
       "  SELECT account_id FROM UserProfile"
@@ -251,7 +252,7 @@
                               :last-name "hello"}}
                    0
                    {}))
-  => (std.string/|
+  => (std.string.prose/|
       "SELECT id FROM UserAccount"
       "WHERE id IN ("
       "  SELECT account_id FROM UserProfile"
@@ -260,7 +261,7 @@
 
 ^{:refer xt.db.sql-graph/select-return-str :added "4.0"
   :setup [(def +result+
-            (std.string/|
+            (std.string.prose/|
              "(SELECT id, nickname, password_updated, is_super, is_suspended, is_official FROM UserAccount"
              "  WHERE id = UserProfile.account_id) AS account"))]}
 (fact "select return string loop"
@@ -306,7 +307,7 @@
 
 ^{:refer xt.db.sql-graph/select-return :added "4.0"
   :setup [(def +result+
-            (std.string/|
+            (std.string.prose/|
              "SELECT (SELECT id, nickname, password_updated, is_super, is_suspended, is_official FROM UserAccount"
              "  WHERE id = UserProfile.account_id) AS account FROM UserProfile"))]}
 (fact "select return call"
@@ -432,7 +433,7 @@
                (ut/LIMIT 1)
                ["wallets"]]]
              {:wrapper-fn ut/postgres-wrapper-fn}))
-  => (std.string/|
+  => (std.string.prose/|
       "WITH j_ret AS ("
       "  SELECT id, nickname, password_updated, is_super, is_suspended, is_official, (WITH j_ret AS ("
       "    SELECT id, slug FROM Wallet"
@@ -448,7 +449,7 @@
                ["profile"]
                ["wallets"]]]
              {:wrapper-fn ut/postgres-wrapper-fn}))
-  => (std.string/|
+  => (std.string.prose/|
       "WITH j_ret AS ("
       "  SELECT id, nickname, password_updated, is_super, is_suspended, is_official, (WITH j_ret AS ("
       "    SELECT id, first_name, last_name, city, about, language FROM UserProfile"
@@ -467,7 +468,7 @@
                  ["account"]]]
                {:wrapper-fn ut/postgres-wrapper-fn})))
   +out+
-  => (std.string/|
+  => (std.string.prose/|
       "WITH j_ret AS ("
       "  SELECT id, first_name, last_name, city, about, language, (WITH j_ret AS ("
       "    SELECT id, nickname, password_updated, is_super, is_suspended, is_official FROM UserAccount"

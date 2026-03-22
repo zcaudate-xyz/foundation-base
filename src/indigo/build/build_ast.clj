@@ -1,8 +1,9 @@
 (ns code.tool.translate.js-ast
-  (:require [std.make :as make :refer [def.make]]
-            [std.lib :as h]
+  (:require [std.fs :as fs]
             [std.lang :as l]
-            [std.fs :as fs]))
+            [std.lib.env]
+            [std.lib.os]
+            [std.make :as make :refer [def.make]]))
 
 (def INDEXJS
   (l/emit-as
@@ -50,7 +51,7 @@
 
 (defn initialise
   []
-  (h/p (h/sh {:root ".build/code-dev-build-ast"
+  (std.lib.env/p (std.lib.os/sh {:root ".build/code-dev-build-ast"
               :args ["npm" "install"]})))
 
 (defn generate-ast
@@ -60,5 +61,5 @@
    (make/build-all BUILD_AST) ;; Ensure build is ready
    (let [args (cond-> ["node" "index.js" input-file]
                 output-file (conj output-file))]
-     (h/sh {:root ".build/code-dev-build-ast"
+     (std.lib.os/sh {:root ".build/code-dev-build-ast"
             :args args}))))

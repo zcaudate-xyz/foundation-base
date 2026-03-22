@@ -1,13 +1,11 @@
 (ns std.time.long-test
-  (:use code.test)
   (:require [std.protocol.string :as string]
             [std.protocol.time :as time]
             [std.time.coerce :as coerce]
             [std.time.common :as common]
             [std.time.map :as map])
-  (:import (java.util Date Calendar TimeZone)
-           (java.sql Timestamp)
-           (java.time Instant Clock ZonedDateTime)))
+  (:use code.test)
+  (:import (java.util Date Calendar TimeZone) (java.sql Timestamp) (java.time Instant Clock ZonedDateTime)))
 
 (fact "time/-now for java.util datastructures"
 

@@ -1,6 +1,7 @@
 (ns std.lang.base.grammar-macro
-  (:require [std.lib :as h :refer [defimpl]]
-            [std.lang.base.grammar-spec :as spec]))
+  (:require [std.lang.base.grammar-spec :as spec]
+            [std.lib.foundation]
+            [std.lib.impl :refer [defimpl]]))
 
 ;;
 ;; macros
@@ -98,7 +99,7 @@
    {:op :tcond     :symbol '#{:?>}    :macro tf-tcond         :type :macro}
    (let [pairs (map vec (partition 2 more))
          _ (if (not= :else (first (last pairs)))
-             (h/error "ternary cond has to end with :else" {:form (last pairs)}))]
+             (std.lib.foundation/error "ternary cond has to end with :else" {:form (last pairs)}))]
      (reduce (fn [acc [q alt]]
                (list :? q [alt acc]))
              (last (last pairs))

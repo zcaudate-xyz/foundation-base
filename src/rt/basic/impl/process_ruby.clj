@@ -1,13 +1,13 @@
 (ns rt.basic.impl.process-ruby
-  (:require [rt.basic.type-common :as common]
+  (:require [rt.basic.type-basic :as basic]
+            [rt.basic.type-common :as common]
             [rt.basic.type-oneshot :as oneshot]
-            [rt.basic.type-basic :as basic]
-            [xt.lang.base-repl :as k]
-            [std.lang.model.spec-ruby :as spec]
             [std.lang.base.impl :as impl]
             [std.lang.base.runtime :as rt]
-            [std.lib :as h]
-            [std.string :as str]))
+            [std.lang.model.spec-ruby :as spec]
+            [std.lib.template]
+            [std.string.common]
+            [xt.lang.base-repl :as k]))
 
 (def +ruby-init+
   (common/put-program-options
@@ -27,7 +27,7 @@
   "wraps forms to be invoked"
   {:added "4.0"}
   [forms]
-  (h/$ (. (fn [] ~@forms) (call))))
+  (std.lib.template/$ (. (fn [] ~@forms) (call))))
 
 (defn default-body-transform
   "standard python transforms"
@@ -86,7 +86,7 @@
                           :layout :flat})
                         (impl/emit-as
                          :ruby +client-basic+)]
-                       (str/join "\n\n"))]
+                       (std.string.common/join "\n\n"))]
     (fn [port & [{:keys [host]}]]
       (str bootstrap
            "\n\n"

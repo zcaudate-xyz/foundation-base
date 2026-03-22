@@ -1,12 +1,11 @@
 (ns rt.redis-test
-  (:use code.test)
-  (:require [rt.redis :refer :all]
+  (:require [kmi.queue.list :as list]
             [lib.redis.bench :as bench]
-            [rt.redis.eval-script :as script]
-            [std.lib :as h]
             [net.resp.connection :as conn]
-            [std.concurrent :as cc]
-            [kmi.queue.list :as list]))
+            [rt.redis :refer :all]
+            [rt.redis.eval-script :as script]
+            [std.concurrent :as cc])
+  (:use code.test))
 
 (fact:global
  {:setup [(bench/start-redis-array [17001])]

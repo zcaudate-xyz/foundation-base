@@ -1,7 +1,6 @@
 (ns script.toml
   (:refer-clojure :exclude [read])
-  (:import (com.moandjiezana.toml Toml)
-           (java.util HashMap ArrayList)))
+  (:import (com.moandjiezana.toml Toml) (java.util HashMap ArrayList)))
 
 
 ;;======================================================================================================================

@@ -1,12 +1,11 @@
 (ns rt.postgres.grammar.common-test
-  (:use code.test)
-  (:require [rt.postgres.grammar.common :as common]
-            [rt.postgres.grammar :as g]
-            [rt.postgres.script.test.scratch-v1 :as scratch]
+  (:require [rt.postgres.grammar :as g]
+            [rt.postgres.grammar.common :as common]
             [rt.postgres.script.builtin :as builtin]
+            [rt.postgres.script.test.scratch-v1 :as scratch]
             [std.lang :as l]
-            [std.lib :as h]
-            [std.lang.base.emit-common :as emit-common]))
+            [std.lang.base.emit-common :as emit-common])
+  (:use code.test))
 
 ^{:refer rt.postgres.grammar.common/pg-type-alias :added "4.0"}
 (fact "gets the type alias"

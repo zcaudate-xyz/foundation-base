@@ -1,12 +1,11 @@
 (ns lib.redis-test
-  (:use [code.test :exclude [run]])
-  (:require [lib.redis.bench :as bench]
+  (:require [lib.redis :as r]
+            [lib.redis.bench :as bench]
             [lib.redis.event :as event]
-            [lib.redis :as r]
             [net.resp.connection :as conn]
             [net.resp.pool :as pool]
-            [std.concurrent :as cc]
-            [std.lib :as h]))
+            [std.concurrent :as cc])
+  (:use [code.test :exclude [run]]))
 
 (defn mock-pool []
   (reify java.lang.AutoCloseable (close [_])))

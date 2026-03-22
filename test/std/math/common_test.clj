@@ -1,6 +1,6 @@
 (ns std.math.common-test
-  (:use code.test)
   (:require [std.math.common :refer :all])
+  (:use code.test)
   (:refer-clojure :exclude [abs]))
 
 ^{:refer std.math.common/abs :added "3.0"}

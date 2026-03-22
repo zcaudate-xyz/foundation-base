@@ -1,10 +1,12 @@
 (ns lib.redis
-  (:require [std.lib :as h :refer [defimpl]]
-            [net.resp.connection :as conn]
-            [net.resp.pool :as pool]
+  (:require [lib.docker :as docker]
             [lib.redis.bench :as bench]
             [lib.redis.event :as event]
-            [lib.docker :as docker])
+            [net.resp.connection :as conn]
+            [net.resp.pool :as pool]
+            [std.lib.component]
+            [std.lib.foundation]
+            [std.lib.impl :refer [defimpl]])
   (:import (hara.net.resp SocketConnection)))
 
 (def ^:dynamic *default*
@@ -33,15 +35,15 @@
 ;;
 
 
-(def ^{:arglists '([conn])} client:stop  (h/wrap-stop  pool/pool:stop  (client-steps)))
-(def ^{:arglists '([conn])} client:kill  (h/wrap-stop  pool/pool:kill  (client-steps)))
+(def ^{:arglists '([conn])} client:stop  (std.lib.component/wrap-stop  pool/pool:stop  (client-steps)))
+(def ^{:arglists '([conn])} client:kill  (std.lib.component/wrap-stop  pool/pool:kill  (client-steps)))
 
 (defn client-string
   "creates a cliet string"
   {:added "4.0"}
   [{:keys [host port pool]}]
   (str "#rt.redis.client " (merge {:host host :port port}
-                                   (h/comp:info pool))))
+                                   (std.lib.component/info pool))))
 
 (defn client-start
   "starts the client"
@@ -54,13 +56,13 @@
                          :path [:redis :pool]})]
     (pool/pool:start (assoc client :pool pool))))
 
-(def ^{:arglists '([conn])} client:start (h/wrap-start client-start (client-steps)))
+(def ^{:arglists '([conn])} client:start (std.lib.component/wrap-start client-start (client-steps)))
 
 (defn client-create
   "creates a redis client"
   {:added "3.0"}
   ([{:keys [id env mode host port] :as m}]
-   (let [id   (or id (h/sid))
+   (let [id   (or id (std.lib.foundation/sid))
          mode (or mode :eval)
          m    (merge m
                      (conn/test:config)

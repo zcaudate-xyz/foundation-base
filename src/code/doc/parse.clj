@@ -1,10 +1,10 @@
 (ns code.doc.parse
   (:require [clojure.java.io :as io]
             [clojure.string :as str]
-            [code.query :as query]
-            [std.block.navigate :as nav]
             [code.doc.parse.check :as checks]
-            [std.block :as block]))
+            [code.query :as query]
+            [std.block :as block]
+            [std.block.navigate :as nav]))
 
 (def ^:dynamic *spacing* 2)
 (def ^:dynamic *indentation* 0)

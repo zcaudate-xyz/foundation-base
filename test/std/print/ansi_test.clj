@@ -1,6 +1,6 @@
 (ns std.print.ansi-test
-  (:use code.test)
-  (:require [std.print.ansi :refer :all]))
+  (:require [std.print.ansi :refer :all])
+  (:use code.test))
 
 ^{:refer std.print.ansi/encode-raw :added "3.0"}
 (fact "encodes the raw ansi modifier codes to string"

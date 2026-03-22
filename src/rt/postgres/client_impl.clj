@@ -1,15 +1,19 @@
 (ns rt.postgres.client-impl
   (:require [clojure.string :as str]
-            [std.lang.base.pointer :as ptr]
-            [std.lang.base.util :as ut]
-            [std.lang.base.impl :as impl]
-            [std.lang.base.library :as lib]
-            [std.lang.base.book :as book]
             [lib.jdbc :as jdbc]
             [lib.postgres :as libpg]
             [lib.postgres.connection :as conn]
             [std.json :as json]
-            [std.lib :as h :refer [defimpl]]))
+            [std.lang.base.book :as book]
+            [std.lang.base.impl :as impl]
+            [std.lang.base.library :as lib]
+            [std.lang.base.pointer :as ptr]
+            [std.lang.base.util :as ut]
+            [std.lib.collection]
+            [std.lib.context.pointer]
+            [std.lib.foundation]
+            [std.lib.impl :refer [defimpl]]
+            [std.lib.walk]))
 
 (defn raw-eval-pg-return
   "returns a regularised result"
@@ -25,7 +29,7 @@
     (if (string? out)
       (try (let [data (json/read out json/+keyword-case-mapper+)]
              (if (number? data)
-               (h/parse-double out))
+               (std.lib.foundation/parse-double out))
              data)
            (catch Throwable t
              out))
@@ -62,7 +66,7 @@
         (or (not (#{:block :macro :special} (:type reserved))))
         (and (symbol? f)
              (let [entry (if-let [var (resolve f)]
-                           (and (h/pointer? @var)
+                           (and (std.lib.context.pointer/pointer? @var)
                                 (let [{:keys [module section id]} @var]
                                   (get-in book [:modules module section id])))
                            (let [[sym-module sym-id] (ut/sym-pair f)]
@@ -88,7 +92,7 @@
                     (or (string? x)
                         (number? x)
                         (map? x)
-                        (and (h/form? x)
+                        (and (std.lib.collection/form? x)
                              (prepend-select-check-form x book)))))))))
 
 (defn invoke-ptr-pg-single
@@ -168,7 +172,7 @@
   "transforms a form"
   {:added "4.0"}
   [form show-exit]
-  (let [inner (h/postwalk (fn [x]
+  (let [inner (std.lib.walk/postwalk (fn [x]
                             (cond (and (list? x)
                                        (= 'return (first x)))
                                   (apply list 'do

@@ -4,7 +4,8 @@
             [std.dom.impl :as impl]
             [std.dom.item :as item]
             [std.dom.type :as type]
-            [std.lib :as h :refer [definvoke]]
+            [std.lib.collection]
+            [std.lib.invoke :refer [definvoke]]
             [std.lib.mutable :as mut]))
 
 (defmulti dom-apply
@@ -39,7 +40,7 @@
    => [1 2 3 4]"
   {:added "3.0"}
   ([list [_ i items]] 
-   (apply h/insert-at list i (map impl/dom-init items))))
+   (apply std.lib.collection/insert-at list i (map impl/dom-init items))))
 
 (defn update-list-remove
   "updates the list by deleting values
@@ -50,7 +51,7 @@
   {:added "3.0"}
   ([list [_ i number]] 
    (doseq [old  (->> list (drop i) (take number))]
-    (if (base/dom? old) (impl/dom-remove old))) (h/remove-at list i number)))
+    (if (base/dom? old) (impl/dom-remove old))) (std.lib.collection/remove-at list i number)))
 
 (defn update-list-update
   "updates :update changes to list

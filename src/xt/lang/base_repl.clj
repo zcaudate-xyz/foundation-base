@@ -1,6 +1,7 @@
 (ns xt.lang.base-repl
   (:require [std.lang :as l]
-            [std.lib :as h]
+            [std.lib.foundation]
+            [std.lib.template]
             [xt.lang.base-notify :as notify])
   (:refer-clojure :exclude [print]))
 
@@ -143,7 +144,7 @@
           port
           value
           notify-id
-          [(h/strn rt-id) (merge {:column column
+          [(std.lib.foundation/strn rt-id) (merge {:column column
                                   :line line
                                   :namespace (or namespace
                                                  (str (.getName *ns*)))
@@ -172,7 +173,7 @@
   [value & [id tag]]
   (notify-form (or id
                    notify/*override-id*
-                   (h/error "No ID for Notify"))
+                   (std.lib.foundation/error "No ID for Notify"))
                value {:tag tag}))
 
 (defmacro.xt ^{:standalone true}
@@ -180,7 +181,7 @@
   "creates a callback function"
   {:added "4.0"}
   [& [f]]
-  (h/$ (fn [val]
+  (std.lib.template/$ (fn [val]
          (return (xt.lang.base-repl/notify ~(if f
                                               (list f 'val)
                                               'val))))))

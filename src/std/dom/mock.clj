@@ -5,8 +5,9 @@
             [std.dom.item :as item]
             [std.dom.type :as type]
             [std.dom.update :as update]
-            [std.lib.mutable :as mut :refer [defmutable]]
-            [std.lib :as h :refer [definvoke]]))
+            [std.lib.collection]
+            [std.lib.invoke :refer [definvoke]]
+            [std.lib.mutable :as mut :refer [defmutable]]))
 
 (declare mock-format)
 
@@ -54,7 +55,7 @@
   ([{:keys [tag props] :as item}] 
    (let [fmt-fn  (fn [obj] (if (mock? obj) (mock-format obj) obj))
         {:keys [key children]} (base/dom-children item)
-        props  (h/map-vals (fn [p]
+        props  (std.lib.collection/map-vals (fn [p]
                              (cond (sequential? p)
                                    (mapv fmt-fn p)
                                    

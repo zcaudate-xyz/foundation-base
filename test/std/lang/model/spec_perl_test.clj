@@ -1,8 +1,7 @@
 (ns std.lang.model.spec-perl-test
-  (:use code.test)
-  (:require [std.lang.model.spec-perl :as spec-perl]
-            [std.lang :as l]
-            [std.lib :as h]))
+  (:require [std.lang :as l]
+            [std.lang.model.spec-perl :as spec-perl])
+  (:use code.test))
 
 (l/script :perl)
 

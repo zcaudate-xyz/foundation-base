@@ -1,10 +1,7 @@
 (ns std.fs.common
   (:require [std.lib.enum :as enum]
-            [std.string :as str])
-  (:import (java.util.regex Pattern)
-           (java.nio.charset Charset)
-           (java.nio.file AccessMode FileVisitOption FileVisitResult
-                          LinkOption StandardCopyOption StandardOpenOption)))
+            [std.string.common])
+  (:import (java.util.regex Pattern) (java.nio.charset Charset) (java.nio.file AccessMode FileVisitOption FileVisitResult LinkOption StandardCopyOption StandardOpenOption)))
 
 ;;
 ;; SYSTEM
@@ -95,8 +92,8 @@
   {:added "3.0"}
   ([s]
    (-> s
-       (str/replace #"\." "\\\\\\Q.\\\\\\E")
-       (str/replace #"\*" ".+")
+       (std.string.common/replace #"\." "\\\\\\Q.\\\\\\E")
+       (std.string.common/replace #"\*" ".+")
        (re-pattern))))
 
 (defn tag-filter

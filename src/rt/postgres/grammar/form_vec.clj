@@ -1,11 +1,13 @@
 (ns rt.postgres.grammar.form-vec
-  (:require [std.string :as str]
-            [std.lib :as h]
+  (:require [rt.postgres.grammar.common :as common]
+            [std.lang.base.emit :as emit]
             [std.lang.base.emit-common :as emit-common]
             [std.lang.base.emit-data :as emit-data]
-            [std.lang.base.emit :as emit]
             [std.lang.base.util :as ut]
-            [rt.postgres.grammar.common :as common]))
+            [std.lib.foundation]
+            [std.string.common]
+            [std.string.prose]
+            [std.string.wrap]))
 
 (declare pg-section)
 
@@ -27,7 +29,7 @@
                     sym)]
      (if (vector? expr)
        (let [[q & rest] expr
-             qalt (common/+pg-query-alias+ ((str/wrap str/lower-case) q))]
+             qalt (common/+pg-query-alias+ ((std.string.wrap/wrap std.string.common/lower-case) q))]
          (concat [sym (or qalt q)] rest))
        [sym := (list '% expr)]))))
 
@@ -36,7 +38,7 @@
   {:added "4.0"}
   ([queries grammar mopts]
    (let [l-sym?  (fn [x] (and (or (keyword? x) (symbol? x))
-                              (#{"AND" "OR"} (str/upper-case (name x)))))
+                              (#{"AND" "OR"} (std.string.common/upper-case (name x)))))
          block   (loop [queries queries
                         acc []]
                    (cond (empty? queries)
@@ -46,7 +48,7 @@
                          (let [iarr (take-while (comp not l-sym?) queries)
                                more (drop (count iarr) queries)
                                _    (if-not (even? (count iarr))
-                                      (h/error "Not even" {:value iarr
+                                      (std.lib.foundation/error "Not even" {:value iarr
                                                            :all queries}))
                                oarr (->> (partition 2 iarr)
                                          (map pg-section-query-pair)
@@ -58,9 +60,9 @@
                                     (concat acc oarr [(first more)]))))))
          indent emit-common/*indent*
          body (pg-section block grammar mopts)]
-     (if (str/multi-line? body)
+     (if (std.string.prose/multi-line? body)
        (str "("
-            (str/indent (str "\n" (str/trim-newlines (str/trim-right body)) ")")
+            (std.string.prose/indent (str "\n" (std.string.common/trim-newlines (std.string.common/trim-right body)) ")")
                         (+ indent 2)))
        (str "(" body ")")))))
 
@@ -70,11 +72,11 @@
   ([queries grammar mopts]
    (let [l-sym?  (fn [x] (and (or (keyword? x)
                                   (symbol? x))
-                              (#{"OR"} (str/upper-case (name x)))))
-         cnt     (h/counter)
+                              (#{"OR"} (std.string.common/upper-case (name x)))))
+         cnt     (std.lib.foundation/counter)
          groups  (->> (partition-by (fn [x]
                                       (if (l-sym? x)
-                                        (h/inc! cnt)))
+                                        (std.lib.foundation/inc! cnt)))
                                     queries)
                       (remove (fn [x] (l-sym? (first x)))))]
      (if (= 1 (count groups))
@@ -83,8 +85,8 @@
                             (map (fn [group]
                                    (pg-section-query-set group grammar mopts))))]
          (if (emit-data/emit-singleline-array? body-arr)
-           (str/join " OR " body-arr)
-           (str (str/join (str (emit-common/newline-indent) "OR " )
+           (std.string.common/join " OR " body-arr)
+           (str (std.string.common/join (str (emit-common/newline-indent) "OR " )
                           body-arr))))))))
 
 (defn pg-section-query-map
@@ -94,8 +96,8 @@
    (let [body-arr (->> (map pg-section-query-pair queries)
                        (map #(pg-section % grammar mopts)))]
      (if (emit-data/emit-singleline-array? body-arr)
-       (str/join " AND " body-arr)
-       (str (str/join (str (emit-common/newline-indent) "AND ")
+       (std.string.common/join " AND " body-arr)
+       (str (std.string.common/join (str (emit-common/newline-indent) "AND ")
                       body-arr))))))
 
 ;;
@@ -108,8 +110,8 @@
   ([e grammar mopts]
    (cond (keyword? e)
          (-> (name e)
-             (str/upper-case)
-             (str/replace #"-" " "))
+             (std.string.common/upper-case)
+             (std.string.common/replace #"-" " "))
          
          (map? e)
          (pg-section-query-map e grammar mopts)
@@ -123,9 +125,9 @@
          (let [indent emit-common/*indent*
                body (binding [emit-common/*indent* 0]
                       (emit-common/*emit-fn* e grammar mopts))]
-           (if (str/multi-line? body)
+           (if (std.string.prose/multi-line? body)
              (str "("
-                  (str/indent (str "\n" (str/trim-newlines (str/trim-right body)) ")")
+                  (std.string.prose/indent (str "\n" (std.string.common/trim-newlines (std.string.common/trim-right body)) ")")
                               (+ indent 2)))
              (str "(" body ")")))
          

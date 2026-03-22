@@ -1,6 +1,6 @@
 (ns std.protocol.string-test
-  (:use code.test)
-  (:require [std.protocol.string :refer :all]))
+  (:require [std.protocol.string :refer :all])
+  (:use code.test))
 
 ^{:refer std.protocol.string/-from-string :added "3.0"}
 (comment "common method for extending string-like objects")

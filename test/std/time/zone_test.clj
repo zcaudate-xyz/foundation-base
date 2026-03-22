@@ -1,7 +1,7 @@
 (ns std.time.zone-test
+  (:require [std.time.common :as common]
+            [std.time.zone :as zone])
   (:use code.test)
-  (:require [std.time.zone :as zone]
-            [std.time.common :as common])
   (:import [java.util Date TimeZone Calendar]))
 
 ^{:refer std.time.zone/pad-zeros :added "3.0"}

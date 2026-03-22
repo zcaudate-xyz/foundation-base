@@ -1,9 +1,8 @@
 (ns rt.postgres.script.test.scratch-v1-test
-  (:use code.test)
-  (:require [std.lang :as l]
-            [std.lib :as h]
-            [rt.postgres]
-            [rt.postgres.script.test.scratch-v1 :as scratch]))
+  (:require [rt.postgres]
+            [rt.postgres.script.test.scratch-v1 :as scratch]
+            [std.lang :as l])
+  (:use code.test))
 
 (l/script- :postgres
   {:runtime :jdbc.client

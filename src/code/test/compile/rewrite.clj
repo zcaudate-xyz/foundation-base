@@ -1,8 +1,8 @@
 (ns code.test.compile.rewrite
-  (:require [std.lib.collection :as c]
-            [std.lib.result :as res]
-            [code.test.base.process :as process]
-            [code.test.compile.types :as types]))
+  (:require [code.test.base.process :as process]
+            [code.test.compile.types :as types]
+            [std.lib.collection :as c]
+            [std.lib.result :as res]))
 
 (declare rewrite-nested-checks)
 

@@ -1,7 +1,6 @@
 (ns code.ai.server.tool.code-manage
   (:require [code.manage :as manage]
-            [std.task :as task]
-            [std.lib :as h]))
+            [std.task :as task]))
 
 (defn manage-fn
   [_ {:keys [task target options]}]

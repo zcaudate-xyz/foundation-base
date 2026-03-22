@@ -1,9 +1,9 @@
 (ns rt.postgres.grammar.form-defn-test
-  (:use code.test)
-  (:require [rt.postgres.grammar.form-defn :refer :all]
-            [rt.postgres.grammar :as g]
+  (:require [rt.postgres.grammar :as g]
+            [rt.postgres.grammar.form-defn :refer :all]
             [std.lang :as l]
-            [std.lib :as h]))
+            [std.string.prose])
+  (:use code.test))
 
 ^{:refer rt.postgres.grammar.form-defn/pg-defn-format :added "4.0"}
 (fact "formats a defn form"
@@ -36,7 +36,7 @@
             g/+grammar+
             {:snapshot (l/get-snapshot (l/runtime-library))}))
   
-  => (std.string/|
+  => (std.string.prose/|
       "CREATE OR REPLACE FUNCTION sales_tax("
       "  subtotal REAL,"
       "  fraction REAL DEFAULT 0.06"
@@ -55,7 +55,7 @@
                (return (* fraction subtotal)))
             g/+grammar+
             {:snapshot (l/get-snapshot (l/runtime-library))}))
-  => (std.string/|
+  => (std.string.prose/|
       "CREATE OR REPLACE FUNCTION sales_tax("
       "  subtotal REAL,"
       "  fraction REAL DEFAULT 0.06"

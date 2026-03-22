@@ -1,7 +1,7 @@
 (ns xt.lang.override.custom-lua-test
-  (:use code.test)
-  (:require [xt.lang.override.custom-lua :refer :all]
-            [std.lang :as l]))
+  (:require [std.lang :as l]
+            [xt.lang.override.custom-lua :refer :all])
+  (:use code.test))
 
 (l/script :lua
   {:runtime :oneshot

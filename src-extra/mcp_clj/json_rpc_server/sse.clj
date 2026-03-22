@@ -1,17 +1,14 @@
 (ns mcp-clj.json-rpc-server.sse
+  (:require [mcp-clj.http :as http]
+            [mcp-clj.http-server.adapter :as http-server]
+            [mcp-clj.json :as json]
+            [mcp-clj.json-rpc.executor :as executor]
+            [mcp-clj.json-rpc.json-protocol :as json-protocol]
+            [mcp-clj.json-rpc.protocols :as protocols]
+            [mcp-clj.log :as log]
+            [mcp-clj.sse :as sse])
   "JSON-RPC 2.0 server with Server-Sent Events (SSE) support"
-  (:require
-    [mcp-clj.http :as http]
-    [mcp-clj.http-server.adapter :as http-server]
-    [mcp-clj.json :as json]
-    [mcp-clj.json-rpc.executor :as executor]
-    [mcp-clj.json-rpc.json-protocol :as json-protocol]
-    [mcp-clj.json-rpc.protocols :as protocols]
-    [mcp-clj.log :as log]
-    [mcp-clj.sse :as sse])
-  (:import
-    (java.util.concurrent
-      RejectedExecutionException)))
+  (:import (java.util.concurrent RejectedExecutionException)))
 
 ;; Executor Service
 

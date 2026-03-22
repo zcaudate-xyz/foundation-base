@@ -1,7 +1,7 @@
 (ns jvm.reflect-test
-  (:use code.test)
   (:require [jvm.reflect :refer :all]
             [std.object.query :as query])
+  (:use code.test)
   (:refer-clojure :exclude [.% .%> .? .?* .?> .* .*> .&]))
 
 ^{:refer jvm.reflect/.% :added "3.0"}

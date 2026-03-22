@@ -1,8 +1,7 @@
 (ns xt.lang.util-handle-test
-  (:use code.test)
-  (:require [std.lib :as h]
-            [std.lang :as l]
-            [xt.lang.base-notify :as notify]))
+  (:require [std.lang :as l]
+            [xt.lang.base-notify :as notify])
+  (:use code.test))
 
 (l/script- :js
   {:runtime :basic

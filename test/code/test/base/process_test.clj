@@ -1,11 +1,11 @@
 (ns code.test.base.process-test
-  (:use code.test)
-  (:require [code.test.base.process :refer :all]
+  (:require [code.test.base.context :as ctx]
+            [code.test.base.process :refer :all]
             [code.test.base.runtime :as rt]
-            [code.test.base.context :as ctx]
             [code.test.checker.common :as base]
             [code.test.compile :as compile]
-            [std.lib :as h]))
+            [std.lib.signal])
+  (:use code.test))
 
 ^{:refer code.test.base.process/evaluate :added "3.0"}
 (fact "converts a form to a result"
@@ -19,7 +19,7 @@
 
   (defn view-signal [op]
     (let [output (atom nil)]
-      (h/signal:with-temp [:test (fn [{:keys [result]}]
+      (std.lib.signal/signal:with-temp [:test (fn [{:keys [result]}]
                                    (reset! output (into {} result)))]
         (process op)
         @output)))

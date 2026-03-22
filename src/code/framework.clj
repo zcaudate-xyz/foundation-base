@@ -1,20 +1,23 @@
 (ns code.framework
-  (:require [std.lib.walk :as walk]
-            [code.framework.cache :as cache]
+  (:require [code.framework.cache :as cache]
             [code.framework.common :as common]
             [code.framework.docstring :as docstring]
             [code.framework.test.clojure]
             [code.framework.test.fact]
             [code.framework.text :as text]
-            [std.block.navigate :as nav]
-            [code.query :as query]
-            [std.fs :as fs]
             [code.project :as project]
-            [std.text.diff :as text.diff]
-            [std.string :as str]
-            [std.print.ansi :as ansi]
+            [code.query :as query]
+            [std.block.navigate :as nav]
+            [std.fs :as fs]
+            [std.lib.collection]
+            [std.lib.env]
+            [std.lib.foundation]
+            [std.lib.invoke :refer [definvoke]]
             [std.lib.result :as res]
-            [std.lib :as h :refer [definvoke]]))
+            [std.lib.walk :as walk]
+            [std.print.ansi :as ansi]
+            [std.string.common]
+            [std.text.diff :as text.diff]))
 
 (def ^:dynamic *toplevel-forms*
   '#{defn
@@ -161,7 +164,7 @@
          frameworks (find-test-frameworks ns-form)]
      (->> frameworks
           (map (fn [framework] (common/analyse-test framework nav)))
-          (apply h/merge-nested)
+          (apply std.lib.collection/merge-nested)
           (common/entry)))))
 
 (definvoke analyse-file
@@ -300,7 +303,7 @@
      (cond (res/result? analysis) analysis
 
            :else
-           (h/map-juxt [(var-function full)
+           (std.lib.collection/map-juxt [(var-function full)
                         (comp docstring/->docstring :code :test)]
                        analysis)))))
 
@@ -335,7 +338,7 @@
                                           (f revised)
                                           nil
                                           (catch Throwable t
-                                            (h/prn t)
+                                            (std.lib.env/prn t)
                                             [k false])))
                                       verify))
                               true)
@@ -347,8 +350,8 @@
                           (spit (fs/path root path) revised)
                           true)
                _        (when (and (:function print) (seq deltas))
-                          (h/local :print (str "\n" (ansi/style path #{:bold :blue :underline}) "\n\n"))
-                          (h/local :print (text.diff/->string deltas) "\n"))]
+                          (std.lib.env/local :print (str "\n" (ansi/style path #{:bold :blue :underline}) "\n\n"))
+                          (std.lib.env/local :print (text.diff/->string deltas) "\n"))]
            (cond-> (if no-analysis
                      (assoc (text.diff/summary deltas)
                             :changed (text.diff/get-lines deltas))
@@ -371,11 +374,11 @@
                                  {:return :zipper})
                        (mapv nav/line-info))]
      (if (seq results)
-       (let [lines (str/split-lines code)
+       (let [lines (std.string.common/split-lines code)
              path  (str (fs/relativize root path))]
          (when (:function print)
-           (h/local :print (str "\n" (ansi/style path #{:bold :blue :underline}) "\n\n"))
-           (h/local :print (text/->string results lines line-lu params) "\n"))
+           (std.lib.env/local :print (str "\n" (ansi/style path #{:bold :blue :underline}) "\n\n"))
+           (std.lib.env/local :print (text/->string results lines line-lu params) "\n"))
          results)))))
 
 ;; GREP
@@ -387,10 +390,10 @@
    => \"\\\\(:require\""
   {:added "3.0"}
   ([obj]
-   (cond (h/regexp? obj) obj
+   (cond (std.lib.foundation/regexp? obj) obj
 
          (string? obj)
-         (h/-> (str obj)
+         (std.lib.foundation/-> (str obj)
                (.replaceAll "\\(" "\\\\(")
                (.replaceAll "\\(" "\\\\(")
                (.replaceAll "\\{" "\\\\{")
@@ -427,7 +430,7 @@
          code     (slurp path)
          analysis (analyse ns params lookup project)
          line-lu  (common/line-lookup ns analysis)
-         lines    (str/split-lines code)
+         lines    (std.string.common/split-lines code)
          results  (keep (fn [[i line]]
                           (if-let [[_ start match] (re-find query line)]
                             (let [col (inc (count start))]
@@ -438,8 +441,8 @@
      (if (seq results)
        (let [path  (str (fs/relativize root path))]
          (when (:function print)
-           (h/local :print (str "\n" (ansi/style path #{:bold :blue :underline}) "\n\n"))
-           (h/local :print (text/->string results lines line-lu params) "\n"))
+           (std.lib.env/local :print (str "\n" (ansi/style path #{:bold :blue :underline}) "\n\n"))
+           (std.lib.env/local :print (text/->string results lines line-lu params) "\n"))
          results)))))
 
 (defn grep-replace
@@ -452,9 +455,9 @@
   ([ns {:keys [print query replace] :as params} lookup {:keys [root] :as project}]
    (let [query    (compile-regex query)
          transform-fn (fn [original]
-                        (->> (str/split-lines original)
-                             (map (fn [line] (str/replace line query replace)))
-                             (str/join "\n")))
+                        (->> (std.string.common/split-lines original)
+                             (map (fn [line] (std.string.common/replace line query replace)))
+                             (std.string.common/join "\n")))
          params (assoc params :transform transform-fn)]
      (transform-code ns params lookup project))))
 
@@ -466,9 +469,9 @@
        (take 10)
        (map #(doto % (-> nav/string prn)))
        (map nav/string)
-       (str/joinl)
+       (std.string.common/joinl)
        (println))
-  (h/error "oeoeu"))
+  (std.lib.foundation/error "oeoeu"))
 
 (defn refactor-code
   "takes in a series of edits and performs them on the code

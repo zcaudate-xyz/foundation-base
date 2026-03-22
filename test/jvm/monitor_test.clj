@@ -1,7 +1,7 @@
 (ns jvm.monitor-test
-  (:use code.test)
   (:require [jvm.monitor :refer :all]
-            [std.object :as object]))
+            [std.object :as object])
+  (:use code.test))
 
 ^{:refer jvm.monitor/class-loading-bean :added "3.0"}
 (fact "gives information about class loading"

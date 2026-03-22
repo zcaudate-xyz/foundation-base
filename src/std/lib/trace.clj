@@ -1,8 +1,8 @@
 (ns std.lib.trace
-  (:require [std.lib.env :as env]
-            [std.lib.time :as time]
+  (:require [std.lib.context.pointer :as pointer]
+            [std.lib.env :as env]
             [std.lib.foundation :as h]
-            [std.lib.context.pointer :as pointer]
+            [std.lib.time :as time]
             [std.string.common :as str]
             [std.string.prose :as prose]))
 

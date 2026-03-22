@@ -1,6 +1,6 @@
 (ns std.lib.stream.iter-test
-  (:use code.test)
-  (:require [std.lib.stream.iter :refer :all]))
+  (:require [std.lib.stream.iter :refer :all])
+  (:use code.test))
 
 ^{:refer std.lib.stream.iter/i:map :added "4.1"}
 (fact "iterator for map"

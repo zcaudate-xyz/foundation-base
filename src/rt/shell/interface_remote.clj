@@ -1,17 +1,23 @@
 ^{:no-test true}
 (ns rt.shell.interface-remote
-  (:require [std.protocol.component :as protocol.component]
-            [std.protocol.context :as protocol.context]
+  (:require [rt.shell.interface-basic :as basic]
             [std.concurrent :as cc]
-            [rt.shell.interface-basic :as basic]
-            [std.lang.interface.type-notify :as notify]
             [std.lang :as l]
-            [std.string :as str]
-            [std.lib :as h :refer [defimpl]]
-            [std.lang.base.runtime :as default]
             [std.lang.base.impl :as impl]
             [std.lang.base.pointer :as ptr]
-            [std.lang.base.util :as ut]))
+            [std.lang.base.runtime :as default]
+            [std.lang.base.util :as ut]
+            [std.lang.interface.type-notify :as notify]
+            [std.lib.atom]
+            [std.lib.component]
+            [std.lib.env]
+            [std.lib.foundation]
+            [std.lib.impl :refer [defimpl]]
+            [std.lib.os]
+            [std.lib.template]
+            [std.protocol.component :as protocol.component]
+            [std.protocol.context :as protocol.context]
+            [std.string.common]))
 
 (def ^:dynamic *remote-id* nil)
 
@@ -21,7 +27,7 @@
   [id port form]
   (let [address (str "/dev/tcp/127.0.0.1/" port)
         fstr  (str "'{id: \"" id  "\", data:.}'")]
-    (h/$ [(exec (:% 3 <> ~address))
+    (std.lib.template/$ [(exec (:% 3 <> ~address))
           [~form
            | (jq {:R true
                   :s true}
@@ -60,7 +66,7 @@
   {:added "4.0"}
   [{:keys [id client last] :as rt} ptr args]
   (let [port  (:socket-port (l/default-notify))
-        tx-id (str id "--" (h/sid))
+        tx-id (str id "--" (std.lib.foundation/sid))
         body  (binding [*remote-id* tx-id
                         *remote-port* port]
                 (ptr/ptr-invoke-script ptr args
@@ -74,9 +80,9 @@
                          (basic/raw-eval-basic client nil))]
     
     (if (not-empty output)
-      (h/pl output))
+      (std.lib.env/pl output))
     (or (if-let [s (get return "data")]
-          (str/trim-right s))
+          (std.string.common/trim-right s))
         return)))
 
 (defn start-shell-remote-tunnel
@@ -86,7 +92,7 @@
   (or @tunnel
       (reset! tunnel
               (let [port (:socket-port (notify/default-notify))]
-                (h/sh {:args ["ssh" "-N" server "-R" (str port ":localhost:" port) "-C"]
+                (std.lib.os/sh {:args ["ssh" "-N" server "-R" (str port ":localhost:" port) "-C"]
                        :wait false})))))
 
 (defn start-shell-remote
@@ -94,7 +100,7 @@
   {:added "4.0"}
   [{:keys [server client] :as rt}]
   (let [_ (start-shell-remote-tunnel rt)
-        _ (h/start client)
+        _ (std.lib.component/start client)
         s (basic/raw-eval-basic client (str "ssh " server))
         _ (loop [n 10]
             (cond (neg? n)
@@ -113,9 +119,9 @@
   "stops the shell"
   {:added "4.0"}
   [{:keys [tunnel client] :as rt}]
-  (let [_ (h/stop client)
-        _ (h/swap-return! tunnel (fn [sh]
-                                   [sh (if sh (h/sh-exit sh))]))]
+  (let [_ (std.lib.component/stop client)
+        _ (std.lib.atom/swap-return! tunnel (fn [sh]
+                                   [sh (if sh (std.lib.os/sh-exit sh))]))]
     rt))
 
 (defn- shell-remote-string
@@ -137,7 +143,7 @@
   "creates the shell remote"
   {:added "4.0"}
   ([{:keys [id server client] :as m
-     :or {id (h/sid)}}]
+     :or {id (std.lib.foundation/sid)}}]
    (map->ShellRemote (assoc m
                             :id id
                             :last   (atom nil)
@@ -151,7 +157,7 @@
    (shell-remote {}))
   ([m]
    (-> (shell-remote:create m)
-       (h/start))))
+       (std.lib.component/start))))
 
 (def +bash-basic+
   [(default/install-type!

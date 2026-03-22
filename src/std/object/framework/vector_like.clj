@@ -1,9 +1,9 @@
 (ns std.object.framework.vector-like
-  (:require [std.object.framework.print :as print]
-            [std.protocol.object :as protocol.object]
+  (:require [std.lib.memoize]
+            [std.object.framework.print :as print]
             [std.object.framework.read :as read]
             [std.object.framework.write :as write]
-            [std.lib :as h]))
+            [std.protocol.object :as protocol.object]))
 
 (defmacro extend-vector-like
   "sets the fields of an object with keyword
@@ -24,6 +24,6 @@
                     ([~'_]
                      {:from-vector ~write})))
 
-     true  (conj `(do (h/memoize:remove read/meta-read-exact ~cls)
-                      (h/memoize:remove write/meta-write-exact ~cls)
+     true  (conj `(do (std.lib.memoize/memoize:remove read/meta-read-exact ~cls)
+                      (std.lib.memoize/memoize:remove write/meta-write-exact ~cls)
                       (print/extend-print ~cls))))))

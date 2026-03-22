@@ -6,7 +6,9 @@
             [std.dom.react :as react]
             [std.dom.type :as type]
             [std.dom.update :as update]
-            [std.lib :as h :refer [definvoke]]
+            [std.lib.collection]
+            [std.lib.function]
+            [std.lib.invoke :refer [definvoke]]
             [std.lib.mutable :as mut]))
 
 (defonce +init+ (type/metaclass-add :dom/component {:metatype :dom/component}))
@@ -52,7 +54,7 @@
                                 {}))
          {:keys [wrap-template]} collected
          template (reduce #(%2 %1) template wrap-template)
-         options  (-> (h/map-vals (fn [fns]
+         options  (-> (std.lib.collection/map-vals (fn [fns]
                                     (fn [dom] (doseq [f fns] (f dom))))
                                   (dissoc collected :wrap-template))
                       (assoc :template template))]
@@ -78,7 +80,7 @@
   {:added "3.0"}
   ([tag doc? attr? & [bindings & body]] 
    (let [[doc attr [class params] & body]
-        (h/fn:create-args (apply vector doc? attr? bindings body))]
+        (std.lib.function/fn:create-args (apply vector doc? attr? bindings body))]
     `(let [~'template (fn ~@body)]
        (component-install ~tag ~class ~'template ~params)))))
 

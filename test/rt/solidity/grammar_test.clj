@@ -1,9 +1,9 @@
 (ns rt.solidity.grammar-test
-  (:use code.test)
   (:require [rt.solidity.grammar :as g]
-            [std.lib :as h]
             [std.lang :as l]
-            [std.lang.base.emit :as emit]))
+            [std.lang.base.emit :as emit]
+            [std.string.prose])
+  (:use code.test))
 
 ^{:refer rt.solidity.grammar/sol-util-types :added "4.0"}
 (fact "format sol types"
@@ -163,7 +163,7 @@
         balanceOf [:address owner]])
     g/+grammar+
     {}))
-  => (std.string/|
+  => (std.string.prose/|
       "interface IERC20 {"
       "  function transfer(address to,uint value) external returns(bool);"
       "  function balanceOf(address owner) external view returns(uint);"

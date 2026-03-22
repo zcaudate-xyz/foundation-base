@@ -2,9 +2,7 @@
   (:require [std.protocol.time :as protocol.time]
             [std.time.coerce :as coerce]
             [std.time.common :as common])
-  (:import (java.sql Timestamp)
-           (java.text SimpleDateFormat)
-           (java.util Calendar Date TimeZone)))
+  (:import (java.sql Timestamp) (java.text SimpleDateFormat) (java.util Calendar Date TimeZone)))
 
 (def timestamp-meta
   {:type :instant

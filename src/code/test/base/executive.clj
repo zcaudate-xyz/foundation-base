@@ -1,14 +1,15 @@
 (ns code.test.base.executive
-  (:require [std.lib :as h]
-            [std.fs :as fs]
-            [std.lib.time :as t]
-            [std.task :as task]
-            [code.project :as project]
-            [code.test.checker.common :as checker]
+  (:require [code.project :as project]
             [code.test.base.context :as context]
-            [code.test.base.runtime :as rt]
             [code.test.base.listener :as listener]
-            [code.test.base.print :as print]))
+            [code.test.base.print :as print]
+            [code.test.base.runtime :as rt]
+            [code.test.checker.common :as checker]
+            [std.fs :as fs]
+            [std.lib.collection]
+            [std.lib.foundation]
+            [std.lib.time :as t]
+            [std.task :as task]))
 
 (defonce +latest+ (atom {}))
 
@@ -79,7 +80,7 @@
   "creates a summary of given results"
   {:added "3.0"}
   ([items]
-   (let [summary (h/map-vals count items)
+   (let [summary (std.lib.collection/map-vals count items)
          summary (merge {:failed 0 :throw 0 :timeout 0} summary)]
      #_(when (:print-bulk context/*print*)
        (doseq [item  (:failed items)]
@@ -181,7 +182,7 @@
    (binding [context/*root*     (:root project)
              context/*errors*   (atom {})
              context/*settings* (merge context/*settings* params)]
-     (let [run-id  (or run-id (h/uuid))
+     (let [run-id  (or run-id (std.lib.foundation/uuid))
            test-ns (if context/*eval-current-ns*
                      ns
                      (project/test-ns ns))
@@ -233,7 +234,7 @@
              context/*root*     (:root project)
              context/*errors*   (atom {})
              context/*settings* (merge context/*settings* params)]
-     (let [run-id (or run-id (h/uuid))
+     (let [run-id (or run-id (std.lib.foundation/uuid))
            test-ns (if context/*eval-current-ns*
                      ns
                      (project/test-ns ns))

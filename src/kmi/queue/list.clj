@@ -1,6 +1,5 @@
 (ns kmi.queue.list
-  (:require [std.lang :as l]
-            [std.lib :as h]))
+  (:require [std.lang :as l]))
 
 (l/script :lua
   {:runtime :redis

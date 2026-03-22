@@ -1,12 +1,11 @@
 (ns std.time.vector-test
-  (:use code.test)
   (:require [std.protocol.time :as time]
             [std.time]
             [std.time.common :as common]
             [std.time.map :as map]
             [std.time.vector :refer :all])
-  (:import (java.util Date TimeZone)
-           (java.time Instant Clock ZonedDateTime ZoneId)))
+  (:use code.test)
+  (:import (java.util Date TimeZone) (java.time Instant Clock ZonedDateTime ZoneId)))
 
 ^{:refer std.time.vector/to-vector :added "3.0"  :class [:time/convert]}
 (fact "converts an instant to an array representation"

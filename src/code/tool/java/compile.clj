@@ -1,21 +1,12 @@
 (ns code.tool.java.compile
-  (:require [std.lib.sort :as sort]
-            [std.fs :as fs]
-            [code.project :as project]
+  (:require [code.project :as project]
             [jvm.classloader :as classloader]
-            [std.string :as str]
-            [std.lib :as h])
-  (:import (java.util Arrays)
-           (java.net URI)
-           (java.io ByteArrayOutputStream)
-           (javax.tools Diagnostic$Kind
-                        Diagnostic
-                        DiagnosticCollector
-                        ForwardingJavaFileManager
-                        JavaFileObject$Kind
-                        SimpleJavaFileObject
-                        ToolProvider)
-           (org.objectweb.asm ClassReader))
+            [std.fs :as fs]
+            [std.lib.collection]
+            [std.lib.env]
+            [std.lib.sort :as sort]
+            [std.string.coerce])
+  (:import (java.util Arrays) (java.net URI) (java.io ByteArrayOutputStream) (javax.tools Diagnostic$Kind Diagnostic DiagnosticCollector ForwardingJavaFileManager JavaFileObject$Kind SimpleJavaFileObject ToolProvider) (org.objectweb.asm ClassReader))
   (:refer-clojure :exclude [supers]))
 
 (defn path->class
@@ -44,7 +35,7 @@
    => \"test/Cat.class\""
   {:added "3.0"}
   ([cls]
-   (-> (str/to-string cls)
+   (-> (std.string.coerce/to-string cls)
        (.replaceAll "\\." "/")
        (str ".class"))))
 
@@ -126,7 +117,7 @@
   {:added "3.0"}
   ([^DiagnosticCollector collector]
    (doseq [^Diagnostic d (.getDiagnostics collector)]
-     (h/explode
+     (std.lib.env/explode
       (if (.getSource d)
         (println
          (format "%s: %s, line %d: %s\n"
@@ -145,13 +136,13 @@
   {:added "3.0"}
   ([bytes-lu {:keys [reload output] :as opts}]
    (let [out (when output
-               {:output (h/map-entries (fn [[cls bytes]]
+               {:output (std.lib.collection/map-entries (fn [[cls bytes]]
                                          (let [path (fs/path output (class->path cls))
                                                _    (fs/create-directory (fs/parent path))]
                                            [cls (fs/write-all-bytes path bytes)]))
                                        bytes-lu)})
          import (when reload
-                  (let [supers-lu (h/map-vals (fn [bytes]
+                  (let [supers-lu (std.lib.collection/map-vals (fn [bytes]
                                                 (->> (supers bytes)
                                                      (filter bytes-lu)
                                                      set))
@@ -222,7 +213,7 @@
                                     arr))
          _         (javac-output collector)]
      (if success?
-       (javac-process (h/map-vals #(.toByteArray ^ByteArrayOutputStream %) @cache) opts)
+       (javac-process (std.lib.collection/map-vals #(.toByteArray ^ByteArrayOutputStream %) @cache) opts)
        :not-compiled))))
 
 (comment

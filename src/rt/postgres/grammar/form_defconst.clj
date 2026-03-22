@@ -1,16 +1,15 @@
 (ns rt.postgres.grammar.form-defconst
-  (:require [rt.postgres.grammar.common-application :as app]
+  (:require [rt.postgres.grammar.common :as common]
+            [rt.postgres.grammar.common-application :as app]
             [rt.postgres.grammar.common-tracker :as tracker]
-            [rt.postgres.grammar.common :as common]
             [rt.postgres.script.impl-base :as base]
-            [rt.postgres.script.impl-main :as main]
             [rt.postgres.script.impl-insert :as insert]
-            [std.lang.base.library-snapshot :as snap]
-            [std.lang.base.emit-preprocess :as preprocess]
-            [std.lang.base.util :as ut]
+            [rt.postgres.script.impl-main :as main]
             [std.lang :as l]
-            [std.string :as str]
-            [std.lib :as h]))
+            [std.lang.base.emit-preprocess :as preprocess]
+            [std.lang.base.library-snapshot :as snap]
+            [std.lang.base.util :as ut]
+            [std.lib.foundation]))
 
 (defn pg-defconst-hydrate
   "creates the"
@@ -27,7 +26,7 @@
          {:static/keys [tracker]} entry
          {:keys [track] :as msym} (meta sym)
          _   (if (and tracker (nil? track))
-               (h/error "Requires a track meta" {:symbol sym
+               (std.lib.foundation/error "Requires a track meta" {:symbol sym
                                                  :table (ut/sym-full entry)
                                                  :meta (meta sym)}))
          link  (select-keys entry [:id :module :section :lang])
@@ -51,7 +50,7 @@
                                                       [_ track-sym track-data] (:form track-entry)
                                                       {:static/keys [table]} (meta track-sym)
                                                       track-tsch  (or (get-in schema [:tree (keyword (name (:id table)))])
-                                                                     (h/error "Not found." {:input table
+                                                                     (std.lib.foundation/error "Not found." {:input table
                                                                                             :keys (keys (:tree schema))}))]
                                                   [track-entry (main/t-select-raw
                                                                 [table track-tsch mopts]

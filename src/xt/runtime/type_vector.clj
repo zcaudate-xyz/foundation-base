@@ -1,6 +1,5 @@
 (ns xt.runtime.type-vector
-  (:require [std.lang :as l]
-            [std.lib :as h])
+  (:require [std.lang :as l])
   (:refer-clojure :exclude [vector]))
 
 (l/script :xtalk

@@ -1,12 +1,12 @@
 (ns std.vm.llvm-interpreter
   (:require [std.block.base :as base]
-            [std.block.type :as type]
-            [std.block.construct :as construct]
             [std.block.check :as check]
+            [std.block.construct :as construct]
             [std.block.parse :as parse]
+            [std.block.type :as type]
             [std.lib.zip :as zip]
             [std.print.ansi :as ansi]
-            [std.string :as str])
+            [std.string.common])
   (:import (std.protocol.block IBlock)))
 
 ;; --- Context & Zip ---
@@ -168,7 +168,7 @@
 
 (defn resolve-val [vm val]
   (cond
-    (and (symbol? val) (str/starts-with? (name val) "%"))
+    (and (symbol? val) (std.string.common/starts-with? (name val) "%"))
     (get (:registers vm) val)
 
     (number? val) val

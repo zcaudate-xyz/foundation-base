@@ -1,9 +1,8 @@
 (ns xt.db.cache-pull-test
-  (:use code.test)
-  (:require [std.lib :as h]
-            [std.lang :as l]
+  (:require [net.http :as http]
             [std.json :as json]
-            [net.http :as http]))
+            [std.lang :as l])
+  (:use code.test))
 
 (l/script- :js
   {:runtime :basic

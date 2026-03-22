@@ -1,7 +1,7 @@
 (ns std.log.common
-  (:require [std.protocol.component :as protocol.component]
-            [std.protocol.log :as protocol.log]
-            [std.concurrent :as cc]))
+  (:require [std.concurrent :as cc]
+            [std.protocol.component :as protocol.component]
+            [std.protocol.log :as protocol.log]))
 
 (def ^:dynamic *level* :debug)
 

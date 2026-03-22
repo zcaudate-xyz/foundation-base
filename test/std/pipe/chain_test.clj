@@ -1,7 +1,7 @@
 (ns std.pipe.chain-test
-  (:use code.test)
   (:require [std.pipe :refer :all]
-            [std.task :as task]))
+            [std.task :as task])
+  (:use code.test))
 
 (def +inc-task+
   (task/task :default "inc"

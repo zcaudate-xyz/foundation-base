@@ -1,8 +1,7 @@
 (ns std.dispatch.debounce-test
-  (:use code.test)
   (:require [std.dispatch.debounce :refer :all]
-            [std.lib.component :as component]
-            [std.lib :as h]))
+            [std.lib.component :as component])
+  (:use code.test))
 
 (defonce ^:dynamic *output*  (atom []))
 

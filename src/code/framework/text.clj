@@ -1,9 +1,9 @@
 (ns code.framework.text
-  (:require [code.framework.common :as common]
-            [std.text.diff :as text.diff]
+  (:require [clojure.set]
+            [code.framework.common :as common]
             [std.print.ansi :as ansi]
-            [std.string :as str]
-            [std.lib :as h]))
+            [std.string.common]
+            [std.text.diff :as text.diff]))
 
 (defn summarise-deltas
   "summary of what changes have been made"
@@ -11,7 +11,7 @@
   ([deltas]
    (-> (text.diff/summary deltas)
        (assoc :changed (->> (reduce (fn [out {:keys [functions]}]
-                                      (h/union out functions))
+                                      (clojure.set/union out functions))
                                     #{}
                                     deltas)
                             (sort)
@@ -80,7 +80,7 @@
                                                                "")))]
                                          (mapv #(ansi/style (str "-" (ansi/on-grey %)) #{(:normal text)})
                                                lines))
-                                 (str/join "\n"))]
+                                 (std.string.common/join "\n"))]
                  output)))
         (map #(str % "\n"))
-        (str/join "\n"))))
+        (std.string.common/join "\n"))))

@@ -1,7 +1,7 @@
 (ns std.config.ext.toml
   (:require [script.toml :as toml]
             [std.config.common :as common]
-            [std.lib :refer [definvoke]]))
+            [std.lib.invoke :refer [definvoke]]))
 
 (definvoke resolve-type-toml
   "resolves toml config

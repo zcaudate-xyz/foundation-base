@@ -1,7 +1,6 @@
 (ns code.ai.server.tool.code-doc
   (:require [code.doc :as doc]
-            [code.doc.executive :as executive]
-            [std.lib :as h]))
+            [code.doc.executive :as executive]))
 
 (defn init-template-fn
   [_ {:keys [site params]}]

@@ -2,8 +2,7 @@
   (:require [clojure.set])
   (:import (hara.lib.foundation Clock Flake Counter)
            (java.util Date))
-  (:refer-clojure :exclude [-> ->> keyword reset! aget set! assert
-                            parse-long parse-double]))
+  (:refer-clojure :exclude [-> ->> keyword reset! aget set! assert parse-long parse-double]))
 
 (def +init+ find-ns)
 
@@ -858,7 +857,7 @@
        (mapv (fn [e]
                (try (tmpl-fn e)
                     (catch Throwable t
-                      (eval (list 'std.lib/prn (list 'quote e)))
+                      (eval (list 'std.lib.env/prn (list 'quote e)))
                       (throw t))))
              entries)))))
 
@@ -883,8 +882,8 @@
                                      (set (map var-sym vars)))]
     (when (not-empty diff)
       (eval (list 'do
-                  (list 'std.lib/beep)
-                  (list 'std.lib/prn diff))))
+                  (list 'std.lib.os/beep)
+                  (list 'std.lib.env/prn diff))))
     vars))
 
 (deftype Wrapped [val show type display]

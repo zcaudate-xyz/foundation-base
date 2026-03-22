@@ -1,7 +1,7 @@
 (ns std.object.element.impl.field-test
-  (:use code.test)
   (:require [std.object.element.impl.field :as field]
-            [std.object.query :as query]))
+            [std.object.query :as query])
+  (:use code.test))
 
 ^{:refer std.object.element.impl.field/arg-params :added "3.0"}
 (fact "arguments for getters and setters of fields"

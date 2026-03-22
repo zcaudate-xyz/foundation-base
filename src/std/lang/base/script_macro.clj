@@ -1,18 +1,22 @@
 (ns std.lang.base.script-macro
-  (:require [std.lang.base.util :as ut]
-            [std.lang.base.library :as lib]
+  (:require [std.lang.base.emit :as emit]
             [std.lang.base.emit-preprocess :as preprocess]
-            [std.lang.base.emit :as emit]
             [std.lang.base.grammar-spec :as grammar]
             [std.lang.base.impl :as impl]
             [std.lang.base.impl-entry :as entry]
+            [std.lang.base.library :as lib]
+            [std.lang.base.pointer :as ptr]
+            [std.lang.base.runtime :as rt]
             [std.lang.base.script-annex :as annex]
             [std.lang.base.script-control :as control]
             [std.lang.base.script-lint :as lint]
-            [std.lang.base.pointer :as ptr]
-            [std.lang.base.runtime :as rt]
-            [std.protocol.context :as protocol.context]
-            [std.lib :as h]))
+            [std.lang.base.util :as ut]
+            [std.lib.context.pointer]
+            [std.lib.context.space]
+            [std.lib.env]
+            [std.lib.foundation]
+            [std.lib.time]
+            [std.protocol.context :as protocol.context]))
 
 (def +form-allow+ [:line :column :file :name :ns])
 
@@ -36,7 +40,7 @@
   "interns a macro"
   {:added "4.0"}
   ([prefix tag val & [namespace]]
-   (intern (or namespace (h/ns-sym))
+   (intern (or namespace (std.lib.env/ns-sym))
            (with-meta (symbol (str prefix (name tag)))
              {:macro true
               :arglists '([& body])})
@@ -80,7 +84,7 @@
       `(intern-def$-fn ~lang
                        (quote ~&form)
                        (merge ~(meta sym)
-                              {:time (h/time-ns)}))))))
+                              {:time (std.lib.time/time-ns)}))))))
 
 (defn intern-defmacro-fn
   "function to intern a macro"
@@ -113,7 +117,7 @@
       `(intern-defmacro-fn ~lang
                            (quote ~&form)
                            (merge ~(meta sym)
-                                  {:time (h/time-ns)}))))))
+                                  {:time (std.lib.time/time-ns)}))))))
 
 (defn call-thunk
   "calls the thunk given meta to control pointer output
@@ -146,7 +150,7 @@
                                   (rt/rt-default rt))]
     (call-thunk meta
                 (fn []
-                  (h/p:rt-invoke-ptr
+                  (std.lib.context.pointer/rt-invoke-ptr
                    rt
                    (ut/lang-pointer lang {:module module}) args)))))
 
@@ -174,7 +178,7 @@
                    (:module rt))
         ptr (ut/lang-pointer lang {:module module
                                    :form body})]
-    (intern (h/ns-sym) sym ptr)))
+    (intern (std.lib.env/ns-sym) sym ptr)))
 
 (defn intern-free
   "creates a defptr macro
@@ -226,7 +230,7 @@
                   (if (= :single (:lang/add-entry rt))
                     (lib/add-entry-single! lib entry)
                     (lib/add-entry! lib entry)))
-         init   (h/p:rt-init-ptr rt entry)
+         init   (std.lib.context.pointer/rt-init-ptr rt entry)
          module (lib/get-module lib
                                 (:lang entry)
                                 (:module entry))
@@ -268,7 +272,7 @@
      (intern-top-level lang tag op grammar)))
   ([lang tag op grammar]
    (let [reserved (or (get-in grammar [:reserved op])
-                      (h/error "Not found" {:op op
+                      (std.lib.foundation/error "Not found" {:op op
                                             :tag tag
                                             :lang lang}))]
      (intern-in
@@ -278,7 +282,7 @@
                               (quote [~op ~reserved])
                               (quote ~&form)
                               (merge (quote ~(meta sym))
-                                     {:time (h/time-ns)})))))))
+                                     {:time (std.lib.time/time-ns)})))))))
 
 (defn intern-macros
   "interns the top-level macros in the grammar"
@@ -300,7 +304,7 @@
    (let [{:keys [highlight reserved]} grammar]
      (vec (keep (fn [sym]
                   (let [op (get reserved sym)]
-                    (intern (h/ns-sym)
+                    (intern (std.lib.env/ns-sym)
                             (with-meta sym (merge {:macro true}
                                                   (select-keys op [:arglists :style/indent])))
                             (fn [_ _ & args]))))
@@ -345,7 +349,7 @@
         vmacro (fn [_ _ & args]
                  (let [form (list `control/script-rt-oneshot
                                   default
-                                  (h/var-sym vptr)
+                                  (std.lib.foundation/var-sym vptr)
                                   (mapv (fn [x]
                                           (list 'quote x))
                                         args))]
@@ -363,10 +367,10 @@
     `(intern-defmacro-rt-fn ~lang
                             (quote ~&form)
                             (merge ~(meta sym)
-                                   {:time (h/time-ns)}))))
+                                   {:time (std.lib.time/time-ns)}))))
 
 (comment
-  (h/p:space-context-unset (ut/lang-context :bash))
+  (std.lib.context.space/space:context-unset (ut/lang-context :bash))
   (std.lang/with-trace
     (std.lang/with:input
         (rt.shell/man:ptr :man))))

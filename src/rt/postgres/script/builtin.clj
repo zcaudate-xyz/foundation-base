@@ -1,10 +1,9 @@
 (ns rt.postgres.script.builtin
-  (:require [std.lib :as h]
+  (:require [rt.postgres.grammar]
             [std.lang :as l]
-            [std.string :as str]
-            [rt.postgres.grammar])
-  (:refer-clojure :exclude [abs concat format replace repeat reverse mod
-                            bit-and bit-or count max min]))
+            [std.lib.foundation]
+            [std.lib.template])
+  (:refer-clojure :exclude [abs concat format replace repeat reverse mod bit-and bit-or count max min]))
 
 (l/script :postgres
   rt.postgres
@@ -406,9 +405,9 @@
   "creates fragments in builtin"
   {:added "4.0"}
   [sym]
-  (h/$ (def$.pg ~sym ~sym)))
+  (std.lib.template/$ (def$.pg ~sym ~sym)))
 
-(h/template-entries [pg-tmpl]
+(std.lib.foundation/template-entries [pg-tmpl]
                     +array+
                     +bit+
                     +current+

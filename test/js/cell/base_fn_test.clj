@@ -1,9 +1,9 @@
 (ns js.cell.base-fn-test
-  (:use code.test)
-  (:require [std.lib :as h]
+  (:require [js.cell.playground :as browser]
             [std.lang :as l]
-            [js.cell.playground :as browser]
-            [xt.lang.base-notify :as notify]))
+            [std.lib.template]
+            [xt.lang.base-notify :as notify])
+  (:use code.test))
 
 (l/script- :js
   {:runtime :basic
@@ -22,7 +22,7 @@
 
 (defmacro eval-worker
   [body & [timeout no-post]]
-  (h/$ (notify/wait-on [:js ~(or timeout 1000)]
+  (std.lib.template/$ (notify/wait-on [:js ~(or timeout 1000)]
          (var worker (new Worker
                           (fn []
                             (eval (@! (browser/play-script

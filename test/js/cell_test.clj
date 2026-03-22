@@ -1,9 +1,8 @@
 (ns js.cell-test
-  (:use code.test)
-  (:require [std.lib :as h]
+  (:require [js.cell.playground :as playground]
             [std.lang :as l]
-            [js.cell.playground :as playground]
-            [xt.lang.base-notify :as notify]))
+            [xt.lang.base-notify :as notify])
+  (:use code.test))
 
 (l/script- :js
   {:runtime :basic

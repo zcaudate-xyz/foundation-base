@@ -1,9 +1,9 @@
 (ns rt.postgres.grammar-test
-  (:use code.test)
-  (:require [rt.postgres.grammar :refer :all]
-            [rt.postgres :as pg]
+  (:require [rt.postgres :as pg]
+            [rt.postgres.grammar :refer :all]
             [rt.postgres.script.test.scratch-v1 :as scratch]
-            [std.lang :as l]))
+            [std.lang :as l])
+  (:use code.test))
 
 (l/script- :postgres
   {:runtime :jdbc.client

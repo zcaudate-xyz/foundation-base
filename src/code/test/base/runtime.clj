@@ -1,7 +1,7 @@
 (ns code.test.base.runtime
-  (:require [std.lib :as h]
-            [std.string :as str]
-            [code.test.base.context :as context]))
+  (:require [code.test.base.context :as context]
+            [std.lib.env]
+            [std.string.common]))
 
 ;; When a namespace is run:
 ;; - *eval* is set to false
@@ -13,7 +13,7 @@
   "purges all facts from namespace"
   {:added "3.0"}
   ([]
-   (purge-all (h/ns-sym)))
+   (purge-all (std.lib.env/ns-sym)))
   ([ns]
    (swap! context/*registry* dissoc ns)
    ns))
@@ -24,7 +24,7 @@
    (get-global)"
   {:added "3.0"}
   ([]
-   (get-global (h/ns-sym)))
+   (get-global (std.lib.env/ns-sym)))
   ([ns]
    (or context/*eval-global*
        (get-in @context/*registry* [ns :global])))
@@ -39,7 +39,7 @@
    => '{:check {:setup [(prn \"hello\")]}}"
   {:added "3.0"}
   ([m]
-   (set-global (h/ns-sym) m))
+   (set-global (std.lib.env/ns-sym) m))
   ([ns m]
    (-> (swap! context/*registry* assoc-in [ns :global] m)
        (get-in [ns :global]))))
@@ -48,7 +48,7 @@
   "updates global data"
   {:added "3.0"}
   ([f]
-   (update-global (h/ns-sym) f))
+   (update-global (std.lib.env/ns-sym) f))
   ([ns f & args]
    (-> (apply swap! context/*registry* update-in [ns :global] f args)
        (get-in [ns :global]))))
@@ -56,14 +56,14 @@
 (defn list-links
   "lists ns links"
   {:added "3.0"}
-  ([] (list-links (h/ns-sym)))
+  ([] (list-links (std.lib.env/ns-sym)))
   ([ns]
    (get-in @context/*registry* [ns :links])))
 
 (defn clear-links
   "clear ns links"
   {:added "3.0"}
-  ([] (clear-links (h/ns-sym)))
+  ([] (clear-links (std.lib.env/ns-sym)))
   ([ns]
    (-> (swap! context/*registry* assoc-in [ns :links] nil)
        (get-in [ns :links]))))
@@ -71,7 +71,7 @@
 (defn add-link
   "add ns link"
   {:added "3.0"}
-  ([link] (add-link (h/ns-sym) link))
+  ([link] (add-link (std.lib.env/ns-sym) link))
   ([ns link]
    (-> (swap! context/*registry* update-in [ns :links] (fnil #(conj % link) #{}))
        (get-in [ns :links]))))
@@ -79,7 +79,7 @@
 (defn remove-link
   "remove ms link"
   {:added "3.0"}
-  ([link] (remove-link (h/ns-sym) link))
+  ([link] (remove-link (std.lib.env/ns-sym) link))
   ([ns link]
    (-> (swap! context/*registry* update-in [ns :links] disj link)
        (get-in [ns :links]))))
@@ -90,7 +90,7 @@
    (keys (all-facts))"
   {:added "3.0"}
   ([]
-   (all-facts (h/ns-sym)))
+   (all-facts (std.lib.env/ns-sym)))
   ([ns]
    (get-in @context/*registry* [ns :facts])))
 
@@ -101,7 +101,7 @@
    => 'test-code_test_base_runtime__purge_all"
   {:added "3.0"}
   ([]
-   (list-facts (h/ns-sym)))
+   (list-facts (std.lib.env/ns-sym)))
   ([ns]
    (->> (all-facts ns)
         (vals)
@@ -116,7 +116,7 @@
    => []"
   {:added "3.0"}
   ([]
-   (purge-facts (h/ns-sym)))
+   (purge-facts (std.lib.env/ns-sym)))
   ([ns]
    (swap! context/*registry* update ns dissoc :facts :flags)
    ns))
@@ -128,7 +128,7 @@
    (if (or (symbol? id)
            (nil? id))
      [ns id (cons arg more)]
-     [(h/ns-sym) ns (cons id
+     [(std.lib.env/ns-sym) ns (cons id
                           (cons arg (rest more)))])))
 
 (defn get-fact
@@ -138,11 +138,11 @@
    => 'code.test.base.runtime/purge-all"
   {:added "3.0"}
   ([id]
-   (get-fact (h/ns-sym) id))
+   (get-fact (std.lib.env/ns-sym) id))
   ([ns id]
    (if (symbol? id)
      (get-in @context/*registry* [ns :facts id])
-     (get-fact (h/ns-sym) ns id)))
+     (get-fact (std.lib.env/ns-sym) ns id)))
   ([ns id k & more]
    (let [[ns id ks] (parse-args ns id k more)]
      (-> (get-fact ns id)
@@ -152,7 +152,7 @@
   "sets the entire data on a fact"
   {:added "3.0"}
   ([id data]
-   (set-fact (h/ns-sym) id data))
+   (set-fact (std.lib.env/ns-sym) id data))
   ([ns id data]
    (swap! context/*registry* assoc-in [ns :facts id] data)
    [ns id]))
@@ -163,7 +163,7 @@
    (set-in-fact (fsym) [:function :other] (fn []))"
   {:added "3.0"}
   ([id ks data]
-   (set-in-fact (h/ns-sym) id ks data))
+   (set-in-fact (std.lib.env/ns-sym) id ks data))
   ([ns id ks data]
    (swap! context/*registry* assoc-in (concat [ns :facts id] ks) data)
    [ns id]))
@@ -174,7 +174,7 @@
    (get-flag (fsym) :setup)"
   {:added "3.0"}
   ([id flag]
-   (get-flag (h/ns-sym) id flag))
+   (get-flag (std.lib.env/ns-sym) id flag))
   ([ns id flag]
    (boolean (get-in @context/*registry* [ns :flags id flag]))))
 
@@ -184,7 +184,7 @@
    (set-flag (fsym) :setup true)"
   {:added "3.0"}
   ([id flag val]
-   (set-flag (h/ns-sym) id flag val))
+   (set-flag (std.lib.env/ns-sym) id flag val))
   ([ns id flag ^Boolean val]
    (swap! context/*registry* assoc-in [ns :flags id flag] val)
    [ns id]))
@@ -201,7 +201,7 @@
   "removes a fact from namespace"
   {:added "3.0"}
   ([id]
-   (remove-fact (h/ns-sym) id))
+   (remove-fact (std.lib.env/ns-sym) id))
   ([ns id]
    (swap! context/*registry* (fn [m]
                        (-> m
@@ -216,10 +216,10 @@
    => 6"
   {:added "3.0"}
   ([id]
-   (teardown-fact (h/ns-sym) id))
+   (teardown-fact (std.lib.env/ns-sym) id))
   ([ns id]
    (let [teardown-fn  (get-fact ns id :function :teardown)
-         out    (h/explode (teardown-fn))
+         out    (std.lib.env/explode (teardown-fn))
          _  (set-flag ns id :setup false)]
      out)))
 
@@ -230,7 +230,7 @@
    => 6"
   {:added "3.0"}
   ([id]
-   (setup-fact (h/ns-sym) id))
+   (setup-fact (std.lib.env/ns-sym) id))
   ([ns id]
    (let [_         (if (get-flag ns id :setup)
                      (teardown-fact ns id))
@@ -257,7 +257,7 @@
   "removes dots and slash from the string"
   {:added "3.0"}
   ([^String s]
-   (str/escape s {\. "_"
+   (std.string.common/escape s {\. "_"
                   \/ "__"})))
 
 (defn fact-id
@@ -278,7 +278,7 @@
    => 'test-code_test_base_runtime__find_fact"
   {:added "3.0"}
   ([meta]
-   (find-fact (h/ns-sym) meta))
+   (find-fact (std.lib.env/ns-sym) meta))
   ([ns {:keys [line source]}]
    (let [id (if source
               (cond (map? source)
@@ -303,7 +303,7 @@
            :self)"
   {:added "3.0"}
   ([{:keys [line source] :as meta} op & args]
-   (let [ns (h/ns-sym)
+   (let [ns (std.lib.env/ns-sym)
          {:keys [id] :as fpkg} (find-fact ns meta)]
      (case op
        :self     fpkg

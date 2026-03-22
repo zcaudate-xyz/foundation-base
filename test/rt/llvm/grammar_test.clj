@@ -1,13 +1,13 @@
 (ns rt.llvm.grammar-test
-  (:use code.test)
   (:require [rt.llvm.grammar :refer :all]
             [std.lang :as l]
-            [std.lib :as h]
-            [std.lib.context.registry :as registry]))
+            [std.lib.atom]
+            [std.lib.context.registry :as registry])
+  (:use code.test))
 
 ;; Register the runtime just in case
 (def +init-rt+
-  (h/swap-return! registry/*registry*
+  (std.lib.atom/swap-return! registry/*registry*
                   (fn [reg]
                     (let [new-reg (assoc reg :llvm {:context :llvm
                                                     :rt {:default {:key :default

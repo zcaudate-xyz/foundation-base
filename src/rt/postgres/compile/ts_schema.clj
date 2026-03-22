@@ -1,6 +1,6 @@
 (ns rt.postgres.compile.ts-schema
-  "Canonical TypeScript schema compile target."
-  (:require [rt.postgres.compile.common :as compile.common]))
+  (:require [rt.postgres.compile.common :as compile.common])
+  "Canonical TypeScript schema compile target.")
 
 (def shape->ts-interface compile.common/shape->ts-interface)
 (def generate-ts-schema compile.common/generate-typescript)

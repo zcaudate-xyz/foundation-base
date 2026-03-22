@@ -1,6 +1,5 @@
 (ns js.react.helper-data
-  (:require [std.lang :as l]
-            [std.lib :as h]))
+  (:require [std.lang :as l]))
 
 (l/script :js
   {:require [[js.react :as r]

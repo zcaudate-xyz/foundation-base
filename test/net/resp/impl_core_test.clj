@@ -1,11 +1,14 @@
 (ns net.resp.impl-core-test
-  (:use [code.test])
-  (:require [net.resp.wire :refer :all]
+  (:require [lib.redis.bench :as bench]
             [net.resp.connection :as conn]
-            [lib.redis.bench :as bench]
-            [std.lib :as h]
+            [net.resp.wire :refer :all]
+            [std.concurrent :as cc]
             [std.concurrent.request :as req]
-            [std.concurrent :as cc])
+            [std.lib.component]
+            [std.lib.foundation]
+            [std.lib.future]
+            [std.lib.time])
+  (:use [code.test])
   (:refer-clojure :exclude [read]))
 
 
@@ -21,7 +24,7 @@
 
 (defmacro test-harness
   [& body]
-  `(h/with:lifecycle [~'|conn| {:start (setup-conn)
+  `(std.lib.component/with-lifecycle [~'|conn| {:start (setup-conn)
                                 :stop conn/connection:close}]
                      ~@body))
 
@@ -33,7 +36,7 @@
 
   (test-harness
     (-> (call |conn| ["SET" "TEST:A" (serialize-bytes {:a 1 :b 2} :json)])
-        (h/string)))
+        (std.lib.foundation/string)))
   => "OK")
 
 ^{:refer net.resp.wire/read :added "3.0"
@@ -45,8 +48,8 @@
     (-> (doto |conn|
           (write ["SET" "TEST:A" (serialize-bytes {:a 1 :b 2} :json)])
           (write ["GET" "TEST:A"]))
-        ((juxt (comp h/string read)
-               (comp h/string read)))))
+        ((juxt (comp std.lib.foundation/string read)
+               (comp std.lib.foundation/string read)))))
   => ["OK" "{\"a\":1,\"b\":2}"])
 
 ^{:refer std.concurrent.request/request-bulk :added "3.0" :adopt true}
@@ -58,7 +61,7 @@
                                               [["SET" "TEST:A" (serialize-bytes {:a 1} :json)]
                                                ["SET" "TEST:B" (serialize-bytes {:b 2} :json)]
                                                ["SET" "TEST:C" (serialize-bytes {:c 3} :json)]])
-         (mapv h/string))
+         (mapv std.lib.foundation/string))
     => ["OK" "OK" "OK"])
 
   (let [|commands| [["SET" "TEST:A" (serialize-bytes {:a 1} :json)]
@@ -69,10 +72,10 @@
                     ["SET" "TEST:F" (serialize-bytes {:c 6} :json)]]]
     (test-harness
      [(-> (std.concurrent.request/request-bulk |conn| |commands|)
-          (h/bench-ns))
+          (std.lib.time/bench-ns))
       (-> (doseq [cmd |commands|]
             (std.concurrent.request/request-single |conn| cmd))
-          (h/bench-ns))]))
+          (std.lib.time/bench-ns))]))
   => vector?)
 
 ^{:refer std.concurrent.request/req:single-complete :added "3.0"
@@ -80,17 +83,17 @@
 (fact "adds extra processing to output"
 
   (test-harness
-    (h/->> (std.concurrent.request/request-single |conn| ["COMMAND" "INFO" "GET"])
+    (std.lib.foundation/->> (std.concurrent.request/request-single |conn| ["COMMAND" "INFO" "GET"])
            (std.concurrent.request/process-single |conn| % {:string true})
            (req/req:single-complete {:chain [ffirst]}))
     => "get"
 
-    (let [received (h/incomplete)]
-      (h/->> (std.concurrent.request/request-single |conn| ["COMMAND" "INFO" "GET"])
+    (let [received (std.lib.future/incomplete)]
+      (std.lib.foundation/->> (std.concurrent.request/request-single |conn| ["COMMAND" "INFO" "GET"])
              (std.concurrent.request/process-single |conn| % {:string true})
              (req/req:single-complete {:async true
                                        :received received
-                                       :final  (h/future:chain received [ffirst])})
+                                       :final  (std.lib.future/future:chain received [ffirst])})
              (deref)))
     => "get"))
 

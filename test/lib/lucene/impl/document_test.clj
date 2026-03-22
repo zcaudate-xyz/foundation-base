@@ -1,7 +1,7 @@
 (ns lib.lucene.impl.document-test
-  (:use code.test)
   (:require [lib.lucene.impl.document :refer :all]
-            [std.object :as object]))
+            [std.object :as object])
+  (:use code.test))
 
 ^{:refer lib.lucene.impl.document/field-type-display :added "3.0"}
 (fact "returns field types that are not defaults"

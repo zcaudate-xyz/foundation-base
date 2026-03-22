@@ -1,7 +1,8 @@
 (ns std.lang.model.spec-js.jsx-test
-  (:use code.test)
-  (:require [std.lang.model.spec-js.jsx :refer :all]
-            [std.lang.model.spec-js :as js]))
+  (:require [std.lang.model.spec-js :as js]
+            [std.lang.model.spec-js.jsx :refer :all]
+            [std.string.prose])
+  (:use code.test))
 
 ^{:refer std.lang.model.spec-js.jsx/jsx-key-fn :added "4.0"}
 (fact "converts jsx key")
@@ -103,7 +104,7 @@
              [:p '(hello 1 2 3)]]
             js/+grammar+
             {:emit {:lang/jsx false}})
-  => (std.string/|
+  => (std.string.prose/|
       "React.createElement("
       "  \"div\","
       "  {\"className\":a},"

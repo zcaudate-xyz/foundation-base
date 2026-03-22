@@ -1,9 +1,9 @@
 (ns std.concurrent.request-apply
-  (:require [std.protocol.request :as protocol.request]
-            [std.protocol.apply :as protocol.apply]
-            [std.concurrent.request :as req]
+  (:require [std.concurrent.request :as req]
+            [std.lib.apply :as apply]
             [std.lib.impl :refer [defimpl]]
-            [std.lib.apply :as apply]))
+            [std.protocol.apply :as protocol.apply]
+            [std.protocol.request :as protocol.request]))
 
 (defmulti req-call
   "extensible function for a request applicative"

@@ -1,6 +1,6 @@
 (ns indigo.prompt.dsl-spec-test
-  (:use code.test)
-  (:require [indigo.prompt.dsl-spec :as spec]))
+  (:require [indigo.prompt.dsl-spec :as spec])
+  (:use code.test))
 
 ^{:refer indigo.prompt.dsl-spec/construct-item :added "4.0"}
 (fact "constructs the item"

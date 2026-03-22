@@ -1,10 +1,9 @@
 (ns std.lib.return
-  (:require [std.protocol.return :as protocol.return]
-            [std.lib.impl :refer [defimpl] :as impl]
-            [std.lib.foundation :as h]
-            [std.lib.future :as f])
-  (:import (java.util.concurrent CompletableFuture
-                                 CompletionStage)))
+  (:require [std.lib.foundation :as h]
+            [std.lib.future :as f]
+            [std.lib.impl :as impl :refer [defimpl]]
+            [std.protocol.return :as protocol.return])
+  (:import (java.util.concurrent CompletableFuture CompletionStage)))
 
 (impl/build-impl {}
                  protocol.return/IReturn)

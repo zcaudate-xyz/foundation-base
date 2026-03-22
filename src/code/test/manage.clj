@@ -1,10 +1,12 @@
 (ns code.test.manage
-  (:require [code.test.base.context :as context]
-            [code.test.base.runtime :as rt]
+  (:require [code.project :as project]
+            [code.test.base.context :as context]
             [code.test.base.executive :as executive]
+            [code.test.base.runtime :as rt]
             [code.test.compile.snippet :as snippet]
-            [code.project :as project]
-            [std.lib :as h]))
+            [std.lib.collection]
+            [std.lib.env]
+            [std.lib.foundation]))
 
 (defn fact:global-map
   "sets and gets the global map
@@ -13,7 +15,7 @@
   {:added "3.0"}
   ([ns {:keys [import unimport remove component] :as m}]
    (let [unimported (-> unimport rt/get-global :component keys)
-         component (or (h/->> (mapv (fn [x]
+         component (or (std.lib.foundation/->> (mapv (fn [x]
                                       (cond (vector? x)
                                             (-> (first x) rt/get-global :component
                                                 (select-keys (second x)))
@@ -26,7 +28,7 @@
                        {})
          m (-> (dissoc m :unimport :import :remove)
                (assoc :component component))]
-     (rt/update-global ns #(h/merge-nested % m)))))
+     (rt/update-global ns #(std.lib.collection/merge-nested % m)))))
 
 (defn fact:global-fn
   "global getter and setter
@@ -36,7 +38,7 @@
   ([]
    (fact:global-fn :get))
   ([cmd & args]
-   (let [ns (h/ns-sym)]
+   (let [ns (std.lib.env/ns-sym)]
      (cond (map? cmd)
            (fact:global-map ns cmd)
 
@@ -68,15 +70,15 @@
              :update   (rt/update-global ns (first args))
              :remove   (rt/update-global ns
                                          (fn [m]
-                                           (h/dissoc-nested m (first args))))
+                                           (std.lib.collection/dissoc-nested m (first args))))
              :prelim   (if context/*eval-mode*
-                         (eval (h/seqify (rt/get-global ns :prelim))))
+                         (eval (std.lib.collection/seqify (rt/get-global ns :prelim))))
              :setup    (if context/*eval-mode*
-                         (eval (h/seqify (rt/get-global ns :setup))))
+                         (eval (std.lib.collection/seqify (rt/get-global ns :setup))))
              :teardown (if context/*eval-mode*
-                         (eval (h/seqify (rt/get-global ns :teardown))))
+                         (eval (std.lib.collection/seqify (rt/get-global ns :teardown))))
              :list     (keys (rt/get-global ns :component))
-             (eval (h/seqify (rt/get-global ns cmd))))))))
+             (eval (std.lib.collection/seqify (rt/get-global ns cmd))))))))
 
 (defmacro fact:global
   "fact global getter and setter
@@ -121,14 +123,14 @@
                       (mapv (fn [[sym ^clojure.lang.Namespace ns]]
                               [(.getName ns) :as sym])))]
      (doseq [alias aliases]
-       (ns-unalias (h/ns-sym) (last alias)))
+       (ns-unalias (std.lib.env/ns-sym) (last alias)))
      aliases)))
 
 (defn fact:ns-intern
   "imports all interns into current namespace"
   {:added "3.0"}
   ([ns]
-   (mapv (partial apply h/intern-var (h/ns-sym))
+   (mapv (partial apply std.lib.foundation/intern-var (std.lib.env/ns-sym))
          (ns-interns ns))))
 
 (defn fact:ns-unintern
@@ -137,7 +139,7 @@
   ([ns]
    (let [isyms (sort (keys (ns-interns ns)))]
      (doseq [sym isyms]
-       (ns-unmap (h/ns-sym) sym))
+       (ns-unmap (std.lib.env/ns-sym) sym))
      isyms)))
 
 (defn fact:ns-import

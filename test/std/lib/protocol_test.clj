@@ -1,7 +1,7 @@
 (ns std.lib.protocol-test
-  (:use code.test)
   (:require [std.lib.protocol :refer :all]
-            [std.protocol.state :as state]))
+            [std.protocol.state :as state])
+  (:use code.test))
 
 ^{:refer std.lib.protocol/protocol:interface :added "3.0"}
 (fact "returns the java interface for a given protocol"

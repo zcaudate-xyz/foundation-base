@@ -1,11 +1,11 @@
 (ns std.vm.forth-interpreter
   (:require [std.block.base :as base]
-            [std.block.construct :as construct]
             [std.block.check :as check]
+            [std.block.construct :as construct]
             [std.block.parse :as parse]
             [std.lib.zip :as zip]
             [std.print.ansi :as ansi]
-            [std.string :as str])
+            [std.string.common])
   (:import (std.protocol.block IBlock)))
 
 ;; --- Context & Zip ---
@@ -76,8 +76,8 @@
     (println "---------------------------------------------------")
     (println (base/block-string root))
     (println "---------------------------------------------------")
-    (println (ansi/style "Stack: " [:bold]) (str/join " " (:stack vm)))
-    (println (ansi/style "Output: " [:bold]) (str/join "" (:output vm)))))
+    (println (ansi/style "Stack: " [:bold]) (std.string.common/join " " (:stack vm)))
+    (println (ansi/style "Output: " [:bold]) (std.string.common/join "" (:output vm)))))
 
 ;; --- Operations ---
 

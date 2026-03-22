@@ -1,6 +1,6 @@
 (ns math.infix-test
-  (:use code.test)
-  (:require [math.infix :as in]))
+  (:require [math.infix :as in])
+  (:use code.test))
 
 ^{:refer math.infix/infix-forms :added "3.0"}
 (fact "helper function for infix macros")

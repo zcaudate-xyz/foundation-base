@@ -1,8 +1,8 @@
 (ns std.image-test
-  (:use code.test)
   (:require [std.image :as image :refer :all]
             [std.image.base.model :as model]
             [std.image.base.util :as util])
+  (:use code.test)
   (:refer-clojure :exclude [read]))
 
 ^{:refer std.image/default-type :added "3.0"}

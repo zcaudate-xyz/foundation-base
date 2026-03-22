@@ -1,34 +1,37 @@
 (ns std.concurrent.relay
-  (:require [std.protocol.component :as protocol.component]
-            [std.concurrent.bus :as bus]
+  (:require [std.concurrent.bus :as bus]
             [std.concurrent.queue :as q]
             [std.concurrent.relay.transport :as transport]
-            [std.lib :as h :refer [defimpl]]
-            [std.string :as str])
+            [std.lib.component]
+            [std.lib.env]
+            [std.lib.foundation]
+            [std.lib.future]
+            [std.lib.impl :refer [defimpl]]
+            [std.lib.network]
+            [std.lib.os]
+            [std.lib.resource]
+            [std.lib.time]
+            [std.protocol.component :as protocol.component])
   (:refer-clojure :exclude [send])
-  (:import (java.io InputStream
-                    OutputStream
-                    InputStreamReader
-                    BufferedReader
-                    ByteArrayOutputStream)))
+  (:import (java.io InputStream OutputStream InputStreamReader BufferedReader ByteArrayOutputStream)))
 
 (defonce ^:dynamic *bus* nil)
 
 (def +init+
-  (h/res:variant-add
+  (std.lib.resource/res:variant-add
    :hara/concurrent.bus
    {:id    :relay
     :alias :hara/relay
     :mode {:allow #{:global} :default :global}
-    :instance {:setup    (fn [bus] (h/start bus) (h/set! *bus* bus) bus)
-               :teardown (fn [bus] (h/set! *bus* nil) (h/stop bus) bus)}}))
+    :instance {:setup    (fn [bus] (std.lib.component/start bus) (std.lib.foundation/set! *bus* bus) bus)
+               :teardown (fn [bus] (std.lib.foundation/set! *bus* nil) (std.lib.component/stop bus) bus)}}))
 
 (defn get-bus
   "gets the common stream bus"
   {:added "3.0"}
   []
   (or *bus*
-      (h/res :hara/relay)))
+      (std.lib.resource/res :hara/relay)))
 
 (defmacro with:bus
   "sets the default relay bus"
@@ -41,10 +44,10 @@
   "attaches a passive process to an input stream"
   {:added "4.0"}
   ([{:keys [raw return result final] :as istream} {:keys [op handler] :as message}]
-   (h/future:run
+   (std.lib.future/future:run
     (bound-fn []
-      (let [return    (h/explode (transport/process-op istream op message))
-            _         (if final (h/future:force final return))]
+      (let [return    (std.lib.env/explode (transport/process-op istream op message))
+            _         (if final (std.lib.future/future:force final return))]
         return)))))
 
 (defn attach-interactive
@@ -92,7 +95,7 @@
     (merge {:id  id
             :in  istream
             :out ostream
-            :started (h/time-ns)}
+            :started (std.lib.time/time-ns)}
            m)))
 
 (defn make-socket-instance
@@ -111,13 +114,13 @@
   ([^Process process id options]
    (let [estream    (relay-stream id :error
                                   (.getErrorStream process)
-                                  (merge {:final (h/incomplete)}
+                                  (merge {:final (std.lib.future/incomplete)}
                                          (:error options)))
          thread      (attach-read-passive estream (or (-> options :error :custom)
                                                       {:op :custom-line
                                                        :handler (fn [line estream]
                                                                   ;; look at saving to history, displaying, etc.
-                                                                  (h/prn line))}))]
+                                                                  (std.lib.env/prn line))}))]
      (instance-map id [(.getInputStream process)
                        (.getOutputStream process)]
                    options
@@ -129,7 +132,7 @@
   "creates an instance"
   {:added "4.0"}
   ([obj]
-   (make-instance obj (h/sid) {}))
+   (make-instance obj (std.lib.foundation/sid) {}))
   ([obj id options]
    (cond (instance? java.net.Socket obj)
          (make-socket-instance obj id options)
@@ -137,7 +140,7 @@
          (instance? Process obj)
          (make-process-instance obj id options)
 
-         :else (h/error "Unsupported type: " 
+         :else (std.lib.foundation/error "Unsupported type: " 
                         {:require [java.net.Socket Process]}))))
 
 (extend-protocol protocol.component/IComponent
@@ -174,8 +177,8 @@
      relay
      (let [obj (or attached
                    (case type
-                     :socket  (h/socket (:host relay) (:port relay))
-                     :process (h/sh (merge (select-keys relay [:root :env :args])
+                     :socket  (std.lib.network/socket (:host relay) (:port relay))
+                     :process (std.lib.os/sh (merge (select-keys relay [:root :env :args])
                                            {:wait false
                                             :inherit false
                                             :wrap false
@@ -199,8 +202,8 @@
     relay
     (let [{:keys [in type]} @instance
           {:keys [bus id]} in
-          _  (and bus (h/explode (bus/bus:kill bus id)))
-          _  (h/stop (get @instance type))
+          _  (and bus (std.lib.env/explode (bus/bus:kill bus id)))
+          _  (std.lib.component/stop (get @instance type))
           _  (reset! instance nil)
           {:keys [teardown]} hooks
            _   (if teardown (teardown relay))]
@@ -222,7 +225,7 @@
   {:added "4.0"}
   ([{:keys [id type] :as m}]
    (map->Relay (assoc m
-                      :id (or id (h/sid))
+                      :id (or id (std.lib.foundation/sid))
                       :instance (atom nil)))))
 
 (defn relay
@@ -230,7 +233,7 @@
   {:added "3.0"}
   ([{:keys [type] :as m}]
    (-> (relay:create m)
-       (h/start))))
+       (std.lib.component/start))))
 
 (def +read-ops+
   #{:count        
@@ -257,7 +260,7 @@
   {:added "3.0"}
   ([{:keys [instance] :as relay} msg]
    (let [{:keys [in out]}  (or @instance
-                               (h/error "Relay not started"
+                               (std.lib.foundation/error "Relay not started"
                                         {:relay relay :msg msg}))
          {:keys [op line]
           :as msg}    (if (string? msg)
@@ -267,7 +270,7 @@
          op  (or (transport/+read-alias+ op)
                  (+read-ops+ op)
                  (+control-ops+ op)
-                 (h/error "Op not valid." {:input op
+                 (std.lib.foundation/error "Op not valid." {:input op
                                            :available (set (concat +control-ops+
                                                                    +read-ops+))
                                            :alias transport/+read-alias+}))]

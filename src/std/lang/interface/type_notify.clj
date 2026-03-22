@@ -1,16 +1,20 @@
 (ns std.lang.interface.type-notify
-  (:require [std.protocol.component :as component]
-            [std.json :as json]
+  (:require [clojure.set]
             [std.concurrent :as cc]
-            [std.string :as str]
+            [std.json :as json]
             [std.lang.base.impl :as impl]
-            [std.lib :as h :refer [defimpl]])
-  (:import (java.net ServerSocket
-                     Socket
-                     InetSocketAddress)
-           (com.sun.net.httpserver HttpExchange
-                                   HttpHandler
-                                   HttpServer)))
+            [std.lib.atom]
+            [std.lib.collection]
+            [std.lib.component]
+            [std.lib.env]
+            [std.lib.foundation]
+            [std.lib.future]
+            [std.lib.impl :refer [defimpl]]
+            [std.lib.network]
+            [std.lib.resource]
+            [std.protocol.component :as component]
+            [std.string.common])
+  (:import (java.net ServerSocket Socket InetSocketAddress) (com.sun.net.httpserver HttpExchange HttpHandler HttpServer)))
 
 (def ^:dynamic *notify-capture*
   (atom []))
@@ -27,7 +31,7 @@
   "gets a sink from the notification app server"
   {:added "4.0"}
   [{:keys [sinks]} id]
-  (h/swap-return! sinks
+  (std.lib.atom/swap-return! sinks
     (fn [m]
       (let [q (get m id)
             curr (or q (atom nil))]
@@ -37,7 +41,7 @@
   "clears a sink"
   {:added "4.0"}
   [{:keys [sinks]} id]
-  (h/swap-return! sinks
+  (std.lib.atom/swap-return! sinks
     (fn [m]
       [(get m id) (dissoc m id)])))
 
@@ -48,7 +52,7 @@
   (let [sink (get-sink notify id)]
     (add-watch sink sink-key
                (fn [_ _ _ v]
-                 (f (h/map-keys keyword v))))))
+                 (f (std.lib.collection/map-keys keyword v))))))
 
 (defn remove-listener
   "removes a listener from the sink"
@@ -65,18 +69,18 @@
   "registers a oneshot id for the app server"
   {:added "4.0"}
   [{:keys [oneshots]}]
-  (h/swap-return! oneshots
+  (std.lib.atom/swap-return! oneshots
     (fn [set]
-      (loop [id (str "oneshot/" (h/sid))]
+      (loop [id (str "oneshot/" (std.lib.foundation/sid))]
         (if (get set id)
-          (recur (str "oneshot/" (h/sid)))
+          (recur (str "oneshot/" (std.lib.foundation/sid)))
           [id (conj set id)])))))
 
 (defn remove-oneshot-id
   "removes a oneshot id"
   {:added "4.0"}
   [{:keys [oneshots]} id]
-  (h/swap-return! oneshots
+  (std.lib.atom/swap-return! oneshots
     (fn [set]
       [(get set id) (disj set id)])))
 
@@ -95,11 +99,11 @@
   [msg]
   (let [{:strs [value key]} msg
         {:strs [line column namespace id data]} (second key)]
-    (h/p (str "\n" namespace (if id (str "/" id))
+    (std.lib.env/p (str "\n" namespace (if id (str "/" id))
               (if (or line column)
                 (str " (" line ":" column ")"))
               (if data (str " " data))))
-    (h/prf value true)))
+    (std.lib.env/prf value true)))
 
 (defn process-capture
   "processes `capture` id option"
@@ -119,7 +123,7 @@
           (process-capture msg)
           
           (and id
-                 (or (not (str/starts-with? id  "oneshot/"))
+                 (or (not (std.string.common/starts-with? id  "oneshot/"))
                      (has-sink? app id)))
           (reset! (get-sink app id) msg))))
 
@@ -173,7 +177,7 @@
   "handler for socket request"
   {:added "4.0"}
   [^java.net.Socket socket app]
-  #_(h/prn :CONNECTED)
+  #_(std.lib.env/prn :CONNECTED)
   (let [is  (.getInputStream socket)
         bytes (.readAllBytes is)
         _   (.close socket)]
@@ -192,7 +196,7 @@
                          (when (not (.isClosed server))
                            (try
                              (let [socket   (.accept server)
-                                   _  (h/future
+                                   _  (std.lib.future/future
                                         (#'handle-notify-socket socket app))])
                              (catch java.net.SocketException e))
                            (recur))))
@@ -237,7 +241,7 @@
                                      sinks] :as notify}]
   (str "#notify.server" {:http   [http-port   (boolean @http-instance)]
                          :socket [socket-port (boolean @socket-instance)]
-                         :sinks (h/difference (set (keys @sinks))
+                         :sinks (clojure.set/difference (set (keys @sinks))
                                                @oneshots)
                          :oneshots (count @oneshots)}))
 
@@ -252,10 +256,10 @@
   {:added "4.0"}
   [{:keys [http-port
            socket-port]}]
-  (let [http-port   (or (h/port:check-available (or http-port   18130))
-                        (h/port:check-available 0))
-        socket-port (or (h/port:check-available (or socket-port 18131))
-                        (h/port:check-available 0))]
+  (let [http-port   (or (std.lib.network/port:check-available (or http-port   18130))
+                        (std.lib.network/port:check-available 0))
+        socket-port (or (std.lib.network/port:check-available (or socket-port 18131))
+                        (std.lib.network/port:check-available 0))]
     (map->NotifyServer {:http-port http-port
                         :http-instance (atom nil)
                         :socket-port socket-port
@@ -268,15 +272,15 @@
   {:added "4.0"}
   [{:keys [port] :as m}]
   (-> (notify-server:create m)
-      (h/start)))
+      (std.lib.component/start)))
 
-(h/res:spec-add
+(std.lib.resource/res:spec-add
  {:type :hara/lang.notify
   :mode {:allow #{:global}
          :default :global}
   :instance {:create #'notify-server:create
-             :start h/start
-             :stop h/stop}})
+             :start std.lib.component/start
+             :stop std.lib.component/stop}})
 
 (defn default-notify
   "gets the default notify server
@@ -285,13 +289,13 @@
   {:added "4.0"}
   []
   (or *notify-override* 
-      (h/res :hara/lang.notify)))
+      (std.lib.resource/res :hara/lang.notify)))
 
 (defn default-notify:reset
   "resets the default notify server"
   {:added "4.0"}
   []
-  (h/res:stop :hara/lang.notify))
+  (std.lib.resource/res:stop :hara/lang.notify))
 
 (defn watch-oneshot
   "returns a completable future
@@ -303,14 +307,14 @@
   [app timeout & [id]]
   (let [id (or id (get-oneshot-id app))
         q   (get-sink app id)
-        pi  (h/incomplete)
+        pi  (std.lib.future/incomplete)
         p   (-> pi 
-                (h/future:timeout timeout)
-                (h/on:complete (fn [ret _]
+                (std.lib.future/future:timeout timeout)
+                (std.lib.future/on:complete (fn [ret _]
                                  (remove-watch q id)
                                  (remove-oneshot-id app id)
                                  (clear-sink app id)
                                  ret)))
         _  (add-watch q id (fn [_ _ _ v]
-                             (h/future:force pi v)))]
+                             (std.lib.future/future:force pi v)))]
     [id p]))

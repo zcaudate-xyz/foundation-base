@@ -1,12 +1,11 @@
 (ns std.block.parse
-  (:require [std.block.base :as base]
+  (:require [clojure.tools.reader :as tools.reader]
+            [std.block.base :as base]
             [std.block.check :as check]
             [std.block.construct :as construct]
             [std.block.reader :as reader]
             [std.block.type :as type]
-            [std.protocol.block :as protocol.block]
-            [std.string :as str]
-            [clojure.tools.reader :as tools.reader]))
+            [std.protocol.block :as protocol.block]))
 
 (def ^:dynamic *end-delimiter* nil)
 

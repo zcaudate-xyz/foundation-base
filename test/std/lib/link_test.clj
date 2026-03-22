@@ -1,6 +1,7 @@
 (ns std.lib.link-test
+  (:require [std.lib.foundation]
+            [std.lib.link :refer :all])
   (:use code.test)
-  (:require [std.lib.link :refer :all])
   (:import (std.lib.link Link)))
 
 (defn create-link
@@ -158,7 +159,7 @@
                            nil
                            nil
                            nil))
-  => #'std.lib/iobj?)
+  => #'std.lib.foundation/iobj?)
 
 ^{:refer std.lib.link/link-synced? :added "3.0"}
 (fact "checks if the source and alias have the same value"

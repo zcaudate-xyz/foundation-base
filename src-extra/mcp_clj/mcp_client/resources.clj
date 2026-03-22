@@ -1,13 +1,10 @@
 (ns mcp-clj.mcp-client.resources
+  (:require [mcp-clj.log :as log]
+            [mcp-clj.mcp-client.session :as session]
+            [mcp-clj.mcp-client.subscriptions :as subscriptions]
+            [mcp-clj.mcp-client.transport :as transport])
   "Resource access implementation for MCP client"
-  (:require
-    [mcp-clj.log :as log]
-    [mcp-clj.mcp-client.session :as session]
-    [mcp-clj.mcp-client.subscriptions :as subscriptions]
-    [mcp-clj.mcp-client.transport :as transport])
-  (:import
-    (java.util.concurrent
-      CompletableFuture)))
+  (:import (java.util.concurrent CompletableFuture)))
 
 (defn- get-resources-cache
   "Get or create resources cache in client session"

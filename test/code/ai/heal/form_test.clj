@@ -1,6 +1,6 @@
 (ns code.ai.heal.form-test
-  (:use code.test)
-  (:require [code.ai.heal.form :refer :all]))
+  (:require [code.ai.heal.form :refer :all])
+  (:use code.test))
 
 (defn mock-task [handler]
   (reify

@@ -3,8 +3,7 @@
             [std.protocol.time :as protocol.time]
             [std.time.coerce :as coerce]
             [std.time.zone.java-time-zoneid])
-  (:import (java.time Clock Clock$FixedClock Instant ZoneId ZonedDateTime)
-           (java.time.format DateTimeFormatter)))
+  (:import (java.time Clock Clock$FixedClock Instant ZoneId ZonedDateTime) (java.time.format DateTimeFormatter)))
 
 (def clock-meta
   {:base :instant

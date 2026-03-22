@@ -1,7 +1,7 @@
 (ns std.make-test
-  (:use code.test)
   (:require [std.make :as make]
-            [std.make.github :as github]))
+            [std.make.github :as github])
+  (:use code.test))
 
 ^{:refer std.make/gh:dwim-init :added "4.0"}
 (fact "prepares the initial project commit"

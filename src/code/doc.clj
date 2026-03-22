@@ -1,9 +1,9 @@
 (ns code.doc
-  (:require [code.project :as project]
-            [code.doc.executive :as executive]
+  (:require [code.doc.executive :as executive]
+            [code.project :as project]
             [std.config :as config]
-            [std.task :as task]
-            [std.lib :refer [definvoke]]))
+            [std.lib.invoke :refer [definvoke]]
+            [std.task :as task]))
 
 (def +config+ "config/publish.edn")
 

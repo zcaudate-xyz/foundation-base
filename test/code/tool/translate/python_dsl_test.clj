@@ -1,6 +1,6 @@
 (ns code.tool.translate.python-dsl-test
-  (:use code.test)
-  (:require [code.tool.translate.python-dsl :as py-dsl]))
+  (:require [code.tool.translate.python-dsl :as py-dsl])
+  (:use code.test))
 
 (fact "translate-node basics"
   (py-dsl/translate-node {:type "Name" :id "x"}) => 'x

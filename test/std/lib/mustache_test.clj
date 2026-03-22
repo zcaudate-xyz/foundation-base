@@ -1,6 +1,6 @@
 (ns std.lib.mustache-test
-  (:use code.test)
-  (:require [std.lib.mustache :refer :all]))
+  (:require [std.lib.mustache :refer :all])
+  (:use code.test))
 
 ^{:refer std.lib.mustache/render :added "3.0"}
 (fact "converts a template with mustache data"

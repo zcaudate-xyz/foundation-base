@@ -1,7 +1,8 @@
 (ns std.dom.common
   (:require [std.dom.type :as type]
-            [std.lib :as h :refer [definvoke]]
-            [std.lib.mutable :refer [defmutable] :as mut]))
+            [std.lib.collection]
+            [std.lib.invoke :refer [definvoke]]
+            [std.lib.mutable :as mut :refer [defmutable]]))
 
 (def ^:dynamic *current-dom* nil)
 
@@ -159,7 +160,7 @@
        :b {:children [\"world\"]}}"
   {:added "3.0"}
   ([props action] 
-   (h/map-vals (fn prop-apply [v]
+   (std.lib.collection/map-vals (fn prop-apply [v]
                   (cond (dom? v)
                         (action v)
                         
@@ -259,7 +260,7 @@
         props      (dissoc props key)
         status   (if (:item dom) :+ :-)
         children (map fmt-fn children)
-        props    (h/map-vals (fn [p]
+        props    (std.lib.collection/map-vals (fn [p]
                                  (cond (sequential? p)
                                        (mapv fmt-fn p)
 
@@ -380,7 +381,7 @@
                             (mapv elem-fn elem)
                             
                             :else elem))
-         props      (h/map-vals elem-fn props)
+         props      (std.lib.collection/map-vals elem-fn props)
          children   (mapv elem-fn children)]
      (create-fn tag props children))))
 

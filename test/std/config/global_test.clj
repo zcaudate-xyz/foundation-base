@@ -1,6 +1,6 @@
 (ns std.config.global-test
-  (:use code.test)
-  (:require [std.config.global :refer :all]))
+  (:require [std.config.global :refer :all])
+  (:use code.test))
 
 ^{:refer std.config.global/global? :added "3.0"}
 (fact "checks if object is of type global"

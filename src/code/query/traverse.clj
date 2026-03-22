@@ -3,8 +3,9 @@
             [code.query.match.optional :as optional]
             [code.query.match.pattern :as pattern]
             [std.block.navigate :as nav]
-            [std.lib.zip :as zip]
-            [std.lib :as h]))
+            [std.lib.collection]
+            [std.lib.walk]
+            [std.lib.zip :as zip]))
 
 (defrecord Position [source pattern op]
   Object
@@ -279,7 +280,7 @@
   {:added "3.0"}
   ([pattern]
    (let [sum (atom 0)]
-     (h/postwalk (fn [x] (swap! sum inc))
+     (std.lib.walk/postwalk (fn [x] (swap! sum inc))
                  pattern)
      @sum)))
 
@@ -297,7 +298,7 @@
   {:added "3.0"}
   ([source pattern]
    (let [pseq    (optional/pattern-seq pattern)
-         lookup   (h/map-juxt [common/prepare-deletion identity] pseq)
+         lookup   (std.lib.collection/map-juxt [common/prepare-deletion identity] pseq)
          p-dels   (->> (nav/value source)
                        ((pattern/pattern-matches (common/prepare-deletion pattern))))
          p-del   (case  (count p-dels)

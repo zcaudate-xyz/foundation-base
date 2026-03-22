@@ -1,10 +1,10 @@
 (ns xt.db.sql-view-test
-  (:use code.test)
-  (:require [std.lang :as l]
-            [std.lib :as h]
-            [rt.postgres :as pg]
-            [xt.db.sample-user-test :as user]
-            [xt.db.sample-data-test :as data]))
+  (:require [rt.postgres :as pg]
+            [std.lang :as l]
+            [std.string.prose]
+            [xt.db.sample-data-test :as data]
+            [xt.db.sample-user-test :as user])
+  (:use code.test))
 
 (l/script- :js
   {:runtime :basic
@@ -127,7 +127,7 @@
                   "account" "00000000-0000-0000-0000-000000000000"}}],
                "links" [],
                "data" ["id"]}]
-             (std.string/|
+             (std.string.prose/|
               "SELECT id FROM Organisation"
               "  WHERE id IN ("
               "    SELECT organisation_id FROM OrganisationAccess"

@@ -1,14 +1,14 @@
 (ns net.resp.connection
-  (:require [std.protocol.component :as protocol.component]
+  (:require [net.resp.wire :as wire]
+            [std.lib.component.track :as track]
+            [std.lib.foundation]
+            [std.lib.impl :refer [defimpl]]
+            [std.lib.network]
+            [std.protocol.component :as protocol.component]
             [std.protocol.request :as protocol.request]
             [std.protocol.track :as protocol.track]
-            [std.protocol.wire :as protocol.wire]
-            [std.lib.component.track :as track]
-            [std.lib :as h :refer [defimpl]]
-            [net.resp.wire :as wire])
-  (:import (hara.net.resp SocketConnection
-                          SocketConnection$Pipeline)
-           (java.net Socket))
+            [std.protocol.wire :as protocol.wire])
+  (:import (hara.net.resp SocketConnection SocketConnection$Pipeline) (java.net Socket))
   (:refer-clojure :exclude [read]))
 
 (def ^:dynamic *close* nil)
@@ -55,7 +55,7 @@
   ([^SocketConnection$Pipeline pipeline input]
    (.call pipeline (input-array input))))
 
-(h/extend-impl SocketConnection$Pipeline
+(std.lib.impl/extend-impl SocketConnection$Pipeline
                :prefix "pipeline:"
                :protocols [std.protocol.wire/IWire
                            :include [-read -write]])
@@ -136,7 +136,7 @@
   ([^SocketConnection connection commands]
    (connection:request-bulk connection commands nil))
   ([^SocketConnection connection commands _]
-   (let [out (h/-> (pipeline connection)
+   (let [out (std.lib.foundation/-> (pipeline connection)
                    (reduce (fn [pl command]
                              (protocol.wire/-write pl command))
                            %
@@ -175,16 +175,16 @@
   "not valid for rdp protocol"
   {:added "3.0"}
   ([_ data]
-   (h/error  "Transaction cannot be combined")))
+   (std.lib.foundation/error  "Transaction cannot be combined")))
 
 (defn connection:info
   "outputs connection info"
   {:added "3.0"}
   ([^SocketConnection connection]
    (let [socket (.-socket connection)]
-     {:host [(h/socket:address socket)]
-      :port [(h/socket:port socket)
-             (h/socket:local-port socket)]})))
+     {:host [(std.lib.network/socket:address socket)]
+      :port [(std.lib.network/socket:port socket)
+             (std.lib.network/socket:local-port socket)]})))
 
 (defn connection:started?
   "checks that connection has started"
@@ -209,7 +209,7 @@
   ([^SocketConnection connection]
    (let [status (try
                   (-> (connection:request-single connection ["PING"])
-                      (h/string)
+                      (std.lib.foundation/string)
                       (= "PONG"))
                   (catch Throwable t))]
      (if status
@@ -222,7 +222,7 @@
   [connection]
   (str "#redis.socket " (connection:info connection)))
 
-(h/extend-impl SocketConnection
+(std.lib.impl/extend-impl SocketConnection
                :prefix "connection:"
                :string connection-string
                :protocols [std.protocol.wire/IWire

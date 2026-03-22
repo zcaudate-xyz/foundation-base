@@ -1,6 +1,6 @@
 (ns std.timeseries.compute-test
-  (:use code.test)
   (:require [std.timeseries.compute :refer :all])
+  (:use code.test)
   (:refer-clojure :exclude [compile]))
 
 ^{:refer std.timeseries.compute/max-fn :added "3.0"}

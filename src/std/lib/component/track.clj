@@ -1,10 +1,10 @@
 (ns std.lib.component.track
-  (:require [std.protocol.track :as protocol.track]
-            [std.lib.impl :refer [defimpl]]
-            [std.lib.atom :as at]
+  (:require [std.lib.atom :as at]
             [std.lib.collection :as c]
+            [std.lib.foundation :as h]
+            [std.lib.impl :refer [defimpl]]
             [std.lib.time :as t]
-            [std.lib.foundation :as h]))
+            [std.protocol.track :as protocol.track]))
 
 (declare untrack track)
 

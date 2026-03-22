@@ -1,12 +1,13 @@
 (ns jvm.namespace
-  (:require [std.pipe :as pipe]
-            [jvm.namespace.common :as common]
-            [jvm.namespace.eval :as eval]
+  (:require [jvm.namespace.common :as common]
             [jvm.namespace.context :as context]
             [jvm.namespace.dependent :as dependent]
-            [std.lib :as h :refer [definvoke]]))
+            [jvm.namespace.eval :as eval]
+            [std.lib.foundation]
+            [std.lib.invoke :refer [definvoke]]
+            [std.pipe :as pipe]))
 
-(h/intern-in eval/eval-ns
+(std.lib.foundation/intern-in eval/eval-ns
              eval/with-ns
              eval/eval-temp-ns
              context/resolve-ns

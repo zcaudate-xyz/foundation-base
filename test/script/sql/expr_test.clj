@@ -1,7 +1,7 @@
 (ns script.sql.expr-test
-  (:use code.test)
   (:require [script.sql.expr :refer :all]
-            [std.string :as str]))
+            [std.string.prose])
+  (:use code.test))
 
 ^{:refer script.sql.expr/as-? :added "3.0"}
 (fact "Given a hash map of column names and values, or a vector of column names,
@@ -89,14 +89,14 @@
 
   (for-upsert :user {:id "a" :account "12345"} {})
   => (any
-      [(str/| "INSERT INTO user"
+      [(std.string.prose/| "INSERT INTO user"
               " (id, account)"
               " VALUES (?, ?)"
               " ON CONFLICT (id)"
               " DO UPDATE SET (account)"
               " = ROW(EXCLUDED.account)")
        "a" "12345"]
-      [(str/| "INSERT INTO user"
+      [(std.string.prose/| "INSERT INTO user"
               " (account, id)"
               " VALUES (?, ?)"
               " ON CONFLICT (id)"
@@ -130,7 +130,7 @@
            {:id "id0" :name "hello"}
            {:id "id0" :name "world"}
            {})
-  => (contains [(str/| "DO $$"
+  => (contains [(std.string.prose/| "DO $$"
              " DECLARE v_id TEXT;"
              " BEGIN"
              " UPDATE account"

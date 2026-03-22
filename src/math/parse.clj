@@ -1,13 +1,6 @@
 (ns math.parse
   (:require [std.lib.walk :as walk])
-  (:import (org.scijava.parsington ExpressionParser
-                                   SyntaxTree
-                                   Operator
-                                   Variable
-                                   Function
-                                   Group
-                                   Token
-                                   Operators)))
+  (:import (org.scijava.parsington ExpressionParser SyntaxTree Operator Variable Function Group Token Operators)))
 
 (defn parse-expr
   "parses string into SyntaxTree

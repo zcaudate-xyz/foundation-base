@@ -1,11 +1,11 @@
 (ns std.timeseries
-  (:require [std.timeseries.common :as common]
-            [std.timeseries.process :as process]
+  (:require [std.lib.foundation]
+            [std.timeseries.common :as common]
             [std.timeseries.journal :as journal]
-            [std.lib :as h])
+            [std.timeseries.process :as process])
   (:refer-clojure :exclude [merge derive]))
 
-(h/intern-in common/create-template
+(std.lib.foundation/intern-in common/create-template
 
              journal/journal
              journal/add-bulk

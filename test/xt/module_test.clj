@@ -1,8 +1,7 @@
 (ns xt.module-test
-  (:use code.test)
   (:require [std.lang :as l]
-            [std.lib :as h]
-            [std.lang.base.book :as book]))
+            [std.lang.base.book :as book])
+  (:use code.test))
 
 (l/script- :js
   {:runtime :oneshot

@@ -1,6 +1,6 @@
 (ns math.stats.distribution-test
-  (:use code.test)
   (:require [math.stats.distribution :refer :all])
+  (:use code.test)
   (:refer-clojure :exclude [random-sample]))
 
 ^{:refer math.stats.distribution/fn-name :added "3.0"}

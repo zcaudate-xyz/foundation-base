@@ -1,21 +1,22 @@
 (ns indigo.server.api-prompt
-  (:require [std.lib :as h]
-            [std.string :as str]
-            [std.block :as block]))
+  (:require [std.block :as block]
+            [std.lib.os]
+            [std.string.common]
+            [std.string.prose]))
 
 (defn with-prompt-fn
   [prompt-fn body]
   (let [input  (prompt-fn body)
-        output @(h/sh {:args ["gemini" "<<" "EOF" input "EOF"]})]
-    (->> (str/split-lines output)
+        output @(std.lib.os/sh {:args ["gemini" "<<" "EOF" input "EOF"]})]
+    (->> (std.string.common/split-lines output)
          (filter (fn [line]
-                   (not (str/starts-with? line "```"))))
-         (str/join-lines)
+                   (not (std.string.common/starts-with? line "```"))))
+         (std.string.prose/join-lines)
          (block/heal))))
 
 (defn to-js-prompt
   [body]
-  (str/join-lines
+  (std.string.prose/join-lines
    ["SYSTEM PROMPT START ----"
     "You are an expert programming language translator and std.lang expert, being able to translate js/ts/jsx/tsx code"
     "into a clojure compatible javascript dsl. The dsl spec is presented in the SYSTEM INFO section. You will take code"
@@ -32,7 +33,7 @@
 
 (defn to-plpgsql-prompt
   [body]
-  (str/join-lines
+  (std.string.prose/join-lines
    ["SYSTEM PROMPT START ----"
     "You are an expert programming language translator and std.lang expert, being able to translate plpgsql code"
     "into a clojure compatible plpgsql dsl. The dsl spec is presented in the SYSTEM INFO section. You will take code"
@@ -49,7 +50,7 @@
 
 (defn to-jsxc-prompt
   [body]
-  (str/join-lines
+  (std.string.prose/join-lines
    ["SYSTEM PROMPT START ----"
     "You are an expert programming language.  being able to translate jsxc/ts/jsxcx/tsx code"
     "into a clojure compatible javascript dsl tree form. There is a decomposition process and a reconstruction"
@@ -67,7 +68,7 @@
 
 (defn to-python-prompt
   [body]
-  (str/join-lines
+  (std.string.prose/join-lines
    ["SYSTEM PROMPT START ----"
     "You are an expert programming language translator and std.lang expert, being able to translate python code"
     "into a clojure compatible python dsl. The dsl spec is presented in the SYSTEM INFO section. You will take code"

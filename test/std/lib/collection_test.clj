@@ -1,7 +1,7 @@
 (ns std.lib.collection-test
-  (:use code.test)
   (:require [std.lib.collection :refer :all]
-            [std.lib.foundation :as h]))
+            [std.lib.foundation :as h])
+  (:use code.test))
 
 ^{:refer std.lib.collection/hash-map? :added "3.0"}
 (fact "Returns `true` if `x` implements `clojure.lang.APersistentMap`."

@@ -1,8 +1,7 @@
 (ns std.print.format.common-test
-  (:use code.test)
-  (:require [std.print.format.common :refer :all]
-            [std.concurrent.print :as print]
-            [std.string :as str]))
+  (:require [std.concurrent.print :as print]
+            [std.print.format.common :refer :all])
+  (:use code.test))
 
 ^{:refer std.print.format.common/pad :added "3.0"}
 (fact "creates `n` number of spaces"

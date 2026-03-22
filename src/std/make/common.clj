@@ -1,14 +1,14 @@
 (ns std.make.common
-  (:require [std.lib.collection :as c]
+  (:require [std.fs :as fs]
             [std.lib.atom :as atom]
-            [std.lib.os :as os]
-            [std.lib.impl :refer [defimpl]]
+            [std.lib.collection :as c]
             [std.lib.env :as env]
             [std.lib.foundation :as h]
             [std.lib.future :as f]
+            [std.lib.impl :refer [defimpl]]
+            [std.lib.os :as os]
             [std.lib.time :as time]
-            [std.string.common :as str]
-            [std.fs :as fs]))
+            [std.string.common :as str]))
 
 (defonce ^:dynamic *triggers* (atom {}))
 

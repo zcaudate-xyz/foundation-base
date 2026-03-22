@@ -1,7 +1,7 @@
 (ns xt.lang.override.custom-js-test
-  (:use code.test)
-  (:require [xt.lang.override.custom-js :refer :all]
-            [std.lang :as l]))
+  (:require [std.lang :as l]
+            [xt.lang.override.custom-js :refer :all])
+  (:use code.test))
 
 (l/script :js
   {:runtime :oneshot

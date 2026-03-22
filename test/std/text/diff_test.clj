@@ -1,10 +1,7 @@
 (ns std.text.diff-test
-  (:use code.test)
   (:require [std.text.diff :refer :all])
-  (:import (difflib DiffUtils
-                    Chunk Patch
-                    Delta Delta$TYPE
-                    ChangeDelta InsertDelta DeleteDelta)))
+  (:use code.test)
+  (:import (difflib DiffUtils Chunk Patch Delta Delta$TYPE ChangeDelta InsertDelta DeleteDelta)))
 
 ^{:refer std.text.diff/create-patch :added "3.0"}
 (fact "creates a Patch object"

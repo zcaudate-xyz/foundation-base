@@ -1,7 +1,8 @@
 ^{:no-test true}
 (ns js.core.fetch
   (:require [std.lang :as l]
-            [std.lib :as h]))
+            [std.lib.foundation]
+            [std.lib.template]))
 
 (l/script :js js.core)
 
@@ -17,7 +18,7 @@
              "only-if-cached"}
    :credentials #{"include", "same-origin", "omit"}
    :headers coll?
-   :body h/T
+   :body std.lib.foundation/T
    :redirect #{"manual" "follow" "error"}
    :referrerPolicy #{"no-referrer",
                      "no-referrer-when-downgrade"
@@ -36,9 +37,9 @@
   (doseq [[k v] opts]
     (let [chk (+fetch-opts+ k)]
       (if-not chk
-        (h/error (str "Key not found: " k)))
+        (std.lib.foundation/error (str "Key not found: " k)))
       (if-not (chk v)
-        (h/error (str "Val is invalid: " v) {:options chk})))))
+        (std.lib.foundation/error (str "Val is invalid: " v) {:options chk})))))
 
 (defn fetch-fn
   "creates the fetch form with checks"
@@ -46,9 +47,9 @@
   ([url opts]
    (let [_ (check-opts opts)
          {:keys [as]} opts
-         form  (h/$ (fetch ~url ~(dissoc opts :as)))
+         form  (std.lib.template/$ (fetch ~url ~(dissoc opts :as)))
          form  (if as
-                 (h/$ (. ~form (then (fn [res]
+                 (std.lib.template/$ (. ~form (then (fn [res]
                                        (return (. res (~(symbol as))))))))
                  form)]
      form)))
@@ -97,7 +98,7 @@
   "assigns the result to an object"
   {:added "4.0"}
   [p state]
-  (h/$ (. ~p (then (fn [res]
+  (std.lib.template/$ (. ~p (then (fn [res]
                      (return (j/assign ~state res)))))))
 
 (defmacro.js fetch-api
@@ -105,7 +106,7 @@
   {:added "4.0"}
   ([url & [opts]]
    (let [fetch-form (fetch-fn url (dissoc (or opts {}) :as))]
-     (h/$ (do:> (return (new Promise
+     (std.lib.template/$ (do:> (return (new Promise
                             (fn [resolve reject]
                               (-> ~fetch-form
                                   (. (then (fn [res]

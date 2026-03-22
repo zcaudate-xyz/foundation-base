@@ -1,7 +1,7 @@
 (ns js.react-native.ui-form-basic-test
-  (:use code.test)
-  (:require [std.lang :as  l]
-            [std.lib :as h]))
+  (:require [std.lang :as l]
+            [std.lib.foundation])
+  (:use code.test))
 
 (l/script :js
   {:runtime :websocket
@@ -224,7 +224,7 @@
   
   
   (def +++
-    (h/suppress
+    (std.lib.foundation/suppress
      (!.js
       (j/assign test.web-00-rn.main/I09_RAW
                 (component.web-native/raw-controls))))))

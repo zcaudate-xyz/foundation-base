@@ -1,6 +1,6 @@
 (ns indigo.client.app.components.theme-editor-test
-  (:use code.test)
-  (:require [indigo.client.app.components.theme-editor :refer :all]))
+  (:require [indigo.client.app.components.theme-editor :refer :all])
+  (:use code.test))
 
 ^{:refer indigo.client.app.components.theme-editor/ColorInput :added "4.0"}
 (fact "TODO")

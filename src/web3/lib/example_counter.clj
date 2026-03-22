@@ -1,6 +1,6 @@
 (ns web3.lib.example-counter
   (:require [std.lang :as l]
-            [std.lib :as h]))
+            [std.lib.env]))
 
 (l/script :solidity
   {:require [[rt.solidity :as s]]})
@@ -105,6 +105,6 @@
   (:= -/g:Counter1 (+ -/g:Counter1 n)))
 
 (def +default-contract+
-  {:ns   (h/ns-sym)
+  {:ns   (std.lib.env/ns-sym)
    :name "Counter"
    :args []})

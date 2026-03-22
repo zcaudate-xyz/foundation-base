@@ -1,11 +1,10 @@
 (ns js.lib.eth-bench-test
-  (:use code.test)
-  (:require [std.lib :as h]
-            [std.lang :as l]
-            [rt.solidity :as solidity]
-            [rt.solidity.env-ganache :as env-ganache]
+  (:require [rt.solidity :as solidity]
             [rt.solidity.compile-solc :as compile-solc]
-            [web3.lib.example-counter :as example-counter]))
+            [rt.solidity.env-ganache :as env-ganache]
+            [std.lang :as l]
+            [web3.lib.example-counter :as example-counter])
+  (:use code.test))
 
 (l/script- :js
   {:runtime :basic

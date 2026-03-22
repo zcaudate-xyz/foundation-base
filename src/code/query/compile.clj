@@ -1,6 +1,6 @@
 (ns code.query.compile
-  (:require [std.lib.walk :as walk]
-            [code.query.common :as common]))
+  (:require [code.query.common :as common]
+            [std.lib.walk :as walk]))
 
 (defn cursor-info
   "finds the information related to the cursor

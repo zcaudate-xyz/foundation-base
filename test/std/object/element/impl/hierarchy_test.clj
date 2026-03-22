@@ -1,6 +1,6 @@
 (ns std.object.element.impl.hierarchy-test
-  (:use code.test)
-  (:require [std.object.element.impl.hierarchy :refer :all]))
+  (:require [std.object.element.impl.hierarchy :refer :all])
+  (:use code.test))
 
 (def -without-method-
   (-> clojure.lang.PersistentArrayMap

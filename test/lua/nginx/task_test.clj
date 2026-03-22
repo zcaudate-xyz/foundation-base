@@ -1,9 +1,8 @@
 (ns lua.nginx.task-test
-  (:use code.test)
-  (:require [std.lang :as l]
-            [std.lib :as h]
+  (:require [rt.nginx.config :as config]
             [std.json :as json]
-            [rt.nginx.config :as config]))
+            [std.lang :as l])
+  (:use code.test))
 
 (l/script- :lua
   {:runtime :basic

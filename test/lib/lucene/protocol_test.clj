@@ -1,6 +1,6 @@
 (ns lib.lucene.protocol-test
-  (:use code.test)
-  (:require [lib.lucene.protocol :refer :all]))
+  (:require [lib.lucene.protocol :refer :all])
+  (:use code.test))
 
 ^{:refer lib.lucene.protocol/-create :added "4.0"}
 (fact "creates a lucene object"

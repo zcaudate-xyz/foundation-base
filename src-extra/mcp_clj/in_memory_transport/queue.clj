@@ -1,9 +1,6 @@
 (ns mcp-clj.in-memory-transport.queue
   "Type-hinted wrapper functions for Java queue operations to eliminate reflection warnings"
-  (:import
-    (java.util.concurrent
-      LinkedBlockingQueue
-      TimeUnit)))
+  (:import (java.util.concurrent LinkedBlockingQueue TimeUnit)))
 
 (defn create-queue
   "Create a new LinkedBlockingQueue"

@@ -1,18 +1,18 @@
 (ns std.lang.base.script-def-test
-  (:use code.test)
   (:require [std.lang.base.script-def :refer :all]
-            [std.lib :as h]))
+            [std.lib.foundation])
+  (:use code.test))
 
 ^{:refer  std.lang.base.script-def/tmpl-entry :added "4.0"}
 (fact "forms for various argument types"
   ^:hidden
   
-  (h/with:template-meta {:type :fragment
+  (std.lib.foundation/with:template-meta {:type :fragment
                          :tag "js"}
     (tmpl-entry '[createObject create]))
   => '(def$.js createObject create)
 
-  (h/with:template-meta {:type :fragment
+  (std.lib.foundation/with:template-meta {:type :fragment
                          :base "Webassembly"
                          :prefix "ws-"
                          :tag "js"}
@@ -23,25 +23,25 @@
 (fact "forms for various argument types"
   ^:hidden
 
-  (h/with:template-meta {:tag "js"}
+  (std.lib.foundation/with:template-meta {:tag "js"}
     (tmpl-macro '[length [arr]  {:property true
                                  :tag "js"}]))
   => '(defmacro.js length
         ([obj] (clojure.core/list (quote .) obj (quote length))))
   
-  (h/with:template-meta '{:tag "js"
+  (std.lib.foundation/with:template-meta '{:tag "js"
                           :subtree [auth]}
     (tmpl-macro '[length [arr]  {:property true
                                  }]))
   => '(defmacro.js length ([obj] (clojure.core/list (quote .) obj (quote auth) (quote length))))
   
-  (h/with:template-meta {:tag "js"}
+  (std.lib.foundation/with:template-meta {:tag "js"}
     (tmpl-macro '[forEach [f]]))
   => '(defmacro.js forEach
         ([obj f]
          (clojure.core/list (quote .) obj (clojure.core/list (quote forEach) f))))
 
-  (h/with:template-meta {:tag "js"}
+  (std.lib.foundation/with:template-meta {:tag "js"}
     (tmpl-macro '[concat [arr]  {:vargs arrs}]))
   => '(defmacro.js concat
         ([obj arr & [:as arrs]]
@@ -50,7 +50,7 @@
           obj
           (clojure.core/apply clojure.core/list (quote concat) arr arrs))))
   
-  (h/with:template-meta {:tag "js"}
+  (std.lib.foundation/with:template-meta {:tag "js"}
     (tmpl-macro '[includes   [val] {:optional [startIdx]}]))
   => '(defmacro.js includes
         ([obj val & [startIdx :as oargs]]
@@ -60,7 +60,7 @@
            clojure.core/list (quote includes) val
            (clojure.core/vec (clojure.core/take (clojure.core/count oargs) [startIdx]))))))
   
-  (h/with:template-meta {:tag "js"}
+  (std.lib.foundation/with:template-meta {:tag "js"}
     (tmpl-macro '[splice [start] {:optional [count e]
                                   :vargs es}]))
   => '(defmacro.js splice

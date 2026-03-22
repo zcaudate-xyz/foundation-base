@@ -1,7 +1,7 @@
 (ns std.log.element-test
-  (:use code.test)
-  (:require [std.log.element :refer :all]
-            [std.lib :as h]))
+  (:require [std.lib.time]
+            [std.log.element :refer :all])
+  (:use code.test))
 
 ^{:refer std.log.element/style-ansi :added "3.0"}
 (fact "constructs the style used in console"
@@ -20,7 +20,7 @@
 ^{:refer std.log.element/elem-daily-instant :added "3.0"}
 (fact "returns a styled label and instant "
 
-  (elem-daily-instant "TIME:" (h/time-ms) {})
+  (elem-daily-instant "TIME:" (std.lib.time/time-ms) {})
   => string?)
 
 ^{:refer std.log.element/elem-ns-duration :added "3.0"}

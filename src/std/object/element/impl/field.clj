@@ -1,6 +1,6 @@
 (ns std.object.element.impl.field
-  (:require [std.object.element.common :as common]
-            [std.object.element.class :as class]
+  (:require [std.object.element.class :as class]
+            [std.object.element.common :as common]
             [std.object.element.impl.type :as type]
             [std.object.element.util :as util])
   (:import (java.lang.reflect Field)))

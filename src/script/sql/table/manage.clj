@@ -1,7 +1,7 @@
 (ns script.sql.table.manage
   (:require [script.sql.common :as common]
-            [std.string :as str]
-            [std.lib :as h]))
+            [std.lib.foundation]
+            [std.string.common]))
 
 (defn table-create
   "generates create table statement"
@@ -11,11 +11,11 @@
                              :or {table-fn identity column-fn identity}}]
    (let [stringify      (fn [x] (if (keyword? x) (name x) (str x)))
          spec-to-string (fn [[column & options]]
-                          (str/join " " (cons (column-fn (name column))
+                          (std.string.common/join " " (cons (column-fn (name column))
                                               (map stringify options))))]
      (format "CREATE TABLE IF NOT EXISTS %s (\n %s%s\n)"
              (table-fn (name table))
-             (str/join ",\n " (map spec-to-string specs))
+             (std.string.common/join ",\n " (map spec-to-string specs))
              constraints))))
 
 (defn table-drop
@@ -38,7 +38,7 @@
    (let [table  (.replaceAll ^String (table-fn (name ns))  "\\." "_")]
      [(str "CREATE TABLE IF NOT EXISTS " table " (value text PRIMARY KEY, comment text)")
       (str "INSERT INTO " table "\n (value, comment)\n VALUES\n "
-           (str/join ",\n " (map (fn [value]
+           (std.string.common/join ",\n " (map (fn [value]
                                    (format "('%s', null)" (name value)))
                                  values)))])))
 
@@ -85,7 +85,7 @@
      (if-not (empty? composites)
        (format ", CONSTRAINT %s PRIMARY KEY (%s)"
                (table-fn constraint)
-               (str/join ", " composites))
+               (std.string.common/join ", " composites))
        ""))))
 
 (defn single-table
@@ -95,7 +95,7 @@
    (single-table input common/*options*))
   ([[table values :as input] opts]
    (let [constraints (single-table:constraints input opts)]
-     (h/->> (partition 2 values)
+     (std.lib.foundation/->> (partition 2 values)
             (keep #(single-table:column % opts))
             (table-create table % constraints opts)))))
 

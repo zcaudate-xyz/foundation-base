@@ -1,6 +1,6 @@
 (ns std.lib.generate-test
-  (:use code.test)
-  (:require [std.lib.generate :refer :all]))
+  (:require [std.lib.generate :refer :all])
+  (:use code.test))
 
 ^{:refer std.lib.generate/macroexpand-code :added "3.0"}
 (fact "macroexpand code, keeping the original meta"

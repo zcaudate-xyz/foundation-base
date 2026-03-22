@@ -3,8 +3,8 @@
             [code.query :as query]
             [std.block :as block]
             [std.block.navigate :as nav]
-            [std.lib :as h]
-            [std.string :as str]))
+            [clojure.string :as str]
+            [std.string.common]))
 
 (defn alias:expand-tb
   "expands tb alias to type-base"
@@ -27,7 +27,7 @@
                 (fn [nav]
                   (let [s (nav/value nav)]
                     (if (and (symbol? s)
-                             (str/starts-with? (str s) "tb/"))
+                             (std.string.common/starts-with? (str s) "tb/"))
                       (nav/replace nav (symbol (str/replace-first (str s) "tb/" "type-base/")))
                       nav)))))
 

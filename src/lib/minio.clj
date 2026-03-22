@@ -1,7 +1,7 @@
 (ns lib.minio
   (:require [lib.minio.bench :as bench]
-            [std.lib :as h]))
+            [std.lib.foundation]))
 
-(h/intern-in bench/start-minio-array
+(std.lib.foundation/intern-in bench/start-minio-array
              bench/stop-minio-array
              bench/all-minio-ports)

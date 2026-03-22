@@ -1,12 +1,13 @@
 (ns jvm.deps
-  (:require [std.print.ansi :as ansi]
-            [std.print :as print]
+  (:require [clojure.java.io :as io]
+            [jvm.artifact :as artifact]
+            [jvm.artifact.common :as base]
+            [jvm.classloader :as loader]
             [std.fs :as fs]
             [std.fs.archive :as archive]
-            [jvm.artifact.common :as base]
-            [jvm.artifact :as artifact]
-            [jvm.classloader :as loader]
-            [clojure.java.io :as io])
+            [std.print :as print]
+            [std.print.ansi :as ansi]
+            [std.string.common])
   (:import (clojure.lang IPersistentVector Symbol))
   (:refer-clojure :exclude [load resolve]))
 
@@ -28,7 +29,7 @@
      (if-let [path (if resource (.getPath resource))]
        (cond (.startsWith path "file:")
              (-> (subs path (count "file:"))
-                 (std.string/split #"\!/"))
+                 (std.string.common/split #"\!/"))
 
              (.startsWith path "/")
              [nil path])))))

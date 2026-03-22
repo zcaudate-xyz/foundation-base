@@ -1,10 +1,10 @@
 ^{:no-test true}
 (ns js.react
-  (:require [std.lang :as l]
-            [std.lib :as h]
-            [std.string :as str]
+  (:require [js.react.compile :as compile]
+            [std.lang :as l]
+            [std.lib.foundation]
             [std.lib.walk :as walk]
-            [js.react.compile :as compile])
+            [std.string.case])
   (:refer-clojure :exclude [> ref derive sync get set]))
 
 (l/script :js
@@ -31,7 +31,7 @@
     useReducer useRef useState useTransition
     version])
 
-(h/template-entries [l/tmpl-entry {:type :fragment
+(std.lib.foundation/template-entries [l/tmpl-entry {:type :fragment
                                    :base "React"
                                    :tag "js"}]
   +react+)
@@ -120,7 +120,7 @@
                                              (list setFn (list 'or expr local))))
          [local])))
 
-(h/template-entries [l/tmpl-entry {:type :fragment
+(std.lib.foundation/template-entries [l/tmpl-entry {:type :fragment
                                    :base "ReactDOM"
                                    :tag "js"}]
   [[renderDom render]
@@ -131,7 +131,7 @@
    [findDom findDOMNode]
    [versionDOM version]])
 
-(h/template-entries [l/tmpl-entry {:type :fragment
+(std.lib.foundation/template-entries [l/tmpl-entry {:type :fragment
                                    :base "ReactNIL"
                                    :tag "js"}]
   [[renderNil render]])
@@ -139,12 +139,12 @@
 (defmacro.js
   get
   [state]
-  (list '. (symbol (str/camel-case (name state)))))
+  (list '. (symbol (std.string.case/camel-case (name state)))))
 
 (defmacro.js
   set
   [state]
-  (list '. (symbol (str/camel-case (str "set-" (name state))))))
+  (list '. (symbol (std.string.case/camel-case (str "set-" (name state))))))
 
 (defmacro.js ^{:style/indent 1
                :static/deps ['React]}

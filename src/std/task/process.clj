@@ -1,7 +1,9 @@
 (ns std.task.process
-  (:require [std.task.bulk :as bulk]
-            [std.lib :as h]
-            [std.lib.result :as res]))
+  (:require [std.lib.collection]
+            [std.lib.foundation]
+            [std.lib.function]
+            [std.lib.result :as res]
+            [std.task.bulk :as bulk]))
 
 (def ^:dynamic *interrupt* false)
 
@@ -11,7 +13,7 @@
    => (contains [h/vargs? false])"
   {:added "4.0"}
   ([func count]
-   (let [fcounts (h/arg-count func)
+   (let [fcounts (std.lib.function/arg-count func)
          fcount  (if-not (empty? fcounts)
                    (apply min fcounts)
                    4)
@@ -39,19 +41,19 @@
   [selector id]
   (cond (or (fn?  selector)
             (var? selector))
-        (h/suppress (selector id))
+        (std.lib.foundation/suppress (selector id))
 
         (or (string? selector)
             (symbol? selector)
             (keyword? selector))
         (.startsWith (str id) (str selector))
 
-        (h/regexp? selector)
+        (std.lib.foundation/regexp? selector)
         (boolean (re-find selector (str id)))
         
         (set? selector) (selector id)
 
-        (h/form? selector)  (every? #(select-filter % id)
+        (std.lib.collection/form? selector)  (every? #(select-filter % id)
                                     selector)
         
         
@@ -116,7 +118,7 @@
            (or (keyword? input)
                (vector? input)
                (set? input)
-               (h/form? input))
+               (std.lib.collection/form? input))
            (let [inputs (select-inputs task lookup env input)]
              (apply bulk/bulk task f inputs params lookup env args))
 
@@ -149,7 +151,7 @@
   "executes the task, given functions and parameters"
   {:added "4.0"}
   ([task & args]
-   (let [idx (h/index-at #{:args} args)
+   (let [idx (std.lib.collection/index-at #{:args} args)
          _    (if (and (neg? idx) (-> task :main :args?))
                 (throw (ex-info "Require `:args` keyword to specify additional arguments"
                                 {:input args})))
@@ -160,7 +162,7 @@
          f  (-> (-> task :main :fn)
                 (wrap-execute task)
                 (wrap-input task))
-         params (h/merge-nested (:params task) params)
+         params (std.lib.collection/merge-nested (:params task) params)
          result (apply f input params lookup env func-args)]
      (alter-var-root #'*interrupt*
                      (fn [_] false))

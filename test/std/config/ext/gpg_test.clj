@@ -1,7 +1,7 @@
 (ns std.config.ext.gpg-test
-  (:use code.test)
-  (:require [std.config.ext.gpg :refer :all]
-            [lib.openpgp]))
+  (:require [lib.openpgp]
+            [std.config.ext.gpg :refer :all])
+  (:use code.test))
 
 ^{:refer std.config.ext.gpg/resolve-type-gpg-public :added "3.0"}
 (fact "resolves content to a PGP public key"

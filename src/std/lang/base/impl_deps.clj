@@ -1,13 +1,14 @@
 (ns std.lang.base.impl-deps
-  (:require [std.lang.base.util :as ut]
+  (:require [clojure.set :as set]
+            [std.lang.base.book :as b]
             [std.lang.base.emit :as emit]
             [std.lang.base.emit-preprocess :as preprocess]
-            [std.lang.base.impl-entry :as entry]
-            [std.lang.base.book :as b]
             [std.lang.base.impl-deps-imports :as imports]
-            [std.string :as str]
-            [std.lib :as h]
-            [clojure.set :as set]))
+            [std.lang.base.impl-entry :as entry]
+            [std.lang.base.util :as ut]
+            [std.lib.collection]
+            [std.lib.deps]
+            [std.lib.foundation]))
 
 ;;
 ;;
@@ -81,7 +82,7 @@
                                  out
 
                                  :else
-                                 (h/error "Imports not of the same name"
+                                 (std.lib.foundation/error "Imports not of the same name"
                                           {:ns   id
                                            :key  k
                                            :curr ov
@@ -95,10 +96,10 @@
   "collects all entries"
   {:added "4.0"}
   ([{:keys [modules] :as book} sym-ids]
-   (let [ids  (h/seqify sym-ids)
-         ids  (:all (h/deps:resolve book ids))
+   (let [ids  (std.lib.collection/seqify sym-ids)
+         ids  (:all (std.lib.deps/deps-resolve book ids))
          module-ids (set (map ut/sym-module ids)) 
-         module-lu  (->> (h/deps:ordered book module-ids)
+         module-lu  (->> (std.lib.deps/deps-ordered book module-ids)
                          (map (fn [i id]
                                 [id {:index i :module (get modules  id)}])
                               (range))

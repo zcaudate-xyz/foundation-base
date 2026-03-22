@@ -1,5 +1,5 @@
 (ns jvm.require
-  (:require [std.lib :as h])
+  (:require [std.lib.env])
   (:refer-clojure :exclude [load resolve]))
 
 (defn force-require
@@ -22,11 +22,11 @@
                         (throw t))
                       (throw t))))]
      (cond ns-dep
-           (do (h/p :REQUIRING ns-dep)
+           (do (std.lib.env/p :REQUIRING ns-dep)
                (recur ns-dep (cons ns stack)))
 
            (not-empty stack)
            (recur (first stack) (rest stack))
            
            :else
-           (h/p :DONE)))))
+           (std.lib.env/p :DONE)))))

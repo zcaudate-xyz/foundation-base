@@ -1,11 +1,10 @@
 (ns lib.aether.dependency
-  (:require [jvm.protocol :as protocol.classloader]
-            [jvm.artifact :as jvm.artifact]
+  (:require [jvm.artifact :as jvm.artifact]
+            [jvm.protocol :as protocol.classloader]
             [lib.aether.artifact :as artifact]
-            [std.lib :refer [definvoke]]
+            [std.lib.invoke :refer [definvoke]]
             [std.object :as object])
-  (:import (org.eclipse.aether.graph DefaultDependencyNode Dependency DependencyNode Exclusion)
-           (org.eclipse.aether.artifact Artifact DefaultArtifact)))
+  (:import (org.eclipse.aether.graph DefaultDependencyNode Dependency DependencyNode Exclusion) (org.eclipse.aether.artifact Artifact DefaultArtifact)))
 
 (definvoke rep-exclusion
   "creates a rep from an exclusion

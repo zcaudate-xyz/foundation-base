@@ -1,7 +1,11 @@
 (ns std.contract.sketch
-  (:require [std.lib :refer [defimpl] :as h]
-            [malli.core :as mc]
-            [malli.util :as mu])
+  (:require [malli.core :as mc]
+            [malli.util :as mu]
+            [std.lib.collection]
+            [std.lib.foundation]
+            [std.lib.function]
+            [std.lib.impl :refer [defimpl]]
+            [std.lib.os])
   (:refer-clojure :exclude [remove]))
 
 (defn optional-string
@@ -70,7 +74,7 @@
   "gets function symbol"
   {:added "3.0"}
   ([f]
-   (h/-> (re-find #"#(function|object)\[(.*?)(--\d+)?\]"
+   (std.lib.foundation/-> (re-find #"#(function|object)\[(.*?)(--\d+)?\]"
                   (prn-str f))
          (nth 2)
          (if % (symbol %)))))
@@ -88,9 +92,9 @@
          num (count args)
          form (list 'fn args)
          pred (fn [f]
-                (if (h/native?)
+                (if (std.lib.os/native?)
                   true
-                  (try (h/arg-check f num) (catch Throwable t false))))]
+                  (try (std.lib.function/arg-check f num) (catch Throwable t false))))]
      (Func. form pred))))
 
 (defmacro func
@@ -131,7 +135,7 @@
 
        (if (keyword? type)
          (with-meta (apply vector type (map from-schema-map children)) properties)
-         (if (h/iobj? type)
+         (if (std.lib.foundation/iobj? type)
            (with-meta type properties)
            type))))))
 
@@ -188,7 +192,7 @@
          (vector? x)
          (mc/schema x)
 
-         (h/hash-map? x)
+         (std.lib.collection/hash-map? x)
          (mc/schema (apply vector
                            :map
                            (or (meta x) {})
@@ -207,7 +211,7 @@
    (let [m (from-schema schema)]
      (if (map? m)
        (lax schema (keys m))
-       (h/error "Not Supported" {:input schema}))))
+       (std.lib.foundation/error "Not Supported" {:input schema}))))
   ([schema ks]
    (let [schema (to-schema schema)
          vs     (mapv (fn [v]
@@ -232,7 +236,7 @@
                              (:v k)
                              k))
                          (keys m)))
-       (h/error "Not Supported" {:input schema}))))
+       (std.lib.foundation/error "Not Supported" {:input schema}))))
   ([schema ks]
    (let [schema (to-schema schema)]
      (mu/required-keys schema ks))))
@@ -263,7 +267,7 @@
                          (:v k)
                          k))
                      (keys m)))
-       (h/error "Not Supported" {:input schema}))))
+       (std.lib.foundation/error "Not Supported" {:input schema}))))
   ([schema ks]
    (let [schema (to-schema schema)
          vs     (mapv (fn [v]

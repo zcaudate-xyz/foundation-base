@@ -1,6 +1,6 @@
 (ns lib.oshi
-  (:require [std.object :as object]
-            [lib.oshi.interop :deps true])
+  (:require [lib.oshi.interop :deps true]
+            [std.object :as object])
   (:import (oshi.software.os OperatingSystem$ProcessSorting)))
 
 (defonce ^:dynamic *raw* true)

@@ -1,5 +1,5 @@
 (ns std.timeseries.types
-  (:require [std.contract :refer [defspec defmultispec defcase] :as c]))
+  (:require [std.contract :as c :refer [defspec defmultispec defcase]]))
 
 (defspec <range-point>
   [:or

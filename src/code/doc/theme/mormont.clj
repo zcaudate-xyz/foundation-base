@@ -1,7 +1,7 @@
 (ns code.doc.theme.mormont
-  (:require [std.string :as str]
+  (:require [code.doc.engine.winterfell :as engine]
             [std.html :as html]
-            [code.doc.engine.winterfell :as engine]))
+            [std.string.common]))
 
 (def settings
   {:engine    "winterfell"
@@ -47,7 +47,7 @@
    (->> (get-in interim [:articles name :elements])
         (map engine/page-element)
         (map (fn [ele] (html/html ele)))
-        (str/joinl))))
+        (std.string.common/joinl))))
 
 (defn render-navigation
   "renders the navigation outline for the mormont theme"
@@ -58,4 +58,4 @@
      (->> telems
           (map engine/nav-element)
           (map (fn [ele] (html/html ele)))
-          str/joinl))))
+          std.string.common/joinl))))

@@ -1,10 +1,12 @@
 (ns net.resp.connection-test
-  (:use [code.test])
-  (:require [net.resp.connection :refer :all :as conn]
+  (:require [lib.redis.bench :as bench]
+            [net.resp.connection :as conn :refer :all]
             [net.resp.node :as node]
-            [lib.redis.bench :as bench]
-            [std.lib :as h]
-            [std.concurrent :as cc])
+            [std.concurrent :as cc]
+            [std.lib.component]
+            [std.lib.foundation]
+            [std.lib.future])
+  (:use [code.test])
   (:refer-clojure :exclude [read]))
 
 (fact:global
@@ -21,9 +23,9 @@
 
 (defmacro test-harness
   [& body]
-  `(h/with:lifecycle [~'|node| {:start (create-node)
+  `(std.lib.component/with-lifecycle [~'|node| {:start (create-node)
                                 :stop node/stop-node}]
-     (h/with:lifecycle [~'|conn| {:start (create-conn)
+     (std.lib.component/with-lifecycle [~'|conn| {:start (create-conn)
                                   :stop conn/connection:close}]
        ~@body)))
 
@@ -62,13 +64,13 @@
   ^:hidden
 
   (test-harness
-    (h/-> (pipeline |conn|)
+    (std.lib.foundation/-> (pipeline |conn|)
           (pipeline:write ["PING"])
           (pipeline:write ["ECHO" "1"])
           (pipeline:write ["ECHO" "2"])
           (pipeline:write ["ECHO" "3"])
           (pipeline:read)
-          (map h/string %)))
+          (map std.lib.foundation/string %)))
   => ["PONG" "1" "2" "3"])
 
 ^{:refer net.resp.connection/connection:read :added "3.0"}
@@ -76,7 +78,7 @@
   ^:hidden
 
   (test-harness
-    @(h/future {:timeout 100}
+    @(std.lib.future/future {:timeout 100}
                (connection:read |conn|)))
   => (throws))
 
@@ -89,10 +91,10 @@
       (connection:write ["PING"])
       (connection:write ["PING"]))
 
-    (h/string (connection:read |conn|))
+    (std.lib.foundation/string (connection:read |conn|))
     => "PONG"
 
-    (h/string (connection:read |conn|))
+    (std.lib.foundation/string (connection:read |conn|))
     => "PONG"))
 
 ^{:refer net.resp.connection/connection:value :added "3.0"}
@@ -115,7 +117,7 @@
   
   (test-harness
     (-> (connection:request-single |conn| ["PING"])
-        (h/string)))
+        (std.lib.foundation/string)))
   => "PONG")
 
 ^{:refer net.resp.connection/connection:process-single :added "3.0"}
@@ -139,7 +141,7 @@
                                    ["ECHO" "1"]
                                    ["ECHO" "2"]
                                    ["ECHO" "3"]])
-         (map h/string)))
+         (map std.lib.foundation/string)))
   => ["PONG" "1" "2" "3"])
 
 ^{:refer net.resp.connection/connection:process-bulk :added "3.0"}

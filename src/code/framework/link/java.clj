@@ -1,6 +1,6 @@
 (ns code.framework.link.java
-  (:require [std.string :as str]
-            [code.framework.link.common :as common])
+  (:require [code.framework.link.common :as common]
+            [std.string.common])
   (:import (java.io File)))
 
 (defn get-class
@@ -11,10 +11,10 @@
   {:added "3.0"}
   ([^File file]
    (let [pkg (-> (->> (slurp file)
-                      (str/split-lines)
+                      (std.string.common/split-lines)
                       (filter #(.startsWith ^String % "package"))
                       (first))
-                 (str/split #"[ ;]")
+                 (std.string.common/split #"[ ;]")
                  (second))
          nm  (let [nm (.getName file)]
                (subs nm 0 (- (count nm) 5)))]
@@ -28,9 +28,9 @@
   {:added "3.0"}
   ([file]
    (->> (slurp file)
-        (str/split-lines)
+        (std.string.common/split-lines)
         (filter #(.startsWith ^String % "import"))
-        (map #(str/split % #"[ ;]"))
+        (map #(std.string.common/split % #"[ ;]"))
         (map second)
         (map symbol))))
 

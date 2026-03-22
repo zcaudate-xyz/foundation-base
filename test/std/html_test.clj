@@ -1,8 +1,7 @@
 (ns std.html-test
-  (:use code.test)
   (:require [std.html :refer :all])
-  (:import (org.jsoup.nodes Element)
-           (org.jsoup.select Elements)))
+  (:use code.test)
+  (:import (org.jsoup.nodes Element) (org.jsoup.select Elements)))
 
 (def +content+
   (str "<html id=3><head><title>First parse</title></head>"

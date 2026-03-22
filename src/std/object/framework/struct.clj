@@ -1,8 +1,8 @@
 (ns std.object.framework.struct
-  (:require [std.lib :refer [definvoke]]
-            [std.object.query :as reflect]
+  (:require [std.lib.invoke :refer [definvoke]]
             [std.object.element :as element]
-            [std.string :as str]))
+            [std.object.query :as reflect]
+            [std.string.case]))
 
 (def ^:dynamic *lead-class* nil)
 
@@ -18,7 +18,7 @@
          [prefix label] (if (.endsWith label "?")
                           ["is-" (subs label 0 (dec (count label)))]
                           ["get-" label])
-         label   (str/camel-case (str prefix label))]
+         label   (std.string.case/camel-case (str prefix label))]
      (eval `(fn ~(symbol label) [~(with-meta 'obj {:tag cls})]
               (and ~'obj
                    (~(symbol (str "." label)) ~'obj)))))))
@@ -31,7 +31,7 @@
   {:added "3.0"}
   [:memoize]
   ([k ^Class cls]
-   (or (try (element/to-element (.getDeclaredField cls (str/camel-case (name k))))
+   (or (try (element/to-element (.getDeclaredField cls (std.string.case/camel-case (name k))))
             (catch NoSuchFieldException e))
        (if-let [super (.getSuperclass cls)]
          (binding [*lead-class* (or *lead-class*

@@ -1,7 +1,8 @@
 (ns std.lang.base.emit-common-test
-  (:use code.test)
-  (:require [std.lang.base.emit-common :refer :all :as common]
-            [std.lang.base.emit-helper :as helper]))
+  (:require [std.lang.base.emit-common :as common :refer :all]
+            [std.lang.base.emit-helper :as helper]
+            [std.string.prose])
+  (:use code.test))
 
 ^{:refer std.lang.base.emit-common/with:explode :added "4.0"}
 (fact "form to control `explode` option"
@@ -82,7 +83,7 @@
   (emit-comment nil '(:# "This \nis \na comment" A B 1)
                 helper/+default+ {})
   
-  => (std.string/|
+  => (std.string.prose/|
       "// This "
       "// is "
       "// a comment A B 1"))
@@ -93,7 +94,7 @@
 
   (emit-indent nil '(\| "This\nis\nan indented" A B 1)
                helper/+default+ {})
-  => (std.string/|
+  => (std.string.prose/|
       "  This"
       "  is"
       "  an indented A B 1"))

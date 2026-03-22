@@ -1,6 +1,6 @@
 (ns std.lang.base.compile-links-test
-  (:use code.test)
-  (:require [std.lang.base.compile-links :refer :all]))
+  (:require [std.lang.base.compile-links :refer :all])
+  (:use code.test))
 
 ^{:refer std.lang.base.compile-links/get-link-lookup :added "4.0"}
 (fact "gets a lookup value"

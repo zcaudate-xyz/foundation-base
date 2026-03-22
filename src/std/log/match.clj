@@ -1,7 +1,6 @@
 (ns std.log.match
-  (:require
-   [std.lib :as h]
-   [std.log.common :as common]))
+  (:require [std.lib.foundation]
+            [std.log.common :as common]))
 
 (defn filter-base
   "matches based on input and filter
@@ -21,8 +20,8 @@
                 false))
 
          :else
-         (let [valstr (h/strn value)]
-           (cond (h/regexp? filter)
+         (let [valstr (std.lib.foundation/strn value)]
+           (cond (std.lib.foundation/regexp? filter)
                  (boolean (re-find filter valstr))
 
                  (string? filter)

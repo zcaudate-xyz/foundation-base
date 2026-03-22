@@ -1,6 +1,6 @@
 (ns code.test.task-test
-  (:use code.test)
-  (:require [code.test.task :as task]))
+  (:require [code.test.task :as task])
+  (:use code.test))
 
 ^{:refer code.test.task/run:interrupt :added "4.0"}
 (fact "interrupts the test")

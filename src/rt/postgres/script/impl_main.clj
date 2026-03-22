@@ -1,11 +1,11 @@
 (ns rt.postgres.script.impl-main
-  (:require [std.lib :as h]
-            [std.string :as str]
-            [std.lib.schema :as schema]
+  (:require [rt.postgres.grammar.common-tracker :as tracker]
+            [rt.postgres.script.impl-base :as base]
             [std.lang :as l]
             [std.lang.base.util :as ut]
-            [rt.postgres.grammar.common-tracker :as tracker]
-            [rt.postgres.script.impl-base :as base]))
+            [std.lib.foundation]
+            [std.lib.schema :as schema]
+            [std.string.case]))
 
 ;;
 ;; select
@@ -195,7 +195,7 @@
               (keep (fn [[k [{:keys [primary unique order]}]]]
                       (if (and (not (or primary #_unique))
                                order)
-                        (symbol (str/snake-case (h/strn k))))))))))
+                        (symbol (std.string.case/snake-case (std.lib.foundation/strn k))))))))))
 
 (defn t-fields
   "returns fields"

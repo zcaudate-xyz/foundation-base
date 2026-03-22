@@ -1,15 +1,16 @@
 (ns code.doc.executive
   (:require [clojure.java.io :as io]
-            [std.config :as config]
             [code.doc.prepare :as prepare]
-            [std.text.diff :as text.diff]
-            [std.fs :as fs]
             [code.project :as project]
-            [std.task :as task]
+            [std.config :as config]
+            [std.fs :as fs]
+            [std.lib.collection]
             [std.print :as print]
             [std.print.ansi :as ansi]
-            [std.string :as str]
-            [std.lib :as h])
+            [std.string.coerce]
+            [std.string.prose]
+            [std.task :as task]
+            [std.text.diff :as text.diff])
   (:import (java.io InputStream)))
 
 (def ^:dynamic *template-path* "template")
@@ -83,7 +84,7 @@
                    (load-var ns "settings"))]
      (update-in theme [:render]
                 (fn [m]
-                  (h/map-vals (fn [v] [:fn (load-var ns v)]) m))))))
+                  (std.lib.collection/map-vals (fn [v] [:fn (load-var ns v)]) m))))))
 
 (defn render
   "renders .clj file to html
@@ -127,7 +128,7 @@
                                                     :fn  ((second v) key interim lookup)))]
                                   (.replaceAll html
                                                (str "<@=" (clojure.core/name k) ">")
-                                               (str/escape-dollars (str value)))))
+                                               (std.string.prose/escape-dollars (str value)))))
                               output
                               include)
          original  (if (fs/exists? output-path) (slurp output-path) "")
@@ -157,7 +158,7 @@
          {:keys [theme]} (lookup site)
          {:keys [theme output] :as out} (lookup site)
          output-path (fs/path root output)
-         template-path (fs/path root *template-path* (str/to-string site))]
+         template-path (fs/path root *template-path* (std.string.coerce/to-string site))]
      (cond (fs/exists? template-path)
            (let [{:keys [copy]} (read-string (slurp (fs/path template-path *default-deploy*)))]
              (mapcat (fn [entry]
@@ -199,7 +200,7 @@
    (let [{:keys [write print]} (task/single-function-print params)
          {:keys [theme]} (lookup site)
          {:keys [resource manifest]} (load-theme theme)
-         template-path (fs/path root *template-path* (str/to-string site))]
+         template-path (fs/path root *template-path* (std.string.coerce/to-string site))]
      (cond (fs/exists? template-path)
            (throw (ex-info (str "Template for " site " already exists") {:path (str template-path)}))
 

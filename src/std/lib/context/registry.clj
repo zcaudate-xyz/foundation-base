@@ -1,10 +1,10 @@
 (ns std.lib.context.registry
-  (:require [std.protocol.context :as protocol.context]
-            [std.lib.atom :as at]
+  (:require [std.lib.atom :as at]
             [std.lib.collection :as c]
             [std.lib.foundation :as h]
+            [std.lib.impl :refer [defimpl]]
             [std.lib.resource :as res]
-            [std.lib.impl :refer [defimpl]]))
+            [std.protocol.context :as protocol.context]))
 
 ;;
 ;; Context 

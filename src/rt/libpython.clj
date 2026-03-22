@@ -1,15 +1,16 @@
 (ns rt.libpython
-  (:require [std.protocol.component :as protocol.component]
-            [std.protocol.context :as protocol.context]
+  (:require [libpython-clj2.python :as lp]
             [rt.basic.impl.process-js :as js]
             [rt.basic.impl.process-python :as python]
-            [std.lang.base.impl :as impl]
-            [std.lang.base.runtime :as default]
-            [libpython-clj2.python :as lp]
             [std.concurrent :as cc]
             [std.lang :as l]
-            [std.lib :as h :refer [defimpl]]
-            [std.string :as str]
+            [std.lang.base.impl :as impl]
+            [std.lang.base.runtime :as default]
+            [std.lib.component]
+            [std.lib.foundation]
+            [std.lib.impl :refer [defimpl]]
+            [std.protocol.component :as protocol.component]
+            [std.protocol.context :as protocol.context]
             [xt.lang.base-repl :as k]))
 
 (defonce +preamble+
@@ -85,7 +86,7 @@
    => lp/rt-libpython?"
   {:added "4.0"}
   [{:keys [id]
-    :or {id (h/sid)}
+    :or {id (std.lib.foundation/sid)}
     :as m}]
   (map->RuntimeLibpython (assoc m :id id)))
 
@@ -94,7 +95,7 @@
   {:added "4.0"}
   ([m]
    (-> (rt-libpython:create m)
-       (h/start))))
+       (std.lib.component/start))))
 
 (defn rt-libpython?
   "checks object is a libpython rt"

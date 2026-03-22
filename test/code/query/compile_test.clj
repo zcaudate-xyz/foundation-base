@@ -1,7 +1,7 @@
 (ns code.query.compile-test
-  (:use code.test)
   (:require [code.query.compile :refer :all]
-            [std.block.navigate :as nav]))
+            [std.block.navigate :as nav])
+  (:use code.test))
 
 ^{:refer code.query.compile/cursor-info :added "3.0"}
 (fact "finds the information related to the cursor"

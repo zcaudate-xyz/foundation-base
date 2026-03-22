@@ -1,7 +1,7 @@
 (ns std.lib.transform.fill-assoc
-  (:require [std.lib.transform.base.complex :as complex]
-            [std.lib.collection :as coll]
-            [std.lib.foundation :as h]))
+  (:require [std.lib.collection :as coll]
+            [std.lib.foundation :as h]
+            [std.lib.transform.base.complex :as complex]))
 
 (defn process-fill-assoc
   "helper function for wrap-model-fill-assoc

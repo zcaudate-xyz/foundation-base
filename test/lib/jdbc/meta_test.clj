@@ -1,7 +1,7 @@
 (ns lib.jdbc.meta-test
-  (:use code.test)
   (:require [lib.jdbc.meta :refer :all]
             [lib.jdbc.protocol :as protocol])
+  (:use code.test)
   (:import (java.sql Connection DatabaseMetaData)))
 
 (defn mock-conn-meta []

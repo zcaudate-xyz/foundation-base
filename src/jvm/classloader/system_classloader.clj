@@ -1,11 +1,10 @@
 (ns jvm.classloader.system-classloader
-  (:require [std.string :as str]
-            [jvm.classloader.common :as common]
+  (:require [jvm.classloader.common :as common]
             [jvm.protocol :as protocol.classloader]
+            [std.lib.collection]
             [std.object.query :as reflect]
-            [std.lib :as h])
-  (:import (clojure.lang RT)
-           (java.net URL)))
+            [std.string.common])
+  (:import (clojure.lang RT) (java.net URL)))
 
 (defonce +base+ (.getClassLoader RT))
 
@@ -37,15 +36,15 @@
         comp-fn #(= (str %) (str entry))
 
         ;;find entry in paths
-        paths-entry (h/element-at comp-fn paths)
+        paths-entry (std.lib.collection/element-at comp-fn paths)
         _  (if paths-entry (.remove paths paths-entry))
 
         ;;find entry in stack and delete it
-        urls-entry (h/element-at comp-fn urls)
+        urls-entry (std.lib.collection/element-at comp-fn urls)
         _ (if urls-entry (.remove urls urls-entry))
 
         ;; find loader in lookup
-        url-key (h/element-at #(= %
+        url-key (std.lib.collection/element-at #(= %
                                   (str (.getProtocol entry)
                                        "://"
                                        (.getFile entry)))
@@ -63,7 +62,7 @@
                   (.hashCode ^Object v)
                   (->> (protocol.classloader/-all-urls v)
                        (mapv #(-> (str %)
-                                  (str/split #"/")
+                                  (std.string.common/split #"/")
                                   last)))))))
 
 (extend-type (type +ucp+)
@@ -71,7 +70,7 @@
   (-has-url?    [ucp path]
     (boolean (protocol.classloader/-get-url ucp path)))
   (-get-url     [ucp path]
-    (h/element-at #(= (str %) (str (common/to-url path)))
+    (std.lib.collection/element-at #(= (str %) (str (common/to-url path)))
                   (ucp-access-path ucp)))
   (-all-urls    [ucp]
     (seq (ucp-get-urls ucp)))

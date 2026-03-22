@@ -1,6 +1,6 @@
 (ns indigo.client.page-index-test
-  (:use code.test)
-  (:require [indigo.client.page-index :refer :all]))
+  (:require [indigo.client.page-index :refer :all])
+  (:use code.test))
 
 ^{:refer indigo.client.page-index/App :added "4.0"}
 (fact "TODO")

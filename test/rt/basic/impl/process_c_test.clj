@@ -1,7 +1,7 @@
 (ns rt.basic.impl.process-c-test
-  (:use code.test)
   (:require [rt.basic.impl.process-c :refer :all]
-            [std.lang :as l]))
+            [std.lang :as l])
+  (:use code.test))
 
 (l/script- :c
   {:runtime :oneshot})

@@ -1,7 +1,7 @@
 (ns std.lib.context.space-test
-  (:use code.test)
-  (:require [std.lib.context.space :refer :all]
-            [std.lib.context.registry :as reg]))
+  (:require [std.lib.context.registry :as reg]
+            [std.lib.context.space :refer :all])
+  (:use code.test))
 
 (fact:global
  {:component

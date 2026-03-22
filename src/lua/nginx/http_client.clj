@@ -1,6 +1,6 @@
 (ns lua.nginx.http-client
   (:require [std.lang :as l]
-            [std.lib :as h]))
+            [std.lib.foundation]))
 
 (l/script :lua
   {:import [["resty.http" :as ngxhttp]
@@ -14,7 +14,7 @@
   []
   (list 'ngxhttp.new))
 
-(h/template-entries [l/tmpl-macro {:base "http"
+(std.lib.foundation/template-entries [l/tmpl-macro {:base "http"
                                    :inst "client"
                                    :tag "lua"}]
   [[connect       [options]]

@@ -1,6 +1,6 @@
 (ns indigo.server.test-runner-test
-  (:use code.test)
-  (:require [indigo.server.test-runner :refer :all]))
+  (:require [indigo.server.test-runner :refer :all])
+  (:use code.test))
 
 ^{:refer indigo.server.test-runner/browser-test-listener :added "4.1"}
 (fact "TODO")

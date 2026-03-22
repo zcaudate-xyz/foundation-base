@@ -1,8 +1,8 @@
 (ns lib.lucene.impl
-  (:require [lib.lucene.protocol :as protocol.search]
-            [lib.lucene.impl.index :as index]
-            [lib.lucene.impl.analyzer :as analyzer]
+  (:require [lib.lucene.impl.analyzer :as analyzer]
             [lib.lucene.impl.document :as doc]
+            [lib.lucene.impl.index :as index]
+            [lib.lucene.protocol :as protocol.search]
             [std.fs :as fs]))
 
 (defn create-directories

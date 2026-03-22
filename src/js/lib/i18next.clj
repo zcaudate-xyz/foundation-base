@@ -1,11 +1,11 @@
 (ns js.lib.i18next
   (:require [std.lang :as l]
-            [std.lib :as h]))
+            [std.lib.foundation]))
 
 (l/script :js
   {:import [["i18n" :as I18n]]})
 
-(h/template-entries [l/tmpl-macro {:base "SupabaseClient"
+(std.lib.foundation/template-entries [l/tmpl-macro {:base "SupabaseClient"
                                    :inst "supabase"
                                    :subtree []
                                    :tag "js"}]

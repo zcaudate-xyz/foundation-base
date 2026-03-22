@@ -1,7 +1,7 @@
 (ns rt.basic.type-common-test
-  (:use code.test)
-  (:require [rt.basic.type-common :as common :refer :all]
-            [rt.basic.impl.process-lua :as lua]))
+  (:require [rt.basic.impl.process-lua :as lua]
+            [rt.basic.type-common :as common :refer :all])
+  (:use code.test))
 
 ^{:refer rt.basic.type-common/get-context-options :added "4.0"}
 (fact "gets all or a section of the `*context-options*` structure"

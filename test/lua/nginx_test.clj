@@ -1,9 +1,8 @@
 (ns lua.nginx-test
-  (:use code.test)
-  (:require [std.lang :as l]
-            [std.lib :as h]
-            [rt.nginx :as nginx]
-            [xt.lang.base-notify :as notify]))
+  (:require [rt.nginx :as nginx]
+            [std.lang :as l]
+            [xt.lang.base-notify :as notify])
+  (:use code.test))
 
 (l/script- :lua
   {:runtime :nginx.instance

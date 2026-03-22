@@ -1,9 +1,8 @@
 (ns std.lang.model.spec-r-test
-  (:use code.test)
-  (:require [std.lang.model.spec-r :refer :all]
-            [std.lang :as l]
-            [std.lib :as h]
-            [std.lang.base.book :as book]))
+  (:require [std.lang :as l]
+            [std.lang.base.book :as book]
+            [std.lang.model.spec-r :refer :all])
+  (:use code.test))
 
 (fact "Preliminary Checks"
   (l/emit-as :R '[[1 2 3 4]])

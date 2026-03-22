@@ -1,6 +1,6 @@
 (ns std.lib.template-test
-  (:use code.test)
-  (:require [std.lib.template :refer :all]))
+  (:require [std.lib.template :refer :all])
+  (:use code.test))
 
 ^{:refer std.lib.template/replace-template :added "3.0"}
 (fact "replace arguments with values"

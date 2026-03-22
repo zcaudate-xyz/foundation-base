@@ -1,6 +1,6 @@
 (ns code.doc-test
-  (:use code.test)
-  (:require [code.doc :refer :all]))
+  (:require [code.doc :refer :all])
+  (:use code.test))
 
 ^{:refer code.doc/make-project :added "3.0"}
 (fact "makes a env for the publish task"

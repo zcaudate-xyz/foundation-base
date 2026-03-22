@@ -1,6 +1,5 @@
 (ns std.lib.function
-  (:import (clojure.lang Fn RestFn)
-           (java.lang.reflect Method)))
+  (:import (clojure.lang Fn RestFn) (java.lang.reflect Method)))
 
 (def +specialized+
   '{int "Int"

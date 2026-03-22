@@ -1,10 +1,10 @@
 (ns std.lib.os
-  (:require [std.lib.impl :refer [defimpl]]
+  (:require [std.lib.env :as env]
             [std.lib.foundation :as h]
-            [std.lib.env :as env]
-            [std.string.common :as str]
+            [std.lib.future :as f]
+            [std.lib.impl :refer [defimpl]]
             [std.protocol.component :as protocol.component]
-            [std.lib.future :as f])
+            [std.string.common :as str])
   (:import (java.io File)))
 
 (def ^:dynamic *native-compile* false)

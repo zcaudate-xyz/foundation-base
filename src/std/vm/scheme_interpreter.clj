@@ -1,11 +1,10 @@
 (ns std.vm.scheme-interpreter
   (:require [std.block.base :as base]
-            [std.block.construct :as construct]
             [std.block.check :as check]
+            [std.block.construct :as construct]
             [std.block.parse :as parse]
             [std.lib.zip :as zip]
-            [std.print.ansi :as ansi]
-            [std.string :as str])
+            [std.print.ansi :as ansi])
   (:import (std.protocol.block IBlock IBlockContainer IBlockExpression)))
 
 ;; --- Context & Zip ---

@@ -1,6 +1,5 @@
 (ns js.tamagui.ui-input
-  (:require [std.lang :as l]
-            [std.lib :as h]))
+  (:require [std.lang :as l]))
 
 (l/script :js
   {:import [["tamagui" :as [* Tamagui]]]

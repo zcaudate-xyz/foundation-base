@@ -1,7 +1,7 @@
 (ns std.lib.return-test
-  (:use code.test)
-  (:require [std.lib.return :refer :all]
-            [std.lib.future :as f]))
+  (:require [std.lib.future :as f]
+            [std.lib.return :refer :all])
+  (:use code.test))
 
 ^{:refer std.lib.return/return-resolve :added "3.0"}
 (fact "resolves encased futures"

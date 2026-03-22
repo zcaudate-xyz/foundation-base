@@ -1,25 +1,17 @@
 (ns mcp-clj.mcp-client.core
+  (:require [mcp-clj.client-transport.factory :as transport-factory]
+            [mcp-clj.client-transport.protocol :as transport-protocol]
+            [mcp-clj.log :as log]
+            [mcp-clj.mcp-client.logging :as logging]
+            [mcp-clj.mcp-client.prompts :as prompts]
+            [mcp-clj.mcp-client.resources :as resources]
+            [mcp-clj.mcp-client.session :as session]
+            [mcp-clj.mcp-client.subscriptions :as subscriptions]
+            [mcp-clj.mcp-client.tools :as tools]
+            [mcp-clj.mcp-client.transport :as transport]
+            [mcp-clj.versions :as version])
   "MCP client implementation with initialization support"
-  (:require
-    [mcp-clj.client-transport.factory :as transport-factory]
-    [mcp-clj.client-transport.protocol :as transport-protocol]
-    [mcp-clj.log :as log]
-    [mcp-clj.mcp-client.logging :as logging]
-    [mcp-clj.mcp-client.prompts :as prompts]
-    [mcp-clj.mcp-client.resources :as resources]
-    [mcp-clj.mcp-client.session :as session]
-    [mcp-clj.mcp-client.subscriptions :as subscriptions]
-    [mcp-clj.mcp-client.tools :as tools]
-    [mcp-clj.mcp-client.transport :as transport]
-    [mcp-clj.versions :as version])
-  (:import
-    (java.lang
-      AutoCloseable)
-    (java.util.concurrent
-      CompletableFuture
-      ExecutionException
-      TimeUnit
-      TimeoutException)))
+  (:import (java.lang AutoCloseable) (java.util.concurrent CompletableFuture ExecutionException TimeUnit TimeoutException)))
 
 ;; Client Record
 

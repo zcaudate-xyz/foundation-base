@@ -1,10 +1,12 @@
 (ns std.log.core
-  (:require [std.protocol.log :as protocol.log]
-            [std.protocol.component :as protocol.component]
+  (:require [std.concurrent :as cc]
+            [std.lib.component]
+            [std.lib.env]
+            [std.lib.time]
             [std.log.common :as common]
             [std.log.match :as match]
-            [std.concurrent :as cc]
-            [std.lib :as h])
+            [std.protocol.component :as protocol.component]
+            [std.protocol.log :as protocol.log])
   (:import (java.text SimpleDateFormat)))
 
 (defn logger-submit
@@ -62,7 +64,7 @@
   ([level {:log/keys [timestamp] :as context} exception]
    (cond-> context
      (nil? (:log/level context)) (assoc :log/level level)
-     (nil? timestamp) (assoc :log/timestamp (h/time-ns))
+     (nil? timestamp) (assoc :log/timestamp (std.lib.time/time-ns))
      exception (assoc :log/exception (if (instance? Throwable exception)
                                        (process-exception exception)
                                        exception))
@@ -156,13 +158,13 @@
     (update logger :loggers (fn [loggers]
                               (mapv (fn [{:keys [import as] :as m}]
                                       (cond-> (protocol.log/-create m)
-                                        :then (h/start)
+                                        :then (std.lib.component/start)
                                         import (assoc as (get logger import))))
                                     loggers))))
 
   (-stop [{:keys [instance] :as logger}]
     (update logger :loggers (fn [loggers]
-                              (mapv h/stop loggers)
+                              (mapv std.lib.component/stop loggers)
                               (:loggers @instance)))))
 
 (defmethod print-method MultiLogger
@@ -188,7 +190,7 @@
   {:added "3.0"}
   ([m]
    (-> (protocol.log/-create (assoc m :type :multi))
-       (h/start))))
+       (std.lib.component/start))))
 
 (defn log-raw
   "sends raw data to the logger"
@@ -206,13 +208,13 @@
    => \"[{:a 1, :b 2}]\\n\""
   {:added "3.0"}
   ([item pretty]
-   (let [item (if (h/component? item)
-                (h/comp:info item)
+   (let [item (if (std.lib.component/component? item)
+                (std.lib.component/info item)
                 item)]
      (if (false? pretty)
-       (h/local :prn item)
-       (do (h/local :pprint item)
-           (h/local :println))))))
+       (std.lib.env/local :prn item)
+       (do (std.lib.env/local :pprint item)
+           (std.lib.env/local :println))))))
 
 (defrecord BasicLogger [instance]
 
@@ -242,7 +244,7 @@
   ([] (basic-logger nil))
   ([m]
    (-> (protocol.log/-create (assoc m :type :basic))
-       (h/start))))
+       (std.lib.component/start))))
 
 (defmacro step
   "conducts a step that is logged"

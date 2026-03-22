@@ -1,10 +1,9 @@
 (ns std.lang.model.spec-js.meta
-  (:require [std.string :as str]
-            [std.lib :as h]
-            [std.fs :as fs]
+  (:require [std.fs :as fs]
             [std.lang.base.book :as book]
             [std.lang.base.book-module :as module]
-            [std.lang.base.util :as ut]))
+            [std.lang.base.util :as ut]
+            [std.string.common]))
 
 ;;
 ;; MODULE
@@ -101,24 +100,24 @@
                         (subs (str path) 0 idx)))
          {:keys [base root-ns]} graph
          root-rel     (parent-rel (str root-ns))
-         is-ext       (not (str/starts-with? (name ns) root-rel))
-         is-ext-base  (not (str/starts-with? (name base) root-rel))
-         base-path    (-> (str/replace (name base) #"\." "/")
+         is-ext       (not (std.string.common/starts-with? (name ns) root-rel))
+         is-ext-base  (not (std.string.common/starts-with? (name base) root-rel))
+         base-path    (-> (std.string.common/replace (name base) #"\." "/")
                           (fs/parent))
          interim (cond (or (not is-ext)
                            is-ext-base)
-                       (let [ns-path   (str/replace (name ns) #"\." "/")]
+                       (let [ns-path   (std.string.common/replace (name ns) #"\." "/")]
                          (str (fs/relativize base-path ns-path)))
                        
                        :else
-                       (let [ns-path   (str/replace (name root-ns) #"\." "/")
+                       (let [ns-path   (std.string.common/replace (name root-ns) #"\." "/")
                              ns-path   (subs ns-path 0 (.lastIndexOf ns-path "/"))
                              interim   (str (fs/relativize base-path ns-path))]
-                         (str interim "/" (str/replace (name ns) #"\." "/"))))]
-     (cond (str/starts-with? interim ".")
+                         (str interim "/" (std.string.common/replace (name ns) #"\." "/"))))]
+     (cond (std.string.common/starts-with? interim ".")
            interim
 
-           (str/starts-with? interim "/")
+           (std.string.common/starts-with? interim "/")
            (str "." interim)
 
            (empty? interim)

@@ -1,6 +1,9 @@
 (ns rt.nginx.script
-  (:require [std.string :as str]
-            [std.lib :as h]))
+  (:require [std.lib.env]
+            [std.lib.foundation]
+            [std.string.case]
+            [std.string.common]
+            [std.string.prose]))
 
 (def ^:dynamic *indent* 0)
 
@@ -24,7 +27,7 @@
        (= :- (ffirst v))))
 
 (defn- ngx-key [k]
-  (str/snake-case (h/strn k)))
+  (std.string.case/snake-case (std.lib.foundation/strn k)))
 
 (defn emit-block
   "emits a block"
@@ -38,27 +41,27 @@
                              (binding [*indent* (+ *indent* *space*)]
                                (emit-fn v))
                              "\n"
-                             (str/spaces *indent*)
+                             (std.string.prose/spaces *indent*)
                              "}")))
         prose-fn (fn [vs]
                    (->> (map (fn [v]
                                (if (string? v)
-                                 (str/indent v *indent*)
-                                 (str (str/spaces *indent*)
-                                      (str/write-line v))))
+                                 (std.string.prose/indent v *indent*)
+                                 (str (std.string.prose/spaces *indent*)
+                                      (std.string.prose/write-line v))))
                              vs)
-                        (str/join "\n")))
+                        (std.string.common/join "\n")))
         loop-fn  (fn [[k v & more]]
                    (cond  (block? v)
                           (let [extended (vec (apply concat v (filter identity more)))]
                             (str (ngx-key k) (inner-fn extended)))
                           
                           (nested-block? v)
-                          (str (ngx-key k) " " (str/join " " (map h/strn (butlast v)))
+                          (str (ngx-key k) " " (std.string.common/join " " (map std.lib.foundation/strn (butlast v)))
                                (inner-fn (last v)))
                           
                           (vector? v)
-                          (str (ngx-key k) " " (str/join " " (map h/strn v)) ";")
+                          (str (ngx-key k) " " (std.string.common/join " " (map std.lib.foundation/strn v)) ";")
                           
                           :else
                           (str (ngx-key k) " " v ";")))
@@ -69,8 +72,8 @@
                          :else
                          (->> (filter identity m)
                               (mapv loop-fn)
-                              (str/join (str "\n" (str/spaces *indent*)))
-                              (str (str/spaces *indent*)))))]
+                              (std.string.common/join (str "\n" (std.string.prose/spaces *indent*)))
+                              (str (std.string.prose/spaces *indent*)))))]
     (emit-fn m)))
 
 (defn write
@@ -82,5 +85,5 @@
 (comment
   (./create-tests)
   (./import)
-  (h/pl (write [[:- "hello \nwhere"]]))
+  (std.lib.env/pl (write [[:- "hello \nwhere"]]))
   (prose-block? ))

@@ -1,7 +1,7 @@
 (ns std.lib.deps-test
-  (:use code.test)
   (:require [std.lib.deps :refer :all]
-            [std.protocol.deps :as protocol.deps]))
+            [std.protocol.deps :as protocol.deps])
+  (:use code.test))
 
 (defrecord MapContext []
   protocol.deps/IDeps

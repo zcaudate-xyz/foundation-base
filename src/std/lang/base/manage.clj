@@ -1,13 +1,17 @@
 (ns std.lang.base.manage
-  (:require [std.task :as task]
-            [std.lang.base.impl :as impl]
+  (:require [std.lang.base.impl :as impl]
             [std.lang.base.library :as lib]
             [std.lang.base.util :as ut]
             [std.lang.base.workspace :as workspace]
-            [std.string :as str]
-            [std.lib :as h :refer [definvoke]]
+            [std.lib.collection]
+            [std.lib.env]
+            [std.lib.invoke :refer [definvoke]]
+            [std.lib.walk]
+            [std.print.ansi :as ansi]
             [std.print.format.common :as common]
-            [std.print.ansi :as ansi]))
+            [std.string.common]
+            [std.string.prose]
+            [std.task :as task]))
 
 (def ^:dynamic *current-lang* nil)
 
@@ -53,7 +57,7 @@
                         (ansi/style (str id) #{:bold :white})
                         50)
                        (common/pad:left
-                        (str/join
+                        (std.string.common/join
                          (map (fn [[d style]]
                                 (if (pos? d)
                                   (ansi/style (common/pad:left (str d) 6) style)
@@ -62,7 +66,7 @@
                                [(count (:fragment module)) #{:magenta}]
                                [(dec (count (:link module))) #{:blue}]]))
                         18)))))
-         (str/join "\n"))))
+         (std.string.common/join "\n"))))
 
 (definvoke ^{:arglists '([] [lang])}
   lib-overview
@@ -115,14 +119,14 @@
   {:added "4.0"}
   [module-id {:keys [lang]} modules _]
   (if-let [module (get modules (or module-id
-                                   (h/ns-sym)))]
+                                   (std.lib.env/ns-sym)))]
     (if (or (not lang)
             (= lang (:lang module))) 
       module)))
 
 (defmethod task/task-defaults :lang.module
   ([_]
-   (h/merge-nested library-template
+   (std.lib.collection/merge-nested library-template
                    {:construct {:env      #'lib-module-env
                                 :input    (fn [_] *current-lang*)
                                 :lookup   (fn [_ {:keys [modules]}] modules)}
@@ -144,7 +148,7 @@
   {:added "4.0"}
   [{:keys [lang id code fragment link native suppress export] :as module} & [{:keys [counts
                                                                                      deps]}]]
-  (str/join-lines
+  (std.string.prose/join-lines
     [(if (not (false? counts))
        (str (ansi/style (common/pad:left (name lang) 10) #{:yellow :bold})
             "  "
@@ -155,7 +159,7 @@
             "  "
             (:as export)))
      (if deps
-       (str/indent  (str/join-lines
+       (std.string.prose/indent  (std.string.prose/join-lines
                      (concat (map #(ansi/style (str %) #{:blue})
                                   (vals (dissoc link '-)))
                              (map #(ansi/style (str %) #{:cyan :bold})
@@ -204,20 +208,20 @@
                                       :macro
                                       :fragment))))
                     12))))
-       (str/join "\n")))
+       (std.string.common/join "\n")))
 
 (defn lib-module-entries-format
   "formats the entries of a module"
   {:added "4.0"}
   [{:keys [lang code fragment export] :as module} & [params]]
-  (str (str/join "\n--------------------------------------------------------------\n"
+  (str (std.string.common/join "\n--------------------------------------------------------------\n"
          [(str (ansi/style (name lang) #{:yellow :bold}) " " (:as export))
           (->> (lib-module-overview-format module {:counts false
                                                    :deps true})
-               (str/split-lines)
-               (map str/trim-left)
-               (str/join "\n"))
-          (str/join "\n--------------------------------------------------------------\n"
+               (std.string.common/split-lines)
+               (map std.string.common/trim-left)
+               (std.string.common/join "\n"))
+          (std.string.common/join "\n--------------------------------------------------------------\n"
             [(if (not (false? (:code params)))
                (lib-module-entries-format-section module :code #{:green :bold} true))
              (if (not (false? (:fragment params)))
@@ -287,14 +291,14 @@
   (if-let [{:keys [code link] :as module}
            (lib-module-filter module-id params modules env)]
     (let [{:keys [ignore]} params
-          lookup (h/transpose link)
+          lookup (std.lib.collection/transpose link)
           unused (volatile! (apply dissoc link '-
                                    (mapcat (fn [ns]
                                              [ns (lookup ns)])
                                            ignore)))]
       (doseq [entry (vals code)]
         (let [{:keys [form-input]} entry]
-          (h/prewalk (fn [form]
+          (std.lib.walk/prewalk (fn [form]
                        (if-let [ns (and (symbol? form)
                                         (namespace form))]
                          (let [ns (symbol ns)] 
@@ -311,15 +315,15 @@
   [:task {:template :lang.module
           :params {:title "UNUSED DEPENDENCIES"}
           :result  {:format  {:data  (fn [result _]
-                                       (str/join "\n" result))}}
+                                       (std.string.common/join "\n" result))}}
           :main    {:fn  #'lib-module-unused-fn}}])
 
 (comment (comment
            (lib-module-unused [(fn [s]
-                                 (str/ends-with? s "test"))])
+                                 (std.string.common/ends-with? s "test"))])
            
            (lib-module-unused [(fn [s]
-                                 (not (str/ends-with? s "test")))]
+                                 (not (std.string.common/ends-with? s "test")))]
                               {:ignore '[xt.lang.base-lib
                                          js.react
                                          js.core]})
@@ -369,8 +373,8 @@
            (lib-module-filter module-id params modules env)]
     (let [all (filter (fn [[id ns]]
                         (when (and (< 3 (count (str id)))
-                                   (str/includes? (str id) "-")
-                                   (not (str/ends-with? (str ns)
+                                   (std.string.common/includes? (str id) "-")
+                                   (not (std.string.common/ends-with? (str ns)
                                                         (str id))))
                           [id ns]))
                       link)]
@@ -384,7 +388,7 @@
   [:task {:template :lang.module
           :params {:title "INCORRECT ALIASES"}
           :result  {:format  {:data  (fn [result _]
-                                       (str/join "\n" result))}}
+                                       (std.string.common/join "\n" result))}}
           :main    {:fn  #'lib-module-incorrect-alias-fn}}])
 
 

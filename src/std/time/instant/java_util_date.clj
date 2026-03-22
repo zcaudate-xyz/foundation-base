@@ -2,8 +2,7 @@
   (:require [std.protocol.time :as protocol.time]
             [std.time.coerce :as coerce]
             [std.time.common :as common])
-  (:import (java.text SimpleDateFormat)
-           (java.util Calendar Date TimeZone)))
+  (:import (java.text SimpleDateFormat) (java.util Calendar Date TimeZone)))
 
 (def date-meta
   {:base :instant

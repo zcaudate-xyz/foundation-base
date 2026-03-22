@@ -1,8 +1,8 @@
 (ns lib.redis.impl.common-test
-  (:use code.test)
   (:require [lib.redis.impl.common :refer :all]
             [std.concurrent :as cc]
-            [std.lib :as h]))
+            [std.lib.future])
+  (:use code.test))
 
 ^{:refer lib.redis.impl.common/opts:cache :added "3.0"}
 (fact "creates a opts map for bulk operations"
@@ -31,7 +31,7 @@
   => 1
 
   (return-default 1 {:async true})
-  => h/future?)
+  => std.lib.future/future?)
 
 ^{:refer lib.redis.impl.common/return:format :added "3.0"}
 (fact "constructs a return function"
