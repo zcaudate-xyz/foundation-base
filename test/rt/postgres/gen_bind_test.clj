@@ -204,7 +204,7 @@
         [{:symbol "i_account_id", :type "uuid"}
          {:symbol "i_organisation_id", :type "uuid"}],
         :return "jsonb",
-        :schema "scratch/xt.db.sample-user-test",
+        :schema "scratch-sample-user-test",
         :id "organisation_assert_is_member",
         :flags {}},
        :args ["{{<%>}}" "{{i_organisation_id}}"]}])
@@ -218,7 +218,7 @@
       :id "currency_all_fiat",
       :input [],
       :return "jsonb",
-      :schema "scratch/xt.db.sample-data-test",
+      :schema "scratch-sample-data-test",
       :view {:access {:query nil, :relation nil, :roles {}, :symbol nil},
              :autos [],
              :guards [],
@@ -231,7 +231,7 @@
   (gen/bind-view data/currency-default)
   => {:input [{:symbol "i_currency_id", :type "citext"}],
       :return "jsonb",
-      :schema "scratch/xt.db.sample-data-test",
+      :schema "scratch-sample-data-test",
       :id "currency_default",
       :flags {:public true},
       :view
@@ -247,7 +247,7 @@
   (gen/bind-view user/organisation-view-membership)
   => {:input [{:symbol "i_organisation_id", :type "uuid"}],
       :return "jsonb",
-      :schema "scratch/xt.db.sample-user-test",
+      :schema "scratch-sample-user-test",
       :id "organisation_view_membership",
       :flags {},
       :view
@@ -268,7 +268,7 @@
   (gen/bind-view user/user-account-by-organisation)
   => {:input [{:symbol "i_organisation_id", :type "uuid"}],
       :return "jsonb",
-      :schema "scratch/xt.db.sample-user-test",
+      :schema "scratch-sample-user-test",
       :id "user_account_by_organisation",
       :flags {},
       :view
@@ -285,7 +285,7 @@
           [{:symbol "i_account_id", :type "uuid"}
            {:symbol "i_organisation_id", :type "uuid"}],
           :return "jsonb",
-          :schema "scratch/xt.db.sample-user-test",
+          :schema "scratch-sample-user-test",
           :id "organisation_assert_is_member",
           :flags {}},
          :args ["{{<%>}}" "{{i_organisation_id}}"]}],
@@ -304,7 +304,7 @@
   ^:hidden
   
   (gen/bind-table data/Currency)
-  => {:schema "scratch/xt.db.sample-data-test",
+  => {:schema "scratch-sample-data-test",
       :schema-primary {"type" "citext", "id" "id"},
       :public true,
       :schema-update false})
@@ -315,79 +315,79 @@
   
   (gen/bind-app (pg/app "xt.db.sample"))
   => {"RegionCity"
-      {:schema "scratch/xt.db.sample-data-test",
+      {:schema "scratch-sample-data-test",
        :schema-primary {"type" "text", "id" "id"},
        :public true,
        :schema-update false,
        :position 12},
       "UserProfile"
-      {:schema "scratch/xt.db.sample-user-test",
+      {:schema "scratch-sample-user-test",
        :schema-primary {"type" "uuid", "id" "id"},
        :public true,
        :schema-update false,
        :position 1},
       "Asset"
-      {:schema "scratch/xt.db.sample-user-test",
+      {:schema "scratch-sample-user-test",
        :schema-primary {"type" "uuid", "id" "id"},
        :public true,
        :schema-update false,
        :position 4},
       "Organisation"
-      {:schema "scratch/xt.db.sample-user-test",
+      {:schema "scratch-sample-user-test",
        :schema-primary {"type" "uuid", "id" "id"},
        :public true,
        :schema-update false,
        :position 7},
       "OrganisationAccess"
-      {:schema "scratch/xt.db.sample-user-test",
+      {:schema "scratch-sample-user-test",
        :schema-primary {"type" "uuid", "id" "id"},
        :public nil,
        :schema-update false,
        :position 8},
       "UserPrivilege"
-      {:schema "scratch/xt.db.sample-user-test",
+      {:schema "scratch-sample-user-test",
        :schema-primary {"type" "uuid", "id" "id"},
        :public true,
        :schema-update false,
        :position 3},
       "RegionState"
-      {:schema "scratch/xt.db.sample-data-test",
+      {:schema "scratch-sample-data-test",
        :schema-primary {"type" "text", "id" "id"},
        :public true,
        :schema-update false,
        :position 11},
       "UserNotification"
-      {:schema "scratch/xt.db.sample-user-test",
+      {:schema "scratch-sample-user-test",
        :schema-primary {"type" "uuid", "id" "id"},
        :public true,
        :schema-update false,
        :position 2},
       "UserAccount"
-      {:schema "scratch/xt.db.sample-user-test",
+      {:schema "scratch-sample-user-test",
        :schema-primary {"type" "uuid", "id" "id"},
        :public true,
        :schema-update false,
        :position 0},
       "WalletAsset"
-      {:schema "scratch/xt.db.sample-user-test",
+      {:schema "scratch-sample-user-test",
        :schema-primary {"type" "uuid", "id" "id"},
        :public true,
        :schema-update false,
        :position 6},
       "Wallet"
-      {:schema "scratch/xt.db.sample-user-test",
+      {:schema "scratch-sample-user-test",
        :schema-primary {"type" "uuid", "id" "id"},
        :public true,
        :schema-update false,
        :position 5},
       "Currency"
-      {:schema "scratch/xt.db.sample-data-test",
+      {:schema "scratch-sample-data-test",
        :schema-primary {"type" "citext", "id" "id"},
        :public true,
        :schema-update false,
        :position 9},
       "RegionCountry"
-      {:schema "scratch/xt.db.sample-data-test",
+      {:schema "scratch-sample-data-test",
        :schema-primary {"type" "citext", "id" "id"},
        :public true,
        :schema-update false,

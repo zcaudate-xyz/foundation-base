@@ -3,7 +3,6 @@
             [rt.postgres.grammar.typed-common :as types]
             [rt.postgres.script.test.scratch-v2 :as scratch]
             [rt.postgres.typed :as typed])
-  "Integration tests for rt.postgres.typed namespace.\n   Tests end-to-end OpenAPI generation from namespace analysis."
   (:use code.test))
 
 ;; -----------------------------------------------------------------------------

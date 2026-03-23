@@ -1,8 +1,10 @@
 (ns std.image.base.common-test
-  (:require [std.image.awt.common :as awt]
+  (:require [std.image.awt]
+            [std.image.awt.common :as awt]
             [std.image.base]
             [std.image.base.common :refer :all]
-            [std.image.base.model :as model])
+            [std.image.base.model :as model]
+            [std.image.base.util :as util])
   (:use code.test)
   (:refer-clojure :exclude [empty]))
 

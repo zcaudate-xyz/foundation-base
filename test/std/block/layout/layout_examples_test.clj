@@ -41,7 +41,7 @@
   (split-block '(component/with [sys system]
                   (start sys)
                   (run sys)))
-  => ["(h/with:component [sys system]"
+  => ["(component/with [sys system]"
       "  (start sys)"
       "  (run sys))"]
 

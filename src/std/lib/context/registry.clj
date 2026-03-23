@@ -41,7 +41,10 @@
   "checks that object is of type NullRuntime"
   {:added "3.0"}
   ([obj]
-   (instance? RuntimeNull obj)))
+   (or (instance? RuntimeNull obj)
+       (and (map? obj)
+            (= :null (:lang obj))
+            (= :default (:runtime obj))))))
 
 (res/res:spec-add
  {:type :hara/context.rt.null

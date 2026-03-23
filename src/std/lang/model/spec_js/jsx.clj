@@ -222,6 +222,9 @@
                                                 (keyword? (first form)))
                                            (emit-jsx-inner form grammar mopts)
 
+                                           (string? form)
+                                           form
+
                                            :else (str "{" (emit/emit-main form grammar mopts) "}"))))))
              single?  (data/emit-singleline-array? body-arr)
              body     (if single?

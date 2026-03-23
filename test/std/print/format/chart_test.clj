@@ -45,8 +45,7 @@
   => ["{a \"1.1\"}"
       " {b \"1.2\"}"
       "  {c \"1.3\"}"
-      "  {d \"1.4\"}"
-      ""])
+      "  {d \"1.4\"}"])
 
 ^{:refer std.print.format.chart/table-basic:format :added "3.0"}
 (fact "generates a table for output"

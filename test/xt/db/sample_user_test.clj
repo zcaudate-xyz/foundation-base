@@ -6,8 +6,8 @@
   {:require [[rt.postgres :as pg]
              [xt.db.sample-data-test :as data]]
    :static {:application ["xt.db.sample"]
-            :seed        ["scratch/xt.db.sample-user-test"]
-            :all         {:schema   ["scratch/xt.db.sample-user-test"]}}})
+            :seed        ["scratch-sample-user-test"]
+            :all         {:schema   ["scratch-sample-user-test"]}}})
 
 (defn.pg as-array
   [:jsonb input]
@@ -182,7 +182,6 @@
 (defn.pg organisation-assert-is-member
   [:uuid i-account-id :uuid i-organisation-id]
   (return true))
-
 
 (defsel.pg ^{:- [-/Organisation]
              :args [:text i-name]

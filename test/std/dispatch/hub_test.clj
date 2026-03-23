@@ -129,7 +129,7 @@
        (map :id)
        (sort)
        (rest))
-  => (range 1 25))
+  => (range 0 25))
 
 (comment
 

@@ -162,11 +162,11 @@
   {:added "3.0"}
   ([form]
    (let [tag     :string
-         lines   (clojure.string/split-lines form)
+         string  (str "\"" form "\"")
+         lines   (clojure.string/split-lines string)
          height  (dec (max 1 (count lines)))
-         width   (cond-> (inc (count (last lines)))
-                   (zero? height) inc)
-         string  (str "\"" form "\"")]
+         width   (count (last lines))
+         width   (max 1 width)]
      #_(type/token-block tag (pr-str form)  form string width height)
      (type/token-block tag string form (pr-str form) width height))))
 

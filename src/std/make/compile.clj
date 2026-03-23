@@ -187,7 +187,7 @@
 
 (defmethod compile-ext-fn :raw
   [_]
-  {:fn 'prose/write-lines})
+  {:fn 'std.string.prose/write-lines})
 
 (defmethod compile-ext-fn :edn
   [_]
@@ -245,7 +245,7 @@
 
 (defmethod compile-ext-fn :gitignore
   [_]
-  {:fn 'prose/write-lines
+  {:fn 'std.string.prose/write-lines
    :file ".gitignore"})
 
 (defmethod compile-ext-fn :nginx.conf
@@ -255,12 +255,12 @@
 
 (defmethod compile-ext-fn :dockerfile
   [_]
-  {:fn 'prose/write-lines
+  {:fn 'std.string.prose/write-lines
    :file "Dockerfile"})
 
 (defmethod compile-ext-fn :readme.md
   [_]
-  {:fn 'prose/write-lines
+  {:fn 'std.string.prose/write-lines
    :file "README.md"})
 
 (defmethod compile-ext-fn :makefile

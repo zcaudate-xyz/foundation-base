@@ -82,7 +82,7 @@
        (:none
         :global)  nil
        :commonjs  (list := 'module.exports table)
-       (if static-export
+       (if (or static-export export)
          (if (and (vector? static-export)
                   (= 1 (count static-export)))
            (list :- :export :default (first static-export))

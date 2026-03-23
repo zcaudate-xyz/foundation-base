@@ -178,6 +178,7 @@
           :fragment :code)
   => '{:require-impl nil,
        :static nil,
+       :includes #{},
        :native-lu {},
        :internal {JS.ui ui, JS.app -},
        :lang :js,
@@ -191,6 +192,7 @@
           :fragment :code)
   => '{:require-impl nil,
        :static nil,
+       :includes #{},
        :native-lu {Puck "@measured/puck",
                    Radix "@radix-ui/themes"},
        :internal {JS.ui -},
@@ -367,4 +369,3 @@
                  :module JS.app
                  :section :fragment})
   )
-

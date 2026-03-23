@@ -3,7 +3,6 @@
             [rt.postgres.grammar.typed-common :as types]
             [rt.postgres.grammar.typed-parse :as parse]
             [rt.postgres.grammar.typed-shape :as shape])
-  "Tests for rt.postgres.compile.common namespace.\n   Provides OpenAPI, JSON Schema, and TypeScript generation."
   (:use code.test))
 
 ;; -----------------------------------------------------------------------------

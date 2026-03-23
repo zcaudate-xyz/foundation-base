@@ -128,7 +128,7 @@
 
   => (contains ["import * as ui_style from '@/blessed/ui-style'"
                 "import * as k from '@/libs/xt/lang/base-lib'"
-                "import * as r from '@//react'"] :in-any-order)
+                "import * as r from '@/react'"] :in-any-order)
 
   (emit-module-setup-link-arr
    {:emit {:code   {:link {:path-separator "|"
@@ -148,7 +148,7 @@
                       :root-ns 'js.blessed.ui-core}}}))
   => (contains ["import * as ui_style from '@|blessed|ui-style'"
                 "import * as k from '@|libs/xt/lang|base-lib'"
-                "import * as r from '@||react'"] :in-any-order))
+                "import * as r from '@|react'"] :in-any-order))
 
 ^{:refer std.lang.base.impl-lifecycle/emit-module-setup-export-body :added "4.0"}
 (fact "the code for exporting the body"

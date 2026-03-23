@@ -30,8 +30,13 @@
                     :then (os/sh-wait))
              {:keys [err out exit] :as ret} (os/sh-output proc)]
          (cond raw
-               [exit (or (not-empty (clojure.string/split-lines (trim out)))
-                         (clojure.string/split-lines (trim err)))]
+               (let [out-lines (->> (clojure.string/split-lines (trim out))
+                                    (remove empty?)
+                                    seq)
+                     err-lines (->> (clojure.string/split-lines (trim err))
+                                    (remove empty?)
+                                    seq)]
+                 [exit (or out-lines err-lines [])])
 
                :else
                (trim out)))
@@ -109,4 +114,3 @@
            program
            process] :as m}]
   (rt-oneshot:create m))
-

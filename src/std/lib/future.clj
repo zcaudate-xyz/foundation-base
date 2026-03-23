@@ -177,7 +177,7 @@
   "helper macro for status functions"
   {:added "3.0"}
   ([future & body]
-   `(if-not (.isDone ~future)
+   `(if-not (.isDone ~(with-meta future {:class CompletableFuture}))
       (throw (ex-info "Future not complete" {:future ~future}))
       (do ~@body))))
 

@@ -6,8 +6,7 @@
             [rt.postgres.grammar.typed-analyze :as analyze]
             [rt.postgres.grammar.typed-common :as types]
             [rt.postgres.grammar.typed-parse :as parse]
-            [rt.postgres.grammar.typed-shape :as shape])
-  "Public API for rt.postgres typed analysis and compile targets.\n   \n   Consolidated, non-redundant interface for schema inference.\n   \n   Addresses all critique issues:\n   1. Single table->shape (no table-instance-shape)\n   2. Centralized +type-formats+ (no duplicate type mappings)\n   3. Single normalize-key (no scattered key conversion)\n   4. Analysis delegates to shape/merge-shapes (no local merge duplication)")
+            [rt.postgres.grammar.typed-shape :as shape]))
 
 ;; ─────────────────────────────────────────────────────────────────────────────
 ;; Type Registry API

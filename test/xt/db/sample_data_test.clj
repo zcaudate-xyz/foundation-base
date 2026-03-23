@@ -1,13 +1,14 @@
 (ns xt.db.sample-data-test
-  (:require [rt.postgres :as pg :refer [defsel.pg defret.pg defaccess.pg]]
+  (:require [rt.postgres :as pg
+             :refer [defsel.pg defret.pg defaccess.pg]]
             [std.lang :as l]
             [std.lib.foundation :as f]))
 
 (l/script :postgres
   {:require [[rt.postgres :as pg]]
    :static {:application ["xt.db.sample"]
-            :seed        ["scratch/xt.db.sample-data-test"]
-            :all         {:schema   ["scratch/xt.db.sample-data-test"]}}})
+            :seed        ["scratch-sample-data-test"]
+            :all         {:schema   ["scratch-sample-data-test"]}}})
 
 (defenum.pg ^{}
   EnumCurrencyType [:digital :fiat :crypto])

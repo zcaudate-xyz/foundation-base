@@ -131,9 +131,9 @@
                        nil
                        nil
                        nil))
-  => :resolved ^:hidden
+  => :unresolved ^:hidden
 
-  (link:status (->Link {:ns 'std.lib :name 'WRONG}
+  (link:status (->Link {:ns 'std.lib.foundation :name 'WRONG}
                        nil
                        nil
                        nil))
@@ -155,7 +155,7 @@
 (fact "finds the source var in the link"
   ^:hidden
 
-  (find-source-var (->Link {:ns 'std.lib :name 'iobj?}
+  (find-source-var (->Link {:ns 'std.lib.foundation :name 'iobj?}
                            nil
                            nil
                            nil))
@@ -167,7 +167,7 @@
 
   (def -iobj?- std.lib.foundation/iobj?)
 
-  (link-synced? (->Link {:ns 'std.lib :name 'iobj?}
+  (link-synced? (->Link {:ns 'std.lib.foundation :name 'iobj?}
                         #'-iobj?-
                         nil
                         nil))
