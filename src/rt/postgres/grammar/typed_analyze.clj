@@ -178,6 +178,16 @@
     {:kind :union
      :types [left right]}))
 
+(defn- literal-map-key
+  [k]
+  (cond
+    (string? k) k
+    (keyword? k) (if-let [ns (namespace k)]
+                   (str ns "/" (name k))
+                   (keyword (name k)))
+    (symbol? k) (name k)
+    :else k))
+
 (defn- resolve-called-fn
   [op aliases]
   (let [op-name (name op)
@@ -308,7 +318,7 @@
      :shape (types/make-jsonb-shape
              (into {}
                    (map (fn [[k v]]
-                          [(keyword (name k))
+                          [(literal-map-key k)
                            (value->field-info (analyze-expr v ctx))]))
                    expr)
              nil :high false)}

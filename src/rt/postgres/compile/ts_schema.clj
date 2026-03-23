@@ -30,13 +30,13 @@
   [[k v]]
   (let [ts-type (type->ts v)
         optional (if (:nullable? v) "?" "")]
-    (str "  " (types/normalize-key k) optional ": " ts-type ";")))
+    (str "  " (types/typescript-key k) optional ": " ts-type ";")))
 
 (defn shape->ts-interface
   "Converts a JsonbShape to TypeScript interface or inline object."
   ([shape name]
    (let [fields (:fields shape)
-         field-strs (map field->ts (sort-by key fields))]
+         field-strs (map field->ts (sort-by (comp types/emitted-key key) fields))]
      (if name
        (str "export interface " name " {\n"
             (str/join "\n" field-strs)

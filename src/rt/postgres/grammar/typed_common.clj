@@ -71,6 +71,23 @@
   [k]
   (case/snake-case (name k)))
 
+(defn emitted-key
+  "Preserves literal string keys while normalizing keywords/symbols for output."
+  [k]
+  (cond
+    (string? k) k
+    (keyword? k) (normalize-key k)
+    (symbol? k) (normalize-key k)
+    :else (str k)))
+
+(defn typescript-key
+  "Formats a JSON object key for TypeScript property emission."
+  [k]
+  (let [key-str (emitted-key k)]
+    (if (re-matches #"[A-Za-z_$][A-Za-z0-9_$]*" key-str)
+      key-str
+      (pr-str key-str))))
+
 ;; ─────────────────────────────────────────────────────────────────────────────
 ;; Constants
 ;; ─────────────────────────────────────────────────────────────────────────────

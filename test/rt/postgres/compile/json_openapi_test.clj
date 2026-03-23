@@ -32,6 +32,18 @@
     (get-in result [:properties "b" :type]) => "boolean"
     (get-in result [:properties "j" :type]) => "object"))
 
+^{:refer rt.postgres.compile.json-openapi/shape->openapi :added "0.1"}
+(fact "shape->openapi preserves raw string keys"
+  (let [shape (types/make-jsonb-shape {"db/sync" {:type :jsonb
+                                                  :shape (types/make-jsonb-shape {"UserProfile" {:type :array
+                                                                                                 :items {:type :jsonb}}}
+                                                                                 nil :high false)}}
+                                      nil :high false)
+        result (compile.openapi/shape->openapi shape)]
+    (contains? (:properties result) "db/sync") => true
+    (contains? (get-in result [:properties "db/sync" :properties]) "UserProfile") => true
+    (contains? (:properties result) "db_sync") => false))
+
 ^{:refer rt.postgres.compile.json-openapi/fn->openapi :added "0.1"}
 (fact "fn->openapi generates OpenAPI operation from FnDef"
   (types/clear-registry!)

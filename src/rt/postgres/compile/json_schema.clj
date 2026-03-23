@@ -26,9 +26,9 @@
   [shape]
   (let [fields (:fields shape)
         properties (into (sorted-map)
-                         (map (fn [[k v]] [(types/normalize-key k) (field->json-schema v)]))
+                         (map (fn [[k v]] [(types/emitted-key k) (field->json-schema v)]))
                          fields)
-        required (mapv types/normalize-key
+        required (mapv types/emitted-key
                        (filter #(not (:nullable? (get fields %))) (keys fields)))]
     (cond-> {:type "object" :properties properties}
       (seq required) (assoc :required required)
