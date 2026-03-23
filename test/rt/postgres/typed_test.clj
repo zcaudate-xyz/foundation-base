@@ -419,3 +419,145 @@
     (get-in (typed/get-function-output-schema 'test.ns/prepare-topic :json-schema)
             [:properties "publish" :type]) => "string"
     (string? (typed/get-function-output-schema 'test.ns/prepare-topic :typescript)) => true))
+
+
+^{:refer rt.postgres.typed/get-app-function-report :added "4.1"}
+(fact "get-app-function-report runs infer reporting against an app typed payload"
+  (let [typed-payload (types/analysis->typed
+                       (parse/analyze-namespace 'rt.postgres.script.test.scratch-v2))]
+    (with-redefs [rt.postgres.grammar.common-application/app-typed (fn [_] typed-payload)]
+      (let [report (typed/get-app-function-report "demo"
+                                                  'rt.postgres.script.test.scratch-v2/insert-entry)]
+        (get-in report [:function :name]) => "insert-entry"
+        (get-in report [:analysis :mutating]) => true))))
+
+^{:refer rt.postgres.typed/get-function-report-json :added "4.1"}
+(fact "get-function-report-json serializes reports for registered functions"
+  (typed/clear-registry!)
+  (-> 'rt.postgres.script.test.scratch-v2
+      parse/analyze-namespace
+      parse/register-types!)
+  (let [output (typed/get-function-report-json 'rt.postgres.script.test.scratch-v2/insert-entry
+                                               true)]
+    (string? output) => true
+    (clojure.string/includes? output "\"insert-entry\"") => true))
+
+^{:refer rt.postgres.typed/get-app-function-report-json :added "4.1"}
+(fact "get-app-function-report-json serializes app-scoped reports"
+  (let [typed-payload (types/analysis->typed
+                       (parse/analyze-namespace 'rt.postgres.script.test.scratch-v2))]
+    (with-redefs [rt.postgres.grammar.common-application/app-typed (fn [_] typed-payload)]
+      (let [output (typed/get-app-function-report-json "demo"
+                                                       'rt.postgres.script.test.scratch-v2/insert-entry
+                                                       true)]
+        (string? output) => true
+        (clojure.string/includes? output "\"insert-entry\"") => true))))
+
+^{:refer rt.postgres.typed/get-app-function-def :added "4.1"}
+(fact "get-app-function-def reads function defs directly from an app typed payload"
+  (let [fn-def (types/make-fn-def "test.ns" "insert-task" [] :jsonb {} nil)
+        typed-payload {:tables {}
+                       :enums {}
+                       :functions {'test.ns/insert-task fn-def}}]
+    (with-redefs [rt.postgres.grammar.common-application/app-typed (fn [_] typed-payload)]
+      (typed/get-app-function-def "demo" 'test.ns/insert-task) => fn-def)))
+
+^{:refer rt.postgres.typed/get-app-function-input-schema :added "4.1"}
+(fact "get-app-function-input-schema formats inferred app input shapes"
+  (let [task-columns [(types/make-column-def :id
+                                             (types/make-type-ref :primitive nil :uuid)
+                                             {:required true :primary true})
+                      (types/make-column-def :status
+                                             (types/make-type-ref :primitive nil :text)
+                                             {:required true})]
+        task-table (types/make-table-def "test.ns" "Task" task-columns :id)
+        fn-def (types/make-fn-def "test.ns"
+                                  "insert-task-raw"
+                                  [(types/->FnArg 'm :jsonb [:jsonb])]
+                                  :jsonb
+                                  {:api/meta {:table 'test.ns/Task}}
+                                  nil)
+        typed-payload {:tables {'test.ns/Task task-table}
+                       :enums {}
+                       :functions {'test.ns/insert-task-raw fn-def}}]
+    (with-redefs [rt.postgres.grammar.common-application/app-typed (fn [_] typed-payload)]
+      (get-in (typed/get-app-function-input-schema "demo"
+                                                   'test.ns/insert-task-raw
+                                                   'm
+                                                   :openapi)
+              [:properties "id" :format])
+      => "uuid"
+
+      (get-in (typed/get-app-function-input-schema "demo"
+                                                   'test.ns/insert-task-raw
+                                                   'm
+                                                   :json-schema)
+              [:properties "status" :type])
+      => "string"
+
+      (string? (typed/get-app-function-input-schema "demo"
+                                                    'test.ns/insert-task-raw
+                                                    'm
+                                                    :typescript))
+      => true)))
+
+^{:refer rt.postgres.typed/get-app-function-output-shape :added "4.1"}
+(fact "get-app-function-output-shape infers output shapes from an app typed payload"
+  (let [form '(defn.pg
+                prepare-topic
+                "prepares a topic payload"
+                [:jsonb m]
+                (let [(:uuid v-organisation-id) (pg/field-id m "organisation")
+                      #{(:text v-code)} m]
+                  (return
+                   (|| {:publish "none"}
+                       m
+                       {:code-full v-code
+                        :organisation-id v-organisation-id}))))
+        fn-def (parse/parse-defn form "test.ns" nil)
+        typed-payload {:tables {}
+                       :enums {}
+                       :functions {'test.ns/prepare-topic fn-def}}]
+    (with-redefs [rt.postgres.grammar.common-application/app-typed (fn [_] typed-payload)]
+      (let [shape (typed/get-app-function-output-shape "demo" 'test.ns/prepare-topic)]
+        (types/jsonb-shape? shape) => true
+        (-> shape :fields keys set) => #{:publish
+                                         :organisation
+                                         :code
+                                         :code-full
+                                         :organisation-id}))))
+
+^{:refer rt.postgres.typed/get-app-function-output-schema :added "4.1"}
+(fact "get-app-function-output-schema formats inferred app output shapes"
+  (let [form '(defn.pg
+                prepare-topic
+                "prepares a topic payload"
+                [:jsonb m]
+                (let [(:uuid v-organisation-id) (pg/field-id m "organisation")
+                      #{(:text v-code)} m]
+                  (return
+                   (|| {:publish "none"}
+                       m
+                       {:code-full v-code
+                        :organisation-id v-organisation-id}))))
+        fn-def (parse/parse-defn form "test.ns" nil)
+        typed-payload {:tables {}
+                       :enums {}
+                       :functions {'test.ns/prepare-topic fn-def}}]
+    (with-redefs [rt.postgres.grammar.common-application/app-typed (fn [_] typed-payload)]
+      (get-in (typed/get-app-function-output-schema "demo"
+                                                    'test.ns/prepare-topic
+                                                    :openapi)
+              [:properties "organisation_id" :format])
+      => "uuid"
+
+      (get-in (typed/get-app-function-output-schema "demo"
+                                                    'test.ns/prepare-topic
+                                                    :json-schema)
+              [:properties "publish" :type])
+      => "string"
+
+      (string? (typed/get-app-function-output-schema "demo"
+                                                     'test.ns/prepare-topic
+                                                     :typescript))
+      => true)))

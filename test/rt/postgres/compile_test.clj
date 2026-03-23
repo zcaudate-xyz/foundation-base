@@ -41,6 +41,31 @@
 
 (ensure-fixtures!)
 
+^{:refer rt.postgres.compile/infer-sync-spec :added "4.1"}
+(fact "infer-sync-spec delegates to the split db compiler"
+  (select-keys (compile/infer-sync-spec +manual-sync-fn+)
+               [:mode :tables])
+  => {:mode :manual
+      :tables ["UserAccount" "UserProfile"]})
+
+^{:refer rt.postgres.compile/db-sync-merge :added "4.1"}
+(fact "db-sync-merge delegates to the split db compiler"
+  (compile/db-sync-merge {:id "u1"} ["UserAccount"])
+  => {:id "u1"
+      :db/sync {"UserAccount" [{:id "u1"}]}})
+
+^{:refer rt.postgres.compile/emit-target :added "4.1"}
+(fact "emit-target delegates to both split target namespaces"
+  (clojure.string/includes?
+   (compile/emit-target +shape-fn+ :supabase-db)
+   "create-user-sync")
+  => true
+
+  (clojure.string/includes?
+   (compile/emit-target +shape-fn+ :xtalk-contracts)
+   "create-user-contract")
+  => true)
+
 ^{:refer rt.postgres.compile/list-targets :added "4.0"}
 (fact "compatibility facade lists and emits across both split namespaces"
   (compile/list-targets)

@@ -438,3 +438,34 @@
     (keys (:tables (types/add-typed (types/empty-typed) table))) => ['demo/User]
     (keys (:enums (types/add-typed (types/empty-typed) enum))) => ['demo/Status]
     (keys (:functions (types/add-typed (types/empty-typed) fn-def))) => ['demo/get-user]))
+
+
+^{:refer rt.postgres.grammar.typed-common/jsonb-path? :added "4.1"}
+(fact "jsonb-path? recognizes JsonbPath records"
+  (types/jsonb-path? (types/make-jsonb-path [:profile] 'm)) => true
+  (types/jsonb-path? {:segments [:profile] :root-var 'm}) => false)
+
+^{:refer rt.postgres.grammar.typed-common/get-var-path :added "4.1"}
+(fact "get-var-path resolves paths from the current scope or parent scopes"
+  (let [path   (types/make-jsonb-path [:profile :name] 'm)
+        parent (types/set-var-path (types/make-context) 'v-name path)
+        child  (types/push-scope parent)]
+    (types/get-var-path child 'v-name) => path
+    (types/get-var-path child 'missing) => nil))
+
+^{:refer rt.postgres.grammar.typed-common/set-var-path :added "4.1"}
+(fact "set-var-path stores a jsonb path for a variable"
+  (let [path (types/make-jsonb-path [:profile] 'm)
+        ctx  (types/set-var-path (types/make-context) 'o-profile path)]
+    (get-in ctx [:jsonb-paths 'o-profile]) => path))
+
+^{:refer rt.postgres.grammar.typed-common/shape-at-path :added "4.1"}
+(fact "shape-at-path resolves nested shapes and bare jsonb leaves"
+  (let [profile-shape (types/make-jsonb-shape {:name {:type :text}})
+        root-shape    (types/make-jsonb-shape {:profile {:type :jsonb
+                                                         :shape profile-shape}
+                                               :detail {:type :jsonb}}
+                                              :User)]
+    (types/shape-at-path root-shape [:profile]) => profile-shape
+    (types/shape-at-path root-shape [:detail]) => (types/empty-jsonb-shape)
+    (types/shape-at-path root-shape [:missing]) => nil))

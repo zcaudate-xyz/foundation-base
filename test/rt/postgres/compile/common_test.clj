@@ -69,3 +69,81 @@
     (let [inferred (compile.common/infer-jsonb-arg-shape 'm insert-def)]
       (:source-table inferred) => "Task"
       (-> inferred :fields keys set) => #{:id :status :name})))
+
+
+^{:refer rt.postgres.compile.common/def-name :added "4.1"}
+(fact "def-name returns the display name for typed definitions"
+  (compile.common/def-name (types/make-table-def "demo" "User" [] :id))
+  => "User"
+
+  (compile.common/def-name nil)
+  => nil)
+
+^{:refer rt.postgres.compile.common/unique-defs :added "4.1"}
+(fact "unique-defs keeps one definition per display name"
+  (let [defs [(types/make-table-def "demo" "User" [] :id)
+              (types/make-table-def "other" "User" [] :id)
+              (types/make-table-def "demo" "Task" [] :id)]
+        out  (compile.common/unique-defs defs)]
+    (count out) => 2
+    (set (map compile.common/def-name out)) => #{"User" "Task"}))
+
+^{:refer rt.postgres.compile.common/select-shape-columns :added "4.1"}
+(fact "select-shape-columns restricts a shape to the requested columns"
+  (let [shape (types/make-jsonb-shape {:id {:type :uuid}
+                                       :name {:type :text}
+                                       :active {:type :boolean}}
+                                      :User)
+        out   (compile.common/select-shape-columns shape [:name 'active])]
+    (set (keys (:fields out))) => #{:name :active}
+    (:source-table out) => :User)
+
+  (let [shape (types/make-jsonb-shape {:id {:type :uuid}} :User)]
+    (compile.common/select-shape-columns shape nil) => shape))
+
+^{:refer rt.postgres.compile.common/infer-jsonb-arg-access-shape :added "4.1"}
+(fact "infer-jsonb-arg-access-shape infers shape from jsonb field access patterns"
+  (let [form '(defn.pg
+                prepare-topic
+                "prepares a topic payload"
+                [:jsonb m]
+                (let [(:uuid v-organisation-id) (pg/field-id m "organisation")
+                      #{(:text v-code)
+                        (:text v-format)
+                        (:citext v-currency-id)} m]
+                  (return
+                   (|| {:publish "none"}
+                       m
+                       {:code-full v-code
+                        :organisation-id v-organisation-id
+                        :format v-format
+                        :currency-id v-currency-id}))))
+        fn-def (parse/parse-defn form "test.ns" nil)
+        shape  (compile.common/infer-jsonb-arg-access-shape 'm fn-def)]
+    (-> shape :fields keys set) => #{:organisation :code :format :currency-id}
+    (get-in shape [:fields :organisation :type]) => :uuid
+    (get-in shape [:fields :currency-id :type]) => :citext))
+
+^{:refer rt.postgres.compile.common/resolve-table-def :added "4.1"}
+(fact "resolve-table-def resolves tables by qualified or display name"
+  (types/clear-registry!)
+  (let [table (types/make-table-def "demo" "User" [] :id)]
+    (types/register-type! 'demo/User table)
+    (:name (compile.common/resolve-table-def 'demo/User)) => "User"
+    (:name (compile.common/resolve-table-def 'User)) => "User"
+    (:name (compile.common/resolve-table-def :User)) => "User"
+    (compile.common/resolve-table-def nil) => nil))
+
+^{:refer rt.postgres.compile.common/resolve-type :added "4.1"}
+(fact "resolve-type formats primitive, enum, and unknown types"
+  (compile.common/resolve-type :uuid :openapi)
+  => {:type "string" :format "uuid"}
+
+  (compile.common/resolve-type (types/make-type-ref :primitive nil :boolean) :openapi)
+  => {:type "boolean"}
+
+  (compile.common/resolve-type {:type :enum :enum-ref {:ns 'demo/Status}} :jschema)
+  => {:$ref "#/definitions/Status"}
+
+  (compile.common/resolve-type {:type :mystery} :ts)
+  => "string")
