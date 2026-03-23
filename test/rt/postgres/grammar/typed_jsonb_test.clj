@@ -51,8 +51,11 @@
     (get-in (access-descriptor ctx '(:-> m "profile")) [:path :root-var]) => 'm
     (get-in (access-descriptor ctx '(:-> m "profile")) [:field-info :type]) => :jsonb
 
-    (get-in (access-descriptor ctx '(pg/field-id m "organisation")) [:path :segments]) => [:organisation]
-    (get-in (access-descriptor ctx '(pg/field-id m "organisation")) [:field-info :type]) => :uuid))
+    (get-in (access-descriptor ctx '(pg/field-id m "organisation")) [:path :segments]) => [:organisation_id]
+    (get-in (access-descriptor ctx '(pg/field-id m "organisation")) [:field-info :type]) => :uuid
+    (mapv #(get-in % [:path :segments])
+          (access-descriptors ctx '(pg/field-id m "organisation")))
+    => [[:organisation_id] [:organisation :id]]))
 
 ^{:refer rt.postgres.grammar.typed-jsonb/expr-jsonb-path :added "4.1"}
 (fact "expr-jsonb-path resolves direct symbols and nested accessor paths"
@@ -134,9 +137,10 @@
                    (return o-profile))
         scanned (scan-form ctx form)
         shape   (types/get-var-shape scanned 'm)]
-    (-> shape :fields keys set) => #{:code :profile :id}
+    (-> shape :fields keys set) => #{:code :profile :id_id :id}
     (get-in shape [:fields :code :type]) => :text
-    (get-in shape [:fields :id :type]) => :uuid
+    (get-in shape [:fields :id_id :type]) => :uuid
+    (get-in shape [:fields :id :shape :fields :id :type]) => :uuid
     (types/get-var-path scanned 'o-profile) => {:segments [:profile] :root-var 'm}))
 
 ^{:refer rt.postgres.grammar.typed-jsonb/infer-jsonb-arg-access-shape :added "4.1"}
@@ -158,7 +162,8 @@
                         :currency-id v-currency-id}))))
         fn-def (parse/parse-defn form "test.ns" nil)
         shape  (infer-jsonb-arg-access-shape 'm fn-def)]
-    (-> shape :fields keys set) => #{:organisation :code :format :currency-id}
-    (get-in shape [:fields :organisation :type]) => :uuid
+    (-> shape :fields keys set) => #{:organisation_id :organisation :code :format :currency-id}
+    (get-in shape [:fields :organisation_id :type]) => :uuid
+    (get-in shape [:fields :organisation :shape :fields :id :type]) => :uuid
     (get-in shape [:fields :currency-id :type]) => :citext
     (:confidence shape) => :medium))

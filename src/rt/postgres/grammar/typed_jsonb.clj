@@ -39,7 +39,7 @@
 
 (declare expr-jsonb-path)
 
-(defn access-descriptor
+(defn access-descriptors
   [ctx expr]
   (when (accessor-expr? expr)
     (let [op (first expr)
@@ -47,14 +47,30 @@
           field-name (nth expr 2 nil)
           field-key (when (string? field-name)
                       (keyword field-name))]
-      (when-let [path (and source-path
-                           field-key
-                           (append-path source-path field-key))]
-        {:path path
-         :field-info (field-info (case op
-                                   'pg/field-id :uuid
-                                   :-> :jsonb
-                                   :->> :text))}))))
+      (cond
+        (and (= 'pg/field-id op) source-path field-key)
+        (keep identity
+              [{:path (append-path source-path
+                                   (keyword (str field-name "_id")))
+                :field-info (field-info :uuid)}
+               (when-let [nested-path (some-> source-path
+                                              (append-path field-key)
+                                              (append-path :id))]
+                 {:path nested-path
+                  :field-info (field-info :uuid)})])
+
+        :else
+        (when-let [path (and source-path
+                             field-key
+                             (append-path source-path field-key))]
+          [{:path path
+            :field-info (field-info (case op
+                                      :-> :jsonb
+                                      :->> :text))}])))))
+
+(defn access-descriptor
+  [ctx expr]
+  (first (access-descriptors ctx expr)))
 
 (defn expr-jsonb-path
   [ctx expr]
@@ -176,9 +192,8 @@
   (cond
     (seq? form)
     (let [ctx' (apply-descriptors ctx
-                                  (if-let [descriptor (and (accessor-expr? form)
-                                                           (access-descriptor ctx form))]
-                                    [descriptor]
+                                  (if (accessor-expr? form)
+                                    (access-descriptors ctx form)
                                     []))]
       (if (and (= 'let (first form))
                (sequential? (second form)))

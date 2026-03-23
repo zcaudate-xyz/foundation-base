@@ -75,7 +75,25 @@
 
 (declare analyze-expr cached-infer)
 
-(defn- value->field-info
+(defonce ^:private +call-analyzers+ (atom {}))
+
+(defn register-call-analyzer!
+  [sym f]
+  (swap! +call-analyzers+ assoc sym f))
+
+(defn- analyzed->shape
+  [value]
+  (cond
+    (types/jsonb-shape? value)
+    value
+
+    (and (= :shaped (:kind value))
+         (types/jsonb-shape? (:shape value)))
+    (:shape value)
+
+    :else nil))
+
+(defn- analyzed->field-info
   [value]
   (cond
     (types/jsonb-shape? value)
@@ -87,11 +105,35 @@
     {:type :jsonb
      :shape (:shape value)}
 
+    (= :array (:kind value))
+    {:type :array
+     :items (or (analyzed->field-info (:element-type value))
+                {:type :jsonb})}
+
+    (= :primitive (:kind value))
+    {:type (:type value)}
+
+    (= :literal (:kind value))
+    {:type (:type value)}
+
+    (= :field-access (:kind value))
+    {:type (:type value)}
+
+    (= :cast (:kind value))
+    {:type (:type value)}
+
+    (= :union (:kind value))
+    {:type :jsonb}
+
     (:type value)
     {:type (:type value)}
 
     :else
     value))
+
+(defn- value->field-info
+  [value]
+  (analyzed->field-info value))
 
 (defn- merge-analyzed-shapes
   [analyzed]
@@ -101,6 +143,59 @@
                      analyzed)]
     (when (seq shapes)
       (reduce types/merge-shapes (types/empty-jsonb-shape) shapes))))
+
+(defn- merge-array-element-types
+  [left right]
+  (cond
+    (nil? left)
+    right
+
+    (nil? right)
+    left
+
+    (= left right)
+    left
+
+    (and (types/jsonb-shape? left)
+         (types/jsonb-shape? right))
+    (types/merge-shapes left right)
+
+    (and (= :shaped (:kind left))
+         (= :shaped (:kind right))
+         (types/jsonb-shape? (:shape left))
+         (types/jsonb-shape? (:shape right)))
+    {:kind :shaped
+     :shape (types/merge-shapes (:shape left) (:shape right))
+     :table (when (= (:table left) (:table right))
+              (:table left))}
+
+    (and (= :primitive (:kind left))
+         (= :primitive (:kind right))
+         (= (:type left) (:type right)))
+    left
+
+    :else
+    {:kind :union
+     :types [left right]}))
+
+(defn- resolve-called-fn
+  [op aliases]
+  (let [op-name (name op)
+        op-ns (namespace op)
+        resolved-op (if op-ns
+                      (let [alias-sym (symbol op-ns)]
+                        (if-let [full-ns (get aliases alias-sym)]
+                          (symbol (str full-ns) op-name)
+                          op))
+                      op)
+        fn-def (or (types/get-type resolved-op)
+                   (types/get-type op)
+                   (types/get-type (symbol op-name))
+                   (first (filter (fn [f]
+                                    (and (types/fn-def? f)
+                                         (= op-name (:name f))))
+                                  (vals @types/*type-registry*))))]
+    [resolved-op fn-def]))
 
 (defn- analyze-table-op [op-sym args ctx]
   (let [op-info (get +pg-operations+ op-sym)
@@ -143,6 +238,13 @@
     {:kind :field-access
      :field field-name
      :type (if (= accessor :->) :jsonb :text)}))
+
+(defn- analyze-jsonb-accessor-expr
+  [expr ctx]
+  (when-let [{:keys [field-info]} (typed-jsonb/access-descriptor ctx expr)]
+    {:kind :field-access
+     :field (nth expr 2 nil)
+     :type (:type field-info)}))
 
 (defn- analyze-let [bindings body ctx]
   (let [bind-entry (fn [c bind-name bind-val]
@@ -193,6 +295,13 @@
     (number? expr) {:kind :literal :type (if (integer? expr) :integer :numeric) :value expr}
     (keyword? expr) {:kind :literal :type :keyword :value expr}
 
+    ;; Vector literal
+    (vector? expr)
+    {:kind :array
+     :element-type (reduce merge-array-element-types
+                           nil
+                           (map #(analyze-expr % ctx) expr))}
+
     ;; Map literal
     (map? expr)
     {:kind :shaped
@@ -240,6 +349,12 @@
         (= :->> op)
         (analyze-jsonb-access :->> args ctx)
 
+        (= 'pg/field-id op)
+        (or (analyze-jsonb-accessor-expr expr ctx)
+            {:kind :field-access
+             :field (second args)
+             :type :uuid})
+
         ;; Return
         (= "return" op-name)
         (analyze-expr (first args) ctx)
@@ -277,22 +392,16 @@
 
         ;; Function call tracing
         (symbol? op)
-        (let [;; Resolve alias to full namespace if possible
-              aliases (:aliases ctx {})
-              op-ns (namespace op)
-              resolved-op (if op-ns
-                            (let [alias-sym (symbol op-ns)]
-                              (if-let [full-ns (get aliases alias-sym)]
-                                (symbol (str full-ns) op-name)
-                                op))
-                            op)
-              fn-def (or (types/get-type resolved-op)
-                         (types/get-type op)
-                         (types/get-type (symbol op-name))
-                         (first (filter (fn [f] (and (types/fn-def? f) (= op-name (:name f))))
-                                        (vals @types/*type-registry*))))]
+        (let [aliases (:aliases ctx {})
+              [resolved-op fn-def] (resolve-called-fn op aliases)]
           (if fn-def
-            (cached-infer fn-def)
+            (if-let [call-analyzer (get @+call-analyzers+ resolved-op)]
+              (or (call-analyzer {:resolved-op resolved-op
+                                  :fn-def fn-def
+                                  :args args
+                                  :ctx ctx})
+                  (cached-infer fn-def))
+              (cached-infer fn-def))
             {:kind :unknown :op resolved-op}))
 
         ;; Unknown

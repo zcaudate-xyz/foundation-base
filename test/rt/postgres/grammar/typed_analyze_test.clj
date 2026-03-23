@@ -58,6 +58,61 @@
     => {:kind :shaped
         :table "Entry"}))
 
+^{:refer rt.postgres.grammar.typed-analyze/analyze-expr :added "4.1"}
+(fact "analyze-expr infers pg/field-id as uuid field access"
+  (let [ctx (types/make-context {'m :jsonb}
+                                {'m (types/make-jsonb-shape
+                                     {:organisation {:type :uuid
+                                                     :nullable? true}})}
+                                {'m (types/make-jsonb-path [] 'm)})]
+    (analyze/analyze-expr '(pg/field-id m "organisation") ctx)
+    => {:kind :field-access
+        :field "organisation"
+        :type :uuid}))
+
+^{:refer rt.postgres.grammar.typed-analyze/analyze-expr :added "4.1"}
+(fact "analyze-expr preserves vector literals as arrays of shaped elements"
+  (let [ctx (types/make-context {'v-profile :jsonb}
+                                {'v-profile (types/make-jsonb-shape
+                                             {:id {:type :uuid}
+                                              :language {:type :text}}
+                                             "UserProfile")}
+                                {})]
+    (select-keys (analyze/analyze-expr '[v-profile] ctx)
+                 [:kind :element-type])
+    => {:kind :array
+        :element-type (types/make-jsonb-shape
+                       {:id {:type :uuid}
+                        :language {:type :text}}
+                       "UserProfile")}))
+
+^{:refer rt.postgres.grammar.typed-analyze/register-call-analyzer! :added "4.1"}
+(fact "call analyzers can specialize a resolved function call"
+  (types/clear-registry!)
+  (analyze/reset-cache!)
+  (let [fn-form '(defn.pg annotate
+                   [:jsonb i-message]
+                   (return i-message))
+        fn-def  (parse/parse-defn fn-form "test.plugin" nil)
+        _       (types/register-type! 'test.plugin/annotate fn-def)
+        _       (analyze/register-call-analyzer!
+                 'test.plugin/annotate
+                 (fn [{:keys [ctx args]}]
+                   (let [base (analyze/analyze-expr (first args) ctx)
+                         base-shape (or (:shape base)
+                                        (types/empty-jsonb-shape))]
+                     {:kind :shaped
+                      :shape (types/merge-shapes
+                              base-shape
+                              (types/make-jsonb-shape
+                               {:plugin-added {:type :text}}
+                               nil :high false))})))
+        result  (analyze/analyze-expr
+                 '(test.plugin/annotate {:hello "world"})
+                 (types/make-context))]
+    (get-in result [:shape :fields :hello :type]) => :text
+    (get-in result [:shape :fields :plugin-added :type]) => :text))
+
 ^{:refer rt.postgres.grammar.typed-analyze/infer-return-type :added "4.1"}
 (fact "infer-return-type analyzes the last form in the function body"
   (types/clear-registry!)
