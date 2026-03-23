@@ -23,12 +23,16 @@
                :pull-sync    impl-sql/sql-pull-sync
                :delete-sync  impl-sql/sql-delete-sync}})
 
+(defn.xt get-dbtype
+  [db]
+  (return (or (. db ["::"])
+              "db.sql")))
+
 (defn.xt process-event
   "processes an event"
   {:added "4.0"}
   [db event schema lookup opts]
-  (var dbtype (or (. db ["::"])
-                  "db.sql"))
+  (var dbtype (-/get-dbtype db))
   (var #{instance} db)
   (var [tag data as-input] event)
   (var event-fn (k/get-in -/IMPL [dbtype tag]))
@@ -81,8 +85,7 @@
   "creates the db"
   {:added "4.0"}
   [m schema lookup opts]
-  (var dbtype (or (. m ["::"])
-                  "db.sql"))
+  (var dbtype (-/get-dbtype m))
   (var create-fn (k/get-in -/IMPL [dbtype "create"]))
   (var instance (or (k/get-key m "instance")
                     (create-fn m)))
@@ -136,8 +139,7 @@
   "runs a raw statement"
   {:added "4.0"}
   [db raw-input]
-  (var dbtype (or (. db ["::"])
-                  "db.sql"))
+  (var dbtype (-/get-dbtype db))
   (var #{instance} db)
   (when (== dbtype "db.sql")
     (return (conn-dbsql/query-sync instance
@@ -147,8 +149,7 @@
   "runs a pull statement"
   {:added "4.0"}
   [db schema tree]
-  (var dbtype (or (. db ["::"])
-                  "db.sql"))
+  (var dbtype (-/get-dbtype db))
   (var #{instance opts} db)
   (cond (== dbtype "db.sql")
         (return (impl-sql/sql-pull-sync instance schema tree opts))
@@ -160,8 +161,7 @@
   "deletes rows from the db"
   {:added "4.0"}
   [db schema table-name ids]
-  (var dbtype (or (. db ["::"])
-                  "db.sql"))
+  (var dbtype (-/get-dbtype db))
   (var #{instance opts} db)
   (cond (== dbtype "db.sql")
         (return (impl-sql/sql-delete-sync instance schema table-name ids opts))
@@ -173,8 +173,7 @@
   "clears the db"
   {:added "4.0"}
   [db]
-  (var dbtype (or (. db ["::"])
-                  "db.sql"))
+  (var dbtype (-/get-dbtype db))
   (var #{instance opts} db)
   (cond (== dbtype "db.sql")
         (return (impl-sql/sql-clear instance))

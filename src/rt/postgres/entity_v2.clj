@@ -23,7 +23,7 @@
              :0d/base :0d/entry :0d/log
              :1d/base :1d/entry :1d/log
              :2d/base :2d/entry :2d/log}
-   :addons #{keyword?}
+   :addons #{keyword? vector? map?}
    :track  #{:track/none
              :track/data
              :track/log

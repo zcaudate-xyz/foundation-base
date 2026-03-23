@@ -1,9 +1,9 @@
 (ns rt.postgres.entity-v2-test
+  (:use code.test)
   (:require [rt.postgres.entity-v2 :as et :refer :all]
             [rt.postgres.entity-util :as ut]
             [std.lang.base.grammar-spec :as grammar-spec]
-            [std.lib.env :as env])
-  (:use code.test))
+            [std.lib.env :as env]))
 
 (def +reduced-target+
   (atom {:api/input {:class :1d/base
@@ -84,7 +84,7 @@
     (E {:class :0d/entry
         :rev true
         :detail false})
-    => (contains {:api/input {:class :0d/entry
+    => (contains-in {:api/input {:class :0d/entry
                               :basis #{:table :context}
                               :addons [:rev]}})))
 
