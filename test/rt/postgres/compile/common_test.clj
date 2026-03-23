@@ -120,8 +120,10 @@
                         :currency-id v-currency-id}))))
         fn-def (parse/parse-defn form "test.ns" nil)
         shape  (compile.common/infer-jsonb-arg-access-shape 'm fn-def)]
-    (-> shape :fields keys set) => #{:organisation :code :format :currency-id}
-    (get-in shape [:fields :organisation :type]) => :uuid
+    (-> shape :fields keys set) => #{:organisation_id :organisation :code :format :currency-id}
+    (get-in shape [:fields :organisation_id :type]) => :uuid
+    (get-in shape [:fields :organisation :type]) => :jsonb
+    (get-in shape [:fields :organisation :shape :fields :id :type]) => :uuid
     (get-in shape [:fields :currency-id :type]) => :citext))
 
 ^{:refer rt.postgres.compile.common/resolve-table-def :added "4.1"}

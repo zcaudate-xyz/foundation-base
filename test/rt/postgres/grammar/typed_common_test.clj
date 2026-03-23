@@ -175,6 +175,19 @@
       :enums {'a/Status :enum}
       :functions {'a/do-work :fn}})
 
+^{:refer rt.postgres.grammar.typed-common/emitted-key :added "4.1"}
+(fact "emitted-key preserves strings and normalizes structured keys"
+  (types/emitted-key :foo-bar) => "foo_bar"
+  (types/emitted-key 'foo-bar) => "foo_bar"
+  (types/emitted-key "literal-key") => "literal-key"
+  (types/emitted-key 42) => "42")
+
+^{:refer rt.postgres.grammar.typed-common/typescript-key :added "4.1"}
+(fact "typescript-key quotes invalid property names and preserves identifiers"
+  (types/typescript-key :foo-bar) => "foo_bar"
+  (types/typescript-key '_value) => "_value"
+  (types/typescript-key "two words") => "\"two words\"")
+
 ;; -----------------------------------------------------------------------------
 ;; Type Constructors
 ;; -----------------------------------------------------------------------------

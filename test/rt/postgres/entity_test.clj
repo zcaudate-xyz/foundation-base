@@ -13,7 +13,13 @@
   (E-check-input {:class :1d/base})
   => {:class :1d/base}
 
+  (E-check-input {:addons [:a :b]})
+  => {:addons [:a :b]}
+
   (E-check-input {:class :invalid})
+  => (throws)
+
+  (E-check-input {:addons [:a [:b 'Ref 10]]})
   => (throws))
 
 ^{:refer rt.postgres.entity/E-entity-class-fields :added "4.1"}
@@ -94,7 +100,9 @@
     => (contains {:api/meta {:sb/rls true :sb/access {:admin :all :auth :select :anon :select}}
                   :public true
                   :track map?
-                  :raw vector?})))
+                  :raw (contains [[:table {:type :ref :required true
+                                           :ref {:ns 'Table}
+                                           :sql {:cascade true :unique ["table"]}}]])})))
 
 ^{:refer rt.postgres.entity/E-main-spec :added "4.1"}
 (fact "handles main spec"
@@ -110,4 +118,7 @@
                 ut/type-class (constantly {})
                 ut/type-class-ref (constantly {})]
     (E {:class :1d/base :entity {:for 'Table} :track :track/log})
-    => (contains {:api/meta {:sb/rls true, :sb/access {:admin :all, :auth :select, :anon :select}} :raw vector?})))
+    => (contains {:api/meta {:sb/rls true, :sb/access {:admin :all, :auth :select, :anon :select}}
+                  :raw (contains [[:table {:type :ref :required true
+                                           :ref {:ns 'Table}
+                                           :sql {:cascade true :unique ["table"]}}]])})))

@@ -37,6 +37,7 @@
                 :0d/base  :0d/entry :0d/data :0d/log
                 :1d/base  :1d/entry :1d/log :1d/simple :1d/data
                 :2d/base  :2d/entry :2d/log}
+   :addons    #{keyword?}
    :track    #{:track/none
                :track/data
                :track/log
@@ -50,24 +51,28 @@
 
 (defn E-check-input
   [m]
-  (let [errors (reduce-kv (fn [acc k allowed]
+  (let [valid? (fn [allowed v]
+                 (let [preds (filter fn? allowed)
+                       lits  (set (remove fn? allowed))]
+                   (or (contains? lits v)
+                       (some #(% v) preds))))
+        errors (reduce-kv (fn [acc k allowed]
                             (if (contains? m k)
                               (let [v (get m k)]
                                 (cond
                                   (= k :addons)
-                                  (let [vs (if (coll? v) v [v])
-                                        bad (remove allowed vs)]
+                                  (let [vs (cond (nil? v) []
+                                                 (coll? v) v
+                                                 :else [v])
+                                        bad (remove #(valid? allowed %) vs)]
                                     (if (seq bad)
                                       (assoc acc k {:invalid bad :allowed allowed})
                                       acc))
                                   
                                   :else
-                                  (let [preds (filter fn? allowed)
-                                        lits  (set (remove fn? allowed))]
-                                    (if (or (contains? lits v)
-                                            (some #(% v) preds))
+                                  (if (valid? allowed v)
                                       acc
-                                      (assoc acc k {:value v :allowed allowed})))))
+                                      (assoc acc k {:value v :allowed allowed}))))
                               acc))
                           {}
                           ESpec)]
@@ -335,7 +340,9 @@
          track-cols
          track-val]   (E-main-track m)
         access-val    (ut/get-access access)
-        class-cols   (E-class-columns m)
+        class-cols   (cond-> (E-class-columns m)
+                       entity (collection/merge-nested
+                               (E-entity-class-fields m)))
         [addon-cols
          addon-class-cols]  (E-addon-columns m)
         final-cols   (E-class-merge m id-cols track-cols
@@ -387,5 +394,3 @@
         out (E-main m)
         _   (E-main-spec m)]
     out))
-
-

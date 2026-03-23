@@ -167,3 +167,34 @@
     (get-in shape [:fields :organisation :shape :fields :id :type]) => :uuid
     (get-in shape [:fields :currency-id :type]) => :citext
     (:confidence shape) => :medium))
+
+
+^{:refer rt.postgres.grammar.typed-jsonb/access-descriptors :added "4.1"}
+(fact "access-descriptors emits typed path descriptors for access expressions"
+  (let [ctx (make-root-ctx)]
+    (mapv #(get-in % [:path :segments])
+          (access-descriptors ctx '(:-> m "profile")))
+    => [[:profile]]
+
+    (get-in (first (access-descriptors ctx '(:-> m "profile")))
+            [:field-info :type])
+    => :jsonb
+
+    (mapv #(get-in % [:path :segments])
+          (access-descriptors ctx '(:->> m "name")))
+    => [[:name]]
+
+    (get-in (first (access-descriptors ctx '(:->> m "name")))
+            [:field-info :type])
+    => :text
+
+    (mapv #(get-in % [:path :segments])
+          (access-descriptors ctx '(pg/field-id m "organisation")))
+    => [[:organisation_id] [:organisation :id]]
+
+    (mapv #(get-in % [:field-info :type])
+          (access-descriptors ctx '(pg/field-id m "organisation")))
+    => [:uuid :uuid]
+
+    (access-descriptors ctx '(str m))
+    => nil))

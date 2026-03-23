@@ -523,6 +523,7 @@
         (types/jsonb-shape? shape) => true
         (-> shape :fields keys set) => #{:publish
                                          :organisation
+                                         :organisation_id
                                          :code
                                          :code-full
                                          :organisation-id}))))
