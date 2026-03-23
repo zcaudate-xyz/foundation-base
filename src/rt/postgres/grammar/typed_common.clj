@@ -123,6 +123,7 @@
 (defn enum-def? [x] (instance? EnumDef x))
 (defn fn-def? [x] (instance? FnDef x))
 (defn jsonb-shape? [x] (instance? JsonbShape x))
+(defn jsonb-path? [x] (instance? JsonbPath x))
 (defn jsonb-merge? [x] (instance? JsonbMerge x))
 (defn jsonb-array? [x] (instance? JsonbArray x))
 (defn type-union? [x] (instance? TypeUnion x))
@@ -267,27 +268,72 @@
 (defn push-scope [ctx] (->BindingContext {} {} {} ctx))
 (defn pop-scope [ctx] (:parent ctx))
 
-(defn add-binding [ctx var-name type-info & {:keys [shape]}]
+(defn add-binding [ctx var-name type-info & {:keys [shape path]}]
   (cond-> ctx
     true (update :bindings assoc var-name type-info)
-    shape (update :jsonb-shapes assoc var-name shape)))
+    shape (update :jsonb-shapes assoc var-name shape)
+    path (update :jsonb-paths assoc var-name path)))
 
 (defn lookup-binding [ctx var-name]
   (or (get-in ctx [:bindings var-name])
       (when-let [parent (:parent ctx)] (lookup-binding parent var-name))))
 
+(declare shape-at-path empty-jsonb-shape)
+
 (defn get-var-shape [ctx var-name]
   (or (get-in ctx [:jsonb-shapes var-name])
+      (when-let [path (get-in ctx [:jsonb-paths var-name])]
+        (when-not (and (= var-name (:root-var path))
+                       (empty? (:segments path)))
+          (when-let [root-shape (get-var-shape ctx (:root-var path))]
+            (shape-at-path root-shape (:segments path)))))
       (when-let [parent (:parent ctx)] (get-var-shape parent var-name))))
 
 (defn set-var-shape [ctx var-name shape]
   (update ctx :jsonb-shapes assoc var-name shape))
+
+(defn get-var-path [ctx var-name]
+  (or (get-in ctx [:jsonb-paths var-name])
+      (when-let [parent (:parent ctx)] (get-var-path parent var-name))))
+
+(defn set-var-path [ctx var-name path]
+  (update ctx :jsonb-paths assoc var-name path))
 
 ;; ─────────────────────────────────────────────────────────────────────────────
 ;; Shape Operations
 ;; ─────────────────────────────────────────────────────────────────────────────
 
 (defn empty-jsonb-shape [] (->JsonbShape {} nil :low false))
+
+(defn shape-at-path
+  "Returns the nested JsonbShape at the provided path, if known."
+  [shape segments]
+  (cond
+    (nil? shape)
+    nil
+
+    (empty? segments)
+    shape
+
+    :else
+    (let [field-info (get-in shape [:fields (first segments)])
+          nested-shape (:shape field-info)
+          remaining (next segments)]
+      (cond
+        (and (empty? remaining)
+             (jsonb-shape? nested-shape))
+        nested-shape
+
+        (and (empty? remaining)
+             (= :jsonb (:type field-info)))
+        (or nested-shape
+            (empty-jsonb-shape))
+
+        (jsonb-shape? nested-shape)
+        (shape-at-path nested-shape remaining)
+
+        :else
+        nil))))
 
 (defn add-key [shape key type-info]
   {:pre [(jsonb-shape? shape)]}
@@ -321,6 +367,11 @@
                          (fn [t1 t2]
                            (cond
                              (= t1 t2) t1
+                             (and (map? t1)
+                                  (map? t2)
+                                  (= (:type t1) (:type t2))
+                                  (:type t1))
+                             (merge t1 t2)
                              (or (= t1 :unknown) (= t1 :jsonb)) t2
                              (or (= t2 :unknown) (= t2 :jsonb)) t1
                              :else (make-type-union [t1 t2])))

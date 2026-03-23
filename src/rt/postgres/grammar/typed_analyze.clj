@@ -1,7 +1,9 @@
 (ns rt.postgres.grammar.typed-analyze
   (:require [clojure.string :as str]
             [clojure.walk :as walk]
+            [rt.postgres.compile.common :as compile.common]
             [rt.postgres.grammar.typed-common :as types]
+            [rt.postgres.grammar.typed-jsonb :as typed-jsonb]
             [rt.postgres.grammar.typed-shape :as shape]
             [std.json :as json]))
 
@@ -73,6 +75,24 @@
 
 (declare analyze-expr cached-infer)
 
+(defn- value->field-info
+  [value]
+  (cond
+    (types/jsonb-shape? value)
+    {:type :jsonb
+     :shape value}
+
+    (and (= :shaped (:kind value))
+         (types/jsonb-shape? (:shape value)))
+    {:type :jsonb
+     :shape (:shape value)}
+
+    (:type value)
+    {:type (:type value)}
+
+    :else
+    value))
+
 (defn- merge-analyzed-shapes
   [analyzed]
   (let [shapes (keep (fn [v]
@@ -102,15 +122,17 @@
 (defn- analyze-jsonb-merge
   "CRITIQUE FIX #4: Uses shape/merge-shapes - no local merge logic."
   [args ctx]
-  (let [left (analyze-expr (first args) ctx)
-        right (analyze-expr (second args) ctx)
-        left-shape (or (:shape left) left)
-        right-shape (or (:shape right) right)]
+  (let [merge-step (fn [acc expr]
+                     (let [analyzed (analyze-expr expr ctx)
+                           analyzed-shape (or (:shape analyzed) analyzed)]
+                       (types/merge-shapes
+                        acc
+                        (if (types/jsonb-shape? analyzed-shape)
+                          analyzed-shape
+                          (types/empty-jsonb-shape)))))
+        merged-shape (reduce merge-step (types/empty-jsonb-shape) args)]
     {:kind :shaped
-     ;; DELEGATES to shape/merge-shapes - single source of truth
-     :shape (types/merge-shapes
-             (if (types/jsonb-shape? left-shape) left-shape (types/empty-jsonb-shape))
-             (if (types/jsonb-shape? right-shape) right-shape (types/empty-jsonb-shape)))
+     :shape merged-shape
      :op :merge}))
 
 (defn- analyze-jsonb-access
@@ -123,14 +145,30 @@
      :type (if (= accessor :->) :jsonb :text)}))
 
 (defn- analyze-let [bindings body ctx]
-  (let [new-ctx (reduce (fn [c [bind-name bind-val]]
-                          (if (symbol? bind-name)
-                            (let [val-type (analyze-expr bind-val c)]
-                              (if (= :shaped (:kind val-type))
-                                (types/add-binding c bind-name :jsonb :shape (:shape val-type))
-                                (types/add-binding c bind-name val-type)))
-                            c))
-                        ctx (partition 2 bindings))]
+  (let [bind-entry (fn [c bind-name bind-val]
+                     (let [val-type (analyze-expr bind-val c)]
+                       (if-let [descriptors (seq (typed-jsonb/binding-descriptors c bind-name bind-val))]
+                         (typed-jsonb/apply-descriptors c descriptors)
+                         (cond
+                           (symbol? bind-name)
+                           (if (= :shaped (:kind val-type))
+                             (types/add-binding c bind-name :jsonb :shape (:shape val-type))
+                             (types/add-binding c bind-name val-type))
+
+                           (and (seq? bind-name)
+                                (keyword? (first bind-name))
+                                (symbol? (second bind-name)))
+                           (types/add-binding c
+                                              (second bind-name)
+                                              {:kind :cast
+                                               :type (first bind-name)
+                                               :expr val-type})
+
+                           :else c))))
+        new-ctx (reduce (fn [c [bind-name bind-val]]
+                          (bind-entry c bind-name bind-val))
+                        ctx
+                        (partition 2 bindings))]
     (analyze-expr (last body) new-ctx)))
 
 (defn- analyze-control-flow [form ctx]
@@ -159,7 +197,11 @@
     (map? expr)
     {:kind :shaped
      :shape (types/make-jsonb-shape
-             (into {} (map (fn [[k v]] [(keyword (name k)) (analyze-expr v ctx)]) expr))
+             (into {}
+                   (map (fn [[k v]]
+                          [(keyword (name k))
+                           (value->field-info (analyze-expr v ctx))]))
+                   expr)
              nil :high false)}
 
     ;; Set literal used as merged JSONB/object return
@@ -192,10 +234,10 @@
         (analyze-jsonb-merge args ctx)
 
         ;; JSONB access
-        (= ":->" op-name)
+        (= :-> op)
         (analyze-jsonb-access :-> args ctx)
 
-        (= ":->>" op-name)
+        (= :->> op)
         (analyze-jsonb-access :->> args ctx)
 
         ;; Return
@@ -267,7 +309,22 @@
   [fn-def]
   (let [body (get-in fn-def [:body-meta :raw-body])
         aliases (get-in fn-def [:body-meta :aliases] {})
-        ctx (types/make-context (into {} (map (fn [arg] [(:name arg) (:type arg)])) (:inputs fn-def)))
+        input-bindings (into {} (map (fn [arg] [(:name arg) (:type arg)])) (:inputs fn-def))
+        input-shapes (into {}
+                           (keep (fn [arg]
+                                   (when (= :jsonb (:type arg))
+                                     (when-let [arg-shape (compile.common/infer-jsonb-arg-access-shape
+                                                           (:name arg)
+                                                           fn-def)]
+                                       [(:name arg) arg-shape]))))
+                           (:inputs fn-def))
+        input-paths (into {}
+                          (keep (fn [arg]
+                                  (when (= :jsonb (:type arg))
+                                    [(:name arg)
+                                     (types/make-jsonb-path [] (:name arg))])))
+                          (:inputs fn-def))
+        ctx (types/make-context input-bindings input-shapes input-paths)
         ctx (assoc ctx :aliases aliases)]
     (when (seq body)
       (analyze-expr (last body) ctx))))
@@ -277,10 +334,12 @@
 ;; ─────────────────────────────────────────────────────────────────────────────
 
 (def ^:dynamic *infer-cache* (atom {}))
+(def ^:dynamic *report-cache* (atom {}))
 (def ^:dynamic *visiting* #{})
 
 (defn reset-cache! []
-  (reset! *infer-cache* {}))
+  (reset! *infer-cache* {})
+  (reset! *report-cache* {}))
 
 (defn cached-infer [fn-def]
   (let [key (symbol (or (:ns fn-def) "") (:name fn-def))]
@@ -406,28 +465,34 @@
 (defn infer-report
   "Returns a JSON-friendly analysis report for a parsed FnDef."
   [fn-def]
-  (let [inferred   (cached-infer fn-def)
-        operations (detect-operations fn-def)
-        source-tables (->> (concat
-                            (keep :table operations)
-                            [(or (:table inferred)
-                                 (some-> inferred :shape :source-table name))])
-                           (remove nil?)
-                           distinct
-                           vec)
-        mutating?  (boolean (some (comp #{:insert :update :delete :upsert} :op)
-                                  operations))]
-    {:function {:ns (:ns fn-def)
-                :name (:name fn-def)
-                :dbschema (:dbschema fn-def)}
-     :declared {:inputs (json-safe (:inputs fn-def))
-                :output (json-safe (:output fn-def))
-                :docstring (get-in fn-def [:body-meta :docstring])
-                :expose (json-safe (get-in fn-def [:body-meta :expose]))}
-     :analysis {:mutating mutating?
-                :source-tables source-tables
-                :operations-detected (json-safe operations)
-                :return (inferred->report inferred)}}))
+  (let [key [(or (:ns fn-def) "")
+             (:name fn-def)
+             (:dbschema fn-def)]]
+    (or (get @*report-cache* key)
+        (let [inferred   (cached-infer fn-def)
+              operations (detect-operations fn-def)
+              source-tables (->> (concat
+                                  (keep :table operations)
+                                  [(or (:table inferred)
+                                       (some-> inferred :shape :source-table name))])
+                                 (remove nil?)
+                                 distinct
+                                 vec)
+              mutating?  (boolean (some (comp #{:insert :update :delete :upsert} :op)
+                                        operations))
+              report     {:function {:ns (:ns fn-def)
+                                     :name (:name fn-def)
+                                     :dbschema (:dbschema fn-def)}
+                          :declared {:inputs (json-safe (:inputs fn-def))
+                                     :output (json-safe (:output fn-def))
+                                     :docstring (get-in fn-def [:body-meta :docstring])
+                                     :expose (json-safe (get-in fn-def [:body-meta :expose]))}
+                          :analysis {:mutating mutating?
+                                     :source-tables source-tables
+                                     :operations-detected (json-safe operations)
+                                     :return (inferred->report inferred)}}]
+          (swap! *report-cache* assoc key report)
+          report))))
 
 (defn report-json
   "Serializes an infer report to JSON."

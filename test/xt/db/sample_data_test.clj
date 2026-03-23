@@ -102,7 +102,6 @@
               {:region-cities <%>}]
    :roles #{:city}})
 
-
 (defret.pg ^{:- [-/RegionCountry]
              :scope #{:public}
              :access [access-city-in-country]

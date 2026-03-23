@@ -1,12 +1,16 @@
 (ns rt.postgres.typed
   (:require [clojure.string :as str]
+            [rt.postgres.compile.common :as compile.common]
             [rt.postgres.compile.json-openapi :as compile.json-openapi]
             [rt.postgres.compile.json-schema :as compile.json-schema]
             [rt.postgres.compile.ts-schema :as compile.ts-schema]
+            [rt.postgres.grammar.common-application :as app]
             [rt.postgres.grammar.typed-analyze :as analyze]
             [rt.postgres.grammar.typed-common :as types]
             [rt.postgres.grammar.typed-parse :as parse]
             [rt.postgres.grammar.typed-shape :as shape]))
+
+(declare get-function-def with-app-typed-registry report-json)
 
 ;; ─────────────────────────────────────────────────────────────────────────────
 ;; Type Registry API
@@ -59,6 +63,181 @@
     (when-let [fn-def (some #(when (= fn-name (:name %)) %)
                             (:functions analysis))]
       (analyze/infer-report fn-def))))
+
+(defn get-function-report
+  "Retrieves a cached infer report for a registered function."
+  [fn-ref]
+  (let [fn-def (if (types/fn-def? fn-ref)
+                 fn-ref
+                 (get-function-def fn-ref))]
+    (when fn-def
+      (analyze/infer-report fn-def))))
+
+(defn get-app-function-report
+  "Retrieves a cached infer report from an app typed payload."
+  [app-name fn-sym]
+  (with-app-typed-registry
+    app-name
+    (fn [typed-payload]
+      (some-> (get-in typed-payload [:functions fn-sym])
+              get-function-report))))
+
+(defn get-function-report-json
+  "Serializes a registered function infer report to JSON."
+  ([fn-ref]
+   (some-> (get-function-report fn-ref)
+           report-json))
+  ([fn-ref pretty?]
+   (some-> (get-function-report fn-ref)
+           (report-json pretty?))))
+
+(defn get-app-function-report-json
+  "Serializes an app function infer report to JSON."
+  ([app-name fn-sym]
+   (some-> (get-app-function-report app-name fn-sym)
+           report-json))
+  ([app-name fn-sym pretty?]
+   (some-> (get-app-function-report app-name fn-sym)
+           (report-json pretty?))))
+
+(defn get-function-def
+  "Retrieves a registered function definition by namespaced symbol."
+  [fn-sym]
+  (let [fn-def (types/get-type fn-sym)]
+    (when (types/fn-def? fn-def)
+      fn-def)))
+
+(defn get-app-function-def
+  "Retrieves a function definition from an app typed payload."
+  [app-name fn-sym]
+  (let [fn-def (get-in (app/app-typed app-name) [:functions fn-sym])]
+    (when (types/fn-def? fn-def)
+      fn-def)))
+
+(defn- with-app-typed-registry
+  [app-name f]
+  (let [typed-payload (app/app-typed app-name)
+        current @types/*type-registry*]
+    (try
+      (swap! types/*type-registry*
+             (fn [registry]
+               (-> registry
+                   (merge (:tables typed-payload))
+                   (merge (:enums typed-payload))
+                   (merge (:functions typed-payload)))))
+      (f typed-payload)
+      (finally
+        (reset! types/*type-registry* current)))))
+
+(defn get-function-input-shape
+  "Infers a JsonbShape for a JSONB function input.
+   `fn-ref` may be a FnDef or a namespaced symbol in the registry."
+  [fn-ref arg-sym]
+  (let [fn-def (if (types/fn-def? fn-ref)
+                 fn-ref
+                 (get-function-def fn-ref))]
+    (when (and fn-def arg-sym)
+      (compile.common/infer-jsonb-arg-shape arg-sym fn-def))))
+
+(defn get-app-function-input-shape
+  "Infers a JsonbShape for a JSONB function input from an app typed payload."
+  [app-name fn-sym arg-sym]
+  (with-app-typed-registry
+    app-name
+    (fn [typed-payload]
+      (when-let [fn-def (get-in typed-payload [:functions fn-sym])]
+        (get-function-input-shape fn-def arg-sym)))))
+
+(defn get-function-input-schema
+  "Formats an inferred JSONB input shape for a function.
+   Formats: `:shape`, `:openapi`, `:json-schema`, `:typescript`."
+  ([fn-ref arg-sym]
+   (get-function-input-schema fn-ref arg-sym :shape))
+  ([fn-ref arg-sym format]
+   (when-let [input-shape (get-function-input-shape fn-ref arg-sym)]
+     (case format
+       :shape input-shape
+       :openapi (compile.json-openapi/shape->openapi input-shape)
+       :json-schema (compile.json-schema/shape->json-schema input-shape)
+       :typescript (compile.ts-schema/shape->ts-interface input-shape)
+       (throw (ex-info "Unknown input schema format"
+                       {:format format
+                        :available [:shape :openapi :json-schema :typescript]}))))))
+
+(defn get-app-function-input-schema
+  "Formats an inferred JSONB input shape from an app typed payload."
+  ([app-name fn-sym arg-sym]
+   (get-app-function-input-schema app-name fn-sym arg-sym :shape))
+  ([app-name fn-sym arg-sym format]
+   (when-let [input-shape (get-app-function-input-shape app-name fn-sym arg-sym)]
+     (case format
+       :shape input-shape
+       :openapi (compile.json-openapi/shape->openapi input-shape)
+       :json-schema (compile.json-schema/shape->json-schema input-shape)
+       :typescript (compile.ts-schema/shape->ts-interface input-shape)
+       (throw (ex-info "Unknown input schema format"
+                       {:format format
+                        :available [:shape :openapi :json-schema :typescript]}))))))
+
+(defn- inferred->shape
+  [inferred]
+  (cond
+    (types/jsonb-shape? inferred)
+    inferred
+
+    (and (= :shaped (:kind inferred))
+         (types/jsonb-shape? (:shape inferred)))
+    (:shape inferred)
+
+    :else nil))
+
+(defn- format-shape
+  [shape format]
+  (case format
+    :shape shape
+    :openapi (compile.json-openapi/shape->openapi shape)
+    :json-schema (compile.json-schema/shape->json-schema shape)
+    :typescript (compile.ts-schema/shape->ts-interface shape)
+    (throw (ex-info "Unknown schema format"
+                    {:format format
+                     :available [:shape :openapi :json-schema :typescript]}))))
+
+(defn get-function-output-shape
+  "Infers a JsonbShape for a function's JSON/object output."
+  [fn-ref]
+  (let [fn-def (if (types/fn-def? fn-ref)
+                 fn-ref
+                 (get-function-def fn-ref))]
+    (when fn-def
+      (some-> fn-def
+              analyze/cached-infer
+              inferred->shape))))
+
+(defn get-app-function-output-shape
+  "Infers a JsonbShape for a function output from an app typed payload."
+  [app-name fn-sym]
+  (with-app-typed-registry
+    app-name
+    (fn [typed-payload]
+      (some-> (get-in typed-payload [:functions fn-sym])
+              get-function-output-shape))))
+
+(defn get-function-output-schema
+  "Formats an inferred JSON/object output shape for a function.
+   Formats: `:shape`, `:openapi`, `:json-schema`, `:typescript`."
+  ([fn-ref]
+   (get-function-output-schema fn-ref :shape))
+  ([fn-ref format]
+   (when-let [output-shape (get-function-output-shape fn-ref)]
+     (format-shape output-shape format))))
+
+(defn get-app-function-output-schema
+  "Formats an inferred JSON/object output shape from an app typed payload."
+  ([app-name fn-sym]
+   (get-app-function-output-schema app-name fn-sym :shape))
+  ([app-name fn-sym format]
+   (when-let [output-shape (get-app-function-output-shape app-name fn-sym)]
+     (format-shape output-shape format))))
 
 (defn report-json
   "Serializes an infer report to JSON."

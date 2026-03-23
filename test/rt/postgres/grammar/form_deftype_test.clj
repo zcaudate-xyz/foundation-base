@@ -147,7 +147,7 @@
   (first (pg-deftype-format-raw [:a {:type :int :priority 100} :b {:type :int :priority 10}] {:raw []}))
   => [:b {:type :int :priority 10} :a {:type :int :priority 100}])
 
-^{:refer rt.postgres.grammar.form-defpartition/pg-deftype-partition :added "4.1"}
+^{:refer rt.postgres.grammar.form-deftype/pg-deftype-partition :added "4.1"}
 (fact "creates partition by statement"
   ^:hidden
 

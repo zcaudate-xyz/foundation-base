@@ -4,6 +4,8 @@
             [rt.postgres.compile.server-db :as server-db])
   (:use code.test))
 
+(fixtures/ensure-fixtures!)
+
 ^{:refer rt.postgres.compile.server-api/xtalk-contract-input :added "4.1"}
 (fact "xtalk-contract-input normalizes the template payload"
   (xtalk-contract-input

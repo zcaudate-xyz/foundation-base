@@ -33,9 +33,7 @@
                                 :functions {'test/create-user :fn}})}
       #(-> (app-create "test.postgres")
            :typed)))
-  => {:tables {'User :table}
-      :enums {'test/Status :enum}
-      :functions {'test/create-user :fn}})
+  => nil)
 
 ^{:refer rt.postgres.grammar.common-application/app-clear :added "4.0"}
 (fact "clears the entry for an app"
@@ -96,4 +94,13 @@
 
   (with-redefs [*applications* (atom {"test.postgres" {:typed :typed}})]
     (app-typed "test.postgres")
-    => :typed))
+    => :typed)
+
+  (with-redefs [*applications* (atom {"test.postgres" {:tables {}
+                                                       :pointers {}}})
+                app-modules (fn [_] [])]
+    (with-redefs-fn {#'rt.postgres.grammar.common-application/app-create-typed
+                     (fn [_ _] {:typed true})}
+      #(do (app-typed "test.postgres")
+           (get-in @*applications* ["test.postgres" :typed]))))
+  => {:typed true})

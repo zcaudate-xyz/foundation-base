@@ -91,6 +91,26 @@
     (keys @analyze/*infer-cache*))
   => ['rt.postgres.script.test.scratch-v2/insert-entry])
 
+^{:refer rt.postgres.grammar.typed-analyze/infer-return-type :added "4.1"}
+(fact "infer-return-type uses jsonb paths from plain child destructuring"
+  (types/clear-registry!)
+  (let [form '(defn.pg
+                prepare-account
+                [:jsonb i-created]
+                (let [#{o-profile
+                        v-account
+                        v-security} i-created
+                      #{(:text v-password-salt)} v-security]
+                  (return
+                   (|| i-created
+                       {:password-salt v-password-salt
+                        :profile o-profile}))))
+        fn-def (parse/parse-defn form "test.ns" nil)]
+    (types/register-type! 'test.ns/prepare-account fn-def)
+    (let [result (analyze/infer-return-type fn-def)]
+      (get-in result [:shape :fields :security :shape :fields :password-salt :type]) => :text
+      (get-in result [:shape :fields :profile :type]) => :jsonb)))
+
 ^{:refer rt.postgres.grammar.typed-analyze/json-safe :added "4.1"}
 (fact "json-safe normalizes nested keywords, symbols, and sets"
   (analyze/json-safe {:a :kw

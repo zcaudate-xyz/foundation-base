@@ -1,56 +1,9 @@
 (ns rt.postgres.typed-test
-  (:require [rt.postgres.compile.json-openapi :as compile.json-openapi]
-            [rt.postgres.grammar.typed-common :as types]
+  (:require [rt.postgres.grammar.typed-common :as types]
+            [rt.postgres.grammar.typed-parse :as parse]
             [rt.postgres.script.test.scratch-v2 :as scratch]
             [rt.postgres.typed :as typed])
   (:use code.test))
-
-;; -----------------------------------------------------------------------------
-;; OpenAPI Generation Tests
-;; -----------------------------------------------------------------------------
-
-^{:refer rt.postgres.compile.json-openapi/generate-openapi :added "0.1"}
-(fact "generate-openapi generates correct OpenAPI spec for rt.postgres.script.test.scratch-v2"
-  (let [spec (compile.json-openapi/generate-openapi 'rt.postgres.script.test.scratch-v2 (constantly true))
-        paths (:paths spec)]
-    ;; Check that paths are generated
-    (map? paths) => true
-    (not (empty? paths)) => true))
-
-^{:refer rt.postgres.compile.json-openapi/generate-openapi :added "0.1"}
-(fact "generate-openapi generates valid OpenAPI structure"
-  (let [spec (compile.json-openapi/generate-openapi 'rt.postgres.script.test.scratch-v2 (constantly true))]
-    ;; Top-level required fields
-    (contains? spec :openapi) => true
-    (contains? spec :info) => true
-    (contains? spec :paths) => true
-    (contains? spec :components) => true
-    ;; Components structure
-    (contains? (:components spec) :schemas) => true
-    ;; Paths should be a map
-    (map? (:paths spec)) => true))
-
-^{:refer rt.postgres.compile.json-openapi/generate-openapi :added "0.1"}
-(fact "generate-openapi includes schemas in components"
-  (let [spec (compile.json-openapi/generate-openapi 'rt.postgres.script.test.scratch-v2 (constantly true))
-        schemas (get-in spec [:components :schemas])]
-    (map? schemas) => true))
-
-^{:refer rt.postgres.compile.json-openapi/generate-openapi :added "0.1"}
-(fact "generate-openapi filters paths based on predicate"
-  (let [spec (compile.json-openapi/generate-openapi 'rt.postgres.script.test.scratch-v2 #(clojure.string/starts-with? % "/rpc/insert"))
-        paths (keys (:paths spec))]
-    ;; Should only include insert functions
-    (every? #(clojure.string/starts-with? % "/rpc/insert") paths) => true))
-
-^{:refer rt.postgres.compile.json-openapi/generate-openapi :added "0.1"}
-(fact "generate-openapi response schemas are valid"
-  (let [spec (compile.json-openapi/generate-openapi 'rt.postgres.script.test.scratch-v2 (constantly true))
-        paths (:paths spec)]
-    ;; Check that response schemas exist for all paths
-    (doseq [[path methods] paths
-            [method op] methods]
-      (contains? op :responses) => true)))
 
 ;; -----------------------------------------------------------------------------
 ;; Public API Tests
@@ -191,6 +144,19 @@
     (get-in report [:analysis :mutating]) => true
     (get-in report [:analysis :source-tables]) => ["Entry"]))
 
+^{:refer rt.postgres.typed/get-function-report :added "4.1"}
+(fact "get-function-report lazily retrieves and caches infer reports for registered functions"
+  (typed/clear-registry!)
+  (let [analysis (-> 'rt.postgres.script.test.scratch-v2
+                     parse/analyze-namespace
+                     parse/register-types!)
+        fn-def   (some #(when (= "insert-entry" (:name %)) %)
+                       (:functions analysis))]
+    (typed/register-type! 'rt.postgres.script.test.scratch-v2/insert-entry fn-def)
+    (let [report (typed/get-function-report 'rt.postgres.script.test.scratch-v2/insert-entry)]
+      (get-in report [:function :name]) => "insert-entry"
+      (get-in report [:analysis :mutating]) => true)))
+
 ^{:refer rt.postgres.typed/report-json :added "4.1"}
 (fact "report-json serializes reports"
   (let [report (typed/make-function-report 'rt.postgres.script.test.scratch-v2
@@ -207,3 +173,249 @@
     (string? output) => true
     (clojure.string/includes? output "\"function\"") => true
     (clojure.string/includes? output "\"Entry\"") => true))
+
+^{:refer rt.postgres.typed/get-function-def :added "4.1"}
+(fact "get-function-def returns a registered function definition"
+  (typed/clear-registry!)
+  (let [fn-def (types/make-fn-def "test" "get-user" [] [:jsonb] {} nil)]
+    (typed/register-type! 'test/get-user fn-def)
+    (typed/get-function-def 'test/get-user) => fn-def))
+
+^{:refer rt.postgres.typed/get-function-input-shape :added "4.1"}
+(fact "get-function-input-shape infers jsonb input shape from a registered function"
+  (typed/clear-registry!)
+  (let [task-columns [(types/make-column-def :id
+                                             (types/make-type-ref :primitive nil :uuid)
+                                             {:required true :primary true})
+                      (types/make-column-def :status
+                                             (types/make-type-ref :primitive nil :text)
+                                             {:required true})
+                      (types/make-column-def :name
+                                             (types/make-type-ref :primitive nil :text)
+                                             {:required true})]
+        task-table (types/make-table-def "test.ns" "Task" task-columns :id)
+        form '(defn.pg ^{:%% :sql :- Task}
+                insert-task-raw
+                "inserts a task"
+                [:jsonb m :jsonb o-op]
+                (let [o-out (pg/t:insert Task m {:track o-op})]
+                  (return o-out)))
+        fn-def (parse/parse-defn form "test.ns" nil)]
+    (typed/register-type! 'test.ns/Task task-table)
+    (typed/register-type! 'test.ns/insert-task-raw fn-def)
+    (let [shape (typed/get-function-input-shape 'test.ns/insert-task-raw 'm)]
+      (types/jsonb-shape? shape) => true
+      (-> shape :fields keys set) => #{:id :status :name})))
+
+^{:refer rt.postgres.typed/get-function-input-shape :added "4.1"}
+(fact "get-function-input-shape follows derived payload vars through helper calls"
+  (typed/clear-registry!)
+  (let [task-columns [(types/make-column-def :id
+                                             (types/make-type-ref :primitive nil :uuid)
+                                             {:required true :primary true})
+                      (types/make-column-def :status
+                                             (types/make-type-ref :primitive nil :text)
+                                             {:required true})
+                      (types/make-column-def :name
+                                             (types/make-type-ref :primitive nil :text)
+                                             {:required true})]
+        task-table (types/make-table-def "test.ns" "Task" task-columns :id)
+        prep-form '(defn.pg
+                     prepare-task
+                     "prepares a task payload"
+                     [:jsonb m]
+                     (return (merge m {:status "pending"})))
+        insert-form '(defn.pg ^{:%% :sql :- Task}
+                       insert-task
+                       "inserts a prepared task"
+                       [:jsonb m]
+                       (let [v-prep (prepare-task m)
+                             v-input (merge v-prep {:name "demo"})]
+                         (pg/t:insert Task v-input)))
+        prep-def (parse/parse-defn prep-form "test.ns" nil)
+        insert-def (parse/parse-defn insert-form "test.ns" nil)]
+    (typed/register-type! 'test.ns/Task task-table)
+    (typed/register-type! 'test.ns/prepare-task prep-def)
+    (typed/register-type! 'test.ns/insert-task insert-def)
+    (let [shape (typed/get-function-input-shape 'test.ns/insert-task 'm)]
+      (types/jsonb-shape? shape) => true
+      (-> shape :fields keys set) => #{:id :status :name})))
+
+^{:refer rt.postgres.typed/get-function-input-shape :added "4.1"}
+(fact "get-function-input-shape infers accessed fields for transformed jsonb payloads"
+  (typed/clear-registry!)
+  (let [form '(defn.pg
+                prepare-topic
+                "prepares a topic payload"
+                [:jsonb m]
+                (let [(:uuid v-organisation-id) (pg/field-id m "organisation")
+                      #{(:text v-code)
+                        (:text v-format)
+                        (:citext v-currency-id)} m]
+                  (return
+                   (|| {:publish "none"}
+                       m
+                       {:code-full v-code
+                        :organisation-id v-organisation-id
+                        :format v-format
+                        :currency-id v-currency-id}))))
+        fn-def (parse/parse-defn form "test.ns" nil)]
+    (typed/register-type! 'test.ns/prepare-topic fn-def)
+    (let [shape (typed/get-function-input-shape 'test.ns/prepare-topic 'm)]
+      (types/jsonb-shape? shape) => true
+      (-> shape :fields keys set) => #{:organisation :code :format :currency-id}
+      (get-in shape [:fields :organisation :type]) => :uuid
+      (get-in shape [:fields :currency-id :type]) => :citext)))
+
+^{:refer rt.postgres.typed/get-function-input-shape :added "4.1"}
+(fact "get-function-input-shape handles plain-symbol jsonb destructuring and nested refinement"
+  (typed/clear-registry!)
+  (let [form '(defn.pg
+                prepare-account
+                "prepares an account payload"
+                [:jsonb i-created]
+                (let [#{o-profile
+                        v-account
+                        v-security} i-created
+                      #{(:text v-password-salt)} v-security
+                      #{(:boolean v-is-super)} v-account]
+                  (return
+                   (|| i-created
+                       {:password-salt v-password-salt
+                        :is-super v-is-super
+                        :profile o-profile}))))
+        fn-def (parse/parse-defn form "test.ns" nil)]
+    (typed/register-type! 'test.ns/prepare-account fn-def)
+    (let [shape (typed/get-function-input-shape 'test.ns/prepare-account 'i-created)]
+      (types/jsonb-shape? shape) => true
+      (-> shape :fields keys set) => #{:profile :account :security}
+      (get-in shape [:fields :account :type]) => :jsonb
+      (get-in shape [:fields :account :shape :fields :is-super :type]) => :boolean
+      (get-in shape [:fields :security :shape :fields :password-salt :type]) => :text)))
+
+^{:refer rt.postgres.typed/get-function-input-schema :added "4.1"}
+(fact "get-function-input-schema formats inferred input shapes"
+  (typed/clear-registry!)
+  (let [task-columns [(types/make-column-def :id
+                                             (types/make-type-ref :primitive nil :uuid)
+                                             {:required true :primary true})
+                      (types/make-column-def :status
+                                             (types/make-type-ref :primitive nil :text)
+                                             {:required true})]
+        task-table (types/make-table-def "test.ns" "Task" task-columns :id)
+        form '(defn.pg ^{:%% :sql :- Task}
+                insert-task-raw
+                "inserts a task"
+                [:jsonb m]
+                (pg/t:insert Task m))
+        fn-def (parse/parse-defn form "test.ns" nil)]
+    (typed/register-type! 'test.ns/Task task-table)
+    (typed/register-type! 'test.ns/insert-task-raw fn-def)
+    (get-in (typed/get-function-input-schema 'test.ns/insert-task-raw 'm :openapi)
+            [:properties "id" :format]) => "uuid"
+    (get-in (typed/get-function-input-schema 'test.ns/insert-task-raw 'm :json-schema)
+            [:properties "status" :type]) => "string"
+    (string? (typed/get-function-input-schema 'test.ns/insert-task-raw 'm :typescript)) => true))
+
+^{:refer rt.postgres.typed/get-app-function-input-shape :added "4.1"}
+(fact "get-app-function-input-shape infers jsonb input shape from an app typed payload"
+  (typed/clear-registry!)
+  (let [task-columns [(types/make-column-def :id
+                                             (types/make-type-ref :primitive nil :uuid)
+                                             {:required true :primary true})
+                      (types/make-column-def :status
+                                             (types/make-type-ref :primitive nil :text)
+                                             {:required true})]
+        task-table (types/make-table-def "test.ns" "Task" task-columns :id)
+        form '(defn.pg ^{:%% :sql :- Task}
+                insert-task-raw
+                "inserts a task"
+                [:jsonb m]
+                (pg/t:insert Task m))
+        fn-def (parse/parse-defn form "test.ns" nil)
+        typed-payload {:tables {'test.ns/Task task-table}
+                       :enums {}
+                       :functions {'test.ns/insert-task-raw fn-def}}]
+    (with-redefs [rt.postgres.grammar.common-application/app-typed (fn [_] typed-payload)]
+      (let [shape (typed/get-app-function-input-shape "demo" 'test.ns/insert-task-raw 'm)]
+        (types/jsonb-shape? shape) => true
+        (-> shape :fields keys set) => #{:id :status}))))
+
+^{:refer rt.postgres.typed/get-function-output-shape :added "4.1"}
+(fact "get-function-output-shape infers merged output shape for transformed jsonb payloads"
+  (typed/clear-registry!)
+  (let [form '(defn.pg
+                prepare-topic
+                "prepares a topic payload"
+                [:jsonb m]
+                (let [(:uuid v-organisation-id) (pg/field-id m "organisation")
+                      #{(:text v-code)
+                        (:text v-format)
+                        (:citext v-currency-id)} m]
+                  (return
+                   (|| {:publish "none"
+                        :timespan "year"}
+                       m
+                       {:code-full v-code
+                        :organisation-id v-organisation-id
+                        :detail (:-> m "detail")
+                        :format v-format
+                        :currency-id v-currency-id}))))
+        fn-def (parse/parse-defn form "test.ns" nil)]
+    (typed/register-type! 'test.ns/prepare-topic fn-def)
+    (let [shape (typed/get-function-output-shape 'test.ns/prepare-topic)]
+      (types/jsonb-shape? shape) => true
+      (-> shape :fields keys set) => #{:publish
+                                       :timespan
+                                       :organisation
+                                       :code
+                                       :format
+                                       :currency-id
+                                       :code-full
+                                       :organisation-id
+                                       :detail}
+      (get-in shape [:fields :detail :type]) => :jsonb)))
+
+^{:refer rt.postgres.typed/get-function-output-shape :added "4.1"}
+(fact "get-function-output-shape preserves nested jsonb refinement from plain child bindings"
+  (typed/clear-registry!)
+  (let [form '(defn.pg
+                prepare-account
+                "prepares an account payload"
+                [:jsonb i-created]
+                (let [#{o-profile
+                        v-account
+                        v-security} i-created
+                      #{(:text v-password-salt)} v-security]
+                  (return
+                   (|| i-created
+                       {:profile o-profile
+                        :password-salt v-password-salt}))))
+        fn-def (parse/parse-defn form "test.ns" nil)]
+    (typed/register-type! 'test.ns/prepare-account fn-def)
+    (let [shape (typed/get-function-output-shape 'test.ns/prepare-account)]
+      (types/jsonb-shape? shape) => true
+      (get-in shape [:fields :security :shape :fields :password-salt :type]) => :text
+      (get-in shape [:fields :profile :type]) => :jsonb)))
+
+^{:refer rt.postgres.typed/get-function-output-schema :added "4.1"}
+(fact "get-function-output-schema formats inferred output shapes"
+  (typed/clear-registry!)
+  (let [form '(defn.pg
+                prepare-topic
+                "prepares a topic payload"
+                [:jsonb m]
+                (let [(:uuid v-organisation-id) (pg/field-id m "organisation")
+                      #{(:text v-code)} m]
+                  (return
+                   (|| {:publish "none"}
+                       m
+                       {:code-full v-code
+                        :organisation-id v-organisation-id}))))
+        fn-def (parse/parse-defn form "test.ns" nil)]
+    (typed/register-type! 'test.ns/prepare-topic fn-def)
+    (get-in (typed/get-function-output-schema 'test.ns/prepare-topic :openapi)
+            [:properties "organisation_id" :format]) => "uuid"
+    (get-in (typed/get-function-output-schema 'test.ns/prepare-topic :json-schema)
+            [:properties "publish" :type]) => "string"
+    (string? (typed/get-function-output-schema 'test.ns/prepare-topic :typescript)) => true))

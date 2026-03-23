@@ -1,42 +1,15 @@
 (ns rt.postgres.compile.common-test
   (:require [rt.postgres.compile.common :as compile.common]
             [rt.postgres.grammar.typed-common :as types]
-            [rt.postgres.grammar.typed-parse :as parse]
-            [rt.postgres.grammar.typed-shape :as shape])
+            [rt.postgres.grammar.typed-parse :as parse])
   (:use code.test))
 
 ;; -----------------------------------------------------------------------------
-;; OpenAPI Schema Generation Tests
+;; Shared Compile Helpers
 ;; -----------------------------------------------------------------------------
 
-^{:refer rt.postgres.compile.common/shape->openapi :added "0.1"}
-(fact "shape->openapi converts JsonbShape to OpenAPI schema"
-  (let [shape (types/make-jsonb-shape {:id {:type :uuid :nullable? false}
-                                        :name {:type :text :nullable? true}}
-                                        :User)
-        result (compile.common/shape->openapi shape)]
-    (:type result) => "object"
-    (contains? (:properties result) "id") => true
-    (contains? (:properties result) "name") => true
-    (:required result) => ["id"]))
-
-^{:refer rt.postgres.compile.common/shape->openapi :added "0.1"}
-(fact "shape->openapi handles various primitive types"
-  (let [shape (types/make-jsonb-shape {:s {:type :text}
-                                        :n {:type :integer}
-                                        :f {:type :numeric}
-                                        :b {:type :boolean}
-                                        :j {:type :jsonb}}
-                                        :Test)
-        result (compile.common/shape->openapi shape)]
-    (get-in result [:properties "s" :type]) => "string"
-    (get-in result [:properties "n" :type]) => "integer"
-    (get-in result [:properties "f" :type]) => "number"
-    (get-in result [:properties "b" :type]) => "boolean"
-    (get-in result [:properties "j" :type]) => "object"))
-
-^{:refer rt.postgres.compile.common/fn->openapi :added "0.1"}
-(fact "fn->openapi generates OpenAPI operation from FnDef"
+^{:refer rt.postgres.compile.common/infer-jsonb-arg-shape :added "0.1"}
+(fact "infer-jsonb-arg-shape traces jsonb args to target table shapes"
   ;; Clear and setup
   (types/clear-registry!)
   (let [task-columns [(types/make-column-def :id
@@ -48,9 +21,8 @@
                       (types/make-column-def :name
                                              (types/make-type-ref :primitive nil :text)
                                              {:required true})]
-        task-table (types/make-table-def "test.ns" "Task" task-columns :id nil nil)]
-    (types/register-type! 'Task task-table)
-    (types/register-type! '-/Task task-table)
+        task-table (types/make-table-def "test.ns" "Task" task-columns :id)]
+    (types/register-type! 'test.ns/Task task-table)
     ;; Parse function
     (let [form '(defn.pg ^{:%% :sql :- Task}
                   insert-task-raw
@@ -60,125 +32,40 @@
                     (return o-out)))
           fn-def (parse/parse-defn form "test.ns" nil)
           _ (types/register-type! (symbol "test.ns" "insert-task-raw") fn-def)
-          openapi (compile.common/fn->openapi fn-def)
-          request-schema (get-in openapi [:requestBody :content "application/json" :schema])
-          m-schema (get-in request-schema [:properties "m"])]
-      ;; Verify m has Task shape
-      (:type m-schema) => "object"
-      (contains? (:properties m-schema) "id") => true
-      (contains? (:properties m-schema) "status") => true
-      (contains? (:properties m-schema) "name") => true)))
+          inferred (compile.common/infer-jsonb-arg-shape 'm fn-def)]
+      (:source-table inferred) => "Task"
+      (-> inferred :fields keys set) => #{:id :status :name})))
 
-^{:refer rt.postgres.compile.common/fn->openapi :added "0.1"}
-(fact "fn->openapi uses output field for response schema - TABLE REF"
-  (let [form '(defn.pg ^{:%% :sql :- Entry}
-                insert-entry
-                "inserts an entry"
-                [:text i-name :jsonb i-tags]
-                (pg/t:insert Entry {:name i-name :tags i-tags}))
-        fn-def (parse/parse-defn form "test.ns" nil)
-        openapi (compile.common/fn->openapi fn-def)
-        response-schema (get-in openapi [:responses "200" :content "application/json" :schema])]
-    ;; Returns reference to Entry schema
-    response-schema => {:$ref "#/components/schemas/Entry"}))
-
-^{:refer rt.postgres.compile.common/fn->openapi :added "0.1"}
-(fact "fn->openapi filters out o-op from request body"
-  (let [form '(defn.pg ^{:%% :sql :- Task}
-                insert-task
-                "inserts a task"
-                [:text i-name :jsonb o-op]
-                (let [o-out (pg/t:insert Task {:name i-name} {:track o-op})]
-                  (return o-op)))
-        fn-def (parse/parse-defn form "test.ns" nil)
-        openapi (compile.common/fn->openapi fn-def)
-        request-schema (get-in openapi [:requestBody :content "application/json" :schema])]
-    ;; o-op should NOT appear in inputs (stripped prefix becomes "op")
-    (contains? (:properties request-schema) "op") => false))
-
-^{:refer rt.postgres.compile.common/generate-openapi :added "0.1"}
-(fact "generate-openapi creates full OpenAPI spec from namespace"
-  (let [spec (compile.common/generate-openapi 'rt.postgres.grammar.typed-common-test (constantly true))]
-    (contains? spec :openapi) => true
-    (contains? spec :paths) => true
-    (contains? spec :components) => true))
-
-;; -----------------------------------------------------------------------------
-;; JSON Schema Generation Tests
-;; -----------------------------------------------------------------------------
-
-^{:refer rt.postgres.compile.common/shape->jschema :added "0.1"}
-(fact "shape->jschema generates JSON Schema from shape"
-  (let [shape (types/make-jsonb-shape {:id {:type :uuid}
-                                        :name {:type :text}}
-                                        :User)
-        result (compile.common/shape->jschema shape)]
-    (:type result) => "object"
-    (contains? (:properties result) "id") => true
-    (contains? (:properties result) "name") => true))
-
-^{:refer rt.postgres.compile.common/generate-jschema :added "0.1"}
-(fact "generate-jschema creates JSON Schema for all types"
-  (let [schemas (compile.common/generate-jschema)]
-    (map? schemas) => true))
-
-;; -----------------------------------------------------------------------------
-;; TypeScript Generation Tests
-;; -----------------------------------------------------------------------------
-
-^{:refer rt.postgres.compile.common/shape->ts-interface :added "0.1"}
-(fact "shape->ts-interface generates TypeScript interface"
-  (let [shape (types/make-jsonb-shape {:id {:type :uuid :nullable? false}
-                                        :name {:type :text :nullable? true}}
-                                        :User)
-        result (compile.common/shape->ts-interface shape "IUser")]
-    (clojure.string/includes? result "interface IUser") => true
-    (clojure.string/includes? result "id: string") => true
-    (clojure.string/includes? result "name: string | null") => true))
-
-^{:refer rt.postgres.compile.common/shape->ts-interface :added "0.1"}
-(fact "shape->ts-interface handles various types"
-  (let [shape (types/make-jsonb-shape {:active {:type :boolean}
-                                        :count {:type :integer}
-                                        :amount {:type :numeric}
-                                        :data {:type :jsonb}}
-                                        :Test)
-        result (compile.common/shape->ts-interface shape "ITest")]
-    (clojure.string/includes? result "active: boolean") => true
-    (clojure.string/includes? result "count: number") => true
-    (clojure.string/includes? result "amount: number") => true
-    (clojure.string/includes? result "data: Record<string, unknown>") => true))
-
-^{:refer rt.postgres.compile.common/shape->ts-interface :added "0.1"}
-(fact "shape->ts-interface uses snake_case keys"
-  (let [shape (types/make-jsonb-shape {:time-created {:type :bigint :nullable? true}
-                                        :op-created {:type :uuid :nullable? true}}
-                                        :User)
-        result (compile.common/shape->ts-interface shape "IUser")]
-    (clojure.string/includes? result "time_created") => true
-    (clojure.string/includes? result "op_created") => true
-    ;; Should NOT have kebab-case
-    (clojure.string/includes? result "time-created") => false))
-
-^{:refer rt.postgres.compile.common/generate-typescript :added "0.1"}
-(fact "generate-typescript creates TypeScript interfaces for all types"
-  (let [ts-code (compile.common/generate-typescript)]
-    (string? ts-code) => true))
-
-;; -----------------------------------------------------------------------------
-;; Emit Tests
-;; -----------------------------------------------------------------------------
-
-^{:refer rt.postgres.compile.common/emit :added "0.1"}
-(fact "emit generates output in specified format"
-  (let [openapi (compile.common/emit :openapi 'rt.postgres.grammar.typed-common-test (constantly true))]
-    (contains? openapi :openapi) => true)
-  (let [jschema (compile.common/emit :jschema)]
-    (map? jschema) => true)
-  (let [typescript (compile.common/emit :typescript)]
-    (string? typescript) => true))
-
-^{:refer rt.postgres.compile.common/emit :added "0.1"}
-(fact "emit throws for unknown format"
-  (compile.common/emit :unknown)
-  => (throws Exception))
+^{:refer rt.postgres.compile.common/infer-jsonb-arg-shape :added "4.1"}
+(fact "infer-jsonb-arg-shape follows derived payload vars through helper calls"
+  (types/clear-registry!)
+  (let [task-columns [(types/make-column-def :id
+                                             (types/make-type-ref :primitive nil :uuid)
+                                             {:required true :primary true})
+                      (types/make-column-def :status
+                                             (types/make-type-ref :primitive nil :text)
+                                             {:required true})
+                      (types/make-column-def :name
+                                             (types/make-type-ref :primitive nil :text)
+                                             {:required true})]
+        task-table (types/make-table-def "test.ns" "Task" task-columns :id)
+        prep-form '(defn.pg
+                     prepare-task
+                     "prepares a task payload"
+                     [:jsonb m]
+                     (return (merge m {:status "pending"})))
+        insert-form '(defn.pg ^{:%% :sql :- Task}
+                       insert-task
+                       "inserts a prepared task"
+                       [:jsonb m]
+                       (let [v-prep (prepare-task m)
+                             v-input (merge v-prep {:name "demo"})]
+                         (pg/t:insert Task v-input)))
+        prep-def (parse/parse-defn prep-form "test.ns" nil)
+        insert-def (parse/parse-defn insert-form "test.ns" nil)]
+    (types/register-type! 'test.ns/Task task-table)
+    (types/register-type! 'test.ns/prepare-task prep-def)
+    (types/register-type! 'test.ns/insert-task insert-def)
+    (let [inferred (compile.common/infer-jsonb-arg-shape 'm insert-def)]
+      (:source-table inferred) => "Task"
+      (-> inferred :fields keys set) => #{:id :status :name})))

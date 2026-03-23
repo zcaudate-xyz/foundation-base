@@ -115,9 +115,8 @@
                        (partition 2)
                        (map vec)
                        (map (fn [[k v]] [(symbol (f/strn k)) v]))
-                       (into {}))
-         typed-info (app-create-typed tables modules)]
-     (app-create-raw tables links typed-info))))
+                       (into {}))]
+     (app-create-raw tables links))))
 
 (defn app-clear
   "clears the entry for an app"
@@ -172,4 +171,9 @@
   "gets the app typed payload"
   {:added "4.1"}
   ([name]
-   (:typed (get @*applications* name))))
+   (or (:typed (get @*applications* name))
+       (when-let [curr (get @*applications* name)]
+         (let [typed-info (app-create-typed (:tables curr)
+                                            (app-modules name))]
+           (get-in (swap! *applications* assoc-in [name :typed] typed-info)
+                   [name :typed]))))))
