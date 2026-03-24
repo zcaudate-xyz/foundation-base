@@ -53,3 +53,10 @@
 (fact "generate-ts-schema creates TypeScript interfaces for all types"
   (let [ts-code (compile.ts/generate-ts-schema)]
     (string? ts-code) => true))
+
+
+^{:refer rt.postgres.compile.ts-schema/type->ts :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.postgres.compile.ts-schema/field->ts :added "4.1"}
+(fact "TODO")

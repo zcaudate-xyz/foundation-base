@@ -9,11 +9,11 @@
             [std.lib.walk :as walk]
             [std.string.case :as case]))
 
-(defn- to-lookup
+(defn to-lookup
   [arr]
   (zipmap arr (repeat true)))
 
-(defn- plain-symbol?
+(defn plain-symbol?
   [form]
   (and (symbol? form)
        (not (namespace form))))

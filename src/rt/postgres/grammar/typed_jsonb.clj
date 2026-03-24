@@ -84,7 +84,7 @@
     :else
     (some-> (access-descriptor ctx expr) :path)))
 
-(defn- set-binding-descriptors
+(defn set-binding-descriptors
   [source-path binding]
   (into []
         (keep (fn [entry]
@@ -181,7 +181,43 @@
 
 (declare scan-form)
 
-(defn- analyze-binding
+(defn js-keys-form->keywords
+  "Extracts keyword field names from common `(js [...])`/vector forms."
+  [form]
+  (let [v (cond
+            (vector? form) form
+            (and (seq? form)
+                 (symbol? (first form))
+                 (= "js" (name (first form)))
+                 (vector? (second form)))
+            (second form)
+            :else nil)]
+    (when (vector? v)
+      (->> v
+           (keep (fn [x]
+                   (cond
+                     (string? x) (keyword x)
+                     (keyword? x) x
+                     :else nil)))
+           (vec)))))
+
+(defn js-select-descriptors
+  "Generates descriptors for `(js-select <jsonb> (js [\"k\" ...]))`-style access."
+  [ctx form]
+  (when (and (seq? form)
+             (symbol? (first form))
+             (= "js-select" (name (first form))))
+    (let [source-expr (second form)
+          keys-expr (nth form 2 nil)
+          source-path (expr-jsonb-path ctx source-expr)
+          field-keys (js-keys-form->keywords keys-expr)]
+      (when (and source-path (seq field-keys))
+        (mapv (fn [k]
+                {:path (append-path source-path k)
+                 :field-info (field-info :jsonb)})
+              field-keys)))))
+
+(defn analyze-binding
   [ctx [binding expr]]
   (let [ctx' (scan-form ctx expr)]
     (apply-descriptors ctx'
@@ -192,9 +228,11 @@
   (cond
     (seq? form)
     (let [ctx' (apply-descriptors ctx
-                                  (if (accessor-expr? form)
-                                    (access-descriptors ctx form)
-                                    []))]
+                                  (concat (if (accessor-expr? form)
+                                            (access-descriptors ctx form)
+                                            [])
+                                          (or (js-select-descriptors ctx form)
+                                              [])))]
       (if (and (= 'let (first form))
                (sequential? (second form)))
         (let [ctx'' (reduce analyze-binding ctx' (partition 2 (second form)))]

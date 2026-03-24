@@ -5,7 +5,7 @@
 
 (declare shape->json-schema)
 
-(defn- field->json-schema
+(defn field->json-schema
   "Converts a field descriptor to JSON Schema."
   [field-info]
   (let [t (:type field-info)]

@@ -241,3 +241,19 @@
   (parse/script? '(script :postgres {:require []})) => true
   (parse/script? '(script :mysql {:require []})) => false
   (parse/script? '(defn test [])) => false)
+
+
+^{:refer rt.postgres.grammar.typed-parse/parse-schema :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.postgres.grammar.typed-parse/extract-aliases :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.postgres.grammar.typed-parse/parse-aliases :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.postgres.grammar.typed-parse/parse-process-constraints :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.postgres.grammar.typed-parse/transform-col-opts :added "4.1"}
+(fact "TODO")

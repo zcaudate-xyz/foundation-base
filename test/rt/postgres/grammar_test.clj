@@ -113,3 +113,13 @@
 
 (comment
   )
+
+
+^{:refer rt.postgres.grammar/pg-tf-free-data :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.postgres.grammar/pg-tf-free-vec :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.postgres.grammar/pg-vector :added "4.1"}
+(fact "TODO")

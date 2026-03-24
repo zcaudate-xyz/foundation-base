@@ -4,6 +4,7 @@
             [rt.postgres.compile.common :as compile.common]
             [rt.postgres.grammar.typed-common :as types]
             [rt.postgres.grammar.typed-jsonb :as typed-jsonb]
+            [rt.postgres.grammar.typed-parse :as parse]
             [rt.postgres.grammar.typed-shape :as shape]
             [std.json :as json]))
 
@@ -39,7 +40,7 @@
 ;; Table Resolution
 ;; ─────────────────────────────────────────────────────────────────────────────
 
-(defn- resolve-table [table-expr]
+(defn resolve-table [table-expr]
   (cond
     ;; Handle quoted symbols like '-/AccessRequest
     (and (seq? table-expr)
@@ -81,7 +82,7 @@
   [sym f]
   (swap! +call-analyzers+ assoc sym f))
 
-(defn- analyzed->shape
+(defn analyzed->shape
   [value]
   (cond
     (types/jsonb-shape? value)
@@ -93,7 +94,7 @@
 
     :else nil))
 
-(defn- analyzed->field-info
+(defn analyzed->field-info
   [value]
   (cond
     (types/jsonb-shape? value)
@@ -131,11 +132,11 @@
     :else
     value))
 
-(defn- value->field-info
+(defn value->field-info
   [value]
   (analyzed->field-info value))
 
-(defn- merge-analyzed-shapes
+(defn merge-analyzed-shapes
   [analyzed]
   (let [shapes (keep (fn [v]
                        (let [shape (or (:shape v) v)]
@@ -144,7 +145,7 @@
     (when (seq shapes)
       (reduce types/merge-shapes (types/empty-jsonb-shape) shapes))))
 
-(defn- merge-array-element-types
+(defn merge-array-element-types
   [left right]
   (cond
     (nil? left)
@@ -178,7 +179,7 @@
     {:kind :union
      :types [left right]}))
 
-(defn- literal-map-key
+(defn literal-map-key
   [k]
   (cond
     (string? k) k
@@ -188,7 +189,7 @@
     (symbol? k) (name k)
     :else k))
 
-(defn- resolve-called-fn
+(defn resolve-called-fn
   [op aliases]
   (let [op-name (name op)
         op-ns (namespace op)
@@ -204,10 +205,22 @@
                    (first (filter (fn [f]
                                     (and (types/fn-def? f)
                                          (= op-name (:name f))))
-                                  (vals @types/*type-registry*))))]
+                                  (vals @types/*type-registry*))))
+        fn-def (if (or fn-def (nil? (namespace resolved-op)))
+                 fn-def
+                 (do
+                   (try
+                     (-> resolved-op namespace symbol parse/analyze-namespace parse/register-types!)
+                     (catch Throwable _ nil))
+                   (or (types/get-type resolved-op)
+                       (types/get-type (symbol op-name))
+                       (first (filter (fn [f]
+                                        (and (types/fn-def? f)
+                                             (= op-name (:name f))))
+                                      (vals @types/*type-registry*))))))]
     [resolved-op fn-def]))
 
-(defn- analyze-table-op [op-sym args ctx]
+(defn analyze-table-op [op-sym args ctx]
   (let [op-info (get +pg-operations+ op-sym)
         table-expr (first args)
         table-def (resolve-table table-expr)]
@@ -224,7 +237,7 @@
           {:kind :unknown}))
       {:kind :unknown :op op-sym})))
 
-(defn- analyze-jsonb-merge
+(defn analyze-jsonb-merge
   "CRITIQUE FIX #4: Uses shape/merge-shapes - no local merge logic."
   [args ctx]
   (let [merge-step (fn [acc expr]
@@ -240,7 +253,7 @@
      :shape merged-shape
      :op :merge}))
 
-(defn- analyze-jsonb-access
+(defn analyze-jsonb-access
   "Analyzes :-> (jsonb) and :->> (text) operators."
   [accessor args ctx]
   (let [source (analyze-expr (first args) ctx)
@@ -249,14 +262,14 @@
      :field field-name
      :type (if (= accessor :->) :jsonb :text)}))
 
-(defn- analyze-jsonb-accessor-expr
+(defn analyze-jsonb-accessor-expr
   [expr ctx]
   (when-let [{:keys [field-info]} (typed-jsonb/access-descriptor ctx expr)]
     {:kind :field-access
      :field (nth expr 2 nil)
      :type (:type field-info)}))
 
-(defn- analyze-let [bindings body ctx]
+(defn analyze-let [bindings body ctx]
   (let [bind-entry (fn [c bind-name bind-val]
                      (let [val-type (analyze-expr bind-val c)]
                        (if-let [descriptors (seq (typed-jsonb/binding-descriptors c bind-name bind-val))]
@@ -283,7 +296,7 @@
                         (partition 2 bindings))]
     (analyze-expr (last body) new-ctx)))
 
-(defn- analyze-control-flow [form ctx]
+(defn analyze-control-flow [form ctx]
   (let [branches (case (first form)
                    (if cond) (rest form)
                    (when) [(nth form 1 nil) nil]
@@ -479,7 +492,7 @@
 ;; JSON-Friendly Reporting
 ;; ─────────────────────────────────────────────────────────────────────────────
 
-(defn- normalize-table-name
+(defn normalize-table-name
   [table-expr]
   (cond
     (and (seq? table-expr)
@@ -551,7 +564,7 @@
     :else
     x))
 
-(defn- inferred->report
+(defn inferred->report
   [inferred]
   (cond
     (nil? inferred)

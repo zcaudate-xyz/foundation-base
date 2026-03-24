@@ -104,3 +104,22 @@
       #(do (app-typed "test.postgres")
            (get-in @*applications* ["test.postgres" :typed]))))
   => {:typed true})
+
+
+^{:refer rt.postgres.grammar.common-application/application-string :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.postgres.grammar.common-application/app-list-entries :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.postgres.grammar.common-application/app-get-entry :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.postgres.grammar.common-application/app-get-deps :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.postgres.grammar.common-application/module-typed :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.postgres.grammar.common-application/app-create-typed :added "4.1"}
+(fact "TODO")

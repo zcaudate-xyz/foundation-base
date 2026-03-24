@@ -7,7 +7,7 @@
 
 (declare shape->openapi)
 
-(defn- field->openapi
+(defn field->openapi
   "Converts a field descriptor to OpenAPI schema."
   [field-info]
   (let [t (:type field-info)]
@@ -35,7 +35,7 @@
     (cond-> {:type "object" :properties properties}
       (seq required) (assoc :required required))))
 
-(defn- arg->openapi
+(defn arg->openapi
   "Converts a function argument to OpenAPI parameter schema.
    For :jsonb types that map to table inputs, uses the table's shape."
   [arg fn-def]

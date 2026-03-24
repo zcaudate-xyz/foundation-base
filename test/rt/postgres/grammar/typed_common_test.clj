@@ -482,3 +482,7 @@
     (types/shape-at-path root-shape [:profile]) => profile-shape
     (types/shape-at-path root-shape [:detail]) => (types/empty-jsonb-shape)
     (types/shape-at-path root-shape [:missing]) => nil))
+
+
+^{:refer rt.postgres.grammar.typed-common/valid-key? :added "4.1"}
+(fact "TODO")

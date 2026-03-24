@@ -70,3 +70,7 @@
 (fact "list-targets exposes the supported db targets"
   (list-targets)
   => '(:supabase-db))
+
+
+^{:refer rt.postgres.compile.server-db/collect-pg-ops :added "4.1"}
+(fact "TODO")

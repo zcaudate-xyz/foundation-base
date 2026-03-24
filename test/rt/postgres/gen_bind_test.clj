@@ -409,3 +409,10 @@
        [divf rt.postgres.script.test.scratch-v1/divf]
        [insert-task rt.postgres.script.test.scratch-v1/insert-task]
        [insert-entry rt.postgres.script.test.scratch-v1/insert-entry]])
+
+
+^{:refer rt.postgres.gen-bind/to-lookup :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.postgres.gen-bind/plain-symbol? :added "4.1"}
+(fact "TODO")

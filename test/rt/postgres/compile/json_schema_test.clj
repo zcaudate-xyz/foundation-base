@@ -29,3 +29,7 @@
 (fact "generate-json-schema creates JSON Schema for all types"
   (let [schemas (compile.json-schema/generate-json-schema)]
     (map? schemas) => true))
+
+
+^{:refer rt.postgres.compile.json-schema/field->json-schema :added "4.1"}
+(fact "TODO")

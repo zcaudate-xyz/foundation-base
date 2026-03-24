@@ -149,3 +149,16 @@
 
   (compile.common/resolve-type {:type :mystery} :ts)
   => "string")
+
+
+^{:refer rt.postgres.compile.common/form-uses-tracked? :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.postgres.compile.common/find-table-op-in-body :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.postgres.compile.common/resolve-called-fn :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.postgres.compile.common/infer-jsonb-arg-shape* :added "4.1"}
+(fact "TODO")

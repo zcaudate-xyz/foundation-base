@@ -144,3 +144,10 @@
     (doseq [[_path methods] paths
             [_method op] methods]
       (contains? op :responses) => true)))
+
+
+^{:refer rt.postgres.compile.json-openapi/field->openapi :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.postgres.compile.json-openapi/arg->openapi :added "4.1"}
+(fact "TODO")

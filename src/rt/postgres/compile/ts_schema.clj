@@ -6,7 +6,7 @@
 
 (declare shape->ts-interface)
 
-(defn- type->ts
+(defn type->ts
   "Converts a type descriptor to TypeScript type string."
   [field-info]
   (let [t (:type field-info)]
@@ -25,7 +25,7 @@
 
       :else (compile.common/resolve-type field-info :ts))))
 
-(defn- field->ts
+(defn field->ts
   "Converts a field to TypeScript property declaration."
   [[k v]]
   (let [ts-type (type->ts v)

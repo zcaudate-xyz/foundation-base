@@ -14,21 +14,21 @@
 (defonce ^:dynamic *applications*
   (atom {}))
 
-(defn- application-string
+(defn application-string
   ([app]
    (str "#pg.app [" (count (:tables app)) "]\n"
         (prose/layout-lines (sort (keys (:tables app))))
         "\n")))
 
-(defn- app-list-entries
+(defn app-list-entries
   ([app]
    (keys (get app :tables))))
 
-(defn- app-get-entry
+(defn app-get-entry
   ([app id]
    (get-in app [:schema :tree (name id)])))
 
-(defn- app-get-deps
+(defn app-get-deps
   ([app id]
    (->> (get-in app [:tables id])
         (partition 2)
@@ -80,7 +80,7 @@
     (cond-> (assoc app :lu lu)
       typed-info (assoc :typed typed-info))))
 
-(defn- module-typed
+(defn module-typed
   [modules]
   (->> modules
        (map (comp tparse/analyze-namespace #(symbol (str (:id %)))))
@@ -88,7 +88,7 @@
        (map typed/analysis->typed)
        (apply typed/merge-typed)))
 
-(defn- app-create-typed
+(defn app-create-typed
   [tables modules]
   (typed/merge-typed (-> tables tparse/analyze-tables typed/analysis->typed)
                      (module-typed modules)))

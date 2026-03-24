@@ -10,7 +10,7 @@
             [std.lib.collection :as collection]
             [std.lib.foundation :as f]))
 
-(defn pg-defn-format
+(defn pg-defnformat
   "formats a defn form"
   {:added "4.0"}
   ([form]
@@ -25,7 +25,7 @@
              args
              body)])))
 
-(def +pg-defn-lang-types+                   
+(def +pg-defnlang-types+                   
   {:default  {:tag "plpgsql"  :lang :postgres}  
    :sql      {:tag "sql"      :lang :postgres}
    :js       {:tag "plv8"     :lang :js}  
@@ -44,7 +44,7 @@
                                       mopts)
         {:static/keys [schema props return language]
          :or {language :default}} (meta sym)
-        {:keys [tag lang] :as m :or {lang language}} (get +pg-defn-lang-types+ language)
+        {:keys [tag lang] :as m :or {lang language}} (get +pg-defnlang-types+ language)
         schstr (if (not-empty schema)
                  (str "\"" schema "\"" "."))
         fnstr  (str schstr preamble)

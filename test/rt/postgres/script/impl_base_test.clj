@@ -382,3 +382,7 @@
 
   (t-wrap-lock [:select :*] [:share :nowait] {:newline true})
   => [:select :* \\ :for :share :nowait])
+
+
+^{:refer rt.postgres.script.impl-base/t-join-target-sym :added "4.1"}
+(fact "TODO")

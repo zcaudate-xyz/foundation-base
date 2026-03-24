@@ -14,7 +14,7 @@
 
 (declare map-schema->shape)
 
-(defn- map-schema-entry->field-type
+(defn map-schema-entry->field-type
        "Converts a single map schema entry to a field descriptor.
    Handles nested map schemas recursively."
        [entry-key entry-val]
@@ -41,7 +41,7 @@
                                map-schema)]
                  (types/make-jsonb-shape fields))))
 
-(defn- resolve-column-type
+(defn resolve-column-type
        "Resolves a ColumnDef's type to a field descriptor.
    Handles map schemas by creating nested JsonbShapes for :type :map columns."
        [col]

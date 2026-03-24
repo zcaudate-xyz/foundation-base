@@ -123,3 +123,10 @@
     (map? result) => true
     (contains? result :fields) => true
     (contains? result :source-table) => true))
+
+
+^{:refer rt.postgres.grammar.typed-shape/map-schema-entry->field-type :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.postgres.grammar.typed-shape/resolve-column-type :added "4.1"}
+(fact "TODO")

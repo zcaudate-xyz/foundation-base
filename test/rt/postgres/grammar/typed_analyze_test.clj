@@ -176,3 +176,65 @@
       :b "sym"
       :c [1 2]
       :d {"inner" "v"}})
+
+^{:refer rt.postgres.grammar.typed-analyze/infer-return-type :added "4.1"}
+(fact "infer-return-type auto-registers referenced function namespaces"
+  (types/clear-registry!)
+  (let [form '(defn.pg
+                call-insert
+                [:text i-name :jsonb i-tags :jsonb o-op]
+                (rt.postgres.script.test.scratch-v2/insert-entry i-name i-tags o-op))
+        fn-def (parse/parse-defn form "test.ns" nil)]
+    (types/register-type! 'test.ns/call-insert fn-def)
+    (let [result (analyze/infer-return-type fn-def)]
+      (types/jsonb-shape? result) => true
+      (:source-table result) => "Entry")))
+
+
+^{:refer rt.postgres.grammar.typed-analyze/resolve-table :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.postgres.grammar.typed-analyze/analyzed->shape :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.postgres.grammar.typed-analyze/analyzed->field-info :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.postgres.grammar.typed-analyze/value->field-info :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.postgres.grammar.typed-analyze/merge-analyzed-shapes :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.postgres.grammar.typed-analyze/merge-array-element-types :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.postgres.grammar.typed-analyze/literal-map-key :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.postgres.grammar.typed-analyze/resolve-called-fn :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.postgres.grammar.typed-analyze/analyze-table-op :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.postgres.grammar.typed-analyze/analyze-jsonb-merge :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.postgres.grammar.typed-analyze/analyze-jsonb-access :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.postgres.grammar.typed-analyze/analyze-jsonb-accessor-expr :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.postgres.grammar.typed-analyze/analyze-let :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.postgres.grammar.typed-analyze/analyze-control-flow :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.postgres.grammar.typed-analyze/normalize-table-name :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.postgres.grammar.typed-analyze/inferred->report :added "4.1"}
+(fact "TODO")

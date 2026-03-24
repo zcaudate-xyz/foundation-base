@@ -4,7 +4,7 @@
             [std.lib.impl :as impl]
             [std.string.case :as case]))
 
-(defn- tracker-string
+(defn tracker-string
   ([{:keys [name disable in out] :as tracker}]
    (str "#pg.tracker [" name "] "
         (cond-> {}

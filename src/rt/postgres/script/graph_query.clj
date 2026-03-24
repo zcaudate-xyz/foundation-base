@@ -107,7 +107,7 @@
                                        mopts)}))
            markers))))
 
-(defn- reverse-keys
+(defn reverse-keys
   "get linked keys"
   {:added "4.0"}
   ([tsch]

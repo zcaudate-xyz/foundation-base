@@ -1,6 +1,6 @@
-(ns rt.postgres.grammar.form-defn-hydrate)
+(ns rt.postgres.grammar.form-defnhydrate)
 
-(defn pg-defn-hydrate-hook
+(defn pg-defnhydrate-hook
   "Leaves postgres function entries unchanged.
    Infer reports are computed lazily through explicit typed APIs."
   {:added "4.1"}

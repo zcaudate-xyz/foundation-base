@@ -562,3 +562,86 @@
                                                      'test.ns/prepare-topic
                                                      :typescript))
       => true)))
+
+^{:refer rt.postgres.typed/Type :added "4.1"}
+(fact "Type can resolve std.lang pointer-like IDeref values"
+  (let [ptr (reify clojure.lang.IDeref
+              (deref [_]
+                {:module 'gwdb.core.fn-user
+                 :id 'user-set-public}))]
+    (#'rt.postgres.typed/fn-ref->fn-sym ptr)
+    => 'gwdb.core.fn-user/user-set-public))
+
+^{:refer rt.postgres.typed/Type :added "4.1"}
+(fact "Type includes primitive input schemas"
+  (types/clear-registry!)
+  (let [form '(defn.pg demo-input [:uuid i-id :jsonb m] (return m))
+        fn-def (parse/parse-defn form "test.ns" nil)]
+    (types/register-type! 'test.ns/demo-input fn-def)
+    (get-in (typed/Type 'test.ns/demo-input)
+            [:input :schemas :i-id :schema :type])
+    => :uuid))
+
+^{:refer rt.postgres.typed/Type :added "4.1"}
+(fact "Type uses app typed registry when available"
+  (types/clear-registry!)
+  (let [table (types/make-table-def "test" "Foo"
+                                    [(types/make-column-def :id (types/make-type-ref :primitive nil :uuid))
+                                     (types/make-column-def :extra (types/make-type-ref :primitive nil :text))]
+                                    :id)
+        form '(defn.pg ^{:static/application ["demo"]}
+                insert-foo
+                [:uuid i-id :text i-extra :jsonb o-op]
+                (pg/t:insert -/Foo {:id i-id :extra i-extra} {:track o-op}))
+        fn-def (parse/parse-defn form "test.ns" nil)]
+    (types/register-type! 'test.ns/insert-foo fn-def)
+    (with-redefs [rt.postgres.grammar.common-application/app
+                  (fn [_] {:dummy true})
+                  rt.postgres.grammar.common-application/app-typed
+                  (fn [_] {:tables {'test/Foo table}
+                           :enums {}
+                           :functions {}})]
+      (contains? (get-in (typed/Type 'test.ns/insert-foo)
+                         [:output :shape :fields])
+                 :extra)
+      => true)))
+
+
+^{:refer rt.postgres.typed/inferred->shape :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.postgres.typed/format-shape :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.postgres.typed/fn-ref->fn-sym :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.postgres.typed/resolve-function-def :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.postgres.typed/with-app-typed-registry :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.postgres.typed/app-name-from-static :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.postgres.typed/fn-ref->app-name :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.postgres.typed/arg-type :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.postgres.typed/arg-type-name :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.postgres.typed/jsonb-arg? :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.postgres.typed/format-primitive :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.postgres.typed/build-input-schemas :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.postgres.typed/build-output-schema :added "4.1"}
+(fact "TODO")

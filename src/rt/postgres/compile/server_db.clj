@@ -13,7 +13,7 @@
 (def ^:private +mutation-ops+
   #{:insert :update :delete :upsert})
 
-(defn- collect-pg-ops
+(defn collect-pg-ops
   [form]
   (let [ops (atom #{})]
     (walk/postwalk

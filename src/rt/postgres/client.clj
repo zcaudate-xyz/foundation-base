@@ -30,7 +30,7 @@
                "lib.postgres.impl.impossibl"  :impossibl
                :postgresql))})
 
-(defn- rt-pg-string [pg]
+(defn rt-pg-string [pg]
   (str "rt.postgres" (into {} (-> pg
                                   (update :notifications (comp keys deref))
                                   (update :instance (comp f/hash-id deref))

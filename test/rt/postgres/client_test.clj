@@ -44,3 +44,7 @@
     (with-redefs [conn/notify-create (fn [_ _] [:conn])]
       (client/rt-add-notify pg "id" {:channel "ch"})
       (client/rt-list-notify pg) => (contains ["id"]))))
+
+
+^{:refer rt.postgres.client/rt-pg-string :added "4.1"}
+(fact "TODO")

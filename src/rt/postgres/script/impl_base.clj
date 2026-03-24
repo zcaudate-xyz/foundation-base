@@ -254,7 +254,7 @@
   [returning key-fn]
   (mapv (comp hash-set ut/sym-default-str) returning))
 
-(defn- t-join-target-sym
+(defn t-join-target-sym
   [link]
   (let [module (or (:module link) (:ns link))
         id     (:id link)]

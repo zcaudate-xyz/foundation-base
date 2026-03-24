@@ -401,7 +401,7 @@
 (def +pgjwt+
   '[verify])
 
-(defn- pg-tmpl
+(defn pg-tmpl
   "creates fragments in builtin"
   {:added "4.0"}
   [sym]

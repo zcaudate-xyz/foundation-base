@@ -53,7 +53,7 @@
              [0 :entry] #{[0 :base] [0 :entry] [1 :base] [2 :base]}
              [0 :base]  #{[0 :base] [0 :entry]}}})
 
-(defn- parse-class
+(defn parse-class
   [class]
   (if (= :none class)
     [nil :none]
@@ -62,7 +62,7 @@
       [(Long/parseLong (subs depth 0 1))
        (keyword role)])))
 
-(defn- basis-for
+(defn basis-for
   [[depth role] basis-kind]
   (case [depth role basis-kind]
     [0 :base  :minimal] #{}
@@ -88,7 +88,7 @@
 
     #{}))
 
-(defn- local-support-columns
+(defn local-support-columns
   [[depth role] basis-kind relation]
   (case [relation depth role basis-kind]
     [:addon 0 :base  :minimal] []
@@ -123,7 +123,7 @@
 
     []))
 
-(defn- target-support-columns
+(defn target-support-columns
   [[depth _]]
   (case depth
     0 []
@@ -131,7 +131,7 @@
     2 [:class-table :class-context]
     []))
 
-(defn- project-support-columns
+(defn project-support-columns
   [relation source-tuple basis-kind target-tuple]
   (let [local-cols  (local-support-columns source-tuple basis-kind relation)
         remote-cols (target-support-columns target-tuple)
@@ -150,31 +150,31 @@
                        :remote-cols remote-cols})))
     (zipmap local-cols remote-cols)))
 
-(defn- column->coord
+(defn column->coord
   [column]
   (first (keep (fn [[coord k]]
                  (when (= column k)
                    coord))
                +coord->column+)))
 
-(defn- required-basis-for-plan
+(defn required-basis-for-plan
   [projection]
   (->> (keys projection)
        (map column->coord)
        (remove nil?)
        set))
 
-(defn- allowed-target?
+(defn allowed-target?
   [relation source-tuple target-tuple]
   (contains? (get-in +compatibility+ [relation source-tuple] #{})
              target-tuple))
 
-(defn- public-input->basis
+(defn public-input->basis
   [input]
   (or (:basis input)
       (basis-for (parse-class (:class input)) :expanded)))
 
-(defn- target-info
+(defn target-info
   [ref]
   (let [resolved (resolve ref)]
     (when resolved
@@ -214,13 +214,13 @@
       (throw (ex-info "Invalid inputs for E" {:errors errors :input m}))
       m)))
 
-(defn- E-known-addon-keys
+(defn E-known-addon-keys
   [application]
   (let [application (or application
                         (ut/default-application (env/ns-sym)))]
     (set (keys (get @ut/+addons+ application)))))
 
-(defn- E-addon-bool-shorthand
+(defn E-addon-bool-shorthand
   [m]
   (let [addon-keys  (E-known-addon-keys (:application m))
         [extra out] (reduce-kv (fn [[extra out] k v]
@@ -265,13 +265,13 @@
           :else
           (f/error "Addon Not Valid" {:input v}))))
 
-(defn- basis-kind-for
+(defn basis-kind-for
   [m]
   (if (= (:basis m) (basis-for (parse-class (:class m)) :minimal))
     :minimal
     :expanded))
 
-(defn- plan-addon-relation
+(defn plan-addon-relation
   [m addon]
   (let [source-tuple (parse-class (:class m))
         target       (target-info (-> addon :field :ref :ns))
@@ -290,7 +290,7 @@
                                                  :column remote}}}]))
           projection)))
 
-(defn- plan-entity-relation
+(defn plan-entity-relation
   [m]
   (let [source-tuple (parse-class (:class m))
         basis-kind   (basis-kind-for m)
@@ -331,7 +331,7 @@
      {key (cond-> ref-field-base
             (= (:class m) :2d/log) (assoc :primary "default"))})))
 
-(defn- plan-link-relation
+(defn plan-link-relation
   [m]
   (let [source-tuple (parse-class (:class m))
         basis-kind   (basis-kind-for m)
@@ -370,7 +370,7 @@
           (collection/merge-nested
            {key {:primary "default"}}))))))
 
-(defn- coordinate-column
+(defn coordinate-column
   [ns-str coord]
   (case coord
     :table (ut/type-class ns-str 1)
@@ -421,7 +421,7 @@
                         {})]
     (collection/merge-nested basis-map generated-map)))
 
-(defn- E-basis-compatible?
+(defn E-basis-compatible?
   [{:keys [entity addons link]
     :as m}
    basis]
@@ -440,7 +440,7 @@
                      true)))
              (map E-addon-columns-single addons)))))
 
-(defn- E-resolve-basis
+(defn E-resolve-basis
   [{:keys [class]
     :as m}]
   (let [parsed   (parse-class class)

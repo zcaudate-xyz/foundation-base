@@ -157,7 +157,7 @@
 
 (defonce ^:dynamic *type-registry* (atom {}))
 
-(defn- valid-key?
+(defn valid-key?
   "Validates that a key is a namespaced symbol (e.g., 'ns/name)."
   [key]
   (and (symbol? key)

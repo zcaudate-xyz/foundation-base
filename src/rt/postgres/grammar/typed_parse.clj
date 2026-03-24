@@ -34,13 +34,13 @@
 ;; Parsing Logic
 ;; ─────────────────────────────────────────────────────────────────────────────
 
-(defn- parse-schema [form]
+(defn parse-schema [form]
   (let [opts (nth form 2 nil)
         all-schema (get-in opts [:static :all :schema])
         seed-schema (get-in opts [:static :seed :schema])]
     (or (first all-schema) (first seed-schema))))
 
-(defn- extract-aliases
+(defn extract-aliases
   "Extracts namespace aliases from require forms.
    Input: [[ns1 :as alias1] [ns2 :as alias2]]
    Output: {alias1 ns1, alias2 ns2}"
@@ -55,13 +55,13 @@
           {}
           require-forms))
 
-(defn- parse-aliases [form]
+(defn parse-aliases [form]
   "Extracts namespace aliases from a script form's :require option."
   (let [opts (nth form 2 nil)
         require-forms (get-in opts [:require])]
     (extract-aliases require-forms)))
 
-(defn- parse-process-constraints [process]
+(defn parse-process-constraints [process]
   (when (sequential? process)
     (reduce (fn [acc directive]
               (if (sequential? directive)
@@ -158,7 +158,7 @@
                                :docstring docstring})
                        (or (:static/schema combined-meta) dbschema))))
 
-(defn- transform-col-opts
+(defn transform-col-opts
   "Transforms app/runtime column opts to deftype.pg-style parse input."
   [opts]
   (if-let [link (get-in opts [:ref :link])]
@@ -227,8 +227,17 @@
 (defn analyze-namespace [ns-sym]
   (let [ns-str (str ns-sym)
         rel-path (-> ns-str (str/replace #"\." "/") (str/replace #"-" "_") (str ".clj"))
-        file-paths [(str "src/" rel-path) (str "clojure/src/" rel-path)]
-        target-file (first (filter #(.exists (io/file %)) file-paths))]
+        source-roots ["src/"
+                      "clojure/src/"
+                      "backend/src/"
+                      "backend/clojure/src/"
+                      "main/src/"
+                      "main/clojure/src/"]
+        file-paths (mapv #(str % rel-path) source-roots)
+        target-file (some (fn [p]
+                            (when (.exists (io/file p))
+                              p))
+                          file-paths)]
     (if target-file
       (analyze-file target-file)
       {:enums [] :tables [] :functions []})))

@@ -68,13 +68,13 @@
             :jschema {:type "string"}
             :ts "string")))))
 
-(defn- form-uses-tracked?
+(defn form-uses-tracked?
   [form tracked]
   (boolean
    (some #(and (symbol? %) (contains? tracked %))
          (tree-seq coll? seq form))))
 
-(defn- find-table-op-in-body
+(defn find-table-op-in-body
   "Searches body for pg/t:insert or pg/g:insert calls with arg-name.
    Also traces through derived let bindings and function calls.
    Returns the table symbol if found, nil otherwise."
@@ -133,7 +133,7 @@
             (some #(scan-form % tracked) forms))]
     (scan-forms body #{arg-name})))
 
-(defn- resolve-called-fn
+(defn resolve-called-fn
   [op aliases]
   (let [op-name (name op)
         op-str (str op)
@@ -159,7 +159,7 @@
   [arg-name fn-def]
   (infer-jsonb-arg-shape* arg-name fn-def #{}))
 
-(defn- infer-jsonb-arg-shape*
+(defn infer-jsonb-arg-shape*
   [arg-name fn-def visited]
   (let [fn-key (symbol (or (:ns fn-def) "") (:name fn-def))
         meta-table (get-in fn-def [:body-meta :api/meta :table])

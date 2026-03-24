@@ -308,3 +308,61 @@
            :op-updated
            :time-created
            :time-updated})))
+
+
+^{:refer rt.postgres.entity/parse-class :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.postgres.entity/basis-for :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.postgres.entity/local-support-columns :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.postgres.entity/target-support-columns :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.postgres.entity/project-support-columns :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.postgres.entity/column->coord :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.postgres.entity/required-basis-for-plan :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.postgres.entity/allowed-target? :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.postgres.entity/public-input->basis :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.postgres.entity/target-info :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.postgres.entity/E-known-addon-keys :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.postgres.entity/E-addon-bool-shorthand :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.postgres.entity/basis-kind-for :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.postgres.entity/plan-addon-relation :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.postgres.entity/plan-entity-relation :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.postgres.entity/plan-link-relation :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.postgres.entity/coordinate-column :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.postgres.entity/E-basis-compatible? :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.postgres.entity/E-resolve-basis :added "4.1"}
+(fact "TODO")

@@ -2,7 +2,7 @@
   (:require [rt.postgres.grammar.common :as common]
             [rt.postgres.grammar.form-defconst :as form-defconst]
             [rt.postgres.grammar.form-defn :as form-defn]
-            [rt.postgres.grammar.form-defn-hydrate :as form-defn-hydrate]
+            [rt.postgres.grammar.form-defnhydrate :as form-defnhydrate]
             [rt.postgres.grammar.form-defpartition :as form-defpartition]
             [rt.postgres.grammar.form-defrole :as form-defrole]
             [rt.postgres.grammar.form-deftype :as form-deftype]
@@ -20,15 +20,15 @@
             [std.lang.base.util :as ut]
             [std.lib.collection :as collection]))
 
-(defn- pg-tf-free-data
+(defn pg-tf-free-data
   [[_ data]]
   (list 'quote (list (list 'quote (vec data)))))
 
-(defn- pg-tf-free-vec
+(defn pg-tf-free-vec
   [[_ data]]
   (list 'quote (vec data)))
 
-(defn- pg-vector
+(defn pg-vector
   [arr grammar mopts]
   (cond (:js (meta arr))
         (emit-common/*emit-fn* (tf/pg-tf-js [nil arr]) grammar mopts)
@@ -65,9 +65,9 @@
         :defrun    {:hydrate #'common/pg-hydrate
                     :static/return [:block]}
         :defn      {:hydrate #'common/pg-hydrate
-                    :format  #'form-defn/pg-defn-format
+                    :format  #'form-defn/pg-defnformat
                     :emit    #'form-defn/pg-defn
-                    :hydrate-hook #'form-defn-hydrate/pg-defn-hydrate-hook
+                    :hydrate-hook #'form-defnhydrate/pg-defnhydrate-hook
                     :static/dbtype :function}
         :def       {:emit :macro
                     :format  #'common/pg-format
