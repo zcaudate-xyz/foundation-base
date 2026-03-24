@@ -160,10 +160,11 @@
 (defn valid-key?
   "Validates that a key is a namespaced symbol (e.g., 'ns/name)."
   [key]
-  (and (symbol? key)
-       (namespace key)
-       (seq (namespace key))
-       (seq (name key))))
+  (boolean
+   (and (symbol? key)
+        (namespace key)
+        (seq (namespace key))
+        (seq (name key)))))
 
 (defn register-type!
   "Registers a type definition. Requires a namespaced symbol key."

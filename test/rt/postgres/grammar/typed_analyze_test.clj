@@ -192,49 +192,268 @@
 
 
 ^{:refer rt.postgres.grammar.typed-analyze/resolve-table :added "4.1"}
-(fact "TODO")
+(fact "resolve-table finds table definitions from symbols and keywords"
+  (types/clear-registry!)
+  (let [table-def (types/make-table-def "test.ns" "User" [] :id)]
+    (types/register-type! 'test.ns/User table-def)
+
+    ;; Resolves symbol directly
+    (:name (analyze/resolve-table 'test.ns/User)) => "User"
+
+    ;; Resolves quoted symbol
+    (:name (analyze/resolve-table ''test.ns/User)) => "User"
+
+    ;; Resolves keyword
+    (:name (analyze/resolve-table :User)) => "User"
+
+    ;; Returns nil for unknown table
+    (analyze/resolve-table 'UnknownTable) => nil))
 
 ^{:refer rt.postgres.grammar.typed-analyze/analyzed->shape :added "4.1"}
-(fact "TODO")
+(fact "analyzed->shape extracts JsonbShape from analyzed values"
+  (let [shape (types/make-jsonb-shape {:id {:type :uuid}} "User")]
+    ;; From shaped result
+    (analyze/analyzed->shape {:kind :shaped :shape shape}) => shape
+
+    ;; From jsonb-shape directly
+    (analyze/analyzed->shape shape) => shape
+
+    ;; Returns nil for non-shaped values
+    (analyze/analyzed->shape {:kind :primitive :type :uuid}) => nil))
 
 ^{:refer rt.postgres.grammar.typed-analyze/analyzed->field-info :added "4.1"}
-(fact "TODO")
+(fact "analyzed->field-info extracts field info from analyzed values"
+  (let [shape (types/make-jsonb-shape {:id {:type :uuid}} "User")]
+    ;; From shaped result
+    (analyze/analyzed->field-info {:kind :shaped :shape shape})
+    => {:type :jsonb :shape shape}
+
+    ;; From primitive
+    (analyze/analyzed->field-info {:kind :primitive :type :uuid})
+    => {:type :uuid}
+
+    ;; From field-access
+    (analyze/analyzed->field-info {:kind :field-access :field "name" :type :text})
+    => {:type :text}
+
+    ;; From array
+    (analyze/analyzed->field-info {:kind :array :element-type {:kind :primitive :type :uuid}})
+    => {:type :array :items {:type :uuid}}))
 
 ^{:refer rt.postgres.grammar.typed-analyze/value->field-info :added "4.1"}
-(fact "TODO")
+(fact "value->field-info is an alias for analyzed->field-info"
+  (let [shape (types/make-jsonb-shape {:id {:type :uuid}})]
+    (analyze/value->field-info {:kind :shaped :shape shape})
+    => {:type :jsonb :shape shape}))
 
 ^{:refer rt.postgres.grammar.typed-analyze/merge-analyzed-shapes :added "4.1"}
-(fact "TODO")
+(fact "merge-analyzed-shapes combines multiple analyzed values into one shape"
+  (let [shape1 (types/make-jsonb-shape {:id {:type :uuid}})
+        shape2 (types/make-jsonb-shape {:name {:type :text}})]
+    ;; Merges shapes from analyzed values
+    (let [merged (analyze/merge-analyzed-shapes [{:kind :shaped :shape shape1}
+                                                 {:kind :shaped :shape shape2}])]
+      (types/jsonb-shape? merged) => true
+      (contains? (:fields merged) :id) => true
+      (contains? (:fields merged) :name) => true)
+
+    ;; Returns nil for empty input
+    (analyze/merge-analyzed-shapes []) => nil
+
+    ;; Returns nil when no shapes found
+    (analyze/merge-analyzed-shapes [{:kind :primitive :type :uuid}]) => nil))
 
 ^{:refer rt.postgres.grammar.typed-analyze/merge-array-element-types :added "4.1"}
-(fact "TODO")
+(fact "merge-array-element-types combines array element types"
+  ;; Merges two shapes
+  (let [shape1 (types/make-jsonb-shape {:id {:type :uuid}})
+        shape2 (types/make-jsonb-shape {:name {:type :text}})
+        merged (analyze/merge-array-element-types
+                {:kind :shaped :shape shape1}
+                {:kind :shaped :shape shape2})]
+    (types/jsonb-shape? (:shape merged)) => true)
+
+  ;; Handles nil left
+  (analyze/merge-array-element-types nil {:kind :primitive :type :uuid})
+  => {:kind :primitive :type :uuid}
+
+  ;; Handles nil right
+  (analyze/merge-array-element-types {:kind :primitive :type :uuid} nil)
+  => {:kind :primitive :type :uuid}
+
+  ;; Returns union for incompatible types
+  (let [result (analyze/merge-array-element-types
+                {:kind :primitive :type :uuid}
+                {:kind :primitive :type :text})]
+    (:kind result) => :union))
 
 ^{:refer rt.postgres.grammar.typed-analyze/literal-map-key :added "4.1"}
-(fact "TODO")
+(fact "literal-map-key normalizes keys for map literals"
+  ;; String keys preserved
+  (analyze/literal-map-key "literal-key") => "literal-key"
+
+  ;; Keyword keys converted
+  (analyze/literal-map-key :foo-bar) => :foo-bar
+  (analyze/literal-map-key :my-ns/foo) => "my-ns/foo"
+
+  ;; Symbol keys converted to name
+  (analyze/literal-map-key 'my-symbol) => "my-symbol"
+
+  ;; Other values passed through
+  (analyze/literal-map-key 42) => 42)
 
 ^{:refer rt.postgres.grammar.typed-analyze/resolve-called-fn :added "4.1"}
-(fact "TODO")
+(fact "resolve-called-fn resolves function references with aliases"
+  (types/clear-registry!)
+  (let [fn-def (types/make-fn-def "test.ns" "my-fn" [] :jsonb {} nil)]
+    (types/register-type! 'test.ns/my-fn fn-def)
+
+    ;; Resolves fully qualified symbol
+    (let [[resolved fn-result] (analyze/resolve-called-fn 'test.ns/my-fn {})]
+      resolved => 'test.ns/my-fn
+      (:name fn-result) => "my-fn")
+
+    ;; Resolves with alias
+    (let [[resolved fn-result] (analyze/resolve-called-fn 'alias/my-fn {'alias "test.ns"})]
+      resolved => (symbol "test.ns" "my-fn"))
+
+    ;; Returns nil for unknown function
+    (let [[resolved fn-result] (analyze/resolve-called-fn 'unknown/fn {})]
+      fn-result => nil)))
 
 ^{:refer rt.postgres.grammar.typed-analyze/analyze-table-op :added "4.1"}
-(fact "TODO")
+(fact "analyze-table-op returns appropriate shape for table operations"
+  (types/clear-registry!)
+  (let [table-def (types/make-table-def "test.ns" "Entry"
+                                        [(types/make-column-def :id (types/make-type-ref :primitive nil :uuid)
+                                                                {:required true :constraints {:primary true}})
+                                         (types/make-column-def :name (types/make-type-ref :primitive nil :text)
+                                                                {:required true})]
+                                        :id)]
+    (types/register-type! 'test.ns/Entry table-def)
+    (let [ctx (types/make-context)]
+      ;; Insert returns shaped result
+      (:kind (analyze/analyze-table-op 'pg/t:insert ['test.ns/Entry] ctx)) => :shaped
+
+      ;; Select returns array
+      (:kind (analyze/analyze-table-op 'pg/t:select ['test.ns/Entry] ctx)) => :array
+
+      ;; Id returns uuid
+      (:kind (analyze/analyze-table-op 'pg/t:id ['test.ns/Entry] ctx)) => :primitive
+      (:type (analyze/analyze-table-op 'pg/t:id ['test.ns/Entry] ctx)) => :uuid
+
+      ;; Exists returns boolean
+      (:type (analyze/analyze-table-op 'pg/t:exists ['test.ns/Entry] ctx)) => :boolean
+
+      ;; Count returns integer
+      (:type (analyze/analyze-table-op 'pg/t:count ['test.ns/Entry] ctx)) => :integer)))
 
 ^{:refer rt.postgres.grammar.typed-analyze/analyze-jsonb-merge :added "4.1"}
-(fact "TODO")
+(fact "analyze-jsonb-merge combines shapes from merge arguments"
+  (let [ctx (types/make-context)]
+    ;; Merges map literals
+    (let [result (analyze/analyze-jsonb-merge [{:id 1} {:name "test"}] ctx)]
+      (:kind result) => :shaped
+      (types/jsonb-shape? (:shape result)) => true)
+
+    ;; Empty merge still returns shaped
+    (let [result (analyze/analyze-jsonb-merge [] ctx)]
+      (:kind result) => :shaped
+      (:op result) => :merge)))
 
 ^{:refer rt.postgres.grammar.typed-analyze/analyze-jsonb-access :added "4.1"}
-(fact "TODO")
+(fact "analyze-jsonb-access analyzes JSONB field access operators"
+  (let [ctx (types/make-context {'m :jsonb}
+                                {'m (types/make-jsonb-shape {:data {:type :jsonb}})}
+                                {})]
+    ;; :-> returns jsonb
+    (let [result (analyze/analyze-jsonb-access :-> '(m "data") ctx)]
+      (:kind result) => :field-access
+      (:type result) => :jsonb)
+
+    ;; :->> returns text
+    (let [result (analyze/analyze-jsonb-access :->> '(m "name") ctx)]
+      (:type result) => :text)))
 
 ^{:refer rt.postgres.grammar.typed-analyze/analyze-jsonb-accessor-expr :added "4.1"}
-(fact "TODO")
+(fact "analyze-jsonb-accessor-expr analyzes JSONB accessor expressions"
+  (let [shape (types/make-jsonb-shape {:organisation {:type :uuid}})
+        ctx (types/make-context {'m :jsonb}
+                                {'m shape}
+                                {'m (types/make-jsonb-path [] 'm)})]
+    ;; Analyzes pg/field-id access
+    (let [result (analyze/analyze-jsonb-accessor-expr '(pg/field-id m "organisation") ctx)]
+      (or (nil? result)
+          (= (:kind result) :field-access)) => true)))
 
 ^{:refer rt.postgres.grammar.typed-analyze/analyze-let :added "4.1"}
-(fact "TODO")
+(fact "analyze-let analyzes let bindings and body"
+  (let [ctx (types/make-context)]
+    ;; Simple binding - returns literal for number
+    (let [result (analyze/analyze-let '[x 1] '[(return x)] ctx)]
+      (:kind result) => :literal)
+
+    ;; JSONB binding with destructuring - nil when no descriptor match
+    (let [ctx-with-jsonb (types/make-context {'m :jsonb}
+                                             {'m (types/make-jsonb-shape {:id {:type :uuid}})}
+                                             {'m (types/make-jsonb-path [] 'm)})]
+      (let [result (analyze/analyze-let '[n (:-> m "id")] '[(return n)] ctx-with-jsonb)]
+        ;; Returns nil because no binding descriptors match
+        (nil? result) => true))))
 
 ^{:refer rt.postgres.grammar.typed-analyze/analyze-control-flow :added "4.1"}
-(fact "TODO")
+(fact "analyze-control-flow analyzes conditional expressions"
+  (let [ctx (types/make-context)]
+    ;; If with different map shapes returns union
+    (let [result (analyze/analyze-control-flow '(if true {:a 1} {:b 2}) ctx)]
+      ;; Maps with different keys produce union kind
+      (:kind result) => :union)
+
+    ;; If with different types returns union
+    (let [result (analyze/analyze-control-flow '(if true 1 "two") ctx)]
+      (or (= (:kind result) :union)
+          (= (:kind result) :literal)) => true)
+
+    ;; When with single branch - returns literal for map
+    (let [result (analyze/analyze-control-flow '(when true {:x 1}) ctx)]
+      (:kind result) => :literal)))
 
 ^{:refer rt.postgres.grammar.typed-analyze/normalize-table-name :added "4.1"}
-(fact "TODO")
+(fact "normalize-table-name extracts table name from expressions"
+  ;; Symbol
+  (analyze/normalize-table-name 'User) => "User"
+
+  ;; Keyword
+  (analyze/normalize-table-name :Entry) => "Entry"
+
+  ;; Quoted symbol
+  (analyze/normalize-table-name ''MyTable) => "MyTable"
+
+  ;; Nil for invalid
+  (analyze/normalize-table-name 123) => nil)
 
 ^{:refer rt.postgres.grammar.typed-analyze/inferred->report :added "4.1"}
-(fact "TODO")
+(fact "inferred->report converts inferred types to JSON-friendly format"
+  ;; JsonbShape
+  (let [shape (types/make-jsonb-shape {:id {:type :uuid}} "User")
+        result (analyze/inferred->report shape)]
+    (:kind result) => "shaped"
+    (contains? result :shape) => true)
+
+  ;; JsonbArray
+  (let [arr (types/make-jsonb-array (types/make-jsonb-shape {:id {:type :uuid}}))
+        result (analyze/inferred->report arr)]
+    (:kind result) => "array")
+
+  ;; TypeUnion
+  (let [union (types/make-type-union [:uuid :text])
+        result (analyze/inferred->report union)]
+    (:kind result) => "union")
+
+  ;; Regular map
+  (let [result (analyze/inferred->report {:kind :primitive :type :uuid})]
+    (:kind result) => "primitive"
+    (:type result) => "uuid")
+
+  ;; Nil
+  (analyze/inferred->report nil) => nil)

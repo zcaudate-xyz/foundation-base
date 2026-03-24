@@ -45,7 +45,7 @@
 ^{:refer rt.postgres.gen-bind/transform-to-str :added "4.0"}
 (fact "transforms relevant forms to string"
   ^:hidden
-  
+
   (gen/transform-to-str 'scratch/Task)
   => {"::" "sql/deftype", :schema "scratch", :name "Task"}
 
@@ -58,7 +58,7 @@
 ^{:refer rt.postgres.gen-bind/transform-query-or :added "4.0"}
 (fact "transforms a setvec form"
   ^:hidden
-  
+
   (gen/transform-query-or
    #{[:name "hello"
       :id "hello"
@@ -99,14 +99,14 @@
               "data" ["id" "nickname"]}])]}
 (fact "generates the query interface"
   ^:hidden
-  
+
   (gen/transform-query
    #{:id :nickname
      [:profile
       {:id 1}
       #{:first-name :last-name}]})
   => ["nickname" "id" ["profile" {"id" 1} ["last_name" "first_name"]]]
-  
+
   (!.js
    (scope/get-tree
     sample/Schema
@@ -119,7 +119,7 @@
             #{:first-name :last-name}]}))
     {}))
   => +query-json+
-  
+
   (!.lua
    (scope/get-tree
     sample/Schema
@@ -143,7 +143,7 @@
            "links" {},
            "data" ["first_name" "last_name"]}]]],
        "data" ["id" "nickname"]}]
-  
+
   (!.py
    (scope/get-tree
     sample/Schema
@@ -160,7 +160,7 @@
 ^{:refer rt.postgres.gen-bind/transform-schema :added "4.0"}
 (fact "transforms the schema"
   ^:hidden
-  
+
   (gen/transform-schema (:tree (:schema sample/+app+)))
   => map?)
 
@@ -169,7 +169,7 @@
   ^:hidden
 
   (gen/bind-function scratch/ping)
-  => {:input [], :return "text", :schema "scratch", :id "ping", :flags {}}  
+  => {:input [], :return "text", :schema "scratch", :id "ping", :flags {}}
 
   (gen/bind-function scratch/addf)
   => {:input [{:symbol "x", :type "numeric"}
@@ -178,7 +178,7 @@
       :schema "scratch",
       :id "addf",
       :flags {}}
-  
+
   (gen/bind-function scratch/echo)
   => {:input [{:symbol "input", :type "jsonb"}],
       :return "jsonb", :schema "scratch", :id "echo", :flags {}})
@@ -186,7 +186,7 @@
 ^{:refer rt.postgres.gen-bind/bind-view-guards :added "4.0"}
 (fact "gets more guards"
   ^:hidden
-  
+
   (gen/bind-view-guards (:guards (:static/view @user/user-account-by-organisation)))
   => [{:function
        {:input
@@ -201,7 +201,7 @@
 ^{:refer rt.postgres.gen-bind/bind-view :added "4.0"}
 (fact "generates the view interface"
   ^:hidden
-  
+
   (gen/bind-view data/currency-all-fiat)
   => {:flags {:public true},
       :id "currency_all_fiat",
@@ -212,8 +212,8 @@
              :table "Currency",
              :tag "all_fiat",
              :type "select"}}
-  
-  
+
+
   (gen/bind-view data/currency-default)
   => {:input [{:symbol "i_currency_id", :type "citext"}],
       :return "jsonb",
@@ -224,9 +224,9 @@
       {:table "Currency",
        :type "return",
        :tag "default",
-       :query ["*/data"],}}
-  
-  
+       :query ["*/data"]}}
+
+
   (gen/bind-view user/organisation-view-membership)
   => {:input [{:symbol "i_organisation_id", :type "uuid"}],
       :return "jsonb",
@@ -238,8 +238,8 @@
        :type "return",
        :tag "view_membership"
        :query
-       ["*/data" ["access" ["*/data" ["account" ["nickname" "id"]]]]],}}
-  
+       ["*/data" ["access" ["*/data" ["account" ["nickname" "id"]]]]]}}
+
   (gen/bind-view user/user-account-by-organisation)
   => {:input [{:symbol "i_organisation_id", :type "uuid"}],
       :return "jsonb",
@@ -252,12 +252,12 @@
        :tag "by_organisation",
        :query
        {"organisation_accesses"
-        {"organisation" "{{i_organisation_id}}"}},}})
+        {"organisation" "{{i_organisation_id}}"}}}})
 
 ^{:refer rt.postgres.gen-bind/bind-table :added "4.0"}
 (fact "gets the table interface"
   ^:hidden
-  
+
   (gen/bind-table data/Currency)
   => {:schema "scratch-sample-db",
       :schema-primary {"type" "citext", "id" "id"},
@@ -267,7 +267,7 @@
 ^{:refer rt.postgres.gen-bind/bind-app :added "4.0"}
 (fact "gets the app interface given a name"
   ^:hidden
-  
+
   (gen/bind-app (pg/app "xt.db.sample"))
   => {"RegionCity"
       {:schema "scratch-sample-db",
@@ -351,14 +351,14 @@
 ^{:refer rt.postgres.gen-bind/bind-schema :added "4.0"}
 (fact "binds a schema"
   ^:hidden
-  
+
   (gen/bind-schema (:schema (pg/app "xt.db.sample")))
   => map?)
 
 ^{:refer rt.postgres.gen-bind/list-view :added "4.0"}
 (fact "lists all views in the schema"
   ^:hidden
-  
+
   (gen/list-view 'xt.db.sample-user-test :select)
   => vector?
 
@@ -370,7 +370,7 @@
 ^{:refer rt.postgres.gen-bind/list-api :added "4.0"}
 (fact "lists all apis"
   ^:hidden
-  
+
   (gen/list-api 'rt.postgres.script.test.scratch-v1)
   => '[[ping rt.postgres.script.test.scratch-v1/ping]
        [ping-ok rt.postgres.script.test.scratch-v1/ping-ok]
@@ -393,7 +393,7 @@
 ^{:refer rt.postgres.gen-bind/list-all :added "4.0"}
 (fact "lists all function forms"
   ^:hidden
-  
+
   (gen/list-all 'rt.postgres.script.test.scratch-v1)
   => '[[as-array rt.postgres.script.test.scratch-v1/as-array]
        [entry-all rt.postgres.script.test.scratch-v1/entry-all]
@@ -412,7 +412,21 @@
 
 
 ^{:refer rt.postgres.gen-bind/to-lookup :added "4.1"}
-(fact "TODO")
+(fact "creates a lookup map from array"
+  (gen/to-lookup [:a :b :c]) => {:a true :b true :c true}
+
+  (gen/to-lookup []) => {}
+
+  (gen/to-lookup ["x" "y"]) => {"x" true "y" true})
 
 ^{:refer rt.postgres.gen-bind/plain-symbol? :added "4.1"}
-(fact "TODO")
+(fact "checks if form is a plain symbol without namespace"
+  (gen/plain-symbol? 'foo) => true
+
+  (gen/plain-symbol? 'clojure.core/map) => false
+
+  (gen/plain-symbol? :keyword) => false
+
+  (gen/plain-symbol? "string") => false
+
+  (gen/plain-symbol? 123) => false)

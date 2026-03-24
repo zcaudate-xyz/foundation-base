@@ -131,7 +131,7 @@
               :else nil))
           (scan-forms [forms tracked]
             (some #(scan-form % tracked) forms))]
-    (scan-forms body #{arg-name})))
+    (scan-form body #{arg-name})))
 
 (defn resolve-called-fn
   [op aliases]

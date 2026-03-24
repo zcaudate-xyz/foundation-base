@@ -56,7 +56,32 @@
 
 
 ^{:refer rt.postgres.compile.ts-schema/type->ts :added "4.1"}
-(fact "TODO")
+(fact "converts type descriptor to TypeScript type string"
+  (compile.ts/type->ts {:type :uuid}) => "string"
+
+  (compile.ts/type->ts {:type :text}) => "string"
+
+  (compile.ts/type->ts {:type :integer}) => "number"
+
+  (compile.ts/type->ts {:type :boolean}) => "boolean"
+
+  (compile.ts/type->ts {:type :numeric}) => "number"
+
+  (compile.ts/type->ts {:type :jsonb}) => "Record<string, any>"
+
+  (compile.ts/type->ts {:is-ref? true}) => "string"
+
+  (compile.ts/type->ts {:type :array :items {:type :text}}) => "string[]"
+
+  (let [shape (types/make-jsonb-shape {:id {:type :uuid}} :Test)]
+    (compile.ts/type->ts {:type :jsonb :shape shape}) => string?))
 
 ^{:refer rt.postgres.compile.ts-schema/field->ts :added "4.1"}
-(fact "TODO")
+(fact "converts field to TypeScript property declaration"
+  (compile.ts/field->ts [:id {:type :uuid :nullable? false}]) => "  id: string;"
+
+  (compile.ts/field->ts [:name {:type :text :nullable? true}]) => "  name?: string;"
+
+  (compile.ts/field->ts [:count {:type :integer :nullable? false}]) => "  count: number;"
+
+  (compile.ts/field->ts [:active {:type :boolean :nullable? true}]) => "  active?: boolean;")

@@ -1,10 +1,25 @@
 (ns rt.postgres.grammar.typed-common-test
-  (:require [rt.postgres.grammar.typed-common :as types])
-  (:use code.test))
+  (:use code.test)
+  (:require [rt.postgres.grammar.typed-common :as types]))
 
-;; -----------------------------------------------------------------------------
-;; Type Predicates
-;; -----------------------------------------------------------------------------
+^{:refer rt.postgres.grammar.typed-common/normalize-key :added "0.1"}
+(fact "normalize-key converts keys to consistent format"
+  (types/normalize-key :id) => "id"
+  (types/normalize-key "name") => "name"
+  (types/normalize-key 'handle) => "handle")
+
+^{:refer rt.postgres.grammar.typed-common/emitted-key :added "4.1"}
+(fact "emitted-key preserves strings and normalizes structured keys"
+  (types/emitted-key :foo-bar) => "foo_bar"
+  (types/emitted-key 'foo-bar) => "foo_bar"
+  (types/emitted-key "literal-key") => "literal-key"
+  (types/emitted-key 42) => "42")
+
+^{:refer rt.postgres.grammar.typed-common/typescript-key :added "4.1"}
+(fact "typescript-key quotes invalid property names and preserves identifiers"
+  (types/typescript-key :foo-bar) => "foo_bar"
+  (types/typescript-key '_value) => "_value"
+  (types/typescript-key "two words") => "\"two words\"")
 
 ^{:refer rt.postgres.grammar.typed-common/type-ref? :added "0.1"}
 (fact "type-ref? returns true for TypeRef records"
@@ -36,6 +51,11 @@
   (types/jsonb-shape? (types/make-jsonb-shape {"id" :uuid})) => true
   (types/jsonb-shape? {}) => false
   (types/jsonb-shape? nil) => false)
+
+^{:refer rt.postgres.grammar.typed-common/jsonb-path? :added "4.1"}
+(fact "jsonb-path? recognizes JsonbPath records"
+  (types/jsonb-path? (types/make-jsonb-path [:profile] 'm)) => true
+  (types/jsonb-path? {:segments [:profile] :root-var 'm}) => false)
 
 ^{:refer rt.postgres.grammar.typed-common/jsonb-merge? :added "0.1"}
 (fact "jsonb-merge? returns true for JsonbMerge records"
@@ -90,17 +110,31 @@
   (types/ref? (types/make-type-ref :table :core "User")) => false
   (types/ref? :ref) => false)
 
-;; -----------------------------------------------------------------------------
-;; Registry Operations
-;; -----------------------------------------------------------------------------
+^{:refer rt.postgres.grammar.typed-common/valid-key? :added "4.1"}
+(fact "valid-key? checks if a key is a valid namespaced symbol"
 
-^{:refer rt.postgres.grammar.typed-common/register-type! :added "0.1"}
-(fact "register-type! and get-type manage the type registry with namespaced keys"
-  (types/clear-registry!)
-  (let [t (types/make-type-ref :table :core "User")]
-    (types/register-type! 'core/User t)
-    (types/get-type 'core/User) => t)
-  (types/clear-registry!))
+  ;; Valid namespaced symbol - returns truthy (seq of name chars)
+  (types/valid-key? 'ns/name) => true
+  (types/valid-key? 'my-namespace/my-function) => true
+
+  ;; Unqualified symbol - invalid (returns false)
+  (types/valid-key? 'unqualified) => false
+
+  ;; Keyword - invalid
+  (types/valid-key? :ns/name) => false
+  (types/valid-key? :keyword) => false
+
+  ;; String - invalid
+  (types/valid-key? "ns/name") => false
+
+  ;; False - invalid
+  (types/valid-key? false) => false
+
+  ;; Map - invalid
+  (types/valid-key? {}) => false
+
+  ;; Empty namespace - invalid
+  (types/valid-key? (symbol "" "name")) => false)
 
 ^{:refer rt.postgres.grammar.typed-common/register-type! :added "0.1"}
 (fact "register-type! validates that keys are namespaced symbols"
@@ -139,10 +173,6 @@
   (types/clear-registry!)
   (types/get-type 'test/TestType) => nil)
 
-;; -----------------------------------------------------------------------------
-;; App Typed Payload
-;; -----------------------------------------------------------------------------
-
 ^{:refer rt.postgres.grammar.typed-common/type-key :added "4.1"}
 (fact "type-key returns stable symbol keys for typed defs"
   (types/type-key (types/make-table-def "test.ns" "User" [] :id))
@@ -156,6 +186,15 @@
   => {:tables {}
       :enums {}
       :functions {}})
+
+^{:refer rt.postgres.grammar.typed-common/add-typed :added "4.1"}
+(fact "add-typed stores table, enum, and function defs by stable key"
+  (let [table (types/make-table-def "demo" "User" [] :id)
+        enum (types/make-enum-def "demo" "Status" #{:active} nil)
+        fn-def (types/make-fn-def "demo" "get-user" [] [:jsonb] {} nil)]
+    (keys (:tables (types/add-typed (types/empty-typed) table))) => ['demo/User]
+    (keys (:enums (types/add-typed (types/empty-typed) enum))) => ['demo/Status]
+    (keys (:functions (types/add-typed (types/empty-typed) fn-def))) => ['demo/get-user]))
 
 ^{:refer rt.postgres.grammar.typed-common/analysis->typed :added "4.1"}
 (fact "analysis->typed normalizes analysis vectors into keyed maps"
@@ -174,23 +213,6 @@
   => {:tables {'a/Table :table}
       :enums {'a/Status :enum}
       :functions {'a/do-work :fn}})
-
-^{:refer rt.postgres.grammar.typed-common/emitted-key :added "4.1"}
-(fact "emitted-key preserves strings and normalizes structured keys"
-  (types/emitted-key :foo-bar) => "foo_bar"
-  (types/emitted-key 'foo-bar) => "foo_bar"
-  (types/emitted-key "literal-key") => "literal-key"
-  (types/emitted-key 42) => "42")
-
-^{:refer rt.postgres.grammar.typed-common/typescript-key :added "4.1"}
-(fact "typescript-key quotes invalid property names and preserves identifiers"
-  (types/typescript-key :foo-bar) => "foo_bar"
-  (types/typescript-key '_value) => "_value"
-  (types/typescript-key "two words") => "\"two words\"")
-
-;; -----------------------------------------------------------------------------
-;; Type Constructors
-;; -----------------------------------------------------------------------------
 
 ^{:refer rt.postgres.grammar.typed-common/make-type-ref :added "0.1"}
 (fact "make-type-ref creates TypeRef with various arities"
@@ -323,13 +345,80 @@
   (types/make-context {:x :uuid} {:x {:fields {}}} {:x {:segments ["x"]}})
   => (contains {:bindings {:x :uuid} :jsonb-shapes {:x {:fields {}}} :jsonb-paths {:x {:segments ["x"]}}}))
 
-;; -----------------------------------------------------------------------------
-;; Shape Operations
-;; -----------------------------------------------------------------------------
+^{:refer rt.postgres.grammar.typed-common/push-scope :added "0.1"}
+(fact "push-scope creates a new child context"
+  (let [ctx (types/make-context {:x :uuid})]
+    (types/push-scope ctx) => (contains {:parent ctx :bindings {}})))
+
+^{:refer rt.postgres.grammar.typed-common/pop-scope :added "0.1"}
+(fact "pop-scope returns the parent context"
+  (let [parent (types/make-context {:x :uuid})
+        child (types/push-scope parent)]
+    (types/pop-scope child) => parent))
+
+^{:refer rt.postgres.grammar.typed-common/add-binding :added "0.1"}
+(fact "add-binding adds a variable binding to the context"
+  (let [ctx (types/make-context)]
+    (types/add-binding ctx 'user :uuid))
+  => (contains-in {:bindings {'user :uuid}})
+  (let [ctx (types/make-context)]
+    (types/add-binding ctx 'user :uuid :shape (types/make-jsonb-shape {"id" :uuid})))
+  => (contains-in {:bindings {'user :uuid} :jsonb-shapes {'user {:fields {"id" :uuid}}}}))
+
+^{:refer rt.postgres.grammar.typed-common/lookup-binding :added "0.1"}
+(fact "lookup-binding finds binding in context or parents"
+  (let [ctx (types/add-binding (types/make-context) 'user :uuid)]
+    (types/lookup-binding ctx 'user) => :uuid)
+  (let [parent (types/add-binding (types/make-context) 'user :uuid)
+        child (types/push-scope parent)]
+    (types/lookup-binding child 'user) => :uuid)
+  (let [ctx (types/make-context)]
+    (types/lookup-binding ctx 'missing) => nil))
+
+^{:refer rt.postgres.grammar.typed-common/get-var-shape :added "0.1"}
+(fact "get-var-shape finds shape in context or parents"
+  (let [shape (types/make-jsonb-shape {"id" :uuid})
+        ctx (types/set-var-shape (types/make-context) 'user shape)]
+    (types/get-var-shape ctx 'user) => shape)
+  (let [shape (types/make-jsonb-shape {"id" :uuid})
+        parent (types/set-var-shape (types/make-context) 'user shape)
+        child (types/push-scope parent)]
+    (types/get-var-shape child 'user) => shape))
+
+^{:refer rt.postgres.grammar.typed-common/set-var-shape :added "0.1"}
+(fact "set-var-shape sets shape for variable"
+  (let [shape (types/make-jsonb-shape {"id" :uuid})
+        ctx (types/set-var-shape (types/make-context) 'user shape)]
+    (get-in ctx [:jsonb-shapes 'user]) => shape))
+
+^{:refer rt.postgres.grammar.typed-common/get-var-path :added "4.1"}
+(fact "get-var-path resolves paths from the current scope or parent scopes"
+  (let [path   (types/make-jsonb-path [:profile :name] 'm)
+        parent (types/set-var-path (types/make-context) 'v-name path)
+        child  (types/push-scope parent)]
+    (types/get-var-path child 'v-name) => path
+    (types/get-var-path child 'missing) => nil))
+
+^{:refer rt.postgres.grammar.typed-common/set-var-path :added "4.1"}
+(fact "set-var-path stores a jsonb path for a variable"
+  (let [path (types/make-jsonb-path [:profile] 'm)
+        ctx  (types/set-var-path (types/make-context) 'o-profile path)]
+    (get-in ctx [:jsonb-paths 'o-profile]) => path))
 
 ^{:refer rt.postgres.grammar.typed-common/empty-jsonb-shape :added "0.1"}
 (fact "empty-jsonb-shape creates empty shape with low confidence"
   (types/empty-jsonb-shape) => (contains {:fields {} :source-table nil :confidence :low :nullable? false}))
+
+^{:refer rt.postgres.grammar.typed-common/shape-at-path :added "4.1"}
+(fact "shape-at-path resolves nested shapes and bare jsonb leaves"
+  (let [profile-shape (types/make-jsonb-shape {:name {:type :text}})
+        root-shape    (types/make-jsonb-shape {:profile {:type :jsonb
+                                                         :shape profile-shape}
+                                               :detail {:type :jsonb}}
+                                              :User)]
+    (types/shape-at-path root-shape [:profile]) => profile-shape
+    (types/shape-at-path root-shape [:detail]) => (types/empty-jsonb-shape)
+    (types/shape-at-path root-shape [:missing]) => nil))
 
 ^{:refer rt.postgres.grammar.typed-common/add-key :added "0.1"}
 (fact "add-key adds a key with its type to shape"
@@ -385,104 +474,3 @@
   (types/flatten-shape {:fields {"x" :uuid}}) => {"x" :uuid}
   (types/flatten-shape {:x :uuid}) => {:x :uuid}
   (types/flatten-shape nil) => {})
-
-;; -----------------------------------------------------------------------------
-;; Context Operations
-;; -----------------------------------------------------------------------------
-
-^{:refer rt.postgres.grammar.typed-common/push-scope :added "0.1"}
-(fact "push-scope creates a new child context"
-  (let [ctx (types/make-context {:x :uuid})]
-    (types/push-scope ctx) => (contains {:parent ctx :bindings {}})))
-
-^{:refer rt.postgres.grammar.typed-common/pop-scope :added "0.1"}
-(fact "pop-scope returns the parent context"
-  (let [parent (types/make-context {:x :uuid})
-        child (types/push-scope parent)]
-    (types/pop-scope child) => parent))
-
-^{:refer rt.postgres.grammar.typed-common/add-binding :added "0.1"}
-(fact "add-binding adds a variable binding to the context"
-  (let [ctx (types/make-context)]
-    (types/add-binding ctx 'user :uuid))
-  => (contains-in {:bindings {'user :uuid}})
-  (let [ctx (types/make-context)]
-    (types/add-binding ctx 'user :uuid :shape (types/make-jsonb-shape {"id" :uuid})))
-  => (contains-in {:bindings {'user :uuid} :jsonb-shapes {'user {:fields {"id" :uuid}}}}))
-
-^{:refer rt.postgres.grammar.typed-common/lookup-binding :added "0.1"}
-(fact "lookup-binding finds binding in context or parents"
-  (let [ctx (types/add-binding (types/make-context) 'user :uuid)]
-    (types/lookup-binding ctx 'user) => :uuid)
-  (let [parent (types/add-binding (types/make-context) 'user :uuid)
-        child (types/push-scope parent)]
-    (types/lookup-binding child 'user) => :uuid)
-  (let [ctx (types/make-context)]
-    (types/lookup-binding ctx 'missing) => nil))
-
-^{:refer rt.postgres.grammar.typed-common/get-var-shape :added "0.1"}
-(fact "get-var-shape finds shape in context or parents"
-  (let [shape (types/make-jsonb-shape {"id" :uuid})
-        ctx (types/set-var-shape (types/make-context) 'user shape)]
-    (types/get-var-shape ctx 'user) => shape)
-  (let [shape (types/make-jsonb-shape {"id" :uuid})
-        parent (types/set-var-shape (types/make-context) 'user shape)
-        child (types/push-scope parent)]
-    (types/get-var-shape child 'user) => shape))
-
-^{:refer rt.postgres.grammar.typed-common/set-var-shape :added "0.1"}
-(fact "set-var-shape sets shape for variable"
-  (let [shape (types/make-jsonb-shape {"id" :uuid})
-        ctx (types/set-var-shape (types/make-context) 'user shape)]
-    (get-in ctx [:jsonb-shapes 'user]) => shape))
-
-^{:refer rt.postgres.grammar.typed-common/normalize-key :added "0.1"}
-(fact "normalize-key converts keys to consistent format"
-  (types/normalize-key :id) => "id"
-  (types/normalize-key "name") => "name"
-  (types/normalize-key 'handle) => "handle")
-
-
-^{:refer rt.postgres.grammar.typed-common/add-typed :added "4.1"}
-(fact "add-typed stores table, enum, and function defs by stable key"
-  (let [table (types/make-table-def "demo" "User" [] :id)
-        enum (types/make-enum-def "demo" "Status" #{:active} nil)
-        fn-def (types/make-fn-def "demo" "get-user" [] [:jsonb] {} nil)]
-    (keys (:tables (types/add-typed (types/empty-typed) table))) => ['demo/User]
-    (keys (:enums (types/add-typed (types/empty-typed) enum))) => ['demo/Status]
-    (keys (:functions (types/add-typed (types/empty-typed) fn-def))) => ['demo/get-user]))
-
-
-^{:refer rt.postgres.grammar.typed-common/jsonb-path? :added "4.1"}
-(fact "jsonb-path? recognizes JsonbPath records"
-  (types/jsonb-path? (types/make-jsonb-path [:profile] 'm)) => true
-  (types/jsonb-path? {:segments [:profile] :root-var 'm}) => false)
-
-^{:refer rt.postgres.grammar.typed-common/get-var-path :added "4.1"}
-(fact "get-var-path resolves paths from the current scope or parent scopes"
-  (let [path   (types/make-jsonb-path [:profile :name] 'm)
-        parent (types/set-var-path (types/make-context) 'v-name path)
-        child  (types/push-scope parent)]
-    (types/get-var-path child 'v-name) => path
-    (types/get-var-path child 'missing) => nil))
-
-^{:refer rt.postgres.grammar.typed-common/set-var-path :added "4.1"}
-(fact "set-var-path stores a jsonb path for a variable"
-  (let [path (types/make-jsonb-path [:profile] 'm)
-        ctx  (types/set-var-path (types/make-context) 'o-profile path)]
-    (get-in ctx [:jsonb-paths 'o-profile]) => path))
-
-^{:refer rt.postgres.grammar.typed-common/shape-at-path :added "4.1"}
-(fact "shape-at-path resolves nested shapes and bare jsonb leaves"
-  (let [profile-shape (types/make-jsonb-shape {:name {:type :text}})
-        root-shape    (types/make-jsonb-shape {:profile {:type :jsonb
-                                                         :shape profile-shape}
-                                               :detail {:type :jsonb}}
-                                              :User)]
-    (types/shape-at-path root-shape [:profile]) => profile-shape
-    (types/shape-at-path root-shape [:detail]) => (types/empty-jsonb-shape)
-    (types/shape-at-path root-shape [:missing]) => nil))
-
-
-^{:refer rt.postgres.grammar.typed-common/valid-key? :added "4.1"}
-(fact "TODO")

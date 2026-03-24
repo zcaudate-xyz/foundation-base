@@ -20,7 +20,7 @@
 
 ^{:refer rt.postgres.grammar/CANARY :adopt true :added "4.0"}
 (fact "stops the postgres runtime"
-  
+
   (try
     (scratch/addf 1.0 2.0)
     (catch Throwable t
@@ -34,11 +34,11 @@
 ^{:refer rt.postgres.grammar/CANARY.select :adopt true :added "4.0"}
 (fact "BASIC SELECT"
   ^:hidden
-  
+
   (!.pg
    [:select (pg/jsonb-agg '("A" "B"))])
   => [{:f1 "A", :f2 "B"}]
-  
+
   (mapv str
         (!.pg
          [:select (pg/array-agg '("A" "B"))]))
@@ -47,7 +47,7 @@
   (!.pg
    [:select * :from '("A" "B")])
   => (throws)
-  
+
   (!.pg
    '("A" "B"))
   => "(A,B)"
@@ -55,7 +55,7 @@
   (!.pg
    (array "A" "B"))
   => '("A" "B")
-  
+
   (!.pg
    [:select * :from (unnest (array "A" "B"))])
   => '("A" "B")
@@ -69,7 +69,7 @@
 ^{:refer rt.postgres.grammar/CANARY.json :adopt true :added "4.0"}
 (fact "BASIC JSON SELECT"
   ^:hidden
-  
+
   (!.pg
    [:select o
     :from '([:select '[[(== c "a") o]]
@@ -77,19 +77,19 @@
              c])
     o])
   => '(true false false)
-  
+
   (!.pg
    [:select true
     :from (pg/jsonb-array-elements-text (js ["a" "b" "c"])) c
     :where c := "a"])
   => true
-  
+
   (!.pg
    [:select *
     :from (pg/jsonb-array-elements-text (js ["a" "b" "c"])) c
     :where c := "a"])
   => "a"
-  
+
   (!.pg
    [:select *
     :from (pg/jsonb-array-elements (js [{:id "a"}
@@ -111,15 +111,21 @@
        {"id" "a", "data" 1}})
 
 
-(comment
-  )
+(comment)
 
 
 ^{:refer rt.postgres.grammar/pg-tf-free-data :added "4.1"}
-(fact "TODO")
+(fact "transforms free data form to quoted structure"
+  (pg-tf-free-data ['>-> '[[a b] [c d]]]) => '(quote ((quote [a b] [c d])))
+
+  (pg-tf-free-data ['>-> '[[1 2] [3 4]]]) => '(quote ((quote [1 2] [3 4]))))
 
 ^{:refer rt.postgres.grammar/pg-tf-free-vec :added "4.1"}
-(fact "TODO")
+(fact "transforms free vec form to quoted vector"
+  (pg-tf-free-vec ['--- '[a b c]]) => '(quote [a b c])
+
+  (pg-tf-free-vec ['--- '[1 2 3]]) => '(quote [1 2 3]))
 
 ^{:refer rt.postgres.grammar/pg-vector :added "4.1"}
-(fact "TODO")
+(fact "handles array with js meta by emitting through pg-tf-js"
+  (pg-vector [1 2 3] {} {}) => vector?)

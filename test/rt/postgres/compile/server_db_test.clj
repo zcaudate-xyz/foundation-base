@@ -73,4 +73,16 @@
 
 
 ^{:refer rt.postgres.compile.server-db/collect-pg-ops :added "4.1"}
-(fact "TODO")
+(fact "collects postgres operations from form"
+  (collect-pg-ops '(pg/t:insert Task {:name "test"})) => #{:insert}
+
+  (collect-pg-ops '(pg/t:update Task {:name "test"} {:id 1})) => #{:update}
+
+  (collect-pg-ops '(pg/t:delete Task {:id 1})) => #{:delete}
+
+  (collect-pg-ops '(let [x 1] (pg/t:insert Task {:name "test"}))) => #{:insert}
+
+  (collect-pg-ops '(+ 1 2 3)) => #{}
+
+  (collect-pg-ops '(do (pg/t:insert Task {:name "a"})
+                       (pg/t:update Task {:name "b"} {:id 1}))) => #{:insert :update})

@@ -2,7 +2,6 @@
   (:require [rt.postgres.grammar.common :as common]
             [rt.postgres.grammar.form-defconst :as form-defconst]
             [rt.postgres.grammar.form-defn :as form-defn]
-            [rt.postgres.grammar.form-defnhydrate :as form-defnhydrate]
             [rt.postgres.grammar.form-defpartition :as form-defpartition]
             [rt.postgres.grammar.form-defrole :as form-defrole]
             [rt.postgres.grammar.form-deftype :as form-deftype]
@@ -67,14 +66,13 @@
         :defn      {:hydrate #'common/pg-hydrate
                     :format  #'form-defn/pg-defnformat
                     :emit    #'form-defn/pg-defn
-                    :hydrate-hook #'form-defnhydrate/pg-defnhydrate-hook
                     :static/dbtype :function}
         :def       {:emit :macro
                     :format  #'common/pg-format
                     :hydrate #'common/pg-hydrate
                     :macro   #'common/pg-defblock}
         :for       {:macro #'tf/pg-tf-for  :emit :macro}})
-      
+
       ;;
       ;; OPS
       ;;
@@ -86,7 +84,7 @@
         :doblk   {:op :doblk   :symbol #{'do:block}    :emit  #'form-let/pg-do-block :type :block}
         :dosup   {:op :dosup   :symbol #{'do:suppress} :emit  #'form-let/pg-do-suppress :type :block}
         :doast   {:op :doast   :symbol #{'do:assert}   :emit  #'common/pg-do-assert :type :block :style/indent 1}
-        
+
         :letblk  {:op :letblk  :symbol #{'let:block}   :macro #'form-let/pg-tf-let-block :emit :macro :type :block}
         :let     {:op :let     :symbol #{'let}         :macro #'form-let/pg-tf-let :emit :macro :type :block}
         :while   {:op :while   :symbol #{'while}       :emit  #'form-let/pg-while-block :type :block}
@@ -102,11 +100,11 @@
         :idxe    {:op :idxe    :symbol #{:#>>}         :value true :raw "#>>" :emit :infix}
         :idxt    {:op :idxt    :symbol #{:->>}         :value true :raw "->>" :emit :infix}
         :idxj    {:op :idxj    :symbol #{:->}          :value true :raw "->"  :emit :infix}
-        :remc    {:op :remc    :symbol #{'re}          :raw "~"    :emit :bi}  
-        :remi    {:op :remi    :symbol #{'re:*}        :raw "~*"   :emit :bi}  
+        :remc    {:op :remc    :symbol #{'re}          :raw "~"    :emit :bi}
+        :remi    {:op :remi    :symbol #{'re:*}        :raw "~*"   :emit :bi}
         :array   {:op :array   :symbol #{'array}       :emit  #'common/pg-array}
         :js      {:op :js      :symbol #{'js}          :macro #'tf/pg-tf-js :type :macro}})
-      
+
       ;;
       ;; TOP LEVEL
       ;;
@@ -185,7 +183,7 @@
                   :uuid      {:custom #'common/pg-uuid}
                   :string    {:custom #'common/pg-string}
                   :symbol    {:replace {\- "_" \: "." \? "p_"}
-                             :link-fn #'common/pg-linked-token}}
+                              :link-fn #'common/pg-linked-token}}
         :block   {:branch  {:wrap    {:start "" :end "END IF;"}
                             :control {:default {:parameter  {:start " " :end " THEN"}
                                                 :body {:append true
@@ -206,8 +204,8 @@
 
 (def +grammar+
   (grammar/grammar :pg
-    (grammar/to-reserved +features+)
-    +template+))
+                   (grammar/to-reserved +features+)
+                   +template+))
 
 (def +meta+
   (book/book-meta meta/+fn+))

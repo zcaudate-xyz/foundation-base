@@ -32,4 +32,21 @@
 
 
 ^{:refer rt.postgres.compile.json-schema/field->json-schema :added "4.1"}
-(fact "TODO")
+(fact "converts field info to JSON Schema"
+  (let [field-info {:type :uuid :nullable? false}]
+    (compile.json-schema/field->json-schema field-info) => {:type "string" :format "uuid"})
+
+  (let [field-info {:type :text :nullable? true}]
+    (compile.json-schema/field->json-schema field-info) => {:type "string"})
+
+  (let [field-info {:type :boolean}]
+    (compile.json-schema/field->json-schema field-info) => {:type "boolean"})
+
+  (let [field-info {:type :array :items {:type :text}}]
+    (:type (compile.json-schema/field->json-schema field-info)) => "array")
+
+  (let [field-info {:is-ref? true}]
+    (compile.json-schema/field->json-schema field-info) => {:type "string" :format "uuid"})
+
+  (let [field-info {:type :jsonb :shape (types/make-jsonb-shape {:id {:type :uuid}} :Test)}]
+    (get-in (compile.json-schema/field->json-schema field-info) [:properties "id" :type]) => "string"))

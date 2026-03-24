@@ -47,4 +47,7 @@
 
 
 ^{:refer rt.postgres.client/rt-pg-string :added "4.1"}
-(fact "TODO")
+(fact "returns string representation of postgres runtime"
+  (let [pg (client/rt-postgres:create {})]
+    (client/rt-pg-string pg)
+    => string?))

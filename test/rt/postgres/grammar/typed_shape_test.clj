@@ -126,7 +126,51 @@
 
 
 ^{:refer rt.postgres.grammar.typed-shape/map-schema-entry->field-type :added "4.1"}
-(fact "TODO")
+(fact "map-schema-entry->field-type converts map schema entries to field descriptors"
+  ;; Basic type
+  (shape/map-schema-entry->field-type :id {:type :uuid})
+  => (contains {:type :uuid})
+
+  ;; Required field
+  (shape/map-schema-entry->field-type :id {:type :uuid :required true})
+  => (contains {:type :uuid :nullable? false})
+
+  ;; Optional field
+  (shape/map-schema-entry->field-type :bio {:type :text :required false})
+  => (contains {:type :text :nullable? true})
+
+  ;; Nested map schema
+  (let [result (shape/map-schema-entry->field-type :profile {:type :map :map {:name {:type :text}}})]
+    (:type result) => :jsonb
+    (some? (:shape result)) => true)
+
+  ;; Unknown type
+  (shape/map-schema-entry->field-type :data {:type :unknown})
+  => (contains {:type :unknown}))
 
 ^{:refer rt.postgres.grammar.typed-shape/resolve-column-type :added "4.1"}
-(fact "TODO")
+(fact "resolve-column-type resolves ColumnDef types to field descriptors"
+  ;; Primitive type via TypeRef
+  (let [col (types/make-column-def :id (types/make-type-ref :primitive nil :uuid)
+                                   {:required true})]
+    (shape/resolve-column-type col)
+    => (contains {:type :uuid :nullable? false}))
+
+  ;; Enum type
+  (let [col (types/make-column-def :status (types/make-type-ref :enum :core "Status")
+                                   {:required false :enum-ref {:ns :core}})]
+    (shape/resolve-column-type col)
+    => (contains {:type :enum}))
+
+  ;; Ref type
+  (let [col (types/make-column-def :org-id (types/make-type-ref :ref nil "Organisation")
+                                   {:required true})]
+    (shape/resolve-column-type col)
+    => (contains {:type :uuid :nullable? false}))
+
+  ;; Map type with nested schema
+  (let [col (types/make-column-def :settings (types/make-type-ref :primitive nil :map)
+                                   {:map-schema {:theme {:type :text}}})]
+    (let [result (shape/resolve-column-type col)]
+      (:type result) => :jsonb
+      (some? (:shape result)) => true)))

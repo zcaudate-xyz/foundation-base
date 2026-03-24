@@ -107,19 +107,61 @@
 
 
 ^{:refer rt.postgres.grammar.common-application/application-string :added "4.1"}
-(fact "TODO")
+(fact "generates a string representation of an application"
+  (application-string {:tables {'users/User {} 'posts/Post {}}})
+  => "#pg.app [2]\nposts/Post users/User\n"
+
+  (application-string {:tables {}})
+  => "#pg.app [0]\n\n")
 
 ^{:refer rt.postgres.grammar.common-application/app-list-entries :added "4.1"}
-(fact "TODO")
+(fact "returns all table entry keys from an application"
+  (set (app-list-entries {:tables {'users/User {} 'posts/Post {}}}))
+  => '#{users/User posts/Post}
+
+  (app-list-entries {:tables {}})
+  => nil)
 
 ^{:refer rt.postgres.grammar.common-application/app-get-entry :added "4.1"}
-(fact "TODO")
+(fact "retrieves a specific entry from the app schema tree"
+  (let [app {:schema {:tree {"users/User" {:id 1} "posts/Post" {:id 2}}}}]
+    (app-get-entry app "users/User"))
+  => {:id 1}
+
+  (app-get-entry {:schema {:tree {}}} "nonexistent")
+  => nil)
 
 ^{:refer rt.postgres.grammar.common-application/app-get-deps :added "4.1"}
-(fact "TODO")
+(fact "extracts dependency namespaces from a table entry"
+  (let [app {:tables {'users/User [{:ref {:ns 'rt.postgres.grammar.types}}
+                                   {:ref {:ns 'rt.postgres.grammar.shapes}}]}}]
+    (app-get-deps app 'users/User))
+  => '#{rt.postgres.grammar.shapes}
+
+  (app-get-deps {:tables {}} 'nonexistent)
+  => #{})
 
 ^{:refer rt.postgres.grammar.common-application/module-typed :added "4.1"}
-(fact "TODO")
+(fact "analyzes modules and returns merged typed information"
+  (let [modules [{:id 'test.module
+                  :code {:ns 'test.module
+                         :forms [{:op 'deftype
+                                  :static/schema-seed []
+                                  :ns 'test.module
+                                  :name 'User
+                                  :vec []}]}}]]
+    (module-typed modules))
+  => (contains {:tables map? :enums map? :functions map?}))
 
 ^{:refer rt.postgres.grammar.common-application/app-create-typed :added "4.1"}
-(fact "TODO")
+(fact "creates typed information from tables and modules"
+  (let [tables {'users/User [{:type :text}]}
+        modules [{:id 'test.module
+                  :code {:ns 'test.module
+                         :forms [{:op 'deftype
+                                  :static/schema-seed []
+                                  :ns 'test.module
+                                  :name 'Post
+                                  :vec []}]}}]]
+    (app-create-typed tables modules))
+  => (contains {:tables map? :enums map? :functions map?}))

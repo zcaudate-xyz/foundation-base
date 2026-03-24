@@ -147,7 +147,33 @@
 
 
 ^{:refer rt.postgres.compile.json-openapi/field->openapi :added "4.1"}
-(fact "TODO")
+(fact "converts field info to OpenAPI schema"
+  (let [field-info {:type :uuid :nullable? false}]
+    (compile.openapi/field->openapi field-info) => {:type "string" :format "uuid"})
+
+  (let [field-info {:type :text :nullable? true}]
+    (compile.openapi/field->openapi field-info) => {:type "string"})
+
+  (let [field-info {:type :boolean}]
+    (compile.openapi/field->openapi field-info) => {:type "boolean"})
+
+  (let [field-info {:type :array :items {:type :text}}]
+    (:type (compile.openapi/field->openapi field-info)) => "array")
+
+  (let [field-info {:is-ref? true}]
+    (compile.openapi/field->openapi field-info) => {:type "string" :format "uuid"}))
 
 ^{:refer rt.postgres.compile.json-openapi/arg->openapi :added "4.1"}
-(fact "TODO")
+(fact "converts function argument to OpenAPI parameter"
+  (types/clear-registry!)
+  (let [arg {:name 'm :type :text}
+        fn-def {:inputs [arg]}]
+    (compile.openapi/arg->openapi arg fn-def) => ["m" {:type "string"}])
+
+  (let [arg {:name 'i-count :type :integer}
+        fn-def {:inputs [arg]}]
+    (compile.openapi/arg->openapi arg fn-def) => ["count" {:type "integer"}])
+
+  (let [arg {:name 'm :type :jsonb}
+        fn-def {:inputs [arg]}]
+    (compile.openapi/arg->openapi arg fn-def) => vector?))

@@ -226,7 +226,7 @@
 ^{:refer rt.postgres.grammar.typed-parse/analyze-tables :added "4.1"}
 (fact "analyze-tables converts app tables into typed table defs"
   (let [analysis (parse/analyze-tables {:User [:id {:type :uuid :primary true}
-                                                :name {:type :text}]
+                                               :name {:type :text}]
                                         :Organisation [:id {:type :uuid :primary true}
                                                        :handle {:type :citext}]}
                                        "gwdb.core")]
@@ -244,16 +244,91 @@
 
 
 ^{:refer rt.postgres.grammar.typed-parse/parse-schema :added "4.1"}
-(fact "TODO")
+(fact "parse-schema extracts schema name from script form"
+  ;; From :static :all :schema
+  (parse/parse-schema '(script :postgres {:static {:all {:schema ["gw_data"]}}}))
+  => "gw_data"
+
+  ;; From :static :seed :schema
+  (parse/parse-schema '(script :postgres {:static {:seed {:schema ["gw_seed"]}}}))
+  => "gw_seed"
+
+  ;; :all takes precedence
+  (parse/parse-schema '(script :postgres {:static {:all {:schema ["all_schema"]}
+                                                   :seed {:schema ["seed_schema"]}}}))
+  => "all_schema"
+
+  ;; Nil when no schema
+  (parse/parse-schema '(script :postgres {})) => nil
+  (parse/parse-schema '(other-form)) => nil)
 
 ^{:refer rt.postgres.grammar.typed-parse/extract-aliases :added "4.1"}
-(fact "TODO")
+(fact "extract-aliases builds alias map from require forms"
+  ;; Single alias
+  (parse/extract-aliases '[[my.ns :as m]])
+  => '{m my.ns}
+
+  ;; Multiple aliases
+  (parse/extract-aliases '[[rt.postgres :as pg] [rt.user :as user]])
+  => '{pg rt.postgres, user rt.user}
+
+  ;; Ignores non-:as forms
+  (parse/extract-aliases '[[rt.postgres :as pg] [rt.util :refer [foo]]])
+  => '{pg rt.postgres}
+
+  ;; Empty input
+  (parse/extract-aliases []) => {})
 
 ^{:refer rt.postgres.grammar.typed-parse/parse-aliases :added "4.1"}
-(fact "TODO")
+(fact "parse-aliases extracts aliases from script form"
+  ;; From script with :require
+  (parse/parse-aliases '(script :postgres {:require [[rt.postgres :as pg]
+                                                     [rt.user :as u]]}))
+  => '{pg rt.postgres, u rt.user}
+
+  ;; Empty require
+  (parse/parse-aliases '(script :postgres {:require []}))
+  => {}
+
+  ;; No script form
+  (parse/parse-aliases '(other-form)) => nil)
 
 ^{:refer rt.postgres.grammar.typed-parse/parse-process-constraints :added "4.1"}
-(fact "TODO")
+(fact "parse-process-constraints extracts constraints from SQL process"
+  ;; as-limit-length
+  (parse/parse-process-constraints '((as-limit-length 255)))
+  => {:max-length 255}
+
+  ;; as-lower-formatted
+  (parse/parse-process-constraints '((as-lower-formatted)))
+  => {:format :handle}
+
+  ;; as-email
+  (parse/parse-process-constraints '((as-email)))
+  => {:format :email}
+
+  ;; as-url
+  (parse/parse-process-constraints '((as-url)))
+  => {:format :uri}
+
+  ;; Combined
+  (parse/parse-process-constraints '((as-limit-length 100) (as-email)))
+  => {:max-length 100, :format :email}
+
+  ;; Empty/nil
+  (parse/parse-process-constraints nil) => {}
+  (parse/parse-process-constraints []) => {})
 
 ^{:refer rt.postgres.grammar.typed-parse/transform-col-opts :added "4.1"}
-(fact "TODO")
+(fact "transform-col-opts transforms runtime column options"
+  ;; Transforms ref link
+  (parse/transform-col-opts {:type :ref :ref {:link {:module :Organisation :id :id}}})
+  => {:type :ref, :ref {:key :Organisation/id}}
+
+  ;; Passes through non-ref opts
+  (parse/transform-col-opts {:type :uuid :required true})
+  => {:type :uuid :required true}
+
+  ;; Passes through opts without link
+  (parse/transform-col-opts {:type :ref :ref {:ns :test}})
+  => {:type :ref :ref {:ns :test}})

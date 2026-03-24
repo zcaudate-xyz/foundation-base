@@ -1,8 +1,8 @@
 (ns rt.postgres.compile.common-test
+  (:use code.test)
   (:require [rt.postgres.compile.common :as compile.common]
             [rt.postgres.grammar.typed-common :as types]
-            [rt.postgres.grammar.typed-parse :as parse])
-  (:use code.test))
+            [rt.postgres.grammar.typed-parse :as parse]))
 
 ;; -----------------------------------------------------------------------------
 ;; Shared Compile Helpers
@@ -152,13 +152,52 @@
 
 
 ^{:refer rt.postgres.compile.common/form-uses-tracked? :added "4.1"}
-(fact "TODO")
+(fact "checks if form contains any tracked symbols"
+  (compile.common/form-uses-tracked? '(+ x y) #{'x}) => true
+  (compile.common/form-uses-tracked? '(+ a b) #{'x}) => false
+  (compile.common/form-uses-tracked? '(let [z 1] (+ z x)) #{'x}) => true
+  (compile.common/form-uses-tracked? 'x #{'x}) => true
+  (compile.common/form-uses-tracked? nil #{'x}) => false)
 
 ^{:refer rt.postgres.compile.common/find-table-op-in-body :added "4.1"}
-(fact "TODO")
+(fact "finds table operations in function body"
+  (types/clear-registry!)
+  (let [body '(pg/t:insert Task m)]
+    (compile.common/find-table-op-in-body body 'm) => 'Task)
+
+  (let [body '(let [m2 (merge m {})]
+                (pg/t:insert Task m2))]
+    (compile.common/find-table-op-in-body body 'm) => nil)
+
+  (let [body '(pg/g:insert OtherTable m)]
+    (compile.common/find-table-op-in-body body 'm) => 'OtherTable)
+
+  (compile.common/find-table-op-in-body '(+ 1 2) 'm) => nil)
 
 ^{:refer rt.postgres.compile.common/resolve-called-fn :added "4.1"}
-(fact "TODO")
+(fact "resolves function from registry or aliases"
+  (types/clear-registry!)
+  (let [fn-def (parse/parse-defn '(defn.pg helper [:jsonb m] (return m)) "demo" nil)]
+    (types/register-type! 'demo/helper fn-def)
+    (:name (compile.common/resolve-called-fn 'demo/helper {})) => "helper"
+    (:name (compile.common/resolve-called-fn 'helper {})) => "helper"
+    (compile.common/resolve-called-fn 'unknown {}) => nil))
 
 ^{:refer rt.postgres.compile.common/infer-jsonb-arg-shape* :added "4.1"}
-(fact "TODO")
+(fact "infers jsonb shape with visited tracking"
+  (types/clear-registry!)
+  (let [task-columns [(types/make-column-def :id
+                                             (types/make-type-ref :primitive nil :uuid)
+                                             {:required true :primary true})]
+        task-table (types/make-table-def "test.ns" "Task" task-columns :id)
+        form '(defn.pg ^{:%% :sql :- Task}
+                insert-task
+                "inserts a task"
+                [:jsonb m]
+                (pg/t:insert Task m))
+        fn-def (parse/parse-defn form "test.ns" nil)]
+    (types/register-type! 'test.ns/Task task-table)
+    (types/register-type! 'test.ns/insert-task fn-def)
+    (let [shape (compile.common/infer-jsonb-arg-shape* 'm fn-def #{})]
+      (:source-table shape) => "Task"
+      (-> shape :fields keys set) => #{:id})))
