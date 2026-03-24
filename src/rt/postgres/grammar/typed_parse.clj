@@ -57,9 +57,10 @@
 
 (defn parse-aliases [form]
   "Extracts namespace aliases from a script form's :require option."
-  (let [opts (nth form 2 nil)
-        require-forms (get-in opts [:require])]
-    (extract-aliases require-forms)))
+  (when (script? form)
+    (let [opts (nth form 2 nil)
+          require-forms (get-in opts [:require])]
+      (extract-aliases require-forms))))
 
 (defn parse-process-constraints [process]
   (when (sequential? process)
@@ -162,7 +163,7 @@
   "Transforms app/runtime column opts to deftype.pg-style parse input."
   [opts]
   (if-let [link (get-in opts [:ref :link])]
-    (assoc opts :ref {:key (keyword (str (:module link)) (name (:id link)))})
+    (assoc opts :ref {:key (keyword (name (:module link)) (name (:id link)))})
     opts))
 
 (defn parse-runtime-table

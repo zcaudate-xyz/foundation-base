@@ -80,55 +80,54 @@
    Returns the table symbol if found, nil otherwise."
   [body arg-name]
   (letfn [(scan-form [form tracked]
-            (cond
-              (seq? form)
-              (let [op (first form)]
-                (cond
-                  (and (#{'pg/t:insert 'pg/g:insert 'pg/t:update 'pg/g:update} op)
-                       (contains? tracked (nth form 2 nil)))
-                  (second form)
+            (cond (seq? form)
+                  (let [op (first form)]
+                    (cond
+                      (and (#{'pg/t:insert 'pg/g:insert 'pg/t:update 'pg/g:update} op)
+                           (contains? tracked (nth form 2 nil)))
+                      (second form)
 
-                  (and (= 'let op)
-                       (sequential? (second form)))
-                  (loop [bindings (partition 2 (second form))
-                         tracked tracked]
-                    (if-let [[binding expr] (first bindings)]
-                      (or (scan-form expr tracked)
-                          (recur (next bindings)
-                                 (cond-> tracked
-                                   (and (symbol? binding)
-                                        (form-uses-tracked? expr tracked))
-                                   (conj binding))))
-                      (scan-forms (drop 2 form) tracked)))
+                      (and (= 'let op)
+                           (sequential? (second form)))
+                      (loop [bindings (partition 2 (second form))
+                             tracked tracked]
+                        (if-let [[binding expr] (first bindings)]
+                          (or (scan-form expr tracked)
+                              (recur (next bindings)
+                                     (cond-> tracked
+                                       (and (symbol? binding)
+                                            (form-uses-tracked? expr tracked))
+                                       (conj binding))))
+                          (scan-forms (drop 2 form) tracked)))
 
-                  (symbol? op)
-                  (let [args (vec (rest form))
-                        arg-pos (first (keep-indexed (fn [idx itm]
-                                                       (when (contains? tracked itm) idx))
-                                                     args))
-                        op-name (name op)
-                        fn-def (or (types/get-type op)
-                                   (types/get-type (symbol op-name))
-                                   (first (filter (fn [f]
-                                                    (and (types/fn-def? f)
-                                                         (= op-name (:name f))))
-                                                  (vals @types/*type-registry*))))]
-                    (or (when (and (some? arg-pos)
-                                   (types/fn-def? fn-def))
-                          (when-let [target-arg (nth (:inputs fn-def) arg-pos nil)]
-                            (when (= :jsonb (:type target-arg))
-                              (find-table-op-in-body
-                               (get-in fn-def [:body-meta :raw-body])
-                               (:name target-arg)))))
-                        (scan-forms form tracked)))
+                      (symbol? op)
+                      (let [args (vec (rest form))
+                            arg-pos (first (keep-indexed (fn [idx itm]
+                                                           (when (contains? tracked itm) idx))
+                                                         args))
+                            op-name (name op)
+                            fn-def (or (types/get-type op)
+                                       (types/get-type (symbol op-name))
+                                       (first (filter (fn [f]
+                                                        (and (types/fn-def? f)
+                                                             (= op-name (:name f))))
+                                                      (vals @types/*type-registry*))))]
+                        (or (when (and (some? arg-pos)
+                                       (types/fn-def? fn-def))
+                              (when-let [target-arg (nth (:inputs fn-def) arg-pos nil)]
+                                (when (= :jsonb (:type target-arg))
+                                  (find-table-op-in-body
+                                   (get-in fn-def [:body-meta :raw-body])
+                                   (:name target-arg)))))
+                            (scan-forms form tracked)))
 
-                  :else
-                  (scan-forms form tracked)))
+                      :else
+                      (scan-forms form tracked)))
 
-              (coll? form)
-              (scan-forms form tracked)
+                  (coll? form)
+                  (scan-forms form tracked)
 
-              :else nil))
+                  :else nil))
           (scan-forms [forms tracked]
             (some #(scan-form % tracked) forms))]
     (scan-form body #{arg-name})))

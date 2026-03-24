@@ -10,7 +10,7 @@
             [std.lib.collection :as collection]
             [std.lib.foundation :as f]))
 
-(defn pg-defnformat
+(defn pg-defn-format
   "formats a defn form"
   {:added "4.0"}
   ([form]
@@ -24,6 +24,8 @@
              (with-meta sym msym)
              args
              body)])))
+
+(def pg-defnformat pg-defn-format)
 
 (def +pg-defnlang-types+                   
   {:default  {:tag "plpgsql"  :lang :postgres}  

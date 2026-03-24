@@ -57,7 +57,7 @@
   ^:hidden
 
   (with-redefs [common/pg-type-alias (fn [x] x)]
-    (pg-deftype-col-fn [:col {:type :uuid :primary true}] {}))
+    (pg-deftype-col-fn [:col {:type :uuid :primary true}] {:schema-primary {}}))
   => (contains [:uuid :primary-key])
 
   (with-redefs [common/pg-type-alias (fn [x] x)]

@@ -279,7 +279,7 @@
                            (if (= :shaped (:kind val-type))
                              (types/add-binding c bind-name :jsonb :shape (:shape val-type))
                              (types/add-binding c bind-name val-type))
-
+                           
                            (and (seq? bind-name)
                                 (keyword? (first bind-name))
                                 (symbol? (second bind-name)))
@@ -288,7 +288,7 @@
                                               {:kind :cast
                                                :type (first bind-name)
                                                :expr val-type})
-
+                           
                            :else c))))
         new-ctx (reduce (fn [c [bind-name bind-val]]
                           (bind-entry c bind-name bind-val))

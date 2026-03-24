@@ -26,9 +26,10 @@
 
 (defn accessor-expr?
   [expr]
-  (and (seq? expr)
-       (or (#{:-> :->>} (first expr))
-           (= 'pg/field-id (first expr)))))
+  (boolean
+   (and (seq? expr)
+        (or (#{:-> :->>} (first expr))
+            (= 'pg/field-id (first expr))))))
 
 (defn append-path
   [path segment]

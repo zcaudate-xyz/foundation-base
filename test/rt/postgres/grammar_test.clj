@@ -1,9 +1,9 @@
 (ns rt.postgres.grammar-test
+  (:use code.test)
   (:require [rt.postgres :as pg]
             [rt.postgres.grammar :refer :all]
             [rt.postgres.script.test.scratch-v1 :as scratch]
-            [std.lang :as l])
-  (:use code.test))
+            [std.lang :as l]))
 
 (l/script- :postgres
   {:runtime :jdbc.client
@@ -110,15 +110,10 @@
   => #{{"id" "a", "data" 2}
        {"id" "a", "data" 1}})
 
-
-(comment)
-
-
 ^{:refer rt.postgres.grammar/pg-tf-free-data :added "4.1"}
 (fact "transforms free data form to quoted structure"
-  (pg-tf-free-data ['>-> '[[a b] [c d]]]) => '(quote ((quote [a b] [c d])))
-
-  (pg-tf-free-data ['>-> '[[1 2] [3 4]]]) => '(quote ((quote [1 2] [3 4]))))
+  (pg-tf-free-data ['>-> '[[a b] [c d]]])
+  => '(quote ((quote [[a b] [c d]]))))
 
 ^{:refer rt.postgres.grammar/pg-tf-free-vec :added "4.1"}
 (fact "transforms free vec form to quoted vector"
@@ -128,4 +123,8 @@
 
 ^{:refer rt.postgres.grammar/pg-vector :added "4.1"}
 (fact "handles array with js meta by emitting through pg-tf-js"
-  (pg-vector [1 2 3] {} {}) => vector?)
+  (pg-vector [1 2 3] {} {})
+  => "1 2 3"
+
+  (pg-vector ^:js [1 2 3] {} {})
+  => "(jsonb-build-array 1 2 3)")

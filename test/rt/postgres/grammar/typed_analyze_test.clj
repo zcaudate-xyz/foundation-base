@@ -388,18 +388,19 @@
 
 ^{:refer rt.postgres.grammar.typed-analyze/analyze-let :added "4.1"}
 (fact "analyze-let analyzes let bindings and body"
-  (let [ctx (types/make-context)]
-    ;; Simple binding - returns literal for number
-    (let [result (analyze/analyze-let '[x 1] '[(return x)] ctx)]
-      (:kind result) => :literal)
+  
+  (let [ctx (types/make-context)
+        result (analyze/analyze-let '[x 1] '[(return x)] ctx)]
+     result)
+  => {:kind :literal, :type :integer, :value 1}
 
-    ;; JSONB binding with destructuring - nil when no descriptor match
-    (let [ctx-with-jsonb (types/make-context {'m :jsonb}
-                                             {'m (types/make-jsonb-shape {:id {:type :uuid}})}
-                                             {'m (types/make-jsonb-path [] 'm)})]
-      (let [result (analyze/analyze-let '[n (:-> m "id")] '[(return n)] ctx-with-jsonb)]
-        ;; Returns nil because no binding descriptors match
-        (nil? result) => true))))
+  ;; JSONB binding with destructuring - nil when no descriptor match
+  (let [ctx-with-jsonb (types/make-context {'m :jsonb}
+                                           {'m (types/make-jsonb-shape {:id {:type :uuid}})}
+                                           {'m (types/make-jsonb-path [] 'm)})
+        result (analyze/analyze-let '[n (:-> m "id")] '[(return n)] ctx-with-jsonb)]
+    result)
+  => :jsonb)
 
 ^{:refer rt.postgres.grammar.typed-analyze/analyze-control-flow :added "4.1"}
 (fact "analyze-control-flow analyzes conditional expressions"
