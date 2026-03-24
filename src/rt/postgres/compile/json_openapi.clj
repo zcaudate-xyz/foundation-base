@@ -41,10 +41,14 @@
   [arg fn-def]
   (let [param-name (types/normalize-key (str/replace (name (:name arg)) #"^i-" ""))
         arg-type (:type arg)
+        arg-role (:role arg)
         meta-table (get-in fn-def [:body-meta :api/meta :table])
         meta-cols (get-in fn-def [:body-meta :api/meta :columns])]
     [param-name
      (cond
+       (= :track arg-role)
+       (compile.common/resolve-type arg-type :openapi)
+
        (and (= :jsonb arg-type)
             (types/fn-def? fn-def))
        (let [base-shape (or (when-let [table-def (compile.common/resolve-table-def meta-table)]
@@ -64,7 +68,7 @@
   (let [fn-name (:name fn-def)
         expose (get-in fn-def [:body-meta :expose])
         meta-table (get-in fn-def [:body-meta :api/meta :table])
-        inputs (remove #(= 'o-op (:name %)) (:inputs fn-def))
+        inputs (:inputs fn-def)
         request-body (when (seq inputs)
                        {:content {"application/json"
                                   {:schema {:type "object"

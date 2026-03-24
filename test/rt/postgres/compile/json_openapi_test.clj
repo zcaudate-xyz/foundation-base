@@ -87,7 +87,7 @@
     response-schema => {:$ref "#/components/schemas/Entry"}))
 
 ^{:refer rt.postgres.compile.json-openapi/fn->openapi :added "0.1"}
-(fact "fn->openapi filters out o-op from request body"
+(fact "fn->openapi retains track args in request body"
   (let [form '(defn.pg ^{:%% :sql :- Task}
                 insert-task
                 "inserts a task"
@@ -97,7 +97,7 @@
         fn-def (parse/parse-defn form "test.ns" nil)
         openapi (compile.openapi/fn->openapi fn-def)
         request-schema (get-in openapi [:requestBody :content "application/json" :schema])]
-    (contains? (:properties request-schema) "op") => false))
+    (contains? (:properties request-schema) "o_op") => true))
 
 ^{:refer rt.postgres.compile.json-openapi/generate-openapi :added "0.1"}
 (fact "generate-openapi creates full OpenAPI spec from namespace"

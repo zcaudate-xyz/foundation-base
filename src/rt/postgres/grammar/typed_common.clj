@@ -112,7 +112,7 @@
                       scope foreign map-schema ref-info])
 (defrecord TableDef [ns name columns primary-key addons entity-meta dbschema])
 (defrecord FnDef [ns name inputs output body-meta dbschema])
-(defrecord FnArg [name type modifiers])
+(defrecord FnArg [name type modifiers role])
 
 (defrecord JsonbShape
   [fields           ; Map of field-key -> type-info

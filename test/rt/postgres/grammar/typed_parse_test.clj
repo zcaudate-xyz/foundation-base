@@ -121,12 +121,22 @@
 ^{:refer rt.postgres.grammar.typed-parse/parse-fn-inputs :added "0.1"}
 (fact "parse-fn-inputs extracts function arguments"
   (parse/parse-fn-inputs [:uuid i-id])
-  => (contains [(contains {:name 'i-id :type :uuid})])
+  => (contains [(contains {:name 'i-id :type :uuid :role :payload})])
   (parse/parse-fn-inputs [:uuid i-id :text i-handle])
-  => (contains [(contains {:name 'i-id :type :uuid})
-                (contains {:name 'i-handle :type :text})])
+  => (contains [(contains {:name 'i-id :type :uuid :role :payload})
+                (contains {:name 'i-handle :type :text :role :payload})])
   (parse/parse-fn-inputs [:jsonb o-op])
-  => (contains [(contains {:name 'o-op :type :jsonb})]))
+  => (contains [(contains {:name 'o-op :type :jsonb :role :payload})]))
+
+^{:refer rt.postgres.grammar.typed-parse/parse-defn :added "0.1"}
+(fact "parse-defn marks track arguments when they flow into :track"
+  (let [form '(defn.pg test-fn
+                [:jsonb o-op]
+                (pg/t:update Task {:set {:x 1}
+                                    :track o-op}))
+        fn-def (parse/parse-defn form "test.ns" nil)]
+    (:name fn-def) => "test-fn"
+    (:role (first (:inputs fn-def))) => :track))
 
 ^{:refer rt.postgres.grammar.typed-parse/parse-defn :added "0.1"}
 (fact "parse-defn extracts function definition"

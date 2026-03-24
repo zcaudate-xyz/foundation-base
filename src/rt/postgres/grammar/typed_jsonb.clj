@@ -73,6 +73,44 @@
   [ctx expr]
   (first (access-descriptors ctx expr)))
 
+(defn source-root-shape
+  [ctx source-path]
+  (when (types/jsonb-path? source-path)
+    (types/get-var-shape ctx (:root-var source-path))))
+
+(defn source-field-info
+  [ctx source-path field-key accessor-type]
+  (let [shape (source-root-shape ctx source-path)
+        source-field-info (when (and shape field-key)
+                            (get-in shape [:fields field-key]))]
+    (or source-field-info
+        (field-info (case accessor-type
+                      :-> :jsonb
+                      :->> :text)))))
+
+(declare js-keys-form->keywords)
+
+(defn js-select-shape
+  [ctx form]
+  (when (and (seq? form)
+             (symbol? (first form))
+             (= "js-select" (name (first form))))
+    (let [source-expr (second form)
+          keys-expr (nth form 2 nil)
+          source-path (expr-jsonb-path ctx source-expr)
+          source-shape (source-root-shape ctx source-path)
+          field-keys (js-keys-form->keywords keys-expr)]
+      (when (and (types/jsonb-shape? source-shape)
+                 (seq field-keys))
+        (types/make-jsonb-shape
+         (into {}
+               (map (fn [k]
+                      [k (source-field-info ctx source-path k :->)]))
+               field-keys)
+         (:source-table source-shape)
+         (:confidence source-shape)
+         (:nullable? source-shape))))))
+
 (defn expr-jsonb-path
   [ctx expr]
   (cond
@@ -197,8 +235,8 @@
       (->> v
            (keep (fn [x]
                    (cond
-                     (string? x) (keyword x)
-                     (keyword? x) x
+                     (string? x) (keyword (str/replace x "_" "-"))
+                     (keyword? x) (keyword (str/replace (name x) "_" "-"))
                      :else nil)))
            (vec)))))
 
@@ -215,14 +253,26 @@
       (when (and source-path (seq field-keys))
         (mapv (fn [k]
                 {:path (append-path source-path k)
-                 :field-info (field-info :jsonb)})
+                 :field-info (source-field-info ctx source-path k :->)})
               field-keys)))))
 
 (defn analyze-binding
   [ctx [binding expr]]
-  (let [ctx' (scan-form ctx expr)]
-    (apply-descriptors ctx'
-                       (binding-descriptors ctx' binding expr))))
+  (let [ctx' (scan-form ctx expr)
+        projected-shape (js-select-shape ctx' expr)
+        source-name (when (and projected-shape
+                               (seq? expr)
+                               (symbol? (first expr))
+                               (= "js-select" (name (first expr)))
+                               (symbol? (second expr)))
+                      (second expr))
+        ctx'' (cond-> ctx'
+                (and projected-shape (symbol? binding))
+                (types/add-binding binding :jsonb :shape projected-shape)
+                source-name
+                (types/add-binding source-name :jsonb :shape projected-shape))]
+    (apply-descriptors ctx''
+                       (binding-descriptors ctx'' binding expr))))
 
 (defn scan-form
   [ctx form]
@@ -247,15 +297,21 @@
     ctx))
 
 (defn infer-jsonb-arg-access-shape
-  [arg-name fn-def]
-  (let [body (get-in fn-def [:body-meta :raw-body])
-        ctx  (types/make-context
-              {arg-name :jsonb}
-              {}
-              {arg-name (types/make-jsonb-path [] arg-name)})
-        out  (reduce scan-form ctx body)]
-    (when-let [shape (types/get-var-shape out arg-name)]
-      (when (seq (:fields shape))
-        (assoc shape
-               :confidence :medium
-               :nullable? true)))))
+  ([arg-name fn-def]
+   (infer-jsonb-arg-access-shape arg-name fn-def nil nil))
+  ([arg-name fn-def seed-shape]
+   (infer-jsonb-arg-access-shape arg-name fn-def seed-shape nil))
+  ([arg-name fn-def seed-shape role]
+   (when-not (= :track role)
+     (let [body (get-in fn-def [:body-meta :raw-body])
+           ctx  (types/make-context
+                 {arg-name :jsonb}
+                 (cond-> {}
+                   seed-shape (assoc arg-name seed-shape))
+                 {arg-name (types/make-jsonb-path [] arg-name)})
+           out  (reduce scan-form ctx body)]
+       (when-let [shape (types/get-var-shape out arg-name)]
+         (when (seq (:fields shape))
+           (assoc shape
+                  :confidence :medium
+                  :nullable? true)))))))

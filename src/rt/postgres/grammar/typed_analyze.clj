@@ -75,12 +75,39 @@
 ;; ─────────────────────────────────────────────────────────────────────────────
 
 (declare analyze-expr cached-infer)
+(declare analyzed->shape)
 
 (defonce ^:private +call-analyzers+ (atom {}))
 
 (defn register-call-analyzer!
   [sym f]
   (swap! +call-analyzers+ assoc sym f))
+
+(defn projected-js-select-shape
+  [ctx source-expr keys-expr]
+  (let [source-shape (or (types/get-var-shape ctx source-expr)
+                         (analyzed->shape (analyze-expr source-expr ctx)))
+        field-keys (typed-jsonb/js-keys-form->keywords keys-expr)]
+    (when (and (types/jsonb-shape? source-shape)
+               (seq field-keys))
+      (types/make-jsonb-shape
+       (into {}
+             (map (fn [k]
+                    [k (get-in source-shape [:fields k]
+                               {:type :jsonb
+                                :nullable? true})]))
+             field-keys)
+       (:source-table source-shape)
+       (:confidence source-shape)
+       (:nullable? source-shape)))))
+
+(register-call-analyzer!
+ 'js-select
+ (fn [{:keys [args ctx]}]
+   (when-let [[source-expr keys-expr] (seq args)]
+     (when-let [shape (projected-js-select-shape ctx source-expr keys-expr)]
+       {:kind :shaped
+        :shape shape}))))
 
 (defn analyzed->shape
   [value]
@@ -271,7 +298,16 @@
 
 (defn analyze-let [bindings body ctx]
   (let [bind-entry (fn [c bind-name bind-val]
-                     (let [val-type (analyze-expr bind-val c)]
+                     (let [val-type (analyze-expr bind-val c)
+                           projected-shape (when (and (seq? bind-val)
+                                                      (= "js-select" (name (first bind-val))))
+                                             (analyzed->shape val-type))
+                           c (cond-> c
+                               (and projected-shape
+                                    (symbol? (second bind-val)))
+                               (types/add-binding (second bind-val)
+                                                  :jsonb
+                                                  :shape projected-shape))]
                        (if-let [descriptors (seq (typed-jsonb/binding-descriptors c bind-name bind-val))]
                          (typed-jsonb/apply-descriptors c descriptors)
                          (cond
@@ -416,9 +452,12 @@
         ;; Function call tracing
         (symbol? op)
         (let [aliases (:aliases ctx {})
-              [resolved-op fn-def] (resolve-called-fn op aliases)]
+              [resolved-op fn-def] (resolve-called-fn op aliases)
+              call-analyzer (or (get @+call-analyzers+ resolved-op)
+                                 (get @+call-analyzers+ op)
+                                 (get @+call-analyzers+ (symbol op-name)))]
           (if fn-def
-            (if-let [call-analyzer (get @+call-analyzers+ resolved-op)]
+            (if call-analyzer
               (or (call-analyzer {:resolved-op resolved-op
                                   :fn-def fn-def
                                   :args args
@@ -444,7 +483,8 @@
         input-bindings (into {} (map (fn [arg] [(:name arg) (:type arg)])) (:inputs fn-def))
         input-shapes (into {}
                            (keep (fn [arg]
-                                   (when (= :jsonb (:type arg))
+                                   (when (and (= :jsonb (:type arg))
+                                              (not= :track (:role arg)))
                                      (when-let [arg-shape (compile.common/infer-jsonb-arg-access-shape
                                                            (:name arg)
                                                            fn-def)]
@@ -452,7 +492,8 @@
                            (:inputs fn-def))
         input-paths (into {}
                           (keep (fn [arg]
-                                  (when (= :jsonb (:type arg))
+                                  (when (and (= :jsonb (:type arg))
+                                             (not= :track (:role arg)))
                                     [(:name arg)
                                      (types/make-jsonb-path [] (:name arg))])))
                           (:inputs fn-def))

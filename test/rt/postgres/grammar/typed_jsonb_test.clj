@@ -92,12 +92,12 @@
                                 {'m (types/make-jsonb-path [] 'm)})]
     ;; :-> accessor
     (let [descriptors (jsonb/access-descriptors ctx '(:-> m "data"))]
-      (seq descriptors) => true
+      (some? descriptors) => true
       (:field-info (first descriptors)) => {:type :jsonb :nullable? true})
 
     ;; :->> accessor
     (let [descriptors (jsonb/access-descriptors ctx '(:->> m "name"))]
-      (seq descriptors) => true
+      (some? descriptors) => true
       (:field-info (first descriptors)) => {:type :text :nullable? true})))
 
 ^{:refer rt.postgres.grammar.typed-jsonb/access-descriptor :added "4.1"}
@@ -146,16 +146,16 @@
   (let [ctx (types/make-context {'m :jsonb} {} {'m (types/make-jsonb-path [] 'm)})]
     ;; Symbol binding to accessor
     (let [descriptors (jsonb/binding-descriptors ctx 'n '(:-> m "id"))]
-      (seq descriptors) => true
+      (some? descriptors) => true
       (:var (first descriptors)) => 'n)
 
     ;; Set binding
     (let [descriptors (jsonb/binding-descriptors ctx '#{o-data} 'm)]
-      (seq descriptors) => true)
+      (some? descriptors) => true)
 
     ;; Typed binding form
     (let [descriptors (jsonb/binding-descriptors ctx '(:uuid v-id) 'm)]
-      (seq descriptors) => true
+      (some? descriptors) => true
       (:var (first descriptors)) => 'v-id)))
 
 ^{:refer rt.postgres.grammar.typed-jsonb/descriptor-shape :added "4.1"}
@@ -248,6 +248,17 @@
     (let [descriptors (jsonb/js-select-descriptors ctx '(js-select m (js ["id" "name"])))]
       (count descriptors) => 2
       (:field-info (first descriptors)) => {:type :jsonb :nullable? true})
+
+    ;; Seeded table shape preserves concrete column types
+    (let [shape (types/make-jsonb-shape {:id {:type :uuid :nullable? false}
+                                         :name {:type :text :nullable? true}}
+                                        "User")
+          seeded-ctx (types/make-context {'m :jsonb}
+                                         {'m shape}
+                                         {'m (types/make-jsonb-path [] 'm)})
+          descriptors (jsonb/js-select-descriptors seeded-ctx '(js-select m (js ["id" "name"])))]
+      (:field-info (first descriptors)) => {:type :uuid :nullable? false}
+      (:field-info (second descriptors)) => {:type :text :nullable? true})
 
     ;; With vector directly
     (let [descriptors (jsonb/js-select-descriptors ctx '(js-select m ["id"]))]

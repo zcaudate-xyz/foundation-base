@@ -7,7 +7,7 @@
   (types/make-fn-def
    "demo.core"
    "create-user"
-   [(types/->FnArg 'm :jsonb [:jsonb])]
+   [(types/->FnArg 'm :jsonb [:jsonb] :payload)]
    :jsonb
    {:raw-body '[(pg/t:insert 'UserAccount {:id "u1"})]}
    nil))

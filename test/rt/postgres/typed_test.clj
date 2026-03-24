@@ -293,6 +293,146 @@
       (get-in shape [:fields :account :shape :fields :is-super :type]) => :boolean
       (get-in shape [:fields :security :shape :fields :password-salt :type]) => :text)))
 
+^{:refer rt.postgres.typed/get-function-input-shape :added "4.1"}
+(fact "get-function-input-shape projects update columns and keeps helper-chain narrowing intact"
+  (typed/clear-registry!)
+  (let [user-columns [(types/make-column-def :id
+                                             (types/make-type-ref :primitive nil :uuid)
+                                             {:required true :primary true})
+                      (types/make-column-def :type
+                                             (types/make-type-ref :primitive nil :text)
+                                             {:required true})
+                      (types/make-column-def :handle
+                                             (types/make-type-ref :primitive nil :text)
+                                             {})
+                      (types/make-column-def :color
+                                             (types/make-type-ref :primitive nil :text)
+                                             {})
+                      (types/make-column-def :is-active
+                                             (types/make-type-ref :primitive nil :boolean)
+                                             {})
+                      (types/make-column-def :is-official
+                                             (types/make-type-ref :primitive nil :boolean)
+                                             {})
+                      (types/make-column-def :is-onboarded
+                                             (types/make-type-ref :primitive nil :boolean)
+                                             {})
+                      (types/make-column-def :is-super
+                                             (types/make-type-ref :primitive nil :boolean)
+                                             {})
+                      (types/make-column-def :first-name
+                                             (types/make-type-ref :primitive nil :text)
+                                             {})
+                      (types/make-column-def :last-name
+                                             (types/make-type-ref :primitive nil :text)
+                                             {})
+                      (types/make-column-def :country-code
+                                             (types/make-type-ref :primitive nil :citext)
+                                             {})
+                      (types/make-column-def :location
+                                             (types/make-type-ref :primitive nil :jsonb)
+                                             {})
+                      (types/make-column-def :bio
+                                             (types/make-type-ref :primitive nil :text)
+                                             {})
+                      (types/make-column-def :picture
+                                             (types/make-type-ref :primitive nil :text)
+                                             {})
+                      (types/make-column-def :detail
+                                             (types/make-type-ref :primitive nil :jsonb)
+                                             {})]
+        user-table (types/make-table-def "test.ns" "User" user-columns :id)
+        update-form '(defn.pg ^{:%% :sql :- User}
+                       update-user-raw
+                       [:uuid i-user-id
+                        :jsonb m
+                        :jsonb o-op]
+                       (pg/t:update User
+                         {:set m
+                          :where {:id i-user-id}
+                          :track o-op
+                          :columns [:type
+                                    :handle
+                                    :color
+                                    :is-active
+                                    :is-official
+                                    :is-onboarded
+                                    :is-super
+                                    :first-name
+                                    :last-name
+                                    :country-code
+                                    :location
+                                    :bio
+                                    :picture
+                                    :detail]
+                          :single true
+                          :coalesce true}))
+        set-form '(defn.pg set-user
+                    [:uuid i-user-id
+                     :jsonb m
+                     :jsonb o-op]
+                    (return
+                     (update-user-raw i-user-id m o-op)))
+        public-form '(defn.pg user-set-public
+                       [:uuid i-user-id
+                        :jsonb m
+                        :jsonb o-op]
+                       (let [v-m (fu/js-select m (js ["type"
+                                                      "color"
+                                                      "is_active"
+                                                      "is_onboarded"
+                                                      "first_name"
+                                                      "last_name"
+                                                      "country_code"
+                                                      "location"
+                                                      "bio"
+                                                      "picture"
+                                                      "detail"]))]
+                         (return
+                          (set-user i-user-id v-m o-op))))
+        js-select-def (types/make-fn-def "test.ns"
+                                         "js-select"
+                                         [(types/->FnArg 'm :jsonb [:jsonb] :payload)
+                                          (types/->FnArg 'keys :jsonb [:jsonb] :payload)]
+                                         :jsonb
+                                         {} nil)
+        update-def (parse/parse-defn update-form "test.ns" nil)
+        set-def (parse/parse-defn set-form "test.ns" nil)
+        public-def (parse/parse-defn public-form "test.ns" nil)
+        full-fields #{:type :handle :color :is-active :is-official :is-onboarded
+                      :is-super :first-name :last-name :country-code :location
+                      :bio :picture :detail}
+        public-fields #{:type :color :is-active :is-onboarded :first-name
+                        :last-name :country-code :location :bio :picture :detail}]
+    (types/register-type! 'test.ns/User user-table)
+    (types/register-type! 'test.ns/js-select js-select-def)
+    (types/register-type! 'test.ns/update-user-raw update-def)
+    (types/register-type! 'test.ns/set-user set-def)
+    (types/register-type! 'test.ns/user-set-public public-def)
+
+    (let [update-shape (typed/get-function-input-shape 'test.ns/update-user-raw 'm)
+          set-shape (typed/get-function-input-shape 'test.ns/set-user 'm)
+          public-shape (typed/get-function-input-shape 'test.ns/user-set-public 'm)
+          public-type (typed/Type public-def)]
+      (types/jsonb-shape? update-shape) => true
+      (types/jsonb-shape? set-shape) => true
+      (types/jsonb-shape? public-shape) => true
+      (some #(= :track (:role %)) (get-in public-type [:input :args])) => true
+      (get-in public-type [:input :schemas :o-op :role]) => :track
+      (nil? (get-in public-type [:input :schemas :o-op :shape])) => true
+
+      (set (keys (:fields update-shape))) => full-fields
+      (set (keys (:fields set-shape))) => full-fields
+      (set (keys (:fields public-shape))) => public-fields
+
+      (nil? (get-in public-shape [:fields :handle])) => true
+      (nil? (get-in public-shape [:fields :is-official])) => true
+      (nil? (get-in public-shape [:fields :is-super])) => true
+
+      (get-in public-shape [:fields :type :type]) => :text
+      (get-in public-shape [:fields :location :type]) => :jsonb
+      (get-in public-shape [:fields :bio :type]) => :text)))
+
 ^{:refer rt.postgres.typed/get-function-input-schema :added "4.1"}
 (fact "get-function-input-schema formats inferred input shapes"
   (typed/clear-registry!)
@@ -473,7 +613,7 @@
         task-table (types/make-table-def "test.ns" "Task" task-columns :id)
         fn-def (types/make-fn-def "test.ns"
                                   "insert-task-raw"
-                                  [(types/->FnArg 'm :jsonb [:jsonb])]
+                                  [(types/->FnArg 'm :jsonb [:jsonb] :payload)]
                                   :jsonb
                                   {:api/meta {:table 'test.ns/Task}}
                                   nil)

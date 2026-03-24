@@ -1,6 +1,7 @@
 (ns rt.postgres.grammar.typed-parse
   (:require [clojure.java.io :as io]
             [clojure.string :as str]
+            [rt.postgres.compile.common :as compile.common]
             [rt.postgres.grammar.typed-common :as types]))
 
 ;; ─────────────────────────────────────────────────────────────────────────────
@@ -139,8 +140,19 @@
         (let [item (first items)]
           (cond
             (keyword? item) (recur result (next items) item)
-            (symbol? item) (recur (conj result (types/->FnArg item (or current-type :unknown) (when current-type [current-type]))) (next items) nil)
+            (symbol? item) (recur (conj result (types/->FnArg item
+                                                              (or current-type :unknown)
+                                                              (when current-type [current-type])
+                                                              (or (:role (meta item)) :payload)))
+                                  (next items)
+                                  nil)
             :else (recur result (next items) current-type)))))))
+
+(defn infer-fn-arg-role
+  [arg-name body]
+  (if (and body (compile.common/find-table-track-spec-in-body body arg-name))
+    :track
+    :payload))
 
 (defn parse-defn [form ns-name dbschema]
   (let [fn-sym (second form)
@@ -150,7 +162,11 @@
         [attr-map remaining] (if (and (map? (first remaining)) (not (contains? (first remaining) :type))) [(first remaining) (rest remaining)] [nil remaining])
         combined-meta (merge (meta (first form)) (meta fn-sym) attr-map)
         [args-form body] (if (vector? (first remaining)) [(first remaining) (rest remaining)] [(first (first remaining)) (rest (first remaining))])
-        inputs (parse-fn-inputs args-form)
+        inputs (->> (parse-fn-inputs args-form)
+                    (mapv (fn [arg]
+                            (assoc arg :role (or (:role arg)
+                                                 (infer-fn-arg-role (:name arg)
+                                                                    body))))))
         return-type (or (get combined-meta :-) [:jsonb])]
     (types/make-fn-def ns-name fn-name inputs return-type
                        (merge combined-meta

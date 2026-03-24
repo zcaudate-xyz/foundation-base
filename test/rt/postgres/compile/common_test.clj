@@ -60,6 +60,39 @@
     (get-in shape [:fields :organisation :shape :fields :id :type]) => :uuid
     (get-in shape [:fields :currency-id :type]) => :citext))
 
+^{:refer rt.postgres.compile.common/infer-jsonb-arg-shape :added "4.1"}
+(fact "infer-jsonb-arg-shape projects js-select fields with table column types"
+  (types/clear-registry!)
+  (let [user-columns [(types/make-column-def :id
+                                             (types/make-type-ref :primitive nil :uuid)
+                                             {:required true :primary true})
+                      (types/make-column-def :type
+                                             (types/make-type-ref :primitive nil :text)
+                                             {:required true})
+                      (types/make-column-def :location
+                                             (types/make-type-ref :primitive nil :jsonb)
+                                             {:required true})
+                      (types/make-column-def :bio
+                                             (types/make-type-ref :primitive nil :text)
+                                             {})]
+        user-table (types/make-table-def "test.ns" "User" user-columns :id)
+        fn-def (-> (parse/parse-defn
+                    '(defn.pg prepare-user
+                       [:uuid i-user-id :jsonb m :jsonb o-op]
+                       (let [v-m (fu/js-select m (js ["type" "location"]))]
+                         (return v-m)))
+                    "test.ns"
+                    nil)
+                   (assoc-in [:body-meta :api/meta]
+                             {:table 'test.ns/User
+                              :columns [:type :location]}))]
+    (types/register-type! 'test.ns/User user-table)
+    (let [shape (compile.common/infer-jsonb-arg-shape 'm fn-def)]
+      (types/jsonb-shape? shape) => true
+      (set (keys (:fields shape))) => #{:type :location}
+      (get-in shape [:fields :type :type]) => :text
+      (get-in shape [:fields :location :type]) => :jsonb)))
+
 ^{:refer rt.postgres.compile.common/resolve-table-def :added "4.1"}
 (fact "resolve-table-def resolves tables by qualified or display name"
   (types/clear-registry!)
@@ -104,6 +137,12 @@
                 (pg/t:insert Task m2))]
     (compile.common/find-table-op-in-body body 'm))
   => 'Task
+
+  (let [body '(pg/t:update User {:set m
+                                  :where {:id user-id}
+                                  :single true})]
+    (compile.common/find-table-op-in-body body 'm))
+  => 'User
 
   (let [body '(pg/g:insert OtherTable m)]
     (compile.common/find-table-op-in-body body 'm))

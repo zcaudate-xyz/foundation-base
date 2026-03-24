@@ -10,7 +10,8 @@
             [rt.postgres.grammar.typed-parse :as parse]
             [rt.postgres.grammar.typed-shape :as shape]))
 
-(declare get-function-def with-app-typed-registry report-json resolve-function-def)
+(declare get-function-def with-app-typed-registry report-json resolve-function-def
+         enrich-function-arg-roles)
 
 ;; ─────────────────────────────────────────────────────────────────────────────
 ;; Type Registry API
@@ -193,16 +194,18 @@
   [fn-ref]
   (cond
     (types/fn-def? fn-ref)
-    fn-ref
+    (enrich-function-arg-roles fn-ref)
 
     (types/fn-def? (get-function-def fn-ref))
-    (get-function-def fn-ref)
+    (enrich-function-arg-roles (get-function-def fn-ref))
 
     :else
     (when-let [fn-sym (fn-ref->fn-sym fn-ref)]
-      (or (get-function-def fn-sym)
+      (or (some-> (get-function-def fn-sym)
+                  enrich-function-arg-roles)
           (do (analyze-and-register! (symbol (namespace fn-sym)))
-              (get-function-def fn-sym))))))
+              (some-> (get-function-def fn-sym)
+                      enrich-function-arg-roles))))))
 
 (defn get-app-function-def
   "Retrieves a function definition from an app typed payload."
@@ -232,7 +235,13 @@
   [fn-ref arg-sym]
   (let [fn-def (resolve-function-def fn-ref)]
     (when (and fn-def arg-sym)
-      (compile.common/infer-jsonb-arg-shape arg-sym fn-def))))
+      (compile.common/infer-jsonb-arg-shape
+       arg-sym
+       fn-def
+       (some (fn [arg]
+               (when (= arg-sym (:name arg))
+                 (:role arg)))
+             (:inputs fn-def))))))
 
 (defn get-app-function-input-shape
   "Infers a JsonbShape for a JSONB function input from an app typed payload."
@@ -428,6 +437,77 @@
   (when-let [t (arg-type arg)]
     (name t)))
 
+(defn track-arg-role?
+  [fn-def arg-name]
+  (let [body (get-in fn-def [:body-meta :raw-body])
+        aliases (get-in fn-def [:body-meta :aliases] {})
+        fn-key (symbol (or (:ns fn-def) "") (:name fn-def))]
+    (letfn [(scan-form [form tracked visited]
+              (cond
+                (seq? form)
+                (let [op (first form)
+                      args (vec (rest form))
+                      params (nth form 2 nil)]
+                  (cond
+                    (and (map? params)
+                         (compile.common/form-uses-track-param? params tracked))
+                    true
+
+                    (and (= 'let op)
+                         (sequential? (second form)))
+                    (loop [bindings (partition 2 (second form))
+                           tracked tracked]
+                      (if-let [[binding expr] (first bindings)]
+                        (or (scan-form expr tracked visited)
+                            (recur (next bindings)
+                                   (cond-> tracked
+                                     (and (symbol? binding)
+                                          (compile.common/form-uses-tracked? expr tracked))
+                                     (conj binding))))
+                        (scan-forms (drop 2 form) tracked visited)))
+
+                    (symbol? op)
+                    (let [arg-pos (first (keep-indexed (fn [idx itm]
+                                                         (when (contains? tracked itm) idx))
+                                                       args))
+                          [_ called-fn] (analyze/resolve-called-fn op aliases)
+                          called-key (when called-fn
+                                       (symbol (or (:ns called-fn) "") (:name called-fn)))]
+                      (or (when (and (some? arg-pos)
+                                     called-fn
+                                     (not (contains? visited called-key)))
+                            (when-let [target-arg (nth (:inputs called-fn) arg-pos nil)]
+                              (when (= :jsonb (:type target-arg))
+                                (scan-form (get-in called-fn [:body-meta :raw-body])
+                                           #{(:name target-arg)}
+                                           (conj visited called-key)))))
+                          (scan-forms form tracked visited)))
+
+                    :else
+                    (scan-forms form tracked visited)))
+
+                (coll? form)
+                (scan-forms form tracked visited)
+
+                :else
+                false))
+            (scan-forms [forms tracked visited]
+              (some #(scan-form % tracked visited) forms))]
+      (boolean (and body (scan-form body #{arg-name} #{fn-key}))))))
+
+(defn enrich-function-arg-roles
+  [fn-def]
+  (if (types/fn-def? fn-def)
+    (update fn-def :inputs
+            (fn [inputs]
+              (mapv (fn [arg]
+                      (if (and (= :jsonb (arg-type arg))
+                               (track-arg-role? fn-def (:name arg)))
+                        (assoc arg :role :track)
+                        (assoc arg :role (or (:role arg) :payload))))
+                    inputs)))
+    fn-def))
+
 (defn jsonb-arg?
   [arg]
   (or (= :jsonb (arg-type arg))
@@ -447,15 +527,23 @@
         (keep (fn [arg]
                 (let [arg-name (:name arg)
                       t (arg-type arg)]
-                  (if (jsonb-arg? arg)
+                  (cond
+                    (= :track (:role arg))
+                    [(keyword arg-name)
+                     {:type :jsonb
+                      :role :track
+                      :schema (format-primitive format :jsonb)}]
+
+                    (jsonb-arg? arg)
                     (when-let [shape (get-function-input-shape fn-def arg-name)]
                       [(keyword arg-name)
                        {:shape shape
                         :schema (format-shape shape format)}])
-                    (when t
-                      [(keyword arg-name)
-                       {:type t
-                        :schema (format-primitive format t)}]))))
+
+                    t
+                    [(keyword arg-name)
+                     {:type t
+                      :schema (format-primitive format t)}])))
               (:inputs fn-def))))
 
 (defn build-output-schema
@@ -481,7 +569,8 @@
                             (assoc :input {:args (mapv (fn [arg]
                                                          {:name (:name arg)
                                                           :type (arg-type-name arg)
-                                                          :modifiers (:modifiers arg)})
+                                                          :modifiers (:modifiers arg)
+                                                          :role (:role arg)})
                                                        (:inputs fn-def))
                                            :schemas input-schemas})
                             (assoc :output output-schema))))
