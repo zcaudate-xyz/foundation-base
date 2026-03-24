@@ -1,11 +1,12 @@
-(ns xt.db.impl-sql-test
+(ns xt.db-lua.impl-sql-test
   (:require [std.lang :as l]
             [std.string.prose :as prose]
             [xt.lang.base-notify :as notify])
   (:use code.test))
 
-(l/script- :js
+(l/script- :lua
   {:runtime :basic
+   :config {:program :resty}
    :require [[xt.db.impl-sql :as impl-sql]
              [xt.lang.base-lib :as k]
              [xt.lang.base-repl :as repl]
@@ -16,46 +17,43 @@
              [xt.db.sql-manage :as manage]
              [xt.db.sql-table :as table]
              [xt.db.sample-test :as sample]
-             [js.lib.driver-sqlite :as js-sqlite]]})
+             [lua.nginx.driver-sqlite :as lua-sqlite]]})
 
-(defn bootstrap-js
+(defn bootstrap-lua
   []
-  (notify/wait-on [:js 2000]
-    (var initSql (require "sql.js"))
-    (-> (initSql)
-        (. (then (fn [SQL]
-                   (:= (!:G SQL) SQL)
-                   (:= (!:G INSTANCE) (js-sqlite/set-methods
-                                       (new SQL.Database)))
-                   (dbsql/query-sync INSTANCE
-                                     (k/join "\n\n"
-                                             (manage/table-create-all
-                                              sample/Schema
-                                              sample/SchemaLookup
-                                              (ut/sqlite-opts nil))))
-                   (dbsql/query-sync INSTANCE
-                                     (raw/raw-insert "Currency"
-                                                     ["id" "type" "symbol" "native" "decimal"
-                                                      "name" "plural" "description"]
-                                                     (@! sample/+currency+)
-                                                     (ut/sqlite-opts nil)))
-                   (repl/notify true)))))))
+  (!.lua
+   (var ngxsqlite (require "lsqlite3"))
+   (:= (!:G INSTANCE) (dbsql/connect {:constructor lua-sqlite/connect-constructor
+                                      :memory true}))
+   (dbsql/query-sync INSTANCE
+                     (k/join "\n\n"
+                             (manage/table-create-all
+                              sample/Schema
+                              sample/SchemaLookup
+                              (ut/sqlite-opts nil))))
+   (dbsql/query-sync INSTANCE
+                     (raw/raw-insert "Currency"
+                                     ["id" "type" "symbol" "native" "decimal"
+                                      "name" "plural" "description"]
+                                     (@! sample/+currency+)
+                                     (ut/sqlite-opts nil)))
+   true))
 
 (fact:global
  {:setup    [(l/rt:restart)
-             (do (l/rt:scaffold :js)
+             (do (l/rt:scaffold :lua)
                  true)
-             (bootstrap-js)]
+             (bootstrap-lua)]
   :teardown [(l/rt:stop)]})
 
 ^{:refer xt.db.impl-sql/CANARY :adopt true :added "4.0"}
 (fact "checks that things are ok"
   ^:hidden
 
-  (!.js
+  (!.lua
    [(dbsql/query INSTANCE
-                 "SELECT 1;"
-                 nil)
+                      "SELECT 1;"
+                      nil)
     (k/sort
      (k/obj-keys
       (f/flatten-bulk sample/Schema
@@ -63,22 +61,8 @@
                        [sample/RootUser]})))])
   => [1 ["UserAccount" "UserProfile"]])
 
-^{:refer xt.db.impl-sql/sql-gen-delete :added "4.0"}
-(fact "generates the delete statements"
-  ^:hidden
-
-  (!.js
-   (impl-sql/sql-gen-delete "HELLO"
-                            ["A" "B"]
-                            (ut/sqlite-opts nil)))
-  => ["DELETE FROM \"HELLO\" WHERE \"id\" = 'A';"
-      "DELETE FROM \"HELLO\" WHERE \"id\" = 'B';")
-
-^{:refer xt.db.impl-sql/sql-process-event-sync :added "4.0"}
-(fact "processes event sync data from database")
-
-^{:refer xt.db.impl-sql/sql-process-event-remove :added "4.0"
-  :setup [(!.js
+^{:refer xt.db.impl-sql/sql-process-event-remove.lua :adopt true :added "4.0"
+  :setup [(!.lua
            (k/sort (impl-sql/sql-process-event-sync
                     INSTANCE
                     "add"
@@ -88,8 +72,8 @@
                     (ut/sqlite-opts nil))))]}
 (fact "removes data from database"
   ^:hidden
-
-  (!.js
+  
+  (!.lua
    (impl-sql/sql-pull-sync
     INSTANCE
     sample/Schema
@@ -99,8 +83,8 @@
        ["first_name"]]]]
     (ut/sqlite-opts nil)))
   => [{"nickname" "root", "profile" [{"first_name" "Root"}]}]
-
-  (!.js
+  
+  (!.lua
    (impl-sql/sql-process-event-remove
     INSTANCE
     "input"
@@ -113,16 +97,86 @@
       ""
       "DELETE FROM \"UserProfile\" WHERE \"id\" = 'c4643895-b0ce-44cc-b07b-2386bf18d43b';")
 
-  (sort (!.js
-         (impl-sql/sql-process-event-remove
-          INSTANCE
-          "remove" {"UserAccount" [sample/RootUser]}
-          sample/Schema
-          sample/SchemaLookup
-          (ut/sqlite-opts nil))))
+  (sort (!.lua
+        (impl-sql/sql-process-event-remove
+         INSTANCE
+         "remove" {"UserAccount" [sample/RootUser]}
+         sample/Schema
+         sample/SchemaLookup
+         (ut/sqlite-opts nil))))
   => ["UserAccount" "UserProfile"]
+  
+  (!.lua
+   (impl-sql/sql-pull-sync
+    INSTANCE
+    sample/Schema
+    ["UserAccount"
+     ["nickname"
+      ["profile"
+       ["first_name"]]]]
+    (ut/sqlite-opts nil)))
+  => empty?)
 
-  (!.js
+^{:refer xt.db.impl-sql/sql-gen-delete :added "4.0"}
+(fact "generates the delete statements"
+  ^:hidden
+  
+  (!.lua
+   (impl-sql/sql-gen-delete "HELLO"
+                            ["A" "B"]
+                            (ut/sqlite-opts nil)))
+  => ["DELETE FROM \"HELLO\" WHERE \"id\" = 'A';"
+      "DELETE FROM \"HELLO\" WHERE \"id\" = 'B';")
+
+^{:refer xt.db.impl-sql/sql-process-event-sync :added "4.0"}
+(fact "processes event sync data from database")
+
+^{:refer xt.db.impl-sql/sql-process-event-remove :added "4.0"
+  :setup [(!.lua
+           (k/sort (impl-sql/sql-process-event-sync
+                    INSTANCE
+                    "add"
+                    {"UserAccount" [sample/RootUser]}
+                    sample/Schema
+                    sample/SchemaLookup
+                    (ut/sqlite-opts nil))))]}
+(fact "removes data from database"
+  ^:hidden
+  
+  (!.lua
+   (impl-sql/sql-pull-sync
+    INSTANCE
+    sample/Schema
+    ["UserAccount"
+     ["nickname"
+      ["profile"
+       ["first_name"]]]]
+    (ut/sqlite-opts nil)))
+  => [{"nickname" "root", "profile" [{"first_name" "Root"}]}]
+  
+  (!.lua
+   (impl-sql/sql-process-event-remove
+    INSTANCE
+    "input"
+    {"UserAccount" [sample/RootUser]}
+    sample/Schema
+    sample/SchemaLookup
+    (ut/sqlite-opts nil)))
+  => (prose/|
+      "DELETE FROM \"UserAccount\" WHERE \"id\" = '00000000-0000-0000-0000-000000000000';"
+      ""
+      "DELETE FROM \"UserProfile\" WHERE \"id\" = 'c4643895-b0ce-44cc-b07b-2386bf18d43b';")
+
+  (sort (!.lua
+        (impl-sql/sql-process-event-remove
+         INSTANCE
+         "remove" {"UserAccount" [sample/RootUser]}
+         sample/Schema
+         sample/SchemaLookup
+         (ut/sqlite-opts nil))))
+  => ["UserAccount" "UserProfile"]
+  
+  (!.lua
    (impl-sql/sql-pull-sync
     INSTANCE
     sample/Schema
@@ -151,14 +205,14 @@
                "is_super" 1}]))]}
 (fact "runs a pull statement"
   ^:hidden
-
-  [(set (!.js
+  
+  [(set (!.lua
          (impl-sql/sql-pull-sync INSTANCE
                                  sample/Schema
                                  ["Currency"
                                   ["id"]]
                                  (ut/sqlite-opts nil))))
-   (!.js
+   (!.lua
     (impl-sql/sql-process-event-sync
      INSTANCE
      "add"

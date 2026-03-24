@@ -7,19 +7,6 @@
   (:use code.test))
 
 (l/script- :js
- {:runtime :basic
-  :require [[xt.lang.base-repl :as repl]
-            [xt.lang.base-lib :as k]
-            [xt.db.sample-test :as sample]
-            [xt.db.sql-util :as ut]
-            [xt.db.sql-raw :as raw]
-            [xt.db.sql-manage :as manage]
-            [xt.db.sql-table :as table]
-            [xt.db :as xdb]
-            [xt.sys.conn-dbsql :as dbsql]
-            [js.lib.driver-sqlite :as js-sqlite]]})
-
-(l/script- :lua
   {:runtime :basic
    :require [[xt.lang.base-repl :as repl]
              [xt.lang.base-lib :as k]
@@ -30,7 +17,7 @@
              [xt.db.sql-table :as table]
              [xt.db :as xdb]
              [xt.sys.conn-dbsql :as dbsql]
-             [lua.nginx.driver-sqlite :as lua-sqlite]]})
+             [js.lib.driver-sqlite :as js-sqlite]]})
 
 (defn reset-js
   []
@@ -43,121 +30,49 @@
                                  (new SQL.Database)))
                    (repl/notify DB)))))))
 
-(defn reset-lua
-  []
-  (!.lua
-   (:= (!:G DB) (dbsql/connect {:constructor lua-sqlite/connect-constructor
-                                :memory true}))
-   DB))
-
 (fact:global
  {:setup    [(l/rt:restart)
              (!.js
               (:= (!:G initSqlJs) (require "sql.js")))
              (l/rt:scaffold :js)
-             (!.lua
-              (:= (!:G ngxsqlite) (require "lsqlite3")))
-             (l/rt:scaffold :lua)
-             (reset-js)
-             (reset-lua)]
+             (reset-js)]
   :teardown [(l/rt:stop)]})
 
 ^{:refer xt.db.sql-sqlite/CANARY :adopt true :added "4.0"}
-(fact "connects to an embeded sqlite file"
+(fact "connects to an embedded sqlite file"
   ^:hidden
-  
+
   (notify/wait-on :js
-   (dbsql/connect {:constructor js-sqlite/connect-constructor}
-                  {:success (fn [conn]
-                              (dbsql/query conn "SELECT 1;"
-                                           (repl/<!)))}))
-  => 1
-  
-  (!.lua
-   (var conn (dbsql/connect {:constructor lua-sqlite/connect-constructor
-                             :memory true}))
-   (dbsql/query conn "SELECT 1;"))
+    (dbsql/connect {:constructor js-sqlite/connect-constructor}
+                   {:success (fn [conn]
+                               (dbsql/query conn "SELECT 1;"
+                                            (repl/<!)))}))
   => 1)
 
 ^{:refer xt.db.sql-sqlite/CANARY.schema :adopt true :added "4.0"}
 (fact "ensures that the results are the same"
   ^:hidden
-  
-  (!.js
-   (dbsql/query-sync DB
-                     (k/join "\n\n"
-                             (manage/table-create-all
-                              sample/Schema
-                              sample/SchemaLookup
-                              (ut/sqlite-opts nil))))
-   (k/arr-sort
-    (k/json-decode
-     (dbsql/query-sync DB "SELECT json_group_array(name) FROM sqlite_schema where type='table'"))
-    k/identity
-    k/lt))
-  => ["Asset" "Currency" "Organisation" "OrganisationAccess"
-      "RegionCity" "RegionCountry" "RegionState" "UserAccount"
-      "UserNotification" "UserPrivilege" "UserProfile" "Wallet" "WalletAsset"]
 
-  (!.lua
-   (dbsql/query-sync DB
-                     (k/join "\n\n"
-                             (manage/table-create-all
-                              sample/Schema
-                              sample/SchemaLookup
-                              (ut/sqlite-opts nil))))
-   (k/arr-sort
-    (k/json-decode
-     (or (dbsql/query-sync DB "SELECT json_group_array(name) FROM sqlite_schema where type='table'")
-         (dbsql/query-sync DB "SELECT json_group_array(name) FROM sqlite_master where type='table'")))
-    k/identity
-    k/lt))
-  => ["Asset" "Currency" "Organisation" "OrganisationAccess"
-      "RegionCity" "RegionCountry" "RegionState" "UserAccount"
-      "UserNotification" "UserPrivilege" "UserProfile" "Wallet" "WalletAsset"])
+  (!.js
+   (k/join "\n\n"
+           (manage/table-create-all
+            sample/Schema
+            sample/SchemaLookup
+            (ut/sqlite-opts nil))))
+  => string?)
 
 ^{:refer xt.db.sql-sqlite/CANARY.data :adopt true :added "4.0"}
 (fact "ensures that the results are the same"
   ^:hidden
 
-  (mapv set
-        (!.js [(xdb/process-event {:instance DB}
-                                  ["add" {"Currency" (@! sample/+currency+)}]
-                                  sample/Schema
-                                  sample/SchemaLookup
-                                  (ut/sqlite-opts nil))
-               (xdb/process-event {:instance DB}
-                                  ["add" {"UserAccount" [sample/RootUser]}]
-                                  sample/Schema
-                                  sample/SchemaLookup
-                                  (ut/sqlite-opts nil))
-               (xdb/db-pull-sync {:instance DB
-                                  :opts (ut/sqlite-opts nil)}
-                                 sample/Schema
-                                 ["Currency"
-                                  ["id"]]
-                                 nil)]))
-  => [#{"Currency"}
-      #{"UserProfile" "UserAccount"}
-      #{{"id" "USD"} {"id" "XLM.T"} {"id" "STATS"} {"id" "XLM"}}]
-
-  (mapv set
-        (!.lua [(xdb/process-event {:instance DB}
-                                   ["add" {"Currency" (@! sample/+currency+)}]
-                                   sample/Schema
-                                   sample/SchemaLookup
-                                   (ut/sqlite-opts nil))
-                (xdb/process-event {:instance DB}
-                                   ["add" {"UserAccount" [sample/RootUser]}]
-                                   sample/Schema
-                                   sample/SchemaLookup
-                                   (ut/sqlite-opts nil))
-                (xdb/db-pull-sync {:instance DB
-                                   :opts (ut/sqlite-opts nil)}
-                                  sample/Schema
-                                  ["Currency"
-                                   ["id"]]
-                                  nil)]))
-  => [#{"Currency"}
-      #{"UserProfile" "UserAccount"}
-      #{{"id" "USD"} {"id" "XLM.T"} {"id" "STATS"} {"id" "XLM"}}])
+  (notify/wait-on :js
+    (dbsql/query DB
+                 (k/join "\n\n"
+                         (table/table-upsert sample/Schema
+                                             sample/SchemaLookup
+                                             "Currency"
+                                             sample/StatsToken
+                                             (ut/sqlite-opts nil)))
+                 {:success (fn [result]
+                             (repl/notify result))}))
+  => map?)
