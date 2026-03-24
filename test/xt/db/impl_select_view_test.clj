@@ -47,19 +47,19 @@
                      {:view {:table "Entry"
                              :type "select"
                              :tag "by-name"
-                             :query ["id" "name"]}
+                             :query {"name" "{{i-name}}"}}
                       :input [{:symbol "i-name" :type "text"}]}
                      ["A-1"]
                      {}
                      true)
-  => ["Entry" {"custom" [], "where" [], "links" [], "data" ["id"]}]
+  => ["Entry" {"custom" [], "where" [{"name" "A-1"}], "links" [], "data" ["id"]}]
   
   (view/query-select sample-scratch/Schema
                      {:view {:table "Entry"
                              :type "select"
                              :tag "by-name"
-                             :query ["id" "name"]}
+                             :query {"name" "{{i-name}}"}}
                       :input [{:symbol "i-name" :type "text"}]}
                      ["A-1"]
                      {})
-  => "SELECT id FROM Entry WHERE name = 'A-1'")
+  => "SELECT id FROM Entry\n  WHERE name = 'A-1'")

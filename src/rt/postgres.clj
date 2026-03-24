@@ -9,9 +9,7 @@
             [rt.postgres.script.graph-view :as graph-view]
             [rt.postgres.script.impl]
             [std.lang :as l]
-            [std.lib.collection :as collection]
-            [std.lib.foundation :as f]
-            [std.lib.walk :as walk])
+            [std.lib.foundation :as f])
   (:refer-clojure :exclude [abs concat replace reverse mod name case drop update format assert repeat bit-and bit-or count max min]))
 
 (f/intern-all rt.postgres.script.builtin
@@ -37,7 +35,6 @@
              app/app-rebuild
              app/app-clear
              
-             graph-view/defaccess.pg
              graph-view/defret.pg
              graph-view/defsel.pg)
 
@@ -61,19 +58,5 @@
       (app/app-clear "scratch-v1")
       (require 'jvm.namespace)
       (eval '(jvm.namespace/reset '[rt.postgres.script.test.scratch-v1]))))
-
-(defn get-rev
-  "formats access table"
-  {:added "4.0"}
-  [access account-sym opts]
-  (list 'rt.postgres/g:get
-        (-> access
-            :reverse
-            :table)
-        {:where (collection/merge-nested (->> access
-                                     :reverse
-                                     :clause
-                                     (walk/prewalk-replace {'<%> account-sym}))
-                                opts)}))
 
 (comment)

@@ -13,77 +13,6 @@
             :seed        ["scratch"]
             :all    {:schema   ["scratch"]}}})
 
-(view/defaccess.pg
-  cache-is-member
-  {:forward  [scratch/Task
-              {:cache <%>}]
-   :reverse  [scratch/TaskCache
-              {:id <%>}]
-   :roles #{:task}})
-
-^{:refer rt.postgres.script.graph-view/create-defaccess-prep :added "4.0"}
-(fact "creates a defaccess prep"
-  ^:hidden
-  
-  (view/create-defaccess-prep 'cache-is-member
-                              '{:forward  [scratch/Task
-                                           {:cache <%>}]
-                                :reverse  [scratch/TaskCache
-                                           {:id <%>}]
-                                :roles #{:task}})
-  => '{:symbol rt.postgres.script.graph-view-test/cache-is-member,
-       :forward
-       {:table rt.postgres.script.test.scratch-v1/Task,
-        :clause {:cache <%>},
-        :form
-        [:with
-         j-ret
-         :as
-         [:select
-          (---
-           [#{"id"}
-            #{"status"}
-            #{"name"}
-            #{"cache_id"}
-            #{"time_created"}
-            #{"time_updated"}])
-          :from
-          rt.postgres.script.test.scratch-v1/Task
-          \\
-          :where
-          {"cache_id" [:eq <%>]}]
-         \\
-         :select
-         (jsonb-agg j-ret)
-         :from
-         j-ret]},
-       :reverse
-       {:table rt.postgres.script.test.scratch-v1/TaskCache,
-        :clause {:id <%>},
-        :form
-        [:with
-         j-ret
-         :as
-         [:select
-          (--- [#{"id"} #{"time_created"} #{"time_updated"}])
-          :from
-          rt.postgres.script.test.scratch-v1/TaskCache
-          \\
-          :where
-          {"id" [:eq <%>]}]
-         \\
-         :select
-         (jsonb-agg j-ret)
-         :from
-         j-ret]},
-       :roles #{:task}})
-
-^{:refer rt.postgres.script.graph-view/defaccess.pg :added "4.0"}
-(fact "creates a defaccess macro")
-
-^{:refer rt.postgres.script.graph-view/make-view-access :added "4.0"}
-(fact "creates view access")
-
 ^{:refer rt.postgres.script.graph-view/make-view-prep :added "4.0"}
 (fact "preps view access")
 
@@ -129,7 +58,6 @@
       :type :select,
       :scope #{:public},
       :guards nil,
-      :access nil,
       :query-base {:name i-name},
       :tag "by-name",
       :query {"name" [:eq i-name]},
@@ -155,7 +83,6 @@
        :type :return,
        :scope nil,
        :guards nil,
-       :access nil,
        :tag "basic",
        :query #{:*/data},
        :autos nil})

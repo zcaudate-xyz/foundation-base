@@ -52,8 +52,8 @@
 
   (!.lua
    [(dbsql/query INSTANCE
-                      "SELECT 1;"
-                      nil)
+                 "SELECT 1;"
+                 nil)
     (k/sort
      (k/obj-keys
       (f/flatten-bulk sample/Schema
@@ -72,7 +72,7 @@
                     (ut/sqlite-opts nil))))]}
 (fact "removes data from database"
   ^:hidden
-  
+
   (!.lua
    (impl-sql/sql-pull-sync
     INSTANCE
@@ -83,7 +83,7 @@
        ["first_name"]]]]
     (ut/sqlite-opts nil)))
   => [{"nickname" "root", "profile" [{"first_name" "Root"}]}]
-  
+
   (!.lua
    (impl-sql/sql-process-event-remove
     INSTANCE
@@ -98,14 +98,14 @@
       "DELETE FROM \"UserProfile\" WHERE \"id\" = 'c4643895-b0ce-44cc-b07b-2386bf18d43b';")
 
   (sort (!.lua
-        (impl-sql/sql-process-event-remove
-         INSTANCE
-         "remove" {"UserAccount" [sample/RootUser]}
-         sample/Schema
-         sample/SchemaLookup
-         (ut/sqlite-opts nil))))
+         (impl-sql/sql-process-event-remove
+          INSTANCE
+          "remove" {"UserAccount" [sample/RootUser]}
+          sample/Schema
+          sample/SchemaLookup
+          (ut/sqlite-opts nil))))
   => ["UserAccount" "UserProfile"]
-  
+
   (!.lua
    (impl-sql/sql-pull-sync
     INSTANCE
@@ -120,13 +120,13 @@
 ^{:refer xt.db.impl-sql/sql-gen-delete :added "4.0"}
 (fact "generates the delete statements"
   ^:hidden
-  
+
   (!.lua
    (impl-sql/sql-gen-delete "HELLO"
                             ["A" "B"]
                             (ut/sqlite-opts nil)))
   => ["DELETE FROM \"HELLO\" WHERE \"id\" = 'A';"
-      "DELETE FROM \"HELLO\" WHERE \"id\" = 'B';")
+      "DELETE FROM \"HELLO\" WHERE \"id\" = 'B';"])
 
 ^{:refer xt.db.impl-sql/sql-process-event-sync :added "4.0"}
 (fact "processes event sync data from database")
@@ -142,7 +142,7 @@
                     (ut/sqlite-opts nil))))]}
 (fact "removes data from database"
   ^:hidden
-  
+
   (!.lua
    (impl-sql/sql-pull-sync
     INSTANCE
@@ -153,7 +153,7 @@
        ["first_name"]]]]
     (ut/sqlite-opts nil)))
   => [{"nickname" "root", "profile" [{"first_name" "Root"}]}]
-  
+
   (!.lua
    (impl-sql/sql-process-event-remove
     INSTANCE
@@ -168,14 +168,14 @@
       "DELETE FROM \"UserProfile\" WHERE \"id\" = 'c4643895-b0ce-44cc-b07b-2386bf18d43b';")
 
   (sort (!.lua
-        (impl-sql/sql-process-event-remove
-         INSTANCE
-         "remove" {"UserAccount" [sample/RootUser]}
-         sample/Schema
-         sample/SchemaLookup
-         (ut/sqlite-opts nil))))
+         (impl-sql/sql-process-event-remove
+          INSTANCE
+          "remove" {"UserAccount" [sample/RootUser]}
+          sample/Schema
+          sample/SchemaLookup
+          (ut/sqlite-opts nil))))
   => ["UserAccount" "UserProfile"]
-  
+
   (!.lua
    (impl-sql/sql-pull-sync
     INSTANCE
@@ -205,7 +205,7 @@
                "is_super" 1}]))]}
 (fact "runs a pull statement"
   ^:hidden
-  
+
   [(set (!.lua
          (impl-sql/sql-pull-sync INSTANCE
                                  sample/Schema

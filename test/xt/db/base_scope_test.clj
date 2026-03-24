@@ -139,7 +139,7 @@
            "where"
            [{"owner"
              ["eq"
-              ["\"scratch/xt.db.sample-user-test\".\"UserAccount\".\"id\""]]}],
+              ["\"scratch-sample-db\".\"UserAccount\".\"id\""]]}],
            "links"
            [["entries"
              "reverse"
@@ -148,7 +148,7 @@
                "where"
                [{"wallet"
                  ["eq"
-                  ["\"scratch/xt.db.sample-user-test\".\"Wallet\".\"id\""]]}],
+                  ["\"scratch-sample-db\".\"Wallet\".\"id\""]]}],
                "links"
                [["asset"
                  "forward"
@@ -157,7 +157,7 @@
                    "where"
                    [{"id"
                      ["eq"
-                      ["\"scratch/xt.db.sample-user-test\".\"WalletAsset\".\"asset_id\""]]}],
+                      ["\"scratch-sample-db\".\"WalletAsset\".\"asset_id\""]]}],
                    "links" [],
                    "data" ["id"]}]]],
                "data" ["id"]}]]],

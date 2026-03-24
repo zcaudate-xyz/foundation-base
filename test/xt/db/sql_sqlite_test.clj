@@ -1,10 +1,9 @@
 (ns xt.db.sql-sqlite-test
-  (:require [lib.docker :as docker]
-            [net.http :as http]
+  (:use code.test)
+  (:require [net.http :as http]
             [std.json :as json]
             [std.lang :as l]
-            [xt.lang.base-notify :as notify])
-  (:use code.test))
+            [xt.lang.base-notify :as notify]))
 
 (l/script- :js
   {:runtime :basic
@@ -54,12 +53,22 @@
   ^:hidden
 
   (!.js
-   (k/join "\n\n"
-           (manage/table-create-all
-            sample/Schema
-            sample/SchemaLookup
-            (ut/sqlite-opts nil))))
-  => string?)
+    (manage/table-create-all
+     sample/Schema
+     sample/SchemaLookup
+     (ut/sqlite-opts nil)))
+  => vector?
+  
+  (notify/wait-on :js
+    (dbsql/query DB
+                 (k/join "\n\n"
+                         (manage/table-create-all
+                          sample/Schema
+                          sample/SchemaLookup
+                          (ut/sqlite-opts nil)))
+                 {:success (fn [_]
+                             (repl/notify true))}))
+  => true)
 
 ^{:refer xt.db.sql-sqlite/CANARY.data :adopt true :added "4.0"}
 (fact "ensures that the results are the same"
@@ -71,8 +80,8 @@
                          (table/table-upsert sample/Schema
                                              sample/SchemaLookup
                                              "Currency"
-                                             sample/StatsToken
+                                             @sample/+currency+
                                              (ut/sqlite-opts nil)))
                  {:success (fn [result]
                              (repl/notify result))}))
-  => map?)
+  => vector?)

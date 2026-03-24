@@ -1,4 +1,4 @@
-(ns xt.db.sql-call-test
+(ns xt.db-lua.sql-call-test
   (:use code.test)
   (:require [rt.postgres :as pg]
             [std.lang :as l]
@@ -9,13 +9,13 @@
    :config  {:dbname "test-scratch"}
    :require [[rt.postgres.script.test.scratch-v1 :as scratch]]})
 
-(l/script- :js
+(l/script- :lua
   {:runtime :basic
+   :config  {:program :resty}
    :require [[xt.lang.base-lib :as k]
-             [xt.lang.base-repl :as repl]
              [xt.db.sql-call :as call]
              [xt.sys.conn-dbsql :as driver]
-             [js.lib.driver-postgres :as js-postgres]]})
+             [lua.nginx.driver-postgres :as lua-postgres]]})
 
 (fact:global
  {:setup    [(l/rt:restart)
@@ -27,13 +27,13 @@
 (fact "decodes the return value"
   ^:hidden
   
-  (!.js
+  (!.lua
    (call/decode-return (k/json-encode
                         {:status "ok"
                          :data 1})))
   => 1
 
-  (!.js
+  (!.lua
    (call/decode-return (k/json-encode
                         {:status "error"
                          :data "NOT VALID"})))
@@ -43,7 +43,7 @@
 (fact "formats the inputs"
   ^:hidden
   
-  (!.js
+  (!.lua
    (call/call-format-input {:input [{:type "numeric"}
                                     {:type "jsonb"}]}
                            [1
@@ -54,39 +54,42 @@
 (fact "formats a query"
   ^:hidden
   
-  (!.js
+  (!.lua
    (call/call-format-query
     (@! (pg/bind-function scratch/divf))
     [1 2]))
-  => "SELECT \"scratch\".divf('1', '2');")
+  => "SELECT \"scratch\".divf('1', '2');"
+  
+  (!.lua
+   (var conn (driver/connect {:constructor lua-postgres/connect-constructor
+                              :database "test-scratch"}))
+   (var q  (call/call-format-query (@! (pg/bind-function scratch/addf))
+                                   [10 20]))
+   (. conn (query q)))
+  => [{"addf" 30}])
 
 ^{:refer xt.db.sql-call/call-raw :added "4.0"}
 (fact "calls a database function"
   ^:hidden
   
-  (notify/wait-on :js
-    (driver/connect {:constructor js-postgres/connect-constructor
-                     :database "test-scratch"}
-                    {:success
-                     (fn [conn]
-                       (. (call/call-raw
-                           conn
-                           (@! (pg/bind-function scratch/addf))
-                           [10 20])
-                          (then (repl/>notify))))}))
-  => "30")
+  (!.lua
+   (var conn (driver/connect {:constructor lua-postgres/connect-constructor
+                              :database "test-scratch"}))
+   (k/json-decode
+    (call/call-raw conn
+                   (@! (pg/bind-function scratch/addf))
+                   [10 20])))
+  => 30)
 
 ^{:refer xt.db.sql-call/call-api :added "4.0"}
 (fact "results an api style result"
   ^:hidden
   
-  (notify/wait-on :js
-    (driver/connect {:constructor js-postgres/connect-constructor
-                     :database "test-scratch"}
-                    {:success
-                     (fn [conn]
-                       (. (call/call-api conn
-                                         (@! (pg/bind-function scratch/addf))
-                                         [10 20])
-                          (then (repl/>notify))))}))
-  => "{\"status\": \"ok\", \"data\":\"30\"}")
+  (!.lua
+   (var conn (driver/connect {:constructor lua-postgres/connect-constructor
+                              :database "test-scratch"}))
+   (k/json-decode
+    (call/call-api conn
+                   (@! (pg/bind-function scratch/addf))
+                   [10 20])))
+  => {"status" "ok", "data" 30})

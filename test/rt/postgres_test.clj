@@ -9,8 +9,3 @@
 
 ^{:refer rt.postgres/purge-scratch :added "4.0"}
 (fact "purges the rt.postgres scratch library. Used for debugging")
-
-^{:refer rt.postgres/get-rev :added "4.0"}
-(fact "formats access table"
-  (pg/get-rev {:reverse {:table "table" :clause {:a 1}}} 'sym {:b 2})
-  => '(rt.postgres/g:get "table" {:where {:a 1 :b 2}}))

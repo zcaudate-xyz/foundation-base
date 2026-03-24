@@ -183,17 +183,6 @@
   => {:input [{:symbol "input", :type "jsonb"}],
       :return "jsonb", :schema "scratch", :id "echo", :flags {}})
 
-^{:refer rt.postgres.gen-bind/bind-view-access :added "4.0"}
-(fact "gets the view access"
-  ^:hidden
-
-  (gen/bind-view-access (:access (:static/view @user/organisation-all-as-member)))
-  => {:symbol "xt.db.sample_user_test/organisation_access_is_member",
-      :relation "reverse",
-      :query
-      {"clause" {"access" {"role" "member", "account" "{{<%>}}"}}},
-      :roles {:organisation.member true}})
-
 ^{:refer rt.postgres.gen-bind/bind-view-guards :added "4.0"}
 (fact "gets more guards"
   ^:hidden
@@ -264,14 +253,6 @@
        :query
        {"organisation_accesses"
         {"organisation" "{{i_organisation_id}}"}},}})
-
-^{:refer rt.postgres.gen-bind/bind-access :added "4.0"}
-(fact "generates the access interface"
-  ^:hidden
-
-  (gen/bind-access data/access-city-in-country)
-  => {:forward {:clause {"country" "{{<%>}}"}, :table "RegionCity"},
-      :reverse {:clause {"region_cities" "{{<%>}}"}, :table "RegionCountry"}})
 
 ^{:refer rt.postgres.gen-bind/bind-table :added "4.0"}
 (fact "gets the table interface"

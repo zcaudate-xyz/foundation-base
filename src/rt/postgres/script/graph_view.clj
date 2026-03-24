@@ -1,11 +1,8 @@
 (ns rt.postgres.script.graph-view
-  (:require [rt.postgres.grammar.common-application :as app]
-            [rt.postgres.script.graph-base :as base]
+  (:require [rt.postgres.script.graph-base :as base]
             [rt.postgres.script.graph-query :as query]
             [std.lang :as l]
             [std.lang.base.emit-preprocess :as preprocess]
-            [std.lang.base.library-snapshot :as snap]
-            [std.lib.env :as env]
             [std.lib.foundation :as f]
             [std.lib.template :as template]
             [std.lib.walk :as walk]
@@ -15,63 +12,11 @@
 ;; select
 ;;
 
-(defn create-defaccess-prep
-  "creates a defaccess prep"
-  {:added "4.0"}
-  [sym access]
-  (let [{:keys [roles forward reverse]} access
-        [forward-table forward-clause] (walk/postwalk f/resolve-namespaced forward)
-        [reverse-table reverse-clause] (walk/postwalk f/resolve-namespaced reverse)
-        module  (l/rt:module :postgres)
-        mopts   (l/rt:macro-opts :postgres)
-        schema  (:schema (app/app (first (:application (:static module)))))
-        [forward-form
-         reverse-form] (l/with:macro-opts [mopts]
-                         [(base/select-fn forward-table {:schema schema
-                                                         :where forward-clause})
-                          (base/select-fn reverse-table {:schema schema
-                                                         :where reverse-clause})])]
-    {:symbol (symbol (name (env/ns-sym)) (name sym))
-     :forward {:table forward-table
-               :clause forward-clause
-               :form forward-form}
-     :reverse {:table reverse-table
-               :clause reverse-clause
-               :form reverse-form}
-     :roles roles}))
-
-(defmacro defaccess.pg
-  "creates a defaccess macro"
-  {:added "4.0"}
-  [sym access]
-  (let [access (create-defaccess-prep sym access)]
-    (list 'def sym (list 'quote access))))
-
-(defn make-view-access
-  "creates view access"
-  {:added "4.0"}
-  [access table-sym]
-  (if access
-    (let [access-var (resolve (first access))
-          access-map @access-var
-          query-fn (fn [k]
-                     (let [{:keys [table] :as e} (get access-map k)]
-                       (if (= table table-sym)
-                         [k e])))
-          [rel entry] (or (query-fn :forward)
-                          (query-fn :reverse)
-                          (f/error "Access not valid" {:access access
-                                                       :table table-sym}))]
-      {:symbol   (f/var-sym access-var)
-       :relation rel
-       :query    entry
-       :roles    (:roles access-map)})))
-
 (defn make-view-prep
   "preps view access"
   {:added "4.0"}
   [sym & [rargs]]
-  (let [{:keys [scope args tag access guards autos] :as msym} (meta sym)
+  (let [{:keys [scope args tag guards autos] :as msym} (meta sym)
         [table] (:- msym)
         table-key  (keyword (name table))
         table-sym  (f/var-sym (resolve table))
@@ -87,8 +32,7 @@
      :args   (or rargs args [])
      :guards guards
      :autos  autos
-     :tag    tag
-     :access access}))
+     :tag    tag}))
 
 (defn primary-key
   "gets the primary key of a schema"
@@ -114,14 +58,9 @@
   "the defsel generator function"
   {:added "4.0"}
   [&form sym query]
-  (let [{:keys [table scope args] :as view-map} (make-view-prep sym)
-        view-access (make-view-access (:access view-map) table)
+  (let [{:keys [table args] :as view-map} (make-view-prep sym)
         mopts     (l/rt:macro-opts :postgres)
-        query     (or query
-                      (if (and (:personal scope)
-                               view-access)
-                        (walk/postwalk-replace {'<%> (lead-symbol args)}
-                                            (:clause (:query view-access)))))
+        query     query
         main-query  (cond-> {:returning #{:id}
                              :as :raw}
                       (not-empty query) (assoc :where query))
@@ -137,8 +76,7 @@
                         :static/view (assoc view-map
                                             :type :select
                                             :query-base query
-                                            :query view-query
-                                            :access view-access)})
+                                            :query view-query)})
              [~@args]
              [:with o :as
               ~main-form
@@ -156,8 +94,7 @@
   "the defref generator function"
   {:added "4.0"}
   [&form sym args query]
-  (let [{:keys [table scope access] :as view-map} (make-view-prep sym args)
-        view-access (make-view-access access table)
+  (let [{:keys [table] :as view-map} (make-view-prep sym args)
         ret-id (lead-symbol args)
         mopts  (l/rt:macro-opts :postgres)
         main-form (l/with:macro-opts [mopts]
@@ -170,8 +107,7 @@
                        {:%% :sql
                         :static/view (assoc view-map
                                             :type :return
-                                            :query query
-                                            :access view-access)})
+                                            :query query)})
              [~@args]
              ~main-form))
       (meta &form))))

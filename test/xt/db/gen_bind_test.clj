@@ -23,18 +23,14 @@
   
   (bind/tmpl-view '[currency-all sample-data/currency-all])
   
-  => '(def.xt currency-all {:input [],
-                            :return "jsonb",
-                            :schema "scratch/xt.db.sample-data-test",
-                            :id "currency_all",
-                            :flags {:public true},
-                            :view {:table "Currency",
-                                   :type "select",
-                                   :tag "all",
-                                   :access {:query nil, :roles {}, :relation nil, :symbol nil},
-                                   :query nil,
-                                   :autos []
-                                   :guards []}}))
+  => '(def.xt currency-all
+        {:input [],
+         :return "jsonb",
+         :schema "scratch-sample-db",
+         :id "currency_all",
+         :flags {:public true},
+         :view
+         {:table "Currency", :type "select", :tag "all", :query nil}}))
 
 ^{:refer xt.db.gen-bind/route-list :added "4.0"}
 (fact "lists all routes"
@@ -49,8 +45,6 @@
   
   (bind/view-list)
   => vector?)
-
-
 
 
 ^{:refer xt.db.gen-bind/route-map :added "4.0"}

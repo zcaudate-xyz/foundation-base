@@ -9,6 +9,7 @@
              [xt.lang.base-lib :as k]
              [xt.db.sql-util :as ut]
              [xt.db.sql-graph :as graph]
+             [xt.db.sql-raw :as raw]
              [xt.db.sql-manage :as manage]
              [xt.db.sample-scratch-test :as sample-scratch]
              [xt.sys.conn-dbsql :as dbsql]
@@ -27,28 +28,70 @@
 (fact:global
  {:setup    [(l/rt:restart)
              (l/rt:scaffold :js)
-             (bootstrap-js)]
+             (bootstrap-js)
+             (notify/wait-on :js
+               (dbsql/query CONN
+                            "CREATE SCHEMA IF NOT EXISTS \"scratch\";"
+                            (repl/<!)))
+             (notify/wait-on :js
+               (dbsql/query CONN
+                            (manage/table-create
+                             sample-scratch/Schema
+                             "Entry"
+                             (ut/postgres-opts {"Entry" {"schema" "scratch"}}))
+                            (repl/<!)))
+             (notify/wait-on :js
+               (dbsql/query CONN
+                            "DELETE FROM \"scratch\".\"Entry\";"
+                            (repl/<!)))
+             (notify/wait-on :js
+               (dbsql/query CONN
+                            (raw/raw-insert
+                             "Entry"
+                             ["id" "name" "tags"]
+                             [{"id" "00000000-0000-0000-0000-000000000001"
+                               "name" "A-1"
+                               "tags" []}
+                              {"id" "00000000-0000-0000-0000-000000000002"
+                               "name" "A-2"
+                               "tags" []}]
+                             (ut/postgres-opts {"Entry" {"schema" "scratch"}}))
+                            (repl/<!)))]
   :teardown [(l/rt:stop)]})
 
 ^{:refer xt.db.impl-select-sql-test/CONNECTION :adopt true :added "4.0"}
 (fact "CONNECTED"
+
   (notify/wait-on :js
     (dbsql/query CONN "SELECT 1;" (repl/<!)))
-  => (any nil 1 [{"?column?" 1}]))
+  => (any nil 1 [{"?column?" 1}])
+
+  (notify/wait-on :js
+    (dbsql/query CONN "SELECT count(*) FROM \"scratch\".\"Entry\";" (repl/<!)))
+  => (any nil "2" 2 [{"count" "2"}] [{"count" 2}]))
 
 ^{:refer xt.db.impl-select-sql-test/QUERY :adopt true :added "4.0"}
 (fact "runs select queries"
   ^:hidden
 
   (notify/wait-on :js
+    (repl/notify
+     (graph/select sample-scratch/Schema
+                   ["Entry"
+                    ["name"
+                     (ut/LIMIT 1)]]
+                   (ut/postgres-opts {"Entry" {"schema" "scratch"}}))))
+  => string?
+  
+  (notify/wait-on :js
     (dbsql/query CONN
                  (graph/select sample-scratch/Schema
                                ["Entry"
                                 ["name"
                                  (ut/LIMIT 1)]]
-                               (ut/postgres-opts sample-scratch/SchemaLookup))
+                               (ut/postgres-opts {"Entry" {"schema" "scratch"}}))
                  (repl/<!)))
-  => string?
+  => vector?
 
   (notify/wait-on :js
     (dbsql/query CONN
@@ -57,7 +100,7 @@
                                 ["name"
                                  (ut/ORDER-BY ["name"])
                                  (ut/LIMIT 5)]]
-                               (ut/postgres-opts sample-scratch/SchemaLookup))
+                               (ut/postgres-opts {"Entry" {"schema" "scratch"}}))
                  {:success (fn [result]
-                             (repl/notify (k/json-decode result)))}))
+                             (repl/notify result))}))
   => vector?)

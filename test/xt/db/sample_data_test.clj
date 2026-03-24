@@ -1,6 +1,6 @@
 (ns xt.db.sample-data-test
   (:require [rt.postgres :as pg
-             :refer [defsel.pg defret.pg defaccess.pg]]
+             :refer [defsel.pg defret.pg]]
             [std.lang :as l]
             [std.lib.foundation :as f]))
 
@@ -94,17 +94,8 @@
    :country      {:type :ref :ref {:ns -/RegionCountry}
                   :web {:example "AU"}}])
 
-(defaccess.pg
-  access-city-in-country
-  {:forward  [-/RegionCity
-              {:country <%>}]
-   :reverse  [-/RegionCountry
-              {:region-cities <%>}]
-   :roles #{:city}})
-
 (defret.pg ^{:- [-/RegionCountry]
              :scope #{:public}
-             :access [access-city-in-country]
              :api/view true}
   region-country-with-access
   [:citext i-city-id]
@@ -112,7 +103,6 @@
 
 (defret.pg ^{:- [-/RegionCity]
              :scope #{:public}
-             :access [access-city-in-country]
              :api/view true}
   region-city-with-access
   [:citext i-country-id]
@@ -308,5 +298,4 @@
    
   (f/template-entries [bind-route]
     +route-entries+))
-
 

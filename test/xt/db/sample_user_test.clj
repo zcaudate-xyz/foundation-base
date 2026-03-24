@@ -1,5 +1,5 @@
 (ns xt.db.sample-user-test
-  (:require [rt.postgres :as pg :refer [defsel.pg defret.pg defaccess.pg]]
+  (:require [rt.postgres :as pg :refer [defsel.pg defret.pg]]
             [std.lang :as l]))
 
 (l/script :postgres
@@ -145,40 +145,6 @@
                    :sql  {:default "member"}}])
 
 
-(defaccess.pg organisation-access-is-owner
-  {:forward  [-/UserAccount
-              {:organisations <%>}]
-   :reverse  [-/Organisation
-              {:owner <%>}]
-   :roles #{:organisation.owner
-            :organisation.admin
-            :organisation.member}})
-
-(defaccess.pg
-  organisation-access-is-admin
-  {:forward  [-/UserAccount
-              {:organisation-accesses
-               {:role "admin"
-                :organisation <%>}}]
-   :reverse  [-/Organisation
-              {:access
-               {:role "admin"
-                :account <%>}}]
-   :roles #{:organisation.admin
-            :organisation.member}})
-
-(defaccess.pg
-  organisation-access-is-member
-  {:forward  [-/UserAccount
-              {:organisation-accesses
-               {:role "member"
-                :organisation <%>}}]
-   :reverse  [-/Organisation
-              {:access
-               {:role "member"
-                :account <%>}}]
-   :roles #{:organisation.member}})
-
 (defn.pg organisation-assert-is-member
   [:uuid i-account-id :uuid i-organisation-id]
   (return true))
@@ -191,28 +157,24 @@
 (defsel.pg ^{:- [-/Organisation]
              :args [:uuid i-account-id]
              :scope   #{:personal}
-             :access  [-/organisation-access-is-owner]
              :api/view true}
   organisation-all-as-owner)
 
 (defsel.pg ^{:- [-/Organisation]
              :args [:uuid i-account-id]
              :scope   #{:personal}
-             :access  [-/organisation-access-is-owner]
              :api/view true}
   organisation-all-as-owner)
 
 (defsel.pg ^{:- [-/Organisation]
              :args [:uuid i-account-id]
              :scope   #{:personal}
-             :access  [-/organisation-access-is-admin]
              :api/view true}
   organisation-all-as-admin)
 
 (defsel.pg ^{:- [-/Organisation]
              :args [:uuid i-account-id]
              :scope   #{:personal}
-             :access  [-/organisation-access-is-member]
              :api/view true}
   organisation-all-as-member)
 
@@ -231,8 +193,6 @@
                                 {:organisation i-organisation-id}})
 
 (defret.pg ^{:- [-/Organisation]
-             :access [-/organisation-access-is-member]
-             :ensure #{:organisation.member}
              :api/view true}
   organisation-view-membership
   [:uuid i-organisation-id]

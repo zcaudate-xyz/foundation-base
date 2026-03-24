@@ -189,18 +189,6 @@
         (update-in [:return] (comp name first))
         (update-in [:input]  (fn [input] (mapv l/emit-type-record input))))))
 
-(defn bind-view-access
-  "gets the view access"
-  {:added "4.0"}
-  [access]
-  (let [{:keys [relation symbol]} access]
-    (-> access
-        (update :query dissoc :form :table :symbol :relation)
-        (update :query transform-query)
-        (update :roles to-lookup)
-        (merge {:relation (if relation (name relation))
-                :symbol   (if symbol  (l/sym-default-str symbol))}))))
-
 (defn bind-view-guards
   "gets more guards"
   {:added "4.0"}
@@ -215,7 +203,7 @@
   {:added "4.0"}
   [ptr & [opts]]
   (let [entry (l/get-entry ptr)
-        {:keys [table type access guards autos scope query query-base args] :as view} (:static/view entry)
+        {:keys [table type guards autos scope query query-base args] :as view} (:static/view entry)
         {:keys [id] :as m} (bind-function ptr)
         
         table     (name table)
@@ -233,22 +221,12 @@
                           {:table table
                            :type  (name type)
                            :tag   tag
-                           #_#_:access (bind-view-access access)
                            :query  (transform-query (or query-base
                                                         query)
                                                     (set (filter symbol? args)))
                            #_#_:guards (bind-view-guards guards)
                            #_#_:autos  (bind-view-guards autos)}
                           opts)})))))
-
-(defn bind-access
-  "generates the access interface"
-  {:added "4.0"}
-  [access]
-  {:forward {:clause (transform-query (-> access :forward :clause))
-             :table  (-> access :forward :table name)}
-   :reverse {:clause (transform-query (-> access :reverse :clause))
-             :table  (-> access :reverse :table name)}})
 
 (defn bind-table
   "gets the table interface"

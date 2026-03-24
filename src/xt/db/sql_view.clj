@@ -159,14 +159,13 @@
   "provides a view combine query"
   {:added "4.0"}
   [schema sel-entry sel-args ret-entry ret-args ret-omit opts as-tree]
-  (var #{access-id} opts)
   (var sel-input  (k/get-key sel-entry "input"))
   (var ret-input  (k/get-key ret-entry "input"))
   (var itree   (-/tree-combined schema
                                 sel-entry
                                 ret-entry
                                 ret-omit
-                                {}
+                                []
                                 opts))
   (var qtree (-/query-fill-input itree
                                  (-> (k/arr-clone  ret-args)
@@ -177,4 +176,3 @@
   (if as-tree
     (return qtree)
     (return (sql-graph/select-return schema qtree 0 opts))))
-

@@ -50,8 +50,7 @@
           (def +tree+
             ["Organisation"
              {"custom" [],
-              "where"
-              [{"access" {"role" "admin", "account" "{{i_account_id}}"}}],
+              "where" [],
               "links" [],
               "data" ["id"]}])]}
 (fact "provides a view select query"
@@ -118,21 +117,13 @@
 ^{:refer xt.db.sql-view/query-select.organisation-all-as-admin :adopt true :added "4.0"
   :setup [(def +select+
             (pg/bind-view user/organisation-all-as-admin))
-          (def +out+
-            [["Organisation"
-              {"custom" [],
-               "where"
-               [{"access"
-                 {"role" "admin",
-                  "account" "00000000-0000-0000-0000-000000000000"}}],
-               "links" [],
-               "data" ["id"]}]
-             (prose/|
-              "SELECT id FROM Organisation"
-              "  WHERE id IN ("
-              "    SELECT organisation_id FROM OrganisationAccess"
-              "    WHERE role = 'admin' AND account_id = '00000000-0000-0000-0000-000000000000'"
-              "  )")])]}
+	          (def +out+
+	            [["Organisation"
+	              {"custom" [],
+	               "where" [],
+	               "links" [],
+	               "data" ["id"]}]
+	             "SELECT id FROM Organisation"]) ]}
 (fact "provides a view select query"
   ^:hidden
 
@@ -440,8 +431,7 @@
           (def +tree+
             ["Organisation"
              {"custom" [],
-              "where"
-              [{"access" {"role" "admin", "account" "{{i_account_id}}"}}],
+              "where" [],
               "links"
               [["access"
                 "reverse"
@@ -494,7 +484,7 @@
   :setup [(def +out+
             ["Organisation"
              {"custom" [],
-              "where" [{"access" {"role" "member", "account" "<ORG-ID>"}}],
+              "where" [],
               "links" [],
               "data" ["id"]}])]}
 (fact "fills out the tree for a given input"
