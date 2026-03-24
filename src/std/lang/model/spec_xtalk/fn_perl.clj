@@ -151,7 +151,7 @@
 (defn perl-tf-x-return-eval
   ([[_ s wrap-fn]]
    (template/$ (return (~wrap-fn (fn []
-                            (return (eval ~s))))))))
+                            (return (~(symbol "CORE::eval") ~s))))))))
 
 (def +perl-return+
   {:x-return-encode  {:macro #'perl-tf-x-return-encode   :emit :macro}

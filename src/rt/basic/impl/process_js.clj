@@ -135,10 +135,8 @@
 ;; 
 
 (def +client-ws+
-  '[(:- :import [createRequire] :from "'module'")
-    (var require (if (not= (typeof require) "undefined")
-                     require
-                     (createRequire (?. import.meta url))))
+  '[(:- :import #{createRequire} :from "'module'")
+    (var require (createRequire (. import.meta url)))
     (defn client-ws
       [host port opts]
       (let [WS     (or (. globalThis ["WebSocket"])

@@ -374,7 +374,7 @@
 
 (defmacro future
   "constructs a completable future
- 
+  
    @(future (Thread/sleep 100)
             1)
    => 1"

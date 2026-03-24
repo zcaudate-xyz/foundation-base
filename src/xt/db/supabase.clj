@@ -92,7 +92,7 @@
         :else
         (k/err (k/cat "Unsupported supabase eventType: " (k/to-string eventType)))))
 
-(defn.js apply-payload!
+(defn.js apply-payload
   "Applies a Supabase payload to a local xt.db instance using `xdb/sync-event`.
 
   Returns:
@@ -125,7 +125,7 @@
            "ids" ids
            "events" events}))
 
-(defn.js attach!
+(defn.js attach-events
   "Attaches Supabase Realtime `postgres_changes` listeners and applies each payload to `xdb`.
 
   Input:
@@ -161,7 +161,7 @@
        (fn [payload]
          (when (k/fn? on-payload)
            (on-payload payload))
-         (var res (-/apply-payload! xdb payload schema lookup opts {"id-key" id-key}))
+         (var res (-/apply-payload xdb payload schema lookup opts {"id-key" id-key}))
          (when (k/fn? on-applied)
            (on-applied res))
          (return res)))

@@ -102,7 +102,7 @@
 ;; Integration: apply to sqlite-backed xt.db
 ;;
 
-^{:refer xt.db.supabase/apply-payload! :added "4.1.3"}
+^{:refer xt.db.supabase/apply-payload :added "4.1.3"}
 (fact "applies supabase payload to local xt.db (sqlite)"
   ^:hidden
 
@@ -110,7 +110,7 @@
    ;; stash USD row in JS global so the expected map is stable in compiled output
     (:= (!:G USD) @+usd-snake+)
     ;; insert
-    (sup/apply-payload! DBSQL
+    (sup/apply-payload DBSQL
                         {"type" "postgres_changes"
                          "eventType" "INSERT"
                          "schema" "public"
@@ -125,7 +125,7 @@
   
   (!.js
     ;; delete
-   (sup/apply-payload! DBSQL
+   (sup/apply-payload DBSQL
                        {"type" "postgres_changes"
                         "eventType" "DELETE"
                         "schema" "public"
@@ -137,7 +137,7 @@
                      ["Currency" ["id"]]))
   => [])
 
-^{:refer xt.db.supabase/attach! :added "4.1.3"}
+^{:refer xt.db.supabase/attach-events :added "4.1.3"}
 (fact "attaches a stubbed supabase realtime client and applies payloads"
   ^:hidden
 
@@ -150,7 +150,7 @@
                  :subscribe (fn [] (return channel))
                  :unsubscribe (fn [] (return true))})
    (var supabase {:channel (fn [_name] (return channel))})
-   (var res (sup/attach!
+   (var res (sup/attach-events
              {"supabase" supabase
               "xdb" DBSQL
               "schema" sample/Schema

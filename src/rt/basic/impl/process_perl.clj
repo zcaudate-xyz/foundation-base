@@ -20,6 +20,14 @@
 ;; ONESHOT
 ;;
 
+(defn default-body-transform
+  "transform oneshot forms for `return-eval`"
+  {:added "4.0"}
+  [input {:keys [bulk]}]
+  (if bulk
+    (apply list 'do input)
+    input))
+
 (def ^{:arglists '([body])}
   default-oneshot-wrap
   (let [bootstrap  (impl/emit-entry-deps
@@ -30,12 +38,13 @@
       (str bootstrap
            "\n\n"
            (impl/emit-as
-            :perl [(list 'print (list 'return-eval (cons 'eval body)))])))))
+            :perl [(list 'print (list 'return-eval body))])))))
 
 (def +perl-oneshot-config+
   (common/set-context-options
    [:perl :oneshot :default]
    {:main  {:in    #'default-oneshot-wrap}
+    :emit  {:body  {:transform #'default-body-transform}}
     :json :full}))
 
 (def +perl-oneshot+

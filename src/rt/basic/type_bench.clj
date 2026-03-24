@@ -56,7 +56,7 @@
                              {:args cmd
                               :wait false
                               :root root-dir}))
-        thread  (-> (future/future (os/sh-wait process))
+        thread  (-> (future/future {} (os/sh-wait process))
                     (future/on:complete (fn [ret err]
                                      (try (let [out (os/sh-output process)]
                                             (when (not= 0 (:exit out))

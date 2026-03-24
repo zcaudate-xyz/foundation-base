@@ -49,7 +49,7 @@
    [:r :oneshot :default]
    {:main  {:in  #'default-oneshot-wrap
             :out #'default-oneshot-trim}
-    :emit  {:body  {:transform #'default/return-transform}}
+    :emit  {:body  {:transform #'rt/return-transform}}
     :json :full}))
 
 (def +r-oneshot+
@@ -103,7 +103,7 @@
    [:r :basic :default]
    {:bootstrap #'default-basic-client
     :main  {}
-    :emit  {:body  {:transform #'default/return-transform}}
+    :emit  {:body  {:transform #'rt/return-transform}}
     :json :full
     :encode :json
     :timeout 2000}))
