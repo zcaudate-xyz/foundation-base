@@ -81,15 +81,6 @@
           code.test/run-errored
           code.tool.java.compile/javac
 
-          indigo/test:all
-          indigo/test:app
-          indigo/test:base
-          indigo/test:base+framework
-          indigo/test:framework
-          indigo/test:standard
-          indigo/test:infra
-          indigo/fix-tests
-
           code.tool.maven/linkage
           code.tool.maven/package
           code.tool.maven/install

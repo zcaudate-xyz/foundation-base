@@ -230,10 +230,10 @@
          remote-schema (:static/schema r-en)
          remote-table (name (:id link))
 
-         local-cols (map (comp symbol :local-col) entries)
+         local-cols  (map (comp symbol :local-col) entries)
          remote-cols (map (comp symbol name :remote-col) entries)
          remote-token (common/pg-base-token #{remote-table} remote-schema)
-         remote-refs  (list 'quote remote-cols)
+         remote-refs  (list 'quote (vec remote-cols))
          refs-form    (if (seq? remote-token)
                         [(list remote-token remote-refs)]
                         [remote-token remote-refs])
