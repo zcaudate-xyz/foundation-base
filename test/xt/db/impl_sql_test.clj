@@ -72,7 +72,7 @@
                             ["A" "B"]
                             (ut/sqlite-opts nil)))
   => ["DELETE FROM \"HELLO\" WHERE \"id\" = 'A';"
-      "DELETE FROM \"HELLO\" WHERE \"id\" = 'B';")
+      "DELETE FROM \"HELLO\" WHERE \"id\" = 'B';"])
 
 ^{:refer xt.db.impl-sql/sql-process-event-sync :added "4.0"}
 (fact "processes event sync data from database")

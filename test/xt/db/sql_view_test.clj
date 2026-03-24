@@ -316,7 +316,7 @@
               [{"type"
                 {"args"
                  [{"name" "{{i_type}}", "::" "sql/arg"}
-                  {"schema" "scratch/xt.db.sample-data-test",
+                  {"schema" "scratch-sample-db",
                    "name" "EnumCurrencyType",
                    "::" "sql/defenum"}],
                  "::" "sql/cast"}}],
@@ -356,7 +356,7 @@
               [{"type"
                 {"args"
                  [{"name" "{{i_type}}", "::" "sql/arg"}
-                  {"schema" "scratch/xt.db.sample-data-test",
+                  {"schema" "scratch-sample-db",
                    "name" "EnumCurrencyType",
                    "::" "sql/defenum"}],
                  "::" "sql/cast"}}],
@@ -490,27 +490,6 @@
                    {}))
   => +tree+)
 
-^{:refer xt.db.sql-view/query-fill-clause :added "4.0"
-  :setup [(def +out+
-            {"access" {"role" "member", "account" "<ACCOUNT-ID>"}})]}
-(fact "fills the clause with access-id"
-  ^:hidden
-  
-  (!.js
-   (var entry (@! (pg/bind-view user/organisation-all-as-member)))
-   (v/query-fill-clause entry "<ACCOUNT-ID>"))
-  => +out+
-
-  (!.lua
-   (var entry (@! (pg/bind-view user/organisation-all-as-member)))
-   (v/query-fill-clause entry "<ACCOUNT-ID>"))
-  => +out+
-
-  (!.py
-   (var entry (@! (pg/bind-view user/organisation-all-as-member)))
-   (v/query-fill-clause entry "<ACCOUNT-ID>"))
-  => +out+)
-
 ^{:refer xt.db.sql-view/query-fill-input :added "4.0"
   :setup [(def +out+
             ["Organisation"
@@ -539,30 +518,6 @@
    (v/query-fill-input tree ["<ORG-ID>"] (. entry ["input"]) false))
   => +out+)
 
-^{:refer xt.db.sql-view/query-access-check :added "4.0"}
-(fact "constructs the access check"
-  ^:hidden
-  
-  (!.js
-   [(v/query-access-check (@! (-> (pg/bind-view user/organisation-all-as-member)
-                                  :view :access))
-                          (@! (-> (pg/bind-view user/organisation-view-membership)
-                                  :view :access)))])
-  => [true]
-  
-  (!.lua
-   [(v/query-access-check (@! (-> (pg/bind-view user/organisation-all-as-member)
-                                  :view :access))
-                          (@! (-> (pg/bind-view user/organisation-view-membership)
-                                  :view :access)))])
-  => [true]
-  
-  (!.py
-   [(v/query-access-check (@! (-> (pg/bind-view user/organisation-all-as-member)
-                                  :view :access))
-                          (@! (-> (pg/bind-view user/organisation-view-membership)
-                                  :view :access)))])
-  => [true])
 
 ^{:refer xt.db.sql-view/query-select :added "4.0"
   :setup [(def +select+
@@ -793,8 +748,8 @@
   (!.js
    [(v/query-combined sample/Schema
                       (@! +select+)
-                         []
-                         (@! +return+)
+                      []
+                      (@! +return+)
                          []
                          nil
                          {}

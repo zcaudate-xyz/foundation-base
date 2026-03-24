@@ -95,7 +95,7 @@
                 (= '++ (first form))
                 {"::" "sql/cast"
                  :args  (mapv transform-fn (rest form))}
-
+                
                 (and (symbol? (first form)) 
                      (namespace (first form)))
                 {"::" "sql/fn"
@@ -233,12 +233,12 @@
                           {:table table
                            :type  (name type)
                            :tag   tag
-                           :access (bind-view-access access)
+                           #_#_:access (bind-view-access access)
                            :query  (transform-query (or query-base
                                                         query)
                                                     (set (filter symbol? args)))
-                           :guards (bind-view-guards guards)
-                           :autos  (bind-view-guards autos)}
+                           #_#_:guards (bind-view-guards guards)
+                           #_#_:autos  (bind-view-guards autos)}
                           opts)})))))
 
 (defn bind-access

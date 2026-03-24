@@ -161,7 +161,7 @@
   {:added "4.0"}
   [m field]
   (template/$ (coalesce (:->> ~m ~(str field "_id"))
-                 (:->> (:-> ~m ~field) "id"))))
+                        (:->> (:-> ~m ~field) "id"))))
 
 ;;
 ;; map/reduce

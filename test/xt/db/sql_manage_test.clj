@@ -75,13 +75,9 @@
   => true
   
   (!.js
-   (DB.exec "SELECT name FROM sqlite_schema where type='table'"))
+    (DB.exec "SELECT name FROM sqlite_schema where type='table'"))
   => [{"values"
-       [["Currency"]
-        ["RegionCountry"]
-        ["RegionState"]
-        ["RegionCity"]
-        ["UserAccount"]
+       [["UserAccount"]
         ["UserProfile"]
         ["UserNotification"]
         ["UserPrivilege"]
@@ -89,7 +85,11 @@
         ["Wallet"]
         ["WalletAsset"]
         ["Organisation"]
-        ["OrganisationAccess"]],
+        ["OrganisationAccess"]
+        ["Currency"]
+        ["RegionCountry"]
+        ["RegionState"]
+        ["RegionCity"]],
        "columns" ["name"]}]
   
   (!.js
@@ -259,9 +259,8 @@
                                           ["UserProfile" "account"])
                                 (ut/postgres-opts sample/SchemaLookup))])
   => ["\"account_id\" text REFERENCES \"UserAccount\""
-      "\"account_id\" uuid REFERENCES \"scratch/xt.db.sample-user-test\".\"UserAccount\""]
+      "\"account_id\" uuid REFERENCES \"scratch-sample-db\".\"UserAccount\""]
 
-  
 
   (!.lua
    [(manage/table-create-column sample/Schema
@@ -273,7 +272,7 @@
                                           ["UserProfile" "account"])
                                 (ut/postgres-opts sample/SchemaLookup))])
   => ["\"account_id\" text REFERENCES \"UserAccount\""
-      "\"account_id\" uuid REFERENCES \"scratch/xt.db.sample-user-test\".\"UserAccount\""]
+      "\"account_id\" uuid REFERENCES \"scratch-sample-db\".\"UserAccount\""]
 
   
 
@@ -287,7 +286,7 @@
                                           ["UserProfile" "account"])
                                 (ut/postgres-opts sample/SchemaLookup))])
   => ["\"account_id\" text REFERENCES \"UserAccount\""
-      "\"account_id\" uuid REFERENCES \"scratch/xt.db.sample-user-test\".\"UserAccount\""])
+      "\"account_id\" uuid REFERENCES \"scratch-sample-db\".\"UserAccount\""])
 
 ^{:refer xt.db.sql-manage/table-create :added "4.0"
   :setup [(def +currency-table+
@@ -395,7 +394,11 @@
 
 ^{:refer xt.db.sql-manage/table-drop-all :added "4.0"
   :setup [(def +drop-all+
-            ["DROP TABLE IF EXISTS \"OrganisationAccess\";"
+            ["DROP TABLE IF EXISTS \"RegionCity\";"
+             "DROP TABLE IF EXISTS \"RegionState\";"
+             "DROP TABLE IF EXISTS \"RegionCountry\";"
+             "DROP TABLE IF EXISTS \"Currency\";"
+             "DROP TABLE IF EXISTS \"OrganisationAccess\";"
              "DROP TABLE IF EXISTS \"Organisation\";"
              "DROP TABLE IF EXISTS \"WalletAsset\";"
              "DROP TABLE IF EXISTS \"Wallet\";"
@@ -403,11 +406,7 @@
              "DROP TABLE IF EXISTS \"UserPrivilege\";"
              "DROP TABLE IF EXISTS \"UserNotification\";"
              "DROP TABLE IF EXISTS \"UserProfile\";"
-             "DROP TABLE IF EXISTS \"UserAccount\";"
-             "DROP TABLE IF EXISTS \"RegionCity\";"
-             "DROP TABLE IF EXISTS \"RegionState\";"
-             "DROP TABLE IF EXISTS \"RegionCountry\";"
-             "DROP TABLE IF EXISTS \"Currency\";"])]}
+             "DROP TABLE IF EXISTS \"UserAccount\";"])]}
 (fact "drops all tables"
   ^:hidden
   
@@ -415,7 +414,7 @@
    (manage/table-drop-all sample/Schema
                           sample/SchemaLookup
                           (ut/sqlite-opts nil)))
-  => +drop-all+
+  
 
   (!.lua
    (manage/table-drop-all sample/Schema

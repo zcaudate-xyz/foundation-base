@@ -7,8 +7,8 @@
 (l/script :postgres
   {:require [[rt.postgres :as pg]]
    :static {:application ["xt.db.sample"]
-            :seed        ["scratch-sample-data-test"]
-            :all         {:schema   ["scratch-sample-data-test"]}}})
+            :seed        ["scratch-sample-db"]
+            :all         {:schema   ["scratch-sample-db"]}}})
 
 (defenum.pg ^{}
   EnumCurrencyType [:digital :fiat :crypto])

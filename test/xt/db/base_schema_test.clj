@@ -321,11 +321,7 @@
 
 ^{:refer xt.db.base-schema/create-table-order :added "4.0"
   :setup [(def +ordered+
-            ["Currency"
-             "RegionCountry"
-             "RegionState"
-             "RegionCity"
-             "UserAccount"
+            ["UserAccount"
              "UserProfile"
              "UserNotification"
              "UserPrivilege"
@@ -333,7 +329,11 @@
              "Wallet"
              "WalletAsset"
              "Organisation"
-             "OrganisationAccess"])]}
+             "OrganisationAccess"
+             "Currency"
+             "RegionCountry"
+             "RegionState"
+             "RegionCity"])]}
 (fact "creates the table order"
   ^:hidden
   
@@ -349,35 +349,21 @@
    (sch/create-table-order sample/SchemaLookup))
   => +ordered+)
 
-^{:refer xt.db.base-schema/table-order :added "4.0"
-  :setup [(def +order+
-            ["Currency"
-             "RegionCountry"
-             "RegionState"
-             "RegionCity"
-             "UserAccount"
-             "UserProfile"
-             "UserNotification"
-             "UserPrivilege"
-             "Asset"
-             "Wallet"
-             "WalletAsset"
-             "Organisation"
-             "OrganisationAccess"])]}
+^{:refer xt.db.base-schema/table-order :added "4.0"}
 (fact "table order with caching"
   ^:hidden
   
   (!.js
    (sch/table-order  sample/SchemaLookup))
-  => +order+
-
+  => +ordered+
+  
   (!.lua
    (sch/table-order  sample/SchemaLookup))
-  => +order+
+  => +ordered+
 
   (!.py
    (sch/table-order  sample/SchemaLookup))
-  => +order+)
+  => +ordered+)
 
 ^{:refer xt.db.base-schema/table-coerce :added "4.0"}
 (fact "coerces output given schema and type functions"

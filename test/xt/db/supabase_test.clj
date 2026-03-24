@@ -1,7 +1,7 @@
 (ns xt.db.supabase-test
+  (:use code.test)
   (:require [std.lang :as l]
-            [xt.lang.base-notify :as notify])
-  (:use code.test))
+            [xt.lang.base-notify :as notify]))
 
 (l/script- :js
   {:runtime :basic
@@ -41,28 +41,28 @@
                      (catch e (repl/notify e)))))))))
 
 
+(def +usd-snake+
+  {"id" "USD"
+   "name" "US Dollar"
+   "symbol" "USD"
+   "type" "fiat"
+   "description" "Default Current for the United States of America"
+   "time-updated" 1631909757019247
+   "time-created" 1631909757019247
+   "decimal" 2})
+
 (fact:global
  {:setup    [(l/rt:restart)
              (do (l/rt:scaffold :js) true)
              (bootstrap-js)]
   :teardown [(l/rt:stop)]})
 
-(def ^:private +usd-snake+
-  {"id" "USD"
-   "name" "US Dollar"
-   "symbol" "USD"
-   "type" "fiat"
-   "description" "Default Current for the United States of America"
-   "time_updated" 1631909757019247
-   "time_created" 1631909757019247
-   "decimal" 2})
-
 ^{:refer xt.db.supabase/payload->xdb-events :added "4.1.3"}
 (fact "translates canonical supabase payloads to xt.db events"
   ^:hidden
 
   (!.js
-    (:= (!:G USD) +usd-snake+)
+    (:= (!:G USD) @+usd-snake+)
     (sup/payload->xdb-events
      {"type" "postgres_changes"
       "eventType" "INSERT"
@@ -108,23 +108,23 @@
 
   (!.js
    ;; stash USD row in JS global so the expected map is stable in compiled output
-   (:= (!:G USD) +usd-snake+)
-   ;; insert
-   (sup/apply-payload! DBSQL
-                       {"type" "postgres_changes"
-                        "eventType" "INSERT"
-                        "schema" "public"
-                        "table" "Currency"
-                        "new" (!:G USD)}
+    (:= (!:G USD) @+usd-snake+)
+    ;; insert
+    (sup/apply-payload! DBSQL
+                        {"type" "postgres_changes"
+                         "eventType" "INSERT"
+                         "schema" "public"
+                         "table" "Currency"
+                         "new" (!:G USD)}
                        sample/Schema sample/SchemaLookup (ut/sqlite-opts nil))
-   ;; query
-   (xdb/db-pull-sync DBSQL
-                     sample/Schema
-                     ["Currency" ["id"]]))
+    ;; query
+    (xdb/db-pull-sync DBSQL
+                      sample/Schema
+                      ["Currency" ["id"]]))
   => [{"id" "USD"}]
-
+  
   (!.js
-   ;; delete
+    ;; delete
    (sup/apply-payload! DBSQL
                        {"type" "postgres_changes"
                         "eventType" "DELETE"
@@ -142,7 +142,7 @@
   ^:hidden
 
   (!.js
-   (:= (!:G USD) +usd-snake+)
+   (:= (!:G USD) @+usd-snake+)
    (var handlers [])
    (var channel {:on (fn [_type _binding handler]
                        (x:arr-push handlers handler)
@@ -160,7 +160,7 @@
               "bindings" [{"event" "*"
                            "schema" "public"
                            "table" "Currency"}]}))
-   (var detach! (k/get-key res "detach!"))
+   (var detach-fn (k/get-key res "detach-fn"))
    ;; feed one insert payload
    ((x:get-idx handlers 0)
     {"type" "postgres_changes"
@@ -171,7 +171,7 @@
    (var rows (xdb/db-pull-sync DBSQL
                                sample/Schema
                                ["Currency" ["id"]]))
-   (detach!))
-  rows
+   (detach-fn)
+   rows)
   => [{"id" "USD"}])
 

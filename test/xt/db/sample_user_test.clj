@@ -6,8 +6,8 @@
   {:require [[rt.postgres :as pg]
              [xt.db.sample-data-test :as data]]
    :static {:application ["xt.db.sample"]
-            :seed        ["scratch-sample-user-test"]
-            :all         {:schema   ["scratch-sample-user-test"]}}})
+            :seed        ["scratch-sample-db"]
+            :all         {:schema   ["scratch-sample-db"]}}})
 
 (defn.pg as-array
   [:jsonb input]

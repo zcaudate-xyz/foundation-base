@@ -20,11 +20,11 @@
 (defn bootstrap-js
   []
   (notify/wait-on [:js 5000]
-                  (dbsql/connect {:constructor js-postgres/connect-constructor
-                                  :database "test-scratch"}
-                                 {:success (fn [conn]
-                                             (:= (!:G CONN) conn)
-                                             (repl/notify true))})))
+    (dbsql/connect {:constructor js-postgres/connect-constructor
+                    :database "test-scratch"}
+                   {:success (fn [conn]
+                               (:= (!:G CONN) conn)
+                               (repl/notify true))})))
 
 (fact:global
  {:setup    [(l/rt:restart)
@@ -34,9 +34,9 @@
 
 ^{:refer xt.db.impl-select-view-test/CONNECTION :adopt true :added "4.0"}
 (fact "CONNECTED"
-
+  
   (notify/wait-on :js
-                  (dbsql/query CONN "SELECT 1;" (repl/<!)))
+    (dbsql/query CONN "SELECT 1;" (repl/<!)))
   => (any nil 1 [{"?column?" 1}]))
 
 ^{:refer xt.db.impl-select-view-test/VIEW-QUERY :added "4.0"}
@@ -53,8 +53,7 @@
                      {}
                      true)
   => ["Entry" {"custom" [], "where" [], "links" [], "data" ["id"]}]
-
-
+  
   (view/query-select sample-scratch/Schema
                      {:view {:table "Entry"
                              :type "select"
@@ -63,4 +62,4 @@
                       :input [{:symbol "i-name" :type "text"}]}
                      ["A-1"]
                      {})
-  => "SELECT id FROM Entry")
+  => "SELECT id FROM Entry WHERE name = 'A-1'")

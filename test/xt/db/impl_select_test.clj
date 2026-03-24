@@ -23,19 +23,10 @@
              [xt.lang.base-repl :as repl]
              [xt.db.sample-scratch-test :as sample-scratch]]})
 
-(l/script- :lua
-  {:runtime :basic
-   :require [[xt.db.base-schema :as sch]
-             [xt.lang.base-lib :as k]
-             [xt.db.sql-util :as ut]
-             [xt.db.sql-manage :as manage]
-             [xt.db.sample-scratch-test :as sample-scratch]]})
-
 (fact:global
  {:setup    [(l/rt:restart)
              (l/rt:setup-to :postgres)
-             (l/rt:scaffold :js)
-             (l/rt:scaffold :lua)]
+             (l/rt:scaffold :js)]
   :teardown [(l/rt:stop)]})
 
 

@@ -85,21 +85,6 @@
 ;; QUERY
 ;;
 
-(defn.xt query-fill-clause
-  "fills the clause with access-id"
-  {:added "4.0"}
-  [entry access-id]
-  (if (k/nil? access-id)
-    (return {}))
-  (var  clause (or (k/get-in entry ["view" "access" "query" "clause"])
-                   {}))
-  (return (k/walk clause
-                  (fn [x]
-                    (return (:? (== x "{{<%>}}")
-                                access-id
-                                x)))
-                  k/identity)))
-
 (defn.xt query-fill-input
   "fills out the tree for a given input"
   {:added "4.0"}
@@ -121,34 +106,13 @@
                                  x)))))
   (return out))
 
-(defn.xt query-access-check
-  "constructs the access check"
-  {:added "4.0"}
-  [sel-access ret-access]
-  (cond (k/nil? (k/get-key sel-access "symbol"))
-        (return false)
-
-        (== (k/get-key sel-access "symbol")
-            (k/get-key ret-access "symbol"))
-        (return true)
-        
-        (< 0 (k/len (k/obj-intersection
-                     (k/get-key sel-access "roles")
-                     (k/get-key ret-access "roles"))))
-        (return true)
-        
-        :else
-        (return false)))
-
 (defn.xt query-select
   "provides a view select query"
   {:added "4.0"}
   [schema entry args opts as-tree]
   
   (var #{input} entry)
-  (var #{access-id} opts)
-  (var clause (-/query-fill-clause entry access-id))
-  (var itree  (-/tree-select schema entry clause opts))
+  (var itree  (-/tree-select schema entry {} opts))
   (var qtree  (-/query-fill-input itree args (k/arr-clone input) false))
   (if as-tree
     (return qtree)
@@ -159,9 +123,7 @@
   {:added "4.0"}
   [schema entry args opts as-tree]
   (var #{input} entry)
-  (var #{access-id} opts)
-  (var clause (-/query-fill-clause entry access-id))
-  (var itree  (-/tree-count schema entry clause opts))
+  (var itree  (-/tree-count schema entry {} opts))
   (var qtree  (-/query-fill-input itree args (k/arr-clone input) false))
   (if as-tree
     (return qtree)
@@ -172,9 +134,7 @@
   {:added "4.0"}
   [schema entry id args opts as-tree]
   (var #{input} entry)
-  (var #{access-id} opts)
-  (var clause (-/query-fill-clause entry access-id))
-  (var itree (-/tree-return schema entry {:id id} clause opts))
+  (var itree (-/tree-return schema entry {:id id} {} opts))
   (var qtree (-/query-fill-input itree args (k/arr-clone input) true))
   (if as-tree
     (return qtree)
@@ -185,12 +145,10 @@
   {:added "4.0"}
   [schema entry ids args opts as-tree]
   (var #{input} entry)
-  (var #{access-id} opts)
-  (var clause (-/query-fill-clause entry access-id))
   (var itree  (-/tree-return schema
                              entry
                              {:id ["in" [ids]]}
-                             clause
+                             {}
                              opts))
   (var qtree (-/query-fill-input itree args (k/arr-clone input) true))
   (if as-tree
@@ -204,22 +162,11 @@
   (var #{access-id} opts)
   (var sel-input  (k/get-key sel-entry "input"))
   (var ret-input  (k/get-key ret-entry "input"))
-  (var sel-access (k/get-path sel-entry ["view" "access"]))
-  (var ret-access (k/get-path ret-entry ["view" "access"]))
-  (var sel-clause [])
-  (var ret-clause [])
-  (when (not= nil (k/get-key sel-access "symbol"))
-    (:= sel-clause (-/query-fill-clause sel-entry access-id)))
-  
-  (when (and (not= nil (k/get-key ret-access "symbol"))
-             (not (-/query-access-check sel-access ret-access)))
-    (:= ret-clause (-/query-fill-clause ret-entry access-id)))
-  (var all-clause (base-scope/merge-queries sel-clause ret-clause))
   (var itree   (-/tree-combined schema
                                 sel-entry
                                 ret-entry
                                 ret-omit
-                                all-clause
+                                {}
                                 opts))
   (var qtree (-/query-fill-input itree
                                  (-> (k/arr-clone  ret-args)
