@@ -102,7 +102,8 @@
            [(case/snake-case (f/strn col))
             [(common/pg-type-alias type)]])
          col-attrs (cond-> col-attrs
-                     primary  (conj :primary-key)
+                     (and primary
+                          (map? (:schema-primary mopts)))  (conj :primary-key)
                      (= type :enum) (pg-deftype-enum-col enum mopts)
                      required (conj :not-null)
                      unique   (conj :unique)
@@ -315,9 +316,12 @@
           :keys [final existing]} (meta sym)
          col-spec (mapv vec (partition 2 spec))
          col-spec (pg-deftype-spec-normalize col-spec)
-         cols     (mapv #(pg-deftype-col-fn % mopts) col-spec)
-         ttok     (common/pg-full-token sym schema)
-         tuniques (pg-deftype-uniques col-spec)
+         cols     (mapv #(pg-deftype-col-fn % (assoc mopts
+                                                     :schema-primary
+                                                     schema-primary))
+                        col-spec)
+         ttok       (common/pg-full-token sym schema)
+         tuniques   (pg-deftype-uniques col-spec)
          tprimaries (pg-deftype-primaries schema-primary)
          tindexes   (pg-deftype-indexes col-spec ttok)
          tforeigns  (pg-deftype-foreigns sym col-spec mopts)

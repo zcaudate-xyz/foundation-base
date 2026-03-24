@@ -73,6 +73,29 @@
     (when fn-def
       (analyze/infer-report fn-def))))
 
+(defn- inferred->shape
+  [inferred]
+  (cond
+    (types/jsonb-shape? inferred)
+    inferred
+
+    (and (= :shaped (:kind inferred))
+         (types/jsonb-shape? (:shape inferred)))
+    (:shape inferred)
+
+    :else nil))
+
+(defn- format-shape
+  [shape format]
+  (case format
+    :shape shape
+    :openapi (compile.json-openapi/shape->openapi shape)
+    :json-schema (compile.json-schema/shape->json-schema shape)
+    :typescript (compile.ts-schema/shape->ts-interface shape)
+    (throw (ex-info "Unknown schema format"
+                    {:format format
+                     :available [:shape :openapi :json-schema :typescript]}))))
+
 (defn get-app-function-report
   "Retrieves a cached infer report from an app typed payload."
   [app-name fn-sym]
@@ -178,29 +201,6 @@
        (throw (ex-info "Unknown input schema format"
                        {:format format
                         :available [:shape :openapi :json-schema :typescript]}))))))
-
-(defn- inferred->shape
-  [inferred]
-  (cond
-    (types/jsonb-shape? inferred)
-    inferred
-
-    (and (= :shaped (:kind inferred))
-         (types/jsonb-shape? (:shape inferred)))
-    (:shape inferred)
-
-    :else nil))
-
-(defn- format-shape
-  [shape format]
-  (case format
-    :shape shape
-    :openapi (compile.json-openapi/shape->openapi shape)
-    :json-schema (compile.json-schema/shape->json-schema shape)
-    :typescript (compile.ts-schema/shape->ts-interface shape)
-    (throw (ex-info "Unknown schema format"
-                    {:format format
-                     :available [:shape :openapi :json-schema :typescript]}))))
 
 (defn get-function-output-shape
   "Infers a JsonbShape for a function's JSON/object output."
@@ -324,6 +324,44 @@
   (doseq [[table-name table-def] runtime-tables]
     (swap! types/*type-registry* assoc table-name table-def)))
 
+;; ─────────────────────────────────────────────────────────────────────────────
+;; Type Function API
+;; ─────────────────────────────────────────────────────────────────────────────
+
+(defn Type
+  ([fn-ref]
+   (Type fn-ref {:format :shape}))
+  ([fn-ref opts]
+   (let [format (get opts :format :shape)
+         fn-def (if (types/fn-def? fn-ref)
+                  fn-ref
+                  (get-function-def fn-ref))]
+     (when fn-def
+       (let [report (analyze/infer-report fn-def)
+             ;; Extract input schemas for each jsonb argument
+             input-schemas (into {}
+                                 (keep (fn [arg]
+                                         (when (= :jsonb (:name (:type arg)))
+                                           (let [arg-name (:name arg)
+                                                 shape (get-function-input-shape fn-def arg-name)]
+                                             (when shape
+                                               [(keyword arg-name)
+                                                {:shape shape
+                                                 :schema (format-shape shape format)}]))))
+                                       (:inputs fn-def)))
+             ;; Extract output schema
+             output-shape (get-function-output-shape fn-def)
+             output-schema (when output-shape
+                             {:shape output-shape
+                              :schema (format-shape output-shape format)})]
+         (-> report
+             (assoc :input {:args (mapv (fn [arg]
+                                          {:name (:name arg)
+                                           :type (:name (:type arg))
+                                           :modifiers (:modifiers arg)})
+                                        (:inputs fn-def))
+                            :schemas input-schemas})
+             (assoc :output output-schema)))))))
 
 (comment
   (keys (into {}  (rt.postgres/app "scratch")))
