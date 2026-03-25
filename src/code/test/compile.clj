@@ -155,11 +155,11 @@
                 :teardown (snippet/fact-teardown meta)
                 :check    (snippet/fact-wrap-check meta)
                 :ceremony (snippet/fact-wrap-ceremony meta)}
-         wrap  {:check        (eval (:check code))
-                :ceremony     (eval (:ceremony code))}
-         function  {:thunk    (eval (fact-thunk (assoc meta :full full)))
-                    :setup    (eval (:setup code))
-                    :teardown (eval (:teardown code))}
+         wrap  {:check        (rt/eval-in-ns ns (:check code))
+                :ceremony     (rt/eval-in-ns ns (:ceremony code))}
+         function  {:thunk    (rt/eval-in-ns ns (fact-thunk (assoc meta :full full)))
+                    :setup    (rt/eval-in-ns ns (:setup code))
+                    :teardown (rt/eval-in-ns ns (:teardown code))}
          fpkg  (-> (merge {:type :core} meta)
                    (assoc :code code
                           :full full

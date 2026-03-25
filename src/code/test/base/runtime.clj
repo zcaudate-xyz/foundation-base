@@ -197,6 +197,15 @@
      (apply swap! context/*registry* update-in [ns :facts id] f args)
      [ns id])))
 
+(defn eval-in-ns
+  "evaluates a form in the provided namespace"
+  {:added "4.0"}
+  ([ns form]
+   (binding [*ns* (cond (nil? ns) *ns*
+                        (instance? clojure.lang.Namespace ns) ns
+                        :else (the-ns ns))]
+     (eval form))))
+
 (defn remove-fact
   "removes a fact from namespace"
   {:added "3.0"}

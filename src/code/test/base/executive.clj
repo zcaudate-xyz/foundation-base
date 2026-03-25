@@ -194,13 +194,13 @@
                         (sort-fn))
            facts   (accumulate (fn []
                                  (binding [*ns* (the-ns test-ns)]
-                                   (let [_       (eval (rt/get-global ns :prelim))
-                                         _       (eval (rt/get-global ns :setup))
+                                   (let [_       (rt/eval-in-ns test-ns (rt/get-global ns :prelim))
+                                         _       (rt/eval-in-ns test-ns (rt/get-global ns :setup))
                                          map-fn  (if (:parallel test)
                                                    pmap
                                                    map)
                                          output  (doall (map-fn #(%) tests))
-                                         _       (eval (rt/get-global ns :teardown))]
+                                         _       (rt/eval-in-ns test-ns (rt/get-global ns :teardown))]
                                      output)))
                                run-id)
            _       (rt/get-global ns :teardown)

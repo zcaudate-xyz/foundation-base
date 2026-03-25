@@ -12,14 +12,14 @@
  
    (->> (evaluate {:form '(+ 1 2 3)})
         (into {}))
-   => (contains {:status :success, :data 6, :form '(+ 1 2 3), :from :evaluate})"
+  => (contains {:status :success, :data 6, :form '(+ 1 2 3), :from :evaluate})"
   {:added "3.0"}
-  ([{:keys [form value]}]
+  ([{:keys [form value meta]}]
    (if value
      value
      (let [eval-fn  (fn []
                       (try
-                        {:status :success :data (eval form)}
+                        {:status :success :data (rt/eval-in-ns (:ns meta) form)}
                         (catch Throwable t
                           {:status :exception :data t})))
            f    (future (eval-fn))

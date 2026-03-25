@@ -32,7 +32,7 @@
 
 (defn fact:global-fn
   "global getter and setter
- 
+   
    (fact:global-fn :get [])"
   {:added "3.0"}
   ([]
@@ -46,19 +46,19 @@
            (let [[sym cmd] [cmd (or (first args)
                                     :init)]
                  data (rt/get-global ns :component sym)]
-             (case cmd
+           (case cmd
                :purge    (fact:global-fn :remove [:component sym])
                :create   (intern ns (with-meta sym {:dynamic true})
-                                 (eval (:create data)))
+                                 (rt/eval-in-ns ns (:create data)))
                :prelim   (if (:prelim data)
-                           (eval ((:prelim data) sym))
-                           (eval sym))
+                           (rt/eval-in-ns ns ((:prelim data) sym))
+                           (rt/eval-in-ns ns sym))
                :setup    (if (:setup data)
-                           (eval ((:setup data) sym))
-                           (eval sym))
+                           (rt/eval-in-ns ns ((:setup data) sym))
+                           (rt/eval-in-ns ns sym))
                :teardown (if (:teardown data)
-                           (eval ((:teardown data) sym))
-                           (eval sym))
+                           (rt/eval-in-ns ns ((:teardown data) sym))
+                           (rt/eval-in-ns ns sym))
                :init     (do (fact:global-fn sym :create)
                              (fact:global-fn sym :setup))))
 
@@ -72,13 +72,13 @@
                                          (fn [m]
                                            (collection/dissoc-nested m (first args))))
              :prelim   (if context/*eval-mode*
-                         (eval (collection/seqify (rt/get-global ns :prelim))))
+                         (rt/eval-in-ns ns (collection/seqify (rt/get-global ns :prelim))))
              :setup    (if context/*eval-mode*
-                         (eval (collection/seqify (rt/get-global ns :setup))))
+                         (rt/eval-in-ns ns (collection/seqify (rt/get-global ns :setup))))
              :teardown (if context/*eval-mode*
-                         (eval (collection/seqify (rt/get-global ns :teardown))))
+                         (rt/eval-in-ns ns (collection/seqify (rt/get-global ns :teardown))))
              :list     (keys (rt/get-global ns :component))
-             (eval (collection/seqify (rt/get-global ns cmd))))))))
+             (rt/eval-in-ns ns (collection/seqify (rt/get-global ns cmd))))))))
 
 (defmacro fact:global
   "fact global getter and setter
