@@ -3,6 +3,7 @@
             [std.lib.foundation :as f]
             [std.lib.function :as fn]
             [std.lib.result :as res]
+            [std.lib.impl :as impl]
             [std.task.bulk :as bulk]))
 
 (def ^:dynamic *interrupt* false)
@@ -67,7 +68,8 @@
   "selects inputs based on matches"
   {:added "4.0"}
   ([task lookup env selector]
-   (let [list-fn    (or (-> task :item :list)
+   (let [task       (impl/dimpl-wrapper-object task)
+         list-fn    (or (-> task :item :list)
                         (throw (ex-info "No `:list` function defined" {:key [:item :list]})))]
      (cond (= selector :all)
            (list-fn lookup env)
@@ -84,16 +86,17 @@
    => 3"
   {:added "3.0"}
   ([f task]
-   (fn [input params lookup env & args]
-     (let [pre-fn    (or (-> task :item :pre) identity)
-           post-fn   (or (-> task :item :post) identity)
-           output-fn (or (-> task :item :output) identity)
-           input  (pre-fn input)
-           result (apply f input params lookup env args)
-           result (post-fn result)]
-       (if (:bulk params)
-         [input (res/->result input result)]
-         (output-fn result))))))
+   (let [task (impl/dimpl-wrapper-object task)]
+     (fn [input params lookup env & args]
+       (let [pre-fn    (or (-> task :item :pre) identity)
+             post-fn   (or (-> task :item :post) identity)
+             output-fn (or (-> task :item :output) identity)
+             input  (pre-fn input)
+             result (apply f input params lookup env args)
+             result (post-fn result)]
+         (if (:bulk params)
+           [input (res/->result input result)]
+           (output-fn result)))))))
 
 (defn wrap-input
   "enables execution of task with single or multiple inputs
@@ -109,40 +112,45 @@
      (get res 4) => 7)"
   {:added "3.0"}
   ([f task]
-   (fn [input params lookup env & args]
-     (cond (= :list input)
-           (let [list-fn  (or (-> task :item :list)
-                              (throw (ex-info "No `:list` function defined" {:key [:item :list]})))]
-             (list-fn lookup env))
+   (let [task (impl/dimpl-wrapper-object task)]
+     (fn [input params lookup env & args]
+       (cond (= :list input)
+             (let [list-fn  (or (-> task :item :list)
+                                (throw (ex-info "No `:list` function defined" {:key [:item :list]})))]
+               (list-fn lookup env))
 
-           (or (keyword? input)
-               (vector? input)
-               (set? input)
-               (collection/form? input))
-           (let [inputs (select-inputs task lookup env input)]
-             (apply bulk/bulk task f inputs params lookup env args))
+             (or (keyword? input)
+                 (vector? input)
+                 (set? input)
+                 (collection/form? input))
+             (let [inputs (select-inputs task lookup env input)]
+               (apply bulk/bulk task f inputs params lookup env args))
 
-           :else
-           (apply f input params lookup env args)))))
+             :else
+             (apply f input params lookup env args))))))
 
 (defn task-inputs
   "constructs inputs to the task given a set of parameters"
   {:added "4.0"}
   ([task]
-   (let [input-fn (or (-> task :construct :input) (constantly nil))]
+   (let [task     (impl/dimpl-wrapper-object task)
+         input-fn (or (-> task :construct :input) (constantly nil))]
      (task-inputs task (input-fn task) task)))
   ([task input]
-   (let [input-fn (or (-> task :construct :input) (constantly nil))
+   (let [task     (impl/dimpl-wrapper-object task)
+         input-fn (or (-> task :construct :input) (constantly nil))
          [input params] (cond (map? input)
                               [(input-fn task) input]
 
                               :else [input {}])]
      (task-inputs task input params)))
   ([task input params]
-   (let [env-fn (or (-> task :construct :env) (constantly {}))]
+   (let [task   (impl/dimpl-wrapper-object task)
+         env-fn (or (-> task :construct :env) (constantly {}))]
      (task-inputs task input params (env-fn (merge task params)))))
   ([task input params env]
-   (let [lookup-fn (or (-> task :construct :lookup) (constantly {}))]
+   (let [task      (impl/dimpl-wrapper-object task)
+         lookup-fn (or (-> task :construct :lookup) (constantly {}))]
      (task-inputs task input params (lookup-fn task (merge env params)) env)))
   ([task input params lookup env]
    [input params lookup env]))
@@ -151,10 +159,11 @@
   "executes the task, given functions and parameters"
   {:added "4.0"}
   ([task & args]
-   (let [idx (collection/index-at #{:args} args)
-         _    (if (and (neg? idx) (-> task :main :args?))
-                (throw (ex-info "Require `:args` keyword to specify additional arguments"
-                                {:input args})))
+   (let [task (impl/dimpl-wrapper-object task)
+         idx (collection/index-at #{:args} args)
+          _    (if (and (neg? idx) (-> task :main :args?))
+                 (throw (ex-info "Require `:args` keyword to specify additional arguments"
+                                 {:input args})))
          [task-args func-args] (if (neg? idx)
                                  [args []]
                                  [(take idx args) (drop (inc idx) args)])

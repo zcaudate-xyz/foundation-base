@@ -14,7 +14,7 @@
   ([_]
    {:main {:arglists '([] [entry])}}))
 
-(declare task-info task-status)
+(declare task-info task-status task:object)
 
 (defn- task-string
   ([task]
@@ -25,17 +25,40 @@
   :string task-string
   :final true)
 
+(defn task:object
+  "unwraps a metadata-backed task wrapper
+
+   Returns the original `Task` record when given a wrapped function,
+   otherwise returns the input unchanged."
+  {:added "4.1"}
+  ([task]
+   (impl/dimpl-wrapper-object task)))
+
+(defn task:wrap
+  "creates a babashka-friendly function wrapper for a task object
+
+   The wrapper stays callable as a plain function and keeps the original
+   `Task` class information in its metadata."
+  {:added "4.1"}
+  ([task]
+   (let [obj (task:object task)]
+     (impl/dimpl-fn-wrapper obj
+                            process/invoke
+                            {:std.task/type :task}))))
+
 (defn task-status
   "displays the task-status"
   {:added "3.0"}
-  ([^Task task]
-   (.type task)))
+  ([task]
+   (let [^Task obj (task:object task)]
+     (.type obj))))
 
 (defn task-info
   "displays the task-body"
   {:added "3.0"}
-  ([^Task task]
-   {:fn (symbol (.name task))}))
+  ([task]
+   (let [^Task obj (task:object task)]
+     {:fn (symbol (.name obj))})))
 
 (defn single-function-print
   "if not `:bulk`, then print function output"
@@ -70,7 +93,7 @@
   "check if object is a task"
   {:added "3.0"}
   ([x]
-   (instance? Task x)))
+   (instance? Task (task:object x))))
 
 (invoke/definvoke invoke-intern-task
   "creates a form defining a task"

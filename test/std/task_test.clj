@@ -63,6 +63,24 @@
       (task?))
   => true)
 
+^{:refer std.task/task:wrap :added "4.1"}
+(fact "creates a metadata-backed callable task wrapper"
+  ^:hidden
+
+  (let [t (task :default "inc" {:main {:fn inc
+                                       :argcount 1}})
+        wrapped (task:wrap t)]
+    [(task? wrapped)
+     (task-status wrapped)
+     (task-info wrapped)
+     (wrapped 1)
+     (-> wrapped meta :std.lib.impl/class-name)])
+  => [true
+      :default
+      '{:fn inc}
+      2
+      'std.task.Task])
+
 ^{:refer std.task/invoke-intern-task :added "3.0"}
 (fact "creates a form defining a task"
   ^:hidden

@@ -1,6 +1,7 @@
 (ns std.task.bulk
   (:require [std.lib.collection :as collection]
             [std.lib.env :as env]
+            [std.lib.impl :as impl]
             [std.lib.result :as res]
             [std.lib.time :as time]
             [std.print :as print]))
@@ -80,29 +81,30 @@
   "processes each item given a input"
   {:added "3.0"}
   ([task f inputs {:keys [print parallel random] :as params} lookup env args]
-   (when (:item print)
-     (print/print "\n")
-     (print/print-subtitle (format "ITEMS (%s)" (count inputs))))
-   (cond (empty? inputs) []
+   (let [task (impl/dimpl-wrapper-object task)]
+     (when (:item print)
+       (print/print "\n")
+       (print/print-subtitle (format "ITEMS (%s)" (count inputs))))
+     (cond (empty? inputs) []
 
-         :else
-         (let [inputs     (if random (shuffle inputs) inputs)
-               total      (count inputs)
-               index-len  (let [digits (if (pos? total)
-                                         (inc (long (Math/log10 total)))
-                                         1)]
-                            (+ 2 (* 2 digits)))
-               input-len  (->> inputs (map (comp count str)) (apply max) (+ 2))
-               display-fn (or (-> task :item :display) identity)
-               display    (bulk-display index-len input-len)
-               context    {:total  total
-                           :idxs   (range total)
-                           :display display
-                           :display-fn display-fn}]
-           (if (:item print) (print/print "\n"))
-           (if parallel
-             (bulk-items-parallel f inputs context params lookup env args)
-             (bulk-items-single f inputs context params lookup env args))))))
+           :else
+           (let [inputs     (if random (shuffle inputs) inputs)
+                 total      (count inputs)
+                 index-len  (let [digits (if (pos? total)
+                                           (inc (long (Math/log10 total)))
+                                           1)]
+                              (+ 2 (* 2 digits)))
+                 input-len  (->> inputs (map (comp count str)) (apply max) (+ 2))
+                 display-fn (or (-> task :item :display) identity)
+                 display    (bulk-display index-len input-len)
+                 context    {:total  total
+                             :idxs   (range total)
+                             :display display
+                             :display-fn display-fn}]
+             (if (:item print) (print/print "\n"))
+             (if parallel
+               (bulk-items-parallel f inputs context params lookup env args)
+               (bulk-items-single f inputs context params lookup env args)))))))
 
 (defn bulk-warnings
   "outputs warnings that have been processed"
@@ -155,7 +157,8 @@
   "outputs results that have been processed"
   {:added "3.0"}
   ([task {:keys [print order-by] :as params} items]
-   (let [ignore-fn (-> task :result :ignore)
+   (let [task      (impl/dimpl-wrapper-object task)
+         ignore-fn (-> task :result :ignore)
 
          remove-fn (fn [[key {:keys [data status] :as result}]]
                      (or (#{:error :warn :info :critical} status)
@@ -202,8 +205,9 @@
   "outputs summary of processed results"
   {:added "3.0"}
   ([task {:keys [print] :as params} items results warnings errors elapsed]
-   (let [aggregate-fns (-> task :summary :aggregate)
-         finalise-fn   (-> task :summary :finalise)
+   (let [task          (impl/dimpl-wrapper-object task)
+         aggregate-fns (-> task :summary :aggregate)
+          finalise-fn   (-> task :summary :finalise)
          cumulative    (apply + (map (comp :time second) items))
          summary (merge {:errors    (count errors)
                          :warnings  (count warnings)
@@ -239,45 +243,47 @@
   "packages results for return"
   {:added "3.0"}
   ([task {:keys [items warnings errors results summary] :as bundle} return package]
-   (cond (= return :all)
-         (bulk-package task bundle #{:items :warnings :errors :results :summary} package)
+   (let [task (impl/dimpl-wrapper-object task)]
+     (cond (= return :all)
+           (bulk-package task bundle #{:items :warnings :errors :results :summary} package)
 
-         (keyword? return)
-         (first (vals (bulk-package task bundle #{return} package)))
+           (keyword? return)
+           (first (vals (bulk-package task bundle #{return} package)))
 
-         :else
-         (let [items-fn    (or (-> task :item :output) identity)
-               results-fn  (or (-> task :result :output) identity)]
-           (reduce (fn [out kw]
-                     (cond (#{:summary :warnings :errors} kw)
-                           (assoc out kw (get bundle kw))
+           :else
+           (let [items-fn    (or (-> task :item :output) identity)
+                 results-fn  (or (-> task :result :output) identity)]
+             (reduce (fn [out kw]
+                       (cond (#{:summary :warnings :errors} kw)
+                             (assoc out kw (get bundle kw))
 
-                           (= :items kw)
-                           (cond->> (get bundle kw)
-                             :then (map (fn [[key v]] [key (items-fn (:data v))]))
-                             (not= package :vector) (into {})
-                             :then (assoc out :items))
+                             (= :items kw)
+                             (cond->> (get bundle kw)
+                               :then (map (fn [[key v]] [key (items-fn (:data v))]))
+                               (not= package :vector) (into {})
+                               :then (assoc out :items))
 
-                           (= :results kw)
-                           (cond->> (get bundle kw)
-                             :then (map (fn [v] [(:key v) (results-fn (:data v))]))
-                             (not= package :vector) (into {})
-                             :then (assoc out :results))
+                             (= :results kw)
+                             (cond->> (get bundle kw)
+                               :then (map (fn [v] [(:key v) (results-fn (:data v))]))
+                               (not= package :vector) (into {})
+                               :then (assoc out :results))
 
-                           :else out))
-                   {}
-                   return)))))
+                             :else out))
+                     {}
+                     return))))))
 
 (defn bulk
   "process and output results for a group of inputs"
   {:added "3.0"}
-  ([task f inputs {:keys [print package title return] :as params} lookup env & args]
-   (let [params   (assoc params :bulk true)
-         _          (when (and (or (:function print) (:item print) (:result print) (:summary print))
-                               title)
-                      (print/print-title (if (fn? title)
-                                           (title params env)
-                                           title)))
+   ([task f inputs {:keys [print package title return] :as params} lookup env & args]
+   (let [task     (impl/dimpl-wrapper-object task)
+         params   (assoc params :bulk true)
+         _        (when (and (or (:function print) (:item print) (:result print) (:summary print))
+                             title)
+                    (print/print-title (if (fn? title)
+                                         (title params env)
+                                         title)))
          start     (time/time-ms)
          items     (bulk-items task f inputs params lookup env args)
          elapsed   (time/elapsed-ms start)
