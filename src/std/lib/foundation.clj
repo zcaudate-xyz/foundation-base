@@ -286,16 +286,26 @@
   ([]
    (str (Flake/flake))))
 
+(defprotocol IFnLike
+  "Protocol for callable objects, babashka-compatible alternative to clojure.lang.IFn.
+   Allows deftype/defrecord instances to be invoked via the `invoke` function in babashka."
+  (-apply-fn [this args]
+    "Applies the object as a function with the given sequence of args"))
+
 (defn invoke
-  "provides a caller for the `IFn`
+  "provides a caller for the `IFn`/`IFnLike`
  
    (invoke (fn [] (+ 1 2 3)))
    => 6"
   {:added "3.0"}
-  ([^clojure.lang.IFn f]
-   (.invoke f))
-  ([^clojure.lang.IFn f & args]
-   (.applyTo f args)))
+  ([f]
+   (if (satisfies? IFnLike f)
+     (-apply-fn f [])
+     (f)))
+  ([f & args]
+   (if (satisfies? IFnLike f)
+     (-apply-fn f args)
+     (apply f args))))
 
 (defn call
   "like `invoke` but reverses the function and first argument
@@ -601,14 +611,21 @@
   ([obj]
    (instance? clojure.lang.IRef obj)))
 
+(defprotocol IDerefLike
+  "Protocol for dereferenceable objects, babashka-compatible alternative to clojure.lang.IDeref.
+   Allows deftype/defrecord instances to be dereferenced via `ideref?` and `-deref-val` in babashka."
+  (-deref-val [this]
+    "Returns the dereferenced value"))
+
 (defn ideref?
-  "checks if 
- 
+  "checks if object is dereferenceable
+
    (ideref? (volatile! 0)) => true
    (ideref? (promise)) => true"
   {:added "3.0"}
   ([obj]
-   (instance? clojure.lang.IDeref obj)))
+   (or (instance? clojure.lang.IDeref obj)
+       (satisfies? IDerefLike obj))))
 
 (defn thread?
   "Returns `true` is `x` is a thread
@@ -884,7 +901,7 @@
     vars))
 
 (deftype Wrapped [val show type display]
-  java.lang.Object
+  Object
   (toString [_]
     (cond display
           (display val)
@@ -896,7 +913,10 @@
                ((or show identity) (str val)))))
   
   clojure.lang.IDeref
-  (deref [_] val))
+  (deref [_] val)
+
+  IDerefLike
+  (-deref-val [_] val))
 
 (defmethod print-method Wrapped
   [v ^java.io.Writer w]

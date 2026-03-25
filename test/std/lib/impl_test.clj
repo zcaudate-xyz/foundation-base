@@ -198,9 +198,19 @@
   => '(invoke [obj a0 a1] (invoke obj a0 a1)))
 
 ^{:refer std.lib.impl/dimpl-fn-forms :added "3.0"}
-(fact "creates the `IFn` forms"
+(fact "creates the `IFn` and `IFnLike` forms for babashka compatibility"
   (dimpl-fn-forms 'invoke)
-  => (contains '[clojure.lang.IFn]))
+  => (contains '[clojure.lang.IFn std.lib.foundation/IFnLike]))
+
+^{:refer std.lib.impl/dimpl-dereflike-forms :added "3.0"}
+(fact "creates the `IDerefLike` protocol forms for babashka compatibility"
+  (dimpl-dereflike-forms [{:interface 'clojure.lang.IFn
+                            :method {'invoke {'[obj] 'some-fn}}}])
+  => nil
+
+  (dimpl-dereflike-forms [{:interface 'clojure.lang.IDeref
+                            :method {'deref {'[ptr] 'pointer-deref}}}])
+  => (contains '[std.lib.foundation/IDerefLike]))
 
 ^{:refer std.lib.impl/dimpl-form :added "3.0"}
 (fact "helper for `defimpl`"

@@ -88,7 +88,10 @@
   :final true
 
   IDeref
-  (deref [link] (bind-resolve link)))
+  (deref [link] (bind-resolve link))
+
+  f/IDerefLike
+  (-deref-val [link] (bind-resolve link)))
 
 (defn ^Link link:create
   "creates a link"

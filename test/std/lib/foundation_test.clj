@@ -187,8 +187,17 @@
   ;; "4Wv-T47LftnVlHhhh00JYuU15NCuNLcr"
   => string?)
 
+^{:refer std.lib.foundation/IFnLike :added "3.0"}
+(fact "Protocol for callable objects, babashka-compatible alternative to clojure.lang.IFn"
+  (defrecord TestCallable [f]
+    IFnLike
+    (-apply-fn [_ args] (apply f args)))
+
+  (invoke (->TestCallable +) 1 2 3)
+  => 6)
+
 ^{:refer std.lib.foundation/invoke :added "3.0"}
-(fact "provides a caller for the `IFn`"
+(fact "provides a caller for the `IFn`/`IFnLike`"
 
   (invoke (fn [] (+ 1 2 3)))
   => 6)
@@ -387,8 +396,20 @@
   (iref? (promise)) => false
   (iref? (clojure.core/future))  => false)
 
+^{:refer std.lib.foundation/IDerefLike :added "3.0"}
+(fact "Protocol for dereferenceable objects, babashka-compatible alternative to clojure.lang.IDeref"
+  (defrecord TestDeref [v]
+    IDerefLike
+    (-deref-val [_] v))
+
+  (ideref? (->TestDeref 42))
+  => true
+
+  (-deref-val (->TestDeref 42))
+  => 42)
+
 ^{:refer std.lib.foundation/ideref? :added "3.0"}
-(fact "checks if "
+(fact "checks if object is dereferenceable"
 
   (ideref? (volatile! 0)) => true
   (ideref? (promise)) => true)

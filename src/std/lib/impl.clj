@@ -292,15 +292,34 @@
      `(~'invoke [~'obj ~@args] (~method ~'obj ~@args)))))
 
 (defn dimpl-fn-forms
-  "creates the `IFn` forms"
+  "creates the `IFn` and `IFnLike` forms for babashka compatibility"
   {:added "3.0"}
   ([invoke]
    (let [[invoke num] (c/seqify invoke)
-         num (or num +dimpl-fn-args+)]
-     `[clojure.lang.IFn
-       ~@(map (fn [n] (dimpl-fn-invoke invoke n)) (range num))
-       (~'applyTo ~'[obj args]
-                  (~'apply ~invoke ~'obj ~'args))])))
+         num (or num +dimpl-fn-args+)
+         bb? (System/getProperty "babashka.version")
+         ifn-forms (when-not bb?
+                     `[clojure.lang.IFn
+                       ~@(map (fn [n] (dimpl-fn-invoke invoke n)) (range num))
+                       (~'applyTo ~'[obj args]
+                                  (~'apply ~invoke ~'obj ~'args))])]
+     `[~@ifn-forms
+       std.lib.foundation/IFnLike
+       (~'-apply-fn [~'obj ~'args]
+                    (~'apply ~invoke ~'obj ~'args))])))
+
+(defn dimpl-dereflike-forms
+  "creates the `IDerefLike` protocol forms when `clojure.lang.IDeref` is in interfaces,
+   providing babashka-compatible deref support"
+  {:added "3.0"}
+  ([interfaces]
+   (when-let [ideref (first (filter #(= 'clojure.lang.IDeref (:interface %)) interfaces))]
+     (let [method-map (:method ideref)
+           deref-entry (get method-map 'deref)
+           [[arg] deref-fn] (first deref-entry)]
+       (when (and arg deref-fn)
+         [`std.lib.foundation/IDerefLike
+          (list '-deref-val [arg] (list deref-fn arg))])))))
 
 (defn dimpl-form
   "helper for `defimpl`"
@@ -320,12 +339,14 @@
                                                        :suffix suffix
                                                        :fns fns})
          interfaces-forms (mapcat dimpl-template-interface interfaces)
-         invoke-forms  (if invoke (dimpl-fn-forms invoke))]
+         invoke-forms  (if invoke (dimpl-fn-forms invoke))
+         dereflike-forms (dimpl-dereflike-forms interfaces)]
      (if-not (and final
                   (resolve sym))
        `[(~type ~sym ~bindings ~@(concat protocol-forms
                                          (keep identity interfaces-forms)
                                          invoke-forms
+                                         dereflike-forms
                                          body))
          ~@(if string
              [(dimpl-print-method sym)]

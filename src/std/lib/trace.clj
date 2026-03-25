@@ -7,12 +7,15 @@
             [std.string.prose :as prose]))
 
 (deftype Trace [type full history original]
-  java.lang.Object
+  Object
   (toString [_]
     (str "#trace " {:type type :history @history}))
   
   clojure.lang.IDeref
-  (deref [_] {:type type :history @history}))
+  (deref [_] {:type type :history @history})
+
+  h/IDerefLike
+  (-deref-val [_] {:type type :history @history}))
 
 (defmethod print-method Trace
   [v ^java.io.Writer w]

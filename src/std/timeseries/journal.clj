@@ -175,7 +175,10 @@
   :final   true
 
   clojure.lang.IDeref
-  (deref [journal] (:entries journal)))
+  (deref [journal] (:entries journal))
+
+  f/IDerefLike
+  (-deref-val [journal] (:entries journal)))
 
 (f/suppress
  (prefer-method clojure.pprint/simple-dispatch
