@@ -207,7 +207,7 @@
   ([task {:keys [print] :as params} items results warnings errors elapsed]
    (let [task          (impl/dimpl-wrapper-object task)
          aggregate-fns (-> task :summary :aggregate)
-          finalise-fn   (-> task :summary :finalise)
+         finalise-fn   (-> task :summary :finalise)
          cumulative    (apply + (map (comp :time second) items))
          summary (merge {:errors    (count errors)
                          :warnings  (count warnings)
@@ -276,7 +276,7 @@
 (defn bulk
   "process and output results for a group of inputs"
   {:added "3.0"}
-   ([task f inputs {:keys [print package title return] :as params} lookup env & args]
+  ([task f inputs {:keys [print package title return] :as params} lookup env & args]
    (let [task     (impl/dimpl-wrapper-object task)
          params   (assoc params :bulk true)
          _        (when (and (or (:function print) (:item print) (:result print) (:summary print))

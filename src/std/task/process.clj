@@ -161,9 +161,9 @@
   ([task & args]
    (let [task (impl/dimpl-wrapper-object task)
          idx (collection/index-at #{:args} args)
-          _    (if (and (neg? idx) (-> task :main :args?))
-                 (throw (ex-info "Require `:args` keyword to specify additional arguments"
-                                 {:input args})))
+         _    (if (and (neg? idx) (-> task :main :args?))
+                (throw (ex-info "Require `:args` keyword to specify additional arguments"
+                                {:input args})))
          [task-args func-args] (if (neg? idx)
                                  [args []]
                                  [(take idx args) (drop (inc idx) args)])
