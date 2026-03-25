@@ -1,83 +1,31 @@
-{:remove-surrounding-whitespace? true
- :remove-trailing-whitespace? true
- :remove-consecutive-blank-lines? false
- :insert-missing-whitespace? true
- :indent-line-comments? true
- :remove-multiple-non-indenting-spaces? false
- :extra-indents {;; std.lang macros (aliased as 'l' or full namespace)
-                 l/script [[:inner 0]]
-                 l/script- [[:inner 0]]
-                 l/script+ [[:inner 0]]
-                 std.lang/script [[:inner 0]]
-                 std.lang/script- [[:inner 0]]
-                 std.lang/script+ [[:inner 0]]
-                 xt.lang.base-notify/wait-on [[:inner 0]]
-                 notify/wait-on [[:inner 0]]
-                 script [[:inner 0]]
-                 script- [[:inner 0]]
-                 script+ [[:inner 0]]
-                 ;; testing
-                 fact [[:inner 0]]
-                 facts [[:inner 0]]
-                 future-fact [[:inner 0]]
-                 future-facts [[:inner 0]]
-                 tabular [[:inner 0]]
-                 ;; Common macros that should have 2-space body indent
-                 let [[:inner 0]]
-                 letfn [[:inner 0]]
-                 binding [[:inner 0]]
-                 loop [[:inner 0]]
-                 recur [[:inner 0]]
-                 doseq [[:inner 0]]
-                 dotimes [[:inner 0]]
-                 when [[:inner 0]]
-                 when-not [[:inner 0]]
-                 when-let [[:inner 0]]
-                 when-first [[:inner 0]]
-                 if-let [[:inner 0]]
-                 if-not [[:inner 0]]
-                 as-> [[:inner 0]]
-                 cond-> [[:inner 0]]
-                 cond->> [[:inner 0]]
-                 some-> [[:inner 0]]
-                 some->> [[:inner 0]]
-                 defprotocol [[:inner 0]]
-                 defrecord [[:inner 0]]
-                 deftype [[:inner 0]]
-                 defmulti [[:inner 0]]
-                 defmethod [[:inner 0]]
-                 extend-type [[:inner 0]]
-                 extend-protocol [[:inner 0]]
-                 reify [[:inner 0]]
-                 proxy [[:inner 0]]
-                 defn [[:inner 0]]
-                 defn- [[:inner 0]]
-                 fn [[:inner 0]]
-                 ns [[:inner 0]]
-                 ;; code.test specific
-                 deftest [[:inner 0]]
-                 testing [[:inner 0]]
-                 is [[:inner 0]]
-                 are [[:inner 0]]
-                 ;; compojure
-                 GET [[:inner 0]]
-                 POST [[:inner 0]]
-                 PUT [[:inner 0]]
-                 DELETE [[:inner 0]]
-                 PATCH [[:inner 0]]
-                 OPTIONS [[:inner 0]]
-                 HEAD [[:inner 0]]
-                 context [[:inner 0]]
-                 defroutes [[:inner 0]]
-                 ;; core.async
-                 go [[:inner 0]]
-                 go-loop [[:inner 0]]
-                 alt! [[:inner 0]]
-                 alt!! [[:inner 0]]
-                 thread [[:inner 0]]
-                 thread-call [[:inner 0]]
-                 ;; hiccup
-                 html [[:inner 0]]
-                 ;; midje
-                 against-background [[:inner 0]]
-                 provided [[:inner 0]]}}
+{:indents {;; Test macros
+           fact [[:block 1]]
+           facts [[:block 1]]
+           tabular [[:block 1]]
+
+           ;; Namespace-like macros (keyword as first arg, then map body)
+           ;; Treat like 'ns' - keyword on same line, map indented
+           std.lang/script [[:block 1]]
+           l/script [[:block 1]]
+           script [[:block 1]]
+
+           ;; Type definition macros (similar to defrecord)
+           ;; name, docstring, attr-map, fields, opts
+           deftype.pg [[:block 1]]
+           std.lang/deftype.pg [[:block 1]]
+
+           ;; Enum definition macros
+           defenum.pg [[:block 1]]
+           std.lang/defenum.pg [[:block 1]]
+
+           ;; Partition definition macros
+           defpartition.pg [[:block 1]]
+           std.lang/defpartition.pg [[:block 1]]
+
+           ;; Function definition macros (similar to defn)
+           ;; name, meta, args, body
+           defn.pg [[:block 2]]
+           std.lang/defn.pg [[:block 2]]
+
+           ;; DSL macros
+           my-dsl/foreign-key [[:block 2]]}}

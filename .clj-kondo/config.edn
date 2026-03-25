@@ -1,1 +1,20 @@
-{:ignore true}
+{:hooks
+ {:analyze-call
+  {std.lang/script hooks.script/script
+   std.lang/script- hooks.script/script
+   std.lang/script+ hooks.script/script
+   std.lang.base.script/script hooks.script/script
+   std.lang.base.script/script- hooks.script/script
+   std.lang.base.script/script+ hooks.script/script
+   defn.js hooks.defn-pg/defn-js
+   defvar.js hooks.defn-pg/defn-js
+   defn.pg hooks.defn-pg/defn-pg
+   defrun.pg hooks.defn-pg/defn-pg
+   deftype.pg hooks.deftype-pg/deftype-pg
+   std.lib/intern-in hooks.std-lib/intern-in-hook
+   std.lib/intern-all hooks.std-lib/intern-all-hook}}
+
+ :linters
+ {:unused-namespace {:exclude [std.lib]}
+  :unresolved-var {:exclude [l/script l/script- l/script+]}
+  :unresolved-symbol {:exclude [defn.pg defrun.pg deftype.pg]}}}

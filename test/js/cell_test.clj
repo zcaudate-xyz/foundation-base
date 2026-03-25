@@ -1,8 +1,8 @@
 (ns js.cell-test
+  (:use code.test)
   (:require [js.cell.playground :as playground]
             [std.lang :as l]
-            [xt.lang.base-notify :as notify])
-  (:use code.test))
+            [xt.lang.base-notify :as notify]))
 
 (l/script- :js
   {:runtime :basic
@@ -659,7 +659,8 @@
            (cl/GD-reset
             (cl/make-cell
              (fn []
-               (eval (@! (playground/play-worker true)))))))]}
+               (eval (@! (playground/play-worker true)))))))
+          (Thread/sleep 100)]}
 (fact "adds a raw callback (for all events)"
   ^:hidden
   
@@ -676,7 +677,7 @@
   => {"body" {"data" 123}, "status" "ok", "op" "stream", "topic" "hello"}
 
   (set (cl/list-raw-callbacks))
-  #{"@/raw" "@/TEST"}
+  => #{"@/raw" "@/TEST"}
 
   (cl/remove-raw-callback "@/TEST")
   => vector?)
