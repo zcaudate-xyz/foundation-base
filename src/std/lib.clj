@@ -153,6 +153,11 @@
              impl/defimpl
              impl/extend-impl
              impl/build-impl
+             impl/dimpl-wrapper-meta
+             impl/dimpl-wrapper-object
+             impl/dimpl-wrapper-class
+             impl/dimpl-wrapper
+             impl/dimpl-fn-wrapper
              impl/impl:proxy
              impl/impl:doto
              impl/impl:unwrap-sym
@@ -177,8 +182,10 @@
              memoize/memoize:enabled?
              memoize/memoize:info
              memoize/memoize:invoke
+             memoize/memoize:object
              memoize/memoize:remove
              memoize/memoize:status
+             memoize/memoize:wrap
 
              origin/defn.origin
              origin/get-origin

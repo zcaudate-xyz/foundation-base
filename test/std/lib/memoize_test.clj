@@ -92,6 +92,23 @@
   (memoize:invoke -plus- 1 2 3)
   => 6)
 
+^{:refer std.lib.memoize/memoize:wrap :added "4.1"}
+(fact "creates a metadata-backed callable wrapper"
+  (let [mem (memoize inc (atom {}) nil)
+        wrapped (memoize:wrap mem)]
+    [(wrapped 1)
+     (wrapped 1)
+     (memoize:status wrapped)
+     (memoize:info wrapped)
+     (-> wrapped meta :std.lib.impl/class)])
+  => [2
+      2
+      :enabled
+      (contains {:status :enabled
+                 :registered false
+                 :items 1})
+      'std.lib.memoize.Memoize])
+
 ^{:refer std.lib.memoize/memoize:remove :added "3.0"}
 (fact "removes a cached result"
 

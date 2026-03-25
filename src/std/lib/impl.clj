@@ -284,12 +284,63 @@
 
 (defonce +dimpl-fn-args+ 21)
 
+(defn dimpl-wrapper-meta
+  "creates metadata for a wrapper"
+  {:added "4.1"}
+  ([obj]
+   (dimpl-wrapper-meta obj nil))
+  ([obj metadata]
+   (merge {:std.lib.impl/type   :wrapper
+           :std.lib.impl/class  (symbol (.getName (class obj)))
+           :std.lib.impl/object obj}
+          metadata)))
+
+(defn dimpl-wrapper-object
+  "unwraps an object from wrapper metadata"
+  {:added "4.1"}
+  ([obj]
+   (or (-> obj meta :std.lib.impl/object)
+       obj)))
+
+(defn dimpl-wrapper-class
+  "returns the wrapped class from metadata"
+  {:added "4.1"}
+  ([obj]
+   (or (-> obj meta :std.lib.impl/class)
+       (symbol (.getName (class obj))))))
+
+(defn dimpl-wrapper
+  "attaches wrapper metadata to a function-like object"
+  {:added "4.1"}
+  ([obj wrapper]
+   (dimpl-wrapper obj wrapper nil))
+  ([obj wrapper metadata]
+   (with-meta wrapper (dimpl-wrapper-meta obj metadata))))
+
 (defn dimpl-fn-invoke
   "creates an invoke method"
   {:added "3.0"}
   ([method n]
    (let [args (map #(symbol (str "a" %)) (range n))]
-     `(~'invoke [~'obj ~@args] (~method ~'obj ~@args)))))
+      `(~'invoke [~'obj ~@args] (~method ~'obj ~@args)))))
+
+(defn dimpl-fn-wrapper
+  "creates a metadata-backed function wrapper
+
+   This is intended for environments such as babashka where custom
+   deftype/defrecord implementations cannot implement `clojure.lang.IFn`.
+   The returned function remains callable and carries the original class
+   information in metadata."
+  {:added "4.1"}
+  ([obj invoke]
+   (dimpl-fn-wrapper obj invoke nil))
+  ([obj invoke metadata]
+   (dimpl-wrapper obj
+                  (fn [& args]
+                    (apply invoke (dimpl-wrapper-object obj) args))
+                  (merge {:std.lib.impl/type   :fn-wrapper
+                          :std.lib.impl/invoke invoke}
+                         metadata))))
 
 (defn dimpl-fn-forms
   "creates the `IFn` forms"
