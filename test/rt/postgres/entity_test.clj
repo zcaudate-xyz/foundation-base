@@ -311,58 +311,152 @@
 
 
 ^{:refer rt.postgres.entity/parse-class :added "4.1"}
-(fact "TODO")
+(fact "parse-class splits class depth and role"
+  (et/parse-class :1d/base) => [1 :base]
+  (et/parse-class :2d/entry) => [2 :entry]
+  (et/parse-class :none) => [nil :none])
 
 ^{:refer rt.postgres.entity/basis-for :added "4.1"}
-(fact "TODO")
+(fact "basis-for maps class tuples to support sets"
+  (et/basis-for [1 :base] :minimal) => #{:table :id}
+  (et/basis-for [1 :entry] :expanded) => #{:table :context :link}
+  (et/basis-for [0 :entry] :expanded) => #{:table :context})
 
 ^{:refer rt.postgres.entity/local-support-columns :added "4.1"}
-(fact "TODO")
+(fact "local-support-columns selects the local columns needed for a relation"
+  (et/local-support-columns [1 :base] :minimal :addon) => [:class-table]
+  (et/local-support-columns [1 :entry] :expanded :addon) => [:class-table :class-link]
+  (et/local-support-columns [2 :base] :minimal :entity) => [:class-table :class-context])
 
 ^{:refer rt.postgres.entity/target-support-columns :added "4.1"}
-(fact "TODO")
+(fact "target-support-columns depend only on target depth"
+  (et/target-support-columns [0 :base]) => []
+  (et/target-support-columns [1 :base]) => [:class-table]
+  (et/target-support-columns [2 :base]) => [:class-table :class-context])
 
 ^{:refer rt.postgres.entity/project-support-columns :added "4.1"}
-(fact "TODO")
+(fact "project-support-columns zips local and remote support columns"
+  (et/project-support-columns :entity [1 :entry] :expanded [1 :base])
+  => {:class-table :class-table}
+  (et/project-support-columns :link [1 :entry] :minimal [1 :base])
+  => {:class-table :class-table})
 
 ^{:refer rt.postgres.entity/column->coord :added "4.1"}
-(fact "TODO")
+(fact "column->coord maps structural columns back to their coordinates"
+  (et/column->coord :class-table) => :table
+  (et/column->coord :class-context) => :context
+  (et/column->coord :unknown) => nil)
 
 ^{:refer rt.postgres.entity/required-basis-for-plan :added "4.1"}
-(fact "TODO")
+(fact "required-basis-for-plan extracts the required basis coordinates"
+  (et/required-basis-for-plan {:class-table {:foreign {:rev {:ns 'Rev}}}
+                               :class-context {:foreign {:rev {:ns 'Rev}}}
+                               :class-link {:foreign {:social {:ns 'Social}}}
+                               :class-ref {:foreign {:social {:ns 'Social}}}})
+  => #{:table :context :link :id})
 
 ^{:refer rt.postgres.entity/allowed-target? :added "4.1"}
-(fact "TODO")
+(fact "allowed-target? checks relation compatibility"
+  (et/allowed-target? :entity [1 :entry] [1 :base]) => true
+  (et/allowed-target? :addons [1 :base] [2 :entry]) => false)
 
 ^{:refer rt.postgres.entity/public-input->basis :added "4.1"}
-(fact "TODO")
+(fact "public-input->basis uses provided bases or derives the expanded set"
+  (et/public-input->basis {:basis #{:table :id}}) => #{:table :id}
+  (et/public-input->basis {:class :1d/base}) => #{:table :context :id})
 
 ^{:refer rt.postgres.entity/target-info :added "4.1"}
-(fact "TODO")
+(fact "target-info resolves input metadata from references"
+  (with-test-entity-v2
+    (et/target-info 'Rev)
+    => {:class :2d/base
+        :tuple [2 :base]
+        :basis #{:table :context :id}}))
 
 ^{:refer rt.postgres.entity/E-known-addon-keys :added "4.1"}
-(fact "TODO")
+(fact "E-known-addon-keys reads the registered application addon set"
+  (with-test-entity-v2
+    (et/E-known-addon-keys :app) => #{:rev :social :detail}))
 
 ^{:refer rt.postgres.entity/E-addon-bool-shorthand :added "4.1"}
-(fact "TODO")
+(fact "E-addon-bool-shorthand folds addon booleans into :addons"
+  (with-test-entity-v2
+    (et/E-addon-bool-shorthand {:application :app
+                                :rev true
+                                :social false
+                                :name "x"})
+    => {:application :app
+        :name "x"
+        :addons [:rev]}))
 
 ^{:refer rt.postgres.entity/basis-kind-for :added "4.1"}
-(fact "TODO")
+(fact "basis-kind-for distinguishes minimal and expanded bases"
+  (et/basis-kind-for {:class :1d/base
+                      :basis #{:table :id}}) => :minimal
+  (et/basis-kind-for {:class :1d/base
+                      :basis #{:table :context :id}}) => :expanded)
 
 ^{:refer rt.postgres.entity/plan-addon-relation :added "4.1"}
-(fact "TODO")
+(fact "plan-addon-relation projects addon refs onto support columns"
+  (with-test-entity-v2
+    (et/plan-addon-relation {:class :1d/entry
+                             :basis #{:table :context :id}}
+                            {:key :rev
+                             :field {:type :ref
+                                     :required true
+                                     :ref {:ns 'Rev}}})
+    => {:class-table {:foreign {:rev {:ns 'Rev
+                                      :column :class-context}}}
+        :class-link {:foreign {:rev {:ns 'Rev
+                                     :column :class-table}}}}))
 
 ^{:refer rt.postgres.entity/plan-entity-relation :added "4.1"}
-(fact "TODO")
+(fact "plan-entity-relation builds the base entity relation map"
+  (with-test-entity-v2
+    (et/plan-entity-relation {:class :1d/base
+                              :basis #{:table :context :id}
+                              :entity {:for 'Social}})
+    => {:class-table {:foreign {:social {:ns 'Social
+                                          :column :class-table}}}
+        :class-context {:foreign {:social {:ns 'Social
+                                            :column :class-context}}}
+        :social {:type :ref
+                 :required true
+                 :ref {:ns 'Social}
+                 :sql {:cascade true
+                       :unique ["social"]}}}))
 
 ^{:refer rt.postgres.entity/plan-link-relation :added "4.1"}
-(fact "TODO")
+(fact "plan-link-relation builds the link relation map"
+  (with-test-entity-v2
+    (et/plan-link-relation {:class :1d/entry
+                            :basis #{:table}
+                            :link {:for 'Social}})
+    => {:class-table {:foreign {:social {:ns 'Social
+                                          :column :class-table}}}
+        :social {:type :ref
+                 :required true
+                 :ref {:ns 'Social}
+                 :sql {:cascade true
+                       :unique ["social"]}}}))
 
 ^{:refer rt.postgres.entity/coordinate-column :added "4.1"}
-(fact "TODO")
+(fact "coordinate-column maps coordinates to generated columns"
+  (et/coordinate-column "schema" :table) => (ut/type-class "schema" 1)
+  (et/coordinate-column "schema" :id) => (ut/type-class-ref {:sql {:unique ["class"]}} 4))
 
 ^{:refer rt.postgres.entity/E-basis-compatible? :added "4.1"}
-(fact "TODO")
+(fact "E-basis-compatible? validates relation compatibility for a basis"
+  (with-test-entity-v2
+    (et/E-basis-compatible? {:class :1d/entry
+                             :basis #{:table}
+                             :entity {:for 'Social}}
+                            #{:table})
+    => true))
 
 ^{:refer rt.postgres.entity/E-resolve-basis :added "4.1"}
-(fact "TODO")
+(fact "E-resolve-basis picks the narrowest compatible basis"
+  (with-test-entity-v2
+    (et/E-resolve-basis {:class :1d/base}) => #{:table :id}
+    (et/E-resolve-basis {:class :1d/base
+                         :addons [:rev]}) => #{:table :context :id}))

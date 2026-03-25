@@ -1,11 +1,24 @@
 (ns rt.postgres.compile.json-openapi
   (:require [clojure.string :as str]
-            [rt.postgres.compile.common :as compile.common]
             [rt.postgres.grammar.typed-analyze :as analyze]
             [rt.postgres.grammar.typed-common :as types]
-            [rt.postgres.grammar.typed-shape :as shape]))
+            [rt.postgres.grammar.typed-infer :as typed-infer]
+            [rt.postgres.grammar.typed-shape :as shape]
+            [rt.postgres.compile.json-schema :as json-schema]))
 
 (declare shape->openapi)
+
+(defn- def-name
+  [x]
+  (some-> x :name name))
+
+(defn- unique-defs
+  [defs]
+  (->> defs
+       (group-by def-name)
+       vals
+       (map first)))
+
 
 (defn field->openapi
   "Converts a field descriptor to OpenAPI schema."
@@ -21,7 +34,7 @@
       (= :array t)
       {:type "array" :items (or (field->openapi (:items field-info)) {:type "object"})}
 
-      :else (compile.common/resolve-type field-info :openapi))))
+      :else (json-schema/resolve-type field-info :openapi))))
 
 (defn shape->openapi
   "Converts a JsonbShape to OpenAPI schema object."
@@ -47,20 +60,20 @@
     [param-name
      (cond
        (= :track arg-role)
-       (compile.common/resolve-type arg-type :openapi)
+       (json-schema/resolve-type arg-type :openapi)
 
        (and (= :jsonb arg-type)
             (types/fn-def? fn-def))
-       (let [base-shape (or (when-let [table-def (compile.common/resolve-table-def meta-table)]
-                              (compile.common/select-shape-columns
+       (let [base-shape (or (when-let [table-def (typed-infer/resolve-table-def meta-table)]
+                              (typed-infer/select-shape-columns
                                (shape/table->shape table-def)
                                meta-cols))
-                            (compile.common/infer-jsonb-arg-shape (:name arg) fn-def))]
+                            (typed-infer/infer-jsonb-arg-shape (:name arg) fn-def))]
          (if base-shape
            (shape->openapi base-shape)
-           (compile.common/resolve-type arg-type :openapi)))
+           (json-schema/resolve-type arg-type :openapi)))
 
-       :else (compile.common/resolve-type arg-type :openapi))]))
+       :else (json-schema/resolve-type arg-type :openapi))]))
 
 (defn fn->openapi
   "Converts a FnDef to OpenAPI operation."
@@ -162,13 +175,13 @@
         fns (->> all-vals
                  (filter types/fn-def?)
                  (filter fn-filter)
-                 (compile.common/unique-defs))
+                 (unique-defs))
         tables (->> all-vals
                     (filter types/table-def?)
-                    (compile.common/unique-defs))
+                    (unique-defs))
         enums (->> all-vals
                    (filter types/enum-def?)
-                   (compile.common/unique-defs))]
+                   (unique-defs))]
     {:openapi "3.0.3"
      :info {:title (str root-ns " API") :version "0.1.0"}
      :paths (into (sorted-map)
@@ -179,7 +192,7 @@
      :components
      {:schemas (into (sorted-map)
                       (concat
-                       (map (fn [t] [(compile.common/def-name t) (shape->openapi (shape/table->shape t))]) tables)
-                       (map (fn [e] [(compile.common/def-name e) {:type "string" :enum (mapv name (:values e))}]) enums)))}
+                       (map (fn [t] [(def-name t) (shape->openapi (shape/table->shape t))]) tables)
+                       (map (fn [e] [(def-name e) {:type "string" :enum (mapv name (:values e))}]) enums)))}
      :security [{"bearerAuth" []}]
      :securityDefinitions {"bearerAuth" {:type "http" :scheme "bearer" :bearerFormat "JWT"}}}))

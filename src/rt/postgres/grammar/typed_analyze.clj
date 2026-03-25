@@ -1,8 +1,9 @@
 (ns rt.postgres.grammar.typed-analyze
   (:require [clojure.string :as str]
             [clojure.walk :as walk]
-            [rt.postgres.compile.common :as compile.common]
             [rt.postgres.grammar.typed-common :as types]
+            [rt.postgres.grammar.typed-infer :as typed-infer]
+            [rt.postgres.grammar.typed-resolve :as typed-resolve]
             [rt.postgres.grammar.typed-jsonb :as typed-jsonb]
             [rt.postgres.grammar.typed-parse :as parse]
             [rt.postgres.grammar.typed-shape :as shape]
@@ -172,6 +173,21 @@
     (when (seq shapes)
       (reduce types/merge-shapes (types/empty-jsonb-shape) shapes))))
 
+(defn analyze-symbol-set
+  "Infers a keyed JSON object from a set of symbols.
+   Each symbol becomes a property key via the existing symbol-to-field rule."
+  [expr ctx]
+  (when (and (seq expr)
+             (every? symbol? expr))
+    (let [shapes (keep (fn [sym]
+                         (when-let [field-key (typed-jsonb/symbol->field-key sym)]
+                           (types/make-jsonb-shape
+                            {field-key (value->field-info (analyze-expr sym ctx))}
+                            nil :high false)))
+                       expr)]
+      (when (seq shapes)
+        (reduce types/merge-shapes (types/empty-jsonb-shape) shapes)))))
+
 (defn merge-array-element-types
   [left right]
   (cond
@@ -218,34 +234,14 @@
 
 (defn resolve-called-fn
   [op aliases]
-  (let [op-name (name op)
-        op-ns (namespace op)
-        resolved-op (if op-ns
-                      (let [alias-sym (symbol op-ns)]
-                        (if-let [full-ns (get aliases alias-sym)]
-                          (symbol (str full-ns) op-name)
-                          op))
-                      op)
-        fn-def (or (types/get-type resolved-op)
-                   (types/get-type op)
-                   (types/get-type (symbol op-name))
-                   (first (filter (fn [f]
-                                    (and (types/fn-def? f)
-                                         (= op-name (:name f))))
-                                  (vals @types/*type-registry*))))
-        fn-def (if (or fn-def (nil? (namespace resolved-op)))
-                 fn-def
-                 (do
-                   (try
-                     (-> resolved-op namespace symbol parse/analyze-namespace parse/register-types!)
-                     (catch Throwable _ nil))
-                   (or (types/get-type resolved-op)
-                       (types/get-type (symbol op-name))
-                       (first (filter (fn [f]
-                                        (and (types/fn-def? f)
-                                             (= op-name (:name f))))
-                                      (vals @types/*type-registry*))))))]
-    [resolved-op fn-def]))
+  (let [[resolved-op fn-def] (typed-resolve/resolve-called-fn op aliases)]
+    (if (or fn-def (nil? (namespace resolved-op)))
+      [resolved-op fn-def]
+      (do
+        (try
+          (-> resolved-op namespace symbol parse/analyze-namespace parse/register-types!)
+          (catch Throwable _ nil))
+        (typed-resolve/resolve-called-fn op aliases)))))
 
 (defn analyze-table-op [op-sym args ctx]
   (let [op-info (get +pg-operations+ op-sym)
@@ -372,13 +368,17 @@
                    expr)
              nil :high false)}
 
-    ;; Set literal used as merged JSONB/object return
+    ;; Set literal used as keyed JSONB/object return when all members are symbols.
     (set? expr)
-    (if-let [merged (merge-analyzed-shapes (map #(analyze-expr % ctx) expr))]
+    (if-let [keyed (analyze-symbol-set expr ctx)]
       {:kind :shaped
-       :shape merged
-       :op :set-merge}
-      {:kind :unknown :expr expr})
+       :shape keyed
+       :op :set-object}
+      (if-let [merged (merge-analyzed-shapes (map #(analyze-expr % ctx) expr))]
+        {:kind :shaped
+         :shape merged
+         :op :set-merge}
+        {:kind :unknown :expr expr}))
 
     ;; Symbol lookup
     (symbol? expr)
@@ -485,10 +485,10 @@
                            (keep (fn [arg]
                                    (when (and (= :jsonb (:type arg))
                                               (not= :track (:role arg)))
-                                     (when-let [arg-shape (compile.common/infer-jsonb-arg-access-shape
+                                     (when-let [arg-shape (typed-infer/infer-jsonb-arg-access-shape
                                                            (:name arg)
                                                            fn-def)]
-                                       [(:name arg) arg-shape]))))
+                                      [(:name arg) arg-shape]))))
                            (:inputs fn-def))
         input-paths (into {}
                           (keep (fn [arg]

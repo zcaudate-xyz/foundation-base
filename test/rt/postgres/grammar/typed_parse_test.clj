@@ -342,3 +342,17 @@
   ;; Passes through opts without link
   (parse/transform-col-opts {:type :ref :ref {:ns :test}})
   => {:type :ref :ref {:ns :test}})
+
+
+^{:refer rt.postgres.grammar.typed-parse/infer-fn-arg-role :added "4.1"}
+(fact "infer-fn-arg-role marks args used in :track positions"
+  (parse/infer-fn-arg-role
+   'o-op
+   '((pg/t:update -/Task {:set {:status o-op}
+                          :track o-op})))
+  => :track
+
+  (parse/infer-fn-arg-role
+   'x
+   '((return x)))
+  => :payload)

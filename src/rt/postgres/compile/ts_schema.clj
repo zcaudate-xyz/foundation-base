@@ -1,10 +1,18 @@
 (ns rt.postgres.compile.ts-schema
   (:require [clojure.string :as str]
-            [rt.postgres.compile.common :as compile.common]
             [rt.postgres.grammar.typed-common :as types]
-            [rt.postgres.grammar.typed-shape :as shape]))
+            [rt.postgres.grammar.typed-shape :as shape]
+            [rt.postgres.compile.json-schema :as json-schema]))
 
+(declare type->ts)
 (declare shape->ts-interface)
+
+(defn field->ts
+  "Converts a field to TypeScript property declaration."
+  [[k v]]
+  (let [ts-type (type->ts v)
+        optional (if (:nullable? v) "?" "")]
+    (str "  " (types/typescript-key k) optional ": " ts-type ";")))
 
 (defn type->ts
   "Converts a type descriptor to TypeScript type string."
@@ -23,14 +31,7 @@
       (:enum-ref field-info)
       (name (get-in field-info [:enum-ref :ns]))
 
-      :else (compile.common/resolve-type field-info :ts))))
-
-(defn field->ts
-  "Converts a field to TypeScript property declaration."
-  [[k v]]
-  (let [ts-type (type->ts v)
-        optional (if (:nullable? v) "?" "")]
-    (str "  " (types/typescript-key k) optional ": " ts-type ";")))
+      :else (json-schema/resolve-type field-info :ts))))
 
 (defn shape->ts-interface
   "Converts a JsonbShape to TypeScript interface or inline object."
@@ -48,17 +49,17 @@
 (defn generate-ts-schema
   "Generates TypeScript interfaces for all tables and enums."
   []
-  (let [all (compile.common/unique-defs (vals @types/*type-registry*))
+  (let [all (->> (vals @types/*type-registry*)
+                 (group-by (fn [x] (some-> x :name name)))
+                 vals
+                 (map first))
         tables (filter types/table-def? all)
         enums (filter types/enum-def? all)
         enum-types (map (fn [e]
-                          (str "export type " (compile.common/def-name e) " = "
+                          (str "export type " (some-> e :name name) " = "
                                (str/join " | " (sort (map #(str "\"" (name %) "\"") (:values e)))) ";"))
                         enums)
         table-interfaces (map (fn [t]
-                                (shape->ts-interface (shape/table->shape t) (compile.common/def-name t)))
+                                (shape->ts-interface (shape/table->shape t) (some-> t :name name)))
                               tables)]
     (str/join "\n\n" (concat enum-types table-interfaces))))
-
-;; Compatibility alias while older callers still use typescript naming.
-(def generate-typescript generate-ts-schema)

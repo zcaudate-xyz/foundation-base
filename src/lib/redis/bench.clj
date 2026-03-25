@@ -42,6 +42,10 @@
                          
                          (false? v)
                          "no"
+
+                         (and (string? v)
+                              (empty? v))
+                         "\"\""
                          
                          :else (str v)))))
        (clojure.string/join "\n")))
@@ -58,6 +62,8 @@
             (spit (str root-dir "/" redis-conf)
                   (str "port " port
                        "\nprotected-mode no"
+                       "\nsave \"\""
+                       "\nappendonly no"
                        (if (map? init)
                          (str "\n" (config-to-args init))))))]
     (-> (if (not (get @*active* port))
@@ -133,4 +139,3 @@
   (map (fn [port]
          (stop-redis-server port :array))
        ports))
-

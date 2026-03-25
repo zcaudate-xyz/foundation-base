@@ -50,3 +50,18 @@
 
   (let [field-info {:type :jsonb :shape (types/make-jsonb-shape {:id {:type :uuid}} :Test)}]
     (get-in (compile.json-schema/field->json-schema field-info) [:properties "id" :type]) => "string"))
+
+^{:refer rt.postgres.compile.json-schema/resolve-type :added "4.1"}
+(fact "resolve-type maps primitive, enum, and fallback schema types"
+  (let [uuid-ref (types/make-type-ref :primitive nil :uuid)]
+    (compile.json-schema/resolve-type uuid-ref :jschema)
+    => {:type "string" :format "uuid"})
+
+  (compile.json-schema/resolve-type
+   {:type :enum
+    :enum-ref {:ns 'Status}}
+   :jschema)
+  => {:$ref "#/definitions/Status"}
+
+  (compile.json-schema/resolve-type :unknown :jschema)
+  => {:type "string"})

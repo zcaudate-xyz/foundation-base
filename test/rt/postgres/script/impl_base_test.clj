@@ -385,4 +385,7 @@
 
 
 ^{:refer rt.postgres.script.impl-base/t-join-target-sym :added "4.1"}
-(fact "TODO")
+(fact "t-join-target-sym builds a namespaced symbol from link info"
+  (t-join-target-sym {:module 'scratch :id 'Task}) => 'scratch/Task
+  (t-join-target-sym {:ns 'scratch :id 'Task}) => 'scratch/Task
+  (t-join-target-sym {:module 'scratch}) => nil)

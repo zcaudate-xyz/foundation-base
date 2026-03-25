@@ -64,7 +64,3 @@
       "  RETURN fraction * subtotal;"
       "END;"
       "$$ LANGUAGE 'plpgsql';"))
-
-
-^{:refer rt.postgres.grammar.form-defn/pg-defnformat :added "4.1"}
-(fact "TODO")

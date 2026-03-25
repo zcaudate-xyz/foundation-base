@@ -202,4 +202,7 @@
 
 
 ^{:refer rt.postgres.script.graph-query/reverse-keys :added "4.1"}
-(fact "TODO")
+(fact "reverse-keys returns reverse relation keys"
+  (q/reverse-keys {:tasks [{:ref {:type :reverse}}]
+                   :id    [{:ref {:type :forward}}]})
+  => #{:tasks})

@@ -1,7 +1,7 @@
 (ns rt.postgres.grammar.typed-parse
   (:require [clojure.java.io :as io]
             [clojure.string :as str]
-            [rt.postgres.compile.common :as compile.common]
+            [rt.postgres.grammar.typed-infer :as typed-infer]
             [rt.postgres.grammar.typed-common :as types]))
 
 ;; ─────────────────────────────────────────────────────────────────────────────
@@ -150,7 +150,7 @@
 
 (defn infer-fn-arg-role
   [arg-name body]
-  (if (and body (compile.common/find-table-track-spec-in-body body arg-name))
+  (if (and body (typed-infer/find-table-track-spec-in-body body arg-name))
     :track
     :payload))
 

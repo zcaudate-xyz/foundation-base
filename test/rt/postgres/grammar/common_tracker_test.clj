@@ -40,4 +40,8 @@
 
 
 ^{:refer rt.postgres.grammar.common-tracker/tracker-string :added "4.1"}
-(fact "TODO")
+(fact "tracker-string formats tracker metadata"
+  (tracker/tracker-string {:name "Task"
+                           :in true
+                           :out true})
+  => "#pg.tracker [Task] {:in true, :out true}")

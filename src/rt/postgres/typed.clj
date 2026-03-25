@@ -1,12 +1,13 @@
 (ns rt.postgres.typed
   (:require [clojure.string :as str]
-            [rt.postgres.compile.common :as compile.common]
             [rt.postgres.compile.json-openapi :as compile.json-openapi]
             [rt.postgres.compile.json-schema :as compile.json-schema]
             [rt.postgres.compile.ts-schema :as compile.ts-schema]
             [rt.postgres.grammar.common-application :as app]
             [rt.postgres.grammar.typed-analyze :as analyze]
             [rt.postgres.grammar.typed-common :as types]
+            [rt.postgres.grammar.typed-infer :as typed-infer]
+            [rt.postgres.grammar.typed-resolve :as typed-resolve]
             [rt.postgres.grammar.typed-parse :as parse]
             [rt.postgres.grammar.typed-shape :as shape]))
 
@@ -132,60 +133,7 @@
 (defn fn-ref->fn-sym
   "Best-effort conversion of a function reference into a namespaced symbol."
   [fn-ref]
-  (letfn [(nsish->str [x]
-            (cond
-              (instance? clojure.lang.Namespace x) (str (ns-name x))
-              (symbol? x) (str x)
-              (string? x) x
-              :else nil))
-          (nameish->str [x]
-            (cond
-              (symbol? x) (name x)
-              (keyword? x) (name x)
-              (string? x) x
-              :else nil))]
-    (cond
-      (symbol? fn-ref)
-      (if (namespace fn-ref)
-        fn-ref
-        (symbol (str (ns-name *ns*)) (name fn-ref)))
-
-      (var? fn-ref)
-      (let [{:keys [ns name]} (meta fn-ref)]
-        (when (and ns name)
-          (symbol (str (ns-name ns)) (str name))))
-
-      ;; std.lang's `defn.pg` functions are often referenced by value in user ns,
-      ;; but those values are pointers (IDeref) rather than IFn/Var. Their deref
-      ;; value (BookEntry-ish) carries `:module`/`:id` we can use to resolve.
-      (instance? clojure.lang.IDeref fn-ref)
-      (let [d (try (deref fn-ref)
-                   (catch Throwable _ nil))
-            module-str (or (some-> (get d :module) nsish->str)
-                           (some-> (get d :namespace) nsish->str)
-                           (some-> (get d :ns) nsish->str))
-            id-val (or (get d :id)
-                       (get d :name))
-            id-str (nameish->str id-val)]
-        (cond
-          (and (symbol? id-val) (namespace id-val))
-          id-val
-
-          (and module-str id-str)
-          (symbol module-str id-str)
-
-          :else nil))
-
-      (instance? clojure.lang.IFn fn-ref)
-      (let [class-name (.getName (class fn-ref))
-            parts (str/split class-name #"\$")
-            ns-part (first parts)
-            fn-part (second parts)]
-        (when (and ns-part fn-part (not (str/blank? ns-part)) (not (str/blank? fn-part)))
-          (symbol (-> ns-part (str/replace "_" "-"))
-                  (-> fn-part (str/replace "_" "-")))))
-
-      :else nil)))
+  (typed-resolve/fn-ref->fn-sym fn-ref))
 
 (defn resolve-function-def
   "Resolves a FnDef from either a FnDef, a namespaced symbol, a Var, or a function value.
@@ -196,15 +144,15 @@
     (types/fn-def? fn-ref)
     (enrich-function-arg-roles fn-ref)
 
-    (types/fn-def? (get-function-def fn-ref))
-    (enrich-function-arg-roles (get-function-def fn-ref))
+    (types/fn-def? (typed-resolve/resolve-function-def fn-ref))
+    (enrich-function-arg-roles (typed-resolve/resolve-function-def fn-ref))
 
     :else
-    (when-let [fn-sym (fn-ref->fn-sym fn-ref)]
-      (or (some-> (get-function-def fn-sym)
+    (when-let [fn-sym (typed-resolve/fn-ref->fn-sym fn-ref)]
+      (or (some-> (typed-resolve/resolve-function-def fn-ref)
                   enrich-function-arg-roles)
           (do (analyze-and-register! (symbol (namespace fn-sym)))
-              (some-> (get-function-def fn-sym)
+              (some-> (typed-resolve/resolve-function-def fn-ref)
                       enrich-function-arg-roles))))))
 
 (defn get-app-function-def
@@ -235,7 +183,7 @@
   [fn-ref arg-sym]
   (let [fn-def (resolve-function-def fn-ref)]
     (when (and fn-def arg-sym)
-      (compile.common/infer-jsonb-arg-shape
+      (typed-infer/infer-jsonb-arg-shape
        arg-sym
        fn-def
        (some (fn [arg]
@@ -409,20 +357,11 @@
 
 (defn app-name-from-static
   [app]
-  (cond
-    (sequential? app) (first app)
-    app app
-    :else nil))
+  (typed-resolve/app-name-from-static app))
 
 (defn fn-ref->app-name
   [fn-ref fn-def]
-  (or (some-> (get-in fn-def [:body-meta :static/application])
-              app-name-from-static)
-      (when (instance? clojure.lang.IDeref fn-ref)
-        (let [d (try (deref fn-ref)
-                     (catch Throwable _ nil))]
-          (some-> (get d :static/application)
-                  app-name-from-static)))))
+  (typed-resolve/fn-ref->app-name fn-ref fn-def))
 
 (defn arg-type
   [arg]
@@ -450,7 +389,7 @@
                       params (nth form 2 nil)]
                   (cond
                     (and (map? params)
-                         (compile.common/form-uses-track-param? params tracked))
+                         (typed-infer/form-uses-track-param? params tracked))
                     true
 
                     (and (= 'let op)
@@ -462,7 +401,7 @@
                             (recur (next bindings)
                                    (cond-> tracked
                                      (and (symbol? binding)
-                                          (compile.common/form-uses-tracked? expr tracked))
+                                          (typed-infer/form-uses-tracked? expr tracked))
                                      (conj binding))))
                         (scan-forms (drop 2 form) tracked visited)))
 
@@ -513,13 +452,39 @@
   (or (= :jsonb (arg-type arg))
       (some #{:jsonb} (:modifiers arg))))
 
+(defn- resolve-type
+  [t target]
+  (let [base-type (cond
+                    (keyword? t) t
+                    (types/type-ref? t) (if (= :primitive (:kind t)) (:name t) (:kind t))
+                    (map? t) (let [inner-type (:type t)]
+                               (cond
+                                 (keyword? inner-type) inner-type
+                                 (types/type-ref? inner-type) (if (= :primitive (:kind inner-type))
+                                                                 (:name inner-type)
+                                                                 (:kind inner-type))
+                                 :else (or (:kind t) :unknown)))
+                    :else :unknown)]
+    (or (get-in types/+type-formats+ [base-type target])
+        (case base-type
+          :enum (if (and (map? t) (:enum-ref t))
+                  (case target
+                    :openapi {:$ref (str "#/components/schemas/" (name (get-in t [:enum-ref :ns])))}
+                    :jschema {:$ref (str "#/definitions/" (name (get-in t [:enum-ref :ns])))}
+                    :ts (name (get-in t [:enum-ref :ns])))
+                  (get-in types/+type-formats+ [:text target]))
+          (case target
+            :openapi {:type "string"}
+            :jschema {:type "string"}
+            :ts "string")))))
+
 (defn format-primitive
   [format t]
   (case format
     :shape {:type t}
-    :openapi (compile.common/resolve-type t :openapi)
-    :json-schema (compile.common/resolve-type t :jschema)
-    :typescript (compile.common/resolve-type t :ts)))
+    :openapi (resolve-type t :openapi)
+    :json-schema (resolve-type t :jschema)
+    :typescript (resolve-type t :ts)))
 
 (defn build-input-schemas
   [fn-def format]

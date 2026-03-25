@@ -86,6 +86,45 @@
                         :language {:type :text}}
                        "UserProfile")}))
 
+^{:refer rt.postgres.grammar.typed-analyze/analyze-expr :added "4.1"}
+(fact "analyze-expr turns all-symbol sets into keyed objects"
+  (let [u1-shape (types/make-jsonb-shape {:id {:type :uuid}} "User")
+        u2-shape (types/make-jsonb-shape {:name {:type :text}} "User")
+        ctx (types/make-context {'v-u1 :jsonb
+                                 'v-u2 :jsonb}
+                                {'v-u1 u1-shape
+                                 'v-u2 u2-shape}
+                                {})
+        result (analyze/analyze-expr '#{v-u1 v-u2} ctx)]
+    (:kind result) => :shaped
+    (:op result) => :set-object
+    (get-in result [:shape :fields :u1 :shape :fields :id :type]) => :uuid
+    (get-in result [:shape :fields :u2 :shape :fields :name :type]) => :text))
+
+^{:refer rt.postgres.grammar.typed-analyze/analyze-expr :added "4.1"}
+(fact "analyze-expr merges duplicate derived keys from symbol sets"
+  (let [u1-a-shape (types/make-jsonb-shape {:id {:type :uuid}} "User")
+        u1-b-shape (types/make-jsonb-shape {:name {:type :text}} "User")
+        ctx (types/make-context {'v-u1 :jsonb
+                                 'o-u1 :jsonb}
+                                {'v-u1 u1-a-shape
+                                 'o-u1 u1-b-shape}
+                                {})
+        result (analyze/analyze-expr '#{v-u1 o-u1} ctx)]
+    (get-in result [:shape :fields :u1 :shape :fields :id :type]) => :uuid
+    (get-in result [:shape :fields :u1 :shape :fields :name :type]) => :text))
+
+^{:refer rt.postgres.grammar.typed-analyze/analyze-expr :added "4.1"}
+(fact "analyze-expr keeps merge behavior for mixed sets"
+  (let [u1-shape (types/make-jsonb-shape {:id {:type :uuid}} "User")
+        ctx (types/make-context {'v-u1 :jsonb}
+                                {'v-u1 u1-shape}
+                                {})
+        result (analyze/analyze-expr '#{v-u1 {:extra "x"}} ctx)]
+    (:op result) => :set-merge
+    (get-in result [:shape :fields :extra :type]) => :text
+    (get-in result [:shape :fields :u1]) => nil))
+
 ^{:refer rt.postgres.grammar.typed-analyze/register-call-analyzer! :added "4.1"}
 (fact "call analyzers can specialize a resolved function call"
   (types/clear-registry!)
@@ -458,3 +497,34 @@
 
   ;; Nil
   (analyze/inferred->report nil) => nil)
+
+
+^{:refer rt.postgres.grammar.typed-analyze/projected-js-select-shape :added "4.1"}
+(fact "projected-js-select-shape projects fields from the analyzed source"
+  (let [shape (types/make-jsonb-shape
+               {:id {:type :uuid :nullable? false}
+                :name {:type :text :nullable? true}}
+               "User")
+        ctx (types/make-context {'m :jsonb}
+                                {'m shape}
+                                {'m (types/make-jsonb-path [] 'm)})]
+    (types/jsonb-shape? (analyze/projected-js-select-shape ctx 'm '(js ["id" "name"]))) => true
+    (get-in (analyze/projected-js-select-shape ctx 'm '(js ["id" "name"]))
+            [:fields :id :type]) => :uuid
+    (get-in (analyze/projected-js-select-shape ctx 'm '(js ["id" "name"]))
+            [:fields :name :type]) => :text))
+
+
+^{:refer rt.postgres.grammar.typed-analyze/analyze-symbol-set :added "4.1"}
+(fact "analyze-symbol-set turns all-symbol sets into keyed jsonb shapes"
+  (let [u1-shape (types/make-jsonb-shape {:id {:type :uuid}} "User")
+        u2-shape (types/make-jsonb-shape {:name {:type :text}} "User")
+        ctx (types/make-context {'v-u1 :jsonb
+                                 'o-u2 :jsonb}
+                                {'v-u1 u1-shape
+                                 'o-u2 u2-shape}
+                                {})
+        result (analyze/analyze-symbol-set '#{v-u1 o-u2} ctx)]
+    (types/jsonb-shape? result) => true
+    (get-in result [:fields :u1 :shape :fields :id :type]) => :uuid
+    (get-in result [:fields :u2 :shape :fields :name :type]) => :text))
