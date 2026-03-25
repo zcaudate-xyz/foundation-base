@@ -11,6 +11,16 @@
     (->Memoize + nil (atom {}) #'-mem- *registry* (volatile! true)))
   (resolve 'map->Memoize) => var?)
 
+^{:refer std.lib.memoize/memoize:unwrap :added "3.0"}
+(fact "returns the underlying `Memoize` instance from an `IFnWrapper` or a bare `Memoize`"
+
+  (def +-unwrap- (atom {}))
+  (declare -unwrap-)
+  (def -unwrap- (memoize inc +-unwrap- #'-unwrap-))
+
+  (instance? Memoize (memoize:unwrap -unwrap-)) => true
+  (instance? Memoize (memoize:unwrap (memoize:unwrap -unwrap-))) => true)
+
 ^{:refer std.lib.memoize/memoize :added "3.0"}
 (fact "caches the result of a function"
   (ns-unmap *ns* '+-inc-)
@@ -20,7 +30,10 @@
   (def -inc-  (memoize inc +-inc- #'-inc-))
 
   (-inc- 1) => 2
-  (-inc- 2) => 3)
+  (-inc- 2) => 3
+
+  ;; memoize now returns an IFnWrapper with class info in metadata
+  (-> -inc- meta :class) => Memoize)
 
 ^{:refer std.lib.memoize/register-memoize :added "3.0"}
 (fact "registers the memoize function"

@@ -157,6 +157,9 @@
              impl/impl:doto
              impl/impl:unwrap-sym
              impl/impl:wrap-sym
+             impl/ifn-wrap
+             impl/ifn-wrap?
+             impl/ifn-wrap:instance
 
              invoke/definvoke
              invoke/invoke:arglists

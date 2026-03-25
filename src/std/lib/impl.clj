@@ -358,6 +358,75 @@
   ([sym bindings & body]
    (dimpl-form sym bindings body)))
 
+;;
+;; IFnWrapper - babashka-compatible callable wrapper with class info in metadata
+;;
+
+(declare wrapper-invoke wrapper-string)
+
+(defimpl IFnWrapper [instance invoke-fn]
+  :string wrapper-string
+  :invoke wrapper-invoke
+
+  clojure.lang.IDeref
+  (deref [wrapper] (.instance wrapper))
+
+  h/IDerefLike
+  (-deref-val [wrapper] (.instance wrapper)))
+
+(defn wrapper-string
+  "creates the string representation for an IFnWrapper"
+  {:added "3.0"}
+  [wrapper]
+  (str "#wrapper[" (type (.instance wrapper)) "]"))
+
+(defn wrapper-invoke
+  "invokes the wrapped instance using its stored invoke function"
+  {:added "3.0"}
+  [wrapper & args]
+  (apply (.invoke-fn wrapper) (.instance wrapper) args))
+
+(defn ifn-wrap
+  "Wraps `instance` with `invoke-fn`, returning a callable with class info in metadata.
+
+   On JVM an `IFnWrapper` record is returned (implements IFn + IFnLike + IDeref).
+   In babashka a plain function with `{:instance instance}` metadata is returned,
+   since deftype+IFn is not supported there.
+
+   (def mem (atom {:n 0}))
+   (def counter (ifn-wrap mem #(swap! %1 update :n + %2)))
+   (counter 5)
+   (-> counter meta :class)
+   ;; => clojure.lang.Atom"
+  {:added "3.0"}
+  [instance invoke-fn]
+  (if (System/getProperty "babashka.version")
+    (with-meta (fn [& args] (apply invoke-fn instance args))
+               {:instance instance})
+    (-> (map->IFnWrapper {:instance instance :invoke-fn invoke-fn})
+        (with-meta {:class (type instance)}))))
+
+(defn ifn-wrap?
+  "checks if `obj` is the result of `ifn-wrap`
+
+   (ifn-wrap? (ifn-wrap (atom 0) swap!)) => true
+   (ifn-wrap? (fn [] :plain)) => false"
+  {:added "3.0"}
+  [obj]
+  (or (instance? IFnWrapper obj)
+      (and (fn? obj) (contains? (meta obj) :instance))))
+
+(defn ifn-wrap:instance
+  "returns the underlying instance from an `ifn-wrap` result
+
+   (ifn-wrap:instance (ifn-wrap {:a 1} identity))
+   => {:a 1}"
+  {:added "3.0"}
+  [wrapper]
+  (cond (instance? IFnWrapper wrapper) (.instance wrapper)
+        (fn? wrapper) (-> wrapper meta :instance)
+        :else wrapper))
+
 ;;;;
 ;;;;
 ;;;;

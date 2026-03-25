@@ -236,6 +236,57 @@
    '(defimpl Test []))
   => '[(defrecord Test [])])
 
+^{:refer std.lib.impl/IFnWrapper :added "3.0"}
+(fact "a callable wrapper that stores class info in metadata"
+  ^:hidden
+
+  (def +counter+ (atom {:n 0}))
+  (def counter-add (fn [st n] (swap! st update :n + n)))
+  (def counter (ifn-wrap +counter+ counter-add))
+
+  ;; callable as a function
+  (counter 5)
+  (counter 3)
+  (:n @+counter+) => 8
+
+  ;; class info accessible via metadata
+  (-> counter meta :class) => clojure.lang.Atom
+
+  ;; underlying instance accessible via deref
+  (= (deref counter) +counter+) => true
+
+  ;; ifn-wrap? check
+  (ifn-wrap? counter) => true
+  (ifn-wrap? (fn [] :plain)) => false
+
+  ;; underlying instance via ifn-wrap:instance
+  (ifn-wrap:instance counter) => +counter+)
+
+^{:refer std.lib.impl/ifn-wrap :added "3.0"}
+(fact "wraps an instance with an invoke function, callable with class info in metadata"
+
+  (def +w+ (atom 0))
+  (def w (ifn-wrap +w+ swap!))
+  (w inc)
+  @+w+ => 1
+  (-> w meta :class) => clojure.lang.Atom)
+
+^{:refer std.lib.impl/ifn-wrap? :added "3.0"}
+(fact "checks if an object is the result of ifn-wrap"
+
+  (ifn-wrap? (ifn-wrap {:a 1} identity)) => true
+  (ifn-wrap? (fn [] :plain)) => false
+  (ifn-wrap? {:a 1}) => false)
+
+^{:refer std.lib.impl/ifn-wrap:instance :added "3.0"}
+(fact "returns the underlying instance from an ifn-wrap result"
+
+  (ifn-wrap:instance (ifn-wrap {:a 1} identity))
+  => {:a 1}
+
+  (ifn-wrap:instance {:a 1})
+  => {:a 1})
+
 ^{:refer std.lib.impl/eimpl-template-fn :added "3.0"}
 (fact "creates forms compatible with `extend-type` and `extend-protocol`"
 

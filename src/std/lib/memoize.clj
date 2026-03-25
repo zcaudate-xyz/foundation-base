@@ -1,6 +1,6 @@
 (ns std.lib.memoize
   (:require [std.lib.function :as fn]
-            [std.lib.impl :refer [defimpl]]
+            [std.lib.impl :as impl :refer [defimpl]]
             [std.lib.invoke :as invoke :refer [definvoke]]
             [std.protocol.invoke :as protocol.invoke])
   (:refer-clojure :exclude [memoize]))
@@ -18,8 +18,17 @@
 
 (defimpl Memoize [function memfunction cache var registry status]
   :string memoize-string
-  :invoke memoize:invoke
   :final true)
+
+(defn memoize:unwrap
+  "returns the underlying `Memoize` instance from an `IFnWrapper` or a bare `Memoize`
+
+   (memoize:unwrap -inc-) => #(instance? Memoize %)"
+  {:added "3.0"}
+  [mem]
+  (if (impl/ifn-wrap? mem)
+    (impl/ifn-wrap:instance mem)
+    mem))
 
 (defn memoize
   "caches the result of a function
@@ -28,7 +37,7 @@
    (def +-inc- (atom {}))
    (declare -inc-)
    (def -inc-  (memoize inc +-inc- #'-inc-))
- 
+
    (-inc- 1) => 2
    (-inc- 2) => 3"
   {:added "3.0"}
@@ -41,29 +50,32 @@
                          (when-let [ret (apply function args)]
                            (swap! cache assoc args ret)
                            ret)))]
-     (Memoize. function memfunction cache var registry status))))
+     (-> (Memoize. function memfunction cache var registry status)
+         (impl/ifn-wrap memoize:invoke)))))
 
 (defn register-memoize
   "registers the memoize function
- 
+
    (register-memoize -inc-)"
   {:added "3.0"}
-  ([^Memoize mem]
-   (let [var (.var mem)
+  ([mem]
+   (let [^Memoize mem (memoize:unwrap mem)
+         v (.var mem)
          registry (.registry mem)]
-     (register-memoize mem var registry)))
+     (register-memoize mem v registry)))
   ([^Memoize mem var registry]
    (swap! registry assoc var mem)))
 
 (defn deregister-memoize
   "deregisters the memoize function
- 
+
    (deregister-memoize -inc-)"
   {:added "3.0"}
-  ([^Memoize mem]
-   (let [var (.var mem)
+  ([mem]
+   (let [^Memoize mem (memoize:unwrap mem)
+         v (.var mem)
          registry (.registry mem)]
-     (deregister-memoize mem var registry)))
+     (deregister-memoize mem v registry)))
   ([^Memoize mem var registry]
    (swap! registry dissoc var)))
 
@@ -87,27 +99,29 @@
 
 (defn registered-memoize?
   "checks if a memoize function is registered
- 
+
    (registered-memoize? -mem-)
    => false"
   {:added "3.0"}
-  ([^Memoize mem]
-   (let [var      (.var mem)
-         registry (.registry mem)]
-     (= mem (get @registry var)))))
+  ([mem]
+   (let [^Memoize inner (memoize:unwrap mem)
+         v (.var inner)
+         registry (.registry inner)]
+     (= inner (get @registry v)))))
 
 (defn memoize:status
   "returns the status of the object
- 
+
    (memoize:status -inc-)
    => :enabled"
   {:added "3.0"}
-  ([^Memoize mem]
-   @(.status mem)))
+  ([mem]
+   (let [^Memoize mem (memoize:unwrap mem)]
+     @(.status mem))))
 
 (defn memoize:info
   "formats the memoize object
- 
+
    (def +-plus- (atom {}))
    (declare -plus-)
    (def -plus- (memoize + +-plus- #'-plus-))
@@ -115,78 +129,86 @@
    => (contains {:status :enabled, :registered false, :items number?})
    ;; {:fn +, :cache #atom {(1 1) 2}}"
   {:added "3.0"}
-  ([^Memoize mem]
-   {:status (memoize:status mem)
-    :registered (registered-memoize? mem)
-    :items (count @(.cache mem))}))
+  ([mem]
+   (let [^Memoize mem (memoize:unwrap mem)]
+     {:status (memoize:status mem)
+      :registered (registered-memoize? mem)
+      :items (count @(.cache mem))})))
 
 (defn memoize:disable
   "disables the usage of the cache
- 
+
    (memoize:disable -inc-)
    => :disabled"
   {:added "3.0"}
-  ([^Memoize mem]
-   (vreset! (.status mem) :disabled)))
+  ([mem]
+   (let [^Memoize mem (memoize:unwrap mem)]
+     (vreset! (.status mem) :disabled))))
 
 (defn memoize:disabled?
   "checks if the memoized function is disabled
- 
+
    (memoize:disabled? -inc-)
    => true"
   {:added "3.0"}
-  ([^Memoize mem]
-   (= @(.status mem) :disabled)))
+  ([mem]
+   (let [^Memoize mem (memoize:unwrap mem)]
+     (= @(.status mem) :disabled))))
 
 (defn memoize:enable
   "enables the usage of the cache
- 
+
    (memoize:enable -inc-)
    => :enabled"
   {:added "3.0"}
-  ([^Memoize mem]
-   (vreset! (.status mem) :enabled)))
+  ([mem]
+   (let [^Memoize mem (memoize:unwrap mem)]
+     (vreset! (.status mem) :enabled))))
 
 (defn memoize:enabled?
   "checks if the memoized function is disabled
- 
+
    (memoize:enabled? -inc-)
    => true"
   {:added "3.0"}
-  ([^Memoize mem]
-   (= @(.status mem) :enabled)))
+  ([mem]
+   (let [^Memoize mem (memoize:unwrap mem)]
+     (= @(.status mem) :enabled))))
 
 (defn memoize:invoke
   "invokes the function with arguments
- 
+
    (memoize:invoke -plus- 1 2 3)
    => 6"
   {:added "3.0"}
-  ([^Memoize mem & args]
-   (if (memoize:enabled? mem)
-     (apply (.memfunction mem) args)
-     (apply (.function mem) args))))
+  ([mem & args]
+   (let [^Memoize mem (memoize:unwrap mem)]
+     (if (memoize:enabled? mem)
+       (apply (.memfunction mem) args)
+       (apply (.function mem) args)))))
 
 (defn memoize:remove
   "removes a cached result
- 
+
    (memoize:remove -inc- 1)
    => 2"
   {:added "3.0"}
-  ([^Memoize mem & args]
-   (let [cache (.cache mem)
+  ([mem & args]
+   (let [^Memoize mem (memoize:unwrap mem)
+         cache (.cache mem)
          v (get @cache args)]
      (swap! cache dissoc args)
      v)))
 
 (defn memoize:clear
   "clears all results
- 
+
    (memoize:clear -inc-)
    => '{(2) 3}"
   {:added "3.0"}
-  ([^Memoize mem]
-   (let [cache (.cache mem)
+  ([mem]
+   (let [^Memoize mem (memoize:unwrap mem)
+         cache (.cache mem)
          v @cache]
      (reset! cache {})
      v)))
