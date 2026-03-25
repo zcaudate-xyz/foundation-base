@@ -291,7 +291,8 @@
    (dimpl-wrapper-meta obj nil))
   ([obj metadata]
    (merge {:std.lib.impl/type   :wrapper
-           :std.lib.impl/class  (symbol (.getName (class obj)))
+           :std.lib.impl/class  (class obj)
+           :std.lib.impl/class-name (symbol (.getName (class obj)))
            :std.lib.impl/object obj}
           metadata)))
 
@@ -303,14 +304,18 @@
        obj)))
 
 (defn dimpl-wrapper-class
-  "returns the wrapped class from metadata"
+  "returns the class from wrapper metadata, or the object's class"
   {:added "4.1"}
   ([obj]
    (or (-> obj meta :std.lib.impl/class)
-       (symbol (.getName (class obj))))))
+       (class obj))))
 
 (defn dimpl-wrapper
-  "attaches wrapper metadata to a function-like object"
+  "attaches wrapper metadata to a function-like object
+
+   `obj` is the original object being represented.
+   `wrapper` is the callable function that should carry the metadata.
+   `metadata` extends the default wrapper metadata."
   {:added "4.1"}
   ([obj wrapper]
    (dimpl-wrapper obj wrapper nil))
@@ -322,7 +327,7 @@
   {:added "3.0"}
   ([method n]
    (let [args (map #(symbol (str "a" %)) (range n))]
-      `(~'invoke [~'obj ~@args] (~method ~'obj ~@args)))))
+     `(~'invoke [~'obj ~@args] (~method ~'obj ~@args)))))
 
 (defn dimpl-fn-wrapper
   "creates a metadata-backed function wrapper
@@ -337,7 +342,7 @@
   ([obj invoke metadata]
    (dimpl-wrapper obj
                   (fn [& args]
-                    (apply invoke (dimpl-wrapper-object obj) args))
+                    (apply invoke obj args))
                   (merge {:std.lib.impl/type   :fn-wrapper
                           :std.lib.impl/invoke invoke}
                          metadata))))

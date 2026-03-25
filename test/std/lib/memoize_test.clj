@@ -100,7 +100,7 @@
      (wrapped 1)
      (memoize:status wrapped)
      (memoize:info wrapped)
-     (-> wrapped meta :std.lib.impl/class)])
+     (-> wrapped meta :std.lib.impl/class-name)])
   => [2
       2
       :enabled

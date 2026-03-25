@@ -199,11 +199,15 @@
 
 ^{:refer std.lib.impl/dimpl-wrapper-meta :added "4.1"}
 (fact "creates metadata for a wrapper"
-  (dimpl-wrapper-meta {:hello "world"} {:tag :sample})
-  => (contains {:std.lib.impl/type :wrapper
-                :std.lib.impl/class symbol?
-                :std.lib.impl/object map?
-                :tag :sample}))
+  (let [m (dimpl-wrapper-meta {:hello "world"} {:tag :sample})]
+    [(:std.lib.impl/class m)
+     (:std.lib.impl/class-name m)
+     (:std.lib.impl/object m)
+     (:tag m)])
+  => [clojure.lang.PersistentArrayMap
+      'clojure.lang.PersistentArrayMap
+      {:hello "world"}
+      :sample])
 
 ^{:refer std.lib.impl/dimpl-wrapper-object :added "4.1"}
 (fact "unwraps an object from wrapper metadata"
@@ -215,9 +219,9 @@
 ^{:refer std.lib.impl/dimpl-wrapper-class :added "4.1"}
 (fact "returns the class from wrapper metadata"
   (let [wrapped (with-meta (fn [& _] :ok)
-                  {:std.lib.impl/class 'hello.Type})]
+                  {:std.lib.impl/class String})]
     (dimpl-wrapper-class wrapped))
-  => 'hello.Type)
+  => String)
 
 ^{:refer std.lib.impl/dimpl-fn-wrapper :added "4.1"}
 (fact "creates a metadata-backed callable wrapper"
@@ -226,7 +230,7 @@
                                     (+ (:value obj) n))
                                   {:example true})]
     [(wrapped 2)
-     (-> wrapped meta :std.lib.impl/class)
+     (-> wrapped meta :std.lib.impl/class-name)
      (-> wrapped meta :example)])
   => [3 'clojure.lang.PersistentArrayMap true])
 

@@ -24,7 +24,10 @@
   :final true)
 
 (defn memoize:object
-  "unwraps a metadata-backed memoize wrapper"
+  "unwraps a metadata-backed memoize wrapper
+
+   Returns the original `Memoize` record when given a wrapped function,
+   otherwise returns the input unchanged."
   {:added "4.1"}
   ([mem]
    (impl/dimpl-wrapper-object mem)))
@@ -60,12 +63,12 @@
    (let [mem (memoize inc (atom {}) nil)
          wrapped (memoize:wrap mem)]
      [(wrapped 1)
-      (-> wrapped meta :std.lib.impl/class)])
+      (-> wrapped meta :std.lib.impl/class-name)])
    => [2 'std.lib.memoize.Memoize]"
   {:added "4.1"}
   ([mem]
-   (let [mem (memoize:object mem)]
-     (impl/dimpl-fn-wrapper mem
+   (let [obj (memoize:object mem)]
+     (impl/dimpl-fn-wrapper obj
                             memoize:invoke
                             {:std.lib.memoize/type :memoize}))))
 
@@ -75,13 +78,13 @@
    (register-memoize -inc-)"
   {:added "3.0"}
   ([mem]
-   (let [^Memoize mem (memoize:object mem)]
-    (let [var (.var mem)
-          registry (.registry mem)]
-      (register-memoize mem var registry))))
+   (let [^Memoize obj (memoize:object mem)]
+     (let [var (.var obj)
+           registry (.registry obj)]
+       (register-memoize obj var registry))))
   ([mem var registry]
-   (let [^Memoize mem (memoize:object mem)]
-     (swap! registry assoc var mem))))
+   (let [^Memoize obj (memoize:object mem)]
+     (swap! registry assoc var obj))))
 
 (defn deregister-memoize
   "deregisters the memoize function
@@ -89,13 +92,12 @@
    (deregister-memoize -inc-)"
   {:added "3.0"}
   ([mem]
-   (let [^Memoize mem (memoize:object mem)]
-    (let [var (.var mem)
-          registry (.registry mem)]
-      (deregister-memoize mem var registry))))
+   (let [^Memoize obj (memoize:object mem)]
+     (let [var (.var obj)
+           registry (.registry obj)]
+       (deregister-memoize obj var registry))))
   ([mem var registry]
-   (let [^Memoize mem (memoize:object mem)]
-     (swap! registry dissoc var))))
+   (swap! registry dissoc var)))
 
 (defn registered-memoizes
   "lists all registered memoizes
@@ -122,10 +124,10 @@
     => false"
   {:added "3.0"}
   ([mem]
-   (let [^Memoize mem (memoize:object mem)]
-    (let [var      (.var mem)
-          registry (.registry mem)]
-      (= mem (get @registry var))))))
+   (let [^Memoize obj (memoize:object mem)]
+     (let [var      (.var obj)
+           registry (.registry obj)]
+       (= obj (get @registry var))))))
 
 (defn memoize:status
   "returns the status of the object
@@ -134,8 +136,8 @@
     => :enabled"
   {:added "3.0"}
   ([mem]
-   (let [^Memoize mem (memoize:object mem)]
-     @(.status mem))))
+   (let [^Memoize obj (memoize:object mem)]
+     @(.status obj))))
 
 (defn memoize:info
   "formats the memoize object
@@ -148,10 +150,10 @@
    ;; {:fn +, :cache #atom {(1 1) 2}}"
   {:added "3.0"}
   ([mem]
-   (let [^Memoize mem (memoize:object mem)]
-    {:status (memoize:status mem)
-     :registered (registered-memoize? mem)
-     :items (count @(.cache mem))})))
+   (let [^Memoize obj (memoize:object mem)]
+     {:status (memoize:status obj)
+      :registered (registered-memoize? obj)
+      :items (count @(.cache obj))})))
 
 (defn memoize:disable
   "disables the usage of the cache
@@ -160,8 +162,8 @@
     => :disabled"
   {:added "3.0"}
   ([mem]
-   (let [^Memoize mem (memoize:object mem)]
-     (vreset! (.status mem) :disabled))))
+   (let [^Memoize obj (memoize:object mem)]
+     (vreset! (.status obj) :disabled))))
 
 (defn memoize:disabled?
   "checks if the memoized function is disabled
@@ -170,8 +172,8 @@
     => true"
   {:added "3.0"}
   ([mem]
-   (let [^Memoize mem (memoize:object mem)]
-     (= @(.status mem) :disabled))))
+   (let [^Memoize obj (memoize:object mem)]
+     (= @(.status obj) :disabled))))
 
 (defn memoize:enable
   "enables the usage of the cache
@@ -180,8 +182,8 @@
     => :enabled"
   {:added "3.0"}
   ([mem]
-   (let [^Memoize mem (memoize:object mem)]
-     (vreset! (.status mem) :enabled))))
+   (let [^Memoize obj (memoize:object mem)]
+     (vreset! (.status obj) :enabled))))
 
 (defn memoize:enabled?
   "checks if the memoized function is disabled
@@ -190,8 +192,8 @@
     => true"
   {:added "3.0"}
   ([mem]
-   (let [^Memoize mem (memoize:object mem)]
-     (= @(.status mem) :enabled))))
+   (let [^Memoize obj (memoize:object mem)]
+     (= @(.status obj) :enabled))))
 
 (defn memoize:invoke
   "invokes the function with arguments
@@ -200,10 +202,10 @@
     => 6"
   {:added "3.0"}
   ([mem & args]
-   (let [^Memoize mem (memoize:object mem)]
-    (if (memoize:enabled? mem)
-      (apply (.memfunction mem) args)
-      (apply (.function mem) args)))))
+   (let [^Memoize obj (memoize:object mem)]
+     (if (memoize:enabled? obj)
+       (apply (.memfunction obj) args)
+       (apply (.function obj) args)))))
 
 (defn memoize:remove
   "removes a cached result
@@ -212,11 +214,11 @@
     => 2"
   {:added "3.0"}
   ([mem & args]
-   (let [^Memoize mem (memoize:object mem)]
-    (let [cache (.cache mem)
-          v (get @cache args)]
-      (swap! cache dissoc args)
-      v))))
+   (let [^Memoize obj (memoize:object mem)]
+     (let [cache (.cache obj)
+           v (get @cache args)]
+       (swap! cache dissoc args)
+       v))))
 
 (defn memoize:clear
   "clears all results
@@ -225,11 +227,11 @@
     => '{(2) 3}"
   {:added "3.0"}
   ([mem]
-   (let [^Memoize mem (memoize:object mem)]
-    (let [cache (.cache mem)
-          v @cache]
-      (reset! cache {})
-      v))))
+   (let [^Memoize obj (memoize:object mem)]
+     (let [cache (.cache obj)
+           v @cache]
+       (reset! cache {})
+       v))))
 
 (definvoke invoke-intern-memoize
   "creates a memoize form template for `definvoke`
