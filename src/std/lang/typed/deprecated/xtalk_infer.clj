@@ -1,7 +1,10 @@
-(ns std.lang.typed.xtalk-infer
+;; Deprecated snapshot of the pre-rebuild xtalk typed engine.
+;; Keep for reference while the new core is rebuilt around grammar-derived builtin typing.
+
+(ns std.lang.typed.deprecated.xtalk-infer
   (:require [std.lang.typed.xtalk-common :as types]
-            [std.lang.typed.xtalk-intrinsic :as intrinsic]
-            [std.lang.typed.xtalk-lower :as lower]
+            [std.lang.typed.deprecated.xtalk-intrinsic :as intrinsic]
+            [std.lang.typed.deprecated.xtalk-lower :as lower]
             [std.lang.typed.xtalk-ops :as ops]
             [std.lang.typed.xtalk-parse :as parse]))
 
@@ -577,85 +580,6 @@
     (result out-type
             (merge-errors type-out opts-out))))
 
-(defn apply-default-type
-  [base-type default-type]
-  (types/union-type [(if (= :maybe (:kind base-type))
-                       (:item base-type)
-                       base-type)
-                     default-type]))
-
-(defn infer-fixed-output
-  [out-type]
-  (fn [form ctx]
-    (let [arg-outs (mapv #(infer-type % ctx) (rest form))]
-      (result out-type
-              (mapcat :errors arg-outs)))))
-
-(defn object-value-type
-  [type ctx]
-  (let [type (resolve-type type ctx)]
-    (cond
-      (= :maybe (:kind type))
-      (types/maybe-type (object-value-type (:item type) ctx))
-
-      (= :record (:kind type))
-      (let [value-types (concat (map :type (:fields type))
-                                (when-let [open (:open type)]
-                                  [(:value open)]))]
-        (if (seq value-types)
-          (types/union-type value-types)
-          types/+unknown-type+))
-
-      (= :dict (:kind type))
-      (:value type)
-
-      :else
-      types/+unknown-type+)))
-
-(defn infer-obj-vals
-  [[_ obj-expr] ctx]
-  (let [obj-out (infer-type obj-expr ctx)]
-    (result {:kind :array
-             :item (object-value-type (:type obj-out) ctx)}
-            (:errors obj-out))))
-
-(defn infer-obj-pairs
-  [[_ obj-expr] ctx]
-  (let [obj-out (infer-type obj-expr ctx)]
-    (result {:kind :array
-             :item {:kind :tuple
-                    :types [types/+str-type+
-                            (object-value-type (:type obj-out) ctx)]}}
-            (:errors obj-out))))
-
-(defn infer-obj-clone
-  [[_ obj-expr] ctx]
-  (let [obj-out (infer-type obj-expr ctx)
-        obj-type (resolve-type (:type obj-out) ctx)
-        out-type (case (:kind obj-type)
-                   :record obj-type
-                   :dict obj-type
-                   (if (= :maybe (:kind obj-type))
-                     (let [item-type (resolve-type (:item obj-type) ctx)]
-                       (if (contains? #{:record :dict} (:kind item-type))
-                         item-type
-                         {:kind :record :fields []}))
-                     {:kind :record :fields []}))]
-    (result out-type
-            (:errors obj-out))))
-
-(defn infer-arr-clone
-  [[_ arr-expr] ctx]
-  (let [arr-out (infer-type arr-expr ctx)
-        arr-type (resolve-type (:type arr-out) ctx)
-        out-type (case (:kind arr-type)
-                   :array arr-type
-                   :tuple {:kind :array
-                           :item (types/union-type (:types arr-type))}
-                   types/+unknown-type+)]
-    (result out-type
-            (:errors arr-out))))
-
 (defn intrinsic-callbacks
   []
   {:result result
@@ -667,6 +591,39 @@
    :infer-obj-assign infer-obj-assign
    :infer-make-container infer-make-container
    :infer-blank-container infer-blank-container})
+
+(defn infer-builtin-form
+  [builtin-op form ctx]
+  (condp = builtin-op
+    'x:get-key (infer-get-key form ctx)
+    'x:get-idx (infer-get-idx form ctx)
+    'x:get-path (infer-get-path form ctx)
+    'x:nil? (result types/+bool-type+
+                    (merge-errors (infer-type (second form) ctx)))
+    'x:not-nil? (result types/+bool-type+
+                        (merge-errors (infer-type (second form) ctx)))
+    'x:len (result types/+int-type+
+                   (merge-errors (infer-type (second form) ctx)))
+    'x:cat (result types/+str-type+
+                   (mapcat :errors (map #(infer-type % ctx) (rest form))))
+    'x:json-encode (let [arg-out (infer-type (second form) ctx)]
+                     (result types/+str-type+
+                             (:errors arg-out)))
+    'x:str-split (let [arg-outs (mapv #(infer-type % ctx) (rest form))]
+                   (result {:kind :array
+                            :item types/+str-type+}
+                           (mapcat :errors arg-outs)))
+    'x:str-join (let [arg-outs (mapv #(infer-type % ctx) (rest form))]
+                  (result types/+str-type+
+                          (mapcat :errors arg-outs)))
+    'x:is-function? (result types/+bool-type+
+                            (merge-errors (infer-type (second form) ctx)))
+    'x:obj-keys (let [arg-out (infer-type (second form) ctx)]
+                  (result {:kind :array
+                           :item types/+str-type+}
+                          (:errors arg-out)))
+    'x:obj-assign (infer-obj-assign form ctx)
+    nil))
 
 (defn infer-function-call
   [[callee & args :as form] ctx]
@@ -711,66 +668,54 @@
                        :actual (types/type->data callee-type)}))))))
 
 (defn infer-get-key
-  [[_ obj-expr key-expr default-expr] ctx]
+  [[_ obj-expr key-expr] ctx]
   (let [obj-out (infer-type obj-expr ctx)
         key-out (infer-type key-expr ctx)
-        default-out (when (some? default-expr)
-                      (infer-type default-expr ctx))
         key (field-literal key-expr)
         obj-type (resolve-type (:type obj-out) ctx)
         errors (merge-errors obj-out key-out)
         errors (cond-> errors
-                  (and (= :dict (:kind obj-type))
+                 (and (= :dict (:kind obj-type))
                       (not (compatible-type? (:type key-out) (:key obj-type) ctx)))
                  (conj {:tag :key-type-mismatch
                         :form key-expr
                         :expected (types/type->data (:key obj-type))
-                        :actual (types/type->data (:type key-out))}))
-        base-type (if key
-                    (field-access-type obj-type key ctx)
-                    (cond
-                      (= :dict (:kind obj-type))
-                      (types/maybe-type (:value obj-type))
+                        :actual (types/type->data (:type key-out))}))]
+    (result (if key
+              (field-access-type obj-type key ctx)
+              (cond
+                (= :dict (:kind obj-type))
+                (types/maybe-type (:value obj-type))
 
-                      (and (= :record (:kind obj-type))
-                           (:open obj-type))
-                      (types/maybe-type (get-in obj-type [:open :value]))
+                (and (= :record (:kind obj-type))
+                     (:open obj-type))
+                (types/maybe-type (get-in obj-type [:open :value]))
 
-                      :else
-                      types/+unknown-type+))
-        out-type (if default-out
-                   (apply-default-type base-type (:type default-out))
-                   base-type)]
-    (result out-type
-            (concat errors (:errors default-out)))))
+                :else
+                types/+unknown-type+))
+            errors)))
 
 (defn infer-get-idx
-  [[_ obj-expr idx-expr default-expr] ctx]
+  [[_ obj-expr idx-expr] ctx]
   (let [obj-out (infer-type obj-expr ctx)
         idx-out (infer-type idx-expr ctx)
-        default-out (when (some? default-expr)
-                      (infer-type default-expr ctx))
         obj-type (resolve-type (:type obj-out) ctx)
         idx-literal (when (integer? idx-expr)
                       idx-expr)
-        base-type (cond
-                    (= :array (:kind obj-type))
-                    (types/maybe-type (:item obj-type))
+        out-type (cond
+                   (= :array (:kind obj-type))
+                   (types/maybe-type (:item obj-type))
 
-                    (= :tuple (:kind obj-type))
-                    (if (some? idx-literal)
-                      (or (nth (:types obj-type) idx-literal nil)
-                          types/+unknown-type+)
-                      (types/maybe-type (types/union-type (:types obj-type))))
+                   (= :tuple (:kind obj-type))
+                   (if (some? idx-literal)
+                     (or (nth (:types obj-type) idx-literal nil)
+                         types/+unknown-type+)
+                     (types/maybe-type (types/union-type (:types obj-type))))
 
-                    :else
-                    types/+unknown-type+)
-        out-type (if default-out
-                   (apply-default-type base-type (:type default-out))
-                   base-type)]
+                   :else
+                   types/+unknown-type+)]
     (result out-type
-            (concat (merge-errors obj-out idx-out)
-                    (:errors default-out)))))
+            (merge-errors obj-out idx-out))))
 
 (defn infer-get-path
   [[_ obj-expr path-expr default-expr] ctx]
@@ -785,45 +730,11 @@
                           (:type obj-out)
                           path)
         out-type (if default-out
-                   (apply-default-type base-type (:type default-out))
+                   (types/union-type [base-type (:type default-out)])
                    base-type)]
     (result out-type
             (concat (:errors obj-out)
                     (:errors default-out)))))
-
-(def +builtin-rules+
-  {'x:get-key infer-get-key
-   'x:get-idx infer-get-idx
-   'x:get-path infer-get-path
-   'x:nil? (infer-fixed-output types/+bool-type+)
-   'x:not-nil? (infer-fixed-output types/+bool-type+)
-   'x:len (infer-fixed-output types/+int-type+)
-   'x:cat (infer-fixed-output types/+str-type+)
-   'x:json-encode (infer-fixed-output types/+str-type+)
-   'x:to-string (infer-fixed-output types/+str-type+)
-   'x:to-number (infer-fixed-output types/+num-type+)
-   'x:str-split (infer-fixed-output {:kind :array
-                                     :item types/+str-type+})
-   'x:str-join (infer-fixed-output types/+str-type+)
-   'x:is-function? (infer-fixed-output types/+bool-type+)
-   'x:is-string? (infer-fixed-output types/+bool-type+)
-   'x:is-number? (infer-fixed-output types/+bool-type+)
-   'x:is-integer? (infer-fixed-output types/+bool-type+)
-   'x:is-boolean? (infer-fixed-output types/+bool-type+)
-   'x:is-object? (infer-fixed-output types/+bool-type+)
-   'x:is-array? (infer-fixed-output types/+bool-type+)
-   'x:obj-keys (infer-fixed-output {:kind :array
-                                    :item types/+str-type+})
-   'x:obj-vals infer-obj-vals
-   'x:obj-pairs infer-obj-pairs
-   'x:obj-clone infer-obj-clone
-   'x:obj-assign infer-obj-assign
-   'x:arr-clone infer-arr-clone})
-
-(defn infer-builtin-form
-  [builtin-entry form ctx]
-  (when-let [rule (get +builtin-rules+ (:canonical-symbol builtin-entry))]
-    (rule form ctx)))
 
 (defn infer-dot
   [[_ obj-expr key-or-path] ctx]
@@ -867,18 +778,19 @@
     (seq? form)
     (let [lowered (lower/lower-form form ctx)]
       (if (not= lowered form)
-         (infer-type lowered ctx)
-         (let [op (first form)
-               resolved-op (if (symbol? op)
-                             (resolve-local-symbol op ctx)
-                             op)
-               builtin-entry (when (symbol? resolved-op)
-                               (ops/canonical-entry resolved-op))
-               intrinsic-out (intrinsic/infer-intrinsic form ctx (intrinsic-callbacks))
-               builtin-out (when builtin-entry
-                             (infer-builtin-form builtin-entry form ctx))]
-           (if intrinsic-out
-             intrinsic-out
+        (infer-type lowered ctx)
+        (let [op (first form)
+              resolved-op (if (symbol? op)
+                            (resolve-local-symbol op ctx)
+                            op)
+              builtin-op (if (symbol? resolved-op)
+                           (ops/canonical-symbol resolved-op)
+                           resolved-op)
+              intrinsic-out (intrinsic/infer-intrinsic form ctx (intrinsic-callbacks))
+              builtin-out (when (symbol? builtin-op)
+                            (infer-builtin-form builtin-op form ctx))]
+          (if intrinsic-out
+            intrinsic-out
             (if builtin-out
               builtin-out
               (case op

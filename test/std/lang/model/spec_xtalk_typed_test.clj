@@ -42,15 +42,57 @@
 
 (fact "canonicalizes builtin wrappers through grammar op tables"
   [(ops/canonical-symbol 'xt.lang.base-lib/obj-assign)
+   (ops/canonical-symbol 'xt.lang.base-lib/obj-vals)
+   (ops/canonical-symbol 'x:str-len)
    (lower/lower-form '(k/obj-assign current extra)
+                     {:ns 'sample.route
+                      :aliases '{k xt.lang.base-lib}})
+   (lower/lower-form '(k/obj-vals current)
+                     {:ns 'sample.route
+                      :aliases '{k xt.lang.base-lib}})
+   (lower/lower-form '(k/obj-clone current)
+                     {:ns 'sample.route
+                      :aliases '{k xt.lang.base-lib}})
+   (lower/lower-form '(k/arr-clone path)
+                     {:ns 'sample.route
+                      :aliases '{k xt.lang.base-lib}})
+   (lower/lower-form '(x:str-len path)
                      {:ns 'sample.route
                       :aliases '{k xt.lang.base-lib}})
    (lower/lower-form '(k/arr-join path "/")
                      {:ns 'sample.route
                       :aliases '{k xt.lang.base-lib}})]
   => '[x:obj-assign
-       (x:obj-assign current extra)
-       (x:str-join "/" path)])
+       x:obj-vals
+       x:len
+         (x:obj-assign current extra)
+         (x:obj-vals current)
+         (x:obj-clone current)
+         (x:arr-clone path)
+         (x:len path)
+         (x:str-join "/" path)])
+
+(fact "lowering uses rule-driven wrapper rewrites"
+  [(lower/lower-form '(k/get-key route "tree")
+                     {:ns 'sample.route
+                      :aliases '{k xt.lang.base-lib}})
+   (lower/lower-form '(k/get-in route ["tree" "leaf"] "fallback")
+                     {:ns 'sample.route
+                      :aliases '{k xt.lang.base-lib}})
+   (lower/lower-form '(k/first items)
+                     {:ns 'sample.route
+                      :aliases '{k xt.lang.base-lib}})
+   (lower/lower-form '(k/second items)
+                     {:ns 'sample.route
+                      :aliases '{k xt.lang.base-lib}})
+   (lower/lower-form '(k/arrayify items)
+                     {:ns 'sample.route
+                      :aliases '{k xt.lang.base-lib}})]
+  => '[(x:get-key route "tree" nil)
+       (x:get-path route ["tree" "leaf"] "fallback")
+       (x:get-idx items (x:offset))
+       (x:get-idx items (x:offset 1))
+       (std.lang.typed.xtalk-intrinsic/arrayify items)])
 
 (fact "infers open object types for dynamic map keys"
   (-> (infer/infer-type '{:type "route.path" pkey true}
@@ -65,6 +107,57 @@
                   :optional? false}]
         :open {:key {:kind :primitive :name :xt/str}
                :value {:kind :primitive :name :xt/bool}}})
+
+(fact "infers canonical object helpers and defaulted access"
+  [(-> (infer/infer-type '(k/obj-vals user)
+                         {:env '{user {:kind :record
+                                       :fields [{:name "name"
+                                                 :type {:kind :primitive :name :xt/str}
+                                                 :optional? false}
+                                                {:name "count"
+                                                 :type {:kind :primitive :name :xt/int}
+                                                 :optional? false}]}}
+                          :ns 'sample.route
+                          :aliases '{k xt.lang.base-lib}})
+       :type
+       types/type->data)
+   (-> (infer/infer-type '(k/obj-pairs user)
+                         {:env '{user {:kind :record
+                                       :fields [{:name "name"
+                                                 :type {:kind :primitive :name :xt/str}
+                                                 :optional? false}
+                                                {:name "count"
+                                                 :type {:kind :primitive :name :xt/int}
+                                                 :optional? false}]}}
+                          :ns 'sample.route
+                          :aliases '{k xt.lang.base-lib}})
+       :type
+       types/type->data)
+   (-> (infer/infer-type '(x:get-idx users 0 "guest")
+                         {:env '{users {:kind :array
+                                        :item {:kind :primitive :name :xt/str}}}
+                          :ns 'sample.route
+                          :aliases {}})
+       :type
+       types/type->data)
+   (-> (infer/infer-type '(x:to-string count)
+                         {:env '{count {:kind :primitive :name :xt/int}}
+                          :ns 'sample.route
+                          :aliases {}})
+       :type
+       types/type->data)]
+  => '[{:kind :array
+        :item {:kind :union
+               :types [{:kind :primitive :name :xt/str}
+                       {:kind :primitive :name :xt/int}]}}
+       {:kind :array
+        :item {:kind :tuple
+               :types [{:kind :primitive :name :xt/str}
+                       {:kind :union
+                        :types [{:kind :primitive :name :xt/str}
+                                {:kind :primitive :name :xt/int}]}]}}
+       {:kind :primitive :name :xt/str}
+       {:kind :primitive :name :xt/str}])
 
 (fact "parses defspec.xt and merges function signatures"
   (let [analysis (parse/analyze-namespace 'std.lang.model.spec-xtalk-typed-fixture)

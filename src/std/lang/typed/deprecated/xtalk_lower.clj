@@ -1,4 +1,7 @@
-(ns std.lang.typed.xtalk-lower
+;; Deprecated snapshot of the pre-rebuild xtalk typed engine.
+;; Keep for reference while the new core is rebuilt around grammar-derived builtin typing.
+
+(ns std.lang.typed.deprecated.xtalk-lower
   (:require [std.lang.typed.xtalk-ops :as ops]))
 
 (def +intrinsic-ns+ "std.lang.typed.xtalk-intrinsic")
@@ -44,45 +47,18 @@
     (vector? (first args))
     (list* 'fn (first args) (rest args))
 
-     :else
-     (list (intrinsic-sym "const-fn") (first args))))
+    :else
+    (list (intrinsic-sym "const-fn") (first args))))
 
 (declare lower-form)
-
-(def +wrapper-targets+
-  {'xt.lang.base-lib/nil? 'x:nil?
-   'xt.lang.base-lib/cat 'x:cat
-   'xt.lang.base-lib/json-encode 'x:json-encode
-   'xt.lang.base-lib/split 'x:str-split
-   'xt.lang.base-lib/fn? 'x:is-function?})
-
-(def +intrinsic-targets+
-  {'xt.lang.base-lib/arrayify "arrayify"
-   'xt.lang.base-lib/not-empty? "not-empty?"
-   'xt.lang.base-lib/is-empty? "is-empty?"
-   'xt.lang.event-common/make-container "make-container"
-   'xt.lang.event-common/blank-container "blank-container"})
-
-(defn lower-defaulted-target
-  [target args]
-  (list target (first args) (second args) (nth args 2 nil)))
-
-(defn lower-offset-index
-  [args offset]
-  (if (zero? offset)
-    (list 'x:get-idx (first args) '(x:offset))
-    (list 'x:get-idx (first args) (list 'x:offset offset))))
 
 (defn lower-list
   [form ctx]
   (let [[op & args] form
-         op' (resolve-op op ctx)
-         canonical-entry (when (symbol? op')
-                           (ops/canonical-entry op'))
-         canonical-op (or (:canonical-symbol canonical-entry)
-                          op')
-         args' (map #(lower-form % ctx) args)
-         lowered (cons canonical-op args')]
+        op' (resolve-op op ctx)
+        canonical-op (ops/canonical-symbol op')
+        args' (map #(lower-form % ctx) args)
+        lowered (cons canonical-op args')]
     (cond
       (= op' '.)
       (lower-dot (cons op' args'))
@@ -94,25 +70,49 @@
       (lower-fn-shorthand (cons op' args'))
 
       (= op' 'xt.lang.base-lib/get-key)
-      (lower-defaulted-target 'x:get-key args')
+      (list 'x:get-key (first args') (second args') (nth args' 2 nil))
 
       (= op' 'xt.lang.base-lib/get-in)
-      (lower-defaulted-target 'x:get-path args')
+      (list 'x:get-path (first args') (second args') (nth args' 2 nil))
+
+      (= op' 'xt.lang.base-lib/nil?)
+      (list 'x:nil? (first args'))
+
+      (= op' 'xt.lang.base-lib/cat)
+      (list* 'x:cat args')
+
+      (= op' 'xt.lang.base-lib/json-encode)
+      (cons 'x:json-encode args')
+
+      (= op' 'xt.lang.base-lib/split)
+      (cons 'x:str-split args')
 
       (= op' 'xt.lang.base-lib/arr-join)
       (list 'x:str-join (second args') (first args'))
 
+      (= op' 'xt.lang.base-lib/fn?)
+      (cons 'x:is-function? args')
+
       (= op' 'xt.lang.base-lib/first)
-      (lower-offset-index args' 0)
+      (list 'x:get-idx (first args') '(x:offset))
 
       (= op' 'xt.lang.base-lib/second)
-      (lower-offset-index args' 1)
+      (list 'x:get-idx (first args') '(x:offset 1))
 
-      (contains? +wrapper-targets+ op')
-      (cons (get +wrapper-targets+ op') args')
+      (= op' 'xt.lang.base-lib/arrayify)
+      (cons (intrinsic-sym "arrayify") args')
 
-      (contains? +intrinsic-targets+ op')
-      (cons (intrinsic-sym (get +intrinsic-targets+ op')) args')
+      (= op' 'xt.lang.base-lib/not-empty?)
+      (cons (intrinsic-sym "not-empty?") args')
+
+      (= op' 'xt.lang.base-lib/is-empty?)
+      (cons (intrinsic-sym "is-empty?") args')
+
+      (= op' 'xt.lang.event-common/make-container)
+      (cons (intrinsic-sym "make-container") args')
+
+      (= op' 'xt.lang.event-common/blank-container)
+      (cons (intrinsic-sym "blank-container") args')
 
       :else
       lowered)))
