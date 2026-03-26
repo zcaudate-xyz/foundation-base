@@ -1,7 +1,7 @@
 (ns rt.postgres
   (:require [rt.postgres.client :as client]
             [rt.postgres.client-impl :as client-impl]
-            [rt.postgres.typed :as typed]
+            [rt.postgres.typed-analysis :as typed-analysis]
             [rt.postgres.gen-bind]
             [rt.postgres.grammar.common-application :as app]
             [rt.postgres.script.addon]
@@ -40,7 +40,7 @@
              graph-view/defret.pg
              graph-view/defsel.pg
 
-             typed/Type)
+             typed-analysis/Type)
 
 (defn purge-postgres
   "purges the rt.postgres library. Used for debugging"

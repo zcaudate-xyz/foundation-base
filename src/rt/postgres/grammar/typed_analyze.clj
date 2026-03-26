@@ -555,12 +555,13 @@
    (:dbschema fn-def)])
 
 (defn- operation-entry
-  [op-sym table-expr]
+  [op-sym table-expr form]
   (when-let [{:keys [op returns linked?]} (get +pg-operations+ op-sym)]
     (let [table-name (normalize-table-name table-expr)]
       (cond-> {:symbol (str op-sym)
                :op op
                :returns returns}
+        form (assoc :operation form)
         linked? (assoc :linked true)
         table-name (assoc :table table-name)))))
 
@@ -578,11 +579,11 @@
                   (walk/postwalk
                    (fn [form]
                      (when (seq? form)
-                       (let [op-sym (first form)]
-                         (if-let [entry (operation-entry op-sym (second form))]
-                           (vswap! found conj entry)
-                           (when (symbol? op-sym)
-                             (let [[_ called-fn] (resolve-called-fn op-sym aliases)]
+                        (let [op-sym (first form)]
+                          (if-let [entry (operation-entry op-sym (second form) form)]
+                            (vswap! found conj entry)
+                            (when (symbol? op-sym)
+                              (let [[_ called-fn] (resolve-called-fn op-sym aliases)]
                                (when called-fn
                                  (vswap! found into (detect* called-fn seen))))))))
                      form)

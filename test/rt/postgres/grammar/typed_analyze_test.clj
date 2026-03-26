@@ -171,7 +171,11 @@
     (let [report (analyze/infer-report wrapper-fn)]
       (get-in report [:analysis :mutating]) => true
       (get-in report [:analysis :operations-by-type "update" 0 :table]) => "User"
-      (get-in report [:analysis :operations-by-type "insert" 0 :table]) => "User")))
+      (get-in report [:analysis :operations-by-type "update" 0 :operation 0]) => "pg/t:update"
+      (get-in report [:analysis :operations-by-type "update" 0 :operation 1]) => "User"
+      (get-in report [:analysis :operations-by-type "insert" 0 :table]) => "User"
+      (get-in report [:analysis :operations-by-type "insert" 0 :operation 0]) => "pg/t:insert"
+      (get-in report [:analysis :operations-by-type "insert" 0 :operation 1]) => "User")))
 
 ^{:refer rt.postgres.grammar.typed-analyze/report-json :added "4.1"}
 (fact "report-json serializes a report"
