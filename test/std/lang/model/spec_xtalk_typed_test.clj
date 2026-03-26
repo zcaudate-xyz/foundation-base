@@ -28,6 +28,17 @@
       types/type->data)
   => {:kind :primitive :name :xt/str})
 
+(fact "defspec.xt resolves aliased type names during registration"
+  (typed/clear-registry!)
+  (eval '(std.lang.typed.xtalk/defspec.xt AliasMaybeFixture
+           [:xt/maybe types/User]))
+  (-> (typed/get-spec 'std.lang.model.spec-xtalk-typed-test/AliasMaybeFixture)
+      :type
+      types/type->data)
+  => '{:kind :maybe
+       :item {:kind :named
+              :name std.lang.typed.xtalk-common/User}})
+
 (fact "normalizes record field names to snake_case strings"
   [(types/field-key :hello-world)
    (types/field-key 'event-meta)
@@ -159,6 +170,141 @@
        {:kind :primitive :name :xt/str}
        {:kind :primitive :name :xt/str}])
 
+(fact "treats callable unions and unknown fn args permissively"
+  [(infer/compatible-type?
+    {:kind :fn
+     :inputs [types/+unknown-type+]
+     :output types/+str-type+}
+    {:kind :fn
+     :inputs [{:kind :named :name 'sample.route/ViewContext}]
+     :output types/+str-type+}
+    {:ns 'sample.route
+     :aliases {}})
+   (-> (infer/infer-type '(handler payload)
+                         {:env '{handler {:kind :maybe
+                                          :item {:kind :fn
+                                                 :inputs [{:kind :primitive :name :xt/any}]
+                                                 :output {:kind :primitive :name :xt/bool}}}
+                                 payload {:kind :record
+                                          :fields [{:name "type"
+                                                    :type {:kind :primitive :name :xt/str}
+                                                    :optional? false}]}}
+                          :ns 'sample.route
+                          :aliases {}})
+       :type
+       types/type->data)]
+  => '[true
+       {:kind :primitive :name :xt/bool}])
+
+(fact "treats unknown and nil unions compatibly"
+  [(infer/compatible-type?
+    types/+unknown-type+
+    {:kind :named :name 'sample.route/RoutePath}
+    {:ns 'sample.route
+     :aliases {}})
+   (infer/compatible-type?
+    {:kind :union
+     :types [types/+nil-type+
+             {:kind :array
+              :item types/+str-type+}]}
+    {:kind :maybe
+     :item {:kind :array
+            :item types/+str-type+}}
+    {:ns 'sample.route
+     :aliases {}})]
+  => '[true true])
+
+(fact "strips nil from or types and allows dynamic assignment targets"
+  [(-> (infer/infer-type '(or maybe-path [])
+                         {:env '{maybe-path {:kind :maybe
+                                             :item {:kind :array
+                                                    :item {:kind :primitive :name :xt/str}}}}
+                          :ns 'sample.route
+                          :aliases {}})
+       :type
+       types/type->data)
+   (-> (infer/infer-type '(:= (x:get-key acc tag) [true err true])
+                         {:env '{acc {:kind :dict
+                                      :key {:kind :primitive :name :xt/str}
+                                      :value {:kind :primitive :name :xt/any}}
+                                 tag {:kind :primitive :name :xt/str}
+                                 err {:kind :primitive :name :xt/str}}
+                          :ns 'sample.route
+                          :aliases {}})
+       :errors)]
+  => '[{:kind :union
+        :types [{:kind :array
+                 :item {:kind :primitive :name :xt/str}}
+                {:kind :tuple
+                 :types []}]}
+       []])
+
+(fact "supports maybe-callables, tuples, and optional trailing args"
+  [(infer/compatible-type?
+    {:kind :maybe
+     :item {:kind :fn
+            :inputs [{:kind :named :name 'sample.route/ViewEvent}]
+            :output types/+bool-type+}}
+    {:kind :maybe
+     :item {:kind :fn
+            :inputs [types/+str-type+]
+            :output types/+bool-type+}}
+    {:ns 'sample.route
+     :aliases {}})
+   (-> (infer/infer-type '[route disabled]
+                         {:env '{route {:kind :named :name sample.route/Route}
+                                 disabled {:kind :primitive :name :xt/bool}}
+                          :ns 'sample.route
+                          :aliases {}})
+       :type
+       types/type->data)
+   (-> (infer/infer-type '(pipeline-call context "main" false async-fn hook-fn)
+                         {:env '{pipeline-call {:kind :fn
+                                                :inputs [{:kind :named :name sample.route/ViewContext}
+                                                         {:kind :primitive :name :xt/str}
+                                                         {:kind :primitive :name :xt/bool}
+                                                         {:kind :primitive :name :xt/any}
+                                                         {:kind :primitive :name :xt/any}
+                                                         {:kind :maybe
+                                                          :item {:kind :dict
+                                                                 :key {:kind :primitive :name :xt/str}
+                                                                 :value {:kind :primitive :name :xt/any}}}]
+                                                :output {:kind :primitive :name :xt/any}}
+                                 context {:kind :named :name sample.route/ViewContext}
+                                 async-fn {:kind :primitive :name :xt/any}
+                                 hook-fn {:kind :primitive :name :xt/any}}
+                          :ns 'sample.route
+                          :aliases {}})
+       :errors)]
+  => '[false
+       {:kind :tuple
+       :types [{:kind :named :name sample.route/Route}
+                {:kind :primitive :name :xt/bool}]}
+       []])
+
+(fact "infers fn:> as a zero-arg constant function"
+  (-> (infer/infer-type '(std.lang.typed.xtalk-intrinsic/const-fn "ok")
+                        {:ns 'sample.route
+                         :aliases {}})
+      :type
+      types/type->data)
+  => '{:kind :fn
+       :inputs []
+       :output {:kind :primitive :name :xt/str}})
+
+(fact "zero-arg callbacks satisfy wider callback slots"
+  (infer/compatible-type?
+   {:kind :fn
+    :inputs []
+    :output {:kind :primitive :name :xt/bool}}
+   {:kind :maybe
+    :item {:kind :fn
+           :inputs [{:kind :primitive :name :xt/any}]
+           :output {:kind :primitive :name :xt/bool}}}
+   {:ns 'sample.route
+    :aliases {}})
+  => true)
+
 (fact "parses defspec.xt and merges function signatures"
   (let [analysis (parse/analyze-namespace 'std.lang.model.spec-xtalk-typed-fixture)
         fn-def (some #(when (= "find-user" (:name %)) %)
@@ -169,8 +315,70 @@
   => '{:spec-count 3
        :input-types [{:kind :named :name std.lang.model.spec-xtalk-typed-fixture/UserMap}
                      {:kind :primitive :name :xt/str}]
-       :output {:kind :maybe
-                :item {:kind :named :name std.lang.model.spec-xtalk-typed-fixture/User}}})
+        :output {:kind :maybe
+                 :item {:kind :named :name std.lang.model.spec-xtalk-typed-fixture/User}}})
+
+(fact "parses single-clause multi-arity forms tolerantly"
+  (let [fn-def (parse/parse-defn
+                '(defn.xt proto-create
+                   ([m]
+                    (x:proto-create m)))
+                'xt.lang.base-lib
+                {})]
+    {:inputs (mapv (comp types/type->data :type) (:inputs fn-def))
+     :body (:raw-body fn-def)})
+  => '{:inputs [{:kind :primitive :name :xt/unknown}]
+     :body [(x:proto-create m)]})
+
+(fact "parses rest and destructured args tolerantly"
+  (let [fn-def (parse/parse-defn
+                '(defn.xt with-opts
+                   [& [m]]
+                   (return m))
+                'xt.lang.base-lib
+                {})]
+    (mapv :name (:inputs fn-def)))
+  => '[m])
+
+(fact "supports map destructuring in let bindings"
+  (-> (infer/infer-type
+       '(let [{:keys [id namespace]} entry]
+          (return id))
+       {:env '{entry {:kind :record
+                      :fields [{:name "id"
+                                :type {:kind :primitive :name :xt/str}
+                                :optional? false}
+                               {:name "namespace"
+                                :type {:kind :primitive :name :xt/str}
+                                :optional? false}]}}
+        :ns 'sample.route
+        :aliases {}})
+      :type
+      types/type->data)
+  => '{:kind :primitive :name :xt/str})
+
+(fact "treats free forms as wrapped literals"
+  (-> (infer/infer-type
+       '(:- "0x55555555")
+       {:env {}
+        :ns 'sample.route
+        :aliases {}})
+      :type
+      types/type->data)
+  => '{:kind :primitive :name :xt/str})
+
+(fact "treats keyword calls as keyed access"
+  (-> (infer/infer-type
+       '(:entry opts)
+       {:env '{opts {:kind :record
+                     :fields [{:name "entry"
+                               :type {:kind :primitive :name :xt/str}
+                               :optional? false}]}}
+        :ns 'sample.route
+        :aliases {}})
+      :type
+      types/type->data)
+  => '{:kind :primitive :name :xt/str})
 
 (fact "checks valid xtalk functions"
   (typed/clear-registry!)

@@ -4,13 +4,22 @@
             [std.lang.typed.xtalk-common :as types]
             [std.lang.typed.xtalk-parse :as parse]))
 
+(defn namespace-aliases
+  [ns-obj]
+  (into {}
+        (map (fn [[alias target-ns]]
+               [alias (ns-name target-ns)]))
+        (ns-aliases ns-obj)))
+
 (defn register-spec-form!
-  [sym type-form spec-meta]
-  (let [ns-sym (some-> sym namespace symbol)
-        spec-sym (symbol (name sym))
-        spec (parse/parse-spec-decl ns-sym spec-sym type-form spec-meta {})]
-    (types/register-spec! sym spec)
-    spec))
+  ([sym type-form spec-meta]
+   (register-spec-form! sym type-form spec-meta {}))
+  ([sym type-form spec-meta aliases]
+   (let [ns-sym (some-> sym namespace symbol)
+         spec-sym (symbol (name sym))
+         spec (parse/parse-spec-decl ns-sym spec-sym type-form spec-meta aliases)]
+     (types/register-spec! sym spec)
+     spec)))
 
 (defmacro defspec.xt
   [spec-sym & body]
@@ -22,14 +31,16 @@
                           [nil body])
         type-form (first body)
         full-sym (symbol (str (ns-name *ns*)) (name spec-sym))
+        aliases (namespace-aliases *ns*)
         spec-meta (cond-> (merge (meta spec-sym) attr-map)
                     docstring (assoc :docstring docstring))]
     `(do
-       (std.lang.typed.xtalk/register-spec-form!
-        '~full-sym
-        '~type-form
-        '~spec-meta)
-       nil)))
+        (std.lang.typed.xtalk/register-spec-form!
+         '~full-sym
+         '~type-form
+         '~spec-meta
+         '~aliases)
+        nil)))
 
 (defn clear-registry!
   []

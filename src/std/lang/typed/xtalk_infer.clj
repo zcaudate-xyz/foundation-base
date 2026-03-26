@@ -7,6 +7,7 @@
 
 (declare infer-body
          infer-type
+         compatible-type?
          infer-get-key
          infer-get-idx
          infer-get-path
@@ -68,20 +69,36 @@
   (= (types/type->data left)
      (types/type->data right)))
 
+(defn any-type?
+  [type]
+  (and (= :primitive (:kind type))
+       (= :xt/any (:name type))))
+
+(defn fn-input-compatible?
+  [actual expected ctx]
+  (or (= actual types/+unknown-type+)
+      (= expected types/+unknown-type+)
+      (any-type? actual)
+      (any-type? expected)
+      (compatible-type? actual expected ctx)
+      (compatible-type? expected actual ctx)))
+
 (defn compatible-type?
   [actual expected ctx]
   (let [actual (resolve-type actual ctx)
         expected (resolve-type expected ctx)]
     (cond
-      (and (= :primitive (:kind expected))
-           (= :xt/any (:name expected)))
+      (any-type? expected)
+      true
+
+      (any-type? actual)
       true
 
       (= expected types/+unknown-type+)
       true
 
       (= actual types/+unknown-type+)
-      false
+      true
 
       (type-eq? actual expected)
       true
@@ -94,7 +111,11 @@
 
       (= :maybe (:kind expected))
       (or (compatible-type? actual types/+nil-type+ ctx)
-          (compatible-type? actual (:item expected) ctx))
+          (and (= :maybe (:kind actual))
+               (compatible-type? (:item actual) (:item expected) ctx))
+          (compatible-type? actual (:item expected) ctx)
+          (and (= :union (:kind actual))
+               (every? #(compatible-type? % expected ctx) (:types actual))))
 
       (= :maybe (:kind actual))
       (and (compatible-type? types/+nil-type+ expected ctx)
@@ -131,6 +152,24 @@
       (and (compatible-type? (:key actual) (:key expected) ctx)
            (compatible-type? (:value actual) (:value expected) ctx))
 
+      (and (= :array (:kind actual))
+           (= :array (:kind expected)))
+      (compatible-type? (:item actual) (:item expected) ctx)
+
+      (and (= :tuple (:kind actual))
+           (= :tuple (:kind expected)))
+      (and (= (count (:types actual))
+              (count (:types expected)))
+           (every? true?
+                   (map #(compatible-type? %1 %2 ctx)
+                        (:types actual)
+                        (:types expected))))
+
+      (and (= :tuple (:kind actual))
+           (= :array (:kind expected)))
+      (every? #(compatible-type? % (:item expected) ctx)
+              (:types actual))
+
       (and (= :apply (:kind actual))
            (= :apply (:kind expected)))
       (and (= (:target actual) (:target expected))
@@ -142,13 +181,14 @@
 
       (and (= :fn (:kind actual))
            (= :fn (:kind expected)))
-      (and (= (count (:inputs actual))
-              (count (:inputs expected)))
+      (and (<= (count (:inputs actual))
+               (count (:inputs expected)))
            (every? true?
-                   (map #(compatible-type? %1 %2 ctx)
-                        (:inputs actual)
-                        (:inputs expected)))
-           (compatible-type? (:output actual) (:output expected) ctx))
+                    (map #(fn-input-compatible? %1 %2 ctx)
+                         (:inputs actual)
+                         (take (count (:inputs actual))
+                               (:inputs expected))))
+            (compatible-type? (:output actual) (:output expected) ctx))
 
       :else
       false)))
@@ -265,8 +305,15 @@
     {:symbol (second target)
      :type (types/normalize-type (first target) ctx)}
 
-    :else
-    nil))
+     :else
+     nil))
+
+(defn dynamic-assignment-target?
+  [target]
+  (and (seq? target)
+       (symbol? (first target))
+       (contains? #{'. 'x:get-key 'x:get-path 'x:get-idx}
+                  (first target))))
 
 (defn infer-map
   [form ctx]
@@ -309,11 +356,33 @@
 (defn infer-vector
   [form ctx]
   (let [item-results (mapv #(infer-type % ctx) form)]
-    (result {:kind :array
-             :item (if (empty? item-results)
-                     types/+unknown-type+
-                     (types/union-type (map :type item-results)))}
+    (result (if (empty? item-results)
+              {:kind :tuple
+               :types []}
+              {:kind :tuple
+               :types (mapv :type item-results)})
             (mapcat :errors item-results))))
+
+(defn map-binding-updates
+  [target expr-type ctx]
+  (let [resolved (resolve-type expr-type ctx)
+        key-syms (:keys target)
+        str-syms (:strs target)
+        sym-syms (:syms target)]
+    (when (or (seq key-syms)
+              (seq str-syms)
+              (seq sym-syms))
+      (into {}
+            (concat
+             (map (fn [sym]
+                    [sym (field-access-type resolved (types/field-key sym) ctx)])
+                  key-syms)
+             (map (fn [sym]
+                    [sym (field-access-type resolved (name sym) ctx)])
+                  str-syms)
+             (map (fn [sym]
+                    [sym (field-access-type resolved sym ctx)])
+                  sym-syms))))))
 
 (defn binding-updates
   [target expr-type ctx]
@@ -352,6 +421,9 @@
                    [sym (field-access-type resolved (types/field-key sym) ctx)]))
             target))
 
+    (map? target)
+    (map-binding-updates target expr-type ctx)
+
     :else
     nil))
 
@@ -364,10 +436,11 @@
                    (merge env updates)
                    env)
         errors (cond-> (vec (:errors expr-out))
-                 (nil? updates)
-                 (conj {:tag :unsupported-binding-target
-                        :target target
-                        :form expr}))]
+                 (and (nil? updates)
+                      (not (dynamic-assignment-target? target)))
+                  (conj {:tag :unsupported-binding-target
+                         :target target
+                         :form expr}))]
     (result (:type expr-out) errors next-env)))
 
 (defn infer-let
@@ -379,22 +452,29 @@
       (let [out (infer-body body (assoc ctx :env env))]
         (result (:type out)
                 (concat errors (:errors out))))
-      (let [{:keys [symbol type]} (or (binding-decl target ctx)
-                                      (throw (ex-info "Unsupported let binding target"
-                                                      {:target target})))
-            inferred (infer-type expr (assoc ctx :env env))
-            binding-errors (cond-> (:errors inferred)
-                             (and type
-                                  (not (compatible-type? (:type inferred) type ctx)))
-                             (conj {:tag :binding-type-mismatch
-                                    :form expr
-                                    :binding symbol
-                                    :expected (types/type->data type)
-                                    :actual (types/type->data (:type inferred))}))
-            bound-type (or type (:type inferred))]
-        (recur (assoc env symbol bound-type)
-               (concat errors binding-errors)
-               more)))))
+      (let [{:keys [symbol type] :as binding} (binding-decl target ctx)
+             inferred (infer-type expr (assoc ctx :env env))
+             updates (if binding
+                       {symbol (or type (:type inferred))}
+                       (binding-updates target (:type inferred) ctx))
+             binding-errors (cond-> (:errors inferred)
+                              (nil? updates)
+                              (conj {:tag :unsupported-binding-target
+                                     :target target
+                                     :form expr})
+                              (and type
+                                   (not (compatible-type? (:type inferred) type ctx)))
+                              (conj {:tag :binding-type-mismatch
+                                     :form expr
+                                     :binding symbol
+                                     :expected (types/type->data type)
+                                     :actual (types/type->data (:type inferred))}))
+             next-env (if updates
+                        (merge env updates)
+                        env)]
+        (recur next-env
+                (concat errors binding-errors)
+                more)))))
 
 (defn infer-if
   [[_ cond-expr then-expr else-expr] ctx]
@@ -410,9 +490,26 @@
 
 (defn infer-or
   [[_ & args] ctx]
-  (let [arg-results (mapv #(infer-type % ctx) args)]
-    (result (if (seq arg-results)
-              (types/union-type (map :type arg-results))
+  (let [arg-results (mapv #(infer-type % ctx) args)
+        non-nil-type (fn strip-nil-type [type]
+                       (let [type (resolve-type type ctx)]
+                         (cond
+                           (= type types/+nil-type+)
+                           nil
+
+                           (= :maybe (:kind type))
+                           (strip-nil-type (:item type))
+
+                           (= :union (:kind type))
+                           (let [items (keep strip-nil-type (:types type))]
+                             (when (seq items)
+                               (types/union-type items)))
+
+                           :else
+                           type)))
+        result-types (keep #(non-nil-type (:type %)) arg-results)]
+    (result (if (seq result-types)
+              (types/union-type result-types)
               types/+nil-type+)
             (mapcat :errors arg-results))))
 
@@ -668,47 +765,106 @@
    :infer-make-container infer-make-container
    :infer-blank-container infer-blank-container})
 
+(defn wildcard-callable?
+  [type ctx]
+  (let [type (resolve-type type ctx)]
+    (cond
+      (= type types/+unknown-type+)
+      true
+
+      (any-type? type)
+      true
+
+      (= :maybe (:kind type))
+      (wildcard-callable? (:item type) ctx)
+
+      (= :union (:kind type))
+      (boolean (some #(wildcard-callable? % ctx) (:types type)))
+
+      :else
+      false)))
+
+(defn callable-types
+  [type ctx]
+  (let [type (resolve-type type ctx)]
+    (cond
+      (= :fn (:kind type))
+      [type]
+
+      (= :maybe (:kind type))
+      (callable-types (:item type) ctx)
+
+      (= :union (:kind type))
+      (vec (mapcat #(callable-types % ctx) (:types type)))
+
+      :else
+      [])))
+
+(defn call-arg-errors
+  [arg-results expected-inputs args ctx]
+  (mapcat (fn [arg-result expected arg-form]
+            (when-not (compatible-type? (:type arg-result) expected ctx)
+              [{:tag :call-arg-type-mismatch
+                :form arg-form
+                :expected (types/type->data expected)
+                :actual (types/type->data (:type arg-result))}]))
+          arg-results
+          expected-inputs
+          args))
+
+(defn optional-arity?
+  [input-types provided-count ctx]
+  (and (<= provided-count (count input-types))
+       (every? #(compatible-type? types/+nil-type+ % ctx)
+               (drop provided-count input-types))))
+
 (defn infer-function-call
   [[callee & args :as form] ctx]
   (let [callee-type (cond
                       (symbol? callee)
                       (lookup-symbol-type callee ctx)
 
-                      :else
-                      (:type (infer-type callee ctx)))
-        arg-results (mapv #(infer-type % ctx) args)
-        errors (vec (mapcat :errors arg-results))
-        callee-type (resolve-type callee-type ctx)]
-    (if (= :fn (:kind callee-type))
-      (let [arity-ok? (= (count args) (count (:inputs callee-type)))
-            arity-errors (if arity-ok?
-                           []
-                           [{:tag :call-arity-mismatch
-                             :form form
-                             :expected (count (:inputs callee-type))
-                             :actual (count args)}])
-            arg-errors (if arity-ok?
-                         (mapcat (fn [arg-result expected arg-form]
-                                   (when-not (compatible-type? (:type arg-result) expected ctx)
-                                     [{:tag :call-arg-type-mismatch
-                                       :form arg-form
-                                       :expected (types/type->data expected)
-                                       :actual (types/type->data (:type arg-result))}]))
-                                 arg-results
-                                 (:inputs callee-type)
-                                 args)
-                         [])]
-        (result (:output callee-type)
-                (concat errors arity-errors arg-errors)))
-      (if (or (= callee-type types/+unknown-type+)
-              (and (= :primitive (:kind callee-type))
-                   (= :xt/any (:name callee-type))))
-        (result types/+unknown-type+ errors)
-        (result types/+unknown-type+
-                (conj errors
-                      {:tag :not-callable
-                       :form form
-                       :actual (types/type->data callee-type)}))))))
+                       :else
+                       (:type (infer-type callee ctx)))
+         arg-results (mapv #(infer-type % ctx) args)
+         errors (vec (mapcat :errors arg-results))
+         callee-type (resolve-type callee-type ctx)
+         callable-types (callable-types callee-type ctx)
+         wildcard? (wildcard-callable? callee-type ctx)]
+     (if (seq callable-types)
+       (let [arity-types (filterv #(optional-arity? (:inputs %) (count args) ctx)
+                                  callable-types)]
+         (if (seq arity-types)
+           (let [passing-types (filterv (fn [fn-type]
+                                          (every? true?
+                                                  (map #(compatible-type? (:type %1) %2 ctx)
+                                                       arg-results
+                                                       (take (count args) (:inputs fn-type)))))
+                                        arity-types)
+                 chosen-types (if (seq passing-types) passing-types arity-types)
+                 arg-errors (if (seq passing-types)
+                              []
+                              (call-arg-errors arg-results
+                                               (take (count args) (:inputs (first arity-types)))
+                                               args
+                                               ctx))]
+             (result (types/union-type (map :output chosen-types))
+                     (concat errors arg-errors)))
+           (if wildcard?
+             (result types/+unknown-type+ errors)
+             (result types/+unknown-type+
+                     (concat errors
+                             [{:tag :call-arity-mismatch
+                               :form form
+                               :expected (mapv #(count (:inputs %)) callable-types)
+                               :actual (count args)}])))))
+       (if wildcard?
+         (result types/+unknown-type+ errors)
+         (result types/+unknown-type+
+                 (conj errors
+                       {:tag :not-callable
+                        :form form
+                        :actual (types/type->data callee-type)}))))))
 
 (defn infer-get-key
   [[_ obj-expr key-expr default-expr] ctx]
@@ -831,6 +987,18 @@
     (infer-get-path (list 'x:get-path obj-expr key-or-path nil) ctx)
     (infer-get-key (list 'x:get-key obj-expr key-or-path) ctx)))
 
+(defn infer-free
+  [[_ & args] ctx]
+  (if-let [value (first args)]
+    (infer-type value ctx)
+    (result types/+unknown-type+)))
+
+(defn infer-keyword-call
+  [[callee target default-expr] ctx]
+  (if (some? default-expr)
+    (infer-get-key (list 'x:get-key target callee default-expr) ctx)
+    (infer-get-key (list 'x:get-key target callee) ctx)))
+
 (defn infer-body
   [body ctx]
   (loop [last-type types/+nil-type+
@@ -881,12 +1049,13 @@
              intrinsic-out
             (if builtin-out
               builtin-out
-              (case op
-                do (infer-body (rest form) ctx)
-                return (infer-type (second form) ctx)
-                let (infer-let form ctx)
-                var (infer-binding-form form ctx)
-                := (infer-binding-form form ctx)
+               (case op
+                 :- (infer-free form ctx)
+                 do (infer-body (rest form) ctx)
+                 return (infer-type (second form) ctx)
+                 let (infer-let form ctx)
+                 var (infer-binding-form form ctx)
+                 := (infer-binding-form form ctx)
                 if (infer-if form ctx)
                 when (infer-when form ctx)
                 fn (infer-anon-fn form ctx)
@@ -901,16 +1070,18 @@
                 or (infer-or form ctx)
                 not (result types/+bool-type+
                             (merge-errors (infer-type (second form) ctx)))
-                xt.lang.base-lib/not-empty? (result types/+bool-type+
+                 xt.lang.base-lib/not-empty? (result types/+bool-type+
+                                                     (merge-errors (infer-type (second form) ctx)))
+                 xt.lang.base-lib/is-empty? (result types/+bool-type+
                                                     (merge-errors (infer-type (second form) ctx)))
-                xt.lang.base-lib/is-empty? (result types/+bool-type+
-                                                   (merge-errors (infer-type (second form) ctx)))
-                xt.lang.base-lib/arrayify (let [arg-out (infer-type (second form) ctx)
-                                                arg-type (arrayify-type (:type arg-out) ctx)]
-                                            (result arg-type
-                                                    (:errors arg-out)))
-                xt.lang.event-common/make-container (infer-make-container form ctx)
-                (infer-function-call form ctx)))))))
+                 xt.lang.base-lib/arrayify (let [arg-out (infer-type (second form) ctx)
+                                                 arg-type (arrayify-type (:type arg-out) ctx)]
+                                             (result arg-type
+                                                     (:errors arg-out)))
+                 xt.lang.event-common/make-container (infer-make-container form ctx)
+                 (if (keyword? op)
+                   (infer-keyword-call form ctx)
+                   (infer-function-call form ctx))))))))
 
     :else
     (result types/+unknown-type+

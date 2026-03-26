@@ -78,7 +78,7 @@
   (let [value-out ((:infer-type callbacks) value ctx)]
     (intrinsic-result callbacks
                       {:kind :fn
-                       :inputs [types/+unknown-type+]
+                       :inputs []
                        :output (:type value-out)}
                       (:errors value-out))))
 

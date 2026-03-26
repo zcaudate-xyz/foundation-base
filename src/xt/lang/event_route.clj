@@ -62,7 +62,7 @@
   [:fn [RouteTree] RouteInterim])
 
 (defspec.xt changed-params-raw
-  [:fn [RouteParamMap RouteParamMap] RouteDiff])
+  [:fn [[:xt/maybe RouteParamMap] [:xt/maybe RouteParamMap]] RouteDiff])
 
 (defspec.xt changed-params
   [:fn [RouteTree RouteTree [:xt/maybe RoutePath]] RouteDiff])
@@ -228,7 +228,7 @@
   (var #{params} tree)
   (var path (-/path-from-tree tree))
   (return {:path path
-           :params params}))
+           :params (or params {})}))
 
 (defn.xt changed-params-raw
   "checks for changed params"

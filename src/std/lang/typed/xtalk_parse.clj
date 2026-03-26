@@ -26,7 +26,7 @@
 (defn defn?
   [form]
   (and (seq? form)
-       (#{"defn" "defn-" "defn.xt"} (name (first form)))))
+       (#{"defn" "defn-" "defn.xt" "defgen.xt"} (name (first form)))))
 
 (defn parse-ns-name
   [forms]
@@ -92,6 +92,26 @@
   (when-let [ret (get (meta sym) :-)]
     (types/normalize-return-meta ret ctx)))
 
+(defn binding-symbols
+  [form]
+  (cond
+    (symbol? form)
+    (if (#{'& 'as} form)
+      []
+      [form])
+
+    (vector? form)
+    (mapcat binding-symbols form)
+
+    (map? form)
+    (mapcat binding-symbols (concat (keys form) (vals form)))
+
+    (seq? form)
+    (mapcat binding-symbols form)
+
+    :else
+    []))
+
 (defn parse-fn-inputs
   [args-form ctx]
   (loop [out []
@@ -111,14 +131,23 @@
                nil
                more)
         (throw (ex-info "Expected symbol after typed arg token"
-                        {:pending pending
-                         :item item
-                         :args args-form})))
+                         {:pending pending
+                          :item item
+                          :args args-form})))
 
-      (arg-from-inline-form item ctx)
-      (recur (conj out (arg-from-inline-form item ctx))
-             nil
-             more)
+       (= '& item)
+       (let [rest-target (first more)
+             syms (binding-symbols rest-target)]
+         (recur (into out
+                      (map #(types/make-arg % types/+unknown-type+ []))
+                      syms)
+                nil
+                nil))
+
+       (arg-from-inline-form item ctx)
+       (recur (conj out (arg-from-inline-form item ctx))
+              nil
+              more)
 
       (symbol? item)
       (let [declared (arg-declared-type item ctx)]
@@ -134,15 +163,24 @@
                  nil
                  more)))
 
-      (or (keyword? item)
-          (vector? item))
-      (recur out
-             (types/normalize-type item ctx)
-             more)
+       (or (keyword? item)
+           (and (vector? item)
+                (symbol? (first more))))
+       (recur out
+              (types/normalize-type item ctx)
+              more)
 
-      :else
-      (throw (ex-info "Unsupported function arg form"
-                      {:item item
+       (or (vector? item)
+           (map? item))
+       (recur (into out
+                    (map #(types/make-arg % types/+unknown-type+ []))
+                    (binding-symbols item))
+              nil
+              more)
+
+       :else
+       (throw (ex-info "Unsupported function arg form"
+                       {:item item
                        :args args-form})))))
 
 (defn parse-spec-decl
@@ -153,44 +191,52 @@
                          (types/normalize-type type-form ctx)
                          spec-meta)))
 
+(defn parse-decl-preamble
+  [items form-sym]
+  (let [[docstring items] (if (string? (first items))
+                            [(first items) (rest items)]
+                            [nil items])
+        [attr-map items] (if (map? (first items))
+                           [(first items) (rest items)]
+                           [nil items])]
+    {:docstring docstring
+     :attr-map attr-map
+     :items items
+     :meta (cond-> (merge attr-map (meta form-sym))
+             docstring (assoc :docstring docstring))}))
+
 (defn parse-defspec
   [form ns-sym aliases]
   (let [[_ spec-sym & more] form
-        [docstring more] (if (string? (first more))
-                           [(first more) (rest more)]
-                           [nil more])
-        [attr-map more] (if (map? (first more))
-                          [(first more) (rest more)]
-                          [nil more])
-        spec-meta (cond-> (merge (meta spec-sym) attr-map)
-                    docstring (assoc :docstring docstring))
-        type-form (first more)]
-    (parse-spec-decl ns-sym spec-sym type-form spec-meta aliases)))
+        {:keys [meta items]} (parse-decl-preamble more spec-sym)
+        type-form (first items)]
+    (parse-spec-decl ns-sym spec-sym type-form meta aliases)))
 
 (defn parse-defn
   [form ns-sym aliases]
   (let [[_ fn-sym & more] form
-        [docstring more] (if (string? (first more))
-                           [(first more) (rest more)]
-                           [nil more])
-        [attr-map more] (if (map? (first more))
-                          [(first more) (rest more)]
-                          [nil more])
-        args-form (first more)
-        body (rest more)
+        {:keys [meta items]} (parse-decl-preamble more fn-sym)
+        [args-form body] (cond
+                           (vector? (first items))
+                           [(first items) (rest items)]
+
+                           (and (seq? (first items))
+                                (vector? (ffirst items)))
+                           [(ffirst items) (rest (first items))]
+
+                           :else
+                           [(first items) (rest items)])
         ctx {:ns ns-sym
-             :aliases aliases}
-        output (if-let [ret (get (merge (meta fn-sym) attr-map) :-)]
-                 (types/normalize-return-meta ret ctx)
-                 types/+unknown-type+)]
+              :aliases aliases}
+        output (if-let [ret (get meta :-)]
+                  (types/normalize-return-meta ret ctx)
+                  types/+unknown-type+)]
     (types/make-fn-def ns-sym fn-sym
-                       (parse-fn-inputs args-form ctx)
-                       output
-                       (cond-> (merge attr-map (meta fn-sym))
-                         docstring (assoc :docstring docstring)
-                         true (assoc :aliases aliases))
-                       body
-                       nil)))
+                        (parse-fn-inputs args-form ctx)
+                        output
+                        (assoc meta :aliases aliases)
+                        body
+                        nil)))
 
 (defn merge-spec-inputs
   [inputs spec-inputs]
