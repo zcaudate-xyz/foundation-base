@@ -1,6 +1,6 @@
 (ns rt.postgres.supabase-test
   (:require [net.http :as http]
-            [rt.postgres.grammar :as grammar]
+            [rt.postgres.base.grammar :as grammar]
             [rt.postgres.supabase :as s]
             [std.lang :as l])
   (:use code.test))
@@ -8,7 +8,7 @@
 (l/script- :postgres
   {:require [[rt.postgres :as pg]
              [rt.postgres.supabase :as s]
-             [rt.postgres.script.test.scratch-v1 :as scratch]]})
+             [rt.postgres.test.scratch-v1 :as scratch]]})
 
 ^{:refer rt.postgres.supabase/create-role :added "4.0"}
 (fact "creates a role"

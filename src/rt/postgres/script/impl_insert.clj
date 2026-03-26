@@ -1,5 +1,5 @@
 (ns rt.postgres.script.impl-insert
-  (:require [rt.postgres.grammar.common-tracker :as tracker]
+  (:require [rt.postgres.base.grammar.common-tracker :as tracker]
             [rt.postgres.script.impl-base :as base]
             [std.lang :as l]
             [std.lang.base.emit-preprocess :as preprocess]

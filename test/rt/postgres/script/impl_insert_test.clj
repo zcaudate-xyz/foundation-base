@@ -1,6 +1,6 @@
 (ns rt.postgres.script.impl-insert-test
-  (:require [rt.postgres.grammar.common-application :as app]
-            [rt.postgres.grammar.common-tracker :as tracker]
+  (:require [rt.postgres.base.application :as app]
+            [rt.postgres.base.grammar.common-tracker :as tracker]
             [rt.postgres.script.impl-base :as base]
             [rt.postgres.script.impl-insert :as insert]
             [std.lang :as l]
@@ -8,7 +8,7 @@
   (:use code.test))
 
 (l/script- :postgres
-  {:require [[rt.postgres.script.test.scratch-v1 :as scratch]]
+  {:require [[rt.postgres.test.scratch-v1 :as scratch]]
    :static {:application ["scratch"]
             :seed        ["scratch"]
             :all    {:schema   ["scratch"]}}})
@@ -37,7 +37,7 @@
                           [:name :status :cache]
                           (tracker/add-tracker {:track 'o-op}
                                             (:static/tracker @scratch/Task)
-                                            rt.postgres.script.test.scratch-v1/Task
+                                            rt.postgres.test.scratch-v1/Task
                                             :insert)
                           (last (base/prep-table 'scratch/Task true (l/rt:macro-opts :postgres))))
   => '[(>-< [#{"status"}
@@ -48,7 +48,7 @@
               #{"time_created"}
               #{"time_updated"}])
        :values
-       (>-< [(++ (:->> sym "status") rt.postgres.script.test.scratch-v1/EnumStatus)
+       (>-< [(++ (:->> sym "status") rt.postgres.test.scratch-v1/EnumStatus)
               (:text (:->> sym "name"))
               (:uuid (coalesce (:->> sym "cache_id")
                                (:->> (:-> sym "cache") "id")))
@@ -67,7 +67,7 @@
                         :cache "cache-aaa"}
                        (tracker/add-tracker {:track 'o-op}
                                             (:static/tracker @scratch/Task)
-                                            rt.postgres.script.test.scratch-v1/Task
+                                            rt.postgres.test.scratch-v1/Task
                                             :insert)
                        (last (base/prep-table 'scratch/Task true (l/rt:macro-opts :postgres))))
   => '[(>-< [#{"status"}
@@ -77,7 +77,7 @@
               #{"op_updated"}
               #{"time_created"}
               #{"time_updated"}])
-       :values (>-< [(++ "pending" rt.postgres.script.test.scratch-v1/EnumStatus)
+       :values (>-< [(++ "pending" rt.postgres.test.scratch-v1/EnumStatus)
                       (:text "hello")
                       (:uuid "cache-aaa")
                       (:uuid (:->> o-op "id"))
@@ -90,17 +90,17 @@
   ^:hidden
   
   (insert/t-insert-record
-   'rt.postgres.script.test.scratch-v1/Task
+   'rt.postgres.test.scratch-v1/Task
    'e
    (tracker/add-tracker {:track 'o-op}
                         
                         (:static/tracker @scratch/Task)
-                        rt.postgres.script.test.scratch-v1/Task
+                        rt.postgres.test.scratch-v1/Task
                         :insert))
   => '[:select *
        :from
        (jsonb-populate-record
-        (++ nil rt.postgres.script.test.scratch-v1/Task)
+        (++ nil rt.postgres.test.scratch-v1/Task)
         (|| e
             {:op-created (:->> o-op "id"),
              :op-updated (:->> o-op "id"),
@@ -118,7 +118,7 @@
     :cache "id"}
    (tracker/add-tracker {:track 'o-op}
                         (:static/tracker @scratch/Task)
-                        rt.postgres.script.test.scratch-v1/Task
+                        rt.postgres.test.scratch-v1/Task
                         :insert))
   => vector?)
 
@@ -136,7 +136,7 @@
        j-ret
        :as
        [:insert-into
-        rt.postgres.script.test.scratch-v1/Task
+        rt.postgres.test.scratch-v1/Task
         (>-<
          [#{"status"}
           #{"name"}
@@ -147,7 +147,7 @@
           #{"time_updated"}])
         :values
         (>-<
-         [(++ "pending" rt.postgres.script.test.scratch-v1/EnumStatus)
+         [(++ "pending" rt.postgres.test.scratch-v1/EnumStatus)
           (:text "hello")
           (:uuid "id")
           (:uuid (:->> o-op "id"))
@@ -179,9 +179,9 @@
     :cache "id"}
    (tracker/add-tracker {:track 'o-op}
                         (:static/tracker @scratch/Task)
-                        rt.postgres.script.test.scratch-v1/Task
+                        rt.postgres.test.scratch-v1/Task
                         :insert))
-  => '[:with j-ret :as [:insert-into rt.postgres.script.test.scratch-v1/Task (>-< [#{"status"} #{"name"} #{"cache_id"} #{"op_created"} #{"op_updated"} #{"time_created"} #{"time_updated"}]) :values (>-< [(++ "pending" rt.postgres.script.test.scratch-v1/EnumStatus) (:text "hello") (:uuid "id") (:uuid (:->> o-op "id")) (:uuid (:->> o-op "id")) (:bigint (:->> o-op "time")) (:bigint (:->> o-op "time"))]) :on-conflict (quote (#{"id"})) :do-update :set (quote (#{"status"} #{"name"} #{"cache_id"} #{"op_updated"} #{"time_updated"})) := (row (. (:- "EXCLUDED") #{"status"}) (. (:- "EXCLUDED") #{"name"}) (. (:- "EXCLUDED") #{"cache_id"}) (. (:- "EXCLUDED") #{"op_updated"}) (. (:- "EXCLUDED") #{"time_updated"})) :returning (--- [#{"id"} #{"status"} #{"name"} #{"cache_id"} #{"time_created"} #{"time_updated"}])] \\ :select (to-jsonb j-ret) :from j-ret])
+  => '[:with j-ret :as [:insert-into rt.postgres.test.scratch-v1/Task (>-< [#{"status"} #{"name"} #{"cache_id"} #{"op_created"} #{"op_updated"} #{"time_created"} #{"time_updated"}]) :values (>-< [(++ "pending" rt.postgres.test.scratch-v1/EnumStatus) (:text "hello") (:uuid "id") (:uuid (:->> o-op "id")) (:uuid (:->> o-op "id")) (:bigint (:->> o-op "time")) (:bigint (:->> o-op "time"))]) :on-conflict (quote (#{"id"})) :do-update :set (quote (#{"status"} #{"name"} #{"cache_id"} #{"op_updated"} #{"time_updated"})) := (row (. (:- "EXCLUDED") #{"status"}) (. (:- "EXCLUDED") #{"name"}) (. (:- "EXCLUDED") #{"cache_id"}) (. (:- "EXCLUDED") #{"op_updated"}) (. (:- "EXCLUDED") #{"time_updated"})) :returning (--- [#{"id"} #{"status"} #{"name"} #{"cache_id"} #{"time_created"} #{"time_updated"}])] \\ :select (to-jsonb j-ret) :from j-ret])
 
 ^{:refer rt.postgres.script.impl-insert/t-upsert :added "4.0"}
 (fact "constructs an upsert form"
@@ -193,4 +193,4 @@
                       :status "pending"
                       :cache "id"}
                      {:track 'o-op}))
-  => '[:with j-ret :as [:insert-into rt.postgres.script.test.scratch-v1/Task (>-< [#{"status"} #{"name"} #{"cache_id"} #{"op_created"} #{"op_updated"} #{"time_created"} #{"time_updated"}]) :values (>-< [(++ "pending" rt.postgres.script.test.scratch-v1/EnumStatus) (:text "hello") (:uuid "id") (:uuid (:->> o-op "id")) (:uuid (:->> o-op "id")) (:bigint (:->> o-op "time")) (:bigint (:->> o-op "time"))]) :on-conflict (quote (#{"id"})) :do-update :set (quote (#{"status"} #{"name"} #{"cache_id"} #{"op_updated"} #{"time_updated"})) := (row (. (:- "EXCLUDED") #{"status"}) (. (:- "EXCLUDED") #{"name"}) (. (:- "EXCLUDED") #{"cache_id"}) (. (:- "EXCLUDED") #{"op_updated"}) (. (:- "EXCLUDED") #{"time_updated"})) :returning (--- [#{"id"} #{"status"} #{"name"} #{"cache_id"} #{"time_created"} #{"time_updated"}])] \\ :select (to-jsonb j-ret) :from j-ret])
+  => '[:with j-ret :as [:insert-into rt.postgres.test.scratch-v1/Task (>-< [#{"status"} #{"name"} #{"cache_id"} #{"op_created"} #{"op_updated"} #{"time_created"} #{"time_updated"}]) :values (>-< [(++ "pending" rt.postgres.test.scratch-v1/EnumStatus) (:text "hello") (:uuid "id") (:uuid (:->> o-op "id")) (:uuid (:->> o-op "id")) (:bigint (:->> o-op "time")) (:bigint (:->> o-op "time"))]) :on-conflict (quote (#{"id"})) :do-update :set (quote (#{"status"} #{"name"} #{"cache_id"} #{"op_updated"} #{"time_updated"})) := (row (. (:- "EXCLUDED") #{"status"}) (. (:- "EXCLUDED") #{"name"}) (. (:- "EXCLUDED") #{"cache_id"}) (. (:- "EXCLUDED") #{"op_updated"}) (. (:- "EXCLUDED") #{"time_updated"})) :returning (--- [#{"id"} #{"status"} #{"name"} #{"cache_id"} #{"time_created"} #{"time_updated"}])] \\ :select (to-jsonb j-ret) :from j-ret])

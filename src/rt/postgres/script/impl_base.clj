@@ -1,6 +1,6 @@
 (ns rt.postgres.script.impl-base
-  (:require [rt.postgres.grammar.common :as common]
-            [rt.postgres.grammar.common-application :as app]
+  (:require [rt.postgres.base.grammar.common :as common]
+            [rt.postgres.base.application :as app]
             [std.lang :as l]
             [std.lang.base.book :as book]
             [std.lang.base.emit-common :as emit-common]

@@ -1,16 +1,16 @@
 (ns rt.postgres.script.graph-test
-  (:require [rt.postgres.grammar.common-application :as app]
+  (:require [rt.postgres.base.application :as app]
             [rt.postgres.script.graph :refer :all]
             [rt.postgres.script.graph-view :as view]
             [rt.postgres.script.impl-base :as impl]
-            [rt.postgres.script.test.scratch-v1 :as scratch]
+            [rt.postgres.test.scratch-v1 :as scratch]
             [std.lang :as l]
             [std.lib.foundation :as f]
             [std.lib.schema :as schema])
   (:use code.test))
 
 (l/script- :postgres
-  {:require [[rt.postgres.script.test.scratch-v1 :as scratch]
+  {:require [[rt.postgres.test.scratch-v1 :as scratch]
              [rt.postgres :as pg]]
    :static {:application ["scratch"]
             :seed        ["scratch"]
@@ -60,7 +60,7 @@
 (fact  "constructs the modify form"
   ^:hidden
 
-  (binding [rt.postgres.grammar.form-let/*input-syms* (volatile! #{'o-op})]
+  (binding [rt.postgres.base.grammar.form-let/*input-syms* (volatile! #{'o-op})]
     (pg/g:modify scratch/Task
       {:set {:name "name"}
        :where {:id (str (f/uuid-nil))}
@@ -78,7 +78,7 @@
 (fact "constructs an insert form"
   ^:hidden
   
-  (binding [rt.postgres.grammar.form-let/*input-syms* (volatile! #{'o-op})]
+  (binding [rt.postgres.base.grammar.form-let/*input-syms* (volatile! #{'o-op})]
     (pg/g:insert scratch/Task
       {:name "name"
        :status "pending"

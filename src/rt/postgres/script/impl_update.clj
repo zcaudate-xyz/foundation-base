@@ -1,7 +1,7 @@
 (ns rt.postgres.script.impl-update
   (:require [clojure.set]
-            [rt.postgres.grammar.common :as common]
-            [rt.postgres.grammar.common-tracker :as tracker]
+            [rt.postgres.base.grammar.common :as common]
+            [rt.postgres.base.grammar.common-tracker :as tracker]
             [rt.postgres.script.impl-base :as base]
             [std.lang :as l]
             [std.lang.base.util :as ut]

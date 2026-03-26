@@ -1,6 +1,6 @@
 (ns rt.postgres-test
   (:require [rt.postgres :as pg]
-            [rt.postgres.grammar.common-application :as app]
+            [rt.postgres.base.application :as app]
             [std.lang :as l])
   (:use code.test))
 

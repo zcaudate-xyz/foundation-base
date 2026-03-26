@@ -1,7 +1,7 @@
 (ns rt.postgres.supabase
   (:require [clojure.string]
             [net.http :as http]
-            [rt.postgres.grammar.common :as common]
+            [rt.postgres.base.grammar.common :as common]
             [rt.postgres.script.addon :as addon]
             [std.json :as json]
             [std.lang :as l]

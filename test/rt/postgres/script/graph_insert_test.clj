@@ -1,8 +1,8 @@
 (ns rt.postgres.script.graph-insert-test
-  (:require [rt.postgres.grammar.common-application :as app]
+  (:require [rt.postgres.base.application :as app]
             [rt.postgres.script.graph-insert :as insert]
             [rt.postgres.script.impl-base :as impl]
-            [rt.postgres.script.test.scratch-v1 :as scratch]
+            [rt.postgres.test.scratch-v1 :as scratch]
             [std.lang :as l]
             [std.lib.collection :as collection]
             [std.lib.schema :as schema]
@@ -10,7 +10,7 @@
   (:use code.test))
 
 (l/script- :postgres
-  {:require [[rt.postgres.script.test.scratch-v1 :as scratch]]
+  {:require [[rt.postgres.test.scratch-v1 :as scratch]]
    :static {:application ["scratch"]
             :seed        ["scratch"]
             :all    {:schema   ["scratch"]}}})

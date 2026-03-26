@@ -1,7 +1,7 @@
 (ns rt.postgres.script.addon-test
   (:require [rt.postgres :as pg]
             [rt.postgres.script.addon :as addon]
-            [rt.postgres.script.test.scratch-v1 :as scratch]
+            [rt.postgres.test.scratch-v1 :as scratch]
             [std.lang :as l])
   (:use code.test))
 
@@ -9,7 +9,7 @@
   {:runtime :jdbc.client
    :config  {:dbname "test-scratch"}
    :require [[rt.postgres :as pg]
-             [rt.postgres.script.test.scratch-v1 :as scratch]]
+             [rt.postgres.test.scratch-v1 :as scratch]]
    :import [["pgcrypto"]]})
 
 ;; Removed global setup to avoid connection attempt

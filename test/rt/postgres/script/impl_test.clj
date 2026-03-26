@@ -1,10 +1,10 @@
 (ns rt.postgres.script.impl-test
   (:require [rt.postgres :as pg]
-            [rt.postgres.grammar.common-application :as app]
-            [rt.postgres.grammar.common-tracker :as tracker]
+            [rt.postgres.base.application :as app]
+            [rt.postgres.base.grammar.common-tracker :as tracker]
             [rt.postgres.script.impl :as impl]
             [rt.postgres.script.impl-main :as main]
-            [rt.postgres.script.test.scratch-v1 :as scratch]
+            [rt.postgres.test.scratch-v1 :as scratch]
             [std.lang :as l]
             [std.lang.base.book :as book]
             [std.lib.collection :as collection]
@@ -15,7 +15,7 @@
   {:runtime :jdbc.client
    :config  {:dbname "test-scratch"}
    :require [[rt.postgres :as pg]
-             [rt.postgres.script.test.scratch-v1 :as scratch]]})
+             [rt.postgres.test.scratch-v1 :as scratch]]})
 
 ;; Removed global setup to avoid connection attempt
 

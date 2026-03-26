@@ -1,9 +1,9 @@
 (ns rt.postgres
-  (:require [rt.postgres.client :as client]
-            [rt.postgres.client-impl :as client-impl]
-            [rt.postgres.typed-analysis :as typed-analysis]
-            [rt.postgres.gen-bind]
-            [rt.postgres.grammar.common-application :as app]
+  (:require [rt.postgres.runtime.client :as client]
+            [rt.postgres.runtime.client-impl :as client-impl]
+            [rt.postgres.base.typed :as typed-analysis]
+            [rt.postgres.base.grammar.gen-bind]
+            [rt.postgres.base.application :as app]
             [rt.postgres.script.addon]
             [rt.postgres.script.builtin]
             [rt.postgres.script.graph]
@@ -18,7 +18,7 @@
               rt.postgres.script.addon
               rt.postgres.script.impl
               rt.postgres.script.graph
-              rt.postgres.gen-bind)
+              rt.postgres.base.grammar.gen-bind)
 
 (f/intern-in client/rt-add-notify
              client/rt-remove-notify
@@ -56,11 +56,11 @@
   {:added "4.0"}
   []
   (do (l/delete-module! (l/default-library) {:lang :postgres
-                                             :id 'rt.postgres.script.test.scratch-v1})
+                                             :id 'rt.postgres.test.scratch-v1})
       (l/delete-module! (l/runtime-library) {:lang :postgres
-                                             :id 'rt.postgres.script.test.scratch-v1})
+                                             :id 'rt.postgres.test.scratch-v1})
       (app/app-clear "scratch-v1")
       (require 'jvm.namespace)
-      (eval '(jvm.namespace/reset '[rt.postgres.script.test.scratch-v1]))))
+      (eval '(jvm.namespace/reset '[rt.postgres.test.scratch-v1]))))
 
 (comment)

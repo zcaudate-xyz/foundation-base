@@ -1,14 +1,14 @@
 (ns rt.postgres.script.impl-base-test
   (:require [rt.postgres]
-            [rt.postgres.grammar.common-application :as app]
+            [rt.postgres.base.application :as app]
             [rt.postgres.script.impl-base :refer :all]
-            [rt.postgres.script.test.scratch-v1 :as scratch]
+            [rt.postgres.test.scratch-v1 :as scratch]
             [std.lang :as l]
             [std.lang.base.book :as book])
   (:use code.test))
 
 (l/script- :postgres
-  {:require [[rt.postgres.script.test.scratch-v1 :as scratch]]
+  {:require [[rt.postgres.test.scratch-v1 :as scratch]]
    :static {:application ["scratch"]
             :all    {:schema   ["scratch"]}}})
 
@@ -88,7 +88,7 @@
   
   (t-val-fn -tsch-
             :status 'a {} {})
-  => '(++ a rt.postgres.script.test.scratch-v1/EnumStatus)
+  => '(++ a rt.postgres.test.scratch-v1/EnumStatus)
   
   (t-val-fn -tsch-
             :cache 'a {}
@@ -155,7 +155,7 @@
                   {:coalesce true}
                   (last (prep-table 'scratch/Task true (l/rt:macro-opts :postgres))))
   => '(jsonb-build-object "id" (rt.postgres/uuid-generate-v4)
-                          "status" (++ a rt.postgres.script.test.scratch-v1/EnumStatus)
+                          "status" (++ a rt.postgres.test.scratch-v1/EnumStatus)
                           "name" (:text "hello")
                           "cache_id" (:uuid hello)
                           "__deleted__" false))
@@ -170,7 +170,7 @@
                                  :cache hello}
                  {:coalesce true}))
   => '(jsonb-build-object "id" (rt.postgres/uuid-generate-v4)
-                          "status" (++ a rt.postgres.script.test.scratch-v1/EnumStatus)
+                          "status" (++ a rt.postgres.test.scratch-v1/EnumStatus)
                           "name" (:text "hello")
                           "cache_id" (:uuid hello)
                           "__deleted__" false))

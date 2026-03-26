@@ -1,6 +1,6 @@
 (ns rt.postgres.script.graph-query
   (:require [clojure.set]
-            [rt.postgres.grammar.common :as common]
+            [rt.postgres.base.grammar.common :as common]
             [rt.postgres.script.graph-base :as base]
             [rt.postgres.script.impl-base :as impl]
             [rt.postgres.script.impl-main :as main]

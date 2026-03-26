@@ -1,6 +1,6 @@
 (ns rt.postgres.script.graph-insert
   (:require [clojure.string]
-            [rt.postgres.grammar.common-application :as app]
+            [rt.postgres.base.application :as app]
             [rt.postgres.script.graph-walk :as walk]
             [rt.postgres.script.impl-base :as base]
             [rt.postgres.script.impl-insert :as insert]

@@ -1,5 +1,5 @@
 (ns rt.postgres.script.builtin
-  (:require [rt.postgres.grammar]
+  (:require [rt.postgres.base.grammar]
             [std.lang :as l]
             [std.lib.foundation :as f]
             [std.lib.template :as template])

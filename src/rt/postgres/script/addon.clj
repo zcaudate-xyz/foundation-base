@@ -1,6 +1,6 @@
 (ns rt.postgres.script.addon
-  (:require [rt.postgres.grammar.common :as common]
-            [rt.postgres.grammar.tf :as tf]
+  (:require [rt.postgres.base.grammar.common :as common]
+            [rt.postgres.base.grammar.tf :as tf]
             [std.json :as json]
             [std.lang :as l]
             [std.lib.template :as template])
