@@ -72,6 +72,60 @@
       (get-in report [:function :name]) => "insert-entry"
       (get-in report [:analysis :mutating]) => true)))
 
+^{:refer rt.postgres.typed/Type :added "4.1"}
+(fact "Type includes grouped nested operations"
+  (typed/clear-registry!)
+  (let [user-table (types/make-table-def "test" "User"
+                                         [(types/make-column-def :id (types/make-type-ref :primitive nil :uuid)
+                                                                 {:required true :primary true})
+                                          (types/make-column-def :handle (types/make-type-ref :primitive nil :text)
+                                                                 {:required true})]
+                                         :id)
+        update-fn (types/make-fn-def "test.core" "update-user-raw"
+                                     [(types/->FnArg 'i-user-id :uuid nil :payload)
+                                      (types/->FnArg 'm :jsonb nil :payload)
+                                      (types/->FnArg 'o-op :jsonb nil :track)]
+                                     [:jsonb]
+                                     {:raw-body '[(pg/t:update User
+                                                              {:set m
+                                                               :where {:id i-user-id}
+                                                               :single true})]}
+                                     "test")
+        create-fn (types/make-fn-def "test.core" "create-user"
+                                     [(types/->FnArg 'i-user-id :uuid nil :payload)
+                                      (types/->FnArg 'm :jsonb nil :payload)
+                                      (types/->FnArg 'o-op :jsonb nil :track)]
+                                     [:jsonb]
+                                     {:raw-body '[(pg/t:insert User
+                                                              {:id i-user-id
+                                                               :handle (:->> m "handle")}
+                                                              {:track o-op})]}
+                                     "test")
+        set-user-fn (types/make-fn-def "test.core" "set-user"
+                                       [(types/->FnArg 'i-user-id :uuid nil :payload)
+                                        (types/->FnArg 'm :jsonb nil :payload)
+                                        (types/->FnArg 'o-op :jsonb nil :track)]
+                                       [:jsonb]
+                                       {:raw-body '[(let [o-user (test.core/update-user-raw i-user-id m o-op)
+                                                          _      (when [o-user :is-null]
+                                                                   (return (test.core/create-user i-user-id m o-op)))]
+                                                      (return o-user))]}
+                                       "test")
+        wrapper-fn (types/make-fn-def "test.rpc" "user-set-handle"
+                                      [(types/->FnArg 'handle :text nil :payload)]
+                                      [:jsonb]
+                                      {:raw-body '[(test.core/set-user auth-user-id {:handle handle} auth-op)]}
+                                      "test.rpc")]
+    (typed/register-type! 'test/User user-table)
+    (typed/register-type! 'test.core/update-user-raw update-fn)
+    (typed/register-type! 'test.core/create-user create-fn)
+    (typed/register-type! 'test.core/set-user set-user-fn)
+    (typed/register-type! 'test.rpc/user-set-handle wrapper-fn)
+    (let [report (typed/Type wrapper-fn)]
+      (get-in report [:analysis :mutating]) => true
+      (get-in report [:analysis :operations-by-type "update" 0 :table]) => "User"
+      (get-in report [:analysis :operations-by-type "insert" 0 :table]) => "User")))
+
 ^{:refer rt.postgres.typed/inferred->shape :added "4.1"}
 (fact "inferred->shape unwraps shaped inference results"
   (let [shape (types/make-jsonb-shape {:id {:type :uuid}} "Entry")]

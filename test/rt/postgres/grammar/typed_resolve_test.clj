@@ -29,6 +29,14 @@
     (typed-resolve/resolve-called-fn 'x/inner {'x 'demo})
     => ['demo/inner fn-def]))
 
+^{:refer rt.postgres.grammar.typed-resolve/resolve-called-fn :added "4.1"}
+(fact "resolve-called-fn keeps qualified lookups namespace-strict"
+  (types/clear-registry!)
+  (let [rpc-fn (types/make-fn-def "demo.rpc" "user-set-handle" [] [:jsonb] {} nil)]
+    (types/register-type! 'demo.rpc/user-set-handle rpc-fn)
+    (typed-resolve/resolve-called-fn 'fuc/user-set-handle {})
+    => ['fuc/user-set-handle nil]))
+
 ^{:refer rt.postgres.grammar.typed-resolve/resolve-function-def :added "4.1"}
 (fact "resolve-function-def returns registered function definitions"
   (let [fn-def (types/make-fn-def "demo" "inner" [] [:jsonb] {} nil)]

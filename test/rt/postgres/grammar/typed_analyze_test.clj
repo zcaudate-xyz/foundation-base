@@ -23,6 +23,60 @@
              :linked true
              :table "Entry"}]))
 
+^{:refer rt.postgres.grammar.typed-analyze/detect-operations :added "4.1"}
+(fact "detect-operations follows nested function calls"
+  (types/clear-registry!)
+  (let [user-table (types/make-table-def "test" "User"
+                                         [(types/make-column-def :id (types/make-type-ref :primitive nil :uuid)
+                                                                 {:required true :primary true})
+                                          (types/make-column-def :handle (types/make-type-ref :primitive nil :text)
+                                                                 {:required true})]
+                                         :id)
+        update-fn (types/make-fn-def "test.core" "update-user-raw"
+                                     [(types/->FnArg 'i-user-id :uuid nil :payload)
+                                      (types/->FnArg 'm :jsonb nil :payload)
+                                      (types/->FnArg 'o-op :jsonb nil :track)]
+                                     [:jsonb]
+                                     {:raw-body '[(pg/t:update User
+                                                              {:set m
+                                                               :where {:id i-user-id}
+                                                               :single true})]}
+                                     "test")
+        create-fn (types/make-fn-def "test.core" "create-user"
+                                     [(types/->FnArg 'i-user-id :uuid nil :payload)
+                                      (types/->FnArg 'm :jsonb nil :payload)
+                                      (types/->FnArg 'o-op :jsonb nil :track)]
+                                     [:jsonb]
+                                     {:raw-body '[(pg/t:insert User
+                                                              {:id i-user-id
+                                                               :handle (:->> m "handle")}
+                                                              {:track o-op})]}
+                                     "test")
+        set-user-fn (types/make-fn-def "test.core" "set-user"
+                                       [(types/->FnArg 'i-user-id :uuid nil :payload)
+                                        (types/->FnArg 'm :jsonb nil :payload)
+                                        (types/->FnArg 'o-op :jsonb nil :track)]
+                                       [:jsonb]
+                                       {:raw-body '[(let [o-user (test.core/update-user-raw i-user-id m o-op)
+                                                          _      (when [o-user :is-null]
+                                                                   (return (test.core/create-user i-user-id m o-op)))]
+                                                      (return o-user))]}
+                                       "test")
+        wrapper-fn (types/make-fn-def "test.rpc" "user-set-handle"
+                                      [(types/->FnArg 'handle :text nil :payload)]
+                                      [:jsonb]
+                                      {:raw-body '[(test.core/set-user auth-user-id {:handle handle} auth-op)]}
+                                      "test.rpc")]
+    (types/register-type! 'test/User user-table)
+    (types/register-type! 'test.core/update-user-raw update-fn)
+    (types/register-type! 'test.core/create-user create-fn)
+    (types/register-type! 'test.core/set-user set-user-fn)
+    (types/register-type! 'test.rpc/user-set-handle wrapper-fn)
+    (let [ops (analyze/detect-operations wrapper-fn)]
+      (count ops) => 2
+      (set (map :op ops)) => #{:update :insert}
+      (set (map :table ops)) => #{"User"})))
+
 ^{:refer rt.postgres.grammar.typed-analyze/infer-report :added "4.1"}
 (fact "infer-report returns JSON-friendly plain data"
   (let [report (analyze/infer-report (get-scratch-fn 'insert-entry))]
@@ -30,6 +84,94 @@
     (get-in report [:analysis :mutating]) => true
     (get-in report [:analysis :source-tables]) => ["Entry"]
     (get-in report [:analysis :return :kind]) => "shaped"))
+
+^{:refer rt.postgres.grammar.typed-analyze/infer-report :added "4.1"}
+(fact "infer-report follows alias-qualified same-name functions without false recursion"
+  (types/clear-registry!)
+  (let [user-table (types/make-table-def "test" "User"
+                                         [(types/make-column-def :id
+                                                                 (types/make-type-ref :primitive nil :uuid)
+                                                                 {:required true :primary true})
+                                          (types/make-column-def :handle
+                                                                 (types/make-type-ref :primitive nil :text)
+                                                                 {})]
+                                         :id)
+        core-fn (types/make-fn-def "test.core" "user-set-handle"
+                                   [(types/->FnArg 'i-user-id :uuid nil :payload)
+                                    (types/->FnArg 'i-handle :text nil :payload)
+                                    (types/->FnArg 'o-op :jsonb nil :track)]
+                                   [:jsonb]
+                                   {:raw-body '[(pg/t:update User
+                                                            {:set {:handle i-handle}
+                                                             :where {:id i-user-id}
+                                                             :single true})]}
+                                   "test")
+        rpc-fn (types/make-fn-def "test.rpc" "user-set-handle"
+                                  [(types/->FnArg 'handle :text nil :payload)]
+                                  [:jsonb]
+                                  {:raw-body '[(fuc/user-set-handle auth-user-id handle auth-op)]
+                                   :aliases {'fuc 'test.core}}
+                                  "test.rpc")]
+    (types/register-type! 'test/User user-table)
+    (types/register-type! 'test.core/user-set-handle core-fn)
+    (types/register-type! 'test.rpc/user-set-handle rpc-fn)
+    (let [report (analyze/infer-report rpc-fn)]
+      (get-in report [:analysis :return :kind]) => "shaped"
+      (get-in report [:analysis :return :table]) => "User")))
+
+^{:refer rt.postgres.grammar.typed-analyze/infer-report :added "4.1"}
+(fact "infer-report groups nested operations by type"
+  (types/clear-registry!)
+  (let [user-table (types/make-table-def "test" "User"
+                                         [(types/make-column-def :id (types/make-type-ref :primitive nil :uuid)
+                                                                 {:required true :primary true})
+                                          (types/make-column-def :handle (types/make-type-ref :primitive nil :text)
+                                                                 {:required true})]
+                                         :id)
+        update-fn (types/make-fn-def "test.core" "update-user-raw"
+                                     [(types/->FnArg 'i-user-id :uuid nil :payload)
+                                      (types/->FnArg 'm :jsonb nil :payload)
+                                      (types/->FnArg 'o-op :jsonb nil :track)]
+                                     [:jsonb]
+                                     {:raw-body '[(pg/t:update User
+                                                              {:set m
+                                                               :where {:id i-user-id}
+                                                               :single true})]}
+                                     "test")
+        create-fn (types/make-fn-def "test.core" "create-user"
+                                     [(types/->FnArg 'i-user-id :uuid nil :payload)
+                                      (types/->FnArg 'm :jsonb nil :payload)
+                                      (types/->FnArg 'o-op :jsonb nil :track)]
+                                     [:jsonb]
+                                     {:raw-body '[(pg/t:insert User
+                                                              {:id i-user-id
+                                                               :handle (:->> m "handle")}
+                                                              {:track o-op})]}
+                                     "test")
+        set-user-fn (types/make-fn-def "test.core" "set-user"
+                                       [(types/->FnArg 'i-user-id :uuid nil :payload)
+                                        (types/->FnArg 'm :jsonb nil :payload)
+                                        (types/->FnArg 'o-op :jsonb nil :track)]
+                                       [:jsonb]
+                                       {:raw-body '[(let [o-user (test.core/update-user-raw i-user-id m o-op)
+                                                          _      (when [o-user :is-null]
+                                                                   (return (test.core/create-user i-user-id m o-op)))]
+                                                      (return o-user))]}
+                                       "test")
+        wrapper-fn (types/make-fn-def "test.rpc" "user-set-handle"
+                                      [(types/->FnArg 'handle :text nil :payload)]
+                                      [:jsonb]
+                                      {:raw-body '[(test.core/set-user auth-user-id {:handle handle} auth-op)]}
+                                      "test.rpc")]
+    (types/register-type! 'test/User user-table)
+    (types/register-type! 'test.core/update-user-raw update-fn)
+    (types/register-type! 'test.core/create-user create-fn)
+    (types/register-type! 'test.core/set-user set-user-fn)
+    (types/register-type! 'test.rpc/user-set-handle wrapper-fn)
+    (let [report (analyze/infer-report wrapper-fn)]
+      (get-in report [:analysis :mutating]) => true
+      (get-in report [:analysis :operations-by-type "update" 0 :table]) => "User"
+      (get-in report [:analysis :operations-by-type "insert" 0 :table]) => "User")))
 
 ^{:refer rt.postgres.grammar.typed-analyze/report-json :added "4.1"}
 (fact "report-json serializes a report"

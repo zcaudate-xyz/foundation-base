@@ -1,6 +1,7 @@
 (ns rt.postgres
   (:require [rt.postgres.client :as client]
             [rt.postgres.client-impl :as client-impl]
+            [rt.postgres.typed :as typed]
             [rt.postgres.gen-bind]
             [rt.postgres.grammar.common-application :as app]
             [rt.postgres.script.addon]
@@ -10,7 +11,8 @@
             [rt.postgres.script.impl]
             [std.lang :as l]
             [std.lib.foundation :as f])
-  (:refer-clojure :exclude [abs concat replace reverse mod name case drop update format assert repeat bit-and bit-or count max min]))
+  (:refer-clojure :exclude [abs concat replace reverse mod name case drop update format
+                            assert repeat bit-and bit-or count max min]))
 
 (f/intern-all rt.postgres.script.builtin
               rt.postgres.script.addon
@@ -36,7 +38,9 @@
              app/app-clear
              
              graph-view/defret.pg
-             graph-view/defsel.pg)
+             graph-view/defsel.pg
+
+             typed/Type)
 
 (defn purge-postgres
   "purges the rt.postgres library. Used for debugging"

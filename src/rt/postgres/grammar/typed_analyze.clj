@@ -546,28 +546,49 @@
     (keyword? table-expr)
     (name table-expr)
 
-    :else nil))
+     :else nil))
+
+(defn- fn-cache-key
+  [fn-def]
+  [(or (:ns fn-def) "")
+   (:name fn-def)
+   (:dbschema fn-def)])
+
+(defn- operation-entry
+  [op-sym table-expr]
+  (when-let [{:keys [op returns linked?]} (get +pg-operations+ op-sym)]
+    (let [table-name (normalize-table-name table-expr)]
+      (cond-> {:symbol (str op-sym)
+               :op op
+               :returns returns}
+        linked? (assoc :linked true)
+        table-name (assoc :table table-name)))))
 
 (defn detect-operations
   "Returns a JSON-friendly vector of postgres operations detected in a FnDef body."
   [fn-def]
-  (let [body (get-in fn-def [:body-meta :raw-body])
-        found (volatile! [])]
-    (walk/postwalk
-     (fn [form]
-       (when (seq? form)
-         (let [op-sym (first form)]
-           (when-let [{:keys [op returns linked?]} (get +pg-operations+ op-sym)]
-             (let [table-name (normalize-table-name (second form))]
-               (vswap! found conj
-                       (cond-> {:symbol (str op-sym)
-                                :op op
-                                :returns returns}
-                         linked? (assoc :linked true)
-                         table-name (assoc :table table-name)))))))
-       form)
-     body)
-    (->> @found
+  (letfn [(detect* [fn-def seen]
+            (let [fn-key (fn-cache-key fn-def)]
+              (if (contains? seen fn-key)
+                []
+                (let [body (get-in fn-def [:body-meta :raw-body])
+                      aliases (get-in fn-def [:body-meta :aliases] {})
+                      seen (conj seen fn-key)
+                      found (volatile! [])]
+                  (walk/postwalk
+                   (fn [form]
+                     (when (seq? form)
+                       (let [op-sym (first form)]
+                         (if-let [entry (operation-entry op-sym (second form))]
+                           (vswap! found conj entry)
+                           (when (symbol? op-sym)
+                             (let [[_ called-fn] (resolve-called-fn op-sym aliases)]
+                               (when called-fn
+                                 (vswap! found into (detect* called-fn seen))))))))
+                     form)
+                   body)
+                  @found))))]
+    (->> (detect* fn-def #{})
          distinct
          vec)))
 
@@ -644,6 +665,7 @@
     (or (get @*report-cache* key)
         (let [inferred   (cached-infer fn-def)
               operations (detect-operations fn-def)
+              operations-json (json-safe operations)
               source-tables (->> (concat
                                   (keep :table operations)
                                   [(or (:table inferred)
@@ -660,10 +682,11 @@
                                      :output (json-safe (:output fn-def))
                                      :docstring (get-in fn-def [:body-meta :docstring])
                                      :expose (json-safe (get-in fn-def [:body-meta :expose]))}
-                          :analysis {:mutating mutating?
-                                     :source-tables source-tables
-                                     :operations-detected (json-safe operations)
-                                     :return (inferred->report inferred)}}]
+                           :analysis {:mutating mutating?
+                                      :source-tables source-tables
+                                      :operations-detected operations-json
+                                      :operations-by-type (group-by :op operations-json)
+                                      :return (inferred->report inferred)}}]
           (swap! *report-cache* assoc key report)
           report))))
 

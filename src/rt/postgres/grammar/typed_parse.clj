@@ -217,7 +217,9 @@
         ns-name (-> (str file-path) (str/replace #"^.*src/" "") (str/replace #"\.clj$" "") (str/replace #"/" ".") (str/replace #"_" "-"))
         script-form (some #(when (script? %) %) forms)
         dbschema (when script-form (parse-schema script-form))
-        aliases (when script-form (parse-aliases script-form))]
+        aliases (cond-> (or (when script-form (parse-aliases script-form))
+                            {})
+                  ns-name (assoc '- (symbol ns-name)))]
     (reduce (fn [acc form]
               (cond
                 (deftype? form) (update acc :tables conj (parse-deftype form ns-name dbschema))

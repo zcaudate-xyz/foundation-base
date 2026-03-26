@@ -73,25 +73,37 @@
           (some-> (get d :static/application)
                   app-name-from-static)))))
 
+(defn- namespaced-symbol?
+  [sym]
+  (boolean (and (symbol? sym)
+                (namespace sym))))
+
+(defn- resolve-by-name
+  [op-name]
+  (or (types/get-type (symbol op-name))
+      (first
+       (filter (fn [f]
+                 (and (types/fn-def? f)
+                      (= op-name (:name f))))
+               (vals @types/*type-registry*)))))
+
 (defn resolve-called-fn
   [op aliases]
   (let [op-name (name op)
         op-str (str op)
         resolved-op (if (str/includes? op-str "/")
                       (let [[alias-part fn-part] (str/split op-str #"/")
-                            alias-sym (symbol alias-part)]
-                        (if-let [full-ns (get aliases alias-sym)]
-                          (symbol (str full-ns "/" fn-part))
-                          op))
-                      op)
+                             alias-sym (symbol alias-part)]
+                         (if-let [full-ns (get aliases alias-sym)]
+                           (symbol (str full-ns "/" fn-part))
+                           op))
+                       op)
+        qualified? (or (namespaced-symbol? op)
+                       (namespaced-symbol? resolved-op))
         fn-def (or (types/get-type resolved-op)
                    (types/get-type op)
-                   (types/get-type (symbol op-name))
-                   (first
-                    (filter (fn [f]
-                              (and (types/fn-def? f)
-                                   (= op-name (:name f))))
-                            (vals @types/*type-registry*))))]
+                   (when-not qualified?
+                     (resolve-by-name op-name)))]
     [resolved-op fn-def]))
 
 (defn resolve-function-def
