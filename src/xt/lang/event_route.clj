@@ -1,9 +1,144 @@
 (ns xt.lang.event-route
-  (:require [std.lang :as l]))
+  (:require [std.lang :as l]
+            [std.lang.model.spec-xtalk.typed :refer [defspec.xt]]))
 
 (l/script :xtalk
   {:require [[xt.lang.base-lib :as k]
              [xt.lang.event-common :as event-common]]})
+
+(defspec.xt RoutePath
+  [:array :xt/str])
+
+(defspec.xt RouteParamMap
+  [:dict :xt/str :xt/str])
+
+(defspec.xt RouteParams
+  [:dict :xt/str RouteParamMap])
+
+(defspec.xt RouteInterim
+  [:record
+   [path RoutePath]
+   [params RouteParams]])
+
+(defspec.xt RouteTree
+  [:dict :xt/str :xt/any])
+
+(defspec.xt RouteDiff
+  [:dict :xt/str :xt/bool])
+
+(defspec.xt RouteEvent
+  [:record
+   [type :xt/str]
+   [params RouteDiff]
+   [path RouteDiff]
+   [meta [:maybe xt.lang.event-common/EventListenerMeta]]])
+
+(defspec.xt EventRoute
+  [:record
+   ["::" :xt/str]
+   [listeners xt.lang.event-common/EventListenerMap]
+   [tree RouteTree]
+   [history [:array :xt/str]]])
+
+(defspec.xt interim-from-url
+  [:fn [:xt/str] RouteInterim])
+
+(defspec.xt interim-to-url
+  [:fn [RouteInterim] :xt/str])
+
+(defspec.xt path-to-tree
+  [:fn [RoutePath [:maybe :xt/bool]] RouteTree])
+
+(defspec.xt interim-to-tree
+  [:fn [RouteInterim [:maybe :xt/bool]] RouteTree])
+
+(defspec.xt path-from-tree
+  [:fn [RouteTree] RoutePath])
+
+(defspec.xt path-params-from-tree
+  [:fn [RouteTree RoutePath] RouteParamMap])
+
+(defspec.xt interim-from-tree
+  [:fn [RouteTree] RouteInterim])
+
+(defspec.xt changed-params-raw
+  [:fn [RouteParamMap RouteParamMap] RouteDiff])
+
+(defspec.xt changed-params
+  [:fn [RouteTree RouteTree [:maybe RoutePath]] RouteDiff])
+
+(defspec.xt changed-path-raw
+  [:fn [RoutePath RoutePath] RouteDiff])
+
+(defspec.xt changed-path
+  [:fn [RouteTree RouteTree] RouteDiff])
+
+(defspec.xt get-url
+  [:fn [EventRoute] :xt/str])
+
+(defspec.xt get-segment
+  [:fn [EventRoute RoutePath] [:maybe :xt/str]])
+
+(defspec.xt get-param
+  [:fn [EventRoute :xt/str [:maybe RoutePath]] [:maybe :xt/str]])
+
+(defspec.xt get-all-params
+  [:fn [EventRoute [:maybe RoutePath]] RouteParamMap])
+
+(defspec.xt make-route
+  [:fn [:xt/any] EventRoute])
+
+(defspec.xt add-url-listener
+  [:fn [EventRoute
+        :xt/str
+        [:fn [RouteEvent] :xt/any]
+        [:maybe xt.lang.event-common/EventListenerMeta]]
+       xt.lang.event-common/EventListenerEntry])
+
+(defspec.xt add-path-listener
+  [:fn [EventRoute
+        RoutePath
+        :xt/str
+        [:fn [RouteEvent] :xt/any]
+        [:maybe xt.lang.event-common/EventListenerMeta]]
+       xt.lang.event-common/EventListenerEntry])
+
+(defspec.xt add-param-listener
+  [:fn [EventRoute
+        :xt/str
+        :xt/str
+        [:fn [RouteEvent] :xt/any]
+        [:maybe xt.lang.event-common/EventListenerMeta]]
+       xt.lang.event-common/EventListenerEntry])
+
+(defspec.xt add-full-listener
+  [:fn [EventRoute
+        RoutePath
+        :xt/str
+        :xt/str
+        [:fn [RouteEvent] :xt/any]
+        [:maybe xt.lang.event-common/EventListenerMeta]]
+       xt.lang.event-common/EventListenerEntry])
+
+(defspec.xt set-url
+  [:fn [EventRoute :xt/str [:maybe :xt/bool]] [:array :xt/str]])
+
+(defspec.xt set-path
+  [:fn [EventRoute [:maybe RoutePath] [:maybe RouteParamMap]] [:array :xt/str]])
+
+(defspec.xt set-segment
+  [:fn [EventRoute RoutePath :xt/str] [:array :xt/str]])
+
+(defspec.xt set-param
+  [:fn [EventRoute :xt/str [:maybe :xt/str] [:maybe RoutePath]] [:array :xt/str]])
+
+(defspec.xt reset-route
+  [:fn [EventRoute [:maybe :xt/str]] [:array :xt/str]])
+
+
+;;
+;;
+;;
 
 (defn.xt interim-from-url
   "creates interim from url"
@@ -19,8 +154,8 @@
   (var params {})
   (when search
     (k/for:array [pair (k/split search "&")]
-      (var [key val] (k/split pair "="))
-      (k/set-key params key val)))
+                 (var [key val] (k/split pair "="))
+                 (k/set-key params key val)))
   (cond (k/is-empty? params)
         (return {:path path :params {}})
 
@@ -397,4 +532,3 @@
   (k/set-key route "tree"
              (-/interim-to-tree (-/interim-from-url (or url "")) true))
   (-/set-url route (or url "") true))
-

@@ -1,9 +1,64 @@
 (ns xt.lang.event-box
-  (:require [std.lang :as l]))
+  (:require [std.lang :as l]
+            [std.lang.model.spec-xtalk.typed :refer [defspec.xt]]))
 
 (l/script :xtalk
   {:require [[xt.lang.base-lib :as k]
              [xt.lang.event-common :as event-common]]})
+
+(defspec.xt BoxPath
+  [:array :xt/any])
+
+(defspec.xt BoxEvent
+  [:record
+   [path BoxPath]
+   [value [:maybe :xt/any]]
+   [data [:dict :xt/str :xt/any]]
+   [meta [:maybe xt.lang.event-common/EventListenerMeta]]])
+
+(defspec.xt EventBox
+  [:record
+   ["::" :xt/str]
+   [listeners xt.lang.event-common/EventListenerMap]
+   [data [:dict :xt/str :xt/any]]])
+
+(defspec.xt make-box
+  [:fn [:xt/any] EventBox])
+
+(defspec.xt check-event
+  [:fn [BoxEvent BoxPath] :xt/bool])
+
+(defspec.xt add-listener
+  [:fn [EventBox
+        :xt/str
+        BoxPath
+        [:fn [BoxEvent] :xt/any]
+        [:maybe xt.lang.event-common/EventListenerMeta]]
+       xt.lang.event-common/EventListenerEntry])
+
+(defspec.xt get-data
+  [:fn [EventBox [:maybe BoxPath]] [:maybe :xt/any]])
+
+(defspec.xt set-data-raw
+  [:fn [EventBox BoxPath :xt/any] :xt/any])
+
+(defspec.xt set-data
+  [:fn [EventBox BoxPath :xt/any] [:array :xt/str]])
+
+(defspec.xt del-data-raw
+  [:fn [EventBox BoxPath] :xt/bool])
+
+(defspec.xt del-data
+  [:fn [EventBox BoxPath] [:maybe [:array :xt/str]]])
+
+(defspec.xt reset-data
+  [:fn [EventBox] [:array :xt/str]])
+
+(defspec.xt merge-data
+  [:fn [EventBox BoxPath [:dict :xt/str :xt/any]] [:array :xt/str]])
+
+(defspec.xt append-data
+  [:fn [EventBox BoxPath :xt/any] [:array :xt/str]])
 
 (defn.xt make-box
   "creates a box"
@@ -129,4 +184,3 @@
   (x:arr-push arr value)
   (return
    (-/set-data box path arr)))
-

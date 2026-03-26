@@ -1,10 +1,115 @@
 (ns xt.lang.event-form
-  (:require [std.lang :as l]))
+  (:require [std.lang :as l]
+            [std.lang.model.spec-xtalk.typed :refer [defspec.xt]]))
 
 (l/script :xtalk
   {:require [[xt.lang.base-lib :as k]
              [xt.lang.event-common :as event-common]
              [xt.lang.util-validate :as validate]]})
+
+(defspec.xt ValidationFieldResult
+  [:record
+   [status :xt/str]])
+
+(defspec.xt ValidationResult
+  [:record
+   ["::" :xt/str]
+   [status :xt/str]
+   [fields [:dict :xt/str ValidationFieldResult]]])
+
+(defspec.xt FormEvent
+  [:record
+   [type :xt/str]
+   [fields [:array :xt/str]]
+   [meta [:maybe xt.lang.event-common/EventListenerMeta]]])
+
+(defspec.xt EventForm
+  [:record
+   ["::" :xt/str]
+   [listeners xt.lang.event-common/EventListenerMap]
+   [data [:dict :xt/str :xt/any]]
+   [validators [:dict :xt/str :xt/any]]
+   [result ValidationResult]])
+
+(defspec.xt make-form
+  [:fn [[:or [:dict :xt/str :xt/any]
+             [:fn [] [:dict :xt/str :xt/any]]]
+        [:dict :xt/str :xt/any]]
+   EventForm])
+
+(defspec.xt check-event
+  [:fn [:xt/any [:array :xt/str]] :xt/bool])
+
+(defspec.xt add-listener
+  [:fn [EventForm
+        :xt/str
+        [:or :xt/str [:array :xt/str]]
+        [:fn [FormEvent] :xt/any]
+        [:maybe xt.lang.event-common/EventListenerMeta]]
+       xt.lang.event-common/EventListenerEntry])
+
+(defspec.xt trigger-all
+  [:fn [EventForm :xt/str] [:array :xt/str]])
+
+(defspec.xt trigger-field
+  [:fn [EventForm [:or :xt/str [:array :xt/str]] :xt/str] [:array :xt/str]])
+
+(defspec.xt set-field
+  [:fn [EventForm :xt/str :xt/any] [:array :xt/str]])
+
+(defspec.xt get-field
+  [:fn [EventForm :xt/str] [:maybe :xt/any]])
+
+(defspec.xt toggle-field
+  [:fn [EventForm :xt/str] [:array :xt/str]])
+
+(defspec.xt field-fn
+  [:fn [EventForm :xt/str] [:fn [:xt/any] [:array :xt/str]]])
+
+(defspec.xt get-result
+  [:fn [EventForm] ValidationResult])
+
+(defspec.xt get-field-result
+  [:fn [EventForm :xt/str] [:maybe ValidationFieldResult]])
+
+(defspec.xt get-data
+  [:fn [EventForm] [:dict :xt/str :xt/any]])
+
+(defspec.xt set-data
+  [:fn [EventForm [:dict :xt/str :xt/any]] [:array :xt/str]])
+
+(defspec.xt reset-all-data
+  [:fn [EventForm] [:array :xt/str]])
+
+(defspec.xt reset-field-data
+  [:fn [EventForm :xt/str] [:array :xt/str]])
+
+(defspec.xt validate-all
+  [:fn [EventForm :xt/any :xt/any] :xt/any])
+
+(defspec.xt validate-field
+  [:fn [EventForm :xt/str :xt/any :xt/any] :xt/any])
+
+(defspec.xt reset-field-validator
+  [:fn [EventForm :xt/str] ValidationResult])
+
+(defspec.xt reset-all-validators
+  [:fn [EventForm] ValidationResult])
+
+(defspec.xt reset-all
+  [:fn [EventForm] ValidationResult])
+
+(defspec.xt check-field-passed
+  [:fn [EventForm :xt/str] :xt/bool])
+
+(defspec.xt check-field-errored
+  [:fn [EventForm :xt/str] :xt/bool])
+
+(defspec.xt check-all-passed
+  [:fn [EventForm] :xt/bool])
+
+(defspec.xt check-any-errored
+  [:fn [EventForm] :xt/bool])
 
 (defn.xt make-form
   "creates a form"
@@ -250,3 +355,11 @@
       (return true)))
   (return false))
 
+
+(comment
+  
+  (require '[std.lang.model.spec-xtalk.typed :as typed]
+           '[std.lang.model.spec-xtalk.typed-analysis :as ta])
+  
+  (typed/check-namespace 'xt.lang.event-form)
+  )

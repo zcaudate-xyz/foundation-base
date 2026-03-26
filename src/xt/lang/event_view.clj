@@ -1,9 +1,164 @@
 (ns xt.lang.event-view
-  (:require [std.lang :as l]))
+  (:require [std.lang :as l]
+            [std.lang.model.spec-xtalk.typed :refer [defspec.xt]]))
 
 (l/script :xtalk
   {:require [[xt.lang.base-lib :as k]
              [xt.lang.event-common :as event-common]]})
+
+(defspec.xt ViewHandler
+  [:fn [:xt/any] :xt/any])
+
+(defspec.xt ViewPipeline
+  [:dict :xt/str :xt/any])
+
+(defspec.xt ViewInput
+  [:record
+   [current [:maybe [:dict :xt/str :xt/any]]]
+   [updated [:maybe :xt/num]]
+   [default [:fn [] :xt/any]]])
+
+(defspec.xt ViewOutput
+  [:record
+   [type :xt/str]
+   [current [:maybe :xt/any]]
+   [updated [:maybe :xt/num]]
+   [elapsed [:maybe :xt/num]]
+   [process [:fn [:xt/any] :xt/any]]
+   [default [:fn [] :xt/any]]])
+
+(defspec.xt ViewRunState
+  [:dict :xt/str :xt/any])
+
+(defspec.xt ViewContext
+  [:record
+   [view EventView]
+   [input [:maybe [:dict :xt/str :xt/any]]]])
+
+(defspec.xt ViewEvent
+  [:record
+   [type :xt/str]
+   [data [:maybe :xt/any]]
+   [meta [:maybe xt.lang.event-common/EventListenerMeta]]])
+
+(defspec.xt EventView
+  [:record
+   ["::" :xt/str]
+   [listeners xt.lang.event-common/EventListenerMap]
+   [pipeline ViewPipeline]
+   [options [:dict :xt/str :xt/any]]
+   [input ViewInput]
+   [output ViewOutput]])
+
+(defspec.xt wrap-args
+  [:fn [ViewHandler] [:fn [ViewContext] :xt/any]])
+
+(defspec.xt check-disabled
+  [:fn [ViewContext] :xt/bool])
+
+(defspec.xt parse-args
+  [:fn [ViewContext] [:maybe :xt/any]])
+
+(defspec.xt create-view
+  [:fn [ViewHandler
+        ViewPipeline
+        :xt/any
+        :xt/any
+        [:maybe [:fn [:xt/any] :xt/any]]
+        [:maybe [:dict :xt/str :xt/any]]]
+       EventView])
+
+(defspec.xt view-context
+  [:fn [EventView] ViewContext])
+
+(defspec.xt add-listener
+  [:fn [EventView
+        :xt/str
+        [:fn [ViewEvent] :xt/any]
+        [:maybe xt.lang.event-common/EventListenerMeta]
+        [:maybe [:fn [ViewEvent] :xt/bool]]]
+       xt.lang.event-common/EventListenerEntry])
+
+(defspec.xt trigger-listeners
+  [:fn [EventView :xt/str :xt/any] [:array :xt/str]])
+
+(defspec.xt get-input
+  [:fn [EventView] ViewInput])
+
+(defspec.xt get-output
+  [:fn [EventView [:maybe :xt/str]] ViewOutput])
+
+(defspec.xt get-current
+  [:fn [EventView [:maybe :xt/str]] [:maybe :xt/any]])
+
+(defspec.xt is-disabled
+  [:fn [EventView] :xt/bool])
+
+(defspec.xt is-errored
+  [:fn [EventView [:maybe :xt/str]] :xt/bool])
+
+(defspec.xt is-pending
+  [:fn [EventView [:maybe :xt/str]] :xt/bool])
+
+(defspec.xt get-time-elapsed
+  [:fn [EventView [:maybe :xt/str]] [:maybe :xt/num]])
+
+(defspec.xt get-time-updated
+  [:fn [EventView [:maybe :xt/str]] [:maybe :xt/num]])
+
+(defspec.xt get-success
+  [:fn [EventView [:maybe :xt/str]] :xt/any])
+
+(defspec.xt set-input
+  [:fn [EventView [:dict :xt/str :xt/any]] ViewInput])
+
+(defspec.xt set-output
+  [:fn [EventView :xt/any :xt/any :xt/str [:maybe :xt/str] [:maybe [:dict :xt/str :xt/any]]] :xt/any])
+
+(defspec.xt set-output-disabled
+  [:fn [EventView :xt/any [:maybe :xt/str]] ViewOutput])
+
+(defspec.xt set-pending
+  [:fn [EventView :xt/any [:maybe :xt/str]] ViewOutput])
+
+(defspec.xt set-elapsed
+  [:fn [EventView :xt/any [:maybe :xt/str]] ViewOutput])
+
+(defspec.xt init-view
+  [:fn [EventView] ViewInput])
+
+(defspec.xt pipeline-prep
+  [:fn [EventView [:maybe [:dict :xt/str :xt/any]]] [:tuple ViewContext :xt/bool]])
+
+(defspec.xt pipeline-set
+  [:fn [ViewContext :xt/str ViewRunState [:maybe :xt/str]] ViewRunState])
+
+(defspec.xt pipeline-call
+  [:fn [ViewContext :xt/str :xt/bool :xt/any :xt/any [:maybe [:dict :xt/str :xt/any]]] :xt/any])
+
+(defspec.xt pipeline-run-impl
+  [:fn [ViewContext [:array :xt/str] :xt/int :xt/any :xt/any :xt/any [:maybe [:dict :xt/str :xt/any]]] :xt/any])
+
+(defspec.xt pipeline-run
+  [:fn [ViewContext :xt/bool :xt/any :xt/any :xt/any [:maybe :xt/str]] :xt/any])
+
+(defspec.xt pipeline-run-force
+  [:fn [ViewContext :xt/bool :xt/any :xt/any :xt/any :xt/str] :xt/any])
+
+(defspec.xt pipeline-run-remote
+  [:fn [ViewContext :xt/bool :xt/any :xt/any :xt/any] :xt/any])
+
+(defspec.xt pipeline-run-sync
+  [:fn [ViewContext :xt/bool :xt/any :xt/any :xt/any] :xt/any])
+
+(defspec.xt get-with-lookup
+  [:fn [[:array :xt/any] [:maybe [:dict :xt/str :xt/any]]] [:dict :xt/str :xt/any]])
+
+(defspec.xt sorted-lookup
+  [:fn [[:maybe :xt/str]] [:fn [[:array :xt/any]] [:dict :xt/str :xt/any]]])
+
+(defspec.xt group-by-lookup
+  [:fn [:xt/str] [:fn [[:array :xt/any]] [:dict :xt/str :xt/any]]])
 
 ;;
 ;; CREATE
