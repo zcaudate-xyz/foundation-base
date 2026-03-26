@@ -1,4 +1,4 @@
-(ns std.lang.model.spec-xtalk.typed-common
+(ns std.lang.typed.xtalk-common
   (:require [clojure.string :as str]))
 
 (def +primitive-types+
@@ -32,6 +32,10 @@
 (defn primitive-type
   [kw]
   {:kind :primitive :name kw})
+
+(defn snake-case-string
+  [s]
+  (str/replace s "-" "_"))
 
 (defn maybe-type
   [type]
@@ -133,9 +137,17 @@
 (defn field-key
   [field]
   (cond
-    (keyword? field) field
-    (symbol? field) (keyword (name field))
-    (string? field) field
+    (keyword? field) (if-let [field-ns (namespace field)]
+                       (str (snake-case-string field-ns)
+                            "/"
+                            (snake-case-string (name field)))
+                       (snake-case-string (name field)))
+    (symbol? field) (if-let [field-ns (namespace field)]
+                      (str (snake-case-string field-ns)
+                           "/"
+                           (snake-case-string (name field)))
+                      (snake-case-string (name field)))
+    (string? field) (snake-case-string field)
     :else (throw (ex-info "Invalid record field key"
                           {:field field}))))
 
@@ -197,6 +209,8 @@
       (case op
         :maybe {:kind :maybe
                 :item (normalize-type (first args) ctx)}
+        :xt/maybe {:kind :maybe
+                   :item (normalize-type (first args) ctx)}
         :or {:kind :union
              :types (mapv #(normalize-type % ctx) args)}
         :and {:kind :intersection
@@ -205,11 +219,18 @@
                 :types (mapv #(normalize-type % ctx) args)}
         :array {:kind :array
                 :item (normalize-type (first args) ctx)}
+        :xt/array {:kind :array
+                   :item (normalize-type (first args) ctx)}
         :dict {:kind :dict
                :key (normalize-type (first args) ctx)
                :value (normalize-type (second args) ctx)}
+        :xt/dict {:kind :dict
+                  :key (normalize-type (first args) ctx)
+                  :value (normalize-type (second args) ctx)}
         :record {:kind :record
-                 :fields (mapv #(normalize-record-field % ctx) args)}
+                  :fields (mapv #(normalize-record-field % ctx) args)}
+        :xt/record {:kind :record
+                    :fields (mapv #(normalize-record-field % ctx) args)}
         :fn {:kind :fn
              :inputs (mapv #(normalize-type % ctx) (first args))
              :output (normalize-type (second args) ctx)}

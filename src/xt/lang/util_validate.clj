@@ -1,28 +1,28 @@
 (ns xt.lang.util-validate
   (:require [std.lang :as l]
-            [std.lang.model.spec-xtalk.typed :refer [defspec.xt]]))
+            [std.lang.typed.xtalk :refer [defspec.xt]]))
 
 (l/script :xtalk
   {:require [[xt.lang.base-lib :as k]]})
 
 (defspec.xt ValidationFieldResult
-  [:record
-   [status :xt/str]])
+  [:xt/record
+   ["status" :xt/str]])
 
 (defspec.xt ValidationResult
-  [:record
+  [:xt/record
    ["::" :xt/str]
-   [status :xt/str]
-   [fields [:dict :xt/str ValidationFieldResult]]])
+   ["status" :xt/str]
+   ["fields" [:xt/dict :xt/str ValidationFieldResult]]])
 
 (defspec.xt create-result
-  [:fn [[:dict :xt/str :xt/any]] ValidationResult])
+  [:fn [[:xt/dict :xt/str :xt/any]] ValidationResult])
 
 (defspec.xt validate-field
-  [:fn [:xt/any :xt/str [:dict :xt/str :xt/any] ValidationResult :xt/any :xt/any] :xt/any])
+  [:fn [:xt/any :xt/str [:xt/dict :xt/str :xt/any] ValidationResult :xt/any :xt/any] :xt/any])
 
 (defspec.xt validate-all
-  [:fn [:xt/any [:dict :xt/str :xt/any] ValidationResult :xt/any :xt/any] :xt/any])
+  [:fn [:xt/any [:xt/dict :xt/str :xt/any] ValidationResult :xt/any :xt/any] :xt/any])
 
 (defn.xt validate-step
   "validates a single step"

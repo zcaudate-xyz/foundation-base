@@ -1,7 +1,7 @@
-(ns std.lang.model.spec-xtalk.typed-parse
+(ns std.lang.typed.xtalk-parse
   (:require [clojure.java.io :as io]
             [clojure.string :as str]
-            [std.lang.model.spec-xtalk.typed-common :as types]))
+            [std.lang.typed.xtalk-common :as types]))
 
 (defn read-forms
   [file-path]

@@ -1,8 +1,18 @@
-(ns std.lang.model.spec-xtalk.typed-infer
-  (:require [std.lang.model.spec-xtalk.typed-common :as types]
-            [std.lang.model.spec-xtalk.typed-parse :as parse]))
+(ns std.lang.typed.xtalk-infer
+  (:require [std.lang.typed.xtalk-common :as types]
+            [std.lang.typed.xtalk-intrinsic :as intrinsic]
+            [std.lang.typed.xtalk-lower :as lower]
+            [std.lang.typed.xtalk-ops :as ops]
+            [std.lang.typed.xtalk-parse :as parse]))
 
-(declare infer-body infer-type)
+(declare infer-body
+         infer-type
+         infer-get-key
+         infer-get-idx
+         infer-get-path
+         infer-obj-assign
+         infer-make-container
+         infer-blank-container)
 
 (defn result
   ([type] (result type []))
@@ -179,7 +189,7 @@
   [form]
   (cond
     (keyword? form) (types/field-key form)
-    (string? form) form
+    (string? form) (types/field-key form)
     :else nil))
 
 (defn literal-key-type
@@ -213,24 +223,23 @@
 
 (defn field-access-type
   [type key ctx]
-  (let [type (resolve-type type ctx)]
+  (let [type (resolve-type type ctx)
+        key' (if (or (keyword? key)
+                     (string? key)
+                     (symbol? key))
+               (types/field-key key)
+               key)]
     (cond
       (= :maybe (:kind type))
-      (types/maybe-type (field-access-type (:item type) key ctx))
+      (types/maybe-type (field-access-type (:item type) key' ctx))
 
       (= :record (:kind type))
       (or (some (fn [{field-name :name field-type :type}]
-                  (when (or (= key field-name)
-                            (and (keyword? key)
-                                 (string? field-name)
-                                 (= (clojure.core/name key) field-name))
-                            (and (string? key)
-                                 (keyword? field-name)
-                                 (= key (clojure.core/name field-name))))
+                  (when (= key' field-name)
                     field-type))
                 (:fields type))
           (when-let [open (:open type)]
-            (when (compatible-type? (literal-key-type key) (:key open) ctx)
+            (when (compatible-type? (literal-key-type key') (:key open) ctx)
               (types/maybe-type (:value open))))
           types/+unknown-type+)
 
@@ -523,12 +532,12 @@
                     :else
                     initial-type)
         base-fields [{:name "::" :type (:type type-out) :optional? false}
-                     {:name :listeners
+                     {:name "listeners"
                       :type {:kind :named
                              :name 'xt.lang.event-common/EventListenerMap}
                       :optional? false}
-                     {:name :data :type data-type :optional? false}
-                     {:name :initial
+                     {:name "data" :type data-type :optional? false}
+                     {:name "initial"
                       :type {:kind :fn
                              :inputs []
                              :output data-type}
@@ -540,6 +549,42 @@
                   :fields (vec (merge-record-fields base-fields extra-fields))}]
     (result out-type
             (merge-errors initial-out type-out opts-out))))
+
+(defn infer-blank-container
+  [[_ type-expr opts-expr] ctx]
+  (let [type-out (infer-type type-expr ctx)
+        opts-out (infer-type opts-expr ctx)
+        opts-type (resolve-type (:type opts-out) ctx)
+        base-fields [{:name "::" :type (:type type-out) :optional? false}
+                     {:name "listeners"
+                      :type {:kind :named
+                             :name 'xt.lang.event-common/EventListenerMap}
+                      :optional? false}]
+        extra-fields (if (= :record (:kind opts-type))
+                       (:fields opts-type)
+                       [])
+        open-type (cond
+                    (= :record (:kind opts-type)) (:open opts-type)
+                    (= :dict (:kind opts-type)) {:key (:key opts-type)
+                                                 :value (:value opts-type)}
+                    :else nil)
+        out-type (cond-> {:kind :record
+                          :fields (vec (merge-record-fields base-fields extra-fields))}
+                   open-type (assoc :open open-type))]
+    (result out-type
+            (merge-errors type-out opts-out))))
+
+(defn intrinsic-callbacks
+  []
+  {:result result
+   :infer-type infer-type
+   :resolve-type resolve-type
+   :arrayify-type arrayify-type
+   :infer-get-key infer-get-key
+   :infer-get-path infer-get-path
+   :infer-obj-assign infer-obj-assign
+   :infer-make-container infer-make-container
+   :infer-blank-container infer-blank-container})
 
 (defn infer-function-call
   [[callee & args :as form] ctx]
@@ -611,6 +656,28 @@
                 types/+unknown-type+))
             errors)))
 
+(defn infer-get-idx
+  [[_ obj-expr idx-expr] ctx]
+  (let [obj-out (infer-type obj-expr ctx)
+        idx-out (infer-type idx-expr ctx)
+        obj-type (resolve-type (:type obj-out) ctx)
+        idx-literal (when (integer? idx-expr)
+                      idx-expr)
+        out-type (cond
+                   (= :array (:kind obj-type))
+                   (types/maybe-type (:item obj-type))
+
+                   (= :tuple (:kind obj-type))
+                   (if (some? idx-literal)
+                     (or (nth (:types obj-type) idx-literal nil)
+                         types/+unknown-type+)
+                     (types/maybe-type (types/union-type (:types obj-type))))
+
+                   :else
+                   types/+unknown-type+)]
+    (result out-type
+            (merge-errors obj-out idx-out))))
+
 (defn infer-get-path
   [[_ obj-expr path-expr default-expr] ctx]
   (let [obj-out (infer-type obj-expr ctx)
@@ -670,93 +737,76 @@
     (result (lookup-symbol-type form ctx))
 
     (seq? form)
-    (let [op (first form)
-          resolved-op (if (symbol? op)
-                        (resolve-local-symbol op ctx)
-                        op)]
-      (case op
-        do (infer-body (rest form) ctx)
-        return (infer-type (second form) ctx)
-        let (infer-let form ctx)
-        var (infer-binding-form form ctx)
-        := (infer-binding-form form ctx)
-        if (infer-if form ctx)
-        :? (infer-ternary form ctx)
-        when (infer-when form ctx)
-        fn (infer-anon-fn form ctx)
-        . (infer-dot form ctx)
-        x:get-key (infer-get-key form ctx)
-        x:get-path (infer-get-path form ctx)
-        x:nil? (result types/+bool-type+ (merge-errors (infer-type (second form) ctx)))
-        x:not-nil? (result types/+bool-type+ (merge-errors (infer-type (second form) ctx)))
-        x:len (result types/+int-type+ (merge-errors (infer-type (second form) ctx)))
-        x:cat (result types/+str-type+
-                      (mapcat :errors (map #(infer-type % ctx) (rest form))))
-        = (result types/+bool-type+
-                  (mapcat :errors (map #(infer-type % ctx) (rest form))))
-        == (result types/+bool-type+
-                   (mapcat :errors (map #(infer-type % ctx) (rest form))))
-        not= (result types/+bool-type+
-                     (mapcat :errors (map #(infer-type % ctx) (rest form))))
-        and (result types/+bool-type+
-                    (mapcat :errors (map #(infer-type % ctx) (rest form))))
-        or (infer-or form ctx)
-        not (result types/+bool-type+
-                    (merge-errors (infer-type (second form) ctx)))
-        (case resolved-op
-          xt.lang.base-lib/json-encode (let [arg-out (infer-type (second form) ctx)]
-                                         (result types/+str-type+
-                                                 (:errors arg-out)))
-          xt.lang.base-lib/split (let [arg-outs (mapv #(infer-type % ctx) (rest form))]
-                                   (result {:kind :array
-                                            :item types/+str-type+}
-                                           (mapcat :errors arg-outs)))
-          xt.lang.base-lib/cat (result types/+str-type+
-                                       (mapcat :errors (map #(infer-type % ctx) (rest form))))
-          xt.lang.base-lib/arr-join (let [arg-outs (mapv #(infer-type % ctx) (rest form))]
-                                      (result types/+str-type+
-                                              (mapcat :errors arg-outs)))
-          xt.lang.base-lib/not-empty? (result types/+bool-type+
-                                             (merge-errors (infer-type (second form) ctx)))
-          xt.lang.base-lib/is-empty? (result types/+bool-type+
-                                            (merge-errors (infer-type (second form) ctx)))
-          xt.lang.base-lib/fn? (result types/+bool-type+
+    (let [lowered (lower/lower-form form ctx)]
+      (if (not= lowered form)
+        (infer-type lowered ctx)
+        (let [op (first form)
+              resolved-op (if (symbol? op)
+                            (resolve-local-symbol op ctx)
+                            op)
+              builtin-op (if (symbol? resolved-op)
+                           (ops/canonical-symbol resolved-op)
+                           resolved-op)]
+          (or (intrinsic/infer-intrinsic form ctx (intrinsic-callbacks))
+              (case op
+                do (infer-body (rest form) ctx)
+                return (infer-type (second form) ctx)
+                let (infer-let form ctx)
+                var (infer-binding-form form ctx)
+                := (infer-binding-form form ctx)
+                if (infer-if form ctx)
+                when (infer-when form ctx)
+                fn (infer-anon-fn form ctx)
+                = (result types/+bool-type+
+                          (mapcat :errors (map #(infer-type % ctx) (rest form))))
+                == (result types/+bool-type+
+                           (mapcat :errors (map #(infer-type % ctx) (rest form))))
+                not= (result types/+bool-type+
+                             (mapcat :errors (map #(infer-type % ctx) (rest form))))
+                and (result types/+bool-type+
+                            (mapcat :errors (map #(infer-type % ctx) (rest form))))
+                or (infer-or form ctx)
+                not (result types/+bool-type+
+                            (merge-errors (infer-type (second form) ctx)))
+                (condp = builtin-op
+                  'x:get-key (infer-get-key form ctx)
+                  'x:get-idx (infer-get-idx form ctx)
+                  'x:get-path (infer-get-path form ctx)
+                  'x:nil? (result types/+bool-type+
+                                  (merge-errors (infer-type (second form) ctx)))
+                  'x:not-nil? (result types/+bool-type+
                                       (merge-errors (infer-type (second form) ctx)))
-          xt.lang.base-lib/first (let [arg-out (infer-type (second form) ctx)
-                                       arg-type (resolve-type (:type arg-out) ctx)
-                                       out-type (cond
-                                                  (= :array (:kind arg-type)) (types/maybe-type (:item arg-type))
-                                                  (= :tuple (:kind arg-type)) (or (first (:types arg-type))
-                                                                                 types/+unknown-type+)
-                                                  :else types/+unknown-type+)]
-                                   (result out-type (:errors arg-out)))
-          xt.lang.base-lib/second (let [arg-out (infer-type (second form) ctx)
-                                        arg-type (resolve-type (:type arg-out) ctx)
-                                        out-type (cond
-                                                   (= :array (:kind arg-type)) (types/maybe-type (:item arg-type))
-                                                   (= :tuple (:kind arg-type)) (or (second (:types arg-type))
-                                                                                  types/+unknown-type+)
-                                                   :else types/+unknown-type+)]
-                                    (result out-type (:errors arg-out)))
-          xt.lang.base-lib/get-key (infer-get-key form ctx)
-          xt.lang.base-lib/get-in (infer-get-path (list 'x:get-path
-                                                       (second form)
-                                                       (nth form 2)
-                                                       (nth form 3 nil))
-                                                  ctx)
-          xt.lang.base-lib/nil? (result types/+bool-type+
-                                        (merge-errors (infer-type (second form) ctx)))
-          xt.lang.base-lib/arrayify (let [arg-out (infer-type (second form) ctx)
-                                          arg-type (arrayify-type (:type arg-out) ctx)]
-                                      (result arg-type
-                                              (:errors arg-out)))
-          xt.lang.base-lib/obj-keys (let [arg-out (infer-type (second form) ctx)]
-                                      (result {:kind :array
-                                               :item types/+str-type+}
-                                              (:errors arg-out)))
-          xt.lang.base-lib/obj-assign (infer-obj-assign form ctx)
-          xt.lang.event-common/make-container (infer-make-container form ctx)
-          (infer-function-call form ctx))))
+                  'x:len (result types/+int-type+
+                                 (merge-errors (infer-type (second form) ctx)))
+                  'x:cat (result types/+str-type+
+                                 (mapcat :errors (map #(infer-type % ctx) (rest form))))
+                  'x:json-encode (let [arg-out (infer-type (second form) ctx)]
+                                   (result types/+str-type+
+                                           (:errors arg-out)))
+                  'x:str-split (let [arg-outs (mapv #(infer-type % ctx) (rest form))]
+                                 (result {:kind :array
+                                          :item types/+str-type+}
+                                         (mapcat :errors arg-outs)))
+                  'x:str-join (let [arg-outs (mapv #(infer-type % ctx) (rest form))]
+                                (result types/+str-type+
+                                        (mapcat :errors arg-outs)))
+                  'x:is-function? (result types/+bool-type+
+                                          (merge-errors (infer-type (second form) ctx)))
+                  'x:obj-keys (let [arg-out (infer-type (second form) ctx)]
+                                (result {:kind :array
+                                         :item types/+str-type+}
+                                        (:errors arg-out)))
+                  'x:obj-assign (infer-obj-assign form ctx)
+                  'xt.lang.base-lib/not-empty? (result types/+bool-type+
+                                                       (merge-errors (infer-type (second form) ctx)))
+                  'xt.lang.base-lib/is-empty? (result types/+bool-type+
+                                                      (merge-errors (infer-type (second form) ctx)))
+                  'xt.lang.base-lib/arrayify (let [arg-out (infer-type (second form) ctx)
+                                                   arg-type (arrayify-type (:type arg-out) ctx)]
+                                               (result arg-type
+                                                       (:errors arg-out)))
+                  'xt.lang.event-common/make-container (infer-make-container form ctx)
+                  (infer-function-call form ctx)))))))
 
     :else
     (result types/+unknown-type+

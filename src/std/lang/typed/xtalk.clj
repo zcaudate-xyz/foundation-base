@@ -1,8 +1,8 @@
-(ns std.lang.model.spec-xtalk.typed
-  (:require [std.lang.model.spec-xtalk.typed-analysis :as analysis]
-            [std.lang.model.spec-xtalk.typed-check :as check]
-            [std.lang.model.spec-xtalk.typed-common :as types]
-            [std.lang.model.spec-xtalk.typed-parse :as parse]))
+(ns std.lang.typed.xtalk
+  (:require [std.lang.typed.xtalk-analysis :as analysis]
+            [std.lang.typed.xtalk-check :as check]
+            [std.lang.typed.xtalk-common :as types]
+            [std.lang.typed.xtalk-parse :as parse]))
 
 (defn register-spec-form!
   [sym type-form spec-meta]
@@ -25,7 +25,7 @@
         spec-meta (cond-> (merge (meta spec-sym) attr-map)
                     docstring (assoc :docstring docstring))]
     `(do
-       (std.lang.model.spec-xtalk.typed/register-spec-form!
+       (std.lang.typed.xtalk/register-spec-form!
         '~full-sym
         '~type-form
         '~spec-meta)

@@ -1,20 +1,20 @@
 (ns std.lang.model.spec-xtalk-typed-fixture
   (:require [std.lang :as l]
-            [std.lang.model.spec-xtalk.typed :refer [defspec.xt]]))
+            [std.lang.typed.xtalk :refer [defspec.xt]]))
 
 (l/script :xtalk
   {:require [[xt.lang.base-lib :as k]]})
 
 (defspec.xt User
-  [:record
-   [id :xt/str]
-   [name :xt/str]])
+  [:xt/record
+   ["id" :xt/str]
+   ["name" :xt/str]])
 
 (defspec.xt UserMap
-  [:dict :xt/str User])
+  [:xt/dict :xt/str User])
 
 (defspec.xt find-user
-  [:fn [UserMap :xt/str] [:maybe User]])
+  [:fn [UserMap :xt/str] [:xt/maybe User]])
 
 (defn.xt find-user
   [users id]
@@ -25,7 +25,7 @@
   [user]
   (return "not-a-user"))
 
-(defn.xt ^{:- [[:maybe User]]}
+(defn.xt ^{:- [[:xt/maybe User]]}
   find-user-wrong-key
   [UserMap users
    :xt/int id]

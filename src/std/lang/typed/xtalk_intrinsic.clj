@@ -1,5 +1,5 @@
-(ns std.lang.model.spec-xtalk.typed-intrinsic
-  (:require [std.lang.model.spec-xtalk.typed-common :as types]))
+(ns std.lang.typed.xtalk-intrinsic
+  (:require [std.lang.typed.xtalk-common :as types]))
 
 (defn intrinsic-result
   [callbacks type errors]
@@ -95,28 +95,12 @@
   ((:infer-blank-container callbacks) form ctx))
 
 (def +intrinsic-rules+
-  {'x:get-key (fn [form ctx callbacks]
-                ((:infer-get-key callbacks) form ctx))
-   'x:get-path (fn [form ctx callbacks]
-                 ((:infer-get-path callbacks) form ctx))
-   'x:nil? unary-bool
-   'x:not-nil? unary-bool
-   'x:len unary-int
-   'x:cat str-returning
-   'std.lang.model.spec-xtalk.typed-intrinsic/obj-assign obj-assign
-   'std.lang.model.spec-xtalk.typed-intrinsic/arrayify arrayify
-   'std.lang.model.spec-xtalk.typed-intrinsic/obj-keys obj-keys
-   'std.lang.model.spec-xtalk.typed-intrinsic/json-encode str-returning
-   'std.lang.model.spec-xtalk.typed-intrinsic/split array-of-strings
-   'std.lang.model.spec-xtalk.typed-intrinsic/arr-join str-returning
-   'std.lang.model.spec-xtalk.typed-intrinsic/not-empty? unary-bool
-   'std.lang.model.spec-xtalk.typed-intrinsic/is-empty? unary-bool
-   'std.lang.model.spec-xtalk.typed-intrinsic/fn? unary-bool
-   'std.lang.model.spec-xtalk.typed-intrinsic/first first-item
-   'std.lang.model.spec-xtalk.typed-intrinsic/second second-item
-   'std.lang.model.spec-xtalk.typed-intrinsic/const-fn const-fn
-   'std.lang.model.spec-xtalk.typed-intrinsic/make-container make-container
-   'std.lang.model.spec-xtalk.typed-intrinsic/blank-container blank-container})
+  {'std.lang.typed.xtalk-intrinsic/arrayify arrayify
+   'std.lang.typed.xtalk-intrinsic/not-empty? unary-bool
+   'std.lang.typed.xtalk-intrinsic/is-empty? unary-bool
+   'std.lang.typed.xtalk-intrinsic/const-fn const-fn
+   'std.lang.typed.xtalk-intrinsic/make-container make-container
+   'std.lang.typed.xtalk-intrinsic/blank-container blank-container})
 
 (defn infer-intrinsic
   [form ctx callbacks]

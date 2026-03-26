@@ -1,6 +1,6 @@
 (ns xt.lang.event-common
   (:require [std.lang :as l]
-            [std.lang.model.spec-xtalk.typed :refer [defspec.xt]]))
+            [std.lang.typed.xtalk :refer [defspec.xt]]))
 
 (l/script :xtalk
   {:require [[xt.lang.base-lib :as k]]})
@@ -12,36 +12,36 @@
   :xt/any)
 
 (defspec.xt EventListenerEntry
-  [:record
-   [callback [:fn [:xt/any] :xt/any]]
-   [meta EventListenerMeta]
-   [pred [:maybe [:fn [:xt/any] :xt/bool]]]])
+  [:xt/record
+   ["callback" [:fn [:xt/any] :xt/any]]
+   ["meta" EventListenerMeta]
+   ["pred" [:xt/maybe [:fn [:xt/any] :xt/bool]]]])
 
 (defspec.xt EventListenerMap
-  [:dict :xt/str EventListenerEntry])
+  [:xt/dict :xt/str EventListenerEntry])
 
 (defspec.xt EventListenerGroups
-  [:dict :xt/str EventListenerMap])
+  [:xt/dict :xt/str EventListenerMap])
 
 (defspec.xt EventTypeIndex
-  [:dict :xt/str [:array :xt/str]])
+  [:xt/dict :xt/str [:xt/array :xt/str]])
 
 (defspec.xt EventContainer
-  [:record
+  [:xt/record
    ["::" :xt/str]
-   [listeners EventListenerMap]])
+   ["listeners" EventListenerMap]])
 
 (defspec.xt blank-container
-  [:fn [:xt/str [:dict :xt/str :xt/any]] EventContainer])
+  [:fn [:xt/str [:xt/dict :xt/str :xt/any]] EventContainer])
 
 (defspec.xt make-container
-  [:fn [:xt/any :xt/str [:dict :xt/str :xt/any]] EventContainer])
+  [:fn [:xt/any :xt/str [:xt/dict :xt/str :xt/any]] EventContainer])
 
 (defspec.xt make-listener-entry
   [:fn [:xt/str :xt/str
         [:fn [:xt/any] :xt/any]
-        [:maybe EventListenerMeta]
-        [:maybe [:fn [:xt/any] :xt/bool]]]
+        [:xt/maybe EventListenerMeta]
+        [:xt/maybe [:fn [:xt/any] :xt/bool]]]
        EventListenerEntry])
 
 (defspec.xt clear-listeners
@@ -52,24 +52,24 @@
         :xt/str
         :xt/str
         [:fn [:xt/any] :xt/any]
-        [:maybe EventListenerMeta]
-        [:maybe [:fn [:xt/any] :xt/bool]]]
+        [:xt/maybe EventListenerMeta]
+        [:xt/maybe [:fn [:xt/any] :xt/bool]]]
        EventListenerEntry])
 
 (defspec.xt remove-listener
-  [:fn [EventContainer :xt/str] [:maybe EventListenerEntry]])
+  [:fn [EventContainer :xt/str] [:xt/maybe EventListenerEntry]])
 
 (defspec.xt list-listeners
-  [:fn [EventContainer] [:array :xt/str]])
+  [:fn [EventContainer] [:xt/array :xt/str]])
 
 (defspec.xt list-listener-types
   [:fn [EventContainer] EventTypeIndex])
 
 (defspec.xt trigger-entry
-  [:fn [EventListenerEntry EventPayload] [:maybe :xt/any]])
+  [:fn [EventListenerEntry EventPayload] [:xt/maybe :xt/any]])
 
 (defspec.xt trigger-listeners
-  [:fn [EventContainer [:maybe EventPayload]] [:array :xt/str]])
+  [:fn [EventContainer [:xt/maybe EventPayload]] [:xt/array :xt/str]])
 
 (defspec.xt add-keyed-listener
   [:fn [EventContainer
@@ -77,21 +77,21 @@
         :xt/str
         :xt/str
         [:fn [:xt/any] :xt/any]
-        [:maybe EventListenerMeta]
-        [:maybe [:fn [:xt/any] :xt/bool]]]
+        [:xt/maybe EventListenerMeta]
+        [:xt/maybe [:fn [:xt/any] :xt/bool]]]
        EventListenerEntry])
 
 (defspec.xt remove-keyed-listener
-  [:fn [EventContainer :xt/str :xt/str] [:maybe EventListenerEntry]])
+  [:fn [EventContainer :xt/str :xt/str] [:xt/maybe EventListenerEntry]])
 
 (defspec.xt list-keyed-listeners
-  [:fn [EventContainer :xt/str] [:array :xt/str]])
+  [:fn [EventContainer :xt/str] [:xt/array :xt/str]])
 
 (defspec.xt all-keyed-listeners
-  [:fn [EventContainer] [:dict :xt/str [:array :xt/str]]])
+  [:fn [EventContainer] [:xt/dict :xt/str [:xt/array :xt/str]]])
 
 (defspec.xt trigger-keyed-listeners
-  [:fn [EventContainer :xt/str [:maybe EventPayload]] [:array :xt/str]])
+  [:fn [EventContainer :xt/str [:xt/maybe EventPayload]] [:xt/array :xt/str]])
 
 (defn.xt blank-container
   "creates a blank container"

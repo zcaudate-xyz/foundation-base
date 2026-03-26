@@ -1,15 +1,17 @@
 (ns std.lang.model.spec-xtalk-typed-test
-  (:require [std.lang.model.spec-xtalk.typed :as typed]
-             [std.lang.model.spec-xtalk.typed-analysis :as analysis]
-             [std.lang.model.spec-xtalk.typed-common :as types]
-             [std.lang.model.spec-xtalk.typed-infer :as infer]
-             [std.lang.model.spec-xtalk.typed-parse :as parse])
+  (:require [std.lang.typed.xtalk :as typed]
+   [std.lang.typed.xtalk-analysis :as analysis]
+   [std.lang.typed.xtalk-common :as types]
+   [std.lang.typed.xtalk-infer :as infer]
+   [std.lang.typed.xtalk-lower :as lower]
+   [std.lang.typed.xtalk-ops :as ops]
+   [std.lang.typed.xtalk-parse :as parse])
   (:use code.test))
 
 (fact "normalizes xtalk type forms"
   (types/type->data
    (types/normalize-type
-    '[:fn [UserMap :xt/str] [:maybe User]]
+    '[:fn [UserMap :xt/str] [:xt/maybe User]]
     {:ns 'sample.user
      :aliases {}}))
   => '{:kind :fn
@@ -20,11 +22,35 @@
 
 (fact "defspec.xt registers a spec declaration"
   (typed/clear-registry!)
-  (eval '(std.lang.model.spec-xtalk.typed/defspec.xt LocalId :xt/str))
+  (eval '(std.lang.typed.xtalk/defspec.xt LocalId :xt/str))
   (-> (typed/get-spec 'std.lang.model.spec-xtalk-typed-test/LocalId)
       :type
       types/type->data)
   => {:kind :primitive :name :xt/str})
+
+(fact "normalizes record field names to snake_case strings"
+  [(types/field-key :hello-world)
+   (types/field-key 'event-meta)
+   (types/field-key "route-path")]
+  => ["hello_world" "event_meta" "route_path"])
+
+(fact "lowers xtalk surface helpers to typed core"
+  (lower/lower-form '(k/get-key route "tree")
+                    {:ns 'sample.route
+                     :aliases '{k xt.lang.base-lib}})
+  => '(x:get-key route "tree" nil))
+
+(fact "canonicalizes builtin wrappers through grammar op tables"
+  [(ops/canonical-symbol 'xt.lang.base-lib/obj-assign)
+   (lower/lower-form '(k/obj-assign current extra)
+                     {:ns 'sample.route
+                      :aliases '{k xt.lang.base-lib}})
+   (lower/lower-form '(k/arr-join path "/")
+                     {:ns 'sample.route
+                      :aliases '{k xt.lang.base-lib}})]
+  => '[x:obj-assign
+       (x:obj-assign current extra)
+       (x:str-join "/" path)])
 
 (fact "infers open object types for dynamic map keys"
   (-> (infer/infer-type '{:type "route.path" pkey true}
@@ -34,11 +60,11 @@
       :type
       types/type->data)
   => '{:kind :record
-       :fields [{:name :type
-                 :type {:kind :primitive :name :xt/str}
-                 :optional? false}]
-       :open {:key {:kind :primitive :name :xt/str}
-              :value {:kind :primitive :name :xt/bool}}})
+       :fields [{:name "type"
+                  :type {:kind :primitive :name :xt/str}
+                  :optional? false}]
+        :open {:key {:kind :primitive :name :xt/str}
+               :value {:kind :primitive :name :xt/bool}}})
 
 (fact "parses defspec.xt and merges function signatures"
   (let [analysis (parse/analyze-namespace 'std.lang.model.spec-xtalk-typed-fixture)

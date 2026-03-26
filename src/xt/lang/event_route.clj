@@ -1,44 +1,44 @@
 (ns xt.lang.event-route
   (:require [std.lang :as l]
-            [std.lang.model.spec-xtalk.typed :refer [defspec.xt]]))
+            [std.lang.typed.xtalk :refer [defspec.xt]]))
 
 (l/script :xtalk
   {:require [[xt.lang.base-lib :as k]
              [xt.lang.event-common :as event-common]]})
 
 (defspec.xt RoutePath
-  [:array :xt/str])
+  [:xt/array :xt/str])
 
 (defspec.xt RouteParamMap
-  [:dict :xt/str :xt/str])
+  [:xt/dict :xt/str :xt/str])
 
 (defspec.xt RouteParams
-  [:dict :xt/str RouteParamMap])
+  [:xt/dict :xt/str RouteParamMap])
 
 (defspec.xt RouteInterim
-  [:record
-   [path RoutePath]
-   [params RouteParams]])
+  [:xt/record
+   ["path" RoutePath]
+   ["params" RouteParams]])
 
 (defspec.xt RouteTree
-  [:dict :xt/str :xt/any])
+  [:xt/dict :xt/str :xt/any])
 
 (defspec.xt RouteDiff
-  [:dict :xt/str :xt/bool])
+  [:xt/dict :xt/str :xt/bool])
 
 (defspec.xt RouteEvent
-  [:record
-   [type :xt/str]
-   [params RouteDiff]
-   [path RouteDiff]
-   [meta [:maybe xt.lang.event-common/EventListenerMeta]]])
+  [:xt/record
+   ["type" :xt/str]
+   ["params" RouteDiff]
+   ["path" RouteDiff]
+   ["meta" [:xt/maybe xt.lang.event-common/EventListenerMeta]]])
 
 (defspec.xt EventRoute
-  [:record
+  [:xt/record
    ["::" :xt/str]
-   [listeners xt.lang.event-common/EventListenerMap]
-   [tree RouteTree]
-   [history [:array :xt/str]]])
+   ["listeners" xt.lang.event-common/EventListenerMap]
+   ["tree" RouteTree]
+   ["history" [:xt/array :xt/str]]])
 
 (defspec.xt interim-from-url
   [:fn [:xt/str] RouteInterim])
@@ -47,10 +47,10 @@
   [:fn [RouteInterim] :xt/str])
 
 (defspec.xt path-to-tree
-  [:fn [RoutePath [:maybe :xt/bool]] RouteTree])
+  [:fn [RoutePath [:xt/maybe :xt/bool]] RouteTree])
 
 (defspec.xt interim-to-tree
-  [:fn [RouteInterim [:maybe :xt/bool]] RouteTree])
+  [:fn [RouteInterim [:xt/maybe :xt/bool]] RouteTree])
 
 (defspec.xt path-from-tree
   [:fn [RouteTree] RoutePath])
@@ -65,7 +65,7 @@
   [:fn [RouteParamMap RouteParamMap] RouteDiff])
 
 (defspec.xt changed-params
-  [:fn [RouteTree RouteTree [:maybe RoutePath]] RouteDiff])
+  [:fn [RouteTree RouteTree [:xt/maybe RoutePath]] RouteDiff])
 
 (defspec.xt changed-path-raw
   [:fn [RoutePath RoutePath] RouteDiff])
@@ -77,13 +77,13 @@
   [:fn [EventRoute] :xt/str])
 
 (defspec.xt get-segment
-  [:fn [EventRoute RoutePath] [:maybe :xt/str]])
+  [:fn [EventRoute RoutePath] [:xt/maybe :xt/str]])
 
 (defspec.xt get-param
-  [:fn [EventRoute :xt/str [:maybe RoutePath]] [:maybe :xt/str]])
+  [:fn [EventRoute :xt/str [:xt/maybe RoutePath]] [:xt/maybe :xt/str]])
 
 (defspec.xt get-all-params
-  [:fn [EventRoute [:maybe RoutePath]] RouteParamMap])
+  [:fn [EventRoute [:xt/maybe RoutePath]] RouteParamMap])
 
 (defspec.xt make-route
   [:fn [:xt/any] EventRoute])
@@ -92,7 +92,7 @@
   [:fn [EventRoute
         :xt/str
         [:fn [RouteEvent] :xt/any]
-        [:maybe xt.lang.event-common/EventListenerMeta]]
+        [:xt/maybe xt.lang.event-common/EventListenerMeta]]
        xt.lang.event-common/EventListenerEntry])
 
 (defspec.xt add-path-listener
@@ -100,7 +100,7 @@
         RoutePath
         :xt/str
         [:fn [RouteEvent] :xt/any]
-        [:maybe xt.lang.event-common/EventListenerMeta]]
+        [:xt/maybe xt.lang.event-common/EventListenerMeta]]
        xt.lang.event-common/EventListenerEntry])
 
 (defspec.xt add-param-listener
@@ -108,7 +108,7 @@
         :xt/str
         :xt/str
         [:fn [RouteEvent] :xt/any]
-        [:maybe xt.lang.event-common/EventListenerMeta]]
+        [:xt/maybe xt.lang.event-common/EventListenerMeta]]
        xt.lang.event-common/EventListenerEntry])
 
 (defspec.xt add-full-listener
@@ -117,23 +117,23 @@
         :xt/str
         :xt/str
         [:fn [RouteEvent] :xt/any]
-        [:maybe xt.lang.event-common/EventListenerMeta]]
+        [:xt/maybe xt.lang.event-common/EventListenerMeta]]
        xt.lang.event-common/EventListenerEntry])
 
 (defspec.xt set-url
-  [:fn [EventRoute :xt/str [:maybe :xt/bool]] [:array :xt/str]])
+  [:fn [EventRoute :xt/str [:xt/maybe :xt/bool]] [:xt/array :xt/str]])
 
 (defspec.xt set-path
-  [:fn [EventRoute [:maybe RoutePath] [:maybe RouteParamMap]] [:array :xt/str]])
+  [:fn [EventRoute [:xt/maybe RoutePath] [:xt/maybe RouteParamMap]] [:xt/array :xt/str]])
 
 (defspec.xt set-segment
-  [:fn [EventRoute RoutePath :xt/str] [:array :xt/str]])
+  [:fn [EventRoute RoutePath :xt/str] [:xt/array :xt/str]])
 
 (defspec.xt set-param
-  [:fn [EventRoute :xt/str [:maybe :xt/str] [:maybe RoutePath]] [:array :xt/str]])
+  [:fn [EventRoute :xt/str [:xt/maybe :xt/str] [:xt/maybe RoutePath]] [:xt/array :xt/str]])
 
 (defspec.xt reset-route
-  [:fn [EventRoute [:maybe :xt/str]] [:array :xt/str]])
+  [:fn [EventRoute [:xt/maybe :xt/str]] [:xt/array :xt/str]])
 
 
 ;;

@@ -1,6 +1,6 @@
 (ns xt.lang.event-form
   (:require [std.lang :as l]
-            [std.lang.model.spec-xtalk.typed :refer [defspec.xt]]))
+            [std.lang.typed.xtalk :refer [defspec.xt]]))
 
 (l/script :xtalk
   {:require [[xt.lang.base-lib :as k]
@@ -8,81 +8,81 @@
              [xt.lang.util-validate :as validate]]})
 
 (defspec.xt ValidationFieldResult
-  [:record
-   [status :xt/str]])
+  [:xt/record
+   ["status" :xt/str]])
 
 (defspec.xt ValidationResult
-  [:record
+  [:xt/record
    ["::" :xt/str]
-   [status :xt/str]
-   [fields [:dict :xt/str ValidationFieldResult]]])
+   ["status" :xt/str]
+   ["fields" [:xt/dict :xt/str ValidationFieldResult]]])
 
 (defspec.xt FormEvent
-  [:record
-   [type :xt/str]
-   [fields [:array :xt/str]]
-   [meta [:maybe xt.lang.event-common/EventListenerMeta]]])
+  [:xt/record
+   ["type" :xt/str]
+   ["fields" [:xt/array :xt/str]]
+   ["meta" [:xt/maybe xt.lang.event-common/EventListenerMeta]]])
 
 (defspec.xt EventForm
-  [:record
+  [:xt/record
    ["::" :xt/str]
-   [listeners xt.lang.event-common/EventListenerMap]
-   [data [:dict :xt/str :xt/any]]
-   [validators [:dict :xt/str :xt/any]]
-   [result ValidationResult]])
+   ["listeners" xt.lang.event-common/EventListenerMap]
+   ["data" [:xt/dict :xt/str :xt/any]]
+   ["validators" [:xt/dict :xt/str :xt/any]]
+   ["result" ValidationResult]])
 
 (defspec.xt make-form
-  [:fn [[:or [:dict :xt/str :xt/any]
-             [:fn [] [:dict :xt/str :xt/any]]]
-        [:dict :xt/str :xt/any]]
+  [:fn [[:or [:xt/dict :xt/str :xt/any]
+             [:fn [] [:xt/dict :xt/str :xt/any]]]
+        [:xt/dict :xt/str :xt/any]]
    EventForm])
 
 (defspec.xt check-event
-  [:fn [:xt/any [:array :xt/str]] :xt/bool])
+  [:fn [:xt/any [:xt/array :xt/str]] :xt/bool])
 
 (defspec.xt add-listener
   [:fn [EventForm
         :xt/str
-        [:or :xt/str [:array :xt/str]]
+        [:or :xt/str [:xt/array :xt/str]]
         [:fn [FormEvent] :xt/any]
-        [:maybe xt.lang.event-common/EventListenerMeta]]
+        [:xt/maybe xt.lang.event-common/EventListenerMeta]]
        xt.lang.event-common/EventListenerEntry])
 
 (defspec.xt trigger-all
-  [:fn [EventForm :xt/str] [:array :xt/str]])
+  [:fn [EventForm :xt/str] [:xt/array :xt/str]])
 
 (defspec.xt trigger-field
-  [:fn [EventForm [:or :xt/str [:array :xt/str]] :xt/str] [:array :xt/str]])
+  [:fn [EventForm [:or :xt/str [:xt/array :xt/str]] :xt/str] [:xt/array :xt/str]])
 
 (defspec.xt set-field
-  [:fn [EventForm :xt/str :xt/any] [:array :xt/str]])
+  [:fn [EventForm :xt/str :xt/any] [:xt/array :xt/str]])
 
 (defspec.xt get-field
-  [:fn [EventForm :xt/str] [:maybe :xt/any]])
+  [:fn [EventForm :xt/str] [:xt/maybe :xt/any]])
 
 (defspec.xt toggle-field
-  [:fn [EventForm :xt/str] [:array :xt/str]])
+  [:fn [EventForm :xt/str] [:xt/array :xt/str]])
 
 (defspec.xt field-fn
-  [:fn [EventForm :xt/str] [:fn [:xt/any] [:array :xt/str]]])
+  [:fn [EventForm :xt/str] [:fn [:xt/any] [:xt/array :xt/str]]])
 
 (defspec.xt get-result
   [:fn [EventForm] ValidationResult])
 
 (defspec.xt get-field-result
-  [:fn [EventForm :xt/str] [:maybe ValidationFieldResult]])
+  [:fn [EventForm :xt/str] [:xt/maybe ValidationFieldResult]])
 
 (defspec.xt get-data
-  [:fn [EventForm] [:dict :xt/str :xt/any]])
+  [:fn [EventForm] [:xt/dict :xt/str :xt/any]])
 
 (defspec.xt set-data
-  [:fn [EventForm [:dict :xt/str :xt/any]] [:array :xt/str]])
+  [:fn [EventForm [:xt/dict :xt/str :xt/any]] [:xt/array :xt/str]])
 
 (defspec.xt reset-all-data
-  [:fn [EventForm] [:array :xt/str]])
+  [:fn [EventForm] [:xt/array :xt/str]])
 
 (defspec.xt reset-field-data
-  [:fn [EventForm :xt/str] [:array :xt/str]])
+  [:fn [EventForm :xt/str] [:xt/array :xt/str]])
 
 (defspec.xt validate-all
   [:fn [EventForm :xt/any :xt/any] :xt/any])
@@ -358,8 +358,8 @@
 
 (comment
   
-  (require '[std.lang.model.spec-xtalk.typed :as typed]
-           '[std.lang.model.spec-xtalk.typed-analysis :as ta])
+  (require '[std.lang.typed.xtalk :as typed]
+           '[std.lang.typed.xtalk-analysis :as ta])
   
   (typed/check-namespace 'xt.lang.event-form)
   )

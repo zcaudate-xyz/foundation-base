@@ -1,8 +1,8 @@
-(ns std.lang.model.spec-xtalk.typed-analysis
+(ns std.lang.typed.xtalk-analysis
   (:require [std.json :as json]
-            [std.lang.model.spec-xtalk.typed-check :as check]
-            [std.lang.model.spec-xtalk.typed-common :as types]
-            [std.lang.model.spec-xtalk.typed-parse :as parse]))
+            [std.lang.typed.xtalk-check :as check]
+            [std.lang.typed.xtalk-common :as types]
+            [std.lang.typed.xtalk-parse :as parse]))
 
 (defn analyze-file
   [file-path]
@@ -21,7 +21,7 @@
 (defn resolve-function-def
   [fn-ref]
   (cond
-    (instance? std.lang.model.spec_xtalk.typed_common.XtFnDef fn-ref)
+    (instance? std.lang.typed.xtalk_common.XtFnDef fn-ref)
     fn-ref
 
     (symbol? fn-ref)

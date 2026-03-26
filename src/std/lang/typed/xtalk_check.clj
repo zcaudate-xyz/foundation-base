@@ -1,6 +1,6 @@
-(ns std.lang.model.spec-xtalk.typed-check
-  (:require [std.lang.model.spec-xtalk.typed-common :as types]
-            [std.lang.model.spec-xtalk.typed-infer :as infer]))
+(ns std.lang.typed.xtalk-check
+  (:require [std.lang.typed.xtalk-common :as types]
+            [std.lang.typed.xtalk-infer :as infer]))
 
 (defn function-env
   [fn-def]
@@ -37,7 +37,7 @@
 (defn check-function
   [fn-ref]
   (let [fn-def (cond
-                 (instance? std.lang.model.spec_xtalk.typed_common.XtFnDef fn-ref)
+                 (instance? std.lang.typed.xtalk_common.XtFnDef fn-ref)
                  fn-ref
 
                  (symbol? fn-ref)
