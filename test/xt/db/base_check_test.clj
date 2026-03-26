@@ -1,6 +1,6 @@
 (ns xt.db.base-check-test
   (:require [rt.postgres :as pg]
-            [rt.postgres.script.test.scratch-v1 :as scratch]
+            [rt.postgres.test.scratch-v1 :as scratch]
             [std.lang :as l])
   (:use code.test))
 

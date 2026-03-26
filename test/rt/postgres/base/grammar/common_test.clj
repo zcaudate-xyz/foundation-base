@@ -1,7 +1,7 @@
 (ns rt.postgres.base.grammar.common-test
   (:require [rt.postgres.base.grammar :as g]
             [rt.postgres.base.grammar.common :as common]
-            [rt.postgres.script.builtin :as builtin]
+            [rt.postgres.runtime.builtin :as builtin]
             [rt.postgres.test.scratch-v1 :as scratch]
             [std.lang :as l]
             [std.lang.base.emit-common :as emit-common])

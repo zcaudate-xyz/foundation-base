@@ -9,7 +9,7 @@
   {:runtime :jdbc.client
    :config  {:dbname "test-scratch"}
    :require [[rt.postgres :as pg]
-             [rt.postgres.system :as sys]
+             [rt.postgres.runtime.system :as sys]
              [rt.postgres.test.scratch-v1 :as scratch]]})
 
 (fact:global

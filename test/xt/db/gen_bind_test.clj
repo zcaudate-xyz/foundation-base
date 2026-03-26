@@ -1,5 +1,5 @@
 (ns xt.db.gen-bind-test
-  (:require [rt.postgres.script.test.scratch-v1 :as scratch]
+  (:require [rt.postgres.test.scratch-v1 :as scratch]
             [xt.db.gen-bind :as bind]
             [xt.db.sample-data-test :as sample-data]
             [xt.db.sample-user-test :as sample-user])

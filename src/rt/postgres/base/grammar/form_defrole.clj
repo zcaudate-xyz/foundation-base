@@ -1,6 +1,6 @@
 (ns rt.postgres.base.grammar.form-defrole
   (:require [rt.postgres.base.grammar.common :as common]
-            [rt.postgres.script.impl-base :as base]
+            [rt.postgres.runtime.impl-base :as base]
             [std.lang :as l]
             [std.lang.base.util :as ut]
             [std.lib.foundation :as f]))

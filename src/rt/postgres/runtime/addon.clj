@@ -1,0 +1,264 @@
+(ns rt.postgres.runtime.addon
+  (:require [rt.postgres.base.grammar.common :as common]
+            [rt.postgres.base.grammar.tf :as tf]
+            [std.json :as json]
+            [std.lang :as l]
+            [std.lib.template :as template])
+  (:refer-clojure :exclude [case update assert throw name]))
+
+(l/script :postgres
+  rt.postgres
+  {:macro-only true})
+
+(defmacro.pg ^{:- [:block]}
+  exec
+  "executes an sql statement"
+  {:added "4.0"}
+  [args] args)
+
+(defmacro.pg ^{:- [:array]}
+  ARRAY
+  "creates an array"
+  {:added "4.0"}
+  ([& args]
+   (list :% (list :- "ARRAY[") (list 'quote (vec args)) (list :- "]"))))
+
+(defmacro.pg ^{:- [:text]}
+  id
+  "gets the id of an object"
+  {:added "4.0"}
+  ([sym & [type]]
+   `(~(or type :uuid) (:->> ~sym "id"))))
+
+(defmacro.pg ^{:- [:text]}
+  name
+  "gets the name of a table"
+  {:added "4.0"}
+  ([table]
+   (let [entry (deref (deref (resolve table)))]
+     (str (:id entry)))))
+
+(defmacro.pg ^{:- [:jsonb]}
+  full
+  "gets the full jsonb for table or function"
+  {:added "4.0"}
+  ([table]
+   (let [entry (deref (deref (resolve table)))]
+     (json/write
+      [(:static/schema entry)
+       (str (:id entry))]))))
+
+(defn full-str
+  "gets the full json str form table or function"
+  {:added "4.0"}
+  [table]
+  (json/write
+   (-/full table)))
+
+(defmacro.pg ^{:- [:jsonb]}
+  coord
+  "gets the coordinate of a row"
+  {:added "4.0"}
+  ([table row-id]
+   (let [entry (deref (deref (resolve table)))]
+     (list 'jsonb-build-array
+           (:static/schema entry)
+           (str (:id entry))
+           row-id))))
+
+(defmacro.pg ^{:- [:text]}
+  rand-hex
+  "generates random hex"
+  {:added "4.0"}
+  ([n]
+   (list 'encode (list 'gen-random-bytes (list '/ n 2)) "hex")))
+
+(defmacro.pg ^{:- [:string]}
+  sha1
+  "calculates the sha1"
+  {:added "4.0"}
+  ([text]
+   (list 'encode (list 'digest (:bytea text) "sha1") "hex")))
+
+(defmacro.pg ^{:- [:block]}
+  client-list
+  "gets the client list for pg"
+  {:added "4.0"}
+  []
+  [:select '* :from 'pg_stat_activity])
+
+;;
+;; time
+;; 
+
+(defmacro.pg ^{:- [:bigint]}
+  time-ms
+  "returns the time in ms"
+  {:added "4.0"}
+  ([]
+   '(:bigint (* 1000 (extract [epoch :from (now)])))))
+
+(defmacro.pg ^{:- [:bigint]}
+  time-us
+  "returns the time in us"
+  {:added "4.0"}
+  ([]
+   '(:bigint (* 1000000 (extract [epoch :from (now)])))))
+
+(defmacro.pg ^{:- [:block]}
+  throw
+  "raises a json exception"
+  {:added "4.0"}
+  ([{:as m}]
+   (tf/pg-tf-throw [nil m])))
+
+(defmacro.pg ^{:- [:block]}
+  error
+  "raises a json error with value"
+  {:added "4.0"}
+  ([{:as m}]
+   (tf/pg-tf-error [nil m])))
+
+(defmacro.pg ^{:- [:block]
+               :style/indent 1}
+  assert
+  "asserts given a block"
+  {:added "4.0"}
+  ([chk [tag data]]
+   (tf/pg-tf-assert [nil chk [tag data]])))
+
+
+(defmacro.pg ^{:style/indent 0}
+  case
+  "builds a case form"
+  {:added "4.0"}
+  ([& args]
+   (let [args  (partition 2 args)
+         block (mapcat (fn [[chk body]]
+                         (if (= :else chk)
+                           [:else (list :% body) \\]
+                           [:when (list :% chk) :then (list :% body) \\]))
+                       args)]
+     (list '% (vec (concat [:case]
+                           block
+                           [:end]))))))
+
+(defmacro.pg ^{:- [:block]}
+  get-stack-diagnostics
+  "gets the stack diagnostics"
+  {:added "4.0"}
+  []
+  [:get-stacked-diagnostics
+   ''[[e_code := :returned_sqlstate]
+      [e_msg := :message_text]
+      [e_detail := :pg_exception_detail]
+      [e_hint := :pg_exception_hint]
+      [e_context := :pg_exception_context]]])
+
+(defmacro.pg
+  field-id
+  "shorthand for getting the field-id for a linked map"
+  {:added "4.0"}
+  [m field]
+  (template/$ (coalesce (:->> ~m ~(str field "_id"))
+                        (:->> (:-> ~m ~field) "id"))))
+
+;;
+;; map/reduce
+;;
+
+(defmacro.pg ^{:- [:anyarray]}
+  map:rel
+  "basic map across relation"
+  {:added "4.0"}
+  [f rel & args]
+  `(~'% [(~'jsonb-agg (~f ~'o-ret ~@args)) :from ~rel :as ~'o-ret]))
+
+(defmacro.pg ^{:- [:jsonb]}
+  map:js-text
+  "maps across json"
+  {:added "4.0"}
+  ([f arr & args]
+   (template/$ (% [(coalesce (jsonb-agg (~f o-ret ~@args))
+                      (js []))
+            \\ :from (jsonb-array-elements-text ~arr) :as o-ret]))))
+
+(defmacro.pg ^{:- [:jsonb]}
+  map:js
+  "basic map across json"
+  {:added "4.0"}
+  ([f arr & args]
+   (template/$ (% [(coalesce (jsonb-agg (~f o-ret ~@args))
+                      (js []))
+            \\ :from (jsonb-array-elements ~arr) :as o-ret]))))
+
+(defmacro.pg ^{:- [:anyelement]}
+  do:reduce
+  "basic reduce macro"
+  {:added "4.0"}
+  ([out f type arr]
+   `(~'let:block {:declare [(~type ~'e)]}
+     (~'for:each [~'e :in ~'(% ARRAY) ~arr]
+      (:= ~out (~f ~out ~'e)))
+     (~'return ~out))))
+  
+(defmacro.pg ^{:- [:block]}
+  b:select
+  "basic select macro"
+  {:added "4.0"}
+  ([& args]
+   `[:select ~@args]))
+
+(defmacro.pg ^{:- [:block]}
+  ret
+  "returns a value alias for select"
+  {:added "4.0"}
+  ([& args]
+   `[:select ~@args]))
+
+(defmacro.pg ^{:- [:block]}
+  b:update
+  "update macro"
+  {:added "4.0"}
+  ([& args]
+   `[:update ~@args]))
+
+(defmacro.pg ^{:- [:block]}
+  b:insert
+  "insert macro"
+  {:added "4.0"}
+  ([& args]
+   `[:insert ~@args]))
+
+(defmacro.pg ^{:- [:block]}
+  b:delete
+  "delete macro"
+  {:added "4.0"}
+  ([& args]
+   `[:delete ~@args]))
+
+(defmacro.pg ^{:- [:block]}
+  perform
+  "perform macro"
+  {:added "4.0"}
+  ([& args]
+   `[:perform ~@args]))
+
+(defmacro.pg ^{:- [:block]}
+  random-enum
+  "gets random enum"
+  {:added "4.0"}
+  [enum]
+  (template/$ [:select p :from (unnest (enum-range (++ nil ~enum))) :as p :order-by (random) :limit 1]))
+
+(defmacro.pg ^{:- [:block]}
+  do:plpgsql
+  "creates a do block"
+  {:added "4.0"}
+  [& forms]
+  `[:DO :$$
+    :BEGIN
+    (do ~@forms)
+    :END
+    :$$ :LANGUAGE "plpgsql"])
+

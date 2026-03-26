@@ -5,8 +5,8 @@
 
 (comment
   ;; PREVIOUS SETUP
-  [rt.postgres.grammar.common-application :as app]
-  [rt.postgres.script.test.scratch-v1 :as scratch]
+  [rt.postgres.base.application :as app]
+  [rt.postgres.test.scratch-v1 :as scratch]
   (def -tsch- (get-in (app/app "scratch")
                       [:schema
                        :tree
@@ -40,7 +40,7 @@
        :rident :Task/cache,
        :link
        {:id Task,
-        :module rt.postgres.script.test.scratch-v1,
+        :module rt.postgres.test.scratch-v1,
         :lang :postgres,
         :section :code}}}],
     :Task/name
@@ -81,7 +81,7 @@
       :cardinality :one,
       :required true,
       :scope :-/info,
-      :enum {:ns rt.postgres.script.test.scratch-v1/EnumStatus},
+      :enum {:ns rt.postgres.test.scratch-v1/EnumStatus},
       :web {:example "success"},
       :order 1,
       :ident :Task/status}],
@@ -99,7 +99,7 @@
       {:ns :TaskCache,
        :link
        {:id TaskCache,
-        :module rt.postgres.script.test.scratch-v1,
+        :module rt.postgres.test.scratch-v1,
         :lang :postgres,
         :section :code},
        :rval :tasks,
@@ -164,7 +164,7 @@
     [{:type :array,
       :cardinality :one,
       :required true,
-      :sql {:process rt.postgres.script.test.scratch-v1/as-array},
+      :sql {:process rt.postgres.test.scratch-v1/as-array},
       :scope :-/data,
       :order 2,
       :ident :Entry/tags}],
@@ -228,7 +228,7 @@
      [{:type :array,
        :cardinality :one,
        :required true,
-       :sql {:process rt.postgres.script.test.scratch-v1/as-array},
+       :sql {:process rt.postgres.test.scratch-v1/as-array},
        :scope :-/data,
        :order 2,
        :ident :Entry/tags}],
@@ -280,7 +280,7 @@
         :rident :Task/cache,
         :link
         {:id Task,
-         :module rt.postgres.script.test.scratch-v1,
+         :module rt.postgres.test.scratch-v1,
          :lang :postgres,
          :section :code}}}],
      :__deleted__
@@ -365,7 +365,7 @@
        {:ns :TaskCache,
         :link
         {:id TaskCache,
-         :module rt.postgres.script.test.scratch-v1,
+         :module rt.postgres.test.scratch-v1,
          :lang :postgres,
          :section :code},
         :rval :tasks,
@@ -382,7 +382,7 @@
        :cardinality :one,
        :required true,
        :scope :-/info,
-       :enum {:ns rt.postgres.script.test.scratch-v1/EnumStatus},
+       :enum {:ns rt.postgres.test.scratch-v1/EnumStatus},
        :web {:example "success"},
        :order 1,
        :ident :Task/status}],
@@ -456,7 +456,7 @@
      {:type :enum,
       :required true,
       :scope :-/info,
-      :enum {:ns rt.postgres.script.test.scratch-v1/EnumStatus},
+      :enum {:ns rt.postgres.test.scratch-v1/EnumStatus},
       :web {:example "success"}}
      :name
      {:type :text,
@@ -470,7 +470,7 @@
       {:ns :TaskCache,
        :link
        {:id TaskCache,
-        :module rt.postgres.script.test.scratch-v1,
+        :module rt.postgres.test.scratch-v1,
         :lang :postgres,
         :section :code}},
       :scope :-/ref}
@@ -499,7 +499,7 @@
      :tags
      {:type :array,
       :required true,
-      :sql {:process rt.postgres.script.test.scratch-v1/as-array},
+      :sql {:process rt.postgres.test.scratch-v1/as-array},
       :scope :-/data}
      :op-created
      {:type :uuid, :scope :-/system}
@@ -554,7 +554,7 @@
       {:ns :TaskCache,
        :link
        {:id TaskCache,
-        :module rt.postgres.script.test.scratch-v1,
+        :module rt.postgres.test.scratch-v1,
         :lang :postgres,
         :section :code},
        :rval :tasks,
@@ -571,7 +571,7 @@
       :cardinality :one,
       :required true,
       :scope :-/info,
-      :enum {:ns rt.postgres.script.test.scratch-v1/EnumStatus},
+      :enum {:ns rt.postgres.test.scratch-v1/EnumStatus},
       :web {:example "success"},
       :order 1,
       :ident :Task/status}],

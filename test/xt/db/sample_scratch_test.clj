@@ -2,7 +2,7 @@
   (:use code.test)
   (:require [rt.postgres :as pg]
             [std.lang :as l]
-            [rt.postgres.script.test.scratch-v1 :as v1]
+            [rt.postgres.test.scratch-v1 :as v1]
             [xt.db.sample-data-test :as data]
             [xt.db.sample-user-test :as user]))
 

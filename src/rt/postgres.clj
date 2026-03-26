@@ -1,23 +1,24 @@
 (ns rt.postgres
-  (:require [rt.postgres.runtime.client :as client]
-            [rt.postgres.runtime.client-impl :as client-impl]
-            [rt.postgres.base.typed :as typed-analysis]
+  (:require [rt.postgres.base.client :as client]
+            [rt.postgres.base.client-impl :as client-impl]
+            [rt.postgres.base.typed :as typed]
             [rt.postgres.base.grammar.gen-bind]
+            [rt.postgres.base.grammar.entity :as entity]
             [rt.postgres.base.application :as app]
-            [rt.postgres.script.addon]
-            [rt.postgres.script.builtin]
-            [rt.postgres.script.graph]
-            [rt.postgres.script.graph-view :as graph-view]
-            [rt.postgres.script.impl]
+            [rt.postgres.runtime.addon]
+            [rt.postgres.runtime.builtin]
+            [rt.postgres.runtime.graph]
+            [rt.postgres.runtime.graph-view :as graph-view]
+            [rt.postgres.runtime.impl]
             [std.lang :as l]
             [std.lib.foundation :as f])
   (:refer-clojure :exclude [abs concat replace reverse mod name case drop update format
                             assert repeat bit-and bit-or count max min]))
 
-(f/intern-all rt.postgres.script.builtin
-              rt.postgres.script.addon
-              rt.postgres.script.impl
-              rt.postgres.script.graph
+(f/intern-all rt.postgres.runtime.builtin
+              rt.postgres.runtime.addon
+              rt.postgres.runtime.impl
+              rt.postgres.runtime.graph
               rt.postgres.base.grammar.gen-bind)
 
 (f/intern-in client/rt-add-notify
@@ -40,7 +41,8 @@
              graph-view/defret.pg
              graph-view/defsel.pg
 
-             typed-analysis/Type)
+             entity/E
+             typed/Type)
 
 (defn purge-postgres
   "purges the rt.postgres library. Used for debugging"

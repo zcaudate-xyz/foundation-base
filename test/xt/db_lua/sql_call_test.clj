@@ -7,7 +7,7 @@
 (l/script- :postgres
   {:runtime :jdbc.client
    :config  {:dbname "test-scratch"}
-   :require [[rt.postgres.script.test.scratch-v1 :as scratch]]})
+   :require [[rt.postgres.test.scratch-v1 :as scratch]]})
 
 (l/script- :lua
   {:runtime :basic

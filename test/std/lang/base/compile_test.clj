@@ -1,5 +1,5 @@
 (ns std.lang.base.compile-test
-  (:require [rt.postgres.script.test.scratch-v1 :as scratch]
+  (:require [rt.postgres.test.scratch-v1 :as scratch]
             [std.fs :as fs]
             [std.lang.base.compile :refer :all]
             [std.lang.base.impl :as impl]
@@ -86,7 +86,7 @@
       :root   ".build"
       :target "src"
       :file   "pkg/schema.sql"
-      :main   'rt.postgres.script.test.scratch-v1
+      :main   'rt.postgres.test.scratch-v1
       :layout :flat
       :entry {:label true}}))
   => (contains-in [".build/src/pkg/schema.sql"

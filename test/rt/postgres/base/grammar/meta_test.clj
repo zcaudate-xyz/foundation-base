@@ -1,6 +1,6 @@
 (ns rt.postgres.base.grammar.meta-test
   (:require [rt.postgres.base.grammar.meta :refer :all]
-            [rt.postgres.script.builtin :as builtin]
+            [rt.postgres.runtime.builtin :as builtin]
             [std.lang :as l])
   (:use code.test))
 

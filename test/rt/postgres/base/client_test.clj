@@ -1,0 +1,53 @@
+(ns rt.postgres.base.client-test
+  (:require [lib.postgres :as base]
+            [lib.postgres.connection :as conn]
+            [rt.postgres.base.client :as client]
+            [rt.postgres.test.scratch-v1 :as scratch]
+            [std.lang :as l])
+  (:use code.test))
+
+^{:refer rt.postgres.base.client/setup-module :adopt true :added "4.0"}
+(fact "creates a postgres runtime"
+  ;; Only checking function existance/stub as we mock everything
+  )
+
+^{:refer rt.postgres.base.client/rt-postgres:create :added "4.0"}
+(fact "creates a postgres runtime"
+  (client/rt-postgres:create {})
+  => map?)
+
+^{:refer rt.postgres.base.client/rt-postgres :added "4.0"}
+(fact "creates and startn a postgres runtime"
+  (with-redefs [base/start-pg (fn [pg] (assoc pg :started true))]
+    (client/rt-postgres {}))
+  => (contains {:started true}))
+
+^{:refer rt.postgres.base.client/rt-add-notify :added "4.0"}
+(fact "adds a notification channel"
+  (let [pg (client/rt-postgres:create {})]
+    (with-redefs [conn/notify-create (fn [_ _] [:conn])]
+      (client/rt-add-notify pg "id" {:channel "ch"})
+      @(:notifications pg) => {"id" [:conn]})))
+
+^{:refer rt.postgres.base.client/rt-remove-notify :added "4.0"}
+(fact "removes a notification channel"
+  (let [pg (client/rt-postgres:create {})]
+    (with-redefs [conn/notify-create (fn [_ _] [:conn])
+                  conn/conn-close (fn [_] nil)]
+      (client/rt-add-notify pg "id" {:channel "ch"})
+      (client/rt-remove-notify pg "id")
+      @(:notifications pg) => {})))
+
+^{:refer rt.postgres.base.client/rt-list-notify :added "4.0"}
+(fact "lists all notification channels"
+  (let [pg (client/rt-postgres:create {})]
+    (with-redefs [conn/notify-create (fn [_ _] [:conn])]
+      (client/rt-add-notify pg "id" {:channel "ch"})
+      (client/rt-list-notify pg) => (contains ["id"]))))
+
+
+^{:refer rt.postgres.base.client/rt-pg-string :added "4.1"}
+(fact "returns string representation of postgres runtime"
+  (let [pg (client/rt-postgres:create {})]
+    (client/rt-pg-string pg)
+    => string?))

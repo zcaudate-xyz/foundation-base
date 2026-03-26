@@ -1,9 +1,9 @@
 (ns std.lang.base.registry)
 
 (def +registry+
-  (atom {[:postgres :default]          'rt.postgres.grammar
-         [:postgres :jdbc]             'rt.postgres.client
-         [:postgres :jdbc.client]      'rt.postgres.client
+  (atom {[:postgres :default]          'rt.postgres.base.grammar
+         [:postgres :jdbc]             'rt.postgres.base.client
+         [:postgres :jdbc.client]      'rt.postgres.base.client
          
          [:redis    :default]          'rt.redis
          [:redis    :redis]            'rt.redis
