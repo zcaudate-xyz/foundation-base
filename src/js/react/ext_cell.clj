@@ -5,7 +5,7 @@
   {:require [[xt.lang.base-lib :as k]
              [js.react :as r]
              [js.core :as j]
-             [js.cell :as cl]
+             [js.cell.kernel :as cl]
              [js.react.ext-view :as ext-view]]})
 
 (def.js TYPES
