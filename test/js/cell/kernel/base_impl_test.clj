@@ -13,6 +13,7 @@
              [js.cell.kernel.base-link-local :as base-link-local]
              [js.cell.kernel.base-model :as base-model]
              [js.cell.kernel.base-impl :as base-impl]
+             [js.cell.kernel.base-util :as base-util]
              [js.cell.kernel.worker-impl :as worker-impl]
              [js.cell.kernel.worker-mock :as worker-mock]]})
 
@@ -94,6 +95,22 @@
        "action" "@worker/error",
        "status" "error",
        "op" "call"}))
+
+(fact "new-cell resolves init when worker emits init synchronously"
+  ^:hidden
+
+  (notify/wait-on :js
+    (var cell (base-impl/new-cell
+               {:create-fn
+                (fn [listener]
+                  (listener {"op" "stream"
+                             "signal" "@worker/::INIT"
+                             "status" "ok"
+                             "body" {"done" true}})
+                  (return {"postMessage" (fn [_] true)}))}))
+    (. cell ["init"]
+       (then (repl/>notify))))
+  => true)
 
 ^{:refer js.cell.kernel.base-impl/list-models :added "4.0"
   :setup [(fact:global :setup)

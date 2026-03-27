@@ -150,9 +150,9 @@
 (defn.js link-create
   "creates a link from url"
   {:added "4.0"}
-  [worker-url]
-  (var active {})
-  (var callbacks {})
+  [worker-url active callbacks]
+  (:= active (or active {}))
+  (:= callbacks (or callbacks {}))
   (var worker (-/link-create-worker worker-url active callbacks))
   (return {"::" "cell.link"
            :id (util/rand-id "" 3)

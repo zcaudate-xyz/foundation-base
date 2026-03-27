@@ -1,5 +1,6 @@
 (ns js.cell.playground-test
-  (:require [js.cell.playground :as play])
+  (:require [js.cell.playground :as play]
+            [std.fs :as fs])
   (:use code.test))
 
 ^{:refer js.cell.playground/start-playground :added "4.0"}
@@ -27,6 +28,19 @@
   
   (play/play-url "hello")
   => #"http://127.0.0.1:\d+/hello")
+
+^{:refer js.cell.playground/play-page :added "4.0"}
+(fact "creates a page asset in the playground"
+  ^:hidden
+
+  (let [page (play/play-page {:name "e2e"
+                              :title "e2e"
+                              :body [:div {:id "root"}]
+                              :scripts ["worker.js"]})
+        path (play/play-file page)]
+    page => string?
+    (fs/exists? path) => true
+    (play/play-url page) => #"http://127.0.0.1:\d+/e2e-.*\.html"))
 
 ^{:refer js.cell.playground/play-script :added "4.0"}
 (fact "gets the script"

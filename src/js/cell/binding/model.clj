@@ -2,7 +2,8 @@
   (:require [std.lang :as l]))
 
 (l/script :js
-  {:require [[js.cell.service.db-query :as db-query]
+  {:require [[js.cell.binding.trigger :as binding-trigger]
+             [js.cell.service.db-query :as db-query]
              [js.cell.service.db-remote :as db-remote]
              [js.cell.service.db-supabase :as db-supabase]
              [js.cell.service.db-sync :as db-sync]
@@ -113,13 +114,15 @@
   "compiles a prepared descriptor into a kernel view spec"
   {:added "4.0"}
   [prepared]
+  (var hooks (binding-trigger/compile-view-hooks prepared))
   (var options
        (k/obj-assign-nested
         {"context" {"modelId" (k/get-key prepared "model_id")
                      "viewId" (k/get-key prepared "view_id")
                      "resolve" (k/get-key prepared "resolve")
                      "stream" (k/get-key prepared "stream")}}
-        (or (k/get-key prepared "options") {})))
+        (or (k/get-key prepared "options") {})
+        (or (k/get-key hooks "options") {})))
   (return {"handler" (-/compile-main-handler prepared)
            "remoteHandler" (-/compile-remote-handler prepared)
            "pipeline" (-/compile-sync-pipeline prepared)
@@ -127,6 +130,8 @@
            "defaultOutput" (k/get-key prepared "default_output")
            "defaultProcess" (k/get-key prepared "default_process")
            "defaultInit" (k/get-key prepared "default_init")
-           "trigger" (k/get-key prepared "trigger")
+           "trigger" (or (k/get-key hooks "trigger")
+                         (k/get-key prepared "trigger"))
            "options" options
-           "deps" (k/get-key prepared "deps")}))
+           "deps" (or (k/get-key hooks "deps")
+                      (k/get-key prepared "deps"))}))

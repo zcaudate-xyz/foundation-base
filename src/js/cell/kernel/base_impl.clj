@@ -95,22 +95,33 @@
 (defn.js new-cell
   "makes the core link"
   {:added "0.1" :adopt true}
-  [worker-url]
-  (var link    (:? (and (k/obj? worker-url)
-                        (not (. worker-url ["create_fn"])))
-                   worker-url
-                   (link/link-create worker-url)))
-  (var init    (-/new-cell-init))
-  (var models  {})
-  (link/add-callback link
-                    util/EV_INIT
-                    (fn:> [signal] (== util/EV_INIT signal))
-                    (fn [data]
-                      (link/remove-callback link util/EV_INIT)
-                      (. init (resolve true))))
-  (return
-   (event-common/blank-container
-    "cell"
+   [worker-url]
+   (var init    (-/new-cell-init))
+   (var link nil)
+   (var callbacks {})
+   (var init-handler
+        (fn [data]
+          (when link
+            (link/remove-callback link util/EV_INIT))
+          (. init (resolve true))))
+   (k/set-key callbacks
+              util/EV_INIT
+              {:key util/EV_INIT
+               :pred (fn:> [signal] (== util/EV_INIT signal))
+               :handler init-handler})
+   (if (and (k/obj? worker-url)
+            (not (. worker-url ["create_fn"])))
+     (do (link/add-callback worker-url
+                            util/EV_INIT
+                            (fn:> [signal] (== util/EV_INIT signal))
+                            init-handler)
+         (:= link worker-url))
+     (:= link (link/link-create worker-url
+                                nil
+                                callbacks)))
+   (return
+    (event-common/blank-container
+     "cell"
     {:id        (. link ["id"])
      :link      link
      :models    {}
@@ -241,4 +252,3 @@
   (return
    (event-common/trigger-keyed-listeners
     cell view-key (j/assign {:path path} event))))
-

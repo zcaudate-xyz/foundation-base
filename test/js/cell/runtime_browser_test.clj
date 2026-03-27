@@ -2,6 +2,7 @@
   (:use code.test)
   (:require [clojure.string :as str]
             [js.cell.runtime.emit :as emit]
+            [js.cell.playground :as play]
             [js.cell.runtime.link :as runtime-link]
             [rt.chromedriver.impl]
             [std.lang :as l]
@@ -10,6 +11,8 @@
 
 (l/script :js
   {:runtime :chromedriver.instance
+   :config {:url (play/play-url
+                  (play/play-page {:name "runtime-browser"}))}
    :require [[xt.lang.base-lib :as k]
              [xt.lang.base-repl :as repl]
              [xt.lang.base-runtime :as rt]
