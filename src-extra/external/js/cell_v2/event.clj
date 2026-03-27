@@ -3,7 +3,7 @@
 
 (l/script :js
   {:require [[xt.lang.base-lib :as k]
-             [js.cell.base-util :as base-util]]})
+             [js.cell.kernel.base-util :as base-util]]})
 
 (def$.js EV_INIT "@/::INIT")
 

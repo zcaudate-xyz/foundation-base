@@ -5,7 +5,7 @@
   {:require [[xt.lang.base-lib :as k]
              [xt.lang.util-throttle :as th]
              [xt.lang.event-view :as event-view]
-             [js.cell.base-util :as util]
+             [js.cell.kernel.base-util :as util]
              [js.cell-v2.impl-common :as impl-common]
              [js.cell-v2.link :as link]
              [js.core :as j]]})

@@ -6,7 +6,7 @@
              [xt.lang.util-throttle :as th]
              [xt.lang.event-view :as event-view]
              [js.cell.link-raw :as raw]
-             [js.cell.base-util :as util]
+             [js.cell.kernel.base-util :as util]
              [js.cell.impl-common :as impl-common]
              [js.core :as j]]})
 
@@ -338,13 +338,13 @@
 (defn.js trigger-model-raw
   "triggers a model"
   {:added "4.0"}
-  [cell model topic event]
+  [cell model signal event]
   (var #{views throttle} model)
   (var out [])
   (k/for:object [[view-id view] views]
     (var #{options} view)
     (var #{trigger} options)
-    (var check (util/check-event trigger topic event {:view view
+    (var check (util/check-event trigger signal event {:view view
                                                       :model model
                                                       :cell cell}))
     (when check
@@ -357,19 +357,19 @@
 (defn.js trigger-model
   "triggers a model"
   {:added "4.0"}
-  [cell model-id topic event]
+  [cell model-id signal event]
   (var model (impl-common/model-ensure cell model-id))
-  (return (-/trigger-model-raw cell model topic event)))
+  (return (-/trigger-model-raw cell model signal event)))
 
 (defn.js trigger-view
   "triggers a view"
   {:added "4.0"}
-  [cell model-id view-id topic event]
+  [cell model-id view-id signal event]
   (var #{link} cell)
   (var [model view] (impl-common/view-ensure cell model-id view-id))
   (var #{options} view)
   (var #{trigger} options)
-  (when (util/check-event trigger topic event {:view view
+  (when (util/check-event trigger signal event {:view view
                                                :model model
                                                :cell cell})
     (return (th/throttle-run (k/get-key model "throttle")
@@ -380,11 +380,11 @@
 (defn.js trigger-all
   "triggers all models in cell"
   {:added "0.1"}
-  [cell topic event]
+  [cell signal event]
   (var #{models} cell)
   (var out {})
   (k/for:object [[model-id model] models]
-    (var model-out (-/trigger-model-raw cell model topic event))
+    (var model-out (-/trigger-model-raw cell model signal event))
     (k/set-key out model-id model-out))
   (return out))
 
@@ -397,8 +397,8 @@
            link
            "@/raw"
            (fn:> true)
-           (fn [event topic]
-             (return (-/trigger-all cell topic event))))))
+           (fn [event signal]
+             (return (-/trigger-all cell signal event))))))
 
 (defn.js remove-raw-callback
   "removes the cell callback"

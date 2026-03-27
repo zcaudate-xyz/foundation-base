@@ -1,4 +1,4 @@
-(ns js.cell.base-util
+(ns js.cell.kernel.base-util
   (:require [std.lang :as l]))
 
 (l/script :js
@@ -17,9 +17,9 @@
              (j/randomId n))))
 
 (defn.js check-event
-  "checks that trigger matches topic and event"
+  "checks that trigger matches signal and event"
   {:added "4.0"}
-  [pred topic event ctx]
+  [pred signal event ctx]
   (var check false)
   (try
     (var t (:? (k/nil? pred)
@@ -29,13 +29,13 @@
                pred
                
                (k/fn? pred)
-               (pred topic ctx)
+               (pred signal ctx)
                
                (k/obj? pred)
-               (k/get-key pred topic)
+               (k/get-key pred signal)
                
                :else
-               (== topic pred)))
+               (== signal pred)))
     (:= check (or (== true t)
                   (and (k/fn? t) (t event ctx))
                   false))

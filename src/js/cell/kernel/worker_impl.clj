@@ -1,12 +1,13 @@
-(ns js.cell.base-internal
+(ns js.cell.kernel.worker-impl
   (:require [std.lang :as l]))
 
 (l/script :js
   {:require [[js.core :as j]
              [xt.lang.base-repl :as repl]
              [xt.lang.base-lib :as k]
-             [js.cell.base-util :as util]
-             [js.cell.base-fn :as base-fn]]})
+             [js.cell.kernel.base-util :as util]
+             [js.cell.kernel.worker-state :as worker-state]
+             [js.cell.kernel.worker-local :as worker-local]]})
 
 (defn.js worker-handle-async
   "worker function for handling async tasks"
@@ -28,13 +29,13 @@
                                              :body ret}))))))
 
 (defn.js worker-process
-  "processes various types of routes"
+  "processes various types of actions"
   {:added "4.0"}
   [worker input]
-  (var #{op id body route} input)
+  (var #{op id body action} input)
   (var post-fn (fn:> [x] (j/postMessage worker x)) )
   (cond (== op "eval")
-        (do (when (== false (. (base-fn/get-state worker)
+        (do (when (== false (. (worker-state/get-state worker)
                                ["eval"]))
               (j/postMessage worker {:op op
                                      :id id
@@ -49,26 +50,26 @@
                         :status "ok"
                         :body out})))
         
-        (== op "route")
-        (do (var route-entry  (. (base-fn/get-routes worker)
-                                 [route]))
-            (when (== nil route-entry)
+        (== op "action")
+        (do (var action-entry  (. (worker-state/get-actions worker)
+                                 [action]))
+            (when (== nil action-entry)
               (return (j/postMessage worker {:op op
                                              :id id
                                              :status "error"
-                                             :body (k/cat "Route not found - " route)})))
+                                             :body (k/cat "action not found - " action)})))
             
-            (var route-async  (. route-entry ["async"]))
-            (var route-fn     (. route-entry ["handler"]))
-            (var f   (:? route-async
+            (var action-async  (. action-entry ["async"]))
+            (var action-fn     (. action-entry ["handler"]))
+            (var f   (:? action-async
                          j/identity
                          post-fn))
             
             (try
               (:= body (util/arg-decode (or body [])))
-              (var out (:? route-async
-                           (-/worker-handle-async worker route-fn op id body)
-                           (route-fn (:.. body))))
+              (var out (:? action-async
+                           (-/worker-handle-async worker action-fn op id body)
+                           (action-fn (:.. body))))
               (return (f {:op op
                           :id id
                           :status "ok"
@@ -86,7 +87,7 @@
 
 
 (defn.js worker-init
-  "initiates the worker routes"
+  "initiates the worker actions"
   {:added "4.0"}
   [worker input-fn]
   (:= input-fn (or input-fn k/identity))
@@ -111,57 +112,6 @@
   [worker body]
   (return (j/postMessage worker {:op "stream"
                                  :status "ok"
-                                 :topic util/EV_INIT
+                                 :signal util/EV_INIT
                                  :body body})))
-
-
-;;
-;; 
-;;
-
-(defn.js mock-send
-  "sends a request to the mock worker"
-  {:added "4.0"}
-  [mock message]
-  (try 
-    (cond (k/is-string? message)
-          (-/worker-process mock
-                            {:op "eval"
-                             :id nil
-                             :body message})
-          
-          :else
-          (-/worker-process mock message))
-    (catch e (k/TRACE! (. e ["stack"]) "SEND.ERROR"))))
-
-(defn.js new-mock
-  "creates a new mock worker
- 
-   (!.js
-    (internal/new-mock k/identity))
-   => {\"::\" \"worker.mock\", \"listeners\" [nil]}"
-  {:added "4.0"}
-  [listener]
-  (var mock {"::" "worker.mock"
-             :listeners [listener]})
-  (var postMessage (fn [event]
-                     (var #{listeners} mock)
-                     (k/for:array [listener listeners]
-                       (listener event))))
-  (var postRequest (fn:> [request]
-                     (j/future (-/mock-send mock request))))
-  (j/assign mock #{postMessage
-                   postRequest})
-  (return mock))
-
-(defn.js mock-init
-  "initialises the mock worker"
-  {:added "4.0"}
-  [listener routes suppress]
-  (var mock (-/new-mock listener))
-  (when routes
-    (base-fn/routes-init routes))
-  (when (not suppress)
-    (-/worker-init-post mock {:done true}))
-  (return mock))
 

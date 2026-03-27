@@ -1,7 +1,7 @@
 (ns js.cell.playground
   (:require [clojure.string]
             [js.cell :as cl]
-            [js.cell.base-internal]
+            [js.cell.kernel.worker-impl]
             [js.core :as j]
             [std.fs :as fs]
             [std.html :as html]
@@ -83,9 +83,9 @@
   "constructs the play worker"
   {:added "4.0"}
   [& [as-script]]
-  (play-script '[(js.cell.base-fn/routes-init {})
-                 (js.cell.base-internal/worker-init self)
-                 (js.cell.base-internal/worker-init-post self {:done true})]
+  (play-script '[(js.cell.kernel.worker-fn/actions-init {})
+                 (js.cell.kernel.worker-impl/worker-init self)
+                 (js.cell.kernel.worker-impl/worker-init-post self {:done true})]
                as-script))
 
 (defn play-files

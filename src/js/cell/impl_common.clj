@@ -5,7 +5,7 @@
   {:require [[xt.lang.base-lib :as k]
              [xt.lang.event-common :as event-common]
              [js.cell.link-raw :as raw]
-             [js.cell.base-util :as util]
+             [js.cell.kernel.base-util :as util]
              [js.core :as j]]})
 
 (defn.js new-cell-init
@@ -32,7 +32,7 @@
   (var models  {})
   (raw/add-callback link
                     util/EV_INIT
-                    (fn:> [topic] (== util/EV_INIT topic))
+                    (fn:> [signal] (== util/EV_INIT signal))
                     (fn [data]
                       (raw/remove-callback link util/EV_INIT)
                       (. init (resolve true))))

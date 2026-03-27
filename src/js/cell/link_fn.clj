@@ -1,5 +1,5 @@
 (ns js.cell.link-fn
-  (:require [js.cell.base-fn :as base-fn]
+  (:require [js.cell.kernel.worker-fn :as base-fn]
             [std.lang :as l]
             [std.lib.foundation :as f]
             [std.string.wrap]))
@@ -7,11 +7,11 @@
 (l/script :js
   {:require [[js.cell.link-raw :as link-raw]]})
 
-(defn tmpl-link-route
+(defn tmpl-link-action
   "performs a template"
   {:added "4.0"}
   [[sym src]]
-  (let [{:api/keys [route static]
+  (let [{:cell/keys [action static]
          :as entry} @@(resolve src)
         args   (cond-> (nth (:form entry) 2)
                  (not static) rest)]
@@ -19,17 +19,17 @@
           (vec (cons 'link args)) 
           (list 'return (list `link-raw/call
                               'link
-                              {:op "route"
-                               :route route
+                              {:op "action"
+                               :action action
                                :body (vec args)})))))
 
 (f/template-ensure
  (mapv (juxt (fn [{:keys [id]}]
                ((std.string.wrap/wrap subs) id 3))
              l/sym-full)
-       (l/module-entries :js 'js.cell.base-fn
-                         :api/route))
- (f/template-entries [tmpl-link-route]
+       (l/module-entries :js 'js.cell.kernel.worker-fn
+                         :cell/action))
+ (f/template-entries [tmpl-link-action]
    [[trigger base-fn/fn-trigger]
     [trigger-async base-fn/fn-trigger-async]
     [final-set base-fn/fn-final-set]
@@ -37,8 +37,8 @@
     [eval-enable base-fn/fn-eval-enable]
     [eval-disable base-fn/fn-eval-disable]
     [eval-status base-fn/fn-eval-status]
-    [route-list base-fn/fn-route-list]
-    [route-entry base-fn/fn-route-entry]
+    [action-list base-fn/fn-action-list]
+    [action-entry base-fn/fn-action-entry]
     [ping base-fn/fn-ping]
     [ping-async base-fn/fn-ping-async]
     [echo base-fn/fn-echo]

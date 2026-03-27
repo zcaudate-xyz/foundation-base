@@ -1,5 +1,5 @@
 (ns js.cell.link-raw
-  (:require [js.cell.base-fn :as base-fn]
+  (:require [js.cell.kernel.worker-fn :as base-fn]
             [std.lang :as l]
             [std.lib.collection :as collection]
             [std.lib.foundation :as f]
@@ -8,7 +8,7 @@
 (l/script :js
   {:require [[js.core :as j]
              [xt.lang.base-lib :as k]
-             [js.cell.base-util :as util]]})
+             [js.cell.kernel.base-util :as util]]})
 
 ;;
 ;;
@@ -25,7 +25,7 @@
     (:= input (or input {}))
     (try
       (cond (== status "ok")
-            (cond (== op "route")
+            (cond (== op "action")
                   (do (k/del-key active id) 
                       (return (resolve (util/arg-decode body))))
                   
@@ -40,14 +40,14 @@
                             (return (resolve out)))))
             :else
             (do (k/del-key active id)
-                (return (reject (j/assign {:route (. input ["route"])
+                (return (reject (j/assign {:action (. input ["action"])
                                            :input (. input ["body"])
                                            :start-time time
                                            :end-time (k/now-ms)}
                                           data)))))
       (catch err (return (reject {:op op
                                   :id id
-                                  :route (. input ["route"])
+                                  :action (. input ["action"])
                                   :status "error"
                                   :message "Format Invalid"
                                   :input (. input ["body"])
@@ -59,12 +59,12 @@
   "notifies all registered callbacks"
   {:added "4.0"}
   [data callbacks]
-  (var #{op id topic status body} data)
+  (var #{op id signal status body} data)
   (var out [])
   (k/for:object [[p-id callback] callbacks]
     (var #{pred handler} callback)
-    (when (util/check-event pred topic data)
-      (try (handler data topic)
+    (when (util/check-event pred signal data)
+      (try (handler data signal)
            (x:arr-push out p-id)
            (catch err (k/LOG! {:stack   (. err ["stack"])
                                :message (. err ["message"])})))))
@@ -77,7 +77,7 @@
   (var #{data} e)
   (var #{op id} data)
   (cond  (or (== op "eval")
-             (== op "route"))
+             (== op "action"))
          (return (-/link-listener-call data active))
 
          (or (== op "stream"))
@@ -171,11 +171,11 @@
   (var p (new Promise (fn [resolve reject]
                         (:= (. active [cid])
                             {:resolve (fn [data]
-                                        #_(when (== "stats/local" (. event route))
+                                        #_(when (== "stats/local" (. event action))
                                           (k/LOG! data event))
                                         (resolve data))
                              :reject (fn [data]
-                                       #_(when (== "stats/local" (. event route))
+                                       #_(when (== "stats/local" (. event action))
                                           (k/LOG! data event))
                                        (reject data))
                              :input  input

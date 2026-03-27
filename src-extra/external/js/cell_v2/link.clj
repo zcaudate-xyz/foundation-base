@@ -4,7 +4,7 @@
 (l/script :js
   {:require [[js.core :as j]
              [xt.lang.base-lib :as k]
-             [js.cell.base-util :as legacy-util]
+             [js.cell.kernel.base-util :as legacy-util]
              [js.cell-v2 :as cell-v2]
              [js.cell-v2.protocol :as protocol]
              [js.cell-v2.transport :as transport]
