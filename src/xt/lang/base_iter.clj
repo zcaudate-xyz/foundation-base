@@ -1,9 +1,118 @@
 (ns xt.lang.base-iter
-  (:require [std.lang :as l])
+  (:require [std.lang :as l]
+            [std.lang.typed.xtalk :refer [defspec.xt]])
   (:refer-clojure :exclude [constantly iterate repeatedly cycle range drop peek take map mapcat concat filter keep partition take-nth]))
 
 (l/script :xtalk
   {:require [[xt.lang.base-macro :as k]]})
+
+(defspec.xt Iterator
+  :xt/any)
+
+(defspec.xt IterEqFn
+  [:fn [:xt/any :xt/any] :xt/bool])
+
+(defspec.xt UnaryFn
+  [:fn [:xt/any] :xt/any])
+
+(defspec.xt Predicate
+  [:fn [:xt/any] :xt/bool])
+
+(defspec.xt MaybeUnaryFn
+  [:fn [:xt/any] [:xt/maybe :xt/any]])
+
+(defspec.xt ReducerFn
+  [:fn [:xt/any :xt/any] :xt/any])
+
+(defspec.xt Thunk
+  [:fn [] :xt/any])
+
+(defspec.xt iter-from-obj
+  [:fn [[:xt/dict :xt/str :xt/any]] Iterator])
+
+(defspec.xt iter-from-arr
+  [:fn [[:xt/array :xt/any]] Iterator])
+
+(defspec.xt iter-from
+  [:fn [:xt/any] Iterator])
+
+(defspec.xt iter-next
+  [:fn [Iterator] :xt/any])
+
+(defspec.xt iter-has?
+  [:fn [:xt/any] :xt/bool])
+
+(defspec.xt iter-native?
+  [:fn [:xt/any] :xt/bool])
+
+(defspec.xt iter-eq
+  [:fn [Iterator Iterator IterEqFn] :xt/bool])
+
+(defspec.xt iter-null
+  [:fn [] Iterator])
+
+(defspec.xt iter?
+  [:fn [:xt/any] :xt/bool])
+
+(defspec.xt iter
+  [:fn [:xt/any] [:xt/maybe Iterator]])
+
+(defspec.xt collect
+  [:fn [Iterator ReducerFn :xt/any] :xt/any])
+
+(defspec.xt nil<
+  [:fn [Iterator] :xt/nil])
+
+(defspec.xt arr<
+  [:fn [Iterator] [:xt/array :xt/any]])
+
+(defspec.xt obj<
+  [:fn [Iterator] [:xt/dict :xt/str :xt/any]])
+
+(defspec.xt constantly
+  [:fn [:xt/any] Iterator])
+
+(defspec.xt iterate
+  [:fn [UnaryFn :xt/any] Iterator])
+
+(defspec.xt repeatedly
+  [:fn [Thunk] Iterator])
+
+(defspec.xt cycle
+  [:fn [:xt/any] Iterator])
+
+(defspec.xt range
+  [:fn [:xt/any] Iterator])
+
+(defspec.xt drop
+  [:fn [:xt/num :xt/any] Iterator])
+
+(defspec.xt peek
+  [:fn [UnaryFn :xt/any] Iterator])
+
+(defspec.xt take
+  [:fn [:xt/num :xt/any] Iterator])
+
+(defspec.xt map
+  [:fn [UnaryFn :xt/any] Iterator])
+
+(defspec.xt mapcat
+  [:fn [UnaryFn :xt/any] Iterator])
+
+(defspec.xt concat
+  [:fn [:xt/any] Iterator])
+
+(defspec.xt filter
+  [:fn [Predicate :xt/any] Iterator])
+
+(defspec.xt keep
+  [:fn [MaybeUnaryFn :xt/any] Iterator])
+
+(defspec.xt partition
+  [:fn [:xt/num :xt/any] Iterator])
+
+(defspec.xt take-nth
+  [:fn [:xt/num :xt/any] Iterator])
 
 (defmacro.xt ^{:style/indent 1}
   for:iter
@@ -300,4 +409,3 @@
        (do (yield e)
            (:= i (- n 1)))
        (:= i (- i 1))))))
-

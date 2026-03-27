@@ -1,8 +1,12 @@
 (ns xt.lang.base-text
-  (:require [std.lang :as l]))
+  (:require [std.lang :as l]
+            [std.lang.typed.xtalk :refer [defspec.xt]]))
 
 (l/script :xtalk
   {:require [[xt.lang.base-lib :as k]]})
+
+(defspec.xt tag-string
+  [:fn [:xt/str] :xt/str])
 
 (defn.xt tag-string
   "gets the string description for a given tag"
@@ -18,4 +22,3 @@
                      (k/replace "_" " ")
                      (k/replace "-" " ")
                      (k/replace (k/trim desc) "")))))
-

@@ -1,9 +1,40 @@
 (ns xt.lang.base-macro
-  (:require [std.lang :as l])
+  (:require [std.lang :as l]
+            [std.lang.typed.xtalk :refer [defspec.xt]])
   (:refer-clojure :exclude [abs bit-and bit-or bit-xor identity inc dec zero? pos? neg? even? odd? max min mod quot cat eval apply print nil? fn? first second nth replace last throw]))
 
 (l/script :xtalk
   {})
+
+(defspec.xt AnyFn
+  [:fn [:xt/any] :xt/any])
+
+(defspec.xt invoke
+  [:fn [AnyFn :xt/any] :xt/any])
+
+(defspec.xt add
+  [:fn [:xt/num :xt/num] :xt/num])
+
+(defspec.xt sub
+  [:fn [:xt/num :xt/num] :xt/num])
+
+(defspec.xt mul
+  [:fn [:xt/num :xt/num] :xt/num])
+
+(defspec.xt div
+  [:fn [:xt/num :xt/num] :xt/num])
+
+(defspec.xt gt
+  [:fn [:xt/any :xt/any] :xt/bool])
+
+(defspec.xt lt
+  [:fn [:xt/any :xt/any] :xt/bool])
+
+(defspec.xt gte
+  [:fn [:xt/any :xt/any] :xt/bool])
+
+(defspec.xt lte
+  [:fn [:xt/any :xt/any] :xt/bool])
 
 (defmacro.xt ^{:style/indent 1}
   for:array

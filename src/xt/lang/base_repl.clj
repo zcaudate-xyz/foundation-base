@@ -1,5 +1,6 @@
 (ns xt.lang.base-repl
   (:require [std.lang :as l]
+            [std.lang.typed.xtalk :refer [defspec.xt]]
             [std.lib.foundation :as f]
             [std.lib.template :as template]
             [xt.lang.base-notify :as notify])
@@ -7,6 +8,72 @@
 
 (l/script :xtalk
  {})
+
+(defspec.xt ReturnCallback
+  [:fn [:xt/any] :xt/any])
+
+(defspec.xt CallbackMap
+  [:xt/dict :xt/str ReturnCallback])
+
+(defspec.xt SocketCallback
+  [:fn [:xt/any :xt/any] :xt/any])
+
+(defspec.xt SocketOptions
+  [:xt/dict :xt/str :xt/any])
+
+(defspec.xt socket-send
+  [:fn [:xt/any :xt/any] :xt/any])
+
+(defspec.xt socket-close
+  [:fn [:xt/any] :xt/any])
+
+(defspec.xt return-encode
+  [:fn [:xt/any :xt/any :xt/any] :xt/str])
+
+(defspec.xt return-wrap
+  [:fn [ReturnCallback] ReturnCallback])
+
+(defspec.xt return-eval
+  [:fn [:xt/str] :xt/str])
+
+(defspec.xt return-callbacks
+  [:fn [CallbackMap :xt/str] ReturnCallback])
+
+(defspec.xt socket-connect-base
+  [:fn [:xt/str :xt/num SocketOptions SocketCallback] :xt/any])
+
+(defspec.xt socket-connect
+  [:fn [:xt/str :xt/num SocketOptions] :xt/any])
+
+(defspec.xt notify-socket-handler
+  [:fn [:xt/any :xt/str] :xt/any])
+
+(defspec.xt notify-socket
+  [:fn [:xt/str :xt/num :xt/any :xt/any :xt/any SocketOptions] :xt/any])
+
+(defspec.xt notify-socket-http-handler
+  [:fn [:xt/any :xt/str :xt/num SocketOptions :xt/str] :xt/any])
+
+(defspec.xt notify-socket-http
+  [:fn [:xt/str :xt/num :xt/any :xt/any :xt/any SocketOptions] :xt/any])
+
+(defspec.xt notify-http
+  [:fn [:xt/str :xt/num :xt/any :xt/any :xt/any SocketOptions] :xt/any])
+
+(defspec.xt print
+  [:fn [:xt/any [:xt/maybe :xt/any]] :xt/any])
+
+(defspec.xt capture
+  [:fn [:xt/any [:xt/maybe :xt/any]] :xt/any])
+
+(defspec.xt notify
+  [:fn [:xt/any [:xt/maybe :xt/any] [:xt/maybe :xt/any]] :xt/any])
+
+(defspec.xt >notify
+  [:fn [[:xt/maybe ReturnCallback]] ReturnCallback])
+
+(defspec.xt <!
+  [:fn [] CallbackMap])
 
 ;;
 ;; RETURN
@@ -195,4 +262,3 @@
                  (return (xt.lang.base-repl/notify val)))
       :error   (fn [err]
                  (return (xt.lang.base-repl/notify err)))}))
-

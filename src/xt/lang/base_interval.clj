@@ -1,8 +1,15 @@
 (ns xt.lang.base-interval
-  (:require [std.lang :as l]))
+  (:require [std.lang :as l]
+            [std.lang.typed.xtalk :refer [defspec.xt]]))
 
 (l/script :xtalk
   {})
+
+(defspec.xt start-interval
+  [:fn [[:fn [] :xt/any] :xt/num] :xt/any])
+
+(defspec.xt stop-interval
+  [:fn [:xt/any] :xt/any])
 
 (defn.xt start-interval
   "starts an interval"
@@ -17,4 +24,3 @@
   ([instance]
    (return
     (x:stop-interval instance))))
-

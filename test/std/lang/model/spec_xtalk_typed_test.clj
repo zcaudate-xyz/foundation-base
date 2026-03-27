@@ -40,12 +40,12 @@
    (types/declaration-kind (typed/get-value 'xt.db.base-scope/Scopes))
    (nil? (typed/get-type 'xt.lang.base-macro/add))
    (= :value (-> (typed/get-entry 'xt.db.base-scope/Scopes)
-                 types/entry-primary-kind))]
-  => '[#{:macro}
-       :macro
-       :value
-       true
-       true])
+                  types/entry-primary-kind))]
+  => '[#{:macro :spec}
+        :macro
+        :value
+        false
+        true])
 
 (fact "defspec.xt resolves aliased type names during registration"
   (typed/clear-registry!)
@@ -618,3 +618,34 @@
   (-> (typed/check-namespace 'xt.lang.event-route)
       :namespace)
   => 'xt.lang.event-route)
+
+(fact "analyzes base namespace specs"
+  (typed/clear-registry!)
+  (doseq [ns-sym '[xt.lang.base-lib
+                   xt.lang.base-macro
+                   xt.lang.base-runtime
+                   xt.lang.base-iter
+                   xt.lang.base-repl
+                   xt.lang.base-text
+                   xt.lang.base-interval]]
+    (typed/analyze-and-register! ns-sym))
+  [(analysis/get-function-output-type 'xt.lang.base-lib/sym-pair)
+   (analysis/get-function-output-type 'xt.lang.base-runtime/xt-create)
+   (analysis/get-function-output-type 'xt.lang.base-runtime/xt-current)
+   (analysis/get-function-output-type 'xt.lang.base-iter/iter)
+   (analysis/get-function-output-type 'xt.lang.base-repl/return-encode)
+   (analysis/get-function-output-type 'xt.lang.base-text/tag-string)
+   (analysis/get-function-output-type 'xt.lang.base-interval/start-interval)
+   (-> (typed/get-macro 'xt.lang.base-macro/add)
+       :output
+       types/type->data)]
+  => '[{:kind :named :name xt.lang.base-lib/StringPair}
+       {:kind :named :name xt.lang.base-runtime/XTState}
+       {:kind :maybe
+        :item {:kind :named :name xt.lang.base-runtime/XTState}}
+       {:kind :maybe
+        :item {:kind :named :name xt.lang.base-iter/Iterator}}
+       {:kind :primitive :name :xt/str}
+       {:kind :primitive :name :xt/str}
+       {:kind :primitive :name :xt/any}
+       {:kind :primitive :name :xt/num}])

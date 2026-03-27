@@ -1,5 +1,6 @@
 (ns xt.lang.base-runtime
   (:require [std.lang :as l]
+            [std.lang.typed.xtalk :refer [defspec.xt]]
             [std.lib.env :as env]
             [std.lib.foundation]
             [std.lib.function :as f]
@@ -7,6 +8,137 @@
 
 (l/script :xtalk
   {:require [[xt.lang.base-lib :as k]]})
+
+(defspec.xt XTWatchFn
+  [:fn [:xt/any :xt/str] :xt/any])
+
+(defspec.xt XTWatchMap
+  [:xt/dict :xt/str XTWatchFn])
+
+(defspec.xt XTItem
+  [:xt/record
+   ["value" :xt/any]
+   ["watch" XTWatchMap]])
+
+(defspec.xt XTSpace
+  [:xt/dict :xt/str XTItem])
+
+(defspec.xt XTConfigMap
+  [:xt/dict :xt/str :xt/any])
+
+(defspec.xt XTSpacesMap
+  [:xt/dict :xt/str XTSpace])
+
+(defspec.xt XTLookup
+  :xt/any)
+
+(defspec.xt XTHash
+  [:xt/record
+   ["lookup" XTLookup]
+   ["counter" :xt/num]])
+
+(defspec.xt XTState
+  [:xt/record
+   ["::" :xt/str]
+   ["config" XTConfigMap]
+   ["spaces" XTSpacesMap]
+   ["hash" XTHash]])
+
+(defspec.xt xt-exists?
+  [:fn [] :xt/bool])
+
+(defspec.xt xt-create
+  [:fn [] XTState])
+
+(defspec.xt xt
+  [:fn [] XTState])
+
+(defspec.xt xt-current
+  [:fn [] [:xt/maybe XTState]])
+
+(defspec.xt xt-purge
+  [:fn [] [:xt/maybe XTState]])
+
+(defspec.xt xt-purge-config
+  [:fn [] [:xt/tuple :xt/bool XTConfigMap]])
+
+(defspec.xt xt-purge-spaces
+  [:fn [] [:xt/tuple :xt/bool XTSpacesMap]])
+
+(defspec.xt xt-lookup-id
+  [:fn [:xt/any] [:xt/maybe :xt/num]])
+
+(defspec.xt xt-config-list
+  [:fn [] [:xt/array :xt/str]])
+
+(defspec.xt xt-config-set
+  [:fn [:xt/str :xt/any]
+   [:xt/tuple :xt/bool [:xt/maybe :xt/any]]])
+
+(defspec.xt xt-config-del
+  [:fn [:xt/str]
+   [:xt/tuple :xt/bool [:xt/maybe :xt/any]]])
+
+(defspec.xt xt-config
+  [:fn [:xt/str] [:xt/maybe :xt/any]])
+
+(defspec.xt xt-space-list
+  [:fn [] [:xt/array :xt/str]])
+
+(defspec.xt xt-space-del
+  [:fn [:xt/str]
+   [:xt/tuple :xt/bool [:xt/maybe XTSpace]]])
+
+(defspec.xt xt-space
+  [:fn [:xt/str] XTSpace])
+
+(defspec.xt xt-space-clear
+  [:fn [:xt/str]
+   [:xt/tuple :xt/bool [:xt/maybe XTSpace]]])
+
+(defspec.xt xt-item-del
+  [:fn [:xt/str :xt/str]
+   [:xt/tuple :xt/bool [:xt/maybe XTItem]]])
+
+(defspec.xt xt-item-trigger
+  [:fn [:xt/str :xt/str]
+   [:xt/maybe [:xt/array :xt/str]]])
+
+(defspec.xt xt-item-set
+  [:fn [:xt/str :xt/str :xt/any]
+   [:xt/tuple :xt/bool XTItem]])
+
+(defspec.xt xt-item
+  [:fn [:xt/str :xt/str]
+   [:xt/maybe :xt/any]])
+
+(defspec.xt xt-item-get
+  [:fn [:xt/str :xt/str [:fn [] :xt/any]]
+   :xt/any])
+
+(defspec.xt xt-var-entry
+  [:fn [:xt/str]
+   [:xt/maybe XTItem]])
+
+(defspec.xt xt-var
+  [:fn [:xt/str]
+   [:xt/maybe :xt/any]])
+
+(defspec.xt xt-var-set
+  [:fn [:xt/str :xt/any]
+   [:xt/tuple :xt/bool [:xt/maybe XTItem]]])
+
+(defspec.xt xt-var-trigger
+  [:fn [:xt/str]
+   [:xt/maybe [:xt/array :xt/str]]])
+
+(defspec.xt xt-add-watch
+  [:fn [:xt/str :xt/str XTWatchFn]
+   :xt/bool])
+
+(defspec.xt xt-remove-watch
+  [:fn [:xt/str :xt/str]
+   :xt/bool])
 
 (defn.xt xt-exists?
   "checks that the xt map exists"

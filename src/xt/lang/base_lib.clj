@@ -1,5 +1,6 @@
 (ns xt.lang.base-lib
   (:require [std.lang :as l]
+            [std.lang.typed.xtalk :refer [defspec.xt]]
             [std.lib.env :as env]
             [std.lib.foundation :as f]
             [std.lib.template :as template])
@@ -9,6 +10,258 @@
   {:require [[xt.lang.base-macro :as k]]})
 
 (l/intern-macros :xtalk 'xt.lang.base-macro)
+
+(defspec.xt AnyArray
+  [:xt/array :xt/any])
+
+(defspec.xt AnyDict
+  [:xt/dict :xt/str :xt/any])
+
+(defspec.xt UnaryFn
+  [:fn [:xt/any] :xt/any])
+
+(defspec.xt Predicate
+  [:fn [:xt/any] :xt/bool])
+
+(defspec.xt MaybeUnaryFn
+  [:fn [:xt/any] [:xt/maybe :xt/any]])
+
+(defspec.xt CounterFn
+  [:fn [] :xt/num])
+
+(defspec.xt Pair
+  [:xt/tuple :xt/str :xt/any])
+
+(defspec.xt StringPair
+  [:xt/tuple [:xt/maybe :xt/str] :xt/str])
+
+(defspec.xt proto-create
+  [:fn [AnyDict] AnyDict])
+
+(defspec.xt type-native
+  [:fn [:xt/any] :xt/str])
+
+(defspec.xt type-class
+  [:fn [:xt/any] :xt/str])
+
+(defspec.xt fn?
+  [:fn [:xt/any] :xt/bool])
+
+(defspec.xt arr?
+  [:fn [:xt/any] :xt/bool])
+
+(defspec.xt obj?
+  [:fn [:xt/any] :xt/bool])
+
+(defspec.xt id-fn
+  [:fn [AnyDict] [:xt/maybe :xt/any]])
+
+(defspec.xt key-fn
+  [:fn [:xt/any] UnaryFn])
+
+(defspec.xt eq-fn
+  [:fn [:xt/any :xt/any] Predicate])
+
+(defspec.xt inc-fn
+  [:fn [[:xt/maybe :xt/num]] CounterFn])
+
+(defspec.xt identity
+  [:fn [:xt/any] :xt/any])
+
+(defspec.xt noop
+  [:fn [] :xt/nil])
+
+(defspec.xt T
+  [:fn [:xt/any] :xt/bool])
+
+(defspec.xt F
+  [:fn [:xt/any] :xt/bool])
+
+(defspec.xt step-nil
+  [:fn [:xt/any :xt/any] :xt/nil])
+
+(defspec.xt step-thrush
+  [:fn [:xt/any UnaryFn] :xt/any])
+
+(defspec.xt step-call
+  [:fn [UnaryFn :xt/any] :xt/any])
+
+(defspec.xt step-push
+  [:fn [AnyArray :xt/any] AnyArray])
+
+(defspec.xt step-set-key
+  [:fn [AnyDict :xt/str :xt/any] AnyDict])
+
+(defspec.xt step-set-fn
+  [:fn [AnyDict :xt/str] UnaryFn])
+
+(defspec.xt step-set-pair
+  [:fn [AnyDict Pair] AnyDict])
+
+(defspec.xt step-del-key
+  [:fn [AnyDict :xt/str] AnyDict])
+
+(defspec.xt starts-with?
+  [:fn [:xt/str :xt/str] :xt/bool])
+
+(defspec.xt ends-with?
+  [:fn [:xt/str :xt/str] :xt/bool])
+
+(defspec.xt capitalize
+  [:fn [:xt/str] :xt/str])
+
+(defspec.xt decapitalize
+  [:fn [:xt/str] :xt/str])
+
+(defspec.xt pad-left
+  [:fn [:xt/str :xt/num :xt/str] :xt/str])
+
+(defspec.xt pad-right
+  [:fn [:xt/str :xt/num :xt/str] :xt/str])
+
+(defspec.xt pad-lines
+  [:fn [:xt/str :xt/num] :xt/str])
+
+(defspec.xt mod-pos
+  [:fn [:xt/num :xt/num] :xt/num])
+
+(defspec.xt mod-offset
+  [:fn [:xt/num :xt/num] :xt/num])
+
+(defspec.xt gcd
+  [:fn [:xt/num :xt/num] :xt/num])
+
+(defspec.xt lcm
+  [:fn [:xt/num :xt/num] :xt/num])
+
+(defspec.xt mix
+  [:fn [:xt/num :xt/num :xt/num] :xt/num])
+
+(defspec.xt sign
+  [:fn [:xt/num] :xt/num])
+
+(defspec.xt round
+  [:fn [:xt/num] :xt/num])
+
+(defspec.xt clamp
+  [:fn [:xt/num :xt/num :xt/num] :xt/num])
+
+(defspec.xt bit-count
+  [:fn [:xt/num] :xt/num])
+
+(defspec.xt sym-full
+  [:fn [[:xt/maybe :xt/str] :xt/str] :xt/str])
+
+(defspec.xt sym-name
+  [:fn [:xt/str] :xt/str])
+
+(defspec.xt sym-ns
+  [:fn [:xt/str] [:xt/maybe :xt/str]])
+
+(defspec.xt sym-pair
+  [:fn [:xt/str] StringPair])
+
+(defspec.xt is-empty?
+  [:fn [:xt/any] :xt/bool])
+
+(defspec.xt arr-lookup
+  [:fn [AnyArray] AnyDict])
+
+(defspec.xt arr-every
+  [:fn [AnyArray Predicate] :xt/bool])
+
+(defspec.xt arr-some
+  [:fn [AnyArray Predicate] :xt/bool])
+
+(defspec.xt arr-map
+  [:fn [AnyArray UnaryFn] AnyArray])
+
+(defspec.xt arr-clone
+  [:fn [AnyArray] AnyArray])
+
+(defspec.xt arr-append
+  [:fn [AnyArray AnyArray] AnyArray])
+
+(defspec.xt arr-slice
+  [:fn [AnyArray :xt/num :xt/num] AnyArray])
+
+(defspec.xt arr-filter
+  [:fn [AnyArray Predicate] AnyArray])
+
+(defspec.xt arr-keep
+  [:fn [AnyArray MaybeUnaryFn] AnyArray])
+
+(defspec.xt arr-group-by
+  [:fn [AnyArray UnaryFn] [:xt/dict :xt/str AnyArray]])
+
+(defspec.xt arr-range
+  [:fn [:xt/any] AnyArray])
+
+(defspec.xt arrayify
+  [:fn [:xt/any] AnyArray])
+
+(defspec.xt obj-empty?
+  [:fn [AnyDict] :xt/bool])
+
+(defspec.xt obj-not-empty?
+  [:fn [AnyDict] :xt/bool])
+
+(defspec.xt obj-first-key
+  [:fn [AnyDict] [:xt/maybe :xt/str]])
+
+(defspec.xt obj-first-val
+  [:fn [AnyDict] [:xt/maybe :xt/any]])
+
+(defspec.xt obj-keys
+  [:fn [AnyDict] [:xt/array :xt/str]])
+
+(defspec.xt obj-vals
+  [:fn [AnyDict] AnyArray])
+
+(defspec.xt obj-pairs
+  [:fn [AnyDict] [:xt/array Pair]])
+
+(defspec.xt obj-clone
+  [:fn [AnyDict] AnyDict])
+
+(defspec.xt obj-assign
+  [:fn [AnyDict AnyDict] AnyDict])
+
+(defspec.xt obj-del
+  [:fn [AnyDict :xt/str] AnyDict])
+
+(defspec.xt obj-pick
+  [:fn [AnyDict [:xt/array :xt/str]] AnyDict])
+
+(defspec.xt obj-omit
+  [:fn [AnyDict [:xt/array :xt/str]] AnyDict])
+
+(defspec.xt get-in
+  [:fn [AnyDict AnyArray] :xt/any])
+
+(defspec.xt path-fn
+  [:fn [AnyArray] UnaryFn])
+
+(defspec.xt not-empty?
+  [:fn [:xt/any] :xt/bool])
+
+(defspec.xt get-data
+  [:fn [:xt/any] :xt/any])
+
+(defspec.xt get-spec
+  [:fn [:xt/any] :xt/any])
+
+(defspec.xt split-long
+  [:fn [:xt/str :xt/num] [:xt/array :xt/str]])
+
+(defspec.xt str-rand
+  [:fn [:xt/num] :xt/str])
+
+(defspec.xt proto-spec
+  [:fn [AnyArray] AnyDict])
+
+(defspec.xt with-delay
+  [:fn [[:fn [] :xt/any] :xt/num] :xt/any])
 
 ;;
 ;; TYPE
