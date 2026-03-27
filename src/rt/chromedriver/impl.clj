@@ -56,7 +56,7 @@
 (defn start-browser
   "starts the browser bench and connection"
   {:added "4.0"}
-  ([{:keys [id state host port container bench] :as rt}]
+  ([{:keys [id state host port container bench url] :as rt}]
    (let [_   (cond container
                    (start-browser-container)
                    
@@ -66,6 +66,8 @@
          _   (h/wait-for-port host port)
          conn (conn/conn-create {:host host
                                  :port port})
+         _   (when url
+               @(util/page-navigate conn url))
          _  (reset! state conn)
          _  @(util/runtime-evaluate conn +bootstrap+)]
      rt)))

@@ -248,3 +248,7 @@
     (with-redefs [env/ns-sym (constantly 'my.ns)]
       (rt/run-op {:line 10} :setup?)))
   => true)
+
+
+^{:refer code.test.base.runtime/eval-in-ns :added "4.1"}
+(fact "TODO")

@@ -46,7 +46,7 @@
   (impl/invoke-ptr-browser @+browser+
                            identity
                            [1])
-  => nil?)
+  => 1)
 
 ^{:refer rt.chromedriver.impl/browser:create :added "4.0"}
 (fact "creates a browser")
