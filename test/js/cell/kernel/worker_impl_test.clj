@@ -1,12 +1,15 @@
 (ns js.cell.kernel.worker-impl-test
-  (:require [std.lang :as l])
+  (:require [std.lang :as l]
+            [xt.lang.base-notify :as notify])
   (:use code.test))
 
 (l/script- :js
   {:runtime :basic
    :require [[xt.lang.base-lib :as k]
-             [js.core :as j]
-             [js.cell.kernel.worker-impl :as worker-impl]]})
+              [xt.lang.base-repl :as repl]
+              [js.core :as j]
+              [js.cell.kernel.worker-local :as worker-local]
+              [js.cell.kernel.worker-impl :as worker-impl]]})
 
 (fact:global
  {:setup     [(l/rt:restart)
@@ -14,7 +17,23 @@
   :teardown  [(l/rt:stop)]})
 
 ^{:refer js.cell.kernel.worker-impl/worker-handle-async :added "4.0" :unchecked true}
-(fact "handles async tasks")
+(fact "handles async tasks"
+  ^:hidden
+  
+  (notify/wait-on :js
+    (var worker {:postMessage (fn [msg] (repl/notify msg))})
+    (worker-impl/worker-handle-async
+     worker
+     (fn [ms]
+       (return (j/future-delayed [ms]
+                 (return ["pong" 1]))))
+     "call"
+     "async-1"
+     [10]))
+  => (contains {"op" "call"
+                "id" "async-1"
+                "status" "ok"
+                "body" ["pong" 1]}))
 
 ^{:refer js.cell.kernel.worker-impl/worker-process :added "4.0" :unchecked true}
 (fact "processes various types of actions"
@@ -34,11 +53,12 @@
   ;; Test call operation (returns ok because it calls worker-process-eval)
   (!.js
    (var messages [])
-   (var worker {:postMessage (fn [msg] (messages.push msg))})
+    (var worker {:postMessage (fn [msg] (messages.push msg))})
+    (worker-local/actions-init {} worker)
    (worker-impl/worker-process
-    worker
-    {:op "call" :id "test-2" :action "@worker/ping"})
-   (k/first messages))
+     worker
+     {:op "call" :id "test-2" :action "@worker/ping"})
+    (k/first messages))
   => (contains {"op" "call"
                 "status" "ok"})
 
@@ -96,10 +116,10 @@
   ;; Test with a registered action
   (!.js
    (var messages [])
-   (var worker {:postMessage (fn [msg] (messages.push msg))
-                :actions {"@test/action" {:handler (fn [x] (return (+ x 10)))
-                                           :async false
-                                           :args ["x"]}}})
+    (var worker {:postMessage (fn [msg] (messages.push msg))
+                 :actions {"@test/action" {:handler (fn [x] (return (+ x 10)))
+                                           :is-async false
+                                            :args ["x"]}}})
    (worker-impl/worker-process-action
     worker
     {:op "call" :id "test-2" :action "@test/action" :body [5]}

@@ -93,7 +93,14 @@
   => {"op" "call" "action" "@worker/ping" "body" []})
 
 ^{:refer js.cell.kernel.base-util/req-eval :added "4.0" :unchecked true}
-(fact "constructs an eval request")
+(fact "constructs an eval request"
+  ^:hidden
+  
+  (!.js (base-util/req-eval "1 + 1"))
+  => {"op" "eval" "body" "1 + 1"}
+
+  (!.js (base-util/req-eval "1 + 1" true))
+  => {"op" "eval" "body" "1 + 1" "async" true})
 
 ^{:refer js.cell.kernel.base-util/resp-ok :added "4.0" :unchecked true}
 (fact "constructs an ok response"

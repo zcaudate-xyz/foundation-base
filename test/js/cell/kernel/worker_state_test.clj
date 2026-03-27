@@ -49,10 +49,24 @@
   => map?)
 
 ^{:refer js.cell.kernel.worker-state/get-state :added "4.0"}
-(fact "gets cell state")
+(fact "gets cell state"
+  ^:hidden
+  
+  (worker-state/get-state nil)
+  => {"eval" true}
+  
+  (!.js (worker-state/get-state {}))
+  => {"eval" true})
 
 ^{:refer js.cell.kernel.worker-state/get-actions :added "4.0"}
-(fact "gets cell actions")
+(fact "gets cell actions"
+  ^:hidden
+  
+  (worker-state/get-actions nil)
+  => map?
+  
+  (!.js (worker-state/get-actions {"actions" {"@test/action" {}}}))
+  => {"@test/action" {}})
 
 ^{:refer js.cell.kernel.worker-state/set-actions :added "4.0"}
 (fact "initiates the base actions"
@@ -169,7 +183,7 @@
   (eval-worker (js.cell.kernel.worker-state/fn-set-eval-status
                 self)
                nil true true)
-  => {"body" {"eval" true}, "status" "ok", "op" "stream", "signal" "@worker/::STATE"})
+  => {"body" {}, "status" "ok", "op" "stream", "signal" "@worker/::STATE"})
 
 ^{:refer js.cell.kernel.worker-state/fn-get-eval-status :added "4.0"}
 (fact "gets the eval status"

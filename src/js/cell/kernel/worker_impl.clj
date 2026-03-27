@@ -75,7 +75,7 @@
   (when (== nil action-entry)
     (return (j/postMessage worker (util/resp-error op id (k/cat "action not found - " action)))))
             
-  (var action-async  (. action-entry ["async"]))
+  (var action-async  (. action-entry ["is_async"]))
   (var action-fn     (. action-entry ["handler"]))
   (var f   (:? action-async
                j/identity
@@ -132,4 +132,3 @@
   {:added "4.0"}
   [worker body]
   (return (j/postMessage worker (util/resp-stream util/EV_INIT body))))
-

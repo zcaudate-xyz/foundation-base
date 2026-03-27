@@ -1,6 +1,6 @@
 (ns js.cell.playground
   (:require [clojure.string]
-            [js.cell :as cl]
+            [js.cell.kernel.worker-local]
             [js.cell.kernel.worker-impl]
             [js.core :as j]
             [std.fs :as fs]
@@ -83,10 +83,10 @@
   "constructs the play worker"
   {:added "4.0"}
   [& [as-script]]
-  (play-script '[(js.cell.kernel.worker-fn/actions-init {})
+  (play-script '[(js.cell.kernel.worker-local/actions-init {})
                  (js.cell.kernel.worker-impl/worker-init self)
-                 (js.cell.kernel.worker-impl/worker-init-post self {:done true})]
-               as-script))
+                 (js.cell.kernel.worker-impl/worker-init-signal self {:done true})]
+                as-script))
 
 (defn play-files
   "copies files to the playground"

@@ -94,8 +94,10 @@
   "initiates the base actions"
   {:added "4.0"}
   [actions worker]
-  (state/set-actions (k/obj-assign (-/actions-baseline)
-                                   actions)))
+  (return
+   (state/set-actions (k/obj-assign (-/actions-baseline)
+                                    actions)
+                      worker)))
 
 ;;
 ;; Generation Template
@@ -105,12 +107,12 @@
   "templates a baseline function"
   {:added "4.0"}
   [entry]
-  (let [{:cell/keys [action static async]} (meta (second (:form entry)))
+  (let [{:cell/keys [action static is-async]} (meta (second (:form entry)))
         handler (cond->> (l/sym-full entry)
                   (not static) (list `state/fn-self))
         args    (nth (:form entry) 2)]
     [action {:handler handler
-             :is-async (true? async)
+             :is-async (true? is-async)
              :args  (mapv str (if static
                                 args
                                 (rest args)))}]))

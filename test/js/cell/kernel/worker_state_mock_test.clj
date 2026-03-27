@@ -266,10 +266,10 @@
                                        {}
                                        true))
     (worker-mock/mock-worker-send mock {:op "call"
-                                   :id "id-action"
-                                   :action "@worker/ping.async"
-                                   :body [100]}))
-  => {"body" "{\"type\":\"data\",\"value\":[100]}", "id" "id-action", "status" "ok", "op" "call"}
+                                        :id "id-action"
+                                        :action "@worker/ping.async"
+                                        :body [100]}))
+  
   => (contains-in
       {"body" ["pong" integer?],
        "id" "id-action",
@@ -288,7 +288,7 @@
                  (worker-mock/create-worker
                   listener
                   {} true))}))
-   (j/notify (base-link-local/ping-async link 300)))
+    (j/notify (base-link-local/ping-async link 300)))
   => (contains ["pong" integer?]) )
 
 
