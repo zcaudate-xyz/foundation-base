@@ -26,7 +26,17 @@
 (defn defn?
   [form]
   (and (seq? form)
-       (#{"defn" "defn-" "defn.xt" "defgen.xt"} (name (first form)))))
+        (#{"defn" "defn-" "defn.xt" "defgen.xt"} (name (first form)))))
+
+(defn defmacro?
+  [form]
+  (and (seq? form)
+       (= "defmacro.xt" (name (first form)))))
+
+(defn defvalue?
+  [form]
+  (and (seq? form)
+       (= "def.xt" (name (first form)))))
 
 (defn parse-ns-name
   [forms]
@@ -196,9 +206,10 @@
   (let [[docstring items] (if (string? (first items))
                             [(first items) (rest items)]
                             [nil items])
-        [attr-map items] (if (map? (first items))
-                           [(first items) (rest items)]
-                           [nil items])]
+        [attr-map items] (if (and (map? (first items))
+                                  (next items))
+                            [(first items) (rest items)]
+                            [nil items])]
     {:docstring docstring
      :attr-map attr-map
      :items items
@@ -212,20 +223,24 @@
         type-form (first items)]
     (parse-spec-decl ns-sym spec-sym type-form meta aliases)))
 
+(defn parse-callable-items
+  [items]
+  (cond
+    (vector? (first items))
+    [(first items) (rest items)]
+
+    (and (seq? (first items))
+         (vector? (ffirst items)))
+    [(ffirst items) (rest (first items))]
+
+    :else
+    [(first items) (rest items)]))
+
 (defn parse-defn
   [form ns-sym aliases]
   (let [[_ fn-sym & more] form
         {:keys [meta items]} (parse-decl-preamble more fn-sym)
-        [args-form body] (cond
-                           (vector? (first items))
-                           [(first items) (rest items)]
-
-                           (and (seq? (first items))
-                                (vector? (ffirst items)))
-                           [(ffirst items) (rest (first items))]
-
-                           :else
-                           [(first items) (rest items)])
+        [args-form body] (parse-callable-items items)
         ctx {:ns ns-sym
               :aliases aliases}
         output (if-let [ret (get meta :-)]
@@ -237,6 +252,36 @@
                         (assoc meta :aliases aliases)
                         body
                         nil)))
+
+(defn parse-defmacro
+  [form ns-sym aliases]
+  (let [[_ macro-sym & more] form
+        {:keys [meta items]} (parse-decl-preamble more macro-sym)
+        [args-form body] (parse-callable-items items)
+        ctx {:ns ns-sym
+             :aliases aliases}]
+    (types/make-fn-def ns-sym macro-sym
+                       (parse-fn-inputs args-form ctx)
+                       types/+unknown-type+
+                       (assoc meta :aliases aliases
+                                   :macro true)
+                       body
+                       nil)))
+
+(defn parse-defvalue
+  [form ns-sym aliases]
+  (let [[_ value-sym & more] form
+        {:keys [meta items]} (parse-decl-preamble more value-sym)
+        ctx {:ns ns-sym
+              :aliases aliases}]
+    (types/make-value-def ns-sym value-sym
+                          (if-let [ret (get meta :-)]
+                            (types/normalize-return-meta ret ctx)
+                            types/+unknown-type+)
+                          (assoc meta :aliases aliases
+                                     :def true)
+                          (first items)
+                          nil)))
 
 (defn merge-spec-inputs
   [inputs spec-inputs]
@@ -259,24 +304,55 @@
              :output (if (= (:output fn-def) types/+unknown-type+)
                        (:output spec-type)
                        (:output fn-def))
-             :spec spec))
+              :spec spec))
     fn-def))
 
-(defn attach-function-specs
-  [{:keys [specs functions] :as analysis}]
-  (let [spec-map (into {}
-                       (keep (fn [spec]
-                               (when (= :fn (get-in spec [:type :kind]))
-                                 [(types/type-key (some-> spec :ns symbol) (:name spec))
-                                  spec])))
-                       specs)]
-    (assoc analysis :functions
+(defn attach-value-spec
+  [value-def spec]
+  (if (and spec
+           (not= :fn (get-in spec [:type :kind])))
+    (assoc value-def
+           :type (if (= (:type value-def) types/+unknown-type+)
+                   (:type spec)
+                   (:type value-def))
+           :spec spec)
+    value-def))
+
+(defn spec-map-by-kind
+  [specs pred]
+  (into {}
+        (keep (fn [spec]
+                (when (pred spec)
+                  [(types/type-key (some-> spec :ns symbol) (:name spec))
+                   spec])))
+        specs))
+
+(defn attach-specs
+  [{:keys [specs functions macros values] :as analysis}]
+  (let [fn-specs (spec-map-by-kind specs #(= :fn (get-in % [:type :kind])))
+        value-specs (spec-map-by-kind specs #(not= :fn (get-in % [:type :kind])))]
+    (assoc analysis
+           :functions
            (mapv (fn [fn-def]
                    (attach-function-spec fn-def
-                                         (get spec-map
+                                         (get fn-specs
                                               (types/type-key (some-> fn-def :ns symbol)
                                                               (:name fn-def)))))
-                 functions))))
+                 functions)
+           :macros
+           (mapv (fn [macro-def]
+                   (attach-function-spec macro-def
+                                         (get fn-specs
+                                              (types/type-key (some-> macro-def :ns symbol)
+                                                              (:name macro-def)))))
+                 macros)
+           :values
+           (mapv (fn [value-def]
+                   (attach-value-spec value-def
+                                      (get value-specs
+                                           (types/type-key (some-> value-def :ns symbol)
+                                                           (:name value-def)))))
+                 values))))
 
 (defn analyze-file
   [file-path]
@@ -288,19 +364,23 @@
                            {})
                        (extract-script-aliases forms))]
     (-> (reduce (fn [acc form]
-                  (cond
-                    (defspec? form) (update acc :specs conj (parse-defspec form ns-sym aliases))
-                    (defn? form) (update acc :functions conj (parse-defn form ns-sym aliases))
-                    :else acc))
-                {:ns ns-sym
-                 :aliases aliases
-                 :specs []
-                 :functions []}
-                forms)
-        attach-function-specs)))
+                   (cond
+                     (defspec? form) (update acc :specs conj (parse-defspec form ns-sym aliases))
+                     (defn? form) (update acc :functions conj (parse-defn form ns-sym aliases))
+                     (defmacro? form) (update acc :macros conj (parse-defmacro form ns-sym aliases))
+                     (defvalue? form) (update acc :values conj (parse-defvalue form ns-sym aliases))
+                     :else acc))
+                 {:ns ns-sym
+                  :aliases aliases
+                  :specs []
+                  :functions []
+                  :macros []
+                  :values []}
+                 forms)
+         attach-specs)))
 
 (defn register-types!
-  [{:keys [specs functions] :as analysis}]
+  [{:keys [specs functions macros values] :as analysis}]
   (doseq [spec specs]
     (types/register-spec! (types/type-key (some-> spec :ns symbol)
                                           (:name spec))
@@ -309,6 +389,14 @@
     (types/register-function! (types/type-key (some-> fn-def :ns symbol)
                                               (:name fn-def))
                               fn-def))
+  (doseq [macro-def macros]
+    (types/register-macro! (types/type-key (some-> macro-def :ns symbol)
+                                           (:name macro-def))
+                           macro-def))
+  (doseq [value-def values]
+    (types/register-value! (types/type-key (some-> value-def :ns symbol)
+                                           (:name value-def))
+                           value-def))
   analysis)
 
 (defn analyze-namespace

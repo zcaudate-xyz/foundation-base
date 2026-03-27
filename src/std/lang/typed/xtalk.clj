@@ -62,6 +62,14 @@
   [sym]
   (types/get-function sym))
 
+(defn get-macro
+  [sym]
+  (types/get-macro sym))
+
+(defn get-value
+  [sym]
+  (types/get-value sym))
+
 (defn list-specs
   []
   (types/list-specs))
@@ -69,6 +77,14 @@
 (defn list-functions
   []
   (types/list-functions))
+
+(defn list-macros
+  []
+  (types/list-macros))
+
+(defn list-values
+  []
+  (types/list-values))
 
 (defn analyze-file
   [file-path]

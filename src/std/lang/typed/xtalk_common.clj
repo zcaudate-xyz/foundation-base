@@ -24,6 +24,7 @@
 (defrecord XtSpecDef [ns name type spec-meta])
 (defrecord XtArg [name type modifiers])
 (defrecord XtFnDef [ns name inputs output body-meta raw-body spec])
+(defrecord XtValueDef [ns name type body-meta raw-value spec])
 
 (defonce ^:dynamic *type-registry* (atom {}))
 
@@ -89,10 +90,19 @@
   [sym]
   (:fn (get-entry sym)))
 
+(defn get-macro
+  [sym]
+  (:macro (get-entry sym)))
+
+(defn get-value
+  [sym]
+  (:value (get-entry sym)))
+
 (defn get-type
   [sym]
   (or (get-spec sym)
-      (get-function sym)))
+      (get-function sym)
+      (get-value sym)))
 
 (defn list-specs
   []
@@ -105,6 +115,18 @@
   (->> @*type-registry*
        vals
        (keep :fn)))
+
+(defn list-macros
+  []
+  (->> @*type-registry*
+       vals
+       (keep :macro)))
+
+(defn list-values
+  []
+  (->> @*type-registry*
+       vals
+       (keep :value)))
 
 (defn register-entry!
   [sym key value]
@@ -122,6 +144,14 @@
   [sym fn-def]
   (register-entry! sym :fn fn-def))
 
+(defn register-macro!
+  [sym macro-def]
+  (register-entry! sym :macro macro-def))
+
+(defn register-value!
+  [sym value-def]
+  (register-entry! sym :value value-def))
+
 (defn make-spec-def
   [ns-sym type-name type spec-meta]
   (->XtSpecDef (some-> ns-sym str) (name type-name) type spec-meta))
@@ -133,6 +163,10 @@
 (defn make-fn-def
   [ns-sym fn-name inputs output body-meta raw-body spec]
   (->XtFnDef (some-> ns-sym str) (name fn-name) (vec inputs) output body-meta (vec raw-body) spec))
+
+(defn make-value-def
+  [ns-sym value-name type body-meta raw-value spec]
+  (->XtValueDef (some-> ns-sym str) (name value-name) type body-meta raw-value spec))
 
 (defn field-key
   [field]
