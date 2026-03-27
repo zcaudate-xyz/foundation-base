@@ -156,13 +156,13 @@
     (collect-type-refs (:item type))
 
     :union
-    (apply into #{} (map collect-type-refs (:types type)))
+    (into #{} (mapcat collect-type-refs) (:types type))
 
     :intersection
-    (apply into #{} (map collect-type-refs (:types type)))
+    (into #{} (mapcat collect-type-refs) (:types type))
 
     :tuple
-    (apply into #{} (map collect-type-refs (:types type)))
+    (into #{} (mapcat collect-type-refs) (:types type))
 
     :array
     (collect-type-refs (:item type))
@@ -172,22 +172,22 @@
           (collect-type-refs (:value type)))
 
     :record
-    (let [field-refs (apply into #{} (map (comp collect-type-refs :type) (:fields type)))
-          open-refs (if-let [open (:open type)]
-                      (into (collect-type-refs (:key open))
-                            (collect-type-refs (:value open)))
-                      #{})]
+    (let [field-refs (into #{} (mapcat (comp collect-type-refs :type)) (:fields type))
+           open-refs (if-let [open (:open type)]
+                       (into (collect-type-refs (:key open))
+                             (collect-type-refs (:value open)))
+                       #{})]
       (into field-refs open-refs))
 
     :fn
-    (into (apply into #{} (map collect-type-refs (:inputs type)))
-          (collect-type-refs (:output type)))
+    (into (into #{} (mapcat collect-type-refs) (:inputs type))
+           (collect-type-refs (:output type)))
 
     :apply
     (let [target-refs (if (symbol? (:target type))
                         #{(:target type)}
                         #{})
-          arg-refs (apply into #{} (map collect-type-refs (:args type)))]
+          arg-refs (into #{} (mapcat collect-type-refs) (:args type))]
       (into target-refs arg-refs))
 
     #{}))
@@ -199,10 +199,8 @@
    :output (:output fn-def)})
 
 (defn analysis-import-groups
-  [{:keys [ns specs functions values]}]
-  (let [all-refs (concat (mapcat (comp collect-type-refs :type) specs)
-                         (mapcat (comp collect-type-refs fn-type) functions)
-                         (mapcat (comp collect-type-refs :type) values))]
+  [{:keys [ns specs]}]
+  (let [all-refs (mapcat (comp collect-type-refs :type) specs)]
     (->> all-refs
          set
          (remove #(= ns (some-> % namespace symbol)))
@@ -259,13 +257,14 @@
 (defn emit-function-declaration
   [fn-def]
   (let [current-ns (some-> fn-def :ns symbol)]
-    (str "export declare function "
+    (str "export type "
          (export-ts-ident (:name fn-def))
-         "("
+         " = ("
          (->> (:inputs fn-def)
-              (map #(emit-function-arg % current-ns))
+              (map-indexed (fn [idx input]
+                             (str "arg" idx ": " (emit-ts-type (:type input) current-ns))))
               (str/join ", "))
-         "): "
+         ") => "
          (emit-ts-type (:output fn-def) current-ns)
          ";")))
 
@@ -279,14 +278,12 @@
          ";")))
 
 (defn emit-analysis-declarations
-  [{:keys [specs functions values] :as analysis}]
+  [{:keys [specs] :as analysis}]
   (->> (concat
         (when-let [imports (not-empty (emit-imports analysis))]
           [imports])
-        (map emit-spec-declaration specs)
-        (map emit-function-declaration functions)
-        (map emit-value-declaration values))
-       (str/join "\n\n")))
+        (map emit-spec-declaration specs))
+        (str/join "\n\n")))
 
 (defn emit-namespace-declarations
   [ns-sym]

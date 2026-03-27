@@ -262,8 +262,8 @@
 (defn likely-type-symbol?
   [sym]
   (let [name-str (name sym)]
-    (or (namespace sym)
-        (re-find #"^[A-Z]" name-str))))
+    (boolean (or (namespace sym)
+                 (re-find #"^[A-Z]" name-str)))))
 
 (defn resolve-type-symbol
   [sym {:keys [ns aliases]}]
