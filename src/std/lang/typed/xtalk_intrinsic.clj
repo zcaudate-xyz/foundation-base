@@ -1,6 +1,12 @@
 (ns std.lang.typed.xtalk-intrinsic
   (:require [std.lang.typed.xtalk-common :as types]))
 
+(def +intrinsic-ns+ (str (ns-name *ns*)))
+
+(defn intrinsic-sym
+  [name]
+  (symbol +intrinsic-ns+ name))
+
 (defn intrinsic-result
   [callbacks type errors]
   ((:result callbacks) type errors))
@@ -95,12 +101,12 @@
   ((:infer-blank-container callbacks) form ctx))
 
 (def +intrinsic-rules+
-  {'std.lang.typed.xtalk-intrinsic/arrayify arrayify
-   'std.lang.typed.xtalk-intrinsic/not-empty? unary-bool
-   'std.lang.typed.xtalk-intrinsic/is-empty? unary-bool
-   'std.lang.typed.xtalk-intrinsic/const-fn const-fn
-   'std.lang.typed.xtalk-intrinsic/make-container make-container
-   'std.lang.typed.xtalk-intrinsic/blank-container blank-container})
+  {(intrinsic-sym "arrayify") arrayify
+   (intrinsic-sym "not-empty?") unary-bool
+   (intrinsic-sym "is-empty?") unary-bool
+   (intrinsic-sym "const-fn") const-fn
+   (intrinsic-sym "make-container") make-container
+   (intrinsic-sym "blank-container") blank-container})
 
 (defn infer-intrinsic
   [form ctx callbacks]

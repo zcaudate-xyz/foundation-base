@@ -1,11 +1,10 @@
 (ns std.lang.typed.xtalk-lower
-  (:require [std.lang.typed.xtalk-ops :as ops]))
-
-(def +intrinsic-ns+ "std.lang.typed.xtalk-intrinsic")
+  (:require [std.lang.typed.xtalk-intrinsic :as intrinsic]
+            [std.lang.typed.xtalk-ops :as ops]))
 
 (defn intrinsic-sym
   [name]
-  (symbol +intrinsic-ns+ name))
+  (intrinsic/intrinsic-sym name))
 
 (defn resolve-op
   [op {:keys [ns aliases]}]

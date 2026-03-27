@@ -1,6 +1,7 @@
 (ns std.lang.model.spec-js.ts
   (:require [clojure.string :as str]
-            [std.lang.typed.xtalk-analysis :as analysis]))
+            [std.lang.typed.xtalk-analysis :as analysis]
+            [std.lang.typed.xtalk-common :as types]))
 
 (declare emit-ts-type)
 
@@ -28,6 +29,17 @@
 
     :else
     "unknown"))
+
+(defn export-ts-ident
+  [decl-name]
+  (sanitize-ts-ident decl-name))
+
+(defn ns->module-path
+  [ns-sym]
+  (str "./"
+       (-> (str ns-sym)
+           (str/replace #"\." "/")
+           (str/replace #"-" "_"))))
 
 (defn quoted-prop
   [s]
@@ -132,23 +144,148 @@
 
     "unknown"))
 
+(defn collect-type-refs
+  [type]
+  (case (:kind type)
+    :named
+    (if (symbol? (:name type))
+      #{(:name type)}
+      #{})
+
+    :maybe
+    (collect-type-refs (:item type))
+
+    :union
+    (apply into #{} (map collect-type-refs (:types type)))
+
+    :intersection
+    (apply into #{} (map collect-type-refs (:types type)))
+
+    :tuple
+    (apply into #{} (map collect-type-refs (:types type)))
+
+    :array
+    (collect-type-refs (:item type))
+
+    :dict
+    (into (collect-type-refs (:key type))
+          (collect-type-refs (:value type)))
+
+    :record
+    (let [field-refs (apply into #{} (map (comp collect-type-refs :type) (:fields type)))
+          open-refs (if-let [open (:open type)]
+                      (into (collect-type-refs (:key open))
+                            (collect-type-refs (:value open)))
+                      #{})]
+      (into field-refs open-refs))
+
+    :fn
+    (into (apply into #{} (map collect-type-refs (:inputs type)))
+          (collect-type-refs (:output type)))
+
+    :apply
+    (let [target-refs (if (symbol? (:target type))
+                        #{(:target type)}
+                        #{})
+          arg-refs (apply into #{} (map collect-type-refs (:args type)))]
+      (into target-refs arg-refs))
+
+    #{}))
+
+(defn fn-type
+  [fn-def]
+  {:kind :fn
+   :inputs (mapv :type (:inputs fn-def))
+   :output (:output fn-def)})
+
+(defn analysis-import-groups
+  [{:keys [ns specs functions values]}]
+  (let [all-refs (concat (mapcat (comp collect-type-refs :type) specs)
+                         (mapcat (comp collect-type-refs fn-type) functions)
+                         (mapcat (comp collect-type-refs :type) values))]
+    (->> all-refs
+         set
+         (remove #(= ns (some-> % namespace symbol)))
+         (group-by #(some-> % namespace symbol))
+         (remove (comp nil? key))
+         (sort-by (comp str key)))))
+
+(defn emit-import-item
+  [sym current-ns]
+  (let [export-name (export-ts-ident (name sym))
+        local-name (named-ts-ident sym current-ns)]
+    (if (= export-name local-name)
+      export-name
+      (str export-name " as " local-name))))
+
+(defn emit-import-declaration
+  [current-ns [import-ns refs]]
+  (str "import type { "
+       (->> refs
+            (sort-by name)
+            (map #(emit-import-item % current-ns))
+            (str/join ", "))
+       " } from "
+       "\""
+       (ns->module-path import-ns)
+       "\";"))
+
+(defn emit-imports
+  [analysis]
+  (let [current-ns (:ns analysis)]
+    (->> (analysis-import-groups analysis)
+         (map #(emit-import-declaration current-ns %))
+         (str/join "\n"))))
+
 (defn emit-spec-declaration
   [spec]
   (let [current-ns (some-> spec :ns symbol)
         type (:type spec)
-        name (sanitize-ts-ident (:name spec))]
+        name (export-ts-ident (:name spec))]
     (if (= :record (:kind type))
       (str "export interface " name " "
            (emit-ts-type type current-ns))
       (str "export type " name
-           " = "
-           (emit-ts-type type current-ns)
-           ";"))))
+            " = "
+            (emit-ts-type type current-ns)
+            ";"))))
+
+(defn emit-function-arg
+  [arg current-ns]
+  (str (sanitize-ts-ident (:name arg))
+       ": "
+       (emit-ts-type (:type arg) current-ns)))
+
+(defn emit-function-declaration
+  [fn-def]
+  (let [current-ns (some-> fn-def :ns symbol)]
+    (str "export declare function "
+         (export-ts-ident (:name fn-def))
+         "("
+         (->> (:inputs fn-def)
+              (map #(emit-function-arg % current-ns))
+              (str/join ", "))
+         "): "
+         (emit-ts-type (:output fn-def) current-ns)
+         ";")))
+
+(defn emit-value-declaration
+  [value-def]
+  (let [current-ns (some-> value-def :ns symbol)]
+    (str "export declare const "
+         (export-ts-ident (:name value-def))
+         ": "
+         (emit-ts-type (:type value-def) current-ns)
+         ";")))
 
 (defn emit-analysis-declarations
-  [{:keys [specs]}]
-  (->> specs
-       (map emit-spec-declaration)
+  [{:keys [specs functions values] :as analysis}]
+  (->> (concat
+        (when-let [imports (not-empty (emit-imports analysis))]
+          [imports])
+        (map emit-spec-declaration specs)
+        (map emit-function-declaration functions)
+        (map emit-value-declaration values))
        (str/join "\n\n")))
 
 (defn emit-namespace-declarations

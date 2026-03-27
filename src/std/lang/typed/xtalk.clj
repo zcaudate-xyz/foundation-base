@@ -1,6 +1,5 @@
 (ns std.lang.typed.xtalk
   (:require [std.lang.typed.xtalk-analysis :as analysis]
-            [std.lang.typed.xtalk-check :as check]
             [std.lang.typed.xtalk-common :as types]
             [std.lang.typed.xtalk-parse :as parse]))
 
@@ -112,8 +111,7 @@
 
 (defn check-function
   [fn-ref]
-  (or (analysis/get-function-report fn-ref)
-      (check/check-function fn-ref)))
+  (analysis/get-function-report fn-ref))
 
 (defn check-namespace
   [ns-sym]
