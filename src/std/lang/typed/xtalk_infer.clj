@@ -13,7 +13,10 @@
          infer-get-path
          infer-obj-assign
          infer-make-container
-         infer-blank-container)
+         infer-blank-container
+         infer-cond
+         infer-while
+         infer-yield)
 
 (defn result
   ([type] (result type []))
@@ -520,6 +523,40 @@
     (result (types/union-type [types/+nil-type+ (:type body-out)])
             (merge-errors cond-out body-out))))
 
+(defn infer-cond
+  [[_ & clauses] ctx]
+  (loop [result-types []
+         errors []
+         [test-expr result-expr & more] clauses]
+    (if (nil? test-expr)
+      (result (if (seq result-types)
+                (types/union-type result-types)
+                types/+nil-type+)
+              errors)
+      (let [test-out (when-not (= :else test-expr)
+                       (infer-type test-expr ctx))
+            result-out (if (some? result-expr)
+                         (infer-type result-expr ctx)
+                         (result types/+nil-type+))]
+        (recur (conj result-types (:type result-out))
+               (concat errors
+                       (when test-out (:errors test-out))
+                       (:errors result-out))
+               more)))))
+
+(defn infer-while
+  [[_ cond-expr & body] ctx]
+  (let [cond-out (infer-type cond-expr ctx)
+        body-out (infer-body body ctx)]
+    (result types/+nil-type+
+            (merge-errors cond-out body-out))))
+
+(defn infer-yield
+  [[_ value-expr] ctx]
+  (let [value-out (infer-type value-expr ctx)]
+    (result types/+nil-type+
+            (:errors value-out))))
+
 (defn infer-anon-fn
   [[_ args & body] ctx]
   (let [input-types (mapv (fn [_] types/+unknown-type+) args)
@@ -968,6 +1005,9 @@
    'x:is-boolean? (infer-fixed-output types/+bool-type+)
    'x:is-object? (infer-fixed-output types/+bool-type+)
    'x:is-array? (infer-fixed-output types/+bool-type+)
+   'x:iter-eq (infer-fixed-output types/+bool-type+)
+   'x:iter-has? (infer-fixed-output types/+bool-type+)
+   'x:iter-native? (infer-fixed-output types/+bool-type+)
    'x:obj-keys (infer-fixed-output {:kind :array
                                     :item types/+str-type+})
    'x:obj-vals infer-obj-vals
@@ -1052,12 +1092,15 @@
                (case op
                  :- (infer-free form ctx)
                  do (infer-body (rest form) ctx)
-                 return (infer-type (second form) ctx)
-                 let (infer-let form ctx)
-                 var (infer-binding-form form ctx)
-                 := (infer-binding-form form ctx)
+                return (infer-type (second form) ctx)
+                let (infer-let form ctx)
+                var (infer-binding-form form ctx)
+                := (infer-binding-form form ctx)
                 if (infer-if form ctx)
+                cond (infer-cond form ctx)
                 when (infer-when form ctx)
+                while (infer-while form ctx)
+                yield (infer-yield form ctx)
                 fn (infer-anon-fn form ctx)
                 = (result types/+bool-type+
                           (mapcat :errors (map #(infer-type % ctx) (rest form))))

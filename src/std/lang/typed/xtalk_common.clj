@@ -223,6 +223,11 @@
   (and (instance? XtFnDef x)
        (true? (get-in x [:body-meta :macro]))))
 
+(defn generator-def?
+  [x]
+  (and (instance? XtFnDef x)
+       (true? (get-in x [:body-meta :generator]))))
+
 (defn value-def?
   [x]
   (instance? XtValueDef x))

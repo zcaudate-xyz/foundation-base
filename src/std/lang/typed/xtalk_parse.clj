@@ -238,7 +238,7 @@
 
 (defn parse-defn
   [form ns-sym aliases]
-  (let [[_ fn-sym & more] form
+  (let [[def-op fn-sym & more] form
         {:keys [meta items]} (parse-decl-preamble more fn-sym)
         [args-form body] (parse-callable-items items)
         ctx {:ns ns-sym
@@ -249,7 +249,9 @@
     (types/make-fn-def ns-sym fn-sym
                         (parse-fn-inputs args-form ctx)
                         output
-                        (assoc meta :aliases aliases)
+                        (assoc meta
+                               :aliases aliases
+                               :generator (= "defgen.xt" (name def-op)))
                         body
                         nil)))
 

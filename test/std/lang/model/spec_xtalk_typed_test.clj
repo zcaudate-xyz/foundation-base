@@ -5,7 +5,8 @@
    [std.lang.typed.xtalk-infer :as infer]
    [std.lang.typed.xtalk-lower :as lower]
    [std.lang.typed.xtalk-ops :as ops]
-   [std.lang.typed.xtalk-parse :as parse])
+   [std.lang.typed.xtalk-parse :as parse]
+   [std.lang.model.spec-js.ts :as ts])
   (:use code.test))
 
 (fact "normalizes xtalk type forms"
@@ -293,12 +294,66 @@
                                  hook-fn {:kind :primitive :name :xt/any}}
                           :ns 'sample.route
                           :aliases {}})
-       :errors)]
+        :errors)]
   => '[false
        {:kind :tuple
-       :types [{:kind :named :name sample.route/Route}
+        :types [{:kind :named :name sample.route/Route}
                 {:kind :primitive :name :xt/bool}]}
        []])
+
+(fact "models cond while and yield explicitly"
+  [(-> (infer/infer-type '(cond flag "a" :else 1)
+                         {:env '{flag {:kind :primitive :name :xt/bool}}
+                          :ns 'sample.route
+                          :aliases {}})
+       :type
+       types/type->data)
+   (-> (infer/infer-type '(while (< i finish)
+                           (yield i)
+                           (:= i (+ i step)))
+                         {:env '{i {:kind :primitive :name :xt/int}
+                                 finish {:kind :primitive :name :xt/int}
+                                 step {:kind :primitive :name :xt/int}}
+                          :ns 'sample.route
+                          :aliases {}})
+       :type
+       types/type->data)
+   (-> (infer/infer-type '(yield value)
+                         {:env '{value {:kind :primitive :name :xt/str}}
+                          :ns 'sample.route
+                          :aliases {}})
+       :type
+       types/type->data)]
+  => '[{:kind :union
+        :types [{:kind :primitive :name :xt/str}
+                {:kind :primitive :name :xt/int}]}
+       {:kind :primitive :name :xt/nil}
+       {:kind :primitive :name :xt/nil}])
+
+(fact "infers iterator predicate builtins as booleans"
+  [(-> (infer/infer-type '(x:iter-native? it)
+                         {:env '{it {:kind :primitive :name :xt/unknown}}
+                          :ns 'sample.route
+                          :aliases {}})
+       :type
+       types/type->data)
+   (-> (infer/infer-type '(x:iter-has? value)
+                         {:env '{value {:kind :primitive :name :xt/unknown}}
+                          :ns 'sample.route
+                          :aliases {}})
+       :type
+       types/type->data)
+   (-> (infer/infer-type '(x:iter-eq left right eq-fn)
+                         {:env '{left {:kind :primitive :name :xt/unknown}
+                                 right {:kind :primitive :name :xt/unknown}
+                                 eq-fn {:kind :primitive :name :xt/unknown}}
+                          :ns 'sample.route
+                          :aliases {}})
+       :type
+       types/type->data)]
+  => '[{:kind :primitive :name :xt/bool}
+       {:kind :primitive :name :xt/bool}
+       {:kind :primitive :name :xt/bool}])
 
 (fact "infers fn:> as a zero-arg constant function"
   (-> (infer/infer-type '(std.lang.typed.xtalk-intrinsic/const-fn "ok")
@@ -357,6 +412,17 @@
                 {})]
     (mapv :name (:inputs fn-def)))
   => '[m])
+
+(fact "marks defgen.xt declarations as generators"
+  (let [fn-def (parse/parse-defn
+                '(defgen.xt repeatedly
+                   [f]
+                   (while true
+                     (yield (f))))
+                'sample.route
+                {})]
+    (true? (types/generator-def? fn-def)))
+  => true)
 
 (fact "parses defmacro.xt declarations explicitly"
   (let [macro-def (parse/parse-defmacro
@@ -434,6 +500,15 @@
    (some? (typed/get-declaration 'xt.db.base-scope/Scopes :value))
    (pos? (count (typed/list-entries)))]
   => '[true true true true true true])
+
+(fact "emits TypeScript declarations from xtalk specs"
+  (ts/emit-namespace-declarations 'std.lang.model.spec-xtalk-typed-fixture)
+  => (str "export interface User {\n"
+          "  id: string;\n"
+          "  name: string;\n"
+          "}\n\n"
+          "export type UserMap = Record<string, User>;\n\n"
+          "export type find_user = (arg0: UserMap, arg1: string) => User | null;"))
 
 (fact "supports map destructuring in let bindings"
   (-> (infer/infer-type
