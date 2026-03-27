@@ -13,7 +13,7 @@
   (return
    (js.cell.kernel.base-link/call
     link
-    {:op "action",
+    {:op "call",
      :action "@worker/trigger",
      :body [op signal status body]})))
 
@@ -23,7 +23,7 @@
   (return
    (js.cell.kernel.base-link/call
     link
-    {:op "action",
+    {:op "call",
      :action "@worker/trigger-async",
      :body [op signal status body ms]})))
 
@@ -33,7 +33,7 @@
   (return
    (js.cell.kernel.base-link/call
     link
-    {:op "action",
+    {:op "call",
      :action "@worker/set-final-status",
      :body [suppress]})))
 
@@ -43,7 +43,7 @@
   (return
    (js.cell.kernel.base-link/call
     link
-    {:op "action", :action "@worker/get-final-status", :body []})))
+    {:op "call", :action "@worker/get-final-status", :body []})))
 
 (defn.js
   set-eval-status
@@ -51,7 +51,7 @@
   (return
    (js.cell.kernel.base-link/call
     link
-    {:op "action",
+    {:op "call",
      :action "@worker/set-eval-status",
      :body [status suppress]})))
 
@@ -61,7 +61,7 @@
   (return
    (js.cell.kernel.base-link/call
     link
-    {:op "action", :action "@worker/get-eval-status", :body []})))
+    {:op "call", :action "@worker/get-eval-status", :body []})))
 
 (defn.js
   get-action-list
@@ -69,7 +69,7 @@
   (return
    (js.cell.kernel.base-link/call
     link
-    {:op "action", :action "@worker/get-action-list", :body []})))
+    {:op "call", :action "@worker/get-action-list", :body []})))
 
 (defn.js
   get-action-entry
@@ -77,7 +77,7 @@
   (return
    (js.cell.kernel.base-link/call
     link
-    {:op "action",
+    {:op "call",
      :action "@worker/get-action-entry",
      :body [name]})))
 
@@ -87,7 +87,7 @@
   (return
    (js.cell.kernel.base-link/call
     link
-    {:op "action", :action "@worker/ping", :body []})))
+    {:op "call", :action "@worker/ping", :body []})))
 
 (defn.js
   ping-async
@@ -95,7 +95,7 @@
   (return
    (js.cell.kernel.base-link/call
     link
-    {:op "action", :action "@worker/ping.async", :body [ms]})))
+    {:op "call", :action "@worker/ping.async", :body [ms]})))
 
 (defn.js
   echo
@@ -103,7 +103,7 @@
   (return
    (js.cell.kernel.base-link/call
     link
-    {:op "action", :action "@worker/echo", :body [arg]})))
+    {:op "call", :action "@worker/echo", :body [arg]})))
 
 (defn.js
   echo-async
@@ -111,7 +111,7 @@
   (return
    (js.cell.kernel.base-link/call
     link
-    {:op "action", :action "@worker/echo.async", :body [arg ms]})))
+    {:op "call", :action "@worker/echo.async", :body [arg ms]})))
 
 (defn.js
   error
@@ -119,7 +119,7 @@
   (return
    (js.cell.kernel.base-link/call
     link
-    {:op "action", :action "@worker/error", :body []})))
+    {:op "call", :action "@worker/error", :body []})))
 
 (defn.js
   error-async
@@ -127,7 +127,7 @@
   (return
    (js.cell.kernel.base-link/call
     link
-    {:op "action", :action "@worker/error.async", :body [ms]})))
+    {:op "call", :action "@worker/error.async", :body [ms]})))
 
 
 ;;
@@ -146,7 +146,7 @@
           (vec (cons 'link args)) 
           (list 'return (list `link/call
                               'link
-                              {:op "action"
+                              {:op "call"
                                :action action
                                :body (vec args)})))))
   

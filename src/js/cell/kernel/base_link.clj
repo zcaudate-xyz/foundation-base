@@ -17,7 +17,7 @@
     (:= input (or input {}))
     (try
       (cond (== status "ok")
-            (cond (== op "action")
+            (cond (== op "call")
                   (do (k/del-key active id) 
                       (return (resolve (util/arg-decode body))))
                   
@@ -69,7 +69,7 @@
   (var #{data} e)
   (var #{op id} data)
   (cond  (or (== op "eval")
-             (== op "action"))
+             (== op "call"))
          (return (-/link-listener-call data active))
 
          (or (== op "stream"))

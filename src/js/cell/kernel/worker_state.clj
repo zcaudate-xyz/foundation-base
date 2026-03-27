@@ -89,11 +89,7 @@
         :else
         (do (set-fn state)
             (when (not suppress)
-              (j/postMessage worker
-                             {:op "stream"
-                              :signal util/EV_STATE
-                              :status "ok"
-                              :body  state}))
+              (j/postMessage worker (util/resp-stream util/EV_STATE state)))
             (return state))))
 
 (defn.js ^{:cell/action "@worker/set-final-status"

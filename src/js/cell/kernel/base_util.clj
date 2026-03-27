@@ -69,10 +69,10 @@
 
 
 ;;
-;; 
+;;  Requests
 ;;
 
-(defn.js op-frame
+(defn.js req-frame
   "constructs a protocol frame"
   {:added "4.0"}
   [op id body meta extra]
@@ -82,13 +82,46 @@
                      :meta (or meta {})}
                     (or extra {}))))
 
-(defn.js op-call
-  "constructs a call frame"
+(defn.js req-call
+  "constructs a call request"
   {:added "4.0"}
-  [id action body meta]
-  (return (-/op-frame "call"
-                      id
-                      body
-                      meta
-                      {:action action})))
+  [action body]
+  (return {:op "call"
+           :action action
+           :body body}))
+
+(defn.js req-eval
+  "constructs an eval request"
+  {:added "4.0"}
+  [body async]
+  (return {:op "eval"
+           :body body
+           :async async}))
+
+(defn.js resp-ok
+  "constructs an ok response"
+  {:added "4.0"}
+  [op id body]
+  (return {:op op
+           :id id
+           :status "ok"
+           :body body}))
+
+(defn.js resp-error
+  "constructs an error response"
+  {:added "4.0"}
+  [op id body]
+  (return {:op op
+           :id id
+           :status "error"
+           :body body}))
+
+(defn.js resp-stream
+  "constructs a stream response"
+  {:added "4.0"}
+  [signal body]
+  (return {:op "stream"
+           :status "ok"
+           :signal signal
+           :body body}))
 
