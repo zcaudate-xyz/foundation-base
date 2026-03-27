@@ -619,6 +619,75 @@
       :namespace)
   => 'xt.lang.event-route)
 
+
+
+(fact "analyzes js cell kernel specs"
+  (typed/clear-registry!)
+  (doseq [ns-sym '[js.cell.kernel.spec
+                   js.cell.kernel.base-util
+                   js.cell.kernel.base-link
+                   js.cell.kernel.base-impl
+                   js.cell.kernel.base-model
+                   js.cell.kernel.worker-state
+                   js.cell.kernel.worker-local
+                   js.cell.kernel.worker-impl
+                   js.cell.kernel.worker-mock
+                   js.cell.kernel.base-link-local
+                   js.cell.kernel.base-link-eval]]
+    (typed/analyze-and-register! ns-sym))
+  [(-> (typed/get-spec 'js.cell.kernel.base-util/req-frame)
+       :type
+       types/type->data)
+   (-> (typed/get-spec 'js.cell.kernel.base-link/link-create)
+       :type
+       types/type->data)
+   (-> (typed/get-spec 'js.cell.kernel.base-impl/new-cell)
+       :type
+       types/type->data)
+   (-> (typed/get-spec 'js.cell.kernel.base-model/create-view)
+       :type
+       types/type->data)
+   (-> (typed/get-spec 'js.cell.kernel.worker-state/fn-get-action-entry)
+       :type
+       types/type->data)
+   (-> (typed/get-spec 'js.cell.kernel.base-link-eval/post-eval)
+       :type
+       types/type->data)]
+  => '[{:kind :fn
+         :inputs [{:kind :primitive :name :xt/str}
+                  {:kind :maybe
+                   :item {:kind :primitive :name :xt/str}}
+                  {:kind :primitive :name :xt/any}
+                  {:kind :maybe
+                   :item {:kind :named :name js.cell.kernel.spec/AnyMap}}
+                  {:kind :maybe
+                   :item {:kind :named :name js.cell.kernel.spec/AnyMap}}]
+         :output {:kind :named :name js.cell.kernel.spec/RequestFrame}}
+        {:kind :fn
+         :inputs [{:kind :primitive :name :xt/any}]
+         :output {:kind :named :name js.cell.kernel.spec/LinkRecord}}
+        {:kind :fn
+         :inputs [{:kind :primitive :name :xt/any}]
+         :output {:kind :named :name js.cell.kernel.spec/CellRecord}}
+        {:kind :fn
+         :inputs [{:kind :named :name js.cell.kernel.spec/CellRecord}
+                  {:kind :primitive :name :xt/str}
+                  {:kind :primitive :name :xt/str}
+                  {:kind :named :name js.cell.kernel.spec/ViewSpec}]
+         :output {:kind :named :name js.cell.kernel.spec/ViewRecord}}
+        {:kind :fn
+         :inputs [{:kind :primitive :name :xt/str}]
+         :output {:kind :maybe
+                  :item {:kind :named :name js.cell.kernel.spec/WorkerActionEntry}}}
+        {:kind :fn
+         :inputs [{:kind :named :name js.cell.kernel.spec/LinkRecord}
+                  {:kind :primitive :name :xt/any}
+                  {:kind :maybe
+                   :item {:kind :primitive :name :xt/bool}}
+                  {:kind :maybe
+                   :item {:kind :primitive :name :xt/str}}]
+         :output {:kind :primitive :name :xt/any}}])
+
 (fact "analyzes base namespace specs"
   (typed/clear-registry!)
   (doseq [ns-sym '[xt.lang.base-lib
