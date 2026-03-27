@@ -28,6 +28,24 @@
       types/type->data)
   => {:kind :primitive :name :xt/str})
 
+(fact "registry entries expose explicit declaration kinds"
+  (typed/clear-registry!)
+  (typed/analyze-and-register! 'xt.lang.base-macro)
+  (typed/analyze-and-register! 'xt.db.base-scope)
+  [(-> (typed/get-entry 'xt.lang.base-macro/add)
+       types/entry-kinds
+       set)
+   (types/declaration-kind (typed/get-macro 'xt.lang.base-macro/add))
+   (types/declaration-kind (typed/get-value 'xt.db.base-scope/Scopes))
+   (nil? (typed/get-type 'xt.lang.base-macro/add))
+   (= :value (-> (typed/get-entry 'xt.db.base-scope/Scopes)
+                 types/entry-primary-kind))]
+  => '[#{:macro}
+       :macro
+       :value
+       true
+       true])
+
 (fact "defspec.xt resolves aliased type names during registration"
   (typed/clear-registry!)
   (eval '(std.lang.typed.xtalk/defspec.xt AliasMaybeFixture
@@ -339,6 +357,83 @@
                 {})]
     (mapv :name (:inputs fn-def)))
   => '[m])
+
+(fact "parses defmacro.xt declarations explicitly"
+  (let [macro-def (parse/parse-defmacro
+                   '(defmacro.xt ^{:standalone true}
+                      add
+                      "performs add operation"
+                      {:added "4.0"}
+                      [a b]
+                      (list '+ a b))
+                   'sample.route
+                   {})]
+    [(:name macro-def)
+     (mapv :name (:inputs macro-def))
+     (get-in macro-def [:body-meta :macro])
+     (types/type->data (:output macro-def))])
+  => '["add"
+       [a b]
+       true
+       {:kind :primitive :name :xt/unknown}])
+
+(fact "parses def.xt value declarations explicitly"
+  (let [value-def (parse/parse-defvalue
+                   '(def.xt ^{:- [:xt/dict :xt/str :xt/num]}
+                      ScopeMap
+                      {:a 1})
+                   'sample.route
+                   {})]
+    [(:name value-def)
+     (types/type->data (:type value-def))
+     (get-in value-def [:body-meta :def])
+     (:raw-value value-def)])
+  => '["ScopeMap"
+       {:kind :dict
+        :key {:kind :primitive :name :xt/str}
+        :value {:kind :primitive :name :xt/num}}
+       true
+       {:a 1}])
+
+(fact "attaches same-name specs to parsed values"
+  (let [spec (parse/parse-spec-decl 'sample.route 'ScopeMap
+                                    '[:xt/dict :xt/str :xt/num]
+                                    {}
+                                    {})
+        value-def (parse/parse-defvalue
+                   '(def.xt ScopeMap {:a 1})
+                   'sample.route
+                   {})
+        attached (parse/attach-value-spec value-def spec)]
+    [(types/type->data (:type attached))
+     (some? (:spec attached))])
+  => '[{:kind :dict
+         :key {:kind :primitive :name :xt/str}
+         :value {:kind :primitive :name :xt/num}}
+        true])
+
+(fact "analyzes macro and value declarations separately"
+  [(-> (parse/analyze-namespace 'xt.lang.base-macro)
+       :macros
+       count
+       pos?)
+   (-> (parse/analyze-namespace 'xt.db.base-scope)
+       :values
+       count
+       pos?)]
+  => '[true true])
+
+(fact "registers macros and values in the typed registry"
+  (typed/clear-registry!)
+  (typed/analyze-and-register! 'xt.lang.base-macro)
+  (typed/analyze-and-register! 'xt.db.base-scope)
+  [(some? (typed/get-macro 'xt.lang.base-macro/add))
+   (true? (get-in (typed/get-macro 'xt.lang.base-macro/add) [:body-meta :macro]))
+   (some? (typed/get-value 'xt.db.base-scope/Scopes))
+   (true? (get-in (typed/get-value 'xt.db.base-scope/Scopes) [:body-meta :def]))
+   (some? (typed/get-declaration 'xt.db.base-scope/Scopes :value))
+   (pos? (count (typed/list-entries)))]
+  => '[true true true true true true])
 
 (fact "supports map destructuring in let bindings"
   (-> (infer/infer-type

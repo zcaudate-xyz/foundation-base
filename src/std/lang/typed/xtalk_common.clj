@@ -25,6 +25,7 @@
 (defrecord XtArg [name type modifiers])
 (defrecord XtFnDef [ns name inputs output body-meta raw-body spec])
 (defrecord XtValueDef [ns name type body-meta raw-value spec])
+(defrecord XtRegistryEntry [symbol spec fn macro value])
 
 (defonce ^:dynamic *type-registry* (atom {}))
 
@@ -78,62 +79,102 @@
   []
   (reset! *type-registry* {}))
 
+(defn make-registry-entry
+  [sym]
+  (->XtRegistryEntry sym nil nil nil nil))
+
 (defn get-entry
   [sym]
   (get @*type-registry* sym))
 
+(defn entry-declarations
+  [entry]
+  (cond-> {}
+    (:spec entry) (assoc :spec (:spec entry))
+    (:fn entry) (assoc :fn (:fn entry))
+    (:macro entry) (assoc :macro (:macro entry))
+    (:value entry) (assoc :value (:value entry))))
+
+(defn entry-kinds
+  [entry]
+  (keys (entry-declarations entry)))
+
+(defn entry-primary
+  [entry]
+  (or (:spec entry)
+      (:fn entry)
+      (:value entry)))
+
+(defn entry-primary-kind
+  [entry]
+  (cond
+    (:spec entry) :spec
+    (:fn entry) :fn
+    (:value entry) :value
+    :else nil))
+
+(defn get-declaration
+  [sym kind]
+  (get (entry-declarations (get-entry sym)) kind))
+
 (defn get-spec
   [sym]
-  (:spec (get-entry sym)))
+  (get-declaration sym :spec))
 
 (defn get-function
   [sym]
-  (:fn (get-entry sym)))
+  (get-declaration sym :fn))
 
 (defn get-macro
   [sym]
-  (:macro (get-entry sym)))
+  (get-declaration sym :macro))
 
 (defn get-value
   [sym]
-  (:value (get-entry sym)))
+  (get-declaration sym :value))
 
 (defn get-type
   [sym]
-  (or (get-spec sym)
-      (get-function sym)
-      (get-value sym)))
+  (some-> sym get-entry entry-primary))
 
 (defn list-specs
   []
   (->> @*type-registry*
-       vals
-       (keep :spec)))
+        vals
+        (mapcat #(vals (select-keys (entry-declarations %) [:spec])))))
 
 (defn list-functions
   []
   (->> @*type-registry*
-       vals
-       (keep :fn)))
+        vals
+        (mapcat #(vals (select-keys (entry-declarations %) [:fn])))))
 
 (defn list-macros
   []
   (->> @*type-registry*
-       vals
-       (keep :macro)))
+        vals
+        (mapcat #(vals (select-keys (entry-declarations %) [:macro])))))
 
 (defn list-values
   []
   (->> @*type-registry*
-       vals
-       (keep :value)))
+        vals
+        (mapcat #(vals (select-keys (entry-declarations %) [:value])))))
+
+(defn list-entries
+  []
+  (vals @*type-registry*))
 
 (defn register-entry!
   [sym key value]
   (when-not (valid-key? sym)
     (throw (ex-info "Invalid registry key. Must be a namespaced symbol."
                     {:key sym})))
-  (swap! *type-registry* update sym (fnil assoc {}) key value)
+  (swap! *type-registry*
+         (fn [registry]
+           (let [entry (or (get registry sym)
+                           (make-registry-entry sym))]
+             (assoc registry sym (assoc entry key value)))))
   value)
 
 (defn register-spec!
@@ -167,6 +208,34 @@
 (defn make-value-def
   [ns-sym value-name type body-meta raw-value spec]
   (->XtValueDef (some-> ns-sym str) (name value-name) type body-meta raw-value spec))
+
+(defn spec-def?
+  [x]
+  (instance? XtSpecDef x))
+
+(defn fn-def?
+  [x]
+  (and (instance? XtFnDef x)
+       (not (get-in x [:body-meta :macro]))))
+
+(defn macro-def?
+  [x]
+  (and (instance? XtFnDef x)
+       (true? (get-in x [:body-meta :macro]))))
+
+(defn value-def?
+  [x]
+  (instance? XtValueDef x))
+
+(defn declaration-kind
+  [x]
+  (cond
+    (spec-def? x) :spec
+    (fn-def? x) :fn
+    (macro-def? x) :macro
+    (value-def? x) :value
+    (instance? XtRegistryEntry x) (entry-primary-kind x)
+    :else nil))
 
 (defn field-key
   [field]

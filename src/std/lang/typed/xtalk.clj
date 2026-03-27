@@ -54,6 +54,14 @@
   [sym]
   (types/get-type sym))
 
+(defn get-entry
+  [sym]
+  (types/get-entry sym))
+
+(defn get-declaration
+  [sym kind]
+  (types/get-declaration sym kind))
+
 (defn get-spec
   [sym]
   (types/get-spec sym))
@@ -73,6 +81,10 @@
 (defn list-specs
   []
   (types/list-specs))
+
+(defn list-entries
+  []
+  (types/list-entries))
 
 (defn list-functions
   []
