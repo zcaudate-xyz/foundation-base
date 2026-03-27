@@ -5,9 +5,9 @@
   {:require [[js.core :as j]
              [xt.lang.base-lib :as k]]})
 
-(def$.js EV_INIT    "@/::INIT")
+(def$.js EV_INIT    "@worker/::INIT")
 
-(def$.js EV_STATE   "@/::STATE")
+(def$.js EV_STATE   "@worker/::STATE")
 
 (defn.js rand-id
   "prepares a rand-id"
@@ -66,4 +66,29 @@
                       (return (k/eval (+ "(" (k/second x) ")")))
                       (return x)))
                   k/identity)))
+
+
+;;
+;; 
+;;
+
+(defn.js op-frame
+  "constructs a protocol frame"
+  {:added "4.0"}
+  [op id body meta extra]
+  (return (j/assign {:op op
+                     :id id
+                     :body body
+                     :meta (or meta {})}
+                    (or extra {}))))
+
+(defn.js op-call
+  "constructs a call frame"
+  {:added "4.0"}
+  [id action body meta]
+  (return (-/op-frame "call"
+                      id
+                      body
+                      meta
+                      {:action action})))
 

@@ -86,10 +86,10 @@
                            (repl/>notify))
     (link-raw/post-eval link
       (postMessage {:op "stream"
-                    :topic "hello"
+                    :signal "hello"
                     :status "ok"
                     :body {}})))
-  => {"body" {}, "status" "ok", "op" "stream", "topic" "hello"}
+  => {"body" {}, "status" "ok", "op" "stream", "signal" "hello"}
 
   (notify/wait-on :js
     (var cell (impl-common/new-cell
@@ -102,12 +102,12 @@
        (catch (repl/>notify))))
   => (contains-in
       {"body" ["error" integer?],
-       "route" "@/error",
+       "action" "@/error",
        "id" string?
        "status" "error", "input" [],
        "start_time" integer?,
        "end_time" integer?,
-       "op" "route"}))
+       "op" "action"}))
 
 ^{:refer js.cell.impl-common/list-models :added "0.1"
   :setup [(fact:global :setup)
@@ -136,15 +136,15 @@
   
   (j/<!
    (impl-common/call (-/CELL)
-              {:op "route"
-               :route "@/echo"
+              {:op "action"
+               :action "@/echo"
                :body ["hello"]}))
   => (contains ["hello" integer?])
 
   (j/<!
    (impl-common/call (. (-/CELL) ["link"])
-               {:op "route"
-                :route "@/echo"
+               {:op "action"
+                :action "@/echo"
                 :body ["hello"]}))
   => (contains ["hello" integer?]))
 

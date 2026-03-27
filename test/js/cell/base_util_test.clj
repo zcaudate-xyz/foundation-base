@@ -1,4 +1,4 @@
-(ns js.cell.base-util-test
+(ns js.cell.kernel.base-util-test
   (:require [std.lang :as l]
             [xt.lang.base-notify :as notify])
   (:use code.test))
@@ -7,13 +7,13 @@
   {:runtime :basic
    :require [[xt.lang.base-lib :as k]
              [js.core :as j]
-             [js.cell.base-util :as util]]})
+             [js.cell.kernel.base-util :as util]]})
 
 (fact:global
  {:setup     [(l/rt:restart)]
   :teardown  [(l/rt:stop)]})
 
-^{:refer js.cell.base-util/rand-id :added "4.0" :unchecked true}
+^{:refer js.cell.kernel.base-util/rand-id :added "4.0" :unchecked true}
 (fact "prepares a rand-id"
   ^:hidden
   
@@ -23,8 +23,8 @@
   (util/rand-id "id-" 4)
   => string?)
 
-^{:refer js.cell.base-util/check-event :added "4.0" :unchecked true}
-(fact "checks that trigger matches topic and event"
+^{:refer js.cell.kernel.base-util/check-event :added "4.0" :unchecked true}
+(fact "checks that trigger matches signal and event"
   ^:hidden
   
   ;; nil
@@ -47,11 +47,11 @@
 
   ;; fn
   (!.js
-   (util/check-event (fn:> [topic] (== topic "hello")) "hello" {}))
+   (util/check-event (fn:> [signal] (== signal "hello")) "hello" {}))
   => true
 
   (!.js
-   (util/check-event (fn:> [topic] (== topic "hello")) "WRONG" {}))
+   (util/check-event (fn:> [signal] (== signal "hello")) "WRONG" {}))
   => false
 
   ;; map boolean
@@ -70,7 +70,7 @@
    (util/check-event {"hello" (fn:> [e] (. e ["ok"]))} "hello" {:not-ok true}))
   => false)
 
-^{:refer js.cell.base-util/arg-encode :added "4.0" :unchecked true}
+^{:refer js.cell.kernel.base-util/arg-encode :added "4.0" :unchecked true}
 (fact "encodes functions in data tree"
   ^:hidden
   
@@ -78,7 +78,7 @@
    (util/arg-encode [(fn:> [x] x)]))
   => [["fn" "function (x){\n      return x;\n    }"]])
 
-^{:refer js.cell.base-util/arg-decode :added "4.0" :unchecked true}
+^{:refer js.cell.kernel.base-util/arg-decode :added "4.0" :unchecked true}
 (fact "decodes function in data tree"
   ^:hidden
 

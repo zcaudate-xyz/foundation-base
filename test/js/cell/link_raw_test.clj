@@ -9,8 +9,8 @@
    :require [[xt.lang.base-lib :as k]
              [xt.lang.base-repl :as repl]
              [xt.lang.base-runtime :as rt]
-             [js.cell.base-internal :as internal]
-             [js.cell.base-fn :as base-fn]
+             [js.cell.kernel.worker-impl :as internal]
+             [js.cell.kernel.worker-fn :as base-fn]
              [js.cell.link-raw :as link-raw]
              [js.cell.link-fn :as link-fn]
              [js.core :as j]]
@@ -62,11 +62,11 @@
 
   (!.js
    (link-raw/link-listener-event {:op    "stream"
-                                  :topic "hello"}
+                                  :signal "hello"}
                                  {:hello {:pred true
                                           :handler (fn:> true)}
                                   :world {:handler (fn:> true)}
-                                  :again {:pred (fn:> [topic event] (not= topic "hello"))
+                                  :again {:pred (fn:> [signal event] (not= signal "hello"))
                                           :handler (fn:> true)}}))
   => ["hello" "world"])
 
@@ -139,15 +139,15 @@
 
   
   ;;
-  ;; Link ROUTE
+  ;; Link action
   ;;
   
   (notify/wait-on :js
     (var link (link-raw/link-create
                (fn []
                  (eval (@! (browser/play-worker true))))))
-    (. (link-raw/call link {:op "route"
-                            :route "@/ping-async"
+    (. (link-raw/call link {:op "action"
+                            :action "@/ping-async"
                             :body [100]})
        (then (repl/>notify))))
   => (contains ["pong" integer?]))
@@ -160,12 +160,12 @@
         (var link (link-raw/link-create
                    (fn []
                      (eval (@! (browser/play-worker true))))))
-        (link-raw/call link {:op "route"
-                             :route "@/ping-async"
+        (link-raw/call link {:op "action"
+                             :action "@/ping-async"
                              :body [100]})
         (link-raw/link-active link)))
   => (contains-in
-      [{"input" {"body" [100], "route" "@/ping-async", "op" "route"}}]))
+      [{"input" {"body" [100], "action" "@/ping-async", "op" "action"}}]))
 
 ^{:refer js.cell.link-raw/add-callback :added "4.0" :unchecked true}
 (fact "adds a callback to the link"
@@ -175,8 +175,8 @@
     (var link (link-raw/link-create
                (fn []
                  (eval (@! (browser/play-worker true))))))
-    (link-raw/call link {:op "route"
-                            :route "@/ping-async"
+    (link-raw/call link {:op "action"
+                            :action "@/ping-async"
                          :body [100]})
     (. link ["active"]))
   
@@ -186,8 +186,8 @@
     (var link (link-raw/link-create
                (fn []
                  (eval (@! (browser/play-worker true))))))
-    (. (link-raw/call link {:op "route"
-                            :route "@/ping-async"
+    (. (link-raw/call link {:op "action"
+                            :action "@/ping-async"
                             :body [100]})
        (then (repl/>notify))))
   => (contains ["pong" integer?])
@@ -196,27 +196,27 @@
     (var link (link-raw/link-create
                (fn []
                  (eval (@! (browser/play-worker true))))))
-    (. (link-raw/call link {:op "route"
-                            :route "@/error"})
+    (. (link-raw/call link {:op "action"
+                            :action "@/error"})
        (then (repl/>notify))
        (catch (repl/>notify))))
   => (contains-in
       {"body" ["error" integer?], "id" string?,
-       "status" "error", "op" "route"
-       "route" "@/error"})
+       "status" "error", "op" "action"
+       "action" "@/error"})
 
   (notify/wait-on :js
     (var link (link-raw/link-create
                (fn []
                  (eval (@! (browser/play-worker true))))))
-    (. (link-raw/call link {:op "route"
-                            :route "@/error-async"
+    (. (link-raw/call link {:op "action"
+                            :action "@/error-async"
                             :body [100]})
        (catch (repl/>notify))))
   => (contains-in
       {"body" ["error" integer?], "id" string?,
-       "status" "error", "op" "route"
-       "route" "@/error-async"}))
+       "status" "error", "op" "action"
+       "action" "@/error-async"}))
 
 ^{:refer js.cell.link-raw/list-callbacks :added "4.0" :unchecked true}
 (fact "lists all callbacks on the link")
@@ -281,7 +281,7 @@
            (repl/notify true))))
     "eval"
     {}
-    "id-route")
+    "id-action")
   => true)
 
 ^{:refer js.cell.link-raw/async-post :added "4.0" :unchecked true
@@ -331,10 +331,10 @@
                          (repl/>notify))
     (link-raw/post-eval link
       (postMessage {:op "stream"
-                    :topic "hello"
+                    :signal "hello"
                     :status "ok"
                     :body {}})))
-  => {"body" {}, "status" "ok", "op" "stream", "topic" "hello"})
+  => {"body" {}, "status" "ok", "op" "stream", "signal" "hello"})
 
 ^{:refer js.cell.link-raw/wait-eval :added "4.0" :unchecked true
   :setup [(!.js (:= (!:G LK) (link-raw/link-create 

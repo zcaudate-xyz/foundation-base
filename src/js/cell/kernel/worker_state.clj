@@ -40,6 +40,17 @@
   (return (or (and worker (. worker actions))
               (-/WORKER_ACTIONS))))
 
+(defn.js set-actions
+  "initiates the base actions"
+  {:added "4.0"}
+  [actions worker]
+  (cond worker
+        (do (k/set-key worker "actions" actions)
+            (return worker))
+        
+        :else
+        (return (-/WORKER_ACTIONS-reset actions))))
+
 (defn.js fn-self
   "applies arguments along with `self`"
   {:added "4.0"}
@@ -85,9 +96,9 @@
                               :body  state}))
             (return state))))
 
-(defn.js ^{:cell/action "@worker/final-set"
+(defn.js ^{:cell/action "@worker/set-final-status"
            :cell/static false}
-  fn-final-set
+  fn-set-final-status
   "sets the worker state to final"
   {:added "4.0"}
   [worker suppress]
@@ -97,57 +108,45 @@
                             (k/set-key state "final" true))
                           suppress)))
 
-(defn.js ^{:cell/action "@worker/final-status"
+(defn.js ^{:cell/action "@worker/get-final-status"
            :cell/static false}
-  fn-final-status
+  fn-get-final-status
   "gets the final status"
   {:added "4.0"}
   [worker]
   (return (. (-/WORKER_STATE) ["final"])))
 
-(defn.js ^{:cell/action "@worker/eval-enable"
+(defn.js ^{:cell/action "@worker/set-eval-status"
            :cell/static false}
-  fn-eval-enable
+  fn-set-eval-status
   "enables eval"
   {:added "4.0"}
-  [worker suppress]
+  [worker status suppress]
   (return (-/fn-set-state worker
                           (-/WORKER_STATE)
                           (fn [state]
-                            (k/set-key state "eval" true))
+                            (k/set-key state "eval" status))
                           suppress)))
 
-(defn.js ^{:cell/action "@worker/eval-disable"
-           :cell/static false}
-  fn-eval-disable
-  "disables eval"
-  {:added "4.0"}
-  [worker suppress]
-  (return (-/fn-set-state worker
-                          (-/WORKER_STATE)
-                          (fn [state]
-                            (k/set-key state "eval" false))
-                          suppress)))
-
-(defn.js ^{:cell/action "@worker/eval-status"
+(defn.js ^{:cell/action "@worker/get-eval-status"
            :cell/static true}
-  fn-eval-status
+  fn-get-eval-status
   "gets the eval status"
   {:added "4.0"}
   []
   (return (. (-/WORKER_STATE) ["eval"])))
 
-(defn.js ^{:cell/action "@worker/action-list"
+(defn.js ^{:cell/action "@worker/get-action-list"
            :cell/static true}
-  fn-action-list
+  fn-get-action-list
   "gets the actions list"
   {:added "4.0"}
   []
   (return (Object.keys (-/WORKER_ACTIONS))))
 
-(defn.js ^{:cell/action "@worker/action-entry"
+(defn.js ^{:cell/action "@worker/get-action-entry"
            :cell/static true}
-  fn-action-entry
+  fn-get-action-entry
   "gets a action entry"
   {:added "4.0"}
   [name]
@@ -162,7 +161,7 @@
   []
   (return ["pong" (k/now-ms)]))
 
-(defn.js ^{:cell/action "@worker/ping-async"
+(defn.js ^{:cell/action "@worker/ping.async"
            :cell/static true
            :cell/async  true}
   fn-ping-async
@@ -180,7 +179,7 @@
   [arg]
   (return [arg (k/now-ms)]))
 
-(defn.js ^{:cell/action "@worker/echo-async"
+(defn.js ^{:cell/action "@worker/echo.async"
            :cell/static true
            :cell/async  true}
   fn-echo-async
@@ -198,7 +197,7 @@
   []
   (throw ["error" (k/now-ms)]))
 
-(defn.js ^{:cell/action "@worker/error-async"
+(defn.js ^{:cell/action "@worker/error.async"
            :cell/static true
            :cell/async  true}
   fn-error-async

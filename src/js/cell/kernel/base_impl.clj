@@ -1,10 +1,10 @@
-(ns js.cell.impl-common
+(ns js.cell.kernel.base-impl
   (:require [std.lang :as l]))
 
 (l/script :js
   {:require [[xt.lang.base-lib :as k]
              [xt.lang.event-common :as event-common]
-             [js.cell.link-raw :as raw]
+             [js.cell.kernel.base-link :as link]
              [js.cell.kernel.base-util :as util]
              [js.core :as j]]})
 
@@ -27,14 +27,14 @@
   (var link    (:? (and (k/obj? worker-url)
                         (not (. worker-url ["create_fn"])))
                    worker-url
-                   (raw/link-create worker-url)))
+                   (link/link-create worker-url)))
   (var init    (-/new-cell-init))
   (var models  {})
-  (raw/add-callback link
+  (link/add-callback link
                     util/EV_INIT
                     (fn:> [signal] (== util/EV_INIT signal))
                     (fn [data]
-                      (raw/remove-callback link util/EV_INIT)
+                      (link/remove-callback link util/EV_INIT)
                       (. init (resolve true))))
   (return
    (event-common/blank-container
@@ -57,10 +57,10 @@
   [client event]
   (var t (k/get-key client "::"))
   (cond (== t "cell.link")
-        (return (raw/call client event))
+        (return (link/call client event))
         
         (== t "cell")
-        (return (raw/call (k/get-key client "link") event))))
+        (return (link/call (k/get-key client "link") event))))
 
 ;;
 ;; ACCESS

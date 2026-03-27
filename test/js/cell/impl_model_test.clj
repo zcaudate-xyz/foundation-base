@@ -409,12 +409,12 @@
         "pre" [false],
         "main" [true
                 {"body" ["error" integer?],
-                 "route" "@/error-async",
+                 "action" "@/error-async",
                  "id" string?
                  "status" "error",
                  "input" [100],
                  "end_time" integer?
-                 "op" "route",
+                 "op" "action",
                  "start_time" integer?}
                 true],
         
@@ -435,12 +435,12 @@
                  "main"
                  [true
                   {"body" ["error" integer?],
-                   "route" "@/error",
+                   "action" "@/error",
                    "id" string?
                    "status" "error",
                    "input" [],
                    "end_time" integer?
-                   "op" "route",
+                   "op" "action",
                    "start_time" integer?}
                   true],
                  "pre" [false],
@@ -718,6 +718,6 @@
          (. CELL
             ["link"]) "HELLO"))
 
-  (j/<! (link-fn/route-list
+  (j/<! (link-fn/action-list
          (. CELL
             ["link"]))))

@@ -1,13 +1,13 @@
-(ns js.cell.impl-model
+(ns js.cell.kernel.base-model
   (:require [std.lang :as l]))
 
 (l/script :js
   {:require [[xt.lang.base-lib :as k]
              [xt.lang.util-throttle :as th]
              [xt.lang.event-view :as event-view]
-             [js.cell.link-raw :as raw]
+             [js.cell.kernel.base-link :as link]
              [js.cell.kernel.base-util :as util]
-             [js.cell.impl-common :as impl-common]
+             [js.cell.kernel.base-impl :as impl]
              [js.core :as j]]})
 
 (defn.js wrap-cell-args
@@ -25,7 +25,7 @@
   {:added "4.0"}
   [cell model-id view-id opts]
   (var path [model-id view-id])
-  (var [model view] (impl-common/view-ensure cell model-id view-id))
+  (var [model view] (impl/view-ensure cell model-id view-id))
   (var [context disabled] (event-view/pipeline-prep view
                                                    (j/assign {:path  path
                                                               :cell  cell
@@ -151,7 +151,7 @@
   "refreshes the model"
   {:added "4.0"}
   [cell model-id event refresh-deps-fn]
-  (var model (impl-common/model-ensure cell model-id))
+  (var model (impl/model-ensure cell model-id))
   (var running [])
   (k/for:object [[view-id view] (. model ["views"])]
     (var [path context disabled]
@@ -188,7 +188,7 @@
               (x:arr-push out [linked-model-id linked-view-id])))
 
           :else
-          (do (var linked-model (impl-common/model-get cell linked-model-id))
+          (do (var linked-model (impl/model-get cell linked-model-id))
               (k/for:object [[linked-view-id _] linked-views]
                 (when (or (k/nil? linked-model)
                           (k/nil? (. linked-model ["views"] [linked-view-id])))
@@ -241,7 +241,7 @@
    view
    "@/cell"
    (fn [event]
-     (return (impl-common/trigger-listeners cell [model-id view-id] event))))
+     (return (impl/trigger-listeners cell [model-id view-id] event))))
   (return view))
 
 (defn.js add-model-attach
@@ -305,7 +305,7 @@
   "updates a model"
   {:added "4.0"}
   [cell model-id ?event]
-  (var model (impl-common/model-ensure cell model-id))
+  (var model (impl/model-ensure cell model-id))
   (var #{throttle views} model)
   (var out [])
   (k/for:object [[view-id _] views]
@@ -319,7 +319,7 @@
   "updates a view"
   {:added "4.0"}
   [cell model-id view-id ?event]
-  (var [model view] (impl-common/view-ensure cell model-id view-id))
+  (var [model view] (impl/view-ensure cell model-id view-id))
   (var #{throttle} model)
   (return (th/throttle-run throttle view-id [(or ?event {})])))
 
@@ -327,7 +327,7 @@
   "sets the view input"
   {:added "4.0"}
   [cell model-id view-id current ?event]
-  (var [model view] (impl-common/view-ensure cell model-id view-id))
+  (var [model view] (impl/view-ensure cell model-id view-id))
   (event-view/set-input view current)
   (return(-/view-update cell model-id view-id (or ?event {}))))
 
@@ -358,7 +358,7 @@
   "triggers a model"
   {:added "4.0"}
   [cell model-id signal event]
-  (var model (impl-common/model-ensure cell model-id))
+  (var model (impl/model-ensure cell model-id))
   (return (-/trigger-model-raw cell model signal event)))
 
 (defn.js trigger-view
@@ -366,7 +366,7 @@
   {:added "4.0"}
   [cell model-id view-id signal event]
   (var #{link} cell)
-  (var [model view] (impl-common/view-ensure cell model-id view-id))
+  (var [model view] (impl/view-ensure cell model-id view-id))
   (var #{options} view)
   (var #{trigger} options)
   (when (util/check-event trigger signal event {:view view
@@ -393,7 +393,7 @@
   {:added "4.0"}
   [cell]
   (var #{link} cell)
-  (return (raw/add-callback
+  (return (link/add-callback
            link
            "@/raw"
            (fn:> true)
@@ -405,5 +405,5 @@
   {:added "4.0"}
   [cell]
   (var #{link} cell)
-  (return (raw/remove-callback link "@/raw")))
+  (return (link/remove-callback link "@/raw")))
 

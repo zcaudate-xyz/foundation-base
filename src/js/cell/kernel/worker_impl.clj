@@ -6,8 +6,7 @@
              [xt.lang.base-repl :as repl]
              [xt.lang.base-lib :as k]
              [js.cell.kernel.base-util :as util]
-             [js.cell.kernel.worker-state :as worker-state]
-             [js.cell.kernel.worker-local :as worker-local]]})
+             [js.cell.kernel.worker-state :as worker-state]]})
 
 (defn.js worker-handle-async
   "worker function for handling async tasks"
@@ -28,63 +27,74 @@
                                              :status "error"
                                              :body ret}))))))
 
+(defn.js worker-process-eval
+  [worker input post-fn]
+  (var #{op id body action} input)
+  (when (== false (. (worker-state/get-state worker)
+                     ["eval"]))
+    (j/postMessage worker {:op op
+                           :id id
+                           :status "error"
+                           :body (k/cat "Not enabled - EVAL")}))
+  (var out (repl/return-eval body))
+  (var f (:? (. input ["async"])
+             j/identity
+             post-fn))
+  (return (f {:op op
+              :id id
+              :status "ok"
+              :body out})))
+
+(defn.js worker-process-action
+  [worker input post-fn]
+  (var #{op id body action} input)
+  (var action-entry  (. (worker-state/get-actions worker)
+                        [action]))
+  (when (== nil action-entry)
+    (return (j/postMessage worker {:op op
+                                   :id id
+                                   :status "error"
+                                   :body (k/cat "action not found - " action)})))
+            
+  (var action-async  (. action-entry ["async"]))
+  (var action-fn     (. action-entry ["handler"]))
+  (var f   (:? action-async
+               j/identity
+               post-fn))
+  
+  (try
+    (:= body (util/arg-decode (or body [])))
+    (var out (:? action-async
+                 (-/worker-handle-async worker action-fn op id body)
+                 (action-fn (:.. body))))
+    (return (f {:op op
+                :id id
+                :status "ok"
+                :body (util/arg-encode out)}))
+    (catch err
+        (return (f {:op op
+                    :id id
+                    :status "error"
+                    :body err})))))
+
 (defn.js worker-process
   "processes various types of actions"
   {:added "4.0"}
   [worker input]
-  (var #{op id body action} input)
-  (var post-fn (fn:> [x] (j/postMessage worker x)) )
+  (var #{op} input)
+  (var post-fn (fn [x] (return (j/postMessage worker x))))
   (cond (== op "eval")
-        (do (when (== false (. (worker-state/get-state worker)
-                               ["eval"]))
-              (j/postMessage worker {:op op
-                                     :id id
-                                     :status "error"
-                                     :body (k/cat "Not enabled - EVAL")}))
-            (var out (repl/return-eval body))
-            (var f (:? (. input ["async"])
-                       j/identity
-                       post-fn))
-            (return (f {:op op
-                        :id id
-                        :status "ok"
-                        :body out})))
+        (return
+         (-/worker-process-eval worker input post-fn))
         
         (== op "action")
-        (do (var action-entry  (. (worker-state/get-actions worker)
-                                 [action]))
-            (when (== nil action-entry)
-              (return (j/postMessage worker {:op op
-                                             :id id
-                                             :status "error"
-                                             :body (k/cat "action not found - " action)})))
-            
-            (var action-async  (. action-entry ["async"]))
-            (var action-fn     (. action-entry ["handler"]))
-            (var f   (:? action-async
-                         j/identity
-                         post-fn))
-            
-            (try
-              (:= body (util/arg-decode (or body [])))
-              (var out (:? action-async
-                           (-/worker-handle-async worker action-fn op id body)
-                           (action-fn (:.. body))))
-              (return (f {:op op
-                          :id id
-                          :status "ok"
-                          :body (util/arg-encode out)}))
-              (catch err
-                  (return (f {:op op
-                              :id id
-                              :status "error"
-                              :body err})))))
+        (return
+         (-/worker-process-eval worker input post-fn))
         
         :else
         (post-fn {:op op
                   :status "error"
                   :body input})))
-
 
 (defn.js worker-init
   "initiates the worker actions"
@@ -106,7 +116,7 @@
              false))
   (return true))
 
-(defn.js worker-init-post
+(defn.js worker-init-signal
   "posts an init message"
   {:added "4.0"}
   [worker body]

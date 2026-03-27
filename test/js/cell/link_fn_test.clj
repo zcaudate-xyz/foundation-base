@@ -9,8 +9,8 @@
    :require [[xt.lang.base-lib :as k]
              [xt.lang.base-repl :as repl]
              [xt.lang.base-runtime :as rt]
-             [js.cell.base-internal :as internal]
-             [js.cell.base-fn :as base-fn]
+             [js.cell.kernel.worker-impl :as internal]
+             [js.cell.kernel.worker-fn :as base-fn]
              [js.cell.link-raw :as link-raw]
              [js.cell.link-fn :as link-fn]
              [js.core :as j]]
@@ -22,20 +22,20 @@
   :teardown  [(l/rt:stop)]})
 
 
-^{:refer js.cell.link-fn/tmpl-link-route :added "4.0" :unchecked true}
+^{:refer js.cell.link-fn/tmpl-link-action :added "4.0" :unchecked true}
 (fact "performs a template"
   ^:hidden
   
-  (link-fn/tmpl-link-route
+  (link-fn/tmpl-link-action
    '[trigger base-fn/fn-trigger])
   => '(defn.js trigger
-        [link op topic status body]
+        [link op signal status body]
         (return
          (js.cell.link-raw/call
           link
-          {:op "route",
-           :route "@/trigger",
-           :body [op topic status body]}))))
+          {:op "action",
+           :action "@/trigger",
+           :body [op signal status body]}))))
 
 ^{:refer js.cell.link-fn/ping :adopt true :added "4.0" :unchecked true}
 (fact "performs link ping"
@@ -122,7 +122,7 @@
   => {"body" "hello",
       "status" "ok",
       "op" "stream",
-      "topic" "hello"})
+      "signal" "hello"})
 
 ^{:refer js.cell.link-fn/trigger-async :adopt true :added "4.0" :unchecked true}
 (fact  "triggers an event after delay"
@@ -134,7 +134,7 @@
                  (eval (@! (browser/play-worker true))))))
     (link-raw/add-callback link "test" "hello" (repl/>notify))
     (link-fn/trigger-async link "stream" "hello" "ok" "hello" 100))
-  => {"body" "hello", "status" "ok", "op" "stream", "topic" "hello"})
+  => {"body" "hello", "status" "ok", "op" "stream", "signal" "hello"})
 
 ^{:refer js.cell.link-fn/error :adopt true :added "4.0" :unchecked true}
 (fact "throws an error"
@@ -146,8 +146,8 @@
                  (eval (@! (browser/play-worker true))))))
     (. (link-fn/error link)
        (catch (repl/>notify))))
-  => (contains-in {"body" ["error" integer?], "route" "@/error",
-                   "status" "error", "op" "route"}))
+  => (contains-in {"body" ["error" integer?], "action" "@/error",
+                   "status" "error", "op" "action"}))
 
 ^{:refer js.cell.link-fn/error-async :adopt true :added "4.0" :unchecked true}
 (fact "throws a error on delay"
@@ -160,21 +160,21 @@
     (. (link-fn/error-async link 100)
        (catch (repl/>notify))))
   => (contains-in {"body" ["error" integer?],
-                   "route" "@/error-async"
-                   "status" "error", "op" "route"}))
+                   "action" "@/error-async"
+                   "status" "error", "op" "action"}))
 
-^{:refer js.cell.link-fn/route-list :adopt true :added "4.0" :unchecked true}
-(fact "gets the route list"
+^{:refer js.cell.link-fn/action-list :adopt true :added "4.0" :unchecked true}
+(fact "gets the action list"
   ^:hidden
   
   (set (notify/wait-on :js
         (var link (link-raw/link-create 
                (fn []
                  (eval (@! (browser/play-worker true))))))
-        (. (link-fn/route-list link)
+        (. (link-fn/action-list link)
            (then (repl/>notify)))))
-  => #{"@/route-list"
-       "@/route-entry"
+  => #{"@/action-list"
+       "@/action-entry"
        "@/error-async"
        "@/echo"
        "@/ping"
@@ -189,15 +189,15 @@
        "@/eval-disable"
        "@/eval-status"})
 
-^{:refer js.cell.link-fn/route-entry :adopt true :added "4.0" :unchecked true}
-(fact "gets the route doc"
+^{:refer js.cell.link-fn/action-entry :adopt true :added "4.0" :unchecked true}
+(fact "gets the action doc"
   ^:hidden
 
   (notify/wait-on :js
     (var link (link-raw/link-create 
                (fn []
                  (eval (@! (browser/play-worker true))))))
-    (. (link-fn/route-entry link "@/echo")
+    (. (link-fn/action-entry link "@/echo")
        (then (repl/>notify))))
   => {"args" ["arg"], "async" false})
 

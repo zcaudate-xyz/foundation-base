@@ -14,7 +14,7 @@
              [js.react :as r :include [:fn]]
              [js.react-native :as n :include [:fn]]
              [js.cell :as cl]
-             [js.cell.base-internal :as base-internal]
+             [js.cell.kernel.worker-impl :as base-internal]
              [js.cell.impl-common :as impl-common]
              [js.cell.link-fn :as link-fn]
              [js.react.ext-cell :as cr]
