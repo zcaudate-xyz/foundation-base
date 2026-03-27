@@ -1,7 +1,34 @@
 (ns rt.chromedriver-test
   (:use code.test)
   (:require [rt.chromedriver :as chromedriver]
-            [std.lib :as h]))
+            [std.lang :as l]
+            [std.lib :as h]
+            [xt.lang.base-lib :as k]
+            [xt.lang.base-repl :as repl]
+            [js.cell.kernel :as cl]
+            [js.cell.kernel.base-link-local :as base-link-local]
+            [js.cell.runtime.link :as runtime-link]))
+
+(l/script :js
+  {:runtime :chromedriver.instance
+   :require [[xt.lang.base-lib :as k]
+             [xt.lang.base-repl :as repl]
+             [xt.lang.base-runtime :as rt]
+             [js.cell.kernel :as cl]
+             [js.cell.kernel.base-link-local :as base-link-local]
+             [js.cell.runtime.link :as runtime-link]]})
+
+(fact:global
+ {:setup [(l/rt:restart :js)
+          (l/rt:scaffold-imports :js)]
+  :teardown [(l/rt:stop)]})
+
+^{:refer rt.chromedriver-test/browser-eval :added "4.0"}
+(fact "chromedriver evaluates !.js expressions"
+  ^:hidden
+
+  (!.js (+ 1 2 3))
+  => 6)
 
 ^{:refer rt.chromedriver/goto :added "4.0"
   :setup [(def +browser+ (chromedriver/browser {:port 19222}))]

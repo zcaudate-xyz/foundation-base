@@ -24,7 +24,8 @@
   (impl/emit-entry-deps
    k/return-eval
    {:lang :js
-    :layout :flat}))
+    :layout :flat
+    :emit {:lang/format :commonjs}}))
 
 (defn start-browser-bench
   "starts the browser bench"
@@ -66,7 +67,7 @@
          conn (conn/conn-create {:host host
                                  :port port})
          _  (reset! state conn)
-         _  (util/runtime-evaluate conn +bootstrap+)]
+         _  @(util/runtime-evaluate conn +bootstrap+)]
      rt)))
 
 (defn stop-browser-raw
