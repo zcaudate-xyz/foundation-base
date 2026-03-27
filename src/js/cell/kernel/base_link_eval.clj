@@ -1,5 +1,6 @@
 (ns js.cell.kernel.base-link-eval
   (:require [std.lang :as l]
+            [std.lang.typed.xtalk :refer [defspec.xt]]
             [std.lib.collection :as collection]
             [std.lib.foundation :as f]
             [std.lib.walk :as walk]
@@ -8,6 +9,14 @@
 (l/script :js
   {:require [[js.cell.kernel.base-link :as link]
              [xt.lang.base-repl :as repl]]})
+
+
+(defspec.xt post-eval
+  [:fn [js.cell.kernel.spec/LinkRecord
+        :xt/any
+        [:xt/maybe :xt/bool]
+        [:xt/maybe :xt/str]]
+   :xt/any])
 
 ;;
 ;; TESTING

@@ -1,5 +1,6 @@
 (ns js.cell.kernel.base-impl
-  (:require [std.lang :as l]))
+  (:require [std.lang :as l]
+            [std.lang.typed.xtalk :refer [defspec.xt]]))
 
 (l/script :js
   {:require [[xt.lang.base-lib :as k]
@@ -7,6 +8,77 @@
              [js.cell.kernel.base-link :as link]
              [js.cell.kernel.base-util :as util]
              [js.core :as j]]})
+
+(defspec.xt new-cell-init
+  [:fn [] js.cell.kernel.spec/CellInit])
+
+(defspec.xt new-cell
+  [:fn [:xt/any] js.cell.kernel.spec/CellRecord])
+
+(defspec.xt list-models
+  [:fn [js.cell.kernel.spec/CellRecord]
+   js.cell.kernel.spec/StringList])
+
+(defspec.xt call
+  [:fn [[:or js.cell.kernel.spec/CellRecord js.cell.kernel.spec/LinkRecord]
+        js.cell.kernel.spec/RequestFrame]
+   :xt/any])
+
+(defspec.xt model-get
+  [:fn [js.cell.kernel.spec/CellRecord :xt/str]
+   [:xt/maybe js.cell.kernel.spec/ModelRecord]])
+
+(defspec.xt model-ensure
+  [:fn [js.cell.kernel.spec/CellRecord :xt/str]
+   js.cell.kernel.spec/ModelRecord])
+
+(defspec.xt list-views
+  [:fn [js.cell.kernel.spec/CellRecord :xt/str]
+   js.cell.kernel.spec/StringList])
+
+(defspec.xt view-ensure
+  [:fn [js.cell.kernel.spec/CellRecord :xt/str :xt/str]
+   [:tuple js.cell.kernel.spec/ModelRecord js.cell.kernel.spec/ViewRecord]])
+
+(defspec.xt view-access
+  [:fn [js.cell.kernel.spec/CellRecord
+        :xt/str
+        :xt/str
+        [:fn [js.cell.kernel.spec/ViewRecord js.cell.kernel.spec/AnyList] :xt/any]
+        js.cell.kernel.spec/AnyList]
+   [:xt/maybe :xt/any]])
+
+(defspec.xt clear-listeners
+  [:fn [js.cell.kernel.spec/CellRecord] :xt/any])
+
+(defspec.xt add-listener
+  [:fn [js.cell.kernel.spec/CellRecord
+        js.cell.kernel.spec/Path
+        :xt/str
+        [:fn [:xt/any] :xt/any]
+        [:xt/maybe :xt/any]
+        [:xt/maybe :xt/any]]
+   :xt/any])
+
+(defspec.xt remove-listener
+  [:fn [js.cell.kernel.spec/CellRecord
+        js.cell.kernel.spec/Path
+        :xt/str]
+   :xt/any])
+
+(defspec.xt list-listeners
+  [:fn [js.cell.kernel.spec/CellRecord js.cell.kernel.spec/Path]
+   js.cell.kernel.spec/StringList])
+
+(defspec.xt list-all-listeners
+  [:fn [js.cell.kernel.spec/CellRecord]
+   js.cell.kernel.spec/AnyMap])
+
+(defspec.xt trigger-listeners
+  [:fn [js.cell.kernel.spec/CellRecord
+        js.cell.kernel.spec/Path
+        js.cell.kernel.spec/AnyMap]
+   :xt/any])
 
 (defn.js new-cell-init
   "creates a record for asynchronous resolve"

@@ -1,5 +1,6 @@
 (ns js.cell.kernel.worker-impl
-  (:require [std.lang :as l]))
+  (:require [std.lang :as l]
+            [std.lang.typed.xtalk :refer [defspec.xt]]))
 
 (l/script :js
   {:require [[js.core :as j]
@@ -7,6 +8,39 @@
              [xt.lang.base-lib :as k]
              [js.cell.kernel.base-util :as util]
              [js.cell.kernel.worker-state :as worker-state]]})
+
+(defspec.xt worker-handle-async
+  [:fn [:xt/any [:fn [js.cell.kernel.spec/AnyList] :xt/any]
+        :xt/str
+        [:xt/maybe :xt/str]
+        js.cell.kernel.spec/AnyList]
+   :xt/any])
+
+(defspec.xt worker-process-eval
+  [:fn [:xt/any
+        js.cell.kernel.spec/RequestFrame
+        [:fn [js.cell.kernel.spec/ResponseFrame]
+         :xt/any]]
+   :xt/any])
+
+(defspec.xt worker-process-action
+  [:fn [:xt/any js.cell.kernel.spec/RequestFrame
+        [:fn [js.cell.kernel.spec/ResponseFrame]
+         :xt/any]]
+   :xt/any])
+
+(defspec.xt worker-process
+  [:fn [:xt/any js.cell.kernel.spec/RequestFrame]
+   :xt/any])
+
+(defspec.xt worker-init
+  [:fn [:xt/any [:xt/maybe [:fn [js.cell.kernel.spec/RequestFrame]
+                            js.cell.kernel.spec/RequestFrame]]]
+   :xt/bool])
+
+(defspec.xt worker-init-signal
+  [:fn [:xt/any :xt/any]
+   :xt/any])
 
 (defn.js worker-handle-async
   "worker function for handling async tasks"
@@ -68,7 +102,7 @@
         
         (== op "call")
         (return
-         (-/worker-process-eval worker input post-fn))
+         (-/worker-process-action worker input post-fn))
         
         :else
         (post-fn (util/resp-error op nil input))))

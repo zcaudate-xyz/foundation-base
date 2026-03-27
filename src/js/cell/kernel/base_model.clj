@@ -1,5 +1,6 @@
 (ns js.cell.kernel.base-model
-  (:require [std.lang :as l]))
+  (:require [std.lang :as l]
+            [std.lang.typed.xtalk :refer [defspec.xt]]))
 
 (l/script :js
   {:require [[xt.lang.base-lib :as k]
@@ -9,6 +10,126 @@
              [js.cell.kernel.base-util :as util]
              [js.cell.kernel.base-impl :as impl]
              [js.core :as j]]})
+
+
+(defspec.xt async-fn :xt/any)
+
+(defspec.xt wrap-cell-args
+  [:fn [[:fn [js.cell.kernel.spec/LinkRecord js.cell.kernel.spec/AnyList] :xt/any]]
+   :xt/any])
+
+(defspec.xt prep-view
+  [:fn [js.cell.kernel.spec/CellRecord :xt/str :xt/str js.cell.kernel.spec/AnyMap]
+   [:tuple js.cell.kernel.spec/Path js.cell.kernel.spec/AnyMap :xt/any]])
+
+(defspec.xt get-view-dependents
+  [:fn [js.cell.kernel.spec/CellRecord :xt/str :xt/str]
+   js.cell.kernel.spec/ViewDependents])
+
+(defspec.xt get-model-dependents
+  [:fn [js.cell.kernel.spec/CellRecord :xt/str]
+   [:xt/dict :xt/str :xt/bool]])
+
+(defspec.xt run-tail-call
+  [:fn [js.cell.kernel.spec/AnyMap [:xt/maybe :xt/any]] :xt/any])
+
+(defspec.xt run-remote
+  [:fn [js.cell.kernel.spec/AnyMap :xt/bool js.cell.kernel.spec/Path [:xt/maybe :xt/any]]
+   :xt/any])
+
+(defspec.xt remote-call
+  [:fn [js.cell.kernel.spec/CellRecord :xt/str :xt/str js.cell.kernel.spec/AnyList :xt/bool]
+   :xt/any])
+
+(defspec.xt run-refresh
+  [:fn [js.cell.kernel.spec/AnyMap :xt/any js.cell.kernel.spec/Path [:xt/maybe :xt/any]]
+   :xt/any])
+
+(defspec.xt refresh-view-dependents
+  [:fn [js.cell.kernel.spec/CellRecord :xt/str :xt/str]
+   js.cell.kernel.spec/ViewDependents])
+
+(defspec.xt refresh-view
+  [:fn [js.cell.kernel.spec/CellRecord :xt/str :xt/str js.cell.kernel.spec/AnyMap [:xt/maybe :xt/any]]
+   :xt/any])
+
+(defspec.xt refresh-view-remote
+  [:fn [js.cell.kernel.spec/CellRecord :xt/str :xt/str [:xt/maybe :xt/any]]
+   :xt/any])
+
+(defspec.xt refresh-view-dependents-unthrottled
+  [:fn [js.cell.kernel.spec/CellRecord :xt/str :xt/str [:xt/maybe :xt/any]]
+   :xt/any])
+
+(defspec.xt refresh-model
+  [:fn [js.cell.kernel.spec/CellRecord :xt/str js.cell.kernel.spec/AnyMap [:xt/maybe :xt/any]]
+   :xt/any])
+
+(defspec.xt get-model-deps
+  [:fn [:xt/str js.cell.kernel.spec/ViewMap]
+   js.cell.kernel.spec/ModelDeps])
+
+(defspec.xt get-unknown-deps
+  [:fn [:xt/str js.cell.kernel.spec/ViewMap js.cell.kernel.spec/ModelDeps js.cell.kernel.spec/CellRecord]
+   [:xt/array js.cell.kernel.spec/Path]])
+
+(defspec.xt create-throttle
+  [:fn [js.cell.kernel.spec/CellRecord :xt/str [:xt/maybe :xt/any]]
+   :xt/any])
+
+(defspec.xt create-view
+  [:fn [js.cell.kernel.spec/CellRecord :xt/str :xt/str js.cell.kernel.spec/ViewSpec]
+   js.cell.kernel.spec/ViewRecord])
+
+(defspec.xt add-model-attach
+  [:fn [js.cell.kernel.spec/CellRecord :xt/str js.cell.kernel.spec/ViewMap]
+   js.cell.kernel.spec/ModelRecord])
+
+(defspec.xt add-model
+  [:fn [js.cell.kernel.spec/CellRecord :xt/str js.cell.kernel.spec/ViewMap]
+   js.cell.kernel.spec/ModelRecord])
+
+(defspec.xt remove-model
+  [:fn [js.cell.kernel.spec/CellRecord :xt/str]
+   [:xt/maybe js.cell.kernel.spec/ModelRecord]])
+
+(defspec.xt remove-view
+  [:fn [js.cell.kernel.spec/CellRecord :xt/str :xt/str]
+   [:xt/maybe js.cell.kernel.spec/ViewRecord]])
+
+(defspec.xt model-update
+  [:fn [js.cell.kernel.spec/CellRecord :xt/str [:xt/maybe js.cell.kernel.spec/AnyMap]]
+   :xt/any])
+
+(defspec.xt view-update
+  [:fn [js.cell.kernel.spec/CellRecord :xt/str :xt/str [:xt/maybe js.cell.kernel.spec/AnyMap]]
+   :xt/any])
+
+(defspec.xt view-set-input
+  [:fn [js.cell.kernel.spec/CellRecord :xt/str :xt/str :xt/any [:xt/maybe js.cell.kernel.spec/AnyMap]]
+   :xt/any])
+
+(defspec.xt trigger-model-raw
+  [:fn [js.cell.kernel.spec/CellRecord js.cell.kernel.spec/ModelRecord :xt/str js.cell.kernel.spec/AnyMap]
+   js.cell.kernel.spec/StringList])
+
+(defspec.xt trigger-model
+  [:fn [js.cell.kernel.spec/CellRecord :xt/str :xt/str js.cell.kernel.spec/AnyMap]
+   js.cell.kernel.spec/StringList])
+
+(defspec.xt trigger-view
+  [:fn [js.cell.kernel.spec/CellRecord :xt/str :xt/str :xt/str js.cell.kernel.spec/AnyMap]
+   [:xt/maybe :xt/any]])
+
+(defspec.xt trigger-all
+  [:fn [js.cell.kernel.spec/CellRecord :xt/str js.cell.kernel.spec/AnyMap]
+   js.cell.kernel.spec/AnyMap])
+
+(defspec.xt add-raw-callback
+  [:fn [js.cell.kernel.spec/CellRecord] [:xt/array :xt/any]])
+
+(defspec.xt remove-raw-callback
+  [:fn [js.cell.kernel.spec/CellRecord] [:xt/array :xt/any]])
 
 (defn.js wrap-cell-args
   "puts the cell as first argument"

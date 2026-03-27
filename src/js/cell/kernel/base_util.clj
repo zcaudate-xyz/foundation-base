@@ -1,9 +1,54 @@
 (ns js.cell.kernel.base-util
-  (:require [std.lang :as l]))
+  (:require [std.lang :as l]
+            [std.lang.typed.xtalk :refer [defspec.xt]]))
 
 (l/script :js
   {:require [[js.core :as j]
              [xt.lang.base-lib :as k]]})
+
+
+(defspec.xt EV_INIT :xt/str)
+(defspec.xt EV_STATE :xt/str)
+
+(defspec.xt rand-id
+  [:fn [[:xt/maybe :xt/str] :xt/int] :xt/str])
+
+(defspec.xt check-event
+  [:fn [:xt/any :xt/str :xt/any :xt/any] :xt/bool])
+
+(defspec.xt arg-encode
+  [:fn [:xt/any] :xt/any])
+
+(defspec.xt arg-decode
+  [:fn [:xt/any] :xt/any])
+
+(defspec.xt req-frame
+  [:fn [:xt/str
+        [:xt/maybe :xt/str]
+        :xt/any
+        [:xt/maybe js.cell.kernel.spec/AnyMap]
+        [:xt/maybe js.cell.kernel.spec/AnyMap]]
+   js.cell.kernel.spec/RequestFrame])
+
+(defspec.xt req-call
+  [:fn [:xt/str :xt/any]
+   js.cell.kernel.spec/RequestFrame])
+
+(defspec.xt req-eval
+  [:fn [:xt/any [:xt/maybe :xt/bool]]
+   js.cell.kernel.spec/RequestFrame])
+
+(defspec.xt resp-ok
+  [:fn [:xt/str [:xt/maybe :xt/str] :xt/any]
+   js.cell.kernel.spec/ResponseFrame])
+
+(defspec.xt resp-error
+  [:fn [:xt/str [:xt/maybe :xt/str] :xt/any]
+   js.cell.kernel.spec/ResponseFrame])
+
+(defspec.xt resp-stream
+  [:fn [:xt/str :xt/any]
+   js.cell.kernel.spec/ResponseFrame])
 
 (def$.js EV_INIT    "@worker/::INIT")
 
@@ -93,10 +138,10 @@
 (defn.js req-eval
   "constructs an eval request"
   {:added "4.0"}
-  [body async]
+  [body is-async]
   (return {:op "eval"
            :body body
-           :async async}))
+           :async is-async}))
 
 (defn.js resp-ok
   "constructs an ok response"

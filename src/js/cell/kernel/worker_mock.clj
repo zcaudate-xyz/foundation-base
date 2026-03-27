@@ -1,11 +1,26 @@
 (ns js.cell.kernel.worker-mock
-  (:require [std.lang :as l]))
+  (:require [std.lang :as l]
+            [std.lang.typed.xtalk :refer [defspec.xt]]))
 
 (l/script :js
   {:require [[js.core :as j]
              [xt.lang.base-lib :as k]
              [js.cell.kernel.worker-local :as worker-local]
              [js.cell.kernel.worker-impl :as worker-impl]]})
+
+
+(defspec.xt mock-worker-send
+  [:fn [js.cell.kernel.spec/MockWorkerRecord [:or :xt/str js.cell.kernel.spec/RequestFrame]]
+   :xt/any])
+
+(defspec.xt mock-worker
+  [:fn [[:fn [:xt/any] :xt/any]] js.cell.kernel.spec/MockWorkerRecord])
+
+(defspec.xt create-worker
+  [:fn [[:xt/maybe [:fn [:xt/any] :xt/any]]
+        [:xt/maybe js.cell.kernel.spec/WorkerActionMap]
+        [:xt/maybe :xt/bool]]
+   js.cell.kernel.spec/MockWorkerRecord])
 
 (defn.js mock-worker-send
   "sends a request to the mock worker"

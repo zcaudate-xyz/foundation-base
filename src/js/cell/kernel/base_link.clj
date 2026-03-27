@@ -1,10 +1,63 @@
 (ns js.cell.kernel.base-link
-  (:require [std.lang :as l]))
+  (:require [std.lang :as l]
+            [std.lang.typed.xtalk :refer [defspec.xt]]))
 
 (l/script :js
   {:require [[js.core :as j]
              [xt.lang.base-lib :as k]
              [js.cell.kernel.base-util :as util]]})
+
+(defspec.xt link-listener-call
+  [:fn [js.cell.kernel.spec/ResponseFrame
+        js.cell.kernel.spec/ActiveCallMap]
+   :xt/any])
+
+(defspec.xt link-listener-event
+  [:fn [js.cell.kernel.spec/ResponseFrame
+        js.cell.kernel.spec/LinkCallbackMap]
+   js.cell.kernel.spec/StringList])
+
+(defspec.xt link-listener
+  [:fn [:xt/any
+        js.cell.kernel.spec/ActiveCallMap
+        js.cell.kernel.spec/LinkCallbackMap]
+   :xt/any])
+
+(defspec.xt link-create-worker
+  [:fn [:xt/any
+        js.cell.kernel.spec/ActiveCallMap
+        js.cell.kernel.spec/LinkCallbackMap]
+   :xt/any])
+
+(defspec.xt link-create
+  [:fn [:xt/any] js.cell.kernel.spec/LinkRecord])
+
+(defspec.xt link-active
+  [:fn [js.cell.kernel.spec/LinkRecord]
+   js.cell.kernel.spec/ActiveCallMap])
+
+(defspec.xt add-callback
+  [:fn [js.cell.kernel.spec/LinkRecord
+        :xt/str
+        :xt/any
+        [:fn [:xt/any :xt/any] :xt/any]]
+   [:xt/array :xt/any]])
+
+(defspec.xt list-callbacks
+  [:fn [js.cell.kernel.spec/LinkRecord]
+   js.cell.kernel.spec/StringList])
+
+(defspec.xt remove-callback
+  [:fn [js.cell.kernel.spec/LinkRecord :xt/str]
+   [:xt/array :xt/any]])
+
+(defspec.xt call-id
+  [:fn [js.cell.kernel.spec/LinkRecord] :xt/str])
+
+(defspec.xt call
+  [:fn [js.cell.kernel.spec/LinkRecord
+        js.cell.kernel.spec/RequestFrame]
+   :xt/any])
 
 (defn.js link-listener-call
   "resolves a call to the link"

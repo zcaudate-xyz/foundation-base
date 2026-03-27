@@ -1,11 +1,79 @@
 (ns js.cell.kernel.worker-state
-  (:require [std.lang :as l]))
+  (:require [std.lang :as l]
+            [std.lang.typed.xtalk :refer [defspec.xt]]))
 
 (l/script :js
   {:require [[js.core :as j]
              [js.cell.kernel.base-util :as util]
              [xt.lang.base-runtime :as rt :with [defvar.js]]
              [xt.lang.base-lib :as k]]})
+
+
+(defspec.xt WORKER_STATE
+  [:fn [] js.cell.kernel.spec/WorkerState])
+
+(defspec.xt WORKER_ACTIONS
+  [:fn [] js.cell.kernel.spec/WorkerActionMap])
+
+(defspec.xt get-state
+  [:fn [:xt/any] js.cell.kernel.spec/WorkerState])
+
+(defspec.xt get-actions
+  [:fn [:xt/any] js.cell.kernel.spec/WorkerActionMap])
+
+(defspec.xt set-actions
+  [:fn [js.cell.kernel.spec/WorkerActionMap [:xt/maybe :xt/any]] :xt/any])
+
+(defspec.xt fn-self
+  [:fn [[:fn [:xt/any] :xt/any]] :xt/any])
+
+(defspec.xt fn-trigger
+  [:fn [:xt/any :xt/str :xt/str :xt/str :xt/any] :xt/any])
+
+(defspec.xt fn-trigger-async
+  [:fn [:xt/any :xt/str :xt/str :xt/str :xt/any :xt/int] :xt/any])
+
+(defspec.xt fn-set-state
+  [:fn [:xt/any js.cell.kernel.spec/WorkerState [:fn [js.cell.kernel.spec/WorkerState] :xt/any] [:xt/maybe :xt/bool]]
+   js.cell.kernel.spec/WorkerState])
+
+(defspec.xt fn-set-final-status
+  [:fn [:xt/any [:xt/maybe :xt/bool]]
+   js.cell.kernel.spec/WorkerState])
+
+(defspec.xt fn-get-final-status
+  [:fn [:xt/any] [:xt/maybe :xt/bool]])
+
+(defspec.xt fn-set-eval-status
+  [:fn [:xt/any :xt/bool [:xt/maybe :xt/bool]]
+   js.cell.kernel.spec/WorkerState])
+
+(defspec.xt fn-get-eval-status
+  [:fn [] :xt/bool])
+
+(defspec.xt fn-get-action-list
+  [:fn [] js.cell.kernel.spec/StringList])
+
+(defspec.xt fn-get-action-entry
+  [:fn [:xt/str] [:xt/maybe js.cell.kernel.spec/WorkerActionEntry]])
+
+(defspec.xt fn-ping
+  [:fn [] [:tuple :xt/str :xt/int]])
+
+(defspec.xt fn-ping-async
+  [:fn [:xt/int] :xt/any])
+
+(defspec.xt fn-echo
+  [:fn [:xt/any] [:tuple :xt/any :xt/int]])
+
+(defspec.xt fn-echo-async
+  [:fn [:xt/any :xt/int] :xt/any])
+
+(defspec.xt fn-error
+  [:fn [] :xt/any])
+
+(defspec.xt fn-error-async
+  [:fn [:xt/int] :xt/any])
 
 (defvar.js ^{:ns "@worker"}
   WORKER_STATE
@@ -71,7 +139,7 @@
 
 (defn.js ^{:cell/action "@worker/trigger-async"
            :cell/static false
-           :cell/async  true}
+           :cell/is-async  true}
   fn-trigger-async
   "triggers an event after a delay"
   {:added "4.0"}
@@ -159,7 +227,7 @@
 
 (defn.js ^{:cell/action "@worker/ping.async"
            :cell/static true
-           :cell/async  true}
+           :cell/is-async  true}
   fn-ping-async
   "pings after a delay"
   {:added "4.0"}
@@ -177,7 +245,7 @@
 
 (defn.js ^{:cell/action "@worker/echo.async"
            :cell/static true
-           :cell/async  true}
+           :cell/is-async  true}
   fn-echo-async
   "echos the first arg after delay"
   {:added "4.0"}
@@ -195,7 +263,7 @@
 
 (defn.js ^{:cell/action "@worker/error.async"
            :cell/static true
-           :cell/async  true}
+           :cell/is-async  true}
   fn-error-async
   "throws an error after delay"
   {:added "4.0"}

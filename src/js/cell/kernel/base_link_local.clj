@@ -1,11 +1,55 @@
 (ns js.cell.kernel.base-link-local
   (:require [js.cell.kernel.worker-local :as worker-local]
             [std.lang :as l]
+            [std.lang.typed.xtalk :refer [defspec.xt]]
             [std.lib.foundation :as f]
             [std.string.wrap]))
 
 (l/script :js
   {:require [[js.cell.kernel.base-link :as link]]})
+
+
+(defspec.xt trigger
+  [:fn [js.cell.kernel.spec/LinkRecord :xt/str :xt/str :xt/str :xt/any] :xt/any])
+
+(defspec.xt trigger-async
+  [:fn [js.cell.kernel.spec/LinkRecord :xt/str :xt/str :xt/str :xt/any :xt/int] :xt/any])
+
+(defspec.xt set-final-status
+  [:fn [js.cell.kernel.spec/LinkRecord [:xt/maybe :xt/bool]] :xt/any])
+
+(defspec.xt get-final-status
+  [:fn [js.cell.kernel.spec/LinkRecord] :xt/any])
+
+(defspec.xt set-eval-status
+  [:fn [js.cell.kernel.spec/LinkRecord :xt/bool [:xt/maybe :xt/bool]] :xt/any])
+
+(defspec.xt get-eval-status
+  [:fn [js.cell.kernel.spec/LinkRecord] :xt/any])
+
+(defspec.xt get-action-list
+  [:fn [js.cell.kernel.spec/LinkRecord] :xt/any])
+
+(defspec.xt get-action-entry
+  [:fn [js.cell.kernel.spec/LinkRecord :xt/str] :xt/any])
+
+(defspec.xt ping
+  [:fn [js.cell.kernel.spec/LinkRecord] :xt/any])
+
+(defspec.xt ping-async
+  [:fn [js.cell.kernel.spec/LinkRecord :xt/int] :xt/any])
+
+(defspec.xt echo
+  [:fn [js.cell.kernel.spec/LinkRecord :xt/any] :xt/any])
+
+(defspec.xt echo-async
+  [:fn [js.cell.kernel.spec/LinkRecord :xt/any :xt/int] :xt/any])
+
+(defspec.xt error
+  [:fn [js.cell.kernel.spec/LinkRecord] :xt/any])
+
+(defspec.xt error-async
+  [:fn [js.cell.kernel.spec/LinkRecord :xt/int] :xt/any])
 
 (defn.js
   trigger
