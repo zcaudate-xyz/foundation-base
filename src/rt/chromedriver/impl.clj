@@ -159,13 +159,13 @@
 
 (def +init+
   [(default/install-type!
-    :js :browser.instance
+    :js :chromedriver.instance
     {:type :hara/rt.chromedriver
      :config {:layout :full}
      :instance {:create browser:create}})
    
    (default/install-type!
-    :js :browser
+    :js :chromedriver
     {:type :hara/rt.chromedriver.shared
      :instance
      {:create (fn [m]

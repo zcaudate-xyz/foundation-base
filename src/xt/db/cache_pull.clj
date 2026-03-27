@@ -201,7 +201,8 @@
              (return out)))))
   (var records (k/arr-keep entries filter-fn))
   (if (< 0 (k/len records))
-    (return [ident records])))
+    (return [ident records]))
+  (return [ident nil]))
 
 (defn.xt pull-return
   "return construct"
@@ -217,16 +218,14 @@
                                    -/pull-where
                                    -/pull-return
                                    attr link-ret))
-    (when ret
-      (k/step-set-pair output ret)))
+    (k/step-set-pair output ret))
   (k/for:array [col data-cols]
     (var #{ident ref} col)
     (cond (k/nil? ref)
           (do (var out (-> record
                            (k/get-key "data")
                            (k/get-key ident)))
-              (when (k/not-nil? out)
-                (k/set-key output ident out)))
+              (k/set-key output ident out))
           
           :else
           (k/set-key output
@@ -280,4 +279,3 @@
     (when as-map
       (:= out (ut/lu-map out))))
   (return out))
-

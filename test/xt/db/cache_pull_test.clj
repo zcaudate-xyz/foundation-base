@@ -357,6 +357,59 @@
                           "cardinality" "many"}
                          [{} ["*/data"]]))
   => ["profile" [{"id" "c4643895-b0ce-44cc-b07b-2386bf18d43b",
+                  "city" nil,
+                  "about" nil,
+                  "last_name" "User",
+                  "first_name" "Root",
+                  "language" "en"}]]
+
+  (!.js
+   (var rows {})
+   (data/merge-bulk rows (@! +flattened+) nil)
+   (q/pull-return-clause rows 
+                         sample/Schema
+                         (k/get-in rows ["UserAccount"
+                                          "00000000-0000-0000-0000-000000000000"
+                                          "record"])
+                         q/pull-where
+                         q/pull-return
+                         {"ident" "profile",
+                          "type" "ref",
+                          "ref" {"key" "_account",
+                                 "rkey" "account",
+                                 "type" "reverse",
+                                 "rident" "account",
+                                 "rval" "account",
+                                 "ns" "UserProfile",
+                                 "val" "profile"},
+                          "cardinality" "many"}
+                         [{:id "missing"} ["*/data"]]))
+  => ["profile" nil]
+
+  (!.lua
+   (var rows {})
+   (data/merge-bulk rows (@! +flattened+) nil)
+   (q/pull-return-clause rows 
+                         sample/Schema
+                         (k/get-in rows ["UserAccount"
+                                          "00000000-0000-0000-0000-000000000000"
+                                          "record"])
+                         q/pull-where
+                         q/pull-return
+                         {"ident" "profile",
+                          "type" "ref",
+                          "ref" {"key" "_account",
+                                 "rkey" "account",
+                                 "type" "reverse",
+                                 "rident" "account",
+                                 "rval" "account",
+                                 "ns" "UserProfile",
+                                 "val" "profile"},
+                          "cardinality" "many"}
+                         [{} ["*/data"]]))
+  => ["profile" [{"id" "c4643895-b0ce-44cc-b07b-2386bf18d43b",
+                  "city" nil,
+                  "about" nil,
                   "last_name" "User",
                   "first_name" "Root",
                   "language" "en"}]]
@@ -381,11 +434,8 @@
                                  "ns" "UserProfile",
                                  "val" "profile"},
                           "cardinality" "many"}
-                         [{} ["*/data"]]))
-  => ["profile" [{"id" "c4643895-b0ce-44cc-b07b-2386bf18d43b",
-                  "last_name" "User",
-                  "first_name" "Root",
-                  "language" "en"}]]
+                         [{:id "missing"} ["*/data"]]))
+  => ["profile" nil]
 
   (!.py
    (var rows {})
@@ -409,9 +459,34 @@
                           "cardinality" "many"}
                          [{} ["*/data"]]))
   => ["profile" [{"id" "c4643895-b0ce-44cc-b07b-2386bf18d43b",
+                  "city" nil,
+                  "about" nil,
                   "last_name" "User",
                   "first_name" "Root",
                   "language" "en"}]])
+
+  (!.py
+   (var rows {})
+   (data/merge-bulk rows (@! +flattened+) nil)
+   (q/pull-return-clause rows 
+                         sample/Schema
+                         (k/get-in rows ["UserAccount"
+                                          "00000000-0000-0000-0000-000000000000"
+                                          "record"])
+                         q/pull-where
+                         q/pull-return
+                         {"ident" "profile",
+                          "type" "ref",
+                          "ref" {"key" "_account",
+                                 "rkey" "account",
+                                 "type" "reverse",
+                                 "rident" "account",
+                                 "rval" "account",
+                                 "ns" "UserProfile",
+                                 "val" "profile"},
+                          "cardinality" "many"}
+                         [{:id "missing"} ["*/data"]]))
+  => ["profile" nil])
 
 ^{:refer xt.db.cache-pull/pull-return :added "4.0"}
 (fact "return construct"
@@ -484,6 +559,8 @@
       [{"nickname" "root",
         "profile"
         [{"id" "c4643895-b0ce-44cc-b07b-2386bf18d43b",
+          "city" nil,
+          "about" nil,
           "last_name" "User",
           "first_name" "Root",
           "language" "en"}],
@@ -506,6 +583,8 @@
       [{"nickname" "root",
         "profile"
         [{"id" "c4643895-b0ce-44cc-b07b-2386bf18d43b",
+          "city" nil,
+          "about" nil,
           "last_name" "User",
           "first_name" "Root",
           "language" "en"}],
@@ -528,6 +607,8 @@
       [{"nickname" "root",
         "profile"
         [{"id" "c4643895-b0ce-44cc-b07b-2386bf18d43b",
+          "city" nil,
+          "about" nil,
           "last_name" "User",
           "first_name" "Root",
           "language" "en"}],
