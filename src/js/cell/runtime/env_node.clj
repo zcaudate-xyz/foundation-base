@@ -23,6 +23,7 @@
 (defn.js init-worker
   "boots kernel actions on a Node worker adapter"
   [worker]
+  (:= (!:G __CELL_WORKER) worker)
   (worker-local/actions-init (worker-local/actions-baseline) worker)
   (worker-impl/worker-init worker)
   (worker-impl/worker-init-signal worker {:done true})

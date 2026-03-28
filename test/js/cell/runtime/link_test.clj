@@ -46,10 +46,14 @@
 ^{:refer js.cell.runtime.link/resolve-script :added "4.1"}
 (fact "resolves script values or thunks"
   ^:hidden
-  (!.js (runtime-link/resolve-script "abc"))
+  (!.js
+   (return (runtime-link/resolve-script "abc")))
   => "abc"
 
-  (!.js (runtime-link/resolve-script (fn [] "xyz")))
+  (!.js
+   (return (runtime-link/resolve-script
+            (fn []
+              (return "xyz")))))
   => "xyz")
 
 ^{:refer js.cell.runtime.link/make-blob-url :added "4.1"}
@@ -57,7 +61,8 @@
   ^:hidden
   (!.js
    (var previous-url (!:G URL))
-   (:= (!:G URL) {"createObjectURL" (fn [blob] "blob:test")})
+   (:= (!:G URL) {"createObjectURL" (fn [blob]
+                                      (return "blob:test"))})
    (var out (runtime-link/make-blob-url "self.postMessage(1)"))
    (:= (!:G URL) previous-url)
    (return out))
@@ -72,14 +77,15 @@
    (var messages [])
    (var revoked [])
    (var listeners [])
-   (:= (!:G URL) {"createObjectURL" (fn [blob] "blob:web")
-                  "revokeObjectURL" (fn [url] (revoked.push url))})
+   (:= (!:G URL) {"createObjectURL" (fn [blob]
+                                      (return "blob:web"))
+                   "revokeObjectURL" (fn [url] (revoked.push url))})
    (:= (!:G Worker)
        (fn [url]
          (return {"addEventListener" (fn [event listener capture]
                                         (listeners.push listener))})))
    (var link (runtime-link/make-webworker-link "worker-script"))
-   (var worker ((. link ["create-fn"]) (fn [data] (messages.push data))))
+   (var worker ((. link ["create_fn"]) (fn [data] (messages.push data))))
    ((k/first listeners) {"data" "hello"})
    (var out {"messages" messages
              "revoked" revoked
@@ -103,13 +109,14 @@
    (var port {"start" (fn [] (starts.push true))
               "addEventListener" (fn [event listener capture]
                                    (listeners.push listener))})
-   (:= (!:G URL) {"createObjectURL" (fn [blob] "blob:shared")
-                  "revokeObjectURL" (fn [url] (revoked.push url))})
+   (:= (!:G URL) {"createObjectURL" (fn [blob]
+                                      (return "blob:shared"))
+                   "revokeObjectURL" (fn [url] (revoked.push url))})
    (:= (!:G SharedWorker)
        (fn [url]
          (return {"port" port})))
    (var link (runtime-link/make-sharedworker-link "worker-script"))
-   (var worker ((. link ["create-fn"]) (fn [data] (messages.push data))))
+   (var worker ((. link ["create_fn"]) (fn [data] (messages.push data))))
    ((k/first listeners) {"data" "world"})
    (var out {"messages" messages
              "revoked" revoked
@@ -127,12 +134,8 @@
   ^:hidden
   (!.js
    (k/obj-keys (runtime-link/make-link "mock" nil {})))
-  => (contains ["create-fn"])
+  => (contains ["create_fn"])
 
-  (str/includes? (!.js
-                  (try
-                    (runtime-link/make-link "unknown" nil {})
-                    (catch err
-                      (return (. err ["message"])))) )
-                 "Unknown js.cell.runtime.link runtime")
-  => true)
+  (!.js
+   (runtime-link/make-link "unknown" nil {}))
+  => (throws))

@@ -124,11 +124,12 @@
  {:description "js util libraries" 
   :include [[js.lib.datetime :complete]]}
  
- xyz.zcaudate/js.lib.driver
- {:description "js util libraries" 
-  :include [[js.lib.driver-postgres :complete]
-            [js.lib.driver-redis :complete]
-            [js.lib.driver-sqlite :complete]]}
+  xyz.zcaudate/js.lib.driver
+  {:description "js util libraries" 
+   :include [[js.lib.driver-postgres :complete]
+             [js.lib.driver-redis :complete]
+             [js.lib.driver-sqlite :complete]
+             [js.lib.driver-sqlite-wasm :complete]]}
 
  xyz.zcaudate/js.lib.ethereum
  {:description "js ethereum and solc" 
