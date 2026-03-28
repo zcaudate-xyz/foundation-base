@@ -22,3 +22,11 @@
       "void main(){"
       "  gl_Position = (u_persp * u_ModelView * vec4(pos,1.0));"
       "}"))
+
+(fact "supports sampler declarations and constructors"
+  (l/emit-as
+   :glsl '[(var :uniform :sampler2D u_Texture)
+           (:= color (:vec4 1.0 0.5 0.0 1.0))])
+  => (prose/|
+      "uniform sampler2D u_Texture;"
+      "color = vec4(1.0,0.5,0.0,1.0);"))

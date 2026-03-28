@@ -257,7 +257,24 @@
   => [0 ["3 2"]])
 
 ^{:refer std.lang.model.spec-bash/bash-defn- :added "4.0"}
-(fact "emits a non paramerised version")
+(fact "emits a non paramerised version"
+  ^:hidden
+
+  (l/emit-as
+   :bash '[(defn- hello []
+             (echo "world"))
+           (hello)])
+  => (prose/|
+      "function hello(){"
+      "  echo world"
+      "}"
+      ""
+      "hello")
+
+  (!.sh (defn- hello []
+          (echo "world"))
+        (hello))
+  => [0 ["world"]])
 
 ^{:refer std.lang.model.spec-bash/bash-expand :added "4.0"}
 (fact "brace expansion syntax"
@@ -387,7 +404,24 @@
   => [0 ["hello" "hello"]])
 
 ^{:refer std.lang.model.spec-bash/bash-if :added "4.0"}
-(fact "if support for custom vectors")
+(fact "if support for custom vectors"
+  ^:hidden
+
+  (l/emit-as
+   :bash '[(if [1 :ne 1]
+             (echo "hello")
+             (echo "world"))])
+  => (prose/|
+      "if [[ 1 -ne 1 ]]; then"
+      "  echo hello"
+      "else"
+      "  echo world"
+      "fi")
+
+  (!.sh (if [1 :ne 1]
+          (echo "hello")
+          (echo "world")))
+  => [0 ["world"]])
 
 ^{:refer std.lang.model.spec-bash/bash-cond :added "4.0"}
 (fact "cond support for custom vectors"

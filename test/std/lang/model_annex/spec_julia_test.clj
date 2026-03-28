@@ -1,12 +1,12 @@
-(ns std.lang.model.spec-julia-test
+(ns std.lang.model-annex.spec-julia-test
   (:require [std.lang.base.script :as script]
             [std.lang.base.util :as ut]
-            [std.lang.model.spec-julia :refer :all])
+            [std.lang.model-annex.spec-julia :refer :all])
   (:use code.test))
 
 (script/script- :julia)
 
-^{:refer std.lang.model.spec-julia/tf-local :added "4.0"}
+^{:refer std.lang.model-annex.spec-julia/tf-local :added "4.0"}
 (fact "a more flexible `var` replacement"
   ^:hidden
 
@@ -16,7 +16,7 @@
   (tf-local '(local a := 1))
   => '(var* :local a := 1))
 
-^{:refer std.lang.model.spec-julia/julia-map-key :added "3.0"}
+^{:refer std.lang.model-annex.spec-julia/julia-map-key :added "3.0"}
 (fact "custom julia map key"
   ^:hidden
 
@@ -33,7 +33,7 @@
   (julia-map-key :abc +grammar+ {})
   => "\"abc\"")
 
-^{:refer std.lang.model.spec-julia/tf-for-iter :added "4.0"}
+^{:refer std.lang.model-annex.spec-julia/tf-for-iter :added "4.0"}
 (fact  "for iter transform"
   ^:hidden
 
@@ -41,7 +41,7 @@
                           e))
   => '(for [e :in iter] e))
 
-^{:refer std.lang.model.spec-julia/tf-for-index :added "4.0"}
+^{:refer std.lang.model-annex.spec-julia/tf-for-index :added "4.0"}
 (fact "for index transform"
   ^:hidden
 
@@ -49,7 +49,7 @@
                             i))
   => '(for [i :in (to 0 10 2)] i))
 
-^{:refer std.lang.model.spec-julia/julia-module-link :added "4.0"}
+^{:refer std.lang.model-annex.spec-julia/julia-module-link :added "4.0"}
 (fact "gets the absolute julia based module"
 
   (julia-module-link 'kmi.common {:root-ns 'kmi.hello})
@@ -59,21 +59,21 @@
                    {:root-ns 'kmi :target "src"})
   => "./kmi/exchange")
 
-^{:refer std.lang.model.spec-julia/tf-dict :added "4.0"}
+^{:refer std.lang.model-annex.spec-julia/tf-dict :added "4.0"}
 (fact "dict transform"
   ^:hidden
 
   (tf-dict '(dict :a 1 :b 2))
   => '(Dict (=> "a" 1) (=> "b" 2)))
 
-^{:refer std.lang.model.spec-julia/tf-push! :added "4.0"}
+^{:refer std.lang.model-annex.spec-julia/tf-push! :added "4.0"}
 (fact "push! transform to avoid sanitization"
   ^:hidden
 
   (tf-push! '(push! arr 1))
   => '(:% "push!(" arr ", " 1 ")"))
 
-^{:refer std.lang.model.spec-julia/julia-module-export :added "4.0"}
+^{:refer std.lang.model-annex.spec-julia/julia-module-export :added "4.0"}
 (fact "outputs the julia module export form"
   ^:hidden
 
@@ -131,5 +131,5 @@
   => "\"push!(\"[1]\", \"2\")\"")
 
 
-^{:refer std.lang.model.spec-julia/emit-to :added "4.1"}
+^{:refer std.lang.model-annex.spec-julia/emit-to :added "4.1"}
 (fact "TODO")

@@ -1,12 +1,12 @@
-(ns rt.basic.impl.process-rust-test
-  (:require [rt.basic.impl.process-rust :refer :all]
+(ns rt.basic.impl-annex.process-rust-test
+  (:require [rt.basic.impl-annex.process-rust :refer :all]
             [std.lang :as l])
   (:use code.test))
 
 (l/script- :rust
   {:runtime :twostep})
 
-^{:refer rt.basic.impl.process-rust/transform-form :added "4.0"}
+^{:refer rt.basic.impl-annex.process-rust/transform-form :added "4.0"}
 (fact "transforms the rust form"
   ^:hidden
 

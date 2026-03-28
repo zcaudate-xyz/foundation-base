@@ -27,7 +27,7 @@
    [com.sun.xml.bind/jaxb-core "4.0.3"]
    [com.sun.xml.bind/jaxb-impl "4.0.3"]
    [clj-kondo "2025.02.20"]
-   
+
    ;; foundation-index
    [org.clojure/java.jdbc "0.7.12"]
    [org.clojure/data.json "2.4.0"]
@@ -160,7 +160,7 @@
 
    ;; std.text.diff
    [com.googlecode.java-diff-utils/diffutils "1.3.0"]
-   
+
    ;; mcp server
    [cheshire "5.13.0"]
    [com.fasterxml.jackson.core/jackson-core "2.20.0"]
@@ -173,11 +173,11 @@
    [hato/hato "1.0.0"]
    [org.slf4j/slf4j-simple "2.0.13"]
    ;; -- end mcp
-   
+
    [org.clojure/java.jdbc    "0.7.12"]
    [org.clojure/data.json    "2.4.0"]
    [clj-kondo/clj-kondo      "2024.09.27"]
-   
+
    ;; TESTS - std.object
    [org.eclipse.jgit/org.eclipse.jgit "5.13.0.202109080827-r"]]
   :global-vars {*warn-on-reflection* true}
@@ -189,7 +189,8 @@
   :profiles {:dev {:plugins [[lein-ancient "0.6.15"]
                              [lein-exec "0.3.7"]
                              [cider/cider-nrepl "0.58.0"]
-                             [lein-dotenv "RELEASE"]]}
+                             [lein-dotenv "RELEASE"]
+                             [lein-mcp "0.1.0-SNAPSHOT"]]}
              :repl {:injections [(try (require 'jvm.tool)
                                       (require '[std.lib :as h])
                                       (catch Throwable t (.printStackTrace t)))]}}

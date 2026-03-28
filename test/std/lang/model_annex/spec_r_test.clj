@@ -1,7 +1,7 @@
-(ns std.lang.model.spec-r-test
+(ns std.lang.model-annex.spec-r-test
   (:require [std.lang :as l]
             [std.lang.base.book :as book]
-            [std.lang.model.spec-r :refer :all])
+            [std.lang.model-annex.spec-r :refer :all])
   (:use code.test))
 
 (fact "Preliminary Checks"
@@ -21,22 +21,22 @@
   => "[\"a\",\"b\",\"c\"][2]"
 )
 
-^{:refer std.lang.model.spec-r/tf-defn :added "3.0"}
+^{:refer std.lang.model-annex.spec-r/tf-defn :added "3.0"}
 (fact "function declaration for R"
   (tf-defn '(defn hello [x y] (return (+ x y))))
   => '(def hello (fn [x y] (return (+ x y)))))
 
-^{:refer std.lang.model.spec-r/tf-infix-if :added "4.0"}
+^{:refer std.lang.model-annex.spec-r/tf-infix-if :added "4.0"}
 (fact "transform for infix if"
   (tf-infix-if '(:? 1 2 3 4))
   => '((:- "`if`") 1 2 ((:- "`if`") 3 4)))
 
-^{:refer std.lang.model.spec-r/tf-for-object :added "4.0"}
+^{:refer std.lang.model-annex.spec-r/tf-for-object :added "4.0"}
 (fact "transform for `for:object`"
   (tf-for-object '(for:object [[k v] obj]))
   => '(for [k :in (names obj)] (:= v (. obj [k]))))
 
-^{:refer std.lang.model.spec-r/tf-for-array :added "4.0"}
+^{:refer std.lang.model-annex.spec-r/tf-for-array :added "4.0"}
 (fact "transform for `for:array`"
   (tf-for-array '(for:array [[i e] arr]))
   => '(do (var i := 0) (for [e :in (% arr)] (:= i (+ i 1))))
@@ -44,17 +44,17 @@
   (tf-for-array '(for:array [e arr]))
   => '(for [e :in (% arr)]))
 
-^{:refer std.lang.model.spec-r/tf-for-iter :added "4.0"}
+^{:refer std.lang.model-annex.spec-r/tf-for-iter :added "4.0"}
 (fact "transform for `for:iter`"
   (tf-for-iter '(for:iter [e it]))
   => '(for [e :in (% it)]))
 
-^{:refer std.lang.model.spec-r/tf-for-index :added "4.0"}
+^{:refer std.lang.model-annex.spec-r/tf-for-index :added "4.0"}
 (fact "transform for `for:index`"
   (tf-for-index '(for:index [i [0 10 3]]))
   => '(for [i :in (seq 0 10 3)]))
 
-^{:refer std.lang.model.spec-r/tf-for-return :added "4.0"}
+^{:refer std.lang.model-annex.spec-r/tf-for-return :added "4.0"}
 (fact  "transform for `for:return`"
   (tf-for-return '(for:return [[ok err] (call)]
                               {:success ok

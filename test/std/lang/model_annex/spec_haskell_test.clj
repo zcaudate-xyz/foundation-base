@@ -1,7 +1,7 @@
-(ns std.lang.model.spec-haskell-test
+(ns std.lang.model-annex.spec-haskell-test
   (:require [std.lang :as l]
             [std.lang.base.script :as script]
-            [std.lang.model.spec-haskell :as spec-haskell])
+            [std.lang.model-annex.spec-haskell :as spec-haskell])
   (:use code.test))
 
 (l/script- :haskell
@@ -10,7 +10,7 @@
 (!.hs
   [1 2 4])
 
-^{:refer std.lang.model.spec-haskell/CANARY :adopt true :added "4.1"}
+^{:refer std.lang.model-annex.spec-haskell/CANARY :adopt true :added "4.1"}
 (fact "basic emit"
 
   (l/emit-script '(defn hello [x] x) {:lang :haskell})
@@ -49,7 +49,7 @@
   (l/emit-as :haskell ['[:> Map String Int]])
   => "Map String Int")
 
-^{:refer std.lang.model.spec-haskell/haskell-typesystem :added "4.1"}
+^{:refer std.lang.model-annex.spec-haskell/haskell-typesystem :added "4.1"}
 (fact "defn with type hint"
 
   (l/emit-script '(defn ^Int add [^Int x ^Int y] (+ x y)) {:lang :haskell})
@@ -57,32 +57,32 @@
 
 
 
-^{:refer std.lang.model.spec-haskell/haskell-vector :added "4.1"}
+^{:refer std.lang.model-annex.spec-haskell/haskell-vector :added "4.1"}
 (fact "TODO")
 
-^{:refer std.lang.model.spec-haskell/emit-raw-str :added "4.1"}
+^{:refer std.lang.model-annex.spec-haskell/emit-raw-str :added "4.1"}
 (fact "TODO")
 
-^{:refer std.lang.model.spec-haskell/emit-indent-body :added "4.1"}
+^{:refer std.lang.model-annex.spec-haskell/emit-indent-body :added "4.1"}
 (fact "TODO")
 
-^{:refer std.lang.model.spec-haskell/tf-defn :added "4.1"}
+^{:refer std.lang.model-annex.spec-haskell/tf-defn :added "4.1"}
 (fact "TODO")
 
-^{:refer std.lang.model.spec-haskell/tf-case :added "4.1"}
+^{:refer std.lang.model-annex.spec-haskell/tf-case :added "4.1"}
 (fact "TODO")
 
-^{:refer std.lang.model.spec-haskell/tf-if :added "4.1"}
+^{:refer std.lang.model-annex.spec-haskell/tf-if :added "4.1"}
 (fact "TODO")
 
-^{:refer std.lang.model.spec-haskell/tf-let :added "4.1"}
+^{:refer std.lang.model-annex.spec-haskell/tf-let :added "4.1"}
 (fact "TODO")
 
-^{:refer std.lang.model.spec-haskell/tf-lambda :added "4.1"}
+^{:refer std.lang.model-annex.spec-haskell/tf-lambda :added "4.1"}
 (fact "TODO")
 
-^{:refer std.lang.model.spec-haskell/tf-do :added "4.1"}
+^{:refer std.lang.model-annex.spec-haskell/tf-do :added "4.1"}
 (fact "TODO")
 
-^{:refer std.lang.model.spec-haskell/haskell-args :added "4.1"}
+^{:refer std.lang.model-annex.spec-haskell/haskell-args :added "4.1"}
 (fact "TODO")

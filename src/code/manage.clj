@@ -3,6 +3,8 @@
             [code.manage.fn-format :as fn-format]
             [code.manage.ns-format :as ns-format]
             [code.manage.ns-rename :as ns-rename]
+            [code.manage.xtalk-ops :as xtalk-ops]
+            [code.manage.xtalk-scaffold :as xtalk-scaffold]
             [code.manage.unit :as unit]
             [code.manage.unit.require :as unit.require]
             [code.manage.unit.template :as template]
@@ -594,6 +596,18 @@
           :item {:display identity}
           :result {:columns (template/code-default-columns :data #{:bold})}}])
 
+(defn generate-xtalk-ops
+  "generates `xtalk_ops.edn` from the xtalk grammar tables"
+  {:added "4.1"}
+  [ns params]
+  (xtalk-ops/generate-xtalk-ops ns params))
+
+(defn scaffold-xtalk-grammar-tests
+  "generates grammar xtalk tests from `xtalk_ops.edn`"
+  {:added "4.1"}
+  [ns params]
+  (xtalk-scaffold/scaffold-xtalk-grammar-tests ns params))
+
 (def +tasks+
   {:analyse       analyse
    :extract       extract
@@ -623,6 +637,8 @@
    :ns-format     ns-format
    :find-usages   find-usages
    :require-file  require-file
+   :generate-xtalk-ops generate-xtalk-ops
+   :scaffold-xtalk-grammar-tests scaffold-xtalk-grammar-tests
    :heal-code     heal-code})
 
 (defn -main
@@ -760,5 +776,4 @@
     (vars '[thing] {:print {:item true}})
     (./import)
     (code.manage/line-limit ['hara] {:length 110})))
-
 

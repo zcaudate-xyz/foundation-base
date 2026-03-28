@@ -70,12 +70,15 @@
       :xtalk-js
       :xtalk-return
       :xtalk-socket
+      :xtalk-ws
       :xtalk-iter
       :xtalk-cache
       :xtalk-thread
       :xtalk-file
       :xtalk-b64
       :xtalk-uri
+      :xtalk-notify
+      :xtalk-service
       :xtalk-special])
   
 ^{:refer std.lang.base.grammar/ops-symbols :added "4.0"}

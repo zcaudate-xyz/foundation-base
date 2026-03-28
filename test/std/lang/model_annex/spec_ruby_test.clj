@@ -1,6 +1,6 @@
-(ns std.lang.model.spec-ruby-test
+(ns std.lang.model-annex.spec-ruby-test
   (:require [std.lang :as l]
-            [std.lang.model.spec-ruby :as spec-ruby])
+            [std.lang.model-annex.spec-ruby :as spec-ruby])
   (:use code.test))
 
 (fact "Ruby Basic Emit"
@@ -45,14 +45,14 @@
       (x:cat "a" "b"))])
   => "puts \"hello\"\n\"a\" + \"b\"")
 
-^{:refer std.lang.model.spec-ruby/ruby-defn :added "4.1"}
+^{:refer std.lang.model-annex.spec-ruby/ruby-defn :added "4.1"}
 (fact "emit ruby function definition"
   ^:hidden
   
   (l/emit-as :ruby '[(defn add [a b] (return (+ a b)))])
   => "def add(a,b)\n  return a + b\nend")
 
-^{:refer std.lang.model.spec-ruby/ruby-symbol :added "4.1"}
+^{:refer std.lang.model-annex.spec-ruby/ruby-symbol :added "4.1"}
 (fact "emit ruby symbol"
   ^:hidden
   
@@ -61,21 +61,21 @@
   (spec-ruby/ruby-symbol 'a spec-ruby/+grammar+ {})
   => "a")
 
-^{:refer std.lang.model.spec-ruby/ruby-var :added "4.1"}
+^{:refer std.lang.model-annex.spec-ruby/ruby-var :added "4.1"}
 (fact "emit ruby variable"
   ^:hidden
   
   (spec-ruby/ruby-var '(var a 1))
   => '(:= a 1))
 
-^{:refer std.lang.model.spec-ruby/ruby-map :added "4.1"}
+^{:refer std.lang.model-annex.spec-ruby/ruby-map :added "4.1"}
 (fact "emit ruby hash"
   ^:hidden
   
   (l/emit-as :ruby '[{:a 1 :b 2}])
   => "{:a => 1, :b => 2}")
 
-^{:refer std.lang.model.spec-ruby/ruby-fn :added "4.1"}
+^{:refer std.lang.model-annex.spec-ruby/ruby-fn :added "4.1"}
 (fact "basic transform for ruby blocks"
   ^:hidden
   

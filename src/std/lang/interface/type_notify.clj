@@ -14,7 +14,8 @@
             [std.lib.network :as network]
             [std.lib.resource :as resource]
             [std.protocol.component :as component])
-  (:import (java.net ServerSocket Socket InetSocketAddress) (com.sun.net.httpserver HttpExchange HttpHandler HttpServer)))
+  (:import (java.net ServerSocket Socket InetSocketAddress) 
+           (com.sun.net.httpserver HttpExchange HttpHandler HttpServer)))
 
 (def ^:dynamic *notify-capture*
   (atom []))

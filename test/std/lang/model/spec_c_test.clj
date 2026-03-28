@@ -131,10 +131,37 @@
 
 
 ^{:refer std.lang.model.spec-c/to-c-type :added "4.1"}
-(fact "TODO")
+(fact "converts C type inputs"
+  (to-c-type :int)
+  => "int"
+
+  (to-c-type 'char**)
+  => "char**"
+
+  (to-c-type [:const :char*])
+  => "const char*")
 
 ^{:refer std.lang.model.spec-c/c-sanitize :added "4.1"}
-(fact "TODO")
+(fact "sanitizes symbols for C identifiers"
+  (c-sanitize 'hello-world/foo.bar)
+  => "hello_world____foo_bar")
 
 ^{:refer std.lang.model.spec-c/emit-defn :added "4.1"}
-(fact "TODO")
+(fact "emits C functions directly"
+  ^:hidden
+
+  (emit-defn
+   (list 'defn
+         (with-meta 'add {:- :int})
+         [[:int lhs] [:int rhs]]
+         '(return (+ lhs rhs)))
+   +grammar+
+   {})
+  => "int add (int lhs, int rhs) {\n\n  return lhs + rhs;\n}"
+
+  (emit-defn
+   '(defn add [[:int lhs] [:int rhs]]
+      (return (+ lhs rhs)))
+   +grammar+
+   {:module {:id 'math.core}})
+  => "void math_core____add (int lhs, int rhs) {\n\n  return lhs + rhs;\n}")
