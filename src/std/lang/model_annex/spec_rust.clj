@@ -1,4 +1,4 @@
-(ns std.lang.model.spec-rust
+(ns std.lang.model-annex.spec-rust
   (:require [clojure.string]
             [std.lang.base.book :as book]
             [std.lang.base.emit :as emit]

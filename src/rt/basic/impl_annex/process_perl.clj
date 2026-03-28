@@ -1,47 +1,55 @@
-(ns rt.basic.impl.process-php
+(ns rt.basic.impl-annex.process-perl
   (:require [clojure.string]
             [rt.basic.type-basic :as basic]
             [rt.basic.type-common :as common]
             [rt.basic.type-oneshot :as oneshot]
             [std.lang.base.impl :as impl]
             [std.lang.base.runtime :as rt]
-            [std.lang.model.spec-php :as spec]
+            [std.lang.model.spec-perl :as spec]
             [xt.lang.base-repl :as k]))
 
-(def +php-init+
+(def +perl-init+
   (common/put-program-options
-   :php  {:default  {:oneshot    :php
-                     :basic      :php}
-          :env      {:php    {:exec   "php"
-                              :flags  {:oneshot   ["-r"]
-                                       :basic     ["-r"]}}}}))
+   :perl  {:default  {:oneshot    :perl
+                      :basic      :perl}
+           :env      {:perl    {:exec   "perl"
+                                :flags  {:oneshot   ["-e"]
+                                         :basic     ["-e"]}}}}))
 
 ;;
 ;; ONESHOT
 ;;
 
+(defn default-body-transform
+  "transform oneshot forms for `return-eval`"
+  {:added "4.0"}
+  [input {:keys [bulk]}]
+  (if bulk
+    (apply list 'do input)
+    input))
+
 (def ^{:arglists '([body])}
   default-oneshot-wrap
   (let [bootstrap  (impl/emit-entry-deps
                     k/return-eval
-                    {:lang :php
+                    {:lang :perl
                      :layout :flat})]
     (fn [body]
       (str bootstrap
            "\n\n"
            (impl/emit-as
-            :php [(list 'echo (list 'return-eval body))])))))
+            :perl [(list 'print (list 'return-eval body))])))))
 
-(def +php-oneshot-config+
+(def +perl-oneshot-config+
   (common/set-context-options
-   [:php :oneshot :default]
+   [:perl :oneshot :default]
    {:main  {:in    #'default-oneshot-wrap}
-    :emit  {:body  {:transform #'rt/return-transform}}
+    :emit  {:body  {:transform #'default-body-transform}}
     :json :full}))
 
-(def +php-oneshot+
+(def +perl-oneshot+
   [(rt/install-type!
-    :php :oneshot
+    :perl :oneshot
     {:type :hara/rt.oneshot
      :instance {:create oneshot/rt-oneshot:create}})])
 
@@ -50,30 +58,34 @@
 ;;
 
 (def +client-basic+
-  '[(defn client-basic
-      [host port opts]
-      (let [conn (fsockopen host port)]
-         (while (not (feof conn))
-            (let [line (fgets conn)
-                  input (json_decode line)
-                  out   (return-eval input)]
-               (if input
-                   (fwrite conn (. (json_encode out) "\n")))))))])
+  (let [io-socket (symbol "IO::Socket::INET->new")]
+    [(list 'defn 'client-basic
+           ['host 'port 'opts]
+           '(:- "use IO::Socket::INET;")
+           '(:- "use JSON::PP;")
+           (list 'let ['conn (list io-socket
+                                   {:PeerHost 'host
+                                    :PeerPort 'port
+                                    :Proto "tcp"})]
+                 '(while (my $line = (<$conn>))
+                    (let [input (decode_json $line)
+                          out   (return-eval input)]
+                      (print $conn (encode_json out) "\n")))))]))
 
 (def ^{:arglists '([port & [{:keys [host]}]])}
   default-basic-client
   (let [bootstrap (->> [(impl/emit-entry-deps
                          k/return-eval
-                         {:lang :php
+                         {:lang :perl
                           :layout :flat})
                         (impl/emit-as
-                         :php +client-basic+)]
+                         :perl +client-basic+)]
                        (clojure.string/join "\n\n"))]
     (fn [port & [{:keys [host]}]]
       (str bootstrap
            "\n\n"
            (impl/emit-as
-            :php [(list 'client-basic
+            :perl [(list 'client-basic
                        (or host "127.0.0.1")
                        port
                        {})])))))
@@ -87,14 +99,14 @@
    :encode :json ;; default
    :timeout 2000})
 
-(def +php-basic-config+
+(def +perl-basic-config+
   (common/set-context-options
-   [:php :basic :default]
+   [:perl :basic :default]
    +default-basic-config+))
 
-(def +php-basic+
+(def +perl-basic+
   [(rt/install-type!
-    :php :basic
+    :perl :basic
     {:type :hara/rt.basic
      :instance {:create #'basic/rt-basic:create}
      :config {:layout :full}})])

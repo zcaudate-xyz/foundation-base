@@ -1,4 +1,4 @@
-(ns rt.circom.grammar
+(ns std.lang.model-annex.spec-circom
   (:require [clojure.string]
             [std.lang.base.book :as book]
             [std.lang.base.emit :as emit]

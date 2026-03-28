@@ -1,4 +1,4 @@
-(ns std.lang.model.spec-julia
+(ns std.lang.model-annex.spec-julia
   (:require [clojure.string]
             [std.fs :as fs]
             [std.lang.base.book :as book]
@@ -9,8 +9,8 @@
             [std.lang.base.impl :as impl]
             [std.lang.base.script :as script]
             [std.lang.base.util :as ut]
-            [std.lang.model.spec-xtalk]
-            [std.lang.model.spec-xtalk.fn-julia :as fn]
+            [std.lang.model-annex.spec-xtalk]
+            [std.lang.model-annex.spec-xtalk.fn-julia :as fn]
             [std.lib.collection :as collection]
             [std.lib.foundation :as f]))
 

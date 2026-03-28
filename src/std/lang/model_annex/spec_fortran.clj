@@ -1,4 +1,4 @@
-(ns rt.fortran.grammar
+(ns std.lang.model-annex.spec-fortran
   (:require [clojure.string]
             [std.lang.base.book :as book]
             [std.lang.base.emit :as emit]

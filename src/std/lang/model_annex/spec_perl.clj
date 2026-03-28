@@ -1,4 +1,4 @@
-(ns std.lang.model.spec-perl
+(ns std.lang.model-annex.spec-perl
   (:require [clojure.string]
             [std.lang.base.book :as book]
             [std.lang.base.emit :as emit]
@@ -10,8 +10,8 @@
             [std.lang.base.grammar :as grammar]
             [std.lang.base.script :as script]
             [std.lang.base.util :as ut]
-            [std.lang.model.spec-xtalk]
-            [std.lang.model.spec-xtalk.fn-perl :as fn]
+            [std.lang.model-annex.spec-xtalk]
+            [std.lang.model-annex.spec-xtalk.fn-perl :as fn]
             [std.lib.collection :as collection]
             [std.lib.foundation :as f]))
 

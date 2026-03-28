@@ -1,4 +1,4 @@
-(ns std.lang.model.spec-r
+(ns std.lang.model-annex.spec-r
   (:require [std.lang.base.book :as book]
             [std.lang.base.emit :as emit]
             [std.lang.base.emit-common :as common]
@@ -7,8 +7,8 @@
             [std.lang.base.grammar-spec :as spec]
             [std.lang.base.script :as script]
             [std.lang.base.util :as ut]
-            [std.lang.model.spec-xtalk]
-            [std.lang.model.spec-xtalk.fn-r :as fn]
+            [std.lang.model-annex.spec-xtalk]
+            [std.lang.model-annex.spec-xtalk.fn-r :as fn]
             [std.lib.collection :as collection]
             [std.lib.template :as template]))
 

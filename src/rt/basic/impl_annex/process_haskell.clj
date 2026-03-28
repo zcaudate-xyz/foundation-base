@@ -1,4 +1,4 @@
-(ns rt.basic.impl.process-haskell
+(ns rt.basic.impl-annex.process-haskell
   (:require [rt.basic.type-common :as common]
             [rt.basic.type-twostep :as twostep]
             [std.lang.base.book :as book]

@@ -1,4 +1,4 @@
-(ns rt.basic.impl.process-circom
+(ns rt.basic.impl-annex.process-circom
   (:require [rt.basic.type-common :as common]
             [rt.basic.type-twostep :as twostep]
             [rt.circom.grammar :as grammar]
