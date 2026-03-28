@@ -72,6 +72,100 @@
              :else
              (return (str (type ~obj))))))
 
+(defn python-tf-x-task-run
+  [[_ thunk]]
+  (template/$
+   (do (var task {"status" "pending"
+                  "value" nil
+                  "error" nil})
+       (try (:= out (~thunk))
+            (:= (. task ["status"]) "ok")
+            (:= (. task ["value"]) out)
+            (catch [Exception :as e]
+                (:= (. task ["status"]) "error")
+                (:= (. task ["error"]) e)))
+       (return task))))
+
+(defn python-tf-x-task-then
+  [[_ task on-ok]]
+  (template/$
+   (if (== "ok" (. ~task (get "status")))
+     (do (var out {"status" "pending"
+                   "value" nil
+                   "error" nil})
+         (var v nil)
+         (try (:= v (~on-ok (. ~task (get "value"))))
+              (:= (. out ["status"]) "ok")
+              (:= (. out ["value"]) v)
+              (catch [Exception :as e]
+                  (:= (. out ["status"]) "error")
+                  (:= (. out ["error"]) e)))
+         (return out))
+     (return ~task))))
+
+(defn python-tf-x-task-catch
+  [[_ task on-err]]
+  (template/$
+   (if (== "error" (. ~task (get "status")))
+     (do (var out {"status" "pending"
+                   "value" nil
+                   "error" nil})
+         (var v nil)
+         (try (:= v (~on-err (. ~task (get "error"))))
+              (:= (. out ["status"]) "ok")
+              (:= (. out ["value"]) v)
+              (catch [Exception :as e]
+                  (:= (. out ["status"]) "error")
+                  (:= (. out ["error"]) e)))
+         (return out))
+     (return ~task))))
+
+(defn python-tf-x-task-finally
+  [[_ task on-done]]
+  (template/$ (do (~on-done)
+            (return ~task))))
+
+(defn python-tf-x-task-cancel
+  [[_ task]]
+  (template/$ (do (:= (. ~task ["status"]) "cancelled")
+            (return ~task))))
+
+(defn python-tf-x-task-status
+  [[_ task]]
+  (template/$ (. ~task (get "status"))))
+
+(defn python-tf-x-task-await
+  [[_ task timeout-ms default]]
+  (template/$
+   (cond (== "ok" (. ~task (get "status")))
+         (return (. ~task (get "value")))
+         
+         (== "error" (. ~task (get "status")))
+         (throw (. ~task (get "error")))
+         
+         :else
+         (return ~default))))
+
+(defn python-tf-x-task-from-async
+  [[_ executor]]
+  (template/$
+   (do (var box {"ok" false
+                 "value" nil
+                 "error" nil})
+       (fn resolve [v]
+         (:= (. box ["ok"]) true)
+         (:= (. box ["value"]) v))
+       (fn reject [e]
+         (:= (. box ["error"]) e))
+       (~executor resolve reject)
+       (if (. box ["ok"])
+         (return {"status" "ok"
+                  "value" (. box ["value"])
+                  "error" nil})
+         (return {"status" "error"
+                  "value" nil
+                  "error" (. box ["error"])})))))
+
 (def +python-core+
   {:x-del            {:macro #'python-tf-x-del    :emit :macro}
    :x-cat            {:macro #'python-tf-x-cat    :emit :macro}
@@ -84,7 +178,15 @@
    :x-print          {:macro #'python-tf-x-print         :emit :macro}
    :x-shell          {:macro #'python-tf-x-shell         :emit :macro}
    :x-now-ms         {:default '(round (* 1000 (. (__import__ "time") (time)))) :emit :unit}
-   :x-type-native    {:macro #'python-tf-x-type-native   :emit :macro}})
+   :x-type-native    {:macro #'python-tf-x-type-native   :emit :macro}
+   :x-task-run       {:macro #'python-tf-x-task-run      :emit :macro}
+   :x-task-then      {:macro #'python-tf-x-task-then     :emit :macro}
+   :x-task-catch     {:macro #'python-tf-x-task-catch    :emit :macro}
+   :x-task-finally   {:macro #'python-tf-x-task-finally  :emit :macro}
+   :x-task-cancel    {:macro #'python-tf-x-task-cancel   :emit :macro}
+   :x-task-status    {:macro #'python-tf-x-task-status   :emit :macro}
+   :x-task-await     {:macro #'python-tf-x-task-await    :emit :macro}
+   :x-task-from-async {:macro #'python-tf-x-task-from-async :emit :macro}})
 
 
 ;;
