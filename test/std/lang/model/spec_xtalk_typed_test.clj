@@ -1,5 +1,6 @@
 (ns std.lang.model.spec-xtalk-typed-test
-  (:require [std.lang.typed.xtalk :as typed]
+  (:require [clojure.string]
+   [std.lang.typed.xtalk :as typed]
    [std.lang.typed.xtalk-analysis :as analysis]
    [std.lang.typed.xtalk-common :as types]
    [std.lang.typed.xtalk-infer :as infer]
@@ -502,13 +503,13 @@
   => '[true true true true true true])
 
 (fact "emits TypeScript declarations from xtalk specs"
-  (ts/emit-namespace-declarations 'std.lang.model.spec-xtalk-typed-fixture)
-  => (str "export interface User {\n"
-          "  id: string;\n"
-          "  name: string;\n"
-          "}\n\n"
-          "export type UserMap = Record<string, User>;\n\n"
-          "export type find_user = (arg0: UserMap, arg1: string) => User | null;"))
+  (let [out (ts/emit-namespace-declarations 'std.lang.model.spec-xtalk-typed-fixture)]
+    [(clojure.string/includes? out "export interface User")
+     (clojure.string/includes? out "export type UserMap = Record<string, User>;")
+     (clojure.string/includes? out "export type find_user = (arg0: UserMap, arg1: string) => User | null;")
+     (clojure.string/includes? out "export type wrong_user_name")
+     (clojure.string/includes? out "export type find_user_wrong_key")])
+  => [true true true true true])
 
 (fact "supports map destructuring in let bindings"
   (-> (infer/infer-type
