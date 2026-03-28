@@ -571,6 +571,106 @@
    :x-with-delay     {:macro #'python-tf-x-with-delay    :emit :macro}})
 
 ;;
+;; FUTURE
+;;
+
+(defn python-tf-x-future-create
+  "creates a concurrent.futures based future with resolve/reject helpers"
+  ([[_]]
+   (template/$ (do (var futures (__import__ "concurrent.futures"))
+              (var executor := (futures.ThreadPoolExecutor 1))
+              (var resolve nil)
+              (var reject  nil)
+              (var f := (executor.submit
+                          (fn []
+                            (return resolve))))
+              (:= resolve (. f set_result))
+              (:= reject  (. f set_exception))
+              (return {:resolve (. f set_result)
+                       :reject  (. f set_exception)
+                       :current f})))))
+
+(defn python-tf-x-future-resolve
+  "resolves a future with a value"
+  ([[_ future val]]
+   (template/$ ((. ~future resolve) ~val))))
+
+(defn python-tf-x-future-reject
+  "rejects a future with an error"
+  ([[_ future err]]
+   (template/$ ((. ~future reject) ~err))))
+
+(defn python-tf-x-future-then
+  "chains a callback on future completion"
+  ([[_ future callback]]
+   (template/$ (. (. ~future current) (add_done_callback ~callback)))))
+
+(defn python-tf-x-future-catch
+  "chains an error callback on future failure"
+  ([[_ future callback]]
+   (template/$ (do (var _f (. ~future current))
+              (defn _on_done [f]
+                (when f.exception()
+                  (~callback (f.exception()))))
+              (. _f (add_done_callback _on_done))))))
+
+(defn python-tf-x-future-await
+  "waits for a future to complete using .result()"
+  ([[_ future]]
+   (template/$ (. (or (. ~future current) ~future) (result)))))
+
+(defn python-tf-x-future-is?
+  "checks if a value is a future"
+  ([[_ val]]
+   (template/$ (do (var futures (__import__ "concurrent.futures"))
+              (return (isinstance ~val futures.Future))))))
+
+(def +python-future+
+  {:x-future-create  {:macro #'python-tf-x-future-create  :emit :macro}
+   :x-future-resolve {:macro #'python-tf-x-future-resolve :emit :macro}
+   :x-future-reject  {:macro #'python-tf-x-future-reject  :emit :macro}
+   :x-future-then    {:macro #'python-tf-x-future-then    :emit :macro}
+   :x-future-catch   {:macro #'python-tf-x-future-catch   :emit :macro}
+   :x-future-await   {:macro #'python-tf-x-future-await   :emit :macro}
+   :x-future-is?     {:macro #'python-tf-x-future-is?     :emit :macro}})
+
+;;
+;; ACTOR
+;;
+
+(defn python-tf-x-actor-create
+  "creates a thread-based actor"
+  ([[_ thunk]]
+   (with-meta
+     (template/$ (do (var threading (__import__ "threading"))
+              (var actor := (threading.Thread :target ~thunk :daemon true))
+              (. actor (start))
+              (return actor)))
+     {:assign/template 'actor})))
+
+(defn python-tf-x-actor-send
+  "sends a message to an actor via its queue attribute"
+  ([[_ actor msg]]
+   (template/$ (when (hasattr ~actor "queue")
+          (. ~actor queue (put ~msg))))))
+
+(defn python-tf-x-actor-recv
+  "sets a receive handler on an actor (stored as attribute)"
+  ([[_ actor handler]]
+   (template/$ (setattr ~actor "recv" ~handler))))
+
+(defn python-tf-x-actor-stop
+  "stops a daemon thread actor (marks as stopped)"
+  ([[_ actor]]
+   (template/$ (setattr ~actor "stopped" true))))
+
+(def +python-actor+
+  {:x-actor-create   {:macro #'python-tf-x-actor-create   :emit :macro}
+   :x-actor-send     {:macro #'python-tf-x-actor-send     :emit :macro}
+   :x-actor-recv     {:macro #'python-tf-x-actor-recv     :emit :macro}
+   :x-actor-stop     {:macro #'python-tf-x-actor-stop     :emit :macro}})
+
+;;
 ;; FILE
 ;;
 
@@ -619,6 +719,8 @@
          +python-socket+
          +python-iter+
          +python-thread+
+         +python-future+
+         +python-actor+
          +python-file+
          +python-b64+))
 

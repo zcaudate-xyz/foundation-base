@@ -99,6 +99,8 @@
         [:xtalk-iter    xtalk/+op-xtalk-iter+]
         [:xtalk-cache   xtalk/+op-xtalk-cache+]
         [:xtalk-thread  xtalk/+op-xtalk-thread+]
+        [:xtalk-future  xtalk/+op-xtalk-future+]
+        [:xtalk-actor   xtalk/+op-xtalk-actor+]
         [:xtalk-file    xtalk/+op-xtalk-file+]
         [:xtalk-b64     xtalk/+op-xtalk-b64+]
         [:xtalk-uri     xtalk/+op-xtalk-uri+]
@@ -222,6 +224,8 @@
                    :xtalk-iter
                    :xtalk-cache
                    :xtalk-thread
+                   :xtalk-future
+                   :xtalk-actor
                    :xtalk-file
                    :xtalk-b64
                    :xtalk-uri

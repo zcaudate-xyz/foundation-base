@@ -391,6 +391,21 @@
    {:op :x-start-interval :symbol #{'x:start-interval}  :emit :abstract}
    {:op :x-stop-interval  :symbol #{'x:stop-interval}   :emit :abstract}])
 
+(def +op-xtalk-future+
+  [{:op :x-future-create  :symbol #{'x:future-create}   :emit :abstract}
+   {:op :x-future-resolve :symbol #{'x:future-resolve}  :emit :abstract}
+   {:op :x-future-reject  :symbol #{'x:future-reject}   :emit :abstract}
+   {:op :x-future-then    :symbol #{'x:future-then}     :emit :abstract}
+   {:op :x-future-catch   :symbol #{'x:future-catch}    :emit :abstract}
+   {:op :x-future-await   :symbol #{'x:future-await}    :emit :abstract}
+   {:op :x-future-is?     :symbol #{'x:future-is?}      :emit :abstract}])
+
+(def +op-xtalk-actor+
+  [{:op :x-actor-create   :symbol #{'x:actor-create}    :emit :abstract}
+   {:op :x-actor-send     :symbol #{'x:actor-send}      :emit :abstract}
+   {:op :x-actor-recv     :symbol #{'x:actor-recv}      :emit :abstract}
+   {:op :x-actor-stop     :symbol #{'x:actor-stop}      :emit :abstract}])
+
 (def +op-xtalk-file+
   [{:op :x-slurp          :symbol #{'x:slurp}         :emit :abstract}
    {:op :x-spit           :symbol #{'x:spit}          :emit :abstract}])

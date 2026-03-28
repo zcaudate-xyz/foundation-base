@@ -593,6 +593,117 @@
    :x-with-delay     {:macro #'lua-tf-x-with-delay    :emit :macro}})
 
 ;;
+;; FUTURE
+;;
+
+(defn lua-tf-x-future-create
+  "creates a coroutine-based future table"
+  ([[_]]
+   ;; Returns a table with :resolve/:reject callbacks and a coroutine handle.
+   ;; The :current field holds the running coroutine (created via thread-spawn).
+   (template/$ (do (var f := {})
+              (:= (. f resolve)
+                  (fn [val]
+                    (:= (. f result) val)
+                    (:= (. f done) true)
+                    (when (. f _co)
+                      (coroutine.resume (. f _co) val))))
+              (:= (. f reject)
+                  (fn [err]
+                    (:= (. f error) err)
+                    (:= (. f done) true)
+                    (:= (. f failed) true)
+                    (when (. f _co)
+                      (coroutine.resume (. f _co) nil err))))
+              (:= (. f done) false)
+              (return f)))))
+
+(defn lua-tf-x-future-resolve
+  "resolves a future with a value"
+  ([[_ future val]]
+   (template/$ ((. ~future resolve) ~val))))
+
+(defn lua-tf-x-future-reject
+  "rejects a future with an error"
+  ([[_ future err]]
+   (template/$ ((. ~future reject) ~err))))
+
+(defn lua-tf-x-future-then
+  "chains a callback to run on future resolution via ngx.thread"
+  ([[_ future callback]]
+   (template/$ (ngx.thread.spawn
+         (fn []
+           (x:future-await ~future)
+           (when (not (. ~future failed))
+             (~callback (. ~future result))))))))
+
+(defn lua-tf-x-future-catch
+  "chains an error handler on future rejection via ngx.thread"
+  ([[_ future callback]]
+   (template/$ (ngx.thread.spawn
+         (fn []
+           (x:future-await ~future)
+           (when (. ~future failed)
+             (~callback (. ~future error))))))))
+
+(defn lua-tf-x-future-await
+  "waits for a future to complete using coroutine yield"
+  ([[_ future]]
+   (template/$ (do (:= (. ~future _co) (coroutine.running))
+              (when (not (. ~future done))
+                (coroutine.yield))
+              (return (. ~future result))))))
+
+(defn lua-tf-x-future-is?
+  "checks if a value is a future table"
+  ([[_ val]]
+   (template/$ (and (x:is-object? ~val)
+            (x:not-nil? (. ~val resolve))
+            (x:not-nil? (. ~val reject))))))
+
+(def +lua-future+
+  {:x-future-create  {:macro #'lua-tf-x-future-create  :emit :macro}
+   :x-future-resolve {:macro #'lua-tf-x-future-resolve :emit :macro}
+   :x-future-reject  {:macro #'lua-tf-x-future-reject  :emit :macro}
+   :x-future-then    {:macro #'lua-tf-x-future-then    :emit :macro}
+   :x-future-catch   {:macro #'lua-tf-x-future-catch   :emit :macro}
+   :x-future-await   {:macro #'lua-tf-x-future-await   :emit :macro}
+   :x-future-is?     {:macro #'lua-tf-x-future-is?     :emit :macro}})
+
+;;
+;; ACTOR
+;;
+
+(defn lua-tf-x-actor-create
+  "creates a coroutine-based actor thread via ngx.thread.spawn"
+  ([[_ thunk]]
+   (template/$ (ngx.thread.spawn ~thunk))))
+
+(defn lua-tf-x-actor-send
+  "sends a message to a coroutine actor via shared mailbox table"
+  ([[_ actor msg]]
+   ;; In Lua/OpenResty, actors communicate via shared tables or ngx.shared.
+   ;; Here we call a send method on the actor table if available.
+   (template/$ (when (. ~actor send)
+          ((. ~actor send) ~msg)))))
+
+(defn lua-tf-x-actor-recv
+  "registers a receive handler on a coroutine actor"
+  ([[_ actor handler]]
+   (template/$ (:= (. ~actor recv) ~handler))))
+
+(defn lua-tf-x-actor-stop
+  "kills a coroutine actor thread"
+  ([[_ actor]]
+   (template/$ (ngx.thread.kill ~actor))))
+
+(def +lua-actor+
+  {:x-actor-create   {:macro #'lua-tf-x-actor-create   :emit :macro}
+   :x-actor-send     {:macro #'lua-tf-x-actor-send     :emit :macro}
+   :x-actor-recv     {:macro #'lua-tf-x-actor-recv     :emit :macro}
+   :x-actor-stop     {:macro #'lua-tf-x-actor-stop     :emit :macro}})
+
+;;
 ;; BASE 64
 ;;
 
@@ -649,6 +760,8 @@
          +lua-iter+
          +lua-cache+
          +lua-thread+
+         +lua-future+
+         +lua-actor+
          +lua-file+
          +lua-b64+
          +lua-uri+

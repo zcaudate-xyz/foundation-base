@@ -610,6 +610,92 @@
    :x-start-interval {:macro #'js-tf-x-start-interval :emit :macro}
    :x-stop-interval  {:macro #'js-tf-x-stop-interval  :emit :macro}})
 
+;;
+;; FUTURE
+;;
+
+(defn js-tf-x-future-create
+  "creates a promise with stored resolve/reject references"
+  ([[_]]
+   (template/$ (do (var #{resolve reject} {})
+              (var current := (new Promise
+                                   (fn [rs rj]
+                                     (:= resolve rs)
+                                     (:= reject  rj))))
+              (return {:resolve resolve
+                       :reject  reject
+                       :current current})))))
+
+(defn js-tf-x-future-resolve
+  "resolves a future with a value"
+  ([[_ future val]]
+   (template/$ ((. ~future resolve) ~val))))
+
+(defn js-tf-x-future-reject
+  "rejects a future with an error"
+  ([[_ future err]]
+   (template/$ ((. ~future reject) ~err))))
+
+(defn js-tf-x-future-then
+  "chains a success callback onto a promise"
+  ([[_ promise callback]]
+   (template/$ (. ~promise current (then ~callback)))))
+
+(defn js-tf-x-future-catch
+  "chains an error callback onto a promise"
+  ([[_ promise callback]]
+   (template/$ (. ~promise current (catch ~callback)))))
+
+(defn js-tf-x-future-await
+  "awaits a promise or future record"
+  ([[_ promise-or-future]]
+   (template/$ (await (or (. ~promise-or-future current) ~promise-or-future)))))
+
+(defn js-tf-x-future-is?
+  "checks if a value is a promise or future record"
+  ([[_ val]]
+   (template/$ (or (instanceof ~val Promise)
+            (x:not-nil? (. ~val current))))))
+
+(def +js-future+
+  {:x-future-create  {:macro #'js-tf-x-future-create  :emit :macro}
+   :x-future-resolve {:macro #'js-tf-x-future-resolve :emit :macro}
+   :x-future-reject  {:macro #'js-tf-x-future-reject  :emit :macro}
+   :x-future-then    {:macro #'js-tf-x-future-then    :emit :macro}
+   :x-future-catch   {:macro #'js-tf-x-future-catch   :emit :macro}
+   :x-future-await   {:macro #'js-tf-x-future-await   :emit :macro}
+   :x-future-is?     {:macro #'js-tf-x-future-is?     :emit :macro}})
+
+;;
+;; ACTOR
+;;
+
+(defn js-tf-x-actor-create
+  "creates a Web Worker actor from a script URL or inline function"
+  ([[_ script-or-url]]
+   (template/$ (new Worker ~script-or-url))))
+
+(defn js-tf-x-actor-send
+  "sends a message to a Web Worker"
+  ([[_ actor msg]]
+   (template/$ (. ~actor (postMessage ~msg)))))
+
+(defn js-tf-x-actor-recv
+  "registers a message handler on a Web Worker"
+  ([[_ actor handler]]
+   (template/$ (:= (. ~actor onmessage) ~handler))))
+
+(defn js-tf-x-actor-stop
+  "terminates a Web Worker"
+  ([[_ actor]]
+   (template/$ (. ~actor (terminate)))))
+
+(def +js-actor+
+  {:x-actor-create   {:macro #'js-tf-x-actor-create   :emit :macro}
+   :x-actor-send     {:macro #'js-tf-x-actor-send     :emit :macro}
+   :x-actor-recv     {:macro #'js-tf-x-actor-recv     :emit :macro}
+   :x-actor-stop     {:macro #'js-tf-x-actor-stop     :emit :macro}})
+
 (def +js-b64+
   {:x-b64-decode     {:emit :alias :raw 'atob}
    :x-b64-encode     {:emit :alias :raw 'btoa}})
@@ -648,6 +734,8 @@
          +js-iter+
          +js-cache+
          +js-thread+
+         +js-future+
+         +js-actor+
          +js-file+
          +js-b64+
          +js-uri+
