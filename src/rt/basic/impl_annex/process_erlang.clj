@@ -5,7 +5,7 @@
             [rt.basic.type-oneshot :as oneshot]
             [std.lang.base.impl :as impl]
             [std.lang.base.runtime :as rt]
-            [std.lang.model.spec-erlang :as spec]
+            [std.lang.model-annex.spec-erlang :as spec]
             [xt.lang.base-repl :as k]))
 
 (def +erlang-init+

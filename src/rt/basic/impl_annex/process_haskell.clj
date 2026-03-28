@@ -6,7 +6,7 @@
             [std.lang.base.pointer :as ptr]
             [std.lang.base.runtime :as rt]
             [std.lang.base.util :as ut]
-            [std.lang.model.spec-haskell :as spec]))
+            [std.lang.model-annex.spec-haskell :as spec]))
 
 (def +program-init+
   (common/put-program-options

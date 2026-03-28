@@ -96,12 +96,15 @@
         [:xtalk-js   xtalk/+op-xtalk-js+]
         [:xtalk-return  xtalk/+op-xtalk-return+]
         [:xtalk-socket  xtalk/+op-xtalk-socket+]
+        [:xtalk-ws      xtalk/+op-xtalk-ws+]
         [:xtalk-iter    xtalk/+op-xtalk-iter+]
         [:xtalk-cache   xtalk/+op-xtalk-cache+]
         [:xtalk-thread  xtalk/+op-xtalk-thread+]
         [:xtalk-file    xtalk/+op-xtalk-file+]
         [:xtalk-b64     xtalk/+op-xtalk-b64+]
         [:xtalk-uri     xtalk/+op-xtalk-uri+]
+        [:xtalk-notify  xtalk/+op-xtalk-notify+]
+        [:xtalk-service xtalk/+op-xtalk-service+]
         [:xtalk-special xtalk/+op-xtalk-special+]]
        (collect-ops)))
 
@@ -219,12 +222,15 @@
                    :xtalk-js
                    :xtalk-return
                    :xtalk-socket
+                   :xtalk-ws
                    :xtalk-iter
                    :xtalk-cache
                    :xtalk-thread
                    :xtalk-file
                    :xtalk-b64
                    :xtalk-uri
+                   :xtalk-notify
+                   :xtalk-service
                    :xtalk-special]))
 
 (defn build:override
@@ -308,4 +314,3 @@
               :macros    (grammar-macros reserved)
               :structure (grammar-structure reserved))
        (map->Grammer))))
-

@@ -16,6 +16,7 @@
             [std.lang.model.spec-js.meta :as meta]
             [std.lang.model.spec-js.qml :as qml]
             [std.lang.model.spec-xtalk]
+            [std.lang.model.spec-xtalk.com-js :as com]
             [std.lang.model.spec-xtalk.fn-js :as fn]
             [std.lib.collection :as collection]
             [std.lib.foundation :as f]
@@ -255,6 +256,7 @@
         :for-try    {:macro  #'tf-for-try     :emit :macro}
         :for-async  {:macro  #'tf-for-async :emit :macro}})
       (grammar/build:override fn/+js+)
+      (grammar/build:override com/+js-com+)
       (grammar/build:extend
        {:property   {:op :property  :symbol  '#{property}   :assign ":" :raw "property" :value true :emit :def-assign}
         :teq        {:op :teq       :symbol  '#{===}        :raw "===" :emit :bi}

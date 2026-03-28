@@ -4,7 +4,7 @@
             [rt.basic.type-oneshot :as oneshot]
             [std.lang.base.impl :as impl]
             [std.lang.base.runtime :as rt]
-            [std.lang.model.spec-xtalk :as spec]
+            [std.lang.model-annex.spec-xtalk :as spec]
             [std.lib.foundation :as f]))
 
 (def +program-init+

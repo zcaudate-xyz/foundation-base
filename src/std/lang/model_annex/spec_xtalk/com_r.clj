@@ -1,4 +1,4 @@
-(ns std.lang.model.spec-xtalk.com-r
+(ns std.lang.model-annex.spec-xtalk.com-r
   (:require [std.lib.template :as template]))
 
 ;;

@@ -6,7 +6,7 @@
             [std.json :as json]
             [std.lang.base.impl :as impl]
             [std.lang.base.runtime :as rt]
-            [std.lang.model.spec-r :as spec]
+            [std.lang.model-annex.spec-r :as spec]
             [xt.lang.base-repl :as k]))
 
 (def +program-init+

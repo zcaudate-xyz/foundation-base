@@ -11,6 +11,7 @@
             [std.lang.base.script :as script]
             [std.lang.base.util :as ut]
             [std.lang.model.spec-xtalk]
+            [std.lang.model.spec-xtalk.com-lua :as com]
             [std.lang.model.spec-xtalk.fn-lua :as fn]
             [std.lib.collection :as collection]
             [std.lib.foundation :as f]
@@ -202,6 +203,7 @@
         :defgen     {:macro #'tf-defgen     :emit :macro}
         :yield      {:macro #'tf-yield      :emit :macro}})
       (grammar/build:override fn/+lua+)
+      (grammar/build:override com/+lua-com+)
       (grammar/build:extend
        {:cat    {:op :cat    :symbol '#{cat}       :raw ".."   :emit :infix}
         :len    {:op :len    :symbol '#{len}       :raw "#"    :emit  :pre}

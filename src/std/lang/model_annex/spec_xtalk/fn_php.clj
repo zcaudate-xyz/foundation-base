@@ -1,4 +1,4 @@
-(ns std.lang.model.spec-xtalk.fn-php
+(ns std.lang.model-annex.spec-xtalk.fn-php
   (:require [std.lib.template :as template]))
 
 ;;

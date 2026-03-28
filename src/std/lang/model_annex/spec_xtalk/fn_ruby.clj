@@ -1,4 +1,4 @@
-(ns std.lang.model.spec-xtalk.fn-ruby
+(ns std.lang.model-annex.spec-xtalk.fn-ruby
   (:require [std.lib.template :as template]))
 
 ;;

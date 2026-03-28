@@ -11,6 +11,7 @@
             [std.lang.base.script :as script]
             [std.lang.base.util :as ut]
             [std.lang.model.spec-xtalk]
+            [std.lang.model.spec-xtalk.com-python :as com]
             [std.lang.model.spec-xtalk.fn-python :as fn]
             [std.lib.collection :as collection]
             [std.lib.foundation :as f]
@@ -181,6 +182,7 @@
         :for-index   {:macro #'tf-for-index  :emit :macro}
         :for-return  {:macro #'tf-for-return :emit :macro}})
       (grammar/build:override fn/+python+)
+      (grammar/build:override com/+python-com+)
       (grammar/build:extend
        {:defn-     {:op :defn-   :symbol #{'defn-}  :type :block :emit #'python-defn-}
         :var-let   {:op :var-let :symbol #{'var}  :macro #'python-var :type :macro}

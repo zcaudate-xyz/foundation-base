@@ -18,6 +18,9 @@
    :mat2x3 :mat2x4
    :mat3x2 :mat3x4
    :mat4x2 :mat4x3
+   :sampler1D :sampler2D :sampler3D :samplerCube
+   :sampler1DShadow :sampler2DShadow :samplerCubeShadow
+   :isampler2D :usampler2D
    :dmat2 :dmat3 :dmat4
    :dmat2x3 :dmat2x4
    :dmat3x2 :dmat3x4

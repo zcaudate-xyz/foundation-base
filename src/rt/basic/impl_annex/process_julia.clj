@@ -6,7 +6,7 @@
             [std.json :as json]
             [std.lang.base.impl :as impl]
             [std.lang.base.runtime :as rt]
-            [std.lang.model.spec-julia :as spec]
+            [std.lang.model-annex.spec-julia :as spec]
             [xt.lang.base-repl :as k]))
 
 (def +julia-init+

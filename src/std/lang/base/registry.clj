@@ -47,22 +47,22 @@
          [:ruby   :oneshot]            'rt.basic.impl.process-ruby
          [:ruby   :basic]              'rt.basic.impl.process-ruby
 
-         [:perl   :oneshot]            'rt.basic.impl.process-perl
-         [:perl   :basic]              'rt.basic.impl.process-perl
+         [:perl   :oneshot]            'rt.basic.impl-annex.process-perl
+         [:perl   :basic]              'rt.basic.impl-annex.process-perl
 
-         [:php    :oneshot]            'rt.basic.impl.process-php
-         [:php    :basic]              'rt.basic.impl.process-php
+         [:php    :oneshot]            'rt.basic.impl-annex.process-php
+         [:php    :basic]              'rt.basic.impl-annex.process-php
          
-         [:r      :oneshot]            'rt.basic.impl.process-r
-         [:r      :basic]              'rt.basic.impl.process-r
+         [:r      :oneshot]            'rt.basic.impl-annex.process-r
+         [:r      :basic]              'rt.basic.impl-annex.process-r
 
-         [:julia  :oneshot]            'rt.basic.impl.process-julia
-         [:julia  :basic]              'rt.basic.impl.process-julia
+         [:julia  :oneshot]            'rt.basic.impl-annex.process-julia
+         [:julia  :basic]              'rt.basic.impl-annex.process-julia
 
-         [:erlang :oneshot]            'rt.basic.impl.process-erlang
-         [:erlang :basic]              'rt.basic.impl.process-erlang
+         [:erlang :oneshot]            'rt.basic.impl-annex.process-erlang
+         [:erlang :basic]              'rt.basic.impl-annex.process-erlang
 
-         [:rust   :twostep]            'rt.basic.impl.process-rust
+         [:rust   :twostep]            'rt.basic.impl-annex.process-rust
          
          [:c      :jocl]               'rt.jocl
          [:c      :oneshot]            'rt.basic.impl.process-c

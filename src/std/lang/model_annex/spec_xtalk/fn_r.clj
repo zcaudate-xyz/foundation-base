@@ -1,5 +1,5 @@
 ^{:no-test true}
-(ns std.lang.model.spec-xtalk.fn-r
+(ns std.lang.model-annex.spec-xtalk.fn-r
   (:require [std.lang.base.grammar-xtalk :as default]
             [std.lib.template :as template]))
 

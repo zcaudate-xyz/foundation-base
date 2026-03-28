@@ -365,6 +365,11 @@
    {:op :x-socket-send     :symbol #{'x:socket-send}      :emit :abstract}
    {:op :x-socket-close    :symbol #{'x:socket-close}     :emit :abstract}])
 
+(def +op-xtalk-ws+
+  [{:op :x-ws-connect      :symbol #{'x:ws-connect}       :emit :abstract}
+   {:op :x-ws-send         :symbol #{'x:ws-send}          :emit :abstract}
+   {:op :x-ws-close        :symbol #{'x:ws-close}         :emit :abstract}])
+
 (def +op-xtalk-iter+      
   [{:op :x-iter-from-obj  :symbol #{'x:iter-from-obj}   :emit :abstract}
    {:op :x-iter-from-arr  :symbol #{'x:iter-from-arr}   :emit :abstract}
@@ -403,6 +408,15 @@
   [{:op :x-uri-encode      :symbol #{'x:uri-encode}     :emit :abstract}
    {:op :x-uri-decode      :symbol #{'x:uri-decode}     :emit :abstract}])
 
+(def +op-xtalk-notify+
+  [{:op :x-notify-socket   :symbol #{'x:notify-socket}   :emit :abstract}])
+
+(def +op-xtalk-service+
+  [{:op :x-client-basic    :symbol #{'x:client-basic}    :emit :abstract}
+   {:op :x-client-ws       :symbol #{'x:client-ws}       :emit :abstract}
+   {:op :x-server-basic    :symbol #{'x:server-basic}    :emit :abstract}
+   {:op :x-server-ws       :symbol #{'x:server-ws}       :emit :abstract}])
+
 (def +op-xtalk-special+
   [{:op :x-notify-http     :symbol #{'x:notify-http}    :type :hard-link
     :raw 'xt.lang.base-repl/notify-socket-http}])
@@ -417,16 +431,6 @@
 
 
 (comment
-  (def +op-xtalk-notify+
-    [{:op :x-notify-socket   :symbol #{'x:notify-socket}   :emit :abstract}
-     {:op :x-notify-http     :symbol #{'x:notify-http}     :emit :abstract}])
-  
-  (def +op-xtalk-service+
-    [{:op :x-client-basic    :symbol #{'x:client-basic}    :emit :abstract}
-     {:op :x-client-ws       :symbol #{'x:client-ws}       :emit :abstract}
-     {:op :x-server-basic    :symbol #{'x:server-basic}    :emit :abstract}
-     {:op :x-server-ws       :symbol #{'x:server-ws}       :emit :abstract}])
-
   (def +op-xtalk-arr-generic+
   '[{:op :x-arr-every       :symbol #{'x:arr-every}   :emit :alias
      :raw xt.lang.base-lib/arr-every}
@@ -440,6 +444,4 @@
   {:op :x-str-pad-right   :symbol #{'x:str-pad-right}   :macro #'tf-str-pad-right :emit :macro}
   {:op :x-str-starts-with :symbol #{'x:str-starts-with} :macro #'tf-str-starts-with :emit :macro}
   {:op :x-str-ends-with   :symbol #{'x:str-ends-with}   :macro #'tf-str-ends-with :emit :macro}
-  {:op :x-ws-connect      :symbol #{'x:ws-connect}       :emit :abstract}
-  {:op :x-ws-send         :symbol #{'x:ws-send}          :emit :abstract}
-  {:op :x-ws-close        :symbol #{'x:ws-close}         :emit :abstract})
+  )
