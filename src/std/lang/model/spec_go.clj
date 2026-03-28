@@ -129,7 +129,6 @@
 
 (def +book+
   (book/book {:lang :go
-              :parent :xtalk
               :meta +meta+
               :grammar +grammar+}))
 

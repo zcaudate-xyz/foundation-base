@@ -1,22 +1,10 @@
 (ns code.manage.xtalk-audit
   (:require [clojure.string :as str]
+            [std.lang.base.book-loader :as book-loader]
             [std.lang.base.grammar :as grammar]
             [std.lang.base.impl :as impl]
-            [std.lang.base.library :as lib]))
-
-(def +audit-spec-namespaces+
-  '[std.lang.model.spec-bash
-    std.lang.model.spec-c
-    std.lang.model.spec-dart
-    std.lang.model.spec-glsl
-    std.lang.model.spec-go
-    std.lang.model.spec-js
-    std.lang.model.spec-lua
-    std.lang.model.spec-python
-    std.lang.model.spec-scheme])
-
-(def +preferred-languages+
-  [:xtalk :bash :c :dart :glsl :go :js :lua :python :scheme])
+            [std.lang.base.library :as lib]
+            [std.lang.base.registry :as reg]))
 
 (def +status-mark+
   {:implemented "Y"
@@ -53,14 +41,29 @@
        vec))
 
 (defn installed-languages
-  "returns installed languages from the default library"
+  "loads all default books from the registry via book-loader and returns installed languages"
   {:added "4.1"}
   []
-  (doseq [ns-sym +audit-spec-namespaces+]
-    (require ns-sym))
-  (->> (keys (lib/get-snapshot (impl/default-library)))
+  (let [library (impl/default-library)]
+    (doseq [[lang key] (reg/registry-book-list)
+            :when (= :default key)]
+      (book-loader/ensure-book! library lang key))
+    (->> (keys (lib/get-snapshot library))
+         sort
+         vec)))
+
+(defn xtalk-parent-languages
+  "returns installed languages whose loaded book has `:parent :xtalk`"
+  {:added "4.1"}
+  []
+  (let [library (impl/default-library)]
+    (installed-languages)
+    (->> (lib/get-snapshot library)
+         (keep (fn [[lang {:keys [book]}]]
+                 (when (= :xtalk (:parent book))
+                   lang)))
        sort
-       vec))
+       vec)))
 
 (defn audit-languages
   "returns languages to include in xtalk support audits"
@@ -68,7 +71,7 @@
   ([] (audit-languages nil))
   ([langs]
    (let [installed (set (installed-languages))
-         selected  (or langs +preferred-languages+)]
+         selected  (or langs (xtalk-parent-languages))]
      (->> selected
           (filter installed)
           vec))))

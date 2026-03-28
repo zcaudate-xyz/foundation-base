@@ -26,10 +26,11 @@
    (fn? xtalk/generate-xtalk-ops)
    (fn? xtalk/scaffold-xtalk-grammar-tests)
    (fn? xtalk/separate-runtime-tests)
+   (fn? xtalk/scaffold-runtime-template)
    (fn? xtalk/runtime-test-ns)
    (fn? xtalk/support-matrix)
    (fn? xtalk/visualize-support)]
-  => [true true true true true true true])
+  => [true true true true true true true true])
 
 
 ^{:refer code.manage.xtalk/xtalk-categories :added "4.1"}

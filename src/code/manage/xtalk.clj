@@ -37,13 +37,24 @@
  scaffold/scaffold-xtalk-grammar-tests
  scaffold/read-top-level-forms
  scaffold/runtime-expr-lang
+ scaffold/normalize-runtime-lang
+ scaffold/runtime-lang-config
+ scaffold/runtime-script-lang
+ scaffold/runtime-dispatch-symbol
+ scaffold/runtime-lang-suffix
  scaffold/fact-form?
  scaffold/fact-global-form?
  scaffold/script-form?
  scaffold/expand-top-level-form
  scaffold/replace-ns-name
  scaffold/runtime-test-ns
+ scaffold/infer-runtime-lang
+ scaffold/replace-runtime-symbol
+ scaffold/transform-script-form
+ scaffold/template-runtime-test-ns
+ scaffold/template-runtime-test-forms
  scaffold/render-top-level-forms
  scaffold/split-fact-form
  scaffold/separate-runtime-test-forms
- scaffold/separate-runtime-tests)
+ scaffold/separate-runtime-tests
+ scaffold/scaffold-runtime-template)

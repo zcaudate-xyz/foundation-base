@@ -15,6 +15,32 @@
 (def ^:dynamic *runtime-test-langs*
   [:js :lua :python :r])
 
+(def +runtime-lang-config+
+  {:js     {:script :js
+            :dispatch '!.js
+            :suffix "js"}
+   :lua    {:script :lua
+            :dispatch '!.lua
+            :suffix "lua"}
+   :python {:script :python
+            :dispatch '!.py
+            :suffix "python"}
+   :r      {:script :r
+            :dispatch '!.R
+            :suffix "r"}
+   :rb     {:script :ruby
+            :dispatch '!.rb
+            :suffix "rb"}
+   :dart   {:script :dart
+            :dispatch '!.dart
+            :suffix "dart"}})
+
+(def +runtime-lang-aliases+
+  {:ruby :rb})
+
+(def +runtime-executable-langs+
+  #{:js :lua :python :r :rb})
+
 (defn read-xtalk-ops
   [path]
   (edn/read-string (slurp path)))
@@ -129,10 +155,40 @@
       :content content})))
 
 (def +runtime-dispatch-map+
-  {"!.js" :js
-   "!.lua" :lua
-   "!.py" :python
-   "!.R" :r})
+  (into {}
+        (map (fn [[lang {:keys [dispatch]}]]
+               [(str dispatch) lang]))
+        +runtime-lang-config+))
+
+(defn normalize-runtime-lang
+  [lang]
+  (let [lang (cond (keyword? lang) lang
+                   (symbol? lang) (keyword (name lang))
+                   (string? lang) (keyword lang)
+                   (nil? lang) :js
+                   :else lang)]
+    (or (get +runtime-lang-aliases+ lang)
+        lang)))
+
+(defn runtime-lang-config
+  [lang]
+  (let [lang (normalize-runtime-lang lang)]
+    (or (get +runtime-lang-config+ lang)
+        (throw (ex-info "Unsupported xtalk runtime language"
+                        {:lang lang
+                         :available (sort (keys +runtime-lang-config+))})))))
+
+(defn runtime-script-lang
+  [lang]
+  (:script (runtime-lang-config lang)))
+
+(defn runtime-dispatch-symbol
+  [lang]
+  (:dispatch (runtime-lang-config lang)))
+
+(defn runtime-lang-suffix
+  [lang]
+  (:suffix (runtime-lang-config lang)))
 
 (defn read-top-level-forms
   [path]
@@ -140,8 +196,28 @@
 
 (defn runtime-expr-lang
   [expr]
-  (when (seq? expr)
-    (get +runtime-dispatch-map+ (str (first expr)))))
+  (letfn [(collect-langs [form]
+            (cond (seq? form)
+                  (if-let [lang (get +runtime-dispatch-map+ (str (first form)))]
+                    #{lang}
+                    (reduce into #{} (map collect-langs form)))
+
+                  (vector? form)
+                  (reduce into #{} (map collect-langs form))
+
+                  (set? form)
+                  (reduce into #{} (map collect-langs form))
+
+                  (map? form)
+                  (reduce into #{}
+                          (concat (map collect-langs (keys form))
+                                  (map collect-langs (vals form))))
+
+                  :else
+                  #{}))]
+    (let [langs (collect-langs expr)]
+      (when (= 1 (count langs))
+        (first langs)))))
 
 (defn fact-form?
   [form]
@@ -174,11 +250,12 @@
 (defn runtime-test-ns
   [test-ns lang]
   (let [base-ns (project/source-ns test-ns)]
-    (symbol (str base-ns "-" (name lang) "-test"))))
+    (symbol (str base-ns "-" (runtime-lang-suffix lang) "-test"))))
 
 (defn render-top-level-forms
   [forms]
   (binding [pprint/*print-right-margin* 100
+            *print-meta* true
             *print-length* nil
             *print-level* nil]
     (with-out-str
@@ -196,6 +273,10 @@
             more))
     clauses))
 
+(defn commented-form?
+  [form]
+  (boolean (:comment (meta form))))
+
 (defn test-file-path
   [project test-ns]
   (or (project/get-path test-ns project)
@@ -203,6 +284,118 @@
                     (or (first (:test-paths project))
                         "test")
                     (str (fs/ns->file test-ns) ".clj")))))
+
+(defn infer-runtime-lang
+  [forms]
+  (let [expanded (mapcat expand-top-level-form forms)]
+    (some (fn [form]
+            (when (script-form? form)
+              (let [[_ lang] form]
+                (some (fn [[k {:keys [script]}]]
+                        (when (= lang script) k))
+                      +runtime-lang-config+))))
+          expanded)))
+
+(defn replace-runtime-symbol
+  [form from-dispatch to-dispatch]
+  (let [recur-form (fn recur-form [form]
+                     (cond (seq? form)
+                           (let [items (map recur-form form)
+                                 updated (apply list items)
+                                 updated (if (= from-dispatch (first updated))
+                                           (cons to-dispatch (rest updated))
+                                           updated)]
+                             (with-meta updated (meta form)))
+
+                           (vector? form)
+                           (with-meta (vec (map recur-form form))
+                             (meta form))
+
+                           (set? form)
+                           (with-meta (into #{} (map recur-form form))
+                             (meta form))
+
+                           (map? form)
+                           (with-meta (into (empty form)
+                                            (map (fn [[k v]]
+                                                   [(recur-form k) (recur-form v)])
+                                                 form))
+                             (meta form))
+
+                           :else
+                           form))]
+    (recur-form form)))
+
+(defn replace-string-value
+  [form from-value to-value]
+  (let [recur-form (fn recur-form [form]
+                     (cond (seq? form)
+                           (with-meta (apply list (map recur-form form))
+                             (meta form))
+
+                           (vector? form)
+                           (with-meta (vec (map recur-form form))
+                             (meta form))
+
+                           (set? form)
+                           (with-meta (into #{} (map recur-form form))
+                             (meta form))
+
+                           (map? form)
+                           (with-meta (into (empty form)
+                                            (map (fn [[k v]]
+                                                   [(recur-form k) (recur-form v)])
+                                                 form))
+                             (meta form))
+
+                           (= from-value form)
+                           to-value
+
+                           :else
+                           form))]
+    (recur-form form)))
+
+(defn transform-script-form
+  [form from-script to-script]
+  (if (and (script-form? form)
+           (= from-script (second form)))
+    (with-meta
+      (apply list 'l/script- to-script (drop 2 form))
+      (meta form))
+    form))
+
+(defn template-runtime-test-ns
+  [source-test-ns from-lang to-lang]
+  (let [from-suffix (runtime-lang-suffix from-lang)
+        to-suffix (runtime-lang-suffix to-lang)
+        source-name (str source-test-ns)
+        pattern (re-pattern (str "-" (java.util.regex.Pattern/quote from-suffix) "-test$"))]
+    (if (re-find pattern source-name)
+      (symbol (str/replace source-name pattern (str "-" to-suffix "-test")))
+      (runtime-test-ns source-test-ns to-lang))))
+
+(defn template-runtime-test-forms
+  [forms from-lang to-lang]
+  (let [from-lang (normalize-runtime-lang from-lang)
+        to-lang (normalize-runtime-lang to-lang)
+        from-script (runtime-script-lang from-lang)
+        to-script (runtime-script-lang to-lang)
+        from-dispatch (runtime-dispatch-symbol from-lang)
+        to-dispatch (runtime-dispatch-symbol to-lang)
+        source-ns (some #(when (and (seq? %) (= 'ns (first %))) (second %)) forms)
+        target-ns (template-runtime-test-ns source-ns from-lang to-lang)
+        source-ns-str (str source-ns)
+        target-ns-str (str target-ns)]
+    (mapv (fn [form]
+            (cond (and (seq? form) (= 'ns (first form)))
+                  (replace-ns-name form target-ns)
+
+                  :else
+                  (-> form
+                      (transform-script-form from-script to-script)
+                      (replace-runtime-symbol from-dispatch to-dispatch)
+                      (replace-string-value source-ns-str target-ns-str))))
+          forms)))
 
 (defn split-fact-form
   [fact-form langs]
@@ -253,7 +446,9 @@
                        by-lang))
               (recur (rest xs)
                      runtime?
-                     (conj prefix expr)
+                     (cond-> prefix
+                       (not (commented-form? expr))
+                       (conj expr))
                      shared
                      leading-meta
                      by-lang))))))))
@@ -265,7 +460,7 @@
         scripts (->> expanded
                      (filter script-form?)
                      (group-by #(second %)))
-        fact-global (some fact-global-form? expanded)
+        fact-global (some #(when (fact-global-form? %) %) expanded)
         facts (filter fact-form? expanded)
         shared-facts (atom [])
         by-lang (atom (zipmap langs (repeat [])))]
@@ -294,16 +489,17 @@
 
 (defn separate-runtime-tests
   "Splits a multi-runtime test namespace into per-language test files."
-  ([_ {:keys [langs write]
+  ([_ {:keys [input-path langs write]
        :or {langs *runtime-test-langs*
             write false}
        :as params}]
    (let [proj (project/project)
          test-ns (project/test-ns (:ns params))
-         input-path (test-file-path proj test-ns)
+         input-path (or input-path
+                        (test-file-path proj test-ns))
          forms (read-top-level-forms input-path)
          {:keys [shared by-lang]} (separate-runtime-test-forms forms langs)
-         shared-path input-path
+         shared-path (test-file-path proj test-ns)
          outputs (into []
                        (concat
                         [{:lang :shared
@@ -323,8 +519,43 @@
          (spit path content)))
      {:input-path input-path
       :langs (vec langs)
-      :outputs (mapv #(select-keys % [:lang :path]) rendered)
+     :outputs (mapv #(select-keys % [:lang :path]) rendered)
       :counts (into {}
                     (map (fn [{:keys [lang forms]}]
                            [lang (count (filter fact-form? forms))]))
                     outputs)})))
+
+(defn scaffold-runtime-template
+  "Generates a target runtime test file from a single-runtime template file."
+  ([_ {:keys [input-path output-path lang from-lang write]
+       :or {write false}
+       :as params}]
+   (let [proj (project/project)
+         source-test-ns (project/test-ns (:ns params))
+         input-path (or input-path
+                        (test-file-path proj source-test-ns))
+         forms (read-top-level-forms input-path)
+         from-lang (or from-lang
+                       (infer-runtime-lang forms)
+                       (throw (ex-info "Cannot infer template runtime language"
+                                       {:path input-path
+                                        :ns source-test-ns})))
+         to-lang (normalize-runtime-lang lang)
+         target-ns (template-runtime-test-ns source-test-ns from-lang to-lang)
+         output-path (or output-path
+                         (test-file-path proj target-ns))
+         rendered-forms (template-runtime-test-forms forms from-lang to-lang)
+         content (render-top-level-forms rendered-forms)]
+     (when write
+       (fs/create-directory (fs/parent output-path))
+       (spit output-path content))
+     {:input-path input-path
+      :output-path output-path
+      :from-lang (normalize-runtime-lang from-lang)
+      :lang to-lang
+      :source-ns source-test-ns
+      :target-ns target-ns
+      :updated (not= (when (fs/exists? output-path)
+                       (slurp output-path))
+                     content)
+      :content content})))

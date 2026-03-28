@@ -212,7 +212,6 @@
 
 (def +book+
   (book/book {:lang :jq
-              :parent :xtalk
               :meta (book/book-meta {})
               :grammar +grammar+}))
 
