@@ -6,7 +6,6 @@
             [std.lang.base.emit-common :as common]
             [std.lang.base.emit-helper :as helper]
             [std.lang.base.emit-preprocess :as preprocess]
-            [std.lang.base.grammar-xtalk-audit :as xtalk-audit]
             [std.lang.base.impl :as impl]
             [std.lang.base.impl-entry :as entry]
             [std.lang.base.impl-lifecycle :as lifecycle]
@@ -53,11 +52,6 @@
  [emit* emit/emit-main]
  helper/basic-typed-args
  helper/emit-type-record
-
- [xtalk-support-matrix xtalk-audit/support-matrix]
- [xtalk-support-missing-by-language xtalk-audit/missing-by-language]
- [xtalk-support-missing-by-feature xtalk-audit/missing-by-feature]
- [xtalk-support-visualize xtalk-audit/visualize-support]
 
  preprocess/macro-form
  preprocess/macro-opts
