@@ -47,3 +47,34 @@
                                            :view :matrix})
                  "x:ws-connect")
   => true)
+
+
+^{:refer std.lang.base.grammar-xtalk-audit/xtalk-categories :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.base.grammar-xtalk-audit/xtalk-op-map :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.base.grammar-xtalk-audit/xtalk-symbols :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.base.grammar-xtalk-audit/installed-languages :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.base.grammar-xtalk-audit/audit-languages :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.base.grammar-xtalk-audit/feature-status :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.base.grammar-xtalk-audit/support-matrix :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.base.grammar-xtalk-audit/missing-by-language :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.base.grammar-xtalk-audit/missing-by-feature :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.base.grammar-xtalk-audit/visualize-support :added "4.1"}
+(fact "TODO")

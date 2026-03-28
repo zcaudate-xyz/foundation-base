@@ -452,3 +452,28 @@
 (fact "b64 decode"
   (l/emit-as :python [(python-tf-x-b64-decode '[_ s])])
   => #"base64")
+
+
+^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-x-task-run :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-x-task-then :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-x-task-catch :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-x-task-finally :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-x-task-cancel :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-x-task-status :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-x-task-await :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-x-task-from-async :added "4.1"}
+(fact "TODO")

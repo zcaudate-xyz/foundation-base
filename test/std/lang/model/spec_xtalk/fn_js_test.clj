@@ -390,3 +390,28 @@
   (comment
     (l/emit-as :js [(js-tf-x-notify-http '[_ host port value id key opts])])
     => #"fetch"))
+
+
+^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-task-run :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-task-then :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-task-catch :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-task-finally :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-task-cancel :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-task-status :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-task-await :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-task-from-async :added "4.1"}
+(fact "TODO")

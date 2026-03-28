@@ -96,3 +96,28 @@
       (loader/load-namespace lib 'root)
 
       @loaded-files => ["src/dep2.clj" "src/dep1.clj" "src/root.clj"])))
+
+
+^{:refer std.lang.base.library-load/eval-in-library :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.base.library-load/load-string-into-library :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.base.library-load/load-file-into-library :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.base.library-load/clone-and-load :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.base.library-load/analyze-string :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.base.library-load/analyze-file :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.base.library-load/create-dependency-graph :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.base.library-load/load-namespace :added "4.1"}
+(fact "TODO")

@@ -375,3 +375,7 @@
      :layout :full})
    'L.core)
   => '[[L.util "L_util____add_fn = nil\n\nL_util____sub_fn = nil"]])
+
+
+^{:refer std.lang.base.runtime/rt-null :added "4.1"}
+(fact "TODO")

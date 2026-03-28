@@ -347,3 +347,28 @@
 (fact "spit"
   (comment (l/emit-as :lua [(lua-tf-x-spit '[_ filename s])])
            => nil?))
+
+
+^{:refer std.lang.model.spec-xtalk.fn-lua/lua-tf-x-task-run :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-lua/lua-tf-x-task-then :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-lua/lua-tf-x-task-catch :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-lua/lua-tf-x-task-finally :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-lua/lua-tf-x-task-cancel :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-lua/lua-tf-x-task-status :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-lua/lua-tf-x-task-await :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-lua/lua-tf-x-task-from-async :added "4.1"}
+(fact "TODO")

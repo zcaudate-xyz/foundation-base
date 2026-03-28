@@ -37,3 +37,7 @@
                    {:root-libs "tools"
                     :path-suffix ".js"})
   => {:is-lib? true, :rel "tools/indigo", :suffix ".js", :label "server", :path "tools/indigo/server.js"})
+
+
+^{:refer std.lang.base.compile-links/get-link-match :added "4.1"}
+(fact "TODO")
