@@ -199,8 +199,13 @@
    :output (:output fn-def)})
 
 (defn analysis-import-groups
-  [{:keys [ns specs]}]
-  (let [all-refs (mapcat (comp collect-type-refs :type) specs)]
+  [{:keys [ns specs functions values]}]
+  (let [spec-refs (mapcat (comp collect-type-refs :type) specs)
+        fn-refs (mapcat (fn [fn-def]
+                          (collect-type-refs (fn-type fn-def)))
+                        functions)
+        value-refs (mapcat (comp collect-type-refs :type) values)
+        all-refs (concat spec-refs fn-refs value-refs)]
     (->> all-refs
          set
          (remove #(= ns (some-> % namespace symbol)))
@@ -278,11 +283,13 @@
          ";")))
 
 (defn emit-analysis-declarations
-  [{:keys [specs] :as analysis}]
+  [{:keys [specs functions values] :as analysis}]
   (->> (concat
         (when-let [imports (not-empty (emit-imports analysis))]
           [imports])
-        (map emit-spec-declaration specs))
+        (map emit-spec-declaration specs)
+        (map emit-function-declaration functions)
+        (map emit-value-declaration values))
         (str/join "\n\n")))
 
 (defn emit-namespace-declarations
