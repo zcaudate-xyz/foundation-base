@@ -11,7 +11,6 @@
              [xt.lang.base-runtime :as rt]
              [xt.lang.event-view :as base-view]
              [js.cell.kernel.worker-impl :as internal]
-             [js.cell.kernel.worker-fn :as base-fn]
              [js.cell.kernel.base-link :as link-raw]
              [js.cell.kernel.base-link-local :as link-fn]
              [js.cell.kernel.base-impl :as impl-common]
@@ -687,3 +686,34 @@
 
 ^{:refer js.cell.kernel/list-raw-callbacks :added "4.0" :unchecked true}
 (fact "lists all raw calllbacks")
+
+
+^{:refer js.cell.kernel/call :added "4.1"}
+(fact "conducts a raw call against a cell or link"
+  ^:hidden
+  (notify/wait-on :js
+    (var cell
+         (cl/make-cell
+          (fn []
+            (eval (@! (playground/play-worker true))))))
+    (. (. cell ["init"])
+       (then
+        (fn []
+          (. (cl/call cell {:op "call"
+                            :action "@worker/echo"
+                            :body ["HELLO"]})
+             (then (repl/>notify)))))))
+  => (contains ["HELLO" integer?])
+
+  (notify/wait-on :js
+    (var cell
+         (cl/make-cell
+          (fn []
+            (eval (@! (playground/play-worker true))))))
+    (. (. cell ["init"])
+       (then
+        (fn []
+          (. (cl/call (. cell ["link"]) {:op "eval"
+                                         :body "1+1"})
+             (then (repl/>notify)))))))
+  => 2)

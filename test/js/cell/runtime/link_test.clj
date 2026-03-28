@@ -1,0 +1,138 @@
+(ns js.cell.runtime.link-test
+  (:require [clojure.string :as str]
+            [js.cell.runtime.emit :as emit]
+            [std.lang :as l]
+            [std.lib.template :as template]
+            [xt.lang.base-notify :as notify])
+  (:use code.test))
+
+(l/script- :js
+  {:runtime :basic
+   :require [[xt.lang.base-lib :as k]
+             [xt.lang.base-repl :as repl]
+             [js.cell.kernel :as cl]
+             [js.cell.runtime.link :as runtime-link]]})
+
+(fact:global
+ {:setup [(l/rt:restart)
+          (l/rt:scaffold-imports :js)]
+  :teardown [(l/rt:stop)]})
+
+(defmacro node-link-init-check
+  []
+  (template/$
+    (notify/wait-on :js
+      (var cell (cl/make-cell
+                 (runtime-link/make-node-link ~(emit/node-script) {})))
+      (. (. cell ["init"])
+         (then (fn []
+                 (repl/notify (cl/list-models cell))))))))
+
+^{:refer js.cell.runtime.link/make-mock-link :added "4.1"}
+(fact "creates a mock worker link"
+  ^:hidden
+  (!.js
+   (var worker ((. (runtime-link/make-mock-link {}) ["create-fn"])
+                (fn [data] data)))
+   (return (k/obj-keys worker)))
+  => (contains ["::" "listeners" "postMessage" "postRequest"]))
+
+^{:refer js.cell.runtime.link/make-node-link :added "4.1"}
+(fact "creates a Node worker link"
+  ^:hidden
+  (node-link-init-check)
+  => [])
+
+^{:refer js.cell.runtime.link/resolve-script :added "4.1"}
+(fact "resolves script values or thunks"
+  ^:hidden
+  (!.js (runtime-link/resolve-script "abc"))
+  => "abc"
+
+  (!.js (runtime-link/resolve-script (fn [] "xyz")))
+  => "xyz")
+
+^{:refer js.cell.runtime.link/make-blob-url :added "4.1"}
+(fact "creates a blob url from a script"
+  ^:hidden
+  (!.js
+   (var previous-url (!:G URL))
+   (:= (!:G URL) {"createObjectURL" (fn [blob] "blob:test")})
+   (var out (runtime-link/make-blob-url "self.postMessage(1)"))
+   (:= (!:G URL) previous-url)
+   (return out))
+  => "blob:test")
+
+^{:refer js.cell.runtime.link/make-webworker-link :added "4.1"}
+(fact "creates a WebWorker link"
+  ^:hidden
+  (!.js
+   (var previous-url (!:G URL))
+   (var previous-worker (!:G Worker))
+   (var messages [])
+   (var revoked [])
+   (var listeners [])
+   (:= (!:G URL) {"createObjectURL" (fn [blob] "blob:web")
+                  "revokeObjectURL" (fn [url] (revoked.push url))})
+   (:= (!:G Worker)
+       (fn [url]
+         (return {"addEventListener" (fn [event listener capture]
+                                        (listeners.push listener))})))
+   (var link (runtime-link/make-webworker-link "worker-script"))
+   (var worker ((. link ["create-fn"]) (fn [data] (messages.push data))))
+   ((k/first listeners) {"data" "hello"})
+   (var out {"messages" messages
+             "revoked" revoked
+             "keys" (k/obj-keys worker)})
+   (:= (!:G Worker) previous-worker)
+   (:= (!:G URL) previous-url)
+   (return out))
+  => (contains-in {"messages" ["hello"]
+                   "revoked" ["blob:web"]}))
+
+^{:refer js.cell.runtime.link/make-sharedworker-link :added "4.1"}
+(fact "creates a SharedWorker link"
+  ^:hidden
+  (!.js
+   (var previous-url (!:G URL))
+   (var previous-shared (!:G SharedWorker))
+   (var messages [])
+   (var revoked [])
+   (var listeners [])
+   (var starts [])
+   (var port {"start" (fn [] (starts.push true))
+              "addEventListener" (fn [event listener capture]
+                                   (listeners.push listener))})
+   (:= (!:G URL) {"createObjectURL" (fn [blob] "blob:shared")
+                  "revokeObjectURL" (fn [url] (revoked.push url))})
+   (:= (!:G SharedWorker)
+       (fn [url]
+         (return {"port" port})))
+   (var link (runtime-link/make-sharedworker-link "worker-script"))
+   (var worker ((. link ["create-fn"]) (fn [data] (messages.push data))))
+   ((k/first listeners) {"data" "world"})
+   (var out {"messages" messages
+             "revoked" revoked
+             "starts" (k/len starts)
+             "keys" (k/obj-keys worker)})
+   (:= (!:G SharedWorker) previous-shared)
+   (:= (!:G URL) previous-url)
+   (return out))
+  => (contains-in {"messages" ["world"]
+                   "revoked" ["blob:shared"]
+                   "starts" 1}))
+
+^{:refer js.cell.runtime.link/make-link :added "4.1"}
+(fact "dispatches to a runtime-specific worker link helper"
+  ^:hidden
+  (!.js
+   (k/obj-keys (runtime-link/make-link "mock" nil {})))
+  => (contains ["create-fn"])
+
+  (str/includes? (!.js
+                  (try
+                    (runtime-link/make-link "unknown" nil {})
+                    (catch err
+                      (return (. err ["message"])))) )
+                 "Unknown js.cell.runtime.link runtime")
+  => true)
