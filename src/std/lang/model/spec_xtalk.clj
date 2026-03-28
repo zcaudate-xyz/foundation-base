@@ -1,5 +1,5 @@
 (ns std.lang.model.spec-xtalk
-  (:require [std.lang.model.spec-xtalk :as annex]))
+  (:require [std.lang.model-annex.spec-xtalk :as annex]))
 
 (def +features+ annex/+features+)
 (def +grammar+ annex/+grammar+)
