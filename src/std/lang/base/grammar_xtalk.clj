@@ -223,7 +223,15 @@
    {:op :x-random         :symbol #{'x:random}          :emit :abstract}
    {:op :x-shell          :symbol #{'x:shell}           :emit :abstract}
    {:op :x-now-ms         :symbol #{'x:now-ms}          :emit :abstract}
-   {:op :x-type-native    :symbol #{'x:type-native}     :emit :abstract}])
+   {:op :x-type-native    :symbol #{'x:type-native}     :emit :abstract}
+   {:op :x-task-run       :symbol #{'x:task-run}        :emit :abstract}
+   {:op :x-task-then      :symbol #{'x:task-then}       :emit :abstract}
+   {:op :x-task-catch     :symbol #{'x:task-catch}      :emit :abstract}
+   {:op :x-task-finally   :symbol #{'x:task-finally}    :emit :abstract}
+   {:op :x-task-cancel    :symbol #{'x:task-cancel}     :emit :abstract}
+   {:op :x-task-status    :symbol #{'x:task-status}     :emit :abstract}
+   {:op :x-task-await     :symbol #{'x:task-await}      :emit :abstract}
+   {:op :x-task-from-async :symbol #{'x:task-from-async} :emit :abstract}])
 
 (def +op-xtalk-proto+
   [{:op :x-this            :symbol #{'x:this}            :emit :abstract}

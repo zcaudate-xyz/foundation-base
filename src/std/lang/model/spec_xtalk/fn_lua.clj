@@ -50,6 +50,101 @@
                (return "array"))
              (return t)))))
 
+(defn lua-tf-x-task-run
+  [[_ thunk]]
+  (template/$
+   (do* (local task {:state "pending"
+                     :value nil
+                     :error nil})
+        (local [ok out] (pcall ~thunk))
+        (if ok
+          (do (:= (. task ["state"]) "ok")
+              (:= (. task ["value"]) out))
+          (do (:= (. task ["state"]) "error")
+              (:= (. task ["error"]) out)))
+        (return task))))
+
+(defn lua-tf-x-task-then
+  [[_ task on-ok]]
+  (template/$
+   (if (== "ok" (. ~task ["state"]))
+     (do* (local out {:state "pending"
+                      :value nil
+                      :error nil})
+          (local [ok v] (pcall (fn []
+                                 (return (~on-ok (. ~task ["value"]))))))
+          (if ok
+            (do (:= (. out ["state"]) "ok")
+                (:= (. out ["value"]) v))
+            (do (:= (. out ["state"]) "error")
+                (:= (. out ["error"]) v)))
+          (return out))
+     (return ~task))))
+
+(defn lua-tf-x-task-catch
+  [[_ task on-err]]
+  (template/$
+   (if (== "error" (. ~task ["state"]))
+     (do* (local out {:state "pending"
+                      :value nil
+                      :error nil})
+          (local [ok v] (pcall (fn []
+                                 (return (~on-err (. ~task ["error"]))))))
+          (if ok
+            (do (:= (. out ["state"]) "ok")
+                (:= (. out ["value"]) v))
+            (do (:= (. out ["state"]) "error")
+                (:= (. out ["error"]) v)))
+          (return out))
+     (return ~task))))
+
+(defn lua-tf-x-task-finally
+  [[_ task on-done]]
+  (template/$ (do* (~on-done)
+             (return ~task))))
+
+(defn lua-tf-x-task-cancel
+  [[_ task]]
+  (template/$ (do* (:= (. ~task ["state"]) "cancelled")
+             (return ~task))))
+
+(defn lua-tf-x-task-status
+  [[_ task]]
+  (template/$ (. ~task ["state"])))
+
+(defn lua-tf-x-task-await
+  [[_ task timeout-ms default]]
+  (template/$
+   (cond (== "ok" (. ~task ["state"]))
+         (return (. ~task ["value"]))
+         
+         (== "error" (. ~task ["state"]))
+         (error (. ~task ["error"]))
+         
+         :else
+         (return ~default))))
+
+(defn lua-tf-x-task-from-async
+  [[_ executor]]
+  (template/$
+   (do* (local task {:state "pending"
+                     :value nil
+                     :error nil})
+        (local [ok out]
+               (pcall
+                (fn []
+                  (local result nil)
+                  (~executor
+                   (fn [v] (:= result v))
+                   (fn [e] (error e)))
+                  (return result))))
+        (if ok
+          (do (:= (. task ["state"]) "ok")
+              (:= (. task ["value"]) out))
+          (do (:= (. task ["state"]) "error")
+              (:= (. task ["error"]) out)))
+        (return task))))
+
 (def +lua-core+
   {:x-del            {:macro #'lua-tf-x-del  :emit :macro}
    :x-cat            {:macro #'lua-tf-x-cat  :emit :macro}
@@ -63,7 +158,15 @@
    :x-random         {:emit :alias :raw 'math.random}
    :x-shell          {:macro #'lua-tf-x-shell         :emit :macro}
    :x-now-ms         {:default '(math.floor (* 1000 (os.time)))   :emit :unit}
-   :x-type-native    {:macro #'lua-tf-x-type-native  :emit :macro}})
+   :x-type-native    {:macro #'lua-tf-x-type-native  :emit :macro}
+   :x-task-run       {:macro #'lua-tf-x-task-run      :emit :macro}
+   :x-task-then      {:macro #'lua-tf-x-task-then     :emit :macro}
+   :x-task-catch     {:macro #'lua-tf-x-task-catch    :emit :macro}
+   :x-task-finally   {:macro #'lua-tf-x-task-finally  :emit :macro}
+   :x-task-cancel    {:macro #'lua-tf-x-task-cancel   :emit :macro}
+   :x-task-status    {:macro #'lua-tf-x-task-status   :emit :macro}
+   :x-task-await     {:macro #'lua-tf-x-task-await    :emit :macro}
+   :x-task-from-async {:macro #'lua-tf-x-task-from-async :emit :macro}})
 
 (defn lua-tf-x-proto-create
   [[_ m]]
