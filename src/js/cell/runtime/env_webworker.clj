@@ -5,37 +5,18 @@
             [std.lang :as l]))
 
 (l/script :js
-  {})
+  {:require [[js.cell.kernel.worker-impl :as worker-impl]
+             [js.cell.kernel.worker-local :as worker-local]]})
 
-(defn- forms*
+(defn.js init-worker
+  "boots kernel actions on a WebWorker"
+  [worker]
+  (worker-local/actions-init (worker-local/actions-baseline) worker)
+  (worker-impl/worker-init worker)
+  (worker-impl/worker-init-signal worker {:done true})
+  (return worker))
+
+(defn.js runtime-init
+  "boots js.cell inside a WebWorker"
   []
-  [(list 'js.cell.kernel.worker-local/actions-init
-         (list 'js.cell.kernel.worker-local/actions-baseline)
-         'self)
-   (list 'js.cell.kernel.worker-impl/worker-init 'self)
-   (list 'js.cell.kernel.worker-impl/worker-init-signal 'self {:done true})])
-
-(defn script-source
-  "emits the WebWorker bootstrap script"
-  ([]
-   (script-source :full))
-  ([layout]
-   (l/emit-script
-    (cons 'do (forms*))
-    {:lang :js
-     :layout layout})))
-
-(defn.js forms
-  "returns the WebWorker bootstrap forms"
-  []
-  (return (@! (mapv pr-str (forms*)))))
-
-(defn.js script
-  "emits the WebWorker bootstrap script"
-  []
-  (return (@! (script-source))))
-
-(defn.js runtime-script
-  "emits the WebWorker bootstrap script"
-  []
-  (return (-/script)))
+  (return (-/init-worker self)))

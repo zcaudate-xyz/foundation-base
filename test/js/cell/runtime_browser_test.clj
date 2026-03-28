@@ -1,38 +1,41 @@
 (ns js.cell.runtime-browser-test
   (:use code.test)
   (:require [clojure.string :as str]
-            [js.cell.runtime.emit :as emit]
-            [js.cell.playground :as play]
-            [js.cell.runtime.link :as runtime-link]
-            [rt.chromedriver.impl]
-            [std.lang :as l]
-            [std.lib.template :as template]
-            [xt.lang.base-notify :as notify]))
+             [js.cell.playground :as play]
+             [js.cell.runtime.browser :as runtime-browser]
+             [js.cell.runtime.emit :as emit]
+             [rt.chromedriver :as chromedriver]
+             [rt.chromedriver.impl]
+             [std.lang :as l]
+             [std.lib.template :as template]
+             [xt.lang.base-notify :as notify]))
+
+(defn runtime-browser-url
+  []
+  (play/play-url
+   (play/play-page {:name "runtime-browser"})))
 
 (l/script :js
   {:runtime :chromedriver.instance
-   :config {:url (play/play-url
-                  (play/play-page {:name "runtime-browser"}))}
-   :require [[xt.lang.base-lib :as k]
-             [xt.lang.base-repl :as repl]
-             [xt.lang.base-runtime :as rt]
-             [js.cell.kernel :as cl]
-             [js.cell.kernel.base-link-local :as base-link-local]
-             [js.cell.runtime.env-sharedworker :as env-sharedworker]
-             [js.cell.runtime.env-webworker :as env-webworker]
-             [js.cell.runtime.link :as runtime-link]]})
+    :config {:url (runtime-browser-url)}
+    :require [[xt.lang.base-lib :as k]
+              [xt.lang.base-repl :as repl]
+              [xt.lang.base-runtime :as rt]
+              [js.cell.kernel :as cl]
+              [js.cell.kernel.base-link-local :as base-link-local]
+              [js.cell.runtime.browser :as runtime-browser]]})
 
 (fact:global
- {:setup [(l/rt:restart :js)
-          (l/rt:scaffold-imports :js)]
-  :teardown [(l/rt:stop)]})
+  {:setup [(l/rt:restart :js)
+           (chromedriver/goto (runtime-browser-url) 5000)
+           (l/rt:scaffold-imports :js)]
+   :teardown [(l/rt:stop)]})
 
 (defmacro webworker-cell-check
   []
   (template/$
     (notify/wait-on :js
-      (var cell (cl/make-cell
-                 (runtime-link/make-webworker-link ~(emit/webworker-script))))
+      (var cell (runtime-browser/make-webworker-cell ~(emit/webworker-script)))
       (. (. cell ["init"])
          (then
            (fn []
@@ -49,8 +52,7 @@
   []
   (template/$
     (notify/wait-on :js
-      (var cell (cl/make-cell
-                 (runtime-link/make-sharedworker-link ~(emit/sharedworker-script))))
+      (var cell (runtime-browser/make-sharedworker-cell ~(emit/sharedworker-script)))
       (. (. cell ["init"])
          (then
            (fn []
@@ -63,13 +65,13 @@
                   (fn []
                     (repl/notify (cl/list-models cell)))))))))))
 
-^{:refer js.cell.runtime.env-webworker/script :added "4.0"}
+^{:refer js.cell.runtime.emit/webworker-script :added "4.0"}
 (fact "emits a WebWorker bootstrap script"
   ^:hidden
   (str/includes? (emit/webworker-script) "self")
   => true)
 
-^{:refer js.cell.runtime.env-sharedworker/script :added "4.0"}
+^{:refer js.cell.runtime.emit/sharedworker-script :added "4.0"}
 (fact "emits a SharedWorker bootstrap script"
   ^:hidden
   (str/includes? (emit/sharedworker-script) "onconnect")

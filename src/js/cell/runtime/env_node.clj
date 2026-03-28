@@ -5,46 +5,30 @@
             [std.lang :as l]))
 
 (l/script :js
-  {})
+  {:require [[js.cell.kernel.worker-impl :as worker-impl]
+             [js.cell.kernel.worker-local :as worker-local]]})
 
-(defn- forms*
+(defn.js make-node-worker
+  "creates a worker-like adapter around parentPort"
   []
-  ['(var #{parentPort} (require "worker_threads"))
-   '(var worker
-         {:postMessage (fn [data]
-                         (. parentPort (postMessage data)))
-          :addEventListener (fn [event listener]
-                              (when (== event "message")
-                                (. parentPort (on "message"
-                                                  (fn [data]
-                                                    (listener {:data data}))))))})
-   '(js.cell.kernel.worker-local/actions-init
-     (js.cell.kernel.worker-local/actions-baseline)
-     worker)
-   '(js.cell.kernel.worker-impl/worker-init worker)
-   '(js.cell.kernel.worker-impl/worker-init-signal worker {:done true})])
+  (var #{parentPort} (require "worker_threads"))
+  (return {:postMessage (fn [data]
+                          (. parentPort (postMessage data)))
+           :addEventListener (fn [event listener]
+                               (when (== event "message")
+                                 (. parentPort (on "message"
+                                                   (fn [data]
+                                                     (listener {:data data}))))))}))
 
-(defn script-source
-  "emits the Node worker bootstrap script"
-  ([]
-   (script-source :full))
-  ([layout]
-   (l/emit-script
-    (cons 'do (forms*))
-    {:lang :js
-     :layout layout})))
+(defn.js init-worker
+  "boots kernel actions on a Node worker adapter"
+  [worker]
+  (worker-local/actions-init (worker-local/actions-baseline) worker)
+  (worker-impl/worker-init worker)
+  (worker-impl/worker-init-signal worker {:done true})
+  (return worker))
 
-(defn.js forms
-  "returns the Node worker bootstrap forms"
+(defn.js runtime-init
+  "boots js.cell inside a Node worker thread"
   []
-  (return (@! (mapv pr-str (forms*)))))
-
-(defn.js script
-  "emits the Node worker bootstrap script"
-  []
-  (return (@! (script-source))))
-
-(defn.js runtime-script
-  "emits the Node worker bootstrap script"
-  []
-  (return (-/script)))
+  (return (-/init-worker (-/make-node-worker))))
