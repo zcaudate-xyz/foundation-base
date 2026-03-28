@@ -1,5 +1,6 @@
 (ns code.manage.xtalk-scaffold
   (:require [clojure.edn :as edn]
+            [clojure.pprint :as pprint]
             [clojure.string :as str]
             [code.manage.xtalk-ops :as xtalk-ops]
             [code.project :as project]
@@ -10,6 +11,9 @@
 
 (def ^:dynamic *grammar-test-ns*
   'std.lang.base.grammar-xtalk-ops-test)
+
+(def ^:dynamic *runtime-test-langs*
+  [:js :lua :python :r])
 
 (defn read-xtalk-ops
   [path]
@@ -123,3 +127,204 @@
       :count (count (grammar-entries entries))
       :updated updated
       :content content})))
+
+(def +runtime-dispatch-map+
+  {"!.js" :js
+   "!.lua" :lua
+   "!.py" :python
+   "!.R" :r})
+
+(defn read-top-level-forms
+  [path]
+  (read-string (str "[" (slurp path) "]")))
+
+(defn runtime-expr-lang
+  [expr]
+  (when (seq? expr)
+    (get +runtime-dispatch-map+ (str (first expr)))))
+
+(defn fact-form?
+  [form]
+  (and (seq? form)
+       (= 'fact (first form))))
+
+(defn fact-global-form?
+  [form]
+  (and (seq? form)
+       (= 'fact:global (first form))))
+
+(defn script-form?
+  [form]
+  (and (seq? form)
+       (= 'l/script- (first form))))
+
+(defn expand-top-level-form
+  [form]
+  (if (and (seq? form)
+           (= 'do (first form)))
+    (rest form)
+    [form]))
+
+(defn replace-ns-name
+  [ns-form new-ns]
+  (with-meta
+    (apply list 'ns new-ns (drop 2 ns-form))
+    (meta ns-form)))
+
+(defn runtime-test-ns
+  [test-ns lang]
+  (let [base-ns (project/source-ns test-ns)]
+    (symbol (str base-ns "-" (name lang) "-test"))))
+
+(defn render-top-level-forms
+  [forms]
+  (binding [pprint/*print-right-margin* 100
+            *print-length* nil
+            *print-level* nil]
+    (with-out-str
+      (doseq [form forms]
+        (pprint/pprint form)
+        (println)))))
+
+(defn attach-leading-meta
+  [clauses metadata]
+  (if (and metadata (seq clauses))
+    (let [[expr & more] clauses]
+      (cons (if (seq? expr)
+              (with-meta expr (merge metadata (meta expr)))
+              expr)
+            more))
+    clauses))
+
+(defn test-file-path
+  [project test-ns]
+  (or (project/get-path test-ns project)
+      (str (fs/path (:root project)
+                    (or (first (:test-paths project))
+                        "test")
+                    (str (fs/ns->file test-ns) ".clj")))))
+
+(defn split-fact-form
+  [fact-form langs]
+  (let [[fact-sym title & body] fact-form]
+    (if (empty? body)
+      {:shared fact-form
+       :langs {}}
+      (loop [xs body
+             runtime? false
+             prefix []
+             shared []
+             leading-meta nil
+             by-lang (zipmap langs (repeat []))]
+        (if (empty? xs)
+          {:shared (cond
+                     (not runtime?)
+                     fact-form
+
+                     (seq shared)
+                     (with-meta
+                       (apply list fact-sym title (concat prefix shared))
+                       (meta fact-form)))
+           :langs (into {}
+                        (keep (fn [[lang clauses]]
+                                (when (seq clauses)
+                                  [lang (with-meta
+                                          (apply list
+                                                 fact-sym
+                                                 title
+                                                 (concat prefix
+                                                         (attach-leading-meta clauses leading-meta)))
+                                          (meta fact-form))])))
+                        by-lang)}
+          (let [[expr arrow expect & more] xs]
+            (if (= '=> arrow)
+              (if-let [lang (runtime-expr-lang expr)]
+                (recur more
+                       true
+                       prefix
+                       shared
+                       (or leading-meta (meta expr))
+                       (update by-lang lang into [expr arrow expect]))
+                (recur more
+                       runtime?
+                       prefix
+                       (into shared [expr arrow expect])
+                       leading-meta
+                       by-lang))
+              (recur (rest xs)
+                     runtime?
+                     (conj prefix expr)
+                     shared
+                     leading-meta
+                     by-lang))))))))
+
+(defn separate-runtime-test-forms
+  [forms langs]
+  (let [expanded (mapcat expand-top-level-form forms)
+        ns-form (some #(when (and (seq? %) (= 'ns (first %))) %) forms)
+        scripts (->> expanded
+                     (filter script-form?)
+                     (group-by #(second %)))
+        fact-global (some fact-global-form? expanded)
+        facts (filter fact-form? expanded)
+        shared-facts (atom [])
+        by-lang (atom (zipmap langs (repeat [])))]
+    (doseq [fact-form facts]
+      (let [{:keys [shared langs]} (split-fact-form fact-form langs)]
+        (when shared
+          (swap! shared-facts conj shared))
+        (doseq [[lang split-form] langs]
+          (swap! by-lang update lang conj split-form))))
+    {:shared (vec (concat
+                   [(replace-ns-name ns-form (second ns-form))]
+                   @shared-facts))
+     :by-lang (into {}
+                    (keep (fn [lang]
+                            (let [script-form (first (get scripts lang))
+                                  fact-forms (get @by-lang lang)]
+                              (when (seq fact-forms)
+                                [lang (vec (concat
+                                            [(replace-ns-name ns-form
+                                                              (runtime-test-ns (second ns-form)
+                                                                               lang))]
+                                            (when script-form [script-form])
+                                            (when fact-global [fact-global])
+                                            fact-forms))]))))
+                    langs)}))
+
+(defn separate-runtime-tests
+  "Splits a multi-runtime test namespace into per-language test files."
+  ([_ {:keys [langs write]
+       :or {langs *runtime-test-langs*
+            write false}
+       :as params}]
+   (let [proj (project/project)
+         test-ns (project/test-ns (:ns params))
+         input-path (test-file-path proj test-ns)
+         forms (read-top-level-forms input-path)
+         {:keys [shared by-lang]} (separate-runtime-test-forms forms langs)
+         shared-path input-path
+         outputs (into []
+                       (concat
+                        [{:lang :shared
+                          :path shared-path
+                          :forms shared}]
+                        (for [[lang out-forms] by-lang
+                              :let [out-ns (runtime-test-ns test-ns lang)]]
+                          {:lang lang
+                           :path (test-file-path proj out-ns)
+                           :forms out-forms})))
+         rendered (mapv (fn [{:keys [path forms] :as entry}]
+                          (assoc entry :content (render-top-level-forms forms)))
+                        outputs)]
+     (when write
+       (doseq [{:keys [path content]} rendered]
+         (fs/create-directory (fs/parent path))
+         (spit path content)))
+     {:input-path input-path
+      :langs (vec langs)
+      :outputs (mapv #(select-keys % [:lang :path]) rendered)
+      :counts (into {}
+                    (map (fn [{:keys [lang forms]}]
+                           [lang (count (filter fact-form? forms))]))
+                    outputs)})))
