@@ -78,7 +78,7 @@
                         (where-fn schema
                                   (k/get-path attr ["ref" "ns"])
                                   (column-fn (k/cat (k/get-path attr ["ref" "rkey"]) "_id"))
-                                  clause
+                                  clause-obj
                                   indent
                                   opts)
                         "\n"
@@ -244,4 +244,3 @@
   [schema query opts]
   (var tree (-/select-tree schema query opts))
   (return (-/select-return schema tree 0 opts)))
-

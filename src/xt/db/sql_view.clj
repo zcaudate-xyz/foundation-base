@@ -75,8 +75,12 @@
   (var ret-table   (k/get-path ret-entry ["view" "table"]))
   (var sel-query   (or (k/get-path sel-entry ["view" "query"]) {}))
   (var ret-query   (or (k/get-path ret-entry ["view" "query"]) {}))
+  (var ret-clause  (:? (k/not-empty? ret-omit)
+                       [{:id {:not-in [ret-omit]}}]
+                       []))
+  (var combined-clause (base-scope/merge-queries clause ret-clause))
   
-  (return (-/tree-base schema sel-table sel-query clause
+  (return (-/tree-base schema sel-table sel-query combined-clause
                        (k/arr-append (k/arr-clone ret-query)
                                      (-/tree-control-array control))
                        opts)))
