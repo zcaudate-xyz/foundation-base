@@ -20,31 +20,23 @@
 
 (defmacro node-dual-cell-scenario
   []
-  (let [node-script (emit/node-script)
-        setup-eval  (common/remote-worker-setup-eval)]
+  (let [node-script (common/node-remote-script)]
     (template/$
       (notify/wait-on :js
         (var remote-cell
              (cl/make-cell
-              (runtime-link/make-node-link ~node-script {})))
+               (runtime-link/make-node-link ~node-script {})))
         (. (. remote-cell ["init"])
            (then
-            (fn []
-              (. (. (cl/call remote-cell
-                             {:op "eval"
-                              :body ~setup-eval})
-                    (then
-                     (fn []
-                       (common/connect-sqlite
-                        {:success
-                         (fn [sqlite-conn]
-                           (. (. (common/run-scenario remote-cell sqlite-conn)
-                                 (then (fn [result]
-                                         (repl/notify result))))
-                              (catch (fn [err]
-                                       (repl/notify {"error" err})))))}))))
-                 (catch (fn [err]
-                          (repl/notify {"error" err})))))))))))
+             (fn []
+               (common/connect-sqlite
+                {:success
+                 (fn [sqlite-conn]
+                   (. (. (common/run-scenario remote-cell sqlite-conn)
+                         (then (fn [result]
+                                 (repl/notify result))))
+                      (catch (fn [err]
+                               (repl/notify {"error" err})))))}))))))))
 
 ^{:refer js.cell.e2e.common/run-scenario :added "4.1"}
 (fact "runs a Node dual-cell cache/sqlite-wasm scenario"

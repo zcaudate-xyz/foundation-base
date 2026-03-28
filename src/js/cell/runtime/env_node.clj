@@ -1,12 +1,12 @@
 (ns js.cell.runtime.env-node
   "Node worker runtime script entrypoint for js.cell.kernel."
-  (:require [js.cell.kernel.worker-impl]
-            [js.cell.kernel.worker-local]
+  (:require [js.cell]
+            [js.cell.kernel.worker-impl]
             [std.lang :as l]))
 
 (l/script :js
-  {:require [[js.cell.kernel.worker-impl :as worker-impl]
-             [js.cell.kernel.worker-local :as worker-local]]})
+  {:require [[js.cell :as cl]
+             [js.cell.kernel.worker-impl :as worker-impl]]})
 
 (defn.js make-node-worker
   "creates a worker-like adapter around parentPort"
@@ -24,7 +24,7 @@
   "boots kernel actions on a Node worker adapter"
   [worker]
   (:= (!:G __CELL_WORKER) worker)
-  (worker-local/actions-init (worker-local/actions-baseline) worker)
+  (cl/actions-init {} worker)
   (worker-impl/worker-init worker)
   (worker-impl/worker-init-signal worker {:done true})
   (return worker))

@@ -1,17 +1,17 @@
 (ns js.cell.runtime.env-sharedworker
   "SharedWorker runtime script entrypoint for js.cell.kernel."
-  (:require [js.cell.kernel.worker-impl]
-            [js.cell.kernel.worker-local]
+  (:require [js.cell]
+            [js.cell.kernel.worker-impl]
             [std.lang :as l]))
 
 (l/script :js
-  {:require [[js.cell.kernel.worker-impl :as worker-impl]
-             [js.cell.kernel.worker-local :as worker-local]]})
+  {:require [[js.cell :as cl]
+             [js.cell.kernel.worker-impl :as worker-impl]]})
 
 (defn.js init-port
   "boots kernel actions on a SharedWorker port"
   [port]
-  (worker-local/actions-init (worker-local/actions-baseline) port)
+  (cl/actions-init {} port)
   (worker-impl/worker-init port)
   (worker-impl/worker-init-signal port {:done true})
   (return port))

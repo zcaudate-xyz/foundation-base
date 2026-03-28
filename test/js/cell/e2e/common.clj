@@ -65,7 +65,7 @@
 (defn node-remote-script
   []
   (l/emit-script
-   '(do
+    '(do
       (var worker (js.cell.runtime.env-node/make-node-worker))
       (var existing-db (!:G __E2E_REMOTE_DB))
       (when (xt.lang.base-lib/nil? existing-db)
@@ -212,9 +212,9 @@
          "is_async" false
          "args" ["sync_request"]}}
        (!:G __CELL_WORKER))
-      "ready")
-   {:lang :js
-    :layout :flat}))
+       "ready")
+    {:lang :js
+     :layout :flat})))
 
 (defn.js shared-desc
   []

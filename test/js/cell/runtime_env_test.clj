@@ -41,8 +41,10 @@
                                     (worker.listeners.push listener))})
    (env-node/init-worker worker)
    (return {"listeners" (k/len worker.listeners)
-            "message" (k/first messages)}))
+            "message" (k/first messages)
+            "has-setup-service" (k/not-nil? (. worker.actions ["@cell/setup-service"]))}))
   => (contains-in {"listeners" 1
+                   "has-setup-service" true
                    "message" {"signal" "@worker/::INIT"
                               "body" {"done" true}}}))
 
@@ -63,8 +65,10 @@
                                     (worker.listeners.push listener))})
    (env-webworker/init-worker worker)
    (return {"listeners" (k/len worker.listeners)
-            "message" (k/first messages)}))
+            "message" (k/first messages)
+            "has-setup-service" (k/not-nil? (. worker.actions ["@cell/setup-service"]))}))
   => (contains-in {"listeners" 1
+                   "has-setup-service" true
                    "message" {"signal" "@worker/::INIT"
                               "body" {"done" true}}}))
 
@@ -100,8 +104,10 @@
               :start (fn [] true)})
    (env-sharedworker/init-port port)
    (return {"listeners" (k/len port.listeners)
-            "message" (k/first messages)}))
+            "message" (k/first messages)
+            "has-setup-service" (k/not-nil? (. port.actions ["@cell/setup-service"]))}))
   => (contains-in {"listeners" 1
+                   "has-setup-service" true
                    "message" {"signal" "@worker/::INIT"
                               "body" {"done" true}}}))
 
