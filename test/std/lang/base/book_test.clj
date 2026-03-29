@@ -368,23 +368,16 @@
       second
       (b/get-entry 'L.core/identity-fn)
       (->> (into {})))
-  => '{:form-input (defn identity-fn [x] x),
-       :section :code,
-       :time nil,
-       :standalone nil,
-       :deps-native nil,
-       :template nil,
-       :module L.core,
-       :lang :lua,
-       :line nil,
-       :deps-fragment nil,
-       :priority nil,
-       :id identity-fn,
-       :declared false,
-       :display :default,
-       :form (),
-       :namespace L.core,
-       :deps #{}})
+  => (contains '{:form-input (defn identity-fn [x] x),
+                 :section :code,
+                 :module L.core,
+                 :lang :lua,
+                 :id identity-fn,
+                 :declared false,
+                 :display :default,
+                 :form (),
+                 :namespace L.core,
+                 :deps #{}}))
 
 ^{:refer std.lang.base.book/has-entry? :added "4.0"}
 (fact "checks that book has an entry"

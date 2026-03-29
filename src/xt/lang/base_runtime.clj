@@ -7,7 +7,7 @@
             [std.lib.template :as template]))
 
 (l/script :xtalk
-  {:require [[xt.lang.common-base :as common-base]
+  {:require [[xt.lang.common-lib :as common-lib]
              [xt.lang.common-data :as common-data]
              [xt.lang.common-string :as common-string]]})
 
@@ -209,9 +209,9 @@
   "gets the runtime id for pointer-like objects"
   {:added "4.0"}
   [obj]
-  (when (or (common-base/fn? obj)
-            (common-base/obj? obj)
-            (common-base/arr? obj))
+  (when (or (common-lib/fn? obj)
+            (common-lib/obj? obj)
+            (common-lib/arr? obj))
     (var #{hash} (-/xt))
     (var #{lookup counter} hash)
     (var hash-id (x:lu-get lookup obj))

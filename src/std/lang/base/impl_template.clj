@@ -1,4 +1,4 @@
-(ns std.lang.base.entry-template
+(ns std.lang.base.impl-template
   (:require [std.lang.base.emit-preprocess :as preprocess]
             [std.lang.base.grammar-xtalk-system :as xtalk-system]
             [std.lib.collection :as collection]
@@ -68,6 +68,17 @@
                   (fn [m]
                     (if (contains? m lang)
                       m
-                      (assoc m lang (compute)))))
+                       (assoc m lang (compute)))))
            lang)
-      (compute))))
+       (compute))))
+
+(defn cached-entry-deps
+  "restages a template entry and returns its current code dependencies for the book language"
+  {:added "4.1"}
+  [{:keys [modules grammar lang]} entry]
+  (let [reserved (get-in grammar [:reserved (:op entry)])]
+    (:deps (cached-code-state entry
+                              reserved
+                              grammar
+                              modules
+                              {:lang lang}))))

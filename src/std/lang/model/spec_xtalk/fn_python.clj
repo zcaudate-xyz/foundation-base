@@ -20,6 +20,12 @@
       (list 'or val default)
       val)))
 
+(defn python-tf-x-has-key?
+  [[_ obj key check]]
+  (if (some? check)
+    (list '== check (list 'x:get-key obj key nil))
+    (list 'not= nil (list '. obj (list 'get key)))))
+
 (defn python-tf-x-err
   [[_ msg]]
   (list 'throw (list 'Exception msg)))
@@ -201,7 +207,8 @@
 ;;
 
 (def +python-custom+
-  {:x-get-key        {:macro #'python-tf-x-get-key}})
+  {:x-get-key        {:macro #'python-tf-x-get-key}
+   :x-has-key?       {:macro #'python-tf-x-has-key? :emit :macro}})
 
 ;;
 ;; MATH
@@ -632,7 +639,7 @@
    :x-iter-from-arr       {:macro #'python-tf-x-iter-from-arr       :emit :macro}
    :x-iter-from           {:macro #'python-tf-x-iter-from           :emit :macro}
    :x-iter-eq             {:macro #'python-tf-x-iter-eq             :emit :macro}
-   :x-iter-null           {:default '(if false (yield))}
+   :x-iter-null           {:default '(if false (yield)) :emit :unit}
    :x-iter-next           {:macro #'python-tf-x-iter-next           :emit :macro}
    :x-iter-has?           {:macro #'python-tf-x-iter-has?           :emit :macro}
    :x-iter-native?        {:macro #'python-tf-x-iter-native?        :emit :macro}})

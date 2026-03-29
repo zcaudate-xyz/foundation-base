@@ -10,7 +10,7 @@
             [std.lang.base.grammar :as grammar]
             [std.lang.base.script :as script]
             [std.lang.base.util :as ut]
-            [std.lang.model-annex.spec-xtalk]
+            [std.lang.model.spec-xtalk]
             [std.lang.model-annex.spec-xtalk.fn-php :as fn]
             [std.lib.collection :as collection]))
 

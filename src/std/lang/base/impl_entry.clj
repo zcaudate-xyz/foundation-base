@@ -1,6 +1,6 @@
 (ns std.lang.base.impl-entry
   (:require [std.lang.base.book :as book]
-             [std.lang.base.entry-template :as entry-template]
+             [std.lang.base.impl-template :as impl-template]
              [std.lang.base.emit :as emit]
              [std.lang.base.emit-preprocess :as preprocess]
              [std.lang.base.grammar-xtalk-system :as xtalk-system]
@@ -44,10 +44,12 @@
                         (assoc (clojure.core/meta sym)
                                :-
                                (mapv #(if (symbol? %)
-                                        (f/var-sym (resolve %))
-                                        %)
-                                     modifiers)))
-                      sym)
+                                        (if-let [v (resolve %)]
+                                          (f/var-sym v)
+                                          %)
+                                         %)
+                                      modifiers)))
+                       sym)
          form-raw     (if (some symbol? modifiers)
                         (apply list op sym body)
                         form-raw)
@@ -90,16 +92,16 @@
   {:added "4.0"}
   ([entry reserved grammar modules & [mopts]]
    (let [{:keys [hydrate-hook]} reserved
-         {:keys [hmeta
-                 form
-                 deps
-                 deps-fragment
-                 deps-native
-                 xtalk-ops
-                 xtalk-profiles
-                 polyfill-modules]
-          template? :static/template}
-         (entry-template/create-code-state entry
+          {:keys [hmeta
+                  form
+                  deps
+                  deps-fragment
+                  deps-native
+                  xtalk-ops
+                  xtalk-profiles
+                  polyfill-modules]
+           template? :static/template}
+          (impl-template/create-code-state entry
                                            reserved
                                            grammar
                                            modules
@@ -253,16 +255,16 @@
           entry   (if (and (:static/template entry)
                            reserved
                            modules)
-                    (merge entry
-                           (select-keys
-                            (entry-template/cached-code-state entry
+                     (merge entry
+                            (select-keys
+                             (impl-template/cached-code-state entry
                                                               reserved
                                                               grammar
                                                               modules
                                                               (assoc mopts :lang lang))
-                            [:form
-                             :deps
-                             :deps-fragment
+                             [:form
+                              :deps
+                              :deps-fragment
                              :deps-native
                              :xtalk-ops
                              :xtalk-profiles

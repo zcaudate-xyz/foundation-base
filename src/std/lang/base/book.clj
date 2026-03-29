@@ -2,7 +2,6 @@
   (:require [clojure.set]
             [clojure.string]
             [std.lang.base.book-entry :as entry]
-            [std.lang.base.entry-template :as entry-template]
             [std.lang.base.book-meta :as meta]
             [std.lang.base.book-module :as module]
             [std.lang.base.util :as ut]
@@ -65,17 +64,15 @@
    (get modules id)))
 
 (defn get-code-deps
-  "gets `:deps` or if a `:static/template` calculate dependencies"
+  "gets `:deps` or, for templates, delegates restaging through the impl layer"
   {:added "4.0"}
-  ([{:keys [modules grammar lang] :as book} id]
-   (let [entry (get-code-entry book id)]
-     (if-not (:static/template entry)
-       (:deps entry)
-       (:deps (entry-template/cached-code-state entry
-                                                (get-in grammar [:reserved (:op entry)])
-                                                grammar
-                                                modules
-                                                {:lang lang}))))))
+  ([book id]
+    (let [entry (get-code-entry book id)]
+      (if-not (:static/template entry)
+        (:deps entry)
+        ((requiring-resolve 'std.lang.base.impl-template/cached-entry-deps)
+         book
+         entry)))))
 
 (defn get-deps
   "get dependencies for a given id"

@@ -274,11 +274,12 @@
                        :runtime (assoc rt
                                        :type (:runtime rt)
                                        :namespace (env/ns-sym)))
-         _      (if common/*trace* (env/prn emit params))
-         body   (ptr/ptr-invoke-script ptr args {:emit emit
-                                                 :lang lang
-                                                 :layout (or (:layout params)
-                                                             layout)})]
+          _      (if common/*trace* (env/prn emit params))
+          body   (ptr/ptr-invoke-script ptr args {:emit emit
+                                                  :library library
+                                                  :lang lang
+                                                  :layout (or (:layout params)
+                                                              layout)})]
      (ptr/ptr-invoke rt
                      f
                      body

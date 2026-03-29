@@ -409,6 +409,7 @@
 
 (def +xt-common-object+
   [{:op :x-is-object?     :symbol #{'x:is-object?}      :emit :abstract}
+   {:op :x-has-key?       :symbol #{'x:has-key?}        :emit :abstract}
    {:op :x-del-key        :symbol #{'x:del-key}         :macro #'tf-del-key     :emit :macro}
    {:op :x-get-key        :symbol #{'x:get-key}         :macro #'tf-get-key     :emit :macro}
    {:op :x-get-path       :symbol #{'x:get-path}        :macro #'tf-get-path    :emit :macro}
@@ -501,7 +502,7 @@
   [{:op :x-is-function?   :symbol #{'x:is-function?}    :emit :abstract}
    {:op :x-callback       :symbol #{'x:callback}        :emit :unit :default nil}
    {:op :x-identity       :symbol #{'x:identity}        :emit :hard-link
-    :raw 'xt.lang.common-base/identity}])
+    :raw 'xt.lang.common-lib/identity}])
 
 (def +xt-functional-invoke+
   [{:op :x-eval           :symbol #{'x:eval}            :emit :abstract}

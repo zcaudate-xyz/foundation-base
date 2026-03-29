@@ -10,9 +10,10 @@
 (defn op-table-vars
   [ns-sym]
   (->> (ns-publics ns-sym)
-       (keep (fn [[sym v]]
-               (when (str/starts-with? (name sym) "+op-")
-                 v)))))
+        (keep (fn [[sym v]]
+                (when (or (str/starts-with? (name sym) "+op-")
+                          (str/starts-with? (name sym) "+xt-"))
+                  v)))))
 
 (defn op-entries
   []

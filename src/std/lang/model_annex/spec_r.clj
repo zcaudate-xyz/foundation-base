@@ -7,7 +7,7 @@
             [std.lang.base.grammar-spec :as spec]
             [std.lang.base.script :as script]
             [std.lang.base.util :as ut]
-            [std.lang.model-annex.spec-xtalk]
+            [std.lang.model.spec-xtalk]
             [std.lang.model-annex.spec-xtalk.fn-r :as fn]
             [std.lib.collection :as collection]
             [std.lib.template :as template]))

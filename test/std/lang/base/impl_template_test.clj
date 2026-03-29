@@ -1,4 +1,4 @@
-(ns std.lang.base.entry-template-test
+(ns std.lang.base.impl-template-test
   (:require [std.lang.base.book :as b]
             [std.lang.base.emit-helper :as helper]
             [std.lang.base.emit-prep-lua-test :as prep]

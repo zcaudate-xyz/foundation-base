@@ -4,7 +4,7 @@
   (:refer-clojure :exclude [constantly iterate repeatedly cycle range drop peek take map mapcat concat filter keep partition take-nth]))
 
 (l/script :xtalk
-  {:require [[xt.lang.common-base :as common-base]
+  {:require [[xt.lang.common-lib :as common-lib]
              [xt.lang.common-data :as common-data]]})
 
 (defspec.xt Iterator
@@ -189,7 +189,7 @@
   {:added "4.0"}
   [x]
   (return (or (-/iter-native? x)
-              (and (common-base/obj? x)
+              (and (common-lib/obj? x)
                    (x:has-key? x
                                "::"
                                "iterator")))))

@@ -44,10 +44,16 @@
                    
                    :else
                    (do (var tn := (. ~obj ["constructor"] ["name"]))
-                       (if (== tn "Object")
-                         (return "object")
-                         (return tn))))
-             (return t)))))
+                        (if (== tn "Object")
+                          (return "object")
+                          (return tn))))
+              (return t)))))
+
+(defn js-tf-x-has-key?
+  [[_ obj key check]]
+  (if (some? check)
+    (list '== check (list 'x:get-key obj key nil))
+    (list 'not= nil (list '. obj [key]))))
 
 (defn js-tf-x-future-run
   [[_ thunk]]
@@ -150,7 +156,8 @@
   {})
 
 (def +js-custom+
-  {:x-callback       {:emit :throw}})
+  {:x-callback       {:emit :throw}
+   :x-has-key?       {:macro #'js-tf-x-has-key? :emit :macro}})
 
 ;;
 ;; MATH
@@ -559,6 +566,7 @@
    :x-iter-from-arr    {:macro #'js-tf-x-iter-from-arr       :emit :macro}
    :x-iter-from        {:macro #'js-tf-x-iter-from           :emit :macro}
    :x-iter-eq          {:macro #'js-tf-x-iter-eq             :emit :macro}
+   :x-iter-null        {:default '((. [] [Symbol.iterator])) :emit :unit}
    :x-iter-next        {:macro #'js-tf-x-iter-next           :emit :macro}
    :x-iter-has?        {:macro #'js-tf-x-iter-has?           :emit :macro}
    :x-iter-native?     {:macro #'js-tf-x-iter-native?        :emit :macro}})

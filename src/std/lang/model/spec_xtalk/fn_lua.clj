@@ -47,8 +47,14 @@
            (if (== t "table")
              (if (== nil (. '(~obj) [1]))
                (return "object")
-               (return "array"))
-             (return t)))))
+                (return "array"))
+              (return t)))))
+
+(defn lua-tf-x-has-key?
+  [[_ obj key check]]
+  (if (some? check)
+    (list '== check (list 'x:get-key obj key nil))
+    (list 'not= nil (list '. obj [key]))))
 
 (defn lua-tf-x-future-run
   [[_ thunk]]
@@ -208,7 +214,7 @@
 ;;
 
 (def +lua-custom+
-  {})
+  {:x-has-key? {:macro #'lua-tf-x-has-key? :emit :macro}})
 
 ;;
 ;; MATH
@@ -619,6 +625,7 @@
    :x-iter-from-arr       {:macro #'lua-tf-x-iter-from-arr       :emit :macro}
    :x-iter-from           {:macro #'lua-tf-x-iter-from           :emit :macro}
    :x-iter-eq             {:macro #'lua-tf-x-iter-eq             :emit :macro}
+   :x-iter-null           {:default '(coroutine.wrap (fn [])) :emit :unit}
    :x-iter-next           {:macro #'lua-tf-x-iter-next           :emit :macro}
    :x-iter-has?           {:macro #'lua-tf-x-iter-has?           :emit :macro}
    :x-iter-native?        {:macro #'lua-tf-x-iter-native?        :emit :macro}})

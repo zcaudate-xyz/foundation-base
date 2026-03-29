@@ -213,13 +213,14 @@
                                    rt-config)
          _  (annex/register-annex-tag ns tag lang runtime config)
          rt (annex/get-annex-runtime ns tag)]
-     (if (or (not rt)
-             (not (annex/same-runtime? rt lang (or runtime :default) rt-config)))
-       (annex/add-annex-runtime ns tag
-                                (annex/start-runtime lang
-                                                     (or runtime :default)
-                                                     rt-config))
-       [rt]))))
+      (if (or (not rt)
+              (not (annex/same-runtime? rt lang (or runtime :default) rt-config)))
+        (annex/add-annex-runtime ns tag
+                                 (annex/start-runtime lang
+                                                      (or runtime :default)
+                                                      (assoc rt-config
+                                                             :library (annex/get-annex-library ns))))
+        [rt]))))
 
 (defmacro ^{:style/indent 1}
   script+

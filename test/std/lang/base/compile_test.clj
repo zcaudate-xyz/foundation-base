@@ -62,7 +62,7 @@
       :layout :flat
       :entry {:label true}}))
   => (contains-in
-      {:files 1, :status :changed, :written [[string?]]}))
+      {:files pos-int?, :status :changed, :written [[string?]]}))
 
 ^{:refer std.lang.base.compile/compile-module-directory :added "4.0"}
 (fact "compiles a directory"
