@@ -1,15 +1,7 @@
 (ns xt.lang.common-string
-  (:require [std.lang :as l]
-            [std.lang.typed.xtalk :refer [defspec.xt]])
-  (:refer-clojure :exclude [abs bit-and bit-or bit-xor type get-in identity inc
-                            dec zero? pos? neg? even? odd? max min mod quot
-                            cat eval apply print nil? fn? first second nth
-                            replace last sort sort-by throw]))
+  (:require [std.lang :as l :refer [defspec.xt]]))
 
-(l/script :xtalk
-  {:require [[xt.lang.base-macro :as k]]})
-
-(l/intern-macros :xtalk 'xt.lang.base-macro)
+(l/script :xtalk)
 
 (defspec.xt StringPair
   [:xt/tuple [:xt/maybe :xt/str] :xt/str])

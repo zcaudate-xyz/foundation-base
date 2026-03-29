@@ -1,6 +1,5 @@
 (ns xt.lang.common-lib
-  (:require [std.lang :as l]
-            [std.lang.typed.xtalk :refer [defspec.xt]]))
+  (:require [std.lang :as l :refer [defspec.xt]]))
 
 (l/script :xtalk)
 
@@ -131,16 +130,17 @@
   "creates a key access function"
   {:added "4.1"}
   [k]
-  (return (k/fn:> [x] (x:get-key x k))))
+  (return (fn [x] (return (x:get-key x k)))))
 
 (defn.xt eq-fn
   "creates an equality comparator"
   {:added "4.1"}
   [k v]
-  (return (k/fn:> [x]
-            (:? (x:is-function? v)
-                (v (x:get-key x k))
-                (== v (x:get-key x k))))))
+  (return (fn [x]
+            (return
+             (:? (x:is-function? v)
+                 (v (x:get-key x k))
+                 (== v (x:get-key x k)))))))
 
 (defn.xt inc-fn
   "creates an increment function by closure"
@@ -191,15 +191,15 @@
   "creates a set key function"
   {:added "4.1"}
   [obj k]
-  (return (k/fn:> [v] (-/step-set-key obj k v))))
+  (return (fn [v] (return (-/step-set-key obj k v)))))
 
 (defn.xt step-set-pair
   "step to set key value pair in object"
   {:added "4.1"}
   [obj e]
   (x:set-key obj
-             (common-data/first e)
-             (common-data/second e))
+             (x:arr-first e)
+             (x:arr-second e))
   (return obj))
 
 (defn.xt step-del-key

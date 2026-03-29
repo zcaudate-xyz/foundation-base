@@ -24,6 +24,7 @@
             [std.lang.base.workspace :as workspace]
             [std.lang.interface.type-notify :as notify]
             [std.lang.interface.type-shared :as shared]
+            [std.lang.typed.xtalk :as xtalk]
             [std.lang.model.spec-xtalk]
             [std.lang.model.spec-bash]
             [std.lang.model.spec-c]
@@ -131,6 +132,8 @@
  [rt:restart script-control/script-rt-restart]
  [rt:stop script-control/script-rt-stop]
 
+ xtalk/defspec.xt
+ 
  workspace/sym-entry
  workspace/module-entries
  workspace/emit-ptr

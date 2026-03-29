@@ -286,10 +286,16 @@
                (f/error "Code entry not found:" {:input f
                                                  :form form}))]
     (concat (reverse rdecl)
-            [(with-meta (cons (cond-> (ut/sym-full f-module f-id)
-                                (not unwrapped) (volatile!))
+             [(with-meta (cons (cond-> (ut/sym-full f-module f-id)
+                                 (not unwrapped) (volatile!))
                               args)
-               {:assign/inline true})])))
+                {:assign/inline true})])))
+
+(defn protect-reserved-head
+  [form]
+  (with-meta (cons (volatile! (first form))
+                   (rest form))
+    (meta form)))
 
 (defn to-staging-form
   "different staging forms"
@@ -312,6 +318,9 @@
           (and (= :def-assign (:emit reserved))
                (= :inline (last form)))
           (walk-fn (process-inline-assignment form modules mopts))
+
+          reserved
+          (protect-reserved-head form)
           
           :else
           (let [fe (get-fragment (first form)
@@ -399,14 +408,18 @@
             *macro-opts* mopts]
     (let [form  (walk/prewalk
                  (fn walk-fn [form]
-                   
-                   (cond  (and (collection/form? form)
-                               (= (first form) '!:template))
-                          (walk-fn (eval (second form)))
+                    
+                    (cond  (and (collection/form? form)
+                                (= (first form) '!:template))
+                           (walk-fn (eval (second form)))
 
-                          (symbol? form)
-                          (or (value-standalone form grammar)
-                              (if (namespace form)
+                           (and (collection/form? form)
+                                (get-in grammar [:reserved (first form)]))
+                           (protect-reserved-head form)
+
+                           (symbol? form)
+                           (or (value-standalone form grammar)
+                               (if (namespace form)
                                 (process-namespaced-symbol form modules mopts nil nil identity)
                                 (process-standard-symbol form mopts nil)))
                           

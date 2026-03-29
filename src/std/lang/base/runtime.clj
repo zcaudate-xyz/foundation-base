@@ -80,6 +80,9 @@
                            body
                            (:main emit)
                            (or (:json emit) :full)))
+
+         (= :xtalk lang)
+         (env/pp-str (:form @ptr))
          
          :else
          (ptr/ptr-display ptr {:library library

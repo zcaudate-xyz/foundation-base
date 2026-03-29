@@ -1,10 +1,6 @@
 (ns xt.lang.common-math
-  (:require [std.lang :as l]
-            [std.lang.typed.xtalk :refer [defspec.xt]])
-  (:refer-clojure :exclude [abs bit-and bit-or bit-xor type get-in identity inc
-                            dec zero? pos? neg? even? odd? max min mod quot
-                            cat eval apply print nil? fn? first second nth
-                            replace last sort sort-by throw]))
+  (:require [std.lang :as l :refer [defspec.xt]])
+  (:refer-clojure :exclude []))
 
 (l/script :xtalk)
 
@@ -34,6 +30,8 @@
 
 (defspec.xt bit-count
   [:fn [:xt/num] :xt/num])
+
+(def$.xt sin x:m-sin)
 
 (defn.xt mod-pos
   "gets the positive mod"
@@ -107,17 +105,3 @@
         (return max)
         :else
         (return v)))
-
-(defn.xt bit-count
-  "get the bit count"
-  {:added "4.1"}
-  [x]
-  (var v0 (- x (x:bit-and (x:bit-rshift x 1) (:- "0x55555555"))))
-  (var v1 (+ (x:bit-and v0 (:- "0x33333333"))
-             (x:bit-and (x:bit-rshift v0 2) (:- "0x33333333"))))
-  (return
-   (x:bit-rshift
-    (* (x:bit-and (+ v1 (x:bit-rshift v1 4))
-                  (:- "0xF0F0F0F"))
-       (:- "0x1010101"))
-    24)))

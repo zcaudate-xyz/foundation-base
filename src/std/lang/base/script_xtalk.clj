@@ -11,20 +11,6 @@
   (boolean (or (= :xtalk lang)
                (= :xtalk parent))))
 
-(defn- library-load-call
-  [sym & args]
-  (apply (requiring-resolve sym) args))
-
-(defn ensure-polyfill-namespaces!
-  "loads any polyfill namespaces required by xtalk hard-links into the current library"
-  {:added "4.1"}
-  [lib lang polyfill-modules]
-  (doseq [module-id polyfill-modules]
-    (when-not (lib/get-module lib lang module-id)
-      (library-load-call 'std.lang.base.library-load/load-namespace
-                         lib
-                         module-id))))
-
 (defn validate-xtalk-profiles!
   "fails early when a form uses xtalk capabilities not fully supported by the target grammar"
   {:added "4.1"}
@@ -59,14 +45,14 @@
     (xtalk-system/scan-xtalk form-hydrate)))
 
 (defn prepare-entry!
-  "hydrates, validates, and loads xtalk dependencies for a top-level entry when applicable"
+  "hydrates and validates xtalk metadata for a top-level entry when applicable"
   {:added "4.1"}
   [lib {:keys [entry lang module reserved snapshot]
         :or {snapshot (lib/get-snapshot lib)}}]
   (let [book (lib/get-book lib lang)]
     (when (xtalk-book? book)
       (let [{:keys [grammar modules]} book
-          {:keys [polyfill-modules] :as xtalk-info}
+            {:as xtalk-info}
           (hydrate-xtalk-scan entry
                               reserved
                               grammar
@@ -75,5 +61,4 @@
                                :snapshot snapshot
                                :module (get modules module)})]
         (validate-xtalk-profiles! lang grammar xtalk-info)
-        (ensure-polyfill-namespaces! lib lang polyfill-modules)
         xtalk-info))))
