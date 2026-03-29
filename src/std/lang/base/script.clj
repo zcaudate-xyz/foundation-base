@@ -263,32 +263,6 @@
                       (quote ~body)
                       ~(meta &form)))))
 
-
-(comment
-
-  (defmacro
-    !.async
-    "switch between defined annex envs"
-    {:added "4.0"}
-    ([tag body]
-     `(future/future:run
-       (bound-fn
-         []
-         (script-ext-run (quote ~(env/ns-sym))
-                         ~tag
-                         (quote ~body)
-                         ~(meta &form))))))
-
-  (defmacro
-    !.run
-    "switch between defined annex envs"
-    {:added "4.0"}
-    ([lang body]
-     `(control/script-rt-oneshot-eval
-       :oneshot
-       ~lang
-       [(quote ~body)]))))
-
 (defn annex:start
   "starts an annex tag"
   {:added "4.0"}

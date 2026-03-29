@@ -158,6 +158,43 @@
              (if (= :defrun (:op-key et))
                (apply list 'do (drop 2 (:form et))))))))))
 
+(defn value-template-args
+  "derives callable value args from a template var"
+  {:added "4.1"}
+  [template]
+  (let [arglists (-> template meta :arglists)
+        argv     (-> arglists first)
+        argv     (if (vector? (first argv))
+                   (first argv)
+                   argv)]
+    (->> argv
+         rest
+         vec)))
+
+(defn value-standalone
+  "returns the standalone expansion for a value-liftable reserved symbol"
+  {:added "4.1"}
+  [sym grammar]
+  (let [{:keys [emit macro]
+         template :value/template
+         standalone :value/standalone} (get-in grammar [:reserved sym])
+        template (or template
+                     (when (= :macro emit)
+                       macro))]
+    (cond (or (collection/form? standalone)
+              (symbol? standalone))
+          standalone
+
+          (and (= true standalone)
+               template)
+          (let [args (value-template-args template)]
+            (list 'fn args
+                  (list 'return
+                        (template (apply list nil args)))))
+
+          :else
+          nil)))
+
 (defn process-namespaced-resolve
   "resolves symbol in current namespace"
   {:added "4.0"}
@@ -269,7 +306,7 @@
           (= :template (:type reserved))
           (walk-fn ((:macro reserved) form))
           
-          (= :hard-link (:type reserved))
+          (= :hard-link (:emit reserved))
           (walk-fn (cons (:raw reserved) (rest form)))
           
           (and (= :def-assign (:emit reserved))
@@ -338,9 +375,11 @@
                          (to-staging-form form grammar modules mopts deps-fragment walk-fn)
                          
                          (and (symbol? form))
-                         (if (namespace form)
-                           (process-namespaced-symbol form modules mopts deps deps-fragment walk-fn)
-                           (process-standard-symbol form mopts deps-native))
+                         (or (when-let [standalone (value-standalone form grammar)]
+                               (walk-fn standalone))
+                             (if (namespace form)
+                               (process-namespaced-symbol form modules mopts deps deps-fragment walk-fn)
+                               (process-standard-symbol form mopts deps-native)))
                          
                          :else form))
                  input)
@@ -366,9 +405,10 @@
                           (walk-fn (eval (second form)))
 
                           (symbol? form)
-                          (if (namespace form)
-                            (process-namespaced-symbol form modules mopts nil nil identity)
-                            (process-standard-symbol form mopts nil))
+                          (or (value-standalone form grammar)
+                              (if (namespace form)
+                                (process-namespaced-symbol form modules mopts nil nil identity)
+                                (process-standard-symbol form mopts nil)))
                           
                           :else
                           form))

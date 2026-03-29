@@ -27,6 +27,25 @@
        (mapv    (fn [[k var]]
                   [k (symbol shortcut (name (f/var-sym var)))]))))
 
+(defn normalize-op-entry
+  "normalizes grammar entry defaults shared across macro-style operators"
+  {:added "4.1"}
+  [entry]
+  (cond-> entry
+    (and (= :macro (:emit entry))
+         (not (contains? entry :value/template))
+         (:macro entry))
+    (assoc :value/template (:macro entry))
+
+    (and (= :macro (:emit entry))
+         (not (contains? entry :value/standalone)))
+    (assoc :value/standalone true)
+
+    (and (= :hard-link (:emit entry))
+         (symbol? (:raw entry))
+         (not (contains? entry :value/standalone)))
+    (assoc :value/standalone (:raw entry))))
+
 (defn collect-ops
   "collects alll ops together
  
@@ -36,8 +55,8 @@
   [arr]
   (->> (map-indexed (fn [i [k v]]
                       [k (with-meta
-                           (collection/map-juxt [:op identity]
-                                       v)
+                           (collection/map-juxt [:op normalize-op-entry]
+                                                v)
                            {:order i})])
                     arr)
        (into {})))

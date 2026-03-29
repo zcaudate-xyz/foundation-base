@@ -822,6 +822,7 @@
        :return        (emit-return raw args grammar mopts)
        :macro         (emit-macro key form grammar mopts)
        :template      (emit-macro key form grammar mopts)
+       :hard-link     (*emit-fn* (cons raw args) grammar mopts)
        
        ;; LANGUAGE SPECIFIC GLOBAL
        :with-global   (emit-with-global key form grammar mopts)

@@ -136,8 +136,6 @@
              (case type
                :fn         (fn/emit-fn key form grammar mopts)
                :def        (emit-top-level key form grammar mopts)
-               :hard-link  (common/*emit-fn* (cons (:raw props) (rest form))
-                                             grammar mopts)
                (f/error "Missing key" {:key key
                                        :symbol sym
                                        :props props
@@ -146,4 +144,3 @@
          (if common/*explode*
            (env/prn :EMIT-ERROR form t))
          (throw t))))))
-

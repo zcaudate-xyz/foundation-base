@@ -5,37 +5,46 @@
             [std.lib.walk :as walk]))
 
 (def +xtalk-profiles+
-  [[:xtalk-core-value xtalk/+op-xtalk-core-value+]
-   [:xtalk-core-invoke xtalk/+op-xtalk-core-invoke+]
-   [:xtalk-runtime     xtalk/+op-xtalk-runtime+]
-   [:xtalk-system      xtalk/+op-xtalk-system+]
-   [:xtalk-task        xtalk/+op-xtalk-task+]
-   [:xtalk-proto       xtalk/+op-xtalk-proto+]
-   [:xtalk-global      xtalk/+op-xtalk-global+]
-   [:xtalk-predicate   xtalk/+op-xtalk-predicate+]
-   [:xtalk-access      xtalk/+op-xtalk-access+]
-   [:xtalk-index       xtalk/+op-xtalk-index+]
-   [:xtalk-callback    xtalk/+op-xtalk-callback+]
-   [:xtalk-math        xtalk/+op-xtalk-math+]
-   [:xtalk-type        xtalk/+op-xtalk-type+]
-   [:xtalk-bit         xtalk/+op-xtalk-bit+]
-   [:xtalk-lu          xtalk/+op-xtalk-lu+]
-   [:xtalk-obj         xtalk/+op-xtalk-obj+]
-   [:xtalk-arr         xtalk/+op-xtalk-arr+]
-   [:xtalk-str         xtalk/+op-xtalk-str+]
-   [:xtalk-js          xtalk/+op-xtalk-js+]
-   [:xtalk-return      xtalk/+op-xtalk-return+]
-   [:xtalk-socket      xtalk/+op-xtalk-socket+]
-   [:xtalk-ws          xtalk/+op-xtalk-ws+]
-   [:xtalk-iter        xtalk/+op-xtalk-iter+]
-   [:xtalk-cache       xtalk/+op-xtalk-cache+]
-   [:xtalk-thread      xtalk/+op-xtalk-thread+]
-   [:xtalk-file        xtalk/+op-xtalk-file+]
-   [:xtalk-b64         xtalk/+op-xtalk-b64+]
-   [:xtalk-uri         xtalk/+op-xtalk-uri+]
-   [:xtalk-notify      xtalk/+op-xtalk-notify+]
-   [:xtalk-service     xtalk/+op-xtalk-service+]
-   [:xtalk-special     xtalk/+op-xtalk-special+]])
+  [[:xtalk-core-value (vec (concat xtalk/+xt-common-basic+
+                                   xtalk/+xt-common-number+
+                                   xtalk/+xt-fn-identity+))]
+   [:xtalk-core-invoke (vec (concat xtalk/+xt-common-print+
+                                    xtalk/+xt-lang-invoke+))]
+   [:xtalk-runtime     xtalk/+xt-runtime-shell+]
+   [:xtalk-system      (vec (concat xtalk/+xt-lang-unpack+
+                                    xtalk/+xt-lang-random+
+                                    xtalk/+xt-lang-time+))]
+   [:xtalk-task        xtalk/+xt-core-future+]
+   [:xtalk-proto       xtalk/+xt-lang-proto+]
+   [:xtalk-global      xtalk/+xt-lang-global+]
+   [:xtalk-predicate   (vec (concat xtalk/+xt-common-number+
+                                    xtalk/+xt-common-nil+))]
+   [:xtalk-access      xtalk/+xt-common-object+]
+   [:xtalk-index       xtalk/+xt-common-index+]
+   [:xtalk-callback    xtalk/+xt-common-function+]
+   [:xtalk-math        xtalk/+xt-math+]
+   [:xtalk-type        (vec (concat xtalk/+xt-common-primitives+
+                                    xtalk/+xt-common-basic+))]
+   [:xtalk-bit         xtalk/+xt-lang-bit+]
+   [:xtalk-lu          xtalk/+xt-lu+]
+   [:xtalk-obj         (vec (concat xtalk/+xt-common-object+
+                                    xtalk/+xt-obj+))]
+   [:xtalk-arr         (vec (concat xtalk/+xt-common-array+
+                                    xtalk/+xt-arr+))]
+   [:xtalk-str         xtalk/+xt-str+]
+   [:xtalk-js          xtalk/+xt-js+]
+   [:xtalk-return      xtalk/+xt-return+]
+   [:xtalk-socket      xtalk/+xt-socket+]
+   [:xtalk-ws          xtalk/+xt-ws+]
+   [:xtalk-iter        xtalk/+xt-iter+]
+   [:xtalk-cache       xtalk/+xt-cache+]
+   [:xtalk-thread      xtalk/+xt-thread+]
+   [:xtalk-file        xtalk/+xt-file+]
+   [:xtalk-b64         xtalk/+xt-b64+]
+   [:xtalk-uri         xtalk/+xt-uri+]
+   [:xtalk-notify      xtalk/+xt-notify+]
+   [:xtalk-service     xtalk/+xt-service+]
+   [:xtalk-special     xtalk/+xt-special+]])
 
 (def +xtalk-profile-order+
   (mapv first +xtalk-profiles+))
@@ -180,8 +189,8 @@
        :profiles (xtalk-ops-profiles xtalk-ops)
        :polyfill-modules (->> xtalk-ops
                               (keep (fn [op]
-                                      (let [{:keys [type raw]} (xtalk-op-entry op)]
-                                        (when (and (= :hard-link type)
+                                      (let [{:keys [emit raw]} (xtalk-op-entry op)]
+                                        (when (and (= :hard-link emit)
                                                    (symbol? raw)
                                                    (namespace raw))
                                           (symbol (namespace raw))))))
