@@ -1,10 +1,12 @@
 (ns std.lang.base.impl-entry-test
   (:require [std.lang.base.book :as b]
-            [std.lang.base.book-entry :as e]
-            [std.lang.base.emit :as emit]
-            [std.lang.base.emit-prep-lua-test :as prep]
-            [std.lang.base.impl-entry :as entry]
-            [std.lib.env :as env])
+              [std.lang.base.book-entry :as e]
+             [std.lang.base.emit :as emit]
+             [std.lang.base.emit-prep-lua-test :as prep]
+             [std.lang.base.impl-entry :as entry]
+             [std.lang.base.library-snapshot :as snap]
+             [std.lang.base.library-snapshot-prep-test :as lprep]
+             [std.lib.env :as env])
   (:use code.test))
 
 ^{:refer std.lang.base.impl-entry/create-common :added "4.0"}
@@ -230,6 +232,41 @@
                                     :display :brief)
                      :emit {:label true}})
   => "// L.core/add-fn [] \nfunction L_core____add_fn(a,b){\n  return G + L_core____identity_fn(a + b);\n}")
+
+(fact "emits template entries using merged parent modules from the snapshot"
+  ^:hidden
+
+  (let [child-module (b/book-module {:id 'L.core
+                                     :lang :lua
+                                     :link '{p x.core
+                                             - L.core}})
+        child-book   (-> (b/book {:lang :lua
+                                  :meta (:meta prep/+book-empty+)
+                                  :grammar (:grammar prep/+book-empty+)
+                                  :parent :x})
+                         (b/set-module child-module)
+                         second)
+        snapshot-0   (-> (snap/snapshot {})
+                         (snap/add-book lprep/+book-x+)
+                         (snap/add-book child-book))
+        merged-book-0 (snap/get-book snapshot-0 :lua)
+        child-entry-0 (entry/create-code-base
+                       '(defn call-parent [a]
+                          (return (p/add a 1)))
+                       {:lang :lua
+                        :namespace (env/ns-sym)
+                        :module 'L.core}
+                       (:grammar merged-book-0))
+        snapshot-1   (second (snap/set-entry snapshot-0 child-entry-0))
+        merged-book-1 (snap/get-book snapshot-1 :lua)
+        child-entry-1 (assoc (get-in merged-book-1 '[:modules L.core :code call-parent])
+                             :static/template true)]
+    (entry/emit-entry (:grammar merged-book-1)
+                      child-entry-1
+                      {:snapshot snapshot-1
+                       :layout :full
+                       :emit {:label false}}))
+  => "function L_core____call_parent(a){\n  return a + 1;\n}")
 
 (comment
   (./import))

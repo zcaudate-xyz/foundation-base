@@ -4,7 +4,7 @@
             [std.lang.base.emit-helper :as helper]
             [std.lang.base.grammar :as grammar]
             [std.lang.base.util :as ut]
-            [std.lang.model.spec-rust :as rust]
+            [std.lang.model-annex.spec-rust :as rust]
             [std.lib.env :as env])
   (:use code.test))
 
@@ -61,11 +61,3 @@
       second
       (b/set-entry +core-code-identity-fn+)
       second))
-
-
-
-;;
-;;
-;;
-;;
-

@@ -1,12 +1,12 @@
 (ns std.lang.base.impl-lifecycle-test
   (:require [js.blessed :as blessed]
             [js.blessed.ui-core :as ui-core]
+            [js.blessed.ui-group :as ui-group]
             [std.lang :as l]
             [std.lang.base.compile :as compile]
             [std.lang.base.impl :as impl]
             [std.lang.base.impl-lifecycle :refer :all]
             [std.lang.base.library :as lib]
-            [xt.lang]
             [xt.lang.base-lib :as k])
   (:use code.test))
 
