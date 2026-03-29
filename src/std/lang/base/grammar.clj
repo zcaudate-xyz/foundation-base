@@ -4,6 +4,7 @@
             [std.lang.base.grammar-macro :as macro]
             [std.lang.base.grammar-spec :as spec]
             [std.lang.base.grammar-xtalk :as xtalk]
+            [std.lang.base.grammar-xtalk-system :as xtalk-system]
             [std.lib.collection :as collection]
             [std.lib.foundation :as f]
             [std.lib.impl :as impl]))
@@ -46,66 +47,43 @@
                                  (gen-ops 'std.lang.base.grammar-macro "macro")
                                  (gen-ops 'std.lang.base.grammar-xtalk "xtalk"))))}
   +op-all+
-  (->> [[:builtin spec/+op-builtin+]
-        [:builtin-global spec/+op-builtin-global+]
-        [:builtin-module spec/+op-builtin-module+]
-        [:builtin-helper spec/+op-builtin-helper+]
-        [:free-control spec/+op-free-control+]
-        [:free-literal spec/+op-free-literal+]
-        [:math       spec/+op-math+]
-        [:compare    spec/+op-compare+]
-        [:logic      spec/+op-logic+]
-        [:counter    spec/+op-counter+]
-        [:return     spec/+op-return+]
-        [:throw      spec/+op-throw+]
-        [:await             spec/+op-await+]
-        [:async             spec/+op-async+]
-        [:data-table        spec/+op-data-table+]
-        [:data-shortcuts    spec/+op-data-shortcuts+]
-        [:data-range        spec/+op-data-range+]
-        [:vars              spec/+op-vars+]
-        [:bit               spec/+op-bit+]
-        [:pointer           spec/+op-pointer+]
-        [:fn                spec/+op-fn+]
-        [:block             spec/+op-block+]
-        [:control-base      spec/+op-control-base+]
-        [:control-general   spec/+op-control-general+]
-        [:control-try-catch spec/+op-control-try-catch+]
-        [:top-base     spec/+op-top-base+]
-        [:top-global   spec/+op-top-global+]
-        [:class        spec/+op-class+]
-        [:for          spec/+op-for+]
-        [:coroutine    spec/+op-coroutine+]
-        [:macro         macro/+op-macro+]
-        [:macro-arrow   macro/+op-macro-arrow+]
-        [:macro-let     macro/+op-macro-let+]
-        [:macro-xor     macro/+op-macro-xor+]
-        [:macro-case    macro/+op-macro-case+]
-        [:macro-forange macro/+op-macro-forange+]
-        [:xtalk-core    xtalk/+op-xtalk-core+]
-        [:xtalk-proto   xtalk/+op-xtalk-proto+]
-        [:xtalk-global  xtalk/+op-xtalk-global+]
-        [:xtalk-custom  xtalk/+op-xtalk-custom+]
-        [:xtalk-math xtalk/+op-xtalk-math+]
-        [:xtalk-type xtalk/+op-xtalk-type+]
-        [:xtalk-bit  xtalk/+op-xtalk-bit+]
-        [:xtalk-lu   xtalk/+op-xtalk-lu+]
-        [:xtalk-obj  xtalk/+op-xtalk-obj+]
-        [:xtalk-arr  xtalk/+op-xtalk-arr+]
-        [:xtalk-str  xtalk/+op-xtalk-str+]
-        [:xtalk-js   xtalk/+op-xtalk-js+]
-        [:xtalk-return  xtalk/+op-xtalk-return+]
-        [:xtalk-socket  xtalk/+op-xtalk-socket+]
-        [:xtalk-ws      xtalk/+op-xtalk-ws+]
-        [:xtalk-iter    xtalk/+op-xtalk-iter+]
-        [:xtalk-cache   xtalk/+op-xtalk-cache+]
-        [:xtalk-thread  xtalk/+op-xtalk-thread+]
-        [:xtalk-file    xtalk/+op-xtalk-file+]
-        [:xtalk-b64     xtalk/+op-xtalk-b64+]
-        [:xtalk-uri     xtalk/+op-xtalk-uri+]
-        [:xtalk-notify  xtalk/+op-xtalk-notify+]
-        [:xtalk-service xtalk/+op-xtalk-service+]
-        [:xtalk-special xtalk/+op-xtalk-special+]]
+  (->> (concat [[:builtin spec/+op-builtin+]
+                [:builtin-global spec/+op-builtin-global+]
+                [:builtin-module spec/+op-builtin-module+]
+                [:builtin-helper spec/+op-builtin-helper+]
+                [:free-control spec/+op-free-control+]
+                [:free-literal spec/+op-free-literal+]
+                [:math       spec/+op-math+]
+                [:compare    spec/+op-compare+]
+                [:logic      spec/+op-logic+]
+                [:counter    spec/+op-counter+]
+                [:return     spec/+op-return+]
+                [:throw      spec/+op-throw+]
+                [:await             spec/+op-await+]
+                [:async             spec/+op-async+]
+                [:data-table        spec/+op-data-table+]
+                [:data-shortcuts    spec/+op-data-shortcuts+]
+                [:data-range        spec/+op-data-range+]
+                [:vars              spec/+op-vars+]
+                [:bit               spec/+op-bit+]
+                [:pointer           spec/+op-pointer+]
+                [:fn                spec/+op-fn+]
+                [:block             spec/+op-block+]
+                [:control-base      spec/+op-control-base+]
+                [:control-general   spec/+op-control-general+]
+                [:control-try-catch spec/+op-control-try-catch+]
+                [:top-base     spec/+op-top-base+]
+                [:top-global   spec/+op-top-global+]
+                [:class        spec/+op-class+]
+                [:for          spec/+op-for+]
+                [:coroutine    spec/+op-coroutine+]
+                [:macro         macro/+op-macro+]
+                [:macro-arrow   macro/+op-macro-arrow+]
+                [:macro-let     macro/+op-macro-let+]
+                [:macro-xor     macro/+op-macro-xor+]
+                [:macro-case    macro/+op-macro-case+]
+                [:macro-forange macro/+op-macro-forange+]]
+               xtalk-system/+xtalk-profiles+)
        (collect-ops)))
 
 (defn ops-list
@@ -208,30 +186,7 @@
    => map?"
   {:added "4.0"}
   []
-  (build :include [:xtalk-core
-                   :xtalk-proto
-                   :xtalk-global
-                   :xtalk-custom
-                   :xtalk-math
-                   :xtalk-type
-                   :xtalk-bit
-                   :xtalk-lu
-                   :xtalk-obj
-                   :xtalk-arr
-                   :xtalk-str
-                   :xtalk-js
-                   :xtalk-return
-                   :xtalk-socket
-                   :xtalk-ws
-                   :xtalk-iter
-                   :xtalk-cache
-                   :xtalk-thread
-                   :xtalk-file
-                   :xtalk-b64
-                   :xtalk-uri
-                   :xtalk-notify
-                   :xtalk-service
-                   :xtalk-special]))
+  (build :include xtalk-system/+xtalk-profile-order+))
 
 (defn build:override
   "overrides existing ops in the map"

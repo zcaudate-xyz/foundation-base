@@ -9,6 +9,7 @@
             [std.lang.base.runtime :as rt]
             [std.lang.base.script-annex :as annex]
             [std.lang.base.script-control :as control]
+            [std.lang.base.script-xtalk :as script-xtalk]
             [std.lang.base.script-lint :as lint]
             [std.lang.base.util :as ut]
             [std.lib.context.pointer]
@@ -209,6 +210,11 @@
                                                        {:lang lang
                                                         :module module})))
          lib    (impl/runtime-library)
+         _      (script-xtalk/prepare-entry! lib
+                                             {:lang lang
+                                              :entry entry
+                                              :reserved reserved
+                                              :module module})
          sym    (cond (vector? sym)
                       (first (filter symbol? sym))
                       

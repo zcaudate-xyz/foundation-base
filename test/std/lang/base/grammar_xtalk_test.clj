@@ -7,6 +7,16 @@
   (tf-throw '(x:throw "error"))
   => '(throw "error"))
 
+^{:refer std.lang.base.grammar-xtalk/tf-add :added "4.1"}
+(fact "wrapper for add transform"
+  (tf-add '(x:add a b))
+  => '(+ a b))
+
+^{:refer std.lang.base.grammar-xtalk/tf-first :added "4.1"}
+(fact "wrapper for first transform"
+  (tf-first '(x:first arr))
+  => '(x:get-idx arr 0))
+
 ^{:refer std.lang.base.grammar-xtalk/tf-eq-nil? :added "4.0"}
 (fact "equals nil transform"
   (tf-eq-nil? '(x:nil? a))

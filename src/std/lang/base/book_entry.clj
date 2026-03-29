@@ -43,6 +43,9 @@
                     deps
                     deps-fragment
                     deps-native
+                    xtalk-ops
+                    xtalk-profiles
+                    polyfill-modules
                     
                     ;; required at runtime for dynamic eval to work
                     namespace
@@ -80,6 +83,9 @@
             form-input
             deps
             deps-native
+            xtalk-ops
+            xtalk-profiles
+            polyfill-modules
             
             namespace
             
@@ -89,4 +95,3 @@
             declared] :as m}]
    (map->BookEntry (merge {:display :default}
                           m))))
-

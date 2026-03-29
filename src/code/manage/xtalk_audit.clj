@@ -1,6 +1,6 @@
 (ns code.manage.xtalk-audit
   (:require [clojure.string :as str]
-            [std.lang.base.book-loader :as book-loader]
+            [std.lang.base.library-loader :as lib-loader]
             [std.lang.base.grammar :as grammar]
             [std.lang.base.impl :as impl]
             [std.lang.base.library :as lib]
@@ -41,13 +41,13 @@
        vec))
 
 (defn installed-languages
-  "loads all default books from the registry via book-loader and returns installed languages"
+  "loads all default books from the registry via lib-loader and returns installed languages"
   {:added "4.1"}
   []
   (let [library (impl/default-library)]
     (doseq [[lang key] (reg/registry-book-list)
             :when (= :default key)]
-      (book-loader/ensure-book! library lang key))
+      (lib-loader/ensure-book! library lang key))
     (->> (keys (lib/get-snapshot library))
          sort
          vec)))
@@ -62,8 +62,8 @@
          (keep (fn [[lang {:keys [book]}]]
                  (when (= :xtalk (:parent book))
                    lang)))
-       sort
-       vec)))
+         sort
+         vec)))
 
 (defn audit-languages
   "returns languages to include in xtalk support audits"

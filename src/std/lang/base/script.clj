@@ -5,7 +5,7 @@
             [std.lang.base.book-entry :as e]
             [std.lang.base.emit :as emit]
             [std.lang.base.impl :as impl]
-            [std.lang.base.book-loader :as book-loader]
+            [std.lang.base.library-loader :as lib-loader]
             [std.lang.base.library :as lib]
             [std.lang.base.library-snapshot :as snap]
             [std.lang.base.registry :as reg]
@@ -51,7 +51,7 @@
    :config
    :layout
    :emit
-   
+
    ;; auto
    :lang
    :context
@@ -94,8 +94,8 @@
          ids    (set (map ut/sym-id syms))
          curr   (env/ns-sym)
          ignore (clojure.set/intersection ids
-                                (set (concat (keys (ns-refers curr))
-                                             (keys (ns-interns curr)))))
+                                          (set (concat (keys (ns-refers curr))
+                                                       (keys (ns-interns curr)))))
          refers (clojure.set/difference ids ignore)]
      (refer mns :only (vec refers))
      [refers ids])))
@@ -121,7 +121,7 @@
   "setup for the runtime"
   {:added "4.0"}
   ([lang module-id config lib]
-   (let [_          (book-loader/ensure-book! lib lang)
+   (let [_          (lib-loader/ensure-book! lib lang)
          primary    (script-ns-import config)
          config     (update config :emit (fnil eval {}))
          [snapshot] (lib/install-module! lib lang module-id (dissoc config
@@ -176,7 +176,7 @@
   ([lang config]
    (let [module-id (env/ns-sym)
          lib       (annex/get-annex-library module-id)]
-     (book-loader/ensure-book! lib lang)
+     (lib-loader/ensure-book! lib lang)
      (binding [book/*skip-check* true]
        (script-fn-base lang module-id config lib)))))
 
@@ -279,7 +279,7 @@
                          (quote ~body)
                          ~(meta &form))))))
 
-  (defmacro 
+  (defmacro
     !.run
     "switch between defined annex envs"
     {:added "4.0"}
@@ -319,9 +319,9 @@
   ([tag ns]
    (let [{:keys [runtimes]} (annex/get-annex ns)]
      (atom/swap-return! runtimes
-       (fn [m]
-         (if-let [rt (get m tag)]
-           [(component/stop rt) (dissoc m tag)]))))))
+                        (fn [m]
+                          (if-let [rt (get m tag)]
+                            [(component/stop rt) (dissoc m tag)]))))))
 
 (defn annex:start-all
   "starts all the annex tags"
@@ -331,10 +331,10 @@
   ([ns]
    (let [{:keys [registry]} (annex/get-annex ns)]
      (collection/map-entries (fn [[tag {:keys [lang
-                                      runtime
-                                      config]}]]
-                      [tag (script-ext [tag lang] config)])
-                    @registry))))
+                                               runtime
+                                               config]}]]
+                               [tag (script-ext [tag lang] config)])
+                             @registry))))
 
 (defn annex:stop-all
   "stops all annexs"

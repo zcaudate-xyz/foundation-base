@@ -2,6 +2,7 @@
   (:require [std.lang.base.book :as book]
             [std.lang.base.emit :as emit]
             [std.lang.base.emit-preprocess :as preprocess]
+            [std.lang.base.grammar-xtalk-system :as xtalk-system]
             [std.lang.base.util :as ut]
             [std.lib.collection :as collection]
             [std.lib.env :as env]
@@ -74,15 +75,22 @@
    (let [reserved (get-in grammar [:reserved op])]
      (second (create-code-raw form reserved meta)))))
 
+(defn hydrate-form
+  "hydrates a raw input form using the reserved hydrate hook"
+  {:added "4.1"}
+  [form-input reserved grammar & [mopts]]
+  (let [{:keys [hydrate]} reserved]
+    (if hydrate
+      (hydrate form-input grammar mopts)
+      [nil form-input])))
+
 (defn create-code-hydrate
   "hydrates the forms"
   {:added "4.0"}
   ([entry reserved grammar modules & [mopts]]
-   (let [{:keys [hydrate hydrate-hook]} reserved
+   (let [{:keys [hydrate-hook]} reserved
          {:keys [form-input]} entry
-         [hmeta form-hydrate] (if hydrate
-                                (hydrate form-input grammar mopts)
-                                [nil form-input])
+         [hmeta form-hydrate] (hydrate-form form-input reserved grammar mopts)
          module (assoc (get modules (:module entry))
                        :display :brief)
          [form
@@ -94,12 +102,16 @@
                                               (merge {:module module
                                                       :entry (assoc entry :display :brief)}
                                                      mopts))
+         {:keys [ops profiles polyfill-modules]} (xtalk-system/scan-xtalk form-hydrate)
          
          entry (merge (assoc entry
                              :form form
                              :deps deps
                              :deps-fragment deps-fragment
-                             :deps-native   deps-native)
+                             :deps-native   deps-native
+                             :xtalk-ops ops
+                             :xtalk-profiles profiles
+                             :polyfill-modules polyfill-modules)
                       hmeta
                       *extra*)
          entry (cond-> entry
@@ -161,11 +173,15 @@
             deps-native]   (preprocess/to-staging form
                                                   grammar
                                                   modules
-                                                  mopts)]
+                                                  mopts)
+           {:keys [ops profiles polyfill-modules]} (xtalk-system/scan-xtalk form)]
        (assoc entry
               :deps #{}
               :deps-fragment deps-fragment
-              :deps-native   deps-native)))))
+              :deps-native   deps-native
+              :xtalk-ops ops
+              :xtalk-profiles profiles
+              :polyfill-modules polyfill-modules)))))
 
 (defn create-macro
   "creates a macro"

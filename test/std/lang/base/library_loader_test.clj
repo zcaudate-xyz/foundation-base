@@ -1,6 +1,6 @@
-(ns std.lang.base.book-loader-test
+(ns std.lang.base.library-loader-test
   (:require [std.lang.base.book :as book]
-            [std.lang.base.book-loader :as loader]
+            [std.lang.base.library-loader :as loader]
             [std.lang.base.library :as lib]
             [std.lang.base.library-snapshot :as snap]
             [std.lang.base.registry :as reg])
@@ -11,7 +11,7 @@
   (reg/registry-book-ns :php)
   => 'std.lang.model-annex.spec-php)
 
-^{:refer std.lang.base.book-loader/ensure-book! :added "4.1"}
+^{:refer std.lang.base.library-loader/ensure-book! :added "4.1"}
 (fact "loads a book from the registry into an empty library"
   (let [library (lib/library {:snapshot (snap/snapshot {})})]
     (loader/ensure-book! library :php)

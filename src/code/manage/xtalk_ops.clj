@@ -70,6 +70,8 @@
           :category category
           :canonical-symbol canonical-symbol
           :symbols symbols
+          :class (:class entry)
+          :requires (not-empty (vec (sort-by str (:requires entry))))
           :emit (:emit entry)
           :type (:type entry)
           :macro (var->symbol (:macro entry))

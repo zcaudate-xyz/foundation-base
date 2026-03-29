@@ -56,10 +56,17 @@
       :macro-xor
       :macro-case
       :macro-forange
-      :xtalk-core
+      :xtalk-core-value
+      :xtalk-core-invoke
+      :xtalk-runtime
+      :xtalk-system
+      :xtalk-task
       :xtalk-proto
       :xtalk-global
-      :xtalk-custom
+      :xtalk-predicate
+      :xtalk-access
+      :xtalk-index
+      :xtalk-callback
       :xtalk-math
       :xtalk-type
       :xtalk-bit

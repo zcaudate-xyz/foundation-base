@@ -10,7 +10,8 @@
                           :coroutine
                           :macro
                           :macro-arrow
-                          :macro-let])))
+                          :macro-let])
+      (merge (grammar/build-xtalk))))
 
 (def +grammar+
   (grammar/grammar :xt

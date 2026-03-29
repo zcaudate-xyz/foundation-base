@@ -7,6 +7,7 @@
             [std.lang.base.pointer :as ptr]
             [std.lang.base.runtime :as rt]
             [std.lang.base.script-macro :as macro]
+            [std.lang.base.script-xtalk :as script-xtalk]
             [std.lang.model.spec-js :as js]
             [std.lang.model.spec-lua :as lua]
             [std.lib.collection :as collection])
@@ -214,6 +215,22 @@
 
   (macro/intern-free :lua "hello")
   => #'std.lang.base.script-macro-test/defptr.hello)
+
+^{:refer std.lang.base.script-xtalk/hydrate-xtalk-scan :added "4.1"}
+(fact "scans xtalk usage from the hydrated form rather than the raw input"
+  ^:hidden
+
+  (script-xtalk/hydrate-xtalk-scan
+   {:module 'L.core
+    :form-input '(do raw)}
+   {:hydrate (fn [_ _ _]
+               [nil '(do (x:get-in data ["a"]))])}
+   {}
+   '{L.core {:id L.core}}
+   {})
+  => '{:ops #{:x-get-in}
+       :profiles #{:xtalk-access}
+      :polyfill-modules #{xt.lang.common-data}})
 
 ^{:refer std.lang.base.script-macro/intern-top-level-fn :added "4.0"}
 (fact "interns a top level function"

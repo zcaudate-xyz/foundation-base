@@ -1,7 +1,7 @@
 (ns std.lang.base.script-annex
   (:require [std.json :as json]
             [std.lang.base.impl :as impl]
-            [std.lang.base.book-loader :as book-loader]
+            [std.lang.base.library-loader :as lib-loader]
             [std.lang.base.library :as lib]
             [std.lang.base.library-snapshot :as snap]
             [std.lang.base.runtime :as rt]
@@ -19,8 +19,7 @@
 (defn- rt-annex-string
   "returns the annex string"
   {:added "4.0"}
-  ([{:keys [
-            runtimes]}]
+  ([{:keys [runtimes]}]
    (str "#lang.annex " (vec (sort (map (fn [[k rt]]
                                          [k (:lang rt)])
                                        @runtimes))))))
@@ -93,7 +92,7 @@
    (let [{:keys [state] :as sp} (space/space ns)
          check  (or (:lang.annex @state)
                     (space/space:context-set sp :lang.annex :default {}))]
-     
+
      (space/space:rt-start sp :lang.annex))))
 
 (defn clear-annex
@@ -104,8 +103,8 @@
   ([ns]
    (let [{:keys [runtimes]} (get-annex ns)]
      (atom/swap-return! runtimes
-       (fn [m]
-         [(collection/map-vals component/stop m) {}])))))
+                        (fn [m]
+                          [(collection/map-vals component/stop m) {}])))))
 
 (defn get-annex-library
   "gets the current annex library
@@ -125,7 +124,7 @@
   ([ns lang]
    (let [curr (:library (get-annex ns))]
      (or (snap/get-book @(:instance curr) lang)
-         (book-loader/ensure-book! curr lang)))))
+         (lib-loader/ensure-book! curr lang)))))
 
 (defn add-annex-runtime
   "adds a runtime to the annex"
@@ -134,10 +133,10 @@
   (let [{:keys [registry
                 runtimes]} (get-annex ns)]
     (atom/swap-return! runtimes
-      (fn [m]
-        (let [curr (get m tag)
-              _  (if curr (component/stop curr))]
-          [[curr rt] (assoc m tag rt)])))))
+                       (fn [m]
+                         (let [curr (get m tag)
+                               _  (if curr (component/stop curr))]
+                           [[curr rt] (assoc m tag rt)])))))
 
 (defn get-annex-runtime
   "gets the annex rutime"
@@ -152,10 +151,10 @@
   [ns tag]
   (let [{:keys [runtimes]} (get-annex ns)]
     (atom/swap-return! runtimes
-      (fn [m]
-        (let [curr (get m tag)
-              _  (if curr (component/stop curr))]
-          [curr (dissoc m tag)])))))
+                       (fn [m]
+                         (let [curr (get m tag)
+                               _  (if curr (component/stop curr))]
+                           [curr (dissoc m tag)])))))
 
 (defn register-annex-tag
   "registers a config for the tag"
@@ -163,11 +162,11 @@
   [ns tag lang runtime config]
   (let [{:keys [registry]} (get-annex ns)]
     (atom/swap-return! registry
-      (fn [m]
-        [[(get m tag) lang]
-         (assoc m tag {:lang lang
-                       :runtime runtime
-                       :config config})]))))
+                       (fn [m]
+                         [[(get m tag) lang]
+                          (assoc m tag {:lang lang
+                                        :runtime runtime
+                                        :config config})]))))
 
 (defn deregister-annex-tag
   "removes the config for the tag"
@@ -175,8 +174,8 @@
   [ns tag]
   (let [{:keys [registry]} (get-annex ns)]
     (atom/swap-return! registry
-      (fn [m]
-        [(get m tag) (dissoc m tag)]))))
+                       (fn [m]
+                         [(get m tag) (dissoc m tag)]))))
 
 (defn start-runtime
   "starts the runtime in the annex"

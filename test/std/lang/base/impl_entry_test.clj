@@ -49,6 +49,18 @@
    @emit/+test-grammar+)
   => e/book-entry?)
 
+^{:refer std.lang.base.impl-entry/hydrate-form :added "4.1"}
+(fact "hydrates input forms through the reserved hydrate hook"
+  ^:hidden
+
+  (entry/hydrate-form '(do raw)
+                      {:hydrate (fn [_ _ _]
+                                  [{:probe true}
+                                   '(do (x:get-in data ["a"]))])}
+                      {})
+  => '[{:probe true}
+       (do (x:get-in data ["a"]))])
+
 ^{:refer std.lang.base.impl-entry/create-code-hydrate :added "4.0"
   :setup [(def +entry+
             (entry/create-code-base
@@ -86,6 +98,23 @@
                                    :link  {- L.core}})
       :probe/value)
   => true)
+
+(fact "xtalk metadata is derived from the hydrated form"
+  ^:hidden
+
+  (-> (entry/create-code-hydrate
+       (assoc +entry+ :form-input '(do raw))
+       {:hydrate (fn [_ _ _]
+                   [nil '(do (x:nil? data))])}
+       @emit/+test-grammar+
+       (:modules prep/+book-min+)
+       '{:id L.core
+         :alias {}
+         :link  {- L.core}})
+      (select-keys [:xtalk-ops :xtalk-profiles :polyfill-modules]))
+  => '{:xtalk-ops #{:x-nil?}
+       :xtalk-profiles #{:xtalk-predicate}
+       :polyfill-modules #{}})
 
 ^{:refer std.lang.base.impl-entry/create-code :added "4.0"}
 (fact "creates the code entry"

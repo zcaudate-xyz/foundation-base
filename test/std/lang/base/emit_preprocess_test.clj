@@ -7,6 +7,7 @@
             [std.lang.base.emit-prep-lua-test :as prep]
             [std.lang.base.emit-preprocess :refer :all]
             [std.lang.base.grammar :as grammar]
+            [std.lang.base.grammar-xtalk-system :as grammar-xtalk]
             [std.lang.base.impl-entry :as impl-entry]
             [std.lang.base.library :as lib]
             [std.lang.base.library-snapshot :as snap])
@@ -269,6 +270,19 @@
                (:modules prep/+book-min+)
                '{:module {:link {u L.core}}}))
   => '[[(var a := (L.core/identity-fn 1)) #{} #{} {}] #:assign{:inline true}])
+
+^{:refer std.lang.base.grammar-xtalk-system/scan-xtalk :added "4.1"}
+(fact "scans xtalk usage and linked polyfill modules"
+  (grammar-xtalk/scan-xtalk '(do (x:get-in data ["a"])
+                                 (x:arr-map items f)
+                                 (x:str-ends-with s suffix)))
+  => '{:ops #{:x-get-in
+              :x-arr-map
+              :x-str-ends-with}
+       :profiles #{:xtalk-access
+                   :xtalk-arr
+                   :xtalk-str}
+       :polyfill-modules #{xt.lang.base-lib}})
 
 ^{:refer std.lang.base.emit-preprocess/to-resolve :added "4.0"}
 (fact "resolves only the code symbols (no macroexpansion)"
