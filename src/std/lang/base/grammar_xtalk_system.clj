@@ -4,54 +4,6 @@
             [std.lib.collection :as collection]
             [std.lib.walk :as walk]))
 
-(def +xtalk-profiles+
-  [[:xtalk-common-basic          xtalk/+xt-common-basic+]
-   [:xtalk-common-index          xtalk/+xt-common-index+]
-   [:xtalk-common-number         xtalk/+xt-common-number+]
-   [:xtalk-common-nil            xtalk/+xt-common-nil+]
-   [:xtalk-common-primitives     xtalk/+xt-common-primitives+]
-   [:xtalk-common-object         xtalk/+xt-common-object+]
-   [:xtalk-common-array          xtalk/+xt-common-array+]
-   [:xtalk-common-print          xtalk/+xt-common-print+]
-   [:xtalk-common-string         xtalk/+xt-common-string+]
-   [:xtalk-common-math           xtalk/+xt-common-math+]
-
-   [:xtalk-functional-base       xtalk/+xt-functional-base+]
-   [:xtalk-functional-invoke     xtalk/+xt-functional-invoke+]
-   [:xtalk-functional-return     xtalk/+xt-functional-return+]
-   [:xtalk-functional-array      xtalk/+xt-functional-array+]
-   [:xtalk-functional-future     xtalk/+xt-functional-future+]
-   [:xtalk-functional-iter       xtalk/+xt-functional-iter+]
-
-   [:xtalk-lang-lu               xtalk/+xt-lang-lu+]
-   [:xtalk-lang-global           xtalk/+xt-lang-global+]
-   [:xtalk-lang-proto            xtalk/+xt-lang-proto+]
-   [:xtalk-lang-bit              xtalk/+xt-lang-bit+]
-   [:xtalk-lang-throw            xtalk/+xt-lang-throw+]
-   [:xtalk-lang-unpack           xtalk/+xt-lang-unpack+]
-   [:xtalk-lang-random           xtalk/+xt-lang-random+]
-   [:xtalk-lang-time             xtalk/+xt-lang-time+]
-
-   [:xtalk-notify-socket         xtalk/+xt-notify-socket+]
-   [:xtalk-notify-http           xtalk/+xt-notify-http+]
-   [:xtalk-network-socket        xtalk/+xt-network-socket+]
-   [:xtalk-network-ws            xtalk/+xt-network-ws+]
-   [:xtalk-network-client-basic  xtalk/+xt-network-client-basic+]
-   [:xtalk-network-client-ws     xtalk/+xt-network-client-ws+]
-   [:xtalk-network-server-basic  xtalk/+xt-network-server-basic+]
-   [:xtalk-network-server-ws     xtalk/+xt-network-server-ws+]
-
-   [:xtalk-runtime-cache         xtalk/+xt-runtime-cache+]
-   [:xtalk-runtime-thread        xtalk/+xt-runtime-thread+]
-   [:xtalk-runtime-shell         xtalk/+xt-runtime-shell+]
-   [:xtalk-runtime-file          xtalk/+xt-runtime-file+]
-   [:xtalk-runtime-b64           xtalk/+xt-runtime-b64+]
-   [:xtalk-runtime-uri           xtalk/+xt-runtime-uri+]
-   [:xtalk-runtime-js            xtalk/+xt-runtime-js+]])
-
-(def +xtalk-profile-order+
-  (mapv first +xtalk-profiles+))
-
 (def +xtalk-area-order+
   [:common
    :functional
@@ -59,46 +11,64 @@
    :std-lang-link-specific
    :runtime-specific])
 
-(def +xtalk-area->profiles+
-  {:common [:xtalk-common-basic
-            :xtalk-common-index
-            :xtalk-common-number
-            :xtalk-common-nil
-            :xtalk-common-primitives
-            :xtalk-common-object
-            :xtalk-common-array
-            :xtalk-common-print
-            :xtalk-common-string
-            :xtalk-common-math]
-   :functional [:xtalk-functional-base
-                :xtalk-functional-invoke
-                :xtalk-functional-return
-                :xtalk-functional-array
-                :xtalk-functional-future
-                :xtalk-functional-iter]
-   :language-specific [:xtalk-lang-lu
-                       :xtalk-lang-global
-                       :xtalk-lang-proto
-                       :xtalk-lang-bit
-                       :xtalk-lang-throw
-                       :xtalk-lang-unpack
-                       :xtalk-lang-random
-                       :xtalk-lang-time]
-   :std-lang-link-specific [:xtalk-notify-socket
-                            :xtalk-notify-http
-                            :xtalk-network-socket
-                            :xtalk-network-ws
-                            :xtalk-network-client-basic
-                            :xtalk-network-client-ws
-                            :xtalk-network-server-basic
-                            :xtalk-network-server-ws]
-   :runtime-specific [:xtalk-runtime-cache
-                      :xtalk-runtime-thread
-                      :xtalk-runtime-shell
-                      :xtalk-runtime-file
-                      :xtalk-runtime-b64
-                      :xtalk-runtime-uri
-                      :xtalk-runtime-js]})
+(def +xtalk-area->entries+
+  {:common [xtalk/+xt-common-basic+
+            xtalk/+xt-common-index+
+            xtalk/+xt-common-number+
+            xtalk/+xt-common-nil+
+            xtalk/+xt-common-primitives+
+            xtalk/+xt-common-object+
+            xtalk/+xt-common-array+
+            xtalk/+xt-common-print+
+            xtalk/+xt-common-string+
+            xtalk/+xt-common-math+]
+   :functional [xtalk/+xt-functional-base+
+                xtalk/+xt-functional-invoke+
+                xtalk/+xt-functional-return+
+                xtalk/+xt-functional-array+
+                xtalk/+xt-functional-future+
+                xtalk/+xt-functional-iter+]
+   :language-specific [xtalk/+xt-lang-lu+
+                       xtalk/+xt-lang-global+
+                       xtalk/+xt-lang-proto+
+                       xtalk/+xt-lang-bit+
+                       xtalk/+xt-lang-throw+
+                       xtalk/+xt-lang-unpack+
+                       xtalk/+xt-lang-random+
+                       xtalk/+xt-lang-time+]
+   :std-lang-link-specific [xtalk/+xt-notify-socket+
+                            xtalk/+xt-notify-http+
+                            xtalk/+xt-network-socket+
+                            xtalk/+xt-network-ws+
+                            xtalk/+xt-network-client-basic+
+                            xtalk/+xt-network-client-ws+
+                            xtalk/+xt-network-server-basic+
+                            xtalk/+xt-network-server-ws+]
+   :runtime-specific [xtalk/+xt-runtime-cache+
+                      xtalk/+xt-runtime-thread+
+                      xtalk/+xt-runtime-shell+
+                      xtalk/+xt-runtime-file+
+                      xtalk/+xt-runtime-b64+
+                      xtalk/+xt-runtime-uri+
+                      xtalk/+xt-runtime-js+]})
+
+(def +xtalk-area->profile+
+  {:common :xtalk-common
+   :functional :xtalk-functional
+   :language-specific :xtalk-language-specific
+   :std-lang-link-specific :xtalk-std-lang-link-specific
+   :runtime-specific :xtalk-runtime-specific})
+
+(def +xtalk-profiles+
+  (mapv (fn [area]
+          [(get +xtalk-area->profile+ area)
+           (->> (get +xtalk-area->entries+ area)
+                (mapcat identity)
+                vec)])
+        +xtalk-area-order+))
+
+(def +xtalk-profile-order+
+  (mapv first +xtalk-profiles+))
 
 (defn xtalk-entry?
   [entry]
@@ -160,7 +130,9 @@
   "returns xtalk profiles grouped by implementation area"
   {:added "4.1"}
   [area]
-  (get +xtalk-area->profiles+ area []))
+  (if-let [profile (get +xtalk-area->profile+ area)]
+    [profile]
+    []))
 
 (defn xtalk-profile-ops
   "returns ops declared under an xtalk grammar profile"
@@ -224,29 +196,37 @@
        (apply set/union #{})))
 
 (defn scan-xtalk
-  "scans a form for xtalk op usage and linked hard-link modules"
+  "scans a form for xtalk op usage, linked hard-link modules, and template restaging"
   {:added "4.1"}
-  [input]
-  (let [ops (volatile! #{})]
-    (walk/prewalk
-     (fn [form]
-       (when (and (collection/form? form)
-                  (symbol? (first form)))
-         (when-let [op (xtalk-symbol-op (first form))]
-           (vswap! ops set/union (xtalk-op-closure op))))
-       form)
-     input)
-    (let [xtalk-ops @ops]
-      {:ops xtalk-ops
-       :profiles (xtalk-ops-profiles xtalk-ops)
-       :polyfill-modules (->> xtalk-ops
-                              (keep (fn [op]
-                                      (let [{:keys [emit raw]} (xtalk-op-entry op)]
-                                        (when (and (= :hard-link emit)
-                                                   (symbol? raw)
-                                                   (namespace raw))
-                                          (symbol (namespace raw))))))
-                              set)})))
+  ([input]
+   (scan-xtalk input nil))
+  ([input grammar]
+   (let [ops       (volatile! #{})
+         template? (volatile! false)
+         reserved  (:reserved grammar)]
+     (walk/prewalk
+      (fn [form]
+        (when (and (collection/form? form)
+                   (symbol? (first form)))
+          (when-let [op (xtalk-symbol-op (first form))]
+            (vswap! ops set/union (xtalk-op-closure op)))
+          (when (and reserved
+                     (= :hard-link (get-in reserved [(first form) :emit])))
+            (vreset! template? true)))
+        form)
+      input)
+     (let [xtalk-ops @ops]
+       {:ops xtalk-ops
+        :profiles (xtalk-ops-profiles xtalk-ops)
+        :polyfill-modules (->> xtalk-ops
+                               (keep (fn [op]
+                                       (let [{:keys [emit raw]} (xtalk-op-entry op)]
+                                         (when (and (= :hard-link emit)
+                                                    (symbol? raw)
+                                                    (namespace raw))
+                                           (symbol (namespace raw))))))
+                               set)
+        :template? @template?}))))
 
 (defn xtalk-grammar-supported-ops
   "returns the xtalk ops supported by a grammar reserved map"

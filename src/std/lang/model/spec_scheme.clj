@@ -21,16 +21,10 @@
 (def +features+
   (grammar/build-min [:coroutine
                       :xtalk
-                      :xtalk-common-math
-                      :xtalk-common-primitives
-                      :xtalk-common-object
-                      :xtalk-common-array
-                      :xtalk-common-string
-                      :xtalk-functional-base
-                      :xtalk-functional-future
-                      :xtalk-functional-iter
-                      :xtalk-lang-lu
-                      :xtalk-runtime-js]))
+                      :xtalk-common
+                      :xtalk-functional
+                      :xtalk-language-specific
+                      :xtalk-runtime-specific]))
 
 (defn emit-scheme
   "emits code into scheme schema"
