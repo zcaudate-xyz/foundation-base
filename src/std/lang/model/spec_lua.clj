@@ -207,8 +207,8 @@
       (grammar/build:extend
        {:cat    {:op :cat    :symbol '#{cat}       :raw ".."   :emit :infix}
         :len    {:op :len    :symbol '#{len}       :raw "#"    :emit  :pre}
-        :local  {:op :local  :symbol '#{local var} :macro  #'tf-local :type :macro}
-        :c-ffi  {:op :c-ffi  :symbol '#{%.c}       :macro  #'tf-c-ffi :type :macro}
+        :local  {:op :local  :symbol '#{local var} :macro  #'tf-local :emit :macro}
+        :c-ffi  {:op :c-ffi  :symbol '#{%.c}       :macro  #'tf-c-ffi :emit :macro}
         :repeat {:op :repeat
                  :symbol '#{repeat} :type :block
                  :block {:raw "repeat"

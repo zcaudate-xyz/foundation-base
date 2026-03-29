@@ -56,37 +56,45 @@
       :macro-xor
       :macro-case
       :macro-forange
-      :xtalk-core-value
-      :xtalk-core-invoke
-      :xtalk-runtime
-      :xtalk-system
-      :xtalk-task
-      :xtalk-proto
-      :xtalk-global
-      :xtalk-predicate
-      :xtalk-access
-      :xtalk-index
-      :xtalk-callback
-      :xtalk-math
-      :xtalk-type
-      :xtalk-bit
-      :xtalk-lu
-      :xtalk-obj
-      :xtalk-arr
-      :xtalk-str
-      :xtalk-js
-      :xtalk-return
-      :xtalk-socket
-      :xtalk-ws
-      :xtalk-iter
-      :xtalk-cache
-      :xtalk-thread
-      :xtalk-file
-      :xtalk-b64
-      :xtalk-uri
-      :xtalk-notify
-      :xtalk-service
-      :xtalk-special])
+      :xtalk-common-basic
+      :xtalk-common-index
+      :xtalk-common-number
+      :xtalk-common-nil
+      :xtalk-common-primitives
+      :xtalk-common-object
+      :xtalk-common-array
+      :xtalk-common-print
+      :xtalk-common-string
+      :xtalk-common-math
+      :xtalk-functional-base
+      :xtalk-functional-invoke
+      :xtalk-functional-return
+      :xtalk-functional-array
+      :xtalk-functional-future
+      :xtalk-functional-iter
+      :xtalk-lang-lu
+      :xtalk-lang-global
+      :xtalk-lang-proto
+      :xtalk-lang-bit
+      :xtalk-lang-throw
+      :xtalk-lang-unpack
+      :xtalk-lang-random
+      :xtalk-lang-time
+      :xtalk-notify-socket
+      :xtalk-notify-http
+      :xtalk-network-socket
+      :xtalk-network-ws
+      :xtalk-network-client-basic
+      :xtalk-network-client-ws
+      :xtalk-network-server-basic
+      :xtalk-network-server-ws
+      :xtalk-runtime-cache
+      :xtalk-runtime-thread
+      :xtalk-runtime-shell
+      :xtalk-runtime-file
+      :xtalk-runtime-b64
+      :xtalk-runtime-uri
+      :xtalk-runtime-js])
   
 ^{:refer std.lang.base.grammar/ops-symbols :added "4.0"}
 (fact "gets a list of symbols"

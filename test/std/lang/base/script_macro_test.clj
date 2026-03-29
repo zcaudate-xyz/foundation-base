@@ -224,12 +224,12 @@
    {:module 'L.core
     :form-input '(do raw)}
    {:hydrate (fn [_ _ _]
-               [nil '(do (x:get-in data ["a"]))])}
+               [nil '(do (x:obj-keys data))])}
    {}
    '{L.core {:id L.core}}
    {})
-  => '{:ops #{:x-get-in}
-       :profiles #{:xtalk-access}
+  => '{:ops #{:x-obj-keys}
+       :profiles #{:xtalk-common-object}
       :polyfill-modules #{xt.lang.common-data}})
 
 ^{:refer std.lang.base.script-macro/intern-top-level-fn :added "4.0"}

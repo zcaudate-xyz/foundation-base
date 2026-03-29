@@ -104,14 +104,14 @@
       (merge (grammar/build-xtalk))
       (grammar/build:extend
        {:erl-raw {:op :erl-raw :symbol #{'erl-raw} :type :token}
-        :defn   {:macro #'tf-erlang-defn :emit :macro :type :macro :symbol #{'defn}}
-        :case   {:macro #'tf-erlang-case :emit :macro :type :macro :symbol #{'case}}
-        :tuple  {:macro #'tf-erlang-tuple :emit :macro :type :macro :symbol #{'tuple}}
-        :var    {:symbol #{'var} :emit :macro :macro #'emit-erlang-var :type :macro}
+        :defn   {:macro #'tf-erlang-defn :emit :macro :symbol #{'defn}}
+        :case   {:macro #'tf-erlang-case :emit :macro :symbol #{'case}}
+        :tuple  {:macro #'tf-erlang-tuple :emit :macro :symbol #{'tuple}}
+        :var    {:symbol #{'var} :emit :macro :macro #'emit-erlang-var}
         :eq-exact {:raw "=:="}
-        :defn- {:op :defn- :symbol #{'defn-} :emit :macro :macro #'emit-erlang-defn :type :macro}
-        :case* {:op :case* :symbol #{'case*} :emit :macro :macro #'emit-erlang-case :type :macro}
-        :tuple* {:op :tuple* :symbol #{'tuple*} :emit :macro :macro #'emit-erlang-tuple :type :macro}
+        :defn- {:op :defn- :symbol #{'defn-} :emit :macro :macro #'emit-erlang-defn}
+        :case* {:op :case* :symbol #{'case*} :emit :macro :macro #'emit-erlang-case}
+        :tuple* {:op :tuple* :symbol #{'tuple*} :emit :macro :macro #'emit-erlang-tuple}
         :send  {:op :send :symbol #{'send '!} :raw "!" :emit :infix}})
       (grammar/build:override fn/+erlang+)
       (grammar/build:override

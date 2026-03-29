@@ -129,7 +129,7 @@
       (grammar/build:override
        {:seteq       {:op :seteq :symbol '#{:=} :raw "<-"}
         :mod         {:raw "%%"}
-        :defn        {:op :defn  :symbol '#{defn}     :macro  #'tf-defn :type :macro}
+        :defn        {:op :defn  :symbol '#{defn}     :macro  #'tf-defn :emit :macro}
         :inif        {:macro #'tf-infix-if   :emit :macro}
         :for-object  {:macro #'tf-for-object :emit :macro}
         :for-array   {:macro #'tf-for-array  :emit :macro}

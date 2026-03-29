@@ -95,7 +95,6 @@
    => '(:? :a [a (:? :b [b c])])"
   {:added "4.0"}
   ([[_ & more]]
-   {:op :tcond     :symbol '#{:?>}    :macro tf-tcond         :type :macro}
    (let [pairs (map vec (partition 2 more))
          _ (if (not= :else (first (last pairs)))
              (f/error "ternary cond has to end with :else" {:form (last pairs)}))]
@@ -170,10 +169,10 @@
    {:op :fn-arrow  :symbol '#{fn:>}   :emit :macro :macro #'tf-lambda-arrow   :type :template}])
 
 (def +op-macro-let+
-  [{:op :let-bind  :symbol #{'let}    :macro #'tf-let-bind       :type :macro}])
+  [{:op :let-bind  :symbol #{'let}    :emit :macro :macro #'tf-let-bind       :type :block}])
 
 (def +op-macro-xor+
-  [{:op :txor      :symbol #{'xor}    :macro #'tf-xor            :type :macro}])
+  [{:op :txor      :symbol #{'xor}    :emit :macro :macro #'tf-xor}])
 
 (def +op-macro-case+
   [{:op :switch     :symbol #{'switch}     :emit :inner 

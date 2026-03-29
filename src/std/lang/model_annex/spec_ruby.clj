@@ -71,7 +71,7 @@
         :or         {:raw "||"}
         :not        {:raw "!" :emit :prefix}
         :eq         {:raw "=="}
-        :fn         {:macro  #'ruby-fn   :type :macro}
+        :fn         {:macro  #'ruby-fn   :emit :macro}
         :neq        {:raw "!="}
         :gt         {:raw ">"}
         :lt         {:raw "<"}

@@ -125,7 +125,7 @@
       (grammar/build:extend
        {:cat    {:op :cat    :symbol '#{cat}       :raw "*"   :emit :infix}
         :len    {:op :len    :symbol '#{len}       :raw "length"    :emit  :pre}
-        :local  {:op :local  :symbol '#{local var} :macro  #'tf-local :type :macro}
+        :local  {:op :local  :symbol '#{local var} :macro  #'tf-local :emit :macro}
         :pair   {:op :pair   :symbol '#{=>}        :raw "=>"        :emit :infix}
         :dict   {:op :dict   :symbol '#{dict}      :macro #'tf-dict :emit :macro}
         :push!  {:op :push!  :symbol '#{push!}     :macro #'tf-push! :emit :macro}

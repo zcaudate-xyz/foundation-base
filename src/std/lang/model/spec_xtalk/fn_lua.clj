@@ -50,7 +50,7 @@
                (return "array"))
              (return t)))))
 
-(defn lua-tf-x-task-run
+(defn lua-tf-x-future-run
   [[_ thunk]]
   (template/$
    (do* (local task {:state "pending"
@@ -64,7 +64,7 @@
               (:= (. task ["error"]) out)))
         (return task))))
 
-(defn lua-tf-x-task-then
+(defn lua-tf-x-future-then
   [[_ task on-ok]]
   (template/$
    (if (== "ok" (. ~task ["state"]))
@@ -81,7 +81,7 @@
           (return out))
      (return ~task))))
 
-(defn lua-tf-x-task-catch
+(defn lua-tf-x-future-catch
   [[_ task on-err]]
   (template/$
    (if (== "error" (. ~task ["state"]))
@@ -98,21 +98,21 @@
           (return out))
      (return ~task))))
 
-(defn lua-tf-x-task-finally
+(defn lua-tf-x-future-finally
   [[_ task on-done]]
   (template/$ (do* (~on-done)
              (return ~task))))
 
-(defn lua-tf-x-task-cancel
+(defn lua-tf-x-future-cancel
   [[_ task]]
   (template/$ (do* (:= (. ~task ["state"]) "cancelled")
              (return ~task))))
 
-(defn lua-tf-x-task-status
+(defn lua-tf-x-future-status
   [[_ task]]
   (template/$ (. ~task ["state"])))
 
-(defn lua-tf-x-task-await
+(defn lua-tf-x-future-await
   [[_ task timeout-ms default]]
   (template/$
    (cond (== "ok" (. ~task ["state"]))
@@ -124,7 +124,7 @@
          :else
          (return ~default))))
 
-(defn lua-tf-x-task-from-async
+(defn lua-tf-x-future-from-async
   [[_ executor]]
   (template/$
    (do* (local task {:state "pending"
@@ -159,14 +159,14 @@
    :x-shell          {:macro #'lua-tf-x-shell         :emit :macro}
    :x-now-ms         {:default '(math.floor (* 1000 (os.time)))   :emit :unit}
    :x-type-native    {:macro #'lua-tf-x-type-native  :emit :macro}
-   :x-task-run       {:macro #'lua-tf-x-task-run      :emit :macro}
-   :x-task-then      {:macro #'lua-tf-x-task-then     :emit :macro}
-   :x-task-catch     {:macro #'lua-tf-x-task-catch    :emit :macro}
-   :x-task-finally   {:macro #'lua-tf-x-task-finally  :emit :macro}
-   :x-task-cancel    {:macro #'lua-tf-x-task-cancel   :emit :macro}
-   :x-task-status    {:macro #'lua-tf-x-task-status   :emit :macro}
-   :x-task-await     {:macro #'lua-tf-x-task-await    :emit :macro}
-   :x-task-from-async {:macro #'lua-tf-x-task-from-async :emit :macro}})
+   :x-future-run       {:macro #'lua-tf-x-future-run      :emit :macro}
+   :x-future-then      {:macro #'lua-tf-x-future-then     :emit :macro}
+   :x-future-catch     {:macro #'lua-tf-x-future-catch    :emit :macro}
+   :x-future-finally   {:macro #'lua-tf-x-future-finally  :emit :macro}
+   :x-future-cancel    {:macro #'lua-tf-x-future-cancel   :emit :macro}
+   :x-future-status    {:macro #'lua-tf-x-future-status   :emit :macro}
+   :x-future-await     {:macro #'lua-tf-x-future-await    :emit :macro}
+   :x-future-from-async {:macro #'lua-tf-x-future-from-async :emit :macro}})
 
 (defn lua-tf-x-proto-create
   [[_ m]]

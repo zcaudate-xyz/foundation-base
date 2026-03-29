@@ -516,7 +516,8 @@
    {:op :x-arr-filter      :symbol #{'x:arr-filter}       :emit :hard-link :raw 'xt.lang.base-lib/arr-filter}
    {:op :x-arr-keep        :symbol #{'x:arr-keep}         :emit :hard-link :raw 'xt.lang.base-lib/arr-keep}
    {:op :x-arr-foldl       :symbol #{'x:arr-foldl}        :emit :hard-link :raw 'xt.lang.base-lib/arr-foldl}
-   {:op :x-arr-foldr       :symbol #{'x:arr-foldr}        :emit :hard-link :raw 'xt.lang.base-lib/arr-foldr}])
+   {:op :x-arr-foldr       :symbol #{'x:arr-foldr}        :emit :hard-link :raw 'xt.lang.base-lib/arr-foldr}
+   {:op :x-arr-find        :symbol #{'x:arr-find}         :emit :hard-link :raw 'xt.lang.base-lib/arr-find}])
 
 (def +xt-functional-future+
   [{:op :x-future-run        :symbol #{'x:future-run}        :emit :abstract}

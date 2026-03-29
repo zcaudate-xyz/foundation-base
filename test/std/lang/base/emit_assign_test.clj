@@ -132,4 +132,14 @@
                            +grammar+
                            {:lang :x
                             :snapshot +snap+})
-  => "(do* (var a := 1) (:= a (+ a 1)))")
+  => "(do* (var a := 1) (:= a (+ a 1)))"
+
+  (assign/test-assign-loop '(var a := (hello 1 2))
+                           (assoc-in +grammar+
+                                     [:reserved 'hello]
+                                     {:emit :macro
+                                      :macro (fn [[_ x y]]
+                                               '(thread :as [1 2 3]))
+                                      :assign/template 'thread})
+                           {})
+  => "(a :as [1 2 3])")

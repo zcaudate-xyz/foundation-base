@@ -211,7 +211,7 @@
   => '(+ 1 2 3 1 2 3)
 
   (to-staging-form '(hello 1 2 3)
-                   {:reserved {'hello {:type :hard-link
+                   {:reserved {'hello {:emit :hard-link
                                        :raw 'world}}}
                    (:modules prep/+book-min+)
                    '{:module {:link {u L.core}}}
@@ -269,20 +269,45 @@
                {:reserved {'var {:emit :def-assign}}}
                (:modules prep/+book-min+)
                '{:module {:link {u L.core}}}))
-  => '[[(var a := (L.core/identity-fn 1)) #{} #{} {}] #:assign{:inline true}])
+  => '[[(var a := (L.core/identity-fn 1)) #{} #{} {}] #:assign{:inline true}]
+
+  (to-staging 'x:add
+              +grammar+
+              {}
+              '{:module {:id L.core
+                         :link {}}})
+  => '[(fn [a b] (return (+ a b))) #{} #{} {}])
+
+^{:refer std.lang.base.emit-preprocess/value-standalone :added "4.1"}
+(fact "callable xtalk intrinsics use shared value-standalone compilation"
+  ^:hidden
+
+  (value-standalone 'x:add +grammar+)
+  => '(fn [a b] (return (+ a b)))
+
+  (value-standalone 'hello
+                    {:reserved {'hello {:emit :macro
+                                        :macro (with-meta
+                                                 (fn [[_ a b]]
+                                                   (list '+ a b))
+                                                 {:arglists '([_ a b])})
+                                        :value/standalone true}}})
+  => '(fn [a b] (return (+ a b))))
 
 ^{:refer std.lang.base.grammar-xtalk-system/scan-xtalk :added "4.1"}
 (fact "scans xtalk usage and linked polyfill modules"
-  (grammar-xtalk/scan-xtalk '(do (x:get-in data ["a"])
+  (grammar-xtalk/scan-xtalk '(do (x:obj-keys data)
                                  (x:arr-map items f)
                                  (x:str-ends-with s suffix)))
-  => '{:ops #{:x-get-in
+  => '{:ops #{:x-obj-keys
               :x-arr-map
               :x-str-ends-with}
-       :profiles #{:xtalk-access
-                   :xtalk-arr
-                   :xtalk-str}
-       :polyfill-modules #{xt.lang.base-lib}})
+       :profiles #{:xtalk-common-object
+                   :xtalk-functional-array
+                   :xtalk-common-string}
+       :polyfill-modules #{xt.lang.base-lib
+                           xt.lang.common-data
+                           xt.lang.common-string}})
 
 ^{:refer std.lang.base.emit-preprocess/to-resolve :added "4.0"}
 (fact "resolves only the code symbols (no macroexpansion)"

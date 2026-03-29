@@ -62,7 +62,7 @@
   [[f :as form] book]
   (or (keyword? f)
       (if-let [reserved (get-in book [:grammar :reserved f])]
-        (or (not (#{:block :macro :special} (:type reserved))))
+        (or (not (#{:block :special} (:type reserved))))
         (and (symbol? f)
              (let [entry (if-let [var (resolve f)]
                            (and (std.lib.context.pointer/pointer? @var)
