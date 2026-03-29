@@ -20,6 +20,14 @@
     (return "[]"))
   (return input))
 
+(defn.pg as-array
+  "returns a jsonb array"
+  {:added "4.0"}
+  [:jsonb input]
+  (when (== input "{}")
+    (return "[]"))
+  (return input))
+
 (defenum.pg ^{:final true}
   EnumStatus
   [:pending :error :success])
@@ -167,7 +175,7 @@
   [:text i-name :text i-status :jsonb o-op]
   (let [out (pg/g:insert -/Task
               {:status i-status
-               :name i-name
+               :name   i-name
                :cache {}}
               {:track o-op})]
     (return out)))

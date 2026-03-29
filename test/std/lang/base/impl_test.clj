@@ -141,6 +141,35 @@
                  :lang :lua})
   => "1 + 2 + 3")
 
+(fact "direct emit failures include std.lang context"
+  ^:hidden
+
+  (let [grammar (assoc-in (:grammar prep/+book-min+)
+                          [:reserved 'boom-op]
+                          {:op :boom-op
+                           :emit (fn [_ _ _]
+                                   (throw (ex-info "boom" {:probe true})))})]
+    (try
+      (emit-direct grammar
+                   '(boom-op 1 2 3)
+                   *ns*
+                   {:emit {}
+                    :lang :lua
+                    :module {:id 'L.core}})
+      nil
+      (catch Throwable t
+        (select-keys (ex-data t)
+                     [:probe
+                      :std.lang/phase
+                      :std.lang/lang
+                      :std.lang/module
+                      :std.lang/form]))))
+  => '{:probe true
+       :std.lang/phase :emit/direct
+       :std.lang/lang :lua
+       :std.lang/module L.core
+       :std.lang/form (boom-op 1 2 3)})
+
 ^{:refer std.lang.base.impl/emit-str :added "4.0"}
 (fact  "converts to an output string"
   ^:hidden

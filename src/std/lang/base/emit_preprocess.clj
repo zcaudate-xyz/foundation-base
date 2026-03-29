@@ -310,7 +310,17 @@
           (volatile! form)
           
           (= :template (:type reserved))
-          (walk-fn ((:macro reserved) form))
+          (try
+            (walk-fn ((:macro reserved) form))
+            (catch Throwable t
+              (ut/throw-with-context
+               "std.lang staging template expansion failed"
+               {:std.lang/phase :staging/reserved-template
+                :std.lang/form form
+                :std.lang/lang (:lang mopts)
+                :std.lang/module (ut/module-id (:module mopts))
+                :std.lang/symbol fsym}
+               t)))
           
           (= :hard-link (:emit reserved))
           (walk-fn (cons (:raw reserved) (rest form)))
@@ -329,10 +339,18 @@
             (if (:template fe)
               (do (if deps-fragment
                     (vswap! deps-fragment conj (ut/sym-full fe)))
-                  (walk-fn (try (binding [*macro-form* form]
-                                  (apply (:template fe) (rest form)))
-                                (catch Throwable t
-                                  (throw t)))))
+                  (walk-fn (try
+                             (binding [*macro-form* form]
+                               (apply (:template fe) (rest form)))
+                             (catch Throwable t
+                               (ut/throw-with-context
+                                "std.lang staging macro expansion failed"
+                                {:std.lang/phase :staging/fragment-template
+                                 :std.lang/form form
+                                 :std.lang/lang (:lang mopts)
+                                 :std.lang/module (ut/module-id (:module mopts))
+                                 :std.lang/entry (ut/entry-summary fe)}
+                                t)))))
               form)))))
 
 (defn process-standard-symbol

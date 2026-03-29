@@ -376,11 +376,11 @@
    {:op :x-neg            :symbol #{'x:neg}             :macro #'tf-neg    :emit :macro}
    {:op :x-inc            :symbol #{'x:inc}             :macro #'tf-inc    :emit :macro}
    {:op :x-dec            :symbol #{'x:dec}             :macro #'tf-dec    :emit :macro}
-   {:op :x-zero?          :symbol #{'x:zero?}           :macro #'tf-zero?       :emit :macro}
-   {:op :x-pos?           :symbol #{'x:pos?}            :macro #'tf-pos?        :emit :macro}
-   {:op :x-neg?           :symbol #{'x:neg?}            :macro #'tf-neg?        :emit :macro}
-   {:op :x-even?          :symbol #{'x:even?}           :macro #'tf-even?       :emit :macro}
-   {:op :x-odd?           :symbol #{'x:odd?}            :macro #'tf-odd?        :emit :macro}
+   {:op :x-zero?          :symbol #{'x:zero?}           :macro #'tf-zero?  :emit :macro}
+   {:op :x-pos?           :symbol #{'x:pos?}            :macro #'tf-pos?   :emit :macro}
+   {:op :x-neg?           :symbol #{'x:neg?}            :macro #'tf-neg?   :emit :macro}
+   {:op :x-even?          :symbol #{'x:even?}           :macro #'tf-even?  :emit :macro}
+   {:op :x-odd?           :symbol #{'x:odd?}            :macro #'tf-odd?   :emit :macro}
    {:op :x-eq             :symbol #{'x:eq}              :macro #'tf-eq     :emit :macro}
    {:op :x-neq            :symbol #{'x:neq}             :macro #'tf-neq    :emit :macro}
    {:op :x-lt             :symbol #{'x:lt}              :macro #'tf-lt     :emit :macro}
@@ -423,13 +423,13 @@
    {:op :x-obj-from-pairs :symbol #{'x:obj-from-pairs}  :emit :hard-link :raw 'xt.lang.base-lib/obj-from-pairs}])
 
 (def +xt-common-array+
-  [{:op :x-is-array?      :symbol #{'x:is-array?}            :emit :abstract}
-   {:op :x-get-idx        :symbol #{'x:get-idx}              :macro #'tf-get-key     :emit :macro}
-   {:op :x-set-idx        :symbol #{'x:set-idx}              :macro #'tf-set-key     :emit :macro}
-   {:op :x-arr-first           :symbol #{'x:arr-first}       :macro #'tf-first   :emit :macro}
-   {:op :x-arr-second          :symbol #{'x:arr-second}      :macro #'tf-second  :emit :macro}
-   {:op :x-arr-last            :symbol #{'x:arr-last}        :macro #'tf-last    :emit :macro}
-   {:op :x-arr-second-last     :symbol #{'x:arr-second-last} :macro #'tf-second-last :emit :macro}
+  [{:op :x-is-array?       :symbol #{'x:is-array?}        :emit :abstract}
+   {:op :x-get-idx         :symbol #{'x:get-idx}          :macro #'tf-get-key     :emit :macro}
+   {:op :x-set-idx         :symbol #{'x:set-idx}          :macro #'tf-set-key     :emit :macro}
+   {:op :x-arr-first       :symbol #{'x:arr-first}        :macro #'tf-first       :emit :macro}
+   {:op :x-arr-second      :symbol #{'x:arr-second}       :macro #'tf-second      :emit :macro}
+   {:op :x-arr-last        :symbol #{'x:arr-last}         :macro #'tf-last        :emit :macro}
+   {:op :x-arr-second-last :symbol #{'x:arr-second-last}  :macro #'tf-second-last :emit :macro}
    {:op :x-arr-remove      :symbol #{'x:arr-remove}       :emit :abstract}
    {:op :x-arr-push        :symbol #{'x:arr-push}         :emit :abstract}
    {:op :x-arr-pop         :symbol #{'x:arr-pop}          :emit :abstract}

@@ -134,3 +134,49 @@
                        :module module :lang lang
                        :context ctx
                        :context/fn #'lang-rt-default)))))
+
+(defn module-id
+  "gets the module id from a module symbol or map"
+  {:added "4.1"}
+  [module]
+  (cond (map? module)
+        (:id module)
+
+        :else
+        module))
+
+(defn entry-summary
+  "returns a concise summary for an entry"
+  {:added "4.1"}
+  [entry]
+  (cond-> (select-keys entry [:lang :module :namespace :id :section :line :op :op-key])
+    (and (:module entry)
+         (:id entry))
+    (assoc :symbol (sym-full entry))))
+
+(defn error-with-context
+  "wraps an exception with std.lang generation context"
+  {:added "4.1"}
+  [message data ^Throwable t]
+  (let [cause-data (ex-data t)
+        wrapped?   (:std.lang/wrapped cause-data)
+        data       (cond-> (merge cause-data data)
+                     true
+                     (assoc :std.lang/wrapped true
+                            :std.lang/cause-class (.getName (class t))
+                            :std.lang/cause-message (.getMessage t))
+
+                     (and cause-data
+                          (not wrapped?))
+                     (assoc :std.lang/cause-data cause-data))]
+    (ex-info (if-let [cause-message (.getMessage t)]
+               (str message ": " cause-message)
+               message)
+             data
+             t)))
+
+(defn throw-with-context
+  "throws an exception wrapped with std.lang generation context"
+  {:added "4.1"}
+  [message data ^Throwable t]
+  (throw (error-with-context message data t)))

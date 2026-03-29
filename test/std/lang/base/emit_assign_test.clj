@@ -143,3 +143,10 @@
                                       :assign/template 'thread})
                            {})
   => "(a :as [1 2 3])")
+
+
+^{:refer std.lang.base.emit-assign/assign-options :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.base.emit-assign/assign-value :added "4.1"}
+(fact "TODO")

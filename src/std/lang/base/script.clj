@@ -218,8 +218,7 @@
         (annex/add-annex-runtime ns tag
                                  (annex/start-runtime lang
                                                       (or runtime :default)
-                                                      (assoc rt-config
-                                                             :library (annex/get-annex-library ns))))
+                                                      rt-config))
         [rt]))))
 
 (defmacro ^{:style/indent 1}

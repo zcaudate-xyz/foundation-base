@@ -183,6 +183,46 @@
                           :layout :full})
   => "function L_core____add_fn(a,b){\n  return a + L_core____identity_fn(b);\n}")
 
+(fact "entry emit failures include entry context"
+  ^:hidden
+
+  (let [grammar (assoc-in @emit/+test-grammar+
+                          [:reserved 'boom-op]
+                          {:op :boom-op
+                           :emit (fn [_ _ _]
+                                   (throw (ex-info "boom" {:probe true})))})
+        entry   (assoc (entry/create-code-base
+                        '(defn explode-fn
+                           [a]
+                           (return (boom-op a)))
+                        {:lang :lua
+                         :namespace (env/ns-sym)
+                         :module 'L.core
+                         :line 42}
+                        grammar)
+                       :form '(defn explode-fn
+                                [a]
+                                (return (boom-op a))))]
+    (try
+      (entry/emit-entry-raw grammar
+                            entry
+                            '{:layout :full})
+      nil
+      (catch Throwable t
+        (let [data (ex-data t)]
+          {:probe (:probe data)
+           :phase (:std.lang/phase data)
+           :lang (:std.lang/lang data)
+           :module (:std.lang/module data)
+           :entry (-> data :std.lang/entry :symbol)
+           :line (-> data :std.lang/entry :line)}))))
+  => '{:probe true
+       :phase :emit/entry
+       :lang :lua
+       :module L.core
+       :entry L.core/explode-fn
+       :line 42})
+
 ^{:refer std.lang.base.impl-entry/emit-entry-cached :added "4.0"
   :setup [(def +book+
             (-> prep/+book-min+

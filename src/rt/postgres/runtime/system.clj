@@ -1,6 +1,7 @@
 (ns rt.postgres.runtime.system
   (:require [std.lang :as l]
-            [std.lib.foundation :as f]))
+            [std.lib.foundation :as f]
+            [std.lib.template :as template]))
 
 (l/script :postgres)
 

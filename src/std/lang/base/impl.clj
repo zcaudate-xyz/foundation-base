@@ -138,10 +138,20 @@
       (let [{:keys [trim transform]} emit
             form (cond-> form transform (transform mopts))
             _    (if *print-form* (env/p :FORM form))
-            body (emit/emit form
-                            grammar
-                            (the-ns namespace)
-                            mopts)
+            body (try
+                   (emit/emit form
+                              grammar
+                              (the-ns namespace)
+                              mopts)
+                   (catch Throwable t
+                     (ut/throw-with-context
+                      "std.lang direct emit failed"
+                      {:std.lang/phase :emit/direct
+                       :std.lang/form form
+                       :std.lang/lang lang
+                       :std.lang/module (ut/module-id (:module mopts))
+                       :std.lang/namespace (ns-name (the-ns namespace))}
+                      t)))
             body (cond-> body trim (trim))]
         body))))
 

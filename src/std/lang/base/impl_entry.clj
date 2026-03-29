@@ -285,7 +285,15 @@
            (env/p   (str (:module entry) " - [" (:line entry) "] - "
                        (:id entry) "\n" (ansi/red (f/date))))
            (env/pp  form)
-           (throw t)))))))
+           (ut/throw-with-context
+            "std.lang entry emit failed"
+            {:std.lang/phase :emit/entry
+             :std.lang/form form
+             :std.lang/lang lang
+             :std.lang/module (:module entry)
+             :std.lang/namespace (:namespace entry)
+             :std.lang/entry (ut/entry-summary entry)}
+            t)))))))
 
 (def +cached-emit-keys+
   [:transform

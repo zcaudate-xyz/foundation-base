@@ -477,3 +477,6 @@
 
 ^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-x-future-from-async :added "4.1"}
 (fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-x-has-key? :added "4.1"}
+(fact "TODO")

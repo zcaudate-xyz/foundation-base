@@ -187,3 +187,70 @@
   
   (tf-bit-xor '(x:bit-xor x y))
   => '(b:xor x y))
+
+
+^{:refer std.lang.base.grammar-xtalk/tf-sub :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.base.grammar-xtalk/tf-mul :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.base.grammar-xtalk/tf-div :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.base.grammar-xtalk/tf-neg :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.base.grammar-xtalk/tf-inc :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.base.grammar-xtalk/tf-dec :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.base.grammar-xtalk/tf-eq :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.base.grammar-xtalk/tf-neq :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.base.grammar-xtalk/tf-lt :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.base.grammar-xtalk/tf-lte :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.base.grammar-xtalk/tf-gt :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.base.grammar-xtalk/tf-gte :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.base.grammar-xtalk/tf-zero? :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.base.grammar-xtalk/tf-pos? :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.base.grammar-xtalk/tf-neg? :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.base.grammar-xtalk/tf-even? :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.base.grammar-xtalk/tf-odd? :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.base.grammar-xtalk/tf-second :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.base.grammar-xtalk/tf-last :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.base.grammar-xtalk/tf-second-last :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.base.grammar-xtalk/tf-lt-string :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.base.grammar-xtalk/tf-gt-string :added "4.1"}
+(fact "TODO")

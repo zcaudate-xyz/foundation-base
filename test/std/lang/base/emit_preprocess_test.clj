@@ -220,6 +220,36 @@
                    identity)
   => '(world 1 2 3))
 
+(fact "staging failures include macro context"
+  ^:hidden
+
+  (try
+    (to-staging-form '(hello 1 2 3)
+                     {:reserved {'hello {:type :template
+                                         :macro (fn [_]
+                                                  (throw (ex-info "boom" {:probe true})))}}}
+                     (:modules prep/+book-min+)
+                     '{:lang :lua
+                       :module {:id L.core
+                                :link {u L.core}}}
+                     nil
+                     identity)
+    nil
+    (catch Throwable t
+      (select-keys (ex-data t)
+                   [:probe
+                    :std.lang/phase
+                    :std.lang/lang
+                    :std.lang/module
+                    :std.lang/symbol
+                    :std.lang/form])))
+  => '{:probe true
+       :std.lang/phase :staging/reserved-template
+       :std.lang/lang :lua
+       :std.lang/module L.core
+       :std.lang/symbol hello
+       :std.lang/form (hello 1 2 3)})
+
 ^{:refer std.lang.base.emit-preprocess/process-standard-symbol :added "4.0"}
 (fact "processes a standard symbol"
   ^:hidden
@@ -399,3 +429,10 @@
                             :js
                             'JS.ui)})
   => '{"react" #{React}})
+
+
+^{:refer std.lang.base.emit-preprocess/value-template-args :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.base.emit-preprocess/protect-reserved-head :added "4.1"}
+(fact "TODO")

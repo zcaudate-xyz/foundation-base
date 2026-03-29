@@ -415,3 +415,6 @@
 
 ^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-future-from-async :added "4.1"}
 (fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-has-key? :added "4.1"}
+(fact "TODO")

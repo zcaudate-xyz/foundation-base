@@ -101,3 +101,16 @@
                         :emit {:label false}})])
   => '[#{}
         "function template_fn(value){\n  return value;\n}"])
+
+
+^{:refer std.lang.base.impl-template/infer-static-template :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.base.impl-template/create-code-state :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.base.impl-template/cached-code-state :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.base.impl-template/cached-entry-deps :added "4.1"}
+(fact "TODO")
