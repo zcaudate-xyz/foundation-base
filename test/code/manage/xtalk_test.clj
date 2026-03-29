@@ -5,7 +5,11 @@
   (:use code.test))
 
 (fact "xtalk audit exposes the extended xtalk categories"
-  (set/subset? #{:xtalk-ws :xtalk-notify :xtalk-service}
+  (set/subset? #{:xtalk-common
+                 :xtalk-functional
+                 :xtalk-language-specific
+                 :xtalk-std-lang-link-specific
+                 :xtalk-runtime-specific}
                (set (xtalk/xtalk-categories)))
   => true)
 

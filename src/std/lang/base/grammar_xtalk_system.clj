@@ -196,37 +196,32 @@
        (apply set/union #{})))
 
 (defn scan-xtalk
-  "scans a form for xtalk op usage, linked hard-link modules, and template restaging"
+  "scans a form for xtalk op usage and linked hard-link modules"
   {:added "4.1"}
-  ([input]
-   (scan-xtalk input nil))
-  ([input grammar]
-   (let [ops       (volatile! #{})
-         template? (volatile! false)
-         reserved  (:reserved grammar)]
+   [input]
+   (let [ops     (volatile! #{})
+         symbols (volatile! #{})]
      (walk/prewalk
       (fn [form]
-        (when (and (collection/form? form)
-                   (symbol? (first form)))
-          (when-let [op (xtalk-symbol-op (first form))]
-            (vswap! ops set/union (xtalk-op-closure op)))
-          (when (and reserved
-                     (= :hard-link (get-in reserved [(first form) :emit])))
-            (vreset! template? true)))
-        form)
+         (when (and (collection/form? form)
+                    (symbol? (first form)))
+           (when-let [op (xtalk-symbol-op (first form))]
+             (vswap! symbols conj (first form))
+             (vswap! ops set/union (xtalk-op-closure op))))
+         form)
       input)
-     (let [xtalk-ops @ops]
-       {:ops xtalk-ops
-        :profiles (xtalk-ops-profiles xtalk-ops)
-        :polyfill-modules (->> xtalk-ops
-                               (keep (fn [op]
-                                       (let [{:keys [emit raw]} (xtalk-op-entry op)]
-                                         (when (and (= :hard-link emit)
-                                                    (symbol? raw)
-                                                    (namespace raw))
-                                           (symbol (namespace raw))))))
-                               set)
-        :template? @template?}))))
+    (let [xtalk-ops @ops]
+      {:ops xtalk-ops
+       :symbols @symbols
+       :profiles (xtalk-ops-profiles xtalk-ops)
+       :polyfill-modules (->> xtalk-ops
+                              (keep (fn [op]
+                                      (let [{:keys [emit raw]} (xtalk-op-entry op)]
+                                        (when (and (= :hard-link emit)
+                                                   (symbol? raw)
+                                                   (namespace raw))
+                                          (symbol (namespace raw))))))
+                              set)})))
 
 (defn xtalk-grammar-supported-ops
   "returns the xtalk ops supported by a grammar reserved map"

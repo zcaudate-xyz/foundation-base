@@ -1,7 +1,6 @@
 (ns rt.postgres.base.grammar.entity
   (:require [clojure.set :as set]
             [clojure.string :as str]
-            [rt.postgres :as pg]
             [rt.postgres.base.grammar.entity-util :as ut]
             [std.lang :as l]
             [std.lang.base.grammar-spec :as grammar-spec]
@@ -125,7 +124,7 @@
 
 (defn target-support-columns
   [[depth _]]
-  (case depth
+  (case (long depth)
     0 []
     1 [:class-table]
     2 [:class-table :class-context]

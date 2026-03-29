@@ -1,6 +1,5 @@
 (ns rt.postgres.base.grammar.entity-util
-  (:require [rt.postgres :as pg]
-            [std.lang :as l]
+  (:require [std.lang :as l]
             [std.lang.base.grammar-spec :as grammar-spec]
             [std.lib.context.pointer :as ptr]
             [std.lib.env :as env]
@@ -147,8 +146,8 @@
 
         (symbol? ptr) ptr
 
-        (var? ptr) (symbol (name (.getName (.ns ptr)))
-                           (name (.sym ptr)))))
+        (var? ptr) (symbol (name (.getName (.ns ^clojure.lang.Var ptr)))
+                           (name (.sym ^clojure.lang.Var ptr)))))
 
 (defn default-fields
   [ns-str]

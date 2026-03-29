@@ -1,11 +1,12 @@
 (ns std.lang.base.script-macro-test
   (:require [clojure.string]
-            [std.lang.base.book :as book]
-            [std.lang.base.impl :as impl]
-            [std.lang.base.library :as lib]
-            [std.lang.base.library-snapshot-prep-test :as prep]
-            [std.lang.base.pointer :as ptr]
-            [std.lang.base.runtime :as rt]
+             [std.lang.base.book :as book]
+             [std.lang.base.impl :as impl]
+             [std.lang.base.library :as lib]
+             [std.lang.base.library-loader :as loader]
+             [std.lang.base.library-snapshot-prep-test :as prep]
+             [std.lang.base.pointer :as ptr]
+             [std.lang.base.runtime :as rt]
             [std.lang.base.script-macro :as macro]
             [std.lang.base.script-xtalk :as script-xtalk]
             [std.lang.model.spec-js :as js]
@@ -17,6 +18,7 @@
 
 (rt/install-lang! :lua)
 (rt/install-lang! :js)
+(rt/install-lang! :xtalk)
 
 ^{:refer std.lang.base.script-macro/body-arglists :added "4.0"}
 (fact "makes arglists from body"
@@ -152,6 +154,78 @@
     (ptr/ptr-invoke-string make-array-0 [1 2 3] {}))
   => "[1,2,3]")
 
+(fact "top level function and macro pointers can be printed"
+  ^:hidden
+
+  (impl/with:library [+library+]
+    (let [macro-var (macro/intern-defmacro-fn
+                     :lua
+                     (with-meta
+                       '(defmacro.lua make-array-printable [& args]
+                          (vec args))
+                       '{:module L.core})
+                     {})
+          fn-var    (macro/intern-top-level-fn
+                     :lua
+                     ['defn (get-in (lib/get-book +library+ :lua)
+                                    [:grammar :reserved 'defn])]
+                     (with-meta
+                       '(defn.lua always-false
+                          [x]
+                          (return false))
+                       {:module 'L.core})
+                     {})]
+      (every? string?
+              [(pr-str @macro-var)
+               (pr-str @fn-var)])))
+  => true)
+
+(fact "xtalk top level forms print and hydrate without forcing abstract emit"
+  ^:hidden
+
+  (let [xlib (lib/library {})]
+    (loader/ensure-book! xlib :xtalk)
+    (impl/with:library [xlib]
+      (let [book      (lib/get-book xlib :xtalk)
+            reserved  ['defn (get-in book [:grammar :reserved 'defn])]
+            macro-var (macro/intern-defmacro-fn
+                       :xtalk
+                       (with-meta
+                         '(defmacro.xt make-type-native-printable [x]
+                            (list 'x:type-native x))
+                         '{:module xt.lang.base-lib})
+                       {})
+            fn-var    (macro/intern-top-level-fn
+                       :xtalk
+                       reserved
+                       (with-meta
+                         '(defn.xt type-native-printable
+                            "gets the native type"
+                            {:added "4.1"}
+                            [obj]
+                            (return (x:type-native obj)))
+                         {:module 'xt.lang.base-lib})
+                       {})
+            if-var    (macro/intern-top-level-fn
+                       :xtalk
+                       reserved
+                       (with-meta
+                         '(defn.xt type-class-printable
+                            "gets the type of an object"
+                            {:added "4.1"}
+                            [x]
+                            (var ntype (-/type-native x))
+                            (if (== ntype "object")
+                              (return (x:get-key x "::" ntype))
+                              (return ntype)))
+                         {:module 'xt.lang.base-lib})
+                       {})]
+        (every? true?
+                [(string? (pr-str @macro-var))
+                 (string? (pr-str @fn-var))
+                 (string? (pr-str @if-var))]))))
+  => true)
+
 ^{:refer std.lang.base.script-macro/intern-defmacro :added "4.0"}
 (fact "the intern macro function"
   ^:hidden
@@ -222,15 +296,16 @@
 
   (script-xtalk/hydrate-xtalk-scan
    {:module 'L.core
-    :form-input '(do raw)}
+     :form-input '(do raw)}
    {:hydrate (fn [_ _ _]
-               [nil '(do (x:obj-keys data))])}
+                [nil '(do (x:obj-keys data))])}
    {}
    '{L.core {:id L.core}}
    {})
   => '{:ops #{:x-obj-keys}
-       :profiles #{:xtalk-common-object}
-      :polyfill-modules #{xt.lang.common-data}})
+       :symbols #{x:obj-keys}
+        :profiles #{:xtalk-common}
+       :polyfill-modules #{xt.lang.common-data}})
 
 ^{:refer std.lang.base.script-macro/intern-top-level-fn :added "4.0"}
 (fact "interns a top level function"

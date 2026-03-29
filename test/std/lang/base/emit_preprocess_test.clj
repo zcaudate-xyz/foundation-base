@@ -10,7 +10,8 @@
             [std.lang.base.grammar-xtalk-system :as grammar-xtalk]
             [std.lang.base.impl-entry :as impl-entry]
             [std.lang.base.library :as lib]
-            [std.lang.base.library-snapshot :as snap])
+            [std.lang.base.library-snapshot :as snap]
+            [std.lang.model.spec-js :as js])
   (:use code.test))
 
 (def +reserved+
@@ -285,14 +286,45 @@
   (value-standalone 'x:add +grammar+)
   => '(fn [a b] (return (+ a b)))
 
+  (value-standalone 'for:object js/+grammar+)
+  => nil
+
   (value-standalone 'hello
                     {:reserved {'hello {:emit :macro
                                         :macro (with-meta
                                                  (fn [[_ a b]]
                                                    (list '+ a b))
                                                  {:arglists '([_ a b])})
-                                        :value/standalone true}}})
+                                         :value/standalone true}}})
   => '(fn [a b] (return (+ a b))))
+
+(fact "language macro form heads do not recurse during staging"
+  ^:hidden
+
+  (first
+   (to-staging '(do (for:object [[k v] obj]
+                        (return false)))
+               js/+grammar+
+               {}
+               '{:module {:id JS.core
+                          :link {- JS.core}}}))
+  => '(do (for:object [[k v] obj]
+          (return false))))
+
+(fact "core macros remain deferred during staging"
+  ^:hidden
+
+  (first
+   (to-staging '(if check
+                  (return a)
+                  (return b))
+               js/+grammar+
+               {}
+               '{:module {:id JS.core
+                          :link {- JS.core}}}))
+  => '(if check
+        (return a)
+        (return b)))
 
 ^{:refer std.lang.base.grammar-xtalk-system/scan-xtalk :added "4.1"}
 (fact "scans xtalk usage and linked polyfill modules"
@@ -302,9 +334,11 @@
   => '{:ops #{:x-obj-keys
               :x-arr-map
               :x-str-ends-with}
-       :profiles #{:xtalk-common-object
-                   :xtalk-functional-array
-                   :xtalk-common-string}
+       :symbols #{x:obj-keys
+                  x:arr-map
+                  x:str-ends-with}
+       :profiles #{:xtalk-common
+                   :xtalk-functional}
        :polyfill-modules #{xt.lang.base-lib
                            xt.lang.common-data
                            xt.lang.common-string}})

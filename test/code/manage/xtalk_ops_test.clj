@@ -13,7 +13,7 @@
                     (xtalk-ops/inventory-entries))]
     (select-keys entry [:op :category :canonical-symbol :macro :emit]))
   => {:op :x-get-key
-      :category :xtalk-access
+      :category :xtalk-common
       :canonical-symbol 'x:get-key
       :macro 'std.lang.base.grammar-xtalk/tf-get-key
       :emit :macro})

@@ -113,7 +113,7 @@
          :link  {- L.core}})
       (select-keys [:xtalk-ops :xtalk-profiles :polyfill-modules]))
   => '{:xtalk-ops #{:x-nil?}
-       :xtalk-profiles #{:xtalk-common-nil}
+       :xtalk-profiles #{:xtalk-common}
        :polyfill-modules #{}})
 
 ^{:refer std.lang.base.impl-entry/create-code :added "4.0"}

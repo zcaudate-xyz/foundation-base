@@ -25,7 +25,9 @@
   []
   (->> (xtalk-categories)
        (mapcat (fn [category]
-                 (for [[op entry] (grammar/ops-detail category)]
+                 (for [[op entry] (grammar/ops-detail category)
+                       :when (and (keyword? op)
+                                  (map? entry))]
                    [op (assoc entry :category category)])))
        (into (sorted-map))))
 

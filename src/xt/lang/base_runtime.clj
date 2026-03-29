@@ -7,7 +7,9 @@
             [std.lib.template :as template]))
 
 (l/script :xtalk
-  {:require [[xt.lang.base-lib :as k]]})
+  {:require [[xt.lang.common-base :as common-base]
+             [xt.lang.common-data :as common-data]
+             [xt.lang.common-string :as common-string]]})
 
 (defspec.xt XTWatchFn
   [:fn [:xt/any :xt/str] :xt/any])
@@ -153,7 +155,7 @@
   (return {"::" "xt"
            :config   {}
            :spaces   {}
-           :hash     {:lookup   (k/lu-create)
+           :hash     {:lookup   (x:lu-create)
                       :counter  (:- "0x011c9dc5")}}))
 
 (defn.xt
@@ -190,8 +192,8 @@
   {:added "4.0"}
   []
   (var g (-/xt))
-  (var prev (k/get-key g "config"))
-  (k/set-key g "config" {})
+  (var prev (x:get-key g "config"))
+  (x:set-key g "config" {})
   (return [true prev]))
 
 (defn.xt xt-purge-spaces
@@ -199,23 +201,23 @@
   {:added "4.0"}
   []
   (var g (-/xt))
-  (var prev (k/get-key g "spaces"))
-  (k/set-key g "spaces" {})
+  (var prev (x:get-key g "spaces"))
+  (x:set-key g "spaces" {})
   (return [true prev]))
 
 (defn.xt xt-lookup-id
   "gets the runtime id for pointer-like objects"
   {:added "4.0"}
   [obj]
-  (when (or (k/fn? obj)
-            (k/obj? obj)
-            (k/arr? obj))
+  (when (or (common-base/fn? obj)
+            (common-base/obj? obj)
+            (common-base/arr? obj))
     (var #{hash} (-/xt))
     (var #{lookup counter} hash)
-    (var hash-id (k/lu-get lookup obj))
-    (when (k/nil? hash-id)
-      (k/set-key hash "counter" (+ 1 counter))
-      (k/lu-set lookup obj counter)
+    (var hash-id (x:lu-get lookup obj))
+    (when (x:nil? hash-id)
+      (x:set-key hash "counter" (+ 1 counter))
+      (x:lu-set lookup obj counter)
       (return counter))
     (return hash-id)))
 
@@ -230,7 +232,7 @@
   []
   (var g (-/xt))
   (var #{config} g)
-  (return (k/obj-keys config)))
+  (return (common-data/obj-keys config)))
 
 (defn.xt xt-config-set
   "sets the config for a module"
@@ -238,8 +240,8 @@
   [module m]
   (var g (-/xt))
   (var #{config} g)
-  (var prev (k/get-key config module))
-  (k/set-key config module m)
+  (var prev (x:get-key config module))
+  (x:set-key config module m)
   (return [true prev]))
 
 (defn.xt xt-config-del
@@ -248,8 +250,8 @@
   [module]
   (var g (-/xt))
   (var #{config} g)
-  (var prev (k/get-key config module))
-  (k/del-key config module)
+  (var prev (x:get-key config module))
+  (x:del-key config module)
   (return [true prev]))
 
 (defn.xt xt-config
@@ -258,7 +260,7 @@
   [module]
   (var g (-/xt))
   (var #{config} g)
-  (return (k/get-key config module)))
+  (return (x:get-key config module)))
 
 ;;
 ;; SPACE
@@ -270,7 +272,7 @@
   []
   (var g (-/xt))
   (var #{spaces} g)
-  (return (k/obj-keys spaces)))
+  (return (common-data/obj-keys spaces)))
 
 (defn.xt xt-space-del
   "deletes a space"
@@ -278,8 +280,8 @@
   [module]
   (var g (-/xt))
   (var #{spaces} g)
-  (var prev  (k/get-key spaces module))
-  (k/del-key g module)
+  (var prev  (x:get-key spaces module))
+  (x:del-key g module)
   (return [true prev]))
 
 (defn.xt xt-space
@@ -288,10 +290,10 @@
   [module]
   (var g (-/xt))
   (var #{spaces} g)
-  (var curr  (k/get-key spaces module))
-  (when (k/nil? curr)
+  (var curr  (x:get-key spaces module))
+  (when (x:nil? curr)
     (:= curr {})
-    (k/set-key spaces module curr))
+    (x:set-key spaces module curr))
   (return curr))
 
 (defn.xt xt-space-clear
@@ -300,8 +302,8 @@
   [module]
   (var g (-/xt))
   (var #{spaces} g)
-  (var prev  (k/get-key spaces module))
-  (k/set-key spaces module {})
+  (var prev  (x:get-key spaces module))
+  (x:set-key spaces module {})
   (return [true prev]))
 
 ;;
@@ -313,8 +315,8 @@
   {:added "4.0"}
   [module key]
   (var space (-/xt-space module))
-  (var prev (k/get-key space key))
-  (k/del-key space key)
+  (var prev (x:get-key space key))
+  (x:del-key space key)
   (return [true prev]))
 
 (defn.xt xt-item-trigger
@@ -322,27 +324,27 @@
   {:added "4.0"}
   [module key]
   (var space (-/xt-space module))
-  (var prev  (k/get-key space key))
-  (when (k/not-nil? prev)
+  (var prev  (x:get-key space key))
+  (when (x:not-nil? prev)
     (var #{value watch} prev)
-    (k/for:object [[watch-key watch-fn] watch]
-      (watch-fn value (k/cat module "/" key)))
-    (return (k/obj-keys watch))))
+    (for:object [[watch-key watch-fn] watch]
+      (watch-fn value (x:cat module "/" key)))
+    (return (common-data/obj-keys watch))))
 
 (defn.xt xt-item-set
   "sets a single item in the space"
   {:added "4.0"}
   [module key value]
   (var space (-/xt-space module))
-  (var prev  (k/get-key space key))
-  (when (k/nil? prev)
+  (var prev  (x:get-key space key))
+  (when (x:nil? prev)
     (:= prev {:watch {}})
-    (k/set-key space key prev))
-  (k/set-key prev "value" value)
+    (x:set-key space key prev))
+  (x:set-key prev "value" value)
   (var #{watch} prev)
-  (k/for:object
+  (for:object
    [[watch-key watch-fn] watch]
-   (watch-fn value (k/cat module "/" key)))
+   (watch-fn value (x:cat module "/" key)))
   (return [true prev]))
 
 (defn.xt xt-item
@@ -350,9 +352,9 @@
   {:added "4.0"}
   [module key]
   (var space (-/xt-space module))
-  (var curr  (k/get-key space key))
+  (var curr  (x:get-key space key))
   (when curr
-    (return (k/get-key curr "value")))
+    (return (x:get-key curr "value")))
   (return nil))
 
 (defn.xt xt-item-get
@@ -360,13 +362,13 @@
   {:added "4.0"}
   [module key init-fn]
   (var space (-/xt-space module))
-  (var curr (k/get-key space key))
+  (var curr (x:get-key space key))
   (cond curr
-        (return (k/get-key curr "value"))
+        (return (x:get-key curr "value"))
         
         :else
         (do (var value (init-fn))
-            (k/set-key space key {:value value
+            (x:set-key space key {:value value
                                   :watch {}})
             (return value))))
 
@@ -374,9 +376,9 @@
   "gets the var entry"
   {:added "4.0"}
   [sym]
-  (var [module key] (k/sym-pair sym))
+  (var [module key] (common-string/sym-pair sym))
   (var space (-/xt-space module))
-  (return (k/get-key space key)))
+  (return (x:get-key space key)))
 
 (defn.xt xt-var
   "gets an xt item
@@ -385,15 +387,15 @@
     (rt/xt-var \"-/hello\"))"
   {:added "4.0"}
   [sym]
-  (var [module key] (k/sym-pair sym))
+  (var [module key] (common-string/sym-pair sym))
   (return (-/xt-item module key)))
 
 (defn.xt xt-var-set
   "sets the var"
   {:added "4.0"}
   [sym value]
-  (var [module key] (k/sym-pair sym))
-  (if (k/nil? value)
+  (var [module key] (common-string/sym-pair sym))
+  (if (x:nil? value)
     (return (-/xt-item-del module key))
     (return (-/xt-item-set module key value))))
 
@@ -401,7 +403,7 @@
   "triggers the var"
   {:added "4.0"}
   [sym]
-  (var [module key] (k/sym-pair sym))
+  (var [module key] (common-string/sym-pair sym))
   (return (-/xt-item-trigger module key)))
 
 (defn.xt xt-add-watch
@@ -411,7 +413,7 @@
   (var entry (-/xt-var-entry sym))
   (when entry
     (var #{watch} entry)
-    (k/set-key watch watch-key watch-fn)
+    (x:set-key watch watch-key watch-fn)
     (return true))
   (return false))
 
@@ -422,7 +424,7 @@
   (var entry (-/xt-var-entry sym))
   (when entry
     (var #{watch} entry)
-    (k/del-key watch watch-key)
+    (x:del-key watch watch-key)
     (return true))
   (return false))
 

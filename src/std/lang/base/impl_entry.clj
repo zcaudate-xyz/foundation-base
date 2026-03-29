@@ -1,5 +1,6 @@
 (ns std.lang.base.impl-entry
   (:require [std.lang.base.book :as book]
+            [std.lang.base.entry-template :as entry-template]
             [std.lang.base.emit :as emit]
             [std.lang.base.emit-preprocess :as preprocess]
             [std.lang.base.grammar-xtalk-system :as xtalk-system]
@@ -89,37 +90,39 @@
   {:added "4.0"}
   ([entry reserved grammar modules & [mopts]]
    (let [{:keys [hydrate-hook]} reserved
-         {:keys [form-input]} entry
-         [hmeta form-hydrate] (hydrate-form form-input reserved grammar mopts)
-         module (assoc (get modules (:module entry))
-                       :display :brief)
-         [form
-          deps
-          deps-fragment
-          deps-native] (preprocess/to-staging form-hydrate
-                                              grammar
-                                              modules
-                                              (merge {:module module
-                                                      :entry (assoc entry :display :brief)}
-                                                     mopts))
-         {:keys [ops profiles polyfill-modules]} (xtalk-system/scan-xtalk form-hydrate)
-         
+         {:keys [hmeta
+                 form
+                 deps
+                 deps-fragment
+                 deps-native
+                 xtalk-ops
+                 xtalk-profiles
+                 polyfill-modules]
+          template? :static/template}
+         (entry-template/create-code-state entry
+                                           reserved
+                                           grammar
+                                           modules
+                                           mopts)
          entry (merge (assoc entry
-                             :form form
-                             :deps deps
-                             :deps-fragment deps-fragment
-                             :deps-native   deps-native
-                             :xtalk-ops ops
-                             :xtalk-profiles profiles
-                             :polyfill-modules polyfill-modules)
-                      hmeta
-                      *extra*)
+                              :form form
+                              :deps deps
+                              :deps-fragment deps-fragment
+                              :deps-native   deps-native
+                              :xtalk-ops xtalk-ops
+                              :xtalk-profiles xtalk-profiles
+                              :polyfill-modules polyfill-modules
+                              :static/template template?)
+                       hmeta
+                       *extra*)
          entry (cond-> entry
-                 (:static/template entry) (assoc :static/template.cache (atom {})))
+                 (and (:static/template entry)
+                      (not (:static/template.cache entry)))
+                 (assoc :static/template.cache (atom {})))
          entry (if hydrate-hook
                  (or (hydrate-hook entry) entry)
                  entry)]
-     entry)))
+      entry)))
 
 (defn create-code
   "creates the code entry"
@@ -237,14 +240,36 @@
   "emits using the raw entry"
   {:added "4.0"}
   ([grammar entry {:keys [emit]
-                   :as mopts}]
-   (assert entry "Entry cannot be null")
-   (let [{:keys [form]}  entry
-         form (if (:transform emit)
-                ((:transform emit) form mopts)
-                form)
-         mopts (assoc mopts :entry (assoc entry :display :brief))]
-     (binding [preprocess/*macro-opts* mopts
+                    :as mopts}]
+    (assert entry "Entry cannot be null")
+    (let [lang    (or (:lang mopts) (:lang entry))
+          modules (or (:modules mopts)
+                      (get-in mopts [:snapshot lang :book :modules]))
+          reserved (get-in grammar [:reserved (:op entry)])
+          entry   (if (and (:static/template entry)
+                           reserved
+                           modules)
+                    (merge entry
+                           (select-keys
+                            (entry-template/cached-code-state entry
+                                                              reserved
+                                                              grammar
+                                                              modules
+                                                              (assoc mopts :lang lang))
+                            [:form
+                             :deps
+                             :deps-fragment
+                             :deps-native
+                             :xtalk-ops
+                             :xtalk-profiles
+                             :polyfill-modules]))
+                    entry)
+          {:keys [form]}  entry
+          form (if (:transform emit)
+                 ((:transform emit) form mopts)
+                 form)
+          mopts (assoc mopts :entry (assoc entry :display :brief))]
+      (binding [preprocess/*macro-opts* mopts
                preprocess/*macro-grammar* grammar]
        (try
          (emit/emit form grammar
@@ -296,11 +321,12 @@
                            (let [{:keys [lang module]} entry]
                              (assoc mopts :module (get-in snapshot [lang :book :modules module]))))
                       mopts)
-           {:keys [label trim cache]} emit
-           body (cond (or *cache-none*
-                          (:static/no-cache entry)
-                          (= cache :none))
-                      (emit-entry-raw grammar entry mopts)
+            {:keys [label trim cache]} emit
+            body (cond (or *cache-none*
+                           (:static/no-cache entry)
+                           (:static/template entry)
+                           (= cache :none))
+                       (emit-entry-raw grammar entry mopts)
                       
                       :else
                       (binding [std.lib.invoke/*force* (or *cache-force* (= cache :force))]

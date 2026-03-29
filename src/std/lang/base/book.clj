@@ -2,9 +2,9 @@
   (:require [clojure.set]
             [clojure.string]
             [std.lang.base.book-entry :as entry]
+            [std.lang.base.entry-template :as entry-template]
             [std.lang.base.book-meta :as meta]
             [std.lang.base.book-module :as module]
-            [std.lang.base.emit-preprocess :as preprocess]
             [std.lang.base.util :as ut]
             [std.lib.atom :as atom]
             [std.lib.collection :as collection]
@@ -71,18 +71,11 @@
    (let [entry (get-code-entry book id)]
      (if-not (:static/template entry)
        (:deps entry)
-       (get-in (swap! (:static/template.cache entry)
-                      (fn [m]
-                        (if (get-in m [lang :deps])
-                          m
-                          (let [input (:form entry)
-                                mopts {:modules modules
-                                       :grammar grammar
-                                       :entry entry}
-
-                                [form deps] (preprocess/to-staging input grammar modules mopts)]
-                            (assoc-in m [lang :deps]  deps)))))
-               [lang :deps])))))
+       (:deps (entry-template/cached-code-state entry
+                                                (get-in grammar [:reserved (:op entry)])
+                                                grammar
+                                                modules
+                                                {:lang lang}))))))
 
 (defn get-deps
   "get dependencies for a given id"

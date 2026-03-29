@@ -98,135 +98,135 @@
   "performs add operation"
   {:added "4.0"}
   [a b]
-  (list '+ a b))
+  (list 'x:add a b))
 
 (defmacro.xt ^{:standalone true}
   sub
   "performs sub operation"
   {:added "4.0"}
   [a b]
-  (list '- a b))
+  (list 'x:sub a b))
 
 (defmacro.xt ^{:standalone true}
   mul
   "perform multiply operation"
   {:added "4.0"}
   [a b]
-  (list '* a b))
+  (list 'x:mul a b))
 
 (defmacro.xt ^{:standalone true}
   div
   "perform divide operation"
   {:added "4.0"}
   [a b]
-  (list '/ a b))
+  (list 'x:div a b))
 
 (defmacro.xt ^{:standalone true}
   gt
   "greater than"
   {:added "4.0"}
   [a b]
-  (list '> a b))
+  (list 'x:gt a b))
 
 (defmacro.xt ^{:standalone true}
   lt
   "less than"
   {:added "4.0"}
   [a b]
-  (list '< a b))
+  (list 'x:lt a b))
 
 (defmacro.xt ^{:standalone true}
   gte
   "greater than or equal to"
   {:added "4.0"}
   [a b]
-  (list '>= a b))
+  (list 'x:gte a b))
 
 (defmacro.xt ^{:standalone true}
   lte
   "less than or equal to"
   {:added "4.0"}
   [a b]
-  (list '<= a b))
+  (list 'x:lte a b))
 
 (defmacro.xt ^{:standalone true}
   eq
   "equal to"
   {:added "4.0"}
   [a b]
-  (list '== a b))
+  (list 'x:eq a b))
 
 (defmacro.xt ^{:standalone true}
   neq
   "not equal to"
   {:added "4.0"}
   [a b]
-  (list 'not= a b))
+  (list 'x:neq a b))
 
 (defmacro.xt ^{:standalone true}
   neg
   "negative function"
   {:added "4.0"}
-  ([x] (list '- (list 'quote x))))
+  ([x] (list 'x:neg x)))
 
 (defmacro.xt ^{:standalone true}
   inc
   "increment function"
   {:added "4.0"}
-  ([x] (list '+ x 1)))
+  ([x] (list 'x:inc x)))
 
 (defmacro.xt ^{:standalone true}
   dec
   "decrement function"
   {:added "4.0"}
-  ([x] (list '- x 1)))
+  ([x] (list 'x:dec x)))
 
 (defmacro.xt ^{:standalone true}
   zero?
   "zero check"
   {:added "4.0"}
   ([x]
-   (list '== x 0)))
+   (list 'x:zero? x)))
 
 (defmacro.xt ^{:standalone true}
   pos?
   "positive check"
   {:added "4.0"}
   ([x]
-   (list '> x 0)))
+   (list 'x:pos? x)))
 
 (defmacro.xt ^{:standalone true}
   neg?
   "negative check"
   {:added "4.0"}
   ([x]
-   (list '< x 0)))
+   (list 'x:neg? x)))
 
 (defmacro.xt ^{:standalone true}
   even?
   "even check"
   {:added "4.0"}
-  ([x] (list '== 0 (list 'mod x 2))))
+  ([x] (list 'x:even? x)))
 
 (defmacro.xt ^{:standalone true}
   odd?
   "odd check"
   {:added "4.0"}
-  ([x] (list 'not (list '== 0 (list 'mod x 2)))))
+  ([x] (list 'x:odd? x)))
 
 (defmacro.xt ^{:standalone true}
   lt-string
   "checks if a is ordered before b"
   {:added "4.0"}
   [a b]
-  (list 'x:arr-str-comp a b))
+  (list 'x:lt-string a b))
 
 (defmacro.xt ^{:standalone true}
   gt-string
   "checks if a is ordered before b"
   {:added "4.0"}
   [a b]
-  (list 'x:arr-str-comp b a))
+  (list 'x:gt-string a b))
 
 
 
@@ -555,14 +555,14 @@
   "gets the first item"
   {:added "4.0"}
   ([arr]
-   (list 'x:get-idx arr '(x:offset))))
+   (list 'x:first arr)))
 
 (defmacro.xt ^{:standalone true}
   second
   "gets the second item"
   {:added "4.0"}
   ([arr]
-   (list 'x:get-idx arr '(x:offset 1))))
+   (list 'x:second arr)))
 
 (defmacro.xt ^{:standalone true}
   nth
@@ -576,18 +576,14 @@
   "gets the last item"
   {:added "4.0"}
   ([arr]
-   (list 'x:get-idx arr (list '+
-                               (list 'x:len arr)
-                               (list 'x:offset -1)))))
+   (list 'x:last arr)))
 
 (defmacro.xt ^{:standalone true}
   second-last
   "gets the second-last item"
   {:added "4.0"}
   ([arr]
-   (list 'x:get-idx arr (list '+
-                              (list 'x:len arr)
-                              (list 'x:offset -2)))))
+   (list 'x:second-last arr)))
 
 ;;
 ;; XLANG BIT

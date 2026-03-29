@@ -68,6 +68,7 @@
 ^{:refer js.cell.runtime.emit/webworker-script :added "4.0"}
 (fact "emits a WebWorker bootstrap script"
   ^:hidden
+
   (str/includes? (emit/webworker-script) "self")
   => true)
 
