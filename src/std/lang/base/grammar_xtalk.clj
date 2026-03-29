@@ -400,6 +400,13 @@
    {:op :x-is-integer?    :symbol #{'x:is-integer?}     :emit :abstract}
    {:op :x-is-boolean?    :symbol #{'x:is-boolean?}     :emit :abstract}])
 
+(def +xt-common-lu+       
+  [{:op :x-lu-create      :symbol #{'x:lu-create}       :emit :unit :default {}}
+   {:op :x-lu-eq          :symbol #{'x:lu-eq}           :macro #'tf-lu-eq :emit :macro}
+   {:op :x-lu-get         :symbol #{'x:lu-get}          :emit :abstract}
+   {:op :x-lu-set         :symbol #{'x:lu-set}          :emit :abstract}
+   {:op :x-lu-del         :symbol #{'x:lu-del}          :emit :abstract}])
+
 (def +xt-common-object+
   [{:op :x-is-object?     :symbol #{'x:is-object?}      :emit :abstract}
    {:op :x-del-key        :symbol #{'x:del-key}         :macro #'tf-del-key     :emit :macro}
@@ -543,12 +550,7 @@
 ;; XTALK LANGUAGE SPECIFIC INTERFACES
 ;;
 
-(def +xt-lang-lu+       
-  [{:op :x-lu-create      :symbol #{'x:lu-create}       :emit :unit :default {}}
-   {:op :x-lu-eq          :symbol #{'x:lu-eq}           :macro #'tf-lu-eq :emit :macro}
-   {:op :x-lu-get         :symbol #{'x:lu-get}          :emit :abstract}
-   {:op :x-lu-set         :symbol #{'x:lu-set}          :emit :abstract}
-   {:op :x-lu-del         :symbol #{'x:lu-del}          :emit :abstract}])
+
 
 (def +xt-lang-global+
   [{:op :x-global-set     :symbol #{'x:global-set}      :macro #'tf-global-set   :emit :macro}

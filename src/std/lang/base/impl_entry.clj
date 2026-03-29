@@ -1,14 +1,14 @@
 (ns std.lang.base.impl-entry
   (:require [std.lang.base.book :as book]
-            [std.lang.base.entry-template :as entry-template]
-            [std.lang.base.emit :as emit]
-            [std.lang.base.emit-preprocess :as preprocess]
-            [std.lang.base.grammar-xtalk-system :as xtalk-system]
-            [std.lang.base.util :as ut]
-            [std.lib.collection :as collection]
-            [std.lib.env :as env]
-            [std.lib.foundation :as f]
-            [std.lib.invoke :as invoke]
+             [std.lang.base.entry-template :as entry-template]
+             [std.lang.base.emit :as emit]
+             [std.lang.base.emit-preprocess :as preprocess]
+             [std.lang.base.grammar-xtalk-system :as xtalk-system]
+             [std.lang.base.util :as ut]
+             [std.lib.collection :as collection]
+             [std.lib.env :as env]
+             [std.lib.foundation :as f]
+             [std.lib.invoke :as invoke]
             [std.print.ansi :as ansi]))
 
 ;;;;
@@ -243,7 +243,11 @@
                     :as mopts}]
     (assert entry "Entry cannot be null")
     (let [lang    (or (:lang mopts) (:lang entry))
+          book    (or (:book mopts)
+                      (when-let [snapshot (:snapshot mopts)]
+                        (book/book-from snapshot lang)))
           modules (or (:modules mopts)
+                      (:modules book)
                       (get-in mopts [:snapshot lang :book :modules]))
           reserved (get-in grammar [:reserved (:op entry)])
           entry   (if (and (:static/template entry)
@@ -318,8 +322,12 @@
    (if (not (:suppress emit))
      (let [mopts  (or (and (not module)
                            snapshot
-                           (let [{:keys [lang module]} entry]
-                             (assoc mopts :module (get-in snapshot [lang :book :modules module]))))
+                           (let [{:keys [lang module]} entry
+                                 book (book/book-from snapshot lang)]
+                             (assoc mopts
+                                    :book book
+                                    :modules (:modules book)
+                                    :module (get-in book [:modules module]))))
                       mopts)
             {:keys [label trim cache]} emit
             body (cond (or *cache-none*
