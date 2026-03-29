@@ -322,9 +322,26 @@
                {}
                '{:module {:id JS.core
                           :link {- JS.core}}}))
-  => '(if check
-        (return a)
-        (return b)))
+   => '(if check
+         (return a)
+         (return b)))
+
+(fact "xtalk operator heads remain in-place inside forms"
+  ^:hidden
+
+  (first
+   (to-staging '(do (x:set-key obj
+                               (x:arr-first e)
+                               (x:arr-second e))
+                    (return obj))
+               +grammar+
+               {}
+               '{:module {:id xt.lang.common-lib
+                          :link {- xt.lang.common-lib}}}))
+  => '(do (x:set-key obj
+                     (x:arr-first e)
+                     (x:arr-second e))
+          (return obj)))
 
 ^{:refer std.lang.base.grammar-xtalk-system/scan-xtalk :added "4.1"}
 (fact "scans xtalk usage and linked polyfill modules"

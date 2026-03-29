@@ -1,6 +1,5 @@
 (ns code.manage.xtalk-audit
   (:require [clojure.string :as str]
-            [std.lang.base.library-loader :as lib-loader]
             [std.lang.base.grammar :as grammar]
             [std.lang.base.impl :as impl]
             [std.lang.base.library :as lib]
@@ -43,13 +42,15 @@
        vec))
 
 (defn installed-languages
-  "loads all default books from the registry via lib-loader and returns installed languages"
+  "loads all default book namespaces and returns installed languages"
   {:added "4.1"}
   []
   (let [library (impl/default-library)]
     (doseq [[lang key] (reg/registry-book-list)
-            :when (= :default key)]
-      (lib-loader/ensure-book! library lang key))
+            :when (= :default key)
+            :let [ns-sym (reg/registry-book-ns lang key)]
+            :when ns-sym]
+      (require ns-sym))
     (->> (keys (lib/get-snapshot library))
          sort
          vec)))

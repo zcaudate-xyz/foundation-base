@@ -5,7 +5,6 @@
             [std.lang.base.book-entry :as e]
             [std.lang.base.emit :as emit]
             [std.lang.base.impl :as impl]
-            [std.lang.base.library-loader :as lib-loader]
             [std.lang.base.library :as lib]
             [std.lang.base.library-snapshot :as snap]
             [std.lang.base.registry :as reg]
@@ -121,8 +120,7 @@
   "setup for the runtime"
   {:added "4.0"}
   ([lang module-id config lib]
-   (let [_          (lib-loader/ensure-book! lib lang)
-         primary    (script-ns-import config)
+   (let [primary    (script-ns-import config)
          config     (update config :emit (fnil eval {}))
          [snapshot] (lib/install-module! lib lang module-id (dissoc config
                                                                     :runtime
@@ -175,8 +173,8 @@
   {:added "4.0"}
   ([lang config]
    (let [module-id (env/ns-sym)
+         book      (annex/get-annex-book module-id lang)
          lib       (annex/get-annex-library module-id)]
-     (lib-loader/ensure-book! lib lang)
      (binding [book/*skip-check* true]
        (script-fn-base lang module-id config lib)))))
 

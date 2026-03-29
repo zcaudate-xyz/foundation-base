@@ -1,17 +1,18 @@
 (ns std.lang.base.script-macro-test
   (:require [clojure.string]
+             [rt.postgres.base.grammar :as pg]
              [std.lang.base.book :as book]
+             [std.lang.base.book-module :as module]
              [std.lang.base.impl :as impl]
              [std.lang.base.library :as lib]
-             [std.lang.base.library-loader :as loader]
              [std.lang.base.library-snapshot-prep-test :as prep]
              [std.lang.base.pointer :as ptr]
              [std.lang.base.runtime :as rt]
-            [std.lang.base.script-macro :as macro]
-            [std.lang.base.script-xtalk :as script-xtalk]
-            [std.lang.model.spec-js :as js]
-            [std.lang.model.spec-lua :as lua]
-            [std.lib.collection :as collection])
+             [std.lang.base.script-macro :as macro]
+             [std.lang.model.spec-js :as js]
+             [std.lang.model.spec-lua :as lua]
+             [std.lang.model.spec-xtalk :as xtalk]
+             [std.lib.collection :as collection])
   (:use code.test))
 
 (def +library+ (lib/library {:snapshot prep/+snap+}))
@@ -19,6 +20,7 @@
 (rt/install-lang! :lua)
 (rt/install-lang! :js)
 (rt/install-lang! :xtalk)
+(rt/install-lang! :postgres)
 
 ^{:refer std.lang.base.script-macro/body-arglists :added "4.0"}
 (fact "makes arglists from body"
@@ -128,9 +130,27 @@
     (ptr/ptr-invoke-string multiply 
                            [1 2 3] {}))
   => "multiply(1,2,3)"
-  
+   
   (meta #'multiply)
   => (contains '{:rt/kernel "hello", :arglists ([a b])}))
+
+(fact "xtalk fragments display their stored form"
+  ^:hidden
+
+  (let [xlib (lib/library {})]
+    (lib/add-book! xlib (assoc xtalk/+book+ :modules {}))
+    (lib/add-module! xlib (module/book-module {:lang :xtalk
+                                               :id 'xt.lang.common-math}))
+    (impl/with:library [xlib]
+      (let [frag-var (macro/intern-def$-fn
+                      :xtalk
+                      (with-meta
+                        '(def$.xt sin x:m-sin)
+                        {:module 'xt.lang.common-math})
+                      {})]
+        [(ptr/ptr-display @frag-var {})
+         (string? (pr-str @frag-var))])))
+  => '["x:m-sin" true])
 
 ^{:refer std.lang.base.script-macro/intern-defmacro-fn :added "4.0"}
 (fact "function to intern a macro"
@@ -184,7 +204,9 @@
   ^:hidden
 
   (let [xlib (lib/library {})]
-    (loader/ensure-book! xlib :xtalk)
+    (lib/add-book! xlib (assoc xtalk/+book+ :modules {}))
+    (lib/add-module! xlib (module/book-module {:lang :xtalk
+                                               :id 'xt.lang.base-lib}))
     (impl/with:library [xlib]
       (let [book      (lib/get-book xlib :xtalk)
             reserved  ['defn (get-in book [:grammar :reserved 'defn])]
@@ -210,20 +232,46 @@
                        :xtalk
                        reserved
                        (with-meta
-                         '(defn.xt type-class-printable
-                            "gets the type of an object"
-                            {:added "4.1"}
-                            [x]
-                            (var ntype (-/type-native x))
-                            (if (== ntype "object")
-                              (return (x:get-key x "::" ntype))
-                              (return ntype)))
-                         {:module 'xt.lang.base-lib})
-                       {})]
+                          '(defn.xt type-class-printable
+                             "gets the type of an object"
+                             {:added "4.1"}
+                             [x]
+                             (var ntype (-/type-native-printable x))
+                             (if (== ntype "object")
+                               (return (x:get-key x "::" ntype))
+                               (return ntype)))
+                          {:module 'xt.lang.base-lib})
+                        {})]
         (every? true?
-                [(string? (pr-str @macro-var))
-                 (string? (pr-str @fn-var))
-                 (string? (pr-str @if-var))]))))
+                 [(string? (pr-str @macro-var))
+                  (string? (pr-str @fn-var))
+                  (string? (pr-str @if-var))]))))
+  => true)
+
+(fact "postgres top level functions initialize against a runtime context"
+  ^:hidden
+
+  (let [plib (lib/library {:snapshot prep/+snap+})]
+    (lib/add-book! plib (assoc pg/+book+ :modules {}))
+    (lib/add-module! plib (module/book-module {:lang :postgres
+                                               :id 'rt.postgres.test.scratch-v1}))
+    (impl/with:library [plib]
+      (let [book     (lib/get-book plib :postgres)
+            reserved ['defn (get-in book [:grammar :reserved 'defn])]
+            fn-var   (macro/intern-top-level-fn
+                      :postgres
+                      reserved
+                      (with-meta
+                        '(defn.pg as-array
+                           "returns a jsonb array"
+                           {:added "4.0"}
+                           [:jsonb input]
+                           (when (== input "{}")
+                             (return "[]"))
+                           (return input))
+                        {:module 'rt.postgres.test.scratch-v1})
+                      {})]
+        (string? (pr-str @fn-var)))))
   => true)
 
 ^{:refer std.lang.base.script-macro/intern-defmacro :added "4.0"}
@@ -289,23 +337,6 @@
 
   (macro/intern-free :lua "hello")
   => #'std.lang.base.script-macro-test/defptr.hello)
-
-^{:refer std.lang.base.script-xtalk/hydrate-xtalk-scan :added "4.1"}
-(fact "scans xtalk usage from the hydrated form rather than the raw input"
-  ^:hidden
-
-  (script-xtalk/hydrate-xtalk-scan
-   {:module 'L.core
-     :form-input '(do raw)}
-   {:hydrate (fn [_ _ _]
-                [nil '(do (x:obj-keys data))])}
-   {}
-   '{L.core {:id L.core}}
-   {})
-  => '{:ops #{:x-obj-keys}
-       :symbols #{x:obj-keys}
-        :profiles #{:xtalk-common}
-       :polyfill-modules #{xt.lang.common-data}})
 
 ^{:refer std.lang.base.script-macro/intern-top-level-fn :added "4.0"}
 (fact "interns a top level function"

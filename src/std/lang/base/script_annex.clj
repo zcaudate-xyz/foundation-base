@@ -1,7 +1,6 @@
 (ns std.lang.base.script-annex
   (:require [std.json :as json]
             [std.lang.base.impl :as impl]
-            [std.lang.base.library-loader :as lib-loader]
             [std.lang.base.library :as lib]
             [std.lang.base.library-snapshot :as snap]
             [std.lang.base.runtime :as rt]
@@ -117,14 +116,16 @@
 
 (defn get-annex-book
   "gets the current book in the annex
- 
+  
    (annex/get-annex-book (h/ns-sym) :lua)
    => book/book?"
   {:added "4.0"}
   ([ns lang]
    (let [curr (:library (get-annex ns))]
      (or (snap/get-book @(:instance curr) lang)
-         (lib-loader/ensure-book! curr lang)))))
+         (let [book   (or (lib/get-book (impl/default-library) lang)
+                          (f/error "Book not found" {:lang lang}))]
+           (lib/add-book! curr (assoc book :modules {})))))))
 
 (defn add-annex-runtime
   "adds a runtime to the annex"
