@@ -3,6 +3,19 @@
 
 (l/script :xtalk)
 
+(def$.xt get-char x:str-char)
+(def$.xt split x:str-split)
+(def$.xt join x:str-join)
+(def$.xt replace x:str-replace)
+(def$.xt index-of x:str-index-of)
+(def$.xt substring x:str-substring)
+(def$.xt to-uppercase x:str-to-upper)
+(def$.xt to-lowercase x:str-to-lower)
+(def$.xt to-fixed x:str-to-fixed)
+(def$.xt trim x:str-trim)
+(def$.xt trim-left x:str-trim-left)
+(def$.xt trim-right x:str-trim-right)
+
 (defspec.xt StringPair
   [:xt/tuple [:xt/maybe :xt/str] :xt/str])
 

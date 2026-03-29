@@ -3,6 +3,19 @@
 
 (l/script :xtalk)
 
+(def$.xt set-proto x:proto-set)
+(def$.xt get-proto x:proto-get)
+(def$.xt type-native x:type-native)
+(def$.xt to-string x:to-string)
+(def$.xt to-number x:to-number)
+(def$.xt is-string? x:is-string?)
+(def$.xt is-number? x:is-number?)
+(def$.xt is-integer? x:is-integer?)
+(def$.xt is-boolean? x:is-boolean?)
+(def$.xt is-function? x:is-function?)
+(def$.xt is-array? x:is-array?)
+(def$.xt is-object? x:is-object?)
+
 (defspec.xt AnyArray
   [:xt/array :xt/any])
 
@@ -56,8 +69,6 @@
 
 (defspec.xt step-del-key
   [:fn [AnyDict :xt/str] AnyDict])
-
-
 ;;
 ;;
 ;;

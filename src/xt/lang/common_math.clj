@@ -2,7 +2,32 @@
   (:require [std.lang :as l :refer [defspec.xt]])
   (:refer-clojure :exclude []))
 
-(l/script :xtalk)
+(l/script :xtalk
+  {:require [[xt.lang.base-macro :as k]]})
+
+(l/intern-macros :xtalk 'xt.lang.base-macro)
+
+(def$.xt abs x:m-abs)
+(def$.xt acos x:m-acos)
+(def$.xt asin x:m-asin)
+(def$.xt atan x:m-atan)
+(def$.xt ceil x:m-ceil)
+(def$.xt cos x:m-cos)
+(def$.xt cosh x:m-cosh)
+(def$.xt exp x:m-exp)
+(def$.xt floor x:m-floor)
+(def$.xt loge x:m-loge)
+(def$.xt log10 x:m-log10)
+(def$.xt max x:m-max)
+(def$.xt min x:m-min)
+(def$.xt mod x:m-mod)
+(def$.xt quot x:m-quot)
+(def$.xt pow x:m-pow)
+(def$.xt sin x:m-sin)
+(def$.xt sinh x:m-sinh)
+(def$.xt sqrt x:m-sqrt)
+(def$.xt tan x:m-tan)
+(def$.xt tanh x:m-tanh)
 
 (defspec.xt mod-pos
   [:fn [:xt/num :xt/num] :xt/num])
@@ -30,8 +55,6 @@
 
 (defspec.xt bit-count
   [:fn [:xt/num] :xt/num])
-
-(def$.xt sin x:m-sin)
 
 (defn.xt mod-pos
   "gets the positive mod"

@@ -1,15 +1,13 @@
 (ns xt.lang.common-data
-  (:require [std.lang :as l]
-            [std.lang.typed.xtalk :refer [defspec.xt]])
-  (:refer-clojure :exclude [abs bit-and bit-or bit-xor type get-in identity inc
-                            dec zero? pos? neg? even? odd? max min mod quot
-                            cat eval apply print nil? fn? first second nth
-                            replace last sort sort-by throw]))
+  (:require [std.lang :as l :refer [defspec.xt]]))
 
-(l/script :xtalk
-  {:require [[xt.lang.base-macro :as k]]})
+(l/script :xtalk)
 
-(l/intern-macros :xtalk 'xt.lang.base-macro)
+(def$.xt arr-push x:arr-push)
+(def$.xt arr-pop x:arr-pop)
+(def$.xt arr-push-first x:arr-push-first)
+(def$.xt arr-pop-first x:arr-pop-first)
+(def$.xt arr-insert x:arr-insert)
 
 (defspec.xt AnyArray
   [:xt/array :xt/any])
@@ -109,7 +107,7 @@
         (x:is-string? res) (return (== 0 (x:str-len res)))
         (x:is-array? res) (return (== 0 (x:len res)))
         (x:is-object? res)
-        (do (k/for:object [[k v] res]
+        (do (for:object [[k v] res]
               (return false))
             (return true))
         :else
@@ -138,7 +136,7 @@
   [obj]
   (var out := [])
   (when (x:not-nil? obj)
-    (k/for:object [[k _] obj]
+    (for:object [[k _] obj]
       (x:arr-push out k)))
   (return out))
 
@@ -168,7 +166,7 @@
   "creates a getter from a path"
   {:added "4.1"}
   [path]
-  (return (k/fn:> [x] (-/get-in x path))))
+  (return (fn:> [x] (-/get-in x path))))
 
 (defn.xt set-in
   "sets item in object"
@@ -190,7 +188,7 @@
         :else
         (do (var k := (-/first arr))
             (var narr := [])
-            (k/for:index [i [1 (x:len arr)]]
+            (for:index [i [1 (x:len arr)]]
               (x:arr-push narr (x:get-idx arr i)))
             (var child := (x:get-key obj k))
             (if (== 0 (x:len narr))
@@ -203,7 +201,7 @@
   {:added "4.1"}
   [obj other]
   (var out := [])
-  (k/for:object [[k _] other]
+  (for:object [[k _] other]
     (if (not (x:has-key? obj k))
       (x:arr-push out k)))
   (return out))
@@ -245,7 +243,7 @@
   (var ks-dst (-/obj-keys dst))
   (if (not= (x:len ks-src) (x:len ks-dst))
     (return false))
-  (k/for:array [k ks-src]
+  (for:array [k ks-src]
     (if (not (-/eq-nested-loop (x:get-key src k)
                                (x:get-key dst k)
                                eq-obj
@@ -262,7 +260,7 @@
   (x:lu-set cache dst-arr dst-arr)
   (if (not= (x:len src-arr) (x:len dst-arr))
     (return false))
-  (k/for:array [[i v] src-arr]
+  (for:array [[i v] src-arr]
     (if (not (-/eq-nested-loop v
                                (. dst-arr [i])
                                eq-obj
@@ -298,7 +296,7 @@
   (if (x:nil? m)   (return {}))
   (if (x:nil? obj) (return m))
   (var out := {})
-  (k/for:object [[k v] m]
+  (for:object [[k v] m]
     (if (not (-/eq-nested (x:get-key obj k)
                           (x:get-key m k)))
       (x:set-key out k v)))
@@ -312,7 +310,7 @@
   (if (x:nil? obj) (return m))
   (var out := {})
   (var ks (-/obj-keys m))
-  (k/for:array [k ks]
+  (for:array [k ks]
     (var v   (x:get-key obj k))
     (var mv  (x:get-key m k))
     (cond (and (x:is-object? v) (x:is-object? mv))
