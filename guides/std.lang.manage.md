@@ -224,9 +224,9 @@ To enable scaffolding for PHP runtime tests, ensure PHP is in `src/std/lang/mana
   {:js     {:script :js   :dispatch '!.js   :suffix "js"}
    :lua    {:script :lua  :dispatch '!.lua  :suffix "lua"}
    :python {:script :python :dispatch '!.py :suffix "python"}
-   :r      {:script :r   :dispatch '!.R    :suffix "r"}
-   :rb     {:script :ruby :dispatch '!.rb  :suffix "rb"}
-   :dart   {:script :dart :dispatch '!.dart :suffix "dart"}
+   :r      {:script :r   :dispatch '!.R     :suffix "r"}
+   :ruby   {:script :ruby :dispatch '!.rb   :suffix "rb"}
+   :dart   {:script :dart :dispatch '!.dt   :suffix "dt"}
    :php    {:script :php  :dispatch '!.php  :suffix "php"}})   ;; <- add this
 ```
 
