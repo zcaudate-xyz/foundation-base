@@ -1,5 +1,5 @@
 (ns rt.basic.impl-annex.process-php
-  (:require [clojure.string]
+  (:require [clojure.string :as str]
             [rt.basic.type-basic :as basic]
             [rt.basic.type-common :as common]
             [rt.basic.type-oneshot :as oneshot]
@@ -36,7 +36,7 @@
       (let [body-source (str "return "
                              (-> (impl/emit-as
                                   :php [(default-body-transform body {})])
-                                 (clojure.string/replace #"\n+" " "))
+                                 (str/replace #"\n+" " "))
                              ";")]
         (str bootstrap
              "\n\n"
@@ -78,9 +78,9 @@
                          k/return-eval
                          {:lang :php
                           :layout :flat})
-                        (impl/emit-as
-                         :php +client-basic+)]
-                       (clojure.string/join "\n\n"))]
+                         (impl/emit-as
+                          :php +client-basic+)]
+                        (str/join "\n\n"))]
     (fn [port & [{:keys [host]}]]
       (str bootstrap
            "\n\n"

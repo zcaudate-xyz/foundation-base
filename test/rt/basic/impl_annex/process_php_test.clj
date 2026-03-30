@@ -9,7 +9,7 @@
 (def CANARY-PHP
   (common/program-exists? "php"))
 
-^{:refer rt.basic.impl-annex.process-php/CANARY :adopt true :added "4.0"}
+^{:refer rt.basic.impl-annex.process-php-test/CANARY-PHP :adopt true :added "4.0"}
 (fact "EVALUATE php code"
   ^:hidden
 
