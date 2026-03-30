@@ -110,6 +110,14 @@ jobs:
       - name: Set up Rust
         uses: dtolnay/rust-toolchain@stable
 
+      # ── Perl (Perl runtime – rt.basic.impl-annex.process-perl) ──────────
+      - name: Install Perl
+        run: sudo apt-get install -y perl
+
+      # ── PHP (PHP runtime – rt.basic.impl-annex.process-php) ──────────────
+      - name: Install PHP
+        run: sudo apt-get install -y php-cli
+
       # ── GCC + TCC (C runtime – rt.basic.impl.process-c) ──────────────────
       - name: Install GCC and TCC
         run: |
