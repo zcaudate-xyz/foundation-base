@@ -20,6 +20,12 @@
 ;; ONESHOT
 ;;
 
+(defn default-body-transform
+  "transform oneshot forms for `return-eval`"
+  {:added "4.1"}
+  [input mopts]
+  (rt/return-transform input mopts))
+
 (def ^{:arglists '([body])}
   default-oneshot-wrap
   (let [bootstrap  (impl/emit-entry-deps
@@ -27,17 +33,22 @@
                     {:lang :php
                      :layout :flat})]
     (fn [body]
-      (str bootstrap
-           "\n\n"
-           (impl/emit-as
-            :php [(list 'do
-                         (list 'echo (list 'return-eval body)))])))))
+      (let [body-source (str "return "
+                             (-> (impl/emit-as
+                                  :php [(default-body-transform body {})])
+                                 (clojure.string/replace #"\n+" " "))
+                             ";")]
+        (str bootstrap
+             "\n\n"
+             (impl/emit-as
+              :php [(list 'do
+                           (list 'echo (list 'return-eval body-source)))]))))))
 
 (def +php-oneshot-config+
   (common/set-context-options
    [:php :oneshot :default]
    {:main  {:in    #'default-oneshot-wrap}
-    :emit  {:body  {:transform #'rt/return-transform}}
+    :emit  {:body  {:transform #'default-body-transform}}
     :json :full}))
 
 (def +php-oneshot+
@@ -83,7 +94,7 @@
 (def +default-basic-config+
   {:bootstrap #'default-basic-client
     :main   {}
-   :emit   {:body  {:transform #'rt/return-transform}
+   :emit   {:body  {:transform #'default-body-transform}
             :lang/format :global}
    :json   :full
    :encode :json ;; default
