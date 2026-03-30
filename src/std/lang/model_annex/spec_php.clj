@@ -12,7 +12,8 @@
             [std.lang.base.util :as ut]
             [std.lang.model.spec-xtalk]
             [std.lang.model-annex.spec-xtalk.fn-php :as fn]
-            [std.lib.collection :as collection]))
+            [std.lib.collection :as collection]
+            [std.lib.foundation :as f]))
 
 (defn is-capitalized?
   "checks if string is capitalized"
@@ -24,18 +25,22 @@
 (defn php-symbol
   "emit php symbol with $ prefix if it's a variable"
   [sym grammar mopts]
-  (cond (or (:php/func mopts)
-            (:php/func (meta sym))
-            (is-capitalized? sym))
-        (common/emit-symbol sym grammar mopts)
+  (let [sym-str (name sym)]
+    (cond (or (:php/func mopts)
+             (:php/func (meta sym))
+             (is-capitalized? sym))
+          (common/emit-symbol sym grammar mopts)
 
-        (namespace sym)
-        (let [ns (namespace sym)
-              nm (name sym)]
-          (str (clojure.string/replace ns "." "\\") "::" nm))
+          (clojure.string/starts-with? sym-str "$")
+          sym-str
 
-        :else
-        (str "$" (common/emit-symbol sym grammar mopts))))
+          (namespace sym)
+          (let [ns (namespace sym)
+                nm (name sym)]
+            (str (clojure.string/replace ns "." "\\") "::" nm))
+
+          :else
+          (str "$" (common/emit-symbol sym grammar mopts)))))
 
 (defn php-invoke-args
   [args grammar mopts]
@@ -82,10 +87,14 @@
   "emit php associative array"
   [m grammar mopts]
   (let [entries (map (fn [[k v]]
-                       (str (common/*emit-fn* k grammar mopts)
-                            " => "
-                            (common/*emit-fn* v grammar mopts)))
-                     m)]
+                       (str (common/*emit-fn* (if (keyword? k)
+                                               (f/strn k)
+                                               k)
+                                             grammar
+                                             mopts)
+                             " => "
+                             (common/*emit-fn* v grammar mopts)))
+                      m)]
     (str "[" (clojure.string/join ", " entries) "]")))
 
 (defn php-dot-string
@@ -142,6 +151,7 @@
        (grammar/build:override fn/+php+)
        (grammar/build:extend
         {:phparray   {:op :phparray :symbol #{'array} :raw "array"}
+         :concat     {:op :concat :symbol #{'concat} :raw "." :emit :infix :value true}
          :echo       {:op :echo :symbol #{'echo} :raw "echo" :emit :prefix}
          :die        {:op :die  :symbol #{'die}  :raw "die"  :emit :prefix}})))
 
@@ -154,6 +164,9 @@
                   :block     {:parameter {:start "(" :end ")"}
                               :body      {:start "{" :end "}"}}
                   :invoke    {:custom #'php-invoke}}
+        :block   {:try       {:control {:catch {:parameter {:start "("
+                                                            :end   ")"
+                                                            :sep   ""}}}}}
         :token   {:nil       {:as "null"}
                   :boolean   {:as (fn [b] (if b "true" "false"))}
                   :string    {:quote :single}

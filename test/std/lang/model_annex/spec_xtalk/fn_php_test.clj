@@ -11,7 +11,7 @@
 ^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-tf-x-cat :added "4.1"}
 (fact "concatenates strings"
   (php-tf-x-cat '(:x-cat "a" "b"))
-  => '(. "a" "b"))
+  => '(concat "a" "b"))
 
 ^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-tf-x-apply :added "4.1"}
 (fact "applies function to array"
@@ -128,10 +128,35 @@
   (php-tf-x-arr-slice '(:x-arr-slice arr 0 5))
   => '(array_slice arr 0 (- 5 0)))
 
+^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-tf-x-arr-insert :added "4.1"}
+(fact "inserts into array"
+  (php-tf-x-arr-insert '(:x-arr-insert arr 2 item))
+  => '(array_splice arr 2 0 [item]))
+
+^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-tf-x-arr-remove :added "4.1"}
+(fact "removes from array"
+  (php-tf-x-arr-remove '(:x-arr-remove arr 2))
+  => '(array_splice arr 2 1))
+
+^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-tf-x-arr-sort :added "4.1"}
+(fact "sorts array with compare fn"
+  (php-tf-x-arr-sort '(:x-arr-sort arr compare-fn))
+  => '(usort arr compare-fn))
+
+^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-tf-x-arr-str-comp :added "4.1"}
+(fact "compares strings for array sorting"
+  (php-tf-x-arr-str-comp '(:x-arr-str-comp a b))
+  => '(< (strcmp a b) 0))
+
 ^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-tf-x-str-char :added "4.1"}
 (fact "gets char code"
   (php-tf-x-str-char '(:x-str-char s 0))
   => '(ord (substr s 0 1)))
+
+^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-tf-x-str-format :added "4.1"}
+(fact "formats strings"
+  (php-tf-x-str-format '(:x-str-format "%s-%s" a b))
+  => '(sprintf "%s-%s" a b))
 
 ^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-tf-x-str-split :added "4.1"}
 (fact "splits string"
@@ -168,10 +193,125 @@
   (php-tf-x-str-replace '(:x-str-replace s "old" "new"))
   => '(str_replace "old" "new" s))
 
+^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-tf-x-str-to-fixed :added "4.1"}
+(fact "formats number with fixed digits"
+  (php-tf-x-str-to-fixed '(:x-str-to-fixed n 2))
+  => '(number_format n 2 "." ""))
+
 ^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-tf-x-str-trim :added "4.1"}
 (fact "trims string"
   (php-tf-x-str-trim '(:x-str-trim s))
   => '(trim s))
+
+^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-tf-x-str-trim-left :added "4.1"}
+(fact "left trims string"
+  (php-tf-x-str-trim-left '(:x-str-trim-left s))
+  => '(ltrim s))
+
+^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-tf-x-str-trim-right :added "4.1"}
+(fact "right trims string"
+  (php-tf-x-str-trim-right '(:x-str-trim-right s))
+  => '(rtrim s))
+
+^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-tf-x-has-key? :added "4.1"}
+(fact "checks that array has key"
+  (php-tf-x-has-key? '(:x-has-key? obj k nil))
+  => '(array_key_exists k obj))
+
+^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-tf-x-proto-get :added "4.1"}
+(fact "gets proto slot via index access"
+  (php-tf-x-proto-get '(:x-proto-get obj k))
+  => '(:% obj [k]))
+
+^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-tf-x-proto-set :added "4.1"}
+(fact "sets proto slot via index access"
+  (php-tf-x-proto-set '(:x-proto-set obj k v))
+  => '(:= (:% obj [k]) v))
+
+^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-tf-x-lu-get :added "4.1"}
+(fact "gets lookup value via object id"
+  (php-tf-x-lu-get '(:x-lu-get lu obj))
+  => '(:% lu [(spl_object_id obj)]))
+
+^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-tf-x-lu-set :added "4.1"}
+(fact "sets lookup value via object id"
+  (php-tf-x-lu-set '(:x-lu-set lu obj gid))
+  => '(:= (:% lu [(spl_object_id obj)]) gid))
+
+^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-tf-x-lu-del :added "4.1"}
+(fact "deletes lookup value via object id"
+  (php-tf-x-lu-del '(:x-lu-del lu obj))
+  => '(unset (:% lu [(spl_object_id obj)])))
+
+^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-tf-x-iter-from-arr :added "4.1"}
+(fact "creates iterator from array"
+  (php-tf-x-iter-from-arr '(:x-iter-from-arr arr))
+  => 'arr)
+
+^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-tf-x-iter-from :added "4.1"}
+(fact "creates iterator from generic value"
+  (php-tf-x-iter-from '(:x-iter-from obj))
+  => 'obj)
+
+^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-tf-x-iter-from-obj :added "4.1"}
+(fact "creates iterator from object pairs"
+  (l/emit-as :php [(php-tf-x-iter-from-obj '(:x-iter-from-obj obj))])
+  => #"array_keys")
+
+^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-tf-x-iter-eq :added "4.1"}
+(fact "compares iterator values"
+  (l/emit-as :php [(php-tf-x-iter-eq '(:x-iter-eq it0 it1 eq-fn))])
+  => #"count")
+
+^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-tf-x-iter-next :added "4.1"}
+(fact "advances iterator"
+  (php-tf-x-iter-next '(:x-iter-next it))
+  => '(array_shift it))
+
+^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-tf-x-iter-has? :added "4.1"}
+(fact "checks iterator readiness"
+  (php-tf-x-iter-has? '(:x-iter-has? it))
+  => '(and (is_array it) (> (count it) 0)))
+
+^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-tf-x-iter-native? :added "4.1"}
+(fact "checks native iterator representation"
+  (php-tf-x-iter-native? '(:x-iter-native? it))
+  => '(is_array it))
+
+^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-tf-x-socket-connect :added "4.1"}
+(fact "connects socket"
+  (php-tf-x-socket-connect '(:x-socket-connect host port))
+  => '(fsockopen host port))
+
+^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-tf-x-socket-send :added "4.1"}
+(fact "sends socket payload"
+  (php-tf-x-socket-send '(:x-socket-send conn value))
+  => '(fwrite conn value))
+
+^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-tf-x-socket-close :added "4.1"}
+(fact "closes socket"
+  (php-tf-x-socket-close '(:x-socket-close conn))
+  => '(fclose conn))
+
+^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-tf-x-cache :added "4.1"}
+(fact "normalizes cache handle names"
+  (php-tf-x-cache '(:x-cache GLOBAL))
+  => "GLOBAL")
+
+^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-global-cache-store :added "4.1"}
+(fact "creates the global cache store access form"
+  (php-global-cache-store)
+  => '(:% $GLOBALS ["__xtalk_cache__"]))
+
+^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-global-cache-bucket :added "4.1"}
+(fact "creates the global cache bucket access form"
+  (php-global-cache-bucket 'cache)
+  => '(:% (:% $GLOBALS ["__xtalk_cache__"]) [cache]))
+
+^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-global-cache-slot :added "4.1"}
+(fact "creates the global cache slot access form"
+  (php-global-cache-slot 'cache 'key)
+  => '(:% (:% (:% $GLOBALS ["__xtalk_cache__"]) [cache]) [key]))
 
 
 ^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-tf-x-return-encode :added "4.1"}
@@ -188,3 +328,186 @@
 (fact "return eval"
   (l/emit-as :php [(php-tf-x-return-eval '[_ s wrap-fn])])
   => #"eval")
+
+^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-tf-x-future-run :added "4.1"}
+(fact "future run emits status box"
+  (l/emit-as :php [(php-tf-x-future-run '[_ thunk])])
+  => #"status")
+
+^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-tf-x-future-await :added "4.1"}
+(fact "future await emits status checks"
+  (l/emit-as :php [(php-tf-x-future-await '[_ task nil nil])])
+  => #"status")
+
+^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-tf-x-future-then :added "4.1"}
+(fact "future then emits success chaining"
+  (l/emit-as :php [(php-tf-x-future-then '[_ task on-ok])])
+  => #"status")
+
+^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-tf-x-future-catch :added "4.1"}
+(fact "future catch emits error chaining"
+  (l/emit-as :php [(php-tf-x-future-catch '[_ task on-err])])
+  => #"status")
+
+^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-tf-x-future-finally :added "4.1"}
+(fact "future finally emits callback"
+  (l/emit-as :php [(php-tf-x-future-finally '[_ task on-done])])
+  => #"on_done")
+
+^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-tf-x-future-cancel :added "4.1"}
+(fact "future cancel emits cancelled status"
+  (l/emit-as :php [(php-tf-x-future-cancel '[_ task])])
+  => #"cancelled")
+
+^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-tf-x-future-status :added "4.1"}
+(fact "future status emits status lookup"
+  (l/emit-as :php [(php-tf-x-future-status '[_ task])])
+  => #"status")
+
+^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-tf-x-future-from-async :added "4.1"}
+(fact "future from async emits resolve reject box"
+  (l/emit-as :php [(php-tf-x-future-from-async '[_ executor])])
+  => #"resolve")
+
+^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-tf-x-thread-spawn :added "4.1"}
+(fact "thread spawn reuses future representation"
+  (l/emit-as :php [(php-tf-x-thread-spawn '[_ thunk])])
+  => #"status")
+
+^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-tf-x-thread-join :added "4.1"}
+(fact "thread join awaits future representation"
+  (l/emit-as :php [(php-tf-x-thread-join '[_ thread])])
+  => #"status")
+
+^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-tf-x-with-delay :added "4.1"}
+(fact "with delay emits sleep"
+  (l/emit-as :php [(php-tf-x-with-delay '[_ thunk 10])])
+  => #"usleep")
+
+^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-tf-x-start-interval :added "4.1"}
+(fact "start interval emits active handle"
+  (l/emit-as :php [(php-tf-x-start-interval '[_ thunk 10])])
+  => #"active")
+
+^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-tf-x-stop-interval :added "4.1"}
+(fact "stop interval emits active false"
+  (l/emit-as :php [(php-tf-x-stop-interval '[_ instance])])
+  => #"active")
+
+^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-tf-x-cache-get :added "4.1"}
+(fact "cache get emits global cache access"
+  (l/emit-as :php [(php-tf-x-cache-get '[_ cache key nil])])
+  => #"__xtalk_cache__")
+
+^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-tf-x-cache-list :added "4.1"}
+(fact "cache list emits global cache access"
+  (l/emit-as :php [(php-tf-x-cache-list '[_ cache])])
+  => #"__xtalk_cache__")
+
+^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-tf-x-cache-flush :added "4.1"}
+(fact "cache flush emits global cache access"
+  (l/emit-as :php [(php-tf-x-cache-flush '[_ cache])])
+  => #"__xtalk_cache__")
+
+^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-tf-x-cache-set :added "4.1"}
+(fact "cache set emits global cache access"
+  (l/emit-as :php [(php-tf-x-cache-set '[_ cache key val])])
+  => #"__xtalk_cache__")
+
+^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-tf-x-cache-del :added "4.1"}
+(fact "cache delete emits global cache access"
+  (l/emit-as :php [(php-tf-x-cache-del '[_ cache key])])
+  => #"__xtalk_cache__")
+
+^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-tf-x-cache-incr :added "4.1"}
+(fact "cache incr emits global cache access"
+  (l/emit-as :php [(php-tf-x-cache-incr '[_ cache key 2])])
+  => #"__xtalk_cache__")
+
+^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-tf-x-notify-socket :added "4.1"}
+(fact "notify socket emits async marker"
+  (l/emit-as :php [(php-tf-x-notify-socket '[_ message])])
+  => #"async")
+
+^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-tf-x-ws-connect :added "4.1"}
+(fact "ws connect falls back to socket connect"
+  (php-tf-x-ws-connect '(:x-ws-connect url))
+  => '(fsockopen url))
+
+^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-tf-x-ws-send :added "4.1"}
+(fact "ws send falls back to socket send"
+  (php-tf-x-ws-send '(:x-ws-send conn value))
+  => '(fwrite conn value))
+
+^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-tf-x-ws-close :added "4.1"}
+(fact "ws close falls back to socket close"
+  (php-tf-x-ws-close '(:x-ws-close conn))
+  => '(fclose conn))
+
+^{:refer std.lang.model-annex.spec-xtalk.fn-php/+php+ :added "4.1"}
+(fact "covers all previously abstract php xtalk helpers"
+  (let [ops [:x-arr-insert
+             :x-arr-remove
+             :x-arr-sort
+             :x-arr-str-comp
+             :x-b64-decode
+             :x-b64-encode
+             :x-cache
+             :x-cache-del
+             :x-cache-flush
+             :x-cache-get
+             :x-cache-incr
+             :x-cache-list
+             :x-cache-set
+             :x-client-basic
+             :x-client-ws
+             :x-future-await
+             :x-future-cancel
+             :x-future-catch
+             :x-future-finally
+             :x-future-from-async
+             :x-future-run
+             :x-future-status
+             :x-future-then
+             :x-has-key?
+             :x-iter-eq
+             :x-iter-from
+             :x-iter-from-arr
+             :x-iter-from-obj
+             :x-iter-has?
+             :x-iter-native?
+             :x-iter-next
+             :x-iter-null
+             :x-lu-del
+             :x-lu-get
+             :x-lu-set
+             :x-notify-socket
+             :x-proto-get
+             :x-proto-set
+             :x-proto-tostring
+             :x-server-basic
+             :x-server-ws
+             :x-slurp
+             :x-socket-close
+             :x-socket-connect
+             :x-socket-send
+             :x-spit
+             :x-start-interval
+             :x-stop-interval
+             :x-str-format
+             :x-str-to-fixed
+             :x-str-trim-left
+             :x-str-trim-right
+             :x-this
+             :x-thread-join
+             :x-thread-spawn
+             :x-uri-decode
+             :x-uri-encode
+             :x-with-delay
+             :x-ws-close
+             :x-ws-connect
+             :x-ws-send]]
+    (and (every? #(contains? +php+ %) ops)
+         (not-any? #{:abstract}
+                   (map #(get-in +php+ [% :emit]) ops))))
+  => true)
