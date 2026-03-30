@@ -295,6 +295,35 @@ Each operator entry in a `+<lang>-*+` map supports these `:emit` modes:
 
 ---
 
+## Part 6.5: Designing Shared `xt.*` Realtime Suites
+
+For `xt.*` runtime verification, prefer a **single shared suite per namespace/function area**
+and then project that suite to each target language, instead of hand-maintaining fully
+independent language test files.
+
+### Recommended Pattern
+
+1. Author the shared suite around the common `xt.*` API surface.
+2. Use `std.lang.manage.xtalk-scaffold/scaffold-runtime-template` to project that suite to
+   each target runtime.
+3. Let the runtime configuration decide how the suite is executed:
+   - `:check-mode :realtime` for fast runtimes that can afford per-fact checks
+   - `:check-mode :batched` for slower `:twostep` runtimes such as Dart and Go, where the
+     same suite should be verified in fewer aggregated runs
+
+### Why This Matters for Dart
+
+Dart is a two-step compile/execute runtime, so checking every function in isolation is too
+slow for day-to-day feedback. The better design is to keep the **same logical suite** as the
+other runtimes, but run it using a batched strategy so correctness is still verified against
+the realtime implementation without paying the full per-check overhead.
+
+`xtalk_scaffold` now tracks both the runtime type (for example `:basic` vs `:twostep`) and
+the suite execution mode (`:realtime` vs `:batched`) so generated runtime templates can keep
+the correct runtime declaration when targeting languages like Dart.
+
+---
+
 ## Part 7: Iterative Development Workflow for Completing an Xtalk Language
 
 This is the repeatable workflow for driving an xtalk language from "partially abstract"

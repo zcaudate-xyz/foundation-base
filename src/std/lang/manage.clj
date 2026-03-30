@@ -125,15 +125,17 @@
                   (for [lang langs
                         :let [{:keys [script dispatch suffix]} (scaffold/runtime-lang-config lang)
                               summary (get-in matrix [:summary lang] {})]]
-                       [lang {:lang lang
-                              :script script
-                              :dispatch dispatch
-                              :suffix suffix
-                              :runtime? true
-                              :runtime-installed? (contains? installed lang)
-                              :runtime-executable? (contains? scaffold/+runtime-executable-langs+ lang)
-                              :spec-implemented (or (:implemented summary) 0)
-                              :spec-abstract (or (:abstract summary) 0)
+                        [lang {:lang lang
+                               :script script
+                               :dispatch dispatch
+                               :suffix suffix
+                               :runtime? true
+                               :runtime-type (scaffold/runtime-type lang)
+                               :runtime-check-mode (scaffold/runtime-check-mode lang)
+                               :runtime-installed? (contains? installed lang)
+                               :runtime-executable? (contains? scaffold/+runtime-executable-langs+ lang)
+                               :spec-implemented (or (:implemented summary) 0)
+                               :spec-abstract (or (:abstract summary) 0)
                               :spec-missing (or (:missing summary) 0)}])))))
 
 (defn xtalk-spec-inventory

@@ -18,28 +18,44 @@
 (def +runtime-lang-config+
   {:js     {:script :js
             :dispatch '!.js
-            :suffix "js"}
+            :suffix "js"
+            :runtime :basic
+            :check-mode :realtime}
    :lua    {:script :lua
             :dispatch '!.lua
-            :suffix "lua"}
+            :suffix "lua"
+            :runtime :basic
+            :check-mode :realtime}
    :python {:script :python
             :dispatch '!.py
-            :suffix "python"}
+            :suffix "python"
+            :runtime :basic
+            :check-mode :realtime}
    :r      {:script :r
             :dispatch '!.R
-            :suffix "r"}
+            :suffix "r"
+            :runtime :basic
+            :check-mode :realtime}
    :rb     {:script :ruby
             :dispatch '!.rb
-            :suffix "rb"}
+            :suffix "rb"
+            :runtime :basic
+            :check-mode :realtime}
    :dart   {:script :dart
             :dispatch '!.dt
-            :suffix "dt"}
+            :suffix "dt"
+            :runtime :twostep
+            :check-mode :batched}
    :php    {:script :php
             :dispatch '!.php
-            :suffix "php"}
+            :suffix "php"
+            :runtime :basic
+            :check-mode :realtime}
    :go    {:script :go
             :dispatch '!.go
-            :suffix "go"}})
+            :suffix "go"
+            :runtime :twostep
+            :check-mode :batched}})
 
 (def +runtime-lang-aliases+
   {:ruby :rb})
@@ -191,6 +207,26 @@
 (defn runtime-dispatch-symbol
   [lang]
   (:dispatch (runtime-lang-config lang)))
+
+(defn runtime-type
+  [lang]
+  (:runtime (runtime-lang-config lang)))
+
+(defn runtime-check-mode
+  [lang]
+  (:check-mode (runtime-lang-config lang)))
+
+(defn runtime-suite-groups
+  ([] (runtime-suite-groups (keys +runtime-lang-config+)))
+  ([langs]
+   (->> langs
+        (map normalize-runtime-lang)
+        distinct
+        sort
+        (group-by runtime-check-mode)
+        (map (fn [[mode grouped-langs]]
+               [mode (vec (sort grouped-langs))]))
+        (into (sorted-map)))))
 
 (defn runtime-lang-suffix
   [lang]
@@ -366,8 +402,20 @@
   (if (and (script-form? form)
            (= from-script (second form)))
     (with-meta
-      (apply list 'l/script- to-script (drop 2 form))
-      (meta form))
+       (apply list 'l/script- to-script (drop 2 form))
+       (meta form))
+     form))
+
+(defn transform-script-runtime
+  [form lang]
+  (if (script-form? form)
+    (let [[script-fn script opts & more] form
+          opts (if (map? opts)
+                 (assoc opts :runtime (runtime-type lang))
+                 opts)]
+      (with-meta
+        (apply list script-fn script opts more)
+        (meta form)))
     form))
 
 (defn template-runtime-test-ns
@@ -396,12 +444,13 @@
             (cond (and (seq? form) (= 'ns (first form)))
                   (replace-ns-name form target-ns)
 
-                  :else
-                  (-> form
-                      (transform-script-form from-script to-script)
-                      (replace-runtime-symbol from-dispatch to-dispatch)
-                      (replace-string-value source-ns-str target-ns-str))))
-          forms)))
+                   :else
+                   (-> form
+                       (transform-script-form from-script to-script)
+                       (transform-script-runtime to-lang)
+                       (replace-runtime-symbol from-dispatch to-dispatch)
+                       (replace-string-value source-ns-str target-ns-str))))
+           forms)))
 
 (defn split-fact-form
   [fact-form langs]
