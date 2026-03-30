@@ -1,15 +1,16 @@
 (ns std.lang.base.emit-top-level
   (:require [clojure.string]
-            [std.lang.base.emit-assign :as assign]
-            [std.lang.base.emit-block :as block]
-            [std.lang.base.emit-common :as common]
-            [std.lang.base.emit-data :as data]
-            [std.lang.base.emit-fn :as fn]
-            [std.lang.base.emit-helper :as helper]
-            [std.lang.base.emit-special :as special]
-            [std.lib.collection :as collection]
-            [std.lib.env :as env]
-            [std.lib.foundation :as f]))
+             [std.lang.base.emit-assign :as assign]
+             [std.lang.base.emit-block :as block]
+             [std.lang.base.emit-common :as common]
+             [std.lang.base.emit-data :as data]
+             [std.lang.base.emit-fn :as fn]
+             [std.lang.base.emit-helper :as helper]
+             [std.lang.base.provenance :as provenance]
+             [std.lang.base.emit-special :as special]
+             [std.lib.collection :as collection]
+             [std.lib.env :as env]
+             [std.lib.foundation :as f]))
 
 (defn transform-defclass-inner
   "transforms the body to be fn.inner and var.inner"
@@ -117,10 +118,10 @@
    (let [{:keys [emit type] :as props} (get reserved sym)]
      (if common/*trace*
        (env/prn form))
-     (try
-       (cond (or (fn? emit)
-                 (var? emit))
-             (emit form grammar mopts)
+      (try
+        (cond (or (fn? emit)
+                  (var? emit))
+              (emit form grammar mopts)
 
              (keyword? emit)
              (common/emit-op key form grammar mopts
@@ -135,12 +136,22 @@
              :else
              (case type
                :fn         (fn/emit-fn key form grammar mopts)
-               :def        (emit-top-level key form grammar mopts)
-               (f/error "Missing key" {:key key
-                                       :symbol sym
-                                       :props props
-                                       :entry (get reserved sym)})))
-       (catch Throwable t
-         (if common/*explode*
-           (env/prn :EMIT-ERROR form t))
-         (throw t))))))
+                :def        (emit-top-level key form grammar mopts)
+                (f/error "Missing key" {:key key
+                                        :symbol sym
+                                        :props props
+                                        :entry (get reserved sym)})))
+        (catch Throwable t
+          (if common/*explode*
+            (env/prn :EMIT-ERROR form t))
+          (provenance/throw-with-provenance
+           "std.lang emit form failed"
+           (provenance/provenance
+            (:std.lang/provenance mopts)
+            {:std.lang/phase :emit/form
+             :std.lang/subsystem :std.lang.base.emit-top-level/emit-form
+             :std.lang/line (or (-> mopts :std.lang/provenance :std.lang/line)
+                                (provenance/line-of form))
+             :std.lang/form form
+             :std.lang/symbol sym})
+           t))))))

@@ -1,16 +1,17 @@
 (ns std.lang.base.impl
   (:require [clojure.string]
-            [std.lang.base.emit :as emit]
-            [std.lang.base.emit-common :as emit-common]
-            [std.lang.base.emit-preprocess :as preprocess]
-            [std.lang.base.grammar :as grammar]
-            [std.lang.base.impl-deps :as deps]
-            [std.lang.base.impl-entry :as entry]
-            [std.lang.base.library :as lib]
-            [std.lang.base.library-snapshot :as snap]
-            [std.lang.base.util :as ut]
-            [std.lib.component :as component]
-            [std.lib.context.space :as space]
+             [std.lang.base.emit :as emit]
+             [std.lang.base.emit-common :as emit-common]
+             [std.lang.base.emit-preprocess :as preprocess]
+             [std.lang.base.grammar :as grammar]
+             [std.lang.base.impl-deps :as deps]
+             [std.lang.base.impl-entry :as entry]
+             [std.lang.base.library :as lib]
+             [std.lang.base.library-snapshot :as snap]
+             [std.lang.base.provenance :as provenance]
+             [std.lang.base.util :as ut]
+             [std.lib.component :as component]
+             [std.lib.context.space :as space]
             [std.lib.deps]
             [std.lib.env :as env]
             [std.lib.foundation :as f]
@@ -132,28 +133,32 @@
                                   bulk]
                            :as mopts}]
   (or lang (f/error "Lang required." {:input (keys mopts)}))
-  (binding [preprocess/*macro-grammar* grammar
-            preprocess/*macro-opts* mopts]
-    (if (not (:suppress emit))
-      (let [{:keys [trim transform]} emit
-            form (cond-> form transform (transform mopts))
-            _    (if *print-form* (env/p :FORM form))
-            body (try
-                   (emit/emit form
-                              grammar
-                              (the-ns namespace)
-                              mopts)
-                   (catch Throwable t
-                     (ut/throw-with-context
-                      "std.lang direct emit failed"
-                      {:std.lang/phase :emit/direct
-                       :std.lang/form form
-                       :std.lang/lang lang
-                       :std.lang/module (ut/module-id (:module mopts))
-                       :std.lang/namespace (ns-name (the-ns namespace))}
-                      t)))
-            body (cond-> body trim (trim))]
-        body))))
+  (let [mopts (provenance/with-provenance
+                mopts
+                {:std.lang/phase :emit/direct
+                 :std.lang/subsystem :std.lang.base.impl/emit-direct
+                 :std.lang/lang lang
+                 :std.lang/module (ut/module-id (:module mopts))
+                 :std.lang/namespace (ns-name (the-ns namespace))})]
+    (binding [preprocess/*macro-grammar* grammar
+              preprocess/*macro-opts* mopts]
+      (if (not (:suppress emit))
+        (let [{:keys [trim transform]} emit
+              form (cond-> form transform (transform mopts))
+              mopts (provenance/with-provenance mopts {:std.lang/form form})
+              _    (if *print-form* (env/p :FORM form))
+              body (try
+                     (emit/emit form
+                                grammar
+                                (the-ns namespace)
+                                mopts)
+                     (catch Throwable t
+                       (ut/throw-with-context
+                        "std.lang direct emit failed"
+                        (:std.lang/provenance mopts)
+                        t)))
+              body (cond-> body trim (trim))]
+          body)))))
 
 (defn emit-str
   "converts to an output string"

@@ -224,10 +224,10 @@
   ^:hidden
 
   (try
-    (to-staging-form '(hello 1 2 3)
+    (to-staging-form (with-meta '(hello 1 2 3) {:line 21})
                      {:reserved {'hello {:type :template
-                                         :macro (fn [_]
-                                                  (throw (ex-info "boom" {:probe true})))}}}
+                                          :macro (fn [_]
+                                                   (throw (ex-info "boom" {:probe true})))}}}
                      (:modules prep/+book-min+)
                      '{:lang :lua
                        :module {:id L.core
@@ -236,19 +236,23 @@
                      identity)
     nil
     (catch Throwable t
-      (select-keys (ex-data t)
-                   [:probe
-                    :std.lang/phase
-                    :std.lang/lang
-                    :std.lang/module
-                    :std.lang/symbol
-                    :std.lang/form])))
+       (select-keys (ex-data t)
+                    [:probe
+                     :std.lang/phase
+                     :std.lang/subsystem
+                     :std.lang/lang
+                     :std.lang/line
+                     :std.lang/module
+                     :std.lang/symbol
+                     :std.lang/form])))
   => '{:probe true
-       :std.lang/phase :staging/reserved-template
-       :std.lang/lang :lua
-       :std.lang/module L.core
-       :std.lang/symbol hello
-       :std.lang/form (hello 1 2 3)})
+        :std.lang/phase :staging/reserved-template
+        :std.lang/subsystem :std.lang.base.emit-preprocess/reserved-template
+        :std.lang/lang :lua
+        :std.lang/line 21
+        :std.lang/module L.core
+        :std.lang/symbol hello
+        :std.lang/form (hello 1 2 3)})
 
 ^{:refer std.lang.base.emit-preprocess/process-standard-symbol :added "4.0"}
 (fact "processes a standard symbol"

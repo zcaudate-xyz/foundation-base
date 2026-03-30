@@ -1,5 +1,6 @@
 (ns std.lang.base.emit-preprocess
   (:require [clojure.string]
+            [std.lang.base.provenance :as provenance]
             [std.lang.base.util :as ut]
             [std.lib.collection :as collection]
             [std.lib.context.pointer :as ptr]
@@ -302,7 +303,11 @@
   {:added "4.0"}
   [form grammar modules mopts deps-fragment walk-fn]
   (let [fsym      (first form)
-        reserved  (get-in grammar [:reserved (first form)])]
+        reserved  (get-in grammar [:reserved (first form)])
+        mopts     (provenance/with-provenance
+                    mopts
+                    {:std.lang/form form
+                     :std.lang/symbol fsym})]
     (cond (= fsym '!:template)
           (walk-fn (eval (second form)))
           
@@ -310,17 +315,20 @@
           (volatile! form)
           
           (= :template (:type reserved))
-          (try
-            (walk-fn ((:macro reserved) form))
-            (catch Throwable t
-              (ut/throw-with-context
-               "std.lang staging template expansion failed"
-               {:std.lang/phase :staging/reserved-template
-                :std.lang/form form
-                :std.lang/lang (:lang mopts)
-                :std.lang/module (ut/module-id (:module mopts))
-                :std.lang/symbol fsym}
-               t)))
+          (let [mopts (provenance/with-provenance
+                        mopts
+                        {:std.lang/phase :staging/reserved-template
+                         :std.lang/subsystem :std.lang.base.emit-preprocess/reserved-template
+                         :std.lang/lang (:lang mopts)
+                         :std.lang/module (ut/module-id (:module mopts))})]
+            (try
+              (binding [*macro-opts* mopts]
+                (walk-fn ((:macro reserved) form)))
+              (catch Throwable t
+                (ut/throw-with-context
+                 "std.lang staging template expansion failed"
+                 (:std.lang/provenance mopts)
+                 t))))
           
           (= :hard-link (:emit reserved))
           (walk-fn (cons (:raw reserved) (rest form)))
@@ -337,20 +345,24 @@
                                  modules
                                  mopts)]
             (if (:template fe)
-              (do (if deps-fragment
-                    (vswap! deps-fragment conj (ut/sym-full fe)))
-                  (walk-fn (try
-                             (binding [*macro-form* form]
-                               (apply (:template fe) (rest form)))
-                             (catch Throwable t
-                               (ut/throw-with-context
-                                "std.lang staging macro expansion failed"
-                                {:std.lang/phase :staging/fragment-template
-                                 :std.lang/form form
-                                 :std.lang/lang (:lang mopts)
-                                 :std.lang/module (ut/module-id (:module mopts))
-                                 :std.lang/entry (ut/entry-summary fe)}
-                                t)))))
+              (let [mopts (provenance/with-provenance
+                            mopts
+                            {:std.lang/phase :staging/fragment-template
+                             :std.lang/subsystem :std.lang.base.emit-preprocess/fragment-template
+                             :std.lang/lang (:lang mopts)
+                             :std.lang/module (ut/module-id (:module mopts))
+                             :std.lang/entry (ut/entry-summary fe)})]
+                (do (if deps-fragment
+                      (vswap! deps-fragment conj (ut/sym-full fe)))
+                    (walk-fn (try
+                               (binding [*macro-form* form
+                                         *macro-opts* mopts]
+                                 (apply (:template fe) (rest form)))
+                               (catch Throwable t
+                                 (ut/throw-with-context
+                                  "std.lang staging macro expansion failed"
+                                  (:std.lang/provenance mopts)
+                                  t))))))
               form)))))
 
 (defn process-standard-symbol
@@ -383,39 +395,46 @@
   "converts the stage"
   {:added "4.0"}
   [input grammar modules mopts]
-  (binding [*macro-skip-deps* false
-            *macro-grammar* grammar
-            *macro-opts* mopts]
-    (let [deps  (volatile! #{})
-          deps-fragment   (volatile! #{})
-          deps-native  (volatile! {})
+  (let [mopts (provenance/with-provenance
+                mopts
+                {:std.lang/phase :staging
+                 :std.lang/subsystem :std.lang.base.emit-preprocess/to-staging
+                 :std.lang/lang (:lang mopts)
+                 :std.lang/module (ut/module-id (:module mopts))
+                 :std.lang/entry (some-> (:entry mopts) ut/entry-summary)})]
+    (binding [*macro-skip-deps* false
+              *macro-grammar* grammar
+              *macro-opts* mopts]
+      (let [deps  (volatile! #{})
+            deps-fragment   (volatile! #{})
+            deps-native  (volatile! {})
           
-          _   (if-let [includes (-> mopts :module :includes)]
-                (doseq [inc-id includes]
-                  (if-let [module (get modules inc-id)]
-                    (doseq [entry (vals (:code module))]
-                      (vswap! deps conj (ut/sym-full entry))))))
+            _   (if-let [includes (-> mopts :module :includes)]
+                  (doseq [inc-id includes]
+                    (if-let [module (get modules inc-id)]
+                      (doseq [entry (vals (:code module))]
+                        (vswap! deps conj (ut/sym-full entry))))))
 
-          form  (walk/prewalk
-                 (fn walk-fn [form]
-                   (cond (collection/form? form)
-                         (to-staging-form form grammar modules mopts deps-fragment walk-fn)
-                         
-                         (and (symbol? form))
-                         (or (when-let [standalone (value-standalone form grammar)]
-                               (walk-fn standalone))
-                             (if (namespace form)
-                               (process-namespaced-symbol form modules mopts deps deps-fragment walk-fn)
-                               (process-standard-symbol form mopts deps-native)))
-                         
-                         :else form))
-                 input)
-          form  (walk/postwalk (fn [form] (if (volatile? form)
-                                         @form
-                                         form))
-                            form)]
+            form  (walk/prewalk
+                   (fn walk-fn [form]
+                     (cond (collection/form? form)
+                           (to-staging-form form grammar modules mopts deps-fragment walk-fn)
+                           
+                           (and (symbol? form))
+                           (or (when-let [standalone (value-standalone form grammar)]
+                                 (walk-fn standalone))
+                               (if (namespace form)
+                                 (process-namespaced-symbol form modules mopts deps deps-fragment walk-fn)
+                                 (process-standard-symbol form mopts deps-native)))
+                           
+                           :else form))
+                   input)
+            form  (walk/postwalk (fn [form] (if (volatile? form)
+                                            @form
+                                            form))
+                               form)]
       
-      [form @deps @deps-fragment @deps-native])))
+        [form @deps @deps-fragment @deps-native]))))
 
 (defn to-resolve
   "resolves only the code symbols (no macroexpansion)"

@@ -1,5 +1,6 @@
 (ns std.lang.base.util-test
-  (:require [std.lang.base.util :refer :all])
+  (:require [std.lang.base.provenance :as provenance]
+            [std.lang.base.util :refer :all])
   (:use code.test))
 
 ^{:refer std.lang.base.util/sym-id :added "3.0"}
@@ -118,9 +119,32 @@
        :op def$
        :module L.core
        :lang :lua
-       :line 10
-       :id add
-       :namespace L.core})
+        :line 10
+        :id add
+        :namespace L.core})
+
+^{:refer std.lang.base.provenance/provenance :added "4.1"}
+(fact "normalises provenance fields"
+  (let [form (with-meta '(boom-op 1 2 3) {:line 17})]
+    (provenance/provenance
+     {:std.lang/module {:id 'L.core}
+      :std.lang/namespace *ns*
+      :std.lang/form form
+      :std.lang/subsystem :test/direct}))
+  => '{:std.lang/module L.core
+       :std.lang/namespace std.lang.base.util-test
+       :std.lang/line 17
+       :std.lang/form (boom-op 1 2 3)
+       :std.lang/subsystem :test/direct})
+
+^{:refer std.lang.base.provenance/with-provenance :added "4.1"}
+(fact "threads provenance through mopts"
+  (-> {:lang :lua}
+      (provenance/with-provenance {:std.lang/phase :emit/direct}
+                                  {:std.lang/module 'L.core})
+      :std.lang/provenance)
+  => '{:std.lang/phase :emit/direct
+       :std.lang/module L.core})
 
 ^{:refer std.lang.base.util/error-with-context :added "4.1"}
 (fact "wraps exceptions with std.lang context"
@@ -133,9 +157,38 @@
        {:inner true
         :outer true
         :std.lang/wrapped true
-        :std.lang/cause-class "clojure.lang.ExceptionInfo"
-        :std.lang/cause-message "inner"
-        :std.lang/cause-data {:inner true}}])
+         :std.lang/cause-class "clojure.lang.ExceptionInfo"
+         :std.lang/cause-message "inner"
+         :std.lang/cause-data {:inner true}}])
+
+(fact "wrapped std.lang errors keep merged provenance"
+  (let [form (with-meta '(boom-op 1 2 3) {:line 33})]
+    (try
+      (throw (ex-info "inner"
+                      {:probe true
+                       :std.lang/provenance {:std.lang/phase :emit/form
+                                             :std.lang/subsystem :inner/op
+                                             :std.lang/form form}}))
+      (catch Throwable t
+        (let [data (ex-data (error-with-context "wrap"
+                                                {:std.lang/phase :emit/direct
+                                                 :std.lang/subsystem :outer/direct
+                                                 :std.lang/module 'L.core}
+                                                t))]
+          {:probe (:probe data)
+           :phase (:std.lang/phase data)
+           :subsystem (:std.lang/subsystem data)
+           :module (:std.lang/module data)
+           :line (:std.lang/line data)
+           :stack (mapv (juxt :std.lang/phase :std.lang/subsystem)
+                        (:std.lang/provenance-stack data))}))))
+  => '{:probe true
+       :phase :emit/form
+       :subsystem :inner/op
+       :module L.core
+       :line 33
+       :stack [[:emit/form :inner/op]
+               [:emit/direct :outer/direct]]})
 
 ^{:refer std.lang.base.util/throw-with-context :added "4.1"}
 (fact "throws wrapped exceptions with std.lang context"
