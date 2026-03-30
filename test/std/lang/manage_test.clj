@@ -40,6 +40,10 @@
 ^{:refer std.lang.manage/xtalk-runtime-inventory :added "4.1"}
 (fact "returns runtime inventory map"
   (map? (manage/xtalk-runtime-inventory))
+  => true
+
+  (get-in (manage/xtalk-runtime-inventory {:langs [:php]})
+          [:php :runtime-executable?])
   => true)
 
 ^{:refer std.lang.manage/xtalk-spec-inventory :added "4.1"}

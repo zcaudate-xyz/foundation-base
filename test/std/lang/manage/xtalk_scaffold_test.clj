@@ -131,7 +131,12 @@
 ^{:refer std.lang.manage.xtalk-scaffold/runtime-lang-config :added "4.1"}
 (fact "returns runtime config"
   (map? (runtime-lang-config :js))
-  => true)
+  => true
+
+  (runtime-lang-config :php)
+  => {:script :php
+      :dispatch '!.php
+      :suffix "php"})
 
 ^{:refer std.lang.manage.xtalk-scaffold/runtime-script-lang :added "4.1"}
 (fact "returns runtime script language"
@@ -146,7 +151,10 @@
 ^{:refer std.lang.manage.xtalk-scaffold/runtime-lang-suffix :added "4.1"}
 (fact "returns runtime suffix"
   (runtime-lang-suffix :ruby)
-  => "rb")
+  => "rb"
+
+  (runtime-lang-suffix :php)
+  => "php")
 
 ^{:refer std.lang.manage.xtalk-scaffold/read-top-level-forms :added "4.1"}
 (fact "read-top-level-forms is callable"

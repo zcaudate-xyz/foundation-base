@@ -13,7 +13,7 @@
   'std.lang.base.grammar-xtalk-ops-test)
 
 (def ^:dynamic *runtime-test-langs*
-  [:js :lua :python :r])
+  [:js :lua :python :r :php])
 
 (def +runtime-lang-config+
   {:js     {:script :js
@@ -45,7 +45,7 @@
   {:ruby :rb})
 
 (def +runtime-executable-langs+
-  #{:js :lua :python :r :rb})
+  #{:js :lua :python :r :rb :php})
 
 (defn read-xtalk-ops
   [path]
