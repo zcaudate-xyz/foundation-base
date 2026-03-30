@@ -416,14 +416,19 @@
              leading-meta nil
              by-lang (zipmap langs (repeat []))]
         (if (empty? xs)
-          {:shared (cond
-                     (not runtime?)
-                     fact-form
+           {:shared (cond
+                      (not runtime?)
+                      fact-form
 
-                     (seq shared)
-                     (with-meta
-                       (apply list fact-sym title (concat prefix shared))
-                       (meta fact-form)))
+                      (seq shared)
+                      (with-meta
+                        (apply list fact-sym title (concat prefix shared))
+                        (meta fact-form))
+                      
+                      :else
+                      (with-meta
+                        (list fact-sym title)
+                        (meta fact-form)))
            :langs (into {}
                         (keep (fn [[lang clauses]]
                                 (when (seq clauses)
