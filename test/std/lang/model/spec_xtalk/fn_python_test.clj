@@ -26,7 +26,7 @@
 ^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-x-err :added "4.0"}
 (fact "raises error"
   (python-tf-x-err '[_ "msg"])
-  => '(raise (Exception "msg")))
+  => '(throw (Exception "msg")))
 
 ^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-x-eval :added "4.0"}
 (fact "evals"
@@ -136,7 +136,7 @@
 ^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-x-m-pow :added "4.0"}
 (fact "math pow"
   (python-tf-x-m-pow '[_ 1 2])
-  => '(** 1 2))
+  => '(pow 1 2))
 
 ^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-x-m-sin :added "4.0"}
 (fact "math sin"
@@ -455,28 +455,46 @@
 
 
 ^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-x-future-run :added "4.1"}
-(fact "TODO")
+(fact "future run"
+  (l/emit-as :python [(python-tf-x-future-run '[_ thunk])])
+  => #"status")
 
 ^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-x-future-then :added "4.1"}
-(fact "TODO")
+(fact "future then"
+  (l/emit-as :python [(python-tf-x-future-then '[_ task on-ok])])
+  => #"status")
 
 ^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-x-future-catch :added "4.1"}
-(fact "TODO")
+(fact "future catch"
+  (l/emit-as :python [(python-tf-x-future-catch '[_ task on-err])])
+  => #"error")
 
 ^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-x-future-finally :added "4.1"}
-(fact "TODO")
+(fact "future finally"
+  (l/emit-as :python [(python-tf-x-future-finally '[_ task on-done])])
+  => #"return")
 
 ^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-x-future-cancel :added "4.1"}
-(fact "TODO")
+(fact "future cancel"
+  (l/emit-as :python [(python-tf-x-future-cancel '[_ task])])
+  => #"cancelled")
 
 ^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-x-future-status :added "4.1"}
-(fact "TODO")
+(fact "future status"
+  (l/emit-as :python [(python-tf-x-future-status '[_ task])])
+  => #"status")
 
 ^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-x-future-await :added "4.1"}
-(fact "TODO")
+(fact "future await"
+  (l/emit-as :python [(python-tf-x-future-await '[_ task 1000 default])])
+  => #"default")
 
 ^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-x-future-from-async :added "4.1"}
-(fact "TODO")
+(fact "future from async"
+  (l/emit-as :python [(python-tf-x-future-from-async '[_ executor])])
+  => #"executor")
 
 ^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-x-has-key? :added "4.1"}
-(fact "TODO")
+(fact "has key"
+  (python-tf-x-has-key? '[_ obj key nil])
+  => '(not= nil (. obj (get key))))

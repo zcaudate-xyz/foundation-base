@@ -1,6 +1,7 @@
 (ns std.lang.model-annex.spec-xtalk.fn-php-test
   (:use code.test)
-  (:require [std.lang.model-annex.spec-xtalk.fn-php :refer :all]))
+  (:require [std.lang :as l]
+            [std.lang.model-annex.spec-xtalk.fn-php :refer :all]))
 
 ^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-tf-x-len :added "4.1"}
 (fact "returns count of array"
@@ -65,7 +66,7 @@
 ^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-tf-x-m-mod :added "4.1"}
 (fact "returns modulo"
   (php-tf-x-m-mod '(:x-m-mod 10 3))
-  => '(:% 10 :- " % " 3))
+  => '(:% 10 (:- " % ") 3))
 
 ^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-tf-x-m-quot :added "4.1"}
 (fact "returns quotient"
@@ -174,10 +175,16 @@
 
 
 ^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-tf-x-return-encode :added "4.1"}
-(fact "TODO")
+(fact "return encode"
+  (l/emit-as :php [(php-tf-x-return-encode '[_ out id key])])
+  => #"json_encode")
 
 ^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-tf-x-return-wrap :added "4.1"}
-(fact "TODO")
+(fact "return wrap"
+  (l/emit-as :php [(php-tf-x-return-wrap '[_ f encode-fn])])
+  => #"json_encode")
 
 ^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-tf-x-return-eval :added "4.1"}
-(fact "TODO")
+(fact "return eval"
+  (l/emit-as :php [(php-tf-x-return-eval '[_ s wrap-fn])])
+  => #"eval")

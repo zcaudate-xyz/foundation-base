@@ -103,3 +103,23 @@
       {:lang :missing.lang
        :runtime :twostep
        :available []}])
+
+
+^{:refer rt.basic.type-common/available-runtimes :added "4.1"}
+(fact "lists installed runtimes for a language"
+  (with-redefs [std.lang.base.registry/+registry+
+                (atom {[:lua :oneshot] 'rt.basic.impl.process-lua
+                       [:lua :basic] 'rt.basic.impl.process-lua
+                       [:python :oneshot] 'rt.basic.impl.process-python})]
+    (available-runtimes :lua))
+  => [:basic :oneshot])
+
+^{:refer rt.basic.type-common/valid-context! :added "4.1"}
+(fact "asserts runtime context is valid"
+  (valid-context! :oneshot)
+  => nil?
+
+  (try (valid-context! :not-a-context)
+       (catch AssertionError e
+         true))
+  => true)

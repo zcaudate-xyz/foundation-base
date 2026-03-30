@@ -1,5 +1,6 @@
 (ns std.lang.manage
-    (:require [clojure.string :as str]
+      (:require [clojure.pprint :as pprint]
+                    [clojure.string :as str]
               [std.lang.manage.xtalk-audit :as audit]
               [std.lang.manage.xtalk-ops :as ops]
               [std.lang.manage.xtalk-scaffold :as scaffold]
@@ -43,7 +44,7 @@
        [root]
        (if (fs/exists? root)
            (->> (keys (fs/list root {:recursive true
-                                     :include ["(fn|com)_[A-Za-z0-9]+(_test)?\\.clj$"]}))
+                                                                                          :include [".clj$"]}))
                 (map str)
                 sort
                 vec)
@@ -501,3 +502,112 @@
                   [:task {:template :lang.manage.action
                           :params {:title "SCAFFOLD RUNTIME TEMPLATE"}
                           :main {:fn #'scaffold-runtime-template-fn}}])
+
+;;
+;; Task Registry and Main Entry Point
+;;
+
+(def +tasks+
+  "all available tasks for the std.lang.manage interface"
+  {:inventory              xtalk-model-inventory
+   :test-inventory         xtalk-test-inventory
+   :runtime-inventory      xtalk-runtime-inventory
+   :spec-inventory         xtalk-spec-inventory
+   :language-status        xtalk-language-status
+   :coverage-summary       xtalk-coverage-summary
+   :status                 xtalk-status
+   :model-status           xtalk-model-status
+   :runtime-status         xtalk-runtime-status
+   :spec-status            xtalk-spec-status
+   :test-status            xtalk-test-status
+   :categories             xtalk-categories
+   :op-map                 xtalk-op-map
+   :symbols                xtalk-symbols
+   :installed-languages    installed-languages
+   :audit-languages        audit-languages
+   :support-matrix         support-matrix
+   :missing-by-language    missing-by-language
+   :missing-by-feature     missing-by-feature
+   :visualize-support      visualize-support
+   :generate-xtalk-ops     generate-xtalk-ops
+   :scaffold-xtalk-grammar-tests  scaffold-xtalk-grammar-tests
+   :separate-runtime-tests separate-runtime-tests
+   :scaffold-runtime-template scaffold-runtime-template})
+
+(def +direct-tasks+
+      #{:inventory
+            :test-inventory
+            :runtime-inventory
+            :spec-inventory
+            :language-status
+            :coverage-summary
+            :categories
+            :op-map
+            :symbols
+            :installed-languages
+            :audit-languages
+            :support-matrix
+            :missing-by-language
+            :missing-by-feature
+            :visualize-support
+            :generate-xtalk-ops
+            :scaffold-xtalk-grammar-tests
+            :separate-runtime-tests
+            :scaffold-runtime-template})
+
+(defn- parse-main-arg
+      [x]
+      (try (read-string x)
+                   (catch Throwable _ x)))
+
+(defn- supports-arity?
+      [f n]
+      (boolean
+       (some (fn [arglist]
+                               (or (= n (count arglist))
+                                           (and (seq arglist)
+                                                            (= '& (nth arglist (dec (count arglist)) nil))
+                                                            (<= (dec (count arglist)) n))))
+                         (:arglists (meta f)))))
+
+(defn -main
+  "main entry point for std.lang.manage
+
+   (std.lang.manage/-main \"inventory\")
+   (std.lang.manage/-main \"support-matrix\" \"{:langs [:python :go]}\")"
+  {:added "4.1"}
+  [& [cmd & args]]
+  (let [print-fn (fn []
+                   (do (println "Available Tasks:")
+                       (doseq [task-name (map name (sort (keys +tasks+)))]
+                         (println (str "  - " task-name)))))
+        print-params {:print {:function false
+                              :item false
+                              :result true
+                              :summary true}}]
+    (if (not cmd)
+      (print-fn)
+
+      (let [task-key (keyword cmd)
+            opts (task/process-ns-args args)
+            params (merge print-params (dissoc opts :ns))
+            func (or (get +tasks+ task-key)
+                     (ns-resolve (find-ns 'std.lang.manage) (symbol cmd)))
+            parsed-args (mapv parse-main-arg args)]
+        (if func
+          (let [result (cond
+                         (seq parsed-args)
+                         (apply func parsed-args)
+
+                         (supports-arity? func 1)
+                         (func params)
+
+                         (supports-arity? func 2)
+                         (func (or (:ns opts) :all) params)
+
+                         :else
+                         (func))]
+            (when (and (contains? +direct-tasks+ task-key)
+                       (some? result))
+              (pprint/pprint result)))
+          (print-fn))))))

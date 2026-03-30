@@ -17,3 +17,12 @@
 
   (!.pl (+ 1 2 3 4))
   => 10)
+
+
+^{:refer rt.basic.impl-annex.process-perl/default-body-transform :added "4.1"}
+(fact "transforms oneshot forms for return-eval"
+  (default-body-transform '[1 2 3] {})
+  => '[1 2 3]
+
+  (default-body-transform '[1 2 3] {:bulk true})
+  => '(do 1 2 3))

@@ -1,11 +1,7 @@
 (ns std.lang.model-annex.spec-xtalk.fn-perl-test
   (:use code.test)
-  (:require [std.lang.model-annex.spec-xtalk.fn-perl :refer :all]))
-
-^{:refer std.lang.model-annex.spec-xtalk.fn-perl/perl-tf-x-fn :added "4.1"}
-(fact "creates an erlang function"
-  (perl-tf-x-fn '(:x-fn [x] (+ x 1)))
-  => '(fn [x] (+ x 1)))
+  (:require [std.lang :as l]
+            [std.lang.model-annex.spec-xtalk.fn-perl :refer :all]))
 
 ^{:refer std.lang.model-annex.spec-xtalk.fn-perl/perl-tf-x-len :added "4.1"}
 (fact "returns scalar length"
@@ -112,10 +108,16 @@
 
 
 ^{:refer std.lang.model-annex.spec-xtalk.fn-perl/perl-tf-x-return-encode :added "4.1"}
-(fact "TODO")
+(fact "return encode"
+  (pr-str (perl-tf-x-return-encode '[_ out id key]))
+  => #"encode_json")
 
 ^{:refer std.lang.model-annex.spec-xtalk.fn-perl/perl-tf-x-return-wrap :added "4.1"}
-(fact "TODO")
+(fact "return wrap"
+  (pr-str (perl-tf-x-return-wrap '[_ f encode-fn]))
+  => #"encode_json")
 
 ^{:refer std.lang.model-annex.spec-xtalk.fn-perl/perl-tf-x-return-eval :added "4.1"}
-(fact "TODO")
+(fact "return eval"
+  (pr-str (perl-tf-x-return-eval '[_ s wrap-fn]))
+  => #"CORE::eval")

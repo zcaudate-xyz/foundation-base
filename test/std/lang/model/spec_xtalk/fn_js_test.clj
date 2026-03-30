@@ -393,28 +393,46 @@
 
 
 ^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-future-run :added "4.1"}
-(fact "TODO")
+(fact "future run"
+  (l/emit-as :js [(js-tf-x-future-run '[_ thunk])])
+  => #"Promise.resolve")
 
 ^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-future-then :added "4.1"}
-(fact "TODO")
+(fact "future then"
+  (l/emit-as :js [(js-tf-x-future-then '[_ task on-ok])])
+  => #"then")
 
 ^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-future-catch :added "4.1"}
-(fact "TODO")
+(fact "future catch"
+  (l/emit-as :js [(js-tf-x-future-catch '[_ task on-err])])
+  => #"catch")
 
 ^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-future-finally :added "4.1"}
-(fact "TODO")
+(fact "future finally"
+  (l/emit-as :js [(js-tf-x-future-finally '[_ task on-done])])
+  => #"finally")
 
 ^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-future-cancel :added "4.1"}
-(fact "TODO")
+(fact "future cancel"
+  (l/emit-as :js [(js-tf-x-future-cancel '[_ task])])
+  => #"cancel")
 
 ^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-future-status :added "4.1"}
-(fact "TODO")
+(fact "future status"
+  (l/emit-as :js [(js-tf-x-future-status '[_ task])])
+  => #"__xt_status")
 
 ^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-future-await :added "4.1"}
-(fact "TODO")
+(fact "future await"
+  (l/emit-as :js [(js-tf-x-future-await '[_ task 1000 nil])])
+  => #"task")
 
 ^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-future-from-async :added "4.1"}
-(fact "TODO")
+(fact "future from async"
+  (l/emit-as :js [(js-tf-x-future-from-async '[_ executor])])
+  => #"new Promise")
 
 ^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-has-key? :added "4.1"}
-(fact "TODO")
+(fact "has key"
+  (l/emit-as :js [(js-tf-x-has-key? '[_ obj "k" nil])])
+  => #"\[\"k\"\]")

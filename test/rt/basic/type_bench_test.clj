@@ -42,7 +42,7 @@
   => bench?
 
   (stop-bench-process 0)
-  => bench?)
+  => (any bench? nil?))
 
 ^{:refer rt.basic.type-bench/stop-bench-process :added "4.0"}
 (fact "stops the bench process"

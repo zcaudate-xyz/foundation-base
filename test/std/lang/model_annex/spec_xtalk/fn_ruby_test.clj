@@ -1,6 +1,7 @@
 (ns std.lang.model-annex.spec-xtalk.fn-ruby-test
   (:use code.test)
-  (:require [std.lang.model-annex.spec-xtalk.fn-ruby :refer :all]))
+  (:require [std.lang :as l]
+            [std.lang.model-annex.spec-xtalk.fn-ruby :refer :all]))
 
 ^{:refer std.lang.model-annex.spec-xtalk.fn-ruby/ruby-tf-x-len :added "4.1"}
 (fact "returns array length"
@@ -102,10 +103,16 @@
 
 
 ^{:refer std.lang.model-annex.spec-xtalk.fn-ruby/ruby-tf-x-return-encode :added "4.1"}
-(fact "TODO")
+(fact "return encode"
+  (l/emit-as :ruby [(ruby-tf-x-return-encode '[_ out id key])])
+  => #"JSON.generate")
 
 ^{:refer std.lang.model-annex.spec-xtalk.fn-ruby/ruby-tf-x-return-wrap :added "4.1"}
-(fact "TODO")
+(fact "return wrap"
+  (l/emit-as :ruby [(ruby-tf-x-return-wrap '[_ f encode-fn])])
+  => #"JSON.generate")
 
 ^{:refer std.lang.model-annex.spec-xtalk.fn-ruby/ruby-tf-x-return-eval :added "4.1"}
-(fact "TODO")
+(fact "return eval"
+  (l/emit-as :ruby [(ruby-tf-x-return-eval '[_ s wrap-fn])])
+  => #"eval")

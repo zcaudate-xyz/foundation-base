@@ -3,7 +3,32 @@
   (:use code.test))
 
 ^{:refer rt.basic.impl-annex.process-julia/default-body-wrap :added "4.1"}
-(fact "TODO")
+(fact "creates julia return wrapper"
+  (default-body-wrap '[1 2 3])
+  => '(do
+        (function OUT-FN []
+          (try
+            (do 1 2 (return 3))
+            (catch e
+              (throw e))))
+        (:= OUT (OUT-FN))))
 
 ^{:refer rt.basic.impl-annex.process-julia/default-body-transform :added "4.1"}
-(fact "TODO")
+(fact "standard julia transforms"
+  (default-body-transform '[1 2 3] {})
+  => '(do
+        (function OUT-FN []
+          (try
+            (do (return [1 2 3]))
+            (catch e
+              (throw e))))
+        (:= OUT (OUT-FN)))
+
+  (default-body-transform '[1 2 3] {:bulk true})
+  => '(do
+        (function OUT-FN []
+          (try
+            (do 1 2 (return 3))
+            (catch e
+              (throw e))))
+        (:= OUT (OUT-FN))))

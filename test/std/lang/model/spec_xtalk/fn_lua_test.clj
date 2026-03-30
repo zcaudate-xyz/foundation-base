@@ -11,7 +11,7 @@
 ^{:refer std.lang.model.spec-xtalk.fn-lua/lua-tf-x-cat :added "4.0"}
 (fact "concatenates"
   (lua-tf-x-cat '[_ "a" "b"])
-  => '(.. "a" "b"))
+  => '(cat "a" "b"))
 
 ^{:refer std.lang.model.spec-xtalk.fn-lua/lua-tf-x-eval :added "4.0"}
 (fact "evals"
@@ -353,28 +353,46 @@
 
 
 ^{:refer std.lang.model.spec-xtalk.fn-lua/lua-tf-x-future-run :added "4.1"}
-(fact "TODO")
+(fact "future run"
+  (l/emit-as :lua [(lua-tf-x-future-run '[_ thunk])])
+  => #"state")
 
 ^{:refer std.lang.model.spec-xtalk.fn-lua/lua-tf-x-future-then :added "4.1"}
-(fact "TODO")
+(fact "future then"
+  (l/emit-as :lua [(lua-tf-x-future-then '[_ task on-ok])])
+  => #"pcall")
 
 ^{:refer std.lang.model.spec-xtalk.fn-lua/lua-tf-x-future-catch :added "4.1"}
-(fact "TODO")
+(fact "future catch"
+  (l/emit-as :lua [(lua-tf-x-future-catch '[_ task on-err])])
+  => #"pcall")
 
 ^{:refer std.lang.model.spec-xtalk.fn-lua/lua-tf-x-future-finally :added "4.1"}
-(fact "TODO")
+(fact "future finally"
+  (l/emit-as :lua [(lua-tf-x-future-finally '[_ task on-done])])
+  => #"return")
 
 ^{:refer std.lang.model.spec-xtalk.fn-lua/lua-tf-x-future-cancel :added "4.1"}
-(fact "TODO")
+(fact "future cancel"
+  (l/emit-as :lua [(lua-tf-x-future-cancel '[_ task])])
+  => #"cancelled")
 
 ^{:refer std.lang.model.spec-xtalk.fn-lua/lua-tf-x-future-status :added "4.1"}
-(fact "TODO")
+(fact "future status"
+  (l/emit-as :lua [(lua-tf-x-future-status '[_ task])])
+  => #"state")
 
 ^{:refer std.lang.model.spec-xtalk.fn-lua/lua-tf-x-future-await :added "4.1"}
-(fact "TODO")
+(fact "future await"
+  (l/emit-as :lua [(lua-tf-x-future-await '[_ task 1000 default])])
+  => #"default")
 
 ^{:refer std.lang.model.spec-xtalk.fn-lua/lua-tf-x-future-from-async :added "4.1"}
-(fact "TODO")
+(fact "future from async"
+  (l/emit-as :lua [(lua-tf-x-future-from-async '[_ executor])])
+  => #"executor")
 
 ^{:refer std.lang.model.spec-xtalk.fn-lua/lua-tf-x-has-key? :added "4.1"}
-(fact "TODO")
+(fact "has key"
+  (l/emit-as :lua [(lua-tf-x-has-key? '[_ obj "k" nil])])
+  => #"\['k'\]")
