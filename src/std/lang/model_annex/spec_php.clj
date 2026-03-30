@@ -134,11 +134,11 @@
 (def +features+
   (-> (grammar/build :exclude [:pointer :block :data-range])
       (grammar/build:override
-        {:var        {:macro #'php-var :emit :macro}
-         :defn       {:macro #'php-defn :emit :macro}
-         :fn         {:macro #'php-defn- :emit :macro}
-         :index      {:macro #'php-dot :emit :macro}
-         :new        {:macro #'php-new :emit :macro}
+       {:var        {:macro #'php-var :emit :macro}
+        :defn       {:macro #'php-defn :emit :macro}
+        :fn         {:macro #'php-defn- :emit :macro}
+        :index      {:macro #'php-dot :emit :macro}
+        :new        {:macro #'php-new :emit :macro}
         :and        {:raw "&&"}
         :or         {:raw "||"}
         :not        {:raw "!"}
@@ -150,10 +150,10 @@
         :lte        {:raw "<="}})
        (grammar/build:override fn/+php+)
        (grammar/build:extend
-         {:phparray   {:op :phparray :symbol #{'array} :raw "array"}
-          :concat     {:op :concat :symbol #{'concat} :raw "." :emit :infix :value true}
-          :echo       {:op :echo :symbol #{'echo} :raw "echo" :emit :prefix}
-          :die        {:op :die  :symbol #{'die}  :raw "die"  :emit :prefix}})))
+        {:phparray   {:op :phparray :symbol #{'array} :raw "array"}
+         :concat     {:op :concat :symbol #{'concat} :raw "." :emit :infix :value true}
+         :echo       {:op :echo :symbol #{'echo} :raw "echo" :emit :prefix}
+         :die        {:op :die  :symbol #{'die}  :raw "die"  :emit :prefix}})))
 
 (def +template+
   (->> {:banned #{:keyword}

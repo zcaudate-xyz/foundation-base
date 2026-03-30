@@ -56,10 +56,10 @@
       (let [conn (fsockopen host port)]
          (while (not (feof conn))
             (let [line (fgets conn)
-                   input (json_decode line)
-                   out   (return-eval input)]
-                (if input
-                    (fwrite conn (concat (json_encode out) "\n")))))))])
+                  input (json_decode line)
+                  out   (return-eval input)]
+               (if input
+                   (fwrite conn (concat (json_encode out) "\n")))))))])
 
 (def ^{:arglists '([port & [{:keys [host]}]])}
   default-basic-client
