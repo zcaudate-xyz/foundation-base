@@ -23,6 +23,9 @@
   (l/emit-as :dart ['(x-len [1 2 3])])
   => "[1,2,3].length"
 
+  (l/emit-as :dart ['(x:len [1 2 3])])
+  => "[1,2,3].length"
+
   (l/emit-as :dart ['(x-arr-push items 1)])
   => "items.add(1)")
 

@@ -3,7 +3,8 @@
 
 (defn- add-sym [m]
   (collection/map-entries (fn [[k v]]
-                   [k (assoc v :symbol #{(symbol (name k))})])
+                   [k (assoc v :symbol #{(symbol (name k))
+                                         (symbol (clojure.string/replace (name k) "-" ":"))})])
                  m))
 
 ;;

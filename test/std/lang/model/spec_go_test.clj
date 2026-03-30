@@ -50,6 +50,9 @@
   (l/emit-as :go ['(x-len [1 2 3])])
   => "len([]interface{}{1, 2, 3})"
 
+  (l/emit-as :go ['(x:len [1 2 3])])
+  => "len([]interface{}{1, 2, 3})"
+
   (l/emit-as :go ['(x-cat "a" "b")])
   => "\"a\" + \"b\""
 

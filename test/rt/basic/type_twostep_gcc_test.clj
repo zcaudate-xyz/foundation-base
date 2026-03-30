@@ -1,6 +1,7 @@
 (ns rt.basic.type-twostep-gcc-test
   (:use code.test)
-  (:require [std.lang :as l]))
+  (:require [rt.basic.type-common :as common]
+            [std.lang :as l]))
 
 (l/script- :c
   {:runtime :twostep})
@@ -8,16 +9,24 @@
 (l/script- :rust
   {:runtime :twostep})
 
+(def CANARY-GCC
+  (common/program-exists? "gcc"))
+
+(def CANARY-RUSTC
+  (common/program-exists? "rustc"))
+
 ;;
 ;; TODO: ADD a c-style function
 ;;
 
 
 (fact "can return a value"
-  
-  (!.c
-    (+ 1 2 3))
-  => 6)
+  (if CANARY-GCC
+    (!.c
+      (+ 1 2 3))
+    :gcc-unavailable)
+  => (any 6
+           :gcc-unavailable))
 
 
 ;;
@@ -25,7 +34,9 @@
 ;;
 
 (fact "can return a value"
-  
-  (!.rs
-    (+ 1 2 3))
-  => 6)
+  (if CANARY-RUSTC
+    (!.rs
+      (+ 1 2 3))
+    :rustc-unavailable)
+  => (any 6
+           :rustc-unavailable))

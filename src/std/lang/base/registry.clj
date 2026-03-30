@@ -67,6 +67,9 @@
          [:c      :jocl]               'rt.jocl
 	 [:c      :oneshot]            'rt.basic.impl.process-c
          [:c      :twostep]            'rt.basic.impl.process-c
+
+         [:dart   :twostep]            'rt.basic.impl.process-dart
+         [:go     :twostep]            'rt.basic.impl.process-go
 	 
          [:xtalk  :oneshot]            'rt.basic.impl.process-xtalk}))
 
