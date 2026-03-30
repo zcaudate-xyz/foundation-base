@@ -99,3 +99,13 @@
 (fact "converts to lowercase"
   (ruby-tf-x-str-to-lower '(:x-str-to-lower s))
   => '(. s (downcase)))
+
+
+^{:refer std.lang.model-annex.spec-xtalk.fn-ruby/ruby-tf-x-return-encode :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model-annex.spec-xtalk.fn-ruby/ruby-tf-x-return-wrap :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model-annex.spec-xtalk.fn-ruby/ruby-tf-x-return-eval :added "4.1"}
+(fact "TODO")

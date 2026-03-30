@@ -171,3 +171,13 @@
 (fact "trims string"
   (php-tf-x-str-trim '(:x-str-trim s))
   => '(trim s))
+
+
+^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-tf-x-return-encode :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-tf-x-return-wrap :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-tf-x-return-eval :added "4.1"}
+(fact "TODO")

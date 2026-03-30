@@ -1,8 +1,8 @@
-(ns code.manage.xtalk-scaffold
+(ns std.lang.manage.xtalk-scaffold
   (:require [clojure.edn :as edn]
             [clojure.pprint :as pprint]
             [clojure.string :as str]
-            [code.manage.xtalk-ops :as xtalk-ops]
+            [std.lang.manage.xtalk-ops :as xtalk-ops]
             [code.project :as project]
             [std.fs :as fs]))
 
