@@ -40,4 +40,16 @@
 
 
 ^{:refer std.lang.base.compile-links/get-link-match :added "4.1"}
-(fact "TODO")
+(fact "gets the matching lookup entry"
+  (get-link-match 'indigo
+                  {'indigo "hello"})
+  => '[indigo "hello"]
+
+  (let [[pattern value] (get-link-match 'indigo.server
+                                        {#"server$" "hello"})]
+    [(str pattern) value])
+  => '["server$" "hello"]
+
+  (get-link-match 'indigo
+                  {'code "hello"})
+  => nil)

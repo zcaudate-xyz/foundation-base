@@ -1,10 +1,11 @@
 (ns std.lang.base.impl-template-test
   (:require [std.lang.base.book :as b]
-            [std.lang.base.emit-helper :as helper]
-            [std.lang.base.emit-prep-lua-test :as prep]
-            [std.lang.base.grammar :as grammar]
-            [std.lang.base.impl-entry :as entry]
-            [std.lib.env :as env])
+             [std.lang.base.emit-helper :as helper]
+             [std.lang.base.emit-prep-lua-test :as prep]
+             [std.lang.base.grammar :as grammar]
+             [std.lang.base.impl-template :refer :all]
+             [std.lang.base.impl-entry :as entry]
+             [std.lib.env :as env])
   (:use code.test))
 
 (def +template-build+
@@ -104,13 +105,67 @@
 
 
 ^{:refer std.lang.base.impl-template/infer-static-template :added "4.1"}
-(fact "TODO")
+(fact "infers template restaging when a hard-link is used"
+  (infer-static-template +template-parent-grammar+
+                         '(defn template-fn [value]
+                            (x:probe value)))
+  => true
+
+  (infer-static-template +template-parent-grammar+
+                         '(defn plain-fn [value]
+                            (return value)))
+  => false)
 
 ^{:refer std.lang.base.impl-template/create-code-state :added "4.1"}
-(fact "TODO")
+(fact "hydrates and stages a code entry for the current grammar"
+  (select-keys
+   (create-code-state (dissoc +template-parent-entry+
+                              :hmeta
+                              :deps
+                              :deps-fragment
+                              :deps-native
+                              :xtalk-ops
+                              :xtalk-profiles
+                              :polyfill-modules
+                              :static/template
+                              :form)
+                      (get-in +template-parent-grammar+ [:reserved 'defn])
+                      +template-parent-grammar+
+                      (:modules +template-helper-book+)
+                      '{:lang :template
+                        :module {:id L.core
+                                 :alias {}
+                                 :link {- L.core}}})
+   [:form :deps :deps-fragment :deps-native :xtalk-ops :xtalk-profiles :polyfill-modules :static/template])
+  => '{:form (defn template-fn [value] (L.core/probe-hard-link value))
+       :deps #{L.core/probe-hard-link}
+       :deps-fragment #{}
+       :deps-native {}
+       :xtalk-ops #{}
+       :xtalk-profiles #{}
+       :polyfill-modules #{}
+       :static/template true})
 
 ^{:refer std.lang.base.impl-template/cached-code-state :added "4.1"}
-(fact "TODO")
+(fact "restages template entries using the per-entry cache"
+  (select-keys
+   (cached-code-state +template-parent-entry+
+                      (get-in +template-parent-grammar+ [:reserved 'defn])
+                      +template-parent-grammar+
+                      (:modules +template-helper-book+)
+                      '{:lang :template
+                        :module {:id L.core
+                                 :alias {}
+                                 :link {- L.core}}})
+   [:form :deps :static/template])
+  => '{:form (defn template-fn [value] (return value))
+       :deps #{}
+       :static/template true})
 
 ^{:refer std.lang.base.impl-template/cached-entry-deps :added "4.1"}
-(fact "TODO")
+(fact "returns restaged code dependencies for the current language"
+  (cached-entry-deps {:modules (:modules +template-helper-book+)
+                      :grammar +template-parent-grammar+
+                      :lang :template}
+                     +template-parent-entry+)
+  => #{})

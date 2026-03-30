@@ -93,3 +93,64 @@
   (into {} (lang-pointer :lua {:module 'L.core}))
   => {:context :lang/lua, :module 'L.core, :lang :lua,
       :context/fn #'std.lang.base.util/lang-rt-default})
+
+^{:refer std.lang.base.util/module-id :added "4.1"}
+(fact "gets the module id from a module symbol or map"
+  (module-id {:id 'L.core})
+  => 'L.core
+
+  (module-id 'L.core)
+  => 'L.core)
+
+^{:refer std.lang.base.util/entry-summary :added "4.1"}
+(fact "returns a concise entry summary"
+  (entry-summary {:lang :lua
+                  :module 'L.core
+                  :namespace 'L.core
+                  :id 'add
+                  :section :fragment
+                  :line 10
+                  :op 'def$
+                  :op-key :def$})
+  => '{:op-key :def$
+       :symbol L.core/add
+       :section :fragment
+       :op def$
+       :module L.core
+       :lang :lua
+       :line 10
+       :id add
+       :namespace L.core})
+
+^{:refer std.lang.base.util/error-with-context :added "4.1"}
+(fact "wraps exceptions with std.lang context"
+  (try
+    (throw (ex-info "inner" {:inner true}))
+    (catch Throwable t
+      [(.getMessage (error-with-context "wrap" {:outer true} t))
+       (ex-data (error-with-context "wrap" {:outer true} t))]))
+  => '["wrap: inner"
+       {:inner true
+        :outer true
+        :std.lang/wrapped true
+        :std.lang/cause-class "clojure.lang.ExceptionInfo"
+        :std.lang/cause-message "inner"
+        :std.lang/cause-data {:inner true}}])
+
+^{:refer std.lang.base.util/throw-with-context :added "4.1"}
+(fact "throws wrapped exceptions with std.lang context"
+  (try
+    (throw (ex-info "inner" {:inner true}))
+    (catch Throwable t
+      (try
+        (throw-with-context "wrap" {:outer true} t)
+        (catch Throwable wrapped
+          [(.getMessage wrapped)
+           (ex-data wrapped)]))))
+  => '["wrap: inner"
+       {:inner true
+        :outer true
+        :std.lang/wrapped true
+        :std.lang/cause-class "clojure.lang.ExceptionInfo"
+        :std.lang/cause-message "inner"
+        :std.lang/cause-data {:inner true}}])

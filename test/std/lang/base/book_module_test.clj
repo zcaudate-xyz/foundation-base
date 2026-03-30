@@ -155,4 +155,13 @@
 
 
 ^{:refer std.lang.base.book-module/module-deps-all :added "4.1"}
-(fact "TODO")
+(fact "gets all module dependencies including explicit links"
+  (module-deps-all
+   (book-module {:id 'L.nginx
+                 :lang :lua
+                 :link '{- L.nginx
+                         u L.core
+                         json L.json}
+                 :code '{identity {:deps #{L.core/add
+                                          L.json/parse}}}}))
+  => '#{L.core L.json})

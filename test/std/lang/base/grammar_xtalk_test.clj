@@ -190,67 +190,111 @@
 
 
 ^{:refer std.lang.base.grammar-xtalk/tf-sub :added "4.1"}
-(fact "TODO")
+(fact "wrapper for sub transform"
+  (tf-sub '(x:sub a b))
+  => '(- a b))
 
 ^{:refer std.lang.base.grammar-xtalk/tf-mul :added "4.1"}
-(fact "TODO")
+(fact "wrapper for mul transform"
+  (tf-mul '(x:mul a b))
+  => '(* a b))
 
 ^{:refer std.lang.base.grammar-xtalk/tf-div :added "4.1"}
-(fact "TODO")
+(fact "wrapper for div transform"
+  (tf-div '(x:div a b))
+  => '(/ a b))
 
 ^{:refer std.lang.base.grammar-xtalk/tf-neg :added "4.1"}
-(fact "TODO")
+(fact "wrapper for neg transform"
+  (tf-neg '(x:neg a))
+  => '(- a))
 
 ^{:refer std.lang.base.grammar-xtalk/tf-inc :added "4.1"}
-(fact "TODO")
+(fact "wrapper for inc transform"
+  (tf-inc '(x:inc a))
+  => '(+ a 1))
 
 ^{:refer std.lang.base.grammar-xtalk/tf-dec :added "4.1"}
-(fact "TODO")
+(fact "wrapper for dec transform"
+  (tf-dec '(x:dec a))
+  => '(- a 1))
 
 ^{:refer std.lang.base.grammar-xtalk/tf-eq :added "4.1"}
-(fact "TODO")
+(fact "wrapper for eq transform"
+  (tf-eq '(x:eq a b))
+  => '(== a b))
 
 ^{:refer std.lang.base.grammar-xtalk/tf-neq :added "4.1"}
-(fact "TODO")
+(fact "wrapper for neq transform"
+  (tf-neq '(x:neq a b))
+  => '(not= a b))
 
 ^{:refer std.lang.base.grammar-xtalk/tf-lt :added "4.1"}
-(fact "TODO")
+(fact "wrapper for lt transform"
+  (tf-lt '(x:lt a b))
+  => '(< a b))
 
 ^{:refer std.lang.base.grammar-xtalk/tf-lte :added "4.1"}
-(fact "TODO")
+(fact "wrapper for lte transform"
+  (tf-lte '(x:lte a b))
+  => '(<= a b))
 
 ^{:refer std.lang.base.grammar-xtalk/tf-gt :added "4.1"}
-(fact "TODO")
+(fact "wrapper for gt transform"
+  (tf-gt '(x:gt a b))
+  => '(> a b))
 
 ^{:refer std.lang.base.grammar-xtalk/tf-gte :added "4.1"}
-(fact "TODO")
+(fact "wrapper for gte transform"
+  (tf-gte '(x:gte a b))
+  => '(>= a b))
 
 ^{:refer std.lang.base.grammar-xtalk/tf-zero? :added "4.1"}
-(fact "TODO")
+(fact "wrapper for zero? transform"
+  (tf-zero? '(x:zero? a))
+  => '(== a 0))
 
 ^{:refer std.lang.base.grammar-xtalk/tf-pos? :added "4.1"}
-(fact "TODO")
+(fact "wrapper for pos? transform"
+  (tf-pos? '(x:pos? a))
+  => '(> a 0))
 
 ^{:refer std.lang.base.grammar-xtalk/tf-neg? :added "4.1"}
-(fact "TODO")
+(fact "wrapper for neg? transform"
+  (tf-neg? '(x:neg? a))
+  => '(< a 0))
 
 ^{:refer std.lang.base.grammar-xtalk/tf-even? :added "4.1"}
-(fact "TODO")
+(fact "wrapper for even? transform"
+  (tf-even? '(x:even? a))
+  => '(== 0 (mod a 2)))
 
 ^{:refer std.lang.base.grammar-xtalk/tf-odd? :added "4.1"}
-(fact "TODO")
+(fact "wrapper for odd? transform"
+  (tf-odd? '(x:odd? a))
+  => '(not (== 0 (mod a 2))))
 
 ^{:refer std.lang.base.grammar-xtalk/tf-second :added "4.1"}
-(fact "TODO")
+(fact "gets the second element"
+  (tf-second '(x:second arr))
+  => '(x:get-idx arr 1))
 
 ^{:refer std.lang.base.grammar-xtalk/tf-last :added "4.1"}
-(fact "TODO")
+(fact "gets the last element"
+  (tf-last '(x:last arr))
+  => '(x:get-idx arr (x:offset-len (x:len arr))))
 
 ^{:refer std.lang.base.grammar-xtalk/tf-second-last :added "4.1"}
-(fact "TODO")
+(fact "gets the second last element"
+  (tf-second-last '(x:second-last arr))
+  => '(x:get-idx arr (+ (x:len arr) (x:offset -2))))
 
 ^{:refer std.lang.base.grammar-xtalk/tf-lt-string :added "4.1"}
-(fact "TODO")
+(fact "checks string ordering ascending"
+  (tf-lt-string '(x:lt-string a b))
+  => '(x:arr-str-comp a b))
 
 ^{:refer std.lang.base.grammar-xtalk/tf-gt-string :added "4.1"}
-(fact "TODO")
+(fact "checks string ordering descending"
+  (tf-gt-string '(x:gt-string a b))
+  => '(x:arr-str-comp b a))

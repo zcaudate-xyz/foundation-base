@@ -393,12 +393,15 @@
    {:op :x-nil?           :symbol #{'x:nil?}            :macro #'tf-eq-nil?     :emit :macro}])
 
 (def +xt-common-primitives+
-  [{:op :x-to-string      :symbol #{'x:to-string}       :emit :abstract}
-   {:op :x-to-number      :symbol #{'x:to-number}       :emit :abstract}
-   {:op :x-is-string?     :symbol #{'x:is-string?}      :emit :abstract}
-   {:op :x-is-number?     :symbol #{'x:is-number?}      :emit :abstract}
-   {:op :x-is-integer?    :symbol #{'x:is-integer?}     :emit :abstract}
-   {:op :x-is-boolean?    :symbol #{'x:is-boolean?}     :emit :abstract}])
+  [{:op :x-to-string      :symbol  #{'x:to-string}       :emit :abstract}
+   {:op :x-to-number      :symbol  #{'x:to-number}       :emit :abstract}
+   {:op :x-is-string?     :symbol  #{'x:is-string?}      :emit :abstract}
+   {:op :x-is-number?     :symbol  #{'x:is-number?}      :emit :abstract}
+   {:op :x-is-integer?    :symbol  #{'x:is-integer?}     :emit :abstract}
+   {:op :x-is-boolean?    :symbol  #{'x:is-boolean?}     :emit :abstract}
+   {:op :x-is-function?   :symbol  #{'x:is-function?}    :emit :abstract}
+   {:op :x-is-object?     :symbol  #{'x:is-object?}      :emit :abstract}
+   {:op :x-is-array?       :symbol #{'x:is-array?}       :emit :abstract}])
 
 (def +xt-common-lu+       
   [{:op :x-lu-create      :symbol #{'x:lu-create}       :emit :unit :default {}}
@@ -408,8 +411,7 @@
    {:op :x-lu-del         :symbol #{'x:lu-del}          :emit :abstract}])
 
 (def +xt-common-object+
-  [{:op :x-is-object?     :symbol #{'x:is-object?}      :emit :abstract}
-   {:op :x-has-key?       :symbol #{'x:has-key?}        :emit :abstract}
+  [{:op :x-has-key?       :symbol #{'x:has-key?}        :emit :abstract}
    {:op :x-del-key        :symbol #{'x:del-key}         :macro #'tf-del-key     :emit :macro}
    {:op :x-get-key        :symbol #{'x:get-key}         :macro #'tf-get-key     :emit :macro}
    {:op :x-get-path       :symbol #{'x:get-path}        :macro #'tf-get-path    :emit :macro}
@@ -423,8 +425,7 @@
    {:op :x-obj-from-pairs :symbol #{'x:obj-from-pairs}  :emit :hard-link :raw 'xt.lang.base-lib/obj-from-pairs}])
 
 (def +xt-common-array+
-  [{:op :x-is-array?       :symbol #{'x:is-array?}        :emit :abstract}
-   {:op :x-get-idx         :symbol #{'x:get-idx}          :macro #'tf-get-key     :emit :macro}
+  [{:op :x-get-idx         :symbol #{'x:get-idx}          :macro #'tf-get-key     :emit :macro}
    {:op :x-set-idx         :symbol #{'x:set-idx}          :macro #'tf-set-key     :emit :macro}
    {:op :x-arr-first       :symbol #{'x:arr-first}        :macro #'tf-first       :emit :macro}
    {:op :x-arr-second      :symbol #{'x:arr-second}       :macro #'tf-second      :emit :macro}

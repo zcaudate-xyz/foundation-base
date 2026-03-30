@@ -378,4 +378,6 @@
 
 
 ^{:refer std.lang.base.runtime/rt-null :added "4.1"}
-(fact "TODO")
+(fact "creates a default null runtime"
+  (select-keys (rt/rt-null {}) [:lang])
+  => {:lang :null})

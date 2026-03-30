@@ -133,9 +133,6 @@
   (b/get-deps +sample+ 'L.core/identity-fn)
   => #{})
 
-^{:refer std.lang.base.book/get-deps-module :added "4.1"}
-(fact "TODO")
-
 ^{:refer std.lang.base.book/get-deps-native :added "4.0"}
 (fact "gets the imports for a book"
   ^:hidden

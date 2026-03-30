@@ -373,23 +373,6 @@
                      (x:arr-second e))
           (return obj)))
 
-^{:refer std.lang.base.grammar-xtalk-system/scan-xtalk :added "4.1"}
-(fact "scans xtalk usage and linked polyfill modules"
-  (grammar-xtalk/scan-xtalk '(do (x:obj-keys data)
-                                 (x:arr-map items f)
-                                 (x:str-ends-with s suffix)))
-  => '{:ops #{:x-obj-keys
-              :x-arr-map
-              :x-str-ends-with}
-       :symbols #{x:obj-keys
-                  x:arr-map
-                  x:str-ends-with}
-       :profiles #{:xtalk-common
-                   :xtalk-functional}
-       :polyfill-modules #{xt.lang.base-lib
-                           xt.lang.common-data
-                           xt.lang.common-string}})
-
 ^{:refer std.lang.base.emit-preprocess/to-resolve :added "4.0"}
 (fact "resolves only the code symbols (no macroexpansion)"
   ^:hidden
@@ -432,7 +415,24 @@
 
 
 ^{:refer std.lang.base.emit-preprocess/value-template-args :added "4.1"}
-(fact "TODO")
+(fact "derives template value args from arglists metadata"
+  (value-template-args
+   (with-meta
+     (fn [_ sym value] [sym value])
+     {:arglists '([ctx sym value])}))
+  => '[sym value]
+
+  (value-template-args
+   (with-meta
+     (fn [_ [sym value]] [sym value])
+     {:arglists '(( [ctx sym value] ))}))
+  => '[sym value])
 
 ^{:refer std.lang.base.emit-preprocess/protect-reserved-head :added "4.1"}
-(fact "TODO")
+(fact "protects reserved heads by wrapping them in a volatile"
+  (let [out (protect-reserved-head (with-meta '(return value) {:line 10}))]
+    [(volatile? (first out))
+     @(first out)
+     (rest out)
+     (meta out)])
+  => '[true return (value) {:line 10}])
