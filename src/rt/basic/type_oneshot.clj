@@ -96,8 +96,11 @@
   (let [[program process exec] (rt-oneshot-setup lang program process exec :oneshot)
         flags   (common/get-program-flags lang program)
         _   (cond (not (:oneshot flags))
-                  (f/error "Oneshot not available" {:flags flags
-                                                    :program program}))]
+                  (f/error "Program does not support oneshot runtime"
+                           {:lang lang
+                            :runtime runtime
+                            :flags flags
+                            :program program}))]
     (map->RuntimeOneshot (assoc m
                                 :id (or id (f/sid))
                                 :runtime runtime

@@ -1,23 +1,23 @@
 (ns rt.basic.type-oneshot-test
   (:require [rt.basic.impl.process-js :as js]
-            [rt.basic.impl.process-lua :as lua]
-            [rt.basic.impl.process-python :as py]
-            [rt.basic.impl.process-r :as r]
-            [rt.basic.type-oneshot :as p]
-            [std.json :as json]
-            [std.lang.base.book :as book]
+             [rt.basic.impl.process-lua :as lua]
+             [rt.basic.impl.process-python :as py]
+             [rt.basic.impl-annex.process-r :as r]
+             [rt.basic.type-oneshot :as p]
+             [std.json :as json]
+             [std.lang.base.book :as book]
             [std.lang.base.emit-prep-lua-test :as prep]
             [std.lang.base.impl-entry :as entry]
             [std.lang.base.library :as lib]
             [std.lang.base.library-snapshot :as snap]
             [std.lang.base.pointer :as ptr]
-            [std.lang.base.util :as ut]
-            [std.lang.model.spec-js :as spec-js]
-            [std.lang.model.spec-lua :as spec-lua]
-            [std.lang.model.spec-python :as spec-py]
-            [std.lang.model.spec-r :as spec-r]
-            [std.lib.env :as env]
-            [std.string.prose :as prose])
+             [std.lang.base.util :as ut]
+             [std.lang.model.spec-js :as spec-js]
+             [std.lang.model.spec-lua :as spec-lua]
+             [std.lang.model.spec-python :as spec-py]
+             [std.lang.model-annex.spec-r :as spec-r]
+             [std.lib.env :as env]
+             [std.string.prose :as prose])
   (:use code.test))
 
 (def +library-ext+

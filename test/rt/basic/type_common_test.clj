@@ -92,3 +92,14 @@
   
   (get-options :lua :oneshot :luajit)
   => map?)
+
+^{:refer rt.basic.type-common/require-runtime! :added "4.0"}
+(fact "raises a clear error when a runtime has not been installed"
+  (try (get-options :missing.lang :twostep :default)
+       (catch clojure.lang.ExceptionInfo e
+         [(.getMessage e)
+          (select-keys (ex-data e) [:lang :runtime :available])]))
+  => ["Runtime not installed"
+      {:lang :missing.lang
+       :runtime :twostep
+       :available []}])

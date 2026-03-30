@@ -1,5 +1,6 @@
 (ns rt.basic.impl.process-c-test
   (:require [rt.basic.impl.process-c :refer :all]
+            [rt.basic.type-common :as common]
             [std.lang :as l])
   (:use code.test))
 
@@ -29,8 +30,10 @@
   (return (-/sub (-/add 1 2)
                  10)))
 
+(def CANARY-TCC
+  (common/program-exists? "tcc"))
 
-^{:refer rt.basic.impl.process-c/CANARY :adopt true :added "4.0"}
+^{:refer rt.basic.impl.process-c-test/CANARY-TCC :guard true :adopt true :added "4.0"}
 (fact "EVALUATE tcc in c"
   ^:hidden
   

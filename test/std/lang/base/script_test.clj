@@ -46,6 +46,13 @@
     (script/script-macro-import (l/get-book (l/runtime-library)
                                             :lua)))
   => vector?)
+
+(fact "allows books without any exported macros"
+  ^:hidden
+
+  (script/script-macro-import {:macros []
+                               :highlights []})
+  => '[#{} #{}])
   
 
 ^{:refer std.lang.base.script/script-fn-base :added "4.0"}

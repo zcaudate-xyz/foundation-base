@@ -1,9 +1,10 @@
 (ns std.lang.base.script-annex
   (:require [std.json :as json]
-            [std.lang.base.impl :as impl]
-            [std.lang.base.library :as lib]
-            [std.lang.base.library-snapshot :as snap]
-            [std.lang.base.runtime :as rt]
+             [std.lang.base.impl :as impl]
+             [std.lang.base.registry :as sreg]
+             [std.lang.base.library :as lib]
+             [std.lang.base.library-snapshot :as snap]
+             [std.lang.base.runtime :as rt]
             [std.lang.base.util :as ut]
             [std.lib.atom :as atom]
             [std.lib.collection :as collection]
@@ -122,10 +123,16 @@
   {:added "4.0"}
   ([ns lang]
    (let [curr (:library (get-annex ns))]
-     (or (snap/get-book @(:instance curr) lang)
-         (let [book   (or (lib/get-book (impl/default-library) lang)
-                          (f/error "Book not found" {:lang lang}))]
-           (lib/add-book! curr (assoc book :modules {})))))))
+      (or (snap/get-book @(:instance curr) lang)
+          (let [default-lib (impl/default-library)
+                book   (or (lib/get-book default-lib lang)
+                           (do (some-> (sreg/registry-book-ns lang)
+                                       require)
+                               (lib/get-book default-lib lang))
+                           (f/error "Book not found"
+                                    {:lang lang
+                                     :available (map first (sreg/registry-book-list))}))]
+            (lib/add-book! curr (assoc book :modules {})))))))
 
 (defn add-annex-runtime
   "adds a runtime to the annex"

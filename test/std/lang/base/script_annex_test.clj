@@ -62,6 +62,12 @@
   (annex/get-annex-book (env/ns-sym) :lua)
   => book/book?)
 
+(fact "loads annex books through the registry when the language has not been preloaded"
+  ^:hidden
+  
+  (annex/get-annex-book (env/ns-sym) :rust)
+  => book/book?)
+
 ^{:refer std.lang.base.script-annex/add-annex-runtime :added "4.0"
   :setup [(annex/clear-annex)]}
 (fact "adds a runtime to the annex"

@@ -1,5 +1,6 @@
 (ns rt.basic.type-common
-  (:require [std.lib.atom :as atom]
+  (:require [std.lang.base.registry :as registry]
+            [std.lib.atom :as atom]
             [std.lib.collection :as collection]
             [std.lib.foundation :as f]
             [std.lib.os :as os]))
@@ -54,6 +55,47 @@
 
 (defonce ^:dynamic *program-options* (atom {}))
 
+(def +valid-contexts+
+  #{:oneshot
+    :twostep
+    :interactive
+    :basic
+    :websocket
+    :remote-port
+    :remote-ws})
+
+(defn available-runtimes
+  "lists installed runtimes for a language"
+  {:added "4.0"}
+  [lang]
+  (->> @registry/+registry+
+       keys
+       (keep (fn [[k-lang runtime]]
+               (when (= k-lang lang)
+                 runtime)))
+       sort
+       vec))
+
+(defn valid-context!
+  "checks that the runtime context is valid"
+  {:added "4.0"}
+  [context]
+  (assert (+valid-contexts+ context)
+          (str "Invalid context: " context)))
+
+(defn require-runtime!
+  "loads the runtime implementation if it has been registered"
+  {:added "4.0"}
+  [lang context]
+  (valid-context! context)
+  (if-let [ns (get @registry/+registry+ [lang context])]
+    (do (require ns)
+        ns)
+    (f/error "Runtime not installed"
+             {:lang lang
+              :runtime context
+              :available (available-runtimes lang)})))
+
 (defn program-exists?
   "checks if an executable exists
    
@@ -91,10 +133,14 @@
   "gets the default program"
   {:added "4.0"}
   [lang context program]
-  (or program
-      (get-in (get-program-options lang)
-              [:default context])
-      (f/error "No program found" {:input [lang context]})))
+  (let [_   (require-runtime! lang context)
+        all (get-program-options lang)]
+    (or program
+        (get-in all [:default context])
+        (f/error "No program found for runtime"
+                 {:lang lang
+                  :runtime context
+                  :available (-> all :env keys sort vec)}))))
 
 (defn get-program-flags
   "gets program flags"
@@ -106,41 +152,35 @@
   "gets running parameters for program"
   {:added "4.0"}
   [lang context program]
-  (let [_   (assert (#{:oneshot
-                       :twostep
-                       :interactive
-                       :basic
-                       :websocket
-                       :remote-port
-                       :remote-ws}
-                     context)
-                    (str "Invalid context: " context))
+  (let [_   (require-runtime! lang context)
         all (get-program-options lang)
         env (get-in all [:env program])
         {:keys [exec flags]} env
         args  (get flags context)]
     (if args
       (vec (cons exec args))
-      (f/error "Cannot be nil" {:input [lang context program]
-                                :options (keys (collection/filter-vals (fn [env]
-                                                                (get-in env [:flags context]))
-                                                              (get-in all [lang :env])))}))))
+      (f/error "Program does not support runtime"
+               {:lang lang
+                :runtime context
+                :program program
+                :available (->> (:env all)
+                                (collection/filter-vals (fn [env]
+                                                          (get-in env [:flags context])))
+                                keys
+                                sort
+                                vec)}))))
 
 (defn get-options
   "gets merged options for context"
   {:added "4.0"}
   [lang context program]
-  (let [_   (assert (#{:oneshot
-                       :twostep
-                       :interactive
-                       :basic
-                       :websocket
-                       :remote-port
-                       :remote-ws}
-                     context)
-                    (str "Invalid key: " context))
-        copts    (get-in @*context-options* [lang context])
-        _        (assert copts (str "Should not be empty: " [lang context]))]
+  (let [_        (require-runtime! lang context)
+        copts    (get-in @*context-options* [lang context])]
+    (when-not copts
+      (f/error "Runtime configuration not installed"
+               {:lang lang
+                :runtime context
+                :available (available-runtimes lang)}))
     (collection/merge-nested (:default copts)
-                    (get-in (get-program-options lang) [:env program])
-                    (get copts program))))  
+                             (get-in (get-program-options lang) [:env program])
+                             (get copts program))))  

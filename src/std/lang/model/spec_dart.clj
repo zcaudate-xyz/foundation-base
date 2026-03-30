@@ -51,7 +51,7 @@
                   :map    {:space "" :key-fn dart-map-key}}})))
 
 (def +grammar+
-  (grammar/grammar :dart
+  (grammar/grammar :dt
     (grammar/to-reserved +features+)
     +template+))
 

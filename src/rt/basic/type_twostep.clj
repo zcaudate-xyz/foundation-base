@@ -21,22 +21,76 @@
                                  root
                                  extension
                                  output-flag]
-                          :as opts
-                          :or {trim clojure.string/trim-newline}}]
+                           :as opts
+                           :or {trim clojure.string/trim-newline}}]
   (let [tmp-exec (java.io.File/createTempFile "tmp" "")
         tmp-file (str tmp-exec
                       "."
                       (or extension
-                          (f/error "Requires File Extension"
+                           (f/error "Requires File Extension"
                                    opts)))
-        _   (spit tmp-file input-body)
-        _   (os/sh {:args (if output-flag
-                           (vec (concat input-args [output-flag (str tmp-exec) (str tmp-file)]))
-                           (conj input-args (str tmp-file)))
-                   :root (str (fs/parent tmp-file))})]
-    (str (os/sh {:args [(str "./" (fs/file-name tmp-exec))]
-                :root (str (fs/parent tmp-file))
-                }))))
+        root-dir   (str (or root (fs/parent tmp-file)))
+        compile-args (if output-flag
+                       (vec (concat input-args [output-flag (str tmp-exec) (str tmp-file)]))
+                       (conj input-args (str tmp-file)))
+        run-args   [(str "./" (fs/file-name tmp-exec))]
+        run!       (fn [args]
+                     (let [proc (os/sh {:wait false
+                                        :output false
+                                        :args args
+                                        :root root-dir})]
+                       (os/sh-wait proc)
+                       (os/sh-output proc)))
+        raw-output (fn [{:keys [exit out err]}]
+                     (let [out-lines (->> (clojure.string/split-lines (trim out))
+                                          (remove empty?)
+                                          seq)
+                           err-lines (->> (clojure.string/split-lines (trim err))
+                                          (remove empty?)
+                                          seq)]
+                       [exit (or out-lines err-lines [])]))
+        stderr-output (fn [{:keys [out err]}]
+                        (trim (or (not-empty err)
+                                  out
+                                  "")))]
+    (try
+      (spit tmp-file input-body)
+      (let [compile-ret (run! compile-args)]
+        (cond raw
+              (if (zero? (:exit compile-ret))
+                (raw-output (run! run-args))
+                (raw-output compile-ret))
+
+              (not (zero? (:exit compile-ret)))
+              (if stderr
+                (stderr-output compile-ret)
+                (f/error "Twostep compile failed"
+                         {:args compile-args
+                          :root root-dir
+                          :file tmp-file
+                          :exec (str tmp-exec)
+                          :result compile-ret}))
+
+              :else
+              (let [run-ret (run! run-args)]
+                (if (zero? (:exit run-ret))
+                  (trim (:out run-ret))
+                  (if stderr
+                    (stderr-output run-ret)
+                    (f/error "Twostep execution failed"
+                             {:args run-args
+                              :root root-dir
+                              :file tmp-file
+                              :exec (str tmp-exec)
+                              :result run-ret}))))))
+      (catch Throwable t
+        (if stderr
+          (trim (.getMessage t))
+          (throw t)))
+      (finally
+        (doseq [path [tmp-file (str tmp-exec)]]
+          (try (fs/delete path)
+               (catch Throwable _)))))))
 
 (defn raw-eval-twostep
   "evaluates the twostep evaluation"
@@ -89,8 +143,11 @@
   (let [[program process exec] (rt-twostep-setup lang program process exec :twostep)
         flags   (common/get-program-flags lang program)
         _   (cond (not (:twostep flags))
-                  (f/error "Twostep not available" {:flags flags
-                                                    :program program}))]
+                  (f/error "Program does not support twostep runtime"
+                           {:lang lang
+                            :runtime runtime
+                            :flags flags
+                            :program program}))]
     (map->RuntimeTwostep (assoc m
                                 :id (or id (f/sid))
                                 :runtime runtime

@@ -89,14 +89,14 @@
                      (filter restrict)
                      (concat (:highlights book)))
          syms   (map f/var-sym macros)
-         mns    (ut/sym-module (first syms))
          ids    (set (map ut/sym-id syms))
          curr   (env/ns-sym)
          ignore (clojure.set/intersection ids
                                           (set (concat (keys (ns-refers curr))
                                                        (keys (ns-interns curr)))))
          refers (clojure.set/difference ids ignore)]
-     (refer mns :only (vec refers))
+     (when-let [mns (some-> syms first ut/sym-module)]
+       (refer mns :only (vec refers)))
      [refers ids])))
 
 
