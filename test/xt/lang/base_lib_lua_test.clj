@@ -1,23 +1,25 @@
-(ns
- xt.lang.base-lib-lua-test
- (:require [std.lang :as l] [std.string.prose :as prose])
- (:use code.test))
+(ns xt.lang.base-lib-lua-test
+  (:use code.test)
+  (:require [std.lang :as l]
+            [std.string.prose :as prose]))
 
-(l/script- :lua {:runtime :basic, :require [[xt.lang.base-lib :as k] [xt.lang.base-macro :as km]]})
+(l/script- :lua
+  {:runtime :basic,
+   :require [[xt.lang.base-lib :as k]
+             [xt.lang.base-macro :as km]]})
 
-(fact:global {:setup [(l/rt:restart)], :teardown [(l/rt:stop)]})
+(fact:global {:setup [(l/rt:restart)],
+              :teardown [(l/rt:stop)]})
 
 ^{:refer xt.lang.base-lib/proto-create, :added "4.0"}
-(fact
- "creates the prototype map"
- ^{:hidden true}
- (!.lua
-  (var mt (k/proto-create {:hello (fn:> [v] (. v world)), :world "hello"}))
-  (var a {})
-  (k/set-proto a mt)
-  (. a (hello)))
- =>
- "hello")
+(fact "creates the prototype map"
+  
+  (!.lua
+    (var mt (k/proto-create {:hello (fn:> [v] (. v world)), :world "hello"}))
+    (var a {})
+    (k/set-proto a mt)
+    (. a (hello)))
+  => "hello")
 
 ^{:refer xt.lang.base-lib/type-native, :added "4.0"}
 (fact

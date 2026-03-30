@@ -261,6 +261,9 @@
 (defn lookup-symbol-type
   [sym {:keys [env] :as ctx}]
   (or (get env sym)
+      (some-> sym
+              (resolve-local-symbol ctx)
+              ops/builtin-type)
       (let [resolved (resolve-local-symbol sym ctx)]
         (some-> (or (types/get-function resolved)
                     (maybe-register-function! resolved))
@@ -1016,10 +1019,44 @@
    'x:obj-assign infer-obj-assign
    'x:arr-clone infer-arr-clone})
 
+(defn infer-op-spec-form
+  [builtin-entry form ctx]
+  (let [fn-types (ops/op-types builtin-entry)]
+    (when (seq fn-types)
+      (let [[_ & args] form
+            arg-results (mapv #(infer-type % ctx) args)
+            errors (vec (mapcat :errors arg-results))
+            arity-types (filterv #(optional-arity? (:inputs %) (count args) ctx)
+                                 fn-types)]
+        (if (seq arity-types)
+          (let [passing-types (filterv (fn [fn-type]
+                                         (every? true?
+                                                 (map #(compatible-type? (:type %1) %2 ctx)
+                                                      arg-results
+                                                      (take (count args) (:inputs fn-type)))))
+                                       arity-types)
+                chosen-types (if (seq passing-types) passing-types arity-types)
+                arg-errors (if (seq passing-types)
+                             []
+                             (call-arg-errors arg-results
+                                              (take (count args) (:inputs (first arity-types)))
+                                              args
+                                              ctx))]
+            (result (types/union-type (map :output chosen-types))
+                    (concat errors arg-errors)))
+          (result types/+unknown-type+
+                  (concat errors
+                          [{:tag :call-arity-mismatch
+                            :form form
+                            :expected (or (ops/op-arglists builtin-entry)
+                                          (mapv #(count (:inputs %)) fn-types))
+                            :actual (count args)}])))))))
+
 (defn infer-builtin-form
   [builtin-entry form ctx]
-  (when-let [rule (get +builtin-rules+ (:canonical-symbol builtin-entry))]
-    (rule form ctx)))
+  (or (infer-op-spec-form builtin-entry form ctx)
+      (when-let [rule (get +builtin-rules+ (:canonical-symbol builtin-entry))]
+        (rule form ctx))))
 
 (defn infer-dot
   [[_ obj-expr key-or-path] ctx]

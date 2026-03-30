@@ -212,12 +212,15 @@
   {:added "4.0"}
   ([lang runtime {:keys [type config] :as spec}]
    (let [ctx    (ut/lang-context lang)
-         r-spec (resource/res:spec-add (dissoc spec :config))
+         spec   (dissoc spec :config)
+         r-spec (when (or (not (f/suppress (resource/res:spec-get type)))
+                          (seq (dissoc spec :type)))
+                  (resource/res:spec-add spec))
          r-ctx  (reg/registry-rt-add ctx {:key runtime
                                           :config config
                                           :resource type})]
-     {:spec r-spec
-      :context r-ctx})))
+      {:spec r-spec
+       :context r-ctx})))
 
 ;;
 ;;

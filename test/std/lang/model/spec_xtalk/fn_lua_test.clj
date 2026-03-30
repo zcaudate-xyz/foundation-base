@@ -236,7 +236,10 @@
 ^{:refer std.lang.model.spec-xtalk.fn-lua/lua-tf-x-return-eval :added "4.0"}
 (fact "return eval"
   (l/emit-as :lua [(lua-tf-x-return-eval '[_ s wrap-fn])])
-  => #"loadstring")
+  => #"loadstring"
+
+  (l/emit-as :lua [(lua-tf-x-return-eval '[_ s wrap-fn])])
+  => #(not (re-find #"unpack\(load_fn\(s\)\)" %)))
 
 ^{:refer std.lang.model.spec-xtalk.fn-lua/lua-tf-x-socket-connect :added "4.0"}
 (fact "socket connect"

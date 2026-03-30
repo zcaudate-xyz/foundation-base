@@ -1,6 +1,5 @@
 (ns xt.lang.impl-bitop
-  (:require [std.lang :as l]
-            [std.lang.typed.xtalk :refer [defspec.xt]])
+  (:require [std.lang :as l  :refer [defspec.xt]])
   (:refer-clojure :exclude []))
 
 (defn.xt bit-count

@@ -1,7 +1,9 @@
 (ns xt.lang.common-data
-  (:require [std.lang :as l :refer [defspec.xt]]))
+  (:require [std.lang :as l :refer [defspec.xt]])
+  (:refer-clojure :exclude [first second nth last get-in]))
 
-(l/script :xtalk)
+(l/script :xtalk
+  {:require [[xt.lang.common-lib :as lib]]})
 
 (def$.xt arr-push x:arr-push)
 (def$.xt arr-pop x:arr-pop)
@@ -9,83 +11,54 @@
 (def$.xt arr-pop-first x:arr-pop-first)
 (def$.xt arr-insert x:arr-insert)
 
-(defspec.xt AnyArray
-  [:xt/array :xt/any])
 
-(defspec.xt AnyDict
-  [:xt/dict :xt/str :xt/any])
+(defn.xt arr?
+  "checks if object is an array"
+  {:added "4.1"}
+  [x]
+  (return (x:is-array? x)))
 
-(defspec.xt UnaryFn
-  [:fn [:xt/any] :xt/any])
-
-(defspec.xt first
-  [:fn [AnyArray] :xt/any])
-
-(defspec.xt second
-  [:fn [AnyArray] :xt/any])
-
-(defspec.xt nth
-  [:fn [AnyArray :xt/num] :xt/any])
-
-(defspec.xt last
-  [:fn [AnyArray] :xt/any])
-
-(defspec.xt is-empty?
-  [:fn [:xt/any] :xt/bool])
-
-(defspec.xt not-empty?
-  [:fn [:xt/any] :xt/bool])
-
-(defspec.xt arrayify
-  [:fn [:xt/any] AnyArray])
-
-(defspec.xt obj-keys
-  [:fn [AnyDict] [:xt/array :xt/str]])
-
-(defspec.xt get-in
-  [:fn [AnyDict AnyArray] :xt/any])
-
-(defspec.xt path-fn
-  [:fn [AnyArray] UnaryFn])
-
-(defspec.xt set-in
-  [:fn [AnyDict AnyArray :xt/any] AnyDict])
-
-(defspec.xt obj-difference
-  [:fn [AnyDict AnyDict] AnyArray])
-
-(defspec.xt eq-nested-loop
-  [:fn [:xt/any :xt/any :xt/any :xt/any :xt/any] :xt/bool])
-
-(defspec.xt eq-nested-obj
-  [:fn [AnyDict AnyDict :xt/any :xt/any :xt/any] :xt/bool])
-
-(defspec.xt eq-nested-arr
-  [:fn [AnyArray AnyArray :xt/any :xt/any :xt/any] :xt/bool])
-
-(defspec.xt eq-nested
-  [:fn [:xt/any :xt/any] :xt/bool])
-
-(defspec.xt eq-shallow
-  [:fn [:xt/any :xt/any] :xt/bool])
-
-(defspec.xt obj-diff
-  [:fn [AnyDict AnyDict] AnyDict])
-
-(defspec.xt obj-diff-nested
-  [:fn [AnyDict AnyDict] AnyDict])
+(defn.xt obj?
+  "checks if object is a map type"
+  {:added "4.1"}
+  [x]
+  (return (x:is-object? x)))
 
 (defn.xt first
   "gets the first item"
   {:added "4.1"}
   [arr]
-  (return (x:first arr)))
+  (return (x:get-idx arr (x:offset 0))))
 
 (defn.xt second
   "gets the second item"
   {:added "4.1"}
   [arr]
-  (return (x:second arr)))
+  (return (x:get-idx arr (x:offset 1))))
+
+(defn.xt arr-first
+  "gets the first item"
+  {:added "4.1"}
+  [arr]
+  (return (x:get-idx arr (x:offset 0))))
+
+(defn.xt arr-second
+  "gets the second item"
+  {:added "4.1"}
+  [arr]
+  (return (x:get-idx arr (x:offset 1))))
+
+(defn.xt arr-last
+  "gets the first item"
+  {:added "4.1"}
+  [arr]
+  (return (x:arr-last arr)))
+
+(defn.xt arr-second-last
+  "gets the second item"
+  {:added "4.1"}
+  [arr]
+  (return (x:arr-second-last arr)))
 
 (defn.xt nth
   "gets the nth item"
@@ -97,7 +70,7 @@
   "gets the last item"
   {:added "4.1"}
   [arr]
-  (return (x:last arr)))
+  (return (x:get-idx arr (x:offset (x:len arr)))))
 
 (defn.xt is-empty?
   "checks that value is empty"
@@ -149,7 +122,7 @@
         (== 0 (x:len arr))
         (return obj)
         (== 1 (x:len arr))
-        (return (x:get-key obj (-/first arr)))
+        (return (x:get-key obj (-/arr-first arr)))
         :else
         (do (var total := (x:len arr))
             (var i := 0)
@@ -186,7 +159,7 @@
               (:= out nested)
               (:= idx (- idx 1))))
         :else
-        (do (var k := (-/first arr))
+        (do (var k := (-/arr-first arr))
             (var narr := [])
             (for:index [i [1 (x:len arr)]]
               (x:arr-push narr (x:get-idx arr i)))

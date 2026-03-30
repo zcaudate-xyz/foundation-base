@@ -9,11 +9,11 @@
 (defn lua-tf-x-return-encode
   ([[_ out id key]]
    (template/$ (do (do (local ret nil)
-                (local [r-ok r-err]
+                (local '[r-ok r-err]
                        (pcall (fn []
-                                (cond (== nil ~out)
-                                      (:= ret (cjson.encode {:id  ~id
-                                                             :key ~key
+                                 (cond (== nil ~out)
+                                       (:= ret (cjson.encode {:id  ~id
+                                                              :key ~key
                                                              :type "data"
                                                              :value (. cjson ["null"])}))
                                       
@@ -35,7 +35,7 @@
 (defn lua-tf-x-return-wrap
   ([[_ f encode-fn]]
    (template/$ (do (local out)
-            (local [o-ok o-err] (pcall (fn [] (:= out (~f)))))
+            (local '[o-ok o-err] (pcall (fn [] (:= out (~f)))))
             (cond o-err
                   (return (cjson.encode {:type "error"
                                          :value o-err}))
@@ -46,12 +46,12 @@
 (defn lua-tf-x-return-eval
   ([[_ s wrap-fn]]
    (template/$ (return (~wrap-fn
-                 (fn []
-                   (local load-fn (or loadstring load))
-                   (local [f err] (load-fn ~s))
-                   (if err
-                     (error err)
-                     (return (f)))))))))
+                  (fn []
+                    (local load-fn (or loadstring load))
+                    (local '[f err] (load-fn ~s))
+                    (if err
+                      (error err)
+                      (return (f)))))))))
 
 (def +lua-return+
   {:x-return-encode  {:macro #'lua-tf-x-return-encode   :emit :macro}
@@ -116,23 +116,23 @@
 (defn lua-tf-x-client-basic
   ([[_ host port connect-fn eval-fn]]
    (template/$ (do* (while true
-               (var '[ok conn] := (unpack (~connect-fn ~host ~port {})))
-               (when (not ok)
-                 (return))
-               (pcall (fn []
-                        (while true
-                          (local [raw err] (conn:receive "*l"))
-                          (if err (break))
-                          (~eval-fn conn raw)))))))))
+                (var '[ok conn] := (unpack (~connect-fn ~host ~port {})))
+                (when (not ok)
+                  (return))
+                (pcall (fn []
+                         (while true
+                           (local '[raw err] (conn:receive "*l"))
+                           (if err (break))
+                           (~eval-fn conn raw)))))))))
 
 (defn lua-tf-x-client-ws
   ([[_ host port opts connect-fn eval-fn]]
-   (template/$ (do* (var '[ok conn] := (unpack (~connect-fn ~host ~port ~opts)))
-             (while true
-               (local [raw type err] (conn:recv-frame))
-               (when err
-                 (ngx.say (cat "failed to read frame: " err))
-                 (break))
+    (template/$ (do* (var '[ok conn] := (unpack (~connect-fn ~host ~port ~opts)))
+              (while true
+                (local '[raw type err] (conn:recv-frame))
+                (when err
+                  (ngx.say (cat "failed to read frame: " err))
+                  (break))
                (when raw
                  (~eval-fn conn raw)))))))
 

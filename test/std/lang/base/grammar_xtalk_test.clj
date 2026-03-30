@@ -1,5 +1,6 @@
 (ns std.lang.base.grammar-xtalk-test
-  (:require [std.lang.base.grammar-xtalk :refer :all])
+  (:require [clojure.string :as str]
+            [std.lang.base.grammar-xtalk :refer :all])
   (:use code.test))
 
 ^{:refer std.lang.base.grammar-xtalk/tf-throw :added "4.0"}
@@ -298,3 +299,13 @@
 (fact "checks string ordering descending"
   (tf-gt-string '(x:gt-string a b))
   => '(x:arr-str-comp b a))
+
+(fact "all xtalk grammar map entries expose op-spec contracts"
+  (vec
+   (for [[sym v] (sort-by key (ns-publics 'std.lang.base.grammar-xtalk))
+         :when (str/starts-with? (name sym) "+xt-")
+         entry @v
+         :when (and (map? entry)
+                    (not (:op-spec entry)))]
+     (:op entry)))
+  => [])
