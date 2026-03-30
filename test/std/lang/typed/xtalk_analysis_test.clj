@@ -13,6 +13,17 @@
   (:ns (analyze-namespace 'std.lang.model.spec-xtalk-typed-fixture))
   => 'std.lang.model.spec-xtalk-typed-fixture)
 
+^{:refer std.lang.typed.xtalk-analysis/analyze-namespace-raw :added "4.1"}
+(fact "exposes raw analysis without same-name spec attachment"
+  (let [analysis (analyze-namespace-raw 'std.lang.model.spec-xtalk-typed-fixture)
+        fn-def (some #(when (= "find-user" (:name %)) %)
+                     (:functions analysis))]
+    {:inputs (mapv (comp types/type->data :type) (:inputs fn-def))
+     :output (types/type->data (:output fn-def))})
+  => '{:inputs [{:kind :primitive :name :xt/unknown}
+                {:kind :primitive :name :xt/unknown}]
+       :output {:kind :primitive :name :xt/unknown}})
+
 ^{:refer std.lang.typed.xtalk-analysis/analyze-and-register! :added "4.1"}
 (fact "registers analysis results"
   (do

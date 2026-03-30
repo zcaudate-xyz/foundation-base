@@ -1,6 +1,6 @@
 (ns std.lang.model.spec-go.typed
   (:require [clojure.string :as str]
-            [std.lang.typed.xtalk-analysis :as analysis]))
+            [std.lang.model.spec-xtalk.mixer :as mixer]))
 
 (declare emit-go-type)
 (declare lossy-go-type)
@@ -87,13 +87,10 @@
     (str "[]" (emit-go-type (:item type) current-ns))
 
     :dict
-    (str "map[" (emit-go-type (:key type) current-ns) "]"
-         (emit-go-type (:value type) current-ns))
+    "map[any]any"
 
     :record
-    (if (:open type)
-      "map[string]any"
-      "struct")
+    "map[string]any"
 
     :fn
     (str "func("
@@ -130,12 +127,10 @@
 (defn emit-spec-declaration
   [spec]
   (let [current-ns (some-> spec :ns symbol)
-        name (sanitize-ident (:name spec))
-        type (:type spec)]
+         name (sanitize-ident (:name spec))
+         type (:type spec)]
     (str "type " name " "
-         (if (= :record (:kind type))
-           (emit-struct-type type current-ns)
-           (emit-go-type type current-ns)))))
+         (emit-go-type type current-ns))))
 
 (defn emit-function-declaration
   [fn-def]
@@ -153,24 +148,39 @@
   [value-def]
   (let [current-ns (some-> value-def :ns symbol)]
     (str "var "
-         (sanitize-ident (:name value-def))
-         " "
-         (emit-go-type (:type value-def) current-ns))))
+          (sanitize-ident (:name value-def))
+          " "
+          (emit-go-type (:type value-def) current-ns))))
+
+(defn emitted-specs
+  [{:keys [specs functions values]}]
+  (let [fn-names    (set (map :name functions))
+        value-names (set (map :name values))]
+    (remove (fn [spec]
+              (let [kind (get-in spec [:type :kind])
+                    name (:name spec)]
+                (or (and (= :fn kind)
+                         (contains? fn-names name))
+                    (and (not= :fn kind)
+                         (contains? value-names name)))))
+            specs)))
 
 (defn emit-analysis-declarations
   ([analysis]
    (emit-analysis-declarations analysis {}))
   ([{:keys [specs functions values]} opts]
-   (binding [*emit-options* (merge *emit-options* opts)]
-     (->> (concat (map emit-spec-declaration specs)
-                  (map emit-function-declaration functions)
-                  (map emit-value-declaration values))
-          (str/join "\n\n")))))
+    (binding [*emit-options* (merge *emit-options* opts)]
+      (->> (concat (map emit-spec-declaration (emitted-specs {:specs specs
+                                                              :functions functions
+                                                              :values values}))
+                   (map emit-function-declaration functions)
+                   (map emit-value-declaration values))
+           (str/join "\n\n")))))
 
 (defn emit-namespace-declarations
   ([ns-sym]
    (emit-namespace-declarations ns-sym {}))
   ([ns-sym opts]
    (-> ns-sym
-       analysis/analyze-namespace
+       mixer/mix-namespace
        (emit-analysis-declarations opts))))

@@ -8,9 +8,17 @@
   [file-path]
   (parse/analyze-file file-path))
 
+(defn analyze-file-raw
+  [file-path]
+  (parse/analyze-file-raw file-path))
+
 (defn analyze-namespace
   [ns-sym]
   (parse/analyze-namespace ns-sym))
+
+(defn analyze-namespace-raw
+  [ns-sym]
+  (parse/analyze-namespace-raw ns-sym))
 
 (defn analyze-and-register!
   [ns-sym]

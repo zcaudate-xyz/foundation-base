@@ -70,15 +70,47 @@
              (= orig body)
              [:unchanged   file]
 
-             :else
-             [:written (doto file (spit body))])))))
+              :else
+              [:written (doto file (spit body))])))))
 
+(defn compile-result-seq
+  "normalizes nested compile results into a flat sequence"
+  {:added "4.1"}
+  [results]
+  (cond
+    (nil? results)
+    []
+
+    (and (vector? results)
+         (= 2 (count results))
+         (or (keyword? (first results))
+             (string? (first results))))
+    [results]
+
+    (sequential? results)
+    (mapcat compile-result-seq results)
+
+    :else
+    []))
+
+(defn compile-write-artifacts
+  "writes multiple artifact descriptors"
+  {:added "4.1"}
+  [artifacts]
+  (->> artifacts
+       (map (fn [{:keys [output body header footer]}]
+              (compile-write output
+                             (compile-fullbody body
+                                               {:header header
+                                                :footer footer}))))
+       vec))
 
 (defn compile-summarise
   "summaries the output"
   {:added "4.0"}
   [files]
-  (let [non-blank (filter (comp #(and (not= % :blank)
+  (let [files     (vec (compile-result-seq files))
+        non-blank (filter (comp #(and (not= % :blank)
                                       (not= % :deleted)) first) files)
         written   (remove (comp #(or (= % :unchanged)
                                      (= % :blank)) first) files)]

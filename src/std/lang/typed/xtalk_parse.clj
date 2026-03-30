@@ -356,7 +356,7 @@
                                                            (:name value-def)))))
                  values))))
 
-(defn analyze-file
+(defn analyze-file-raw
   [file-path]
   (let [forms (read-forms file-path)
         ns-sym (parse-ns-name forms)
@@ -372,14 +372,19 @@
                      (defmacro? form) (update acc :macros conj (parse-defmacro form ns-sym aliases))
                      (defvalue? form) (update acc :values conj (parse-defvalue form ns-sym aliases))
                      :else acc))
-                 {:ns ns-sym
-                  :aliases aliases
-                  :specs []
-                  :functions []
-                  :macros []
-                  :values []}
-                 forms)
-         attach-specs)))
+                  {:ns ns-sym
+                   :aliases aliases
+                   :specs []
+                   :functions []
+                   :macros []
+                   :values []}
+                 forms))))
+
+(defn analyze-file
+  [file-path]
+  (-> file-path
+      analyze-file-raw
+      attach-specs))
 
 (defn register-types!
   [{:keys [specs functions macros values] :as analysis}]
@@ -401,7 +406,7 @@
                            value-def))
   analysis)
 
-(defn analyze-namespace
+(defn analyze-namespace-raw
   [ns-sym]
   (let [rel-path (-> (str ns-sym)
                      (str/replace #"\." "/")
@@ -416,11 +421,17 @@
                       "main/clojure/src/"]
         target-file (some (fn [root]
                             (let [path (str root rel-path)]
-                              (when (.exists (io/file path))
-                                path)))
-                          source-roots)]
-    (if target-file
-      (analyze-file target-file)
-      (throw (ex-info "Namespace source file not found"
-                      {:ns ns-sym
-                       :searched source-roots})))))
+                               (when (.exists (io/file path))
+                                 path)))
+                           source-roots)]
+     (if target-file
+       (analyze-file-raw target-file)
+       (throw (ex-info "Namespace source file not found"
+                       {:ns ns-sym
+                        :searched source-roots})))))
+
+(defn analyze-namespace
+  [ns-sym]
+  (-> ns-sym
+      analyze-namespace-raw
+      attach-specs))

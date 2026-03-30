@@ -1,0 +1,50 @@
+#+STARTUP: showall
+
+* Go xtalk user directory
+
+This example shows a Go artifact generated from a source namespace authored with
+=l/script :xtalk=.
+
+The source namespace in =main.clj= stays in canonical xtalk style:
+
+- shared shapes are declared with =defspec.xt=
+- functions are declared with same-name callable specs plus plain =defn.xt=
+- values are declared with =defspec.xt= plus =def.xt=
+
+The build step does not try to compile xtalk runtime bodies directly into Go.
+Instead, it mixes the xtalk analysis and emits a Go declaration surface from
+that typed view.
+
+That means the generated =user_directory.go= contains things like:
+
+- =type User map[string]any=
+- =type UserMap map[any]any=
+- =type lookupUser func(arg0 UserMap, arg1 UserId) *User=
+- =var DEFAULT_PAGE_SIZE int=
+
+* Generated build tree
+
+Running =(make/build-all PROJECT)= writes:
+
+- =.build/.gitignore=
+- =.build/Makefile=
+- =.build/go.mod=
+- =.build/user_directory.go=
+
+* Build the project
+
+#+BEGIN_SRC clojure :results output silent :cache no :eval no
+(load-file "build.clj")
+(require '[std.make :as make]
+         '[play.go-001-xtalk-user-directory.build :as build])
+(make/build-all build/PROJECT)
+#+END_SRC
+
+* Inspect the generated Go source
+
+#+BEGIN_SRC clojure :results output silent :cache no :eval no
+(load-file "build.clj")
+(require '[std.make :as make]
+         '[play.go-001-xtalk-user-directory.build :as build])
+(make/run build/PROJECT :show-source)
+#+END_SRC

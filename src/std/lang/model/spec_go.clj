@@ -37,9 +37,9 @@
            (go-typesystem arr grammar mopts)
 
            :else
-           (str "[]interface{}{"
-                (clojure.string/join ", " (map #(emit/emit-main % grammar mopts) arr))
-                "}")))))
+            (str "[]any{"
+                 (clojure.string/join ", " (map #(emit/emit-main % grammar mopts) arr))
+                 "}")))))
 
 (defn tf-go-arrow
   "macro for channel op"
@@ -102,19 +102,19 @@
 (def +template+
   (-> (emit/default-grammar)
       (collection/merge-nested
-       {:banned #{:set :regex}
-        :highlight '#{return break continue fallthrough}
-        :default {:common    {:statement ""}
+        {:banned #{:set :regex}
+         :highlight '#{return break continue fallthrough}
+         :default {:common    {:statement ""}
                   :function  {:prefix "func"
                               :raw ""
                               :args {:sep ", "}}
                   :typehint  {:enabled true :assign "" :space " " :after true}
                   :invoke    {:reversed true :hint ""}
                   :block     {:start " {" :end "}"}}
-        :token   {:symbol {:replace {\- "_"}}}
-        :data    {:vector {:custom #'go-vector}
-                  :map    {:start "map[string]interface{}{" :end "}" :space ""}}
-        :xtalk   {:notify {:custom true}}})))
+         :token   {:symbol {:replace {\- "_"}}}
+         :data    {:vector {:custom #'go-vector}
+                   :map    {:start "map[string]any{" :end "}" :space ""}}
+         :xtalk   {:notify {:custom true}}})))
 
 (def +grammar+
   (grammar/grammar :go

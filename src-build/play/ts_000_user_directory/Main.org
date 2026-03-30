@@ -1,0 +1,51 @@
+#+STARTUP: showall
+
+* TypeScript User Directory
+
+This example shows how to use =def.make= to generate both runtime JavaScript and
+TypeScript declaration files from Clojure sources.
+
+- =main.clj= is the runtime =:js= module
+- =types.clj= is the typed xtalk surface
+- =build.clj= uses the mixer to turn =types.clj= into =.d.ts= declarations
+
+* Generated build tree
+
+Running =(make/build-all PROJECT)= writes:
+
+- =.build/.gitignore=
+- =.build/Makefile=
+- =.build/package.json=
+- =.build/src/index.js=
+- =.build/src/index.d.ts=
+
+The declaration artifact is created in =build.clj= by calling the mixer on
+=play.ts-000-user-directory.types= and writing the output beside the runtime JS
+file.
+
+*** Build the project
+
+#+BEGIN_SRC clojure :results output silent :cache no :eval no
+(load-file "build.clj")
+(require '[std.make :as make]
+         '[play.ts-000-user-directory.build :as build])
+(make/build-all build/PROJECT)
+#+END_SRC
+
+*** Inspect the generated declarations
+
+#+BEGIN_SRC clojure :results output silent :cache no :eval no
+(load-file "build.clj")
+(require '[std.make :as make]
+         '[play.ts-000-user-directory.build :as build])
+(make/run build/PROJECT :show-types)
+#+END_SRC
+
+*** Inspect the generated JavaScript
+
+#+BEGIN_SRC clojure :results output silent :cache no :eval no
+(load-file "build.clj")
+(require '[std.make :as make]
+         '[play.ts-000-user-directory.build :as build])
+(make/run build/PROJECT :show-js)
+#+END_SRC

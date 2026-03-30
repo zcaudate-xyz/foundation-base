@@ -43,15 +43,15 @@
   => "map[string]int"
 )
 
-(fact "test xtalk integration"
+  (fact "test xtalk integration"
   (l/emit-as :go ['(x-print "hello")])
   => "fmt.Println(\"hello\")"
 
   (l/emit-as :go ['(x-len [1 2 3])])
-  => "len([]interface{}{1, 2, 3})"
+  => "len([]any{1, 2, 3})"
 
   (l/emit-as :go ['(x:len [1 2 3])])
-  => "len([]interface{}{1, 2, 3})"
+  => "len([]any{1, 2, 3})"
 
   (l/emit-as :go ['(x-cat "a" "b")])
   => "\"a\" + \"b\""
@@ -63,7 +63,7 @@
   => "arr = append(arr,1)"
 
   (l/emit-as :go ['(x-str-join "," ["a" "b"])])
-  => "strings.Join([]interface{}{\"a\", \"b\"},\",\")"
+  => "strings.Join([]any{\"a\", \"b\"},\",\")"
 )
 
 
@@ -77,7 +77,7 @@
 ^{:refer std.lang.model.spec-go/go-vector :added "4.1"}
 (fact "emit vector or slice"
   (spec-go/go-vector '[1 2 3] spec-go/+grammar+ {})
-  => "[]interface{}{1, 2, 3}"
+  => "[]any{1, 2, 3}"
   (spec-go/go-vector '[:> slice int] spec-go/+grammar+ {})
   => "[]int")
 

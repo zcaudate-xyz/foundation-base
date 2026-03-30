@@ -1,6 +1,8 @@
 (ns std.lang.model.spec-js.ts-test
   (:use code.test)
-  (:require [std.lang.model.spec-js.ts :refer :all]))
+  (:require [clojure.string :as str]
+            [std.lang.model.spec-js.ts :refer :all]
+            [std.lang.model.spec-xtalk.mixer :as mixer]))
 
 ^{:refer std.lang.model.spec-js.ts/valid-ts-ident? :added "4.1"}
 (fact "checks if string is valid TypeScript identifier"
@@ -139,6 +141,33 @@
 
 ^{:refer std.lang.model.spec-js.ts/emit-analysis-declarations :added "4.1"}
 (fact "TODO")
+
+(fact "does not duplicate same-name callable specs in declaration output"
+  (let [out (-> 'std.lang.model.spec-xtalk-typed-fixture
+                mixer/mix-namespace
+                emit-analysis-declarations)]
+    [(count (re-seq #"export type find_user =" out))
+     (str/includes? out "export interface User")])
+  => [1 true])
+
+^{:refer std.lang.model.spec-js.ts/declaration-output-path :added "4.1"}
+(fact "maps runtime outputs to declaration sidecars"
+  [(declaration-output-path "dist/demo.js")
+   (declaration-output-path "dist/demo.bundle.min.js")
+   (declaration-output-path "dist/demo")]
+  => ["dist/demo.d.ts"
+      "dist/demo.bundle.min.d.ts"
+      "dist/demo.d.ts"])
+
+^{:refer std.lang.model.spec-js.ts/module-dts-artifact :added "4.1"}
+(fact "builds declaration artifacts alongside runtime output"
+  (let [{:keys [output body]}
+        (module-dts-artifact {:main 'std.lang.model.spec-xtalk-typed-fixture
+                              :runtime-output "dist/spec_xtalk_typed_fixture.js"})]
+    [output
+     (boolean (re-find #"export interface User" body))
+     (boolean (re-find #"export type find_user" body))])
+  => ["dist/spec_xtalk_typed_fixture.d.ts" true true])
 
 ^{:refer std.lang.model.spec-js.ts/emit-namespace-declarations :added "4.1"}
 (fact "TODO")
