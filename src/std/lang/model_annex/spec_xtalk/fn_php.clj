@@ -1,5 +1,6 @@
 (ns std.lang.model-annex.spec-xtalk.fn-php
-  (:require [std.lib.template :as template]))
+  (:require [std.lib.foundation :as f]
+            [std.lib.template :as template]))
 
 ;;
 ;; CORE
@@ -58,6 +59,146 @@
    :x-shell          {:macro #'php-tf-x-shell :emit :macro}
    :x-now-ms         {:macro #'php-tf-x-now-ms :emit :macro}
    :x-type-native    {:macro #'php-tf-x-type-native :emit :macro}})
+
+(defn php-tf-x-future-run
+  [[_ thunk]]
+  (template/$
+   (do (:= task {"status" "pending"
+                 "value" nil
+                 "error" nil})
+       (try (:= out (~thunk))
+            (:= (:% task ["status"]) "ok")
+            (:= (:% task ["value"]) out)
+            (catch Exception $e
+              (:= (:% task ["status"]) "error")
+              (:= (:% task ["error"]) $e)))
+       (return task))))
+
+(defn php-tf-x-future-then
+  [[_ task on-ok]]
+  (template/$
+   (if (== "ok" (:% ~task ["status"]))
+     (do (:= out {"status" "pending"
+                  "value" nil
+                  "error" nil})
+         (try (:= v (~on-ok (:% ~task ["value"])))
+              (:= (:% out ["status"]) "ok")
+              (:= (:% out ["value"]) v)
+              (catch Exception $e
+                (:= (:% out ["status"]) "error")
+                (:= (:% out ["error"]) $e)))
+         (return out))
+     (return ~task))))
+
+(defn php-tf-x-future-catch
+  [[_ task on-err]]
+  (template/$
+   (if (== "error" (:% ~task ["status"]))
+     (do (:= out {"status" "pending"
+                  "value" nil
+                  "error" nil})
+         (try (:= v (~on-err (:% ~task ["error"])))
+              (:= (:% out ["status"]) "ok")
+              (:= (:% out ["value"]) v)
+              (catch Exception $e
+                (:= (:% out ["status"]) "error")
+                (:= (:% out ["error"]) $e)))
+         (return out))
+     (return ~task))))
+
+(defn php-tf-x-future-finally
+  [[_ task on-done]]
+  (template/$
+   (do (~on-done)
+       (return ~task))))
+
+(defn php-tf-x-future-cancel
+  [[_ task]]
+  (template/$
+   (do (:= (:% ~task ["status"]) "cancelled")
+       (return ~task))))
+
+(defn php-tf-x-future-status
+  [[_ task]]
+  (template/$
+   (return (:% ~task ["status"]))))
+
+(defn php-tf-x-future-await
+  [[_ task & [timeout-ms default]]]
+  (template/$
+   (cond (== "ok" (:% ~task ["status"]))
+         (return (:% ~task ["value"]))
+
+         (== "error" (:% ~task ["status"]))
+         (throw (:% ~task ["error"]))
+
+         :else
+         (return ~default))))
+
+(defn php-tf-x-future-from-async
+  [[_ executor]]
+  (template/$
+   (do (:= box {"ok" false
+                "value" nil
+                "error" nil})
+       (:= resolve
+           (fn [v]
+             (:= (:% box ["ok"]) true)
+             (:= (:% box ["value"]) v)))
+       (:= reject
+           (fn [e]
+             (:= (:% box ["error"]) e)))
+       (~executor resolve reject)
+       (if (:% box ["ok"])
+         (return {"status" "ok"
+                  "value" (:% box ["value"])
+                  "error" nil})
+         (return {"status" "error"
+                  "value" nil
+                  "error" (:% box ["error"])})))))
+
+(def +php-future+
+  {:x-future-run         {:macro #'php-tf-x-future-run        :emit :macro}
+   :x-future-then        {:macro #'php-tf-x-future-then       :emit :macro}
+   :x-future-catch       {:macro #'php-tf-x-future-catch      :emit :macro}
+   :x-future-finally     {:macro #'php-tf-x-future-finally    :emit :macro}
+   :x-future-cancel      {:macro #'php-tf-x-future-cancel     :emit :macro}
+   :x-future-status      {:macro #'php-tf-x-future-status     :emit :macro}
+   :x-future-await       {:macro #'php-tf-x-future-await      :emit :macro}
+   :x-future-from-async  {:macro #'php-tf-x-future-from-async :emit :macro}})
+
+;;
+;; PROTO
+;;
+
+(defn php-tf-x-proto-get
+  [[_ obj key]]
+  (list :% obj [key]))
+
+(defn php-tf-x-proto-set
+  [[_ obj key value]]
+  (list ':= (list :% obj [key]) value))
+
+(def +php-proto+
+  {:x-this            {:emit :unit  :default 'this}
+   :x-proto-get       {:macro #'php-tf-x-proto-get    :emit :macro}
+   :x-proto-set       {:macro #'php-tf-x-proto-set    :emit :macro}
+   :x-proto-tostring  {:emit :unit  :default "__toString"}})
+
+;;
+;; CUSTOM
+;;
+
+(defn php-tf-x-has-key?
+  [[_ obj key check]]
+  (if (some? check)
+    (list 'and
+          (list 'array_key_exists key obj)
+          (list '== check (list :% obj [key])))
+    (list 'array_key_exists key obj)))
+
+(def +php-custom+
+  {:x-has-key? {:macro #'php-tf-x-has-key? :emit :macro}})
 
 ;;
 ;; MATH
@@ -131,6 +272,27 @@
    :x-is-array?      {:macro #'php-tf-x-is-array? :emit :macro}})
 
 ;;
+;; LU
+;;
+
+(defn php-tf-x-lu-get
+  [[_ lu obj]]
+  (list :% lu [(list 'spl_object_id obj)]))
+
+(defn php-tf-x-lu-set
+  [[_ lu obj gid]]
+  (list ':= (list :% lu [(list 'spl_object_id obj)]) gid))
+
+(defn php-tf-x-lu-del
+  [[_ lu obj]]
+  (list 'unset (list :% lu [(list 'spl_object_id obj)])))
+
+(def +php-lu+
+  {:x-lu-get         {:macro #'php-tf-x-lu-get :emit :macro}
+   :x-lu-set         {:macro #'php-tf-x-lu-set :emit :macro}
+   :x-lu-del         {:macro #'php-tf-x-lu-del :emit :macro}})
+
+;;
 ;; ARR
 ;;
 
@@ -154,12 +316,46 @@
   [[_ arr start end]]
   (list 'array_slice arr start (if end (list '- end start) nil)))
 
+(defn php-tf-x-arr-insert
+  [[_ arr idx e]]
+  (list 'array_splice arr idx 0 [e]))
+
+(defn php-tf-x-arr-remove
+  [[_ arr idx]]
+  (list 'array_splice arr idx 1))
+
+(defn php-tf-x-arr-sort
+  [[_ arr & more]]
+  (let [[f0 f1] more]
+    (cond (nil? f0)
+          (list 'sort arr)
+
+          (nil? f1)
+          (list 'usort arr f0)
+
+          :else
+          (list 'usort arr
+                (template/$
+                 (fn [a b]
+                   (return (:? (~f1
+                                (~f0 a)
+                                (~f0 b))
+                               -1 1))))))))
+
+(defn php-tf-x-arr-str-comp
+  [[_ a b]]
+  (list '< (list 'strcmp a b) 0))
+
 (def +php-arr+
   {:x-arr-push        {:macro #'php-tf-x-arr-push       :emit :macro}
    :x-arr-pop         {:macro #'php-tf-x-arr-pop        :emit :macro}
    :x-arr-push-first  {:macro #'php-tf-x-arr-push-first :emit :macro}
    :x-arr-pop-first   {:macro #'php-tf-x-arr-pop-first  :emit :macro}
-   :x-arr-slice       {:macro #'php-tf-x-arr-slice      :emit :macro}})
+   :x-arr-slice       {:macro #'php-tf-x-arr-slice      :emit :macro}
+   :x-arr-insert      {:macro #'php-tf-x-arr-insert     :emit :macro}
+   :x-arr-remove      {:macro #'php-tf-x-arr-remove     :emit :macro}
+   :x-arr-sort        {:macro #'php-tf-x-arr-sort       :emit :macro}
+   :x-arr-str-comp    {:macro #'php-tf-x-arr-str-comp   :emit :macro}})
 
 ;;
 ;; STRING
@@ -181,6 +377,10 @@
   ([[_ s tok]]
    (list 'strpos s tok)))
 
+(defn php-tf-x-str-format
+  ([[_ fmt & args]]
+   (apply list 'sprintf fmt args)))
+
 (defn php-tf-x-str-substring
   ([[_ s start & args]]
    (list 'substr s start (first args))))
@@ -197,20 +397,36 @@
   ([[_ s tok replacement]]
    (list 'str_replace tok replacement s)))
 
+(defn php-tf-x-str-to-fixed
+  ([[_ s & [digits]]]
+   (list 'number_format s (or digits 0) "." "")))
+
 (defn php-tf-x-str-trim
   ([[_ s]]
    (list 'trim s)))
 
+(defn php-tf-x-str-trim-left
+  ([[_ s]]
+   (list 'ltrim s)))
+
+(defn php-tf-x-str-trim-right
+  ([[_ s]]
+   (list 'rtrim s)))
+
 (def +php-str+
   {:x-str-char        {:macro #'php-tf-x-str-char       :emit :macro}
+   :x-str-format      {:macro #'php-tf-x-str-format     :emit :macro}
    :x-str-split       {:macro #'php-tf-x-str-split      :emit :macro}
    :x-str-join        {:macro #'php-tf-x-str-join       :emit :macro}
    :x-str-index-of    {:macro #'php-tf-x-str-index-of   :emit :macro}
    :x-str-substring   {:macro #'php-tf-x-str-substring  :emit :macro}
    :x-str-to-upper    {:macro #'php-tf-x-str-to-upper   :emit :macro}
    :x-str-to-lower    {:macro #'php-tf-x-str-to-lower   :emit :macro}
+   :x-str-to-fixed    {:macro #'php-tf-x-str-to-fixed   :emit :macro}
    :x-str-replace     {:macro #'php-tf-x-str-replace    :emit :macro}
-   :x-str-trim        {:macro #'php-tf-x-str-trim       :emit :macro}})
+   :x-str-trim        {:macro #'php-tf-x-str-trim       :emit :macro}
+   :x-str-trim-left   {:macro #'php-tf-x-str-trim-left  :emit :macro}
+   :x-str-trim-right  {:macro #'php-tf-x-str-trim-right :emit :macro}})
 
 ;;
 ;; JSON
@@ -219,6 +435,268 @@
 (def +php-js+
   {:x-json-encode      {:emit :alias :raw 'json_encode}
    :x-json-decode      {:emit :alias :raw 'json_decode}})
+
+;;
+;; ITER
+;;
+
+(defn php-tf-x-iter-from-obj
+  [[_ obj]]
+  (template/$
+   (array_map
+    (fn [k]
+      (return [k (:% ~obj [k])]))
+    (array_keys ~obj))))
+
+(defn php-tf-x-iter-from-arr
+  [[_ arr]]
+  arr)
+
+(defn php-tf-x-iter-from
+  [[_ obj]]
+  obj)
+
+(defn php-tf-x-iter-eq
+  [[_ it0 it1 eq-fn]]
+  (template/$
+   (if (!= (count ~it0) (count ~it1))
+     (return false)
+     (do (for [i (range 0 (count ~it0))]
+           (if (not (~eq-fn (:% ~it0 [i])
+                            (:% ~it1 [i])))
+             (return false)))
+         (return true)))))
+
+(defn php-tf-x-iter-next
+  [[_ it]]
+  (list 'array_shift it))
+
+(defn php-tf-x-iter-has?
+  [[_ obj]]
+  (list 'and
+        (list 'is_array obj)
+        (list '> (list 'count obj) 0)))
+
+(defn php-tf-x-iter-native?
+  [[_ it]]
+  (list 'is_array it))
+
+(def +php-iter+
+  {:x-iter-from-obj       {:macro #'php-tf-x-iter-from-obj       :emit :macro}
+   :x-iter-from-arr       {:macro #'php-tf-x-iter-from-arr       :emit :macro}
+   :x-iter-from           {:macro #'php-tf-x-iter-from           :emit :macro}
+   :x-iter-eq             {:macro #'php-tf-x-iter-eq             :emit :macro}
+   :x-iter-null           {:default [] :emit :unit}
+   :x-iter-next           {:macro #'php-tf-x-iter-next           :emit :macro}
+   :x-iter-has?           {:macro #'php-tf-x-iter-has?           :emit :macro}
+   :x-iter-native?        {:macro #'php-tf-x-iter-native?        :emit :macro}})
+
+;;
+;; SOCKET
+;;
+
+(defn php-tf-x-socket-connect
+  [[_ host & [port opts]]]
+  (if (some? port)
+    (list 'fsockopen host port)
+    (list 'fsockopen host)))
+
+(defn php-tf-x-socket-send
+  [[_ conn value]]
+  (list 'fwrite conn value))
+
+(defn php-tf-x-socket-close
+  [[_ conn]]
+  (list 'fclose conn))
+
+(def +php-socket+
+  {:x-socket-connect      {:macro #'php-tf-x-socket-connect      :emit :macro}
+   :x-socket-send         {:macro #'php-tf-x-socket-send         :emit :macro}
+   :x-socket-close        {:macro #'php-tf-x-socket-close        :emit :macro}})
+
+;;
+;; THREAD
+;;
+
+(defn php-tf-x-thread-spawn
+  [[_ thunk]]
+  (php-tf-x-future-run [nil thunk]))
+
+(defn php-tf-x-thread-join
+  [[_ thread]]
+  (php-tf-x-future-await [nil thread nil nil]))
+
+(defn php-tf-x-with-delay
+  [[_ thunk ms]]
+  (template/$
+   (do (usleep (* ~ms 1000))
+       (return (~thunk)))))
+
+(defn php-tf-x-start-interval
+  [[_ thunk ms]]
+  (template/$
+   (return {"active" true
+            "ms" ~ms
+            "thunk" ~thunk})))
+
+(defn php-tf-x-stop-interval
+  [[_ instance]]
+  (template/$
+   (do (:= (:% ~instance ["active"]) false)
+       (return ~instance))))
+
+(def +php-thread+
+  {:x-thread-spawn   {:macro #'php-tf-x-thread-spawn   :emit :macro}
+   :x-thread-join    {:macro #'php-tf-x-thread-join    :emit :macro}
+   :x-with-delay     {:macro #'php-tf-x-with-delay     :emit :macro}
+   :x-start-interval {:macro #'php-tf-x-start-interval :emit :macro}
+   :x-stop-interval  {:macro #'php-tf-x-stop-interval  :emit :macro}})
+
+;;
+;; FILE
+;;
+
+(def +php-file+
+  {:x-slurp          {:emit :alias :raw 'file_get_contents}
+   :x-spit           {:emit :alias :raw 'file_put_contents}})
+
+;;
+;; BASE 64
+;;
+
+(def +php-b64+
+  {:x-b64-decode     {:emit :alias :raw 'base64_decode}
+   :x-b64-encode     {:emit :alias :raw 'base64_encode}})
+
+;;
+;; URI
+;;
+
+(def +php-uri+
+  {:x-uri-decode     {:emit :alias :raw 'rawurldecode}
+   :x-uri-encode     {:emit :alias :raw 'rawurlencode}})
+
+;;
+;; CACHE
+;;
+
+(defn php-global-cache-store
+  []
+  (list :% '$GLOBALS ["__xtalk_cache__"]))
+
+(defn php-global-cache-bucket
+  [cache]
+  (list :% (php-global-cache-store) [cache]))
+
+(defn php-global-cache-slot
+  [cache key]
+  (list :% (php-global-cache-bucket cache) [key]))
+
+(defn php-tf-x-cache
+  [[_ name]]
+  (if (or (string? name) (keyword? name) (symbol? name))
+    (f/strn name)
+    name))
+
+(defn php-tf-x-cache-list
+  [[_ cache]]
+  (template/$
+   (do (if (not (array_key_exists "__xtalk_cache__" $GLOBALS))
+         (:= (:% $GLOBALS ["__xtalk_cache__"]) {}))
+       (if (not (array_key_exists ~cache (:% $GLOBALS ["__xtalk_cache__"])))
+         (:= (:% (:% $GLOBALS ["__xtalk_cache__"]) [~cache]) {}))
+       (return (array_keys ~(php-global-cache-bucket 'cache))))))
+
+(defn php-tf-x-cache-flush
+  [[_ cache]]
+  (template/$
+   (do (if (not (array_key_exists "__xtalk_cache__" $GLOBALS))
+         (:= (:% $GLOBALS ["__xtalk_cache__"]) {}))
+       (:= (:% (:% $GLOBALS ["__xtalk_cache__"]) [~cache]) {})
+       (return true))))
+
+(defn php-tf-x-cache-get
+  [[_ cache key & [default]]]
+  (template/$
+   (do (if (not (array_key_exists "__xtalk_cache__" $GLOBALS))
+         (:= (:% $GLOBALS ["__xtalk_cache__"]) {}))
+       (if (not (array_key_exists ~cache (:% $GLOBALS ["__xtalk_cache__"])))
+         (:= (:% (:% $GLOBALS ["__xtalk_cache__"]) [~cache]) {}))
+       (if (array_key_exists ~key ~(php-global-cache-bucket 'cache))
+         (return ~(php-global-cache-slot 'cache 'key))
+         (return ~default)))))
+
+(defn php-tf-x-cache-set
+  [[_ cache key val]]
+  (template/$
+   (do (if (not (array_key_exists "__xtalk_cache__" $GLOBALS))
+         (:= (:% $GLOBALS ["__xtalk_cache__"]) {}))
+       (if (not (array_key_exists ~cache (:% $GLOBALS ["__xtalk_cache__"])))
+         (:= (:% (:% $GLOBALS ["__xtalk_cache__"]) [~cache]) {}))
+       (:= ~(php-global-cache-slot 'cache 'key) ~val)
+       (return ~val))))
+
+(defn php-tf-x-cache-del
+  [[_ cache key]]
+  (template/$
+   (do (if (array_key_exists "__xtalk_cache__" $GLOBALS)
+         (if (array_key_exists ~cache (:% $GLOBALS ["__xtalk_cache__"]))
+           (unset ~(php-global-cache-slot 'cache 'key))))
+       (return true))))
+
+(defn php-tf-x-cache-incr
+  [[_ cache key & [amount]]]
+  (template/$
+   (do (if (not (array_key_exists "__xtalk_cache__" $GLOBALS))
+         (:= (:% $GLOBALS ["__xtalk_cache__"]) {}))
+       (if (not (array_key_exists ~cache (:% $GLOBALS ["__xtalk_cache__"])))
+         (:= (:% (:% $GLOBALS ["__xtalk_cache__"]) [~cache]) {}))
+       (:= prev (:? (array_key_exists ~key ~(php-global-cache-bucket 'cache))
+                    ~(php-global-cache-slot 'cache 'key)
+                    0))
+       (:= curr (+ prev ~(or amount 1)))
+       (:= ~(php-global-cache-slot 'cache 'key) curr)
+       (return curr))))
+
+(def +php-cache+
+  {:x-cache                 {:macro #'php-tf-x-cache        :emit :macro}
+   :x-cache-list            {:macro #'php-tf-x-cache-list   :emit :macro}
+   :x-cache-flush           {:macro #'php-tf-x-cache-flush  :emit :macro}
+   :x-cache-get             {:macro #'php-tf-x-cache-get    :emit :macro}
+   :x-cache-set             {:macro #'php-tf-x-cache-set    :emit :macro}
+   :x-cache-del             {:macro #'php-tf-x-cache-del    :emit :macro}
+   :x-cache-incr            {:macro #'php-tf-x-cache-incr   :emit :macro}})
+
+;;
+;; NETWORK
+;;
+
+(defn php-tf-x-notify-socket
+  [[_ message]]
+  (template/$
+   (do (return ["async" ~message]))))
+
+(defn php-tf-x-ws-connect
+  [[_ url & [opts]]]
+  (php-tf-x-socket-connect [nil url nil opts]))
+
+(defn php-tf-x-ws-send
+  [[_ conn value]]
+  (php-tf-x-socket-send [nil conn value]))
+
+(defn php-tf-x-ws-close
+  [[_ conn]]
+  (php-tf-x-socket-close [nil conn]))
+
+(def +php-network+
+  {:x-notify-socket   {:macro #'php-tf-x-notify-socket :emit :macro}
+   :x-ws-connect      {:macro #'php-tf-x-ws-connect    :emit :macro}
+   :x-ws-send         {:macro #'php-tf-x-ws-send       :emit :macro}
+   :x-ws-close        {:macro #'php-tf-x-ws-close      :emit :macro}
+   :x-client-basic    {:emit :alias :raw 'client_basic}
+   :x-client-ws       {:emit :alias :raw 'client_ws}
+   :x-server-basic    {:emit :alias :raw 'server_basic}
+   :x-server-ws       {:emit :alias :raw 'server_ws}})
 
 ;;
 ;; RETURN
@@ -258,9 +736,21 @@
 
 (def +php+
   (merge +php-core+
+         +php-future+
+         +php-proto+
+         +php-custom+
          +php-math+
          +php-type+
+         +php-lu+
          +php-arr+
          +php-str+
          +php-js+
-         +php-return+))
+         +php-return+
+         +php-iter+
+         +php-socket+
+         +php-thread+
+         +php-file+
+         +php-b64+
+         +php-uri+
+         +php-cache+
+         +php-network+))
