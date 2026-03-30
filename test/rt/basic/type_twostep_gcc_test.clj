@@ -6,37 +6,31 @@
 (l/script- :c
   {:runtime :twostep})
 
-(l/script- :rust
-  {:runtime :twostep})
-
 (def CANARY-GCC
   (common/program-exists? "gcc"))
 
-(def CANARY-RUSTC
-  (common/program-exists? "rustc"))
+(defn.c ^{:- [:int]}
+  add-10
+  [:int x]
+  (return (+ x 10)))
 
-;;
-;; TODO: ADD a c-style function
-;;
+(defn.c ^{:- [:int]}
+  add-20
+  [:int x]
+  (return (+ x 20)))
 
-
-(fact "can return a value"
+(fact "gcc twostep can return values"
   (if CANARY-GCC
-    (!.c
-      (+ 1 2 3))
+    [(!.c
+       (+ 1 2 3))
+
+     (add-10 6)
+
+     (!.c
+       (-/add-20 (-/add-10 6)))
+
+     (!.c
+       (-/add-20 10))]
     :gcc-unavailable)
-  => (any 6
+  => (any [6 16 36 30]
            :gcc-unavailable))
-
-
-;;
-;; TODO: ADD a rust-style function
-;;
-
-(fact "can return a value"
-  (if CANARY-RUSTC
-    (!.rs
-      (+ 1 2 3))
-    :rustc-unavailable)
-  => (any 6
-           :rustc-unavailable))

@@ -58,11 +58,14 @@
   (let [ptr (-> opts :emit :input :pointer)
         {:keys [book]} opts
         sym (and (collection/form? form)
-                 (first form))]
+                  (first form))]
     (cond (and (symbol? sym)
                (namespace sym))
           (let [s (get-format-string (book/get-entry book sym))]
             (list 'printf s form))
+
+          (= 'printf sym)
+          form
           
           
           (:id ptr)
@@ -71,7 +74,7 @@
             (list 'printf s (apply list form args)))
 
           :else
-          form)))
+          (list 'printf "%d" form))))
 
 (defn transform-form
   "transforms the form for tcc output"
