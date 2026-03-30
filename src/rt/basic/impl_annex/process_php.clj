@@ -26,6 +26,17 @@
   [input mopts]
   (rt/return-transform input mopts))
 
+(defn php-body-source
+  "creates a single-line php source string for runtime eval"
+  {:added "4.1"}
+  [input mopts]
+  (-> (impl/emit-as
+       :php [(default-body-transform input mopts)])
+      (str/replace #"(?s)<\?php\s*" "")
+      (str/replace #"(?s)\s*\?>" "")
+      (str/replace #"\n+" " ")
+      (str/trim)))
+
 (def ^{:arglists '([body])}
   default-oneshot-wrap
   (let [bootstrap  (impl/emit-entry-deps
@@ -34,15 +45,21 @@
                      :layout :flat})]
     (fn [body]
       (let [body-source (str "return "
-                             (-> (impl/emit-as
-                                  :php [(default-body-transform body {})])
-                                 (str/replace #"\n+" " "))
+                             (php-body-source body {})
                              ";")]
         (str bootstrap
              "\n\n"
              (impl/emit-as
               :php [(list 'do
                            (list 'echo (list 'return-eval body-source)))]))))))
+
+(defn default-basic-body-transform
+  "transform basic runtime forms for `return-eval`"
+  {:added "4.1"}
+  [input mopts]
+  (list ':- (str "return "
+                 (php-body-source input mopts)
+                 ";")))
 
 (def +php-oneshot-config+
   (common/set-context-options
@@ -66,11 +83,11 @@
       [host port opts]
       (let [conn (fsockopen host port)]
          (while (not (feof conn))
-            (let [line (fgets conn)
-                  input (json_decode line)
-                  out   (return-eval input)]
-               (if input
-                   (fwrite conn (concat (json_encode out) "\n")))))))])
+               (let [line (fgets conn)
+                     input (json_decode line)
+                     out   (return-eval input)]
+                (if input
+                    (fwrite conn (concat out "\n")))))))])
 
 (def ^{:arglists '([port & [{:keys [host]}]])}
   default-basic-client
@@ -94,7 +111,7 @@
 (def +default-basic-config+
   {:bootstrap #'default-basic-client
     :main   {}
-   :emit   {:body  {:transform #'default-body-transform}
+   :emit   {:body  {:transform #'default-basic-body-transform}
             :lang/format :global}
    :json   :full
    :encode :json ;; default
