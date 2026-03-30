@@ -10,8 +10,8 @@
 
 ^{:refer std.lang.model.spec-xtalk.fn-lua/lua-tf-x-cat :added "4.0"}
 (fact "concatenates"
-  (l/emit-as :lua [(lua-tf-x-cat '[_ "a" "b"])])
-  => #"\.\.")
+  (lua-tf-x-cat '[_ "a" "b"])
+  => '(.. "a" "b"))
 
 ^{:refer std.lang.model.spec-xtalk.fn-lua/lua-tf-x-eval :added "4.0"}
 (fact "evals"
