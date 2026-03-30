@@ -292,3 +292,144 @@ Each operator entry in a `+<lang>-*+` map supports these `:emit` modes:
 | `test/std/lang/model_annex/spec_xtalk/fn_<lang>_test.clj` | Operator transform tests | Required |
 | `test/rt/basic/impl_annex/process_<lang>_test.clj` | Runtime bootstrap tests | Required |
 | Entry in `xtalk_scaffold.clj` `+runtime-lang-config+` | Scaffold/audit registration | Required |
+
+---
+
+## Part 7: Iterative Development Workflow for Completing an Xtalk Language
+
+This is the repeatable workflow for driving an xtalk language from "partially abstract"
+to "implemented and tested". It works for PHP, but the same cycle also applies to any
+other xtalk language.
+
+### 7.1 The Core Loop
+
+1. **Audit missing/abstract features**
+
+   ```bash
+   ./lein lang missing-by-language "{:langs [:php]}"
+   ```
+
+   This shows the current xtalk operators that are still `:abstract` for the target
+   language. Treat this as the authoritative backlog for the next implementation pass.
+
+2. **Implement the functions**
+
+   Add the missing transforms and registrations in the language fn table, usually under:
+
+   - `src/std/lang/model/spec_xtalk/fn_<lang>.clj` for core languages
+   - `src/std/lang/model_annex/spec_xtalk/fn_<lang>.clj` for annex languages
+
+   For PHP this means updating:
+
+   - `src/std/lang/model_annex/spec_xtalk/fn_php.clj`
+   - and, when necessary, its grammar/runtime counterparts:
+     - `src/std/lang/model_annex/spec_php.clj`
+     - `src/rt/basic/impl_annex/process_php.clj`
+
+3. **Scaffold tests for the language model**
+
+   High-level command:
+
+   ```bash
+   ./lein manage scaffold :with std.lang.model
+   ```
+
+   When focusing on PHP, prefer scoping the task to the relevant namespaces:
+
+   ```bash
+   ./lein exec -ep "(require '[code.manage :as manage])
+   (manage/scaffold ['std.lang.model-annex.spec-php
+                     'std.lang.model-annex.spec-xtalk.fn-php]
+                    {:write false})"
+   ```
+
+   Use scaffold as a way to discover expected test stubs without blindly overwriting the
+   existing test files.
+
+4. **Check for incomplete tests**
+
+   High-level command:
+
+   ```bash
+   ./lein manage incomplete :with std.lang.model
+   ```
+
+   PHP-focused variant:
+
+   ```bash
+   ./lein exec -ep "(require '[code.manage :as manage])
+   (manage/incomplete ['std.lang.model-annex.spec-php
+                       'std.lang.model-annex.spec-xtalk.fn-php]
+                      {})"
+   ```
+
+   This identifies either missing facts or placeholder/TODO facts that still need to be
+   filled in.
+
+5. **Fill out the PHP tests**
+
+   Complete or add focused facts in:
+
+   - `test/std/lang/model_annex/spec_xtalk/fn_php_test.clj`
+   - `test/std/lang/model_annex/spec_php_test.clj`
+   - `test/rt/basic/impl_annex/process_php_test.clj` when runtime/bootstrap behavior changes
+
+   Prefer small, operator-specific facts that assert on the transformed AST form, and add
+   grammar/runtime tests only when the change affects actual emitted PHP strings or runtime
+   execution.
+
+6. **Run the PHP-focused model tests**
+
+   High-level command:
+
+   ```bash
+   ./lein test :with std.lang.model
+   ```
+
+   For a PHP-focused development loop, run the narrower namespaces first:
+
+   ```bash
+   ./lein test :only std.lang.model-annex.spec-xtalk.fn-php-test
+   ./lein test :only std.lang.model-annex.spec-php-test
+   ./lein test :only rt.basic.impl-annex.process-php-test
+   ```
+
+7. **Fix errors and repeat the test pass**
+
+   If tests fail:
+
+   - inspect the emitted form or PHP string
+   - fix the transform/grammar/runtime code
+   - re-run the same PHP-focused tests
+
+   Stay in this loop until the PHP test set is green.
+
+8. **Re-audit missing/abstract features**
+
+   ```bash
+   ./lein lang missing-by-language "{:langs [:php]}"
+   ```
+
+   Compare the new output against the previous run. Any function removed from the audit has
+   moved from `:abstract` to implemented. Repeat from step 2 until the remaining backlog is
+   acceptable.
+
+### 7.2 Why This Workflow Works
+
+- `lein lang missing-by-language` gives the implementation backlog.
+- `code.manage scaffold` and `code.manage incomplete` keep test coverage aligned with the
+  source namespace.
+- narrow `lein test :only ...` runs provide fast feedback while iterating.
+- the final re-audit confirms that the language support matrix has actually improved.
+
+### 7.3 Applying the Same Loop to Other Languages
+
+To use this for a language other than PHP:
+
+- replace `:php` with the target language keyword in the audit step
+- replace the PHP model namespaces with that language's `spec_<lang>` and `fn_<lang>`
+  namespaces
+- keep the same audit -> implement -> scaffold -> incomplete -> test -> re-audit cycle
+
+This makes the process suitable as a general xtalk language development cycle, not just a
+one-off PHP procedure.
