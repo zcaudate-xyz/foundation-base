@@ -33,7 +33,7 @@
             :suffix "rb"}
    :dart   {:script :dart
             :dispatch '!.dt
-            :suffix "dart"}
+            :suffix "dt"}
    :php    {:script :php
             :dispatch '!.php
             :suffix "php"}
