@@ -6,6 +6,8 @@ on:
 jobs:
   copilot-setup-steps:
     runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/zcaudate-xyz/infra-foundation-clean:ci
 
     permissions:
       contents: read
@@ -29,104 +31,3 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
-      # ── Java 21 (required by Leiningen / Clojure) ──────────────────────────
-      - name: Set up Java 21
-        uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: "21"
-
-      # ── Leiningen ──────────────────────────────────────────────────────────
-      - name: Install Leiningen
-        run: |
-          curl -fsSL https://raw.githubusercontent.com/technomancy/leiningen/stable/bin/lein \
-            -o /usr/local/bin/lein
-          chmod +x /usr/local/bin/lein
-          lein version
-
-      # ── Maven / Leiningen dependency cache ────────────────────────────────
-      - name: Cache Maven dependencies
-        uses: actions/cache@v4
-        with:
-          path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-${{ hashFiles('project.clj') }}
-          restore-keys: |
-            ${{ runner.os }}-maven-
-
-      # ── Node.js (JavaScript runtime – rt.basic.impl.process-js) ──────────
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "22"
-
-      - name: Install Node.js global packages
-        run: npm install -g ws
-
-      # ── Python 3 (Python runtime – rt.basic.impl.process-python) ─────────
-      - name: Set up Python 3
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.x"
-
-      - name: Install Python packages
-        run: pip install websockets
-
-      # ── LuaJIT (Lua runtime – rt.basic.impl.process-lua) ─────────────────
-      - name: Install LuaJIT and luarocks
-        run: |
-          sudo apt-get update -qq
-          sudo apt-get install -y luajit luarocks libluajit-5.1-dev
-          # lua-cjson is the JSON backend used by the Lua runtime; installation
-          # may fail on some runner images (missing headers) so we treat it as
-          # best-effort and verify separately.
-          luarocks install lua-cjson 2>&1 || echo "lua-cjson install failed (non-fatal)"
-
-      # ── Go (Go runtime – rt.basic.impl.process-go) ───────────────────────
-      - name: Set up Go
-        uses: actions/setup-go@v5
-        with:
-          go-version: "stable"
-
-      # ── Dart (Dart runtime – rt.basic.impl.process-dart) ─────────────────
-      - name: Set up Dart
-        uses: dart-lang/setup-dart@v1
-        with:
-          sdk: stable
-
-      # ── Ruby (Ruby runtime – rt.basic.impl.process-ruby) ─────────────────
-      - name: Set up Ruby
-        uses: ruby/setup-ruby@v1
-        with:
-          ruby-version: "3.3"
-
-      # ── R (R runtime – rt.basic.impl-annex.process-r) ────────────────────
-      - name: Install R
-        run: |
-          sudo apt-get install -y r-base
-          Rscript -e "install.packages('jsonlite', repos='https://cloud.r-project.org')"
-
-      # ── Rust (Rust runtime – rt.basic.impl-annex.process-rust) ───────────
-      - name: Set up Rust
-        uses: dtolnay/rust-toolchain@stable
-
-      # ── Perl (Perl runtime – rt.basic.impl-annex.process-perl) ──────────
-      - name: Install Perl
-        run: sudo apt-get install -y perl
-
-      # ── PHP (PHP runtime – rt.basic.impl-annex.process-php) ──────────────
-      - name: Install PHP
-        run: sudo apt-get install -y php-cli
-
-      # ── GCC + TCC (C runtime – rt.basic.impl.process-c) ──────────────────
-      - name: Install GCC and TCC
-        run: |
-          sudo apt-get install -y gcc tcc
-
-      # ── PostgreSQL client tools (for rt.postgres connectivity checks) ─────
-      - name: Install PostgreSQL client
-        run: sudo apt-get install -y postgresql-client
-
-      # ── Warm up Leiningen / download all project dependencies ─────────────
-      - name: Warm up Leiningen dependencies
-        run: lein deps
