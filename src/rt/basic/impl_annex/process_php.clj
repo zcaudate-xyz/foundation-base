@@ -30,7 +30,8 @@
       (str bootstrap
            "\n\n"
            (impl/emit-as
-            :php [(list 'echo (list 'return-eval body))])))))
+            :php [(list 'do
+                         (list 'echo (list 'return-eval body)))])))))
 
 (def +php-oneshot-config+
   (common/set-context-options
@@ -55,10 +56,10 @@
       (let [conn (fsockopen host port)]
          (while (not (feof conn))
             (let [line (fgets conn)
-                  input (json_decode line)
-                  out   (return-eval input)]
-               (if input
-                   (fwrite conn (. (json_encode out) "\n")))))))])
+                   input (json_decode line)
+                   out   (return-eval input)]
+                (if input
+                    (fwrite conn (concat (json_encode out) "\n")))))))])
 
 (def ^{:arglists '([port & [{:keys [host]}]])}
   default-basic-client
@@ -73,10 +74,11 @@
       (str bootstrap
            "\n\n"
            (impl/emit-as
-            :php [(list 'client-basic
-                       (or host "127.0.0.1")
-                       port
-                       {})])))))
+            :php [(list 'do
+                         (list 'client-basic
+                               (or host "127.0.0.1")
+                               port
+                               {}))])))))
 
 (def +default-basic-config+
   {:bootstrap #'default-basic-client

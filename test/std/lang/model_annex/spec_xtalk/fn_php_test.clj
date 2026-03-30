@@ -11,7 +11,7 @@
 ^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-tf-x-cat :added "4.1"}
 (fact "concatenates strings"
   (php-tf-x-cat '(:x-cat "a" "b"))
-  => '(. "a" "b"))
+  => '(concat "a" "b"))
 
 ^{:refer std.lang.model-annex.spec-xtalk.fn-php/php-tf-x-apply :added "4.1"}
 (fact "applies function to array"

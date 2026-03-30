@@ -11,7 +11,7 @@
 
 (defn php-tf-x-cat
   [[_ & args]]
-  (apply list '. args))
+  (apply list 'concat args))
 
 (defn php-tf-x-apply
   [[_ f args]]
@@ -231,25 +231,25 @@
                                     :key ~key
                                     :type  "data"
                                     :value  ~out}))
-              (catch Exception $e
-                (return (json_encode {:id ~id
-                                      :key ~key
-                                      :type  "raw"
-                                      :value (. "" ~out)}))))))))
+               (catch Exception $e
+                 (return (json_encode {:id ~id
+                                       :key ~key
+                                       :type  "raw"
+                                       :value (concat "" ~out)}))))))))
 
 (defn php-tf-x-return-wrap
   ([[_ f encode-fn]]
-   (template/$ (do (try
-              (:= out (~f))
-              (catch Exception $e
-                (return (json_encode {:type "error"
-                                      :value (. "" $e)}))))
-            (return (~encode-fn out nil nil))))))
+    (template/$ (do (try
+               (:= out (call_user_func_array ~f []))
+               (catch Exception $e
+                 (return (json_encode {:type "error"
+                                      :value (concat "" $e)}))))
+             (return (~encode-fn out nil nil))))))
 
 (defn php-tf-x-return-eval
   ([[_ s wrap-fn]]
-   (template/$ (return (~wrap-fn (function []
-                            (return (eval ~s))))))))
+    (template/$ (return (~wrap-fn
+                         (:- "function () use ($s) {\n  return eval($s);\n}"))))))
 
 (def +php-return+
   {:x-return-encode  {:macro #'php-tf-x-return-encode   :emit :macro}

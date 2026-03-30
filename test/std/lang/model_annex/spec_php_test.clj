@@ -38,6 +38,13 @@
       (add 1 2))])
   => "x_print('Hello');\nadd(1, 2);")
 
+(fact "test php xtalk compatibility"
+  (l/emit-as :php
+   '[(do
+      (x:len arr)
+      (x:cat "a" "b"))])
+  => "count($arr);\n'a' . 'b';")
+
 (fact "test php dot access"
   (l/emit-as :php
    '[(. obj (method arg))])
@@ -106,7 +113,10 @@
 ^{:refer std.lang.model-annex.spec-php/php-map :added "4.1"}
 (fact "emit php associative array"
   (spec-php/php-map {"a" 1 "b" 2} spec-php/+grammar+ {})
-  => "[\"a\" => 1, \"b\" => 2]")
+  => "[\"a\" => 1, \"b\" => 2]"
+
+  (spec-php/php-map {:id 1 :value 'out} spec-php/+grammar+ {})
+  => "[\"id\" => 1, \"value\" => out]")
 
 ^{:refer std.lang.model-annex.spec-php/php-dot-string :added "4.1"}
 (fact "helper for php dot string"
