@@ -267,8 +267,8 @@
         :undef      {:op :undef     :symbol  '#{undefined}  :raw "undefined" :value true :emit :throw}
         :nan        {:op :nan       :symbol  '#{NaN} :raw "NaN" :value true :emit :throw}
         :vargs      {:op :vargs     :symbol  '#{...} :raw "...vargs" :value true :emit :throw}
-        :var-let    {:op :var-let   :symbol  '#{var}     :macro  #'tf-var-let :type :macro}
-        :var-const  {:op :var-const :symbol  '#{const}   :macro  #'tf-var-const :type :macro}})))
+        :var-let    {:op :var-let   :symbol  '#{var}     :macro  #'tf-var-let :emit :macro}
+        :var-const  {:op :var-const :symbol  '#{const}   :macro  #'tf-var-const :emit :macro}})))
 
 (def +template+
   (->> {:banned #{:keyword}

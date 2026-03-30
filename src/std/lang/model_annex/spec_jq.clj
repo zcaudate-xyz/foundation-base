@@ -5,7 +5,7 @@
             [std.lang.base.emit-common :as common]
             [std.lang.base.grammar :as grammar]
             [std.lang.base.script :as script]
-            [std.lang.model-annex.spec-xtalk]
+            [std.lang.model.spec-xtalk]
             [std.lib.collection :as collection]))
 
 ;;
@@ -212,7 +212,6 @@
 
 (def +book+
   (book/book {:lang :jq
-              :parent :xtalk
               :meta (book/book-meta {})
               :grammar +grammar+}))
 

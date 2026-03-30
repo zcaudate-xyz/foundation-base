@@ -408,7 +408,7 @@
                        :static/type :mapping}
         
         :var-ext     {:op :var-ext   :symbol '#{var}
-                      :macro  #'sol-tf-var-ext :type :macro}})))
+                      :macro  #'sol-tf-var-ext :emit :macro}})))
 
 (def +template+
   (->> {:banned #{}

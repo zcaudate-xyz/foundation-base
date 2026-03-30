@@ -1,8 +1,13 @@
 (ns std.lang.base.grammar-spec-test
   (:require [std.lang.base.emit-common :as common]
-            [std.lang.base.emit-helper :as helper]
-            [std.lang.base.grammar-spec :refer :all])
+             [std.lang.base.emit-helper :as helper]
+             [std.lang.base.grammar-spec :refer :all])
   (:use code.test))
+
+(defn mixin-add-symbol
+  [m]
+  {:symbol *symbol*
+   :base (:base m)})
 
 ^{:refer std.lang.base.grammar-spec/get-comment :added "4.0"}
 (fact "gets the comment access prefix for a language"
@@ -36,4 +41,16 @@
 
 
 ^{:refer std.lang.base.grammar-spec/format-defn-mixins :added "4.1"}
-(fact "TODO")
+(fact "applies mixins from symbols, forms and maps in order"
+  (binding [*symbol* 'hello]
+    [(format-defn-mixins {:base true}
+                         ['std.lang.base.grammar-spec-test/mixin-add-symbol])
+     (format-defn-mixins {:base true}
+                         ['(hash-map :from-form *symbol*)])
+     (format-defn-mixins {:base true}
+                         ['{:from-map true}])])
+  => '[{:symbol hello
+        :base true}
+       {:from-form hello}
+       {:base true
+        :from-map true}])

@@ -28,11 +28,25 @@
   (->> grammar/+op-all+
        (keep (fn [[category entries]]
                (when (str/starts-with? (name category) "xtalk")
-                 (map (fn [[op _]]
-                        [op category])
-                      entries))))
+                 (keep (fn [[op entry]]
+                         (when (and (keyword? op)
+                                    (map? entry))
+                           [op category]))
+                       entries))))
        (mapcat identity)
        (into {})))
+
+(defn grammar-xtalk-entries
+  []
+  (->> (grammar/ops-list)
+       (filter #(str/starts-with? (name %) "xtalk-"))
+       (mapcat (fn [category]
+                 (for [[op entry] (grammar/ops-detail category)]
+                   (when (and (keyword? op)
+                              (map? entry))
+                     (assoc entry :op op)))))
+       (remove nil?)
+       vec))
 
 (defn read-xtalk-ops
   ([path]
@@ -70,6 +84,8 @@
           :category category
           :canonical-symbol canonical-symbol
           :symbols symbols
+          :class (:class entry)
+          :requires (not-empty (vec (sort-by str (:requires entry))))
           :emit (:emit entry)
           :type (:type entry)
           :macro (var->symbol (:macro entry))
@@ -94,7 +110,7 @@
                             (map (fn [entry]
                                    [(:op entry) entry]))
                             (or existing []))]
-     (->> (ops/op-entries)
+     (->> (grammar-xtalk-entries)
           (keep (fn [entry]
                   (when-let [category (get category-map (:op entry))]
                     (inventory-entry entry

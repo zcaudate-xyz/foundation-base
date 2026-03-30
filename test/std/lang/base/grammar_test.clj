@@ -56,30 +56,11 @@
       :macro-xor
       :macro-case
       :macro-forange
-      :xtalk-core
-      :xtalk-proto
-      :xtalk-global
-      :xtalk-custom
-      :xtalk-math
-      :xtalk-type
-      :xtalk-bit
-      :xtalk-lu
-      :xtalk-obj
-      :xtalk-arr
-      :xtalk-str
-      :xtalk-js
-      :xtalk-return
-      :xtalk-socket
-      :xtalk-ws
-      :xtalk-iter
-      :xtalk-cache
-      :xtalk-thread
-      :xtalk-file
-      :xtalk-b64
-      :xtalk-uri
-      :xtalk-notify
-      :xtalk-service
-      :xtalk-special])
+      :xtalk-common
+      :xtalk-functional
+      :xtalk-language-specific
+      :xtalk-std-lang-link-specific
+      :xtalk-runtime-specific])
   
 ^{:refer std.lang.base.grammar/ops-symbols :added "4.0"}
 (fact "gets a list of symbols"
@@ -216,3 +197,19 @@
 (comment
   (./import)
   (./create-tests))
+
+
+^{:refer std.lang.base.grammar/normalize-op-entry :added "4.1"}
+(fact "normalizes shared macro and hard-link defaults"
+  (normalize-op-entry
+   {:op :x-add
+    :emit :macro
+    :macro #'std.lang.base.grammar-xtalk/tf-add})
+  => (contains {:value/template #'std.lang.base.grammar-xtalk/tf-add
+                :value/standalone true})
+
+  (normalize-op-entry
+   {:op :helper
+    :emit :hard-link
+    :raw 'xt.lang.common-data/obj-keys})
+  => (contains {:value/standalone 'xt.lang.common-data/obj-keys}))

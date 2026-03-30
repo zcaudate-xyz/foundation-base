@@ -116,12 +116,35 @@
   (do
     (fixture-register!)
     [(lookup-symbol-type 'user-id {:env '{user-id {:kind :primitive :name :xt/str}} :ns 'sample.route :aliases {}})
+     (types/type->data (lookup-symbol-type 'x:add +ctx+))
      (types/type->data (lookup-symbol-type 'std.lang.model.spec-xtalk-typed-fixture/find-user +ctx+))])
   => '[{:kind :primitive :name :xt/str}
+        {:kind :fn
+         :inputs [{:kind :primitive :name :xt/num}
+                  {:kind :primitive :name :xt/num}]
+         :output {:kind :primitive :name :xt/num}}
         {:kind :fn
          :inputs [{:kind :named :name std.lang.model.spec-xtalk-typed-fixture/UserMap}
                   {:kind :primitive :name :xt/str}]
          :output {:kind :maybe :item {:kind :named :name std.lang.model.spec-xtalk-typed-fixture/User}}}])
+
+^{:refer std.lang.typed.xtalk-infer/infer-op-spec-form :added "4.1"}
+(fact "infers builtin calls directly from op-spec declarations"
+  [(types/type->data (:type (infer-op-spec-form (ops/canonical-entry 'x:add)
+                                                '(x:add 1 2)
+                                                +ctx+)))
+   (:errors (infer-op-spec-form (ops/canonical-entry 'x:add)
+                                '(x:add 1 "b")
+                                +ctx+))
+   (:tag (first (:errors (infer-op-spec-form (ops/canonical-entry 'x:add)
+                                             '(x:add 1)
+                                             +ctx+))))]
+  => '[{:kind :primitive :name :xt/num}
+        [{:tag :call-arg-type-mismatch
+          :form "b"
+          :expected {:kind :primitive :name :xt/num}
+          :actual {:kind :primitive :name :xt/str}}]
+        :call-arity-mismatch])
 
 ^{:refer std.lang.typed.xtalk-infer/field-access-type :added "4.1"}
 (fact "reads field types from records and dicts"
@@ -436,11 +459,19 @@
 
 ^{:refer std.lang.typed.xtalk-infer/infer-builtin-form :added "4.1"}
 (fact "dispatches builtin inference rules"
-  (types/type->data (:type (infer-builtin-form (ops/canonical-entry 'x:get-key)
-                                               '(x:get-key route "id")
-                                               {:env '{route {:kind :record :fields [{:name "id" :type {:kind :primitive :name :xt/str} :optional? false}]}}
-                                                :ns 'sample.route :aliases {}})))
-  => '{:kind :primitive :name :xt/str})
+  [(types/type->data (:type (infer-builtin-form (ops/canonical-entry 'x:get-key)
+                                                '(x:get-key route "id")
+                                                {:env '{route {:kind :record :fields [{:name "id" :type {:kind :primitive :name :xt/str} :optional? false}]}}
+                                                 :ns 'sample.route :aliases {}})))
+   (types/type->data (:type (infer-builtin-form (ops/canonical-entry 'x:add)
+                                                '(x:add 1 2)
+                                                +ctx+)))
+   (:tag (first (:errors (infer-builtin-form (ops/canonical-entry 'x:add)
+                                             '(x:add 1)
+                                             +ctx+))))]
+  => '[{:kind :primitive :name :xt/str}
+        {:kind :primitive :name :xt/num}
+        :call-arity-mismatch])
 
 ^{:refer std.lang.typed.xtalk-infer/infer-dot :added "4.1"}
 (fact "dispatches dot access by key or path"
@@ -479,3 +510,7 @@
    (types/type->data (:type (infer-type '(if true 1 2) +ctx+)))]
   => '[{:kind :primitive :name :xt/str}
         {:kind :primitive :name :xt/int}])
+
+
+^{:refer std.lang.typed.xtalk-infer/infer-op-spec-form :added "4.1"}
+(fact "TODO")

@@ -158,6 +158,43 @@
              (if (= :defrun (:op-key et))
                (apply list 'do (drop 2 (:form et))))))))))
 
+(defn value-template-args
+  "derives callable value args from a template var"
+  {:added "4.1"}
+  [template]
+  (let [arglists (-> template meta :arglists)
+        argv     (-> arglists first)
+        argv     (if (vector? (first argv))
+                   (first argv)
+                   argv)]
+    (->> argv
+         rest
+         vec)))
+
+(defn value-standalone
+  "returns the standalone expansion for a value-liftable reserved symbol"
+  {:added "4.1"}
+  [sym grammar]
+  (let [{:keys [emit macro]
+         template :value/template
+         standalone :value/standalone} (get-in grammar [:reserved sym])
+        template (or template
+                     (when (= :macro emit)
+                       macro))]
+    (cond (or (collection/form? standalone)
+              (symbol? standalone))
+          standalone
+
+          (and (= true standalone)
+               template)
+          (let [args (value-template-args template)]
+            (list 'fn args
+                  (list 'return
+                        (template (apply list nil args)))))
+
+          :else
+          nil)))
+
 (defn process-namespaced-resolve
   "resolves symbol in current namespace"
   {:added "4.0"}
@@ -249,10 +286,16 @@
                (f/error "Code entry not found:" {:input f
                                                  :form form}))]
     (concat (reverse rdecl)
-            [(with-meta (cons (cond-> (ut/sym-full f-module f-id)
-                                (not unwrapped) (volatile!))
+             [(with-meta (cons (cond-> (ut/sym-full f-module f-id)
+                                 (not unwrapped) (volatile!))
                               args)
-               {:assign/inline true})])))
+                {:assign/inline true})])))
+
+(defn protect-reserved-head
+  [form]
+  (with-meta (cons (volatile! (first form))
+                   (rest form))
+    (meta form)))
 
 (defn to-staging-form
   "different staging forms"
@@ -267,14 +310,27 @@
           (volatile! form)
           
           (= :template (:type reserved))
-          (walk-fn ((:macro reserved) form))
+          (try
+            (walk-fn ((:macro reserved) form))
+            (catch Throwable t
+              (ut/throw-with-context
+               "std.lang staging template expansion failed"
+               {:std.lang/phase :staging/reserved-template
+                :std.lang/form form
+                :std.lang/lang (:lang mopts)
+                :std.lang/module (ut/module-id (:module mopts))
+                :std.lang/symbol fsym}
+               t)))
           
-          (= :hard-link (:type reserved))
+          (= :hard-link (:emit reserved))
           (walk-fn (cons (:raw reserved) (rest form)))
           
           (and (= :def-assign (:emit reserved))
                (= :inline (last form)))
           (walk-fn (process-inline-assignment form modules mopts))
+
+          reserved
+          (protect-reserved-head form)
           
           :else
           (let [fe (get-fragment (first form)
@@ -283,10 +339,18 @@
             (if (:template fe)
               (do (if deps-fragment
                     (vswap! deps-fragment conj (ut/sym-full fe)))
-                  (walk-fn (try (binding [*macro-form* form]
-                                  (apply (:template fe) (rest form)))
-                                (catch Throwable t
-                                  (throw t)))))
+                  (walk-fn (try
+                             (binding [*macro-form* form]
+                               (apply (:template fe) (rest form)))
+                             (catch Throwable t
+                               (ut/throw-with-context
+                                "std.lang staging macro expansion failed"
+                                {:std.lang/phase :staging/fragment-template
+                                 :std.lang/form form
+                                 :std.lang/lang (:lang mopts)
+                                 :std.lang/module (ut/module-id (:module mopts))
+                                 :std.lang/entry (ut/entry-summary fe)}
+                                t)))))
               form)))))
 
 (defn process-standard-symbol
@@ -338,9 +402,11 @@
                          (to-staging-form form grammar modules mopts deps-fragment walk-fn)
                          
                          (and (symbol? form))
-                         (if (namespace form)
-                           (process-namespaced-symbol form modules mopts deps deps-fragment walk-fn)
-                           (process-standard-symbol form mopts deps-native))
+                         (or (when-let [standalone (value-standalone form grammar)]
+                               (walk-fn standalone))
+                             (if (namespace form)
+                               (process-namespaced-symbol form modules mopts deps deps-fragment walk-fn)
+                               (process-standard-symbol form mopts deps-native)))
                          
                          :else form))
                  input)
@@ -360,15 +426,20 @@
             *macro-opts* mopts]
     (let [form  (walk/prewalk
                  (fn walk-fn [form]
-                   
-                   (cond  (and (collection/form? form)
-                               (= (first form) '!:template))
-                          (walk-fn (eval (second form)))
+                    
+                    (cond  (and (collection/form? form)
+                                (= (first form) '!:template))
+                           (walk-fn (eval (second form)))
 
-                          (symbol? form)
-                          (if (namespace form)
-                            (process-namespaced-symbol form modules mopts nil nil identity)
-                            (process-standard-symbol form mopts nil))
+                           (and (collection/form? form)
+                                (get-in grammar [:reserved (first form)]))
+                           (protect-reserved-head form)
+
+                           (symbol? form)
+                           (or (value-standalone form grammar)
+                               (if (namespace form)
+                                (process-namespaced-symbol form modules mopts nil nil identity)
+                                (process-standard-symbol form mopts nil)))
                           
                           :else
                           form))

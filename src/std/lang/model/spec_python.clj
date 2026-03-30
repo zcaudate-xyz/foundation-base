@@ -169,7 +169,7 @@
         :or          {:raw "or"}
         :not         {:raw "not" :emit :prefix}
         :throw       {:raw "raise"  :emit :prefix}
-        :fn          {:macro  #'python-fn   :type :macro}
+        :fn          {:macro  #'python-fn   :emit :macro}
         :var         {:symbol #{'var*}}
         :defn        {:symbol #{'defn}   :macro #'python-defn :emit :macro}
         :defgen      {:symbol #{'defgen} :macro #'python-defn :emit :macro}
@@ -185,7 +185,7 @@
       (grammar/build:override com/+python-com+)
       (grammar/build:extend
        {:defn-     {:op :defn-   :symbol #{'defn-}  :type :block :emit #'python-defn-}
-        :var-let   {:op :var-let :symbol #{'var}  :macro #'python-var :type :macro}
+        :var-let   {:op :var-let :symbol #{'var}  :macro #'python-var :emit :macro}
         :unarr     {:op :unarr   :symbol #{:*}    :raw "*"    :emit :pre}
         :undict    {:op :undict  :symbol #{:**}   :raw "**"   :emit :pre}
         :del       {:op :del     :symbol #{'del}  :raw "del"  :emit :prefix}

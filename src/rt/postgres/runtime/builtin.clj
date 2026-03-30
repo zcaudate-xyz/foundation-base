@@ -1,7 +1,8 @@
 (ns rt.postgres.runtime.builtin
   (:require [rt.postgres.base.grammar]
             [std.lang :as l]
-            [std.lib.foundation :as f])
+            [std.lib.foundation :as f]
+            [std.lib.template :as template])
   (:refer-clojure :exclude [abs concat format replace repeat reverse mod bit-and bit-or count max min]))
 
 (l/script :postgres

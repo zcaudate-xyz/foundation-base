@@ -9,7 +9,7 @@
             [std.lang.base.impl :as impl]
             [std.lang.base.script :as script]
             [std.lang.base.util :as ut]
-            [std.lang.model-annex.spec-xtalk]
+            [std.lang.model.spec-xtalk]
             [std.lang.model-annex.spec-xtalk.fn-julia :as fn]
             [std.lib.collection :as collection]
             [std.lib.foundation :as f]))
@@ -125,7 +125,7 @@
       (grammar/build:extend
        {:cat    {:op :cat    :symbol '#{cat}       :raw "*"   :emit :infix}
         :len    {:op :len    :symbol '#{len}       :raw "length"    :emit  :pre}
-        :local  {:op :local  :symbol '#{local var} :macro  #'tf-local :type :macro}
+        :local  {:op :local  :symbol '#{local var} :macro  #'tf-local :emit :macro}
         :pair   {:op :pair   :symbol '#{=>}        :raw "=>"        :emit :infix}
         :dict   {:op :dict   :symbol '#{dict}      :macro #'tf-dict :emit :macro}
         :push!  {:op :push!  :symbol '#{push!}     :macro #'tf-push! :emit :macro}

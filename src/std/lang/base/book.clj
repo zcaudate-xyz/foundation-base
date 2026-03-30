@@ -4,7 +4,6 @@
             [std.lang.base.book-entry :as entry]
             [std.lang.base.book-meta :as meta]
             [std.lang.base.book-module :as module]
-            [std.lang.base.emit-preprocess :as preprocess]
             [std.lang.base.util :as ut]
             [std.lib.atom :as atom]
             [std.lib.collection :as collection]
@@ -65,24 +64,15 @@
    (get modules id)))
 
 (defn get-code-deps
-  "gets `:deps` or if a `:static/template` calculate dependencies"
+  "gets `:deps` or, for templates, delegates restaging through the impl layer"
   {:added "4.0"}
-  ([{:keys [modules grammar lang] :as book} id]
-   (let [entry (get-code-entry book id)]
-     (if-not (:static/template entry)
-       (:deps entry)
-       (get-in (swap! (:static/template.cache entry)
-                      (fn [m]
-                        (if (get-in m [lang :deps])
-                          m
-                          (let [input (:form entry)
-                                mopts {:modules modules
-                                       :grammar grammar
-                                       :entry entry}
-
-                                [form deps] (preprocess/to-staging input grammar modules mopts)]
-                            (assoc-in m [lang :deps]  deps)))))
-               [lang :deps])))))
+  ([book id]
+    (let [entry (get-code-entry book id)]
+      (if-not (:static/template entry)
+        (:deps entry)
+        ((requiring-resolve 'std.lang.base.impl-template/cached-entry-deps)
+         book
+         entry)))))
 
 (defn get-deps
   "get dependencies for a given id"

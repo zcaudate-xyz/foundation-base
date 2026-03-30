@@ -4,7 +4,8 @@
   (:refer-clojure :exclude [constantly iterate repeatedly cycle range drop peek take map mapcat concat filter keep partition take-nth]))
 
 (l/script :xtalk
-  {:require [[xt.lang.base-macro :as k]]})
+  {:require [[xt.lang.common-lib :as common-lib]
+             [xt.lang.common-data :as common-data]]})
 
 (defspec.xt Iterator
   :xt/any)
@@ -188,7 +189,7 @@
   {:added "4.0"}
   [x]
   (return (or (-/iter-native? x)
-              (and (k/is-object? x)
+              (and (common-lib/obj? x)
                    (x:has-key? x
                                "::"
                                "iterator")))))
@@ -197,7 +198,7 @@
   "converts to an iterator"
   {:added "4.0"}
   [x]
-  (cond (k/nil? x)
+  (cond (x:nil? x)
         (return (-/iter-null))
         
         (-/iter? x)
@@ -247,8 +248,8 @@
   (var out := {})
   (for:iter [e it]
             (x:set-key out
-                       (k/first e)
-                       (k/second e)))
+                       (common-data/first e)
+                       (common-data/second e)))
   (return out))
 
 
@@ -287,7 +288,7 @@
   (if (== 0 (x:len arr))
     (x:err "Cannot be empty"))
   (while true
-    (k/for:array [e arr]
+    (for:array [e arr]
       (yield e))))
 
 (defgen.xt range
@@ -296,17 +297,17 @@
   [x]
   (var arr    := (:? (x:is-array? x) x [x]))
   (var arrlen := (x:len arr))
-  (var start  (:? (< 1 arrlen) (k/first arr) 0))
-  (var finish (:? (< 1 arrlen) (k/second arr) (k/first arr)))
-  (var step   (:? (< 2 arrlen) (k/nth arr 2) 1))
+  (var start  (:? (< 1 arrlen) (common-data/first arr) 0))
+  (var finish (:? (< 1 arrlen) (common-data/second arr) (common-data/first arr)))
+  (var step   (:? (< 2 arrlen) (common-data/nth arr 2) 1))
   (var i := start)
-  (cond (and (k/pos? step)
+  (cond (and (> step 0)
              (< start finish))
         (while (< i finish)
           (yield i)
           (:= i (+ i step)))
         
-        (and (k/neg? step)
+        (and (< step 0)
              (< finish start))
         (while (> i finish)
           (yield i)

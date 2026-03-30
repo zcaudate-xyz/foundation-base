@@ -10,7 +10,7 @@
             [std.lang.base.grammar :as grammar]
             [std.lang.base.script :as script]
             [std.lang.base.util :as ut]
-            [std.lang.model-annex.spec-xtalk]
+            [std.lang.model.spec-xtalk]
             [std.lang.model-annex.spec-xtalk.fn-ruby :as fn]
             [std.lib.collection :as collection]))
 
@@ -71,7 +71,7 @@
         :or         {:raw "||"}
         :not        {:raw "!" :emit :prefix}
         :eq         {:raw "=="}
-        :fn         {:macro  #'ruby-fn   :type :macro}
+        :fn         {:macro  #'ruby-fn   :emit :macro}
         :neq        {:raw "!="}
         :gt         {:raw ">"}
         :lt         {:raw "<"}

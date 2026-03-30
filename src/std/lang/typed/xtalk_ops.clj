@@ -1,5 +1,6 @@
 (ns std.lang.typed.xtalk-ops
   (:require [clojure.string :as str]
+            [std.lang.typed.xtalk-common :as types]
             [std.lang.base.grammar-spec]
             [std.lang.base.grammar-xtalk]))
 
@@ -10,9 +11,10 @@
 (defn op-table-vars
   [ns-sym]
   (->> (ns-publics ns-sym)
-       (keep (fn [[sym v]]
-               (when (str/starts-with? (name sym) "+op-")
-                 v)))))
+        (keep (fn [[sym v]]
+                (when (or (str/starts-with? (name sym) "+op-")
+                          (str/starts-with? (name sym) "+xt-"))
+                  v)))))
 
 (defn op-entries
   []
@@ -72,6 +74,31 @@
   (if-let [entry (canonical-entry sym)]
     (:canonical-symbol entry)
     sym))
+
+(defn op-arglists
+  [entry]
+  (get-in entry [:op-spec :arglists]))
+
+(defn op-type-forms
+  [entry]
+  (let [op-spec (:op-spec entry)]
+    (cond
+      (nil? op-spec) []
+      (:types op-spec) (vec (:types op-spec))
+      (:type op-spec) [(:type op-spec)]
+      :else [])))
+
+(defn op-types
+  [entry]
+  (mapv #(types/normalize-type % {:ns nil :aliases {}})
+        (op-type-forms entry)))
+
+(defn builtin-type
+  [sym]
+  (when-let [entry (canonical-entry sym)]
+    (let [fn-types (op-types entry)]
+      (when (seq fn-types)
+        (types/union-type fn-types)))))
 
 (defn builtin?
   [sym]

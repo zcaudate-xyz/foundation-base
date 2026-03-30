@@ -88,6 +88,39 @@
                                                          (get smap @return-ref)
                                                          @return-ref))])))))
 
+(defn assign-options
+  "gets assignment options either from value metadata or from a reserved macro entry"
+  {:added "4.1"}
+  [value grammar]
+  (let [meta-opts (select-keys (meta value) +assign-types+)
+        reserved-opts (when (and (collection/form? value)
+                                 (symbol? (first value)))
+                        (let [reserved (get-in grammar [:reserved (first value)])]
+                          (when (= :macro (:emit reserved))
+                            (select-keys reserved +assign-types+))))]
+    (merge reserved-opts meta-opts)))
+
+(defn assign-value
+  "prepares an assignment override payload for a value"
+  {:added "4.1"}
+  [symbol value grammar mopts]
+  (let [{inline :assign/inline
+         template :assign/template
+         assign-fn :assign/fn} (assign-options value grammar)
+        reserved (when (and (collection/form? value)
+                            (symbol? (first value)))
+                   (get-in grammar [:reserved (first value)]))
+        expanded (if (and (= :macro (:emit reserved))
+                          (or assign-fn template inline))
+                   ((:macro reserved) value)
+                   value)]
+    (cond assign-fn [:raw      (assign-fn symbol)]
+          template [:template (walk/prewalk-replace {template symbol} expanded)]
+          inline   [:inline   (emit-def-assign-inline symbol
+                                                     expanded
+                                                     grammar
+                                                     mopts)])))
+
 (defn emit-def-assign
   "emits a declare expression"
   {:added "3.0"}
@@ -96,13 +129,7 @@
          args     (helper/emit-typed-args args grammar)
          
          argstrs  (map (fn [{:keys [value symbol] :as arg}]
-                         (let [{:assign/keys [inline template] :as aopts} (meta value)
-                               custom (cond (:assign/fn aopts) [:raw  ((:assign/fn aopts) symbol)]
-                                            template [:template (walk/prewalk-replace {template symbol} value)]
-                                            inline   [:inline   (emit-def-assign-inline symbol
-                                                                                        value
-                                                                                        grammar
-                                                                                        mopts)])]
+                         (let [custom (assign-value symbol value grammar mopts)]
                            (if custom
                              (common/*emit-fn* (second custom) grammar mopts)
                              (fn/emit-input-default arg assign grammar mopts))))

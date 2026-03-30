@@ -1,9 +1,9 @@
-(ns std.lang.model.spec-rust-test
+(ns std.lang.model-annex.spec-rust-test
   (:require [std.fs :as fs]
             [std.lang :as l]
             [std.lang.base.script :as script]
             [std.lang.base.util :as ut]
-            [std.lang.model.spec-rust :refer :all]
+            [std.lang.model-annex.spec-rust :refer :all]
             [std.lib.os :as os]
             [std.string.prose :as prose])
   (:use code.test))
@@ -545,29 +545,29 @@ fn main() {
   )
 
 
-^{:refer std.lang.model.spec-rust/rst-typesystem :added "4.0"}
+^{:refer std.lang.model-annex.spec-rust/rst-typesystem :added "4.0"}
 (fact "emits rust typesystem syntax")
 
-^{:refer std.lang.model.spec-rust/rst-vector :added "4.0"}
+^{:refer std.lang.model-annex.spec-rust/rst-vector :added "4.0"}
 (fact "emits rust vector syntax")
 
-^{:refer std.lang.model.spec-rust/rst-attributes :added "4.0"}
+^{:refer std.lang.model-annex.spec-rust/rst-attributes :added "4.0"}
 (fact "emits rust attributes")
 
-^{:refer std.lang.model.spec-rust/rst-defenum :added "4.0"}
+^{:refer std.lang.model-annex.spec-rust/rst-defenum :added "4.0"}
 (fact "emits rust enum definition")
 
-^{:refer std.lang.model.spec-rust/rst-deftrait :added "4.0"}
+^{:refer std.lang.model-annex.spec-rust/rst-deftrait :added "4.0"}
 (fact "emits rust trait definition")
 
-^{:refer std.lang.model.spec-rust/rst-defimpl :added "4.0"}
+^{:refer std.lang.model-annex.spec-rust/rst-defimpl :added "4.0"}
 (fact "emits rust impl definition")
 
-^{:refer std.lang.model.spec-rust/rst-new :added "4.0"}
+^{:refer std.lang.model-annex.spec-rust/rst-new :added "4.0"}
 (fact "emits rust new expression")
 
-^{:refer std.lang.model.spec-rust/rst-exec :added "4.0"}
+^{:refer std.lang.model-annex.spec-rust/rst-exec :added "4.0"}
 (fact "emits rust exec block")
 
-^{:refer std.lang.model.spec-rust/rst-defstruct :added "4.0"}
+^{:refer std.lang.model-annex.spec-rust/rst-defstruct :added "4.0"}
 (fact "emits rust struct definition")

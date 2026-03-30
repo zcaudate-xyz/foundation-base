@@ -137,7 +137,11 @@
   ^:hidden
   
   (script/annex:get :LUA.0)
-  => map?)
+  => map?
+
+  (-> (script/annex:get :LUA.0)
+      :library)
+  => nil)
 
 ^{:refer std.lang.base.script/annex:stop :added "4.0"
   :setup [(script/annex:start :LUA.0)]}

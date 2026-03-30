@@ -1,10 +1,12 @@
 (ns std.lang.base.impl-entry-test
   (:require [std.lang.base.book :as b]
-            [std.lang.base.book-entry :as e]
-            [std.lang.base.emit :as emit]
-            [std.lang.base.emit-prep-lua-test :as prep]
-            [std.lang.base.impl-entry :as entry]
-            [std.lib.env :as env])
+              [std.lang.base.book-entry :as e]
+             [std.lang.base.emit :as emit]
+             [std.lang.base.emit-prep-lua-test :as prep]
+             [std.lang.base.impl-entry :as entry]
+             [std.lang.base.library-snapshot :as snap]
+             [std.lang.base.library-snapshot-prep-test :as lprep]
+             [std.lib.env :as env])
   (:use code.test))
 
 ^{:refer std.lang.base.impl-entry/create-common :added "4.0"}
@@ -49,6 +51,18 @@
    @emit/+test-grammar+)
   => e/book-entry?)
 
+^{:refer std.lang.base.impl-entry/hydrate-form :added "4.1"}
+(fact "hydrates input forms through the reserved hydrate hook"
+  ^:hidden
+
+  (entry/hydrate-form '(do raw)
+                      {:hydrate (fn [_ _ _]
+                                  [{:probe true}
+                                   '(do (x:get-in data ["a"]))])}
+                      {})
+  => '[{:probe true}
+       (do (x:get-in data ["a"]))])
+
 ^{:refer std.lang.base.impl-entry/create-code-hydrate :added "4.0"
   :setup [(def +entry+
             (entry/create-code-base
@@ -86,6 +100,23 @@
                                    :link  {- L.core}})
       :probe/value)
   => true)
+
+(fact "xtalk metadata is derived from the hydrated form"
+  ^:hidden
+
+  (-> (entry/create-code-hydrate
+       (assoc +entry+ :form-input '(do raw))
+       {:hydrate (fn [_ _ _]
+                   [nil '(do (x:nil? data))])}
+       @emit/+test-grammar+
+       (:modules prep/+book-min+)
+       '{:id L.core
+         :alias {}
+         :link  {- L.core}})
+      (select-keys [:xtalk-ops :xtalk-profiles :polyfill-modules]))
+  => '{:xtalk-ops #{:x-nil?}
+       :xtalk-profiles #{:xtalk-common}
+       :polyfill-modules #{}})
 
 ^{:refer std.lang.base.impl-entry/create-code :added "4.0"}
 (fact "creates the code entry"
@@ -152,6 +183,46 @@
                           :layout :full})
   => "function L_core____add_fn(a,b){\n  return a + L_core____identity_fn(b);\n}")
 
+(fact "entry emit failures include entry context"
+  ^:hidden
+
+  (let [grammar (assoc-in @emit/+test-grammar+
+                          [:reserved 'boom-op]
+                          {:op :boom-op
+                           :emit (fn [_ _ _]
+                                   (throw (ex-info "boom" {:probe true})))})
+        entry   (assoc (entry/create-code-base
+                        '(defn explode-fn
+                           [a]
+                           (return (boom-op a)))
+                        {:lang :lua
+                         :namespace (env/ns-sym)
+                         :module 'L.core
+                         :line 42}
+                        grammar)
+                       :form '(defn explode-fn
+                                [a]
+                                (return (boom-op a))))]
+    (try
+      (entry/emit-entry-raw grammar
+                            entry
+                            '{:layout :full})
+      nil
+      (catch Throwable t
+        (let [data (ex-data t)]
+          {:probe (:probe data)
+           :phase (:std.lang/phase data)
+           :lang (:std.lang/lang data)
+           :module (:std.lang/module data)
+           :entry (-> data :std.lang/entry :symbol)
+           :line (-> data :std.lang/entry :line)}))))
+  => '{:probe true
+       :phase :emit/entry
+       :lang :lua
+       :module L.core
+       :entry L.core/explode-fn
+       :line 42})
+
 ^{:refer std.lang.base.impl-entry/emit-entry-cached :added "4.0"
   :setup [(def +book+
             (-> prep/+book-min+
@@ -201,6 +272,41 @@
                                     :display :brief)
                      :emit {:label true}})
   => "// L.core/add-fn [] \nfunction L_core____add_fn(a,b){\n  return G + L_core____identity_fn(a + b);\n}")
+
+(fact "emits template entries using merged parent modules from the snapshot"
+  ^:hidden
+
+  (let [child-module (b/book-module {:id 'L.core
+                                     :lang :lua
+                                     :link '{p x.core
+                                             - L.core}})
+        child-book   (-> (b/book {:lang :lua
+                                  :meta (:meta prep/+book-empty+)
+                                  :grammar (:grammar prep/+book-empty+)
+                                  :parent :x})
+                         (b/set-module child-module)
+                         second)
+        snapshot-0   (-> (snap/snapshot {})
+                         (snap/add-book lprep/+book-x+)
+                         (snap/add-book child-book))
+        merged-book-0 (snap/get-book snapshot-0 :lua)
+        child-entry-0 (entry/create-code-base
+                       '(defn call-parent [a]
+                          (return (p/add a 1)))
+                       {:lang :lua
+                        :namespace (env/ns-sym)
+                        :module 'L.core}
+                       (:grammar merged-book-0))
+        snapshot-1   (second (snap/set-entry snapshot-0 child-entry-0))
+        merged-book-1 (snap/get-book snapshot-1 :lua)
+        child-entry-1 (assoc (get-in merged-book-1 '[:modules L.core :code call-parent])
+                             :static/template true)]
+    (entry/emit-entry (:grammar merged-book-1)
+                      child-entry-1
+                      {:snapshot snapshot-1
+                       :layout :full
+                       :emit {:label false}}))
+  => "function L_core____call_parent(a){\n  return a + 1;\n}")
 
 (comment
   (./import))

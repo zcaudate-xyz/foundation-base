@@ -103,7 +103,7 @@
         :remc    {:op :remc    :symbol #{'re}          :raw "~"    :emit :bi}
         :remi    {:op :remi    :symbol #{'re:*}        :raw "~*"   :emit :bi}
         :array   {:op :array   :symbol #{'array}       :emit  #'common/pg-array}
-        :js      {:op :js      :symbol #{'js}          :macro #'tf/pg-tf-js :type :macro}})
+        :js      {:op :js      :symbol #{'js}          :macro #'tf/pg-tf-js :emit :macro}})
 
       ;;
       ;; TOP LEVEL

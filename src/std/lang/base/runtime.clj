@@ -80,6 +80,9 @@
                            body
                            (:main emit)
                            (or (:json emit) :full)))
+
+         (= :xtalk lang)
+         (env/pp-str (:form @ptr))
          
          :else
          (ptr/ptr-display ptr {:library library
@@ -209,12 +212,15 @@
   {:added "4.0"}
   ([lang runtime {:keys [type config] :as spec}]
    (let [ctx    (ut/lang-context lang)
-         r-spec (resource/res:spec-add (dissoc spec :config))
+         spec   (dissoc spec :config)
+         r-spec (when (or (not (f/suppress (resource/res:spec-get type)))
+                          (seq (dissoc spec :type)))
+                  (resource/res:spec-add spec))
          r-ctx  (reg/registry-rt-add ctx {:key runtime
                                           :config config
                                           :resource type})]
-     {:spec r-spec
-      :context r-ctx})))
+      {:spec r-spec
+       :context r-ctx})))
 
 ;;
 ;;
@@ -271,11 +277,12 @@
                        :runtime (assoc rt
                                        :type (:runtime rt)
                                        :namespace (env/ns-sym)))
-         _      (if common/*trace* (env/prn emit params))
-         body   (ptr/ptr-invoke-script ptr args {:emit emit
-                                                 :lang lang
-                                                 :layout (or (:layout params)
-                                                             layout)})]
+          _      (if common/*trace* (env/prn emit params))
+          body   (ptr/ptr-invoke-script ptr args {:emit emit
+                                                  :library library
+                                                  :lang lang
+                                                  :layout (or (:layout params)
+                                                              layout)})]
      (ptr/ptr-invoke rt
                      f
                      body

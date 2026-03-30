@@ -30,28 +30,30 @@
 
 ^{:refer js.cell.runtime.link/make-mock-link :added "4.1"}
 (fact "creates a mock worker link"
-  ^:hidden
+  
   (!.js
-   (var worker ((. (runtime-link/make-mock-link {}) ["create-fn"])
-                (fn [data] data)))
-   (return (k/obj-keys worker)))
-  => (contains ["::" "listeners" "postMessage" "postRequest"]))
+    (var worker ((. (runtime-link/make-mock-link {})
+                    ["create_fn"])
+                 (fn [data] data)))
+    (return (k/obj-keys worker)))
+  => (contains ["::" "listeners"
+                "postMessage" "postRequest"]))
 
 ^{:refer js.cell.runtime.link/make-node-link :added "4.1"}
 (fact "creates a Node worker link"
-  ^:hidden
+  
   (node-link-init-check)
   => [])
 
 ^{:refer js.cell.runtime.link/resolve-script :added "4.1"}
 (fact "resolves script values or thunks"
-  ^:hidden
+  
   (!.js
-   (return (runtime-link/resolve-script "abc")))
+    (return (runtime-link/resolve-script "abc")))
   => "abc"
-
+  
   (!.js
-   (return (runtime-link/resolve-script
+    (return (runtime-link/resolve-script
             (fn []
               (return "xyz")))))
   => "xyz")
@@ -60,12 +62,12 @@
 (fact "creates a blob url from a script"
   ^:hidden
   (!.js
-   (var previous-url (!:G URL))
-   (:= (!:G URL) {"createObjectURL" (fn [blob]
-                                      (return "blob:test"))})
-   (var out (runtime-link/make-blob-url "self.postMessage(1)"))
-   (:= (!:G URL) previous-url)
-   (return out))
+    (var previous-url (!:G URL))
+    (:= (!:G URL) {"createObjectURL" (fn [blob]
+                                       (return "blob:test"))})
+    (var out (runtime-link/make-blob-url "self.postMessage(1)"))
+    (:= (!:G URL) previous-url)
+    (return out))
   => "blob:test")
 
 ^{:refer js.cell.runtime.link/make-webworker-link :added "4.1"}
@@ -132,8 +134,9 @@
 ^{:refer js.cell.runtime.link/make-link :added "4.1"}
 (fact "dispatches to a runtime-specific worker link helper"
   ^:hidden
+
   (!.js
-   (k/obj-keys (runtime-link/make-link "mock" nil {})))
+    (k/obj-keys (runtime-link/make-link "mock" nil {})))
   => (contains ["create_fn"])
 
   (!.js

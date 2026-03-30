@@ -20,6 +20,12 @@
       (list 'or val default)
       val)))
 
+(defn python-tf-x-has-key?
+  [[_ obj key check]]
+  (if (some? check)
+    (list '== check (list 'x:get-key obj key nil))
+    (list 'not= nil (list '. obj (list 'get key)))))
+
 (defn python-tf-x-err
   [[_ msg]]
   (list 'throw (list 'Exception msg)))
@@ -72,7 +78,7 @@
              :else
              (return (str (type ~obj))))))
 
-(defn python-tf-x-task-run
+(defn python-tf-x-future-run
   [[_ thunk]]
   (template/$
    (do (var task {"status" "pending"
@@ -86,7 +92,7 @@
                 (:= (. task ["error"]) e)))
        (return task))))
 
-(defn python-tf-x-task-then
+(defn python-tf-x-future-then
   [[_ task on-ok]]
   (template/$
    (if (== "ok" (. ~task (get "status")))
@@ -103,7 +109,7 @@
          (return out))
      (return ~task))))
 
-(defn python-tf-x-task-catch
+(defn python-tf-x-future-catch
   [[_ task on-err]]
   (template/$
    (if (== "error" (. ~task (get "status")))
@@ -120,21 +126,21 @@
          (return out))
      (return ~task))))
 
-(defn python-tf-x-task-finally
+(defn python-tf-x-future-finally
   [[_ task on-done]]
   (template/$ (do (~on-done)
             (return ~task))))
 
-(defn python-tf-x-task-cancel
+(defn python-tf-x-future-cancel
   [[_ task]]
   (template/$ (do (:= (. ~task ["status"]) "cancelled")
             (return ~task))))
 
-(defn python-tf-x-task-status
+(defn python-tf-x-future-status
   [[_ task]]
   (template/$ (. ~task (get "status"))))
 
-(defn python-tf-x-task-await
+(defn python-tf-x-future-await
   [[_ task timeout-ms default]]
   (template/$
    (cond (== "ok" (. ~task (get "status")))
@@ -146,7 +152,7 @@
          :else
          (return ~default))))
 
-(defn python-tf-x-task-from-async
+(defn python-tf-x-future-from-async
   [[_ executor]]
   (template/$
    (do (var box {"ok" false
@@ -179,14 +185,14 @@
    :x-shell          {:macro #'python-tf-x-shell         :emit :macro}
    :x-now-ms         {:default '(round (* 1000 (. (__import__ "time") (time)))) :emit :unit}
    :x-type-native    {:macro #'python-tf-x-type-native   :emit :macro}
-   :x-task-run       {:macro #'python-tf-x-task-run      :emit :macro}
-   :x-task-then      {:macro #'python-tf-x-task-then     :emit :macro}
-   :x-task-catch     {:macro #'python-tf-x-task-catch    :emit :macro}
-   :x-task-finally   {:macro #'python-tf-x-task-finally  :emit :macro}
-   :x-task-cancel    {:macro #'python-tf-x-task-cancel   :emit :macro}
-   :x-task-status    {:macro #'python-tf-x-task-status   :emit :macro}
-   :x-task-await     {:macro #'python-tf-x-task-await    :emit :macro}
-   :x-task-from-async {:macro #'python-tf-x-task-from-async :emit :macro}})
+   :x-future-run       {:macro #'python-tf-x-future-run      :emit :macro}
+   :x-future-then      {:macro #'python-tf-x-future-then     :emit :macro}
+   :x-future-catch     {:macro #'python-tf-x-future-catch    :emit :macro}
+   :x-future-finally   {:macro #'python-tf-x-future-finally  :emit :macro}
+   :x-future-cancel    {:macro #'python-tf-x-future-cancel   :emit :macro}
+   :x-future-status    {:macro #'python-tf-x-future-status   :emit :macro}
+   :x-future-await     {:macro #'python-tf-x-future-await    :emit :macro}
+   :x-future-from-async {:macro #'python-tf-x-future-from-async :emit :macro}})
 
 
 ;;
@@ -201,7 +207,8 @@
 ;;
 
 (def +python-custom+
-  {:x-get-key        {:macro #'python-tf-x-get-key}})
+  {:x-get-key        {:macro #'python-tf-x-get-key}
+   :x-has-key?       {:macro #'python-tf-x-has-key? :emit :macro}})
 
 ;;
 ;; MATH
@@ -632,7 +639,7 @@
    :x-iter-from-arr       {:macro #'python-tf-x-iter-from-arr       :emit :macro}
    :x-iter-from           {:macro #'python-tf-x-iter-from           :emit :macro}
    :x-iter-eq             {:macro #'python-tf-x-iter-eq             :emit :macro}
-   :x-iter-null           {:default '(if false (yield))}
+   :x-iter-null           {:default '(if false (yield)) :emit :unit}
    :x-iter-next           {:macro #'python-tf-x-iter-next           :emit :macro}
    :x-iter-has?           {:macro #'python-tf-x-iter-has?           :emit :macro}
    :x-iter-native?        {:macro #'python-tf-x-iter-native?        :emit :macro}})

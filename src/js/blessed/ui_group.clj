@@ -2,12 +2,7 @@
   (:require [std.lang :as l]))
 
 (l/script :js
-  {:runtime :basic
-   :config {:id :playground/tui-main
-            :bench false
-            :emit {:native {:suppress true}
-                   :lang/jsx false}}
-   :require [[xt.lang.base-lib :as k]
+  {:require [[xt.lang.base-lib :as k]
              [js.core :as j]
              [js.react :as r]
              [js.blessed :as b]

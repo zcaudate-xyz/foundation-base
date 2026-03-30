@@ -7,7 +7,7 @@
             [std.lang.base.grammar-spec :as spec]
             [std.lang.base.script :as script]
             [std.lang.base.util :as ut]
-            [std.lang.model-annex.spec-xtalk]
+            [std.lang.model.spec-xtalk]
             [std.lang.model-annex.spec-xtalk.fn-r :as fn]
             [std.lib.collection :as collection]
             [std.lib.template :as template]))
@@ -129,7 +129,7 @@
       (grammar/build:override
        {:seteq       {:op :seteq :symbol '#{:=} :raw "<-"}
         :mod         {:raw "%%"}
-        :defn        {:op :defn  :symbol '#{defn}     :macro  #'tf-defn :type :macro}
+        :defn        {:op :defn  :symbol '#{defn}     :macro  #'tf-defn :emit :macro}
         :inif        {:macro #'tf-infix-if   :emit :macro}
         :for-object  {:macro #'tf-for-object :emit :macro}
         :for-array   {:macro #'tf-for-array  :emit :macro}

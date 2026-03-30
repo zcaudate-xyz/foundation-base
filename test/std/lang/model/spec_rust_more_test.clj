@@ -1,9 +1,9 @@
-(ns std.lang.model.spec-rust-more-test
+(ns std.lang.model-annex.spec-rust-more-test
   (:require [std.fs :as fs]
             [std.lang :as l]
             [std.lang.base.script :as script]
             [std.lang.base.util :as ut]
-            [std.lang.model.spec-rust :refer :all])
+            [std.lang.model-annex.spec-rust :refer :all])
   (:use code.test))
 
 (script/script- :rust
@@ -40,7 +40,6 @@
        (new -/Rectangle
             :top-left (-/origin)
             :bottom-right (new -/Point :x 3.0 :y -4.0))))
-
 
 (fact "compiles"
   1 => 1)

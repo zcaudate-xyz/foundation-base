@@ -21,16 +21,10 @@
 (def +features+
   (grammar/build-min [:coroutine
                       :xtalk
-                      :xtalk-math
-                      :xtalk-type
-                      :xtalk-lu
-                      :xtalk-iter
-                      :xtalk-async
-                      :xtalk-obj
-                      :xtalk-arr
-                      :xtalk-fn
-                      :xtalk-str
-                      :xtalk-js]))
+                      :xtalk-common
+                      :xtalk-functional
+                      :xtalk-language-specific
+                      :xtalk-runtime-specific]))
 
 (defn emit-scheme
   "emits code into scheme schema"
@@ -56,7 +50,6 @@
 
 (def +book+
   (book/book {:lang :scheme
-              :parent :xtalk
               :meta +meta+
               :grammar +grammar+}))
 

@@ -50,7 +50,7 @@
    :config
    :layout
    :emit
-   
+
    ;; auto
    :lang
    :context
@@ -93,8 +93,8 @@
          ids    (set (map ut/sym-id syms))
          curr   (env/ns-sym)
          ignore (clojure.set/intersection ids
-                                (set (concat (keys (ns-refers curr))
-                                             (keys (ns-interns curr)))))
+                                          (set (concat (keys (ns-refers curr))
+                                                       (keys (ns-interns curr)))))
          refers (clojure.set/difference ids ignore)]
      (refer mns :only (vec refers))
      [refers ids])))
@@ -213,13 +213,13 @@
                                    rt-config)
          _  (annex/register-annex-tag ns tag lang runtime config)
          rt (annex/get-annex-runtime ns tag)]
-     (if (or (not rt)
-             (not (annex/same-runtime? rt lang (or runtime :default) rt-config)))
-       (annex/add-annex-runtime ns tag
-                                (annex/start-runtime lang
-                                                     (or runtime :default)
-                                                     rt-config))
-       [rt]))))
+      (if (or (not rt)
+              (not (annex/same-runtime? rt lang (or runtime :default) rt-config)))
+        (annex/add-annex-runtime ns tag
+                                 (annex/start-runtime lang
+                                                      (or runtime :default)
+                                                      rt-config))
+        [rt]))))
 
 (defmacro ^{:style/indent 1}
   script+
@@ -261,32 +261,6 @@
                       (quote ~body)
                       ~(meta &form)))))
 
-
-(comment
-
-  (defmacro
-    !.async
-    "switch between defined annex envs"
-    {:added "4.0"}
-    ([tag body]
-     `(future/future:run
-       (bound-fn
-         []
-         (script-ext-run (quote ~(env/ns-sym))
-                         ~tag
-                         (quote ~body)
-                         ~(meta &form))))))
-
-  (defmacro 
-    !.run
-    "switch between defined annex envs"
-    {:added "4.0"}
-    ([lang body]
-     `(control/script-rt-oneshot-eval
-       :oneshot
-       ~lang
-       [(quote ~body)]))))
-
 (defn annex:start
   "starts an annex tag"
   {:added "4.0"}
@@ -317,9 +291,9 @@
   ([tag ns]
    (let [{:keys [runtimes]} (annex/get-annex ns)]
      (atom/swap-return! runtimes
-       (fn [m]
-         (if-let [rt (get m tag)]
-           [(component/stop rt) (dissoc m tag)]))))))
+                        (fn [m]
+                          (if-let [rt (get m tag)]
+                            [(component/stop rt) (dissoc m tag)]))))))
 
 (defn annex:start-all
   "starts all the annex tags"
@@ -329,10 +303,10 @@
   ([ns]
    (let [{:keys [registry]} (annex/get-annex ns)]
      (collection/map-entries (fn [[tag {:keys [lang
-                                      runtime
-                                      config]}]]
-                      [tag (script-ext [tag lang] config)])
-                    @registry))))
+                                               runtime
+                                               config]}]]
+                               [tag (script-ext [tag lang] config)])
+                             @registry))))
 
 (defn annex:stop-all
   "stops all annexs"

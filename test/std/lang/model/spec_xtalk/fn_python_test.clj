@@ -454,26 +454,29 @@
   => #"base64")
 
 
-^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-x-task-run :added "4.1"}
+^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-x-future-run :added "4.1"}
 (fact "TODO")
 
-^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-x-task-then :added "4.1"}
+^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-x-future-then :added "4.1"}
 (fact "TODO")
 
-^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-x-task-catch :added "4.1"}
+^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-x-future-catch :added "4.1"}
 (fact "TODO")
 
-^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-x-task-finally :added "4.1"}
+^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-x-future-finally :added "4.1"}
 (fact "TODO")
 
-^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-x-task-cancel :added "4.1"}
+^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-x-future-cancel :added "4.1"}
 (fact "TODO")
 
-^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-x-task-status :added "4.1"}
+^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-x-future-status :added "4.1"}
 (fact "TODO")
 
-^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-x-task-await :added "4.1"}
+^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-x-future-await :added "4.1"}
 (fact "TODO")
 
-^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-x-task-from-async :added "4.1"}
+^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-x-future-from-async :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-x-has-key? :added "4.1"}
 (fact "TODO")

@@ -10,7 +10,8 @@
             [std.lang.base.runtime :as rt]
             [std.lang.base.util :as ut]
             [std.lib.deps]
-            [std.lib.env :as env])
+            [std.lib.env :as env]
+            [std.lib.resource :as resource])
   (:use code.test))
 
 (def +library-ext+
@@ -111,9 +112,14 @@
 
 ^{:refer std.lang.base.runtime/install-type! :added "4.0"}
 (fact "installs a specific runtime type given `:lang`"
-  (rt/install-type! :lua :test-runtime {:type :hara/lang.rt
-                                        :config {:bootstrap false}})
-  => map?)
+  (let [create (get-in (resource/res:spec-get :hara/lang.rt)
+                       [:instance :create])]
+    (= create
+       (do (rt/install-type! :lua :test-runtime {:type :hara/lang.rt
+                                                 :config {:bootstrap false}})
+           (get-in (resource/res:spec-get :hara/lang.rt)
+                   [:instance :create]))))
+  => true)
 
 ^{:refer std.lang.base.runtime/return-format-simple :added "4.0"}
 (fact "format forms for return"
@@ -378,4 +384,6 @@
 
 
 ^{:refer std.lang.base.runtime/rt-null :added "4.1"}
-(fact "TODO")
+(fact "creates a default null runtime"
+  (select-keys (rt/rt-null {}) [:lang])
+  => {:lang :null})

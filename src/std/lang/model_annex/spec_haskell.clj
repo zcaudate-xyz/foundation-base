@@ -144,11 +144,11 @@
       (grammar/build:override
        {:defn    {:macro #'tf-defn :emit :macro}
         :fn      {:macro #'tf-lambda :emit :macro}
-        :if      {:op :if :symbol #{'if} :emit :macro :macro #'tf-if :type :macro}
-        :case    {:op :case :symbol #{'case} :emit :macro :macro #'tf-case :type :macro}})
+        :if      {:op :if :symbol #{'if} :emit :macro :macro #'tf-if}
+        :case    {:op :case :symbol #{'case} :emit :macro :macro #'tf-case}})
       (grammar/build:extend
-       {:let:h   {:op :let:h :symbol #{'let:h 'let} :emit :macro :macro #'tf-let :type :macro}
-        :do      {:op :do :symbol #{'do} :emit :macro :macro #'tf-do :type :macro}
+       {:let:h   {:op :let:h :symbol #{'let:h 'let} :emit :macro :macro #'tf-let}
+        :do      {:op :do :symbol #{'do} :emit :macro :macro #'tf-do}
         :cons    {:op :cons :symbol #{'cons} :emit :infix :raw ":"}
         :concat  {:op :concat :symbol #{'concat} :emit :infix :raw "++"}
         :h-args  {:op :h-args :symbol #{:h-args} :emit #'haskell-args}

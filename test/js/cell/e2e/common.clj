@@ -212,9 +212,9 @@
          "is_async" false
          "args" ["sync_request"]}}
        (!:G __CELL_WORKER))
-       "ready")
-    {:lang :js
-     :layout :flat})))
+       "ready"))
+   {:lang :js
+     :layout :flat}))
 
 (defn.js shared-desc
   []

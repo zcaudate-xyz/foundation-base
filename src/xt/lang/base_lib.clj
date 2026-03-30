@@ -53,6 +53,18 @@
 (defspec.xt obj?
   [:fn [:xt/any] :xt/bool])
 
+(defn.xt arr?
+  "checks if object is an array"
+  {:added "4.1"}
+  [x]
+  (return (x:is-array? x)))
+
+(defn.xt obj?
+  "checks if object is a map type"
+  {:added "4.1"}
+  [x]
+  (return (x:is-object? x)))
+
 (defspec.xt id-fn
   [:fn [AnyDict] [:xt/maybe :xt/any]])
 

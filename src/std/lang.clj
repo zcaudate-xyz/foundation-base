@@ -6,7 +6,6 @@
             [std.lang.base.emit-common :as common]
             [std.lang.base.emit-helper :as helper]
             [std.lang.base.emit-preprocess :as preprocess]
-            [std.lang.base.grammar-xtalk-audit :as xtalk-audit]
             [std.lang.base.impl :as impl]
             [std.lang.base.impl-entry :as entry]
             [std.lang.base.impl-lifecycle :as lifecycle]
@@ -25,13 +24,15 @@
             [std.lang.base.workspace :as workspace]
             [std.lang.interface.type-notify :as notify]
             [std.lang.interface.type-shared :as shared]
+            [std.lang.typed.xtalk :as xtalk]
+            [std.lang.model.spec-xtalk]
             [std.lang.model.spec-bash]
             [std.lang.model.spec-c]
+            [std.lang.model.spec-dart]
             [std.lang.model.spec-glsl]
             [std.lang.model.spec-js]
             [std.lang.model.spec-lua]
             [std.lang.model.spec-python]
-            [std.lang.model-annex.spec-xtalk]
             [std.lib.context.pointer]
             [std.lib.deps :as deps]
             [std.lib.env :as env]
@@ -53,11 +54,6 @@
  [emit* emit/emit-main]
  helper/basic-typed-args
  helper/emit-type-record
-
- [xtalk-support-matrix xtalk-audit/support-matrix]
- [xtalk-support-missing-by-language xtalk-audit/missing-by-language]
- [xtalk-support-missing-by-feature xtalk-audit/missing-by-feature]
- [xtalk-support-visualize xtalk-audit/visualize-support]
 
  preprocess/macro-form
  preprocess/macro-opts
@@ -136,6 +132,8 @@
  [rt:restart script-control/script-rt-restart]
  [rt:stop script-control/script-rt-stop]
 
+ xtalk/defspec.xt
+ 
  workspace/sym-entry
  workspace/module-entries
  workspace/emit-ptr

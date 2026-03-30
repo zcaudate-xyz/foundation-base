@@ -87,7 +87,7 @@
       (grammar/build:override fn-go/+go+)
       (grammar/build:extend
        {:go-chan    {:op :go-chan    :symbol '#{chan} :raw "chan " :emit :pre}
-        :go-arrow   {:op :go-arrow   :symbol '#{<-}   :macro #'tf-go-arrow :emit :macro :type :macro}
+        :go-arrow   {:op :go-arrow   :symbol '#{<-}   :macro #'tf-go-arrow :emit :macro}
         :go         {:op :go         :symbol '#{go}   :raw "go " :emit :pre}
         :defer      {:op :defer      :symbol '#{defer} :raw "defer " :emit :pre}
         :make       {:op :make       :symbol '#{make} :raw "make" :emit :invoke}
@@ -129,7 +129,6 @@
 
 (def +book+
   (book/book {:lang :go
-              :parent :xtalk
               :meta +meta+
               :grammar +grammar+}))
 

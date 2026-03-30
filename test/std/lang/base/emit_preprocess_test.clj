@@ -7,9 +7,11 @@
             [std.lang.base.emit-prep-lua-test :as prep]
             [std.lang.base.emit-preprocess :refer :all]
             [std.lang.base.grammar :as grammar]
+            [std.lang.base.grammar-xtalk-system :as grammar-xtalk]
             [std.lang.base.impl-entry :as impl-entry]
             [std.lang.base.library :as lib]
-            [std.lang.base.library-snapshot :as snap])
+            [std.lang.base.library-snapshot :as snap]
+            [std.lang.model.spec-js :as js])
   (:use code.test))
 
 (def +reserved+
@@ -210,13 +212,43 @@
   => '(+ 1 2 3 1 2 3)
 
   (to-staging-form '(hello 1 2 3)
-                   {:reserved {'hello {:type :hard-link
+                   {:reserved {'hello {:emit :hard-link
                                        :raw 'world}}}
                    (:modules prep/+book-min+)
                    '{:module {:link {u L.core}}}
                    nil
                    identity)
   => '(world 1 2 3))
+
+(fact "staging failures include macro context"
+  ^:hidden
+
+  (try
+    (to-staging-form '(hello 1 2 3)
+                     {:reserved {'hello {:type :template
+                                         :macro (fn [_]
+                                                  (throw (ex-info "boom" {:probe true})))}}}
+                     (:modules prep/+book-min+)
+                     '{:lang :lua
+                       :module {:id L.core
+                                :link {u L.core}}}
+                     nil
+                     identity)
+    nil
+    (catch Throwable t
+      (select-keys (ex-data t)
+                   [:probe
+                    :std.lang/phase
+                    :std.lang/lang
+                    :std.lang/module
+                    :std.lang/symbol
+                    :std.lang/form])))
+  => '{:probe true
+       :std.lang/phase :staging/reserved-template
+       :std.lang/lang :lua
+       :std.lang/module L.core
+       :std.lang/symbol hello
+       :std.lang/form (hello 1 2 3)})
 
 ^{:refer std.lang.base.emit-preprocess/process-standard-symbol :added "4.0"}
 (fact "processes a standard symbol"
@@ -268,7 +300,78 @@
                {:reserved {'var {:emit :def-assign}}}
                (:modules prep/+book-min+)
                '{:module {:link {u L.core}}}))
-  => '[[(var a := (L.core/identity-fn 1)) #{} #{} {}] #:assign{:inline true}])
+  => '[[(var a := (L.core/identity-fn 1)) #{} #{} {}] #:assign{:inline true}]
+
+  (to-staging 'x:add
+              +grammar+
+              {}
+              '{:module {:id L.core
+                         :link {}}})
+  => '[(fn [a b] (return (+ a b))) #{} #{} {}])
+
+^{:refer std.lang.base.emit-preprocess/value-standalone :added "4.1"}
+(fact "callable xtalk intrinsics use shared value-standalone compilation"
+  ^:hidden
+
+  (value-standalone 'x:add +grammar+)
+  => '(fn [a b] (return (+ a b)))
+
+  (value-standalone 'for:object js/+grammar+)
+  => nil
+
+  (value-standalone 'hello
+                    {:reserved {'hello {:emit :macro
+                                        :macro (with-meta
+                                                 (fn [[_ a b]]
+                                                   (list '+ a b))
+                                                 {:arglists '([_ a b])})
+                                         :value/standalone true}}})
+  => '(fn [a b] (return (+ a b))))
+
+(fact "language macro form heads do not recurse during staging"
+  ^:hidden
+
+  (first
+   (to-staging '(do (for:object [[k v] obj]
+                        (return false)))
+               js/+grammar+
+               {}
+               '{:module {:id JS.core
+                          :link {- JS.core}}}))
+  => '(do (for:object [[k v] obj]
+          (return false))))
+
+(fact "core macros remain deferred during staging"
+  ^:hidden
+
+  (first
+   (to-staging '(if check
+                  (return a)
+                  (return b))
+               js/+grammar+
+               {}
+               '{:module {:id JS.core
+                          :link {- JS.core}}}))
+   => '(if check
+         (return a)
+         (return b)))
+
+(fact "xtalk operator heads remain in-place inside forms"
+  ^:hidden
+
+  (first
+   (to-staging '(do (x:set-key obj
+                               (x:arr-first e)
+                               (x:arr-second e))
+                    (return obj))
+               +grammar+
+               {}
+               '{:module {:id xt.lang.common-lib
+                          :link {- xt.lang.common-lib}}}))
+  => '(do (x:set-key obj
+                     (x:arr-first e)
+                     (x:arr-second e))
+          (return obj)))
 
 ^{:refer std.lang.base.emit-preprocess/to-resolve :added "4.0"}
 (fact "resolves only the code symbols (no macroexpansion)"
@@ -309,3 +412,27 @@
                             :js
                             'JS.ui)})
   => '{"react" #{React}})
+
+
+^{:refer std.lang.base.emit-preprocess/value-template-args :added "4.1"}
+(fact "derives template value args from arglists metadata"
+  (value-template-args
+   (with-meta
+     (fn [_ sym value] [sym value])
+     {:arglists '([ctx sym value])}))
+  => '[sym value]
+
+  (value-template-args
+   (with-meta
+     (fn [_ [sym value]] [sym value])
+     {:arglists '(( [ctx sym value] ))}))
+  => '[sym value])
+
+^{:refer std.lang.base.emit-preprocess/protect-reserved-head :added "4.1"}
+(fact "protects reserved heads by wrapping them in a volatile"
+  (let [out (protect-reserved-head (with-meta '(return value) {:line 10}))]
+    [(volatile? (first out))
+     @(first out)
+     (rest out)
+     (meta out)])
+  => '[true return (value) {:line 10}])

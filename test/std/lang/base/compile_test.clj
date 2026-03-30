@@ -36,7 +36,7 @@
       :root   ".build"
       :target "src"
       :file   "pkg/file.lua"
-      :main   'xt.lang.base-lib
+      :main   'xt.lang.common-lib
       :layout :flat
       :entry {:label true}
       :emit  {:static {:header true}
@@ -58,7 +58,7 @@
       :root   ".build"
       :target "src"
       :file   "pkg/file.lua"
-      :main   'xt.lang.base-iter
+      :main   'xt.lang.common-data
       :layout :flat
       :entry {:label true}}))
   => (contains-in

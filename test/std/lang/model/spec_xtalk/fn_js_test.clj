@@ -392,26 +392,29 @@
     => #"fetch"))
 
 
-^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-task-run :added "4.1"}
+^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-future-run :added "4.1"}
 (fact "TODO")
 
-^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-task-then :added "4.1"}
+^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-future-then :added "4.1"}
 (fact "TODO")
 
-^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-task-catch :added "4.1"}
+^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-future-catch :added "4.1"}
 (fact "TODO")
 
-^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-task-finally :added "4.1"}
+^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-future-finally :added "4.1"}
 (fact "TODO")
 
-^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-task-cancel :added "4.1"}
+^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-future-cancel :added "4.1"}
 (fact "TODO")
 
-^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-task-status :added "4.1"}
+^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-future-status :added "4.1"}
 (fact "TODO")
 
-^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-task-await :added "4.1"}
+^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-future-await :added "4.1"}
 (fact "TODO")
 
-^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-task-from-async :added "4.1"}
+^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-future-from-async :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-js/js-tf-x-has-key? :added "4.1"}
 (fact "TODO")
