@@ -32,11 +32,14 @@
             :dispatch '!.rb
             :suffix "rb"}
    :dart   {:script :dart
-            :dispatch '!.dart
+            :dispatch '!.dt
             :suffix "dart"}
    :php    {:script :php
             :dispatch '!.php
-            :suffix "php"}})
+            :suffix "php"}
+   :go    {:script :go
+            :dispatch '!.go
+            :suffix "go"}})
 
 (def +runtime-lang-aliases+
   {:ruby :rb})
