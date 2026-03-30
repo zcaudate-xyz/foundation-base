@@ -1,4 +1,4 @@
-(ns code.manage.xtalk-ops
+(ns std.lang.manage.xtalk-ops
   (:require [clojure.edn :as edn]
             [clojure.pprint :as pprint]
             [clojure.string :as str]

@@ -120,3 +120,25 @@
 (fact "emits import declaration"
   (emit-import-declaration 'my.ns ['other.ns ['other.ns/Type]])
   => "import type { Type as other_ns_Type } from \"./other/ns\";")
+
+
+^{:refer std.lang.model.spec-js.ts/emit-imports :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-js.ts/emit-spec-declaration :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-js.ts/emit-function-arg :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-js.ts/emit-function-declaration :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-js.ts/emit-value-declaration :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-js.ts/emit-analysis-declarations :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-js.ts/emit-namespace-declarations :added "4.1"}
+(fact "TODO")

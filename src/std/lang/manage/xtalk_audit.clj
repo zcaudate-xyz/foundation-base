@@ -1,4 +1,4 @@
-(ns code.manage.xtalk-audit
+(ns std.lang.manage.xtalk-audit
   (:require [clojure.string :as str]
             [std.lang.base.grammar :as grammar]
             [std.lang.base.impl :as impl]

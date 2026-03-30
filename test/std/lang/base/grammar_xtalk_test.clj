@@ -309,3 +309,13 @@
                     (not (:op-spec entry)))]
      (:op entry)))
   => [])
+
+
+^{:refer std.lang.base.grammar-xtalk/op-spec :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.base.grammar-xtalk/attach-op-spec :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.base.grammar-xtalk/apply-op-specs :added "4.1"}
+(fact "TODO")

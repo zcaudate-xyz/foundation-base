@@ -109,3 +109,13 @@
 (fact "converts to lowercase"
   (perl-tf-x-str-to-lower '(:x-str-to-lower s))
   => '(lc s))
+
+
+^{:refer std.lang.model-annex.spec-xtalk.fn-perl/perl-tf-x-return-encode :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model-annex.spec-xtalk.fn-perl/perl-tf-x-return-wrap :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model-annex.spec-xtalk.fn-perl/perl-tf-x-return-eval :added "4.1"}
+(fact "TODO")
