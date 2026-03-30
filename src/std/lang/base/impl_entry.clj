@@ -4,6 +4,7 @@
              [std.lang.base.emit :as emit]
              [std.lang.base.emit-preprocess :as preprocess]
              [std.lang.base.grammar-xtalk-system :as xtalk-system]
+             [std.lang.base.provenance :as provenance]
              [std.lang.base.util :as ut]
              [std.lib.collection :as collection]
              [std.lib.env :as env]
@@ -274,26 +275,30 @@
           form (if (:transform emit)
                  ((:transform emit) form mopts)
                  form)
-          mopts (assoc mopts :entry (assoc entry :display :brief))]
+          mopts (-> mopts
+                    (assoc :entry (assoc entry :display :brief))
+                    (provenance/with-provenance
+                      {:std.lang/phase :emit/entry
+                       :std.lang/subsystem :std.lang.base.impl-entry/emit-entry-raw
+                       :std.lang/form form
+                       :std.lang/lang lang
+                       :std.lang/module (:module entry)
+                       :std.lang/namespace (:namespace entry)
+                       :std.lang/entry (ut/entry-summary entry)}))]
       (binding [preprocess/*macro-opts* mopts
-               preprocess/*macro-grammar* grammar]
-       (try
+                preprocess/*macro-grammar* grammar]
+        (try
          (emit/emit form grammar
                     (:namespace entry)
                     mopts)
-         (catch Throwable t
-           (env/p   (str (:module entry) " - [" (:line entry) "] - "
-                       (:id entry) "\n" (ansi/red (f/date))))
-           (env/pp  form)
-           (ut/throw-with-context
-            "std.lang entry emit failed"
-            {:std.lang/phase :emit/entry
-             :std.lang/form form
-             :std.lang/lang lang
-             :std.lang/module (:module entry)
-             :std.lang/namespace (:namespace entry)
-             :std.lang/entry (ut/entry-summary entry)}
-            t)))))))
+          (catch Throwable t
+            (env/p   (str (:module entry) " - [" (:line entry) "] - "
+                        (:id entry) "\n" (ansi/red (f/date))))
+            (env/pp  form)
+            (ut/throw-with-context
+             "std.lang entry emit failed"
+             (:std.lang/provenance mopts)
+             t)))))))
 
 (def +cached-emit-keys+
   [:transform

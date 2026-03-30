@@ -26,7 +26,8 @@
    :book
    :snapshot
    :layout
-   :emit])
+   :emit
+   :std.lang/provenance])
 
 (defn emit-main-loop
   "creates the raw emit

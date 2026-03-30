@@ -243,9 +243,9 @@
                           {:module 'xt.lang.base-lib})
                         {})]
         (every? true?
-                 [(string? (pr-str @macro-var))
-                  (string? (pr-str @fn-var))
-                  (string? (pr-str @if-var))]))))
+                  [(string? (pr-str @macro-var))
+                   (string? (pr-str @fn-var))
+                   (string? (pr-str @if-var))]))))
   => true)
 
 (fact "postgres top level functions initialize against a runtime context"

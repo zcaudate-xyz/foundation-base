@@ -212,16 +212,22 @@
         (let [data (ex-data t)]
           {:probe (:probe data)
            :phase (:std.lang/phase data)
+           :subsystem (:std.lang/subsystem data)
            :lang (:std.lang/lang data)
            :module (:std.lang/module data)
            :entry (-> data :std.lang/entry :symbol)
-           :line (-> data :std.lang/entry :line)}))))
+           :line (:std.lang/line data)
+           :stack (mapv (juxt :std.lang/phase :std.lang/subsystem)
+                        (:std.lang/provenance-stack data))}))))
   => '{:probe true
-       :phase :emit/entry
-       :lang :lua
-       :module L.core
-       :entry L.core/explode-fn
-       :line 42})
+        :phase :emit/form
+        :subsystem :std.lang.base.emit-top-level/emit-form
+        :lang :lua
+        :module L.core
+        :entry L.core/explode-fn
+        :line 42
+        :stack [[:emit/form :std.lang.base.emit-top-level/emit-form]
+                [:emit/entry :std.lang.base.impl-entry/emit-entry-raw]]})
 
 ^{:refer std.lang.base.impl-entry/emit-entry-cached :added "4.0"
   :setup [(def +book+

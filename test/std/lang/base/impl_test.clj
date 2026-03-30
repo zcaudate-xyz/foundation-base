@@ -148,27 +148,46 @@
                           [:reserved 'boom-op]
                           {:op :boom-op
                            :emit (fn [_ _ _]
-                                   (throw (ex-info "boom" {:probe true})))})]
+                                   (throw (ex-info "boom" {:probe true})))})
+        form    (with-meta '(boom-op 1 2 3) {:line 19})]
     (try
       (emit-direct grammar
-                   '(boom-op 1 2 3)
+                   form
                    *ns*
                    {:emit {}
-                    :lang :lua
-                    :module {:id 'L.core}})
+                     :lang :lua
+                     :module {:id 'L.core}})
       nil
-      (catch Throwable t
-        (select-keys (ex-data t)
-                     [:probe
-                      :std.lang/phase
-                      :std.lang/lang
-                      :std.lang/module
-                      :std.lang/form]))))
+       (catch Throwable t
+         (select-keys (ex-data t)
+                      [:probe
+                       :std.lang/phase
+                       :std.lang/subsystem
+                       :std.lang/lang
+                       :std.lang/module
+                       :std.lang/form
+                       :std.lang/provenance-stack]))))
   => '{:probe true
-       :std.lang/phase :emit/direct
-       :std.lang/lang :lua
-       :std.lang/module L.core
-       :std.lang/form (boom-op 1 2 3)})
+        :std.lang/phase :emit/form
+        :std.lang/subsystem :std.lang.base.emit-top-level/emit-form
+        :std.lang/lang :lua
+        :std.lang/module L.core
+        :std.lang/form (boom-op 1 2 3)
+        :std.lang/provenance-stack [{:std.lang/phase :emit/form
+                                     :std.lang/subsystem :std.lang.base.emit-top-level/emit-form
+                                     :std.lang/lang :lua
+                                     :std.lang/module L.core
+                                     :std.lang/namespace std.lang.base.impl-test
+                                     :std.lang/line 19
+                                     :std.lang/form (boom-op 1 2 3)
+                                     :std.lang/symbol boom-op}
+                                    {:std.lang/phase :emit/direct
+                                     :std.lang/subsystem :std.lang.base.impl/emit-direct
+                                     :std.lang/lang :lua
+                                     :std.lang/module L.core
+                                     :std.lang/namespace std.lang.base.impl-test
+                                     :std.lang/line 19
+                                     :std.lang/form (boom-op 1 2 3)}]})
 
 ^{:refer std.lang.base.impl/emit-str :added "4.0"}
 (fact  "converts to an output string"

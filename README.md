@@ -11,6 +11,7 @@ Detailed usage guides and scenarios for core libraries can be found in the `guid
 
 - [code.test](guides/code.test.md): A robust testing framework replacing `clojure.test`.
 - [code.manage](guides/code.manage.md): Tools for code maintenance, refactoring, and test management.
+- [std.lang.manage](guides/std.lang.manage.md): Interactive guide for auditing and extending xtalk language support (PHP, Ruby, Perl, etc.).
 - [std.task](guides/std.task.md): Task definition and execution engine.
 - [std.block](guides/std.block.md): Source code block parsing and layout.
 - [code.query](guides/code.query.md): Pattern matching and structural editing for code.

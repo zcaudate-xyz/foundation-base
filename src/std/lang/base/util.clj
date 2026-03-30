@@ -1,5 +1,6 @@
 (ns std.lang.base.util
   (:require [clojure.string]
+            [std.lang.base.provenance :as provenance]
             [std.lib.collection :as collection]
             [std.lib.context.pointer :as ptr]
             [std.lib.context.space :as space]
@@ -158,25 +159,10 @@
   "wraps an exception with std.lang generation context"
   {:added "4.1"}
   [message data ^Throwable t]
-  (let [cause-data (ex-data t)
-        wrapped?   (:std.lang/wrapped cause-data)
-        data       (cond-> (merge cause-data data)
-                     true
-                     (assoc :std.lang/wrapped true
-                            :std.lang/cause-class (.getName (class t))
-                            :std.lang/cause-message (.getMessage t))
-
-                     (and cause-data
-                          (not wrapped?))
-                     (assoc :std.lang/cause-data cause-data))]
-    (ex-info (if-let [cause-message (.getMessage t)]
-               (str message ": " cause-message)
-               message)
-             data
-             t)))
+  (provenance/error-with-provenance message data t))
 
 (defn throw-with-context
   "throws an exception wrapped with std.lang generation context"
   {:added "4.1"}
   [message data ^Throwable t]
-  (throw (error-with-context message data t)))
+  (provenance/throw-with-provenance message data t))
