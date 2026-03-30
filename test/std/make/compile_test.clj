@@ -39,6 +39,23 @@
   (compile-summarise [[:unchanged "hello.txt"]])
   => {:files 1, :status :unchanged})
 
+^{:refer std.make.compile/compile-result-seq :added "4.1"}
+(fact "normalizes nested compile results"
+  (vec (compile-result-seq [[:unchanged "a.js"]
+                            [[:written "a.d.ts"]
+                             [:written "a.map"]]]))
+  => [[:unchanged "a.js"]
+      [:written "a.d.ts"]
+      [:written "a.map"]])
+
+^{:refer std.make.compile/compile-write-artifacts :added "4.1"}
+(fact "writes multiple artifacts"
+  (with:mock-compile
+    (compile-write-artifacts [{:output "a.js" :body "A"}
+                              {:output "a.d.ts" :body "B"}]))
+  => [["a.js" "A"]
+      ["a.d.ts" "B"]])
+
 ^{:refer std.make.compile/compile-resource :added "4.0"}
 (fact "copies resources to the build directory"
   ^:hidden

@@ -42,6 +42,44 @@
 (def +install-script-fn+
   (compile/types-add :script #'compile-script))
 
+(defn resolve-artifact-producer
+  [producer]
+  (cond
+    (var? producer) @producer
+    (symbol? producer) (some-> producer resolve deref)
+    (fn? producer) producer
+    :else nil))
+
+(defn artifact-descriptor-seq
+  [artifacts]
+  (cond
+    (nil? artifacts)
+    []
+
+    (map? artifacts)
+    [artifacts]
+
+    (sequential? artifacts)
+    (mapcat artifact-descriptor-seq artifacts)
+
+    :else
+    (f/error "Invalid artifact descriptor" {:artifacts artifacts})))
+
+(defn compile-module-artifacts
+  [full output {:keys [emit main] :as opts} mopts]
+  (let [ctx (merge opts
+                   {:emit emit
+                    :runtime-body full
+                    :runtime-output output
+                    :mopts mopts})
+        extra (->> (or (:artifacts emit) [])
+                   (map resolve-artifact-producer)
+                   (remove nil?)
+                   (mapcat (fn [producer]
+                             (artifact-descriptor-seq (producer ctx)))))]
+    (vec (concat [{:output output
+                   :body full}]
+                 extra))))
 
 ;;
 ;; SINGLE
@@ -58,12 +96,16 @@
          full    (compile/compile-fullbody body opts)
 
          ;; output transformations
-         full    (reduce (fn [full transform]
-                           (transform full (-> emit :static)))
-                         full
-                         (-> emit :code :transforms :full))
-         output  (compile/compile-out-path opts)]
-     (compile/compile-write output full))))
+          full    (reduce (fn [full transform]
+                            (transform full (-> emit :static)))
+                          full
+                          (-> emit :code :transforms :full))
+          output  (compile/compile-out-path opts)
+          artifacts (compile-module-artifacts full output opts mopts)
+          written   (compile/compile-write-artifacts artifacts)]
+      (if (= 1 (count written))
+        (first written)
+        written))))
 
 (def +install-module-single-fn+
   (compile/types-add :module.single #'compile-module-single))
@@ -128,7 +170,7 @@
                      (concat ns-selected ns-extras))
 
         ;; generate for all namespaces
-        files  (mapv compile-fn ns-compile)]
+        files  (mapcat (comp compile/compile-result-seq compile-fn) ns-compile)]
     (compile/compile-summarise files)))
 
 (defn compile-module-directory

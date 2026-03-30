@@ -1,0 +1,18 @@
+* Go user directory example
+
+This example shows a minimal =def.make= Go project. The source logic lives in
+=main.clj= using =l/script :go=. Running the build writes a small Go library
+project into =.build/= with:
+
+- =.gitignore=
+- =Makefile=
+- =go.mod=
+- =user_directory.go=
+
+The generated =user_directory.go= is a normal Go source file with an explicit
+=package userdirectory= header, so the emitted project can be built with:
+
+#+begin_src bash
+cd .build
+make build
+#+end_src

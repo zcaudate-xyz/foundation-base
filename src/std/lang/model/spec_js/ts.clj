@@ -1,6 +1,6 @@
 (ns std.lang.model.spec-js.ts
   (:require [clojure.string :as str]
-            [std.lang.typed.xtalk-analysis :as analysis]
+            [std.lang.model.spec-xtalk.mixer :as mixer]
             [std.lang.typed.xtalk-common :as types]))
 
 (declare emit-ts-type)
@@ -20,9 +20,11 @@
   [type-name current-ns]
   (cond
     (symbol? type-name)
-    (if (= current-ns (some-> type-name namespace symbol))
-      (sanitize-ts-ident (clojure.core/name type-name))
-      (sanitize-ts-ident (str (namespace type-name) "_" (clojure.core/name type-name))))
+    (if-let [type-ns (some-> type-name namespace symbol)]
+      (if (= current-ns type-ns)
+        (sanitize-ts-ident (clojure.core/name type-name))
+        (sanitize-ts-ident (str (namespace type-name) "_" (clojure.core/name type-name))))
+      (sanitize-ts-ident (clojure.core/name type-name)))
 
     (string? type-name)
     (sanitize-ts-ident type-name)
@@ -282,18 +284,44 @@
          (emit-ts-type (:type value-def) current-ns)
          ";")))
 
+(defn emitted-specs
+  [{:keys [specs functions values]}]
+  (let [fn-names    (set (map :name functions))
+        value-names (set (map :name values))]
+    (remove (fn [spec]
+              (let [kind (get-in spec [:type :kind])
+                    name (:name spec)]
+                (or (and (= :fn kind)
+                         (contains? fn-names name))
+                    (and (not= :fn kind)
+                         (contains? value-names name)))))
+            specs)))
+
 (defn emit-analysis-declarations
   [{:keys [specs functions values] :as analysis}]
   (->> (concat
         (when-let [imports (not-empty (emit-imports analysis))]
           [imports])
-        (map emit-spec-declaration specs)
+        (map emit-spec-declaration (emitted-specs analysis))
         (map emit-function-declaration functions)
         (map emit-value-declaration values))
         (str/join "\n\n")))
 
+(defn declaration-output-path
+  [output]
+  (if (str/includes? output ".")
+    (str/replace output #"\.[^./]+$" ".d.ts")
+    (str output ".d.ts")))
+
+(defn module-dts-artifact
+  [{:keys [main runtime-output]}]
+  {:output (declaration-output-path runtime-output)
+   :body   (-> main
+               mixer/mix-namespace
+               emit-analysis-declarations)})
+
 (defn emit-namespace-declarations
   [ns-sym]
   (-> ns-sym
-      analysis/analyze-namespace
+      mixer/mix-namespace
       emit-analysis-declarations))

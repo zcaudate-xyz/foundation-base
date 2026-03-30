@@ -101,9 +101,17 @@
   [file-path]
   (analysis/analyze-file file-path))
 
+(defn analyze-file-raw
+  [file-path]
+  (analysis/analyze-file-raw file-path))
+
 (defn analyze-namespace
   [ns-sym]
   (analysis/analyze-namespace ns-sym))
+
+(defn analyze-namespace-raw
+  [ns-sym]
+  (analysis/analyze-namespace-raw ns-sym))
 
 (defn analyze-and-register!
   [ns-sym]

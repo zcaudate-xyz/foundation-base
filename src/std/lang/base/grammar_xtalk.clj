@@ -558,9 +558,13 @@
 ;; XTALK COMMON INTERFACES
 ;;
 
+;; common-lib
+
 (def +xt-common-basic+
-  [{:op :x-del            :symbol #{'x:del}             :emit :abstract}
-   {:op :x-cat            :symbol #{'x:cat}             :emit :abstract}
+  [{:op :x-del            :symbol #{'x:del}             :emit :abstract  
+    :lowered 1 :arglists '([var]) :type [:fn [:xt/any] :xt/any]}
+   {:op :x-cat            :symbol #{'x:cat}             :emit :abstract  
+    :lowered 2 :arglists '([a b & more]) :type [:fn [:xt/any :xt/any] :xt/str]}
    {:op :x-len            :symbol #{'x:len}             :emit :abstract
     :op-spec {:arglists '([value])
               :type [:fn [:xt/any] :xt/int]}}
@@ -666,6 +670,12 @@
     :op-spec {:arglists '([value])
               :type [:fn [:xt/any] :xt/bool]}}])
 
+(def +xt-common-print+
+  [{:op :x-print          :symbol #{'x:print}           :emit :abstract}])
+
+
+;; common-data
+
 (def +xt-common-lu+       
   [{:op :x-lu-create      :symbol #{'x:lu-create}       :emit :unit :default {}}
    {:op :x-lu-eq          :symbol #{'x:lu-eq}           :macro #'tf-lu-eq :emit :macro}
@@ -685,15 +695,15 @@
    {:op :x-obj-keys       :symbol #{'x:obj-keys}        :emit :hard-link :raw 'xt.lang.common-data/obj-keys
     :op-spec {:arglists '([obj])
               :type [:fn [:xt/obj] [:xt/array :xt/str]]}}
-   {:op :x-obj-vals       :symbol #{'x:obj-vals}        :emit :hard-link :raw 'xt.lang.base-lib/obj-vals
+   {:op :x-obj-vals       :symbol #{'x:obj-vals}        :emit :hard-link :raw 'xt.lang.common-data/obj-vals
     :op-spec {:arglists '([obj])}}
-   {:op :x-obj-pairs      :symbol #{'x:obj-pairs}       :emit :hard-link :raw 'xt.lang.base-lib/obj-pairs
+   {:op :x-obj-pairs      :symbol #{'x:obj-pairs}       :emit :hard-link :raw 'xt.lang.common-data/obj-pairs
     :op-spec {:arglists '([obj])}}
-   {:op :x-obj-clone      :symbol #{'x:obj-clone}       :emit :hard-link :raw 'xt.lang.base-lib/obj-clone
+   {:op :x-obj-clone      :symbol #{'x:obj-clone}       :emit :hard-link :raw 'xt.lang.common-data/obj-clone
     :op-spec {:arglists '([obj])}}
-   {:op :x-obj-assign     :symbol #{'x:obj-assign}      :emit :hard-link :raw 'xt.lang.base-lib/obj-assign
+   {:op :x-obj-assign     :symbol #{'x:obj-assign}      :emit :hard-link :raw 'xt.lang.common-data/obj-assign
     :op-spec {:arglists '([obj other])}}
-   {:op :x-obj-from-pairs :symbol #{'x:obj-from-pairs}  :emit :hard-link :raw 'xt.lang.base-lib/obj-from-pairs}])
+   {:op :x-obj-from-pairs :symbol #{'x:obj-from-pairs}  :emit :hard-link :raw 'xt.lang.common-data/obj-from-pairs}])
 
 (def +xt-common-array+
   [{:op :x-get-idx         :symbol #{'x:get-idx}          :macro #'tf-get-key     :emit :macro
@@ -710,11 +720,10 @@
    {:op :x-arr-pop-first   :symbol #{'x:arr-pop-first}    :emit :abstract}
    {:op :x-arr-insert      :symbol #{'x:arr-insert}       :emit :abstract}
    {:op :x-arr-str-comp    :symbol #{'x:arr-str-comp}     :emit :abstract}
-   {:op :x-arr-slice       :symbol #{'x:arr-splice}       :emit :hard-link :raw 'xt.lang.base-lib/arr-slice}
-   {:op :x-arr-reverse     :symbol #{'x:arr-reverse}      :emit :hard-link :raw 'xt.lang.base-lib/arr-reverse}])
+   {:op :x-arr-slice       :symbol #{'x:arr-splice}       :emit :hard-link :raw 'xt.lang.common-data/arr-slice}
+   {:op :x-arr-reverse     :symbol #{'x:arr-reverse}      :emit :hard-link :raw 'xt.lang.common-data/arr-reverse}])
 
-(def +xt-common-print+
-  [{:op :x-print          :symbol #{'x:print}           :emit :abstract}])
+;; common-string
 
 (def +xt-common-string+
   [{:op :x-str-len         :symbol #{'x:str-len}         :emit :alias :raw 'x:len}
@@ -745,6 +754,8 @@
    {:op :x-str-trim        :symbol #{'x:str-trim}        :emit :abstract}
    {:op :x-str-trim-left   :symbol #{'x:str-trim-left}   :emit :abstract}
    {:op :x-str-trim-right  :symbol #{'x:str-trim-right}  :emit :abstract}])
+
+;; common-math
 
 (def +xt-common-math+       
   [{:op :x-m-abs          :symbol #{'x:m-abs}        :emit :abstract}

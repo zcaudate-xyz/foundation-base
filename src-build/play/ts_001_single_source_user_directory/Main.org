@@ -1,0 +1,47 @@
+#+STARTUP: showall
+
+* TypeScript Single-Source User Directory
+
+This example shows the single-source version of the JS plus =.d.ts= pipeline.
+
+One file, =main.clj=, is used for both outputs:
+
+- runtime JavaScript is compiled from the xtalk namespace with =:lang :js=
+- declarations are generated from the same file through the mixer
+
+* Generated build tree
+
+Running =(make/build-all PROJECT)= writes:
+
+- =.build/.gitignore=
+- =.build/Makefile=
+- =.build/package.json=
+- =.build/src/index.js=
+- =.build/src/index.d.ts=
+
+*** Build the project
+
+#+BEGIN_SRC clojure :results output silent :cache no :eval no
+(load-file "build.clj")
+(require '[std.make :as make]
+         '[play.ts-001-single-source-user-directory.build :as build])
+(make/build-all build/PROJECT)
+#+END_SRC
+
+*** Inspect the generated declarations
+
+#+BEGIN_SRC clojure :results output silent :cache no :eval no
+(load-file "build.clj")
+(require '[std.make :as make]
+         '[play.ts-001-single-source-user-directory.build :as build])
+(make/run build/PROJECT :show-types)
+#+END_SRC
+
+*** Inspect the generated JavaScript
+
+#+BEGIN_SRC clojure :results output silent :cache no :eval no
+(load-file "build.clj")
+(require '[std.make :as make]
+         '[play.ts-001-single-source-user-directory.build :as build])
+(make/run build/PROJECT :show-js)
+#+END_SRC

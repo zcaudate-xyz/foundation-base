@@ -131,6 +131,15 @@
   (count (:specs (analyze-file "test/std/lang/model/spec_xtalk_typed_fixture.clj")))
   => 3)
 
+^{:refer std.lang.typed.xtalk/analyze-namespace-raw :added "4.1"}
+(fact "exposes raw namespace analysis through facade"
+  (->> (analyze-namespace-raw 'std.lang.model.spec-xtalk-typed-fixture)
+       :functions
+       (some #(when (= "find-user" (:name %)) %))
+       :output
+       :name)
+  => :xt/unknown)
+
 ^{:refer std.lang.typed.xtalk/analyze-namespace :added "4.1"}
 (fact "analyzes namespaces through facade"
   (:ns (analyze-namespace 'std.lang.model.spec-xtalk-typed-fixture))

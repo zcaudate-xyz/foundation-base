@@ -1,14 +1,15 @@
 (ns std.lang.base.compile-test
   (:require [rt.postgres.test.scratch-v1 :as scratch]
-            [std.fs :as fs]
-            [std.lang.base.compile :refer :all]
-            [std.lang.base.impl :as impl]
-            [std.lang.base.library :as lib]
-            [std.lang.base.library-snapshot :as snap]
-            [std.make :as make]
-            [std.make.compile :as compile]
-            [xt.lang.base-iter :as it]
-            [xt.lang.base-lib :as k])
+             [std.fs :as fs]
+             [std.lang.base.compile :refer :all]
+             [std.lang.base.impl :as impl]
+             [std.lang.base.library :as lib]
+             [std.lang.base.library-snapshot :as snap]
+             [std.lang.model.spec-js.ts :as ts]
+             [std.make :as make]
+             [std.make.compile :as compile]
+             [xt.lang.base-iter :as it]
+             [xt.lang.base-lib :as k])
   (:use code.test))
 
 ^{:refer std.lang.base.compile/compile-script :added "4.0"}
@@ -47,6 +48,23 @@
   => (contains-in
       [".build/src/pkg/file.lua"
        string?]))
+
+(fact "compiles a single module with sidecar artifacts"
+  ^:hidden
+
+  (make/with:mock-compile
+    (compile-module-single
+     {:lang :js
+      :root   ".build"
+      :target "src"
+      :file   "pkg/file.js"
+      :main   'xt.lang.base-lib
+      :layout :flat
+      :entry {:label true}
+      :emit  {:artifacts [#'ts/module-dts-artifact]}}))
+  => (contains-in
+      [[".build/src/pkg/file.js" string?]
+       [".build/src/pkg/file.d.ts" string?]]))
 
 ^{:refer std.lang.base.compile/compile-module-graph :added "4.0"}
 (fact "compiles a module graph"
@@ -108,7 +126,18 @@
        :directory
        ['xt.lang.base-lib 'xt.lang.base-iter]
        {:lang :lua :main 'xt.lang.base-lib :root ".build" :target "src"})))
-  => (contains {:files 1}))
+  => (contains {:files 1})
+
+  (compile/with:mock-compile
+    (compile-module-directory-selected
+      :directory
+      ['xt.lang.base-lib]
+      {:lang :js
+       :main 'xt.lang.base-lib
+       :root ".build"
+       :target "src"
+       :emit {:artifacts [#'ts/module-dts-artifact]}}))
+  => (contains {:files 2}))
 
 ^{:refer std.lang.base.compile/compile-module-prep :added "4.0"}
 (fact "precs the single entry point setup"
