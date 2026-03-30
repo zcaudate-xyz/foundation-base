@@ -36,3 +36,7 @@
 
   (spec-dart/dart-map-key '(+ a 1) spec-dart/+grammar+ {})
   => "(a + 1)")
+
+(fact "xtalk error throws"
+  (l/emit-as :dart ['(x-err "error")])
+  => "throw \"error\"")
