@@ -20,13 +20,13 @@
 
 ^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-x-get-key :added "4.0"}
 (fact "gets key"
-  (l/emit-as :python [(python-tf-x-get-key '[_ obj key default])])
-  => #"or")
+  (python-tf-x-get-key '[_ obj key default])
+  => '(or (. obj (get key)) default))
 
 ^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-x-err :added "4.0"}
 (fact "raises error"
-  (l/emit-as :python [(python-tf-x-err '[_ "msg"])])
-  => #"raise")
+  (python-tf-x-err '[_ "msg"])
+  => '(raise (Exception "msg")))
 
 ^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-x-eval :added "4.0"}
 (fact "evals"
@@ -135,8 +135,8 @@
 
 ^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-x-m-pow :added "4.0"}
 (fact "math pow"
-  (l/emit-as :python [(python-tf-x-m-pow '[_ 1 2])])
-  => #"\*\*")
+  (python-tf-x-m-pow '[_ 1 2])
+  => '(** 1 2))
 
 ^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-x-m-sin :added "4.0"}
 (fact "math sin"
