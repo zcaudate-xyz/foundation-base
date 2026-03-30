@@ -33,7 +33,10 @@
             :suffix "rb"}
    :dart   {:script :dart
             :dispatch '!.dart
-            :suffix "dart"}})
+            :suffix "dart"}
+   :php    {:script :php
+            :dispatch '!.php
+            :suffix "php"}})
 
 (def +runtime-lang-aliases+
   {:ruby :rb})
