@@ -256,7 +256,7 @@
    (template/$ (. ~lu (delete ~obj)))))
 
 (def +js-lu+
-  {:x-lu-create      {:default '(new WeakMap)}
+  {:x-lu-create      {:emit :unit :default '(new WeakMap)}
    :x-lu-get         {:macro #'js-tf-x-lu-get :emit :macro}
    :x-lu-set         {:macro #'js-tf-x-lu-set :emit :macro}
    :x-lu-del         {:macro #'js-tf-x-lu-del :emit :macro}})

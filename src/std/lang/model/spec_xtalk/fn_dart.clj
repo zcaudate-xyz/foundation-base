@@ -1,13 +1,6 @@
 (ns std.lang.model.spec-xtalk.fn-dart
   (:require [std.lib.collection :as collection]))
 
-(defn- add-sym
-  [m]
-  (collection/map-entries (fn [[k v]]
-                            [k (assoc v :symbol #{(symbol (name k))
-                                                  (symbol (clojure.string/replace (name k) "-" ":"))})])
-                          m))
-
 (defn dart-tf-x-len
   [[_ arr]]
   (list '. arr 'length))
@@ -400,4 +393,20 @@
      :x-spit           {:macro #'dart-tf-x-spit            :emit :macro}})
 
 (def +dart+
-  (merge +dart-core+ +dart-math+ +dart-type+ +dart-str+ +dart-lu+ +dart-json+ +dart-arr+ +dart-cache+ +dart-future+ +dart-iter+ +dart-socket+ +dart-proto+ +dart-return+ +dart-thread+ +dart-b64+ +dart-uri+ +dart-file+))
+  (merge +dart-core+
+         +dart-math+
+         +dart-type+
+         +dart-str+
+         +dart-lu+
+         +dart-json+
+         +dart-arr+
+         +dart-cache+
+         +dart-future+
+         +dart-iter+
+         +dart-socket+
+         +dart-proto+
+         +dart-return+
+         +dart-thread+
+         +dart-b64+
+         +dart-uri+
+         +dart-file+))

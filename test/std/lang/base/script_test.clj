@@ -7,9 +7,11 @@
             [std.lang.base.library :as lib]
             [std.lang.base.library-snapshot :as snap]
             [std.lang.base.runtime :as rt]
-            [std.lang.base.script :as script]
-            [std.lang.model.spec-lua :as lua]
-            [std.lib.env :as env])
+             [std.lang.base.script :as script]
+             [std.lang.model.spec-lua :as lua]
+             [std.lib.env :as env]
+             [xt.lang.common-data]
+             [xt.lang.common-lib])
   (:use code.test))
 
 (def +library+
@@ -19,7 +21,7 @@
 
 (l/script+ [:LUA.0 :lua]
   {:runtime :oneshot
-   :require [[xt.lang.base-lib :as k]]})
+   :require [[xt.lang.common-data :as k]]})
 
 ^{:refer std.lang.base.script/install :added "4.0"}
 (fact "installs a language"
@@ -35,8 +37,8 @@
   ^:hidden
   
   (impl/with:library [+library+]
-    (script/script-ns-import {:require '[[xt.lang.base-lib :as k :primary true]]}))
-  => '#{xt.lang.base-lib})
+    (script/script-ns-import {:require '[[xt.lang.common-data :as k :primary true]]}))
+  => '#{xt.lang.common-data})
 
 ^{:refer std.lang.base.script/script-macro-import :added "4.0"}
 (fact "import macros into the namespace"
@@ -62,8 +64,8 @@
   (impl/with:library [+library+]
     (binding [book/*skip-check* true]
       (keys (script/script-fn-base :lua 'std.lang.base.script-test
-                                   {:require '[[xt.lang.base-lib :as k]]}
-                                   (l/runtime-library)))))
+                                   {:require '[[xt.lang.common-data :as k]]}
+                                    (l/runtime-library)))))
   => (contains [:module :module/internal :module/primary]))
 
 ^{:refer std.lang.base.script/script-fn :added "4.0"}
@@ -125,11 +127,11 @@
   ^:hidden
   
   (l/! [:LUA.0] (k/arr-map [1 2 3 4]
-                           k/inc))
+                           (fn:> [x] (+ x 1))))
   => [2 3 4 5]
 
   (l/! [:NOT-FOUND] (k/arr-map [1 2 3 4]
-                               k/inc))
+                               (fn:> [x] (+ x 1))))
   => (throws))
 
 ^{:refer std.lang.base.script/annex:start :added "4.0"}

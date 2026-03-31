@@ -1,21 +1,25 @@
 (ns std.lang.base.impl-deps-imports-test
-  (:require [js.blessed]
-            [js.react]
-            [std.lang.base.book :as b]
+  (:require [xt.lang.common-data]
+             [xt.lang.common-lib]
+             [js.blessed]
+             [js.react]
+             [std.lang.base.book :as b]
             [std.lang.base.emit-prep-js-test :as prep-js]
             [std.lang.base.emit-prep-lua-test :as prep-lua]
             [std.lang.base.impl :as impl]
             [std.lang.base.impl-deps :as deps]
-            [std.lang.base.impl-deps-imports :as deps-imports]
-            [std.lang.base.impl-entry :as entry]
-            [std.lang.base.library :as lib]
-            [std.lang.base.library-snapshot :as snap]
-            [std.lang.model.spec-lua :as lua])
+             [std.lang.base.impl-deps-imports :as deps-imports]
+             [std.lang.base.impl-entry :as entry]
+             [std.lang.base.library :as lib]
+             [std.lang.base.library-snapshot :as snap]
+             [std.lang.model.spec-lua :as lua])
   (:use code.test))
 
 (def +library-js-cloned+
   (let [lib (impl/clone-default-library)]
     (impl/with:library [lib]
+      (require '[xt.lang.common-data] :reload)
+      (require '[xt.lang.common-lib] :reload)
       (require '[js.react] :reload)
       (require '[js.blessed] :reload)
       (require '[js.blessed.ui-core] :reload)
@@ -298,15 +302,17 @@
               js.blessed.ui-group
               js.blessed.frame-console
               xt.lang.base-lib
+              xt.lang.common-data
               js.react
               js.blessed.ui-core}
        :graph {js.blessed.frame-console  #{js.blessed.ui-group
                                            xt.lang.base-lib
-                                          js.blessed.ui-core}
+                                           js.blessed.ui-core}
                js.blessed.ui-group       #{js.blessed.ui-style
                                            xt.lang.base-lib
                                            js.react}
-               xt.lang.base-lib          #{}
+               xt.lang.base-lib          #{xt.lang.common-data}
+               xt.lang.common-data       #{}
                js.blessed.ui-core        #{js.blessed.ui-style
                                            xt.lang.base-lib
                                            js.react}
@@ -319,9 +325,10 @@
       +library-js-cloned+
       :js)
      '[js.react]))
-  => '{:all #{xt.lang.base-lib js.react},
+  => '{:all #{xt.lang.base-lib xt.lang.common-data js.react},
        :graph {js.react #{xt.lang.base-lib},
-               xt.lang.base-lib #{}}})
+               xt.lang.base-lib #{xt.lang.common-data},
+               xt.lang.common-data #{}}})
 
 (comment
 

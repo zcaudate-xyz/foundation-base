@@ -11,6 +11,7 @@
   "config/xtalk/xtalk_ops.edn")
 
 (defn var->symbol
+  "converts a var or symbol to a canonical symbol"
   [x]
   (cond
     (var? x)

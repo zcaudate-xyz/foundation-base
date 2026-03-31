@@ -98,7 +98,7 @@
    (if true
      (println "Yes")
      (println "No")))
-  => "if true\n  println(\"Yes\") end\nelse\n  println(\"No\") end\nend"
+  => "if true\n  println(\"Yes\")\nelse\n  println(\"No\")\nend"
 
   (!.julia
    (for [i :in (to 1 1 3)]

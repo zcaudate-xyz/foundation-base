@@ -715,6 +715,7 @@
   (let [[fact-sym title & body] fact-form]
     (if (empty? body)
       {:shared fact-form
+       :runtime? false
        :langs {}}
       (loop [xs body
              runtime? false
@@ -736,10 +737,11 @@
                       (with-meta
                         (list fact-sym title)
                         (meta fact-form)))
+            :runtime? runtime?
             :langs (into {}
-                         (keep (fn [[lang clauses]]
-                                 (when (seq clauses)
-                                   [lang (with-meta
+                        (keep (fn [[lang clauses]]
+                                (when (seq clauses)
+                                  [lang (with-meta
                                           (apply list
                                                  fact-sym
                                                  title
@@ -783,17 +785,21 @@
         shared-facts (atom [])
         by-lang (atom (zipmap langs (repeat [])))]
     (doseq [fact-form facts]
-      (let [{:keys [shared langs]} (split-fact-form fact-form langs)]
-        (when shared
+      (let [{:keys [shared langs runtime?]} (split-fact-form fact-form langs)]
+        (when (and shared
+                   (or (not runtime?)
+                       (> (count shared) 2)))
           (swap! shared-facts conj shared))
         (doseq [[lang split-form] langs]
           (swap! by-lang update lang conj split-form))))
     {:shared (vec (concat
                    [(replace-ns-name ns-form (second ns-form))]
+                   (remove nil?
+                           [(when fact-global fact-global)])
                    @shared-facts))
-     :by-lang (into {}
-                    (keep (fn [lang]
-                            (let [script-form (first (get scripts lang))
+      :by-lang (into {}
+                     (keep (fn [lang]
+                             (let [script-form (first (get scripts lang))
                                   fact-forms (get @by-lang lang)]
                               (when (seq fact-forms)
                                 [lang (vec (concat

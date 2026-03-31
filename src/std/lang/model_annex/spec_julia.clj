@@ -159,7 +159,7 @@
                  :while     {:body    {:start "" :end "end"}}
                  :branch    {:wrap    {:start "" :end "end"}
                              :control {:default {:parameter  {:start " " :end ""}
-                                                 :body {:append true :start "" :end " end"}}
+                                                 :body {:append true :start "" :end ""}}
                                        :if      {:raw "if"}
                                        :elseif  {:raw "elseif"}
                                        :else    {:raw "else"}}}}

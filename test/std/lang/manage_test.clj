@@ -3,6 +3,7 @@
             [std.lang.manage.xtalk-audit :as audit]
             [std.lang.manage.xtalk-ops :as xtalk-ops]
             [std.lang.manage.xtalk-scaffold :as scaffold])
+            [std.task :as task])
   (:use code.test))
 
 (fact "xtalk inventory interfaces return language keyed maps"
@@ -15,11 +16,11 @@
   => [true true true true true true])
 
 (fact "xtalk manage exposes task-pluggable interfaces"
-  [(fn? manage/xtalk-status)
-   (fn? manage/xtalk-model-status)
-   (fn? manage/xtalk-runtime-status)
-   (fn? manage/xtalk-spec-status)
-   (fn? manage/xtalk-test-status)]
+  [(task/task? manage/xtalk-status)
+   (task/task? manage/xtalk-model-status)
+   (task/task? manage/xtalk-runtime-status)
+   (task/task? manage/xtalk-spec-status)
+   (task/task? manage/xtalk-test-status)]
   => [true true true true true])
 
 (fact "xtalk status tasks run through std.task"
@@ -66,27 +67,27 @@
 
 ^{:refer std.lang.manage/xtalk-status :added "4.1"}
 (fact "status task is invokable"
-  (fn? manage/xtalk-status)
+  (task/task? manage/xtalk-status)
   => true)
 
 ^{:refer std.lang.manage/xtalk-model-status :added "4.1"}
 (fact "model status task is invokable"
-  (fn? manage/xtalk-model-status)
+  (task/task? manage/xtalk-model-status)
   => true)
 
 ^{:refer std.lang.manage/xtalk-runtime-status :added "4.1"}
 (fact "runtime status task is invokable"
-  (fn? manage/xtalk-runtime-status)
+  (task/task? manage/xtalk-runtime-status)
   => true)
 
 ^{:refer std.lang.manage/xtalk-spec-status :added "4.1"}
 (fact "spec status task is invokable"
-  (fn? manage/xtalk-spec-status)
+  (task/task? manage/xtalk-spec-status)
   => true)
 
 ^{:refer std.lang.manage/xtalk-test-status :added "4.1"}
 (fact "test status task is invokable"
-  (fn? manage/xtalk-test-status)
+  (task/task? manage/xtalk-test-status)
   => true)
 
 ^{:refer std.lang.manage.xtalk-audit/xtalk-op-map :added "4.1"}
@@ -117,65 +118,65 @@
 
 ^{:refer std.lang.manage/xtalk-categories :added "4.1"}
 (fact "xtalk-categories task is available"
-  (fn? manage/xtalk-categories)
+  (task/task? manage/xtalk-categories)
   => true)
 
 ^{:refer std.lang.manage/xtalk-op-map :added "4.1"}
 (fact "xtalk-op-map task is available"
-  (fn? manage/xtalk-op-map)
+  (task/task? manage/xtalk-op-map)
   => true)
 
 ^{:refer std.lang.manage/xtalk-symbols :added "4.1"}
 (fact "xtalk-symbols task is available"
-  (fn? manage/xtalk-symbols)
+  (task/task? manage/xtalk-symbols)
   => true)
 
 ^{:refer std.lang.manage/installed-languages :added "4.1"}
 (fact "installed-languages task is available"
-  (fn? manage/installed-languages)
+  (task/task? manage/installed-languages)
   => true)
 
 ^{:refer std.lang.manage/audit-languages :added "4.1"}
 (fact "audit-languages task is available"
-  (fn? manage/audit-languages)
+  (task/task? manage/audit-languages)
   => true)
 
 ^{:refer std.lang.manage/support-matrix :added "4.1"}
 (fact "support-matrix task is available"
-  (fn? manage/support-matrix)
+  (task/task? manage/support-matrix)
   => true)
 
 ^{:refer std.lang.manage/missing-by-language :added "4.1"}
 (fact "missing-by-language task is available"
-  (fn? manage/missing-by-language)
+  (task/task? manage/missing-by-language)
   => true)
 
 ^{:refer std.lang.manage/missing-by-feature :added "4.1"}
 (fact "missing-by-feature task is available"
-  (fn? manage/missing-by-feature)
+  (task/task? manage/missing-by-feature)
   => true)
 
 ^{:refer std.lang.manage/visualize-support :added "4.1"}
 (fact "visualize-support task is available"
-  (fn? manage/visualize-support)
+  (task/task? manage/visualize-support)
   => true)
 
 ^{:refer std.lang.manage/generate-xtalk-ops :added "4.1"}
 (fact "generate-xtalk-ops task is available"
-  (fn? manage/generate-xtalk-ops)
+  (task/task? manage/generate-xtalk-ops)
   => true)
 
 ^{:refer std.lang.manage/scaffold-xtalk-grammar-tests :added "4.1"}
 (fact "scaffold-xtalk-grammar-tests task is available"
-  (fn? manage/scaffold-xtalk-grammar-tests)
+  (task/task? manage/scaffold-xtalk-grammar-tests)
   => true)
 
 ^{:refer std.lang.manage/separate-runtime-tests :added "4.1"}
 (fact "separate-runtime-tests task is available"
-  (fn? manage/separate-runtime-tests)
+  (task/task? manage/separate-runtime-tests)
   => true)
 
 ^{:refer std.lang.manage/scaffold-runtime-template :added "4.1"}
 (fact "scaffold-runtime-template task is available"
-  (fn? manage/scaffold-runtime-template)
+  (task/task? manage/scaffold-runtime-template)
   => true)

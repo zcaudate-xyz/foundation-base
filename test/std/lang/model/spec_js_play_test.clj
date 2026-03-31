@@ -1,13 +1,14 @@
 (ns std.lang.model.spec-js-play-test
   (:use code.test)
   (:require [clojure.string :as str]
-            [std.lang.model.spec-xtalk.mixer :as mixer]
-            [std.lang.model.spec-js.ts :as ts]))
+             [std.lang.model.spec-xtalk.mixer :as mixer]
+             [std.lang.model.spec-js.ts :as ts]))
 
-(load-file "src-play/demo/typescript_model.clj")
+(def +typescript-model-fixture+
+  "test/std/lang/model/typescript_model_fixture.clj")
 
 (fact "emits TypeScript declarations for the playground model"
-  (let [analysis (mixer/mix-file "src-play/demo/typescript_model.clj")
+  (let [analysis (mixer/mix-file +typescript-model-fixture+)
         out (ts/emit-analysis-declarations analysis)]
     [(str/includes? out "export type UserId = string;")
      (str/includes? out "export type LookupKey = UserId | number;")
@@ -25,7 +26,7 @@
   => [true true true true true true true true true true true true true])
 
 (fact "keeps function declarations separate from defspec.xt data declarations"
-  (let [analysis (mixer/mix-file "src-play/demo/typescript_model.clj")]
+  (let [analysis (mixer/mix-file +typescript-model-fixture+)]
     [(mapv :name (:specs analysis))
      (mapv :name (:functions analysis))])
   => [["UserId" "LookupKey" "UserRow" "User" "UserMap" "SearchResult"]

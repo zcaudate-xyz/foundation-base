@@ -1,7 +1,10 @@
 (ns std.lang.model.spec-xtalk.mixer-test
   (:use code.test)
   (:require [std.lang.model.spec-xtalk.mixer :as mixer]
-            [std.lang.typed.xtalk-common :as types]))
+             [std.lang.typed.xtalk-common :as types]))
+
+(def +typescript-model-fixture+
+  "test/std/lang/model/typescript_model_fixture.clj")
 
 ^{:refer std.lang.model.spec-xtalk.mixer/mix-namespace :added "4.1"}
 (fact "mixes same-name callable specs for typed targets"
@@ -19,7 +22,7 @@
 
 ^{:refer std.lang.model.spec-xtalk.mixer/mix-file :added "4.1"}
 (fact "mixes analysis from file paths for sidecar emitters"
-  (-> (mixer/mix-file "src-play/demo/typescript_model.clj")
+  (-> (mixer/mix-file +typescript-model-fixture+)
       :functions
       first
       :name)

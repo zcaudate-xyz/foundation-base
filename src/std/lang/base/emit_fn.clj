@@ -134,10 +134,10 @@
          {:keys [sep space assign start end multiline]}
          (collection/merge-nested (helper/get-options grammar [:default :function :args])
                          (get-in grammar [:function key :args]))]
-     (str (if prefix (str prefix " "))
-          (if name (common/*emit-fn* name grammar mopts))
-          space
-          (cond (empty? iargs) (str start end)
+     (str (if (not-empty prefix) (str prefix " "))
+           (if name (common/*emit-fn* name grammar mopts))
+           space
+           (cond (empty? iargs) (str start end)
                 
                 multiline
                 (str start

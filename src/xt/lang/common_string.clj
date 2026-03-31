@@ -4,6 +4,7 @@
 (l/script :xtalk)
 
 (def$.xt get-char x:str-char)
+(def$.xt str-format x:str-format)
 (def$.xt split x:str-split)
 (def$.xt join x:str-join)
 (def$.xt replace x:str-replace)
