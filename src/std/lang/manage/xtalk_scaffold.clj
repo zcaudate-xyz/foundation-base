@@ -255,9 +255,16 @@
   [path]
   (let [rdr (block-reader/create (slurp path))]
     (loop [forms []]
-      (let [form (reader/read {:read-cond :allow
-                               :eof ::eof}
-                              rdr)]
+      (let [form (try
+                   (reader/read {:read-cond :allow
+                                 :eof ::eof}
+                                rdr)
+                   (catch Throwable t
+                     (throw (ex-info "Unable to read runtime test forms"
+                                     {:path path
+                                      :line (first (block-reader/reader-position rdr))
+                                      :column (second (block-reader/reader-position rdr))}
+                                     t))))]
         (if (= ::eof form)
           forms
           (recur (conj forms form)))))))
@@ -265,15 +272,15 @@
 (defn form-line-info
   [form]
   (let [m (meta form)]
+    (let [line (or (:line m) (:row m))
+          column (or (:column m) (:col m))
+          end-line (or (:end-line m) (:end-row m))
+          end-column (or (:end-column m) (:end-col m))]
     (cond-> {}
-      (:line m) (assoc :line (:line m))
-      (:column m) (assoc :column (:column m))
-      (:end-line m) (assoc :end-line (:end-line m))
-      (:end-column m) (assoc :end-column (:end-column m))
-      (:row m) (assoc :line (:row m))
-      (:col m) (assoc :column (:col m))
-      (:end-row m) (assoc :end-line (:end-row m))
-      (:end-col m) (assoc :end-column (:end-col m)))))
+      line (assoc :line line)
+      column (assoc :column column)
+      end-line (assoc :end-line end-line)
+      end-column (assoc :end-column end-column)))))
 
 (defn merge-language-exceptions
   [& inputs]
@@ -290,6 +297,7 @@
         {})))
 
 (defn strip-runtime-dispatch
+  "Removes runtime dispatch wrappers like `!.lua` while preserving the underlying form."
   [form]
   (cond (seq? form)
         (let [head (first form)]
@@ -441,7 +449,7 @@
          input-path (or input-path
                         (when source-test-ns
                           (test-file-path proj source-test-ns))
-                        (throw (ex-info "Requires runtime suite input-path or :ns"
+                        (throw (ex-info "Requires runtime suite input-path or a valid test :ns"
                                         {:params (dissoc params :write)})))
          suite (canonical-runtime-suite-forms (read-top-level-forms input-path) lang)
          output-path (or output-path
@@ -709,18 +717,23 @@
              leading-meta nil
              by-lang (zipmap langs (repeat []))]
         (if (empty? xs)
-          {:shared (cond
-                     (not runtime?)
-                     fact-form
+           {:shared (cond
+                      (not runtime?)
+                      fact-form
 
-                     (seq shared)
-                     (with-meta
-                       (apply list fact-sym title (concat prefix shared))
-                       (meta fact-form)))
-           :langs (into {}
-                        (keep (fn [[lang clauses]]
-                                (when (seq clauses)
-                                  [lang (with-meta
+                      (seq shared)
+                      (with-meta
+                        (apply list fact-sym title (concat prefix shared))
+                        (meta fact-form))
+
+                      :else
+                      (with-meta
+                        (list fact-sym title)
+                        (meta fact-form)))
+            :langs (into {}
+                         (keep (fn [[lang clauses]]
+                                 (when (seq clauses)
+                                   [lang (with-meta
                                           (apply list
                                                  fact-sym
                                                  title
