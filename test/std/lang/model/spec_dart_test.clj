@@ -14,6 +14,9 @@
   (l/emit-as :dart ['(new Person name)])
   => "new Person(name)"
 
+  (l/emit-as :dart ['(for [(var i := 0) (< i 3) (:++ i)] (print i))])
+  => "for(var i = 0; i < 3; ++i){\n  print(i)\n}"
+
   (l/emit-as :dart ['{:name "hello" :count 2}])
   => "{\"name\":\"hello\",\"count\":2}")
 
@@ -42,3 +45,78 @@
 (fact "xtalk error throws"
   (l/emit-as :dart ['(x:err "error")])
   => "throw \"error\"")
+
+(fact "for:* transforms for dart"
+  ^{:hidden true}
+
+  (spec-dart/tf-for-object '(for:object [[k v] obj]
+                             [k v]))
+  => '(for [(var entry) :in (. obj entries)]
+        (var k (. entry key))
+        (var v (. entry value))
+        [k v])
+
+  (spec-dart/tf-for-object '(for:object [[_ v] obj]
+                             v))
+  => '(for [(var v) :in (. obj values)]
+        v)
+
+  (spec-dart/tf-for-array '(for:array [[i e] arr]
+                            [i e]))
+  => '(for [(var i := 0) (< i (. arr length)) (:++ i)]
+        (var e (. arr [i]))
+        [i e])
+
+  (spec-dart/tf-for-array '(for:array [e arr]
+                            e))
+  => '(for [(var e) :in arr]
+        e)
+
+  (spec-dart/tf-for-iter '(for:iter [e iter]
+                           e))
+  => '(for [(var e) :in iter]
+        e)
+
+  (spec-dart/tf-for-return '(for:return [[ok err] (call (x:callback))]
+                               {:success (return ok)
+                                :error   (return err)}))
+  => '(call (fn [err ok]
+              (if err
+                (return err)
+                (return ok))))
+
+  (spec-dart/tf-for-try '(for:try [[ok err] (call)]
+                            {:success (return ok)
+                             :error   (return err)}))
+  => '(try
+        (var ok := (call))
+        (return ok)
+        (catch err (return err)))
+
+  (spec-dart/tf-for-async '(for:async [[ok err] (call)]
+                              {:success (return ok)
+                               :error   (return err)
+                               :finally (return true)}))
+  => '(. (Future (fn []
+                   (return (call))))
+        (then (fn [ok]
+                (return ok)))
+        (catchError (fn [err]
+                      (return err)))
+        (whenComplete (fn []
+                        (return true)))))
+
+(fact "for:* emission for dart"
+  (l/emit-as :dart ['(for:object [[k v] obj]
+                       [k v])])
+  => "for(var entry in obj.entries){\n  var k = entry.key\n  var v = entry.value\n  [k,v]\n}"
+
+  (l/emit-as :dart ['(for:array [[i e] arr]
+                       [i e])])
+  => "for(var i = 0; i < arr.length; ++i){\n  var e = arr[i]\n  [i,e]\n}"
+
+  (l/emit-as :dart ['(for:async [[ok err] (call)]
+                       {:success (return ok)
+                        :error   (return err)
+                        :finally (return true)})])
+  => "Future(() {\n  return call()\n}).then((ok) {\n  return ok\n}).catchError((err) {\n  return err\n}).whenComplete(() {\n  return true\n})")
