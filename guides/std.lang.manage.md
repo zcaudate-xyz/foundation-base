@@ -322,6 +322,39 @@ the realtime implementation without paying the full per-check overhead.
 the suite execution mode (`:realtime` vs `:batched`) so generated runtime templates can keep
 the correct runtime declaration when targeting languages like Dart.
 
+### Canonical Lua -> EDN -> Bulk Workflow
+
+The preferred direction for `xt.*` runtime correctness is now:
+
+1. Write a canonical `*-lua-test` namespace in normal `code.test` form.
+2. Export the Lua assertions into an EDN suite containing:
+   - the stripped runtime form
+   - the expected value
+   - source line information
+   - optional per-language exceptions
+3. For fast runtimes, apply those cases directly.
+4. For `:twostep` runtimes, compile the EDN suite into a single bulk payload and verify the
+   aggregated results back in Clojure.
+
+The scaffold entry points are:
+
+- `export-runtime-suite` – reads the canonical test namespace and emits suite EDN
+- `compile-runtime-bulk` – reads suite EDN and emits a batched verification payload for a
+  target language such as Dart or Go
+
+Language exceptions can be attached using metadata, for example:
+
+```clojure
+^{:lang-exceptions {:dart {:expect 30}
+                    :go   {:skip true}}}
+(fact "simple lua case"
+  (!.lua (+ 10 20))
+  => 30)
+```
+
+Per-language exception entries may override `:expect`, override `:form`, or mark a case with
+`:skip true`.
+
 ---
 
 ## Part 7: Iterative Development Workflow for Completing an Xtalk Language

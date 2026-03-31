@@ -1,9 +1,11 @@
 (ns std.lang.manage.xtalk-scaffold
   (:require [clojure.edn :as edn]
+            [clojure.tools.reader :as reader]
             [clojure.pprint :as pprint]
             [clojure.string :as str]
             [std.lang.manage.xtalk-ops :as xtalk-ops]
             [code.project :as project]
+            [std.block.reader :as block-reader]
             [std.fs :as fs]))
 
 (def ^:dynamic *grammar-test-path*
@@ -14,6 +16,9 @@
 
 (def ^:dynamic *runtime-test-langs*
   [:js :lua :python :r :php])
+
+(def ^:dynamic *canonical-runtime-lang*
+  :lua)
 
 (def +runtime-lang-config+
   {:js     {:script :js
@@ -62,6 +67,11 @@
 
 (def +runtime-executable-langs+
   #{:js :lua :python :r :rb :php})
+
+(declare runtime-expr-lang
+         expand-top-level-form
+         fact-form?
+         test-file-path)
 
 (defn read-xtalk-ops
   [path]
@@ -232,9 +242,243 @@
   [lang]
   (:suffix (runtime-lang-config lang)))
 
+(defn canonical-suite-path
+  [path]
+  (str/replace path #"(?:_test)?\.clj$" "_suite.edn"))
+
+(defn runtime-bulk-path
+  [path lang]
+  (str/replace path #"\.edn$"
+               (str "-" (runtime-lang-suffix lang) "-bulk.edn")))
+
 (defn read-top-level-forms
   [path]
-  (read-string (str "[" (slurp path) "]")))
+  (let [rdr (block-reader/create (slurp path))]
+    (loop [forms []]
+      (let [form (reader/read {:read-cond :allow
+                               :eof ::eof}
+                              rdr)]
+        (if (= ::eof form)
+          forms
+          (recur (conj forms form)))))))
+
+(defn form-line-info
+  [form]
+  (let [m (meta form)]
+    (cond-> {}
+      (:line m) (assoc :line (:line m))
+      (:column m) (assoc :column (:column m))
+      (:end-line m) (assoc :end-line (:end-line m))
+      (:end-column m) (assoc :end-column (:end-column m))
+      (:row m) (assoc :line (:row m))
+      (:col m) (assoc :column (:col m))
+      (:end-row m) (assoc :end-line (:end-row m))
+      (:end-col m) (assoc :end-column (:end-col m)))))
+
+(defn merge-language-exceptions
+  [& inputs]
+  (reduce (fn [out m]
+            (merge-with merge out (or m {})))
+          {}
+          inputs))
+
+(defn form-language-exceptions
+  [form]
+  (let [m (meta form)]
+    (or (:lang-exceptions m)
+        (:exceptions m)
+        {})))
+
+(defn strip-runtime-dispatch
+  [form]
+  (cond (seq? form)
+        (let [head (first form)]
+          (if-let [lang (get +runtime-dispatch-map+ (str head))]
+            (let [items (map strip-runtime-dispatch (rest form))]
+              (cond (empty? items) nil
+                    (= 1 (count items)) (first items)
+                    :else (with-meta (apply list 'do items) (meta form))))
+            (with-meta (apply list (map strip-runtime-dispatch form))
+              (meta form))))
+
+        (vector? form)
+        (with-meta (vec (map strip-runtime-dispatch form))
+          (meta form))
+
+        (set? form)
+        (with-meta (into #{} (map strip-runtime-dispatch form))
+          (meta form))
+
+        (map? form)
+        (with-meta (into (empty form)
+                         (map (fn [[k v]]
+                                [(strip-runtime-dispatch k)
+                                 (strip-runtime-dispatch v)])
+                              form))
+          (meta form))
+
+        :else
+        form))
+
+(defn fact-assertion-forms
+  [fact-form]
+  (let [[_ _ & body] fact-form]
+    (loop [xs body
+           out []]
+      (if (empty? xs)
+        out
+        (let [[expr arrow expect & more] xs]
+          (if (= '=> arrow)
+            (recur more (conj out [expr expect]))
+            (recur (rest xs) out)))))))
+
+(defn canonical-case-id
+  [source-ns title idx]
+  (str source-ns "::"
+       (str/replace (str title) #"\s+" "-")
+       "::"
+       idx))
+
+(defn fact-runtime-cases
+  [source-ns fact-form lang]
+  (let [[_ title] fact-form
+        fact-meta (meta fact-form)
+        fact-line (form-line-info fact-form)
+        fact-exceptions (form-language-exceptions fact-form)]
+    (->> (fact-assertion-forms fact-form)
+         (keep-indexed (fn [idx [expr expect]]
+                         (when (= lang (runtime-expr-lang expr))
+                           (let [expr-line (or (not-empty (form-line-info expr))
+                                               fact-line)
+                                 expr-exceptions (form-language-exceptions expr)]
+                             {:id (canonical-case-id source-ns title idx)
+                              :title title
+                              :lang lang
+                              :line expr-line
+                              :expr expr
+                              :form (strip-runtime-dispatch expr)
+                              :expect expect
+                              :exceptions (merge-language-exceptions fact-exceptions
+                                                                    expr-exceptions)
+                              :meta (dissoc fact-meta
+                                            :line
+                                            :column
+                                            :end-line
+                                            :end-column)}))))
+         vec)))
+
+(defn canonical-runtime-suite-forms
+  ([forms]
+   (canonical-runtime-suite-forms forms *canonical-runtime-lang*))
+  ([forms lang]
+   (let [lang (normalize-runtime-lang lang)
+         expanded (mapcat expand-top-level-form forms)
+         source-ns (some #(when (and (seq? %) (= 'ns (first %))) (second %)) forms)
+         facts (filter fact-form? expanded)
+         cases (mapcat #(fact-runtime-cases source-ns % lang) facts)]
+     {:ns source-ns
+      :lang lang
+      :runtime-type (runtime-type lang)
+      :check-mode (runtime-check-mode lang)
+      :cases (vec cases)
+      :exceptions (into (sorted-map)
+                        (keep (fn [{:keys [id exceptions]}]
+                                (when (seq exceptions)
+                                  [id exceptions])))
+                        cases)})))
+
+(defn case-language-config
+  [case lang]
+  (let [lang (normalize-runtime-lang lang)
+        exception (get (:exceptions case) lang)]
+    {:skip (true? (:skip exception))
+     :expect (if (contains? exception :expect)
+               (:expect exception)
+               (:expect case))
+     :form (or (:form exception)
+               (:form case))
+     :exception exception}))
+
+(defn compile-runtime-bulk-suite
+  [suite lang]
+  (let [lang (normalize-runtime-lang lang)
+        prepared (mapv (fn [case]
+                         (merge case (case-language-config case lang)))
+                       (:cases suite))
+        active (remove :skip prepared)]
+    {:ns (:ns suite)
+     :source-lang (:lang suite)
+     :lang lang
+     :runtime-type (runtime-type lang)
+     :check-mode (runtime-check-mode lang)
+     :bulk-form (vec
+                 (for [{:keys [id line form]} active]
+                   {:id id
+                    :line line
+                    :value form}))
+     :verify (vec
+              (for [{:keys [id title line expect]} active]
+                {:id id
+                 :title title
+                 :line line
+                 :expect expect}))
+     :skipped (vec
+               (for [{:keys [id title line exception skip]} prepared
+                     :when skip]
+                 {:id id
+                  :title title
+                  :line line
+                  :exception exception}))}))
+
+(defn export-runtime-suite
+  "Exports a canonical runtime test namespace to EDN cases."
+  ([_ {:keys [input-path output-path lang write]
+       :or {lang *canonical-runtime-lang*
+            write false}
+       :as params}]
+   (let [proj (project/project)
+         source-test-ns (some-> (:ns params) project/test-ns)
+         input-path (or input-path
+                        (when source-test-ns
+                          (test-file-path proj source-test-ns))
+                        (throw (ex-info "Requires runtime suite input-path or :ns"
+                                        {:params (dissoc params :write)})))
+         suite (canonical-runtime-suite-forms (read-top-level-forms input-path) lang)
+         output-path (or output-path
+                         (canonical-suite-path input-path))
+         content (pr-str suite)]
+     (when write
+       (fs/create-directory (fs/parent output-path))
+       (spit output-path content))
+     {:input-path input-path
+      :output-path output-path
+      :lang (:lang suite)
+      :count (count (:cases suite))
+      :suite suite
+      :content content})))
+
+(defn compile-runtime-bulk
+  "Compiles a canonical runtime EDN suite into a batched verification payload."
+  ([_ {:keys [input-path output-path lang write]
+       :or {write false}}]
+   (let [lang (normalize-runtime-lang lang)
+         input-path (or input-path
+                        (throw (ex-info "Requires canonical suite input-path"
+                                        {:lang lang})))
+         suite (edn/read-string (slurp input-path))
+         bulk (compile-runtime-bulk-suite suite lang)
+         output-path (or output-path
+                         (runtime-bulk-path input-path lang))
+         content (pr-str bulk)]
+     (when write
+       (fs/create-directory (fs/parent output-path))
+       (spit output-path content))
+     {:input-path input-path
+      :output-path output-path
+      :lang lang
+      :count (count (:verify bulk))
+      :bulk bulk
+      :content content})))
 
 (defn runtime-expr-lang
   [expr]

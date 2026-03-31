@@ -401,6 +401,14 @@
       [_ params _ _]
       (scaffold/scaffold-runtime-template nil params))
 
+(defn export-runtime-suite-fn
+      [_ params _ _]
+      (scaffold/export-runtime-suite nil params))
+
+(defn compile-runtime-bulk-fn
+      [_ params _ _]
+      (scaffold/compile-runtime-bulk nil params))
+
 (invoke/definvoke ^{:arglists '([] [params])}
  xtalk-categories
                   "returns all xtalk categories in declaration order"
@@ -499,11 +507,27 @@
 
 (invoke/definvoke ^{:arglists '([] [params])}
  scaffold-runtime-template
-                  "generates a runtime test file from a single-runtime template"
+                   "generates a runtime test file from a single-runtime template"
+                   {:added "4.1"}
+                   [:task {:template :lang.manage.action
+                           :params {:title "SCAFFOLD RUNTIME TEMPLATE"}
+                           :main {:fn #'scaffold-runtime-template-fn}}])
+
+(invoke/definvoke ^{:arglists '([] [params])}
+ export-runtime-suite
+                  "exports a canonical runtime test namespace to EDN cases"
                   {:added "4.1"}
                   [:task {:template :lang.manage.action
-                          :params {:title "SCAFFOLD RUNTIME TEMPLATE"}
-                          :main {:fn #'scaffold-runtime-template-fn}}])
+                          :params {:title "EXPORT RUNTIME SUITE"}
+                          :main {:fn #'export-runtime-suite-fn}}])
+
+(invoke/definvoke ^{:arglists '([] [params])}
+ compile-runtime-bulk
+                  "compiles a canonical runtime EDN suite into a batched verification payload"
+                  {:added "4.1"}
+                  [:task {:template :lang.manage.action
+                          :params {:title "COMPILE RUNTIME BULK"}
+                          :main {:fn #'compile-runtime-bulk-fn}}])
 
 ;;
 ;; Task Registry and Main Entry Point
@@ -534,7 +558,9 @@
    :generate-xtalk-ops     generate-xtalk-ops
    :scaffold-xtalk-grammar-tests  scaffold-xtalk-grammar-tests
    :separate-runtime-tests separate-runtime-tests
-   :scaffold-runtime-template scaffold-runtime-template})
+   :scaffold-runtime-template scaffold-runtime-template
+   :export-runtime-suite    export-runtime-suite
+   :compile-runtime-bulk    compile-runtime-bulk})
 
 (def +direct-tasks+
       #{:inventory
@@ -552,10 +578,12 @@
             :missing-by-language
             :missing-by-feature
             :visualize-support
-            :generate-xtalk-ops
-            :scaffold-xtalk-grammar-tests
-            :separate-runtime-tests
-            :scaffold-runtime-template})
+             :generate-xtalk-ops
+             :scaffold-xtalk-grammar-tests
+             :separate-runtime-tests
+             :scaffold-runtime-template
+             :export-runtime-suite
+             :compile-runtime-bulk})
 
 (defn- parse-main-arg
       [x]
