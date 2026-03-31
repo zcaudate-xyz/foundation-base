@@ -136,7 +136,9 @@
   (runtime-lang-config :php)
   => {:script :php
       :dispatch '!.php
-      :suffix "php"})
+      :suffix "php"
+      :runtime :basic
+      :check-mode :realtime})
 
 ^{:refer std.lang.manage.xtalk-scaffold/runtime-script-lang :added "4.1"}
 (fact "returns runtime script language"

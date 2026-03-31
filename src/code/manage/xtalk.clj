@@ -103,3 +103,11 @@
 (defn scaffold-runtime-template
     [& args]
     (call-manage 'scaffold-runtime-template args))
+
+(defn export-runtime-suite
+    [& args]
+    (call-manage 'export-runtime-suite args))
+
+(defn compile-runtime-bulk
+    [& args]
+    (call-manage 'compile-runtime-bulk args))

@@ -1,9 +1,11 @@
 (ns std.lang.manage.xtalk-scaffold
   (:require [clojure.edn :as edn]
+            [clojure.tools.reader :as reader]
             [clojure.pprint :as pprint]
             [clojure.string :as str]
             [std.lang.manage.xtalk-ops :as xtalk-ops]
             [code.project :as project]
+            [std.block.reader :as block-reader]
             [std.fs :as fs]))
 
 (def ^:dynamic *grammar-test-path*
@@ -15,37 +17,61 @@
 (def ^:dynamic *runtime-test-langs*
   [:js :lua :python :r :php])
 
+(def ^:dynamic *canonical-runtime-lang*
+  :lua)
+
 (def +runtime-lang-config+
   {:js     {:script :js
             :dispatch '!.js
-            :suffix "js"}
+            :suffix "js"
+            :runtime :basic
+            :check-mode :realtime}
    :lua    {:script :lua
             :dispatch '!.lua
-            :suffix "lua"}
+            :suffix "lua"
+            :runtime :basic
+            :check-mode :realtime}
    :python {:script :python
             :dispatch '!.py
-            :suffix "python"}
+            :suffix "python"
+            :runtime :basic
+            :check-mode :realtime}
    :r      {:script :r
             :dispatch '!.R
-            :suffix "r"}
+            :suffix "r"
+            :runtime :basic
+            :check-mode :realtime}
    :rb     {:script :ruby
             :dispatch '!.rb
-            :suffix "rb"}
+            :suffix "rb"
+            :runtime :basic
+            :check-mode :realtime}
    :dart   {:script :dart
             :dispatch '!.dt
-            :suffix "dt"}
+            :suffix "dt"
+            :runtime :twostep
+            :check-mode :batched}
    :php    {:script :php
             :dispatch '!.php
-            :suffix "php"}
+            :suffix "php"
+            :runtime :basic
+            :check-mode :realtime}
    :go    {:script :go
             :dispatch '!.go
-            :suffix "go"}})
+            :suffix "go"
+            :runtime :twostep
+            :check-mode :batched}})
 
 (def +runtime-lang-aliases+
   {:ruby :rb})
 
 (def +runtime-executable-langs+
   #{:js :lua :python :r :rb :php})
+
+(declare runtime-expr-lang
+         expand-top-level-form
+         fact-form?
+         test-file-path)
 
 (defn read-xtalk-ops
   [path]
@@ -142,7 +168,7 @@
 (defn scaffold-xtalk-grammar-tests
   "Renders a grammar xtalk test scaffold from xtalk_ops.edn."
   ([_ {:keys [ops-path output-path write]
-       :or {write false}}]
+        :or {write false}}]
    (let [proj (project/project)
          ops-path (xtalk-ops/ops-path proj ops-path)
          test-path (grammar-test-path proj output-path)
@@ -154,11 +180,13 @@
      (when write
        (fs/create-directory (fs/parent test-path))
        (spit test-path content))
-     {:path test-path
-      :ops-path ops-path
-      :count (count (grammar-entries entries))
-      :updated updated
-      :content content})))
+      {:path test-path
+       :ops-path ops-path
+       :count (count (grammar-entries entries))
+       :updated updated
+       :content content}))
+  ([_ params _ _]
+   (scaffold-xtalk-grammar-tests nil params)))
 
 (def +runtime-dispatch-map+
   (into {}
@@ -192,13 +220,279 @@
   [lang]
   (:dispatch (runtime-lang-config lang)))
 
+(defn runtime-type
+  [lang]
+  (:runtime (runtime-lang-config lang)))
+
+(defn runtime-check-mode
+  [lang]
+  (:check-mode (runtime-lang-config lang)))
+
+(defn runtime-suite-groups
+  ([] (runtime-suite-groups (keys +runtime-lang-config+)))
+  ([langs]
+   (->> langs
+        (map normalize-runtime-lang)
+        distinct
+        sort
+        (group-by runtime-check-mode)
+        (map (fn [[mode grouped-langs]]
+               [mode (vec (sort grouped-langs))]))
+        (into (sorted-map)))))
+
 (defn runtime-lang-suffix
   [lang]
   (:suffix (runtime-lang-config lang)))
 
+(defn canonical-suite-path
+  [path]
+  (str/replace path #"(?:_test)?\.clj$" "_suite.edn"))
+
+(defn runtime-bulk-path
+  [path lang]
+  (str/replace path #"\.edn$"
+               (str "-" (runtime-lang-suffix lang) "-bulk.edn")))
+
 (defn read-top-level-forms
   [path]
-  (read-string (str "[" (slurp path) "]")))
+  (let [rdr (block-reader/create (slurp path))]
+    (loop [forms []]
+      (let [form (try
+                   (reader/read {:read-cond :allow
+                                 :eof ::eof}
+                                rdr)
+                   (catch Throwable t
+                     (throw (ex-info "Unable to read runtime test forms"
+                                     {:path path
+                                      :line (first (block-reader/reader-position rdr))
+                                      :column (second (block-reader/reader-position rdr))}
+                                     t))))]
+        (if (= ::eof form)
+          forms
+          (recur (conj forms form)))))))
+
+(defn form-line-info
+  [form]
+  (let [m (meta form)]
+    (let [line (or (:line m) (:row m))
+          column (or (:column m) (:col m))
+          end-line (or (:end-line m) (:end-row m))
+          end-column (or (:end-column m) (:end-col m))]
+    (cond-> {}
+      line (assoc :line line)
+      column (assoc :column column)
+      end-line (assoc :end-line end-line)
+      end-column (assoc :end-column end-column)))))
+
+(defn merge-language-exceptions
+  [& inputs]
+  (reduce (fn [out m]
+            (merge-with merge out (or m {})))
+          {}
+          inputs))
+
+(defn form-language-exceptions
+  [form]
+  (let [m (meta form)]
+    (or (:lang-exceptions m)
+        (:exceptions m)
+        {})))
+
+(defn strip-runtime-dispatch
+  "Removes runtime dispatch wrappers like `!.lua` while preserving the underlying form."
+  [form]
+  (cond (seq? form)
+        (let [head (first form)]
+          (if-let [lang (get +runtime-dispatch-map+ (str head))]
+            (let [items (map strip-runtime-dispatch (rest form))]
+              (cond (empty? items) nil
+                    (= 1 (count items)) (first items)
+                    :else (with-meta (apply list 'do items) (meta form))))
+            (with-meta (apply list (map strip-runtime-dispatch form))
+              (meta form))))
+
+        (vector? form)
+        (with-meta (vec (map strip-runtime-dispatch form))
+          (meta form))
+
+        (set? form)
+        (with-meta (into #{} (map strip-runtime-dispatch form))
+          (meta form))
+
+        (map? form)
+        (with-meta (into (empty form)
+                         (map (fn [[k v]]
+                                [(strip-runtime-dispatch k)
+                                 (strip-runtime-dispatch v)])
+                              form))
+          (meta form))
+
+        :else
+        form))
+
+(defn fact-assertion-forms
+  [fact-form]
+  (let [[_ _ & body] fact-form]
+    (loop [xs body
+           out []]
+      (if (empty? xs)
+        out
+        (let [[expr arrow expect & more] xs]
+          (if (= '=> arrow)
+            (recur more (conj out [expr expect]))
+            (recur (rest xs) out)))))))
+
+(defn canonical-case-id
+  [source-ns title idx]
+  (str source-ns "::"
+       (str/replace (str title) #"\s+" "-")
+       "::"
+       idx))
+
+(defn fact-runtime-cases
+  [source-ns fact-form lang]
+  (let [[_ title] fact-form
+        fact-meta (meta fact-form)
+        fact-line (form-line-info fact-form)
+        fact-exceptions (form-language-exceptions fact-form)]
+    (->> (fact-assertion-forms fact-form)
+         (keep-indexed (fn [idx [expr expect]]
+                         (when (= lang (runtime-expr-lang expr))
+                           (let [expr-line (or (not-empty (form-line-info expr))
+                                               fact-line)
+                                 expr-exceptions (form-language-exceptions expr)]
+                             {:id (canonical-case-id source-ns title idx)
+                              :title title
+                              :lang lang
+                              :line expr-line
+                              :expr expr
+                              :form (strip-runtime-dispatch expr)
+                              :expect expect
+                              :exceptions (merge-language-exceptions fact-exceptions
+                                                                    expr-exceptions)
+                              :meta (dissoc fact-meta
+                                            :line
+                                            :column
+                                            :end-line
+                                            :end-column)}))))
+         vec)))
+
+(defn canonical-runtime-suite-forms
+  ([forms]
+   (canonical-runtime-suite-forms forms *canonical-runtime-lang*))
+  ([forms lang]
+   (let [lang (normalize-runtime-lang lang)
+         expanded (mapcat expand-top-level-form forms)
+         source-ns (some #(when (and (seq? %) (= 'ns (first %))) (second %)) forms)
+         facts (filter fact-form? expanded)
+         cases (mapcat #(fact-runtime-cases source-ns % lang) facts)]
+     {:ns source-ns
+      :lang lang
+      :runtime-type (runtime-type lang)
+      :check-mode (runtime-check-mode lang)
+      :cases (vec cases)
+      :exceptions (into (sorted-map)
+                        (keep (fn [{:keys [id exceptions]}]
+                                (when (seq exceptions)
+                                  [id exceptions])))
+                        cases)})))
+
+(defn case-language-config
+  [case lang]
+  (let [lang (normalize-runtime-lang lang)
+        exception (get (:exceptions case) lang)]
+    {:skip (true? (:skip exception))
+     :expect (if (contains? exception :expect)
+               (:expect exception)
+               (:expect case))
+     :form (or (:form exception)
+               (:form case))
+     :exception exception}))
+
+(defn compile-runtime-bulk-suite
+  [suite lang]
+  (let [lang (normalize-runtime-lang lang)
+        prepared (mapv (fn [case]
+                         (merge case (case-language-config case lang)))
+                       (:cases suite))
+        active (remove :skip prepared)]
+    {:ns (:ns suite)
+     :source-lang (:lang suite)
+     :lang lang
+     :runtime-type (runtime-type lang)
+     :check-mode (runtime-check-mode lang)
+     :bulk-form (vec
+                 (for [{:keys [id line form]} active]
+                   {:id id
+                    :line line
+                    :value form}))
+     :verify (vec
+              (for [{:keys [id title line expect]} active]
+                {:id id
+                 :title title
+                 :line line
+                 :expect expect}))
+     :skipped (vec
+               (for [{:keys [id title line exception skip]} prepared
+                     :when skip]
+                 {:id id
+                  :title title
+                  :line line
+                  :exception exception}))}))
+
+(defn export-runtime-suite
+  "Exports a canonical runtime test namespace to EDN cases."
+  ([_ {:keys [input-path output-path lang write]
+        :or {lang *canonical-runtime-lang*
+             write false}
+       :as params}]
+   (let [proj (project/project)
+         source-test-ns (some-> (:ns params) project/test-ns)
+         input-path (or input-path
+                        (when source-test-ns
+                          (test-file-path proj source-test-ns))
+                        (throw (ex-info "Requires runtime suite input-path or a valid test :ns"
+                                        {:params (dissoc params :write)})))
+         suite (canonical-runtime-suite-forms (read-top-level-forms input-path) lang)
+         output-path (or output-path
+                         (canonical-suite-path input-path))
+         content (pr-str suite)]
+     (when write
+       (fs/create-directory (fs/parent output-path))
+       (spit output-path content))
+      {:input-path input-path
+       :output-path output-path
+       :lang (:lang suite)
+       :count (count (:cases suite))
+       :suite suite
+       :content content}))
+  ([_ params _ _]
+   (export-runtime-suite nil params)))
+
+(defn compile-runtime-bulk
+  "Compiles a canonical runtime EDN suite into a batched verification payload."
+  ([_ {:keys [input-path output-path lang write]
+        :or {write false}}]
+   (let [lang (normalize-runtime-lang lang)
+         input-path (or input-path
+                        (throw (ex-info "Requires canonical suite input-path"
+                                        {:lang lang})))
+         suite (edn/read-string (slurp input-path))
+         bulk (compile-runtime-bulk-suite suite lang)
+         output-path (or output-path
+                         (runtime-bulk-path input-path lang))
+         content (pr-str bulk)]
+     (when write
+       (fs/create-directory (fs/parent output-path))
+       (spit output-path content))
+      {:input-path input-path
+       :output-path output-path
+       :lang lang
+       :count (count (:verify bulk))
+       :bulk bulk
+       :content content}))
+  ([_ params _ _]
+   (compile-runtime-bulk nil params)))
 
 (defn runtime-expr-lang
   [expr]
@@ -366,8 +660,20 @@
   (if (and (script-form? form)
            (= from-script (second form)))
     (with-meta
-      (apply list 'l/script- to-script (drop 2 form))
-      (meta form))
+       (apply list 'l/script- to-script (drop 2 form))
+       (meta form))
+     form))
+
+(defn transform-script-runtime
+  [form lang]
+  (if (script-form? form)
+    (let [[script-fn script opts & more] form
+          opts (if (map? opts)
+                 (assoc opts :runtime (runtime-type lang))
+                 opts)]
+      (with-meta
+        (apply list script-fn script opts more)
+        (meta form)))
     form))
 
 (defn template-runtime-test-ns
@@ -396,12 +702,13 @@
             (cond (and (seq? form) (= 'ns (first form)))
                   (replace-ns-name form target-ns)
 
-                  :else
-                  (-> form
-                      (transform-script-form from-script to-script)
-                      (replace-runtime-symbol from-dispatch to-dispatch)
-                      (replace-string-value source-ns-str target-ns-str))))
-          forms)))
+                   :else
+                   (-> form
+                       (transform-script-form from-script to-script)
+                       (transform-script-runtime to-lang)
+                       (replace-runtime-symbol from-dispatch to-dispatch)
+                       (replace-string-value source-ns-str target-ns-str))))
+           forms)))
 
 (defn split-fact-form
   [fact-form langs]
@@ -425,7 +732,7 @@
                       (with-meta
                         (apply list fact-sym title (concat prefix shared))
                         (meta fact-form))
-                      
+
                       :else
                       (with-meta
                         (list fact-sym title)
@@ -507,8 +814,8 @@
 (defn separate-runtime-tests
   "Splits a multi-runtime test namespace into per-language test files."
   ([_ {:keys [input-path langs write]
-       :or {langs *runtime-test-langs*
-            write false}
+        :or {langs *runtime-test-langs*
+             write false}
        :as params}]
    (let [proj (project/project)
          test-ns (project/test-ns (:ns params))
@@ -536,17 +843,19 @@
          (spit path content)))
      {:input-path input-path
       :langs (vec langs)
-     :outputs (mapv #(select-keys % [:lang :path]) rendered)
+      :outputs (mapv #(select-keys % [:lang :path]) rendered)
       :counts (into {}
                     (map (fn [{:keys [lang forms]}]
                            [lang (count (filter fact-form? forms))]))
-                    outputs)})))
+                    outputs)}))
+  ([_ params _ _]
+   (separate-runtime-tests nil params)))
 
 (defn scaffold-runtime-template
   "Generates a target runtime test file from a single-runtime template file."
   ([_ {:keys [input-path output-path lang from-lang write]
-       :or {write false}
-       :as params}]
+        :or {write false}
+        :as params}]
    (let [proj (project/project)
          source-test-ns (project/test-ns (:ns params))
          input-path (or input-path
@@ -566,13 +875,15 @@
      (when write
        (fs/create-directory (fs/parent output-path))
        (spit output-path content))
-     {:input-path input-path
-      :output-path output-path
-      :from-lang (normalize-runtime-lang from-lang)
-      :lang to-lang
-      :source-ns source-test-ns
-      :target-ns target-ns
-      :updated (not= (when (fs/exists? output-path)
-                       (slurp output-path))
-                     content)
-      :content content})))
+      {:input-path input-path
+       :output-path output-path
+       :from-lang (normalize-runtime-lang from-lang)
+       :lang to-lang
+       :source-ns source-test-ns
+       :target-ns target-ns
+       :updated (not= (when (fs/exists? output-path)
+                        (slurp output-path))
+                      content)
+       :content content}))
+  ([_ params _ _]
+   (scaffold-runtime-template nil params)))

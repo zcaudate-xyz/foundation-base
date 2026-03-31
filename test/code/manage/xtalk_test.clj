@@ -31,8 +31,9 @@
    (fn? xtalk/scaffold-xtalk-grammar-tests)
    (fn? xtalk/separate-runtime-tests)
    (fn? xtalk/scaffold-runtime-template)
+   (fn? xtalk/export-runtime-suite)
+   (fn? xtalk/compile-runtime-bulk)
    (fn? xtalk/support-matrix)
    (fn? xtalk/visualize-support)]
-  => [true true true true true true true true])
-
+  => [true true true true true true true true true true])
 

@@ -139,7 +139,7 @@
 (defn generate-xtalk-ops
   "Generates an xtalk operator inventory EDN from the grammar tables."
   ([_ {:keys [path write]
-       :or {write false}}]
+        :or {write false}}]
    (let [proj (project/project)
          out-path (ops-path proj path)
          existing (read-xtalk-ops out-path)
@@ -151,7 +151,9 @@
      (when write
        (fs/create-directory (fs/parent out-path))
        (spit out-path content))
-     {:path out-path
-      :count (count entries)
-      :updated updated
-      :entries entries})))
+      {:path out-path
+       :count (count entries)
+       :updated updated
+       :entries entries}))
+  ([_ params _ _]
+   (generate-xtalk-ops nil params)))

@@ -1,5 +1,8 @@
 (ns std.lang.manage-test
   (:require [std.lang.manage :as manage]
+            [std.lang.manage.xtalk-audit :as audit]
+            [std.lang.manage.xtalk-ops :as xtalk-ops]
+            [std.lang.manage.xtalk-scaffold :as scaffold])
             [std.task :as task])
   (:use code.test))
 
@@ -62,31 +65,6 @@
   (map? (manage/xtalk-coverage-summary))
   => true)
 
-^{:refer std.lang.manage/xtalk-status-fn :added "4.1"}
-(fact "status fn returns entry by language"
-  (manage/xtalk-status-fn :js nil {:js {:lang :js}} nil)
-  => {:lang :js})
-
-^{:refer std.lang.manage/xtalk-model-status-fn :added "4.1"}
-(fact "model status fn filters model keys"
-  (manage/xtalk-model-status-fn :js nil {:js {:lang :js :model-count 1 :model-forms [:fn] :model-files ["a"] :x 1}} nil)
-  => {:lang :js :model-count 1 :model-forms [:fn] :model-files ["a"]})
-
-^{:refer std.lang.manage/xtalk-runtime-status-fn :added "4.1"}
-(fact "runtime status fn filters runtime keys"
-  (manage/xtalk-runtime-status-fn :js nil {:js {:lang :js :script :js :dispatch '!.js :suffix "js" :runtime-installed? true :runtime-executable? true :x 1}} nil)
-  => {:lang :js :script :js :dispatch '!.js :suffix "js" :runtime-installed? true :runtime-executable? true})
-
-^{:refer std.lang.manage/xtalk-spec-status-fn :added "4.1"}
-(fact "spec status fn filters spec keys"
-  (manage/xtalk-spec-status-fn :js nil {:js {:lang :js :spec-feature-count 10 :spec-implemented 8 :spec-abstract 1 :spec-missing 1 :x 1}} nil)
-  => {:lang :js :spec-feature-count 10 :spec-implemented 8 :spec-abstract 1 :spec-missing 1})
-
-^{:refer std.lang.manage/xtalk-test-status-fn :added "4.1"}
-(fact "test status fn filters test keys"
-  (manage/xtalk-test-status-fn :js nil {:js {:lang :js :test-count 4 :test-forms [:fn] :test-files ["a"] :coverage 1.0 :ready? true :x 1}} nil)
-  => {:lang :js :test-count 4 :test-forms [:fn] :test-files ["a"] :coverage 1.0 :ready? true})
-
 ^{:refer std.lang.manage/xtalk-status :added "4.1"}
 (fact "status task is invokable"
   (task/task? manage/xtalk-status)
@@ -112,70 +90,31 @@
   (task/task? manage/xtalk-test-status)
   => true)
 
-^{:refer std.lang.manage/xtalk-categories-fn :added "4.1"}
-(fact "categories fn returns vector"
-  (vector? (manage/xtalk-categories-fn nil nil nil nil))
+^{:refer std.lang.manage.xtalk-audit/xtalk-op-map :added "4.1"}
+(fact "audit functions can be used directly as 4-arity task fns"
+  [(vector? (audit/xtalk-categories nil nil nil nil))
+   (map? (audit/xtalk-op-map nil nil nil nil))
+   (vector? (audit/xtalk-symbols nil nil nil nil))
+   (vector? (audit/audit-languages nil {} nil nil))
+   (map? (audit/support-matrix nil {} nil nil))
+   (map? (audit/missing-by-language nil {} nil nil))
+   (map? (audit/missing-by-feature nil {} nil nil))
+   (string? (audit/visualize-support nil {} nil nil))]
+  => [true true true true true true true true])
+
+^{:refer std.lang.manage.xtalk-ops/generate-xtalk-ops :added "4.1"}
+(fact "ops generation supports direct task-style invocation"
+  (map? (xtalk-ops/generate-xtalk-ops nil {:write false} nil nil))
   => true)
 
-^{:refer std.lang.manage/xtalk-op-map-fn :added "4.1"}
-(fact "op-map fn returns map"
-  (map? (manage/xtalk-op-map-fn nil nil nil nil))
-  => true)
-
-^{:refer std.lang.manage/xtalk-symbols-fn :added "4.1"}
-(fact "symbols fn returns vector"
-  (vector? (manage/xtalk-symbols-fn nil nil nil nil))
-  => true)
-
-^{:refer std.lang.manage/installed-languages-fn :added "4.1"}
-(fact "installed languages fn returns vector"
-  (vector? (manage/installed-languages-fn nil nil nil nil))
-  => true)
-
-^{:refer std.lang.manage/audit-languages-fn :added "4.1"}
-(fact "audit languages fn returns vector"
-  (vector? (manage/audit-languages-fn nil {} nil nil))
-  => true)
-
-^{:refer std.lang.manage/support-matrix-fn :added "4.1"}
-(fact "support matrix fn returns map"
-  (map? (manage/support-matrix-fn nil {} nil nil))
-  => true)
-
-^{:refer std.lang.manage/missing-by-language-fn :added "4.1"}
-(fact "missing-by-language fn returns map"
-  (map? (manage/missing-by-language-fn nil {} nil nil))
-  => true)
-
-^{:refer std.lang.manage/missing-by-feature-fn :added "4.1"}
-(fact "missing-by-feature fn returns map"
-  (map? (manage/missing-by-feature-fn nil {} nil nil))
-  => true)
-
-^{:refer std.lang.manage/visualize-support-fn :added "4.1"}
-(fact "visualize support fn returns string"
-  (string? (manage/visualize-support-fn nil {} nil nil))
-  => true)
-
-^{:refer std.lang.manage/generate-xtalk-ops-fn :added "4.1"}
-(fact "generate xtalk ops fn is available"
-  (fn? manage/generate-xtalk-ops-fn)
-  => true)
-
-^{:refer std.lang.manage/scaffold-xtalk-grammar-tests-fn :added "4.1"}
-(fact "scaffold grammar tests fn is available"
-  (fn? manage/scaffold-xtalk-grammar-tests-fn)
-  => true)
-
-^{:refer std.lang.manage/separate-runtime-tests-fn :added "4.1"}
-(fact "separate runtime tests fn is available"
-  (fn? manage/separate-runtime-tests-fn)
-  => true)
-
-^{:refer std.lang.manage/scaffold-runtime-template-fn :added "4.1"}
-(fact "scaffold runtime template fn is available"
-  (fn? manage/scaffold-runtime-template-fn)
-  => true)
+^{:refer std.lang.manage.xtalk-scaffold/export-runtime-suite :added "4.1"}
+(fact "scaffold functions remain directly available after wrapper cleanup"
+  [(fn? scaffold/scaffold-xtalk-grammar-tests)
+   (fn? scaffold/separate-runtime-tests)
+   (fn? scaffold/scaffold-runtime-template)
+   (fn? scaffold/export-runtime-suite)
+   (fn? scaffold/compile-runtime-bulk)]
+  => [true true true true true])
 
 ^{:refer std.lang.manage/xtalk-categories :added "4.1"}
 (fact "xtalk-categories task is available"
