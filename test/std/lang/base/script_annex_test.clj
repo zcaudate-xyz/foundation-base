@@ -1,11 +1,13 @@
 (ns std.lang.base.script-annex-test
   (:require [std.lang.base.book :as book]
             [std.lang.base.library :as lib]
-            [std.lang.base.script-annex :as annex]
-            [std.lib.context.registry :as reg]
-            [std.lib.context.space :as space]
-            [std.lib.env :as env]
-            [xt.lang])
+             [std.lang.base.script-annex :as annex]
+             [std.lib.context.registry :as reg]
+             [std.lib.context.space :as space]
+             [std.lib.env :as env]
+             [xt.lang]
+             [xt.lang.common-data]
+             [xt.lang.common-lib])
   (:use code.test))
 
 ^{:refer std.lang.base.script-annex/rt-annex? :added "4.0"}

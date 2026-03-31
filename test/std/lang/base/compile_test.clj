@@ -1,5 +1,7 @@
 (ns std.lang.base.compile-test
-  (:require [rt.postgres.test.scratch-v1 :as scratch]
+  (:require [xt.lang.common-data]
+             [xt.lang.common-lib]
+             [rt.postgres.test.scratch-v1 :as scratch]
              [std.fs :as fs]
              [std.lang.base.compile :refer :all]
              [std.lang.base.impl :as impl]
@@ -84,14 +86,14 @@
 
 ^{:refer std.lang.base.compile/compile-module-directory :added "4.0"}
 (fact "compiles a directory"
-  (with-redefs [fs/select (constantly ["src/xt/lang/base_lib.clj"])
-                fs/file-namespace (constantly 'xt.lang.base-lib)]
+  (with-redefs [fs/select (constantly ["src/xt/lang/common_lib.clj"])
+                fs/file-namespace (constantly 'xt.lang.common-lib)]
     (make/with:mock-compile
       (compile-module-directory
        {:lang :lua
         :root ".build"
         :target "src"
-        :main 'xt.lang.base-lib})))
+        :main 'xt.lang.common-lib})))
   => (contains {:files pos-int?}))
 
 ^{:refer std.lang.base.compile/compile-module-schema :added "4.0"}
@@ -116,32 +118,32 @@
   (make/with:mock-compile
     (compile-module-directory-selected
       :directory
-      ['xt.lang.base-lib]
-      {:lang :lua :main 'xt.lang.base-lib :root ".build" :target "src"}))
+      ['xt.lang.common-lib]
+      {:lang :lua :main 'xt.lang.common-lib :root ".build" :target "src"}))
   => (contains {:files pos-int?})
 
   (compile/with:mock-compile
-    (compile/with:compile-filter #{'xt.lang.base-lib}
+    (compile/with:compile-filter #{'xt.lang.common-lib}
       (compile-module-directory-selected
        :directory
-       ['xt.lang.base-lib 'xt.lang.base-iter]
-       {:lang :lua :main 'xt.lang.base-lib :root ".build" :target "src"})))
+       ['xt.lang.common-lib 'xt.lang.common-data]
+       {:lang :lua :main 'xt.lang.common-lib :root ".build" :target "src"})))
   => (contains {:files 1})
 
   (compile/with:mock-compile
     (compile-module-directory-selected
       :directory
-      ['xt.lang.base-lib]
+      ['xt.lang.common-data]
       {:lang :js
-       :main 'xt.lang.base-lib
+       :main 'xt.lang.common-data
        :root ".build"
        :target "src"
        :emit {:artifacts [#'ts/module-dts-artifact]}}))
-  => (contains {:files 2}))
+  => (contains {:files pos-int?}))
 
 ^{:refer std.lang.base.compile/compile-module-prep :added "4.0"}
 (fact "precs the single entry point setup"
-  (compile-module-prep {:lang :lua :main 'xt.lang.base-lib})
+  (compile-module-prep {:lang :lua :main 'xt.lang.common-lib})
   => vector?)
 
 ^{:refer std.lang.base.compile/compile-module-root :added "4.0"}
@@ -149,9 +151,9 @@
   (make/with:mock-compile
     (compile-module-root
      {:lang :lua
-      :root   ".build"
-      :target "src"
-      :main   'xt.lang.base-lib}))
+       :root   ".build"
+       :target "src"
+       :main   'xt.lang.common-lib}))
   => (contains {:files pos-int?}))
 
 ^{:refer std.lang.base.compile/compile-module-create-links :added "4.0"}

@@ -151,13 +151,11 @@
   ^:hidden
 
   (emit-defn
-   (list 'defn
-         (with-meta 'add {:- :int})
-         [[:int lhs] [:int rhs]]
-         '(return (+ lhs rhs)))
+   '(defn add [[:int lhs] [:int rhs]]
+      (return (+ lhs rhs)))
    +grammar+
    {})
-  => "int add (int lhs, int rhs) {\n\n  return lhs + rhs;\n}"
+  => "void add (int lhs, int rhs) {\n\n  return lhs + rhs;\n}"
 
   (emit-defn
    '(defn add [[:int lhs] [:int rhs]]

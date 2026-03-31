@@ -143,13 +143,16 @@
              (cond (nil? entry)
                    (str (ptr-tag ptr :not-found))
                    
-                   (= :fragment section)
-                   (let [{:keys [form standalone template]} entry]
-                     (cond (collection/form? standalone)
-                           (clojure.string/trim (with-out-str (clojure.pprint/pprint (second standalone))))
-                           
-                           (not template)
-                           (impl/emit-str form meta)
+                    (= :fragment section)
+                    (let [{:keys [form standalone template]} entry]
+                      (cond (collection/form? standalone)
+                            (clojure.string/trim (with-out-str (clojure.pprint/pprint (second standalone))))
+                            
+                            (symbol? form)
+                            (str form)
+                            
+                            (not template)
+                            (impl/emit-str form meta)
                            
                            :else
                            (let [args (second form)]
@@ -332,4 +335,3 @@
                               (env/pl raw))))
                 output (ptr-output raw json)]
             output))))
-

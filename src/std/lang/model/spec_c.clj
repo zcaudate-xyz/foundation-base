@@ -80,20 +80,24 @@
                args)
         args (if (vector? args)
                (if (vector? (first args))
-                 args
-                 (partition 2 args))
-               [args])]
+                  args
+                  (partition 2 args))
+                [args])]
     (str "("
          (clojure.string/join ", "
-                   (map (fn [arg]
-                          (if (sequential? arg)
-                            (let [[type name] arg]
-                              (str (c-sanitize (to-c-type type))
-                                   " "
-                                   (emit/emit-main name grammar mopts)))
-                            (emit/emit-main arg grammar mopts)))
-                        args))
-         ")")))
+                    (map (fn [arg]
+                           (if (sequential? arg)
+                             (let [[type name] arg]
+                               (str (to-c-type type)
+                                    " "
+                                    (if (symbol? name)
+                                      (c-sanitize name)
+                                      (emit/emit-main name grammar mopts))))
+                             (if (symbol? arg)
+                               (c-sanitize arg)
+                               (emit/emit-main arg grammar mopts))))
+                         args))
+          ")")))
 
 
 

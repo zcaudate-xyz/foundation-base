@@ -1,15 +1,19 @@
 (ns std.lang.base.script-lint-test
-  (:require [js.blessed]
-            [std.lang :as l]
-            [std.lang.base.impl :as impl]
-            [std.lang.base.library :as lib]
-            [std.lang.base.runtime :as rt]
-            [std.lang.base.script-lint :refer :all])
+  (:require [xt.lang.common-data]
+             [xt.lang.common-lib]
+             [js.blessed]
+             [std.lang :as l]
+             [std.lang.base.impl :as impl]
+             [std.lang.base.library :as lib]
+             [std.lang.base.runtime :as rt]
+             [std.lang.base.script-lint :refer :all])
   (:use code.test))
 
 (def +library+
   (let [lib (impl/clone-default-library)]
     (impl/with:library [lib]
+      (require '[xt.lang.common-data] :reload)
+      (require '[xt.lang.common-lib] :reload)
       (require '[js.blessed] :reload))
     lib))
 

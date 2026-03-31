@@ -72,18 +72,18 @@
   => '(x:get-key route "tree" nil))
 
 (fact "canonicalizes builtin wrappers through grammar op tables"
-  [(ops/canonical-symbol 'xt.lang.base-lib/obj-assign)
-   (ops/canonical-symbol 'xt.lang.base-lib/obj-vals)
+  [(ops/canonical-symbol 'xt.lang.common-data/obj-assign)
+   (ops/canonical-symbol 'xt.lang.common-data/obj-vals)
    (ops/canonical-symbol 'x:str-len)
    (lower/lower-form '(k/obj-assign current extra)
                      {:ns 'sample.route
-                      :aliases '{k xt.lang.base-lib}})
+                      :aliases '{k xt.lang.common-data}})
    (lower/lower-form '(k/obj-vals current)
                      {:ns 'sample.route
-                      :aliases '{k xt.lang.base-lib}})
+                      :aliases '{k xt.lang.common-data}})
    (lower/lower-form '(k/obj-clone current)
                      {:ns 'sample.route
-                      :aliases '{k xt.lang.base-lib}})
+                      :aliases '{k xt.lang.common-data}})
    (lower/lower-form '(k/arr-clone path)
                      {:ns 'sample.route
                       :aliases '{k xt.lang.base-lib}})
@@ -149,7 +149,7 @@
                                                  :type {:kind :primitive :name :xt/int}
                                                  :optional? false}]}}
                           :ns 'sample.route
-                          :aliases '{k xt.lang.base-lib}})
+                          :aliases '{k xt.lang.common-data}})
        :type
        types/type->data)
    (-> (infer/infer-type '(k/obj-pairs user)
@@ -161,7 +161,7 @@
                                                  :type {:kind :primitive :name :xt/int}
                                                  :optional? false}]}}
                           :ns 'sample.route
-                          :aliases '{k xt.lang.base-lib}})
+                          :aliases '{k xt.lang.common-data}})
        :type
        types/type->data)
    (-> (infer/infer-type '(x:get-idx users 0 "guest")

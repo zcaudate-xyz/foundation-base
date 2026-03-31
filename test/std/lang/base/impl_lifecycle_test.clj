@@ -1,18 +1,22 @@
 (ns std.lang.base.impl-lifecycle-test
-  (:require [js.blessed :as blessed]
-            [js.blessed.ui-core :as ui-core]
-            [js.blessed.ui-group :as ui-group]
-            [std.lang :as l]
-            [std.lang.base.compile :as compile]
-            [std.lang.base.impl :as impl]
-            [std.lang.base.impl-lifecycle :refer :all]
-            [std.lang.base.library :as lib]
-            [xt.lang.base-lib :as k])
+  (:require [xt.lang.common-data]
+             [xt.lang.common-lib]
+             [js.blessed :as blessed]
+             [js.blessed.ui-core :as ui-core]
+             [js.blessed.ui-group :as ui-group]
+             [std.lang :as l]
+             [std.lang.base.compile :as compile]
+             [std.lang.base.impl :as impl]
+             [std.lang.base.impl-lifecycle :refer :all]
+             [std.lang.base.library :as lib]
+             [xt.lang.base-lib :as k])
   (:use code.test))
 
 (def +library+
   (let [lib (impl/clone-default-library)]
     (impl/with:library [lib]
+      (require '[xt.lang.common-data] :reload)
+      (require '[xt.lang.common-lib] :reload)
       (require '[js.react] :reload)
       (require '[js.blessed] :reload)
       (require '[js.blessed.ui-core] :reload)
@@ -36,7 +40,7 @@
                                    {:lang :lua
                                     :emit {:compile {:type :graph
                                                      :root-ns 'lua}}})))
-  => #{}
+  => '#{xt.lang.common-data}
   
   (:direct (second (emit-module-prep 'js.blessed
                                    {:lang :js
@@ -167,13 +171,13 @@
 (fact "emits the entire module as string"
   ^:hidden
   
-  (:link (second (emit-module-prep 'xt.lang.base-lib
-                                   {:lang :lua
-                                    :graph {:root-ns 'lua}})))
+  (:link (second (emit-module-prep 'xt.lang.common-lib
+                                    {:lang :lua
+                                     :graph {:root-ns 'lua}})))
   => '{}
   
-  (emit-module-setup 'xt.lang.base-lib
-                     {:lang :lua})
+  (emit-module-setup 'xt.lang.common-lib
+                      {:lang :lua})
   => string?)
 
 ^{:refer std.lang.base.impl-lifecycle/emit-module-teardown-concat :added "4.0"}
