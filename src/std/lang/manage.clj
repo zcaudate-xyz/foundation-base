@@ -265,54 +265,14 @@
                                :summary false}}
               :main {:argcount 4}})))
 
-(defn xtalk-status-fn
-      [lang _ lookup _]
-      (get lookup lang))
-
-(defn xtalk-model-status-fn
-      [lang _ lookup _]
-      (select-keys (get lookup lang)
-                   [:lang
-                    :model-count
-                    :model-forms
-                    :model-files]))
-
-(defn xtalk-runtime-status-fn
-      [lang _ lookup _]
-      (select-keys (get lookup lang)
-                   [:lang
-                    :script
-                    :dispatch
-                    :suffix
-                    :runtime-installed?
-                    :runtime-executable?]))
-
-(defn xtalk-spec-status-fn
-      [lang _ lookup _]
-      (select-keys (get lookup lang)
-                   [:lang
-                    :spec-feature-count
-                    :spec-implemented
-                    :spec-abstract
-                    :spec-missing]))
-
-(defn xtalk-test-status-fn
-      [lang _ lookup _]
-      (select-keys (get lookup lang)
-                   [:lang
-                    :test-count
-                    :test-forms
-                    :test-files
-                    :coverage
-                    :ready?]))
-
 (invoke/definvoke ^{:arglists '([] [lang] [lang params])}
  xtalk-status
                   "returns unified xtalk status for each language"
                   {:added "4.1"}
                   [:task {:template :lang.manage
                           :params {:title "XTALK LANGUAGE STATUS"}
-                          :main {:fn #'xtalk-status-fn}}])
+                          :main {:fn (fn [lang _ lookup _]
+                                       (get lookup lang))}}])
 
 (invoke/definvoke ^{:arglists '([] [lang] [lang params])}
  xtalk-model-status
@@ -320,7 +280,12 @@
                   {:added "4.1"}
                   [:task {:template :lang.manage
                           :params {:title "XTALK MODEL STATUS"}
-                          :main {:fn #'xtalk-model-status-fn}}])
+                          :main {:fn (fn [lang _ lookup _]
+                                       (select-keys (get lookup lang)
+                                                    [:lang
+                                                     :model-count
+                                                     :model-forms
+                                                     :model-files]))}}])
 
 (invoke/definvoke ^{:arglists '([] [lang] [lang params])}
  xtalk-runtime-status
@@ -328,7 +293,14 @@
                   {:added "4.1"}
                   [:task {:template :lang.manage
                           :params {:title "XTALK RUNTIME STATUS"}
-                          :main {:fn #'xtalk-runtime-status-fn}}])
+                          :main {:fn (fn [lang _ lookup _]
+                                       (select-keys (get lookup lang)
+                                                    [:lang
+                                                     :script
+                                                     :dispatch
+                                                     :suffix
+                                                     :runtime-installed?
+                                                     :runtime-executable?]))}}])
 
 (invoke/definvoke ^{:arglists '([] [lang] [lang params])}
  xtalk-spec-status
@@ -336,7 +308,13 @@
                   {:added "4.1"}
                   [:task {:template :lang.manage
                           :params {:title "XTALK SPEC STATUS"}
-                          :main {:fn #'xtalk-spec-status-fn}}])
+                          :main {:fn (fn [lang _ lookup _]
+                                       (select-keys (get lookup lang)
+                                                    [:lang
+                                                     :spec-feature-count
+                                                     :spec-implemented
+                                                     :spec-abstract
+                                                     :spec-missing]))}}])
 
 (invoke/definvoke ^{:arglists '([] [lang] [lang params])}
  xtalk-test-status
@@ -344,70 +322,14 @@
                   {:added "4.1"}
                   [:task {:template :lang.manage
                           :params {:title "XTALK TEST STATUS"}
-                          :main {:fn #'xtalk-test-status-fn}}])
-
-(defn xtalk-categories-fn
-      [_ _ _ _]
-      (audit/xtalk-categories))
-
-(defn xtalk-op-map-fn
-      [_ _ _ _]
-      (audit/xtalk-op-map))
-
-(defn xtalk-symbols-fn
-      [_ _ _ _]
-      (audit/xtalk-symbols))
-
-(defn installed-languages-fn
-      [_ _ _ _]
-      (audit/installed-languages))
-
-(defn audit-languages-fn
-      [_ params _ _]
-      (audit/audit-languages (:langs params)))
-
-(defn support-matrix-fn
-      [_ params _ _]
-      (audit/support-matrix (:langs params)
-                            (:features params)))
-
-(defn missing-by-language-fn
-      [_ params _ _]
-      (audit/missing-by-language (:langs params)
-                                 (:features params)))
-
-(defn missing-by-feature-fn
-      [_ params _ _]
-      (audit/missing-by-feature (:langs params)
-                                (:features params)))
-
-(defn visualize-support-fn
-      [_ params _ _]
-      (audit/visualize-support params))
-
-(defn generate-xtalk-ops-fn
-      [_ params _ _]
-      (ops/generate-xtalk-ops nil params))
-
-(defn scaffold-xtalk-grammar-tests-fn
-      [_ params _ _]
-      (scaffold/scaffold-xtalk-grammar-tests nil params))
-
-(defn separate-runtime-tests-fn
-      [_ params _ _]
-      (scaffold/separate-runtime-tests nil params))
-
-(defn scaffold-runtime-template-fn
-      [_ params _ _]
-      (scaffold/scaffold-runtime-template nil params))
-
-(defn export-runtime-suite-fn
-      [_ params _ _]
-      (scaffold/export-runtime-suite nil params))
-
-(defn compile-runtime-bulk-fn
-      [_ params _ _]
-      (scaffold/compile-runtime-bulk nil params))
+                          :main {:fn (fn [lang _ lookup _]
+                                       (select-keys (get lookup lang)
+                                                    [:lang
+                                                     :test-count
+                                                     :test-forms
+                                                     :test-files
+                                                     :coverage
+                                                     :ready?]))}}])
 
 (invoke/definvoke ^{:arglists '([] [params])}
  xtalk-categories
@@ -415,7 +337,7 @@
                   {:added "4.1"}
                   [:task {:template :lang.manage.action
                           :params {:title "XTALK CATEGORIES"}
-                          :main {:fn #'xtalk-categories-fn}}])
+                          :main {:fn #'audit/xtalk-categories}}])
 
 (invoke/definvoke ^{:arglists '([] [params])}
  xtalk-op-map
@@ -423,7 +345,7 @@
                   {:added "4.1"}
                   [:task {:template :lang.manage.action
                           :params {:title "XTALK OP MAP"}
-                          :main {:fn #'xtalk-op-map-fn}}])
+                          :main {:fn #'audit/xtalk-op-map}}])
 
 (invoke/definvoke ^{:arglists '([] [params])}
  xtalk-symbols
@@ -431,7 +353,7 @@
                   {:added "4.1"}
                   [:task {:template :lang.manage.action
                           :params {:title "XTALK SYMBOLS"}
-                          :main {:fn #'xtalk-symbols-fn}}])
+                          :main {:fn #'audit/xtalk-symbols}}])
 
 (invoke/definvoke ^{:arglists '([] [params])}
  installed-languages
@@ -439,7 +361,7 @@
                   {:added "4.1"}
                   [:task {:template :lang.manage.action
                           :params {:title "XTALK INSTALLED LANGUAGES"}
-                          :main {:fn #'installed-languages-fn}}])
+                          :main {:fn #'audit/installed-languages}}])
 
 (invoke/definvoke ^{:arglists '([] [params])}
  audit-languages
@@ -447,7 +369,7 @@
                   {:added "4.1"}
                   [:task {:template :lang.manage.action
                           :params {:title "XTALK AUDIT LANGUAGES"}
-                          :main {:fn #'audit-languages-fn}}])
+                          :main {:fn #'audit/audit-languages}}])
 
 (invoke/definvoke ^{:arglists '([] [params])}
  support-matrix
@@ -455,7 +377,7 @@
                   {:added "4.1"}
                   [:task {:template :lang.manage.action
                           :params {:title "XTALK SUPPORT MATRIX"}
-                          :main {:fn #'support-matrix-fn}}])
+                          :main {:fn #'audit/support-matrix}}])
 
 (invoke/definvoke ^{:arglists '([] [params])}
  missing-by-language
@@ -463,7 +385,7 @@
                   {:added "4.1"}
                   [:task {:template :lang.manage.action
                           :params {:title "XTALK MISSING BY LANGUAGE"}
-                          :main {:fn #'missing-by-language-fn}}])
+                          :main {:fn #'audit/missing-by-language}}])
 
 (invoke/definvoke ^{:arglists '([] [params])}
  missing-by-feature
@@ -471,7 +393,7 @@
                   {:added "4.1"}
                   [:task {:template :lang.manage.action
                           :params {:title "XTALK MISSING BY FEATURE"}
-                          :main {:fn #'missing-by-feature-fn}}])
+                          :main {:fn #'audit/missing-by-feature}}])
 
 (invoke/definvoke ^{:arglists '([] [params])}
  visualize-support
@@ -479,7 +401,7 @@
                   {:added "4.1"}
                   [:task {:template :lang.manage.action
                           :params {:title "XTALK VISUALIZE SUPPORT"}
-                          :main {:fn #'visualize-support-fn}}])
+                          :main {:fn #'audit/visualize-support}}])
 
 (invoke/definvoke ^{:arglists '([] [params])}
  generate-xtalk-ops
@@ -487,7 +409,7 @@
                   {:added "4.1"}
                   [:task {:template :lang.manage.action
                           :params {:title "GENERATE XTALK OPS"}
-                          :main {:fn #'generate-xtalk-ops-fn}}])
+                          :main {:fn #'ops/generate-xtalk-ops}}])
 
 (invoke/definvoke ^{:arglists '([] [params])}
  scaffold-xtalk-grammar-tests
@@ -495,7 +417,7 @@
                   {:added "4.1"}
                   [:task {:template :lang.manage.action
                           :params {:title "SCAFFOLD XTALK GRAMMAR TESTS"}
-                          :main {:fn #'scaffold-xtalk-grammar-tests-fn}}])
+                          :main {:fn #'scaffold/scaffold-xtalk-grammar-tests}}])
 
 (invoke/definvoke ^{:arglists '([] [params])}
  separate-runtime-tests
@@ -503,7 +425,7 @@
                   {:added "4.1"}
                   [:task {:template :lang.manage.action
                           :params {:title "SEPARATE RUNTIME TESTS"}
-                          :main {:fn #'separate-runtime-tests-fn}}])
+                          :main {:fn #'scaffold/separate-runtime-tests}}])
 
 (invoke/definvoke ^{:arglists '([] [params])}
  scaffold-runtime-template
@@ -511,7 +433,7 @@
                    {:added "4.1"}
                    [:task {:template :lang.manage.action
                            :params {:title "SCAFFOLD RUNTIME TEMPLATE"}
-                           :main {:fn #'scaffold-runtime-template-fn}}])
+                           :main {:fn #'scaffold/scaffold-runtime-template}}])
 
 (invoke/definvoke ^{:arglists '([] [params])}
  export-runtime-suite
@@ -519,7 +441,7 @@
                   {:added "4.1"}
                   [:task {:template :lang.manage.action
                           :params {:title "EXPORT RUNTIME SUITE"}
-                          :main {:fn #'export-runtime-suite-fn}}])
+                          :main {:fn #'scaffold/export-runtime-suite}}])
 
 (invoke/definvoke ^{:arglists '([] [params])}
  compile-runtime-bulk
@@ -527,7 +449,7 @@
                   {:added "4.1"}
                   [:task {:template :lang.manage.action
                           :params {:title "COMPILE RUNTIME BULK"}
-                          :main {:fn #'compile-runtime-bulk-fn}}])
+                          :main {:fn #'scaffold/compile-runtime-bulk}}])
 
 ;;
 ;; Task Registry and Main Entry Point

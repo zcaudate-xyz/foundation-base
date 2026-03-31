@@ -13,47 +13,51 @@
 (defn xtalk-categories
   "returns all xtalk categories in declaration order"
   {:added "4.1"}
-  []
-  (->> (grammar/ops-list)
-       (filter #(str/starts-with? (name %) "xtalk-"))
-       vec))
+  ([] (xtalk-categories nil nil nil nil))
+  ([_ _ _ _]
+   (->> (grammar/ops-list)
+        (filter #(str/starts-with? (name %) "xtalk-"))
+        vec)))
 
 (defn xtalk-op-map
   "returns xtalk op definitions keyed by op"
   {:added "4.1"}
-  []
-  (->> (xtalk-categories)
-       (mapcat (fn [category]
-                 (for [[op entry] (grammar/ops-detail category)
-                       :when (and (keyword? op)
-                                  (map? entry))]
-                   [op (assoc entry :category category)])))
-       (into (sorted-map))))
+  ([] (xtalk-op-map nil nil nil nil))
+  ([_ _ _ _]
+   (->> (xtalk-categories)
+        (mapcat (fn [category]
+                  (for [[op entry] (grammar/ops-detail category)
+                        :when (and (keyword? op)
+                                   (map? entry))]
+                    [op (assoc entry :category category)])))
+        (into (sorted-map)))))
 
 (defn xtalk-symbols
   "returns all x:* symbols in xtalk grammar"
   {:added "4.1"}
-  []
-  (->> (vals (xtalk-op-map))
-       (mapcat :symbol)
-       (filter #(str/starts-with? (name %) "x:"))
-       distinct
-       sort
-       vec))
+  ([] (xtalk-symbols nil nil nil nil))
+  ([_ _ _ _]
+   (->> (vals (xtalk-op-map))
+        (mapcat :symbol)
+        (filter #(str/starts-with? (name %) "x:"))
+        distinct
+        sort
+        vec)))
 
 (defn installed-languages
   "loads all default book namespaces and returns installed languages"
   {:added "4.1"}
-  []
-  (let [library (impl/default-library)]
-    (doseq [[lang key] (reg/registry-book-list)
-            :when (= :default key)
-            :let [ns-sym (reg/registry-book-ns lang key)]
-            :when ns-sym]
-      (require ns-sym))
-    (->> (keys (lib/get-snapshot library))
-         sort
-         vec)))
+  ([] (installed-languages nil nil nil nil))
+  ([_ _ _ _]
+   (let [library (impl/default-library)]
+     (doseq [[lang key] (reg/registry-book-list)
+             :when (= :default key)
+             :let [ns-sym (reg/registry-book-ns lang key)]
+             :when ns-sym]
+       (require ns-sym))
+     (->> (keys (lib/get-snapshot library))
+          sort
+          vec))))
 
 (defn xtalk-parent-languages
   "returns installed languages whose loaded book has `:parent :xtalk`"
@@ -74,10 +78,12 @@
   ([] (audit-languages nil))
   ([langs]
    (let [installed (set (installed-languages))
-         selected  (or langs (xtalk-parent-languages))]
-     (->> selected
-          (filter installed)
-          vec))))
+          selected  (or langs (xtalk-parent-languages))]
+      (->> selected
+           (filter installed)
+           vec)))
+  ([_ params _ _]
+   (audit-languages (:langs params))))
 
 (defn feature-status
   "returns xtalk feature status for a language"
@@ -111,7 +117,10 @@
      {:languages langs
       :features features
       :status status
-      :summary summary})))
+      :summary summary}))
+  ([_ params _ _]
+   (support-matrix (:langs params)
+                   (:features params))))
 
 (defn missing-by-language
   "returns non-implemented xtalk features grouped by language"
@@ -124,7 +133,10 @@
            (for [lang languages]
              [lang (into (sorted-map)
                          (remove (comp #{:implemented} val))
-                         (get status lang))])))))
+                         (get status lang))]))))
+  ([_ params _ _]
+   (missing-by-language (:langs params)
+                        (:features params))))
 
 (defn missing-by-feature
   "returns languages missing or leaving features abstract"
@@ -139,7 +151,10 @@
                             (for [lang languages
                                   :let [state (get-in status [lang feature])]
                                   :when (not= :implemented state)]
-                              [lang state]))])))))
+                              [lang state]))]))))
+  ([_ params _ _]
+   (missing-by-feature (:langs params)
+                        (:features params))))
 
 (defn- pad-right
   [s width]
@@ -199,4 +214,6 @@
        :summary (visualize-summary* matrix)
        (throw (ex-info "Unsupported xtalk support view"
                        {:view view
-                        :supported #{:summary :matrix}}))))))
+                        :supported #{:summary :matrix}})))))
+  ([_ params _ _]
+   (visualize-support params)))

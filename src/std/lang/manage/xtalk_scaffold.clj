@@ -168,7 +168,7 @@
 (defn scaffold-xtalk-grammar-tests
   "Renders a grammar xtalk test scaffold from xtalk_ops.edn."
   ([_ {:keys [ops-path output-path write]
-       :or {write false}}]
+        :or {write false}}]
    (let [proj (project/project)
          ops-path (xtalk-ops/ops-path proj ops-path)
          test-path (grammar-test-path proj output-path)
@@ -180,11 +180,13 @@
      (when write
        (fs/create-directory (fs/parent test-path))
        (spit test-path content))
-     {:path test-path
-      :ops-path ops-path
-      :count (count (grammar-entries entries))
-      :updated updated
-      :content content})))
+      {:path test-path
+       :ops-path ops-path
+       :count (count (grammar-entries entries))
+       :updated updated
+       :content content}))
+  ([_ params _ _]
+   (scaffold-xtalk-grammar-tests nil params)))
 
 (def +runtime-dispatch-map+
   (into {}
@@ -441,8 +443,8 @@
 (defn export-runtime-suite
   "Exports a canonical runtime test namespace to EDN cases."
   ([_ {:keys [input-path output-path lang write]
-       :or {lang *canonical-runtime-lang*
-            write false}
+        :or {lang *canonical-runtime-lang*
+             write false}
        :as params}]
    (let [proj (project/project)
          source-test-ns (some-> (:ns params) project/test-ns)
@@ -458,17 +460,19 @@
      (when write
        (fs/create-directory (fs/parent output-path))
        (spit output-path content))
-     {:input-path input-path
-      :output-path output-path
-      :lang (:lang suite)
-      :count (count (:cases suite))
-      :suite suite
-      :content content})))
+      {:input-path input-path
+       :output-path output-path
+       :lang (:lang suite)
+       :count (count (:cases suite))
+       :suite suite
+       :content content}))
+  ([_ params _ _]
+   (export-runtime-suite nil params)))
 
 (defn compile-runtime-bulk
   "Compiles a canonical runtime EDN suite into a batched verification payload."
   ([_ {:keys [input-path output-path lang write]
-       :or {write false}}]
+        :or {write false}}]
    (let [lang (normalize-runtime-lang lang)
          input-path (or input-path
                         (throw (ex-info "Requires canonical suite input-path"
@@ -481,12 +485,14 @@
      (when write
        (fs/create-directory (fs/parent output-path))
        (spit output-path content))
-     {:input-path input-path
-      :output-path output-path
-      :lang lang
-      :count (count (:verify bulk))
-      :bulk bulk
-      :content content})))
+      {:input-path input-path
+       :output-path output-path
+       :lang lang
+       :count (count (:verify bulk))
+       :bulk bulk
+       :content content}))
+  ([_ params _ _]
+   (compile-runtime-bulk nil params)))
 
 (defn runtime-expr-lang
   [expr]
@@ -802,8 +808,8 @@
 (defn separate-runtime-tests
   "Splits a multi-runtime test namespace into per-language test files."
   ([_ {:keys [input-path langs write]
-       :or {langs *runtime-test-langs*
-            write false}
+        :or {langs *runtime-test-langs*
+             write false}
        :as params}]
    (let [proj (project/project)
          test-ns (project/test-ns (:ns params))
@@ -831,17 +837,19 @@
          (spit path content)))
      {:input-path input-path
       :langs (vec langs)
-     :outputs (mapv #(select-keys % [:lang :path]) rendered)
+      :outputs (mapv #(select-keys % [:lang :path]) rendered)
       :counts (into {}
                     (map (fn [{:keys [lang forms]}]
                            [lang (count (filter fact-form? forms))]))
-                    outputs)})))
+                    outputs)}))
+  ([_ params _ _]
+   (separate-runtime-tests nil params)))
 
 (defn scaffold-runtime-template
   "Generates a target runtime test file from a single-runtime template file."
   ([_ {:keys [input-path output-path lang from-lang write]
-       :or {write false}
-       :as params}]
+        :or {write false}
+        :as params}]
    (let [proj (project/project)
          source-test-ns (project/test-ns (:ns params))
          input-path (or input-path
@@ -861,13 +869,15 @@
      (when write
        (fs/create-directory (fs/parent output-path))
        (spit output-path content))
-     {:input-path input-path
-      :output-path output-path
-      :from-lang (normalize-runtime-lang from-lang)
-      :lang to-lang
-      :source-ns source-test-ns
-      :target-ns target-ns
-      :updated (not= (when (fs/exists? output-path)
-                       (slurp output-path))
-                     content)
-      :content content})))
+      {:input-path input-path
+       :output-path output-path
+       :from-lang (normalize-runtime-lang from-lang)
+       :lang to-lang
+       :source-ns source-test-ns
+       :target-ns target-ns
+       :updated (not= (when (fs/exists? output-path)
+                        (slurp output-path))
+                      content)
+       :content content}))
+  ([_ params _ _]
+   (scaffold-runtime-template nil params)))
