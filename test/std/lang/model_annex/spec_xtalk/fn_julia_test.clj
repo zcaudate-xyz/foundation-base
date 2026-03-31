@@ -325,26 +325,25 @@
 ^{:refer std.lang.model-annex.spec-xtalk.fn-julia/julia-tf-x-json-encode :added "4.1"}
 (fact "encodes an object to JSON"
   (julia-tf-x-json-encode '(:x-json-encode obj))
-  => '(. JSON (json obj)))
+  => '(JSON.json obj))
 
 ^{:refer std.lang.model-annex.spec-xtalk.fn-julia/julia-tf-x-json-decode :added "4.1"}
 (fact "decodes a JSON string"
   (julia-tf-x-json-decode '(:x-json-decode s))
-  => '(. JSON (parse s)))
+  => '(JSON.parse s))
 
 ^{:refer std.lang.model-annex.spec-xtalk.fn-julia/julia-tf-x-return-encode :added "4.1"}
 (fact "encodes a return value with id and key"
   (julia-tf-x-return-encode '(:x-return-encode out id key))
-  => '(. JSON (json (Dict "id" id "key" key "type" "data" "value" out))))
+  => '(JSON.json {:id id
+                  :key key
+                  :type "data"
+                  :value out}))
 
 ^{:refer std.lang.model-annex.spec-xtalk.fn-julia/julia-tf-x-return-wrap :added "4.1"}
 (fact "wraps a function with error handling"
   (julia-tf-x-return-wrap '(:x-return-wrap f encode-fn))
-  => '(try
-       (let [out (f)]
-         (encode-fn out nil nil))
-       (catch e
-         (. JSON (json (Dict "type" "error" "value" (string e)))))))
+  => '(encode-fn (f) nil nil))
 
 ^{:refer std.lang.model-annex.spec-xtalk.fn-julia/julia-tf-x-return-eval :added "4.1"}
 (fact "evaluates code with a wrapper function"

@@ -85,7 +85,7 @@
                   :else
                   (let [input (x:json-decode line)
                         out   (return-eval input)]
-                    (write conn (string (x:json-encode out) "\n"))
+                    (write conn (string out "\n"))
                     (flush conn)))))))])
 
 (def ^{:arglists '([port & [{:keys [host]}]])}
@@ -123,21 +123,3 @@
     {:type :hara/rt.basic
      :instance {:create #'basic/rt-basic:create}
      :config {:layout :full}})])
-
-[
- "function client_basic(host, port, opts)\n"
-            "  conn = connect(host, port)\n"
-            "  while true\n"
-            "    line = readline(conn)\n"
-            "    if line == \"<PING>\"\n"
-            "      write(conn, \"<PONG>\\n\")\n"
-            "      flush(conn)\n"
-            "    else\n"
-            "      input = JSON.parse(line)\n"
-            "      out = return_eval(input)\n"
-            "      write(conn, string(out, \"\\n\"))\n"
-            "      flush(conn)\n"
-            "    end\n"
-            "  end\n"
-            "end\n\n"
-]
