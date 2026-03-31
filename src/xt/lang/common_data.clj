@@ -9,6 +9,8 @@
 (def$.xt arr-push-first x:arr-push-first)
 (def$.xt arr-pop-first x:arr-pop-first)
 (def$.xt arr-insert x:arr-insert)
+(def$.xt arr-remove x:arr-remove)
+(def$.xt arr-str-comp x:arr-str-comp)
 
 
 (defn.xt arr?
