@@ -2,8 +2,7 @@
   (:require [std.lang :as l :refer [defspec.xt]])
   (:refer-clojure :exclude [first second nth last get-in]))
 
-(l/script :xtalk
-  {:require [[xt.lang.common-lib :as lib]]})
+(l/script :xtalk)
 
 (def$.xt arr-push x:arr-push)
 (def$.xt arr-pop x:arr-pop)
@@ -72,6 +71,35 @@
   [arr]
   (return (x:get-idx arr (x:offset (x:len arr)))))
 
+(defn.xt arr-slice
+  "returns a slice of the array"
+  {:added "4.1"}
+  [arr start finish]
+  (var out := [])
+  (for:index [i [start finish]]
+    (x:arr-push out (x:get-idx arr i)))
+  (return out))
+
+(defn.xt arr-reverse
+  "reverses the array"
+  {:added "4.1"}
+  [arr]
+  (var out := [])
+  (for:index [i [(x:len arr)
+                 (x:offset)
+                 -1]]
+    (x:arr-push out (x:get-idx arr (x:offset-rev i))))
+  (return out))
+
+(defn.xt arr-map
+  "maps a function across an array"
+  {:added "4.1"}
+  [arr f]
+  (var out := [])
+  (for:array [e arr]
+    (x:arr-push out (f e)))
+  (return out))
+
 (defn.xt is-empty?
   "checks that value is empty"
   {:added "4.1"}
@@ -111,6 +139,58 @@
   (when (x:not-nil? obj)
     (for:object [[k _] obj]
       (x:arr-push out k)))
+  (return out))
+
+(defn.xt obj-vals
+  "gets vals of an object"
+  {:added "4.1"}
+  [obj]
+  (var out := [])
+  (when (x:not-nil? obj)
+    (for:object [[_ v] obj]
+      (x:arr-push out v)))
+  (return out))
+
+(defn.xt obj-pairs
+  "creates entry pairs from object"
+  {:added "4.1"}
+  [obj]
+  (var out := [])
+  (when (x:not-nil? obj)
+    (for:object [[k v] obj]
+      (x:arr-push out [k v])))
+  (return out))
+
+(defn.xt obj-clone
+  "clones an object"
+  {:added "4.1"}
+  [obj]
+  (var out := {})
+  (when (x:not-nil? obj)
+    (for:object [[k v] obj]
+      (x:set-key out k v)))
+  (return out))
+
+(defn.xt obj-assign
+  "merges key value pairs from into another"
+  {:added "4.1"}
+  [obj m]
+  (when (x:nil? obj)
+    (:= obj {}))
+  (when (x:not-nil? m)
+    (for:object [[k v] m]
+      (x:set-key obj k v)))
+  (return obj))
+
+(defn.xt obj-from-pairs
+  "creates an object from pairs"
+  {:added "4.1"}
+  [pairs]
+  (var out := {})
+  (for:array [pair pairs]
+    (x:set-key out
+               (-/first pair)
+               (-/second pair)))
   (return out))
 
 (defn.xt get-in

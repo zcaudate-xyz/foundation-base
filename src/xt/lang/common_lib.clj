@@ -40,17 +40,17 @@
   [x]
   (return (x:is-object? x)))
 
-(defmacro.xt type-native
+(defn.xt type-native
   "gets the native type"
   {:added "4.1"}
-  [obj]
-  (return (x:type-native obj)))
+  ([obj]
+   (x:type-native obj)))
 
 (defn.xt type-class
   "gets the type of an object"
   {:added "4.1"}
-  [x]
-  (var ntype (-/type-native x))
-  (if (== ntype "object")
-    (return (x:get-key x "::" ntype))
-    (return ntype)))
+  ([x]
+   (var ntype (-/type-native x))
+   (if (== ntype "object")
+     (return (x:get-key x "::" ntype))
+     (return ntype))))
