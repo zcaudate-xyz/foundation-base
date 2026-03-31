@@ -79,7 +79,7 @@
 (defn julia-tf-x-m-max   [[_ & args]] (apply list 'max args))
 (defn julia-tf-x-m-min   [[_ & args]] (apply list 'min args))
 (defn julia-tf-x-m-mod   [[_ num denom]] (list :% num denom))
-(defn julia-tf-x-m-pow   [[_ base n]] (list (list :- "^") base n))
+(defn julia-tf-x-m-pow   [[_ base n]] (list (symbol "^") base n))
 (defn julia-tf-x-m-quot  [[_ num denom]] (list 'div num denom))
 (defn julia-tf-x-m-sin   [[_ num]] (list 'sin num))
 (defn julia-tf-x-m-sinh  [[_ num]] (list 'sinh num))
@@ -290,12 +290,12 @@
 ;;
 
 (defn julia-tf-x-json-encode
-      ([[_ obj]]
-       (list '. 'JSON (list 'json obj))))
+       ([[_ obj]]
+        (list 'JSON.json obj)))
 
 (defn julia-tf-x-json-decode
-      ([[_ s]]
-       (list '. 'JSON (list 'parse s))))
+       ([[_ s]]
+        (list 'JSON.parse s)))
 
 (def +julia-js+
      {:x-json-encode      {:macro #'julia-tf-x-json-encode      :emit :macro}
@@ -306,23 +306,15 @@
 ;;
 
 (defn julia-tf-x-return-encode
-      ([[_ out id key]]
-       (list '. 'JSON (list 'json (list 'Dict
-                                        "id" id
-                                        "key" key
-                                        "type" "data"
-                                        "value" out)))))
+       ([[_ out id key]]
+        (list 'JSON.json {:id id
+                          :key key
+                          :type "data"
+                          :value out})))
 
 (defn julia-tf-x-return-wrap
-      ([[_ f encode-fn]]
-       (list 'try
-             (list 'let
-                   (list 'out (list f))
-                   (list encode-fn 'out nil nil))
-             (list 'catch 'e
-                   (list '. 'JSON (list 'json (list 'Dict
-                                                    "type" "error"
-                                                    "value" (list 'string 'e))))))))
+       ([[_ f encode-fn]]
+        (list encode-fn (list f) nil nil)))
 
 (defn julia-tf-x-return-eval
       ([[_ s wrap-fn]]

@@ -26,16 +26,11 @@
   {:added "4.0"}
   [forms]
   (list 'do
-        (list 'function (with-meta 'OUT-FN
-                          {:inner true})
-              []
-              (list 'try
-                    (concat
-                     '(do)
-                     (butlast forms)
-                     [(list 'return (last forms))])
-                    (list 'catch 'e
-                          (list 'throw 'e))))
+        (apply list 'defn (with-meta 'OUT-FN
+                            {:inner true})
+               []
+               (concat (butlast forms)
+                       [(list 'return (last forms))]))
         (list ':= 'OUT (list 'OUT-FN))))
 
 (defn default-body-transform
@@ -88,9 +83,9 @@
                       (flush conn))
 
                   :else
-                  (let [input (x-json-decode line)
+                  (let [input (x:json-decode line)
                         out   (return-eval input)]
-                    (write conn (string (x-json-encode out) "\n"))
+                    (write conn (string (x:json-encode out) "\n"))
                     (flush conn)))))))])
 
 (def ^{:arglists '([port & [{:keys [host]}]])}
@@ -104,13 +99,13 @@
                        (clojure.string/join "\n\n"))]
     (fn [port & [{:keys [host]}]]
       (str "import Pkg; Pkg.add(\"JSON\"); using JSON; using Sockets;\n\n"
-           bootstrap
-           "\n\n"
-           (impl/emit-as
-            :julia [(list 'client-basic
-                          (or host "127.0.0.1")
-                          port
-                          {})])))))
+            bootstrap
+            "\n\n"
+            (impl/emit-as
+             :julia [(list 'client-basic
+                           (or host "127.0.0.1")
+                           port
+                           {})])))))
 
 (def +julia-basic-config+
   (common/set-context-options
@@ -128,3 +123,21 @@
     {:type :hara/rt.basic
      :instance {:create #'basic/rt-basic:create}
      :config {:layout :full}})])
+
+[
+ "function client_basic(host, port, opts)\n"
+            "  conn = connect(host, port)\n"
+            "  while true\n"
+            "    line = readline(conn)\n"
+            "    if line == \"<PING>\"\n"
+            "      write(conn, \"<PONG>\\n\")\n"
+            "      flush(conn)\n"
+            "    else\n"
+            "      input = JSON.parse(line)\n"
+            "      out = return_eval(input)\n"
+            "      write(conn, string(out, \"\\n\"))\n"
+            "      flush(conn)\n"
+            "    end\n"
+            "  end\n"
+            "end\n\n"
+]
