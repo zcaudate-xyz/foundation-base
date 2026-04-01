@@ -6,7 +6,8 @@
             [std.lang.base.grammar :as grammar]
             [std.lang.base.script :as script]
             [std.lang.model.spec-xtalk]
-            [std.lib.collection :as collection]))
+            [std.lib.collection :as collection])
+  (:refer-clojure :exclude [reduce]))
 
 ;;
 ;; JQ

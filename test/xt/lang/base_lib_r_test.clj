@@ -7,34 +7,6 @@
 
 (fact:global {:setup [(l/rt:restart)], :teardown [(l/rt:stop)]})
 
-^{:refer xt.lang.base-lib/type-native, :added "4.0"}
-(fact
- "gets the native type"
- ^{:hidden true}
- (!.R
-  [(k/type-native {:a 1, :b 2})
-   (k/type-native [1])
-   (k/type-native (fn []))
-   (k/type-native 1)
-   (k/type-native "")
-   (k/type-native true)])
- =>
- ["object" "array" "function" "number" "string" "boolean"])
-
-^{:refer xt.lang.base-lib/type-class, :added "4.0"}
-(fact
- "gets the type of an object"
- ^{:hidden true}
- (!.R
-  [(k/type-class {:a 1, :b 2})
-   (k/type-class [1])
-   (k/type-class (fn []))
-   (k/type-class 1)
-   (k/type-class "")
-   (k/type-class true)])
- =>
- ["object" "array" "function" "number" "string" "boolean"])
-
 ^{:refer xt.lang.base-lib/fn?, :added "4.0"}
 (fact
  "checks if object is a function type"
@@ -42,22 +14,6 @@
  (!.R [(k/fn? (fn:>)) (k/fn? k/first) (k/fn? 1)])
  =>
  [true true false])
-
-^{:refer xt.lang.base-lib/arr?, :added "4.0"}
-(fact
- "checks if object is an array"
- ^{:hidden true}
- (!.R [(k/arr? [1 2 3]) (k/arr? {:a 1})])
- =>
- [true false])
-
-^{:refer xt.lang.base-lib/obj?, :added "4.0"}
-(fact
- "checks if object is a map type"
- ^{:hidden true}
- (!.R [(k/obj? {:a 1}) (k/obj? [1 2 3])])
- =>
- [true false])
 
 ^{:refer xt.lang.base-lib/identity, :added "4.0"}
 (fact "identity function" ^{:hidden true} (!.R (k/identity 1)) => 1)
@@ -156,21 +112,6 @@
 
 ^{:refer xt.lang.base-lib/sym-pair, :added "4.0"}
 (fact "gets the sym pair" ^{:hidden true} (!.R (k/sym-pair "hello/world")) => ["hello" "world"])
-
-^{:refer xt.lang.base-lib/is-empty?, :added "4.0"}
-(fact
- "checks that array is empty"
- ^{:hidden true}
- (!.R
-  [(k/is-empty? nil)
-   (k/is-empty? "")
-   (k/is-empty? "123")
-   (k/is-empty? [])
-   (k/is-empty? [1 2 3])
-   (k/is-empty? {})
-   (k/is-empty? {:a 1, :b 2})])
- =>
- [true true false true false true false])
 
 ^{:refer xt.lang.base-lib/arr-lookup, :added "4.0"}
 (fact
@@ -442,9 +383,6 @@
 ^{:refer xt.lang.base-lib/obj-first-val, :added "4.0"}
 (fact "gets the first val" ^{:hidden true} (!.R (k/obj-first-val {:a 1})) => 1)
 
-^{:refer xt.lang.base-lib/obj-keys, :added "4.0"}
-(fact "gets keys of an object" ^{:hidden true} (set (!.R (k/obj-keys {:a 1, :b 2}))) => #{"a" "b"})
-
 ^{:refer xt.lang.base-lib/obj-vals, :added "4.0"}
 (fact "gets vals of an object" ^{:hidden true} (set (!.R (k/obj-vals {:a 1, :b 2}))) => #{1 2})
 
@@ -558,16 +496,6 @@
  =>
  ["b"])
 
-^{:refer xt.lang.base-lib/obj-difference, :added "4.0"}
-(fact
- "finds the difference between two map lookups"
- ^{:hidden true}
- (!.R
-  [(k/obj-difference {:a true, :b true} {:c true, :b true})
-   (k/obj-difference {:c true, :b true} {:a true, :b true})])
- =>
- [["c"] ["a"]])
-
 ^{:refer xt.lang.base-lib/to-flat, :added "4.0"}
 (fact
  "flattens pairs of object into array"
@@ -577,24 +505,6 @@
    (k/from-flat (k/to-flat (k/obj-pairs {:a 1, :b 2, :c 3})) k/step-set-key {})])
  =>
  [{"a" 1, "b" 2, "c" 3} {"a" 1, "b" 2, "c" 3}])
-
-^{:refer xt.lang.base-lib/get-in, :added "4.0"}
-(fact "gets item in object" ^{:hidden true} (!.R (k/get-in {:a {:b {:c 1}}} ["a" "b"])) => {"c" 1})
-
-^{:refer xt.lang.base-lib/not-empty?, :added "4.0"}
-(fact
- "checks that array is not empty"
- ^{:hidden true}
- (!.R
-  [(k/not-empty? nil)
-   (k/not-empty? "")
-   (k/not-empty? "123")
-   (k/not-empty? [])
-   (k/not-empty? [1 2 3])
-   (k/not-empty? {})
-   (k/not-empty? {:a 1, :b 2})])
- =>
- [false false true false true false true])
 
 ^{:refer xt.lang.base-lib/objify, :added "4.0"}
 (fact "decodes object if string" ^{:hidden true} (!.R (k/objify "{}")) => {})

@@ -40,3 +40,6 @@
 
 ^{:refer std.lang.model.spec-go.typed/emit-namespace-declarations :added "4.1"}
 (fact "TODO")
+
+^{:refer std.lang.model.spec-go.typed/emitted-specs :added "4.1"}
+(fact "TODO")

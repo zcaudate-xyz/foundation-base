@@ -12,7 +12,8 @@
             [std.lang.model.spec-xtalk]
             [std.lang.model-annex.spec-xtalk.fn-julia :as fn]
             [std.lib.collection :as collection]
-            [std.lib.foundation :as f]))
+            [std.lib.foundation :as f])
+  (:refer-clojure :exclude [for import]))
 
 ;;
 ;; LANG

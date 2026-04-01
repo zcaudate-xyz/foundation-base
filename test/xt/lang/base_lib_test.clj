@@ -8,12 +8,6 @@
 
 ^{:refer xt.lang.base-lib/inc-fn, :added "4.0"} (fact "creates a increment function by closure")
 
-^{:refer xt.lang.base-lib/noop, :added "4.0"} (fact "always a no op")
-
-^{:refer xt.lang.base-lib/T, :added "4.0"} (fact "always true")
-
-^{:refer xt.lang.base-lib/F, :added "4.0"} (fact "always false")
-
 ^{:refer xt.lang.base-lib/step-nil, :added "4.0"} (fact "nil step for fold")
 
 ^{:refer xt.lang.base-lib/step-thrush, :added "4.0"} (fact "thrush step for fold")
@@ -27,12 +21,6 @@
 ^{:refer xt.lang.base-lib/step-set-pair, :added "4.0"} (fact "step to set key value pair in object")
 
 ^{:refer xt.lang.base-lib/step-del-key, :added "4.0"} (fact "step to delete key in object")
-
-^{:refer xt.lang.base-lib/eq-nested-loop, :added "4.0"} (fact "switch for nested check")
-
-^{:refer xt.lang.base-lib/eq-nested-obj, :added "4.0"} (fact "checking object equality")
-
-^{:refer xt.lang.base-lib/eq-nested-arr, :added "4.0"} (fact "checking aray equality")
 
 ^{:refer xt.lang.base-lib/sort, :added "4.0"} (fact "dumb version of arr-sort")
 
@@ -52,11 +40,6 @@
 ^{:refer xt.lang.base-lib/LOG!, :added "4.0"} (fact "logging with meta info")
 
 ^{:refer xt.lang.base-lib/trace-run, :added "4.0"} (fact "run helper for `RUN!` macro")
-
-^{:refer xt.lang.base-lib/path-fn, :added "4.0"}
-(fact "creates a function that accesses a path in an object")
-
-^{:refer xt.lang.base-lib/eq-shallow, :added "4.0"} (fact "checks for shallow equality")
 
 ^{:refer xt.lang.base-lib/str-rand, :added "4.0"} (fact "generates a random string of length n")
 

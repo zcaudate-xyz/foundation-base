@@ -187,3 +187,10 @@
 (fact "finds source files for namespaces"
   (count (:functions (analyze-namespace 'std.lang.model.spec-xtalk-typed-fixture)))
   => 3)
+
+
+^{:refer std.lang.typed.xtalk-parse/analyze-file-raw :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.typed.xtalk-parse/analyze-namespace-raw :added "4.1"}
+(fact "TODO")

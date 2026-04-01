@@ -1,53 +1,22 @@
-(ns xt.lang.base-lib-lua-test
-  (:use code.test)
-  (:require [std.lang :as l]
-            [std.string.prose :as prose]))
+(ns
+ xt.lang.base-lib-lua-test
+ (:use code.test)
+ (:require [std.lang :as l] [std.string.prose :as prose]))
 
-(l/script- :lua
-  {:runtime :basic,
-   :require [[xt.lang.base-lib :as k]
-             [xt.lang.base-macro :as km]]})
+(l/script- :lua {:runtime :basic, :require [[xt.lang.base-lib :as k] [xt.lang.base-macro :as km]]})
 
-(fact:global {:setup [(l/rt:restart)],
-              :teardown [(l/rt:stop)]})
+(fact:global {:setup [(l/rt:restart)], :teardown [(l/rt:stop)]})
 
 ^{:refer xt.lang.base-lib/proto-create, :added "4.0"}
-(fact "creates the prototype map"
-  
-  (!.lua
-    (var mt (k/proto-create {:hello (fn:> [v] (. v world)), :world "hello"}))
-    (var a {})
-    (k/set-proto a mt)
-    (. a (hello)))
-  => "hello")
-
-^{:refer xt.lang.base-lib/type-native, :added "4.0"}
 (fact
- "gets the native type"
- ^{:hidden true}
+ "creates the prototype map"
  (!.lua
-  [(k/type-native {})
-   (k/type-native [1])
-   (k/type-native (fn []))
-   (k/type-native 1)
-   (k/type-native "")
-   (k/type-native true)])
+  (var mt (k/proto-create {:hello (fn:> [v] (. v world)), :world "hello"}))
+  (var a {})
+  (k/set-proto a mt)
+  (. a (hello)))
  =>
- ["object" "array" "function" "number" "string" "boolean"])
-
-^{:refer xt.lang.base-lib/type-class, :added "4.0"}
-(fact
- "gets the type of an object"
- ^{:hidden true}
- (!.lua
-  [(k/type-class {})
-   (k/type-class [1])
-   (k/type-class (fn []))
-   (k/type-class 1)
-   (k/type-class "")
-   (k/type-class true)])
- =>
- ["object" "array" "function" "number" "string" "boolean"])
+ "hello")
 
 ^{:refer xt.lang.base-lib/fn?, :added "4.0"}
 (fact
@@ -56,22 +25,6 @@
  (!.lua [(k/fn? (fn:>)) (k/fn? k/first) (k/fn? 1)])
  =>
  [true true false])
-
-^{:refer xt.lang.base-lib/arr?, :added "4.0"}
-(fact
- "checks if object is an array"
- ^{:hidden true}
- (!.lua [(k/arr? [1 2 3]) (k/arr? {:a 1})])
- =>
- [true false])
-
-^{:refer xt.lang.base-lib/obj?, :added "4.0"}
-(fact
- "checks if object is a map type"
- ^{:hidden true}
- (!.lua [(k/obj? {:a 1}) (k/obj? [1 2 3])])
- =>
- [true false])
 
 ^{:refer xt.lang.base-lib/identity, :added "4.0"}
 (fact "identity function" ^{:hidden true} (!.lua (k/identity 1)) => 1)
@@ -183,21 +136,6 @@
 
 ^{:refer xt.lang.base-lib/sym-pair, :added "4.0"}
 (fact "gets the sym pair" ^{:hidden true} (!.lua (k/sym-pair "hello/world")) => ["hello" "world"])
-
-^{:refer xt.lang.base-lib/is-empty?, :added "4.0"}
-(fact
- "checks that array is empty"
- ^{:hidden true}
- (!.lua
-  [(k/is-empty? nil)
-   (k/is-empty? "")
-   (k/is-empty? "123")
-   (k/is-empty? [])
-   (k/is-empty? [1 2 3])
-   (k/is-empty? {})
-   (k/is-empty? {:a 1, :b 2})])
- =>
- [true true false true false true false])
 
 ^{:refer xt.lang.base-lib/arr-lookup, :added "4.0"}
 (fact
@@ -501,15 +439,6 @@
  =>
  string?)
 
-^{:refer xt.lang.base-lib/arrayify, :added "4.0"}
-(fact
- "makes something into an array"
- (comment (!.R [(k/arrayify 1) (k/arrayify [1])]) => [[1] [1]])
- ^{:hidden true}
- (!.lua [(k/arrayify 1) (k/arrayify [1])])
- =>
- [[1] [1]])
-
 ^{:refer xt.lang.base-lib/obj-empty?, :added "4.0"}
 (fact
  "checks that object is empty"
@@ -531,14 +460,6 @@
 
 ^{:refer xt.lang.base-lib/obj-first-val, :added "4.0"}
 (fact "gets the first val" ^{:hidden true} (!.lua (k/obj-first-val {:a 1})) => 1)
-
-^{:refer xt.lang.base-lib/obj-keys, :added "4.0"}
-(fact
- "gets keys of an object"
- ^{:hidden true}
- (set (!.lua (k/obj-keys {:a 1, :b 2})))
- =>
- #{"a" "b"})
 
 ^{:refer xt.lang.base-lib/obj-vals, :added "4.0"}
 (fact "gets vals of an object" ^{:hidden true} (set (!.lua (k/obj-vals {:a 1, :b 2}))) => #{1 2})
@@ -672,16 +593,6 @@
  =>
  ["b"])
 
-^{:refer xt.lang.base-lib/obj-difference, :added "4.0"}
-(fact
- "finds the difference between two map lookups"
- ^{:hidden true}
- (!.lua
-  [(k/obj-difference {:a true, :b true} {:c true, :b true})
-   (k/obj-difference {:c true, :b true} {:a true, :b true})])
- =>
- [["c"] ["a"]])
-
 ^{:refer xt.lang.base-lib/obj-keys-nested, :added "4.0"}
 (fact
  "gets nested keys"
@@ -708,22 +619,6 @@
  =>
  {"a" 1, "b" 2, "c" 3})
 
-^{:refer xt.lang.base-lib/get-in, :added "4.0"}
-(fact
- "gets item in object"
- ^{:hidden true}
- (!.lua (k/get-in {:a {:b {:c 1}}} ["a" "b"]))
- =>
- {"c" 1})
-
-^{:refer xt.lang.base-lib/set-in, :added "4.0"}
-(fact
- "sets item in object"
- [(!.lua (var a {:a {:b {:c 1}}}) (k/set-in a ["a" "b"] 2) a)
-  (!.lua (var a {:a {:b {:c 1}}}) (k/set-in a ["a" "d"] 2) a)]
- =>
- [{"a" {"b" 2}} {"a" {"d" 2, "b" {"c" 1}}}])
-
 ^{:refer xt.lang.base-lib/memoize-key, :added "4.0"}
 (fact
  "memoize for functions of single argument"
@@ -735,62 +630,6 @@
   [(mf 1) (mf 2) (mf 1) (mf 1) cache])
  =>
  [1 2 1 1 [1 2]])
-
-^{:refer xt.lang.base-lib/not-empty?, :added "4.0"}
-(fact
- "checks that array is not empty"
- ^{:hidden true}
- (!.lua
-  [(k/not-empty? nil)
-   (k/not-empty? "")
-   (k/not-empty? "123")
-   (k/not-empty? [])
-   (k/not-empty? [1 2 3])
-   (k/not-empty? {})
-   (k/not-empty? {:a 1, :b 2})])
- =>
- [false false true false true false true])
-
-^{:refer xt.lang.base-lib/eq-nested, :added "4.0"}
-(fact
- "checking for nested equality"
- ^{:hidden true}
- (!.lua
-  [(k/eq-nested {:a {:b {:c 1}}} {:a {:b {:c 1}}})
-   (k/eq-nested {:a {:b {:c 1}}} {:a {:b {:c 2}}})
-   (k/eq-nested 1 1)
-   (k/eq-nested 1 2)
-   (k/eq-nested [1] [1])
-   (k/eq-nested [1] [2])
-   (k/eq-nested {:a [{:b {:c 1}}]} {:a [{:b {:c 1}}]})
-   (k/eq-nested {:a [{:b {:c 1}}]} {:a [{:b {:c 2}}]})])
- =>
- [true false true false true false true false]
- (!.lua
-  (var out {:a {:b 1}})
-  (k/set-in out ["a" "c"] out)
-  [(k/eq-nested out (k/get-in out ["a" "c"])) (k/eq-nested out (k/get-in out ["a"]))])
- =>
- [true false])
-
-^{:refer xt.lang.base-lib/obj-diff, :added "4.0"}
-(fact
- "diffs only keys within map"
- ^{:hidden true}
- (!.lua (k/obj-diff {:a 1, :b 2} {:a 1, :c 2}))
- =>
- {"c" 2})
-
-^{:refer xt.lang.base-lib/obj-diff-nested, :added "4.0"}
-(fact
- "diffs nested keys within map"
- ^{:hidden true}
- (!.lua
-  [(k/obj-diff-nested {:a 1, :b 2} {:a 1, :c 2})
-   (k/obj-diff-nested {:a 1, :b {:c 3}} {:a 1, :b {:d 3}})
-   (k/obj-diff-nested {:a 1, :b {:c {:d 3}}} {:a 1, :b {:c {:e 3}}})])
- =>
- [{"c" 2} {"b" {"d" 3}} {"b" {"c" {"e" 3}}}])
 
 ^{:refer xt.lang.base-lib/objify, :added "4.0"}
 (fact "decodes object if string" ^{:hidden true} (!.lua (k/objify "{}")) => {})

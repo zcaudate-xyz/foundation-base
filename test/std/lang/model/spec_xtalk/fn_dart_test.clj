@@ -159,3 +159,270 @@
 (fact "stop interval"
   (l/emit-as :dart [(dart-tf-x-stop-interval '[_ timer])])
   => #"cancel")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-m-ceil :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-m-floor :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-m-cos :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-m-tan :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-m-asin :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-m-acos :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-m-atan :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-m-exp :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-m-loge :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-m-log10 :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-m-min :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-m-quot :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-m-cosh :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-m-sinh :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-m-tanh :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-to-string :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-to-number :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-is-number? :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-is-integer? :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-is-boolean? :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-is-function? :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-is-object? :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-is-array? :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-str-char :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-str-split :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-str-join :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-str-index-of :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-str-last-index-of :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-str-substring :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-str-to-upper :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-str-to-lower :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-str-to-fixed :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-str-replace :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-str-trim :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-str-trim-left :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-str-trim-right :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-str-starts-with? :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-str-ends-with? :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-str-includes? :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-lu-get :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-lu-set :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-lu-del :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-arr-pop :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-arr-push-first :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-arr-pop-first :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-arr-insert :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-arr-remove :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-arr-sort :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-arr-str-comp :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-cache :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-cache-list :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-cache-flush :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-cache-get :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-cache-set :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-cache-del :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-cache-incr :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-future-run :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-future-then :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-future-catch :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-future-finally :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-future-cancel :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-future-status :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-future-await :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-future-from-async :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-iter-eq :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-iter-from :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-iter-from-arr :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-iter-from-obj :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-iter-has? :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-iter-native? :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-iter-next :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-iter-null :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-socket-connect :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-socket-send :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-socket-close :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-client-ws :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-server-basic :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-server-ws :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-notify-socket :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-ws-connect :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-ws-send :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-ws-close :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-proto-get :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-proto-set :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-proto-tostring :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-return-encode :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-return-wrap :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-return-eval :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-thread-join :added "4.1"}
+(fact "TODO")

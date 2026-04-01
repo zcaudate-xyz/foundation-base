@@ -120,3 +120,22 @@
                         :error   (return err)
                         :finally (return true)})])
   => "Future(() {\n  return call()\n}).then((ok) {\n  return ok\n}).catchError((err) {\n  return err\n}).whenComplete(() {\n  return true\n})")
+
+
+^{:refer std.lang.model.spec-dart/tf-for-object :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-dart/tf-for-array :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-dart/tf-for-iter :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-dart/tf-for-return :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-dart/tf-for-try :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model.spec-dart/tf-for-async :added "4.1"}
+(fact "TODO")

@@ -2,6 +2,16 @@
   (:require [clojure.string :as str]
             [std.lang.base.emit-preprocess :as preprocess]))
 
+(defn tmpl-fragment-fn
+  [{:keys [op-spec] :as e}]
+  (let [name  (symbol (str/replace-first (name (first (:symbol e)))
+                                         "x:"
+                                         ""))]
+    (list 'def$.xt (with-meta name
+                     {:arglists (list 'quote (:arglists op-spec))
+                      :- (:types op-spec)})
+          (first (:symbol e)))))
+
 (defn tf-throw
   "wrapper for throw transform"
   {:added "4.0"}
@@ -368,9 +378,13 @@
 
 (def +xt-common-basic+
   [{:op :x-del            :symbol #{'x:del}             :emit :abstract  
-    :op-spec    {:lowered 1 :arglists '([var]) :type [:fn [:xt/any] :xt/any]}}
+    :op-spec    {:lowered 1
+                 :arglists '([var])
+                 :type [:fn [:xt/any] :xt/any]}}
    {:op :x-cat            :symbol #{'x:cat}             :emit :abstract  
-    :op-spec   {:lowered 2 :arglists '([a b & more]) :type [:fn [:xt/any :xt/any] :xt/str]}}
+    :op-spec   {:lowered 2
+                :arglists '([x & more])
+                :type [:fn [:xt/any :xt/any] :xt/str]}}
    {:op :x-len            :symbol #{'x:len}             :emit :abstract
     :op-spec {:arglists '([value])
               :type [:fn [:xt/any] :xt/int]
@@ -384,21 +398,21 @@
 
 (def +xt-common-index+
   [{:op :x-offset         :symbol #{'x:offset}          :macro #'tf-offset      :emit :macro
-    :op-spec {:arglists '([] [n])
+    :op-spec {:arglists '([n])
               :types [[:fn [] :xt/int] [:fn [:xt/int] :xt/int]]
-              :lowered 0}}
+              :lowered 1}}
    {:op :x-offset-rev     :symbol #{'x:offset-rev}      :macro #'tf-offset-rev  :emit :macro
-    :op-spec {:arglists '([] [n])
+    :op-spec {:arglists '([n])
               :types [[:fn [] :xt/int] [:fn [:xt/int] :xt/int]]
-              :lowered 0}}
+              :lowered 1}}
     {:op :x-offset-len     :symbol #{'x:offset-len}      :macro #'tf-offset-len  :emit :macro
-    :op-spec {:arglists '([] [n])
+    :op-spec {:arglists '([n])
               :types [[:fn [] :xt/int] [:fn [:xt/int] :xt/int]]
-              :lowered 0}}
+              :lowered 1}}
     {:op :x-offset-rlen    :symbol #{'x:offset-rlen}     :macro #'tf-offset-rlen :emit :macro
-    :op-spec {:arglists '([] [n])
+    :op-spec {:arglists '([n])
               :types [[:fn [] :xt/int] [:fn [:xt/int] :xt/int]]
-              :lowered 0}}])
+              :lowered 1}}])
 
 (def +xt-common-number+
   [{:op :x-add            :symbol #{'x:add}             :macro #'tf-add    :emit :macro
@@ -536,22 +550,22 @@
 
 (def +xt-common-object+
   [{:op :x-has-key?       :symbol #{'x:has-key?}        :emit :abstract
-    :op-spec  {:arglists '([obj key] [obj key present?])
+    :op-spec  {:arglists '([obj key present?])
                :lowered 2}}
    {:op :x-del-key        :symbol #{'x:del-key}         :macro #'tf-del-key     :emit :macro
     :op-spec {:arglists '([obj key])
               :lowered 2}}
     {:op :x-get-key        :symbol #{'x:get-key}         :macro #'tf-get-key     :emit :macro
-     :op-spec {:arglists '([obj key] [obj key default])
-               :lowered 2}}
+     :op-spec {:arglists '([obj key default])
+               :lowered 3}}
     {:op :x-get-path       :symbol #{'x:get-path}        :macro #'tf-get-path    :emit :macro
-     :op-spec {:arglists '([obj path] [obj path default])
-               :lowered 2}}
+     :op-spec {:arglists '([obj path default])
+               :lowered 3}}
    {:op :x-set-key        :symbol #{'x:set-key}         :macro #'tf-set-key     :emit :macro
     :op-spec   {:arglists '([obj key value])
                 :lowered 3}}
    {:op :x-copy-key       :symbol #{'x:copy-key}        :macro #'tf-copy-key    :emit :macro
-    :op-spec   {:arglists '([dst src key] [dst src [dst-key src-key]])
+    :op-spec   {:arglists '([dst src key])
                 :lowered 3}}
    {:op :x-obj-keys       :symbol #{'x:obj-keys}        :emit :hard-link :raw 'xt.lang.common-data/obj-keys
     :op-spec   {:arglists '([obj])
@@ -615,7 +629,7 @@
                 :type [:fn [:xt/str :xt/str] :xt/bool]
                 :lowered 2}}
    {:op :x-arr-slice       :symbol #{'x:arr-splice}       :emit :hard-link :raw 'xt.lang.common-data/arr-slice
-    :op-spec   {:arglists '([arr start] [arr start end])
+    :op-spec   {:arglists '([arr start end])
                 :lowered 2}}
    {:op :x-arr-reverse     :symbol #{'x:arr-reverse}      :emit :hard-link :raw 'xt.lang.common-data/arr-reverse
     :op-spec   {:arglists '([arr])
@@ -646,12 +660,12 @@
    
    {:op :x-str-pad-left    :symbol #{'x:str-pad-left}    :emit :hard-link
     :raw 'xt.lang.common-string/pad-left
-    :op-spec   {:arglists '([value len] [value len pad])
-                :lowered 2}}
+    :op-spec   {:arglists '([value len pad])
+                :lowered 3}}
    {:op :x-str-pad-right   :symbol #{'x:str-pad-right}   :emit :hard-link
     :raw 'xt.lang.common-string/pad-right
-    :op-spec   {:arglists '([value len] [value len pad])
-                :lowered 2}}
+    :op-spec   {:arglists '([value len pad])
+                :lowered 3}}
    {:op :x-str-starts-with :symbol #{'x:str-starts-with} :emit :hard-link
     :raw 'xt.lang.common-string/starts-with?
     :op-spec   {:arglists '([value prefix])
@@ -678,11 +692,11 @@
                  :type [:fn [:xt/str [:xt/array :xt/any]] :xt/str]
                  :lowered 2}}
    {:op :x-str-index-of    :symbol #{'x:str-index-of}    :emit :abstract
-    :op-spec    {:arglists '([value pattern] [value pattern from])
-                 :lowered 2}}
+    :op-spec    {:arglists '([value pattern from])
+                 :lowered 3}}
    {:op :x-str-substring   :symbol #{'x:str-substring}   :emit :abstract
-    :op-spec    {:arglists '([value start] [value start end])
-                 :lowered 2}}
+    :op-spec    {:arglists '([value start end])
+                 :lowered 3}}
    {:op :x-str-to-upper    :symbol #{'x:str-to-upper}    :emit :abstract
     :op-spec     {:arglists '([value])
                   :type [:fn [:xt/str] :xt/str]

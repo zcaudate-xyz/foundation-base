@@ -14,6 +14,11 @@
              [xt.lang.base-lib :as k])
   (:use code.test))
 
+(defn artifact-producer-fixture
+  [{:keys [runtime-output runtime-body main]}]
+  [{:output (str runtime-output ".artifact")
+    :body (str main "::" runtime-body)}])
+
 ^{:refer std.lang.base.compile/compile-script :added "4.0"}
 (fact "compiles a script"
   ^:hidden
@@ -160,3 +165,38 @@
 (fact "creates links for modules"
   (compile-module-create-links '[a.b a.c] 'a {})
   => (contains {'a.b (contains {:label "b"}) 'a.c (contains {:label "c"})}))
+
+
+^{:refer std.lang.base.compile/resolve-artifact-producer :added "4.1"}
+(fact "resolves artifact producers from vars, symbols and functions"
+  [(fn? (resolve-artifact-producer #'artifact-producer-fixture))
+   (fn? (resolve-artifact-producer 'std.lang.base.compile-test/artifact-producer-fixture))
+   (fn? (resolve-artifact-producer artifact-producer-fixture))
+   (nil? (resolve-artifact-producer :missing))]
+  => [true true true true])
+
+^{:refer std.lang.base.compile/artifact-descriptor-seq :added "4.1"}
+(fact "normalizes nested artifact descriptors into a flat sequence"
+  (vec (artifact-descriptor-seq [{:output "a"}
+                                 [{:output "b"}]
+                                 [{:output "c"}
+                                  [{:output "d"}]]]))
+  => [{:output "a"}
+      {:output "b"}
+      {:output "c"}
+      {:output "d"}])
+
+^{:refer std.lang.base.compile/compile-module-artifacts :added "4.1"}
+(fact "includes the primary output and any sidecar artifacts"
+  (let [artifacts (compile-module-artifacts
+                   "BODY"
+                   "pkg/file.js"
+                   {:main 'demo.core
+                    :emit {:artifacts [#'artifact-producer-fixture]}}
+                   {:module 'demo.core})]
+    [(mapv :output artifacts)
+     (mapv :body artifacts)])
+  => [["pkg/file.js"
+       "pkg/file.js.artifact"]
+      ["BODY"
+       "demo.core::BODY"]])

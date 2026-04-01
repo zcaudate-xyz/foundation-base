@@ -1,5 +1,6 @@
 (ns std.lang.manage.xtalk-scaffold-test
   (:require [clojure.string :as str]
+            [std.fs :as fs]
             [std.lang.manage.xtalk-scaffold :refer :all])
   (:use code.test))
 
@@ -56,9 +57,19 @@
         ^:hidden
         (!.js (k/identity 1))
         => 1)
-      (fact \"wrapped runtime form\"
-        (set (!.js (k/example)))
-        => #{1})]"))
+       (fact \"wrapped runtime form\"
+         (set (!.js (k/example)))
+         => #{1})]"))
+
+(defn with-temp-runtime-suite-file
+  [forms f]
+  (let [root (str (fs/create-tmpdir "xtalk-scaffold"))
+        path (str (fs/path root "sample_test.clj"))]
+    (try
+      (spit path (render-top-level-forms forms))
+      (f path)
+      (finally
+        (fs/delete root)))))
 
 ^{:refer std.lang.manage.xtalk-scaffold/read-xtalk-ops :added "4.1"}
 (fact "reads xtalk ops from path"
@@ -301,3 +312,179 @@
 (fact "scaffold-runtime-template is callable"
   (fn? scaffold-runtime-template)
   => true)
+
+
+^{:refer std.lang.manage.xtalk-scaffold/runtime-type :added "4.1"}
+(fact "returns configured runtime implementation type"
+  [(runtime-type :js)
+   (runtime-type :dart)]
+  => [:basic :twostep])
+
+^{:refer std.lang.manage.xtalk-scaffold/runtime-check-mode :added "4.1"}
+(fact "returns configured runtime verification mode"
+  [(runtime-check-mode :php)
+   (runtime-check-mode :dart)]
+  => [:realtime :batched])
+
+^{:refer std.lang.manage.xtalk-scaffold/runtime-suite-groups :added "4.1"}
+(fact "groups runtimes by check mode"
+  (runtime-suite-groups [:ruby :dart :php :js])
+  => '{:batched [:dart]
+       :realtime [:js :php :rb]})
+
+^{:refer std.lang.manage.xtalk-scaffold/canonical-suite-path :added "4.1"}
+(fact "derives the canonical suite path from a test file"
+  (canonical-suite-path "test/xt/lang/base_lib_test.clj")
+  => "test/xt/lang/base_lib_suite.edn")
+
+^{:refer std.lang.manage.xtalk-scaffold/runtime-bulk-path :added "4.1"}
+(fact "derives the per-language bulk suite path"
+  (runtime-bulk-path "test/xt/lang/base_lib_suite.edn" :dart)
+  => "test/xt/lang/base_lib_suite-dt-bulk.edn")
+
+^{:refer std.lang.manage.xtalk-scaffold/form-line-info :added "4.1"}
+(fact "extracts line and column metadata from forms"
+  (form-line-info (with-meta '(+ 1 2)
+                    {:line 10 :column 3 :end-line 10 :end-column 9}))
+  => '{:line 10
+       :column 3
+       :end-line 10
+       :end-column 9})
+
+^{:refer std.lang.manage.xtalk-scaffold/merge-language-exceptions :added "4.1"}
+(fact "merges nested language exception maps"
+  (merge-language-exceptions {:dart {:expect 10}}
+                             {:dart {:skip true}
+                              :go {:expect 20}})
+  => '{:dart {:expect 10
+              :skip true}
+       :go {:expect 20}})
+
+^{:refer std.lang.manage.xtalk-scaffold/form-language-exceptions :added "4.1"}
+(fact "reads exception metadata from either supported key"
+  [(form-language-exceptions (with-meta '(+ 1 2) {:lang-exceptions {:dart {:skip true}}}))
+   (form-language-exceptions (with-meta '(+ 1 2) {:exceptions {:go {:expect 20}}}))]
+  => '[{:dart {:skip true}}
+       {:go {:expect 20}}])
+
+^{:refer std.lang.manage.xtalk-scaffold/strip-runtime-dispatch :added "4.1"}
+(fact "removes runtime dispatch wrappers recursively"
+  [(strip-runtime-dispatch '(!.js (k/a)))
+   (strip-runtime-dispatch '[(!.js (k/a)) (!.lua (k/b))])]
+  => '[(k/a)
+       [(k/a) (k/b)]])
+
+^{:refer std.lang.manage.xtalk-scaffold/fact-assertion-forms :added "4.1"}
+(fact "extracts assertion pairs from fact bodies"
+  (fact-assertion-forms '(fact "x" (!.js (k/a)) => 1 "note" (!.lua (k/b)) => 2))
+  => '[[(!.js (k/a)) 1]
+       [(!.lua (k/b)) 2]])
+
+^{:refer std.lang.manage.xtalk-scaffold/canonical-case-id :added "4.1"}
+(fact "builds stable case ids from namespace, title and index"
+  (canonical-case-id 'xt.lang.base-lib-test "identity function" 2)
+  => "xt.lang.base-lib-test::identity-function::2")
+
+^{:refer std.lang.manage.xtalk-scaffold/fact-runtime-cases :added "4.1"}
+(fact "extracts canonical runtime cases from a fact"
+  (let [fact-form (with-meta
+                    '(fact "identity function"
+                       ^{:lang-exceptions {:dart {:expect 10}}}
+                       (!.js (+ 1 2))
+                       => 3
+                       (!.lua (+ 2 3))
+                       => 5)
+                    {:line 20})
+        cases (fact-runtime-cases 'xt.lang.base-lib-test fact-form :js)]
+    [(count cases)
+     (:id (first cases))
+     (:form (first cases))
+     (:expect (first cases))
+     (:exceptions (first cases))])
+  => [1
+      "xt.lang.base-lib-test::identity-function::0"
+      '(+ 1 2)
+      3
+      {:dart {:expect 10}}])
+
+^{:refer std.lang.manage.xtalk-scaffold/canonical-runtime-suite-forms :added "4.1"}
+(fact "converts runtime tests into canonical suite data"
+  (let [suite (canonical-runtime-suite-forms runtime-test-forms :lua)]
+    [(:ns suite)
+     (:lang suite)
+     (:runtime-type suite)
+     (:check-mode suite)
+     (count (:cases suite))
+     (mapv :form (:cases suite))])
+  => '[xt.lang.base-lib-test
+       :lua
+       :basic
+       :realtime
+       3
+       [(k/identity 1)
+        (set (k/example))
+        [(k/a) (k/b)]]])
+
+^{:refer std.lang.manage.xtalk-scaffold/case-language-config :added "4.1"}
+(fact "applies language-specific overrides to cases"
+  (case-language-config {:expect 30
+                         :form '(+ 10 20)
+                         :exceptions {:dart {:skip true
+                                             :expect 10
+                                             :form '(* 2 5)}}}
+                        :dart)
+  => '{:skip true
+       :expect 10
+       :form (* 2 5)
+       :exception {:skip true
+                   :expect 10
+                   :form (* 2 5)}})
+
+^{:refer std.lang.manage.xtalk-scaffold/compile-runtime-bulk-suite :added "4.1"}
+(fact "compiles canonical suites into bulk payloads"
+  (let [suite (canonical-runtime-suite-forms runtime-test-forms :js)
+        bulk (compile-runtime-bulk-suite suite :dart)]
+    [(:lang bulk)
+     (:runtime-type bulk)
+     (:check-mode bulk)
+     (mapv :value (:bulk-form bulk))
+     (mapv :expect (:verify bulk))])
+  => [:dart
+      :twostep
+      :batched
+      '[(k/identity 1)
+        (set (k/example))
+        [(k/a) (k/b)]]
+      '[1 #{1} [1 2]]])
+
+^{:refer std.lang.manage.xtalk-scaffold/export-runtime-suite :added "4.1"}
+(fact "exports runtime tests from a file to canonical suite EDN"
+  (with-temp-runtime-suite-file
+    runtime-test-forms
+    (fn [path]
+      (let [{:keys [output-path suite count]} (export-runtime-suite nil {:input-path path
+                                                                         :lang :lua})]
+        [(str/ends-with? output-path "_suite.edn")
+         (= :lua (:lang suite))
+         (= 3 count)])))
+  => [true true true])
+
+^{:refer std.lang.manage.xtalk-scaffold/compile-runtime-bulk :added "4.1"}
+(fact "reads canonical suite EDN files and emits batched runtime payloads"
+  (with-temp-runtime-suite-file
+    runtime-test-forms
+    (fn [path]
+      (let [{:keys [output-path]} (export-runtime-suite nil {:input-path path
+                                                             :lang :js
+                                                             :write true})
+            {:keys [bulk count]} (compile-runtime-bulk nil {:input-path output-path
+                                                            :lang :dart})]
+        [(:lang bulk)
+         (:check-mode bulk)
+         count])))
+  => [:dart :batched 3])
+
+^{:refer std.lang.manage.xtalk-scaffold/transform-script-runtime :added "4.1"}
+(fact "updates script runtime options for the target language"
+  (transform-script-runtime '(l/script- :js {:runtime :basic :layout :flat}) :dart)
+  => '(l/script- :js {:runtime :twostep :layout :flat}))

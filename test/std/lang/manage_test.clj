@@ -2,7 +2,7 @@
   (:require [std.lang.manage :as manage]
             [std.lang.manage.xtalk-audit :as audit]
             [std.lang.manage.xtalk-ops :as xtalk-ops]
-            [std.lang.manage.xtalk-scaffold :as scaffold])
+            [std.lang.manage.xtalk-scaffold :as scaffold]
             [std.task :as task])
   (:use code.test))
 
@@ -180,3 +180,10 @@
 (fact "scaffold-runtime-template task is available"
   (task/task? manage/scaffold-runtime-template)
   => true)
+
+
+^{:refer std.lang.manage/compile-runtime-bulk :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.manage/-main :added "4.1"}
+(fact "TODO")

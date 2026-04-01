@@ -1,26 +1,20 @@
 (ns xt.lang.common-lib
   (:require [std.lang :as l :refer [defspec.xt]]
+            [std.lib.foundation :as f]
+            [clojure.string :as str]
             [std.lang.base.grammar-xtalk :as xtalk])
   (:refer-clojure :exclude [identity fn? cat print]))
 
 (l/script :xtalk)
 
-(def$.xt del x:del)
-(def$.xt cat x:cat)
-(def$.xt len x:len)
-(def$.xt err x:err)
-(def$.xt ^{:arglists '([value])} type-native x:type-native)
-(def$.xt ^{:arglists '([value])} to-string x:to-string)
-(def$.xt ^{:arglists '([value])} to-number x:to-number)
-(def$.xt ^{:arglists '([value])} is-string? x:is-string?)
-(def$.xt ^{:arglists '([value])} is-number? x:is-number?)
-(def$.xt ^{:arglists '([value])} is-integer? x:is-integer?)
-(def$.xt ^{:arglists '([value])} is-boolean? x:is-boolean?)
-(def$.xt ^{:arglists '([lookup key] [lookup key default])} lu-get x:lu-get)
-(def$.xt ^{:arglists '([lookup key value])} lu-set x:lu-set)
-(def$.xt ^{:arglists '([lookup key])} lu-del x:lu-del)
-(def$.xt ^{:arglists '([obj key] [obj key present?])} has-key? x:has-key?)
-(def$.xt ^{:arglists '([value])} print x:print)
+(f/template-entries [xtalk/tmpl-fragment-fn]
+  xtalk/+xt-common-basic+
+  xtalk/+xt-common-index+
+  xtalk/+xt-common-nil+
+  xtalk/+xt-common-number+
+  xtalk/+xt-common-primitives+
+  xtalk/+xt-common-print+)
+
 
 (defn.xt noop
   "always a no op"
@@ -51,12 +45,6 @@
   {:added "4.1"}
   [x]
   (return (x:is-object? x)))
-
-(defn.xt type-native
-  "gets the native type"
-  {:added "4.1"}
-  ([obj]
-   (x:type-native obj)))
 
 (defn.xt type-class
   "gets the type of an object"

@@ -2,6 +2,7 @@
   (:require [std.lang.base.script :as script]
             [std.lang.base.util :as ut]
             [std.lang.model-annex.spec-julia :refer :all])
+  (:refer-clojure :exclude [for import])
   (:use code.test))
 
 (script/script- :julia)

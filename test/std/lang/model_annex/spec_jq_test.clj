@@ -1,6 +1,7 @@
 (ns std.lang.model-annex.spec-jq-test
   (:require [std.lang.base.script :as script]
             [std.lang.model-annex.spec-jq :refer :all])
+  (:refer-clojure :exclude [reduce])
   (:use code.test))
 
 (script/script- :jq)

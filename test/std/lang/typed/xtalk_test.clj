@@ -165,3 +165,7 @@
     (clear-registry!)
     (:namespace (check-namespace 'xt.lang.event-route)))
   => 'xt.lang.event-route)
+
+
+^{:refer std.lang.typed.xtalk/analyze-file-raw :added "4.1"}
+(fact "TODO")

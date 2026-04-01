@@ -171,3 +171,7 @@
 
 ^{:refer std.lang.model.spec-js.ts/emit-namespace-declarations :added "4.1"}
 (fact "TODO")
+
+
+^{:refer std.lang.model.spec-js.ts/emitted-specs :added "4.1"}
+(fact "TODO")

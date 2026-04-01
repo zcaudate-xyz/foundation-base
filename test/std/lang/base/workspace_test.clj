@@ -5,6 +5,7 @@
              [std.lang.base.workspace :as w]
              [std.lib.env :as env]
              [std.lib.os :as os])
+  (:refer-clojure :exclude [cat print])
   (:use code.test))
 
 (l/script- :xtalk

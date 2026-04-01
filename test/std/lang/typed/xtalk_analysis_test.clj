@@ -72,3 +72,7 @@
   [(report-json {:a 1})
    (boolean (re-find #"\n" (report-json {:a 1} true)))]
   => ["{\"a\":1}" true])
+
+
+^{:refer std.lang.typed.xtalk-analysis/analyze-file-raw :added "4.1"}
+(fact "TODO")

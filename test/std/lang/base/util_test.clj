@@ -151,8 +151,9 @@
   (try
     (throw (ex-info "inner" {:inner true}))
     (catch Throwable t
-      [(.getMessage (error-with-context "wrap" {:outer true} t))
-       (ex-data (error-with-context "wrap" {:outer true} t))]))
+      (let [^Throwable wrapped (error-with-context "wrap" {:outer true} t)]
+        [(.getMessage wrapped)
+         (ex-data wrapped)])))
   => '["wrap: inner"
        {:inner true
         :outer true
