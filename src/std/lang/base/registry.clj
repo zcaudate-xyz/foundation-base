@@ -61,6 +61,8 @@
 
          [:erlang :oneshot]            'rt.basic.impl-annex.process-erlang
          [:erlang :basic]              'rt.basic.impl-annex.process-erlang
+ 
+         [:haskell :twostep]           'rt.basic.impl-annex.process-haskell
 
          [:rust   :twostep]            'rt.basic.impl-annex.process-rust
          
