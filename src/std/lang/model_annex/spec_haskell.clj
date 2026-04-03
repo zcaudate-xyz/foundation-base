@@ -2,6 +2,7 @@
   (:require [clojure.string]
             [std.lang.base.book :as book]
             [std.lang.base.emit :as emit]
+            [std.lang.base.emit-common :as common]
             [std.lang.base.emit-data :as data]
             [std.lang.base.emit-fn :as emit-fn]
             [std.lang.base.emit-helper :as helper]
@@ -50,6 +51,18 @@
   (let [s (emit/emit-main form grammar mopts)]
     (prose/indent s 2)))
 
+(defn haskell-invoke
+  "wraps wrappable arguments for function application"
+  {:added "4.1"}
+  [[sym & args] grammar mopts]
+  (let [emit-arg (fn [arg]
+                   (if (common/emit-wrappable? arg grammar)
+                     (str "(" (emit/emit-main arg grammar mopts) ")")
+                     (emit/emit-main arg grammar mopts)))]
+    (str (emit/emit-main sym grammar mopts)
+         (when (seq args) " ")
+         (clojure.string/join " " (map emit-arg args)))))
+
 (defn tf-defn
   "custom defn for Haskell"
   {:added "4.0"}
@@ -76,13 +89,32 @@
         (list :lines (list :- sig) (list :- sym (list :h-args args-emit) "=" body-emit))
         (list :- sym (list :h-args args-emit) "=" body-emit))))
 
-(defn tf-case
-  "transforms case"
+(defn parse-match-clauses
+  "parses shared `match` clauses"
   {:added "4.0"}
+  [clauses]
+  (mapv (fn [[pattern result]]
+          (if (and (vector? result)
+                   (= :when (first result)))
+            {:pattern pattern
+             :guard   (second result)
+             :body    (nth result 2)}
+            {:pattern pattern
+             :body    result}))
+        (partition 2 clauses)))
+
+(defn tf-match
+  "transforms match"
+  {:added "4.1"}
   [[_ val & clauses]]
-  (let [clauses (partition 2 clauses)
-        out (map (fn [[pattern result]]
-                   (list :% pattern (list :raw-str " -> ") (list :% result)))
+  (let [clauses (parse-match-clauses clauses)
+        out (map (fn [{:keys [pattern guard body]}]
+                   (apply list :%
+                          (concat [pattern]
+                                  (when guard
+                                    [(list :% (list :raw-str " | ") guard)])
+                                  [(list :raw-str " -> ")
+                                   (list :% body)])))
                  clauses)]
     (list :%
           (list :% (list :raw-str "case ") val (list :raw-str " of\n"))
@@ -94,18 +126,21 @@
   [[_ cond then else]]
   (list :% (list :raw-str "if ") cond (list :raw-str " then ") then (list :raw-str " else ") else))
 
-(defn tf-let
-  "transforms let"
+(defn tf-letrec
+  "transforms letrec"
   {:added "4.0"}
-  [[_ bindings body]]
+  [[_ bindings & body]]
   (let [bindings (partition 2 bindings)
+        body-emit (if (> (count body) 1)
+                    (cons 'do body)
+                    (first body))
         out (map (fn [[sym val]]
                    (list :% sym (list :raw-str " = ") val))
                  bindings)]
     (list :%
           (list :raw-str "let\n")
           (list :indent-body (apply list :lines out))
-          (list :raw-str "\nin ") body)))
+          (list :raw-str "\nin ") body-emit)))
 
 (defn tf-lambda
   "transforms fn/lambda"
@@ -136,19 +171,22 @@
                    args))))
 
 (def +features+
-  (-> (grammar/build :exclude [:control-try-catch
-                               :class
-                               :macro-arrow
-                               :control-base
-                               :control-general])
+  (-> (merge (grammar/build :exclude [:control-try-catch
+                                      :class
+                                      :macro-arrow
+                                      :macro-let
+                                      :macro-case
+                                      :control-base
+                                      :control-general])
+             (grammar/build-functional-core))
       (grammar/build:override
        {:defn    {:macro #'tf-defn :emit :macro}
         :fn      {:macro #'tf-lambda :emit :macro}
         :if      {:op :if :symbol #{'if} :emit :macro :macro #'tf-if}
-        :case    {:op :case :symbol #{'case} :emit :macro :macro #'tf-case}})
+        :match   {:op :match :symbol #{'match} :emit :macro :macro #'tf-match :type :block}
+        :letrec  {:op :letrec :symbol #{'letrec 'letfn} :emit :macro :macro #'tf-letrec :type :block}})
       (grammar/build:extend
-       {:let:h   {:op :let:h :symbol #{'let:h 'let} :emit :macro :macro #'tf-let}
-        :do      {:op :do :symbol #{'do} :emit :macro :macro #'tf-do}
+       {:do      {:op :do :symbol #{'do} :emit :macro :macro #'tf-do}
         :cons    {:op :cons :symbol #{'cons} :emit :infix :raw ":"}
         :concat  {:op :concat :symbol #{'concat} :emit :infix :raw "++"}
         :h-args  {:op :h-args :symbol #{:h-args} :emit #'haskell-args}
@@ -174,7 +212,8 @@
                               :body      {:start "" :end ""}}
                   :function  {:raw ""
                               :args {:sep " "}}
-                  :invoke    {:sep " " :start " " :end ""}}
+                  :invoke    {:sep " " :start " " :end ""
+                              :custom #'haskell-invoke}}
         :data    {:vector    {:start "[" :end "]" :space "" :custom #'haskell-vector}
                   :tuple     {:start "(" :end ")" :space ""}}
         :token   {:symbol    {:replace +sym-replace+}}
