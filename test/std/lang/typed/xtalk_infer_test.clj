@@ -514,3 +514,15 @@
 
 ^{:refer std.lang.typed.xtalk-infer/infer-op-spec-form :added "4.1"}
 (fact "TODO")
+
+(fact "infers xt self outputs from the first argument"
+  (-> (infer-op-spec-form (ops/canonical-entry 'x:arr-push)
+                          '(x:arr-push items "a")
+                          {:env '{items {:kind :array
+                                         :item {:kind :primitive :name :xt/str}}}
+                           :ns 'sample.route
+                           :aliases {}})
+      :type
+      types/type->data)
+  => '{:kind :array
+       :item {:kind :primitive :name :xt/str}})

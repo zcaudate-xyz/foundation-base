@@ -177,24 +177,32 @@
   {:added "4.1"}
   [sym grammar]
   (let [{:keys [emit macro]
-         template :value/template
-         standalone :value/standalone} (get-in grammar [:reserved sym])
+          template :value/template
+          standalone :value/standalone
+          op-spec :op-spec} (get-in grammar [:reserved sym])
         template (or template
                      (when (= :macro emit)
-                       macro))]
+                       macro))
+        self-return? (= :xt/self
+                        (get-in op-spec [:type 2]))]
     (cond (or (collection/form? standalone)
               (symbol? standalone))
-          standalone
+           standalone
 
-          (and (= true standalone)
-               template)
-          (let [args (value-template-args template)]
-            (list 'fn args
-                  (list 'return
-                        (template (apply list nil args)))))
+           (and (= true standalone)
+                template)
+           (let [args (value-template-args template)]
+             (if self-return?
+               (let [self-arg (first args)]
+                 (list 'fn args
+                       (template (apply list nil args))
+                       (list 'return self-arg)))
+               (list 'fn args
+                     (list 'return
+                           (template (apply list nil args))))))
 
-          :else
-          nil)))
+           :else
+           nil)))
 
 (defn process-namespaced-resolve
   "resolves symbol in current namespace"

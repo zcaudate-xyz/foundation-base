@@ -89,16 +89,20 @@
       :else [])))
 
 (defn op-types
-  [entry]
-  (mapv #(types/normalize-type % {:ns nil :aliases {}})
-        (op-type-forms entry)))
+  ([entry]
+   (op-types entry {:ns nil :aliases {}}))
+  ([entry ctx]
+   (mapv #(types/normalize-type % ctx)
+         (op-type-forms entry))))
 
 (defn builtin-type
-  [sym]
+  ([sym]
+   (builtin-type sym {:ns nil :aliases {}}))
+  ([sym ctx]
   (when-let [entry (canonical-entry sym)]
-    (let [fn-types (op-types entry)]
+    (let [fn-types (op-types entry ctx)]
       (when (seq fn-types)
-        (types/union-type fn-types)))))
+        (types/union-type fn-types))))))
 
 (defn builtin?
   [sym]

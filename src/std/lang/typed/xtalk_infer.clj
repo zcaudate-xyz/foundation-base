@@ -1021,10 +1021,12 @@
 
 (defn infer-op-spec-form
   [builtin-entry form ctx]
-  (let [fn-types (ops/op-types builtin-entry)]
+  (let [[_ & args] form
+        arg-results (mapv #(infer-type % ctx) args)
+        self-type (some-> arg-results first :type)
+        fn-types (ops/op-types builtin-entry (assoc ctx :self self-type))]
     (when (seq fn-types)
-      (let [[_ & args] form
-            arg-results (mapv #(infer-type % ctx) args)
+      (let [arg-results arg-results
             errors (vec (mapcat :errors arg-results))
             arity-types (filterv #(optional-arity? (:inputs %) (count args) ctx)
                                  fn-types)]
@@ -1054,9 +1056,9 @@
 
 (defn infer-builtin-form
   [builtin-entry form ctx]
-  (or (infer-op-spec-form builtin-entry form ctx)
-      (when-let [rule (get +builtin-rules+ (:canonical-symbol builtin-entry))]
-        (rule form ctx))))
+  (or (when-let [rule (get +builtin-rules+ (:canonical-symbol builtin-entry))]
+        (rule form ctx))
+      (infer-op-spec-form builtin-entry form ctx)))
 
 (defn infer-dot
   [[_ obj-expr key-or-path] ctx]

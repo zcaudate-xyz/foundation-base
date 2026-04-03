@@ -1704,7 +1704,7 @@
                          (return (-/lt v1 v0))
                          
                          :else
-                         (return (-/lt-string (-/to-string v1)
+                         (return (-/str-lt (-/to-string v1)
                                               (-/to-string v0))))
 
                    :else
@@ -1712,7 +1712,7 @@
                          (return (-/lt v0 v1))
                          
                          :else
-                         (return (-/lt-string (-/to-string v0)
+                         (return (-/str-lt (-/to-string v0)
                                               (-/to-string v1)))))))
          (return false)))
   (return

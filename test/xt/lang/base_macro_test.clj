@@ -605,36 +605,36 @@
          (k/odd? 1)])
   => [false true])
 
-^{:refer xt.lang.base-macro/lt-string :added "4.0"}
+^{:refer xt.lang.base-macro/str-lt :added "4.0"}
 (fact "checks if a is ordered before b"
   ^:hidden
   
-  (!.js [(k/lt-string "a" "b")
-         (k/lt-string "A" "a")])
+  (!.js [(k/str-lt "a" "b")
+         (k/str-lt "A" "a")])
   => [true false]
 
-  (!.lua [(k/lt-string "a" "b")
-          (k/lt-string "a" "A" )])
+  (!.lua [(k/str-lt "a" "b")
+          (k/str-lt "a" "A" )])
   => [true false]
   
-  (!.py [(k/lt-string "a" "b")
-         (k/lt-string "a" "A")])
+  (!.py [(k/str-lt "a" "b")
+         (k/str-lt "a" "A")])
   => [true false])
 
-^{:refer xt.lang.base-macro/gt-string :added "4.0"}
+^{:refer xt.lang.base-macro/str-gt :added "4.0"}
 (fact "checks if a is ordered before b"
   ^:hidden
   
-  (!.js [(k/gt-string "a" "b")
-         (k/gt-string "A" "a")])
+  (!.js [(k/str-gt "a" "b")
+         (k/str-gt "A" "a")])
   => [false true]
 
-  (!.lua [(k/gt-string "a" "b")
-          (k/gt-string "a" "A" )])
+  (!.lua [(k/str-gt "a" "b")
+          (k/str-gt "a" "A" )])
   => [false true]
   
-  (!.py [(k/gt-string "a" "b")
-         (k/gt-string "a" "A")])
+  (!.py [(k/str-gt "a" "b")
+         (k/str-gt "a" "A")])
   => [false true])
 
 ^{:refer xt.lang.base-macro/this :added "4.0"}

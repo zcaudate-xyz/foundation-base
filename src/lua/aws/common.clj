@@ -112,7 +112,7 @@
     (when (not (k/get-key -/AWS_EXCLUDE nk))
       (var nv (k/replace v "[ ]+" " "))
       (x:arr-push out [nk nv])))
-  (return (k/arr-sort out k/first k/lt-string)))
+  (return (k/arr-sort out k/first k/str-lt)))
 
 (defn.lua get-canonical-route
   "gets the canonical route"
@@ -127,7 +127,7 @@
       (var [k v] (k/split pair "="))
       (x:arr-push params [k (or v "")])))
   (return {:path path
-           :params (k/arr-sort params k/first k/lt-string)}))
+           :params (k/arr-sort params k/first k/str-lt)}))
 
 (defn.lua get-canonical
   "gets the canonical string"

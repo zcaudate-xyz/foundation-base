@@ -28,7 +28,7 @@
   [schema]
   (return  (k/arr-sort (k/obj-keys schema)
                        k/identity
-                       k/lt-string)))
+                       k/str-lt)))
 
 (defn.xt get-cached-schema
   "get lookup"

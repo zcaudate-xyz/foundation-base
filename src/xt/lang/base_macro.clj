@@ -215,18 +215,18 @@
   ([x] (list 'x:odd? x)))
 
 (defmacro.xt ^{:standalone true}
-  lt-string
+  str-lt
   "checks if a is ordered before b"
   {:added "4.0"}
   [a b]
-  (list 'x:lt-string a b))
+  (list 'x:str-lt a b))
 
 (defmacro.xt ^{:standalone true}
-  gt-string
+  str-gt
   "checks if a is ordered before b"
   {:added "4.0"}
   [a b]
-  (list 'x:gt-string a b))
+  (list 'x:str-gt a b))
 
 
 
