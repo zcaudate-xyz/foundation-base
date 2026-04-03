@@ -130,6 +130,12 @@
          [:haskell  :default]          {:ns 'std.lang.model-annex.spec-haskell
                                         :book '+book+
                                         :parent :xtalk}
+         [:lean     :default]          {:ns 'std.lang.model-annex.spec-lean
+                                        :book '+book+
+                                        :parent :xtalk}
+         [:ocaml    :default]          {:ns 'std.lang.model-annex.spec-ocaml
+                                        :book '+book+
+                                        :parent :xtalk}
          [:jq       :default]          {:ns 'std.lang.model-annex.spec-jq
                                         :book '+book+
                                         :parent :xtalk}

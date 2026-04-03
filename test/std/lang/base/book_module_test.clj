@@ -1,11 +1,11 @@
 (ns std.lang.base.book-module-test
   (:require [xt.lang.common-data]
-             [xt.lang.common-lib]
-             [js.blessed]
-             [js.blessed.frame]
-             [std.lang :as l]
-             [std.lang.base.book-module :refer :all]
-             [std.lang.base.impl :as impl])
+            [xt.lang.common-lib]
+            [js.blessed]
+            [js.blessed.frame]
+            [std.lang :as l]
+            [std.lang.base.book-module :refer :all]
+            [std.lang.base.impl :as impl])
   (:use code.test))
 
 (def +library+ (impl/clone-default-library))

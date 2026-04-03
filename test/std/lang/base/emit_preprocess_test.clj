@@ -320,6 +320,11 @@
   (value-standalone 'x:add +grammar+)
   => '(fn [a b] (return (+ a b)))
 
+  (value-standalone 'x:arr-push js/+grammar+)
+  => '(fn [arr item]
+        (. arr (push item))
+        (return arr))
+
   (value-standalone 'for:object js/+grammar+)
   => nil
 

@@ -50,6 +50,7 @@
       :class
       :for
       :coroutine
+      :functional-core
       :macro
       :macro-arrow
       :macro-let
@@ -104,6 +105,12 @@
 (fact "xtalk ops"
 
   (build-xtalk)
+  => map?)
+
+^{:refer std.lang.base.grammar/build-functional-core :added "4.1"}
+(fact "functional core ops"
+
+  (build-functional-core)
   => map?)
 
 ^{:refer std.lang.base.grammar/build:override :added "4.0"}

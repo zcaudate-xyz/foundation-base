@@ -63,9 +63,21 @@
                     arr)
        (into {})))
 
+(def +op-functional-core+
+  [{:op :letrec            :symbol #{'letrec 'letfn}
+    :emit :abstract        :type :block
+    :block {:main #{:parameter :body}}}
+   {:op :match             :symbol #{'match}
+    :emit :abstract        :type :block
+    :block {:main #{:parameter :body}}}])
+
+(def +optional-categories+
+  #{:functional-core})
+
 (def ^{:generator (fn []
                     (vec (concat (gen-ops 'std.lang.base.grammar-spec "spec")
                                  (gen-ops 'std.lang.base.grammar-macro "macro")
+                                 [[:functional-core '+op-functional-core+]]
                                  (gen-ops 'std.lang.base.grammar-xtalk "xtalk"))))}
   +op-all+
   (->> (concat [[:builtin spec/+op-builtin+]
@@ -98,6 +110,7 @@
                 [:class        spec/+op-class+]
                 [:for          spec/+op-for+]
                 [:coroutine    spec/+op-coroutine+]
+                [:functional-core +op-functional-core+]
                 [:macro         macro/+op-macro+]
                 [:macro-arrow   macro/+op-macro-arrow+]
                 [:macro-let     macro/+op-macro-let+]
@@ -142,16 +155,23 @@
 ;;
 ;;
 
+(defn default-lookup
+  "returns the default lookup with optional categories removed"
+  {:added "4.1"}
+  [lookup]
+  (apply dissoc lookup +optional-categories+))
+
 (defn build
   "selector for picking required ops in grammar"
   {:added "3.0"}
   ([]
-   (apply merge (vals +op-all+)))
+   (apply merge (vals (default-lookup +op-all+))))
   ([& {:keys [lookup
               include
               exclude]
        :or {lookup +op-all+}}]
-   (let [sel-fn (fn [[k tag entries]]
+   (let [lookup-default (default-lookup lookup)
+         sel-fn (fn [[k tag entries]]
                   (let [all (get lookup k)]
                     (case tag
                       :include (select-keys all entries)
@@ -173,8 +193,11 @@
 
                                         :else
                                         (dissoc out sel)))
-                                lookup
-                                exclude))]
+                                lookup-default
+                                exclude)
+
+                        :else
+                        lookup-default)]
      (apply merge (vals selected)))))
 
 (defn build-min
@@ -209,6 +232,15 @@
   []
   (build :include xtalk-system/+xtalk-profile-order+))
 
+(defn build-functional-core
+  "functional core ops
+
+   (build-functional-core)
+   => map?"
+  {:added "4.1"}
+  []
+  (build :include [:functional-core]))
+
 (defn build:override
   "overrides existing ops in the map"
   {:added "4.0"}
@@ -216,8 +248,12 @@
   (let [ks (clojure.set/difference (set (keys m))
                          (set (keys build)))
         _  (if (not-empty ks)
-             (f/error "Keys not in original map: " {:keys ks}))]
-    (collection/merge-nested build m)))
+             (f/error "Keys not in original map: " {:keys ks}))
+        merged (collection/merge-nested build m)]
+    (reduce (fn [out k]
+              (update out k normalize-op-entry))
+            merged
+            (keys m))))
 
 (defn build:extend
   "adds new  ops in the map"
@@ -226,8 +262,12 @@
   (let [ks (clojure.set/intersection (set (keys m))
                            (set (keys build)))
         _  (if (not-empty ks)
-             (f/error "Keys in original map: " {:keys ks}))]
-    (merge build m)))
+             (f/error "Keys in original map: " {:keys ks}))
+        merged (merge build m)]
+    (reduce (fn [out k]
+              (update out k normalize-op-entry))
+            merged
+            (keys m))))
 
 (defn to-reserved
   "convert op map to symbol map"
