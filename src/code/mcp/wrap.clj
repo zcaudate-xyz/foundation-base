@@ -60,7 +60,12 @@
     (reify BiFunction
       (apply [_ exchange args]
         (try
-          (let [result (f exchange (into {} args))]
+          (let [result (f exchange
+                          (reduce-kv (fn [output key value]
+                                       (cond-> (assoc output key value)
+                                         (string? key) (assoc (keyword key) value)))
+                                     {}
+                                     (into {} args)))]
             (if (instance? McpSchema$CallToolResult result)
               result
               (call-tool-result result)))

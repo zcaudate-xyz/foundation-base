@@ -6,9 +6,8 @@
 
 (defn tokenize
   [text]
-  (->> (or text "")
-       (str/lower-case)
-       (re-seq #"[\p{L}\p{N}_-]+")))
+  (re-seq #"[A-Za-z0-9_-]+"
+          (str/lower-case (or text ""))))
 
 (defn l2-norm
   [values]
@@ -33,17 +32,15 @@
 
 (defn token->bucket
   [dimensions token]
-  (let [hashed (hash token)]
-    [(mod (Math/abs (long hashed)) dimensions)
-     (if (neg? hashed) -1.0 1.0)]))
+  (mod (Math/abs (long (hash token))) dimensions))
 
 (defrecord HashEmbedder [dimensions]
   IEmbeddings
   (-embed-texts [_ texts _]
     (mapv (fn [text]
             (let [weights (reduce (fn [output token]
-                                    (let [[idx sign] (token->bucket dimensions token)]
-                                      (update output idx (fnil + 0.0) sign)))
+                                    (let [idx (token->bucket dimensions token)]
+                                      (update output idx (fnil + 0.0) 1.0)))
                                   (vec (repeat dimensions 0.0))
                                   (tokenize text))]
               (unit-vector weights)))

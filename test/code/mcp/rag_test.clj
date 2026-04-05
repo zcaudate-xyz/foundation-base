@@ -8,8 +8,12 @@
     (rag/upsert-documents store [{:id "mcp" :text "Clojure MCP server wrapper with stdio transport"}
                                  {:id "rag" :text "RAG embeddings module for semantic retrieval"}
                                  {:id "other" :text "Something completely unrelated"}])
-    (->> (rag/retrieve store "clojure mcp" {:limit 2})
-         (mapv :id)))
+    [(->> (rag/retrieve store "clojure mcp" {:limit 1})
+          first
+          :id)
+     (->> (rag/retrieve store "semantic retrieval" {:limit 1})
+          first
+          :id)])
   => ["mcp" "rag"])
 
 ^{:refer code.mcp.rag/retrieve-context :added "4.1"}

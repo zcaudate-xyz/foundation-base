@@ -8,9 +8,9 @@
         left (embed/embed-text provider "alpha beta")
         right (embed/embed-text provider "alpha beta")]
     [(count left)
-     left
+     (boolean (some pos? left))
      (embed/cosine-similarity left right)])
-  => [16 any 1.0])
+  => [16 true 1.0])
 
 ^{:refer code.mcp.embed/cosine-similarity :added "4.1"}
 (fact "related text ranks above unrelated text"
