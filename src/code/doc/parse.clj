@@ -1,5 +1,6 @@
 (ns code.doc.parse
-  (:require [clojure.java.io :as io]
+  (:require [clojure.edn :as edn]
+            [clojure.java.io :as io]
             [clojure.string :as str]
             [code.doc.parse.check :as checks]
             [code.query :as query]
@@ -387,7 +388,7 @@
       (if (and (seq remaining) (seq frontmatter))
         [{:type :article}
          (-> (str/join "\n" frontmatter)
-             read-string
+             edn/read-string
              (assoc :type :article))
          (rest remaining)]
         [nil nil lines]))

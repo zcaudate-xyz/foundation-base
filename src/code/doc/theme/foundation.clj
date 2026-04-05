@@ -91,7 +91,7 @@
   [key interim lookup]
   (let [{:keys [name]} (lookup key)]
     (->> (get-in interim [:articles name :elements])
-         (filter #(-> % :type #{:chapter :section}))
+         (filter #(-> % :type #{:chapter :section :subsection :subsubsection}))
          structure/structure
          :elements
          (map engine/render-chapter)
