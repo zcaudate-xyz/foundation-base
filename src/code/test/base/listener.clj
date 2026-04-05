@@ -6,12 +6,25 @@
             [std.lib.os :as os]
             [std.lib.signal :as signal]))
 
-(defn- result-name
+(defn result-function
+  "returns the preferred function identifier for a result.
+
+   Uses explicit `:refer` first, then inferred `:function`."
+  {:added "4.1"}
   [result]
-  (str (or (-> result :meta :refer)
-           (-> result :meta :function)
-           (-> result :meta :desc)
-           (-> result :meta :id))))
+  (or (-> result :meta :refer)
+      (-> result :meta :function)))
+
+(defn result-name
+  "returns the preferred display name for a result.
+
+   Uses `:refer`, then inferred `:function`, then `:desc`, then `:id`."
+  {:added "4.1"}
+  [result]
+  (some-> (or (result-function result)
+              (-> result :meta :desc)
+              (-> result :meta :id))
+          str))
 
 (defn summarise-verify
   "extract the comparison into a valid format"

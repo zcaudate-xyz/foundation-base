@@ -11,6 +11,9 @@
   '#{quote do let let* loop loop* recur fn fn* if if-not when when-not
      when-let when-first if-let cond case try catch finally comment})
 
+(def ^:private +infer-function-depth+
+  12)
+
 (defn evaluate
   "converts a form to a result
  
@@ -33,33 +36,41 @@
         (res/result (assoc out :type :code/test :form form :from :evaluate))))))
 
 (defn infer-function
-  "infers the target function from a form"
+  "infers the target function from a form.
+
+   Uses a bounded recursive walk so deeply nested forms do not blow the stack."
   {:added "4.1"}
   ([form]
-   (cond (seq? form)
-         (let [head (first form)]
-           (cond (= 'quote head) nil
-                 (and (symbol? head)
-                      (not (+skip-forms+ head))) head
-                 :else (some infer-function (rest form))))
+   (infer-function form +infer-function-depth+))
+  ([form depth]
+   (when (pos? depth)
+     (cond (seq? form)
+           (let [head (first form)]
+             (cond (= 'quote head) nil
+                   (and (symbol? head)
+                        (not (+skip-forms+ head))) head
+                   :else (some #(infer-function % (dec depth)) (rest form))))
 
-         (map? form)
-         (or (some infer-function (keys form))
-             (some infer-function (vals form)))
+           (map? form)
+           (or (some #(infer-function % (dec depth)) (keys form))
+               (some #(infer-function % (dec depth)) (vals form)))
 
-         (coll? form)
-         (some infer-function form))))
+           (coll? form)
+           (some #(infer-function % (dec depth)) form)))))
 
 (defn attach-meta
-  "attaches metadata to the result"
+  "attaches metadata to the result.
+
+   Preserves explicit `:function`, otherwise falls back to `:refer`, and finally
+   infers a function symbol from the form."
   {:added "4.1"}
-  ([result meta form]
-   (let [function (or (:function meta)
-                      (:refer meta)
+  ([result meta-map form]
+   (let [function (or (:function meta-map)
+                      (:refer meta-map)
                       (infer-function form))
-         meta     (cond-> (or meta {})
+         meta-map (cond-> (or meta-map {})
                     function (assoc :function function))]
-     (assoc result :meta meta))))
+     (assoc result :meta meta-map))))
 
 (defmulti process
   "processes a form or a check
