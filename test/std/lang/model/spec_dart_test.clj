@@ -123,19 +123,58 @@
 
 
 ^{:refer std.lang.model.spec-dart/tf-for-object :added "4.1"}
-(fact "TODO")
+(fact "transforms for:object loops"
+  (spec-dart/tf-for-object '(for:object [[k _] obj]
+                             k))
+  => '(for [(var k) :in (. obj keys)]
+        k))
 
 ^{:refer std.lang.model.spec-dart/tf-for-array :added "4.1"}
-(fact "TODO")
+(fact "transforms for:array loops"
+  (spec-dart/tf-for-array '(for:array [[i e] arr]
+                            [i e]))
+  => '(for [(var i := 0) (< i (. arr length)) (:++ i)]
+        (var e (. arr [i]))
+        [i e]))
 
 ^{:refer std.lang.model.spec-dart/tf-for-iter :added "4.1"}
-(fact "TODO")
+(fact "transforms for:iter loops"
+  (spec-dart/tf-for-iter '(for:iter [e iter]
+                           e))
+  => '(for [(var e) :in iter]
+        e))
 
 ^{:refer std.lang.model.spec-dart/tf-for-return :added "4.1"}
-(fact "TODO")
+(fact "transforms for:return callbacks"
+  (spec-dart/tf-for-return '(for:return [[ok err] (call (x:callback))]
+                               {:success (return ok)
+                                :error   (return err)}))
+  => '(call (fn [err ok]
+              (if err
+                (return err)
+                (return ok)))))
 
 ^{:refer std.lang.model.spec-dart/tf-for-try :added "4.1"}
-(fact "TODO")
+(fact "transforms for:try blocks"
+  (spec-dart/tf-for-try '(for:try [[ok err] (call)]
+                            {:success (return ok)
+                             :error   (return err)}))
+  => '(try
+        (var ok := (call))
+        (return ok)
+        (catch err (return err))))
 
 ^{:refer std.lang.model.spec-dart/tf-for-async :added "4.1"}
-(fact "TODO")
+(fact "transforms for:async chains"
+  (spec-dart/tf-for-async '(for:async [[ok err] (call)]
+                              {:success (return ok)
+                               :error   (return err)
+                               :finally (return true)}))
+  => '(. (Future (fn []
+                   (return (call))))
+        (then (fn [ok]
+                (return ok)))
+        (catchError (fn [err]
+                      (return err)))
+        (whenComplete (fn []
+                        (return true)))))

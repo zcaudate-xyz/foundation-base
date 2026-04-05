@@ -3,6 +3,9 @@
   (:require [std.lang :as l]
             [std.lang.model.spec-xtalk.fn-dart :refer :all]))
 
+(defn emit-dart [form]
+  (l/emit-as :dart [form]))
+
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-len :added "4.1"}
 (fact "gets length"
   (l/emit-as :dart [(dart-tf-x-len '[_ arr])])
@@ -161,268 +164,446 @@
   => #"cancel")
 
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-m-ceil :added "4.1"}
-(fact "TODO")
+(fact "ceiling"
+  (emit-dart (dart-tf-x-m-ceil '[_ x]))
+  => #"\.ceil")
 
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-m-floor :added "4.1"}
-(fact "TODO")
+(fact "floor"
+  (emit-dart (dart-tf-x-m-floor '[_ x]))
+  => #"\.floor")
 
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-m-cos :added "4.1"}
-(fact "TODO")
+(fact "cosine"
+  (emit-dart (dart-tf-x-m-cos '[_ x]))
+  => #"cos")
 
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-m-tan :added "4.1"}
-(fact "TODO")
+(fact "tangent"
+  (emit-dart (dart-tf-x-m-tan '[_ x]))
+  => #"tan")
 
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-m-asin :added "4.1"}
-(fact "TODO")
+(fact "arc sine"
+  (emit-dart (dart-tf-x-m-asin '[_ x]))
+  => #"asin")
 
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-m-acos :added "4.1"}
-(fact "TODO")
+(fact "arc cosine"
+  (emit-dart (dart-tf-x-m-acos '[_ x]))
+  => #"acos")
 
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-m-atan :added "4.1"}
-(fact "TODO")
+(fact "arc tangent"
+  (emit-dart (dart-tf-x-m-atan '[_ x]))
+  => #"atan")
 
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-m-exp :added "4.1"}
-(fact "TODO")
+(fact "exponential"
+  (emit-dart (dart-tf-x-m-exp '[_ x]))
+  => #"exp")
 
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-m-loge :added "4.1"}
-(fact "TODO")
+(fact "natural logarithm"
+  (emit-dart (dart-tf-x-m-loge '[_ x]))
+  => #"log")
 
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-m-log10 :added "4.1"}
-(fact "TODO")
+(fact "base-10 logarithm"
+  (emit-dart (dart-tf-x-m-log10 '[_ x]))
+  => #"log10")
 
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-m-min :added "4.1"}
-(fact "TODO")
+(fact "minimum"
+  (emit-dart (dart-tf-x-m-min '[_ a b]))
+  => #"min")
 
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-m-quot :added "4.1"}
-(fact "TODO")
+(fact "integer quotient"
+  (emit-dart (dart-tf-x-m-quot '[_ a b]))
+  => #"~/")
 
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-m-cosh :added "4.1"}
-(fact "TODO")
+(fact "hyperbolic cosine"
+  (emit-dart (dart-tf-x-m-cosh '[_ x]))
+  => #"cosh")
 
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-m-sinh :added "4.1"}
-(fact "TODO")
+(fact "hyperbolic sine"
+  (emit-dart (dart-tf-x-m-sinh '[_ x]))
+  => #"sinh")
 
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-m-tanh :added "4.1"}
-(fact "TODO")
+(fact "hyperbolic tangent"
+  (emit-dart (dart-tf-x-m-tanh '[_ x]))
+  => #"tanh")
 
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-to-string :added "4.1"}
-(fact "TODO")
+(fact "converts to string"
+  (emit-dart (dart-tf-x-to-string '[_ x]))
+  => #"toString")
 
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-to-number :added "4.1"}
-(fact "TODO")
+(fact "converts to number"
+  (emit-dart (dart-tf-x-to-number '[_ x]))
+  => #"num\.parse")
 
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-is-number? :added "4.1"}
-(fact "TODO")
+(fact "checks if number"
+  (emit-dart (dart-tf-x-is-number? '[_ x]))
+  => #"is\(x,num\)")
 
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-is-integer? :added "4.1"}
-(fact "TODO")
+(fact "checks if integer"
+  (emit-dart (dart-tf-x-is-integer? '[_ x]))
+  => #"is\(x,int\)")
 
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-is-boolean? :added "4.1"}
-(fact "TODO")
+(fact "checks if boolean"
+  (emit-dart (dart-tf-x-is-boolean? '[_ x]))
+  => #"is\(x,bool\)")
 
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-is-function? :added "4.1"}
-(fact "TODO")
+(fact "checks if function"
+  (emit-dart (dart-tf-x-is-function? '[_ x]))
+  => #"is\(x,Function\)")
 
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-is-object? :added "4.1"}
-(fact "TODO")
+(fact "checks if object"
+  (emit-dart (dart-tf-x-is-object? '[_ x]))
+  => #"Object.*List.*Function")
 
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-is-array? :added "4.1"}
-(fact "TODO")
+(fact "checks if array"
+  (emit-dart (dart-tf-x-is-array? '[_ x]))
+  => #"is\(x,List\)")
 
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-str-char :added "4.1"}
-(fact "TODO")
+(fact "gets string character"
+  (dart-tf-x-str-char '[_ s i])
+  => '(. s ([] i)))
 
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-str-split :added "4.1"}
-(fact "TODO")
+(fact "splits strings"
+  (emit-dart (dart-tf-x-str-split '[_ s sep]))
+  => #"split")
 
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-str-join :added "4.1"}
-(fact "TODO")
+(fact "joins strings"
+  (emit-dart (dart-tf-x-str-join '[_ arr sep]))
+  => #"join")
 
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-str-index-of :added "4.1"}
-(fact "TODO")
+(fact "finds string index"
+  (emit-dart (dart-tf-x-str-index-of '[_ s sub]))
+  => #"indexOf")
 
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-str-last-index-of :added "4.1"}
-(fact "TODO")
+(fact "finds last string index"
+  (emit-dart (dart-tf-x-str-last-index-of '[_ s sub]))
+  => #"lastIndexOf")
 
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-str-substring :added "4.1"}
-(fact "TODO")
+(fact "extracts substrings"
+  (emit-dart (dart-tf-x-str-substring '[_ s start end]))
+  => #"substring")
 
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-str-to-upper :added "4.1"}
-(fact "TODO")
+(fact "uppercases strings"
+  (emit-dart (dart-tf-x-str-to-upper '[_ s]))
+  => #"toUpperCase")
 
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-str-to-lower :added "4.1"}
-(fact "TODO")
+(fact "lowercases strings"
+  (emit-dart (dart-tf-x-str-to-lower '[_ s]))
+  => #"toLowerCase")
 
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-str-to-fixed :added "4.1"}
-(fact "TODO")
+(fact "formats numbers with fixed precision"
+  (emit-dart (dart-tf-x-str-to-fixed '[_ s n]))
+  => #"toStringAsFixed")
 
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-str-replace :added "4.1"}
-(fact "TODO")
+(fact "replaces strings"
+  (emit-dart (dart-tf-x-str-replace '[_ s pattern replacement]))
+  => #"replaceAll")
 
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-str-trim :added "4.1"}
-(fact "TODO")
+(fact "trims strings"
+  (emit-dart (dart-tf-x-str-trim '[_ s]))
+  => #"trim")
 
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-str-trim-left :added "4.1"}
-(fact "TODO")
+(fact "trims strings on the left"
+  (emit-dart (dart-tf-x-str-trim-left '[_ s]))
+  => #"trimLeft")
 
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-str-trim-right :added "4.1"}
-(fact "TODO")
+(fact "trims strings on the right"
+  (emit-dart (dart-tf-x-str-trim-right '[_ s]))
+  => #"trimRight")
 
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-str-starts-with? :added "4.1"}
-(fact "TODO")
+(fact "checks string prefixes"
+  (emit-dart (dart-tf-x-str-starts-with? '[_ s prefix]))
+  => #"startsWith")
 
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-str-ends-with? :added "4.1"}
-(fact "TODO")
+(fact "checks string suffixes"
+  (emit-dart (dart-tf-x-str-ends-with? '[_ s suffix]))
+  => #"endsWith")
 
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-str-includes? :added "4.1"}
-(fact "TODO")
+(fact "checks string containment"
+  (emit-dart (dart-tf-x-str-includes? '[_ s sub]))
+  => #"contains")
 
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-lu-get :added "4.1"}
-(fact "TODO")
+(fact "gets lookup values"
+  (emit-dart (dart-tf-x-lu-get '[_ lu obj]))
+  => "[](lu,obj)")
 
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-lu-set :added "4.1"}
-(fact "TODO")
+(fact "sets lookup values"
+  (emit-dart (dart-tf-x-lu-set '[_ lu obj gid]))
+  => "[](lu,obj) = gid")
 
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-lu-del :added "4.1"}
-(fact "TODO")
+(fact "deletes lookup values"
+  (emit-dart (dart-tf-x-lu-del '[_ lu obj]))
+  => #"remove")
 
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-arr-pop :added "4.1"}
-(fact "TODO")
+(fact "pops array items"
+  (emit-dart (dart-tf-x-arr-pop '[_ arr]))
+  => #"removeLast")
 
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-arr-push-first :added "4.1"}
-(fact "TODO")
+(fact "pushes array items to the front"
+  (emit-dart (dart-tf-x-arr-push-first '[_ arr item]))
+  => #"insert")
 
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-arr-pop-first :added "4.1"}
-(fact "TODO")
+(fact "pops first array items"
+  (dart-tf-x-arr-pop-first '[_ arr])
+  => '(. arr removeAt 0))
 
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-arr-insert :added "4.1"}
-(fact "TODO")
+(fact "inserts array items"
+  (emit-dart (dart-tf-x-arr-insert '[_ arr idx e]))
+  => #"insert")
 
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-arr-remove :added "4.1"}
-(fact "TODO")
+(fact "removes array items"
+  (emit-dart (dart-tf-x-arr-remove '[_ arr idx]))
+  => #"removeAt")
 
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-arr-sort :added "4.1"}
-(fact "TODO")
+(fact "sorts arrays"
+  (emit-dart (dart-tf-x-arr-sort '[_ arr key-fn comp-fn]))
+  => #"sort")
 
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-arr-str-comp :added "4.1"}
-(fact "TODO")
+(fact "compares array items by string value"
+  (emit-dart (dart-tf-x-arr-str-comp '[_ a b]))
+  => #"compareTo")
 
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-cache :added "4.1"}
-(fact "TODO")
+(fact "creates caches"
+  (emit-dart (dart-tf-x-cache '[_ name]))
+  => #"new Map")
 
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-cache-list :added "4.1"}
-(fact "TODO")
+(fact "lists cache keys"
+  (emit-dart (dart-tf-x-cache-list '[_ cache]))
+  => #"keys.*toList")
 
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-cache-flush :added "4.1"}
-(fact "TODO")
+(fact "flushes caches"
+  (emit-dart (dart-tf-x-cache-flush '[_ cache]))
+  => #"clear")
 
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-cache-get :added "4.1"}
-(fact "TODO")
+(fact "gets cached values"
+  (emit-dart (dart-tf-x-cache-get '[_ cache key]))
+  => "[](cache,key)")
 
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-cache-set :added "4.1"}
-(fact "TODO")
+(fact "sets cached values"
+  (emit-dart (dart-tf-x-cache-set '[_ cache key val]))
+  => "[](cache,key) = val")
 
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-cache-del :added "4.1"}
-(fact "TODO")
+(fact "deletes cached values"
+  (emit-dart (dart-tf-x-cache-del '[_ cache key]))
+  => #"remove")
 
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-cache-incr :added "4.1"}
-(fact "TODO")
+(fact "increments cached values"
+  (emit-dart (dart-tf-x-cache-incr '[_ cache key num]))
+  => #"(?s)int\.parse.*curr")
 
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-future-run :added "4.1"}
-(fact "TODO")
+(fact "runs futures"
+  (emit-dart (dart-tf-x-future-run '[_ thunk]))
+  => #"Future")
 
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-future-then :added "4.1"}
-(fact "TODO")
+(fact "chains future success callbacks"
+  (emit-dart (dart-tf-x-future-then '[_ task on-ok]))
+  => #"then")
 
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-future-catch :added "4.1"}
-(fact "TODO")
+(fact "chains future error callbacks"
+  (emit-dart (dart-tf-x-future-catch '[_ task on-err]))
+  => #"catchError")
 
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-future-finally :added "4.1"}
-(fact "TODO")
+(fact "chains future finalizers"
+  (emit-dart (dart-tf-x-future-finally '[_ task on-done]))
+  => #"whenComplete")
 
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-future-cancel :added "4.1"}
-(fact "TODO")
+(fact "cancels futures"
+  (emit-dart (dart-tf-x-future-cancel '[_ task]))
+  => #"null")
 
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-future-status :added "4.1"}
-(fact "TODO")
+(fact "reports future status"
+  (emit-dart (dart-tf-x-future-status '[_ task]))
+  => #"pending")
 
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-future-await :added "4.1"}
-(fact "TODO")
+(fact "awaits futures"
+  (emit-dart (dart-tf-x-future-await '[_ task timeout-ms default]))
+  => #"task")
 
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-future-from-async :added "4.1"}
-(fact "TODO")
+(fact "creates futures from async executors"
+  (emit-dart (dart-tf-x-future-from-async '[_ executor]))
+  => #"Future")
 
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-iter-eq :added "4.1"}
-(fact "TODO")
+(fact "compares iterators"
+  (emit-dart (dart-tf-x-iter-eq '[_ a b]))
+  => #"==")
 
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-iter-from :added "4.1"}
-(fact "TODO")
+(fact "creates iterators"
+  (emit-dart (dart-tf-x-iter-from '[_ x]))
+  => #"iterator")
 
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-iter-from-arr :added "4.1"}
-(fact "TODO")
+(fact "creates iterators from arrays"
+  (emit-dart (dart-tf-x-iter-from-arr '[_ arr]))
+  => #"iterator")
 
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-iter-from-obj :added "4.1"}
-(fact "TODO")
+(fact "creates iterators from objects"
+  (emit-dart (dart-tf-x-iter-from-obj '[_ obj]))
+  => #"entries.*iterator")
 
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-iter-has? :added "4.1"}
-(fact "TODO")
+(fact "checks iterator availability"
+  (emit-dart (dart-tf-x-iter-has? '[_ iter]))
+  => #"moveNext")
 
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-iter-native? :added "4.1"}
-(fact "TODO")
+(fact "marks iterators as native"
+  (emit-dart (dart-tf-x-iter-native? '[_ iter]))
+  => #"true")
 
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-iter-next :added "4.1"}
-(fact "TODO")
+(fact "gets iterator values"
+  (emit-dart (dart-tf-x-iter-next '[_ iter]))
+  => #"current")
 
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-iter-null :added "4.1"}
-(fact "TODO")
+(fact "returns null iterators"
+  (emit-dart (dart-tf-x-iter-null '[_]))
+  => #"null")
 
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-socket-connect :added "4.1"}
-(fact "TODO")
+(fact "socket connect is not implemented"
+  (emit-dart (dart-tf-x-socket-connect '[_ host port opts cb]))
+  => #"Socket not implemented")
 
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-socket-send :added "4.1"}
-(fact "TODO")
+(fact "socket send is not implemented"
+  (emit-dart (dart-tf-x-socket-send '[_ conn s]))
+  => #"Socket not implemented")
 
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-socket-close :added "4.1"}
-(fact "TODO")
+(fact "socket close is not implemented"
+  (emit-dart (dart-tf-x-socket-close '[_ conn]))
+  => #"Socket not implemented")
 
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-client-ws :added "4.1"}
-(fact "TODO")
+(fact "websocket clients are not implemented"
+  (emit-dart (dart-tf-x-client-ws '[_ host port opts cb]))
+  => #"WebSocket client not implemented")
 
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-server-basic :added "4.1"}
-(fact "TODO")
+(fact "basic servers are not implemented"
+  (emit-dart (dart-tf-x-server-basic '[_ port opts cb]))
+  => #"Server not implemented")
 
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-server-ws :added "4.1"}
-(fact "TODO")
+(fact "websocket servers are not implemented"
+  (emit-dart (dart-tf-x-server-ws '[_ port opts cb]))
+  => #"WebSocket server not implemented")
 
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-notify-socket :added "4.1"}
-(fact "TODO")
+(fact "socket notifications are not implemented"
+  (emit-dart (dart-tf-x-notify-socket '[_ host port value id key opts]))
+  => #"Notify socket not implemented")
 
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-ws-connect :added "4.1"}
-(fact "TODO")
+(fact "websocket connect is not implemented"
+  (emit-dart (dart-tf-x-ws-connect '[_ host port opts cb]))
+  => #"WebSocket connect not implemented")
 
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-ws-send :added "4.1"}
-(fact "TODO")
+(fact "websocket send is not implemented"
+  (emit-dart (dart-tf-x-ws-send '[_ conn s]))
+  => #"WebSocket send not implemented")
 
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-ws-close :added "4.1"}
-(fact "TODO")
+(fact "websocket close is not implemented"
+  (emit-dart (dart-tf-x-ws-close '[_ conn]))
+  => #"WebSocket close not implemented")
 
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-proto-get :added "4.1"}
-(fact "TODO")
+(fact "gets runtime prototypes"
+  (emit-dart (dart-tf-x-proto-get '[_ obj]))
+  => #"runtimeType")
 
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-proto-set :added "4.1"}
-(fact "TODO")
+(fact "setting prototypes is not supported"
+  (emit-dart (dart-tf-x-proto-set '[_ obj prototype]))
+  => #"Proto set not supported in Dart")
 
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-proto-tostring :added "4.1"}
-(fact "TODO")
+(fact "stringifies prototypes"
+  (emit-dart (dart-tf-x-proto-tostring '[_ obj]))
+  => #"toString")
 
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-return-encode :added "4.1"}
-(fact "TODO")
+(fact "encodes return values"
+  (emit-dart (dart-tf-x-return-encode '[_ out id key]))
+  => #"json\.encode")
 
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-return-wrap :added "4.1"}
-(fact "TODO")
+(fact "wraps return handlers"
+  (emit-dart (dart-tf-x-return-wrap '[_ thunk encode-fn]))
+  => #"json\.encode")
 
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-return-eval :added "4.1"}
-(fact "TODO")
+(fact "eval return handling is not supported"
+  (emit-dart (dart-tf-x-return-eval '[_ s wrap-fn]))
+  => #"eval not supported in Dart")
 
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-thread-join :added "4.1"}
-(fact "TODO")
+(fact "thread join is not implemented"
+  (emit-dart (dart-tf-x-thread-join '[_ thread]))
+  => #"Thread join not implemented in Dart")

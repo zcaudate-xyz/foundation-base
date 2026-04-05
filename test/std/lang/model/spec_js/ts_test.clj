@@ -4,6 +4,41 @@
             [std.lang.model.spec-js.ts :refer :all]
             [std.lang.model.spec-xtalk.mixer :as mixer]))
 
+(def sample-analysis
+  {:ns 'sample.user
+   :specs [{:ns "sample.user"
+            :name "User"
+            :type {:kind :record
+                   :fields [{:name "id"
+                             :type {:kind :primitive :name :xt/str}
+                             :optional? false}]}}
+           {:ns "sample.user"
+            :name "UserMap"
+            :type {:kind :dict
+                   :key {:kind :primitive :name :xt/str}
+                   :value {:kind :named :name 'sample.user/User}}}
+           {:ns "sample.user"
+            :name "find_user"
+            :type {:kind :fn
+                   :inputs [{:kind :named :name 'sample.user/UserMap}
+                            {:kind :primitive :name :xt/str}]
+                   :output {:kind :maybe
+                            :item {:kind :named :name 'sample.user/User}}}}
+           {:ns "sample.user"
+            :name "DEFAULT_USER"
+            :type {:kind :named :name 'sample.user/User}}]
+   :functions [{:ns "sample.user"
+                :name "find_user"
+                :inputs [{:name 'users
+                          :type {:kind :named :name 'sample.user/UserMap}}
+                         {:name 'id
+                          :type {:kind :primitive :name :xt/str}}]
+                :output {:kind :maybe
+                         :item {:kind :named :name 'sample.user/User}}}]
+   :values [{:ns "sample.user"
+             :name "DEFAULT_USER"
+             :type {:kind :named :name 'sample.user/User}}]})
+
 ^{:refer std.lang.model.spec-js.ts/valid-ts-ident? :added "4.1"}
 (fact "checks if string is valid TypeScript identifier"
   (valid-ts-ident? "hello")
@@ -125,22 +160,66 @@
 
 
 ^{:refer std.lang.model.spec-js.ts/emit-imports :added "4.1"}
-(fact "TODO")
+(fact "emits grouped type imports"
+  (emit-imports {:ns 'sample.user
+                 :specs [{:type {:kind :named :name 'other.ns/User}}]
+                 :functions [{:inputs [{:type {:kind :named :name 'shared.token/Token}}]
+                              :output {:kind :primitive :name :xt/str}}]
+                 :values []})
+  => (str "import type { User as other_ns_User } from \"./other/ns\";\n"
+          "import type { Token as shared_token_Token } from \"./shared/token\";"))
 
 ^{:refer std.lang.model.spec-js.ts/emit-spec-declaration :added "4.1"}
-(fact "TODO")
+(fact "emits spec declarations"
+  [(emit-spec-declaration {:ns "sample.user"
+                           :name "User"
+                           :type {:kind :record
+                                  :fields [{:name "id"
+                                            :type {:kind :primitive :name :xt/str}
+                                            :optional? false}]}})
+   (emit-spec-declaration {:ns "sample.user"
+                           :name "UserMap"
+                           :type {:kind :dict
+                                  :key {:kind :primitive :name :xt/str}
+                                  :value {:kind :named :name 'sample.user/User}}})]
+  => ["export interface User {\n  id: string;\n}"
+      "export type UserMap = Record<string, User>;"])
 
 ^{:refer std.lang.model.spec-js.ts/emit-function-arg :added "4.1"}
-(fact "TODO")
+(fact "emits function arguments"
+  (emit-function-arg {:name "user-id"
+                      :type {:kind :primitive :name :xt/str}}
+                     'sample.user)
+  => "user_id: string")
 
 ^{:refer std.lang.model.spec-js.ts/emit-function-declaration :added "4.1"}
-(fact "TODO")
+(fact "emits function declarations"
+  (emit-function-declaration {:ns "sample.user"
+                              :name "find_user"
+                              :inputs [{:name 'users
+                                        :type {:kind :named :name 'sample.user/UserMap}}
+                                       {:name 'id
+                                        :type {:kind :primitive :name :xt/str}}]
+                              :output {:kind :maybe
+                                       :item {:kind :named :name 'sample.user/User}}})
+  => "export type find_user = (arg0: UserMap, arg1: string) => User | null;")
 
 ^{:refer std.lang.model.spec-js.ts/emit-value-declaration :added "4.1"}
-(fact "TODO")
+(fact "emits value declarations"
+  (emit-value-declaration {:ns "sample.user"
+                           :name "DEFAULT_USER"
+                           :type {:kind :named :name 'sample.user/User}})
+  => "export declare const DEFAULT_USER: User;")
 
 ^{:refer std.lang.model.spec-js.ts/emit-analysis-declarations :added "4.1"}
-(fact "TODO")
+(fact "emits analysis declarations"
+  (emit-analysis-declarations sample-analysis)
+  => (str "export interface User {\n"
+          "  id: string;\n"
+          "}\n\n"
+          "export type UserMap = Record<string, User>;\n\n"
+          "export type find_user = (arg0: UserMap, arg1: string) => User | null;\n\n"
+          "export declare const DEFAULT_USER: User;"))
 
 (fact "does not duplicate same-name callable specs in declaration output"
   (let [out (-> 'std.lang.model.spec-xtalk-typed-fixture
@@ -170,8 +249,15 @@
   => ["dist/spec_xtalk_typed_fixture.d.ts" true true])
 
 ^{:refer std.lang.model.spec-js.ts/emit-namespace-declarations :added "4.1"}
-(fact "TODO")
+(fact "emits namespace declarations"
+  (let [out (emit-namespace-declarations 'std.lang.model.spec-xtalk-typed-fixture)]
+    [(str/includes? out "export interface User")
+     (str/includes? out "export type UserMap = Record<string, User>;")
+     (str/includes? out "export type find_user =")])
+  => [true true true])
 
 
 ^{:refer std.lang.model.spec-js.ts/emitted-specs :added "4.1"}
-(fact "TODO")
+(fact "filters specs shadowed by callable and value declarations"
+  (mapv :name (emitted-specs sample-analysis))
+  => ["User" "UserMap"])
