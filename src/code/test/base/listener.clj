@@ -11,21 +11,23 @@
   {:added "3.0"}
   ([result]
    #_(env/prfn :VERIFY result)
-   {:status    (cond (and (= :success (-> result :status))
-                          (= true (-> result :data)))
-                     :success
+    {:status    (cond (and (= :success (-> result :status))
+                           (= true (-> result :data)))
+                      :success
 
                      (= :timeout (-> result :actual :status))
                      :timeout
 
                      :else
                      :failed)
-    :path     (-> result :meta :path)
-    :name     (str (or (-> result :meta :refer)
-                       (-> result :meta :desc)
-                       (-> result :meta :id)))
-    :ns       (-> result :meta :ns)
-    :line     (-> result :meta :line)
+     :path     (-> result :meta :path)
+     :name     (str (or (-> result :meta :refer)
+                        (-> result :meta :function)
+                        (-> result :meta :desc)
+                        (-> result :meta :id)))
+     :function (-> result :meta :function)
+     :ns       (-> result :meta :ns)
+     :line     (-> result :meta :line)
     :desc     (-> result :meta :desc)
     :form     (-> result :actual :form)
     :check    (-> result :checker :form)
@@ -39,13 +41,15 @@
   {:added "3.0"}
   ([result]
    #_(env/prfn :EVAL result)
-   {:status   (-> result :status)
-    :path     (-> result :meta :path)
-    :name     (str (or (-> result :meta :refer)
-                       (-> result :meta :desc)
-                       (-> result :meta :id)))
-    :ns       (-> result :meta :ns)
-    :line     (-> result :meta :line)
+    {:status   (-> result :status)
+     :path     (-> result :meta :path)
+     :name     (str (or (-> result :meta :refer)
+                        (-> result :meta :function)
+                        (-> result :meta :desc)
+                        (-> result :meta :id)))
+     :function (-> result :meta :function)
+     :ns       (-> result :meta :ns)
+     :line     (-> result :meta :line)
     :desc     (-> result :meta :desc)
     :form     (-> result :form)
     :original (-> result :original)

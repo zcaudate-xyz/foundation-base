@@ -24,9 +24,40 @@
                           {:status :exception :data t})))
            f    (future (eval-fn))
            out  (deref f context/*timeout* {:status :timeout :data context/*timeout*})
-           _    (when (= (:status out) :timeout)
-                  (future-cancel f))]
-       (res/result (assoc out :type :code/test :form form :from :evaluate))))))
+            _    (when (= (:status out) :timeout)
+                   (future-cancel f))]
+        (res/result (assoc out :type :code/test :form form :from :evaluate))))))
+
+(defn infer-function
+  "infers the target function from a form"
+  {:added "4.1"}
+  ([form]
+   (let [skip '#{quote do let let* loop loop* recur fn fn* if if-not when when-not
+                 when-let when-first if-let cond case try catch finally comment}]
+     (cond (seq? form)
+           (let [head (first form)]
+             (cond (= 'quote head) nil
+                   (and (symbol? head)
+                        (not (skip head))) head
+                   :else (some infer-function (rest form))))
+
+           (map? form)
+           (or (some infer-function (keys form))
+               (some infer-function (vals form)))
+
+           (coll? form)
+           (some infer-function form)))))
+
+(defn attach-meta
+  "attaches metadata to the result"
+  {:added "4.1"}
+  ([result meta form]
+   (let [function (or (:function meta)
+                      (:refer meta)
+                      (infer-function form))
+         meta     (cond-> (or meta {})
+                    function (assoc :function function))]
+     (assoc result :meta meta))))
 
 (defmulti process
   "processes a form or a check
@@ -62,11 +93,11 @@
 (defmethod process :form
   ([{:keys [form original meta] :as op}]
    (let [result (-> (evaluate op)
-                    (assoc :meta meta
-                           :original original))
-         _    (intern *ns* (with-meta '*last* {:dynamic true})
-                      result)]
-     (signal/signal {:test :form :result result})
+                    (attach-meta meta form)
+                    (assoc :original original))
+          _    (intern *ns* (with-meta '*last* {:dynamic true})
+                       result)]
+      (signal/signal {:test :form :result result})
      (when context/*results*
        (swap! context/*results* conj result))
      result)))
@@ -75,15 +106,15 @@
   ([{:keys [input output meta] :as op}]
    (let [{:keys [guard before after]} context/*eval-check*
          _ (before)
-         actual   (evaluate input)
-         expected (evaluate output)
-         checker  (assoc (checker/->checker (res/result-data expected))
-                         :form (:form expected))
-         result   (-> (checker/verify checker actual)
-                      (assoc :meta meta))
-         _    (intern *ns* (with-meta '*last* {:dynamic true})
-                      (:data actual))
-         _    (after)]
+          actual   (evaluate input)
+          expected (evaluate output)
+          checker  (assoc (checker/->checker (res/result-data expected))
+                          :form (:form expected))
+          result   (-> (checker/verify checker actual)
+                       (attach-meta meta (:form input)))
+          _    (intern *ns* (with-meta '*last* {:dynamic true})
+                       (:data actual))
+          _    (after)]
      (signal/signal {:test :check :result result})
      (when context/*results*
        (swap! context/*results* conj result))
