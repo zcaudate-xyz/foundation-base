@@ -31,14 +31,14 @@
                 :data 6,
                 :form '(+ 1 2 3),
                 :from :evaluate,
-                :meta {:line 10, :col 3, :function +}})
+                :meta {:line 10, :col 3, :function '+}})
 
   ((contains {:status :success,
                :data true,
                :checker base/checker?
-                :actual 6,
+               :actual 6,
                :from :verify,
-               :meta {:function +}})
+               :meta {:function '+}})
    (view-signal {:type :test-equal
                   :input  {:form '(+ 1 2 3)}
                   :output {:form 'even?}}))
@@ -51,7 +51,7 @@
                '(xtgen/generate-common-lib {}))
   => {:status :success
       :meta {:line 10
-             :function xtgen/generate-common-lib}})
+             :function 'xtgen/generate-common-lib}})
 
 ^{:refer code.test.base.process/collect :added "3.0"}
 (fact "makes sure that all returned verified results are true"

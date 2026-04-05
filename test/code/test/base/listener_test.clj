@@ -17,7 +17,7 @@
   => {:status :success
       :path "path"
       :name "refer"
-      :function foo
+      :function 'foo
       :ns "ns"
       :line 1
       :desc "desc"
@@ -37,7 +37,7 @@
   => {:status :success
       :path "path"
       :name "refer"
-      :function foo
+      :function 'foo
       :ns "ns"
       :line 1
       :desc "desc"
