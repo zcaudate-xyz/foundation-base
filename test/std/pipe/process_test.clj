@@ -13,3 +13,6 @@
 
 ^{:refer std.pipe.process/invoke :added "4.1"}
 (fact "TODO")
+
+^{:refer std.pipe.process/resolve-input :added "4.1"}
+(fact "TODO")

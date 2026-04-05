@@ -250,3 +250,7 @@
 
 ^{:refer std.make.compile/compile-directory :added "4.0"}
 (fact "copies a directory to the build directory")
+
+
+^{:refer std.make.compile/with:compile-filter :added "4.1"}
+(fact "TODO")

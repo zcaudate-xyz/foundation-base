@@ -23,3 +23,43 @@
 
   (impl/emit-as :lean ['(fn [x] (+ x 1))])
   => "fun x => x + 1")
+
+
+^{:refer std.lang.model-annex.spec-lean/emit-raw-str :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model-annex.spec-lean/emit-indent-body :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model-annex.spec-lean/lean-args :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model-annex.spec-lean/lean-invoke :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model-annex.spec-lean/parse-match-clauses :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model-annex.spec-lean/catch-all-pattern? :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model-annex.spec-lean/guarded-body :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model-annex.spec-lean/match-form :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model-annex.spec-lean/tf-defn :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model-annex.spec-lean/tf-match :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model-annex.spec-lean/tf-if :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model-annex.spec-lean/tf-letrec :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model-annex.spec-lean/tf-lambda :added "4.1"}
+(fact "TODO")

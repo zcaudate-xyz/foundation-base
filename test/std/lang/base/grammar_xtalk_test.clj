@@ -346,3 +346,22 @@
   => (xtalk/xtgen.fragment-fn
       {:symbol  '[x:arr-push]
        :op-spec {:arglists '([arr val])}}))
+
+
+^{:refer std.lang.base.grammar-xtalk/xtgen-fragment-spec-input :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.base.grammar-xtalk/xtgen.fragment-spec :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.base.grammar-xtalk/xtgen-fragment-fn-input :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.base.grammar-xtalk/xtgen.fragment-fn :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.base.grammar-xtalk/tmpl-fragment-spec :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.base.grammar-xtalk/tmpl-defn-fn :added "4.1"}
+(fact "TODO")

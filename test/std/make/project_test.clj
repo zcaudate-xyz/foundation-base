@@ -141,3 +141,16 @@
     (trace/remove-trace #'add)
     
     (add 1 2)))
+
+
+^{:refer std.make.project/file-watcher-heal :added "4.1"}
+(fact "TODO")
+
+^{:refer std.make.project/file-watcher-handler :added "4.1"}
+(fact "TODO")
+
+^{:refer std.make.project/watch :added "4.1"}
+(fact "TODO")
+
+^{:refer std.make.project/watch-project :added "4.1"}
+(fact "TODO")

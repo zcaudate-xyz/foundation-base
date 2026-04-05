@@ -43,3 +43,7 @@
   => '(def -task- (clojure.core/with-meta
                     (std.pipe/task nil "-task-" {:main {:fn inc, :argcount 1}})
                     {:doc nil, :arglists (quote ([& args]))})))
+
+
+^{:refer std.pipe/pipe :added "4.1"}
+(fact "TODO")
