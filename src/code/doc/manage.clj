@@ -15,11 +15,12 @@
   "extracts documented namespaces from a parsed element"
   {:added "4.1"}
   [{:keys [type namespace refer ns link]}]
-  (cond-> #{}
+  (let [refer-ns (some-> refer symbol .getNamespace symbol)]
+    (cond-> #{}
     namespace (conj (symbol namespace))
-    refer     (conj (symbol (.getNamespace (symbol refer))))
+    refer-ns  (conj refer-ns)
     (#{:ns :ns-form} type) (conj ns)
-    link      (conj (symbol link))))
+    link      (conj (symbol link)))))
 
 (defn documented-coverage
   "returns a namespace -> pages coverage map"
