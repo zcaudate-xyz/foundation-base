@@ -152,7 +152,11 @@
                         [end-line])))))
 
 (defn create-block-scan
-  "creates a scan window for a block"
+  "creates a scan window for a block.
+
+   The default arity scans the full block. The extended arities allow the
+   caller to override the scan line range, start column, and optional end
+   column when a smaller suspect region has already been identified."
   {:added "4.1"}
   ([block lines]
    (create-block-scan block lines (:line block) (:col block)))
@@ -167,37 +171,51 @@
     :snippet (prose/join-lines
               (get-block-lines lines line col end-col))}))
 
+(def default-max-col
+  Integer/MAX_VALUE)
+
+(defn tighter-scan?
+  "checks if the candidate scan is narrower than the current scan"
+  {:added "4.1"}
+  [scan line col end-col]
+  (let [scan-start-line (first (:line scan))
+        scan-end-line   (second (:line scan))
+        scan-start-col  (:col scan)
+        scan-end-col    (or (:end-col scan)
+                            default-max-col)]
+    (and (<= scan-start-line (first line))
+         (<= (second line) scan-end-line)
+         (<= scan-start-col col)
+         (<= end-col scan-end-col)
+         (or (> (first line) scan-start-line)
+             (> col scan-start-col)
+             (< (second line) scan-end-line)
+             (< end-col scan-end-col)))))
+
 (defn create-close-hint-scan
   "uses a later correct close delimiter to narrow the suspect scan window"
   {:added "4.1"}
   [block lines scan interim interim-errors]
-  (let [anchor        (last (filter #(= :open (:type %))
-                                    interim-errors))
-        after-anchor? (fn [{:keys [line col]}]
-                        (or (> line (:line anchor))
-                            (and (= line (:line anchor))
-                                 (> col (:col anchor)))))
-        close-hint    (when anchor
-                        (first (filter #(and (:correct? %)
-                                             (= :close (:type %))
-                                             (after-anchor? %))
-                                       interim)))
-        global-line   (fn [line]
-                        (+ (:offset scan) line))]
-    (when (and anchor
-               close-hint)
-      (let [line    [(global-line (:line anchor))
-                     (global-line (:line close-hint))]
-            col     (:col anchor)
-            end-col (:col close-hint)]
-        (when (or (> (first line) (first (:line scan)))
-                  (> col (:col scan))
-                  (< (second line) (second (:line scan)))
-                  (and (= (second line) (second (:line scan)))
-                       (< end-col
-                          (or (:end-col scan)
-                              ##Inf))))
-          (create-block-scan block lines line col end-col))))))
+  (let [first-open-error (first (filter #(= :open (:type %))
+                                        interim-errors))
+        global-line (fn [line]
+                      (+ (:offset scan) line))]
+    (when first-open-error
+      (let [after-anchor? (fn [{:keys [line col]}]
+                            (or (> line (:line first-open-error))
+                                (and (= line (:line first-open-error))
+                                     (> col (:col first-open-error)))))
+            close-hint    (first (filter #(and (:correct? %)
+                                               (= :close (:type %))
+                                               (after-anchor? %))
+                                         interim))]
+        (when close-hint
+          (let [line    [(global-line (:line first-open-error))
+                         (global-line (:line close-hint))]
+                col     (:col first-open-error)
+                end-col (:col close-hint)]
+            (when (tighter-scan? scan line col end-col)
+              (create-block-scan block lines line col end-col))))))))
 
 (defn localize-close-hint-scan
   "runs a close-delimiter localization pass before the full structural check"
@@ -207,6 +225,10 @@
         interim        (parse/parse (:snippet scan))
         interim-errors (vec (filter (comp not :correct?) interim))]
     (if (seq (:children block))
+      ;; Child blocks are already checked first in get-errored-loop. Their
+      ;; indentation already gives us a tighter boundary, so applying the
+      ;; close-hint prepass at the parent level tends to pull the scan back out
+      ;; toward later closes that belong to the wider enclosing form.
       {:scan scan
        :interim interim
        :errors interim-errors}
@@ -216,8 +238,8 @@
               narrowed-errors  (vec (filter (comp not :correct?)
                                             narrowed-interim))]
           (if (and (seq narrowed-errors)
-                   (<= (count narrowed-errors)
-                       (count interim-errors)))
+                   (< (count narrowed-errors)
+                      (count interim-errors)))
             {:scan narrowed
              :interim narrowed-interim
              :errors narrowed-errors}
@@ -232,14 +254,13 @@
   [scan lines leftover-errors]
   (let [{:keys [line col]
          :as error} (first leftover-errors)
-        scan-line   (or (:line scan)
-                        (some-> scan :lead :line vector))
-        row-offset  (first scan-line)
+        line-range  (:line scan)
+        row-offset  (first line-range)
         args   [[row-offset
                  (+ row-offset
                     (dec line))]
                  (:col scan)
-                 (dec col)]        
+                 (dec col)]
         #_#_#_#_#_#_
         _ (env/prn args)
         _ (env/prn scan)
@@ -298,8 +319,8 @@
          other-errors     (remove leftover-fn interim-errors)
          all-errors       (vec (concat (if (not is-suspect)
                                          leftover-errors)
-                                       other-errors))
- 
+                                        other-errors))
+
          block-error      (if (seq all-errors)
                             {:errors (mapv #(update % :line + (:offset scan)) all-errors)
                              :lines  (clojure.string/split-lines snippet)

@@ -1180,12 +1180,16 @@
 
 ^{:refer std.block.heal.core/check-errored-suspect :added "4.0"}
 (fact "checks if a block is suspect based on leftover errors"
-  (level/check-errored-suspect
-   {:lead {:line 1 :col 1}
-    :col 1
-    :last true}
-   ["(foo) (bar))"]
-   [{:line 1 :col 12 :type :close}])
+  (let [content "(foo) (bar))"
+        lines   (clojure.string/split-lines content)]
+    (level/check-errored-suspect
+     (level/create-block-scan
+      {:line [1 1]
+       :col 1
+       :last true}
+      lines)
+     lines
+     [{:line 1 :col 12 :type :close}]))
   => true)
 
 ^{:refer std.block.heal.core/create-close-hint-scan :added "4.1"}
@@ -1221,7 +1225,6 @@
                :col 3
                :end-col nil})
        :errors vector?})
-  
   (let [content (prose/join-lines
                  ["(outer"
                   "  (a 1)"
