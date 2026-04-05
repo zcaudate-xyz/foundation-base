@@ -46,4 +46,11 @@
 
 
 ^{:refer std.pipe/pipe :added "4.1"}
-(fact "TODO")
+(fact "creates a pipe from tasks and executes it"
+  (pipe [(task {:main {:fn inc :argcount 1}})
+         (task {:main {:fn (fn [x params]
+                             (+ x (:offset params)))
+                       :argcount 2}})]
+        1
+        {:offset 4})
+  => 6)
