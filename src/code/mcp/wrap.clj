@@ -6,7 +6,7 @@
 
 (defn text-content
   [text]
-  (McpSchema$TextContent. (str (or text ""))))
+  (McpSchema$TextContent. (str text)))
 
 (defn- normalize-content-item
   [item]
