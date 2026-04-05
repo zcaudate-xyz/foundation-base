@@ -6,6 +6,13 @@
             [std.lib.os :as os]
             [std.lib.signal :as signal]))
 
+(defn- result-name
+  [result]
+  (str (or (-> result :meta :refer)
+           (-> result :meta :function)
+           (-> result :meta :desc)
+           (-> result :meta :id))))
+
 (defn summarise-verify
   "extract the comparison into a valid format"
   {:added "3.0"}
@@ -18,13 +25,10 @@
                      (= :timeout (-> result :actual :status))
                      :timeout
 
-                     :else
-                     :failed)
+                      :else
+                      :failed)
      :path     (-> result :meta :path)
-     :name     (str (or (-> result :meta :refer)
-                        (-> result :meta :function)
-                        (-> result :meta :desc)
-                        (-> result :meta :id)))
+     :name     (result-name result)
      :function (-> result :meta :function)
      :ns       (-> result :meta :ns)
      :line     (-> result :meta :line)
@@ -43,10 +47,7 @@
    #_(env/prfn :EVAL result)
     {:status   (-> result :status)
      :path     (-> result :meta :path)
-     :name     (str (or (-> result :meta :refer)
-                        (-> result :meta :function)
-                        (-> result :meta :desc)
-                        (-> result :meta :id)))
+     :name     (result-name result)
      :function (-> result :meta :function)
      :ns       (-> result :meta :ns)
      :line     (-> result :meta :line)

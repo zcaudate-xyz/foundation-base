@@ -7,6 +7,10 @@
             [std.lib.result :as res]
             [std.lib.signal :as signal]))
 
+(def ^:private +skip-forms+
+  '#{quote do let let* loop loop* recur fn fn* if if-not when when-not
+     when-let when-first if-let cond case try catch finally comment})
+
 (defn evaluate
   "converts a form to a result
  
@@ -32,21 +36,19 @@
   "infers the target function from a form"
   {:added "4.1"}
   ([form]
-   (let [skip '#{quote do let let* loop loop* recur fn fn* if if-not when when-not
-                 when-let when-first if-let cond case try catch finally comment}]
-     (cond (seq? form)
-           (let [head (first form)]
-             (cond (= 'quote head) nil
-                   (and (symbol? head)
-                        (not (skip head))) head
-                   :else (some infer-function (rest form))))
+   (cond (seq? form)
+         (let [head (first form)]
+           (cond (= 'quote head) nil
+                 (and (symbol? head)
+                      (not (+skip-forms+ head))) head
+                 :else (some infer-function (rest form))))
 
-           (map? form)
-           (or (some infer-function (keys form))
-               (some infer-function (vals form)))
+         (map? form)
+         (or (some infer-function (keys form))
+             (some infer-function (vals form)))
 
-           (coll? form)
-           (some infer-function form)))))
+         (coll? form)
+         (some infer-function form))))
 
 (defn attach-meta
   "attaches metadata to the result"
