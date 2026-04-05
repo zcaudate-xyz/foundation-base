@@ -37,9 +37,9 @@
          (map (fn [[page-key {title :title}]]
                 (html/html
                  [:a {:class (str "sidebar-link"
-                                  (when (= name page-key) " active"))
-                      :href (str page-key ".html")}
-                  title])))
+                                   (when (= name (clojure.core/name page-key)) " active"))
+                      :href (str (clojure.core/name page-key) ".html")}
+                   title])))
          common/joinl)))
 
 (defn render-site-links
@@ -47,12 +47,12 @@
   {:added "4.1"}
   [key _ lookup]
   (->> (site-pages key lookup)
-       (map (fn [[page-key {:keys [title subtitle]}]]
-              (html/html
-               [:a {:class "site-link-card"
-                    :href (str page-key ".html")}
-                [:span {:class "site-link-title"} title]
-                [:span {:class "site-link-subtitle"} subtitle]])))
+        (map (fn [[page-key {:keys [title subtitle]}]]
+               (html/html
+                [:a {:class "site-link-card"
+                    :href (str (clojure.core/name page-key) ".html")}
+                 [:span {:class "site-link-title"} title]
+                 [:span {:class "site-link-subtitle"} subtitle]])))
        common/joinl))
 
 (defn render-page-meta
@@ -71,7 +71,7 @@
         [:a {:class "meta-chip meta-chip-link"
              :href url
              :target "_blank"}
-         "Repository"]]
+         "Repository"])
       (when (= name "index")
         [:span {:class "meta-chip"} "Landing page"])])))
 

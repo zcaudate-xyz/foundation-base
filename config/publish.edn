@@ -5,5 +5,6 @@
             :tracking "UA-31320512-2"}
  :snippets "config/snippets"
  :sites      {:core         [:include "config/publish/foundation.core.edn" {:type :edn}]
+              :foundation.code [:include "config/publish/foundation.code.edn" {:type :edn}]
               :std.lib      [:include "config/publish/std.lib.edn" {:type :edn}]
               :test-site    [:include "config/publish/test.site.edn" {:type :edn}]}}

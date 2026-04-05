@@ -1,0 +1,5 @@
+{:theme-base "theme-foundation"
+ :site-label "foundation-code"
+ :tagline "Static docs for serious Clojure systems"
+ :nav-label "Docs"
+ :tracking-enabled "false"}

@@ -10,7 +10,10 @@
   => "<div></div>"
 
   (page-element {:type :chapter :tag "chk" :number 1 :title "Introduction"})
-  => [:div [:span {:id "chk"}] [:h2 [:b "1 &nbsp;&nbsp; Introduction"]]])
+  => [:div [:span {:id "chk"}] [:h2 [:b "1 &nbsp;&nbsp; Introduction"]]]
+
+  (page-element {:type :hero :title "foundation-code"})
+  => (contains [:section {:class "hero"}]))
 
 ^{:refer code.doc.engine.winterfell/render-chapter :added "3.0"}
 (fact "seed function for rendering a chapter element"

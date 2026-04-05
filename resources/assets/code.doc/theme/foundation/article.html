@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><@=site-label> · <@=title></title>
+    <meta name="description" content="<@=subtitle>">
+    <link rel="stylesheet" href="css/foundation.css">
+  </head>
+  <body class="<@=theme-base>">
+    <div class="site-shell">
+      <aside class="site-sidebar">
+        <a class="site-brand" href="index.html">
+          <span class="site-brand-kicker"><@=site-label></span>
+          <strong><@=tagline></strong>
+        </a>
+        <nav class="site-nav">
+          <span class="site-nav-label"><@=nav-label></span>
+          <@=top-level>
+        </nav>
+      </aside>
+      <main class="site-main">
+        <header class="page-header">
+          <div>
+            <p class="page-eyebrow"><@=site-label></p>
+            <h1><@=title></h1>
+            <p class="page-subtitle"><@=subtitle></p>
+          </div>
+          <@=page-meta>
+        </header>
+        <section class="article-layout">
+          <article class="article-body">
+            <@=article>
+          </article>
+          <aside class="article-outline">
+            <div class="outline-panel">
+              <h3>On this page</h3>
+              <ul>
+                <@=outline>
+              </ul>
+            </div>
+          </aside>
+        </section>
+      </main>
+    </div>
+    <script>
+      document.querySelectorAll('pre').forEach(function(pre) {
+        var code = pre.querySelector('code');
+        if (!code) return;
+        var button = document.createElement('button');
+        button.className = 'copy-button';
+        button.type = 'button';
+        button.textContent = 'Copy';
+        button.addEventListener('click', function() {
+          navigator.clipboard.writeText(code.innerText).then(function() {
+            button.textContent = 'Copied';
+            setTimeout(function() { button.textContent = 'Copy'; }, 1200);
+          });
+        });
+        pre.appendChild(button);
+      });
+    </script>
+  </body>
+</html>

@@ -17,7 +17,7 @@
     (with-redefs [reference/reference-namespaces (fn [_ _ namespaces] namespaces)]
       (-> (collect-apis bundle "code-doc")
           :references)))
-  => '[code.doc code.doc.parse])
+  => '[code.doc code.doc.manage])
 
 (comment
   (code.manage/import))

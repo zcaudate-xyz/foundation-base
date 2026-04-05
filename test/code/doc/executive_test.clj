@@ -25,7 +25,7 @@
 
   (load-theme "bolton")
   => (contains {:engine "winterfell",
-                :resource "theme/bolton",
+                :resource "assets/code.doc/theme/bolton",
                 :copy ["assets"],
                 :render map?,
                 :manifest sequential?}))
@@ -67,5 +67,3 @@
       (get "index"))
   (get (all-documents {:root "."})
        'hara/index))
-
-
