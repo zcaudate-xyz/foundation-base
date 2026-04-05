@@ -1,6 +1,6 @@
-(ns code.framework.generate-test
+(ns std.block.template-test
   (:require [clojure.string]
-            [code.framework.generate :as gen]
+            [std.block.template :as gen]
             [std.block :as b]
             [std.string.prose :as prose])
   (:use code.test))
@@ -23,7 +23,7 @@
     "  []"
     "  (~name (szndb.core.fn-util/auth-uid) ~@hello))"]))
 
-^{:refer code.framework.generate/get-template-params :added "4.0"}
+^{:refer std.block.template/get-template-params :added "4.0"}
 (fact "gets the template params in the query"
   ^:hidden
   
@@ -35,13 +35,13 @@
        (unquote name)
        (unquote-splicing hello)))
 
-^{:refer code.framework.generate/get-template :added "4.0"}
+^{:refer std.block.template/get-template :added "4.0"}
 (fact "gets the template"
 
   (gen/get-template TEMPLATE_QUERY)
   => map?)
 
-^{:refer code.framework.generate/fill-template :added "4.0"}
+^{:refer std.block.template/fill-template :added "4.0"}
 (fact "fills out the template"
   ^:hidden
   

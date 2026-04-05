@@ -1,6 +1,6 @@
 (ns rt.postgres.base.compile.server-db
   (:require [clojure.walk :as walk]
-            [code.framework.generate :as gen]
+            [std.block.template :as gen]
             [rt.postgres.base.typed.typed-analyze :as analyze]
             [rt.postgres.base.typed.typed-common :as types]))
 

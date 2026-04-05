@@ -1,4 +1,4 @@
-(ns code.framework.generate
+(ns std.block.template
   (:require [clojure.set :as set]
             [std.block :as b]
             [std.block.navigate :as nav]

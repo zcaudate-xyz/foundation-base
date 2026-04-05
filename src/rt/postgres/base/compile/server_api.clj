@@ -1,5 +1,5 @@
 (ns rt.postgres.base.compile.server-api
-  (:require [code.framework.generate :as gen]
+  (:require [std.block.template :as gen]
             [rt.postgres.base.compile.server-db :as server-db]
             [rt.postgres.base.typed.typed-common :as types]))
 

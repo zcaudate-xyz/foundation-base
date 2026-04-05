@@ -1,16 +1,77 @@
 (ns std.lang.base.grammar-xtalk
   (:require [clojure.string :as str]
+            [std.block.template :as gen]
+            [std.lib.foundation :as f]
             [std.lang.base.emit-preprocess :as preprocess]))
 
-(defn tmpl-fragment-fn
+(def ^:private XTGEN_FRAGMENT_SPEC
+  "(defspec.xt ~sym-name
+  ~type)")
+
+(defn xtgen-fragment-spec-input
   [{:keys [op-spec] :as e}]
-  (let [name  (symbol (str/replace-first (name (first (:symbol e)))
-                                         "x:"
-                                         ""))]
-    (list 'def$.xt (with-meta name
-                     {:arglists (list 'quote (:arglists op-spec))
-                      :- (:types op-spec)})
-          (first (:symbol e)))))
+  {'sym-name (first (:symbol e))
+   'type     (:type op-spec)})
+
+(def ^:private +xtgen-fragment-spec+
+  (gen/get-template XTGEN_FRAGMENT_SPEC
+                    xtgen-fragment-spec-input))
+
+(defn xtgen.fragment-spec
+  [e]
+  (read-string
+   (gen/fill-template +xtgen-fragment-spec+ e)))
+
+(def ^:private XTGEN_FRAGMENT_FN
+  "(defmacro.xt ^{:template :standalone}
+  ~sym-name
+  ~arglists
+  ~call-form)")
+
+(defn xtgen-fragment-fn-input
+  [{:keys [op-spec] :as e}]
+  (let [sym-name (first (:symbol e))]
+    {'sym-name  sym-name
+     'arglists  (:arglists op-spec)
+     'call-form (apply list sym-name (first (:arglists op-spec)))}))
+
+(def ^:private +xtgen-fragment-fn+
+  (gen/get-template XTGEN_FRAGMENT_FN
+                    xtgen-fragment-fn-input))
+
+(defn xtgen.fragment-fn
+  [e]
+  (read-string
+   (gen/fill-template +xtgen-fragment-fn+ e)))
+
+(defn tmpl-fragment-spec
+  [e]
+  (#'xtgen.fragment-spec e))
+
+(defn tmpl-fragment-fn
+  [e]
+  (#'xtgen.fragment-fn e))
+
+
+
+#_
+(defn tmpl-defn-fn
+  [{:keys [op-spec] :as e}]
+  (let [sym-fn   (fn [e]
+                   (symbol (str/replace-first (name (first (:symbol e)))
+                                              (or (:prefix (f/template-meta))
+                                                  "x:")
+                                              "")))
+        sym-name (sym-fn e)]
+    (list 'do
+          (list 'defspec.xt sym-name
+                (:type op-spec))
+          (list 'def$.xt (with-meta sym-name
+                           {:arglists (list 'quote (:arglists op-spec))})
+                (first (:symbol e)))
+          (list 'defn.xt (with-meta sym-name
+                           {:arglists (list 'quote (:arglists op-spec))})
+                (first (:symbol e))))))
 
 (defn tf-throw
   "wrapper for throw transform"
@@ -178,8 +239,7 @@
   "set-key transform"
   {:added "4.0"}
   [[_ obj k v]]
-  (list := (list '. obj [k])
-        v))
+  (list := (list '. obj [k])))
 
 (defn tf-del-key
   "del-key transform"
@@ -283,17 +343,17 @@
   (list 'x:get-idx arr (list '+ (list 'x:len arr)
                              (list 'x:offset -2))))
 
-(defn tf-lt-string
+(defn tf-str-lt
   "checks if string a sorts before b"
   {:added "4.1"}
   [[_ a b]]
-  (list 'x:arr-str-comp a b))
+  (list 'x:str-comp a b))
 
-(defn tf-gt-string
+(defn tf-str-gt
   "checks if string a sorts after b"
   {:added "4.1"}
   [[_ a b]]
-  (list 'x:arr-str-comp b a))
+  (list 'x:str-comp b a))
 
 ;;
 ;; GLOBAL
@@ -536,7 +596,6 @@
               :lowered 0}}
    {:op :x-lu-eq          :symbol #{'x:lu-eq}           :macro #'tf-lu-eq :emit :macro
     :op-spec {:arglists '([left right])
-              :type [:fn [:xt/any :xt/any] :xt/bool]
               :lowered 2}}
    {:op :x-lu-get         :symbol #{'x:lu-get}          :emit :abstract
     :op-spec {:arglists '([lookup key] [lookup key default])
@@ -550,89 +609,109 @@
 
 (def +xt-common-object+
   [{:op :x-has-key?       :symbol #{'x:has-key?}        :emit :abstract
-    :op-spec  {:arglists '([obj key present?])
+    :op-spec  {:type [:fn [:xt/obj :xt/str] :xt/bool]
+               :arglists '([obj key present?])
                :lowered 2}}
    {:op :x-del-key        :symbol #{'x:del-key}         :macro #'tf-del-key     :emit :macro
-    :op-spec {:arglists '([obj key])
+    :op-spec {:type [:fn [:xt/obj :xt/str] :xt/any]
+              :arglists '([obj key])
               :lowered 2}}
     {:op :x-get-key        :symbol #{'x:get-key}         :macro #'tf-get-key     :emit :macro
-     :op-spec {:arglists '([obj key default])
+     :op-spec {:type [:fn [:xt/obj :xt/str] :xt/any]
+               :arglists '([obj key default])
                :lowered 3}}
     {:op :x-get-path       :symbol #{'x:get-path}        :macro #'tf-get-path    :emit :macro
-     :op-spec {:arglists '([obj path default])
+     :op-spec {:type [:fn [:xt/obj [:xt/array :xt/str]] :xt/any]
+               :arglists '([obj path default])
                :lowered 3}}
    {:op :x-set-key        :symbol #{'x:set-key}         :macro #'tf-set-key     :emit :macro
-    :op-spec   {:arglists '([obj key value])
+    :op-spec   {:type [:fn [:xt/obj [:xt/array :xt/str] :xt/any] :xt/self]
+                :arglists '([obj key value])
                 :lowered 3}}
    {:op :x-copy-key       :symbol #{'x:copy-key}        :macro #'tf-copy-key    :emit :macro
-    :op-spec   {:arglists '([dst src key])
+    :op-spec   {:type [:fn [:xt/obj :xt/obj :xt/str :xt/any] :xt/self]
+                :arglists '([dst src key])
                 :lowered 3}}
    {:op :x-obj-keys       :symbol #{'x:obj-keys}        :emit :hard-link :raw 'xt.lang.common-data/obj-keys
-    :op-spec   {:arglists '([obj])
-                :type [:fn [:xt/obj] [:xt/array :xt/str]]
+    :op-spec   {:type [:fn [:xt/obj] [:xt/array :xt/str]]
+                :arglists '([obj])
                 :lowered 1}}
    {:op :x-obj-vals       :symbol #{'x:obj-vals}        :emit :hard-link :raw 'xt.lang.common-data/obj-vals
-    :op-spec   {:arglists '([obj])
+    :op-spec   {:type [:fn [:xt/obj] [:xt/array :xt/any]]
+                :arglists '([obj])
                 :lowered 1}}
    {:op :x-obj-pairs      :symbol #{'x:obj-pairs}       :emit :hard-link :raw 'xt.lang.common-data/obj-pairs
-    :op-spec   {:arglists '([obj])
+    :op-spec   {:type [:fn [:xt/obj] [:xt/array [:xt/tuple :xt/str :xt/any]]]
+                :arglists '([obj])
                 :lowered 1}}
    {:op :x-obj-clone      :symbol #{'x:obj-clone}       :emit :hard-link :raw 'xt.lang.common-data/obj-clone
-    :op-spec   {:arglists '([obj])
+    :op-spec   {:type [:fn [:xt/obj] :xt/obj]
+                :arglists '([obj])
                 :lowered 1}}
    {:op :x-obj-assign     :symbol #{'x:obj-assign}      :emit :hard-link :raw 'xt.lang.common-data/obj-assign
-    :op-spec   {:arglists '([obj other])
+    :op-spec   {:type [:fn [:xt/obj :xt/obj] :xt/obj]
+                :arglists '([obj other])
                 :lowered 2}}
    {:op :x-obj-from-pairs :symbol #{'x:obj-from-pairs}  :emit :hard-link :raw 'xt.lang.common-data/obj-from-pairs
-    :op-spec   {:arglists '([pairs])
+    :op-spec   {:type [:fn [[:xt/array [:xt/tuple :xt/str :xt/any]]] :xt/obj]
+                :arglists '([pairs])
                 :lowered 1}}])
 
 (def +xt-common-array+
   [{:op :x-get-idx         :symbol #{'x:get-idx}          :macro #'tf-get-key     :emit :macro
-    :op-spec {:arglists '([arr idx] [arr idx default])
+    :op-spec {:type [:fn [[:xt/array :xt/any] :xt/num] :xt/any]
+              :arglists '([arr idx] [arr idx default])
               :lowered 2}}
    {:op :x-set-idx         :symbol #{'x:set-idx}          :macro #'tf-set-key     :emit :macro
-    :op-spec {:arglists '([arr idx value])
+    :op-spec {:type [:fn [[:xt/array :xt/any] :xt/num] :xt/self]
+              :arglists '([arr idx value])
               :lowered 3}}
-   {:op :x-arr-first       :symbol #{'x:arr-first}        :macro #'tf-first       :emit :macro
-    :op-spec  {:arglists '([arr])
+   {:op :x-arr-first       :symbol #{'x:first}        :macro #'tf-first       :emit :macro
+    :op-spec  {:type [:fn [[:xt/array :xt/any]] :xt/any]
+               :arglists '([arr])
                :lowered 1}}
-   {:op :x-arr-second      :symbol #{'x:arr-second}       :macro #'tf-second      :emit :macro
-    :op-spec  {:arglists '([arr])
+   {:op :x-arr-second      :symbol #{'x:second}       :macro #'tf-second      :emit :macro
+    :op-spec  {:type [:fn [[:xt/array :xt/any]] :xt/any]
+               :arglists '([arr])
                :lowered 1}}
-   {:op :x-arr-last        :symbol #{'x:arr-last}         :macro #'tf-last        :emit :macro
-    :op-spec  {:arglists '([arr])
+   {:op :x-arr-last        :symbol #{'x:last}         :macro #'tf-last        :emit :macro
+    :op-spec  {:type [:fn [[:xt/array :xt/any]] :xt/any]
+               :arglists '([arr])
                :lowered 1}}
-   {:op :x-arr-second-last :symbol #{'x:arr-second-last}  :macro #'tf-second-last :emit :macro
-    :op-spec  {:arglists '([arr])
+   {:op :x-arr-second-last :symbol #{'x:second-last}  :macro #'tf-second-last :emit :macro
+    :op-spec  {:type [:fn [[:xt/array :xt/any]] :xt/any]
+               :arglists '([arr])
                :lowered 1}}
    {:op :x-arr-remove      :symbol #{'x:arr-remove}       :emit :abstract
-    :op-spec  {:arglists '([arr idx])
+    :op-spec  {:type [:fn [[:xt/array :xt/any] :xt/num] :xt/any]
+               :arglists '([arr idx])
                :lowered 2}}
    {:op :x-arr-push        :symbol #{'x:arr-push}         :emit :abstract
-    :op-spec  {:arglists '([arr value])
+    :op-spec  {:type [:fn [[:xt/array :xt/any] :xt/any] :xt/self]
+               :arglists '([arr value])
                :lowered 2}}
    {:op :x-arr-pop         :symbol #{'x:arr-pop}          :emit :abstract
-    :op-spec   {:arglists '([arr])
+    :op-spec   {:type [:fn [[:xt/array :xt/any] :xt/any] :xt/any]
+                :arglists '([arr])
                 :lowered 1}}
    {:op :x-arr-push-first  :symbol #{'x:arr-push-first}   :emit :abstract
-    :op-spec   {:arglists '([arr value])
+    :op-spec   {:type [:fn [[:xt/array :xt/any] :xt/any] :xt/self]
+                :arglists '([arr value])
                 :lowered 2}}
    {:op :x-arr-pop-first   :symbol #{'x:arr-pop-first}    :emit :abstract
     :op-spec   {:arglists '([arr])
                 :lowered 1}}
    {:op :x-arr-insert      :symbol #{'x:arr-insert}       :emit :abstract
-    :op-spec   {:arglists '([arr idx value])
+    :op-spec   {:type [:fn [[:xt/array :xt/any] :xt/any] :xt/self]
+                :arglists '([arr idx value])
                 :lowered 3}}
-   {:op :x-arr-str-comp    :symbol #{'x:arr-str-comp}     :emit :abstract
-    :op-spec   {:arglists '([left right])
-                :type [:fn [:xt/str :xt/str] :xt/bool]
-                :lowered 2}}
-   {:op :x-arr-slice       :symbol #{'x:arr-splice}       :emit :hard-link :raw 'xt.lang.common-data/arr-slice
-    :op-spec   {:arglists '([arr start end])
+   {:op :x-arr-slice       :symbol #{'x:arr-slice}       :emit :hard-link :raw 'xt.lang.common-data/arr-slice
+    :op-spec   {:type [:fn [[:xt/array :xt/any]] [:xt/array :xt/any]]
+                :arglists '([arr start end])
                 :lowered 2}}
    {:op :x-arr-reverse     :symbol #{'x:arr-reverse}      :emit :hard-link :raw 'xt.lang.common-data/arr-reverse
-    :op-spec   {:arglists '([arr])
+    :op-spec   {:type [:fn [[:xt/array :xt/any]] [:xt/array :xt/any]]
+                :arglists '([arr])
                 :lowered 1}}])
 
 (def +xt-common-print+
@@ -648,16 +727,18 @@
     :op-spec   {:arglists '([value])
                 :type [:fn [:xt/str] :xt/int]
                 :lowered 1}}
-   {:op :x-lt-string       :symbol #{'x:lt-string}       :macro #'tf-lt-string :emit :macro
+   {:op :x-str-comp    :symbol #{'x:str-comp}     :emit :abstract
+    :op-spec   {:arglists '([left right])
+                :type [:fn [:xt/str :xt/str] :xt/bool]
+                :lowered 2}}
+   {:op :x-str-lt       :symbol #{'x:str-lt}       :macro #'tf-str-lt :emit :macro
     :op-spec    {:arglists '([left right])
                  :type [:fn [:xt/str :xt/str] :xt/bool]
                  :lowered 2}}
-   
-   {:op :x-gt-string       :symbol #{'x:gt-string}       :macro #'tf-gt-string :emit :macro
+   {:op :x-str-gt       :symbol #{'x:str-gt}       :macro #'tf-str-gt :emit :macro
     :arglists '([left right])
     :op-spec    {:type [:fn [:xt/str :xt/str] :xt/bool]
                  :lowered 2}}
-   
    {:op :x-str-pad-left    :symbol #{'x:str-pad-left}    :emit :hard-link
     :raw 'xt.lang.common-string/pad-left
     :op-spec   {:arglists '([value len pad])
@@ -729,27 +810,71 @@
 ;; common-math
 
 (def +xt-common-math+       
-  [{:op :x-m-abs :symbol #{'x:m-abs} :emit :abstract :op-spec {:arglists '([value]), :type [:fn [:xt/num] :xt/num], :lowered 1}}
-   {:op :x-m-acos :symbol #{'x:m-acos} :emit :abstract :op-spec {:arglists '([value]), :type [:fn [:xt/num] :xt/num], :lowered 1}}
-   {:op :x-m-asin :symbol #{'x:m-asin} :emit :abstract :op-spec {:arglists '([value]), :type [:fn [:xt/num] :xt/num], :lowered 1}}
-   {:op :x-m-atan :symbol #{'x:m-atan} :emit :abstract :op-spec {:arglists '([value]), :type [:fn [:xt/num] :xt/num], :lowered 1}}
-   {:op :x-m-ceil :symbol #{'x:m-ceil} :emit :abstract :op-spec {:arglists '([value]), :type [:fn [:xt/num] :xt/num], :lowered 1}}
-   {:op :x-m-cos :symbol #{'x:m-cos} :emit :abstract :op-spec {:arglists '([value]), :type [:fn [:xt/num] :xt/num], :lowered 1}}
-   {:op :x-m-cosh :symbol #{'x:m-cosh} :emit :abstract :op-spec {:arglists '([value]), :type [:fn [:xt/num] :xt/num], :lowered 1}}
-   {:op :x-m-exp :symbol #{'x:m-exp} :emit :abstract :op-spec {:arglists '([value]), :type [:fn [:xt/num] :xt/num], :lowered 1}}
-   {:op :x-m-floor :symbol #{'x:m-floor} :emit :abstract :op-spec {:arglists '([value]), :type [:fn [:xt/num] :xt/num], :lowered 1}}
-   {:op :x-m-loge :symbol #{'x:m-loge} :emit :abstract :op-spec {:arglists '([value]), :type [:fn [:xt/num] :xt/num], :lowered 1}}
-   {:op :x-m-log10 :symbol #{'x:m-log10} :emit :abstract :op-spec {:arglists '([value]), :type [:fn [:xt/num] :xt/num], :lowered 1}}
-   {:op :x-m-max :symbol #{'x:m-max} :emit :abstract :op-spec {:arglists '([left right]), :type [:fn [:xt/num :xt/num] :xt/num], :lowered 2}}
-   {:op :x-m-mod :symbol #{'x:m-mod} :emit :abstract :op-spec {:arglists '([left right]), :type [:fn [:xt/num :xt/num] :xt/num], :lowered 2}}
-   {:op :x-m-min :symbol #{'x:m-min} :emit :abstract :op-spec {:arglists '([left right]), :type [:fn [:xt/num :xt/num] :xt/num], :lowered 2}}
-   {:op :x-m-pow :symbol #{'x:m-pow} :emit :abstract :op-spec {:arglists '([left right]), :type [:fn [:xt/num :xt/num] :xt/num], :lowered 2}}
-   {:op :x-m-quot :symbol #{'x:m-quot} :emit :abstract :op-spec {:arglists '([left right]), :type [:fn [:xt/num :xt/num] :xt/num], :lowered 2}}
-   {:op :x-m-sin :symbol #{'x:m-sin} :emit :abstract :op-spec {:arglists '([value]), :type [:fn [:xt/num] :xt/num], :lowered 1}}
-   {:op :x-m-sinh :symbol #{'x:m-sinh} :emit :abstract :op-spec {:arglists '([value]), :type [:fn [:xt/num] :xt/num], :lowered 1}}
-   {:op :x-m-sqrt :symbol #{'x:m-sqrt} :emit :abstract :op-spec {:arglists '([value]), :type [:fn [:xt/num] :xt/num], :lowered 1}}
-   {:op :x-m-tan :symbol #{'x:m-tan} :emit :abstract :op-spec {:arglists '([value]), :type [:fn [:xt/num] :xt/num], :lowered 1}}
-   {:op :x-m-tanh :symbol #{'x:m-tanh} :emit :abstract :op-spec {:arglists '([value]), :type [:fn [:xt/num] :xt/num], :lowered 1}}])
+  [{:op :x-m-abs :symbol #{'x:m-abs} :emit :abstract
+    :op-spec {:arglists '([value]),
+              :type [:fn [:xt/num] :xt/num], :lowered 1}}
+   {:op :x-m-acos :symbol #{'x:m-acos} :emit :abstract
+    :op-spec {:arglists '([value]),
+              :type [:fn [:xt/num] :xt/num],
+              :lowered 1}}
+   {:op :x-m-asin :symbol #{'x:m-asin} :emit :abstract
+    :op-spec {:arglists '([value]),
+              :type [:fn [:xt/num] :xt/num],
+              :lowered 1}}
+   {:op :x-m-atan :symbol #{'x:m-atan} :emit :abstract
+    :op-spec {:arglists '([value]),
+              :type [:fn [:xt/num] :xt/num], :lowered 1}}
+   {:op :x-m-ceil :symbol #{'x:m-ceil} :emit :abstract
+    :op-spec {:arglists '([value]),
+              :type [:fn [:xt/num] :xt/num], :lowered 1}}
+   {:op :x-m-cos :symbol #{'x:m-cos} :emit :abstract
+    :op-spec {:arglists '([value]),
+              :type [:fn [:xt/num] :xt/num], :lowered 1}}
+   {:op :x-m-cosh :symbol #{'x:m-cosh} :emit :abstract
+    :op-spec {:arglists '([value]),
+              :type [:fn [:xt/num] :xt/num], :lowered 1}}
+   {:op :x-m-exp :symbol #{'x:m-exp} :emit :abstract
+    :op-spec {:arglists '([value]),
+              :type [:fn [:xt/num] :xt/num], :lowered 1}}
+   {:op :x-m-floor :symbol #{'x:m-floor} :emit :abstract
+    :op-spec {:arglists '([value]),
+              :type [:fn [:xt/num] :xt/num], :lowered 1}}
+   {:op :x-m-loge :symbol #{'x:m-loge} :emit :abstract
+    :op-spec {:arglists '([value]),
+              :type [:fn [:xt/num] :xt/num], :lowered 1}}
+   {:op :x-m-log10 :symbol #{'x:m-log10} :emit :abstract
+    :op-spec {:arglists '([value]),
+              :type [:fn [:xt/num] :xt/num], :lowered 1}}
+   {:op :x-m-max :symbol #{'x:m-max} :emit :abstract
+    :op-spec {:arglists '([left right]),
+              :type [:fn [:xt/num :xt/num] :xt/num], :lowered 2}}
+   {:op :x-m-mod :symbol #{'x:m-mod} :emit :abstract
+    :op-spec {:arglists '([left right]),
+              :type [:fn [:xt/num :xt/num] :xt/num], :lowered 2}}
+   {:op :x-m-min :symbol #{'x:m-min} :emit :abstract
+    :op-spec {:arglists '([left right]),
+              :type [:fn [:xt/num :xt/num] :xt/num], :lowered 2}}
+   {:op :x-m-pow :symbol #{'x:m-pow} :emit :abstract
+    :op-spec {:arglists '([left right]),
+              :type [:fn [:xt/num :xt/num] :xt/num], :lowered 2}}
+   {:op :x-m-quot :symbol #{'x:m-quot} :emit :abstract
+    :op-spec {:arglists '([left right]),
+              :type [:fn [:xt/num :xt/num] :xt/num], :lowered 2}}
+   {:op :x-m-sin :symbol #{'x:m-sin} :emit :abstract
+    :op-spec {:arglists '([value]),
+              :type [:fn [:xt/num] :xt/num], :lowered 1}}
+   {:op :x-m-sinh :symbol #{'x:m-sinh} :emit :abstract
+    :op-spec {:arglists '([value]),
+              :type [:fn [:xt/num] :xt/num], :lowered 1}}
+   {:op :x-m-sqrt :symbol #{'x:m-sqrt} :emit :abstract
+    :op-spec {:arglists '([value]),
+              :type [:fn [:xt/num] :xt/num], :lowered 1}}
+   {:op :x-m-tan :symbol #{'x:m-tan} :emit :abstract
+    :op-spec {:arglists '([value]),
+              :type [:fn [:xt/num] :xt/num], :lowered 1}}
+   {:op :x-m-tanh :symbol #{'x:m-tanh} :emit :abstract
+    :op-spec {:arglists '([value]),
+              :type [:fn [:xt/num] :xt/num], :lowered 1}}])
 
 ;;
 ;; XTALK LANGUAGE SPECIFIC INTERFACES
@@ -762,12 +887,7 @@
               :lowered 1}}
    {:op :x-callback       :symbol #{'x:callback}        :emit :unit :default nil
     :op-spec {:arglists '([])
-              :lowered 0}}
-   {:op :x-identity       :symbol #{'x:identity}        :emit :hard-link
-    :raw 'xt.lang.common-lib/identity
-    :op-spec {:arglists '([value])
-              :type [:fn [:xt/any] :xt/any]
-              :lowered 1}}])
+              :lowered 0}}])
 
 (def +xt-functional-invoke+
   [{:op :x-eval           :symbol #{'x:eval}            :emit :abstract
@@ -792,39 +912,39 @@
   [{:op :x-arr-sort        :symbol #{'x:arr-sort}         :emit :abstract
     :op-spec {:arglists '([arr] [arr compare-fn])
               :lowered 1}}
-   {:op :x-arr-clone       :symbol #{'x:arr-clone}        :emit :hard-link :raw 'xt.lang.base-lib/arr-clone
+   {:op :x-arr-clone       :symbol #{'x:arr-clone}        :emit :hard-link :raw 'xt.lang.common-data/arr-clone
     :op-spec {:arglists '([arr])
               :lowered 1}}
-   {:op :x-arr-each        :symbol #{'x:arr-each}         :emit :hard-link :raw 'xt.lang.base-lib/arr-each
+   {:op :x-arr-each        :symbol #{'x:arr-each}         :emit :hard-link :raw 'xt.lang.common-data/arr-each
     :op-spec {:arglists '([arr f])
               :lowered 2}}
-   {:op :x-arr-every       :symbol #{'x:arr-every}        :emit :hard-link :raw 'xt.lang.base-lib/arr-every
+   {:op :x-arr-every       :symbol #{'x:arr-every}        :emit :hard-link :raw 'xt.lang.common-data/arr-every
     :op-spec {:arglists '([arr pred])
               :type [:fn [[:xt/array :xt/any] :xt/fn] :xt/bool]
               :lowered 2}}
-   {:op :x-arr-some        :symbol #{'x:arr-some}         :emit :hard-link :raw 'xt.lang.base-lib/arr-some
+   {:op :x-arr-some        :symbol #{'x:arr-some}         :emit :hard-link :raw 'xt.lang.common-data/arr-some
     :op-spec {:arglists '([arr pred])
               :type [:fn [[:xt/array :xt/any] :xt/fn] :xt/bool]
               :lowered 2}}
-   {:op :x-arr-map         :symbol #{'x:arr-map}          :emit :hard-link :raw 'xt.lang.base-lib/arr-map
+   {:op :x-arr-map         :symbol #{'x:arr-map}          :emit :hard-link :raw 'xt.lang.common-data/arr-map
     :op-spec {:arglists '([arr f])
               :lowered 2}}
-   {:op :x-arr-append      :symbol #{'x:arr-append}       :emit :hard-link :raw 'xt.lang.base-lib/arr-append
+   {:op :x-arr-append      :symbol #{'x:arr-append}       :emit :hard-link :raw 'xt.lang.common-data/arr-append
     :op-spec {:arglists '([arr value])
               :lowered 2}}
-   {:op :x-arr-filter      :symbol #{'x:arr-filter}       :emit :hard-link :raw 'xt.lang.base-lib/arr-filter
+   {:op :x-arr-filter      :symbol #{'x:arr-filter}       :emit :hard-link :raw 'xt.lang.common-data/arr-filter
     :op-spec {:arglists '([arr pred])
               :lowered 2}}
-   {:op :x-arr-keep        :symbol #{'x:arr-keep}         :emit :hard-link :raw 'xt.lang.base-lib/arr-keep
+   {:op :x-arr-keep        :symbol #{'x:arr-keep}         :emit :hard-link :raw 'xt.lang.common-data/arr-keep
     :op-spec {:arglists '([arr f])
               :lowered 2}}
-   {:op :x-arr-foldl       :symbol #{'x:arr-foldl}        :emit :hard-link :raw 'xt.lang.base-lib/arr-foldl
+   {:op :x-arr-foldl       :symbol #{'x:arr-foldl}        :emit :hard-link :raw 'xt.lang.common-data/arr-foldl
     :op-spec {:arglists '([arr init f])
               :lowered 3}}
-   {:op :x-arr-foldr       :symbol #{'x:arr-foldr}        :emit :hard-link :raw 'xt.lang.base-lib/arr-foldr
+   {:op :x-arr-foldr       :symbol #{'x:arr-foldr}        :emit :hard-link :raw 'xt.lang.common-data/arr-foldr
     :op-spec {:arglists '([arr init f])
               :lowered 3}}
-   {:op :x-arr-find        :symbol #{'x:arr-find}         :emit :hard-link :raw 'xt.lang.base-lib/arr-find
+   {:op :x-arr-find        :symbol #{'x:arr-find}         :emit :hard-link :raw 'xt.lang.common-data/arr-find
     :op-spec {:arglists '([arr pred])
               :lowered 2}}])
 
