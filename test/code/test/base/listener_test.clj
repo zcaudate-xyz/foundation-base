@@ -12,11 +12,12 @@
   ^:hidden
   
   (summarise-verify {:status :success :data true :meta
-                     {:path "path" :refer "refer" :ns "ns" :line 1 :desc "desc" :parent-form "parent"}
+                     {:path "path" :refer "refer" :function 'foo :ns "ns" :line 1 :desc "desc" :parent-form "parent"}
                      :checker {:form "check"} :actual {:form "actual"}})
   => {:status :success
       :path "path"
       :name "refer"
+      :function 'foo
       :ns "ns"
       :line 1
       :desc "desc"
@@ -32,10 +33,11 @@
   ^:hidden
   
   (summarise-evaluate {:status :success :data "data"
-                       :meta {:path "path" :refer "refer" :ns "ns" :line 1 :desc "desc"} :form "form" :original "original"})
+                       :meta {:path "path" :refer "refer" :function 'foo :ns "ns" :line 1 :desc "desc"} :form "form" :original "original"})
   => {:status :success
       :path "path"
       :name "refer"
+      :function 'foo
       :ns "ns"
       :line 1
       :desc "desc"
