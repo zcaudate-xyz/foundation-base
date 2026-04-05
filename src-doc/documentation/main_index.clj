@@ -1,64 +1,40 @@
-(ns documentation.main-index
-  (:require [std.html :as html]))
+(ns documentation.main-index)
 
-"
-# Welcome
+[[:hero {:title "foundation-code"
+         :subtitle "A modern static documentation compiler for Clojure libraries."
+         :lead "`code.doc` turns **Clojure source**, **markdown**, and **generated API metadata** into a polished multi-page site without giving up the code-first workflow that already fits this repository."
+         :badges ["Static publishing" "API extraction" "Markdown + Clojure" "Themeable"]
+         :actions [{:label "Get Started" :href "getting-started.html" :variant :primary}
+                   {:label "See the architecture" :href "architecture.html"}
+                   {:label "Review the reference" :href "reference.html"}]}]]
 
-### What is It?
+[[:callout {:tone :info
+            :title "What changed"
+            :content "The revived site focuses on **landing pages**, **guided docs**, and **generated API reference**. It keeps the existing parse → collect/link → render pipeline, but adds a sharper theme, richer authoring blocks, and better markdown ingestion."}]]
 
-[hara](https://zcaudate.github.io/hara) is a set of libraries extending `clojure.core`, 
-providing the building blocks for building more declarative and robust systems.
+[[:card-grid {:title "Why this works for foundation-code"
+              :lead "The core pipeline was already strong. The biggest lift was modernizing the authoring and presentation layers around it."
+              :items [{:meta "Pipeline"
+                       :title "Compiler-first docs"
+                       :text "Keep documentation in versioned source files and let the compiler resolve numbering, links, references, and generated API tables."
+                       :href "architecture.html"}
+                      {:meta "Authoring"
+                       :title "Narrative + generated reference"
+                       :text "Use markdown and Clojure pages for high-level explanations, then drop in generated `:api` and `:reference` blocks where they add value."
+                       :href "guides.html"}
+                      {:meta "Coverage"
+                       :title "Track what's still missing"
+                       :text "Audit which source namespaces have not yet been surfaced in `code.doc`, just like the repository already audits tests and maintenance gaps."
+                       :href "code-doc.html"}]}]]
 
-### Libraries
+[[:chapter {:title "Design goals"}]]
 
-- [benchmark](./hara-benchmark.html)
-- [code](./hara-code.html)
-- [code.block](./hara-code-block.html)
-- [std.block.navigate](./hara-code-navigate.html)
-- [code.query](./hara-code-query.html)
-- [config](./hara-config.html)
-- [core](./hara-core.html)
-- [core.component](./std.lib.component.html)
-- [core.version](./hara-core-version.html)
-- [core.zip](./hara-core-zip.html)
-- [data](./hara-data.html)
-- [deploy](./hara-deploy.html)
-- [event](./hara-event.html)
-- [function](./hara-function.html)
-- [function.procedure](./hara-function-procedure.html)
-- [function.task](./hara-function-task.html)
-- [image](./hara-image.html)
-- [io.archive](./hara-io-archive.html)
-- [io.binary](./hara-io-binary.html)
-- [io.file](./hara-io-file.html)
-- [io.project](./hara-io-project.html)
-- [io.scheduler](./hara-io-scheduler.html)
-- [lib.aether](./hara-lib-aether.html)
-- [lib.datomic](./hara-lib-datomic.html)
-- [lib.jackson](./hara-lib-jackson.html)
-- [lib.jgit](./hara-lib-jgit.html)
-- [std.html](./hara-lib-jsoup.html)
-- [lib.opencl](./hara-lib-opencl.html)
-- [lib.oshi](./hara-lib-oshi.html)
-- [lib.rabbitmq](./hara-lib-rabbitmq.html)
-- [math](./hara-math.html)
-- [math.variant](./hara-m;65;7Math-variant.html)
-- [module](./hara-module.html)
-- [module.deps](./hara-module-deps.html)
-- [module.namespace](./hara-module-namespace.html)
-- [object](./hara-object.html)
-- [platform](./hara-platform.html)
-- [print](./hara-print.html)
-- [print.graphic](./hara-print-graphic.html)
-- [publish](./hara-code.doc.html)
-- [security](./hara-security.html)
-- [security.openpgp](./hara-security-openpgp.html)
-- [state](./hara-state.html)
-- [state.concurrent](./hara-state-concurrent.html)
-- [state.ova](./hara-state-ova.html)
-- [string](./hara-string.html)
-- [string.text](./hara-string-text.html)
-- [test](./hara-test.html)
-- [time](./hara-time.html)
-- [tool.monitor](./hara-tool-monitor.html)
-- [watch](./hara-watch.html)"
+"The new `foundation-code` site is trying to do three things at once: present the library well, keep the authoring workflow close to the code, and make it easy to expand coverage over time."
+
+[[:quote {:text "The fastest path is to treat `code.doc` as a static doc compiler with strong API/source linking, then modernize it through a new theme, better authoring blocks, and improved markdown ingestion rather than a full rewrite."
+           :author "Revival plan"}]]
+
+[[:demo {:title "A page stays close to the source"
+          :content "The landing page can mix marketing-style blocks with generated technical material."
+          :lang "clojure"
+          :code "[[:hero {:title \"foundation-code\"\n         :actions [{:label \"Get Started\" :href \"getting-started.html\"}]}]]\n\n[[:card-grid {:items [{:title \"Compiler-first docs\"\n                       :text \"Author in source. Publish to a site.\"}]}]]"}]]

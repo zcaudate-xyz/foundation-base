@@ -71,23 +71,55 @@
                 :id (entry-tag (str "pre-" namespace)  var)}]
        [:label {:class "source-toggle"
                 :for (entry-tag (str "pre-" namespace) var)} ""]
-       [:pre {:class "source"}
-        [:code {:class "clojure"}
-         (-> entry :source :code)]]]])))
+        [:pre {:class "source"}
+         [:code {:class "clojure"}
+          (-> entry :source :code)]]]])))
+
+(defn entry-arglists
+  "formats arglists for api display"
+  {:added "4.1"}
+  [entry]
+  (when-let [arglists (seq (:arglists entry))]
+    (->> arglists
+         (map pr-str)
+         (clojure.string/join " "))))
+
+(defn entry-status-badges
+  "creates badges for deprecated or experimental apis"
+  {:added "4.1"}
+  [entry]
+  (let [meta (:meta entry)]
+    (cond-> []
+      (:deprecated meta)
+      (conj [:span {:class "entry-badge entry-badge-deprecated"} "Deprecated"])
+
+      (or (:experimental meta)
+          (:alpha meta)
+          (:beta meta))
+      (conj [:span {:class "entry-badge entry-badge-experimental"} "Experimental"])
+
+      (:added meta)
+      (conj [:span {:class "entry-badge entry-badge-version"}
+             (str "Added " (:added meta))]))))
 
 (defn api-entry
   "formats a `ns/var` pair tag into an html element"
   {:added "3.0"}
   ([[var entry :as pair] {:keys [project namespace] :as elem}]
-   [:div {:class "entry"}
-    [:span {:id (entry-tag namespace var)}]
-    [:div {:class "entry-description"}
-     [:h4 [:b (str var) "&nbsp"
-           [:a {:data-scroll ""
-                :href (str "#" (entry-tag namespace ""))} "^"]]]
-     [:p [:i (lower-first (:intro entry))]]]
-    (api-entry-source entry project var namespace)
-    (api-entry-example entry project)]))
+    [:div {:class "entry"}
+     [:span {:id (entry-tag namespace var)}]
+     [:div {:class "entry-description"}
+      [:h4 [:b (str var) "&nbsp"
+            [:a {:data-scroll ""
+                 :href (str "#" (entry-tag namespace ""))} "^"]]]
+      (when-let [arglists (entry-arglists entry)]
+        [:pre {:class "entry-arglists"}
+         [:code {:class "clojure"} arglists]])
+      (when-let [badges (seq (entry-status-badges entry))]
+        (apply vector :div {:class "entry-badges"} badges))
+      [:p [:i (lower-first (:intro entry))]]]
+     (api-entry-source entry project var namespace)
+     (api-entry-example entry project)]))
 
 (defn select-entries
   "selects api entries based on filters"

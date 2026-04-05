@@ -38,4 +38,4 @@
     (-> (collect-references bundle "code.doc")
         :references
         keys))
-  => '(code.doc.parse))
+  => '(code.doc code.doc.manage))
