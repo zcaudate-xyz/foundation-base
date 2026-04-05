@@ -1188,6 +1188,34 @@
    [{:line 1 :col 12 :type :close}])
   => true)
 
+^{:refer std.block.heal.core/localize-close-hint-scan :added "4.1"}
+(fact "uses closing delimiters to narrow the scan before deeper healing"
+  (let [content "(foo (+ 1 2] 3))"
+        lines   (clojure.string/split-lines content)
+        block   (first (level/group-blocks content))]
+    (level/localize-close-hint-scan block lines))
+  => (contains
+      {:scan (contains
+              {:line [1 1]
+               :col 6
+               :end-col 15})
+       :errors vector?})
+  
+  (let [content (prose/join-lines
+                 ["(outer"
+                  "  (a 1)"
+                  "  ((b 2"
+                  "     [3 4])"
+                  "  (c 5))"])
+        lines   (clojure.string/split-lines content)
+        block   (first (level/group-blocks content))]
+    (level/localize-close-hint-scan block lines))
+  => (contains
+      {:scan (contains
+              {:line [1 5]
+               :col 1
+               :end-col nil})}))
+
 ^{:refer std.block.heal.core/heal-content-complex-edits :added "4.0"}
 (fact "handles complex edits for healing"
   (level/heal-content-complex-edits
