@@ -9,7 +9,8 @@
 (defn result-function
   "returns the preferred function identifier for a result.
 
-   Uses explicit `:refer` first, then inferred `:function`."
+   Uses explicit `:refer` first, then the consolidated `:function` field,
+   which may itself come from explicit metadata or form inference."
   {:added "4.1"}
   [result]
   (or (-> result :meta :refer)

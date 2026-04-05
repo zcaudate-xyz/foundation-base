@@ -71,9 +71,9 @@
                     (get results key)
                     (get-in (meta results) [:data key]))]
       (->> (mapv (fn [result]
-                   (let [refer (listener/result-function result)
+                   (let [function-sym (listener/result-function result)
                          line (-> result :meta :line)]
-                     [line (if refer (-> refer name symbol))]))
+                     [line (if function-sym (-> function-sym name symbol))]))
                  items)))))
 
 (defn summarise

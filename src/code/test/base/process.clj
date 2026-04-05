@@ -9,9 +9,11 @@
 
 (def ^:private +skip-forms+
   '#{quote do let let* loop loop* recur fn fn* if if-not when when-not
-     when-let when-first if-let cond case try catch finally comment})
+     when-let when-first when-some if-let if-some cond case try catch finally
+     comment})
 
 (def ^:private +infer-function-depth+
+  ;; enough for typical test wrapper nesting while keeping inference bounded
   12)
 
 (defn evaluate
