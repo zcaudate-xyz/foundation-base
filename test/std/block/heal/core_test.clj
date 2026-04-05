@@ -1180,13 +1180,65 @@
 
 ^{:refer std.block.heal.core/check-errored-suspect :added "4.0"}
 (fact "checks if a block is suspect based on leftover errors"
-  (level/check-errored-suspect
-   {:lead {:line 1 :col 1}
-    :col 1
-    :last true}
-   ["(foo) (bar))"]
-   [{:line 1 :col 12 :type :close}])
+  (let [content "(foo) (bar))"
+        lines   (clojure.string/split-lines content)]
+    (level/check-errored-suspect
+     (level/create-block-scan
+      {:line [1 1]
+       :col 1
+       :last true}
+      lines)
+     lines
+     [{:line 1 :col 12 :type :close}]))
   => true)
+
+^{:refer std.block.heal.core/create-close-hint-scan :added "4.1"}
+(fact "builds a tighter scan from a later correct close delimiter"
+  (let [content "(foo (+ 1 2] 3))"
+        lines   (clojure.string/split-lines content)
+        block   (first (level/group-blocks content))
+        scan    (level/create-block-scan block lines)
+        interim (std.block.heal.parse/parse (:snippet scan))
+        errors  (vec (filter (comp not :correct?) interim))]
+    (level/create-close-hint-scan
+     block lines scan interim errors))
+  => (contains
+      {:line [1 1]
+       :col 6
+       :end-col 15}))
+
+^{:refer std.block.heal.core/localize-close-hint-scan :added "4.1"}
+(fact "keeps the full scan when indentation already isolates a child block"
+  (let [content (prose/join-lines
+                 ["(foo"
+                  "  (bar baz qux]"
+                  "  zot))"])
+        lines   (clojure.string/split-lines content)
+        block   (-> (level/group-blocks content)
+                    first
+                    :children
+                    last)]
+    (level/localize-close-hint-scan block lines))
+  => (contains
+      {:scan (contains
+              {:line [2 2]
+               :col 3
+               :end-col nil})
+       :errors vector?})
+  (let [content (prose/join-lines
+                 ["(outer"
+                  "  (a 1)"
+                  "  ((b 2"
+                  "     [3 4])"
+                  "  (c 5))"])
+        lines   (clojure.string/split-lines content)
+        block   (first (level/group-blocks content))]
+    (level/localize-close-hint-scan block lines))
+  => (contains
+      {:scan (contains
+              {:line [1 5]
+               :col 1
+               :end-col nil})}))
 
 ^{:refer std.block.heal.core/heal-content-complex-edits :added "4.0"}
 (fact "handles complex edits for healing"

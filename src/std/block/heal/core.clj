@@ -146,30 +146,130 @@
                                  (throw t)))]
           (vec (concat [(str (prose/spaces (dec start-col))
                              start-line)]
-                       (subvec lines
-                               start
-                               (dec end))
-                       [end-line])))))
+                        (subvec lines
+                                start
+                                (dec end))
+                        [end-line])))))
+
+(defn create-block-scan
+  "creates a scan window for a block.
+
+   The default arity scans the full block. The extended arities allow the
+   caller to override the scan line range, start column, and optional end
+   column when a smaller suspect region has already been identified."
+  {:added "4.1"}
+  ([block lines]
+   (create-block-scan block lines (:line block) (:col block)))
+  ([block lines line col]
+   (create-block-scan block lines line col nil))
+  ([block lines line col end-col]
+   {:line line
+    :col col
+    :last (:last block)
+    :end-col end-col
+    :offset (dec (first line))
+    :snippet (prose/join-lines
+              (get-block-lines lines line col end-col))}))
+
+(def default-max-col
+  Integer/MAX_VALUE)
+
+(defn tighter-scan?
+  "checks if the candidate scan is narrower than the current scan"
+  {:added "4.1"}
+  [scan line col end-col]
+  (let [scan-start-line (first (:line scan))
+        scan-end-line   (second (:line scan))
+        scan-start-col  (:col scan)
+        scan-end-col    (or (:end-col scan)
+                            default-max-col)]
+    (and (<= scan-start-line (first line))
+         (<= (second line) scan-end-line)
+         (<= scan-start-col col)
+         (<= end-col scan-end-col)
+         (or (> (first line) scan-start-line)
+             (> col scan-start-col)
+             (< (second line) scan-end-line)
+             (< end-col scan-end-col)))))
+
+(defn create-close-hint-scan
+  "uses a later correct close delimiter to narrow the suspect scan window"
+  {:added "4.1"}
+  [block lines scan interim interim-errors]
+  (let [first-open-error (first (filter #(= :open (:type %))
+                                        interim-errors))
+        global-line (fn [line]
+                      (+ (:offset scan) line))]
+    (when first-open-error
+      (let [after-anchor? (fn [{:keys [line col]}]
+                            (or (> line (:line first-open-error))
+                                (and (= line (:line first-open-error))
+                                     (> col (:col first-open-error)))))
+            close-hint    (first (filter #(and (:correct? %)
+                                               (= :close (:type %))
+                                               (after-anchor? %))
+                                         interim))]
+        (when close-hint
+          (let [line    [(global-line (:line first-open-error))
+                         (global-line (:line close-hint))]
+                col     (:col first-open-error)
+                end-col (:col close-hint)]
+            (when (tighter-scan? scan line col end-col)
+              (create-block-scan block lines line col end-col))))))))
+
+(defn localize-close-hint-scan
+  "runs a close-delimiter localization pass before the full structural check"
+  {:added "4.1"}
+  [block lines]
+  (let [scan           (create-block-scan block lines)
+        interim        (parse/parse (:snippet scan))
+        interim-errors (vec (filter (comp not :correct?) interim))]
+    (if (seq (:children block))
+      ;; Child blocks are already checked first in get-errored-loop. Their
+      ;; indentation already gives us a tighter boundary, so applying the
+      ;; close-hint prepass at the parent level tends to pull the scan back out
+      ;; toward later closes that belong to the wider enclosing form.
+      {:scan scan
+       :interim interim
+       :errors interim-errors}
+      (if-let [narrowed (create-close-hint-scan
+                         block lines scan interim interim-errors)]
+        (let [narrowed-interim (parse/parse (:snippet narrowed))
+              narrowed-errors  (vec (filter (comp not :correct?)
+                                            narrowed-interim))]
+          (if (and (seq narrowed-errors)
+                   (< (count narrowed-errors)
+                      (count interim-errors)))
+            {:scan narrowed
+             :interim narrowed-interim
+             :errors narrowed-errors}
+            {:scan scan
+             :interim interim
+             :errors interim-errors}))
+        {:scan scan
+         :interim interim
+         :errors interim-errors}))))
 
 (defn check-errored-suspect
-  [block lines leftover-errors]
+  [scan lines leftover-errors]
   (let [{:keys [line col]
          :as error} (first leftover-errors)
-        row-offset  (:line (:lead block))        
+        line-range  (:line scan)
+        row-offset  (first line-range)
         args   [[row-offset
                  (+ row-offset
                     (dec line))]
-                (:col block)
-                (dec col)]        
+                 (:col scan)
+                 (dec col)]
         #_#_#_#_#_#_
         _ (env/prn args)
-        _ (env/prn (dissoc block :children))
+        _ (env/prn scan)
         _ (env/prn error)
         snippet       (prose/join-lines
                        (apply get-block-lines lines args))]
     (try
       (let [forms (read-string (str "[" snippet "]"))]
-        (if (and (:last block)
+        (if (and (:last scan)
                  (<  1 (count forms)))
           true
           false))
@@ -194,38 +294,37 @@
   ;;  - if there are, check if the form within the delimiters are valid
   ;;  - if the element is the last form, make sure that it can only be a single
   ;;    form. this prevents early termination errors
-  ;;  - if there are child errors and they are less than the currently found errors
-  ;;    return these. otherwise return the errors in the current block
-  ;;
-  (let [{:keys [children]} block
-        child-error      (if (seq children)
-                           (reduce (fn [_ child]
-                                     (if-let [errored (get-errored-loop child lines)]
-                                       (reduced errored)))
-                                   nil
-                                   children))
-        leftover-fn      (fn [{:keys [pair-id
-                                      type]}]
-                           (and (not pair-id)
-                                (= type :close)))
-        snippet          (prose/join-lines
-                          (get-block-lines lines
-                                           (:line block)
-                                           (:col block)))
-        interim          (parse/parse snippet)
-        interim-errors   (filter (comp not :correct?) interim)
-        leftover-errors  (filter leftover-fn interim-errors)
-        is-suspect       (if (seq leftover-errors)
-                           (check-errored-suspect block lines leftover-errors))
-        other-errors     (remove leftover-fn interim-errors)
-        all-errors       (vec (concat (if (not is-suspect)
-                                        leftover-errors)
-                                      other-errors))
+   ;;  - if there are child errors and they are less than the currently found errors
+   ;;    return these. otherwise return the errors in the current block
+   ;;
+   (let [{:keys [children]} block
+         child-error      (if (seq children)
+                            (reduce (fn [_ child]
+                                      (if-let [errored (get-errored-loop child lines)]
+                                        (reduced errored)))
+                                    nil
+                                    children))
+         {:keys [scan
+                 interim
+                 errors]} (localize-close-hint-scan block lines)
+         leftover-fn      (fn [{:keys [pair-id
+                                       type]}]
+                            (and (not pair-id)
+                                 (= type :close)))
+         snippet          (:snippet scan)
+         interim-errors   errors
+         leftover-errors  (filter leftover-fn interim-errors)
+         is-suspect       (if (seq leftover-errors)
+                            (check-errored-suspect scan lines leftover-errors))
+         other-errors     (remove leftover-fn interim-errors)
+         all-errors       (vec (concat (if (not is-suspect)
+                                         leftover-errors)
+                                        other-errors))
 
-        block-error      (if (seq all-errors)
-                           {:errors (mapv #(update % :line + (dec (first (:line block)))) all-errors)
-                            :lines  (clojure.string/split-lines snippet)
-                            :at     (dissoc block :children)})
+         block-error      (if (seq all-errors)
+                            {:errors (mapv #(update % :line + (:offset scan)) all-errors)
+                             :lines  (clojure.string/split-lines snippet)
+                             :at     (dissoc block :children)})
         #_#_
         _                (env/pl snippet)
         #_#_
@@ -381,4 +480,3 @@
   (fn [content]
     (let [new-content (print-fn content)]
       (diff/diff content new-content))))
-
