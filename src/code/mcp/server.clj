@@ -9,7 +9,7 @@
       (case (or type :stdio)
         :stdio (StdioServerTransportProvider.)
         (throw (ex-info "Unsupported transport type"
-                        {:type type})))) )
+                        {:type type})))))
 
 (defn create-server
   ([]
