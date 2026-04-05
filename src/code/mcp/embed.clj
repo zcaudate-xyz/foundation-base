@@ -4,9 +4,12 @@
 (defprotocol IEmbeddings
   (-embed-texts [this texts opts]))
 
+(def ^:private +token-pattern+
+  #"[\p{L}\p{N}_-]+")
+
 (defn tokenize
   [text]
-  (re-seq #"[\p{L}\p{N}_-]+"
+  (re-seq +token-pattern+
           (str/lower-case (or text ""))))
 
 (defn l2-norm

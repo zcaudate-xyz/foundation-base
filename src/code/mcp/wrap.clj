@@ -61,11 +61,13 @@
       (apply [_ exchange args]
         (try
           (let [result (f exchange
-                          (reduce-kv (fn [output key value]
-                                       (cond-> (assoc output key value)
-                                         (string? key) (assoc (keyword key) value)))
-                                     {}
-                                     (into {} args)))]
+                          (reduce (fn [output entry]
+                                    (let [key (.getKey ^java.util.Map$Entry entry)
+                                          value (.getValue ^java.util.Map$Entry entry)]
+                                      (cond-> (assoc output key value)
+                                        (string? key) (assoc (keyword key) value))))
+                                  {}
+                                  (.entrySet ^java.util.Map args)))]
             (if (instance? McpSchema$CallToolResult result)
               result
               (call-tool-result result)))

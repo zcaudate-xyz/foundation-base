@@ -21,4 +21,4 @@
   (let [store (rag/create-store)]
     (rag/upsert-documents store [{:id "rag" :text "Embeddings can drive retrieval."}])
     (rag/query-context store "embeddings"))
-  => #"rag")
+  => #"\[1\] rag\nEmbeddings can drive retrieval\.")
