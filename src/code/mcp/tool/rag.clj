@@ -13,7 +13,7 @@
   [store _ {:keys [query limit]}]
   (let [results (rag/retrieve store query {:limit (or limit 5)})]
     {:content [{:type "text"
-                :text (rag/retrieve-context store query {:limit (or limit 5)})}]
+                :text (rag/retrieve-context results)}]
      :structuredContent {:results results}
      :isError false}))
 

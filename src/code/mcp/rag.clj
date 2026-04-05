@@ -69,10 +69,14 @@
           vec))))
 
 (defn retrieve-context
+  [results]
+  (->> results
+       (map-indexed (fn [idx {:keys [id text]}]
+                      (format "[%s] %s\n%s" (inc idx) id text)))
+       (str/join "\n\n")))
+
+(defn query-context
   ([store query]
-   (retrieve-context store query {}))
+   (query-context store query {}))
   ([store query opts]
-   (->> (retrieve store query opts)
-        (map-indexed (fn [idx {:keys [id text score]}]
-                       (format "[%s] %s\n%s" (inc idx) id text)))
-        (str/join "\n\n"))))
+   (retrieve-context (retrieve store query opts))))

@@ -6,7 +6,7 @@
 
 (defn tokenize
   [text]
-  (re-seq #"[A-Za-z0-9_-]+"
+  (re-seq #"[\p{L}\p{N}_-]+"
           (str/lower-case (or text ""))))
 
 (defn l2-norm

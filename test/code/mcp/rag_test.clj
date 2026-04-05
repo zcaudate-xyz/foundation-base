@@ -16,9 +16,9 @@
           :id)])
   => ["mcp" "rag"])
 
-^{:refer code.mcp.rag/retrieve-context :added "4.1"}
+^{:refer code.mcp.rag/query-context :added "4.1"}
 (fact "retrieved context is rendered as text blocks"
   (let [store (rag/create-store)]
     (rag/upsert-documents store [{:id "rag" :text "Embeddings can drive retrieval."}])
-    (rag/retrieve-context store "embeddings"))
+    (rag/query-context store "embeddings"))
   => #"rag")
