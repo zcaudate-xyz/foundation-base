@@ -73,4 +73,17 @@
 
 
 ^{:refer lib.postgres.connection/load-impl :added "4.1"}
-(fact "TODO")
+(fact "loads a postgres implementation by vendor keyword"
+  ^:hidden
+
+  (:status (conn/load-impl :impossibl))
+  => :loaded
+
+  (:ns (conn/load-impl :impossibl))
+  => 'lib.postgres.impl.impossibl
+
+  (:status (conn/load-impl :postgresql))
+  => :loaded
+
+  (:ns (conn/load-impl :postgresql))
+  => 'lib.postgres.impl.postgresql)

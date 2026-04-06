@@ -349,19 +349,43 @@
 
 
 ^{:refer std.lang.base.grammar-xtalk/xtgen-fragment-spec-input :added "4.1"}
-(fact "TODO")
+(fact "produces the template input map for fragment spec generation"
+  (xtgen-fragment-spec-input {:symbol '[x:arr-push]
+                               :op-spec {:type '[:fn [:xt/arr :xt/any] :xt/self]}})
+  => {'sym-name 'x:arr-push
+      'type      '[:fn [:xt/arr :xt/any] :xt/self]})
 
 ^{:refer std.lang.base.grammar-xtalk/xtgen.fragment-spec :added "4.1"}
-(fact "TODO")
+(fact "generates a defspec.xt form from a symbol and op-spec type"
+  (xtalk/xtgen.fragment-spec {:symbol '[x:arr-push]
+                               :op-spec {:type '[:fn [:xt/arr :xt/any] :xt/self]}})
+  => '(defspec.xt x:arr-push
+        [:fn [:xt/arr :xt/any] :xt/self]))
 
 ^{:refer std.lang.base.grammar-xtalk/xtgen-fragment-fn-input :added "4.1"}
-(fact "TODO")
+(fact "produces the template input map for fragment fn generation"
+  (xtgen-fragment-fn-input {:symbol '[x:arr-push]
+                              :op-spec {:arglists '([arr val])}})
+  => {'sym-name  'x:arr-push
+      'arglists  '([arr val])
+      'call-form '(x:arr-push arr val)})
 
 ^{:refer std.lang.base.grammar-xtalk/xtgen.fragment-fn :added "4.1"}
-(fact "TODO")
+(fact "generates a defmacro.xt standalone form from a symbol and op-spec"
+  (let [form (xtalk/xtgen.fragment-fn {:symbol  '[x:arr-push]
+                                        :op-spec {:arglists '([arr val])}})]
+    [(first form)
+     (second form)])
+  => '[defmacro.xt x:arr-push])
 
 ^{:refer std.lang.base.grammar-xtalk/tmpl-fragment-spec :added "4.1"}
-(fact "TODO")
+(fact "compatibility wrapper delegates to xtgen fragment spec"
+  (let [entry {:symbol  '[x:arr-push]
+               :op-spec {:type '[:fn [:xt/arr :xt/any] :xt/self]}}]
+    (tmpl-fragment-spec entry))
+  => (xtalk/xtgen.fragment-spec
+      {:symbol  '[x:arr-push]
+       :op-spec {:type '[:fn [:xt/arr :xt/any] :xt/self]}}))
 
 ^{:refer std.lang.base.grammar-xtalk/tmpl-defn-fn :added "4.1"}
-(fact "TODO")
+(fact "tmpl-defn-fn is currently disabled in source")

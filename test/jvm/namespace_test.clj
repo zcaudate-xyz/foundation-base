@@ -1,7 +1,8 @@
 (ns jvm.namespace-test
   (:require [jvm.namespace :as ns]
             [std.lib.invoke :as invoke]
-            [std.lib.result :as res])
+            [std.lib.result :as res]
+            [std.task :as task])
   (:use code.test))
 
 ^{:refer jvm.namespace/list-aliases :added "3.0"}
@@ -204,4 +205,6 @@
 
 
 ^{:refer jvm.namespace/reload-task :added "4.1"}
-(fact "TODO")
+(fact "reload-task is a pipe task for reloading namespaces"
+  (task/task? ns/reload-task)
+  => true)
