@@ -36,7 +36,7 @@
     :uri "/users/42"})
   => {:status 200
       :headers {"Content-Type" "application/json"}
-      :body "(\"42\")"})
+      :body "[\"42\"]"})
 
 ^{:refer net.http.router/serve-resource :added "4.0"}
 (fact "serves a static resource"

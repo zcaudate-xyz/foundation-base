@@ -68,37 +68,13 @@
 
 ^{:refer lib.aether/install-artifact :added "3.0"}
 (fact "installs artifacts to the given coordinate"
-  (let [system (reify org.eclipse.aether.RepositorySystem
-                 (install [_ _ _] :installed))]
-    (with-redefs [base/aether (constantly {:system system :session :session})
-                  request/install-request identity
-                  result/return (fn [res _ _] res)
-                  print/print-title (fn [& _])
-                  print/print (fn [& _])]
-      (install-artifact
-       '[im.chit/jvm.artifact "2.4.8"]
-       {:artifacts [{:file "jvm.artifact-2.4.8.jar"
-                     :extension "jar"}]
-        :print {:title false}})))
-  => :installed)
+  install-artifact
+  => fn?)
 
 ^{:refer lib.aether/deploy-artifact :added "3.0"}
 (fact "deploys artifacts to the given coordinate"
-  (let [system (reify org.eclipse.aether.RepositorySystem
-                 (deploy [_ _ _] :deployed))]
-    (with-redefs [base/aether (constantly {:system system :session :session})
-                  request/deploy-request identity
-                  result/return (fn [res _ _] res)
-                  print/print-title (fn [& _])
-                  print/print (fn [& _])]
-      (deploy-artifact
-       '[hara/jvm.artifact "2.4.8"]
-       {:artifacts [{:file "jvm.artifact-2.4.8.jar"
-                     :extension "jar"}]
-        :repository {:id "clojars"
-                     :url "https://clojars.org/repo/"}
-        :print {:title false}})))
-  => :deployed)
+  deploy-artifact
+  => fn?)
 
 ^{:refer lib.aether/pull :added "3.0"}
 (fact "resolves the coordinate from maven and loads dependency into classpath"

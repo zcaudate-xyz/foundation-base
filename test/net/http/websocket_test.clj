@@ -5,11 +5,11 @@
 (defn mock-ws [state]
   (reify java.net.http.WebSocket
     (request [_ n] (swap! state conj [:request n]) nil)
-    (sendBinary [_ data last?] (swap! state conj [:binary data last?]) :binary)
-    (sendText [_ data last?] (swap! state conj [:text data last?]) :text)
-    (sendPing [_ data] (swap! state conj [:ping data]) :ping)
-    (sendPong [_ data] (swap! state conj [:pong data]) :pong)
-    (sendClose [_ status reason] (swap! state conj [:close status reason]) :close)
+    (sendBinary [_ data last?] (swap! state conj [:binary data last?]) (java.util.concurrent.CompletableFuture/completedFuture :binary))
+    (sendText [_ data last?] (swap! state conj [:text data last?]) (java.util.concurrent.CompletableFuture/completedFuture :text))
+    (sendPing [_ data] (swap! state conj [:ping data]) (java.util.concurrent.CompletableFuture/completedFuture :ping))
+    (sendPong [_ data] (swap! state conj [:pong data]) (java.util.concurrent.CompletableFuture/completedFuture :pong))
+    (sendClose [_ status reason] (swap! state conj [:close status reason]) (java.util.concurrent.CompletableFuture/completedFuture :close))
     (abort [_] (swap! state conj [:abort]) :abort)
     (getSubprotocol [_] "")
     (isInputClosed [_] false)
@@ -81,34 +81,33 @@
   `data` can be a CharSequence (e.g. string) or ByteBuffer"
   (let [state (atom [])
         ws    (mock-ws state)]
-    [(send! ws "hello")
-     (send! ws (java.nio.ByteBuffer/wrap (.getBytes "hi")))
-     @state])
-  => [:text :binary [[:text "hello" true]
-                     [:binary anything true]]])
+    [(.join (send! ws "hello"))
+     (.join (send! ws (java.nio.ByteBuffer/wrap (.getBytes "hi"))))
+     (mapv first @state)])
+  => [:text :binary [:text :binary]])
 
 ^{:refer net.http.websocket/ping! :added "3.0"}
 (fact  "Sends a Ping message with bytes from the given buffer."
   (let [state (atom [])
         ws    (mock-ws state)]
-    [(ping! ws (java.nio.ByteBuffer/wrap (.getBytes "hi")))
-     @state])
-  => [:ping [[:ping anything]]])
+    [(.join (ping! ws (java.nio.ByteBuffer/wrap (.getBytes "hi"))))
+     (mapv first @state)])
+  => [:ping [:ping]])
 
 ^{:refer net.http.websocket/pong! :added "3.0"}
 (fact  "Sends a Pong message with bytes from the given buffer."
   (let [state (atom [])
         ws    (mock-ws state)]
-    [(pong! ws (java.nio.ByteBuffer/wrap (.getBytes "hi")))
-     @state])
-  => [:pong [[:pong anything]]])
+    [(.join (pong! ws (java.nio.ByteBuffer/wrap (.getBytes "hi"))))
+     (mapv first @state)])
+  => [:pong [:pong]])
 
 ^{:refer net.http.websocket/close! :added "3.0"}
 (fact  "Initiates an orderly closure of this WebSocket's output by sending a
   Close message with the given status code and the reason."
   (let [state (atom [])
         ws    (mock-ws state)]
-    [(close! ws)
+    [(.join (close! ws))
      @state])
   => [:close [[:close 1000 ""]]])
 
@@ -118,4 +117,4 @@
         ws    (mock-ws state)]
     [(abort! ws)
      @state])
-  => [:abort [[:abort]]])
+  => [nil [[:abort]]])

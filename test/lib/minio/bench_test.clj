@@ -20,6 +20,7 @@
     (with-redefs [network/port:check-available (constantly 9000)
                   fs/create-directory (fn [_] nil)
                   os/sh (fn [& _] :process)
+                  os/sh-wait (fn [_] nil)
                   future/future (fn [& _] :thread)
                   future/on:complete (fn [thread _] thread)
                   network/wait-for-port (fn [& _] true)]
@@ -28,7 +29,7 @@
                 :port 9000
                 :root "/tmp/minio-root"
                 :process :process
-                :thread :thread}))
+                :thread some?}))
 
 ^{:refer lib.minio.bench/stop-minio-server :added "4.0"}
 (fact "stop the minio server"

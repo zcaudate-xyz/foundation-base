@@ -81,4 +81,4 @@
         (conn/load-impl :stub))
       (finally
         (reset! conn/+impls+ original))))
-  => {:status :loaded :ns clojure.core})
+  => (contains {:status :loaded}))

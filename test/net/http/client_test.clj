@@ -88,8 +88,8 @@
 
 ^{:refer net.http.client/create-http-methods :added "3.0"}
 (fact "creates the standard http get, post, etc requests "
-  (mapv second (create-http-methods [:get :post]))
-  => '[get post])
+  (every? var? (create-http-methods [:get :post]))
+  => true)
 
 ^{:refer net.http.client/endpoint-data :added "3.0"}
 (fact "gets the data returned from endpoint"

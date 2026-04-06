@@ -4,10 +4,11 @@
             [lib.redis.event :refer :all]
             [net.resp.connection :as conn]
             [net.resp.pool :as pool]
-            [net.resp.wire :as wire]
-            [std.concurrent :as cc]
-            [std.lib.foundation :as f]
-            [std.lib.future :as future])
+             [net.resp.wire :as wire]
+             [std.concurrent :as cc]
+             [std.lib.component :as component]
+             [std.lib.foundation :as f]
+             [std.lib.future :as future])
   (:use code.test))
 
 (def |client|

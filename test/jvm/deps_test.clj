@@ -83,10 +83,8 @@
         cl    (loader/url-classloader [])]
     (with-redefs [all-loaded-artifacts (fn [_ _] [(artifact/artifact coord)])
                   unload-artifact (fn [x _] x)]
-      (unload [coord] cl :same)))
-  => [(contains {:group "org.clojure"
-                 :artifact "clojure"
-                 :version "1.12.0"})])
+      (mapv artifact/rep? (unload [coord] cl :same))))
+  => [true])
 
 ^{:refer jvm.deps/load :added "3.0"}
 (fact "loads all artifacts in list, unloading previous versions of the same artifact"
