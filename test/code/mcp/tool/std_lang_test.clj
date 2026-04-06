@@ -21,4 +21,7 @@
 
 
 ^{:refer code.mcp.tool.std-lang/lang-emit-as-safe :added "4.0"}
-(fact "TODO")
+(fact "returns emitted code on success and an error string on failure"
+  [(re-find #"[+]" (std-lang/lang-emit-as-safe :js "[:+ 1 2]"))
+   (re-find #"Error:" (std-lang/lang-emit-as-safe :js "("))]
+  => ["+" "Error:"])

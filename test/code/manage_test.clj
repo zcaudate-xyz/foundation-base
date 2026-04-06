@@ -222,6 +222,15 @@
   (require-file 'code.manage)
   => (contains ['analyse 'extract 'vars] :in-any-order :gaps-ok))
 
+^{:refer code.manage/heal-code :added "4.1"}
+(fact "builds a transform task configured with std.block.heal"
+  (let [task (into {} heal-code)]
+    [(:template task)
+     (-> task :params :title)
+     (fn? (-> task :params :transform))
+     (-> task :params :no-analysis)])
+  => [:code.transform "HEAL CODE" true true])
+
 ^{:refer code.manage/-main :added "4.0"
   :timeout 1000}
 (fact "main entry point for code.manage"

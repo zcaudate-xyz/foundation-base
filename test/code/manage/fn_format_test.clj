@@ -58,7 +58,21 @@
 
 
 ^{:refer code.manage.fn-format/manual-step-right :added "4.1"}
-(fact "TODO")
+(fact "moves to the next sibling without using zip/step-right"
+  (let [nav (-> "(defn foo [x] 1)"
+                nav/parse-string
+                nav/down)]
+    [(nav/value (zip/step-right nav))
+     (nav/value (manual-step-right nav))])
+  => '[foo foo])
 
 ^{:refer code.manage.fn-format/list-transform :added "4.1"}
-(fact "TODO")
+(fact "wraps arglists and body in a nested list"
+  (-> "(defn foo [x] (+ x 1))"
+      nav/parse-string
+      nav/down
+      nav/right
+      nav/right
+      list-transform
+      nav/root-string)
+  => "(defn foo\n  ([x]\n    (+ x 1)))")
