@@ -58,11 +58,11 @@
 ^{:refer std.lang/rt:invoke :added "4.0"}
 (fact "rt:invoke"
   (with-redefs [ut/lang-rt (fn [ns lang]
-                             [ns lang])
+                              [ns lang])
                 l/ptr (fn [lang m]
                         [lang m])
                 std.lib.context.pointer/rt-invoke-ptr (fn [rt ptr code]
-                                                       [rt ptr code])]
+                                                        [rt ptr code])]
     (l/rt:invoke 'hello.core :lua '(+ 1 2)))
   => [['hello.core :lua]
       [:lua {:module 'hello.core}]

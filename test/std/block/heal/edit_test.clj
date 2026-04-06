@@ -51,7 +51,7 @@
   => false)
 
 ^{:refer std.block.heal.edit/check-append-edits :added "4.0"}
-(fact "checks that append edits are value"
+(fact "checks that append edits are valid"
   (core/check-append-edits
    [{:type :open}
     {:type :open}
@@ -87,7 +87,6 @@
     {:type :close :line 2 :col 3}])
   => [{:action :remove, :line 2, :col 3}
       {:action :remove, :line 1, :col 2}])
-
 
 
 

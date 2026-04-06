@@ -362,7 +362,7 @@
     (xtgen.fragment-spec
      {:symbol '[x:arr-push]
       :op-spec {:type '[:fn [:xt/arr :xt/any] :xt/self]}})
-    (catch Throwable _
+    (catch Exception _
       :error))
   => #(or (list? %)
           (= % :error)))
@@ -382,7 +382,7 @@
     (xtgen.fragment-fn
      {:symbol '[x:arr-push]
       :op-spec {:arglists '([arr val])}})
-    (catch Throwable _
+    (catch Exception _
       :error))
   => #(or (list? %)
           (= % :error)))
@@ -393,7 +393,7 @@
     (tmpl-fragment-spec
      {:symbol '[x:arr-push]
       :op-spec {:type '[:fn [:xt/arr :xt/any] :xt/self]}})
-    (catch Throwable _
+    (catch Exception _
       :error))
   => #(or (list? %)
           (= % :error)))
