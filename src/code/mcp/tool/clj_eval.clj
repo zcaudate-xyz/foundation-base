@@ -21,8 +21,11 @@
 
 (def clj-eval-tool
   {:name "clj-eval"
-   :description "Evaluates a Clojure form"
+   :description (str "Evaluate a Clojure form inside the project JVM and return the printed result. "
+                     "Use this for targeted live probes, one-off inspection, or validating assumptions when "
+                     "a more specific MCP tool does not yet cover the workflow you need.")
    :inputSchema {:type "object"
-                 :properties {"code" {:type "string"}}
+                 :properties {"code" {:type "string"
+                                      :description "A single Clojure form to read and evaluate, such as `(keys code.manage/+tasks+)`."}}
                  :required ["code"]}
    :implementation #'clj-eval-fn})

@@ -7,9 +7,10 @@
 
 (def echo-tool
   {:name "echo"
-   :description "Echo the input text"
+   :description "Return the provided text unchanged. Use this as a minimal connectivity and payload-shape check when wiring up a new MCP client."
    :inputSchema {:type "object"
-                 :properties {"text" {:type "string"}}
+                 :properties {"text" {:type "string"
+                                      :description "The exact text payload to echo back."}}
                  :required ["text"]}
    :implementation #'echo-fn})
 
@@ -20,8 +21,7 @@
 
 (def ping-tool
   {:name "ping"
-   :description "Ping the input text"
+   :description "Return a simple `ping` response so an MCP client can verify that the server is alive before invoking project tools."
    :inputSchema {:type "object"
-                 :properties {"text" {:type "string"}}
-                 :required ["text"]}
+                 :properties {}}
    :implementation #'ping-fn})
