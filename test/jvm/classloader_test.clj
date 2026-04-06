@@ -112,9 +112,12 @@
 (fact "unloads a class from the current namespace"
    ^:hidden
 
-  (do (any-load-class test.Cat nil nil)
-      (unload-class "test.Cat")
-      (.get +class-cache+ "test.Cat"))
+  (try
+    (any-load-class test.Cat nil nil)
+    (unload-class "test.Cat")
+    (.get +class-cache+ "test.Cat")
+    (finally
+      (unload-class "test.Cat")))
   => nil)
 
 ^{:refer jvm.classloader/to-bytes :added "3.0"}

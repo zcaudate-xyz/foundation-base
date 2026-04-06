@@ -96,10 +96,14 @@
 (fact "starts the remote node"
   (let [node (start-node nil 4457)]
     (try
-      (select-keys node [:server :executor :thread])
+      {:listening (not (.isClosed ^java.net.ServerSocket (:server node)))
+       :has-thread (some? (:thread node))
+       :has-executor (some? (:executor node))}
       (finally
         (stop-node node))))
-  => (contains {:server java.net.ServerSocket}))
+  => {:listening true
+      :has-thread true
+      :has-executor true})
 
 ^{:refer net.resp.node/stop-node :added "3.0"}
 (fact "stops the remote node"

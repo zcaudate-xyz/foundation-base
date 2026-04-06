@@ -28,12 +28,16 @@
 (fact "stops the reaper"
   ^:hidden
 
-  (let [stopped (atom [])]
-    (alter-var-root #'*ryuk* (constantly {:relay :relay :socket :socket}))
-    (with-redefs [common/stop-container (fn [_] :stopped)
-                  component/stop (fn [relay] (swap! stopped conj [:relay relay]))
-                  env/close (fn [socket] (swap! stopped conj [:socket socket]))]
-      [(stop-ryuk) @stopped *ryuk*]))
+  (let [stopped  (atom [])
+        original *ryuk*]
+    (try
+      (alter-var-root #'*ryuk* (constantly {:relay :relay :socket :socket}))
+      (with-redefs [common/stop-container (fn [_] :stopped)
+                    component/stop (fn [relay] (swap! stopped conj [:relay relay]))
+                    env/close (fn [socket] (swap! stopped conj [:socket socket]))]
+        [(stop-ryuk) @stopped *ryuk*])
+      (finally
+        (alter-var-root #'*ryuk* (constantly original)))))
   => [nil [[:relay :relay] [:socket :socket]] nil])
 
 ^{:refer lib.docker.ryuk/start-reaped :added "4.0"}

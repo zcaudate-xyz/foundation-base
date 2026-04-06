@@ -90,11 +90,11 @@
       (clojure.core/refer 'clojure.string :only '[join])
       (import java.io.File))
     (intern tmp 'hello 1)
-    (do (doall (ns-clear tmp))
-        [(ns-aliases tmp)
-         (ns-refers tmp)
-         (ns-interns tmp)
-         (ns-list-external-imports tmp)]))
+    (let [_ (doall (ns-clear tmp))]
+      [(ns-aliases tmp)
+       (ns-refers tmp)
+       (ns-interns tmp)
+       (ns-list-external-imports tmp)]))
   => [{} {} {} ()])
 
 ^{:refer jvm.namespace.common/group-in-memory :added "3.0"}
