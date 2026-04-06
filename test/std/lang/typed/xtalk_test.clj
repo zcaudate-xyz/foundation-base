@@ -168,4 +168,9 @@
 
 
 ^{:refer std.lang.typed.xtalk/analyze-file-raw :added "4.1"}
-(fact "TODO")
+(fact "delegates file-raw analysis to xtalk-parse"
+  (let [result (analyze-file-raw "test/std/lang/model/spec_xtalk_typed_fixture.clj")]
+    [(map? result)
+     (contains? result :specs)
+     (contains? result :functions)])
+  => [true true true])

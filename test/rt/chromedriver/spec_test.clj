@@ -66,7 +66,19 @@
 
 
 ^{:refer rt.chromedriver.spec/tmpl-connection :added "4.1"}
-(fact "TODO")
+(fact "creates a connection wrapper defn form for a domain/method"
+  ^:hidden
+
+  (let [form (spec/tmpl-connection '[navigate-page ["Page" "navigate"]])]
+    [(first form)
+     (second form)])
+  => '[defn navigate-page])
 
 ^{:refer rt.chromedriver.spec/tmpl-browser :added "4.1"}
-(fact "TODO")
+(fact "constructs a def form that wraps a function with browser state"
+  ^:hidden
+
+  (let [form (spec/tmpl-browser '[my-browser rt.chromedriver.impl/start-browser])]
+    [(first form)
+     (second form)])
+  => '[def my-browser])

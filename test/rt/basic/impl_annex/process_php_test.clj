@@ -49,7 +49,18 @@
 
 
 ^{:refer rt.basic.impl-annex.process-php/php-body-source :added "4.1"}
-(fact "TODO")
+(fact "creates a single-line php source string for runtime eval"
+  (php-body-source '[1 2 3] {})
+  => string?
+
+  (php-body-source '[1 2 3] {})
+  => (fn [s] (not (clojure.string/includes? s "\n"))))
 
 ^{:refer rt.basic.impl-annex.process-php/default-basic-body-transform :added "4.1"}
-(fact "TODO")
+(fact "transform basic runtime forms for return-eval"
+  (default-basic-body-transform '[1 2 3] {})
+  => (contains [:-])
+
+  (let [result (default-basic-body-transform '[1 2 3] {})]
+    (clojure.string/includes? (second result) "return"))
+  => true)

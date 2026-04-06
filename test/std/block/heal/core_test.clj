@@ -1256,7 +1256,28 @@
 
 
 ^{:refer std.block.heal.core/create-block-scan :added "4.1"}
-(fact "TODO")
+(fact "creates a scan window for a block"
+  (let [content "(foo (+ 1 2) 3)"
+        lines   (clojure.string/split-lines content)
+        block   (first (level/group-blocks content))]
+    (level/create-block-scan block lines))
+  => (contains {:line [1 1]
+                :col 1
+                :offset 0
+                :snippet string?}))
 
 ^{:refer std.block.heal.core/tighter-scan? :added "4.1"}
-(fact "TODO")
+(fact "checks if a candidate scan window is narrower than the current one"
+  (let [content "(foo (+ 1 2) 3)"
+        lines   (clojure.string/split-lines content)
+        block   (first (level/group-blocks content))
+        scan    (level/create-block-scan block lines)]
+    (level/tighter-scan? scan [1 1] 5 12))
+  => true
+
+  (let [content "(foo (+ 1 2) 3)"
+        lines   (clojure.string/split-lines content)
+        block   (first (level/group-blocks content))
+        scan    (level/create-block-scan block lines)]
+    (level/tighter-scan? scan [1 1] 1 Integer/MAX_VALUE))
+  => false)
