@@ -1,5 +1,7 @@
 (ns jvm.deps-test
   (:require [jvm.deps :refer :all]
+            [jvm.artifact :as artifact]
+            [jvm.classloader :as loader]
             [std.fs :as fs])
   (:use code.test)
   (:refer-clojure :exclude [load resolve]))
@@ -34,20 +36,33 @@
                 "clojure/core.clj"]))
 
 ^{:refer jvm.deps/loaded-artifact? :added "3.0"}
-(comment "checks if artifact has been loaded"
+(fact "checks if artifact has been loaded"
 
-  (loaded-artifact? '[org.clojure/clojure "1.9.0"])
-  => true)
+    (let [coord  '[org.clojure/clojure "1.12.0"]
+        cl     (loader/url-classloader [])]
+    [(loaded-artifact? coord cl)
+     (do (loader/add-url cl (artifact/artifact-path coord))
+         (loaded-artifact? coord cl))])
+  => [false true])
 
 ^{:refer jvm.deps/load-artifact :added "3.0"}
-(comment "loads an artifact into the system"
+(fact "loads an artifact into the system"
 
-  (load-artifact '[org.clojure/clojure "1.9.0"]))
+  (let [coord '[org.clojure/clojure "1.12.0"]
+        cl    (loader/url-classloader [])]
+    [(load-artifact coord cl)
+     (loaded-artifact? coord cl)])
+  => ['[org.clojure/clojure "1.12.0"] true])
 
 ^{:refer jvm.deps/unload-artifact :added "3.0"}
-(comment "unloads an artifact from the system"
+(fact "unloads an artifact from the system"
 
-  (unload-artifact '[org.clojure/clojure "1.9.0"]))
+  (let [coord '[org.clojure/clojure "1.12.0"]
+        cl    (loader/url-classloader [])]
+    (with-redefs [loaded-artifact? (fn [_ _] true)
+                  loader/remove-url (fn [& _] nil)]
+      (unload-artifact coord cl)))
+  => '[org.clojure/clojure "1.12.0"])
 
 ^{:refer jvm.deps/all-loaded-artifacts :added "3.0"}
 (fact "returns all loaded artifacts"
@@ -63,10 +78,22 @@
   => sequential?)
 
 ^{:refer jvm.deps/unload :added "3.0"}
-(fact "unloads all artifacts in list")
+(fact "unloads all artifacts in list"
+  (let [coord '[org.clojure/clojure "1.12.0"]
+        cl    (loader/url-classloader [])]
+    (with-redefs [all-loaded-artifacts (fn [_ _] [(artifact/artifact coord)])
+                  unload-artifact (fn [x _] x)]
+      (unload [coord] cl :same)))
+  => [(contains {:group "org.clojure"
+                 :artifact "clojure"
+                 :version "1.12.0"})])
 
 ^{:refer jvm.deps/load :added "3.0"}
-(fact "loads all artifacts in list, unloading previous versions of the same artifact")
+(fact "loads all artifacts in list, unloading previous versions of the same artifact"
+  (let [coord '[org.clojure/clojure "1.12.0"]
+        cl    (loader/url-classloader [])]
+    (load [coord] cl))
+  => ['[org.clojure/clojure "1.12.0"]])
 
 ^{:refer jvm.deps/clean :added "3.0"}
 (fact "cleans the maven entries for the artifact, `:full` deletes all the versions"

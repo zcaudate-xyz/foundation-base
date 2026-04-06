@@ -111,11 +111,11 @@
 ^{:refer jvm.classloader/unload-class :added "3.0"}
 (fact "unloads a class from the current namespace"
    ^:hidden
-  
-  (unload-class "test.Cat")
-  ;; #object[java.lang.ref.SoftReference 0x10074132
-  ;;         "java.lang.ref.SoftReference@10074132"]
-  )
+
+  (do (any-load-class test.Cat nil nil)
+      (unload-class "test.Cat")
+      (.get +class-cache+ "test.Cat"))
+  => nil)
 
 ^{:refer jvm.classloader/to-bytes :added "3.0"}
 (fact "opens `.class` file from an external source"
@@ -141,24 +141,23 @@
   => test.Cat)
 
 ^{:refer jvm.classloader/dynamic-load-string :added "3.0"}
-(comment "loads a class from a path string"
+(fact "loads a class from a path string"
    ^:hidden
-  
-  (dynamic-load-string "<.m2>/org/yaml/snakeyaml/1.5/snakeyaml-1.5.jar"
-                       (dynamic-classloader)
-                       {:name "org.yaml.snakeyaml.Dumper"
-                        :entry-path "org/yaml/snakeyaml/Dumper.class"})
-  => org.yaml.snakeyaml.Dumper)
+
+  (.getName (dynamic-load-string "target/classes/test/Cat.class"
+                                 (dynamic-classloader)
+                                 {:name "test.Cat"}))
+  => "test.Cat")
 
 ^{:refer jvm.classloader/dynamic-load-coords :added "3.0"}
-(comment "loads a class from a coordinate"
+(fact "loads a class from a coordinate"
    ^:hidden
-  
-  (.getName (dynamic-load-coords '[org.yaml/snakeyaml "1.5"]
-                                 (dynamic-classloader)
-                                 {:name "org.yaml.snakeyaml.Dumper"
-                                  :entry-path "org/yaml/snakeyaml/Dumper.class"}))
-  => "org.yaml.snakeyaml.Dumper")
+
+  (with-redefs [artifact/artifact (fn [_ _] "target/classes/test/Cat.class")]
+    (.getName (dynamic-load-coords '[example/cat "0.1.0"]
+                                   (dynamic-classloader)
+                                   {:name "test.Cat"})))
+  => "test.Cat")
 
 (comment
 

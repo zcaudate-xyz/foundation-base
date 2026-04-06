@@ -7,15 +7,11 @@
 ^{:refer jvm.artifact.search/class-seq :added "3.0"}
 (fact "creates a sequence of class names"
   ^:hidden
-  
-  (class-seq
-   '[[org.eclipse.aether/aether-api "1.1.0"]])
-  
-  ;; classifier4j is not a dependency in project.clj, so this test fails if not present in local repo
-  ;; replacing with clojure as it's guaranteed to be there
-  (class-seq
-   '[[org.clojure/clojure "1.12.0"]])
-  )
+
+  (some #{"clojure.lang.RT"}
+        (class-seq
+         '[[org.clojure/clojure "1.12.0"]]))
+  => "clojure.lang.RT")
 
 ^{:refer jvm.artifact.search/search-match :added "3.0"}
 (fact "constructs a matching function for filtering"
@@ -27,19 +23,14 @@
   => true)
 
 ^{:refer jvm.artifact.search/search :added "3.0"}
-(comment "searches a pattern for class names"
-  
-  (->> (.getURLs cls/+base+)
-       (map #(-> % str (subs (count "file:"))))
-       (filter #(.endsWith % "jfxrt.jar"))
-       (class-seq)
-       (search [#"^javafx.*[A-Za-z0-9]Builder$"])
-       (take 5))
-  => (javafx.animation.AnimationBuilder
-      javafx.animation.FadeTransitionBuilder
-      javafx.animation.FillTransitionBuilder
-      javafx.animation.ParallelTransitionBuilder
-      javafx.animation.PathTransitionBuilder))
+(fact "searches a pattern for class names"
+
+  (->> (search [#"^java\.lang\."
+                java.lang.CharSequence]
+               ["java.lang.String"
+                "java.util.ArrayList"])
+       (map #(.getName ^Class %)))
+  => ["java.lang.String"])
 
 (comment
   (defn match-jars

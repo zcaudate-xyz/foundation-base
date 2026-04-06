@@ -1,7 +1,9 @@
 (ns lib.docker.ryuk-test
   (:require [lib.docker.common :as common]
-            [lib.docker.ryuk :refer :all]
-            [std.lib.foundation :as f])
+             [lib.docker.ryuk :refer :all]
+             [std.lib.component :as component]
+             [std.lib.env :as env]
+             [std.lib.foundation :as f])
   (:use code.test))
 
 ^{:refer lib.docker.common/CANARY :guard true :adopt true :added "4.0"}
@@ -25,8 +27,14 @@
 ^{:refer lib.docker.ryuk/stop-ryuk :added "4.0"}
 (fact "stops the reaper"
   ^:hidden
-  
-  (stop-ryuk))
+
+  (let [stopped (atom [])]
+    (alter-var-root #'*ryuk* (constantly {:relay :relay :socket :socket}))
+    (with-redefs [common/stop-container (fn [_] :stopped)
+                  component/stop (fn [relay] (swap! stopped conj [:relay relay]))
+                  env/close (fn [socket] (swap! stopped conj [:socket socket]))]
+      [(stop-ryuk) @stopped *ryuk*]))
+  => [nil [[:relay :relay] [:socket :socket]] nil])
 
 ^{:refer lib.docker.ryuk/start-reaped :added "4.0"}
 (fact "starts a reaped container"
