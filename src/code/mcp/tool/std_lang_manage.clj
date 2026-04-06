@@ -8,8 +8,8 @@
    (some (fn [arglist]
            (or (= n (count arglist))
                (and (seq arglist)
-                    (= '& (nth arglist (- (count arglist) 2) nil))
-                    (<= (dec (count arglist)) n))))
+                    (= '& (get arglist (- (count arglist) 2)))
+                    (<= (- (count arglist) 2) n))))
          (:arglists (meta f)))))
 
 (defn std-lang-manage-fn
