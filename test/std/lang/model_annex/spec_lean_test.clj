@@ -64,8 +64,8 @@
 (fact "wraps guarded clause in an if expression"
   (let [clause {:guard '(> n 0) :body "positive"}
         remaining [{:pattern '_ :body "other"}]]
-    (spec-lean/guarded-body 'x clause remaining))
-  => list?)
+    (first (spec-lean/guarded-body 'x clause remaining)))
+  => :%)
 
 ^{:refer std.lang.model-annex.spec-lean/match-form :added "4.1"}
 (fact "emits a Lean match with expression"

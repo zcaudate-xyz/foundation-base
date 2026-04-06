@@ -58,8 +58,8 @@
 
 ^{:refer rt.basic.impl-annex.process-php/default-basic-body-transform :added "4.1"}
 (fact "transform basic runtime forms for return-eval"
-  (default-basic-body-transform '[1 2 3] {})
-  => (contains [:-])
+  (first (default-basic-body-transform '[1 2 3] {}))
+  => :-
 
   (let [result (default-basic-body-transform '[1 2 3] {})]
     (clojure.string/includes? (second result) "return"))

@@ -1,6 +1,7 @@
 (ns std.lang.model-annex.spec-circom-test
   (:use code.test)
-  (:require [std.lang.base.impl :as impl]
+  (:require [clojure.string :as str]
+            [std.lang.base.impl :as impl]
             [std.lang.model-annex.spec-circom :refer :all]))
 
 ^{:refer std.lang.model-annex.spec-circom/format-string :added "4.1"}
@@ -24,9 +25,19 @@
 
 ^{:refer std.lang.model-annex.spec-circom/tf-component :added "4.1"}
 (fact "transforms component instantiation"
-  (let [form '(component c (MyTemplate 1 2))]
-    (tf-component form))
-  => list?)
+  (first (tf-component '(component c (MyTemplate 1 2))))
+  => :%)
+
+^{:refer std.lang.model-annex.spec-circom/tf-signal :added "4.1"}
+(fact "transforms signal declarations"
+  (impl/emit-script '(signal input x) {:lang :circom})
+  => "signal input x;"
+
+  (impl/emit-script '(signal output y) {:lang :circom})
+  => "signal output y;"
+
+  (impl/emit-script '(signal z) {:lang :circom})
+  => "signal z;")
 
 ^{:refer std.lang.model-annex.spec-circom/tf-signal :added "4.1"}
 (fact "transforms signal declarations"
@@ -56,18 +67,24 @@
 
 ^{:refer std.lang.model-annex.spec-circom/tf-main :added "4.1"}
 (fact "transforms main component definition"
-  (let [form '(main {} (Multiplier))]
-    (tf-main form))
-  => list?)
+  (first (tf-main '(main {} (Multiplier))))
+  => :%
+
+  (let [form (tf-main '(main {} (Multiplier)))]
+    (str/includes? (str form) "main"))
+  => true)
 
 ^{:refer std.lang.model-annex.spec-circom/tf-constraint :added "4.1"}
 (fact "transforms constraints to circom constraint syntax"
-  (let [form '(<== c (+ a b))]
-    (tf-constraint form))
-  => list?)
+  (first (tf-constraint '(<== c (+ a b))))
+  => :%
+
+  (let [form (tf-constraint '(<== c (+ a b)))]
+    (str/includes? (str form) "<=="))
+  => true)
 
 ^{:refer std.lang.model-annex.spec-circom/tf-for :added "4.1"}
 (fact "transforms for loop to circom for syntax"
-  (let [form '(for [i 0 10] (var x i))]
-    (tf-for form))
-  => list?)
+  (let [form (tf-for '(for [i 0 10] (var x i)))]
+    (str/includes? (str form) "for"))
+  => true)

@@ -1,5 +1,6 @@
 (ns std.lang.model-annex.spec-ocaml-test
-  (:require [std.lang.base.impl :as impl]
+  (:require [clojure.string :as str]
+            [std.lang.base.impl :as impl]
             [std.lang.model-annex.spec-ocaml :as spec-ocaml])
   (:use code.test))
 
@@ -44,7 +45,7 @@
 (fact "joins forms with a separator"
   (impl/emit-as :ocaml ['(fn [x]
                             (:lines-with ";\n" (+ x 1) (* x 2)))])
-  => (fn [s] (clojure.string/includes? s ";\n")))
+  => (fn [s] (str/includes? s ";\n")))
 
 ^{:refer std.lang.model-annex.spec-ocaml/ml-invoke :added "4.1"}
 (fact "wraps complex arguments for function application"
@@ -70,8 +71,9 @@
   (spec-ocaml/body-expr '((+ x 1)))
   => '(+ x 1)
 
-  (spec-ocaml/body-expr '((+ x 1) (* x 2)))
-  => list?)
+  (let [form (spec-ocaml/body-expr '((+ x 1) (* x 2)))]
+    (str/includes? (str form) "begin"))
+  => true)
 
 ^{:refer std.lang.model-annex.spec-ocaml/tf-defn :added "4.1"}
 (fact "transforms defn to OCaml let rec"
