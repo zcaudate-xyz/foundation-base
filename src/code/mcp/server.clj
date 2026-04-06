@@ -1,6 +1,6 @@
 (ns code.mcp.server
   (:require [code.mcp.base.server :as base-server]
-	    [code.mcp.tool.basic :as basic]
+            [code.mcp.tool.basic :as basic]
             [code.mcp.tool.clj-eval :as clj-eval]
             [code.mcp.tool.code-doc :as code-doc]
             [code.mcp.tool.code-maven :as code-maven]
