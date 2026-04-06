@@ -34,10 +34,14 @@
 
 (def lang-emit-as-tool
   {:name "lang-emit-as"
-   :description "Emits code given clojure dsl"
+   :description (str "Transpile a single Clojure DSL form into a target `std.lang` language. Use this for quick "
+                     "emit probes, syntax verification, or experimenting with generated output before editing "
+                     "language models or runtime code.")
    :inputSchema {:type "object"
-                 :properties {"code" {:type "string"}
-                              "type" {:type "string"}}
+                 :properties {"code" {:type "string"
+                                      :description "A single Clojure DSL form to emit, such as `(+ 1 2)` or `[:+ 1 2]`."}
+                              "type" {:type "string"
+                                      :description "The target language key, such as `js`, `lua`, `python`, or `rust`."}}
                  :required ["code" "type"]}
    :implementation #'lang-emit-as-fn})
 
@@ -49,9 +53,8 @@
 
 (def list-languages-tool
   {:name "std-lang-list"
-   :description "Lists available languages in std.lang"
-   :inputSchema {:type "object"
-                 :properties {}}
+   :description "List the currently installed `std.lang` language books available to the MCP session."
+   :inputSchema {:type "object"}
    :implementation #'list-languages-fn})
 
 (defn list-modules-fn
@@ -62,8 +65,10 @@
 
 (def list-modules-tool
   {:name "std-lang-modules"
-   :description "Lists modules for a given language"
+   :description (str "List registered modules for a specific `std.lang` language. Use this when an agent needs to "
+                     "discover the loaded modules before doing emit or manage work.")
    :inputSchema {:type "object"
-                 :properties {"lang" {:type "string"}}
+                 :properties {"lang" {:type "string"
+                                      :description "The language key whose modules should be listed, such as `js`, `lua`, or `python`."}}
                  :required ["lang"]}
    :implementation #'list-modules-fn})
