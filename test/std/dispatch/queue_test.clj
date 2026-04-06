@@ -38,7 +38,8 @@
 
   (-> (create-dispatch +test-config+)
       (start-dispatch)
-      (component/stop)))
+      (common/started?-dispatch))
+  => true)
 
 ^{:refer std.dispatch.queue/handler-fn :added "3.0"}
 (fact "creates a queue handler function"

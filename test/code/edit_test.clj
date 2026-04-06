@@ -373,7 +373,7 @@
   (-> (parse-string "(1  {}  2 3 #|4)")
       (left-most-token)
       str)
-  "<0,10> (1  {}  2 |3 4)")
+  => "<0,1> (|1  {}  2 3 4)")
 
 ^{:refer std.block.navigate/right-token :added "3.0" :class [:nav/move]}
 (fact "moves to the right token"

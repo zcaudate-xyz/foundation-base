@@ -78,16 +78,22 @@
   (-> (executor:single)
       (doto (submit (fn [] (Thread/sleep 1000))))
       (doto (submit (fn [] (Thread/sleep 1000))))
-      (exec:shutdown-now)))
+      (exec:shutdown-now)
+      (exec:shutdown?))
+  => true)
 
 ^{:refer std.concurrent.executor/exec:get-queue :added "3.0"
   :teardown [(track/tracked:last [:raw :executor] :stop)]}
 (fact "gets the queue from the executor"
   ^:hidden
   
-  (doto (executor:pool 10 10 1000 (q/queue))
-    (exec:get-queue)
-    (exec:shutdown)))
+  (let [queue (q/queue)
+        exe   (executor:pool 10 10 1000 queue)]
+    (try
+      (= queue (exec:get-queue exe))
+      (finally
+        (exec:shutdown exe))))
+  => true)
 
 ^{:refer std.concurrent.executor/submit :added "3.0"
   :teardown [(track/tracked:last [:raw :executor] :stop 2)]}

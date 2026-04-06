@@ -1,5 +1,6 @@
 (ns std.image-test
-  (:require [std.image :as image :refer :all]
+  (:require [std.fs :as fs]
+            [std.image :as image :refer :all]
             [std.image.base.model :as model]
             [std.image.base.util :as util])
   (:use code.test)
@@ -37,9 +38,9 @@
 (fact "returns the channels of an image"
 
   (-> (image/read "test-data/std.image/circle-30.png")
-      (image-channels))
-  ;;[#object["[B" 0x76926cfc "[B@76926cfc"]]
-  )
+      (image-channels)
+      (count))
+  => 1)
 
 ^{:refer std.image/image-size :added "3.0"}
 (fact "returns the size of the image"
@@ -112,24 +113,28 @@
 (fact "converts an image :byte-gray representation"
 
   (-> (image/read "test-data/std.image/circle-30.png")
-      (to-byte-gray))
-  ;;#object["[B" 0x2c1a4f3 "[B@2c1a4f3"]
-  )
+      (to-byte-gray)
+      (alength))
+  => 900)
 
 ^{:refer std.image/to-int-argb :added "3.0"}
 (fact "converts an image :int-argb representation"
 
   (-> (image/read "test-data/std.image/circle-30.png")
-      (to-int-argb))
-  ;;#object["[I" 0x3514a0dc "[I@3514a0dc"]
-  )
+      (to-int-argb)
+      (alength))
+  => 900)
 
 ^{:refer std.image/write :added "3.0"}
-(fact "writes an image to file"
+(fact "writes an image to file" ^:hidden
+  (do (fs/delete "test-scratch/circle-30.jpg")
+      (-> (image/read "test-data/std.image/circle-30.png")
+          (image/coerce (model/model :3-byte-bgr) :base)
+          (image/write "test-scratch/circle-30.jpg" {:format "JPG"}))
+      (fs/exists? "test-scratch/circle-30.jpg"))
+  => true
 
-  (-> (image/read "test-data/std.image/circle-30.png")
-      (image/coerce (model/model :3-byte-bgr) :base)
-      (image/write "test-data/std.image/circle-30.jpg" {:format "JPG"})))
+  (fs/delete "test-scratch/circle-30.jpg"))
 
 ^{:refer std.image/image :added "3.0"}
 (fact "creates an image given parameters"
@@ -160,8 +165,10 @@
 ^{:refer std.image/display :added "3.0"}
 (fact "displays an image"
 
-  (-> (image/read "test-data/std.image/circle-10.png")
-      (display {:channel :red} :base)))
+  (with-out-str
+    (-> (image/read "test-data/std.image/circle-10.png")
+        (display {:channel :red} :base)))
+  => string?)
 
 (comment
   (./scaffold)

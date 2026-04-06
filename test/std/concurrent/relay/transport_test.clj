@@ -12,7 +12,11 @@
   => java.io.ByteArrayOutputStream)
 
 ^{:refer std.concurrent.relay.transport/mock-input-stream :added "4.0"}
-(fact "creates a mock input stream")
+(fact "creates a mock input stream"
+  (let [stream (t/mock-input-stream (atom ["abc" "de"]))]
+    [(String. (.readNBytes stream 2))
+     (String. (.readAllBytes stream))])
+  => ["ab" "cde"])
 
 ^{:refer std.concurrent.relay.transport/read-bytes-limit :added "4.0"
   :setup [(def +stream+ (t/mock-input-stream
@@ -277,16 +281,32 @@
   => 13)
 
 ^{:refer std.concurrent.relay.transport/send-write-raw :added "4.0"}
-(fact "sends a raw write command")
+(fact "sends a raw write command"
+  (let [out (java.io.ByteArrayOutputStream.)]
+    (t/send-write-raw {:raw out} (.getBytes "hello"))
+    (.toString out))
+  => "hello")
 
 ^{:refer std.concurrent.relay.transport/send-write-flush :added "4.0"}
-(fact "sends a raw flush command")
+(fact "sends a raw flush command"
+  (let [out (java.io.ByteArrayOutputStream.)]
+    (t/send-write-flush {:raw out}))
+  => java.io.ByteArrayOutputStream)
 
 ^{:refer std.concurrent.relay.transport/send-write-line :added "4.0"}
-(fact "sends a command with a newline and flush")
+(fact "sends a command with a newline and flush"
+  (let [out (java.io.ByteArrayOutputStream.)]
+    (t/send-write-line {:raw out} "hello")
+    (.toString out))
+  => "hello\n")
 
 ^{:refer std.concurrent.relay.transport/send-command :added "4.0"}
-(fact "sends a command to output and then waits on the input")
+(fact "sends a command to output and then waits on the input"
+  (let [in  {:raw (java.io.ByteArrayInputStream. (.getBytes "hello"))}
+        out {:raw (java.io.ByteArrayOutputStream.)}]
+    [(t/send-command in out :read-all "PING" {:direct false})
+     (.toString ^java.io.ByteArrayOutputStream (:raw out))])
+  => (contains [(contains {:output "hello"}) "PING\n"]))
 
 (comment
   (./import)

@@ -27,7 +27,11 @@
   (write {:a 1 :b 2}) => "{\"a\":1,\"b\":2}")
 
 ^{:refer std.json/write-pp :added "4.0"}
-(fact "pretty print json output")
+(fact "pretty print json output"
+  (write-pp {:a 1 :b 2})
+  => #(and (string? %)
+           (re-find #"\n" %)
+           (re-find #"\"a\"" %)))
 
 ^{:refer std.json/write-bytes :added "3.0"}
 (fact "writes clojure data to json bytes"
@@ -46,4 +50,6 @@
   => "{\"a\":1,\"b\":2}")
 
 ^{:refer std.json/sys:resource-json :added "4.0"}
-(fact "returns cached json map of on a resource")
+(fact "returns cached json map of on a resource"
+  (sys:resource-json "assets/lib.redis/info.json")
+  => vector?)

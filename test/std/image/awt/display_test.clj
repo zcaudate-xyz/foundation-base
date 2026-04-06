@@ -4,14 +4,26 @@
   (:use code.test))
 
 ^{:refer std.image.awt.display/create-viewer :added "3.0" :unit #{:gui}}
-(comment "creates a viewer for the awt image"
-
-  (create-viewer "hello")
-  => (contains {:frame javax.swing.JFrame}))
+(fact "creates a viewer for the awt image"
+  (let [viewer (try
+                 (create-viewer "hello")
+                 (catch java.awt.HeadlessException _
+                   :headless))]
+    (if (= viewer :headless)
+      :headless
+      (contains? viewer :frame)))
+  => (contains #{true :headless}))
 
 ^{:refer std.image.awt.display/display :added "3.0" :unit #{:gui}}
-(comment "displays a BufferedImage in a JFrame"
-
-  (doto (display (io/read "test-data/std.image/circle-100.png")
-                 {})
-    (-> :frame (.hide))))
+(fact "displays a BufferedImage in a JFrame"
+  (let [result (try
+                 (let [viewer (display (io/read "test-data/std.image/circle-100.png")
+                                       {})]
+                   (.setVisible ^javax.swing.JFrame (:frame viewer) false)
+                   viewer)
+                 (catch java.awt.HeadlessException _
+                   :headless))]
+    (if (= result :headless)
+      :headless
+      (contains? result :frame)))
+  => (contains #{true :headless}))
