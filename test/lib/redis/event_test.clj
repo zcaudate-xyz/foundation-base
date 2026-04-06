@@ -4,10 +4,11 @@
             [lib.redis.event :refer :all]
             [net.resp.connection :as conn]
             [net.resp.pool :as pool]
-            [net.resp.wire :as wire]
-            [std.concurrent :as cc]
-            [std.lib.foundation :as f]
-            [std.lib.future :as future])
+             [net.resp.wire :as wire]
+             [std.concurrent :as cc]
+             [std.lib.component :as component]
+             [std.lib.foundation :as f]
+             [std.lib.future :as future])
   (:use code.test))
 
 (def |client|
@@ -37,13 +38,40 @@
   => {:a 1})
 
 ^{:refer lib.redis.event/listener-string :added "3.0"}
-(fact "string description of a listener")
+(fact "string description of a listener"
+  (with-redefs [future/future:complete? (constantly false)
+                component/started? (constantly true)]
+    (listener-string {:type :test
+                      :id :listener
+                      :connection {:id :conn
+                                   :args ["in"]
+                                   :raw :raw
+                                   :thread :thread}}))
+  => "#test:listener {:id :conn, :args [\"in\"], :running true}")
 
 ^{:refer lib.redis.event/listener? :added "3.0"}
-(fact "checks that object is a listener")
+(fact "checks that object is a listener"
+  (listener? (map->Listener {:type :test
+                             :id :id
+                             :namespace "ns"
+                             :handler identity
+                             :connection {}}))
+  => true)
 
 ^{:refer lib.redis.event/listener-loop :added "3.0"}
-(fact "creates a listener loop")
+(fact "creates a listener loop"
+  (let [seen  (atom [])
+        count (atom 0)]
+    (try
+      (with-redefs [wire/read (fn [_]
+                                (let [n (swap! count inc)]
+                                  (if (< n 3)
+                                    n
+                                    (throw (ex-info "done" {})))))]
+        (listener-loop :conn #(swap! seen conj %)))
+      (catch clojure.lang.ExceptionInfo _))
+    @seen)
+  => [1 2])
 
 ^{:refer lib.redis.event/listener:create :added "3.0"}
 (fact "creates a listener"

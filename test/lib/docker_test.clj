@@ -6,10 +6,31 @@
   (:use code.test))
 
 ^{:refer lib.docker/start-runtime :added "4.0"}
-(fact "starts a runtime with attached container")
+(fact "starts a runtime with attached container"
+  (with-redefs [docker/start-ryuk (fn [] :ryuk)
+                docker/start-reaped (fn [container]
+                                      {:container-ip "127.0.0.1"
+                                       :container-id "cid"
+                                       :container container})
+                docker/start-container (fn [container]
+                                         {:container-ip "127.0.0.1"
+                                          :container-id "cid"
+                                          :container container})]
+    (docker/start-runtime {:lang :clj :tag :app :module :core}
+                          {:suffix "dev"}))
+  => (contains {:host "127.0.0.1"
+                :container (contains {:id "app-dev"
+                                      :container-id "cid"
+                                      :labels {"rt/lang" "clj"
+                                               "rt/module" "core"}})}))
 
 ^{:refer lib.docker/stop-runtime :added "4.0"}
-(fact "stops a runtime with attached container")
+(fact "stops a runtime with attached container"
+  (let [stopped (atom nil)]
+    (with-redefs [docker/stop-container (fn [container] (reset! stopped container))]
+      [(docker/stop-runtime {:id :rt} {:id "cid"})
+       @stopped]))
+  => [{:id :rt} {:id "cid"}])
 
 (comment
 

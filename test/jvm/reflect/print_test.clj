@@ -1,5 +1,6 @@
 (ns jvm.reflect.print-test
-  (:require [jvm.reflect.print :refer :all])
+  (:require [jvm.reflect.print :refer :all]
+            [std.object.query :as query])
   (:use code.test))
 
 ^{:refer jvm.reflect.print/format-type :added "3.0"}
@@ -14,34 +15,58 @@
   (format-type (type (char-array ()))) => "char[]")
 
 ^{:refer jvm.reflect.print/order-modifiers :added "3.0"}
-(fact "orders elements based on modifiers for printing")
+(fact "orders elements based on modifiers for printing"
+  (order-modifiers #{:public :static :final})
+  => ":final :public :static")
 
 ^{:refer jvm.reflect.print/col-color :added "3.0"}
-(fact "returns the column color")
+(fact "returns the column color"
+  (col-color 0 :cyan :instance :public :name +col-colors+ +matrix+)
+  => #{:cyan :bold})
 
 ^{:refer jvm.reflect.print/col-settings :added "3.0"}
-(fact "returns the column settings")
+(fact "returns the column settings"
+  (mapv :id (col-settings [:method :instance :public]))
+  => [:name :type :params :modifiers])
 
 ^{:refer jvm.reflect.print/class-elements :added "3.0"}
-(fact "returns all class elements for a given category")
+(fact "returns all class elements for a given category"
+  (class-elements (query/query-class String []) [:method :instance])
+  => seq?)
 
 ^{:refer jvm.reflect.print/print-elements :added "3.0"}
-(fact "prints all elements in a given category")
+(fact "prints all elements in a given category"
+  (print-elements "PUBLIC"
+                  []
+                  (col-settings [:method :instance :public]))
+  => nil)
 
 ^{:refer jvm.reflect.print/category-title :added "3.0"}
-(fact "creates a category title")
+(fact "creates a category title"
+  (category-title [:method :instance])
+  => "INSTANCE METHOD")
 
 ^{:refer jvm.reflect.print/print-classname :added "3.0"}
-(fact "prints the classname with title")
+(fact "prints the classname with title"
+  (print-classname "CLASS" String)
+  => nil)
 
 ^{:refer jvm.reflect.print/print-category :added "3.0"}
-(fact "prints a given category")
+(fact "prints a given category"
+  (print-category (query/query-class String []) [:method :instance])
+  => vector?)
 
 ^{:refer jvm.reflect.print/print-class :added "3.0"}
-(fact "prints a given class")
+(fact "prints a given class"
+  (print-class (query/query-class String []))
+  => vector?)
 
 ^{:refer jvm.reflect.print/sort-elements :added "3.0"}
-(fact "sorts elements given a comparator")
+(fact "sorts elements given a comparator"
+  (->> (sort-elements [{:name "b" :params []}
+                       {:name "a" :params []}])
+       (map :name))
+  => ["a" "b"])
 
 (comment
 

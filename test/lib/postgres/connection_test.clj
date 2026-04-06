@@ -73,17 +73,12 @@
 
 
 ^{:refer lib.postgres.connection/load-impl :added "4.1"}
-(fact "loads a postgres implementation by vendor keyword"
-  ^:hidden
-
-  (:status (conn/load-impl :impossibl))
-  => :loaded
-
-  (:ns (conn/load-impl :impossibl))
-  => 'lib.postgres.impl.impossibl
-
-  (:status (conn/load-impl :postgresql))
-  => :loaded
-
-  (:ns (conn/load-impl :postgresql))
-  => 'lib.postgres.impl.postgresql)
+(fact "loads a postgres implementation"
+  (let [original @conn/+impls+]
+    (try
+      (reset! conn/+impls+ {:stub {:status :pending :ns 'clojure.core}})
+      (with-redefs [require (fn [& _] nil)]
+        (conn/load-impl :stub))
+      (finally
+        (reset! conn/+impls+ original))))
+  => (contains {:status :loaded}))

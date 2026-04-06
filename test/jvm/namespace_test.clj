@@ -1,9 +1,19 @@
 (ns jvm.namespace-test
   (:require [jvm.namespace :as ns]
+            [jvm.namespace.common :as common]
+            [jvm.namespace.dependent :as dependent]
+            [clojure.string]
             [std.lib.invoke :as invoke]
             [std.lib.result :as res]
             [std.task :as task])
   (:use code.test))
+
+(defmacro with-temp-ns [[sym] & body]
+  `(let [~sym (create-ns (gensym "jvm.namespace.test-"))]
+     (try
+       ~@body
+       (finally
+         (remove-ns (ns-name ~sym))))))
 
 ^{:refer jvm.namespace/list-aliases :added "3.0"}
 (fact "namespace list all aliases task"
@@ -12,25 +22,12 @@
   => map?)
 
 ^{:refer jvm.namespace/clear-aliases :added "3.0"}
-(comment "removes all namespace aliases" ^:hidden
-
-  ;; require std.string
-  (require '[std.string :as str])
-  => nil
-
-  ;; error if a new namespace is set to the same alias
-  (require '[clojure.set :as string])
-  => (throws) ;;  Alias string already exists in namespace
-
-  ;; clearing all aliases
-  (clear-aliases)
-
-  (ns-aliases *ns*)
-  => {}
-
-  ;; okay to require
-  (require '[clojure.set :as string])
-  => nil)
+(fact "removes all namespace aliases" ^:hidden
+  (with-temp-ns [tmp]
+    (binding [*ns* tmp]
+      (alias 'str 'clojure.string))
+    (ns/clear-aliases [(ns-name tmp)] {:return :summary})
+    => map?))
 
 ^{:refer jvm.namespace/list-imports :added "3.0"}
 (fact "namespace list all imports task"
@@ -46,7 +43,12 @@
   => map?)
 
 ^{:refer jvm.namespace/clear-external-imports :added "3.0"}
-(fact "clears all external imports")
+(fact "clears all external imports"
+  (with-temp-ns [tmp]
+    (binding [*ns* tmp]
+      (import java.io.File))
+    (ns/clear-external-imports [(ns-name tmp)] {:return :summary})
+    => map?))
 
 ^{:refer jvm.namespace/list-mappings :added "3.0"}
 (fact "namespace list all mappings task"
@@ -56,22 +58,11 @@
   => map?)
 
 ^{:refer jvm.namespace/clear-mappings :added "3.0"}
-(comment "removes all mapped vars in the namespace" ^:hidden
-
-  ;; require `join`
-  (require '[std.string.base :refer [join]])
-
-  ;; check that it runs
-  (join ["a" "b" "c"])
-  => "abc"
-
-  ;; clear mappings
-  (ns/clear-mappings)
-
-  ;; the mapped symbol is gone
-  (join ["a" "b" "c"])
-  => (throws) ;; "Unable to resolve symbol: join in this context"
-  )
+(fact "removes all mapped vars in the namespace" ^:hidden
+  (with-temp-ns [tmp]
+    (intern tmp 'join (fn [xs] (apply str xs)))
+    (ns/clear-mappings [(ns-name tmp)] {:return :summary})
+    => map?))
 
 ^{:refer jvm.namespace/list-interns :added "3.0"}
 (fact "namespace list all interns task"
@@ -81,12 +72,19 @@
   => map?)
 
 ^{:refer jvm.namespace/clear-interns :added "3.0"}
-(comment "clears all interned vars in the namespace"
-
-  (ns/clear-interns))
+(fact "clears all interned vars in the namespace"
+  (with-temp-ns [tmp]
+    (intern tmp 'hello 1)
+    (ns/clear-interns [(ns-name tmp)] {:return :summary})
+    => map?))
 
 ^{:refer jvm.namespace/clear-refers :added "3.0"}
-(fact "clears all refers in a namespace")
+(fact "clears all refers in a namespace"
+  (with-temp-ns [tmp]
+    (binding [*ns* tmp]
+      (clojure.core/refer 'clojure.string :only '[join]))
+    (ns/clear-refers [(ns-name tmp)] {:return :summary})
+    => map?))
 
 ^{:refer jvm.namespace/list-publics :added "3.0"}
 (fact "namespace list all publics task"
@@ -103,11 +101,13 @@
   => map?)
 
 ^{:refer jvm.namespace/clear :added "3.0"}
-(comment "namespace clear all mappings and aliases task"
-
-  (ns/clear #{*ns*})
-  ;; { .... }
-  => map?)
+(fact "namespace clear all mappings and aliases task"
+  (with-temp-ns [tmp]
+    (binding [*ns* tmp]
+      (alias 'str 'clojure.string))
+    (intern tmp 'hello 1)
+    (ns/clear [(ns-name tmp)] {:return :summary})
+    => map?))
 
 ^{:refer jvm.namespace/list-in-memory :added "3.0"}
 (fact "namespace list all objects in memory task"
@@ -128,25 +128,26 @@
   => map?)
 
 ^{:refer jvm.namespace/reset :added "3.0"}
-(comment "deletes all namespaces under the root namespace" ^:hidden
-
-  (ns/reset 'hara)
-
-  (ns/reset '[jvm.namespace]))
+(fact "deletes all namespaces under the root namespace" ^:hidden
+  (let [sym (symbol "jvm.namespace.reset-temp")]
+    (create-ns sym)
+    (ns/reset [sym] {:return :summary})
+    => map?))
 
 ^{:refer jvm.namespace/unmap :added "3.0"}
-(comment "namespace unmap task"
-
-  (ns/unmap :args 'something)
-
-  (ns/unmap 'jvm.namespace :args '[something more]))
+(fact "namespace unmap task"
+  (with-temp-ns [tmp]
+    (intern tmp 'something 1)
+    (ns/unmap [(ns-name tmp)] :args '[something])
+    => map?))
 
 ^{:refer jvm.namespace/unalias :added "3.0"}
-(comment "namespace unalias task"
-
-  (ns/unalias :args 'something)
-
-  (ns/unalias 'jvm.namespace :args '[something more]))
+(fact "namespace unalias task"
+  (with-temp-ns [tmp]
+    (binding [*ns* tmp]
+      (alias 'something 'clojure.string))
+    (ns/unalias [(ns-name tmp)] :args '[something])
+    => map?))
 
 (invoke/definvoke check
   "check for namespace task group"
@@ -185,17 +186,22 @@
                                       :data   (vec (range (rand-int 40)))})))}}])
 
 ^{:refer jvm.namespace/reload :added "3.0"}
-(comment "reloads all listed namespace aliases"
-
-  (ns/reload))
+(fact "reloads all listed namespace aliases"
+  (with-redefs [ns/reload-task (fn [& _] :reloaded)
+                dependent/sort-topo identity]
+    (ns/reload '[jvm.namespace.dependent jvm.namespace.common]))
+  => :reloaded)
 
 ^{:refer jvm.namespace/reload-all :added "3.0"}
-(comment "reloads all listed namespaces and dependents"
-
-  (ns/reload-all))
+(fact "reloads all listed namespaces and dependents"
+  (with-redefs [common/ns-reload-all identity]
+    (ns/reload-all '[jvm.namespace] {:return :summary}))
+  => map?)
 
 ^{:refer jvm.namespace/list-loaded :added "4.0"}
-(fact "list all loaded namespaces")
+(fact "list all loaded namespaces"
+  (list (ns/list-loaded '[jvm.namespace]))
+  => (contains ['jvm.namespace]))
 
 (comment
   (code.manage/import {:write true})
@@ -205,6 +211,7 @@
 
 
 ^{:refer jvm.namespace/reload-task :added "4.1"}
-(fact "reload-task is a pipe task for reloading namespaces"
-  (task/task? ns/reload-task)
-  => true)
+(fact "reload task delegates to namespace reload"
+  (with-redefs [common/ns-reload identity]
+    (ns/reload-task '[jvm.namespace] {:return :summary}))
+  => map?)

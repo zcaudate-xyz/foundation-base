@@ -1,6 +1,7 @@
 (ns lib.docker.common-test
   (:require [lib.docker.common :refer :all]
-            [lib.docker.ryuk :as ryuk])
+            [lib.docker.ryuk :as ryuk]
+            [std.lib.os :as os])
   (:use code.test))
 
 ^{:refer lib.docker.common/raw-exec :guard true :added "4.0"}
@@ -43,7 +44,20 @@
   => true)
 
 ^{:refer lib.docker.common/start-container :added "4.0"}
-(fact "starts a container")
+(fact "starts a container"
+  (with-redefs [has-container? (constantly false)
+                os/sh (fn [& _] (delay "cid-1\n"))
+                get-ip (constantly "127.0.0.1")]
+    (start-container {:id "hello"
+                      :image "redis:latest"
+                      :cmd ["redis-server"]}))
+  => (contains {:container-id "cid-1\n"
+                :container-ip "127.0.0.1"
+                :container-name "testing_hello"}))
 
 ^{:refer lib.docker.common/stop-container :added "4.0"}
-(fact "stops a container")
+(fact "stops a container"
+  (with-redefs [has-container? (constantly true)
+                os/sh (fn [& _] (delay "killed"))]
+    (stop-container {:id "hello"}))
+  => "killed")

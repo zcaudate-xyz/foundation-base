@@ -1,5 +1,6 @@
 (ns net.http.client-test
-  (:require [net.http.client :refer :all])
+  (:require [net.http.client :refer :all]
+            [net.http.common :as common])
   (:use code.test)
   (:refer-clojure :exclude [get]))
 
@@ -55,7 +56,24 @@
   => java.net.http.HttpRequest)
 
 ^{:refer net.http.client/response-map :added "3.0"}
-(fact "constucts a map from java.net.http.HttpResponse")
+(fact "constucts a map from java.net.http.HttpResponse"
+  (response-map
+   (reify java.net.http.HttpResponse
+     (statusCode [_] 200)
+     (body [_] "hello")
+     (version [_] java.net.http.HttpClient$Version/HTTP_1_1)
+     (headers [_]
+       (java.net.http.HttpHeaders/of {"content-type" ["text/plain"]}
+                                     (reify java.util.function.BiPredicate
+                                       (test [_ _ _] true))))
+     (request [_] nil)
+     (previousResponse [_] (java.util.Optional/empty))
+     (sslSession [_] (java.util.Optional/empty))
+     (uri [_] (java.net.URI/create "http://example.com"))))
+  => {:status 200
+      :body "hello"
+      :version "HTTP_1_1"
+      :headers {:content-type "text/plain"}})
 
 ^{:refer net.http.client/request :added "3.0"}
 (fact "performs a http request"
@@ -69,7 +87,9 @@
                   :headers map?})))
 
 ^{:refer net.http.client/create-http-methods :added "3.0"}
-(fact "creates the standard http get, post, etc requests ")
+(fact "creates the standard http get, post, etc requests "
+  (every? var? (create-http-methods [:get :post]))
+  => true)
 
 ^{:refer net.http.client/endpoint-data :added "3.0"}
 (fact "gets the data returned from endpoint"
@@ -80,10 +100,22 @@
   => [1 2 3 4])
 
 ^{:refer net.http.client/remote :added "3.0"}
-(fact "creates a remote access to an endpoint")
+(fact "creates a remote access to an endpoint"
+  (with-redefs [request (fn [_ {:keys [method body]}]
+                          {:status 200
+                           :body (str {:status :return
+                                       :data [method body]})})]
+    (remote "/endpoint" {:id :add
+                         :args [1 2]}))
+  => [:post "{:id :add, :args [1 2]}"])
 
 ^{:refer net.http.client/stream-lines :added "4.0"}
-(fact "reads lines from a stream")
+(fact "reads lines from a stream"
+  (let [seen (atom [])]
+    @(stream-lines (java.io.ByteArrayInputStream. (.getBytes "a\nb\n"))
+                   #(swap! seen conj %))
+    @seen)
+  => ["a" "b"])
 
 ^{:refer net.http.client/mock-endpoint :added "3.0"}
 (fact "creates a mock-endpoint for testing"
