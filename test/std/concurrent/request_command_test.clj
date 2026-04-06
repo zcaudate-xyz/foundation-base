@@ -22,8 +22,8 @@
 
 ^{:refer std.concurrent.request-command/run-request :added "3.0"}
 (fact "extensible function for command templates"
-  (with-redefs [std.concurrent.request/req (fn [client command opts]
-                                             [client command opts])]
+  (with-redefs [std.concurrent.request/req-fn (fn [client command opts]
+                                                [client command opts])]
     (run-request {:type :single
                   :function (fn [args _]
                               {:command args})}
@@ -36,22 +36,26 @@
 (fact "runs a command"
   (with-redefs [run-request (fn [_ client input opts]
                               [client input opts])]
-    (req:run {:options {:select [:id]
-                        :input (fn [args]
-                                 {:id (:id args)})
-                        :output (fn [_]
-                                  {:id 2})}
-              :format {:input (fn [input opts]
-                                [input opts])
-                       :output (fn [output opts]
-                                 [output opts])}
-              :process {:chain [inc]}}
-             :client
-             {:id 1 :value 2}
-             {:extra true}))
-  => [:client [{:id 1, :value 2} {:id 1}]
-      (contains {:chain [inc]
-                 :post [fn?]})])
+    (let [[client input opts] (req:run {:options {:select [:id]
+                                                  :input (fn [args]
+                                                           {:id (:id args)})
+                                                  :output (fn [_]
+                                                            {:id 2})}
+                                        :format {:input (fn [input opts]
+                                                          [input opts])
+                                                 :output (fn [output opts]
+                                                           [output opts])}
+                                        :process {:chain [inc]}}
+                                       :client
+                                       {:id 1 :value 2}
+                                       {:extra true})]
+      [client
+       input
+       (map? opts)
+       (= [inc] (:chain opts))
+       (= 1 (count (:post opts)))
+       (fn? (first (:post opts)))]))
+  => [:client [{:id 1, :value 2} {:id 1}] true true true true])
 
 ^{:refer std.concurrent.request-command/req:command :added "3.0"}
 (fact "constructs a command"

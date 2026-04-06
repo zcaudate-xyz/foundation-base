@@ -1,5 +1,6 @@
 (ns std.concurrent.print-test
-  (:require [std.concurrent.print :as print])
+  (:require [std.concurrent.print :as print]
+            [std.lib.env :as env])
   (:use code.test))
 
 ^{:refer std.concurrent.print/print-handler :added "3.0"}
@@ -45,6 +46,6 @@
 
 ^{:refer std.concurrent.print/with-system :added "3.0"}
 (fact "with system print instead of local"
-  (with-system
+  (env/with-system
     (print/print "hello"))
   => nil)
