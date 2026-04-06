@@ -259,10 +259,12 @@
                     (create-ns ns-sym))
         result (try
                  (rt/eval-in-ns sandbox '(do (def answer 42)
-                                             [(ns-name *ns*) answer]))
+                                             [(clojure.core/boolean
+                                               (clojure.core/resolve 'answer))
+                                              answer]))
                  (finally
                    (remove-ns ns-sym)))]
-    [(rt/eval-in-ns nil '(ns-name *ns*))
-     (symbol? (first result))
+    [(rt/eval-in-ns nil '(+ 1 2))
+     (first result)
      (second result)])
-  => '[code.test.base.runtime-test true 42])
+  => [3 true 42])

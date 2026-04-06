@@ -19,7 +19,7 @@
 (fact "generates ast from js files"
   ^:hidden
   
-  (let [tmp-input (fs/create-tmpfile "input.js" "var x = 1;")
+  (let [tmp-input (fs/create-tmpfile "var x = 1;")
         tmp-output (str tmp-input ".json")
         ast-json "{\"type\":\"File\",\"program\":{\"type\":\"Program\",\"body\":[]},\"comments\":[]}"]
     (with-redefs [make/build-all (fn [target] target)
@@ -30,5 +30,5 @@
       [(json/read (:out (js-ast/translate-ast (str tmp-input))))
        (do (js-ast/translate-ast (str tmp-input) tmp-output)
            (json/read (slurp tmp-output)))]))
-  => [{:type "File" :program {:type "Program" :body []} :comments []}
-      {:type "File" :program {:type "Program" :body []} :comments []}])
+  => [{"type" "File" "program" {"type" "Program" "body" []} "comments" []}
+      {"type" "File" "program" {"type" "Program" "body" []} "comments" []}])

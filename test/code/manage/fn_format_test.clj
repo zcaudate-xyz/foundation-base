@@ -61,10 +61,16 @@
 (fact "moves to the next sibling without using zip/step-right"
   (let [nav (-> "(defn foo [x] 1)"
                 nav/parse-string
-                nav/down)]
-    [(nav/value (zip/step-right nav))
-     (nav/value (manual-step-right nav))])
-  => '[foo foo])
+                nav/down)
+        step (zip/step-right nav)
+        manual (manual-step-right nav)]
+    [(str (zip/get step))
+     (count (:left step))
+     (count (:right step))
+     (str (zip/get manual))
+     (count (:left manual))
+     (count (:right manual))])
+  => ["␣" 1 6 "␣" 1 6])
 
 ^{:refer code.manage.fn-format/list-transform :added "4.1"}
 (fact "wraps arglists and body in a nested list"
@@ -75,4 +81,4 @@
       nav/right
       list-transform
       nav/root-string)
-  => "(defn foo\n  ([x]\n    (+ x 1)))")
+  => "(defn foo\n  ([x] (+ x 1)))")

@@ -15,7 +15,7 @@
 (fact "builds the translator and shells out to clang"
   ^:hidden
   
-  (let [input (fs/create-tmpfile "example.c" "int main(){return 0;}")
+  (let [input (fs/create-tmpfile "int main(){return 0;}")
         output (str input ".json")]
     (with-redefs [make/build-all (fn [target] target)
                   os/sh (fn [_]
