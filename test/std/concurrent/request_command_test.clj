@@ -24,13 +24,17 @@
 (fact "extensible function for command templates"
   (with-redefs [std.concurrent.request/req-fn (fn [client command opts]
                                                 [client command opts])]
-    (run-request {:type :single
-                  :function (fn [args _]
-                              {:command args})}
-                 :client
-                 [:hello]
-                 {:async true}))
-  => [:client {:command [:hello]} {:async true}])
+    (let [[client command opts] (run-request {:type :single
+                                              :function (fn [args _]
+                                                          {:command args})}
+                                             :client
+                                             [:hello]
+                                             {:async true})]
+      [client
+       command
+       (:async opts)
+       (contains? opts :context)]))
+  => [:client {:command [:hello]} true true])
 
 ^{:refer std.concurrent.request-command/req:run :added "3.0"}
 (fact "runs a command"

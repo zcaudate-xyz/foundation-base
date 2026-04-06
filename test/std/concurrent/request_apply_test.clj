@@ -7,23 +7,30 @@
 (fact "extensible function for a request applicative"
   (with-redefs [req/req-fn (fn [client command opts]
                              [client command opts])]
-    (req-call {:type :single
-               :function (fn [args _]
-                           {:type :echo
-                            :args args})}
-              :client
-              [:hello]
-              {:async true}))
-  => [:client {:type :echo, :args [:hello]} {:async true}])
+    (let [[client command opts] (req-call {:type :single
+                                           :function (fn [args _]
+                                                       {:type :echo
+                                                        :args args})}
+                                          :client
+                                          [:hello]
+                                          {:async true})]
+      [client
+       command
+       (:async opts)
+       (contains? opts :context)]))
+  => [:client {:type :echo, :args [:hello]} true true])
 
 ^{:refer std.concurrent.request-apply/req-apply-in :added "3.0"}
 (fact "runs a request applicative"
   (with-redefs [req-call (fn [& args]
                            (swap! req/*inputs* conj args))]
-    (req-apply-in {:options {:async true}}
-                  nil
-                  [:hello]))
-  => [{:options {:async true}} nil [:hello] {:async true}]
+    (let [captured (req-apply-in {:options {:async true}}
+                                 nil
+                                 [:hello])]
+      [(= 1 (count captured))
+       (= [{:options {:async true}} nil [:hello] {:async true}]
+          (vec (first captured)))]))
+  => [true true]
 
   (with-redefs [req-call (fn [_ _ _ opts]
                             opts)]
