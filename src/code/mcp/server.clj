@@ -1,57 +1,53 @@
 (ns code.mcp.server
-  (:require [code.mcp.wrap :as wrap])
-  (:import [io.modelcontextprotocol.server McpServer McpSyncServer]
-           [io.modelcontextprotocol.server.transport StdioServerTransportProvider]))
+  (:require [code.mcp.base.server :as base-server]
+            [code.mcp.tool.basic :as basic]
+            [code.mcp.tool.clj-eval :as clj-eval]
+            [code.mcp.tool.code-doc :as code-doc]
+            [code.mcp.tool.code-manage :as code-manage]
+            [code.mcp.tool.form-heal :as form-heal]
+            [code.mcp.tool.std-lang :as std-lang]))
 
-(defn create-transport-provider
-  [{:keys [provider type]}]
-  (or provider
-      (case (or type :stdio)
-        :stdio (StdioServerTransportProvider.)
-        (throw (ex-info "Unsupported transport type"
-                        {:type type})))))
+(defonce *server* (atom nil))
+
+(defn default-tools
+  []
+  [basic/echo-tool
+   basic/ping-tool
+   std-lang/lang-emit-as-tool
+   std-lang/list-languages-tool
+   std-lang/list-modules-tool
+   clj-eval/clj-eval-tool
+   code-doc/init-template-tool
+   code-doc/deploy-template-tool
+   code-doc/publish-tool
+   code-manage/manage-tool
+   form-heal/list-edits-tool
+   form-heal/get-dsl-deps-tool
+   form-heal/refactor-directory-tool])
 
 (defn create-server
   ([]
    (create-server {}))
-  ([{:keys [transport tools server-info instructions immediate-execution]
-     :or {transport {:type :stdio}
-          tools []
-          server-info {:name "foundation-base" :version "0.1.0"}}}]
-   (let [provider (create-transport-provider transport)
-         spec (McpServer/sync provider)
-         spec (.serverInfo spec (:name server-info) (:version server-info))
-         spec (cond-> spec
-                instructions (.instructions instructions)
-                true (.immediateExecution (boolean immediate-execution)))
-         spec (reduce (fn [server-spec tool]
-                        (.tool server-spec
-                               (wrap/tool->sdk-tool tool)
-                               (wrap/tool-handler tool)))
-                      spec
-                      tools)
-         server (.build spec)]
-     {:provider provider
-      :server server
-      :tool-specs (atom (into {}
-                              (map (fn [tool]
-                                     [(:name tool) (wrap/clj-tool->spec tool)]))
-                              tools))})))
+  ([opts]
+   (base-server/create-server
+    (merge {:transport {:type :stdio}
+            :server-info {:name "foundation-mcp" :version "0.1.0"}
+            :tools (default-tools)}
+           opts))))
 
-(defn add-tool!
-  [{:keys [server tool-specs]} tool]
-  (let [spec (wrap/clj-tool->spec tool)]
-    (.addTool ^McpSyncServer server spec)
-    (swap! tool-specs assoc (:name tool) spec)
-    spec))
+(defn start-server
+  ([]
+   (start-server {}))
+  ([opts]
+   (swap! *server*
+          (fn [current]
+            (or current
+                (create-server opts))))))
 
-(defn remove-tool!
-  [{:keys [server tool-specs]} tool-name]
-  (.removeTool ^McpSyncServer server tool-name)
-  (swap! tool-specs dissoc tool-name)
-  tool-name)
-
-(defn close!
-  [{:keys [server]}]
-  (.closeGracefully ^McpSyncServer server)
-  nil)
+(defn stop-server
+  []
+  (swap! *server*
+         (fn [current]
+           (when current
+             (base-server/close! current))
+           nil)))
