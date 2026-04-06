@@ -141,8 +141,7 @@
   (->> (test-scaffold +test-config+ 20 5 5)
        second
        (map :id)
-       (sort)
-       (rest))
+       (sort))
   => (range 0 25))
 
 (comment

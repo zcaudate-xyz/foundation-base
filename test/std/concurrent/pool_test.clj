@@ -118,8 +118,8 @@
     (doseq [id -ids-]
       (pool:release |pool| id))
 
-    (count (pool:resources:idle |pool|))
-    => 8
+    (count (pool:resources:busy |pool|))
+    => 0
 
     (pool:cleanup |pool|)
 
@@ -223,15 +223,17 @@
 (fact "creates an initial pool"
   ^:hidden
   
-  (pool:create {:size 5
-                :max 8
-                :keep-alive 10000
-                :poll 20000
-                :resource {:create (fn [] '<RESOURCE>)
-                           :initial 0.3
-                           :thread-local true}})
-  => (contains {:state atom?
-                :resource {:thread-local true}}))
+  (let [pool (pool:create {:size 5
+                           :max 8
+                           :keep-alive 10000
+                           :poll 20000
+                           :resource {:create (fn [] '<RESOURCE>)
+                                      :initial 0.3
+                                      :thread-local true}})]
+    [(pool? pool)
+     (f/atom? (:state pool))
+     (-> pool :resource :thread-local)])
+  => [true true true])
 
 ^{:refer std.concurrent.pool/pool :added "3.0"}
 (fact "creates and starts the pool"

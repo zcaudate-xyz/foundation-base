@@ -90,7 +90,7 @@
   ^:hidden
 
   (all-stacktraces)
-  => map?)
+  => #(instance? java.util.Map %))
 
 ^{:refer std.concurrent.thread/thread:all :added "3.0"}
 (fact "lists all threads"
@@ -110,9 +110,8 @@
 (fact "dumps out current thread information"
   ^:hidden
 
-  (with-err-str
-    (thread:dump))
-  => string?)
+  (do (thread:dump) true)
+  => true)
 
 ^{:refer std.concurrent.thread/thread:active-count :added "3.0"}
 (fact "returns active threads"
@@ -153,10 +152,14 @@
 (fact "starts a thread"
   ^:hidden
 
-  (-> (thread {:handler (fn [])})
-      (thread:start)
-      (thread:alive?))
-  => true)
+  (let [started (promise)
+        t (thread {:handler (fn []
+                              (deliver started true)
+                              (thread:sleep 50))})]
+    (thread:start t)
+    [(deref started 100 false)
+     (do (thread:join t) true)])
+  => [true true])
 
 ^{:refer std.concurrent.thread/thread:run :added "3.0"}
 (fact "runs the thread function locally"

@@ -60,37 +60,37 @@
   :setup [(def |client| (eval-client))]}
 (fact "execute command on single, bulk and transact calls"
 
-  (req |client| {:type :eval :form 1}
-       {:post [inc inc]})
+  (req-fn |client| {:type :eval :form 1}
+          {:post [inc inc]})
   => 3
 
   (bulk |client|
         (fn []
-          (req |client| {:type :eval :form 1}
-               {:post [inc inc]})))
+          (req-fn |client| {:type :eval :form 1}
+                  {:post [inc inc]})))
   => [3]
 
   (bulk |client|
         (fn []
-          (req |client| {:type :eval :form 1}
-               {:pre [#(update % :form inc)]
-                :post [inc]})))
+          (req-fn |client| {:type :eval :form 1}
+                  {:pre [#(update % :form inc)]
+                   :post [inc]})))
   => [3]
 
   (bulk |client|
         (fn []
-          (req |client| {:type :eval :form 1}
-               {:pre [#(update % :form inc)]
-                :post  [inc]
-                :chain [inc]})))
+          (req-fn |client| {:type :eval :form 1}
+                  {:pre [#(update % :form inc)]
+                   :post  [inc]
+                   :chain [inc]})))
   => [4]
 
   (->> (transact |client|
                  (fn []
-                   (req |client| {:type :eval :form 1}
-                        {:pre   [#(update % :form inc)]
-                         :post  [inc]
-                         :chain [inc]})))
+                   (req-fn |client| {:type :eval :form 1}
+                           {:pre   [#(update % :form inc)]
+                            :post  [inc]
+                            :chain [inc]})))
        (map deref))
   => [4])
 
@@ -102,13 +102,13 @@
   ;; Manual
   ;;
   (let [state (atom {})
-        _ (req |client| {:type :eval :form 1}
-               {:pre  [(fn [x]
-                         (swap! state assoc :start (time/time-ns))
-                         x)]
-                :post [(fn [x]
-                         (swap! state assoc :end (time/time-ns))
-                         x)]})
+        _ (req-fn |client| {:type :eval :form 1}
+                  {:pre  [(fn [x]
+                            (swap! state assoc :start (time/time-ns))
+                            x)]
+                   :post [(fn [x]
+                            (swap! state assoc :end (time/time-ns))
+                            x)]})
         {:keys [start end]} @state]
     (time/format-ns (- end start)))
   => string?
@@ -117,8 +117,8 @@
   ;; With measure key
   ;;
   (def -p- (promise))
-  (req |client| {:type :eval :form 1}
-       {:measure #(deliver -p- %)})
+  (req-fn |client| {:type :eval :form 1}
+          {:measure #(deliver -p- %)})
 
   @-p-
   ;; {:output 1, :start 1600748490664158898, :end 1600748490664239782}
@@ -141,9 +141,9 @@
   ^:hidden
 
   (-> (req:bulk [+ {:debug true}]
-                (req + [1 2 3] {:debug true})
-                (req + [1 2 3] {:debug true})
-                (req - [4 5 6] {:debug true}))
+                (req-fn + [1 2 3] {:debug true})
+                (req-fn + [1 2 3] {:debug true})
+                (req-fn - [4 5 6] {:debug true}))
       (env/with-out-str))
   => string?)
 
@@ -195,10 +195,13 @@
 
 ^{:refer std.concurrent.request/req:opts-init :added "3.0"}
 (fact "initialise request opts"
-  (req:opts-init {:debug true
-                  :context {:line 1}})
-  => (contains {:pre [fn?]
-                :chain [fn?]}))
+  (let [opts (req:opts-init {:debug true
+                             :context {:line 1}})]
+    [(= 1 (count (:pre opts)))
+     (fn? (first (:pre opts)))
+     (= 1 (count (:chain opts)))
+     (fn? (first (:chain opts)))])
+  => [true true true true])
 
 ^{:refer std.concurrent.request/req:return :added "3.0"}
 (fact "returns the output"
@@ -313,42 +316,42 @@
 
   (bulk |client|
         (fn []
-          (req |client| {:type :eval, :form '(+ 1 2 3)})
-          (req |client| {:type :eval, :form '(+ 4 5 6)})))
+          (req-fn |client| {:type :eval, :form '(+ 1 2 3)})
+          (req-fn |client| {:type :eval, :form '(+ 4 5 6)})))
   => [6 15]
 
   (bulk |client|
         (fn []
-          (req |client| {:type :eval, :form '(+ 1 2 3)})
-          (req |client| {:type :eval, :form '(+ 4 5 6)}))
+          (req-fn |client| {:type :eval, :form '(+ 1 2 3)})
+          (req-fn |client| {:type :eval, :form '(+ 4 5 6)}))
         {:chain [#(apply + %)]})
   => 21
 
   (bulk |client|
         (fn []
-          (req |client| {:type :eval, :form 1} {:chain [inc]})
-          (req |client| {:type :eval, :form 2} {:chain [inc]})))
+          (req-fn |client| {:type :eval, :form 1} {:chain [inc]})
+          (req-fn |client| {:type :eval, :form 2} {:chain [inc]})))
   => [2 3]
 
   (bulk |client|
         (fn []
           (bulk |client|
                 (fn []
-                  (req |client| {:type :eval, :form 1} {:chain [inc]})
-                  (req |client| {:type :eval, :form 2} {:chain [inc]})))
-          (req |client| {:type :eval, :form 3} {:chain [inc]})
-          (req |client| {:type :eval, :form 4} {:chain [inc]})))
+                  (req-fn |client| {:type :eval, :form 1} {:chain [inc]})
+                  (req-fn |client| {:type :eval, :form 2} {:chain [inc]})))
+          (req-fn |client| {:type :eval, :form 3} {:chain [inc]})
+          (req-fn |client| {:type :eval, :form 4} {:chain [inc]})))
   => [[2 3] 4 5]
 
   (bulk |client|
         (fn []
           (bulk |client|
                 (fn []
-                  (req |client| {:type :eval, :form 1} {:chain [inc]})
-                  (req |client| {:type :eval, :form 2} {:chain [inc]}))
+                  (req-fn |client| {:type :eval, :form 1} {:chain [inc]})
+                  (req-fn |client| {:type :eval, :form 2} {:chain [inc]}))
                 {:chain [#(apply + %)]})
-          (req |client| {:type :eval, :form 3} {:chain [inc]})
-          (req |client| {:type :eval, :form 4} {:chain [inc]}))
+          (req-fn |client| {:type :eval, :form 3} {:chain [inc]})
+          (req-fn |client| {:type :eval, :form 4} {:chain [inc]}))
         {:chain [#(apply + %)]})
   => 14)
 
