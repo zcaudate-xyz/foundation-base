@@ -44,10 +44,37 @@
 
 
 ^{:refer code.doc.link.manage/format-manage-output :added "4.1"}
-(fact "TODO")
+(fact "supports custom formatters"
+  (format-manage-output {:value 1} (fn [{:keys [value]}] (str "value=" value)))
+  => "value=1"
+
+  (format-manage-output {:value 1} 'pr-str)
+  => "{:value 1}")
 
 ^{:refer code.doc.link.manage/run-manage-task :added "4.1"}
-(fact "TODO")
+(fact "resolves string tasks and merges formatter print options"
+  (with-redefs [manage/missing (fn [& args] (last args))]
+    (-> (run-manage-task "missing"
+                         [['code.doc] {:return :summary
+                                       :print {:summary true}}]
+                         'pr-str)
+        read-string))
+  => {:return :summary
+      :print {:summary false
+              :result false
+              :item false}})
 
 ^{:refer code.doc.link.manage/link-manage :added "4.1"}
-(fact "TODO")
+(fact "replaces only manage elements with rendered blocks"
+  (with-redefs [run-manage-task (fn [task args formatter]
+                                  (str task "|" formatter "|" (count args)))]
+    (-> {:articles {:demo {:elements [{:type :manage
+                                       :task 'missing
+                                       :args [1 2]
+                                       :formatter :edn}
+                                      {:type :text
+                                       :code "keep"}]}}}
+        (link-manage :demo)
+        (get-in [:articles :demo :elements])))
+  => [{:type :block :code "missing|:edn|2"}
+      {:type :text :code "keep"}])
