@@ -1256,7 +1256,35 @@
 
 
 ^{:refer std.block.heal.core/create-block-scan :added "4.1"}
-(fact "TODO")
+(fact "creates a scan window from the block bounds"
+  (let [lines ["(ab"
+               " cd)"]]
+    (level/create-block-scan
+     {:line [1 2]
+      :col 2
+      :last true}
+     lines))
+  => (contains {:line [1 2]
+                :col 2
+                :last true
+                :end-col nil
+                :offset 0
+                :snippet " ab\n cd)"}))
 
 ^{:refer std.block.heal.core/tighter-scan? :added "4.1"}
-(fact "TODO")
+(fact "checks whether a candidate scan is narrower"
+  (level/tighter-scan? {:line [1 3]
+                        :col 1
+                        :end-col 20}
+                       [2 2]
+                       4
+                       10)
+  => true
+
+  (level/tighter-scan? {:line [2 2]
+                        :col 4
+                        :end-col 10}
+                       [1 2]
+                       4
+                       10)
+  => false)
