@@ -252,7 +252,7 @@
                                (fn []
                                  :done))]
       [(main-loop {:state state})
-       (= (thread:current) (:main @state))]))
+       (= (Thread/currentThread) (:main @state))]))
   => [:done true])
 
 ^{:refer std.concurrent.bus/started?-bus :added "3.0"}

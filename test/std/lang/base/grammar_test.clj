@@ -223,4 +223,9 @@
 
 
 ^{:refer std.lang.base.grammar/default-lookup :added "4.1"}
-(fact "TODO")
+(fact "removes optional grammar categories from a lookup"
+  (default-lookup {:macro :macro
+                   :control-general :control
+                   :top-base :base
+                   :required :value})
+  => {:required :value})

@@ -1,5 +1,6 @@
 (ns std.concurrent.relay-test
   (:require [std.concurrent :as cc]
+            [std.concurrent.bus :as bus]
             [std.concurrent.relay :refer :all]
             [std.lib.component :as component]
             [std.lib.network :as network]
@@ -17,16 +18,23 @@
 
 ^{:refer std.concurrent.relay/with:bus :added "4.0"}
 (fact "sets the default relay bus"
-  ;; (with:bus [nil]
-  ;;   std.concurrent.relay/*bus*)
-  ;; => nil?
-  )
+  (with:bus [:hello]
+    *bus*)
+  => [:hello])
 
 ^{:refer std.concurrent.relay/attach-read-passive :added "4.0"}
-(fact "attaches a passive process to an input stream")
+(fact "attaches a passive process to an input stream"
+  @(attach-read-passive
+    {:raw (java.io.ByteArrayInputStream. (.getBytes "hello"))}
+    {:op :read-all})
+  => (contains {:output "hello"}))
 
 ^{:refer std.concurrent.relay/attach-interactive :added "4.0"}
-(fact "attaches a bus process to an input stream")
+(fact "attaches a bus process to an input stream"
+  (bus/bus:with-temp bus
+    (attach-interactive {:raw (java.io.ByteArrayInputStream. (.getBytes "hello"))
+                         :bus bus}))
+  => Thread)
 
 ^{:refer std.concurrent.relay/relay-stream :added "4.0"}
 (fact "creates a relay stream"

@@ -47,7 +47,11 @@
   => string?)
 
 ^{:refer std.image.base.display/render :added "3.0"}
-(fact "renders an image for output")
+(fact "renders an image for output"
+  (render {:data (byte-array [10 20 30 40])
+           :size [2 2]
+           :model (model/model :byte-gray)})
+  => string?)
 
 ^{:refer std.image.base.display/display :added "3.0"}
 (fact "outputs an ascii string based on image input"
@@ -56,11 +60,17 @@
     (display {:data (byte-array [10 20 30 40 50])
               :size [5 1]
               :model (model/model :byte-gray)}))
-  ;;"Ã#HXÕß¶$\n"
-  )
+  => string?)
 
 ^{:refer std.image.base.display/animate :added "3.0"}
-(fact "allows for animation of images to occur")
+(fact "allows for animation of images to occur"
+  (with-out-str
+    (animate [{:data (byte-array [10 20 30 40])
+               :size [2 2]
+               :model (model/model :byte-gray)}]
+             {:pause 0
+              :loop 1}))
+  => string?)
 
 (comment
   (./import)

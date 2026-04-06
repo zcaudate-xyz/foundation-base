@@ -57,11 +57,28 @@
 
 ^{:refer std.lang/rt:invoke :added "4.0"}
 (fact "rt:invoke"
-  "difficult to test without dependency injection")
+  (with-redefs [ut/lang-rt (fn [ns lang]
+                             [ns lang])
+                ptr/ptr (fn [lang m]
+                          [lang m])
+                std.lib.context.pointer/rt-invoke-ptr (fn [rt ptr code]
+                                                       [rt ptr code])]
+    (l/rt:invoke 'hello.core :lua '(+ 1 2)))
+  => [['hello.core :lua]
+      [:lua {:module 'hello.core}]
+      '(+ 1 2)])
 
 ^{:refer std.lang/rt:space :added "4.1"}
 (fact "rt:space"
-  "difficult to test due to test runner's context isolation")
+  (with-redefs [space/space (fn [ns]
+                              [:space ns])
+                ut/lang-context (fn [lang]
+                                  [:context lang])
+                std.lib.context.space/space:rt-get (fn [space ctx]
+                                                     [space ctx])]
+    (l/rt:space :lua 'hello.core))
+  => [[:space 'hello.core]
+      [:context :lua]])
 
 ^{:refer std.lang/get-entry :added "4.1"}
 (fact "get-entry"
@@ -75,4 +92,15 @@
 
 ^{:refer std.lang/force-reload :added "4.1"}
 (fact "force-reload"
-  "difficult to test without dependency injection")
+  (let [purged (atom [])]
+    (with-redefs [l/default-library (fn []
+                                      :library)
+                  l/get-book (fn [_ _]
+                               :book)
+                  std.lib.deps/deps-ordered (fn [_ _]
+                                              [])
+                  lib/lib:purge (fn [ns]
+                                  (swap! purged conj ns))]
+      [(l/force-reload 'hello.core :lua)
+       @purged]))
+  => [nil []])
