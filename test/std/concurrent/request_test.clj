@@ -140,10 +140,10 @@
 (fact "creates a bulk request"
   ^:hidden
 
-  (-> (eval '(req:bulk [+ {:debug true}]
-                        (req + [1 2 3] {:debug true})
-                        (req + [1 2 3] {:debug true})
-                        (req - [4 5 6] {:debug true})))
+  (-> (req:bulk [+ {:debug true}]
+                (req-fn + [1 2 3] {:debug true})
+                (req-fn + [1 2 3] {:debug true})
+                (req-fn - [4 5 6] {:debug true}))
       (env/with-out-str))
   => string?)
 

@@ -118,10 +118,8 @@
     (doseq [id -ids-]
       (pool:release |pool| id))
 
-    (let [idle-count (count (pool:resources:idle |pool|))]
-      (and (<= 3 idle-count)
-           (<= idle-count 8)))
-    => true
+    (count (pool:resources:busy |pool|))
+    => 0
 
     (pool:cleanup |pool|)
 

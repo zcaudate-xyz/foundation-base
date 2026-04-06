@@ -152,12 +152,14 @@
 (fact "starts a thread"
   ^:hidden
 
-  (let [t (thread {:handler (fn [] (thread:sleep 50))})]
+  (let [started (promise)
+        t (thread {:handler (fn []
+                              (deliver started true)
+                              (thread:sleep 50))})]
     (thread:start t)
-    (let [alive? (thread:alive? t)]
-      (thread:join t)
-      alive?))
-  => true)
+    [(deref started 100 false)
+     (do (thread:join t) true)])
+  => [true true])
 
 ^{:refer std.concurrent.thread/thread:run :added "3.0"}
 (fact "runs the thread function locally"
