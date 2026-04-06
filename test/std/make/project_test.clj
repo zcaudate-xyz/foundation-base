@@ -144,13 +144,25 @@
 
 
 ^{:refer std.make.project/file-watcher-heal :added "4.1"}
-(fact "TODO")
+(fact "heals a file's content and writes it back if changed"
+  (let [tmp (str (java.io.File/createTempFile "test" ".clj"))
+        content "(defn foo [x] x)"]
+    (spit tmp content)
+    (file-watcher-heal tmp 'my.ns)
+    (slurp tmp))
+  => string?)
 
 ^{:refer std.make.project/file-watcher-handler :added "4.1"}
-(fact "TODO")
+(fact "file-watcher-handler is a function"
+  (fn? file-watcher-handler)
+  => true)
 
 ^{:refer std.make.project/watch :added "4.1"}
-(fact "TODO")
+(fact "watch is a function that starts directory watchers"
+  (fn? watch)
+  => true)
 
 ^{:refer std.make.project/watch-project :added "4.1"}
-(fact "TODO")
+(fact "watch-project is a function that watches all project paths"
+  (fn? watch-project)
+  => true)

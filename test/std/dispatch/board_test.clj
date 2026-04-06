@@ -1,5 +1,6 @@
 (ns std.dispatch.board-test
   (:require [std.concurrent :as cc]
+            [std.dispatch.common :as common]
             [std.dispatch.board :refer :all]
             [std.lib.component :as component]
             [std.lib.future :as future])
@@ -148,7 +149,10 @@
 ^{:refer std.dispatch.board/stop-dispatch :added "3.0"}
 (fact "stops the board executor"
   (def -ex- (doto (create-dispatch +test-config+) (start-dispatch)))
-  (stop-dispatch -ex-))
+  (-> -ex-
+      (stop-dispatch)
+      (common/started?-dispatch))
+  => false)
 
 ^{:refer std.dispatch.board/create-dispatch :added "3.0"}
 (fact "creates the board executor"

@@ -90,8 +90,7 @@
   (image {:size [2 2]
           :model :byte-gray
           :data (byte-array [10 20 30 40])})
-  ;;=> #img[2 2]{:type java.awt.image.BufferedImage, :model :byte-gray}
-  )
+  => java.awt.image.BufferedImage)
 
 (comment
   (./import))

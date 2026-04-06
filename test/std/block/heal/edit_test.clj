@@ -43,10 +43,26 @@
   => '({:action :replace, :line 5, :col 19, :new-char ")"}))
 
 ^{:refer std.block.heal.edit/check-append-fn :added "4.0"}
-(fact "check for open unpaired")
+(fact "check for open unpaired"
+  (core/check-append-fn {:type :open})
+  => true
+
+  (core/check-append-fn {:type :open :pair-id 1})
+  => false)
 
 ^{:refer std.block.heal.edit/check-append-edits :added "4.0"}
-(fact "checks that append edits are value")
+(fact "checks that append edits are valid"
+  (core/check-append-edits
+   [{:type :open}
+    {:type :open}
+    {:type :close :pair-id 1}])
+  => true
+
+  (core/check-append-edits
+   [{:type :open}
+    {:type :close :pair-id 1}
+    {:type :open}])
+  => false)
 
 ^{:refer std.block.heal.edit/create-append-edits :added "4.0"}
 (fact "creates the append edits"
@@ -57,12 +73,20 @@
   => [{:action :insert, :line 1, :col 2, :new-char ")"}])
 
 ^{:refer std.block.heal.edit/check-remove-fn :added "4.0"}
-(fact "check for close unpaired")
+(fact "check for close unpaired"
+  (core/check-remove-fn {:type :close})
+  => true
+
+  (core/check-remove-fn {:type :close :pair-id 1})
+  => false)
 
 ^{:refer std.block.heal.edit/create-remove-edits :added "4.0"}
-(fact "creates removes edits")
-
-
+(fact "creates removes edits"
+  (core/create-remove-edits
+   [{:type :close :line 1 :col 2}
+    {:type :close :line 2 :col 3}])
+  => [{:action :remove, :line 2, :col 3}
+      {:action :remove, :line 1, :col 2}])
 
 
 

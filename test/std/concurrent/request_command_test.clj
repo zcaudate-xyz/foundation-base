@@ -3,19 +3,62 @@
   (:use [code.test :exclude [run]]))
 
 ^{:refer std.concurrent.request-command/format-input :added "3.0"}
-(fact "helper for formatting command input")
+(fact "helper for formatting command input"
+  (format-input {:format {:input (fn [input opts]
+                                   [input opts])}
+                 :options {:select [:id]}}
+                :hello
+                {:id 1 :skip true})
+  => [:hello {:id 1}])
 
 ^{:refer std.concurrent.request-command/format-output :added "3.0"}
-(fact "helper for formatting command input")
+(fact "helper for formatting command input"
+  (format-output {:format {:output (fn [output opts]
+                                     [output opts])}
+                  :options {:select [:id]}}
+                 :hello
+                 {:id 1 :skip true})
+  => [:hello {:id 1}])
 
 ^{:refer std.concurrent.request-command/run-request :added "3.0"}
-(fact "extensible function for command templates")
+(fact "extensible function for command templates"
+  (with-redefs [std.concurrent.request/req (fn [client command opts]
+                                             [client command opts])]
+    (run-request {:type :single
+                  :function (fn [args _]
+                              {:command args})}
+                 :client
+                 [:hello]
+                 {:async true}))
+  => [:client {:command [:hello]} {:async true}])
 
 ^{:refer std.concurrent.request-command/req:run :added "3.0"}
-(fact "runs a command")
+(fact "runs a command"
+  (with-redefs [run-request (fn [_ client input opts]
+                              [client input opts])]
+    (req:run {:options {:select [:id]
+                        :input (fn [args]
+                                 {:id (:id args)})
+                        :output (fn [_]
+                                  {:id 2})}
+              :format {:input (fn [input opts]
+                                [input opts])
+                       :output (fn [output opts]
+                                 [output opts])}
+              :process {:chain [inc]}}
+             :client
+             {:id 1 :value 2}
+             {:extra true}))
+  => [:client [{:id 1, :value 2} {:id 1}]
+      (contains {:chain [inc]
+                 :post [fn?]})])
 
 ^{:refer std.concurrent.request-command/req:command :added "3.0"}
-(fact "constructs a command")
+(fact "constructs a command"
+  (req:command {:type :single
+                :name :echo})
+  => (contains {:type :single
+                :name :echo}))
 
 (comment
   (./import)

@@ -4,7 +4,8 @@
             [jvm.namespace.dependent :as dependent]
             [clojure.string]
             [std.lib.invoke :as invoke]
-            [std.lib.result :as res])
+            [std.lib.result :as res]
+            [std.task :as task])
   (:use code.test))
 
 (defmacro with-temp-ns [[sym] & body]

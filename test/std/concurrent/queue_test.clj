@@ -21,10 +21,20 @@
   => java.util.concurrent.LinkedBlockingQueue)
 
 ^{:refer std.concurrent.queue/queue? :added "3.0"}
-(fact "checks if object is a `BlockingQueue`")
+(fact "checks if object is a `BlockingQueue`"
+  (q/queue? (q/queue))
+  => true
+
+  (q/queue? [])
+  => false)
 
 ^{:refer std.concurrent.queue/deque? :added "3.0"}
-(fact "checks if object is a `BlockingDeque`")
+(fact "checks if object is a `BlockingDeque`"
+  (q/deque? (q/deque))
+  => true
+
+  (q/deque? (q/queue))
+  => false)
 
 ^{:refer std.concurrent.queue/queue:fixed :added "3.0"}
 (fact "constructs a fixed size blocking queue"
@@ -34,8 +44,8 @@
 
 ^{:refer std.concurrent.queue/queue:limited :added "3.0"}
 (fact "constructs a limited queue"
-
-  (q/queue:limited 10))
+  (q/queue? (q/queue:limited 10))
+  => true)
 
 ^{:refer std.concurrent.queue/take :added "3.0"}
 (fact "takes an element from the queue"
@@ -60,8 +70,10 @@
 
 ^{:refer std.concurrent.queue/peek :added "3.0"}
 (fact "takes element at the front of the queue"
-
-  (q/peek (q/queue)))
+  (let [queue (q/queue 1 2 3)]
+    [(q/peek queue)
+     (vec queue)])
+  => [1 [1 2 3]])
 
 ^{:refer std.concurrent.queue/remaining-capacity :added "3.0"}
 (fact "returns the remaining capacity"

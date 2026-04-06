@@ -319,8 +319,14 @@
   :setup [(def ^:dynamic *dlm4*
             (parse/parse (slurp "test-data/std.block.heal/cases/002_complex.block")))]}
 (fact "constructs a single edit"
-
-  )
+  (indent/build-insert-edit
+   {:line 4 :col 7}
+   [{:char "("}
+    {:char "["}])
+  => {:action :insert
+      :line 4
+      :col 7
+      :new-char ")]"})
 
 ^{:refer std.block.heal.indent/build-insert-edits :added "4.0"
   :setup [(def ^:dynamic *dlm4*
@@ -443,4 +449,3 @@
   => {:correct? true, :index 986, :pair-id 480, :type :close, :style :square, :line 410, :col 51, :depth 25, :char "]"}
 
   )
-

@@ -513,7 +513,12 @@
 
 
 ^{:refer std.lang.typed.xtalk-infer/infer-op-spec-form :added "4.1"}
-(fact "TODO")
+(fact "infers result type from builtin op-spec for a given call form"
+  (types/type->data
+   (:type (infer-op-spec-form (ops/canonical-entry 'x:add)
+                              '(x:add 1 2)
+                              +ctx+)))
+  => {:kind :primitive :name :xt/num})
 
 (fact "infers xt self outputs from the first argument"
   (-> (infer-op-spec-form (ops/canonical-entry 'x:arr-push)

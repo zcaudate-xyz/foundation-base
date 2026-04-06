@@ -194,7 +194,11 @@
   => (contains {:start fn? :stop fn?}))
 
 ^{:refer std.concurrent.request/req:opts-init :added "3.0"}
-(fact "initialise request opts")
+(fact "initialise request opts"
+  (req:opts-init {:debug true
+                  :context {:line 1}})
+  => (contains {:pre [fn?]
+                :chain [fn?]}))
 
 ^{:refer std.concurrent.request/req:return :added "3.0"}
 (fact "returns the output"
@@ -425,7 +429,11 @@
   => map?)
 
 ^{:refer std.concurrent.request/req-fn :added "3.0"}
-(fact "function for req")
+(fact "function for req"
+  (binding [*inputs* (atom [])]
+    (req-fn :client {:type :eval :form 1})
+    @*inputs*)
+  => [{:type :eval :form 1}])
 
 ^{:refer std.concurrent.request/bulk:transact :added "3.0"
   :style/indent 1

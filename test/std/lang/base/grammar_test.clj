@@ -223,4 +223,12 @@
 
 
 ^{:refer std.lang.base.grammar/default-lookup :added "4.1"}
-(fact "TODO")
+(fact "returns the default lookup with optional categories removed"
+  (map? (default-lookup +op-all+))
+  => true
+
+  (contains? (default-lookup +op-all+) :functional-core)
+  => false
+
+  (contains? (default-lookup +op-all+) :builtin)
+  => true)
