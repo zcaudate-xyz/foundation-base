@@ -32,8 +32,8 @@
 
 ^{:refer std.lang.model-annex.spec-lean/emit-indent-body :added "4.1"}
 (fact "indents the body by 2 spaces"
-  (impl/emit-as :lean ['(letrec [x 1] x)])
-  => (fn [s] (clojure.string/includes? s "  ")))
+  (spec-lean/emit-indent-body [:indent-body "hello"] nil nil)
+  => "  \"hello\"")
 
 ^{:refer std.lang.model-annex.spec-lean/lean-args :added "4.1"}
 (fact "emits space-separated Lean arguments"

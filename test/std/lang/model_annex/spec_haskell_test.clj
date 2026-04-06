@@ -72,8 +72,8 @@
 
 ^{:refer std.lang.model-annex.spec-haskell/emit-indent-body :added "4.1"}
 (fact "indents body output by 2 spaces"
-  (impl/emit-as :haskell ['(letrec [x 1] x)])
-  => (fn [s] (clojure.string/includes? s "  ")))
+  (spec-haskell/emit-indent-body [:indent-body "hello"] nil nil)
+  => "  \"hello\"")
 
 ^{:refer std.lang.model-annex.spec-haskell/tf-defn :added "4.1"}
 (fact "emits Haskell function definition"

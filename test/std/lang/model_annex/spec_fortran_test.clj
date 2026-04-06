@@ -64,5 +64,5 @@
 
 ^{:refer std.lang.model-annex.spec-fortran/fortran-emit-for :added "4.1"}
 (fact "emits DO loop"
-  (impl/emit-as :fortran ['(for [i 1 10] (print i))])
+  (fortran-emit-for '(for [i 1 10] (print i)) +grammar+ {})
   => (fn [s] (clojure.string/includes? s "DO i =")))

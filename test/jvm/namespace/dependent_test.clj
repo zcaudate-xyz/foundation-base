@@ -44,5 +44,6 @@
 
 ^{:refer jvm.namespace.dependent/sort-topo :added "4.1"}
 (fact "topologically sorts namespaces by dependency order"
-  (sort-topo '[jvm.namespace.dependent std.lib])
-  => '[std.lib jvm.namespace.dependent])
+  (require '[jvm.namespace.dependent])
+  (sort-topo '[jvm.namespace.dependent-test jvm.namespace.dependent])
+  => '[jvm.namespace.dependent jvm.namespace.dependent-test])

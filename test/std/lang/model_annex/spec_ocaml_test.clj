@@ -37,8 +37,8 @@
 
 ^{:refer std.lang.model-annex.spec-ocaml/emit-indent-body :added "4.1"}
 (fact "indents the body by 2 spaces"
-  (impl/emit-as :ocaml ['(letrec [x 1] x)])
-  => (fn [s] (clojure.string/includes? s "  ")))
+  (spec-ocaml/emit-indent-body [:indent-body "hello"] nil nil)
+  => "  \"hello\"")
 
 ^{:refer std.lang.model-annex.spec-ocaml/emit-lines-with :added "4.1"}
 (fact "joins forms with a separator"
