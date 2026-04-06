@@ -32,3 +32,15 @@
            (json/read (slurp tmp-output)))]))
   => [{"type" "File" "program" {"type" "Program" "body" []} "comments" []}
       {"type" "File" "program" {"type" "Program" "body" []} "comments" []}])
+
+^{:refer code.tool.translate.js-ast/generate-ast :added "4.1"}
+(fact "generates ast using the build-ast runner (alias for translate-ast)"
+  ^:hidden
+
+  (let [tmp-input (fs/create-tmpfile "var y = 2;")
+        ast-json "{\"type\":\"File\",\"program\":{\"type\":\"Program\",\"body\":[]},\"comments\":[]}"]
+    (with-redefs [make/build-all (fn [target] target)
+                  os/sh (fn [{:keys [args] :as opts}]
+                          (assoc opts :out ast-json))]
+      (json/read (:out (js-ast/translate-ast (str tmp-input))))))
+  => {"type" "File" "program" {"type" "Program" "body" []} "comments" []})

@@ -1,7 +1,8 @@
 (ns code.manage-test
   (:require [code.manage :refer :all]
             [code.project :as project]
-            [std.lib.env :as env])
+            [std.lib.env :as env]
+            [std.task :as task])
   (:use code.test)
   (:refer-clojure :exclude [import]))
 
@@ -304,4 +305,6 @@
 
 
 ^{:refer code.manage/heal-code :added "4.1"}
-(fact "TODO")
+(fact "heal-code is a transform task for fixing code formatting"
+  (task/task? heal-code)
+  => true)

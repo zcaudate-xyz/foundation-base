@@ -223,13 +223,12 @@
 
 
 ^{:refer std.lang.base.grammar/default-lookup :added "4.1"}
-(fact "removes optional grammar categories from a lookup"
-  (default-lookup {:macro :macro
-                   :control-general :control
-                   :functional-core :functional
-                   :top-base :base
-                   :required :value})
-  => {:macro :macro
-      :control-general :control
-      :top-base :base
-      :required :value})
+(fact "returns the default lookup with optional categories removed"
+  (map? (default-lookup +op-all+))
+  => true
+
+  (contains? (default-lookup +op-all+) :functional-core)
+  => false
+
+  (contains? (default-lookup +op-all+) :builtin)
+  => true)

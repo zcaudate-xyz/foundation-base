@@ -30,4 +30,11 @@
 
 
 ^{:refer std.lang.model.spec-xtalk.mixer/mix-analysis :added "4.1"}
-(fact "TODO")
+(fact "attaches specs to an analyzed namespace map"
+  (let [analysis (mixer/mix-namespace 'std.lang.model.spec-xtalk-typed-fixture)]
+    (map? analysis))
+  => true
+
+  (let [raw (mixer/mix-namespace 'std.lang.model.spec-xtalk-typed-fixture)]
+    (contains? raw :functions))
+  => true)

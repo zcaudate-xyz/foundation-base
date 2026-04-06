@@ -253,4 +253,11 @@
 
 
 ^{:refer std.make.compile/with:compile-filter :added "4.1"}
-(fact "TODO")
+(fact "sets the compile filter binding for the body"
+  (with:compile-filter #(clojure.string/ends-with? % ".lua")
+    (fn? *compile-filter*))
+  => true
+
+  (with:compile-filter nil
+    (nil? *compile-filter*))
+  => true)

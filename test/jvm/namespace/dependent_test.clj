@@ -43,4 +43,7 @@
 
 
 ^{:refer jvm.namespace.dependent/sort-topo :added "4.1"}
-(fact "TODO")
+(fact "topologically sorts namespaces by dependency order"
+  (require '[jvm.namespace.dependent])
+  (sort-topo '[jvm.namespace.dependent-test jvm.namespace.dependent])
+  => '[jvm.namespace.dependent jvm.namespace.dependent-test])
