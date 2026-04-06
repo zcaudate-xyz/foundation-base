@@ -1287,7 +1287,7 @@
                        [1 2]
                        4
                        10)
-  => false))
+  => false)
 
 ^{:refer std.block.heal.core/tighter-scan? :added "4.1"}
 (fact "checks if a candidate scan window is narrower than the current one"
