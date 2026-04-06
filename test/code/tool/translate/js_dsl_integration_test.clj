@@ -5,6 +5,15 @@
             [std.lib.os :as os])
   (:use code.test))
 
+(defonce ^:private +js-parser-ready+
+  (delay
+    (let [root (str (fs/path "scripts/js_parser"))
+          parser-path (fs/path root "node_modules" "@babel" "parser")]
+      (when-not (fs/exists? parser-path)
+        (os/sh {:root root
+                :args ["npm" "install"]}))
+      root)))
+
 (def +sample-js+
   "
   import React from 'react';
@@ -32,6 +41,7 @@
   ")
 
 (defn parse-js [js-code]
+  @+js-parser-ready+
   (let [tmp-file (fs/create-tmpfile js-code)
         proc (os/sh "node" "scripts/js_parser/parse.js" (str tmp-file) {:wait false})
         _    (os/sh-wait proc)

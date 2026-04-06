@@ -132,28 +132,33 @@
     (list :- (str "new " cls-str "(" args-str ")"))))
 
 (def +features+
-  (-> (grammar/build :exclude [:pointer :block :data-range])
-      (grammar/build:override
-       {:var        {:macro #'php-var :emit :macro}
-        :defn       {:macro #'php-defn :emit :macro}
-        :fn         {:macro #'php-defn- :emit :macro}
-        :index      {:macro #'php-dot :emit :macro}
-        :new        {:macro #'php-new :emit :macro}
-        :and        {:raw "&&"}
-        :or         {:raw "||"}
-        :not        {:raw "!"}
-        :eq         {:raw "=="}
-        :neq        {:raw "!="}
-        :gt         {:raw ">"}
-        :lt         {:raw "<"}
-        :gte        {:raw ">="}
-        :lte        {:raw "<="}})
-       (grammar/build:override fn/+php+)
-       (grammar/build:extend
-        {:phparray   {:op :phparray :symbol #{'array} :raw "array"}
-         :concat     {:op :concat :symbol #{'concat} :raw "." :emit :infix :value true}
-         :echo       {:op :echo :symbol #{'echo} :raw "echo" :emit :prefix}
-         :die        {:op :die  :symbol #{'die}  :raw "die"  :emit :prefix}})))
+  (let [base (-> (grammar/build :exclude [:pointer :block :data-range])
+                 (grammar/build:override
+                  {:var        {:macro #'php-var :emit :macro}
+                   :defn       {:macro #'php-defn :emit :macro}
+                   :fn         {:macro #'php-defn- :emit :macro}
+                   :index      {:macro #'php-dot :emit :macro}
+                   :new        {:macro #'php-new :emit :macro}
+                   :and        {:raw "&&"}
+                   :or         {:raw "||"}
+                   :not        {:raw "!"}
+                   :eq         {:raw "=="}
+                   :neq        {:raw "!="}
+                   :gt         {:raw ">"}
+                   :lt         {:raw "<"}
+                   :gte        {:raw ">="}
+                   :lte        {:raw "<="}}))
+        base-keys (set (keys base))
+        fn-overrides (select-keys fn/+php+ base-keys)
+        fn-extensions (apply dissoc fn/+php+ base-keys)]
+    (cond-> base
+      (seq fn-overrides) (grammar/build:override fn-overrides)
+      (seq fn-extensions) (grammar/build:extend fn-extensions)
+      true (grammar/build:extend
+            {:phparray   {:op :phparray :symbol #{'array} :raw "array"}
+             :concat     {:op :concat :symbol #{'concat} :raw "." :emit :infix :value true}
+             :echo       {:op :echo :symbol #{'echo} :raw "echo" :emit :prefix}
+             :die        {:op :die  :symbol #{'die}  :raw "die"  :emit :prefix}}))))
 
 (def +template+
   (->> {:banned #{:keyword}

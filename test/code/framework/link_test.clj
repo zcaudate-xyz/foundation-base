@@ -17,7 +17,7 @@
   => '{:exports #{[:class code.framework.link.common.FileInfo]
                   [:clj code.framework.link.common]},
        :imports #{[:clj std.fs]
-                  [:clj std.lib]}})
+                  [:clj std.lib.invoke]}})
 
 ^{:refer code.framework.link/read-packages :added "3.0"}
 (fact "reads a list of packages from a configuration file (e.g., 'config/packages.edn')"

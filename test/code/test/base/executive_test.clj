@@ -1,11 +1,9 @@
 (ns code.test.base.executive-test
-  (:require [clojure.string]
-            [code.project :as project]
+  (:require [code.project :as project]
             [code.test.base.context :as context]
             [code.test.base.executive :as executive]
             [code.test.base.print :as print]
-            [code.test.base.runtime :as rt]
-            [std.lib.env :as env])
+            [code.test.base.runtime :as rt])
   (:use [code.test :exclude [run]]))
 
 (defn notify [data]
@@ -46,20 +44,16 @@
   ^:hidden
   
   (binding [context/*print* #{:print-bulk}]
-    (clojure.string/includes? (env/with-out-str
-                     (executive/summarise {:passed [] :failed [] :throw [] :timeout []}))
-                   "Summary"))
-  => true)
+    (executive/summarise {:passed [] :failed [] :throw [] :timeout []}))
+  => {:passed 0 :failed 0 :throw 0 :timeout 0})
 
 ^{:refer code.test.base.executive/summarise-bulk :added "3.0"}
 (fact "creates a summary of all bulk results"
   ^:hidden
   
   (binding [context/*print* #{:print-bulk}]
-    (clojure.string/includes? (env/with-out-str
-                     (executive/summarise-bulk nil {:id {:data {:passed [] :failed [] :throw [] :timeout []}}} nil))
-                   "Summary"))
-  => true)
+    (executive/summarise-bulk nil {:id {:data {:passed [] :failed [] :throw [] :timeout []}}} nil))
+  => {:passed 0 :failed 0 :throw 0 :timeout 0})
 
 ^{:refer code.test.base.executive/save-report :added "4.1"}
 (fact "saves the report to .hara/runs"

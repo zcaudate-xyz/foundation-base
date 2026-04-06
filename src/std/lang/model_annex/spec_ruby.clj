@@ -64,26 +64,31 @@
                     ["}"])))))
 
 (def +features+
-  (-> (grammar/build :exclude [:pointer :block :data-range])
-      (grammar/build:override
-       {:var        {:macro #'ruby-var :emit :macro}
-        :and        {:raw "&&"}
-        :or         {:raw "||"}
-        :not        {:raw "!" :emit :prefix}
-        :eq         {:raw "=="}
-        :fn         {:macro  #'ruby-fn   :emit :macro}
-        :neq        {:raw "!="}
-        :gt         {:raw ">"}
-        :lt         {:raw "<"}
-        :gte        {:raw ">="}
-        :lte        {:raw "<="}})
-      (grammar/build:override fn/+ruby+)
-      (grammar/build:extend
-       {:assign     {:op :assign :symbol #{':=} :raw "=" :emit :infix}
-        :puts       {:op :puts :symbol #{'puts} :raw "puts" :emit :prefix}
-        :nil?       {:op :nil? :symbol #{'nil?} :raw "nil?" :emit :postfix}
-        :attr       {:op :attr :symbol #{'attr_accessor} :raw "attr_accessor" :emit :prefix}
-        :end        {:op :end  :symbol #{'end}  :raw "end"  :emit :token}})))
+  (let [base (-> (grammar/build :exclude [:pointer :block :data-range])
+                 (grammar/build:override
+                  {:var        {:macro #'ruby-var :emit :macro}
+                   :and        {:raw "&&"}
+                   :or         {:raw "||"}
+                   :not        {:raw "!" :emit :prefix}
+                   :eq         {:raw "=="}
+                   :fn         {:macro  #'ruby-fn   :emit :macro}
+                   :neq        {:raw "!="}
+                   :gt         {:raw ">"}
+                   :lt         {:raw "<"}
+                   :gte        {:raw ">="}
+                   :lte        {:raw "<="}}))
+        base-keys (set (keys base))
+        fn-overrides (select-keys fn/+ruby+ base-keys)
+        fn-extensions (apply dissoc fn/+ruby+ base-keys)]
+    (cond-> base
+      (seq fn-overrides) (grammar/build:override fn-overrides)
+      (seq fn-extensions) (grammar/build:extend fn-extensions)
+      true (grammar/build:extend
+            {:assign     {:op :assign :symbol #{':=} :raw "=" :emit :infix}
+             :puts       {:op :puts :symbol #{'puts} :raw "puts" :emit :prefix}
+             :nil?       {:op :nil? :symbol #{'nil?} :raw "nil?" :emit :postfix}
+             :attr       {:op :attr :symbol #{'attr_accessor} :raw "attr_accessor" :emit :prefix}
+             :end        {:op :end  :symbol #{'end}  :raw "end"  :emit :token}}))))
 
 (def +template+
   (->> {:banned #{}
