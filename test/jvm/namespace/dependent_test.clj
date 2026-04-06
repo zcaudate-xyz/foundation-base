@@ -40,3 +40,7 @@
   (->> (reeval '#{jvm.namespace.dependent})
        (map str))
   => ["jvm.namespace.dependent-test"])
+
+
+^{:refer jvm.namespace.dependent/sort-topo :added "4.1"}
+(fact "TODO")

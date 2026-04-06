@@ -1253,3 +1253,10 @@
    {:at {:lead {:style :paren}}}
    [{:pair-id 1} {:pair-id 1}])
   => seq?)
+
+
+^{:refer std.block.heal.core/create-block-scan :added "4.1"}
+(fact "TODO")
+
+^{:refer std.block.heal.core/tighter-scan? :added "4.1"}
+(fact "TODO")

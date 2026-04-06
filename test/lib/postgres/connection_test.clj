@@ -70,3 +70,7 @@
        (catch Throwable t t))
   => (contains-in
       [com.impossibl.postgres.jdbc.PGDirectConnection]))
+
+
+^{:refer lib.postgres.connection/load-impl :added "4.1"}
+(fact "TODO")
