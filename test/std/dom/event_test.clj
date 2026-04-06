@@ -46,11 +46,13 @@
 
 ^{:refer std.dom.event/handle-event :added "3.0"}
 (fact "handles an event given all necessary inputs"
-  (handle-event (dom/dom-create :mock/pane)
-                {:id :dom/set}
-                :item
-                :listener
-                {:value 1})
+  (with-redefs [std.dom.react/dom-set-state identity]
+    (handle-event {:tag :mock/pane}
+                  {:id :dom/set}
+                  :item
+                  :listener
+                  {:value 1}))
   => (contains {:id :dom/set
                 :item :item
-                :listener :listener}))
+                :listener :listener
+                :value 1}))

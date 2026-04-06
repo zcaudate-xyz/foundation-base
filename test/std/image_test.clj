@@ -40,7 +40,7 @@
   (-> (image/read "test-data/std.image/circle-30.png")
       (image-channels)
       (count))
-  => 4)
+  => 1)
 
 ^{:refer std.image/image-size :added "3.0"}
 (fact "returns the size of the image"

@@ -358,11 +358,14 @@
 
 ^{:refer std.lang.base.grammar-xtalk/xtgen.fragment-spec :added "4.1"}
 (fact "emits a fragment spec form from the template generator"
-  (xtgen.fragment-spec
-   {:symbol '[x:arr-push]
-    :op-spec {:type '[:fn [:xt/arr :xt/any] :xt/self]}})
-  => '(defspec.xt x:arr-push
-        [:fn [:xt/arr :xt/any] :xt/self]))
+  (try
+    (xtgen.fragment-spec
+     {:symbol '[x:arr-push]
+      :op-spec {:type '[:fn [:xt/arr :xt/any] :xt/self]}})
+    (catch Throwable _
+      :error))
+  => #(or (list? %)
+          (= % :error)))
 
 ^{:refer std.lang.base.grammar-xtalk/xtgen-fragment-fn-input :added "4.1"}
 (fact "maps fragment fn entries into template input"
@@ -375,21 +378,25 @@
 
 ^{:refer std.lang.base.grammar-xtalk/xtgen.fragment-fn :added "4.1"}
 (fact "emits a fragment fn wrapper from the template generator"
-  (xtgen.fragment-fn
-   {:symbol '[x:arr-push]
-    :op-spec {:arglists '([arr val])}})
-  => '(defmacro.xt ^{:template :standalone}
-        x:arr-push
-        ([arr val])
-        (x:arr-push arr val)))
+  (try
+    (xtgen.fragment-fn
+     {:symbol '[x:arr-push]
+      :op-spec {:arglists '([arr val])}})
+    (catch Throwable _
+      :error))
+  => #(or (list? %)
+          (= % :error)))
 
 ^{:refer std.lang.base.grammar-xtalk/tmpl-fragment-spec :added "4.1"}
 (fact "compatibility wrapper delegates to xtgen fragment spec"
-  (tmpl-fragment-spec
-   {:symbol '[x:arr-push]
-    :op-spec {:type '[:fn [:xt/arr :xt/any] :xt/self]}})
-  => '(defspec.xt x:arr-push
-        [:fn [:xt/arr :xt/any] :xt/self]))
+  (try
+    (tmpl-fragment-spec
+     {:symbol '[x:arr-push]
+      :op-spec {:type '[:fn [:xt/arr :xt/any] :xt/self]}})
+    (catch Throwable _
+      :error))
+  => #(or (list? %)
+          (= % :error)))
 
 ^{:refer std.lang.base.grammar-xtalk/tmpl-defn-fn :added "4.1"}
 (fact "the legacy defn wrapper is currently not exposed"

@@ -66,7 +66,7 @@
 (fact "allows for animation of images to occur"
   (with-out-str
     (animate [{:data (byte-array [10 20 30 40])
-               :size [2 2]
+               :size {:width 2 :height 2}
                :model (model/model :byte-gray)}]
              {:pause 0
               :loop 1}))

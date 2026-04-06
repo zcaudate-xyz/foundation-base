@@ -59,8 +59,8 @@
 (fact "rt:invoke"
   (with-redefs [ut/lang-rt (fn [ns lang]
                              [ns lang])
-                ptr/ptr (fn [lang m]
-                          [lang m])
+                l/ptr (fn [lang m]
+                        [lang m])
                 std.lib.context.pointer/rt-invoke-ptr (fn [rt ptr code]
                                                        [rt ptr code])]
     (l/rt:invoke 'hello.core :lua '(+ 1 2)))
@@ -99,8 +99,8 @@
                                :book)
                   std.lib.deps/deps-ordered (fn [_ _]
                                               [])
-                  lib/lib:purge (fn [ns]
-                                  (swap! purged conj ns))]
+                  l/lib:purge (fn [ns]
+                                (swap! purged conj ns))]
       [(l/force-reload 'hello.core :lua)
        @purged]))
   => [nil []])

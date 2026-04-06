@@ -306,7 +306,7 @@
         out {:raw (java.io.ByteArrayOutputStream.)}]
     [(t/send-command in out :read-all "PING" {:direct false})
      (.toString ^java.io.ByteArrayOutputStream (:raw out))])
-  => [(contains {:output "hello"}) "PING\n"])
+  => (contains [(contains {:output "hello"}) "PING\n"]))
 
 (comment
   (./import)

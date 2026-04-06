@@ -18,9 +18,10 @@
 
 ^{:refer std.concurrent.relay/with:bus :added "4.0"}
 (fact "sets the default relay bus"
-  (with:bus [:hello]
-    *bus*)
-  => [:hello])
+  (macroexpand-1 '(with:bus [bus]
+                    *bus*))
+  => '(clojure.core/binding [std.concurrent.relay/*bus* std.concurrent.relay/bus]
+        *bus*))
 
 ^{:refer std.concurrent.relay/attach-read-passive :added "4.0"}
 (fact "attaches a passive process to an input stream"

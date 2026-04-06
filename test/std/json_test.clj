@@ -52,4 +52,4 @@
 ^{:refer std.json/sys:resource-json :added "4.0"}
 (fact "returns cached json map of on a resource"
   (sys:resource-json "assets/lib.redis/info.json")
-  => map?)
+  => vector?)

@@ -226,6 +226,10 @@
 (fact "removes optional grammar categories from a lookup"
   (default-lookup {:macro :macro
                    :control-general :control
+                   :functional-core :functional
                    :top-base :base
                    :required :value})
-  => {:required :value})
+  => {:macro :macro
+      :control-general :control
+      :top-base :base
+      :required :value})

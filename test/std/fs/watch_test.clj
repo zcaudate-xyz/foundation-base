@@ -64,8 +64,8 @@
                              (reset! out [type (.getName ^File file)]))
                  :excludes []
                  :filters []
-                 :kinds #{StandardWatchEventKinds/ENTRY_CREATE}}]
-    (process-event watcher StandardWatchEventKinds/ENTRY_CREATE (io/file "project.clj"))
+                 :kinds #{java.nio.file.StandardWatchEventKinds/ENTRY_CREATE}}]
+    (process-event watcher java.nio.file.StandardWatchEventKinds/ENTRY_CREATE (io/file "project.clj"))
     @out)
   => [:create "project.clj"])
 
@@ -73,31 +73,41 @@
 (fact "initiates the watcher with the given callbacks"
   ^:hidden
 
-  (let [dir      (str (io/file "test-scratch/watch-run"))
-        _        (.mkdirs (io/file dir))
-        service  (.newWatchService (FileSystems/getDefault))
-        out      (promise)
-        watcher  {:paths [dir]
-                  :callback (fn [type file]
-                              (deliver out [type (.getName ^File file)]))
-                  :options {:recursive false :mode :sync}
-                  :root dir
-                  :service service
-                  :seen (atom #{})
-                  :filters []
-                  :excludes []
-                  :includes []
-                  :kinds #{StandardWatchEventKinds/ENTRY_CREATE}}
-        _        (register-path watcher dir)
-        runner   (future
-                   (try
-                     (run-watcher watcher)
-                     (catch java.nio.file.ClosedWatchServiceException _ :closed)))
-        _        (spit (str dir "/hello.watch") "hello")
-        result   (deref out 2000 :timeout)
-        _        (.close service)]
-    @runner
-    result)
+  (let [dir     (str (io/file "test-scratch/watch-run"))
+        out     (promise)
+        event   (reify java.nio.file.WatchEvent
+                  (kind [_] java.nio.file.StandardWatchEventKinds/ENTRY_CREATE)
+                  (count [_] 1)
+                  (context [_] (Paths/get "hello.watch" (make-array String 0))))
+        key     (reify java.nio.file.WatchKey
+                  (isValid [_] true)
+                  (pollEvents [_] [event])
+                  (reset [_] true)
+                  (cancel [_] nil)
+                  (watchable [_] (Paths/get dir (make-array String 0))))
+        service (let [calls (atom 0)]
+                  (reify java.nio.file.WatchService
+                    (close [_] nil)
+                    (poll [_] nil)
+                    (poll [_ _ _] nil)
+                    (take [_]
+                      (if (= 1 (swap! calls inc))
+                        key
+                        (throw (java.nio.file.ClosedWatchServiceException.))))))]
+    (try
+      (run-watcher {:paths [dir]
+                    :callback (fn [type file]
+                                (deliver out [type (.getName ^File file)]))
+                    :options {:recursive false :mode :sync}
+                    :root dir
+                    :service service
+                    :seen (atom #{})
+                    :filters []
+                    :excludes []
+                    :includes []
+                    :kinds #{java.nio.file.StandardWatchEventKinds/ENTRY_CREATE}})
+      (catch java.nio.file.ClosedWatchServiceException _))
+    @out)
   => [:create "hello.watch"])
 
 ^{:refer std.fs.watch/start-watcher :added "3.0"}
@@ -127,7 +137,7 @@
 (fact "the watch interface provided for java.io.File"
   (watcher ["src"] (fn [_ _]) {:recursive false})
   => (contains {:paths ["src"]
-                :options {:recursive false}}))
+                :options (contains {:recursive false})}))
 
 ^{:refer std.fs.watch/watch-callback :added "3.0"}
 (fact "helper function to create watch callback"
