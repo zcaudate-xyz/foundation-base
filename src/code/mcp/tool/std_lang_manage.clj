@@ -8,6 +8,7 @@
    (some (fn [arglist]
            (or (= n (count arglist))
                (and (seq arglist)
+                    (>= (count arglist) 2)
                     (= '& (get arglist (- (count arglist) 2)))
                     (<= (- (count arglist) 2) n))))
          (:arglists (meta f)))))

@@ -17,9 +17,7 @@
                            (.printStackTrace e)
                             {:error (.getMessage e)}))
             raw-result (if (and (map? raw-result)
-                                (or (empty? raw-result)
-                                    (and (contains? raw-result :changes) (empty? (:changes raw-result)))
-                                    (and (contains? raw-result :updated) (not (:updated raw-result)))))
+                                (empty? raw-result))
                          "Task completed, but no changes were reported or found."
                          raw-result)]
         (common/response raw-result))

@@ -54,8 +54,7 @@
 (def list-languages-tool
   {:name "std-lang-list"
    :description "List the currently installed `std.lang` language books available to the MCP session."
-   :inputSchema {:type "object"
-                  :properties {}}
+   :inputSchema {:type "object"}
    :implementation #'list-languages-fn})
 
 (defn list-modules-fn
