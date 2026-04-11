@@ -26,7 +26,7 @@
   [list]
   (var out [])
   (while (not= (. list _head) -/EMPTY_MARKER)
-    (x:arr-push out (. list _head))
+    (xt/x:arr-push out (. list _head))
     (:= list (. list _rest)))
   (return out))
 
@@ -76,9 +76,9 @@
                   :to-iter  -/list-to-iter
                   :to-array -/list-to-array}]
    [spec/IEdit   {:is-mutable (fn:> true)
-                  :to-mutable k/identity
+                  :to-mutable (fn [x] (return x))
                   :is-persistent (fn:> true)
-                  :to-persistent k/identity}]
+                  :to-persistent (fn [x] (return x))}]
    [spec/IEmpty  {:empty  -/list-empty}]
    [spec/IEq     {:eq     interface-collection/coll-eq}]
    [spec/IHash   {:hash   (interface-common/wrap-with-cache

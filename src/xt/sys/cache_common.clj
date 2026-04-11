@@ -56,8 +56,8 @@
   "gets the cache map"
   {:added "4.0"}
   [cache]
-  (return (xt/x:arr-juxt (-/list-keys cache)
-                      k/identity
+  (return (xtd/arr-juxt (-/list-keys cache)
+                      (fn [x] (return x))
                       (fn:> [key] (-/get cache key)))))
 
 (defmacro.xt meta-key

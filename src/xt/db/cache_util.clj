@@ -8,19 +8,19 @@
   "checks if entry exists"
   {:added "4.0"}
   [rows table-key id]
-  (return (not= nil (xt/x:get-in rows [table-key id]))))
+  (return (not= nil (xtd/get-in rows [table-key id]))))
 
 (defn.xt get-entry
   "gets entry by id"
   {:added "4.0"}
   [rows table-key id]
-  (return (xt/x:get-in rows [table-key id])))
+  (return (xtd/get-in rows [table-key id])))
 
 (defn.xt swap-if-entry
   "modifies entry if exists"
   {:added "4.0"}
   [rows table-key id f]
-  (let [entry (xt/x:get-in rows [table-key id])]
+  (let [entry (xtd/get-in rows [table-key id])]
     (if entry
       (let [#{record} entry
             _ (f record)
@@ -58,7 +58,7 @@
     (xt/for:object [[id new-record] m]
       (xt/x:set-in out [table-key id]
                 (-/merge-single rows table-key id new-record
-                                (or new-fn k/identity)))))
+                                (or new-fn (fn [x] (return x)))))))
   (return out))
 
 (defn.xt get-ids
@@ -73,8 +73,8 @@
   {:added "4.0"}
   [rows table-key]
   (if (xt/x:nil? table-key)
-    (return (-> (xt/x:arr-juxt (xt/x:obj-keys rows)
-                            k/identity
+    (return (-> (xtd/arr-juxt (xt/x:obj-keys rows)
+                            (fn [x] (return x))
                             (fn [k] (return (-/all-records rows k))))
                 (xt/x:obj-filter (fn [e]
                                 (return (or (xt/x:nil? e)
@@ -106,7 +106,7 @@
   "find link attributes"
   {:added "4.0"}
   [schema table-key field]
-  (let [attr (xt/x:get-in schema [table-key field "ref"])
+  (let [attr (xtd/get-in schema [table-key field "ref"])
         _    (if (not attr)
                (xt/x:err (xt/x:cat "Not a valid link type: " (xt/x:json-encode [table-key field]))))
         #{ns type rval} attr
@@ -191,7 +191,7 @@
    (return (-> (xt/x:arr-keep ids
                            (fn [id]
                              (return (-/remove-single rows schema table-key id))))
-               (xt/x:arr-mapcat k/identity)))))
+               (xt/x:arr-mapcat (fn [x] (return x)))))))
 
 
 ;;
@@ -275,14 +275,14 @@
       (xt/for:object [[field links] ref-links]
         (xt/for:object [[link-id _] links]
           (-/add-single-link rows schema table-key row-id field link-id)
-          (x:arr-push out {:table table-key
+          (xt/x:arr-push out {:table table-key
                            :id row-id
                            :field field
                            :link-id link-id})))
       (xt/for:object [[field links] rev-links]
         (xt/for:object [[link-id _] links]
           (-/add-single-link rows schema table-key row-id field link-id)
-          (x:arr-push out {:table table-key
+          (xt/x:arr-push out {:table table-key
                            :id row-id
                            :field field
                            :link-id link-id})))))

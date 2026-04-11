@@ -41,7 +41,7 @@
   "creates a new mock worker
  
    (!.js
-    (internal/new-mock k/identity))
+    (internal/new-mock (fn [x] (return x))))
    => {\"::\" \"worker.mock\", \"listeners\" [nil]}"
   {:added "4.0"}
   [listener]

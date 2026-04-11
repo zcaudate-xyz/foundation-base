@@ -68,7 +68,7 @@
   "gets the queue meta"
   {:added "4.0"}
   [cache]
-  (return (xt/x:json-decode (or (x:cache-get cache "__meta__:queue")
+  (return (xt/x:json-decode (or (xt/x:cache-get cache "__meta__:queue")
                            "{}"))))
 
 (defn.xt buffer-item
@@ -147,7 +147,7 @@
                        (fn:> [k]
                          (:? (xt/x:starts-with? k group-key)
                              (xt/x:sym-name k)))
-		       k/identity))))
+		       (fn [x] (return x))))))
 
 (defn.xt purge-queue
   "removes all groups and items in a queue"
@@ -268,16 +268,16 @@
    (var bidx (-/buffer-get-index cache queue))
    (var res [])
    (cond (> bidx gidx)
-         (do (xt/for:index [i [(+ gidx 1) (+ bidx (x:offset-rlen 1))]]
-               (x:arr-push res (cache/get cache (-/BUFFER-KEY queue i))))
+         (do (xt/for:index [i [(+ gidx 1) (+ bidx (xt/x:offset-rlen 1))]]
+               (xt/x:arr-push res (cache/get cache (-/BUFFER-KEY queue i))))
              (-/group-set-index cache queue group-id bidx)
              (return [(xt/x:len res) res bidx]))
 
          (< bidx gidx)
-         (do (xt/for:index [i [(+ gidx 1) (x:offset-rlen size)]]
-               (x:arr-push res (cache/get cache (-/BUFFER-KEY queue i))))
-             (xt/for:index [i [0 (+ bidx (x:offset-rlen 1))]]
-               (x:arr-push res (cache/get cache (-/BUFFER-KEY queue i))))
+         (do (xt/for:index [i [(+ gidx 1) (xt/x:offset-rlen size)]]
+               (xt/x:arr-push res (cache/get cache (-/BUFFER-KEY queue i))))
+             (xt/for:index [i [0 (+ bidx (xt/x:offset-rlen 1))]]
+               (xt/x:arr-push res (cache/get cache (-/BUFFER-KEY queue i))))
              (-/group-set-index cache queue group-id bidx)
              (return [(xt/x:len res) res bidx]))
 

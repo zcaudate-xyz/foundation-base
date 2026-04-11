@@ -3,6 +3,7 @@
 
 (l/script :xtalk
   {:require [[xt.lang.common-spec :as xt]
+             [xt.lang.common-data :as xtd]
              [xt.lang.event-common :as event-common]]})
 
 (defn.xt new-log
@@ -43,7 +44,7 @@
   (var #{processed} log)
   (var total (xt/x:len processed))
   (return (xt/x:arr-slice processed 0
-                       (xt/x:min n total))))
+                       (xt/x:m-min n total))))
 
 (defn.xt get-filtered
   "filters entries using predicate"
@@ -58,9 +59,9 @@
   [log n]
   (var #{processed} log)
   (var total (xt/x:len processed))
-  (return (xt/x:arr-rslice processed
-                        (xt/x:max 0 (- total n))
-                        total)))
+  (return (xtd/arr-rslice processed
+                          (xt/x:m-max 0 (- total n))
+                          total)))
 
 (defn.xt get-slice
   "gets a slice of the log entries"
@@ -69,8 +70,8 @@
   (var #{processed} log)
   (var total (xt/x:len processed))
   (return (xt/x:arr-slice processed
-                       (xt/x:min (xt/x:max 0 start) total)
-                       (xt/x:min (xt/x:max 0 finish) total))))
+                       (xt/x:m-min (xt/x:m-max 0 start) total)
+                       (xt/x:m-min (xt/x:m-max 0 finish) total))))
 
 (defn.xt clear
   "clears all processed entries"
@@ -95,7 +96,7 @@
   (xt/for:object [[k kt] cache]
     (when (< interval (- t kt))
       (xt/x:del-key cache k)
-      (x:arr-push out k)))
+      (xt/x:arr-push out k)))
   (return out))
 
 
@@ -143,9 +144,9 @@
         
         :else
         (do (xt/x:set-key cache key t)
-            (xt/x:arr-pushl processed
-                         (xt/x:clone-nested data)
-                         maximum)
+            (xtd/arr-pushl processed
+                           (xtd/clone-nested data)
+                           maximum)
             (when callback (callback data t))
             (xt/for:object [[id entry] listeners]
               (var #{callback meta} entry)

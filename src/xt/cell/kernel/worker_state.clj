@@ -160,7 +160,7 @@
   (return
    (task/task-from-async
     (fn [resolve reject]
-      (x:with-delay
+      (xt/x:with-delay
        (fn []
          (resolve (-/fn-trigger worker op signal status body)))
        ms)))))
@@ -253,7 +253,7 @@
   (return
    (task/task-from-async
     (fn [resolve reject]
-      (x:with-delay
+      (xt/x:with-delay
        (fn []
          (resolve (-/fn-ping)))
        ms)))))
@@ -276,7 +276,7 @@
   (return
    (task/task-from-async
     (fn [resolve reject]
-      (x:with-delay
+      (xt/x:with-delay
        (fn []
          (resolve (-/fn-echo arg)))
        ms)))))
@@ -299,7 +299,7 @@
   (return
    (task/task-from-async
     (fn [resolve reject]
-      (x:with-delay
+      (xt/x:with-delay
        (fn []
          (try
            (-/fn-error)

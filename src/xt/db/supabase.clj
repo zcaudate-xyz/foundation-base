@@ -108,7 +108,7 @@
   (when newv
     (var nid (xt/x:get-key newv id-key))
     (when (xt/x:not-nil? nid)
-      (x:arr-push ids nid)))
+      (xt/x:arr-push ids nid)))
   (when (and oldv (or (== (xt/x:get-key payload "eventType") "DELETE")
                      ;; include oldv-id on PK change updates
                      (and newv
@@ -117,7 +117,7 @@
     (var oid (xt/x:get-key oldv id-key))
     (when (and (xt/x:not-nil? oid)
                (not (xt/x:arr-some ids (fn:> [x] (== x oid)))))
-      (x:arr-push ids oid)))
+      (xt/x:arr-push ids oid)))
   (var events (-/payload->xdb-events payload {"id-key" id-key}))
   (xt/for:array [e events]
     (xdb/sync-event xdb e))

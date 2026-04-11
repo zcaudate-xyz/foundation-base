@@ -32,7 +32,7 @@
   (xt/for:object [[k entry] cache]
     (when (< interval (- t (. entry t)))
       (xt/x:del-key cache k)
-      (x:arr-push out k)))
+      (xt/x:arr-push out k)))
   (return out))
 
 (defn.xt queue-latest

@@ -20,8 +20,8 @@
   "merges query with clause"
   {:added "4.0"}
   [q-0 q-1]
-  (var arr-0 (xt/x:arr-filter (xt/x:arrayify q-0) k/not-empty?))
-  (var arr-1 (xt/x:arr-filter (xt/x:arrayify q-1) k/not-empty?))
+  (var arr-0 (xt/x:arr-filter (xtd/arrayify q-0) k/not-empty?))
+  (var arr-1 (xt/x:arr-filter (xtd/arrayify q-1) k/not-empty?))
   (when (xt/x:is-empty? arr-0)
     (return arr-1))
   (when (xt/x:is-empty? arr-1)
@@ -29,9 +29,9 @@
   (var out [])
   (xt/for:array [e-0 arr-0]
     (xt/for:array [e-1 arr-1]
-      (x:arr-push out (xt/x:obj-assign-nested
-                       (xt/x:walk e-0 k/identity k/identity)
-                       (xt/x:walk e-1 k/identity k/identity)))))
+      (xt/x:arr-push out (xt/x:obj-assign-nested
+                       (xt/x:walk e-0 (fn [x] (return x)) (fn [x] (return x)))
+                       (xt/x:walk e-1 (fn [x] (return x)) (fn [x] (return x)))))))
   (return out))
 
 (defn.xt filter-scope
@@ -91,8 +91,8 @@
   (var llen (xt/x:len link))
   (when (== 1 llen)
     (return [ltag [{} ["*/data"]]]))
-  (var lmap (xt/x:arr-filter link xt/is-object?))
-  (var larr (xt/x:arr-filter link xt/is-array?))
+  (var lmap (xt/x:arr-filter link xt/x:is-object?))
+  (var larr (xt/x:arr-filter link xt/x:is-array?))
   (when (== 0 (xt/x:len larr))
     (:= larr [["*/data"]]))
   (when (== 0 (xt/x:len lmap))
@@ -117,7 +117,7 @@
       (var e (xt/x:get-key table k))
       (when (==  "ref" (xt/x:get-key e "type"))
         (var link-key (xt/x:get-path e ["ref" "ns"]))
-        (cond (xt/is-object? v)
+        (cond (xt/x:is-object? v)
               (-/get-query-tables schema link-key v acc)
               
               :else
@@ -128,7 +128,7 @@
   "get columns for given keys"
   {:added "4.0"}
   [schema table-key ks]
-  (var link-arr (xt/x:arr-filter ks xt/is-array?))
+  (var link-arr (xt/x:arr-filter ks xt/x:is-array?))
   (var linked (-> (xt/x:arr-map link-arr -/get-link-standard)
                   (xt/x:obj-from-pairs)))
   (var cols   (xt/x:get-key schema table-key))
@@ -164,7 +164,7 @@
   (cond (xt/x:is-empty? input)
         (return [])
 
-        (xt/is-array? input)
+        (xt/x:is-array? input)
         (return input)
 
         :else
@@ -174,12 +174,12 @@
   "calculated linked tree given query"
   {:added "4.0"}
   [schema table-name where returning opts]
-  (var table-fn   (xt/x:get-key opts "table_fn" k/identity))
-  (var column-fn  (xt/x:get-key opts "column_fn" k/identity))
+  (var table-fn   (xt/x:get-key opts "table_fn" (fn [x] (return x))))
+  (var column-fn  (xt/x:get-key opts "column_fn" (fn [x] (return x))))
   (:= where (-/as-where-input where))
   (:= returning (or returning ["*/data"]))
-  (var where-pred  (fn:> [e] (and (xt/is-object? e) (xt/x:nil? (xt/x:get-key  e "::")))))
-  (var custom-pred (fn:> [e] (and (xt/is-object? e) (xt/x:is-string? (xt/x:get-key  e "::")))))
+  (var where-pred  (fn:> [e] (and (xt/x:is-object? e) (xt/x:nil? (xt/x:get-key  e "::")))))
+  (var custom-pred (fn:> [e] (and (xt/x:is-object? e) (xt/x:is-string? (xt/x:get-key  e "::")))))
   (var custom (xt/x:arr-filter returning custom-pred))
   (var data   (-/get-data-columns schema table-name returning))
   (var links  (-/get-link-columns schema table-name returning))

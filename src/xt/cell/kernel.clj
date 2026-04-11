@@ -68,7 +68,7 @@
         (xt/x:is-string? ctx)
         (return (-/GX-val ctx))
 
-        (xt/is-object? ctx)
+        (xt/x:is-object? ctx)
         (if (== (. ctx ["::"]) "cell")
           (return ctx)
           (return (. ctx ["cell"])))
@@ -159,7 +159,7 @@
   "gets the view in context"
   {:added "4.0"}
   [path ctx]
-  (return (-/fn-access-view k/identity path [] ctx)))
+  (return (-/fn-access-view (fn [x] (return x)) path [] ctx)))
 
 ;;
 ;; FNS
@@ -435,7 +435,7 @@
   (var out (-/view-val path ctx))
   (when (or (xt/x:nil? out) (xt/x:is-empty? subpath))
     (return out))
-  (return (xt/x:get-in out subpath)))
+  (return (xtd/get-in out subpath)))
 
 (defn.xt get-for
   "gets the subview after update"

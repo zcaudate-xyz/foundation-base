@@ -64,7 +64,7 @@
    "jsonb_array_elements_text" {:type "macro" :fn -/sqlite-json-values}
    "jsonb_array_elements"      {:type "macro" :fn -/sqlite-json-values}
    "jsonb_object_keys"         {:type "macro" :fn -/sqlite-json-keys}
-   "\"core/util\".as_array"    {:type "macro" :fn k/identity}})
+   "\"core/util\".as_array"    {:type "macro" :fn (fn [x] (return x))}})
 
 (defn.xt encode-bool
   "encodes a boolean to sql"
@@ -94,7 +94,7 @@
   {:added "4.0"}
   [op opts]
   (return (or (xt/x:get-key -/OPERATORS op)
-              (xt/x:get-in opts ["operators" op])
+              (xtd/get-in opts ["operators" op])
                op)))
 
 (defn.xt encode-json
@@ -118,8 +118,8 @@
         (xt/x:is-boolean? v)
         (return (-/encode-bool v))
         
-        (or (xt/is-array? v)
-            (xt/is-object? v))
+        (or (xt/x:is-array? v)
+            (xt/x:is-object? v))
         (return (-/encode-json v))
 
         (xt/x:is-number? v)
@@ -219,7 +219,7 @@
   (var #{args} v)
   (var #{querystr-fn} opts)
   (var arg-fn (fn [arg]
-                (cond (and (xt/is-object? arg)
+                (cond (and (xt/x:is-object? arg)
                            (not (xt/x:has-key? arg "::")))
                       (return (querystr-fn arg "" opts))
 
@@ -255,7 +255,7 @@
   "loop function to encode"
   {:added "4.0"}
   [v column-fn opts loop-fn]
-  (cond (and (xt/is-object? v)
+  (cond (and (xt/x:is-object? v)
              (xt/x:has-key? v "::"))
         (return (-/encode-sql v column-fn opts loop-fn))
 
@@ -272,13 +272,13 @@
   (var col (column-fn key))
   (var encode-fn
        (fn [v]
-         (cond (and (xt/is-object? v)
+         (cond (and (xt/x:is-object? v)
                     (xt/x:has-key? v "::"))
                (return (-/encode-loop-fn v column-fn opts -/encode-loop-fn))
                
-               (xt/is-array? v)
+               (xt/x:is-array? v)
                (cond (and (== 1 (xt/x:len v))
-                          (xt/is-array? (xt/x:first v))
+                          (xt/x:is-array? (xt/x:first v))
                           (xt/x:arr-every (xt/x:first v) k/is-string?))
                      (return (xt/x:cat "(" (xt/x:join ", " (xt/x:arr-map (xt/x:first v)
                                                                 -/encode-value))
@@ -299,7 +299,7 @@
                
                :else
                (return (-/encode-value v)))))
-  (cond (xt/is-array? v)
+  (cond (xt/x:is-array? v)
         (return (xt/x:cat col
                        " " (-/encode-operator (xt/x:first v) opts)
                        " " (-> (xt/x:arr-slice v 1 (xt/x:len v))
@@ -313,7 +313,7 @@
   "helper for encode-query-string"
   {:added "4.0"}
   ([params opts]
-   (var column-fn  (xt/x:get-key opts "column_fn" k/identity))
+   (var column-fn  (xt/x:get-key opts "column_fn" (fn [x] (return x))))
    (var out := "")
    (xt/for:object [[key v] params]
      (when (< 0 (xt/x:len out))
@@ -325,7 +325,7 @@
   "encodes a query string"
   {:added "4.0"}
   ([params prefix opts]
-   (var out (-> (xt/x:arrayify params)
+   (var out (-> (xtd/arrayify params)
                 (xt/x:arr-map (fn:> [p] (-/encode-query-single-string p opts)))
                 (xt/x:arr-filter k/not-empty?)))
    (cond (== 0 (xt/x:len out))
@@ -386,7 +386,7 @@
   "default return format-fn"
   {:added "4.0"}
   [input nest-fn column-fn opts]
-  (cond (xt/is-object? input)
+  (cond (xt/x:is-object? input)
         (if (xt/x:has-key? input "::")
           (return (-/encode-sql input column-fn opts -/encode-loop-fn))
           (return (xt/x:cat (xt/x:get-key input "expr")
@@ -394,7 +394,7 @@
                              (xt/x:cat " AS " (xt/x:get-key input "as"))
                              ""))))
         
-        (xt/is-array? input)
+        (xt/x:is-array? input)
         (return (nest-fn input))
 
         (xt/x:is-string? input)
@@ -444,11 +444,11 @@
   "sqlite return format function"
   {:added "4.0"}
   [input nest-fn column-fn]
-  (cond (xt/is-object? input)
+  (cond (xt/x:is-object? input)
         (return (xt/x:cat "'" (xt/x:get-key input "as") "'"
                        ", " (xt/x:get-key input "expr")))
         
-        (xt/is-array? input)
+        (xt/x:is-array? input)
         (return (nest-fn input))
 
         (xt/x:is-string? input)

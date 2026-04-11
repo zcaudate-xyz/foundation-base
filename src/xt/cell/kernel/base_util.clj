@@ -75,7 +75,7 @@
                (xt/x:is-function? pred)
                (pred signal ctx)
                
-               (xt/is-object? pred)
+               (xt/x:is-object? pred)
                (xt/x:get-key pred signal)
                
                :else
@@ -96,7 +96,7 @@
                     (if (xt/x:is-function? x)
                       (return ["fn" (xt/x:to-string x)])
                       (return x)))
-                  k/identity)))
+                  (fn [x] (return x)))))
 
 (defn.xt arg-decode
   "decodes function in data tree"
@@ -104,12 +104,12 @@
   [arg]
   (return (xt/x:walk arg
                   (fn [x]
-                    (if (and (xt/is-array? x)
+                    (if (and (xt/x:is-array? x)
                              (== 2 (xt/x:len x))
                              (== "fn" (xt/x:first x)))
                       (return (xt/x:eval (+ "(" (xt/x:second x) ")")))
                       (return x)))
-                  k/identity)))
+                  (fn [x] (return x)))))
 
 
 ;;

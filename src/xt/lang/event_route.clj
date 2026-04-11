@@ -4,6 +4,7 @@
 
 (l/script :xtalk
   {:require [[xt.lang.common-spec :as xt]
+             [xt.lang.common-data :as xtd]
              [xt.lang.event-common :as event-common]]})
 
 (defspec.xt RoutePath
@@ -144,19 +145,20 @@
   "creates interim from url"
   {:added "4.0"}
   [url]
-  (var arr (xt/x:split (xt/x:cat "/" url) "?"))
+  (var arr (xt/x:str-split (xt/x:cat "/" url) "?"))
   (var body (xt/x:first arr))
   (var search nil)
   (when (< 1 (xt/x:len arr))
     (:= search (xt/x:second arr)))
-  (var path (-> (xt/x:split body "/")
-                (xt/x:arr-filter k/not-empty?)))
+  (var path (-> (xt/x:str-split body "/")
+                (xt/x:arr-filter (fn [x]
+                                   (return (< 0 (xt/x:len x)))))))
   (var params {})
   (when search
-    (xt/for:array [pair (xt/x:split search "&")]
-                 (var [key val] (xt/x:split pair "="))
+    (xt/for:array [pair (xt/x:str-split search "&")]
+                 (var [key val] (xt/x:str-split pair "="))
                  (xt/x:set-key params key val)))
-  (cond (xt/x:is-empty? params)
+  (cond (xtd/obj-empty? params)
         (return {:path path :params {}})
 
         :else
@@ -171,11 +173,11 @@
   (xt/for:object [[key val] (or (xt/x:get-key params (xt/x:json-encode path))
                                {})]
     (when val
-      (x:arr-push param-arr (xt/x:cat key "=" val))))
+      (xt/x:arr-push param-arr (xt/x:cat key "=" val))))
   (return
-   (xt/x:cat (xt/x:arr-join path "/")
-          (:? (xt/x:not-empty? param-arr)
-              (xt/x:cat "?" (xt/x:arr-join param-arr "&"))
+   (xt/x:cat (xt/x:str-join path "/")
+          (:? (xtd/arr-not-empty? param-arr)
+              (xt/x:cat "?" (xt/x:str-join "&" param-arr))
               ""))))
 
 (defn.xt path-to-tree
@@ -186,7 +188,7 @@
   (var arr [])
   (xt/for:array [[i v] path]
     (xt/x:set-key out (xt/x:json-encode arr) v)
-    (x:arr-push arr v))
+    (xt/x:arr-push arr v))
   (when terminate
     (xt/x:set-key out (xt/x:json-encode arr) nil))
   (return out))
@@ -206,8 +208,8 @@
   [tree]
   (var path [])
   (var v    (xt/x:get-key tree (xt/x:json-encode path)))
-  (while (xt/x:not-empty? v)
-    (x:arr-push path v)
+  (while (xtd/arr-not-empty? v)
+    (xt/x:arr-push path v)
     (:= v (xt/x:get-key tree (xt/x:json-encode path))))
   (return path))
 
@@ -269,7 +271,7 @@
       (:= changed true))
     (when changed
       (xt/x:set-key all (xt/x:json-encode arr) true))
-    (x:arr-push arr v))
+    (xt/x:arr-push arr v))
   (return all))
 
 (defn.xt changed-path
@@ -421,14 +423,14 @@
   
   ^MERGE
   (xt/x:obj-assign tree (-/path-to-tree npath terminate))
-  (cond (xt/x:is-empty? nparams)
+  (cond (xtd/obj-empty? nparams)
         (xt/x:del-key all-params pkey)
         
         :else
         (xt/x:set-key all-params pkey nparams))
 
   (var #{history} route)
-  (xt/x:arr-pushl history url 50)
+  (xtd/arr-pushl history url 50)
   (return
    (event-common/trigger-listeners
     route
@@ -456,14 +458,14 @@
 
   ^MERGE
   (xt/x:obj-assign tree (-/path-to-tree npath true))
-  (cond (xt/x:is-empty? nparams)
+  (cond (xtd/obj-empty? nparams)
         (xt/x:del-key all-params pkey)
         
         :else
         (xt/x:set-key all-params pkey nparams))
 
   (var #{history} route)
-  (xt/x:arr-pushl history (-/get-url route) 50)
+  (xtd/arr-pushl history (-/get-url route) 50)
   (return
    (event-common/trigger-listeners
     route
@@ -481,7 +483,7 @@
   (xt/x:set-key tree pkey value)
   
   (var #{history} route)
-  (xt/x:arr-pushl history (-/get-url route) 50)
+  (xtd/arr-pushl history (-/get-url route) 50)
   (return
    (event-common/trigger-listeners
     route
@@ -502,18 +504,18 @@
   (cond (not= pvalue value)
         (do (cond (xt/x:nil? value)
                   (xt/x:del-key pparams param)
-
+                  
                   :else
                   (xt/x:set-key pparams param value))
 
-            (cond (xt/x:is-empty? pparams)
+            (cond (xtd/obj-empty? pparams)
                   (xt/x:del-key all-params pkey)
                   
                   :else
                   (xt/x:set-key all-params pkey pparams))
 
             (var #{history} route)
-            (xt/x:arr-pushl history (-/get-url route) 50)
+            (xtd/arr-pushl history (-/get-url route) 50)
             (return
              (event-common/trigger-listeners
               route

@@ -19,7 +19,7 @@
   (var arr (node/node-array-for _root _size _shift _tail idx false))
   
   (when arr
-    (var out (xt/x:get-idx arr (x:offset (node/impl-mask idx))))
+    (var out (xt/x:get-idx arr (xt/x:offset (node/impl-mask idx))))
     (return (interface-common/impl-denormalise out))))
 
 (defgen.xt vector-to-iter
@@ -27,7 +27,7 @@
   {:added "4.0"}
   [vector]
   (var #{_size} vector)
-  (xt/for:index [idx [0 (x:offset-rlen _size)]]
+  (xt/for:index [idx [0 (xt/x:offset-rlen _size)]]
     (yield (-/vector-get-idx vector idx))))
 
 (defn.xt vector-to-array
@@ -36,8 +36,8 @@
   [vector]
   (var #{_size} vector)
   (var out [])
-  (xt/for:index [idx [0 (x:offset-rlen _size)]]
-    (x:arr-push out (-/vector-get-idx vector idx)))
+  (xt/for:index [idx [0 (xt/x:offset-rlen _size)]]
+    (xt/x:arr-push out (-/vector-get-idx vector idx)))
   (return out))
 
 (defn.xt vector-new
@@ -80,7 +80,7 @@
   (when (< (- _size (node/impl-offset _size))
            node/WIDTH)
     (var n_tail (xt/x:arr-clone _tail))
-    (x:arr-push n_tail (interface-common/impl-normalise x))
+    (xt/x:arr-push n_tail (interface-common/impl-normalise x))
     (return (-/vector-new (node/ensure-persistent _root)
                           (+ _size 1)
                           _shift
@@ -159,11 +159,11 @@
     (return vector))
   (when (== _size 1)
     (xt/x:set-key vector "_size" 0)
-    (x:arr-pop _tail)
+    (xt/x:arr-pop _tail)
     (return vector))
   (when (<  0 (node/impl-mask (- _size 1)))
     (xt/x:set-key vector "_size" (- _size 1))
-    (x:arr-pop _tail)
+    (xt/x:arr-pop _tail)
     (return vector))
 
   (var #{edit-id} _root)
@@ -198,7 +198,7 @@
   (node/ensure-editable _root)
   (when (< (- _size (node/impl-offset _size))
            node/WIDTH)
-    (x:arr-push _tail (interface-common/impl-normalise x))
+    (xt/x:arr-push _tail (interface-common/impl-normalise x))
     (xt/x:set-key vector "_size" (+ _size 1))
     (return vector))
   

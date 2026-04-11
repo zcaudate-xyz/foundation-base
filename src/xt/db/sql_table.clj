@@ -86,7 +86,7 @@
   (var ordered (xt/x:arr-keep (base-schema/table-order lookup)
                            (fn [col]
                              (return (:? (xt/x:has-key? flat col) [col (xt/x:get-key flat col)] nil)))))
-  (var column-fn  (xt/x:get-key opts "column_fn" k/identity))
+  (var column-fn  (xt/x:get-key opts "column_fn" (fn [x] (return x))))
   (var emit-pair-fn
        (fn [pair]
          (var [table-name data] pair)

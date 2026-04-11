@@ -2,11 +2,12 @@
   (:require [std.lang :as l]))
 
 (l/script :xtalk
-  {:require [[xt.lang.common-spec :as xt]]})
+  {:require [[xt.lang.common-spec :as xt]
+             [xt.lang.common-data :as xtd]]})
 
-(def.xt CACHED_SCHEMA (x:lu-create))
+(def.xt CACHED_SCHEMA (xt/x:lu-create))
 
-(def.xt CACHED_LOOKUP (x:lu-create))
+(def.xt CACHED_LOOKUP (xt/x:lu-create))
 
 (def.xt ^{:arglists '([e])}
   get-order (fn:> [e] (xt/x:get-key e "order")))
@@ -27,8 +28,8 @@
   {:added "4.0"}
   [schema]
   (return  (xt/x:arr-sort (xt/x:obj-keys schema)
-                       k/identity
-                       k/str-lt)))
+                       (fn [x] (return x))
+                       xt/x:str-lt)))
 
 (defn.xt get-cached-schema
   "get lookup"
@@ -48,7 +49,7 @@
    (return (-> (xt/x:obj-vals table)
                (xt/x:arr-filter (fn:> [e] (and (xt/x:is-number? (xt/x:get-key e "order"))
                                             (not= (xt/x:get-key e "type") "ref"))))
-               (xt/x:arr-sort   -/get-order k/lt)
+               (xt/x:arr-sort   -/get-order xt/x:lt)
                (xt/x:arr-map    -/get-ident)))))
 
 (defn.xt create-ref-keys
@@ -59,7 +60,7 @@
    (return (-> (xt/x:obj-vals table)
                (xt/x:arr-filter (fn:> [e] (and (xt/x:is-number? (xt/x:get-key e "order"))
                                             (== (xt/x:get-key e "type") "ref"))))
-               (xt/x:arr-sort   -/get-order k/lt)
+               (xt/x:arr-sort   -/get-order xt/x:lt)
                (xt/x:arr-map    -/get-ident)))))
 
 (defn.xt create-rev-keys
@@ -80,14 +81,14 @@
   (return (-> (xt/x:obj-vals table)
               (xt/x:arr-filter (fn [e]
                               (return (xt/x:is-number? (xt/x:get-key e "order")))))
-              (xt/x:arr-sort   -/get-order k/lt))))
+              (xt/x:arr-sort   -/get-order xt/x:lt))))
 
 (defn.xt create-defaults
   "creates defaults from sql inputs"
   {:added "4.0"}
   [schema table-name]
   (var table := (xt/x:get-key schema table-name))
-  (return (xt/x:obj-keepf table
+  (return (xtd/obj-keepf table
                        (fn [m]
                          (return (and (xt/x:get-key m "sql")
                                       (xt/x:has-key? (xt/x:get-key m "sql")
@@ -161,17 +162,17 @@
   {:added "4.0"}
   [schema table-name]
   (return (xt/x:arr-map (-/table-entries schema table-name)
-                     -/get-ident-id)))
+                        -/get-ident-id)))
 
 (defn.xt create-table-order
   "creates the table order"
   {:added "4.0"}
   [lookup]
   (return (-> (xt/x:arr-sort (xt/x:obj-pairs lookup)
-                          (fn [pair]
-                            (return (xt/x:get-key (xt/x:second pair) "position")))
-                          k/lt)
-              (xt/x:arr-map k/first))))
+                             (fn [pair]
+                               (return (xt/x:get-key (xt/x:second pair) "position")))
+                             xt/x:lt)
+              (xt/x:arr-map xt/x:first))))
 
 (defn.xt table-order
   "table order with caching"
@@ -190,10 +191,10 @@
   
   (var out {})
   (var ref-fn (fn:> [ntable vdata] (-/table-coerce schema ntable vdata ctypes)))
-  (when (xt/is-array? data)
+  (when (xt/x:is-array? data)
     (return (xt/x:arr-map data (fn:> [vdata] (ref-fn table vdata)))))
   (xt/for:object [[key v] data]
-    (var rec (xt/x:get-in schema [table key]))
+    (var rec (xtd/get-in schema [table key]))
     (cond (xt/x:nil? rec)
           (xt/x:set-key out key v)
 

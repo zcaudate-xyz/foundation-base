@@ -29,7 +29,7 @@
   "stores the current worker service registry"
   {:added "4.0"}
   [service]
-  (x:global-set __CELL_SERVICE service)
+  (xt/x:global-set __CELL_SERVICE service)
   (return (!:G __CELL_SERVICE)))
 
 (defn.xt ^{:cell/action "@cell/get-service"
@@ -38,7 +38,7 @@
   "gets the current worker service registry"
   {:added "4.0"}
   []
-  (return (:? (x:global-has? __CELL_SERVICE)
+  (return (:? (xt/x:global-has? __CELL_SERVICE)
               (!:G __CELL_SERVICE)
               nil)))
 
@@ -48,7 +48,7 @@
   "stores the current worker bindings registry"
   {:added "4.0"}
   [bindings]
-  (x:global-set __CELL_BINDINGS bindings)
+  (xt/x:global-set __CELL_BINDINGS bindings)
   (return (!:G __CELL_BINDINGS)))
 
 (defn.xt ^{:cell/action "@cell/get-bindings"
@@ -57,7 +57,7 @@
   "gets the current worker bindings registry"
   {:added "4.0"}
   []
-  (return (:? (x:global-has? __CELL_BINDINGS)
+  (return (:? (xt/x:global-has? __CELL_BINDINGS)
               (!:G __CELL_BINDINGS)
               {})))
 

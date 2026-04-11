@@ -136,7 +136,7 @@
   "adds listener to a form"
   {:added "4.0"}
   [form listener-id fields callback meta]
-  (:= fields (xt/x:arrayify fields))
+  (:= fields (xtd/arrayify fields))
   (return
    (event-common/add-listener
     form listener-id "form" callback
@@ -174,7 +174,7 @@
    (event-common/trigger-listeners
     form
     {:type   event-type
-     :fields (xt/x:arrayify fields)})))
+     :fields (xtd/arrayify fields)})))
 
 (defn.xt set-field
   "sets the field"
@@ -323,7 +323,7 @@
   [form field]
   (var #{result} form)
   (var #{fields} result)
-  (return (== "ok" (xt/x:get-in fields [field "status"]))))
+  (return (== "ok" (xtd/get-in fields [field "status"]))))
 
 (defn.xt check-field-errored
   "checks that field has passed"
@@ -331,7 +331,7 @@
   [form field]
   (var #{result} form)
   (var #{fields} result)
-  (return (== "errored" (xt/x:get-in fields [field "status"]))))
+  (return (== "errored" (xtd/get-in fields [field "status"]))))
 
 (defn.xt check-all-passed
   "checks that all fields have passed"
@@ -355,11 +355,3 @@
       (return true)))
   (return false))
 
-
-(comment
-  
-  (require '[std.lang.typed.xtalk :as typed]
-           '[std.lang.typed.xtalk-analysis :as ta])
-  
-  (typed/check-namespace 'xt.lang.event-form)
-  )

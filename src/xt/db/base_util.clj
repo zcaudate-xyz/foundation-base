@@ -2,27 +2,28 @@
   (:require [std.lang :as l]))
 
 (l/script :xtalk
-  {:require [[xt.lang.common-spec :as xt]]})
+  {:require [[xt.lang.common-spec :as xt]
+             [xt.lang.common-data :as xtd]]})
 
 (defn.xt collect-routes
   "collect routes"
   {:added "4.0"}
   [routes type]
   (return
-   (xt/x:arr-juxt routes
-               (fn:> [e] (xt/x:get-key e "url"))
-               (fn:> [e] (xt/x:obj-assign {:type type}
-                                       e)))))
+   (xtd/arr-juxt routes
+                 (fn [e] (return (xt/x:get-key e "url")))
+                 (fn [e] (return (xt/x:obj-assign {:type type}
+                                                  e))))))
 
 (defn.xt collect-routes-object
   "TODO"
   {:added "4.0"}
   [routes type]
   (return
-   (xt/x:arr-juxt (xt/x:obj-vals routes)
-               (fn:> [e] (xt/x:get-key e "url"))
-               (fn:> [e] (xt/x:obj-assign {:type type}
-                                       e)))))
+   (xtd/arr-juxt (xt/x:obj-vals routes)
+                 (fn [e] (return (xt/x:get-key e "url")))
+                 (fn [e] (return (xt/x:obj-assign {:type type}
+                                                  e))))))
 
 (defn.xt collect-views
   "collect views into views structure"
@@ -59,7 +60,7 @@
          (return e)))
   (return (xt/x:arr-foldl views
                        (fn [out view]
-                         (return (xt/x:obj-assign-with
+                         (return (xtd/obj-assign-with
                                   out
                                   view
                                   merge-fn)))
@@ -77,8 +78,8 @@
        (var interim (f e))
        (when (or (xt/x:is-number? interim)
                  (xt/x:is-string? interim)
-                 (xt/x:not-empty? interim))
-         (x:arr-push out interim)
+                 (xtd/obj-not-empty? interim))
+         (xt/x:arr-push out interim)
          (:= i (+ i 1)))))
    (return out)))
 
@@ -89,11 +90,12 @@
   (cond (xt/x:nil? obj)
         (return obj)
         
-        (xt/is-object? obj)
-        (return (xt/x:obj-map obj (fn:> [v] (-/lu-nested v key-fn))))
+        (xt/x:is-object? obj)
+        (return (xtd/obj-map obj (fn [v]
+                                   (return (-/lu-nested v key-fn)))))
         
-        (xt/is-array? obj)
-        (return (-/lu-nested (xt/x:arr-juxt obj key-fn k/identity)
+        (xt/x:is-array? obj)
+        (return (-/lu-nested (xtd/arr-juxt obj key-fn (fn [x] (return x)))
                              key-fn))
         
         :else (return obj)))
@@ -102,7 +104,7 @@
   "constructs a nested lu map of ids"
   {:added "4.0"}
   [arr]
-  (return (-/lu-nested arr (fn:> [v] (xt/x:get-key v "id")))))
+  (return (-/lu-nested arr (fn [v] (return (xt/x:get-key v "id"))))))
 
 (comment
   (./create-tests)

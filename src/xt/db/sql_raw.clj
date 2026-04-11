@@ -9,22 +9,22 @@
   "encodes a delete query"
   {:added "4.0"}
   [table-name where-params opts]
-  (var table-fn   (xt/x:get-key opts "table_fn" k/identity))
+  (var table-fn   (xt/x:get-key opts "table_fn" (fn [x] (return x))))
   (var where-str  (:? (xt/x:nil? where-params) ""
                       :else (ut/encode-query-string where-params
                                                     "WHERE"
                                                     opts)))
   (var out-arr    [(xt/x:cat "DELETE FROM " (table-fn table-name))])
   (when (< 0 (xt/x:len where-str))
-    (x:arr-push out-arr where-str))
+    (xt/x:arr-push out-arr where-str))
   (return (xt/x:cat (xt/x:join " " out-arr) ";")))
 
 (defn.xt raw-insert-array
   "constructs an array for insert and upsert"
   {:added "4.0"}
   ([table-name columns values opts]
-   (var table-fn   (xt/x:get-key opts "table_fn" k/identity))
-   (var column-fn  (xt/x:get-key opts "column_fn" k/identity))
+   (var table-fn   (xt/x:get-key opts "table_fn" (fn [x] (return x))))
+   (var column-fn  (xt/x:get-key opts "column_fn" (fn [x] (return x))))
    (var out-arr    [(xt/x:cat "INSERT INTO " (table-fn table-name))
                     (xt/x:cat " (" (xt/x:join ", " (xt/x:arr-map columns column-fn)) ")")])
    (var val-fn
@@ -37,7 +37,7 @@
    (var val-arr    (xt/x:arr-map values val-fn))
    (var val-str    (xt/x:cat " VALUES\n "
                           (xt/x:join ",\n " val-arr)))
-   (x:arr-push out-arr val-str)
+   (xt/x:arr-push out-arr val-str)
    (return out-arr)))
 
 (defn.xt raw-insert
@@ -51,8 +51,8 @@
   "encodes an upsert query"
   {:added "4.0"}
   ([table-name id-column columns values opts]
-   (var table-fn   (xt/x:get-key opts "table_fn" k/identity))
-   (var column-fn  (xt/x:get-key opts "column_fn" k/identity))
+   (var table-fn   (xt/x:get-key opts "table_fn" (fn [x] (return x))))
+   (var column-fn  (xt/x:get-key opts "column_fn" (fn [x] (return x))))
    (var upsert-clause  (xt/x:get-key opts "upsert_clause"))
    (var out-arr (-/raw-insert-array table-name columns values opts))
    (var col-arr (-> columns
@@ -78,7 +78,7 @@
   "encodes an update query"
   {:added "4.0"}
   ([table-name where-params data opts]
-   (var table-fn   (xt/x:get-key opts "table_fn" k/identity))
+   (var table-fn   (xt/x:get-key opts "table_fn" (fn [x] (return x))))
    (var where-str  (:? (xt/x:nil? where-params) ""
                        :else (ut/encode-query-string where-params
                                                     "WHERE"
@@ -95,8 +95,8 @@
   "encodes an select query"
   {:added "4.0"}
   ([table-name where-params return-params opts]
-   (var table-fn   (xt/x:get-key opts "table_fn" k/identity))
-   (var column-fn  (xt/x:get-key opts "column_fn" k/identity))
+   (var table-fn   (xt/x:get-key opts "table_fn" (fn [x] (return x))))
+   (var column-fn  (xt/x:get-key opts "column_fn" (fn [x] (return x))))
    
    (var return-str  (:? (xt/x:is-string? return-params)
                         return-params
@@ -108,6 +108,6 @@
    (var out-arr    [(xt/x:cat "SELECT " return-str)
                     (xt/x:cat " FROM "(table-fn table-name))])
    (when (< 0 (xt/x:len where-str))
-     (x:arr-push out-arr where-str))
+     (xt/x:arr-push out-arr where-str))
    (return (xt/x:cat (xt/x:join "\n " out-arr) ";"))))
 

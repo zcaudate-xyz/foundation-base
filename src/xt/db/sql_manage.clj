@@ -26,7 +26,7 @@
   (cond (and (== stype "ref")
              (xt/x:has-key? schema (xt/x:get-path entry ["ref" "ns"])))
         (do (var rtable (xt/x:get-path entry ["ref" "ns"]))
-            (var rtype  (xt/x:get-in schema [rtable "id" "type"]))
+            (var rtype  (xtd/get-in schema [rtable "id" "type"]))
             (cond (not rtype)
                   (return (default-fn (xt/x:cat ident "_id")))
 
@@ -44,7 +44,7 @@
   "emits a table create string"
   {:added "4.0"}
   ([schema table-name opts]
-   (var table-fn         (xt/x:get-key opts "table_fn" k/identity))
+   (var table-fn         (xt/x:get-key opts "table_fn" (fn [x] (return x))))
    (var columns (base-schema/table-entries schema table-name))
    (return (xt/x:cat "CREATE TABLE IF NOT EXISTS "
                   (table-fn table-name)
@@ -67,7 +67,7 @@
   "creates a table statement"
   {:added "4.0"}
   ([schema table-name opts]
-   (var table-fn         (xt/x:get-key opts "table_fn" k/identity))
+   (var table-fn         (xt/x:get-key opts "table_fn" (fn [x] (return x))))
    (return (xt/x:cat "DROP TABLE IF EXISTS " (table-fn table-name) ";"))))
 
 (defn.xt table-drop-all

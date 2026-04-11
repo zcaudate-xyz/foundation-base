@@ -113,7 +113,7 @@
     (var #{pred handler} callback)
     (when (util/check-event pred signal data)
       (try (handler data signal)
-           (x:arr-push out p-id)
+           (xt/x:arr-push out p-id)
            (catch err (xt/x:LOG! {:stack   (. err ["stack"])
                                :message (. err ["message"])})))))
   (return out))

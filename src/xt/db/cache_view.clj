@@ -13,7 +13,7 @@
                                                     [])))
   (var tree (xt/x:arr-append [table-name] (or tarr [])))
   (when returning
-    (x:arr-push tree returning))
+    (xt/x:arr-push tree returning))
   (return tree))
 
 (defn.xt tree-select
@@ -54,14 +54,14 @@
   [tree args input-spec drop-first]
   (var arg-map {})
   (when drop-first
-    (x:arr-pop-first input-spec))
+    (xt/x:arr-pop-first input-spec))
   (when (== 0 (xt/x:len input-spec))
     (return tree))
   (xt/for:array [[i e] input-spec]
     (:= (. arg-map [(xt/x:cat "{{" (. e ["symbol"]) "}}")])
         (. args [i])))
   (var out (xt/x:walk tree
-                   k/identity
+                   (fn [x] (return x))
                    (fn [x]
                      (return (:? (and (xt/x:is-string? x)
                                       (xt/x:has-key? arg-map x))

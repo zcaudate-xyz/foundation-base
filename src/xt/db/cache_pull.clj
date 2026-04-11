@@ -69,13 +69,13 @@
   {:added "4.0"}
   [record ktype key clause]
   (cond (== ktype "data")
-        (return (== clause (xt/x:get-in record ["data" key])))
+        (return (== clause (xtd/get-in record ["data" key])))
 
         (== ktype "forward")
-        (return (xt/x:get-in record ["ref_links" key clause]))
+        (return (xtd/get-in record ["ref_links" key clause]))
 
         (== ktype "reverse")
-        (return (xt/x:get-in record ["rev_links" key clause]))))
+        (return (xtd/get-in record ["rev_links" key clause]))))
 
 (defn.xt check-clause-function
   "checks the clause for a function within a record"
@@ -85,20 +85,20 @@
         (return false)
 
         (== ktype "data")
-        (return (pred (xt/x:get-in record ["data" key])
+        (return (pred (xtd/get-in record ["data" key])
                       (xt/x:unpack exprs)))
         
         (== ktype "forward")
         (cond (== pred (. -/PULL_CHECK ["is_null"]))
-              (return (pred (xt/x:get-in record ["ref_links" key])))
+              (return (pred (xtd/get-in record ["ref_links" key])))
               
               :else
-              (return (xt/x:arr-some (xt/x:obj-keys (or (xt/x:get-in record ["ref_links" key])
+              (return (xt/x:arr-some (xt/x:obj-keys (or (xtd/get-in record ["ref_links" key])
                                                   {}))
                                   (fn:> [v] (pred v (xt/x:unpack exprs))))))
         
         (== ktype "reverse")
-        (return (xt/x:arr-some (xt/x:obj-keys (or (xt/x:get-in record ["rev_links" key])
+        (return (xt/x:arr-some (xt/x:obj-keys (or (xtd/get-in record ["rev_links" key])
                                             {}))
                             (fn:> [v] (pred v (xt/x:unpack exprs)))))))
 
@@ -106,12 +106,12 @@
   "pull where clause"
   {:added "4.0"}
   [rows schema table-key record where-fn key clause]
-  (var ktype (or (xt/x:get-in schema [table-key key "ref" "type"])
+  (var ktype (or (xtd/get-in schema [table-key key "ref" "type"])
                  "data"))
-  (cond (xt/is-array? clause)
+  (cond (xt/x:is-array? clause)
         (do (var [tag] clause)
             (var exprs [(xt/x:unpack clause)])
-            (x:arr-pop-first exprs)
+            (xt/x:arr-pop-first exprs)
             (return
              (-/check-clause-function
               record ktype key (xt/x:get-key -/PULL_CHECK tag) exprs)))
@@ -121,11 +121,11 @@
          (-/check-clause-function
           record ktype key clause []))
         
-        (xt/is-object? clause)
-        (let [ref  (xt/x:get-in schema [table-key key "ref"]) 
+        (xt/x:is-object? clause)
+        (let [ref  (xtd/get-in schema [table-key key "ref"]) 
               #{ns type} ref 
               table-link (xt/x:get-key -/PULL_LU type)
-              ids  (xt/x:obj-keys (or (xt/x:get-in record [table-link key])
+              ids  (xt/x:obj-keys (or (xtd/get-in record [table-link key])
                                    {}))
               records (-> (or (xt/x:get-key rows ns)
                               {})
@@ -154,7 +154,7 @@
         (xt/x:is-empty? where)
         (return true)
 
-        (xt/is-array? where)
+        (xt/x:is-array? where)
         (return
          (xt/x:arr-some where
                      (fn:> [or-clause]
@@ -178,7 +178,7 @@
   (var table-link (xt/x:get-key -/PULL_LU
                              type))
   
-  (var ids (xt/x:obj-keys (or (xt/x:get-in record [table-link ident])
+  (var ids (xt/x:obj-keys (or (xtd/get-in record [table-link ident])
                            {})))
   (var entries (-> (or (xt/x:get-key rows link-key)
                        {})
@@ -187,7 +187,7 @@
   
   (var return-params (xt/x:last linked))
   (var where-params  (xt/x:arr-filter linked (fn [x]
-                                            (return (and (xt/is-object? x)
+                                            (return (and (xt/x:is-object? x)
                                                          (xt/x:not-empty? x))))))
   (var filter-fn
        (fn [e]
@@ -250,9 +250,9 @@
                   (return (-/pull-return rows schema
                                          table-key returning record))))
   (var entries (:? id
-                   (-> [(xt/x:get-in rows [table-key id])]
-                       (xt/x:arr-filter k/identity))
-                   (-> (or (xt/x:get-in rows [table-key]) {})
+                   (-> [(xtd/get-in rows [table-key id])]
+                       (xt/x:arr-filter (fn [x] (return x))))
+                   (-> (or (xtd/get-in rows [table-key]) {})
                        (xt/x:obj-vals))))
   (var out)
 
@@ -272,7 +272,7 @@
               offset)
       (var sidx (or offset 0))
       (var eidx (+ sidx (or limit (- (xt/x:len entries) sidx))))
-      (:= eidx (xt/x:min eidx (xt/x:len entries)))
+      (:= eidx (xt/x:m-min eidx (xt/x:len entries)))
       (:= out (xt/x:arr-slice out sidx eidx)))
     (when single
       (:= out (xt/x:first out)))

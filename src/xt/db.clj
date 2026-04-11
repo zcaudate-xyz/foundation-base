@@ -35,7 +35,7 @@
   (var dbtype (-/get-dbtype db))
   (var #{instance} db)
   (var [tag data as-input] event)
-  (var event-fn (xt/x:get-in -/IMPL [dbtype tag]))
+  (var event-fn (xtd/get-in -/IMPL [dbtype tag]))
   (var input-tag (:? as-input "input" tag))
   (return (event-fn instance input-tag data schema lookup opts)))
 
@@ -48,7 +48,7 @@
     (var #{listen callback} trigger)
     (var update? (xt/x:arr-some listen (fn [key] (return (xt/x:has-key? tables key)))))
     (when update?
-      (x:arr-push out id)
+      (xt/x:arr-push out id)
       (if (xt/x:get-key trigger "async")
         (xt/for:async [[ok err] (callback db trigger)]
           {:success (return ok)
@@ -86,7 +86,7 @@
   {:added "4.0"}
   [m schema lookup opts]
   (var dbtype (-/get-dbtype m))
-  (var create-fn (xt/x:get-in -/IMPL [dbtype "create"]))
+  (var create-fn (xtd/get-in -/IMPL [dbtype "create"]))
   (var instance (or (xt/x:get-key m "instance")
                     (create-fn m)))
   (var db      {"::" dbtype
@@ -117,7 +117,7 @@
   {:added "4.0"}
   [db event]
   (var #{throttle events} db)
-  (x:arr-push events event)
+  (xt/x:arr-push events event)
   (return (th/throttle-run throttle "main")))
 
 (defn.xt sync-event

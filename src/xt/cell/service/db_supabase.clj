@@ -41,18 +41,18 @@
     (var path (:? (xt/x:not-empty? prefix)
                   (xt/x:cat prefix "." key)
                   key))
-    (cond (and (xt/is-object? value)
-               (not (xt/is-array? value)))
+    (cond (and (xt/x:is-object? value)
+               (not (xt/x:is-array? value)))
           (-/compile-filters-into path value out)
 
-          (and (xt/is-array? value)
+          (and (xt/x:is-array? value)
                (== "in" (xt/x:first value)))
-          (x:arr-push out {"path" path
+          (xt/x:arr-push out {"path" path
                            "op" "in"
-                           "value" (xt/x:get-in value [1 0])})
+                           "value" (xtd/get-in value [1 0])})
 
           :else
-          (x:arr-push out {"path" path
+          (xt/x:arr-push out {"path" path
                            "op" "eq"
                            "value" value})))
   (return out))
@@ -64,10 +64,10 @@
   (var table (xt/x:first query-plan))
   (var second (xt/x:second query-plan))
   (var third  (xt/x:get-idx query-plan 2))
-  (var where (:? (xt/is-object? second)
+  (var where (:? (xt/x:is-object? second)
                  second
                  {}))
-  (var returning (:? (xt/is-object? second)
+  (var returning (:? (xt/x:is-object? second)
                      third
                      second))
   (return {"table" table

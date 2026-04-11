@@ -11,7 +11,7 @@
   (var #{constructor} m)
   (var success-fn (xt/x:wrap-callback cb "success"))
   (var error-fn   (xt/x:wrap-callback cb "error"))
-  (xt/for:return [[conn err] (constructor m (x:callback))]
+  (xt/for:return [[conn err] (constructor m (xt/x:callback))]
     {:success (return (success-fn conn))
      :error   (return (error-fn err))
      :final   true}))
@@ -23,7 +23,7 @@
   (var disconnect-fn (xt/x:get-key conn "::disconnect"))
   (var success-fn (xt/x:wrap-callback cb "success"))
   (var error-fn   (xt/x:wrap-callback cb "error"))
-  (xt/for:return [[res err] (disconnect-fn (x:callback))]
+  (xt/for:return [[res err] (disconnect-fn (xt/x:callback))]
     {:success (return (success-fn res))
      :error   (return (error-fn err))
      :final   true}))
@@ -35,7 +35,7 @@
   (var exec-fn (xt/x:get-key conn "::exec"))
   (var success-fn (xt/x:wrap-callback cb "success"))
   (var error-fn   (xt/x:wrap-callback cb "error"))
-  (xt/for:return [[conn err] (exec-fn command args (x:callback))]
+  (xt/for:return [[conn err] (exec-fn command args (xt/x:callback))]
     {:success (return (success-fn conn))
      :error   (return (error-fn err))
      :final   true}))

@@ -52,7 +52,7 @@
   (var [table-name linked] input)
   (var return-params (xt/x:last linked))
   (var where-params  (xt/x:arr-filter linked (fn:> [x]
-                                            (and (xt/is-object? x)
+                                            (and (xt/x:is-object? x)
                                                  (xt/x:not-empty? x)))))
   (var #{rows} cache)
   (var output (cache-pull/pull

@@ -162,15 +162,15 @@
   (var step nil)
   (:= step
       (fn [i]
-        (if (< i (x:offset total))
+        (if (< i (xt/x:offset total))
           (return
            (task/task-then
             (xt/x:get-idx tasks i)
             (fn [res]
-              (x:arr-push out res)
+              (xt/x:arr-push out res)
               (return (step (xt/x:inc i))))))
           (return (task/task-run (fn [] (return out)))))))
-  (return (step (x:offset 0))))
+  (return (step (xt/x:offset 0))))
 
 (defn.xt prep-view
   "prepares params of views"
@@ -193,7 +193,7 @@
   (var #{models} cell)
   (xt/for:object [[dmodel-id dmodel] models]
     (var #{deps} dmodel)
-    (var view-lu (xt/x:get-in deps [model-id view-id]))
+    (var view-lu (xtd/get-in deps [model-id view-id]))
     (when (xt/x:not-nil? view-lu)
       (xt/x:set-key out dmodel-id (xt/x:obj-keys view-lu))))
   (return out))
@@ -234,7 +234,7 @@
      save-output
      -/async-fn
      nil
-     k/identity)
+     (fn [x] (return x)))
     (fn [_]
       (return (-/run-tail-call context refresh-deps-fn))))))
 
@@ -258,7 +258,7 @@
      disabled
      -/async-fn
      nil
-     k/identity)
+     (fn [x] (return x)))
     (fn [_]
       (return (-/run-tail-call context refresh-deps-fn))))))
 
@@ -299,7 +299,7 @@
   (var out [])
   (xt/for:object [[dmodel-id dview-ids] dependents]
     (xt/for:array [dview-id dview-ids]
-      (x:arr-push out (-/refresh-view cell dmodel-id dview-id {} refresh-deps-fn))))
+      (xt/x:arr-push out (-/refresh-view cell dmodel-id dview-id {} refresh-deps-fn))))
   (return (-/task-all out)))
 
 (defn.xt refresh-model
@@ -311,7 +311,7 @@
   (xt/for:object [[view-id view] (. model ["views"])]
     (var [path context disabled]
          (-/prep-view cell model-id view-id {:event event}))
-    (x:arr-push running (-/run-refresh context disabled path refresh-deps-fn)))
+    (xt/x:arr-push running (-/run-refresh context disabled path refresh-deps-fn)))
   (return (-/task-all running)))
 
 
@@ -323,7 +323,7 @@
   (xt/for:object [[view-id view-entry] views]
     (var #{deps} view-entry)
     (xt/for:array [path (or deps [])]
-      (:= path (:? (xt/is-array? path) path [model-id path]))
+      (:= path (:? (xt/x:is-array? path) path [model-id path]))
       (xt/x:set-in all-deps
                 [(xt/x:first path)
                  (xt/x:second path)
@@ -340,14 +340,14 @@
     (cond (== model-id linked-model-id)
           (xt/for:object [[linked-view-id _] linked-views]
             (when (xt/x:nil? (. views [linked-view-id]))
-              (x:arr-push out [linked-model-id linked-view-id])))
+              (xt/x:arr-push out [linked-model-id linked-view-id])))
 
           :else
           (do (var linked-model (impl/model-get cell linked-model-id))
               (xt/for:object [[linked-view-id _] linked-views]
                 (when (or (xt/x:nil? linked-model)
                           (xt/x:nil? (. linked-model ["views"] [linked-view-id])))
-                  (x:arr-push out [linked-model-id linked-view-id]))))))
+                  (xt/x:arr-push out [linked-model-id linked-view-id]))))))
   (return out))
 
 (defn.xt create-throttle
@@ -466,7 +466,7 @@
   (var #{throttle views} model)
   (var out [])
   (xt/for:object [[view-id _] views]
-    (x:arr-push out [view-id (xt/x:first (th/throttle-run throttle view-id [(or ?event {})]))]))
+    (xt/x:arr-push out [view-id (xt/x:first (th/throttle-run throttle view-id [(or ?event {})]))]))
   (return
    (task/task-then
     (-/task-all (xt/x:arr-map out k/second))
@@ -510,7 +510,7 @@
       (th/throttle-run (xt/x:get-key model "throttle")
                        view-id
                        [event])
-      (x:arr-push out view-id)))
+      (xt/x:arr-push out view-id)))
   (return out))
 
 (defn.xt trigger-model

@@ -19,14 +19,14 @@
          order-sort
          limit
          offset} control)
-  (when (xt/is-array? order-by)
-    (x:arr-push out (sql-util/ORDER-BY order-by)))
+  (when (xt/x:is-array? order-by)
+    (xt/x:arr-push out (sql-util/ORDER-BY order-by)))
   (when order-sort
-    (x:arr-push out (sql-util/ORDER-SORT order-sort)))
+    (xt/x:arr-push out (sql-util/ORDER-SORT order-sort)))
   (when (xt/x:is-number? limit)
-    (x:arr-push out (sql-util/LIMIT limit)))
+    (xt/x:arr-push out (sql-util/LIMIT limit)))
   (when (xt/x:is-number? offset)
-    (x:arr-push out (sql-util/OFFSET offset)))
+    (xt/x:arr-push out (sql-util/OFFSET offset)))
   (return out))
 
 (defn.xt tree-base
@@ -36,7 +36,7 @@
   (var tarr (base-scope/merge-queries sel-query clause))
   (var tree (xt/x:arr-append [table-name] tarr))
   (when returning
-    (x:arr-push tree returning))
+    (xt/x:arr-push tree returning))
   (return (sql-graph/select-tree schema tree opts)))
 
 (defn.xt tree-count
@@ -95,14 +95,14 @@
   [tree args input-spec drop-first]
   (var arg-map {})
   (when drop-first
-    (x:arr-pop-first input-spec))
+    (xt/x:arr-pop-first input-spec))
   (when (== 0 (xt/x:len input-spec))
     (return tree))
   (xt/for:array [[i e] input-spec]
     (:= (. arg-map [(xt/x:cat "{{" (. e ["symbol"]) "}}")])
         (. args [i])))
   (var out (xt/x:walk tree
-                   k/identity
+                   (fn [x] (return x))
                    (fn [x]
                      (return (:? (and (xt/x:is-string? x)
                                       (xt/x:has-key? arg-map x))

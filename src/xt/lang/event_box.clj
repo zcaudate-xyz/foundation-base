@@ -181,6 +181,6 @@
   {:added "4.0"}
   [box path value]
   (var arr   (xt/x:arr-clone (-/get-data box path)))
-  (x:arr-push arr value)
+  (xt/x:arr-push arr value)
   (return
    (-/set-data box path arr)))

@@ -97,7 +97,7 @@
   (while (> level 0)
     (var nidx (-/impl-mask (xt/x:bit-rshift idx level)))
     (var #{children} nnode)
-    (:= nnode (xt/x:get-idx children (x:offset nidx)))
+    (:= nnode (xt/x:get-idx children (xt/x:offset nidx)))
     (when editable
       (:= nnode (-/node-editable nnode (xt/x:get-key node "edit_id"))))
     (:= level (- level -/BITS)))
@@ -129,12 +129,12 @@
   (var nnode (-/node-clone parent))
   (var #{children} nnode)
   (cond (== level -/BITS)
-        (x:arr-push children tail-node)
+        (xt/x:arr-push children tail-node)
 
         :else
-        (do (var child (xt/x:get-idx children (x:offset sidx)))
+        (do (var child (xt/x:get-idx children (xt/x:offset sidx)))
             (cond (xt/x:nil? child)
-                  (x:arr-push
+                  (xt/x:arr-push
                    children
                    (-/node-new-path edit-id
                                     (- level -/BITS)
@@ -142,7 +142,7 @@
                   :else
                   (xt/x:set-idx
                    children
-                   (x:offset sidx)
+                   (xt/x:offset sidx)
                    (-/node-push-tail
                     edit-id size (- level -/BITS) child tail-node editable)))))
   (return nnode))
@@ -161,17 +161,17 @@
                         edit-id
                         size
                         (- level -/BITS)
-                        (xt/x:get-idx children (x:offset sidx))))
+                        (xt/x:get-idx children (xt/x:offset sidx))))
             (cond (and (== nnode nil)
                        (== 0 sidx))
                   (return nil)
 
                   :else
-                  (do (xt/x:set-idx children (x:offset sidx) nnode)
+                  (do (xt/x:set-idx children (xt/x:offset sidx) nnode)
                       (return parent))))
 
         :else
-        (do (x:arr-pop children)
+        (do (xt/x:arr-pop children)
             (return parent))))
 
 (defn.xt node-assoc
@@ -182,14 +182,14 @@
   (var #{children} node)
   (cond (== level 0)
         (xt/x:set-idx children
-                   (x:offset (-/impl-mask idx))
+                   (xt/x:offset (-/impl-mask idx))
                    x)
         :else
         (do (var sidx (-/impl-mask (xt/x:bit-rshift idx level)))
             (xt/x:set-idx children
-                       (x:offset sidx)
+                       (xt/x:offset sidx)
                        (-/node-assoc
-                        (xt/x:get-idx children (x:offset sidx))
+                        (xt/x:get-idx children (xt/x:offset sidx))
                         (- level -/BITS)
                         idx
                         x))))

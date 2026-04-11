@@ -13,7 +13,7 @@
   "checks that the db descriptor can prepare queries"
   {:added "4.0"}
   [db]
-  (return (and (xt/is-object? db)
+  (return (and (xt/x:is-object? db)
                (xt/x:has-key? db "schema")
                (xt/x:has-key? db "views"))))
 
@@ -26,14 +26,14 @@
   (var #{view} view-entry)
   (var tview (xt/x:walk view
                      (fn [res]
-                       (return (:? (xt/is-array? res)
+                       (return (:? (xt/x:is-array? res)
                                    (xt/x:arr-filter res
                                                  (fn [e]
                                                    (return (not= e "__deleted__"))))
                                    res)))
                      (fn [res]
                        (when (and (xt/x:not-nil? res)
-                                  (xt/is-object? res)
+                                  (xt/x:is-object? res)
                                   (xt/x:has-key? res "__deleted__"))
                          (xt/x:del-key res "__deleted__"))
                        (return res))))
@@ -47,7 +47,7 @@
   (var targs (xt/x:get-key entry "input"))
   (when drop-first
     (:= targs [(xt/x:unpack targs)])
-    (x:arr-pop-first targs))
+    (xt/x:arr-pop-first targs))
   (var [l-ok l-err] (check/check-args-length args targs))
   (when (not l-ok)
     (return [l-ok l-err]))

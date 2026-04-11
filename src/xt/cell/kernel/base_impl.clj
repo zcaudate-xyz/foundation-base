@@ -97,7 +97,7 @@
   "makes the core link"
   {:added "0.1" :adopt true}
   [worker-url]
-  (var link    (:? (and (xt/is-object? worker-url)
+  (var link    (:? (and (xt/x:is-object? worker-url)
                         (not (. worker-url ["create_fn"])))
                    worker-url
                    (link/link-create worker-url)))

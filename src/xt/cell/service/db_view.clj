@@ -44,7 +44,7 @@
   (var query-mixin (:? data-only
                        (xt/x:arr-filter return-query k/is-string?)
                        return-query))
-  (var query (xt/x:get-in return-entry ["view" "query"]))
+  (var query (xtd/get-in return-entry ["view" "query"]))
   (xt/x:arr-append query query-mixin)
   (return return-entry))
 
@@ -57,18 +57,18 @@
          return-query} qm)
   (var views (-/get-views db))
   (var select-entry (:? (xt/x:not-nil? select-method)
-                        (xt/x:get-in views [table "select" select-method])))
+                        (xtd/get-in views [table "select" select-method])))
   (var return-entry nil)
   (cond (and return-method
              return-query)
         (:= return-entry (-/view-query-return-combined
                           table
-                          (xt/x:clone-nested (xt/x:get-in views [table "return" return-method]))
+                          (xt/x:clone-nested (xtd/get-in views [table "return" return-method]))
                           return-query
                           data-only))
 
         return-method
-        (:= return-entry (xt/x:get-in views [table "return" return-method]))
+        (:= return-entry (xtd/get-in views [table "return" return-method]))
 
         return-query
         (:= return-entry (-/view-query-return-entry table return-query data-only)))
@@ -120,6 +120,6 @@
   "gets the view detail"
   {:added "4.0"}
   [db table type id]
-  (return (xt/x:get-in (-/get-views db) [table type id])))
+  (return (xtd/get-in (-/get-views db) [table type id])))
 
 (def.xt MODULE (!:module))

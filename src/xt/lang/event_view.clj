@@ -4,6 +4,7 @@
 
 (l/script :xtalk
   {:require [[xt.lang.common-spec :as xt]
+             [xt.lang.common-data :as xtd]
              [xt.lang.event-common :as event-common]]})
 
 (defspec.xt ViewHandler
@@ -197,7 +198,8 @@
    default-output
    default-process
    options]
-  (var entry {:pipeline  (xt/x:obj-assign-nested
+  (var identity-fn (fn [x] (return x)))
+  (var entry {:pipeline  (xtd/obj-assign-nested
                           {:main    {:handler main-handler
                                      :wrapper -/wrap-args}
                            :remote  {:wrapper -/wrap-args
@@ -215,21 +217,21 @@
                        :current nil
                        :updated nil
                        :elapsed nil
-                       :process (or default-process k/identity)
+                       :process (or default-process identity-fn)
                        :default (:? (xt/x:is-function? default-output) default-output (fn:> default-output))}})
-  (when (xt/x:get-in pipeline ["remote"])
+  (when (xtd/get-in pipeline ["remote"])
     (xt/x:set-key entry "remote" {:type "remote"
                                :current nil
                                :updated nil
                                :elapsed nil
-                               :process (or default-process k/identity)
+                               :process (or default-process identity-fn)
                                :default (:? (xt/x:is-function? default-output) default-output (fn:> default-output))}))
-  (when (xt/x:get-in pipeline ["sync"])
+  (when (xtd/get-in pipeline ["sync"])
     (xt/x:set-key entry "sync" {:type "sync"
                                :current nil
                                :updated nil
                                :elapsed nil
-                               :process (or default-process k/identity)
+                               :process (or default-process identity-fn)
                                :default (:? (xt/x:is-function? default-output) default-output (fn:> default-output))}))
   (return
    (event-common/blank-container
@@ -305,7 +307,7 @@
   "gets the current view output"
   {:added "4.0"}
   [view dest-key]
-  (return (xt/x:get-in view [(or dest-key "output")
+  (return (xtd/get-in view [(or dest-key "output")
                           "current"])))
 
 (defn.xt is-disabled
@@ -321,28 +323,28 @@
   "checks that output is errored"
   {:added "4.0"}
   [view dest-key]
-  (return (== true (xt/x:get-in view [(or dest-key "output")
-                                   "errored"]))))
+  (return (== true (xtd/get-in view [(or dest-key "output")
+                                     "errored"]))))
 
 (defn.xt is-pending
   "checks that output is pending"
   {:added "4.0"}
   [view dest-key]
-  (return (== true (xt/x:get-in view [(or dest-key "output")
+  (return (== true (xtd/get-in view [(or dest-key "output")
                                    "pending"]))))
 
 (defn.xt get-time-elapsed
   "gets time elapsed of output"
   {:added "4.0"}
   [view dest-key]
-  (return (xt/x:get-in view [(or dest-key "output")
+  (return (xtd/get-in view [(or dest-key "output")
                           "elapsed"])))
 
 (defn.xt get-time-updated
   "gets time updated of output"
   {:added "4.0"}
   [view dest-key]
-  (return (xt/x:get-in view [(or dest-key "output")
+  (return (xtd/get-in view [(or dest-key "output")
                           "updated"])))
 
 (defn.xt get-success
@@ -382,10 +384,10 @@
   (xt/x:set-key output "tag" tag)
   
   (cond accumulate
-        (do (var prev (xt/x:arrayify (xt/x:get-key output "current")))
+        (do (var prev (xtd/arrayify (xt/x:get-key output "current")))
             (var next (xt/x:arr-append
                        (xt/x:arr-clone prev)
-                       (xt/x:arrayify current)))
+                       (xtd/arrayify current)))
             (xt/x:set-key output "current" next))
 
         :else
@@ -457,11 +459,11 @@
   (when (xt/x:nil? args)
     (:= disabled true))
   
-  (xt/x:set-key context "args" (xt/x:arrayify args))
+  (xt/x:set-key context "args" (xtd/arrayify args))
   (xt/x:set-key context "acc"  {"::" "view.run"})
   #_(when (. context name)
     #_(when (xt/x:nil? (. context input data))
-      (x:throw "NO DATA"))
+      (xt/x:throw "NO DATA"))
     (xt/x:LOG! context))
   
   (return [context disabled]))
@@ -471,11 +473,11 @@
   {:added "4.0"}
   [context tag acc dest-key]
   (var #{cell view} context)
-  (var process (xt/x:get-in view [(or dest-key "output")
+  (var process (xtd/get-in view [(or dest-key "output")
                                "process"]))
   (var [update? current errored] (xt/x:get-key acc tag))
   (when (xt/x:nil? current)
-    (:= current ((xt/x:get-in view [(or dest-key
+    (:= current ((xtd/get-in view [(or dest-key
                                      "output")
                                  "default"]))))
   
@@ -495,14 +497,15 @@
   "calls the pipeline with async function"
   {:added "4.0"}
   [context tag disabled async-fn hook-fn skip-guard]
+  (var identity-fn (fn [x] (return x)))
   (:= skip-guard (or skip-guard {}))
-  (:= hook-fn (or hook-fn k/identity))
+  (:= hook-fn (or hook-fn identity-fn))
   (var #{cell model view args acc} context)
   (var #{pipeline} view)
   (var stage (or (xt/x:get-key pipeline tag)
                  {}))
   (var #{handler guard wrapper} stage)
-  (:= wrapper (or wrapper k/identity))
+  (:= wrapper (or wrapper identity-fn))
   (var error-fn   (fn [err]
                     (:= (. acc [tag]) [true err true])
                     (:= (. acc ["error"]) true)
@@ -528,7 +531,7 @@
   "runs the pipeline"
   {:added "4.0"}
   [context stages index async-fn hook-fn complete-fn skip-guard]
-  (cond (< index (x:offset (xt/x:len stages)))
+  (cond (< index (xt/x:offset (xt/x:len stages)))
         (return
          (-/pipeline-call
           context
@@ -578,7 +581,7 @@
              (-/pipeline-run-impl context ["pre"
                                            dest-tag
                                            "post"]
-                                  (x:offset 0)
+                                  (xt/x:offset 0)
                                   async-fn
                                   (fn [acc tag]
                                     (when hook-fn
@@ -602,7 +605,7 @@
    (-/pipeline-run-impl context ["pre"
                                  dest-key
                                  "post"]
-                        (x:offset 0)
+                        (xt/x:offset 0)
                         async-fn
                         (fn [acc tag]
                           (when hook-fn
@@ -644,9 +647,9 @@
          key-fn
          val-fn} opts)
   (return {:results (:? sort-fn (sort-fn results) results)
-           :lookup (xt/x:arr-juxt (or results [])
-                               (or key-fn k/id-fn)
-                               (or val-fn k/identity))}))
+           :lookup (xtd/arr-juxt (or results [])
+                                 (or key-fn (fn [e] (return (xt/x:get-key x "id"))))
+                                 (or val-fn (fn [x] (return x))))}))
 
 (defn.xt sorted-lookup
   "sorted lookup for region data"
@@ -659,8 +662,8 @@
        results
        {:sort-fn (fn:> [arr]
                    (xt/x:arr-sort arr
-                               (xt/x:key-fn (or key "name"))
-                               k/lt))})))))
+                                  (fn [e] (xt/x:get-key e (or key "name")))
+                                  xt/x:lt))})))))
 
 (defn.xt group-by-lookup
   "creates group-by lookup"
@@ -669,9 +672,10 @@
   (return
    (fn:> [results]
      {:results results
-      :lookup (xt/x:arr-group-by results
-                              (xt/x:key-fn key)
-                              k/identity)})))
+      :lookup (xtd/arr-group-by results
+                                (fn [e] (xt/x:get-key e key))
+                                (fn [x] (return x)))})))
+
 
 (comment
   (defn.xt pipeline-run-remote
@@ -683,7 +687,7 @@
      (-/pipeline-run-impl context ["pre"
                                    "remote"
                                    "post"]
-                          (x:offset 0)
+                          (xt/x:offset 0)
                           async-fn
                           (fn [acc tag]
                             (when hook-fn
@@ -703,7 +707,7 @@
      (-/pipeline-run-impl context ["pre"
                                    "sync"
                                    "post"]
-                          (x:offset 0)
+                          (xt/x:offset 0)
                           async-fn
                           (fn [acc tag]
                             (when hook-fn

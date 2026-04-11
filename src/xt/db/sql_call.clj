@@ -35,7 +35,7 @@
 
           :else
           (:= dbarg (ut/encode-value arg)))
-    (x:arr-push out dbarg))
+    (xt/x:arr-push out dbarg))
   (return out))
 
 (defn.xt call-format-query

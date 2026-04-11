@@ -79,7 +79,7 @@
     (-/post-message worker (util/resp-error op id (xt/x:cat "Not enabled - EVAL"))))
   (var out (repl/return-eval body))
   (var f (:? (. input ["async"])
-             k/identity
+             (fn [x] (return x))
              post-fn))
   (return (f (util/resp-ok op id out))))
 
@@ -94,7 +94,7 @@
   (var action-async  (. action-entry ["is_async"]))
   (var action-fn     (. action-entry ["handler"]))
   (var f   (:? action-async
-               k/identity
+               (fn [x] (return x))
                post-fn))
   
   (try
@@ -127,7 +127,7 @@
   "initiates the worker actions"
   {:added "4.0"}
   [worker input-fn]
-  (:= input-fn (or input-fn k/identity))
+  (:= input-fn (or input-fn (fn [x] (return x))))
   (. worker (addEventListener
              "message"
              (fn [e]

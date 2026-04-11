@@ -1,8 +1,5 @@
 (ns xt.db.base-check
-  (:require [std.json :as json]
-            [std.lang :as l]
-            [std.lib.foundation :as f])
-  (:use code.test))
+  (:require [std.lang :as l]))
 
 (l/script :xtalk
   {:require [[xt.lang.common-spec :as xt]]})
@@ -14,11 +11,11 @@
   (when (not (xt/x:is-string? s))
     (return false))
 
-  (when (not (== 36 (x:str-len s)))
+  (when (not (== 36 (xt/x:str-len s)))
     (return false))
 
   (xt/for:array [i [8 13 18 23]]
-    (when (not (== "-" (xt/x:substring s i (+ i 1))))
+    (when (not (== "-" (xt/x:str-substring s i (+ i 1))))
       (return false)))
 
   (return true))
@@ -53,8 +50,8 @@
                     (xt/x:is-string? arg)))
         
         (== arg-type "jsonb")
-        (return (or (xt/is-object? arg)
-                    (xt/is-array? arg)))
+        (return (or (xt/x:is-object? arg)
+                    (xt/x:is-array? arg)))
 
         :else
         (return false)))
@@ -88,30 +85,3 @@
                            :actual (xt/x:len args)
                            :input args}}]))
   (return [true]))
-
-(comment
-  (str (f/uuid))
-  
-  #_
-  (defn.xt check-args
-    [args meta]
-    (var targs (. meta ["args"]))
-    (var scope (or (. meta ["scope"]) {}))
-
-    (when (not targs)
-      (return))
-
-    ;;
-    ;; CHECK LENGTTH
-    ;;
-    
-    (var is-debug (. scope ["debug"]))
-    (var tlen (:? is-debug (- (len targs) 1) (len targs)))
-    
-    (-/check-args-length args tlen)
-    (-/check-args-type args tlen targs)
-    (return true)))
-
-(comment
-  (./create-tests)
-  )

@@ -20,7 +20,7 @@
   (return
    (xt/x:obj-keep obj
                (fn:> [v]
-                     (:? (xt/is-array? v)
+                     (:? (xt/x:is-array? v)
                          (-> (xt/x:arr-map v link-fn)
                              (xt/x:obj-from-pairs))
                          nil)))))
@@ -52,7 +52,7 @@
     (:= table-map {})
     (xt/x:set-key acc table-name table-map))
   (var data-obj     (xt/x:obj-pick data (sch/data-keys schema table-name)))
-  (var obj-fn       (fn:> [v] (:? (xt/is-object? v) [v] v)))
+  (var obj-fn       (fn:> [v] (:? (xt/x:is-object? v) [v] v)))
   (var rev-obj      (-> (xt/x:obj-pick data (sch/rev-keys schema table-name))
                         (xt/x:obj-keep obj-fn)))
   (var rev-links    (-/flatten-get-links rev-obj))
@@ -79,13 +79,13 @@
   [schema table-name link-obj link-id acc flatten-fn]
   (var link-fn
        (fn [e]
-         (var ref (xt/x:get-in schema [table-name e "ref"]))
+         (var ref (xtd/get-in schema [table-name e "ref"]))
          (return [(xt/x:get-key ref "ns")
                   (xt/x:get-key ref "rval")])))
   (xt/for:object [[e v] link-obj]
-    (when (xt/is-array? v)
+    (when (xt/x:is-array? v)
       (var [link-key link-path] (link-fn e))
-      (xt/for:array [e (xt/x:arr-filter v xt/is-object?)]
+      (xt/for:array [e (xt/x:arr-filter v xt/x:is-object?)]
         (flatten-fn schema link-key
                     e 
                     {link-path [link-id]}
@@ -112,7 +112,7 @@
   [schema table-name data parent]
   (:= data (or data []))
   (var acc {})
-  (if (xt/is-array? data)
+  (if (xt/x:is-array? data)
     (xt/for:array [subdata data]
       (when (xt/x:not-nil? subdata)
         (-/flatten-obj schema table-name subdata (or parent {}) acc)))
@@ -124,7 +124,7 @@
   {:added "4.0"}
   [schema m]
   (var acc {})
-  (var bulk (:? (xt/is-array? m)
+  (var bulk (:? (xt/x:is-array? m)
                 m
                 (xt/x:obj-pairs m)))
   (xt/for:array [e bulk]

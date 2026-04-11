@@ -15,7 +15,7 @@
   (return
    (xt/x:arr-map deps
               (fn [path]
-                (return (:? (xt/is-array? path)
+                (return (:? (xt/x:is-array? path)
                             path
                             [model-id path]))))))
 
@@ -33,9 +33,9 @@
   (when (xt/x:nil? stream)
     (return nil))
   (var stream-spec (:? (and (xt/x:nil? (xt/x:get-key stream "target"))
-                            (xt/is-object? (xt/x:get-key stream "db")))
+                            (xt/x:is-object? (xt/x:get-key stream "db")))
                         (xt/x:obj-assign (xt/x:obj-clone stream)
-                                      {"target" (xt/x:get-in stream ["db" "target"])})
+                                      {"target" (xtd/get-in stream ["db" "target"])})
                         stream))
   (var view-context {"model-id" (xt/x:get-key prepared "model_id")
                      "view-id" (xt/x:get-key prepared "view_id")})

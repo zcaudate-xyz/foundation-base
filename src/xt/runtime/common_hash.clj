@@ -80,7 +80,7 @@
   {:added "4.0"}
   [s]
   (var hval (:- "0x811c9dc5"))
-  (xt/for:index [i [(x:offset 0) (xt/x:len s)]]
+  (xt/for:index [i [(xt/x:offset 0) (xt/x:len s)]]
     (:= hval (xt/x:bit-xor hval (xt/x:bit-and (xt/x:get-char s i)
                                         (:- "0xFF"))))
     (:= hval (+ hval

@@ -31,7 +31,7 @@
   {:added "4.0"}
   [x]
   (return
-   (and (xt/is-object? x)
+   (and (xt/x:is-object? x)
         (xt/x:not-nil? (. x ["::"])))))
 
 (defn.xt is-syntax?
@@ -39,7 +39,7 @@
   {:added "4.0"}
   [x]
   (return
-   (and (xt/is-object? x)
+   (and (xt/x:is-object? x)
         (== "syntax" (. x ["::"])))))
 
 (defn.xt hash
@@ -134,9 +134,9 @@
         (return (. x (size)))
         
         (xt/x:is-string? x)
-        (return (x:str-len x))
+        (return (xt/x:str-len x))
 
-        (xt/is-array? x)
+        (xt/x:is-array? x)
         (return (xt/x:len x))))
 
 (defmacro.xt ^{:standalone true}

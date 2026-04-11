@@ -12,7 +12,7 @@
   "checks that the db descriptor can process sync requests"
   {:added "4.0"}
   [db]
-  (return (and (xt/is-object? db)
+  (return (and (xt/x:is-object? db)
                (xt/x:has-key? db "schema"))))
 
 (defn.xt normalize-sync
@@ -41,25 +41,25 @@
     (return [false {:status "error"
                     :tag "db/sync-empty-request"}]))
   (when (and (xt/x:not-nil? db-sync)
-             (not (xt/is-object? db-sync)))
+             (not (xt/x:is-object? db-sync)))
     (return [false {:status "error"
                     :tag "db/sync-invalid"
                     :data {:input db-sync}}]))
   (when (and (xt/x:not-nil? db-remove)
-             (not (xt/is-object? db-remove)))
+             (not (xt/x:is-object? db-remove)))
     (return [false {:status "error"
                     :tag "db/remove-invalid"
                     :data {:input db-remove}}]))
-  (when (xt/is-object? db-sync)
+  (when (xt/x:is-object? db-sync)
     (xt/for:object [[table entries] db-sync]
-      (when (not (xt/is-array? entries))
+      (when (not (xt/x:is-array? entries))
         (return [false {:status "error"
                         :tag "db/sync-invalid-entries"
                         :data {:table table
                                :input entries}}]))))
-  (when (xt/is-object? db-remove)
+  (when (xt/x:is-object? db-remove)
     (xt/for:object [[table ids] db-remove]
-      (when (not (xt/is-array? ids))
+      (when (not (xt/x:is-array? ids))
         (return [false {:status "error"
                         :tag "db/remove-invalid-ids"
                         :data {:table table
@@ -76,10 +76,10 @@
                     :tag "db/local-db-not-provided"}]))
   (var db-sync (xt/x:get-key sync-request "db/sync"))
   (var db-remove (xt/x:get-key sync-request "db/remove"))
-  (when (and (xt/is-object? db-sync)
+  (when (and (xt/x:is-object? db-sync)
              (xt/x:not-empty? db-sync))
     (xdb/sync-event local-db ["add" db-sync]))
-  (when (and (xt/is-object? db-remove)
+  (when (and (xt/x:is-object? db-remove)
              (xt/x:not-empty? db-remove))
     (xt/for:object [[table ids] db-remove]
       (xdb/db-delete-sync local-db

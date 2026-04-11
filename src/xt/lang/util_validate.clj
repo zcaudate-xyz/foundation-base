@@ -31,7 +31,7 @@
   [form field guards index result hook-fn complete-fn]
   (:= guards (or guards []))
   (cond (< index (xt/x:len guards))
-        (do (var guard (xt/x:get-idx guards (x:offset index)))
+        (do (var guard (xt/x:get-idx guards (xt/x:offset index)))
             (var [id m] guard)
             (var #{check message} m)
             (var error-fn
