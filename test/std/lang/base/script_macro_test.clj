@@ -174,6 +174,35 @@
     (ptr/ptr-invoke-string make-array-0 [1 2 3] {}))
   => "[1,2,3]")
 
+(fact "function to intern a macro supports multi-arity clauses"
+  ^:hidden
+
+  (let [xlib (lib/library {})]
+    (lib/add-book! xlib (assoc xtalk/+book+ :modules {}))
+    (lib/add-module! xlib (module/book-module {:lang :xtalk
+                                               :id 'xt.lang.base-lib}))
+    (impl/with:library [xlib]
+      (let [macro-var (macro/intern-defmacro-fn
+                       :xtalk
+                       (with-meta
+                         '(defmacro.xt get-idx
+                            "gets array indices"
+                            {:standalone true}
+                            ([arr idx]
+                             (list 'x:get-idx arr idx))
+                            ([arr idx default]
+                             (list 'x:get-idx arr idx default)))
+                         '{:module xt.lang.base-lib})
+                       {})
+            entry @@macro-var]
+        [(-> macro-var meta :arglists)
+         ((:template entry) 'arr 'idx)
+         ((:template entry) 'arr 'idx 'fallback)])))
+  => '[([arr idx]
+         [arr idx default])
+        (x:get-idx arr idx)
+        (x:get-idx arr idx fallback)])
+
 (fact "top level function and macro pointers can be printed"
   ^:hidden
 

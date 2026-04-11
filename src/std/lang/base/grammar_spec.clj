@@ -1,7 +1,7 @@
 (ns std.lang.base.grammar-spec
   (:require [std.lib.collection :as collection]
-            [std.lib.foundation :as f]
-            [std.lib.function :as fn]))
+             [std.lib.foundation :as f]
+             [std.lib.function :as fn]))
 
 (def ^:dynamic *symbol* nil)
 
@@ -18,15 +18,11 @@
   "formats function inputs"
   {:added "3.0"}
   ([[doc? attr? & body]]
-   (let [[doc attr body] (fn/fn:init-args doc? attr? body)
-         body (cond (vector? (first body))
-                    body
-
-                    (vector? (ffirst body))
-                    (first body)
-
-                    :else (f/error "Invalid body" {:body body}))]
-     [doc attr body])))
+   (try
+     (fn/fn:call-body doc? attr? body)
+     (catch clojure.lang.ExceptionInfo e
+       (f/error "Invalid body" {:body (or (-> e ex-data :body)
+                                          body)})))))
 
 (defn format-defn-mixins
   "applies all mixins in order"

@@ -233,8 +233,16 @@
          (vector? (ffirst items)))
     [(ffirst items) (rest (first items))]
 
-    :else
-    [(first items) (rest items)]))
+     :else
+     [(first items) (rest items)]))
+
+(defn multi-callable-items?
+  [items]
+  (and (next items)
+       (every? (fn [item]
+                 (and (seq? item)
+                      (vector? (first item))))
+               items)))
 
 (defn parse-defn
   [form ns-sym aliases]
@@ -258,17 +266,20 @@
 (defn parse-defmacro
   [form ns-sym aliases]
   (let [[_ macro-sym & more] form
-        {:keys [meta items]} (parse-decl-preamble more macro-sym)
-        [args-form body] (parse-callable-items items)
-        ctx {:ns ns-sym
-             :aliases aliases}]
-    (types/make-fn-def ns-sym macro-sym
-                       (parse-fn-inputs args-form ctx)
-                       types/+unknown-type+
-                       (assoc meta :aliases aliases
-                                   :macro true)
-                       body
-                       nil)))
+         {:keys [meta items]} (parse-decl-preamble more macro-sym)
+         [args-form body] (parse-callable-items items)
+         raw-body (if (multi-callable-items? items)
+                    items
+                    body)
+         ctx {:ns ns-sym
+              :aliases aliases}]
+     (types/make-fn-def ns-sym macro-sym
+                        (parse-fn-inputs args-form ctx)
+                        types/+unknown-type+
+                        (assoc meta :aliases aliases
+                                    :macro true)
+                        raw-body
+                        nil)))
 
 (defn parse-defvalue
   [form ns-sym aliases]

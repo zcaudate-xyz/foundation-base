@@ -41,9 +41,7 @@
                    xtalk/+xt-network-socket+
                    xtalk/+xt-network-ws+
                    xtalk/+xt-network-client-basic+
-                   xtalk/+xt-network-client-ws+
-                   xtalk/+xt-network-server-basic+
-                   xtalk/+xt-network-server-ws+]
+                   xtalk/+xt-network-client-ws+]
    :xtalk-runtime [xtalk/+xt-runtime-cache+
                    xtalk/+xt-runtime-thread+
                    xtalk/+xt-runtime-shell+

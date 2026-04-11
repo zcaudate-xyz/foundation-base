@@ -1,4 +1,4 @@
-33(ns xtgen.gen-common-spec
+(ns xtgen.gen-common-spec
   (:require [std.string.prose :as prose]
             [std.string.common :as str]
             [std.block.template :as gen]
@@ -45,8 +45,6 @@
     xtalk/+xt-lang-unpack+
     xtalk/+xt-network-client-basic+
     xtalk/+xt-network-client-ws+
-    xtalk/+xt-network-server-basic+
-    xtalk/+xt-network-server-ws+
     xtalk/+xt-network-socket+
     xtalk/+xt-network-ws+
     xtalk/+xt-notify-http+
@@ -58,6 +56,52 @@
     xtalk/+xt-runtime-shell+
     xtalk/+xt-runtime-thread+
     xtalk/+xt-runtime-uri+]))
+
+
+(def ^:private GENERATE_COMMON_FOR_TEMPLATE
+  "
+(defmacro.xt ^{:style/indent 1}
+  for:array
+  ([[e arr] & body]
+   (clojure.core/apply list 'for:array [e arr] body)))
+
+(defmacro.xt ^{:style/indent 1}
+  for:object
+  ([[[k v] obj] & body]
+   (clojure.core/apply list 'for:object [[k v] obj] body)))
+
+(defmacro.xt ^{:style/indent 1}
+  for:index
+  ([[i [start stop step]] & body]
+   (clojure.core/apply list 'for:index [i [start stop step]] body)))
+
+(defmacro.xt ^{:style/indent 1}
+  for:iter
+  ([[e it] & body]
+   (apply list 'for:iter [e it] body)))
+
+(defmacro.xt ^{:style/indent 1}
+  for:return
+  ([[[ok err] statement] {:keys [success error final]}]
+   (list 'for:return [[ok err] statement]
+         {:success success
+          :error error
+          :final final})))
+
+(defmacro.xt ^{:style/indent 1}
+  for:try
+  ([[[ok err] statement] {:keys [success error]}]
+   (list 'for:try [[ok err] statement]
+         {:success success
+          :error error})))
+
+(defmacro.xt ^{:style/indent 1}
+  for:async
+  ([[[ok err] statement] {:keys [success error finally]}]
+   (list 'for:async [[ok err] statement]
+         {:success success
+          :error error
+          :finally finally})))")
 
 ;;
 ;; TMPL.NAMESPACE
@@ -87,10 +131,7 @@
 
 (defn generate-common-type-template
   [{:keys [op-spec] :as e}]
-  #_(when (nil? (:type op-spec))
-      (std.lib/prn (str (first (:symbol e))
-                        " - "
-                        e)))
+  
   {'target   (first (:symbol e))
    'type     (:type op-spec)})
 
@@ -108,20 +149,31 @@
 
 (def ^:private GENERATE_COMMON_MACRO_TEMPLATE
   "
-(defmacro.xt ^{:standalone ~standalone} 
+(defmacro.xt ^{:standalone ~standalone :is-template ~is-template} 
   ~target
-  ~arglist
-  ~form)")
+  ~@forms)")
 
 (defn generate-common-macro-template
   [{:keys [op-spec] :as e}]
-  (let [target   (first (:symbol e))
-        arglist (first (:arglists op-spec))
-        form     (apply list 'list (list 'quote target) arglist)]
-    {'arglist  arglist  
-     'target   target
-     'form     form
-     'standalone true}))
+  (let [target    (first (:symbol e))
+        {:keys [arglists
+                variadic
+                template-only]} op-spec
+        forms     (if variadic
+                    (list (conj (first arglists)
+                                '& 'more)
+                          (apply list 'apply 'list (list 'quote target) (conj (first arglists) 'more)))
+                    (->> arglists
+                         (map (fn [arglist]
+                                (list arglist
+                                      (apply list 'list (list 'quote target) arglist))))
+                         (interpose [(std.block/newline)])
+                         (mapcat (fn [x]
+                                   (if (vector? x) x [x])))))]
+    {'target   target
+     'forms     forms
+     'standalone true
+     'is-template (boolean template-only)}))
 
 (def ^:private +generate-common-macro+
   (gen/get-template GENERATE_COMMON_MACRO_TEMPLATE
@@ -131,6 +183,14 @@
   [e]
   (gen/fill-template +generate-common-macro+ e))
 
+(comment
+
+  (generate-common-macro
+   {:op :x-offset         :symbol #{'x:offset}                :emit :macro
+    :op-spec {:arglists '([] [n])
+              :type [:fn [:xt/int] :xt/int]}})
+  
+  )
 
 ;;
 ;; TMPL.FUNCTIONS
@@ -146,7 +206,7 @@
 (defn generate-common-function-template
   [{:keys [op-spec] :as e}]
   (let [target   (first (:symbol e))
-        arglist (first (:arglists op-spec))
+        arglist  (first (:arglists op-spec))
         form     (apply list 'list (list 'quote target) arglist)]
     {'arglist  arglist  
      'target   target
@@ -171,7 +231,8 @@
   [namespace]
   (spit "src/xt/lang/common_spec.clj"
         (str/join "\n\n"
-                  (concat [(generate-common-ns-template 'xt.lang.common-spec)]
+                  (concat [(generate-common-ns-template 'xt.lang.common-spec)
+                           GENERATE_COMMON_FOR_TEMPLATE]
                           (interleave (map generate-common-type +xtalk-entries+)
                                       (map generate-common-macro +xtalk-entries+))))))
 
