@@ -3,8 +3,8 @@
   (:refer-clojure :exclude [vector]))
 
 (l/script :xtalk
-  {:require [[xt.lang.base-lib :as k]
-             [xt.lang.base-iter :as it]
+  {:require [[xt.lang.common-spec :as xt]
+             [xt.lang.common-iter :as it]
              [xt.runtime.interface-common :as interface-common]
              [xt.runtime.interface-spec :as spec]
              [xt.runtime.interface-collection :as interface-collection]
@@ -19,7 +19,7 @@
   (var arr (node/node-array-for _root _size _shift _tail idx false))
   
   (when arr
-    (var out (k/get-idx arr (x:offset (node/impl-mask idx))))
+    (var out (xt/x:get-idx arr (x:offset (node/impl-mask idx))))
     (return (interface-common/impl-denormalise out))))
 
 (defgen.xt vector-to-iter
@@ -27,7 +27,7 @@
   {:added "4.0"}
   [vector]
   (var #{_size} vector)
-  (k/for:index [idx [0 (x:offset-rlen _size)]]
+  (xt/for:index [idx [0 (x:offset-rlen _size)]]
     (yield (-/vector-get-idx vector idx))))
 
 (defn.xt vector-to-array
@@ -36,7 +36,7 @@
   [vector]
   (var #{_size} vector)
   (var out [])
-  (k/for:index [idx [0 (x:offset-rlen _size)]]
+  (xt/for:index [idx [0 (x:offset-rlen _size)]]
     (x:arr-push out (-/vector-get-idx vector idx)))
   (return out))
 
@@ -49,14 +49,14 @@
                :_size size
                :_shift shift
                :_tail tail})
-  (k/set-proto vector protocol)
+  (xt/x:set-proto vector protocol)
   (return vector))
 
 (defn.xt vector-empty
   "creates an empty vector from current"
   {:added "4.0"}
   [vector]
-  (var protocol (k/get-proto vector))
+  (var protocol (xt/x:get-proto vector))
   (return (-/vector-new node/EMPTY_VECTOR_NODE 0 node/BITS [] protocol)))
 
 (defn.xt vector-is-editable
@@ -65,7 +65,7 @@
   [vector]
   (var #{_root} vector)
   (var #{edit-id} _root)
-  (return (k/not-nil? edit-id)))
+  (return (xt/x:not-nil? edit-id)))
 
 ;;
 ;;
@@ -75,11 +75,11 @@
   "push-lastoins an element to the vector"
   {:added "4.0"}
   [vector x]
-  (var protocol (k/get-proto vector))
+  (var protocol (xt/x:get-proto vector))
   (var #{_root _size _shift _tail} vector)
   (when (< (- _size (node/impl-offset _size))
            node/WIDTH)
-    (var n_tail (k/arr-clone _tail))
+    (var n_tail (xt/x:arr-clone _tail))
     (x:arr-push n_tail (interface-common/impl-normalise x))
     (return (-/vector-new (node/ensure-persistent _root)
                           (+ _size 1)
@@ -90,8 +90,8 @@
   (var n_root)
   (var _tail-node (node/node-create nil _tail))
   (var n_shift _shift)
-  (cond (> (k/bit-rshift _size node/BITS)
-           (k/bit-lshift 1 _shift))
+  (cond (> (xt/x:bit-rshift _size node/BITS)
+           (xt/x:bit-lshift 1 _shift))
         (do (:= n_root
                 (node/node-create nil [_root (node/node-new-path nil _shift _tail-node)]))
             (:= n_shift (+ n_shift node/BITS)))
@@ -108,7 +108,7 @@
   "pops the last element off vector"
   {:added "4.0"}
   [vector]
-  (var protocol (k/get-proto vector))
+  (var protocol (xt/x:get-proto vector))
   (var #{_root _size _shift _tail} vector)
   (when (== _size 0)
     (return vector))
@@ -116,7 +116,7 @@
     (return (-/vector-empty)))
   (when (> (- _size (node/impl-offset _size))
            1)
-    (var n_tail (k/arr-slice _tail 0 (- (k/len _tail) 1)))
+    (var n_tail (xt/x:arr-slice _tail 0 (- (xt/x:len _tail) 1)))
     (return (-/vector-new (node/ensure-persistent _root)
                              (- _size 1)
                              _shift
@@ -126,12 +126,12 @@
   (var n_tail (node/node-array-for _root _size _shift _tail (- _size 2) false))
   (var n_root (node/node-pop-tail nil _size _shift _root false))
   (var children (and n_root
-                     (k/get-key n_root "children")))
+                     (xt/x:get-key n_root "children")))
 
   (cond (and (> _shift node/BITS)
              n_root
-             (k/nil? (k/second children)))
-        (-/vector-new (k/first children)
+             (xt/x:nil? (xt/x:second children)))
+        (-/vector-new (xt/x:first children)
                          (- _size 1)
                          (- _shift node/BITS)
                          n_tail
@@ -158,11 +158,11 @@
   (when (== _size 0)
     (return vector))
   (when (== _size 1)
-    (k/set-key vector "_size" 0)
+    (xt/x:set-key vector "_size" 0)
     (x:arr-pop _tail)
     (return vector))
   (when (<  0 (node/impl-mask (- _size 1)))
-    (k/set-key vector "_size" (- _size 1))
+    (xt/x:set-key vector "_size" (- _size 1))
     (x:arr-pop _tail)
     (return vector))
 
@@ -170,24 +170,24 @@
   (var _tail-node (node/node-array-for _root _size _shift _tail (- _size 2) true))
   (var n_root (node/node-pop-tail _root _size _shift _root true))
   (var children (and n_root
-                     (k/get-key n_root "children")))
+                     (xt/x:get-key n_root "children")))
 
   (cond (and (> _shift node/BITS)
              n_root
-             (k/nil? (k/second children)))
-        (do (k/set-key vector "_root"
-                       (node/node-editable (k/first children)
+             (xt/x:nil? (xt/x:second children)))
+        (do (xt/x:set-key vector "_root"
+                       (node/node-editable (xt/x:first children)
                                         edit-id))
-            (k/set-key vector "_shift"
+            (xt/x:set-key vector "_shift"
                        (- _shift node/BITS)))
         
         
         :else
-        (k/set-key vector "_root"
+        (xt/x:set-key vector "_root"
                    (or n_root
                        (node/node-create edit-id []))))
-  (k/set-key vector "_tail" _tail-node)
-  (k/set-key vector "_size" (- _size 1))
+  (xt/x:set-key vector "_tail" _tail-node)
+  (xt/x:set-key vector "_size" (- _size 1))
   (return vector))
 
 (defn.xt vector-push-last!
@@ -199,32 +199,32 @@
   (when (< (- _size (node/impl-offset _size))
            node/WIDTH)
     (x:arr-push _tail (interface-common/impl-normalise x))
-    (k/set-key vector "_size" (+ _size 1))
+    (xt/x:set-key vector "_size" (+ _size 1))
     (return vector))
   
   (var #{edit-id} _root)
   (var _tail-node (node/node-create edit-id _tail))
-  (cond (> (k/bit-rshift _size node/BITS)
-           (k/bit-lshift 1 _shift))
-        (do (k/set-key vector "_root"
+  (cond (> (xt/x:bit-rshift _size node/BITS)
+           (xt/x:bit-lshift 1 _shift))
+        (do (xt/x:set-key vector "_root"
                        (node/node-create nil [_root (node/node-new-path nil _shift _tail-node)]))
-            (k/set-key vector "_shift" (+ _shift node/BITS)))
+            (xt/x:set-key vector "_shift" (+ _shift node/BITS)))
 
         :else
-        (k/set-key vector "_root"
+        (xt/x:set-key vector "_root"
                    (node/node-push-tail edit-id _size _shift _root _tail-node true)))
-  (k/set-key vector "_tail" [(interface-common/impl-normalise x)])
-  (k/set-key vector "_size" (+ _size 1))
+  (xt/x:set-key vector "_tail" [(interface-common/impl-normalise x)])
+  (xt/x:set-key vector "_size" (+ _size 1))
   (return vector))
 
 (defn.xt vector-to-mutable!
   "mutates the vector"
   {:added "4.0"}
   [vector]
-  (var protocol (k/get-proto vector))
+  (var protocol (xt/x:get-proto vector))
   (var #{_root _size _shift _tail} vector)
   (var #{edit-id} _root)
-  (cond (k/not-nil? edit-id)
+  (cond (xt/x:not-nil? edit-id)
         (return vector)
 
         :else
@@ -238,11 +238,11 @@
   "creates persistent vector"
   {:added "4.0"}
   [vector]
-  (var protocol (k/get-proto vector))
+  (var protocol (xt/x:get-proto vector))
   (var #{_root _size _shift _tail} vector)
   (node/ensure-editable _root)
   (var #{children} _root)
-  (return (-/vector-new (node/node-create nil (k/arr-clone children))
+  (return (-/vector-new (node/node-create nil (xt/x:arr-clone children))
                         _size
                         _shift
                         _tail
@@ -305,8 +305,8 @@
 
 (def.xt VECTOR_PROTOTYPE
   (-> -/VECTOR_SPEC
-      (k/proto-spec)
-      (k/proto-create)))
+      (xt/x:proto-spec)
+      (xt/x:proto-create)))
 
 (defn.xt vector-create
   "creates a vector"
@@ -328,7 +328,7 @@
   "creates an empty mutable vector"
   {:added "4.0"}
   []
-  (return (-/vector-create (node/node-create (k/random) [])
+  (return (-/vector-create (node/node-create (xt/x:random) [])
                            0
                            node/BITS
                            [])))
@@ -338,7 +338,7 @@
   {:added "4.0"}
   [...]
   (var input [...])
-  (cond (k/is-empty? input)
+  (cond (xt/x:is-empty? input)
         (return -/EMPTY_VECTOR)
 
         :else

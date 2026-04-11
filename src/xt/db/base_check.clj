@@ -5,20 +5,20 @@
   (:use code.test))
 
 (l/script :xtalk
-  {:require [[xt.lang.base-lib :as k]]})
+  {:require [[xt.lang.common-spec :as xt]]})
 
 (defn.xt is-uuid?
   "checks that a string input is a uuid"
   {:added "4.0"}
   [s]
-  (when (not (k/is-string? s))
+  (when (not (xt/x:is-string? s))
     (return false))
 
   (when (not (== 36 (x:str-len s)))
     (return false))
 
-  (k/for:array [i [8 13 18 23]]
-    (when (not (== "-" (k/substring s i (+ i 1))))
+  (xt/for:array [i [8 13 18 23]]
+    (when (not (== "-" (xt/x:substring s i (+ i 1))))
       (return false)))
 
   (return true))
@@ -33,28 +33,28 @@
         (or (== arg-type "citext")
             (== arg-type "inet")
             (== arg-type "text"))
-        (return (k/is-string? arg))
+        (return (xt/x:is-string? arg))
 
         (== arg-type "uuid")
         (return (-/is-uuid? arg))
         
         (== arg-type "boolean")
-        (return (k/is-boolean? arg))
+        (return (xt/x:is-boolean? arg))
 
         (or (== arg-type "integer")
             (== arg-type "int")
             (== arg-type "long")
             (== arg-type "bigint")
             (== arg-type "float"))
-        (return (k/is-number? arg))
+        (return (xt/x:is-number? arg))
 
         (== arg-type "numeric")
-        (return (or (k/is-number? arg)
-                    (k/is-string? arg)))
+        (return (or (xt/x:is-number? arg)
+                    (xt/x:is-string? arg)))
         
         (== arg-type "jsonb")
-        (return (or (k/obj? arg)
-                    (k/arr? arg)))
+        (return (or (xt/is-object? arg)
+                    (xt/is-array? arg)))
 
         :else
         (return false)))
@@ -66,9 +66,9 @@
   ;;
   ;; CHECK TYPE
   ;;
-  (k/for:array [[i spec] targs]
-    (var arg (k/get-idx args i))
-    (if (not (-/check-arg-type (k/get-key spec "type") arg))
+  (xt/for:array [[i spec] targs]
+    (var arg (xt/x:get-idx args i))
+    (if (not (-/check-arg-type (xt/x:get-key spec "type") arg))
       (return [false {:status "error"
                       :tag "net/arg-typecheck-failed"
                       :data {:input arg
@@ -80,12 +80,12 @@
   "checks that input and spec are of the same length"
   {:added "4.0"}
   [args targs]
-  (when (not= (k/len args)
-              (k/len targs))
+  (when (not= (xt/x:len args)
+              (xt/x:len targs))
     (return [false {:status "error"
                     :tag "net/args-not-same-length",
-                    :data {:expected (k/len targs)
-                           :actual (k/len args)
+                    :data {:expected (xt/x:len targs)
+                           :actual (xt/x:len args)
                            :input args}}]))
   (return [true]))
 

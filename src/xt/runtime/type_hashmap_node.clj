@@ -3,26 +3,26 @@
   (:require [std.lang :as l]))
 
 (l/script :xtalk
-  {:require [[xt.lang.base-lib :as k]
-             [xt.lang.base-iter :as it]
+  {:require [[xt.lang.common-spec :as xt]
+             [xt.lang.common-iter :as it]
              [xt.runtime.interface-common :as data-common]]})
 
 (def.xt BITS 5)
-(def.xt WIDTH (k/pow 2 -/BITS))
+(def.xt WIDTH (xt/x:pow 2 -/BITS))
 (def.xt MASK (- -/WIDTH 1))
 
 (defn.xt impl-mask
   [hash shift]
-  (return (k/bit-and (k/bit-rshift hash shift)
+  (return (xt/x:bit-and (xt/x:bit-rshift hash shift)
                                      -/MASK)))
 
 (defn.xt impl-bitpos
   [hash shift]
-  (return (k/bit-lshift 1 (-/impl-mask hash shift))))
+  (return (xt/x:bit-lshift 1 (-/impl-mask hash shift))))
 
 (defn.xt impl-edit-allowed
   [edit-0 edit-1]
-  (return (and (k/not-nil? edit-0)
+  (return (and (xt/x:not-nil? edit-0)
                (== edit-0 edit-1))))
 
 (defn.xt node-create
@@ -32,8 +32,8 @@
   (var out {"::" "hashmap.node"
             :bitmap bitmap
             :children children})
-  (when (k/not-nil? edit-id)
-    (k/set-key out "edit_id" edit-id))
+  (when (xt/x:not-nil? edit-id)
+    (xt/x:set-key out "edit_id" edit-id))
   (return out))
 
 (defn.xt node-set-

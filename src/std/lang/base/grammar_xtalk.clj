@@ -701,13 +701,15 @@
     :op-spec {:arglists '([value])
               :type [:fn [:xt/num] :xt/num]}}
    {:op :x-m-max :symbol #{'x:m-max} :emit :abstract
-    :op-spec {:arglists '([x y])
+    :op-spec {:variadic true
+              :arglists '([x y])
               :type [:fn [:xt/num :xt/num] :xt/num]}}
    {:op :x-m-mod :symbol #{'x:m-mod} :emit :abstract
     :op-spec {:arglists '([x y])
               :type [:fn [:xt/num :xt/num] :xt/num]}}
    {:op :x-m-min :symbol #{'x:m-min} :emit :abstract
-    :op-spec {:arglists '([x y])
+    :op-spec {:variadic true
+              :arglists '([x y])
               :type [:fn [:xt/num :xt/num] :xt/num]}}
    {:op :x-m-pow :symbol #{'x:m-pow} :emit :abstract
     :op-spec {:arglists '([x y])

@@ -5,7 +5,7 @@
             [std.lib.schema.base :as base]))
 
 (l/script :xtalk
-  {:require [[xt.lang.base-lib :as k]]})
+  {:require [[xt.lang.common-spec :as xt]]})
 
 (def +scope+ (collection/map-entries
               (fn [[k v]]
@@ -20,40 +20,40 @@
   "merges query with clause"
   {:added "4.0"}
   [q-0 q-1]
-  (var arr-0 (k/arr-filter (k/arrayify q-0) k/not-empty?))
-  (var arr-1 (k/arr-filter (k/arrayify q-1) k/not-empty?))
-  (when (k/is-empty? arr-0)
+  (var arr-0 (xt/x:arr-filter (xt/x:arrayify q-0) k/not-empty?))
+  (var arr-1 (xt/x:arr-filter (xt/x:arrayify q-1) k/not-empty?))
+  (when (xt/x:is-empty? arr-0)
     (return arr-1))
-  (when (k/is-empty? arr-1)
+  (when (xt/x:is-empty? arr-1)
     (return arr-0))
   (var out [])
-  (k/for:array [e-0 arr-0]
-    (k/for:array [e-1 arr-1]
-      (x:arr-push out (k/obj-assign-nested
-                       (k/walk e-0 k/identity k/identity)
-                       (k/walk e-1 k/identity k/identity)))))
+  (xt/for:array [e-0 arr-0]
+    (xt/for:array [e-1 arr-1]
+      (x:arr-push out (xt/x:obj-assign-nested
+                       (xt/x:walk e-0 k/identity k/identity)
+                       (xt/x:walk e-1 k/identity k/identity)))))
   (return out))
 
 (defn.xt filter-scope
   "filter scopes from keys"
   {:added "4.0"}
   [ks]
-  (var mscopes (k/arr-filter ks (fn:> [s] (== "-" (k/sym-ns s)))))
-  (var ascopes (k/arr-filter ks (fn:> [s] (== "*" (k/sym-ns s)))))
+  (var mscopes (xt/x:arr-filter ks (fn:> [s] (== "-" (xt/x:sym-ns s)))))
+  (var ascopes (xt/x:arr-filter ks (fn:> [s] (== "*" (xt/x:sym-ns s)))))
   (return
-   (k/arr-foldl
-    (k/arr-map ascopes
-               (fn:> [s] (k/get-key -/Scopes s)))
+   (xt/x:arr-foldl
+    (xt/x:arr-map ascopes
+               (fn:> [s] (xt/x:get-key -/Scopes s)))
     k/obj-assign 
-    (k/arr-lookup mscopes))))
+    (xt/x:arr-lookup mscopes))))
 
 (defn.xt filter-plain-key
   "converts _id tags to standard keys"
   {:added "4.0"}
   [s]
-  (when (== nil (k/sym-ns s))
-    (return (:? (k/ends-with? s "_id")
-                (k/substring s 0 (- (k/len s) 3))
+  (when (== nil (xt/x:sym-ns s))
+    (return (:? (xt/x:ends-with? s "_id")
+                (xt/x:substring s 0 (- (xt/x:len s) 3))
                 s))))
 
 (defn.xt filter-plain
@@ -61,45 +61,45 @@
   {:added "4.0"}
   [ks]
   (return
-   (k/arr-lookup (k/arr-keep ks -/filter-plain-key))))
+   (xt/x:arr-lookup (xt/x:arr-keep ks -/filter-plain-key))))
 
 (defn.xt get-data-columns
   "get columns for given keys"
   {:added "4.0"}
   [schema table-key ks]
-  (var str-ks (k/arr-filter ks k/is-string?))
+  (var str-ks (xt/x:arr-filter ks k/is-string?))
   (var scopes (-/filter-scope str-ks))
   (var plains (-/filter-plain str-ks))
-  (var cols   (k/get-key schema table-key))
-  (when (k/nil? cols)
-    (k/err (k/cat "ERR - Table not in Schema - " table-key)))
-  (var scoped (k/arr-filter (k/obj-vals cols)
+  (var cols   (xt/x:get-key schema table-key))
+  (when (xt/x:nil? cols)
+    (xt/x:err (xt/x:cat "ERR - Table not in Schema - " table-key)))
+  (var scoped (xt/x:arr-filter (xt/x:obj-vals cols)
                             (fn:> [e]
-                                  (or (and (k/has-key? e "scope")
-                                           (k/get-key scopes (k/cat "-/" (k/get-key e "scope"))))
-                                      (k/get-key plains (k/get-key e "ident"))))))
+                                  (or (and (xt/x:has-key? e "scope")
+                                           (xt/x:get-key scopes (xt/x:cat "-/" (xt/x:get-key e "scope"))))
+                                      (xt/x:get-key plains (xt/x:get-key e "ident"))))))
   (return
-   (k/arr-sort scoped
-               (fn:> [e] (k/get-key e "order"))
+   (xt/x:arr-sort scoped
+               (fn:> [e] (xt/x:get-key e "order"))
                (fn:> [a b] (< a b)))))
 
 (defn.xt get-link-standard
   "classifies the link"
   {:added "4.0"}
   [link]
-  (var ltag (k/first link))
-  (var llen (k/len link))
+  (var ltag (xt/x:first link))
+  (var llen (xt/x:len link))
   (when (== 1 llen)
     (return [ltag [{} ["*/data"]]]))
-  (var lmap (k/arr-filter link k/obj?))
-  (var larr (k/arr-filter link k/arr?))
-  (when (== 0 (k/len larr))
+  (var lmap (xt/x:arr-filter link xt/is-object?))
+  (var larr (xt/x:arr-filter link xt/is-array?))
+  (when (== 0 (xt/x:len larr))
     (:= larr [["*/data"]]))
-  (when (== 0 (k/len lmap))
+  (when (== 0 (xt/x:len lmap))
     (:= lmap [{}]))
   (var lout [])
-  (k/arr-append lout lmap)
-  (k/arr-append lout larr)
+  (xt/x:arr-append lout lmap)
+  (xt/x:arr-append lout larr)
   (return [ltag lout]))
 
 ;;
@@ -110,14 +110,14 @@
   {:added "4.0"}
   [schema table-key query acc]
   (:= acc (or acc {}))
-  (var table (k/get-key schema table-key))
+  (var table (xt/x:get-key schema table-key))
   (when table
     (:= (. acc [table-key]) true)
-    (k/for:object [[k v] query]
-      (var e (k/get-key table k))
-      (when (==  "ref" (k/get-key e "type"))
-        (var link-key (k/get-path e ["ref" "ns"]))
-        (cond (k/obj? v)
+    (xt/for:object [[k v] query]
+      (var e (xt/x:get-key table k))
+      (when (==  "ref" (xt/x:get-key e "type"))
+        (var link-key (xt/x:get-path e ["ref" "ns"]))
+        (cond (xt/is-object? v)
               (-/get-query-tables schema link-key v acc)
               
               :else
@@ -128,14 +128,14 @@
   "get columns for given keys"
   {:added "4.0"}
   [schema table-key ks]
-  (var link-arr (k/arr-filter ks k/arr?))
-  (var linked (-> (k/arr-map link-arr -/get-link-standard)
-                  (k/obj-from-pairs)))
-  (var cols   (k/get-key schema table-key))
+  (var link-arr (xt/x:arr-filter ks xt/is-array?))
+  (var linked (-> (xt/x:arr-map link-arr -/get-link-standard)
+                  (xt/x:obj-from-pairs)))
+  (var cols   (xt/x:get-key schema table-key))
   (return
-   (k/arr-keepf (k/obj-vals cols)
-                (fn:> [col] (k/has-key? linked (k/get-key col "ident")))
-                (fn:> [col] [col (k/get-key linked (k/get-key col "ident"))]))))
+   (xt/x:arr-keepf (xt/x:obj-vals cols)
+                (fn:> [col] (xt/x:has-key? linked (xt/x:get-key col "ident")))
+                (fn:> [col] [col (xt/x:get-key linked (xt/x:get-key col "ident"))]))))
 
 (defn.xt get-linked-tables
   "calculated linked tables given query"
@@ -148,12 +148,12 @@
               (fn [arr]
                 (var [attr link-query] := arr)
                 (var [link-where link-returning] := link-query)
-                (link-loop (k/get-path attr ["ref" "ns"])
+                (link-loop (xt/x:get-path attr ["ref" "ns"])
                            link-returning
                            acc)))
 
-         (do (k/set-key acc table-key true)
-             (k/arr-each linked inner-loop))
+         (do (xt/x:set-key acc table-key true)
+             (xt/x:arr-each linked inner-loop))
          (return acc)))
   (return (link-loop table-key returning {})))
 
@@ -161,10 +161,10 @@
   "when empty, returns an empty array"
   {:added "4.0"}
   [input]
-  (cond (k/is-empty? input)
+  (cond (xt/x:is-empty? input)
         (return [])
 
-        (k/arr? input)
+        (xt/is-array? input)
         (return input)
 
         :else
@@ -174,36 +174,36 @@
   "calculated linked tree given query"
   {:added "4.0"}
   [schema table-name where returning opts]
-  (var table-fn   (k/get-key opts "table_fn" k/identity))
-  (var column-fn  (k/get-key opts "column_fn" k/identity))
+  (var table-fn   (xt/x:get-key opts "table_fn" k/identity))
+  (var column-fn  (xt/x:get-key opts "column_fn" k/identity))
   (:= where (-/as-where-input where))
   (:= returning (or returning ["*/data"]))
-  (var where-pred  (fn:> [e] (and (k/obj? e) (k/nil? (k/get-key  e "::")))))
-  (var custom-pred (fn:> [e] (and (k/obj? e) (k/is-string? (k/get-key  e "::")))))
-  (var custom (k/arr-filter returning custom-pred))
+  (var where-pred  (fn:> [e] (and (xt/is-object? e) (xt/x:nil? (xt/x:get-key  e "::")))))
+  (var custom-pred (fn:> [e] (and (xt/is-object? e) (xt/x:is-string? (xt/x:get-key  e "::")))))
+  (var custom (xt/x:arr-filter returning custom-pred))
   (var data   (-/get-data-columns schema table-name returning))
   (var links  (-/get-link-columns schema table-name returning))
   (var get-child-tree
        (fn [link]
          (var [attr link-query] link)
-         (var link-where-query (k/arr-filter link-query where-pred))
-         (var link-returning  (k/last link-query))
-         (var link-where-returning  (k/arr-filter link-returning where-pred))
+         (var link-where-query (xt/x:arr-filter link-query where-pred))
+         (var link-returning  (xt/x:last link-query))
+         (var link-where-returning  (xt/x:arr-filter link-returning where-pred))
          (var link-where  (-/merge-queries link-where-query link-where-returning))
-         (var link-table  (k/get-path attr ["ref" "ns"]))
-         (var link-type   (k/get-path attr ["ref" "type"]))
+         (var link-table  (xt/x:get-path attr ["ref" "ns"]))
+         (var link-type   (xt/x:get-path attr ["ref" "type"]))
          (var link-extra (:? (== "reverse" link-type)
-                             {(k/get-path attr ["ref" "rkey"])
-                              ["eq" [(k/cat (table-fn table-name)
+                             {(xt/x:get-path attr ["ref" "rkey"])
+                              ["eq" [(xt/x:cat (table-fn table-name)
                                             "."
                                             (column-fn "id"))]]}
                              
                              {"id"
-                              ["eq" [(k/cat (table-fn table-name)
+                              ["eq" [(xt/x:cat (table-fn table-name)
                                             "."
-                                            (column-fn (k/cat (k/get-path attr ["ref" "key"])
+                                            (column-fn (xt/x:cat (xt/x:get-path attr ["ref" "key"])
                                                               "_id")))]]}))
-         (return [(k/get-key attr "ident")
+         (return [(xt/x:get-key attr "ident")
                   link-type
                   (-/get-tree schema
                               link-table
@@ -212,9 +212,9 @@
                               opts)])))
   (return [table-name 
            {:where where
-            :data  (k/arr-map data (fn:> [e] (:? (== "ref" (k/get-key e "type"))
-                                                 (k/cat (k/get-key e "ident") "_id")
-                                                 (k/get-key e "ident"))))
-            :links (k/arr-map links get-child-tree)
+            :data  (xt/x:arr-map data (fn:> [e] (:? (== "ref" (xt/x:get-key e "type"))
+                                                 (xt/x:cat (xt/x:get-key e "ident") "_id")
+                                                 (xt/x:get-key e "ident"))))
+            :links (xt/x:arr-map links get-child-tree)
             :custom custom}]))
 

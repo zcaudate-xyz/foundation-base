@@ -3,7 +3,8 @@
             [std.lang.typed.xtalk :refer [defspec.xt]]))
 
 (l/script :xtalk
-  {:require [[xt.lang.base-lib :as k]]})
+  {:require [[xt.lang.common-spec :as xt]
+             [xt.lang.common-data :as xtd]]})
 
 (defspec.xt ValidationFieldResult
   [:xt/record
@@ -29,20 +30,20 @@
   {:added "4.0"}
   [form field guards index result hook-fn complete-fn]
   (:= guards (or guards []))
-  (cond (< index (k/len guards))
-        (do (var guard (k/get-idx guards (x:offset index)))
+  (cond (< index (xt/x:len guards))
+        (do (var guard (xt/x:get-idx guards (x:offset index)))
             (var [id m] guard)
             (var #{check message} m)
             (var error-fn
                  (fn []
-                   (k/obj-assign (k/get-path result ["fields" field])
-                                 {:status "errored"
-                                  :id id
-                                  :data (k/get-key form field)
-                                  :message message})
+                   (xt/x:obj-assign (xt/x:get-path result ["fields" field])
+                                    {:status "errored"
+                                     :id id
+                                     :data (xt/x:get-key form field)
+                                     :message message})
                    (when hook-fn (hook-fn id false))
                    (when complete-fn (complete-fn false result))))
-            (return (k/for:async [[ok err] (check (k/get-key form field) form)]
+            (return (xt/for:async [[ok err] (check (xt/x:get-key form field) form)]
                       {:success  (cond (== ok false)
                                        (return (error-fn))
                                        
@@ -56,12 +57,12 @@
                        :error    (error-fn)})))
         
         :else
-        (do (var entry (k/get-path result ["fields" field]))
+        (do (var entry (xt/x:get-path result ["fields" field]))
             (when entry
-              (k/del-key entry "id")
-              (k/del-key entry "data")
-              (k/del-key entry "message")
-              (k/obj-assign entry {:status "ok"}))
+              (xt/x:del-key entry "id")
+              (xt/x:del-key entry "data")
+              (xt/x:del-key entry "message")
+              (xt/x:obj-assign entry {:status "ok"}))
             (when complete-fn
               (complete-fn true result))
             (return result))))
@@ -70,13 +71,13 @@
   "validates a single field"
   {:added "4.0"}
   [form field validators result hook-fn complete-fn]
-  (var guards (k/get-key validators field))
+  (var guards (xt/x:get-key validators field))
   (var index 0)
   (return (-/validate-step form field guards index result
                            hook-fn
                            (fn [passed status]
                              (when (not passed)
-                               (k/set-key result "status" "errored"))
+                               (xt/x:set-key result "status" "errored"))
                              (when complete-fn
                                (complete-fn passed status))))))
 
@@ -84,20 +85,20 @@
   "validates all data"
   {:added "4.0"}
   [form validators result hook-fn complete-fn]
-  (var fields (k/obj-keys validators))
+  (var fields (xt/x:obj-keys validators))
   (var complete-check-fn
        (fn [success]
-         (when (not success) (k/set-key result "status" "errored"))
-         (when (== "errored" (k/get-key result "status"))
+         (when (not success) (xt/x:set-key result "status" "errored"))
+         (when (== "errored" (xt/x:get-key result "status"))
            (when complete-fn (complete-fn false result))
            (return))
-         (when (k/arr-every (k/obj-vals (k/get-key result "fields"))
+         (when (xt/x:arr-every (xt/x:obj-vals (xt/x:get-key result "fields"))
                             (fn [e]
-                              (return (== (k/get-key e "status") "ok"))))
-           (k/set-key result "status" "ok")
+                              (return (== (xt/x:get-key e "status") "ok"))))
+           (xt/x:set-key result "status" "ok")
            (when complete-fn (complete-fn true result))
            (return))))
-  (return (k/arr-map fields
+  (return (xt/x:arr-map fields
                      (fn [field]
                        (return (-/validate-field
                                 form field validators result
@@ -109,7 +110,7 @@
   [validators]
   (var result  {"::" "validation.result"
                 :status   "pending"
-                :fields   (k/obj-map validators
-                                     (fn [_]
-                                       (return {:status "pending"})))})
+                :fields   (xtd/obj-map validators
+                                       (fn [_]
+                                         (return {:status "pending"})))})
   (return result))

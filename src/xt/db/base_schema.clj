@@ -2,31 +2,31 @@
   (:require [std.lang :as l]))
 
 (l/script :xtalk
-  {:require [[xt.lang.base-lib :as k]]})
+  {:require [[xt.lang.common-spec :as xt]]})
 
 (def.xt CACHED_SCHEMA (x:lu-create))
 
 (def.xt CACHED_LOOKUP (x:lu-create))
 
 (def.xt ^{:arglists '([e])}
-  get-order (fn:> [e] (k/get-key e "order")))
+  get-order (fn:> [e] (xt/x:get-key e "order")))
 
 (def.xt ^{:arglists '([e])}
-  get-ident (fn:> [e] (k/get-key e "ident")))
+  get-ident (fn:> [e] (xt/x:get-key e "ident")))
 
 (defn.xt get-ident-id
   "gets the ident id for a schema entry"
   {:added "4.0"}
   [e]
-  (return (:? (== "ref" (k/get-key e "type"))
-              (k/cat (k/get-key e "ident") "_id")
-              (k/get-key e "ident"))))
+  (return (:? (== "ref" (xt/x:get-key e "type"))
+              (xt/x:cat (xt/x:get-key e "ident") "_id")
+              (xt/x:get-key e "ident"))))
 
 (defn.xt list-tables
   "list tables"
   {:added "4.0"}
   [schema]
-  (return  (k/arr-sort (k/obj-keys schema)
+  (return  (xt/x:arr-sort (xt/x:obj-keys schema)
                        k/identity
                        k/str-lt)))
 
@@ -34,74 +34,74 @@
   "get lookup"
   {:added "4.0"}
   [schema]
-  (var cached := (k/lu-get -/CACHED_SCHEMA schema))
+  (var cached := (xt/x:lu-get -/CACHED_SCHEMA schema))
   (when (not cached)
     (:= cached {})
-    (k/lu-set -/CACHED_SCHEMA schema cached))
+    (xt/x:lu-set -/CACHED_SCHEMA schema cached))
   (return cached))
 
 (defn.xt create-data-keys
   "creates data keys"
   {:added "4.0"}
   ([schema table-name]
-   (var table := (k/get-key schema table-name))
-   (return (-> (k/obj-vals table)
-               (k/arr-filter (fn:> [e] (and (k/is-number? (k/get-key e "order"))
-                                            (not= (k/get-key e "type") "ref"))))
-               (k/arr-sort   -/get-order k/lt)
-               (k/arr-map    -/get-ident)))))
+   (var table := (xt/x:get-key schema table-name))
+   (return (-> (xt/x:obj-vals table)
+               (xt/x:arr-filter (fn:> [e] (and (xt/x:is-number? (xt/x:get-key e "order"))
+                                            (not= (xt/x:get-key e "type") "ref"))))
+               (xt/x:arr-sort   -/get-order k/lt)
+               (xt/x:arr-map    -/get-ident)))))
 
 (defn.xt create-ref-keys
   "creates ref keys"
   {:added "4.0"}
   ([schema table-name]
-   (var table := (k/get-key schema table-name))
-   (return (-> (k/obj-vals table)
-               (k/arr-filter (fn:> [e] (and (k/is-number? (k/get-key e "order"))
-                                            (== (k/get-key e "type") "ref"))))
-               (k/arr-sort   -/get-order k/lt)
-               (k/arr-map    -/get-ident)))))
+   (var table := (xt/x:get-key schema table-name))
+   (return (-> (xt/x:obj-vals table)
+               (xt/x:arr-filter (fn:> [e] (and (xt/x:is-number? (xt/x:get-key e "order"))
+                                            (== (xt/x:get-key e "type") "ref"))))
+               (xt/x:arr-sort   -/get-order k/lt)
+               (xt/x:arr-map    -/get-ident)))))
 
 (defn.xt create-rev-keys
   "creates rev keys"
   {:added "4.0"}
   ([schema table-name]
-   (var table := (k/get-key schema table-name))
-   (return (-> (k/obj-vals table)
-               (k/arr-filter (fn:> [e] (not (k/is-number?
-                                             (k/get-key e "order")))))
-               (k/arr-map    -/get-ident)))))
+   (var table := (xt/x:get-key schema table-name))
+   (return (-> (xt/x:obj-vals table)
+               (xt/x:arr-filter (fn:> [e] (not (xt/x:is-number?
+                                             (xt/x:get-key e "order")))))
+               (xt/x:arr-map    -/get-ident)))))
 
 (defn.xt create-table-entries
   "creates the table keys"
   {:added "4.0"}
   [schema table-name]
-  (var table := (k/get-key schema table-name))
-  (return (-> (k/obj-vals table)
-              (k/arr-filter (fn [e]
-                              (return (k/is-number? (k/get-key e "order")))))
-              (k/arr-sort   -/get-order k/lt))))
+  (var table := (xt/x:get-key schema table-name))
+  (return (-> (xt/x:obj-vals table)
+              (xt/x:arr-filter (fn [e]
+                              (return (xt/x:is-number? (xt/x:get-key e "order")))))
+              (xt/x:arr-sort   -/get-order k/lt))))
 
 (defn.xt create-defaults
   "creates defaults from sql inputs"
   {:added "4.0"}
   [schema table-name]
-  (var table := (k/get-key schema table-name))
-  (return (k/obj-keepf table
+  (var table := (xt/x:get-key schema table-name))
+  (return (xt/x:obj-keepf table
                        (fn [m]
-                         (return (and (k/get-key m "sql")
-                                      (k/has-key? (k/get-key m "sql")
+                         (return (and (xt/x:get-key m "sql")
+                                      (xt/x:has-key? (xt/x:get-key m "sql")
                                                   "default"))))
                        (fn [m]
-                         (return (k/get-path m ["sql" "default"]))))))
+                         (return (xt/x:get-path m ["sql" "default"]))))))
 
 (defn.xt create-all-keys
   "creates all keys"
   {:added "4.0"}
   ([schema table-name]
    (var ref-ks := (-/create-ref-keys  schema table-name))
-   (var ref-id-ks := (-> (k/arr-map ref-ks (fn:> [k] [(k/cat k "_id") k]))
-                         (k/obj-from-pairs)))
+   (var ref-id-ks := (-> (xt/x:arr-map ref-ks (fn:> [k] [(xt/x:cat k "_id") k]))
+                         (xt/x:obj-from-pairs)))
    (return {:data     (-/create-data-keys schema table-name)
             :ref      ref-ks
             :ref-id   ref-id-ks
@@ -114,73 +114,73 @@
   {:added "4.0"}
   ([schema table-name]
    (var cached  (-/get-cached-schema schema))
-   (var table   (k/get-key cached table-name))
+   (var table   (xt/x:get-key cached table-name))
    (when (not table)
      (:= table (-/create-all-keys schema table-name))
-     (k/set-key cached table-name table))
+     (xt/x:set-key cached table-name table))
    (return table)))
 
 (defn.xt data-keys
   "gets data keys"
   {:added "4.0"}
   [schema table-name]
-  (return (k/get-path (-/get-all-keys schema table-name) ["data"])))
+  (return (xt/x:get-path (-/get-all-keys schema table-name) ["data"])))
 
 (defn.xt ref-keys
   "gets ref keys"
   {:added "4.0"}
   [schema table-name]
-  (return (k/get-path (-/get-all-keys schema table-name) ["ref"])))
+  (return (xt/x:get-path (-/get-all-keys schema table-name) ["ref"])))
 
 (defn.xt ref-id-keys
   "gets ref id keys"
   {:added "4.0"}
   [schema table-name]
-  (return (k/get-path (-/get-all-keys schema table-name) ["ref_id"])))
+  (return (xt/x:get-path (-/get-all-keys schema table-name) ["ref_id"])))
 
 (defn.xt rev-keys
   "gets rev keys"
   {:added "4.0"}
   [schema table-name]
-  (return (k/get-path (-/get-all-keys schema table-name) ["rev"])))
+  (return (xt/x:get-path (-/get-all-keys schema table-name) ["rev"])))
 
 (defn.xt table-defaults
   "gets the table defaults"
   {:added "4.0"}
   [schema table-name]
-  (return (k/get-path (-/get-all-keys schema table-name) ["defaults"])))
+  (return (xt/x:get-path (-/get-all-keys schema table-name) ["defaults"])))
 
 (defn.xt table-entries
   "gets the table entries"
   {:added "4.0"}
   [schema table-name]
-  (return (k/get-path (-/get-all-keys schema table-name) ["table"])))
+  (return (xt/x:get-path (-/get-all-keys schema table-name) ["table"])))
 
 (defn.xt table-columns
   "ges the table columns"
   {:added "4.0"}
   [schema table-name]
-  (return (k/arr-map (-/table-entries schema table-name)
+  (return (xt/x:arr-map (-/table-entries schema table-name)
                      -/get-ident-id)))
 
 (defn.xt create-table-order
   "creates the table order"
   {:added "4.0"}
   [lookup]
-  (return (-> (k/arr-sort (k/obj-pairs lookup)
+  (return (-> (xt/x:arr-sort (xt/x:obj-pairs lookup)
                           (fn [pair]
-                            (return (k/get-key (k/second pair) "position")))
+                            (return (xt/x:get-key (xt/x:second pair) "position")))
                           k/lt)
-              (k/arr-map k/first))))
+              (xt/x:arr-map k/first))))
 
 (defn.xt table-order
   "table order with caching"
   {:added "4.0"}
   [lookup]
-  (var cached (k/lu-get -/CACHED_LOOKUP lookup))
+  (var cached (xt/x:lu-get -/CACHED_LOOKUP lookup))
   (when (not cached)
     (:= cached (-/create-table-order lookup))
-    (k/lu-set -/CACHED_LOOKUP lookup cached))
+    (xt/x:lu-set -/CACHED_LOOKUP lookup cached))
   (return cached))
 
 (defn.xt table-coerce
@@ -190,23 +190,23 @@
   
   (var out {})
   (var ref-fn (fn:> [ntable vdata] (-/table-coerce schema ntable vdata ctypes)))
-  (when (k/arr? data)
-    (return (k/arr-map data (fn:> [vdata] (ref-fn table vdata)))))
-  (k/for:object [[key v] data]
-    (var rec (k/get-in schema [table key]))
-    (cond (k/nil? rec)
-          (k/set-key out key v)
+  (when (xt/is-array? data)
+    (return (xt/x:arr-map data (fn:> [vdata] (ref-fn table vdata)))))
+  (xt/for:object [[key v] data]
+    (var rec (xt/x:get-in schema [table key]))
+    (cond (xt/x:nil? rec)
+          (xt/x:set-key out key v)
 
-          (== "ref" (k/get-key rec "type"))
-          (do (var ntable (k/get-path rec ["ref" "ns"]))
-              (k/set-key out key (k/arr-map v (fn:> [vdata] (ref-fn ntable vdata)))))
+          (== "ref" (xt/x:get-key rec "type"))
+          (do (var ntable (xt/x:get-path rec ["ref" "ns"]))
+              (xt/x:set-key out key (xt/x:arr-map v (fn:> [vdata] (ref-fn ntable vdata)))))
           
           :else
-          (do (var f (k/get-key ctypes (k/get-key rec "type")))
-              (var val (:? (k/nil? f)
+          (do (var f (xt/x:get-key ctypes (xt/x:get-key rec "type")))
+              (var val (:? (xt/x:nil? f)
                            v
                            (f v)))
-              #_(k/LOG! [table key (. rec ["type"]) v val])
-              (k/set-key out key val))))
+              #_(xt/x:LOG! [table key (. rec ["type"]) v val])
+              (xt/x:set-key out key val))))
   (return out))
 

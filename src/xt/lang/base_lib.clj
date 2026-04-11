@@ -351,7 +351,7 @@
   {:added "4.0"}
   ([init]
    (var i := init)
-   (when (k/nil? i)
+   (when (xt/x:nil? i)
      (:= i -1))
    (var inc-fn
         (fn []
@@ -432,8 +432,8 @@
   {:added "4.0"}
   ([obj e]
    (x:set-key obj
-              (k/first e)
-              (k/second e))
+              (xt/x:first e)
+              (xt/x:second e))
    (return obj)))
 
 (defn.xt step-del-key
@@ -497,7 +497,7 @@
   ([s n ch]
    (var l := (- n (x:offset (x:str-len s))))
    (var out := s)
-   (k/for:index [i [0 l]]
+   (xt/for:index [i [0 l]]
      (:= out (x:cat ch out)))
    (return out)))
 
@@ -507,7 +507,7 @@
   ([s n ch]
    (var l := (- n (x:offset (x:str-len s))))
    (var out := s)
-   (k/for:index [i [0 l]]
+   (xt/for:index [i [0 l]]
      (:= out (x:cat out ch)))
    (return out)))
 
@@ -515,12 +515,12 @@
   "pad lines with starting chars"
   {:added "4.0"}
   [s n ch]
-  (var lines (k/split s "\n"))
+  (var lines (xt/x:split s "\n"))
   (var out := "")
-  (k/for:array [line lines]
-    (when (< 0 (k/len out))
-      (:= out (k/cat out "\n")))
-    (:= out (k/cat out (-/pad-left "" n " ") line)))
+  (xt/for:array [line lines]
+    (when (< 0 (xt/x:len out))
+      (:= out (xt/x:cat out "\n")))
+    (:= out (xt/x:cat out (-/pad-left "" n " ") line)))
   (return out))
 
 
@@ -543,7 +543,7 @@
   {:added "4.0"}
   [pval nval modulo]
   (var offset (mod (- nval pval) modulo))
-  (cond (> (k/abs offset)
+  (cond (> (xt/x:abs offset)
            (/ modulo 2))
         (cond (> offset 0)
               (return (- offset modulo))
@@ -573,7 +573,7 @@
   "mixes two values with a fraction"
   {:added "4.0"}
   [x0 x1 v f]
-  (when (k/nil? f)
+  (when (xt/x:nil? f)
     (:= f -/identity))
   (return (+ x0 (* (- x1 x0)
                    (f v)))))
@@ -590,7 +590,7 @@
   "rounds to the nearest integer"
   {:added "4.0"}
   [x]
-  (return (k/floor (+ x 0.5))))
+  (return (xt/x:floor (+ x 0.5))))
 
 (defn.xt clamp
   "clamps a value between min and max"
@@ -628,7 +628,7 @@
   "creates a sym"
   {:added "4.0"}
   [ns name]
-  (if (k/nil? ns)
+  (if (xt/x:nil? ns)
     (return name)
     (return (x:cat ns "/" name))))
 
@@ -664,26 +664,26 @@
   "checks that array is empty"
   {:added "4.0"}
   [res]
-  (cond (k/nil? res) (return true)
-        (k/is-string? res) (return (== 0 (x:str-len res)))
-        (-/arr? res) (return (== 0 (k/len res)))
+  (cond (xt/x:nil? res) (return true)
+        (xt/x:is-string? res) (return (== 0 (x:str-len res)))
+        (-/arr? res) (return (== 0 (xt/x:len res)))
         (-/obj? res)
-        (do (k/for:object [[k v] res]
+        (do (xt/for:object [[k v] res]
               (return false))
             (return true))
 
         :else
-        (do (k/err (k/cat "Invalid type - "
+        (do (xt/x:err (xt/x:cat "Invalid type - "
                           (-/type-native res)
                           " - "
-                          (k/to-string res))))))
+                          (xt/x:to-string res))))))
 
 (defn.xt arr-lookup
   "constructs a lookup given keys"
   {:added "4.0"}
   [arr]
   (var out := {})
-  (k/for:array [k arr]
+  (xt/for:array [k arr]
     (x:set-key out k true))
   (return out))
 
@@ -691,7 +691,7 @@
   "checks that every element fulfills thet predicate"
   {:added "4.0"}
   [arr pred]
-  (k/for:array [[i v] arr]
+  (xt/for:array [[i v] arr]
     (if (not (pred v))
       (return false)))
   (return true))
@@ -700,7 +700,7 @@
   "checks that the array contains an element"
   {:added "4.0"}
   [arr pred]
-  (k/for:array [[i v] arr]
+  (xt/for:array [[i v] arr]
     (if (pred v)
       (return true)))
   (return false))
@@ -709,7 +709,7 @@
   "performs a function call for each element"
   {:added "4.0"}
   ([arr f]
-   (k/for:array [e arr] (f e))
+   (xt/for:array [e arr] (f e))
    (return true)))
 
 (defn.xt arr-omit
@@ -717,7 +717,7 @@
   {:added "4.0"}
   ([arr i]
    (var out := [])
-   (k/for:array [[j e] arr]
+   (xt/for:array [[j e] arr]
      (when (not= (x:offset i) j)
        (x:arr-push out e)))
    (return out)))
@@ -727,7 +727,7 @@
   {:added "4.0"}
   [arr]
   (var out := [])
-  (k/for:index [i [(x:len arr)
+  (xt/for:index [i [(x:len arr)
                    (x:offset)
                    -1]]
     (x:arr-push out (x:get-idx arr (x:offset-rev i))))
@@ -737,7 +737,7 @@
   "finds first index matching predicate"
   {:added "4.0"}
   [arr pred]
-  (k/for:array [[i v] arr]
+  (xt/for:array [[i v] arr]
     (when (pred v)
       (return (- i (x:offset)))))
   (return -1))
@@ -747,7 +747,7 @@
   {:added "4.0"}
   [ks vs]
   (var out := {})
-  (k/for:array [[i k] ks]
+  (xt/for:array [[i k] ks]
     (x:copy-key out vs [k i]))
   (return out))
 
@@ -756,7 +756,7 @@
   {:added "4.0"}
   ([arr f]
    (var out := [])
-   (k/for:array [e arr]
+   (xt/for:array [e arr]
      (x:arr-push out (f e)))
    (return out)))
 
@@ -765,7 +765,7 @@
   {:added "4.0"}
   ([arr]
    (var out := [])
-   (k/for:array [e arr]
+   (xt/for:array [e arr]
      (x:arr-push out e))
    (return out)))
 
@@ -773,7 +773,7 @@
   "appends to the end of an array"
   {:added "4.0"}
   ([arr other]
-   (k/for:array [e other]
+   (xt/for:array [e other]
      (x:arr-push arr e))
    (return arr)))
 
@@ -782,7 +782,7 @@
   {:added "4.0"}
   ([arr start finish]
    (var out := [])
-   (k/for:index [i [(x:offset start) (or finish
+   (xt/for:index [i [(x:offset start) (or finish
                                          (-/len arr))]]
      (x:arr-push out (x:get-idx arr i)))
    (return out)))
@@ -792,7 +792,7 @@
   {:added "4.0"}
   ([arr start finish]
    (var out := [])
-   (k/for:index [i [(x:offset start) finish]]
+   (xt/for:index [i [(x:offset start) finish]]
      (x:arr-push-first out (x:get-idx arr i)))
    (return out)))
 
@@ -800,18 +800,18 @@
   "gets the tail of the array"
   {:added "4.0"}
   ([arr n]
-   (var t  (k/len arr))
-   (return (-/arr-rslice arr (k/max (- t n) 0) t))))
+   (var t  (xt/x:len arr))
+   (return (-/arr-rslice arr (xt/x:max (- t n) 0) t))))
 
 (defn.xt arr-mapcat
   "maps an array function, concatenting results"
   {:added "4.0"}
   [arr f]
   (var out := [])
-  (k/for:array [e arr]
+  (xt/for:array [e arr]
     (var res (f e))
     (if (x:not-nil? res)
-      (k/for:array [v res]
+      (xt/for:array [v res]
         (x:arr-push out v))))
   (return out))
 
@@ -822,7 +822,7 @@
   (var out := [])
   (var i := 0)
   (var sarr := [])
-  (k/for:array [e arr]
+  (xt/for:array [e arr]
     (when (== i n)
       (x:arr-push out sarr)
       (:= i 0)
@@ -838,7 +838,7 @@
   {:added "4.0"}
   ([arr pred]
    (var out := [])
-   (k/for:array [e arr]
+   (xt/for:array [e arr]
      (if (pred e)
        (x:arr-push out e)))
    (return out)))
@@ -848,7 +848,7 @@
   {:added "4.0"}
   [arr f]
   (var out := [])
-  (k/for:array [e arr]
+  (xt/for:array [e arr]
     (var v (f e))
     (if (x:not-nil? v)
       (x:arr-push out v)))
@@ -859,7 +859,7 @@
   {:added "4.0"}
   [arr pred f]
   (var out := [])
-  (k/for:array [e arr]
+  (xt/for:array [e arr]
    (if (pred e)
      (x:arr-push out (f e))))
   (return out))
@@ -869,8 +869,8 @@
   {:added "4.0"}
   [arr key-fn val-fn]
   (var out := {})
-  (when (k/not-nil? arr)
-    (k/for:array [e arr]
+  (when (xt/x:not-nil? arr)
+    (xt/for:array [e arr]
       (x:set-key out (key-fn e)
                  (val-fn e))))
   (return out))
@@ -880,7 +880,7 @@
   {:added "4.0"}
   [arr f init]
   (var out := init)
-  (k/for:array [e arr]
+  (xt/for:array [e arr]
     (:= out (f out e)))
   (return out))
 
@@ -889,7 +889,7 @@
   {:added "4.0"}
   [arr f init]
   (var out := init)
-  (k/for:index [i [(x:len arr)
+  (xt/for:index [i [(x:len arr)
                    (x:offset)
                    -1]]
     (:= out (f out (x:get-idx arr (x:offset-rev i)))))
@@ -912,8 +912,8 @@
   {:added "4.0"}
   ([arr key-fn view-fn]
    (var out := {})
-   (when (k/not-nil? arr)
-     (k/for:array [e arr]
+   (when (xt/x:not-nil? arr)
+     (xt/for:array [e arr]
       (var g := (key-fn e))
       (var garr := (x:get-key out g []))
       (x:set-key out g [])
@@ -927,9 +927,9 @@
   [x]
   (var arr    := (:? (x:is-array? x) x [x]))
   (var arrlen := (x:len arr))
-  (var start  := (:? (< 1 arrlen) (k/first arr) 0))
-  (var finish := (:? (< 1 arrlen) (k/second arr) (k/first arr)))
-  (var step   := (:? (< 2 arrlen) (k/nth arr 2) 1))
+  (var start  := (:? (< 1 arrlen) (xt/x:first arr) 0))
+  (var finish := (:? (< 1 arrlen) (xt/x:second arr) (xt/x:first arr)))
+  (var step   := (:? (< 2 arrlen) (xt/x:nth arr 2) 1))
   (var out := [start])
   (var i := (+ step start))
   (cond (and (< 0 step)
@@ -953,7 +953,7 @@
   [arr other]
   (var lu  := (-/arr-lookup arr) :inline)
   (var out := [])
-  (k/for:array [e other]
+  (xt/for:array [e other]
     (if (x:has-key? lu e)
       (x:arr-push out e)))
   (return out))
@@ -964,7 +964,7 @@
   [arr other]
   (var lu  := (-/arr-lookup arr) :inline)
   (var out := [])
-  (k/for:array [e other]
+  (xt/for:array [e other]
     (if (not (x:has-key? lu e))
       (x:arr-push out e)))
   (return out))
@@ -974,13 +974,13 @@
   {:added "4.0"}
   [arr other]
   (var lu := {})
-  (k/for:array [e arr]
+  (xt/for:array [e arr]
     (x:set-key lu e e))
-  (k/for:array [e other]
+  (xt/for:array [e other]
     (x:set-key lu e e))
 
   (var out := [])
-  (k/for:object [[_ v] lu]
+  (xt/for:object [[_ v] lu]
     (x:arr-push out v))
   (return out))
 
@@ -998,16 +998,16 @@
   [arr brr comp-fn]
   (:= arr (or arr []))
   (:= brr (or brr []))
-  (var alen (k/len arr))
-  (var blen (k/len brr))
+  (var alen (xt/x:len arr))
+  (var blen (xt/x:len brr))
   (var i 0)
   (var j 0)
   (var k 0)
   (var out := [])
   (while (and (< i alen)
               (< j blen))
-    (var aitem (k/get-idx arr (x:offset i)))
-    (var bitem (k/get-idx brr (x:offset j)))
+    (var aitem (xt/x:get-idx arr (x:offset i)))
+    (var bitem (xt/x:get-idx brr (x:offset j)))
     (cond (comp-fn aitem bitem)
           (do (:= i (+ i 1)) 
               (x:arr-push out aitem))
@@ -1017,12 +1017,12 @@
               (x:arr-push out bitem))))
 
   (while (< i alen)
-    (var aitem (k/get-idx arr (x:offset i)))
+    (var aitem (xt/x:get-idx arr (x:offset i)))
     (:= i (+ i 1))
     (x:arr-push out aitem))
 
   (while (< j blen)
-    (var bitem (k/get-idx brr (x:offset j)))
+    (var bitem (xt/x:get-idx brr (x:offset j)))
     (:= j (+ j 1))
     (x:arr-push out bitem))
   (return out))
@@ -1033,12 +1033,12 @@
   [arr]
   (var tmp-val := nil)
   (var tmp-idx := nil)
-  (var total (k/len arr))
-  (k/for:index [i [(x:offset) total]]
-    (:= tmp-idx (+ (x:offset) (k/floor (* (k/random) total))))
-    (:= tmp-val (k/get-idx arr tmp-idx))
-    (k/set-idx arr tmp-idx (k/get-idx arr i))
-    (k/set-idx arr i tmp-val))
+  (var total (xt/x:len arr))
+  (xt/for:index [i [(x:offset) total]]
+    (:= tmp-idx (+ (x:offset) (xt/x:floor (* (xt/x:random) total))))
+    (:= tmp-val (xt/x:get-idx arr tmp-idx))
+    (xt/x:set-idx arr tmp-idx (xt/x:get-idx arr i))
+    (xt/x:set-idx arr i tmp-val))
   (return arr))
 
 (defn.xt arr-pushl
@@ -1082,7 +1082,7 @@
   [x n]
   (var out := [])
   (-/for:index [i [0 (- n (x:offset))]]
-    (x:arr-push out (:? (k/is-function? x)
+    (x:arr-push out (:? (xt/x:is-function? x)
                         (x)
                         x)))
   (return out))
@@ -1091,8 +1091,8 @@
   "gets a random element from array"
   {:added "4.0"}
   [arr]
-  (var idx (k/floor (* (x:len arr) (x:random))))
-  (return (k/get-idx arr (x:offset idx))))
+  (var idx (xt/x:floor (* (x:len arr) (x:random))))
+  (return (xt/x:get-idx arr (x:offset idx))))
 
 (defn.xt arr-normalise
   "normalises array elements to 1"
@@ -1105,8 +1105,8 @@
   "samples array according to probability"
   {:added "4.0"}
   [arr dist]
-  (var q (k/random))
-  (k/for:array [[i p] dist]
+  (var q (xt/x:random))
+  (xt/for:array [[i p] dist]
     (:= q (- q p))
     (when (< q 0)
       (return (. arr [i])))))
@@ -1132,7 +1132,7 @@
   "checks that object is empty"
   {:added "4.0"}
   [obj]
-  (k/for:object [[k _] obj]
+  (xt/for:object [[k _] obj]
     (return false))
   (return true))
 
@@ -1140,7 +1140,7 @@
   "checks that object is not empty"
   {:added "4.0"}
   [obj]
-  (k/for:object [[k _] obj]
+  (xt/for:object [[k _] obj]
     (return true))
   (return false))
 
@@ -1148,7 +1148,7 @@
   "gets the first key"
   {:added "4.0"}
   [obj]
-  (k/for:object [[k _] obj]
+  (xt/for:object [[k _] obj]
     (return k))
   (return nil))
 
@@ -1156,7 +1156,7 @@
   "gets the first val"
   {:added "4.0"}
   [obj]
-  (k/for:object [[_ v] obj]
+  (xt/for:object [[_ v] obj]
     (return v))
   (return nil))
 
@@ -1166,7 +1166,7 @@
   [obj]
   (var out := [])
   (when (x:not-nil? obj)
-    (k/for:object [[k _] obj]
+    (xt/for:object [[k _] obj]
       (x:arr-push out k)))
   (return out))
 
@@ -1176,7 +1176,7 @@
   [obj]
   (var out := [])
   (when (x:not-nil? obj)
-    (k/for:object [[_ v] obj]
+    (xt/for:object [[_ v] obj]
       (x:arr-push out v)))
   (return out))
 
@@ -1186,7 +1186,7 @@
   ([obj]
    (var out := [])
    (when (x:not-nil? obj)
-     (k/for:object [[k v] obj]
+     (xt/for:object [[k v] obj]
        (x:arr-push out [k v])))
    (return out)))
 
@@ -1196,7 +1196,7 @@
   [obj]
   (var out := {})
   (when (x:not-nil? obj)
-    (k/for:object [[k v] obj]
+    (xt/for:object [[k v] obj]
       (x:set-key out k v)))
   (return out))
 
@@ -1204,10 +1204,10 @@
   "merges key value pairs from into another"
   {:added "4.0"}
   [obj m]
-  (when (k/nil? obj)
+  (when (xt/x:nil? obj)
     (:= obj {}))
   (if (x:not-nil? m)
-    (k/for:object [[k v] m]
+    (xt/for:object [[k v] m]
       (x:set-key obj k v)))
   (return obj))
 
@@ -1215,10 +1215,10 @@
   "merges objects at a nesting level"
   {:added "4.0"}
   ([obj m]
-   (when (k/nil? obj)
+   (when (xt/x:nil? obj)
      (:= obj {}))
    (when (x:not-nil? m)
-     (k/for:object [[k mv] m]
+     (xt/for:object [[k mv] m]
        (var v := (x:get-key obj k))
        (cond (and (-/obj? mv)
                   (-/obj? v))
@@ -1234,7 +1234,7 @@
   [obj m f]
   (when (x:not-nil? m)
     (var input (or m {}))
-    (k/for:object [[k mv] input]
+    (xt/for:object [[k mv] input]
       (x:set-key obj k 
                  (:? (x:has-key? obj k)
                      (f (x:get-key obj k)
@@ -1247,17 +1247,17 @@
   {:added "4.0"}
   ([pairs]
    (var out := {})
-   (k/for:array [pair pairs]
+   (xt/for:array [pair pairs]
      (x:set-key out
-                (k/first pair)
-                (k/second pair)))
+                (xt/x:first pair)
+                (xt/x:second pair)))
    (return out)))
 
 (defn.xt obj-del
   "deletes multiple keys"
   {:added "4.0"}
   [obj ks]
-  (k/for:array [k ks]
+  (xt/for:array [k ks]
    (x:del-key obj k))
   (return obj))
 
@@ -1266,7 +1266,7 @@
   "deletes all keys"
   {:added "4.0"}
   [obj]
-  (k/for:array [k (-/obj-keys obj)]
+  (xt/for:array [k (-/obj-keys obj)]
     (x:del-key obj k))
   (return obj))
 
@@ -1275,9 +1275,9 @@
   {:added "4.0"}
   [obj ks]
   (var out := {})
-  (when (k/nil? obj)
+  (when (xt/x:nil? obj)
     (return out))
-  (k/for:array [k ks]
+  (xt/for:array [k ks]
     (var v (x:get-key obj k))
     (if (x:not-nil? v)
       (x:set-key out k v)))
@@ -1289,9 +1289,9 @@
   [obj ks]
   (var out := {})
   (var lu := {})
-  (k/for:array [k ks]
+  (xt/for:array [k ks]
     (x:set-key lu k true))
-  (k/for:object [[k v] obj]
+  (xt/for:object [[k v] obj]
     (if (not (x:has-key? lu k))
       (x:set-key out k v)))
   (return out))
@@ -1302,7 +1302,7 @@
   [obj]
   (var out := {})
   (when (x:not-nil? obj)
-    (k/for:object [[k v] obj]
+    (xt/for:object [[k v] obj]
       (x:set-key out v k)))
   (return out))
 
@@ -1327,7 +1327,7 @@
   [obj f]
   (var out := {})
   (when (x:not-nil? obj)
-    (k/for:object [[k v] obj]
+    (xt/for:object [[k v] obj]
       (x:set-key out k (f v))))
   (return out))
 
@@ -1337,7 +1337,7 @@
   [obj pred]
   (var out := {})
   (when (x:not-nil? obj)
-    (k/for:object [[k v] obj]
+    (xt/for:object [[k v] obj]
        (if (pred v)
          (x:set-key out k v))))
   (return out))
@@ -1348,7 +1348,7 @@
   [obj f]
   (var out := {})
   (when (x:not-nil? obj)
-    (k/for:object [[k e] obj]
+    (xt/for:object [[k e] obj]
       (var v (f e))
       (if (x:not-nil? v)
         (x:set-key out k v))))
@@ -1360,7 +1360,7 @@
   [obj pred f]
   (var out := {})
   (when (x:not-nil? obj)
-    (k/for:object [[k e] obj]
+    (xt/for:object [[k e] obj]
       (if (pred e)
         (x:set-key out k (f e)))))
   (return out))
@@ -1370,7 +1370,7 @@
   {:added "4.0"}
   [obj other]
   (var out := [])
-  (k/for:object [[k _] other]
+  (xt/for:object [[k _] other]
     (if (x:has-key? obj k)
       (x:arr-push out k)))
   (return out))
@@ -1380,7 +1380,7 @@
   {:added "4.0"}
   [obj other]
   (var out := [])
-  (k/for:object [[k _] other]
+  (xt/for:object [[k _] other]
     (if (not (x:has-key? obj k))
       (x:arr-push out k)))
   (return out))
@@ -1390,12 +1390,12 @@
   {:added "4.0"}
   [m path]
   (var out [])
-  (k/for:object [[k v] m]
-    (var npath [(k/unpack path)])
+  (xt/for:object [[k v] m]
+    (var npath [(xt/x:unpack path)])
     (x:arr-push npath k)
     
     (cond (-/obj? v)
-          (do (k/for:array [e (-/obj-keys-nested v npath)]
+          (do (xt/for:array [e (-/obj-keys-nested v npath)]
                 (x:arr-push out e)))
           
           :else
@@ -1412,14 +1412,14 @@
   ([obj]
    (var out := [])
    (cond (-/obj? obj)
-         (k/for:object [[k v] obj]
+         (xt/for:object [[k v] obj]
            (x:arr-push out k)
            (x:arr-push out v))
          
          (-/arr? obj)
-         (k/for:array [e obj]
-           (x:arr-push out (k/first e))
-           (x:arr-push out (k/second e))))
+         (xt/for:array [e obj]
+           (x:arr-push out (xt/x:first e))
+           (x:arr-push out (xt/x:second e))))
    (return out)))
 
 (defn.xt from-flat
@@ -1428,8 +1428,8 @@
   ([arr f init]
    (var out := init)
    (var k := nil)
-   (k/for:array [[i e] arr]
-     (if (k/even? (x:offset i))
+   (xt/for:array [[i e] arr]
+     (if (xt/x:even? (x:offset i))
        (:= k e)
        (:= out (f out k e))))
    (return out)))
@@ -1445,7 +1445,7 @@
         (return obj)
 
         (== 1 (x:len arr))
-        (return (x:get-key obj (k/first arr)))
+        (return (x:get-key obj (xt/x:first arr)))
 
         :else
         (do (var total := (x:len arr))
@@ -1477,7 +1477,7 @@
         (return (-/obj-nest arr v))
         
         :else
-        (do (var k := (k/first arr))
+        (do (var k := (xt/x:first arr))
             (var narr := (x:arr-clone arr))
             (x:arr-pop-first narr)
             (var child := (x:get-key obj k))
@@ -1493,29 +1493,29 @@
   (var cache {})
   (var cache-fn (fn [key]
                   (var res (f key))
-                  (k/set-key cache key res)
+                  (xt/x:set-key cache key res)
                   (return res)))
   (return (fn [key]
-            (return (or (k/get-key cache key)
+            (return (or (xt/x:get-key cache key)
                         (cache-fn key))))))
 
 (defn.xt not-empty?
   "checks that array is not empty"
   {:added "4.0"}
   [res]
-  (cond (k/nil? res) (return false)
-        (k/is-string? res) (return (< 0 (x:str-len res)))
-        (-/arr? res) (return (< 0 (k/len res)))
+  (cond (xt/x:nil? res) (return false)
+        (xt/x:is-string? res) (return (< 0 (x:str-len res)))
+        (-/arr? res) (return (< 0 (xt/x:len res)))
         (-/obj? res)
-        (do (k/for:object [[i v] res]
+        (do (xt/for:object [[i v] res]
               (return true))
             (return false))
 
         :else
-        (do (k/err (k/cat "Invalid type - "
+        (do (xt/x:err (xt/x:cat "Invalid type - "
                           (-/type-native res)
                           " - "
-                          (k/to-string res))))))
+                          (xt/x:to-string res))))))
 
 ;;
 ;; NESTED
@@ -1552,7 +1552,7 @@
   (var ks-dst (-/obj-keys dst))
   (if (not= (x:len ks-src) (x:len ks-dst))
     (return false))
-  (k/for:array [k ks-src]
+  (xt/for:array [k ks-src]
     (if (not (-/eq-nested-loop (x:get-key src k)
                                (x:get-key dst k)
                                eq-obj
@@ -1569,7 +1569,7 @@
   (x:lu-set cache dst-arr dst-arr)
   (if (not= (x:len src-arr) (x:len dst-arr))
     (return false))
-  (k/for:array [[i v] src-arr]
+  (xt/for:array [[i v] src-arr]
     (if (not (-/eq-nested-loop v
                                (. dst-arr [i])
                                eq-obj
@@ -1605,7 +1605,7 @@
   (if (x:nil? m)   (return {}))
   (if (x:nil? obj) (return m))
   (var out := {})
-  (k/for:object [[k v] m]
+  (xt/for:object [[k v] m]
     (if (not (-/eq-nested (x:get-key obj k)
                           (x:get-key m k)))
       (x:set-key out k v)))
@@ -1619,7 +1619,7 @@
   (if (x:nil? obj) (return m))
   (var out := {})
   (var ks (-/obj-keys m))
-  (k/for:array [k ks]
+  (xt/for:array [k ks]
     (var v   (x:get-key obj k))
     (var mv  (x:get-key m k))
     (cond (and (-/obj? v) (-/obj? mv))
@@ -1640,8 +1640,8 @@
   "decodes object if string"
   {:added "4.0"}
   [v]
-  (cond (k/is-string? v)
-        (return (k/json-decode v))
+  (cond (xt/x:is-string? v)
+        (return (xt/x:json-decode v))
 
         :else (return v)))
 
@@ -1675,7 +1675,7 @@
        (fn [entry props]
          (-/for:array [template arr]
            (var out (-/template-entry entry template props))
-           (when (k/not-nil? out)
+           (when (xt/x:not-nil? out)
              (return out)))))
   (return template-fn))
 
@@ -1690,7 +1690,7 @@
          (cond (-/fn? key)
                (return (key e))
 
-               :else (return (k/get-key e key)))))
+               :else (return (xt/x:get-key e key)))))
   (var key-fn
        (fn:> [e] (-/arr-map keys (fn:> [key] (get-fn e key)))))
   (var comp-fn
@@ -1722,8 +1722,8 @@
   "builds an edge with links"
   {:added "4.0"}
   [nodes edge]
-  (var n-from := (k/first edge))
-  (var n-to   := (k/second edge))
+  (var n-from := (xt/x:first edge))
+  (var n-to   := (xt/x:second edge))
   (if (not (x:has-key? nodes n-from))
     (x:set-key nodes n-from {:id n-from
                          :links []}))
@@ -1746,7 +1746,7 @@
       (x:arr-push ancestors id)
       (x:set-key visited id true)
       (var input (. node ["links"]))
-      (k/for:array [aid input]
+      (xt/for:array [aid input]
         (-/sort-edges-visit nodes visited sorted aid (x:arr-clone ancestors))))
   (x:arr-push-first sorted id))
 
@@ -1757,9 +1757,9 @@
   (var nodes   := {})
   (var sorted  := [])
   (var visited := {})
-  (k/for:array [e edges]
+  (xt/for:array [e edges]
     (-/sort-edges-build nodes e))
-  (k/for:object [[id _] nodes]
+  (xt/for:object [[id _] nodes]
     (-/sort-edges-visit nodes visited sorted id nil))
   (return sorted))
 
@@ -1769,10 +1769,10 @@
   {:added "4.0"}
   [input]
   (var edges := [])
-  (k/for:array [link input]
-    (var root (k/first link))
-    (var deps (k/second link))
-    (k/for:array [d deps]
+  (xt/for:array [link input]
+    (var root (xt/x:first link))
+    (var deps (xt/x:second link))
+    (xt/for:array [d deps]
       (x:arr-push edges [root d])))
   (return (x:arr-reverse (-/sort-edges edges))))
 
@@ -1798,14 +1798,14 @@
         (-/obj? obj)
         (do (var out := {})
             (x:lu-set cache obj out)
-            (k/for:object [[k v] obj]
+            (xt/for:object [[k v] obj]
               (x:set-key out k (-/clone-nested-loop v cache)))
             (return out))
         
         (-/arr? obj)
         (do (var out := [])
             (x:lu-set cache obj out)
-            (k/for:array [e obj]
+            (xt/for:array [e obj]
               (x:arr-push out (-/clone-nested-loop e cache)))
             (return out))
 
@@ -1865,14 +1865,14 @@
   [obj]
   (var data-fn
        (fn [obj]
-         (if (or (k/is-string? obj)
-                 (k/is-number? obj)
-                 (k/is-boolean? obj)
-                 (k/is-object? obj)
-                 (k/is-array? obj)
-                 (k/nil? obj))
+         (if (or (xt/x:is-string? obj)
+                 (xt/x:is-number? obj)
+                 (xt/x:is-boolean? obj)
+                 (xt/x:is-object? obj)
+                 (xt/x:is-array? obj)
+                 (xt/x:nil? obj))
            (return obj)
-           (return (k/cat "<" (-/type-native obj) ">")))))
+           (return (xt/x:cat "<" (-/type-native obj) ">")))))
   (return (-/walk obj -/identity data-fn)))
 
 (defn.xt get-spec
@@ -1919,7 +1919,7 @@
                 "o" "p" "q" "r" "s" "t" "u" "v" "w" "x" "y" "z"
                 "0" "1" "2" "3" "4" "5" "6" "7" "8"])
   (var out "")
-  (k/for:index [i [0 n]]
+  (xt/for:index [i [0 n]]
                (:= out (x:cat out (-/arr-random choices))))
   (return out))
 
@@ -1930,10 +1930,10 @@
   (var acc-fn
        (fn [acc e]
          (var [spec-i spec-map] e)
-         (k/for:array [key spec-i]
-                      (when (k/nil? (-/get-key spec-map key))
+         (xt/for:array [key spec-i]
+                      (when (xt/x:nil? (-/get-key spec-map key))
                         (-/err (-/cat "NOT VALID."
-                                      (k/json-encode {:required key
+                                      (xt/x:json-encode {:required key
                                                       :actual (-/obj-keys spec-map)})))))
          (return (-/obj-assign
                   acc
@@ -2012,7 +2012,7 @@
   (var m (-/obj-assign
           {:tag tag
            :data data
-           :time (k/now-ms)}
+           :time (xt/x:now-ms)}
           opts))
   (x:arr-push log m)
   (return (x:len log)))
@@ -2021,7 +2021,7 @@
   "filters out traced entries"
   {:added "4.0"}
   [tag]
-  (return (-/arr-filter (-/trace-log) (fn:> [e] (== tag (k/get-key e "tag"))))))
+  (return (-/arr-filter (-/trace-log) (fn:> [e] (== tag (xt/x:get-key e "tag"))))))
 
 (defn.xt trace-last-entry
   "gets the last entry"
@@ -2037,7 +2037,7 @@
   "gets the trace data"
   {:added "4.0"}
   [tag]
-  (return (-/arr-map (-/trace-log) (fn:> [e] (k/get-key e "data")))))
+  (return (-/arr-map (-/trace-log) (fn:> [e] (xt/x:get-key e "data")))))
 
 (defn.xt trace-last
   "gets the last value"

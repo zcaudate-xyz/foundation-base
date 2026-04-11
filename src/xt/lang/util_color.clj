@@ -2,7 +2,9 @@
   (:require [std.lang :as l]))
 
 (l/script :xtalk
-  {:require [[xt.lang.base-lib :as k]]})
+  {:require [[xt.lang.common-spec :as xt]
+             [xt.lang.common-math :as xtm]
+             [xt.lang.common-string :as xts]]})
 
 (def.xt HEX
   (tab ["0" 0]
@@ -195,41 +197,42 @@
   "named color to rgb"
   {:added "4.0"}
   [s]
-  (return (or (k/get-key -/NAMED s)
+  (return (or (xt/x:get-key -/NAMED s)
               [0 0 0])))
 
 (defn.xt hex->n
   "hex to rgb val"
   {:added "4.0"}
   [s]
-  (return (or (k/get-key -/HEX (k/to-uppercase s))
+  (return (or (xt/x:get-key -/HEX (xts/to-uppercase s))
               0)))
 
 (defn.xt n->hex
   "converts an rgb to hex"
   {:added "4.0"}
   [n]
-  (var v1 (k/quot n 16))
-  (var v0 (k/mod-pos n 16))
-  (return (k/cat (or (k/get-key -/LU v1) "0")
-                 (or (k/get-key -/LU v0) "0"))))
+  (var v1 (xtm/quot n 16))
+  (var v0 (xtm/mod-pos n 16))
+  (return (xt/x:cat (or (xt/x:get-key -/LU v1) "0")
+                    (or (xt/x:get-key -/LU v0) "0"))))
 
 (defn.xt hex->rgb
   "converts a hex value to rgb array"
   {:added "4.0"}
   [s]
-  (var val-fn (fn:> [s start finish]
-                (-/hex->n (k/substring s start finish))))
-  (when (not (k/starts-with? s "#"))
-    (k/err "Not a valid hex color."))
-  (when (== 4 (k/len s))
+  (var val-fn (fn [s start finish]
+                (return
+                 (-/hex->n (xts/substring s start finish)))))
+  (when (not (xts/starts-with? s "#"))
+    (xt/x:err "Not a valid hex color."))
+  (when (== 4 (xt/x:len s))
     (var r (val-fn s 1 2))
     (var g (val-fn s 2 3))
     (var b (val-fn s 3 4))
     (return [(+ (* r 16) r)
              (+ (* g 16) g)
              (+ (* b 16) b)]))
-  (when (== 7 (k/len s))
+  (when (== 7 (xt/x:len s))
     (var r1 (val-fn s 1 2))
     (var r0 (val-fn s 2 3))
     (var g1 (val-fn s 3 4))
@@ -246,10 +249,10 @@
   {:added "4.0"}
   [rgb]
   (var [r g b] rgb)
-  (return (k/cat "#"
-                 (-/n->hex r)
-                 (-/n->hex g)
-                 (-/n->hex b))))
+  (return (xt/x:cat "#"
+                    (-/n->hex r)
+                    (-/n->hex g)
+                    (-/n->hex b))))
 
 (defn.xt rgb->hue
   "helper function for rgb->hsl"
@@ -288,8 +291,8 @@
   {:added "4.0"}
   [rgb fallback]
   (var [r g b] rgb)
-  (var value (k/max r g b))
-  (var whiteness (k/min r g b))
+  (var value (xtm/max r g b))
+  (var whiteness (xtm/min r g b))
   (var delta (- value whiteness))
   (var h (-/rgb->hue r g b value delta (or fallback 0)))
   (var l (/ (* 100
@@ -299,10 +302,10 @@
   (if (== delta 0)
     (:= s 0)
     (:= s (/ (* (/ delta 255) 10000)
-             (- 100 (k/abs (- (* 2 l) 100))))))
+             (- 100 (xtm/abs (- (* 2 l) 100))))))
   (return [h
-           (k/min 100 s)
-           (k/min 100 l)]))
+           (xtm/min 100 s)
+           (xtm/min 100 l)]))
 
 (defn.xt hue->v
   "converts a hue to a value"
@@ -331,16 +334,16 @@
   (var s (/ si 100))
   (var l (/ li 100))
   (if (== s 0)
-    (return [(k/round (* 255 l))
-             (k/round (* 255 l))
-             (k/round (* 255 l))])
+    (return [(xtm/round (* 255 l))
+             (xtm/round (* 255 l))
+             (xtm/round (* 255 l))])
     (let [t2 (:? (< l 0.5)
                  (* l (+ s 1))
                  (- (+ l s) (* s l)))
           t1 (- (* 2 l) t2)]
-      (return [(k/round (* 255 (-/hue->v t1 t2 (+ h (/ 1 3)))))
-               (k/round (* 255 (-/hue->v t1 t2 h)))
-               (k/round (* 255 (-/hue->v t1 t2 (- h (/ 1 3)))))]))))
+      (return [(xtm/round (* 255 (-/hue->v t1 t2 (+ h (/ 1 3)))))
+               (xtm/round (* 255 (-/hue->v t1 t2 h)))
+               (xtm/round (* 255 (-/hue->v t1 t2 (- h (/ 1 3)))))]))))
 
 (defn.xt named->hsl
   "converts a named color to hsl"

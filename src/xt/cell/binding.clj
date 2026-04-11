@@ -3,26 +3,26 @@
 
 (l/script :xtalk
   {:require [[xt.cell.service :as service]
-             [xt.lang.base-lib :as k]]
+             [xt.lang.common-spec :as xt]]
    :export  [MODULE]})
 
 (defn.xt resolve-section
   "resolves a named db inside a descriptor section"
   {:added "4.0"}
   [service-registry descriptor section-key view-context]
-  (var section (k/get-key descriptor section-key))
-  (when (k/nil? section)
+  (var section (xt/x:get-key descriptor section-key))
+  (when (xt/x:nil? section)
     (return [true nil]))
-  (var db-ref (k/get-key section "db"))
-  (when (and (k/is-string? db-ref)
-             (k/nil? (service/get-db service-registry db-ref)))
+  (var db-ref (xt/x:get-key section "db"))
+  (when (and (xt/x:is-string? db-ref)
+             (xt/x:nil? (service/get-db service-registry db-ref)))
     (return [false {:status "error"
                     :tag "xt.cell.binding/db-not-found"
                     :data {:section section-key
                            :db db-ref}}]))
   (var resolved-db (service/resolve-db service-registry section view-context))
   (return [true (:? resolved-db
-                    (k/obj-assign (k/obj-clone section)
+                    (xt/x:obj-assign (xt/x:obj-clone section)
                                   {"db" resolved-db})
                     section)]))
 
@@ -50,25 +50,25 @@
                  "sync" sync
                  "remote" remote
                  "stream" stream
-                 "resolve" (k/get-key descriptor "resolve")
-                 "deps" (or (k/get-key descriptor "deps") [])
-                 "trigger" (k/get-key descriptor "trigger")
-                 "options" (or (k/get-key descriptor "options") {})
-                 "default_args" (k/get-key descriptor "default_args")
-                 "default_output" (k/get-key descriptor "default_output")
-                 "default_process" (k/get-key descriptor "default_process")
-                 "default_init" (k/get-key descriptor "default_init")}]))
+                 "resolve" (xt/x:get-key descriptor "resolve")
+                 "deps" (or (xt/x:get-key descriptor "deps") [])
+                 "trigger" (xt/x:get-key descriptor "trigger")
+                 "options" (or (xt/x:get-key descriptor "options") {})
+                 "default_args" (xt/x:get-key descriptor "default_args")
+                 "default_output" (xt/x:get-key descriptor "default_output")
+                 "default_process" (xt/x:get-key descriptor "default_process")
+                 "default_init" (xt/x:get-key descriptor "default_init")}]))
 
 (defn.xt compile-model
   "compiles all views for a model using a provided view compiler"
   {:added "4.0"}
   [service-registry model-id views compile-view-fn]
   (var out {})
-  (k/for:object [[view-id descriptor] views]
+  (xt/for:object [[view-id descriptor] views]
     (var [ok prepared] (-/prepare-view service-registry model-id view-id descriptor))
     (when (not ok)
       (return [ok prepared]))
-    (k/set-key out view-id (compile-view-fn prepared)))
+    (xt/x:set-key out view-id (compile-view-fn prepared)))
   (return [true out]))
 
 (defn.xt compile-bindings
@@ -76,11 +76,11 @@
   {:added "4.0"}
   [service-registry bindings compile-view-fn]
   (var out {})
-  (k/for:object [[model-id views] bindings]
+  (xt/for:object [[model-id views] bindings]
     (var [ok compiled-model] (-/compile-model service-registry model-id views compile-view-fn))
     (when (not ok)
       (return [ok compiled-model]))
-    (k/set-key out model-id compiled-model))
+    (xt/x:set-key out model-id compiled-model))
   (return [true out]))
 
 (def.xt MODULE (!:module))

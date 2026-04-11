@@ -7,7 +7,7 @@
              [xt.db.base-scope :as scope]
              [xt.db.cache-pull :as cache-pull]
              [xt.db.cache-util :as cache-util]
-             [xt.lang.base-lib :as k]
+             [xt.lang.common-spec :as xt]
              [xt.lang.util-throttle :as th]]})
 
 (defn.xt cache-process-event-sync
@@ -22,7 +22,7 @@
         :else
         (do (cache-util/merge-bulk rows flat)
             (cache-util/add-bulk-links rows schema flat)
-            (return (k/obj-keys flat)))))
+            (return (xt/x:obj-keys flat)))))
 
 (defn.xt cache-process-event-remove
   "removes data from database"
@@ -30,19 +30,19 @@
   [cache tag data schema lookup opts]
   (var #{rows} cache)
   (var flat (f/flatten-bulk schema data))
-  (var ordered (k/arr-keep (base-schema/table-order lookup)
+  (var ordered (xt/x:arr-keep (base-schema/table-order lookup)
                            (fn:> [col]
-                             (:? (k/has-key? flat col)
-                                 [col (k/obj-keys (k/get-key flat col))]
+                             (:? (xt/x:has-key? flat col)
+                                 [col (xt/x:obj-keys (xt/x:get-key flat col))]
                                  nil))))
   (cond (== tag "input")
         (return ordered)
 
         :else
-        (do (k/for:array [e ordered]
+        (do (xt/for:array [e ordered]
               (var [table-name ids] e)
               (cache-util/remove-bulk rows schema table-name ids))
-            (return (k/obj-keys flat)))))
+            (return (xt/x:obj-keys flat)))))
 
 (defn.xt cache-pull-sync
   "runs a pull statement"
@@ -50,10 +50,10 @@
   [cache schema tree opts]
   (var input (scope/get-link-standard tree))
   (var [table-name linked] input)
-  (var return-params (k/last linked))
-  (var where-params  (k/arr-filter linked (fn:> [x]
-                                            (and (k/obj? x)
-                                                 (k/not-empty? x)))))
+  (var return-params (xt/x:last linked))
+  (var where-params  (xt/x:arr-filter linked (fn:> [x]
+                                            (and (xt/is-object? x)
+                                                 (xt/x:not-empty? x)))))
   (var #{rows} cache)
   (var output (cache-pull/pull
                rows schema table-name
@@ -72,6 +72,6 @@
   "clears the cache"
   {:added "4.0"}
   [cache]
-  (k/set-key cache "rows" {})
+  (xt/x:set-key cache "rows" {})
   (return true))
 

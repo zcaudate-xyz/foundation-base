@@ -3,8 +3,8 @@
   (:refer-clojure :exclude [list]))
 
 (l/script :xtalk
-  {:require [[xt.lang.base-lib :as k]
-             [xt.lang.base-iter :as it]
+  {:require [[xt.lang.common-spec :as xt]
+             [xt.lang.common-iter :as it]
              [xt.runtime.interface-spec :as spec]
              [xt.runtime.interface-common :as interface-common]
              [xt.runtime.interface-collection :as interface-collection]]})
@@ -47,14 +47,14 @@
   (var list {"::" "list"
              :_head head
              :_rest rest})
-  (k/set-proto list prototype)
+  (xt/x:set-proto list prototype)
   (return list))
 
 (defn.xt list-push
   "pushs onto the front of the list"
   {:added "4.0"}
   [list x]
-  (return (-/list-new x list (k/get-proto list))))
+  (return (-/list-new x list (xt/x:get-proto list))))
 
 (defn.xt list-pop
   "pops an element from front of list"
@@ -66,7 +66,7 @@
   "gets the empty list"
   {:added "4.0"}
   [list]
-  (return (-/list-new -/EMPTY_MARKER nil (k/get-proto list))))
+  (return (-/list-new -/EMPTY_MARKER nil (xt/x:get-proto list))))
 
 (def.xt LIST_SPEC
   [[spec/IColl   {:_start_string  "("
@@ -92,8 +92,8 @@
 
 (def.xt LIST_PROTOTYPE
   (-> -/LIST_SPEC
-      (k/proto-spec)
-      (k/proto-create)))
+      (xt/x:proto-spec)
+      (xt/x:proto-create)))
 
 (defn.xt list-create
   "creates a list"
@@ -102,8 +102,8 @@
   (var list {"::" "list"
              :_head head})
   (when rest
-    (k/set-key list "_rest" rest))
-  (k/set-proto list -/LIST_PROTOTYPE)
+    (xt/x:set-key list "_rest" rest))
+  (xt/x:set-proto list -/LIST_PROTOTYPE)
   (return list))
 
 (def.xt EMPTY_LIST
@@ -114,7 +114,7 @@
   {:added "4.0"}
   [...]
   (return
-   (k/arr-foldr [...]
+   (xt/x:arr-foldr [...]
                 -/list-push
                 -/EMPTY_LIST)))
 

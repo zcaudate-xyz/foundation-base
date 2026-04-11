@@ -3,7 +3,7 @@
             [std.lang.typed.xtalk :refer [defspec.xt]]))
 
 (l/script :xtalk
-  {:require [[xt.lang.base-lib :as k]
+  {:require [[xt.lang.common-spec :as xt]
              [xt.lang.base-task :as task]
              [xt.lang.util-throttle :as th]
              [xt.lang.event-view :as event-view]
@@ -140,7 +140,7 @@
   [handler]
   (return (fn [context]
             (return (handler (. context ["cell"] ["link"])
-                             (k/unpack (. context ["args"])))))))
+                             (xt/x:unpack (. context ["args"])))))))
 
 (def.xt async-fn
   (fn [handler-fn context #{success error}]
@@ -158,17 +158,17 @@
   {:added "4.0"}
   [tasks]
   (var out [])
-  (var total (k/len tasks))
+  (var total (xt/x:len tasks))
   (var step nil)
   (:= step
       (fn [i]
         (if (< i (x:offset total))
           (return
            (task/task-then
-            (k/get-idx tasks i)
+            (xt/x:get-idx tasks i)
             (fn [res]
               (x:arr-push out res)
-              (return (step (k/inc i))))))
+              (return (step (xt/x:inc i))))))
           (return (task/task-run (fn [] (return out)))))))
   (return (step (x:offset 0))))
 
@@ -179,7 +179,7 @@
   (var path [model-id view-id])
   (var [model view] (impl/view-ensure cell model-id view-id))
   (var [context disabled] (event-view/pipeline-prep view
-                                                   (k/obj-assign {:path  path
+                                                   (xt/x:obj-assign {:path  path
                                                                   :cell  cell
                                                                   :model  model}
                                                                  opts)))
@@ -191,11 +191,11 @@
   [cell model-id view-id]
   (var out {})
   (var #{models} cell)
-  (k/for:object [[dmodel-id dmodel] models]
+  (xt/for:object [[dmodel-id dmodel] models]
     (var #{deps} dmodel)
-    (var view-lu (k/get-in deps [model-id view-id]))
-    (when (k/not-nil? view-lu)
-      (k/set-key out dmodel-id (k/obj-keys view-lu))))
+    (var view-lu (xt/x:get-in deps [model-id view-id]))
+    (when (xt/x:not-nil? view-lu)
+      (xt/x:set-key out dmodel-id (xt/x:obj-keys view-lu))))
   (return out))
 
 (defn.xt get-model-dependents
@@ -204,11 +204,11 @@
   [cell model-id]
   (var out {})
   (var #{models} cell)
-  (k/for:object [[dmodel-id dmodel] models]
+  (xt/for:object [[dmodel-id dmodel] models]
     (var #{deps} dmodel)
     (var model-lu (. deps [model-id]))
-    (when (k/not-nil? model-lu)
-      (k/set-key out dmodel-id true)))
+    (when (xt/x:not-nil? model-lu)
+      (xt/x:set-key out dmodel-id true)))
   (return out))
 
 (defn.xt run-tail-call
@@ -226,7 +226,7 @@
   "runs the remote function"
   {:added "4.0"}
   [context save-output path refresh-deps-fn]
-  (k/set-key (. context ["acc"]) "path" path)
+  (xt/x:set-key (. context ["acc"]) "path" path)
   (return
    (task/task-then
     (event-view/pipeline-run-remote
@@ -250,7 +250,7 @@
   "helper function for refresh"
   {:added "4.0"}
   [context disabled path refresh-deps-fn]
-  (k/set-key (. context ["acc"]) "path" path)
+  (xt/x:set-key (. context ["acc"]) "path" path)
   (return
    (task/task-then
     (event-view/pipeline-run
@@ -268,9 +268,9 @@
   [cell model-id view-id]
   (var #{models} cell)
   (var dependents (-/get-view-dependents cell model-id view-id))
-  (k/for:object [[dmodel-id dview-ids] dependents]
+  (xt/for:object [[dmodel-id dview-ids] dependents]
     (var #{throttle} (. models [dmodel-id]))
-    (k/for:array [dview-id dview-ids]
+    (xt/for:array [dview-id dview-ids]
       (th/throttle-run throttle dview-id [])))
   (return dependents))
 
@@ -297,8 +297,8 @@
   (var #{models} cell)
   (var dependents (-/get-view-dependents cell model-id view-id))
   (var out [])
-  (k/for:object [[dmodel-id dview-ids] dependents]
-    (k/for:array [dview-id dview-ids]
+  (xt/for:object [[dmodel-id dview-ids] dependents]
+    (xt/for:array [dview-id dview-ids]
       (x:arr-push out (-/refresh-view cell dmodel-id dview-id {} refresh-deps-fn))))
   (return (-/task-all out)))
 
@@ -308,7 +308,7 @@
   [cell model-id event refresh-deps-fn]
   (var model (impl/model-ensure cell model-id))
   (var running [])
-  (k/for:object [[view-id view] (. model ["views"])]
+  (xt/for:object [[view-id view] (. model ["views"])]
     (var [path context disabled]
          (-/prep-view cell model-id view-id {:event event}))
     (x:arr-push running (-/run-refresh context disabled path refresh-deps-fn)))
@@ -320,13 +320,13 @@
   {:added "4.0"}
   [model-id views]
   (var all-deps {})
-  (k/for:object [[view-id view-entry] views]
+  (xt/for:object [[view-id view-entry] views]
     (var #{deps} view-entry)
-    (k/for:array [path (or deps [])]
-      (:= path (:? (k/arr? path) path [model-id path]))
-      (k/set-in all-deps
-                [(k/first path)
-                 (k/second path)
+    (xt/for:array [path (or deps [])]
+      (:= path (:? (xt/is-array? path) path [model-id path]))
+      (xt/x:set-in all-deps
+                [(xt/x:first path)
+                 (xt/x:second path)
                  view-id]
                 true)))
   (return all-deps))
@@ -336,17 +336,17 @@
   {:added "4.0"}
   [model-id views model-deps cell]
   (var out [])
-  (k/for:object [[linked-model-id linked-views] model-deps]
+  (xt/for:object [[linked-model-id linked-views] model-deps]
     (cond (== model-id linked-model-id)
-          (k/for:object [[linked-view-id _] linked-views]
-            (when (k/nil? (. views [linked-view-id]))
+          (xt/for:object [[linked-view-id _] linked-views]
+            (when (xt/x:nil? (. views [linked-view-id]))
               (x:arr-push out [linked-model-id linked-view-id])))
 
           :else
           (do (var linked-model (impl/model-get cell linked-model-id))
-              (k/for:object [[linked-view-id _] linked-views]
-                (when (or (k/nil? linked-model)
-                          (k/nil? (. linked-model ["views"] [linked-view-id])))
+              (xt/for:object [[linked-view-id _] linked-views]
+                (when (or (xt/x:nil? linked-model)
+                          (xt/x:nil? (. linked-model ["views"] [linked-view-id])))
                   (x:arr-push out [linked-model-id linked-view-id]))))))
   (return out))
 
@@ -361,7 +361,7 @@
        (task/task-catch
         (-/refresh-view cell model-id view-id event refresh-deps-fn)
         (fn [err]
-          (k/LOG! {:stack   (. err ["stack"])
+          (xt/x:LOG! {:stack   (. err ["stack"])
                    :message (. err ["message"])})
           (return err)))))
     k/now-ms)))
@@ -381,7 +381,7 @@
      options}]
   (var view (event-view/create-view
              nil
-             (k/obj-assign-nested
+             (xt/x:obj-assign-nested
               {:main   {:handler handler
                         :wrapper -/wrap-cell-args}
                :remote {:handler remoteHandler
@@ -390,7 +390,7 @@
              defaultArgs
               defaultOutput
               defaultProcess
-              (k/obj-assign {:trigger trigger
+              (xt/x:obj-assign {:trigger trigger
                              :init defaultInit}
                             options)))
   (event-view/init-view view)
@@ -409,17 +409,17 @@
   (var model-throttle (-/create-throttle cell model-id -/refresh-view-dependents))
   (var model-deps (-/get-model-deps model-id views))
   (var unknown-deps (-/get-unknown-deps model-id views model-deps cell))
-  (when (k/not-empty? unknown-deps)
-    (k/LOG! {:message (k/cat "ERR - deps not found - " (k/json-encode unknown-deps))
+  (when (xt/x:not-empty? unknown-deps)
+    (xt/x:LOG! {:message (xt/x:cat "ERR - deps not found - " (xt/x:json-encode unknown-deps))
              :deps model-deps}))
   (var model-views {})
-  (k/for:object [[view-id view] views]
-    (k/set-key model-views view-id (-/create-view cell model-id view-id view)))
+  (xt/for:object [[view-id view] views]
+    (xt/x:set-key model-views view-id (-/create-view cell model-id view-id view)))
   (var model {:name     model-id
               :views    model-views
               :throttle model-throttle
               :deps     model-deps})
-  (k/set-key models model-id model)
+  (xt/x:set-key models model-id model)
   (return model))
 
 (defn.xt add-model
@@ -428,7 +428,7 @@
   [cell model-id views]
   (var #{models} cell)
   (var model (-/add-model-attach cell model-id views))
-  (k/set-key model "init" (-/refresh-model cell model-id {}))
+  (xt/x:set-key model "init" (-/refresh-model cell model-id {}))
   (return model))
 
 (defn.xt remove-model
@@ -437,10 +437,10 @@
   [cell model-id]
   (var #{models} cell)
   (var dependents (-/get-model-dependents cell models))
-  (when (k/not-empty? dependents)
-    (k/err (k/cat "ERR - existing model dependents - " (k/json-encode dependents))))
-  (var curr (k/get-key models model-id))
-  (k/del-key models model-id)
+  (when (xt/x:not-empty? dependents)
+    (xt/x:err (xt/x:cat "ERR - existing model dependents - " (xt/x:json-encode dependents))))
+  (var curr (xt/x:get-key models model-id))
+  (xt/x:del-key models model-id)
   (return curr))
 
 (defn.xt remove-view
@@ -449,13 +449,13 @@
   [cell model-id view-id]
   (var #{models} cell)
   (var dependents (-/get-view-dependents cell model-id view-id))
-  (when (k/not-empty? dependents)
-    (k/err (k/cat "ERR - existing view dependents - " (k/json-encode dependents))))
-  (var model (k/get-key models model-id))
+  (when (xt/x:not-empty? dependents)
+    (xt/x:err (xt/x:cat "ERR - existing view dependents - " (xt/x:json-encode dependents))))
+  (var model (xt/x:get-key models model-id))
   (when model
     (var #{views} model)
-    (var curr (k/get-key views view-id))
-    (k/del-key views view-id)
+    (var curr (xt/x:get-key views view-id))
+    (xt/x:del-key views view-id)
     (return curr)))
 
 (defn.xt model-update
@@ -465,13 +465,13 @@
   (var model (impl/model-ensure cell model-id))
   (var #{throttle views} model)
   (var out [])
-  (k/for:object [[view-id _] views]
-    (x:arr-push out [view-id (k/first (th/throttle-run throttle view-id [(or ?event {})]))]))
+  (xt/for:object [[view-id _] views]
+    (x:arr-push out [view-id (xt/x:first (th/throttle-run throttle view-id [(or ?event {})]))]))
   (return
    (task/task-then
-    (-/task-all (k/arr-map out k/second))
+    (-/task-all (xt/x:arr-map out k/second))
     (fn [arr]
-      (return (k/arr-zip (k/arr-map out k/first)
+      (return (xt/x:arr-zip (xt/x:arr-map out k/first)
                          arr))))))
 
 (defn.xt view-update
@@ -500,14 +500,14 @@
   [cell model signal event]
   (var #{views throttle} model)
   (var out [])
-  (k/for:object [[view-id view] views]
+  (xt/for:object [[view-id view] views]
     (var #{options} view)
     (var #{trigger} options)
     (var check (util/check-event trigger signal event {:view view
                                                       :model model
                                                       :cell cell}))
     (when check
-      (th/throttle-run (k/get-key model "throttle")
+      (th/throttle-run (xt/x:get-key model "throttle")
                        view-id
                        [event])
       (x:arr-push out view-id)))
@@ -531,7 +531,7 @@
   (when (util/check-event trigger signal event {:view view
                                                :model model
                                                :cell cell})
-    (return (th/throttle-run (k/get-key model "throttle")
+    (return (th/throttle-run (xt/x:get-key model "throttle")
                              view-id
                              [event])))
   (return nil))
@@ -542,9 +542,9 @@
   [cell signal event]
   (var #{models} cell)
   (var out {})
-  (k/for:object [[model-id model] models]
+  (xt/for:object [[model-id model] models]
     (var model-out (-/trigger-model-raw cell model signal event))
-    (k/set-key out model-id model-out))
+    (xt/x:set-key out model-id model-out))
   (return out))
 
 (defn.xt add-raw-callback

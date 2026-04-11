@@ -75,7 +75,7 @@
 
 (defmacro.xt ^{:standalone true} 
   max
-  ([x y] (list (quote x:m-max) x y)))
+  ([x y & more] (apply list (quote x:m-max) x y more)))
 
 (defspec.xt mod [:fn [:xt/num :xt/num] :xt/num])
 
@@ -87,7 +87,7 @@
 
 (defmacro.xt ^{:standalone true} 
   min
-  ([x y] (list (quote x:m-min) x y)))
+  ([x y & more] (apply list (quote x:m-min) x y more)))
 
 (defspec.xt pow [:fn [:xt/num :xt/num] :xt/num])
 
@@ -130,7 +130,6 @@
 (defmacro.xt ^{:standalone true} 
   tanh
   ([value] (list (quote x:m-tanh) value)))
-
 
 (defspec.xt mod-pos
   [:fn [:xt/num :xt/num] :xt/num])

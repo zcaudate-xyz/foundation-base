@@ -21,7 +21,7 @@
   (var as-ret (. options ["as"]))
   (var p (fetch url options))
 
-  (cond (k/nil? as-ret)
+  (cond (xt/x:nil? as-ret)
         (return p)
 
         (== as-ret "json")

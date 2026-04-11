@@ -3,7 +3,7 @@
             [std.lang.typed.xtalk :refer [defspec.xt]]))
 
 (l/script :xtalk
-  {:require [[xt.lang.base-lib :as k]
+  {:require [[xt.lang.common-spec :as xt]
              [xt.lang.base-task :as task]
              [xt.cell.kernel.base-util :as util]]})
 
@@ -67,19 +67,19 @@
   {:added "4.0"}
   [data active]
   (var #{op id status body} data)
-  (var entry (k/get-key active id))
-  (when (k/not-nil? entry)
+  (var entry (xt/x:get-key active id))
+  (when (xt/x:not-nil? entry)
     (var #{input time resolve reject} entry)
     (:= input (or input {}))
     (try
       (cond (== status "ok")
             (cond (== op "call")
-                  (do (k/del-key active id) 
+                  (do (xt/x:del-key active id) 
                       (return (resolve (util/arg-decode body))))
                   
                   (== op "eval")
-                  (do (k/del-key active id)
-                      (var out (k/json-decode body))
+                  (do (xt/x:del-key active id)
+                      (var out (xt/x:json-decode body))
                       (var #{type value} out)
                       (cond (== type "data")
                             (return (resolve out.value))
@@ -87,11 +87,11 @@
                             :else
                             (return (resolve out)))))
             :else
-            (do (k/del-key active id)
-                (return (reject (k/obj-assign {:action (. input ["action"])
+            (do (xt/x:del-key active id)
+                (return (reject (xt/x:obj-assign {:action (. input ["action"])
                                                :input (. input ["body"])
                                                :start-time time
-                                               :end-time (k/now-ms)}
+                                               :end-time (xt/x:now-ms)}
                                               data)))))
       (catch err (return (reject {:op op
                                   :id id
@@ -100,7 +100,7 @@
                                   :message "Format Invalid"
                                   :input (. input ["body"])
                                   :start-time time
-                                  :end-time (k/now-ms)
+                                  :end-time (xt/x:now-ms)
                                   :body body}))))))
 
 (defn.xt link-listener-event
@@ -109,12 +109,12 @@
   [data callbacks]
   (var #{op id signal status body} data)
   (var out [])
-  (k/for:object [[p-id callback] callbacks]
+  (xt/for:object [[p-id callback] callbacks]
     (var #{pred handler} callback)
     (when (util/check-event pred signal data)
       (try (handler data signal)
            (x:arr-push out p-id)
-           (catch err (k/LOG! {:stack   (. err ["stack"])
+           (catch err (xt/x:LOG! {:stack   (. err ["stack"])
                                :message (. err ["message"])})))))
   (return out))
 
@@ -135,15 +135,15 @@
   "helper function to create a worker"
   {:added "4.0"}
   [worker-url active callbacks]
-  (cond (k/fn? worker-url)
+  (cond (xt/x:is-function? worker-url)
         (return
          (worker-url
           (fn [data]
             (return (-/link-listener {:data data} active callbacks)))))
 
-        (k/is-function? (k/get-key worker-url "create_fn"))
+        (xt/x:is-function? (xt/x:get-key worker-url "create_fn"))
         (return
-         ((k/get-key worker-url "create_fn")
+         ((xt/x:get-key worker-url "create_fn")
           (fn [data]
             (return (-/link-listener {:data data} active callbacks)))))
 
@@ -154,12 +154,12 @@
   "posts an encoded request to a worker transport"
   {:added "4.0"}
   [worker input]
-  (var post-fn (or (k/get-key worker "post_request")
-                   (k/get-key worker "postRequest")
-                   (k/get-key worker "post_message")
-                   (k/get-key worker "postMessage")))
-  (when (not (k/is-function? post-fn))
-    (k/err "ERR - worker transport cannot post requests"))
+  (var post-fn (or (xt/x:get-key worker "post_request")
+                   (xt/x:get-key worker "postRequest")
+                   (xt/x:get-key worker "post_message")
+                   (xt/x:get-key worker "postMessage")))
+  (when (not (xt/x:is-function? post-fn))
+    (xt/x:err "ERR - worker transport cannot post requests"))
   (return (post-fn input)))
 
 (defn.xt link-create
@@ -179,7 +179,7 @@
   "gets the calls that are active"
   {:added "4.0"}
   [link]
-  (return (k/get-key link "active")))
+  (return (xt/x:get-key link "active")))
 
 (defn.xt add-callback
   "adds a callback to the link"
@@ -195,14 +195,14 @@
   "lists all callbacks on the link"
   {:added "4.0"}
   [link]
-  (return (k/obj-keys (. link ["callbacks"]))))
+  (return (xt/x:obj-keys (. link ["callbacks"]))))
 
 (defn.xt remove-callback
   "removes a callback on the link"
   {:added "4.0"}
   [link key]
   (var prev (. link ["callbacks"] [key]))
-  (k/del-key (. link ["callbacks"]) key)
+  (xt/x:del-key (. link ["callbacks"]) key)
   (return [prev]))
 
 ;;
@@ -216,7 +216,7 @@
   (var #{id active} link)
   (while true
     (var cid (util/rand-id (+ id "-") 3))
-    (when (k/nil? (k/get-key active cid))
+    (when (xt/x:nil? (xt/x:get-key active cid))
       (return cid))))
 
 (defn.xt call
@@ -235,5 +235,5 @@
           {:resolve resolve
            :reject reject
            :input  input
-           :time   (k/now-ms)})
+           :time   (xt/x:now-ms)})
       (-/link-post worker input)))))

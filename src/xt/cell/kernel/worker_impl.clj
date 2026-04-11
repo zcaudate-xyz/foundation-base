@@ -4,7 +4,7 @@
 
 (l/script :xtalk
   {:require [[xt.lang.base-repl :as repl]
-             [xt.lang.base-lib :as k]
+             [xt.lang.common-spec :as xt]
              [xt.lang.base-task :as task]
              [xt.cell.kernel.base-util :as util]
              [xt.cell.kernel.worker-state :as worker-state]]})
@@ -49,10 +49,10 @@
   "posts a response via a worker-like transport"
   {:added "4.0"}
   [worker body]
-  (var post-fn (or (k/get-key worker "post_message")
-                   (k/get-key worker "postMessage")))
-  (when (not (k/is-function? post-fn))
-    (k/err "ERR - worker transport cannot post messages"))
+  (var post-fn (or (xt/x:get-key worker "post_message")
+                   (xt/x:get-key worker "postMessage")))
+  (when (not (xt/x:is-function? post-fn))
+    (xt/x:err "ERR - worker transport cannot post messages"))
   (return (post-fn body)))
 
 (defn.xt worker-handle-async
@@ -68,7 +68,7 @@
                                               (util/resp-ok op id (util/arg-encode ret))))))
     (fn [ret]
       (when (. ret ["stack"])
-        (k/TRACE! (. ret ["stack"]) "ERR"))
+        (xt/x:TRACE! (. ret ["stack"]) "ERR"))
       (return (-/post-message worker (util/resp-error op id ret)))))))
 
 (defn.xt worker-process-eval
@@ -76,7 +76,7 @@
   (var #{op id body action} input)
   (when (== false (. (worker-state/get-state worker)
                      ["eval"]))
-    (-/post-message worker (util/resp-error op id (k/cat "Not enabled - EVAL"))))
+    (-/post-message worker (util/resp-error op id (xt/x:cat "Not enabled - EVAL"))))
   (var out (repl/return-eval body))
   (var f (:? (. input ["async"])
              k/identity
@@ -89,7 +89,7 @@
   (var action-entry  (. (worker-state/get-actions worker)
                         [action]))
   (when (== nil action-entry)
-    (return (-/post-message worker (util/resp-error op id (k/cat "action not found - " action)))))
+    (return (-/post-message worker (util/resp-error op id (xt/x:cat "action not found - " action)))))
             
   (var action-async  (. action-entry ["is_async"]))
   (var action-fn     (. action-entry ["handler"]))
@@ -131,7 +131,7 @@
   (. worker (addEventListener
              "message"
              (fn [e]
-               (cond (k/is-string? e.data)
+               (cond (xt/x:is-string? e.data)
                      (-/worker-process worker
                                        (input-fn
                                         {:op "eval"

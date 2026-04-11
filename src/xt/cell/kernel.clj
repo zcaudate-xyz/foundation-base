@@ -3,7 +3,7 @@
 
 (l/script :xtalk
   {:require [[xt.lang.base-runtime :as rt :with [defvar.xt]]
-             [xt.lang.base-lib :as k]
+             [xt.lang.common-spec :as xt]
              [xt.lang.base-task :as task]
              [xt.lang.event-view :as event-view]
              [xt.cell.kernel.base-link :as raw]
@@ -45,13 +45,13 @@
   "gets the current annex key"
   {:added "4.0"}
   [key]
-  (return (k/get-key (-/GX) key)))
+  (return (xt/x:get-key (-/GX) key)))
 
 (defn.xt GX-set
   "set the current annex key"
   {:added "4.0"}
   [key val]
-  (k/set-key (-/GX) key val)
+  (xt/x:set-key (-/GX) key val)
   (return val))
 
 ;;
@@ -62,13 +62,13 @@
   "gets the current cell"
   {:added "4.0"}
   [ctx]
-  (cond (k/nil? ctx)
+  (cond (xt/x:nil? ctx)
         (return (-/GD))
         
-        (k/is-string? ctx)
+        (xt/x:is-string? ctx)
         (return (-/GX-val ctx))
 
-        (k/obj? ctx)
+        (xt/is-object? ctx)
         (if (== (. ctx ["::"]) "cell")
           (return ctx)
           (return (. ctx ["cell"])))
@@ -91,14 +91,14 @@
   {:added "4.0"}
   [f args ctx]
   (var cell (-/get-cell ctx))
-  (return (f cell (k/unpack args))))
+  (return (f cell (xt/x:unpack args))))
 
 (defn.xt fn-call-model
   "calls the model in context"
   {:added "4.0"}
   [f model-id args ctx]
   (var cell (-/get-cell ctx))
-  (return (f cell model-id (k/unpack args))))
+  (return (f cell model-id (xt/x:unpack args))))
 
 (defn.xt fn-call-view
   "calls the view in context"
@@ -106,7 +106,7 @@
   [f path args ctx]
     (var cell (-/get-cell ctx))
     (var [model-id view-id] path)
-    (return (f cell model-id view-id (k/unpack args))))
+    (return (f cell model-id view-id (xt/x:unpack args))))
 
 (defn.xt fn-access-cell
   "calls access function on the current cell"
@@ -114,10 +114,10 @@
   [f ctx]
   (var cell (-/get-cell ctx))
   (var #{models} cell)
-  (return (k/obj-map models
+  (return (xt/x:obj-map models
                      (fn [model]
                        (var #{views} model)
-                       (return (k/obj-map views f))))))
+                       (return (xt/x:obj-map views f))))))
 
 (defn.xt fn-access-model
   "calls access function on the current model"
@@ -127,7 +127,7 @@
   (var model (impl-common/model-get cell model-id))
   (when model
     (var #{views} model)
-    (return (k/obj-map views f))))
+    (return (xt/x:obj-map views f))))
 
 (defn.xt fn-access-view
   "calls access function on the current view"
@@ -213,7 +213,7 @@
   (var model (impl-common/model-get cell model-id))
   (when model
     (var #{views} model)
-    (return (k/arr-some (k/obj-vals views)
+    (return (xt/x:arr-some (xt/x:obj-vals views)
                         event-view/is-errored)))
   (return false))
 
@@ -225,7 +225,7 @@
   (var model (impl-common/model-get cell model-id))
   (when model
     (var #{views} model)
-    (return (k/arr-some (k/obj-vals views)
+    (return (xt/x:arr-some (xt/x:obj-vals views)
                         event-view/is-pending)))
   (return false))
 
@@ -414,7 +414,7 @@
   [path ctx]
   (return
    (task/task-then
-    (k/first (-/view-update path ctx))
+    (xt/x:first (-/view-update path ctx))
     (fn [_]
       (return (-/view-val path ctx))))))
 
@@ -424,7 +424,7 @@
   [path input ctx]
   (return
    (task/task-then
-    (k/first (-/view-set-input path input ctx))
+    (xt/x:first (-/view-set-input path input ctx))
     (fn [_]
       (return (-/view-val path ctx))))))
 
@@ -433,9 +433,9 @@
   {:added "4.0"}
   [path subpath ctx]
   (var out (-/view-val path ctx))
-  (when (or (k/nil? out) (k/is-empty? subpath))
+  (when (or (xt/x:nil? out) (xt/x:is-empty? subpath))
     (return out))
-  (return (k/get-in out subpath)))
+  (return (xt/x:get-in out subpath)))
 
 (defn.xt get-for
   "gets the subview after update"
@@ -443,7 +443,7 @@
   [path subpath ctx]
   (return
    (task/task-then
-    (k/first (-/view-update path ctx))
+    (xt/x:first (-/view-update path ctx))
     (fn [_]
       (return (-/get-val path subpath ctx))))))
 
@@ -458,7 +458,7 @@
   {:added "4.0"}
   [model-id ctx]
   (return (-/task-all
-           (k/arr-map (-/list-views model-id ctx)
+           (xt/x:arr-map (-/list-views model-id ctx)
                       (fn [k]
                         (return (-/nil-view [model-id k] ctx)))))))
 
@@ -516,9 +516,9 @@
            key
            pred
            (fn [event signal]
-             (var out (k/obj-assign {} event))
-             (k/del-key out "signal")
-             (k/set-key out "topic" signal)
+             (var out (xt/x:obj-assign {} event))
+             (xt/x:del-key out "signal")
+             (xt/x:set-key out "topic" signal)
              (return
               (handler
                out
