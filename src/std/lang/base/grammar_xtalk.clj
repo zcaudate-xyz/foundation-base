@@ -171,7 +171,7 @@
   "set-key transform"
   {:added "4.0"}
   [[_ obj k v]]
-  (list := (list '. obj [k])))
+  (list := (list '. obj [k]) v))
 
 (defn tf-del-key
   "del-key transform"
@@ -254,13 +254,13 @@
   "gets the first element of an indexed collection"
   {:added "4.1"}
   [[_ arr]]
-  (list 'x:get-idx arr 0))
+  (list 'x:get-idx arr (list 'x:offset 0)))
 
 (defn tf-second
   "gets the second element of an indexed collection"
   {:added "4.1"}
   [[_ arr]]
-  (list 'x:get-idx arr 1))
+  (list 'x:get-idx arr (list 'x:offset 1)))
 
 (defn tf-last
   "gets the last element of an indexed collection"

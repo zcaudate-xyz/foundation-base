@@ -51,7 +51,8 @@
 
 (defn.xt lu-del
   ([lu key]
-   (return (xt/x:lu-del lu key))))
+   (xt/x:lu-del lu key)
+   (return lu)))
 
 (defn.xt lu-get
   ([lu key]
@@ -59,7 +60,8 @@
 
 (defn.xt lu-set
   ([lu key value]
-   (return (xt/x:lu-set lu key value))))
+   (xt/x:lu-set lu key value)
+   (return lu)))
 
 (defn.xt lu-eq
   ([x y]
@@ -106,7 +108,7 @@
   "checks that arrect is empty"
   {:added "4.0"}
   [arr]
-  (if (xt/x:nil? res)
+  (if (xt/x:nil? arr)
     (return true)
     (return (== 0 (xt/x:len arr)))))
 
@@ -114,7 +116,7 @@
   "checks that arrect is not empty"
   {:added "4.0"}
   [arr]
-  (if (xt/x:nil? res)
+  (if (xt/x:nil? arr)
     (return false)
     (return (not= 0 (xt/x:len arr)))))
 
@@ -218,7 +220,7 @@
   (var arrlen (xt/x:len arr))
   (var start  (:? (< 1 arrlen) (xt/x:first arr) 0))
   (var finish (:? (< 1 arrlen) (xt/x:second arr) (xt/x:first arr)))
-  (var step   (:? (< 2 arrlen) (xt/x:get-idx arr 2) 1))
+  (var step   (:? (< 2 arrlen) (xt/x:get-idx arr (xt/x:offset 2)) 1))
   (var out [start])
   (var i (+ step start))
   (cond (and (< 0 step)

@@ -68,6 +68,11 @@
   (l/emit-as :lua [(lua-tf-x-m-quot '[_ 1 2])])
   => #"math.floor")
 
+^{:refer std.lang.model.spec-xtalk.fn-lua/lua-tf-x-m-mod :added "4.1"}
+(fact "math mod"
+  (l/emit-as :lua [(lua-tf-x-m-mod '[_ 10 3])])
+  => #"%")
+
 ^{:refer std.lang.model.spec-xtalk.fn-lua/lua-tf-x-is-string? :added "4.0"}
 (fact "is string?"
   (l/emit-as :lua [(lua-tf-x-is-string? '[_ x])])

@@ -220,8 +220,13 @@
 ;; MATH
 ;;
 
-(defn lua-tf-x-m-quot  [[_ num denom]] (list 'math.floor
-                                             (list '/ num denom)))
+(defn lua-tf-x-m-mod
+  [[_ num denom]]
+  (list 'mod num denom))
+
+(defn lua-tf-x-m-quot
+  [[_ num denom]]
+  (list 'math.floor (list '/ num denom)))
 
 (def +lua-math+
   {:x-m-abs           {:emit :alias :raw 'math.abs}
@@ -237,7 +242,7 @@
    :x-m-log10         {:emit :alias :raw 'math.log10}
    :x-m-max           {:emit :alias :raw 'math.max}
    :x-m-min           {:emit :alias :raw 'math.min}
-   :x-m-mod           {:emit :alias :raw 'math.mod}
+   :x-m-mod           {:macro #'lua-tf-x-m-mod,      :emit :macro}
    :x-m-pow           {:emit :alias :raw 'math.pow}
    :x-m-quot          {:macro #'lua-tf-x-m-quot,     :emit :macro}
    :x-m-sin           {:emit :alias :raw 'math.sin}

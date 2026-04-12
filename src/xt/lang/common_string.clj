@@ -42,7 +42,7 @@
   ([s start finish]
    (return (xt/x:str-substring s
                                (xt/x:offset start)
-                               (:? finish (xt/x:offset finish))))))
+                               finish))))
 
 (defn.xt to-uppercase
   "converts string to uppercase"
@@ -191,9 +191,9 @@
   (var lines (xt/x:m-ceil (/ total line-len)))
   (var out [])
   (xt/for:index [i [0 lines 1]]
-    (var line (xt/x:str-substring s
-                                  (* i line-len)
-                                  (* (+ i 1) line-len)))
+    (var line (-/substring s
+                           (* i line-len)
+                           (* (+ i 1) line-len)))
     (when (< 0 (xt/x:str-len line))
       (xt/x:arr-push out line)))
   (return out))
@@ -208,7 +208,7 @@
                 "o" "p" "q" "r" "s" "t" "u" "v" "w" "x" "y" "z"
                 "0" "1" "2" "3" "4" "5" "6" "7" "8"])
   (var out "")
-  (xt/for:index [i [0 n]]
+  (xt/for:index [i [0 (- n 1)]]
     (var idx (xt/x:m-floor (* (xt/x:random) (xt/x:len choices))))
     (:= out (xt/x:cat out (xt/x:get-idx choices (xt/x:offset idx)))))
   (return out))

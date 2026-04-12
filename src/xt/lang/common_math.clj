@@ -138,7 +138,7 @@
   "gets the positive mod"
   {:added "4.1"}
   [val modulo]
-  (var out (xt/x:m-mod val modulo))
+  (var out (x:m-mod val modulo))
   (return
    (:? (< out 0)
        (+ out modulo)
@@ -151,8 +151,8 @@
   "calculates the closest offset"
   {:added "4.1"}
   [pval nval modulo]
-  (var offset (xt/x:m-mod (- nval pval) modulo))
-  (cond (> (xt/x:m-abs offset)
+  (var offset (x:m-mod (- nval pval) modulo))
+  (cond (> (x:m-abs offset)
            (/ modulo 2))
         (cond (> offset 0)
               (return (- offset modulo))
