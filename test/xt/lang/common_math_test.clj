@@ -210,8 +210,7 @@
  (!.lua
   [(xtm/tanh 0)
    (xtm/tanh 1)])
- =>
- [0 0.76159415595576])
+ => [0 0.76159415595576])
 
 ^{:refer xt.lang.common-math/mod-pos :added "4.1"}
 (fact "returns a positive modulo"
@@ -228,8 +227,7 @@
   [(xtm/mod-offset 9 1 10)
    (xtm/mod-offset 1 9 10)
    (xtm/mod-offset 2 4 10)])
- =>
- [2 -2 2])
+ => [2 -2 2])
 
 ^{:refer xt.lang.common-math/gcd :added "4.1"}
 (fact "returns the greatest common divisor"
@@ -237,8 +235,7 @@
  (!.lua
   [(xtm/gcd 54 24)
    (xtm/gcd 10 0)])
- =>
- [6 10])
+ => [6 10])
 
 ^{:refer xt.lang.common-math/lcm :added "4.1"}
 (fact "returns the least common multiple"
@@ -246,8 +243,7 @@
  (!.lua
   [(xtm/lcm 4 6)
    (xtm/lcm 3 7)])
- =>
- [12 21])
+ => [12 21])
 
 ^{:refer xt.lang.common-math/mix :added "4.1"}
 (fact "interpolates between two values"
@@ -255,8 +251,7 @@
  (!.lua
   [(xtm/mix 0 10 0.5)
    (xtm/mix 10 20 0.25)])
- =>
- [5 12.5])
+ => [5 12.5])
 
 ^{:refer xt.lang.common-math/sign :added "4.1"}
 (fact "returns the sign of a number"
