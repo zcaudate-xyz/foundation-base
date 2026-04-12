@@ -534,69 +534,6 @@
     (:= out nested)
     (:= idx (- idx 1))))
 
-
-(defn.xt obj-keys
-  "gets keys of an object"
-  {:added "4.1"}
-  [obj]
-  (var out [])
-  (when (xt/x:not-nil? obj)
-    (xt/for:object [[k _] obj]
-      (xt/x:arr-push out k)))
-  (return out))
-
-(defn.xt obj-vals
-  "gets vals of an object"
-  {:added "4.1"}
-  [obj]
-  (var out [])
-  (when (xt/x:not-nil? obj)
-    (xt/for:object [[_ v] obj]
-      (xt/x:arr-push out v)))
-  (return out))
-
-(defn.xt obj-pairs
-  "creates entry pairs from object"
-  {:added "4.1"}
-  [obj]
-  (var out [])
-  (when (xt/x:not-nil? obj)
-    (xt/for:object [[k v] obj]
-      (xt/x:arr-push out [k v])))
-  (return out))
-
-(defn.xt obj-clone
-  "clones an object"
-  {:added "4.1"}
-  [obj]
-  (var out {})
-  (when (xt/x:not-nil? obj)
-    (xt/for:object [[k v] obj]
-      (xt/x:set-key out k v)))
-  (return out))
-
-(defn.xt obj-assign
-  "merges key value pairs from into another"
-  {:added "4.1"}
-  [obj m]
-  (when (xt/x:nil? obj)
-    (:= obj {}))
-  (when (xt/x:not-nil? m)
-    (xt/for:object [[k v] m]
-      (xt/x:set-key obj k v)))
-  (return obj))
-
-(defn.xt obj-from-pairs
-  "creates an object from pairs"
-  {:added "4.1"}
-  [pairs]
-  (var out {})
-  (xt/for:array [pair pairs]
-    (xt/x:set-key out
-                  (xt/x:first pair)
-                  (xt/x:second pair)))
-  (return out))
-
 (defn.xt get-in
   "gets item in object"
   {:added "4.1"}
@@ -628,7 +565,8 @@
   (when (== 0 (xt/x:len (or arr [])))
     (return obj))
 
-  (when (xt/x:is-object? obj)
+  ;; If the current branch does not exist yet, build the remaining path.
+  (when (not (xt/x:is-object? obj))
     (var idx (xt/x:len arr))
     (var out v)
     (while true
@@ -641,9 +579,7 @@
       (:= idx (- idx 1))))
   
   (var k (xt/x:first arr))
-  (var narr [])
-  (xt/for:index [i [1 (xt/x:len arr)]]
-    (xt/x:arr-push narr (xt/x:get-idx arr i)))
+  (var narr (-/arr-slice arr 1 nil))
   (var child (xt/x:get-key obj k))
   (if (== 0 (xt/x:len narr))
     (xt/x:set-key obj k v)
@@ -704,8 +640,8 @@
   ([obj k f args]
    (var inputs (xt/x:arr-clone args))
    (xt/x:arr-push-first inputs (xt/x:get-key obj k))
-   (return
-    (xt/x:set-key obj k (xt/x:apply f inputs)))))
+   (xt/x:set-key obj k (xt/x:apply f inputs))
+   (return obj)))
 
 ;;
 ;; FLAT

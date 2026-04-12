@@ -180,7 +180,7 @@
 (fact "TODO"
   
   (!.lua (xtd/arr-tail [1 2 3 4] 2))
-  => [3 4])
+  => [4 3])
 
 ^{:refer xt.lang.common-data/arr-range :added "4.1"}
 (fact "TODO"
@@ -296,9 +296,9 @@
 (fact "TODO"
   
   (!.lua
-   (var out {:a 1, :b 2})
-   (xtd/obj-del-all out)
-   out)
+    (var out {:a 1, :b 2})
+    (xtd/obj-del-all out)
+    out)
   => {})
 
 ^{:refer xt.lang.common-data/obj-pick :added "4.1"}
@@ -368,27 +368,28 @@
 ^{:refer xt.lang.common-data/get-in :added "4.1"}
 (fact "TODO"
   
-  (!.lua [(xtd/get-in {:a {:b {:c 1}}} ["a" "b"])
-          (xtd/get-in {:a {:b {:c 1}}} ["a" "b" "c"])])
+(!.lua [(xtd/get-in {:a {:b {:c 1}}} ["a" "b"])
+        (xtd/get-in {:a {:b {:c 1}}} ["a" "b" "c"])])
   => [{"c" 1} 1])
 
 ^{:refer xt.lang.common-data/set-in :added "4.1"}
 (fact "TODO"
+
   [(!.lua
-    (var a {:a {:b {:c 1}}})
-    (xtd/set-in a ["a" "b"] 2)
-    a)
+     (var a {:a {:b {:c 1}}})
+     (xtd/set-in a ["a" "b"] 2)
+     a)
    (!.lua
-    (var a {:a {:b {:c 1}}})
-    (xtd/set-in a ["a" "d"] 2)
-    a)]
+     (var a {:a {:b {:c 1}}})
+     (xtd/set-in a ["a" "d"] 2)
+     a)]
   => [{"a" {"b" 2}}
       {"a" {"b" {"c" 1}, "d" 2}}])
 
 ^{:refer xt.lang.common-data/obj-intersection :added "4.1"}
 (fact "TODO"
   
-  (set (!.lua (xtd/obj-intersection {:a true, :b true} {:b true, :c true})))
+      (set (!.lua (xtd/obj-intersection {:a true, :b true} {:b true, :c true})))
   => #{"b"})
 
 ^{:refer xt.lang.common-data/obj-keys-nested :added "4.1"}
@@ -512,16 +513,16 @@
 (fact "TODO"
   
   (!.lua
-   [(xtd/arr-every [2 4 6] (fn [x] (return (== 0 (% x 2)))))
-    (xtd/arr-every [2 3 6] (fn [x] (return (== 0 (% x 2)))))])
+   [(xtd/arr-every [2 4 6] (fn [x] (return (== 0 (mod x 2)))))
+    (xtd/arr-every [2 3 6] (fn [x] (return (== 0 (mod x 2)))))])
   => [true false])
 
 ^{:refer xt.lang.common-data/arr-some :added "4.1"}
 (fact "TODO"
   
   (!.lua
-   [(xtd/arr-some [1 3 5] (fn [x] (return (== 0 (% x 2)))))
-    (xtd/arr-some [1 2 5] (fn [x] (return (== 0 (% x 2)))))])
+   [(xtd/arr-some [1 3 5] (fn [x] (return (== 0 (mod x 2)))))
+    (xtd/arr-some [1 2 5] (fn [x] (return (== 0 (mod x 2)))))])
   => [false true])
 
 ^{:refer xt.lang.common-data/arr-each :added "4.1"}
@@ -537,8 +538,8 @@
 (fact "TODO"
   
   (!.lua
-   [(xtd/arr-find [1 3 4] (fn [x] (return (== 0 (% x 2)))))
-    (xtd/arr-find [1 3 5] (fn [x] (return (== 0 (% x 2)))))])
+   [(xtd/arr-find [1 3 4] (fn [x] (return (== 0 (mod x 2)))))
+    (xtd/arr-find [1 3 5] (fn [x] (return (== 0 (mod x 2)))))])
   => [2 -1])
 
 ^{:refer xt.lang.common-data/arr-map :added "4.1"}
@@ -562,7 +563,7 @@
 ^{:refer xt.lang.common-data/arr-filter :added "4.1"}
 (fact "TODO"
   
-  (!.lua (xtd/arr-filter [1 2 3 4] (fn [x] (return (== 0 (% x 2))))))
+  (!.lua (xtd/arr-filter [1 2 3 4] (fn [x] (return (== 0 (mod x 2))))))
   => [2 4])
 
 ^{:refer xt.lang.common-data/arr-keep :added "4.1"}
@@ -572,7 +573,7 @@
    (xtd/arr-keep
     [1 2 3 4]
     (fn [x]
-      (if (== 0 (% x 2))
+      (if (== 0 (mod x 2))
         (return (* x 10))
         (return nil)))))
   => [20 40])
@@ -583,7 +584,7 @@
   (!.lua
    (xtd/arr-keepf
     [1 2 3 4]
-    (fn [x] (return (== 1 (% x 2))))
+    (fn [x] (return (== 1 (mod x 2))))
     (fn [x] (return (* x 10)))))
   => [10 30])
 
@@ -635,7 +636,7 @@
   (!.lua
    (xtd/arr-group-by
     [1 2 3 4]
-    (fn [x] (return (xt/x:to-string (% x 2))))
+    (fn [x] (return (xt/x:to-string (mod x 2))))
     (fn [x] (return x))))
   => {"0" [2 4], "1" [1 3]})
 
@@ -680,7 +681,7 @@
 ^{:refer xt.lang.common-data/obj-filter :added "4.1"}
 (fact "TODO"
   
-  (!.lua (xtd/obj-filter {:a 1, :b 2, :c 3} (fn [x] (return (== 1 (% x 2))))))
+  (!.lua (xtd/obj-filter {:a 1, :b 2, :c 3} (fn [x] (return (== 1 (mod x 2))))))
   => {"a" 1, "c" 3})
 
 ^{:refer xt.lang.common-data/obj-keep :added "4.1"}
@@ -690,7 +691,7 @@
    (xtd/obj-keep
     {:a 1, :b 2, :c 3}
     (fn [x]
-      (if (== 0 (% x 2))
+      (if (== 0 (mod x 2))
         (return (* x 10))
         (return nil)))))
   => {"b" 20})
@@ -701,7 +702,7 @@
   (!.lua
    (xtd/obj-keepf
     {:a 1, :b 2, :c 3}
-    (fn [x] (return (== 1 (% x 2))))
+    (fn [x] (return (== 1 (mod x 2))))
     (fn [x] (return (* x 10)))))
   => {"a" 10, "c" 30})
 
