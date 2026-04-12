@@ -2,10 +2,9 @@
   (:require [std.lang :as l]))
 
 (l/script :xtalk
-  {:require [[xt.lang.common-spec :as xt]]})
-
-(l/script :lua
-  {:require [[xt.lang.common-spec :as xt]]})
+  {:require [[xt.lang.common-spec :as xt]
+             [xt.lang.common-data :as xtd]
+             [xt.lang.common-string :as xts]]})
 
 (def.xt OPERATORS
   {:neq "!="
@@ -74,15 +73,6 @@
         (== b false) (return "FALSE")
         :else (xt/x:err "Not Valid")))
 
-(defn.lua encode-number
-  "encodes a number (for lua dates)"
-  {:added "4.0"}
-  [v]
-  (var '[rv fv] (math.modf v))
-  (if (== fv 0)
-    (return (xt/x:cat "'" (string.format "%.f" v) "'"))
-    (return (xt/x:cat "'" (xt/x:to-string v) "'"))))
-
 (defn.xt encode-number
   "encodes a number (for lua dates)"
   {:added "4.0"}
@@ -101,9 +91,9 @@
   "encodes a json value"
   {:added "4.0"}
   [v]
-  (return (xt/x:cat "'" (xt/x:replace (xt/x:json-encode v)
-                                "'" "''")
-                 "'")))
+  (return (xt/x:cat "'" (xt/x:str-replace (xt/x:json-encode v)
+                                      "'" "''")
+                    "'")))
 
 (defn.xt encode-value
   "encodes a value to sql"
@@ -113,7 +103,7 @@
         (return "NULL")
 
         (xt/x:is-string? v)
-        (return (xt/x:cat "'" (xt/x:replace v "'" "''") "'"))
+        (return (xt/x:cat "'" (xt/x:str-replace v "'" "''") "'"))
         
         (xt/x:is-boolean? v)
         (return (-/encode-bool v))
@@ -150,7 +140,7 @@
   (var arg-fn (fn [arg]
                 (return (loop-fn arg column-fn opts loop-fn))))
   (var fargs (xt/x:arr-map (or args []) arg-fn))
-  (return (xt/x:arr-join fargs ", ")))
+  (return (xt/x:str-join ", " fargs)))
 
 (defn.xt encode-sql-table
   "encodes an sql table"
@@ -182,7 +172,7 @@
   (var arg-fn (fn [arg]
                 (return (loop-fn arg column-fn opts loop-fn))))
   (var fargs (xt/x:arr-map (or args []) arg-fn))
-  (return (xt/x:arr-join [name (xt/x:unpack fargs)] " ")))
+  (return (xt/x:str-join  " " [name (xt/x:unpack fargs)])))
 
 (defn.xt encode-sql-fn
   "encodes an sql function"
@@ -193,18 +183,18 @@
                 (return (loop-fn arg column-fn opts loop-fn))))
   (var fargs (xt/x:arr-map args arg-fn))
   (cond (xt/x:has-key? -/INFIX name)
-        (return (xt/x:cat "(" (xt/x:arr-join fargs (xt/x:cat " " name " ")) ")"))
+        (return (xt/x:cat "(" (xt/x:str-join (xt/x:cat " " name " ") fargs) ")"))
         
         :else
         (do (var lu (xt/x:get-path opts ["values" "replace"]))
             (var fspec (xt/x:get-key lu name))
             (cond (xt/x:nil? fspec)
-                  (return (xt/x:cat  name "(" (xt/x:arr-join fargs ", ") ")"))
+                  (return (xt/x:cat  name "(" (xt/x:str-join ", " fargs) ")"))
                   
                   (== "alias" (xt/x:get-key fspec "type"))
                   (return (xt/x:cat (xt/x:get-key fspec "name")
                                  "("
-                                 (xt/x:arr-join fargs ", ") ")"))
+                                 (xt/x:str-join ", " fargs) ")"))
 
                   (== "macro" (xt/x:get-key fspec "type"))
                   (return ((xt/x:get-key fspec "fn") (xt/x:unpack fargs)))
@@ -222,11 +212,11 @@
                 (cond (and (xt/x:is-object? arg)
                            (not (xt/x:has-key? arg "::")))
                       (return (querystr-fn arg "" opts))
-
+                      
                       :else
                       (return (loop-fn arg column-fn opts loop-fn)))))
   (var fargs (xt/x:arr-map args arg-fn))
-  (return (xt/x:cat "(SELECT " (xt/x:arr-join fargs " ") ")")))
+  (return (xt/x:cat "(SELECT " (xt/x:str-join  " " fargs) ")")))
 
 (def.xt ENCODE_SQL
   {"sql/arg"      -/encode-sql-arg
@@ -279,10 +269,10 @@
                (xt/x:is-array? v)
                (cond (and (== 1 (xt/x:len v))
                           (xt/x:is-array? (xt/x:first v))
-                          (xt/x:arr-every (xt/x:first v) k/is-string?))
-                     (return (xt/x:cat "(" (xt/x:join ", " (xt/x:arr-map (xt/x:first v)
-                                                                -/encode-value))
-                                    ")"))
+                          (xt/x:arr-every (xt/x:first v) xt/x:is-string?))
+                     (return (xt/x:cat "(" (xt/x:str-join ", " (xt/x:arr-map (xt/x:first v)
+                                                                             -/encode-value))
+                                       ")"))
                      
                      ;; HACK FOR ENCODING IDS
                      (and (== 1 (xt/x:len v))
@@ -290,8 +280,7 @@
                      (return (xt/x:first v))
                      
                      :else
-                     (return (xt/x:arr-join (xt/x:arr-map v encode-fn)
-                                         " ")))
+                     (return (xt/x:str-join " " (xt/x:arr-map v encode-fn))))
 
                (or (== v "and")
                    (== v "or"))
@@ -302,9 +291,9 @@
   (cond (xt/x:is-array? v)
         (return (xt/x:cat col
                        " " (-/encode-operator (xt/x:first v) opts)
-                       " " (-> (xt/x:arr-slice v 1 (xt/x:len v))
-                               (xt/x:arr-map encode-fn)
-                               (xt/x:arr-join " "))))
+                       " " (xt/x:str-join " "
+                                          (-> (xt/x:arr-slice v 1 (xt/x:len v))
+                                              (xt/x:arr-map encode-fn)))))
         
         :else
         (return (xt/x:cat col " = " (encode-fn v)))))
@@ -327,7 +316,8 @@
   ([params prefix opts]
    (var out (-> (xtd/arrayify params)
                 (xt/x:arr-map (fn:> [p] (-/encode-query-single-string p opts)))
-                (xt/x:arr-filter k/not-empty?)))
+                (xt/x:arr-filter (fn [e] (return (or (xt/x:not-nil? e)
+                                                     (< 0 (xt/x:len e))))))))
    (cond (== 0 (xt/x:len out))
          (return "")
 
@@ -335,9 +325,9 @@
          (return (xt/x:cat prefix " " (xt/x:first out)))
 
          :else
-         (return (xt/x:cat prefix " " (->  out
-                                        (xt/x:arr-map (fn:> [s] (xt/x:cat "(" s ")")))
-                                        (xt/x:arr-join " OR ")))))))
+         (return (xt/x:cat prefix " " 
+                           (xt/x:str-join " OR "
+                                          (xt/x:arr-map out (fn:> [s] (xt/x:cat "(" s ")")))))))))
 
 (defn.xt LIMIT
   "creates a LIMIT keyword"
@@ -374,7 +364,7 @@
   {:added "4.0"}
   [order]
   (return {"::" "sql/keyword"
-           :name (xt/x:to-uppercase order)}))
+           :name (xts/to-uppercase order)}))
 
 (defn.xt default-quote-fn
   "wraps a column in double quotes"
@@ -408,16 +398,16 @@
   {:added "4.0"}
   [table lookup]
   (return (xt/x:cat "\"" (xt/x:get-path lookup
-                                  [table "schema"])
-                 "\".\"" table "\"" )))
+                                        [table "schema"])
+                    "\".\"" table "\"" )))
 
 (defn.xt postgres-wrapper-fn
   "wraps a call for postgres"
   {:added "4.0"}
   [s indent]
   (return (xt/x:cat "WITH j_ret AS (\n"
-                 (xt/x:pad-lines s 2 " ")
-                 "\n) SELECT jsonb_agg(j_ret) FROM j_ret")))
+                    (xts/pad-lines s 2 " ")
+                    "\n) SELECT jsonb_agg(j_ret) FROM j_ret")))
 
 (defn.xt postgres-opts
   "constructs postgres options"
@@ -435,8 +425,8 @@
                          (return (-/default-table-fn table lookup)))
            :return-format-fn -/default-return-format-fn
            :return-count-fn  (fn []
-                               (return (xt/x:cat "count(*)")))
-           :return-join-fn   (fn [arr] (return (xt/x:join ", " arr)))
+                               (return "count(*)"))
+           :return-join-fn   (fn [arr] (return (xt/x:str-join ", " arr)))
            :return-link-fn   (fn [s link-name]
                                (return (xt/x:cat "(" s ") AS " link-name)))}))
 
@@ -476,19 +466,19 @@
            :strict false
            :querystr-fn -/encode-query-string
            :wrapper-fn (fn [s indent]
-                         (return (:? (< indent 2) s (xt/x:cat "(\n" (xt/x:pad-lines s 2 " ") ")"))))
+                         (return (:? (< indent 2) s (xt/x:cat "(\n" (xts/pad-lines s 2 " ") ")"))))
            :operators        {:ilike "LIKE"}
            :coerce           {:boolean -/sqlite-to-boolean
-                              :jsonb   k/json-decode
-                              :map     k/json-decode
-                              :array   k/json-decode}
+                              :jsonb   xt/x:json-decode
+                              :map     xt/x:json-decode
+                              :array   xt/x:json-decode}
            :column-fn        -/default-quote-fn
            :table-fn         -/default-quote-fn
            :return-format-fn -/sqlite-return-format-fn
            :return-count-fn  (fn []
-                               (return (xt/x:cat "json_array(json_object('count',count(*)))")))
+                               (return "json_array(json_object('count',count(*)))"))
            :return-join-fn   (fn [arr]
-                               (return (xt/x:cat "json_group_array(json_object(" (xt/x:join ", " arr) "))")))
+                               (return (xt/x:cat "json_group_array(json_object(" (xt/x:str-join ", " arr) "))")))
            :return-link-fn   (fn [s link-name]
                                (return (xt/x:cat "'" link-name "', " s)))}))
 

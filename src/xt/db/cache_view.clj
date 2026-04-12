@@ -3,6 +3,7 @@
 
 (l/script :xtalk
   {:require [[xt.lang.common-spec :as xt]
+             [xt.lang.common-data :as xtd]
              [xt.db.base-scope :as base-scope]]})
 
 (defn.xt tree-base
@@ -44,7 +45,7 @@
                        sel-table
                        sel-query
                        ret-query
-                       (:? (xt/x:not-empty? ret-omit)
+                       (:? (xtd/not-empty? ret-omit)
                            [{:id {:not-in [ret-omit]}}]
                            []))))
 
@@ -60,7 +61,7 @@
   (xt/for:array [[i e] input-spec]
     (:= (. arg-map [(xt/x:cat "{{" (. e ["symbol"]) "}}")])
         (. args [i])))
-  (var out (xt/x:walk tree
+  (var out (xtd/tree-walk tree
                    (fn [x] (return x))
                    (fn [x]
                      (return (:? (and (xt/x:is-string? x)

@@ -270,7 +270,7 @@
   "increment function"
   {:added "4.0"}
   ([x] (return (xt/x:inc x))))
-35;57;12M
+
 (defspec.xt dec [:fn [:xt/num] :xt/num])
 
 (defn.xt dec
@@ -312,3 +312,21 @@
   "odd check"
   {:added "4.0"}
   ([x] (return (xt/x:odd? x))))
+
+
+;;
+;; CALLBACK
+;;
+
+(defn.xt wrap-callback
+  "returns a wrapped callback given map"
+  {:added "4.0"}
+  [callbacks key]
+  (:= callbacks (or callbacks {}))
+  (var result-fn
+       (fn [result]
+         (var f (xt/x:get-key callbacks key))
+         (if (xt/x:not-nil? f)
+           (return (f result))
+           (return result))))
+  (return result-fn))

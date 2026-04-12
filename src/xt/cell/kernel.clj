@@ -114,10 +114,10 @@
   [f ctx]
   (var cell (-/get-cell ctx))
   (var #{models} cell)
-  (return (xt/x:obj-map models
+  (return (xtd/obj-map models
                      (fn [model]
                        (var #{views} model)
-                       (return (xt/x:obj-map views f))))))
+                       (return (xtd/obj-map views f))))))
 
 (defn.xt fn-access-model
   "calls access function on the current model"
@@ -127,7 +127,7 @@
   (var model (impl-common/model-get cell model-id))
   (when model
     (var #{views} model)
-    (return (xt/x:obj-map views f))))
+    (return (xtd/obj-map views f))))
 
 (defn.xt fn-access-view
   "calls access function on the current view"
@@ -433,7 +433,7 @@
   {:added "4.0"}
   [path subpath ctx]
   (var out (-/view-val path ctx))
-  (when (or (xt/x:nil? out) (xt/x:is-empty? subpath))
+  (when (or (xt/x:nil? out) (xtd/is-empty? subpath))
     (return out))
   (return (xtd/get-in out subpath)))
 

@@ -24,7 +24,7 @@
   (when (xt/x:nil? view-entry)
     (return nil))
   (var #{view} view-entry)
-  (var tview (xt/x:walk view
+  (var tview (xtd/tree-walk view
                      (fn [res]
                        (return (:? (xt/x:is-array? res)
                                    (xt/x:arr-filter res

@@ -9,7 +9,8 @@
              [xt.db.sql-graph :as sql-graph]
              [xt.db.sql-table :as sql-table]
              [xt.db.sql-raw :as raw]
-             [xt.lang.common-spec :as xt]]})
+             [xt.lang.common-spec :as xt]
+             [xt.lang.common-data :as xtd]]})
 
 (defn.xt sql-gen-delete
   "generates the delete statements"
@@ -27,11 +28,11 @@
                    sql-table/table-emit-upsert
                    schema lookup flat opts))
   (cond (== tag "input")
-        (return (xt/x:join "\n\n" statements))
+        (return (xt/x:str-join "\n\n" statements))
 
         :else
         (do (conn-dbsql/query-sync instance 
-                                   (xt/x:join "\n\n" statements))
+                                   (xt/x:str-join "\n\n" statements))
             (return (xt/x:obj-keys flat)))))
 
 (defn.xt sql-process-event-remove
@@ -47,13 +48,13 @@
        (fn [e]
          (var [table-name ids] e)
          (return (-/sql-gen-delete table-name ids opts))))
-  (var statements (xt/x:arr-mapcat ordered emit-fn))
+  (var statements (xtd/arr-mapcat ordered emit-fn))
   (cond (== tag "input")
-        (return (xt/x:join "\n\n" statements))
+        (return (xt/x:str-join "\n\n" statements))
 
         :else
         (do (conn-dbsql/query-sync instance 
-                                   (xt/x:join "\n\n" statements))
+                                   (xt/x:str-join "\n\n" statements))
             (return (xt/x:obj-keys flat)))))
 
 
@@ -72,7 +73,7 @@
   [instance schema table-name ids opts]
   (return (conn-dbsql/query-sync
            instance
-           (xt/x:join "\n\n" (-/sql-gen-delete table-name ids opts)))))
+           (xt/x:str-join "\n\n" (-/sql-gen-delete table-name ids opts)))))
 
 (defn.xt sql-clear
   "clears the sql db"

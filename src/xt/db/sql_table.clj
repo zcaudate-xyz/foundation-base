@@ -3,6 +3,7 @@
 
 (l/script :xtalk
   {:require [[xt.lang.common-spec :as xt]
+             [xt.lang.common-data :as xtd]
              [xt.db.base-schema :as base-schema]
              [xt.db.base-flatten :as f]
              [xt.db.sql-raw :as raw]]})
@@ -14,7 +15,7 @@
   (var cols  (base-schema/table-columns schema table-name))
   (return    (raw/raw-update table-name
                              {:id id}
-                             (xt/x:obj-pick m cols)
+                             (xtd/obj-pick m cols)
                              opts)))
 
 (defn.xt table-insert-single
@@ -64,7 +65,7 @@
   [entry]
   (var out  (xt/x:obj-clone (xt/x:get-key entry "data")))
   (xt/for:object [[link m] (xt/x:get-key entry "ref_links")]
-    (xt/x:set-key out (xt/x:cat link "_id") (xt/x:obj-first-key m)))
+    (xt/x:set-key out (xt/x:cat link "_id") (xtd/obj-first-key m)))
   (return out))
 
 (def.xt ^{:arglists '([table-name cols out opts])}
@@ -92,7 +93,7 @@
          (var [table-name data] pair)
          (var cols     (base-schema/table-columns schema table-name))
          (var defaults (base-schema/table-defaults schema table-name))
-         (var out  (xt/x:arr-keepf (xt/x:obj-vals data)
+         (var out  (xtd/arr-keepf (xt/x:obj-vals data)
                                 -/table-filter-id
                                 -/table-get-data))
          (var sout (xt/x:arr-map out (fn:> [v] (xt/x:obj-assign (xt/x:obj-clone defaults) v))))

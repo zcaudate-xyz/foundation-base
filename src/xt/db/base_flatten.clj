@@ -4,6 +4,7 @@
 
 (l/script :xtalk
   {:require [[xt.lang.common-spec :as xt]
+             [xt.lang.common-data :as xtd]
              [xt.db.base-schema :as sch]]})
 
 (defn.xt flatten-get-links
@@ -18,7 +19,7 @@
              (xt/x:err (xt/x:cat "Invalid link - " (xt/x:json-encode obj)))
              (return [(xt/x:get-key e "id") true])))))
   (return
-   (xt/x:obj-keep obj
+   (xtd/obj-keep obj
                (fn:> [v]
                      (:? (xt/x:is-array? v)
                          (-> (xt/x:arr-map v link-fn)
@@ -38,26 +39,26 @@
              :rev-links {}})
     (xt/x:set-key table-map id rec))
   (xt/x:obj-assign (xt/x:get-key rec "data") data-obj)
-  (xt/x:swap-key rec "ref_links" k/obj-assign-with ref-links k/obj-assign)
-  (xt/x:swap-key rec "rev_links" k/obj-assign-with rev-links k/obj-assign)
+  (xtd/swap-key rec "ref_links" xtd/obj-assign-with [ref-links xt/x:obj-assign])
+  (xtd/swap-key rec "rev_links" xtd/obj-assign-with [rev-links xt/x:obj-assign])
   (return table-map))
 
 (defn.xt flatten-node
   "flatten node"
   {:added "4.0"}
   [schema table-name data parent acc]
-  (:= data  (xt/x:obj-assign data (xt/x:clone-nested parent)))
+  (:= data  (xt/x:obj-assign data (xtd/clone-nested parent)))
   (var table-map (xt/x:get-key acc table-name))
   (when (not table-map)
     (:= table-map {})
     (xt/x:set-key acc table-name table-map))
-  (var data-obj     (xt/x:obj-pick data (sch/data-keys schema table-name)))
+  (var data-obj     (xtd/obj-pick data (sch/data-keys schema table-name)))
   (var obj-fn       (fn:> [v] (:? (xt/x:is-object? v) [v] v)))
-  (var rev-obj      (-> (xt/x:obj-pick data (sch/rev-keys schema table-name))
-                        (xt/x:obj-keep obj-fn)))
+  (var rev-obj      (-> (xtd/obj-pick data (sch/rev-keys schema table-name))
+                        (xtd/obj-keep obj-fn)))
   (var rev-links    (-/flatten-get-links rev-obj))
-  (var ref-obj      (-> (xt/x:obj-pick data (sch/ref-keys schema table-name))
-                        (xt/x:obj-keep obj-fn)))
+  (var ref-obj      (-> (xtd/obj-pick data (sch/ref-keys schema table-name))
+                        (xtd/obj-keep obj-fn)))
   (var ref-links    (-/flatten-get-links ref-obj))
   (var ref-id-map   (sch/ref-id-keys schema table-name))
   (var ref-id-links {})
@@ -66,7 +67,7 @@
               (xt/x:set-key ref-id-links k {(xt/x:get-key data id-k) true})))
   (-/flatten-merge table-map
                    data-obj
-                   (xt/x:obj-assign-with ref-links ref-id-links k/obj-assign)
+                   (xtd/obj-assign-with ref-links ref-id-links xt/x:obj-assign)
                    rev-links)
   (return {:table-map table-map
            :data-obj data-obj

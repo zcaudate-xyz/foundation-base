@@ -9,6 +9,42 @@
 ;; LOOKUP
 ;;
 
+(defn.xt is-empty?
+  "checks that array is not empty"
+  {:added "4.0"}
+  [res]
+  (cond (xt/x:nil? res) (return true)
+        (xt/x:is-string? res) (return (== 0 (xt/x:str-len res)))
+        (xt/x:is-array? res)  (return (== 0 (xt/x:len res)))
+        (xt/x:is-object? res)
+        (do (xt/for:object [[i v] res]
+              (return false))
+            (return true))
+        
+        :else
+        (do (xt/x:err (xt/x:cat "Invalid type - "
+                                (xt/x:to-string res))))))
+
+(defn.xt not-empty?
+  "checks that array is not empty"
+  {:added "4.0"}
+  [res]
+  (cond (xt/x:nil? res) (return false)
+        (xt/x:is-string? res) (return (< 0 (xt/x:str-len res)))
+        (xt/x:is-array? res) (return (< 0 (xt/x:len res)))
+        (xt/x:is-object? res)
+        (do (xt/for:object [[i v] res]
+              (return true))
+            (return false))
+        
+        :else
+        (do (xt/x:err (xt/x:cat "Invalid type - "
+                                (xt/x:to-string res))))))
+
+;;
+;; LOOKUP
+;;
+
 (defn.xt lu-create
   ([]
    (return (xt/x:lu-create))))
@@ -30,7 +66,7 @@
    (return (xt/x:lu-eq x y))))
 
 ;;
-;; ARRAY
+;; ARRAY INDEX
 ;;
 
 (defn.xt first
@@ -63,9 +99,8 @@
 
 
 ;;
-;; ARRAY
+;; ARRAY CONTAINER
 ;;
-
 
 (defn.xt arr-empty?
   "checks that arrect is empty"
@@ -661,6 +696,14 @@
       (xt/x:arr-push out k)))
   (return out))
 
+(defn.xt swap-key
+  "swaps a value in the key with a function"
+  {:added "4.0"}
+  ([obj k f args]
+   (var inputs (xt/x:arr-clone args))
+   (xt/x:arr-push-first inputs (xt/x:get-key obj k))
+   (return
+    (xt/x:set-key obj k (xt/x:apply f inputs)))))
 
 ;;
 ;; FLAT
@@ -781,6 +824,34 @@
            -/eq-nested-basic
            -/eq-nested-basic
            nil)))
+
+
+;;
+;; TREE
+;;
+
+(defn.xt tree-walk
+  "walks over object"
+  {:added "4.0"}
+  [x pre-fn post-fn]
+  (:= x (pre-fn x))
+  (cond (xt/x:nil? x)
+        (return (post-fn x))
+        
+        (xt/x:is-object? x)
+        (do (var out := {})
+            (xt/for:object [[k v] x]
+              (xt/x:set-key out k (-/tree-walk v pre-fn post-fn)))
+            (return (post-fn out)))
+
+        (xt/x:is-array? x)
+        (do (var out := [])
+            (xt/for:array [e x]
+              (xt/x:arr-push out (-/tree-walk e pre-fn post-fn)))
+            (return (post-fn out)))
+
+        :else
+        (return (post-fn x))))
 
 
 (defn.xt tree-diff

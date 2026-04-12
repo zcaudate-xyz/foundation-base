@@ -3,6 +3,7 @@
 
 (l/script :xtalk
   {:require [[xt.lang.common-spec :as xt]
+             [xt.lang.common-data :as xtd]
              [xt.db.sql-graph :as sql-graph]
              [xt.db.sql-util :as sql-util]
              [xt.db.base-scope :as base-scope]]})
@@ -11,7 +12,7 @@
   "creates a control array"
   {:added "4.0"}
   [control]
-  (when (xt/x:is-empty? control)
+  (when (xtd/is-empty? control)
     (return []))
   
   (var out [])
@@ -75,7 +76,7 @@
   (var ret-table   (xt/x:get-path ret-entry ["view" "table"]))
   (var sel-query   (or (xt/x:get-path sel-entry ["view" "query"]) {}))
   (var ret-query   (or (xt/x:get-path ret-entry ["view" "query"]) {}))
-  (var ret-clause  (:? (xt/x:not-empty? ret-omit)
+  (var ret-clause  (:? (xtd/not-empty? ret-omit)
                        [{:id {:not-in [ret-omit]}}]
                        []))
   (var combined-clause (base-scope/merge-queries clause ret-clause))
@@ -101,7 +102,7 @@
   (xt/for:array [[i e] input-spec]
     (:= (. arg-map [(xt/x:cat "{{" (. e ["symbol"]) "}}")])
         (. args [i])))
-  (var out (xt/x:walk tree
+  (var out (xtd/tree-walk tree
                    (fn [x] (return x))
                    (fn [x]
                      (return (:? (and (xt/x:is-string? x)

@@ -229,7 +229,7 @@
   (var #{listeners} cell)
   (var out {})
   (xt/for:object [[view-key callbacks] listeners]
-    (xt/x:set-in out
+    (xtd/set-in out
               (xt/x:json-decode view-key)
               (xt/x:obj-keys callbacks)))
   (return out))

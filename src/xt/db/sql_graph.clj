@@ -3,6 +3,7 @@
 
 (l/script :xtalk
   {:require [[xt.lang.common-spec :as xt]
+             [xt.lang.common-data :as xtd]
              [xt.db.sql-util :as ut]
              [xt.db.base-scope :as scope]]})
 
@@ -16,7 +17,7 @@
         (return [table-name {} nil])
 
         (== cnt 3)
-        (return [table-name (xt/x:second query) (xt/x:nth query 2)])
+        (return [table-name (xt/x:second query) (xtd/nth query 2)])
 
         (xt/x:is-array? (xt/x:second query))
         (return [table-name {} (xt/x:second query)])
@@ -53,15 +54,15 @@
     (xt/x:err (xt/x:cat "Attribute not found - " table-name " - " key)))
   (var arr-fn (fn [clause-fn clause-arr]
                 (return (xt/x:cat "("
-                               (-> clause-arr
-                                   (xt/x:arr-map (fn [clause-obj]
-                                                (return (xt/x:cat "(" (clause-fn clause-obj) ")"))))
-                                   (xt/x:arr-join " OR "))
+                                  (xt/x:str-join " OR "
+                                                 (-> clause-arr
+                                                     (xt/x:arr-map (fn [clause-obj]
+                                                                     (return (xt/x:cat "(" (clause-fn clause-obj) ")"))))))
                                ")"))))
   (var forward-fn
        (fn [clause-obj]
          (return (xt/x:cat key "_id" " IN (\n"
-                        (xt/x:pad-left "" indent " ")
+                        (xt/x:str-pad-left "" indent " ")
                         (where-fn schema
                                   (xt/x:get-path attr ["ref" "ns"])
                                   (column-fn "id")
@@ -69,12 +70,12 @@
                                   indent
                                   opts)
                         "\n"
-                        (xt/x:pad-left "" (- indent 2) " ")
+                        (xt/x:str-pad-left "" (- indent 2) " ")
                         ")"))))
   (var reverse-fn
        (fn [clause-obj]
          (return (xt/x:cat "id IN (\n"
-                        (xt/x:pad-left "" indent " ")
+                        (xt/x:str-pad-left "" indent " ")
                         (where-fn schema
                                   (xt/x:get-path attr ["ref" "ns"])
                                   (column-fn (xt/x:cat (xt/x:get-path attr ["ref" "rkey"]) "_id"))
@@ -82,7 +83,7 @@
                                   indent
                                   opts)
                         "\n"
-                        (xt/x:pad-left "" (- indent 2) " ")
+                        (xt/x:str-pad-left "" (- indent 2) " ")
                         ")"))))
   
   (cond (==  "ref" (xt/x:get-key attr "type"))
@@ -141,20 +142,19 @@
                          -/select-where))))
          (var clause-arr (xt/x:arr-map (xt/x:obj-pairs clause)
                                     pair-fn))
-         (return (xt/x:join " AND " clause-arr))))
+         (return (xt/x:str-join " AND " clause-arr))))
   (var where-arr  (-> (xt/x:arr-map where-params clause-fn)
-                      (xt/x:arr-filter k/not-empty?)))
+                      (xt/x:arr-filter xtd/not-empty?)))
   (var where-str  (:? (== 0 (xt/x:len where-arr)) ""
                       (== 1 (xt/x:len where-arr)) (xt/x:first where-arr)
-                      :else (-> where-arr
-                                (xt/x:arr-map (fn:> [s] (xt/x:cat "(" s ")")))
-                                (xt/x:arr-join " OR "))))
+                      :else (xt/x:str-join " OR "
+                                           (xt/x:arr-map where-arr (fn:> [s] (xt/x:cat "(" s ")"))))))
   (var out-arr    [(xt/x:cat "SELECT " return-str)
                    (xt/x:cat " FROM "  (table-fn table-name))])
   (if (< 0 (xt/x:len where-str))
-    (xt/x:arr-push out-arr (xt/x:cat "\n" (xt/x:pad-left "" indent " ")
+    (xt/x:arr-push out-arr (xt/x:cat "\n" (xt/x:str-pad-left "" indent " ")
                                "WHERE " where-str)))
-  (return (xt/x:join "" out-arr)))
+  (return (xt/x:str-join "" out-arr)))
 
 (defn.xt select-return-str
   "select return string loop"
@@ -166,9 +166,9 @@
    opts]
   (var column-fn   (xt/x:get-key opts "column_fn" (fn [x] (return x))))
   (var return-count-fn   (xt/x:get-key opts "return_count_fn" (fn []
-                                                             (return (xt/x:cat "count(*)")))))
+                                                             (return "count(*)"))))
   (var return-format-fn  (xt/x:get-key opts "return_format_fn" ut/default-return-format-fn))
-  (var return-join-fn    (xt/x:get-key opts "return_join_fn" (fn [arr] (return (xt/x:join ", " arr)))))
+  (var return-join-fn    (xt/x:get-key opts "return_join_fn" (fn [arr] (return (xt/x:str-join ", " arr)))))
   (var return-link-fn    (xt/x:get-key opts "return_link_fn" (fn [s link-name]
                                                             (return (xt/x:cat "(" s ") AS " link-name)))))
   (var nest-fn
@@ -195,9 +195,9 @@
   (var return-data   (xt/x:arr-map data-params format-fn))
   (var return-links  (xt/x:arr-map link-params format-fn))
   (return  (return-join-fn
-            (xt/x:arr-mapcat [return-data
-                           return-links]
-                          (fn [x] (return x))))))
+            (xtd/arr-mapcat [return-data
+                              return-links]
+                             (fn [x] (return x))))))
 
 (defn.xt select-return
   "select return call"
@@ -218,9 +218,9 @@
                                          indent
                                          opts))
   (var return-base  (-/select-where schema table-name return-str where-params 2 opts))
-  (return (wrapper-fn (xt/x:arr-join [return-base
-                                   (xt/x:unpack (xt/x:arr-map custom-params format-fn))]
-                                  " ")
+  (return (wrapper-fn (xt/x:str-join " "
+                                     [return-base
+                                      (xt/x:unpack (xt/x:arr-map custom-params format-fn))])
                       (:? (> indent 0)
                           2
                           0))))
@@ -234,7 +234,7 @@
   (var return-params (xt/x:last linked))
   (var where-params  (xt/x:arr-filter linked (fn [x]
                                             (return (and (xt/x:is-object? x)
-                                                         (xt/x:not-empty? x))))))
+                                                         (xtd/not-empty? x))))))
   (var tree (scope/get-tree schema table-name where-params return-params opts))
   (return tree))
 

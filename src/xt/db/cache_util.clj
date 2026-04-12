@@ -2,7 +2,8 @@
   (:require [std.lang :as l]))
 
 (l/script :xtalk
-  {:require [[xt.lang.common-spec :as xt]]})
+  {:require [[xt.lang.common-spec :as xt]
+             [xt.lang.common-data :as xtd]]})
 
 (defn.xt has-entry
   "checks if entry exists"
@@ -26,7 +27,7 @@
             _ (f record)
             new-entry {:t (xt/x:now-ms)
                        :record record}]
-        (xt/x:set-in rows [table-key id] new-entry)
+        (xtd/set-in rows [table-key id] new-entry)
         (return new-entry)))
     (return entry)))
 
@@ -42,11 +43,11 @@
         #{data rev-links ref-links} new-record
         #{record} entry
         _ (xt/x:obj-assign (xt/x:get-key record "data") data)
-        _ (xt/x:swap-key record "ref_links" k/obj-assign-with ref-links k/obj-assign)
-        _ (xt/x:swap-key record "rev_links" k/obj-assign-with rev-links k/obj-assign)
+        _ (xtd/swap-key record "ref_links" xtd/obj-assign-with [ref-links xt/x:obj-assign])
+        _ (xtd/swap-key record "rev_links" xtd/obj-assign-with [rev-links xt/x:obj-assign])
         new-entry  (new-fn {:t (xt/x:now-ms)
                             :record record})]
-    (xt/x:set-in rows [table-key id] new-entry)
+    (xtd/set-in rows [table-key id] new-entry)
     (return new-entry)))
 
 (defn.xt merge-bulk
@@ -56,7 +57,7 @@
   (var out {})
   (xt/for:object [[table-key m] fdata]
     (xt/for:object [[id new-record] m]
-      (xt/x:set-in out [table-key id]
+      (xtd/set-in out [table-key id]
                 (-/merge-single rows table-key id new-record
                                 (or new-fn (fn [x] (return x)))))))
   (return out))
@@ -76,10 +77,10 @@
     (return (-> (xtd/arr-juxt (xt/x:obj-keys rows)
                             (fn [x] (return x))
                             (fn [k] (return (-/all-records rows k))))
-                (xt/x:obj-filter (fn [e]
+                (xtd/obj-filter (fn [e]
                                 (return (or (xt/x:nil? e)
                                             (< 0 (xt/x:len (xt/x:obj-keys e)))))))))
-    (return (xt/x:obj-map (xt/x:get-key rows table-key)
+    (return (xtd/obj-map (xt/x:get-key rows table-key)
                        (fn [e]
                          (return (xt/x:get-key e "record")))))))
 
@@ -92,8 +93,8 @@
         (return record)
 
         :else
-        (return (xt/x:obj-diff-nested (xt/x:get-key curr "record")
-                                   record))))
+        (return (xtd/tree-diff-nested (xt/x:get-key curr "record")
+                                      record))))
 
 (defn.xt has-changed-single
   "checks if record has changed"
@@ -191,7 +192,7 @@
    (return (-> (xt/x:arr-keep ids
                            (fn [id]
                              (return (-/remove-single rows schema table-key id))))
-               (xt/x:arr-mapcat (fn [x] (return x)))))))
+               (xtd/arr-mapcat (fn [x] (return x)))))))
 
 
 ;;

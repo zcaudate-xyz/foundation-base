@@ -5,7 +5,9 @@
             [std.lib.schema.base :as base]))
 
 (l/script :xtalk
-  {:require [[xt.lang.common-spec :as xt]]})
+  {:require [[xt.lang.common-spec :as xt]
+             [xt.lang.common-data :as xtd]
+             [xt.lang.common-string :as xts]]})
 
 (def +scope+ (collection/map-entries
               (fn [[k v]]
@@ -20,40 +22,40 @@
   "merges query with clause"
   {:added "4.0"}
   [q-0 q-1]
-  (var arr-0 (xt/x:arr-filter (xtd/arrayify q-0) k/not-empty?))
-  (var arr-1 (xt/x:arr-filter (xtd/arrayify q-1) k/not-empty?))
-  (when (xt/x:is-empty? arr-0)
+  (var arr-0 (xt/x:arr-filter (xtd/arrayify q-0) xtd/not-empty?))
+  (var arr-1 (xt/x:arr-filter (xtd/arrayify q-1) xtd/not-empty?))
+  (when (xtd/arr-empty? arr-0)
     (return arr-1))
-  (when (xt/x:is-empty? arr-1)
+  (when (xtd/arr-empty? arr-1)
     (return arr-0))
   (var out [])
   (xt/for:array [e-0 arr-0]
     (xt/for:array [e-1 arr-1]
-      (xt/x:arr-push out (xt/x:obj-assign-nested
-                       (xt/x:walk e-0 (fn [x] (return x)) (fn [x] (return x)))
-                       (xt/x:walk e-1 (fn [x] (return x)) (fn [x] (return x)))))))
+      (xt/x:arr-push out (xtd/obj-assign-nested
+                          (xtd/tree-walk e-0 (fn [x] (return x)) (fn [x] (return x)))
+                          (xtd/tree-walk e-1 (fn [x] (return x)) (fn [x] (return x)))))))
   (return out))
 
 (defn.xt filter-scope
   "filter scopes from keys"
   {:added "4.0"}
   [ks]
-  (var mscopes (xt/x:arr-filter ks (fn:> [s] (== "-" (xt/x:sym-ns s)))))
-  (var ascopes (xt/x:arr-filter ks (fn:> [s] (== "*" (xt/x:sym-ns s)))))
+  (var mscopes (xt/x:arr-filter ks (fn:> [s] (== "-" (xts/sym-ns s)))))
+  (var ascopes (xt/x:arr-filter ks (fn:> [s] (== "*" (xts/sym-ns s)))))
   (return
    (xt/x:arr-foldl
     (xt/x:arr-map ascopes
                (fn:> [s] (xt/x:get-key -/Scopes s)))
-    k/obj-assign 
-    (xt/x:arr-lookup mscopes))))
+    xt/x:obj-assign 
+    (xtd/arr-lookup mscopes))))
 
 (defn.xt filter-plain-key
   "converts _id tags to standard keys"
   {:added "4.0"}
   [s]
-  (when (== nil (xt/x:sym-ns s))
-    (return (:? (xt/x:ends-with? s "_id")
-                (xt/x:substring s 0 (- (xt/x:len s) 3))
+  (when (== nil (xts/sym-ns s))
+    (return (:? (xt/x:str-ends-with s "_id")
+                (xt/x:str-substring s 0 (- (xt/x:len s) 3))
                 s))))
 
 (defn.xt filter-plain
@@ -61,13 +63,13 @@
   {:added "4.0"}
   [ks]
   (return
-   (xt/x:arr-lookup (xt/x:arr-keep ks -/filter-plain-key))))
+   (xtd/arr-lookup (xt/x:arr-keep ks -/filter-plain-key))))
 
 (defn.xt get-data-columns
   "get columns for given keys"
   {:added "4.0"}
   [schema table-key ks]
-  (var str-ks (xt/x:arr-filter ks k/is-string?))
+  (var str-ks (xt/x:arr-filter ks xt/x:is-string?))
   (var scopes (-/filter-scope str-ks))
   (var plains (-/filter-plain str-ks))
   (var cols   (xt/x:get-key schema table-key))
@@ -133,7 +135,7 @@
                   (xt/x:obj-from-pairs)))
   (var cols   (xt/x:get-key schema table-key))
   (return
-   (xt/x:arr-keepf (xt/x:obj-vals cols)
+   (xtd/arr-keepf (xt/x:obj-vals cols)
                 (fn:> [col] (xt/x:has-key? linked (xt/x:get-key col "ident")))
                 (fn:> [col] [col (xt/x:get-key linked (xt/x:get-key col "ident"))]))))
 
@@ -161,7 +163,7 @@
   "when empty, returns an empty array"
   {:added "4.0"}
   [input]
-  (cond (xt/x:is-empty? input)
+  (cond (xtd/is-empty? input)
         (return [])
 
         (xt/x:is-array? input)

@@ -324,7 +324,7 @@
     (var #{deps} view-entry)
     (xt/for:array [path (or deps [])]
       (:= path (:? (xt/x:is-array? path) path [model-id path]))
-      (xt/x:set-in all-deps
+      (xtd/set-in all-deps
                 [(xt/x:first path)
                  (xt/x:second path)
                  view-id]
@@ -381,7 +381,7 @@
      options}]
   (var view (event-view/create-view
              nil
-             (xt/x:obj-assign-nested
+             (xtd/obj-assign-nested
               {:main   {:handler handler
                         :wrapper -/wrap-cell-args}
                :remote {:handler remoteHandler

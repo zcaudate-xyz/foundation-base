@@ -3,6 +3,8 @@
 
 (l/script :xtalk
   {:require [[xt.lang.common-spec :as xt]
+             [xt.lang.common-data :as xtd]
+             [xt.lang.common-sort-by :as xtsb]
              [xt.db.base-util :as ut]
              [xt.db.base-scope :as scope]]})
 
@@ -10,14 +12,15 @@
   {:require [[js.core :as j]
              [xt.db.base-util :as ut]
              [xt.db.base-scope :as scope]
-             [xt.lang.common-spec :as xt]]})
+             [xt.lang.common-spec :as xt]
+             [xt.lang.common-data :as xtd]]})
 
 (defn.xt check-in-clause
   "emulates the sql `in` clause"
   {:added "4.0"}
   [x expr]
   (return (xt/x:arr-some (xt/x:first expr)
-                      (fn:> [e] (== e x)))))
+                         (fn [e] (return (== e x))))))
 
 (defn.js check-like-clause
   "emulates the sql `like` clause"
@@ -45,11 +48,11 @@
 (def.xt PULL_CHECK
   {"neq"  (fn [x expr]
             (return (xt/x:neq x expr)))
-   "eq"   k/eq
-   "lt"   k/lt
-   "lte"  k/lte
-   "gt"   k/gt
-   "gte"  k/gte
+   "eq"   xt/x:eq
+   "lt"   xt/x:lt
+   "lte"  xt/x:lte
+   "gt"   xt/x:gt
+   "gte"  xt/x:gte
    "like" -/check-like-clause
    "in"   -/check-in-clause
    "between"  (fn:> [x start-expr _and end-expr]
@@ -59,10 +62,10 @@
                          (<= x _and))))
    "not_like" (fn:> [x expr] (not (-/check-like-clause x expr)))
    "not_in" (fn:> [x expr] (not (-/check-in-clause x expr)))
-   "is_null" k/nil? #_(fn [x]
+   "is_null" xt/x:nil? #_(fn [x]
                (xt/x:LOG! x)
                (return (== nil x)))
-   "is_not_null"  k/not-nil? #_(fn:> [x] (not= nil x))})
+   "is_not_null"  xt/x:not-nil? #_(fn:> [x] (not= nil x))})
 
 (defn.xt check-clause-value
   "checks the clause within a record"
@@ -129,7 +132,7 @@
                                    {}))
               records (-> (or (xt/x:get-key rows ns)
                               {})
-                          (xt/x:obj-pick ids)
+                          (xtd/obj-pick ids)
                           (xt/x:obj-vals)
                           (xt/x:arr-map (fn:> [e] (xt/x:get-key e "record"))))
               found   (xt/x:arr-filter records
@@ -151,18 +154,19 @@
   (cond (xt/x:is-function? where)
         (return (where record table-key))
 
-        (xt/x:is-empty? where)
+        (xtd/is-empty? where)
         (return true)
 
         (xt/x:is-array? where)
         (return
          (xt/x:arr-some where
-                     (fn:> [or-clause]
-                       (-/pull-where rows schema table-key or-clause record))))
+                        (fn [or-clause]
+                          (return
+                           (-/pull-where rows schema table-key or-clause record)))))
         
         :else
-        (return (-> (xt/x:obj-filter where k/not-nil?)
-                    (xt/x:obj-pairs where)
+        (return (-> (xtd/obj-filter where xt/x:not-nil?)
+                    (xt/x:obj-pairs)
                     (xt/x:arr-every clause-fn)))))
 
 (defn.xt pull-return-clause
@@ -182,13 +186,13 @@
                            {})))
   (var entries (-> (or (xt/x:get-key rows link-key)
                        {})
-                   (xt/x:obj-pick ids)
+                   (xtd/obj-pick ids)
                    (xt/x:obj-vals)))
   
   (var return-params (xt/x:last linked))
   (var where-params  (xt/x:arr-filter linked (fn [x]
                                             (return (and (xt/x:is-object? x)
-                                                         (xt/x:not-empty? x))))))
+                                                         (xtd/not-empty? x))))))
   (var filter-fn
        (fn [e]
          (when (where-fn rows schema link-key
@@ -197,7 +201,7 @@
            (var out (return-fn rows schema link-key
                                return-params
                                (xt/x:get-key e "record")))
-           (when (xt/x:not-empty? out)
+           (when (xtd/not-empty? out)
              (return out)))))
   (var records (xt/x:arr-keep entries filter-fn))
   (if (< 0 (xt/x:len records))
@@ -218,22 +222,20 @@
                                    -/pull-where
                                    -/pull-return
                                    attr link-ret))
-    (xt/x:step-set-pair output ret))
+    (xt/x:set-key output
+                  (xt/x:first ret)
+                  (xt/x:second ret)))
   (xt/for:array [col data-cols]
     (var #{ident ref} col)
     (cond (xt/x:nil? ref)
-          (do (var out (-> record
-                           (xt/x:get-key "data")
-                           (xt/x:get-key ident)))
+          (do (var out (xt/x:get-path record ["data" ident]))
               (xt/x:set-key output ident out))
           
           :else
           (xt/x:set-key output
                      (xt/x:cat ident "_id")
-                     (xt/x:first (xt/x:obj-keys (or (-> record
-                                                  (xt/x:get-key "ref_links")
-                                                  (xt/x:get-key ident))
-                                              {}))))))
+                     (xt/x:first (xt/x:obj-keys
+                                  (xt/x:get-path record ["ref_links" ident]))))))
   (return output))
 
 (defn.xt pull
@@ -265,7 +267,7 @@
   
   (when out
     (when order-by
-      (:= out (xt/x:sort-by out order-by)))
+      (:= out (xtsb/sort-by out order-by)))
     (when (== order-sort "desc")
       (:= out (xt/x:arr-reverse out)))
     (when (or order-by

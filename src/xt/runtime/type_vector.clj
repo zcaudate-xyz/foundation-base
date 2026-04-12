@@ -338,7 +338,7 @@
   {:added "4.0"}
   [...]
   (var input [...])
-  (cond (xt/x:is-empty? input)
+  (cond (xtd/is-empty? input)
         (return -/EMPTY_VECTOR)
 
         :else

@@ -91,7 +91,7 @@
   "encodes functions in data tree"
   {:added "4.0"}
   [arg]
-  (return (xt/x:walk arg
+  (return (xtd/tree-walk arg
                   (fn [x]
                     (if (xt/x:is-function? x)
                       (return ["fn" (xt/x:to-string x)])
@@ -102,7 +102,7 @@
   "decodes function in data tree"
   {:added "4.0"}
   [arg]
-  (return (xt/x:walk arg
+  (return (xtd/tree-walk arg
                   (fn [x]
                     (if (and (xt/x:is-array? x)
                              (== 2 (xt/x:len x))

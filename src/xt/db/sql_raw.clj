@@ -17,7 +17,7 @@
   (var out-arr    [(xt/x:cat "DELETE FROM " (table-fn table-name))])
   (when (< 0 (xt/x:len where-str))
     (xt/x:arr-push out-arr where-str))
-  (return (xt/x:cat (xt/x:join " " out-arr) ";")))
+  (return (xt/x:cat (xt/x:str-join " " out-arr) ";")))
 
 (defn.xt raw-insert-array
   "constructs an array for insert and upsert"
@@ -26,17 +26,17 @@
    (var table-fn   (xt/x:get-key opts "table_fn" (fn [x] (return x))))
    (var column-fn  (xt/x:get-key opts "column_fn" (fn [x] (return x))))
    (var out-arr    [(xt/x:cat "INSERT INTO " (table-fn table-name))
-                    (xt/x:cat " (" (xt/x:join ", " (xt/x:arr-map columns column-fn)) ")")])
+                    (xt/x:cat " (" (xt/x:str-join ", " (xt/x:arr-map columns column-fn)) ")")])
    (var val-fn
         (fn [data]
           (var s-arr (xt/x:arr-map
                       columns
                       (fn:> [k] (ut/encode-value (xt/x:get-key data k)))))
           (return
-           (xt/x:cat "(" (xt/x:join "," s-arr) ")"))))
+           (xt/x:cat "(" (xt/x:str-join "," s-arr) ")"))))
    (var val-arr    (xt/x:arr-map values val-fn))
    (var val-str    (xt/x:cat " VALUES\n "
-                          (xt/x:join ",\n " val-arr)))
+                          (xt/x:str-join ",\n " val-arr)))
    (xt/x:arr-push out-arr val-str)
    (return out-arr)))
 
@@ -45,7 +45,7 @@
   {:added "4.0"}
   [table-name columns values opts]
   (var out-arr (-/raw-insert-array table-name columns values opts))
-  (return (xt/x:cat (xt/x:join "\n" out-arr) ";")))
+  (return (xt/x:cat (xt/x:str-join "\n" out-arr) ";")))
 
 (defn.xt raw-upsert
   "encodes an upsert query"
@@ -65,10 +65,10 @@
                                                 ","
                                                 (column-fn col)
                                                 ")"))))))
-   (return (xt/x:cat (xt/x:join "\n" out-arr)
+   (return (xt/x:cat (xt/x:str-join "\n" out-arr)
                   "\n"
                   (xt/x:cat "ON CONFLICT (" (column-fn id-column) ") DO UPDATE SET\n")
-                  (xt/x:join ",\n" col-arr)
+                  (xt/x:str-join ",\n" col-arr)
                   (:? (xt/x:is-string? upsert-clause)
                       (xt/x:cat "\nWHERE " upsert-clause)
                       "")
@@ -89,7 +89,7 @@
    (var out-arr    [(xt/x:cat "UPDATE " (table-fn table-name))
                     set-str
                     where-str])
-   (return (xt/x:cat (xt/x:join "\n " out-arr) ";"))))
+   (return (xt/x:cat (xt/x:str-join "\n " out-arr) ";"))))
 
 (defn.xt raw-select
   "encodes an select query"
@@ -100,7 +100,7 @@
    
    (var return-str  (:? (xt/x:is-string? return-params)
                         return-params
-                        (xt/x:join ", " (xt/x:arr-map return-params column-fn))))
+                        (xt/x:str-join ", " (xt/x:arr-map return-params column-fn))))
    (var where-str  (:? (xt/x:nil? where-params) ""
                        :else (ut/encode-query-string where-params
                                                      "WHERE"
@@ -109,5 +109,5 @@
                     (xt/x:cat " FROM "(table-fn table-name))])
    (when (< 0 (xt/x:len where-str))
      (xt/x:arr-push out-arr where-str))
-   (return (xt/x:cat (xt/x:join "\n " out-arr) ";"))))
+   (return (xt/x:cat (xt/x:str-join "\n " out-arr) ";"))))
 

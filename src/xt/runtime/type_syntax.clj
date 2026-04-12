@@ -41,7 +41,7 @@
 (def.xt SYNTAX_PROTOTYPE
   (-> -/SYNTAX_SPEC
       (xt/x:proto-spec)
-      (xt/x:obj-map -/syntax-wrap)
+      (xtd/obj-map -/syntax-wrap)
       (xt/x:proto-create)))
 
 (defn.xt syntax-create

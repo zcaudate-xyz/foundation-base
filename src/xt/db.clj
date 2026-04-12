@@ -8,6 +8,7 @@
              [xt.db.impl-cache :as impl-cache]
              [xt.db.impl-sql :as impl-sql]
              [xt.lang.common-spec :as xt]
+             [xt.lang.common-data :as xtd]
              [xt.lang.util-throttle :as th]
              [xt.sys.conn-dbsql :as conn-dbsql]]})
 
@@ -98,11 +99,11 @@
                   (var #{events
                          triggers} db)
                   (xt/x:set-key db "events" [])
-                  (var tables (-> (xt/x:arr-mapcat
+                  (var tables (-> (xtd/arr-mapcat
                                    events
                                    (fn [e]
                                      (return (-/process-event db e schema lookup opts))))
-                                  (xt/x:arr-lookup)))
+                                  (xtd/arr-lookup)))
                   (return (-/process-triggers db triggers tables))))
   (var throttle (th/throttle-create handler nil))
   (var sync-handler (fn [e]
@@ -131,7 +132,7 @@
         (return output)
         
         :else
-        (do (var tables (xt/x:arr-lookup output))
+        (do (var tables (xtd/arr-lookup output))
             (return [(-/process-triggers db triggers tables)
                      tables]))))
 

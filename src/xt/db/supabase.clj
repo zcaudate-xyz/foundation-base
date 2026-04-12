@@ -21,7 +21,7 @@
   {:added "4.1.3"}
   [s]
   (cond (xt/x:is-string? s)
-        (return (xt/x:replace s "_" "-"))
+        (return (xt/x:str-replace s "_" "-"))
 
         :else
         (return s)))

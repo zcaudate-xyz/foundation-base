@@ -97,7 +97,7 @@
   (var sync-changes (:? (xt/x:not-nil? db-sync)
                         (-> (flatten/flatten-bulk (db-view/get-schema db)
                                                   db-sync)
-                            (xt/x:obj-map k/obj-keys))
+                            (xtd/obj-map k/obj-keys))
                         nil))
   (var body {"db/sync" sync-changes
              "db/remove" db-remove})

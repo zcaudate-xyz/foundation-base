@@ -116,7 +116,7 @@
   [prepared]
   (var hooks (binding-trigger/compile-view-hooks prepared))
   (var options
-       (xt/x:obj-assign-nested
+       (xtd/obj-assign-nested
         {"context" {"modelId" (xt/x:get-key prepared "model_id")
                      "viewId" (xt/x:get-key prepared "view_id")
                      "resolve" (xt/x:get-key prepared "resolve")

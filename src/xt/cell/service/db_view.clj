@@ -32,7 +32,7 @@
     :view {:table table
            :type "return"
            :query  (:? data-only
-                       (xt/x:arr-filter return-query k/is-string?)
+                       (xt/x:arr-filter return-query xt/x:is-string?)
                        return-query)
            :access {:roles {}}
            :guards []}}))
@@ -42,7 +42,7 @@
   {:added "4.0"}
   [table return-entry return-query data-only]
   (var query-mixin (:? data-only
-                       (xt/x:arr-filter return-query k/is-string?)
+                       (xt/x:arr-filter return-query xt/x:is-string?)
                        return-query))
   (var query (xtd/get-in return-entry ["view" "query"]))
   (xt/x:arr-append query query-mixin)
@@ -63,7 +63,7 @@
              return-query)
         (:= return-entry (-/view-query-return-combined
                           table
-                          (xt/x:clone-nested (xtd/get-in views [table "return" return-method]))
+                          (xtd/clone-nested (xtd/get-in views [table "return" return-method]))
                           return-query
                           data-only))
 

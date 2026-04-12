@@ -43,8 +43,8 @@
   {:added "4.0"}
   [spec args]
   (var #{schema id} spec)
-  (var dbname (xt/x:cat "\"" schema "\"." (xt/x:replace id "-" "_") ""))
-  (var dbargs (xt/x:join ", " (-/call-format-input spec args)))
+  (var dbname (xt/x:cat "\"" schema "\"." (xt/x:str-replace id "-" "_") ""))
+  (var dbargs (xt/x:str-join ", " (-/call-format-input spec args)))
   (return (xt/x:cat "SELECT " dbname "(" dbargs  ");")))
   
 (defn.xt call-raw

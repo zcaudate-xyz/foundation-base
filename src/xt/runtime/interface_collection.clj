@@ -75,7 +75,7 @@
     (:= s (xt/x:cat s
                  (interface-common/show e)
                  sep)))
-  (return (xt/x:cat (xt/x:substring s 0 (- (xt/x:len s)
+  (return (xt/x:cat (xt/x:str-substring s 0 (- (xt/x:len s)
                                      (xt/x:len sep)))
                  (-/end-string coll))))
 

@@ -3,6 +3,7 @@
 
 (l/script :xtalk
   {:require [[xt.lang.common-spec :as xt]
+             [xt.lang.common-data :as xtd]
              [xt.db.base-schema :as base-schema]]})
 
 (defn.xt table-create-column
@@ -49,7 +50,7 @@
    (return (xt/x:cat "CREATE TABLE IF NOT EXISTS "
                   (table-fn table-name)
                   " (\n  " 
-                  (xt/x:join ",\n  " (xt/x:arr-map columns
+                  (xt/x:str-join ",\n  " (xt/x:arr-map columns
                                              (fn [e]
                                                (return (-/table-create-column schema e opts)))))
                   "\n);"))))

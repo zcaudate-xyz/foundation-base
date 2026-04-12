@@ -22,7 +22,7 @@
         (var entries (xt/x:second item))
         (return (xt/x:cat rel
                        "("
-                       (xt/x:join ","
+                       (xt/x:str-join ","
                                (xt/x:arr-map entries -/compile-select-item))
                        ")")))))
 
@@ -30,7 +30,7 @@
   "compiles a return vector to Supabase select syntax"
   {:added "4.0"}
   [entries]
-  (return (xt/x:join ","
+  (return (xt/x:str-join ","
                   (xt/x:arr-map entries -/compile-select-item))))
 
 (defn.xt compile-filters-into
