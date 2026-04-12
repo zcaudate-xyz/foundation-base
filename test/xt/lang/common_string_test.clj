@@ -1,6 +1,15 @@
 (ns xt.lang.common-string-test
   (:use code.test)
-  (:require [xt.lang.common-string :refer :all]))
+  (:require [std.lang :as l]))
+
+(l/script- :lua
+ {:runtime :basic,
+  :require [[xt.lang.common-string :as xts]
+            [xt.lang.common-spec :as xt]]})
+
+(fact:global
+ {:setup [(l/rt:restart)]
+  :teardown [(l/rt:stop)]})
 
 ^{:refer xt.lang.common-string/get-char :added "4.1"}
 (fact "TODO")

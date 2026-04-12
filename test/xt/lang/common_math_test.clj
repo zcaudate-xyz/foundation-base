@@ -1,6 +1,15 @@
 (ns xt.lang.common-math-test
   (:use code.test)
-  (:require [xt.lang.common-math :refer :all]))
+  (:require [std.lang :as l]))
+
+(l/script- :lua
+ {:runtime :basic,
+  :require [[xt.lang.common-math :as xtm]
+            [xt.lang.common-spec :as xt]]})
+
+(fact:global
+ {:setup [(l/rt:restart)]
+  :teardown [(l/rt:stop)]})
 
 ^{:refer xt.lang.common-math/abs :added "4.1"}
 (fact "TODO")
