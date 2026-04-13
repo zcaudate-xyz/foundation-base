@@ -421,7 +421,7 @@
    :x-arr-pop-first   {:macro #'lua-tf-x-arr-pop-first  :emit :macro}
    :x-arr-insert      {:macro #'lua-tf-x-arr-insert     :emit :macro}
    :x-arr-sort        {:macro #'lua-tf-x-arr-sort       :emit :macro}
-   :x-arr-str-comp    {:emit :alias :raw '<}})
+   :x-str-comp        {:emit :alias :raw '<}})
 
 ;;
 ;; STRING

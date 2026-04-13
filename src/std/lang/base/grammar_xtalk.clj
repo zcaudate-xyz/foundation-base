@@ -930,7 +930,8 @@
               :arglists '([host port value id key connect-fn encode-fn])}}])
 
 (def +xt-notify-http+
-  [{:op :x-notify-http     :symbol #{'x:notify-http}     :emit :abstract
+  [{:op :x-notify-http     :symbol #{'x:notify-http}     :emit :hard-link
+    :raw 'xt.lang.common-repl/notify-socket-http
     :op-spec {:template-only true
               :type  [:fn [:xt/str :xt/num :xt/any :xt/str :xt/str :xt/fn] :xt/any]
               :arglists '([host port value id key encode-fn])}}])

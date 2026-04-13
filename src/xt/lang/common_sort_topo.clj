@@ -1,5 +1,6 @@
 (ns xt.lang.common-sort-topo
-  (:require [std.lang :as l :refer [defspec.xt]]))
+  (:require [std.lang :as l :refer [defspec.xt]]
+            [xt.lang.common-data :as common-data]))
 
 (l/script :xtalk
   {:require [[xt.lang.common-spec :as xt]]})

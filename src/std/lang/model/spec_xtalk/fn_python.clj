@@ -447,7 +447,7 @@
                                          (~key-fn b))
                                         -1 1))))))))
 
-(defn python-tf-x-arr-str-comp
+(defn python-tf-x-str-comp
   [[_ a b]]
   (list '< a b))
 
@@ -461,7 +461,7 @@
    :x-arr-pop-first   {:macro #'python-tf-x-arr-pop-first  :emit :macro}
    :x-arr-insert      {:macro #'python-tf-x-arr-insert     :emit :macro}
    :x-arr-sort        {:macro #'python-tf-x-arr-sort       :emit :macro}
-   :x-arr-str-comp    {:macro #'python-tf-x-arr-str-comp   :emit :macro}})
+   :x-str-comp        {:macro #'python-tf-x-str-comp       :emit :macro}})
 
 
 ;;

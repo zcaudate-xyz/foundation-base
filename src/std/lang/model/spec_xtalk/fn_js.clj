@@ -338,7 +338,7 @@
                                          (~key-fn b))
                                         -1 1)))))))
 
-(defn js-tf-x-arr-str-comp
+(defn js-tf-x-str-comp
   [[_ a b]]
   (list '> 0 (list '. a (list 'localeCompare b))))
 
@@ -353,7 +353,7 @@
    :x-arr-remove      {:macro #'js-tf-x-arr-remove     :emit :macro   :type :template}
    :x-arr-insert      {:macro #'js-tf-x-arr-insert     :emit :macro   :type :template}
    :x-arr-sort        {:macro #'js-tf-x-arr-sort       :emit :macro}
-   :x-arr-str-comp    {:macro #'js-tf-x-arr-str-comp   :emit :macro}})
+   :x-str-comp        {:macro #'js-tf-x-str-comp       :emit :macro}})
 
 ;;
 ;; STRING
