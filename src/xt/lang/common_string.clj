@@ -208,7 +208,7 @@
                 "o" "p" "q" "r" "s" "t" "u" "v" "w" "x" "y" "z"
                 "0" "1" "2" "3" "4" "5" "6" "7" "8"])
   (var out "")
-  (xt/for:index [i [0 (- n 1)]]
+  (xt/for:index [i [0 (xt/x:offset-rlen n)]]
     (var idx (xt/x:m-floor (* (xt/x:random) (xt/x:len choices))))
     (:= out (xt/x:cat out (xt/x:get-idx choices (xt/x:offset idx)))))
   (return out))
