@@ -24,8 +24,8 @@
   {:added "4.1"}
   ([x]
    (var ntype (xt/x:type-native x))
-   (if (== ntype "object")
-     (return (xt/x:get-key x "::" ntype))
+   (if (xt/x:is-object? x)
+     (return (xt/x:get-key x "::" "object"))
      (return ntype))))
 
 (defspec.xt to-string [:fn [:xt/num] :xt/str])
