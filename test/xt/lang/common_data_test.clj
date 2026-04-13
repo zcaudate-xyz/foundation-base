@@ -750,3 +750,7 @@
              (return (* x 10)))))
    [(f 2) (f 2) (f 3) n])
   => [20 20 30 2])
+
+
+^{:refer xt.lang.common-data/is-empty? :added "4.1"}
+(fact "TODO")

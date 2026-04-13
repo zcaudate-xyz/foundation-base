@@ -234,1148 +234,2132 @@
      (xt/x:nil? (xt/x:callback))])
    => [true false true])
 
-
-(defn expands-to-form? [form expected]
-  (let [expanded (macroexpand-1 form)]
-    (or (= expanded expected)
-        (= expanded form))))
-
 (^{:refer xt.lang.common-spec/for:iter :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/for:iter [e it] body)
-                     '(for:iter [e it] body))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/for:iter [e it] body)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/for:try :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/for:try [[ok err] statement] {:success success, :error error})
-                     '(for:try [[ok err] statement] {:success success, :error error}))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/for:try [[ok err] statement] {:success success, :error error})))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/for:async :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/for:async [[ok err] statement] {:success success, :error error, :finally finally})
-                     '(for:async [[ok err] statement] {:success success, :error error, :finally finally}))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/for:async [[ok err] statement] {:success success, :error error, :finally finally})))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:set-idx :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:set-idx arr idx value)
-                     '(x:set-idx arr idx value))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:set-idx arr idx value)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:first :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:first arr)
-                     '(x:first arr))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:first arr)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:second :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:second arr)
-                     '(x:second arr))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:second arr)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:last :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:last arr)
-                     '(x:last arr))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:last arr)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:second-last :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:second-last arr)
-                     '(x:second-last arr))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:second-last arr)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:arr-push :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:arr-push arr value)
-                     '(x:arr-push arr value))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:arr-push arr value)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:arr-pop :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:arr-pop arr)
-                     '(x:arr-pop arr))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:arr-pop arr)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:arr-push-first :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:arr-push-first arr value)
-                     '(x:arr-push-first arr value))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:arr-push-first arr value)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:arr-pop-first :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:arr-pop-first arr)
-                     '(x:arr-pop-first arr))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:arr-pop-first arr)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:arr-insert :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:arr-insert arr idx value)
-                     '(x:arr-insert arr idx value))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:arr-insert arr idx value)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:arr-slice :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:arr-slice arr start end)
-                     '(x:arr-slice arr start end))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:arr-slice arr start end)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:arr-reverse :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:arr-reverse arr)
-                     '(x:arr-reverse arr))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:arr-reverse arr)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:del :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:del var)
-                     '(x:del var))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:del var)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:len :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:len value)
-                     '(x:len value))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:len value)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:err :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:err message)
-                     '(x:err message))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:err message)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:type-native :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:type-native value)
-                     '(x:type-native value))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:type-native value)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:offset :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:offset n)
-                     '(x:offset n))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:offset n)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:offset-rev :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:offset-rev n)
-                     '(x:offset-rev n))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:offset-rev n)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:offset-len :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:offset-len n)
-                     '(x:offset-len n))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:offset-len n)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:offset-rlen :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:offset-rlen n)
-                     '(x:offset-rlen n))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:offset-rlen n)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:lu-create :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:lu-create)
-                     '(x:lu-create))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:lu-create)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:lu-eq :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:lu-eq x y)
-                     '(x:lu-eq x y))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:lu-eq x y)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:lu-get :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:lu-get lookup key)
-                     '(x:lu-get lookup key))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:lu-get lookup key)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:lu-set :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:lu-set lookup key value)
-                     '(x:lu-set lookup key value))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:lu-set lookup key value)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:lu-del :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:lu-del lookup key)
-                     '(x:lu-del lookup key))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:lu-del lookup key)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:m-abs :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:m-abs value)
-                     '(x:m-abs value))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:m-abs value)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:m-acos :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:m-acos value)
-                     '(x:m-acos value))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:m-acos value)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:m-asin :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:m-asin value)
-                     '(x:m-asin value))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:m-asin value)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:m-atan :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:m-atan value)
-                     '(x:m-atan value))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:m-atan value)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:m-ceil :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:m-ceil value)
-                     '(x:m-ceil value))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:m-ceil value)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:m-cos :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:m-cos value)
-                     '(x:m-cos value))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:m-cos value)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:m-cosh :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:m-cosh value)
-                     '(x:m-cosh value))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:m-cosh value)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:m-exp :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:m-exp value)
-                     '(x:m-exp value))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:m-exp value)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:m-floor :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:m-floor value)
-                     '(x:m-floor value))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:m-floor value)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:m-loge :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:m-loge value)
-                     '(x:m-loge value))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:m-loge value)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:m-log10 :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:m-log10 value)
-                     '(x:m-log10 value))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:m-log10 value)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:m-max :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:m-max x y)
-                     '(x:m-max x y))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:m-max x y)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:m-mod :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:m-mod x y)
-                     '(x:m-mod x y))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:m-mod x y)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:m-min :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:m-min x y)
-                     '(x:m-min x y))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:m-min x y)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:m-pow :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:m-pow x y)
-                     '(x:m-pow x y))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:m-pow x y)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:m-quot :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:m-quot x y)
-                     '(x:m-quot x y))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:m-quot x y)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:m-sin :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:m-sin value)
-                     '(x:m-sin value))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:m-sin value)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:m-sinh :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:m-sinh value)
-                     '(x:m-sinh value))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:m-sinh value)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:m-sqrt :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:m-sqrt value)
-                     '(x:m-sqrt value))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:m-sqrt value)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:m-tan :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:m-tan value)
-                     '(x:m-tan value))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:m-tan value)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:m-tanh :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:m-tanh value)
-                     '(x:m-tanh value))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:m-tanh value)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:not-nil? :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:not-nil? value)
-                     '(x:not-nil? value))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:not-nil? value)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:nil? :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:nil? value)
-                     '(x:nil? value))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:nil? value)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:sub :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:sub x y body)
-                     '(x:sub x y body))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:sub x y body)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:mul :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:mul x y body)
-                     '(x:mul x y body))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:mul x y body)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:div :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:div x y body)
-                     '(x:div x y body))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:div x y body)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:neg :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:neg x)
-                     '(x:neg x))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:neg x)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:inc :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:inc x)
-                     '(x:inc x))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:inc x)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:dec :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:dec x)
-                     '(x:dec x))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:dec x)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:zero? :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:zero? x)
-                     '(x:zero? x))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:zero? x)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:pos? :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:pos? x)
-                     '(x:pos? x))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:pos? x)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:neg? :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:neg? x)
-                     '(x:neg? x))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:neg? x)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:even? :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:even? x)
-                     '(x:even? x))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:even? x)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:odd? :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:odd? x)
-                     '(x:odd? x))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:odd? x)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:eq :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:eq x y)
-                     '(x:eq x y))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:eq x y)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:neq :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:neq x y)
-                     '(x:neq x y))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:neq x y)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:lt :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:lt x y)
-                     '(x:lt x y))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:lt x y)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:lte :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:lte x y)
-                     '(x:lte x y))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:lte x y)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:gt :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:gt x y)
-                     '(x:gt x y))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:gt x y)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:gte :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:gte x y)
-                     '(x:gte x y))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:gte x y)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:del-key :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:del-key obj key)
-                     '(x:del-key obj key))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:del-key obj key)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:get-key :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:get-key obj key default)
-                     '(x:get-key obj key default))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:get-key obj key default)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:get-path :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:get-path obj path default)
-                     '(x:get-path obj path default))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:get-path obj path default)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:set-key :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:set-key obj key value)
-                     '(x:set-key obj key value))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:set-key obj key value)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:copy-key :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:copy-key dst src key)
-                     '(x:copy-key dst src key))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:copy-key dst src key)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:obj-vals :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:obj-vals obj)
-                     '(x:obj-vals obj))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:obj-vals obj)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:obj-pairs :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:obj-pairs obj)
-                     '(x:obj-pairs obj))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:obj-pairs obj)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:obj-clone :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:obj-clone obj)
-                     '(x:obj-clone obj))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:obj-clone obj)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:obj-assign :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:obj-assign obj other)
-                     '(x:obj-assign obj other))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:obj-assign obj other)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:obj-from-pairs :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:obj-from-pairs pairs)
-                     '(x:obj-from-pairs pairs))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:obj-from-pairs pairs)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:to-string :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:to-string value)
-                     '(x:to-string value))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:to-string value)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:to-number :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:to-number value)
-                     '(x:to-number value))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:to-number value)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:is-string? :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:is-string? value)
-                     '(x:is-string? value))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:is-string? value)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:is-number? :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:is-number? value)
-                     '(x:is-number? value))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:is-number? value)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:is-integer? :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:is-integer? value)
-                     '(x:is-integer? value))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:is-integer? value)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:is-boolean? :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:is-boolean? value)
-                     '(x:is-boolean? value))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:is-boolean? value)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:is-object? :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:is-object? value)
-                     '(x:is-object? value))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:is-object? value)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:is-array? :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:is-array? value)
-                     '(x:is-array? value))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:is-array? value)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:print :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:print value)
-                     '(x:print value))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:print value)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:str-comp :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:str-comp x y)
-                     '(x:str-comp x y))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:str-comp x y)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:str-lt :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:str-lt x y)
-                     '(x:str-lt x y))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:str-lt x y)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:str-gt :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:str-gt x y)
-                     '(x:str-gt x y))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:str-gt x y)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:str-pad-left :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:str-pad-left value len pad)
-                     '(x:str-pad-left value len pad))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:str-pad-left value len pad)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:str-pad-right :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:str-pad-right value len pad)
-                     '(x:str-pad-right value len pad))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:str-pad-right value len pad)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:str-starts-with :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:str-starts-with value prefix)
-                     '(x:str-starts-with value prefix))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:str-starts-with value prefix)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:str-ends-with :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:str-ends-with value suffix)
-                     '(x:str-ends-with value suffix))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:str-ends-with value suffix)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:str-char :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:str-char value idx)
-                     '(x:str-char value idx))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:str-char value idx)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:str-format :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:str-format template values)
-                     '(x:str-format template values))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:str-format template values)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:str-split :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:str-split value separator)
-                     '(x:str-split value separator))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:str-split value separator)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:str-join :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:str-join separator coll)
-                     '(x:str-join separator coll))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:str-join separator coll)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:str-index-of :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:str-index-of value pattern from)
-                     '(x:str-index-of value pattern from))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:str-index-of value pattern from)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:str-substring :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:str-substring value start len)
-                     '(x:str-substring value start len))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:str-substring value start len)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:str-to-upper :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:str-to-upper value)
-                     '(x:str-to-upper value))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:str-to-upper value)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:str-to-lower :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:str-to-lower value)
-                     '(x:str-to-lower value))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:str-to-lower value)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:str-to-fixed :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:str-to-fixed value digits)
-                     '(x:str-to-fixed value digits))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:str-to-fixed value digits)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:str-replace :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:str-replace value match replacement)
-                     '(x:str-replace value match replacement))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:str-replace value match replacement)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:str-trim :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:str-trim value)
-                     '(x:str-trim value))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:str-trim value)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:str-trim-left :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:str-trim-left value)
-                     '(x:str-trim-left value))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:str-trim-left value)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:str-trim-right :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:str-trim-right value)
-                     '(x:str-trim-right value))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:str-trim-right value)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:arr-sort :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:arr-sort arr key-fn compare-fn)
-                     '(x:arr-sort arr key-fn compare-fn))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:arr-sort arr key-fn compare-fn)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:arr-each :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:arr-each arr f)
-                     '(x:arr-each arr f))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:arr-each arr f)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:arr-every :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:arr-every arr pred)
-                     '(x:arr-every arr pred))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:arr-every arr pred)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:arr-some :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:arr-some arr pred)
-                     '(x:arr-some arr pred))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:arr-some arr pred)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:arr-map :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:arr-map arr f)
-                     '(x:arr-map arr f))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:arr-map arr f)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:arr-append :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:arr-append arr value)
-                     '(x:arr-append arr value))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:arr-append arr value)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:arr-filter :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:arr-filter arr pred)
-                     '(x:arr-filter arr pred))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:arr-filter arr pred)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:arr-keep :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:arr-keep arr f)
-                     '(x:arr-keep arr f))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:arr-keep arr f)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:arr-foldl :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:arr-foldl arr init f)
-                     '(x:arr-foldl arr init f))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:arr-foldl arr init f)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:arr-foldr :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:arr-foldr arr init f)
-                     '(x:arr-foldr arr init f))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:arr-foldr arr init f)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:arr-find :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:arr-find arr pred)
-                     '(x:arr-find arr pred))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:arr-find arr pred)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:callback :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:callback)
-                     '(x:callback))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:callback)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:future-run :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:future-run thunk)
-                     '(x:future-run thunk))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:future-run thunk)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:future-then :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:future-then task on-ok)
-                     '(x:future-then task on-ok))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:future-then task on-ok)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:future-catch :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:future-catch task on-err)
-                     '(x:future-catch task on-err))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:future-catch task on-err)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:future-finally :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:future-finally task on-done)
-                     '(x:future-finally task on-done))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:future-finally task on-done)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:future-cancel :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:future-cancel task)
-                     '(x:future-cancel task))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:future-cancel task)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:future-status :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:future-status task)
-                     '(x:future-status task))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:future-status task)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:future-await :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:future-await task timeout-ms default)
-                     '(x:future-await task timeout-ms default))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:future-await task timeout-ms default)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:future-from-async :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:future-from-async executor)
-                     '(x:future-from-async executor))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:future-from-async executor)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:eval :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:eval value)
-                     '(x:eval value))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:eval value)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:apply :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:apply f args)
-                     '(x:apply f args))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:apply f args)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:iter-from-obj :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:iter-from-obj obj)
-                     '(x:iter-from-obj obj))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:iter-from-obj obj)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:iter-from-arr :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:iter-from-arr arr)
-                     '(x:iter-from-arr arr))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:iter-from-arr arr)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:iter-from :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:iter-from value)
-                     '(x:iter-from value))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:iter-from value)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:iter-eq :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:iter-eq iter0 iter1 eq-fn)
-                     '(x:iter-eq iter0 iter1 eq-fn))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:iter-eq iter0 iter1 eq-fn)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:iter-null :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:iter-null)
-                     '(x:iter-null))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:iter-null)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:iter-next :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:iter-next iter)
-                     '(x:iter-next iter))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:iter-next iter)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:iter-has? :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:iter-has? iter)
-                     '(x:iter-has? iter))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:iter-has? iter)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:iter-native? :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:iter-native? iter)
-                     '(x:iter-native? iter))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:iter-native? iter)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:return-encode :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:return-encode out id key)
-                     '(x:return-encode out id key))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:return-encode out id key)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:return-wrap :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:return-wrap callbock encode-fn)
-                     '(x:return-wrap callbock encode-fn))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:return-wrap callbock encode-fn)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:return-eval :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:return-eval expr wrap-fn)
-                     '(x:return-eval expr wrap-fn))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:return-eval expr wrap-fn)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:bit-and :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:bit-and x y)
-                     '(x:bit-and x y))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:bit-and x y)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:bit-or :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:bit-or x y)
-                     '(x:bit-or x y))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:bit-or x y)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:bit-lshift :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:bit-lshift x y)
-                     '(x:bit-lshift x y))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:bit-lshift x y)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:bit-rshift :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:bit-rshift x y)
-                     '(x:bit-rshift x y))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:bit-rshift x y)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:bit-xor :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:bit-xor x y)
-                     '(x:bit-xor x y))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:bit-xor x y)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:global-set :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:global-set sym value)
-                     '(x:global-set sym value))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:global-set sym value)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:global-del :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:global-del sym)
-                     '(x:global-del sym))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:global-del sym)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:global-has? :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:global-has? sym)
-                     '(x:global-has? sym))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:global-has? sym)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:this :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:this)
-                     '(x:this))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:this)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:proto-get :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:proto-get obj key)
-                     '(x:proto-get obj key))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:proto-get obj key)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:proto-set :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:proto-set obj key value)
-                     '(x:proto-set obj key value))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:proto-set obj key value)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:proto-create :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:proto-create value)
-                     '(x:proto-create value))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:proto-create value)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:proto-tostring :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:proto-tostring value)
-                     '(x:proto-tostring value))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:proto-tostring value)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:random :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:random)
-                     '(x:random))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:random)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:throw :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:throw value)
-                     '(x:throw value))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:throw value)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:now-ms :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:now-ms)
-                     '(x:now-ms))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:now-ms)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:unpack :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:unpack value)
-                     '(x:unpack value))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:unpack value)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:client-basic :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:client-basic host port connect-fn eval-fn)
-                     '(x:client-basic host port connect-fn eval-fn))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:client-basic host port connect-fn eval-fn)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:client-ws :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:client-ws host port opts connect-fn eval-fn)
-                     '(x:client-ws host port opts connect-fn eval-fn))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:client-ws host port opts connect-fn eval-fn)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:server-basic :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:server-basic config)
-                     '(x:server-basic config))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:server-basic config)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:server-ws :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:server-ws config)
-                     '(x:server-ws config))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:server-ws config)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:socket-connect :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:socket-connect host port opts cb)
-                     '(x:socket-connect host port opts cb))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:socket-connect host port opts cb)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:socket-send :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:socket-send conn message)
-                     '(x:socket-send conn message))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:socket-send conn message)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:socket-close :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:socket-close conn)
-                     '(x:socket-close conn))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:socket-close conn)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:ws-connect :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:ws-connect host port opts)
-                     '(x:ws-connect host port opts))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:ws-connect host port opts)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:ws-send :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:ws-send conn value)
-                     '(x:ws-send conn value))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:ws-send conn value)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:ws-close :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:ws-close conn)
-                     '(x:ws-close conn))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:ws-close conn)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:notify-http :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:notify-http host port value id key encode-fn)
-                     '(x:notify-http host port value id key encode-fn))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:notify-http host port value id key encode-fn)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:notify-socket :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:notify-socket host port value id key connect-fn encode-fn)
-                     '(x:notify-socket host port value id key connect-fn encode-fn))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:notify-socket host port value id key connect-fn encode-fn)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:b64-encode :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:b64-encode value)
-                     '(x:b64-encode value))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:b64-encode value)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:b64-decode :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:b64-decode value)
-                     '(x:b64-decode value))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:b64-decode value)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:cache :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:cache name)
-                     '(x:cache name))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:cache name)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:cache-list :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:cache-list)
-                     '(x:cache-list))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:cache-list)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:cache-flush :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:cache-flush cache)
-                     '(x:cache-flush cache))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:cache-flush cache)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:cache-get :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:cache-get cache key)
-                     '(x:cache-get cache key))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:cache-get cache key)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:cache-set :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:cache-set cache key value)
-                     '(x:cache-set cache key value))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:cache-set cache key value)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:cache-del :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:cache-del cache key)
-                     '(x:cache-del cache key))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:cache-del cache key)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:cache-incr :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:cache-incr cache key val)
-                     '(x:cache-incr cache key val))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:cache-incr cache key val)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:slurp :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:slurp path)
-                     '(x:slurp path))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:slurp path)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:spit :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:spit path value)
-                     '(x:spit path value))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:spit path value)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:json-encode :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:json-encode value)
-                     '(x:json-encode value))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:json-encode value)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:json-decode :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:json-decode expr)
-                     '(x:json-decode expr))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:json-decode expr)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:shell :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:shell command opts)
-                     '(x:shell command opts))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:shell command opts)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:thread-spawn :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:thread-spawn f)
-                     '(x:thread-spawn f))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:thread-spawn f)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:thread-join :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:thread-join thread)
-                     '(x:thread-join thread))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:thread-join thread)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:with-delay :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:with-delay ms value)
-                     '(x:with-delay ms value))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:with-delay ms value)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:start-interval :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:start-interval ms f)
-                     '(x:start-interval ms f))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:start-interval ms f)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:stop-interval :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:stop-interval id)
-                     '(x:stop-interval id))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:stop-interval id)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:uri-encode :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:uri-encode value)
-                     '(x:uri-encode value))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:uri-encode value)))
+    true)
    => true)
 
 (^{:refer xt.lang.common-spec/x:uri-decode :added "4.1"}
- fact "expands to xtalk form"
-   (expands-to-form? '(xt/x:uri-decode value)
-                     '(x:uri-decode value))
+ fact "compiles in lua runtime"
+   ^{:hidden true}
+   (!.lua
+    (var _ (fn [] (xt/x:uri-decode value)))
+    true)
    => true)
+
+
+^{:refer xt.lang.common-spec/for:array :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/for:object :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/for:index :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/for:iter :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/for:return :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/for:try :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/for:async :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:get-idx :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:set-idx :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:first :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:second :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:last :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:second-last :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:arr-remove :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:arr-push :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:arr-pop :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:arr-push-first :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:arr-pop-first :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:arr-insert :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:arr-slice :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:arr-reverse :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:del :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:cat :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:len :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:err :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:type-native :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:offset :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:offset-rev :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:offset-len :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:offset-rlen :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:lu-create :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:lu-eq :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:lu-get :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:lu-set :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:lu-del :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:m-abs :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:m-acos :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:m-asin :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:m-atan :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:m-ceil :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:m-cos :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:m-cosh :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:m-exp :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:m-floor :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:m-loge :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:m-log10 :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:m-max :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:m-mod :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:m-min :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:m-pow :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:m-quot :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:m-sin :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:m-sinh :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:m-sqrt :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:m-tan :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:m-tanh :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:not-nil? :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:nil? :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:add :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:sub :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:mul :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:div :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:neg :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:inc :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:dec :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:zero? :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:pos? :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:neg? :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:even? :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:odd? :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:eq :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:neq :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:lt :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:lte :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:gt :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:gte :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:has-key? :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:del-key :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:get-key :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:get-path :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:set-key :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:copy-key :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:obj-keys :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:obj-vals :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:obj-pairs :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:obj-clone :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:obj-assign :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:obj-from-pairs :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:to-string :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:to-number :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:is-string? :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:is-number? :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:is-integer? :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:is-boolean? :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:is-object? :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:is-array? :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:print :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:str-len :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:str-comp :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:str-lt :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:str-gt :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:str-pad-left :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:str-pad-right :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:str-starts-with :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:str-ends-with :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:str-char :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:str-format :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:str-split :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:str-join :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:str-index-of :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:str-substring :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:str-to-upper :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:str-to-lower :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:str-to-fixed :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:str-replace :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:str-trim :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:str-trim-left :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:str-trim-right :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:arr-sort :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:arr-clone :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:arr-each :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:arr-every :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:arr-some :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:arr-map :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:arr-append :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:arr-filter :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:arr-keep :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:arr-foldl :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:arr-foldr :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:arr-find :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:is-function? :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:callback :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:future-run :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:future-then :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:future-catch :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:future-finally :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:future-cancel :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:future-status :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:future-await :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:future-from-async :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:eval :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:apply :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:iter-from-obj :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:iter-from-arr :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:iter-from :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:iter-eq :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:iter-null :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:iter-next :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:iter-has? :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:iter-native? :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:return-encode :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:return-wrap :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:return-eval :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:bit-and :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:bit-or :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:bit-lshift :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:bit-rshift :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:bit-xor :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:global-set :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:global-del :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:global-has? :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:this :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:proto-get :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:proto-set :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:proto-create :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:proto-tostring :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:random :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:throw :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:now-ms :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:unpack :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:client-basic :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:client-ws :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:server-basic :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:server-ws :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:socket-connect :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:socket-send :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:socket-close :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:ws-connect :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:ws-send :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:ws-close :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:notify-http :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:notify-socket :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:b64-encode :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:b64-decode :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:cache :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:cache-list :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:cache-flush :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:cache-get :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:cache-set :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:cache-del :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:cache-incr :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:slurp :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:spit :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:json-encode :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:json-decode :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:shell :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:thread-spawn :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:thread-join :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:with-delay :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:start-interval :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:stop-interval :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:uri-encode :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.lang.common-spec/x:uri-decode :added "4.1"}
+(fact "TODO")
