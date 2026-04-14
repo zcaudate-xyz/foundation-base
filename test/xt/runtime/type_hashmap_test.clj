@@ -42,7 +42,7 @@
   ^:hidden
 
   (!.js
-   (var out (hm/hashmap "a" nil))
+   (var out (hm/hashmap-assoc hm/EMPTY_HASHMAP "a" nil))
    (var entry (hm/hashmap-find-key out "a"))
    [(. entry _key)
     (. entry _val)
@@ -50,7 +50,7 @@
   => ["a" nil "fallback"]
 
   (!.lua
-   (var out (hm/hashmap "a" nil))
+   (var out (hm/hashmap-assoc hm/EMPTY_HASHMAP "a" nil))
    (var entry (hm/hashmap-find-key out "a"))
    [(. entry _key)
     (. entry _val)

@@ -20,14 +20,14 @@
     (var tag (xt/x:get-key child "::"))
     (cond (== tag "hashmap.leaf")
           (xt/x:arr-push out
-                         (type-pair/pair-new (. child _key)
-                                             (interface-common/impl-denormalise (. child _val))))
+                         (type-pair/pair (. child _key)
+                                         (interface-common/impl-denormalise (. child _val))))
 
           (== tag "hashmap.collision")
           (xt/for:array [leaf (. child children)]
             (xt/x:arr-push out
-                           (type-pair/pair-new (. leaf _key)
-                                               (interface-common/impl-denormalise (. leaf _val)))))
+                           (type-pair/pair (. leaf _key)
+                                           (interface-common/impl-denormalise (. leaf _val)))))
 
           :else
           (-/hashmap-collect-pairs child out)))
@@ -60,12 +60,6 @@
   (xt/x:proto-set hashmap protocol nil)
   (return hashmap))
 
-(defn.xt hashmap-create
-  "creates a hashmap with the default prototype"
-  {:added "4.1"}
-  [root size]
-  (return (-/hashmap-new root size -/HASHMAP_PROTOTYPE)))
-
 (defn.xt hashmap-empty
   "creates an empty hashmap from the current hashmap"
   {:added "4.1"}
@@ -79,13 +73,6 @@
   {:added "4.1"}
   [hashmap]
   (return (xt/x:not-nil? (xt/x:get-key (. hashmap _root) "edit_id"))))
-
-(defn.xt hashmap-empty-mutable
-  "creates an empty mutable hashmap"
-  {:added "4.1"}
-  []
-  (return (-/hashmap-create (node/node-create (xt/x:random) 0 [])
-                            0)))
 
 (defn.xt hashmap-to-mutable!
   "creates a mutable hashmap"
@@ -116,8 +103,8 @@
                                  (interface-common/hash key)
                                  key))
   (when leaf
-    (return (type-pair/pair-new (. leaf _key)
-                                (interface-common/impl-denormalise (. leaf _val))))))
+    (return (type-pair/pair (. leaf _key)
+                            (interface-common/impl-denormalise (. leaf _val))))))
 
 (defn.xt hashmap-lookup-key
   "looks up a key in the hashmap"
@@ -285,6 +272,19 @@
   (-> -/HASHMAP_SPEC
       (spec/proto-spec)
       (spec/proto-create)))
+
+(defn.xt hashmap-create
+  "creates a hashmap with the default prototype"
+  {:added "4.1"}
+  [root size]
+  (return (-/hashmap-new root size -/HASHMAP_PROTOTYPE)))
+
+(defn.xt hashmap-empty-mutable
+  "creates an empty mutable hashmap"
+  {:added "4.1"}
+  []
+  (return (-/hashmap-create (node/node-create (xt/x:random) 0 [])
+                            0)))
 
 (def.xt EMPTY_HASHMAP
   (-/hashmap-create node/EMPTY_HASHMAP_NODE 0))
