@@ -93,7 +93,7 @@
                          ~success*)
                        (catch ~err ~error*)))))
               (let [cb (list 'fn [err res]
-                             (list 'if err
+                             (list 'if (list 'not= err nil)
                                    error
                                    success))]
                 (walk/prewalk (fn [x]
@@ -197,8 +197,12 @@
 (def +meta+
   (book/book-meta
    {:module-current   (fn [])
-    :module-import    (fn [name _ _]
-                        (list :- "import" (str "'" name "';")))}))
+    :module-import    (fn [name {:keys [as]} _]
+                        (list :-
+                              (str "import '" name "'"
+                                   (when as
+                                     (str " as " as))
+                                   ";")))}))
 
 (def +book+
   (book/book {:lang :dart

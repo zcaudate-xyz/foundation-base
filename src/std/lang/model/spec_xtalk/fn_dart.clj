@@ -208,14 +208,14 @@
 (defn dart-tf-x-lu-del [[_ lu obj]] (list '. lu (list 'remove obj)))
 
 (def +dart-lu+
-   {:x-lu-create      {:default '(new Map)}
+   {:x-lu-create      {:emit :unit :default '(new Map)}
     :x-lu-get         {:macro #'dart-tf-x-lu-get :emit :macro}
     :x-lu-set         {:macro #'dart-tf-x-lu-set :emit :macro}
     :x-lu-del         {:macro #'dart-tf-x-lu-del :emit :macro}})
 
 (def +dart-json+
-   {:x-json-encode {:emit :alias :raw 'json.encode}
-    :x-json-decode {:emit :alias :raw 'json.decode}})
+   {:x-json-encode {:emit :alias :raw 'jsonEncode}
+    :x-json-decode {:emit :alias :raw 'jsonDecode}})
 
 (def +dart-math+
    {:x-m-abs    {:macro #'dart-tf-x-m-abs    :emit :macro}

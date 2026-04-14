@@ -50,10 +50,13 @@
 
 (def +wrapper-targets+
   {'xt.lang.common-lib/nil? 'x:nil?
-   'xt.lang.common-lib/cat 'x:cat
-   'xt.lang.common-lib/json-encode 'x:json-encode
-   'xt.lang.common-lib/split 'x:str-split
-   'xt.lang.common-lib/fn? 'x:is-function?})
+    'xt.lang.common-lib/cat 'x:cat
+    'xt.lang.common-lib/json-decode 'x:json-decode
+    'xt.lang.common-lib/json-encode 'x:json-encode
+    'xt.lang.common-lib/split 'x:str-split
+    'xt.lang.common-lib/fn? 'x:is-function?
+    'xt.lang.common-lib/arr? 'x:is-array?
+    'xt.lang.common-lib/obj? 'x:is-object?})
 
 (def +intrinsic-targets+
   {'xt.lang.common-lib/arrayify "arrayify"

@@ -1,7 +1,6 @@
 (ns js.cell.kernel-test
   (:use code.test)
-  (:require [js.core :refer [<!]]
-            [js.cell.playground :as playground]
+  (:require [js.cell.playground :as playground]
             [js.cell.runtime.link :as runtime-link]
             [std.lang :as l]
             [xt.lang.common-notify :as notify]))
@@ -133,13 +132,13 @@
 ^{:refer js.cell.kernel/fn-access-cell :added "4.0" :unchecked true
   :setup [(!.js
             (cl/GD-reset (-/make-playground-cell)))
-          (!.js
-            (<!
-             (. (cl/add-model "hello"
-                              {:echo  {:handler link-fn/echo
-                                       :trigger {"@worker/::INIT" false}
-                                       :defaultArgs ["HELLO"]}})
-                ["init"])))]}
+          (notify/wait-on :js
+            (. (cl/add-model "hello"
+                             {:echo  {:handler link-fn/echo
+                                      :trigger {"@worker/::INIT" false}
+                                      :defaultArgs ["HELLO"]}})
+               ["init"]
+               (then (repl/>notify))))]}
 (fact "calls access function on the current cell"
   ^:hidden
   
@@ -158,13 +157,13 @@
 ^{:refer js.cell.kernel/fn-access-view :added "4.0" :unchecked true
   :setup [(!.js
             (cl/GD-reset (-/make-playground-cell)))
-          (!.js
-            (<!
-             (. (cl/add-model "hello"
-                              {:echo  {:handler link-fn/echo
-                                       :trigger {"@worker/::INIT" false}
-                                       :defaultArgs ["HELLO"]}})
-                ["init"])))]}
+          (notify/wait-on :js
+            (. (cl/add-model "hello"
+                             {:echo  {:handler link-fn/echo
+                                      :trigger {"@worker/::INIT" false}
+                                      :defaultArgs ["HELLO"]}})
+               ["init"]
+               (then (repl/>notify))))]}
 (fact "calls access function on the current view"
   ^:hidden
   
@@ -238,26 +237,27 @@
 ^{:refer js.cell.kernel/cell-trigger :added "4.0" :unchecked true
   :setup [(!.js
              (cl/GD-reset (-/make-playground-cell)))
-          (!.js
-           (<!
+          (notify/wait-on :js
             (. (cl/GD)
                ["init"]
                (then (fn []
                        (cl/add-model-attach
                         "hello"
                         {:echo  {:handler link-fn/echo
-                                 :defaultArgs ["HELLO"]}}))))))]}
+                                 :defaultArgs ["HELLO"]}})
+                       (repl/notify true)))))]}
 (fact "triggers a view given event"
   ^:hidden
   
   (cl/view-val ["hello" "echo"])
   => nil
 
-  (!.js
-   (do (<! (xt/x:first (cl/view-trigger ["hello" "echo"]
-                                        "@/::EVENT"
-                                        {})))
-       (cl/view-val ["hello" "echo"])))
+  (notify/wait-on :js
+    (. (xt/x:first (cl/view-trigger ["hello" "echo"]
+                                    "@/::EVENT"
+                                    {}))
+       (then (fn [_]
+               (repl/notify (cl/view-val ["hello" "echo"])))))) 
   => (contains-in ["HELLO" integer?]))
 
 ^{:refer js.cell.kernel/model-outputs :added "4.0" :unchecked true}
@@ -312,12 +312,12 @@
 (fact "attaches a model"
   ^:hidden
   
-  (!.js
-   (<!
+  (notify/wait-on :js
     (. (cl/add-model "hello"
                      {:echo  {:handler link-fn/echo
                               :defaultArgs ["HELLO"]}})
-       ["init"])))
+       ["init"]
+       (then (repl/>notify))))
   => (contains-in
       [{"path" ["hello" "echo"],
         "post" [false],
@@ -331,8 +331,7 @@
 ^{:refer js.cell.kernel/model-update :added "4.0" :unchecked true
   :setup [(!.js
              (cl/GD-reset (-/make-playground-cell)))
-          (!.js
-           (<!
+          (notify/wait-on :js
             (. (cl/GD)
                ["init"]
                (then (fn []
@@ -340,15 +339,17 @@
                                             {:echo   {:handler link-fn/echo
                                                       :defaultArgs ["HELLO"]}
                                              :echo1  {:handler link-fn/echo
-                                                      :defaultArgs ["HELLO1"]}}))))))]}
+                                                      :defaultArgs ["HELLO1"]}})
+                       (repl/notify true)))))]}
 (fact "calls update on a model"
   ^:hidden
   
   (cl/model-vals "hello")
   => {"echo1" nil, "echo" nil}
 
-  (!.js
-   (<! (cl/model-update "hello")))
+  (notify/wait-on :js
+    (. (cl/model-update "hello")
+       (then (repl/>notify))))
   => (contains-in
       {"echo1"
        {"path" ["hello" "echo1"],
@@ -458,8 +459,9 @@
   => false)
 
 ^{:refer js.cell.kernel/view-get-time-elapsed :added "4.0" :unchecked true
-  :setup [(!.js
-           (<! (cl/view-refresh ["hello" "echo"])))]}
+  :setup [(notify/wait-on :js
+            (. (cl/view-refresh ["hello" "echo"])
+               (then (repl/>notify))))]}
 (fact "gets the elapsed time"
   ^:hidden
 
@@ -471,9 +473,10 @@
 (fact "sets the view input"
   ^:hidden
   
-  (!.js
-   (<! (xt/x:first (cl/view-set-input ["hello" "echo"]
-                                      {:data ["WORLD"]}))))
+  (notify/wait-on :js
+    (. (xt/x:first (cl/view-set-input ["hello" "echo"]
+                                      {:data ["WORLD"]}))
+       (then (repl/>notify))))
   => (contains-in
       {"::" "view.run"
        "path" ["hello" "echo"],
@@ -494,8 +497,9 @@
 (fact "refreshes the view"
   ^:hidden
   
-  (!.js
-   (<! (cl/view-refresh ["hello" "echo"])))
+  (notify/wait-on :js
+    (. (cl/view-refresh ["hello" "echo"])
+       (then (repl/>notify))))
   => (contains-in
       {"::" "view.run"
        "path" ["hello" "echo"],
@@ -508,8 +512,9 @@
 (fact "updates the view"
   ^:hidden
   
-  (!.js
-   (<! (xt/x:first (cl/view-update ["hello" "echo"]))))
+  (notify/wait-on :js
+    (. (xt/x:first (cl/view-update ["hello" "echo"]))
+       (then (repl/>notify))))
   => (contains-in
       {"::" "view.run"
        "path" ["hello" "echo"],
@@ -528,10 +533,11 @@
 (fact "calls the remote function"
   ^:hidden
   
-  (!.js
-   (<! (cl/view-call-remote ["hello" "echo"]
+  (notify/wait-on :js
+    (. (cl/view-call-remote ["hello" "echo"]
                             1
-                            false)))
+                            false)
+       (then (repl/>notify))))
   =>  {"::" "view.run",
         "path" ["hello" "echo"],
         "post" [false],
@@ -542,8 +548,9 @@
 (fact "refreshes the remote function"
   ^:hidden
   
-  (!.js
-   (<! (cl/view-refresh-remote ["hello" "echo"])))
+  (notify/wait-on :js
+    (. (cl/view-refresh-remote ["hello" "echo"])
+       (then (repl/>notify))))
   => {"::" "view.run",
       "path" ["hello" "echo"],
       "post" [false],
@@ -554,11 +561,11 @@
 (fact "triggers the view with an event"
   ^:hidden
   
-  (!.js
-   (<!
-    (xt/x:first (cl/view-trigger ["hello" "echo"]
-                                 "@/::HELLO"
-                                 {}))))
+  (notify/wait-on :js
+    (. (xt/x:first (cl/view-trigger ["hello" "echo"]
+                                    "@/::HELLO"
+                                    {}))
+       (then (repl/>notify))))
   => (contains-in
       {"path" ["hello" "echo"],
        "post" [false],
@@ -570,16 +577,18 @@
 (fact "gets the view after update"
   ^:hidden
   
-  (!.js
-   (<! (cl/view-for ["hello" "echo"])))
+  (notify/wait-on :js
+    (. (cl/view-for ["hello" "echo"])
+       (then (repl/>notify))))
   => (contains-in ["HELLO" integer?]))
 
 ^{:refer js.cell.kernel/view-for-input :added "4.0" :unchecked true}
 (fact "gets the view after setting input"
   ^:hidden
   
-  (!.js
-   (<! (cl/view-for-input ["hello" "echo"] {})))
+  (notify/wait-on :js
+    (. (cl/view-for-input ["hello" "echo"] {})
+       (then (repl/>notify))))
   => (contains-in ["HELLO" integer?]))
 
 ^{:refer js.cell.kernel/get-val :added "4.0" :unchecked true}
@@ -593,9 +602,10 @@
 (fact "gets the subview after update"
   ^:hidden
   
-  (!.js
-   (<! (cl/get-for ["hello" "echo"]
-                   [0])))
+  (notify/wait-on :js
+    (. (cl/get-for ["hello" "echo"]
+                   [0])
+       (then (repl/>notify))))
   => "HELLO")
 
 ^{:refer js.cell.kernel/nil-view :added "4.0" :unchecked true}
@@ -611,13 +621,13 @@
   :setup [(fact:global :setup)
           (!.js
            (cl/GD-reset (-/make-playground-cell)))
-          (!.js
-           (<!
+          (notify/wait-on :js
             (. (cl/add-model "hello"
                              {:echo  {:handler link-fn/echo
                                       :trigger {"@/::HELLO" true}
                                       :defaultArgs ["HELLO"]}})
-               ["init"])))]}
+               ["init"]
+               (then (repl/>notify))))]}
 (fact "adds a cell listener"
   ^:hidden
   
@@ -665,10 +675,12 @@
   :setup [(fact:global :setup)
           (!.js
            (cl/GD-reset (-/make-playground-cell)))
-          (Thread/sleep 100)]}
+          (notify/wait-on :js
+            (. (cl/GD) ["init"]
+               (then (repl/>notify))))]}
 (fact "adds a raw callback (for all events)"
   ^:hidden
-  
+   
   (notify/wait-on :js
     (cl/add-raw-callback "@/TEST"
                          true
