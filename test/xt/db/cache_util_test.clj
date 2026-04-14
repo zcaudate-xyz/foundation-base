@@ -40,6 +40,12 @@
                 (f/flatten sample/Schema
                            "UserAccount"
                            sample/RootUser
+                           {})))
+             (def +flattened-full+
+               (!.js
+                (f/flatten sample/Schema
+                           "UserAccount"
+                           sample/RootUserFull
                            {})))]
   :teardown [(l/rt:stop)]})
 
@@ -194,9 +200,141 @@
                                      sample/RootUser
                                      {})
                      nil)
-    (data/get-ids rows "UserAccount")])
+   (data/get-ids rows "UserAccount")])
   => (contains-in
       [map? ["00000000-0000-0000-0000-000000000000"]]))
+
+^{:refer xt.db.cache-util/merge-bulk :added "4.0"
+  :setup [(def +full-core+
+            (!.js
+             (f/flatten sample/Schema
+                        "UserAccount"
+                        (xtd/obj-omit sample/RootUserFull
+                                      ["notification" "organisations" "wallets"
+                                       "emails" "portfolios" "identities" "profile"])
+                        {})))
+          (def +full-contact+
+            (!.js
+             (f/flatten sample/Schema
+                        "UserAccount"
+                        (xtd/obj-omit sample/RootUserFull
+                                      ["notification" "organisations" "wallets"
+                                       "portfolios" "identities"])
+                        {})))
+          (def +full-org-notify+
+            (!.js
+             (f/flatten sample/Schema
+                        "UserAccount"
+                        (xtd/obj-omit sample/RootUserFull
+                                      ["wallets" "portfolios" "identities"])
+                        {})))
+          (def +full-wallets+
+            (!.js
+             (f/flatten sample/Schema
+                        "UserAccount"
+                        (xtd/obj-omit sample/RootUserFull
+                                      ["notification" "organisations" "emails"
+                                       "portfolios" "identities" "profile"])
+                        {})))
+          (def +full-no-wallets+
+            (!.js
+             (f/flatten sample/Schema
+                        "UserAccount"
+                        (xtd/obj-omit sample/RootUserFull
+                                      ["wallets"])
+                        {})))]}
+(fact "merges the full cache fixture step by step in python"
+  ^:hidden
+
+  (!.py
+   (var rows {})
+   (data/merge-bulk rows (@! +full-core+) nil))
+  => map?
+
+  (!.py
+   (var rows {})
+   (data/merge-bulk rows (@! +full-contact+) nil))
+  => map?
+
+  (!.py
+   (var rows {})
+   (data/merge-bulk rows (@! +full-org-notify+) nil))
+  => map?
+
+  (!.py
+   (var rows {})
+   (data/merge-bulk rows (@! +full-wallets+) nil))
+  => map?
+
+  (!.py
+   (var rows {})
+   (data/merge-bulk rows (@! +full-no-wallets+) nil))
+  => map?)
+
+^{:refer xt.db.cache-util/merge-bulk :added "4.0"
+  :setup [(def +full-core+
+            (!.js
+             (f/flatten sample/Schema
+                        "UserAccount"
+                        (xtd/obj-omit sample/RootUserFull
+                                      ["notification" "organisations" "wallets"
+                                       "emails" "portfolios" "identities" "profile"])
+                        {})))
+          (def +full-contact+
+            (!.js
+             (f/flatten sample/Schema
+                        "UserAccount"
+                        (xtd/obj-omit sample/RootUserFull
+                                      ["notification" "organisations" "wallets"
+                                       "portfolios" "identities"])
+                        {})))
+          (def +full-org-notify+
+            (!.js
+             (f/flatten sample/Schema
+                        "UserAccount"
+                        (xtd/obj-omit sample/RootUserFull
+                                      ["wallets" "portfolios" "identities"])
+                        {})))
+          (def +full-wallets+
+            (!.js
+             (f/flatten sample/Schema
+                        "UserAccount"
+                        (xtd/obj-omit sample/RootUserFull
+                                      ["notification" "organisations" "emails"
+                                       "portfolios" "identities" "profile"])
+                        {})))
+          (def +full-no-wallets+
+            (!.js
+             (f/flatten sample/Schema
+                        "UserAccount"
+                        (xtd/obj-omit sample/RootUserFull
+                                      ["wallets"])
+                        {})))]}
+(fact "merges the combined full cache fixture in python"
+  ^:hidden
+
+  (!.py
+   (var rows {})
+   (data/merge-bulk rows (@! +flattened-full+) nil))
+  => map?
+
+  (!.py
+   (var rows {})
+   (data/merge-bulk rows (@! +full-core+) nil)
+   (data/merge-bulk rows (@! +full-contact+) nil))
+  => map?
+
+  (!.py
+   (var rows {})
+   (data/merge-bulk rows (@! +full-contact+) nil)
+   (data/merge-bulk rows (@! +full-org-notify+) nil))
+  => map?
+
+  (!.py
+   (var rows {})
+   (data/merge-bulk rows (@! +full-no-wallets+) nil)
+   (data/merge-bulk rows (@! +full-wallets+) nil))
+  => map?)
 
 ^{:refer xt.db.cache-util/get-ids :added "4.0"}
 (fact "get ids for table-key")

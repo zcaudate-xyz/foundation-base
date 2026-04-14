@@ -35,12 +35,13 @@
   "merges a single entry"
   {:added "4.0"}
   [rows table-key id new-record new-fn]
-  (let [entry    (or (-/get-entry rows table-key id)
+  (let [incoming-record (or new-record {})
+        entry    (or (-/get-entry rows table-key id)
                      {:record {:id id
                                :data {}
                                :ref-links {}
                                :rev-links {}}})
-        #{data rev-links ref-links} new-record
+        #{data rev-links ref-links} incoming-record
         #{record} entry
         _ (xt/x:obj-assign (xt/x:get-key record "data") data)
         _ (xtd/swap-key record "ref_links" xtd/obj-assign-with [ref-links xt/x:obj-assign])
@@ -56,7 +57,8 @@
   [rows fdata new-fn]
   (var out {})
   (xt/for:object [[table-key m] fdata]
-    (xt/for:object [[id new-record] (or m {})]
+    (var entries (or m {}))
+    (xt/for:object [[id new-record] entries]
       (xtd/set-in out [table-key id]
                 (-/merge-single rows table-key id new-record
                                 (or new-fn (fn [x] (return x)))))))
