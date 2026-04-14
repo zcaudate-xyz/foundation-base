@@ -51,7 +51,7 @@
                             (xtd/clone-nested m)))))
   (var __reset__ (fn []
                    (xt/for:object [[k _] out]
-                      (k/del-key out k))
+                     (xt/x:del-key out k))
                     (j/assign out (val-fn))))
   (j/defineProperty out "__reset__"
     {:value __reset__
@@ -67,7 +67,7 @@
   (if (xt/x:is-function? __reset__)
     (__reset__)
     (xt/for:object [[k _] pobj]
-      (k/del-key pobj k)))
+      (xt/x:del-key pobj k)))
   (return (j/assign pobj m)))
 
 (defn.js useVal
@@ -112,13 +112,13 @@
   {:added "4.0"}
   ([pobj]
    (let [getFn   (fn []
-                   (return (k/obj-omit (-/useSnapshot pobj)
-                                       ["__reset__"])))
+                   (return (xtd/obj-omit (-/useSnapshot pobj)
+                                        ["__reset__"])))
          setFn   (fn [m]
                    (return (j/assign pobj m)))
           resetFn (fn [m]
                     (xt/for:object [[k _] pobj]
-                      (k/del-key pobj k))
+                      (xt/x:del-key pobj k))
                     (j/assign pobj m))]
      (return [getFn setFn resetFn pobj]))))
 
