@@ -1,6 +1,5 @@
 (ns xt.runtime.type-hashmap
-  (:require [std.lang :as l])
-  (:refer-clojure :exclude [hashmap]))
+  (:require [std.lang :as l]))
 
 (l/script :xtalk
   {:require [[xt.lang.common-spec :as xt]

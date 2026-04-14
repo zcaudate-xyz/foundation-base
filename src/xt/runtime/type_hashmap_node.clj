@@ -31,7 +31,7 @@
   (return
    (xt/x:bit-rshift
     (* (xt/x:bit-and (+ v1 (xt/x:bit-rshift v1 4))
-                     (:- "0xF0F0F0F"))
+                     (:- "0x0F0F0F0F"))
        (:- "0x1010101"))
     24)))
 
