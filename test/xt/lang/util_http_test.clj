@@ -1,5 +1,6 @@
 (ns xt.lang.util-http-test
-  (:require [org.httpkit.server :as server]
+  (:require [net.http :as nhttp]
+            [org.httpkit.server :as server]
   	        [rt.nginx :as nginx]
             [std.lib.os :as os]
             [std.lang :as l]
@@ -21,21 +22,35 @@
 
 (fact:global
  {:setup    [(l/rt:restart)
-              (!.js
-               (:= (!:G fetch) (require "node-fetch"))
-                (:= (!:G EventSource) (require "eventsource")))
-               (when CANARY-NGINX
-                 (l/annex:restart-all)
-                 (Thread/sleep 500)
-                 (l/! [:es]
-                   (do:> (ws/service-register "ES_DEBUG" {} nil)
-                         (:= (. DEBUG ["es_handler"])
-                            (fn []
-                              (ws/es-test-loop "ES_DEBUG"
-                                               100
-                                               5
-                                               (fn [n]
-                                                 (return (cat  "TEST-" n)))))))))]
+             (!.js
+              (:= (!:G fetch) (require "node-fetch"))
+              (:= (!:G EventSource) (require "eventsource")))
+             (when CANARY-NGINX
+               (l/annex:restart-all)
+               (l/! [:es]
+                 (do:> (ws/service-register "ES_DEBUG" {} nil)
+                       (:= (. DEBUG ["es_handler"])
+                           (fn []
+                             (ws/es-test-loop "ES_DEBUG"
+                                              100
+                                              5
+                                              (fn [n]
+                                                (return (cat "TEST-" n))))))))
+               (let [url (str "http://localhost:" (:port (l/annex:get :es)) "/eval/es")
+                     ok? (loop [attempt 0]
+                           (let [status (try (:status (nhttp/get url {:headers {"Accept" "text/event-stream"}}))
+                                             (catch Exception _ nil))]
+                             (cond (= 200 status)
+                                   true
+
+                                   (< attempt 19)
+                                   (do (Thread/sleep 100)
+                                       (recur (inc attempt)))
+
+                                   :else
+                                   false)))]
+                 (when-not ok?
+                   (throw (ex-info "Event source did not become ready." {:url url})))))]
    :teardown [(l/rt:stop)
               (when CANARY-NGINX
                 (l/annex:stop-all))]})
