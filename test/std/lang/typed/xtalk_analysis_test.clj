@@ -75,4 +75,9 @@
 
 
 ^{:refer std.lang.typed.xtalk-analysis/analyze-file-raw :added "4.1"}
-(fact "TODO")
+(fact "returns raw parsed analysis without spec attachment"
+  (let [result (analyze-file-raw "test/std/lang/model/spec_xtalk_typed_fixture.clj")]
+    [(map? result)
+     (contains? result :specs)
+     (= (:ns result) 'std.lang.model.spec-xtalk-typed-fixture)])
+  => [true true true])

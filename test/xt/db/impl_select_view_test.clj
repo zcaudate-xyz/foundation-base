@@ -1,13 +1,13 @@
 (ns xt.db.impl-select-view-test
   (:require [std.lang :as l]
             [std.string.prose :as prose]
-            [xt.lang.base-notify :as notify])
+            [xt.lang.common-notify :as notify])
   (:use code.test))
 
 (l/script- :js
   {:runtime :basic
    :require [[xt.db.base-schema :as sch]
-             [xt.lang.base-lib :as k]
+             [xt.lang.common-lib :as k]
              [xt.db.sql-util :as ut]
              [xt.db.sql-graph :as graph]
              [xt.db.sql-view :as view]
@@ -15,7 +15,7 @@
              [xt.db.sample-scratch-test :as sample-scratch]
              [xt.sys.conn-dbsql :as dbsql]
              [js.lib.driver-postgres :as js-postgres]
-             [xt.lang.base-repl :as repl]]})
+             [xt.lang.common-repl :as repl]]})
 
 (defn bootstrap-js
   []

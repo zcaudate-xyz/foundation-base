@@ -58,6 +58,14 @@
    (clojure.core/apply list 'for:index [i [start stop step]] body)))
 
 (defmacro.xt ^{:style/indent 1}
+  return-run
+  "normalises success and error callbacks for `for:return`"
+  {:added "4.0"}
+  ([[resolve reject] & body]
+   (list 'x:return-run
+         (clojure.core/apply list 'fn [resolve reject] body))))
+
+(defmacro.xt ^{:style/indent 1}
   for:return
   "defines a return construct"
   {:added "4.0"}
@@ -991,6 +999,13 @@
   {:added "4.0"}
   ([]
    (list 'x:callback)))
+
+(defmacro.xt ^{:standalone true}
+  x:return-run
+  "gets the standard return runner token"
+  {:added "4.0"}
+  ([runner]
+   (list 'x:return-run runner)))
 
 ;;
 ;; XLANG ARR

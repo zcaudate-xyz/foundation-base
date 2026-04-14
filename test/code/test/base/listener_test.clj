@@ -7,16 +7,32 @@
             [std.lib.env :as env])
   (:use code.test))
 
+^{:refer code.test.base.listener/result-function :added "4.1"}
+(fact "prefers explicit refer metadata and falls back to function"
+  [(result-function {:meta {:refer 'demo/ref
+                            :function 'demo/fn}})
+   (result-function {:meta {:function 'demo/fn}})]
+  => '[demo/ref demo/fn])
+
+^{:refer code.test.base.listener/result-name :added "4.1"}
+(fact "builds a display name from refer, function, desc or id"
+  [(result-name {:meta {:refer 'demo/ref}})
+   (result-name {:meta {:function 'demo/fn}})
+   (result-name {:meta {:desc "A demo"}})
+   (result-name {:meta {:id :demo}})]
+  => ["demo/ref" "demo/fn" "A demo" ":demo"])
+
 ^{:refer code.test.base.listener/summarise-verify :added "3.0"}
 (fact "extract the comparison into a valid format "
   ^:hidden
   
   (summarise-verify {:status :success :data true :meta
-                     {:path "path" :refer "refer" :ns "ns" :line 1 :desc "desc" :parent-form "parent"}
+                     {:path "path" :refer "refer" :function 'foo :ns "ns" :line 1 :desc "desc" :parent-form "parent"}
                      :checker {:form "check"} :actual {:form "actual"}})
   => {:status :success
       :path "path"
       :name "refer"
+      :function 'foo
       :ns "ns"
       :line 1
       :desc "desc"
@@ -32,10 +48,11 @@
   ^:hidden
   
   (summarise-evaluate {:status :success :data "data"
-                       :meta {:path "path" :refer "refer" :ns "ns" :line 1 :desc "desc"} :form "form" :original "original"})
+                       :meta {:path "path" :refer "refer" :function 'foo :ns "ns" :line 1 :desc "desc"} :form "form" :original "original"})
   => {:status :success
       :path "path"
       :name "refer"
+      :function 'foo
       :ns "ns"
       :line 1
       :desc "desc"

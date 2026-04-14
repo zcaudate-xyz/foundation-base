@@ -342,7 +342,7 @@
                                 (~f0 b))
                                -1 1))))))))
 
-(defn php-tf-x-arr-str-comp
+(defn php-tf-x-str-comp
   [[_ a b]]
   (list '< (list 'strcmp a b) 0))
 
@@ -355,7 +355,7 @@
    :x-arr-insert      {:macro #'php-tf-x-arr-insert     :emit :macro}
    :x-arr-remove      {:macro #'php-tf-x-arr-remove     :emit :macro}
    :x-arr-sort        {:macro #'php-tf-x-arr-sort       :emit :macro}
-   :x-arr-str-comp    {:macro #'php-tf-x-arr-str-comp   :emit :macro}})
+   :x-str-comp        {:macro #'php-tf-x-str-comp       :emit :macro}})
 
 ;;
 ;; STRING

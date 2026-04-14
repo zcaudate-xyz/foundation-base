@@ -1,6 +1,6 @@
 (ns xt.db.impl-select-test
   (:require [std.lang :as l]
-            [xt.lang.base-notify :as notify])
+            [xt.lang.common-notify :as notify])
   (:use code.test))
 
 (l/script- :postgres
@@ -19,8 +19,8 @@
              [xt.db.sql-util :as ut]
              [xt.db.sql-manage :as manage]
              [xt.db.sql-table :as table]
-             [xt.lang.base-lib :as k]
-             [xt.lang.base-repl :as repl]
+             [xt.lang.common-lib :as k]
+             [xt.lang.common-repl :as repl]
              [xt.db.sample-scratch-test :as sample-scratch]]})
 
 (fact:global

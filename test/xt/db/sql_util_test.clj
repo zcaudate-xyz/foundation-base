@@ -5,17 +5,23 @@
 (l/script- :js
   {:runtime :basic
    :require [[xt.db.sql-util :as ut]
-             [xt.lang.base-lib :as k]]})
+             [xt.lang.common-spec :as xt]
+             [xt.lang.common-data :as xtd]
+             [xt.lang.common-lib :as k]]})
 
 (l/script- :lua
   {:runtime :basic
    :require [[xt.db.sql-util :as ut]
-             [xt.lang.base-lib :as k]]})
+             [xt.lang.common-spec :as xt]
+             [xt.lang.common-data :as xtd]
+             [xt.lang.common-lib :as k]]})
 
 (l/script- :python
   {:runtime :basic
    :require [[xt.db.sql-util :as ut]
-             [xt.lang.base-lib :as k]]})
+             [xt.lang.common-spec :as xt]
+             [xt.lang.common-data :as xtd]
+             [xt.lang.common-lib :as k]]})
 
 (fact:global
  {:setup    [(l/rt:restart)]
@@ -29,7 +35,7 @@
    (ut/encode-query-string [{:name "hello"}
                             {:name "world"}]
                            "WHERE"
-                           {:column-fn (fn:> [col] (k/cat "\"SCHEMA\"." col))}))
+                           {:column-fn (fn:> [col] (xt/x:cat "\"SCHEMA\"." col))}))
   => "WHERE (\"SCHEMA\".name = 'hello') OR (\"SCHEMA\".name = 'world')")
 
 ^{:refer xt.db.sql-util/sqlite-json-values :added "4.0"}
@@ -107,8 +113,8 @@
 (fact "encodes a value to sql"
   ^:hidden
 
-  (!.js (k/json-encode 100000000000000000))
-  (!.lua (k/json-encode 100000000000000000))
+  (!.js (xt/x:json-encode 100000000000000000))
+  (!.lua (xt/x:json-encode 100000000000000000))
   
   (!.lua
    (string.format "%0.f" 100000000000000000))
@@ -417,7 +423,7 @@
   ^:hidden
   
   (!.js
-   (k/arr-map
+   (xtd/arr-map
     (@! +inputs+)
     (fn [v]
       (return (ut/encode-sql v
@@ -431,7 +437,7 @@
       "(SELECT * from jsonb_each('[1,2,3]', TRUE))"]
 
   (!.lua
-   (k/arr-map
+   (xtd/arr-map
     (@! +inputs+)
     (fn [v]
       (return (ut/encode-sql v
@@ -445,7 +451,7 @@
       "(SELECT * from jsonb_each('[1,2,3]', TRUE))"]
 
   (!.py
-   (k/arr-map
+   (xtd/arr-map
     (@! +inputs+)
     (fn [v]
       (return (ut/encode-sql v
@@ -518,7 +524,7 @@
   (!.js
    [(ut/encode-query-string {} "WHERE" {})
     (ut/encode-query-string {:name "hello"} "WHERE"
-                            {:column-fn (fn:> [col] (k/cat "\"SCHEMA\"." col))})
+                            {:column-fn (fn:> [col] (xt/x:cat "\"SCHEMA\"." col))})
     (ut/encode-query-string {:data {:a 1}
                              :name "hello"}
                            "WHERE"
@@ -531,7 +537,7 @@
   (!.lua
    [(ut/encode-query-string {} "WHERE" {})
     (ut/encode-query-string {:name "hello"} "WHERE"
-                           {:column-fn (fn:> [col] (k/cat "\"SCHEMA\"." col))})
+                           {:column-fn (fn:> [col] (xt/x:cat "\"SCHEMA\"." col))})
     (ut/encode-query-string {:data {:a 1}}
                            "WHERE"
                            {})])
@@ -542,7 +548,7 @@
   (!.py
    [(ut/encode-query-string {} "WHERE" {})
     (ut/encode-query-string {:name "hello"} "WHERE"
-                            {:column-fn (fn:> [col] (k/cat "\"SCHEMA\"." col))})
+                            {:column-fn (fn:> [col] (xt/x:cat "\"SCHEMA\"." col))})
     (ut/encode-query-string {:data {:a 1}
                             :name "hello"}
                            "WHERE"

@@ -189,7 +189,7 @@
   [[_ arr key-fn comp-fn]]
   (list '. arr (list 'sort!))) ;; simplified
 
-(defn ruby-tf-x-arr-str-comp
+(defn ruby-tf-x-str-comp
   [[_ a b]]
   (list '< a b))
 
@@ -201,7 +201,7 @@
    :x-arr-remove      {:macro #'ruby-tf-x-arr-remove     :emit :macro}
    :x-arr-insert      {:macro #'ruby-tf-x-arr-insert     :emit :macro}
    :x-arr-sort        {:macro #'ruby-tf-x-arr-sort       :emit :macro}
-   :x-arr-str-comp    {:macro #'ruby-tf-x-arr-str-comp   :emit :macro}})
+   :x-str-comp        {:macro #'ruby-tf-x-str-comp       :emit :macro}})
 
 ;;
 ;; STRING

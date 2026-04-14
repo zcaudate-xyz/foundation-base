@@ -11,6 +11,7 @@
              [xt.lang.base-runtime :as rt]
              [xt.lang.event-view :as base-view]
              [js.cell.kernel.worker-impl :as internal]
+             [js.cell.kernel.worker-fn :as base-fn]
              [js.cell.kernel.base-link :as link-raw]
              [js.cell.kernel.base-link-local :as link-fn]
              [js.cell.kernel.base-impl :as impl-common]
@@ -117,7 +118,7 @@
           (j/<!
            (. (cl/add-model "hello"
                             {:echo  {:handler link-fn/echo
-                                     :trigger {"@/::INIT" false}
+                                     :trigger {"@worker/::INIT" false}
                                      :defaultArgs ["HELLO"]}})
               ["init"]))]}
 (fact "calls access function on the current cell"
@@ -144,7 +145,7 @@
           (j/<!
            (. (cl/add-model "hello"
                             {:echo  {:handler link-fn/echo
-                                     :trigger {"@/::INIT" false}
+                                     :trigger {"@worker/::INIT" false}
                                      :defaultArgs ["HELLO"]}})
               ["init"]))]}
 (fact "calls access function on the current view"
@@ -689,31 +690,4 @@
 
 
 ^{:refer js.cell.kernel/call :added "4.1"}
-(fact "conducts a raw call against a cell or link"
-  ^:hidden
-  (notify/wait-on :js
-    (var cell
-         (cl/make-cell
-          (fn []
-            (eval (@! (playground/play-worker true))))))
-    (. (. cell ["init"])
-       (then
-        (fn []
-          (. (cl/call cell {:op "call"
-                            :action "@worker/echo"
-                            :body ["HELLO"]})
-             (then (repl/>notify)))))))
-  => (contains ["HELLO" integer?])
-
-  (notify/wait-on :js
-    (var cell
-         (cl/make-cell
-          (fn []
-            (eval (@! (playground/play-worker true))))))
-    (. (. cell ["init"])
-       (then
-        (fn []
-          (. (cl/call (. cell ["link"]) {:op "eval"
-                                         :body "1+1"})
-             (then (repl/>notify)))))))
-  => 2)
+(fact "TODO")

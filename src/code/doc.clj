@@ -1,8 +1,10 @@
 (ns code.doc
   (:require [code.doc.executive :as executive]
+            [code.doc.manage :as manage]
             [code.project :as project]
             [std.config :as config]
             [std.lib.invoke :as invoke]
+            [std.lib.result :as res]
             [std.task :as task]))
 
 (def +config+ "config/publish.edn")
@@ -21,6 +23,17 @@
             :lookup  (project/file-lookup project)
             :publish (config/load (or (config/resolve (:publish project))
                                       +config+))))))
+
+(defn make-audit-project
+  "makes an env for code.doc coverage tasks"
+  {:added "4.1"}
+  ([]
+   (make-audit-project nil))
+  ([_]
+   (let [project (make-project)]
+     (assoc project
+            :code.doc/source-namespaces (manage/source-namespaces project)
+            :code.doc/coverage (manage/documented-coverage project)))))
 
 (defmethod task/task-defaults :publish
   ([_]
@@ -94,12 +107,57 @@
 
 (invoke/definvoke deploy-template
   "deploys the theme for a given site
- 
+  
    (deploy-template \"hara\")"
   {:added "3.0"}
   [:task {:template :code.doc.theme
           :params {:title "DEPLOY TEMPLATE ASSETS"}
           :main {:fn #'executive/deploy-template}}])
+
+(defmethod task/task-defaults :code.doc.audit
+  ([_]
+   {:construct {:input  (fn [_] *ns*)
+                :lookup (fn [_ project] (:code.doc/coverage project))
+                :env    make-audit-project}
+    :params    {:print {:item true
+                        :result true
+                        :summary true}}
+    :arglists '([] [ns] [ns params] [ns params project] [ns params lookup project])
+    :main      {:count 4}
+    :item      {:list    (fn [_ project] (:code.doc/source-namespaces project))
+                :pre     project/sym-name
+                :display (fn [data]
+                           (if (empty? data)
+                             (res/result {:status :info
+                                          :data :documented})
+                             data))}
+    :result    {:ignore empty?
+                :keys {:count count
+                       :data  identity}
+                :columns [{:key    :key
+                           :align  :left}
+                          {:key    :count
+                           :format "(%s)"
+                           :length 8
+                           :align  :center
+                           :color  #{:bold}}
+                          {:key    :data
+                           :align  :left
+                           :length 80
+                           :color  #{:yellow}}]}
+    :summary   {:aggregate {:total [:count + 0]}}}))
+
+(invoke/definvoke missing
+  "checks for namespaces not yet referenced by code.doc pages
+  
+   (missing)
+  
+   (missing '[code.doc] {:print {:result false :summary false}
+                         :return :all})"
+  {:added "4.1"}
+  [:task {:template :code.doc.audit
+          :params {:title "MISSING CODE.DOC NAMESPACES"}
+          :main {:fn #'manage/missing-namespaces}}])
 
 (comment
   ;; Currently have to change `config/code.doc.edn` manually

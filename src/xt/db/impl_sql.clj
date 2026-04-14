@@ -9,14 +9,15 @@
              [xt.db.sql-graph :as sql-graph]
              [xt.db.sql-table :as sql-table]
              [xt.db.sql-raw :as raw]
-             [xt.lang.base-lib :as k]]})
+             [xt.lang.common-spec :as xt]
+             [xt.lang.common-data :as xtd]]})
 
 (defn.xt sql-gen-delete
   "generates the delete statements"
   {:added "4.0"}
   [table-name ids opts]
   (return
-   (k/arr-map ids (fn:> [id] (raw/raw-delete table-name {:id id} opts)))))
+   (xt/x:arr-map ids (fn:> [id] (raw/raw-delete table-name {:id id} opts)))))
 
 (defn.xt sql-process-event-sync
   "processes event sync data from database"
@@ -27,41 +28,41 @@
                    sql-table/table-emit-upsert
                    schema lookup flat opts))
   (cond (== tag "input")
-        (return (k/join "\n\n" statements))
+        (return (xt/x:str-join "\n\n" statements))
 
         :else
         (do (conn-dbsql/query-sync instance 
-                                   (k/join "\n\n" statements))
-            (return (k/obj-keys flat)))))
+                                   (xt/x:str-join "\n\n" statements))
+            (return (xt/x:obj-keys flat)))))
 
 (defn.xt sql-process-event-remove
   "removes data from database"
   {:added "4.0"}
   [instance tag data schema lookup opts]
   (var flat (f/flatten-bulk schema data))
-  (var ordered (k/arr-keep (base-schema/table-order lookup)
+  (var ordered (xt/x:arr-keep (base-schema/table-order lookup)
                            (fn [col]
-                             (return (:? (k/has-key? flat col) [col (k/obj-keys (k/get-key flat col))] nil)))))
+                             (return (:? (xt/x:has-key? flat col) [col (xt/x:obj-keys (xt/x:get-key flat col))] nil)))))
   
   (var emit-fn
        (fn [e]
          (var [table-name ids] e)
          (return (-/sql-gen-delete table-name ids opts))))
-  (var statements (k/arr-mapcat ordered emit-fn))
+  (var statements (xtd/arr-mapcat ordered emit-fn))
   (cond (== tag "input")
-        (return (k/join "\n\n" statements))
+        (return (xt/x:str-join "\n\n" statements))
 
         :else
         (do (conn-dbsql/query-sync instance 
-                                   (k/join "\n\n" statements))
-            (return (k/obj-keys flat)))))
+                                   (xt/x:str-join "\n\n" statements))
+            (return (xt/x:obj-keys flat)))))
 
 
 (defn.xt sql-pull-sync
   "runs a pull statement"
   {:added "4.0"}
   [instance schema tree opts]
-  (return (k/json-decode (or (conn-dbsql/query-sync
+  (return (xt/x:json-decode (or (conn-dbsql/query-sync
                             instance
                             (sql-graph/select schema tree opts))
                            "null"))))
@@ -72,7 +73,7 @@
   [instance schema table-name ids opts]
   (return (conn-dbsql/query-sync
            instance
-           (k/join "\n\n" (-/sql-gen-delete table-name ids opts)))))
+           (xt/x:str-join "\n\n" (-/sql-gen-delete table-name ids opts)))))
 
 (defn.xt sql-clear
   "clears the sql db"

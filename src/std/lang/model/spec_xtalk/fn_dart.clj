@@ -188,7 +188,7 @@
 (defn dart-tf-x-arr-insert [[_ arr idx e]] (list '. arr (list 'insert idx e)))
 (defn dart-tf-x-arr-remove [[_ arr idx]] (list '. arr (list 'removeAt idx)))
 (defn dart-tf-x-arr-sort [[_ arr key-fn comp-fn]] (list '. arr 'sort))
-(defn dart-tf-x-arr-str-comp [[_ a b]] (list '. (list '. a 'toString) 'compareTo (list '. b 'toString)))
+(defn dart-tf-x-str-comp [[_ a b]] (list '. (list '. a 'toString) 'compareTo (list '. b 'toString)))
 
 (def +dart-arr+
    {:x-arr-push        {:macro #'dart-tf-x-arr-push       :emit :macro :type :template}
@@ -198,7 +198,7 @@
     :x-arr-insert      {:macro #'dart-tf-x-arr-insert     :emit :macro :type :template}
      :x-arr-remove      {:macro #'dart-tf-x-arr-remove     :emit :macro :type :template}
      :x-arr-sort        {:macro #'dart-tf-x-arr-sort       :emit :macro}
-     :x-arr-str-comp    {:macro #'dart-tf-x-arr-str-comp   :emit :macro}})
+     :x-str-comp        {:macro #'dart-tf-x-str-comp       :emit :macro}})
 
 (defn dart-tf-x-cache [[_ name]] (list 'new 'Map))
 (defn dart-tf-x-cache-list [[_ cache]] (list '. (list '. cache 'keys) 'toList))

@@ -54,6 +54,17 @@
                    :module #{"code.core"}})
   => ['bar 'foo])
 
+^{:refer code.doc.engine.plugin.api/entry-arglists :added "4.1"}
+(fact "formats arglists for api display"
+  (entry-arglists {:arglists '([x] [x y])})
+  => "[x] [x y]")
+
+^{:refer code.doc.engine.plugin.api/entry-status-badges :added "4.1"}
+(fact "creates metadata badges for api entries"
+  (entry-status-badges {:meta {:added "4.1" :experimental true}})
+  => [[:span {:class "entry-badge entry-badge-experimental"} "Experimental"]
+      [:span {:class "entry-badge entry-badge-version"} "Added 4.1"]])
+
 ^{:refer code.doc.engine.plugin.api/api-element :added "3.0"}
 (fact "displays the entire `:api` namespace"
 

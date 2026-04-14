@@ -1180,13 +1180,65 @@
 
 ^{:refer std.block.heal.core/check-errored-suspect :added "4.0"}
 (fact "checks if a block is suspect based on leftover errors"
-  (level/check-errored-suspect
-   {:lead {:line 1 :col 1}
-    :col 1
-    :last true}
-   ["(foo) (bar))"]
-   [{:line 1 :col 12 :type :close}])
+  (let [content "(foo) (bar))"
+        lines   (clojure.string/split-lines content)]
+    (level/check-errored-suspect
+     (level/create-block-scan
+      {:line [1 1]
+       :col 1
+       :last true}
+      lines)
+     lines
+     [{:line 1 :col 12 :type :close}]))
   => true)
+
+^{:refer std.block.heal.core/create-close-hint-scan :added "4.1"}
+(fact "builds a tighter scan from a later correct close delimiter"
+  (let [content "(foo (+ 1 2] 3))"
+        lines   (clojure.string/split-lines content)
+        block   (first (level/group-blocks content))
+        scan    (level/create-block-scan block lines)
+        interim (std.block.heal.parse/parse (:snippet scan))
+        errors  (vec (filter (comp not :correct?) interim))]
+    (level/create-close-hint-scan
+     block lines scan interim errors))
+  => (contains
+      {:line [1 1]
+       :col 6
+       :end-col 15}))
+
+^{:refer std.block.heal.core/localize-close-hint-scan :added "4.1"}
+(fact "keeps the full scan when indentation already isolates a child block"
+  (let [content (prose/join-lines
+                 ["(foo"
+                  "  (bar baz qux]"
+                  "  zot))"])
+        lines   (clojure.string/split-lines content)
+        block   (-> (level/group-blocks content)
+                    first
+                    :children
+                    last)]
+    (level/localize-close-hint-scan block lines))
+  => (contains
+      {:scan (contains
+              {:line [2 2]
+               :col 3
+               :end-col nil})
+       :errors vector?})
+  (let [content (prose/join-lines
+                 ["(outer"
+                  "  (a 1)"
+                  "  ((b 2"
+                  "     [3 4])"
+                  "  (c 5))"])
+        lines   (clojure.string/split-lines content)
+        block   (first (level/group-blocks content))]
+    (level/localize-close-hint-scan block lines))
+  => (contains
+      {:scan (contains
+              {:line [1 5]
+               :col 1
+               :end-col nil})}))
 
 ^{:refer std.block.heal.core/heal-content-complex-edits :added "4.0"}
 (fact "handles complex edits for healing"
@@ -1201,3 +1253,54 @@
    {:at {:lead {:style :paren}}}
    [{:pair-id 1} {:pair-id 1}])
   => seq?)
+
+
+^{:refer std.block.heal.core/create-block-scan :added "4.1"}
+(fact "creates a scan window from the block bounds"
+  (let [lines ["(ab"
+               " cd)"]]
+    (level/create-block-scan
+     {:line [1 2]
+      :col 2
+      :last true}
+     lines))
+  => (contains {:line [1 2]
+                :col 2
+                :last true
+                :end-col nil
+                :offset 0
+                :snippet " ab\n cd)"}))
+
+^{:refer std.block.heal.core/tighter-scan? :added "4.1"}
+(fact "checks whether a candidate scan is narrower"
+  (level/tighter-scan? {:line [1 3]
+                        :col 1
+                        :end-col 20}
+                       [2 2]
+                       4
+                       10)
+  => true
+
+  (level/tighter-scan? {:line [2 2]
+                        :col 4
+                        :end-col 10}
+                       [1 2]
+                       4
+                       10)
+  => false)
+
+^{:refer std.block.heal.core/tighter-scan? :added "4.1"}
+(fact "checks if a candidate scan window is narrower than the current one"
+  (let [content "(foo (+ 1 2) 3)"
+        lines   (clojure.string/split-lines content)
+        block   (first (level/group-blocks content))
+        scan    (level/create-block-scan block lines)]
+    (level/tighter-scan? scan [1 1] 5 12))
+  => true
+
+  (let [content "(foo (+ 1 2) 3)"
+        lines   (clojure.string/split-lines content)
+        block   (first (level/group-blocks content))
+        scan    (level/create-block-scan block lines)]
+    (level/tighter-scan? scan [1 1] 1 Integer/MAX_VALUE))
+  => false)

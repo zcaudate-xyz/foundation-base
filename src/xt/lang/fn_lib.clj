@@ -5,7 +5,7 @@
   "checks if object is a function type"
   {:added "4.1"}
   [x]
-  (return (x:is-function? x)))
+  (return (xt/x:is-function? x)))
 
 (defn.xt identity
   "identity function"
@@ -19,13 +19,13 @@
   "gets the id for an object"
   {:added "4.1"}
   [x]
-  (return (x:get-key x "id")))
+  (return (xt/x:get-key x "id")))
 
 (defn.xt key-fn
   "creates a key access function"
   {:added "4.1"}
   [k]
-  (return (fn [x] (return (x:get-key x k)))))
+  (return (fn [x] (return (xt/x:get-key x k)))))
 
 (defn.xt eq-fn
   "creates an equality comparator"
@@ -33,16 +33,16 @@
   [k v]
   (return (fn [x]
             (return
-             (:? (x:is-function? v)
-                 (v (x:get-key x k))
-                 (== v (x:get-key x k)))))))
+             (:? (xt/x:is-function? v)
+                 (v (xt/x:get-key x k))
+                 (== v (xt/x:get-key x k)))))))
 
 (defn.xt inc-fn
   "creates an increment function by closure"
   {:added "4.1"}
   [init]
   (var i := init)
-  (when (x:nil? i)
+  (when (xt/x:nil? i)
     (:= i -1))
   (var inc-fn
        (fn []
@@ -72,14 +72,14 @@
   "step to push element into arr"
   {:added "4.1"}
   [arr e]
-  (x:arr-push arr e)
+  (xt/x:arr-push arr e)
   (return arr))
 
 (defn.xt step-set-key
   "step to set key in object"
   {:added "4.1"}
   [obj k v]
-  (x:set-key obj k v)
+  (xt/x:set-key obj k v)
   (return obj))
 
 (defn.xt step-set-fn
@@ -92,14 +92,14 @@
   "step to set key value pair in object"
   {:added "4.1"}
   [obj e]
-  (x:set-key obj
-             (x:arr-first e)
-             (x:arr-second e))
+  (xt/x:set-key obj
+             (xt/x:arr-first e)
+             (xt/x:arr-second e))
   (return obj))
 
 (defn.xt step-del-key
   "step to delete key in object"
   {:added "4.1"}
   [obj k]
-  (x:del-key obj k)
+  (xt/x:del-key obj k)
   (return obj))

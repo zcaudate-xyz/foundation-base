@@ -52,10 +52,16 @@
   => nil)
 
 ^{:refer std.concurrent.thread/thread:notify :added "3.0"}
-(fact "notifies threads waiting on lock")
+(fact "notifies threads waiting on lock"
+  (let [lock (Object.)]
+    (thread:notify lock))
+  => nil)
 
 ^{:refer std.concurrent.thread/thread:notify-all :added "3.0"}
-(fact "notifies all threads waiting on lock")
+(fact "notifies all threads waiting on lock"
+  (let [lock (Object.)]
+    (thread:notify-all lock))
+  => nil)
 
 ^{:refer std.concurrent.thread/thread:has-lock? :added "3.0"}
 (fact "checks if thread has the lock"
@@ -83,25 +89,29 @@
 (fact "returns all available stacktraces"
   ^:hidden
 
-  (all-stacktraces))
+  (all-stacktraces)
+  => #(instance? java.util.Map %))
 
 ^{:refer std.concurrent.thread/thread:all :added "3.0"}
 (fact "lists all threads"
   ^:hidden
 
-  (thread:all))
+  (thread:all)
+  => seq?)
 
 ^{:refer std.concurrent.thread/thread:all-ids :added "3.0"}
 (fact "lists all thread ids"
   ^:hidden
 
-  (thread:all-ids))
+  (thread:all-ids)
+  => set?)
 
 ^{:refer std.concurrent.thread/thread:dump :added "3.0"}
-(comment "dumps out current thread information"
+(fact "dumps out current thread information"
   ^:hidden
 
-  (thread:dump))
+  (do (thread:dump) true)
+  => true)
 
 ^{:refer std.concurrent.thread/thread:active-count :added "3.0"}
 (fact "returns active threads"
@@ -142,15 +152,22 @@
 (fact "starts a thread"
   ^:hidden
 
-  (-> (thread {:handler (fn [])})
-      (thread:start)))
+  (let [started (promise)
+        t (thread {:handler (fn []
+                              (deliver started true)
+                              (thread:sleep 50))})]
+    (thread:start t)
+    [(deref started 100 false)
+     (do (thread:join t) true)])
+  => [true true])
 
 ^{:refer std.concurrent.thread/thread:run :added "3.0"}
 (fact "runs the thread function locally"
   ^:hidden
 
   (-> (thread {:handler (fn [])})
-      (thread:run)))
+      (thread:run))
+  => nil)
 
 ^{:refer std.concurrent.thread/thread:join :added "3.0"}
 (fact "calls join on a thread"
@@ -161,13 +178,43 @@
   => nil)
 
 ^{:refer std.concurrent.thread/thread:uncaught :added "3.0"}
-(fact "gets and sets the uncaught exception handler")
+(fact "gets and sets the uncaught exception handler"
+  (let [handler (reify Thread$UncaughtExceptionHandler
+                  (uncaughtException [_ _ _] nil))
+        thread  (thread {:handler (fn [])})]
+    (thread:uncaught thread handler)
+    (= handler (thread:uncaught thread)))
+  => true)
 
 ^{:refer std.concurrent.thread/thread:global-uncaught :added "3.0"}
-(fact "gets and sets the global uncaught exception handler")
+(fact "gets and sets the global uncaught exception handler"
+  (let [original (thread:global-uncaught)
+        handler  (reify Thread$UncaughtExceptionHandler
+                   (uncaughtException [_ _ _] nil))]
+    (try
+      (thread:global-uncaught handler)
+      (= handler (thread:global-uncaught))
+      (finally
+        (thread:global-uncaught original))))
+  => true)
 
 ^{:refer std.concurrent.thread/thread:classloader :added "3.0"}
-(fact "gets and sets the context classloader")
+(fact "gets and sets the context classloader"
+  (let [thread   (thread:current)
+        original (thread:classloader thread)
+        loader   (.getContextClassLoader (Thread/currentThread))]
+    (try
+      (thread:classloader thread loader)
+      (= loader (thread:classloader thread))
+      (finally
+        (thread:classloader thread original))))
+  => true)
 
 ^{:refer std.concurrent.thread/thread :added "3.0"}
-(fact "creates a new thread")
+(fact "creates a new thread"
+  (let [thread (thread {:handler (fn [])
+                        :name "hello-thread"
+                        :daemon true})]
+    [(.getName thread)
+     (thread:daemon? thread)])
+  => ["hello-thread" true])

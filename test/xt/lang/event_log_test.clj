@@ -1,20 +1,65 @@
 (ns xt.lang.event-log-test
   (:require [std.json :as json]
             [std.lang :as l]
-            [xt.lang.base-notify :as notify])
+            [xt.lang.common-notify :as notify])
   (:use code.test))
+
+(l/script- :xtalk
+  {:require [[xt.lang.common-lib :as k]
+             [xt.lang.common-spec :as xt]]})
 
 (l/script- :js
   {:runtime :basic
-   :require [[xt.lang.base-lib :as k]
+   :require [[xt.lang.common-lib :as k]
+             [xt.lang.common-spec :as xt]
              [xt.lang.event-log :as log]
-             [xt.lang.base-repl :as repl]]})
+             [xt.lang.common-repl :as repl]]})
 
 (l/script- :lua
   {:runtime :basic
-   :require [[xt.lang.base-lib :as k]
+   :require [[xt.lang.common-lib :as k]
+             [xt.lang.common-spec :as xt]
              [xt.lang.event-log :as log]
-             [xt.lang.base-repl :as repl]]})
+             [xt.lang.common-repl :as repl]]})
+
+(defn.xt walk
+  [obj pre-fn post-fn]
+  (:= obj (pre-fn obj))
+  (cond (xt/x:nil? obj)
+        (return (post-fn obj))
+
+        (xt/x:is-object? obj)
+        (do (var out := {})
+            (xt/for:object [[k v] obj]
+              (xt/x:set-key out k (-/walk v pre-fn post-fn)))
+            (return (post-fn out)))
+
+        (xt/x:is-array? obj)
+        (do (var out := [])
+            (xt/for:array [e obj]
+              (xt/x:arr-push out (-/walk e pre-fn post-fn)))
+            (return (post-fn out)))
+
+        :else
+        (return (post-fn obj))))
+
+(defn.xt get-data
+  [obj]
+  (var data-fn
+       (fn [obj]
+         (if (or (xt/x:is-string? obj)
+                 (xt/x:is-number? obj)
+                 (xt/x:is-boolean? obj)
+                 (xt/x:is-object? obj)
+                 (xt/x:is-array? obj)
+                 (xt/x:nil? obj))
+           (return obj)
+           (return (xt/x:cat "<" (k/type-native obj) ">")))))
+  (return (-/walk obj k/identity data-fn)))
+
+(defn.xt id-fn
+  [x]
+  (return (xt/x:get-key x "id")))
 
 (fact:global
  {:setup    [(l/rt:restart)]
@@ -63,9 +108,9 @@
   (!.js
    (var l (log/new-log {}))
    
-   (k/for:index [i [0 10]]
-     (log/queue-entry l {:id (k/cat "id-" i)}
-                      k/id-fn
+   (xt/for:index [i [0 10]]
+     (log/queue-entry l {:id (xt/x:cat "id-" i)}
+                      -/id-fn
                       k/identity
                       1))
    (log/clear-cache l 100000)
@@ -93,9 +138,9 @@
   (!.lua
    (var l (log/new-log {}))
    
-   (k/for:index [i [0 9]]
-     (log/queue-entry l {:id (k/cat "id-" i)}
-                      k/id-fn
+   (xt/for:index [i [0 9]]
+     (log/queue-entry l {:id (xt/x:cat "id-" i)}
+                      -/id-fn
                       k/identity
                       1))
    (log/clear-cache l 100000)
@@ -145,7 +190,7 @@
   => {"pred" nil, "meta" {"listener/id" "test1", "listener/type" "log"}}
 
   (!.lua
-   (k/get-data
+   (-/get-data
     (log/add-listener
      (log/new-log {})
      "test1" (fn [id data t]))))
@@ -172,13 +217,10 @@
    (log/add-listener
     l
     "test1" (fn [id data t meta]))
-   (k/get-data
+   (-/get-data
     (log/remove-listener
      l
      "test1")))
   => {"callback" "<function>",
       "pred" nil,
       "meta" {"listener/id" "test1", "listener/type" "log"}})
-
-
-

@@ -3,12 +3,12 @@
   (:require [net.http :as http]
             [std.json :as json]
             [std.lang :as l]
-            [xt.lang.base-notify :as notify]))
+            [xt.lang.common-notify :as notify]))
 
 (l/script- :js
   {:runtime :basic
-   :require [[xt.lang.base-repl :as repl]
-             [xt.lang.base-lib :as k]
+   :require [[xt.lang.common-repl :as repl]
+             [xt.lang.common-string :as str]
              [xt.db.sample-test :as sample]
              [xt.db.sql-util :as ut]
              [xt.db.sql-raw :as raw]
@@ -61,11 +61,11 @@
   
   (notify/wait-on :js
     (dbsql/query DB
-                 (k/join "\n\n"
-                         (manage/table-create-all
-                          sample/Schema
-                          sample/SchemaLookup
-                          (ut/sqlite-opts nil)))
+                 (str/join "\n\n"
+                          (manage/table-create-all
+                           sample/Schema
+                           sample/SchemaLookup
+                           (ut/sqlite-opts nil)))
                  {:success (fn [_]
                              (repl/notify true))}))
   => true)
@@ -76,12 +76,12 @@
 
   (notify/wait-on :js
     (dbsql/query DB
-                 (k/join "\n\n"
-                         (table/table-upsert sample/Schema
-                                             sample/SchemaLookup
-                                             "Currency"
-                                             @sample/+currency+
-                                             (ut/sqlite-opts nil)))
+                 (str/join "\n\n"
+                          (table/table-upsert sample/Schema
+                                              sample/SchemaLookup
+                                              "Currency"
+                                              @sample/+currency+
+                                              (ut/sqlite-opts nil)))
                  {:success (fn [result]
                              (repl/notify result))}))
   => vector?)

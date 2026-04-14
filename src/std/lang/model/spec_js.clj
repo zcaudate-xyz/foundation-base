@@ -199,17 +199,42 @@
   "for return transform"
   {:added "4.0"}
   [[_ [[res err] statement] {:keys [success error final]}]]
-  (let [cb (list 'fn [err res]
-                 (list 'if err
-                       error
-                       success))
-        out (walk/prewalk (fn [x]
-                         (if (= x '(x:callback))
-                           cb
-                           x))
-                       statement)]
+  (let [return-run? (and (seq? statement)
+                         (= 'x:return-run (first statement)))
+        success* (if (and return-run? final)
+                   (list 'return success)
+                   success)
+        error* (if (and return-run? final)
+                 (list 'return error)
+                 error)
+        out (if return-run?
+              (let [[_ runner] statement]
+                (template/$
+                 (do (var ~res nil)
+                     (var ~err nil)
+                     (try
+                       (~runner
+                        (fn [value]
+                          (:= ~res value)
+                          (:= ~err nil))
+                        (fn [value]
+                          (:= ~res nil)
+                          (:= ~err value)))
+                       (if ~err
+                         ~error*
+                         ~success*)
+                       (catch ~err ~error*)))))
+              (let [cb (list 'fn [err res]
+                             (list 'if err
+                                   error
+                                   success))]
+                (walk/prewalk (fn [x]
+                                (if (= x '(x:callback))
+                                  cb
+                                  x))
+                              statement)))]
     (cond->> out
-      final (list 'return))))
+      (and final (not return-run?)) (list 'return))))
 
 (defn tf-for-try
   "for try transform"
@@ -224,51 +249,75 @@
   "for async transform"
   {:added "4.0"}
   [[_ [[res err] statement] {:keys [success error finally]}]]
-  (template/$ (. (new Promise (fn [resolve reject]
-                         (resolve ~statement)))
-          ~@(if success
-              [(list 'then
-                     (list 'fn [res]
-                           success))])
-          ~@(if error
-              [(list 'catch
-                     (list 'fn [err]
-                           error))])
-          ~@(if finally
-              [(list 'finally
-                     (list 'fn '[]
-                           finally))]))))
+  (let [return-run? (and (seq? statement)
+                         (= 'x:return-run (first statement)))
+        base (if return-run?
+               (let [[_ runner] statement]
+                 (template/$
+                  (new Promise
+                       (fn [resolve reject]
+                         (try
+                           (~runner resolve reject)
+                           (catch ~err
+                             (reject ~err)))))))
+               (template/$
+                (new Promise
+                     (fn [resolve reject]
+                       (resolve ~statement)))))]
+    (template/$ (. ~base
+                   ~@(if success
+                       [(list 'then
+                              (list 'fn [res]
+                                    success))])
+                   ~@(if error
+                       [(list 'catch
+                              (list 'fn [err]
+                                    error))])
+                   ~@(if finally
+                       [(list 'finally
+                              (list 'fn '[]
+                                    finally))])))))
 
 (def +features+
-  (-> (grammar/build :exclude [:pointer
-                               :block
-                               :data-range])
-      (grammar/build:override
-       {:var        {:symbol '#{var*}}
-        :mul        {:value true}
-        :defn       {:symbol '#{defn defn- defelem}}
-        :with-global {:value true :raw "globalThis"}
-        :defclass   {:macro  #'js-defclass    :emit :macro}
-        :for-object {:macro  #'tf-for-object  :emit :macro}
-        :for-array  {:macro  #'tf-for-array   :emit :macro}
-        :for-iter   {:macro  #'tf-for-iter    :emit :macro}
-        :for-return {:macro  #'tf-for-return  :emit :macro}
-        :for-try    {:macro  #'tf-for-try     :emit :macro}
-        :for-async  {:macro  #'tf-for-async :emit :macro}})
-      (grammar/build:override fn/+js+)
-      (grammar/build:override com/+js-com+)
-      (grammar/build:extend
-       {:property   {:op :property  :symbol  '#{property}   :assign ":" :raw "property" :value true :emit :def-assign}
-        :teq        {:op :teq       :symbol  '#{===}        :raw "===" :emit :bi}
-        :tneq       {:op :tneq      :symbol  '#{not==}      :raw "!==" :emit :bi}
-        :delete     {:op :delete    :symbol  '#{del}        :raw "delete" :value true :emit :prefix}
-        :typeof     {:op :typeof    :symbol  '#{typeof}     :raw "typeof" :emit :prefix}
-        :instanceof {:op :instof    :symbol  '#{instanceof} :raw "instanceof" :emit :bi}
-        :undef      {:op :undef     :symbol  '#{undefined}  :raw "undefined" :value true :emit :throw}
-        :nan        {:op :nan       :symbol  '#{NaN} :raw "NaN" :value true :emit :throw}
-        :vargs      {:op :vargs     :symbol  '#{...} :raw "...vargs" :value true :emit :throw}
-        :var-let    {:op :var-let   :symbol  '#{var}     :macro  #'tf-var-let :emit :macro}
-        :var-const  {:op :var-const :symbol  '#{const}   :macro  #'tf-var-const :emit :macro}})))
+  (let [base (-> (grammar/build :exclude [:pointer
+                                          :block
+                                          :data-range])
+                 (grammar/build:override
+                  {:var         {:symbol '#{var*}}
+                   :mul         {:value true}
+                   :defn        {:symbol '#{defn defn- defelem}}
+                   :with-global {:value true :raw "globalThis"}
+                   :defclass    {:macro  #'js-defclass    :emit :macro}
+                   :for-object  {:macro  #'tf-for-object  :emit :macro}
+                   :for-array   {:macro  #'tf-for-array   :emit :macro}
+                   :for-iter    {:macro  #'tf-for-iter    :emit :macro}
+                   :for-return  {:macro  #'tf-for-return  :emit :macro}
+                   :for-try     {:macro  #'tf-for-try     :emit :macro}
+                   :for-async   {:macro  #'tf-for-async   :emit :macro}}))
+        base-keys (set (keys base))
+        fn-overrides (select-keys fn/+js+ base-keys)
+        fn-extensions (apply dissoc fn/+js+ base-keys)
+        with-fn (cond-> base
+                  (seq fn-overrides) (grammar/build:override fn-overrides)
+                  (seq fn-extensions) (grammar/build:extend fn-extensions))
+        with-fn-keys (set (keys with-fn))
+        com-overrides (select-keys com/+js-com+ with-fn-keys)
+        com-extensions (apply dissoc com/+js-com+ with-fn-keys)]
+    (cond-> with-fn
+      (seq com-overrides) (grammar/build:override com-overrides)
+      (seq com-extensions) (grammar/build:extend com-extensions)
+      true (grammar/build:extend
+            {:property   {:op :property  :symbol  '#{property}   :assign ":" :raw "property" :value true :emit :def-assign}
+             :teq        {:op :teq       :symbol  '#{===}        :raw "===" :emit :bi}
+             :tneq       {:op :tneq      :symbol  '#{not==}      :raw "!==" :emit :bi}
+             :delete     {:op :delete    :symbol  '#{del}        :raw "delete" :value true :emit :prefix}
+             :typeof     {:op :typeof    :symbol  '#{typeof}     :raw "typeof" :emit :prefix}
+             :instanceof {:op :instof    :symbol  '#{instanceof} :raw "instanceof" :emit :bi}
+             :undef      {:op :undef     :symbol  '#{undefined}  :raw "undefined" :value true :emit :throw}
+             :nan        {:op :nan       :symbol  '#{NaN} :raw "NaN" :value true :emit :throw}
+             :vargs      {:op :vargs     :symbol  '#{...} :raw "...vargs" :value true :emit :throw}
+             :var-let    {:op :var-let   :symbol  '#{var}     :macro  #'tf-var-let :emit :macro}
+             :var-const  {:op :var-const :symbol  '#{const}   :macro  #'tf-var-const :emit :macro}}))))
 
 (def +template+
   (->> {:banned #{:keyword}

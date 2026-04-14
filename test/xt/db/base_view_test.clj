@@ -8,21 +8,21 @@
 
 (l/script- :js
   {:runtime :basic
-   :require [[xt.lang.base-lib :as k]
-             [xt.db.base-view :as v]
-             [xt.db.base-util :as ut]]})
+   :require [[xt.lang.common-data :as xtd]
+              [xt.db.base-view :as v]
+              [xt.db.base-util :as ut]]})
 
 (l/script- :lua
   {:runtime :basic
-   :require [[xt.lang.base-lib :as k]
-             [xt.db.base-view :as v]
-             [xt.db.base-util :as ut]]})
+   :require [[xt.lang.common-data :as xtd]
+              [xt.db.base-view :as v]
+              [xt.db.base-util :as ut]]})
 
 (l/script- :python
   {:runtime :basic
-   :require [[xt.lang.base-lib :as k]
-             [xt.db.base-view :as v]
-             [xt.db.base-util :as ut]]})
+   :require [[xt.lang.common-data :as xtd]
+              [xt.db.base-view :as v]
+              [xt.db.base-util :as ut]]})
 
 (fact:global
  {:setup    [(l/rt:restart)]
@@ -59,7 +59,7 @@
        "select" ["by_name" "all"]}}
   
   (set (!.lua
-        (k/obj-keys (v/all-overview (ut/collect-views (@! +views+))))))
+        (xtd/obj-keys (v/all-overview (ut/collect-views (@! +views+))))))
   => #{"RegionCity" "Organisation" "RegionState" "UserAccount" "Currency" "RegionCountry"}
   
   (!.py

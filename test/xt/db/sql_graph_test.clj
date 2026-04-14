@@ -6,30 +6,33 @@
 (l/script- :js
   {:runtime :basic
    :require [[xt.db.sql-graph :as g]
-             [xt.db.sql-util :as ut]
-             [xt.db.sql-raw :as raw]
-             [xt.lang.base-lib :as k]
-             [xt.db.base-schema :as sch]
-             [xt.db.base-scope :as scope]
-             [xt.db.sample-test :as sample]]})
+              [xt.db.sql-util :as ut]
+              [xt.db.sql-raw :as raw]
+              [xt.lang.common-data :as xtd]
+              [xt.lang.common-lib :as k]
+              [xt.db.base-schema :as sch]
+              [xt.db.base-scope :as scope]
+              [xt.db.sample-test :as sample]]})
 
 (l/script- :lua
   {:runtime :basic
    :require [[xt.db.sql-graph :as g]
-             [xt.lang.base-lib :as k]
-             [xt.db.sql-util :as ut]
-             [xt.db.base-schema :as sch]
-             [xt.db.base-scope :as scope]
-             [xt.db.sample-test :as sample]]})
+              [xt.lang.common-data :as xtd]
+              [xt.lang.common-lib :as k]
+              [xt.db.sql-util :as ut]
+              [xt.db.base-schema :as sch]
+              [xt.db.base-scope :as scope]
+              [xt.db.sample-test :as sample]]})
 
 (l/script- :python
   {:runtime :basic
    :require [[xt.db.sql-graph :as g]
-             [xt.lang.base-lib :as k]
-             [xt.db.sql-util :as ut]
-             [xt.db.base-schema :as sch]
-             [xt.db.base-scope :as scope]
-             [xt.db.sample-test :as sample]]})
+              [xt.lang.common-data :as xtd]
+              [xt.lang.common-lib :as k]
+              [xt.db.sql-util :as ut]
+              [xt.db.base-schema :as sch]
+              [xt.db.base-scope :as scope]
+              [xt.db.sample-test :as sample]]})
 
 (fact:global
  {:setup    [(l/rt:restart)
@@ -269,7 +272,7 @@
   
   (!.js
    (g/select-return-str sample/Schema
-                        (k/second (scope/get-tree sample/Schema
+                        (xtd/second (scope/get-tree sample/Schema
                                                   "UserProfile"
                                                   {}
                                                   [["account"]]
@@ -283,7 +286,7 @@
 
   (!.lua
    (g/select-return-str sample/Schema
-                        (k/second (scope/get-tree sample/Schema
+                        (xtd/second (scope/get-tree sample/Schema
                                                   "UserProfile"
                                                   {}
                                                   [["account"]]
@@ -295,7 +298,7 @@
 
   (!.py
    (g/select-return-str sample/Schema
-                    (k/second (scope/get-tree sample/Schema
+                    (xtd/second (scope/get-tree sample/Schema
                                               "UserProfile"
                                               {}
                                               [["account"]]

@@ -6,17 +6,17 @@
 (l/script- :js
   {:runtime :basic
    :require [[xt.db.sql-raw :as raw]
-             [xt.lang.base-lib :as k]]})
+             [xt.lang.common-lib :as k]]})
 
 (l/script- :lua
   {:runtime :basic
    :require [[xt.db.sql-raw :as raw]
-             [xt.lang.base-lib :as k]]})
+             [xt.lang.common-lib :as k]]})
 
 (l/script- :python
   {:runtime :basic
    :require [[xt.db.sql-raw :as raw]
-             [xt.lang.base-lib :as k]]})
+             [xt.lang.common-lib :as k]]})
 
 (fact:global
  {:setup    [(l/rt:restart)]

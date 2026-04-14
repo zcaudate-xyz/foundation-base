@@ -3,8 +3,8 @@
   (:require [std.lang :as l]))
 
 (l/script :xtalk
-  {:require [[xt.lang.base-lib :as k]
-             [xt.lang.base-iter :as it]
+  {:require [[xt.lang.common-spec :as xt]
+             [xt.lang.common-iter :as it]
              [xt.runtime.common-hash :as common-hash]
              [xt.runtime.interface-common :as interface-common]]})
 
@@ -72,11 +72,11 @@
   (var sep  (-/sep-string coll))
   (it/for:iter [e (. coll (to-iter))]
     
-    (:= s (k/cat s
+    (:= s (xt/x:cat s
                  (interface-common/show e)
                  sep)))
-  (return (k/cat (k/substring s 0 (- (k/len s)
-                                     (k/len sep)))
+  (return (xt/x:cat (xt/x:str-substring s 0 (- (xt/x:len s)
+                                     (xt/x:len sep)))
                  (-/end-string coll))))
 
 (defn.xt coll-into-iter
@@ -98,7 +98,7 @@
   [coll arr]
   (var mutable (interface-common/is-mutable? coll))
   (var ncoll
-       (k/arr-foldl arr
+       (xt/x:arr-foldl arr
                     interface-common/push-mutable
                     (interface-common/to-mutable coll)))
   (if mutable

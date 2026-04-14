@@ -1,16 +1,18 @@
 (ns xt.db.impl-sql-test
   (:require [std.lang :as l]
             [std.string.prose :as prose]
-            [xt.lang.base-notify :as notify])
+            [xt.lang.common-notify :as notify])
   (:use code.test))
 
 (l/script- :js
   {:runtime :basic
    :require [[xt.db.impl-sql :as impl-sql]
-             [xt.lang.base-lib :as k]
-             [xt.lang.base-repl :as repl]
-             [xt.sys.conn-dbsql :as dbsql]
-             [xt.db.base-flatten :as f]
+              [xt.lang.common-lib :as k]
+              [xt.lang.common-data :as xtd]
+              [xt.lang.common-string :as str]
+              [xt.lang.common-repl :as repl]
+              [xt.sys.conn-dbsql :as dbsql]
+              [xt.db.base-flatten :as f]
              [xt.db.sql-util :as ut]
              [xt.db.sql-raw :as raw]
              [xt.db.sql-manage :as manage]
@@ -28,7 +30,7 @@
                    (:= (!:G INSTANCE) (js-sqlite/set-methods
                                        (new SQL.Database)))
                    (dbsql/query-sync INSTANCE
-                                     (k/join "\n\n"
+                                     (str/join "\n\n"
                                              (manage/table-create-all
                                               sample/Schema
                                               sample/SchemaLookup
@@ -57,7 +59,7 @@
                  "SELECT 1;"
                  nil)
     (k/sort
-     (k/obj-keys
+     (xtd/obj-keys
       (f/flatten-bulk sample/Schema
                       {"UserAccount"
                        [sample/RootUser]})))])

@@ -1,9 +1,9 @@
 (ns xt.lang.event-box
-  (:require [std.lang :as l]
-            [std.lang.typed.xtalk :refer [defspec.xt]]))
+  (:require [std.lang :as l :refer [defspec.xt]]))
 
 (l/script :xtalk
-  {:require [[xt.lang.base-lib :as k]
+  {:require [[xt.lang.common-spec :as xt]
+             [xt.lang.common-data :as xtd]
              [xt.lang.event-common :as event-common]]})
 
 (defspec.xt BoxPath
@@ -71,10 +71,10 @@
   "checks that event matches path predicate"
   {:added "4.0"}
   [event path]
-  (var evpath (k/get-key event "path"))
-  (when (> (k/len path) (k/len evpath))
+  (var evpath (xt/x:get-key event "path"))
+  (when (> (xt/x:len path) (xt/x:len evpath))
     (return false))
-  (k/for:array [[i v] path]
+  (xt/for:array [[i v] path]
     (when (not= v (. evpath [i]))
       (return false)))
   (return true))
@@ -83,11 +83,11 @@
   "adds a listener to box"
   {:added "4.0"}
   [box listener-id path callback meta]
-  (:= path (k/arrayify path))
+  (:= path (xtd/arrayify path))
   (return
    (event-common/add-listener
     box listener-id "box" callback
-    (k/obj-assign
+    (xt/x:obj-assign
      {:box/path  path}
      meta)
     (fn [event]
@@ -106,26 +106,26 @@
   {:added "4.0"}
   [box path]
   (var #{data} box)
-  (:= path (k/arrayify path))
-  (return (k/get-in data path)))
+  (:= path (xtd/arrayify path))
+  (return (xtd/get-in data path)))
 
 (defn.xt set-data-raw
   "sets the data in the box"
   {:added "4.0"}
   [box path value]
   (var #{data} box)
-  (cond (k/is-empty? path)
-        (k/set-key box "data" value)
+  (cond (xtd/arr-empty? path)
+        (xt/x:set-key box "data" value)
         
         :else
-        (return (k/set-in data path value))))
+        (return (xtd/set-in data path value))))
 
 (defn.xt set-data
   "sets data with a trigger"
   {:added "4.0"}
   [box path value]
   (var #{data} box)
-  (:= path (k/arrayify path))
+  (:= path (xtd/arrayify path))
   (-/set-data-raw box path value)
   (return
    (event-common/trigger-listeners
@@ -139,12 +139,12 @@
   {:added "4.0"}
   [box path]
   (var #{data} box)
-  (var ppath (k/arr-slice path 0 (- (k/len path) 1)))
-  (var parent (k/get-in data ppath))
+  (var ppath (xt/x:arr-slice path 0 (- (xt/x:len path) 1)))
+  (var parent (xtd/get-in data ppath))
   (when parent
-    (var val (k/get-key parent (k/last path)))
-    (k/del-key parent (k/last path))
-    (return (k/not-nil? val)))
+    (var val (xt/x:get-key parent (xt/x:last path)))
+    (xt/x:del-key parent (xt/x:last path))
+    (return (xt/x:not-nil? val)))
   (return false))
 
 (defn.xt del-data
@@ -172,7 +172,7 @@
   {:added "4.0"}
   [box path value]
   (var prev   (-/get-data box path))
-  (var merged (k/obj-assign (k/obj-clone prev) value))
+  (var merged (xt/x:obj-assign (xt/x:obj-clone prev) value))
   (return
    (-/set-data box path merged)))
 
@@ -180,7 +180,7 @@
   "merges the data in the box"
   {:added "4.0"}
   [box path value]
-  (var arr   (k/arr-clone (-/get-data box path)))
-  (x:arr-push arr value)
+  (var arr   (xt/x:arr-clone (-/get-data box path)))
+  (xt/x:arr-push arr value)
   (return
    (-/set-data box path arr)))

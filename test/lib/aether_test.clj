@@ -1,5 +1,9 @@
 (ns lib.aether-test
-  (:require [lib.aether :refer :all])
+  (:require [lib.aether :refer :all]
+            [lib.aether.base :as base]
+            [lib.aether.request :as request]
+            [lib.aether.result :as result]
+            [std.print :as print])
   (:use code.test))
 
 ^{:refer lib.aether/artifact->dependency :added "3.0"}
@@ -63,32 +67,14 @@
         [utilize/utilize "0.2.3"]])
 
 ^{:refer lib.aether/install-artifact :added "3.0"}
-(comment "installs artifacts to the given coordinate"
-
-  (install-artifact
-   '[im.chit/jvm.artifact "2.4.8"]
-   {:artifacts [{:file "jvm.artifact-2.4.8.jar"
-                 :extension "jar"}
-                {:file "jvm.artifact-2.4.8.pom"
-                 :extension "pom"}]}))
+(fact "installs artifacts to the given coordinate"
+  install-artifact
+  => fn?)
 
 ^{:refer lib.aether/deploy-artifact :added "3.0"}
-(comment "deploys artifacts to the given coordinate"
-
-  (deploy-artifact
-   '[hara/jvm.artifact "2.4.8"]
-   {:artifacts [{:file "jvm.artifact-2.4.8.jar"
-                 :extension "jar"}
-                {:file "jvm.artifact-2.4.8.pom"
-                 :extension "pom"}
-                {:file "jvm.artifact-2.4.8.pom.asc"
-                 :extension "pom.asc"}
-                {:file "jvm.artifact-2.4.8.jar.asc"
-                 :extension "jar.asc"}]
-    :repository {:id "clojars"
-                 :url "https://clojars.org/repo/"
-                 :authentication {:username "zcaudate"
-                                  :password "hello"}}}))
+(fact "deploys artifacts to the given coordinate"
+  deploy-artifact
+  => fn?)
 
 ^{:refer lib.aether/pull :added "3.0"}
 (fact "resolves the coordinate from maven and loads dependency into classpath"

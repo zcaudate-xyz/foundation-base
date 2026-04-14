@@ -2,7 +2,7 @@
   (:require [std.lang :as l]))
 
 (l/script :xtalk
-  {:require [[xt.lang.base-lib :as k]
+  {:require [[xt.lang.common-spec :as xt]
              [xt.sys.cache-common :as cache]]})
 
 ;;
@@ -68,7 +68,7 @@
   "gets the queue meta"
   {:added "4.0"}
   [cache]
-  (return (k/json-decode (or (x:cache-get cache "__meta__:queue")
+  (return (xt/x:json-decode (or (xt/x:cache-get cache "__meta__:queue")
                            "{}"))))
 
 (defn.xt buffer-item
@@ -82,32 +82,32 @@
   {:added "4.0"}
   ([cache queue]
    (var index (cache/get cache (-/INDEX-KEY queue)))
-   (if (k/nil? index)
-     (k/err (k/cat "Not found - Index, Queue: " queue))
-     (return (k/to-number index)))))
+   (if (xt/x:nil? index)
+     (xt/x:err (xt/x:cat "Not found - Index, Queue: " queue))
+     (return (xt/x:to-number index)))))
 
 (defn.xt buffer-set-index
   "sets the index for a buffer"
   {:added "4.0"}
   ([cache queue idx]
-   (return (cache/set cache (-/INDEX-KEY queue) (k/to-string idx)))))
+   (return (cache/set cache (-/INDEX-KEY queue) (xt/x:to-string idx)))))
 
 (defn.xt queue-groupcount
   "gets the queue group count"
   {:added "4.0"}
   ([cache queue]
    (var count (cache/get cache (-/GROUPCOUNT-KEY queue)))
-   (if (k/nil? count)
-     (k/err (k/cat "Not found - Count, Queue: " queue))
-     (return (k/to-number count)))))
+   (if (xt/x:nil? count)
+     (xt/x:err (xt/x:cat "Not found - Count, Queue: " queue))
+     (return (xt/x:to-number count)))))
 
 (defn.xt queue-meta-assoc
   "sets a key in the queue meta"
   {:added "4.0"}
   [cache key item]
   (var meta (-/queue-meta cache))
-  (k/set-key meta key item)
-  (cache/set cache -/META-KEY (k/json-encode meta))
+  (xt/x:set-key meta key item)
+  (cache/set cache -/META-KEY (xt/x:json-encode meta))
   (return meta))
 
 (defn.xt queue-meta-dissoc
@@ -115,9 +115,9 @@
   {:added "4.0"}
   [cache key]
   (var meta (-/queue-meta cache))
-  (var out  (k/get-key meta key))
-  (k/del-key meta key)
-  (cache/set cache -/META-KEY (k/json-encode meta))
+  (var out  (xt/x:get-key meta key))
+  (xt/x:del-key meta key)
+  (cache/set cache -/META-KEY (xt/x:json-encode meta))
   (return out))
 
 (defn.xt create-queue
@@ -135,7 +135,7 @@
   {:added "4.0"}
   ([cache]
    (var meta (-/queue-meta cache))
-   (return (k/obj-keys meta))))
+   (return (xt/x:obj-keys meta))))
 
 (defn.xt list-queue-groups
   "lists all queue groups"
@@ -143,11 +143,11 @@
   ([cache queue]
    (var ks (cache/list-keys cache))
    (var group-key (-/GROUP-KEY queue ""))
-   (return (k/arr-keep ks
+   (return (xt/x:arr-keep ks
                        (fn:> [k]
-                         (:? (k/starts-with? k group-key)
-                             (k/sym-name k)))
-		       k/identity))))
+                         (:? (xt/x:starts-with? k group-key)
+                             (xt/x:sym-name k)))
+		       (fn [x] (return x))))))
 
 (defn.xt purge-queue
   "removes all groups and items in a queue"
@@ -162,13 +162,13 @@
    (cache/del cache (-/GROUPCOUNT-KEY queue))
 
    ;; groups
-   (k/for:index [idx [0 (- size 1)]]
+   (xt/for:index [idx [0 (- size 1)]]
      (cache/del cache (-/BUFFER-KEY queue idx)))
    
    ;; buffers
    (var group-key (-/GROUP-KEY queue ""))
-   (k/for:array [k (cache/list-keys cache)]
-     (if (k/starts-with? k group-key)
+   (xt/for:array [k (cache/list-keys cache)]
+     (if (xt/x:starts-with? k group-key)
        (cache/del cache k)))
    (return (-/queue-meta-dissoc cache queue))))
 
@@ -184,21 +184,21 @@
    (cache/set cache (-/INDEX-KEY queue) ridx)
    ;; buffers
    (var group-key (-/GROUP-KEY queue ""))
-   (k/for:array [k (cache/list-keys cache)]
-     (if (k/starts-with? k group-key)
+   (xt/for:array [k (cache/list-keys cache)]
+     (if (xt/x:starts-with? k group-key)
        (cache/set cache k ridx)))))
 
 (defn.xt has-queue
   "checks that queue exists"
   {:added "4.0"}
   ([cache queue]
-   (return (k/not-nil? (cache/get cache (-/INDEX-KEY queue))))))
+   (return (xt/x:not-nil? (cache/get cache (-/INDEX-KEY queue))))))
 
 (defn.xt has-group
   "checks that group exists"
   {:added "4.0"}
   ([cache queue group-id]
-   (return (k/not-nil?  (cache/get cache (-/GROUP-KEY queue group-id))))))
+   (return (xt/x:not-nil?  (cache/get cache (-/GROUP-KEY queue group-id))))))
 
 (defn.xt push-item
   "pushes an item into the queue"
@@ -217,7 +217,7 @@
   ([cache queue items size]
    (var idx (-/buffer-get-index cache queue))
    (var nidx idx)
-   (k/for:array [item items]
+   (xt/for:array [item items]
      (:= nidx (:? (< nidx (- size 1)) (+ nidx 1) 0))
      (cache/set cache (-/BUFFER-KEY queue nidx) item))
    (-/buffer-set-index cache queue nidx)
@@ -237,16 +237,16 @@
   {:added "4.0"}
   ([cache queue group-id gidx]
    (return (cache/set cache (-/GROUP-KEY queue group-id)
-                      (k/to-string gidx)))))
+                      (xt/x:to-string gidx)))))
 
 (defn.xt group-get-index
   "gets an index for a group"
   {:added "4.0"}
   ([cache queue group-id]
    (var gidx (cache/get cache (-/GROUP-KEY queue group-id)))
-   (if (k/nil? gidx)
-     (k/err (k/cat "Not found - Group: " group-id ", Queue: " queue))
-     (return (k/to-number gidx)))))
+   (if (xt/x:nil? gidx)
+     (xt/x:err (xt/x:cat "Not found - Group: " group-id ", Queue: " queue))
+     (return (xt/x:to-number gidx)))))
 
 (defn.xt group-setup
   "setup a group"
@@ -268,18 +268,18 @@
    (var bidx (-/buffer-get-index cache queue))
    (var res [])
    (cond (> bidx gidx)
-         (do (k/for:index [i [(+ gidx 1) (+ bidx (x:offset-rlen 1))]]
-               (x:arr-push res (cache/get cache (-/BUFFER-KEY queue i))))
+         (do (xt/for:index [i [(+ gidx 1) (+ bidx (xt/x:offset-rlen 1))]]
+               (xt/x:arr-push res (cache/get cache (-/BUFFER-KEY queue i))))
              (-/group-set-index cache queue group-id bidx)
-             (return [(k/len res) res bidx]))
+             (return [(xt/x:len res) res bidx]))
 
          (< bidx gidx)
-         (do (k/for:index [i [(+ gidx 1) (x:offset-rlen size)]]
-               (x:arr-push res (cache/get cache (-/BUFFER-KEY queue i))))
-             (k/for:index [i [0 (+ bidx (x:offset-rlen 1))]]
-               (x:arr-push res (cache/get cache (-/BUFFER-KEY queue i))))
+         (do (xt/for:index [i [(+ gidx 1) (xt/x:offset-rlen size)]]
+               (xt/x:arr-push res (cache/get cache (-/BUFFER-KEY queue i))))
+             (xt/for:index [i [0 (+ bidx (xt/x:offset-rlen 1))]]
+               (xt/x:arr-push res (cache/get cache (-/BUFFER-KEY queue i))))
              (-/group-set-index cache queue group-id bidx)
-             (return [(k/len res) res bidx]))
+             (return [(xt/x:len res) res bidx]))
 
          :else
          (return [0]))))
@@ -300,7 +300,7 @@
   "pushes a queue, if not there creates a queue and default group"
   {:added "4.0"}
   [cache queue item size]
-  (k/for:try [[ok err] (-/push-item cache
+  (xt/for:try [[ok err] (-/push-item cache
                                     queue
                                     item
                                     size)]

@@ -1,7 +1,6 @@
 (ns std.lang.base.script-macro
   (:require [std.lang.base.emit :as emit]
             [std.lang.base.emit-preprocess :as preprocess]
-            [std.lang.base.grammar-spec :as grammar]
             [std.lang.base.impl :as impl]
             [std.lang.base.impl-entry :as entry]
             [std.lang.base.library :as lib]
@@ -14,6 +13,7 @@
             [std.lib.context.space :as space]
             [std.lib.env :as env]
             [std.lib.foundation :as f]
+            [std.lib.function :as fn]
             [std.lib.time :as time]))
 
 (def +form-allow+ [:line :column :file :name :ns])
@@ -88,11 +88,13 @@
   "function to intern a macro"
   {:added "4.0"}
   ([lang [op sym & body :as form] smeta]
-   (let [[doc attr body] (grammar/format-fargs body)
-         [module fmeta]  (intern-prep lang form)
-         entry  (entry/create-macro (apply list 'defmacro sym body)
-                                    (merge smeta
-                                           fmeta
+   (let [[doc attr body] (fn/fn:call-body (first body)
+                                          (second body)
+                                          (nnext body))
+          [module fmeta]  (intern-prep lang form)
+          entry  (entry/create-macro (apply list 'defmacro sym body)
+                                     (merge smeta
+                                            fmeta
                                            {:lang lang
                                             :module module}))
          lib    (impl/runtime-library)

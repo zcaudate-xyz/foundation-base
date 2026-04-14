@@ -1,6 +1,10 @@
 name: Run Code
 
 on: [push, repository_dispatch, workflow_dispatch]
+
+env:
+  LEIN_JVM_OPTS: -Xms512m -Xmx3g -XX:+UseG1GC -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=/tmp
+
 jobs:
   
   run-incomplete:
@@ -14,6 +18,7 @@ jobs:
       - name: Run Incomplete
         run: >
           docker run --network host 
+          -e "LEIN_JVM_OPTS=${LEIN_JVM_OPTS}"
           -v /var/run/docker.sock:/var/run/docker.sock 
           -v $(pwd):$(pwd) 
           -w $(pwd) 
@@ -30,6 +35,7 @@ jobs:
       - name: Run Tests - std, math, net and script
         run: >
           docker run --network host 
+          -e "LEIN_JVM_OPTS=${LEIN_JVM_OPTS}"
           -v /var/run/docker.sock:/var/run/docker.sock 
           -v $(pwd):$(pwd) 
           -w $(pwd) 
@@ -46,6 +52,7 @@ jobs:
       - name: Run Tests - code
         run: >
           docker run --network host 
+          -e "LEIN_JVM_OPTS=${LEIN_JVM_OPTS}"
           -v /var/run/docker.sock:/var/run/docker.sock 
           -v $(pwd):$(pwd) 
           -w $(pwd) 
@@ -73,6 +80,7 @@ jobs:
       - name: Run Tests - lib and jvm
         run: >
           docker run --network host 
+          -e "LEIN_JVM_OPTS=${LEIN_JVM_OPTS}"
           -v /var/run/docker.sock:/var/run/docker.sock 
           -v $(pwd):$(pwd) 
           -w $(pwd) 
@@ -100,6 +108,7 @@ jobs:
       - name: Run Tests - rt, xtalk
         run: >
           docker run --network host 
+          -e "LEIN_JVM_OPTS=${LEIN_JVM_OPTS}"
           -v /var/run/docker.sock:/var/run/docker.sock 
           -v $(pwd):$(pwd) 
           -w $(pwd) 
@@ -127,6 +136,7 @@ jobs:
       - name: Run Tests - indigo
         run: >
           docker run --network host 
+          -e "LEIN_JVM_OPTS=${LEIN_JVM_OPTS}"
           -v /var/run/docker.sock:/var/run/docker.sock 
           -v $(pwd):$(pwd) 
           -w $(pwd) 
@@ -154,6 +164,7 @@ jobs:
       - name: Deploying native-code
         run: >
           docker run --network host
+          -e "LEIN_JVM_OPTS=${LEIN_JVM_OPTS}"
           -v /var/run/docker.sock:/var/run/docker.sock
           -v $HOME/.ssh:/root/.ssh
           -v $(pwd):$(pwd) -w $(pwd)

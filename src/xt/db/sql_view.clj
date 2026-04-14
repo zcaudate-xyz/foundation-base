@@ -2,7 +2,8 @@
   (:require [std.lang :as l]))
 
 (l/script :xtalk
-  {:require [[xt.lang.base-lib :as k]
+  {:require [[xt.lang.common-spec :as xt]
+             [xt.lang.common-data :as xtd]
              [xt.db.sql-graph :as sql-graph]
              [xt.db.sql-util :as sql-util]
              [xt.db.base-scope :as base-scope]]})
@@ -11,7 +12,7 @@
   "creates a control array"
   {:added "4.0"}
   [control]
-  (when (k/is-empty? control)
+  (when (xtd/is-empty? control)
     (return []))
   
   (var out [])
@@ -19,14 +20,14 @@
          order-sort
          limit
          offset} control)
-  (when (k/arr? order-by)
-    (x:arr-push out (sql-util/ORDER-BY order-by)))
+  (when (xt/x:is-array? order-by)
+    (xt/x:arr-push out (sql-util/ORDER-BY order-by)))
   (when order-sort
-    (x:arr-push out (sql-util/ORDER-SORT order-sort)))
-  (when (k/is-number? limit)
-    (x:arr-push out (sql-util/LIMIT limit)))
-  (when (k/is-number? offset)
-    (x:arr-push out (sql-util/OFFSET offset)))
+    (xt/x:arr-push out (sql-util/ORDER-SORT order-sort)))
+  (when (xt/x:is-number? limit)
+    (xt/x:arr-push out (sql-util/LIMIT limit)))
+  (when (xt/x:is-number? offset)
+    (xt/x:arr-push out (sql-util/OFFSET offset)))
   (return out))
 
 (defn.xt tree-base
@@ -34,9 +35,9 @@
   {:added "4.0"}
   [schema table-name sel-query clause returning opts]
   (var tarr (base-scope/merge-queries sel-query clause))
-  (var tree (k/arr-append [table-name] tarr))
+  (var tree (xt/x:arr-append [table-name] tarr))
   (when returning
-    (x:arr-push tree returning))
+    (xt/x:arr-push tree returning))
   (return (sql-graph/select-tree schema tree opts)))
 
 (defn.xt tree-count
@@ -45,9 +46,9 @@
   [schema entry clause opts]
   (var #{view control} entry)
   (var #{table query} view)
-  (return (-/tree-base schema table query clause [{"::" "sql/count"}
-                                                  (k/unpack (-/tree-control-array control))]
-                       opts)))
+  (return (-/tree-base schema table query clause (xt/x:arr-append [{"::" "sql/count"}]
+                                                                   (-/tree-control-array control))
+                        opts)))
 
 (defn.xt tree-select
   "provides a view select query"
@@ -55,8 +56,9 @@
   [schema entry clause opts]
   (var #{view control} entry)
   (var #{table query} view)
-  (return (-/tree-base schema table query clause ["id"
-                                                  (k/unpack (-/tree-control-array control))] opts)))
+  (return (-/tree-base schema table query clause (xt/x:arr-append ["id"]
+                                                                   (-/tree-control-array control))
+                        opts)))
 
 (defn.xt tree-return
   "provides a view return query"
@@ -71,17 +73,17 @@
   {:added "4.0"}
   [schema sel-entry ret-entry ret-omit clause opts]
   (var #{control} sel-entry)
-  (var sel-table   (k/get-path sel-entry ["view" "table"]))
-  (var ret-table   (k/get-path ret-entry ["view" "table"]))
-  (var sel-query   (or (k/get-path sel-entry ["view" "query"]) {}))
-  (var ret-query   (or (k/get-path ret-entry ["view" "query"]) {}))
-  (var ret-clause  (:? (k/not-empty? ret-omit)
+  (var sel-table   (xt/x:get-path sel-entry ["view" "table"]))
+  (var ret-table   (xt/x:get-path ret-entry ["view" "table"]))
+  (var sel-query   (or (xt/x:get-path sel-entry ["view" "query"]) {}))
+  (var ret-query   (or (xt/x:get-path ret-entry ["view" "query"]) {}))
+  (var ret-clause  (:? (xtd/not-empty? ret-omit)
                        [{:id {:not-in [ret-omit]}}]
                        []))
   (var combined-clause (base-scope/merge-queries clause ret-clause))
   
   (return (-/tree-base schema sel-table sel-query combined-clause
-                       (k/arr-append (k/arr-clone ret-query)
+                       (xt/x:arr-append (xt/x:arr-clone ret-query)
                                      (-/tree-control-array control))
                        opts)))
 
@@ -95,18 +97,18 @@
   [tree args input-spec drop-first]
   (var arg-map {})
   (when drop-first
-    (x:arr-pop-first input-spec))
-  (when (== 0 (k/len input-spec))
+    (xt/x:arr-pop-first input-spec))
+  (when (== 0 (xt/x:len input-spec))
     (return tree))
-  (k/for:array [[i e] input-spec]
-    (:= (. arg-map [(k/cat "{{" (. e ["symbol"]) "}}")])
+  (xt/for:array [[i e] input-spec]
+    (:= (. arg-map [(xt/x:cat "{{" (. e ["symbol"]) "}}")])
         (. args [i])))
-  (var out (k/walk tree
-                   k/identity
+  (var out (xtd/tree-walk tree
+                   (fn [x] (return x))
                    (fn [x]
-                     (return (:? (and (k/is-string? x)
-                                      (k/has-key? arg-map x))
-                                 (k/get-key arg-map x)
+                     (return (:? (and (xt/x:is-string? x)
+                                      (xt/x:has-key? arg-map x))
+                                 (xt/x:get-key arg-map x)
                                  x)))))
   (return out))
 
@@ -117,7 +119,7 @@
   
   (var #{input} entry)
   (var itree  (-/tree-select schema entry {} opts))
-  (var qtree  (-/query-fill-input itree args (k/arr-clone input) false))
+  (var qtree  (-/query-fill-input itree args (xt/x:arr-clone input) false))
   (if as-tree
     (return qtree)
     (return (sql-graph/select-return schema qtree 0 opts))))
@@ -128,7 +130,7 @@
   [schema entry args opts as-tree]
   (var #{input} entry)
   (var itree  (-/tree-count schema entry {} opts))
-  (var qtree  (-/query-fill-input itree args (k/arr-clone input) false))
+  (var qtree  (-/query-fill-input itree args (xt/x:arr-clone input) false))
   (if as-tree
     (return qtree)
     (return (sql-graph/select-return schema qtree 0 opts))))
@@ -139,7 +141,7 @@
   [schema entry id args opts as-tree]
   (var #{input} entry)
   (var itree (-/tree-return schema entry {:id id} {} opts))
-  (var qtree (-/query-fill-input itree args (k/arr-clone input) true))
+  (var qtree (-/query-fill-input itree args (xt/x:arr-clone input) true))
   (if as-tree
     (return qtree)
     (return (sql-graph/select-return schema qtree 0 opts))))
@@ -154,7 +156,7 @@
                              {:id ["in" [ids]]}
                              {}
                              opts))
-  (var qtree (-/query-fill-input itree args (k/arr-clone input) true))
+  (var qtree (-/query-fill-input itree args (xt/x:arr-clone input) true))
   (if as-tree
     (return qtree)
     (return (sql-graph/select-return schema qtree 0 opts))))
@@ -163,8 +165,8 @@
   "provides a view combine query"
   {:added "4.0"}
   [schema sel-entry sel-args ret-entry ret-args ret-omit opts as-tree]
-  (var sel-input  (k/get-key sel-entry "input"))
-  (var ret-input  (k/get-key ret-entry "input"))
+  (var sel-input  (xt/x:get-key sel-entry "input"))
+  (var ret-input  (xt/x:get-key ret-entry "input"))
   (var itree   (-/tree-combined schema
                                 sel-entry
                                 ret-entry
@@ -172,10 +174,10 @@
                                 []
                                 opts))
   (var qtree (-/query-fill-input itree
-                                 (-> (k/arr-clone  ret-args)
-                                     (k/arr-append sel-args))
-                                 (-> (k/arr-clone  ret-input)
-                                     (k/arr-append sel-input))
+                                 (-> (xt/x:arr-clone  ret-args)
+                                     (xt/x:arr-append sel-args))
+                                 (-> (xt/x:arr-clone  ret-input)
+                                     (xt/x:arr-append sel-input))
                                  true))
   (if as-tree
     (return qtree)

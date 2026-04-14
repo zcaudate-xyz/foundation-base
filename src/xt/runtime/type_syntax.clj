@@ -2,7 +2,7 @@
   (:require [std.lang :as l]))
 
 (l/script :xtalk
-  {:require [[xt.lang.base-lib :as k]
+  {:require [[xt.lang.common-spec :as xt]
              [xt.lang.base-runtime :as rt :with [defvar.xt]]
              [xt.runtime.interface-spec :as spec]
              [xt.runtime.interface-common :as interface-common]
@@ -40,9 +40,9 @@
 
 (def.xt SYNTAX_PROTOTYPE
   (-> -/SYNTAX_SPEC
-      (k/proto-spec)
-      (k/obj-map -/syntax-wrap)
-      (k/proto-create)))
+      (xt/x:proto-spec)
+      (xtd/obj-map -/syntax-wrap)
+      (xt/x:proto-create)))
 
 (defn.xt syntax-create
   "creates a syntax
@@ -55,7 +55,7 @@
   (var syntax {"::" "syntax"
                :_value value
                :_metadata metadata})
-  (k/set-proto syntax -/SYNTAX_PROTOTYPE)
+  (xt/x:set-proto syntax -/SYNTAX_PROTOTYPE)
   (return syntax))
 
 (defn.xt get-metadata
@@ -73,7 +73,7 @@
   (var v (:? (interface-common/is-syntax? x)
              (. x _value)
              x))
-  (return (:? (k/nil? metadata)
+  (return (:? (xt/x:nil? metadata)
               v
               (-/syntax-create v metadata))))
 
@@ -84,7 +84,7 @@
       spec/IIndexedKV
       spec/ILookup
      ]
-  (k/proto-spec))
+  (xt/x:proto-spec))
   (comment
   [(def.xt IAssoc  ["assoc"])
    (def.xt IDissoc ["dissoc"])

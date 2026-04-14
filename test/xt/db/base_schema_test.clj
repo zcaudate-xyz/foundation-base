@@ -5,21 +5,21 @@
 
 (l/script- :js
   {:runtime :basic
-   :require [[xt.lang.base-lib :as k]
+   :require [[xt.lang.common-lib :as k]
              [xt.db.base-schema :as sch]
              [xt.db.sample-test :as sample]
              [xt.db.sql-util :as ut]]})
 
 (l/script- :lua
   {:runtime :basic
-   :require [[xt.lang.base-lib :as k]
+   :require [[xt.lang.common-lib :as k]
              [xt.db.base-schema :as sch]
              [xt.db.sample-test :as sample]
              [xt.db.sql-util :as ut]]})
 
 (l/script- :python
   {:runtime :basic
-   :require [[xt.lang.base-lib :as k]
+   :require [[xt.lang.common-lib :as k]
              [xt.db.base-schema :as sch]
              [xt.db.sample-test :as sample]
              [xt.db.sql-util :as ut]]})

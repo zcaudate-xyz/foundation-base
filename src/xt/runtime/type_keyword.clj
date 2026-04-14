@@ -3,7 +3,7 @@
   (:refer-clojure :exclude [keyword]))
 
 (l/script :xtalk
-  {:require [[xt.lang.base-lib :as k]
+  {:require [[xt.lang.common-spec :as xt]
              [xt.lang.base-runtime :as rt :with [defvar.xt]]
              [xt.runtime.interface-common :as interface-common]
              [xt.runtime.interface-spec :as spec]
@@ -18,9 +18,9 @@
   [sym]
   (var #{_ns _name} sym)
   (return
-   (-> (k/get-key common-hash/SEED "keyword")
-       (k/bit-xor (common-hash/hash-string
-                   (k/sym-full _ns _name))))))
+   (-> (xt/x:get-key common-hash/SEED "keyword")
+       (xt/x:bit-xor (common-hash/hash-string
+                   (xt/x:sym-full _ns _name))))))
 
 (defn.xt keyword-show
   "shows the keyword"
@@ -28,13 +28,13 @@
   [sym]
   (var #{_ns _name} sym)
   (return
-   (k/cat ":" (k/sym-full _ns _name))))
+   (xt/x:cat ":" (xt/x:sym-full _ns _name))))
 
 (defn.xt keyword-eq
   "gets keyword equality"
   {:added "4.0"}
   [sym o]
-  (return (and (== "keyword" (k/type-class o))
+  (return (and (== "keyword" (xt/x:type-class o))
                (== (. sym _ns)   (. o _ns))
                (== (. sym _name) (. o _name)))))
 
@@ -48,8 +48,8 @@
 
 (def.xt KEYWORD_PROTOTYPE
   (-> -/KEYWORD_SPEC
-      (k/proto-spec)
-      (k/proto-create)))
+      (xt/x:proto-spec)
+      (xt/x:proto-create)))
 
 (defn.xt keyword-create
   "creates a keyword"
@@ -58,7 +58,7 @@
   (var sym {"::" "keyword"
             :_ns   ns
             :_name name})
-  (k/set-proto sym -/KEYWORD_PROTOTYPE)
+  (xt/x:set-proto sym -/KEYWORD_PROTOTYPE)
   (return sym))
 
 (defn.xt keyword
@@ -66,11 +66,11 @@
   {:added "4.0"}
   [ns name]
   (var lu -/KEYWORD_LOOKUP)
-  (var key (k/sym-full ns name))
-  (var out (k/get-key lu key))
-  (when (k/nil? out)
+  (var key (xt/x:sym-full ns name))
+  (var out (xt/x:get-key lu key))
+  (when (xt/x:nil? out)
     (var sym (-/keyword-create ns name))
-    (k/set-key lu key sym)
+    (xt/x:set-key lu key sym)
     (return sym))
   (return out))
 

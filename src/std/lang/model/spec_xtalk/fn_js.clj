@@ -256,32 +256,32 @@
    (template/$ (. ~lu (delete ~obj)))))
 
 (def +js-lu+
-  {:x-lu-create      {:emit :unit :default '(new WeakMap)}
+  {:x-lu-create      {:emit :unit :default '(new Map)}
    :x-lu-get         {:macro #'js-tf-x-lu-get :emit :macro}
    :x-lu-set         {:macro #'js-tf-x-lu-set :emit :macro}
    :x-lu-del         {:macro #'js-tf-x-lu-del :emit :macro}})
 
 (defn js-tf-x-obj-keys
   [[_ obj]]
-  (list 'return (list 'Object.keys obj)))
+  (list 'Object.keys obj))
 
 (defn js-tf-x-obj-vals
   [[_ obj]]
-  (list 'return (list 'Object.values obj)))
+  (list 'Object.values obj))
 
 (defn js-tf-x-obj-pairs
   "converts map to array"
   {:added "4.0"}
   ([[_ m]]
-   (list 'return (list 'Object.entries m))))
+   (list 'Object.entries m)))
 
 (defn js-tf-x-obj-clone
   [[_ m]]
-  (list 'return (list 'Object.assign {} m)))
+  (list 'Object.assign {} m))
 
 (defn js-tf-x-obj-assign
   [[_ obj m]]
-  (list 'return (list 'Object.assign obj m)))
+  (list 'Object.assign obj m))
 
 (def +js-obj+
   {:x-obj-keys      {:macro #'js-tf-x-obj-keys    :emit :macro  :type :template}
@@ -338,7 +338,7 @@
                                          (~key-fn b))
                                         -1 1)))))))
 
-(defn js-tf-x-arr-str-comp
+(defn js-tf-x-str-comp
   [[_ a b]]
   (list '> 0 (list '. a (list 'localeCompare b))))
 
@@ -353,7 +353,7 @@
    :x-arr-remove      {:macro #'js-tf-x-arr-remove     :emit :macro   :type :template}
    :x-arr-insert      {:macro #'js-tf-x-arr-insert     :emit :macro   :type :template}
    :x-arr-sort        {:macro #'js-tf-x-arr-sort       :emit :macro}
-   :x-arr-str-comp    {:macro #'js-tf-x-arr-str-comp   :emit :macro}})
+   :x-str-comp        {:macro #'js-tf-x-str-comp       :emit :macro}})
 
 ;;
 ;; STRING

@@ -6,6 +6,6 @@
 
 (defn.js hello
   [a b]
-  (x:m-sin)
+  (xt/x:m-sin)
   (return
    (lib/T)))

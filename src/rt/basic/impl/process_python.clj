@@ -10,7 +10,7 @@
             [std.lang.base.runtime :as rt]
             [std.lang.model.spec-python :as spec]
             [std.lib.os :as os]
-            [xt.lang.base-repl :as k]))
+            [xt.lang.common-repl :as k]))
 
 (def +python-init+
   (common/put-program-options
@@ -267,4 +267,3 @@
         (clojure.string/join "\n\n")))
   
   (os/sh-output +sh+))
-

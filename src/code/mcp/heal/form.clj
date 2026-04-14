@@ -1,0 +1,163 @@
+(ns code.mcp.heal.form
+  (:require [code.mcp.heal.form-edits :as form-edits]
+            [code.manage :as manage]
+            [code.query :as query]
+            [std.block :as b]
+            [std.block.heal.core :as heal]
+            [std.block.navigate :as edit]
+            [std.fs :as fs]
+            [std.lib.collection :as collection]
+            [std.lib.sort :as sort]))
+
+(defn get-dsl-deps-fn
+  [content]
+  (let [nav      (edit/parse-root content)
+        ns-name  (edit/value
+                  (first (query/select nav
+                                       '[(ns | _ & _)])))
+        ns-deps  (set (map first
+                           (:require (edit/value
+                                      (first
+                                       (query/select nav
+                                                     ['(l/script & _)
+                                                      '|
+                                                      map?]))))))]
+    {:ns ns-name
+     :deps ns-deps}))
+
+(defn load-file-fn
+  [content]
+  (let [ns  (second (read-string content))
+        res (load-string content)]
+    [ns ]))
+
+(defn get-load-order
+  [input-deps]
+  (let [all-deps   (apply clojure.set/union
+                          (map :deps (vals input-deps)))
+        lu-ns      (collection/map-vals :ns input-deps)
+        lu-path    (collection/transpose lu-ns)
+        load-deps  (set (keys lu-path))
+        sys-deps   (clojure.set/difference
+                    all-deps load-deps)
+        mdeps      (collection/map-entries
+                    (fn [[path {:keys [ns deps]}]]
+                      [ns (clojure.set/difference
+                           deps sys-deps)])
+                    input-deps)
+        ordered    (sort/topological-sort-order-by-deps
+                    mdeps
+                    (sort/topological-sort mdeps))]
+    (mapv lu-path ordered)))
+
+(defn heal-directory
+  [{:keys [root source-paths]
+    :as env}
+   & [{:keys [write]
+       :as params}]]
+  (manage/transform-code
+   :all
+   (collection/merge-nested
+    {:title (fn [params env]
+              (str "HEAL DIRECTORY" " - " (fs/path (:root env))))
+     :transform heal/heal-content
+     :print {:function true}
+     :verify {:read b/parse-root}
+     :no-analysis true}
+    params)
+   {:root root
+    :source-paths source-paths}))
+
+(defn refactor-directory
+  [{:keys [root source-paths]
+    :as env}
+   edits
+   & [{:keys [write]
+       :as params}]]
+  (manage/refactor-code
+   :all
+   (collection/merge-nested
+    {:title (fn [params env]
+              (str "REFACTOR DIRECTORY" " - " (fs/path (:root env))))
+     :edits  edits
+     :print  {:function true}
+     :verify {:read b/parse-root}
+     :no-analysis true}
+    params)
+   {:root root
+    :source-paths source-paths}))
+
+(defn get-dsl-deps
+  [{:keys [root source-paths]
+    :as env}
+   & [{:keys [write]
+       :as params}]]
+  (manage/extract
+   :all
+   (collection/merge-nested
+    {:title (fn [params env]
+              (str "GET DSL DEPS" " - " (fs/path (:root env))))
+     :process get-dsl-deps-fn}
+    params)
+   {:root root
+    :source-paths source-paths}))
+
+(defn load-directory
+  [{:keys [root source-paths]
+    :as env}
+   deps
+   & [{:keys [write ]
+       :as params}]]
+  (let [task-fn (assoc-in manage/extract
+                       [:item :list]
+                       (fn [lookup env]
+                         (get-load-order deps)))]
+    (task-fn
+     :all
+     (collection/merge-nested
+      {:parallel false
+       :print {:item true :result true :summary true}
+       :title (fn [params env]
+                (str "LOAD DSL" " - " (fs/path (:root env))))
+       :process load-file-fn}
+      params)
+     {:root root
+      :source-paths source-paths})))
+
+
+(comment
+  (heal-directory
+   {:root "../Szncampaigncenter/"
+    :source-paths ["src-translated"]}
+   {:write true})
+  
+  (refactor-directory
+   {:root "../Szncampaigncenter/"
+    :source-paths ["src-translated"]}
+   [form-edits/fix:remove-fg-extra-references
+    form-edits/fix:replace-fg-extra-namepspaces
+    form-edits/fix:namespaced-symbol-no-dot
+    form-edits/fix:set-arg-destructuring
+    form-edits/fix:dash-indexing
+    form-edits/fix:remove-mistranslated-syms]
+   {:write true})
+  
+
+  (refactor-directory
+   {:root "../Szncampaigncenter/"
+    :source-paths ["src-translated"]}
+   [form-edits/fix:remove-mistranslated-syms])
+  
+  
+  (def +deps+
+    (get-dsl-deps
+     {:root "../Szncampaigncenter/"
+      :source-paths ["src-translated"]}))
+  
+
+  (load-directory
+   {:root "../Szncampaigncenter/"
+    :source-paths ["src-translated"]}
+   +deps+))
+
+

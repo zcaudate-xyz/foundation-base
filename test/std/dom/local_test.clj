@@ -105,7 +105,11 @@
   (-> (base/dom-create :test/carrot)
       (impl/dom-render)
       (local-trigger-add :on/top {:id :event/top})
-      (local-trigger-remove :on/top)))
+      (local-trigger-remove :on/top)
+      :cache
+      :local/active
+      deref)
+  => {})
 
 ^{:refer std.dom.local/local-split-props :added "3.0"}
 (fact "splits props between change events and trigger events"

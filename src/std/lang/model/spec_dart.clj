@@ -67,17 +67,42 @@
   "for return transform"
   {:added "4.0"}
   [[_ [[res err] statement] {:keys [success error final]}]]
-  (let [cb (list 'fn [err res]
-                 (list 'if err
-                       error
-                       success))
-        out (walk/prewalk (fn [x]
-                            (if (= x '(x:callback))
-                              cb
-                              x))
-                          statement)]
+  (let [return-run? (and (seq? statement)
+                         (= 'x:return-run (first statement)))
+        success* (if (and return-run? final)
+                   (list 'return success)
+                   success)
+        error* (if (and return-run? final)
+                 (list 'return error)
+                 error)
+        out (if return-run?
+              (let [[_ runner] statement]
+                (template/$
+                 (do (var ~res nil)
+                     (var ~err nil)
+                     (try
+                       (~runner
+                        (fn [value]
+                          (:= ~res value)
+                          (:= ~err nil))
+                        (fn [value]
+                          (:= ~res nil)
+                          (:= ~err value)))
+                       (if ~err
+                         ~error*
+                         ~success*)
+                       (catch ~err ~error*)))))
+              (let [cb (list 'fn [err res]
+                             (list 'if err
+                                   error
+                                   success))]
+                (walk/prewalk (fn [x]
+                                (if (= x '(x:callback))
+                                  cb
+                                  x))
+                              statement)))]
     (cond->> out
-      final (list 'return))))
+      (and final (not return-run?)) (list 'return))))
 
 (defn tf-for-try
   "for try transform"
@@ -92,37 +117,59 @@
   "for async transform"
   {:added "4.0"}
   [[_ [[res err] statement] {:keys [success error finally]}]]
-  (template/$ (. (Future (fn []
-                           (return ~statement)))
-                 ~@(if success
-                     [(list 'then
-                            (list 'fn [res]
-                                  success))])
-                 ~@(if error
-                     [(list 'catchError
-                            (list 'fn [err]
-                                  error))])
-                 ~@(if finally
-                     [(list 'whenComplete
-                            (list 'fn '[]
-                                  finally))]))))
+  (let [return-run? (and (seq? statement)
+                         (= 'x:return-run (first statement)))
+        base (if return-run?
+               (let [[_ runner] statement]
+                 (template/$
+                  (do (var completer (new Completer))
+                      (try
+                        (~runner
+                         (fn [~res]
+                           (. completer (complete ~res)))
+                         (fn [~err]
+                           (. completer (completeError ~err))))
+                        (catch ~err
+                          (. completer (completeError ~err))))
+                      (. completer future))))
+               (template/$
+                (Future (fn []
+                          (return ~statement)))))]
+    (template/$ (. ~base
+                   ~@(if success
+                       [(list 'then
+                              (list 'fn [res]
+                                    success))])
+                   ~@(if error
+                       [(list 'catchError
+                              (list 'fn [err]
+                                    error))])
+                   ~@(if finally
+                       [(list 'whenComplete
+                              (list 'fn '[]
+                                    finally))])))))
 
 (def +features+
-  (-> (grammar/build :exclude [:pointer
-                               :block
-                               :data-set])
-        (grammar/build:override
-         {:var        {:symbol '#{var} :raw "var"}
-          :defn       {:symbol '#{defn}}
-          :new        {:symbol '#{new} :raw "new" :emit :new}
-          :for-object {:macro #'tf-for-object :emit :macro}
-          :for-array  {:macro #'tf-for-array  :emit :macro}
-          :for-iter   {:macro #'tf-for-iter   :emit :macro}
-          :for-return {:macro #'tf-for-return :emit :macro}
-          :for-try    {:macro #'tf-for-try    :emit :macro}
-          :for-async  {:macro #'tf-for-async  :emit :macro}
-          :with-global {:value true :raw "globalThis"}})
-       (grammar/build:override fn-dart/+dart+)))
+  (let [base (-> (grammar/build :exclude [:pointer
+                                          :block
+                                          :data-set])
+                 (grammar/build:override
+                  {:var         {:symbol '#{var} :raw "var"}
+                   :defn        {:symbol '#{defn}}
+                   :new         {:symbol '#{new} :raw "new" :emit :new}
+                   :for-object  {:macro #'tf-for-object :emit :macro}
+                   :for-array   {:macro #'tf-for-array  :emit :macro}
+                   :for-iter    {:macro #'tf-for-iter   :emit :macro}
+                   :for-return  {:macro #'tf-for-return :emit :macro}
+                   :for-try     {:macro #'tf-for-try    :emit :macro}
+                   :for-async   {:macro #'tf-for-async  :emit :macro}
+                   :with-global {:value true :raw "globalThis"}}))
+        base-keys (set (keys base))
+        overrides (select-keys fn-dart/+dart+ base-keys)
+        extensions (apply dissoc fn-dart/+dart+ base-keys)]
+    (cond-> base
+      (seq overrides) (grammar/build:override overrides)
+      (seq extensions) (grammar/build:extend extensions))))
 
 (def +template+
   (-> (emit/default-grammar)

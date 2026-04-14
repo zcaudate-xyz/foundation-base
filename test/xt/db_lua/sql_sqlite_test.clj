@@ -1,12 +1,12 @@
 (ns xt.db-lua.sql-sqlite-test
   (:require [std.lang :as l]
-            [xt.lang.base-notify :as notify])
+            [xt.lang.common-notify :as notify])
   (:use code.test))
 
 (l/script- :lua
   {:runtime :basic
-   :require [[xt.lang.base-repl :as repl]
-             [xt.lang.base-lib :as k]
+   :require [[xt.lang.common-repl :as repl]
+             [xt.lang.common-string :as str]
              [xt.db.sample-test :as sample]
              [xt.db.sql-util :as ut]
              [xt.db.sql-raw :as raw]
@@ -46,7 +46,7 @@
   ^:hidden
 
   (!.lua
-   (k/join "\n\n"
+   (str/join "\n\n"
            (manage/table-create-all
             sample/Schema
             sample/SchemaLookup

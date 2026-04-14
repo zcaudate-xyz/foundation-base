@@ -133,4 +133,9 @@
 
 
 ^{:refer std.lang.model-annex.spec-julia/emit-to :added "4.1"}
-(fact "TODO")
+(fact "emits a Julia range expression"
+  (emit-to [:to 1 1 10] +grammar+ {})
+  => "1:10"
+
+  (emit-to [:to 1 2 10] +grammar+ {})
+  => "1:2:10")

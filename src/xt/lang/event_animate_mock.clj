@@ -3,7 +3,7 @@
   (:require [std.lang :as l]))
 
 (l/script :xtalk
-  {:require [[xt.lang.base-lib :as k]]})
+  {:require [[xt.lang.common-spec :as xt]]})
 
 (defn.xt new-observed
   [v]
@@ -13,19 +13,19 @@
 
 (defn.xt is-observed
   [x]
-  (return (and (k/obj? x)
+  (return (and (xt/x:is-object? x)
                (== "observed"
-                   (k/get-key x "::")))))
+                   (xt/x:get-key x "::")))))
 
 (defn.xt add-listener
   [obs f]
   (var #{listeners} obs)
-  (x:arr-push listeners f))
+  (xt/x:arr-push listeners f))
 
 (defn.xt notify-listeners
   [obs]
   (var #{listeners value} obs)
-  (k/for:array [listener listeners]
+  (xt/for:array [listener listeners]
     (listener value)))
 
 (defn.xt get-value
@@ -36,7 +36,7 @@
 (defn.xt set-value
   [obs v]
   (var #{listeners} obs)
-  (k/set-key obs "value" v)
+  (xt/x:set-key obs "value" v)
   (-/notify-listeners obs))
 
 (defn.xt mock-transition
@@ -54,7 +54,7 @@
    :add-listener      -/add-listener
    :get-value         -/get-value
    :set-value         -/set-value
-   :set-props         (fn [elem props] (k/set-key elem "props" props))
+   :set-props         (fn [elem props] (xt/x:set-key elem "props" props))
    :is-animated       -/is-observed
    :create-transition -/mock-transition
    :stop-transition   (fn [])})

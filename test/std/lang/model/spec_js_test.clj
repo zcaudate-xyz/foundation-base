@@ -158,7 +158,48 @@
   => '(call (fn [err ok]
               (if err
                 (return err)
-                (return ok)))))
+                (return ok))))
+
+  (tf-for-return '(for:return [[ok err] (x:return-run runner)]
+                              {:success (return ok)
+                               :error   (return err)}))
+  => '(do
+        (var ok nil)
+        (var err nil)
+        (try
+          (runner
+           (fn [value]
+             (:= ok value)
+             (:= err nil))
+           (fn [value]
+             (:= ok nil)
+             (:= err value)))
+          (if err
+            (return err)
+            (return ok))
+          (catch err
+            (return err))))
+
+  (tf-for-return '(for:return [[ok err] (x:return-run runner)]
+                              {:success ok
+                               :error   err
+                               :final   true}))
+  => '(do
+        (var ok nil)
+        (var err nil)
+        (try
+          (runner
+           (fn [value]
+             (:= ok value)
+             (:= err nil))
+           (fn [value]
+             (:= ok nil)
+             (:= err value)))
+          (if err
+            (return err)
+            (return ok))
+          (catch err
+            (return err)))))
 
 ^{:refer std.lang.model.spec-js/tf-for-try :added "4.0"}
 (fact "for try transform"
@@ -181,6 +222,20 @@
                              :finally (return true)}))
   => '(. (new Promise (fn [resolve reject]
                         (resolve (call (x:callback)))))
+         (then (fn [ok] (return ok)))
+         (catch (fn [err] (return err)))
+         (finally (fn [] (return true))))
+
+  (tf-for-async '(for:async [[ok err] (x:return-run runner)]
+                            {:success (return ok)
+                             :error   (return err)
+                             :finally (return true)}))
+  => '(. (new Promise
+              (fn [resolve reject]
+                (try
+                  (runner resolve reject)
+                  (catch err
+                    (reject err)))))
          (then (fn [ok] (return ok)))
          (catch (fn [err] (return err)))
          (finally (fn [] (return true)))))

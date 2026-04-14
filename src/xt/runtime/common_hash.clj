@@ -6,8 +6,8 @@
 ;;
 
 (l/script :js
-  {:require [[xt.lang.base-lib :as k]
-             [xt.lang.base-iter :as it]
+  {:require [[xt.lang.common-spec :as xt]
+             [xt.lang.common-iter :as it]
              [xt.lang.base-runtime :as rt]]})
 
 (defn.js hash-float
@@ -23,8 +23,8 @@
 ;;
 
 (l/script :lua
-  {:require [[xt.lang.base-lib :as k]
-             [xt.lang.base-iter :as it]
+  {:require [[xt.lang.common-spec :as xt]
+             [xt.lang.common-iter :as it]
              [xt.lang.base-runtime :as rt]]})
 
 (defn.lua hash-float
@@ -32,8 +32,8 @@
   {:added "4.0"}
   [f]
   (var '[m e] (math.frexp f))
-  (return (k/bit-and
-           (+ (k/floor (* (- m 0.5)
+  (return (xt/x:bit-and
+           (+ (xt/x:floor (* (- m 0.5)
                              (pow 2 31)))
               e)
            (:- "0xFFFFFF"))))
@@ -43,8 +43,8 @@
 ;;
 
 (l/script :python
-  {:require [[xt.lang.base-lib :as k]
-             [xt.lang.base-iter :as it]
+  {:require [[xt.lang.common-spec :as xt]
+             [xt.lang.common-iter :as it]
              [xt.lang.base-runtime :as rt]]})
 
 (defn.py hash-float
@@ -53,8 +53,8 @@
   [f]
   (var math (__import__ "math"))
   (var '[m e] (math.frexp f))
-  (return (k/bit-and
-           (+ (k/floor (* (- m 0.5)
+  (return (xt/x:bit-and
+           (+ (xt/x:floor (* (- m 0.5)
                              (pow 2 31)))
               e)
            (:- "0xFFFFFF"))))
@@ -64,8 +64,8 @@
 ;;
 
 (l/script :xtalk
-  {:require [[xt.lang.base-lib :as k]
-             [xt.lang.base-iter :as it]
+  {:require [[xt.lang.common-spec :as xt]
+             [xt.lang.common-iter :as it]
              [xt.lang.base-runtime :as rt]]})
 
 (defabstract.xt hash-float [f])
@@ -80,15 +80,15 @@
   {:added "4.0"}
   [s]
   (var hval (:- "0x811c9dc5"))
-  (k/for:index [i [(x:offset 0) (k/len s)]]
-    (:= hval (k/bit-xor hval (k/bit-and (k/get-char s i)
+  (xt/for:index [i [(xt/x:offset 0) (xt/x:len s)]]
+    (:= hval (xt/x:bit-xor hval (xt/x:bit-and (xt/x:get-char s i)
                                         (:- "0xFF"))))
     (:= hval (+ hval
-                (k/bit-lshift hval 1)
-                (k/bit-lshift hval 4)
-                (k/bit-lshift hval 7)
-                (k/bit-lshift hval 24))))
-  (return (k/bit-and hval (:- "0xFFFFFF"))))
+                (xt/x:bit-lshift hval 1)
+                (xt/x:bit-lshift hval 4)
+                (xt/x:bit-lshift hval 7)
+                (xt/x:bit-lshift hval 24))))
+  (return (xt/x:bit-and hval (:- "0xFFFFFF"))))
 
 (defn.xt hash-iter
   "hashes an iterator"
@@ -96,14 +96,14 @@
   [iter hash-fn]
   (var hval (:- "0x811c9dc5"))
   (it/for:iter [e iter]
-    (:= hval (k/bit-xor hval (k/bit-and (hash-fn e)
+    (:= hval (xt/x:bit-xor hval (xt/x:bit-and (hash-fn e)
                                         (:- "0xFF"))))
     (:= hval (+ hval
-                (k/bit-lshift hval 1)
-                (k/bit-lshift hval 4)
-                (k/bit-lshift hval 7)
-                (k/bit-lshift hval 24))))
-  (return (k/bit-and hval (:- "0xFFFFFF"))))
+                (xt/x:bit-lshift hval 1)
+                (xt/x:bit-lshift hval 4)
+                (xt/x:bit-lshift hval 7)
+                (xt/x:bit-lshift hval 24))))
+  (return (xt/x:bit-and hval (:- "0xFFFFFF"))))
 
 (defn.xt hash-iter-unordered
   "hashes an unordered set"
@@ -111,15 +111,15 @@
   [iter hash-fn]
   (var hval (:- "0x811c9dc5"))
   (it/for:iter [e iter]
-    (:= hval (k/bit-xor hval (k/bit-and (hash-fn e)
+    (:= hval (xt/x:bit-xor hval (xt/x:bit-and (hash-fn e)
                                         (:- "0xFF")))))
-  (return (k/bit-and hval (:- "0xFFFFFF"))))
+  (return (xt/x:bit-and hval (:- "0xFFFFFF"))))
 
 (defn.xt hash-integer
   "hashes an integer"
   {:added "4.0"}
   [n]
-  (return (k/bit-and n (:- "0xFFFFFF"))))
+  (return (xt/x:bit-and n (:- "0xFFFFFF"))))
 
 (defn.xt hash-boolean
   "hashes a boolean"
@@ -131,7 +131,7 @@
   "hashes a value"
   {:added "4.0"}
   [x]
-  (var t (k/type-native x))
+  (var t (xt/x:type-native x))
   (cond (== t "nil")
         (return 0)
         
@@ -142,7 +142,7 @@
         (return (-/hash-boolean x))
 
         (== t "number")
-        (cond (k/is-integer? x)
+        (cond (xt/x:is-integer? x)
               (return (-/hash-integer x))
 
               :else
@@ -153,6 +153,6 @@
         (return (rt/xt-lookup-id x))
 
         (== t "object")
-        (return (or (k/get-key x "hash")
+        (return (or (xt/x:get-key x "hash")
                     (rt/xt-lookup-id x)))))
 

@@ -7,9 +7,11 @@
 ^{:refer std.image.awt.io/providers :added "3.0"}
 (fact "list providers for ImageIO"
 
-  (providers :reader)
+  (count (providers :reader))
+  => pos?
 
-  (providers :writer))
+  (count (providers :writer))
+  => pos?)
 
 ^{:refer std.image.awt.io/supported-formats :added "3.0"}
 (fact "list supported formats for ImageIO"

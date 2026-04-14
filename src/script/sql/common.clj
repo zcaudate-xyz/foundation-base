@@ -1,13 +1,15 @@
 (ns script.sql.common
   (:require [clojure.string]
-            [std.lib.foundation :as f])
+            [std.lib :as h]
+            [std.lib.foundation :as f]
+            [std.string :as str])
   (:import (java.util ArrayList)))
 
 (defn- ansi-quote [s] (str \" s \"))
 
 (def ^:dynamic *options*
-  {:table-fn  (comp ansi-quote str/snake-case h/strn)
-   :column-fn (comp ansi-quote str/snake-case h/strn)})
+  {:table-fn  (comp ansi-quote str/snake-case f/strn)
+   :column-fn (comp ansi-quote str/snake-case f/strn)})
 
 (defn sql:type
   "constructs sql type from `std.lib.schema` type

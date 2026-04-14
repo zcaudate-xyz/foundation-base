@@ -8,6 +8,12 @@
   (make-project)
   => map?)
 
+^{:refer code.doc/make-audit-project :added "4.1"}
+(fact "makes an env for code.doc coverage tasks"
+  (make-audit-project)
+  => (contains {:code.doc/source-namespaces coll?
+                :code.doc/coverage map?}))
+
 ^{:refer code.doc/publish :added "3.0"}
 (comment "main publish method"
 
@@ -22,6 +28,11 @@
 (comment "deploys the theme for a given site"
 
   (deploy-template "hara"))
+
+^{:refer code.doc/missing :added "4.1"}
+(comment "checks for namespaces not yet referenced by code.doc pages"
+
+  (missing))
 
 (comment
   (publish :all {:write true})

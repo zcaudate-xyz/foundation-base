@@ -87,30 +87,40 @@
   => fs/path?)
 
 ^{:refer std.fs.archive/remove :added "3.0"}
-(comment "removes an entry from the archive"
+(fact "removes an entry from the archive"
+  ^:hidden
 
-  (remove "test-scratch/hello.jar" "project.clj")
-  => #{"project.clj"} ^:hidden
+  (do (fs/delete "test-scratch/remove.jar")
+      (open "test-scratch/remove.jar" {:create true})
+      (insert "test-scratch/remove.jar" "project.clj" "project.clj")
+      (remove "test-scratch/remove.jar" "project.clj")
+      (has? "test-scratch/remove.jar" "project.clj"))
+  => false
 
-  (fs/delete "test-scratch/hello.jar"))
+  (fs/delete "test-scratch/remove.jar"))
 
 ^{:refer std.fs.archive/write :added "3.0"}
-(comment "writes files to an archive"
+(fact "writes files to an archive"
+  ^:hidden
 
-  (doto "test-scratch/hello.jar"
-    (fs/delete)
-    (open)
-    (write "test.stuff"
-           (binary/input-stream (.getBytes "Hello World"))))
+  (do (fs/delete "test-scratch/write.jar")
+      (open "test-scratch/write.jar" {:create true})
+      (write "test-scratch/write.jar"
+             "test.stuff"
+             (binary/input-stream (.getBytes "Hello World")))
+      (slurp (stream "test-scratch/write.jar" "test.stuff")))
+  => "Hello World"
 
-  (slurp (stream (open "test-scratch/hello.jar") "test.stuff"))
-  => "Hello World")
+  (fs/delete "test-scratch/write.jar"))
 
 ^{:refer std.fs.archive/stream :added "3.0"}
-(comment "creates a stream for an entry wthin the archive"
+(fact "creates a stream for an entry wthin the archive"
+  ^:hidden
 
-  (do (insert "test-scratch/hello.jar" "project.clj" "project.clj")
-      (slurp (stream "test-scratch/hello.jar" "project.clj")))
-  => (slurp "project.clj") ^:hidden
+  (do (fs/delete "test-scratch/stream.jar")
+      (open "test-scratch/stream.jar" {:create true})
+      (insert "test-scratch/stream.jar" "project.clj" "project.clj")
+      (slurp (stream "test-scratch/stream.jar" "project.clj")))
+  => (slurp "project.clj")
 
-  (fs/delete "test-scratch/hello.jar"))
+  (fs/delete "test-scratch/stream.jar"))

@@ -127,6 +127,28 @@
   (get-in (parse-defmacro '(defmacro.xt add [a b] (list '+ a b)) 'sample.route {}) [:body-meta :macro])
   => true)
 
+(fact "parses multi-arity defmacro.xt forms"
+  (let [macro-def (parse-defmacro
+                   '(defmacro.xt ^{:standalone true}
+                      x:get-idx
+                      ([arr idx]
+                       (list (quote x:get-idx) arr idx))
+                      ([arr idx default]
+                       (list (quote x:get-idx) arr idx default)))
+                   'sample.route
+                   {})]
+    {:name (:name macro-def)
+     :inputs (mapv :name (:inputs macro-def))
+     :standalone (get-in macro-def [:body-meta :standalone])
+     :raw-body (:raw-body macro-def)})
+  => '{:name "x:get-idx"
+       :inputs [arr idx]
+       :standalone true
+       :raw-body [([arr idx]
+                   (list (quote x:get-idx) arr idx))
+                  ([arr idx default]
+                   (list (quote x:get-idx) arr idx default))]})
+
 ^{:refer std.lang.typed.xtalk-parse/parse-defvalue :added "4.1"}
 (fact "parses def.xt forms"
   (types/type->data (:type (parse-defvalue '(def.xt ^{:- [:xt/dict :xt/str :xt/num]} ScopeMap {:a 1}) 'sample.route {})))
@@ -190,7 +212,17 @@
 
 
 ^{:refer std.lang.typed.xtalk-parse/analyze-file-raw :added "4.1"}
-(fact "TODO")
+(fact "returns raw parsed map without spec attachment"
+  (let [result (analyze-file-raw "test/std/lang/model/spec_xtalk_typed_fixture.clj")]
+    [(map? result)
+     (:ns result)
+     (contains? result :specs)
+     (contains? result :functions)])
+  => [true 'std.lang.model.spec-xtalk-typed-fixture true true])
 
 ^{:refer std.lang.typed.xtalk-parse/analyze-namespace-raw :added "4.1"}
-(fact "TODO")
+(fact "looks up namespace source file and returns raw analysis"
+  (let [result (analyze-namespace-raw 'std.lang.model.spec-xtalk-typed-fixture)]
+    [(map? result)
+     (:ns result)])
+  => [true 'std.lang.model.spec-xtalk-typed-fixture])

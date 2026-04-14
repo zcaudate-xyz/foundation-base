@@ -247,9 +247,13 @@
 
 ^{:refer std.concurrent.bus/main-loop :added "3.0"}
 (fact "creates a new message return loop"
-  (bus:with-temp bus
-                 (bus:send bus (bus:get-id bus)
-                           {:op :hello :message "world"})))
+  (let [state (atom {})]
+    (with-redefs [main-thunk (fn [_]
+                               (fn []
+                                 :done))]
+      [(main-loop {:state state})
+       (= (Thread/currentThread) (:main @state))]))
+  => [:done true])
 
 ^{:refer std.concurrent.bus/started?-bus :added "3.0"}
 (fact "checks if bus is running"

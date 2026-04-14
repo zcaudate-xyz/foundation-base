@@ -6,17 +6,20 @@
   {:runtime :oneshot
    :config {:program :nodejs}
    :require [[xt.db.base-util :as ut]
-             [xt.lang.base-lib :as k]]})
+             [xt.lang.common-spec :as xt]
+             [xt.lang.common-lib :as k]]})
 
 (l/script- :lua
   {:runtime :oneshot
    :require [[xt.db.base-util :as ut]
-             [xt.lang.base-lib :as k]]})
+             [xt.lang.common-spec :as xt]
+             [xt.lang.common-lib :as k]]})
 
 (l/script- :python
   {:runtime :oneshot
    :require [[xt.db.base-util :as ut]
-             [xt.lang.base-lib :as k]]})
+             [xt.lang.common-spec :as xt]
+             [xt.lang.common-lib :as k]]})
 
 ^{:refer xt.db.base-util/collect-routes :added "4.0"
   :setup [(def +routes+ [{:input [],
@@ -136,21 +139,21 @@
   
   (!.js
    (ut/keepf-limit [1 2 3 4 5]
-	           k/odd?
+	           xt/x:odd?
                    k/identity
                    3))
   => [1 3 5]
   
   (!.lua
    (ut/keepf-limit [1 2 3 4 5]
-	           k/odd?
+	           xt/x:odd?
                    k/identity
                    3))
   => [1 3 5]
   
   (!.py
    (ut/keepf-limit [1 2 3 4 5]
-	           k/odd?
+	           xt/x:odd?
                    k/identity
                    3))
   => [1 3 5])

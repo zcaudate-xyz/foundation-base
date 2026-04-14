@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><@=site-label> · <@=title></title>
+    <meta name="description" content="<@=subtitle>">
+    <link rel="stylesheet" href="css/foundation.css">
+  </head>
+  <body class="<@=theme-base>">
+    <main class="home-shell">
+      <section class="home-hero">
+        <p class="page-eyebrow"><@=site-label></p>
+        <h1><@=title></h1>
+        <p class="page-subtitle"><@=subtitle></p>
+        <@=page-meta>
+      </section>
+      <section class="home-grid">
+        <article class="home-content">
+          <@=article>
+        </article>
+        <aside class="home-links">
+          <h2>Explore the site</h2>
+          <div class="site-link-grid"><@=site-links></div>
+        </aside>
+      </section>
+    </main>
+    <script>
+      document.querySelectorAll('pre').forEach(function(pre) {
+        var code = pre.querySelector('code');
+        if (!code) return;
+        var button = document.createElement('button');
+        button.className = 'copy-button';
+        button.type = 'button';
+        button.textContent = 'Copy';
+        button.addEventListener('click', function() {
+          navigator.clipboard.writeText(code.innerText).then(function() {
+            button.textContent = 'Copied';
+            setTimeout(function() { button.textContent = 'Copy'; }, 1200);
+          });
+        });
+        pre.appendChild(button);
+      });
+    </script>
+  </body>
+</html>

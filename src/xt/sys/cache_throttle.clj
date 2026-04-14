@@ -2,14 +2,14 @@
   (:require [std.lang :as l]))
 
 (l/script :xtalk
-  {:require [[xt.lang.base-lib :as k]
+  {:require [[xt.lang.common-spec :as xt]
              [xt.sys.cache-common :as cache]]})
 
 (defn.xt throttle-key
   "creates the throttle key"
   {:added "0.1"}
   [throttle key]
-  (return (k/cat "__throttle__:" (. throttle ["tag"]) ":" key)))
+  (return (xt/x:cat "__throttle__:" (. throttle ["tag"]) ":" key)))
 
 (defn.xt throttle-create
   "creates a throttle"
@@ -24,11 +24,11 @@
   {:added "0.1"}
   [throttle id]
   (var #{handler now-fn} throttle)
-  (return (k/for:async [[ret err] (handler id)]
+  (return (xt/for:async [[ret err] (handler id)]
             {:finally (do (cache/meta-dissoc (-/throttle-key throttle "active")
                                              id)
                           (var queued (cache/meta-get (-/throttle-key throttle "queued")))
-                          (when (not= nil (k/get-key queued id))
+                          (when (not= nil (xt/x:get-key queued id))
                             (cache/meta-assoc (-/throttle-key throttle "active")
                                               id (now-fn))
                             (cache/meta-dissoc (-/throttle-key throttle "queued")
@@ -42,11 +42,11 @@
   (var #{tag handler now-fn} throttle)
   
   (var queued (cache/meta-get (-/throttle-key throttle "queued")))
-  (when (not= nil (k/get-key queued id))
+  (when (not= nil (xt/x:get-key queued id))
     (return nil))
   
   (var active (cache/meta-get (-/throttle-key throttle "active")))
-  (when (not= nil (k/get-key active id))
+  (when (not= nil (xt/x:get-key active id))
     (cache/meta-assoc (-/throttle-key throttle "queued")
                       id (now-fn))
     (return nil))

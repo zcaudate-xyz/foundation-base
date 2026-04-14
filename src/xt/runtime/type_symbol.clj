@@ -3,7 +3,7 @@
   (:refer-clojure :exclude [symbol]))
 
 (l/script :xtalk
-  {:require [[xt.lang.base-lib :as k]
+  {:require [[xt.lang.common-spec :as xt]
              [xt.lang.base-runtime :as rt :with [defvar.xt]]
              [xt.runtime.interface-common :as interface-common]
              [xt.runtime.interface-spec :as spec]
@@ -18,8 +18,8 @@
   [sym]
   (var #{_ns _name} sym)
   (return
-   (-> (k/get-key common-hash/SEED "symbol")
-       (k/bit-xor (common-hash/hash-string (k/sym-full _ns _name))))))
+   (-> (xt/x:get-key common-hash/SEED "symbol")
+       (xt/x:bit-xor (common-hash/hash-string (xt/x:sym-full _ns _name))))))
 
 (defn.xt symbol-show
   "shows the symbol"
@@ -27,13 +27,13 @@
   [sym]
   (var #{_ns _name} sym)
   (return
-   (k/sym-full _ns _name)))
+   (xt/x:sym-full _ns _name)))
 
 (defn.xt symbol-eq
   "gets symbol equality"
   {:added "4.0"}
   [sym o]
-  (return (and (== "symbol" (k/type-class o))
+  (return (and (== "symbol" (xt/x:type-class o))
                (== (. sym _ns) (. o _ns))
                (== (. sym _name) (. o _name)))))
 
@@ -47,8 +47,8 @@
 
 (def.xt SYMBOL_PROTOTYPE
   (-> -/SYMBOL_SPEC
-      (k/proto-spec)
-      (k/proto-create)))
+      (xt/x:proto-spec)
+      (xt/x:proto-create)))
 
 (defn.xt symbol-create
   "creates a symbol"
@@ -57,7 +57,7 @@
   (var sym {"::" "symbol"
             :_ns   ns
             :_name name})
-  (k/set-proto sym -/SYMBOL_PROTOTYPE)
+  (xt/x:set-proto sym -/SYMBOL_PROTOTYPE)
   (return sym))
 
 (defn.xt symbol
@@ -65,11 +65,11 @@
   {:added "4.0"}
   [ns name]
   (var lu -/SYMBOL_LOOKUP)
-  (var key (k/sym-full ns name))
-  (var out (k/get-key lu key))
-  (when (k/nil? out)
+  (var key (xt/x:sym-full ns name))
+  (var out (xt/x:get-key lu key))
+  (when (xt/x:nil? out)
     (var sym (-/symbol-create ns name))
-    (k/set-key lu key sym)
+    (xt/x:set-key lu key sym)
     (return sym))
   (return out))
 

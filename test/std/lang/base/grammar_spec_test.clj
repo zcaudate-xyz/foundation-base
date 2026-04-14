@@ -23,7 +23,12 @@
   => '["" {} ([a b])]
 
   (format-fargs '["docstring" [a b]])
-  => '["docstring" {} ([a b])])
+  => '["docstring" {} ([a b])]
+
+  (format-fargs '(([a] a)
+                  ([a b] (+ a b))))
+  => '["" {} (([a] a)
+              ([a b] (+ a b)))])
 
 ^{:refer std.lang.base.grammar-spec/format-defn :added "3.0"}
 (fact "standardize defn forms"

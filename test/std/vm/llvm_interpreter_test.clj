@@ -1,5 +1,6 @@
 (ns std.vm.llvm-interpreter-test
   (:require [clojure.string]
+            [std.block.base :as base]
             [std.block.parse :as parse]
             [std.lib.env :as env]
             [std.lib.zip :as zip]
@@ -184,4 +185,13 @@
 
 
 ^{:refer std.vm.llvm-interpreter/filter-valid :added "4.1"}
-(fact "TODO")
+(fact "filters out void, comment, linespace and linebreak blocks"
+  (let [blocks (parse/parse-string "(a b c)")]
+    (seq? (llvm/filter-valid blocks)))
+  => true
+
+  (let [blocks (parse/parse-string "(a b c)")]
+    (every? #(and (not= :void (base/block-type %))
+                  (not= :comment (base/block-type %)))
+            (llvm/filter-valid blocks)))
+  => true)

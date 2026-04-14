@@ -20,14 +20,13 @@
 
 (defmacro node-dual-cell-scenario
   []
-  (let [node-script (common/node-remote-script)]
-    (template/$
-      (notify/wait-on :js
-        (var remote-cell
-             (cl/make-cell
-               (runtime-link/make-node-link ~node-script {})))
-        (. (. remote-cell ["init"])
-           (then
+  )
+
+
+(comment
+
+  #_(. (. (. remote-cell ["init"])
+            (then
              (fn []
                (common/connect-sqlite
                 {:success
@@ -36,12 +35,23 @@
                          (then (fn [result]
                                  (repl/notify result))))
                       (catch (fn [err]
-                               (repl/notify {"error" err})))))}))))))))
+                               (repl/notify {"error" err})))))
+                 :error
+                 (fn [err]
+                   (repl/notify {"error" err}))}))))
+         (catch (fn [err]
+                  (repl/notify {"error" err})))))
 
 ^{:refer js.cell.e2e.common/run-scenario :added "4.1"}
 (fact "runs a Node dual-cell cache/sqlite-wasm scenario"
   ^:hidden
-  (node-dual-cell-scenario)
+
+  (notify/wait-on :js
+    (var remote-cell
+         (cl/make-cell
+          (runtime-link/make-node-link (@! (common/node-remote-script)) {})))
+    )
+  
   => (contains-in
       {"remote_seed" [{"id" "ord-1"
                        "status" "open"}]

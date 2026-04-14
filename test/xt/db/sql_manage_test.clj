@@ -1,7 +1,7 @@
 (ns xt.db.sql-manage-test
   (:require [std.lang :as l]
             [std.string.prose :as prose]
-            [xt.lang.base-notify :as notify])
+            [xt.lang.common-notify :as notify])
   (:use code.test))
 
 (l/script- :js
@@ -9,19 +9,23 @@
    :require [[xt.db.base-schema :as sch]
              [xt.db.base-flatten :as f]
              [xt.db.cache-util :as cache-util]
-             [xt.db.sql-raw :as raw]
-             [xt.db.sql-graph :as graph]
-             [xt.db.sql-util :as ut]
-             [xt.db.sql-manage :as manage]
-             [xt.db.sql-table :as table]
-             [xt.db.sample-test :as sample]
-             [xt.lang.base-lib :as k]
-             [xt.lang.base-repl :as repl]]})
+              [xt.db.sql-raw :as raw]
+              [xt.db.sql-graph :as graph]
+              [xt.db.sql-util :as ut]
+              [xt.db.sql-manage :as manage]
+              [xt.db.sql-table :as table]
+              [xt.db.sample-test :as sample]
+              [xt.lang.common-spec :as xt]
+              [xt.lang.common-data :as xtd]
+              [xt.lang.common-string :as str]
+              [xt.lang.common-repl :as repl]]})
 
 (l/script- :lua
   {:runtime :basic
    :require [[xt.db.base-schema :as sch]
-             [xt.lang.base-lib :as k]
+             [xt.lang.common-spec :as xt]
+             [xt.lang.common-data :as xtd]
+             [xt.lang.common-string :as str]
              [xt.db.sql-util :as ut]
              [xt.db.sql-manage :as manage]
              [xt.db.sample-test :as sample]]})
@@ -29,7 +33,9 @@
 (l/script- :python
   {:runtime :basic
    :require [[xt.db.base-schema :as sch]
-             [xt.lang.base-lib :as k]
+             [xt.lang.common-spec :as xt]
+             [xt.lang.common-data :as xtd]
+             [xt.lang.common-string :as str]
              [xt.db.sql-util :as ut]
              [xt.db.sql-manage :as manage]
              [xt.db.sample-test :as sample]]})
@@ -54,18 +60,18 @@
   => true
   
   (!.js
-   (DB.run (k/join "\n\n"
-                   (manage/table-create-all
-                    sample/Schema
-                    sample/SchemaLookup
-                    (ut/sqlite-opts nil))))
+   (DB.run (str/join "\n\n"
+                    (manage/table-create-all
+                     sample/Schema
+                     sample/SchemaLookup
+                     (ut/sqlite-opts nil))))
    (DB.run
     (raw/raw-insert "Currency"
                     ["id" "type" "symbol" "native" "decimal" "name" "plural" "description"]
                     (@! sample/+currency+)
                     (ut/sqlite-opts nil)))
    (DB.run
-    (k/join "\n\n"
+    (str/join "\n\n"
             (table/table-insert sample/Schema
                               sample/SchemaLookup
                               "UserAccount"
@@ -113,7 +119,7 @@
                               ["id"]]]]
                            (ut/sqlite-opts nil)))
             (. [0] ["values"] [0] [0])
-            k/json-decode)))
+            xt/x:json-decode)))
   => #{{"currency" [{"id" "XLM"}],
         "id" "222de282-ca29-4d04-81dd-86ec3f9189cf"}
        {"currency" [{"id" "XLM.T"}],
@@ -138,7 +144,7 @@
                             ["currency"]]]]]]]]]
                       (ut/sqlite-opts nil)))
        (. [0] ["values"] [0] [0])
-       k/json-decode))
+       xt/x:json-decode))
   => [{"is_official" 0,
        "nickname" "root",
        "profile"
@@ -214,11 +220,11 @@
   
   (!.js
    [(manage/table-create-column sample/Schema
-                                (k/get-in sample/Schema
+                                (xtd/get-in sample/Schema
                                           ["Currency" "id"])
                                 (ut/sqlite-opts nil))
     (manage/table-create-column sample/Schema
-                                (k/get-in sample/Schema
+                                (xtd/get-in sample/Schema
                                           ["Currency" "id"])
                                 (ut/postgres-opts sample/SchemaLookup))])
   => ["\"id\" text PRIMARY KEY"
@@ -226,11 +232,11 @@
 
   (!.lua
    [(manage/table-create-column sample/Schema
-                                (k/get-in sample/Schema
+                                (xtd/get-in sample/Schema
                                           ["Currency" "id"])
                                 (ut/sqlite-opts nil))
     (manage/table-create-column sample/Schema
-                                (k/get-in sample/Schema
+                                (xtd/get-in sample/Schema
                                           ["Currency" "id"])
                                 (ut/postgres-opts sample/SchemaLookup))])
   => ["\"id\" text PRIMARY KEY"
@@ -238,11 +244,11 @@
 
   (!.py
    [(manage/table-create-column sample/Schema
-                                (k/get-in sample/Schema
+                                (xtd/get-in sample/Schema
                                           ["Currency" "id"])
                                 (ut/sqlite-opts nil))
     (manage/table-create-column sample/Schema
-                                (k/get-in sample/Schema
+                                (xtd/get-in sample/Schema
                                           ["Currency" "id"])
                                 (ut/postgres-opts sample/SchemaLookup))])
   => ["\"id\" text PRIMARY KEY"
@@ -251,11 +257,11 @@
   
   (!.js
    [(manage/table-create-column sample/Schema
-                                (k/get-in sample/Schema
+                                (xtd/get-in sample/Schema
                                           ["UserProfile" "account"])
                                 (ut/sqlite-opts nil))
     (manage/table-create-column sample/Schema
-                                (k/get-in sample/Schema
+                                (xtd/get-in sample/Schema
                                           ["UserProfile" "account"])
                                 (ut/postgres-opts sample/SchemaLookup))])
   => ["\"account_id\" text REFERENCES \"UserAccount\""
@@ -264,11 +270,11 @@
 
   (!.lua
    [(manage/table-create-column sample/Schema
-                                (k/get-in sample/Schema
+                                (xtd/get-in sample/Schema
                                           ["UserProfile" "account"])
                                 (ut/sqlite-opts nil))
     (manage/table-create-column sample/Schema
-                                (k/get-in sample/Schema
+                                (xtd/get-in sample/Schema
                                           ["UserProfile" "account"])
                                 (ut/postgres-opts sample/SchemaLookup))])
   => ["\"account_id\" text REFERENCES \"UserAccount\""
@@ -278,11 +284,11 @@
 
   (!.py
    [(manage/table-create-column sample/Schema
-                                (k/get-in sample/Schema
+                                (xtd/get-in sample/Schema
                                           ["UserProfile" "account"])
                                 (ut/sqlite-opts nil))
     (manage/table-create-column sample/Schema
-                                (k/get-in sample/Schema
+                                (xtd/get-in sample/Schema
                                           ["UserProfile" "account"])
                                 (ut/postgres-opts sample/SchemaLookup))])
   => ["\"account_id\" text REFERENCES \"UserAccount\""

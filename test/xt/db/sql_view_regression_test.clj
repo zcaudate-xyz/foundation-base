@@ -5,17 +5,20 @@
 (l/script- :js
   {:runtime :basic
    :require [[xt.db.sql-view :as v]
-             [xt.lang.base-lib :as k]]})
+             [xt.lang.common-spec :as xt]
+             [xt.lang.common-data :as xtd]]})
 
 (l/script- :lua
   {:runtime :basic
    :require [[xt.db.sql-view :as v]
-             [xt.lang.base-lib :as k]]})
+             [xt.lang.common-spec :as xt]
+             [xt.lang.common-data :as xtd]]})
 
 (l/script- :python
   {:runtime :basic
    :require [[xt.db.sql-view :as v]
-             [xt.lang.base-lib :as k]]})
+             [xt.lang.common-spec :as xt]
+             [xt.lang.common-data :as xtd]]})
 
 (fact:global
  {:setup    [(l/rt:restart)
@@ -48,10 +51,10 @@
                         ["USER-0"]
                         []
                         {})
-       (k/second)
-       (k/get-key "where")
-       (k/first)
-       (k/get-key "id")))
+       (xtd/second)
+       (xt/x:get-key "where")
+       (xtd/first)
+       (xt/x:get-key "id")))
   => +tree+
 
   (!.lua
@@ -61,10 +64,10 @@
                         ["USER-0"]
                         []
                         {})
-       (k/second)
-       (k/get-key "where")
-       (k/first)
-       (k/get-key "id")))
+       (xtd/second)
+       (xt/x:get-key "where")
+       (xtd/first)
+       (xt/x:get-key "id")))
   => (l/as-lua +tree+)
 
   (!.py
@@ -74,8 +77,8 @@
                         ["USER-0"]
                         []
                         {})
-       (k/second)
-       (k/get-key "where")
-       (k/first)
-       (k/get-key "id")))
+       (xtd/second)
+       (xt/x:get-key "where")
+       (xtd/first)
+       (xt/x:get-key "id")))
   => +tree+)

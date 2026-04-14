@@ -1,9 +1,18 @@
 (ns lib.oshi-test
-  (:require [lib.oshi :refer :all])
+  (:require [lib.oshi :refer :all]
+            [std.object :as object])
   (:use [code.test :exclude [all]]))
 
 ^{:refer lib.oshi/to-data :added "3.0"}
-(fact "converts the object to a map provided *raw* is false")
+(fact "converts the object to a map provided *raw* is false"
+  (binding [*raw* true]
+    (to-data :value))
+  => :value
+
+  (binding [*raw* false]
+    (with-redefs [object/to-data (fn [_] :converted)]
+      (to-data :value)))
+  => :converted)
 
 ^{:refer lib.oshi/all :added "3.0" :class [:oshi/general]}
 (fact "returns the entire map of the current system"

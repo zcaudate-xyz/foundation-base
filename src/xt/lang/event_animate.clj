@@ -1,8 +1,11 @@
 (ns xt.lang.event-animate
-  (:require [std.lang :as l]))
+  (:require [std.lang :as l]
+            [xt.lang.common-data :as xtd]))
 
 (l/script :xtalk
-  {:require [[xt.lang.base-lib :as k]]})
+  {:require [[xt.lang.common-spec :as xt]
+             [xt.lang.common-math :as xtm]
+             [xt.lang.common-data :as xtd]]})
 
 (defn.xt new-derived
   "creates a new derived value"
@@ -12,9 +15,9 @@
          add-listener
          set-value
          get-value} impl)
-  (var thunk-fn (fn:> [] (f (k/unpack (k/arr-map arr get-value)))))
+  (var thunk-fn (fn [] (return (f (xt/x:unpack (xt/x:arr-map arr get-value))))))
   (var derived  (create-val (thunk-fn)))
-  (k/for:array [v arr]
+  (xt/for:array [v arr]
     (add-listener
      v
      (fn [v]
@@ -30,7 +33,7 @@
    ref
    ind
    f]
-  (:= f (or f (fn:> {})))
+  (:= f (or f (fn [_] (return {}))))
   (var #{add-listener
          set-props
          get-value} impl)
@@ -50,17 +53,17 @@
    ref
    arr
    f]
-  (:= f (or f (fn:> {})))
+  (:= f (or f (fn [_] (return {}))))
   (var #{add-listener
          set-props
          get-value} impl)
   (var trigger-fn
        (fn []
-         (let [props (f (k/unpack (k/arr-map arr get-value)))]
+         (let [props (f (xt/x:unpack (xt/x:arr-map arr get-value)))]
            (when (and ref (. ref ["current"]))
              (set-props (. ref ["current"]) props))
            (return props))))
-  (k/for:array [ind arr]
+  (xt/for:array [ind arr]
     (add-listener ind trigger-fn))
   (return (trigger-fn)))
 
@@ -74,14 +77,14 @@
   (:= parent (or parent []))
   (:= all (or all []))
   (var #{is-animated} impl)
-  (k/for:object [[k x] m]
+  (xt/for:object [[k x] m]
     (cond (is-animated x)
-          (x:arr-push all [[(k/unpack parent)] k x])
+          (xt/x:arr-push all [[(xt/x:unpack parent)] k x])
           
-          (k/obj? x)
-          (do (x:arr-push all [[(k/unpack parent)] k false])
-              (var nparent [(k/unpack parent)])
-              (x:arr-push nparent k)
+          (xt/x:is-object? x)
+          (do (xt/x:arr-push all [[(xt/x:unpack parent)] k false])
+              (var nparent [(xt/x:unpack parent)])
+              (xt/x:arr-push nparent k)
               (-/get-map-paths impl x nparent all))))
   (return all))
 
@@ -91,28 +94,29 @@
   [impl paths]
   (var #{get-value} impl)
   (var out {})
-  (k/for:array [e paths]
+  (xt/for:array [e paths]
     (var [path key v] e)
     (var val (:? (not v) {} (get-value v)))
-    (cond (k/is-empty? path)
-          (k/set-key out key val)
+    (cond (or (xt/x:nil? path)
+              (== 0 (xt/x:len path)))
+          (xt/x:set-key out key val)
           
           :else
-          (k/set-key (k/get-in out path)
-                     key val)))
+          (xt/x:set-key (xtd/get-in out path)
+                        key val)))
   (return out))
 
 (defn.xt listen-map
   "listens to a map of indicators"
   {:added "4.0"}
   [impl ref m f]
-  (:= f (or f (fn:> {})))
+  (:= f (or f (fn [_] (return {}))))
   (var #{add-listener
          set-props} impl)
   (var paths      (-/get-map-paths impl m))
-  (var animated   (k/arr-keepf paths
-                               k/last
-                               k/last))
+  (var animated   (xtd/arr-keepf paths
+                                 xt/x:last
+                                 xt/x:last))
   (var trigger-fn
        (fn []
          (var input (-/get-map-input impl paths))
@@ -120,7 +124,7 @@
          (when (and ref (. ref ["current"]))
            (set-props (. ref ["current"])  props))
          (return props)))
-  (k/for:array [ind animated]
+  (xt/for:array [ind animated]
     (add-listener ind trigger-fn))
   (return (trigger-fn)))
 
@@ -130,11 +134,11 @@
   [impl ref indicators transformations get-chord]
   (var #{is-animated
          set-props} impl)
-  (cond (k/nil? transformations)
+  (cond (xt/x:nil? transformations)
         (return {})
         
-        (k/fn? transformations)
-        (cond (k/nil? indicators)
+        (xt/x:is-function? transformations)
+        (cond (xt/x:nil? indicators)
               (return)
               
               (is-animated indicators)
@@ -148,10 +152,10 @@
         
         :else
         (do (var out {})
-            (k/for:object [[key subtransformations] transformations]
+            (xt/for:object [[key subtransformations] transformations]
               (var subindicators (. indicators [key]))
               (var subout (-/listen-transformations impl ref subindicators subtransformations get-chord))
-              (k/set-key out key subout))
+              (xt/x:set-key out key subout))
             (return out))))
 
 (defn.xt new-progressing
@@ -173,15 +177,15 @@
   (when (and running
              animation)
     (stop-transition animation)
-    (k/obj-assign progressing {:running false
-                               :animation nil}))
+    (xt/x:obj-assign progressing {:running false
+                                  :animation nil}))
   (var anim (animate-fn (fn [finished]
-                          (k/obj-assign progressing {:running false
-                                                     :animation nil})
-                         (when progress-fn
-                           (progress-fn {:status "stopped"
-                                         :finished finished})))))
-  (k/obj-assign progressing {:animation anim})
+                          (xt/x:obj-assign progressing {:running false
+                                                        :animation nil})
+                          (when progress-fn
+                            (progress-fn {:status "stopped"
+                                          :finished finished})))))
+  (xt/x:obj-assign progressing {:animation anim})
   (when progress-fn
     (progress-fn {:status "running"}))
   (return progressing))
@@ -194,7 +198,7 @@
   "runs with cleanup"
   {:added "4.0"}
   [impl progressing progress-fn]
-  (var out (k/obj-assign progressing (-/new-progressing)))
+  (var out (xt/x:obj-assign progressing (-/new-progressing)))
   (when progress-fn
     (progress-fn {:status "cleanup"}))
   (return out))
@@ -204,7 +208,7 @@
   {:added "4.0"}
   [impl progressing progress-fn]
   (var #{queued}  progressing)
-  (var queued-fn  (k/first queued))
+  (var queued-fn  (xt/x:first queued))
   (when (not queued-fn)
     (return (-/animate-chained-cleanup impl
                                        progressing
@@ -213,8 +217,8 @@
   (var anim (queued-fn (fn:> (-/animate-chained-cleanup impl
                                                         progressing
                                                         progress-fn))))
-  (k/obj-assign progressing {:running  true
-                             :animation anim})
+  (xt/x:obj-assign progressing {:running  true
+                                :animation anim})
   (when progress-fn
     (progress-fn {:status "running"}))
   (return progressing))
@@ -225,16 +229,16 @@
   [impl progressing progress-fn]
   (var #{queued}  progressing)
   
-  (when (== 0 (k/len queued))
+  (when (== 0 (xt/x:len queued))
     (return (-/animate-chained-cleanup impl progressing progress-fn)))
-  (var queued-fn (k/first queued))
-  (x:arr-pop-first queued)
+  (var queued-fn (xt/x:first queued))
+  (xt/x:arr-pop-first queued)
   (when queued-fn
     (var anim (queued-fn (fn:> [res]
                            (-/animate-chained-all impl progressing progress-fn))))
     (when anim
-      (k/obj-assign progressing {:running  true
-                                 :animation anim})
+      (xt/x:obj-assign progressing {:running  true
+                                    :animation anim})
       (when progress-fn
         (progress-fn {:status "running"}))))
   (return progressing))
@@ -254,15 +258,15 @@
   (cond (not running)
         (do (var anim (animate-fn callback-fn))
             (when anim
-              (k/obj-assign progressing {:running  true
-                                         :animation anim})))
+              (xt/x:obj-assign progressing {:running  true
+                                            :animation anim})))
         
         (and (== type "chained-one")
-             (k/first queued))
+             (xt/x:first queued))
         (do)
         
         :else
-        (x:arr-push queued animate-fn))
+        (xt/x:arr-push queued animate-fn))
   
   (return progressing))
 
@@ -278,7 +282,7 @@
         (return (-/run-with-chained impl type animate-fn progressing progress-fn))
 
         :else
-        (k/err (+ "Not a valid type: " type))))
+        (xt/x:err (+ "Not a valid type: " type))))
 
 ;;
 ;; 
@@ -294,19 +298,20 @@
   (var #{create-val
          create-transition} impl)
   (var indicator    (create-val (:? initial 1 0)))
+  (var identity-fn  (fn [x] (return x)))
   (var zero-fn      (create-transition indicator
                                        tparams
                                        [1 0]
-                                       k/identity))
+                                       identity-fn))
   (var one-fn       (create-transition indicator
                                        tparams
                                        [0 1]
-                                       k/identity))
+                                       identity-fn))
   (var #{check} tparams)
   (return {:indicator indicator
            :zero-fn zero-fn
            :one-fn one-fn
-           :check-fn (or check k/identity)}))
+           :check-fn (or check identity-fn)}))
 
 (defn.xt make-binary-indicator
   "makes a binary indicator"
@@ -354,12 +359,12 @@
    {:indicator indicator
     :trigger-fn
     (fn [value]
-      (when (or (k/nil? check-fn)
+      (when (or (xt/x:nil? check-fn)
                 (check-fn value))
         (var t-fn (create-transition indicator
                                      tparams
                                      [(get-prev) value]
-                                     k/identity))
+                                     (fn [x] (return x))))
         (when progress-fn
           (progress-fn {:status "started"}))
         (var out (-/run-with impl type t-fn progressing progress-fn))
@@ -386,15 +391,15 @@
    {:indicator indicator
     :trigger-fn
     (fn [value]
-      (when (or (k/nil? check-fn)
+      (when (or (xt/x:nil? check-fn)
                 (check-fn value))
         (var pval (get-prev))
-        (var offset (k/mod-offset pval value (or modulo 360)))
+        (var offset (xtm/mod-offset pval value (or modulo 360)))
         (var nval (+ pval offset))
         (var t-fn (create-transition indicator
                                      tparams
                                      [pval nval]
-                                     k/identity))
+                                     (fn [x] (return x))))
         (when progress-fn
           (progress-fn {:status "started"}))
         (var out (-/run-with impl type t-fn progressing progress-fn))

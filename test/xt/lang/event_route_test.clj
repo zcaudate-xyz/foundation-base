@@ -1,26 +1,68 @@
 (ns xt.lang.event-route-test
   (:require [std.json :as json]
             [std.lang :as l]
-            [xt.lang.base-notify :as notify])
+            [xt.lang.common-notify :as notify])
   (:use code.test))
+
+(l/script- :xtalk
+  {:require [[xt.lang.common-lib :as k]
+             [xt.lang.common-spec :as xt]]})
 
 (l/script- :js
   {:runtime :basic
-   :require [[xt.lang.base-lib :as k]
+   :require [[xt.lang.common-lib :as k]
+             [xt.lang.common-spec :as xt]
              [xt.lang.event-route :as route]
-             [xt.lang.base-repl :as repl]]})
+             [xt.lang.common-repl :as repl]]})
 
 (l/script- :lua
   {:runtime :basic
-   :require [[xt.lang.base-lib :as k]
+   :require [[xt.lang.common-lib :as k]
+             [xt.lang.common-spec :as xt]
              [xt.lang.event-route :as route]
-             [xt.lang.base-repl :as repl]]})
+             [xt.lang.common-repl :as repl]]})
 
 (l/script- :python
   {:runtime :basic
-   :require [[xt.lang.base-lib :as k]
+   :require [[xt.lang.common-lib :as k]
+             [xt.lang.common-spec :as xt]
              [xt.lang.event-route :as route]
-             [xt.lang.base-repl :as repl]]})
+             [xt.lang.common-repl :as repl]]})
+
+(defn.xt walk
+  [obj pre-fn post-fn]
+  (:= obj (pre-fn obj))
+  (cond (xt/x:nil? obj)
+        (return (post-fn obj))
+
+        (xt/x:is-object? obj)
+        (do (var out := {})
+            (xt/for:object [[k v] obj]
+              (xt/x:set-key out k (-/walk v pre-fn post-fn)))
+            (return (post-fn out)))
+
+        (xt/x:is-array? obj)
+        (do (var out := [])
+            (xt/for:array [e obj]
+              (xt/x:arr-push out (-/walk e pre-fn post-fn)))
+            (return (post-fn out)))
+
+        :else
+        (return (post-fn obj))))
+
+(defn.xt get-data
+  [obj]
+  (var data-fn
+       (fn [obj]
+         (if (or (xt/x:is-string? obj)
+                 (xt/x:is-number? obj)
+                 (xt/x:is-boolean? obj)
+                 (xt/x:is-object? obj)
+                 (xt/x:is-array? obj)
+                 (xt/x:nil? obj))
+           (return obj)
+           (return (xt/x:cat "<" (k/type-native obj) ">")))))
+  (return (-/walk obj k/identity data-fn)))
 
 (fact:global
  {:setup    [(l/rt:restart)]
@@ -67,21 +109,21 @@
   ^:hidden
   
   (!.js
-   [(route/interim-to-url {"params" {(k/json-encode ["hello" "world"])
+   [(route/interim-to-url {"params" {(xt/x:json-encode ["hello" "world"])
                                      {"id" "1", "type" "name"}}, "path" ["hello" "world"]})
     (route/interim-to-url {"params" {"[]" {"id" "1"}}, "path" []})
     (route/interim-to-url {"params" {}, "path" ["hello"]})])
   => ["hello/world?id=1&type=name" "?id=1" "hello"]
 
   (!.lua
-   [(route/interim-to-url {"params" {(k/json-encode ["hello" "world"])
+   [(route/interim-to-url {"params" {(xt/x:json-encode ["hello" "world"])
                                      {"type" "name"}}, "path" ["hello" "world"]})
     (route/interim-to-url {"params" {"{}" {"id" "1"}}, "path" []})
     (route/interim-to-url {"params" {}, "path" ["hello"]})])
   => ["hello/world?type=name" "?id=1" "hello"]
 
   (!.py
-   [(route/interim-to-url {"params" {(k/json-encode ["hello" "world"])
+   [(route/interim-to-url {"params" {(xt/x:json-encode ["hello" "world"])
                                      {"id" "1", "type" "name"}}, "path" ["hello" "world"]})
     (route/interim-to-url {"params" {"[]" {"id" "1"}}, "path" []})
     (route/interim-to-url {"params" {}, "path" ["hello"]})])
@@ -438,17 +480,17 @@
   
   (!.js
    (var r (route/make-route "hello"))
-   (k/get-data (route/add-url-listener r "a1" (fn:>))))
+   (-/get-data (route/add-url-listener r "a1" (fn:>))))
   => +out+
 
   (!.js
    (var r (route/make-route "hello"))
-   (k/get-data (route/add-url-listener r "a1" (fn:>))))
+   (-/get-data (route/add-url-listener r "a1" (fn:>))))
   => +out+
 
   (!.py
    (var r (route/make-route "hello"))
-   (k/get-data (route/add-url-listener r "a1" (fn:>) nil)))
+   (-/get-data (route/add-url-listener r "a1" (fn:>) nil)))
   => +out+)
 
 ^{:refer xt.lang.event-route/add-path-listener :added "4.0"
@@ -464,17 +506,17 @@
   
   (!.js
    (var r (route/make-route "hello"))
-   (k/get-data (route/add-path-listener r [] "a1" (fn:>))))
+   (-/get-data (route/add-path-listener r [] "a1" (fn:>))))
   => +out+
 
   (!.js
    (var r (route/make-route "hello"))
-   (k/get-data (route/add-path-listener r [] "a1" (fn:>))))
+   (-/get-data (route/add-path-listener r [] "a1" (fn:>))))
   => +out+
 
   (!.py
    (var r (route/make-route "hello"))
-   (k/get-data (route/add-path-listener r [] "a1" (fn:>) nil)))
+   (-/get-data (route/add-path-listener r [] "a1" (fn:>) nil)))
   => +out+)
 
 ^{:refer xt.lang.event-route/add-param-listener :added "4.0"
@@ -490,17 +532,17 @@
 
   (!.js
    (var r (route/make-route "hello"))
-   (k/get-data (route/add-param-listener r "auth" "a1" (fn:>))))
+   (-/get-data (route/add-param-listener r "auth" "a1" (fn:>))))
   => +out+
 
   (!.lua
    (var r (route/make-route "hello"))
-   (k/get-data (route/add-param-listener r "auth" "a1" (fn:>))))
+   (-/get-data (route/add-param-listener r "auth" "a1" (fn:>))))
   => +out+
 
   (!.py
    (var r (route/make-route "hello"))
-   (k/get-data (route/add-param-listener r "auth" "a1" (fn:>) nil)))
+   (-/get-data (route/add-param-listener r "auth" "a1" (fn:>) nil)))
   => +out+)
 
 ^{:refer xt.lang.event-route/add-full-listener :added "4.0"
@@ -517,17 +559,17 @@
   
   (!.js
    (var r (route/make-route "hello"))
-   (k/get-data (route/add-full-listener r ["hello"] "auth" "a1" (fn:>))))
+   (-/get-data (route/add-full-listener r ["hello"] "auth" "a1" (fn:>))))
   => +out+
 
   (!.lua
    (var r (route/make-route "hello"))
-   (k/get-data (route/add-full-listener r ["hello"] "auth" "a1" (fn:>))))
+   (-/get-data (route/add-full-listener r ["hello"] "auth" "a1" (fn:>))))
   => +out+
 
   (!.py
    (var r (route/make-route "hello"))
-   (k/get-data (route/add-full-listener r ["hello"] "auth" "a1" (fn:>) nil)))
+   (-/get-data (route/add-full-listener r ["hello"] "auth" "a1" (fn:>) nil)))
   => +out+)
 
 ^{:refer xt.lang.event-route/set-url :added "4.0"

@@ -70,3 +70,15 @@
        (catch Throwable t t))
   => (contains-in
       [com.impossibl.postgres.jdbc.PGDirectConnection]))
+
+
+^{:refer lib.postgres.connection/load-impl :added "4.1"}
+(fact "loads a postgres implementation"
+  (let [original @conn/+impls+]
+    (try
+      (reset! conn/+impls+ {:stub {:status :pending :ns 'clojure.core}})
+      (with-redefs [require (fn [& _] nil)]
+        (conn/load-impl :stub))
+      (finally
+        (reset! conn/+impls+ original))))
+  => (contains {:status :loaded}))

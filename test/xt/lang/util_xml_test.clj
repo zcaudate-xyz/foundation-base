@@ -6,7 +6,7 @@
 (l/script- :lua
   {:runtime :basic
    :require [[xt.lang.util-xml :as xml]
-             [xt.lang.base-lib :as k]]})
+             [xt.lang.common-lib :as k]]})
 
 (fact:global
  {:setup    [(l/rt:restart)]

@@ -3,8 +3,8 @@
   (:refer-clojure :exclude [hash count pop nth assoc dissoc to-array find empty keyword symbol vector]))
 
 (l/script :xtalk
-  {:require [[xt.lang.base-lib :as k]
-             [xt.lang.base-iter :as it]
+  {:require [[xt.lang.common-spec :as xt]
+             [xt.lang.common-iter :as it]
              [xt.runtime.common-hash :as common-hash]
              [xt.runtime.interface-spec :as spec]]})
 
@@ -31,15 +31,15 @@
   {:added "4.0"}
   [x]
   (return
-   (and (k/obj? x)
-        (k/not-nil? (. x ["::"])))))
+   (and (xt/x:is-object? x)
+        (xt/x:not-nil? (. x ["::"])))))
 
 (defn.xt is-syntax?
   "checks if object is of type syntax"
   {:added "4.0"}
   [x]
   (return
-   (and (k/obj? x)
+   (and (xt/x:is-object? x)
         (== "syntax" (. x ["::"])))))
 
 (defn.xt hash
@@ -47,7 +47,7 @@
   {:added "4.0"}
   [x]
   (var hash-id (common-hash/hash-native x))
-  (if (k/is-number? hash-id)
+  (if (xt/x:is-number? hash-id)
     (return hash-id)
     (return (. x (hash)))))
 
@@ -68,9 +68,9 @@
   {:added "4.0"}
   [obj hash-fn]
   (var hash-id (. obj _hash))
-  (when (k/nil? hash-id)
+  (when (xt/x:nil? hash-id)
     (:= hash-id (hash-fn obj))
-    (k/set-key obj "_hash" hash-id))
+    (xt/x:set-key obj "_hash" hash-id))
   (return hash-id))
 
 (defn.xt wrap-with-cache
@@ -87,20 +87,20 @@
   "show interface"
   {:added "4.0"}
   [x]
-  (var t (k/type-native x))
+  (var t (xt/x:type-native x))
   (cond (== t "nil")
         (return "nil")
         
         (== t "string")
-        (return (k/cat "\"" x "\""))
+        (return (xt/x:cat "\"" x "\""))
         
         (-/is-managed? x)
         (if (. x show)
           (return (. x (show)))
-          (return (k/to-string x)))
+          (return (xt/x:to-string x)))
         
         :else
-        (return (k/to-string x))))
+        (return (xt/x:to-string x))))
 
 (defn.xt eq
   "equivalence check"
@@ -133,11 +133,11 @@
              (. x size))
         (return (. x (size)))
         
-        (k/is-string? x)
-        (return (x:str-len x))
+        (xt/x:is-string? x)
+        (return (xt/x:str-len x))
 
-        (k/arr? x)
-        (return (k/len x))))
+        (xt/x:is-array? x)
+        (return (xt/x:len x))))
 
 (defmacro.xt ^{:standalone true}
   is-persistent?

@@ -2,13 +2,14 @@
   (:require [std.lang :as l]))
 
 (l/script :xtalk
-  {:require [[xt.lang.base-lib :as k]]})
+  {:require [[xt.lang.common-spec :as xt]
+             [xt.lang.common-data :as xtd]]})
 
 (defn.xt throttle-create
   "creates a throttle"
   {:added "4.0"}
   [handler now-fn]
-  (return {:now-fn (or now-fn k/now-ms)
+  (return {:now-fn (or now-fn xt/x:now-ms)
            :handler handler
            :active {}
            :queued {}}))
@@ -19,12 +20,12 @@
   [throttle id args]
   (var #{active queued handler now-fn} throttle)
   (:= args (or args []))
-  (return (k/for:async [[ret err] (handler id (k/unpack args))]
-            {:finally (do (k/del-key active id)
-                          (let [qentry (k/get-key queued id)]
+  (return (xt/for:async [[ret err] (handler id (xt/x:unpack args))]
+            {:finally (do (xt/x:del-key active id)
+                          (let [qentry (xt/x:get-key queued id)]
                             (when qentry
-                              (k/set-key active id qentry)
-                              (k/del-key queued id)
+                              (xt/x:set-key active id qentry)
+                              (xt/x:del-key queued id)
                               (return (-/throttle-run-async throttle id args)))))})))
 
 (defn.xt throttle-run
@@ -32,19 +33,19 @@
   {:added "4.0"}
   [throttle id args]
   (var #{active queued handler now-fn} throttle)
-  (var qentry (k/get-key queued id))
+  (var qentry (xt/x:get-key queued id))
   (when qentry
     (return qentry))
   
-  (var aentry (k/get-key active id))
+  (var aentry (xt/x:get-key active id))
   (when aentry
-    (:= qentry [(k/first aentry) (now-fn)])
-    (k/set-key queued id qentry)
+    (:= qentry [(xt/x:first aentry) (now-fn)])
+    (xt/x:set-key queued id qentry)
     (return qentry))
   
   (var thread (-/throttle-run-async throttle id args))
   (:= aentry [thread (now-fn)])
-  (k/set-key active id aentry)
+  (xt/x:set-key active id aentry)
   (return aentry))
 
 (defn.xt throttle-waiting
@@ -52,20 +53,20 @@
   {:added "4.0"}
   [throttle]
   (var #{active queued} throttle)
-  (return (k/arr-union (k/obj-keys active)
-                       (k/obj-keys queued))))
+  (return (xtd/arr-union (xt/x:obj-keys active)
+                         (xt/x:obj-keys queued))))
 
 (defn.xt throttle-active
   "gets the active ids in a throttle"
   {:added "4.0"}
   [throttle]
   (var #{active} throttle)
-  (return (k/obj-keys active)))
+  (return (xt/x:obj-keys active)))
 
 (defn.xt throttle-queued
   "gets all the queued ids"
   {:added "4.0"}
   [throttle]
   (var #{queued} throttle)
-  (return (k/obj-keys queued)))
+  (return (xt/x:obj-keys queued)))
 

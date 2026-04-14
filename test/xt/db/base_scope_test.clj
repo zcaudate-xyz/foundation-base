@@ -3,30 +3,34 @@
   (:use code.test))
 
 (l/script- :xtalk
-  {:require [[xt.lang.base-lib :as k]
-             [xt.db.base-scope :as scope]
-             [xt.db.sample-test :as sample]]})
+  {:require [[xt.lang.common-spec :as xt]
+             [xt.lang.common-data :as xtd]
+              [xt.db.base-scope :as scope]
+              [xt.db.sample-test :as sample]]})
 
 (l/script- :js
   {:runtime :basic
-   :require [[xt.lang.base-lib :as k]
-             [xt.db.base-scope :as scope]
-             [xt.db.sample-test :as sample]
-             [xt.db.sql-util :as ut]]})
+   :require [[xt.lang.common-spec :as xt]
+             [xt.lang.common-data :as xtd]
+              [xt.db.base-scope :as scope]
+              [xt.db.sample-test :as sample]
+              [xt.db.sql-util :as ut]]})
 
 (l/script- :lua
   {:runtime :basic
-   :require [[xt.lang.base-lib :as k]
-             [xt.db.base-scope :as scope]
-             [xt.db.sample-test :as sample]
-             [xt.db.sql-util :as ut]]})
+   :require [[xt.lang.common-spec :as xt]
+             [xt.lang.common-data :as xtd]
+              [xt.db.base-scope :as scope]
+              [xt.db.sample-test :as sample]
+              [xt.db.sql-util :as ut]]})
 
 (l/script- :python
   {:runtime :basic
-   :require [[xt.lang.base-lib :as k]
-             [xt.db.base-scope :as scope]
-             [xt.db.sample-test :as sample]
-             [xt.db.sql-util :as ut]]})
+   :require [[xt.lang.common-spec :as xt]
+             [xt.lang.common-data :as xtd]
+              [xt.db.base-scope :as scope]
+              [xt.db.sample-test :as sample]
+              [xt.db.sql-util :as ut]]})
 
 (fact:global
  {:setup    [(l/rt:restart)
@@ -39,23 +43,23 @@
 (fact "classifies the link"
 
   (!.js
-   (k/arr-map (scope/get-data-columns sample/Schema
-                                      "UserAccount"
-                                      ["*/info" "password_updated"])
-              (fn:> [e] (. e ["ident"]))))
+   (xtd/arr-map (scope/get-data-columns sample/Schema
+                                        "UserAccount"
+                                        ["*/info" "password_updated"])
+                (fn:> [e] (. e ["ident"]))))
   => ["id" "nickname" "password_updated" "is_super" "is_suspended" "is_official"]
 
   (!.js
-   (k/arr-map (scope/get-data-columns sample/Schema
-                                      "RegionState"
-                                      ["*/info" "country"])
-              (fn:> [e] (. e ["ident"]))))
+   (xtd/arr-map (scope/get-data-columns sample/Schema
+                                        "RegionState"
+                                        ["*/info" "country"])
+                (fn:> [e] (. e ["ident"]))))
   
   (!.js
-   (k/arr-map (scope/get-data-columns sample/Schema
-                                      "RegionState"
-                                      ["*/info" "country_id"])
-              (fn:> [e] (. e ["ident"]))))
+   (xtd/arr-map (scope/get-data-columns sample/Schema
+                                        "RegionState"
+                                        ["*/info" "country_id"])
+                (fn:> [e] (. e ["ident"]))))
   => ["id" "country"])
 
 ^{:refer xt.db.base-scope/get-tree.more :adopt true :added "4.0"}
@@ -216,7 +220,7 @@
 
 
   (!.js
-   (k/arr-map (scope/get-link-columns sample/Schema
+   (xtd/arr-map (scope/get-link-columns sample/Schema
                                       "UserAccount"
                                       [["profile"
                                         {:id "1"}
@@ -362,14 +366,14 @@
   ^:hidden
   
   (!.js
-   (k/arr-map (scope/get-data-columns sample/Schema
+   (xtd/arr-map (scope/get-data-columns sample/Schema
                                 "UserAccount"
                                 ["*/data"])
           (fn:> [e] (. e ["ident"]))))
   => ["id" "nickname" "password_updated" "is_super" "is_suspended" "is_official"]
 
   (!.js
-   (k/arr-map (scope/get-data-columns sample/Schema
+   (xtd/arr-map (scope/get-data-columns sample/Schema
                                 "UserProfile"
                                 ["*/standard"])
           (fn:> [e] (. e ["ident"]))))
@@ -377,28 +381,28 @@
 
 
   (!.lua
-   (k/arr-map (scope/get-data-columns sample/Schema
+   (xtd/arr-map (scope/get-data-columns sample/Schema
                                       "UserAccount"
                                       ["*/data"])
               (fn:> [e] (. e ["ident"]))))
   => ["id" "nickname" "password_updated" "is_super" "is_suspended" "is_official"]
   
   (!.lua
-   (k/arr-map (scope/get-data-columns sample/Schema
+   (xtd/arr-map (scope/get-data-columns sample/Schema
                                       "UserProfile"
                                       ["*/standard"])
           (fn:> [e] (. e ["ident"]))))
   => +out+
 
   (!.py
-   (k/arr-map (scope/get-data-columns sample/Schema
+   (xtd/arr-map (scope/get-data-columns sample/Schema
                                       "UserAccount"
                                       ["*/data"])
               (fn:> [e] (. e ["ident"]))))
   => ["id" "nickname" "password_updated" "is_super" "is_suspended" "is_official"]
   
   (!.py
-   (k/arr-map (scope/get-data-columns sample/Schema
+   (xtd/arr-map (scope/get-data-columns sample/Schema
                                       "UserProfile"
                                       ["*/standard"])
           (fn:> [e] (. e ["ident"]))))
@@ -452,31 +456,31 @@
   ^:hidden
   
   (!.js
-   (k/arr-map (scope/get-link-columns sample/Schema
-                                      "UserAccount"
-                                      [["profile" ["first_name"
-                                                   "last_name"]]])
-              (fn [[e cols]] (return [e.ident cols]))))
+   (xtd/arr-map (scope/get-link-columns sample/Schema
+                                        "UserAccount"
+                                        [["profile" ["first_name"
+                                                     "last_name"]]])
+                (fn [[e cols]] (return [e.ident cols]))))
   => [["profile" [{} ["first_name" "last_name"]]]]
   
   (!.lua
-   (k/arr-map (scope/get-link-columns sample/Schema
-                                      "UserAccount"
-                                      [["profile" ["first_name"
-                                                   "last_name"]]])
-              (fn [e] (return [(k/get-key (k/first e)
-                                          "ident")
-                               (k/second e)]))))
+   (xtd/arr-map (scope/get-link-columns sample/Schema
+                                        "UserAccount"
+                                        [["profile" ["first_name"
+                                                     "last_name"]]])
+                (fn [e] (return [(xt/x:get-key (xtd/first e)
+                                               "ident")
+                                 (xtd/second e)]))))
   => [["profile" [{} ["first_name" "last_name"]]]]
 
   (!.py
-   (k/arr-map (scope/get-link-columns sample/Schema
-                                      "UserAccount"
-                                      [["profile" ["first_name"
-                                                   "last_name"]]])
-              (fn [e] (return [(k/get-key (k/first e)
-                                          "ident")
-                               (k/second e)]))))
+   (xtd/arr-map (scope/get-link-columns sample/Schema
+                                        "UserAccount"
+                                        [["profile" ["first_name"
+                                                     "last_name"]]])
+                (fn [e] (return [(xt/x:get-key (xtd/first e)
+                                               "ident")
+                                 (xtd/second e)]))))
   => [["profile" [{} ["first_name" "last_name"]]]])
 
 ^{:refer xt.db.base-scope/get-linked-tables :added "4.0"}
@@ -560,7 +564,7 @@
 
 (comment
   (!.py
-   (k/get-path sample/Schema ["UserProfile" "account"]))
+   (xt/x:get-path sample/Schema ["UserProfile" "account"]))
   
   (!.py
    (scope/get-tree sample/Schema

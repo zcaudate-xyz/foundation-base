@@ -2,25 +2,27 @@
   (:require [std.lang :as l]))
 
 (l/script :xtalk
-  {:require [[xt.lang.base-lib :as k]]})
+  {:require [[xt.lang.common-spec :as xt]
+             [xt.lang.common-data :as xtd]]})
 
 (defn.xt  all-overview
   "gets an overview of the views"
   {:added "4.0"}
   [views]
-  (return (k/obj-map views
-                     (fn [m]
-                       (return (k/obj-map m k/obj-keys))))))
+  (return (xtd/obj-map
+           views
+           (fn [m]
+             (return (xtd/obj-map m xt/x:obj-keys))))))
 
 (defn.xt all-keys
   "gets all table keys for a view"
   {:added "4.0"}
   [views table type]
-  (var tviews (k/get-key views table))
-  (var ttypes (:? (k/not-nil? tviews)
-                  (k/get-key tviews type)
+  (var tviews (xt/x:get-key views table))
+  (var ttypes (:? (xt/x:not-nil? tviews)
+                  (xt/x:get-key tviews type)
                   {}))
-  (return (k/obj-keys (or ttypes {}))))
+  (return (xt/x:obj-keys (or ttypes {}))))
 
 (defn.xt all-methods
   "gets all methods for views"
@@ -28,10 +30,10 @@
   [views]
   (var method-fn
        (fn [views table type]
-         (return (k/arr-map (-/all-keys views table type)
-                            (fn [sk] (return [table type sk]))))))
-  (return (k/arr-mapcat (k/obj-keys views)
-                        (fn [k]
-                          (return (k/arr-append (method-fn views k "select")
-                                                (method-fn views k "return")))))))
+         (return (xt/x:arr-map (-/all-keys views table type)
+                               (fn [sk] (return [table type sk]))))))
+  (return (xtd/arr-mapcat (xt/x:obj-keys views)
+                          (fn [k]
+                            (return (xt/x:arr-append (method-fn views k "select")
+                                                     (method-fn views k "return")))))))
 

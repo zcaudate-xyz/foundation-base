@@ -1,11 +1,16 @@
 (ns net.resp.wire-test
   (:require [net.resp.wire :refer :all]
-            [std.lib.foundation :as f])
+             [std.lib.foundation :as f])
   (:use [code.test])
   (:refer-clojure :exclude [read]))
 
 ^{:refer net.resp.wire/call :added "3.0"}
-(fact "completes a request on the wire")
+(fact "completes a request on the wire"
+  (call (reify std.protocol.wire/IWire
+          (-read [_] :pong)
+          (-write [_ command] command))
+        ["PING"])
+  => :pong)
 
 ^{:refer net.resp.wire/as-input :added "3.0"}
 (fact "creates an input from value"

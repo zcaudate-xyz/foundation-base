@@ -183,7 +183,11 @@
 
 
 ^{:refer std.lang.manage/compile-runtime-bulk :added "4.1"}
-(fact "TODO")
+(fact "compile-runtime-bulk is a task for compiling runtime EDN suites"
+  (task/task? manage/compile-runtime-bulk)
+  => true)
 
 ^{:refer std.lang.manage/-main :added "4.1"}
-(fact "TODO")
+(fact "main entry point lists available tasks when called with no args"
+  (string? (with-out-str (manage/-main)))
+  => true)

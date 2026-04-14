@@ -336,8 +336,7 @@
   "converts map to array"
   {:added "4.0"}
   ([[_]]
-   '(. (__import__ "weakref")
-       (WeakKeyDictionary))))
+   '{}))
 
 (defn python-tf-x-lu-eq
   "converts map to array"
@@ -364,10 +363,10 @@
    (template/$ (del (. ~lu [(id ~obj)])))))
 
 (def +python-lu+
-  {;;:x-lu-create      {:macro #'python-tf-x-lu-create  :emit :macro}
-   :x-lu-eq          {:macro #'python-tf-x-lu-eq  :emit :macro}
-   :x-lu-get         {:macro #'python-tf-x-lu-get :emit :macro}
-   :x-lu-set         {:macro #'python-tf-x-lu-set :emit :macro}
+  {:x-lu-create      {:macro #'python-tf-x-lu-create  :emit :macro}
+    :x-lu-eq          {:macro #'python-tf-x-lu-eq  :emit :macro}
+    :x-lu-get         {:macro #'python-tf-x-lu-get :emit :macro}
+    :x-lu-set         {:macro #'python-tf-x-lu-set :emit :macro}
    :x-lu-del         {:macro #'python-tf-x-lu-del :emit :macro}})
 
 ;;
@@ -440,14 +439,14 @@
   [[_ arr key-fn compare-fn]]
   (list '. arr (list 'sort :key #_key-fn
                      (template/$ (. (__import__ "functools")
-                             (cmp_to_key
-                              (fn:> [a b]
-                                    (:? (~compare-fn
-                                         (~key-fn a)
-                                         (~key-fn b))
-                                        -1 1))))))))
+                              (cmp_to_key
+                               (fn:> [a b]
+                                     (:? (~compare-fn
+                                          (~key-fn a)
+                                          (~key-fn b))
+                                         -1 1))))))))
 
-(defn python-tf-x-arr-str-comp
+(defn python-tf-x-str-comp
   [[_ a b]]
   (list '< a b))
 
@@ -461,7 +460,7 @@
    :x-arr-pop-first   {:macro #'python-tf-x-arr-pop-first  :emit :macro}
    :x-arr-insert      {:macro #'python-tf-x-arr-insert     :emit :macro}
    :x-arr-sort        {:macro #'python-tf-x-arr-sort       :emit :macro}
-   :x-arr-str-comp    {:macro #'python-tf-x-arr-str-comp   :emit :macro}})
+   :x-str-comp        {:macro #'python-tf-x-str-comp       :emit :macro}})
 
 
 ;;
@@ -484,6 +483,11 @@
   ([[_ s tok]]
    (list '. s (list 'find tok))))
 
+(defn python-tf-x-str-to-fixed
+  [[_ num digits]]
+  (list '. (list 'x:cat "{:." (list 'str digits) "f}")
+        (list 'format num)))
+
 (defn python-tf-x-str-substring
   ([[_ s start & [end]]]
    (template/$ (. ~s [~(list :to start (or end \0))]))))
@@ -505,6 +509,7 @@
    :x-str-split      {:macro #'python-tf-x-str-split      :emit :macro}
    :x-str-join       {:macro #'python-tf-x-str-join       :emit :macro}
    :x-str-index-of   {:macro #'python-tf-x-str-index-of   :emit :macro}
+   :x-str-to-fixed   {:macro #'python-tf-x-str-to-fixed   :emit :macro}
    :x-str-substring  {:macro #'python-tf-x-str-substring  :emit :macro}
    :x-str-to-upper   {:macro #'python-tf-x-str-to-upper      :emit :macro}
    :x-str-to-lower   {:macro #'python-tf-x-str-to-lower      :emit :macro}

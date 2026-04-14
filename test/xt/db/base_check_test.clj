@@ -8,17 +8,17 @@
   {:runtime :oneshot
    :config  {:program :nodejs}
    :require [[xt.db.base-check :as chk]
-             [xt.lang.base-lib :as k]]})
+             [xt.lang.common-lib :as k]]})
 
 (l/script- :lua
   {:runtime :oneshot
    :require [[xt.db.base-check :as chk]
-             [xt.lang.base-lib :as k]]})
+             [xt.lang.common-lib :as k]]})
 
 (l/script- :python
   {:runtime :oneshot
    :require [[xt.db.base-check :as chk]
-             [xt.lang.base-lib :as k]]})
+             [xt.lang.common-lib :as k]]})
 
 ^{:refer xt.db.base-check/is-uuid? :added "4.0"}
 (fact "checks that a string input is a uuid"

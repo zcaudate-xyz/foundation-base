@@ -1,27 +1,66 @@
 (ns xt.lang.event-view-test
   (:require [std.json :as json]
             [std.lang :as l]
-            [xt.lang.base-notify :as notify])
+            [xt.lang.common-notify :as notify])
   (:use code.test))
 
 (l/script- :xtalk
-  {:require [[xt.lang.base-lib :as k]
+  {:require [[xt.lang.common-lib :as k]
+             [xt.lang.common-data :as xtd]
+             [xt.lang.common-spec :as xt]
              [xt.lang.event-view :as view]]})
 
 (l/script- :js
   {:runtime :basic
-   :require [[xt.lang.base-lib :as k]
-             [xt.lang.base-repl :as repl]
+   :require [[xt.lang.common-lib :as k]
+             [xt.lang.common-data :as xtd]
+             [xt.lang.common-repl :as repl]
              [xt.lang.event-view :as view]
              [js.core :as j]]})
 
 (l/script- :lua
   {:runtime :basic
    :config  {:program :resty}
-   :require [[xt.lang.base-lib :as k]
-             [xt.lang.base-repl :as repl]
+   :require [[xt.lang.common-lib :as k]
+             [xt.lang.common-data :as xtd]
+             [xt.lang.common-repl :as repl]
              [xt.lang.event-view :as view]
              [lua.nginx :as n]]})
+
+(defn.xt walk
+  [obj pre-fn post-fn]
+  (:= obj (pre-fn obj))
+  (cond (xt/x:nil? obj)
+        (return (post-fn obj))
+
+        (xt/x:is-object? obj)
+        (do (var out := {})
+            (xt/for:object [[k v] obj]
+              (xt/x:set-key out k (-/walk v pre-fn post-fn)))
+            (return (post-fn out)))
+
+        (xt/x:is-array? obj)
+        (do (var out := [])
+            (xt/for:array [e obj]
+              (xt/x:arr-push out (-/walk e pre-fn post-fn)))
+            (return (post-fn out)))
+
+        :else
+        (return (post-fn obj))))
+
+(defn.xt get-data
+  [obj]
+  (var data-fn
+       (fn [obj]
+         (if (or (xt/x:is-string? obj)
+                 (xt/x:is-number? obj)
+                 (xt/x:is-boolean? obj)
+                 (xt/x:is-object? obj)
+                 (xt/x:is-array? obj)
+                 (xt/x:nil? obj))
+           (return obj)
+           (return (xt/x:cat "<" (k/type-native obj) ">")))))
+  (return (-/walk obj k/identity data-fn)))
 
 (defn.xt test-view
   []
@@ -76,7 +115,7 @@
                                            (throw "ERRORED")))}}
             [3]
             ["BLAH"]
-            k/first))
+            xtd/first))
     (view/init-view v)
     (var [context disabled] (view/pipeline-prep v))
     (var async-fn
@@ -86,12 +125,12 @@
                              (resolve (handler-fn context))))
                       (then success)
                       (catch error)))))
-    (j/notify (. (view/pipeline-run-remote context
-                                           true
-                                           async-fn
-                                           (fn:>)
-                                           k/identity)
-                 (then (fn:> context.acc)))))
+    (. (view/pipeline-run-remote context
+                                 true
+                                 async-fn
+                                 (fn:>)
+                                 k/identity)
+       (then (fn:> (repl/notify context.acc)))))
   => {"error" true,
       "remote" [true "ERRORED" true],
       "post" [false],
@@ -105,7 +144,7 @@
                                            (return nil)))}}
             [3]
             ["BLAH"]
-            k/first))
+            xtd/first))
     (view/init-view v)
     (var [context disabled] (view/pipeline-prep v))
     (var async-fn
@@ -115,12 +154,12 @@
                              (resolve (handler-fn context))))
                       (then success)
                       (catch error)))))
-    (j/notify (. (view/pipeline-run-remote context
-                                           true
-                                           async-fn
-                                           (fn:>)
-                                           k/identity)
-                 (then (fn:> (view/get-output v)))))))
+    (. (view/pipeline-run-remote context
+                                 true
+                                 async-fn
+                                 (fn:>)
+                                 k/identity)
+       (then (fn:> (repl/notify (view/get-output v)))))))
 
 ^{:refer xt.lang.event-view/wrap-args :added "4.0"}
 (fact "wraps handler for context args"
@@ -189,7 +228,7 @@
   ^:hidden
   
   (!.js
-   (k/get-data
+   (-/get-data
     (view/create-view
      (fn:> [x] (j/future-delayed [100]
                  (return {:value x})))
@@ -216,7 +255,7 @@
   
 
   (!.lua
-   (k/get-data
+   (-/get-data
     (view/create-view
      (fn:> [x] {:value x})
      {}
@@ -247,7 +286,7 @@
            [3]
            {:value 0}))
    (view/init-view v)
-   (k/obj-keys (view/view-context v)))
+   (xtd/obj-keys (view/view-context v)))
   => ["view" "input"]
 
   (set (!.lua
@@ -257,7 +296,7 @@
                 [3]
                 {:value 0}))
         (view/init-view v)
-        (k/obj-keys (view/view-context v))))
+        (xtd/obj-keys (view/view-context v))))
   => #{"input" "view"})
 
 ^{:refer xt.lang.event-view/add-listener :added "4.0"}
@@ -355,7 +394,7 @@
   (notify/wait-on :lua
     (var v (-/test-view))
     (view/add-listener v "a1" (fn [res]
-                                (repl/notify (k/get-data res))))
+                                (repl/notify (-/get-data res))))
     (view/set-input v 1))
   => (contains-in
       {"type" "view.input",
@@ -378,7 +417,7 @@
   (notify/wait-on :lua
     (var v (-/test-view))
     (view/add-listener v "a1" (fn [res]
-                                (repl/notify (k/get-data res))))
+                                (repl/notify (-/get-data res))))
     (view/set-output v 1))
   => (contains-in
       {"type" "view.output",
@@ -429,12 +468,12 @@
                              (resolve (handler-fn context))))
                       (then success)
                       (catch error)))))
-    (j/notify (. (view/pipeline-run context
-                                    disabled
-                                    async-fn
-                                    (fn:>)
-                                    k/identity)
-                 (then (fn:> context.acc)))))
+    (. (view/pipeline-run context
+                          disabled
+                          async-fn
+                          (fn:>)
+                          k/identity)
+       (then (fn:> (repl/notify context.acc)))))
   => {"::" "view.run"
       "pre" [false],
       "main" [true {"value" 3}]
@@ -484,12 +523,12 @@
                              (resolve (handler-fn context))))
                       (then success)
                       (catch error)))))
-    (j/notify (. (view/pipeline-run-remote context
-                                           true
-                                           async-fn
-                                           (fn:>)
-                                           k/identity)
-                 (then (fn:> context.acc)))))
+    (. (view/pipeline-run-remote context
+                                 true
+                                 async-fn
+                                 (fn:>)
+                                 k/identity)
+       (then (fn:> (repl/notify context.acc)))))
   => {"::" "view.run"
       "pre" [false]
       "remote" [true {"value" 3}],
@@ -536,12 +575,12 @@
                              (resolve (handler-fn context))))
                       (then success)
                       (catch error)))))
-    (j/notify (. (view/pipeline-run-sync context
-                                           true
-                                           async-fn
-                                           (fn:>)
-                                           k/identity)
-                 (then (fn:> context.acc)))))
+    (. (view/pipeline-run-sync context
+                               true
+                               async-fn
+                               (fn:>)
+                               k/identity)
+       (then (fn:> (repl/notify context.acc)))))
   => {"::" "view.run"
       "pre" [false]
       "sync" [true {"value" 3}],

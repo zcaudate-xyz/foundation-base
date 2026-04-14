@@ -4,24 +4,27 @@
 
 (l/script- :js
   {:runtime :basic
-   :require [[xt.lang.base-lib :as k]
-             [xt.db.base-flatten :as f]
-             [xt.db.base-schema :as sch]
-             [xt.db.sample-test :as sample]]})
+   :require [[xt.lang.common-spec :as xt]
+             [xt.lang.common-data :as xtd]
+              [xt.db.base-flatten :as f]
+              [xt.db.base-schema :as sch]
+              [xt.db.sample-test :as sample]]})
 
 (l/script- :lua
   {:runtime :basic
-   :require [[xt.lang.base-lib :as k]
-             [xt.db.base-flatten :as f]
-             [xt.db.base-schema :as sch]
-             [xt.db.sample-test :as sample]]})
+   :require [[xt.lang.common-spec :as xt]
+             [xt.lang.common-data :as xtd]
+              [xt.db.base-flatten :as f]
+              [xt.db.base-schema :as sch]
+              [xt.db.sample-test :as sample]]})
 
 (l/script- :python
   {:runtime :basic
-   :require [[xt.lang.base-lib :as k]
-             [xt.db.base-flatten :as f]
-             [xt.db.base-schema :as sch]
-             [xt.db.sample-test :as sample]]})
+   :require [[xt.lang.common-spec :as xt]
+             [xt.lang.common-data :as xtd]
+              [xt.db.base-flatten :as f]
+              [xt.db.base-schema :as sch]
+              [xt.db.sample-test :as sample]]})
 
 (fact:global
  {:setup    [(l/rt:restart)]
@@ -87,7 +90,7 @@
                                     sample/RootUserFull
                                     {}
                                     {}))
-           (k/obj-keys out)))
+           (xtd/obj-keys out)))
   => #{"table_map" "data_obj" "ref_obj" "rev_obj"}
 
   (set (!.lua
@@ -96,7 +99,7 @@
                                 sample/RootUserFull
                                 {}
                                 {}))
-       (k/obj-keys out)))
+       (xtd/obj-keys out)))
   => #{"table_map" "data_obj" "ref_obj" "rev_obj"}
 
   (set (!.py
@@ -105,7 +108,7 @@
                                  sample/RootUserFull
                                  {}
                                  {}))
-        (k/obj-keys out)))
+        (xtd/obj-keys out)))
   => #{"table_map" "data_obj" "ref_obj" "rev_obj"})
 
 ^{:refer xt.db.base-flatten/flatten-node.account :adopt true :added "4.0"
@@ -134,7 +137,7 @@
                        sample/RootUserFull
                        {}
                        {})
-       (k/get-key "table_map")))
+       (xt/x:get-key "table_map")))
   => +table-map-account+
 
   (!.lua
@@ -143,7 +146,7 @@
                        sample/RootUserFull
                        {}
                        {})
-       (k/get-key "table_map")))
+       (xt/x:get-key "table_map")))
   
   
   => +table-map-account+
@@ -154,7 +157,7 @@
                        sample/RootUserFull
                        {}
                        {})
-       (k/get-key "table_map")))
+       (xt/x:get-key "table_map")))
   => +table-map-account+)
 
 ^{:refer xt.db.base-flatten/flatten-node.profile :adopt true :added "4.0"

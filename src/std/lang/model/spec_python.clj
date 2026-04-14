@@ -155,44 +155,68 @@
 (defn tf-for-return
   "for return transform"
   {:added "4.0"}
-  [[_ [[res err] statement] {:keys [success error]}]]
-   (template/$ (try (var ~res ~statement)
-             ~success
-             (catch [Exception :as ~err] ~error))))
+  [[_ [[res err] statement] {:keys [success error final]}]]
+  (if (and (seq? statement)
+           (= 'x:return-run (first statement)))
+    (let [[_ runner] statement]
+      (template/$ (do (var ~res nil)
+                      (try
+                        (~runner
+                         (fn [value]
+                           (:= ~res value))
+                         (fn [value]
+                           (throw value)))
+                        ~(if final (list 'return success) success)
+                        (catch [Exception :as ~err]
+                          ~(if final (list 'return error) error))))))
+    (template/$ (try (var ~res ~statement)
+                     ~(if final (list 'return success) success)
+                     (catch [Exception :as ~err]
+                       ~(if final (list 'return error) error))))))
 
 (def +features+
-  (-> (grammar/build :exclude [:pointer
-                               :block])
-      (grammar/build:override
-       {:pow         {:raw "**"}
-        :and         {:raw "and"}
-        :or          {:raw "or"}
-        :not         {:raw "not" :emit :prefix}
-        :throw       {:raw "raise"  :emit :prefix}
-        :fn          {:macro  #'python-fn   :emit :macro}
-        :var         {:symbol #{'var*}}
-        :defn        {:symbol #{'defn}   :macro #'python-defn :emit :macro}
-        :defgen      {:symbol #{'defgen} :macro #'python-defn :emit :macro}
-        :fn.inner    {:macro #'python-defn :emit :macro}
-        :with-global {:value true :raw "globals()"}
-        :defclass    {:macro  #'python-defclass :emit :macro}
-        :for-object  {:macro #'tf-for-object :emit :macro}
-        :for-array   {:macro #'tf-for-array  :emit :macro}
-        :for-iter    {:macro #'tf-for-iter   :emit :macro}
-        :for-index   {:macro #'tf-for-index  :emit :macro}
-        :for-return  {:macro #'tf-for-return :emit :macro}})
-      (grammar/build:override fn/+python+)
-      (grammar/build:override com/+python-com+)
-      (grammar/build:extend
-       {:defn-     {:op :defn-   :symbol #{'defn-}  :type :block :emit #'python-defn-}
-        :var-let   {:op :var-let :symbol #{'var}  :macro #'python-var :emit :macro}
-        :unarr     {:op :unarr   :symbol #{:*}    :raw "*"    :emit :pre}
-        :undict    {:op :undict  :symbol #{:**}   :raw "**"   :emit :pre}
-        :del       {:op :del     :symbol #{'del}  :raw "del"  :emit :prefix}
-        :pass      {:op :pass    :symbol #{'pass} :raw "pass" :emit :return :type :special}
-        :nan       {:op :nan     :symbol #{'NaN}  :raw "NaN"  :value true :emit :throw}
-        :with      {:op :with    :symbol #{'with} :type :block
-                    :block  {:main #{:parameter :body}}}})))
+  (let [base (-> (grammar/build :exclude [:pointer
+                                          :block])
+                 (grammar/build:override
+                  {:pow         {:raw "**"}
+                   :and         {:raw "and"}
+                   :or          {:raw "or"}
+                   :not         {:raw "not" :emit :prefix}
+                   :throw       {:raw "raise"  :emit :prefix}
+                   :fn          {:macro  #'python-fn   :emit :macro}
+                   :var         {:symbol #{'var*}}
+                   :defn        {:symbol #{'defn}   :macro #'python-defn :emit :macro}
+                   :defgen      {:symbol #{'defgen} :macro #'python-defn :emit :macro}
+                   :fn.inner    {:macro #'python-defn :emit :macro}
+                   :with-global {:value true :raw "globals()"}
+                   :defclass    {:macro  #'python-defclass :emit :macro}
+                   :for-object  {:macro #'tf-for-object :emit :macro}
+                   :for-array   {:macro #'tf-for-array  :emit :macro}
+                   :for-iter    {:macro #'tf-for-iter   :emit :macro}
+                   :for-index   {:macro #'tf-for-index  :emit :macro}
+                   :for-return  {:macro #'tf-for-return :emit :macro}}))
+        base-keys (set (keys base))
+        fn-overrides (select-keys fn/+python+ base-keys)
+        fn-extensions (apply dissoc fn/+python+ base-keys)
+        with-fn (cond-> base
+                  (seq fn-overrides) (grammar/build:override fn-overrides)
+                  (seq fn-extensions) (grammar/build:extend fn-extensions))
+        with-fn-keys (set (keys with-fn))
+        com-overrides (select-keys com/+python-com+ with-fn-keys)
+        com-extensions (apply dissoc com/+python-com+ with-fn-keys)]
+    (cond-> with-fn
+      (seq com-overrides) (grammar/build:override com-overrides)
+      (seq com-extensions) (grammar/build:extend com-extensions)
+      true (grammar/build:extend
+            {:defn-     {:op :defn-   :symbol #{'defn-}  :type :block :emit #'python-defn-}
+             :var-let   {:op :var-let :symbol #{'var}  :macro #'python-var :emit :macro}
+             :unarr     {:op :unarr   :symbol #{:*}    :raw "*"    :emit :pre}
+             :undict    {:op :undict  :symbol #{:**}   :raw "**"   :emit :pre}
+             :del       {:op :del     :symbol #{'del}  :raw "del"  :emit :prefix}
+             :pass      {:op :pass    :symbol #{'pass} :raw "pass" :emit :return :type :special}
+             :nan       {:op :nan     :symbol #{'NaN}  :raw "NaN"  :value true :emit :throw}
+             :with      {:op :with    :symbol #{'with} :type :block
+                         :block  {:main #{:parameter :body}}}}))))
 
 (def +template+
   (->> {:banned #{:keyword}

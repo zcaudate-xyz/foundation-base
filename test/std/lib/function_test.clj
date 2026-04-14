@@ -98,6 +98,18 @@
   (fn:init-args '[x] '(inc x) [])
   => '["" {} ([x] (inc x))])
 
+^{:refer std.lib.function/fn:call-body :added "4.1"}
+(fact "creates callable args with multi-arity support"
+
+  (fn:call-body '[x] '(inc x) [])
+  => '["" {} ([x] (inc x))]
+
+  (fn:call-body '([x] (inc x))
+                '([x y] (+ x y))
+                [])
+  => '["" {} (([x] (inc x))
+              ([x y] (+ x y)))])
+
 ^{:refer std.lib.function/fn:create-args :added "3.0"}
 (fact "creates args for the body"
 
