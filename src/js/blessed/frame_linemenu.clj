@@ -49,7 +49,7 @@
   "helper function for LineMenu"
   {:added "4.0"}
   ([items]
-   (let [entries (j/filter items (fn:> [e] (:? (k/arr? e.hidden) (not (e.hidden)) (not e.hidden))))
+   (let [entries (j/filter items (fn:> [e] (:? (k/is-array? e.hidden) (not (e.hidden)) (not e.hidden))))
          lens     (j/map entries (fn:> [e] (k/len e.label)))
          lefts    (j/reduce lens
                             (fn [acc l]

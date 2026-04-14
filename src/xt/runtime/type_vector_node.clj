@@ -7,7 +7,7 @@
              [xt.runtime.interface-common :as interface-common]]})
 
 (def.xt BITS 5)
-(def.xt WIDTH (xt/x:pow 2 -/BITS))
+(def.xt WIDTH (xt/x:m-pow 2 -/BITS))
 (def.xt MASK (- -/WIDTH 1))
 
 (defmacro.xt impl-mask
@@ -201,4 +201,3 @@
 
 (def.xt EMPTY_VECTOR_NODE
   (-/node-create nil []))
-

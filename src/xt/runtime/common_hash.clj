@@ -33,10 +33,10 @@
   [f]
   (var '[m e] (math.frexp f))
   (return (xt/x:bit-and
-           (+ (xt/x:floor (* (- m 0.5)
-                             (pow 2 31)))
-              e)
-           (:- "0xFFFFFF"))))
+           (+ (xt/x:m-floor (* (- m 0.5)
+                               (pow 2 31)))
+               e)
+            (:- "0xFFFFFF"))))
 
 ;;
 ;; PYTHON
@@ -54,10 +54,10 @@
   (var math (__import__ "math"))
   (var '[m e] (math.frexp f))
   (return (xt/x:bit-and
-           (+ (xt/x:floor (* (- m 0.5)
-                             (pow 2 31)))
-              e)
-           (:- "0xFFFFFF"))))
+           (+ (xt/x:m-floor (* (- m 0.5)
+                               (pow 2 31)))
+               e)
+            (:- "0xFFFFFF"))))
 
 ;;
 ;; XTALK
@@ -81,8 +81,8 @@
   [s]
   (var hval (:- "0x811c9dc5"))
   (xt/for:index [i [(xt/x:offset 0) (xt/x:len s)]]
-    (:= hval (xt/x:bit-xor hval (xt/x:bit-and (xt/x:get-char s i)
-                                        (:- "0xFF"))))
+    (:= hval (xt/x:bit-xor hval (xt/x:bit-and (xt/x:str-char s i)
+                                         (:- "0xFF"))))
     (:= hval (+ hval
                 (xt/x:bit-lshift hval 1)
                 (xt/x:bit-lshift hval 4)
@@ -95,9 +95,9 @@
   {:added "4.0"}
   [iter hash-fn]
   (var hval (:- "0x811c9dc5"))
-  (it/for:iter [e iter]
+  (xt/for:iter [e iter]
     (:= hval (xt/x:bit-xor hval (xt/x:bit-and (hash-fn e)
-                                        (:- "0xFF"))))
+                                         (:- "0xFF"))))
     (:= hval (+ hval
                 (xt/x:bit-lshift hval 1)
                 (xt/x:bit-lshift hval 4)
@@ -110,9 +110,9 @@
   {:added "4.0"}
   [iter hash-fn]
   (var hval (:- "0x811c9dc5"))
-  (it/for:iter [e iter]
+  (xt/for:iter [e iter]
     (:= hval (xt/x:bit-xor hval (xt/x:bit-and (hash-fn e)
-                                        (:- "0xFF")))))
+                                         (:- "0xFF")))))
   (return (xt/x:bit-and hval (:- "0xFFFFFF"))))
 
 (defn.xt hash-integer
@@ -155,4 +155,3 @@
         (== t "object")
         (return (or (xt/x:get-key x "hash")
                     (rt/xt-lookup-id x)))))
-

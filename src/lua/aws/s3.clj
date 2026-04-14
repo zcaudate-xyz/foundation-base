@@ -74,7 +74,7 @@
   (var #{status body} res)
   (when (== status 200)
     (var result (k/get-in body ["ListBucketResult"]))
-    (var arr (:? (k/arr? result)
+    (var arr (:? (k/is-array? result)
                  (k/arr-keep result (k/key-fn "Contents"))
                  (k/arrayify (k/get-in result ["Contents"]))))
     (:= (. res body) (k/arr-map arr (k/key-fn "Key"))))
@@ -162,4 +162,3 @@
       (-/delete-all-objects aws bucket (. m body) opts))
     (return (-/delete-bucket aws bucket opts)))
   (return m))
-

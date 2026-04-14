@@ -13,7 +13,7 @@
   "checks that the db descriptor can prepare queries"
   {:added "4.0"}
   [db]
-  (return (and (k/obj? db)
+  (return (and (k/is-object? db)
                (k/has-key? db "schema")
                (k/has-key? db "views"))))
 
@@ -26,14 +26,14 @@
   (var #{view} view-entry)
   (var tview (k/walk view
                      (fn [res]
-                       (return (:? (k/arr? res)
+                       (return (:? (k/is-array? res)
                                    (k/arr-filter res
                                                  (fn [e]
                                                    (return (not= e "__deleted__"))))
                                    res)))
                      (fn [res]
                        (when (and (k/not-nil? res)
-                                  (k/obj? res)
+                                  (k/is-object? res)
                                   (k/has-key? res "__deleted__"))
                          (k/del-key res "__deleted__"))
                        (return res))))

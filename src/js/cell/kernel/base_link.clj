@@ -133,7 +133,7 @@
   {:added "4.0"}
   [worker-url active callbacks]
   (cond (or (k/is-string? worker-url)
-            (k/fn? worker-url))
+            (k/is-function? worker-url))
         (do (var worker (new Worker worker-url))
             (. worker (addEventListener
                        "message"

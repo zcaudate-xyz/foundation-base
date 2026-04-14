@@ -18,7 +18,7 @@
   (cond (k/is-string? x)
         (return x)
 
-        (k/arr? x)
+        (k/is-array? x)
         (do (var [h s l] x)
             (return (+ "hsl("
                        (j/floor h) ","
@@ -67,7 +67,7 @@
   "general convertion to hsl"
   {:added "4.0"}
   [s]
-  (cond (k/arr? s)
+  (cond (k/is-array? s)
         (return s)
 
         (k/is-string? s)
@@ -91,10 +91,10 @@
   "interpolates given a function"
   {:added "4.0"}
   [from to fraction]
-  (cond (k/fn? from)
+  (cond (k/is-function? from)
         (return (-/interpolateScalar (from to) to fraction))
 
-        (k/fn? to)
+        (k/is-function? to)
         (return (-/interpolateScalar from (to from) fraction))
 
         :else
@@ -131,13 +131,13 @@
                   (-/interpolateNum (. to [2]) from)]
                  to])
 
-        (k/fn? to)
+        (k/is-function? to)
         (return [from
                  [(. from [0])
                   (. from [1])
                   to]])
 
-        (k/fn? from)
+        (k/is-function? from)
         (return [[(. to [0])
                   (. to [1])
                   from]
@@ -247,4 +247,3 @@
                                               "0"
                                               2)))
                          (j/join "")))))
-

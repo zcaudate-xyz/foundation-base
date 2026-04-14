@@ -15,7 +15,7 @@
   (return
    (k/arr-map deps
               (fn [path]
-                (return (:? (k/arr? path)
+                (return (:? (k/is-array? path)
                             path
                             [model-id path]))))))
 
@@ -33,7 +33,7 @@
   (when (k/nil? stream)
     (return nil))
   (var stream-spec (:? (and (k/nil? (k/get-key stream "target"))
-                            (k/obj? (k/get-key stream "db")))
+                            (k/is-object? (k/get-key stream "db")))
                         (k/obj-assign (k/obj-clone stream)
                                       {"target" (k/get-in stream ["db" "target"])})
                         stream))

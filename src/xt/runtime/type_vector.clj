@@ -5,6 +5,7 @@
 (l/script :xtalk
   {:require [[xt.lang.common-spec :as xt]
              [xt.lang.common-iter :as it]
+             [xt.lang.common-data :as xtd]
              [xt.runtime.interface-common :as interface-common]
              [xt.runtime.interface-spec :as spec]
              [xt.runtime.interface-collection :as interface-collection]
@@ -49,14 +50,14 @@
                :_size size
                :_shift shift
                :_tail tail})
-  (xt/x:set-proto vector protocol)
+  (xt/x:proto-set vector protocol nil)
   (return vector))
 
 (defn.xt vector-empty
   "creates an empty vector from current"
   {:added "4.0"}
   [vector]
-  (var protocol (xt/x:get-proto vector))
+  (var protocol (xt/x:proto-get vector nil))
   (return (-/vector-new node/EMPTY_VECTOR_NODE 0 node/BITS [] protocol)))
 
 (defn.xt vector-is-editable
@@ -75,7 +76,7 @@
   "push-lastoins an element to the vector"
   {:added "4.0"}
   [vector x]
-  (var protocol (xt/x:get-proto vector))
+  (var protocol (xt/x:proto-get vector nil))
   (var #{_root _size _shift _tail} vector)
   (when (< (- _size (node/impl-offset _size))
            node/WIDTH)
@@ -108,7 +109,7 @@
   "pops the last element off vector"
   {:added "4.0"}
   [vector]
-  (var protocol (xt/x:get-proto vector))
+  (var protocol (xt/x:proto-get vector nil))
   (var #{_root _size _shift _tail} vector)
   (when (== _size 0)
     (return vector))
@@ -221,7 +222,7 @@
   "mutates the vector"
   {:added "4.0"}
   [vector]
-  (var protocol (xt/x:get-proto vector))
+  (var protocol (xt/x:proto-get vector nil))
   (var #{_root _size _shift _tail} vector)
   (var #{edit-id} _root)
   (cond (xt/x:not-nil? edit-id)
@@ -238,7 +239,7 @@
   "creates persistent vector"
   {:added "4.0"}
   [vector]
-  (var protocol (xt/x:get-proto vector))
+  (var protocol (xt/x:proto-get vector nil))
   (var #{_root _size _shift _tail} vector)
   (node/ensure-editable _root)
   (var #{children} _root)
@@ -305,7 +306,7 @@
 
 (def.xt VECTOR_PROTOTYPE
   (-> -/VECTOR_SPEC
-      (xt/x:proto-spec)
+      (spec/proto-spec)
       (xt/x:proto-create)))
 
 (defn.xt vector-create
@@ -351,4 +352,3 @@
 ;;
 ;; 
 ;;
-

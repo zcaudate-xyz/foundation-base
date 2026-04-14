@@ -62,7 +62,7 @@
         (k/is-string? ctx)
         (return (-/GX-val ctx))
 
-        (k/obj? ctx)
+        (k/is-object? ctx)
         (if (== (. ctx ["::"]) "cell")
           (return ctx)
           (return (. ctx ["cell"])))

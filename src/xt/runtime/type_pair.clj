@@ -16,18 +16,18 @@
   (var pair {"::" "pair"
              :_key key
              :_val val})
-  (xt/x:set-proto pair protocol)
+  (xt/x:proto-set pair protocol nil)
   (return pair))
 
 (def.xt PAIR_SPEC
-  [[spec/IColl   {:_start_string  "["
-                  :_end_string    "]"
-                  :_sep_string    ", "
-                  :_is_ordered    true
-                  :to-iter  (fn:> [e] (it/iter-from-arr [(. e _key)
-                                                         (. e _val)]))
-                  :to-array (fn:> [e] [(. e _key)
-                                       (. e _val)])}]
+   [[spec/IColl   {:_start_string  "["
+                   :_end_string    "]"
+                   :_sep_string    ", "
+                   :_is_ordered    true
+                   :to-iter  (fn:> [e] (it/iter [(. e _key)
+                                                 (. e _val)]))
+                   :to-array (fn:> [e] [(. e _key)
+                                        (. e _val)])}]
    [spec/IEq     {:eq     interface-collection/coll-eq}]    
    [spec/IHash   {:hash   (interface-common/wrap-with-cache
                            interface-collection/coll-hash-ordered)}]
@@ -42,7 +42,7 @@
 
 (def.xt PAIR_PROTOTYPE
   (-> -/PAIR_SPEC
-      (xt/x:proto-spec)
+      (spec/proto-spec)
       (xt/x:proto-create)))
 
 (defn.xt pair
@@ -50,4 +50,3 @@
   {:added "4.0"}
   [key val]
   (return (-/pair-new key val -/PAIR_PROTOTYPE)))
-

@@ -51,7 +51,7 @@
   (cond (== true print)
         (return true)
 
-        (k/obj? print)
+        (k/is-object? print)
         (do (k/for:object [[key v] print]
               (var term (. meta [key]))
               (when (k/is-empty? (k/arr-intersection (j/arrayify v)
@@ -365,4 +365,3 @@
       (setClearing false)))
   (return #{onActionReset
             onActionCheck}))
-

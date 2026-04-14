@@ -8,7 +8,7 @@
              [xt.runtime.interface-common :as data-common]]})
 
 (def.xt BITS 5)
-(def.xt WIDTH (xt/x:pow 2 -/BITS))
+(def.xt WIDTH (xt/x:m-pow 2 -/BITS))
 (def.xt MASK (- -/WIDTH 1))
 
 (defn.xt impl-mask
@@ -40,6 +40,5 @@
   "creates a new node"
   {:added "4.0"}
   [node edit-id idx val])
-
 
 
