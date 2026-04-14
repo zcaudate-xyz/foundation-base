@@ -75,6 +75,54 @@
     out)
   => "OK")
 
+^{:refer xt.lang.common-spec/return-run :added "4.1"}
+(fact "can compute a value before resolving"
+  (!.lua
+    (var out nil)
+    (xt/for:return [[ok err] (xt/return-run [resolve reject]
+                                (var total (+ 1 2 3))
+                                (resolve total))]
+      {:success (:= out ok)
+       :error (:= out err)})
+    out)
+  => 6)
+
+^{:refer xt.lang.common-spec/return-run :added "4.1"}
+(fact "can branch between resolve and reject"
+  [(!.lua
+     (var out nil)
+     (var value 5)
+     (xt/for:return [[ok err] (xt/return-run [resolve reject]
+                                 (if (< value 10)
+                                   (reject "small")
+                                   (resolve value)))]
+       {:success (:= out ok)
+        :error (:= out err)})
+     out)
+   (!.lua
+     (var out nil)
+     (var value 12)
+     (xt/for:return [[ok err] (xt/return-run [resolve reject]
+                                 (if (< value 10)
+                                   (reject "small")
+                                   (resolve value)))]
+       {:success (:= out ok)
+        :error (:= out err)})
+     out)]
+  => ["small" 12])
+
+^{:refer xt.lang.common-spec/return-run :added "4.1"}
+(fact "supports final returns through for:return"
+  (!.lua
+    ((fn []
+       (xt/for:return [[ok err] (xt/return-run [resolve reject]
+                                   (resolve "OK"))]
+         {:success ok
+          :error err
+          :final true})
+       (return "MISS"))))
+  => "OK")
+
 ^{:refer xt.lang.common-spec/x:return-run :added "4.1"}
 (fact "can be used directly inside for:return"
   (!.lua

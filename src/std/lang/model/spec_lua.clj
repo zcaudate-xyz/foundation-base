@@ -117,7 +117,7 @@
 (defn tf-for-return
   "for return transform"
   {:added "4.0"}
-  [[_ [[res err] statement] {:keys [success error]}]]
+  [[_ [[res err] statement] {:keys [success error final]}]]
   (if (and (seq? statement)
            (= 'x:return-run (first statement)))
     (let [[_ runner] statement]
@@ -131,12 +131,12 @@
                          (:= ~res nil)
                          (:= ~err value)))
                       (if (not ~err)
-                        ~success
-                        ~error))))
+                        ~(if final (list 'return success) success)
+                        ~(if final (list 'return error) error)))))
     (template/$ (do (var '[~res ~err] ~statement)
                     (if (not ~err)
-                      ~success
-                      ~error)))))
+                      ~(if final (list 'return success) success)
+                      ~(if final (list 'return error) error))))))
 
 (defn tf-for-try
   "for try transform"

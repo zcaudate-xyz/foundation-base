@@ -88,11 +88,43 @@
   (spec-dart/tf-for-return '(for:return [[ok err] (x:return-run runner)]
                                {:success (return ok)
                                 :error   (return err)}))
-  => '(try
-        (runner
-         (fn [ok] (return ok))
-         (fn [err] (return err)))
-        (catch err (return err)))
+  => '(do
+        (var ok nil)
+        (var err nil)
+        (try
+          (runner
+           (fn [value]
+             (:= ok value)
+             (:= err nil))
+           (fn [value]
+             (:= ok nil)
+             (:= err value)))
+          (if err
+            (return err)
+            (return ok))
+          (catch err
+            (return err))))
+
+  (spec-dart/tf-for-return '(for:return [[ok err] (x:return-run runner)]
+                               {:success ok
+                                :error   err
+                                :final   true}))
+  => '(do
+        (var ok nil)
+        (var err nil)
+        (try
+          (runner
+           (fn [value]
+             (:= ok value)
+             (:= err nil))
+           (fn [value]
+             (:= ok nil)
+             (:= err value)))
+          (if err
+            (return err)
+            (return ok))
+          (catch err
+            (return err)))))
 
   (spec-dart/tf-for-try '(for:try [[ok err] (call)]
                             {:success (return ok)
@@ -113,7 +145,7 @@
         (catchError (fn [err]
                       (return err)))
         (whenComplete (fn []
-                        (return true)))))
+                        (return true))))
 
 (fact "for:* emission for dart"
   (l/emit-as :dart ['(for:object [[k v] obj]
@@ -181,6 +213,28 @@
                                :finally (return true)}))
   => '(. (Future (fn []
                    (return (call))))
+        (then (fn [ok]
+                (return ok)))
+        (catchError (fn [err]
+                      (return err)))
+        (whenComplete (fn []
+                        (return true))))
+
+  (spec-dart/tf-for-async '(for:async [[ok err] (x:return-run runner)]
+                              {:success (return ok)
+                               :error   (return err)
+                               :finally (return true)}))
+  => '(. (do
+           (var completer (new Completer))
+           (try
+             (runner
+              (fn [ok]
+                (. completer (complete ok)))
+              (fn [err]
+                (. completer (completeError err))))
+             (catch err
+               (. completer (completeError err))))
+           (. completer future))
         (then (fn [ok]
                 (return ok)))
         (catchError (fn [err]

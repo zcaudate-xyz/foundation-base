@@ -115,6 +115,23 @@
              (:= err nil))
            (fn [value]
              (:= ok nil)
+           (:= err value)))
+          (if (not err)
+            (return ok)
+            (return err)))
+
+  (tf-for-return '(for:return [[ok err] (x:return-run runner)]
+                              {:success ok
+                               :error   err
+                               :final   true}))
+  => '(do (var ok nil)
+          (var err nil)
+          (runner
+           (fn [value]
+             (:= ok value)
+             (:= err nil))
+           (fn [value]
+             (:= ok nil)
              (:= err value)))
           (if (not err)
             (return ok)

@@ -69,14 +69,29 @@
   [[_ [[res err] statement] {:keys [success error final]}]]
   (let [return-run? (and (seq? statement)
                          (= 'x:return-run (first statement)))
+        success* (if (and return-run? final)
+                   (list 'return success)
+                   success)
+        error* (if (and return-run? final)
+                 (list 'return error)
+                 error)
         out (if return-run?
               (let [[_ runner] statement]
                 (template/$
-                 (try
-                   (~runner
-                    (fn [~res] ~success)
-                    (fn [~err] ~error))
-                   (catch ~err ~error))))
+                 (do (var ~res nil)
+                     (var ~err nil)
+                     (try
+                       (~runner
+                        (fn [value]
+                          (:= ~res value)
+                          (:= ~err nil))
+                        (fn [value]
+                          (:= ~res nil)
+                          (:= ~err value)))
+                       (if ~err
+                         ~error*
+                         ~success*)
+                       (catch ~err ~error*)))))
               (let [cb (list 'fn [err res]
                              (list 'if err
                                    error
@@ -102,20 +117,37 @@
   "for async transform"
   {:added "4.0"}
   [[_ [[res err] statement] {:keys [success error finally]}]]
-  (template/$ (. (Future (fn []
-                           (return ~statement)))
-                 ~@(if success
-                     [(list 'then
-                            (list 'fn [res]
-                                  success))])
-                 ~@(if error
-                     [(list 'catchError
-                            (list 'fn [err]
-                                  error))])
-                 ~@(if finally
-                     [(list 'whenComplete
-                            (list 'fn '[]
-                                  finally))]))))
+  (let [return-run? (and (seq? statement)
+                         (= 'x:return-run (first statement)))
+        base (if return-run?
+               (let [[_ runner] statement]
+                 (template/$
+                  (do (var completer (new Completer))
+                      (try
+                        (~runner
+                         (fn [~res]
+                           (. completer (complete ~res)))
+                         (fn [~err]
+                           (. completer (completeError ~err))))
+                        (catch ~err
+                          (. completer (completeError ~err))))
+                      (. completer future))))
+               (template/$
+                (Future (fn []
+                          (return ~statement)))))]
+    (template/$ (. ~base
+                   ~@(if success
+                       [(list 'then
+                              (list 'fn [res]
+                                    success))])
+                   ~@(if error
+                       [(list 'catchError
+                              (list 'fn [err]
+                                    error))])
+                   ~@(if finally
+                       [(list 'whenComplete
+                              (list 'fn '[]
+                                    finally))])))))
 
 (def +features+
   (let [base (-> (grammar/build :exclude [:pointer
