@@ -6,7 +6,7 @@
             [std.lang.base.impl :as impl]
             [std.lang.base.runtime :as rt]
             [std.lang.model-annex.spec-perl :as spec]
-            [xt.lang.base-repl :as k]))
+            [xt.lang.common-repl :as k]))
 
 (def +perl-init+
   (common/put-program-options

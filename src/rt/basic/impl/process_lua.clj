@@ -9,7 +9,7 @@
             [std.lang.model.spec-lua :as spec]
             [std.lib.env :as env]
             [std.lib.os :as os]
-            [xt.lang.base-repl :as k]))
+            [xt.lang.common-repl :as k]))
 
 ;;
 ;; PROGRAM

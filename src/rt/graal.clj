@@ -13,7 +13,7 @@
             [std.lib.impl]
             [std.protocol.component :as protocol.component]
             [std.protocol.context :as protocol.context]
-            [xt.lang.base-repl :as k])
+            [xt.lang.common-repl :as k])
   (:import (org.graalvm.polyglot Context Context$Builder Engine Value Source) (org.graalvm.polyglot.io ByteSequence) (hara.lib.graal Require ResourceFolder FilesystemFolder)))
 
 (def ^:dynamic *lang* nil)
