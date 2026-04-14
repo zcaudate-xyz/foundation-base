@@ -7,10 +7,11 @@
   {:runtime :basic
    :config {:program :resty}
    :require [[xt.db :as impl]
-             [xt.lang.common-lib :as k]
-             [xt.lang.common-spec :as xt]
-             [xt.lang.common-string :as str]
-             [xt.lang.common-repl :as repl]
+              [xt.lang.common-lib :as k]
+              [xt.lang.common-data :as xtd]
+              [xt.lang.common-spec :as xt]
+              [xt.lang.common-string :as str]
+              [xt.lang.common-repl :as repl]
              [xt.sys.conn-dbsql :as dbsql]
              [xt.db.base-flatten :as f]
              [xt.db.sql-util :as ut]
@@ -54,18 +55,22 @@
   ^:hidden
 
   (!.lua
-   [(k/sort (impl/process-event
-             DBSQL
-             ["add" {"UserAccount" [sample/RootUser]}]
-             sample/Schema
-             sample/SchemaLookup
-             (ut/sqlite-opts nil)))
-    (k/sort (impl/process-event
-             DBCACHE
-             ["add" {"UserAccount" [sample/RootUser]}]
-             sample/Schema
-             sample/SchemaLookup
-             nil))])
+   [(xtd/arr-sort (impl/process-event
+                   DBSQL
+                   ["add" {"UserAccount" [sample/RootUser]}]
+                   sample/Schema
+                   sample/SchemaLookup
+                   (ut/sqlite-opts nil))
+                  k/identity
+                  k/lt)
+    (xtd/arr-sort (impl/process-event
+                   DBCACHE
+                   ["add" {"UserAccount" [sample/RootUser]}]
+                   sample/Schema
+                   sample/SchemaLookup
+                   nil)
+                  k/identity
+                  k/lt)])
   => [["UserAccount" "UserProfile"]
       ["UserAccount" "UserProfile"]])
 

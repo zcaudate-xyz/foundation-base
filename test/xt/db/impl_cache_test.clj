@@ -7,19 +7,21 @@
   {:runtime :basic
    :config {:program :resty}
    :require [[xt.db.impl-cache :as impl-cache]
-             [xt.lang.common-lib :as k]
-             [xt.lang.common-repl :as repl]
-             [xt.db.base-flatten :as f]
-             [xt.db.cache-util :as ut]
+              [xt.lang.common-lib :as k]
+              [xt.lang.common-data :as xtd]
+              [xt.lang.common-repl :as repl]
+              [xt.db.base-flatten :as f]
+              [xt.db.cache-util :as ut]
              [xt.db.sample-test :as sample]]})
 
 (l/script- :js
   {:runtime :basic
    :require [[xt.db.impl-cache :as impl-cache]
-             [xt.lang.common-lib :as k]
-             [xt.lang.common-repl :as repl]
-             [xt.db.base-flatten :as f]
-             [xt.db.cache-util :as ut]
+              [xt.lang.common-lib :as k]
+              [xt.lang.common-data :as xtd]
+              [xt.lang.common-repl :as repl]
+              [xt.db.base-flatten :as f]
+              [xt.db.cache-util :as ut]
              [xt.db.sample-test :as sample]]})
 
 (fact:global
@@ -94,13 +96,15 @@
 
 ^{:refer xt.db.impl-cache/cache-process-event-remove :added "4.0"
   :setup [(!.js
-           (k/sort (impl-cache/cache-process-event-sync
-                    INSTANCE
-                    "add"
-                    {"UserAccount" [sample/RootUser]}
-                    sample/Schema
-                    sample/SchemaLookup
-                    nil)))]}
+           (xtd/arr-sort (impl-cache/cache-process-event-sync
+                          INSTANCE
+                          "add"
+                          {"UserAccount" [sample/RootUser]}
+                          sample/Schema
+                          sample/SchemaLookup
+                          nil)
+                         k/identity
+                         k/lt))]}
 (fact "removes data from database"
   ^:hidden
   

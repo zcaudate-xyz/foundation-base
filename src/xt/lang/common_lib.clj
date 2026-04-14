@@ -125,30 +125,6 @@
   [separator arr]
   (return (str/join separator arr)))
 
-(defn.xt arr-map
-  "maps a function across an array"
-  {:added "4.1"}
-  [arr f]
-  (return (xtd/arr-map arr f)))
-
-(defn.xt get-in
-  "gets a nested path from an object"
-  {:added "4.1"}
-  [obj path]
-  (return (xtd/get-in obj path)))
-
-(defn.xt set-in
-  "sets a nested path in an object"
-  {:added "4.1"}
-  [obj path v]
-  (return (xtd/set-in obj path v)))
-
-(defn.xt obj-omit
-  "omits keys from an object"
-  {:added "4.1"}
-  [obj keys]
-  (return (xtd/obj-omit obj keys)))
-
 (defspec.xt is-boolean? [:fn [:xt/any] :xt/bool])
 
 (defn.xt is-boolean?
@@ -254,12 +230,6 @@
   "identity function"
   {:added "4.0"}
   ([x] (return x)))
-
-(defn.xt sort
-  "sorts an array with the default ordering"
-  {:added "4.1"}
-  [arr]
-  (return (xtd/arr-sort arr -/identity xt/x:lt)))
 
 (defspec.xt T [:fn [:xt/any] :xt/bool])
 

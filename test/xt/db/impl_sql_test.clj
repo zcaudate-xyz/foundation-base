@@ -58,11 +58,13 @@
    [(dbsql/query INSTANCE
                  "SELECT 1;"
                  nil)
-    (k/sort
-     (xtd/obj-keys
-      (f/flatten-bulk sample/Schema
-                      {"UserAccount"
-                       [sample/RootUser]})))])
+     (xtd/arr-sort
+       (xtd/obj-keys
+        (f/flatten-bulk sample/Schema
+                        {"UserAccount"
+                         [sample/RootUser]}))
+       k/identity
+       k/lt)])
   => [1 ["UserAccount" "UserProfile"]])
 
 ^{:refer xt.db.impl-sql/sql-gen-delete :added "4.0"}
@@ -81,13 +83,15 @@
 
 ^{:refer xt.db.impl-sql/sql-process-event-remove :added "4.0"
   :setup [(!.js
-           (k/sort (impl-sql/sql-process-event-sync
-                    INSTANCE
-                    "add"
-                    {"UserAccount" [sample/RootUser]}
-                    sample/Schema
-                    sample/SchemaLookup
-                    (ut/sqlite-opts nil))))]}
+           (xtd/arr-sort (impl-sql/sql-process-event-sync
+                          INSTANCE
+                          "add"
+                          {"UserAccount" [sample/RootUser]}
+                          sample/Schema
+                          sample/SchemaLookup
+                          (ut/sqlite-opts nil))
+                         k/identity
+                         k/lt))]}
 (fact "removes data from database"
   ^:hidden
 
