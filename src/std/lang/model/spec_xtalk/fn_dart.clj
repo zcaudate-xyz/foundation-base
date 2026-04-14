@@ -1,5 +1,14 @@
 (ns std.lang.model.spec-xtalk.fn-dart
-  (:require [std.lib.collection :as collection]))
+  (:require [std.lib.collection :as collection]
+            [std.lib.template :as template]))
+
+(defn dart-method0
+  [obj method]
+  (list '. obj (list method)))
+
+(defn dart-runtime-type-string
+  [obj]
+  (dart-method0 (list '. obj 'runtimeType) 'toString))
 
 (defn dart-tf-x-len
   [[_ arr]]
@@ -27,11 +36,38 @@
 
 (defn dart-tf-x-random
   [_]
-  (list '. (list 'Random) 'nextDouble))
+  (dart-method0 (list 'Random) 'nextDouble))
 
 (defn dart-tf-x-type-native
   [[_ obj]]
-  (list '. obj 'runtimeType))
+  (let [rtype (gensym "rtype")
+        sval  (gensym "sval")
+        rtype-expr (dart-runtime-type-string obj)
+        sval-expr  (dart-method0 obj 'toString)]
+    (template/$
+     (do (if (== ~obj nil)
+           (return nil))
+         (var ~rtype ~rtype-expr)
+         (if (== "String" ~rtype)
+           (return "string"))
+         (if (or (== "int" ~rtype)
+                 (== "double" ~rtype)
+                 (== "num" ~rtype))
+           (return "number"))
+         (if (== "bool" ~rtype)
+           (return "boolean"))
+         (if (or (== "List" ~rtype)
+                 (. ~rtype (contains "List")))
+           (return "array"))
+         (if (or (== "Map" ~rtype)
+                 (. ~rtype (contains "Map")))
+           (return "object"))
+         (var ~sval ~sval-expr)
+         (if (or (. ~rtype (contains "Function"))
+                 (. ~rtype (contains "=>"))
+                 (. ~sval (startsWith "Closure")))
+           (return "function"))
+         (return (. ~rtype (toLowerCase)))))))
 
 (defn dart-tf-x-del
   [[_ obj key]]
@@ -44,8 +80,8 @@
 (defn dart-tf-x-has-key?
   [[_ obj key check]]
   (if (some? check)
-    (list '== check (list '[] obj key))
-    (list '!= nil (list '[] obj key))))
+    (list '== check (list '. obj [key]))
+    (list '!= nil (list '. obj [key]))))
 
 (defn dart-tf-x-shell
   [[_ s opts]]
@@ -66,9 +102,9 @@
       :x-unpack   {:emit :alias :raw '...}
       :x-shell    {:macro #'dart-tf-x-shell    :emit :macro}})
 
-(defn dart-tf-x-m-abs [[_ x]] (list '. x 'abs))
-(defn dart-tf-x-m-ceil [[_ x]] (list '. x 'ceil))
-(defn dart-tf-x-m-floor [[_ x]] (list '. x 'floor))
+(defn dart-tf-x-m-abs [[_ x]] (dart-method0 x 'abs))
+(defn dart-tf-x-m-ceil [[_ x]] (dart-method0 x 'ceil))
+(defn dart-tf-x-m-floor [[_ x]] (dart-method0 x 'floor))
 (defn dart-tf-x-m-sin [[_ x]] (list 'sin x))
 (defn dart-tf-x-m-cos [[_ x]] (list 'cos x))
 (defn dart-tf-x-m-tan [[_ x]] (list 'tan x))
@@ -88,15 +124,37 @@
 (defn dart-tf-x-m-sinh [[_ x]] (list 'sinh x))
 (defn dart-tf-x-m-tanh [[_ x]] (list 'tanh x))
 
-(defn dart-tf-x-to-string [[_ x]] (list '. x 'toString))
+(defn dart-tf-x-to-string [[_ x]]
+  (dart-method0 x 'toString))
 (defn dart-tf-x-to-number [[_ x]] (list 'num.parse x))
-(defn dart-tf-x-is-string? [[_ x]] (list 'is x 'String))
-(defn dart-tf-x-is-number? [[_ x]] (list 'is x 'num))
-(defn dart-tf-x-is-integer? [[_ x]] (list 'is x 'int))
-(defn dart-tf-x-is-boolean? [[_ x]] (list 'is x 'bool))
-(defn dart-tf-x-is-function? [[_ x]] (list 'is x 'Function))
-(defn dart-tf-x-is-object? [[_ x]] (list 'and (list 'is x 'Object) (list 'not (list 'is x 'List)) (list 'not (list 'is x 'Function))))
-(defn dart-tf-x-is-array? [[_ x]] (list 'is x 'List))
+(defn dart-tf-x-is-string? [[_ x]] (list '== "String" (dart-runtime-type-string x)))
+(defn dart-tf-x-is-number? [[_ x]]
+  (let [rtype-expr (dart-runtime-type-string x)]
+    (list 'or
+          (list '== "int" rtype-expr)
+          (list '== "double" rtype-expr)
+          (list '== "num" rtype-expr))))
+(defn dart-tf-x-is-integer? [[_ x]]
+  (let [rtype-expr (dart-runtime-type-string x)]
+    (list '== "int" rtype-expr)))
+(defn dart-tf-x-is-boolean? [[_ x]] (list '== "bool" (dart-runtime-type-string x)))
+(defn dart-tf-x-is-function? [[_ x]]
+  (let [rtype-expr (dart-runtime-type-string x)
+        sval-expr  (dart-method0 x 'toString)]
+    (list 'or
+          (list '. rtype-expr (list 'contains "Function"))
+          (list '. rtype-expr (list 'contains "=>"))
+          (list '. sval-expr (list 'startsWith "Closure")))))
+(defn dart-tf-x-is-object? [[_ x]]
+  (let [rtype-expr (dart-runtime-type-string x)]
+    (list 'or
+          (list '== "Map" rtype-expr)
+          (list '. rtype-expr (list 'contains "Map")))))
+(defn dart-tf-x-is-array? [[_ x]]
+  (let [rtype-expr (dart-runtime-type-string x)]
+    (list 'or
+          (list '== "List" rtype-expr)
+          (list '. rtype-expr (list 'contains "List")))))
 
 (def +dart-type+
    {:x-to-string    {:macro #'dart-tf-x-to-string    :emit :macro}
@@ -109,17 +167,17 @@
     :x-is-object?   {:macro #'dart-tf-x-is-object?   :emit :macro}
     :x-is-array?    {:macro #'dart-tf-x-is-array?    :emit :macro}})
 
-(defn dart-tf-x-str-char [[_ s i]] (list '. s (list '[] i)))
+(defn dart-tf-x-str-char [[_ s i]] (list '. s [i]))
 (defn dart-tf-x-str-split [[_ s sep]] (list '. s (list 'split sep)))
 (defn dart-tf-x-str-join [[_ arr sep]] (list '. arr (list 'join sep)))
 (defn dart-tf-x-str-index-of [[_ s sub]] (list '. s (list 'indexOf sub)))
 (defn dart-tf-x-str-last-index-of [[_ s sub]] (list '. s (list 'lastIndexOf sub)))
 (defn dart-tf-x-str-substring [[_ s start end]] (list '. s (list 'substring start end)))
-(defn dart-tf-x-str-to-upper [[_ s]] (list '. s 'toUpperCase))
-(defn dart-tf-x-str-to-lower [[_ s]] (list '. s 'toLowerCase))
+(defn dart-tf-x-str-to-upper [[_ s]] (dart-method0 s 'toUpperCase))
+(defn dart-tf-x-str-to-lower [[_ s]] (dart-method0 s 'toLowerCase))
 (defn dart-tf-x-str-to-fixed [[_ s n]] (list '. s (list 'toStringAsFixed n)))
 (defn dart-tf-x-str-replace [[_ s pattern replacement]] (list '. s (list 'replaceAll pattern replacement)))
-(defn dart-tf-x-str-trim [[_ s]] (list '. s 'trim))
+(defn dart-tf-x-str-trim [[_ s]] (dart-method0 s 'trim))
 (defn dart-tf-x-str-trim-left [[_ s]] (list '. s (list 'trimLeft)))
 (defn dart-tf-x-str-trim-right [[_ s]] (list '. s (list 'trimRight)))
 (defn dart-tf-x-str-starts-with? [[_ s prefix]] (list '. s (list 'startsWith prefix)))
@@ -145,8 +203,8 @@
      :x-str-trim-right  {:macro #'dart-tf-x-str-trim-right :emit :macro}
      :x-str-format      {:macro #'dart-tf-x-str-format     :emit :macro}})
 
-(defn dart-tf-x-lu-get [[_ lu obj]] (list '[] lu obj))
-(defn dart-tf-x-lu-set [[_ lu obj gid]] (list ':= (list '[] lu obj) gid))
+(defn dart-tf-x-lu-get [[_ lu obj]] (list '. lu [obj]))
+(defn dart-tf-x-lu-set [[_ lu obj gid]] (list ':= (list '. lu [obj]) gid))
 (defn dart-tf-x-lu-del [[_ lu obj]] (list '. lu (list 'remove obj)))
 
 (def +dart-lu+
@@ -182,13 +240,14 @@
      :x-m-sinh   {:macro #'dart-tf-x-m-sinh   :emit :macro}
      :x-m-tanh   {:macro #'dart-tf-x-m-tanh   :emit :macro}})
 
-(defn dart-tf-x-arr-pop [[_ arr]] (list '. arr 'removeLast))
+(defn dart-tf-x-arr-pop [[_ arr]] (dart-method0 arr 'removeLast))
 (defn dart-tf-x-arr-push-first [[_ arr item]] (list '. arr (list 'insert 0 item)))
 (defn dart-tf-x-arr-pop-first [[_ arr]] (list '. arr 'removeAt 0))
 (defn dart-tf-x-arr-insert [[_ arr idx e]] (list '. arr (list 'insert idx e)))
 (defn dart-tf-x-arr-remove [[_ arr idx]] (list '. arr (list 'removeAt idx)))
-(defn dart-tf-x-arr-sort [[_ arr key-fn comp-fn]] (list '. arr 'sort))
-(defn dart-tf-x-str-comp [[_ a b]] (list '. (list '. a 'toString) 'compareTo (list '. b 'toString)))
+(defn dart-tf-x-arr-sort [[_ arr key-fn comp-fn]] (dart-method0 arr 'sort))
+(defn dart-tf-x-str-comp [[_ a b]]
+  (list '. (dart-method0 a 'toString) (list 'compareTo (dart-method0 b 'toString))))
 
 (def +dart-arr+
    {:x-arr-push        {:macro #'dart-tf-x-arr-push       :emit :macro :type :template}
@@ -201,17 +260,17 @@
      :x-str-comp        {:macro #'dart-tf-x-str-comp       :emit :macro}})
 
 (defn dart-tf-x-cache [[_ name]] (list 'new 'Map))
-(defn dart-tf-x-cache-list [[_ cache]] (list '. (list '. cache 'keys) 'toList))
-(defn dart-tf-x-cache-flush [[_ cache]] (list '. cache 'clear))
-(defn dart-tf-x-cache-get [[_ cache key]] (list '[] cache key))
-(defn dart-tf-x-cache-set [[_ cache key val]] (list ':= (list '[] cache key) val))
+(defn dart-tf-x-cache-list [[_ cache]] (dart-method0 (list '. cache 'keys) 'toList))
+(defn dart-tf-x-cache-flush [[_ cache]] (dart-method0 cache 'clear))
+(defn dart-tf-x-cache-get [[_ cache key]] (list '. cache [key]))
+(defn dart-tf-x-cache-set [[_ cache key val]] (list ':= (list '. cache [key]) val))
 (defn dart-tf-x-cache-del [[_ cache key]] (list '. cache (list 'remove key)))
 (defn dart-tf-x-cache-incr [[_ cache key num]]
   (list (list 'fn '[]
-          (list 'var 'prev (list 'int.parse (list 'or (list '[] cache key) '"0")))
+          (list 'var 'prev (list 'int.parse (list 'or (list '. cache [key]) '"0")))
           (list 'var 'curr (list '+ 'prev num))
-          (list ':= (list '[] cache key) 'curr)
-          (list 'return 'curr)) '()))
+          (list ':= (list '. cache [key]) 'curr)
+          (list 'return 'curr))))
 
 (def +dart-cache+
     {:x-cache                 {:macro #'dart-tf-x-cache           :emit :macro}
@@ -245,7 +304,7 @@
 (defn dart-tf-x-iter-from [[_ x]] (list '. x 'iterator))
 (defn dart-tf-x-iter-from-arr [[_ arr]] (list '. arr 'iterator))
 (defn dart-tf-x-iter-from-obj [[_ obj]] (list '. (list '. obj 'entries) 'iterator))
-(defn dart-tf-x-iter-has? [[_ iter]] (list '. iter 'moveNext))
+(defn dart-tf-x-iter-has? [[_ iter]] (dart-method0 iter 'moveNext))
 (defn dart-tf-x-iter-native? [[_ iter]] (list 'true))
 (defn dart-tf-x-iter-next [[_ iter]] (list '. iter 'current))
 (defn dart-tf-x-iter-null [[_]] (list 'null))
@@ -286,28 +345,50 @@
     :x-ws-send             {:macro #'dart-tf-x-ws-send             :emit :macro}
     :x-ws-close            {:macro #'dart-tf-x-ws-close            :emit :macro}})
 
-(defn dart-tf-x-proto-get [[_ obj]] (list '. obj 'runtimeType))
-(defn dart-tf-x-proto-set [[_ obj prototype]] (list 'throw '"Proto set not supported in Dart"))
-(defn dart-tf-x-proto-tostring [[_ obj]] (list '. obj 'toString))
+(defn dart-tf-x-proto-create [[_ m]] m)
+(defn dart-tf-x-proto-get [[_ obj _]] (list '. obj ["__proto__"]))
+(defn dart-tf-x-proto-set [[_ obj prototype _]]
+  (template/$
+   (do (:= (. ~obj ["__proto__"]) ~prototype)
+       (return ~obj))))
+(defn dart-tf-x-proto-tostring [[_ obj]] '"toString")
 
 (def +dart-proto+
-    {:x-proto-get          {:macro #'dart-tf-x-proto-get         :emit :macro}
+    {:x-proto-create       {:macro #'dart-tf-x-proto-create      :emit :macro}
+     :x-proto-get          {:macro #'dart-tf-x-proto-get         :emit :macro}
      :x-proto-set          {:macro #'dart-tf-x-proto-set         :emit :macro}
      :x-proto-tostring     {:macro #'dart-tf-x-proto-tostring    :emit :macro}
      :x-this               {:emit :unit :default 'this}})
 
 (defn dart-tf-x-return-encode
   [[_ out id key]]
-  (list 'json.encode
-        (list 'if (list '== out 'null)
-              '{"id" id "key" key "type" "data" "return" "nil" "value" null}
-              (list 'if (list 'is out 'Function)
-                    '{"id" id "key" key "type" "raw" "return" "function" "value" (out.toString)}
-                    (list 'if (list 'or (list 'is out 'num) (list 'is out 'String) (list 'is out 'bool))
-                          '{"id" id "key" key "type" "data" "return" (out.runtimeType.toString) "value" out}
-                          (list 'if (list 'or (list 'is out 'List) (list 'is out 'Map))
-                                '{"id" id "key" key "type" "data" "value" out}
-                                '{"id" id "key" key "type" "raw" "return" (out.runtimeType.toString) "value" (out.toString)}))))))
+  (let [outtype (gensym "outtype")
+        outstr  (gensym "outstr")
+        rtype-expr (dart-runtime-type-string out)
+        outstr-expr  (dart-method0 out 'toString)]
+    (template/$
+     (do (if (== ~out nil)
+           (return (json.encode {"id" ~id "key" ~key "type" "data" "return" "nil" "value" nil})))
+         (var ~outtype ~rtype-expr)
+         (var ~outstr ~outstr-expr)
+         (if (== "String" ~outtype)
+           (return (json.encode {"id" ~id "key" ~key "type" "data" "return" "string" "value" ~out})))
+         (if (or (== "int" ~outtype)
+                 (== "double" ~outtype)
+                 (== "num" ~outtype))
+           (return (json.encode {"id" ~id "key" ~key "type" "data" "return" "number" "value" ~out})))
+         (if (== "bool" ~outtype)
+           (return (json.encode {"id" ~id "key" ~key "type" "data" "return" "boolean" "value" ~out})))
+         (if (or (== "List" ~outtype)
+                 (. ~outtype (contains "List"))
+                 (== "Map" ~outtype)
+                 (. ~outtype (contains "Map")))
+           (return (json.encode {"id" ~id "key" ~key "type" "data" "value" ~out})))
+         (if (or (. ~outtype (contains "Function"))
+                 (. ~outtype (contains "=>"))
+                 (. ~outstr (startsWith "Closure")))
+           (return (json.encode {"id" ~id "key" ~key "type" "raw" "return" "function" "value" ~outstr})))
+         (return (json.encode {"id" ~id "key" ~key "type" "raw" "return" (. ~outtype (toLowerCase)) "value" ~outstr}))))))
 
 (defn dart-tf-x-return-wrap
   [[_ f encode-fn]]

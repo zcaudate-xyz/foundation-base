@@ -3,7 +3,7 @@
             [std.lang.typed.xtalk :refer [defspec.xt]]))
 
 (l/script :xtalk
-  {})
+  {:require [[xt.lang.common-spec :as xt]]})
 
 (defspec.xt Task
   :xt/any)
@@ -38,48 +38,93 @@
   "runs a thunk as a task handle"
   {:added "4.0"}
   [thunk]
-  (return (x:task-run thunk)))
+  (try
+    (var out (thunk))
+    (return
+     (:? (and (xt/x:is-object? out)
+              (xt/x:is-function? (. out ["then"])))
+         out
+         (new Promise
+              (fn [resolve reject]
+                (resolve out)))))
+    (catch err
+      (return
+       (new Promise
+            (fn [resolve reject]
+              (reject err)))))))
 
 (defn.xt task-then
   "chains success continuation on a task"
   {:added "4.0"}
   [task on-ok]
-  (return (x:task-then task on-ok)))
+  (return
+   (:? (and (xt/x:is-object? task)
+            (xt/x:is-function? (. task ["then"])))
+       (. task (then on-ok))
+       (new Promise
+            (fn [resolve reject]
+              (try
+                (resolve (on-ok task))
+                (catch err
+                  (reject err))))))))
 
 (defn.xt task-catch
   "chains error continuation on a task"
   {:added "4.0"}
   [task on-err]
-  (return (x:task-catch task on-err)))
+  (return
+   (:? (and (xt/x:is-object? task)
+            (xt/x:is-function? (. task ["catch"])))
+       (. task (catch on-err))
+       (new Promise
+            (fn [resolve reject]
+              (resolve task))))))
 
 (defn.xt task-finally
   "chains completion continuation on a task"
   {:added "4.0"}
   [task on-done]
-  (return (x:task-finally task on-done)))
+  (return
+   (:? (and (xt/x:is-object? task)
+            (xt/x:is-function? (. task ["finally"])))
+       (. task (finally on-done))
+       (new Promise
+            (fn [resolve reject]
+              (try
+                (on-done)
+                (resolve task)
+                (catch err
+                  (reject err))))))))
 
 (defn.xt task-cancel
   "cancels task cooperatively"
   {:added "4.0"}
   [task]
-  (return (x:task-cancel task)))
+  (return task))
 
 (defn.xt task-status
   "gets task status"
   {:added "4.0"}
   [task]
-  (return (x:task-status task)))
+  (return
+   (:? (and (xt/x:is-object? task)
+            (xt/x:is-function? (. task ["then"])))
+       "pending"
+       "done")))
 
 (defn.xt task-await
   "awaits task result where supported"
   {:added "4.0"}
   ([task]
-   (return (x:task-await task nil nil)))
+   (return task))
   ([task timeout-ms default]
-   (return (x:task-await task timeout-ms default))))
+   (return task)))
 
 (defn.xt task-from-async
   "bridges callback-style async into a task"
   {:added "4.0"}
   [executor]
-  (return (x:task-from-async executor)))
+  (return
+   (new Promise
+        (fn [resolve reject]
+          (executor resolve reject)))))

@@ -4,10 +4,11 @@
 
 (l/script :xtalk
   {:require [[xt.lang.common-repl :as repl]
-             [xt.lang.common-spec :as xt]
-             [xt.lang.common-task :as task]
-             [xt.cell.kernel.base-util :as util]
-             [xt.cell.kernel.worker-state :as worker-state]]})
+              [xt.lang.common-spec :as xt]
+              [xt.lang.common-trace :as trace]
+              [xt.lang.common-task :as task]
+              [xt.cell.kernel.base-util :as util]
+              [xt.cell.kernel.worker-state :as worker-state]]})
 
 (defspec.xt worker-handle-async
   [:fn [:xt/any [:fn [xt.cell.kernel.spec/AnyList] :xt/any]
@@ -68,7 +69,7 @@
                                               (util/resp-ok op id (util/arg-encode ret))))))
     (fn [ret]
       (when (. ret ["stack"])
-        (xt/x:TRACE! (. ret ["stack"]) "ERR"))
+        (trace/TRACE! (. ret ["stack"]) "ERR"))
       (return (-/post-message worker (util/resp-error op id ret)))))))
 
 (defn.xt worker-process-eval
@@ -76,7 +77,7 @@
   (var #{op id body action} input)
   (when (== false (. (worker-state/get-state worker)
                      ["eval"]))
-    (-/post-message worker (util/resp-error op id (xt/x:cat "Not enabled - EVAL"))))
+    (-/post-message worker (util/resp-error op id "Not enabled - EVAL")))
   (var out (repl/return-eval body))
   (var f (:? (. input ["async"])
              (fn [x] (return x))

@@ -142,12 +142,12 @@
 ^{:refer js.cell.kernel/fn-access-cell :added "4.0" :unchecked true
   :setup [(!.js
             (cl/GD-reset (-/make-playground-cell))
-          (j/<!
-           (. (cl/add-model "hello"
-                            {:echo  {:handler link-fn/echo
-                                     :trigger {"@worker/::INIT" false}
-                                     :defaultArgs ["HELLO"]}})
-              ["init"]))]}
+            (j/<!
+             (. (cl/add-model "hello"
+                              {:echo  {:handler link-fn/echo
+                                       :trigger {"@worker/::INIT" false}
+                                       :defaultArgs ["HELLO"]}})
+                ["init"])))]}
 (fact "calls access function on the current cell"
   ^:hidden
   
@@ -166,12 +166,12 @@
 ^{:refer js.cell.kernel/fn-access-view :added "4.0" :unchecked true
   :setup [(!.js
             (cl/GD-reset (-/make-playground-cell))
-          (j/<!
-           (. (cl/add-model "hello"
-                            {:echo  {:handler link-fn/echo
-                                     :trigger {"@worker/::INIT" false}
-                                     :defaultArgs ["HELLO"]}})
-              ["init"]))]}
+            (j/<!
+             (. (cl/add-model "hello"
+                              {:echo  {:handler link-fn/echo
+                                       :trigger {"@worker/::INIT" false}
+                                       :defaultArgs ["HELLO"]}})
+                ["init"])))]}
 (fact "calls access function on the current view"
   ^:hidden
   
@@ -244,15 +244,16 @@
 
 ^{:refer js.cell.kernel/cell-trigger :added "4.0" :unchecked true
   :setup [(!.js
-            (cl/GD-reset (-/make-playground-cell))
-          (j/<!
-           (. (cl/GD)
-              ["init"]
-              (then (fn []
-                      (cl/add-model-attach
-                       "hello"
-                       {:echo  {:handler link-fn/echo
-                                :defaultArgs ["HELLO"]}})))))]}
+             (cl/GD-reset (-/make-playground-cell)))
+          (!.js
+           (j/<!
+            (. (cl/GD)
+               ["init"]
+               (then (fn []
+                       (cl/add-model-attach
+                        "hello"
+                        {:echo  {:handler link-fn/echo
+                                 :defaultArgs ["HELLO"]}}))))))]}
 (fact "triggers a view given event"
   ^:hidden
   
@@ -317,11 +318,12 @@
 (fact "attaches a model"
   ^:hidden
   
-  (j/<!
-   (. (cl/add-model "hello"
-                    {:echo  {:handler link-fn/echo
-                             :defaultArgs ["HELLO"]}})
-      ["init"]))
+  (!.js
+   (j/<!
+    (. (cl/add-model "hello"
+                     {:echo  {:handler link-fn/echo
+                              :defaultArgs ["HELLO"]}})
+       ["init"])))
   => (contains-in
       [{"path" ["hello" "echo"],
         "post" [false],
@@ -334,23 +336,25 @@
 
 ^{:refer js.cell.kernel/model-update :added "4.0" :unchecked true
   :setup [(!.js
-            (cl/GD-reset (-/make-playground-cell))
-          (j/<!
-           (. (cl/GD)
-              ["init"]
-              (then (fn []
-                      (cl/add-model-attach "hello"
-                                   {:echo   {:handler link-fn/echo
-                                             :defaultArgs ["HELLO"]}
-                                    :echo1  {:handler link-fn/echo
-                                             :defaultArgs ["HELLO1"]}})))))]}
+             (cl/GD-reset (-/make-playground-cell)))
+          (!.js
+           (j/<!
+            (. (cl/GD)
+               ["init"]
+               (then (fn []
+                       (cl/add-model-attach "hello"
+                                            {:echo   {:handler link-fn/echo
+                                                      :defaultArgs ["HELLO"]}
+                                             :echo1  {:handler link-fn/echo
+                                                      :defaultArgs ["HELLO1"]}}))))))]}
 (fact "calls update on a model"
   ^:hidden
   
   (cl/model-vals "hello")
   => {"echo1" nil, "echo" nil}
 
-  (j/<! (cl/model-update "hello"))
+  (!.js
+   (j/<! (cl/model-update "hello")))
   => (contains-in
       {"echo1"
        {"path" ["hello" "echo1"],
@@ -370,10 +374,7 @@
 ^{:refer js.cell.kernel/model-trigger :added "4.0" :unchecked true
   :setup [(fact:global :setup)
           (!.js
-           (cl/GD-reset
-            (cl/make-cell
-             (fn []
-               (eval (@! (playground/play-worker true)))))))
+           (cl/GD-reset (-/make-playground-cell)))
           (!.js
            (cl/add-model-attach "hello"
                                 {:echo  {:handler  link-fn/echo
@@ -394,13 +395,10 @@
 ^{:refer js.cell.kernel/view-val :added "4.0" :unchecked true
   :setup [(fact:global :setup)
           (!.js
-           (cl/GD-reset
-            (cl/make-cell
-             (fn []
-               (eval (@! (playground/play-worker true)))))))
+           (cl/GD-reset (-/make-playground-cell)))
           (!.js
            (cl/add-model-attach "hello"
-                        {:echo  {:handler link-fn/echo
+                         {:echo  {:handler link-fn/echo
                                  :trigger {"@/::HELLO" true}
                                  :defaultArgs ["HELLO"]}}))]}
 (fact "gets the view val"
@@ -466,8 +464,8 @@
   => false)
 
 ^{:refer js.cell.kernel/view-get-time-elapsed :added "4.0" :unchecked true
-  :setup [(j/<!
-           (cl/view-refresh ["hello" "echo"]))]}
+  :setup [(!.js
+           (j/<! (cl/view-refresh ["hello" "echo"])))]}
 (fact "gets the elapsed time"
   ^:hidden
 
@@ -479,8 +477,9 @@
 (fact "sets the view input"
   ^:hidden
   
-  (j/<! (xt/x:first (cl/view-set-input ["hello" "echo"]
-                                     {:data ["WORLD"]})))
+  (!.js
+   (j/<! (xt/x:first (cl/view-set-input ["hello" "echo"]
+                                        {:data ["WORLD"]}))))
   => (contains-in
       {"::" "view.run"
        "path" ["hello" "echo"],
@@ -492,10 +491,7 @@
 ^{:refer js.cell.kernel/view-refresh :added "4.0" :unchecked true
   :setup [(fact:global :setup)
           (!.js
-           (cl/GD-reset
-            (cl/make-cell
-             (fn []
-               (eval (@! (playground/play-worker true)))))))
+           (cl/GD-reset (-/make-playground-cell)))
           (!.js
            (cl/add-model-attach "hello"
                                 {:echo  {:handler link-fn/echo
@@ -504,7 +500,8 @@
 (fact "refreshes the view"
   ^:hidden
   
-  (j/<! (cl/view-refresh ["hello" "echo"]))
+  (!.js
+   (j/<! (cl/view-refresh ["hello" "echo"])))
   => (contains-in
       {"::" "view.run"
        "path" ["hello" "echo"],
@@ -517,7 +514,8 @@
 (fact "updates the view"
   ^:hidden
   
-  (j/<! (xt/x:first (cl/view-update ["hello" "echo"])))
+  (!.js
+   (j/<! (xt/x:first (cl/view-update ["hello" "echo"]))))
   => (contains-in
       {"::" "view.run"
        "path" ["hello" "echo"],
@@ -536,12 +534,13 @@
 (fact "calls the remote function"
   ^:hidden
   
-  (j/<! (cl/view-call-remote ["hello" "echo"]
+  (!.js
+   (j/<! (cl/view-call-remote ["hello" "echo"]
                               1
-                              false))
+                              false)))
   =>  {"::" "view.run",
-       "path" ["hello" "echo"],
-       "post" [false],
+        "path" ["hello" "echo"],
+        "post" [false],
        "pre" [false],
        "remote" [false]})
 
@@ -549,7 +548,8 @@
 (fact "refreshes the remote function"
   ^:hidden
   
-  (j/<! (cl/view-refresh-remote ["hello" "echo"]))
+  (!.js
+   (j/<! (cl/view-refresh-remote ["hello" "echo"])))
   => {"::" "view.run",
       "path" ["hello" "echo"],
       "post" [false],
@@ -560,10 +560,11 @@
 (fact "triggers the view with an event"
   ^:hidden
   
-  (j/<!
-   (xt/x:first (cl/view-trigger ["hello" "echo"]
-                              "@/::HELLO"
-                              {})))
+  (!.js
+   (j/<!
+    (xt/x:first (cl/view-trigger ["hello" "echo"]
+                                 "@/::HELLO"
+                                 {}))))
   => (contains-in
       {"path" ["hello" "echo"],
        "post" [false],
@@ -575,14 +576,16 @@
 (fact "gets the view after update"
   ^:hidden
   
-  (j/<! (cl/view-for ["hello" "echo"]))
+  (!.js
+   (j/<! (cl/view-for ["hello" "echo"])))
   => (contains-in ["HELLO" integer?]))
 
 ^{:refer js.cell.kernel/view-for-input :added "4.0" :unchecked true}
 (fact "gets the view after setting input"
   ^:hidden
   
-  (j/<! (cl/view-for-input ["hello" "echo"] {}))
+  (!.js
+   (j/<! (cl/view-for-input ["hello" "echo"] {})))
   => (contains-in ["HELLO" integer?]))
 
 ^{:refer js.cell.kernel/get-val :added "4.0" :unchecked true}
@@ -596,8 +599,9 @@
 (fact "gets the subview after update"
   ^:hidden
   
-  (j/<! (cl/get-for ["hello" "echo"]
-                    [0]))
+  (!.js
+   (j/<! (cl/get-for ["hello" "echo"]
+                     [0])))
   => "HELLO")
 
 ^{:refer js.cell.kernel/nil-view :added "4.0" :unchecked true}
@@ -612,16 +616,14 @@
 ^{:refer js.cell.kernel/add-listener :added "4.0" :unchecked true
   :setup [(fact:global :setup)
           (!.js
-           (cl/GD-reset
-            (cl/make-cell
-             (fn []
-               (eval (@! (playground/play-worker true)))))))
-          (j/<!
-           (. (cl/add-model "hello"
-                            {:echo  {:handler link-fn/echo
-                                     :trigger {"@/::HELLO" true}
-                                     :defaultArgs ["HELLO"]}})
-              ["init"]))]}
+           (cl/GD-reset (-/make-playground-cell)))
+          (!.js
+           (j/<!
+            (. (cl/add-model "hello"
+                             {:echo  {:handler link-fn/echo
+                                      :trigger {"@/::HELLO" true}
+                                      :defaultArgs ["HELLO"]}})
+               ["init"])))]}
 (fact "adds a cell listener"
   ^:hidden
   
@@ -668,10 +670,7 @@
 ^{:refer js.cell.kernel/add-raw-callback :added "4.0" :unchecked true
   :setup [(fact:global :setup)
           (!.js
-           (cl/GD-reset
-            (cl/make-cell
-             (fn []
-               (eval (@! (playground/play-worker true)))))))
+           (cl/GD-reset (-/make-playground-cell)))
           (Thread/sleep 100)]}
 (fact "adds a raw callback (for all events)"
   ^:hidden

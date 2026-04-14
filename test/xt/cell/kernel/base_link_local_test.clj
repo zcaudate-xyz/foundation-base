@@ -291,4 +291,4 @@
   
   (base-link-local/tmpl-link-action
    '[trigger xt.cell.kernel.worker-state/fn-trigger])
-  => (contains '(defn.js trigger)))
+  => (contains '(defn.xt trigger)))

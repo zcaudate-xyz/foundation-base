@@ -3,6 +3,7 @@
   (:require [js.cell.playground :as play]
             [js.cell.runtime.browser :as runtime-browser]
             [js.cell.runtime.emit :as emit]
+            [rt.basic.type-common :as common]
             [rt.chromedriver :as chromedriver]
             [rt.chromedriver.impl]
             [std.lang :as l]
@@ -14,20 +15,30 @@
   (play/play-url
    (play/play-page {:name "runtime-browser-scaffold"})))
 
-(l/script :js
-  {:runtime :chromedriver.instance
-   :config {:url (runtime-browser-url)}
-   :require [[xt.lang.common-repl :as repl]
-             [xt.lang.common-runtime :as rt]
-             [js.cell.kernel :as cl]
-             [js.cell.kernel.base-link-local :as base-link-local]
-             [js.cell.runtime.browser :as runtime-browser]]})
+(def ^:private +chromium-available+
+  (common/program-exists?
+   (or (System/getenv "CHROME")
+       "chromium")))
+
+(when +chromium-available+
+  (l/script :js
+    {:runtime :chromedriver.instance
+     :config {:url (runtime-browser-url)}
+     :require [[xt.lang.common-repl :as repl]
+               [xt.lang.common-runtime :as rt]
+               [js.cell.kernel :as cl]
+               [js.cell.kernel.base-link-local :as base-link-local]
+               [js.cell.runtime.browser :as runtime-browser]]}))
 
 (fact:global
-  {:setup [(l/rt:restart :js)
-           (chromedriver/goto (runtime-browser-url) 5000)
-           (l/rt:scaffold-imports :js)]
-   :teardown [(l/rt:stop)]})
+  {:setup [(when +chromium-available+
+             (l/rt:restart :js))
+           (when +chromium-available+
+             (chromedriver/goto (runtime-browser-url) 5000))
+           (when +chromium-available+
+             (l/rt:scaffold-imports :js))]
+   :teardown [(when +chromium-available+
+                (l/rt:stop))]})
 
 (defmacro webworker-cell-check
   []
@@ -66,11 +77,19 @@
 ^{:refer js.cell.runtime.browser/make-webworker-cell :added "4.1"}
 (fact "creates a kernel cell backed by a browser WebWorker"
   ^:hidden
-  (webworker-cell-check)
-  => (contains-in {"echo" ["HELLO" integer?]}))
+  (if +chromium-available+
+    (webworker-cell-check)
+    :skip)
+  => (if +chromium-available+
+       (contains-in {"echo" ["HELLO" integer?]})
+       :skip))
 
 ^{:refer js.cell.runtime.browser/make-sharedworker-cell :added "4.1"}
 (fact "creates a kernel cell backed by a browser SharedWorker"
   ^:hidden
-  (sharedworker-cell-check)
-  => ["hello"])
+  (if +chromium-available+
+    (sharedworker-cell-check)
+    :skip)
+  => (if +chromium-available+
+       ["hello"]
+       :skip))

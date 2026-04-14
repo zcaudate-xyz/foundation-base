@@ -33,13 +33,16 @@
    '[(js.cell.e2e.common/remote-runtime-init)]
    :flat))
 
+(def +remote-worker-setup-eval+
+  (common/remote-worker-setup-eval))
+
 (defmacro with-node-remote
   [script & body]
   (template/$
     (notify/wait-on :js
       (var remote-cell
            (cl/make-cell
-            (runtime-link/make-node-link ~script {})))
+            (runtime-link/make-node-link (@! ~script) {})))
       (. (. remote-cell ["init"])
          (then (fn []
                  (do ~@body)))))))
@@ -50,7 +53,7 @@
     (notify/wait-on :js
       (var remote-cell
            (cl/make-cell
-            (runtime-link/make-node-link ~script {})))
+            (runtime-link/make-node-link (@! ~script) {})))
       (. (. remote-cell ["init"])
          (then
           (fn []
@@ -77,7 +80,7 @@
     (. (. (cl/call remote-cell
                    {:op "eval"
                     :id "setup-1"
-                    :body ~(common/remote-worker-setup-eval)})
+                    :body (@! +remote-worker-setup-eval+)})
           (then (fn [status]
                   (. (common/call-remote-query remote-cell "open")
                      (then (fn [rows]

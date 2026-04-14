@@ -206,16 +206,16 @@
           "args" ["query_plan"]}
          "@e2e/sync"
          {"handler"
-         (fn [sync-request]
-           (var db-sync (xt.lang.common-spec/x:get-key sync-request "db/sync"))
-           (when (and (xt.lang.common-spec/x:is-object? db-sync)
-                      (xt.lang.common-data/not-empty? db-sync))
-             (xt.db/sync-event (!:G __E2E_REMOTE_DB) ["add" db-sync]))
-           (return sync-request))
-         "is_async" false
-         "args" ["sync_request"]}}
+          (fn [sync-request]
+            (var db-sync (xt.lang.common-spec/x:get-key sync-request "db/sync"))
+            (when (and (xt.lang.common-spec/x:is-object? db-sync)
+                       (xt.lang.common-data/not-empty? db-sync))
+              (xt.db/sync-event (!:G __E2E_REMOTE_DB) ["add" db-sync]))
+            (return sync-request))
+          "is_async" false
+          "args" ["sync_request"]}})
        (!:G __CELL_WORKER))
-       "ready"))
+       "ready")
    {:lang :js
      :layout :flat}))
 
@@ -276,10 +276,12 @@
 
 (defn.js order-query-plan
   [status]
-  (var [ok plan] (db-query/prepare-query
-                  (-/shared-desc)
-                  (-/query-spec)
-                  {"args" [status]}))
+  (var prepared (db-query/prepare-query
+                 (-/shared-desc)
+                 (-/query-spec)
+                 {"args" [status]}))
+  (var ok (xt/x:first prepared))
+  (var plan (xt/x:second prepared))
   (when (not ok)
     (throw plan))
   (return plan))
@@ -386,7 +388,9 @@
 
 (defn.js link-call
   [link event]
-  (var #{worker active id} link)
+  (var worker (. link ["worker"]))
+  (var active (. link ["active"]))
+  (var id (. link ["id"]))
   (var cid (or (. event ["id"])
                (util/rand-id (xt/x:cat id "-") 3)))
   (:= (. event ["id"]) cid)
@@ -400,9 +404,9 @@
                                 (reject data))
                       :input input
                       :time (xt/x:now-ms)}))))
-  (var #{postRequest} worker)
-  (if postRequest
-    (postRequest input)
+  (var post-request (. worker ["postRequest"]))
+  (if post-request
+    (post-request input)
     (. worker (postMessage input)))
   (return p))
 
@@ -446,15 +450,17 @@
     "sync_status"
     {"pipeline"
      {"sync"
-      {"handler"
-       (fn [context]
-         (var args (or (xt/x:get-key context "args") []))
-         (var [ok sync-request] (db-sync/prepare-sync
-                                 (-/shared-desc)
-                                 {"sync" {"Order" args}}
-                                 {}))
-         (when (not ok)
-           (throw sync-request))
+       {"handler"
+        (fn [context]
+          (var args (or (xt/x:get-key context "args") []))
+          (var prepared (db-sync/prepare-sync
+                         (-/shared-desc)
+                         {"sync" {"Order" args}}
+                         {}))
+          (var ok (xt/x:first prepared))
+          (var sync-request (xt/x:second prepared))
+          (when (not ok)
+            (throw sync-request))
          (return
           (. (-/call-remote-sync remote-cell sync-request)
              (then
@@ -477,12 +483,13 @@
   (when model
     (var views (or (. model ["views"])
                    model))
-    (var deps (or (xt/x:get-key model "deps")
-                  (do (var out {"orders" {}})
-                      (xt/for:object [[view-id view-spec] views]
-                        (xt/for:array [dep-id (or (. view-spec ["deps"]) [])]
-                          (xtd/set-in out ["orders" dep-id view-id] true)))
-                      out)))
+    (var deps (xt/x:get-key model "deps"))
+    (when (xt/x:nil? deps)
+      (:= deps {"orders" {}})
+      (xt/for:array [view-id (xtd/obj-keys views)]
+        (var view-spec (. views [view-id]))
+        (xt/for:array [dep-id (or (. view-spec ["deps"]) [])]
+          (xtd/set-in deps ["orders" dep-id view-id] true))))
     (return {"views" (-/sort-strings
                       (xtd/obj-keys views))
              "deps" deps})))
@@ -515,8 +522,10 @@
 
 (defn.js run-sync-view
   [cell model-id view-id args]
-  (var [path context disabled]
-       (base-model/prep-view cell model-id view-id {:args args}))
+  (var prepared (base-model/prep-view cell model-id view-id {:args args}))
+  (var path (. prepared [0]))
+  (var context (. prepared [1]))
+  (var disabled (. prepared [2]))
   (xt/x:set-key (. context ["acc"]) "path" path)
   (return
    (. (event-view/pipeline-run-sync

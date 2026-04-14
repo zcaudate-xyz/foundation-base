@@ -175,11 +175,11 @@
   (-> (emit/default-grammar)
       (collection/merge-nested
        {:banned #{:set :regex}
-        :highlight '#{return break continue}
-         :default {:common    {:statement ""}
-                   :function  {:prefix ""
-                               :raw ""
-                               :args {:sep ", "}}
+         :highlight '#{return break continue}
+          :default {:common    {:statement ";"}
+                    :function  {:prefix ""
+                                :raw ""
+                                :args {:sep ", "}}
                    :invoke    {:reversed true :hint ""}
                    :block     {:start " {" :end "}"}}
          :block   {:for {:parameter {:sep ";"}}}

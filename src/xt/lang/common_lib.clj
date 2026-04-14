@@ -429,10 +429,11 @@
   "returns a wrapped callback given map"
   {:added "4.0"}
   [callbacks key]
-  (:= callbacks (or callbacks {}))
+  (when (xt/x:nil? callbacks)
+    (:= callbacks {}))
   (var result-fn
        (fn [result]
-         (var f (xt/x:get-key callbacks key))
+          (var f (xt/x:get-key callbacks key))
          (if (xt/x:not-nil? f)
            (return (f result))
            (return result))))

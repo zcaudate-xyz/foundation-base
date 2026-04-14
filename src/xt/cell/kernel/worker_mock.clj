@@ -4,6 +4,7 @@
 
 (l/script :xtalk
   {:require [[xt.lang.common-spec :as xt]
+             [xt.lang.common-trace :as trace]
              [xt.lang.common-task :as task]
              [xt.cell.kernel.worker-local :as worker-local]
              [xt.cell.kernel.worker-impl :as worker-impl]]})
@@ -35,7 +36,7 @@
           
           :else
           (worker-impl/worker-process mock message))
-    (catch e (xt/x:TRACE! (. e ["stack"]) "SEND.ERROR"))))
+    (catch e (trace/TRACE! (. e ["stack"]) "SEND.ERROR"))))
 
 (defn.xt mock-worker
   "creates a new mock worker

@@ -142,13 +142,27 @@
          ~body
          "\n}")))
 
+(defn- dart-exec
+  "Resolves a user-local Dart SDK binary before falling back to PATH."
+  {:added "4.1"}
+  []
+  (let [home (System/getenv "HOME")
+        candidates (remove nil?
+                           [(some-> home (str "/.local/bin/dart"))
+                            (some-> home (str "/.local/lib/dart-sdk/bin/dart"))])]
+    (or (some (fn [path]
+                (when (.exists (java.io.File. path))
+                  path))
+              candidates)
+        "dart")))
+
 (def +program-init+
   (common/put-program-options
    :dart {:default {:twostep :dart}
-           :env     {:dart {:exec "dart"
-                            :extension "dart"
-                            :exec-fn sh-exec-dart
-                            :stderr true
+           :env     {:dart {:exec (dart-exec)
+                             :extension "dart"
+                             :exec-fn sh-exec-dart
+                             :stderr true
                             :flags {:twostep ["compile" "exe"]
                                     :interactive false
                                     :json false

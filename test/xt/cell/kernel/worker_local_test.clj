@@ -5,9 +5,10 @@
 (l/script- :js
   {:runtime :basic
    :require [[xt.lang.common-lib :as k]
-             [js.core :as j]
-             [xt.cell.kernel.worker-state :as worker-state]
-             [xt.cell.kernel.worker-local :as worker-local]]})
+             [xt.lang.common-spec :as xt]
+              [js.core :as j]
+              [xt.cell.kernel.worker-state :as worker-state]
+              [xt.cell.kernel.worker-local :as worker-local]]})
 
 (fact:global
  {:setup     [(l/rt:restart)
@@ -44,13 +45,13 @@
   (!.js
    (worker-local/actions-init {"@custom/action" {}} nil)
    ;; Check that baseline actions are registered
-   (k/has-key? (worker-state/WORKER_ACTIONS) "@worker/ping"))
+   (xt/x:has-key? (worker-state/WORKER_ACTIONS) "@worker/ping"))
   => true
   
   ;; Check that custom action is also registered
   (!.js
    (worker-local/actions-init {"@custom/action" {"handler" k/identity}} nil)
-   (k/has-key? (worker-state/WORKER_ACTIONS) "@custom/action"))
+   (xt/x:has-key? (worker-state/WORKER_ACTIONS) "@custom/action"))
   => true)
 
 ^{:refer xt.cell.kernel.worker-local/tmpl-baseline-action :added "4.0" :unchecked true}

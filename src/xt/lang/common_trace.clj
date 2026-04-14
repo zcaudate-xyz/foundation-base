@@ -5,7 +5,8 @@
             [std.lib.env :as env]))
 
 (l/script :xtalk
-  {:require [[xt.lang.common-spec :as xt]]})
+  {:require [[xt.lang.common-spec :as xt]
+             [xt.lang.common-data :as xtd]]})
 
 ;;
 ;; METADATA
@@ -65,7 +66,7 @@
   {:added "4.0"}
   [data tag opts]
   (var log (-/trace-log))
-  (var m (xt/x:obj-assign
+  (var m (xtd/obj-assign
           {:tag tag
            :data data
            :time (xt/x:now-ms)}
