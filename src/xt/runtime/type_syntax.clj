@@ -42,7 +42,7 @@
   (-> -/SYNTAX_SPEC
       (spec/proto-spec)
       (xtd/obj-map -/syntax-wrap)
-      (xt/x:proto-create)))
+      (spec/proto-create)))
 
 (defn.xt syntax-create
   "creates a syntax

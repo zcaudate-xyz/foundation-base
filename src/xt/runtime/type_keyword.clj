@@ -39,10 +39,7 @@
   "gets keyword equality"
   {:added "4.0"}
   [sym o]
-  (var otype (xt/x:type-native o))
-  (var oclass (:? (xt/x:is-object? o)
-                  (xt/x:get-key o "::" otype)
-                  otype))
+  (var oclass (common-hash/native-class o))
   (return (and (== "keyword" oclass)
                (== (. sym _ns)   (. o _ns))
                (== (. sym _name) (. o _name)))))
@@ -58,7 +55,7 @@
 (def.xt KEYWORD_PROTOTYPE
   (-> -/KEYWORD_SPEC
       (spec/proto-spec)
-      (xt/x:proto-create)))
+      (spec/proto-create)))
 
 (defn.xt keyword-create
   "creates a keyword"

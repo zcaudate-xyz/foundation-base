@@ -87,7 +87,7 @@
   "show interface"
   {:added "4.0"}
   [x]
-  (var t (xt/x:type-native x))
+  (var t (common-hash/native-type x))
   (cond (== t "nil")
         (return "nil")
         
@@ -257,4 +257,3 @@
   {:added "4.0"}
   [coll idx]
   (list '. coll '(empty)))
-
