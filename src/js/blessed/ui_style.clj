@@ -2,7 +2,7 @@
   (:require [std.lang :as l]))
 
 (l/script :js
-  {:require [[xt.lang.common-lib :as k]]})
+  {:require [[xt.lang.common-data :as xtd]]})
 
 
 ;;
@@ -13,35 +13,35 @@
   "helper function to get color props"
   {:added "4.0"}
   [props]
-  (return (k/obj-pick props ["bg"
-                             "fg"
-                             "style"])))
+  (return (xtd/obj-pick props ["bg"
+                               "fg"
+                               "style"])))
 
 (defn.js getLayout
   "helper function to get layout props"
   {:added "4.0"}
   [props]
-  (return (k/obj-pick props ["width"
-                             "height"
-                             "left"
-                             "right"
-                             "top"
-                             "bottom"])))
+  (return (xtd/obj-pick props ["width"
+                               "height"
+                               "left"
+                               "right"
+                               "top"
+                               "bottom"])))
 
 (defn.js getTopProps
   "helper function for top layout props"
   {:added "4.0"}
   [props noShrink]
-  (return (k/obj-assign (-/getLayout props)
-                        {:bg "black"
-                         :shrink (not noShrink)})))
+  (return (xtd/obj-assign (-/getLayout props)
+                          {:bg "black"
+                           :shrink (not noShrink)})))
 
 (defn.js omitLayoutProps
   "helper function for stripping layout props"
   {:added "4.0"}
   [props]
-  (return (k/obj-assign
-           (k/obj-clone props)
+  (return (xtd/obj-assign
+           (xtd/obj-clone props)
            {:left nil
             :right nil
             :top nil
@@ -117,4 +117,3 @@
 ;;
 ;;
 ;;
-

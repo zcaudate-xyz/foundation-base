@@ -4,9 +4,10 @@
 (l/script :js
   {:require [[xt.lang.common-lib :as k]
              [xt.lang.common-spec :as xt]
-              [js.core :as j]
-              [js.react :as r]
-              [js.blessed :as b]
+             [xt.lang.common-data :as xtd]
+               [js.core :as j]
+               [js.react :as r]
+               [js.blessed :as b]
              [js.blessed.ui-style :as ui-style]]})
 
 (defn.js Enclosed
@@ -238,7 +239,7 @@
              (if (and (k/is-number? value)
                       (not= internal value))
                (setInternal value)))
-         bprops (k/obj-assign-nested
+         bprops (xtd/obj-assign-nested
                  {:mouse true
                   #_#_:border {:type "line"}
                   :shrink true
@@ -294,8 +295,8 @@
             (if (and (k/is-number? index)
                      (not= internal index))
               (setInternal index)))
-         bprops (k/obj-assign-nested
-                {:mouse true
+         bprops (xtd/obj-assign-nested
+                 {:mouse true
                  :shrink true
                  :style {:fg (or textColor "white")
                          :bg "black"
@@ -517,12 +518,12 @@
   "Displays text as content"
   {:added "4.0"}
   ([props]
-   (let [bprops (k/obj-assign-nested
-                 {:bg "black"
-                  :mouse true
-                  :scrollable true
-                  :scrollbar ui-style/styleScrollBar}
-                 props)]
+   (let [bprops (xtd/obj-assign-nested
+                  {:bg "black"
+                   :mouse true
+                   :scrollable true
+                   :scrollbar ui-style/styleScrollBar}
+                  props)]
      (return [:box #{(:.. bprops)}]))))
 
 ;;

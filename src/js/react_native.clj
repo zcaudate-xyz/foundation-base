@@ -7,7 +7,9 @@
               [js.react :as r]
               [js.react.helper-portal :as helper-portal]
               [xt.lang.common-lib :as k]
-              [xt.lang.common-spec :as xt]]
+              [xt.lang.common-spec :as xt]
+              [xt.lang.common-data :as xtd]
+              [xt.lang.common-string :as str]]
     :import [["react-native" :as [* ReactNative]]
             ["react-native-video" :as RNVideo]
             ["react-native-gesture-handler" :as [* RNGestureHandler]]
@@ -478,9 +480,9 @@
   (var s (or (JSON.stringify e nil 2)
              ""))
   (var arr (k/split s "\n"))
-  (return (+ (-> (k/arr-slice arr 1 (- (xt/x:len arr) 1))
-                  (k/arr-map (fn:> [l] (k/substring l 2)))
-                  (k/arr-join "\n" )))))
+  (return (+ (-> (xtd/arr-slice arr 1 (- (xt/x:len arr) 1))
+                  (xtd/arr-map (fn:> [l] (str/substring l 2)))
+                  (str/join "\n" )))))
 
 (defn.js format-entry
   "formats an entry"
@@ -873,7 +875,7 @@
        (setInternal index)))
    (return
     [:% -/FlatList
-     {:data  (k/arr-map items format)
+     {:data  (xtd/arr-map items format)
       :keyExtractor k/identity
       :renderItem (fn [e]
                     (var #{item} e)

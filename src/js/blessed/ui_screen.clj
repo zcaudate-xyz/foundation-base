@@ -2,10 +2,10 @@
   (:require [std.lang :as l]))
 
 (l/script :js
-  {:require [[xt.lang.common-lib :as k]
-             [js.core :as j]
-             [js.lib.valtio :as v]
-             [js.react :as r]
+  {:require [[xt.lang.common-data :as xtd]
+              [js.core :as j]
+              [js.lib.valtio :as v]
+              [js.react :as r]
              [js.blessed :as b]
              [js.blessed.ui-style :as ui-style]]})
 
@@ -81,7 +81,7 @@
                 :scrollbar {:style {:bg (or color "gray")
                                     :fg (or color "gray")}
                             :track true}}
-         bprops (k/obj-assign-nested (ui-style/getLayout props) bopts)]
+         bprops (xtd/obj-assign-nested (ui-style/getLayout props) bopts)]
      (return [:box #{(:.. bprops)}
               #_[:box {:bottom 0
                      :height 1
