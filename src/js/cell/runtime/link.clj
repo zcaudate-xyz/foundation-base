@@ -7,7 +7,7 @@
 
 (l/script :js
   {:require [[js.core :as j]
-             [xt.lang.common-lib :as k]
+             [xt.lang.common-spec :as xt]
              [js.cell.kernel.worker-local :as worker-local]
              [js.cell.kernel.worker-mock :as worker-mock]]})
 
@@ -28,8 +28,8 @@
   {:added "4.0"}
   [script opts]
   (var config (or opts {}))
-  (var eval-flag (k/get-key config "eval"))
-  (var eval-mode (:? (k/nil? eval-flag) true eval-flag))
+  (var eval-flag (xt/x:get-key config "eval"))
+  (var eval-mode (:? (xt/x:nil? eval-flag) true eval-flag))
   (var #{Worker} (require "worker_threads"))
   (return {:create-fn (fn [listener]
                         (var worker (new Worker script
@@ -45,7 +45,7 @@
   "resolves a script function or value"
   {:added "4.0"}
   [script]
-  (return (:? (k/is-function? script)
+  (return (:? (xt/x:is-function? script)
               (script)
               script)))
 
@@ -101,7 +101,7 @@
   "dispatches to a runtime-specific worker link helper"
   {:added "4.0"}
   [runtime script opts]
-  (var runtime-name (k/to-string runtime))
+  (var runtime-name (xt/x:to-string runtime))
   (cond (== runtime-name "mock")
         (return (-/make-mock-link opts))
 
@@ -115,4 +115,4 @@
         (return (-/make-sharedworker-link script))
 
         :else
-        (throw (k/cat "Unknown js.cell.runtime.link runtime: " runtime))))
+        (throw (xt/x:cat "Unknown js.cell.runtime.link runtime: " runtime))))

@@ -3,71 +3,72 @@
 
 (l/script :xtalk
   {:require [[js.cell.service.db-query :as db-query]
-             [xt.lang.common-lib :as k]]
+             [xt.lang.common-spec :as xt]
+             [xt.lang.common-data :as xtd]]
    :export  [MODULE]})
 
 (defn.xt supabase-capable?
   "checks that the db descriptor can execute compiled supabase queries"
   {:added "4.0"}
   [db]
-  (return (k/is-function? (k/get-key db "execute"))))
+  (return (xt/x:is-function? (xt/x:get-key db "execute"))))
 
 (defn.xt compile-select-item
   "compiles a returning entry to Supabase select syntax"
   {:added "4.0"}
   [item]
-  (if (k/is-string? item)
+  (if (xt/x:is-string? item)
     (return item)
-    (do (var rel (k/first item))
-        (var entries (k/second item))
-        (return (k/cat rel
-                       "("
-                       (k/join ","
-                               (k/arr-map entries -/compile-select-item))
-                       ")")))))
+    (do (var rel (xt/x:first item))
+        (var entries (xt/x:second item))
+        (return (xt/x:cat rel
+                          "("
+                          (xt/x:str-join ","
+                                         (xt/x:arr-map entries -/compile-select-item))
+                          ")")))))
 
 (defn.xt compile-select
   "compiles a return vector to Supabase select syntax"
   {:added "4.0"}
   [entries]
-  (return (k/join ","
-                  (k/arr-map entries -/compile-select-item))))
+  (return (xt/x:str-join ","
+                         (xt/x:arr-map entries -/compile-select-item))))
 
 (defn.xt compile-filters-into
   "compiles nested where params into Supabase filter descriptors"
   {:added "4.0"}
   [prefix obj out]
-  (k/for:object [[key value] obj]
-    (var path (:? (k/not-empty? prefix)
-                  (k/cat prefix "." key)
+  (xt/for:object [[key value] obj]
+    (var path (:? (xt/x:not-empty? prefix)
+                  (xt/x:cat prefix "." key)
                   key))
-    (cond (and (k/is-object? value)
-               (not (k/is-array? value)))
+    (cond (and (xt/x:is-object? value)
+               (not (xt/x:is-array? value)))
           (-/compile-filters-into path value out)
 
-          (and (k/is-array? value)
-               (== "in" (k/first value)))
-          (x:arr-push out {"path" path
-                           "op" "in"
-                           "value" (k/get-in value [1 0])})
+          (and (xt/x:is-array? value)
+               (== "in" (xt/x:first value)))
+          (xt/x:arr-push out {"path" path
+                              "op" "in"
+                              "value" (xtd/get-in value [1 0])})
 
           :else
-          (x:arr-push out {"path" path
-                           "op" "eq"
-                           "value" value})))
+          (xt/x:arr-push out {"path" path
+                              "op" "eq"
+                              "value" value})))
   (return out))
 
 (defn.xt compile-query
   "compiles a query plan into a Supabase request description"
   {:added "4.0"}
   [db query-plan view-context]
-  (var table (k/first query-plan))
-  (var second (k/second query-plan))
-  (var third  (k/get-idx query-plan 2))
-  (var where (:? (k/is-object? second)
+  (var table (xt/x:first query-plan))
+  (var second (xt/x:second query-plan))
+  (var third  (xt/x:get-idx query-plan 2))
+  (var where (:? (xt/x:is-object? second)
                  second
                  {}))
-  (var returning (:? (k/is-object? second)
+  (var returning (:? (xt/x:is-object? second)
                      third
                      second))
   (return {"table" table
@@ -79,9 +80,9 @@
   {:added "4.0"}
   [db query-plan view-context]
   (var compiled (-/compile-query db query-plan view-context))
-  (var execute-fn (or (k/get-key db "execute")
-                      (k/get-key view-context "execute")))
-  (when (not (k/is-function? execute-fn))
+  (var execute-fn (or (xt/x:get-key db "execute")
+                      (xt/x:get-key view-context "execute")))
+  (when (not (xt/x:is-function? execute-fn))
     (return [false {:status "error"
                     :tag "db/supabase-execute-not-provided"
                     :data compiled}]))
@@ -91,9 +92,9 @@
   "maps an execution error into the local error contract"
   {:added "4.0"}
   [db error view-context]
-  (var map-fn (or (k/get-key db "map_error")
-                  (k/get-key view-context "map_error")))
-  (if (k/is-function? map-fn)
+  (var map-fn (or (xt/x:get-key db "map_error")
+                  (xt/x:get-key view-context "map_error")))
+  (if (xt/x:is-function? map-fn)
     (return (map-fn error view-context))
     (return {:status "error"
              :tag "db/supabase-query-failed"
@@ -109,7 +110,7 @@
   (var [e-ok result] (-/execute-query db query-plan view-context))
   (when (not e-ok)
     (return [false (-/map-supabase-error db result view-context)]))
-  (when (== "error" (k/get-key result "status"))
+  (when (== "error" (xt/x:get-key result "status"))
     (return [false (-/map-supabase-error db result view-context)]))
   (return [true result]))
 

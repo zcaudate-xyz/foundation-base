@@ -2,6 +2,7 @@
   (:require [net.http :as nhttp]
             [org.httpkit.server :as server]
   	        [rt.nginx :as nginx]
+            [std.lib.network :as network]
             [std.lib.os :as os]
             [std.lang :as l]
             [xt.lang.common-notify :as notify])
@@ -21,13 +22,20 @@
   (not= "Mac OS X" (os/os)))
 
 (fact:global
- {:setup    [(l/rt:restart)
-             (!.js
-              (:= (!:G fetch) (require "node-fetch"))
-              (:= (!:G EventSource) (require "eventsource")))
-             (when CANARY-NGINX
-               (l/annex:restart-all)
-               (l/! [:es]
+  {:setup    [(l/rt:restart)
+              (!.js
+               (:= (!:G fetch) (require "node-fetch"))
+               (:= (!:G EventSource) (require "eventsource")))
+              (let [port (:http-port (l/default-notify))
+                    ok?  (boolean
+                          (network/wait-for-port "localhost" port {:timeout 2000}))]
+                (when ok?
+                  (Thread/sleep 150))
+                (when-not ok?
+                  (throw (ex-info "Notify HTTP port did not become ready." {:port port}))))
+              (when CANARY-NGINX
+                (l/annex:restart-all)
+                (l/! [:es]
                  (do:> (ws/service-register "ES_DEBUG" {} nil)
                        (:= (. DEBUG ["es_handler"])
                            (fn []
@@ -36,21 +44,13 @@
                                               5
                                               (fn [n]
                                                 (return (cat "TEST-" n))))))))
-               (let [url (str "http://localhost:" (:port (l/annex:get :es)) "/eval/es")
-                     ok? (loop [attempt 0]
-                           (let [status (try (:status (nhttp/get url {:headers {"Accept" "text/event-stream"}}))
-                                             (catch Exception _ nil))]
-                             (cond (= 200 status)
-                                   true
-
-                                   (< attempt 19)
-                                   (do (Thread/sleep 100)
-                                       (recur (inc attempt)))
-
-                                   :else
-                                   false)))]
-                 (when-not ok?
-                   (throw (ex-info "Event source did not become ready." {:url url})))))]
+                (let [port (:port (l/annex:get :es))
+                      ok? (boolean
+                           (network/wait-for-port "localhost" port {:timeout 2000}))]
+                  (when ok?
+                    (Thread/sleep 150))
+                  (when-not ok?
+                    (throw (ex-info "Event source port did not become ready." {:port port})))))]
    :teardown [(l/rt:stop)
               (when CANARY-NGINX
                 (l/annex:stop-all))]})

@@ -4,7 +4,8 @@
 
 (l/script :js
   {:require [[js.core :as j]
-             [xt.lang.common-lib :as k]
+             [xt.lang.common-spec :as xt]
+             [xt.lang.common-trace :as trace]
              [js.cell.kernel.base-util :as util]]})
 
 (defspec.xt link-listener-call
@@ -64,19 +65,19 @@
   {:added "4.0"}
   [data active]
   (var #{op id status body} data)
-  (var entry (k/get-key active id))
-  (when (k/not-nil? entry)
+  (var entry (xt/x:get-key active id))
+  (when (xt/x:not-nil? entry)
     (var #{input time resolve reject} entry)
     (:= input (or input {}))
     (try
       (cond (== status "ok")
             (cond (== op "call")
-                  (do (k/del-key active id) 
+                  (do (xt/x:del-key active id) 
                       (return (resolve (util/arg-decode body))))
                   
                   (== op "eval")
-                  (do (k/del-key active id)
-                      (var out (k/json-decode body))
+                  (do (xt/x:del-key active id)
+                      (var out (xt/x:json-decode body))
                       (var #{type value} out)
                       (cond (== type "data")
                             (return (resolve out.value))
@@ -84,12 +85,12 @@
                             :else
                             (return (resolve out)))))
             :else
-            (do (k/del-key active id)
-                (return (reject (j/assign {:action (. input ["action"])
-                                           :input (. input ["body"])
-                                           :start-time time
-                                           :end-time (k/now-ms)}
-                                          data)))))
+            (do (xt/x:del-key active id)
+                (return (reject (xt/x:obj-assign {:action (. input ["action"])
+                                                  :input (. input ["body"])
+                                                  :start-time time
+                                                  :end-time (xt/x:now-ms)}
+                                                 data)))))
       (catch err (return (reject {:op op
                                   :id id
                                   :action (. input ["action"])
@@ -97,7 +98,7 @@
                                   :message "Format Invalid"
                                   :input (. input ["body"])
                                   :start-time time
-                                  :end-time (k/now-ms)
+                                  :end-time (xt/x:now-ms)
                                   :body body}))))))
 
 (defn.js link-listener-event
@@ -106,13 +107,13 @@
   [data callbacks]
   (var #{op id signal status body} data)
   (var out [])
-  (k/for:object [[p-id callback] callbacks]
+  (xt/for:object [[p-id callback] callbacks]
     (var #{pred handler} callback)
     (when (util/check-event pred signal data)
       (try (handler data signal)
-           (x:arr-push out p-id)
-           (catch err (k/LOG! {:stack   (. err ["stack"])
-                               :message (. err ["message"])})))))
+           (xt/x:arr-push out p-id)
+           (catch err (trace/LOG! {:stack   (. err ["stack"])
+                                   :message (. err ["message"])})))))
   (return out))
 
 (defn.js link-listener
@@ -132,8 +133,8 @@
   "helper function to create a worker"
   {:added "4.0"}
   [worker-url active callbacks]
-  (cond (or (k/is-string? worker-url)
-            (k/is-function? worker-url))
+  (cond (or (xt/x:is-string? worker-url)
+            (xt/x:is-function? worker-url))
         (do (var worker (new Worker worker-url))
             (. worker (addEventListener
                        "message"
@@ -164,7 +165,7 @@
   "gets the calls that are active"
   {:added "4.0"}
   [link]
-  (return (k/get-key link "active")))
+  (return (xt/x:get-key link "active")))
 
 (defn.js add-callback
   "adds a callback to the link"
@@ -201,7 +202,7 @@
   (var #{id active} link)
   (while true
     (var cid (util/rand-id (+ id "-") 3))
-    (when (k/nil? (k/get-key active cid))
+    (when (xt/x:nil? (xt/x:get-key active cid))
       (return cid))))
 
 (defn.js call
@@ -219,8 +220,8 @@
                                         (resolve data))
                              :reject (fn [data]
                                        (reject data))
-                             :input  input
-                             :time   (k/now-ms)}))))
+                              :input  input
+                              :time   (xt/x:now-ms)}))))
   (var #{postRequest} worker)
   (if postRequest
     (postRequest input)

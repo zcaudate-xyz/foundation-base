@@ -192,19 +192,19 @@
   
   (var return-params (xt/x:last linked))
   (var where-params  (xt/x:arr-filter linked (fn [x]
-                                            (return (and (xt/x:is-object? x)
-                                                         (xtd/not-empty? x))))))
-  (var filter-fn
-       (fn [e]
-         (when (where-fn rows schema link-key
-                         where-params
-                         (xt/x:get-key e "record"))
-           (var out (return-fn rows schema link-key
-                               return-params
-                               (xt/x:get-key e "record")))
-           (when (xtd/not-empty? out)
-             (return out)))))
-  (var records (xt/x:arr-keep entries filter-fn))
+                                             (return (and (xt/x:is-object? x)
+                                                          (xtd/not-empty? x))))))
+  (var records [])
+  (xt/for:array [e entries]
+    (var linked-record (xt/x:get-key e "record"))
+    (when (where-fn rows schema link-key
+                    where-params
+                    linked-record)
+      (var out (return-fn rows schema link-key
+                          return-params
+                          linked-record))
+      (when (xtd/not-empty? out)
+        (xt/x:arr-push records out))))
   (if (< 0 (xt/x:len records))
     (return [ident records]))
   (return [ident nil]))
@@ -229,14 +229,15 @@
   (xt/for:array [col data-cols]
     (var #{ident ref} col)
     (cond (xt/x:nil? ref)
-          (do (var out (xt/x:get-path record ["data" ident]))
+          (do (var out (xtd/get-in record ["data" ident]))
               (xt/x:set-key output ident out))
           
           :else
           (xt/x:set-key output
-                     (xt/x:cat ident "_id")
-                     (xt/x:first (xt/x:obj-keys
-                                  (xt/x:get-path record ["ref_links" ident]))))))
+                        (xt/x:cat ident "_id")
+                        (xt/x:first (xt/x:obj-keys
+                                     (or (xtd/get-in record ["ref_links" ident])
+                                         {}))))))
   (return output))
 
 (defn.xt pull

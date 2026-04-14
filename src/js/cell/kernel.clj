@@ -3,7 +3,8 @@
 
 (l/script :js
   {:require [[xt.lang.common-runtime :as rt :with [defvar.js]]
-             [xt.lang.common-lib :as k]
+             [xt.lang.common-spec :as xt]
+             [xt.lang.common-data :as xtd]
              [xt.lang.event-view :as event-view]
              [js.cell.kernel.base-link :as raw]
              [js.cell.kernel.base-impl :as impl-common]
@@ -39,13 +40,13 @@
   "gets the current annex key"
   {:added "4.0"}
   [key]
-  (return (k/get-key (-/GX) key)))
+  (return (xt/x:get-key (-/GX) key)))
 
 (defn.js GX-set
   "set the current annex key"
   {:added "4.0"}
   [key val]
-  (k/set-key (-/GX) key val)
+  (xt/x:set-key (-/GX) key val)
   (return val))
 
 ;;
@@ -56,13 +57,13 @@
   "gets the current cell"
   {:added "4.0"}
   [ctx]
-  (cond (k/nil? ctx)
+  (cond (xt/x:nil? ctx)
         (return (-/GD))
-        
-        (k/is-string? ctx)
+         
+        (xt/x:is-string? ctx)
         (return (-/GX-val ctx))
 
-        (k/is-object? ctx)
+        (xt/x:is-object? ctx)
         (if (== (. ctx ["::"]) "cell")
           (return ctx)
           (return (. ctx ["cell"])))
@@ -85,14 +86,14 @@
   {:added "4.0"}
   [f args ctx]
   (var cell (-/get-cell ctx))
-  (return (f cell (k/unpack args))))
+  (return (f cell (xt/x:unpack args))))
 
 (defn.js fn-call-model
   "calls the model in context"
   {:added "4.0"}
   [f model-id args ctx]
   (var cell (-/get-cell ctx))
-  (return (f cell model-id (k/unpack args))))
+  (return (f cell model-id (xt/x:unpack args))))
 
 (defn.js fn-call-view
   "calls the view in context"
@@ -100,7 +101,7 @@
   [f path args ctx]
     (var cell (-/get-cell ctx))
     (var [model-id view-id] path)
-    (return (f cell model-id view-id (k/unpack args))))
+    (return (f cell model-id view-id (xt/x:unpack args))))
 
 (defn.js fn-access-cell
   "calls access function on the current cell"
@@ -108,10 +109,10 @@
   [f ctx]
   (var cell (-/get-cell ctx))
   (var #{models} cell)
-  (return (k/obj-map models
-                     (fn [model]
-                       (var #{views} model)
-                       (return (k/obj-map views f))))))
+   (return (xtd/obj-map models
+                        (fn [model]
+                          (var #{views} model)
+                          (return (xtd/obj-map views f))))))
 
 (defn.js fn-access-model
   "calls access function on the current model"
@@ -121,7 +122,7 @@
   (var model (impl-common/model-get cell model-id))
   (when model
     (var #{views} model)
-    (return (k/obj-map views f))))
+    (return (xtd/obj-map views f))))
 
 (defn.js fn-access-view
   "calls access function on the current view"
@@ -153,7 +154,7 @@
   "gets the view in context"
   {:added "4.0"}
   [path ctx]
-  (return (-/fn-access-view k/identity path [] ctx)))
+  (return (-/fn-access-view j/identity path [] ctx)))
 
 ;;
 ;; FNS
@@ -207,8 +208,8 @@
   (var model (impl-common/model-get cell model-id))
   (when model
     (var #{views} model)
-    (return (k/arr-some (k/obj-vals views)
-                        event-view/is-errored)))
+    (return (xt/x:arr-some (xtd/obj-vals views)
+                         event-view/is-errored)))
   (return false))
 
 (defn.js model-is-pending
@@ -219,8 +220,8 @@
   (var model (impl-common/model-get cell model-id))
   (when model
     (var #{views} model)
-    (return (k/arr-some (k/obj-vals views)
-                        event-view/is-pending)))
+    (return (xt/x:arr-some (xtd/obj-vals views)
+                         event-view/is-pending)))
   (return false))
 
 (defn.js add-model-attach
@@ -406,32 +407,32 @@
   "gets the view after update"
   {:added "4.0"}
   [path ctx]
-  (return (. (k/first (-/view-update path ctx))
-             (then (fn []
-                     (return (-/view-val path ctx)))))))
+   (return (. (xt/x:first (-/view-update path ctx))
+              (then (fn []
+                      (return (-/view-val path ctx)))))))
 
 (defn.js view-for-input
   "gets the view after setting input"
   {:added "4.0"}
   [path input ctx]
-  (return (. (k/first (-/view-set-input path input ctx))
-             (then (fn []
-                     (return (-/view-val path ctx)))))))
+   (return (. (xt/x:first (-/view-set-input path input ctx))
+              (then (fn []
+                      (return (-/view-val path ctx)))))))
 
 (defn.js get-val
   "gets the subview"
   {:added "4.0"}
   [path subpath ctx]
   (var out (-/view-val path ctx))
-  (when (or (k/nil? out) (k/is-empty? subpath))
+  (when (or (xt/x:nil? out) (xt/x:is-empty? subpath))
     (return out))
-  (return (k/get-in out subpath)))
+  (return (xtd/get-in out subpath)))
 
 (defn.js get-for
   "gets the subview after update"
   {:added "4.0"}
   [path subpath ctx]
-  (return (. (k/first (-/view-update path ctx))
+  (return (. (xt/x:first (-/view-update path ctx))
              (then (fn []
                      (return (-/get-val path subpath ctx)))))))
 
@@ -445,9 +446,9 @@
   "sets all model inputs to nil"
   {:added "4.0"}
   [model-id ctx]
-  (return (j/onAll (k/arr-map (-/list-views model-id ctx)
-                              (fn [k]
-                                (return (-/nil-view [model-id k] ctx)))))))
+  (return (j/onAll (xt/x:arr-map (-/list-views model-id ctx)
+                               (fn [k]
+                                 (return (-/nil-view [model-id k] ctx)))))))
 
 ;;
 ;; LISTENERS
@@ -504,8 +505,8 @@
            pred
            (fn [event signal]
              (var out (j/assign {} event))
-             (k/del-key out "signal")
-             (k/set-key out "topic" signal)
+              (xt/x:del-key out "signal")
+              (xt/x:set-key out "topic" signal)
              (return
               (handler
                out

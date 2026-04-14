@@ -142,6 +142,25 @@
                  ~timeout
                  ~(meta &form))))
 
+(defn capture-key-match?
+  [id x]
+  (cond (= id x)
+        true
+
+        (map? x)
+        (boolean
+         (or (capture-key-match? id (get x 0))
+             (capture-key-match? id (get x 1))
+             (capture-key-match? id (get x "0"))
+             (capture-key-match? id (get x "1"))
+             (some #(capture-key-match? id %) (vals x))))
+
+        (sequential? x)
+        (boolean (some #(capture-key-match? id %) x))
+
+        :else
+        false))
+
 (defn captured
   "gets captured results"
   {:added "4.0"}
@@ -150,7 +169,7 @@
                     [n nil] [lang n])
         {:keys [id]} (notify-ceremony-rt lang)
         pred  (fn [{:strs [key]}]
-                (= id (first key)))
+                (capture-key-match? id key))
         captured-fn (fn []
                       (filter pred @notify/*notify-capture*))
         entries (loop [attempt 0
@@ -178,7 +197,7 @@
   ([& [lang]]
    (let [{:keys [id]} (notify-ceremony-rt lang)
          pred  (fn [{:strs [key]}]
-                 (= id (first key)))]
+                 (capture-key-match? id key))]
      (atom/swap-return! notify/*notify-capture*
        (fn [v]
          [(count (filter pred v))

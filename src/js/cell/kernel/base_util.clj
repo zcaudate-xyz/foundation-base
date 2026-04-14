@@ -4,7 +4,9 @@
 
 (l/script :js
   {:require [[js.core :as j]
-             [xt.lang.common-lib :as k]]})
+             [xt.lang.common-spec :as xt]
+             [xt.lang.common-data :as xtd]
+             [xt.lang.common-trace :as trace]]})
 
 
 (defspec.xt EV_INIT :xt/str)
@@ -67,50 +69,50 @@
   [pred signal event ctx]
   (var check false)
   (try
-    (var t (:? (k/nil? pred)
+    (var t (:? (xt/x:nil? pred)
                true
 
-               (k/is-boolean? pred)
+               (xt/x:is-boolean? pred)
                pred
-               
-               (k/is-function? pred)
+                
+               (xt/x:is-function? pred)
                (pred signal ctx)
-               
-               (k/is-object? pred)
-               (k/get-key pred signal)
-               
+                
+               (xt/x:is-object? pred)
+               (xt/x:get-key pred signal)
+                
                :else
                (== signal pred)))
     (:= check (or (== true t)
-                  (and (k/is-function? t) (t event ctx))
+                  (and (xt/x:is-function? t) (t event ctx))
                   false))
-    (catch err (k/LOG! {:stack   (. err ["stack"])
-                        :message (. err ["message"])})))
+    (catch err (trace/LOG! {:stack   (. err ["stack"])
+                            :message (. err ["message"])})))
   (return check))
 
 (defn.js arg-encode
   "encodes functions in data tree"
   {:added "4.0"}
   [arg]
-  (return (k/walk arg
-                  (fn [x]
-                    (if (k/is-function? x)
-                      (return ["fn" (k/to-string x)])
-                      (return x)))
-                  k/identity)))
+  (return (xtd/tree-walk arg
+                         (fn [x]
+                           (if (xt/x:is-function? x)
+                             (return ["fn" (xt/x:to-string x)])
+                             (return x)))
+                         (fn [x] (return x)))))
 
 (defn.js arg-decode
   "decodes function in data tree"
   {:added "4.0"}
   [arg]
-  (return (k/walk arg
-                  (fn [x]
-                    (if (and (k/is-array? x)
-                             (== 2 (k/len x))
-                             (== "fn" (k/first x)))
-                      (return (k/eval (+ "(" (k/second x) ")")))
-                      (return x)))
-                  k/identity)))
+  (return (xtd/tree-walk arg
+                         (fn [x]
+                           (if (and (xt/x:is-array? x)
+                                    (== 2 (xt/x:len x))
+                                    (== "fn" (xt/x:first x)))
+                             (return (xt/x:eval (+ "(" (xt/x:second x) ")")))
+                             (return x)))
+                         (fn [x] (return x)))))
 
 
 ;;

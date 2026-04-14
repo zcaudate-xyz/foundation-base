@@ -5,8 +5,9 @@
 (l/script :js
   {:require [[js.core :as j]
              [js.cell.kernel.base-util :as util]
+             [xt.lang.common-spec :as xt]
              [xt.lang.common-runtime :as rt :with [defvar.js]]
-             [xt.lang.common-lib :as k]]})
+             ]})
 
 
 (defspec.xt WORKER_STATE
@@ -113,7 +114,7 @@
   {:added "4.0"}
   [actions worker]
   (cond worker
-        (do (k/set-key worker "actions" actions)
+        (do (xt/x:set-key worker "actions" actions)
             (return worker))
         
         :else
@@ -151,7 +152,7 @@
   "helper to set the state and emit event"
   {:added "4.0"}
   [worker state set-fn suppress]
-  (cond (k/get-key state "final")
+  (cond (xt/x:get-key state "final")
         (throw "Worker State is Final.")
         
         :else
@@ -169,7 +170,7 @@
   (return (-/fn-set-state worker
                           (-/WORKER_STATE)
                           (fn [state]
-                            (k/set-key state "final" true))
+                            (xt/x:set-key state "final" true))
                           suppress)))
 
 (defn.js ^{:cell/action "@worker/get-final-status"
@@ -189,7 +190,7 @@
   (return (-/fn-set-state worker
                           (-/WORKER_STATE)
                           (fn [state]
-                            (k/set-key state "eval" status))
+                            (xt/x:set-key state "eval" status))
                           suppress)))
 
 (defn.js ^{:cell/action "@worker/get-eval-status"
@@ -223,7 +224,7 @@
   "pings the worker"
   {:added "4.0"}
   []
-  (return ["pong" (k/now-ms)]))
+  (return ["pong" (xt/x:now-ms)]))
 
 (defn.js ^{:cell/action "@worker/ping.async"
            :cell/static true
@@ -241,7 +242,7 @@
   "echos the first arg"
   {:added "4.0"}
   [arg]
-  (return [arg (k/now-ms)]))
+  (return [arg (xt/x:now-ms)]))
 
 (defn.js ^{:cell/action "@worker/echo.async"
            :cell/static true
@@ -259,7 +260,7 @@
   "throws an error"
   {:added "4.0"}
   []
-  (throw ["error" (k/now-ms)]))
+  (throw ["error" (xt/x:now-ms)]))
 
 (defn.js ^{:cell/action "@worker/error.async"
            :cell/static true

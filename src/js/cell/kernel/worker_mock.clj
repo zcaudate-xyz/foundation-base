@@ -4,7 +4,8 @@
 
 (l/script :js
   {:require [[js.core :as j]
-             [xt.lang.common-lib :as k]
+             [xt.lang.common-spec :as xt]
+             [xt.lang.common-trace :as trace]
              [js.cell.kernel.worker-local :as worker-local]
              [js.cell.kernel.worker-impl :as worker-impl]]})
 
@@ -27,7 +28,7 @@
   {:added "4.0"}
   [mock message]
   (try 
-    (cond (k/is-string? message)
+    (cond (xt/x:is-string? message)
           (worker-impl/worker-process mock
                                       {:op "eval"
                                        :id nil
@@ -35,13 +36,13 @@
           
           :else
           (worker-impl/worker-process mock message))
-    (catch e (k/TRACE! (. e ["stack"]) "SEND.ERROR"))))
+    (catch e (trace/TRACE! (. e ["stack"]) "SEND.ERROR"))))
 
 (defn.js mock-worker
   "creates a new mock worker
  
    (!.js
-    (internal/new-mock k/identity))
+    (internal/new-mock j/identity))
    => {\"::\" \"worker.mock\", \"listeners\" [nil]}"
   {:added "4.0"}
   [listener]
@@ -49,7 +50,7 @@
                :listeners [listener]})
   (var postMessage (fn [event]
                      (var #{listeners} worker)
-                     (k/for:array [listener listeners]
+                     (xt/for:array [listener listeners]
                        (listener event))))
   (var postRequest (fn [request]
                      (return

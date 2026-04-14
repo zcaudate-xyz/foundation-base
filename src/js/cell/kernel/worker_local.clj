@@ -6,8 +6,9 @@
   {:require [[js.core :as j]
              [js.cell.kernel.base-util :as util]
              [js.cell.kernel.worker-state :as state]
+             [xt.lang.common-spec :as xt]
              [xt.lang.common-runtime :as rt :with [defvar.js]]
-             [xt.lang.common-lib :as k]]})
+             ]})
 
 
 (defspec.xt actions-baseline
@@ -95,8 +96,8 @@
   {:added "4.0"}
   [actions worker]
   (return
-   (state/set-actions (k/obj-assign (-/actions-baseline)
-                                    actions)
+   (state/set-actions (xt/x:obj-assign (-/actions-baseline)
+                                       actions)
                       worker)))
 
 ;;

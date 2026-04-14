@@ -162,3 +162,19 @@
       (:= err (. traceback (format-exc)))))
    (return (or err "NO_ERROR")))
   => "NO_ERROR")
+
+^{:refer xt.db.cache-util/merge-bulk :added "4.0"}
+(fact "two standalone python evaluations can reuse the full fixture"
+  ^:hidden
+
+  (!.py
+   (var rows {})
+   (data/merge-bulk rows (@! +flattened-full+) nil)
+   "OK")
+  => "OK"
+
+  (!.py
+   (var rows {})
+   (data/merge-bulk rows (@! +flattened-full+) nil)
+   "OK")
+  => "OK")
