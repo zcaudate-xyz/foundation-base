@@ -7,8 +7,8 @@
 
 (l/script- :js
   {:runtime :basic
-   :require [[xt.lang.common-lib :as k]
-             [js.cell.runtime.link :as runtime-link]]})
+   :require [[xt.lang.common-spec :as xt]
+              [js.cell.runtime.link :as runtime-link]]})
 
 (fact:global
  {:setup [(l/rt:restart)
@@ -30,5 +30,5 @@
    (var worker ((. (runtime-link/make-link "mock" nil {})
                    ["create-fn"])
                 (fn [data] data)))
-   (return (k/obj-keys worker)))
+   (return (xt/x:obj-keys worker)))
   => (contains ["::" "listeners" "postMessage" "postRequest"]))

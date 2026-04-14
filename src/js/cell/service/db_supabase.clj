@@ -39,7 +39,7 @@
   {:added "4.0"}
   [prefix obj out]
   (xt/for:object [[key value] obj]
-    (var path (:? (xt/x:not-empty? prefix)
+    (var path (:? (xtd/not-empty? prefix)
                   (xt/x:cat prefix "." key)
                   key))
     (cond (and (xt/x:is-object? value)

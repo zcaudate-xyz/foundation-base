@@ -424,7 +424,7 @@
   {:added "4.0"}
   [path subpath ctx]
   (var out (-/view-val path ctx))
-  (when (or (xt/x:nil? out) (xt/x:is-empty? subpath))
+  (when (or (xt/x:nil? out) (xtd/is-empty? subpath))
     (return out))
   (return (xtd/get-in out subpath)))
 

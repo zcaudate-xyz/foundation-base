@@ -3,7 +3,7 @@
 
 (l/script :js
   {:require [[xt.lang.common-runtime :as rt :with [defvar.js]]
-             [xt.lang.common-lib :as k]
+             [xt.lang.common-spec :as xt]
              [js.cell.kernel :as kernel]
              [js.cell.kernel.base-link-local :as base-link-local]
              [js.cell.kernel.worker-local :as worker-local]
@@ -88,15 +88,15 @@
   "returns worker baseline actions with js.cell setup helpers"
   {:added "4.0"}
   []
-  (return (k/obj-assign (worker-local/actions-baseline)
-                        (-/actions-cell))))
+  (return (xt/x:obj-assign (worker-local/actions-baseline)
+                           (-/actions-cell))))
 
 (defn.js actions-init
   "initialises worker baseline actions with js.cell setup helpers"
   {:added "4.0"}
   [actions worker]
-  (return (worker-local/actions-init (k/obj-assign (-/actions-cell)
-                                                   (or actions {}))
+  (return (worker-local/actions-init (xt/x:obj-assign (-/actions-cell)
+                                                      (or actions {}))
                                      worker)))
 
 (defn.js setup-service

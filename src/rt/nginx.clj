@@ -99,10 +99,13 @@
         tmp-log  (str (fs/create-directory (str tmp-dir "/logs")))]
     [tmp-dir tmp-file conf]))
 
+(def ^:private +local-hosts+
+  #{"localhost" "127.0.0.1"})
+
 (defn start-test-server-shell
   "starts in shell"
   {:added "4.0"}
-  [{:keys [port]
+  [{:keys [host port]
     :as rt}]
   (let [[tmp-dir tmp-file] (make-temp rt)
         sh-args  ["nginx" "-p" tmp-dir "-c" tmp-file]
@@ -110,7 +113,7 @@
                    (os/sh {:args sh-args})
                    nil)
         wait-err (f/with-thrown
-                   (network/wait-for-port "localhost" port {:timeout 2000})
+                   (network/wait-for-port (or host "127.0.0.1") port {:timeout 2000})
                    nil)]
     (cond wait-err
           (do (env/p (clojure.string/join " " sh-args))
@@ -124,8 +127,8 @@
 (defn start-test-server-container
   "starts in container"
   {:added "4.0"}
-  ([{:keys [port container]
-     :as rt}]
+  ([{:keys [host port container]
+      :as rt}]
    (let [{:keys [exec image]} container
          [tmp-dir tmp-file] (make-temp rt)
          
@@ -138,13 +141,13 @@
                    (or exec  (f/error "No exec found"  {:exec exec}))
                    "-g" "daemon off;"
                    "-p" tmp-dir "-c" tmp-file]
-         sh-err   (f/with-thrown
-                    (os/sh {:args sh-args})
-                    nil)
-         wait-err (f/with-thrown
-                    (network/wait-for-port "localhost" port {:timeout 2000})
-                    (Thread/sleep 1000)
-                    nil)]
+          sh-err   (f/with-thrown
+                     (os/sh {:args sh-args})
+                     nil)
+          wait-err (f/with-thrown
+                     (network/wait-for-port (or host "127.0.0.1") port {:timeout 2000})
+                     (Thread/sleep 1000)
+                     nil)]
      (cond wait-err
            (do (env/p (clojure.string/join " " sh-args))
                #_(throw (or sh-err
@@ -228,8 +231,8 @@
 (defn- start-nginx
   ([{:keys [id state host port container no-server] :as rt}]
    (cond (or no-server
-             (not= host "localhost"))
-         rt
+             (not (contains? +local-hosts+ host)))
+          rt
          
          :else
          (let [out (start-test-server rt)]
@@ -240,8 +243,8 @@
   ([{:keys [state host port container no-server] :as rt}]
    (cond (or container
              no-server
-             (not= host "localhost"))
-         rt
+             (not (contains? +local-hosts+ host)))
+          rt
 
          :else
          (do (stop-test-server rt)

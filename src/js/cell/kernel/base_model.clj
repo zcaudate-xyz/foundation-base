@@ -162,7 +162,7 @@
   [cell model-id view-id]
   (var out {})
   (var #{models} cell)
-  (k/for:object [[dmodel-id dmodel] models]
+  (xt/for:object [[dmodel-id dmodel] models]
     (var #{deps} dmodel)
     (var view-lu (xtd/get-in deps [model-id view-id]))
     (when (xt/x:not-nil? view-lu)
@@ -204,7 +204,7 @@
        save-output
        -/async-fn
        nil
-       k/identity)
+        j/identity)
        (then (fn []
                (return (-/run-tail-call context refresh-deps-fn)))))))
 
@@ -375,7 +375,7 @@
   (var model-throttle (-/create-throttle cell model-id -/refresh-view-dependents))
   (var model-deps (-/get-model-deps model-id views))
   (var unknown-deps (-/get-unknown-deps model-id views model-deps cell))
-   (when (xt/x:not-empty? unknown-deps)
+   (when (xtd/not-empty? unknown-deps)
      (console.log (xt/x:cat "ERR - deps not found - " (xt/x:json-encode unknown-deps))
                   model-deps))
   (var model-views {})
@@ -403,7 +403,7 @@
   [cell model-id]
   (var #{models} cell)
   (var dependents (-/get-model-dependents cell models))
-  (when (xt/x:not-empty? dependents)
+  (when (xtd/not-empty? dependents)
     (xt/x:err (xt/x:cat "ERR - existing model dependents - " (xt/x:json-encode dependents))))
   (var curr (xt/x:get-key models model-id))
   (xt/x:del-key models model-id)
@@ -415,7 +415,7 @@
   [cell model-id view-id]
   (var #{models} cell)
   (var dependents (-/get-view-dependents cell model-id view-id))
-  (when (xt/x:not-empty? dependents)
+  (when (xtd/not-empty? dependents)
     (xt/x:err (xt/x:cat "ERR - existing view dependents - " (xt/x:json-encode dependents))))
   (var model (xt/x:get-key models model-id))
   (when model
@@ -435,8 +435,8 @@
     (xt/x:arr-push out [view-id (xt/x:first (th/throttle-run throttle view-id [(or ?event {})]))]))
   (return (. (j/onAll (xt/x:arr-map out xt/x:second))
              (then (fn [arr]
-                     (return (xt/x:arr-zip (xt/x:arr-map out xt/x:first)
-                                         arr)))))))
+                     (return (xtd/arr-zip (xt/x:arr-map out xt/x:first)
+                                          arr)))))))
 
 (defn.js view-update
   "updates a view"

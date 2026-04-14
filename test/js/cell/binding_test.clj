@@ -5,7 +5,8 @@
 (l/script- :js
   {:runtime :basic
    :require [[js.cell.binding :as binding]
-             [xt.lang.common-lib :as k]]})
+             [xt.lang.common-spec :as xt]
+             [xt.lang.common-data :as xtd]]})
 
 (fact:global
  {:setup    [(l/rt:restart)]
@@ -60,7 +61,7 @@
     (@! +service+)
     "orders"
     "list"
-    (k/get-in (@! +bindings+) ["orders" "list"])))
+    (xtd/get-in (@! +bindings+) ["orders" "list"])))
   => [true
       {"model_id" "orders"
        "view_id" "list"
@@ -82,11 +83,11 @@
    (binding/compile-model
     (@! +service+)
     "orders"
-    (k/get-key (@! +bindings+) "orders")
-    (fn [prepared]
-      (return {"path" [(k/get-key prepared "model_id")
-                       (k/get-key prepared "view_id")]
-               "db_kind" (k/get-in prepared ["query" "db" "kind"])}))))
+     (xt/x:get-key (@! +bindings+) "orders")
+     (fn [prepared]
+       (return {"path" [(xt/x:get-key prepared "model_id")
+                        (xt/x:get-key prepared "view_id")]
+                "db_kind" (xtd/get-in prepared ["query" "db" "kind"])}))))
   => [true
       {"list" {"path" ["orders" "list"]
                "db_kind" "cache"}}])
@@ -98,10 +99,10 @@
   (!.js
    (binding/compile-bindings
     (@! +service+)
-    (@! +bindings+)
-    (fn [prepared]
-      (return {"path" [(k/get-key prepared "model_id")
-                       (k/get-key prepared "view_id")]}))))
+     (@! +bindings+)
+     (fn [prepared]
+       (return {"path" [(xt/x:get-key prepared "model_id")
+                        (xt/x:get-key prepared "view_id")]}))))
   => [true
       {"orders"
        {"list" {"path" ["orders" "list"]}}}])

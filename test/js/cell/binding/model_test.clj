@@ -5,9 +5,10 @@
 (l/script- :js
   {:runtime :basic
    :require [[js.cell.binding :as binding]
-             [js.cell.binding.model :as binding-model]
-             [xt.db :as xdb]
-             [xt.lang.common-lib :as k]]})
+              [js.cell.binding.model :as binding-model]
+              [xt.db :as xdb]
+              [xt.lang.common-spec :as xt]
+              [xt.lang.common-data :as xtd]]})
 
 (fact:global
  {:setup    [(l/rt:restart)]
@@ -78,10 +79,10 @@
   (!.js
    (var schema (@! +schema+))
    (var views (@! +views+))
-   (var local-db (k/obj-assign
-                  (xdb/db-create {"::" "db.cache"} schema (@! +lookup+) nil)
-                  {"schema" schema
-                   "views" views}))
+    (var local-db (xtd/obj-assign
+                   (xdb/db-create {"::" "db.cache"} schema (@! +lookup+) nil)
+                   {"schema" schema
+                    "views" views}))
    (xdb/sync-event local-db
                    ["add"
                     {"Order" [{"id" "ord-1"
@@ -142,10 +143,10 @@
   (!.js
    (var schema (@! +schema+))
    (var views (@! +views+))
-   (var local-db (k/obj-assign
-                  (xdb/db-create {"::" "db.cache"} schema (@! +lookup+) nil)
-                  {"schema" schema
-                   "views" views}))
+    (var local-db (xtd/obj-assign
+                   (xdb/db-create {"::" "db.cache"} schema (@! +lookup+) nil)
+                   {"schema" schema
+                    "views" views}))
    (var service {"dbs" {"local-cache" local-db}})
    (var [ok prepared] (binding/prepare-view
                        service
@@ -156,7 +157,7 @@
                                                   "status" "open"}]}}}))
    (var pipeline (binding-model/compile-sync-pipeline prepared))
    [ok
-    ((k/get-in pipeline ["sync" "handler"]) {"id" "link-1"})])
+     ((xtd/get-in pipeline ["sync" "handler"]) {"id" "link-1"})])
   => [true
       {"result" {"db/sync" {"Order" [{"id" "ord-1"
                                       "status" "open"}]}}
@@ -170,10 +171,10 @@
   (!.js
    (var schema (@! +schema+))
    (var views (@! +views+))
-   (var local-db (k/obj-assign
-                  (xdb/db-create {"::" "db.cache"} schema (@! +lookup+) nil)
-                  {"schema" schema
-                   "views" views}))
+    (var local-db (xtd/obj-assign
+                   (xdb/db-create {"::" "db.cache"} schema (@! +lookup+) nil)
+                   {"schema" schema
+                    "views" views}))
    (var service {"dbs" {"local-cache" local-db}})
    (var [ok prepared] (binding/prepare-view
                        service
@@ -187,10 +188,10 @@
                         "resolve" {"policy" "replace"}}))
    (var spec (binding-model/compile-view-spec prepared))
    [ok
-    (k/is-function? (k/get-key spec "handler"))
-    (k/get-key spec "deps")
-    (k/get-in spec ["options" "context" "modelId"])
-    (k/get-in spec ["options" "context" "resolve"])])
+     (xt/x:is-function? (xt/x:get-key spec "handler"))
+     (xt/x:get-key spec "deps")
+     (xtd/get-in spec ["options" "context" "modelId"])
+     (xtd/get-in spec ["options" "context" "resolve"])])
   => [true
       true
       [["accounts" "current"]]

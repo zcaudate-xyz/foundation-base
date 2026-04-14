@@ -1,7 +1,8 @@
 (ns xt.lang.util-http-test
   (:require [net.http :as nhttp]
             [org.httpkit.server :as server]
-  	        [rt.nginx :as nginx]
+   	        [rt.nginx :as nginx]
+            [std.lib.component :as component]
             [std.lib.network :as network]
             [std.lib.os :as os]
             [std.lang :as l]
@@ -15,43 +16,61 @@
 
 (l/script+ [:es :lua]
   {:runtime :nginx.instance
+   :config  {:host "127.0.0.1"}
    :require [[lua.nginx.websocket :as ws]
              [lua.nginx :as n]]})
+
+(defonce +test-http+ (atom nil))
 
 (def CANARY-NGINX
   (not= "Mac OS X" (os/os)))
 
 (fact:global
   {:setup    [(l/rt:restart)
-              (!.js
-               (:= (!:G fetch) (require "node-fetch"))
-               (:= (!:G EventSource) (require "eventsource")))
-              (let [port (:http-port (l/default-notify))
-                    ok?  (boolean
-                          (network/wait-for-port "localhost" port {:timeout 2000}))]
-                (when ok?
-                  (Thread/sleep 150))
-                (when-not ok?
-                  (throw (ex-info "Notify HTTP port did not become ready." {:port port}))))
+              (component/start (l/default-notify))
+              (let [port    (network/port:check-available 0)
+                    stop-fn (server/run-server (fn [_]
+                                                 {:status 200
+                                                  :headers {"Content-Type" "text/plain"}
+                                                  :body "OK"})
+                                               {:port port})]
+                (reset! +test-http+ {:port port
+                                     :stop stop-fn}))
+              (Thread/sleep 250)
               (when CANARY-NGINX
                 (l/annex:restart-all)
-                (l/! [:es]
-                 (do:> (ws/service-register "ES_DEBUG" {} nil)
-                       (:= (. DEBUG ["es_handler"])
-                           (fn []
-                             (ws/es-test-loop "ES_DEBUG"
-                                              100
-                                              5
-                                              (fn [n]
-                                                (return (cat "TEST-" n))))))))
                 (let [port (:port (l/annex:get :es))
                       ok? (boolean
-                           (network/wait-for-port "localhost" port {:timeout 2000}))]
+                           (network/wait-for-port "127.0.0.1" port {:timeout 2000}))]
                   (when ok?
                     (Thread/sleep 150))
                   (when-not ok?
-                    (throw (ex-info "Event source port did not become ready." {:port port})))))]
+                    (throw (ex-info "Event source port did not become ready." {:port port})))
+                  (let [registered? (loop [attempt 0]
+                                      (if (try
+                                            (l/! [:es]
+                                              (do:> (ws/service-register "ES_DEBUG" {} nil)
+                                                    (:= (. DEBUG ["es_handler"])
+                                                        (fn []
+                                                          (ws/es-test-loop "ES_DEBUG"
+                                                                           100
+                                                                           5
+                                                                           (fn [n]
+                                                                             (return (cat "TEST-" n))))))))
+                                            true
+                                            (catch Exception _
+                                              false))
+                                        true
+                                        (if (< attempt 19)
+                                          (do (Thread/sleep 100)
+                                              (recur (inc attempt)))
+                                          false)))]
+                    (when-not registered?
+                      (throw (ex-info "Event source eval endpoint did not become ready." {:port port}))))))]
    :teardown [(l/rt:stop)
+              (when-let [{:keys [stop]} @+test-http+]
+                (stop)
+                (reset! +test-http+ nil))
               (when CANARY-NGINX
                 (l/annex:stop-all))]})
 
@@ -66,8 +85,8 @@
 
   #_#_#_
   (notify/wait-on :js
-    (-> (http/fetch-call (+ "http://localhost:"
-                            (@! (:http-port (l/default-notify))))
+    (-> (http/fetch-call (+ "http://127.0.0.1:"
+                            (:port @+test-http+))
                          {:as "text"})
         (. (then (repl/>notify)))))
   => "OK")
@@ -78,7 +97,7 @@
   (when CANARY-NGINX
     (notify/wait-on :js
       (var es (http/es-connect
-               (@! (str "http://localhost:" (:port (l/annex:get :es))
+               (@! (str "http://127.0.0.1:" (:port (l/annex:get :es))
                          "/eval/es"))
                {:on-message (fn [msg]
                               (repl/notify msg.data)

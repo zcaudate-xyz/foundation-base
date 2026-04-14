@@ -6,10 +6,10 @@
 
 (l/script- :js
   {:runtime :basic
-   :require [[xt.lang.common-lib :as k]
-             [xt.lang.common-repl :as repl]
-             [xt.lang.common-runtime :as rt]
-             [xt.lang.event-view :as base-view]
+   :require [[xt.lang.common-spec :as xt]
+              [xt.lang.common-repl :as repl]
+              [xt.lang.common-runtime :as rt]
+              [xt.lang.event-view :as base-view]
              [js.cell.kernel.worker-impl :as internal]
              [js.cell.kernel.worker-fn :as base-fn]
              [js.cell.kernel.base-link :as link-raw]
@@ -51,7 +51,7 @@
   ^:hidden
   
   (!.js
-   (k/obj-keys (cl/GX)))
+   (xt/x:obj-keys (cl/GX)))
   => ["p0"])
 
 ^{:refer js.cell.kernel/GX-val :added "4.0" :unchecked true}
@@ -84,10 +84,10 @@
 (fact "calls the cell in context"
   ^:hidden
   
-  (cl/fn-call-cell k/identity [])
+  (cl/fn-call-cell j/identity [])
   => map?
 
-  (cl/fn-call-cell k/identity [] "p0")
+  (cl/fn-call-cell j/identity [] "p0")
   => map?)
 
 ^{:refer js.cell.kernel/fn-call-model :added "4.0" :unchecked true
@@ -106,7 +106,7 @@
   ^:hidden
   
   (!.js
-   (k/second (cl/fn-call-view impl-common/view-ensure ["hello" "echo"] [])))
+   (xt/x:second (cl/fn-call-view impl-common/view-ensure ["hello" "echo"] [])))
   => map?)
 
 ^{:refer js.cell.kernel/fn-access-cell :added "4.0" :unchecked true
@@ -238,9 +238,9 @@
   (cl/view-val ["hello" "echo"])
   => nil
 
-  (do (j/<! (k/first (cl/view-trigger ["hello" "echo"]
-                                       "@/::EVENT"
-                                       {})))
+  (do (j/<! (xt/x:first (cl/view-trigger ["hello" "echo"]
+                                        "@/::EVENT"
+                                        {})))
       (cl/view-val ["hello" "echo"]))
   => (contains-in ["HELLO" integer?]))
 
@@ -413,7 +413,7 @@
   ^:hidden
   
   (set (!.js
-        (k/obj-keys (cl/view-get-output ["hello" "echo"]))))
+        (xt/x:obj-keys (cl/view-get-output ["hello" "echo"]))))
   =>  #{"current" "default" "elapsed" "process" "tag" "type" "updated"}
 
   (cl/view-get-output ["hello" "WRONG"])
@@ -467,8 +467,8 @@
 (fact "sets the view input"
   ^:hidden
   
-  (j/<! (k/first (cl/view-set-input ["hello" "echo"]
-                                    {:data ["WORLD"]})))
+  (j/<! (xt/x:first (cl/view-set-input ["hello" "echo"]
+                                     {:data ["WORLD"]})))
   => (contains-in
       {"::" "view.run"
        "path" ["hello" "echo"],
@@ -505,7 +505,7 @@
 (fact "updates the view"
   ^:hidden
   
-  (j/<! (k/first (cl/view-update ["hello" "echo"])))
+  (j/<! (xt/x:first (cl/view-update ["hello" "echo"])))
   => (contains-in
       {"::" "view.run"
        "path" ["hello" "echo"],
@@ -549,9 +549,9 @@
   ^:hidden
   
   (j/<!
-   (k/first (cl/view-trigger ["hello" "echo"]
-                             "@/::HELLO"
-                             {})))
+   (xt/x:first (cl/view-trigger ["hello" "echo"]
+                              "@/::HELLO"
+                              {})))
   => (contains-in
       {"path" ["hello" "echo"],
        "post" [false],

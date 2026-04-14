@@ -5,7 +5,8 @@
 (l/script- :js
   {:runtime :basic
    :require [[js.cell.service.db-remote :as db-remote]
-             [xt.lang.common-lib :as k]]})
+              [xt.lang.common-spec :as xt]
+              [xt.lang.common-data :as xtd]]})
 
 (fact:global
  {:setup    [(l/rt:restart)]
@@ -54,9 +55,9 @@
   ^:hidden
 
   (!.js
-   (var db (k/obj-assign (@! +db+)
-                         {"dispatch" (fn [request _]
-                                       (return [true request]))}))
+    (var db (xtd/obj-assign (@! +db+)
+                          {"dispatch" (fn [request _]
+                                        (return [true request]))}))
    [(db-remote/remote-capable? db)
     (db-remote/remote-capable? (@! +db+))])
   => [true false])
@@ -66,18 +67,18 @@
   ^:hidden
 
   (!.js
-   (var db (k/obj-assign (@! +db+)
-                         {"target" "server-rpc"
-                          "dispatch" (fn [request _]
-                                       (return [true request]))}))
+    (var db (xtd/obj-assign (@! +db+)
+                          {"target" "server-rpc"
+                           "dispatch" (fn [request _]
+                                        (return [true request]))}))
    (var remote (db-remote/normalize-remote
                 db
-                {"decode" (fn [response _]
-                            (return (k/get-key response "body")))}
-                {}))
-   [(k/get-key remote "target")
-    (k/is-function? (k/get-key remote "dispatch"))
-    (k/is-function? (k/get-key remote "decode"))])
+                 {"decode" (fn [response _]
+                            (return (xt/x:get-key response "body")))}
+                 {}))
+    [(xt/x:get-key remote "target")
+     (xt/x:is-function? (xt/x:get-key remote "dispatch"))
+     (xt/x:is-function? (xt/x:get-key remote "decode"))])
   => ["server-rpc" true true])
 
 ^{:refer js.cell.service.db-remote/build-request :added "4.1"}
@@ -85,9 +86,9 @@
   ^:hidden
 
   (!.js
-   (var db (k/obj-assign (@! +db+)
-                         {"dispatch" (fn [request _]
-                                       (return [true request]))}))
+    (var db (xtd/obj-assign (@! +db+)
+                          {"dispatch" (fn [request _]
+                                        (return [true request]))}))
    (var request (db-remote/build-request
                  db
                  {"target" "server-rpc"
@@ -95,11 +96,11 @@
                  ["Order" {"account" {"id" "acct-1"}} ["status"]]
                  {"view-id" "orders/list"
                   "model-id" "orders"}))
-   [(k/get-key request "target")
-    (k/get-key request "op")
-    (k/get-key request "body")
-    (k/get-key request "view_id")
-    (k/get-key request "model_id")])
+    [(xt/x:get-key request "target")
+     (xt/x:get-key request "op")
+     (xt/x:get-key request "body")
+     (xt/x:get-key request "view_id")
+     (xt/x:get-key request "model_id")])
   => ["server-rpc"
       "query"
       ["Order" {"account" {"id" "acct-1"}} ["status"]]
@@ -115,7 +116,7 @@
     (@! +db+)
     {"dispatch" (fn [request _]
                   (return [true {"status" "ok"
-                                 "body" (k/get-key request "body")}]))
+                                 "body" (xt/x:get-key request "body")}]))
      "body" {"hello" "world"}}
     {}))
   => [true {"status" "ok"
@@ -128,8 +129,8 @@
   (!.js
    [(db-remote/decode-response
      (@! +db+)
-     {"decode" (fn [response _]
-                 (return (k/get-key response "body")))}
+      {"decode" (fn [response _]
+                  (return (xt/x:get-key response "body")))}
      {"status" "ok"
       "body" {"value" 1}}
      {})
@@ -173,15 +174,15 @@
   ^:hidden
 
   (!.js
-   (var db (k/obj-assign (@! +db+)
-                         {"dispatch" (fn [request _]
-                                       (return [true {"status" "ok"
-                                                      "body" (k/get-key request "body")}]))}))
+    (var db (xtd/obj-assign (@! +db+)
+                          {"dispatch" (fn [request _]
+                                        (return [true {"status" "ok"
+                                                       "body" (xt/x:get-key request "body")}]))}))
    (var [ok result] (db-remote/run-remote-query
                      db
                      {"target" "server-rpc"
-                      "decode" (fn [response _]
-                                 (return (k/get-key response "body")))}
+                       "decode" (fn [response _]
+                                  (return (xt/x:get-key response "body")))}
                      {:table "Order"
                       :select-method "by_account"
                       :return-method "default"}
@@ -189,9 +190,9 @@
                       "view-id" "orders/list"
                       "model-id" "orders"}))
    [ok
-    (k/first result)
-    (k/get-in result [1 "account" "id"])
-    (k/last result)])
+     (xt/x:first result)
+     (xtd/get-in result [1 "account" "id"])
+     (xtd/last result)])
   => [true
       "Order"
       "acct-1"
@@ -203,15 +204,15 @@
   ^:hidden
 
   (!.js
-   (var db (k/obj-assign (@! +db+)
-                         {"dispatch" (fn [request _]
-                                       (return [true {"status" "ok"
-                                                      "body" (k/get-key request "body")}]))}))
+    (var db (xtd/obj-assign (@! +db+)
+                          {"dispatch" (fn [request _]
+                                        (return [true {"status" "ok"
+                                                       "body" (xt/x:get-key request "body")}]))}))
    (db-remote/run-remote-sync
     db
     {"target" "server-rpc"
-     "decode" (fn [response _]
-                (return (k/get-key response "body")))}
+      "decode" (fn [response _]
+                 (return (xt/x:get-key response "body")))}
     {:sync {"Order" [{"id" "ord-1"
                       "status" "open"}]}}
     {"model-id" "orders"}))

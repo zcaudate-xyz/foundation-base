@@ -5,8 +5,9 @@
 (l/script- :js
   {:runtime :basic
    :require [[js.cell.service.db-query :as db-query]
-             [xt.db :as xdb]
-             [xt.lang.common-lib :as k]]})
+              [xt.db :as xdb]
+              [xt.lang.common-spec :as xt]
+              [xt.lang.common-data :as xtd]]})
 
 (fact:global
  {:setup    [(l/rt:restart)]
@@ -137,9 +138,9 @@
                     :return-method "default"}
                    {:args ["acct-1"]}))
    [ok
-    (k/first tree)
-    (k/get-in tree [1 "account" "id"])
-    (k/last tree)])
+     (xt/x:first tree)
+     (xtd/get-in tree [1 "account" "id"])
+     (xtd/last tree)])
   => [true
       "Order"
       "acct-1"
@@ -155,7 +156,7 @@
   (!.js
    (var desc (@! +db+))
    (var local-db (xdb/db-create {"::" "db.cache"}
-                                (k/get-key desc "schema")
+                                 (xt/x:get-key desc "schema")
                                 (@! +lookup+)
                                 nil))
    (xdb/sync-event local-db
@@ -201,7 +202,7 @@
   (!.js
    (var desc (@! +db+))
    (var local-db (xdb/db-create {"::" "db.cache"}
-                                (k/get-key desc "schema")
+                                 (xt/x:get-key desc "schema")
                                 (@! +lookup+)
                                 nil))
    (xdb/sync-event local-db
