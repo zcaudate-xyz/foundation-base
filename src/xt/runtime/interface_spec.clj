@@ -42,8 +42,13 @@
 
 (l/script :xtalk
   {:require [[xt.lang.common-spec :as xt]
-             [xt.lang.common-iter :as it]]})
-  
+             [xt.lang.common-iter :as it]
+             [xt.lang.common-data :as xtd]]})
+
+;;
+;; Primitive runtime hooks
+;;
+
 (def.xt IAssoc  ["assoc"])
 
 (def.xt IAssocMutable  ["assoc_mutable"])
@@ -95,6 +100,136 @@
                       "val"])
 
 (def.xt IShow    ["show"])
+
+(defn.xt iface-combine
+  "combines interface vectors into a stable, deduped protocol surface"
+  {:added "4.1"}
+  [interfaces]
+  (var seen {})
+  (var out [])
+  (xt/for:array [iface interfaces]
+    (xt/for:array [key iface]
+      (when (xt/x:nil? (xt/x:get-key seen key))
+        (xt/x:set-key seen key true)
+        (xt/x:arr-push out key))))
+  (return out))
+
+(defn.xt proto-group
+  "creates a grouped protocol entry from interface vectors and an implementation map"
+  {:added "4.1"}
+  [interfaces spec-map]
+  (return [(-/iface-combine interfaces) spec-map]))
+
+;;
+;; Immutable Lisp-facing groupings
+;;
+
+(def.xt ICounted
+  (-/iface-combine [-/ISize]))
+
+(def.xt INamed
+  (-/iface-combine [-/INamespaced]))
+
+(def.xt IMapEntry
+  (-/iface-combine [-/IPair]))
+
+(def.xt IValue
+  (-/iface-combine [-/IEq
+                    -/IHash
+                    -/IShow]))
+
+(def.xt ILookupable
+  (-/iface-combine [-/ILookup
+                    -/IFind]))
+
+(def.xt IAssociative
+  (-/iface-combine [-/IAssoc
+                    -/IDissoc
+                    -/ILookup
+                    -/IFind]))
+
+(def.xt IAssociativeMutable
+  (-/iface-combine [-/IAssocMutable
+                    -/IDissocMutable]))
+
+(def.xt ICollection
+  (-/iface-combine [-/IColl
+                    -/IEmpty
+                    -/ISize]))
+
+(def.xt ISequential
+  (-/iface-combine [-/IColl
+                    -/IEmpty
+                    -/ISize
+                    -/INth]))
+
+(def.xt IStack
+  (-/iface-combine [-/IPush
+                    -/IPop]))
+
+(def.xt IStackMutable
+  (-/iface-combine [-/IPushMutable
+                    -/IPopMutable]))
+
+(def.xt IPersistent
+  (-/iface-combine [-/IEdit]))
+
+(def.xt ISeqable
+  ["seq"])
+
+(def.xt ISeq
+  ["first"
+   "rest"
+   "next"])
+
+(def.xt IConj
+  ["conj"])
+
+(def.xt ICons
+  ["cons"])
+
+(def.xt IPeek
+  ["peek"])
+
+(def.xt IReduce
+  ["reduce"])
+
+(def.xt IMeta
+  ["meta"
+   "with_meta"])
+
+(def.xt IInvokable
+  ["invoke"])
+
+(def.xt ILispScalar
+  (-/iface-combine [-/IValue
+                    -/IMeta]))
+
+(def.xt ILispNamed
+  (-/iface-combine [-/ILispScalar
+                    -/INamed]))
+
+(def.xt ILispSequential
+  (-/iface-combine [-/ILispScalar
+                    -/ISequential
+                    -/IStack
+                    -/ISeqable
+                    -/ISeq
+                    -/IConj
+                    -/ICons
+                    -/IPeek]))
+
+(def.xt ILispAssociative
+  (-/iface-combine [-/ILispScalar
+                    -/ICollection
+                    -/IAssociative
+                    -/ISeqable
+                    -/ISeq]))
+
+(def.xt ILispPersistent
+  (-/iface-combine [-/IPersistent
+                    -/IAssociativeMutable
+                    -/IStackMutable]))
 
 (defn.xt proto-spec
   "creates a prototype spec map from interface entries"

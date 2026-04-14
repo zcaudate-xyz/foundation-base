@@ -9,7 +9,7 @@
              [xt.runtime.type-vector-node :as node]
              [xt.runtime.interface-common :as ic]
              [xt.runtime.interface-collection :as coll]
-             [xt.lang.common-lib :as k]
+             [xt.lang.common-data :as k]
              [xt.lang.common-iter :as it]
              [xt.lang.common-repl :as repl]]})
 
@@ -19,7 +19,7 @@
              [xt.runtime.type-vector-node :as node]
              [xt.runtime.interface-common :as ic]
              [xt.runtime.interface-collection :as coll]
-             [xt.lang.common-lib :as k]
+             [xt.lang.common-data :as k]
              [xt.lang.common-iter :as it]
              [xt.lang.common-repl :as repl]]})
 
