@@ -1,6 +1,6 @@
 (ns xt.lang.common-sort-by
-  (:require [std.lang :as l :refer [defspec.xt]]
-            [xt.lang.common-data :as common-data]))
+  (:require [std.lang :as l :refer [defspec.xt]])
+  (:refer-clojure :exclude [sort-by]))
 
 (l/script :xtalk
   {:require [[xt.lang.common-spec :as xt]]})
@@ -46,5 +46,6 @@
                          (return (xt/x:str-lt (xt/x:to-string v0)
                                               (xt/x:to-string v1)))))))
          (return false)))
-  (return
-   (xt/x:arr-sort arr key-fn comp-fn)))
+  (var out (xt/x:arr-clone arr))
+  (xt/x:arr-sort out key-fn comp-fn)
+  (return out))

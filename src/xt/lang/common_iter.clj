@@ -135,7 +135,7 @@
   (var arrlen (xt/x:len arr))
   (var start  (:? (< 1 arrlen) (xt/x:first arr) 0))
   (var finish (:? (< 1 arrlen) (xt/x:second arr) (xt/x:first arr)))
-  (var step   (:? (< 2 arrlen) (xt/x:get-idx arr 2) 1))
+  (var step   (:? (< 2 arrlen) (xt/x:get-idx arr (xt/x:offset 2)) 1))
   (var i start)
   (cond (and (> step 0)
              (< start finish))

@@ -24,6 +24,12 @@
    (apply list 'for:iter [e it] body)))
 
 (defmacro.xt ^{:style/indent 1}
+  return-run
+  ([[resolve reject] & body]
+   (list 'x:return-run
+         (clojure.core/apply list 'fn [resolve reject] body))))
+
+(defmacro.xt ^{:style/indent 1}
   for:return
   ([[[ok err] statement] {:keys [success error final]}]
    (list 'for:return [[ok err] statement]
@@ -809,7 +815,7 @@
 
 (defspec.xt x:return-run nil)
 
-(defmacro.xt ^{:standalone true :is-template true}
+(defmacro.xt ^{:standalone true :is-template false}
   x:return-run
   ([runner] (list (quote x:return-run) runner)))
 

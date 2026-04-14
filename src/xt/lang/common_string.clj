@@ -1,5 +1,6 @@
 (ns xt.lang.common-string
-  (:require [std.lang :as l :refer [defspec.xt]]))
+  (:require [std.lang :as l :refer [defspec.xt]])
+  (:refer-clojure :exclude [replace]))
 
 (l/script :xtalk
   {:require [[xt.lang.common-spec :as xt]]})
