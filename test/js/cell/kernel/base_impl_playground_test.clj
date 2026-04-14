@@ -10,12 +10,15 @@
              [xt.lang.common-repl :as repl]
              [xt.lang.common-runtime :as rt :with [defvar.js]]
              [js.core :as j]
-             [js.cell.kernel.base-link :as base-link]
-             [js.cell.kernel.base-link-local :as base-link-local]
-             [js.cell.kernel.base-link-eval :as base-link-eval]
-             [js.cell.kernel.base-model :as base-model]
-             [js.cell.kernel.base-impl :as base-impl]]
-   :import [["tiny-worker" :as Worker]]})
+              [js.cell.kernel.base-link :as base-link]
+              [js.cell.kernel.base-link-local :as base-link-local]
+              [js.cell.kernel.base-link-eval :as base-link-eval]
+              [js.cell.kernel.base-model :as base-model]
+              [js.cell.kernel.base-impl :as base-impl]]})
+
+(def$.js Worker
+  (require (+ (. process (cwd))
+              "/node_modules/tiny-worker/lib/index.js")))
 
 (fact:global
  {:setup     [(l/rt:restart :js)

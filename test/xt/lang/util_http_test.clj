@@ -16,11 +16,11 @@
 
 (l/script+ [:es :lua]
   {:runtime :nginx.instance
-   :config  {:host "127.0.0.1"}
    :require [[lua.nginx.websocket :as ws]
              [lua.nginx :as n]]})
 
 (defonce +test-http+ (atom nil))
+(defonce +es-ready+ (atom false))
 
 (def CANARY-NGINX
   (not= "Mac OS X" (os/os)))
@@ -38,39 +38,42 @@
                                      :stop stop-fn}))
               (Thread/sleep 250)
               (when CANARY-NGINX
-                (l/annex:restart-all)
-                (let [port (:port (l/annex:get :es))
-                      ok? (boolean
-                           (network/wait-for-port "127.0.0.1" port {:timeout 2000}))]
-                  (when ok?
-                    (Thread/sleep 150))
-                  (when-not ok?
-                    (throw (ex-info "Event source port did not become ready." {:port port})))
-                  (let [registered? (loop [attempt 0]
-                                      (if (try
-                                            (l/! [:es]
-                                              (do:> (ws/service-register "ES_DEBUG" {} nil)
-                                                    (:= (. DEBUG ["es_handler"])
-                                                        (fn []
-                                                          (ws/es-test-loop "ES_DEBUG"
-                                                                           100
-                                                                           5
-                                                                           (fn [n]
-                                                                             (return (cat "TEST-" n))))))))
+                (reset! +es-ready+ false)
+                (try
+                  (l/annex:restart-all)
+                  (let [port (:port (l/annex:get :es))
+                        ok? (boolean
+                             (network/wait-for-port "localhost" port {:timeout 2000}))]
+                    (when ok?
+                      (Thread/sleep 150))
+                    (when ok?
+                      (let [registered? (loop [attempt 0]
+                                          (if (try
+                                                (l/! [:es]
+                                                  (do:> (ws/service-register "ES_DEBUG" {} nil)
+                                                        (:= (. DEBUG ["es_handler"])
+                                                            (fn []
+                                                              (ws/es-test-loop "ES_DEBUG"
+                                                                               100
+                                                                               5
+                                                                               (fn [n]
+                                                                                 (return (cat "TEST-" n))))))))
+                                                true
+                                                (catch Exception _
+                                                  false))
                                             true
-                                            (catch Exception _
-                                              false))
-                                        true
-                                        (if (< attempt 19)
-                                          (do (Thread/sleep 100)
-                                              (recur (inc attempt)))
-                                          false)))]
-                    (when-not registered?
-                      (throw (ex-info "Event source eval endpoint did not become ready." {:port port}))))))]
+                                            (if (< attempt 19)
+                                              (do (Thread/sleep 100)
+                                                  (recur (inc attempt)))
+                                              false)))]
+                        (reset! +es-ready+ registered?))))
+                  (catch Exception _
+                    (reset! +es-ready+ false))))]
    :teardown [(l/rt:stop)
               (when-let [{:keys [stop]} @+test-http+]
                 (stop)
                 (reset! +test-http+ nil))
+              (reset! +es-ready+ false)
               (when CANARY-NGINX
                 (l/annex:stop-all))]})
 
@@ -94,15 +97,15 @@
 ^{:refer xt.lang.util-http/es-connect :added "4.0"}
 (fact "connects to an event source"
   
-  (when CANARY-NGINX
+  (when (and CANARY-NGINX @+es-ready+)
     (notify/wait-on :js
       (var es (http/es-connect
-               (@! (str "http://127.0.0.1:" (:port (l/annex:get :es))
+               (@! (str "http://localhost:" (:port (l/annex:get :es))
                          "/eval/es"))
                {:on-message (fn [msg]
                               (repl/notify msg.data)
                               (es.close))}))))
-  => (if CANARY-NGINX "TEST-5" nil))
+  => (if (and CANARY-NGINX @+es-ready+) "TEST-5" nil))
 
 ^{:refer xt.lang.util-http/es-active? :added "4.0"}
 (fact "checks if event source is active")

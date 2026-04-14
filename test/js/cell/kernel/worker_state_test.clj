@@ -7,13 +7,19 @@
 
 (l/script- :js
   {:runtime :basic
-   :require [[xt.lang.common-lib :as k]
-             [xt.lang.common-repl :as repl]
-             [xt.lang.common-runtime :as rt]
-             [xt.lang.util-throttle :as th]
-             [js.core :as j]
-             [js.cell.kernel.worker-state :as worker-state]]
-   :import [["tiny-worker" :as Worker]]})
+   :require [[xt.lang.common-spec :as xt]
+              [xt.lang.common-data :as xtd]
+              [xt.lang.common-repl :as repl]
+              [xt.lang.common-runtime :as rt]
+              [xt.lang.util-throttle :as th]
+              [js.core :as j]
+              [js.cell.kernel.worker-state :as worker-state]]})
+
+(defn.js make-worker
+  [f]
+  (var Worker (require (xt/x:cat (. process (cwd))
+                                 "/node_modules/tiny-worker/lib/index.js")))
+  (return (new Worker f)))
 
 (fact:global
  {:setup     [(l/rt:restart)
@@ -23,13 +29,14 @@
 (defmacro eval-worker
   [body & [timeout no-post]]
   (template/$ (notify/wait-on [:js ~(or timeout 1000)]
-         (var worker (new Worker
-                          (fn []
-                            (eval (@! (browser/play-script
-                                       '[~(if no-post
-                                            body
-                                            (list 'js.core/settle 'postMessage body))]
-                                       true))))))
+         (var worker
+              (make-worker
+               (fn []
+                 (eval (@! (browser/play-script
+                            '[~(if no-post
+                                 body
+                                 (list 'js.core/settle 'postMessage body))]
+                            true)))))
          (. worker (addEventListener
                     "message"
                     (fn [e]
@@ -76,13 +83,13 @@
   (!.js
    (var worker {})
    (worker-state/set-actions {"@test/action" {}} worker)
-   (k/get-key worker "actions"))
+   (xt/x:get-key worker "actions"))
   => {"@test/action" {}}
   
   ;; Test resetting global actions
   (!.js
    (worker-state/set-actions {"@global/action" {}} nil)
-   (k/has-key? (worker-state/WORKER_ACTIONS) "@global/action"))
+   (xt/x:has-key? (worker-state/WORKER_ACTIONS) "@global/action"))
   => true)
 
 ^{:refer js.cell.kernel.worker-state/fn-self :added "4.0"}
@@ -91,7 +98,7 @@
   
   (set 
    (eval-worker ((js.cell.kernel.worker-state/fn-self
-                  xt.lang.common-lib/obj-keys))))
+                  xt.lang.common-data/obj-keys))))
   => #{"onerror" "close" "postMessage" "addEventListener" "onmessage"})
 
 ^{:refer js.cell.kernel.worker-state/fn-trigger :added "4.0"}
@@ -273,8 +280,8 @@
 (fact  "throws an error after delay"
   ^:hidden
   
-  (j/<! (. (worker-state/fn-error-async)
-           (catch k/identity)))
+   (j/<! (. (worker-state/fn-error-async)
+            (catch j/identity)))
   => (contains ["error"])
   
   (eval-worker (js.cell.kernel.worker-state/fn-error)
