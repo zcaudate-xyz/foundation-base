@@ -2,7 +2,8 @@
   (:require [std.lang :as l]))
 
 (l/script :xtalk
-  {:require [[xt.lang.common-spec :as xt]]
+  {:require [[xt.lang.common-spec :as xt]
+             [xt.lang.common-data :as xtd]]
    :export  [MODULE]})
 
 (defn.xt service?
@@ -35,8 +36,8 @@
   "associates a db into the registry"
   {:added "4.0"}
   [service db-id db]
-  (var out (xt/x:obj-clone (or service {})))
-  (var dbs (xt/x:obj-clone (-/get-dbs out)))
+  (var out (xtd/obj-clone (or service {})))
+  (var dbs (xtd/obj-clone (-/get-dbs out)))
   (xt/x:set-key dbs db-id db)
   (xt/x:set-key out "dbs" dbs)
   (return out))

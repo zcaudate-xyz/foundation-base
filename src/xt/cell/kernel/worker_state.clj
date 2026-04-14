@@ -6,7 +6,8 @@
   {:require [[xt.cell.kernel.base-util :as util]
              [xt.lang.common-task :as task]
              [xt.lang.common-runtime :as rt :with [defvar.xt]]
-             [xt.lang.common-spec :as xt]]})
+             [xt.lang.common-spec :as xt]
+             [xt.lang.common-data :as xtd]]})
 
 
 (defspec.xt WORKER_STATE
@@ -224,7 +225,7 @@
   "gets the actions list"
   {:added "4.0"}
   []
-  (return (xt/x:obj-keys (-/WORKER_ACTIONS))))
+  (return (xtd/obj-keys (-/WORKER_ACTIONS))))
 
 (defn.xt ^{:cell/action "@worker/get-action-entry"
            :cell/static true}

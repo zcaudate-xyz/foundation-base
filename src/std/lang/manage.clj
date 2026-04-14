@@ -451,6 +451,22 @@
           :params {:title "COMPILE RUNTIME BULK"}
           :main {:fn #'scaffold/compile-runtime-bulk}}])
 
+(invoke/definvoke ^{:arglists '([] [params])}
+  xtlang-runtime-suite-sources
+  "lists xt.lang runtime test templates eligible for a target runtime bulk suite"
+  {:added "4.1"}
+  [:task {:template :lang.manage.action
+          :params {:title "XT.LANG RUNTIME SUITE SOURCES"}
+          :main {:fn #'scaffold/xtlang-runtime-suite-sources}}])
+
+(invoke/definvoke ^{:arglists '([] [params])}
+  compile-xtlang-runtime-bulk-suites
+  "exports and compiles xt.lang runtime suites into batched payloads for a target runtime"
+  {:added "4.1"}
+  [:task {:template :lang.manage.action
+          :params {:title "COMPILE XT.LANG RUNTIME BULKS"}
+          :main {:fn #'scaffold/compile-xtlang-runtime-bulk-suites}}])
+
 ;;
 ;; Task Registry and Main Entry Point
 ;;
@@ -482,7 +498,9 @@
    :separate-runtime-tests separate-runtime-tests
    :scaffold-runtime-template scaffold-runtime-template
    :export-runtime-suite    export-runtime-suite
-   :compile-runtime-bulk    compile-runtime-bulk})
+   :compile-runtime-bulk    compile-runtime-bulk
+   :xtlang-runtime-suite-sources xtlang-runtime-suite-sources
+   :compile-xtlang-runtime-bulk-suites compile-xtlang-runtime-bulk-suites})
 
 (def +direct-tasks+
   #{:inventory
@@ -505,7 +523,9 @@
     :separate-runtime-tests
     :scaffold-runtime-template
     :export-runtime-suite
-    :compile-runtime-bulk})
+    :compile-runtime-bulk
+    :xtlang-runtime-suite-sources
+    :compile-xtlang-runtime-bulk-suites})
 
 (defn- parse-main-arg
   [x]

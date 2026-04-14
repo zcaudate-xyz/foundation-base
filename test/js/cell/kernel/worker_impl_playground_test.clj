@@ -4,6 +4,13 @@
             [xt.lang.common-notify :as notify])
   (:use code.test))
 
+(def ^:private +tiny-worker-path+
+  (str (System/getProperty "user.dir") "/node_modules/tiny-worker/lib/index.js"))
+
+(defmacro require-tiny-worker
+  []
+  `(require ~+tiny-worker-path+))
+
 (l/script- :js
   {:runtime :basic
    :require [[xt.lang.common-lib :as k]
@@ -18,7 +25,7 @@
 
 (defn.js make-worker
   [f]
-  (var Worker (require (+ (. process (cwd))
+  (var Worker (require (+ (. process ["env"] ["PWD"])
                           "/node_modules/tiny-worker/lib/index.js")))
   (return (new Worker f)))
 
@@ -41,7 +48,7 @@
                           (fn [e]
                             (. self (postMessage e.data)))
                           false)]
-                       true)))))
+                       true))))))
     (. worker (addEventListener
                "message"
                (fn [e]
@@ -60,7 +67,7 @@
                           (fn [e]
                             (. self (postMessage ((eval e.data) "hello"))))
                           false)]
-                       true)))))
+                       true))))))
     (. worker (addEventListener
                "message"
                (fn [e]
@@ -99,7 +106,7 @@
                           (fn [e]
                             (postMessage e.data))
                           false)]
-                       true)))))
+                       true))))))
     (. worker (addEventListener
           "message"
           (fn [e]
@@ -128,7 +135,7 @@
                           (fn [e]
                             (postMessage e.data))
                           false)]
-                       true)))))
+                       true))))))
     (. worker (addEventListener
           "message"
           (fn [e]
@@ -153,7 +160,7 @@
                           (fn [e]
                             (postMessage e.data))
                           false)]
-                       true)))))
+                       true))))))
     (. worker (addEventListener
           "message"
           (fn [e]
@@ -176,7 +183,7 @@
                           (fn [e]
                             (postMessage e.data))
                           false)]
-                       true)))))
+                       true))))))
     (. worker (addEventListener
                "message"
                (fn [e]
@@ -202,7 +209,7 @@
                          (fn [e]
                            (postMessage e.data))
                          false)]
-                      true)))))
+                      true))))))
    (worker-impl/worker-init worker))
   => true)
 
@@ -220,7 +227,7 @@
                           (fn [e]
                             (postMessage e.data))
                           false)]
-                       true)))))
+                       true))))))
     (. worker (addEventListener
                "message"
                (fn [e]

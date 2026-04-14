@@ -4,6 +4,7 @@
 
 (l/script :xtalk
   {:require [[xt.lang.common-spec :as xt]
+             [xt.lang.common-data :as xtd]
              [xt.lang.common-task :as task]
              [xt.lang.event-common :as event-common]
              [xt.cell.kernel.base-link :as link]
@@ -88,8 +89,8 @@
   (var init-state
        (task/task-from-async
         (fn [resolve reject]
-          (xt/x:obj-assign init {:resolve resolve
-                              :reject reject}))))
+          (xtd/obj-assign init {:resolve resolve
+                                :reject reject}))))
   (xt/x:set-key init "current" init-state)
   (return init))
 
@@ -122,7 +123,7 @@
   {:added "0.1"}
   [cell]
     (var #{models} cell)
-    (return (xt/x:obj-keys models)))
+    (return (xtd/obj-keys models)))
 
 (defn.xt call
   "conducts a call, either for a link or cell"
@@ -161,7 +162,7 @@
   [cell model-id]
   (var model (-/model-ensure cell model-id))
   (var #{views} model)
-  (return (xt/x:obj-keys views)))
+  (return (xtd/obj-keys views)))
 
 (defn.xt view-ensure
   "gets the view"
@@ -231,7 +232,7 @@
   (xt/for:object [[view-key callbacks] listeners]
     (xtd/set-in out
               (xt/x:json-decode view-key)
-              (xt/x:obj-keys callbacks)))
+              (xtd/obj-keys callbacks)))
   (return out))
 
 (defn.xt trigger-listeners
@@ -241,4 +242,4 @@
   (var view-key (xt/x:json-encode path))
   (return
    (event-common/trigger-keyed-listeners
-    cell view-key (xt/x:obj-assign {:path path} event))))
+    cell view-key (xtd/obj-assign {:path path} event))))

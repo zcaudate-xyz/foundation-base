@@ -5,7 +5,8 @@
   {:require [[xt.cell.service.db-view :as db-view]
              [xt.db :as xdb]
              [xt.db.base-flatten :as flatten]
-             [xt.lang.common-spec :as xt]]
+             [xt.lang.common-spec :as xt]
+             [xt.lang.common-data :as xtd]]
    :export  [MODULE]})
 
 (defn.xt sync-capable?
@@ -77,10 +78,10 @@
   (var db-sync (xt/x:get-key sync-request "db/sync"))
   (var db-remove (xt/x:get-key sync-request "db/remove"))
   (when (and (xt/x:is-object? db-sync)
-             (xt/x:not-empty? db-sync))
+             (xtd/not-empty? db-sync))
     (xdb/sync-event local-db ["add" db-sync]))
   (when (and (xt/x:is-object? db-remove)
-             (xt/x:not-empty? db-remove))
+             (xtd/not-empty? db-remove))
     (xt/for:object [[table ids] db-remove]
       (xdb/db-delete-sync local-db
                           (db-view/get-schema db)
@@ -97,7 +98,7 @@
   (var sync-changes (:? (xt/x:not-nil? db-sync)
                         (-> (flatten/flatten-bulk (db-view/get-schema db)
                                                   db-sync)
-                            (xtd/obj-map k/obj-keys))
+                            (xtd/obj-map xtd/obj-keys))
                         nil))
   (var body {"db/sync" sync-changes
              "db/remove" db-remove})

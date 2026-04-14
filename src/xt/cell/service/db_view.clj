@@ -3,6 +3,7 @@
 
 (l/script :xtalk
   {:require [[xt.lang.common-spec :as xt]
+             [xt.lang.common-data :as xtd]
              [xt.db.base-scope :as base-scope]
              [xt.db.base-view :as base-view]]
    :export  [MODULE]})
@@ -94,7 +95,7 @@
                             schema table
                             (xt/x:get-path return-entry ["view" "query"]))
                            {}))
-  (return (xt/x:obj-assign select-triggers return-triggers)))
+  (return (xtd/obj-assign select-triggers return-triggers)))
 
 (defn.xt view-overview
   "gets the view overview"
@@ -106,7 +107,7 @@
   "gets the view tables"
   {:added "4.0"}
   [db]
-  (return (xt/x:obj-keys (-/get-views db))))
+  (return (xtd/obj-keys (-/get-views db))))
 
 (defn.xt view-methods
   "gets the view methods"

@@ -52,11 +52,11 @@
       :value/template #'std.lang.base.grammar-xtalk/tf-first
       :value/standalone true}
 
-  (select-keys (get (grammar/build-xtalk) :x-identity)
+  (select-keys (get (grammar/build-xtalk) :x-obj-clone)
                [:emit :raw :value/standalone])
   => {:emit :hard-link
-      :raw 'xt.lang.common-base/identity
-      :value/standalone 'xt.lang.common-base/identity})
+      :raw 'xt.lang.common-data/obj-clone
+      :value/standalone 'xt.lang.common-data/obj-clone})
 
 ^{:refer std.lang.base.grammar-xtalk-system/xtalk-grammar-supported-profiles :added "4.1"}
 (fact "grammars expose the xtalk profiles they fully support"

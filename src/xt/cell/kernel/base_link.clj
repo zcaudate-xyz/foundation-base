@@ -4,6 +4,8 @@
 
 (l/script :xtalk
   {:require [[xt.lang.common-spec :as xt]
+             [xt.lang.common-data :as xtd]
+             [xt.lang.common-trace :as trace]
              [xt.lang.common-task :as task]
              [xt.cell.kernel.base-util :as util]]})
 
@@ -88,11 +90,11 @@
                             (return (resolve out)))))
             :else
             (do (xt/x:del-key active id)
-                (return (reject (xt/x:obj-assign {:action (. input ["action"])
-                                               :input (. input ["body"])
-                                               :start-time time
-                                               :end-time (xt/x:now-ms)}
-                                              data)))))
+                (return (reject (xtd/obj-assign {:action (. input ["action"])
+                                                 :input (. input ["body"])
+                                                 :start-time time
+                                                 :end-time (xt/x:now-ms)}
+                                                data)))))
       (catch err (return (reject {:op op
                                   :id id
                                   :action (. input ["action"])
@@ -114,8 +116,8 @@
     (when (util/check-event pred signal data)
       (try (handler data signal)
            (xt/x:arr-push out p-id)
-           (catch err (xt/x:LOG! {:stack   (. err ["stack"])
-                               :message (. err ["message"])})))))
+           (catch err (trace/LOG! {:stack   (. err ["stack"])
+                                   :message (. err ["message"])})))))
   (return out))
 
 (defn.xt link-listener
@@ -195,7 +197,7 @@
   "lists all callbacks on the link"
   {:added "4.0"}
   [link]
-  (return (xt/x:obj-keys (. link ["callbacks"]))))
+  (return (xtd/obj-keys (. link ["callbacks"]))))
 
 (defn.xt remove-callback
   "removes a callback on the link"

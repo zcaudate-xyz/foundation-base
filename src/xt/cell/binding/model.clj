@@ -7,7 +7,8 @@
              [xt.cell.service.db-remote :as db-remote]
              [xt.cell.service.db-supabase :as db-supabase]
              [xt.cell.service.db-sync :as db-sync]
-             [xt.lang.common-spec :as xt]]})
+             [xt.lang.common-spec :as xt]
+             [xt.lang.common-data :as xtd]]})
 
 (defn.xt unwrap-result
   "unwraps a service-layer [ok result] tuple"

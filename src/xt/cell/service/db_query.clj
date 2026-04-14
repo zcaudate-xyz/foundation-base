@@ -4,6 +4,7 @@
 (l/script :xtalk
   {:require [[xt.cell.service.db-view :as db-view]
              [xt.lang.common-spec :as xt]
+             [xt.lang.common-data :as xtd]
              [xt.db :as xdb]
              [xt.db.base-check :as check]
              [xt.db.cache-view :as cache-view]]
@@ -37,8 +38,8 @@
                                   (xt/x:has-key? res "__deleted__"))
                          (xt/x:del-key res "__deleted__"))
                        (return res))))
-  (return (xt/x:obj-assign (xt/x:obj-clone view-entry)
-                        {:view tview})))
+  (return (xtd/obj-assign (xtd/obj-clone view-entry)
+                          {:view tview})))
 
 (defn.xt query-check
   "checks query arguments against the entry input"

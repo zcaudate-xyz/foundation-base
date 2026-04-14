@@ -1,8 +1,26 @@
 (ns js.cell.kernel-test
   (:use code.test)
   (:require [js.cell.playground :as playground]
-            [std.lang :as l]
-            [xt.lang.common-notify :as notify]))
+             [std.lang :as l]
+             [xt.lang.common-notify :as notify]))
+
+(def ^:private +tiny-worker-path+
+  (str (System/getProperty "user.dir") "/node_modules/tiny-worker/lib/index.js"))
+
+(defmacro playground-worker-url
+  []
+  `{:create-fn
+    (fn [listener]
+      (var Worker (require ~+tiny-worker-path+))
+      (var worker (new Worker
+                       (fn []
+                         (eval (@! (playground/play-worker true))))))
+      (. worker (addEventListener
+                 "message"
+                 (fn [e]
+                   (listener e.data))
+                 false))
+      (return worker))})
 
 (l/script- :js
   {:runtime :basic
@@ -12,15 +30,34 @@
               [xt.lang.event-view :as base-view]
               [js.cell.kernel.worker-impl :as internal]
               [js.cell.kernel.base-link :as link-raw]
-             [js.cell.kernel.base-link-local :as link-fn]
+              [js.cell.kernel.base-link-local :as link-fn]
               [js.cell.kernel.base-impl :as impl-common]
               [js.cell.kernel.base-model :as impl-model]
               [js.cell.kernel :as cl]
               [js.core :as j]]})
 
-(def$.js Worker
-  (require (+ (. process (cwd))
-              "/node_modules/tiny-worker/lib/index.js")))
+(defn.js make-playground-worker-url
+  []
+  (return
+   {:create-fn
+    (fn [listener]
+      (var Worker (require (+ (. process ["env"] ["PWD"])
+                              "/node_modules/tiny-worker/lib/index.js")))
+      (var worker (new Worker
+                       (fn []
+                         (eval (@! (playground/play-worker true))))))
+      (. worker (addEventListener
+                 "message"
+                 (fn [e]
+                   (listener e.data))
+                 false))
+      (return worker))}))
+
+(defn.js make-playground-cell
+  []
+  (return
+   (cl/make-cell
+    (-/make-playground-worker-url))))
 
 (fact:global
  {:setup     [(l/rt:restart)
@@ -32,10 +69,7 @@
 
 ^{:refer js.cell.kernel/GD :added "4.0" :unchecked true
   :setup [(!.js
-           (cl/GD-reset
-            (cl/make-cell
-             (fn []
-               (eval (@! (playground/play-worker true)))))))]}
+            (cl/GD-reset (-/make-playground-cell)))]}
 (fact "gets the current cell"
   ^:hidden
   
@@ -44,11 +78,9 @@
 
 ^{:refer js.cell.kernel/GX :added "4.0" :unchecked true
   :setup [(!.js
-           (cl/GX-set
-            "p0"
-            (cl/make-cell
-             (fn []
-               (eval (@! (playground/play-worker true)))))))]}
+            (cl/GX-set
+             "p0"
+             (-/make-playground-cell)))]}
 (fact "gets the current annex"
   ^:hidden
   
@@ -67,12 +99,8 @@
 (fact "set the current annex key"
   ^:hidden
   
-  (!.js
-   (cl/GX-set
-    "p0"
-    (cl/make-cell
-     (fn []
-       (eval (@! (playground/play-worker true)))))))
+   (!.js
+    (cl/GX-set "p0" (-/make-playground-cell)))
   => map?)
 
 ^{:refer js.cell.kernel/get-cell :added "4.0" :unchecked true}
@@ -113,10 +141,7 @@
 
 ^{:refer js.cell.kernel/fn-access-cell :added "4.0" :unchecked true
   :setup [(!.js
-           (cl/GD-reset
-            (cl/make-cell
-             (fn []
-               (eval (@! (playground/play-worker true)))))))
+            (cl/GD-reset (-/make-playground-cell))
           (j/<!
            (. (cl/add-model "hello"
                             {:echo  {:handler link-fn/echo
@@ -140,10 +165,7 @@
 
 ^{:refer js.cell.kernel/fn-access-view :added "4.0" :unchecked true
   :setup [(!.js
-           (cl/GD-reset
-            (cl/make-cell
-             (fn []
-               (eval (@! (playground/play-worker true)))))))
+            (cl/GD-reset (-/make-playground-cell))
           (j/<!
            (. (cl/add-model "hello"
                             {:echo  {:handler link-fn/echo
@@ -222,10 +244,7 @@
 
 ^{:refer js.cell.kernel/cell-trigger :added "4.0" :unchecked true
   :setup [(!.js
-           (cl/GD-reset
-            (cl/make-cell
-             (fn []
-               (eval (@! (playground/play-worker true)))))))
+            (cl/GD-reset (-/make-playground-cell))
           (j/<!
            (. (cl/GD)
               ["init"]
@@ -269,10 +288,7 @@
 
 ^{:refer js.cell.kernel/add-model-attach :added "4.0" :unchecked true
   :setup [(!.js
-           (cl/GD-reset
-            (cl/make-cell
-             (fn []
-               (eval (@! (playground/play-worker true)))))))]}
+            (cl/GD-reset (-/make-playground-cell)))]}
 (fact "adds a model"
   ^:hidden
   
@@ -297,10 +313,7 @@
 
 ^{:refer js.cell.kernel/add-model :added "4.0" :unchecked true
   :setup [(!.js
-           (cl/GD-reset
-            (cl/make-cell
-             (fn []
-               (eval (@! (playground/play-worker true)))))))]}
+            (cl/GD-reset (-/make-playground-cell)))]}
 (fact "attaches a model"
   ^:hidden
   
@@ -321,10 +334,7 @@
 
 ^{:refer js.cell.kernel/model-update :added "4.0" :unchecked true
   :setup [(!.js
-           (cl/GD-reset
-            (cl/make-cell
-             (fn []
-               (eval (@! (playground/play-worker true)))))))
+            (cl/GD-reset (-/make-playground-cell))
           (j/<!
            (. (cl/GD)
               ["init"]

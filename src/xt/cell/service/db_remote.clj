@@ -4,7 +4,8 @@
 (l/script :xtalk
   {:require [[xt.cell.service.db-query :as db-query]
              [xt.cell.service.db-sync :as db-sync]
-             [xt.lang.common-spec :as xt]]
+             [xt.lang.common-spec :as xt]
+             [xt.lang.common-data :as xtd]]
    :export  [MODULE]})
 
 (defn.xt remote-capable?
@@ -86,7 +87,7 @@
   (when (not ok)
     (return [ok query-plan]))
   (var request (-/build-request db
-                                (xt/x:obj-assign remote-spec {"op" "query"})
+                                (xtd/obj-assign remote-spec {"op" "query"})
                                 query-plan
                                 view-context))
   (var [d-ok response] (-/dispatch-request db request view-context))
@@ -104,7 +105,7 @@
   (when (not ok)
     (return [ok request-body]))
   (var request (-/build-request db
-                                (xt/x:obj-assign remote-spec {"op" "sync"})
+                                (xtd/obj-assign remote-spec {"op" "sync"})
                                 request-body
                                 view-context))
   (var [d-ok response] (-/dispatch-request db request view-context))

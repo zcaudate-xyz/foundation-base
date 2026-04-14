@@ -3,7 +3,10 @@
             [std.lang.typed.xtalk :refer [defspec.xt]]))
 
 (l/script :xtalk
-  {:require [[xt.lang.common-spec :as xt]]})
+  {:require [[xt.lang.common-spec :as xt]
+             [xt.lang.common-data :as xtd]
+             [xt.lang.common-string :as str]
+             [xt.lang.common-trace :as trace]]})
 
 
 (defspec.xt EV_INIT :xt/str)
@@ -58,7 +61,7 @@
   {:added "4.0"}
   [prefix n]
   (return (xt/x:cat (or prefix "")
-                 (xt/x:str-rand n))))
+                    (str/str-rand n))))
 
 (defn.xt check-event
   "checks that trigger matches signal and event"
@@ -83,8 +86,8 @@
     (:= check (or (== true t)
                   (and (xt/x:is-function? t) (t event ctx))
                   false))
-    (catch err (xt/x:LOG! {:stack   (. err ["stack"])
-                        :message (. err ["message"])})))
+    (catch err (trace/LOG! {:stack   (. err ["stack"])
+                            :message (. err ["message"])})))
   (return check))
 
 (defn.xt arg-encode
@@ -120,11 +123,11 @@
   "constructs a protocol frame"
   {:added "4.0"}
   [op id body meta extra]
-  (return (xt/x:obj-assign {:op op
-                         :id id
-                         :body body
-                         :meta (or meta {})}
-                        (or extra {}))))
+  (return (xtd/obj-assign {:op op
+                           :id id
+                           :body body
+                           :meta (or meta {})}
+                          (or extra {}))))
 
 (defn.xt req-call
   "constructs a call request"

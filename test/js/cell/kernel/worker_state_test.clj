@@ -5,6 +5,13 @@
             [std.lib.template :as template]
             [xt.lang.common-notify :as notify]))
 
+(def ^:private +tiny-worker-path+
+  (str (System/getProperty "user.dir") "/node_modules/tiny-worker/lib/index.js"))
+
+(defmacro require-tiny-worker
+  []
+  `(require ~+tiny-worker-path+))
+
 (l/script- :js
   {:runtime :basic
    :require [[xt.lang.common-spec :as xt]
@@ -15,12 +22,6 @@
               [js.core :as j]
               [js.cell.kernel.worker-state :as worker-state]]})
 
-(defn.js make-worker
-  [f]
-  (var Worker (require (xt/x:cat (. process (cwd))
-                                 "/node_modules/tiny-worker/lib/index.js")))
-  (return (new Worker f)))
-
 (fact:global
  {:setup     [(l/rt:restart)
               (l/rt:scaffold-imports :js)]
@@ -29,14 +30,15 @@
 (defmacro eval-worker
   [body & [timeout no-post]]
   (template/$ (notify/wait-on [:js ~(or timeout 1000)]
+         (var Worker (require ~+tiny-worker-path+))
          (var worker
-              (make-worker
-               (fn []
-                 (eval (@! (browser/play-script
-                            '[~(if no-post
-                                 body
-                                 (list 'js.core/settle 'postMessage body))]
-                            true)))))
+              (new Worker
+                   (fn []
+                     (eval (@! (browser/play-script
+                                '[~(if no-post
+                                     body
+                                     (list 'js.core/settle 'postMessage body))]
+                                true))))))
          (. worker (addEventListener
                     "message"
                     (fn [e]

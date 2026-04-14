@@ -15,7 +15,7 @@
   'std.lang.base.grammar-xtalk-ops-test)
 
 (def ^:dynamic *runtime-test-langs*
-  [:js :lua :python :r :php])
+  [:js :lua :python :r :php :dart])
 
 (def ^:dynamic *canonical-runtime-lang*
   :lua)
@@ -67,6 +67,18 @@
 
 (def +runtime-executable-langs+
   #{:js :lua :python :r :rb :php})
+
+(def ^:dynamic *xtlang-runtime-test-root*
+  "test/xt/lang")
+
+(def ^:dynamic *twostep-runtime-blockers*
+  '#{notify/wait-on
+     notify/wait-on-call
+     l/annex:restart-all
+     l/annex:get
+     l/annex:stop-all
+     server/run-server
+     ws/service-register})
 
 (declare runtime-expr-lang
          expand-top-level-form
@@ -593,8 +605,78 @@
               (let [[_ lang] form]
                 (some (fn [[k {:keys [script]}]]
                         (when (= lang script) k))
-                      +runtime-lang-config+))))
-          expanded)))
+                       +runtime-lang-config+))))
+           expanded)))
+
+(defn runtime-script-langs
+  [forms]
+  (let [expanded (mapcat expand-top-level-form forms)]
+    (->> expanded
+         (keep (fn [form]
+                 (when (script-form? form)
+                   (let [[_ script-val] form]
+                     (some (fn [[k {:keys [script]}]]
+                             (when (= script-val script)
+                               k))
+                            +runtime-lang-config+)))))
+         distinct
+         vec)))
+
+(defn single-runtime-template-lang
+  [forms]
+  (let [langs (runtime-script-langs forms)]
+    (when (= 1 (count langs))
+      (first langs))))
+
+(defn runtime-suffixed-test-ns?
+  [test-ns]
+  (let [suffixes (->> (keys +runtime-lang-config+)
+                      (map runtime-lang-suffix)
+                      distinct
+                      sort)
+        pattern  (re-pattern
+                  (str "-(" (str/join "|" (map #(java.util.regex.Pattern/quote %) suffixes))
+                       ")-test$"))]
+    (boolean (re-find pattern (str test-ns)))))
+
+(defn form-contains-symbol?
+  [form targets]
+  (let [targets (set targets)]
+    (cond (symbol? form)
+          (contains? targets form)
+
+          (seq? form)
+          (boolean (some #(form-contains-symbol? % targets) form))
+
+          (vector? form)
+          (boolean (some #(form-contains-symbol? % targets) form))
+
+          (set? form)
+          (boolean (some #(form-contains-symbol? % targets) form))
+
+          (map? form)
+          (boolean
+           (or (some #(form-contains-symbol? % targets) (keys form))
+               (some #(form-contains-symbol? % targets) (vals form))))
+
+          :else
+          false)))
+
+(defn runtime-template-supported?
+  [forms lang]
+  (let [lang (normalize-runtime-lang lang)]
+    (cond (nil? (single-runtime-template-lang forms))
+          false
+
+          (runtime-suffixed-test-ns?
+           (some #(when (and (seq? %) (= 'ns (first %))) (second %)) forms))
+          false
+
+          (= :twostep (runtime-type lang))
+          (not (some #(form-contains-symbol? % *twostep-runtime-blockers*) forms))
+
+          :else
+          true)))
 
 (defn replace-runtime-symbol
   [form from-dispatch to-dispatch]
@@ -887,3 +969,83 @@
        :content content}))
   ([_ params _ _]
    (scaffold-runtime-template nil params)))
+
+(defn xtlang-runtime-suite-sources
+  "Lists canonical xt.lang runtime test templates that can be exported and
+   compiled for the target runtime."
+  ([params]
+   (xtlang-runtime-suite-sources nil params))
+  ([_ {:keys [root input-root lang]
+       :or {input-root *xtlang-runtime-test-root*
+            lang :dart}}]
+   (let [proj (merge (project/project)
+                     (select-keys {:root root} [:root]))
+         root (:root proj)
+         scan-root (str (fs/path root input-root))
+         paths (if (fs/exists? scan-root)
+                 (->> (keys (fs/list scan-root {:recursive true
+                                               :include [".clj$"]}))
+                       (map str)
+                       (filter #(str/ends-with? % "_test.clj"))
+                       sort)
+                 [])]
+     (->> paths
+          (keep (fn [path]
+                  (let [forms (read-top-level-forms path)
+                        source-ns (some #(when (and (seq? %) (= 'ns (first %)))
+                                           (second %))
+                                        forms)
+                        from-lang (single-runtime-template-lang forms)]
+                    (when (and source-ns
+                               from-lang
+                               (not (runtime-suffixed-test-ns? source-ns))
+                               (runtime-template-supported? forms lang))
+                      {:path path
+                       :ns source-ns
+                       :from-lang from-lang
+                       :lang (normalize-runtime-lang lang)
+                       :runtime-type (runtime-type lang)
+                       :check-mode (runtime-check-mode lang)}))))
+          vec)))
+  ([_ params _ _]
+   (xtlang-runtime-suite-sources nil params)))
+
+(defn compile-xtlang-runtime-bulk-suites
+  "Exports canonical runtime suites from eligible xt.lang tests and compiles
+   batched twostep bulk payloads for the target runtime."
+  ([params]
+   (compile-xtlang-runtime-bulk-suites nil params))
+  ([_ {:keys [root input-root lang write]
+       :or {input-root *xtlang-runtime-test-root*
+            lang :dart
+            write false}
+       :as params}]
+   (let [sources (xtlang-runtime-suite-sources {:root root
+                                                :input-root input-root
+                                                :lang lang})
+         outputs (mapv (fn [{:keys [path from-lang] :as source}]
+                         (let [{suite-path :output-path
+                                suite :suite}
+                                (export-runtime-suite nil {:input-path path
+                                                           :lang from-lang
+                                                           :write write})
+                               bulk (compile-runtime-bulk-suite suite lang)
+                               bulk-path (runtime-bulk-path suite-path lang)
+                               bulk-content (pr-str bulk)
+                               _ (when write
+                                   (fs/create-directory (fs/parent bulk-path))
+                                   (spit bulk-path bulk-content))]
+                            (assoc source
+                                   :suite-path suite-path
+                                   :bulk-path bulk-path
+                                   :suite-count (count (:cases suite))
+                                   :bulk-count (count (:verify bulk))
+                                   :runtime-type (:runtime-type bulk)
+                                   :check-mode (:check-mode bulk))))
+                       sources)]
+      {:lang (normalize-runtime-lang lang)
+       :input-root input-root
+       :count (count outputs)
+       :outputs outputs}))
+  ([_ params _ _]
+   (compile-xtlang-runtime-bulk-suites nil params)))

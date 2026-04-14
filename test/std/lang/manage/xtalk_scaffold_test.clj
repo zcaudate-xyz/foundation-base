@@ -58,8 +58,38 @@
         (!.js (k/identity 1))
         => 1)
        (fact \"wrapped runtime form\"
-         (set (!.js (k/example)))
-         => #{1})]"))
+        (set (!.js (k/example)))
+        => #{1})]"))
+
+(def canonical-runtime-template-forms
+  (read-string
+   "[(ns xt.lang.common-lib-test
+       (:require [std.lang :as l]
+                 [xt.lang.common-lib :as k])
+       (:use code.test))
+      (l/script- :lua {:runtime :basic})
+      (fact:global {:setup [(l/rt:restart)]})
+      ^{:refer xt.lang.common-lib/identity :added \"4.1\"}
+      (fact \"identity function\"
+        ^:hidden
+        (!.lua (k/identity 1))
+        => 1)
+      (fact \"wrapped runtime form\"
+        (set (!.lua (k/example)))
+        => #{1})]"))
+
+(def blocked-runtime-template-forms
+  (read-string
+   "[(ns xt.lang.common-notify-test
+       (:require [std.lang :as l]
+                 [xt.lang.common-notify :as notify]
+                 [xt.lang.common-repl :as repl])
+       (:use code.test))
+      (l/script- :js {:runtime :basic})
+      (fact \"notify helper\"
+        (notify/wait-on :js
+          (repl/notify 1))
+        => 1)]"))
 
 (defn with-temp-runtime-suite-file
   [forms f]
@@ -68,6 +98,18 @@
     (try
       (spit path (render-top-level-forms forms))
       (f path)
+      (finally
+        (fs/delete root)))))
+
+(defn with-temp-xtlang-root
+  [entries f]
+  (let [root (str (fs/create-tmpdir "xtalk-scaffold-root"))]
+    (try
+      (doseq [[rel-path forms] entries]
+        (let [path (str (fs/path root rel-path))]
+          (fs/create-directory (fs/parent path))
+          (spit path (render-top-level-forms forms))))
+      (f root)
       (finally
         (fs/delete root)))))
 
@@ -234,6 +276,36 @@
   (infer-runtime-lang '((l/script- :js {:runtime :basic})))
   => :js)
 
+^{:refer std.lang.manage.xtalk-scaffold/runtime-script-langs :added "4.1"}
+(fact "collects distinct script languages from template forms"
+  (runtime-script-langs runtime-template-forms)
+  => [:js]
+
+  (set (runtime-script-langs runtime-test-forms))
+  => #{:js :lua})
+
+^{:refer std.lang.manage.xtalk-scaffold/single-runtime-template-lang :added "4.1"}
+(fact "detects single-runtime templates"
+  (single-runtime-template-lang runtime-template-forms)
+  => :js
+
+  (single-runtime-template-lang runtime-test-forms)
+  => nil)
+
+^{:refer std.lang.manage.xtalk-scaffold/runtime-suffixed-test-ns? :added "4.1"}
+(fact "detects runtime suffixed test namespaces"
+  [(runtime-suffixed-test-ns? 'xt.lang.common-lib-js-test)
+   (runtime-suffixed-test-ns? 'xt.lang.common-lib-test)
+   (runtime-suffixed-test-ns? 'xt.lang.common-lib-dt-test)]
+  => [true false true])
+
+^{:refer std.lang.manage.xtalk-scaffold/runtime-template-supported? :added "4.1"}
+(fact "blocks twostep suite generation for runtime-coupled templates"
+  [(runtime-template-supported? canonical-runtime-template-forms :dart)
+   (runtime-template-supported? blocked-runtime-template-forms :dart)
+   (runtime-template-supported? runtime-test-forms :dart)]
+  => [true false false])
+
 ^{:refer std.lang.manage.xtalk-scaffold/replace-runtime-symbol :added "4.1"}
 (fact "replaces runtime dispatch symbol"
   (replace-runtime-symbol '(!.js (k/a)) '!.js '!.lua)
@@ -284,17 +356,17 @@
         shared-out (render-top-level-forms shared)
         js-out (render-top-level-forms (get by-lang :js))
         lua-out (render-top-level-forms (get by-lang :lua))]
-    [(str/includes? shared-out "(ns xt.lang.common-lib-test")
+    [(str/includes? shared-out "xt.lang.common-lib-test")
      (str/includes? shared-out "(fact \"placeholder\")")
      (not (str/includes? shared-out "wrapped runtime form"))
-     (str/includes? js-out "(ns xt.lang.common-lib-js-test")
+     (str/includes? js-out "xt.lang.common-lib-js-test")
      (str/includes? js-out "(l/script- :js")
      (= true (:hidden (meta (nth js-form 2))))
      (str/includes? js-out "!.js")
      (not (str/includes? js-out "!.lua"))
      (str/includes? js-out "wrapped runtime form")
      (str/includes? js-out "vector runtime form")
-     (str/includes? lua-out "(ns xt.lang.common-lib-lua-test")
+     (str/includes? lua-out "xt.lang.common-lib-lua-test")
      (str/includes? lua-out "(l/script- :lua")
      (= true (:hidden (meta (nth lua-form 2))))
      (str/includes? lua-out "!.lua")
@@ -312,6 +384,47 @@
 (fact "scaffold-runtime-template is callable"
   (fn? scaffold-runtime-template)
   => true)
+
+^{:refer std.lang.manage.xtalk-scaffold/xtlang-runtime-suite-sources :added "4.1"}
+(fact "finds eligible xt.lang templates for twostep bulk compilation"
+  (with-temp-xtlang-root
+    {"test/xt/lang/common_lib_test.clj" canonical-runtime-template-forms
+     "test/xt/lang/common_notify_test.clj" blocked-runtime-template-forms
+     "test/xt/lang/common_lib_js_test.clj" runtime-template-forms}
+    (fn [root]
+      (let [sources (xtlang-runtime-suite-sources {:root root
+                                                   :input-root "test/xt/lang"
+                                                   :lang :dart})
+            source  (first sources)]
+        [(= 1 (count sources))
+         (= 'xt.lang.common-lib-test (:ns source))
+         (= :lua (:from-lang source))
+         (= :dart (:lang source))
+         (= :twostep (:runtime-type source))
+         (= :batched (:check-mode source))])))
+  => [true true true true true true])
+
+^{:refer std.lang.manage.xtalk-scaffold/compile-xtlang-runtime-bulk-suites :added "4.1"}
+(fact "exports and compiles eligible xt.lang templates into dart bulk payloads"
+  (with-temp-xtlang-root
+    {"test/xt/lang/common_lib_test.clj" canonical-runtime-template-forms
+     "test/xt/lang/common_notify_test.clj" blocked-runtime-template-forms}
+    (fn [root]
+      (let [{:keys [lang count outputs]}
+             (compile-xtlang-runtime-bulk-suites nil {:root root
+                                                      :input-root "test/xt/lang"
+                                                      :lang :dart})
+             output (first outputs)]
+        [(= :dart lang)
+         (= 1 count)
+         (= :lua (:from-lang output))
+         (= 2 (:suite-count output))
+         (= 2 (:bulk-count output))
+         (= :twostep (:runtime-type output))
+         (= :batched (:check-mode output))
+         (str/ends-with? (:suite-path output) "_suite.edn")
+         (str/ends-with? (:bulk-path output) "-dt-bulk.edn")])))
+  => [true true true true true true true true true])
 
 
 ^{:refer std.lang.manage.xtalk-scaffold/runtime-type :added "4.1"}

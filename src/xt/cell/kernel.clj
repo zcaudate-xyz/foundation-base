@@ -4,6 +4,7 @@
 (l/script :xtalk
   {:require [[xt.lang.common-runtime :as rt :with [defvar.xt]]
              [xt.lang.common-spec :as xt]
+             [xt.lang.common-data :as xtd]
              [xt.lang.common-task :as task]
              [xt.lang.event-view :as event-view]
              [xt.cell.kernel.base-link :as raw]
@@ -213,8 +214,8 @@
   (var model (impl-common/model-get cell model-id))
   (when model
     (var #{views} model)
-    (return (xt/x:arr-some (xt/x:obj-vals views)
-                        event-view/is-errored)))
+    (return (xt/x:arr-some (xtd/obj-vals views)
+                         event-view/is-errored)))
   (return false))
 
 (defn.xt model-is-pending
@@ -225,8 +226,8 @@
   (var model (impl-common/model-get cell model-id))
   (when model
     (var #{views} model)
-    (return (xt/x:arr-some (xt/x:obj-vals views)
-                        event-view/is-pending)))
+    (return (xt/x:arr-some (xtd/obj-vals views)
+                         event-view/is-pending)))
   (return false))
 
 (defn.xt add-model-attach
@@ -516,7 +517,7 @@
            key
            pred
            (fn [event signal]
-             (var out (xt/x:obj-assign {} event))
+             (var out (xtd/obj-assign {} event))
              (xt/x:del-key out "signal")
              (xt/x:set-key out "topic" signal)
              (return

@@ -3,7 +3,8 @@
 
 (l/script :xtalk
   {:require [[xt.cell.service.db-query :as db-query]
-             [xt.lang.common-spec :as xt]]
+             [xt.lang.common-spec :as xt]
+             [xt.lang.common-data :as xtd]]
    :export  [MODULE]})
 
 (defn.xt supabase-capable?
@@ -38,7 +39,7 @@
   {:added "4.0"}
   [prefix obj out]
   (xt/for:object [[key value] obj]
-    (var path (:? (xt/x:not-empty? prefix)
+    (var path (:? (xtd/not-empty? prefix)
                   (xt/x:cat prefix "." key)
                   key))
     (cond (and (xt/x:is-object? value)

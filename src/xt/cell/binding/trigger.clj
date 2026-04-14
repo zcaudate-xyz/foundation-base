@@ -3,7 +3,8 @@
 
 (l/script :xtalk
   {:require [[xt.cell.service.db-stream :as db-stream]
-             [xt.lang.common-spec :as xt]]
+             [xt.lang.common-spec :as xt]
+             [xt.lang.common-data :as xtd]]
    :export  [MODULE]})
 
 (defn.xt normalize-deps
@@ -34,8 +35,8 @@
     (return nil))
   (var stream-spec (:? (and (xt/x:nil? (xt/x:get-key stream "target"))
                             (xt/x:is-object? (xt/x:get-key stream "db")))
-                        (xt/x:obj-assign (xt/x:obj-clone stream)
-                                      {"target" (xtd/get-in stream ["db" "target"])})
+                        (xtd/obj-assign (xtd/obj-clone stream)
+                                        {"target" (xtd/get-in stream ["db" "target"])})
                         stream))
   (var view-context {"model-id" (xt/x:get-key prepared "model_id")
                      "view-id" (xt/x:get-key prepared "view_id")})

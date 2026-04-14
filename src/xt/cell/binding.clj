@@ -3,7 +3,8 @@
 
 (l/script :xtalk
   {:require [[xt.cell.service :as service]
-             [xt.lang.common-spec :as xt]]
+             [xt.lang.common-spec :as xt]
+             [xt.lang.common-data :as xtd]]
    :export  [MODULE]})
 
 (defn.xt resolve-section
@@ -22,8 +23,8 @@
                            :db db-ref}}]))
   (var resolved-db (service/resolve-db service-registry section view-context))
   (return [true (:? resolved-db
-                    (xt/x:obj-assign (xt/x:obj-clone section)
-                                  {"db" resolved-db})
+                    (xtd/obj-assign (xtd/obj-clone section)
+                                    {"db" resolved-db})
                     section)]))
 
 (defn.xt prepare-view

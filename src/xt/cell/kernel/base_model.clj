@@ -4,6 +4,8 @@
 
 (l/script :xtalk
   {:require [[xt.lang.common-spec :as xt]
+             [xt.lang.common-data :as xtd]
+             [xt.lang.common-trace :as trace]
              [xt.lang.common-task :as task]
              [xt.lang.util-throttle :as th]
              [xt.lang.event-view :as event-view]
@@ -178,11 +180,11 @@
   [cell model-id view-id opts]
   (var path [model-id view-id])
   (var [model view] (impl/view-ensure cell model-id view-id))
-  (var [context disabled] (event-view/pipeline-prep view
-                                                   (xt/x:obj-assign {:path  path
-                                                                  :cell  cell
-                                                                  :model  model}
-                                                                 opts)))
+   (var [context disabled] (event-view/pipeline-prep view
+                                                     (xtd/obj-assign {:path  path
+                                                                      :cell  cell
+                                                                      :model model}
+                                                                     opts)))
   (return [path context disabled]))
 
 (defn.xt get-view-dependents
@@ -195,7 +197,7 @@
     (var #{deps} dmodel)
     (var view-lu (xtd/get-in deps [model-id view-id]))
     (when (xt/x:not-nil? view-lu)
-      (xt/x:set-key out dmodel-id (xt/x:obj-keys view-lu))))
+      (xt/x:set-key out dmodel-id (xtd/obj-keys view-lu))))
   (return out))
 
 (defn.xt get-model-dependents
@@ -361,10 +363,10 @@
        (task/task-catch
         (-/refresh-view cell model-id view-id event refresh-deps-fn)
         (fn [err]
-          (xt/x:LOG! {:stack   (. err ["stack"])
-                   :message (. err ["message"])})
+          (trace/LOG! {:stack   (. err ["stack"])
+                       :message (. err ["message"])})
           (return err)))))
-    k/now-ms)))
+    xt/x:now-ms)))
 
 (defn.xt create-view
   "creates a view"
@@ -390,9 +392,9 @@
              defaultArgs
               defaultOutput
               defaultProcess
-              (xt/x:obj-assign {:trigger trigger
-                             :init defaultInit}
-                            options)))
+               (xtd/obj-assign {:trigger trigger
+                                :init defaultInit}
+                               options)))
   (event-view/init-view view)
   (event-view/add-listener
    view
@@ -409,9 +411,9 @@
   (var model-throttle (-/create-throttle cell model-id -/refresh-view-dependents))
   (var model-deps (-/get-model-deps model-id views))
   (var unknown-deps (-/get-unknown-deps model-id views model-deps cell))
-  (when (xt/x:not-empty? unknown-deps)
-    (xt/x:LOG! {:message (xt/x:cat "ERR - deps not found - " (xt/x:json-encode unknown-deps))
-             :deps model-deps}))
+  (when (xtd/not-empty? unknown-deps)
+    (trace/LOG! {:message (xt/x:cat "ERR - deps not found - " (xt/x:json-encode unknown-deps))
+                 :deps model-deps}))
   (var model-views {})
   (xt/for:object [[view-id view] views]
     (xt/x:set-key model-views view-id (-/create-view cell model-id view-id view)))
@@ -437,7 +439,7 @@
   [cell model-id]
   (var #{models} cell)
   (var dependents (-/get-model-dependents cell models))
-  (when (xt/x:not-empty? dependents)
+  (when (xtd/not-empty? dependents)
     (xt/x:err (xt/x:cat "ERR - existing model dependents - " (xt/x:json-encode dependents))))
   (var curr (xt/x:get-key models model-id))
   (xt/x:del-key models model-id)
@@ -449,7 +451,7 @@
   [cell model-id view-id]
   (var #{models} cell)
   (var dependents (-/get-view-dependents cell model-id view-id))
-  (when (xt/x:not-empty? dependents)
+  (when (xtd/not-empty? dependents)
     (xt/x:err (xt/x:cat "ERR - existing view dependents - " (xt/x:json-encode dependents))))
   (var model (xt/x:get-key models model-id))
   (when model
@@ -469,10 +471,10 @@
     (xt/x:arr-push out [view-id (xt/x:first (th/throttle-run throttle view-id [(or ?event {})]))]))
   (return
    (task/task-then
-    (-/task-all (xt/x:arr-map out k/second))
+     (-/task-all (xt/x:arr-map out xt/x:second))
     (fn [arr]
-      (return (xt/x:arr-zip (xt/x:arr-map out k/first)
-                         arr))))))
+       (return (xtd/arr-zip (xt/x:arr-map out xt/x:first)
+                            arr))))))
 
 (defn.xt view-update
   "updates a view"
