@@ -4,10 +4,11 @@
 
 (l/script :js
   {:require [[js.core :as j]
-             [js.react :as r]
-             [js.react.helper-portal :as helper-portal]
-             [xt.lang.common-lib :as k]]
-   :import [["react-native" :as [* ReactNative]]
+              [js.react :as r]
+              [js.react.helper-portal :as helper-portal]
+              [xt.lang.common-lib :as k]
+              [xt.lang.common-spec :as xt]]
+    :import [["react-native" :as [* ReactNative]]
             ["react-native-video" :as RNVideo]
             ["react-native-gesture-handler" :as [* RNGestureHandler]]
             ["@react-navigation/bottom-tabs" :as [* RNNavTabs]]
@@ -477,9 +478,9 @@
   (var s (or (JSON.stringify e nil 2)
              ""))
   (var arr (k/split s "\n"))
-  (return (+ (-> (k/arr-slice arr 1 (- (k/len arr) 1))
-                 (k/arr-map (fn:> [l] (k/substring l 2)))
-                 (k/arr-join "\n" )))))
+  (return (+ (-> (k/arr-slice arr 1 (- (xt/x:len arr) 1))
+                  (k/arr-map (fn:> [l] (k/substring l 2)))
+                  (k/arr-join "\n" )))))
 
 (defn.js format-entry
   "formats an entry"
@@ -768,7 +769,7 @@
                  :onPress (fn []
                             (setInternal i)
                             (if setIndex (setIndex i))
-                            (if onChange (onChange (k/get-key items i))))}
+                            (if onChange (onChange (. items [i]))))}
                 [:% -/Text {:key item
                             :style [(j/assign {:color  "#888"
                                                :padding 2}
@@ -1033,7 +1034,7 @@
          :setValues setValues
          :format (fn:> [s] (+ \" \" s \" \"))}] 
  [:% n/Caption
-        {:text (k/json-encode #{values})
+        {:text (xt/x:json-encode #{values})
          :style {:marginTop 10}}])))"
   {:added "4.0"}
   ([#{[data
@@ -1070,7 +1071,7 @@
   (var Pane (:? (== type "list")
                 -/ListPane
                 -/TabsPane))
-  (var isFinal (== 1 (k/len levels)))
+  (var isFinal (== 1 (xt/x:len levels)))
   (when isFinal
     (return [:% Pane #{[tree
                         root
@@ -1172,7 +1173,7 @@
     (j/map columns
            (fn [[label key f]]
              (:= f (or f k/identity))
-             (var val (k/get-key entry key))
+             (var val (xt/x:get-key entry key))
              (var output (f val entry))
              (return
               [:% -/View

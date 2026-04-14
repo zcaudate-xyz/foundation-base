@@ -11,8 +11,13 @@
   {:import [["react" :as React]
             ["react-dom/client" :as ReactDOM]
             ["react-nil" :as ReactNIL]]
-   :require [[js.core :as j]
-             [xt.lang.common-lib :as k]]})
+    :require [[js.core :as j]
+              [xt.lang.common-lib :as k]
+              [xt.lang.common-spec :as xt]
+              [xt.lang.common-data :as xtd]
+              [xt.lang.common-string :as str]
+              [xt.lang.common-math :as math]
+              [xt.lang.common-trace :as trace]]})
 
 #_(defrun.js __init__
   (:# "eslint-disable react-hooks/rules-of-hooks"))
@@ -173,9 +178,9 @@
 (defn.js getDOMRoot
   [domNode]
   (var internalKey
-       (k/arr-find (k/obj-keys domNode)
-                   (fn [key]
-                     (return (. key (startsWith "__reactContainer$"))))))
+       (xtd/arr-find (xtd/obj-keys domNode)
+                    (fn [key]
+                      (return (. key (startsWith "__reactContainer$"))))))
   
   (if (> internalKey 0)
     (return (. domNode [internalKey])))
@@ -185,14 +190,14 @@
   [id Component]
   (var rootElement (document.getElementById id))
   (var root (-/getDOMRoot rootElement))
-  (when  (k/nil? root)
+  (when  (xt/x:nil? root)
     (:= root (-/createDOMRoot rootElement)))
   (. root (render [:% Component]))
   (return true))
 
 (defn.js useStateFor
   [controls key]
-  (var setterKey (+ "set" (k/capitalize key)))
+  (var setterKey (+ "set" (str/capitalize key)))
   (return
    [(. controls [key])
     (. controls [setterKey])]))
@@ -240,7 +245,7 @@
   "makes the lazy component"
   {:added "4.0"}
   [component]
-  (if (k/is-function? component)
+  (if (xt/x:is-function? component)
     (return component)
     (return (-/lazy (fn:> component)))))
 
@@ -248,7 +253,7 @@
   "constructs a lazy component in function"
   {:added "4.0"}
   [component]
-  (if (k/is-function? component)
+  (if (xt/x:is-function? component)
     (return component)
     (do (:# "eslint-disable-next-line react-hooks/rules-of-hooks")
         (return (-/const (-/lazy (fn:> component)))))))
@@ -345,8 +350,8 @@
   (var [output setOutput] (-/local input))
   (-/watch [input]
     (when (and isStabilized
-               (k/not-nil? input)
-               (k/eq-nested input output))
+               (xt/x:not-nil? input)
+               (xtd/eq-nested input output))
       (setOutput input)))
   (return (:? isStabilized
               output
@@ -361,7 +366,7 @@
   {:added "4.0"}
   [intervalRef]
   (var interval (-/curr intervalRef))
-  (when (k/not-nil? interval)
+  (when (xt/x:not-nil? interval)
     (j/clearInterval interval)
     (-/curr:set intervalRef nil))
   (return interval))
@@ -407,7 +412,7 @@
   {:added "4.0"}
   [timeoutRef]
   (var timeout (-/curr timeoutRef))
-  (when (k/not-nil? timeout)
+  (when (xt/x:not-nil? timeout)
     (j/clearTimeout timeout)
     (-/curr:set timeoutRef nil))
   (return timeout))
@@ -477,11 +482,11 @@
   "uses the current time"
   {:added "4.0"}
   [interval]
-  (var [now setNow] (-/local (k/now-ms)))
+  (var [now setNow] (-/local (xt/x:now-ms)))
   (var #{stopInterval
          startInterval} (-/useInterval
                          (fn []
-                           (setNow (k/now-ms)))
+                            (setNow (xt/x:now-ms)))
                          (or interval 1000)))
   (return [now {:startNow startInterval
                 :stopNow stopInterval}]))
@@ -498,7 +503,7 @@
       (:= setResult (fn:>))
       (:= onSubmit  (fn:>))
       (:= onError   (fn [res]
-                      (k/LOG! "ERRORED" res)
+                      (trace/LOG! "ERRORED" res)
                       (return (. res ["body"]))))
       (:= onSuccess k/identity)
       (:= isMounted (fn:> true))]}]
@@ -520,7 +525,7 @@
                                   (setWaiting false)))
                               (when (isMounted)
                                 (setResult (onError err))))))))
-  (var errored (and result (== "error" (k/get-key result ["status"]))))
+  (var errored (and result (== "error" (. result ["status"]))))
   (return
    #{waiting setWaiting
      onAction errored}))
@@ -536,7 +541,7 @@
      setResult}]
   (var isMounted (-/useIsMounted))
   (:# "eslint-disable-next-line react-hooks/rules-of-hooks")
-  (:= [result setResult] (:? (k/nil? setResult)
+  (:= [result setResult] (:? (xt/x:nil? setResult)
                              (-/local)
                              [result setResult]))
   (-/watch [result]
@@ -602,14 +607,14 @@
       (:= valueFn j/identity)
       indexFn]}]
   (var forwardFn (fn [idx]
-                   (var out (and data (. data [(k/mod-pos (or idx 0)
-                                                          (k/len data))])))
+                    (var out (and data (. data [(math/mod-pos (or idx 0)
+                                                           (xt/x:len data))])))
                    (return (:? out (valueFn out)))))
   (var reverseFn (fn [label]
                    (var pval (indexFn))
                    (var nval (j/max 0 (j/indexOf (j/map data valueFn)
                                                  label)))
-                   (var offset (k/mod-offset pval nval (k/len data)))
+                    (var offset (math/mod-offset pval nval (xt/x:len data)))
                    (return (+ pval offset))))
   (var setIndex (fn [idx] (setValue (forwardFn idx))))
   (var index    (reverseFn value))
@@ -627,7 +632,7 @@
       (:= valueFn j/identity)]}]
   (var forwardFn (fn [indices]
                    (var out [])
-                   (k/for:array [[i e] indices]
+                    (xt/for:array [[i e] indices]
                      (when e
                        (x:arr-push out (. data [i]))))
                    (return out)))
@@ -663,13 +668,13 @@
   "uses value and setValue that may be influenced by available data"
   {:added "4.0"}
   [data f state]
-  (:= f (or f k/first))
+  (:= f (or f xtd/first))
   (:= data (or data []))
   (:# "eslint-disable-next-line react-hooks/rules-of-hooks")
   (var [value setValue] (or state (-/local (f data))))
-  (-/watch [(k/json-encode data)]
-    (when (and (k/not-empty? data)
-               (or (k/nil? value)
+  (-/watch [(xt/x:json-encode data)]
+    (when (and (xtd/not-empty? data)
+               (or (xt/x:nil? value)
                    (> 0 (j/indexOf data value))))
       (setValue (f data))))
   (return [value setValue]))
@@ -688,27 +693,29 @@
      displayFn}]
   (:= branchesFn (or branchesFn
                      (fn [tree _parents _root]
-                       (if tree
-                         (return (k/sort (k/obj-keys tree)))
-                         (return [])))))
+                        (if tree
+                          (do (var out (xtd/obj-keys tree))
+                              (. out (sort))
+                              (return out))
+                          (return [])))))
   (:= targetFn   (or targetFn
                      (fn [tree branch _parents _root]
-                       (if tree
-                         (return (k/get-key tree branch))
-                         (return nil)))))
+                        (if tree
+                          (return (xt/x:get-key tree branch))
+                          (return nil)))))
   (var branches  (branchesFn tree parents root))
-  (var [branch setBranch] (-/local (or initial (k/first branches))))
+  (var [branch setBranch] (-/local (or initial (xtd/first branches))))
   (var target (:? (and tree branch)
                   (targetFn tree branch parents root)))
   (-/watch [branch initial]
-    (when (and (k/not-nil? branch)
-               (k/nil? target)
-               (k/not-empty? branches)
-               (targetFn tree (k/first branches) parents root))
-      (setBranch (k/first branches)))
-    (when (and (k/not-nil? branch)
-               setInitial
-               (not= initial branch))
+    (when (and (xt/x:not-nil? branch)
+               (xt/x:nil? target)
+                 (xtd/not-empty? branches)
+                 (targetFn tree (xtd/first branches) parents root))
+      (setBranch (xtd/first branches)))
+    (when (and (xt/x:not-nil? branch)
+                setInitial
+                (not= initial branch))
       (setInitial branch)))
   (var view (displayFn target branch parents root))
   (return #{branch
