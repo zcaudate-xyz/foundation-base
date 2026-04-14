@@ -435,7 +435,8 @@
                          (return (-/default-table-fn table lookup)))
            :return-format-fn -/default-return-format-fn
            :return-count-fn  (fn []
-                               (return "count(*)"))
+                               (return (xt/x:cat "count" "(*)")))
+
            :return-join-fn   (fn [arr] (return (xt/x:str-join ", " arr)))
            :return-link-fn   (fn [s link-name]
                                (return (xt/x:cat "(" s ") AS " link-name)))}))
@@ -486,7 +487,8 @@
            :table-fn         -/default-quote-fn
            :return-format-fn -/sqlite-return-format-fn
            :return-count-fn  (fn []
-                               (return "json_array(json_object('count',count(*)))"))
+                               (return (xt/x:cat "json_array(json_object('count',count" "(*)))")))
+
            :return-join-fn   (fn [arr]
                                (return (xt/x:cat "json_group_array(json_object(" (xt/x:str-join ", " arr) "))")))
            :return-link-fn   (fn [s link-name]

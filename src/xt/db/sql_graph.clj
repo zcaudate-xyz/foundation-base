@@ -166,7 +166,7 @@
    opts]
   (var column-fn   (xt/x:get-key opts "column_fn" (fn [x] (return x))))
   (var return-count-fn   (xt/x:get-key opts "return_count_fn" (fn []
-                                                             (return "count(*)"))))
+                                                             (return (xt/x:cat "count" "(*)"))))) 
   (var return-format-fn  (xt/x:get-key opts "return_format_fn" ut/default-return-format-fn))
   (var return-join-fn    (xt/x:get-key opts "return_join_fn" (fn [arr] (return (xt/x:str-join ", " arr)))))
   (var return-link-fn    (xt/x:get-key opts "return_link_fn" (fn [s link-name]
