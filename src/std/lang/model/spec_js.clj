@@ -199,17 +199,27 @@
   "for return transform"
   {:added "4.0"}
   [[_ [[res err] statement] {:keys [success error final]}]]
-  (let [cb (list 'fn [err res]
-                 (list 'if err
-                       error
-                       success))
-        out (walk/prewalk (fn [x]
-                         (if (= x '(x:callback))
-                           cb
-                           x))
-                       statement)]
+  (let [return-run? (and (seq? statement)
+                         (= 'x:return-run (first statement)))
+        out (if return-run?
+              (let [[_ runner] statement]
+                (template/$
+                 (try
+                   (~runner
+                    (fn [~res] ~success)
+                    (fn [~err] ~error))
+                   (catch ~err ~error))))
+              (let [cb (list 'fn [err res]
+                             (list 'if err
+                                   error
+                                   success))]
+                (walk/prewalk (fn [x]
+                                (if (= x '(x:callback))
+                                  cb
+                                  x))
+                              statement)))]
     (cond->> out
-      final (list 'return))))
+      (and final (not return-run?)) (list 'return))))
 
 (defn tf-for-try
   "for try transform"

@@ -160,4 +160,18 @@
   => '(try (var ok (call))
            (return ok)
            (catch [Exception :as err]
-               (return err))))
+               (return err)))
+
+  (py/tf-for-return '(for:return [[ok err] (x:return-run runner)]
+                                 {:success (return ok)
+                                  :error   (return err)}))
+  => '(do (var ok nil)
+          (try
+            (runner
+             (fn [value]
+               (:= ok value))
+             (fn [value]
+               (throw value)))
+            (return ok)
+            (catch [Exception :as err]
+              (return err)))))

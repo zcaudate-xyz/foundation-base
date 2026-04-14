@@ -85,6 +85,15 @@
                 (return err)
                 (return ok))))
 
+  (spec-dart/tf-for-return '(for:return [[ok err] (x:return-run runner)]
+                               {:success (return ok)
+                                :error   (return err)}))
+  => '(try
+        (runner
+         (fn [ok] (return ok))
+         (fn [err] (return err)))
+        (catch err (return err)))
+
   (spec-dart/tf-for-try '(for:try [[ok err] (call)]
                             {:success (return ok)
                              :error   (return err)}))

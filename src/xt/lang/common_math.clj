@@ -1,6 +1,6 @@
 (ns xt.lang.common-math
   (:require [std.lang :as l :refer [defspec.xt]])
-  (:refer-clojure :exclude [mod round abs]))
+  (:refer-clojure :exclude [mod round abs max min quot]))
 
 (l/script :xtalk
   {:require [[xt.lang.common-spec :as xt]]})

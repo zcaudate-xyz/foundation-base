@@ -158,7 +158,16 @@
   => '(call (fn [err ok]
               (if err
                 (return err)
-                (return ok)))))
+                (return ok))))
+
+  (tf-for-return '(for:return [[ok err] (x:return-run runner)]
+                              {:success (return ok)
+                               :error   (return err)}))
+  => '(try
+        (runner
+         (fn [ok] (return ok))
+         (fn [err] (return err)))
+        (catch err (return err))))
 
 ^{:refer std.lang.model.spec-js/tf-for-try :added "4.0"}
 (fact "for try transform"

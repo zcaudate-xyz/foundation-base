@@ -1,6 +1,8 @@
 (ns xt.lang.common-lib
   (:require [std.lang :as l :refer [defspec.xt]])
-  (:refer-clojure :exclude [identity fn? cat print]))
+  (:refer-clojure :exclude [identity fn? cat print
+                            nil? inc dec zero? pos?
+                            neg? even? odd?]))
 
 (l/script :xtalk
   {:require [[xt.lang.common-spec :as xt]]})

@@ -55,4 +55,3 @@
   (var query-fn (or (xt/x:get-key conn "::query_sync")
                     (xt/x:get-key conn "::query")))
   (return (query-fn raw)))
-

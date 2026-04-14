@@ -102,6 +102,22 @@
   => '(do (var (quote [ok err]) (call))
           (if (not err)
             (return ok)
+            (return err)))
+
+  (tf-for-return '(for:return [[ok err] (x:return-run runner)]
+                              {:success (return ok)
+                               :error   (return err)}))
+  => '(do (var ok nil)
+          (var err nil)
+          (runner
+           (fn [value]
+             (:= ok value)
+             (:= err nil))
+           (fn [value]
+             (:= ok nil)
+             (:= err value)))
+          (if (not err)
+            (return ok)
             (return err))))
 
 ^{:refer std.lang.model.spec-lua/tf-for-try :added "4.0"}

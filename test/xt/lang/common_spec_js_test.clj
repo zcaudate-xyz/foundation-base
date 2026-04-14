@@ -6,7 +6,9 @@
 (l/script- :js
   {:runtime :basic
    :require [[xt.lang.common-spec :as xt]
-             [xt.lang.common-repl :as repl]]})
+             [xt.lang.common-data :as xtd]
+             [xt.lang.common-repl :as repl]
+             [xt.lang.common-string :as xts]]})
 
 (fact:global
  {:setup [(l/rt:restart)]
@@ -50,17 +52,42 @@
   
   [(!.js
      (var out nil)
-     (xt/for:return [[ok err] (unpack ["OK" nil])]
+     (xt/for:return [[ok err] (xt/return-run [resolve reject]
+                                 (resolve "OK"))]
        {:success (:= out ok)
         :error (:= out err)})
      out)
    (!.js
      (var out nil)
-     (xt/for:return [[ok err] (unpack [nil "ERR"])]
+     (xt/for:return [[ok err] (xt/return-run [resolve reject]
+                                 (reject "ERR"))]
        {:success (:= out ok)
         :error (:= out err)})
      out)]
   => ["OK" "ERR"])
+
+^{:refer xt.lang.common-spec/return-run :added "4.1"}
+(fact "normalises success and error callbacks"
+  (!.js
+    (var out nil)
+    (xt/for:return [[ok err] (xt/return-run [resolve reject]
+                                (resolve "OK"))]
+      {:success (:= out ok)
+       :error (:= out err)})
+    out)
+  => "OK")
+
+^{:refer xt.lang.common-spec/x:return-run :added "4.1"}
+(fact "can be used directly inside for:return"
+  (!.js
+    (var out nil)
+    (xt/for:return [[ok err] (xt/x:return-run
+                               (fn [resolve reject]
+                                 (reject "ERR")))]
+      {:success (:= out ok)
+       :error (:= out err)})
+    out)
+  => "ERR")
 
 ^{:refer xt.lang.common-spec/x:get-idx :added "4.1"}
 (fact "reads the first indexed value"
@@ -106,7 +133,7 @@
     (var out [0 1 2 3])
     (xt/x:arr-remove out (xt/x:offset 1))
     out)
-  => [0 1 3])
+  => [0 2 3])
 
 ^{:refer xt.lang.common-spec/x:arr-push :added "4.1"}
 (fact "pushes an element onto an array"
@@ -150,7 +177,7 @@
 (fact "slices a range from an array"
   (!.js
     (xt/x:arr-slice [1 2 3] (xt/x:offset 0) (xt/x:offset 1)))
-  => [2])
+  => [1])
 
 ^{:refer xt.lang.common-spec/x:arr-reverse :added "4.1"}
 (fact "reverses an array"
@@ -449,7 +476,7 @@
 (fact "gets the character code at an index"
   (!.js
     (xt/x:str-char "abc" 1))
-  => 97)
+  => 98)
 
 ^{:refer xt.lang.common-spec/x:str-split :added "4.1"}
 (fact "splits a string"
@@ -469,13 +496,13 @@
   
   (!.js
     (xt/x:str-index-of "hello/world" "/" 0))
-  => 6)
+  => 5)
 
 ^{:refer xt.lang.common-spec/x:str-substring :added "4.1"}
 (fact "gets a substring"
   (!.js
     (xt/x:str-substring "hello/world" 3 8))
-  => "llo/wo")
+  => "lo/wo")
 
 ^{:refer xt.lang.common-spec/x:str-to-upper :added "4.1"}
 (fact "converts a string to upper case"
@@ -546,7 +573,21 @@
   => true)
 
 ^{:refer xt.lang.common-spec/x:callback :added "4.1"}
-(fact "returns the empty callback token in lua"
-  (!.js
-    (xt/x:nil? (xt/x:callback)))
-  => true)
+(fact "dispatches node-style callbacks through for:return"
+  [(!.js
+     (var out nil)
+     (var success (fn [cb]
+                    (cb nil "OK")))
+     (xt/for:return [[ret err] (success (xt/x:callback))]
+       {:success (:= out ret)
+        :error   (:= out err)})
+     out)
+   (!.js
+     (var out nil)
+     (var failure (fn [cb]
+                    (cb "ERR" nil)))
+     (xt/for:return [[ret err] (failure (xt/x:callback))]
+       {:success (:= out ret)
+        :error   (:= out err)})
+     out)]
+  => ["OK" "ERR"])

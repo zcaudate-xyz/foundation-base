@@ -59,4 +59,19 @@
   (tf-for-return '(for:return [[ok err] (call)]
                               {:success ok
                                :error err}))
-  => '(tryCatch (block (var ok (call)) ok) :error (fn [err] err)))
+  => '(tryCatch (block (var ok (call)) ok) :error (fn [err] err))
+
+  (tf-for-return '(for:return [[ok err] (x:return-run runner)]
+                              {:success ok
+                               :error err}))
+  => '(block
+        (var ok nil)
+        (tryCatch
+         (block
+          (runner
+           (fn [value]
+             (:= ok value))
+           (fn [value]
+             (stop value)))
+          ok)
+         :error (fn [err] err))))

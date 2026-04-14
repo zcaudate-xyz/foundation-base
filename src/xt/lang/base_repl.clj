@@ -192,7 +192,7 @@
   "call a http notify function."
   {:added "4.0"}
   [host port value id key opts]
-  (x:notify-http host port value id key opts))
+  (-/notify-socket-http host port value id key opts))
 
 (defn notify-form
   "creates the notify form"

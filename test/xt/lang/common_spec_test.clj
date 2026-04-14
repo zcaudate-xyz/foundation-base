@@ -50,17 +50,42 @@
   
   [(!.lua
      (var out nil)
-     (xt/for:return [[ok err] (unpack ["OK" nil])]
+     (xt/for:return [[ok err] (xt/return-run [resolve reject]
+                                 (resolve "OK"))]
        {:success (:= out ok)
         :error (:= out err)})
      out)
    (!.lua
      (var out nil)
-     (xt/for:return [[ok err] (unpack [nil "ERR"])]
+     (xt/for:return [[ok err] (xt/return-run [resolve reject]
+                                 (reject "ERR"))]
        {:success (:= out ok)
         :error (:= out err)})
      out)]
   => ["OK" "ERR"])
+
+^{:refer xt.lang.common-spec/return-run :added "4.1"}
+(fact "normalises success and error callbacks"
+  (!.lua
+    (var out nil)
+    (xt/for:return [[ok err] (xt/return-run [resolve reject]
+                                (resolve "OK"))]
+      {:success (:= out ok)
+       :error (:= out err)})
+    out)
+  => "OK")
+
+^{:refer xt.lang.common-spec/x:return-run :added "4.1"}
+(fact "can be used directly inside for:return"
+  (!.lua
+    (var out nil)
+    (xt/for:return [[ok err] (xt/x:return-run
+                               (fn [resolve reject]
+                                 (reject "ERR")))]
+      {:success (:= out ok)
+       :error (:= out err)})
+    out)
+  => "ERR")
 
 ^{:refer xt.lang.common-spec/x:get-idx :added "4.1"}
 (fact "reads the first indexed value"

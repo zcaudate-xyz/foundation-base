@@ -156,9 +156,21 @@
   "for return transform"
   {:added "4.0"}
   [[_ [[res err] statement] {:keys [success error]}]]
-   (template/$ (try (var ~res ~statement)
-             ~success
-             (catch [Exception :as ~err] ~error))))
+  (if (and (seq? statement)
+           (= 'x:return-run (first statement)))
+    (let [[_ runner] statement]
+      (template/$ (do (var ~res nil)
+                      (try
+                        (~runner
+                         (fn [value]
+                           (:= ~res value))
+                         (fn [value]
+                           (throw value)))
+                        ~success
+                        (catch [Exception :as ~err] ~error)))))
+    (template/$ (try (var ~res ~statement)
+                     ~success
+                     (catch [Exception :as ~err] ~error)))))
 
 (def +features+
   (let [base (-> (grammar/build :exclude [:pointer

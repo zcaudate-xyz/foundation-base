@@ -89,11 +89,25 @@
   "transform for `for:return`"
   {:added "4.0"}
   [[_ [[res err] statement] {:keys [success error]}]]
-  (template/$ (tryCatch
-        (block
-         (var ~res ~statement)
-         ~success)
-        :error (fn [~err] ~error))))
+  (if (and (seq? statement)
+           (= 'x:return-run (first statement)))
+    (let [[_ runner] statement]
+      (template/$ (block
+                   (var ~res nil)
+                   (tryCatch
+                    (block
+                     (~runner
+                      (fn [value]
+                        (:= ~res value))
+                      (fn [value]
+                        (stop value)))
+                     ~success)
+                    :error (fn [~err] ~error)))))
+    (template/$ (tryCatch
+                 (block
+                  (var ~res ~statement)
+                  ~success)
+                 :error (fn [~err] ~error)))))
 
 (defn- r-token-boolean
   [bool]
