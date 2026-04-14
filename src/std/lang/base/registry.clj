@@ -63,7 +63,9 @@
          [:erlang :basic]              'rt.basic.impl-annex.process-erlang
  
          [:haskell :twostep]           'rt.basic.impl-annex.process-haskell
-
+         [:lean    :twostep]           'rt.basic.impl-annex.process-lean
+         [:ocaml   :twostep]           'rt.basic.impl-annex.process-ocaml
+ 
          [:rust   :twostep]            'rt.basic.impl-annex.process-rust
          
          [:c      :jocl]               'rt.jocl

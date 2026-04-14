@@ -6,7 +6,7 @@
              [std.lang.base.impl :as impl]
              [std.lang.base.runtime :as rt]
              [std.lang.model-annex.spec-ruby :as spec]
-             [std.lib.template :as template]
+             [std.lib.collection :as collection]
              [xt.lang.base-repl :as k]))
 
 (def +ruby-init+
@@ -23,19 +23,49 @@
 ;;
 
 
-(defn return-wrap-invoke
-  "wraps forms to be invoked"
+(defn default-body-wrap
+  "wraps body forms in a top-level `OUT` assignment so Ruby inline `defn`
+   forms remain callable within the same eval scope."
   {:added "4.0"}
   [forms]
-  (template/$ (. (fn [] ~@forms) (call))))
+  (cons 'do
+        (concat (butlast forms)
+                [(list ':= 'OUT (last forms))])))
+
+(defn normalize-forms
+  "normalizes runtime input into a flat sequence of Ruby statements."
+  {:added "4.1"}
+  [input {:keys [bulk]}]
+  (let [forms (if bulk input [input])]
+    (if (and (= 1 (count forms))
+             (collection/form? (first forms))
+             (= 'do (ffirst forms)))
+      (rest (first forms))
+      forms)))
+
+(defn mark-inline-defs
+  "marks inline `defn` forms as inner so Ruby does not namespace-qualify
+   helper definitions created within a runtime eval body."
+  {:added "4.1"}
+  [forms]
+  (map (fn [form]
+         (if (and (collection/form? form)
+                  (= 'defn (first form))
+                  (symbol? (second form)))
+           (apply list 'defn
+                  (with-meta (second form)
+                    (assoc (meta (second form)) :inner true))
+                  (drop 2 form))
+           form))
+       forms))
 
 (defn default-body-transform
-  "standard python transforms"
+  "standard ruby transforms"
   {:added "4.0"}
   [input mopts]
-  (rt/return-transform
-   input mopts
-   {:wrap-fn return-wrap-invoke}))
+  (-> (normalize-forms input mopts)
+      (mark-inline-defs)
+      (default-body-wrap)))
 
 (def ^{:arglists '([body])}
   default-oneshot-wrap
@@ -99,8 +129,7 @@
 (def +default-basic-config+
   {:bootstrap #'default-basic-client
    :main   {}
-   :emit   {:body  {:transform #'default-body-transform}
-            :lang/format :global}
+   :emit   {:body  {:transform #'default-body-transform}}
    :json :full
    :encode :json ;; default
    :timeout 2000})

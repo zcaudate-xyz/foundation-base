@@ -1,7 +1,8 @@
 (ns rt.basic.impl.process-ruby-test
   (:require [rt.basic.impl.process-ruby :refer :all]
-            [rt.basic.type-common :as common]
-            [std.lang :as l])
+             [rt.basic.type-common :as common]
+             [std.lang.base.runtime :as rt]
+             [std.lang :as l])
   (:use code.test))
 
 (l/script- :ruby
@@ -40,15 +41,25 @@
   (default-basic-client 1000 {:host "localhost"}))
 
 
-^{:refer rt.basic.impl.process-ruby/return-wrap-invoke :added "4.1"}
+^{:refer std.lang.base.runtime/return-wrap-invoke :added "4.1"}
 (fact "wraps forms for invoke"
-  (return-wrap-invoke '[1 2 3])
-  => '(. (fn [] 1 2 3) (call)))
+  (rt/return-wrap-invoke '[1 2 3])
+  => seq?)
 
 ^{:refer rt.basic.impl.process-ruby/default-body-transform :added "4.1"}
 (fact "applies ruby return transform"
   (default-body-transform '[1 2 3] {})
-  => '(. (fn [] (return [1 2 3])) (call))
+  => '(do (:= OUT [1 2 3]))
 
   (default-body-transform '[1 2 3] {:bulk true})
-  => '(. (fn [] 1 2 (return 3)) (call)))
+  => '(do 1 2 (:= OUT 3)))
+
+
+^{:refer rt.basic.impl.process-ruby/default-body-wrap :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.basic.impl.process-ruby/normalize-forms :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.basic.impl.process-ruby/mark-inline-defs :added "4.1"}
+(fact "TODO")

@@ -46,3 +46,10 @@
 
   (default-basic-client 19000)
   => string?)
+
+
+^{:refer rt.basic.impl-annex.process-php/php-body-source :added "4.1"}
+(fact "TODO")
+
+^{:refer rt.basic.impl-annex.process-php/default-basic-body-transform :added "4.1"}
+(fact "TODO")

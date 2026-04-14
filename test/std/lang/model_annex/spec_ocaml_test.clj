@@ -28,3 +28,40 @@
 
   (impl/emit-as :ocaml ['(fn [x] (+ x 1))])
   => "fun x -> x + 1")
+
+
+^{:refer std.lang.model-annex.spec-ocaml/emit-raw-str :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model-annex.spec-ocaml/emit-indent-body :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model-annex.spec-ocaml/emit-lines-with :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model-annex.spec-ocaml/ml-invoke :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model-annex.spec-ocaml/ml-args :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model-annex.spec-ocaml/parse-match-clauses :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model-annex.spec-ocaml/body-expr :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model-annex.spec-ocaml/tf-defn :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model-annex.spec-ocaml/tf-match :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model-annex.spec-ocaml/tf-if :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model-annex.spec-ocaml/tf-letrec :added "4.1"}
+(fact "TODO")
+
+^{:refer std.lang.model-annex.spec-ocaml/tf-lambda :added "4.1"}
+(fact "TODO")

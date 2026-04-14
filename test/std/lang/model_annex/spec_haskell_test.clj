@@ -89,3 +89,7 @@
 
 ^{:refer std.lang.model-annex.spec-haskell/haskell-args :added "4.1"}
 (fact "TODO")
+
+
+^{:refer std.lang.model-annex.spec-haskell/haskell-invoke :added "4.1"}
+(fact "TODO")

@@ -66,7 +66,7 @@
         mopts   preprocess/*macro-opts*
         sym-str (common/emit-symbol sym grammar (assoc mopts :php/func true))
         args-str (php-invoke-args args grammar (dissoc mopts :php/func))
-        body-str (common/*emit-fn* (cons 'do body) grammar mopts)]
+        body-str (common/*emit-fn* (cons 'do body) grammar (dissoc mopts :php/func))]
     (list :- (str "function " sym-str "(" args-str ") {\n" body-str "\n}"))))
 
 (defn php-defn-
@@ -75,7 +75,7 @@
   (let [grammar preprocess/*macro-grammar*
         mopts   preprocess/*macro-opts*
         args-str (php-invoke-args args grammar (dissoc mopts :php/func))
-        body-str (common/*emit-fn* (cons 'do body) grammar mopts)]
+        body-str (common/*emit-fn* (cons 'do body) grammar (dissoc mopts :php/func))]
     (list :- (str "function (" args-str ") {\n" body-str "\n}"))))
 
 (defn php-array

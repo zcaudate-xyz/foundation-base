@@ -76,50 +76,62 @@
      :or {remove true detached true
           group "testing"}}
     & [repeat]]
-   (let [args (reduce (fn [args [from to]]
-                        (conj args "-v" (str from ":" to)))
-                      []
-                      volumes)
-         args (reduce (fn [args [k v]]
-                        (conj args "-l" (str k "=" v)))
-                      args
-                      labels)
-         args (reduce (fn [args [k v]]
-                        (conj args "-e" (str k "=" v)))
-                      args
-                      environment)
-         args (reduce (fn [args ports]
-                        (conj args "-p"
-                              (if (vector? ports)
-                                (clojure.string/join ":" ports)
-                                ports)))
-                      args
-                      expose)
-         args (if (not no-host)
-                (conj args "--add-host=host.docker.internal:host-gateway")
-                args)
-         name (str group "_" (or id (f/error "Id required")))
-         args (apply conj args "--name" name image cmd)
-         cid  (cond (has-container? m)
-                    nil
-                    
-                    :else
-                    @(apply os/sh (concat ["docker" "run"]
-                                         (when *host* ["--host" *host*])
-                                         (if detached ["-d"])
-                                         (if remove ["--rm"])
-                                         flags args)))
-         cid   (if (empty? cid)
-                 @(os/sh {:args (concat ["docker" "ps"]
-                                       (when *host* ["--host" *host*])
-                                       ["-aqf" (str "name=^" name "$")])})
-                 cid)
-         ip   (get-ip cid)]
+   (let [volume-args (reduce (fn [acc [from to]]
+                               (conj acc "-v" (str from ":" to)))
+                             []
+                             volumes)
+         label-args (reduce (fn [acc [k v]]
+                              (conj acc "-l" (str k "=" v)))
+                            volume-args
+                            labels)
+         env-args   (reduce (fn [acc [k v]]
+                              (conj acc "-e" (str k "=" v)))
+                            label-args
+                            environment)
+         port-args  (reduce (fn [acc ports]
+                              (conj acc "-p"
+                                    (if (vector? ports)
+                                      (clojure.string/join ":" ports)
+                                      ports)))
+                            env-args
+                            expose)
+         base-args  (cond-> port-args
+                      (not no-host)
+                      (conj "--add-host=host.docker.internal:host-gateway"))
+         name       (str group "_" (or id (f/error "Id required")))
+         cmd-args   (cond
+                      (coll? cmd) cmd
+                      (some? cmd) [cmd]
+                      :else [])
+         args       (-> (concat base-args
+                                ["--name" name image]
+                                cmd-args)
+                        vec)
+         run-args   (->> (concat ["docker" "run"]
+                                 (when *host* ["--host" *host*])
+                                 (when detached ["-d"])
+                                 (when remove ["--rm"])
+                                 flags
+                                 args)
+                        (clojure.core/remove nil?)
+                        vec)
+         cid        (cond
+                      (has-container? m)
+                      nil
+
+                      :else
+                      @(apply os/sh run-args))
+         cid        (if (empty? cid)
+                      @(os/sh {:args (concat ["docker" "ps"]
+                                            (when *host* ["--host" *host*])
+                                            ["-aqf" (str "name=^" name "$")])})
+                      cid)
+         ip         (get-ip cid)]
      (assoc
       (if (or repeat ip)
         (assoc m :container-id cid :container-ip ip :container-name name)
         (start-container m true))
-      :args args))))
+       :args args))))
 
 (defn stop-container
   "stops a container"

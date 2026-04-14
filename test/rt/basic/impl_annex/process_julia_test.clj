@@ -6,29 +6,24 @@
 (fact "creates julia return wrapper"
   (default-body-wrap '[1 2 3])
   => '(do
-        (function OUT-FN []
-          (try
-            (do 1 2 (return 3))
-            (catch e
-              (throw e))))
+        (defn OUT-FN []
+          1
+          2
+          (return 3))
         (:= OUT (OUT-FN))))
 
 ^{:refer rt.basic.impl-annex.process-julia/default-body-transform :added "4.1"}
 (fact "standard julia transforms"
   (default-body-transform '[1 2 3] {})
   => '(do
-        (function OUT-FN []
-          (try
-            (do (return [1 2 3]))
-            (catch e
-              (throw e))))
+        (defn OUT-FN []
+          (return [1 2 3]))
         (:= OUT (OUT-FN)))
 
   (default-body-transform '[1 2 3] {:bulk true})
   => '(do
-        (function OUT-FN []
-          (try
-            (do 1 2 (return 3))
-            (catch e
-              (throw e))))
+        (defn OUT-FN []
+          1
+          2
+          (return 3))
         (:= OUT (OUT-FN))))

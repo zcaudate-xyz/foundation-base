@@ -220,3 +220,7 @@
     :emit :hard-link
     :raw 'xt.lang.common-data/obj-keys})
   => (contains {:value/standalone 'xt.lang.common-data/obj-keys}))
+
+
+^{:refer std.lang.base.grammar/default-lookup :added "4.1"}
+(fact "TODO")

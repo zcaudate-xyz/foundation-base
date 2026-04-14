@@ -1,15 +1,16 @@
 (ns rt.basic.impl.process-lua
   (:require [clojure.string]
-            [rt.basic.type-basic :as basic]
-            [rt.basic.type-common :as common]
-            [rt.basic.type-oneshot :as oneshot]
-            [rt.basic.type-websocket :as websocket]
-            [std.lang.base.impl :as impl]
-            [std.lang.base.runtime :as rt]
-            [std.lang.model.spec-lua :as spec]
-            [std.lib.env :as env]
-            [std.lib.os :as os]
-            [xt.lang.base-repl :as k]))
+             [rt.basic.type-basic :as basic]
+             [rt.basic.type-common :as common]
+             [rt.basic.type-oneshot :as oneshot]
+             [rt.basic.type-websocket :as websocket]
+             [std.lang.base.impl :as impl]
+             [std.lang.base.runtime :as rt]
+             [std.lang.model.spec-lua :as spec]
+             [std.lib.collection :as collection]
+             [std.lib.env :as env]
+             [std.lib.os :as os]
+             [xt.lang.base-repl :as k]))
 
 ;;
 ;; PROGRAM
@@ -51,6 +52,45 @@
 ;; ONESHOT
 ;; 
 
+(defn default-body-wrap
+  "wraps body forms in a local helper so inline defs remain callable within
+   the same Lua eval scope."
+  {:added "4.1"}
+  [forms]
+  (list 'do
+        (apply list 'defn (with-meta 'OUT-FN
+                            {:inner true})
+               []
+               (concat (butlast forms)
+                       [(list 'return (last forms))]))
+        (list 'return (list 'OUT-FN))))
+
+(defn normalize-forms
+  "normalizes runtime input into a flat sequence of Lua statements."
+  {:added "4.1"}
+  [input {:keys [bulk]}]
+  (let [forms (if bulk input [input])]
+    (if (and (= 1 (count forms))
+             (collection/form? (first forms))
+             (= 'do (ffirst forms)))
+      (rest (first forms))
+      forms)))
+
+(defn mark-inline-defs
+  "marks inline `defn` forms as inner so Lua emits local helper definitions."
+  {:added "4.1"}
+  [forms]
+  (map (fn [form]
+         (if (and (collection/form? form)
+                  (= 'defn (first form))
+                  (symbol? (second form)))
+           (apply list 'defn
+                  (with-meta (second form)
+                    (assoc (meta (second form)) :inner true))
+                  (drop 2 form))
+           form))
+       forms))
+
 (defn default-body-transform
   "transform code for return
  
@@ -61,10 +101,9 @@
    => '(do 1 2 (return 3))"
   {:added "4.0"}
   [input mopts]
-  (rt/return-transform
-   input mopts
-   {:wrap-fn (fn [forms]
-               (apply list 'do forms))}))
+  (-> (normalize-forms input mopts)
+      (mark-inline-defs)
+      (default-body-wrap)))
 
 (def ^{:arglists '([body])}
   default-oneshot-wrap
