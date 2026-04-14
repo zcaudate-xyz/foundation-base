@@ -39,7 +39,7 @@
   (return (. (eth-lib/contract-run signer address abi fn-name args overrides)
              (then (fn [res]
                      (return
-                      (:? (and (k/obj? res)
+                      (:? (and (k/is-object? res)
                                (. res wait))
                           (. res (wait))
                           res))))

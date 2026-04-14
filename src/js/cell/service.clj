@@ -9,7 +9,7 @@
   "checks if the value is a service registry"
   {:added "4.0"}
   [service]
-  (return (and (k/obj? service)
+  (return (and (k/is-object? service)
                (k/has-key? service "dbs"))))
 
 (defn.xt create-service
@@ -50,7 +50,7 @@
   (cond (k/is-string? db-ref)
         (return (-/get-db service db-ref))
 
-        (k/obj? db-ref)
+        (k/is-object? db-ref)
         (return db-ref)
 
         :else

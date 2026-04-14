@@ -57,4 +57,20 @@
 
 (def.xt IShow    ["show"])
 
+(defn.xt proto-spec
+  "creates a prototype spec map from interface entries"
+  {:added "4.0"}
+  [spec-arr]
+  (var acc {})
+  (xt/for:array [e spec-arr]
+    (var spec-i (xt/x:first e))
+    (var spec-map (xt/x:second e))
+    (xt/for:array [key spec-i]
+      (when (xt/x:nil? (xt/x:get-key spec-map key))
+        (xt/x:err
+         (xt/x:cat "NOT VALID."
+                   (xt/x:json-encode {:required key
+                                      :actual (xt/x:obj-keys spec-map)})))))
+    (:= acc (xt/x:obj-assign acc spec-map)))
+  (return acc))
 

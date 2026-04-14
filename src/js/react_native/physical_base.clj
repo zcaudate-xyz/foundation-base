@@ -71,7 +71,7 @@
             (:= size "md")
             (:= transformations {})
             (:.. rprops)]} props
-         ostyles (:? (k/arr? style) style [style])
+         ostyles (:? (k/is-array? style) style [style])
          sstyle  (or (. helper-theme-default/FontSize [size])
                      {:fontSize size})
          refChord   (r/useFollowRef chord)
@@ -85,7 +85,7 @@
                      (:.. (-/transformInner indicators chord inner -/transformProps))])
      (return (j/assign
               {(:? (or allowRef
-                       (not (k/fn? component)))
+                       (not (k/is-function? component)))
                    "ref"
                    "refLink") refLink
                :style [sstyle
@@ -503,4 +503,3 @@
                 (:.. inner)]
         :addons addons
         (:.. (j/assign inputable containerProps))]}])))
-

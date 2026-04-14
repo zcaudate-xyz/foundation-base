@@ -99,8 +99,8 @@
                     (fn:>)))
   (var fgCustom (or (k/get-key transformations "fg")
                     (fn:>)))
-  (when (not (and (k/fn? bgCustom)
-                  (k/fn? fgCustom)))
+  (when (not (and (k/is-function? bgCustom)
+                  (k/is-function? fgCustom)))
     (k/err "Themed transformations require functions."))
   (var #{bg fg} themePipeline)
   (var bgInitial  (. bg ["initial"]))
@@ -133,7 +133,7 @@
    colorKeys]
   (var custom (or (k/get-key transformations type)
                   (fn:>)))
-  (when (not (k/fn? custom))
+  (when (not (k/is-function? custom))
     (k/err "Themed transformations require functions."))
   (var pipe     (k/get-key themePipeline type))
   (var initial  (. pipe ["initial"]))
@@ -183,4 +183,3 @@
   (var transformFn (-/createSingleTransformations props type colorKeys))
   (var styleStatic (-/combinedStatic props {} transformFn))
   (return [styleStatic transformFn]))
-

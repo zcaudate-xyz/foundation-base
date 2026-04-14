@@ -3,7 +3,7 @@
 
 (l/script :xtalk
   {:require [[xt.lang.common-spec :as xt]
-             [xt.lang.base-runtime :as rt :with [defvar.xt]]
+             [xt.lang.common-data :as xtd]
              [xt.runtime.interface-spec :as spec]
              [xt.runtime.interface-common :as interface-common]
              [xt.runtime.interface-collection :as interface-collection]
@@ -40,7 +40,7 @@
 
 (def.xt SYNTAX_PROTOTYPE
   (-> -/SYNTAX_SPEC
-      (xt/x:proto-spec)
+      (spec/proto-spec)
       (xtd/obj-map -/syntax-wrap)
       (xt/x:proto-create)))
 
@@ -55,7 +55,7 @@
   (var syntax {"::" "syntax"
                :_value value
                :_metadata metadata})
-  (xt/x:set-proto syntax -/SYNTAX_PROTOTYPE)
+  (xt/x:proto-set syntax -/SYNTAX_PROTOTYPE nil)
   (return syntax))
 
 (defn.xt get-metadata

@@ -12,7 +12,7 @@
   "checks that the db descriptor can process sync requests"
   {:added "4.0"}
   [db]
-  (return (and (k/obj? db)
+  (return (and (k/is-object? db)
                (k/has-key? db "schema"))))
 
 (defn.xt normalize-sync
@@ -41,25 +41,25 @@
     (return [false {:status "error"
                     :tag "db/sync-empty-request"}]))
   (when (and (k/not-nil? db-sync)
-             (not (k/obj? db-sync)))
+             (not (k/is-object? db-sync)))
     (return [false {:status "error"
                     :tag "db/sync-invalid"
                     :data {:input db-sync}}]))
   (when (and (k/not-nil? db-remove)
-             (not (k/obj? db-remove)))
+             (not (k/is-object? db-remove)))
     (return [false {:status "error"
                     :tag "db/remove-invalid"
                     :data {:input db-remove}}]))
-  (when (k/obj? db-sync)
+  (when (k/is-object? db-sync)
     (k/for:object [[table entries] db-sync]
-      (when (not (k/arr? entries))
+      (when (not (k/is-array? entries))
         (return [false {:status "error"
                         :tag "db/sync-invalid-entries"
                         :data {:table table
                                :input entries}}]))))
-  (when (k/obj? db-remove)
+  (when (k/is-object? db-remove)
     (k/for:object [[table ids] db-remove]
-      (when (not (k/arr? ids))
+      (when (not (k/is-array? ids))
         (return [false {:status "error"
                         :tag "db/remove-invalid-ids"
                         :data {:table table
@@ -76,10 +76,10 @@
                     :tag "db/local-db-not-provided"}]))
   (var db-sync (k/get-key sync-request "db/sync"))
   (var db-remove (k/get-key sync-request "db/remove"))
-  (when (and (k/obj? db-sync)
+  (when (and (k/is-object? db-sync)
              (k/not-empty? db-sync))
     (xdb/sync-event local-db ["add" db-sync]))
-  (when (and (k/obj? db-remove)
+  (when (and (k/is-object? db-remove)
              (k/not-empty? db-remove))
     (k/for:object [[table ids] db-remove]
       (xdb/db-delete-sync local-db

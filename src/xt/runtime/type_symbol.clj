@@ -4,7 +4,6 @@
 
 (l/script :xtalk
   {:require [[xt.lang.common-spec :as xt]
-             [xt.lang.base-runtime :as rt :with [defvar.xt]]
              [xt.runtime.interface-common :as interface-common]
              [xt.runtime.interface-spec :as spec]
              [xt.runtime.common-hash :as common-hash]]})
@@ -17,23 +16,33 @@
   {:added "4.0"}
   [sym]
   (var #{_ns _name} sym)
+  (var sname (:? (xt/x:nil? _ns)
+                 _name
+                 (xt/x:cat _ns "/" _name)))
   (return
    (-> (xt/x:get-key common-hash/SEED "symbol")
-       (xt/x:bit-xor (common-hash/hash-string (xt/x:sym-full _ns _name))))))
+       (xt/x:bit-xor (common-hash/hash-string sname)))))
 
 (defn.xt symbol-show
   "shows the symbol"
   {:added "4.0"}
   [sym]
   (var #{_ns _name} sym)
+  (var sname (:? (xt/x:nil? _ns)
+                 _name
+                 (xt/x:cat _ns "/" _name)))
   (return
-   (xt/x:sym-full _ns _name)))
+   sname))
 
 (defn.xt symbol-eq
   "gets symbol equality"
   {:added "4.0"}
   [sym o]
-  (return (and (== "symbol" (xt/x:type-class o))
+  (var otype (xt/x:type-native o))
+  (var oclass (:? (xt/x:is-object? o)
+                  (xt/x:get-key o "::" otype)
+                  otype))
+  (return (and (== "symbol" oclass)
                (== (. sym _ns) (. o _ns))
                (== (. sym _name) (. o _name)))))
 
@@ -47,7 +56,7 @@
 
 (def.xt SYMBOL_PROTOTYPE
   (-> -/SYMBOL_SPEC
-      (xt/x:proto-spec)
+      (spec/proto-spec)
       (xt/x:proto-create)))
 
 (defn.xt symbol-create
@@ -57,7 +66,7 @@
   (var sym {"::" "symbol"
             :_ns   ns
             :_name name})
-  (xt/x:set-proto sym -/SYMBOL_PROTOTYPE)
+  (xt/x:proto-set sym -/SYMBOL_PROTOTYPE nil)
   (return sym))
 
 (defn.xt symbol
@@ -65,11 +74,12 @@
   {:added "4.0"}
   [ns name]
   (var lu -/SYMBOL_LOOKUP)
-  (var key (xt/x:sym-full ns name))
+  (var key (:? (xt/x:nil? ns)
+               name
+               (xt/x:cat ns "/" name)))
   (var out (xt/x:get-key lu key))
   (when (xt/x:nil? out)
     (var sym (-/symbol-create ns name))
     (xt/x:set-key lu key sym)
     (return sym))
   (return out))
-

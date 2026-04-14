@@ -193,7 +193,7 @@
          (setResult nresult))
        (when resultFn
          (resultFn event))
-       (when (k/fn? resultPrint)
+       (when (k/is-function? resultPrint)
          (resultPrint #{resultTag nresult event})))
      meta
      pred)
@@ -425,5 +425,4 @@
                  (not init))
         (setInit true)))
     (return init)))
-
 

@@ -41,11 +41,11 @@
     (var path (:? (k/not-empty? prefix)
                   (k/cat prefix "." key)
                   key))
-    (cond (and (k/obj? value)
-               (not (k/arr? value)))
+    (cond (and (k/is-object? value)
+               (not (k/is-array? value)))
           (-/compile-filters-into path value out)
 
-          (and (k/arr? value)
+          (and (k/is-array? value)
                (== "in" (k/first value)))
           (x:arr-push out {"path" path
                            "op" "in"
@@ -64,10 +64,10 @@
   (var table (k/first query-plan))
   (var second (k/second query-plan))
   (var third  (k/get-idx query-plan 2))
-  (var where (:? (k/obj? second)
+  (var where (:? (k/is-object? second)
                  second
                  {}))
-  (var returning (:? (k/obj? second)
+  (var returning (:? (k/is-object? second)
                      third
                      second))
   (return {"table" table

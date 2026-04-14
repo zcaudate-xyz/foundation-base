@@ -69,7 +69,7 @@
   "layout for menu entry"
   {:added "4.0"}
   ([items]
-   (let [entries (j/filter items (fn:> [e] (:? (k/arr? e.hidden) (not (e.hidden)) (not e.hidden))))
+   (let [entries (j/filter items (fn:> [e] (:? (k/is-array? e.hidden) (not (e.hidden)) (not e.hidden))))
          lens     (j/map entries (fn:> [e] (k/len e.label)))
          lefts    (j/reduce lens
                             (fn [acc l]
@@ -87,7 +87,7 @@
   "layout for toggle entry"
   {:added "4.0"}
   ([items]
-   (let [entries (j/filter items (fn:> [e] (:? (k/fn? e.hidden) (not (e.hidden)) (not e.hidden))))
+   (let [entries (j/filter items (fn:> [e] (:? (k/is-function? e.hidden) (not (e.hidden)) (not e.hidden))))
          lens     (j/map entries (fn:> [e] (:? (== e.type "separator") 1 3)))
          lefts    (j/reduce lens
                              (fn [acc l]

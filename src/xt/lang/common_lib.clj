@@ -46,6 +46,25 @@
   {:added "4.0"}
   ([x] (return (xt/x:to-number x))))
 
+(defspec.xt proto-spec [:fn [[:xt/array :xt/any]] :xt/obj])
+
+(defn.xt proto-spec
+  "creates a prototype spec map from interface entries"
+  {:added "4.1"}
+  [spec-arr]
+  (var acc {})
+  (xt/for:array [e spec-arr]
+    (var spec-i (xt/x:first e))
+    (var spec-map (xt/x:second e))
+    (xt/for:array [key spec-i]
+      (when (xt/x:nil? (xt/x:get-key spec-map key))
+        (xt/x:err
+         (xt/x:cat "NOT VALID."
+                   (xt/x:json-encode {:required key
+                                      :actual (xt/x:obj-keys spec-map)})))))
+    (:= acc (xt/x:obj-assign acc spec-map)))
+  (return acc))
+
 
 ;;
 ;; TYPE PREDICATE
@@ -165,6 +184,14 @@
   [x]
   (return (xt/x:is-function? x)))
 
+(defspec.xt fn? [:fn [:xt/any] :xt/bool])
+
+(defn.xt fn?
+  "legacy alias for `is-function?`"
+  {:added "4.1"}
+  [x]
+  (return (-/is-function? x)))
+
 (defspec.xt is-array? [:fn [:xt/any] :xt/bool])
 
 (defn.xt is-array?
@@ -173,6 +200,14 @@
   [x]
   (return (xt/x:is-array? x)))
 
+(defspec.xt arr? [:fn [:xt/any] :xt/bool])
+
+(defn.xt arr?
+  "legacy alias for `is-array?`"
+  {:added "4.1"}
+  [x]
+  (return (-/is-array? x)))
+
 (defspec.xt is-object? [:fn [:xt/any] :xt/bool])
 
 (defn.xt is-object?
@@ -180,6 +215,14 @@
   {:added "4.1"}
   [x]
   (return (xt/x:is-object? x)))
+
+(defspec.xt obj? [:fn [:xt/any] :xt/bool])
+
+(defn.xt obj?
+  "legacy alias for `is-object?`"
+  {:added "4.1"}
+  [x]
+  (return (-/is-object? x)))
 
 
 

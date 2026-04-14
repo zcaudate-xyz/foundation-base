@@ -73,16 +73,16 @@
                (k/is-boolean? pred)
                pred
                
-               (k/fn? pred)
+               (k/is-function? pred)
                (pred signal ctx)
                
-               (k/obj? pred)
+               (k/is-object? pred)
                (k/get-key pred signal)
                
                :else
                (== signal pred)))
     (:= check (or (== true t)
-                  (and (k/fn? t) (t event ctx))
+                  (and (k/is-function? t) (t event ctx))
                   false))
     (catch err (k/LOG! {:stack   (. err ["stack"])
                         :message (. err ["message"])})))
@@ -94,7 +94,7 @@
   [arg]
   (return (k/walk arg
                   (fn [x]
-                    (if (k/fn? x)
+                    (if (k/is-function? x)
                       (return ["fn" (k/to-string x)])
                       (return x)))
                   k/identity)))
@@ -105,7 +105,7 @@
   [arg]
   (return (k/walk arg
                   (fn [x]
-                    (if (and (k/arr? x)
+                    (if (and (k/is-array? x)
                              (== 2 (k/len x))
                              (== "fn" (k/first x)))
                       (return (k/eval (+ "(" (k/second x) ")")))
@@ -169,4 +169,3 @@
            :status "ok"
            :signal signal
            :body body}))
-

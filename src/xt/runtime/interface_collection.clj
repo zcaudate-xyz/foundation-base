@@ -70,7 +70,7 @@
   [coll]
   (var s    (-/start-string coll))
   (var sep  (-/sep-string coll))
-  (it/for:iter [e (. coll (to-iter))]
+  (xt/for:iter [e (. coll (to-iter))]
     
     (:= s (xt/x:cat s
                  (interface-common/show e)
@@ -109,11 +109,13 @@
   "TODO"
   {:added "4.0"}
   [o1 o2]
-  )
+  (return
+   (it/iter-eq (. o1 (to-iter))
+               (. o2 (to-iter))
+               interface-common/eq)))
 
 
 (def.xt IColl
   ["start_string"
    "end_string"
    "sep_string"])
-

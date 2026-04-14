@@ -47,14 +47,14 @@
   (var list {"::" "list"
              :_head head
              :_rest rest})
-  (xt/x:set-proto list prototype)
+  (xt/x:proto-set list prototype nil)
   (return list))
 
 (defn.xt list-push
   "pushs onto the front of the list"
   {:added "4.0"}
   [list x]
-  (return (-/list-new x list (xt/x:get-proto list))))
+  (return (-/list-new x list (xt/x:proto-get list nil))))
 
 (defn.xt list-pop
   "pops an element from front of list"
@@ -66,7 +66,7 @@
   "gets the empty list"
   {:added "4.0"}
   [list]
-  (return (-/list-new -/EMPTY_MARKER nil (xt/x:get-proto list))))
+  (return (-/list-new -/EMPTY_MARKER nil (xt/x:proto-get list nil))))
 
 (def.xt LIST_SPEC
   [[spec/IColl   {:_start_string  "("
@@ -92,7 +92,7 @@
 
 (def.xt LIST_PROTOTYPE
   (-> -/LIST_SPEC
-      (xt/x:proto-spec)
+      (spec/proto-spec)
       (xt/x:proto-create)))
 
 (defn.xt list-create
@@ -103,7 +103,7 @@
              :_head head})
   (when rest
     (xt/x:set-key list "_rest" rest))
-  (xt/x:set-proto list -/LIST_PROTOTYPE)
+  (xt/x:proto-set list -/LIST_PROTOTYPE nil)
   (return list))
 
 (def.xt EMPTY_LIST
@@ -129,4 +129,3 @@
     (return
      (-/list-create (f _head)
                     (-/list-map _rest f)))))
-

@@ -44,7 +44,7 @@
   [m]
   (var out (-/proxy))
   (var val-fn (fn []
-                (return (:? (k/fn? m)
+                (return (:? (k/is-function? m)
                             (m)
                             (k/clone-nested m)))))
   (var __reset__ (fn []
@@ -62,7 +62,7 @@
   {:added "4.0"}
   [pobj m]
   (var #{__reset__} pobj)
-  (if (k/fn? __reset__)
+  (if (k/is-function? __reset__)
     (__reset__)
     (k/for:object [[k _] pobj]
       (k/del-key pobj k)))
@@ -73,10 +73,10 @@
   {:added "4.0"}
   ([pobj f := k/identity]
    (let [snap      (-/useSnapshot pobj)]
-     (return (:?  (k/fn? f)
+     (return (:?  (k/is-function? f)
                   (f snap)
                   
-                  (k/arr? f)
+                  (k/is-array? f)
                   (. f (reduce (fn [acc k]
                                  (return (. acc [k])))
                                snap))

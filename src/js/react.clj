@@ -240,7 +240,7 @@
   "makes the lazy component"
   {:added "4.0"}
   [component]
-  (if (k/fn? component)
+  (if (k/is-function? component)
     (return component)
     (return (-/lazy (fn:> component)))))
 
@@ -248,7 +248,7 @@
   "constructs a lazy component in function"
   {:added "4.0"}
   [component]
-  (if (k/fn? component)
+  (if (k/is-function? component)
     (return component)
     (do (:# "eslint-disable-next-line react-hooks/rules-of-hooks")
         (return (-/const (-/lazy (fn:> component)))))))

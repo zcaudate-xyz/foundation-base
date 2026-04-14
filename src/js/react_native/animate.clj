@@ -101,7 +101,7 @@
   {:added "4.0"}
   [x]
   (return (and (not= nil x)
-               (k/obj? (. x ["_listeners"]))
+               (k/is-object? (. x ["_listeners"]))
                #_(== (. x
                       ["constructor"]
                       ["name"])
@@ -136,7 +136,7 @@
   [elem props]
   (cond (and elem
              elem.setNativeProps
-             (k/fn? elem.setNativeProps))
+             (k/is-function? elem.setNativeProps))
         (try (elem.setNativeProps props)
              (catch e))
         
@@ -450,4 +450,3 @@
                          (when onComplete (onComplete 1)))))))
   (return [(or visible showing)
            vindicator]))
-

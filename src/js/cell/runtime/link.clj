@@ -45,7 +45,7 @@
   "resolves a script function or value"
   {:added "4.0"}
   [script]
-  (return (:? (k/fn? script)
+  (return (:? (k/is-function? script)
               (script)
               script)))
 

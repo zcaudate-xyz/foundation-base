@@ -289,7 +289,7 @@
   (k/for:object [[view-id view-entry] views]
     (var #{deps} view-entry)
     (k/for:array [path (or deps [])]
-      (:= path (:? (k/arr? path) path [model-id path]))
+      (:= path (:? (k/is-array? path) path [model-id path]))
       (k/set-in all-deps
                 [(k/first path)
                  (k/second path)
@@ -527,4 +527,3 @@
   [cell]
   (var #{link} cell)
   (return (link/remove-callback link "@/raw")))
-

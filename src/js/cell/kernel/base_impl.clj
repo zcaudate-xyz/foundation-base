@@ -96,7 +96,7 @@
   "makes the core link"
   {:added "0.1" :adopt true}
   [worker-url]
-  (var link    (:? (and (k/obj? worker-url)
+  (var link    (:? (and (k/is-object? worker-url)
                         (not (. worker-url ["create_fn"])))
                    worker-url
                    (link/link-create worker-url)))
@@ -241,4 +241,3 @@
   (return
    (event-common/trigger-keyed-listeners
     cell view-key (j/assign {:path path} event))))
-
