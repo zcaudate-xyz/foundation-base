@@ -20,20 +20,14 @@
 ;; EVAL
 ;;
 
-(defn default-body-wrap
-  "creates the scaffolding for the runtime eval to work"
-  {:added "4.0"}
-  [forms]
-  forms)
-
 (defn default-body-transform
-  "standard erlang transforms"
+  "standard erlang body transform - returns the last form as a single expression"
   {:added "4.0"}
   [input mopts]
   (rt/return-transform
    input mopts
    {:format-fn identity
-    :wrap-fn default-body-wrap}))
+    :wrap-fn last}))
 
 (def ^{:arglists '([body])}
   default-oneshot-wrap
@@ -58,59 +52,34 @@
 ;; BASIC
 ;;
 
-(def +client-basic-baked+
-  "
-main(_) ->
-    Port = PORT_PLACEHOLDER,
-    {ok, Sock} = gen_tcp:connect(\"localhost\", Port, [{active, false}, {packet, line}, {binary, true}]),
-    loop(Sock).
-
-loop(Sock) ->
-    case gen_tcp:recv(Sock, 0) of
-        {ok, Packet} ->
-            S = string:trim(Packet),
-            if
-                S == <<\"<PING>\">> ->
-                    gen_tcp:send(Sock, \"<PONG>\\n\"),
-                    loop(Sock);
-                true ->
-                    Input = json:decode(S),
-                    WrapFn = fun(F) ->
-                        try
-                            V = F(),
-                            json:encode(#{
-                                <<\"id\">> => maps:get(<<\"id\">>, Input),
-                                <<\"key\">> => maps:get(<<\"key\">>, Input),
-                                <<\"type\">> => <<\"data\">>,
-                                <<\"value\">> => V
-                            })
-                        catch error:E ->
-                            json:encode(#{
-                                <<\"type\">> => <<\"error\">>,
-                                <<\"value\">> => list_to_binary(io_lib:format(\"~p\", [E]))
-                            })
-                        end
-                    end,
-                    Out = eval_helper(maps:get(<<\"body\">>, Input), WrapFn),
-                    gen_tcp:send(Sock, [Out, \"\\n\"]),
-                    loop(Sock)
-            end;
-        {error, closed} ->
-            ok
-    end.
-
-eval_helper(S, WrapFn) ->
-    {ok, Tokens, _} = erl_scan:string(binary_to_list(S)),
-    {ok, Exprs} = erl_parse:parse_exprs(Tokens),
-    Bindings = [{'EvalHelper', fun eval_helper/2}],
-    {value, Val, _} = erl_eval:exprs(Exprs, Bindings),
-    WrapFn(fun() -> Val end).
-")
+(defn erlang-basic-client-forms
+  "emits the Erlang basic client loop as Erlang source."
+  {:added "4.1"}
+  [host port]
+  [(list 'erl-raw "#!/usr/bin/env escript")
+   (list 'defn 'main '[_]
+         (list 'erl-raw (str "Port = " port))
+         (list 'erl-raw (str "{ok, Sock} = gen_tcp:connect(\""
+                             host
+                             "\", Port, [binary, {active, false}, {packet, line}])"))
+         (list 'erl-raw "loop(Sock)"))
+   (list 'defn 'loop '[sock]
+         (list 'erl-raw "case gen_tcp:recv(Sock, 0) of {ok, Packet} -> S = string:trim(Packet), if S == <<\"<PING>\">> -> gen_tcp:send(Sock, \"<PONG>\\n\"), loop(Sock); true -> Code = json:decode(S), Out = eval_code(<<Code/binary, $.>>), gen_tcp:send(Sock, [Out, \"\\n\"]), loop(Sock) end; {error, closed} -> ok end"))
+   (list 'defn 'eval-code '[s]
+         (list 'erl-raw "try {ok, Tokens, _} = erl_scan:string(binary_to_list(S)), {ok, Exprs} = erl_parse:parse_exprs(Tokens), {value, Val, _} = erl_eval:exprs(Exprs, []), json:encode(#{<<\"type\">> => <<\"data\">>, <<\"value\">> => Val}) catch error:E -> json:encode(#{<<\"type\">> => <<\"error\">>, <<\"value\">> => list_to_binary(io_lib:format(\"~p\", [E]))}) end"))])
 
 (def ^{:arglists '([port & [{:keys [host]}]])}
   default-basic-client
   (fn [port & [{:keys [host]}]]
-    (clojure.string/replace +client-basic-baked+ "PORT_PLACEHOLDER" (str port))))
+    (let [erl-code (impl/emit-as :erlang
+                                 (erlang-basic-client-forms
+                                  (or host "127.0.0.1")
+                                  port))]
+      ;; Write the escript to a temp file and run it via sh -c
+      ;; (escript does not support inline code as CLI argument; OTP 27 requires shebang for non-.erl files)
+      (str "cat > /tmp/erl_client.escript <<'ESCRIPT_END'\n"
+           erl-code
+           "\nESCRIPT_END\nescript /tmp/erl_client.escript"))))
 
 (def +erlang-basic-config+
   (common/set-context-options

@@ -14,8 +14,14 @@
    :julia  {:default  {:oneshot     :julia
                        :basic       :julia}
             :env      {:julia     {:exec    "julia"
-                                   :flags   {:oneshot   ["-e"]
-                                             :basic     ["-e"]}}}}))
+                                    :flags   {:oneshot   ["-e"]
+                                              :basic     ["-e"]}}}}))
+
+(def ^:private +julia-oneshot-prefix+
+  "using JSON;\n\n")
+
+(def ^:private +julia-basic-prefix+
+  "using JSON; using Sockets;\n\n")
 
 ;;
 ;; EVAL
@@ -49,11 +55,11 @@
                    {:lang :julia
                     :layout :flat})]
     (fn [body]
-      (str "import Pkg; Pkg.add(\"JSON\"); using JSON;\n\n"
-           bootstrap
-           "\n\n"
-           (impl/emit-as
-            :julia [(list 'println (list 'return-eval body))])))))
+      (str +julia-oneshot-prefix+
+            bootstrap
+            "\n\n"
+            (impl/emit-as
+             :julia [(list 'println (list 'return-eval body))])))))
 
 (def +julia-oneshot-config+
   (common/set-context-options
@@ -98,7 +104,7 @@
                          :julia +client-basic+)]
                        (clojure.string/join "\n\n"))]
     (fn [port & [{:keys [host]}]]
-      (str "import Pkg; Pkg.add(\"JSON\"); using JSON; using Sockets;\n\n"
+      (str +julia-basic-prefix+
             bootstrap
             "\n\n"
             (impl/emit-as
@@ -107,15 +113,20 @@
                            port
                            {})])))))
 
+(def +default-julia-basic-config+
+  {:bootstrap #'default-basic-client
+   :main  {}
+   :container {:image "foundation-base/rt-basic-julia:latest"}
+   :container-backup true
+   :emit  {:body  {:transform #'default-body-transform}}
+   :json :full
+   :encode :json
+   :timeout 2000})
+
 (def +julia-basic-config+
   (common/set-context-options
    [:julia :basic :default]
-   {:bootstrap #'default-basic-client
-    :main  {}
-    :emit  {:body  {:transform #'default-body-transform}}
-    :json :full
-    :encode :json
-    :timeout 2000}))
+   +default-julia-basic-config+))
 
 (def +julia-basic+
   [(rt/install-type!

@@ -108,9 +108,12 @@
 (def +c-twostep-config+
   (common/set-context-options
    [:c :twostep :default]
-   {:emit  {:body  {:transform #'transform-form}}
-    #_#_
-    :json :string}))
+   {:container {:image "foundation-base/rt-twostep-c:latest"}
+    :container-backup true
+    :exec-fn #'twostep/sh-exec-portable
+    :emit  {:body  {:transform #'transform-form}}
+     #_#_
+     :json :string}))
 
 (def +c-twostep+
   [(rt/install-type!

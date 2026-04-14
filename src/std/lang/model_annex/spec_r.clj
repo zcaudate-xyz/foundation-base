@@ -177,7 +177,7 @@
                  :boolean   {:as #'r-token-boolean}
                  :string    {:quote :single}
                  :symbol    {}}
-        :data   {:vector    {:start "list(" :end ")" :space ""}
+        :data   {:vector    {:start "c(" :end ")" :space ""}
                  :map       {:start "list(" :end ")" :space ""}
                  :map-entry {:start ""  :end ""  :space "" :assign "=" :keyword :symbol}}
         :define {:def       {:raw ""}

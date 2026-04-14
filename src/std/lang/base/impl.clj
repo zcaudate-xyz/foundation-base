@@ -182,10 +182,18 @@
   "helper function for emitting multiple forms"
   {:added "4.0"}
   [lang forms & [meta]]
-  (->> forms
-       (map (fn [form] (emit-str form (merge {:lang lang}
-                                             meta))))
-       (clojure.string/join "\n\n")))
+  (let [library (default-library)
+        lang    (or (when (lib/get-book library lang)
+                      lang)
+                    (when (keyword? lang)
+                      (let [lower (keyword (clojure.string/lower-case (name lang)))]
+                        (when (lib/get-book library lower)
+                          lower)))
+                    lang)]
+    (->> forms
+         (map (fn [form] (emit-str form (merge {:lang lang}
+                                               meta))))
+         (clojure.string/join "\n\n"))))
 
 (defn emit-symbol
   "emits string given symbol and grammar"

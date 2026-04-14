@@ -28,6 +28,21 @@
     (apply list 'do input)
     input))
 
+(defn perl-body-wrap
+  "wraps forms for Perl basic eval - flat do block, CORE::eval returns last value"
+  {:added "4.0"}
+  [forms]
+  (apply list 'do forms))
+
+(defn default-basic-body-transform
+  "transform basic forms for Perl - uses flat statements, no function wrapper"
+  {:added "4.0"}
+  [input mopts]
+  (rt/return-transform
+   input mopts
+   {:wrap-fn perl-body-wrap
+    :format-fn identity}))
+
 (def ^{:arglists '([body])}
   default-oneshot-wrap
   (let [bootstrap  (impl/emit-entry-deps
@@ -58,42 +73,38 @@
 ;;
 
 (def +client-basic+
-  (let [io-socket (symbol "IO::Socket::INET->new")]
-    [(list 'defn 'client-basic
-           ['host 'port 'opts]
-           '(:- "use IO::Socket::INET;")
-           '(:- "use JSON::PP;")
-           (list 'let ['conn (list io-socket
-                                   {:PeerHost 'host
-                                    :PeerPort 'port
-                                    :Proto "tcp"})]
-                 '(while (my $line = (<$conn>))
-                    (let [input (decode_json $line)
-                          out   (return-eval input)]
-                      (print $conn (encode_json out) "\n")))))]))
+  '[(:- "use IO::Socket::INET;")
+    (:- "use JSON::PP;")
+    (:- "$| = 1;")
+    (defn client-basic [host port opts]
+      (:- "my $conn = IO::Socket::INET->new(PeerHost => $host, PeerPort => $port, Proto => 'tcp') or die \"Cannot connect: $!\";")
+      (:- "while (my $line = <$conn>) {")
+      (:- "  chomp $line;")
+      (:- "  my $input = decode_json($line);")
+      (:- "  my $out = return_eval($input);")
+      (:- "  print $conn $out . \"\\n\";")
+      (:- "}"))])
 
 (def ^{:arglists '([port & [{:keys [host]}]])}
   default-basic-client
-  (let [bootstrap (->> [(impl/emit-entry-deps
+  (let [return-eval-src (impl/emit-entry-deps
                          k/return-eval
-                         {:lang :perl
-                          :layout :flat})
-                        (impl/emit-as
-                         :perl +client-basic+)]
-                       (clojure.string/join "\n\n"))]
+                          {:lang :perl
+                           :layout :flat})]
     (fn [port & [{:keys [host]}]]
-      (str bootstrap
-           "\n\n"
+      (str return-eval-src
+            "\n\n"
            (impl/emit-as
-            :perl [(list 'client-basic
-                       (or host "127.0.0.1")
-                       port
-                       {})])))))
+            :perl (concat +client-basic+
+                          [(list 'client-basic
+                                 (or host "127.0.0.1")
+                                 port
+                                 {})]))))))
 
 (def +default-basic-config+
   {:bootstrap #'default-basic-client
     :main   {}
-   :emit   {:body  {:transform #'rt/return-transform}
+   :emit   {:body  {:transform #'default-basic-body-transform}
             :lang/format :global}
    :json   :full
    :encode :json ;; default

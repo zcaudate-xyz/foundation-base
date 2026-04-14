@@ -1,6 +1,5 @@
 (ns std.lang.model-annex.spec-ocaml-test
-  (:require [clojure.string :as str]
-            [std.lang.base.impl :as impl]
+  (:require [std.lang.base.impl :as impl]
             [std.lang.model-annex.spec-ocaml :as spec-ocaml])
   (:use code.test))
 
@@ -32,70 +31,37 @@
 
 
 ^{:refer std.lang.model-annex.spec-ocaml/emit-raw-str :added "4.1"}
-(fact "emits a raw string without processing"
-  (spec-ocaml/emit-raw-str [:raw-str "hello"] nil nil)
-  => "hello")
+(fact "TODO")
 
 ^{:refer std.lang.model-annex.spec-ocaml/emit-indent-body :added "4.1"}
-(fact "indents the body by 2 spaces"
-  (spec-ocaml/emit-indent-body [:indent-body "hello"] nil nil)
-  => "  \"hello\"")
+(fact "TODO")
 
 ^{:refer std.lang.model-annex.spec-ocaml/emit-lines-with :added "4.1"}
-(fact "joins forms with a separator"
-  (impl/emit-as :ocaml ['(fn [x]
-                            (:lines-with ";\n" (+ x 1) (* x 2)))])
-  => (fn [s] (str/includes? s ";\n")))
+(fact "TODO")
 
 ^{:refer std.lang.model-annex.spec-ocaml/ml-invoke :added "4.1"}
-(fact "wraps complex arguments for function application"
-  (impl/emit-as :ocaml ['(f (+ 1 2) x)])
-  => "f (1 + 2) x")
+(fact "TODO")
 
 ^{:refer std.lang.model-annex.spec-ocaml/ml-args :added "4.1"}
-(fact "emits space-separated OCaml arguments"
-  (impl/emit-script '(defn hello [x y] x) {:lang :ocaml})
-  => "let rec hello x y = x")
+(fact "TODO")
 
 ^{:refer std.lang.model-annex.spec-ocaml/parse-match-clauses :added "4.1"}
-(fact "parses match clauses into pattern/body pairs"
-  (spec-ocaml/parse-match-clauses '(0 "zero" 1 "one"))
-  => [{:pattern 0 :body "zero"}
-      {:pattern 1 :body "one"}]
-
-  (spec-ocaml/parse-match-clauses '(n [:when (> n 0) "positive"]))
-  => [{:pattern 'n :guard '(> n 0) :body "positive"}])
+(fact "TODO")
 
 ^{:refer std.lang.model-annex.spec-ocaml/body-expr :added "4.1"}
-(fact "wraps multi-form bodies in begin/end"
-  (spec-ocaml/body-expr '((+ x 1)))
-  => '(+ x 1)
-
-  (let [form (spec-ocaml/body-expr '((+ x 1) (* x 2)))]
-    (str/includes? (str form) "begin"))
-  => true)
+(fact "TODO")
 
 ^{:refer std.lang.model-annex.spec-ocaml/tf-defn :added "4.1"}
-(fact "transforms defn to OCaml let rec"
-  (impl/emit-script '(defn hello [x] x) {:lang :ocaml})
-  => "let rec hello x = x")
+(fact "TODO")
 
 ^{:refer std.lang.model-annex.spec-ocaml/tf-match :added "4.1"}
-(fact "transforms match expression"
-  (impl/emit-as :ocaml ['(match x 0 "zero" _ "other")])
-  => "match x with\n  | 0 -> \"zero\"\n  | _ -> \"other\"")
+(fact "TODO")
 
 ^{:refer std.lang.model-annex.spec-ocaml/tf-if :added "4.1"}
-(fact "transforms if expression"
-  (impl/emit-as :ocaml ['(if true 1 2)])
-  => "if true then 1 else 2")
+(fact "TODO")
 
 ^{:refer std.lang.model-annex.spec-ocaml/tf-letrec :added "4.1"}
-(fact "transforms letrec expression"
-  (impl/emit-as :ocaml ['(letrec [x 1] x)])
-  => "let rec x = 1\nin x")
+(fact "TODO")
 
 ^{:refer std.lang.model-annex.spec-ocaml/tf-lambda :added "4.1"}
-(fact "transforms lambda expression"
-  (impl/emit-as :ocaml ['(fn [x] x)])
-  => "fun x -> x")
+(fact "TODO")

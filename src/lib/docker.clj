@@ -30,7 +30,8 @@
         container (assoc container
                          :id (or id (str (name tag) "-" suffix))
                          :labels {"rt/lang"   (name lang)
-                                  "rt/module" (name module)})
+                                  "rt/module" (or (some-> module name)
+                                                  "")})
         {:keys [container-ip
                 container-id]} (start-fn container)]
     (assoc rt
