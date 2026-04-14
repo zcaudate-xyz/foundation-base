@@ -1,10 +1,11 @@
 (ns lua.nginx.driver-sqlite
   (:require [std.lang :as l]
-            [std.lib.foundation :as f]
-            [xt.sys.conn-dbsql :as dbsql]))
+             [std.lib.foundation :as f]
+             [xt.sys.conn-dbsql :as dbsql]))
 
 (l/script :lua
-  {:require [[xt.lang.base-lib :as k]]
+  {:require [[xt.lang.common-spec :as xt]
+             [xt.lang.common-data :as xtd]]
    :import [["lsqlite3" :as ngxsqlite]]})
 
 (f/template-entries [l/tmpl-entry {:type :fragment
@@ -33,10 +34,10 @@
   (. db (exec query
               (fn [udata cols values names]
                 (var entry {})
-                (k/for:array [[i k] names]
+                (xt/for:array [[i k] names]
                   (:= (. entry [k])
                       (. values [i])))
-                (x:arr-push out entry)
+                (xt/x:arr-push out entry)
                 (return 0))))
   (return out))
 
@@ -48,14 +49,14 @@
   (. db (exec query
               (fn [udata cols values names]
                 (cond (== cols 1)
-                      (table.insert out (-/coerce-number (k/first values)))
-                      
-                      :else
-                      (table.insert out (k/arr-map values -/coerce-number)))
+                      (table.insert out (-/coerce-number (xtd/first values)))
+                       
+                       :else
+                       (table.insert out (xtd/arr-map values -/coerce-number)))
                 (return 0))))
   (if (< 2 (len out))
     (return out)
-    (return (k/first out))))
+    (return (xtd/first out))))
 
 (defn.lua connect-constructor
   "create db connection"
@@ -77,4 +78,3 @@
       (fn [query]
         (return (-/raw-query instance query))))
   (return conn))
-

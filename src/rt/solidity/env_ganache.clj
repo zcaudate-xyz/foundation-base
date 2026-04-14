@@ -85,10 +85,10 @@
           (-> (if (not @*server*)
                 (swap! *server*
                        (fn [m]
-                         (let [process (os/sh {:args ["/bin/bash" "-c"
-                                                     "ganache --wallet.seed 'test' --host '0.0.0.0'"]
-                                              :wait false
-                                              :root +default-dir+})
+                          (let [process (os/sh {:args ["/bin/bash" "-c"
+                                                      "npx ganache --wallet.seed 'test' --host '0.0.0.0'"]
+                                               :wait false
+                                               :root +default-dir+})
                                thread  (-> (future/future
                                              (os/sh-wait process))
                                            (future/on:complete

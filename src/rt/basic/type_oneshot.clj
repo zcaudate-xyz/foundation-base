@@ -17,18 +17,20 @@
                                  trim
                                  stderr
                                  raw
-                                 root]
-                          :or {trim clojure.string/trim-newline}}]
+                                 root
+                                 shell]
+                           :or {trim clojure.string/trim-newline}}]
   (try (let [args (if pipe
                     input-args
                     (conj input-args input-body))
-             proc (os/sh {:wait false
-                         :args args
-                         :root root})
-             _    (cond-> proc
-                    pipe  (doto (os/sh-write input-body) (os/sh-close))
-                    :then (os/sh-wait))
-             {:keys [err out exit] :as ret} (os/sh-output proc)]
+             proc (os/sh (merge shell
+                                {:wait false
+                                 :args args
+                                 :root root}))
+              _    (cond-> proc
+                     pipe  (doto (os/sh-write input-body) (os/sh-close))
+                     :then (os/sh-wait))
+              {:keys [err out exit] :as ret} (os/sh-output proc)]
          (cond raw
                (let [out-lines (->> (clojure.string/split-lines (trim out))
                                     (remove empty?)

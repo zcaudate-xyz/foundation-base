@@ -42,15 +42,20 @@
   {:added "4.0"}
   ([rt]
    (start-basic rt server/create-basic-server))
-  ([{:keys [id lang container bench program port process exec] :as rt} f]
-   (let [[program process exec] (oneshot/rt-oneshot-setup
-                                 lang
-                                 program
-                                 process
-                                 exec
-                                 (:runtime rt))
-         explicit-container?    (some? container)
-         fallback-container     (:container process)
+   ([{:keys [id lang container bench program port process exec] :as rt} f]
+    (let [[program process exec] (oneshot/rt-oneshot-setup
+                                  lang
+                                  program
+                                  process
+                                  exec
+                                  (:runtime rt))
+          rt-base                (assoc rt
+                                   :program program
+                                   :process process
+                                   :exec exec
+                                   :shell (:shell process))
+          explicit-container?    (some? container)
+          fallback-container     (:container process)
          container-backup?      (if (contains? process :container-backup)
                                   (:container-backup process)
                                   (default-container-backup?))
@@ -60,20 +65,21 @@
                                   (and (not local-exec?)
                                        container-backup?)
                                   fallback-container)
-         server (server/start-server id lang port
+          server (server/start-server id lang port
                                       f
                                       ;; TODO link common options
                                       (or (:encode process)
                                           {}))
-         merge-rt (fn [m]
-                    (merge (eval (select-keys rt [:program
-                                                  :make
-                                                  :exec]))
-                           {:program program
-                            :exec exec}
-                           (if (map? m)
-                             m
-                             {})))
+          merge-rt (fn [m]
+                     (merge (eval (select-keys rt-base [:program
+                                                   :make
+                                                   :exec
+                                                   :shell]))
+                            {:program program
+                             :exec exec}
+                            (if (map? m)
+                              m
+                              {})))
          container-config' (cond-> (merge-rt container-config)
                              (and container-config
                                   (not explicit-container?)
@@ -81,27 +87,24 @@
                              (dissoc :exec :program))
           [attach key] (cond container-config
                              [(container/start-container
-                                lang
-                                (merge {:suffix id}
-                                       container-config')
-                                (:port server)
-                                rt)
-                               :container]
-                             
-                            (not (false? bench))
-                            [(bench/start-bench
-                              lang
-                              (merge-rt bench)
-                              (:port server)
-                              rt)
-                             :bench])
-          rt   (cond-> rt
-                 true (assoc :program program
-                             :process process
-                             :exec exec)
-                 key (assoc key attach)
-                 key (doto (server/wait-ready)))]
-      rt)))
+                                 lang
+                                 (merge {:suffix id}
+                                        container-config')
+                                 (:port server)
+                                 rt-base)
+                                :container]
+                              
+                             (not (false? bench))
+                             [(bench/start-bench
+                               lang
+                               (merge-rt bench)
+                               (:port server)
+                               rt-base)
+                              :bench])
+        rt   (cond-> rt-base
+                  key (assoc key attach)
+                  key (doto (server/wait-ready)))]
+       rt)))
 
 (defn stop-basic
   "stops the basic rt"
@@ -167,12 +170,13 @@
     :or {runtime :basic}}]
   (let [process (collection/merge-nested (common/get-options lang :basic :default)
                                 process)]
-    (map->RuntimeBasic (merge  m
-                               {:id (or id (f/sid))
-                                :tag runtime
-                                :runtime runtime
-                                :process process
-                                :lifecycle process}))))
+     (map->RuntimeBasic (merge  m
+                                {:id (or id (f/sid))
+                                 :tag runtime
+                                 :runtime runtime
+                                 :process process
+                                 :shell (:shell process)
+                                 :lifecycle process}))))
 
 (defn rt-basic
   "creates and starts a basic rt

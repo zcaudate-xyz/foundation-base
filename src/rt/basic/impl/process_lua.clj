@@ -10,11 +10,41 @@
              [std.lib.collection :as collection]
              [std.lib.env :as env]
              [std.lib.os :as os]
-             [xt.lang.base-repl :as k]))
+             [xt.lang.common-repl :as k]))
 
 ;;
 ;; PROGRAM
 ;;
+
+(defn- lua-local-rocks-env
+  "adds the user-local luarocks tree to Lua module lookup when present."
+  {:added "4.1"}
+  []
+  (let [home  (System/getenv "HOME")
+        share (some-> home (str "/.luarocks/share/lua/5.1"))
+        lib   (some-> home (str "/.luarocks/lib/lua/5.1"))
+        share-paths (cond-> []
+                      (and share (.exists (java.io.File. share)))
+                      (into [(str share "/?.lua")
+                             (str share "/?/init.lua")]))
+        lib-paths   (cond-> []
+                      (and lib (.exists (java.io.File. lib)))
+                      (conj (str lib "/?.so")))]
+    (cond-> {}
+      (seq share-paths)
+      (assoc "LUA_PATH" (str (clojure.string/join ";" share-paths)
+                             ";"
+                             (or (System/getenv "LUA_PATH")
+                                 ";;")))
+      (seq lib-paths)
+      (assoc "LUA_CPATH" (str (clojure.string/join ";" lib-paths)
+                              ";"
+                              (or (System/getenv "LUA_CPATH")
+                                  ";;"))))))
+
+(def +lua-local-rocks-shell+
+  (when-let [env (not-empty (lua-local-rocks-env))]
+    {:env env}))
 
 (def +program-init+
   (common/put-program-options
@@ -22,24 +52,28 @@
 	             :basic          :luajit
 	             :websocket      :resty}
           :env      {:lua       {:exec   "lua"
+                                 :shell  +lua-local-rocks-shell+
 	                         :flags  {:oneshot ["-e"]
                                           :basic   ["-e"]
                                           :interactive ["-i"]
 	                                  :json ["cjson" :install]
                                           :bench {:basic     ["luasocket" :install]}}}
 	             :luajit    {:exec   "luajit"
+                                 :shell  +lua-local-rocks-shell+
 	                         :flags   {:oneshot ["-e"]
                                            :basic   ["-e"]
                                            :interactive  ["-i"]
 	                                   :json ["cjson" :install]
                                            :bench {:basic     ["luasocket" :install]}}}
                      :torch     {:exec   "th"
+                                 :shell  +lua-local-rocks-shell+
 	                         :flags   {:oneshot ["-e"]
                                            :basic   ["-e"]
                                            :interactive  ["-i"]
 	                                   :json ["cjson" :install]
                                            :bench {:basic     ["luasocket" :install]}}}
 	             :resty     {:exec   "resty"
+                                 :shell  +lua-local-rocks-shell+
 	                         :flags   {:oneshot   ["-e"]
                                            :basic     ["-e"]
                                            :websocket ["-e"]
@@ -57,13 +91,13 @@
    the same Lua eval scope."
   {:added "4.1"}
   [forms]
-  (list 'do
-        (apply list 'defn (with-meta 'OUT-FN
-                            {:inner true})
-               []
-               (concat (butlast forms)
-                       [(list 'return (last forms))]))
-        (list 'return (list 'OUT-FN))))
+  (let [forms (rt/return-format forms '#{:- := var local def defn break throw})]
+    (list 'do
+          (apply list 'defn (with-meta 'OUT-FN
+                              {:inner true})
+                 []
+                 forms)
+          (list 'return (list 'OUT-FN)))))
 
 (defn normalize-forms
   "normalizes runtime input into a flat sequence of Lua statements."

@@ -5,11 +5,11 @@
   (:use code.test))
 
 (l/script- :js
-  {:runtime :basic
-   :require [[xt.lang.base-lib :as k]
-              [xt.lang.common-repl :as repl]
-              [js.lib.fastify :as http]
-              [js.core :as j]]})
+   {:runtime :basic
+    :require [[xt.lang.common-lib :as k]
+               [xt.lang.common-repl :as repl]
+               [js.lib.fastify :as http]
+               [js.core :as j]]})
 
 (fact:global
  {:setup    [(l/rt:restart)

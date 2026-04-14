@@ -8,12 +8,12 @@
   (:use code.test))
 
 (l/script- :js
-  {:runtime :basic
-   :require [[xt.lang.base-lib :as k]
-              [xt.lang.common-repl :as repl]
-              [js.lib.eth-lib :as e :include [:fn]]
-              [js.lib.eth-solc :as eth-solc :include [:fn]]
-              [web3.lib.example-counter :as example-counter]
+   {:runtime :basic
+    :require [[xt.lang.common-lib :as k]
+               [xt.lang.common-repl :as repl]
+               [js.lib.eth-lib :as e :include [:fn]]
+               [js.lib.eth-solc :as eth-solc :include [:fn]]
+               [web3.lib.example-counter :as example-counter]
              [js.core :as j]]})
 
 (fact:global
@@ -231,14 +231,15 @@
 (fact "deploys the contract"
   ^:hidden
   
-  (j/<!
-   (e/contract-deploy (e/get-signer "http://127.0.0.1:8545"
-                                    (@! (last env-ganache/+default-private-keys+)))
-                      (@! (:abi +contract+))
-                      (@! (:bytecode +contract+))
-                      []
-                      {})
-   (k/key-fn "deployTransaction"))
+   (j/<!
+    (e/contract-deploy (e/get-signer "http://127.0.0.1:8545"
+                                     (@! (last env-ganache/+default-private-keys+)))
+                       (@! (:abi +contract+))
+                       (@! (:bytecode +contract+))
+                       []
+                       {})
+    (fn [m]
+      (return (k/get-key m "deployTransaction"))))
   => map?)
 
 ^{:refer js.lib.eth-lib/contract-run :added "4.0" :unchecked true
@@ -247,14 +248,15 @@
              (l/rt :js)
              example-counter/+default-contract+))
           (def +address+
-            (j/<!
-             (e/contract-deploy (e/get-signer "http://127.0.0.1:8545"
-                                              (@! (last env-ganache/+default-private-keys+)))
-                                (@! (:abi +contract+))
-                                (@! (:bytecode +contract+))
-                                []
-                                {})
-             (k/key-fn "address")))]}
+             (j/<!
+              (e/contract-deploy (e/get-signer "http://127.0.0.1:8545"
+                                               (@! (last env-ganache/+default-private-keys+)))
+                                 (@! (:abi +contract+))
+                                 (@! (:bytecode +contract+))
+                                 []
+                                 {})
+              (fn [m]
+                (return (k/get-key m "address")))))]}
 (fact "runs the contract"
   ^:hidden
   
@@ -282,14 +284,15 @@
              (l/rt :js)
              example-counter/+default-contract+))
           (def +address+
-            (j/<!
-             (e/contract-deploy (e/get-signer "http://127.0.0.1:8545"
-                                              (@! (last env-ganache/+default-private-keys+)))
-                                (@! (:abi +contract+))
-                                (@! (:bytecode +contract+))
-                                []
-                                {})
-             (k/key-fn "address")))]}
+             (j/<!
+              (e/contract-deploy (e/get-signer "http://127.0.0.1:8545"
+                                               (@! (last env-ganache/+default-private-keys+)))
+                                 (@! (:abi +contract+))
+                                 (@! (:bytecode +contract+))
+                                 []
+                                 {})
+              (fn [m]
+                (return (k/get-key m "address")))))]}
 (fact "subscribes to events"
   ^:hidden
 
@@ -325,14 +328,15 @@
              (l/rt :js)
              example-counter/+default-contract+))
           (def +address+
-            (j/<!
-             (e/contract-deploy (e/get-signer "http://127.0.0.1:8545"
-                                              (@! (last env-ganache/+default-private-keys+)))
-                                (@! (:abi +contract+))
-                                (@! (:bytecode +contract+))
-                                []
-                                {})
-             (k/key-fn "address")))]}
+             (j/<!
+              (e/contract-deploy (e/get-signer "http://127.0.0.1:8545"
+                                               (@! (last env-ganache/+default-private-keys+)))
+                                 (@! (:abi +contract+))
+                                 (@! (:bytecode +contract+))
+                                 []
+                                 {})
+              (fn [m]
+                (return (k/get-key m "address")))))]}
 (fact "subscribes to single event"
   ^:hidden
 

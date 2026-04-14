@@ -3,10 +3,11 @@
             [std.lang :as l]))
 
 (l/script :js
-  {:require [[js.core :as j]
-             [xt.lang.common-runtime :as rt :with [defvar.js]]
-             [xt.lang.base-lib :as k]]
-   :import  [["fastify" :as Fastify]]})
+   {:require [[js.core :as j]
+              [xt.lang.common-data :as d]
+              [xt.lang.common-spec :as x]
+              [xt.lang.common-runtime :as rt :with [defvar.js]]]
+    :import  [["fastify" :as Fastify]]})
 
 (defvar.js current-servers
   "gets the current servers"
@@ -20,11 +21,13 @@
   [f]
   (return
    (fn:> [req res]
-     (f {:headers (k/from-flat (. req raw rawHeaders)
-                               k/step-set-key
+     (f {:headers (d/from-flat (. req raw rawHeaders)
+                               (fn [obj k v]
+                                 (x:set-key obj k v)
+                                 (return obj))
                                {})
-         :query  (. req query)
-         :path   (. req params ["*"])
+          :query  (. req query)
+          :path   (. req params ["*"])
          :url (. req
                  raw
                  url)
@@ -50,13 +53,14 @@
   "stops a fastify server"
   {:added "4.0"}
   [port-or-app]
-  (var app (:? (k/is-number? port-or-app)
-               (k/get-key (-/current-servers) port-or-app)
+  (var app (:? (x:is-number? port-or-app)
+               (x:get-key (-/current-servers) port-or-app)
                port-or-app))
   (if app
-    (return (do (k/del-key (-/current-servers)
+    (return (do (x:del-key (-/current-servers)
                            (. app port))
                 (. app
                    (close)
-                   (then k/T))))
+                   (then (fn []
+                           (return true))))))
     (return nil)))

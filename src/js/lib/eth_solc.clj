@@ -4,10 +4,10 @@
   (:refer-clojure :exclude [compile]))
 
 (l/script :js
-  {:require [[xt.lang.base-lib :as k]
+  {:require [[xt.lang.common-lib :as k]
              [js.core :as j]]
-   :import [["solc" :as solc]
-            ["solc" :as solc]]})
+    :import [["solc" :as solc]
+             ["solc" :as solc]]})
 
 (def$.js compile solc.compile)
 
@@ -37,4 +37,3 @@
          {"*" {"*" ["*"]}}}})
   (return
    (k/json-decode (-/compile (k/json-encode input)))))
-

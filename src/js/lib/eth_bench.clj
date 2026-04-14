@@ -5,7 +5,7 @@
 (l/script :js
   {:require [[js.lib.eth-lib :as eth-lib]
              [js.lib.eth-solc :as eth-solc]
-             [xt.lang.base-lib :as k]
+             [xt.lang.common-lib :as k]
              [js.core :as j]]})
 
 (defn.js send-wei
