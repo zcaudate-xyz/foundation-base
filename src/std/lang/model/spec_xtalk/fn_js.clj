@@ -685,7 +685,7 @@
           (var #{path scheme} (or ~opts {}))
           (fetch (+ (or scheme "http") "://" ~host ":" ~port "/" (or path ""))
                  {:method "POST"
-                  :body (xt.lang.base-repl/return-encode ~value ~id ~key)})
+                  :body (xt.lang.common-repl/return-encode ~value ~id ~key)})
           (return ["async"])
           (catch e (return ["unable to connect"]))))))
 

@@ -1,6 +1,6 @@
 (ns js.lib.valtio-test
   (:require [std.lang :as l]
-            [xt.lang.base-notify :as notify])
+            [xt.lang.common-notify :as notify])
   (:use code.test)
   (:refer-clojure :exclude [use val proxy]))
 
@@ -9,7 +9,7 @@
    :require [[js.lib.valtio :as v]
              [js.core :as j]
              [xt.lang.base-lib :as k]
-             [xt.lang.base-repl :as repl]]})
+             [xt.lang.common-repl :as repl]]})
 
 (fact:global
  {:setup    [(l/rt:restart)]

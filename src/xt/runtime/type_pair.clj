@@ -43,7 +43,7 @@
 (def.xt PAIR_PROTOTYPE
   (-> -/PAIR_SPEC
       (spec/proto-spec)
-      (xt/x:proto-create)))
+      (spec/proto-create)))
 
 (defn.xt pair
   "creates a pair"

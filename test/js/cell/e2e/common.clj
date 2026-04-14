@@ -58,7 +58,7 @@
              [js.lib.driver-sqlite-wasm :as sqlite-wasm]
              [xt.db :as xdb]
              [xt.lang.base-lib :as k]
-             [xt.lang.base-runtime :as rt :with [defvar.js]]
+             [xt.lang.common-runtime :as rt :with [defvar.js]]
              [xt.lang.event-view :as event-view]
              [xt.sys.conn-dbsql :as dbsql]]})
 

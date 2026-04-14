@@ -5,7 +5,7 @@
 (l/script :xtalk
   {:require [[xt.cell.kernel.base-util :as util]
              [xt.cell.kernel.worker-state :as state]
-             [xt.lang.base-runtime :as rt :with [defvar.xt]]
+             [xt.lang.common-runtime :as rt :with [defvar.xt]]
              [xt.lang.common-spec :as xt]]})
 
 

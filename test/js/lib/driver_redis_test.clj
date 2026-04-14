@@ -1,14 +1,14 @@
 (ns js.lib.driver-redis-test
   (:require [lib.redis.bench :as bench]
             [std.lang :as l]
-            [xt.lang.base-notify :as notify])
+            [xt.lang.common-notify :as notify])
   (:use code.test))
 
 (l/script- :js
   {:runtime :basic
    :require [[xt.sys.conn-redis :as redis]
              [xt.lang.base-lib :as k]
-             [xt.lang.base-repl :as repl]
+             [xt.lang.common-repl :as repl]
              [js.lib.driver-redis :as js-driver]]})
 
 (fact:global

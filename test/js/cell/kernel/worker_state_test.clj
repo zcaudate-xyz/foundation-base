@@ -3,13 +3,13 @@
   (:require [js.cell.playground :as browser]
             [std.lang :as l]
             [std.lib.template :as template]
-            [xt.lang.base-notify :as notify]))
+            [xt.lang.common-notify :as notify]))
 
 (l/script- :js
   {:runtime :basic
    :require [[xt.lang.base-lib :as k]
-             [xt.lang.base-repl :as repl]
-             [xt.lang.base-runtime :as rt]
+             [xt.lang.common-repl :as repl]
+             [xt.lang.common-runtime :as rt]
              [xt.lang.util-throttle :as th]
              [js.core :as j]
              [js.cell.kernel.worker-state :as worker-state]]

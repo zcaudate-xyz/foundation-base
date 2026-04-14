@@ -1,7 +1,7 @@
 (ns lua.nginx.driver-redis-test
   (:require [lib.redis.bench :as bench]
             [std.lang :as l]
-            [xt.lang.base-notify :as notify])
+            [xt.lang.common-notify :as notify])
   (:use code.test))
 
 (l/script- :lua

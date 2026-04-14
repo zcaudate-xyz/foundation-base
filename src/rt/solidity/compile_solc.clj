@@ -13,8 +13,8 @@
             [std.lib.template :as template]
             [std.make.compile :as compile]
             [std.string.prose :as prose]
-            [xt.lang.base-notify :as notify]
-            [xt.lang.base-repl :as repl]))
+            [xt.lang.common-notify :as notify]
+            [xt.lang.common-repl :as repl]))
 
 (defn compile-base-emit
   "emits solidity given entries and interfaces"
@@ -174,7 +174,7 @@
                  {:lang :js
                   :runtime :basic
                   :layout :full})
-        form (template/$ [(xt.lang.base-repl/notify
+        form (template/$ [(xt.lang.common-repl/notify
                     (:= (!:G solc) (require "solc")))])
         _    (notify/wait-on-fn
               rt-node

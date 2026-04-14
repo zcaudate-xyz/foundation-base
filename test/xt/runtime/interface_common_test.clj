@@ -1,29 +1,29 @@
 (ns xt.runtime.interface-common-test
   (:require [std.lang :as l]
-            [xt.lang.base-notify :as notify])
+            [xt.lang.common-notify :as notify])
   (:use code.test))
 
 (l/script- :js
   {:runtime :basic
-   :require [[xt.runtime.interface-common :as v]
-             [xt.lang.base-lib :as k]
-             [xt.lang.base-iter :as it]
-             [xt.lang.base-repl :as repl]
-             [xt.runtime.type-keyword :as kw]
-             [xt.runtime.type-symbol :as sym]
-             [xt.runtime.type-list :as list]
-             [xt.runtime.type-vector :as vec]]})
+    :require [[xt.runtime.interface-common :as v]
+              [xt.lang.common-lib :as k]
+              [xt.lang.common-iter :as it]
+              [xt.lang.common-repl :as repl]
+              [xt.runtime.type-keyword :as kw]
+              [xt.runtime.type-symbol :as sym]
+              [xt.runtime.type-list :as list]
+              [xt.runtime.type-vector :as vec]]})
 
 (l/script- :lua
   {:runtime :basic
-   :require [[xt.runtime.interface-common :as v]
-             [xt.lang.base-lib :as k]
-             [xt.lang.base-iter :as it]
-             [xt.lang.base-repl :as repl]
-             [xt.runtime.type-keyword :as kw]
-             [xt.runtime.type-symbol :as sym]
-             [xt.runtime.type-list :as list]
-             [xt.runtime.type-vector :as vec]]})
+    :require [[xt.runtime.interface-common :as v]
+              [xt.lang.common-lib :as k]
+              [xt.lang.common-iter :as it]
+              [xt.lang.common-repl :as repl]
+              [xt.runtime.type-keyword :as kw]
+              [xt.runtime.type-symbol :as sym]
+              [xt.runtime.type-list :as list]
+              [xt.runtime.type-vector :as vec]]})
 
 (fact:global
  {:setup    [(l/rt:restart)]

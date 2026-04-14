@@ -38,10 +38,7 @@
   "gets symbol equality"
   {:added "4.0"}
   [sym o]
-  (var otype (xt/x:type-native o))
-  (var oclass (:? (xt/x:is-object? o)
-                  (xt/x:get-key o "::" otype)
-                  otype))
+  (var oclass (common-hash/native-class o))
   (return (and (== "symbol" oclass)
                (== (. sym _ns) (. o _ns))
                (== (. sym _name) (. o _name)))))
@@ -57,7 +54,7 @@
 (def.xt SYMBOL_PROTOTYPE
   (-> -/SYMBOL_SPEC
       (spec/proto-spec)
-      (xt/x:proto-create)))
+      (spec/proto-create)))
 
 (defn.xt symbol-create
   "creates a symbol"

@@ -1,13 +1,13 @@
 (ns lua.nginx-test
   (:require [rt.nginx :as nginx]
             [std.lang :as l]
-            [xt.lang.base-notify :as notify])
+            [xt.lang.common-notify :as notify])
   (:use code.test))
 
 (l/script- :lua
   {:runtime :nginx.instance
    :require [[lua.nginx :as n]
-             [xt.lang.base-repl :as repl]]})
+             [xt.lang.common-repl :as repl]]})
 
 (fact:global
  {:setup    [(l/rt:restart)]

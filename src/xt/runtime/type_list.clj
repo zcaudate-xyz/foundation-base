@@ -93,7 +93,7 @@
 (def.xt LIST_PROTOTYPE
   (-> -/LIST_SPEC
       (spec/proto-spec)
-      (xt/x:proto-create)))
+      (spec/proto-create)))
 
 (defn.xt list-create
   "creates a list"

@@ -6,17 +6,17 @@
 (l/script- :js
   {:runtime :basic
    :require [[xt.runtime.common-hash :as hash]
-             [xt.lang.base-iter :as it]]})
+             [xt.lang.common-iter :as it]]})
 
 (l/script- :lua
   {:runtime :basic
    :require [[xt.runtime.common-hash :as hash]
-             [xt.lang.base-iter :as it]]})
+             [xt.lang.common-iter :as it]]})
 
 (l/script- :python
   {:runtime :basic
    :require [[xt.runtime.common-hash :as hash]
-             [xt.lang.base-iter :as it]]})
+             [xt.lang.common-iter :as it]]})
 
 (fact:global
  {:setup    [(l/rt:restart)]

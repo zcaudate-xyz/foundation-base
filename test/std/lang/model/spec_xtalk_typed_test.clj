@@ -693,26 +693,26 @@
   (typed/clear-registry!)
   (doseq [ns-sym '[xt.lang.base-lib
                    xt.lang.base-macro
-                   xt.lang.base-runtime
+                   xt.lang.common-runtime
                    xt.lang.base-iter
-                   xt.lang.base-repl
+                   xt.lang.common-repl
                    xt.lang.base-text
                    xt.lang.base-interval]]
     (typed/analyze-and-register! ns-sym))
   [(analysis/get-function-output-type 'xt.lang.base-lib/sym-pair)
-   (analysis/get-function-output-type 'xt.lang.base-runtime/xt-create)
-   (analysis/get-function-output-type 'xt.lang.base-runtime/xt-current)
+   (analysis/get-function-output-type 'xt.lang.common-runtime/xt-create)
+   (analysis/get-function-output-type 'xt.lang.common-runtime/xt-current)
    (analysis/get-function-output-type 'xt.lang.base-iter/iter)
-   (analysis/get-function-output-type 'xt.lang.base-repl/return-encode)
+   (analysis/get-function-output-type 'xt.lang.common-repl/return-encode)
    (analysis/get-function-output-type 'xt.lang.base-text/tag-string)
    (analysis/get-function-output-type 'xt.lang.base-interval/start-interval)
    (-> (typed/get-macro 'xt.lang.base-macro/add)
        :output
        types/type->data)]
   => '[{:kind :named :name xt.lang.base-lib/StringPair}
-       {:kind :named :name xt.lang.base-runtime/XTState}
+       {:kind :named :name xt.lang.common-runtime/XTState}
        {:kind :maybe
-        :item {:kind :named :name xt.lang.base-runtime/XTState}}
+        :item {:kind :named :name xt.lang.common-runtime/XTState}}
        {:kind :maybe
         :item {:kind :named :name xt.lang.base-iter/Iterator}}
        {:kind :primitive :name :xt/str}

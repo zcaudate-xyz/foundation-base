@@ -307,7 +307,7 @@
 (def.xt VECTOR_PROTOTYPE
   (-> -/VECTOR_SPEC
       (spec/proto-spec)
-      (xt/x:proto-create)))
+      (spec/proto-create)))
 
 (defn.xt vector-create
   "creates a vector"

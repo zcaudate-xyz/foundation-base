@@ -19,8 +19,8 @@
             [std.lib.template :as template]
             [std.protocol.component :as protocol.component]
             [std.protocol.context :as protocol.context]
-            [xt.lang.base-notify :as notify]
-            [xt.lang.base-repl :as base-repl]))
+            [xt.lang.common-notify :as notify]
+            [xt.lang.common-repl :as base-repl]))
 
 ;;
 ;;

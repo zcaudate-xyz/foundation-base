@@ -1,14 +1,14 @@
 (ns js.cell.kernel.worker-impl-playground-test
   (:require [js.cell.playground :as browser]
             [std.lang :as l]
-            [xt.lang.base-notify :as notify])
+            [xt.lang.common-notify :as notify])
   (:use code.test))
 
 (l/script- :js
   {:runtime :basic
    :require [[xt.lang.base-lib :as k]
-             [xt.lang.base-repl :as repl]
-             [xt.lang.base-runtime :as rt]
+             [xt.lang.common-repl :as repl]
+             [xt.lang.common-runtime :as rt]
              [js.cell.kernel.worker-impl :as worker-impl]
              [js.cell.kernel.worker-local :as worker-local]
              [js.cell.kernel.worker-mock :as worker-mock]

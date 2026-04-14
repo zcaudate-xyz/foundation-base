@@ -9,7 +9,7 @@
             [std.lib.env]
             [std.lib.foundation :as f]
             [std.make.compile :as compile]
-            [xt.lang.base-notify :as notify]))
+            [xt.lang.common-notify :as notify]))
 
 ;;
 ;; Deploys the contract

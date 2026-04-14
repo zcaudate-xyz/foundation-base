@@ -8,7 +8,7 @@
 (l/script :js
   {:require [[xt.lang.common-spec :as xt]
              [xt.lang.common-iter :as it]
-             [xt.lang.base-runtime :as rt]]})
+             [xt.lang.common-runtime :as rt]]})
 
 (defn.js hash-float
   "hashes a floating point"
@@ -25,7 +25,7 @@
 (l/script :lua
   {:require [[xt.lang.common-spec :as xt]
              [xt.lang.common-iter :as it]
-             [xt.lang.base-runtime :as rt]]})
+             [xt.lang.common-runtime :as rt]]})
 
 (defn.lua hash-float
   "hashes a floating point"
@@ -45,7 +45,7 @@
 (l/script :python
   {:require [[xt.lang.common-spec :as xt]
              [xt.lang.common-iter :as it]
-             [xt.lang.base-runtime :as rt]]})
+             [xt.lang.common-runtime :as rt]]})
 
 (defn.py hash-float
   "hashes a floating point"
@@ -66,7 +66,7 @@
 (l/script :xtalk
   {:require [[xt.lang.common-spec :as xt]
              [xt.lang.common-iter :as it]
-             [xt.lang.base-runtime :as rt]]})
+             [xt.lang.common-runtime :as rt]]})
 
 (defabstract.xt hash-float [f])
 
@@ -127,11 +127,44 @@
   [s]
   (return (:? s 1 -1)))
 
+(defn.xt native-type
+  "returns the runtime-native type tag using expression-safe predicates"
+  {:added "4.1"}
+  [x]
+  (cond (xt/x:nil? x)
+        (return "nil")
+
+        (xt/x:is-string? x)
+        (return "string")
+
+        (xt/x:is-boolean? x)
+        (return "boolean")
+
+        (xt/x:is-number? x)
+        (return "number")
+
+        (xt/x:is-array? x)
+        (return "array")
+
+        (xt/x:is-function? x)
+        (return "function")
+
+        (xt/x:is-object? x)
+        (return "object")))
+
+(defn.xt native-class
+  "returns the managed class tag for objects, or the native type otherwise"
+  {:added "4.1"}
+  [x]
+  (if (xt/x:is-object? x)
+    (return (xt/x:get-key x "::" "object"))
+    (return (-/native-type x))))
+
 (defn.xt hash-native
   "hashes a value"
   {:added "4.0"}
   [x]
-  (var t (xt/x:type-native x))
+  (var t (-/native-type x))
   (cond (== t "nil")
         (return 0)
         

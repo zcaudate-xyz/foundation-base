@@ -1,12 +1,12 @@
 (ns js.lib.driver-sqlite-wasm-test
   (:require [std.lang :as l]
-            [xt.lang.base-notify :as notify])
+            [xt.lang.common-notify :as notify])
   (:use code.test))
 
 (l/script- :js
   {:runtime :basic
    :require [[xt.sys.conn-dbsql :as dbsql]
-             [xt.lang.base-repl :as repl]
+             [xt.lang.common-repl :as repl]
              [js.lib.driver-sqlite-wasm :as js-sqlite-wasm]]})
 
 (fact:global
