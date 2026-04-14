@@ -12,7 +12,7 @@
              [js.react :as r]
              [js.react-native :as n]
              [js.react-native.animate :as a]
-             [xt.lang.base-lib :as k]]})
+             [xt.lang.common-lib :as k]]})
 
 (defn.js ScrollViewImpl
   "creates a non global enhanced scrollview"

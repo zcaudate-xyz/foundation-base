@@ -19,8 +19,8 @@
             [std.lib.template :as template]
             [std.protocol.component :as protocol.component]
             [std.protocol.context :as protocol.context]
-            [xt.lang.base-notify :as notify]
-            [xt.lang.base-repl :as base-repl]))
+            [xt.lang.common-notify :as notify]
+            [xt.lang.common-repl :as base-repl]))
 
 ;;
 ;;
@@ -247,7 +247,7 @@
                     (conj (mapv l/emit-ptr interfaces) "")))
           form   (list `web3/contract-test-prep
                        'web3
-                       (list `xt.lang.base-lib/join
+                       (list `xt.lang.common-lib/join
                              "\n"
                              (clojure.string/split-lines code))
                        (common/get-caller-private-key id)

@@ -5,7 +5,7 @@
   (:refer-clojure :exclude [delay sequence loop val derive]))
 
 (l/script :js
-  {:require [[xt.lang.base-lib :as k]
+  {:require [[xt.lang.common-lib :as k]
              [js.core :as j]
              [js.react :as r]
              [js.react-native :as n]

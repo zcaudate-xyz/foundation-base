@@ -18,7 +18,7 @@
              [js.cell.impl-common :as impl-common]
              [js.cell.link-fn :as link-fn]
              [js.react.ext-cell :as cr]
-             [xt.lang.base-lib :as k]
+             [xt.lang.common-lib :as k]
              ]
    })
 

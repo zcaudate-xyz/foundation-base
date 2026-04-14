@@ -22,13 +22,14 @@
 (fact:global
  {:setup    [(l/rt:restart)
               (!.js
-                (:= (!:G fetch) (require "node-fetch"))
+               (:= (!:G fetch) (require "node-fetch"))
                 (:= (!:G EventSource) (require "eventsource")))
-              (when CANARY-NGINX
-                (l/annex:restart-all)
-                (l/! [:es]
-                  (do:> (ws/service-register "ES_DEBUG" {} nil)
-                        (:= (. DEBUG ["es_handler"])
+               (when CANARY-NGINX
+                 (l/annex:restart-all)
+                 (Thread/sleep 500)
+                 (l/! [:es]
+                   (do:> (ws/service-register "ES_DEBUG" {} nil)
+                         (:= (. DEBUG ["es_handler"])
                             (fn []
                               (ws/es-test-loop "ES_DEBUG"
                                                100

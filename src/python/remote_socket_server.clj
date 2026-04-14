@@ -3,7 +3,7 @@
             [std.lib.network :as network]))
 
 (l/script :python
-  {:require [[xt.lang.base-repl :as repl]]
+  {:require [[xt.lang.common-repl :as repl]]
    :import  [["asyncio" :as asyncio]
              ["socket" :as socket]
              ["json" :as json]

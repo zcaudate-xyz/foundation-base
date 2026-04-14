@@ -52,7 +52,7 @@
       +library+
       :js
       'js.blessed.ui-core)))
-  => '#{js.blessed.ui-style xt.lang.base-lib js.react})
+  => '#{js.blessed.ui-style xt.lang.common-lib js.react})
 
 ^{:refer std.lang.base.book-module/module-deps-native :added "4.0"}
 (fact "gets the native link dependencies"
@@ -79,32 +79,32 @@
   => '#{js.core/floor
         js.core/map
         js.react/ref
-        xt.lang.base-lib/json-encode
+        xt.lang.common-lib/json-encode
         js.react/curr:set
-        xt.lang.base-lib/now-ms
-        xt.lang.base-lib/for:array
+        xt.lang.common-lib/now-ms
+        xt.lang.common-lib/for:array
         js.react/lazy
         js.react/watch
         js.core/delayed
-        xt.lang.base-lib/nil?
+        xt.lang.common-lib/nil?
         js.react/Component
         js.react/init
         js.react/createDOMRoot
-        xt.lang.base-lib/get-key
+        xt.lang.common-lib/get-key
         js.core/min
         js.react/local
         js.core/identity
         js.core/repeating
         js.core/round
-        xt.lang.base-lib/len
+        xt.lang.common-lib/len
         js.react/run
         js.react/curr
         js.core/randomId
         js.core/future
-        xt.lang.base-lib/first
+        xt.lang.common-lib/first
         js.core/indexOf
-        xt.lang.base-lib/not-nil?
-        xt.lang.base-lib/LOG!
+        xt.lang.common-lib/not-nil?
+        xt.lang.common-lib/LOG!
         js.core/clearTimeout
         js.core/clearInterval
         js.core/future-delayed

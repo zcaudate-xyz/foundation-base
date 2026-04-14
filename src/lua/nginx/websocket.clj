@@ -3,7 +3,7 @@
             [std.lib.foundation :as f]))
 
 (l/script :lua
-  {:require [[xt.lang.base-lib :as k]
+  {:require [[xt.lang.common-spec :as xt]
              [xt.sys.cache-common :as cache]
              [lua.nginx :as n]]
    :import [["resty.websocket.server" :as ngxwsserver]
@@ -59,8 +59,8 @@
     (do 
       (cache/set g (-/STREAM-ACTIVE-KEY name) 0)
       (cache/meta-assoc "stream" name
-                        (k/obj-assign {:key name}
-                                      metadata))
+                        (xt/x:obj-assign {:key name}
+                                         metadata))
       (if setup (setup))
       (return true))))
 
@@ -121,13 +121,13 @@
   (if (cache/get (cache/cache name) uid)
     (error "INSTANCE ALREADY ADDED"))
   
-  (cache/set (cache/cache name)
-          uid
-          (cjson.encode (k/obj-assign
-                         {:id uid
-                          :group name
-                          :started (os.time)}
-                         (or conndata {}))))
+   (cache/set (cache/cache name)
+           uid
+           (cjson.encode (xt/x:obj-assign
+                          {:id uid
+                           :group name
+                           :started (os.time)}
+                          (or conndata {}))))
   (cache/incr g (-/STREAM-ACTIVE-KEY name) 1)
   (return true))
 
@@ -223,10 +223,10 @@
   {:added "4.0"}
   [m]
   (local '[ws err] (. ngxwsserver
-                     (new (k/obj-assign
-                           {:timeout 10000
-                            :max-payload-len 65535}
-                           m))))
+                     (new (xt/x:obj-assign
+                            {:timeout 10000
+                             :max-payload-len 65535}
+                            m))))
   (when (not ws)
     (n/log n/ERR "failed to create stream: " err)
     (return (n/exit 444)))

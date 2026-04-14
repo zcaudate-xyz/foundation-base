@@ -5,7 +5,7 @@
             [std.lang.typed.xtalk-ops :as ops]
             [std.lang.typed.xtalk-parse :as parse]))
 
-(def +ctx+ {:ns 'sample.route :aliases '{k xt.lang.base-lib}})
+(def +ctx+ {:ns 'sample.route :aliases '{k xt.lang.common-lib}})
 (def +user-record+
   {:kind :record
    :fields [{:name "id" :type types/+str-type+ :optional? false}
@@ -39,7 +39,7 @@
    (resolve-local-symbol 'k/get-key +ctx+)
    (resolve-local-symbol '-/route +ctx+)
    (resolve-local-symbol 'User +ctx+)]
-  => '[x:get-key xt.lang.base-lib/get-key sample.route/route sample.route/User])
+  => '[x:get-key xt.lang.common-lib/get-key sample.route/route sample.route/User])
 
 ^{:refer std.lang.typed.xtalk-infer/resolve-type :added "4.1"}
 (fact "resolves named specs from the registry"
@@ -506,7 +506,7 @@
 ^{:refer std.lang.typed.xtalk-infer/infer-type :added "4.1"}
 (fact "dispatches across literals lowered forms and calls"
   [(types/type->data (:type (infer-type '(k/get-key route "id") {:env '{route {:kind :record :fields [{:name "id" :type {:kind :primitive :name :xt/str} :optional? false}]}}
-                                                           :ns 'sample.route :aliases '{k xt.lang.base-lib}})))
+                                                           :ns 'sample.route :aliases '{k xt.lang.common-lib}})))
    (types/type->data (:type (infer-type '(if true 1 2) +ctx+)))]
   => '[{:kind :primitive :name :xt/str}
         {:kind :primitive :name :xt/int}])

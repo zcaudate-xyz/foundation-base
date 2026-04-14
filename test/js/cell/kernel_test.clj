@@ -2,13 +2,13 @@
   (:use code.test)
   (:require [js.cell.playground :as playground]
             [std.lang :as l]
-            [xt.lang.base-notify :as notify]))
+            [xt.lang.common-notify :as notify]))
 
 (l/script- :js
   {:runtime :basic
-   :require [[xt.lang.base-lib :as k]
-             [xt.lang.base-repl :as repl]
-             [xt.lang.base-runtime :as rt]
+   :require [[xt.lang.common-lib :as k]
+             [xt.lang.common-repl :as repl]
+             [xt.lang.common-runtime :as rt]
              [xt.lang.event-view :as base-view]
              [js.cell.kernel.worker-impl :as internal]
              [js.cell.kernel.worker-fn :as base-fn]

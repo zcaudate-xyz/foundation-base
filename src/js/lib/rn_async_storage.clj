@@ -3,7 +3,7 @@
             [std.lib.foundation :as f]))
 
 (l/script :js
-  {:require  [[xt.lang.base-lib :as k]]
+  {:require  [[xt.lang.common-lib :as k]]
    :import   [["@react-native-async-storage/async-storage" :as RNAsyncStorage]]})
 
 (f/template-entries [l/tmpl-entry {:type :fragment

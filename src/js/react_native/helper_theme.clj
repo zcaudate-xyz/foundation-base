@@ -10,7 +10,7 @@
             :notify {:host "test.statstrade.io"}}
    :require [[js.core :as j]
              [js.react-native.helper-color :as c]
-             [xt.lang.base-lib :as k]]})
+             [xt.lang.common-lib :as k]]})
 
 ;;
 ;; Pairs

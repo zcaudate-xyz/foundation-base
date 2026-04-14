@@ -12,7 +12,7 @@
    :require [[js.core :as j]
              [js.react :as r]
              [js.react-native :as n :include [:fn]]
-             [xt.lang.base-lib :as k]]
+             [xt.lang.common-lib :as k]]
    })
 
 (defn.js nest-tree

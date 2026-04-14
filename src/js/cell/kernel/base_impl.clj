@@ -3,7 +3,7 @@
             [std.lang.typed.xtalk :refer [defspec.xt]]))
 
 (l/script :js
-  {:require [[xt.lang.base-lib :as k]
+  {:require [[xt.lang.common-lib :as k]
              [xt.lang.event-common :as event-common]
              [js.cell.kernel.base-link :as link]
              [js.cell.kernel.base-util :as util]

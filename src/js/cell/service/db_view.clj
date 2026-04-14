@@ -2,7 +2,7 @@
   (:require [std.lang :as l]))
 
 (l/script :xtalk
-  {:require [[xt.lang.base-lib :as k]
+  {:require [[xt.lang.common-lib :as k]
              [xt.db.base-scope :as base-scope]
              [xt.db.base-view :as base-view]]
    :export  [MODULE]})

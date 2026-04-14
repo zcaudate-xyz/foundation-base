@@ -12,7 +12,7 @@
                                                :wif
                                                :message
                                                :safe-buffer]]
-              [xt.lang.base-lib :as k]]
+              [xt.lang.common-lib :as k]]
    :export  [MODULE]})
 
 (fact:global

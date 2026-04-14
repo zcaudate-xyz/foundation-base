@@ -15,7 +15,7 @@
              [js.react :as r]
              [js.react-native :as n :include [:fn]]
              [js.react-native.ui-input :as ui-input]
-             [xt.lang.base-lib :as k]]
+             [xt.lang.common-lib :as k]]
    })
 
 ^{:refer js.react-native.ui-form-basic/LoginForm

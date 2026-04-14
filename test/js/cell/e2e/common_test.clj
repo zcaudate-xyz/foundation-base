@@ -4,15 +4,15 @@
             [js.cell.runtime.emit :as emit]
             [std.lang :as l]
             [std.lib.template :as template]
-            [xt.lang.base-notify :as notify])
+            [xt.lang.common-notify :as notify])
   (:use code.test))
 
 (l/script- :js
   {:runtime :basic
    :require [[js.core :as j]
-             [xt.lang.base-lib :as k]
-             [xt.lang.base-repl :as repl]
-             [xt.lang.base-runtime :as rt :with [defvar.js]]
+             [xt.lang.common-lib :as k]
+             [xt.lang.common-repl :as repl]
+             [xt.lang.common-runtime :as rt :with [defvar.js]]
              [xt.lang.event-view :as event-view]
              [js.cell.kernel :as cl]
              [js.cell.e2e.common :as common]

@@ -4,7 +4,7 @@
 
 (l/script :js
   {:require [[js.core :as j]
-             [xt.lang.base-lib :as k]
+             [xt.lang.common-lib :as k]
              [js.cell.kernel.base-util :as util]]})
 
 (defspec.xt link-listener-call

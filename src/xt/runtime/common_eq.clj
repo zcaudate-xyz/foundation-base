@@ -7,5 +7,5 @@
 
 (l/script :xtalk
   {:require [[xt.lang.common-spec :as xt]
-             [xt.lang.base-runtime :as rt]]})
+             [xt.lang.common-runtime :as rt]]})
 

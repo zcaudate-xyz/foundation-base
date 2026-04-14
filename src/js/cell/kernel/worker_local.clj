@@ -7,7 +7,7 @@
              [js.cell.kernel.base-util :as util]
              [js.cell.kernel.worker-state :as state]
              [xt.lang.common-runtime :as rt :with [defvar.js]]
-             [xt.lang.base-lib :as k]]})
+             [xt.lang.common-lib :as k]]})
 
 
 (defspec.xt actions-baseline

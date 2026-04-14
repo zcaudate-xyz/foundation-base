@@ -1,21 +1,21 @@
 (ns xt.runtime.type-symbol-test
   (:require [std.lang :as l]
-            [xt.lang.base-notify :as notify])
+            [xt.lang.common-notify :as notify])
   (:use code.test))
 
 (l/script- :js
   {:runtime :basic
    :require [[xt.runtime.type-symbol :as sym]
              [xt.runtime.interface-common :as tc]
-             [xt.lang.base-lib :as k]
-             [xt.lang.base-repl :as repl]]})
+             [xt.lang.common-lib :as k]
+             [xt.lang.common-repl :as repl]]})
 
 (l/script- :lua
   {:runtime :basic
    :require [[xt.runtime.type-symbol :as sym]
              [xt.runtime.interface-common :as tc]
-             [xt.lang.base-lib :as k]
-             [xt.lang.base-repl :as repl]]})
+             [xt.lang.common-lib :as k]
+             [xt.lang.common-repl :as repl]]})
 
 (fact:global
  {:setup    [(l/rt:restart)]

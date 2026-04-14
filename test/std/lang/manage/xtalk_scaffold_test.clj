@@ -18,9 +18,9 @@
 
 (def runtime-test-forms
   (read-string
-   "[(ns xt.lang.base-lib-test
+   "[(ns xt.lang.common-lib-test
        (:require [std.lang :as l]
-                 [xt.lang.base-lib :as k])
+                 [xt.lang.common-lib :as k])
        (:use code.test))
       (do
         (l/script- :js {:runtime :basic})
@@ -46,13 +46,13 @@
 
 (def runtime-template-forms
   (read-string
-   "[(ns xt.lang.base-lib-js-test
+   "[(ns xt.lang.common-lib-js-test
        (:require [std.lang :as l]
-                 [xt.lang.base-lib :as k])
+                 [xt.lang.common-lib :as k])
        (:use code.test))
       (l/script- :js {:runtime :basic})
       (fact:global {:setup [(l/rt:restart)]})
-      ^{:refer xt.lang.base-lib/identity :added \"4.0\"}
+      ^{:refer xt.lang.common-lib/identity :added \"4.0\"}
       (fact \"identity function\"
         ^:hidden
         (!.js (k/identity 1))
@@ -206,8 +206,8 @@
 
 ^{:refer std.lang.manage.xtalk-scaffold/runtime-test-ns :added "4.1"}
 (fact "creates runtime test ns"
-  (runtime-test-ns 'xt.lang.base-lib-test :js)
-  => 'xt.lang.base-lib-js-test)
+  (runtime-test-ns 'xt.lang.common-lib-test :js)
+  => 'xt.lang.common-lib-js-test)
 
 ^{:refer std.lang.manage.xtalk-scaffold/render-top-level-forms :added "4.1"}
 (fact "renders top-level forms"
@@ -251,22 +251,22 @@
 
 ^{:refer std.lang.manage.xtalk-scaffold/template-runtime-test-ns :added "4.1"}
 (fact "templates runtime test namespace"
-  (template-runtime-test-ns 'xt.lang.base-lib-js-test :js :rb)
-  => 'xt.lang.base-lib-rb-test)
+  (template-runtime-test-ns 'xt.lang.common-lib-js-test :js :rb)
+  => 'xt.lang.common-lib-rb-test)
 
 ^{:refer std.lang.manage.xtalk-scaffold/template-runtime-test-forms :added "4.1"}
 (fact "templates a runtime test from js to ruby"
   (let [out-forms (template-runtime-test-forms runtime-template-forms :js :ruby)
         out (render-top-level-forms out-forms)]
     [(= :rb (normalize-runtime-lang :ruby))
-     (= 'xt.lang.base-lib-rb-test
+     (= 'xt.lang.common-lib-rb-test
         (second (first out-forms)))
      (= :ruby (second (second out-forms)))
-     (str/includes? out "xt.lang.base-lib-rb-test")
+     (str/includes? out "xt.lang.common-lib-rb-test")
      (str/includes? out "(l/script- :ruby")
      (str/includes? out "!.rb")
      (not (str/includes? out "!.js"))
-     (str/includes? out ":refer xt.lang.base-lib/identity")])
+     (str/includes? out ":refer xt.lang.common-lib/identity")])
   => [true true true true true true true true])
 
 ^{:refer std.lang.manage.xtalk-scaffold/split-fact-form :added "4.1"}
@@ -284,17 +284,17 @@
         shared-out (render-top-level-forms shared)
         js-out (render-top-level-forms (get by-lang :js))
         lua-out (render-top-level-forms (get by-lang :lua))]
-    [(str/includes? shared-out "(ns xt.lang.base-lib-test")
+    [(str/includes? shared-out "(ns xt.lang.common-lib-test")
      (str/includes? shared-out "(fact \"placeholder\")")
      (not (str/includes? shared-out "wrapped runtime form"))
-     (str/includes? js-out "(ns xt.lang.base-lib-js-test")
+     (str/includes? js-out "(ns xt.lang.common-lib-js-test")
      (str/includes? js-out "(l/script- :js")
      (= true (:hidden (meta (nth js-form 2))))
      (str/includes? js-out "!.js")
      (not (str/includes? js-out "!.lua"))
      (str/includes? js-out "wrapped runtime form")
      (str/includes? js-out "vector runtime form")
-     (str/includes? lua-out "(ns xt.lang.base-lib-lua-test")
+     (str/includes? lua-out "(ns xt.lang.common-lib-lua-test")
      (str/includes? lua-out "(l/script- :lua")
      (= true (:hidden (meta (nth lua-form 2))))
      (str/includes? lua-out "!.lua")
@@ -334,13 +334,13 @@
 
 ^{:refer std.lang.manage.xtalk-scaffold/canonical-suite-path :added "4.1"}
 (fact "derives the canonical suite path from a test file"
-  (canonical-suite-path "test/xt/lang/base_lib_test.clj")
-  => "test/xt/lang/base_lib_suite.edn")
+  (canonical-suite-path "test/xt/lang/common_lib_test.clj")
+  => "test/xt/lang/common_lib_suite.edn")
 
 ^{:refer std.lang.manage.xtalk-scaffold/runtime-bulk-path :added "4.1"}
 (fact "derives the per-language bulk suite path"
-  (runtime-bulk-path "test/xt/lang/base_lib_suite.edn" :dart)
-  => "test/xt/lang/base_lib_suite-dt-bulk.edn")
+  (runtime-bulk-path "test/xt/lang/common_lib_suite.edn" :dart)
+  => "test/xt/lang/common_lib_suite-dt-bulk.edn")
 
 ^{:refer std.lang.manage.xtalk-scaffold/form-line-info :added "4.1"}
 (fact "extracts line and column metadata from forms"
@@ -382,8 +382,8 @@
 
 ^{:refer std.lang.manage.xtalk-scaffold/canonical-case-id :added "4.1"}
 (fact "builds stable case ids from namespace, title and index"
-  (canonical-case-id 'xt.lang.base-lib-test "identity function" 2)
-  => "xt.lang.base-lib-test::identity-function::2")
+  (canonical-case-id 'xt.lang.common-lib-test "identity function" 2)
+  => "xt.lang.common-lib-test::identity-function::2")
 
 ^{:refer std.lang.manage.xtalk-scaffold/fact-runtime-cases :added "4.1"}
 (fact "extracts canonical runtime cases from a fact"
@@ -395,14 +395,14 @@
                        (!.lua (+ 2 3))
                        => 5)
                     {:line 20})
-        cases (fact-runtime-cases 'xt.lang.base-lib-test fact-form :js)]
+        cases (fact-runtime-cases 'xt.lang.common-lib-test fact-form :js)]
     [(count cases)
      (:id (first cases))
      (:form (first cases))
      (:expect (first cases))
      (:exceptions (first cases))])
   => [1
-      "xt.lang.base-lib-test::identity-function::0"
+      "xt.lang.common-lib-test::identity-function::0"
       '(+ 1 2)
       3
       {:dart {:expect 10}}])
@@ -416,7 +416,7 @@
      (:check-mode suite)
      (count (:cases suite))
      (mapv :form (:cases suite))])
-  => '[xt.lang.base-lib-test
+  => '[xt.lang.common-lib-test
        :lua
        :basic
        :realtime

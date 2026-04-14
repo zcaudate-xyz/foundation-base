@@ -3,6 +3,7 @@
 
 (l/script :xtalk
   {:require [[xt.lang.common-spec :as xt]
+             [xt.lang.common-string :as xts]
              [xt.sys.cache-common :as cache]]})
 
 ;;
@@ -141,13 +142,13 @@
   "lists all queue groups"
   {:added "4.0"}
   ([cache queue]
-   (var ks (cache/list-keys cache))
-   (var group-key (-/GROUP-KEY queue ""))
-   (return (xt/x:arr-keep ks
-                       (fn:> [k]
-                         (:? (xt/x:starts-with? k group-key)
-                             (xt/x:sym-name k)))
-		       (fn [x] (return x))))))
+    (var ks (cache/list-keys cache))
+    (var group-key (-/GROUP-KEY queue ""))
+    (return (xt/x:arr-keep ks
+                           (fn:> [k]
+                             (:? (xts/starts-with? k group-key)
+                                 k
+                                 nil))))))
 
 (defn.xt purge-queue
   "removes all groups and items in a queue"
@@ -165,12 +166,12 @@
    (xt/for:index [idx [0 (- size 1)]]
      (cache/del cache (-/BUFFER-KEY queue idx)))
    
-   ;; buffers
-   (var group-key (-/GROUP-KEY queue ""))
-   (xt/for:array [k (cache/list-keys cache)]
-     (if (xt/x:starts-with? k group-key)
-       (cache/del cache k)))
-   (return (-/queue-meta-dissoc cache queue))))
+    ;; buffers
+    (var group-key (-/GROUP-KEY queue ""))
+    (xt/for:array [k (cache/list-keys cache)]
+      (if (xts/starts-with? k group-key)
+        (cache/del cache k)))
+    (return (-/queue-meta-dissoc cache queue))))
 
 (defn.xt reset-queue
   "resets a group's index"
@@ -181,12 +182,12 @@
    (if (not qdata) (return false))
    (var #{groups size} qdata)
    (var ridx (- size 1))
-   (cache/set cache (-/INDEX-KEY queue) ridx)
-   ;; buffers
-   (var group-key (-/GROUP-KEY queue ""))
-   (xt/for:array [k (cache/list-keys cache)]
-     (if (xt/x:starts-with? k group-key)
-       (cache/set cache k ridx)))))
+    (cache/set cache (-/INDEX-KEY queue) ridx)
+    ;; buffers
+    (var group-key (-/GROUP-KEY queue ""))
+    (xt/for:array [k (cache/list-keys cache)]
+      (if (xts/starts-with? k group-key)
+        (cache/set cache k ridx)))))
 
 (defn.xt has-queue
   "checks that queue exists"

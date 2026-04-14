@@ -12,7 +12,7 @@
             ["react-dom/client" :as ReactDOM]
             ["react-nil" :as ReactNIL]]
    :require [[js.core :as j]
-             [xt.lang.base-lib :as k]]})
+             [xt.lang.common-lib :as k]]})
 
 #_(defrun.js __init__
   (:# "eslint-disable react-hooks/rules-of-hooks"))

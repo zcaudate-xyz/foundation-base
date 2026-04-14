@@ -7,7 +7,7 @@
 
 (l/script- :python
   {:runtime :libpython
-   :require [[xt.lang.base-lib :as k]]})
+   :require [[xt.lang.common-lib :as k]]})
 
 (defn.py add10
   [x]

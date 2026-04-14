@@ -245,7 +245,7 @@
 (defn emit-module-teardown-concat
   "joins teardown raw into individual blocks
  
-   (-> (emit-module-teardown-raw 'xt.lang.base-lib
+   (-> (emit-module-teardown-raw 'xt.lang.common-lib
                                  {:lang :lua})
        (emit-module-teardown-concat))
    => coll?"
@@ -262,7 +262,7 @@
 (defn emit-module-teardown-join
   "joins teardown raw into code
  
-   (-> (emit-module-teardown-raw 'xt.lang.base-lib
+   (-> (emit-module-teardown-raw 'xt.lang.common-lib
                                  {:lang :lua})
        (emit-module-teardown-join))
    => string?"

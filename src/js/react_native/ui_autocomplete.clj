@@ -8,7 +8,7 @@
              [js.react-native :as n]
              [js.react-native.ui-tooltip :as ui-tooltip]
              [js.react.ext-view :as ext-view]
-             [xt.lang.base-lib :as k]]})
+             [xt.lang.common-lib :as k]]})
 
 (defn.js AutocompleteModal
   "creates the autocomplete modal display"

@@ -2,7 +2,7 @@
   (:require [std.lang :as l]))
 
 (l/script :lua
-  {:require [[xt.lang.base-lib :as k]
+  {:require [[xt.lang.common-lib :as k]
              [kmi.redis :as r]]
    :static {:lang/lint-globals #{redis}}})
 

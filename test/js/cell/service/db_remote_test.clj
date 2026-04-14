@@ -5,7 +5,7 @@
 (l/script- :js
   {:runtime :basic
    :require [[js.cell.service.db-remote :as db-remote]
-             [xt.lang.base-lib :as k]]})
+             [xt.lang.common-lib :as k]]})
 
 (fact:global
  {:setup    [(l/rt:restart)]

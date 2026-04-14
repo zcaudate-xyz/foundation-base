@@ -3,7 +3,7 @@
             [lib.redis.script :as script]
             [rt.redis.eval-basic :refer :all]
             [std.lang :as l]
-            [xt.lang.base-lib :as k])
+            [xt.lang.common-lib :as k])
   (:use code.test))
 
 (l/script- :lua

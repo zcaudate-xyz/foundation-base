@@ -5,7 +5,7 @@
 (l/script- :lua
   {:runtime :basic
    :config  {:program :resty}
-   :require [[xt.lang.base-lib :as k :include [:json]]
+   :require [[xt.lang.common-lib :as k :include [:json]]
              [lua.nginx :as n]
              [lua.nginx.openssl :as ssl]]})
 

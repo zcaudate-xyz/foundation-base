@@ -5,7 +5,7 @@
             [std.lib.template :as template]
             [std.lang :as l]
             [xt.db :as xdb]
-            [xt.lang.base-lib :as k]))
+            [xt.lang.common-lib :as k]))
 
 (def +schema+
   {"Order"
@@ -57,8 +57,8 @@
              [js.cell.service.db-sync :as db-sync]
              [js.lib.driver-sqlite-wasm :as sqlite-wasm]
              [xt.db :as xdb]
-             [xt.lang.base-lib :as k]
-             [xt.lang.base-runtime :as rt :with [defvar.js]]
+             [xt.lang.common-lib :as k]
+             [xt.lang.common-runtime :as rt :with [defvar.js]]
              [xt.lang.event-view :as event-view]
              [xt.sys.conn-dbsql :as dbsql]]})
 
@@ -68,7 +68,7 @@
     '(do
       (var worker (js.cell.runtime.env-node/make-node-worker))
       (var existing-db (!:G __E2E_REMOTE_DB))
-      (when (xt.lang.base-lib/nil? existing-db)
+      (when (xt.lang.common-lib/nil? existing-db)
         (var schema {"Order"
                      {"id" {"ident" "id" "type" "text" "order" 0}
                       "status" {"ident" "status" "type" "text" "order" 1}}})
@@ -94,7 +94,7 @@
                                "guards" []
                                "query" ["id" "status"]}}}}})
         (:= existing-db
-            (xt.lang.base-lib/obj-assign
+            (xt.lang.common-lib/obj-assign
              (xt.db/db-create {"::" "db.cache"}
                               schema
                               {"Order" {"position" 0}}
@@ -126,9 +126,9 @@
         "@e2e/sync"
         {"handler"
          (fn [sync-request]
-           (var db-sync (xt.lang.base-lib/get-key sync-request "db/sync"))
-           (when (and (xt.lang.base-lib/obj? db-sync)
-                      (xt.lang.base-lib/not-empty? db-sync))
+           (var db-sync (xt.lang.common-lib/get-key sync-request "db/sync"))
+           (when (and (xt.lang.common-lib/obj? db-sync)
+                      (xt.lang.common-lib/not-empty? db-sync))
              (xt.db/sync-event (!:G __E2E_REMOTE_DB) ["add" db-sync]))
            (return sync-request))
          "is_async" false
@@ -144,7 +144,7 @@
   (l/emit-script
    '(do
       (var existing-db (!:G __E2E_REMOTE_DB))
-      (when (xt.lang.base-lib/nil? existing-db)
+      (when (xt.lang.common-lib/nil? existing-db)
         (var schema {"Order"
                      {"id" {"ident" "id" "type" "text" "order" 0}
                       "status" {"ident" "status" "type" "text" "order" 1}}})
@@ -170,7 +170,7 @@
                                "guards" []
                                "query" ["id" "status"]}}}}})
         (:= existing-db
-            (xt.lang.base-lib/obj-assign
+            (xt.lang.common-lib/obj-assign
              (xt.db/db-create {"::" "db.cache"}
                               schema
                               {"Order" {"position" 0}}
@@ -183,7 +183,7 @@
                                      {"id" "ord-2" "status" "closed"}]}])
         (:= (!:G __E2E_REMOTE_DB) existing-db))
       (js.cell.kernel.worker-state/set-actions
-       (xt.lang.base-lib/obj-assign
+       (xt.lang.common-lib/obj-assign
         (js.cell.kernel.worker-local/actions-baseline)
         {"@e2e/query"
          {"handler"
@@ -204,9 +204,9 @@
          "@e2e/sync"
          {"handler"
          (fn [sync-request]
-           (var db-sync (xt.lang.base-lib/get-key sync-request "db/sync"))
-           (when (and (xt.lang.base-lib/obj? db-sync)
-                      (xt.lang.base-lib/not-empty? db-sync))
+           (var db-sync (xt.lang.common-lib/get-key sync-request "db/sync"))
+           (when (and (xt.lang.common-lib/obj? db-sync)
+                      (xt.lang.common-lib/not-empty? db-sync))
              (xt.db/sync-event (!:G __E2E_REMOTE_DB) ["add" db-sync]))
            (return sync-request))
          "is_async" false

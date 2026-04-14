@@ -6,7 +6,7 @@
 
 (l/script :lua
   kmi.redis
-  {:require [[xt.lang.base-lib :as k]]
+  {:require [[xt.lang.common-lib :as k]]
    :static {:lang/lint-globals #{redis}}})
 
 (defmacro.lua flushdb

@@ -6,7 +6,7 @@
              [lua.nginx :as n]
              [lua.nginx.http-client :as http]
              [lua.core :as u]
-             [xt.lang.base-lib :as k]
+             [xt.lang.common-lib :as k]
              [xt.lang.util-xml :as xml]]})
 
 (def.lua AWS_ALGO "AWS4-HMAC-SHA256")

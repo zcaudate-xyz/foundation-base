@@ -4,7 +4,7 @@
 
 (l/script :xtalk
   {:require [[xt.lang.common-spec :as xt]
-             [xt.lang.base-task :as task]
+             [xt.lang.common-task :as task]
              [xt.cell.kernel.worker-local :as worker-local]
              [xt.cell.kernel.worker-impl :as worker-impl]]})
 

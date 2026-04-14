@@ -7,7 +7,7 @@
    :require [[js.cell.binding :as binding]
              [js.cell.binding.model :as binding-model]
              [xt.db :as xdb]
-             [xt.lang.base-lib :as k]]})
+             [xt.lang.common-lib :as k]]})
 
 (fact:global
  {:setup    [(l/rt:restart)]

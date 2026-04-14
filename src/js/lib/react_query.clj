@@ -4,7 +4,7 @@
 
 (l/script :js
   {:require [[js.react :as r]
-             [xt.lang.base-lib :as k]]
+             [xt.lang.common-lib :as k]]
    :import [["@tanstack/react-query" :as [* ReactQuery]]]})
 
 (f/template-entries [l/tmpl-entry {:type :fragment

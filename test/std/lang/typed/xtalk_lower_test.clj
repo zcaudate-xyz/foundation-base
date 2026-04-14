@@ -2,7 +2,7 @@
   (:use code.test)
   (:require [std.lang.typed.xtalk-lower :refer :all]))
 
-(def +ctx+ {:ns 'sample.route :aliases '{k xt.lang.base-lib}})
+(def +ctx+ {:ns 'sample.route :aliases '{k xt.lang.common-lib}})
 
 ^{:refer std.lang.typed.xtalk-lower/intrinsic-sym :added "4.1"}
 (fact "builds intrinsic symbols"
@@ -13,7 +13,7 @@
 (fact "resolves aliases and local symbols"
   [(resolve-op 'k/get-key +ctx+)
    (resolve-op '-/route +ctx+)]
-  => '[xt.lang.base-lib/get-key sample.route/route])
+  => '[xt.lang.common-lib/get-key sample.route/route])
 
 ^{:refer std.lang.typed.xtalk-lower/lower-dot :added "4.1"}
 (fact "lowers dot access to key and path helpers"

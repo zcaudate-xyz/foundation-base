@@ -10,7 +10,7 @@
              [lua.nginx :as n :include [:string]]
              [lua.aws.s3 :as s3]
              [lua.aws.common :as common]
-             [xt.lang.base-lib :as k]]})
+             [xt.lang.common-lib :as k]]})
 
 (fact:global
  {:setup    [(l/rt:restart)

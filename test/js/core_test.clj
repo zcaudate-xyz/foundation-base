@@ -6,7 +6,7 @@
 (l/script- :js
   {:runtime :basic
    :require [[js.core :as j]
-              [xt.lang.base-lib :as k]
+              [xt.lang.common-lib :as k]
               [xt.lang.common-repl :as repl]]})
 
 (fact:global
@@ -154,7 +154,7 @@
   => string?)
 
 ^{:refer js.core/LOG! :added "4.0" :unchecked true}
-(fact "like `xt.lang.base-lib/LOG!` but also for promises")
+(fact "like `xt.lang.common-lib/LOG!` but also for promises")
 
 ^{:refer js.core/<! :added "4.0" :unchecked true}
 (fact "shortcut for notify/wait-on"

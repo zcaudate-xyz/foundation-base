@@ -3,7 +3,7 @@
 
 (l/script :js
   {:require [[xt.lang.common-runtime :as rt :with [defvar.js]]
-             [xt.lang.base-lib :as k]
+             [xt.lang.common-lib :as k]
              [js.cell.kernel :as kernel]
              [js.cell.kernel.base-link-local :as base-link-local]
              [js.cell.kernel.worker-local :as worker-local]

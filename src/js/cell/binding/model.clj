@@ -7,7 +7,7 @@
              [js.cell.service.db-remote :as db-remote]
              [js.cell.service.db-supabase :as db-supabase]
              [js.cell.service.db-sync :as db-sync]
-             [xt.lang.base-lib :as k]]})
+             [xt.lang.common-lib :as k]]})
 
 (defn.js unwrap-result
   "unwraps a service-layer [ok result] tuple"

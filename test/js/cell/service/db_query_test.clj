@@ -6,7 +6,7 @@
   {:runtime :basic
    :require [[js.cell.service.db-query :as db-query]
              [xt.db :as xdb]
-             [xt.lang.base-lib :as k]]})
+             [xt.lang.common-lib :as k]]})
 
 (fact:global
  {:setup    [(l/rt:restart)]

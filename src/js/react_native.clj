@@ -6,7 +6,7 @@
   {:require [[js.core :as j]
              [js.react :as r]
              [js.react.helper-portal :as helper-portal]
-             [xt.lang.base-lib :as k]]
+             [xt.lang.common-lib :as k]]
    :import [["react-native" :as [* ReactNative]]
             ["react-native-video" :as RNVideo]
             ["react-native-gesture-handler" :as [* RNGestureHandler]]

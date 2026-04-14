@@ -1152,11 +1152,11 @@
                 or (infer-or form ctx)
                 not (result types/+bool-type+
                             (merge-errors (infer-type (second form) ctx)))
-                 xt.lang.base-lib/not-empty? (result types/+bool-type+
+                 xt.lang.common-lib/not-empty? (result types/+bool-type+
                                                      (merge-errors (infer-type (second form) ctx)))
-                 xt.lang.base-lib/is-empty? (result types/+bool-type+
+                 xt.lang.common-lib/is-empty? (result types/+bool-type+
                                                     (merge-errors (infer-type (second form) ctx)))
-                 xt.lang.base-lib/arrayify (let [arg-out (infer-type (second form) ctx)
+                 xt.lang.common-lib/arrayify (let [arg-out (infer-type (second form) ctx)
                                                  arg-type (arrayify-type (:type arg-out) ctx)]
                                              (result arg-type
                                                      (:errors arg-out)))

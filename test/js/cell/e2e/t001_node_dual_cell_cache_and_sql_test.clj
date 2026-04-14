@@ -3,12 +3,12 @@
             [js.cell.runtime.emit :as emit]
             [std.lang :as l]
             [std.lib.template :as template]
-            [xt.lang.base-notify :as notify])
+            [xt.lang.common-notify :as notify])
   (:use code.test))
 
 (l/script- :js
   {:runtime :basic
-   :require [[xt.lang.base-repl :as repl]
+   :require [[xt.lang.common-repl :as repl]
              [js.cell.kernel :as cl]
              [js.cell.e2e.common :as common]
              [js.cell.runtime.link :as runtime-link]]})

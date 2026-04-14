@@ -4,10 +4,10 @@
             [std.lib.env :as env]))
 
 (l/script :xtalk
-  {:require  [[xt.lang.base-macro :as macro]
-              [xt.lang.base-iter :as iter :dynamic true]
-              [xt.lang.base-repl :as repl :dynamic true]
-              [xt.lang.base-lib :as lib :dynamic true]]
+  {:require  [[xt.lang.common-spec :as macro]
+              [xt.lang.common-iter :as iter :dynamic true]
+              [xt.lang.common-repl :as repl :dynamic true]
+              [xt.lang.common-lib :as lib :dynamic true]]
    :header   {:dynamic  true
               :override {:js  xt.lang.override.custom-js
                          :lua xt.lang.override.custom-lua}}})
@@ -39,7 +39,7 @@
                                        (->> (vreset! out)))))]
            [imports (std.lang.base.library-snapshot/add-book snap new-book)])))))
 
-  (intern-macros :xtalk 'xt.lang.base-macro)
+  (intern-macros :xtalk 'xt.lang.common-spec)
 
   (def +book+ (l/get-book (l/default-library)
                           :xtalk))
@@ -48,7 +48,7 @@
     (collection/map-vals
      (fn [e]
        (assoc e :module 'xt.lang))
-     (get-in +book+ [:modules 'xt.lang.base-macro :fragment])))
+     (get-in +book+ [:modules 'xt.lang.common-spec :fragment])))
 
   (def +new-book+
     (assoc-in +book+
@@ -57,8 +57,8 @@
 
 
   (comment
-    (l/link-macros   'xt.lang.base-macro)
-    (l/link-all      'xt.lang.base-lib))
+    (l/link-macros   'xt.lang.common-spec)
+    (l/link-all      'xt.lang.common-lib))
 
 
 

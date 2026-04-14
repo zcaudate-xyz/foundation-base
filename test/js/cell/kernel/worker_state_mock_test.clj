@@ -1,14 +1,14 @@
 (ns js.cell.kernel.worker-state-mock-test
   (:require [std.lang :as l]
             [std.lib.foundation :as f]
-            [xt.lang.base-notify :as notify])
+            [xt.lang.common-notify :as notify])
   (:use code.test))
 
 (l/script- :js
   {:runtime :basic
-   :require [[xt.lang.base-lib :as k]
-             [xt.lang.base-repl :as repl]
-             [xt.lang.base-runtime :as rt]
+   :require [[xt.lang.common-lib :as k]
+             [xt.lang.common-repl :as repl]
+             [xt.lang.common-runtime :as rt]
              [xt.lang.util-throttle :as th]
              [js.core :as j]
              [js.cell.kernel.worker-state :as worker-state]

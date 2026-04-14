@@ -4,7 +4,7 @@
 (l/script :xtalk
   {:require [[js.cell.service.db-query :as db-query]
              [js.cell.service.db-sync :as db-sync]
-             [xt.lang.base-lib :as k]]
+             [xt.lang.common-lib :as k]]
    :export  [MODULE]})
 
 (defn.xt remote-capable?

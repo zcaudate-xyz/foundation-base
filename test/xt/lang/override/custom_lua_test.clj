@@ -7,7 +7,7 @@
   {:runtime :oneshot
    :layout :full
    :require [[xt.lang :as k]
-             [xt.lang.base-lib :as lib :include [:fn]]]})
+             [xt.lang.common-lib :as lib :include [:fn]]]})
 
 ^{:refer xt.lang.override.custom-lua/pad-left :added "4.0"}
 (fact "override for pad left"

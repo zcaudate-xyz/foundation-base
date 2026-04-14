@@ -16,7 +16,7 @@
              [js.react-native.physical-base :as physical-base]
              [js.react-native.model-roller :as model-roller]
              [js.react-native.physical-edit :as physical-edit]
-             [xt.lang.base-lib :as k]]
+             [xt.lang.common-lib :as k]]
    })
 
 ^{:refer js.react-native.model-roller/DigitRollerManual

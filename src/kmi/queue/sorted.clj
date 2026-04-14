@@ -3,7 +3,7 @@
 
 (l/script :lua
   {:runtime :redis
-   :require [[xt.lang.base-lib :as k]
+   :require [[xt.lang.common-lib :as k]
              [kmi.redis :as r]
              [kmi.queue.common :as q]]
    :static {:lang/lint-globals #{redis}}})

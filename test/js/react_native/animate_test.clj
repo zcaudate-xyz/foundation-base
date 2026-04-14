@@ -1,6 +1,6 @@
 (ns js.react-native.animate-test
   (:require [std.lang :as l]
-            [xt.lang.base-notify :as notify])
+            [xt.lang.common-notify :as notify])
   (:use code.test))
 
 (l/script :js
@@ -15,7 +15,7 @@
              [js.react-native :as n :include [:fn]]
              [js.react-native.animate :as a]
              [xt.lang.event-animate :as event-animate]
-             [xt.lang.base-lib :as k]]
+             [xt.lang.common-lib :as k]]
    })
 
 ^{:refer js.react-native.animate/val :added "4.0" :unchecked true}

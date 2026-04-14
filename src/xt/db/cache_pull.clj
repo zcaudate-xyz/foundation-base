@@ -177,10 +177,11 @@
   (var [table-name linked] input)
   
   (var #{ident ref} attr)
-  (var #{ns type}   ref)
+  (var ns (xt/x:get-key ref "ns"))
+  (var link-type (xt/x:get-key ref "type"))
   (var link-key ns)
   (var table-link (xt/x:get-key -/PULL_LU
-                             type))
+                             link-type))
   
   (var ids (xt/x:obj-keys (or (xtd/get-in record [table-link ident])
                            {})))

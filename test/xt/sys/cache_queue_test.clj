@@ -24,10 +24,10 @@
 
 (l/script- :lua
   {:runtime :basic
-   :config  {:exec ["resty" "--http-conf" (create-resty-params) "-e"]
-              #_#_
-              :container {:group "test"
-                          :image "python"
+   :config  {:exec ["resty" "--http-conf" "client_body_buffer_size 1m;\nvariables_hash_max_size 2048;\nvariables_hash_bucket_size 128;\nlua_shared_dict GLOBAL 20k;\nlua_shared_dict WS_DEBUG 20k;\nlua_shared_dict ES_DEBUG 20k;" "-e"]
+               #_#_
+               :container {:group "test"
+                           :image "python"
                          :runtime :basic
                          :exec ["python" "-c"]
                          #_#_:bootstrap (fn [port opts]

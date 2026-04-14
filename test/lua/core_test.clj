@@ -6,7 +6,7 @@
   {:runtime :basic
    :exec    :resty
    :require [[lua.core :as u]
-             [xt.lang.base-iter :as it]]})
+             [xt.lang.common-iter :as it]]})
 
 (fact:global
  {:setup [(l/rt:restart)]

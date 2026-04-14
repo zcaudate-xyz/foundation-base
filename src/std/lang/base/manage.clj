@@ -324,7 +324,7 @@
            
            (lib-module-unused [(fn [s]
                                  (not (clojure.string/ends-with? s "test")))]
-                              {:ignore '[xt.lang.base-lib
+                              {:ignore '[xt.lang.common-lib
                                          js.react
                                          js.core]})
            

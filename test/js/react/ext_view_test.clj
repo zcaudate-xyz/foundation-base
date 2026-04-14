@@ -1,13 +1,13 @@
 (ns js.react.ext-view-test
   (:require [std.fs :as fs]
             [std.lang :as l]
-            [xt.lang.base-notify :as notify])
+            [xt.lang.common-notify :as notify])
   (:use code.test))
 
 (l/script- :js
   {:runtime :basic
-   :require [[xt.lang.base-lib :as k]
-             [xt.lang.base-repl :as repl]
+   :require [[xt.lang.common-lib :as k]
+             [xt.lang.common-repl :as repl]
              [xt.lang.event-view :as event-view]
              [js.core :as j]
              [js.react.ext-view :as ext-view]]})

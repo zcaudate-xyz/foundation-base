@@ -3,7 +3,7 @@
 
 (l/script :xtalk
   {:require [[js.cell.service :as service]
-             [xt.lang.base-lib :as k]]
+             [xt.lang.common-lib :as k]]
    :export  [MODULE]})
 
 (defn.xt resolve-section

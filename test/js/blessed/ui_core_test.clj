@@ -9,7 +9,7 @@
               [js.blessed.ui-core :as ui-core]
               [js.blessed :as b :include [:fn]]
               [js.lib.chalk :as chk]
-              [xt.lang.base-lib :as k]]
+              [xt.lang.common-lib :as k]]
    :export  [MODULE]})
 
 (defn.js boolText

@@ -49,16 +49,16 @@
 (declare lower-form)
 
 (def +wrapper-targets+
-  {'xt.lang.base-lib/nil? 'x:nil?
-   'xt.lang.base-lib/cat 'x:cat
-   'xt.lang.base-lib/json-encode 'x:json-encode
-   'xt.lang.base-lib/split 'x:str-split
-   'xt.lang.base-lib/fn? 'x:is-function?})
+  {'xt.lang.common-lib/nil? 'x:nil?
+   'xt.lang.common-lib/cat 'x:cat
+   'xt.lang.common-lib/json-encode 'x:json-encode
+   'xt.lang.common-lib/split 'x:str-split
+   'xt.lang.common-lib/fn? 'x:is-function?})
 
 (def +intrinsic-targets+
-  {'xt.lang.base-lib/arrayify "arrayify"
-   'xt.lang.base-lib/not-empty? "not-empty?"
-   'xt.lang.base-lib/is-empty? "is-empty?"
+  {'xt.lang.common-lib/arrayify "arrayify"
+   'xt.lang.common-lib/not-empty? "not-empty?"
+   'xt.lang.common-lib/is-empty? "is-empty?"
    'xt.lang.event-common/make-container "make-container"
    'xt.lang.event-common/blank-container "blank-container"})
 
@@ -92,19 +92,19 @@
       (= op' 'fn:>)
       (lower-fn-shorthand (cons op' args'))
 
-      (= op' 'xt.lang.base-lib/get-key)
+      (= op' 'xt.lang.common-lib/get-key)
       (lower-defaulted-target 'x:get-key args')
 
-      (= op' 'xt.lang.base-lib/get-in)
+      (= op' 'xt.lang.common-lib/get-in)
       (lower-defaulted-target 'x:get-path args')
 
-      (= op' 'xt.lang.base-lib/arr-join)
+      (= op' 'xt.lang.common-lib/arr-join)
       (list 'x:str-join (second args') (first args'))
 
-      (= op' 'xt.lang.base-lib/first)
+      (= op' 'xt.lang.common-lib/first)
       (lower-offset-index args' 0)
 
-      (= op' 'xt.lang.base-lib/second)
+      (= op' 'xt.lang.common-lib/second)
       (lower-offset-index args' 1)
 
       (contains? +wrapper-targets+ op')

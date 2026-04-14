@@ -48,15 +48,15 @@
 
 ^{:refer std.lang.typed.xtalk-parse/extract-aliases :added "4.1"}
 (fact "extracts aliases from require vectors"
-  (extract-aliases '[[xt.lang.base-lib :as k]
+  (extract-aliases '[[xt.lang.common-lib :as k]
                      [xt.lang.event-common :as event-common]])
-  => '{k xt.lang.base-lib
+  => '{k xt.lang.common-lib
        event-common xt.lang.event-common})
 
 ^{:refer std.lang.typed.xtalk-parse/extract-ns-aliases :added "4.1"}
 (fact "extracts aliases from ns forms"
-  (extract-ns-aliases '(ns sample.core (:require [xt.lang.base-lib :as k])))
-  => '{k xt.lang.base-lib})
+  (extract-ns-aliases '(ns sample.core (:require [xt.lang.common-lib :as k])))
+  => '{k xt.lang.common-lib})
 
 ^{:refer std.lang.typed.xtalk-parse/script-form? :added "4.1"}
 (fact "detects script forms"
@@ -66,8 +66,8 @@
 
 ^{:refer std.lang.typed.xtalk-parse/extract-script-aliases :added "4.1"}
 (fact "extracts aliases from script forms"
-  (extract-script-aliases '[(script :xtalk {:require [[xt.lang.base-lib :as k]]})])
-  => '{k xt.lang.base-lib})
+  (extract-script-aliases '[(script :xtalk {:require [[xt.lang.common-lib :as k]]})])
+  => '{k xt.lang.common-lib})
 
 ^{:refer std.lang.typed.xtalk-parse/arg-from-inline-form :added "4.1"}
 (fact "builds args from inline type forms"

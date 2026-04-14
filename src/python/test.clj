@@ -5,7 +5,7 @@
 (l/script :python
   {:runtime :remote-port
    :config {:port 12678}
-   :require [[xt.lang.base-lib :as k]]})
+   :require [[xt.lang.common-lib :as k]]})
 
 (comment
   (into {} (l/rt :python))

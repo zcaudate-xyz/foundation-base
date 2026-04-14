@@ -3,7 +3,7 @@
   (:refer-clojure :exclude [print flush time re-find]))
 
 (l/script :lua
-  {:require [[xt.lang.base-lib :suppress true :as k]
+  {:require [[xt.lang.common-lib :suppress true :as k]
              [lua.core :as u]]
    :import [["crypt.core" :as ngxcryptcore]]})
 

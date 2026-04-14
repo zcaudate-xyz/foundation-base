@@ -1,13 +1,13 @@
 (ns js.cell.kernel.base-model-test
   (:require [std.lang :as l]
-            [xt.lang.base-notify :as notify])
+            [xt.lang.common-notify :as notify])
   (:use code.test))
 
 (l/script- :js
   {:runtime :basic
-   :require [[xt.lang.base-lib :as k]
-             [xt.lang.base-repl :as repl]
-             [xt.lang.base-runtime :as rt :with [defvar.js]]
+   :require [[xt.lang.common-lib :as k]
+             [xt.lang.common-repl :as repl]
+             [xt.lang.common-runtime :as rt :with [defvar.js]]
              [xt.lang.event-view :as base-view]
              [js.core :as j]
              [js.cell.kernel.base-link :as base-link]

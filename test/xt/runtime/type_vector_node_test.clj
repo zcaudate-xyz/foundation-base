@@ -1,21 +1,21 @@
 (ns xt.runtime.type-vector-node-test
   (:require [std.lang :as l]
-            [xt.lang.base-notify :as notify])
+            [xt.lang.common-notify :as notify])
   (:use code.test))
 
 (l/script- :js
   {:runtime :basic
    :require [[xt.runtime.type-vector-node :as node]
-             [xt.lang.base-lib :as k]
-             [xt.lang.base-iter :as it]
-             [xt.lang.base-repl :as repl]]})
+             [xt.lang.common-lib :as k]
+             [xt.lang.common-iter :as it]
+             [xt.lang.common-repl :as repl]]})
 
 (l/script- :lua
   {:runtime :basic
    :require [[xt.runtime.type-vector-node :as node]
-             [xt.lang.base-lib :as k]
-             [xt.lang.base-iter :as it]
-             [xt.lang.base-repl :as repl]]})
+             [xt.lang.common-lib :as k]
+             [xt.lang.common-iter :as it]
+             [xt.lang.common-repl :as repl]]})
 
 (fact:global
  {:setup    [(l/rt:restart)]

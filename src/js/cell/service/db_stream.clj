@@ -2,7 +2,7 @@
   (:require [std.lang :as l]))
 
 (l/script :xtalk
-  {:require [[xt.lang.base-lib :as k]]
+  {:require [[xt.lang.common-lib :as k]]
    :export  [MODULE]})
 
 (defn.xt stream-capable?

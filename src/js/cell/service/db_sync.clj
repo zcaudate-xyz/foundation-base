@@ -5,7 +5,7 @@
   {:require [[js.cell.service.db-view :as db-view]
              [xt.db :as xdb]
              [xt.db.base-flatten :as flatten]
-             [xt.lang.base-lib :as k]]
+             [xt.lang.common-lib :as k]]
    :export  [MODULE]})
 
 (defn.xt sync-capable?

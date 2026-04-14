@@ -15,7 +15,7 @@
              [js.react-native :as n :include [:fn]]
              [js.react.ext-log :as ext-log]
              [xt.lang.event-log :as event-log]
-             [xt.lang.base-lib :as k]
+             [xt.lang.common-lib :as k]
              ]
    })
 

@@ -5,7 +5,7 @@
 (l/script- :js
   {:runtime :basic
    :require [[xt.cell.binding :as binding]
-             [xt.lang.base-lib :as k]]})
+             [xt.lang.common-lib :as k]]})
 
 (fact:global
  {:setup    [(l/rt:restart)]

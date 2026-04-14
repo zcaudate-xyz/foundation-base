@@ -15,7 +15,7 @@
              [js.react-native.animate :as a]
              [js.react-native.physical-base :as physical-base]
              [js.react-native.model-roller :as model-roller]
-             [xt.lang.base-lib :as k]]
+             [xt.lang.common-lib :as k]]
    })
 
 ^{:refer js.react-native.physical-play/DigitRollerStatic

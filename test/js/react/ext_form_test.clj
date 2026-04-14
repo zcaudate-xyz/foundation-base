@@ -1,13 +1,13 @@
 (ns js.react.ext-form-test
   (:require [std.fs :as fs]
             [std.lang :as l]
-            [xt.lang.base-notify :as notify])
+            [xt.lang.common-notify :as notify])
   (:use code.test))
 
 (l/script- :js
   {:runtime :basic
-   :require [[xt.lang.base-lib :as k]
-             [xt.lang.base-repl :as repl]
+   :require [[xt.lang.common-lib :as k]
+             [xt.lang.common-repl :as repl]
              [js.core :as j]
              [js.react.ext-form :as ext-form]]})
 

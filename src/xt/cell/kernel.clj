@@ -2,9 +2,9 @@
   (:require [std.lang :as l]))
 
 (l/script :xtalk
-  {:require [[xt.lang.base-runtime :as rt :with [defvar.xt]]
+  {:require [[xt.lang.common-runtime :as rt :with [defvar.xt]]
              [xt.lang.common-spec :as xt]
-             [xt.lang.base-task :as task]
+             [xt.lang.common-task :as task]
              [xt.lang.event-view :as event-view]
              [xt.cell.kernel.base-link :as raw]
              [xt.cell.kernel.base-impl :as impl-common]

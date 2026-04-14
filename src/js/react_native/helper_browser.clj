@@ -2,7 +2,7 @@
   (:require [std.lang :as l]))
 
 (l/script :js
-  {:require [[xt.lang.base-lib :as k]
+  {:require [[xt.lang.common-lib :as k]
              [xt.lang.event-route :as event-route]
              [js.react :as r]
              [js.react-native :as n]

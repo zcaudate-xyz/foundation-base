@@ -8,7 +8,7 @@
 
 (l/script- :js
   {:runtime :graal
-   :require [[xt.lang.base-lib :as k]]})
+   :require [[xt.lang.common-lib :as k]]})
 
 (fact:global
  {:setup [(l/rt:restart)]

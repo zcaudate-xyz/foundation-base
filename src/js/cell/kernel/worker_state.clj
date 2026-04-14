@@ -6,7 +6,7 @@
   {:require [[js.core :as j]
              [js.cell.kernel.base-util :as util]
              [xt.lang.common-runtime :as rt :with [defvar.js]]
-             [xt.lang.base-lib :as k]]})
+             [xt.lang.common-lib :as k]]})
 
 
 (defspec.xt WORKER_STATE

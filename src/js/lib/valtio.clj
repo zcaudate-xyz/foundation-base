@@ -4,7 +4,7 @@
   (:refer-clojure :exclude [use val proxy]))
 
 (l/script :js
-  {:require [[xt.lang.base-lib :as k]
+  {:require [[xt.lang.common-lib :as k]
              [js.core :as j]]
    :import [["valtio/vanilla" :as [* ValtioCore]]
             ["valtio/utils" :as [* ValtioUtils]]

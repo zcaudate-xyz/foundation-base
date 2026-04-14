@@ -4,7 +4,7 @@
 
 (l/script- :js
   {:runtime :basic
-   :require [[xt.lang.base-lib :as k]
+   :require [[xt.lang.common-lib :as k]
              [js.core :as j]
              [js.cell.kernel.base-util :as base-util]]})
 

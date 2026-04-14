@@ -6,7 +6,7 @@
 (def canonical-runtime-source
   "(ns xt.lang.sample-lua-test
      (:require [std.lang :as l]
-               [xt.lang.base-lib :as k])
+               [xt.lang.common-lib :as k])
      (:use code.test))
    (l/script- :lua {:runtime :basic})
    ^{:lang-exceptions {:dart {:expect 30}

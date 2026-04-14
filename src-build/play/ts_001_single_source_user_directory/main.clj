@@ -1,11 +1,11 @@
 (ns play.ts-001-single-source-user-directory.main
   (:require [std.lang :as l]
-            [xt.lang.base-lib]
+            [xt.lang.common-lib]
             [xt.lang.common-data]
             [std.lang.typed.xtalk :refer [defspec.xt]]))
 
 (l/script :xtalk
-  {:require [[xt.lang.base-lib :as k]
+  {:require [[xt.lang.common-lib :as k]
              [xt.lang.common-data :as common-data]]})
 
 (defspec.xt UserId

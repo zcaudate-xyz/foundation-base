@@ -20,7 +20,7 @@
   (require 'std.lang.model.spec-lua :reload)
   (require 'std.lang.model.spec-python :reload)
   (require 'std.lang.model-annex.spec-r :reload)
-  (require 'xt.lang.base-lib :reload))
+  (require 'xt.lang.common-lib :reload))
 
 (comment
   (s/reload-specs)

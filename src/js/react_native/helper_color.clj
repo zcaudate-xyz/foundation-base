@@ -5,7 +5,7 @@
   {:runtime :websocket
    :require [[js.core :as j]
              [xt.lang.util-color :as c]
-             [xt.lang.base-lib :as k]]})
+             [xt.lang.common-lib :as k]]})
 
 ;;
 ;; hsl function

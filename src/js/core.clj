@@ -304,11 +304,11 @@
   [msg & [tag]]
   (template/$ (try
          (throw (new Error ~msg))
-         (catch e (xt.lang.base-lib/TRACE! (. e ["stack"]) ~tag)))))
+         (catch e (xt.lang.common-lib/TRACE! (. e ["stack"]) ~tag)))))
 
 (defmacro.js
   LOG!
-  "like `xt.lang.base-lib/LOG!` but also for promises"
+  "like `xt.lang.common-lib/LOG!` but also for promises"
   {:added "4.0"}
   [body]
   (let [{:keys [line]} (meta (l/macro-form))

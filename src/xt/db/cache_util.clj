@@ -56,7 +56,7 @@
   [rows fdata new-fn]
   (var out {})
   (xt/for:object [[table-key m] fdata]
-    (xt/for:object [[id new-record] m]
+    (xt/for:object [[id new-record] (or m {})]
       (xtd/set-in out [table-key id]
                 (-/merge-single rows table-key id new-record
                                 (or new-fn (fn [x] (return x)))))))
@@ -110,14 +110,15 @@
   (let [attr (xtd/get-in schema [table-key field "ref"])
         _    (if (not attr)
                (xt/x:err (xt/x:cat "Not a valid link type: " (xt/x:json-encode [table-key field]))))
-        #{ns type rval} attr
+        #{ns rval} attr
+        link-type (xt/x:get-key attr "type")
         [table-link
          inverse-link] (xt/x:get-key {:reverse ["rev_links" "ref_links"]
-                                   :forward ["ref_links" "rev_links"]}
-                                  type)]
+                                    :forward ["ref_links" "rev_links"]}
+                                   link-type)]
     (return {:table-key     table-key
-             :table-link    table-link
-             :table-field   field
+              :table-link    table-link
+              :table-field   field
              :inverse-key   ns
              :inverse-link  inverse-link
              :inverse-field rval})))
@@ -288,4 +289,3 @@
                            :field field
                            :link-id link-id})))))
   (return out))
-

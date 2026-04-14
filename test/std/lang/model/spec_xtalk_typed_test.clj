@@ -32,14 +32,14 @@
 
 (fact "registry entries expose explicit declaration kinds"
   (typed/clear-registry!)
-  (typed/analyze-and-register! 'xt.lang.base-macro)
+  (typed/analyze-and-register! 'xt.lang.common-macro)
   (typed/analyze-and-register! 'xt.db.base-scope)
-  [(-> (typed/get-entry 'xt.lang.base-macro/add)
+  [(-> (typed/get-entry 'xt.lang.common-macro/add)
        types/entry-kinds
        set)
-   (types/declaration-kind (typed/get-macro 'xt.lang.base-macro/add))
+   (types/declaration-kind (typed/get-macro 'xt.lang.common-macro/add))
    (types/declaration-kind (typed/get-value 'xt.db.base-scope/Scopes))
-   (nil? (typed/get-type 'xt.lang.base-macro/add))
+   (nil? (typed/get-type 'xt.lang.common-macro/add))
    (= :value (-> (typed/get-entry 'xt.db.base-scope/Scopes)
                   types/entry-primary-kind))]
   => '[#{:macro :spec}
@@ -68,7 +68,7 @@
 (fact "lowers xtalk surface helpers to typed core"
   (lower/lower-form '(k/get-key route "tree")
                     {:ns 'sample.route
-                     :aliases '{k xt.lang.base-lib}})
+                     :aliases '{k xt.lang.common-lib}})
   => '(x:get-key route "tree" nil))
 
 (fact "canonicalizes builtin wrappers through grammar op tables"
@@ -86,13 +86,13 @@
                       :aliases '{k xt.lang.common-data}})
    (lower/lower-form '(k/arr-clone path)
                      {:ns 'sample.route
-                      :aliases '{k xt.lang.base-lib}})
+                      :aliases '{k xt.lang.common-lib}})
    (lower/lower-form '(x:str-len path)
                      {:ns 'sample.route
-                      :aliases '{k xt.lang.base-lib}})
+                      :aliases '{k xt.lang.common-lib}})
    (lower/lower-form '(k/arr-join path "/")
                      {:ns 'sample.route
-                      :aliases '{k xt.lang.base-lib}})]
+                      :aliases '{k xt.lang.common-lib}})]
   => '[x:obj-assign
        x:obj-vals
        x:len
@@ -106,19 +106,19 @@
 (fact "lowering uses rule-driven wrapper rewrites"
   [(lower/lower-form '(k/get-key route "tree")
                      {:ns 'sample.route
-                      :aliases '{k xt.lang.base-lib}})
+                      :aliases '{k xt.lang.common-lib}})
    (lower/lower-form '(k/get-in route ["tree" "leaf"] "fallback")
                      {:ns 'sample.route
-                      :aliases '{k xt.lang.base-lib}})
+                      :aliases '{k xt.lang.common-lib}})
    (lower/lower-form '(k/first items)
                      {:ns 'sample.route
-                      :aliases '{k xt.lang.base-lib}})
+                      :aliases '{k xt.lang.common-lib}})
    (lower/lower-form '(k/second items)
                      {:ns 'sample.route
-                      :aliases '{k xt.lang.base-lib}})
+                      :aliases '{k xt.lang.common-lib}})
    (lower/lower-form '(k/arrayify items)
                      {:ns 'sample.route
-                      :aliases '{k xt.lang.base-lib}})]
+                      :aliases '{k xt.lang.common-lib}})]
   => '[(x:get-key route "tree" nil)
        (x:get-path route ["tree" "leaf"] "fallback")
        (x:get-idx items (x:offset))
@@ -397,7 +397,7 @@
                 '(defn.xt proto-create
                    ([m]
                     (x:proto-create m)))
-                'xt.lang.base-lib
+                'xt.lang.common-lib
                 {})]
     {:inputs (mapv (comp types/type->data :type) (:inputs fn-def))
      :body (:raw-body fn-def)})
@@ -409,7 +409,7 @@
                 '(defn.xt with-opts
                    [& [m]]
                    (return m))
-                'xt.lang.base-lib
+                'xt.lang.common-lib
                 {})]
     (mapv :name (:inputs fn-def)))
   => '[m])
@@ -480,7 +480,7 @@
         true])
 
 (fact "analyzes macro and value declarations separately"
-  [(-> (parse/analyze-namespace 'xt.lang.base-macro)
+  [(-> (parse/analyze-namespace 'xt.lang.common-macro)
        :macros
        count
        pos?)
@@ -492,10 +492,10 @@
 
 (fact "registers macros and values in the typed registry"
   (typed/clear-registry!)
-  (typed/analyze-and-register! 'xt.lang.base-macro)
+  (typed/analyze-and-register! 'xt.lang.common-macro)
   (typed/analyze-and-register! 'xt.db.base-scope)
-  [(some? (typed/get-macro 'xt.lang.base-macro/add))
-   (true? (get-in (typed/get-macro 'xt.lang.base-macro/add) [:body-meta :macro]))
+  [(some? (typed/get-macro 'xt.lang.common-macro/add))
+   (true? (get-in (typed/get-macro 'xt.lang.common-macro/add) [:body-meta :macro]))
    (some? (typed/get-value 'xt.db.base-scope/Scopes))
    (true? (get-in (typed/get-value 'xt.db.base-scope/Scopes) [:body-meta :def]))
    (some? (typed/get-declaration 'xt.db.base-scope/Scopes :value))
@@ -691,30 +691,30 @@
 
 (fact "analyzes base namespace specs"
   (typed/clear-registry!)
-  (doseq [ns-sym '[xt.lang.base-lib
-                   xt.lang.base-macro
-                   xt.lang.base-runtime
-                   xt.lang.base-iter
-                   xt.lang.base-repl
-                   xt.lang.base-text
-                   xt.lang.base-interval]]
+  (doseq [ns-sym '[xt.lang.common-lib
+                   xt.lang.common-macro
+                   xt.lang.common-runtime
+                   xt.lang.common-iter
+                   xt.lang.common-repl
+                   xt.lang.common-text
+                   xt.lang.common-interval]]
     (typed/analyze-and-register! ns-sym))
-  [(analysis/get-function-output-type 'xt.lang.base-lib/sym-pair)
-   (analysis/get-function-output-type 'xt.lang.base-runtime/xt-create)
-   (analysis/get-function-output-type 'xt.lang.base-runtime/xt-current)
-   (analysis/get-function-output-type 'xt.lang.base-iter/iter)
-   (analysis/get-function-output-type 'xt.lang.base-repl/return-encode)
-   (analysis/get-function-output-type 'xt.lang.base-text/tag-string)
-   (analysis/get-function-output-type 'xt.lang.base-interval/start-interval)
-   (-> (typed/get-macro 'xt.lang.base-macro/add)
+  [(analysis/get-function-output-type 'xt.lang.common-lib/sym-pair)
+   (analysis/get-function-output-type 'xt.lang.common-runtime/xt-create)
+   (analysis/get-function-output-type 'xt.lang.common-runtime/xt-current)
+   (analysis/get-function-output-type 'xt.lang.common-iter/iter)
+   (analysis/get-function-output-type 'xt.lang.common-repl/return-encode)
+   (analysis/get-function-output-type 'xt.lang.common-text/tag-string)
+   (analysis/get-function-output-type 'xt.lang.common-interval/start-interval)
+   (-> (typed/get-macro 'xt.lang.common-macro/add)
        :output
        types/type->data)]
-  => '[{:kind :named :name xt.lang.base-lib/StringPair}
-       {:kind :named :name xt.lang.base-runtime/XTState}
+  => '[{:kind :named :name xt.lang.common-lib/StringPair}
+       {:kind :named :name xt.lang.common-runtime/XTState}
        {:kind :maybe
-        :item {:kind :named :name xt.lang.base-runtime/XTState}}
+        :item {:kind :named :name xt.lang.common-runtime/XTState}}
        {:kind :maybe
-        :item {:kind :named :name xt.lang.base-iter/Iterator}}
+        :item {:kind :named :name xt.lang.common-iter/Iterator}}
        {:kind :primitive :name :xt/str}
        {:kind :primitive :name :xt/str}
        {:kind :primitive :name :xt/any}

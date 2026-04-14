@@ -4,7 +4,7 @@
             [std.lib.foundation :as f]
             [std.lib.walk :as walk]
             [std.string.case :as case]
-            [xt.lang.base-lib :as k])
+            [xt.lang.common-lib :as k])
   (:refer-clojure :exclude [compile]))
 
 (defn parse-map

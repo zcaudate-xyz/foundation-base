@@ -147,11 +147,20 @@
   {:added "4.0"}
   [& [n lang]]
   (let [[lang n] (if (keyword? n)
-                   [n nil] [lang n])
+                    [n nil] [lang n])
         {:keys [id]} (notify-ceremony-rt lang)
         pred  (fn [{:strs [key]}]
-                (= id (first key)))]
-    (cond->> (filter pred @notify/*notify-capture*)
+                (= id (first key)))
+        captured-fn (fn []
+                      (filter pred @notify/*notify-capture*))
+        entries (loop [attempt 0
+                       out (captured-fn)]
+                  (if (or (seq out)
+                          (>= attempt 20))
+                    out
+                    (do (Thread/sleep 25)
+                        (recur (inc attempt) (captured-fn)))))]
+    (cond->> entries
       :then (reverse)
       n (take n)
       :then (map #(get % "value"))
@@ -182,4 +191,3 @@
    (atom/swap-return! notify/*notify-capture*
      (fn [v]
        [(count v) []]))))
-

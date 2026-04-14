@@ -18,7 +18,7 @@
              [js.react-native.model-roller :as model-roller]
              [js.react-native.ui-button :as ui-button]
              [js.react-native.ui-input :as ui-input]
-             [xt.lang.base-lib :as k]]
+             [xt.lang.common-lib :as k]]
    })
 
 ^{:refer js.react-native.ui-form/LoginFormWalkthrough

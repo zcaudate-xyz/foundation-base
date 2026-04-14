@@ -7,7 +7,7 @@
              [std.lang.base.runtime :as rt]
              [std.lang.model-annex.spec-ruby :as spec]
              [std.lib.collection :as collection]
-             [xt.lang.base-repl :as k]))
+             [xt.lang.common-repl :as k]))
 
 (def +ruby-init+
   (common/put-program-options

@@ -4,7 +4,7 @@
 
 (l/script- :js
   {:runtime :basic
-   :require [[xt.lang.base-lib :as k]
+   :require [[xt.lang.common-lib :as k]
              [js.cell.runtime.env-webworker :as env-webworker]]})
 
 (fact:global

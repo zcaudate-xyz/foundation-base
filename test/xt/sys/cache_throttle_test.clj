@@ -1,8 +1,19 @@
 (ns xt.sys.cache-throttle-test
-  (:require [rt.nginx.config :as config]
+  (:require [rt.nginx.script :as script]
             [xt.lang.common-notify :as notify]
             [std.lang :as l])
   (:use code.test))
+
+(defn create-resty-params
+  "creates default resty params"
+  {:added "4.0"}
+  ([]
+   (script/write [[:client-body-buffer-size "1m"]
+                  [:variables-hash-max-size 2048]
+                  [:variables-hash-bucket-size 128]
+                  [:lua-shared-dict [:GLOBAL "20k"]]
+                  [:lua-shared-dict [:WS_DEBUG "20k"]]
+                  [:lua-shared-dict [:ES_DEBUG "20k"]]])))
 
 (l/script- :js
   {:runtime :basic
@@ -14,7 +25,7 @@
 
 (l/script- :lua
   {:runtime :basic
-   :config  {:exec ["resty" "--http-conf" (config/create-resty-params) "-e"]}
+   :config  {:exec ["resty" "--http-conf" "client_body_buffer_size 1m;\nvariables_hash_max_size 2048;\nvariables_hash_bucket_size 128;\nlua_shared_dict GLOBAL 20k;\nlua_shared_dict WS_DEBUG 20k;\nlua_shared_dict ES_DEBUG 20k;" "-e"]}
    :require [[xt.lang.common-lib :as k]
              [xt.sys.cache-throttle :as throttle]
              [xt.sys.cache-common :as cache]

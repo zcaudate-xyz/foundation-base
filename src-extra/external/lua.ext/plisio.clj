@@ -3,7 +3,7 @@
 
 (l/script :lua
   {:require [[lua.nginx.http-client :as http]
-             [xt.lang.base-lib :as k]]
+             [xt.lang.common-lib :as k]]
    })
 
 (def.lua ROOT_API_URL
