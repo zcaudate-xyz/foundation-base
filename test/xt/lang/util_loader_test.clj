@@ -1,23 +1,60 @@
 (ns xt.lang.util-loader-test
   (:require [std.json :as json]
             [std.lang :as l]
-            [xt.lang.base-notify :as notify])
+            [xt.lang.common-notify :as notify])
   (:use code.test))
+
+(l/script- :xtalk
+  {:require [[xt.lang.common-lib :as k]
+             [xt.lang.common-spec :as xt]]})
 
 (l/script- :js
   {:runtime :basic
-   :require [[xt.lang.base-lib :as k]
-             [xt.lang.base-repl :as repl]
+   :require [[xt.lang.common-lib :as k]
+             [xt.lang.common-spec :as xt]
+             [xt.lang.common-repl :as repl]
              [xt.lang.util-loader :as loader]
              [js.core :as j]]})
 
 (l/script- :lua
   {:runtime :basic
    :config  {:program :resty}
-   :require [[xt.lang.base-lib :as k]
-             [xt.lang.base-repl :as repl]
+   :require [[xt.lang.common-lib :as k]
+             [xt.lang.common-spec :as xt]
+             [xt.lang.common-repl :as repl]
              [xt.lang.util-loader :as loader]
              [lua.nginx :as n]]})
+
+(defn.xt walk
+  [obj pre-fn post-fn]
+  (:= obj (pre-fn obj))
+  (cond (xt/x:nil? obj)
+        (return (post-fn obj))
+
+        (xt/x:is-object? obj)
+        (do (var out := {})
+            (xt/for:object [[k v] obj]
+              (xt/x:set-key out k (-/walk v pre-fn post-fn)))
+            (return (post-fn out)))
+
+        (xt/x:is-array? obj)
+        (do (var out := [])
+            (xt/for:array [e obj]
+              (xt/x:arr-push out (-/walk e pre-fn post-fn)))
+            (return (post-fn out)))
+
+        :else
+        (return (post-fn obj))))
+
+(defn.xt get-spec
+  [obj]
+  (var spec-fn
+       (fn [obj]
+         (if (not (or (xt/x:is-object? obj)
+                      (xt/x:is-array? obj)))
+           (return (k/type-native obj))
+           (return obj))))
+  (return (-/walk obj k/identity spec-fn)))
 
 (fact:global
  {:setup    [(l/rt:restart)]
@@ -29,7 +66,7 @@
   
   (set
    (!.js
-    (k/obj-keys
+    (xt/x:obj-keys
      (loader/new-task
       "A" [] []
       {:load-fn (fn []
@@ -38,7 +75,7 @@
 
   (set
    (!.lua
-    (k/obj-keys
+    (xt/x:obj-keys
      (loader/new-task
       "A" [] []
       {:load-fn (fn []
@@ -139,10 +176,10 @@
       "::" "loader"}
   
   (!.lua
-   (k/get-spec
+   (-/get-spec
     (loader/new-loader [(loader/new-task
-                        "A" [] []
-                        {:load-fn (fn []
+                         "A" [] []
+                         {:load-fn (fn []
                                     (return "A"))})
                         (loader/new-task
                          "B" ["A"] []
@@ -422,20 +459,20 @@
                          "A" [] []
                          {:load-fn (fn []
                                      (return (j/future-delayed [100]
-                                               (:= (!:G A) (k/now-ms)))))})
+                                              (:= (!:G A) (xt/x:now-ms)))))})
                         (loader/new-task
                          "B" ["A"] []
                          {:load-fn (fn []
                                      (return (j/future-delayed [100]
-                                               (:= (!:G B) (k/now-ms)))))})
+                                              (:= (!:G B) (xt/x:now-ms)))))})
                         (loader/new-task
                          "C" ["B"] []
                          {:load-fn (fn []
                                      (return (j/future-delayed [100]
-                                               (:= (!:G C) (k/now-ms)))))})]))
+                                              (:= (!:G C) (xt/x:now-ms)))))})]))
     (loader/load-tasks loader
                         nil
                         (fn []
-                          (repl/notify  [(k/floor (/ (- B A) 100))
-                                         (k/floor (/ (- C A) 100))]))))
+                         (repl/notify  [(xt/x:m-floor (/ (- B A) 100))
+                                        (xt/x:m-floor (/ (- C A) 100))]))))
   => (contains [number? 2]))

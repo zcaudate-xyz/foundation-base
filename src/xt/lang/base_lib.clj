@@ -7,7 +7,11 @@
   (:refer-clojure :exclude [abs bit-and bit-or bit-xor type get-in identity inc dec zero? pos? neg? even? odd? max min mod quot cat eval apply print nil? fn? first second nth replace fn? last sort sort-by throw]))
 
 (l/script :xtalk
-  {:require [[xt.lang.base-macro :as k]]})
+  {:require [[xt.lang.base-macro :as k]
+             [xt.lang.common-spec :as xt]
+             [xt.lang.common-data :as xtd]
+             [xt.lang.common-string :as xts]
+             [xt.lang.common-math :as xtm]]})
 
 (l/intern-macros :xtalk 'xt.lang.base-macro)
 
@@ -515,7 +519,7 @@
   "pad lines with starting chars"
   {:added "4.0"}
   [s n ch]
-  (var lines (xt/x:split s "\n"))
+  (var lines (xts/split s "\n"))
   (var out := "")
   (xt/for:array [line lines]
     (when (< 0 (xt/x:len out))
@@ -543,7 +547,7 @@
   {:added "4.0"}
   [pval nval modulo]
   (var offset (mod (- nval pval) modulo))
-  (cond (> (xt/x:abs offset)
+  (cond (> (xtm/abs offset)
            (/ modulo 2))
         (cond (> offset 0)
               (return (- offset modulo))
@@ -590,7 +594,7 @@
   "rounds to the nearest integer"
   {:added "4.0"}
   [x]
-  (return (xt/x:floor (+ x 0.5))))
+  (return (xtm/floor (+ x 0.5))))
 
 (defn.xt clamp
   "clamps a value between min and max"
@@ -801,7 +805,7 @@
   {:added "4.0"}
   ([arr n]
    (var t  (xt/x:len arr))
-   (return (-/arr-rslice arr (xt/x:max (- t n) 0) t))))
+   (return (-/arr-rslice arr (xtm/max (- t n) 0) t))))
 
 (defn.xt arr-mapcat
   "maps an array function, concatenting results"
@@ -929,7 +933,7 @@
   (var arrlen := (x:len arr))
   (var start  := (:? (< 1 arrlen) (xt/x:first arr) 0))
   (var finish := (:? (< 1 arrlen) (xt/x:second arr) (xt/x:first arr)))
-  (var step   := (:? (< 2 arrlen) (xt/x:nth arr 2) 1))
+  (var step   := (:? (< 2 arrlen) (xtd/nth arr 2) 1))
   (var out := [start])
   (var i := (+ step start))
   (cond (and (< 0 step)
@@ -1035,7 +1039,7 @@
   (var tmp-idx := nil)
   (var total (xt/x:len arr))
   (xt/for:index [i [(x:offset) total]]
-    (:= tmp-idx (+ (x:offset) (xt/x:floor (* (xt/x:random) total))))
+    (:= tmp-idx (+ (x:offset) (xtm/floor (* (xt/x:random) total))))
     (:= tmp-val (xt/x:get-idx arr tmp-idx))
     (xt/x:set-idx arr tmp-idx (xt/x:get-idx arr i))
     (xt/x:set-idx arr i tmp-val))
@@ -1091,7 +1095,7 @@
   "gets a random element from array"
   {:added "4.0"}
   [arr]
-  (var idx (xt/x:floor (* (x:len arr) (x:random))))
+  (var idx (xtm/floor (* (x:len arr) (x:random))))
   (return (xt/x:get-idx arr (x:offset idx))))
 
 (defn.xt arr-normalise

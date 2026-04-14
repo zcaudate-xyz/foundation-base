@@ -5,7 +5,9 @@
                             neg? even? odd?]))
 
 (l/script :xtalk
-  {:require [[xt.lang.common-spec :as xt]]})
+  {:require [[xt.lang.common-spec :as xt]
+             [xt.lang.common-data :as xtd]
+             [xt.lang.common-string :as str]]})
 
 ;;
 ;; TYPE
@@ -62,6 +64,90 @@
   "checks that value is not nil"
   {:added "4.0"}
   ([x] (return (xt/x:not-nil? x))))
+
+(defspec.xt len [:fn [:xt/any] :xt/int])
+
+(defn.xt len
+  "gets length of a value"
+  {:added "4.1"}
+  [x]
+  (return (xt/x:len x)))
+
+(defspec.xt first [:fn [[:xt/array :xt/any]] :xt/any])
+
+(defn.xt first
+  "gets the first item of an array"
+  {:added "4.1"}
+  [arr]
+  (return (xt/x:first arr)))
+
+(defspec.xt second [:fn [[:xt/array :xt/any]] :xt/any])
+
+(defn.xt second
+  "gets the second item of an array"
+  {:added "4.1"}
+  [arr]
+  (return (xt/x:second arr)))
+
+(defn.xt get-key
+  "gets a key from an object"
+  {:added "4.1"}
+  [obj key]
+  (return (xt/x:get-key obj key)))
+
+(defn.xt obj-keys
+  "gets object keys"
+  {:added "4.1"}
+  [obj]
+  (return (xt/x:obj-keys obj)))
+
+(defn.xt json-encode
+  "encodes an object to json"
+  {:added "4.1"}
+  [obj]
+  (return (xt/x:json-encode obj)))
+
+(defn.xt json-decode
+  "decodes json to an object"
+  {:added "4.1"}
+  [s]
+  (return (xt/x:json-decode s)))
+
+(defn.xt cat
+  "concats two strings"
+  {:added "4.1"}
+  [a b]
+  (return (xt/x:cat a b)))
+
+(defn.xt join
+  "joins an array with a separator"
+  {:added "4.1"}
+  [separator arr]
+  (return (str/join separator arr)))
+
+(defn.xt arr-map
+  "maps a function across an array"
+  {:added "4.1"}
+  [arr f]
+  (return (xtd/arr-map arr f)))
+
+(defn.xt get-in
+  "gets a nested path from an object"
+  {:added "4.1"}
+  [obj path]
+  (return (xtd/get-in obj path)))
+
+(defn.xt set-in
+  "sets a nested path in an object"
+  {:added "4.1"}
+  [obj path v]
+  (return (xtd/set-in obj path v)))
+
+(defn.xt obj-omit
+  "omits keys from an object"
+  {:added "4.1"}
+  [obj keys]
+  (return (xtd/obj-omit obj keys)))
 
 (defspec.xt is-boolean? [:fn [:xt/any] :xt/bool])
 
@@ -168,6 +254,12 @@
   "identity function"
   {:added "4.0"}
   ([x] (return x)))
+
+(defn.xt sort
+  "sorts an array with the default ordering"
+  {:added "4.1"}
+  [arr]
+  (return (xtd/arr-sort arr -/identity xt/x:lt)))
 
 (defspec.xt T [:fn [:xt/any] :xt/bool])
 

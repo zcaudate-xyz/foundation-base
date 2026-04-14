@@ -648,7 +648,7 @@
          val-fn} opts)
   (return {:results (:? sort-fn (sort-fn results) results)
            :lookup (xtd/arr-juxt (or results [])
-                                 (or key-fn (fn [e] (return (xt/x:get-key x "id"))))
+                                 (or key-fn (fn [e] (return (xt/x:get-key e "id"))))
                                  (or val-fn (fn [x] (return x))))}))
 
 (defn.xt sorted-lookup
@@ -670,11 +670,12 @@
   {:added "0.1"}
   [key]
   (return
-   (fn:> [results]
-     {:results results
-      :lookup (xtd/arr-group-by results
-                                (fn [e] (xt/x:get-key e key))
-                                (fn [x] (return x)))})))
+   (fn [results]
+     (return
+      {:results results
+       :lookup (xtd/arr-group-by results
+                                 (fn [e] (return (xt/x:get-key e key)))
+                                 (fn [x] (return x)))}))))
 
 
 (comment

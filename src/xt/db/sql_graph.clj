@@ -206,35 +206,38 @@
   (var column-fn   (xt/x:get-key opts "column_fn" (fn [x] (return x))))
   (var wrapper-fn  (xt/x:get-key opts "wrapper_fn" (fn [s indent] (return s))))
   (var format-fn   (fn:> [input] (ut/encode-sql input column-fn opts ut/encode-loop-fn)))
-  (var [table-name params] tree)
+  (var table-name := (xt/x:first tree))
+  (var params := (xtd/second tree))
   (var where-params  (xt/x:get-key params "where"))
   (var custom-params (xt/x:arr-filter (or (xt/x:get-key params "custom")
-                                       [])
-                                   (fn:> [e] (== (. e ["::"])
-                                                 "sql/keyword"))))
+                                        [])
+                                    (fn:> [e] (== (. e ["::"])
+                                                  "sql/keyword"))))
   (var return-str   (-/select-return-str schema
                                          params
                                          -/select-return
                                          indent
                                          opts))
   (var return-base  (-/select-where schema table-name return-str where-params 2 opts))
-  (return (wrapper-fn (xt/x:str-join " "
-                                     [return-base
-                                      (xt/x:unpack (xt/x:arr-map custom-params format-fn))])
-                      (:? (> indent 0)
-                          2
-                          0))))
+  (var custom-str   (xt/x:str-join " " (xt/x:arr-map custom-params format-fn)))
+  (return (wrapper-fn (:? (xtd/not-empty? custom-str)
+                          (xt/x:cat return-base " " custom-str)
+                          return-base)
+                       (:? (> indent 0)
+                           2
+                           0))))
 
 (defn.xt select-tree
   "gets the selection tree structure"
   {:added "4.0"}
   [schema query opts]
   (var input (scope/get-link-standard query))
-  (var [table-name linked] input)
+  (var table-name := (xt/x:first input))
+  (var linked := (xtd/second input))
   (var return-params (xt/x:last linked))
   (var where-params  (xt/x:arr-filter linked (fn [x]
-                                            (return (and (xt/x:is-object? x)
-                                                         (xtd/not-empty? x))))))
+                                             (return (and (xt/x:is-object? x)
+                                                          (xtd/not-empty? x))))))
   (var tree (scope/get-tree schema table-name where-params return-params opts))
   (return tree))
 

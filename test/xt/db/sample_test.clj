@@ -7,7 +7,7 @@
   (:use code.test))
 
 (l/script :xtalk
-  {:require [[xt.lang.base-lib :as k]]})
+  {:require [[xt.lang.common-lib :as k]]})
 
 (def +currency+
   [{:description "Default Currency for Statstrade",

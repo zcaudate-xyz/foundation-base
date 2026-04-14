@@ -1,21 +1,23 @@
 (ns xt.lang.util-throttle-test
   (:require [std.json :as json]
             [std.lang :as l]
-            [xt.lang.base-notify :as notify])
+            [xt.lang.common-notify :as notify])
   (:use code.test))
 
 (l/script- :js
   {:runtime :basic
-   :require [[xt.lang.base-lib :as k]
+   :require [[xt.lang.common-lib :as k]
+             [xt.lang.common-spec :as xt]
              [xt.lang.util-throttle :as throttle]
-             [xt.lang.base-repl :as repl]]})
+             [xt.lang.common-repl :as repl]]})
 
 (l/script- :lua
   {:runtime :basic
    :config  {:program :resty}
-   :require [[xt.lang.base-lib :as k]
+   :require [[xt.lang.common-lib :as k]
+             [xt.lang.common-spec :as xt]
              [xt.lang.util-throttle :as throttle]
-             [xt.lang.base-repl :as repl]]})
+             [xt.lang.common-repl :as repl]]})
 
 (fact:global
  {:setup    [(l/rt:restart)]
@@ -26,14 +28,14 @@
   ^:hidden
   
   (set (!.js
-        (k/obj-keys
+        (xt/x:obj-keys
          (throttle/throttle-create
           (fn [])
           nil))))
   => #{"handler" "queued" "now_fn" "active"}
   
   (set (!.lua
-        (k/obj-keys
+        (xt/x:obj-keys
          (throttle/throttle-create
           (fn [])
           nil))))

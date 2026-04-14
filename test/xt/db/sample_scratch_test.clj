@@ -7,7 +7,7 @@
             [xt.db.sample-user-test :as user]))
 
 (l/script :xtalk
-  {:require [[xt.lang.base-lib :as k]]})
+  {:require [[xt.lang.common-lib :as k]]})
 
 (def +app+ (pg/app "scratch"))
 

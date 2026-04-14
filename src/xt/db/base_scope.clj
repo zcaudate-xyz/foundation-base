@@ -81,9 +81,9 @@
                                            (xt/x:get-key scopes (xt/x:cat "-/" (xt/x:get-key e "scope"))))
                                       (xt/x:get-key plains (xt/x:get-key e "ident"))))))
   (return
-   (xt/x:arr-sort scoped
-               (fn:> [e] (xt/x:get-key e "order"))
-               (fn:> [a b] (< a b)))))
+   (xtd/arr-sort scoped
+                 (fn:> [e] (xt/x:get-key e "order"))
+                 (fn:> [a b] (< a b)))))
 
 (defn.xt get-link-standard
   "classifies the link"
@@ -144,15 +144,17 @@
   {:added "4.0"}
   [schema table-key returning]
   (var link-loop
-       (fn [table-key returning acc]
-         (var linked := (-/get-link-columns schema table-key (or returning [])))
-         (var inner-loop
-              (fn [arr]
-                (var [attr link-query] := arr)
-                (var [link-where link-returning] := link-query)
-                (link-loop (xt/x:get-path attr ["ref" "ns"])
-                           link-returning
-                           acc)))
+        (fn [table-key returning acc]
+          (var linked := (-/get-link-columns schema table-key (or returning [])))
+          (var inner-loop
+               (fn [arr]
+                 (var attr := (xt/x:first arr))
+                 (var link-query := (xtd/second arr))
+                 (var link-where := (xt/x:first link-query))
+                 (var link-returning := (xtd/second link-query))
+                 (link-loop (xt/x:get-path attr ["ref" "ns"])
+                            link-returning
+                            acc)))
 
          (do (xt/x:set-key acc table-key true)
              (xt/x:arr-each linked inner-loop))
@@ -187,7 +189,8 @@
   (var links  (-/get-link-columns schema table-name returning))
   (var get-child-tree
        (fn [link]
-         (var [attr link-query] link)
+         (var attr := (xt/x:first link))
+         (var link-query := (xtd/second link))
          (var link-where-query (xt/x:arr-filter link-query where-pred))
          (var link-returning  (xt/x:last link-query))
          (var link-where-returning  (xt/x:arr-filter link-returning where-pred))
@@ -219,4 +222,3 @@
                                                  (xt/x:get-key e "ident"))))
             :links (xt/x:arr-map links get-child-tree)
             :custom custom}]))
-

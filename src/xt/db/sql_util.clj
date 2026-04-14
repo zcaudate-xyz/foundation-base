@@ -77,7 +77,11 @@
   "encodes a number (for lua dates)"
   {:added "4.0"}
   [v]
-  (return (xt/x:cat "'" (xt/x:to-string v) "'")))
+  (return (xt/x:cat "'"
+                    (:? (xt/x:is-integer? v)
+                        (xt/x:str-to-fixed v 0)
+                        (xt/x:to-string v))
+                    "'")))
 
 (defn.xt encode-operator
   "encodes an operator to sql"
@@ -172,7 +176,9 @@
   (var arg-fn (fn [arg]
                 (return (loop-fn arg column-fn opts loop-fn))))
   (var fargs (xt/x:arr-map (or args []) arg-fn))
-  (return (xt/x:str-join  " " [name (xt/x:unpack fargs)])))
+  (if (xtd/arr-empty? fargs)
+    (return name)
+    (return (xt/x:cat name " " (xt/x:str-join " " fargs)))))
 
 (defn.xt encode-sql-fn
   "encodes an sql function"
@@ -192,12 +198,12 @@
                   (return (xt/x:cat  name "(" (xt/x:str-join ", " fargs) ")"))
                   
                   (== "alias" (xt/x:get-key fspec "type"))
-                  (return (xt/x:cat (xt/x:get-key fspec "name")
-                                 "("
-                                 (xt/x:str-join ", " fargs) ")"))
+                   (return (xt/x:cat (xt/x:get-key fspec "name")
+                                  "("
+                                  (xt/x:str-join ", " fargs) ")"))
 
-                  (== "macro" (xt/x:get-key fspec "type"))
-                  (return ((xt/x:get-key fspec "fn") (xt/x:unpack fargs)))
+                   (== "macro" (xt/x:get-key fspec "type"))
+                   (return (xt/x:apply (xt/x:get-key fspec "fn") fargs))
 
                   :else
                   (xt/x:err (xt/x:cat "Invalid Spec Type - " (xt/x:get-key fspec "type")))))))
@@ -314,20 +320,24 @@
   "encodes a query string"
   {:added "4.0"}
   ([params prefix opts]
-   (var out (-> (xtd/arrayify params)
-                (xt/x:arr-map (fn:> [p] (-/encode-query-single-string p opts)))
-                (xt/x:arr-filter (fn [e] (return (or (xt/x:not-nil? e)
-                                                     (< 0 (xt/x:len e))))))))
-   (cond (== 0 (xt/x:len out))
-         (return "")
+    (var out (-> (xtd/arrayify params)
+                 (xt/x:arr-map (fn:> [p] (-/encode-query-single-string p opts)))
+                 (xt/x:arr-filter (fn [e] (return (and (xt/x:not-nil? e)
+                                                       (< 0 (xt/x:len e))))))))
+    (var joined (xt/x:str-join " OR "
+                               (xt/x:arr-map out (fn:> [s] (xt/x:cat "(" s ")")))))
+    (cond (== 0 (xt/x:len out))
+          (return "")
 
-         (== 1 (xt/x:len out))
-         (return (xt/x:cat prefix " " (xt/x:first out)))
+          (== 1 (xt/x:len out))
+          (return (:? (xtd/not-empty? prefix)
+                     (xt/x:cat prefix " " (xt/x:first out))
+                     (xt/x:first out)))
 
-         :else
-         (return (xt/x:cat prefix " " 
-                           (xt/x:str-join " OR "
-                                          (xt/x:arr-map out (fn:> [s] (xt/x:cat "(" s ")")))))))))
+          :else
+          (return (:? (xtd/not-empty? prefix)
+                      (xt/x:cat prefix " " joined)
+                      joined)))))
 
 (defn.xt LIMIT
   "creates a LIMIT keyword"

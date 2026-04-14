@@ -11,14 +11,14 @@
              [xt.db.sql-raw :as raw]
              [xt.db.sql-graph :as graph]
              [xt.db.sql-util :as ut]
-             [xt.lang.base-lib :as k]
+             [xt.lang.common-lib :as k]
              [xt.db.sql-table :as table]
              [xt.db.sample-test :as sample]]})
 
 (l/script- :lua
   {:runtime :basic
    :require [[xt.db.base-schema :as sch]
-             [xt.lang.base-lib :as k]
+             [xt.lang.common-lib :as k]
              [xt.db.sql-util :as ut]
              [xt.db.sql-table :as table]
              [xt.db.sample-test :as sample]]})
@@ -26,7 +26,7 @@
 (l/script- :python
   {:runtime :basic
    :require [[xt.db.base-schema :as sch]
-             [xt.lang.base-lib :as k]
+             [xt.lang.common-lib :as k]
              [xt.db.sql-util :as ut]
              [xt.db.sql-table :as table]
              [xt.db.sample-test :as sample]]})

@@ -211,7 +211,7 @@
 ^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-x-lu-create :added "4.0"}
 (fact "lu create"
   (l/emit-as :python [(python-tf-x-lu-create '[_])])
-  => #"WeakKeyDictionary")
+  => #"\{\}")
 
 ^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-x-lu-eq :added "4.0"}
 (fact "lu eq"

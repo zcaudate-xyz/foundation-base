@@ -46,9 +46,9 @@
   [schema entry clause opts]
   (var #{view control} entry)
   (var #{table query} view)
-  (return (-/tree-base schema table query clause [{"::" "sql/count"}
-                                                  (xt/x:unpack (-/tree-control-array control))]
-                       opts)))
+  (return (-/tree-base schema table query clause (xt/x:arr-append [{"::" "sql/count"}]
+                                                                   (-/tree-control-array control))
+                        opts)))
 
 (defn.xt tree-select
   "provides a view select query"
@@ -56,8 +56,9 @@
   [schema entry clause opts]
   (var #{view control} entry)
   (var #{table query} view)
-  (return (-/tree-base schema table query clause ["id"
-                                                  (xt/x:unpack (-/tree-control-array control))] opts)))
+  (return (-/tree-base schema table query clause (xt/x:arr-append ["id"]
+                                                                   (-/tree-control-array control))
+                        opts)))
 
 (defn.xt tree-return
   "provides a view return query"

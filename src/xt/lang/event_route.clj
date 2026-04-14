@@ -175,10 +175,10 @@
     (when val
       (xt/x:arr-push param-arr (xt/x:cat key "=" val))))
   (return
-   (xt/x:cat (xt/x:str-join path "/")
-          (:? (xtd/arr-not-empty? param-arr)
-              (xt/x:cat "?" (xt/x:str-join "&" param-arr))
-              ""))))
+   (xt/x:cat (xt/x:str-join "/" path)
+           (:? (xtd/arr-not-empty? param-arr)
+               (xt/x:cat "?" (xt/x:str-join "&" param-arr))
+               ""))))
 
 (defn.xt path-to-tree
   "turns a path to tree"
@@ -417,6 +417,7 @@
   
   (var pparams (xt/x:get-key all-params pkey))
   (var nparams (xt/x:get-key ninterim-params pkey))
+  (:= nparams (or nparams {}))
 
   (var dpath   (-/changed-path-raw ppath npath))
   (var dparams (-/changed-params-raw pparams nparams))
@@ -452,6 +453,7 @@
   
   (var pparams  (xt/x:get-key all-params pkey))
   (var nparams  (or params pparams))
+  (:= nparams (or nparams {}))
 
   (var dpath   (-/changed-path-raw ppath npath))
   (var dparams (-/changed-params-raw pparams nparams))

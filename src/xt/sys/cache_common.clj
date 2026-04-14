@@ -3,7 +3,8 @@
   (:refer-clojure :exclude [flush get set]))
 
 (l/script :xtalk
-  {:require  [[xt.lang.common-spec :as xt]]})
+  {:require  [[xt.lang.common-spec :as xt]
+              [xt.lang.common-data :as xtd]]})
 
 ;;
 ;; cache encode
@@ -100,7 +101,9 @@
   [type key item]
   (return (-/meta-update
            type
-           (fn:> [prev] (xt/x:step-set-key prev key item)))))
+           (fn:> [prev]
+             (xt/x:set-key prev key item)
+             (return prev)))))
 
 (defn.xt meta-dissoc
   "dissocs a key from the meta"
@@ -108,5 +111,6 @@
   [type key]
   (return (-/meta-update
            type
-           (fn:> [prev] (xt/x:step-del-key prev key)))))
-
+           (fn:> [prev]
+             (xt/x:del-key prev key)
+             (return prev)))))

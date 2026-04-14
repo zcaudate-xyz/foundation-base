@@ -209,9 +209,9 @@
   "gets the runtime id for pointer-like objects"
   {:added "4.0"}
   [obj]
-  (when (or (common-lib/fn? obj)
-            (common-lib/obj? obj)
-            (common-lib/arr? obj))
+  (when (or (x:is-function? obj)
+            (x:is-object? obj)
+            (x:is-array? obj))
     (var #{hash} (-/xt))
     (var #{lookup counter} hash)
     (var hash-id (x:lu-get lookup obj))

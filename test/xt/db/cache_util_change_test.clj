@@ -1,12 +1,12 @@
 (ns xt.db.cache-util-change-test
   (:require [std.lang :as l]
-            [xt.lang.base-notify :as notify])
+            [xt.lang.common-notify :as notify])
   (:use code.test))
 
 (l/script- :js
   {:runtime :basic
-   :require [[xt.lang.base-repl :as repl]
-             [xt.lang.base-lib :as k]
+   :require [[xt.lang.common-repl :as repl]
+             [xt.lang.common-data :as xtd]
              [xt.db.cache-util :as data]
              [xt.db.base-flatten :as f]
              [xt.db.sample-test :as sample]]})
@@ -21,7 +21,7 @@
             (!.js
              (f/flatten sample/Schema
                         "UserAccount"
-                        (k/obj-omit sample/RootUser ["emails" "profile"])
+                        (xtd/obj-omit sample/RootUser ["emails" "profile"])
                         {})))
           
           (def +profile+

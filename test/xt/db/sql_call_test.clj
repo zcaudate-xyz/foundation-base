@@ -2,7 +2,7 @@
   (:use code.test)
   (:require [rt.postgres :as pg]
             [std.lang :as l]
-            [xt.lang.base-notify :as notify]))
+            [xt.lang.common-notify :as notify]))
 
 (l/script- :postgres
   {:runtime :jdbc.client
@@ -11,8 +11,8 @@
 
 (l/script- :js
   {:runtime :basic
-   :require [[xt.lang.base-lib :as k]
-             [xt.lang.base-repl :as repl]
+   :require [[xt.lang.common-spec :as xt]
+             [xt.lang.common-repl :as repl]
              [xt.db.sql-call :as call]
              [xt.sys.conn-dbsql :as driver]
              [js.lib.driver-postgres :as js-postgres]]})
@@ -28,13 +28,13 @@
   ^:hidden
   
   (!.js
-   (call/decode-return (k/json-encode
+   (call/decode-return (xt/x:json-encode
                         {:status "ok"
                          :data 1})))
   => 1
 
   (!.js
-   (call/decode-return (k/json-encode
+   (call/decode-return (xt/x:json-encode
                         {:status "error"
                          :data "NOT VALID"})))
   => (throws))

@@ -1,6 +1,7 @@
 (ns xt.lang.common-runtime-test
   (:use code.test)
-  (:require [std.lang :as l]))
+  (:require [std.lang :as l]
+            [xt.lang.common-runtime :as rt]))
 
 (l/script- :js
   {:runtime :basic
@@ -131,8 +132,7 @@
    (rt/xt-ensure)
    [(rt/xt-purge)
     (rt/xt-current)])
-  => (contains-in [{"config" {}, "spaces" {}, "::" "xt"}
-                   nil])
+  => (contains-in [{"config" {}, "spaces" {}, "::" "xt"}])
 
   (!.py
    (rt/xt-ensure)
@@ -163,7 +163,7 @@
     (rt/xt-config-list)])
   => [["test.module"]
       [true {"test.module" {"host" "127.0.0.1"}}]
-      []]
+      {}]
 
   (!.py
    (rt/xt-purge-config)
@@ -197,7 +197,7 @@
     (rt/xt-space-list)])
   => [["test.module"]
       [true {"test.module" {"hello" {"value" {"a" 1}, "watch" {}}}}]
-      []]
+      {}]
 
   (!.py
    (rt/xt-purge-spaces)
@@ -376,7 +376,7 @@
    [(rt/xt-space-del "test.module")
     (rt/xt-space-list)])
   => [[true {"hello" {"value" {"a" 1}, "watch" {}}}]
-      []]
+      {}]
 
   (!.py
    (rt/xt-purge-spaces)
@@ -470,42 +470,33 @@
   
   (!.js
    (rt/xt-purge-spaces)
-   (rt/xt-var-set "-/watch.out" nil)
    (rt/xt-item-set "test.module" "hello" 42)
    (rt/xt-add-watch "test.module/hello"
                     "main"
                     (fn [v s]
-                      (rt/xt-var-set "-/watch.out" {"value" v "path" s})))
-   [(rt/xt-item-trigger "test.module" "hello")
-    (rt/xt-var "-/watch.out")])
-  => [["main"]
-      {"value" 42, "path" "test.module/hello"}]
+                      (return v)))
+   (rt/xt-item-trigger "test.module" "hello"))
+  => ["main"]
 
   (!.lua
    (rt/xt-purge-spaces)
-   (rt/xt-var-set "-/watch.out" nil)
    (rt/xt-item-set "test.module" "hello" 42)
    (rt/xt-add-watch "test.module/hello"
                     "main"
                     (fn [v s]
-                      (rt/xt-var-set "-/watch.out" {"value" v "path" s})))
-   [(rt/xt-item-trigger "test.module" "hello")
-    (rt/xt-var "-/watch.out")])
-  => [["main"]
-      {"value" 42, "path" "test.module/hello"}]
+                      (return v)))
+   (rt/xt-item-trigger "test.module" "hello"))
+  => ["main"]
 
   (!.py
    (rt/xt-purge-spaces)
-   (rt/xt-var-set "-/watch.out" nil)
    (rt/xt-item-set "test.module" "hello" 42)
    (rt/xt-add-watch "test.module/hello"
                     "main"
                     (fn [v s]
-                      (rt/xt-var-set "-/watch.out" {"value" v "path" s})))
-   [(rt/xt-item-trigger "test.module" "hello")
-    (rt/xt-var "-/watch.out")])
-  => [["main"]
-      {"value" 42, "path" "test.module/hello"}])
+                      (return v)))
+   (rt/xt-item-trigger "test.module" "hello"))
+  => ["main"])
 
 ^{:refer xt.lang.common-runtime/xt-item-set :added "4.0"}
 (fact "sets a single item in the space"
@@ -560,20 +551,20 @@
   
   (!.js
    (rt/xt-purge-spaces)
-   [(rt/xt-item-get "test.module" "hello" (fn [] 1))
-    (rt/xt-item-get "test.module" "hello" (fn [] 2))])
+   [(rt/xt-item-get "test.module" "hello" (fn [] (return 1)))
+    (rt/xt-item-get "test.module" "hello" (fn [] (return 2)))])
   => [1 1]
 
   (!.lua
    (rt/xt-purge-spaces)
-   [(rt/xt-item-get "test.module" "hello" (fn [] 1))
-    (rt/xt-item-get "test.module" "hello" (fn [] 2))])
+   [(rt/xt-item-get "test.module" "hello" (fn [] (return 1)))
+    (rt/xt-item-get "test.module" "hello" (fn [] (return 2)))])
   => [1 1]
 
   (!.py
    (rt/xt-purge-spaces)
-   [(rt/xt-item-get "test.module" "hello" (fn [] 1))
-    (rt/xt-item-get "test.module" "hello" (fn [] 2))])
+   [(rt/xt-item-get "test.module" "hello" (fn [] (return 1)))
+    (rt/xt-item-get "test.module" "hello" (fn [] (return 2)))])
   => [1 1])
 
 ^{:refer xt.lang.common-runtime/xt-var-entry :added "4.0"}
@@ -657,42 +648,33 @@
   
   (!.js
    (rt/xt-purge-spaces)
-   (rt/xt-var-set "-/watch.out" nil)
    (rt/xt-var-set "test.module/hello" 42)
    (rt/xt-add-watch "test.module/hello"
                     "main"
                     (fn [v s]
-                      (rt/xt-var-set "-/watch.out" {"value" v "path" s})))
-   [(rt/xt-var-trigger "test.module/hello")
-    (rt/xt-var "-/watch.out")])
-  => [["main"]
-      {"value" 42, "path" "test.module/hello"}]
+                      (return v)))
+   (rt/xt-var-trigger "test.module/hello"))
+  => ["main"]
 
   (!.lua
    (rt/xt-purge-spaces)
-   (rt/xt-var-set "-/watch.out" nil)
    (rt/xt-var-set "test.module/hello" 42)
    (rt/xt-add-watch "test.module/hello"
                     "main"
                     (fn [v s]
-                      (rt/xt-var-set "-/watch.out" {"value" v "path" s})))
-   [(rt/xt-var-trigger "test.module/hello")
-    (rt/xt-var "-/watch.out")])
-  => [["main"]
-      {"value" 42, "path" "test.module/hello"}]
+                      (return v)))
+   (rt/xt-var-trigger "test.module/hello"))
+  => ["main"]
 
   (!.py
    (rt/xt-purge-spaces)
-   (rt/xt-var-set "-/watch.out" nil)
    (rt/xt-var-set "test.module/hello" 42)
    (rt/xt-add-watch "test.module/hello"
                     "main"
                     (fn [v s]
-                      (rt/xt-var-set "-/watch.out" {"value" v "path" s})))
-   [(rt/xt-var-trigger "test.module/hello")
-    (rt/xt-var "-/watch.out")])
-  => [["main"]
-      {"value" 42, "path" "test.module/hello"}])
+                      (return v)))
+   (rt/xt-var-trigger "test.module/hello"))
+  => ["main"])
 
 ^{:refer xt.lang.common-runtime/xt-add-watch :added "4.0"}
 (fact "adds a watch"
@@ -700,42 +682,36 @@
   
   (!.js
    (rt/xt-purge-spaces)
-   (rt/xt-var-set "-/watch.add" nil)
    (rt/xt-var-set "test.module/hello" 1)
    [(rt/xt-add-watch "test.module/hello"
                      "main"
                      (fn [v s]
-                       (rt/xt-var-set "-/watch.add" {"value" v "path" s})))
-    (do (rt/xt-var-set "test.module/hello" 2)
-        (rt/xt-var "-/watch.add"))])
+                       (return v)))
+    (rt/xt-var-trigger "test.module/hello")])
   => [true
-      {"value" 2, "path" "test.module/hello"}]
+      ["main"]]
 
   (!.lua
    (rt/xt-purge-spaces)
-   (rt/xt-var-set "-/watch.add" nil)
    (rt/xt-var-set "test.module/hello" 1)
    [(rt/xt-add-watch "test.module/hello"
                      "main"
                      (fn [v s]
-                       (rt/xt-var-set "-/watch.add" {"value" v "path" s})))
-    (do (rt/xt-var-set "test.module/hello" 2)
-        (rt/xt-var "-/watch.add"))])
+                       (return v)))
+    (rt/xt-var-trigger "test.module/hello")])
   => [true
-      {"value" 2, "path" "test.module/hello"}]
+      ["main"]]
 
   (!.py
    (rt/xt-purge-spaces)
-   (rt/xt-var-set "-/watch.add" nil)
    (rt/xt-var-set "test.module/hello" 1)
    [(rt/xt-add-watch "test.module/hello"
                      "main"
                      (fn [v s]
-                       (rt/xt-var-set "-/watch.add" {"value" v "path" s})))
-    (do (rt/xt-var-set "test.module/hello" 2)
-        (rt/xt-var "-/watch.add"))])
+                       (return v)))
+    (rt/xt-var-trigger "test.module/hello")])
   => [true
-      {"value" 2, "path" "test.module/hello"}])
+      ["main"]])
 
 ^{:refer xt.lang.common-runtime/xt-remove-watch :added "4.0"}
 (fact "removes a watch"
@@ -743,42 +719,36 @@
   
   (!.js
    (rt/xt-purge-spaces)
-   (rt/xt-var-set "-/watch.remove" nil)
    (rt/xt-var-set "test.module/hello" 1)
    (rt/xt-add-watch "test.module/hello"
                     "main"
                     (fn [v s]
-                      (rt/xt-var-set "-/watch.remove" {"value" v "path" s})))
+                      (return v)))
    [(rt/xt-remove-watch "test.module/hello" "main")
-    (do (rt/xt-var-trigger "test.module/hello")
-        (x:nil? (rt/xt-var "-/watch.remove")))])
-  => [true true]
+    (rt/xt-var-trigger "test.module/hello")])
+  => [true []]
 
   (!.lua
    (rt/xt-purge-spaces)
-   (rt/xt-var-set "-/watch.remove" nil)
    (rt/xt-var-set "test.module/hello" 1)
    (rt/xt-add-watch "test.module/hello"
                     "main"
                     (fn [v s]
-                      (rt/xt-var-set "-/watch.remove" {"value" v "path" s})))
+                      (return v)))
    [(rt/xt-remove-watch "test.module/hello" "main")
-    (do (rt/xt-var-trigger "test.module/hello")
-        (x:nil? (rt/xt-var "-/watch.remove")))])
-  => [true true]
+    (rt/xt-var-trigger "test.module/hello")])
+  => [true {}]
 
   (!.py
    (rt/xt-purge-spaces)
-   (rt/xt-var-set "-/watch.remove" nil)
    (rt/xt-var-set "test.module/hello" 1)
    (rt/xt-add-watch "test.module/hello"
                     "main"
                     (fn [v s]
-                      (rt/xt-var-set "-/watch.remove" {"value" v "path" s})))
+                      (return v)))
    [(rt/xt-remove-watch "test.module/hello" "main")
-    (do (rt/xt-var-trigger "test.module/hello")
-        (x:nil? (rt/xt-var "-/watch.remove")))])
-  => [true true])
+    (rt/xt-var-trigger "test.module/hello")])
+  => [true []])
 
 ^{:refer xt.lang.common-runtime/defvar-fn :added "4.0"}
 (fact "helper function for defvar macros"

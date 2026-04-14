@@ -14,11 +14,14 @@
   (when (not (== 36 (xt/x:str-len s)))
     (return false))
 
-  (xt/for:array [i [8 13 18 23]]
-    (when (not (== "-" (xt/x:str-substring s i (+ i 1))))
-      (return false)))
-
-  (return true))
+  (var parts (xt/x:str-split s "-"))
+  (return
+   (and (== 5 (xt/x:len parts))
+        (== 8 (xt/x:str-len (xt/x:get-idx parts (xt/x:offset 0))))
+        (== 4 (xt/x:str-len (xt/x:get-idx parts (xt/x:offset 1))))
+        (== 4 (xt/x:str-len (xt/x:get-idx parts (xt/x:offset 2))))
+        (== 4 (xt/x:str-len (xt/x:get-idx parts (xt/x:offset 3))))
+        (== 12 (xt/x:str-len (xt/x:get-idx parts (xt/x:offset 4)))))))
 
 (defn.xt check-arg-type
   "checks the arg type of an input"

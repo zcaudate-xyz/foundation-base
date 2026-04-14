@@ -1,28 +1,31 @@
 (ns xt.db.cache-util-test
   (:require [std.lang :as l]
-            [xt.lang.base-notify :as notify])
+            [xt.lang.common-notify :as notify])
   (:use code.test))
 
 (l/script- :js
   {:runtime :basic
-   :require [[xt.lang.base-repl :as repl]
-             [xt.lang.base-lib :as k]
+   :require [[xt.lang.common-repl :as repl]
+             [xt.lang.common-lib :as k]
+             [xt.lang.common-data :as xtd]
              [xt.db.cache-util :as data]
              [xt.db.base-flatten :as f]
              [xt.db.sample-test :as sample]]})
 
 (l/script- :lua
   {:runtime :basic
-   :require [[xt.lang.base-repl :as repl]
-             [xt.lang.base-lib :as k]
+   :require [[xt.lang.common-repl :as repl]
+             [xt.lang.common-lib :as k]
+             [xt.lang.common-data :as xtd]
              [xt.db.cache-util :as data]
              [xt.db.base-flatten :as f]
              [xt.db.sample-test :as sample]]})
 
 (l/script- :python
   {:runtime :basic
-   :require [[xt.lang.base-repl :as repl]
-             [xt.lang.base-lib :as k]
+   :require [[xt.lang.common-repl :as repl]
+             [xt.lang.common-lib :as k]
+             [xt.lang.common-data :as xtd]
              [xt.db.cache-util :as data]
              [xt.db.base-flatten :as f]
              [xt.db.sample-test :as sample]]})
@@ -94,8 +97,8 @@
    (-> (data/swap-if-entry rows
                            "UserAccount" "00000000-0000-0000-0000-000000000000"
                            (fn [record]
-                             (return (k/set-in record ["data" "foo"] "hello"))))
-       (k/get-in ["record" "data" "foo"])))
+                             (return (xtd/set-in record ["data" "foo"] "hello"))))
+        (xtd/get-in ["record" "data" "foo"])))
   => "hello"
 
   (!.lua
@@ -104,8 +107,8 @@
    (-> (data/swap-if-entry rows
                            "UserAccount" "00000000-0000-0000-0000-000000000000"
                            (fn [record]
-                             (return (k/set-in record ["data" "foo"] "hello"))))
-       (k/get-in ["record" "data" "foo"])))
+                             (return (xtd/set-in record ["data" "foo"] "hello"))))
+        (xtd/get-in ["record" "data" "foo"])))
   => "hello"
 
   (!.py
@@ -114,8 +117,8 @@
    (-> (data/swap-if-entry rows
                            "UserAccount" "00000000-0000-0000-0000-000000000000"
                            (fn [record]
-                             (return (k/set-in record ["data" "foo"] "hello"))))
-       (k/get-in ["record" "data" "foo"])))
+                             (return (xtd/set-in record ["data" "foo"] "hello"))))
+        (xtd/get-in ["record" "data" "foo"])))
   => "hello")
 
 ^{:refer xt.db.cache-util/merge-single :added "4.0"}
@@ -229,8 +232,8 @@
    (data/merge-bulk rows (@! +flattened+) nil)
    (var changed (-> (data/get-entry rows  "UserAccount" "00000000-0000-0000-0000-000000000000")
                     (. ["record"])
-                    (k/clone-nested)
-                    (k/set-in ["data" "nickname"] "hello")))
+                    (xtd/clone-nested)
+                    (xtd/set-in ["data" "nickname"] "hello")))
    
    (data/get-changed-single rows
                             "UserAccount" "00000000-0000-0000-0000-000000000000"
@@ -242,8 +245,8 @@
    (data/merge-bulk rows (@! +flattened+) nil)
    (var changed (-> (data/get-entry rows  "UserAccount" "00000000-0000-0000-0000-000000000000")
                     (. ["record"])
-                    (k/clone-nested)
-                    (k/set-in ["data" "nickname"] "hello")))
+                    (xtd/clone-nested)
+                    (xtd/set-in ["data" "nickname"] "hello")))
    
    (data/get-changed-single rows
                             "UserAccount" "00000000-0000-0000-0000-000000000000"
@@ -255,8 +258,8 @@
    (data/merge-bulk rows (@! +flattened+) nil)
    (var changed (-> (data/get-entry rows  "UserAccount" "00000000-0000-0000-0000-000000000000")
                     (. ["record"])
-                    (k/clone-nested)
-                    (k/set-in ["data" "nickname"] "hello")))
+                    (xtd/clone-nested)
+                    (xtd/set-in ["data" "nickname"] "hello")))
    
    (data/get-changed-single rows
                             "UserAccount" "00000000-0000-0000-0000-000000000000"
@@ -272,8 +275,8 @@
    (data/merge-bulk rows (@! +flattened+) nil)
    (var changed (-> (data/get-entry rows  "UserAccount" "00000000-0000-0000-0000-000000000000")
                     (. ["record"])
-                    (k/clone-nested)
-                    (k/set-in ["data" "nickname"] "hello")))
+                    (xtd/clone-nested)
+                    (xtd/set-in ["data" "nickname"] "hello")))
    (data/has-changed-single rows "UserAccount" "00000000-0000-0000-0000-000000000000"
                             changed))
   => true
@@ -283,8 +286,8 @@
    (data/merge-bulk rows (@! +flattened+) nil)
    (var changed (-> (data/get-entry rows  "UserAccount" "00000000-0000-0000-0000-000000000000")
                     (. ["record"])
-                    (k/clone-nested)
-                    (k/set-in ["data" "nickname"] "hello")))
+                    (xtd/clone-nested)
+                    (xtd/set-in ["data" "nickname"] "hello")))
    (data/has-changed-single rows "UserAccount" "00000000-0000-0000-0000-000000000000"
                             changed))
   => true
@@ -294,8 +297,8 @@
    (data/merge-bulk rows (@! +flattened+) nil)
    (var changed (-> (data/get-entry rows  "UserAccount" "00000000-0000-0000-0000-000000000000")
                     (. ["record"])
-                    (k/clone-nested)
-                    (k/set-in ["data" "nickname"] "hello")))
+                    (xtd/clone-nested)
+                    (xtd/set-in ["data" "nickname"] "hello")))
    (data/has-changed-single rows "UserAccount" "00000000-0000-0000-0000-000000000000"
                             changed))
   => true)
@@ -403,7 +406,7 @@
             (!.js
              (f/flatten sample/Schema
                         "UserAccount"
-                        (k/obj-omit sample/RootUser ["emails" "profile"])
+                        (xtd/obj-omit sample/RootUser ["emails" "profile"])
                         {})))
           
           (def +profile+

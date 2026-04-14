@@ -1,14 +1,14 @@
 (ns xt.db.impl-cache-test
   (:require [std.lang :as l]
-            [xt.lang.base-notify :as notify])
+            [xt.lang.common-notify :as notify])
   (:use code.test))
 
 (l/script- :lua
   {:runtime :basic
    :config {:program :resty}
    :require [[xt.db.impl-cache :as impl-cache]
-             [xt.lang.base-lib :as k]
-             [xt.lang.base-repl :as repl]
+             [xt.lang.common-lib :as k]
+             [xt.lang.common-repl :as repl]
              [xt.db.base-flatten :as f]
              [xt.db.cache-util :as ut]
              [xt.db.sample-test :as sample]]})
@@ -16,8 +16,8 @@
 (l/script- :js
   {:runtime :basic
    :require [[xt.db.impl-cache :as impl-cache]
-             [xt.lang.base-lib :as k]
-             [xt.lang.base-repl :as repl]
+             [xt.lang.common-lib :as k]
+             [xt.lang.common-repl :as repl]
              [xt.db.base-flatten :as f]
              [xt.db.cache-util :as ut]
              [xt.db.sample-test :as sample]]})

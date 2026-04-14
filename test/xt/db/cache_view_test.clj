@@ -10,7 +10,7 @@
    :require [[xt.db.cache-view :as v]
              [xt.db.sql-util :as ut]
              [xt.db.sql-raw :as raw]
-             [xt.lang.base-lib :as k]
+             [xt.lang.common-lib :as k]
              [xt.db.base-schema :as sch]
              [xt.db.base-scope :as scope]
              [xt.db.sample-test :as sample]]})

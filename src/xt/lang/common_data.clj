@@ -1020,8 +1020,17 @@
   "arr-sort using key function and comparator"
   {:added "4.0"}
   [arr key-fn comp-fn]
-  (var out (xt/x:arr-clone arr))
-  (xt/x:arr-sort out key-fn comp-fn)
+  (var out [])
+  (xt/for:array [e arr]
+    (var inserted false)
+    (xt/for:index [i [(xt/x:offset) (xt/x:len out)]]
+      (when (and (not inserted)
+                 (comp-fn (key-fn e)
+                          (key-fn (xt/x:get-idx out i))))
+        (xt/x:arr-insert out i e)
+        (:= inserted true)))
+    (when (not inserted)
+      (xt/x:arr-push out e)))
   (return out))
 
 (defn.xt arr-sorted-merge

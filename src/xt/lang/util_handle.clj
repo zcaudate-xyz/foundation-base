@@ -2,7 +2,8 @@
   (:require [std.lang :as l]))
 
 (l/script :xtalk
-  {:require [[xt.lang.common-spec :as xt]]})
+  {:require [[xt.lang.common-spec :as xt]
+             [xt.lang.common-data :as xtd]]})
 
 (defn.xt incr-fn
   []
@@ -106,44 +107,41 @@
   (var receipt  {:id (id-fn)})
   (var teardown-fn
        (fn []
-         (xt/for:array [cb tcbs]
-           (var #{on-teardown
-                  name
-                  output} cb)
-           (when on-teardown
-             (on-teardown))
-           (when (and name output)
-             (xt/x:set-key receipt name output)))))
+           (xt/for:array [cb tcbs]
+             (var on_teardown (xt/x:get-key cb "on_teardown"))
+             (var name (xt/x:get-key cb "name"))
+             (var output (xt/x:get-key cb "output"))
+             (when on_teardown
+               (on_teardown))
+             (when (and name output)
+               (xt/x:set-key receipt name output)))))
   (var call-fn
        (fn []
-         (return (xt/for:async [[ret err] (handler args)]
-                   {:success (do
-                               (xt/for:array [cb tcbs]
-                                 (var #{on-success} cb)
-                                 (when on-success
-                                   (var output (on-success ret))))
-                               (teardown-fn)
-                               (return ret))
-                    :error   (do
-                               (xt/for:array [cb tcbs]
-                                 
-                                 (var #{on-error} cb)
-                                 (when on-error
-                                   (on-error err)))
-                               (teardown-fn)
-                               (xt/x:throw err))
-                    :finally (do )}))))
+          (return (xt/for:async [[ret err] (handler (xt/x:unpack args))]
+                     {:success (do
+                                 (xt/for:array [cb tcbs]
+                                   (var on_success (xt/x:get-key cb "on_success"))
+                                   (when on_success
+                                     (on_success ret)))
+                                 (teardown-fn)
+                                 (return ret))
+                     :error   (do
+                                 (xt/for:array [cb tcbs]
+                                   (var on_error (xt/x:get-key cb "on_error"))
+                                   (when on_error
+                                     (on_error err)))
+                                 (teardown-fn)
+                                 (xt/x:throw err))}))))
   (var run-fn
        (fn []
-         (xt/for:array [cb tcbs]
-           (var #{on-setup} cb)
-           (when on-setup
-             (on-setup args)))
-         (if (< 0 (or delay 0))
-           (return (xt/x:with-delay call-fn delay))
-           (return (call-fn)))))
+           (xt/for:array [cb tcbs]
+             (var on_setup (xt/x:get-key cb "on_setup"))
+             (when on_setup
+               (on_setup args)))
+          (if (< 0 (or delay 0))
+            (xt/x:with-delay call-fn delay)
+            (return (call-fn)))))
   (var proc (:? wrap-fn
                 (wrap-fn run-fn args receipt handle)
                 (run-fn)))
   (return [receipt proc]))
-

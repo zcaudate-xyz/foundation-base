@@ -4,10 +4,11 @@
   (:refer-clojure :exclude [print send]))
 
 (l/script :js
-  {:require [[xt.lang.base-lib :as k]
-             [xt.lang.base-runtime :as rt]
+  {:require [[xt.lang.common-lib :as k]
+             [xt.lang.common-data :as xtd]
+             [xt.lang.common-runtime :as rt]
              [js.core.util :as ut]]
-   :import  [["pg" :as [* Postgres]]]})
+    :import  [["pg" :as [* Postgres]]]})
 
 (defn.js default-env
   "gets the default env"
@@ -24,7 +25,7 @@
   "sets the default env"
   {:added "4.0"}
   [m]
-  (var env (k/obj-assign (k/obj-clone (-/default-env)) m))
+  (var env (xtd/obj-assign (xtd/obj-clone (-/default-env)) m))
   (rt/xt-config-set "js.lib.driver-postgres" env)
   (return env))
 
@@ -49,13 +50,13 @@
                      (fn [resolve]
                        (. conn (query input
                                       (fn [err res]
-                                        (when res
-                                          (var #{rows} res)
-                                          (when (== 1 rows.length)
-                                            (resolve (callback nil (k/obj-first-val
-                                                                   (k/first rows)))))
-                                          (resolve (callback nil rows)))
-                                        (resolve (callback err nil))))))))))
+                                         (when res
+                                           (var #{rows} res)
+                                           (when (== 1 rows.length)
+                                             (resolve (callback nil (xtd/obj-first-val
+                                                                    (k/first rows)))))
+                                           (resolve (callback nil rows)))
+                                         (resolve (callback err nil))))))))))
   (:= (. conn ["::query_sync"])
       (fn [query]
         (throw "Not Allowed")))
@@ -66,12 +67,11 @@
   {:added "4.0"}
   [m callback]
   (:= callback (or callback ut/pass-callback))
-  (var env (k/obj-assign (-/default-env)
-                         m))
+  (var env (xtd/obj-assign (-/default-env)
+                          m))
   (var conn (new -/Client env))
   
   (. conn
      (connect)
      (then (fn [] (callback nil conn))))
   (return (-/set-methods conn)))
-

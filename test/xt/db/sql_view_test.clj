@@ -11,7 +11,7 @@
    :require [[xt.db.sql-view :as v]
              [xt.db.sql-util :as ut]
              [xt.db.sql-raw :as raw]
-             [xt.lang.base-lib :as k]
+             [xt.lang.common-lib :as k]
              [xt.db.base-schema :as sch]
              [xt.db.base-scope :as scope]
              [xt.db.sample-test :as sample]]})
@@ -19,7 +19,7 @@
 (l/script- :lua
   {:runtime :basic
    :require [[xt.db.sql-view :as v]
-             [xt.lang.base-lib :as k]
+             [xt.lang.common-lib :as k]
              [xt.db.sql-util :as ut]
              [xt.db.base-schema :as sch]
              [xt.db.base-scope :as scope]
@@ -28,7 +28,7 @@
 (l/script- :python
   {:runtime :basic
    :require [[xt.db.sql-view :as v]
-             [xt.lang.base-lib :as k]
+             [xt.lang.common-lib :as k]
              [xt.db.sql-util :as ut]
              [xt.db.base-schema :as sch]
              [xt.db.base-scope :as scope]

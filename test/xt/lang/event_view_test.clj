@@ -125,12 +125,12 @@
                              (resolve (handler-fn context))))
                       (then success)
                       (catch error)))))
-    (j/notify (. (view/pipeline-run-remote context
-                                           true
-                                           async-fn
-                                           (fn:>)
-                                           k/identity)
-                 (then (fn:> context.acc)))))
+    (. (view/pipeline-run-remote context
+                                 true
+                                 async-fn
+                                 (fn:>)
+                                 k/identity)
+       (then (fn:> (repl/notify context.acc)))))
   => {"error" true,
       "remote" [true "ERRORED" true],
       "post" [false],
@@ -154,12 +154,12 @@
                              (resolve (handler-fn context))))
                       (then success)
                       (catch error)))))
-    (j/notify (. (view/pipeline-run-remote context
-                                           true
-                                           async-fn
-                                           (fn:>)
-                                           k/identity)
-                 (then (fn:> (view/get-output v)))))))
+    (. (view/pipeline-run-remote context
+                                 true
+                                 async-fn
+                                 (fn:>)
+                                 k/identity)
+       (then (fn:> (repl/notify (view/get-output v)))))))
 
 ^{:refer xt.lang.event-view/wrap-args :added "4.0"}
 (fact "wraps handler for context args"
@@ -468,12 +468,12 @@
                              (resolve (handler-fn context))))
                       (then success)
                       (catch error)))))
-    (j/notify (. (view/pipeline-run context
-                                    disabled
-                                    async-fn
-                                    (fn:>)
-                                    k/identity)
-                 (then (fn:> context.acc)))))
+    (. (view/pipeline-run context
+                          disabled
+                          async-fn
+                          (fn:>)
+                          k/identity)
+       (then (fn:> (repl/notify context.acc)))))
   => {"::" "view.run"
       "pre" [false],
       "main" [true {"value" 3}]
@@ -523,12 +523,12 @@
                              (resolve (handler-fn context))))
                       (then success)
                       (catch error)))))
-    (j/notify (. (view/pipeline-run-remote context
-                                           true
-                                           async-fn
-                                           (fn:>)
-                                           k/identity)
-                 (then (fn:> context.acc)))))
+    (. (view/pipeline-run-remote context
+                                 true
+                                 async-fn
+                                 (fn:>)
+                                 k/identity)
+       (then (fn:> (repl/notify context.acc)))))
   => {"::" "view.run"
       "pre" [false]
       "remote" [true {"value" 3}],
@@ -575,12 +575,12 @@
                              (resolve (handler-fn context))))
                       (then success)
                       (catch error)))))
-    (j/notify (. (view/pipeline-run-sync context
-                                           true
-                                           async-fn
-                                           (fn:>)
-                                           k/identity)
-                 (then (fn:> context.acc)))))
+    (. (view/pipeline-run-sync context
+                               true
+                               async-fn
+                               (fn:>)
+                               k/identity)
+       (then (fn:> (repl/notify context.acc)))))
   => {"::" "view.run"
       "pre" [false]
       "sync" [true {"value" 3}],

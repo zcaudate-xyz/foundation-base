@@ -1,13 +1,14 @@
 (ns xt.lang.common-runtime
   (:require [std.lang :as l]
-            [std.lang.typed.xtalk :refer [defspec.xt]]
-            [std.lib.env :as env]
-            [std.lib.foundation]
-            [std.lib.function :as f]
-            [std.lib.template :as template]))
+             [std.lang.typed.xtalk :refer [defspec.xt]]
+             [std.lib.env :as env]
+             [std.lib.foundation]
+             [std.lib.function :as f]
+             [std.lib.template :as template]))
 
 (l/script :xtalk
   {:require [[xt.lang.common-spec :as xt]
+             [xt.lang.common-data :as common-data]
              [xt.lang.common-string :as xts]]})
 
 (defspec.xt XTWatchFn
@@ -231,7 +232,7 @@
   []
   (var g (-/xt-ensure))
   (var #{config} g)
-  (return (xt/x:obj-keys config)))
+  (return (common-data/obj-keys config)))
 
 (defn.xt xt-config-set
   "sets the config for a module"
@@ -271,7 +272,7 @@
   []
   (var g (-/xt-ensure))
   (var #{spaces} g)
-  (return (xt/x:obj-keys spaces)))
+  (return (common-data/obj-keys spaces)))
 
 (defn.xt xt-space-del
   "deletes a space"
@@ -280,7 +281,8 @@
   (var g (-/xt-ensure))
   (var #{spaces} g)
   (var prev  (xt/x:get-key spaces module))
-  (xt/x:del-key g module)
+  (when (xt/x:not-nil? prev)
+    (xt/x:del-key spaces module))
   (return [true prev]))
 
 (defn.xt xt-space
@@ -315,7 +317,8 @@
   [module key]
   (var space (-/xt-space module))
   (var prev (xt/x:get-key space key))
-  (xt/x:del-key space key)
+  (when (xt/x:not-nil? prev)
+    (xt/x:del-key space key))
   (return [true prev]))
 
 (defn.xt xt-item-trigger
@@ -328,7 +331,7 @@
     (var #{value watch} prev)
     (for:object [[watch-key watch-fn] watch]
       (watch-fn value (xt/x:cat module "/" key)))
-    (return (xt/x:obj-keys watch))))
+    (return (common-data/obj-keys watch))))
 
 (defn.xt xt-item-set
   "sets a single item in the space"
@@ -444,16 +447,16 @@
         def-sym (clojure.core/symbol (str "defn." tag))]
     (template/$ [(~def-sym ~(with-meta sym-id (merge (meta &form)
                                               (meta sym-id)))
-            []
-            (return (xt.lang.base-runtime/xt-item-get
-                     ~sym-ns
-                     ~sym-key
-                     (fn ~@more))))
+             []
+             (return (xt.lang.common-runtime/xt-item-get
+                      ~sym-ns
+                      ~sym-key
+                      (fn ~@more))))
           (~def-sym ~(with-meta (clojure.core/symbol (str sym-id "-reset"))
-                       (merge (meta &form)
-                              (meta sym-id)))
+                        (merge (meta &form)
+                               (meta sym-id)))
             [val]
-            (return (xt.lang.base-runtime/xt-var-set
+            (return (xt.lang.common-runtime/xt-var-set
                      ~(str sym-ns "/" sym-key)
                      val)))])))
 

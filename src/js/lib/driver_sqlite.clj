@@ -2,7 +2,7 @@
   (:require [std.lang :as l]))
 
 (l/script :js
-  {:require [[xt.lang.base-lib :as k]
+  {:require [[xt.lang.common-spec :as xt]
              [js.core.util :as ut]]})
 
 (defn.js raw-query
@@ -10,10 +10,10 @@
   {:added "4.0"}
   [db query]
   (var out (. db (exec query)))
-  (when (== 1 (k/len out))
+  (when (== 1 (xt/x:len out))
     (var values (. out [0] ["values"]))
     (when (and (not= nil values)
-               (== 1 (k/len values)))
+               (== 1 (xt/x:len values)))
       (return (. values [0] [0]))))
   (return out))
 

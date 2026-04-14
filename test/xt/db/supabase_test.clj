@@ -1,12 +1,13 @@
 (ns xt.db.supabase-test
   (:use code.test)
   (:require [std.lang :as l]
-            [xt.lang.base-notify :as notify]))
+            [xt.lang.common-notify :as notify]))
 
 (l/script- :js
   {:runtime :basic
-   :require [[xt.lang.base-lib :as k]
-             [xt.lang.base-repl :as repl]
+   :require [[xt.lang.common-spec :as xt]
+             [xt.lang.common-string :as str]
+             [xt.lang.common-repl :as repl]
              [xt.sys.conn-dbsql :as dbsql]
              [xt.db.sql-util :as ut]
              [xt.db.sql-manage :as manage]
@@ -31,11 +32,11 @@
                           sample/Schema
                           sample/SchemaLookup
                           (ut/sqlite-opts nil)))
-                     (dbsql/query-sync (k/get-key DBSQL "instance")
-                                       (k/join "\n\n"
-                                               (manage/table-create-all
-                                                sample/Schema
-                                                sample/SchemaLookup
+                      (dbsql/query-sync (xt/x:get-key DBSQL "instance")
+                                        (str/join "\n\n"
+                                                (manage/table-create-all
+                                                 sample/Schema
+                                                 sample/SchemaLookup
                                                 (ut/sqlite-opts nil))))
                      (repl/notify true)
                      (catch e (repl/notify e)))))))))
@@ -160,7 +161,7 @@
               "bindings" [{"event" "*"
                            "schema" "public"
                            "table" "Currency"}]}))
-   (var detach-fn (k/get-key res "detach-fn"))
+    (var detach-fn (xt/x:get-key res "detach-fn"))
    ;; feed one insert payload
    ((x:get-idx handlers 0)
     {"type" "postgres_changes"
@@ -174,4 +175,3 @@
    (detach-fn)
    rows)
   => [{"id" "USD"}])
-

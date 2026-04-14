@@ -1,14 +1,16 @@
-(ns xt.db-lua.test
+(ns xt.db-lua.test-test
   (:require [std.lang :as l]
-            [xt.lang.base-notify :as notify])
+            [xt.lang.common-notify :as notify])
   (:use code.test))
 
 (l/script- :lua
   {:runtime :basic
    :config {:program :resty}
    :require [[xt.db :as impl]
-             [xt.lang.base-lib :as k]
-             [xt.lang.base-repl :as repl]
+             [xt.lang.common-lib :as k]
+             [xt.lang.common-spec :as xt]
+             [xt.lang.common-string :as str]
+             [xt.lang.common-repl :as repl]
              [xt.sys.conn-dbsql :as dbsql]
              [xt.db.base-flatten :as f]
              [xt.db.sql-util :as ut]
@@ -28,8 +30,8 @@
                                    sample/Schema
                                    sample/SchemaLookup
                                    (ut/sqlite-opts nil)))
-   (dbsql/query-sync (k/get-key DBSQL "instance")
-                     (k/join "\n\n"
+   (dbsql/query-sync (xt/x:get-key DBSQL "instance")
+                     (str/join "\n\n"
                              (manage/table-create-all
                               sample/Schema
                               sample/SchemaLookup
