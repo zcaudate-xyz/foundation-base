@@ -2,8 +2,8 @@
   (:require [std.lang :as l]))
 
 (l/script :js
-  {:require [[xt.lang.base-lib :as k]
-             [js.core.util :as ut]]
+  {:require [[xt.lang.common-spec :as xt]
+              [js.core.util :as ut]]
    :import [["@sqlite.org/sqlite-wasm" :as sqlite3InitModule]]})
 
 (defn.js raw-query
@@ -15,10 +15,10 @@
                            :rowMode     "array"
                            :columnNames columns
                            :returnValue "resultRows"})))
-  (when (and (== 1 (k/len values))
-             (== 1 (k/len (. values [0]))))
+  (when (and (== 1 (xt/x:len values))
+             (== 1 (xt/x:len (. values [0]))))
     (return (. values [0] [0])))
-  (return (:? (k/len columns)
+  (return (:? (xt/x:len columns)
               [{"columns" columns
                 "values"  values}]
               values)))
@@ -46,9 +46,9 @@
   {:added "4.1"}
   [sqlite3 opts]
   (var config (or opts {}))
-  (var filename (or (k/get-key config "filename")
+  (var filename (or (xt/x:get-key config "filename")
                     ":memory:"))
-  (var flags (or (k/get-key config "flags")
+  (var flags (or (xt/x:get-key config "flags")
                  "c"))
   (var conn (new (. sqlite3 ["oo1"] ["DB"]) filename flags))
   (return (-/set-methods conn)))

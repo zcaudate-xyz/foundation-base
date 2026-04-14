@@ -46,17 +46,19 @@
   (:= (. conn ["::query"])
       (fn [input callback]
         (:= callback (or callback ut/pass-callback))
-        (return (new Promise
-                     (fn [resolve]
-                       (. conn (query input
-                                      (fn [err res]
-                                         (when res
-                                           (var #{rows} res)
-                                           (when (== 1 rows.length)
-                                             (resolve (callback nil (xtd/obj-first-val
-                                                                    (k/first rows)))))
-                                           (resolve (callback nil rows)))
-                                         (resolve (callback err nil))))))))))
+        (return
+         (ut/wrap-callback
+          (. conn (query input))
+          (fn [err res]
+            (when err
+              (return (callback err nil)))
+            (var #{rows} res)
+            (if (and (== 1 rows.length)
+                     (== 1 (k/len (k/obj-keys (k/first rows)))))
+              (return (callback nil
+                                (xtd/obj-first-val
+                                 (k/first rows))))
+              (return (callback nil rows))))))))
   (:= (. conn ["::query_sync"])
       (fn [query]
         (throw "Not Allowed")))
@@ -73,5 +75,6 @@
   
   (. conn
      (connect)
-     (then (fn [] (callback nil conn))))
+     (then (fn [] (callback nil conn))
+           (fn [err] (callback err nil))))
   (return (-/set-methods conn)))

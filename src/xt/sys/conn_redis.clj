@@ -2,15 +2,16 @@
   (:require [std.lang :as l]))
 
 (l/script :xtalk
-  {:require [[xt.lang.common-spec :as xt]]})
+  {:require [[xt.lang.common-spec :as xt]
+             [xt.lang.common-lib :as xtl]]})
 
 (defn.xt connect
   "connects to a datasource"
   {:added "4.0"}
   [m cb]
   (var #{constructor} m)
-  (var success-fn (xt/x:wrap-callback cb "success"))
-  (var error-fn   (xt/x:wrap-callback cb "error"))
+  (var success-fn (xtl/wrap-callback cb "success"))
+  (var error-fn   (xtl/wrap-callback cb "error"))
   (xt/for:return [[conn err] (constructor m (xt/x:callback))]
     {:success (return (success-fn conn))
      :error   (return (error-fn err))
@@ -21,8 +22,8 @@
   {:added "4.0"}
   [conn cb]
   (var disconnect-fn (xt/x:get-key conn "::disconnect"))
-  (var success-fn (xt/x:wrap-callback cb "success"))
-  (var error-fn   (xt/x:wrap-callback cb "error"))
+  (var success-fn (xtl/wrap-callback cb "success"))
+  (var error-fn   (xtl/wrap-callback cb "error"))
   (xt/for:return [[res err] (disconnect-fn (xt/x:callback))]
     {:success (return (success-fn res))
      :error   (return (error-fn err))
@@ -33,8 +34,8 @@
   {:added "4.0"}
   [conn command args cb]
   (var exec-fn (xt/x:get-key conn "::exec"))
-  (var success-fn (xt/x:wrap-callback cb "success"))
-  (var error-fn   (xt/x:wrap-callback cb "error"))
+  (var success-fn (xtl/wrap-callback cb "success"))
+  (var error-fn   (xtl/wrap-callback cb "error"))
   (xt/for:return [[conn err] (exec-fn command args (xt/x:callback))]
     {:success (return (success-fn conn))
      :error   (return (error-fn err))
@@ -67,15 +68,14 @@
   (var #{sha body} script)
   (var err-fn
        (fn [err]
-         (:= body (:? (xt/x:is-function? body) (body) body))
-         (return (-/exec conn "eval" [body "0" (xt/x:unpack args)]
-                         cb))))
+          (:= body (:? (xt/x:is-function? body) (body) body))
+          (return (-/exec conn "eval" [body "0" (xt/x:unpack args)]
+                          cb))))
   (return (-/exec conn "evalsha" [sha "0" (xt/x:unpack args)]
-                  {:success (xt/x:wrap-callback cb "success")
+                  {:success (xtl/wrap-callback cb "success")
                    :error   err-fn})))
 
 (comment
   (./create-tests)
   (./create-tests)
   )
-

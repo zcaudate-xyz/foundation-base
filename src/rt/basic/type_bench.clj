@@ -41,21 +41,22 @@
   {:added "4.0"}
   [lang port {:keys [root-dir
                      host]
-              :as opts}
+               :as opts}
    input-args input-body]
   (let [cmd  (concat input-args (collection/seqify input-body))
         cmd  (walk/postwalk (fn [x]
-                           (if (keyword? x)
-                             (or (get (:params opts) x)
-                                 (throw (ex-info (str "Need to supply in [:config :params " x "]")
-                                                 {:cmd cmd
-                                                  :params (:params opts)})))
-                             x))
-                         cmd)  
-        process (os/sh (merge (:shell opts)
-                             {:args cmd
-                              :wait false
-                              :root root-dir}))
+                            (if (keyword? x)
+                              (or (get (:params opts) x)
+                                  (throw (ex-info (str "Need to supply in [:config :params " x "]")
+                                                  {:cmd cmd
+                                                   :params (:params opts)})))
+                              x))
+                          cmd)
+        cmd  (mapv str cmd)
+         process (os/sh (merge (:shell opts)
+                              {:args cmd
+                               :wait false
+                               :root root-dir}))
         thread  (-> (future/future {} (os/sh-wait process))
                     (future/on:complete (fn [ret err]
                                      (try (let [out (os/sh-output process)]
@@ -132,4 +133,3 @@
         _ (when (and root-dir (not save))
             (fs/delete root-dir))]
     stopped))
-
