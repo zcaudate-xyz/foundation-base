@@ -24,10 +24,9 @@
 (fact "creates a instance once SQL is loaded")
 
 ^{:refer js.lib.driver-sqlite/connect-constructor :added "4.0" :unchecked true}
-(fact "connects to an embeded sqlite file"
+(fact "connects to an embedded sqlite file"
 
   (notify/wait-on :js
-    (:= (!:G initSqlJs) (require "sql.js"))
     (dbsql/connect {:constructor js-sqlite/connect-constructor}
                    {:success (fn [conn]
                                (dbsql/query conn "SELECT 1;"

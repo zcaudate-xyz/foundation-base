@@ -16,7 +16,7 @@
   {:added "0.1"}
   [tag handler now-fn]
   (return {:tag tag
-           :now-fn (or now-fn k/now-ms)
+           :now-fn (or now-fn xt/x:now-ms)
            :handler handler}))
 
 (defn.xt throttle-run-async
@@ -53,4 +53,3 @@
   (cache/meta-assoc (-/throttle-key throttle "active")
                     id (now-fn))
   (return (-/throttle-run-async throttle id)))
-

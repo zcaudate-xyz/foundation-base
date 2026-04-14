@@ -1,19 +1,20 @@
 (ns xt.sys.cache-common-test
   (:require [rt.nginx.config :as config]
+            [xt.lang.common-notify :as notify]
             [std.lang :as l])
   (:use code.test))
 
 (l/script- :js
   {:runtime :basic
-   :require [[xt.lang.base-lib :as k]
-             [xt.lang.base-notify :as notify]
-             [xt.lang.base-repl :as repl]
+   :require [[xt.lang.common-spec :as xt]
+             [xt.lang.common-lib :as k]
+             [xt.lang.common-repl :as repl]
              [xt.sys.cache-common :as cache]]})
 
 (l/script- :lua
   {:runtime :basic
    :config  {:exec ["resty" "--http-conf" (config/create-resty-params) "-e"]}
-   :require [[xt.lang.base-lib :as k]
+   :require [[xt.lang.common-spec :as xt]
              [xt.sys.cache-common :as cache]]})
 
 (fact:global
@@ -65,7 +66,7 @@
   
   (!.js
    (var cache (cache/cache :GLOBAL))
-   (k/for:array [k ["A" "B" "C" "D" "E"]]
+   (xt/for:array [k ["A" "B" "C" "D" "E"]]
      (cache/set cache k k))
    (cache/flush cache)
    (cache/get-all cache))
@@ -73,7 +74,7 @@
 
   (!.lua
    (var cache (cache/cache :GLOBAL))
-   (k/for:array [k ["A" "B" "C" "D" "E"]]
+   (xt/for:array [k ["A" "B" "C" "D" "E"]]
      (cache/set cache k k))
    (cache/flush cache)
    (cache/get-all cache))
@@ -111,7 +112,7 @@
   (!.js
    (var cache (cache/cache :GLOBAL))
    (cache/flush cache)
-   (k/for:array [k ["A" "B" "C" "D" "E"]]
+   (xt/for:array [k ["A" "B" "C" "D" "E"]]
      (cache/set cache k k))
    (cache/get-all cache))
   => {"E" "E", "C" "C", "B" "B", "A" "A", "D" "D"}
@@ -119,7 +120,7 @@
   (!.lua
    (var cache (cache/cache :GLOBAL))
    (cache/flush cache)
-   (k/for:array [k ["A" "B" "C" "D" "E"]]
+   (xt/for:array [k ["A" "B" "C" "D" "E"]]
      (cache/set cache k k))
    (cache/get-all cache))
   => {"E" "E", "C" "C", "B" "B", "A" "A", "D" "D"})
@@ -146,7 +147,8 @@
    [(cache/meta-get "task")
     (cache/meta-update "task"
                        (fn:> [m]
-                             (k/step-set-key m "A" 1)))
+                             (xt/x:set-key m "A" 1)
+                             (return m)))
     (cache/meta-assoc "task" "B" 2)
     (cache/meta-dissoc "task" "A")])
   => [{}
@@ -160,7 +162,8 @@
    [(cache/meta-get "task")
     (cache/meta-update "task"
                        (fn:> [m]
-                             (k/step-set-key m "A" 1)))
+                             (xt/x:set-key m "A" 1)
+                             (return m)))
     (cache/meta-assoc "task" "B" 2)
     (cache/meta-dissoc "task" "A")])
   => [{}

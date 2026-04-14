@@ -23,25 +23,22 @@
 (defn bootstrap-js
   []
   (notify/wait-on [:js 2000]
-    (var initSql (require "sql.js"))
-    (-> (initSql)
-        (. (then (fn [SQL]
-                   (:= (!:G SQL) SQL)
-                   (:= (!:G INSTANCE) (js-sqlite/set-methods
-                                       (new SQL.Database)))
-                   (dbsql/query-sync INSTANCE
-                                     (str/join "\n\n"
-                                             (manage/table-create-all
-                                              sample/Schema
-                                              sample/SchemaLookup
-                                              (ut/sqlite-opts nil))))
-                   (dbsql/query-sync INSTANCE
-                                     (raw/raw-insert "Currency"
-                                                     ["id" "type" "symbol" "native" "decimal"
-                                                      "name" "plural" "description"]
-                                                     (@! sample/+currency+)
-                                                     (ut/sqlite-opts nil)))
-                   (repl/notify true)))))))
+    (dbsql/connect {:constructor js-sqlite/connect-constructor}
+                   {:success (fn [conn]
+                               (:= (!:G INSTANCE) conn)
+                               (dbsql/query-sync INSTANCE
+                                                 (str/join "\n\n"
+                                                           (manage/table-create-all
+                                                            sample/Schema
+                                                            sample/SchemaLookup
+                                                            (ut/sqlite-opts nil))))
+                               (dbsql/query-sync INSTANCE
+                                                 (raw/raw-insert "Currency"
+                                                                 ["id" "type" "symbol" "native" "decimal"
+                                                                  "name" "plural" "description"]
+                                                                 (@! sample/+currency+)
+                                                                 (ut/sqlite-opts nil)))
+                               (repl/notify true))})))
 
 (fact:global
  {:setup    [(l/rt:restart)

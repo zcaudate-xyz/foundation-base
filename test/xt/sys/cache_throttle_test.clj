@@ -1,13 +1,13 @@
 (ns xt.sys.cache-throttle-test
   (:require [rt.nginx.config :as config]
+            [xt.lang.common-notify :as notify]
             [std.lang :as l])
   (:use code.test))
 
 (l/script- :js
   {:runtime :basic
-   :require [[xt.lang.base-lib :as k]
-             [xt.lang.base-notify :as notify]
-             [xt.lang.base-repl :as repl]
+   :require [[xt.lang.common-lib :as k]
+             [xt.lang.common-repl :as repl]
              [xt.sys.cache-throttle :as throttle]
              [xt.sys.cache-common :as cache]
              [js.core :as j]]})
@@ -15,7 +15,7 @@
 (l/script- :lua
   {:runtime :basic
    :config  {:exec ["resty" "--http-conf" (config/create-resty-params) "-e"]}
-   :require [[xt.lang.base-lib :as k]
+   :require [[xt.lang.common-lib :as k]
              [xt.sys.cache-throttle :as throttle]
              [xt.sys.cache-common :as cache]
              [lua.nginx :as n]]})
@@ -109,4 +109,3 @@
     (k/nil? (throttle/throttle-run THT "default"))
     (k/nil? (throttle/throttle-run THT "default"))])
   => [false true true])
-

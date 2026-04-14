@@ -1,13 +1,12 @@
 (ns xt.sys.cache-queue-test
   (:require [rt.nginx.config :as config]
+            [xt.lang.common-notify :as notify]
             [std.lang :as l])
   (:use code.test))
 
 (l/script- :js
   {:runtime :basic
-   :require [[xt.lang.base-lib :as k]
-             [xt.lang.base-notify :as notify]
-             [xt.lang.base-repl :as repl]
+   :require [[xt.lang.common-repl :as repl]
              [xt.sys.cache-queue :as queue]
              [xt.sys.cache-common :as cache]]})
 
@@ -26,15 +25,14 @@
 (l/script- :lua
   {:runtime :basic
    :config  {:exec ["resty" "--http-conf" (create-resty-params) "-e"]
-             #_#_
-             :container {:group "test"
-                         :image "python"
+              #_#_
+              :container {:group "test"
+                          :image "python"
                          :runtime :basic
                          :exec ["python" "-c"]
                          #_#_:bootstrap (fn [port opts]
                                           "1+1")}}
-   :require [[xt.lang.base-lib :as k]
-             [xt.sys.cache-queue :as queue]
+   :require [[xt.sys.cache-queue :as queue]
              [xt.sys.cache-common :as cache]]})
 
 (fact:global

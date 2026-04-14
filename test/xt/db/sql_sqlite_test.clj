@@ -21,21 +21,16 @@
 (defn reset-js
   []
   (notify/wait-on [:js 2000]
-    (var initSql (require "sql.js"))
-    (-> (initSql)
-        (. (then (fn [SQL]
-                   (:= (!:G SQL) SQL)
-                   (:= (!:G DB) (js-sqlite/set-methods
-                                 (new SQL.Database)))
-                   (repl/notify DB)))))))
+    (dbsql/connect {:constructor js-sqlite/connect-constructor}
+                   {:success (fn [conn]
+                               (:= (!:G DB) conn)
+                               (repl/notify DB))})))
 
 (fact:global
- {:setup    [(l/rt:restart)
-             (!.js
-              (:= (!:G initSqlJs) (require "sql.js")))
-             (l/rt:scaffold :js)
-             (reset-js)]
-  :teardown [(l/rt:stop)]})
+  {:setup    [(l/rt:restart)
+              (l/rt:scaffold :js)
+              (reset-js)]
+   :teardown [(l/rt:stop)]})
 
 ^{:refer xt.db.sql-sqlite/CANARY :adopt true :added "4.0"}
 (fact "connects to an embedded sqlite file"

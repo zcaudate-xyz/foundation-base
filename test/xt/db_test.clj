@@ -22,31 +22,28 @@
 (defn bootstrap-js
   []
   (notify/wait-on [:js 2000]
-    (var initSql (require "sql.js"))
-    (-> (initSql)
-        (. (then (fn [SQL]
-                   (try
-                     (:= (!:G SQL) SQL)
-                     (:= (!:G DBSQL) (impl/db-create
-                                      {"::" "db.sql"
-                                       :instance (js-sqlite/set-methods
-                                                  (new SQL.Database))}
-                                      sample/Schema
-                                      sample/SchemaLookup
-                                      (ut/sqlite-opts nil)))
-                     (dbsql/query-sync (xt/x:get-key DBSQL "instance")
-                                       (str/join "\n\n"
-                                               (manage/table-create-all
-                                                sample/Schema
-                                                sample/SchemaLookup
-                                                (ut/sqlite-opts nil))))
-                     (:= (!:G DBCACHE) (impl/db-create
-                                        {"::" "db.cache"}
-                                        sample/Schema
-                                        sample/SchemaLookup
-                                        (ut/sqlite-opts nil)))
-                     (repl/notify true)
-                     (catch e (repl/notify e)))))))))
+    (dbsql/connect {:constructor js-sqlite/connect-constructor}
+                   {:success (fn [conn]
+                               (try
+                                 (:= (!:G DBSQL) (impl/db-create
+                                                  {"::" "db.sql"
+                                                   :instance conn}
+                                                  sample/Schema
+                                                  sample/SchemaLookup
+                                                  (ut/sqlite-opts nil)))
+                                 (dbsql/query-sync (xt/x:get-key DBSQL "instance")
+                                                   (str/join "\n\n"
+                                                             (manage/table-create-all
+                                                              sample/Schema
+                                                              sample/SchemaLookup
+                                                              (ut/sqlite-opts nil))))
+                                 (:= (!:G DBCACHE) (impl/db-create
+                                                    {"::" "db.cache"}
+                                                    sample/Schema
+                                                    sample/SchemaLookup
+                                                    (ut/sqlite-opts nil)))
+                                 (repl/notify true)
+                                 (catch e (repl/notify e))))})))
 
 (fact:global
  {:setup    [(l/rt:restart)

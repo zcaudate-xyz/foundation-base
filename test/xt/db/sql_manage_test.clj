@@ -18,7 +18,9 @@
               [xt.lang.common-spec :as xt]
               [xt.lang.common-data :as xtd]
               [xt.lang.common-string :as str]
-              [xt.lang.common-repl :as repl]]})
+              [xt.lang.common-repl :as repl]
+              [xt.sys.conn-dbsql :as dbsql]
+              [js.lib.driver-sqlite :as js-sqlite]]})
 
 (l/script- :lua
   {:runtime :basic
@@ -48,40 +50,39 @@
   :teardown [(l/rt:stop)]})
 
 ^{:refer xt.db.sql-manage/table-create.sqlite :adopt true :added "4.0"}
-(fact "workflow for sql.js"
+(fact "workflow for sqlite-wasm"
   
   (notify/wait-on :js
-   (var initSql (require "sql.js"))
-   (-> (initSql)
-       (. (then (fn [res]
-                  (:= (!:G SQL) res)
-                  (:= (!:G DB) (new SQL.Database))
-                  (repl/notify true))))))
+   (dbsql/connect {:constructor js-sqlite/connect-constructor}
+                  {:success (fn [conn]
+                              (:= (!:G DB) conn)
+                              (repl/notify true))}))
   => true
   
   (!.js
-   (DB.run (str/join "\n\n"
-                    (manage/table-create-all
-                     sample/Schema
-                     sample/SchemaLookup
-                     (ut/sqlite-opts nil))))
-   (DB.run
-    (raw/raw-insert "Currency"
-                    ["id" "type" "symbol" "native" "decimal" "name" "plural" "description"]
-                    (@! sample/+currency+)
-                    (ut/sqlite-opts nil)))
-   (DB.run
-    (str/join "\n\n"
-            (table/table-insert sample/Schema
-                              sample/SchemaLookup
-                              "UserAccount"
-                              [sample/RootUserFull]
-                              (ut/sqlite-opts nil))))
+   (dbsql/query-sync DB
+                     (str/join "\n\n"
+                               (manage/table-create-all
+                                sample/Schema
+                                sample/SchemaLookup
+                                (ut/sqlite-opts nil))))
+   (dbsql/query-sync DB
+                     (raw/raw-insert "Currency"
+                                     ["id" "type" "symbol" "native" "decimal" "name" "plural" "description"]
+                                     (@! sample/+currency+)
+                                     (ut/sqlite-opts nil)))
+   (dbsql/query-sync DB
+                     (str/join "\n\n"
+                               (table/table-insert sample/Schema
+                                                   sample/SchemaLookup
+                                                   "UserAccount"
+                                                   [sample/RootUserFull]
+                                                   (ut/sqlite-opts nil))))
    true)
   => true
   
   (!.js
-    (DB.exec "SELECT name FROM sqlite_schema where type='table'"))
+    (dbsql/query-sync DB "SELECT name FROM sqlite_schema where type='table'"))
   => [{"values"
        [["UserAccount"]
         ["UserProfile"]
@@ -99,7 +100,7 @@
        "columns" ["name"]}]
   
   (!.js
-   (DB.exec "pragma table_info('Currency')"))
+   (dbsql/query-sync DB "pragma table_info('Currency')"))
   => [{"columns" ["cid" "name" "type" "notnull" "dflt_value" "pk"],
        "values" [[0 "id" "TEXT" 0 nil 1]
                  [1 "type" "TEXT" 0 nil 0]
@@ -111,14 +112,13 @@
                  [7 "description" "TEXT" 0 nil 0]]}]
   
   (set (!.js
-        (-> (DB.exec
-             (graph/select sample/Schema
-                           ["Asset"
-                            ["id"
-                             ["currency"
-                              ["id"]]]]
-                           (ut/sqlite-opts nil)))
-            (. [0] ["values"] [0] [0])
+        (-> (dbsql/query-sync DB
+                              (graph/select sample/Schema
+                                            ["Asset"
+                                             ["id"
+                                              ["currency"
+                                               ["id"]]]]
+                                            (ut/sqlite-opts nil)))
             xt/x:json-decode)))
   => #{{"currency" [{"id" "XLM"}],
         "id" "222de282-ca29-4d04-81dd-86ec3f9189cf"}
@@ -130,20 +130,19 @@
         "id" "9e576e3e-c73e-4d18-92b4-f975c1bed3d4"}}
   
   (!.js
-   (-> (DB.exec
-        (graph/select sample/Schema
-                      ["UserAccount"
-                       ["*/data"
-                        ["profile"]
-                        ["wallets"
-                         ["*/data"
-                          ["entries"
-                           ["*/data"
-                            ["asset"
-                           ["*/data"
-                            ["currency"]]]]]]]]]
-                      (ut/sqlite-opts nil)))
-       (. [0] ["values"] [0] [0])
+   (-> (dbsql/query-sync DB
+                         (graph/select sample/Schema
+                                       ["UserAccount"
+                                        ["*/data"
+                                         ["profile"]
+                                         ["wallets"
+                                          ["*/data"
+                                           ["entries"
+                                            ["*/data"
+                                             ["asset"
+                                              ["*/data"
+                                               ["currency"]]]]]]]]]
+                                       (ut/sqlite-opts nil)))
        xt/x:json-decode))
   => [{"is_official" 0,
        "nickname" "root",
