@@ -4,16 +4,16 @@
             [rt.solidity.env-ganache :as env-ganache]
             [std.lang :as l]
             [web3.lib.example-counter :as example-counter]
-            [xt.lang.base-notify :as notify])
+            [xt.lang.common-notify :as notify])
   (:use code.test))
 
 (l/script- :js
   {:runtime :basic
    :require [[xt.lang.base-lib :as k]
-             [xt.lang.base-repl :as repl]
-             [js.lib.eth-lib :as e :include [:fn]]
-             [js.lib.eth-solc :as eth-solc :include [:fn]]
-             [web3.lib.example-counter :as example-counter]
+              [xt.lang.common-repl :as repl]
+              [js.lib.eth-lib :as e :include [:fn]]
+              [js.lib.eth-solc :as eth-solc :include [:fn]]
+              [web3.lib.example-counter :as example-counter]
              [js.core :as j]]})
 
 (fact:global

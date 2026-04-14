@@ -6,7 +6,7 @@
   {:require [[js.core :as j]
              [js.cell.kernel.base-util :as util]
              [js.cell.kernel.worker-state :as state]
-             [xt.lang.base-runtime :as rt :with [defvar.js]]
+             [xt.lang.common-runtime :as rt :with [defvar.js]]
              [xt.lang.base-lib :as k]]})
 
 

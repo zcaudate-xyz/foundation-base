@@ -1,6 +1,6 @@
 (ns js.lib.eth-bench
   (:require [std.lang :as l]
-            [xt.lang.base-notify :as notify]))
+            [xt.lang.common-notify :as notify]))
 
 (l/script :js
   {:require [[js.lib.eth-lib :as eth-lib]

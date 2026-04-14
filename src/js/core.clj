@@ -8,7 +8,8 @@
             [std.lib.env :as env]
             [std.lib.foundation :as f]
             [std.lib.template :as template]
-            [xt.lang.base-repl]
+            [xt.lang.common-notify]
+            [xt.lang.common-repl]
             [xt.module :as module])
   (:refer-clojure :exclude [abs identity reduce map reverse sort eval find min read replace future concat pop name some keys filter max]))
 
@@ -277,9 +278,9 @@
         (if (and (not= nil out)
                  (== "Promise" (. out ["constructor"] ["name"])))
           (return (. out
-                     (then  (xt.lang.base-repl/>notify ~f))
-                     (catch (xt.lang.base-repl/>notify ~f))))
-          (return (xt.lang.base-repl/notify out))))))
+                     (then  (xt.lang.common-repl/>notify ~f))
+                     (catch (xt.lang.common-repl/>notify ~f))))
+          (return (xt.lang.common-repl/notify out))))))
 
 (defmacro.js ^{:standalone true}
   notify-api
@@ -293,9 +294,9 @@
                      (then (fn [res]
                              (if (== (. res ["status"])
                                        "ok")
-                               (xt.lang.base-repl/notify (. res ["data"]))
-                               (xt.lang.base-repl/notify res))))))
-          (return (xt.lang.base-repl/notify out)))))) 
+                                (xt.lang.common-repl/notify (. res ["data"]))
+                                (xt.lang.common-repl/notify res))))))
+          (return (xt.lang.common-repl/notify out)))))) 
 
 (defmacro.js STACKTRACE!
   "Adds a trace entry with stack infomation"
@@ -332,7 +333,7 @@
   "shortcut for notify/wait-on"
   {:added "4.0"}
   [body & [f]]
-  (list 'xt.lang.base-notify/wait-on [:js 5000]
+  (list 'xt.lang.common-notify/wait-on [:js 5000]
         (with-meta (list 'js.core/notify body f)
           (meta &form))))
 
@@ -340,7 +341,7 @@
   "shortcut for notify/wait-on for api calls"
   {:added "4.0"}
   [body]
-  (list 'xt.lang.base-notify/wait-on :js
+  (list 'xt.lang.common-notify/wait-on :js
         (list 'js.core/notify-api body)))
 
 (defmacro.js module:async
@@ -384,6 +385,5 @@
   (./create-tests)
   (!.js
  (:- "hello" "world")))
-
 
 

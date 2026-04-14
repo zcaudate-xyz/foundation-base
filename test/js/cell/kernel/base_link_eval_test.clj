@@ -20,7 +20,7 @@
   
   (let [out (macroexpand-1 '(base-link-eval/wait-post worker (repl/notify true)))]
     (first out)
-    => 'xt.lang.base-notify/wait-on
+    => 'xt.lang.common-notify/wait-on
     
     (-> out last first)
     => '.)
@@ -61,7 +61,7 @@
                                true
                                "eval-2"))]
     (first out)
-    => 'xt.lang.base-notify/wait-on
+    => 'xt.lang.common-notify/wait-on
     
     (-> out last first)
     => '.)

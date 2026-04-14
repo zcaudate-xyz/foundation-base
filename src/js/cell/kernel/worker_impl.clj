@@ -4,7 +4,7 @@
 
 (l/script :js
   {:require [[js.core :as j]
-             [xt.lang.base-repl :as repl]
+             [xt.lang.common-repl :as repl]
              [xt.lang.base-lib :as k]
              [js.cell.kernel.base-util :as util]
              [js.cell.kernel.worker-state :as worker-state]]})

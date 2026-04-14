@@ -1,7 +1,7 @@
 (ns js.lib.eth-lib
   (:require [std.lang :as l]
             [std.lib.foundation :as f]
-            [xt.lang.base-notify :as notify])
+            [xt.lang.common-notify :as notify])
   (:refer-clojure :exclude [compile]))
 
 (l/script :js
@@ -253,4 +253,3 @@
   (var provider (-/new-rpc-provider url))
   (. provider (once event-type listener))
   (return (fn [] (. provider (off event-type listener)))))
-

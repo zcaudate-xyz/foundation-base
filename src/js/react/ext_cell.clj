@@ -2,7 +2,8 @@
   (:require [std.lang :as l]))
 
 (l/script :js
-  {:require [[xt.lang.base-lib :as k]
+  {:require [[xt.lang.common-spec :as xt]
+             [xt.lang.common-data :as xtd]
              [js.react :as r]
              [js.core :as j]
              [js.cell.kernel :as cl]
@@ -46,11 +47,11 @@
   "listen to parts of the cell"
   {:added "4.0"}
   [path type meta context]
-  (var [tfn tkey tevent] (k/get-key -/TYPES type))
+  (var [tfn tkey tevent] (xt/x:get-key -/TYPES type))
   (:= tevent (or tevent type))
   (var getResult (fn []
                    (var out (tfn path context))
-                   (return (k/clone-shallow
+                   (return (xtd/clone-shallow
                             (:? tkey (. out [tkey]) out)))))
   (var [result setResult] (r/local getResult))
   (var resultRef (r/useFollowRef result))
@@ -67,7 +68,7 @@
   "listens to the cell output"
   {:added "4.0"}
   [path types meta context]
-  (var getOutput (fn:> (k/obj-clone
+  (var getOutput (fn:> (xtd/obj-clone
                         (or (cl/view-get-output path context)
                             {}))))
   
@@ -76,11 +77,11 @@
   (var pred
        (fn [event]
          (return
-          (k/arr-some
-           types
-           (fn [type]
-             (return (== (. event ["type"])
-                         (+ "view." type))))))))
+           (xtd/arr-some
+            types
+            (fn [type]
+              (return (== (. event ["type"])
+                          (+ "view." type))))))))
   (-/initCellBase #{meta pred context path
                     {:setResult setOutput
                      :getResult getOutput
@@ -91,7 +92,7 @@
   "listens to the throttled output"
   {:added "4.0"}
   [path delay meta context]
-  (var getResult (fn:> (k/clone-shallow
+  (var getResult (fn:> (xtd/clone-shallow
                         (cl/view-success path context))))
   (var [result setResult] (r/local getResult))
   (var resultRef (r/useFollowRef result))
@@ -111,10 +112,10 @@
        (return (== "view.output"
                    (. event ["type"]))))
      context)
-    (return
-     (fn []
-       (k/set-key throttle "mounted" false)
-       (cl/remove-listener path listener-id context))))
+     (return
+      (fn []
+        (xt/x:set-key throttle "mounted" false)
+        (cl/remove-listener path listener-id context))))
   (return result))
 
 (defn.js listenRawEvents
@@ -129,4 +130,3 @@
                          context)
     (return (fn:> (cl/remove-raw-callback listener-id context))))
   (return listener-id))
-

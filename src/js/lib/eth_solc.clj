@@ -1,6 +1,6 @@
 (ns js.lib.eth-solc
   (:require [std.lang :as l]
-            [xt.lang.base-notify :as notify])
+            [xt.lang.common-notify :as notify])
   (:refer-clojure :exclude [compile]))
 
 (l/script :js
@@ -37,5 +37,4 @@
          {"*" {"*" ["*"]}}}})
   (return
    (k/json-decode (-/compile (k/json-encode input)))))
-
 

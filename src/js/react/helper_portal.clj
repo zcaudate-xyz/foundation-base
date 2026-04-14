@@ -3,7 +3,8 @@
 
 (l/script :js
   {:require [[js.core :as j]
-             [xt.lang.base-lib :as k]]})
+             [xt.lang.common-spec :as xt]
+             [xt.lang.common-data :as xtd]]})
 
 (defn.js newRegistry
   "creates a new portal registry"
@@ -32,16 +33,16 @@
   {:added "4.0"}
   [reg name portalId onSink]
   (var #{initial} reg)
-  (var entry (k/get-in reg ["sinks"
-                            name]))
+  (var entry (xtd/get-in reg ["sinks"
+                              name]))
   (cond entry
         (do (var #{sinkRef} entry)
             (onSink sinkRef)
             (return sinkRef))
          
         :else
-        (do (k/set-in initial
-                      [name portalId]  onSink)
+        (do (xtd/set-in initial
+                        [name portalId]  onSink)
             (return nil))))
 
 (defn.js triggerSink
@@ -61,13 +62,13 @@
   {:added "4.0"}
   [reg name entry]
   (var #{sinks initial} reg)
-  (k/set-key sinks name entry)
-  (var callbacks (k/get-key initial name))
+  (xt/x:set-key sinks name entry)
+  (var callbacks (xt/x:get-key initial name))
   (when callbacks
     (var #{sinkRef} entry)
-    (k/for:object [[id callback] callbacks]
+    (xt/for:object [[id callback] callbacks]
       (callback sinkRef)))
-  (k/del-key initial name)
+  (xt/x:del-key initial name)
   (return (-/triggerSink reg name)))
 
 (defn.js removeSink
@@ -85,8 +86,8 @@
   {:added "4.0"}
   [reg name]
   (var #{sinks} reg)
-  (var curr (k/get-key sinks name))
-  (k/del-key sinks name)
+  (var curr (xt/x:get-key sinks name))
+  (xt/x:del-key sinks name)
   (return curr))
 
 (defn.js addSource
@@ -97,10 +98,10 @@
   (var entries (. sources [name]))
   (when (not entries)
     (:= entries {})
-    (k/set-key sources name entries))
-  (k/set-key entries
-             portalId
-             child)
+    (xt/x:set-key sources name entries))
+  (xt/x:set-key entries
+                portalId
+                child)
   (return (-/triggerSink reg name)))
 
 (defn.js removeSource
@@ -110,9 +111,8 @@
   (var #{sources} reg)
   (var entries (. sources [name]))
   (when entries
-    (var curr (k/get-key entries portalId))
-    (k/del-key entries portalId)
-    (when (k/is-empty? entries)
-      (k/del-key sources name))
+    (var curr (xt/x:get-key entries portalId))
+    (xt/x:del-key entries portalId)
+    (when (xtd/is-empty? entries)
+      (xt/x:del-key sources name))
     (return (-/triggerSink reg name))))
-

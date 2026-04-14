@@ -9,10 +9,10 @@
 (l/script- :js
   {:runtime :basic
    :require [[xt.lang.base-lib :as k]
-             [xt.lang.base-repl :as repl]
-             [js.lib.eth-bench :as e :include [:fn]]
-             [js.lib.eth-solc :as eth-solc :include [:fn]]
-             [js.core :as j]]})
+              [xt.lang.common-repl :as repl]
+              [js.lib.eth-bench :as e :include [:fn]]
+              [js.lib.eth-solc :as eth-solc :include [:fn]]
+              [js.core :as j]]})
 
 (fact:global
  {:setup    [(solidity/rt:start-ganache-server)

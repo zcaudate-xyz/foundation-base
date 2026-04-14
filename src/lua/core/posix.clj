@@ -1,7 +1,7 @@
 (ns lua.core.posix
   (:require [std.lang :as l]
             [std.lib.foundation :as f]
-            [xt.lang.base-repl :as repl])
+            [xt.lang.common-repl :as repl])
   (:refer-clojure :exclude [print flush time re-find read send sync]))
 
 (l/script :lua

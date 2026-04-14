@@ -8,9 +8,9 @@
 (l/script- :js
   {:runtime :basic
    :require [[xt.lang.base-lib :as k]
-             [xt.lang.base-repl :as repl]
-             [js.lib.eth-solc :as eth-solc :include [:fn]]
-             [js.core :as j]]})
+              [xt.lang.common-repl :as repl]
+              [js.lib.eth-solc :as eth-solc :include [:fn]]
+              [js.core :as j]]})
 
 (fact:global
  {:setup    [(s/rt:stop-ganache-server)

@@ -2,7 +2,8 @@
   (:require [std.lang :as l]))
 
 (l/script :js
-  {:require [[xt.lang.base-lib :as k]
+  {:require [[xt.lang.common-spec :as xt]
+             [xt.lang.common-data :as xtd]
              [xt.lang.event-box :as event-box]
              [js.react :as r]
              [js.core :as j]]})
@@ -19,19 +20,19 @@
   [box path meta]
   (var dataFn (r/useCallback
                (fn []
-                 (return (k/clone-shallow
+                 (return (xtd/clone-shallow
                           (event-box/get-data box path))))
                [box path]))
   (var [data setData] (r/local (dataFn)))
-  (var path-str (k/json-encode path))
+  (var path-str (xt/x:json-encode path))
   (r/watch [path-str]
     (var listener-id (j/randomId 4))
     (event-box/add-listener box listener-id path
-                            (fn [m]
-                              (setData (dataFn)))
-                            meta)
+                             (fn [m]
+                               (setData (dataFn)))
+                             meta)
     (var nData (dataFn))
-    (when (not (k/eq-nested data nData))
+    (when (not (xtd/eq-nested data nData))
       (setData nData))
     (return (fn [] (event-box/remove-listener box listener-id))))
   (return data))
@@ -98,4 +99,3 @@
 
 (def.js ^{:arglists ([box listener-id])}
   removeListener event-box/remove-listener)
-

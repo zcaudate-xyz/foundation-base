@@ -2,7 +2,7 @@
   (:require [std.lang :as l]))
 
 (l/script :js
-  {:require [[xt.lang.base-runtime :as rt :with [defvar.js]]
+  {:require [[xt.lang.common-runtime :as rt :with [defvar.js]]
              [xt.lang.base-lib :as k]
              [xt.lang.event-view :as event-view]
              [js.cell.kernel.base-link :as raw]

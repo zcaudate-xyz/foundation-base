@@ -4,7 +4,7 @@
 
 (l/script :js
   {:require [[js.core :as j]
-             [xt.lang.base-runtime :as rt :with [defvar.js]]
+             [xt.lang.common-runtime :as rt :with [defvar.js]]
              [xt.lang.base-lib :as k]]
    :import  [["fastify" :as Fastify]]})
 
@@ -60,4 +60,3 @@
                    (close)
                    (then k/T))))
     (return nil)))
-

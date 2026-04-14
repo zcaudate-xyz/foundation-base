@@ -5,7 +5,7 @@
 (l/script :js
   {:require [[js.core :as j]
              [js.cell.kernel.base-util :as util]
-             [xt.lang.base-runtime :as rt :with [defvar.js]]
+             [xt.lang.common-runtime :as rt :with [defvar.js]]
              [xt.lang.base-lib :as k]]})
 
 

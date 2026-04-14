@@ -2,16 +2,26 @@
   (:require [std.lang :as l]))
 
 (l/script :xtalk
-  {:require [[xt.lang.common-spec :as xt]
-             [xt.lang.common-lib :as xtl]]})
+  {:require [[xt.lang.common-spec :as xt]]})
+
+(defn.xt wrap-callback
+  [callbacks key]
+  (:= callbacks (or callbacks {}))
+  (var result-fn
+       (fn [result]
+         (var f (xt/x:get-key callbacks key))
+         (if (xt/x:not-nil? f)
+           (return (f result))
+           (return result))))
+  (return result-fn))
 
 (defn.xt connect
   "connects to a database"
   {:added "4.0"}
   [m cb]
   (var #{constructor} m)
-  (var success-fn (xtl/wrap-callback cb "success"))
-  (var error-fn   (xtl/wrap-callback cb "error"))
+  (var success-fn (-/wrap-callback cb "success"))
+  (var error-fn   (-/wrap-callback cb "error"))
   (xt/for:return [[conn err] (constructor m (xt/x:callback))]
     {:success (return (success-fn conn))
      :error   (return (error-fn err))
@@ -22,8 +32,8 @@
   {:added "4.0"}
   [conn cb]
   (var disconnect-fn (xt/x:get-key conn "::disconnect"))
-  (var success-fn (xtl/wrap-callback cb "success"))
-  (var error-fn   (xtl/wrap-callback cb "error"))
+  (var success-fn (-/wrap-callback cb "success"))
+  (var error-fn   (-/wrap-callback cb "error"))
   (xt/for:return [[res err] (disconnect-fn (xt/x:callback))]
     {:success (return (success-fn res))
      :error   (return (error-fn err))
@@ -41,8 +51,8 @@
   {:added "4.0"}
   [conn raw cb]
   (var query-fn (xt/x:get-key conn "::query"))
-  (var success-fn (xtl/wrap-callback cb "success"))
-  (var error-fn   (xtl/wrap-callback cb "error"))
+  (var success-fn (-/wrap-callback cb "success"))
+  (var error-fn   (-/wrap-callback cb "error"))
   (xt/for:return [[res err] (query-fn raw (xt/x:callback))]
     {:success (return (success-fn res))
      :error   (return (error-fn err))
