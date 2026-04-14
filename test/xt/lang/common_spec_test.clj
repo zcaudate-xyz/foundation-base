@@ -1,12 +1,15 @@
 (ns xt.lang.common-spec-test
-  (:require [std.lang :as l]
+  (:require [clojure.set :as set]
+            [std.lang :as l]
             [xt.lang.common-notify :as notify])
   (:use code.test))
 
 (l/script- :lua
   {:runtime :basic
    :require [[xt.lang.common-spec :as xt]
-             [xt.lang.common-repl :as repl]]})
+             [xt.lang.common-data :as xtd]
+             [xt.lang.common-repl :as repl]
+             [xt.lang.common-string :as xts]]})
 
 (fact:global
  {:setup [(l/rt:restart)]
@@ -621,3 +624,66 @@
   (!.lua
     (xt/x:nil? (xt/x:callback)))
   => true)
+
+
+(def ^:private +common-spec-control-forms+
+  '#{for:array for:object for:index for:iter
+     return-run for:return for:try for:async})
+
+(defn- common-spec-defs [kind]
+  (let [text (slurp "src/xt/lang/common_spec.clj")
+        pattern (case kind
+                  :macro #"\(defmacro\.xt[^\n]*\n\s+([^\s\)]+)"
+                  :spec  #"\(defspec\.xt\s+([^\s\)]+)")]
+    (->> (re-seq pattern text)
+         (map second)
+         (map symbol)
+         (sort)
+         (vec))))
+
+(defn- common-spec-publics []
+  (->> (ns-publics 'xt.lang.common-spec)
+       keys
+       sort
+       vec))
+
+;; Macro Smoke Coverage
+
+(fact "keeps source macros and public wrappers in sync"
+  (let [macros (common-spec-defs :macro)
+        specs  (common-spec-defs :spec)
+        publics (common-spec-publics)]
+    [(count macros)
+     (count specs)
+     (set macros)
+     (set publics)
+     (set/difference (set macros) (set specs))])
+  => [205
+      197
+      (set (common-spec-publics))
+      (set (common-spec-publics))
+      +common-spec-control-forms+])
+
+(fact "all public wrappers expose arglists metadata"
+  (->> (ns-publics 'xt.lang.common-spec)
+       (keep (fn [[sym var]]
+               (when-not (:arglists (meta var))
+                 sym)))
+       vec)
+  => [])
+
+(fact "all non-control wrappers keep matching defspec contracts"
+  (let [macros (set (common-spec-defs :macro))
+        specs  (set (common-spec-defs :spec))]
+    [(set/difference specs macros)
+     (set/difference (set/difference macros +common-spec-control-forms+) specs)])
+  => [#{} #{}])
+
+(fact "the lua test namespace imports the shared helper modules used by common-spec"
+  (let [text (slurp "test/xt/lang/common_spec_test.clj")]
+    (mapv #(boolean (re-find (re-pattern %) text))
+          ["\\[xt\\.lang\\.common-spec :as xt\\]"
+           "\\[xt\\.lang\\.common-data :as xtd\\]"
+           "\\[xt\\.lang\\.common-repl :as repl\\]"
+           "\\[xt\\.lang\\.common-string :as xts\\]"]))
+  => [true true true true])

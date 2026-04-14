@@ -1,4 +1,4 @@
-(ns xt.lang.common-spec-test
+(ns xt.lang.common-spec-js-test
   (:require [std.lang :as l]
             [xt.lang.common-notify :as notify])
   (:use code.test))

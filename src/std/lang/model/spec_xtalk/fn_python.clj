@@ -364,10 +364,10 @@
    (template/$ (del (. ~lu [(id ~obj)])))))
 
 (def +python-lu+
-  {;;:x-lu-create      {:macro #'python-tf-x-lu-create  :emit :macro}
-   :x-lu-eq          {:macro #'python-tf-x-lu-eq  :emit :macro}
-   :x-lu-get         {:macro #'python-tf-x-lu-get :emit :macro}
-   :x-lu-set         {:macro #'python-tf-x-lu-set :emit :macro}
+  {:x-lu-create      {:macro #'python-tf-x-lu-create  :emit :macro}
+    :x-lu-eq          {:macro #'python-tf-x-lu-eq  :emit :macro}
+    :x-lu-get         {:macro #'python-tf-x-lu-get :emit :macro}
+    :x-lu-set         {:macro #'python-tf-x-lu-set :emit :macro}
    :x-lu-del         {:macro #'python-tf-x-lu-del :emit :macro}})
 
 ;;
