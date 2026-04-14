@@ -172,3 +172,10 @@
    (detach-fn)
    rows)
   => [{"id" "USD"}])
+
+
+^{:refer xt.db.supabase/snake->kebab :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.db.supabase/normalize-row :added "4.1"}
+(fact "TODO")

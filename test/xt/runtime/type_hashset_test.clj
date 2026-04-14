@@ -124,3 +124,46 @@
     (== (. s1 (hash))
         (. s2 (hash)))])
   => [true true])
+
+
+^{:refer xt.runtime.type-hashset/hashset-to-array :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.runtime.type-hashset/hashset-to-iter :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.runtime.type-hashset/hashset-new :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.runtime.type-hashset/hashset-empty :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.runtime.type-hashset/hashset-is-editable :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.runtime.type-hashset/hashset-to-persistent! :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.runtime.type-hashset/hashset-has? :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.runtime.type-hashset/hashset-push! :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.runtime.type-hashset/hashset-dissoc :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.runtime.type-hashset/hashset-dissoc! :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.runtime.type-hashset/hashset-hash :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.runtime.type-hashset/hashset-show :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.runtime.type-hashset/hashset-create :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.runtime.type-hashset/hashset-empty-mutable :added "4.1"}
+(fact "TODO")

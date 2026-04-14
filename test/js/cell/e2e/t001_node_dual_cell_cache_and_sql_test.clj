@@ -49,8 +49,18 @@
   (notify/wait-on :js
     (var remote-cell
          (cl/make-cell
-          (runtime-link/make-node-link (@! (common/node-remote-script)) {})))
-    )
+           (runtime-link/make-node-link (@! (common/node-remote-script)) {})))
+    (. (. remote-cell ["init"])
+       (then
+        (fn []
+          (common/connect-sqlite
+            {:success (fn [sqlite-conn]
+                        (. (common/run-scenario remote-cell sqlite-conn)
+                           (then (repl/>notify))))
+             :error (fn [err]
+                      (repl/notify {"error" err}))})))
+       (catch (fn [err]
+                (repl/notify {"error" err})))))
   
   => (contains-in
       {"remote_seed" [{"id" "ord-1"

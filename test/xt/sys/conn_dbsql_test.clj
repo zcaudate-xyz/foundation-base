@@ -55,3 +55,7 @@
 
 ^{:refer xt.sys.conn-dbsql/query-sync :added "4.0"}
 (fact "sends a synchronous query")
+
+
+^{:refer xt.sys.conn-dbsql/wrap-callback :added "4.1"}
+(fact "TODO")

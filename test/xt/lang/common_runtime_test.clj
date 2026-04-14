@@ -797,3 +797,7 @@
      (-> out first second)
      (-> out second second)])
   => '[defn.python PY_SAMPLE PY_SAMPLE-reset])
+
+
+^{:refer xt.lang.common-runtime/xt-ensure :added "4.1"}
+(fact "TODO")

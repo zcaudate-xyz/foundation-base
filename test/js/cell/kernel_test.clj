@@ -1,8 +1,10 @@
 (ns js.cell.kernel-test
   (:use code.test)
-  (:require [js.cell.playground :as playground]
-             [std.lang :as l]
-             [xt.lang.common-notify :as notify]))
+  (:require [js.core :refer [<!]]
+            [js.cell.playground :as playground]
+            [js.cell.runtime.link :as runtime-link]
+            [std.lang :as l]
+            [xt.lang.common-notify :as notify]))
 
 (def ^:private +tiny-worker-path+
   (str (System/getProperty "user.dir") "/node_modules/tiny-worker/lib/index.js"))
@@ -25,33 +27,22 @@
 (l/script- :js
   {:runtime :basic
    :require [[xt.lang.common-spec :as xt]
-              [xt.lang.common-repl :as repl]
-              [xt.lang.common-runtime :as rt]
-              [xt.lang.event-view :as base-view]
-              [js.cell.kernel.worker-impl :as internal]
-              [js.cell.kernel.base-link :as link-raw]
-              [js.cell.kernel.base-link-local :as link-fn]
-              [js.cell.kernel.base-impl :as impl-common]
-              [js.cell.kernel.base-model :as impl-model]
-              [js.cell.kernel :as cl]
-              [js.core :as j]]})
+               [xt.lang.common-repl :as repl]
+               [xt.lang.common-runtime :as rt]
+               [xt.lang.event-view :as base-view]
+               [js.cell.kernel.worker-impl :as internal]
+               [js.cell.kernel.base-link :as link-raw]
+               [js.cell.kernel.base-link-local :as link-fn]
+               [js.cell.kernel.base-impl :as impl-common]
+               [js.cell.kernel.base-model :as impl-model]
+               [js.cell.runtime.link :as runtime-link]
+               [js.cell.kernel :as cl]
+               [js.core :as j]]})
 
 (defn.js make-playground-worker-url
   []
   (return
-   {:create-fn
-    (fn [listener]
-      (var Worker (require (+ (. process ["env"] ["PWD"])
-                              "/node_modules/tiny-worker/lib/index.js")))
-      (var worker (new Worker
-                       (fn []
-                         (eval (@! (playground/play-worker true))))))
-      (. worker (addEventListener
-                 "message"
-                 (fn [e]
-                   (listener e.data))
-                 false))
-      (return worker))}))
+   (runtime-link/make-mock-link {})))
 
 (defn.js make-playground-cell
   []
@@ -141,8 +132,9 @@
 
 ^{:refer js.cell.kernel/fn-access-cell :added "4.0" :unchecked true
   :setup [(!.js
-            (cl/GD-reset (-/make-playground-cell))
-            (j/<!
+            (cl/GD-reset (-/make-playground-cell)))
+          (!.js
+            (<!
              (. (cl/add-model "hello"
                               {:echo  {:handler link-fn/echo
                                        :trigger {"@worker/::INIT" false}
@@ -165,8 +157,9 @@
 
 ^{:refer js.cell.kernel/fn-access-view :added "4.0" :unchecked true
   :setup [(!.js
-            (cl/GD-reset (-/make-playground-cell))
-            (j/<!
+            (cl/GD-reset (-/make-playground-cell)))
+          (!.js
+            (<!
              (. (cl/add-model "hello"
                               {:echo  {:handler link-fn/echo
                                        :trigger {"@worker/::INIT" false}
@@ -246,7 +239,7 @@
   :setup [(!.js
              (cl/GD-reset (-/make-playground-cell)))
           (!.js
-           (j/<!
+           (<!
             (. (cl/GD)
                ["init"]
                (then (fn []
@@ -260,10 +253,11 @@
   (cl/view-val ["hello" "echo"])
   => nil
 
-  (do (j/<! (xt/x:first (cl/view-trigger ["hello" "echo"]
+  (!.js
+   (do (<! (xt/x:first (cl/view-trigger ["hello" "echo"]
                                         "@/::EVENT"
                                         {})))
-      (cl/view-val ["hello" "echo"]))
+       (cl/view-val ["hello" "echo"])))
   => (contains-in ["HELLO" integer?]))
 
 ^{:refer js.cell.kernel/model-outputs :added "4.0" :unchecked true}
@@ -319,7 +313,7 @@
   ^:hidden
   
   (!.js
-   (j/<!
+   (<!
     (. (cl/add-model "hello"
                      {:echo  {:handler link-fn/echo
                               :defaultArgs ["HELLO"]}})
@@ -338,7 +332,7 @@
   :setup [(!.js
              (cl/GD-reset (-/make-playground-cell)))
           (!.js
-           (j/<!
+           (<!
             (. (cl/GD)
                ["init"]
                (then (fn []
@@ -354,7 +348,7 @@
   => {"echo1" nil, "echo" nil}
 
   (!.js
-   (j/<! (cl/model-update "hello")))
+   (<! (cl/model-update "hello")))
   => (contains-in
       {"echo1"
        {"path" ["hello" "echo1"],
@@ -465,7 +459,7 @@
 
 ^{:refer js.cell.kernel/view-get-time-elapsed :added "4.0" :unchecked true
   :setup [(!.js
-           (j/<! (cl/view-refresh ["hello" "echo"])))]}
+           (<! (cl/view-refresh ["hello" "echo"])))]}
 (fact "gets the elapsed time"
   ^:hidden
 
@@ -478,8 +472,8 @@
   ^:hidden
   
   (!.js
-   (j/<! (xt/x:first (cl/view-set-input ["hello" "echo"]
-                                        {:data ["WORLD"]}))))
+   (<! (xt/x:first (cl/view-set-input ["hello" "echo"]
+                                      {:data ["WORLD"]}))))
   => (contains-in
       {"::" "view.run"
        "path" ["hello" "echo"],
@@ -501,7 +495,7 @@
   ^:hidden
   
   (!.js
-   (j/<! (cl/view-refresh ["hello" "echo"])))
+   (<! (cl/view-refresh ["hello" "echo"])))
   => (contains-in
       {"::" "view.run"
        "path" ["hello" "echo"],
@@ -515,7 +509,7 @@
   ^:hidden
   
   (!.js
-   (j/<! (xt/x:first (cl/view-update ["hello" "echo"]))))
+   (<! (xt/x:first (cl/view-update ["hello" "echo"]))))
   => (contains-in
       {"::" "view.run"
        "path" ["hello" "echo"],
@@ -535,9 +529,9 @@
   ^:hidden
   
   (!.js
-   (j/<! (cl/view-call-remote ["hello" "echo"]
-                              1
-                              false)))
+   (<! (cl/view-call-remote ["hello" "echo"]
+                            1
+                            false)))
   =>  {"::" "view.run",
         "path" ["hello" "echo"],
         "post" [false],
@@ -549,7 +543,7 @@
   ^:hidden
   
   (!.js
-   (j/<! (cl/view-refresh-remote ["hello" "echo"])))
+   (<! (cl/view-refresh-remote ["hello" "echo"])))
   => {"::" "view.run",
       "path" ["hello" "echo"],
       "post" [false],
@@ -561,7 +555,7 @@
   ^:hidden
   
   (!.js
-   (j/<!
+   (<!
     (xt/x:first (cl/view-trigger ["hello" "echo"]
                                  "@/::HELLO"
                                  {}))))
@@ -577,7 +571,7 @@
   ^:hidden
   
   (!.js
-   (j/<! (cl/view-for ["hello" "echo"])))
+   (<! (cl/view-for ["hello" "echo"])))
   => (contains-in ["HELLO" integer?]))
 
 ^{:refer js.cell.kernel/view-for-input :added "4.0" :unchecked true}
@@ -585,7 +579,7 @@
   ^:hidden
   
   (!.js
-   (j/<! (cl/view-for-input ["hello" "echo"] {})))
+   (<! (cl/view-for-input ["hello" "echo"] {})))
   => (contains-in ["HELLO" integer?]))
 
 ^{:refer js.cell.kernel/get-val :added "4.0" :unchecked true}
@@ -600,8 +594,8 @@
   ^:hidden
   
   (!.js
-   (j/<! (cl/get-for ["hello" "echo"]
-                     [0])))
+   (<! (cl/get-for ["hello" "echo"]
+                   [0])))
   => "HELLO")
 
 ^{:refer js.cell.kernel/nil-view :added "4.0" :unchecked true}
@@ -618,7 +612,7 @@
           (!.js
            (cl/GD-reset (-/make-playground-cell)))
           (!.js
-           (j/<!
+           (<!
             (. (cl/add-model "hello"
                              {:echo  {:handler link-fn/echo
                                       :trigger {"@/::HELLO" true}

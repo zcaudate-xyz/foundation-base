@@ -67,5 +67,7 @@
   (when actions
     (worker-local/actions-init actions worker))
   (when (not suppress)
-    (worker-impl/worker-init-signal worker {:done true}))
+    (. (j/future)
+       (then (fn []
+               (worker-impl/worker-init-signal worker {:done true})))))
   (return worker))

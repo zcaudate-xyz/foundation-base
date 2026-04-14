@@ -448,8 +448,8 @@
      "deps" ["sync_status"]
      "options" {"context" {"kind" "remote-query"}}}
     "sync_status"
-    {"pipeline"
-     {"sync"
+     {"pipeline"
+      {"sync"
        {"handler"
         (fn [context]
           (var args (or (xt/x:get-key context "args") []))
@@ -461,22 +461,23 @@
           (var sync-request (xt/x:second prepared))
           (when (not ok)
             (throw sync-request))
-         (return
-          (. (-/call-remote-sync remote-cell sync-request)
-             (then
-              (fn [result]
-                (var sync-rows (xtd/get-in result ["db/sync" "Order"]))
-                (-/sqlite-upsert-orders sqlite-conn sync-rows)
-                (return {"result" result
-                         "update" (db-sync/result->update
-                                   (-/shared-desc)
-                                   result
-                                   {"view-id" "sync_status"})
-                         "rows" (-/sqlite-select-orders sqlite-conn)}))))))}}
-     "defaultArgs" []
-     "defaultInit" {"disabled" true}
-     "defaultOutput" nil
-     "options" {"context" {"kind" "remote-sync"}}}}))
+          (return
+           (. (-/call-remote-sync remote-cell sync-request)
+              (then
+               (fn [result]
+                 (var sync-rows (xtd/get-in result ["db/sync" "Order"]))
+                 (-/sqlite-upsert-orders sqlite-conn sync-rows)
+                 (return {"result" result
+                          "update" (db-sync/result->update
+                                    (-/shared-desc)
+                                    result
+                                    {"view-id" "sync_status"})
+                          "rows" (-/sqlite-select-orders sqlite-conn)}))))))
+        "wrapper" nil}}
+      "defaultArgs" []
+      "defaultInit" {"disabled" true}
+      "defaultOutput" nil
+      "options" {"context" {"kind" "remote-sync"}}}}))
 
 (defn.js summarize-model
   [model]
@@ -586,8 +587,10 @@
              (. (-/boot-proxy-cell service-registry)
                 (then
                  (fn [proxy-cell]
-                   (var initial-vals (cl/model-vals "orders" proxy-cell))
-                   (var initial-outputs (cl/model-outputs "orders" proxy-cell))
+                   (var initial-vals (xtd/clone-nested
+                                      (cl/model-vals "orders" proxy-cell)))
+                   (var initial-outputs (xtd/clone-nested
+                                         (cl/model-outputs "orders" proxy-cell)))
                    (return
                     (. (-/run-sync-view proxy-cell
                                         "orders"

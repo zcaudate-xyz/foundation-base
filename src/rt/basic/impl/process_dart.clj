@@ -135,10 +135,11 @@
   (let [forms (if (symbol? (first forms))
                 [forms]
                 forms)
-        body  (concat '[do]
-                      (butlast forms)
-                      [(list 'print (last forms))])]
-    `(:- "void main() {\n "
+         body  (concat '[do]
+                       (butlast forms)
+                       [(list 'print (list 'json.encode (last forms)))])]
+    `(:- "import 'dart:convert' as json;\n\n"
+         "void main() {\n "
          ~body
          "\n}")))
 

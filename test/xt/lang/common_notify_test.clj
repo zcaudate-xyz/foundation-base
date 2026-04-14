@@ -129,3 +129,7 @@
 ^{:refer xt.lang.common-notify/captured:clear-all :added "4.0"}
 (fact "clears all captured items")
 
+
+
+^{:refer xt.lang.common-notify/capture-key-match? :added "4.1"}
+(fact "TODO")

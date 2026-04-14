@@ -119,3 +119,10 @@
   (!.py
    (hash/hash-native (fn:>)))
   => integer?)
+
+
+^{:refer xt.runtime.common-hash/native-type :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.runtime.common-hash/native-class :added "4.1"}
+(fact "TODO")

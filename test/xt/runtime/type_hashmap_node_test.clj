@@ -114,3 +114,55 @@
     (node/node-lookup (. removed-1 node) 0 11 "y" "missing")
     (. removed-2 removed)])
   => [true "missing" 20 true])
+
+
+^{:refer xt.runtime.type-hashmap-node/impl-mask :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.runtime.type-hashmap-node/impl-bitpos :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.runtime.type-hashmap-node/impl-index :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.runtime.type-hashmap-node/impl-edit-allowed :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.runtime.type-hashmap-node/leaf-create :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.runtime.type-hashmap-node/collision-create :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.runtime.type-hashmap-node/leaf-value :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.runtime.type-hashmap-node/node-clone :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.runtime.type-hashmap-node/node-editable :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.runtime.type-hashmap-node/node-editable-root :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.runtime.type-hashmap-node/ensure-editable :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.runtime.type-hashmap-node/ensure-persistent :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.runtime.type-hashmap-node/collision-find-leaf :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.runtime.type-hashmap-node/collision-assoc :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.runtime.type-hashmap-node/collision-dissoc :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.runtime.type-hashmap-node/node-lookup :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.runtime.type-hashmap-node/node-find-leaf :added "4.1"}
+(fact "TODO")

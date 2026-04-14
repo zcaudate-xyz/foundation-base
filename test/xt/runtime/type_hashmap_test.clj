@@ -124,3 +124,55 @@
     (== (. h1 (hash))
         (. h2 (hash)))])
   => [true true])
+
+
+^{:refer xt.runtime.type-hashmap/hashmap-collect-pairs :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.runtime.type-hashmap/hashmap-to-iter :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.runtime.type-hashmap/hashmap-to-array :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.runtime.type-hashmap/hashmap-new :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.runtime.type-hashmap/hashmap-empty :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.runtime.type-hashmap/hashmap-is-editable :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.runtime.type-hashmap/hashmap-to-persistent! :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.runtime.type-hashmap/hashmap-lookup-key :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.runtime.type-hashmap/hashmap-keys :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.runtime.type-hashmap/hashmap-vals :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.runtime.type-hashmap/hashmap-assoc! :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.runtime.type-hashmap/hashmap-dissoc :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.runtime.type-hashmap/hashmap-dissoc! :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.runtime.type-hashmap/hashmap-hash :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.runtime.type-hashmap/hashmap-show :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.runtime.type-hashmap/hashmap-create :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.runtime.type-hashmap/hashmap-empty-mutable :added "4.1"}
+(fact "TODO")

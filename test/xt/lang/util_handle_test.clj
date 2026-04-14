@@ -130,3 +130,7 @@
 
 ^{:refer xt.lang.util-handle/run-handle :added "4.0"}
 (fact "runs a handle")
+
+
+^{:refer xt.lang.util-handle/incr-fn :added "4.1"}
+(fact "TODO")

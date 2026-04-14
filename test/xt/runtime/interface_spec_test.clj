@@ -102,3 +102,10 @@
        ["is_mutable" "to_mutable" "is_persistent" "to_persistent"
         "assoc_mutable" "dissoc_mutable"
         "push_mutable" "pop_mutable"]])
+
+
+^{:refer xt.runtime.interface-spec/proto-create :added "4.1"}
+(fact "TODO")
+
+^{:refer xt.runtime.interface-spec/proto-spec :added "4.1"}
+(fact "TODO")
