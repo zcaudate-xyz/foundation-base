@@ -31,7 +31,7 @@
      :arrow {:placement "none"}}
     [:% n/View
      {:style [{:width (. dims width)}
-              (:.. (k/arrayify styleContainer))]}
+              (:.. (j/arrayify styleContainer))]}
      (:? isBusy
          (r/% componentBusy rprops)
 
@@ -56,10 +56,9 @@
   (var refInput (r/ref))
   (r/watch [sourceInput isBusy]
     (when (and (not isBusy)
-               (not (k/eq-nested sourceInput (. refInput current))))
+               (not (xtd/eq-nested sourceInput (. refInput current))))
       (ext-view/refresh-args sourceView sourceInput)
       (r/curr:set refInput sourceInput)))
   (return
    (r/% -/AutocompleteModal
         (j/assign #{entries isBusy} rprops))))
-

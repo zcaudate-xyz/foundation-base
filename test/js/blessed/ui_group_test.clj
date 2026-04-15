@@ -8,12 +8,14 @@
    :require  [[js.react :as r :include [:fn]]
               [js.core :as j :include [:node :util]]
               [js.lib.valtio :as v]
-              [js.blessed.ui-group :as ui-group]
-              [js.blessed.ui-core :as ui-core]
-              [js.blessed :as b :include [:fn]]
-              [js.lib.chalk :as chk]
-              [xt.lang.common-lib :as k]]
-   :export  [MODULE]})
+               [js.blessed.ui-group :as ui-group]
+               [js.blessed.ui-core :as ui-core]
+               [js.blessed :as b :include [:fn]]
+               [js.lib.chalk :as chk]
+               [xt.lang.common-spec :as xt]
+               [xt.lang.common-lib :as k]
+               [xt.lang.common-data :as xtd]]
+    :export  [MODULE]})
 
 (fact:global
  {:setup [(l/rt:restart)
@@ -22,13 +24,13 @@
 
 (defn.js nest-tree
   [obj prefix]
-  (return (k/walk obj
+  (return (xtd/tree-walk obj
                   k/identity
                   (fn [x]
                     (when  (k/obj? x)
                       (var out {})
-                      (k/for:object [[k v] x]
-                        (k/set-key out (+ prefix k) v))
+                      (xt/for:object [[k v] x]
+                        (xt/x:set-key out (+ prefix k) v))
                       (return out))
                     (return x)))))
 
@@ -379,7 +381,4 @@
              :content (j/inspect #{initial l1 l2 l3})}]])))
 
 ^{:refer js.blessed.ui-group/displayTarget :added "4.0" :unchecked true}
-(fact "helper function for display"
-  ^:hidden
-  
-  )
+(fact "helper function for display")

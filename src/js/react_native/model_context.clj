@@ -2,7 +2,7 @@
   (:require [std.lang :as l]))
 
 (l/script :js
-  {:require [[js.core :as j] [xt.lang.common-lib :as k] [xt.lang.common-spec :as xt]]})
+  {:require [[js.core :as j] [xt.lang.common-lib :as k] [xt.lang.common-math :as math] [xt.lang.common-spec :as xt]]})
 
 
 ;;
@@ -186,7 +186,7 @@
   [effect key]
   (var scalar (xt/x:get-key (or effect {}) key))
   (if (k/is-number? scalar)
-    (return (fn:> [visible] (k/mix scalar 1 visible)))))
+    (return (fn:> [visible] (math/mix scalar 1 visible)))))
 
 
 ;;
@@ -212,18 +212,18 @@
                  :counter "from_left"}
    :flip-horizontal {:transform "rotateY"
                      :out (fn [progress]
-                            (+ (k/mix 0 j/PI progress)
+                             (+ (math/mix 0 j/PI progress)
                                "rad"))
                      :in  (fn [progress]
-                            (+ (k/mix (- j/PI) 0 progress)
+                             (+ (math/mix (- j/PI) 0 progress)
                                "rad"))
                      :counter "flip_vertical"}
    :flip-vertical   {:transform "rotateX"
                      :out (fn [progress]
-                            (+ (k/mix 0 j/PI progress)
+                             (+ (math/mix 0 j/PI progress)
                                "rad"))
                      :in  (fn [progress]
-                            (+ (k/mix (- j/PI) 0 progress)
+                             (+ (math/mix (- j/PI) 0 progress)
                                "rad"))
                      :counter "flip_horizontal"}})
 
@@ -263,7 +263,7 @@
                                       entry))
          (return (fn [progress]
                    (return
-                    {transform (k/mix offset
+                     {transform (math/mix offset
                                       0
                                       progress)})))))
   (return
@@ -287,7 +287,7 @@
                                       entry))
          (return (fn [progress]
                    (return
-                    {transform (k/mix 0
+                     {transform (math/mix 0
                                       offset
                                       progress)})))))
   (return
@@ -351,23 +351,23 @@
         (:= margin 0)]}]
     (var [transform magnitude]
          (:? (== transition "from_top")
-             ["translateY" (k/mix (- height) 0 progress)]
+              ["translateY" (math/mix (- height) 0 progress)]
              
              (== transition "from_bottom")
-             ["translateY" (k/mix height 0 progress)]
+              ["translateY" (math/mix height 0 progress)]
 
              (== transition "from_right")
-             ["translateX" (k/mix width 0 progress)]
+              ["translateX" (math/mix width 0 progress)]
              
              (== transition "from_left")
-             ["translateX" (k/mix (- width) 0 progress)]
+              ["translateX" (math/mix (- width) 0 progress)]
              
              (== transition "flip_horizontal")
-             ["rotateY" (+ (k/mix (- j/PI) 0 progress)
+              ["rotateY" (+ (math/mix (- j/PI) 0 progress)
                            "rad")]
              
              (== transition "flip_vertical")
-             ["rotateX" (+ (k/mix (- j/PI) 0 progress)
+              ["rotateX" (+ (math/mix (- j/PI) 0 progress)
                            "rad")]
              
              :else ["translateX" 0]))
@@ -384,28 +384,28 @@
     (var opacity 0)
     
     (:= opacity (:? (not= transition "fade")
-                    (k/mix 1 fade progress)
+                    (math/mix 1 fade progress)
                     
-                    :else (k/mix 1 0 (j/min 1 (* 2 progress)))))
+                    :else (math/mix 1 0 (j/min 1 (* 2 progress)))))
     (var [direction amount]
          (:? (== transition "from_top")
-             ["translateY" (k/mix 0 height progress)]
+              ["translateY" (math/mix 0 height progress)]
              
              (== transition "from_bottom")
-             ["translateY" (k/mix 0 (- height) progress)]
+              ["translateY" (math/mix 0 (- height) progress)]
 
              (== transition "from_right")
-             ["translateX" (k/mix 0 (- width) progress)]
+              ["translateX" (math/mix 0 (- width) progress)]
              
              (== transition "from_left")
-             ["translateX" (k/mix 0 width progress)]
+              ["translateX" (math/mix 0 width progress)]
              
              (== transition "flip_horizontal")
-             ["rotateY" (+ (k/mix 0 j/PI progress)
+              ["rotateY" (+ (math/mix 0 j/PI progress)
                            "rad")]
 
              (== transition "flip_vertical")
-             ["rotateX" (+ (k/mix 0 j/PI progress)
+              ["rotateX" (+ (math/mix 0 j/PI progress)
                            "rad")]
 
              :else

@@ -8,13 +8,14 @@
             :emit {:native {:suppress true}
                    :lang/jsx false}
             :notify {:host "test.statstrade.io"}}
-   :require [[js.core :as j]
-             [js.react :as r]
-             [js.react-native :as n]
-             [js.react-native.animate :as a]
-             [js.react-native.physical-base :as physical-base]
-             [js.react-native.model-context :as model-context]
-             [xt.lang.common-lib :as k]]})
+    :require [[js.core :as j]
+              [js.react :as r]
+              [js.react-native :as n]
+              [js.react-native.animate :as a]
+              [js.react-native.physical-base :as physical-base]
+              [js.react-native.model-context :as model-context]
+              [xt.lang.common-data :as xtd]
+              [xt.lang.common-lib :as k]]})
 
 (defn.js useTransition
   "creates all props involved with transition"
@@ -68,9 +69,9 @@
   (var #{height width} dims)
   (var [prevKey setPrevKey] (r/local routeKey))
   (:= transition (or transition
-                     (k/get-in transitionMap
-                               [prevKey
-                                routeKey])
+                     (xtd/get-in transitionMap
+                                [prevKey
+                                 routeKey])
                      transitionDefault))
   (var #{changing
          setChanging
@@ -101,8 +102,8 @@
        (model-context/animateIn chord))
   (var outFn
        (model-context/animateOut
-        (j/assign {} chord {:transition (k/get-in model-context/ANIMATE
-                                                  [transition "counter"])})))
+         (j/assign {} chord {:transition (xtd/get-in model-context/ANIMATE
+                                                   [transition "counter"])})))
   (var evenFn
        (fn [progress chord]
          (var #{even
@@ -130,8 +131,8 @@
   (r/run []
     (n/measureRef containerRef
                   (fn [e]
-                    (when (k/not-empty? (k/obj-diff e dims))
-                      ((isMountedWrap setDims) e)))))
+                    (when (xtd/not-empty? (xtd/obj-difference e dims))
+                       ((isMountedWrap setDims) e)))))
   (return
    [:<>
     [:% n/View
@@ -211,5 +212,4 @@
     (return (r/% Component componentProps)))
 
   (return (r/% -/RouterImpl props)))
-
 

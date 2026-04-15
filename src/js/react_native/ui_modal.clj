@@ -8,14 +8,16 @@
             :emit {:native {:suppress true}
                    :lang/jsx false}
             :notify {:host "test.statstrade.io"}}
-   :require [[js.core :as j]
-             [js.react :as r]
-             [js.react-native :as n]
-             [js.react-native.animate :as a]
-             [js.react-native.physical-base :as physical-base]
-             [js.react-native.model-context :as model-context]
-             [js.react-native.helper-transition :as helper-transition]
-             [xt.lang.common-lib :as k]]})
+    :require [[js.core :as j]
+              [js.react :as r]
+              [js.react-native :as n]
+              [js.react-native.animate :as a]
+              [js.react-native.physical-base :as physical-base]
+              [js.react-native.model-context :as model-context]
+              [js.react-native.helper-transition :as helper-transition]
+              [xt.lang.common-data :as xtd]
+              [xt.lang.common-lib :as k]
+              [xt.lang.common-trace :as trace]]})
 
 (defn.js ModalBackdrop
   "constructs the modal backdrop"
@@ -58,14 +60,14 @@
        (fn []
          (when (r/curr contentRef)
            (var contentElem
-                (or (k/get-in contentRef
-                              ["current"
-                               "children"
-                          0])
-                    (k/get-in contentRef
-                              ["current"
-                               "_children"
-                               0])))
+                 (or (xtd/get-in contentRef
+                               ["current"
+                                "children"
+                           0])
+                     (xtd/get-in contentRef
+                               ["current"
+                                "_children"
+                                0])))
            (n/measure contentElem setLayout))))
   (r/watch [children visible dimensions]
     (getLayout))
@@ -141,7 +143,7 @@
                                             :width 0
                                             :px 0
                                             :py 0}))
-  (k/LOG! layout hostLayout)
+  (trace/LOG! layout hostLayout)
   (var layoutRef (r/useFollowRef layout))
   (var hostLayoutRef (r/useFollowRef hostLayout))
   (var contentRef (-/useMeasureContent children visible dimensions setLayout))
@@ -241,4 +243,3 @@
        styleBackdrop
        indicators
        chord}]]))
-

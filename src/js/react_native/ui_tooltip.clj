@@ -8,14 +8,15 @@
             :emit {:native {:suppress true}
                    :lang/jsx false}
             :notify {:host "test.statstrade.io"}}
-   :require [[js.core :as j]
-             [js.react :as r]
-             [js.react-native :as n]
-             [js.react-native.animate :as a]
-             [js.react-native.physical-base :as physical-base]
-             [js.react-native.model-geom :as model-geom]
-             [js.react-native.model-context :as model-context]
-             [xt.lang.common-lib :as k]]})
+    :require [[js.core :as j]
+              [js.react :as r]
+              [js.react-native :as n]
+              [js.react-native.animate :as a]
+              [js.react-native.physical-base :as physical-base]
+              [js.react-native.model-geom :as model-geom]
+              [js.react-native.model-context :as model-context]
+              [xt.lang.common-spec :as xt]
+              [xt.lang.common-lib :as k]]})
 
 (defn.js tooltipPortalOffset
   "calculates the portal offset"
@@ -228,7 +229,7 @@
                        :animate  false}
                       arrow))
   (when (k/nil? (. arrow point))
-    (k/set-key arrow "placement" "none"))
+    (xt/x:set-key arrow "placement" "none"))
 
   (var [showing
         vindicator] (a/useShowing (and visible delayed)
@@ -250,4 +251,3 @@
           {:chord {:visible (and visible delayed)}
            :indicators {:visible vindicator}}}
         children])))
-

@@ -47,22 +47,17 @@
    (db-query/normalize-query
     {}
     {"table" "Order"
-     "select-method" "all"
-     "return-method" "detail"
-     "return-omit" ["secret"]}
+     "select_method" "all"
+     "return_method" "detail"
+     "return_omit" ["secret"]}
     {"args" ["active"]}))
   => {"table" "Order"
-      "select-method" "all"
-      "select-args" ["active"]
-      "select-control" nil
-      "return-method" "detail"
-      "return-query" nil
-      "return-count" nil
-      "return-id" nil
-      "return-bulk" nil
-      "return-args" []
-      "return-omit" ["secret"]
-      "data-only" nil})
+      "select_method" "all"
+      "select_args" ["active"]
+      "return_method" "detail"
+      "return_args" []
+      "return_omit" ["secret"]
+      })
 
 ^{:refer xt.cell.service.db-query/prepare-query :added "4.1"}
 (fact "fails cleanly when a referenced select method is missing"
@@ -73,7 +68,7 @@
     {"schema" {}
      "views" {"Order" {"select" {} "return" {}}}}
     {"table" "Order"
-     "select-method" "missing"}
+     "select_method" "missing"}
     {}))
   => [false
       {"status" "error"
@@ -102,7 +97,7 @@
     {"schema" {}
      "views" {"Order" {"select" {} "return" {}}}}
     {"table" "Order"
-     "select-method" "missing"}
+     "select_method" "missing"}
     {}))
   => [false
       {"status" "error"

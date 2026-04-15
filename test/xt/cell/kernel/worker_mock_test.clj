@@ -6,6 +6,7 @@
 (l/script- :js
   {:runtime :basic
    :require [[xt.lang.common-lib :as k]
+             [xt.lang.common-spec :as xt]
              [xt.lang.common-repl :as repl]
              [js.core :as j]
              [xt.cell.kernel.worker-mock :as worker-mock]]})
@@ -30,10 +31,11 @@
 
   (notify/wait-on :js
     (var worker
-         (worker-mock/mock-worker
-          (fn [event]
-            (when (== (. event ["op"]) "call")
-              (repl/notify event)))))
+          (worker-mock/create-worker
+           (fn [event]
+             (when (== (. event ["op"]) "call")
+               (repl/notify event)))
+           {} true))
     (worker-mock/mock-worker-send
      worker
      {"op" "call"
@@ -52,9 +54,9 @@
    (var worker (worker-mock/mock-worker (fn:> [event] event)))
    [(k/get-key worker "::")
     (k/len (k/get-key worker "listeners"))
-    (fn? (k/get-key worker "postMessage"))
-    (fn? (k/get-key worker "postRequest"))])
-  => ["worker.mock" 1 true true]
+    (== nil (k/get-key worker "postMessage"))
+    (== nil (k/get-key worker "postRequest"))])
+  => ["worker.mock" 1 false false]
 
   (notify/wait-on :js
     (var worker (worker-mock/mock-worker (repl/>notify)))
@@ -80,7 +82,7 @@
                             :is_async false
                             :args ["x"]}}
          true))
-   (k/has-key? (. worker ["actions"]) "@custom/action"))
+   (xt/x:has-key? (. worker ["actions"]) "@custom/action"))
   => true
 
   (notify/wait-on :js

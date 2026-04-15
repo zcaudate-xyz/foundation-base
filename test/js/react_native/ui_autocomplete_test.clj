@@ -13,12 +13,13 @@
             :notify {:host "test.statstrade.io"}}
    :require [[js.core :as j]
              [js.react :as r]
-             [js.react.ext-view :as ext-view]
-             [js.react-native :as n :include [:fn]]
-             [js.react-native.physical-addon :as physical-addon]
-             [js.react-native.ui-autocomplete :as ui-autocomplete]
-             [js.react-native.ui-input :as ui-input]
-             [xt.lang.common-lib :as k]]
+              [js.react.ext-view :as ext-view]
+              [js.react-native :as n :include [:fn]]
+              [js.react-native.physical-addon :as physical-addon]
+              [js.react-native.ui-autocomplete :as ui-autocomplete]
+              [js.react-native.ui-input :as ui-input]
+              [xt.lang.common-spec :as xt]
+              [xt.lang.common-lib :as k]]
    })
 
 ^{:refer js.react-native.ui-autocomplete/AutocompleteModal :added "4.0" :unchecked true}
@@ -34,7 +35,7 @@
                       (return
                        [:% n/Text
                         {:style {:padding 5}}
-                        (k/json-encode entry)]))))
+                        (xt/x:json-encode entry)]))))
     (return
      (n/EnclosedCode 
 {:label "js.react-native.ui-autocomplete/AutocompleteModal"} 
@@ -67,10 +68,10 @@
   (defn.js get-names
     [filt]
     (var output [])
-    (k/for:array [n -/NAMES]
+    (xt/for:array [n -/NAMES]
       (when (j/startsWith n (j/toUpperCase filt))
-        (x:arr-push output {:name n}))
-      (when (< 15 (k/len output))
+        (xt/x:arr-push output {:name n}))
+      (when (< 15 (xt/x:len output))
         (return output)))
     (return output))
   
@@ -89,7 +90,7 @@
                       (return
                        [:% n/Text
                         {:style {:padding 5}}
-                        (k/json-encode entry)]))))
+                        (xt/x:json-encode entry)]))))
     (return
      (n/EnclosedCode 
 {:label "js.react-native.ui-autocomplete/Autocomplete"} 

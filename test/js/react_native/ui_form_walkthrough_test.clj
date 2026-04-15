@@ -43,15 +43,15 @@
                 (var active (j/max (- 1 emptying)
                                    focusing))
                 (return {:style {:opacity 1
-                                 :fontSize   (k/mix 20  12  active)
-                                 :fontWeight (k/mix 400 800 active)
+                                 :fontSize   (math/mix 20  12  active)
+                                 :fontWeight (math/mix 400 800 active)
                                  :textShadowColor "black"
                                  :color (c/toHSL (c/interpolate
                                                   ["#999" "#555"]
                                                   active))
                                  :transform
-                                 [{:translateY (k/mix 15 60 active)}
-                                  {:translateX (k/mix 10 -5  active)}]}}))}]))
+                                 [{:translateY (math/mix 15 60 active)}
+                                  {:translateX (math/mix 10 -5  active)}]}}))}]))
   
   (defn.js useLoginForm
     []
@@ -241,13 +241,13 @@
         (:? (== step 0)
             [:% -/LoginForm
              #{[:onSubmit submitLogin
-                :submitDisabled (k/is-empty? login)
+                :submitDisabled (xtd/is-empty? login)
                 :inputDisabled  waiting
                 (:.. form)]}]
             (== step 1)
             [:% -/PasswordForm
              #{[:onSubmit submitPassword
-                :submitDisabled (k/is-empty? password)
+                :submitDisabled (xtd/is-empty? password)
                 :inputDisabled  waiting
                 (:.. form)]}]
             :else
@@ -324,7 +324,7 @@
                   visible} (modelFn v))
            (return
             {:style {:opacity (:? visible
-                                  (k/mix -2 1 scale)
+                                  (math/mix -2 1 scale)
                                   0)
                      :zIndex (* 100 scale)
                      :transform
@@ -355,7 +355,7 @@
                        #{[:key session
                           :onSubmit submitLogin
                           :submitDisabled (or (not= step 0)
-                                              (k/is-empty? login))
+                                              (xtd/is-empty? login))
                           :inputDisabled  (or (not= step 0)
                                               waiting)
                           (:.. form)]}]]
@@ -370,7 +370,7 @@
                        #{[:key session
                           :onSubmit submitPassword
                           :submitDisabled (or (not= step 1)
-                                              (k/is-empty? password))
+                                              (xtd/is-empty? password))
                           :inputDisabled  (or (not= step 1)
                                               waiting)
                           (:.. form)]}]]

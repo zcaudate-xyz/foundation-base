@@ -2,7 +2,7 @@
   (:require [std.lang :as l]))
 
 (l/script :js
-  {:config {:bench false :emit {:native {:suppress true} :lang/jsx false} :id :play/web-main :notify {:host "test.statstrade.io"}} :require [[js.core :as j] [js.react-native.helper-color :as c] [xt.lang.common-lib :as k] [xt.lang.common-spec :as xt]] :runtime :websocket})
+  {:config {:bench false :emit {:native {:suppress true} :lang/jsx false} :id :play/web-main :notify {:host "test.statstrade.io"}} :require [[js.core :as j] [js.react-native.helper-color :as c] [xt.lang.common-lib :as k] [xt.lang.common-data :as xtd] [xt.lang.common-spec :as xt]] :runtime :websocket})
 
 ;;
 ;; Pairs
@@ -57,8 +57,8 @@
                   (j/assign {} -/StageMap stageMap)))
   (var lu (xt/x:get-key -/ThemeLookup type))
   (var colorInit (xt/x:get-key theme (xt/x:get-key lu initial)))
-  (return (k/arr-foldl stages
-                       (fn [colorOut stageKey]
+  (return (xtd/arr-foldl stages
+                        (fn [colorOut stageKey]
                          (var tf   (xt/x:get-key __fns stageKey))
                          (var val  (xt/x:get-key indValues stageKey))
                          (var colorStage  (xt/x:get-key theme (xt/x:get-key lu stageKey)))
@@ -73,11 +73,11 @@
   {:added "4.0"}
   [arr]
   (var out {:style []})
-  (k/for:array [e arr]
+  (xt/for:array [e arr]
     (var #{[style
             (:.. rprops)]} (or e {}))
-    (k/for:array [s (j/arrayify style)]
-      (x:arr-push out.style s))
+    (xt/for:array [s (j/arrayify style)]
+      (xt/x:arr-push out.style s))
     (j/assign out rprops))
   (return out))
 
@@ -93,7 +93,7 @@
                     (fn:>)))
   (when (not (and (k/is-function? bgCustom)
                   (k/is-function? fgCustom)))
-    (k/err "Themed transformations require functions."))
+    (xt/x:err "Themed transformations require functions."))
   (var #{bg fg} themePipeline)
   (var bgInitial  (. bg ["initial"]))
   (var bgStages   (. bg ["stages"]))
@@ -126,7 +126,7 @@
   (var custom (or (xt/x:get-key transformations type)
                   (fn:>)))
   (when (not (k/is-function? custom))
-    (k/err "Themed transformations require functions."))
+    (xt/x:err "Themed transformations require functions."))
   (var pipe     (xt/x:get-key themePipeline type))
   (var initial  (. pipe ["initial"]))
   (var stages   (. pipe ["stages"]))
@@ -135,8 +135,8 @@
             (var customProps (custom indValues chord))
             (var color (c/toHSL (-/transformColor indValues theme type initial stages stageMap)))
             (var style {})
-            (k/for:array [key colorKeys]
-              (k/set-key style key color))
+            (xt/for:array [key colorKeys]
+              (xt/x:set-key style key color))
             (return (-/mergeProps [customProps
                                    {:style style}])))))
 
@@ -154,7 +154,7 @@
                        #{disabled
                          highlighted}
                        more))
-  (var indValues (k/obj-map chord indFn))
+  (var indValues (xtd/obj-map chord indFn))
   (return (. (transformFn indValues chord)
              ["style"])))
 

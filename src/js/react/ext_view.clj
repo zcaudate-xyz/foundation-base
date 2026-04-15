@@ -2,7 +2,7 @@
   (:require [std.lang :as l]))
 
 (l/script :js
-  {:require [[xt.lang.common-lib :as k] [xt.lang.event-view :as event-view] [js.react :as r] [js.core :as j] [xt.lang.common-spec :as xt] [xt.lang.common-data :as xtd]]})
+  {:require [[xt.lang.common-lib :as k] [xt.lang.event-view :as event-view] [js.react :as r] [js.core :as j] [xt.lang.common-spec :as xt] [xt.lang.common-data :as xtd] [xt.lang.common-trace :as trace]]})
 
 (defn.js throttled-setter
   "creates a throttled setter which only updates after a delay"
@@ -13,20 +13,20 @@
                  :mounted true})
   (var throttled-fn
        (fn [result]
-         (var t (k/now-ms))
+         (var t (xt/x:now-ms))
          (cond (k/not-nil? (xt/x:get-key throttle "thread"))
-               (k/set-key throttle "val" result)
+                (xt/x:set-key throttle "val" result)
 
                :else
-               (do (k/set-key throttle "val" result)
-                   (setResult result)
-                   (k/set-key throttle "thread"
-                              (j/future-delayed [delay]
-                                (when (and (not= (xt/x:get-key throttle "val")
-                                                 result)
-                                           (xt/x:get-key throttle "mounted"))
-                                  (setResult (xt/x:get-key throttle "val")))
-                                (k/del-key throttle "thread")))))))
+                (do (xt/x:set-key throttle "val" result)
+                    (setResult result)
+                    (xt/x:set-key throttle "thread"
+                               (j/future-delayed [delay]
+                                 (when (and (not= (xt/x:get-key throttle "val")
+                                                  result)
+                                            (xt/x:get-key throttle "mounted"))
+                                   (setResult (xt/x:get-key throttle "val")))
+                                 (xt/x:del-key throttle "thread")))))))
   (return [throttled-fn throttle]))
 
 (defn.js refresh-view
@@ -56,7 +56,7 @@
   "refreshes view using remote function"
   {:added "4.0"}
   [view save-output opts]
-  (when (k/get-in view ["pipeline" "remote" "handler"])
+  (when (xtd/get-in view ["pipeline" "remote" "handler"])
     (var [context disabled] (event-view/pipeline-prep view opts))
     (var #{acc} context)
     
@@ -79,7 +79,7 @@
   "refreshes view using sync function"
   {:added "4.0"}
   [view save-output opts]
-  (when (k/get-in view ["pipeline" "sync" "handler"])
+  (when (xtd/get-in view ["pipeline" "sync" "handler"])
     (var [context disabled] (event-view/pipeline-prep view opts))
     (var #{acc} context)
     (return (. (event-view/pipeline-run-sync
@@ -114,7 +114,7 @@
              default-process
              options))
   (event-view/init-view view)
-  (k/set-key view "init" (-/refresh-view view))
+  (xt/x:set-key view "init" (-/refresh-view view))
   (return view))
 
 (defn.js makeViewRaw
@@ -183,10 +183,10 @@
                             (. event type))
                       (== (. event data type)
                           (or dest-key "output")))
-                  (not (k/eq-nested (r/curr resultRef)
-                                    nresult)))
+                  (not (xtd/eq-nested (r/curr resultRef)
+                                     nresult)))
          #_(when (== "pending" (. event type))
-           (k/LOG! event))
+           (trace/LOG! event))
          (setResult nresult))
        (when resultFn
          (resultFn event))
@@ -205,7 +205,7 @@
   (:= tevent (or tevent type))
   (var getResult (fn []
                    (var out (tfn view))
-                   (return (k/clone-shallow
+                   (return (xtd/clone-shallow
                             (:? tkey (. out [tkey]) out)))))
   (var [result setResult] (r/local getResult))
   (var resultRef (r/useFollowRef result))
@@ -217,7 +217,7 @@
                     
                     meta
                     {:resultTag tag-key
-                     :resultFn  (k/get-in meta "resultFn")
+                     :resultFn  (xtd/get-in meta "resultFn")
                      :pred (fn [event]
                              (return (== (. event ["type"])
                                          (+ "view." tevent))))}})
@@ -227,14 +227,14 @@
   "creates listeners on the output"
   {:added "4.0"}
   [view types meta dest-key tag-key]
-  (var getOutput (fn:> (k/obj-clone (event-view/get-output view dest-key))))
+  (var getOutput (fn:> (xtd/obj-clone (event-view/get-output view dest-key))))
   (var [output setOutput] (r/local getOutput))
   (var wrap (r/useIsMountedWrap))
   (var outputRef (r/useFollowRef output))
   (var pred
        (fn [event]
          (return
-          (k/arr-some
+          (xtd/arr-some
            types
            (fn [type]
              (return (== (. event ["type"])
@@ -246,14 +246,14 @@
                      :getResult getOutput
                      :resultRef outputRef
                      :resultTag tag-key
-                     :resultFn  (k/get-in meta "resultFn")}})
+                     :resultFn  (xtd/get-in meta "resultFn")}})
   (return output))
 
 (defn.js listenViewThrottled
   "creates the throttled listener"
   {:added "4.0"}
   [view delay meta dest-key]
-  (var getResult (fn:> (k/clone-shallow
+  (var getResult (fn:> (xtd/clone-shallow
                         (event-view/get-success view))))
   (var [result setResult] (r/local getResult))
   (var resultRef (r/useFollowRef result))
@@ -274,7 +274,7 @@
                    (. event ["type"])))))
     (return
      (fn []
-       (k/set-key throttle "mounted" false)
+       (xt/x:set-key throttle "mounted" false)
        (event-view/remove-listener view listener-id))))
   (return result))
 
@@ -297,12 +297,12 @@
   "creates the refresh args function"
   {:added "4.0"}
   [view args opts]
-  (cond (k/arr-every args k/not-nil?)
+  (cond (xtd/arr-every args k/not-nil?)
         (return
          (. (-/refresh-args view args opts)
             (then
              (fn [acc]
-               (var [ok data] (k/get-in acc ["main"]))
+               (var [ok data] (xtd/get-in acc ["main"]))
                (when (not ok) (throw data))
                (cond (== (. opts remote) "always")
                      (do (return
@@ -316,7 +316,7 @@
                      :else
                      (when (or (k/nil? (. opts remote-check))
                                (. opts (remote-check args)))
-                       (if (k/not-empty? data)
+                       (if (xtd/not-empty? data)
                          (return (-/refresh-args-sync view args false opts))
                          (return (-/refresh-args-remote view args true opts)))))))))
 
@@ -353,7 +353,7 @@
   {:added "0.1"}
   [handler m]
   (return
-   (k/obj-assign-nested
+   (xtd/obj-assign-nested
     {:handler handler
      :defaultArgs []
      :defaultInit {:disabled true}}
@@ -408,7 +408,7 @@
                                  ["pending" "output" "elapsed"]
                                  meta))
     (r/watch [out]
-      (when (and (k/not-empty? (. out current))
+      (when (and (xtd/not-empty? (. out current))
                  (not init))
         (setInit true))
       (when (. out pending)
@@ -422,4 +422,3 @@
                  (not init))
         (setInit true)))
     (return init)))
-

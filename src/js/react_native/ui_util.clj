@@ -2,7 +2,7 @@
   (:require [std.lang :as l]))
 
 (l/script :js
-  {:config {:bench false :emit {:native {:suppress true} :lang/jsx false} :id :play/web-main :notify {:host "test.statstrade.io"}} :require [[js.core :as j] [js.react :as r] [js.react-native :as n] [js.react-native.animate :as a] [js.react-native.physical-base :as physical-base] [xt.lang.common-lib :as k] [xt.lang.common-spec :as xt]] :runtime :websocket})
+  {:config {:bench false :emit {:native {:suppress true} :lang/jsx false} :id :play/web-main :notify {:host "test.statstrade.io"}} :require [[js.core :as j] [js.react :as r] [js.react-native :as n] [js.react-native.animate :as a] [js.react-native.physical-base :as physical-base] [xt.lang.common-data :as xtd] [xt.lang.common-lib :as k] [xt.lang.common-spec :as xt]] :runtime :websocket})
 
 (defn.js Page
   "creates a Page"
@@ -112,14 +112,14 @@
                           :width 0}))
   (var vindicator (xt/x:get-key indicators "visible"))
   (r/watch [visible children]
-    (var contentElem (or (k/get-in contentRef
-                                   ["current"
-                                    "children"
-                                    0])
-                         (k/get-in contentRef
-                                   ["current"
-                                    "_children"
-                                    0])))
+    (var contentElem (or (xtd/get-in contentRef
+                                    ["current"
+                                     "children"
+                                     0])
+                         (xtd/get-in contentRef
+                                    ["current"
+                                     "_children"
+                                     0])))
     (. (n/measure contentElem)
        (then (fn [layout]
                (r/curr:set layoutRef layout)))
@@ -202,4 +202,3 @@
       (return [:% n/View])))
   
   (return (r/% -/FoldImpl props)))
-

@@ -49,7 +49,7 @@
                                            :padding 1
                                            :top 30
                                            :left 30
-                                           :opacity (k/mix 0.5 1 scale
+                                           :opacity (math/mix 0.5 1 scale
                                                            (fn:> [v] (* v v v v v v v)))
                                            :transform
                                            [{:translateY translate}
@@ -74,23 +74,23 @@
   
   (defn.js make-values
     [values divisions]
-    (var total (k/len values))
+    (var total (xt/x:len values))
     (var n (/ (k/lcm total divisions)
               total))
-    (return (k/arr-mapcat (k/arr-repeat values n)
+    (return (xtd/arr-mapcat (xtd/arr-repeat values n)
                           k/identity)))
   
   (defn.js get-element
     [offset index divisions values]
     (var noffset  (j/round offset))
-    (var center   (k/mod-pos noffset divisions))
+    (var center   (math/mod-pos noffset divisions))
     (var shifted     (- index center))
-    (var shifted-mod (k/mod-pos shifted divisions))
+    (var shifted-mod (math/mod-pos shifted divisions))
     (var normalised  (:? (< shifted-mod (/ divisions 2))
                          shifted-mod
                          (- shifted-mod divisions)))
-    (var total (k/len values))
-    (return (k/get-key values (k/mod-pos (+ noffset normalised)
+    (var total (xt/x:len values))
+    (return (xt/x:get-key values (math/mod-pos (+ noffset normalised)
                                          total))))
   
   (defn.js singleTransform
@@ -102,14 +102,14 @@
     (return
      {:style
       {:opacity (:? visible
-                    (k/mix -1.5 1 scale)
+                    (math/mix -1.5 1 scale)
                     0)
        :zIndex (* 10 scale)
        :transform
        [{:translateY (- translate)}
         {:translateX (* 0.5 (j/abs translate))}
-        {:scaleX (k/mix 0.2 1 scale)}
-        {:scaleY (k/mix 0.2 1 scale)}]}}))
+        {:scaleX (math/mix 0.2 1 scale)}
+        {:scaleY (math/mix 0.2 1 scale)}]}}))
   
   (defn.js createComponent
     [index indicator modelFn transformFn style divisions values]
@@ -151,7 +151,7 @@
          :style {:height 80
                  :width 80
                  :backgroundColor "black"}
-         :addons [(:.. (j/map (k/arr-range -/DIVISIONS)
+         :addons [(:.. (j/map (xtd/arr-range -/DIVISIONS)
                               (fn:> [index]
                                 (-/createComponent index
                                                    "offset0"
@@ -180,14 +180,14 @@
     (return
      {:style
       {:opacity (:? visible
-                    (k/mix -2 1 scale)
+                    (math/mix -2 1 scale)
                     0)
        :zIndex (* 10 scale)
        :transform
        [{:translateY (- translate)}
         #_{:translateX (* 0.5 (j/abs translate))}
-        #_{:scaleX (k/mix 0.2 1 scale)}
-        #_{:scaleY (k/mix 0.2 1 scale)}]}}))
+        #_{:scaleX (math/mix 0.2 1 scale)}
+        #_{:scaleY (math/mix 0.2 1 scale)}]}}))
   
   (defn.js DigitRollerDoubleDemo
     []
@@ -214,7 +214,7 @@
          :style {:height 80
                  :width 80
                  :backgroundColor "black"}
-         :addons [(:.. (j/map (k/arr-range -/DIVISIONS)
+         :addons [(:.. (j/map (xtd/arr-range -/DIVISIONS)
                               (fn:> [index]
                                 (-/createComponent index
                                                    "offset1"
@@ -224,7 +224,7 @@
                                                     :left 18}
                                                    -/DIVISIONS
                                                    HOURS_ARRAY))))
-                  (:.. (j/map (k/arr-range -/DIVISIONS)
+                  (:.. (j/map (xtd/arr-range -/DIVISIONS)
                               (fn:> [index]
                                 (-/createComponent index
                                                    "offset0"
@@ -275,14 +275,14 @@
     (return
      {:style
       {:opacity (:? visible
-                    (k/mix -10 1 scale)
+                    (math/mix -10 1 scale)
                     0)
        :zIndex (* 100 scale)
        :transform
        [{:translateY (* -1.4 translate)}
-        {:scale (k/mix -4 2 scale)}
-        #_#_{:scaleX (k/mix -3 2 scale)}
-        {:scaleY (k/mix -3 2 scale)}]}}))
+        {:scale (math/mix -4 2 scale)}
+        #_#_{:scaleX (math/mix -3 2 scale)}
+        {:scaleY (math/mix -3 2 scale)}]}}))
   
   (defn.js DigitClockDemo
     []
@@ -326,7 +326,7 @@
           :style {:height 40
                   :width 20
                   :backgroundColor "black"}
-          :addons [(:.. (j/map (k/arr-range 6)
+          :addons [(:.. (j/map (xtd/arr-range 6)
                                (fn:> [index]
                                  (-/createComponent index
                                                     "minutes1"
@@ -343,7 +343,7 @@
           :style {:height 40
                   :width 20
                   :backgroundColor "black"}
-          :addons [(:.. (j/map (k/arr-range -/CLOCK_DIVISIONS)
+          :addons [(:.. (j/map (xtd/arr-range -/CLOCK_DIVISIONS)
                                (fn:> [index]
                                  (-/createComponent index
                                                     "minutes0"
@@ -363,7 +363,7 @@
           :style {:height 40
                   :width 20
                   :backgroundColor "black"}
-          :addons [(:.. (j/map (k/arr-range 6)
+          :addons [(:.. (j/map (xtd/arr-range 6)
                                (fn:> [index]
                                  (-/createComponent index
                                                     "seconds1"
@@ -380,7 +380,7 @@
           :style {:height 40
                   :width 20
                   :backgroundColor "black"}
-          :addons [(:.. (j/map (k/arr-range -/CLOCK_DIVISIONS)
+          :addons [(:.. (j/map (xtd/arr-range -/CLOCK_DIVISIONS)
                                (fn:> [index]
                                  (-/createComponent index
                                                     "seconds0"

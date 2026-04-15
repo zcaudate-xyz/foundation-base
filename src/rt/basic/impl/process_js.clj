@@ -34,7 +34,7 @@
                     :basic      :nodejs
                     :websocket  :nodejs}
          :env      {:nodejs    {:exec   "node"
-                                :env    +node-shell-env+
+                                :shell  {:env +node-shell-env+}
                                  :flags  {:oneshot   ["-e"]
                                           :basic     ["-e"]
                                           :websocket ["-e"]

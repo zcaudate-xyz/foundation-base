@@ -5,8 +5,9 @@
 (l/script- :js
     {:runtime :basic
      :require [[js.react-native.model-roller :as  model-roller]
-               [js.core :as j]
-               [xt.lang.common-lib :as k]]})
+                [js.core :as j]
+                [xt.lang.common-data :as xtd]
+                [xt.lang.common-lib :as k]]})
 
 (fact:global
  {:setup    [(l/rt:restart)]
@@ -17,7 +18,7 @@
   ^:hidden
   
   (!.js
-   (j/map (k/arr-range 4)
+   (j/map (xtd/arr-range 4)
           (model-roller/roller-model 4 10)))
   => [{"offset" 0,
        "translate" 0,
@@ -45,7 +46,7 @@
        "raw" 3}]
 
   (!.js
-   (j/map (k/arr-range 10)
+   (j/map (xtd/arr-range 10)
           (model-roller/roller-model 10 10)))
   => [{"offset" 0,
        "translate" 0,
@@ -113,9 +114,9 @@
   ^:hidden
   
   (!.js
-   (j/map (k/arr-range 4)
+   (j/map (xtd/arr-range 4)
           (fn:> [index]
-            (j/map (k/arr-range 4)
+            (j/map (xtd/arr-range 4)
                    (fn:> [center]
                      (model-roller/roller-shifted-norm 4 index center))))))
   => [[0 -1 -2 1]
@@ -124,9 +125,9 @@
       [-1 -2 1 0]]
 
   (!.js
-   (j/map (k/arr-range 7)
+   (j/map (xtd/arr-range 7)
           (fn:> [index]
-            (j/map (k/arr-range 7)
+            (j/map (xtd/arr-range 7)
                    (fn:> [center]
                      (model-roller/roller-shifted-norm 7 index center))))))
   => [[0 -1 -2 -3 3 2 1]
@@ -142,9 +143,9 @@
   ^:hidden
   
   (!.js
-   (j/map (k/arr-range 7)
+   (j/map (xtd/arr-range 7)
           (fn:> [roller-index]
-            (j/map (k/arr-range 10)
+            (j/map (xtd/arr-range 10)
                    (fn:> [input-raw]
                      (model-roller/roller-shifted-index
                       7
@@ -160,9 +161,9 @@
       [9 9 9 6 6 6 6 6 6 6]]
 
   (!.js
-   (j/map (k/arr-range 6)
+   (j/map (xtd/arr-range 6)
           (fn:> [roller-index]
-            (j/map (k/arr-range 10)
+            (j/map (xtd/arr-range 10)
                    (fn:> [input-raw]
                      (model-roller/roller-shifted-index
                       6

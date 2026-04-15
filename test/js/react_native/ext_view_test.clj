@@ -9,12 +9,13 @@
             :emit {:native {:suppress true}
                    :lang/jsx false}
             :notify {:host "test.statstrade.io"}}
-   :require [[js.core :as j]
-             [js.react :as r :include [:fn]]
-             [js.react-native :as n :include [:fn]]
-             [js.react.ext-view :as ext-view]
-             [xt.lang.event-view :as event-view]
-             [xt.lang.common-lib :as k]]
+    :require [[js.core :as j]
+              [js.react :as r :include [:fn]]
+              [js.react-native :as n :include [:fn]]
+              [js.react.ext-view :as ext-view]
+              [xt.lang.event-view :as event-view]
+              [xt.lang.common-data :as xtd]
+              [xt.lang.common-lib :as k]]
    })
 
 ^{:refer js.react.ext-view/listenView :adopt true :added "4.0" :unchecked true}
@@ -31,7 +32,7 @@
                  {:type type
                   :result output
                   :count (getCount)
-                  :view  (k/obj-pick view ["input" "output"])})}]))
+                  :view  (xtd/obj-pick view ["input" "output"])})}]))
   
   (defn.js ListenViewDemo
     []
@@ -65,9 +66,13 @@
         {:data ["input" "output" "pending" "elapsed" "disabled" "success"]
          :value type
          :setValue setType}]] 
-[:% -/ListenViewPane
-       #{view type
-         {:key type}}]))))
+ [:% n/TextDisplay
+        {:key type
+         :content (n/format-entry
+                   {:type type
+                    :result (ext-view/listenView view type {})
+                    :count ((r/useGetCount))
+                    :view  (xtd/obj-pick view ["input" "output"])})}]))))
 
 
 ^{:refer js.react.ext-view/listenViewOutput :adopt true :added "4.0" :unchecked true}
@@ -85,7 +90,7 @@
                  {:types types
                   :result output
                   :count (getCount)
-                  :view  (k/obj-pick view ["input" "output"])})}]))
+                  :view  (xtd/obj-pick view ["input" "output"])})}]))
   
   (defn.js ListenViewOutputDemo
     []
@@ -119,9 +124,13 @@
         {:data ["input" "output" "pending" "elapsed" "disabled"]
          :values types
          :setValues setTypes}]] 
-[:% -/ListenViewOutputPane
-       #{view types
-         {:key types}}]))))
+ [:% n/TextDisplay
+        {:key types
+         :content (n/format-entry
+                   {:types types
+                    :result (ext-view/listenViewOutput view types {})
+                    :count ((r/useGetCount))
+                    :view  (xtd/obj-pick view ["input" "output"])})}]))))
 
 
 ^{:refer js.react.ext-view/listenViewOutput.MULTI :adopt true :added "4.0" :unchecked true}
@@ -145,7 +154,7 @@
                            :remote remoteOutput
                            :sync syncOutput}
                   :count (getCount)
-                  :view  (k/obj-pick view ["input" "output" "sync" "remote"])})}]))
+                  :view  (xtd/obj-pick view ["input" "output" "sync" "remote"])})}]))
   
   (defn.js ListenViewOutputMultiDemo
     []
@@ -201,9 +210,15 @@
         {:data ["input" "output" "pending" "elapsed" "disabled"]
          :values types
          :setValues setTypes}]] 
-[:% -/ListenViewOutputMultiPane
-       #{view types
-         {:key types}}])))
+ [:% n/TextDisplay
+        {:key types
+         :content (n/format-entry
+                   {:types types
+                    :result {:main   (ext-view/listenViewOutput view types {})
+                             :remote (ext-view/listenViewOutput view types {} "remote")
+                             :sync   (ext-view/listenViewOutput view types {} "sync")}
+                    :count ((r/useGetCount))
+                    :view  (xtd/obj-pick view ["input" "output" "sync" "remote"])})}])))
   
   )
 

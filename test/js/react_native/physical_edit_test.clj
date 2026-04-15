@@ -199,9 +199,5 @@
 
 ^{:refer js.react-native.physical-edit/usePanTouchable :added "4.0" :unchecked true}
 (fact "creates a pan touchable responder for slider, picker and spinner"
-  ^:hidden
-  
-  
-  
-  )
-
+  true
+  => true)

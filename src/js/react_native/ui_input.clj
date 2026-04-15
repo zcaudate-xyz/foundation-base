@@ -63,8 +63,8 @@
          containerProps)
         :transformations fgTransformFn
         :onChangeText (fn [v]
-                        (return (j/map (k/arrayify onChangeText)
-                                      (fn:> [f] (f v)))))
+                        (return (j/map (j/arrayify onChangeText)
+                                       (fn:> [f] (f v)))))
         :size  "sm"
         :style [{:flex 1}
                 (:.. fgStyleStatic)

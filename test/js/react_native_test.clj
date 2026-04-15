@@ -9,21 +9,23 @@
             :emit {:native {:suppress true}
                    :lang/jsx false}
             :notify {:host "test.statstrade.io"}}
-   :require [[js.core :as j]
-             [js.react :as r]
-             [js.react-native :as n :include [:fn]]
-             [xt.lang.common-lib :as k]]
-   })
+    :require [[js.core :as j]
+              [js.react :as r]
+              [js.react-native :as n :include [:fn]]
+              [xt.lang.common-spec :as xt]
+              [xt.lang.common-lib :as k]
+              [xt.lang.common-data :as xtd]]
+    })
 
 (defn.js nest-tree
   [obj prefix]
-  (return (k/walk obj
+  (return (xtd/tree-walk obj
                   k/identity
                   (fn [x]
                     (when  (k/obj? x)
                       (var out {})
-                      (k/for:object [[k v] x]
-                        (k/set-key out (+ prefix k) v))
+                      (xt/for:object [[k v] x]
+                        (xt/x:set-key out (+ prefix k) v))
                       (return out))
                     (return x)))))
 

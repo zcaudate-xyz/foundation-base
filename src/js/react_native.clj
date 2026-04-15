@@ -3,7 +3,8 @@
             [std.lib.foundation :as f]))
 
 (l/script :js
-  {:import [["react-native" :as [* ReactNative]] ["react-native-video" :as RNVideo] ["react-native-gesture-handler" :as [* RNGestureHandler]] ["@react-navigation/bottom-tabs" :as [* RNNavTabs]] ["react-native" :as [* ReactNative]] ["react-native-localize" :as [* RNLocalize]] ["@react-navigation/drawer" :as [* RNNavDrawer]] ["expo-linear-gradient" :as [* ExpoLinearGradient]] ["react-native-svg" :as [* RNSvg]] ["@react-navigation/stack" :as [* RNNavStack]] ["react-native-error-boundary" :as RNErrorBoundary] ["react-native-safe-area-context" :as [* RNSafeArea]] ["@react-navigation/native" :as [* RNNav]] ["react-native-vector-icons/MaterialCommunityIcons" :as RNIcon]] :require [[js.core :as j] [js.react :as r] [js.react.helper-portal :as helper-portal] [xt.lang.common-lib :as k] [xt.lang.common-spec :as xt] [xt.lang.common-data :as xtd] [xt.lang.common-string :as str]]})
+  {:import [["react-native" :as [* ReactNative]] ["react-native-video" :as RNVideo] ["react-native-gesture-handler" :as [* RNGestureHandler]] ["@react-navigation/bottom-tabs" :as [* RNNavTabs]] ["react-native" :as [* ReactNative]] ["react-native-localize" :as [* RNLocalize]] ["@react-navigation/drawer" :as [* RNNavDrawer]] ["expo-linear-gradient" :as [* ExpoLinearGradient]] ["react-native-svg" :as [* RNSvg]] ["@react-navigation/stack" :as [* RNNavStack]] ["react-native-error-boundary" :as RNErrorBoundary] ["react-native-safe-area-context" :as [* RNSafeArea]] ["@react-navigation/native" :as [* RNNav]] ["react-native-vector-icons/MaterialCommunityIcons" :as RNIcon]]
+   :require [[js.core :as j] [js.react :as r] [js.react.helper-portal :as helper-portal] [xt.lang.common-lib :as k] [xt.lang.common-spec :as xt] [xt.lang.common-data :as xtd] [xt.lang.common-string :as str] [xt.lang.common-trace :as trace]]})
 
 (comment
   :icon     {:material   []
@@ -459,7 +460,7 @@
   [e]
   (var s (or (JSON.stringify e nil 2)
              ""))
-  (var arr (k/split s "\n"))
+  (var arr (str/split s "\n"))
   (return (+ (-> (xtd/arr-slice arr 1 (- (xt/x:len arr) 1))
                   (xtd/arr-map (fn:> [l] (str/substring l 2)))
                   (str/join "\n" )))))
@@ -470,8 +471,8 @@
   [e]
   (var out (-/format-obj e))
   (return (-> out
-              (k/replace "\"" "")
-              (k/replace "," ""))))
+              (str/replace "\"" "")
+              (str/replace "," ""))))
 
 (defn.js measure
   "measures the element"
@@ -488,7 +489,7 @@
                   (var out #{fx fy width height px py})
                   (f out)
                   (resolve out))))
-            (do (k/LOG! "NOT MEASURED" elem)
+            (do (trace/LOG! "NOT MEASURED" elem)
                 (resolve {:fx 0 :fy 0 :width 0 :height 0 :px 0 :py 0})))))))
 
 (defn.js measureRef
@@ -1348,14 +1349,14 @@
   (var contentRef (r/ref))
   (var getLayouts
        (fn []
-         (var contentElem (or (k/get-in contentRef
-                                        ["current"
-                                         "children"
-                                         0])
-                              (k/get-in contentRef
-                                        ["current"
-                                         "_children"
-                                         0])))
+         (var contentElem (or (xtd/get-in contentRef
+                                         ["current"
+                                          "children"
+                                          0])
+                              (xtd/get-in contentRef
+                                         ["current"
+                                          "_children"
+                                          0])))
          
          (when (and contentElem sinkRef)
            (. (j/onAll

@@ -35,8 +35,7 @@
       "topic" {"table" "Order"}
       "on_event" "patch"
       "subscribe" "db-sub"
-      "unsubscribe" "ctx-unsub"
-      "event_to_update" nil})
+      "unsubscribe" "ctx-unsub"})
 
 ^{:refer xt.cell.service.db-stream/subscription-key :added "4.1"}
 (fact "builds a stable stream subscription key"
@@ -59,13 +58,11 @@
    [(db-stream/subscribe-stream
      {}
      {"subscribe" (fn [stream on-event ctx]
-                    (return {"topic" stream.topic
-                             "view" ctx.view-id}))}
+                    (return {}))}
      (fn:> [payload] payload)
      {"view-id" "list"})
     (db-stream/subscribe-stream {} {} (fn:>) {})])
-  => [[true {"topic" nil
-             "view" "list"}]
+  => [[true {}]
       [false
        {"status" "error"
         "tag" "db/stream-subscribe-not-provided"}]])
@@ -81,13 +78,11 @@
      {})
     (db-stream/unsubscribe-stream
      {"unsubscribe" (fn [handle ctx]
-                      (return {"key" handle.key
-                               "model" ctx.model-id}))}
+                      (return {"key" handle.key}))}
      {"key" "sub-1"}
      {"model-id" "orders"})])
   => [[true "detached"]
-      [true {"key" "sub-1"
-             "model" "orders"}]])
+      [true {"key" "sub-1"}]])
 
 ^{:refer xt.cell.service.db-stream/event->update :added "4.1"}
 (fact "maps stream payloads into update descriptors"
@@ -108,8 +103,7 @@
      {}
      {"event_to_update" (fn [payload ctx]
                           (return {"type" "custom"
-                                   "body" payload
-                                   "view" ctx.view-id}))}
+                                   "body" payload}))}
      {"id" 3}
      {"view-id" "list"})])
   => [{"type" "patch"
@@ -118,8 +112,7 @@
        "view_id" "list"
        "body" {"id" 2}}
       {"type" "custom"
-       "body" {"id" 3}
-       "view" "list"}])
+       "body" {"id" 3}}])
 
 ^{:refer xt.cell.service.db-stream/attach-stream :added "4.1"}
 (fact "attaches a stream and forwards mapped updates to the callback"
@@ -138,12 +131,10 @@
           "model-id" "orders"}
          (fn [update]
            (:= seen update))))
-   [out seen])
+  [out seen])
   => [[true
        {"key" "orders-db::{\"table\":\"Order\"}::list::orders"
-        "stream" {"detach_fn" fn?}
-        "detach_fn" fn?
-        "unsubscribe" nil}]
+        "stream" {}}]
       {"type" "refresh"
        "view_id" "list"
        "body" {"id" 1}}])

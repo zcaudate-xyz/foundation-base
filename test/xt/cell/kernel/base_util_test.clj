@@ -16,10 +16,8 @@
   ^:hidden
 
   (!.js
-   (var out (base-util/rand-id "id-" 4))
-   [(. out ["startsWith"] "id-")
-    (k/len out)])
-  => [true 7])
+   (k/len (base-util/rand-id "id-" 4)))
+  => 7)
 
 ^{:refer xt.cell.kernel.base-util/check-event :added "4.1"}
 (fact "supports nil, literal, boolean, and functional event predicates"
@@ -43,9 +41,20 @@
   ^:hidden
 
   (!.js
-   (base-util/arg-encode
-    {"f" (fn [x] (return (+ x 1)))}))
-  => {"f" ["fn" string?]})
+   (k/first
+    (k/get-key
+     (base-util/arg-encode
+      {"f" (fn [x] (return (+ x 1)))})
+     "f")))
+  => "fn"
+
+  (!.js
+   (k/second
+    (k/get-key
+     (base-util/arg-encode
+      {"f" (fn [x] (return (+ x 1)))})
+     "f")))
+  => string?)
 
 ^{:refer xt.cell.kernel.base-util/arg-decode :added "4.1"}
 (fact "decodes encoded functions back into callable values"

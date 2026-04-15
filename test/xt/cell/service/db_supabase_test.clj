@@ -77,11 +77,10 @@
   ^:hidden
 
   (!.js
-   [(db-supabase/execute-query {} ["User"] {})
+   [(db-supabase/execute-query {} ["User" ["id"]] {})
     (db-supabase/execute-query
      {"execute" (fn [compiled ctx]
-                  (return [true {"compiled" compiled
-                                 "view" ctx.view-id}]))}
+                  (return [true {"compiled" compiled}]))}
      ["User" ["id"]]
      {"view-id" "list"})])
   => [[false
@@ -93,30 +92,27 @@
       [true
        {"compiled" {"table" "User"
                     "select" "id"
-                    "filters" []}
-        "view" "list"}]])
+                    "filters" []}}]])
 
 ^{:refer xt.cell.service.db-supabase/map-supabase-error :added "4.1"}
 (fact "maps Supabase execution errors into the local contract"
   ^:hidden
 
   (!.js
-   [(db-supabase/map-supabase-error {} {"message" "boom"} {})
-    (db-supabase/map-supabase-error
-     {"map_error" (fn [error ctx]
-                    (return {"status" "error"
-                             "tag" "custom/supabase"
-                             "data" {"view" ctx.view-id
-                                     "error" error}}))}
-     {"message" "boom"}
-     {"view-id" "list"})])
+    [(db-supabase/map-supabase-error {} {"message" "boom"} {})
+     (db-supabase/map-supabase-error
+      {"map_error" (fn [error ctx]
+                     (return {"status" "error"
+                              "tag" "custom/supabase"
+                              "data" {"error" error}}))}
+      {"message" "boom"}
+      {"view-id" "list"})])
   => [{"status" "error"
        "tag" "db/supabase-query-failed"
        "data" {"message" "boom"}}
       {"status" "error"
        "tag" "custom/supabase"
-       "data" {"view" "list"
-               "error" {"message" "boom"}}}])
+       "data" {"error" {"message" "boom"}}}])
 
 ^{:refer xt.cell.service.db-supabase/run-supabase-query :added "4.1"}
 (fact "returns query preparation errors before execution"
@@ -127,7 +123,7 @@
     {"schema" {}
      "views" {"User" {"select" {} "return" {}}}}
     {"table" "User"
-     "select-method" "missing"}
+     "select_method" "missing"}
     {}))
   => [false
       {"status" "error"

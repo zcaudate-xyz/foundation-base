@@ -9,8 +9,9 @@
                    :lang/jsx false}
             :notify {:host "test.statstrade.io"}}
    :require [[js.core :as j]
-             [js.react-native :as n]
-             [xt.lang.common-lib :as k]]})
+              [js.react-native :as n]
+              [xt.lang.common-data :as xtd]
+              [xt.lang.common-lib :as k]]})
 
 (defn.js tagBase
   "base for tag single and tag all"
@@ -53,7 +54,6 @@
                      :transformations
                      (fn [m]
                        (var display (:? keys
-                                        (k/obj-pick m keys)
+                                        (xtd/obj-pick m keys)
                                         m))
                        (return {:value (n/format-entry display)}))})))
-

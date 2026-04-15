@@ -1,6 +1,7 @@
 (ns xt.lang.common-spec-test
   (:require [clojure.set :as set]
             [std.lang :as l]
+            [std.lang.model.spec-lua :as lua]
             [xt.lang.common-notify :as notify])
   (:use code.test))
 
@@ -647,6 +648,14 @@
        sort
        vec))
 
+(defn- emit-lua-form
+  [form]
+  (l/emit-as :lua [(list 'fn [] form)]))
+
+(defn- emits-lua?
+  [form pattern]
+  (boolean (re-find pattern (emit-lua-form form))))
+
 ;; Macro Smoke Coverage
 
 (fact "keeps source macros and public wrappers in sync"
@@ -690,370 +699,672 @@
 
 
 ^{:refer xt.lang.common-spec/for:iter :added "4.1"}
-(fact "TODO")
+(fact "expands to the canonical iterator form"
+  (!.lua
+    (var out [])
+    (xt/for:iter [e (xt/x:iter-from-arr [1 2 3])]
+      (xt/x:arr-push out e))
+    out)
+  => [1 2 3])
 
 ^{:refer xt.lang.common-spec/for:try :added "4.1"}
-(fact "TODO")
+(fact "expands to the canonical try form"
+  (emits-lua? '(for:try [[ok err] (call (x:callback))]
+                {:success (return ok)
+                 :error   (return err)})
+              #"pcall")
+  => true)
 
 ^{:refer xt.lang.common-spec/for:async :added "4.1"}
-(fact "TODO")
+(fact "expands to the canonical async form"
+  (emits-lua? '(for:async [[ok err] (call (x:callback))]
+                  {:success (return ok)
+                   :error   (return err)
+                   :finally (return true)})
+              #"ngx\.thread\.spawn")
+  => true)
 
 ^{:refer xt.lang.common-spec/x:del :added "4.1"}
-(fact "TODO")
+(fact "expands and emits a lua delete form"
+  (!.lua
+    (var out {:a 1 :b 2})
+    (xt/x:del (. out ["a"]))
+    out)
+  => {"b" 2})
 
 ^{:refer xt.lang.common-spec/x:err :added "4.1"}
-(fact "TODO")
+(fact "expands and emits a lua error form"
+  (emits-lua? '(x:err "boom") #"error")
+  => true)
 
 ^{:refer xt.lang.common-spec/x:type-native :added "4.1"}
-(fact "TODO")
+(fact "expands and emits the lua type helper"
+  (emits-lua? '(x:type-native obj) #"type")
+  => true)
 
 ^{:refer xt.lang.common-spec/x:offset :added "4.1"}
-(fact "TODO")
+(fact "uses the grammar base offset"
+  (!.lua
+    (xt/x:offset 10))
+  => 11)
 
 ^{:refer xt.lang.common-spec/x:offset-rev :added "4.1"}
-(fact "TODO")
+(fact "uses the reverse grammar offset"
+  (!.lua
+    (xt/x:offset-rev 10))
+  => 10)
 
 ^{:refer xt.lang.common-spec/x:offset-len :added "4.1"}
-(fact "TODO")
+(fact "uses the length grammar offset"
+  (!.lua
+    (xt/x:offset-len 10))
+  => 10)
 
 ^{:refer xt.lang.common-spec/x:offset-rlen :added "4.1"}
-(fact "TODO")
+(fact "uses the reverse length grammar offset"
+  (!.lua
+    (xt/x:offset-rlen 10))
+  => 9)
 
 ^{:refer xt.lang.common-spec/x:lu-create :added "4.1"}
-(fact "TODO")
+(fact "creates a lookup table wrapper"
+  (!.lua
+    (var lu (xt/x:lu-create))
+    (xt/x:lu-set lu "k" 1)
+    (xt/x:lu-get lu "k"))
+  => 1)
 
 ^{:refer xt.lang.common-spec/x:lu-eq :added "4.1"}
-(fact "TODO")
+(fact "compares lookup keys using lua identity"
+  (!.lua
+    (var obj {:id 1})
+    (xt/x:lu-eq obj obj))
+  => true)
 
 ^{:refer xt.lang.common-spec/x:lu-get :added "4.1"}
-(fact "TODO")
+(fact "reads values from a lookup table"
+  (!.lua
+    (var lu (xt/x:lu-create))
+    (var obj {:id 1})
+    (xt/x:lu-set lu obj "value")
+    (xt/x:lu-get lu obj))
+  => "value")
 
 ^{:refer xt.lang.common-spec/x:lu-set :added "4.1"}
-(fact "TODO")
+(fact "writes values into a lookup table"
+  (!.lua
+    (var lu (xt/x:lu-create))
+    (var obj {:id 1})
+    (xt/x:lu-set lu obj "value")
+    (xt/x:lu-get lu obj))
+  => "value")
 
 ^{:refer xt.lang.common-spec/x:lu-del :added "4.1"}
-(fact "TODO")
+(fact "removes values from a lookup table"
+  (!.lua
+    (var lu (xt/x:lu-create))
+    (var obj {:id 1})
+    (xt/x:lu-set lu obj "value")
+    (xt/x:lu-del lu obj)
+    (xt/x:lu-get lu obj))
+  => nil)
 
 ^{:refer xt.lang.common-spec/x:m-abs :added "4.1"}
-(fact "TODO")
+(fact "computes absolute values"
+  (!.lua (xt/x:m-abs -3))
+  => 3)
 
 ^{:refer xt.lang.common-spec/x:m-acos :added "4.1"}
-(fact "TODO")
+(fact "computes inverse cosine"
+  (!.lua (xt/x:m-acos 1))
+  => 0)
 
 ^{:refer xt.lang.common-spec/x:m-asin :added "4.1"}
-(fact "TODO")
+(fact "computes inverse sine"
+  (!.lua (xt/x:m-asin 0))
+  => 0)
 
 ^{:refer xt.lang.common-spec/x:m-atan :added "4.1"}
-(fact "TODO")
+(fact "computes inverse tangent"
+  (!.lua (xt/x:m-atan 0))
+  => 0)
 
 ^{:refer xt.lang.common-spec/x:m-ceil :added "4.1"}
-(fact "TODO")
+(fact "rounds numbers upward"
+  (!.lua (xt/x:m-ceil 1.2))
+  => 2)
 
 ^{:refer xt.lang.common-spec/x:m-cos :added "4.1"}
-(fact "TODO")
+(fact "computes cosine"
+  (!.lua (xt/x:m-cos 0))
+  => 1)
 
 ^{:refer xt.lang.common-spec/x:m-cosh :added "4.1"}
-(fact "TODO")
+(fact "computes hyperbolic cosine"
+  (!.lua (xt/x:m-cosh 0))
+  => 1)
 
 ^{:refer xt.lang.common-spec/x:m-exp :added "4.1"}
-(fact "TODO")
+(fact "computes the exponential function"
+  (!.lua (xt/x:m-exp 0))
+  => 1)
 
 ^{:refer xt.lang.common-spec/x:m-floor :added "4.1"}
-(fact "TODO")
+(fact "rounds numbers downward"
+  (!.lua (xt/x:m-floor 1.8))
+  => 1)
 
 ^{:refer xt.lang.common-spec/x:m-loge :added "4.1"}
-(fact "TODO")
+(fact "computes the natural logarithm"
+  (!.lua (xt/x:m-loge 1))
+  => 0)
 
 ^{:refer xt.lang.common-spec/x:m-log10 :added "4.1"}
-(fact "TODO")
+(fact "computes the base-10 logarithm"
+  (!.lua (xt/x:m-log10 100))
+  => 2)
 
 ^{:refer xt.lang.common-spec/x:m-max :added "4.1"}
-(fact "TODO")
+(fact "computes the maximum value"
+  (!.lua (xt/x:m-max 3 5))
+  => 5)
 
 ^{:refer xt.lang.common-spec/x:m-mod :added "4.1"}
-(fact "TODO")
+(fact "computes modulo values"
+  (!.lua (xt/x:m-mod 10 3))
+  => 1)
 
 ^{:refer xt.lang.common-spec/x:m-min :added "4.1"}
-(fact "TODO")
+(fact "computes the minimum value"
+  (!.lua (xt/x:m-min 3 5))
+  => 3)
 
 ^{:refer xt.lang.common-spec/x:m-pow :added "4.1"}
-(fact "TODO")
+(fact "raises numbers to a power"
+  (!.lua (xt/x:m-pow 2 4))
+  => 16)
 
 ^{:refer xt.lang.common-spec/x:m-quot :added "4.1"}
-(fact "TODO")
+(fact "computes integer quotients"
+  (!.lua (xt/x:m-quot 7 2))
+  => 3)
 
 ^{:refer xt.lang.common-spec/x:m-sin :added "4.1"}
-(fact "TODO")
+(fact "computes sine"
+  (!.lua (xt/x:m-sin 0))
+  => 0)
 
 ^{:refer xt.lang.common-spec/x:m-sinh :added "4.1"}
-(fact "TODO")
+(fact "computes hyperbolic sine"
+  (!.lua (xt/x:m-sinh 0))
+  => 0)
 
 ^{:refer xt.lang.common-spec/x:m-sqrt :added "4.1"}
-(fact "TODO")
+(fact "computes square roots"
+  (!.lua (xt/x:m-sqrt 9))
+  => 3)
 
 ^{:refer xt.lang.common-spec/x:m-tan :added "4.1"}
-(fact "TODO")
+(fact "computes tangent"
+  (!.lua (xt/x:m-tan 0))
+  => 0)
 
 ^{:refer xt.lang.common-spec/x:m-tanh :added "4.1"}
-(fact "TODO")
+(fact "computes hyperbolic tangent"
+  (!.lua (xt/x:m-tanh 0))
+  => 0)
 
 ^{:refer xt.lang.common-spec/x:del-key :added "4.1"}
-(fact "TODO")
+(fact "deletes keys from objects"
+  (!.lua
+    (var out {:a 1 :b 2})
+    (xt/x:del-key out "a")
+    out)
+  => {"b" 2})
 
 ^{:refer xt.lang.common-spec/x:print :added "4.1"}
-(fact "TODO")
+(fact "expands and emits a lua print form"
+  (!.lua
+    (xt/x:nil? (xt/x:print "hello")))
+  => true)
 
 ^{:refer xt.lang.common-spec/x:str-comp :added "4.1"}
-(fact "TODO")
+(fact "compares strings by sort order"
+  (!.lua (xt/x:str-comp "abc" "abd"))
+  => true)
 
 ^{:refer xt.lang.common-spec/x:str-lt :added "4.1"}
-(fact "TODO")
+(fact "checks whether one string sorts before another"
+  (!.lua (xt/x:str-lt "abc" "abd"))
+  => true)
 
 ^{:refer xt.lang.common-spec/x:str-gt :added "4.1"}
-(fact "TODO")
+(fact "checks whether one string sorts after another"
+  (!.lua (xt/x:str-gt "abd" "abc"))
+  => true)
 
 ^{:refer xt.lang.common-spec/x:str-format :added "4.1"}
-(fact "TODO")
+(fact "keeps the string format wrapper intact"
+  (:arglists (meta #'xt/x:str-format))
+  => '([template values]))
 
 ^{:refer xt.lang.common-spec/x:str-replace :added "4.1"}
-(fact "TODO")
+(fact "replaces matching substrings"
+  (!.lua (xt/x:str-replace "hello-world" "-" "/"))
+  => "hello/world")
 
 ^{:refer xt.lang.common-spec/x:str-trim :added "4.1"}
-(fact "TODO")
+(fact "trims whitespace from both sides"
+  (!.lua (xt/x:str-trim "  hello  "))
+  => "hello")
 
 ^{:refer xt.lang.common-spec/x:str-trim-left :added "4.1"}
-(fact "TODO")
+(fact "trims whitespace from the left side"
+  (!.lua (xt/x:str-trim-left "  hello"))
+  => "hello")
 
 ^{:refer xt.lang.common-spec/x:str-trim-right :added "4.1"}
-(fact "TODO")
+(fact "trims whitespace from the right side"
+  (!.lua (xt/x:str-trim-right "hello  "))
+  => "hello")
 
 ^{:refer xt.lang.common-spec/x:arr-sort :added "4.1"}
-(fact "TODO")
+(fact "sorts arrays using key and compare functions"
+  (!.lua
+    (var out [{:id 3} {:id 1} {:id 2}])
+    (xt/x:arr-sort out
+                   (fn [e] (return (xt/x:get-key e "id")))
+                   (fn [a b] (return (xt/x:lt a b))))
+    out)
+  => [{"id" 1} {"id" 2} {"id" 3}])
 
 ^{:refer xt.lang.common-spec/x:arr-every :added "4.1"}
-(fact "TODO")
+(fact "checks whether every array element matches a predicate"
+  (!.lua
+    (xt/x:arr-every [2 4 6]
+                    (fn [e] (return (xt/x:even? e)))))
+  => true)
 
 ^{:refer xt.lang.common-spec/x:arr-some :added "4.1"}
-(fact "TODO")
+(fact "checks whether any array element matches a predicate"
+  (!.lua
+    (xt/x:arr-some [1 3 4]
+                   (fn [e] (return (xt/x:even? e)))))
+  => true)
 
 ^{:refer xt.lang.common-spec/x:arr-foldl :added "4.1"}
-(fact "TODO")
+(fact "folds arrays from the left"
+  (!.lua
+    (xt/x:arr-foldl [1 2 3]
+                    (fn [out e] (return (+ out e)))
+                    0))
+  => 6)
 
 ^{:refer xt.lang.common-spec/x:arr-foldr :added "4.1"}
-(fact "TODO")
+(fact "folds arrays from the right"
+  (!.lua
+    (xt/x:arr-foldr [1 2 3]
+                    (fn [out e] (return (+ (* 10 out) e)))
+                    0))
+  => 321)
 
 ^{:refer xt.lang.common-spec/x:arr-find :added "4.1"}
-(fact "TODO")
+(fact "keeps the find wrapper pointed at the canonical op"
+  (:arglists (meta #'xt/x:arr-find))
+  => '([arr pred]))
 
 ^{:refer xt.lang.common-spec/x:future-run :added "4.1"}
-(fact "TODO")
+(fact "expands and emits a lua future runner"
+  (emits-lua? '(x:future-run thunk) #"state")
+  => true)
 
 ^{:refer xt.lang.common-spec/x:future-then :added "4.1"}
-(fact "TODO")
+(fact "expands and emits a lua future continuation"
+  (emits-lua? '(x:future-then task on-ok) #"pcall")
+  => true)
 
 ^{:refer xt.lang.common-spec/x:future-catch :added "4.1"}
-(fact "TODO")
+(fact "expands and emits a lua future error handler"
+  (emits-lua? '(x:future-catch task on-err) #"pcall")
+  => true)
 
 ^{:refer xt.lang.common-spec/x:future-finally :added "4.1"}
-(fact "TODO")
+(fact "expands and emits a lua future finalizer"
+  (emits-lua? '(x:future-finally task on-done) #"return")
+  => true)
 
 ^{:refer xt.lang.common-spec/x:future-cancel :added "4.1"}
-(fact "TODO")
+(fact "expands and emits a lua future cancellation"
+  (emits-lua? '(x:future-cancel task) #"cancelled")
+  => true)
 
 ^{:refer xt.lang.common-spec/x:future-status :added "4.1"}
-(fact "TODO")
+(fact "expands and emits a lua future status lookup"
+  (emits-lua? '(x:future-status task) #"state")
+  => true)
 
 ^{:refer xt.lang.common-spec/x:future-await :added "4.1"}
-(fact "TODO")
+(fact "expands and emits a lua future await"
+  (emits-lua? '(x:future-await task 1000 default) #"default")
+  => true)
 
 ^{:refer xt.lang.common-spec/x:future-from-async :added "4.1"}
-(fact "TODO")
+(fact "expands and emits a lua async future bridge"
+  (emits-lua? '(x:future-from-async executor) #"executor")
+  => true)
 
 ^{:refer xt.lang.common-spec/x:eval :added "4.1"}
-(fact "TODO")
+(fact "expands and emits a lua eval form"
+  (emits-lua? '(x:eval "1 + 1") #"loadstring")
+  => true)
 
 ^{:refer xt.lang.common-spec/x:apply :added "4.1"}
-(fact "TODO")
+(fact "expands and emits a lua apply form"
+  (emits-lua? '(x:apply f args) #"unpack")
+  => true)
 
 ^{:refer xt.lang.common-spec/x:iter-from-obj :added "4.1"}
-(fact "TODO")
+(fact "expands and emits an object iterator"
+  (emits-lua? '(x:iter-from-obj obj) #"coroutine\.wrap")
+  => true)
 
 ^{:refer xt.lang.common-spec/x:iter-from-arr :added "4.1"}
-(fact "TODO")
+(fact "expands and emits an array iterator"
+  (emits-lua? '(x:iter-from-arr arr) #"coroutine\.wrap")
+  => true)
 
 ^{:refer xt.lang.common-spec/x:iter-from :added "4.1"}
-(fact "TODO")
+(fact "expands and emits a generic iterator"
+  (emits-lua? '(x:iter-from obj) #"coroutine\.wrap")
+  => true)
 
 ^{:refer xt.lang.common-spec/x:iter-eq :added "4.1"}
-(fact "TODO")
+(fact "expands and emits iterator equality checks"
+  (emits-lua? '(x:iter-eq it0 it1 eq-fn) #"for")
+  => true)
 
 ^{:refer xt.lang.common-spec/x:iter-null :added "4.1"}
-(fact "TODO")
+(fact "expands and emits an empty iterator"
+  (emits-lua? '(x:iter-null) #"coroutine\.wrap")
+  => true)
 
 ^{:refer xt.lang.common-spec/x:iter-next :added "4.1"}
-(fact "TODO")
+(fact "expands and emits an iterator advance call"
+  (emits-lua? '(x:iter-next it) #"it")
+  => true)
 
 ^{:refer xt.lang.common-spec/x:iter-has? :added "4.1"}
-(fact "TODO")
+(fact "expands and emits an iterator predicate"
+  (emits-lua? '(x:iter-has? it) #"iterator")
+  => true)
 
 ^{:refer xt.lang.common-spec/x:iter-native? :added "4.1"}
-(fact "TODO")
+(fact "expands and emits a native iterator predicate"
+  (emits-lua? '(x:iter-native? it) #"type")
+  => true)
 
 ^{:refer xt.lang.common-spec/x:return-encode :added "4.1"}
-(fact "TODO")
+(fact "expands and emits the lua return encoder"
+  (emits-lua? '(x:return-encode out "id" "key") #"cjson\.encode")
+  => true)
 
 ^{:refer xt.lang.common-spec/x:return-wrap :added "4.1"}
-(fact "TODO")
+(fact "expands and emits the lua return wrapper"
+  (emits-lua? '(x:return-wrap callback encode-fn) #"pcall")
+  => true)
 
 ^{:refer xt.lang.common-spec/x:return-eval :added "4.1"}
-(fact "TODO")
+(fact "expands and emits the lua return eval form"
+  (emits-lua? '(x:return-eval "1 + 1" wrap-fn) #"loadstring")
+  => true)
 
 ^{:refer xt.lang.common-spec/x:bit-and :added "4.1"}
-(fact "TODO")
+(fact "computes bitwise and"
+  (!.lua (xt/x:bit-and 6 3))
+  => 2)
 
 ^{:refer xt.lang.common-spec/x:bit-or :added "4.1"}
-(fact "TODO")
+(fact "computes bitwise or"
+  (!.lua (xt/x:bit-or 6 3))
+  => 7)
 
 ^{:refer xt.lang.common-spec/x:bit-lshift :added "4.1"}
-(fact "TODO")
+(fact "computes bitwise left shifts"
+  (!.lua (xt/x:bit-lshift 3 2))
+  => 12)
 
 ^{:refer xt.lang.common-spec/x:bit-rshift :added "4.1"}
-(fact "TODO")
+(fact "computes bitwise right shifts"
+  (!.lua (xt/x:bit-rshift 12 2))
+  => 3)
 
 ^{:refer xt.lang.common-spec/x:bit-xor :added "4.1"}
-(fact "TODO")
+(fact "computes bitwise xor"
+  (!.lua (xt/x:bit-xor 6 3))
+  => 5)
 
 ^{:refer xt.lang.common-spec/x:global-set :added "4.1"}
-(fact "TODO")
+(fact "writes values to the shared global map"
+  (emits-lua? '(x:global-set SYM 1) #"SYM")
+  => true)
 
 ^{:refer xt.lang.common-spec/x:global-del :added "4.1"}
-(fact "TODO")
+(fact "removes values from the shared global map"
+  (emits-lua? '(x:global-del SYM) #"nil")
+  => true)
 
 ^{:refer xt.lang.common-spec/x:global-has? :added "4.1"}
-(fact "TODO")
+(fact "checks whether the shared global map contains a value"
+  (emits-lua? '(x:global-has? SYM) #"SYM")
+  => true)
 
 ^{:refer xt.lang.common-spec/x:this :added "4.1"}
-(fact "TODO")
+(fact "expands and emits the lua self binding"
+  (emits-lua? '(x:this) #"self")
+  => true)
 
 ^{:refer xt.lang.common-spec/x:proto-get :added "4.1"}
-(fact "TODO")
+(fact "expands and emits prototype lookup"
+  (emits-lua? '(x:proto-get obj key) #"getmetatable")
+  => true)
 
 ^{:refer xt.lang.common-spec/x:proto-set :added "4.1"}
-(fact "TODO")
+(fact "expands and emits prototype assignment"
+  (emits-lua? '(x:proto-set obj proto value) #"setmetatable")
+  => true)
 
 ^{:refer xt.lang.common-spec/x:proto-create :added "4.1"}
-(fact "TODO")
+(fact "expands to a canonical prototype constructor"
+  (emits-lua? '(x:proto-create {:a 1}) #"return")
+  => true)
 
 ^{:refer xt.lang.common-spec/x:proto-tostring :added "4.1"}
-(fact "TODO")
+(fact "expands and emits the lua tostring metamethod key"
+  (:arglists (meta #'xt/x:proto-tostring))
+  => '([value]))
 
 ^{:refer xt.lang.common-spec/x:random :added "4.1"}
-(fact "TODO")
+(fact "expands and emits the lua random function"
+  (emits-lua? '(x:random) #"math\.random")
+  => true)
 
 ^{:refer xt.lang.common-spec/x:throw :added "4.1"}
-(fact "TODO")
+(fact "expands to the canonical throw form"
+  (:arglists (meta #'xt/x:throw))
+  => '([value]))
 
 ^{:refer xt.lang.common-spec/x:now-ms :added "4.1"}
-(fact "TODO")
+(fact "expands and emits a millisecond time expression"
+  (!.lua
+    (> (xt/x:now-ms) 0))
+  => true)
 
 ^{:refer xt.lang.common-spec/x:unpack :added "4.1"}
-(fact "TODO")
+(fact "expands and emits the lua unpack helper"
+  (emits-lua? '(x:unpack args) #"unpack")
+  => true)
 
 ^{:refer xt.lang.common-spec/x:client-basic :added "4.1"}
-(fact "TODO")
+(fact "expands and emits the lua basic client loop"
+  (emits-lua? '(x:client-basic "localhost" 8080 connect-fn eval-fn) #"receive")
+  => true)
 
 ^{:refer xt.lang.common-spec/x:client-ws :added "4.1"}
-(fact "TODO")
+(fact "expands and emits the lua websocket client loop"
+  (emits-lua? '(x:client-ws "localhost" 8080 {} connect-fn eval-fn) #"recv")
+  => true)
 
 ^{:refer xt.lang.common-spec/x:server-basic :added "4.1"}
-(fact "TODO")
+(fact "keeps the basic server wrapper intact"
+  (emits-lua? '(x:server-basic config) #"server")
+  => true)
 
 ^{:refer xt.lang.common-spec/x:server-ws :added "4.1"}
-(fact "TODO")
+(fact "keeps the websocket server wrapper intact"
+  (emits-lua? '(x:server-ws config) #"server")
+  => true)
 
 ^{:refer xt.lang.common-spec/x:socket-connect :added "4.1"}
-(fact "TODO")
+(fact "expands and emits a lua socket connect form"
+  (emits-lua? '(x:socket-connect "localhost" 8080 {} callback) #"connect")
+  => true)
 
 ^{:refer xt.lang.common-spec/x:socket-send :added "4.1"}
-(fact "TODO")
+(fact "expands and emits a lua socket send form"
+  (emits-lua? '(x:socket-send conn "PING") #"send")
+  => true)
 
 ^{:refer xt.lang.common-spec/x:socket-close :added "4.1"}
-(fact "TODO")
+(fact "expands and emits a lua socket close form"
+  (emits-lua? '(x:socket-close conn) #"close")
+  => true)
 
 ^{:refer xt.lang.common-spec/x:ws-connect :added "4.1"}
-(fact "TODO")
+(fact "expands and emits a lua websocket connect form"
+  (emits-lua? '(x:ws-connect "localhost" 8080 {}) #"websocket")
+  => true)
 
 ^{:refer xt.lang.common-spec/x:ws-send :added "4.1"}
-(fact "TODO")
+(fact "expands and emits a lua websocket send form"
+  (emits-lua? '(x:ws-send wb "PING") #"send")
+  => true)
 
 ^{:refer xt.lang.common-spec/x:ws-close :added "4.1"}
-(fact "TODO")
+(fact "expands and emits a lua websocket close form"
+  (emits-lua? '(x:ws-close wb) #"close")
+  => true)
 
 ^{:refer xt.lang.common-spec/x:notify-http :added "4.1"}
-(fact "TODO")
+(fact "keeps the notify-http wrapper intact"
+  (emits-lua? '(x:notify-http "localhost" 8080 value "id" "key" encode-fn) #"http")
+  => true)
 
 ^{:refer xt.lang.common-spec/x:notify-socket :added "4.1"}
-(fact "TODO")
+(fact "keeps the notify-socket wrapper intact"
+  (:arglists (meta #'xt/x:notify-socket))
+  => '([host port value id key connect-fn encode-fn]))
 
 ^{:refer xt.lang.common-spec/x:b64-encode :added "4.1"}
-(fact "TODO")
+(fact "expands and emits the lua base64 encoder"
+  (emits-lua? '(x:b64-encode "hello") #"ngx\.encode")
+  => true)
 
 ^{:refer xt.lang.common-spec/x:b64-decode :added "4.1"}
-(fact "TODO")
+(fact "expands and emits the lua base64 decoder"
+  (emits-lua? '(x:b64-decode "aGVsbG8=") #"ngx\.decode")
+  => true)
 
 ^{:refer xt.lang.common-spec/x:cache :added "4.1"}
-(fact "TODO")
+(fact "expands and emits a lua cache lookup"
+  (emits-lua? '(x:cache "GLOBAL") #"ngx\.shared")
+  => true)
 
 ^{:refer xt.lang.common-spec/x:cache-list :added "4.1"}
-(fact "TODO")
+(fact "expands and emits a lua cache key listing"
+  (emits-lua? '(x:cache-list) #"keys")
+  => true)
 
 ^{:refer xt.lang.common-spec/x:cache-flush :added "4.1"}
-(fact "TODO")
+(fact "expands and emits a lua cache flush"
+  (emits-lua? '(x:cache-flush cache) #"flush_all")
+  => true)
 
 ^{:refer xt.lang.common-spec/x:cache-get :added "4.1"}
-(fact "TODO")
+(fact "expands and emits a lua cache get"
+  (emits-lua? '(x:cache-get cache "key") #"get")
+  => true)
 
 ^{:refer xt.lang.common-spec/x:cache-set :added "4.1"}
-(fact "TODO")
+(fact "expands and emits a lua cache set"
+  (emits-lua? '(x:cache-set cache "key" "value") #"set")
+  => true)
 
 ^{:refer xt.lang.common-spec/x:cache-del :added "4.1"}
-(fact "TODO")
+(fact "expands and emits a lua cache delete"
+  (emits-lua? '(x:cache-del cache "key") #"delete")
+  => true)
 
 ^{:refer xt.lang.common-spec/x:cache-incr :added "4.1"}
-(fact "TODO")
+(fact "expands and emits a lua cache increment"
+  (emits-lua? '(x:cache-incr cache "key" 1) #"incr")
+  => true)
 
 ^{:refer xt.lang.common-spec/x:slurp :added "4.1"}
-(fact "TODO")
+(fact "keeps the slurp wrapper intact"
+  (:arglists (meta #'xt/x:slurp))
+  => '([path]))
 
 ^{:refer xt.lang.common-spec/x:spit :added "4.1"}
-(fact "TODO")
+(fact "keeps the spit wrapper intact"
+  (:arglists (meta #'xt/x:spit))
+  => '([path value]))
 
 ^{:refer xt.lang.common-spec/x:json-encode :added "4.1"}
-(fact "TODO")
+(fact "encodes lua data structures as json"
+  (!.lua (xt/x:json-encode {:a 1}))
+  => "{\"a\":1}")
 
 ^{:refer xt.lang.common-spec/x:json-decode :added "4.1"}
-(fact "TODO")
+(fact "decodes json strings into lua data structures"
+  (!.lua (xt/x:json-decode "{\"a\":1}"))
+  => {"a" 1})
 
 ^{:refer xt.lang.common-spec/x:shell :added "4.1"}
-(fact "TODO")
+(fact "expands and emits the lua shell helper"
+  (emits-lua? '(x:shell "ls" opts) #"io\.popen")
+  => true)
 
 ^{:refer xt.lang.common-spec/x:thread-spawn :added "4.1"}
-(fact "TODO")
+(fact "expands and emits a lua thread spawn"
+  (emits-lua? '(x:thread-spawn thunk) #"ngx\.thread\.spawn")
+  => true)
 
 ^{:refer xt.lang.common-spec/x:thread-join :added "4.1"}
-(fact "TODO")
+(fact "expands and emits a lua thread join"
+  (emits-lua? '(x:thread-join thread) #"ngx\.thread\.wait")
+  => true)
 
 ^{:refer xt.lang.common-spec/x:with-delay :added "4.1"}
-(fact "TODO")
+(fact "expands and emits a delayed lua computation"
+  (emits-lua? '(x:with-delay 100 value) #"sleep")
+  => true)
 
 ^{:refer xt.lang.common-spec/x:start-interval :added "4.1"}
-(fact "TODO")
+(fact "keeps the start-interval wrapper intact"
+  (:arglists (meta #'xt/x:start-interval))
+  => '([ms f]))
 
 ^{:refer xt.lang.common-spec/x:stop-interval :added "4.1"}
-(fact "TODO")
+(fact "keeps the stop-interval wrapper intact"
+  (:arglists (meta #'xt/x:stop-interval))
+  => '([id]))
 
 ^{:refer xt.lang.common-spec/x:uri-encode :added "4.1"}
-(fact "TODO")
+(fact "expands and emits the lua uri encoder"
+  (emits-lua? '(x:uri-encode "hello world") #"ngx\.escape")
+  => true)
 
 ^{:refer xt.lang.common-spec/x:uri-decode :added "4.1"}
-(fact "TODO")
+(fact "expands and emits the lua uri decoder"
+  (emits-lua? '(x:uri-decode "hello%20world") #"ngx\.unescape")
+  => true)

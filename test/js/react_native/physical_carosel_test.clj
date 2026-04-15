@@ -30,9 +30,9 @@
 
   (defn.js DigitCaroselManualDemo
     []
-    (var values  (r/const (k/arr-map (k/arr-range -/DIVISIONS)
+    (var values  (r/const (xtd/arr-map (xtd/arr-range -/DIVISIONS)
                                      (fn:> [i] (new a/Value i)))))
-    (var lu      (r/const (k/arr-juxt values
+    (var lu      (r/const (xtd/arr-juxt values
                                       (fn:> [v] (+ "index" v._value))
                                       k/identity)))
     (var [offset0 setOffset0] (r/local 0))
@@ -44,7 +44,7 @@
                                               values
                                               -/DIVISIONS
                                               offset0
-                                              (k/len -/DIGITS))))))
+                                              (xt/x:len -/DIGITS))))))
     (var modelFn (r/const (model-roller/roller-model -/DIVISIONS 10)))
     
     (return
@@ -56,7 +56,7 @@
                  :height 200
                  :backgroundColor "white"
                  :overflow "hidden"}}
-        (j/map (k/arr-range -/DIVISIONS)
+        (j/map (xtd/arr-range -/DIVISIONS)
                (fn:> [index i]
                  [:% physical-base/Box
                   {:key i

@@ -85,16 +85,16 @@
    (db-view/view-query-entries
     (@! +db+)
     "User"
-    {"select-method" "all"
-     "return-method" "detail"
-     "return-query" ["name"]}
+    {"select_method" "all"
+     "return_method" "detail"
+     "return_query" ["name"]}
     true))
-  => {"select-entry"
+  => {"select_entry"
       {"input" []
        "view" {"query" ["id" "name"]}}
-      "return-entry"
+      "return_entry"
       {"input" []
-       "view" {"query" ["id" "name"]}}})
+       "view" {"query" ["id" ["profile" ["bio"]] "name"]}}})
 
 ^{:refer xt.cell.service.db-view/view-triggers :added "4.1"}
 (fact "derives the affected tables for a query"
@@ -104,8 +104,8 @@
    (db-view/view-triggers
     (@! +db+)
     "User"
-    {"select-method" "all"
-     "return-method" "detail"}))
+    {"select_method" "all"
+     "return_method" "detail"}))
   => map?)
 
 ^{:refer xt.cell.service.db-view/view-overview :added "4.1"}

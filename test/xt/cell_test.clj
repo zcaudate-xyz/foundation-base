@@ -6,6 +6,7 @@
   {:runtime :basic
    :require [[xt.lang.common-lib :as k]
              [xt.lang.common-spec :as xt]
+             [xt.lang.common-runtime :as rt :with [defvar.js]]
              [js.core :as j]
              [xt.cell :as cell]
              [xt.cell.kernel.base-link :as base-link]
@@ -24,6 +25,10 @@
        (var worker (worker-mock/create-worker listener {} true))
        (cell/actions-init {} worker)
        (return worker))})))
+
+(defvar.js LINK
+  []
+  (return nil))
 
 ^{:refer xt.cell/SERVICE :added "4.1"}
 (fact "returns nil when the worker service registry has not been set"
@@ -123,12 +128,19 @@
 (fact "gets the worker service registry over a link transport"
   ^:hidden
 
+  (!.js
+   (-/LINK-reset (-/make-link))
+   true)
+  => true
+
   (j/<!
-   (!.js
-    (var link (-/make-link))
-    (. (cell/setup-service link {"dbs" {"local" {"kind" "cache"}}})
-       (then (fn:> [_]
-               (cell/get-service link))))))
+   (cell/setup-service
+    (-/LINK)
+    {"dbs" {"local" {"kind" "cache"}}}))
+  => {"dbs" {"local" {"kind" "cache"}}}
+
+  (j/<!
+   (cell/get-service (-/LINK)))
   => {"dbs" {"local" {"kind" "cache"}}})
 
 ^{:refer xt.cell/setup-bindings :added "4.1"}
@@ -145,10 +157,17 @@
 (fact "gets the worker bindings registry over a link transport"
   ^:hidden
 
+  (!.js
+   (-/LINK-reset (-/make-link))
+   true)
+  => true
+
   (j/<!
-   (!.js
-    (var link (-/make-link))
-    (. (cell/setup-bindings link {"orders" {"list" {}}})
-       (then (fn:> [_]
-               (cell/get-bindings link))))))
+   (cell/setup-bindings
+    (-/LINK)
+    {"orders" {"list" {}}}))
+  => {"orders" {"list" {}}}
+
+  (j/<!
+   (cell/get-bindings (-/LINK)))
   => {"orders" {"list" {}}})

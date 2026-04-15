@@ -32,9 +32,9 @@
 
   (defn.js DigitRollerManualDemo
     []
-    (var values  (r/const (k/arr-map (k/arr-range -/DIVISIONS)
+    (var values  (r/const (xtd/arr-map (xtd/arr-range -/DIVISIONS)
                                      (fn:> [i] (new a/Value i)))))
-    (var lu      (r/const (k/arr-juxt values
+    (var lu      (r/const (xtd/arr-juxt values
                                       (fn:> [v] (+ "index" v._value))
                                       k/identity)))
     (var [offset0 setOffset0] (r/local 0))
@@ -46,14 +46,14 @@
                                               values
                                               -/DIVISIONS
                                               offset0
-                                              (k/len -/DIGITS))))))
+                                              (xt/x:len -/DIGITS))))))
     (var modelFn (r/const (model-roller/roller-model -/DIVISIONS 20)))
     (r/init []
       (model-roller/roller-set-values
        values
        -/DIVISIONS
        offset0
-       (k/len -/DIGITS)))
+       (xt/x:len -/DIGITS)))
     (return
      (n/EnclosedCode 
 {:label "js.react-native.model-roller/DigitRollerManual"} 
@@ -62,7 +62,7 @@
         {:style {:height 80
                  :width 80
                  :backgroundColor "black"}}
-        (j/map (k/arr-range -/DIVISIONS)
+        (j/map (xtd/arr-range -/DIVISIONS)
                (fn:> [index i]
                  [:% physical-base/Text
                   {:key i
@@ -122,34 +122,34 @@
     (return
      {:style
       {:opacity (:? visible
-                    (k/mix -2 1 scale)
+                    (math/mix -2 1 scale)
                     0)
        :zIndex (* 10 scale)
        :transform
        [{:translateY translate}
         #_{:translateX (* 0.5 (j/abs translate))}
-        #_{:scaleX (k/mix 0.2 1 scale)}
-        #_{:scaleY (k/mix 0.2 1 scale)}]}}))
+        #_{:scaleX (math/mix 0.2 1 scale)}
+        #_{:scaleY (math/mix 0.2 1 scale)}]}}))
 
   (defn.js make-values
     [values divisions]
-    (var total (k/len values))
+    (var total (xt/x:len values))
     (var n (/ (k/lcm total divisions)
               total))
-    (return (k/arr-mapcat (k/arr-repeat values n)
+    (return (xtd/arr-mapcat (xtd/arr-repeat values n)
                           k/identity)))
   
   (defn.js get-element
     [offset index divisions values]
     (var noffset  (j/round offset))
-    (var center   (k/mod-pos noffset divisions))
+    (var center   (math/mod-pos noffset divisions))
     (var shifted     (- index center))
-    (var shifted-mod (k/mod-pos shifted divisions))
+    (var shifted-mod (math/mod-pos shifted divisions))
     (var normalised  (:? (< shifted-mod (/ divisions 2))
                          shifted-mod
                          (- shifted-mod divisions)))
-    (var total (k/len values))
-    (return (k/get-key values (k/mod-pos (+ noffset normalised)
+    (var total (xt/x:len values))
+    (return (xt/x:get-key values (math/mod-pos (+ noffset normalised)
                                          total))))
   
   (defn.js createComponent
@@ -203,7 +203,7 @@
          :style {:height 80
                  :width 80
                  :backgroundColor "black"}
-         :addons [(:.. (j/map (k/arr-range -/DIVISIONS)
+         :addons [(:.. (j/map (xtd/arr-range -/DIVISIONS)
                               (fn:> [index]
                                 (-/createComponent index
                                                    "offset1"
@@ -213,7 +213,7 @@
                                                     :left 18}
                                                    -/DIVISIONS
                                                    HOURS_ARRAY))))
-                  (:.. (j/map (k/arr-range -/DIVISIONS)
+                  (:.. (j/map (xtd/arr-range -/DIVISIONS)
                               (fn:> [index]
                                 (-/createComponent index
                                                    "offset0"

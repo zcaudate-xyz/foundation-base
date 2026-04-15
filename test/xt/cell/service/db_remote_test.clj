@@ -49,9 +49,6 @@
   => {"target" "db-target"
       "op" "query"
       "body" ["select"]
-      "dispatch" nil
-      "decode" nil
-      "map_error" nil
       "view_id" "list"
       "model_id" "orders"})
 
@@ -63,12 +60,10 @@
    [(db-remote/dispatch-request
      {}
      {"dispatch" (fn [request ctx]
-                   (return [true {"op" request.op
-                                  "model" ctx.model-id}]))}
+                   (return [true {}]))}
      {"model-id" "orders"})
     (db-remote/dispatch-request {} {} {})])
-  => [[true {"op" nil
-             "model" "orders"}]
+  => [[true {}]
       [false
        {"status" "error"
         "tag" "db/remote-dispatch-not-provided"}]])
@@ -81,13 +76,11 @@
    (db-remote/decode-response
     {}
     {"decode" (fn [response ctx]
-                (return {"decoded" response.body
-                         "view" ctx.view-id}))}
+                (return {"decoded" response.body}))}
     {"body" {"rows" [1 2 3]}}
     {"view-id" "list"}))
   => [true
-      {"decoded" {"rows" [1 2 3]}
-       "view" "list"}])
+      {"decoded" {"rows" [1 2 3]}}])
 
 ^{:refer xt.cell.service.db-remote/map-remote-error :added "4.1"}
 (fact "maps remote errors into the local contract"
@@ -99,8 +92,7 @@
      {"map_error" (fn [error ctx]
                     (return {"status" "error"
                              "tag" "custom/remote"
-                             "data" {"view" ctx.view-id
-                                     "error" error}}))}
+                             "data" {"error" error}}))}
      {"message" "boom"}
      {"view-id" "list"})])
   => [{"status" "error"
@@ -108,8 +100,7 @@
        "data" {"message" "boom"}}
       {"status" "error"
        "tag" "custom/remote"
-       "data" {"view" "list"
-               "error" {"message" "boom"}}}])
+       "data" {"error" {"message" "boom"}}}])
 
 ^{:refer xt.cell.service.db-remote/run-remote-query :added "4.1"}
 (fact "returns query preparation errors before dispatch"
@@ -121,7 +112,7 @@
      "views" {"Order" {"select" {} "return" {}}}}
     {}
     {"table" "Order"
-     "select-method" "missing"}
+     "select_method" "missing"}
     {}))
   => [false
       {"status" "error"

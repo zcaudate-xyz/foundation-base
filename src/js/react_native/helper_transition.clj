@@ -3,6 +3,7 @@
 
 (l/script :js
   {:require [[xt.lang.common-lib :as k]
+             [xt.lang.common-math :as math]
              [js.react-native.model-context :as model-context]]})
 
 (def.js DefaultTransitions
@@ -69,14 +70,14 @@
                       margin
                       height
                       width}))
-  (var opacity (k/mix (or (. effect fade) 0) 1 visible))
+  (var opacity (math/mix (or (. effect fade) 0) 1 visible))
   (var style {:opacity   (* opacity opacity)
               :transform [(:.. (:? translateKey
                                    [{translateKey (* (- 1 visible)
                                                      magnitude)}]
                                    []))
                           (:.. (:? (. effect zoom)
-                                   [{:scale (k/mix (. effect zoom) 1 visible)}]
+                                   [{:scale (math/mix (. effect zoom) 1 visible)}]
                                    []))]})
   (return {:style style}))
 
@@ -92,13 +93,12 @@
       xOffset
       yOffset]}
    visible]
-  (var style {:opacity  (k/mix (or (. effect fade) 0) 1 visible)
+  (var style {:opacity  (math/mix (or (. effect fade) 0) 1 visible)
               :transform [{:translateX (* (- 1 visible)
                                           xOffset)}
                           {:translateY (* (- 1 visible)
                                           yOffset)}
                           (:.. (:? (. effect zoom)
-                                   [{:scale (k/mix (. effect zoom) 1 visible)}]
+                                    [{:scale (math/mix (. effect zoom) 1 visible)}]
                                    []))]})
   (return {:style style}))
-

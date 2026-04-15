@@ -28,27 +28,27 @@
                          :onPanResponderGrant
                          (fn []
                            (when (not (r/curr disabledRef))
-                             (k/for:object [[dk ind] pan]
-                               (a/setOffset ind ind._value))))
+                              (xt/for:object [[dk ind] pan]
+                                (a/setOffset ind ind._value))))
                          :onPanResponderMove
                          (fn [e state]
                            (when (not (r/curr disabledRef))
                              (cond absolute
-                                   (k/for:object [[dk ind] pan]
-                                     (var dv (xt/x:get-key state dk))
-                                     (a/setValue ind (+ ind._offset dv)))
+                                    (xt/for:object [[dk ind] pan]
+                                      (var dv (xt/x:get-key state dk))
+                                      (a/setValue ind (+ ind._offset dv)))
                                    
                                    :else
-                                   (k/for:object [[dk ind] pan]
-                                     (var dv (xt/x:get-key state dk))
-                                     (a/setValue ind dv)))))
+                                    (xt/for:object [[dk ind] pan]
+                                      (var dv (xt/x:get-key state dk))
+                                      (a/setValue ind dv)))))
                          :onPanResponderRelease
                          (fn []
                            (when setPressing (setPressing false))
                            (when onPressOut (onPressOut))
                            (when (not absolute)
-                             (k/for:object [[dk ind] pan]
-                               (a/flattenOffset ind))))}
+                              (xt/for:object [[dk ind] pan]
+                                (a/flattenOffset ind))))}
                         rprops)))))
 
 (defn.js usePanTouchable
@@ -85,7 +85,6 @@
                                      absolute
                                      (:.. rprops)]})))
   (return #{touchable panHandlers}))
-
 
 
 

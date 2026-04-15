@@ -3,7 +3,8 @@
             [std.lib.foundation :as f]))
 
 (l/script :js
-  {:import [["@tanstack/react-query" :as [* ReactQuery]]] :require [[js.react :as r] [xt.lang.common-lib :as k] [xt.lang.common-data :as xtd] [xt.lang.common-spec :as xt]]})
+  {:import [["@tanstack/react-query" :as [* ReactQuery]]]
+   :require [[js.react :as r] [xt.lang.common-lib :as k] [xt.lang.common-data :as xtd] [xt.lang.common-spec :as xt] [xt.lang.common-sort-by :as xtsb]]})
 
 (f/template-entries [l/tmpl-entry {:type :fragment
                                    :base "ReactQuery"
@@ -87,14 +88,14 @@
   (var #{data} raw)
   (var output q.default)
   (try
-    (:= output (or (transform (k/get-in data path))
+    (:= output (or (transform (xtd/get-in data path))
                    q.default))
     (catch e))
   
   (return
-   (k/obj-assign raw #{[input setInput
-                        output
-                        :queryRaw q.fn]})))
+   (xtd/obj-assign raw #{[input setInput
+                          output
+                          :queryRaw q.fn]})))
 
 (defn.js useApiQueriesBase
   "A base hook for managing multiple API queries, providing a structured way to define and access query states."
@@ -103,28 +104,28 @@
   (return
    (-> (. api
           queries)
-       (k/obj-pairs)
-       (k/sort-by [xtd/first])
-       (k/arr-juxt
-        xtd/first
-        -/useApiQueriesSingle))))
+       (xtd/obj-pairs)
+       (xtsb/sort-by [xtd/first])
+       (xtd/arr-juxt
+         xtd/first
+         -/useApiQueriesSingle))))
 
 (defn.js useApiQueriesWire
   "A hook for wiring up API queries with dependencies, ensuring proper execution order and data flow."
   {:added "0.1"}
   [api queries]
-  (k/for:array [qpair (-> (. api queries)
-                             (k/obj-pairs)
-                             (k/sort-by [xtd/first]))]
+  (xt/for:array [qpair (-> (. api queries)
+                           (xtd/obj-pairs)
+                           (xtsb/sort-by [xtd/first]))]
     (var [qkey q] qpair)
     (when q.deps
       (var params {})
-      (k/for:array [dpair (-> q.deps
-                                 (k/obj-pairs)
-                                 (k/sort-by [xtd/first]))]
+      (xt/for:array [dpair (-> q.deps
+                               (xtd/obj-pairs)
+                               (xtsb/sort-by [xtd/first]))]
         (var [dkey d] dpair)
         (var #{output
-               dataUpdatedAt} (k/get-in queries [dkey]))
+               dataUpdatedAt} (xtd/get-in queries [dkey]))
         (var #{[(:= transform k/identity)
                 (:= check k/T)]} d)
         (var flag)
@@ -140,15 +141,15 @@
       (var params-str (xt/x:json-encode params))
       (r/useEffect
        (fn []
-         (when (k/obj-empty?
-                (k/obj-filter params (fn [#{enabled}]
-                                       (return (== enabled false)))))
-           (var #{setInput
-                  input
-                  refetch} (k/get-in queries [qkey]))
-           (var ninput (k/obj-map params (k/key-fn "value")))
-           (cond (not (k/eq-nested ninput input))
-                 (setInput ninput)
+          (when (xtd/obj-empty?
+                 (xtd/obj-filter params (fn [#{enabled}]
+                                          (return (== enabled false)))))
+            (var #{setInput
+                   input
+                   refetch} (xtd/get-in queries [qkey]))
+            (var ninput (xtd/obj-map params (fn [x] (return (xt/x:get-key x "value")))))
+            (cond (not (xtd/eq-nested ninput input))
+                  (setInput ninput)
                  
                  q.refetch
                  (do (refetch)))))
@@ -170,21 +171,20 @@
   (var client (-/useQueryClient))
   (var queries   (-/useApiQueries api))
   (var mutations (-> (. api mutations)
-                     (k/obj-pairs)
-                     (k/sort-by [xtd/first])
-                     (k/arr-juxt
-                      xtd/first
-                      (fn [[key mut]]
-                        (return
-                         (-/useMutation {:onSuccess
-                                          (fn []
-                                            (k/for:array [key (or mut.refresh [])]
-                                              (. client
-                                                 (invalidateQueries {:queryKey [key]}))))
-                                          :mutationFn mut.fn}))))))
+                     (xtd/obj-pairs)
+                     (xtsb/sort-by [xtd/first])
+                     (xtd/arr-juxt
+                       xtd/first
+                       (fn [[key mut]]
+                         (return
+                          (-/useMutation {:onSuccess
+                                           (fn []
+                                             (xt/for:array [key (or mut.refresh [])]
+                                               (. client
+                                                  (invalidateQueries {:queryKey [key]}))))
+                                           :mutationFn mut.fn}))))))
   (return #{client
             queries
             mutations}))
 
    
-

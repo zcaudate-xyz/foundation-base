@@ -3,16 +3,7 @@
   (:use code.test))
 
 (l/script :js
-  {:require  [[js.react :as r :include [:fn]]
-              [js.core :as j :include [:node :util]]
-              [js.lib.valtio :as v]
-              [js.blessed.ui-core :as ui-core]
-              [js.blessed :as b :include [:fn]]
-              [js.lib.chalk :as chk]
-              [xt.lang.common-lib :as k]
-              [xt.lang.common-data :as xtd]
-              [xt.lang.common-string :as str]]
-    :export  [MODULE]})
+  {:export [MODULE] :require [[js.react :as r :include [:fn]] [js.core :as j :include [:node :util]] [js.lib.valtio :as v] [js.blessed.ui-core :as ui-core] [js.blessed :as b :include [:fn]] [js.lib.chalk :as chk] [xt.lang.common-lib :as k] [xt.lang.common-data :as xtd] [xt.lang.common-string :as str]]})
 
 (defn.js boolText
   "gets the text for true or false"

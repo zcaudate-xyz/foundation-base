@@ -2,7 +2,7 @@
   (:require [std.lang :as l]))
 
 (l/script :js
-  {:require [[xt.lang.common-lib :as k] [xt.lang.common-data :as xtd] [js.core :as j] [js.react :as r] [js.react-native :as n] [js.react-native.animate :as a] [js.react-native.physical-base :as physical-base] [js.react-native.physical-edit :as physical-edit] [js.react-native.helper-roller :as helper-roller] [js.react-native.helper-theme :as helper-theme] [js.react-native.helper-theme-default :as helper-theme-default]]})
+  {:require [[xt.lang.common-lib :as k] [xt.lang.common-data :as xtd] [xt.lang.common-math :as math] [xt.lang.common-spec :as xt] [js.core :as j] [js.react :as r] [js.react-native :as n] [js.react-native.animate :as a] [js.react-native.physical-base :as physical-base] [js.react-native.physical-edit :as physical-edit] [js.react-native.helper-roller :as helper-roller] [js.react-native.helper-theme :as helper-theme] [js.react-native.helper-theme-default :as helper-theme-default]]})
   
 (def.js ITEMS
   ["0" "1" "2" "3" "4" "5" "6" "7" "8" "9"])
@@ -100,7 +100,7 @@
                  (return
                   {:text  (. items [value])
                    :style {:opacity (:? visible
-                                        (k/mix -2 1 scale)
+                                        (math/mix -2 1 scale)
                                         0)
                            :zIndex (* 10 scale)
                            :transform [{:translateY (* -2 translate)}]}}))}]))]))
@@ -121,13 +121,13 @@
       (:= decimal 0)]}]
   (var arrDigits [])
   (var arrTotal  (j/ceil (j/log10 (+ max 0.0001))))
-  (k/for:index [i [0 (j/max arrTotal
+  (xt/for:index [i [0 (j/max arrTotal
                             (+ 1 decimal)) 1]]
     (when (and (== i decimal)
                (< 0 i))
-      (x:arr-push-first arrDigits {:type "decimal"}))
-    (x:arr-push-first arrDigits {:type "digit"
-                                 :order i}))
+      (xt/x:arr-push-first arrDigits {:type "decimal"}))
+    (xt/x:arr-push-first arrDigits {:type "digit"
+                                    :order i}))
   
   (var digitFn
        (fn [#{type order} i]
@@ -142,7 +142,7 @@
                  {:key (+ "digit" i)
                   :style (:? hideDigit {:opacity 0})}
                  [:% -/SpinnerDigit
-                  {:index (j/floor (/ value (j/round (k/pow 10 order))))
+                  {:index (j/floor (/ value (j/round (j/pow 10 order))))
                    :style styleDigit
                    :styleText styleDigitText
                    :editable editable}]])
@@ -170,10 +170,10 @@
     (a/addListener position
                    (fn []
                      (var #{_value _offset} position)
-                     (var nValue (k/clamp
-                                  min max
-                                  (- (r/curr valueRef)
-                                     (j/round (/ _value (or stride 8))))))
+                     (var nValue (math/clamp
+                                   min max
+                                   (- (r/curr valueRef)
+                                      (j/round (/ _value (or stride 8))))))
                      
                      (when (not= nValue (r/curr prevRef))
                        (setValue nValue)
@@ -239,7 +239,7 @@
                                 "-45deg")}]}}
         [:% n/Icon
          {:name "resize-full-screen"
-          :style {:color (k/get-in styleStatic [0 "color"]) 
+          :style {:color (xtd/get-in styleStatic [0 "color"]) 
                   :paddingLeft 5}
           :size 15}]])
   (return

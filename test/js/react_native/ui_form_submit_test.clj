@@ -73,15 +73,15 @@
                 (var active (j/max (- 1 emptying)
                                    focusing))
                 (return {:style {:opacity 1
-                                 :fontSize   (k/mix 20  12  active)
-                                 :fontWeight (k/mix 400 800 active)
+                                 :fontSize   (math/mix 20  12  active)
+                                 :fontWeight (math/mix 400 800 active)
                                  :textShadowColor "black"
                                  :color (c/toHSL (c/interpolate
                                                   ["#999" "#555"]
                                                   active))
                                  :transform
-                                 [{:translateY (k/mix 15 60 active)}
-                                  {:translateX (k/mix 10 -5  active)}]}}))}]))
+                                 [{:translateY (math/mix 15 60 active)}
+                                  {:translateX (math/mix 10 -5  active)}]}}))}]))
 
   (defn.js useFavoriteForm
     []
@@ -259,8 +259,8 @@
                      (var active (j/max (- 1 emptying)
                                         focusing))
                      (return {:style {:opacity 1
-                                      :fontSize   (k/mix 20  14 (- 1 emptying))
-                                      :fontWeight (k/mix 400 800 (- 1 emptying))
+                                      :fontSize   (math/mix 20  14 (- 1 emptying))
+                                      :fontWeight (math/mix 400 800 (- 1 emptying))
                                       :color (c/toHSL (c/interpolate
                                                        ["#999" "#555e" ]
                                                        (- 1 emptying)))
