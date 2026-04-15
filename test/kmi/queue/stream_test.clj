@@ -7,10 +7,11 @@
   {:runtime :redis.client
    :config {:port 17003
             :bench true}
-   :require [[xt.lang.common-lib :as k]
-             [kmi.redis :as r]
-             [kmi.queue.common :as mq]
-             [kmi.queue.stream :as stream]]})
+   :require [[xt.lang.common-spec :as xt]
+             [xt.lang.common-data :as xtd]
+              [kmi.redis :as r]
+              [kmi.queue.common :as mq]
+              [kmi.queue.stream :as stream]]})
 
 (fact:global
  {:setup [(l/rt:restart)]

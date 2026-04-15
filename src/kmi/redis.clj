@@ -6,7 +6,9 @@
 
 (l/script :lua
   kmi.redis
-  {:require [[xt.lang.common-lib :as k]]
+  {:require [[xt.lang.common-spec :as xt]
+             [xt.lang.common-lib :as k]
+             [xt.lang.common-data :as xtd]]
    :static {:lang/lint-globals #{redis}}})
 
 (defmacro.lua flushdb
@@ -236,9 +238,9 @@
    (while true
      (:= tmp (-/call "SCAN" cur "MATCH" match))
      (:= '[cur out] '[(tonumber (. tmp [1])) (. tmp [2])])
-     (if out
-       (k/for:object [[k v] out]
-         (if (. v (find re)) (f v))))
+      (if out
+        (xt/for:object [[k v] out]
+          (if (. v (find re)) (f v))))
      (if (== 0 cur)
        (return true)))))
 
@@ -272,19 +274,21 @@
   "flat pairs to object"
   {:added "4.0"}
   ([arr]
-   (return (k/from-flat arr
-                        k/step-set-key
-                        {}))))
+   (return (xtd/from-flat arr
+                        (fn [obj k v]
+                          (xt/x:set-key obj k v)
+                          (return obj))
+                         {}))))
 
 (defn.lua flat-pairs-to-array
   "flat pairs to array"
   {:added "4.0"}
   ([arr]
-   (return (k/from-flat arr
-                        (fn [arr k v]
-                          (table.insert arr [k v])
-                          (return arr))
-                        []))))
+   (return (xtd/from-flat arr
+                         (fn [arr k v]
+                           (table.insert arr [k v])
+                           (return arr))
+                         []))))
 
 (defn.lua call-batched
   "applies command to keys in batches"
@@ -304,17 +308,16 @@
    (local '[tnum trem] '[(math.floor (/ total n))
                          (mod total n)])
    (local out [])
-   (k/for:index [i [0 (- tnum 1)]]
-     (local chunk [])
-     (k/for:index [j [1 n]]
-       (table.insert chunk (. bargs [(+ (* i n) j)])))
-     (table.insert out (call-fn chunk)))
+    (xt/for:index [i [0 (- tnum 1)]]
+      (local chunk [])
+      (xt/for:index [j [1 n]]
+        (table.insert chunk (. bargs [(+ (* i n) j)])))
+      (table.insert out (call-fn chunk)))
    
-   (when (< 0 trem)
-     (local chunk [])
-     (k/for:index [j [1 trem]]
-       (table.insert chunk (. bargs [(+ (* tnum n) j)])))
-     (table.insert out (call-fn chunk)))
+    (when (< 0 trem)
+      (local chunk [])
+      (xt/for:index [j [1 trem]]
+        (table.insert chunk (. bargs [(+ (* tnum n) j)])))
+      (table.insert out (call-fn chunk)))
 
    (return out)))
-

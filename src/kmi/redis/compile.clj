@@ -1,10 +1,11 @@
 (ns kmi.redis.compile
   (:require [kmi.redis :as r]
-            [std.lib.collection :as collection]
-            [std.lib.foundation :as f]
-            [std.lib.walk :as walk]
-            [std.string.case :as case]
-            [xt.lang.common-lib :as k])
+             [std.lib.collection :as collection]
+             [std.lib.foundation :as f]
+             [std.lib.walk :as walk]
+             [std.string.case :as case]
+             [xt.lang.common-lib :as k]
+             [xt.lang.common-data :as xtd])
   (:refer-clojure :exclude [compile]))
 
 (defn parse-map
@@ -76,7 +77,7 @@
                                   s
                                   (f/strn s)))
                               form)
-                        `(k/to-flat ~form)))
+                         `(xtd/to-flat ~form)))
                     body)]
     (if (= 1 (count forms))
       [(list 'unpack (first forms))]

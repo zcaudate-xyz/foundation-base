@@ -7,7 +7,8 @@
 
 (l/script- :js
    {:runtime :basic
-    :require [[xt.lang.common-lib :as k]
+     :require [[xt.lang.common-lib :as k]
+               [xt.lang.common-data :as xtd]
                [xt.lang.common-repl :as repl]
                [js.lib.eth-solc :as eth-solc :include [:fn]]
                [js.core :as j]]})
