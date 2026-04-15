@@ -65,7 +65,7 @@
   ^:hidden
 
   (!.js
-   (k/obj-keys (db-view/get-views (@! +db+))))
+   (xtd/obj-keys (db-view/get-views (@! +db+))))
   => ["Order"])
 
 ^{:refer js.cell.service.db-view/get-schema :added "4.1"}
@@ -73,7 +73,7 @@
   ^:hidden
 
   (!.js
-   (k/obj-keys (db-view/get-schema (@! +db+))))
+   (xtd/obj-keys (db-view/get-schema (@! +db+))))
   => ["Order" "Account" "Profile"])
 
 ^{:refer js.cell.service.db-view/view-query-return-entry :added "4.1"}

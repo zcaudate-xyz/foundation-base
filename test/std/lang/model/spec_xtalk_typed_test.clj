@@ -66,7 +66,7 @@
   => ["hello_world" "event_meta" "route_path"])
 
 (fact "lowers xtalk surface helpers to typed core"
-  (lower/lower-form '(k/get-key route "tree")
+  (lower/lower-form '(xt/x:get-key route "tree")
                     {:ns 'sample.route
                      :aliases '{k xt.lang.common-lib}})
   => '(x:get-key route "tree" nil))
@@ -104,16 +104,16 @@
           (x:str-join "/" path)])
 
 (fact "lowering uses rule-driven wrapper rewrites"
-  [(lower/lower-form '(k/get-key route "tree")
+  [(lower/lower-form '(xt/x:get-key route "tree")
                      {:ns 'sample.route
                       :aliases '{k xt.lang.common-lib}})
    (lower/lower-form '(k/get-in route ["tree" "leaf"] "fallback")
                      {:ns 'sample.route
                       :aliases '{k xt.lang.common-lib}})
-   (lower/lower-form '(k/first items)
+   (lower/lower-form '(xtd/first items)
                      {:ns 'sample.route
                       :aliases '{k xt.lang.common-lib}})
-   (lower/lower-form '(k/second items)
+   (lower/lower-form '(xtd/second items)
                      {:ns 'sample.route
                       :aliases '{k xt.lang.common-lib}})
    (lower/lower-form '(k/arrayify items)

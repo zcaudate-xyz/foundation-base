@@ -194,4 +194,4 @@
   (!.js
    (j/parseFloat "xoeko"))
   (!.js
-   (k/last "hello.")))
+   (xtd/last "hello.")))

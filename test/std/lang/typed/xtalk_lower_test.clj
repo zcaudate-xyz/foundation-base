@@ -46,16 +46,20 @@
 ^{:refer std.lang.typed.xtalk-lower/lower-list :added "4.1"}
 (fact "lowers wrapper calls to canonical forms"
   [(lower-list '(k/get-key route "tree") +ctx+)
+   (lower-list '(x:get-key route "leaf") +ctx+)
    (lower-list '(k/first items) +ctx+)
+   (lower-list '(x:second items) +ctx+)
    (lower-list '(k/not-empty? items) +ctx+)]
   => '[(x:get-key route "tree" nil)
+       (x:get-key route "leaf" nil)
        (x:get-idx items (x:offset))
+       (x:get-idx items (x:offset 1))
        (std.lang.typed.xtalk-intrinsic/not-empty? items)])
 
 ^{:refer std.lang.typed.xtalk-lower/lower-form :added "4.1"}
 (fact "recursively lowers nested forms"
-  (lower-form '{:route (k/get-key data "tree")
-                :paths [(k/second items)]}
+  (lower-form '{:route (x:get-key data "tree")
+                :paths [(x:second items)]}
               +ctx+)
   => '{:route (x:get-key data "tree" nil)
        :paths [(x:get-idx items (x:offset 1))]})

@@ -8,11 +8,12 @@
 
 (l/script- :js
    {:runtime :basic
-    :require [[xt.lang.common-lib :as k]
-               [xt.lang.common-repl :as repl]
-               [js.lib.eth-bench :as e :include [:fn]]
-               [js.lib.eth-solc :as eth-solc :include [:fn]]
-               [js.core :as j]]})
+     :require [[xt.lang.common-lib :as k]
+                [xt.lang.common-spec :as xt]
+                [xt.lang.common-repl :as repl]
+                [js.lib.eth-bench :as e :include [:fn]]
+                [js.lib.eth-solc :as eth-solc :include [:fn]]
+                [js.core :as j]]})
 
 (fact:global
  {:setup    [(solidity/rt:stop-ganache-server)
@@ -69,7 +70,7 @@
                        []
                        {})
                (fn [m]
-                 (return (k/get-key m "contractAddress")))))]}
+                 (return (xt/x:get-key m "contractAddress")))))]}
 (fact "runs the contract given address and arguments"
   ^:hidden
 
@@ -106,7 +107,7 @@
                         []
                         {})
                (fn [m]
-                 (return (k/get-key m "contractAddress")))))
+                 (return (xt/x:get-key m "contractAddress")))))
           (j/<! (e/contract-run "http://127.0.0.1:8545"
                         (@! (last env-ganache/+default-private-keys+))
                         (@! +address+)

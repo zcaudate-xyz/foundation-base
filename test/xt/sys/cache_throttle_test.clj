@@ -64,13 +64,13 @@
   ^:hidden
 
   (set (!.js
-        (k/obj-keys (throttle/throttle-create "SYNC_FRAME"
+        (xtd/obj-keys (throttle/throttle-create "SYNC_FRAME"
                                               (fn [])
                                               nil))))
   => #{"handler" "tag" "now_fn"}
   
   (set (!.lua
-        (k/obj-keys (throttle/throttle-create "SYNC_FRAME"
+        (xtd/obj-keys (throttle/throttle-create "SYNC_FRAME"
                                               (fn [])
                                               nil))))
   => #{"handler" "tag" "now_fn"})

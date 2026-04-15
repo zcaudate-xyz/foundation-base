@@ -9,11 +9,13 @@
 
 (l/script- :js
    {:runtime :basic
-    :require [[xt.lang.common-lib :as k]
-               [xt.lang.common-repl :as repl]
-               [js.lib.eth-lib :as e :include [:fn]]
-               [js.lib.eth-solc :as eth-solc :include [:fn]]
-               [web3.lib.example-counter :as example-counter]
+     :require [[xt.lang.common-lib :as k]
+                [xt.lang.common-spec :as xt]
+                [xt.lang.common-data :as xtd]
+                [xt.lang.common-repl :as repl]
+                [js.lib.eth-lib :as e :include [:fn]]
+                [js.lib.eth-solc :as eth-solc :include [:fn]]
+                [web3.lib.example-counter :as example-counter]
              [js.core :as j]]})
 
 (fact:global
@@ -117,7 +119,7 @@
   
   (set
    (j/<!
-     (k/obj-keys
+     (xtd/obj-keys
       (e/new-contract "0x94e3361495bD110114ac0b6e35Ed75E77E6a6cFA"
                       (@! (:abi +contract+))
                       (e/get-signer "http://127.0.0.1:8545"
@@ -133,7 +135,7 @@
   ^:hidden
   
   (j/<!
-   (k/obj-keys
+   (xtd/obj-keys
     (e/new-contract-factory
      (@! (:abi +contract+))
      (@! (:bytecode +contract+))
@@ -146,7 +148,7 @@
   ^:hidden
   
   (j/<!
-   (k/obj-keys
+   (xtd/obj-keys
     (e/get-signer "http://127.0.0.1:8545"
                   (@! (last env-ganache/+default-private-keys+)))))
   => ["provider" "address"])
@@ -205,7 +207,7 @@
                        []
                        {})
      (fn [m]
-       (return (k/get-key m "target"))))
+       (return (xt/x:get-key m "target"))))
   => string?)
 
 ^{:refer js.lib.eth-lib/contract-run :added "4.0" :unchecked true
@@ -222,7 +224,7 @@
                                  []
                                  {})
                (fn [m]
-                 (return (k/get-key m "target")))))]}
+                 (return (xt/x:get-key m "target")))))]}
 (fact "runs the contract"
   ^:hidden
   
@@ -258,7 +260,7 @@
                                  []
                                  {})
                (fn [m]
-                 (return (k/get-key m "target")))))]}
+                 (return (xt/x:get-key m "target")))))]}
 (fact "subscribes to events"
   ^:hidden
 
@@ -302,7 +304,7 @@
                                  []
                                  {})
                (fn [m]
-                 (return (k/get-key m "target")))))]}
+                 (return (xt/x:get-key m "target")))))]}
 (fact "subscribes to single event"
   ^:hidden
 
@@ -312,14 +314,14 @@
                               "block"
                               (fn [x]
                                 (return x))))
-       (var output (k/fn? unsub))
+       (var output (xt/x:is-function? unsub))
        (unsub)
        (return output)))
   => true)
 
 (comment
   (!.js
-   (k/sort (k/obj-keys (. ethers utils))))
+   (k/sort (xtd/obj-keys (. ethers utils))))
 
   (e/parseUnits "1.234"
                 8)
@@ -348,8 +350,8 @@
   
   
   (!.js
-   (k/obj-keys (. ethers ethers)))
+   (xtd/obj-keys (. ethers ethers)))
 
   (!.js
-   (k/obj-keys P))
+   (xtd/obj-keys P))
   )

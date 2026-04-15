@@ -202,13 +202,13 @@
   (!.js
    (var out (node/node-pop-tail nil 33 5 (node/node-create nil [(node/node-create nil [1 2 3])]) false))
    [(. out ["::"])
-    (k/len (. out children))])
+    (xt/x:len (. out children))])
   => ["vector.node" 0]
 
   (!.lua
    (var out (node/node-pop-tail nil 33 5 (node/node-create nil [(node/node-create nil [1 2 3])]) false))
    [(. out ["::"])
-    (k/len (. out children))])
+    (xt/x:len (. out children))])
   => ["vector.node" 0])
 
 ^{:refer xt.runtime.type-vector-node/node-assoc :added "4.0"}

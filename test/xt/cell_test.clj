@@ -4,11 +4,12 @@
 
 (l/script- :js
   {:runtime :basic
-   :require [[xt.lang.common-lib :as k]
-             [xt.lang.common-spec :as xt]
-             [xt.lang.common-runtime :as rt :with [defvar.js]]
-             [js.core :as j]
-             [xt.cell :as cell]
+    :require [[xt.lang.common-lib :as k]
+              [xt.lang.common-spec :as xt]
+              [xt.lang.common-data :as xtd]
+              [xt.lang.common-runtime :as rt :with [defvar.js]]
+              [js.core :as j]
+              [xt.cell :as cell]
              [xt.cell.kernel.base-link :as base-link]
              [xt.cell.kernel.worker-mock :as worker-mock]]})
 
@@ -85,7 +86,7 @@
   ^:hidden
 
   (!.js
-   (k/obj-keys (cell/actions-cell)))
+   (xtd/obj-keys (cell/actions-cell)))
   => ["@cell/setup-service"
       "@cell/get-service"
       "@cell/setup-bindings"

@@ -49,7 +49,7 @@
   ^:hidden
   
   (set (!.js
-        (k/obj-keys
+        (xtd/obj-keys
          (base-impl/new-cell-init))))
   => #{"resolve" "current" "reject"}
   
@@ -227,7 +227,7 @@
   ^:hidden
   
   (!.js
-   (k/second (base-impl/view-ensure (-/CELL)
+   (xtd/second (base-impl/view-ensure (-/CELL)
                                     "hello"
                                     "echo")))
   => (contains-in

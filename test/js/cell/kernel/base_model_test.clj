@@ -618,7 +618,7 @@
   ^:hidden
   
   (j/<!
-   (k/first
+   (xtd/first
     (base-model/view-update
      (-/CELL)
      "hello"
@@ -644,7 +644,7 @@
   ^:hidden
   
   (j/<!
-   (k/first
+   (xtd/first
     (base-model/view-set-input
      (-/CELL) "hello" "ping" {:data ["bar"]})))
   => (contains-in

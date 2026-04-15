@@ -87,9 +87,9 @@
            (local '[elems reply] '[(-/call "ZRANGE" key 0 -1) []])
            (if (and (< 0 (len arg))
                     (< 0 (len elems)))
-             (k/for:array [[i e] elems]
+             (xt/for:array [[i e] elems]
                (local ~param true)
-               (k/for:array [[j k] arg]
+               (xt/for:array [[j k] arg]
                  (local score (-/call "ZSCORE" k e))
                  (if ~check
                    (do (:= ~param false)
@@ -170,7 +170,7 @@
   {:added "4.0"}
   []
   (local ks (-/call "KEYS" "*"))
-  (return (k/arr-juxt ks k/identity -/key-export)))
+  (return (xtd/arr-juxt ks k/identity -/key-export)))
 
 
 (defn.lua time-ms
@@ -264,7 +264,7 @@
   "scan keys but return only subkey part"
   {:added "3.0"}
   ([key]
-   (return (k/arr-map (-/scan-regex (cat key ":[^\\:]+$")
+   (return (xtd/arr-map (-/scan-regex (cat key ":[^\\:]+$")
                                     (cat key ":*"))
                       (fn [k] (return (. k (sub (+ 2 (len key))))))))))
 
@@ -295,7 +295,7 @@
                                (or (. opts ["suffix"]) [])])
    (local call-fn (fn [args]
                     (return (-/call command
-                                    (unpack (k/arr-mapcat
+                                    (unpack (xtd/arr-mapcat
                                              [prefix
                                               args
                                               suffix]

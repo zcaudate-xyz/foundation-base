@@ -72,7 +72,7 @@
 
   (!.js
    (var desc (@! +db+))
-   (var schema (k/get-key desc "schema"))
+   (var schema (xt/x:get-key desc "schema"))
    (var local-db (xdb/db-create {"::" "db.cache"}
                                 schema
                                 (@! +lookup+)
@@ -127,7 +127,7 @@
 
   (!.js
    (var desc (@! +db+))
-   (var schema (k/get-key desc "schema"))
+   (var schema (xt/x:get-key desc "schema"))
    (var local-db (xdb/db-create {"::" "db.cache"}
                                 schema
                                 (@! +lookup+)

@@ -71,7 +71,7 @@
    (var messages [])
    (var worker {:postMessage (fn [msg] (messages.push msg))})
    (worker-state/post-message worker {:op "stream" :signal "test"})
-   (k/first messages))
+   (xtd/first messages))
   => {"op" "stream", "signal" "test"})
 
 ^{:refer xt.cell.kernel.worker-state/fn-self :added "4.1"}
@@ -90,7 +90,7 @@
    (var messages [])
    (var worker {:postMessage (fn [msg] (messages.push msg))})
    (worker-state/fn-trigger worker "stream" "hello" "ok" {:a 1})
-   (k/first messages))
+   (xtd/first messages))
   => {"body" {"a" 1}, "status" "ok", "op" "stream", "signal" "hello"})
 
 ^{:refer xt.cell.kernel.worker-state/fn-trigger-async :added "4.1"}
@@ -114,7 +114,7 @@
    (var messages [])
    (var worker {:postMessage (fn [msg] (messages.push msg))})
    (worker-state/fn-set-state worker (worker-state/WORKER_STATE) (fn []))
-   (k/first messages))
+   (xtd/first messages))
   => {"body" {"eval" true},
       "status" "ok",
       "op" "stream",
@@ -156,7 +156,7 @@
    (var messages [])
    (var worker {:postMessage (fn [msg] (messages.push msg))})
    (worker-state/fn-set-eval-status worker false)
-   (k/first messages))
+   (xtd/first messages))
   => {"body" {"eval" false},
       "status" "ok",
       "op" "stream",

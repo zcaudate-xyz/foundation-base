@@ -13,7 +13,7 @@
    (+ 1 2 3))
   
   (!.py
-   (k/arr-map [1 2 3 4]
+   (xtd/arr-map [1 2 3 4]
               k/inc))
   (require 'std.concurrent.print)
   (./create-tests)

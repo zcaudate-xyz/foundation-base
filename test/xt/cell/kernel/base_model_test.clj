@@ -6,10 +6,11 @@
 (l/script- :js
   {:runtime :basic
    :require [[xt.lang.common-lib :as k]
-             [xt.lang.common-runtime :as rt :with [defvar.js]]
-             [xt.lang.common-spec :as xt]
-             [js.core :as j]
-             [xt.cell.kernel.base-link :as base-link]
+              [xt.lang.common-runtime :as rt :with [defvar.js]]
+              [xt.lang.common-spec :as xt]
+              [xt.lang.common-data :as xtd]
+              [js.core :as j]
+              [xt.cell.kernel.base-link :as base-link]
              [xt.cell.kernel.base-link-local :as base-link-local]
              [xt.cell.kernel.base-impl :as base-impl]
              [xt.cell.kernel.base-model :as base-model]
@@ -85,7 +86,7 @@
   ^:hidden
 
   (!.js
-   (k/first
+   (xtd/first
     (base-model/prep-view (-/CELL) "hello" "echo" {})))
   => ["hello" "echo"])
 

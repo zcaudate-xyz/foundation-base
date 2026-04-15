@@ -46,7 +46,7 @@
    (worker-impl/worker-process
     worker
     {:op "eval" :id "test-1" :body "1 + 1"})
-   (k/first messages))
+   (xtd/first messages))
   => (contains {"op" "eval"
                 "status" "ok"})
 
@@ -58,7 +58,7 @@
    (worker-impl/worker-process
      worker
      {:op "call" :id "test-2" :action "@worker/ping"})
-    (k/first messages))
+    (xtd/first messages))
   => (contains {"op" "call"
                 "status" "ok"})
 
@@ -69,7 +69,7 @@
    (worker-impl/worker-process
     worker
     {:op "unknown" :id "test-3"})
-   (k/first messages))
+   (xtd/first messages))
   => (contains {"op" "unknown"
                 "status" "error"}))
 
@@ -90,7 +90,7 @@
                 :addEventListener (fn [event listener capture]
                                     (worker.listeners.push listener))})
    (worker-impl/worker-init worker k/identity)
-   (k/len worker.listeners))
+   (xt/x:len worker.listeners))
   => 1)
 
 ^{:refer js.cell.kernel.worker-impl/worker-process-eval :added "4.0" :unchecked true}
@@ -104,7 +104,7 @@
     worker
     {:op "eval" :id "test-1" :body "1 + 1"}
     (fn [x] (return (worker.postMessage x))))
-   (k/first messages))
+   (xtd/first messages))
   => (contains {"op" "eval"
                 "id" "test-1"
                 "status" "ok"}))
@@ -124,7 +124,7 @@
     worker
     {:op "call" :id "test-2" :action "@test/action" :body [5]}
     (fn [x] (return (worker.postMessage x))))
-   (k/first messages))
+   (xtd/first messages))
   => (contains {"op" "call"
                 "id" "test-2"
                 "status" "ok"})
@@ -138,7 +138,7 @@
     worker
     {:op "call" :id "test-3" :action "@missing/action"}
     (fn [x] (return (worker.postMessage x))))
-   (k/first messages))
+   (xtd/first messages))
   => (contains {"op" "call"
                 "id" "test-3"
                 "status" "error"}))
@@ -151,7 +151,7 @@
    (var messages [])
    (var worker {:postMessage (fn [msg] (messages.push msg))})
    (worker-impl/worker-init-signal worker {:done true})
-   (k/first messages))
+   (xtd/first messages))
   => (contains {"op" "stream"
                 "signal" "@worker/::INIT"
                 "body" {"done" true}}))

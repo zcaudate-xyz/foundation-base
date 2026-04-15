@@ -33,7 +33,7 @@
    (local k-space   (cat key ":_"))
    (local k-pattern (cat k-space ":[^\\:]+$"))
    (local k-partitions (r/scan-regex k-pattern (cat k-space ":*")))
-   (k/for:array [[i pfull]  k-partitions]
+   (xt/for:array [[i pfull]  k-partitions]
      (local p (. pfull (sub (+ (len key) 4))))
      (f key p acc))
    (return acc)))
@@ -76,7 +76,7 @@
   "creates a mq key fragment"
   {:added "3.0"}
   ([key partition ...]
-   (return (k/join ":" [key "_" partition ...]))))
+   (return (str/join ":" [key "_" partition ...]))))
 
 (defn.lua mq-index
   "converts id to an index"

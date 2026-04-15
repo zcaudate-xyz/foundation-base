@@ -122,7 +122,7 @@
 (fact "updates view input against the playground worker"
   ^:hidden
 
-  (j/<! (k/first
+  (j/<! (xtd/first
          (base-model/view-set-input
           (-/CELL) "hello" "ping" {:data ["bar"]})))
   => (contains-in

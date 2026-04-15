@@ -130,8 +130,8 @@
   {:added "3.0"}
   ([key partition group]
    (local k-queue (q/mq-path key partition))
-   (return (k/arr-map (r/call "XPENDING" k-queue group "-" "+" 100)
-                   k/first))))
+   (return (xtd/arr-map (r/call "XPENDING" k-queue group "-" "+" 100)
+                   xtd/first))))
 
 (defn.lua ^{:rt/redis {}
             :rt/db {:in  [:text :text :text]
@@ -142,7 +142,7 @@
   ([key partition group]
    (local k-queue (q/mq-path key partition))
    (local '[info-groups mq-common-group-id] '[(r/call "XINFO" "GROUPS" k-queue) "0-0"])
-   (k/for:array [[i arr] info-groups]
+   (xt/for:array [[i arr] info-groups]
      (if (== group (. arr [2])) (:= mq-common-group-id (. arr [8]))))
    (return mq-common-group-id)))
 
@@ -178,7 +178,7 @@
   ([key partition group]
    (local k-queue (q/mq-path key partition))
    (local '[groups exists] '[(r/call "XINFO" "GROUPS" k-queue) false])
-   (k/for:array [[i arr] groups]
+   (xt/for:array [[i arr] groups]
      (if (== group (. arr [2])) (:= exists true)))
    (return exists)))
 
@@ -217,8 +217,8 @@
 
    (return (-> (r/call "XINFO" "GROUPS" k-queue)
                (k/arr-filter (fn [arr]
-                            (return (== group (k/second arr)))))
-               (k/first)))))
+                            (return (== group (xtd/second arr)))))
+               (xtd/first)))))
 
 (defn.lua ^{:rt/redis {}
             :rt/db {:in  [:text :text :text]
@@ -284,7 +284,7 @@
   (cond (== mode "last")
         (do (local k-last (r/call "XREVRANGE" k-queue "+" "-" "COUNT" "2"))
             (-/mq-stream-group-create k-queue group
-                                      (k/first (or (k/second k-last)
+                                      (xtd/first (or (xtd/second k-last)
                                                    {}))))
         
         (or (== nil mode)
@@ -471,9 +471,9 @@
   ([key entry-list ids]
    (var entries (cjson.decode entry-list))
    (var out [])
-   (k/for:array [e entries]
-     (var partition (k/first e))
-     (var pkg (k/second e))
+   (xt/for:array [e entries]
+     (var partition (xtd/first e))
+     (var pkg (xtd/second e))
      (table.insert out (r/call "XADD" (cat key ":_:" partition) "*" "_" (cjson.encode pkg))))
    (when ids
      (r/call "PUBLISH" key ids))

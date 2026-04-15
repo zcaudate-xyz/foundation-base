@@ -5,7 +5,9 @@
 (l/script- :js
   {:runtime :basic
    :require [[xt.cell.kernel.base-util :as base-util]
-             [xt.lang.common-lib :as k]]})
+              [xt.lang.common-lib :as k]
+              [xt.lang.common-spec :as xt]
+              [xt.lang.common-data :as xtd]]})
 
 (fact:global
   {:setup    [(l/rt:restart)]
@@ -16,7 +18,7 @@
   ^:hidden
 
   (!.js
-   (k/len (base-util/rand-id "id-" 4)))
+   (xt/x:len (base-util/rand-id "id-" 4)))
   => 7)
 
 ^{:refer xt.cell.kernel.base-util/check-event :added "4.1"}
@@ -41,16 +43,16 @@
   ^:hidden
 
   (!.js
-   (k/first
-    (k/get-key
+   (xtd/first
+    (xt/x:get-key
      (base-util/arg-encode
       {"f" (fn [x] (return (+ x 1)))})
      "f")))
   => "fn"
 
   (!.js
-   (k/second
-    (k/get-key
+   (xtd/second
+    (xt/x:get-key
      (base-util/arg-encode
       {"f" (fn [x] (return (+ x 1)))})
      "f")))

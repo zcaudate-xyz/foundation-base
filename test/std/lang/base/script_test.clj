@@ -126,11 +126,11 @@
 (fact "switch between defined annex envs"
   ^:hidden
   
-  (l/! [:LUA.0] (k/arr-map [1 2 3 4]
+  (l/! [:LUA.0] (xtd/arr-map [1 2 3 4]
                            (fn:> [x] (+ x 1))))
   => [2 3 4 5]
 
-  (l/! [:NOT-FOUND] (k/arr-map [1 2 3 4]
+  (l/! [:NOT-FOUND] (xtd/arr-map [1 2 3 4]
                                (fn:> [x] (+ x 1))))
   => (throws))
 

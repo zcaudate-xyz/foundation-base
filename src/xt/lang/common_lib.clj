@@ -84,66 +84,6 @@
   {:added "4.0"}
   ([x] (return (xt/x:not-nil? x))))
 
-(defspec.xt len [:fn [:xt/any] :xt/int])
-
-(defn.xt len
-  "gets length of a value"
-  {:added "4.1"}
-  [x]
-  (return (xt/x:len x)))
-
-(defspec.xt first [:fn [[:xt/array :xt/any]] :xt/any])
-
-(defn.xt first
-  "gets the first item of an array"
-  {:added "4.1"}
-  [arr]
-  (return (xt/x:first arr)))
-
-(defspec.xt second [:fn [[:xt/array :xt/any]] :xt/any])
-
-(defn.xt second
-  "gets the second item of an array"
-  {:added "4.1"}
-  [arr]
-  (return (xt/x:second arr)))
-
-(defn.xt get-key
-  "gets a key from an object"
-  {:added "4.1"}
-  [obj key]
-  (return (xt/x:get-key obj key)))
-
-(defn.xt obj-keys
-  "gets object keys"
-  {:added "4.1"}
-  [obj]
-  (return (xt/x:obj-keys obj)))
-
-(defn.xt json-encode
-  "encodes an object to json"
-  {:added "4.1"}
-  [obj]
-  (return (xt/x:json-encode obj)))
-
-(defn.xt json-decode
-  "decodes json to an object"
-  {:added "4.1"}
-  [s]
-  (return (xt/x:json-decode s)))
-
-(defn.xt cat
-  "concats two strings"
-  {:added "4.1"}
-  [a b]
-  (return (xt/x:cat a b)))
-
-(defn.xt join
-  "joins an array with a separator"
-  {:added "4.1"}
-  [separator arr]
-  (return (str/join separator arr)))
-
 (defspec.xt is-boolean? [:fn [:xt/any] :xt/bool])
 
 (defn.xt is-boolean?
@@ -184,14 +124,6 @@
   [x]
   (return (xt/x:is-function? x)))
 
-(defspec.xt fn? [:fn [:xt/any] :xt/bool])
-
-(defn.xt fn?
-  "legacy alias for `is-function?`"
-  {:added "4.1"}
-  [x]
-  (return (-/is-function? x)))
-
 (defspec.xt is-array? [:fn [:xt/any] :xt/bool])
 
 (defn.xt is-array?
@@ -200,14 +132,6 @@
   [x]
   (return (xt/x:is-array? x)))
 
-(defspec.xt arr? [:fn [:xt/any] :xt/bool])
-
-(defn.xt arr?
-  "legacy alias for `is-array?`"
-  {:added "4.1"}
-  [x]
-  (return (-/is-array? x)))
-
 (defspec.xt is-object? [:fn [:xt/any] :xt/bool])
 
 (defn.xt is-object?
@@ -215,14 +139,6 @@
   {:added "4.1"}
   [x]
   (return (xt/x:is-object? x)))
-
-(defspec.xt obj? [:fn [:xt/any] :xt/bool])
-
-(defn.xt obj?
-  "legacy alias for `is-object?`"
-  {:added "4.1"}
-  [x]
-  (return (-/is-object? x)))
 
 
 

@@ -247,9 +247,9 @@
                     (conj (mapv l/emit-ptr interfaces) "")))
           form   (list `web3/contract-test-prep
                        'web3
-                       (list `xt.lang.common-lib/join
-                             "\n"
-                             (clojure.string/split-lines code))
+                       (list `xt.lang.common-string/join
+                              "\n"
+                              (clojure.string/split-lines code))
                        (common/get-caller-private-key id)
                        {:args args :file file :name name
                         :no-wrap no-wrap :prefix prefix})
@@ -276,4 +276,3 @@
                   (common/update-rt-settings
                    id {:contract-address contractAddress}))]
       result)))
-

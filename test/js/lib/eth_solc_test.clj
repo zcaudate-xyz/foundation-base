@@ -47,7 +47,7 @@
   ^:hidden
 
   (!.js
-   (k/obj-keys
+   (xtd/obj-keys
     (eth-solc/contract-compile
      (eth-solc/contract-wrap-body
       (@! (prose/|
@@ -59,7 +59,7 @@
   => ["contracts" "sources"]
   
   (!.js
-   (k/obj-keys
+   (xtd/obj-keys
     (eth-solc/contract-compile
      (eth-solc/contract-wrap-body
       "function test___WRONG() {\n  return \"HELLO WORLD\";\n}"

@@ -23,17 +23,17 @@
   => map?
   
   ;; Check that @worker/ping action exists with correct structure
-  (!.js (k/get-key (worker-local/actions-baseline) "@worker/ping"))
+  (!.js (xt/x:get-key (worker-local/actions-baseline) "@worker/ping"))
   => (contains {"is_async" false
                 "args" []})
   
   ;; Check that @worker/echo action exists
-  (!.js (k/get-key (worker-local/actions-baseline) "@worker/echo"))
+  (!.js (xt/x:get-key (worker-local/actions-baseline) "@worker/echo"))
   => (contains {"is_async" false
                 "args" ["arg"]})
   
   ;; Check that @worker/ping.async action exists and is async
-  (!.js (k/get-key (worker-local/actions-baseline) "@worker/ping.async"))
+  (!.js (xt/x:get-key (worker-local/actions-baseline) "@worker/ping.async"))
   => (contains {"is_async" true
                 "args" ["ms"]}))
 

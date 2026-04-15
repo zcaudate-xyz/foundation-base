@@ -74,7 +74,7 @@
     (var arr (:? (k/is-array? result)
                  (k/arr-keep result (k/key-fn "Contents"))
                  (k/arrayify (k/get-in result ["Contents"]))))
-    (:= (. res body) (k/arr-map arr (k/key-fn "Key"))))
+    (:= (. res body) (xtd/arr-map arr (k/key-fn "Key"))))
   (return res))
 
 (defn.lua list-objects
@@ -135,7 +135,7 @@
         (k/arr-append
          [{:tag "Quiet"
            :children [true]}]
-         (k/arr-map all-keys
+         (xtd/arr-map all-keys
                     (fn:> [key]
                       {:tag "Object"
                        :children [{:tag "Key"
@@ -155,7 +155,7 @@
   [aws bucket opts]
   (var m (-/list-objects aws bucket opts))
   (when (== 200 (. m status))
-    (when (k/not-empty? (. m body))
+    (when (xtd/not-empty? (. m body))
       (-/delete-all-objects aws bucket (. m body) opts))
     (return (-/delete-bucket aws bucket opts)))
   (return m))

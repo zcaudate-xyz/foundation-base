@@ -88,7 +88,7 @@
   ^:hidden
   
   (!.js
-   (k/get-key
+   (xt/x:get-key
     (base-link/link-create-worker
      {:create-fn
       (fn:> [listener]
@@ -103,7 +103,7 @@
   ^:hidden
   
   (!.js
-   (k/get-key (-/make-link) "::"))
+   (xt/x:get-key (-/make-link) "::"))
   => "cell.link"
   
   (notify/wait-on :js

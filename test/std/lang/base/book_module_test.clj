@@ -52,7 +52,7 @@
       +library+
       :js
       'js.blessed.ui-core)))
-  => '#{js.blessed.ui-style xt.lang.common-lib js.react})
+  => '#{js.blessed.ui-style xt.lang.common-data xt.lang.common-lib js.react})
 
 ^{:refer std.lang.base.book-module/module-deps-native :added "4.0"}
 (fact "gets the native link dependencies"
@@ -77,37 +77,37 @@
       :js
       'js.react)))
   => '#{js.core/floor
-        js.core/map
-        js.react/ref
-        xt.lang.common-lib/json-encode
-        js.react/curr:set
-        xt.lang.common-lib/now-ms
-        xt.lang.common-lib/for:array
-        js.react/lazy
-        js.react/watch
-        js.core/delayed
-        xt.lang.common-lib/nil?
-        js.react/Component
-        js.react/init
-        js.react/createDOMRoot
-        xt.lang.common-lib/get-key
-        js.core/min
-        js.react/local
-        js.core/identity
-        js.core/repeating
-        js.core/round
-        xt.lang.common-lib/len
-        js.react/run
-        js.react/curr
-        js.core/randomId
-        js.core/future
-        xt.lang.common-lib/first
-        js.core/indexOf
-        xt.lang.common-lib/not-nil?
-        xt.lang.common-lib/LOG!
-        js.core/clearTimeout
-        js.core/clearInterval
-        js.core/future-delayed
+         js.core/map
+         js.react/ref
+         js.react/curr:set
+         xt.lang.common-spec/x:json-encode
+         xt.lang.common-spec/x:now-ms
+         xt.lang.common-spec/for:array
+         js.react/lazy
+         js.react/watch
+         js.core/delayed
+         xt.lang.common-spec/x:nil?
+         js.react/Component
+         js.react/init
+         js.react/createDOMRoot
+         xt.lang.common-spec/x:get-key
+         js.core/min
+         js.react/local
+         js.core/identity
+         js.core/repeating
+         js.core/round
+         xt.lang.common-spec/x:len
+         js.react/run
+         js.react/curr
+         js.core/randomId
+         js.core/future
+         js.core/indexOf
+         xt.lang.common-spec/x:not-nil?
+         xt.lang.common-spec/x:is-function?
+         xt.lang.common-trace/LOG!
+         js.core/clearTimeout
+         js.core/clearInterval
+         js.core/future-delayed
         js.core/max
         js.react/const})
 

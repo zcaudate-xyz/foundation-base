@@ -5,10 +5,11 @@
 (l/script- :js
   {:runtime :basic
    :require [[xt.cell.binding :as binding]
-             [xt.cell.binding.model :as binding-model]
-             [xt.db :as xdb]
-             [xt.lang.common-lib :as k]
-             [xt.lang.common-data :as xtd]]})
+              [xt.cell.binding.model :as binding-model]
+              [xt.db :as xdb]
+              [xt.lang.common-lib :as k]
+              [xt.lang.common-spec :as xt]
+              [xt.lang.common-data :as xtd]]})
 
 (fact:global
  {:setup    [(l/rt:restart)]
@@ -188,8 +189,8 @@
                         "resolve" {"policy" "replace"}}))
    (var spec (binding-model/compile-view-spec prepared))
     [ok
-     (k/is-function? (k/get-key spec "handler"))
-     (k/get-key spec "deps")
+     (k/is-function? (xt/x:get-key spec "handler"))
+     (xt/x:get-key spec "deps")
      (xtd/get-in spec ["options" "context" "modelId"])
      (xtd/get-in spec ["options" "context" "resolve"])])
   => [true

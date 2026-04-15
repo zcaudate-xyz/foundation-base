@@ -80,7 +80,7 @@
                     body)]
     (if (= 1 (count forms))
       [(list 'unpack (first forms))]
-      [(list 'unpack `(k/arr-mapcat ~(vec forms) k/identity))])))
+      [(list 'unpack `(xtd/arr-mapcat ~(vec forms) k/identity))])))
 
 (defn build-path
   "build path command"
@@ -96,7 +96,7 @@
                      (apply list 'cat (interpose ":" kpath))
                      
                      :else
-                     `(k/join ":" ~kpath))]
+                     `(str/join ":" ~kpath))]
     kform))
 
 (defn build-command
@@ -173,14 +173,14 @@
   {:added "3.0"}
   [e rpath parent]
   (let [path (build-path (reverse (cons e rpath)) parent)]
-    `(k/arr-map (r/scan-level ~path) r/key-export)))
+    `(xtd/arr-map (r/scan-level ~path) r/key-export)))
 
 (defn get-vals-key
   "export input keys"
   {:added "3.0"}
   [e rpath parent body]
   (let [path (build-path (reverse (cons {:path '_k} (cons e rpath))) parent)]
-    (list `k/arr-map (first body)
+    (list `xtd/arr-map (first body)
           (list 'fn '[_k]
                 (list 'return (list `r/key-export path))))))
 
@@ -282,7 +282,7 @@
   [e rpath parent body]
   (let [path (build-path (reverse (cons {:path '_k} (cons e rpath))) parent)]
     (list 'redis.call "DEL" (list 'unpack
-                                  (list `k/arr-map (first body)
+                                  (list `xtd/arr-map (first body)
                                         (list 'fn '[_k]
                                               (list 'return (list `r/key-export path))))))))
 

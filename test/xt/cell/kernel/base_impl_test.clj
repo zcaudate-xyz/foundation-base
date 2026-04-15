@@ -6,9 +6,10 @@
 (l/script- :js
   {:runtime :basic
    :require [[xt.lang.common-lib :as k]
-             [xt.lang.common-repl :as repl]
-             [xt.lang.common-runtime :as rt :with [defvar.js]]
-             [js.core :as j]
+              [xt.lang.common-data :as xtd]
+              [xt.lang.common-repl :as repl]
+              [xt.lang.common-runtime :as rt :with [defvar.js]]
+              [js.core :as j]
              [xt.cell.kernel.base-link :as base-link]
              [xt.cell.kernel.base-link-local :as base-link-local]
              [xt.cell.kernel.base-model :as base-model]
@@ -48,7 +49,7 @@
   ^:hidden
 
   (set (!.js
-        (k/obj-keys
+        (xtd/obj-keys
          (base-impl/new-cell-init))))
   => #{"resolve" "current" "reject"}
 
@@ -226,7 +227,7 @@
   ^:hidden
 
   (!.js
-   (k/second (base-impl/view-ensure (-/CELL)
+   (xtd/second (base-impl/view-ensure (-/CELL)
                                     "hello"
                                     "echo")))
   => (contains-in

@@ -19,8 +19,8 @@
   (var signer (eth-lib/get-signer url private-key))
   (return (. (eth-lib/contract-deploy signer abi bytecode init-args overrides)
               (then (fn:> [contract]
-                      (var address (or (k/get-key contract "contractAddress")
-                                       (k/get-key contract "target")))
+                      (var address (or (xt/x:get-key contract "contractAddress")
+                                       (xt/x:get-key contract "target")))
                       {:status true
                         :size (j/toFixed (/ (xt/x:len bytecode) 2 1024)
                                          3)

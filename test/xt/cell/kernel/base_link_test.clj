@@ -154,14 +154,14 @@
   ^:hidden
 
   (!.js
-   [(k/get-key
+   [(xt/x:get-key
      (base-link/link-create-worker
       (fn [listener]
         (return {"postRequest" (fn [input] (return nil))}))
       {}
       {})
      "::")
-    (k/get-key
+    (xt/x:get-key
      (base-link/link-create-worker
       {"create_fn"
        (fn [listener]
@@ -170,7 +170,7 @@
       {})
      "::")
     (xt/x:is-function?
-     (k/get-key
+     (xt/x:get-key
       (base-link/link-create-worker
        {"postRequest" (fn [input] input)}
        {}
@@ -260,7 +260,7 @@
   ^:hidden
 
   (!.js
-   (k/len
+   (xt/x:len
     (base-link/call-id
      {"id" "ln"
       "active" {}})))

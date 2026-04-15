@@ -6,9 +6,11 @@
 (l/script- :js
   {:runtime :basic
    :require [[xt.lang.common-lib :as k]
-             [xt.lang.common-runtime :as rt :with [defvar.js]]
-             [xt.lang.common-repl :as repl]
-             [js.core :as j]
+              [xt.lang.common-spec :as xt]
+              [xt.lang.common-data :as xtd]
+              [xt.lang.common-runtime :as rt :with [defvar.js]]
+              [xt.lang.common-repl :as repl]
+              [js.core :as j]
              [xt.cell.kernel :as kernel]
              [xt.cell.kernel.base-link :as base-link]
              [xt.cell.kernel.base-link-local :as base-link-local]
@@ -495,8 +497,8 @@
   ^:hidden
 
   (!.js
-   [(k/get-key (k/first (kernel/view-ensure ["hello" "echo"] nil)) "name")
-    (k/get-key (k/second (kernel/view-ensure ["hello" "echo"] nil)) "::")])
+   [(xt/x:get-key (xtd/first (kernel/view-ensure ["hello" "echo"] nil)) "name")
+    (xt/x:get-key (xtd/second (kernel/view-ensure ["hello" "echo"] nil)) "::")])
   => ["hello" "event.view"])
 
 ^{:refer xt.cell.kernel/view-call-remote :added "4.1"}

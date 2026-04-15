@@ -118,7 +118,7 @@
   (var search  (xtd/second arr))
   (var params [])
   (when search
-    (k/for:array [pair (k/split search "&")]
+    (xt/for:array [pair (k/split search "&")]
       (var [k v] (k/split pair "="))
       (x:arr-push params [k (or v "")])))
   (return {:path path
@@ -133,12 +133,12 @@
    (k/arr-join
     [(k/to-uppercase method)
      path
-     (k/arr-join (k/arr-map params (fn:> [arr] (xt/x:cat (xtd/first arr) "=" (xtd/second arr))))
+     (k/arr-join (xtd/arr-map params (fn:> [arr] (xt/x:cat (xtd/first arr) "=" (xtd/second arr))))
                  "&")
-     (k/arr-join (k/arr-map headers (fn:> [arr] (xt/x:cat (xtd/first arr) ":" (xtd/second arr))))
+     (k/arr-join (xtd/arr-map headers (fn:> [arr] (xt/x:cat (xtd/first arr) ":" (xtd/second arr))))
                  "\n")
      ""
-     (k/arr-join (k/arr-map headers xtd/first) ";")
+     (k/arr-join (xtd/arr-map headers xtd/first) ";")
      (or hash "UNSIGNED-PAYLOAD")]
     "\n")
    headers))
@@ -176,7 +176,7 @@
                   credential
                   ", "
                   "SignedHeaders="
-                  (k/arr-join (k/arr-map canonical-headers xtd/first) ";")
+                  (k/arr-join (xtd/arr-map canonical-headers xtd/first) ";")
                   ", "
                   "Signature="
                   signature))
@@ -216,9 +216,9 @@
   "parses the response body"
   {:added "4.0"}
   [response opts]
-  (var out (k/obj-pick response -/REQ_KEYS))
+  (var out (xtd/obj-pick response -/REQ_KEYS))
   (var body (. out body))
-  (if (and (k/not-empty? body)
+  (if (and (xtd/not-empty? body)
            (k/starts-with? body "<?xml"))
     (k/set-key out "body"
                (xml/to-brief (xml/parse-xml (xtd/second (k/split body "\n"))))))

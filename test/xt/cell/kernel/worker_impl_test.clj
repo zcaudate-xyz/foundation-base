@@ -6,9 +6,11 @@
 (l/script- :js
   {:runtime :basic
    :require [[xt.lang.common-lib :as k]
-             [xt.lang.common-repl :as repl]
-             [js.core :as j]
-             [xt.cell.kernel.worker-local :as worker-local]
+              [xt.lang.common-spec :as xt]
+              [xt.lang.common-data :as xtd]
+              [xt.lang.common-repl :as repl]
+              [js.core :as j]
+              [xt.cell.kernel.worker-local :as worker-local]
              [xt.cell.kernel.worker-impl :as worker-impl]]})
 
 (fact:global
@@ -23,7 +25,7 @@
    (var messages [])
    (var worker {:postMessage (fn [msg] (messages.push msg))})
    (worker-impl/post-message worker {:op "stream" :signal "test"})
-   (k/first messages))
+   (xtd/first messages))
   => {"op" "stream", "signal" "test"})
 
 ^{:refer xt.cell.kernel.worker-impl/worker-handle-async :added "4.1"}
@@ -56,7 +58,7 @@
     worker
     {:op "eval" :id "test-1" :body "1 + 1"}
     (fn [x] (return (worker.postMessage x))))
-   (k/first messages))
+   (xtd/first messages))
   => (contains {"op" "eval"
                 "id" "test-1"
                 "status" "ok"}))
@@ -76,7 +78,7 @@
     worker
     {:op "call" :id "test-2" :action "@test/action" :body [5]}
     (fn [x] (return (worker.postMessage x))))
-   (k/first messages))
+   (xtd/first messages))
   => (contains {"op" "call"
                 "id" "test-2"
                 "status" "ok"})
@@ -90,7 +92,7 @@
     worker
     {:op "call" :id "test-3" :action "@missing/action"}
     (fn [x] (return (worker.postMessage x))))
-   (k/first messages))
+   (xtd/first messages))
   => (contains {"op" "call"
                 "id" "test-3"
                 "status" "error"}))
@@ -106,7 +108,7 @@
    (worker-impl/worker-process
     worker
     {:op "eval" :id "test-1" :body "1 + 1"})
-   (k/first messages))
+   (xtd/first messages))
   => (contains {"op" "eval"
                 "status" "ok"})
 
@@ -118,7 +120,7 @@
    (worker-impl/worker-process
     worker
     {:op "call" :id "test-2" :action "@worker/ping"})
-   (k/first messages))
+   (xtd/first messages))
   => (contains {"op" "call"
                 "status" "ok"})
 
@@ -129,7 +131,7 @@
    (worker-impl/worker-process
     worker
     {:op "unknown" :id "test-3"})
-   (k/first messages))
+   (xtd/first messages))
   => (contains {"op" "unknown"
                 "status" "error"}))
 
@@ -150,7 +152,7 @@
                 :addEventListener (fn [event listener capture]
                                     (worker.listeners.push listener))})
    (worker-impl/worker-init worker k/identity)
-   (k/len worker.listeners))
+   (xt/x:len worker.listeners))
   => 1)
 
 ^{:refer xt.cell.kernel.worker-impl/worker-init-signal :added "4.1"}
@@ -161,7 +163,7 @@
    (var messages [])
    (var worker {:postMessage (fn [msg] (messages.push msg))})
    (worker-impl/worker-init-signal worker {:done true})
-   (k/first messages))
+   (xtd/first messages))
   => (contains {"op" "stream"
                 "signal" "@worker/::INIT"
                 "body" {"done" true}}))

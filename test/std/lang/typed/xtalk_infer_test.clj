@@ -505,7 +505,7 @@
 
 ^{:refer std.lang.typed.xtalk-infer/infer-type :added "4.1"}
 (fact "dispatches across literals lowered forms and calls"
-  [(types/type->data (:type (infer-type '(k/get-key route "id") {:env '{route {:kind :record :fields [{:name "id" :type {:kind :primitive :name :xt/str} :optional? false}]}}
+  [(types/type->data (:type (infer-type '(x:get-key route "id") {:env '{route {:kind :record :fields [{:name "id" :type {:kind :primitive :name :xt/str} :optional? false}]}}
                                                            :ns 'sample.route :aliases '{k xt.lang.common-lib}})))
    (types/type->data (:type (infer-type '(if true 1 2) +ctx+)))]
   => '[{:kind :primitive :name :xt/str}

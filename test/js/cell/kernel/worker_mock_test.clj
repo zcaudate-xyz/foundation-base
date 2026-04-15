@@ -49,11 +49,11 @@
                 (fn [msg] (messages.push msg))
                 {}
                 true))
-   (k/get-key worker "::"))
+   (xt/x:get-key worker "::"))
   => "worker.mock"
   
   ;; Check that worker has postMessage function
   (!.js
    (var worker (worker-mock/create-worker k/identity {} true))
-   (k/is-function? (k/get-key worker "postMessage")))
+   (k/is-function? (xt/x:get-key worker "postMessage")))
   => true)

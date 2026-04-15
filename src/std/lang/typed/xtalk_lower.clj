@@ -95,19 +95,22 @@
       (= op' 'fn:>)
       (lower-fn-shorthand (cons op' args'))
 
-      (= op' 'xt.lang.common-lib/get-key)
+      (= canonical-op 'x:get-key)
       (lower-defaulted-target 'x:get-key args')
 
-      (= op' 'xt.lang.common-lib/get-in)
+      (or (= op' 'xt.lang.common-lib/get-in)
+          (= canonical-op 'x:get-path))
       (lower-defaulted-target 'x:get-path args')
 
       (= op' 'xt.lang.common-lib/arr-join)
       (list 'x:str-join (second args') (first args'))
 
-      (= op' 'xt.lang.common-lib/first)
+      (or (= op' 'xt.lang.common-lib/first)
+          (= canonical-op 'x:first))
       (lower-offset-index args' 0)
 
-      (= op' 'xt.lang.common-lib/second)
+      (or (= op' 'xt.lang.common-lib/second)
+          (= canonical-op 'x:second))
       (lower-offset-index args' 1)
 
       (contains? +wrapper-targets+ op')

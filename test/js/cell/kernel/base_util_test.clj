@@ -32,7 +32,7 @@
   (!.js (base-util/rand-id "test-" 8))
   => string?
   
-  (!.js (k/len (base-util/rand-id "" 10)))
+  (!.js (xt/x:len (base-util/rand-id "" 10)))
   => 10
   
   (!.js (k/is-string? (base-util/rand-id "prefix-" 6)))

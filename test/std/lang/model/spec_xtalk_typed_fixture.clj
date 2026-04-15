@@ -18,7 +18,7 @@
 
 (defn.xt find-user
   [users id]
-  (return (k/get-key users id)))
+  (return (xt/x:get-key users id)))
 
 (defn.xt ^{:- [User]}
   wrong-user-name

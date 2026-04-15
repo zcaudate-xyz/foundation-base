@@ -52,10 +52,10 @@
 
   (!.js
    (var worker (worker-mock/mock-worker (fn:> [event] event)))
-   [(k/get-key worker "::")
-    (k/len (k/get-key worker "listeners"))
-    (== nil (k/get-key worker "postMessage"))
-    (== nil (k/get-key worker "postRequest"))])
+   [(xt/x:get-key worker "::")
+    (xt/x:len (xt/x:get-key worker "listeners"))
+    (== nil (xt/x:get-key worker "postMessage"))
+    (== nil (xt/x:get-key worker "postRequest"))])
   => ["worker.mock" 1 false false]
 
   (notify/wait-on :js
