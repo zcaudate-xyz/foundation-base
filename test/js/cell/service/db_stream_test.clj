@@ -5,6 +5,7 @@
 (l/script- :js
   {:runtime :basic
    :require [[js.cell.service.db-stream :as db-stream]
+             [xt.lang.common-spec :as xt]
              [xt.lang.common-lib :as k]]})
 
 (fact:global

@@ -6,10 +6,12 @@
 (l/script- :js
   {:runtime :basic
    :require [[xt.lang.common-lib :as k]
-              [xt.lang.common-repl :as repl]
-              [js.core :as j]
-              [js.cell.kernel.worker-local :as worker-local]
-              [js.cell.kernel.worker-impl :as worker-impl]]})
+              [xt.lang.common-spec :as xt]
+              [xt.lang.common-data :as xtd]
+               [xt.lang.common-repl :as repl]
+               [js.core :as j]
+               [js.cell.kernel.worker-local :as worker-local]
+               [js.cell.kernel.worker-impl :as worker-impl]]})
 
 (fact:global
  {:setup     [(l/rt:restart)

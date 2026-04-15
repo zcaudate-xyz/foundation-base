@@ -5,6 +5,7 @@
 (l/script- :js
   {:runtime :basic
    :require [[js.cell.service.db-view :as db-view]
+             [xt.lang.common-data :as xtd]
              [xt.lang.common-lib :as k]]})
 
 (fact:global

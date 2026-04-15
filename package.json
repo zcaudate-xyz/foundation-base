@@ -5,8 +5,8 @@
   "type": "commonjs",
   "dependencies": {
     "@measured/puck": "^0.20.2",
-    "@react-native-async-storage/async-storage": "^2.2.0",
     "@radix-ui/themes": "^3.3.0",
+    "@react-native-async-storage/async-storage": "^2.2.0",
     "@sqlite.org/sqlite-wasm": "^3.51.2-build8",
     "@supabase/supabase-js": "^2.103.0",
     "@tamagui/get-token": "^2.0.0-rc.40",
@@ -28,6 +28,7 @@
     "ganache": "^7.9.2",
     "javascript-time-ago": "^2.6.4",
     "node-fetch": "^3.3.2",
+    "node-localstorage": "^2.2.1",
     "osc-js": "^2.4.1",
     "pg": "^8.20.0",
     "react": "^19.2.5",
@@ -45,6 +46,7 @@
     "ua-parser-js": "^2.0.9",
     "uuid": "^13.0.0",
     "valtio": "^2.3.1",
-    "wif": "^5.0.0"
+    "wif": "^5.0.0",
+    "window": "^4.2.7"
   }
 }

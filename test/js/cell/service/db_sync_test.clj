@@ -5,8 +5,9 @@
 (l/script- :js
   {:runtime :basic
    :require [[js.cell.service.db-sync :as db-sync]
-             [xt.db :as xdb]
-             [xt.lang.common-lib :as k]]})
+              [xt.db :as xdb]
+              [xt.lang.common-spec :as xt]
+              [xt.lang.common-lib :as k]]})
 
 (fact:global
  {:setup    [(l/rt:restart)]

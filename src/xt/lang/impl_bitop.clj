@@ -2,6 +2,9 @@
   (:require [std.lang :as l  :refer [defspec.xt]])
   (:refer-clojure :exclude []))
 
+(l/script :xtalk
+  {:require [[xt.lang.common-spec :as xt]]})
+
 (defn.xt bit-count
   "get the bit count"
   {:added "4.1"}

@@ -6,10 +6,11 @@
 (l/script- :js
   {:runtime :basic
    :require [[xt.lang.common-lib :as k]
-              [xt.lang.common-repl :as repl]
-              [js.core :as j]
-              [js.cell.kernel.base-link :as base-link]
-              [js.cell.kernel.base-link-local :as base-link-local]
+              [xt.lang.common-spec :as xt]
+               [xt.lang.common-repl :as repl]
+               [js.core :as j]
+               [js.cell.kernel.base-link :as base-link]
+               [js.cell.kernel.base-link-local :as base-link-local]
               [js.cell.kernel.worker-mock :as worker-mock]]})
 
 (fact:global
