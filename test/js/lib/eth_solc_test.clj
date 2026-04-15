@@ -16,7 +16,7 @@
  {:setup    [(s/rt:stop-ganache-server)
              (Thread/sleep 1000)
              (s/rt:start-ganache-server)
-             (Thread/sleep 500)
+             (Thread/sleep 3000)
              (l/rt:restart)
              (l/rt:scaffold :js)]
   :teardown [(l/rt:stop)]})

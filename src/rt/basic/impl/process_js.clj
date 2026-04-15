@@ -34,7 +34,8 @@
                     :basic      :nodejs
                     :websocket  :nodejs}
          :env      {:nodejs    {:exec   "node"
-                                :shell  {:env +node-shell-env+}
+                                :env    +node-shell-env+
+                                :bench  {:shell {:env +node-shell-env+}}
                                  :flags  {:oneshot   ["-e"]
                                           :basic     ["-e"]
                                           :websocket ["-e"]
@@ -96,7 +97,9 @@
   '[(:- :import net :from "'net'")
     (:- :import rl :from "'readline'")
     (:- :import #{createRequire} :from "'module'")
-    (var require (createRequire (. import.meta url)))
+    (var require (createRequire (+ (or (. process env ["PWD"])
+                                       (. process (cwd)))
+                                   "/package.json")))
     (defn client-basic
       [host port opts]
       (let [conn (new net.Socket)
@@ -156,7 +159,9 @@
 
 (def +client-ws+
   '[(:- :import #{createRequire} :from "'module'")
-    (var require (createRequire (. import.meta url)))
+    (var require (createRequire (+ (or (. process env ["PWD"])
+                                       (. process (cwd)))
+                                   "/package.json")))
     (defn client-ws
       [host port opts]
       (let [WS     (or (. globalThis ["WebSocket"])

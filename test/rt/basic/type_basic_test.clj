@@ -87,6 +87,30 @@
   => {:exec ["sh" "-c"]
       :image "erlang:27-alpine"})
 
+^{:refer rt.basic.type-basic/start-basic :added "4.1"}
+(fact "start-basic merges process bench defaults into the bench runtime"
+  ^:hidden
+
+  (let [captured (atom nil)]
+    (with-redefs [server/start-server (fn [& _] {:port 1234})
+                  server/wait-ready (fn [& _] true)
+                  container/start-container (fn [& _] (throw (ex-info "container should not start" {})))
+                  bench/start-bench (fn [_lang config _port _rt]
+                                      (reset! captured config)
+                                      {})
+                  rt.basic.type-common/get-options (fn [& _] {})
+                  rt.basic.type-oneshot/rt-oneshot-setup (fn [& _]
+                                                           [:js
+                                                            {:bench {:shell {:env {"NODE_PATH" "/tmp/node_modules"}}}}
+                                                            ["node" "-e"]])]
+      (start-basic {:lang :js
+                    :id "test-bench-config"
+                    :runtime :basic
+                    :bench {:host "127.0.0.1"}})
+      (select-keys @captured [:host :shell])))
+  => {:host "127.0.0.1"
+      :shell {:env {"NODE_PATH" "/tmp/node_modules"}}})
+
 ^{:refer rt.basic.type-basic/stop-basic :added "4.0"}
 (fact "stops the basic rt"
   ^:hidden

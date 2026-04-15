@@ -70,21 +70,34 @@
                                       ;; TODO link common options
                                       (or (:encode process)
                                           {}))
-          merge-rt (fn [m]
-                     (merge (eval (select-keys rt-base [:program
-                                                   :make
-                                                   :exec
-                                                   :shell]))
-                            {:program program
-                             :exec exec}
-                            (if (map? m)
-                              m
-                              {})))
-         container-config' (cond-> (merge-rt container-config)
-                             (and container-config
-                                  (not explicit-container?)
-                                  (not local-exec?))
-                             (dissoc :exec :program))
+           merge-rt (fn [m]
+                      (merge (eval (select-keys rt-base [:program
+                                                    :make
+                                                    :exec
+                                                    :shell]))
+                             {:program program
+                              :exec exec}
+                             (if (map? m)
+                               m
+                               {})))
+          bench-config       (cond
+                               (false? bench)
+                               false
+
+                               (map? bench)
+                               (collection/merge-nested (:bench process) bench)
+
+                               (or (nil? bench)
+                                   (true? bench))
+                               (or (:bench process) bench)
+
+                               :else
+                               bench)
+          container-config' (cond-> (merge-rt container-config)
+                              (and container-config
+                                   (not explicit-container?)
+                                   (not local-exec?))
+                              (dissoc :exec :program))
           [attach key] (cond container-config
                              [(container/start-container
                                  lang
@@ -94,13 +107,13 @@
                                  rt-base)
                                 :container]
                               
-                             (not (false? bench))
-                             [(bench/start-bench
-                               lang
-                               (merge-rt bench)
-                               (:port server)
-                               rt-base)
-                              :bench])
+                             (not (false? bench-config))
+                              [(bench/start-bench
+                                lang
+                                (merge-rt bench-config)
+                                (:port server)
+                                rt-base)
+                               :bench])
         rt   (cond-> rt-base
                   key (assoc key attach)
                   key (doto (server/wait-ready)))]

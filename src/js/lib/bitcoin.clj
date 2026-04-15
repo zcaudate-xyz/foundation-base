@@ -280,16 +280,18 @@
                    1000))
   (var multiple 100000000)
    (var fee      (j/round (* fee-per-kb est-kbs multiple)))
-   (var to-total (j/round (- (* (xtd/arr-foldl
-                                  from-inputs
-                                  (fn:> [total input]
-                                    (return
-                                     (+ total (Number (. input value)))))
-                                  0)
-                                 multiple)
-                              fee)))
+    (var to-total (j/round (- (* (xtd/arr-foldl
+                                   from-inputs
+                                   (fn:> [total input]
+                                     (return
+                                      (+ total (Number (. input value)))))
+                                   0)
+                                  multiple)
+                               fee)))
   (var secret-pair (. (ECPairFactory.default TinySecp256k1)
                       (fromWIF from-wif network)))
+  (when (not (. Bitcoin TransactionBuilder))
+    (throw (new Error "TransactionBuilder not available in installed bitcoinjs-lib")))
   (var dtx (new Bitcoin.TransactionBuilder network))
   (xt/for:array [[i input] from-inputs]
     (. dtx (addInput  (. input txid)
@@ -326,17 +328,19 @@
    (var fee       (j/round (* fee-per-kb est-kbs multiple)))
    (var to-total  (j/round (* amount multiple)))
    
-   (var to-change (j/round (- (* (xtd/arr-foldl
-                                   from-inputs
-                                   (fn:> [total input]
-                                     (return
-                                      (+ total (Number (. input value)))))
-                                   0)
-                                  multiple)
-                               to-total
-                              fee)))
+    (var to-change (j/round (- (* (xtd/arr-foldl
+                                    from-inputs
+                                    (fn:> [total input]
+                                      (return
+                                       (+ total (Number (. input value)))))
+                                    0)
+                                   multiple)
+                                to-total
+                               fee)))
   (var secret-pair (. (ECPairFactory.default TinySecp256k1)
                       (fromWIF from-wif network)))
+  (when (not (. Bitcoin TransactionBuilder))
+    (throw (new Error "TransactionBuilder not available in installed bitcoinjs-lib")))
   (var dtx (new Bitcoin.TransactionBuilder network))
   (xt/for:array [[i input] from-inputs]
     (. dtx (addInput  (. input txid)

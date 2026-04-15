@@ -4,14 +4,18 @@
   (:refer-clojure :exclude [compile]))
 
 (l/script :js
-  {:import [["solc" :as Solc]]
-   :require [[js.core :as j]
-             [xt.lang.common-spec :as xt]
-             [xt.lang.common-string :as str]]})
+  {:require [[js.core :as j]
+              [xt.lang.common-spec :as xt]
+              [xt.lang.common-string :as str]]})
 
 (defn.js compile
   [input]
-  (return (. Solc (compile input))))
+  (var root (or (. process env ["PWD"])
+                (. process (cwd))))
+  (var solc (or (!:G solc)
+                (require (+ root "/node_modules/solc"))))
+  (:= (!:G solc) solc)
+  (return (. solc (compile input))))
 
 (defn.js contract-wrap-body
   "wraps the body in a contract"

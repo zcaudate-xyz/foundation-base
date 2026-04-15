@@ -18,15 +18,17 @@
   [url private-key abi bytecode init-args overrides]
   (var signer (eth-lib/get-signer url private-key))
   (return (. (eth-lib/contract-deploy signer abi bytecode init-args overrides)
-             (then (fn:> [contract]
-                     {:status true
-                      :size (j/toFixed (/ (xt/x:len bytecode) 2 1024)
-                                       3)
-                      :contractAddress (. contract address)}))
+              (then (fn:> [contract]
+                      (var address (or (k/get-key contract "contractAddress")
+                                       (k/get-key contract "target")))
+                      {:status true
+                        :size (j/toFixed (/ (xt/x:len bytecode) 2 1024)
+                                         3)
+                        :contractAddress address}))
 
-             (catch (fn:> [err]
-                      {:status false
-                       :data err})))))
+              (catch (fn:> [err]
+                        {:status false
+                         :data err})))))
 
 (defn.js contract-run
   "runs the contract given address and arguments"

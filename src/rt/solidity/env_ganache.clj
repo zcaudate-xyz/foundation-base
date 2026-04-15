@@ -1,5 +1,6 @@
 (ns rt.solidity.env-ganache
-  (:require [rt.basic.impl.process-js :as process-js]
+  (:require [clojure.string :as string]
+            [rt.basic.impl.process-js :as process-js]
             [std.fs :as fs]
             [std.json :as json]
             [std.lang :as l]
@@ -72,6 +73,24 @@
 
 (defonce ^:dynamic *server* (atom nil))
 
+(defn- get-listener-pids
+  []
+  (->> (os/sh {:args ["/bin/bash" "-lc"
+                      (str "lsof -t -iTCP:" +default-port+ " -sTCP:LISTEN 2>/dev/null || true")]
+               :wrap false})
+       string/split-lines
+       (remove string/blank?)
+       (map parse-long)))
+
+(defn- stop-listeners
+  []
+  (doseq [pid (get-listener-pids)]
+    (when-let [handle (.orElse (java.lang.ProcessHandle/of pid) nil)]
+      (.destroy handle)
+      (Thread/sleep 200)
+      (when (.isAlive handle)
+        (.destroyForcibly handle)))))
+
 (defn start-ganache-server
   "starts the ganache service"
   {:added "4.0"}
@@ -85,25 +104,25 @@
           (-> (if (not @*server*)
                 (swap! *server*
                        (fn [m]
-                          (let [process (os/sh {:args ["/bin/bash" "-c"
-                                                      "npx ganache --wallet.seed 'test' --host '0.0.0.0'"]
-                                               :wait false
-                                               :root +default-dir+})
-                               thread  (-> (future/future
-                                             (os/sh-wait process))
-                                           (future/on:complete
+                           (let [process (os/sh {:args ["/bin/bash" "-c"
+                                                       "npx ganache --wallet.seed 'test' --host '0.0.0.0'"]
+                                                :wait false
+                                                :root +default-dir+})
+                                thread  (-> (future/future
+                                              (os/sh-wait process))
+                                            (future/on:complete
                                             (fn [_ _]
                                               (try (let [out (os/sh-output process)]
                                                      (when (not= 0 (:exit out))
                                                        (env/prn out)))
                                                    (catch Throwable t))
                                               (reset! *server* nil))))]
-                           (network/wait-for-port (network/local-ip) +default-port+
-                                            {:timeout 10000})
-                           {:type "ganache"
-                            :port +default-port+
-                            :root +default-port+
-                            :process process
+                            (network/wait-for-port "127.0.0.1" +default-port+
+                                                   {:timeout 10000})
+                            {:type "ganache"
+                             :port +default-port+
+                             :root +default-port+
+                             :process process
                             :thread thread})))
                 @*server*))))))
 
@@ -117,4 +136,6 @@
         (os/sh-close)
         (os/sh-exit)
         (os/sh-wait)))
+    (stop-listeners)
+    (reset! *server* nil)
     entry))
