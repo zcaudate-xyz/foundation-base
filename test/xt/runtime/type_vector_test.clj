@@ -60,10 +60,46 @@
   => [1 2 3 4])
 
 ^{:refer xt.runtime.type-vector/vector-to-array :added "4.0"}
-(fact "converts vector to array")
+(fact "converts vector to array"
+  ^:hidden
+
+  (!.js
+   (v/vector-to-array
+    (v/vector 1 2 3 4)))
+  => [1 2 3 4]
+
+  (!.lua
+   (v/vector-to-array
+    (v/vector 1 2 3 4)))
+  => [1 2 3 4])
 
 ^{:refer xt.runtime.type-vector/vector-new :added "4.0"}
-(fact "creates a new vector")
+(fact "creates a new vector"
+  ^:hidden
+
+  (!.js
+   (var out (v/vector-new (node/node-create nil [])
+                          2
+                          node/BITS
+                          [1 2]
+                          nil))
+   [(. out ["::"])
+    (. out _size)
+    (. out _shift)
+    (v/vector-to-array out)])
+  => ["vector" 2 5 [1 2]]
+
+  (!.lua
+   (var out (v/vector-new (node/node-create nil [])
+                          2
+                          node/BITS
+                          [1 2]
+                          nil))
+   [(. out ["::"])
+    (. out _size)
+    (. out _shift)
+    (v/vector-to-array out)])
+  => ["vector" 2 5 [1 2]])
 
 ^{:refer xt.runtime.type-vector/vector-empty :added "4.0"}
 (fact "creates an empty vector from current"
@@ -76,7 +112,18 @@
   => [])
 
 ^{:refer xt.runtime.type-vector/vector-is-editable :added "4.0"}
-(fact "checks that vector is editable")
+(fact "checks that vector is editable"
+  ^:hidden
+
+  (!.js
+   [(v/vector-is-editable (v/vector 1 2 3))
+    (v/vector-is-editable (v/vector-empty-mutable))])
+  => [false true]
+
+  (!.lua
+   [(v/vector-is-editable (v/vector 1 2 3))
+    (v/vector-is-editable (v/vector-empty-mutable))])
+  => [false true])
 
 ^{:refer xt.runtime.type-vector/vector-push-last :added "4.0"}
 (fact "push-lastoins an element to the vector"
@@ -165,16 +212,74 @@
   => (contains {"_tail" [0 1 2 3 4 5 6 7 8 9]}))
 
 ^{:refer xt.runtime.type-vector/vector-to-mutable! :added "4.0"}
-(fact "mutates the vector")
+(fact "mutates the vector"
+  ^:hidden
+
+  (!.js
+   (var out (v/vector-to-mutable! (v/vector 1 2 3)))
+   [(v/vector-is-editable out)
+    (v/vector-to-array out)])
+  => [true [1 2 3]]
+
+  (!.lua
+   (var out (v/vector-to-mutable! (v/vector 1 2 3)))
+   [(v/vector-is-editable out)
+    (v/vector-to-array out)])
+  => [true [1 2 3]])
 
 ^{:refer xt.runtime.type-vector/vector-to-persistent! :added "4.0"}
-(fact "creates persistent vector")
+(fact "creates persistent vector"
+  ^:hidden
+
+  (!.js
+   (var out (-> (v/vector 1 2 3)
+                (v/vector-to-mutable!)
+                (v/vector-push-last! 4)
+                (v/vector-to-persistent!)))
+   [(v/vector-is-editable out)
+    (v/vector-to-array out)])
+  => [false [1 2 3 4]]
+
+  (!.lua
+   (var out (-> (v/vector 1 2 3)
+                (v/vector-to-mutable!)
+                (v/vector-push-last! 4)
+                (v/vector-to-persistent!)))
+   [(v/vector-is-editable out)
+    (v/vector-to-array out)])
+  => [false [1 2 3 4]])
 
 ^{:refer xt.runtime.type-vector/vector-find-idx :added "4.0"}
-(fact "finds the pair entry")
+(fact "finds the pair entry"
+  ^:hidden
+
+  (!.js
+   (var entry (v/vector-find-idx (v/vector 1 2 3) 1))
+   [(. entry _key)
+    (. entry _val)
+    (== nil (v/vector-find-idx (v/vector 1 2 3) 8))])
+  => [1 2 true]
+
+  (!.lua
+   (var entry (v/vector-find-idx (v/vector 1 2 3) 1))
+   [(. entry _key)
+    (. entry _val)
+    (== nil (v/vector-find-idx (v/vector 1 2 3) 8))])
+  => [1 2 true])
 
 ^{:refer xt.runtime.type-vector/vector-lookup-idx :added "4.0"}
-(fact "finds the value")
+(fact "finds the value"
+  ^:hidden
+
+  (!.js
+   [(v/vector-lookup-idx (v/vector 1 2 3) 1 "missing")
+    (v/vector-lookup-idx (v/vector 1 2 3) 8 "missing")])
+  => [2 "missing"]
+
+  (!.lua
+   [(v/vector-lookup-idx (v/vector 1 2 3) 1 "missing")
+    (v/vector-lookup-idx (v/vector 1 2 3) 8 "missing")])
+  => [2 "missing"])
 
 ^{:refer xt.runtime.type-vector/vector-create :added "4.0"}
 (fact "creates a vector"

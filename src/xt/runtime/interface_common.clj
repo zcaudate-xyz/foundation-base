@@ -61,7 +61,7 @@
   "gets the namespace of a symbol, keyword or var"
   {:added "4.0"}
   [x]
-  (return (. x _namespace)))
+  (return (. x _ns)))
 
 (defn.xt hash-with-cache
   "gets a memoized cache id"
@@ -186,7 +186,7 @@
   "nth coll"
   {:added "4.0"}
   [coll idx]
-  (list '. coll '(nth idx)))
+  (list '. coll (list 'nth idx)))
 
 (defmacro.xt  ^{:standalone true}
   push-mutable
@@ -214,7 +214,7 @@
   "disassociates a key from aa persistent collection"
   {:added "4.0"}
   [coll k]
-  (list '. coll '(dissoc k)))
+  (list '. coll (list 'dissoc k)))
 
 (defmacro.xt  ^{:standalone true}
   assoc-mutable
@@ -249,11 +249,11 @@
   "find coll"
   {:added "4.0"}
   [coll idx]
-  (list '. coll '(find idx)))
+  (list '. coll (list 'find idx)))
 
 (defmacro.xt  ^{:standalone true}
   empty
   "empty coll"
   {:added "4.0"}
-  [coll idx]
+  [coll]
   (list '. coll '(empty)))

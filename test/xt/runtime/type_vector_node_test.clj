@@ -140,7 +140,22 @@
   => {"children" {}, "::" "vector.node"})
 
 ^{:refer xt.runtime.type-vector-node/node-array-for :added "4.0"}
-(fact "gets the node array")
+(fact "gets the node array"
+  ^:hidden
+
+  (!.js
+   (var root (node/node-create nil [(node/node-create nil [1 2 3 4])]))
+   [(node/node-array-for root 36 5 [32 33 34 35] 2 false)
+    (node/node-array-for root 36 5 [32 33 34 35] 34 false)
+    (== nil (node/node-array-for root 36 5 [32 33 34 35] 40 false))])
+  => [[1 2 3 4] [32 33 34 35] true]
+
+  (!.lua
+   (var root (node/node-create nil [(node/node-create nil [1 2 3 4])]))
+   [(node/node-array-for root 36 5 [32 33 34 35] 2 false)
+    (node/node-array-for root 36 5 [32 33 34 35] 34 false)
+    (== nil (node/node-array-for root 36 5 [32 33 34 35] 40 false))])
+  => [[1 2 3 4] [32 33 34 35] true])
 
 ^{:refer xt.runtime.type-vector-node/node-new-path :added "4.0"}
 (fact "new path"
@@ -163,11 +178,53 @@
       "::" "vector.node"})
 
 ^{:refer xt.runtime.type-vector-node/node-push-tail :added "4.0"}
-(fact "pushes an element onto node")
+(fact "pushes an element onto node"
+  ^:hidden
+
+  (!.js
+   (node/node-push-tail nil 32 5 node/EMPTY_VECTOR_NODE (node/node-create nil [1 2 3]) false))
+  => {"children"
+      [{"children" [1 2 3]
+        "::" "vector.node"}]
+      "::" "vector.node"}
+
+  (!.lua
+   (node/node-push-tail nil 32 5 node/EMPTY_VECTOR_NODE (node/node-create nil [1 2 3]) false))
+  => {"children"
+      [{"children" [1 2 3]
+        "::" "vector.node"}]
+      "::" "vector.node"})
 
 ^{:refer xt.runtime.type-vector-node/node-pop-tail :added "4.0"}
-(fact "pops the last element off node")
+(fact "pops the last element off node"
+  ^:hidden
+
+  (!.js
+   (var out (node/node-pop-tail nil 33 5 (node/node-create nil [(node/node-create nil [1 2 3])]) false))
+   [(. out ["::"])
+    (k/len (. out children))])
+  => ["vector.node" 0]
+
+  (!.lua
+   (var out (node/node-pop-tail nil 33 5 (node/node-create nil [(node/node-create nil [1 2 3])]) false))
+   [(. out ["::"])
+    (k/len (. out children))])
+  => ["vector.node" 0])
 
 ^{:refer xt.runtime.type-vector-node/node-assoc :added "4.0"}
-(fact "associates a given node")
+(fact "associates a given node without mutating the original"
+  ^:hidden
 
+  (!.js
+   (var root (node/node-create nil [1 2 3]))
+   (var out (node/node-assoc root 0 1 9))
+   [(. root children)
+    (. out children)])
+  => [[1 2 3] [1 9 3]]
+
+  (!.lua
+   (var root (node/node-create nil [1 2 3]))
+   (var out (node/node-assoc root 0 1 9))
+   [(. root children)
+    (. out children)])
+  => [[1 2 3] [1 9 3]])

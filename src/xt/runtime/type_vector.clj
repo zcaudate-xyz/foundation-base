@@ -256,12 +256,12 @@
   (var size (interface-collection/coll-size vector))
   (cond (or (< idx 0)
             (>= idx size))
-        (return nil)
+         (return nil)
 
-        :else
-        (return (type-pair/pair-new
-                 idx
-                 (. vector (nth idx))))))
+         :else
+         (return (type-pair/pair
+                  idx
+                  (. vector (nth idx))))))
 
 (defn.xt vector-lookup-idx
   "finds the value"

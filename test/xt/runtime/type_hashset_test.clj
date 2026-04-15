@@ -6,13 +6,19 @@
 (l/script- :js
   {:runtime :basic
    :require [[xt.runtime.type-hashset :as hs]
+             [xt.runtime.type-hashmap :as hm]
              [xt.runtime.interface-common :as ic]
+             [xt.lang.common-iter :as it]
+             [xt.lang.common-spec :as xt]
              [xt.lang.common-repl :as repl]]})
 
 (l/script- :lua
   {:runtime :basic
    :require [[xt.runtime.type-hashset :as hs]
+             [xt.runtime.type-hashmap :as hm]
              [xt.runtime.interface-common :as ic]
+             [xt.lang.common-iter :as it]
+             [xt.lang.common-spec :as xt]
              [xt.lang.common-repl :as repl]]})
 
 (fact:global
@@ -127,43 +133,255 @@
 
 
 ^{:refer xt.runtime.type-hashset/hashset-to-array :added "4.1"}
-(fact "TODO")
+(fact "converts the hashset to an array"
+  ^:hidden
+
+  (!.js
+   (hs/hashset-to-array
+    (hs/hashset "a" "b")))
+  => ["b" "a"]
+
+  (!.lua
+   (hs/hashset-to-array
+    (hs/hashset "a" "b")))
+  => ["b" "a"])
 
 ^{:refer xt.runtime.type-hashset/hashset-to-iter :added "4.1"}
-(fact "TODO")
+(fact "iterates over the hashset values"
+  ^:hidden
+
+  (!.js
+   (it/arr<
+    (hs/hashset-to-iter
+     (hs/hashset "a" "b"))))
+  => ["b" "a"]
+
+  (!.lua
+   (it/arr<
+    (hs/hashset-to-iter
+     (hs/hashset "a" "b"))))
+  => ["b" "a"])
 
 ^{:refer xt.runtime.type-hashset/hashset-new :added "4.1"}
-(fact "TODO")
+(fact "creates a bare hashset from an underlying hashmap"
+  ^:hidden
+
+  (!.js
+   (var out (hs/hashset-new hm/EMPTY_HASHMAP nil))
+   [(. out ["::"])
+    (. out _size)
+    (. (. out _map) ["::"])])
+  => ["hashset" 0 "hashmap"]
+
+  (!.lua
+   (var out (hs/hashset-new hm/EMPTY_HASHMAP nil))
+   [(. out ["::"])
+    (. out _size)
+    (. (. out _map) ["::"])])
+  => ["hashset" 0 "hashmap"])
 
 ^{:refer xt.runtime.type-hashset/hashset-empty :added "4.1"}
-(fact "TODO")
+(fact "creates an empty hashset from the current hashset"
+  ^:hidden
+
+  (!.js
+   (var out (hs/hashset-empty (hs/hashset "a")))
+   [(. out _size)
+    (hs/hashset-show out)])
+  => [0 "#{}"]
+
+  (!.lua
+   (var out (hs/hashset-empty (hs/hashset "a")))
+   [(. out _size)
+    (hs/hashset-show out)])
+  => [0 "#{}"])
 
 ^{:refer xt.runtime.type-hashset/hashset-is-editable :added "4.1"}
-(fact "TODO")
+(fact "detects mutable vs persistent hashsets"
+  ^:hidden
+
+  (!.js
+   [(hs/hashset-is-editable (hs/hashset "a"))
+    (hs/hashset-is-editable (hs/hashset-empty-mutable))])
+  => [false true]
+
+  (!.lua
+   [(hs/hashset-is-editable (hs/hashset "a"))
+    (hs/hashset-is-editable (hs/hashset-empty-mutable))])
+  => [false true])
 
 ^{:refer xt.runtime.type-hashset/hashset-to-persistent! :added "4.1"}
-(fact "TODO")
+(fact "converts a mutable hashset back into a persistent hashset"
+  ^:hidden
+
+  (!.js
+   (var out (-> (hs/hashset "a")
+                (hs/hashset-to-mutable!)
+                (hs/hashset-push! "b")
+                (hs/hashset-to-persistent!)))
+   [(hs/hashset-is-editable out)
+    (hs/hashset-has? out "b")])
+  => [false true]
+
+  (!.lua
+   (var out (-> (hs/hashset "a")
+                (hs/hashset-to-mutable!)
+                (hs/hashset-push! "b")
+                (hs/hashset-to-persistent!)))
+   [(hs/hashset-is-editable out)
+    (hs/hashset-has? out "b")])
+  => [false true])
 
 ^{:refer xt.runtime.type-hashset/hashset-has? :added "4.1"}
-(fact "TODO")
+(fact "checks membership in the hashset"
+  ^:hidden
+
+  (!.js
+   [(hs/hashset-has? (hs/hashset "a" "b") "a")
+    (hs/hashset-has? (hs/hashset "a" "b") "c")])
+  => [true false]
+
+  (!.lua
+   [(hs/hashset-has? (hs/hashset "a" "b") "a")
+    (hs/hashset-has? (hs/hashset "a" "b") "c")])
+  => [true false])
 
 ^{:refer xt.runtime.type-hashset/hashset-push! :added "4.1"}
-(fact "TODO")
+(fact "mutably adds values without growing for duplicates"
+  ^:hidden
+
+  (!.js
+   (var out (hs/hashset-empty-mutable))
+   (hs/hashset-push! out "a")
+   (hs/hashset-push! out "b")
+   (hs/hashset-push! out "b")
+   [(hs/hashset-has? out "a")
+    (hs/hashset-has? out "b")
+    (. out _size)])
+  => [true true 2]
+
+  (!.lua
+   (var out (hs/hashset-empty-mutable))
+   (hs/hashset-push! out "a")
+   (hs/hashset-push! out "b")
+   (hs/hashset-push! out "b")
+   [(hs/hashset-has? out "a")
+    (hs/hashset-has? out "b")
+    (. out _size)])
+  => [true true 2])
 
 ^{:refer xt.runtime.type-hashset/hashset-dissoc :added "4.1"}
-(fact "TODO")
+(fact "keeps persistent removals immutable"
+  ^:hidden
+
+  (!.js
+   (var s0 (hs/hashset "a" "b"))
+   (var s1 (hs/hashset-dissoc s0 "a"))
+   [(hs/hashset-has? s0 "a")
+    (hs/hashset-has? s1 "a")
+    (. s1 _size)])
+  => [true false 1]
+
+  (!.lua
+   (var s0 (hs/hashset "a" "b"))
+   (var s1 (hs/hashset-dissoc s0 "a"))
+   [(hs/hashset-has? s0 "a")
+    (hs/hashset-has? s1 "a")
+    (. s1 _size)])
+  => [true false 1])
 
 ^{:refer xt.runtime.type-hashset/hashset-dissoc! :added "4.1"}
-(fact "TODO")
+(fact "mutably removes values and ignores missing values"
+  ^:hidden
+
+  (!.js
+   (var out (-> (hs/hashset "a" "b")
+                (hs/hashset-to-mutable!)))
+   (hs/hashset-dissoc! out "a")
+   (hs/hashset-dissoc! out "missing")
+   [(hs/hashset-has? out "a")
+    (hs/hashset-has? out "b")
+    (. out _size)])
+  => [false true 1]
+
+  (!.lua
+   (var out (-> (hs/hashset "a" "b")
+                (hs/hashset-to-mutable!)))
+   (hs/hashset-dissoc! out "a")
+   (hs/hashset-dissoc! out "missing")
+   [(hs/hashset-has? out "a")
+    (hs/hashset-has? out "b")
+    (. out _size)])
+  => [false true 1])
 
 ^{:refer xt.runtime.type-hashset/hashset-hash :added "4.1"}
-(fact "TODO")
+(fact "computes the same unordered hash as the protocol hash function"
+  ^:hidden
+
+  (!.js
+   (var s1 (hs/hashset "a" "b"))
+   (var s2 (hs/hashset "b" "a"))
+   [(== (hs/hashset-hash s1)
+        (. s1 (hash)))
+    (== (hs/hashset-hash s1)
+        (hs/hashset-hash s2))])
+  => [true true]
+
+  (!.lua
+   (var s1 (hs/hashset "a" "b"))
+   (var s2 (hs/hashset "b" "a"))
+   [(== (hs/hashset-hash s1)
+        (. s1 (hash)))
+    (== (hs/hashset-hash s1)
+        (hs/hashset-hash s2))])
+  => [true true])
 
 ^{:refer xt.runtime.type-hashset/hashset-show :added "4.1"}
-(fact "TODO")
+(fact "shows the hashset as an EDN-like set string"
+  ^:hidden
+
+  (!.js
+   (hs/hashset-show
+    (hs/hashset "a" "b")))
+  => #"\#\{(?:\"a\", \"b\"|\"b\", \"a\")\}"
+
+  (!.lua
+   (hs/hashset-show
+    (hs/hashset "a" "b")))
+  => #"\#\{(?:\"a\", \"b\"|\"b\", \"a\")\}")
 
 ^{:refer xt.runtime.type-hashset/hashset-create :added "4.1"}
-(fact "TODO")
+(fact "creates a hashset with the default prototype"
+  ^:hidden
+
+  (!.js
+   (var out (hs/hashset-create hm/EMPTY_HASHMAP))
+   [(. out ["::"])
+    (. out _size)
+    (hs/hashset-show out)])
+  => ["hashset" 0 "#{}"]
+
+  (!.lua
+   (var out (hs/hashset-create hm/EMPTY_HASHMAP))
+   [(. out ["::"])
+    (. out _size)
+    (hs/hashset-show out)])
+  => ["hashset" 0 "#{}"])
 
 ^{:refer xt.runtime.type-hashset/hashset-empty-mutable :added "4.1"}
-(fact "TODO")
+(fact "creates an empty mutable hashset"
+  ^:hidden
+
+  (!.js
+   (var out (hs/hashset-empty-mutable))
+   [(hs/hashset-is-editable out)
+    (. out _size)
+    (hs/hashset-show out)])
+  => [true 0 "#{}"]
+
+  (!.lua
+   (var out (hs/hashset-empty-mutable))
+   [(hs/hashset-is-editable out)
+    (. out _size)
+    (hs/hashset-show out)])
+  => [true 0 "#{}"])

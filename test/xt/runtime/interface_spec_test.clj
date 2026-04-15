@@ -3,14 +3,16 @@
              [xt.lang.common-notify :as notify])
    (:use code.test))
 
- (l/script- :js
+  (l/script- :js
    {:runtime :basic
     :require [[xt.runtime.interface-spec :as spec]
+              [xt.lang.common-spec :as xt]
               [xt.lang.common-repl :as repl]]})
 
- (l/script- :lua
+  (l/script- :lua
    {:runtime :basic
     :require [[xt.runtime.interface-spec :as spec]
+              [xt.lang.common-spec :as xt]
               [xt.lang.common-repl :as repl]]})
 
  (fact:global
@@ -105,7 +107,40 @@
 
 
 ^{:refer xt.runtime.interface-spec/proto-create :added "4.1"}
-(fact "TODO")
+(fact "creates a prototype object suitable for runtime dispatch"
+  ^:hidden
+
+  (!.js
+   (var proto (spec/proto-create
+               {"value" 4
+                "sum" (fn [x]
+                        (return x))}))
+   [(xt/x:get-key proto "value")
+    (xt/x:is-function? (xt/x:get-key proto "sum"))])
+  => [4 true]
+
+  (!.lua
+   (var proto (spec/proto-create
+               {"value" 4
+                "sum" (fn [x]
+                        (return x))}))
+   [(xt/x:get-key proto "value")
+    (xt/x:is-function? (xt/x:get-key proto "sum"))
+    (== proto (xt/x:get-key proto "__index"))])
+  => [4 true true])
 
 ^{:refer xt.runtime.interface-spec/proto-spec :added "4.1"}
-(fact "TODO")
+(fact "merges protocol entries into a validated spec map"
+  ^:hidden
+
+  (!.js
+   (spec/proto-spec
+    [[["eq" "hash"] {"eq" "eq" "hash" "hash"}]
+     [["show"] {"show" "show"}]]))
+  => {"eq" "eq" "hash" "hash" "show" "show"}
+
+  (!.lua
+   (spec/proto-spec
+    [[["eq" "hash"] {"eq" "eq" "hash" "hash"}]
+     [["show"] {"show" "show"}]]))
+  => {"eq" "eq" "hash" "hash" "show" "show"})

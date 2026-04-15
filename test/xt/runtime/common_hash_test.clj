@@ -99,10 +99,42 @@
   => true)
 
 ^{:refer xt.runtime.common-hash/hash-integer :added "4.0"}
-(fact "hashes an integer")
+(fact "hashes an integer"
+  ^:hidden
+
+  (!.js
+   [(hash/hash-integer 1)
+    (hash/hash-integer 16777217)])
+  => [1 1]
+
+  (!.lua
+   [(hash/hash-integer 1)
+    (hash/hash-integer 16777217)])
+  => [1 1]
+
+  (!.py
+   [(hash/hash-integer 1)
+    (hash/hash-integer 16777217)])
+  => [1 1])
 
 ^{:refer xt.runtime.common-hash/hash-boolean :added "4.0"}
-(fact "hashes a boolean")
+(fact "hashes a boolean"
+  ^:hidden
+
+  (!.js
+   [(hash/hash-boolean true)
+    (hash/hash-boolean false)])
+  => [1 -1]
+
+  (!.lua
+   [(hash/hash-boolean true)
+    (hash/hash-boolean false)])
+  => [1 -1]
+
+  (!.py
+   [(hash/hash-boolean true)
+    (hash/hash-boolean false)])
+  => [1 -1])
 
 ^{:refer xt.runtime.common-hash/hash-native :added "4.0"}
 (fact "hashes a value"
@@ -122,7 +154,54 @@
 
 
 ^{:refer xt.runtime.common-hash/native-type :added "4.1"}
-(fact "TODO")
+(fact "returns the runtime-native type tag"
+  ^:hidden
+
+  (!.js
+   [(hash/native-type nil)
+    (hash/native-type "abc")
+    (hash/native-type true)
+    (hash/native-type 1)
+    (hash/native-type [1 2])
+    (hash/native-type (fn:>))
+    (hash/native-type {})])
+  => ["nil" "string" "boolean" "number" "array" "function" "object"]
+
+  (!.lua
+   [(hash/native-type nil)
+    (hash/native-type "abc")
+    (hash/native-type true)
+    (hash/native-type 1)
+    (hash/native-type [1 2])
+    (hash/native-type (fn:>))
+    (hash/native-type {})])
+  => ["nil" "string" "boolean" "number" "array" "function" "object"]
+
+  (!.py
+   [(hash/native-type nil)
+    (hash/native-type "abc")
+    (hash/native-type true)
+    (hash/native-type 1)
+    (hash/native-type [1 2])
+    (hash/native-type (fn:>))
+    (hash/native-type {})])
+  => ["nil" "string" "boolean" "number" "array" "function" "object"])
 
 ^{:refer xt.runtime.common-hash/native-class :added "4.1"}
-(fact "TODO")
+(fact "returns managed class tags for objects and native types otherwise"
+  ^:hidden
+
+  (!.js
+   [(hash/native-class "abc")
+    (hash/native-class {"::" "demo"})])
+  => ["string" "demo"]
+
+  (!.lua
+   [(hash/native-class "abc")
+    (hash/native-class {"::" "demo"})])
+  => ["string" "demo"]
+
+  (!.py
+   [(hash/native-class "abc")
+    (hash/native-class {"::" "demo"})])
+  => ["string" "demo"])

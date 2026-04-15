@@ -108,7 +108,22 @@
   => 3)
 
 ^{:refer xt.runtime.type-list/list-new :added "4.0"}
-(fact "creates a new list")
+(fact "creates a new list"
+  ^:hidden
+
+  (!.js
+   (var out (t/list-new 1 t/EMPTY_LIST nil))
+   [(. out ["::"])
+    (. out _head)
+    (t/list-to-array out)])
+  => ["list" 1 [1]]
+
+  (!.lua
+   (var out (t/list-new 1 t/EMPTY_LIST nil))
+   [(. out ["::"])
+    (. out _head)
+    (t/list-to-array out)])
+  => ["list" 1 [1]])
 
 ^{:refer xt.runtime.type-list/list-push :added "4.0"}
 (fact "pushs onto the front of the list"
