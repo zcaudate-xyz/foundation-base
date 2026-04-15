@@ -9,14 +9,123 @@
             :emit {:native {:suppress true}
                    :lang/jsx false}
             :notify {:host "test.statstrade.io"}}
-   :require [[js.core :as j]
-             [js.react :as r]
-             [js.react-native :as n :include [:fn]]
-             [js.react-native.animate :as a]
-             [js.react-native.physical-base :as physical-base]
-             [js.react-native.model-roller :as model-roller]
-             [xt.lang.common-lib :as k]]
-   })
+    :require [[js.core :as j]
+              [js.react :as r]
+              [js.react-native :as n :include [:fn]]
+              [js.react-native.animate :as a]
+              [js.react-native.physical-base :as physical-base]
+              [js.react-native.model-roller :as model-roller]
+              [xt.lang.common-data :as xtd]
+              [xt.lang.common-spec :as xt]
+              [xt.lang.common-math :as math]]
+    })
+
+(defn.js make-values
+  [values divisions]
+  (var total (xt/x:len values))
+  (var n (/ (math/lcm total divisions)
+            total))
+  (return (xtd/arr-mapcat (xtd/arr-repeat values n)
+                          (fn:> [v] v))))
+
+(defn.js get-element
+  [offset index divisions values]
+  (var noffset (j/round offset))
+  (var center (math/mod-pos noffset divisions))
+  (var shifted (- index center))
+  (var shifted-mod (math/mod-pos shifted divisions))
+  (var normalised (:? (< shifted-mod (/ divisions 2))
+                      shifted-mod
+                      (- shifted-mod divisions)))
+  (var total (xt/x:len values))
+  (return (xt/x:get-key values (math/mod-pos (+ noffset normalised)
+                                             total))))
+
+(defn.js singleTransform
+  [offset i modelFn]
+  (var v (- offset i))
+  (var #{translate
+         scale
+         visible} (modelFn v))
+  (return
+   {:style
+    {:opacity (:? visible
+                  (math/mix -1.5 1 scale)
+                  0)
+     :zIndex (* 10 scale)
+     :transform
+     [{:translateY (- translate)}
+      {:translateX (* 0.5 (j/abs translate))}
+      {:scaleX (math/mix 0.2 1 scale)}
+      {:scaleY (math/mix 0.2 1 scale)}]}}))
+
+(defn.js doubleTransform
+  [offset i modelFn]
+  (var v (- offset i))
+  (var #{translate
+         scale
+         visible} (modelFn v))
+  (return
+   {:style
+    {:opacity (:? visible
+                  (math/mix -2 1 scale)
+                  0)
+     :zIndex (* 10 scale)
+     :transform
+     [{:translateY (- translate)}
+      #_{:translateX (* 0.5 (j/abs translate))}
+      #_{:scaleX (math/mix 0.2 1 scale)}
+      #_{:scaleY (math/mix 0.2 1 scale)}]}}))
+
+(defn.js clockTransform
+  [offset i modelFn]
+  (var v (- offset i))
+  (var #{translate
+         scale
+         visible} (modelFn v))
+  (return
+   {:style
+    {:opacity (:? visible
+                  (math/mix -10 1 scale)
+                  0)
+     :zIndex (* 100 scale)
+     :transform
+     [{:translateY (* -1.4 translate)}
+      {:scale (math/mix -4 2 scale)}
+      #_#_{:scaleX (math/mix -3 2 scale)}
+      {:scaleY (math/mix -3 2 scale)}]}}))
+
+(defn.js createComponent
+  [index indicator modelFn transformFn style divisions values]
+  (return
+   {:component n/TextInput
+    :editable false
+    :style [{:position "absolute"
+             :width 15
+             :padding 2
+             :fontWeight "800"
+             :textAlign "center"
+             :color "white"}
+            style]
+    :transformations
+    {indicator
+     (fn:> [offset]
+       (j/assign (transformFn offset index modelFn)
+                 {:text (-/get-element offset index divisions values)}))}}))
+
+(defn.js useInterval
+  [f ms]
+  (var interval (r/ref nil))
+  (var [active setActive] (r/local true))
+  (r/watch [active]
+    (when (and active
+               (not (r/curr interval)))
+      (r/curr:set interval (j/setInterval f ms)))
+    (when (and (not active)
+               (r/curr interval))
+      (j/clearInterval (r/curr interval))
+      (r/curr:set interval nil)))
+  (return [active setActive]))
 
 ^{:refer js.react-native.physical-play/DigitRollerStatic
   :adopt true
@@ -72,66 +181,6 @@
   (def.js HOURS
     ["0" "1" "2" "3" "4" "5" "0" "1" "2" "3" "4" "5"])
   
-  (defn.js make-values
-    [values divisions]
-    (var total (xt/x:len values))
-    (var n (/ (k/lcm total divisions)
-              total))
-    (return (xtd/arr-mapcat (xtd/arr-repeat values n)
-                          k/identity)))
-  
-  (defn.js get-element
-    [offset index divisions values]
-    (var noffset  (j/round offset))
-    (var center   (math/mod-pos noffset divisions))
-    (var shifted     (- index center))
-    (var shifted-mod (math/mod-pos shifted divisions))
-    (var normalised  (:? (< shifted-mod (/ divisions 2))
-                         shifted-mod
-                         (- shifted-mod divisions)))
-    (var total (xt/x:len values))
-    (return (xt/x:get-key values (math/mod-pos (+ noffset normalised)
-                                         total))))
-  
-  (defn.js singleTransform
-    [offset i modelFn]
-    (var v (- offset i))
-    (var #{translate
-           scale
-           visible} (modelFn v))
-    (return
-     {:style
-      {:opacity (:? visible
-                    (math/mix -1.5 1 scale)
-                    0)
-       :zIndex (* 10 scale)
-       :transform
-       [{:translateY (- translate)}
-        {:translateX (* 0.5 (j/abs translate))}
-        {:scaleX (math/mix 0.2 1 scale)}
-        {:scaleY (math/mix 0.2 1 scale)}]}}))
-  
-  (defn.js createComponent
-    [index indicator modelFn transformFn style divisions values]
-    (return
-     {:component n/TextInput
-      :editable false
-      :style [{:position "absolute"
-               :width 15
-               :padding 2
-               :fontWeight "800"
-               :textAlign "center"
-               :color "white"
-               ;;:backgroundColor "black"
-               }
-              style]
-      :transformations
-      {indicator
-       (fn:> [offset]
-         (j/assign (transformFn offset index modelFn)
-                   {:text (-/get-element offset index divisions values)}))}}))
-  
-  
   (defn.js DigitRollerSingleDemo
     []
     (var [position0 setPosition0] (r/local 9))
@@ -171,24 +220,6 @@
         ]
        [:% n/Fill]])))
 
-  (defn.js doubleTransform
-    [offset i modelFn]
-    (var v (- offset i))
-    (var #{translate
-           scale
-           visible} (modelFn v))
-    (return
-     {:style
-      {:opacity (:? visible
-                    (math/mix -2 1 scale)
-                    0)
-       :zIndex (* 10 scale)
-       :transform
-       [{:translateY (- translate)}
-        #_{:translateX (* 0.5 (j/abs translate))}
-        #_{:scaleX (math/mix 0.2 1 scale)}
-        #_{:scaleY (math/mix 0.2 1 scale)}]}}))
-  
   (defn.js DigitRollerDoubleDemo
     []
     
@@ -252,48 +283,16 @@
 
   (def.js CLOCK_DIVISIONS 10)
   
-  (defn.js useInterval
-    [f ms]
-    (var interval (r/ref nil))
-    (var [active setActive] (r/local true))
-    (r/watch [active]
-      (when (and active
-                 (not (r/curr interval)))
-        (r/curr:set interval (j/setInterval f ms)))
-      (when (and (not active)
-                 (r/curr interval))
-        (j/clearInterval (r/curr interval))
-        (r/curr:set interval nil)))
-    (return [active setActive]))
-  
-  (defn.js clockTransform
-    [offset i modelFn]
-    (var v (- offset i))
-    (var #{translate
-           scale
-           visible} (modelFn v))
-    (return
-     {:style
-      {:opacity (:? visible
-                    (math/mix -10 1 scale)
-                    0)
-       :zIndex (* 100 scale)
-       :transform
-       [{:translateY (* -1.4 translate)}
-        {:scale (math/mix -4 2 scale)}
-        #_#_{:scaleX (math/mix -3 2 scale)}
-        {:scaleY (math/mix -3 2 scale)}]}}))
-  
   (defn.js DigitClockDemo
     []
-    (var [seconds0 setSeconds0] (r/local (j/floor (/ (k/now-ms) 1000))))
+    (var [seconds0 setSeconds0] (r/local (j/floor (/ (xt/x:now-ms) 1000))))
     (var iseconds0  (a/useIndexIndicator seconds0
                                         {:default {:duration 100}}))
     
     (var [seconds1 setSeconds1] (r/local  (j/floor (/ seconds0 10))))
     (var iseconds1   (a/useIndexIndicator seconds1
                                           {:default {:duration 100}}))
-    (var [minutes0 setMinutes0] (r/local (j/floor (/ (k/now-ms) 1000))))
+    (var [minutes0 setMinutes0] (r/local (j/floor (/ (xt/x:now-ms) 1000))))
     (var iminutes0  (a/useIndexIndicator minutes0
                                         {:default {:duration 100}}))
     
@@ -301,7 +300,7 @@
     (var iminutes1   (a/useIndexIndicator minutes1
                                           {:default {:duration 100}}))
     (var [active setActive] (-/useInterval (fn []
-                                               (var now (j/floor (/ (k/now-ms) 1000)))
+                                                (var now (j/floor (/ (xt/x:now-ms) 1000)))
                                                (when (not= seconds0 now)
                                                  (setSeconds0 now)))
                                              200))
@@ -400,4 +399,3 @@
   
   
   )
-

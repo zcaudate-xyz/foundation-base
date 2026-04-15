@@ -16,11 +16,9 @@
 
 (fact:global
  {:setup    [(solidity/rt:start-ganache-server)
-             (l/rt:restart)
-             (l/rt:scaffold :js)
-             (!.js
-              (:= solc (require "solc")))]
-  :teardown [(l/rt:stop)]})
+              (l/rt:restart)
+              (l/rt:scaffold :js)]
+   :teardown [(l/rt:stop)]})
 
 ^{:refer js.lib.eth-bench/send-wei :added "4.0" :unchecked true}
 (fact "sends currency for bench")

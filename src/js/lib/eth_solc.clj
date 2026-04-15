@@ -4,22 +4,27 @@
   (:refer-clojure :exclude [compile]))
 
 (l/script :js
-  {:import [["solc" :as solc] ["solc" :as solc]] :require [[xt.lang.common-lib :as k] [js.core :as j] [xt.lang.common-spec :as xt]]})
+  {:import [["solc" :as Solc]]
+   :require [[js.core :as j]
+             [xt.lang.common-spec :as xt]
+             [xt.lang.common-string :as str]]})
 
-(def$.js compile solc.compile)
+(defn.js compile
+  [input]
+  (return (. Solc (compile input))))
 
 (defn.js contract-wrap-body
   "wraps the body in a contract"
   {:added "4.0"}
   [code name prefix]
   (return
-   (k/arr-join ["// SPDX-License-Identifier: GPL-3.0"
-                "pragma solidity >=0.7.0 <0.9.0;"
-                (or prefix "")
-                (+ "contract " name " {")
-                code
-                "}"]
-               "\n")))
+   (str/join "\n"
+             ["// SPDX-License-Identifier: GPL-3.0"
+              "pragma solidity >=0.7.0 <0.9.0;"
+              (or prefix "")
+              (+ "contract " name " {")
+              code
+              "}"])))
 
 (defn.js contract-compile
   "compiles a single contract"

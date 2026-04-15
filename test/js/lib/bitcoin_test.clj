@@ -1,18 +1,20 @@
 (ns js.lib.bitcoin-test
-  (:require [std.lang :as l])
+  (:require [std.lang :as l]
+            [xt.lang.common-data :as xtd])
   (:use code.test))
 
 (l/script- :js
   {:runtime :basic
    :require  [[js.lib.bitcoin :as bc :include [:fn
-                                               :ecc     
-                                               :ecpair  
-                                               :bip32
-                                               :bip39
-                                               :wif
-                                               :message
-                                               :safe-buffer]]
-              [xt.lang.common-lib :as k]]
+                                                :ecc     
+                                                :ecpair  
+                                                :bip32
+                                                :bip39
+                                                :wif
+                                                :message
+                                                :safe-buffer]]
+               [xt.lang.common-data :as xtd]
+               [xt.lang.common-lib :as k]]
    :export  [MODULE]})
 
 (fact:global
@@ -117,7 +119,7 @@
 
   (!.js
    (var pair (bc/pair-from-wif "KwDiBf89QgGbjEhKnhXJuH7LrciVrZi3qYjgd9M7rFU73sVHnoWn"))
-   (k/obj-map (Bitcoin.payments.p2pkh {:pubkey (. pair publicKey)})
+   (xtd/obj-map (Bitcoin.payments.p2pkh {:pubkey (. pair publicKey)})
               (fn:> [x]
                 (:? (== "Buffer" (k/type-native x))
                     (. x (toString "hex"))
@@ -143,8 +145,8 @@
                                (@! +dogetestnet+)))
 
    
-   (k/obj-map (Bitcoin.payments.p2pkh {:pubkey (. pair publicKey)
-                                       :network (@! +dogetestnet+)})
+   (xtd/obj-map (Bitcoin.payments.p2pkh {:pubkey (. pair publicKey)
+                                        :network (@! +dogetestnet+)})
               (fn:> [x]
                 (:? (== "Buffer" (k/type-native x))
                     (. x (toString "hex"))
@@ -209,8 +211,8 @@
                                (@! +dogetestnet+)))
 
    
-   (k/obj-map (Bitcoin.payments.p2pkh {:pubkey (. pair publicKey)
-                                       :network (@! +dogetestnet+)})
+   (xtd/obj-map (Bitcoin.payments.p2pkh {:pubkey (. pair publicKey)
+                                        :network (@! +dogetestnet+)})
               (fn:> [x]
                 (:? (== "Buffer" (k/type-native x))
                     (. x (toString "hex"))

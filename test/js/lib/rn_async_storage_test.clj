@@ -10,16 +10,18 @@
              [xt.lang.common-repl :as repl]]})
 
 (fact:global
- {:setup    [(l/rt:restart)
-             (l/rt:scaffold :js)
-             (notify/wait-on :js
-               (:= (!:G window)  (require "window"))
-               (:= LocalStorage  (. (require "node-localstorage")
-                                    LocalStorage))
-               (j/assign (!:G window)
-                         {:localStorage (new LocalStorage ".localstorage")})
-               (repl/notify true))]
-  :teardown [(l/rt:stop)]})
+  {:setup    [(l/rt:restart)
+              (l/rt:scaffold :js)
+              (notify/wait-on :js
+                (:= (!:G window)  (require "window"))
+                (var LocalStorageCtor
+                     (. (require "node-localstorage")
+                        LocalStorage))
+                (j/assign (!:G window)
+                          {:localStorage (new LocalStorageCtor
+                                             ".localstorage")})
+                (repl/notify true))]
+   :teardown [(l/rt:stop)]})
 
 
 ^{:refer js.lib.rn-async-storage/getJSON :added "4.0" :unchecked true

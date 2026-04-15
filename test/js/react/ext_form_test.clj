@@ -6,10 +6,10 @@
 
 (l/script- :js
   {:runtime :basic
-   :require [[xt.lang.common-lib :as k]
-             [xt.lang.common-repl :as repl]
-             [js.core :as j]
-             [js.react.ext-form :as ext-form]]})
+   :require [[xt.lang.common-spec :as xt]
+              [xt.lang.common-repl :as repl]
+              [js.core :as j]
+              [js.react.ext-form :as ext-form]]})
 
 (fact:global
  {:setup    [(do (l/rt:restart :js)
@@ -18,18 +18,18 @@
 
 (def.js Validatiors
   {:first    [["is-not-empty" {:message "Must not be empty"
-                               :check (fn:> [v rec] (and (k/not-nil? v)
-                                                         (< 0 (xt/x:len v))))}]]
+                               :check (fn:> [v rec] (and (xt/x:not-nil? v)
+                                                          (< 0 (xt/x:len v))))}]]
    :last     [["is-not-empty" {:message "Must not be empty"
-                               :check (fn:> [v rec]
-                                        (j/future-delayed [100]
-                                          (return (and (k/not-nil? v)
-                                                       (< 0 (xt/x:len v))))))}]]
+                                :check (fn:> [v rec]
+                                         (j/future-delayed [100]
+                                           (return (and (xt/x:not-nil? v)
+                                                        (< 0 (xt/x:len v))))))}]]
    :email    [["is-not-empty" {:message "Must not be empty"
-                               :check (fn:> [v rec]
-                                        (j/future-delayed [100]
-                                                          (return (and (k/not-nil? v)
-                                                       (< 0 (xt/x:len v))))))}]]})
+                                :check (fn:> [v rec]
+                                         (j/future-delayed [100]
+                                                           (return (and (xt/x:not-nil? v)
+                                                        (< 0 (xt/x:len v))))))}]]})
 
 ^{:refer js.react.ext-form/makeFree :added "4.0" :unchecked true}
 (fact "makes a free form (no validation)")

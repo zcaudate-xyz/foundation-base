@@ -9,13 +9,15 @@
             :emit {:native {:suppress true}
                    :lang/jsx false}
             :notify {:host "test.statstrade.io"}}
-   :require [[js.core :as j]
-             [js.react :as r]
-             [js.react-native :as n :include [:fn]]
-             [js.react-native.animate :as a]
-             [js.react-native.physical-base :as physical-base]
-             [js.react-native.model-roller :as model-roller]
-             [xt.lang.common-lib :as k]]})
+    :require [[js.core :as j]
+              [js.react :as r]
+              [js.react-native :as n :include [:fn]]
+              [js.react-native.animate :as a]
+              [js.react-native.physical-base :as physical-base]
+              [js.react-native.model-roller :as model-roller]
+              [xt.lang.common-data :as xtd]
+              [xt.lang.common-spec :as xt]
+              [xt.lang.common-math :as math]]})
 
 ^{:refer js.react-native.physical-carosel/DigitCaroselManual
   :adopt true
@@ -33,8 +35,8 @@
     (var values  (r/const (xtd/arr-map (xtd/arr-range -/DIVISIONS)
                                      (fn:> [i] (new a/Value i)))))
     (var lu      (r/const (xtd/arr-juxt values
-                                      (fn:> [v] (+ "index" v._value))
-                                      k/identity)))
+                                       (fn:> [v] (+ "index" v._value))
+                                       (fn:> [v] v))))
     (var [offset0 setOffset0] (r/local 0))
     (var ioffset0   (a/useIndexIndicator offset0
                                          {:default {:duration 800}}
@@ -108,8 +110,8 @@
                                :zIndex (* 10 scale)
                                :transform
                                [#_{:scale scale}
-                                {:translateX (* 8
-                                                (k/sign translate)
+                                 {:translateX (* 8
+                                                (math/sign translate)
                                                 translate translate)}
                                 #_{:translateY (* 0.5 (j/abs translate))}]}}))}]))]] 
       [:% n/Row

@@ -22,10 +22,8 @@
              (s/rt:start-ganache-server)
              (Thread/sleep 500)
              (do (l/rt:restart)
-                 (l/rt:scaffold :js))
-             (!.js
-              (:= solc (require "solc")))]
-  :teardown [(l/rt:stop)]})
+                 (l/rt:scaffold :js))]
+   :teardown [(l/rt:stop)]})
 
 ^{:refer js.lib.eth-lib/to-bignum-pow10 :added "4.0" :unchecked true}
 (fact "number with base 10 exponent"

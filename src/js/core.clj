@@ -6,11 +6,12 @@
             [std.lang.base.util :as ut]
             [std.lib.collection :as collection]
             [std.lib.env :as env]
-            [std.lib.foundation :as f]
-            [std.lib.template :as template]
-            [xt.lang.common-notify]
-            [xt.lang.common-repl]
-            [xt.module :as module])
+             [std.lib.foundation :as f]
+             [std.lib.template :as template]
+             [xt.lang.common-notify]
+             [xt.lang.common-repl]
+             [xt.lang.common-trace]
+             [xt.module :as module])
   (:refer-clojure :exclude [abs identity reduce map reverse sort eval find min read replace future concat pop name some keys filter max]))
 
 (l/script :js
@@ -304,7 +305,7 @@
   [msg & [tag]]
   (template/$ (try
          (throw (new Error ~msg))
-         (catch e (xt.lang.common-lib/TRACE! (. e ["stack"]) ~tag)))))
+         (catch e (xt.lang.common-trace/TRACE! (. e ["stack"]) ~tag)))))
 
 (defmacro.js
   LOG!
@@ -385,5 +386,4 @@
   (./create-tests)
   (!.js
  (:- "hello" "world")))
-
 

@@ -33,19 +33,19 @@
       :ui/text      [:p]}
 
 
-  (def *comp-1* {:ui/container [:div]
-                 :ui/text      [:p]})
-  (def *comp-2* {:ui/button    [:ui/container
-                                [:ui/text
-                                 {:name :props/name}]]})
-  (c/components-resolve '*comp-1*)
+  (def comp-1 {:ui/container [:div]
+               :ui/text      [:p]})
+  (def comp-2 {:ui/button    [:ui/container
+                              [:ui/text
+                               {:name :props/name}]]})
+  (c/components-resolve 'comp-1)
   => {:ui/container [:div], :ui/text [:p]}
 
-  (c/components-resolve '(merge *comp-2*
-                                *comp-1*))
+  (c/components-resolve '[comp-2
+                          comp-1])
   => {:ui/button    [:ui/container
-                     [:ui/text
-                      {:name :props/name}]]
+                      [:ui/text
+                       {:name :props/name}]]
       :ui/container [:div]
       :ui/text      [:p]})
 
@@ -161,7 +161,7 @@
   
   (c/compile-element-action-set
    :var/history-idx
-   '{:from (base-fn :var/dsl-code)
+   '{:to (base-fn :var/dsl-code)
      :transform transform-fn})
   => '(setHistoryIdx (transform-fn (base-fn dslCode))))
 
@@ -171,10 +171,10 @@
   
   (c/compile-element-action-set-async
    :var/history-idx
-   '{:from (async-fn :var/dsl-code)
-     :pending :var/pending
-     :error   :var/error
-     :transform (fn [])})
+   '{:to (async-fn :var/dsl-code)
+      :pending :var/pending
+      :error   :var/error
+      :transform (fn [])})
   => '(do (setPending true)
         (. (async-fn dslCode)
            (then (fn [res] (return ((fn []) res))))
@@ -188,12 +188,12 @@
   
   (c/compile-element-actions
    '[{:%/set-async :var/output
-      :from (async-fn :var/dsl-code)
+      :to (async-fn :var/dsl-code)
       :pending :var/pending
       :error   :var/error
       :transform (fn [])}
      {:%/set :var/data
-      :from (base-fn :var/input)
+      :to (base-fn :var/input)
       :transform transform-fn}])
   => '(fn []
         (do (setPending true)
@@ -221,9 +221,9 @@
 
   (c/compile-element-directives
    {:type :action
-    :key :onPress}
+     :key :onPress}
    '{:%/action [{:%/set-async :var/output
-                  :from (async-fn :var/dsl-code)
+                  :to (async-fn :var/dsl-code)
                   :pending :var/pending
                   :error   :var/error
                   :transform (fn [])}]})
@@ -269,11 +269,11 @@
   (c/compile-element-loop
    [:ui/toolbar.history-clear]
    (c/components-expand
-    {:ui/toolbar.history-clear
-     [:ui/button
-      {:%/action [{:%/set :var/combined
-                    :from 'i}]}
-      [:ui/text ]]
+     {:ui/toolbar.history-clear
+      [:ui/button
+       {:%/action [{:%/set :var/combined
+                    :to 'i}]}
+       [:ui/text ]]
      :ui/button    {:tag :button
                     :props {:class ["p-8"]}
                     :children [:props/children]
@@ -290,8 +290,8 @@
 
   (c/compile-element-loop
    [:ui/toolbar.history-clear
-    {:%/actions [{:%/set :var/combined
-                  :from 'i}]}]
+    {:%/action [{:%/set :var/combined
+                 :to 'i}]}]
    (c/components-expand
     {:ui/toolbar.history-clear [:ui/button
                                 [:ui/text ]]

@@ -6,37 +6,48 @@
 
 (l/script :js
   {:require [[xt.lang.common-lib :as k]
-             [js.core :as j]]
-    :import [["ethers" :as [* ethers]]
-             ["ethers" :as [* ethers]]]})
+              [js.core :as j]]
+    :import [["ethers" :as [* ethers]]]})
 
 (def$.js ^{:arglists '([message, signature])}
   verifyMessage
-  ethers.utils.verifyMessage)
+  ethers.verifyMessage)
 
 (def$.js ^{:arglists '([s, units])}
   parseUnits
-  ethers.utils.parseUnits)
+  ethers.parseUnits)
 
 (def$.js ^{:arglists '([s, units])}
   formatUnits
-  ethers.utils.formatUnits)
+  ethers.formatUnits)
 
 (def$.js ^{:arglists '([s, units])}
   keccak256
-  ethers.utils.keccak256)
+  ethers.keccak256)
 
 (def$.js ^{:arglists '([s, units])}
   ripemd160
-  ethers.utils.ripemd160)
+  ethers.ripemd160)
 
-(def$.js ^{:arglists '([s, units])}
+(defn.js ^{:arglists '([s, units])}
   mnemonicToSeed
-  ethers.utils.mnemonicToSeed)
+  [phrase]
+  (return (. (. ethers Mnemonic)
+             (fromPhrase phrase)
+             (computeSeed))))
 
-(def$.js ^{:arglists '([value])}
+(defn.js ^{:arglists '([value])}
   to-bignum
-  ethers.BigNumber.from)
+  [value]
+  (cond (and value
+             (. value toBigInt))
+        (return (. value (toBigInt)))
+
+        (and value
+             (== (. value type)
+                 "BigNumber"))
+        (:= value (. value hex)))
+  (return (BigInt value)))
 
 (f/template-entries [l/tmpl-macro {:base "Provider"
                                    :inst "p"
@@ -106,11 +117,7 @@
   "number with base 10 exponent"
   {:added "4.0"}
   [unit]
-  (return
-   (. ethers
-      BigNumber
-      (from "10")
-      (pow unit))))
+  (return (-/parseUnits "1" unit)))
 
 (defn.js bn-mul
   "multiplies two bignums together"
@@ -118,10 +125,8 @@
   [bn x precision]
   (var b1 (-/parseUnits "1" (or precision 24)))
   (var bx (-/parseUnits (j/toString x) (or precision 24)))
-  (return
-   (. (-/to-bignum bn)
-      (mul bx)
-      (div b1))))
+  (return (/ (* (-/to-bignum bn) bx)
+             b1)))
 
 (defn.js bn-div
   "divides two bignums together"
@@ -129,45 +134,37 @@
   [bn x precision]
   (var b1 (-/parseUnits "1" (or precision 24)))
   (var bx (-/parseUnits (j/toString x) (or precision 24)))
-  (return
-   (. (-/to-bignum bn)
-      (mul b1)
-      (div bx))))
+  (return (/ (* (-/to-bignum bn) b1)
+             bx)))
 
 (defn.js to-number
   "converts the bignum to a number"
   {:added "4.0"}
   [value]
-  (cond (and value
-             (== (. value type)
-                 "BigNumber"))
-        (:= value (. value hex)))
-  (return
-   (. ethers BigNumber (from value) (toNumber))))
+  (var bn (-/to-bignum value))
+  (when (> bn (BigInt (. Number MAX_SAFE_INTEGER)))
+    (throw (new Error "Unsafe integer")))
+  (return (Number bn)))
 
 (defn.js to-number-string
   "converts the bignum to a number string"
   {:added "4.0"}
   [value]
-  (cond (and value
-             (== (. value type)
-                 "BigNumber"))
-        (:= value (. value hex)))
-  (return
-   (. ethers BigNumber (from value) (toString))))
+  (return (. (-/to-bignum value)
+             (toString))))
 
 (defn.js new-rpc-provider
   "creates a new rpc provider"
   {:added "4.0"}
   [url]
-  (return (new (. ethers providers JsonRpcProvider)
+  (return (new (. ethers JsonRpcProvider)
                url)))
 
 (defn.js new-web3-provider
   "creates a new web3 compatible provider"
   {:added "4.0"}
   [proxy]
-  (return (new (. ethers providers Web3Provider)
+  (return (new (. ethers BrowserProvider)
                proxy)))
 
 (defn.js new-wallet
@@ -180,7 +177,7 @@
   "creates new wallet from mnemonic"
   {:added "4.0"}
   [mnemonic path wordlist]
-  (return (. ethers Wallet (fromMnemonic mnemonic path wordlist))))
+  (return (. ethers Wallet (fromPhrase mnemonic))))
 
 (defn.js new-contract
   "creates a new contract"

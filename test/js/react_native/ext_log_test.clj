@@ -25,27 +25,25 @@
     []
     (var log    (ext-log/makeLog {}))
     (var latest (ext-log/listenLogLatest log))
+    (var queueEntry (fn:> []
+                      (event-log/queue-entry
+                       log
+                       {:id (j/randomId 6)}
+                       (fn:> [entry t] (. entry id))
+                       (fn:> [entry] entry))))
     (r/init []
-       (event-log/queue-entry
-        log
-        {:id (j/randomId 6)}
-        (fn:> [entry t] (. entry id))
-        (fn:> [entry] entry)))
+      (queueEntry))
     (return
      (n/EnclosedCode 
 {:label "js.react.ext-log/listenLogLatest"} 
 [:% n/Row
        [:% n/Button
         {:title "QUEUE"
-         :onPress (fn:> (event-log/queue-entry
-                          log
-                          {:id (j/randomId 6)}
-                          (fn:> [entry t] (. entry id))
-                          (fn:> [entry] entry))}]] 
+         :onPress queueEntry}]] 
 [:% n/TextDisplay
-       {:content (n/format-entry {:latest latest
-                                  :count (event-log/get-count log)
-                                  :tail (event-log/get-tail log 5)})}])))
+        {:content (n/format-entry {:latest latest
+                                   :count (event-log/get-count log)
+                                   :tail (event-log/get-tail log 5)})}])))
   
   
   )

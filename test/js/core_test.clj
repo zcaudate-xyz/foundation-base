@@ -6,8 +6,8 @@
 (l/script- :js
   {:runtime :basic
    :require [[js.core :as j]
-              [xt.lang.common-lib :as k]
-              [xt.lang.common-repl :as repl]]})
+             [xt.lang.common-trace :as trace]
+             [xt.lang.common-repl :as repl]]})
 
 (fact:global
  {:setup    [(l/rt:restart)]
@@ -150,7 +150,7 @@
   
   (!.js
    (j/STACKTRACE! "hello")
-   (k/trace-last))
+   (trace/trace-last))
   => string?)
 
 ^{:refer js.core/LOG! :added "4.0" :unchecked true}

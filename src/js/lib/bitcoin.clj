@@ -2,7 +2,18 @@
   (:require [std.lang :as l]))
 
 (l/script :js
-  {:import [["bitcoinjs-lib" :as Bitcoin] ["bitcoinjs-message" :as BitcoinMessage] ["tiny-secp256k1" :as TinySecp256k1] ["ecpair" :as ECPairFactory] ["bip32" :as BIP32Factory] ["bip39" :as BIP39] ["wif" :as WIF] ["safe-buffer" :as SafeBuffer] ["ecpair" :as ECPairFactory] ["bitcoinjs-lib" :as Bitcoin] ["wif" :as WIF] ["safe-buffer" :as SafeBuffer] ["bip32" :as BIP32Factory] ["bip39" :as BIP39] ["tiny-secp256k1" :as TinySecp256k1] ["bitcoinjs-message" :as BitcoinMessage]] :require [[xt.lang.common-lib :as k] [js.core :as j] [xt.lang.common-data :as xtd] [xt.lang.common-spec :as xt]]})
+  {:import [["bitcoinjs-lib" :as Bitcoin]
+            ["bitcoinjs-message" :as BitcoinMessage]
+            ["tiny-secp256k1" :as TinySecp256k1]
+            ["ecpair" :as ECPairFactory]
+            ["bip32" :as BIP32Factory]
+            ["bip39" :as BIP39]
+            ["wif" :as WIF]
+            ["safe-buffer" :as SafeBuffer]]
+   :require [[js.core :as j]
+             [xt.lang.common-lib :as k]
+             [xt.lang.common-data :as xtd]
+             [xt.lang.common-spec :as xt]]})
 
 (def +networks+
   {:citycoin ["main" "test"],
@@ -240,13 +251,13 @@
   (return (-> (. Bitcoin payments
                  (p2pkh {:pubkey (. pair publicKey)
                          :network network}))
-              (k/obj-map 
-               (fn:> [x]
-                 (:? (== "Buffer" (k/type-native x))
-                     (. x (toString "hex"))
-                     x)))
-              (k/obj-assign {:prvkey (. pair privateKey (toString "hex"))
-                             :wif wif}))))
+                (xtd/obj-map
+                 (fn:> [x]
+                   (:? (== "Buffer" (k/type-native x))
+                       (. x (toString "hex"))
+                       x)))
+               (xtd/obj-assign {:prvkey (. pair privateKey (toString "hex"))
+                                :wif wif}))))
 
 (defn.js ^{:arglists '([{:keys [network
                                 fee-per-kb
@@ -268,24 +279,25 @@
   (var est-kbs  (/ (* 55 (+ 1 (* 2 (xt/x:len from-inputs))))
                    1000))
   (var multiple 100000000)
-  (var fee      (j/round (* fee-per-kb est-kbs multiple)))
-  (var to-total (j/round (- (* (k/arr-foldl
-                                from-inputs
-                                (fn [total input]
-                                  (return
-                                   (+ total (Number (. input value)))))
-                                0)
-                               multiple)
-                            fee)))
-  (var secret-pair (. Bitcoin ECPair (fromWIF from-wif network)))
+   (var fee      (j/round (* fee-per-kb est-kbs multiple)))
+   (var to-total (j/round (- (* (xtd/arr-foldl
+                                  from-inputs
+                                  (fn:> [total input]
+                                    (return
+                                     (+ total (Number (. input value)))))
+                                  0)
+                                 multiple)
+                              fee)))
+  (var secret-pair (. (ECPairFactory.default TinySecp256k1)
+                      (fromWIF from-wif network)))
   (var dtx (new Bitcoin.TransactionBuilder network))
-  (k/for:array [[i input] from-inputs]
+  (xt/for:array [[i input] from-inputs]
     (. dtx (addInput  (. input txid)
                       (. input output-no))))
   
   (. dtx (addOutput to-address to-total))
 
-  (k/for:array [[i input] from-inputs]
+  (xt/for:array [[i input] from-inputs]
     (. dtx (sign i secret-pair)))
   
   (return (. dtx (build) (toHex))))
@@ -311,28 +323,29 @@
   (var est-kbs  (/ (* 110 (+ 1 (xt/x:len from-inputs)))
                    1000))
   (var multiple 100000000)
-  (var fee       (j/round (* fee-per-kb est-kbs multiple)))
-  (var to-total  (j/round (* amount multiple)))
-  
-  (var to-change (j/round (- (* (k/arr-foldl
-                                 from-inputs
-                                 (fn [total input]
-                                   (return
-                                    (+ total (Number (. input value)))))
-                                 0)
-                                multiple)
-                             to-total
-                             fee)))
-  (var secret-pair (. Bitcoin ECPair (fromWIF from-wif network)))
+   (var fee       (j/round (* fee-per-kb est-kbs multiple)))
+   (var to-total  (j/round (* amount multiple)))
+   
+   (var to-change (j/round (- (* (xtd/arr-foldl
+                                   from-inputs
+                                   (fn:> [total input]
+                                     (return
+                                      (+ total (Number (. input value)))))
+                                   0)
+                                  multiple)
+                               to-total
+                              fee)))
+  (var secret-pair (. (ECPairFactory.default TinySecp256k1)
+                      (fromWIF from-wif network)))
   (var dtx (new Bitcoin.TransactionBuilder network))
-  (k/for:array [[i input] from-inputs]
+  (xt/for:array [[i input] from-inputs]
     (. dtx (addInput  (. input txid)
                       (. input output-no))))
 
   (. dtx (addOutput from-address to-change))
   (. dtx (addOutput to-address to-total))
   
-  (k/for:array [[i input] from-inputs]
+  (xt/for:array [[i input] from-inputs]
     (. dtx (sign i secret-pair)))
   
   (return (. dtx (build) (toHex))))
@@ -356,10 +369,10 @@
    Bitcoin.crypto.sha256)
 
   (!.js
-   (k/obj-map Bitcoin xtd/obj-keys))
+   (xtd/obj-map Bitcoin xtd/obj-keys))
 
   (!.js
-   (k/obj-map Coininfo xtd/obj-keys))
+   (xtd/obj-map Coininfo xtd/obj-keys))
   
   
   ["address"

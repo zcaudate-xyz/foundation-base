@@ -22,23 +22,23 @@
    ["grow"])
   => [:div {:class ["grow" "gap-3" "h-full"]}])
 
-^{:refer js.react.compile-directives/compile-ui-directives :added "4.0" :unchecked true}
+^{:refer js.react.compile-directives/compile-directives :added "4.0" :unchecked true}
 (fact "templates the control directives"
   ^:hidden
 
-  (d/compile-ui-directives
+  (d/compile-directives
    [:*/v  {:gap 3
            :h :full}]
    {})
   => [:div {:class ["flex" "flex-col" "grow" "gap-3" "h-full"]}]
 
-  (d/compile-ui-directives
+  (d/compile-directives
    [:*/h  {:gap 3
            :h :full}]
    {})
   => [:div {:class ["flex" "flex-row" "grow" "gap-3" "h-full"]}]
   
-  (d/compile-ui-directives
+  (d/compile-directives
    '[:*/for [[i p] pages]
      [:div
       [:h2 p.title]]]
