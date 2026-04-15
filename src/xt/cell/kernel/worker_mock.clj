@@ -56,7 +56,7 @@
                       (return
                        (task/task-run
                         (fn []
-                          (return (-/mock-worker-send worker request))))))
+                          (return (-/mock-worker-send worker request)))))))
   (xt/x:set-key worker "postMessage" postMessage)
   (xt/x:set-key worker "postRequest" postRequest)
   (return worker))

@@ -2,10 +2,10 @@
   (:require [std.lang :as l]))
 
 (l/script :js
-  {:require [[xt.lang.common-lib :as k]
-             [js.core :as j]
-             [js.react :as r]
-             [js.blessed :as b]
+  {:require [[xt.lang.common-data :as xtd]
+              [js.core :as j]
+              [js.react :as r]
+              [js.blessed :as b]
              [js.blessed.ui-style :as ui-style]]})
 
 (defn.js ^{:static/lint-globals '#{process}}
@@ -34,10 +34,10 @@
   ([props]
    (let [#{input color onClick} props
          [clicked setClicked] (r/local false)
-         bprops (k/obj-assign-nested
-                 {:shrink true
-                  :content (:? clicked "  OK  " " COPY ")
-                  :mouse true
+         bprops (xtd/obj-assign-nested
+                  {:shrink true
+                   :content (:? clicked "  OK  " " COPY ")
+                   :mouse true
                   :disabled clicked
                   :onClick (fn []
                              (-/copyClipboard
