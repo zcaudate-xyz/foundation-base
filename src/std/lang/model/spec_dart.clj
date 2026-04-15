@@ -5,6 +5,7 @@
             [std.lang.base.emit-data :as data]
             [std.lang.base.grammar :as grammar]
             [std.lang.base.script :as script]
+            [std.lang.base.util :as ut]
             [std.lang.model.spec-xtalk]
             [std.lang.model.spec-xtalk.fn-dart :as fn-dart]
             [std.lib.collection :as collection]
@@ -149,12 +150,40 @@
                               (list 'fn '[]
                                     finally))])))))
 
+(defn dart-var
+  "var -> destructuring shorthand for dart"
+  {:added "4.1"}
+  ([[_ sym & args]]
+   (let [bound (last args)
+         has-value? (pos? (count args))]
+     (cond
+       (and (vector? sym) has-value?)
+       (let [tmp (gensym "tmp_")]
+         (cons 'do*
+               (concat
+                [(list 'var* tmp := bound)]
+                (map-indexed (fn [i e]
+                               (list 'var* e := (list '. tmp [i])))
+                             sym))))
+
+       (and (set? sym) has-value?)
+       (cons 'do*
+             (map (fn [e]
+                    (list 'var* e := (list '. bound [(ut/sym-default-str e)])))
+                  sym))
+
+       has-value?
+       (list 'var* sym := bound)
+
+       :else
+       (list 'var* sym)))))
+
 (def +features+
   (let [base (-> (grammar/build :exclude [:pointer
                                           :block
                                           :data-set])
                  (grammar/build:override
-                  {:var         {:symbol '#{var} :raw "var"}
+                  {:var         {:symbol '#{var*} :raw "var"}
                    :defn        {:symbol '#{defn}}
                    :new         {:symbol '#{new} :raw "new" :emit :new}
                    :for-object  {:macro #'tf-for-object :emit :macro}
@@ -169,7 +198,9 @@
         extensions (apply dissoc fn-dart/+dart+ base-keys)]
     (cond-> base
       (seq overrides) (grammar/build:override overrides)
-      (seq extensions) (grammar/build:extend extensions))))
+      (seq extensions) (grammar/build:extend extensions)
+      true (grammar/build:extend
+            {:var-let {:op :var-let :symbol #{'var} :macro #'dart-var :emit :macro}}))))
 
 (def +template+
   (-> (emit/default-grammar)
@@ -183,6 +214,7 @@
                    :invoke    {:reversed true :hint ""}
                    :block     {:start " {" :end "}"}}
          :block   {:for {:parameter {:sep ";"}}}
+         :define  {:def {:raw "var"}}
          :token   {:symbol {:replace {\- "_"}}
                    :nil {:as "null"}}
          :data    {:vector {:start "[" :end "]" :space ""}

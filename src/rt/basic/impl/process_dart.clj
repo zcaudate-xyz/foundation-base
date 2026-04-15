@@ -18,36 +18,81 @@
   {"DART_TOOL_DISABLE_ANALYTICS" "true"})
 
 (defn normalize-dart-source
-  "Adds statement terminators so emitted Dart source can compile as a standalone file."
+  "Adds statement terminators so emitted Dart source can compile as a standalone file.
+   Tracks both paren/bracket depth (for multi-line expressions) and brace depth
+   (for block vs. assignment contexts) to correctly place semicolons."
   {:added "4.1"}
   [source]
-  (->> (reduce (fn [[lines depth] line]
-                 (let [trimmed   (str/trim line)
-                       delta     (+ (- (char-count trimmed \()
-                                         (char-count trimmed \)))
-                                    (- (char-count trimmed \[)
-                                       (char-count trimmed \])))
-                       next-depth (max 0 (+ depth delta))
-                       complete? (and (zero? depth)
-                                      (zero? next-depth))
-                       line'     (cond (or (empty? trimmed)
-                                           (str/starts-with? trimmed "//")
-                                           (str/ends-with? trimmed "{")
-                                           (= trimmed "}")
-                                           (str/ends-with? trimmed ";")
-                                           (and (pos? depth)
-                                                (pos? next-depth)))
-                                       line
+  (->> (reduce (fn [[lines paren-depth brace-stack] line]
+                 (let [trimmed        (str/trim line)
+                       p-delta        (+ (- (char-count trimmed \()
+                                            (char-count trimmed \)))
+                                         (- (char-count trimmed \[)
+                                            (char-count trimmed \])))
+                       next-paren     (max 0 (+ paren-depth p-delta))
+                       closing-brace? (= trimmed "}")
+                       opening-brace? (str/ends-with? trimmed "{")
+                       ;; brace opened by assignment (var x = {) vs a block body (fn() {)
+                       assign-brace?  (and opening-brace?
+                                           (re-find #"=\s*\{$" trimmed))
+                       next-brace-stack (cond
+                                          closing-brace? (rest brace-stack)
+                                          opening-brace? (cons (if assign-brace?
+                                                                  :assignment
+                                                                  :block)
+                                                                brace-stack)
+                                          :else brace-stack)
+                       in-brace?      (seq brace-stack)
+                       in-assign?     (= (first brace-stack) :assignment)
+                       complete?      (and (zero? paren-depth)
+                                           (zero? next-paren)
+                                           (not in-brace?))
+                       line'          (cond
+                                        ;; blank lines and comments unchanged
+                                        (or (empty? trimmed)
+                                            (str/starts-with? trimmed "//"))
+                                        line
 
-                                       (or complete?
-                                           (and (pos? depth)
-                                                (zero? next-depth)))
-                                       (str line ";")
+                                        ;; closing brace of an assignment block (map/object)
+                                        ;; the var declaration needs its semicolon here
+                                        (and closing-brace? in-assign?)
+                                        (str line ";")
 
-                                       :else
-                                       line)]
-                   [(conj lines line') next-depth]))
-               [[] 0]
+                                        ;; closing brace of a function/control block
+                                        closing-brace?
+                                        line
+
+                                        ;; line that opens a new block
+                                        opening-brace?
+                                        line
+
+                                        ;; already terminated
+                                        (str/ends-with? trimmed ";")
+                                        line
+
+                                        ;; end of multi-line paren/bracket expression:
+                                        ;; add ; only in statement context (top-level or inside
+                                        ;; a function block, NOT inside an assignment/map brace)
+                                        (and (pos? paren-depth)
+                                             (zero? next-paren)
+                                             (not in-assign?))
+                                        (str line ";")
+
+                                        ;; inside a brace block (map entries, function body)
+                                        in-brace?
+                                        line
+
+                                        ;; inside a multi-line paren/bracket expression
+                                        (and (pos? paren-depth) (pos? next-paren))
+                                        line
+
+                                        ;; complete top-level statement
+                                        complete?
+                                        (str line ";")
+
+                                        :else line)]
+                   [(conj lines line') next-paren next-brace-stack]))
+               [[] 0 '()]
                (str/split-lines source))
         first
         (str/join "\n")))
