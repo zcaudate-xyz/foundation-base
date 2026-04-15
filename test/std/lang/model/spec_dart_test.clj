@@ -241,3 +241,40 @@
                       (return err)))
         (whenComplete (fn []
                         (return true)))))
+
+^{:refer std.lang.model.spec-dart/dart-var :added "4.1"}
+(fact "transforms var destructuring for dart"
+
+  (let [[op init a b] (spec-dart/dart-var '(var [a b] expr))]
+    [op
+     (and (= 'var* (first init)) (= 'expr (last init)))
+     (= a (list 'var* 'a := (list '. (second init) [0])))
+     (= b (list 'var* 'b := (list '. (second init) [1])))])
+  => ['do* true true true]
+
+  (spec-dart/dart-var '(var #{id} data-obj))
+  => '(do* (var* id := (. data-obj ["id"])))
+
+  (let [result (spec-dart/dart-var '(var #{name args} v))]
+    [(first result) (count result)])
+  => ['do* 3]
+
+  (spec-dart/dart-var '(var x 42))
+  => '(var* x := 42)
+
+  (spec-dart/dart-var '(var entry))
+  => '(var* entry))
+
+(fact "dart var destructuring emission"
+
+  (l/emit-as :dart ['(var [a b] expr)])
+  => (fn [s]
+       (and (string? s)
+            (clojure.string/includes? s "var a = ")
+            (clojure.string/includes? s "var b = ")))
+
+  (l/emit-as :dart ['(var #{id} data_obj)])
+  => "var id = data_obj[\"id\"]"
+
+  (l/emit-as :dart ['(var x 42)])
+  => "var x = 42")
