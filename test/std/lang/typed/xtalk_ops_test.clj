@@ -18,7 +18,7 @@
   (canonical-symbol-from-entry {:emit :alias
                                 :raw 'xt.lang.common-lib/get-key
                                 :symbol #{'xt.lang.common-lib/get-key 'x:get-key}})
-  => 'xt.lang.common-lib/get-key)
+  => 'x:get-key)
 
 ^{:refer std.lang.typed.xtalk-ops/builtin-entry :added "4.1"}
 (fact "looks up builtin entries"
@@ -46,8 +46,9 @@
 ^{:refer std.lang.typed.xtalk-ops/canonical-symbol :added "4.1"}
 (fact "returns canonical builtin symbols when indexed"
   [(canonical-symbol 'x:get-key)
-   (canonical-symbol 'xt.lang.common-lib/get-key)]
-  => '[x:get-key xt.lang.common-lib/get-key])
+   (canonical-symbol 'xt.lang.common-lib/get-key)
+   (canonical-symbol 'xt.lang.common-lib/len)]
+  => '[x:get-key x:get-key x:len])
 
 ^{:refer std.lang.typed.xtalk-ops/builtin-type :added "4.1"}
 (fact "returns callable builtin types when op-spec declares them"

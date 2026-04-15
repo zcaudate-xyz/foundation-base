@@ -12,40 +12,182 @@
   [s ch]
   (count (filter #(= ch %) s)))
 
+(declare dart-exec)
+
+(def +dart-shell-env+
+  {"DART_TOOL_DISABLE_ANALYTICS" "true"})
+
 (defn normalize-dart-source
-  "Adds statement terminators so emitted Dart source can compile as a standalone file."
+  "Adds statement terminators so emitted Dart source can compile as a standalone file.
+   Tracks both paren/bracket depth (for multi-line expressions) and brace depth
+   (for block vs. assignment contexts) to correctly place semicolons."
   {:added "4.1"}
   [source]
-  (->> (reduce (fn [[lines depth] line]
-                 (let [trimmed   (str/trim line)
-                       delta     (+ (- (char-count trimmed \()
-                                         (char-count trimmed \)))
-                                    (- (char-count trimmed \[)
-                                       (char-count trimmed \])))
-                       next-depth (max 0 (+ depth delta))
-                       complete? (and (zero? depth)
-                                      (zero? next-depth))
-                       line'     (cond (or (empty? trimmed)
-                                           (str/starts-with? trimmed "//")
-                                           (str/ends-with? trimmed "{")
-                                           (= trimmed "}")
-                                           (str/ends-with? trimmed ";")
-                                           (and (pos? depth)
-                                                (pos? next-depth)))
-                                       line
+  (->> (reduce (fn [[lines paren-depth brace-stack] line]
+                 (let [trimmed        (str/trim line)
+                       p-delta        (+ (- (char-count trimmed \()
+                                            (char-count trimmed \)))
+                                         (- (char-count trimmed \[)
+                                            (char-count trimmed \])))
+                       next-paren     (max 0 (+ paren-depth p-delta))
+                       closing-brace? (= trimmed "}")
+                       opening-brace? (str/ends-with? trimmed "{")
+                       ;; brace opened by assignment (var x = {) vs a block body (fn() {)
+                       assign-brace?  (and opening-brace?
+                                           (re-find #"=\s*\{$" trimmed))
+                       next-brace-stack (cond
+                                          closing-brace? (rest brace-stack)
+                                          opening-brace? (cons (if assign-brace?
+                                                                  :assignment
+                                                                  :block)
+                                                                brace-stack)
+                                          :else brace-stack)
+                       in-brace?      (seq brace-stack)
+                       in-assign?     (= (first brace-stack) :assignment)
+                       complete?      (and (zero? paren-depth)
+                                           (zero? next-paren)
+                                           (not in-brace?))
+                       line'          (cond
+                                        ;; blank lines and comments unchanged
+                                        (or (empty? trimmed)
+                                            (str/starts-with? trimmed "//"))
+                                        line
 
-                                       (or complete?
-                                           (and (pos? depth)
-                                                (zero? next-depth)))
-                                       (str line ";")
+                                        ;; closing brace of an assignment block (map/object)
+                                        ;; the var declaration needs its semicolon here
+                                        (and closing-brace? in-assign?)
+                                        (str line ";")
 
-                                       :else
-                                       line)]
-                   [(conj lines line') next-depth]))
-               [[] 0]
+                                        ;; closing brace of a function/control block
+                                        closing-brace?
+                                        line
+
+                                        ;; line that opens a new block
+                                        opening-brace?
+                                        line
+
+                                        ;; already terminated
+                                        (str/ends-with? trimmed ";")
+                                        line
+
+                                        ;; end of multi-line paren/bracket expression:
+                                        ;; add ; only in statement context (top-level or inside
+                                        ;; a function block, NOT inside an assignment/map brace)
+                                        (and (pos? paren-depth)
+                                             (zero? next-paren)
+                                             (not in-assign?))
+                                        (str line ";")
+
+                                        ;; inside a brace block (map entries, function body)
+                                        in-brace?
+                                        line
+
+                                        ;; inside a multi-line paren/bracket expression
+                                        (and (pos? paren-depth) (pos? next-paren))
+                                        line
+
+                                        ;; complete top-level statement
+                                        complete?
+                                        (str line ";")
+
+                                        :else line)]
+                   [(conj lines line') next-paren next-brace-stack]))
+               [[] 0 '()]
                (str/split-lines source))
-       first
-       (str/join "\n")))
+        first
+        (str/join "\n")))
+
+(defn ensure-dart-imports
+  "Hoists required imports to the top of the standalone Dart file."
+  {:added "4.1"}
+  [source]
+  (let [convert-needed? (or (str/includes? source "jsonEncode(")
+                            (str/includes? source "jsonDecode("))
+        lines           (str/split-lines source)
+        [import-lines body-lines]
+        (reduce (fn [[imports body] line]
+                  (if (re-matches #"\s*import\s+'[^']+'(?:\s+as\s+\w+)?;\s*" line)
+                    [(conj imports (str/trim line)) body]
+                    [imports (conj body line)]))
+                [[] []]
+                lines)
+        imports         (cond-> (vec (distinct import-lines))
+                          (and convert-needed?
+                               (not-any? #(= "import 'dart:convert';" %) import-lines))
+                          (conj "import 'dart:convert';"))]
+    (str/join "\n"
+              (concat imports
+                      (when (and (seq imports)
+                                 (seq body-lines))
+                        [""])
+                      body-lines))))
+
+(defn dart-package-imports
+  "Finds package imports referenced by the generated Dart source."
+  {:added "4.1"}
+  [source]
+  (->> (re-seq #"package:([^/]+)/" source)
+       (map second)
+       distinct
+       sort
+       vec))
+
+(defn dart-package-root
+  "Returns the cached Dart package root used for twostep scripts."
+  {:added "4.1"}
+  [root]
+  (str (java.io.File. (or root (System/getProperty "user.dir"))
+                      "target/dart-twostep")))
+
+(defn dart-pubspec
+  "Creates a minimal pubspec for generated twostep scripts."
+  {:added "4.1"}
+  [packages]
+  (str "name: foundation_base_dart_twostep\n"
+       "publish_to: 'none'\n"
+       "environment:\n"
+       "  sdk: '>=3.0.0 <4.0.0'\n"
+       (when (seq packages)
+         (str "dependencies:\n"
+              (apply str
+                     (map (fn [package]
+                            (str "  " package ": any\n"))
+                          packages))))))
+
+(defn ensure-dart-package-context
+  "Creates a cached package root and resolves dependencies for package imports."
+  {:added "4.1"}
+  [root source]
+  (let [packages (dart-package-imports source)]
+    (when (seq packages)
+      (let [package-root   (dart-package-root root)
+            package-dir    (java.io.File. package-root)
+            _              (.mkdirs package-dir)
+            pubspec-path   (str package-root "/pubspec.yaml")
+            pubspec-body   (dart-pubspec packages)
+            current-body   (when (.exists (java.io.File. pubspec-path))
+                             (slurp pubspec-path))
+            changed?       (not= current-body pubspec-body)
+            package-config (java.io.File. (str package-root "/.dart_tool/package_config.json"))]
+        (when changed?
+          (spit pubspec-path pubspec-body))
+        (when (or changed?
+                  (not (.exists package-config)))
+          (let [proc (os/sh {:wait false
+                             :output false
+                             :env +dart-shell-env+
+                             :args [(dart-exec) "pub" "get"]
+                             :root package-root})]
+            (os/sh-wait proc)
+            (let [{:keys [exit err out] :as ret} (os/sh-output proc)]
+              (when-not (zero? exit)
+                (f/error "Unable to prepare Dart package context"
+                         {:root package-root
+                          :packages packages
+                          :result ret
+                          :stderr err
+                          :stdout out})))))
+        package-root))))
 
 (defn sh-exec-dart
   "Executes the dart compile and run process."
@@ -54,79 +196,135 @@
                                  stderr
                                  raw
                                  root
-                                 extension
-                                 output-flag]
-                          :as opts
-                          :or {trim str/trim-newline}}]
-  (let [tmp-exec (java.io.File/createTempFile "tmp" "")
-        tmp-file (str tmp-exec
-                      "."
-                      (or extension
-                          (f/error "Requires File Extension"
-                                   opts)))
-        root-dir     (str (or root (fs/parent tmp-file)))
-        compile-args (vec (concat input-args
-                                  [(str tmp-file)
-                                   output-flag
-                                   (str tmp-exec)]))
-        run-args     [(str "./" (fs/file-name tmp-exec))]
-        run!         (fn [args]
-                       (let [proc (os/sh {:wait false
-                                          :output false
-                                          :args args
-                                          :root root-dir})]
-                         (os/sh-wait proc)
-                         (os/sh-output proc)))
-        raw-output   (fn [{:keys [exit out err]}]
-                       (let [out-lines (->> (str/split-lines (trim out))
-                                            (remove empty?)
-                                            seq)
-                             err-lines (->> (str/split-lines (trim err))
-                                            (remove empty?)
-                                            seq)]
-                         [exit (or out-lines err-lines [])]))
+                                  extension
+                                  output-flag]
+                           :as opts
+                           :or {trim str/trim-newline}}]
+  (let [package-root  (ensure-dart-package-context root input-body)
+        raw-output    (fn [{:keys [exit out err]}]
+                        (let [out-lines (->> (str/split-lines (trim out))
+                                             (remove empty?)
+                                             seq)
+                              err-lines (->> (str/split-lines (trim err))
+                                             (remove empty?)
+                                             seq)]
+                          [exit (or out-lines err-lines [])]))
         stderr-output (fn [{:keys [out err]}]
                         (trim (or (not-empty err)
                                   out
                                   "")))]
-    (try
-      (spit tmp-file (normalize-dart-source input-body))
-      (let [compile-ret (run! compile-args)]
-        (cond raw
-              (if (zero? (:exit compile-ret))
-                (raw-output (run! run-args))
-                (raw-output compile-ret))
+    (if package-root
+      (let [script-dir (doto (java.io.File. (str package-root "/bin"))
+                         (.mkdirs))
+            tmp-file-obj (java.io.File/createTempFile
+                          "tmp"
+                          (str "."
+                               (or extension
+                                   (f/error "Requires File Extension"
+                                            opts)))
+                          script-dir)
+            tmp-file     (str tmp-file-obj)
+            file-name    (.getName tmp-file-obj)
+            run-args     [(dart-exec) "run" "--verbosity" "error" (str "bin/" file-name)]
+            run!         (fn [args]
+                           (let [proc (os/sh {:wait false
+                                              :output false
+                                              :env +dart-shell-env+
+                                              :args args
+                                              :root package-root})]
+                             (os/sh-wait proc)
+                             (os/sh-output proc)))]
+        (try
+          (spit tmp-file (-> input-body
+                             normalize-dart-source
+                             ensure-dart-imports))
+          (let [run-ret (run! run-args)]
+            (if raw
+              (raw-output run-ret)
+              (if (zero? (:exit run-ret))
+                (trim (:out run-ret))
+                (if stderr
+                  (stderr-output run-ret)
+                  (f/error "Twostep execution failed"
+                           {:args run-args
+                            :root package-root
+                            :file tmp-file
+                            :result run-ret})))))
+          (catch Throwable t
+            (if stderr
+              (trim (.getMessage t))
+              (throw t)))
+          (finally
+            (try (fs/delete tmp-file)
+                 (catch Throwable _)))))
+      (let [temp-root    (some-> root str)
+            temp-dir     (some-> temp-root java.io.File.)
+            _            (when temp-dir
+                           (.mkdirs temp-dir))
+            tmp-exec (if temp-dir
+                       (java.io.File/createTempFile "tmp" "" temp-dir)
+                       (java.io.File/createTempFile "tmp" ""))
+            tmp-file (str tmp-exec
+                          "."
+                          (or extension
+                              (f/error "Requires File Extension"
+                                       opts)))
+            root-dir     (str (or temp-root
+                                  root
+                                  (fs/parent tmp-file)))
+            compile-args (vec (concat input-args
+                                      [(str tmp-file)
+                                       output-flag
+                                       (str tmp-exec)]))
+            run-args     [(str "./" (fs/file-name tmp-exec))]
+            run!         (fn [args]
+                           (let [proc (os/sh {:wait false
+                                              :output false
+                                              :env +dart-shell-env+
+                                              :args args
+                                              :root root-dir})]
+                             (os/sh-wait proc)
+                             (os/sh-output proc)))]
+        (try
+          (spit tmp-file (-> input-body
+                             normalize-dart-source
+                             ensure-dart-imports))
+          (let [compile-ret (run! compile-args)]
+            (cond raw
+                  (if (zero? (:exit compile-ret))
+                    (raw-output (run! run-args))
+                    (raw-output compile-ret))
 
-              (not (zero? (:exit compile-ret)))
-              (if stderr
-                (stderr-output compile-ret)
-                (f/error "Twostep compile failed"
-                         {:args compile-args
-                          :root root-dir
-                          :file tmp-file
-                          :exec (str tmp-exec)
-                          :result compile-ret}))
-
-              :else
-              (let [run-ret (run! run-args)]
-                (if (zero? (:exit run-ret))
-                  (trim (:out run-ret))
+                  (not (zero? (:exit compile-ret)))
                   (if stderr
-                    (stderr-output run-ret)
-                    (f/error "Twostep execution failed"
-                             {:args run-args
+                    (stderr-output compile-ret)
+                    (f/error "Twostep compile failed"
+                             {:args compile-args
                               :root root-dir
                               :file tmp-file
                               :exec (str tmp-exec)
-                              :result run-ret}))))))
-      (catch Throwable t
-        (if stderr
-          (trim (.getMessage t))
-          (throw t)))
-      (finally
-        (doseq [path [tmp-file (str tmp-exec)]]
-          (try (fs/delete path)
-               (catch Throwable _)))))))
+                              :result compile-ret}))
+
+                  :else
+                  (let [run-ret (run! run-args)]
+                    (if (zero? (:exit run-ret))
+                      (trim (:out run-ret))
+                      (if stderr
+                        (stderr-output run-ret)
+                        (f/error "Twostep execution failed"
+                                 {:args run-args
+                                  :root root-dir
+                                  :file tmp-file
+                                  :exec (str tmp-exec)
+                                  :result run-ret}))))))
+          (catch Throwable t
+            (if stderr
+              (trim (.getMessage t))
+              (throw t)))
+          (finally
+            (doseq [path [tmp-file (str tmp-exec)]]
+              (try (fs/delete path)
+                   (catch Throwable _)))))))))
 
 (defn transform-form
   "Transforms forms into a standalone Dart `main` function."
@@ -137,9 +335,8 @@
                 forms)
          body  (concat '[do]
                        (butlast forms)
-                       [(list 'print (list 'json.encode (last forms)))])]
-    `(:- "import 'dart:convert' as json;\n\n"
-         "void main() {\n "
+                        [(list 'print (list 'jsonEncode (last forms)))])]
+    `(:- "void main() {\n "
          ~body
          "\n}")))
 

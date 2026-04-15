@@ -28,6 +28,9 @@
 (defspec.xt fn-self
   [:fn [[:fn [:xt/any] :xt/any]] :xt/any])
 
+(defspec.xt fn-bind
+  [:fn [:xt/any [:fn [:xt/any] :xt/any]] :xt/any])
+
 (defspec.xt fn-trigger
   [:fn [:xt/any :xt/str :xt/str :xt/str :xt/any] :xt/any])
 
@@ -126,6 +129,13 @@
   [f]
   (return (fn [...args]
             (return (f self ...args)))))
+
+(defn.js fn-bind
+  "applies arguments along with an explicit worker instance"
+  {:added "4.0"}
+  [worker f]
+  (return (fn [...args]
+            (return (f worker ...args)))))
 
 (defn.js ^{:cell/action "@worker/trigger"
            :cell/static false}

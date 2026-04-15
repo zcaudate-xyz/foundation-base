@@ -6,10 +6,11 @@
 
 (defn.xt wrap-callback
   [callbacks key]
-  (:= callbacks (or callbacks {}))
+  (when (xt/x:nil? callbacks)
+    (:= callbacks {}))
   (var result-fn
        (fn [result]
-         (var f (xt/x:get-key callbacks key))
+          (var f (xt/x:get-key callbacks key))
          (if (xt/x:not-nil? f)
            (return (f result))
            (return result))))
@@ -19,7 +20,9 @@
   "connects to a database"
   {:added "4.0"}
   [m cb]
-  (var #{constructor} m)
+  (when (xt/x:nil? m)
+    (:= m {}))
+  (var constructor (xt/x:get-key m "constructor"))
   (var success-fn (-/wrap-callback cb "success"))
   (var error-fn   (-/wrap-callback cb "error"))
   (xt/for:return [[conn err] (constructor m (xt/x:callback))]
@@ -62,6 +65,7 @@
   "sends a synchronous query"
   {:added "4.0"}
   [conn raw]
-  (var query-fn (or (xt/x:get-key conn "::query_sync")
-                    (xt/x:get-key conn "::query")))
+  (var query-fn (xt/x:get-key conn "::query_sync"))
+  (when (xt/x:nil? query-fn)
+    (:= query-fn (xt/x:get-key conn "::query")))
   (return (query-fn raw)))

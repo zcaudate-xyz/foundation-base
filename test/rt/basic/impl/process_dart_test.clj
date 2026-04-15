@@ -8,7 +8,13 @@
   ^:hidden
 
   (normalize-dart-source "void main() {\n  print(\n    foo(1)\n  )\n}")
-  => "void main() {\n  print(\n    foo(1)\n  );\n}")
+  => "void main() {\n  print(\n    foo(1)\n  );\n}"
+
+  (normalize-dart-source "var OPERATORS = {\n  \"neq\":\"!=\",\n  \"gt\":\">\"\n}")
+  => "var OPERATORS = {\n  \"neq\":\"!=\",\n  \"gt\":\">\"\n};"
+
+  (normalize-dart-source "encode_bool(b) {\n  return \"TRUE\";\n}")
+  => "encode_bool(b) {\n  return \"TRUE\";\n}")
 
 
 ^{:refer rt.basic.impl.process-dart/sh-exec-dart :added "4.1"}

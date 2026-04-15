@@ -94,14 +94,14 @@
                      {:ns 'sample.route
                       :aliases '{k xt.lang.common-lib}})]
   => '[x:obj-assign
-       x:obj-vals
-       x:len
-         (x:obj-assign current extra)
-         (x:obj-vals current)
-         (x:obj-clone current)
-         (x:arr-clone path)
-         (x:len path)
-         (x:str-join "/" path)])
+        x:obj-vals
+        x:str-len
+          (x:obj-assign current extra)
+          (x:obj-vals current)
+          (x:obj-clone current)
+          (x:arr-clone path)
+          (x:str-len path)
+          (x:str-join "/" path)])
 
 (fact "lowering uses rule-driven wrapper rewrites"
   [(lower/lower-form '(k/get-key route "tree")

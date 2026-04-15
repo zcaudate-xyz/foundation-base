@@ -17,7 +17,7 @@
   [opts]
   (var config (or opts {}))
   (var #{actions suppress} config)
-  (var resolved-actions (or actions (worker-local/actions-baseline)))
+  (var resolved-actions actions)
   (return {:create-fn (fn [listener]
                         (return (worker-mock/create-worker listener
                                                            resolved-actions

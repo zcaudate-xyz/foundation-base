@@ -3,9 +3,11 @@
 
 (l/script :js
   {:require [[xt.lang.common-lib :as k]
-             [js.core :as j]
-             [js.react :as r]
-             [js.blessed :as b]
+             [xt.lang.common-spec :as xt]
+             [xt.lang.common-data :as xtd]
+              [js.core :as j]
+              [js.react :as r]
+              [js.blessed :as b]
              [js.blessed.ui-style :as ui-style]]})
 
 (defn.js useTree
@@ -40,7 +42,7 @@
   [items layout height format]
   (var lefts
        (:? (== layout "vertical")
-           (j/fill (Array (k/len items))
+           (j/fill (Array (xt/x:len items))
                    0)
            (-> items
                (j/reduce (fn [acc item]
@@ -56,7 +58,7 @@
          (j/map items
                 (fn:> [e i]
                   (* i (or height 1))))
-         (j/fill (Array (k/len items))
+         (j/fill (Array (xt/x:len items))
                  0)))
   (return [lefts tops]))
 
@@ -82,7 +84,7 @@
                                 :style (:? (. indices [i]) (ui-style/styleSmall color) ui-style/styleInvertDisabled)
                                 :left  (. lefts [i])
                                 :top   (. tops [i])
-                                :width (k/len text)
+                                :width (xt/x:len text)
                                 :height height
                                 :shrink true
                                 :mouse true
@@ -150,14 +152,14 @@
                                              ui-style/styleInvertDisabled)
                                   :left  (. lefts [i])
                                   :top   (. tops [i])
-                                  :width (k/len text)
+                                  :width (xt/x:len text)
                                   :height (or height 1)
                                   :shrink true
                                   :mouse true
                                   :onClick (fn []
                                               (setInternal i)
                                               (if setIndex (setIndex i))
-                                              (if onChange (onChange (k/get-key items i))))
+                                              (if onChange (onChange (. items [i]))))
                                   :content text}])))]))))
 
 (defn.js Tabs
@@ -378,7 +380,7 @@
       #{[:width width
          :layout "vertical"
          :color color
-         :value (or branch (k/first branches))
+         :value (or branch (xtd/first branches))
          :setValue (fn [k]
                      (setBranch k))
          :data branches
@@ -412,7 +414,7 @@
 
                 :else
                 -/ListPane))
-  (var isFinal (== 1 (k/len levels)))
+  (var isFinal (== 1 (xt/x:len levels)))
   (when isFinal
     (return [:% Pane #{[tree
                         root

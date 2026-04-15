@@ -64,8 +64,7 @@
   {:added "4.0"}
   [listener actions suppress]
   (var worker (-/mock-worker listener))
-  (when actions
-    (worker-local/actions-init actions worker))
+  (worker-local/actions-init (or actions {}) worker)
   (when (not suppress)
     (. (j/future)
        (then (fn []

@@ -3,9 +3,10 @@
 
 (l/script :js
   {:require [[xt.lang.common-lib :as k]
-             [js.core :as j]
-             [js.react :as r]
-             [js.blessed :as b]
+             [xt.lang.common-spec :as xt]
+              [js.core :as j]
+              [js.react :as r]
+              [js.blessed :as b]
              [js.blessed.ui-style :as ui-style]]})
 
 (defn.js Enclosed
@@ -278,14 +279,14 @@
          [internal setInternal] (r/local (or index 0))
          
          incIdx (fn []
-                  (let [ni (mod (+ (k/len items) (+ internal 1))
-                                (k/len items))]
+                  (let [ni (mod (+ (xt/x:len items) (+ internal 1))
+                                (xt/x:len items))]
                     (setInternal ni)
                     (if onChange (onChange ni))
                     (if setIndex (setIndex ni))))
          decIdx (fn []
-                  (let [ni (mod (+ (k/len items) (- internal 1))
-                                (k/len items))]
+                  (let [ni (mod (+ (xt/x:len items) (- internal 1))
+                                (xt/x:len items))]
                     (setInternal ni)
                     (if onChange (onChange ni))
                     (if setIndex (setIndex ni))))
@@ -300,8 +301,8 @@
                          :bg "black"
                          :bold true}
                  :onClick incIdx
-                 :content (+ " " (j/padStart (k/get-key items internal)
-                                             (or pad 0)))}
+                  :content (+ " " (j/padStart (. items [internal])
+                                              (or pad 0)))}
                 (ui-style/getLayout props))]
      (return [:button #{(:.. bprops)}
               [:button {:shrink true
@@ -355,7 +356,7 @@
                 (return)))
         prompt (b/list {:parent screen
                         :top lpos.yl
-                        :height (k/len items)
+                        :height (xt/x:len items)
                         :mouse true
                         :keys true
                         :inputOnFocus true
@@ -363,7 +364,7 @@
                         :left (+ lpos.xi)
                         :width (- lpos.xl lpos.xi)
                         :style {:bg "gray"
-                                :selected {:bg (or (k/get-key opts "color")
+                                :selected {:bg (or (xt/x:get-key opts "color")
                                                    "yellow")
                                            :fg "black"}}
                         :items items})]
@@ -402,7 +403,7 @@
                                                    (if setIndex (setIndex i))
                                                  (if onChange (onChange i)))}))
          tprops   (ui-style/getTopProps props)
-         content  (formatFn (k/get-key items internal)) 
+         content  (formatFn (. items [internal])) 
          
          _ (r/run []
             (if (and (k/is-number? index)
@@ -510,7 +511,7 @@
                               :bold bold}
                       :width width
                       :content (:? censor "" content)}]
-               (:? error [:box {:align "right" :content (+ " " (k/get-key error "message") " ") :right 1 :shrink true :top 0 :width (+ 2 ((k/get-key error "message")))}])]]))))
+               (:? error [:box {:align "right" :content (+ " " (xt/x:get-key error "message") " ") :right 1 :shrink true :top 0 :width (+ 2 (xt/x:len (xt/x:get-key error "message")))}])]]))))
 
 (defn.js TextDisplay
   "Displays text as content"
@@ -539,7 +540,7 @@
         _ (:= color (or color "yellow"))
         grid (b/box {:parent screen
                      :top lpos.yl
-                     :height (j/ceil (/ (k/len numbers) colCount))
+                     :height (j/ceil (/ (xt/x:len numbers) colCount))
                      :mouse true
                      :keys true
                      :inputOnFocus true

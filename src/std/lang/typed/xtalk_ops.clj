@@ -8,6 +8,20 @@
   '[std.lang.base.grammar-spec
     std.lang.base.grammar-xtalk])
 
+(def +legacy-op-aliases+
+  '{xt.lang.common-lib/len x:len
+    xt.lang.common-lib/arr-clone x:arr-clone
+    xt.lang.common-lib/first x:first
+    xt.lang.common-lib/second x:second
+    xt.lang.common-lib/get-key x:get-key
+    xt.lang.common-lib/obj-keys x:obj-keys
+    xt.lang.common-lib/json-encode x:json-encode
+    xt.lang.common-lib/json-decode x:json-decode
+    xt.lang.common-lib/cat x:cat
+    xt.lang.common-lib/fn? x:is-function?
+    xt.lang.common-lib/arr? x:is-array?
+    xt.lang.common-lib/obj? x:is-object?})
+
 (defn op-table-vars
   [ns-sym]
   (->> (ns-publics ns-sym)
@@ -29,15 +43,12 @@
 
 (defn canonical-symbol-from-entry
   [entry]
-  (if (and (= :alias (:emit entry))
-           (symbol? (:raw entry)))
-    (:raw entry)
-    (or (some (fn [sym]
-                (when (and (symbol? sym)
-                           (str/starts-with? (name sym) "x:"))
-                  sym))
-              (sort-by str (:symbol entry)))
-        (first (sort-by str (:symbol entry))))))
+  (or (some (fn [sym]
+              (when (and (symbol? sym)
+                         (str/starts-with? (name sym) "x:"))
+                sym))
+            (sort-by str (:symbol entry)))
+      (first (sort-by str (:symbol entry)))))
 
 (defonce +op-index+
   (delay
@@ -62,7 +73,9 @@
 (defn builtin-entry
   [sym]
   (or (get-in @+op-index+ [:by-symbol sym])
-      (get-in @+op-index+ [:by-raw sym])))
+      (get-in @+op-index+ [:by-raw sym])
+      (when-let [alias-sym (get +legacy-op-aliases+ sym)]
+        (get-in @+op-index+ [:by-symbol alias-sym]))))
 
 (defn canonical-entry
   [sym]

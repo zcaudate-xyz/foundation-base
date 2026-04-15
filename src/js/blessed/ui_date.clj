@@ -3,9 +3,10 @@
 
 (l/script :js
   {:require [[xt.lang.common-lib :as k]
-             [js.core :as j]
-             [js.react :as r]
-             [js.blessed :as b]
+             [xt.lang.common-spec :as xt]
+              [js.core :as j]
+              [js.react :as r]
+              [js.blessed :as b]
              [js.blessed.ui-style :as ui-style]
              [js.blessed.ui-core :as ui-core]]})
 
@@ -56,7 +57,7 @@
                      :style {:bg "black"
                              :fg color}
                      :content hourLabel}]
-              (:? (not minuteHidden) [[:% ui-core/NumberGridBox #{(:.. minuteProps)}] [:box {:content minuteLabel :key "1" :left (+ 14 (k/len hourLabel)) :shrink true :style {:bg "black" :fg color} :top 0}]])]))))
+               (:? (not minuteHidden) [[:% ui-core/NumberGridBox #{(:.. minuteProps)}] [:box {:content minuteLabel :key "1" :left (+ 14 (xt/x:len hourLabel)) :shrink true :style {:bg "black" :fg color} :top 0}]])]))))
 
 (defn.js DatePicker
   "Constructs a DatePicker"
@@ -101,20 +102,19 @@
         {:start 1
          :end 12
          :format (fn [i]
-                   (return (-> (k/get-key ["JAN"
-                                           "FEB"
-                                           "MAR"
-                                           "APR"
-                                           "MAY"
-                                           "JUN"
-                                           "JUL"
-                                           "AUG"
-                                           "SEP"
-                                           "OCT"
-                                           "NOV"
-                                           "DEC"]
-                                          (- i 1))
-                               (j/padStart 4))))
+                   (return (-> (. ["JAN"
+                                   "FEB"
+                                   "MAR"
+                                   "APR"
+                                   "MAY"
+                                   "JUN"
+                                   "JUL"
+                                   "AUG"
+                                   "SEP"
+                                   "OCT"
+                                   "NOV"
+                                   "DEC"] [(- i 1)])
+                                (j/padStart 4))))
          :left  10 #_(+ 2 (k/len dayLabel))
          :value month
          :setValue setMonth
