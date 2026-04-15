@@ -37,10 +37,21 @@
 
 ^{:refer xt.runtime.type-syntax/syntax-create :added "4.0"}
 (fact "creates a syntax"
+  ^:hidden
 
   (!.js
-   (tc/count
-    (syn/syntax-create [1 2 3] "hello"))))
+   (var out (syn/syntax-create [1 2 3] "hello"))
+   [(tc/is-syntax? out)
+    (tc/count out)
+    (syn/get-metadata out)])
+  => [true 3 "hello"]
+
+  (!.lua
+   (var out (syn/syntax-create [1 2 3] "hello"))
+   [(tc/is-syntax? out)
+    (tc/count out)
+    (syn/get-metadata out)])
+  => [true 3 "hello"])
 
 ^{:refer xt.runtime.type-syntax/get-metadata :added "4.0"}
 (fact "gets metadata"
@@ -60,4 +71,19 @@
   => [nil "hello"])
 
 ^{:refer xt.runtime.type-syntax/syntax :added "4.0"}
-(fact "creates a syntax")
+(fact "creates or unwraps syntax values"
+  ^:hidden
+
+  (!.js
+   (var wrapped (syn/syntax 1 "hello"))
+   [(syn/syntax 1 nil)
+    (syn/get-metadata wrapped)
+    (syn/syntax wrapped nil)])
+  => [1 "hello" 1]
+
+  (!.lua
+   (var wrapped (syn/syntax 1 "hello"))
+   [(syn/syntax 1 nil)
+    (syn/get-metadata wrapped)
+    (syn/syntax wrapped nil)])
+  => [1 "hello" 1])

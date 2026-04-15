@@ -179,7 +179,7 @@
   {:added "4.0"}
   [node level idx x]
   (var nnode (-/node-clone node))
-  (var #{children} node)
+  (var #{children} nnode)
   (cond (== level 0)
         (xt/x:set-idx children
                    (xt/x:offset (-/impl-mask idx))
