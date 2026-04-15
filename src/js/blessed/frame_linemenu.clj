@@ -2,10 +2,7 @@
   (:require [std.lang :as l]))
 
 (l/script :js
-  {:require [[xt.lang.common-lib :as k]
-             [js.core :as j]
-             [js.react :as r]
-             [js.lib.chalk :as chalk]]})
+  {:require [[xt.lang.common-lib :as k] [js.core :as j] [js.react :as r] [js.lib.chalk :as chalk] [xt.lang.common-data :as xtd] [xt.lang.common-spec :as xt]]})
 
 (def.js lineNormal
   {:hover {:fg "black"
@@ -50,10 +47,10 @@
   {:added "4.0"}
   ([items]
    (let [entries (j/filter items (fn:> [e] (:? (k/is-array? e.hidden) (not (e.hidden)) (not e.hidden))))
-         lens     (j/map entries (fn:> [e] (k/len e.label)))
+         lens     (j/map entries (fn:> [e] (xt/x:len e.label)))
          lefts    (j/reduce lens
                             (fn [acc l]
-                               (j/push acc (+ (k/last acc) l 8))
+                               (j/push acc (+ (xtd/last acc) l 8))
                                (return acc))
                              [0])]
      (return (j/map entries (fn [e i]
@@ -79,7 +76,7 @@
                                      (j/filter 
                                       (fn [e]
                                         (return (== e.index key.name))))
-                                     (k/first))]
+                                     (xtd/first))]
                            (when e
                              (setRoute e.route))))))
      (return (fn []

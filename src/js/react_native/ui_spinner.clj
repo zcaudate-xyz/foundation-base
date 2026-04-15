@@ -2,16 +2,7 @@
   (:require [std.lang :as l]))
 
 (l/script :js
-  {:require [[xt.lang.common-lib :as k]
-             [js.core :as j]
-             [js.react :as r]
-             [js.react-native :as n]
-             [js.react-native.animate :as a]
-             [js.react-native.physical-base :as physical-base]
-             [js.react-native.physical-edit :as physical-edit]
-             [js.react-native.helper-roller :as helper-roller]
-             [js.react-native.helper-theme :as helper-theme]
-             [js.react-native.helper-theme-default :as helper-theme-default]]})
+  {:require [[xt.lang.common-lib :as k] [xt.lang.common-data :as xtd] [js.core :as j] [js.react :as r] [js.react-native :as n] [js.react-native.animate :as a] [js.react-native.physical-base :as physical-base] [js.react-native.physical-edit :as physical-edit] [js.react-native.helper-roller :as helper-roller] [js.react-native.helper-theme :as helper-theme] [js.react-native.helper-theme-default :as helper-theme-default]]})
   
 (def.js ITEMS
   ["0" "1" "2" "3" "4" "5" "6" "7" "8" "9"])
@@ -87,8 +78,8 @@
    [:% n/View
     {:style [-/styleDigit
              (:.. (j/arrayify style))]}
-    (j/map (k/arr-range divisions)
-           (fn:> [index i]
+     (j/map (xtd/arr-range divisions)
+            (fn:> [index i]
              [:% physical-base/Text
               {:key i
                :indicators {:offset offset

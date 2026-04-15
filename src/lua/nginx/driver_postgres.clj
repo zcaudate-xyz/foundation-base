@@ -3,11 +3,7 @@
             [xt.sys.conn-dbsql :as dbsql]))
 
 (l/script :lua
-  {:require [[xt.lang.common-lib :as k]
-             [xt.lang.common-spec :as xt]
-             [xt.lang.common-data :as xtd]
-             [xt.lang.common-runtime :as rt]]
-    :import [["pgmoon" :as ngxpg]]})
+  {:import [["pgmoon" :as ngxpg]] :require [[xt.lang.common-lib :as k] [xt.lang.common-spec :as xt] [xt.lang.common-data :as xtd] [xt.lang.common-runtime :as rt]]})
 
 (defn.lua default-env
   "gets the default env"
@@ -99,7 +95,7 @@
   
   (when (not= 1 err)
     (return false err))
-  (:= ret (:? (k/is-array? ret) (k/first ret) ret))
+  (:= ret (:? (k/is-array? ret) (xtd/first ret) ret))
   (local val (:? (k/is-boolean? ret)
                  ret
                  (xtd/obj-first-val (or ret {}))))

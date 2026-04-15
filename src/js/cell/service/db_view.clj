@@ -2,11 +2,7 @@
   (:require [std.lang :as l]))
 
 (l/script :xtalk
-  {:require [[xt.lang.common-spec :as xt]
-             [xt.lang.common-data :as xtd]
-             [xt.db.base-scope :as base-scope]
-             [xt.db.base-view :as base-view]]
-   :export  [MODULE]})
+  {:export [MODULE] :require [[xt.lang.common-spec :as xt] [xt.lang.common-data :as xtd] [xt.db.base-scope :as base-scope] [xt.db.base-view :as base-view]]})
 
 (defn.xt get-views
   "gets the db views"

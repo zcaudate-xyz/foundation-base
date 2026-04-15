@@ -2,13 +2,7 @@
   (:require [std.lang :as l]))
 
 (l/script :js
-  {:require [[xt.lang.common-lib :as k]
-             [xt.lang.common-spec :as xt]
-              [js.core :as j]
-              [js.react :as r]
-              [js.blessed :as b]
-             [js.blessed.ui-style :as ui-style]
-             [js.blessed.ui-core :as ui-core]]})
+  {:require [[xt.lang.common-lib :as k] [xt.lang.common-spec :as xt] [js.core :as j] [js.react :as r] [js.blessed :as b] [js.blessed.ui-style :as ui-style] [js.blessed.ui-core :as ui-core]]})
 
 (defn.js TimePicker
   "Constructs a TimePicker"
@@ -115,14 +109,14 @@
                                    "NOV"
                                    "DEC"] [(- i 1)])
                                 (j/padStart 4))))
-         :left  10 #_(+ 2 (k/len dayLabel))
+         :left  10 #_(+ 2 (xt/x:len dayLabel))
          :value month
          :setValue setMonth
          :colWidth 5
          :colCount 3
          :color color
          :width 10}]
-       #_[:box {:left (+ 2 (k/len dayLabel) 20)
+       #_[:box {:left (+ 2 (xt/x:len dayLabel) 20)
               :top 0
               :height 3
               :width 3

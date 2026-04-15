@@ -3,12 +3,7 @@
             [std.lang.typed.xtalk :refer [defspec.xt]]))
 
 (l/script :js
-  {:require [[xt.lang.common-spec :as xt]
-             [xt.lang.common-data :as xtd]
-              [xt.lang.event-common :as event-common]
-              [js.cell.kernel.base-link :as link]
-              [js.cell.kernel.base-util :as util]
-              [js.core :as j]]})
+  {:require [[xt.lang.common-spec :as xt] [xt.lang.common-data :as xtd] [xt.lang.event-common :as event-common] [js.cell.kernel.base-link :as link] [js.cell.kernel.base-util :as util] [js.core :as j]]})
 
 (defspec.xt new-cell-init
   [:fn [] js.cell.kernel.spec/CellInit])

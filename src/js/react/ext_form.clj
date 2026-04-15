@@ -2,10 +2,7 @@
   (:require [std.lang :as l]))
 
 (l/script :js
-  {:require [[xt.lang.common-lib :as k]
-             [xt.lang.event-form :as event-form]
-             [js.react :as r]
-             [js.core :as j]]})
+  {:require [[xt.lang.common-lib :as k] [xt.lang.event-form :as event-form] [js.react :as r] [js.core :as j] [xt.lang.common-data :as xtd] [xt.lang.common-spec :as xt]]})
 
 ;;
 ;; No Validation
@@ -54,7 +51,7 @@
         (k/is-object? print)
         (do (k/for:object [[key v] print]
               (var term (. meta [key]))
-              (when (k/is-empty? (k/arr-intersection (j/arrayify v)
+              (when (xtd/is-empty? (k/arr-intersection (j/arrayify v)
                                                      (j/arrayify term)))
                 (return false)))
             (return true)))
@@ -345,8 +342,8 @@
   
   (var validateFilled
        (fn []
-         (k/for:array [vkey (k/obj-keys (. form validators))]
-           (var v (k/get-key data vkey))
+         (k/for:array [vkey (xtd/obj-keys (. form validators))]
+           (var v (xt/x:get-key data vkey))
            (when (and (not (k/is-boolean? v))
                       (not (k/is-number? v))
                       (k/not-empty? v))

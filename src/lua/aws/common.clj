@@ -2,12 +2,7 @@
   (:require [std.lang :as l]))
 
 (l/script :lua
-  {:require [[lua.nginx.openssl :as ssl]
-             [lua.nginx :as n]
-             [lua.nginx.http-client :as http]
-             [lua.core :as u]
-             [xt.lang.common-lib :as k]
-             [xt.lang.util-xml :as xml]]})
+  {:require [[lua.nginx.openssl :as ssl] [lua.nginx :as n] [lua.nginx.http-client :as http] [lua.core :as u] [xt.lang.common-lib :as k] [xt.lang.util-xml :as xml] [xt.lang.common-data :as xtd] [xt.lang.common-spec :as xt]]})
 
 (def.lua AWS_ALGO "AWS4-HMAC-SHA256")
 
@@ -72,7 +67,7 @@
   "gets the scope for a call"
   {:added "4.0"}
   [t region service]
-  (return (k/cat (-/get-date-short t)
+  (return (xt/x:cat (-/get-date-short t)
                  "/"
                  (or region "us-east-1")
                  "/"
@@ -84,13 +79,13 @@
   "gets the aws credential"
   {:added "4.0"}
   [user t region service]
-  (return (k/cat user "/" (-/get-aws-scope t region service))))
+  (return (xt/x:cat user "/" (-/get-aws-scope t region service))))
 
 (defn.lua get-signing-key
   "gets the aws signing key"
   {:added "4.0"}
   [secret t region service]
-  (var h0    (ssl/hmac (k/cat "AWS4" secret)
+  (var h0    (ssl/hmac (xt/x:cat "AWS4" secret)
                        (-/get-date-short t)
                        "sha256"))
   (var h1    (ssl/hmac h0 (or region  "us-east-1") "sha256"))
@@ -109,25 +104,25 @@
   (var out [])
   (k/for:object [[k v] headers]
     (var nk (k/to-lowercase k))
-    (when (not (k/get-key -/AWS_EXCLUDE nk))
+    (when (not (xt/x:get-key -/AWS_EXCLUDE nk))
       (var nv (k/replace v "[ ]+" " "))
       (x:arr-push out [nk nv])))
-  (return (k/arr-sort out k/first k/str-lt)))
+  (return (k/arr-sort out xtd/first k/str-lt)))
 
 (defn.lua get-canonical-route
   "gets the canonical route"
   {:added "4.0"}
   [route]
   (var arr     (k/split route "?"))
-  (var path    (k/first arr))
-  (var search  (k/second arr))
+  (var path    (xtd/first arr))
+  (var search  (xtd/second arr))
   (var params [])
   (when search
     (k/for:array [pair (k/split search "&")]
       (var [k v] (k/split pair "="))
       (x:arr-push params [k (or v "")])))
   (return {:path path
-           :params (k/arr-sort params k/first k/str-lt)}))
+           :params (k/arr-sort params xtd/first k/str-lt)}))
 
 (defn.lua get-canonical
   "gets the canonical string"
@@ -138,12 +133,12 @@
    (k/arr-join
     [(k/to-uppercase method)
      path
-     (k/arr-join (k/arr-map params (fn:> [arr] (k/cat (k/first arr) "=" (k/second arr))))
+     (k/arr-join (k/arr-map params (fn:> [arr] (xt/x:cat (xtd/first arr) "=" (xtd/second arr))))
                  "&")
-     (k/arr-join (k/arr-map headers (fn:> [arr] (k/cat (k/first arr) ":" (k/second arr))))
+     (k/arr-join (k/arr-map headers (fn:> [arr] (xt/x:cat (xtd/first arr) ":" (xtd/second arr))))
                  "\n")
      ""
-     (k/arr-join (k/arr-map headers k/first) ";")
+     (k/arr-join (k/arr-map headers xtd/first) ";")
      (or hash "UNSIGNED-PAYLOAD")]
     "\n")
    headers))
@@ -175,13 +170,13 @@
   (var credential  (-/get-aws-credential user t region service))
   
   (var signature   (n/to-hex (ssl/hmac signing-key signing-input "sha256")))
-  (var out (k/cat -/AWS_ALGO
+  (var out (xt/x:cat -/AWS_ALGO
                   " "
                   "Credential="
                   credential
                   ", "
                   "SignedHeaders="
-                  (k/arr-join (k/arr-map canonical-headers k/first) ";")
+                  (k/arr-join (k/arr-map canonical-headers xtd/first) ";")
                   ", "
                   "Signature="
                   signature))
@@ -200,17 +195,17 @@
   (var hash  (n/to-hex (-/get-sha256 body)))
   (var headers (k/obj-assign
                 headers
-                {"host" (k/cat host ":" port)
+                {"host" (xt/x:cat host ":" port)
                  "x-amz-content-sha256" hash
                  "x-amz-date" (-/get-date-long (. aws t))}))
   (var authorization (-/header-authorization
                       aws
                       method
-                      (k/cat "/" route)
+                      (xt/x:cat "/" route)
                       headers
                       hash))
   (k/set-key headers "authorization" authorization)
-  (var url (k/cat scheme "://" host ":" port "/" route))
+  (var url (xt/x:cat scheme "://" host ":" port "/" route))
   (return
    {:method method
     :headers headers
@@ -226,7 +221,7 @@
   (if (and (k/not-empty? body)
            (k/starts-with? body "<?xml"))
     (k/set-key out "body"
-               (xml/to-brief (xml/parse-xml (k/second (k/split body "\n"))))))
+               (xml/to-brief (xml/parse-xml (xtd/second (k/split body "\n"))))))
   (return out))
 
 (defn.lua make-request-auth
@@ -244,8 +239,8 @@
   [aws method route headers body opts]
   (:= aws    (-/get-aws-defaults aws))
   (var #{scheme host port} aws)
-  (var headers {"host" (k/cat host ":" port)})
-  (var url (k/cat scheme "://" host ":" port "/" route))
+  (var headers {"host" (xt/x:cat host ":" port)})
+  (var url (xt/x:cat scheme "://" host ":" port "/" route))
   (return (-> (http/request-uri (http/new) url {:method method
                                                 :headers headers
                                                 :body body})

@@ -4,11 +4,7 @@
   (:refer-clojure :exclude [print send]))
 
 (l/script :js
-  {:require [[xt.lang.common-lib :as k]
-             [xt.lang.common-data :as xtd]
-             [xt.lang.common-runtime :as rt]
-             [js.core.util :as ut]]
-    :import  [["pg" :as [* Postgres]]]})
+  {:import [["pg" :as [* Postgres]]] :require [[xt.lang.common-lib :as k] [xt.lang.common-data :as xtd] [xt.lang.common-runtime :as rt] [js.core.util :as ut] [xt.lang.common-spec :as xt]]})
 
 (defn.js default-env
   "gets the default env"
@@ -54,10 +50,10 @@
               (return (callback err nil)))
             (var #{rows} res)
             (if (and (== 1 rows.length)
-                     (== 1 (k/len (k/obj-keys (k/first rows)))))
+                     (== 1 (xt/x:len (xtd/obj-keys (xtd/first rows)))))
               (return (callback nil
                                 (xtd/obj-first-val
-                                 (k/first rows))))
+                                 (xtd/first rows))))
               (return (callback nil rows))))))))
   (:= (. conn ["::query_sync"])
       (fn [query]

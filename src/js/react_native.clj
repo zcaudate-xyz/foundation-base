@@ -3,27 +3,7 @@
             [std.lib.foundation :as f]))
 
 (l/script :js
-  {:require [[js.core :as j]
-              [js.react :as r]
-              [js.react.helper-portal :as helper-portal]
-              [xt.lang.common-lib :as k]
-              [xt.lang.common-spec :as xt]
-              [xt.lang.common-data :as xtd]
-              [xt.lang.common-string :as str]]
-    :import [["react-native" :as [* ReactNative]]
-            ["react-native-video" :as RNVideo]
-            ["react-native-gesture-handler" :as [* RNGestureHandler]]
-            ["@react-navigation/bottom-tabs" :as [* RNNavTabs]]
-            ["react-native" :as [* ReactNative]]
-            ["react-native-localize" :as [* RNLocalize]]
-            ["@react-navigation/drawer" :as [* RNNavDrawer]]
-            ["expo-linear-gradient" :as [* ExpoLinearGradient]]
-            ["react-native-svg" :as [* RNSvg]]
-            ["@react-navigation/stack" :as [* RNNavStack]]
-            ["react-native-error-boundary" :as RNErrorBoundary]
-            ["react-native-safe-area-context" :as [* RNSafeArea]]
-            ["@react-navigation/native" :as [* RNNav]]
-            ["react-native-vector-icons/MaterialCommunityIcons" :as RNIcon]]})
+  {:import [["react-native" :as [* ReactNative]] ["react-native-video" :as RNVideo] ["react-native-gesture-handler" :as [* RNGestureHandler]] ["@react-navigation/bottom-tabs" :as [* RNNavTabs]] ["react-native" :as [* ReactNative]] ["react-native-localize" :as [* RNLocalize]] ["@react-navigation/drawer" :as [* RNNavDrawer]] ["expo-linear-gradient" :as [* ExpoLinearGradient]] ["react-native-svg" :as [* RNSvg]] ["@react-navigation/stack" :as [* RNNavStack]] ["react-native-error-boundary" :as RNErrorBoundary] ["react-native-safe-area-context" :as [* RNSafeArea]] ["@react-navigation/native" :as [* RNNav]] ["react-native-vector-icons/MaterialCommunityIcons" :as RNIcon]] :require [[js.core :as j] [js.react :as r] [js.react.helper-portal :as helper-portal] [xt.lang.common-lib :as k] [xt.lang.common-spec :as xt] [xt.lang.common-data :as xtd] [xt.lang.common-string :as str]]})
 
 (comment
   :icon     {:material   []
@@ -1066,7 +1046,7 @@
       (:= root tree)
       (:= parents [])
       levels]}]
-  (when (k/is-empty? levels)
+  (when (xtd/is-empty? levels)
     (return [:% -/Text "NO DATA"]))
   (var [level (:.. more)] levels)
   (var #{type} level)

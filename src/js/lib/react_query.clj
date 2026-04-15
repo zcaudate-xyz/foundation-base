@@ -3,9 +3,7 @@
             [std.lib.foundation :as f]))
 
 (l/script :js
-  {:require [[js.react :as r]
-             [xt.lang.common-lib :as k]]
-   :import [["@tanstack/react-query" :as [* ReactQuery]]]})
+  {:import [["@tanstack/react-query" :as [* ReactQuery]]] :require [[js.react :as r] [xt.lang.common-lib :as k] [xt.lang.common-data :as xtd] [xt.lang.common-spec :as xt]]})
 
 (f/template-entries [l/tmpl-entry {:type :fragment
                                    :base "ReactQuery"
@@ -106,9 +104,9 @@
    (-> (. api
           queries)
        (k/obj-pairs)
-       (k/sort-by [k/first])
+       (k/sort-by [xtd/first])
        (k/arr-juxt
-        k/first
+        xtd/first
         -/useApiQueriesSingle))))
 
 (defn.js useApiQueriesWire
@@ -117,13 +115,13 @@
   [api queries]
   (k/for:array [qpair (-> (. api queries)
                              (k/obj-pairs)
-                             (k/sort-by [k/first]))]
+                             (k/sort-by [xtd/first]))]
     (var [qkey q] qpair)
     (when q.deps
       (var params {})
       (k/for:array [dpair (-> q.deps
                                  (k/obj-pairs)
-                                 (k/sort-by [k/first]))]
+                                 (k/sort-by [xtd/first]))]
         (var [dkey d] dpair)
         (var #{output
                dataUpdatedAt} (k/get-in queries [dkey]))
@@ -139,7 +137,7 @@
               (:= (. params [d.key]) {:value nil
                                       :enabled false
                                       :updated dataUpdatedAt}))))
-      (var params-str (k/json-encode params))
+      (var params-str (xt/x:json-encode params))
       (r/useEffect
        (fn []
          (when (k/obj-empty?
@@ -173,9 +171,9 @@
   (var queries   (-/useApiQueries api))
   (var mutations (-> (. api mutations)
                      (k/obj-pairs)
-                     (k/sort-by [k/first])
+                     (k/sort-by [xtd/first])
                      (k/arr-juxt
-                      k/first
+                      xtd/first
                       (fn [[key mut]]
                         (return
                          (-/useMutation {:onSuccess

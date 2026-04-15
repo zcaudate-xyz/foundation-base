@@ -3,11 +3,7 @@
             [std.lang.typed.xtalk :refer [defspec.xt]]))
 
 (l/script :js
-  {:require [[js.core :as j]
-             [js.cell.kernel.base-util :as util]
-             [xt.lang.common-spec :as xt]
-             [xt.lang.common-runtime :as rt :with [defvar.js]]
-             ]})
+  {:require [[js.core :as j] [js.cell.kernel.base-util :as util] [xt.lang.common-spec :as xt] [xt.lang.common-runtime :as rt :with [defvar.js]]]})
 
 
 (defspec.xt WORKER_STATE

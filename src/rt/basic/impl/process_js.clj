@@ -9,16 +9,36 @@
             [std.lang.interface.type-notify :as notify]
             [xt.lang.common-repl :as k]))
 
+(defn node-path
+  "Builds a NODE_PATH that keeps temp-file Node executions resolving project-local modules."
+  {:added "4.1"}
+  []
+  (let [root     (or (System/getenv "PWD")
+                     (System/getProperty "user.dir"))
+        local    (str root "/node_modules")
+        existing (System/getenv "NODE_PATH")]
+    (->> [local existing]
+         (remove clojure.string/blank?)
+         distinct
+         (clojure.string/join java.io.File/pathSeparator))))
+
+(def +node-shell-env+
+  (let [path (node-path)]
+    (cond-> {}
+      (not (clojure.string/blank? path))
+      (assoc "NODE_PATH" path))))
+
 (def +program-init+
   (common/put-program-options
    :js  {:default  {:oneshot    :nodejs
                     :basic      :nodejs
                     :websocket  :nodejs}
          :env      {:nodejs    {:exec   "node"
-                                :flags  {:oneshot   ["-e"]
-                                         :basic     ["-e"]
-                                         :websocket ["-e"]
-                                         :interactive ["-i"]
+                                :env    +node-shell-env+
+                                 :flags  {:oneshot   ["-e"]
+                                          :basic     ["-e"]
+                                          :websocket ["-e"]
+                                          :interactive ["-i"]
                                          :json ["JSON" :builtin]
                                          :bench {:websocket ["ws" :install]}}}
                     :qjs       {:exec   "qjs"

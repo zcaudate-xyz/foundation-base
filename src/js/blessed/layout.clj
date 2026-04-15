@@ -2,12 +2,7 @@
   (:require [std.lang :as l]))
 
 (l/script :js
-  {:require [[xt.lang.common-lib :as k]
-             [xt.lang.common-spec :as xt]
-             [xt.lang.common-data :as xtd]
-              [js.core :as j]
-              [js.react :as r]
-              [js.lib.chalk :as chalk]]})
+  {:require [[xt.lang.common-lib :as k] [xt.lang.common-spec :as xt] [xt.lang.common-data :as xtd] [js.core :as j] [js.react :as r] [js.lib.chalk :as chalk]]})
 
 (def.js primaryNormal
   {:hover {:fg "black"
@@ -75,7 +70,7 @@
          lens     (j/map entries (fn:> [e] (xt/x:len e.label)))
          lefts    (j/reduce lens
                             (fn [acc l]
-                               (j/push acc (+ (k/last acc) l 8))
+                               (j/push acc (+ (xtd/last acc) l 8))
                                (return acc))
                              [0])]
      (return (j/map entries (fn [e i]
@@ -93,7 +88,7 @@
          lens     (j/map entries (fn:> [e] (:? (== e.type "separator") 1 3)))
          lefts    (j/reduce lens
                              (fn [acc l]
-                               (j/push acc (+ (k/last acc) l))
+                               (j/push acc (+ (xtd/last acc) l))
                                (return acc))
                              [0])]
      (return (j/map entries (fn [e i]

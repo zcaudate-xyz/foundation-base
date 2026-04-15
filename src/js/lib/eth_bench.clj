@@ -3,10 +3,7 @@
             [xt.lang.common-notify :as notify]))
 
 (l/script :js
-  {:require [[js.lib.eth-lib :as eth-lib]
-             [js.lib.eth-solc :as eth-solc]
-             [xt.lang.common-lib :as k]
-             [js.core :as j]]})
+  {:require [[js.lib.eth-lib :as eth-lib] [js.lib.eth-solc :as eth-solc] [xt.lang.common-lib :as k] [js.core :as j] [xt.lang.common-spec :as xt]]})
 
 (defn.js send-wei
   "sends currency for bench"
@@ -23,7 +20,7 @@
   (return (. (eth-lib/contract-deploy signer abi bytecode init-args overrides)
              (then (fn:> [contract]
                      {:status true
-                      :size (j/toFixed (/ (k/len bytecode) 2 1024)
+                      :size (j/toFixed (/ (xt/x:len bytecode) 2 1024)
                                        3)
                       :contractAddress (. contract address)}))
 

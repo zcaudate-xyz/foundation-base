@@ -3,11 +3,7 @@
             [std.lang.typed.xtalk :refer [defspec.xt]]))
 
 (l/script :js
-  {:require [[js.core :as j]
-             [xt.lang.common-spec :as xt]
-             [xt.lang.common-trace :as trace]
-             [js.cell.kernel.worker-local :as worker-local]
-             [js.cell.kernel.worker-impl :as worker-impl]]})
+  {:require [[js.core :as j] [xt.lang.common-spec :as xt] [xt.lang.common-trace :as trace] [js.cell.kernel.worker-local :as worker-local] [js.cell.kernel.worker-impl :as worker-impl]]})
 
 
 (defspec.xt mock-worker-send

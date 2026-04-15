@@ -2,13 +2,7 @@
   (:require [std.lang :as l]))
 
 (l/script :js
-  {:require [[xt.lang.common-lib :as k]
-             [xt.lang.common-spec :as xt]
-             [xt.lang.common-data :as xtd]
-              [js.core :as j]
-              [js.react :as r]
-              [js.blessed :as b]
-             [js.blessed.ui-style :as ui-style]]})
+  {:require [[xt.lang.common-lib :as k] [xt.lang.common-spec :as xt] [xt.lang.common-data :as xtd] [js.core :as j] [js.react :as r] [js.blessed :as b] [js.blessed.ui-style :as ui-style]]})
 
 (defn.js useTree
   "wrapper for `js.react/useTree`"
@@ -46,7 +40,7 @@
                    0)
            (-> items
                (j/reduce (fn [acc item]
-                           (let [prev (k/last acc)
+                           (let [prev (xtd/last acc)
                                  curr (+ prev
                                          1
                                          (. (format item) ["length"]))]
@@ -306,16 +300,16 @@
        (when init
          (. (r/curr proxy)
             (on "action" handler))))
-     (return [:box #{(:.. tprops)}
-              [:list {:ref proxy
-                      :height height
-                      :interactive true
-                      :mouse true
-                      :scrollable true
-                      :keys true
-                      :inputOnFocus true
-                      :items (k/arr-map items format)
-                      :style (ui-style/styleListView color)}]]))))
+      (return [:box #{(:.. tprops)}
+               [:list {:ref proxy
+                       :height height
+                       :interactive true
+                       :mouse true
+                       :scrollable true
+                       :keys true
+                       :inputOnFocus true
+                       :items (xtd/arr-map items format)
+                       :style (ui-style/styleListView color)}]]))))
 
 (defn.js List
   "Constructs a List"
@@ -398,7 +392,7 @@
       levels
       (:.. rprops)]}]
   (var tprops (ui-style/getTopProps rprops true))
-  (when (k/is-empty? levels)
+  (when (xtd/is-empty? levels)
     (return [:box "NO DATA"]))
   (var [level (:.. more)] levels)
   (var #{type} level)

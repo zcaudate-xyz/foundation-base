@@ -2,13 +2,7 @@
   (:require [std.lang :as l]))
 
 (l/script :js
-  {:runtime :websocket
-   :config {:id :play/web-main
-            :bench false
-            :emit {:native {:suppress true}
-                   :lang/jsx false}
-            :notify {:host "test.statstrade.io"}}
-   :require [[xt.lang.common-lib :as k]]})
+  {:config {:bench false :emit {:native {:suppress true} :lang/jsx false} :id :play/web-main :notify {:host "test.statstrade.io"}} :require [[xt.lang.common-lib :as k] [xt.lang.common-spec :as xt]] :runtime :websocket})
 
 (def.js POSITION
   {"top"    {:opposite "bottom"
@@ -31,7 +25,7 @@
   {:added "4.0"}
   [color point baseLength baseHeight]
   (var #{opposite
-         sides} (k/get-key -/POSITION point))
+         sides} (xt/x:get-key -/POSITION point))
   (var [s0 s1] sides)
   (var Point    (k/capitalize point))
   (var Opposite (k/capitalize opposite))

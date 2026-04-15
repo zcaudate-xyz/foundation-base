@@ -2,9 +2,7 @@
   (:require [std.lang :as l]))
 
 (l/script :xtalk
-  {:require [[xt.lang.common-spec :as xt]
-             [xt.lang.common-string :as str]]
-   :export  [MODULE]})
+  {:export [MODULE] :require [[xt.lang.common-spec :as xt] [xt.lang.common-string :as str]]})
 
 (defn.xt stream-capable?
   "checks that the db descriptor can attach streams"

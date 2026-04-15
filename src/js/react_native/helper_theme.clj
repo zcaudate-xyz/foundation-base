@@ -2,15 +2,7 @@
   (:require [std.lang :as l]))
 
 (l/script :js
-  {:runtime :websocket
-   :config {:id :play/web-main
-            :bench false
-            :emit {:native {:suppress true}
-                   :lang/jsx false}
-            :notify {:host "test.statstrade.io"}}
-   :require [[js.core :as j]
-             [js.react-native.helper-color :as c]
-             [xt.lang.common-lib :as k]]})
+  {:config {:bench false :emit {:native {:suppress true} :lang/jsx false} :id :play/web-main :notify {:host "test.statstrade.io"}} :require [[js.core :as j] [js.react-native.helper-color :as c] [xt.lang.common-lib :as k] [xt.lang.common-spec :as xt]] :runtime :websocket})
 
 ;;
 ;; Pairs
@@ -63,13 +55,13 @@
   (var __fns  (:? (k/nil? stageMap)
                   -/StageMap
                   (j/assign {} -/StageMap stageMap)))
-  (var lu (k/get-key -/ThemeLookup type))
-  (var colorInit (k/get-key theme (k/get-key lu initial)))
+  (var lu (xt/x:get-key -/ThemeLookup type))
+  (var colorInit (xt/x:get-key theme (xt/x:get-key lu initial)))
   (return (k/arr-foldl stages
                        (fn [colorOut stageKey]
-                         (var tf   (k/get-key __fns stageKey))
-                         (var val  (k/get-key indValues stageKey))
-                         (var colorStage  (k/get-key theme (k/get-key lu stageKey)))
+                         (var tf   (xt/x:get-key __fns stageKey))
+                         (var val  (xt/x:get-key indValues stageKey))
+                         (var colorStage  (xt/x:get-key theme (xt/x:get-key lu stageKey)))
                          (return (c/interpolate
                                   [colorOut
                                    colorStage]
@@ -95,9 +87,9 @@
   [#{[theme
       themePipeline
       (:= transformations {})]}]
-  (var bgCustom (or (k/get-key transformations "bg")
+  (var bgCustom (or (xt/x:get-key transformations "bg")
                     (fn:>)))
-  (var fgCustom (or (k/get-key transformations "fg")
+  (var fgCustom (or (xt/x:get-key transformations "fg")
                     (fn:>)))
   (when (not (and (k/is-function? bgCustom)
                   (k/is-function? fgCustom)))
@@ -131,11 +123,11 @@
       (:= transformations {})]}
    type
    colorKeys]
-  (var custom (or (k/get-key transformations type)
+  (var custom (or (xt/x:get-key transformations type)
                   (fn:>)))
   (when (not (k/is-function? custom))
     (k/err "Themed transformations require functions."))
-  (var pipe     (k/get-key themePipeline type))
+  (var pipe     (xt/x:get-key themePipeline type))
   (var initial  (. pipe ["initial"]))
   (var stages   (. pipe ["stages"]))
   (var stageMap (. pipe ["values"]))

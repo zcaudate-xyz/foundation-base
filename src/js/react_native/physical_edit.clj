@@ -2,18 +2,7 @@
   (:require [std.lang :as l]))
 
 (l/script :js
-  {:runtime :websocket
-   :config {:id :play/web-main
-            :bench false
-            :emit {:native {:suppress true}
-                   :lang/jsx false}
-            :notify {:host "test.statstrade.io"}}
-   :require [[js.core :as j]
-             [js.react :as r]
-             [js.react-native :as n]
-             [js.react-native.animate :as a]
-             [js.react-native.physical-base :as physical-base]
-             [xt.lang.common-lib :as k]]})
+  {:config {:bench false :emit {:native {:suppress true} :lang/jsx false} :id :play/web-main :notify {:host "test.statstrade.io"}} :require [[js.core :as j] [js.react :as r] [js.react-native :as n] [js.react-native.animate :as a] [js.react-native.physical-base :as physical-base] [xt.lang.common-lib :as k] [xt.lang.common-spec :as xt]] :runtime :websocket})
 
 (defn.js createPan
   "creates a PanResponder"
@@ -46,12 +35,12 @@
                            (when (not (r/curr disabledRef))
                              (cond absolute
                                    (k/for:object [[dk ind] pan]
-                                     (var dv (k/get-key state dk))
+                                     (var dv (xt/x:get-key state dk))
                                      (a/setValue ind (+ ind._offset dv)))
                                    
                                    :else
                                    (k/for:object [[dk ind] pan]
-                                     (var dv (k/get-key state dk))
+                                     (var dv (xt/x:get-key state dk))
                                      (a/setValue ind dv)))))
                          :onPanResponderRelease
                          (fn []

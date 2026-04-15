@@ -3,8 +3,7 @@
             [std.lib.foundation :as f]))
 
 (l/script :js
-  {:require  [[xt.lang.common-lib :as k]]
-   :import   [["@react-native-async-storage/async-storage" :as RNAsyncStorage]]})
+  {:import [["@react-native-async-storage/async-storage" :as RNAsyncStorage]] :require [[xt.lang.common-lib :as k] [xt.lang.common-spec :as xt]]})
 
 (f/template-entries [l/tmpl-entry {:type :fragment
                                    :base "RNAsyncStorage.default"
@@ -31,7 +30,7 @@
       (then (fn [res]
               (when (k/is-string? res)
                 (try
-                  (return (k/json-decode res))
+                  (return (xt/x:json-decode res))
                   (catch e (return nil)))))))))
 
 (defn.js setJSON
@@ -39,12 +38,12 @@
   {:added "4.0"}
   [key data]
   (return
-   (-/setItem key (k/json-encode data))))
+   (-/setItem key (xt/x:json-encode data))))
 
 (defn.js mergeJSON
   "merges json data on the same key"
   {:added "4.0"}
   [key data]
   (return
-   (-/mergeItem key (k/json-encode data))))
+   (-/mergeItem key (xt/x:json-encode data))))
 

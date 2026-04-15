@@ -3,12 +3,7 @@
   (:use code.test))
 
 (l/script :js
-  {:require [[js.core :as j]
-             [js.react :as r]
-             [js.react-native :as n]
-             [js.react-native.ui-tooltip :as ui-tooltip]
-             [js.react.ext-view :as ext-view]
-             [xt.lang.common-lib :as k]]})
+  {:require [[js.core :as j] [js.react :as r] [js.react-native :as n] [js.react-native.ui-tooltip :as ui-tooltip] [js.react.ext-view :as ext-view] [xt.lang.common-lib :as k] [xt.lang.common-data :as xtd]]})
 
 (defn.js AutocompleteModal
   "creates the autocomplete modal display"
@@ -40,7 +35,7 @@
      (:? isBusy
          (r/% componentBusy rprops)
 
-         (k/is-empty? entries)
+         (xtd/is-empty? entries)
          (r/% componentEmpty rprops)
 
          :else

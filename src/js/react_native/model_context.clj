@@ -2,8 +2,7 @@
   (:require [std.lang :as l]))
 
 (l/script :js
-  {:require [[js.core :as j]
-             [xt.lang.common-lib :as k]]})
+  {:require [[js.core :as j] [xt.lang.common-lib :as k] [xt.lang.common-spec :as xt]]})
 
 
 ;;
@@ -185,7 +184,7 @@
   "gets a scalar function from input"
   {:added "4.0"}
   [effect key]
-  (var scalar (k/get-key (or effect {}) key))
+  (var scalar (xt/x:get-key (or effect {}) key))
   (if (k/is-number? scalar)
     (return (fn:> [visible] (k/mix scalar 1 visible)))))
 
@@ -254,7 +253,7 @@
       height
       width
       (:= margin 0)]}]
-  (var entry (k/get-key -/ANIMATE transition))
+  (var entry (xt/x:get-key -/ANIMATE transition))
   (when (not entry)
     (return (fn:>)))
   (var #{transform} entry)
@@ -268,7 +267,7 @@
                                       0
                                       progress)})))))
   (return
-   (or (k/get-key entry "in")
+   (or (xt/x:get-key entry "in")
        (createInFn entry))))
 
 (defn.js animateOut
@@ -278,7 +277,7 @@
       height
       width
       (:= margin 0)]}]
-  (var entry (k/get-key -/ANIMATE transition))
+  (var entry (xt/x:get-key -/ANIMATE transition))
   (when (not entry)
     (return (fn:>)))
   (var #{transform} entry)
@@ -292,7 +291,7 @@
                                       offset
                                       progress)})))))
   (return
-   (or (k/get-key entry "out")
+   (or (xt/x:get-key entry "out")
        (createInFn entry))))
 
 

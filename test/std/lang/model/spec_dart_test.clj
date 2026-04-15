@@ -9,13 +9,13 @@
   => "var greeting = \"hello\""
 
   (l/emit-as :dart ['(defn hello [name] (return (x:cat "hi " name)))])
-  => "hello(name) {\n  return \"hi \" + name\n}"
+  => "hello(name) {\n  return \"hi \" + name;\n}"
 
   (l/emit-as :dart ['(new Person name)])
   => "new Person(name)"
 
   (l/emit-as :dart ['(for [(var i := 0) (< i 3) (:++ i)] (print i))])
-  => "for(var i = 0; i < 3; ++i){\n  print(i)\n}"
+  => "for(var i = 0; i < 3; ++i){\n  print(i);\n}"
 
   (l/emit-as :dart ['{:name "hello" :count 2}])
   => "{\"name\":\"hello\",\"count\":2}")
@@ -81,7 +81,7 @@
                                {:success (return ok)
                                 :error   (return err)}))
   => '(call (fn [err ok]
-              (if err
+              (if (not= err nil)
                 (return err)
                 (return ok))))
 
@@ -150,17 +150,17 @@
 (fact "for:* emission for dart"
   (l/emit-as :dart ['(for:object [[k v] obj]
                        [k v])])
-  => "for(var entry in obj.entries){\n  var k = entry.key\n  var v = entry.value\n  [k,v]\n}"
+  => "for(var entry in obj.entries){\n  var k = entry.key;\n  var v = entry.value;\n  [k,v];\n}"
 
   (l/emit-as :dart ['(for:array [[i e] arr]
                        [i e])])
-  => "for(var i = 0; i < arr.length; ++i){\n  var e = arr[i]\n  [i,e]\n}"
+  => "for(var i = 0; i < arr.length; ++i){\n  var e = arr[i];\n  [i,e];\n}"
 
   (l/emit-as :dart ['(for:async [[ok err] (call)]
                        {:success (return ok)
                         :error   (return err)
                         :finally (return true)})])
-  => "Future(() {\n  return call()\n}).then((ok) {\n  return ok\n}).catchError((err) {\n  return err\n}).whenComplete(() {\n  return true\n})")
+  => "Future(() {\n  return call();\n}).then((ok) {\n  return ok;\n}).catchError((err) {\n  return err;\n}).whenComplete(() {\n  return true;\n})")
 
 
 ^{:refer std.lang.model.spec-dart/tf-for-object :added "4.1"}
@@ -191,7 +191,7 @@
                                {:success (return ok)
                                 :error   (return err)}))
   => '(call (fn [err ok]
-              (if err
+              (if (not= err nil)
                 (return err)
                 (return ok)))))
 

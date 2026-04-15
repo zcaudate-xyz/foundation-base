@@ -3,10 +3,7 @@
             [std.lang.typed.xtalk :refer [defspec.xt]]))
 
 (l/script :js
-  {:require [[js.core :as j]
-             [xt.lang.common-spec :as xt]
-             [xt.lang.common-data :as xtd]
-             [xt.lang.common-trace :as trace]]})
+  {:require [[js.core :as j] [xt.lang.common-spec :as xt] [xt.lang.common-data :as xtd] [xt.lang.common-trace :as trace]]})
 
 
 (defspec.xt EV_INIT :xt/str)

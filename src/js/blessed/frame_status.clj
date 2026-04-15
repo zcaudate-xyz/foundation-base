@@ -2,10 +2,7 @@
   (:require [std.lang :as l]))
 
 (l/script :js
-  {:require [[xt.lang.common-lib :as k]
-             [js.core :as j]
-             [js.react :as r]
-             [js.lib.chalk :as chalk]]})
+  {:require [[xt.lang.common-lib :as k] [js.core :as j] [js.react :as r] [js.lib.chalk :as chalk] [xt.lang.common-spec :as xt]]})
 
 (defn.js Status
   "displays status"
@@ -18,7 +15,7 @@
       autoClear
       (:.. rprops)]}]
   (let [#{content type} status
-        width  (j/min [(:? content (k/len content) 0)
+        width  (j/min [(:? content (xt/x:len content) 0)
                         50])
         clearFn (fn:> (setStatus {:content ""
                                 :type "info"}))]

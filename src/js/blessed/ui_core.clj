@@ -2,13 +2,7 @@
   (:require [std.lang :as l]))
 
 (l/script :js
-  {:require [[xt.lang.common-lib :as k]
-             [xt.lang.common-spec :as xt]
-             [xt.lang.common-data :as xtd]
-               [js.core :as j]
-               [js.react :as r]
-               [js.blessed :as b]
-             [js.blessed.ui-style :as ui-style]]})
+  {:require [[xt.lang.common-lib :as k] [xt.lang.common-spec :as xt] [xt.lang.common-data :as xtd] [js.core :as j] [js.react :as r] [js.blessed :as b] [js.blessed.ui-style :as ui-style]]})
 
 (defn.js Enclosed
   "constructs a box with label"
@@ -393,14 +387,14 @@
                     (return
                      (:? format (format val) (j/padStart val (or pad 0)))))
          
-         modal (r/ref)
-         ref   (r/ref)
-         displayFn (fn []
-                     (-/displayDropdown ref modal
-                                        (k/arr-map items formatFn)
-                                        {:color color
-                                         :select (fn [e i]
-                                                   (setInternal i)
+          modal (r/ref)
+          ref   (r/ref)
+          displayFn (fn []
+                      (-/displayDropdown ref modal
+                                        (xtd/arr-map items formatFn)
+                                         {:color color
+                                          :select (fn [e i]
+                                                    (setInternal i)
                                                    (if setIndex (setIndex i))
                                                  (if onChange (onChange i)))}))
          tprops   (ui-style/getTopProps props)
@@ -537,7 +531,7 @@
   (let [#{screen lpos} (r/curr ref)
         #{format start step end colCount color colWidth} opts
         _ (if (r/curr modal) (return))
-        numbers (k/arr-range [start (+ end step) step])
+        numbers (xtd/arr-range [start (+ end step) step])
         _ (:= color (or color "yellow"))
         grid (b/box {:parent screen
                      :top lpos.yl

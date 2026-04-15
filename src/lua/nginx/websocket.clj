@@ -3,12 +3,7 @@
             [std.lib.foundation :as f]))
 
 (l/script :lua
-  {:require [[xt.lang.common-spec :as xt]
-             [xt.sys.cache-common :as cache]
-             [lua.nginx :as n]]
-   :import [["resty.websocket.server" :as ngxwsserver]
-            ["cjson" :as cjson]
-            ["resty.websocket.server" :as ngxwsserver]]})
+  {:import [["resty.websocket.server" :as ngxwsserver] ["cjson" :as cjson] ["resty.websocket.server" :as ngxwsserver]] :require [[xt.lang.common-spec :as xt] [xt.sys.cache-common :as cache] [lua.nginx :as n]]})
 
 (f/template-entries [l/tmpl-macro {:base "websocket"
                                    :inst "wb"

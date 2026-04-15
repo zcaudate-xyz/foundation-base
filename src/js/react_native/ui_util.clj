@@ -2,18 +2,7 @@
   (:require [std.lang :as l]))
 
 (l/script :js
-  {:runtime :websocket
-   :config {:id :play/web-main
-            :bench false
-            :emit {:native {:suppress true}
-                   :lang/jsx false}
-            :notify {:host "test.statstrade.io"}}
-   :require [[js.core :as j]
-             [js.react :as r]
-             [js.react-native :as n]
-             [js.react-native.animate :as a]
-             [js.react-native.physical-base :as physical-base]
-             [xt.lang.common-lib :as k]]})
+  {:config {:bench false :emit {:native {:suppress true} :lang/jsx false} :id :play/web-main :notify {:host "test.statstrade.io"}} :require [[js.core :as j] [js.react :as r] [js.react-native :as n] [js.react-native.animate :as a] [js.react-native.physical-base :as physical-base] [xt.lang.common-lib :as k] [xt.lang.common-spec :as xt]] :runtime :websocket})
 
 (defn.js Page
   "creates a Page"
@@ -121,7 +110,7 @@
   (var contentRef (r/ref))
   (var layoutRef  (r/ref {:height 0
                           :width 0}))
-  (var vindicator (k/get-key indicators "visible"))
+  (var vindicator (xt/x:get-key indicators "visible"))
   (r/watch [visible children]
     (var contentElem (or (k/get-in contentRef
                                    ["current"

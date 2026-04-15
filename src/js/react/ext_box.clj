@@ -2,11 +2,7 @@
   (:require [std.lang :as l]))
 
 (l/script :js
-  {:require [[xt.lang.common-spec :as xt]
-             [xt.lang.common-data :as xtd]
-             [xt.lang.event-box :as event-box]
-             [js.react :as r]
-             [js.core :as j]]})
+  {:require [[xt.lang.common-spec :as xt] [xt.lang.common-data :as xtd] [xt.lang.event-box :as event-box] [js.react :as r] [js.core :as j]]})
 
 (defn.js createBox
   "creates a box for react"

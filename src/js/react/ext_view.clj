@@ -2,10 +2,7 @@
   (:require [std.lang :as l]))
 
 (l/script :js
-  {:require [[xt.lang.common-lib :as k]
-             [xt.lang.event-view :as event-view]
-             [js.react :as r]
-             [js.core :as j]]})
+  {:require [[xt.lang.common-lib :as k] [xt.lang.event-view :as event-view] [js.react :as r] [js.core :as j] [xt.lang.common-spec :as xt] [xt.lang.common-data :as xtd]]})
 
 (defn.js throttled-setter
   "creates a throttled setter which only updates after a delay"
@@ -17,7 +14,7 @@
   (var throttled-fn
        (fn [result]
          (var t (k/now-ms))
-         (cond (k/not-nil? (k/get-key throttle "thread"))
+         (cond (k/not-nil? (xt/x:get-key throttle "thread"))
                (k/set-key throttle "val" result)
 
                :else
@@ -25,10 +22,10 @@
                    (setResult result)
                    (k/set-key throttle "thread"
                               (j/future-delayed [delay]
-                                (when (and (not= (k/get-key throttle "val")
+                                (when (and (not= (xt/x:get-key throttle "val")
                                                  result)
-                                           (k/get-key throttle "mounted"))
-                                  (setResult (k/get-key throttle "val")))
+                                           (xt/x:get-key throttle "mounted"))
+                                  (setResult (xt/x:get-key throttle "val")))
                                 (k/del-key throttle "thread")))))))
   (return [throttled-fn throttle]))
 
@@ -204,7 +201,7 @@
   "creates the most basic views"
   {:added "4.0"}
   [view type meta dest-key tag-key]
-  (var [tfn tkey tevent] (k/get-key -/TYPES type))
+  (var [tfn tkey tevent] (xt/x:get-key -/TYPES type))
   (:= tevent (or tevent type))
   (var getResult (fn []
                    (var out (tfn view))
@@ -331,7 +328,7 @@
   {:added "4.0"}
   [view args opts]
   (:= opts (or opts {}))
-  (r/watch [(k/json-encode args)]
+  (r/watch [(xt/x:json-encode args)]
     (return
      (-/refreshArgsFn view args opts))))
 
@@ -398,7 +395,7 @@
   "checks that view is empty (context method)"
   {:added "0.1"}
   [#{view}]
-  (return (k/is-empty? (event-view/get-current view))))
+  (return (xtd/is-empty? (event-view/get-current view))))
 
 (comment
   

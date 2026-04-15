@@ -2,10 +2,7 @@
   (:require [std.lang :as l]))
 
 (l/script :js
-  {:runtime :websocket
-   :require [[js.core :as j]
-             [xt.lang.util-color :as c]
-             [xt.lang.common-lib :as k]]})
+  {:require [[js.core :as j] [xt.lang.util-color :as c] [xt.lang.common-lib :as k] [xt.lang.common-spec :as xt]] :runtime :websocket})
 
 ;;
 ;; hsl function
@@ -31,7 +28,7 @@
   [s n parseFn]
   (var curr (j/substring s n))
   (var arr  (j/split curr #"[,\(\)\%\s]"))
-  (return (-> (j/filter arr (fn:> [s] (> (k/len s) 0)))
+  (return (-> (j/filter arr (fn:> [s] (> (xt/x:len s) 0)))
               (j/splice 0 3)
               (j/map (fn:> [s] (parseFn s))))))
 
