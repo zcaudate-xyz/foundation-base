@@ -153,7 +153,7 @@
               (apply list '. obj (map vector ks))
               (apply list '. (list 'quote (list obj)) (map vector ks)))]
     (if default
-      (list 'or val default)
+      (list ':? (list 'x:nil? val) default val)
       val)))
 
 (defn tf-get-key
@@ -164,7 +164,7 @@
               (list '. obj [k])
               (list '. (list 'quote (list obj)) [k]))]
     (if default
-      (list 'or val default)
+      (list ':? (list 'x:nil? val) default val)
       val)))
 
 (defn tf-set-key

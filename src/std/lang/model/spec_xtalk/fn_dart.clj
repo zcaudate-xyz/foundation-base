@@ -80,8 +80,10 @@
 (defn dart-tf-x-has-key?
   [[_ obj key check]]
   (if (some? check)
-    (list '== check (list '. obj [key]))
-    (list '!= nil (list '. obj [key]))))
+    (list 'and
+          (list '. obj (list 'containsKey key))
+          (list '== check (list '. obj [key])))
+    (list '. obj (list 'containsKey key))))
 
 (defn dart-tf-x-shell
   [[_ s opts]]
@@ -149,12 +151,13 @@
   (let [rtype-expr (dart-runtime-type-string x)]
     (list 'or
           (list '== "Map" rtype-expr)
-          (list '. rtype-expr (list 'contains "Map")))))
+          (list '. rtype-expr (list 'startsWith "_Map"))
+          (list '. rtype-expr (list 'startsWith "LinkedMap")))))
 (defn dart-tf-x-is-array? [[_ x]]
   (let [rtype-expr (dart-runtime-type-string x)]
     (list 'or
-          (list '== "List" rtype-expr)
-          (list '. rtype-expr (list 'contains "List")))))
+          (list '. rtype-expr (list 'startsWith "List"))
+          (list '. rtype-expr (list 'startsWith "_GrowableList")))))
 
 (def +dart-type+
    {:x-to-string    {:macro #'dart-tf-x-to-string    :emit :macro}
@@ -169,7 +172,7 @@
 
 (defn dart-tf-x-str-char [[_ s i]] (list '. s [i]))
 (defn dart-tf-x-str-split [[_ s sep]] (list '. s (list 'split sep)))
-(defn dart-tf-x-str-join [[_ arr sep]] (list '. arr (list 'join sep)))
+(defn dart-tf-x-str-join [[_ sep arr]] (list '. arr (list 'join sep)))
 (defn dart-tf-x-str-index-of [[_ s sub]] (list '. s (list 'indexOf sub)))
 (defn dart-tf-x-str-last-index-of [[_ s sub]] (list '. s (list 'lastIndexOf sub)))
 (defn dart-tf-x-str-substring [[_ s start end]] (list '. s (list 'substring start end)))

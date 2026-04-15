@@ -87,9 +87,16 @@
   "encodes an operator to sql"
   {:added "4.0"}
   [op opts]
-  (return (or (xt/x:get-key -/OPERATORS op)
-              (xtd/get-in opts ["operators" op])
-               op)))
+  (cond (xt/x:has-key? -/OPERATORS op)
+        (return (xt/x:get-key -/OPERATORS op))
+
+        (and (xt/x:is-object? opts)
+             (xt/x:is-object? (xt/x:get-key opts "operators"))
+             (xt/x:has-key? (xt/x:get-key opts "operators") op))
+        (return (xtd/get-in opts ["operators" op]))
+
+        :else
+        (return op)))
 
 (defn.xt encode-json
   "encodes a json value"
@@ -143,7 +150,8 @@
   (var #{args} v)
   (var arg-fn (fn [arg]
                 (return (loop-fn arg column-fn opts loop-fn))))
-  (var fargs (xt/x:arr-map (or args []) arg-fn))
+  (var arg-arr (:? (xt/x:is-array? args) args []))
+  (var fargs (xt/x:arr-map arg-arr arg-fn))
   (return (xt/x:str-join ", " fargs)))
 
 (defn.xt encode-sql-table
@@ -175,7 +183,8 @@
   (var #{name args} v)
   (var arg-fn (fn [arg]
                 (return (loop-fn arg column-fn opts loop-fn))))
-  (var fargs (xt/x:arr-map (or args []) arg-fn))
+  (var arg-arr (:? (xt/x:is-array? args) args []))
+  (var fargs (xt/x:arr-map arg-arr arg-fn))
   (if (xtd/arr-empty? fargs)
     (return name)
     (return (xt/x:cat name " " (xt/x:str-join " " fargs)))))
@@ -261,48 +270,58 @@
         :else
         (return (-/encode-value v))))
 
+(defn.xt encode-query-value
+  "encodes a query value recursively"
+  {:added "4.1"}
+  [v column-fn opts]
+  (cond (and (xt/x:is-object? v)
+             (xt/x:has-key? v "::"))
+        (return (-/encode-loop-fn v column-fn opts -/encode-loop-fn))
+
+        (xt/x:is-array? v)
+        (cond (and (== 1 (xt/x:len v))
+                   (xt/x:is-array? (xt/x:first v))
+                   (xt/x:arr-every (xt/x:first v) xt/x:is-string?))
+              (return (xt/x:cat "("
+                                (xt/x:str-join ", "
+                                               (xt/x:arr-map (xt/x:first v)
+                                                             -/encode-value))
+                                ")"))
+
+              ;; HACK FOR ENCODING IDS
+              (and (== 1 (xt/x:len v))
+                   (xt/x:is-string? (xt/x:first v)))
+              (return (xt/x:first v))
+
+              :else
+              (do (var map-fn (fn:> [item]
+                                (-/encode-query-value item column-fn opts)))
+                  (return (xt/x:str-join " "
+                                         (xt/x:arr-map v map-fn)))))
+
+        (or (== v "and")
+            (== v "or"))
+        (return v)
+
+        :else
+        (return (-/encode-value v))))
+
 (defn.xt encode-query-segment
   "encodes a query segment"
   {:added "4.0"}
   [key v column-fn opts]
   (var col (column-fn key))
-  (var encode-fn
-       (fn [v]
-         (cond (and (xt/x:is-object? v)
-                    (xt/x:has-key? v "::"))
-               (return (-/encode-loop-fn v column-fn opts -/encode-loop-fn))
-               
-               (xt/x:is-array? v)
-               (cond (and (== 1 (xt/x:len v))
-                          (xt/x:is-array? (xt/x:first v))
-                          (xt/x:arr-every (xt/x:first v) xt/x:is-string?))
-                     (return (xt/x:cat "(" (xt/x:str-join ", " (xt/x:arr-map (xt/x:first v)
-                                                                             -/encode-value))
-                                       ")"))
-                     
-                     ;; HACK FOR ENCODING IDS
-                     (and (== 1 (xt/x:len v))
-                          (xt/x:is-string? (xt/x:first v)))
-                     (return (xt/x:first v))
-                     
-                     :else
-                     (return (xt/x:str-join " " (xt/x:arr-map v encode-fn))))
-
-               (or (== v "and")
-                   (== v "or"))
-               (return v)
-               
-               :else
-               (return (-/encode-value v)))))
   (cond (xt/x:is-array? v)
-        (return (xt/x:cat col
-                       " " (-/encode-operator (xt/x:first v) opts)
-                       " " (xt/x:str-join " "
-                                          (-> (xt/x:arr-slice v 1 (xt/x:len v))
-                                              (xt/x:arr-map encode-fn)))))
-        
-        :else
-        (return (xt/x:cat col " = " (encode-fn v)))))
+         (do (var map-fn (fn:> [item]
+                           (-/encode-query-value item column-fn opts)))
+             (var tail-values (xt/x:arr-slice v 1 (xt/x:len v)))
+             (var encoded (xt/x:arr-map tail-values map-fn))
+             (return (xt/x:cat col
+                               " " (-/encode-operator (xt/x:first v) opts)
+                               " " (xt/x:str-join " " encoded))))
+         
+         :else
+         (return (xt/x:cat col " = " (-/encode-query-value v column-fn opts)))))
 
 (defn.xt encode-query-single-string
   "helper for encode-query-string"
@@ -444,7 +463,7 @@
 (defn.xt sqlite-return-format-fn
   "sqlite return format function"
   {:added "4.0"}
-  [input nest-fn column-fn]
+  [input nest-fn column-fn opts]
   (cond (xt/x:is-object? input)
         (return (xt/x:cat "'" (xt/x:get-key input "as") "'"
                        ", " (xt/x:get-key input "expr")))

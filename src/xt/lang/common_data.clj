@@ -191,9 +191,11 @@
   {:added "4.0"}
   ([arr start finish]
    (var out [])
-   (xt/for:index [i [(xt/x:offset start) (or finish
-                                             (xt/x:len arr))]]
-     (xt/x:arr-push out (xt/x:get-idx arr i)))
+   (var finish-idx (:? (xt/x:is-number? finish)
+                       finish
+                       (xt/x:len arr)))
+   (xt/for:index [i [(xt/x:offset start) finish-idx]]
+      (xt/x:arr-push out (xt/x:get-idx arr i)))
    (return out)))
 
 (defn.xt arr-rslice
@@ -446,7 +448,7 @@
   {:added "4.0"}
   [obj m f]
   (when (xt/x:not-nil? m)
-    (var input (or m {}))
+    (var input (:? (xt/x:is-object? m) m {}))
     (xt/for:object [[k mv] input]
       (xt/x:set-key obj k 
                     (:? (xt/x:has-key? obj k)

@@ -15,29 +15,34 @@
   (var itype     (xt/x:get-key entry "type"))
   (var iprimary  (xt/x:get-key entry "primary"))
   (var irequired (xt/x:get-key entry "required"))
-  (var stype (or (xt/x:get-key types itype)
+  (var stype (:? (xt/x:has-key? types itype)
+                 (xt/x:get-key types itype)
                  itype))
   (var default-fn
        (fn [ident]
-         (return (xt/x:cat (column-fn ident)
-                        " " (:? (== "ref" stype) "text" stype)
-                        (:? iprimary " PRIMARY KEY" "")
-                        (:? (and irequired strict) " NOT NULL" "")))))
+          (return (xt/x:cat (column-fn ident)
+                         " " (:? (== "ref" stype) "text" stype)
+                         (:? (== true iprimary) " PRIMARY KEY" "")
+                         (:? (and (== true irequired)
+                                  (== true strict))
+                             " NOT NULL"
+                             "")))))
   
   (cond (and (== stype "ref")
              (xt/x:has-key? schema (xt/x:get-path entry ["ref" "ns"])))
         (do (var rtable (xt/x:get-path entry ["ref" "ns"]))
             (var rtype  (xtd/get-in schema [rtable "id" "type"]))
-            (cond (not rtype)
+            (cond (not (xt/x:is-string? rtype))
                   (return (default-fn (xt/x:cat ident "_id")))
 
                   :else
                   (return (xt/x:cat (column-fn (xt/x:cat ident "_id"))
                                  " "
-                                 (or (xt/x:get-key types rtype)
-                                     rtype)
-                                 " REFERENCES "
-                                 (table-fn rtable)))))
+                                  (:? (xt/x:has-key? types rtype)
+                                      (xt/x:get-key types rtype)
+                                      rtype)
+                                  " REFERENCES "
+                                  (table-fn rtable)))))
         :else
         (return (default-fn ident))))
 
@@ -78,4 +83,3 @@
    (var ks (xt/x:arr-reverse (base-schema/table-order lookup)))
    (return (xt/x:arr-map ks (fn [table-name]
                            (return (-/table-drop schema table-name opts)))))))
-

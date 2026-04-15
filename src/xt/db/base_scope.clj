@@ -76,10 +76,13 @@
   (when (xt/x:nil? cols)
     (xt/x:err (xt/x:cat "ERR - Table not in Schema - " table-key)))
   (var scoped (xt/x:arr-filter (xt/x:obj-vals cols)
-                            (fn:> [e]
-                                  (or (and (xt/x:has-key? e "scope")
-                                           (xt/x:get-key scopes (xt/x:cat "-/" (xt/x:get-key e "scope"))))
-                                      (xt/x:get-key plains (xt/x:get-key e "ident"))))))
+                             (fn:> [e]
+                                   (or (and (xt/x:has-key? e "scope")
+                                            (== true
+                                                (xt/x:get-key scopes
+                                                              (xt/x:cat "-/" (xt/x:get-key e "scope")))))
+                                       (xt/x:has-key? plains
+                                                      (xt/x:get-key e "ident"))))))
   (return
    (xtd/arr-sort scoped
                  (fn:> [e] (xt/x:get-key e "order"))
@@ -110,8 +113,8 @@
 (defn.xt get-query-tables
   "get columns for given query"
   {:added "4.0"}
-  [schema table-key query acc]
-  (:= acc (or acc {}))
+[schema table-key query acc]
+  (:= acc (:? (xt/x:is-object? acc) acc {}))
   (var table (xt/x:get-key schema table-key))
   (when table
     (:= (. acc [table-key]) true)
@@ -145,7 +148,10 @@
   [schema table-key returning]
   (var link-loop
         (fn [table-key returning acc]
-          (var linked := (-/get-link-columns schema table-key (or returning [])))
+          (var linked := (-/get-link-columns schema table-key
+                                             (:? (xt/x:is-array? returning)
+                                                 returning
+                                                 [])))
           (var inner-loop
                (fn [arr]
                  (var attr := (xt/x:first arr))
@@ -181,7 +187,9 @@
   (var table-fn   (xt/x:get-key opts "table_fn" (fn [x] (return x))))
   (var column-fn  (xt/x:get-key opts "column_fn" (fn [x] (return x))))
   (:= where (-/as-where-input where))
-  (:= returning (or returning ["*/data"]))
+  (:= returning (:? (xt/x:is-array? returning)
+                    returning
+                    ["*/data"]))
   (var where-pred  (fn:> [e] (and (xt/x:is-object? e) (xt/x:nil? (xt/x:get-key  e "::")))))
   (var custom-pred (fn:> [e] (and (xt/x:is-object? e) (xt/x:is-string? (xt/x:get-key  e "::")))))
   (var custom (xt/x:arr-filter returning custom-pred))
@@ -193,24 +201,26 @@
          (var link-query := (xtd/second link))
          (var link-where-query (xt/x:arr-filter link-query where-pred))
          (var link-returning  (xt/x:last link-query))
-         (var link-where-returning  (xt/x:arr-filter link-returning where-pred))
-         (var link-where  (-/merge-queries link-where-query link-where-returning))
-         (var link-table  (xt/x:get-path attr ["ref" "ns"]))
-         (var link-type   (xt/x:get-path attr ["ref" "type"]))
-         (var link-extra (:? (== "reverse" link-type)
-                             {(xt/x:get-path attr ["ref" "rkey"])
-                              ["eq" [(xt/x:cat (table-fn table-name)
-                                            "."
-                                            (column-fn "id"))]]}
-                             
-                             {"id"
-                              ["eq" [(xt/x:cat (table-fn table-name)
-                                            "."
-                                            (column-fn (xt/x:cat (xt/x:get-path attr ["ref" "key"])
-                                                              "_id")))]]}))
-         (return [(xt/x:get-key attr "ident")
-                  link-type
-                  (-/get-tree schema
+          (var link-where-returning  (xt/x:arr-filter link-returning where-pred))
+          (var link-where  (-/merge-queries link-where-query link-where-returning))
+          (var link-table  (xt/x:get-path attr ["ref" "ns"]))
+          (var link-type   (xt/x:get-path attr ["ref" "type"]))
+          (var link-extra {})
+          (if (== "reverse" link-type)
+            (xt/x:set-key link-extra
+                          (xt/x:get-path attr ["ref" "rkey"])
+                          ["eq" [(xt/x:cat (table-fn table-name)
+                                           "."
+                                           (column-fn "id"))]])
+            (xt/x:set-key link-extra
+                          "id"
+                          ["eq" [(xt/x:cat (table-fn table-name)
+                                           "."
+                                           (column-fn (xt/x:cat (xt/x:get-path attr ["ref" "key"])
+                                                                "_id")))]]))
+          (return [(xt/x:get-key attr "ident")
+                   link-type
+                   (-/get-tree schema
                               link-table
                               (-/merge-queries link-where link-extra)
                               link-returning

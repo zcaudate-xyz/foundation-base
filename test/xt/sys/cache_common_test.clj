@@ -29,13 +29,13 @@
              [xt.sys.cache-common :as cache]]})
 
 (fact:global
- {:setup    [(l/rt:restart)
-             (notify/wait-on [:js 5000]
-               (:= (!:G window)  (require "window"))
-               (:= (!:G LocalStorage)  (. (require "node-localstorage")
-                                          LocalStorage))
-               (:= window.localStorage (new LocalStorage "./test-scratch/localstorage"))
-               (repl/notify true))]
+  {:setup    [(l/rt:restart)
+              (notify/wait-on [:js 5000]
+                (:= (!:G window)  {})
+                (:= (!:G LocalStorage)  (. (require "node-localstorage")
+                                           LocalStorage))
+                (:= window.localStorage (new LocalStorage "./test-scratch/localstorage"))
+                (repl/notify true))]
   :teardown [(l/rt:stop)]})
 
 ^{:refer xt.sys.cache-common/cache :added "4.0"}

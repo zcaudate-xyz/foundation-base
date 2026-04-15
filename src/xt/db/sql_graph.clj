@@ -209,10 +209,12 @@
   (var table-name := (xt/x:first tree))
   (var params := (xtd/second tree))
   (var where-params  (xt/x:get-key params "where"))
-  (var custom-params (xt/x:arr-filter (or (xt/x:get-key params "custom")
-                                        [])
-                                    (fn:> [e] (== (. e ["::"])
-                                                  "sql/keyword"))))
+  (var custom-input (xt/x:get-key params "custom"))
+  (var custom-params (xt/x:arr-filter (:? (xt/x:is-array? custom-input)
+                                          custom-input
+                                          [])
+                                     (fn:> [e] (== (. e ["::"])
+                                                   "sql/keyword"))))
   (var return-str   (-/select-return-str schema
                                          params
                                          -/select-return

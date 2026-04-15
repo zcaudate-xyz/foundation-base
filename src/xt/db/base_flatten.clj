@@ -32,7 +32,7 @@
   [table-map data-obj ref-links rev-links]
   (var #{id} := data-obj)
   (var rec := (xt/x:get-key table-map id))
-  (when (not rec)
+  (when (not (xt/x:is-object? rec))
     (:= rec {:id id
              :data {}
              :ref-links {}
@@ -49,7 +49,7 @@
   [schema table-name data parent acc]
   (:= data  (xt/x:obj-assign data (xtd/clone-nested parent)))
   (var table-map (xt/x:get-key acc table-name))
-  (when (not table-map)
+  (when (not (xt/x:is-object? table-map))
     (:= table-map {})
     (xt/x:set-key acc table-name table-map))
   (var data-obj     (xtd/obj-pick data (sch/data-keys schema table-name)))
@@ -111,13 +111,20 @@
   "flattens data schema"
   {:added "4.0"}
   [schema table-name data parent]
-  (:= data (or data []))
+  (var input (:? (xt/x:is-array? data)
+                 data
+                 (:? (xt/x:is-object? data)
+                     data
+                     [])))
+  (var parent-obj (:? (xt/x:is-object? parent)
+                      parent
+                      {}))
   (var acc {})
-  (if (xt/x:is-array? data)
-    (xt/for:array [subdata data]
+  (if (xt/x:is-array? input)
+    (xt/for:array [subdata input]
       (when (xt/x:not-nil? subdata)
-        (-/flatten-obj schema table-name subdata (or parent {}) acc)))
-    (-/flatten-obj schema table-name data (or parent {}) acc))
+        (-/flatten-obj schema table-name subdata parent-obj acc)))
+    (-/flatten-obj schema table-name input parent-obj acc))
   (return acc))
 
 (defn.xt flatten-bulk
@@ -125,13 +132,16 @@
   {:added "4.0"}
   [schema m]
   (var acc {})
-  (var bulk (:? (xt/x:is-array? m)
-                m
-                (xt/x:obj-pairs m)))
-  (xt/for:array [e bulk]
-    (var [table-name arr] e)
-    (xt/for:array [obj arr]
-      (when (xt/x:not-nil? obj)
-        (-/flatten-obj schema table-name obj {} acc))))
+  (if (xt/x:is-array? m)
+    (xt/for:array [e m]
+      (var [table-name arr] e)
+      (var items (:? (xt/x:is-array? arr) arr [arr]))
+      (xt/for:array [obj items]
+        (when (xt/x:not-nil? obj)
+          (-/flatten-obj schema table-name obj {} acc))))
+    (xt/for:object [[table-name arr] m]
+      (var items (:? (xt/x:is-array? arr) arr [arr]))
+      (xt/for:array [obj items]
+        (when (xt/x:not-nil? obj)
+          (-/flatten-obj schema table-name obj {} acc)))))
   (return acc))
-

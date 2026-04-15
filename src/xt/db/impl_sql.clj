@@ -62,10 +62,12 @@
   "runs a pull statement"
   {:added "4.0"}
   [instance schema tree opts]
-  (return (xt/x:json-decode (or (conn-dbsql/query-sync
-                            instance
-                            (sql-graph/select schema tree opts))
-                           "null"))))
+  (var output (conn-dbsql/query-sync
+               instance
+               (sql-graph/select schema tree opts)))
+  (return (xt/x:json-decode (:? (xt/x:is-string? output)
+                                output
+                                "null"))))
 
 (defn.xt sql-delete-sync
   "deletes sync data from sql db"
@@ -80,4 +82,3 @@
   {:added "4.0"}
   [instance]
   (return true))
-

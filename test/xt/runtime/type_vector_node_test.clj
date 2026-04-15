@@ -6,6 +6,7 @@
 (l/script- :js
   {:runtime :basic
    :require [[xt.runtime.type-vector-node :as node]
+             [xt.lang.common-spec :as xt]
              [xt.lang.common-lib :as k]
              [xt.lang.common-iter :as it]
              [xt.lang.common-repl :as repl]]})
@@ -13,6 +14,7 @@
 (l/script- :lua
   {:runtime :basic
    :require [[xt.runtime.type-vector-node :as node]
+             [xt.lang.common-spec :as xt]
              [xt.lang.common-lib :as k]
              [xt.lang.common-iter :as it]
              [xt.lang.common-repl :as repl]]})
