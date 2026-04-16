@@ -134,11 +134,11 @@
   (cond (xt/x:nil? ch)
         (rdr/throw-reader reader "EOF while reading dispatch")
 
-        (== ch "{")
-        (return (-/read-set reader read-fn))
+         (== ch "{")
+         (return (-/read-set reader read-fn))
 
-        (== ch "'")
-        (return (-/read-var-quote reader read-fn))
+         (== ch "'")
+         (return (-/read-var-quote reader read-fn))
 
         (== ch "_")
         (return (-/read-discard reader read-fn))

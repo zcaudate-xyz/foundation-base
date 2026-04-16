@@ -134,10 +134,10 @@
 (fact "dispatch helpers cover #' and #_"
   ^:hidden
   (!.js (var quoted (list/list-to-array (forms/read-dispatch (rdr/create "'hello") core/read)))
-        (var out (forms/read-discard (rdr/create "skip keep") core/read))
-        [[(. (xt/x:first quoted) _name)
-          (. (xt/x:second quoted) _name)]
-         (. out _name)])
+         (var out (forms/read-discard (rdr/create "skip keep") core/read))
+         [[(. (xt/x:first quoted) _name)
+           (. (xt/x:second quoted) _name)]
+          (. out _name)])
   => [["var" "hello"] "keep"])
 
 (fact "prefix form helpers reject EOF"
