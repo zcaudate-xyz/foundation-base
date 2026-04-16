@@ -436,6 +436,14 @@
           :main {:fn #'scaffold/scaffold-runtime-template}}])
 
 (invoke/definvoke ^{:arglists '([] [params])}
+  diagnose-runtime-generation
+  "reports whether a runtime seed can be generated directly and why it may fail"
+  {:added "4.1"}
+  [:task {:template :lang.manage.action
+          :params {:title "DIAGNOSE RUNTIME GENERATION"}
+          :main {:fn #'scaffold/diagnose-runtime-generation}}])
+
+(invoke/definvoke ^{:arglists '([] [params])}
   export-runtime-suite
   "exports a canonical runtime test namespace to EDN cases"
   {:added "4.1"}
@@ -497,6 +505,7 @@
    :scaffold-xtalk-grammar-tests  scaffold-xtalk-grammar-tests
    :separate-runtime-tests separate-runtime-tests
    :scaffold-runtime-template scaffold-runtime-template
+   :diagnose-runtime-generation diagnose-runtime-generation
    :export-runtime-suite    export-runtime-suite
    :compile-runtime-bulk    compile-runtime-bulk
    :xtlang-runtime-suite-sources xtlang-runtime-suite-sources
@@ -522,6 +531,7 @@
     :scaffold-xtalk-grammar-tests
     :separate-runtime-tests
     :scaffold-runtime-template
+    :diagnose-runtime-generation
     :export-runtime-suite
     :compile-runtime-bulk
     :xtlang-runtime-suite-sources

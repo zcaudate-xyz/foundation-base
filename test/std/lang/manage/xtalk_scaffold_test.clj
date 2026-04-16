@@ -42,7 +42,24 @@
         => [1 2]
         [(!.lua (k/a)) (!.lua (k/b))]
         => [1 2])
-      (fact \"placeholder\")]"))
+       (fact \"placeholder\")]"))
+
+(def runtime-test-forms-with-top-level
+  (read-string
+   "[(ns xt.db.base-view-test
+       (:require [std.lang :as l]
+                 [xt.db.base-view :as v])
+       (:use code.test))
+      (l/script- :js {:runtime :basic})
+      (l/script- :lua {:runtime :basic})
+      (fact:global {:setup [(l/rt:restart)
+                            (l/rt:scaffold :js)
+                            (l/rt:scaffold :lua)]})
+      (def +views+ (!.js (v/example)))
+      (fact \"baseline\"
+        (def +tables+ (!.js (v/example)))
+        (!.lua (v/example))
+        => +tables+)]"))
 
 (def runtime-template-forms
   (read-string
@@ -81,15 +98,28 @@
 (def blocked-runtime-template-forms
   (read-string
    "[(ns xt.lang.common-notify-test
-       (:require [std.lang :as l]
-                 [xt.lang.common-notify :as notify]
+        (:require [std.lang :as l]
+                  [xt.lang.common-notify :as notify]
                  [xt.lang.common-repl :as repl])
        (:use code.test))
       (l/script- :js {:runtime :basic})
-      (fact \"notify helper\"
-        (notify/wait-on :js
-          (repl/notify 1))
-        => 1)]"))
+       (fact \"notify helper\"
+         (notify/wait-on :js
+           (repl/notify 1))
+         => 1)]"))
+
+(def runtime-test-forms-with-unsupported
+  (read-string
+   "[(ns xt.db.base-mixed-test
+       (:require [std.lang :as l]
+                 [xt.db.base-view :as v])
+       (:use code.test))
+      (l/script- :js {:runtime :basic})
+      (l/script- :lua {:runtime :basic})
+      (def +mixed+ [(!.js (v/example)) (!.lua (v/example))])
+      (fact \"mixed assertion\"
+        [(!.js (v/example)) (!.lua (v/example))]
+        => [1 1])]"))
 
 (defn with-temp-runtime-suite-file
   [forms f]
@@ -97,6 +127,16 @@
         path (str (fs/path root "sample_test.clj"))]
     (try
       (spit path (render-top-level-forms forms))
+      (f path)
+      (finally
+        (fs/delete root)))))
+
+(defn with-temp-runtime-source-file
+  [source f]
+  (let [root (str (fs/create-tmpdir "xtalk-scaffold-source"))
+        path (str (fs/path root "sample_test.clj"))]
+    (try
+      (spit path source)
       (f path)
       (finally
         (fs/delete root)))))
@@ -371,6 +411,15 @@
     [(some? shared) (set (keys langs))])
   => [true #{:js :lua}])
 
+^{:refer std.lang.manage.xtalk-scaffold/classify-split-form :added "4.1"}
+(fact "classifies split-relevant forms"
+  [(classify-split-form '(fact:global {:setup [(l/rt:restart) (l/rt:scaffold :js)]}))
+   (classify-split-form '(def +views+ (!.js (k/example))))
+   (classify-split-form '(fact "x" (def +tables+ (!.js (k/example))) (!.lua (k/example)) => +tables+))]
+  => '[#{:fact-global}
+       #{:top-level-shared}
+       #{:runtime-fact :runtime-prefix}])
+
 ^{:refer std.lang.manage.xtalk-scaffold/separate-runtime-test-forms :added "4.1"}
 (fact "splits a multi-runtime test namespace into per-language forms"
   (let [{:keys [shared by-lang]}
@@ -395,9 +444,25 @@
       (= true (:hidden (meta (nth lua-form 2))))
       (str/includes? lua-out "!.lua")
       (not (str/includes? lua-out "!.js"))
-      (str/includes? lua-out "wrapped runtime form")
-      (str/includes? lua-out "vector runtime form")])
+       (str/includes? lua-out "wrapped runtime form")
+       (str/includes? lua-out "vector runtime form")])
   => [true true true true true true true true true true true true true true true true true])
+
+^{:refer std.lang.manage.xtalk-scaffold/separate-runtime-test-forms :added "4.1"}
+(fact "preserves top-level helpers and normalizes split runtime output"
+  (let [{:keys [by-lang]}
+        (separate-runtime-test-forms runtime-test-forms-with-top-level [:js :lua])
+        js-out (render-top-level-forms (get by-lang :js))
+        lua-out (render-top-level-forms (get by-lang :lua))]
+    [(str/includes? js-out "(def +views+ (!.js (v/example)))")
+     (str/includes? lua-out "(def +views+ (!.lua (v/example)))")
+     (str/includes? js-out "(l/rt:scaffold :js)")
+     (not (str/includes? js-out "(l/rt:scaffold :lua)"))
+     (str/includes? lua-out "(l/rt:scaffold :lua)")
+     (not (str/includes? lua-out "(l/rt:scaffold :js)"))
+     (str/includes? lua-out "(def +tables+ (!.lua (v/example)))")
+     (not (str/includes? lua-out "(def +tables+ (!.js"))])
+  => [true true true true true true true true])
 
 ^{:refer std.lang.manage.xtalk-scaffold/canonical-runtime-source-test-ns :added "4.1"}
 (fact "normalizes generated runtime namespaces back to canonical test namespaces"
@@ -411,6 +476,18 @@
 ^{:refer std.lang.manage.xtalk-scaffold/separate-runtime-tests :added "4.1"}
 (fact "separate-runtime-tests is callable"
   (fn? separate-runtime-tests)
+  => true)
+
+^{:refer std.lang.manage.xtalk-scaffold/separate-runtime-tests :added "4.1"}
+(fact "separate-runtime-tests does not overwrite the source seed by default"
+  (with-temp-runtime-suite-file
+    runtime-test-forms
+    (fn [path]
+      (let [before (slurp path)]
+        (separate-runtime-tests nil {:input-path path
+                                     :langs [:js :lua]
+                                     :write true})
+        (= before (slurp path)))))
   => true)
 
 ^{:refer std.lang.manage.xtalk-scaffold/scaffold-runtime-template :added "4.1"}
@@ -457,10 +534,87 @@
          (mapv :source-ns outputs)
          (mapv :target-ns outputs)])))
   => '["xt.lang.*"
+        :dart
+        1
+        [xt.lang.common-lib-test]
+        [xtbench.dart.lang.common-lib-test]])
+
+^{:refer std.lang.manage.xtalk-scaffold/scaffold-runtime-template :added "4.1"}
+(fact "scaffold-runtime-template preserves source formatting"
+  (with-temp-runtime-source-file
+    "(ns xtbench.js.lang.common-lib-test\n  (:require [std.lang :as l]\n            [xt.lang.common-lib :as k])\n  (:use code.test))\n\n(l/script- :js {:runtime :basic})\n\n(fact:global {:setup [(l/rt:restart)]})\n\n^{:refer xt.lang.common-lib/identity :added \"4.0\"}\n(fact \"identity function\"\n  ^:hidden\n  (!.js (k/identity 1))\n  => 1)\n"
+    (fn [path]
+      (let [{:keys [content]}
+            (scaffold-runtime-template nil {:input-path path
+                                            :output-path (str path ".out")
+                                            :lang :lua})]
+        [(str/includes? content "(fact \"identity function\"\n  ^:hidden\n  (!.lua (k/identity 1))\n  => 1)")
+         (str/includes? content "(l/script- :lua {:runtime :basic})")
+         (not (str/includes? content "(fact \"identity function\" (!.lua"))])))
+  => [true true true])
+
+^{:refer std.lang.manage.xtalk-scaffold/diagnose-runtime-generation :added "4.1"}
+(fact "diagnoses split generation rewrites and expected outputs"
+  (with-temp-runtime-suite-file
+    runtime-test-forms-with-top-level
+    (fn [path]
+      (let [{:keys [mode expected-success? script-langs outputs warnings unsupported summary]}
+            (diagnose-runtime-generation nil {:input-path path
+                                              :langs [:js :lua]})]
+        [mode
+         expected-success?
+         script-langs
+         (mapv (juxt :lang :status :script-present :fact-count) outputs)
+         (set (map :code warnings))
+         unsupported
+         (:rewritten-count summary)])))
+  => '[:split
+       true
+       [:js :lua]
+       [[:js :expected-pass true 2]
+        [:lua :expected-pass true 2]]
+       #{:normalized-runtime-setup
+         :retargeted-top-level-runtime
+         :retargeted-runtime-prefix}
+       []
+       3])
+
+^{:refer std.lang.manage.xtalk-scaffold/diagnose-runtime-generation :added "4.1"}
+(fact "diagnoses unsupported split seed patterns"
+  (with-temp-runtime-suite-file
+    runtime-test-forms-with-unsupported
+    (fn [path]
+      (let [{:keys [mode expected-success? unsupported]}
+            (diagnose-runtime-generation nil {:input-path path
+                                              :langs [:js :lua]})]
+        [mode
+         expected-success?
+         (set (map :code unsupported))])))
+  => '[:split
+       false
+       #{:mixed-runtime-top-level
+         :mixed-runtime-assertion}])
+
+^{:refer std.lang.manage.xtalk-scaffold/diagnose-runtime-generation :added "4.1"}
+(fact "diagnoses blocked template generation for twostep runtimes"
+  (with-temp-runtime-suite-file
+    blocked-runtime-template-forms
+    (fn [path]
+      (let [{:keys [mode from-lang requested-lang expected-success? unsupported]}
+            (diagnose-runtime-generation nil {:input-path path
+                                              :lang :dart})]
+        [mode
+         from-lang
+         requested-lang
+         expected-success?
+         (mapv :code unsupported)
+         (-> unsupported first :blockers)])))
+  => '[:template
+       :js
        :dart
-       1
-       [xt.lang.common-lib-test]
-       [xtbench.dart.lang.common-lib-test]])
+       false
+       [:twostep-runtime-blocker]
+       [notify/wait-on]])
 
 ^{:refer std.lang.manage.xtalk-scaffold/xtlang-runtime-suite-sources :added "4.1"}
 (fact "finds eligible xt.lang templates for twostep bulk compilation"
