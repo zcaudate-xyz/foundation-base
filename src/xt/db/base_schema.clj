@@ -36,7 +36,7 @@
   {:added "4.0"}
   [schema]
   (var cached := (xt/x:lu-get -/CACHED_SCHEMA schema))
-  (when (not (xt/x:has-key? -/CACHED_SCHEMA schema))
+  (when (xt/x:nil? cached)
     (:= cached {})
     (xt/x:lu-set -/CACHED_SCHEMA schema cached))
   (return cached))
@@ -89,12 +89,11 @@
   [schema table-name]
   (var table-def := (xt/x:get-key schema table-name))
   (return (xtd/obj-keepf table-def
+                         (fn:> [m]
+                           (and (xt/x:is-object? (xt/x:get-key m "sql"))
+                                (xt/x:has-key? (xt/x:get-key m "sql") "default")))
                          (fn [m]
-                           (var sql (xt/x:get-key m "sql"))
-                           (return (and (xt/x:is-object? sql)
-                                        (xt/x:has-key? sql "default"))))
-                        (fn [m]
-                          (return (xt/x:get-path m ["sql" "default"]))))))
+                           (return (xt/x:get-path m ["sql" "default"]))))))
 
 (defn.xt create-all-keys
   "creates all keys"
@@ -115,11 +114,11 @@
   {:added "4.0"}
   ([schema table-name]
    (var cached  (-/get-cached-schema schema))
-   (var table-keys (xt/x:get-key cached table-name))
-   (when (not (xt/x:has-key? cached table-name))
-      (:= table-keys (-/create-all-keys schema table-name))
-      (xt/x:set-key cached table-name table-keys))
-   (return table-keys)))
+    (var table-keys (xt/x:get-key cached table-name))
+   (when (xt/x:nil? table-keys)
+       (:= table-keys (-/create-all-keys schema table-name))
+       (xt/x:set-key cached table-name table-keys))
+    (return table-keys)))
 
 (defn.xt data-keys
   "gets data keys"
@@ -179,7 +178,7 @@
   {:added "4.0"}
   [lookup]
   (var cached (xt/x:lu-get -/CACHED_LOOKUP lookup))
-  (when (not (xt/x:has-key? -/CACHED_LOOKUP lookup))
+  (when (xt/x:nil? cached)
     (:= cached (-/create-table-order lookup))
     (xt/x:lu-set -/CACHED_LOOKUP lookup cached))
   (return cached))

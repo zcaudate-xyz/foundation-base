@@ -71,6 +71,9 @@
 (def ^:dynamic *xtlang-runtime-test-root*
   "test/xt/lang")
 
+(def ^:dynamic *xtbench-root*
+  "xtbench")
+
 (def ^:dynamic *twostep-runtime-blockers*
   '#{notify/wait-on
      notify/wait-on-call
@@ -81,9 +84,34 @@
      ws/service-register})
 
 (declare runtime-expr-lang
-         expand-top-level-form
-         fact-form?
-         test-file-path)
+          expand-top-level-form
+          fact-form?
+          test-file-path
+          runtime-lang-suffix)
+
+(defn runtime-bench-ns?
+  [ns]
+  (boolean (re-find #"^xtbench\.[^.]+\." (str ns))))
+
+(defn canonical-runtime-source-test-ns
+  [test-ns]
+  (let [test-ns (project/test-ns test-ns)
+        ns-str (str test-ns)]
+    (cond
+      (runtime-bench-ns? test-ns)
+      (let [[_ tail] (re-find #"^xtbench\.[^.]+\.(.+)$" ns-str)]
+        (symbol (str "xt." tail)))
+
+      :else
+      (or (some (fn [lang]
+                  (let [suffix (runtime-lang-suffix lang)
+                        pattern (re-pattern (str "-(" (java.util.regex.Pattern/quote suffix) ")-test$"))]
+                    (when (re-find pattern ns-str)
+                      (symbol (str (subs ns-str 0 (- (count ns-str)
+                                                     (+ (count suffix) 6)))
+                                   "-test")))))
+                (keys +runtime-lang-config+))
+          test-ns))))
 
 (defn read-xtalk-ops
   [path]
@@ -561,8 +589,16 @@
 
 (defn runtime-test-ns
   [test-ns lang]
-  (let [base-ns (project/source-ns test-ns)]
-    (symbol (str base-ns "-" (runtime-lang-suffix lang) "-test"))))
+  (let [lang (normalize-runtime-lang lang)
+        source-test-ns (canonical-runtime-source-test-ns test-ns)
+        source-str (str source-test-ns)]
+    (symbol
+     (cond
+       (str/starts-with? source-str "xt.")
+       (str "xtbench." (name lang) "." (subs source-str 3))
+
+       :else
+       (str "xtbench." (name lang) "." source-str)))))
 
 (defn render-top-level-forms
   [forms]
@@ -592,10 +628,13 @@
 (defn test-file-path
   [project test-ns]
   (or (project/get-path test-ns project)
-      (str (fs/path (:root project)
-                    (or (first (:test-paths project))
-                        "test")
-                    (str (fs/ns->file test-ns) ".clj")))))
+      (if (runtime-bench-ns? test-ns)
+        (str (fs/path (:root project)
+                      (str (fs/ns->file test-ns) ".clj")))
+        (str (fs/path (:root project)
+                      (or (first (:test-paths project))
+                          "test")
+                      (str (fs/ns->file test-ns) ".clj"))))))
 
 (defn infer-runtime-lang
   [forms]
@@ -634,10 +673,11 @@
                       (map runtime-lang-suffix)
                       distinct
                       sort)
-        pattern  (re-pattern
-                  (str "-(" (str/join "|" (map #(java.util.regex.Pattern/quote %) suffixes))
-                       ")-test$"))]
-    (boolean (re-find pattern (str test-ns)))))
+        suffixed-pattern  (re-pattern
+                           (str "-(" (str/join "|" (map #(java.util.regex.Pattern/quote %) suffixes))
+                                ")-test$"))]
+    (or (runtime-bench-ns? test-ns)
+        (boolean (re-find suffixed-pattern (str test-ns))))))
 
 (defn form-contains-symbol?
   [form targets]
@@ -760,13 +800,8 @@
 
 (defn template-runtime-test-ns
   [source-test-ns from-lang to-lang]
-  (let [from-suffix (runtime-lang-suffix from-lang)
-        to-suffix (runtime-lang-suffix to-lang)
-        source-name (str source-test-ns)
-        pattern (re-pattern (str "-" (java.util.regex.Pattern/quote from-suffix) "-test$"))]
-    (if (re-find pattern source-name)
-      (symbol (str/replace source-name pattern (str "-" to-suffix "-test")))
-      (runtime-test-ns source-test-ns to-lang))))
+  (runtime-test-ns (canonical-runtime-source-test-ns source-test-ns)
+                   to-lang))
 
 (defn template-runtime-test-forms
   [forms from-lang to-lang]

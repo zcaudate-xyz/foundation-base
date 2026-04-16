@@ -46,11 +46,11 @@
 
 (def runtime-template-forms
   (read-string
-   "[(ns xt.lang.common-lib-js-test
-       (:require [std.lang :as l]
-                 [xt.lang.common-lib :as k])
-       (:use code.test))
-      (l/script- :js {:runtime :basic})
+   "[(ns xtbench.js.lang.common-lib-test
+        (:require [std.lang :as l]
+                  [xt.lang.common-lib :as k])
+        (:use code.test))
+       (l/script- :js {:runtime :basic})
       (fact:global {:setup [(l/rt:restart)]})
       ^{:refer xt.lang.common-lib/identity :added \"4.0\"}
       (fact \"identity function\"
@@ -249,7 +249,7 @@
 ^{:refer std.lang.manage.xtalk-scaffold/runtime-test-ns :added "4.1"}
 (fact "creates runtime test ns"
   (runtime-test-ns 'xt.lang.common-lib-test :js)
-  => 'xt.lang.common-lib-js-test)
+  => 'xtbench.js.lang.common-lib-test)
 
 ^{:refer std.lang.manage.xtalk-scaffold/render-top-level-forms :added "4.1"}
 (fact "renders top-level forms"
@@ -269,6 +269,11 @@
 ^{:refer std.lang.manage.xtalk-scaffold/test-file-path :added "4.1"}
 (fact "builds a test file path"
   (string? (test-file-path {:root "." :test-paths ["test"]} 'a.b-test))
+  => true
+
+  (str/ends-with? (test-file-path {:root "." :test-paths ["test"]}
+                                  'xtbench.js.lang.common-lib-test)
+                  "/xtbench/js/lang/common_lib_test.clj")
   => true)
 
 ^{:refer std.lang.manage.xtalk-scaffold/infer-runtime-lang :added "4.1"}
@@ -295,9 +300,10 @@
 ^{:refer std.lang.manage.xtalk-scaffold/runtime-suffixed-test-ns? :added "4.1"}
 (fact "detects runtime suffixed test namespaces"
   [(runtime-suffixed-test-ns? 'xt.lang.common-lib-js-test)
+   (runtime-suffixed-test-ns? 'xtbench.js.lang.common-lib-test)
    (runtime-suffixed-test-ns? 'xt.lang.common-lib-test)
    (runtime-suffixed-test-ns? 'xt.lang.common-lib-dt-test)]
-  => [true false true])
+  => [true true false true])
 
 ^{:refer std.lang.manage.xtalk-scaffold/runtime-template-supported? :added "4.1"}
 (fact "blocks twostep suite generation for runtime-coupled templates"
@@ -323,22 +329,22 @@
 
 ^{:refer std.lang.manage.xtalk-scaffold/template-runtime-test-ns :added "4.1"}
 (fact "templates runtime test namespace"
-  (template-runtime-test-ns 'xt.lang.common-lib-js-test :js :rb)
-  => 'xt.lang.common-lib-rb-test)
+  (template-runtime-test-ns 'xtbench.js.lang.common-lib-test :js :rb)
+  => 'xtbench.rb.lang.common-lib-test)
 
 ^{:refer std.lang.manage.xtalk-scaffold/template-runtime-test-forms :added "4.1"}
 (fact "templates a runtime test from js to ruby"
   (let [out-forms (template-runtime-test-forms runtime-template-forms :js :ruby)
         out (render-top-level-forms out-forms)]
     [(= :rb (normalize-runtime-lang :ruby))
-     (= 'xt.lang.common-lib-rb-test
-        (second (first out-forms)))
-     (= :ruby (second (second out-forms)))
-     (str/includes? out "xt.lang.common-lib-rb-test")
-     (str/includes? out "(l/script- :ruby")
-     (str/includes? out "!.rb")
-     (not (str/includes? out "!.js"))
-     (str/includes? out ":refer xt.lang.common-lib/identity")])
+      (= 'xtbench.rb.lang.common-lib-test
+         (second (first out-forms)))
+      (= :ruby (second (second out-forms)))
+      (str/includes? out "xtbench.rb.lang.common-lib-test")
+      (str/includes? out "(l/script- :ruby")
+      (str/includes? out "!.rb")
+      (not (str/includes? out "!.js"))
+      (str/includes? out ":refer xt.lang.common-lib/identity")])
   => [true true true true true true true true])
 
 ^{:refer std.lang.manage.xtalk-scaffold/split-fact-form :added "4.1"}
@@ -358,22 +364,31 @@
         lua-out (render-top-level-forms (get by-lang :lua))]
     [(str/includes? shared-out "xt.lang.common-lib-test")
      (str/includes? shared-out "(fact \"placeholder\")")
-     (not (str/includes? shared-out "wrapped runtime form"))
-     (str/includes? js-out "xt.lang.common-lib-js-test")
-     (str/includes? js-out "(l/script- :js")
-     (= true (:hidden (meta (nth js-form 2))))
-     (str/includes? js-out "!.js")
-     (not (str/includes? js-out "!.lua"))
-     (str/includes? js-out "wrapped runtime form")
-     (str/includes? js-out "vector runtime form")
-     (str/includes? lua-out "xt.lang.common-lib-lua-test")
-     (str/includes? lua-out "(l/script- :lua")
-     (= true (:hidden (meta (nth lua-form 2))))
-     (str/includes? lua-out "!.lua")
-     (not (str/includes? lua-out "!.js"))
-     (str/includes? lua-out "wrapped runtime form")
-     (str/includes? lua-out "vector runtime form")])
+      (not (str/includes? shared-out "wrapped runtime form"))
+      (str/includes? js-out "xtbench.js.lang.common-lib-test")
+      (str/includes? js-out "(l/script- :js")
+      (= true (:hidden (meta (nth js-form 2))))
+      (str/includes? js-out "!.js")
+      (not (str/includes? js-out "!.lua"))
+      (str/includes? js-out "wrapped runtime form")
+      (str/includes? js-out "vector runtime form")
+      (str/includes? lua-out "xtbench.lua.lang.common-lib-test")
+      (str/includes? lua-out "(l/script- :lua")
+      (= true (:hidden (meta (nth lua-form 2))))
+      (str/includes? lua-out "!.lua")
+      (not (str/includes? lua-out "!.js"))
+      (str/includes? lua-out "wrapped runtime form")
+      (str/includes? lua-out "vector runtime form")])
   => [true true true true true true true true true true true true true true true true true])
+
+^{:refer std.lang.manage.xtalk-scaffold/canonical-runtime-source-test-ns :added "4.1"}
+(fact "normalizes generated runtime namespaces back to canonical test namespaces"
+  [(canonical-runtime-source-test-ns 'xtbench.js.lang.common-lib-test)
+   (canonical-runtime-source-test-ns 'xt.lang.common-lib-js-test)
+   (canonical-runtime-source-test-ns 'xt.lang.common-lib-test)]
+  => '[xt.lang.common-lib-test
+       xt.lang.common-lib-test
+       xt.lang.common-lib-test])
 
 ^{:refer std.lang.manage.xtalk-scaffold/separate-runtime-tests :added "4.1"}
 (fact "separate-runtime-tests is callable"

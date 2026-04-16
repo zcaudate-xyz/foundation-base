@@ -2,9 +2,10 @@
   (:require [std.lang :as l]))
 
 (l/script :lua
-  {:require [[xt.lang.common-lib :as k]
-             [kmi.redis :as r]
-             [kmi.queue.common :as q]]
+  {:require [[xt.lang.common-spec :as xt]
+             [xt.lang.common-data :as xtd]
+              [kmi.redis :as r]
+              [kmi.queue.common :as q]]
    :static {:lang/lint-globals #{redis}}})
 
 ;;
@@ -216,9 +217,9 @@
                       (return)))
 
    (return (-> (r/call "XINFO" "GROUPS" k-queue)
-               (k/arr-filter (fn [arr]
-                            (return (== group (xtd/second arr)))))
-               (xtd/first)))))
+                (xtd/arr-filter (fn [arr]
+                             (return (== group (xtd/second arr)))))
+                (xtd/first)))))
 
 (defn.lua ^{:rt/redis {}
             :rt/db {:in  [:text :text :text]
@@ -304,11 +305,11 @@
    (local '[success err] (pcall res-fn))
    (if err
      (if (== "NOGROUP" (string.sub err 1 7))
-       (do (:= res (-/mq-stream-read-init key partition group
-                                          (k/obj-assign {:consumer consumer
-                                                         :count count}
-                                                        opts))))
-       (error err)))
+        (do (:= res (-/mq-stream-read-init key partition group
+                                           (xtd/obj-assign {:consumer consumer
+                                                            :count count}
+                                                           opts))))
+        (error err)))
    (return (:? res (. res [1] [2]) res))))
 
 (defn.lua ^{:rt/redis {}
@@ -431,7 +432,7 @@
   "writes entry to a stream"
   {:added "4.0"}
   ([key partition m]
-   (return (r/call "XADD" (cat key ":_:" partition) "*" (unpack (k/to-flat m))))))
+   (return (r/call "XADD" (cat key ":_:" partition) "*" (unpack (xtd/to-flat m))))))
 
 (defn.lua ^{:rt/redis {}
             :rt/db {:in  [:text :text :jsonb]
@@ -502,7 +503,7 @@
        "group_not_exists_all"  -/mq-stream-group-not-exists-all
        "group_remove"          -/mq-stream-group-remove
        "group_remove_all"      -/mq-stream-group-remove-all}
-      (k/obj-assign q/mq-common-table)))
+      (xtd/obj-assign q/mq-common-table)))
 
 (def.lua mq-stream-table-get
   {"read_group"           -/mq-stream-read
