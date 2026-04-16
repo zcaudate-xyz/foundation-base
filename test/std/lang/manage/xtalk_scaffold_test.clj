@@ -254,7 +254,25 @@
 ^{:refer std.lang.manage.xtalk-scaffold/render-top-level-forms :added "4.1"}
 (fact "renders top-level forms"
   (string? (render-top-level-forms '[(ns a.b) (def x 1)]))
-  => true)
+  => true
+
+  (let [out (render-top-level-forms
+             [(with-meta
+                '(fact "x"
+                   (!.js 1)
+                   => 1)
+                {:line 10
+                 :column 2
+                 :hidden true
+                 :refer (with-meta 'xt.lang.common-lib/identity
+                          {:line 9 :column 1})
+                 :added "4.1"})])]
+    [(str/includes? out ":line")
+     (str/includes? out ":column")
+     (str/includes? out ":refer xt.lang.common-lib/identity")
+     (str/includes? out ":added \"4.1\"")
+     (str/includes? out ":hidden true")])
+  => [false false true true true])
 
 ^{:refer std.lang.manage.xtalk-scaffold/attach-leading-meta :added "4.1"}
 (fact "attaches leading metadata"
@@ -273,7 +291,7 @@
 
   (str/ends-with? (test-file-path {:root "." :test-paths ["test"]}
                                   'xtbench.js.lang.common-lib-test)
-                  "/xtbench/js/lang/common_lib_test.clj")
+                  "/test/xtbench/js/lang/common_lib_test.clj")
   => true)
 
 ^{:refer std.lang.manage.xtalk-scaffold/infer-runtime-lang :added "4.1"}
@@ -399,6 +417,50 @@
 (fact "scaffold-runtime-template is callable"
   (fn? scaffold-runtime-template)
   => true)
+
+^{:refer std.lang.manage.xtalk-scaffold/scaffold-runtime-template :added "4.1"}
+(fact "scaffold-runtime-template supports input-path without :ns"
+  (with-temp-runtime-suite-file
+    runtime-template-forms
+    (fn [path]
+      (let [{:keys [source-ns target-ns from-lang lang content]}
+            (scaffold-runtime-template nil {:input-path path
+                                            :output-path (str path ".out")
+                                            :lang :lua})]
+        [source-ns
+         target-ns
+         from-lang
+         lang
+         (str/includes? content ":line")
+         (str/includes? content ":column")])))
+  => '[xtbench.js.lang.common-lib-test
+       xtbench.lua.lang.common-lib-test
+       :js
+       :lua
+       false
+       false])
+
+^{:refer std.lang.manage.xtalk-scaffold/scaffold-runtime-template :added "4.1"}
+(fact "scaffold-runtime-template supports namespace patterns for batch generation"
+  (with-temp-xtlang-root
+    {"test/xt/lang/common_lib_test.clj" canonical-runtime-template-forms
+     "test/xt/lang/common_notify_test.clj" blocked-runtime-template-forms}
+    (fn [root]
+      (let [{:keys [pattern lang count outputs]}
+            (scaffold-runtime-template nil {:root root
+                                            :input-root "test/xt/lang"
+                                            :ns 'xt.lang.*
+                                            :lang :dart})]
+        [pattern
+         lang
+         count
+         (mapv :source-ns outputs)
+         (mapv :target-ns outputs)])))
+  => '["xt.lang.*"
+       :dart
+       1
+       [xt.lang.common-lib-test]
+       [xtbench.dart.lang.common-lib-test]])
 
 ^{:refer std.lang.manage.xtalk-scaffold/xtlang-runtime-suite-sources :added "4.1"}
 (fact "finds eligible xt.lang templates for twostep bulk compilation"

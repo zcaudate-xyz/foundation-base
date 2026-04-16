@@ -87,7 +87,8 @@
           expand-top-level-form
           fact-form?
           test-file-path
-          runtime-lang-suffix)
+          runtime-lang-suffix
+          xtlang-runtime-suite-sources)
 
 (defn runtime-bench-ns?
   [ns]
@@ -417,16 +418,38 @@
                                             :end-column)}))))
          vec)))
 
+(defn source-test-ns-from-forms
+  [forms]
+  (some #(when (and (seq? %) (= 'ns (first %))) (second %)) forms))
+
+(defn namespace-pattern?
+  [x]
+  (boolean (and x
+                (str/includes? (str x) "*"))))
+
+(defn namespace-pattern-regex
+  [pattern]
+  (re-pattern
+   (str "^"
+        (->> (str/split (str pattern) #"\*" -1)
+             (map #(java.util.regex.Pattern/quote %))
+             (str/join ".*"))
+        "$")))
+
+(defn namespace-pattern-match?
+  [pattern ns]
+  (boolean (re-find (namespace-pattern-regex pattern) (str ns))))
+
 (defn canonical-runtime-suite-forms
   ([forms]
    (canonical-runtime-suite-forms forms *canonical-runtime-lang*))
   ([forms lang]
    (let [lang (normalize-runtime-lang lang)
-         expanded (mapcat expand-top-level-form forms)
-         source-ns (some #(when (and (seq? %) (= 'ns (first %))) (second %)) forms)
-         facts (filter fact-form? expanded)
-         cases (mapcat #(fact-runtime-cases source-ns % lang) facts)]
-     {:ns source-ns
+          expanded (mapcat expand-top-level-form forms)
+          source-ns (source-test-ns-from-forms forms)
+          facts (filter fact-form? expanded)
+          cases (mapcat #(fact-runtime-cases source-ns % lang) facts)]
+      {:ns source-ns
       :lang lang
       :runtime-type (runtime-type lang)
       :check-mode (runtime-check-mode lang)
@@ -602,14 +625,53 @@
 
 (defn render-top-level-forms
   [forms]
-  (binding [pprint/*print-right-margin* 100
-            *print-meta* true
-            *print-length* nil
-            *print-level* nil]
-    (with-out-str
-      (doseq [form forms]
-        (pprint/pprint form)
-        (println)))))
+  (letfn [(clean-meta-map [m]
+            (let [m (not-empty
+                     (reduce dissoc (or m {})
+                             [:line :column :end-line :end-column
+                              :row :col :end-row :end-col :file]))]
+              (when m
+                (into (empty m)
+                      (map (fn [[k v]]
+                             [(clean-form k) (clean-form v)]))
+                      m))))
+          (clean-iobj [obj original]
+            (if (instance? clojure.lang.IObj obj)
+              (if-let [m (clean-meta-map (meta original))]
+                (with-meta obj m)
+                (with-meta obj nil))
+              obj))
+          (clean-form [form]
+            (cond (seq? form)
+                  (clean-iobj (apply list (map clean-form form)) form)
+
+                  (vector? form)
+                  (clean-iobj (vec (map clean-form form)) form)
+
+                  (set? form)
+                  (clean-iobj (into #{} (map clean-form form)) form)
+
+                  (map? form)
+                  (clean-iobj
+                   (into (empty form)
+                         (map (fn [[k v]]
+                                [(clean-form k) (clean-form v)]))
+                         form)
+                   form)
+
+                  (instance? clojure.lang.IObj form)
+                  (clean-iobj form form)
+
+                  :else
+                  form))]
+    (binding [pprint/*print-right-margin* 100
+              *print-meta* true
+              *print-length* nil
+              *print-level* nil]
+      (with-out-str
+        (doseq [form (map clean-form forms)]
+          (pprint/pprint form)
+          (println))))))
 
 (defn attach-leading-meta
   [clauses metadata]
@@ -628,13 +690,10 @@
 (defn test-file-path
   [project test-ns]
   (or (project/get-path test-ns project)
-      (if (runtime-bench-ns? test-ns)
-        (str (fs/path (:root project)
-                      (str (fs/ns->file test-ns) ".clj")))
-        (str (fs/path (:root project)
-                      (or (first (:test-paths project))
-                          "test")
-                      (str (fs/ns->file test-ns) ".clj"))))))
+      (str (fs/path (:root project)
+                    (or (first (:test-paths project))
+                        "test")
+                    (str (fs/ns->file test-ns) ".clj")))))
 
 (defn infer-runtime-lang
   [forms]
@@ -811,7 +870,7 @@
         to-script (runtime-script-lang to-lang)
         from-dispatch (runtime-dispatch-symbol from-lang)
         to-dispatch (runtime-dispatch-symbol to-lang)
-        source-ns (some #(when (and (seq? %) (= 'ns (first %))) (second %)) forms)
+        source-ns (source-test-ns-from-forms forms)
         target-ns (template-runtime-test-ns source-ns from-lang to-lang)
         source-ns-str (str source-ns)
         target-ns-str (str target-ns)]
@@ -933,12 +992,19 @@
   ([_ {:keys [input-path langs write]
         :or {langs *runtime-test-langs*
              write false}
-       :as params}]
+        :as params}]
    (let [proj (project/project)
-         test-ns (project/test-ns (:ns params))
+         test-ns-param (some-> (:ns params) project/test-ns)
          input-path (or input-path
-                        (test-file-path proj test-ns))
+                        (when test-ns-param
+                          (test-file-path proj test-ns-param))
+                        (throw (ex-info "Requires runtime test input-path or a valid test :ns"
+                                        {:params (dissoc params :write)})))
          forms (read-top-level-forms input-path)
+         test-ns (or test-ns-param
+                     (source-test-ns-from-forms forms)
+                     (throw (ex-info "Unable to determine runtime test namespace"
+                                     {:input-path input-path})))
          {:keys [shared by-lang]} (separate-runtime-test-forms forms langs)
          shared-path (test-file-path proj test-ns)
          outputs (into []
@@ -968,40 +1034,84 @@
   ([_ params _ _]
    (separate-runtime-tests nil params)))
 
+(defn scaffold-runtime-template-single
+  [proj {:keys [input-path output-path lang from-lang write]
+         :or {write false}
+         :as params}]
+  (let [source-test-ns-param (some-> (:ns params) project/test-ns)
+        input-path (or input-path
+                       (when source-test-ns-param
+                         (test-file-path proj source-test-ns-param))
+                       (throw (ex-info "Requires runtime template input-path or a valid test :ns"
+                                       {:params (dissoc params :write)})))
+        forms (read-top-level-forms input-path)
+        source-test-ns (or source-test-ns-param
+                           (source-test-ns-from-forms forms)
+                           (throw (ex-info "Unable to determine runtime template namespace"
+                                           {:input-path input-path})))
+        from-lang (or from-lang
+                      (infer-runtime-lang forms)
+                      (throw (ex-info "Cannot infer template runtime language"
+                                      {:path input-path
+                                       :ns source-test-ns})))
+        to-lang (normalize-runtime-lang lang)
+        target-ns (template-runtime-test-ns source-test-ns from-lang to-lang)
+        output-path (or output-path
+                        (test-file-path proj target-ns))
+        rendered-forms (template-runtime-test-forms forms from-lang to-lang)
+        content (render-top-level-forms rendered-forms)]
+    (when write
+      (fs/create-directory (fs/parent output-path))
+      (spit output-path content))
+    {:input-path input-path
+     :output-path output-path
+     :from-lang (normalize-runtime-lang from-lang)
+     :lang to-lang
+     :source-ns source-test-ns
+     :target-ns target-ns
+     :updated (not= (when (fs/exists? output-path)
+                      (slurp output-path))
+                    content)
+     :content content}))
+
+(defn scaffold-runtime-template-pattern
+  [proj {:keys [output-path ns pattern root input-root lang]
+         :as params}]
+  (when output-path
+    (throw (ex-info "Pattern scaffolding does not support a single output-path"
+                    {:output-path output-path
+                     :pattern (or pattern ns)})))
+  (let [pattern (or pattern
+                    (when (namespace-pattern? ns) ns))
+        sources (->> (xtlang-runtime-suite-sources {:root (or root (:root proj))
+                                                    :input-root input-root
+                                                    :lang lang})
+                     (filter #(namespace-pattern-match? pattern (:ns %)))
+                     vec)
+        outputs (mapv (fn [{:keys [path from-lang ns]}]
+                        (scaffold-runtime-template-single
+                         proj
+                         (assoc params
+                                :ns ns
+                                :input-path path
+                                :from-lang from-lang
+                                :output-path nil)))
+                      sources)]
+    {:pattern (str pattern)
+     :lang (normalize-runtime-lang lang)
+     :count (count outputs)
+     :outputs outputs}))
+
 (defn scaffold-runtime-template
-  "Generates a target runtime test file from a single-runtime template file."
+  "Generates runtime test files from a single-runtime template or namespace pattern."
   ([_ {:keys [input-path output-path lang from-lang write]
-        :or {write false}
-        :as params}]
-   (let [proj (project/project)
-         source-test-ns (project/test-ns (:ns params))
-         input-path (or input-path
-                        (test-file-path proj source-test-ns))
-         forms (read-top-level-forms input-path)
-         from-lang (or from-lang
-                       (infer-runtime-lang forms)
-                       (throw (ex-info "Cannot infer template runtime language"
-                                       {:path input-path
-                                        :ns source-test-ns})))
-         to-lang (normalize-runtime-lang lang)
-         target-ns (template-runtime-test-ns source-test-ns from-lang to-lang)
-         output-path (or output-path
-                         (test-file-path proj target-ns))
-         rendered-forms (template-runtime-test-forms forms from-lang to-lang)
-         content (render-top-level-forms rendered-forms)]
-     (when write
-       (fs/create-directory (fs/parent output-path))
-       (spit output-path content))
-      {:input-path input-path
-       :output-path output-path
-       :from-lang (normalize-runtime-lang from-lang)
-       :lang to-lang
-       :source-ns source-test-ns
-       :target-ns target-ns
-       :updated (not= (when (fs/exists? output-path)
-                        (slurp output-path))
-                      content)
-       :content content}))
+         :or {write false}
+         :as params}]
+   (let [proj (project/project)]
+     (if (or (namespace-pattern? (:ns params))
+             (namespace-pattern? (:pattern params)))
+       (scaffold-runtime-template-pattern proj params)
+       (scaffold-runtime-template-single proj params))))
   ([_ params _ _]
    (scaffold-runtime-template nil params)))
 
@@ -1025,14 +1135,12 @@
                        sort)
                  [])]
      (->> paths
-          (keep (fn [path]
-                  (let [forms (read-top-level-forms path)
-                        source-ns (some #(when (and (seq? %) (= 'ns (first %)))
-                                           (second %))
-                                        forms)
-                        from-lang (single-runtime-template-lang forms)]
-                    (when (and source-ns
-                               from-lang
+           (keep (fn [path]
+                   (let [forms (read-top-level-forms path)
+                        source-ns (source-test-ns-from-forms forms)
+                         from-lang (single-runtime-template-lang forms)]
+                     (when (and source-ns
+                                from-lang
                                (not (runtime-suffixed-test-ns? source-ns))
                                (runtime-template-supported? forms lang))
                       {:path path
