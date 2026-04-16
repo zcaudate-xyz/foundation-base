@@ -84,17 +84,25 @@
      server/run-server
      ws/service-register})
 
+(def ^:dynamic *template-runtime-symbol-blockers*
+  {:lua '#{setmetatable
+           getmetatable
+           rawget
+           rawset
+           rawequal}})
+
 (declare runtime-expr-lang
            expand-top-level-form
            fact-form?
            script-form?
            fact-global-form?
-           test-file-path
-           transform-script-form
-           transform-script-runtime
-           runtime-lang-suffix
-           template-runtime-test-ns
-           xtlang-runtime-suite-sources)
+            test-file-path
+            transform-script-form
+            transform-script-runtime
+            runtime-lang-suffix
+            template-runtime-test-ns
+            template-runtime-blockers
+            xtlang-runtime-suite-sources)
 
 (defn runtime-bench-ns?
   [ns]
@@ -344,6 +352,11 @@
     (or (:lang-exceptions m)
         (:exceptions m)
         {})))
+
+(defn form-skipped-for-lang?
+  [form lang]
+  (true? (get-in (form-language-exceptions form)
+                 [(normalize-runtime-lang lang) :skip])))
 
 (defn strip-runtime-dispatch
   "Removes runtime dispatch wrappers like `!.lua` while preserving the underlying form."
@@ -897,19 +910,26 @@
 
 (defn runtime-template-supported?
   [forms lang]
-  (let [lang (normalize-runtime-lang lang)]
+  (let [lang (normalize-runtime-lang lang)
+        from-lang (single-runtime-template-lang forms)
+        template-blockers (when from-lang
+                            (template-runtime-blockers forms from-lang lang))]
     (cond (nil? (single-runtime-template-lang forms))
           false
 
           (runtime-suffixed-test-ns?
-           (some #(when (and (seq? %) (= 'ns (first %))) (second %)) forms))
+            (some #(when (and (seq? %) (= 'ns (first %))) (second %)) forms))
+          false
+
+          (or (seq (:twostep template-blockers))
+              (seq (:runtime-specific template-blockers)))
           false
 
           (= :twostep (runtime-type lang))
           (not (some #(form-contains-symbol? % *twostep-runtime-blockers*) forms))
 
-           :else
-           true)))
+          :else
+          true)))
 
 (defn runtime-setup-langs
   [form]
@@ -938,13 +958,29 @@
          vec)))
 
 (defn template-runtime-blockers
-  [forms]
-  (->> *twostep-runtime-blockers*
-       (filter #(some (fn [form]
-                        (form-contains-symbol? form [%]))
-                      forms))
-       (sort-by str)
-       vec))
+  ([forms]
+   (template-runtime-blockers forms (single-runtime-template-lang forms) nil))
+  ([forms from-lang to-lang]
+   (let [from-lang (some-> from-lang normalize-runtime-lang)
+         to-lang (some-> to-lang normalize-runtime-lang)
+         twostep-blockers (->> *twostep-runtime-blockers*
+                               (filter #(some (fn [form]
+                                                (form-contains-symbol? form [%]))
+                                              forms))
+                               (sort-by str)
+                               vec)
+         runtime-specific (if (and from-lang
+                                   to-lang
+                                   (not= from-lang to-lang))
+                            (->> (get *template-runtime-symbol-blockers* from-lang)
+                                 (filter #(some (fn [form]
+                                                  (form-contains-symbol? form [%]))
+                                                forms))
+                                 (sort-by str)
+                                 vec)
+                            [])]
+     {:twostep twostep-blockers
+      :runtime-specific runtime-specific})))
 
 (defn replace-runtime-symbol
   [form from-dispatch to-dispatch]
@@ -1159,22 +1195,23 @@
         from-script (runtime-script-lang from-lang)
         to-script (runtime-script-lang to-lang)
         from-dispatch (runtime-dispatch-symbol from-lang)
-        to-dispatch (runtime-dispatch-symbol to-lang)
-        source-ns (source-test-ns-from-forms forms)
-        target-ns (template-runtime-test-ns source-ns from-lang to-lang)
-        source-ns-str (str source-ns)
-        target-ns-str (str target-ns)]
-    (mapv (fn [form]
-            (cond (and (seq? form) (= 'ns (first form)))
-                  (replace-ns-name form target-ns)
+         to-dispatch (runtime-dispatch-symbol to-lang)
+         source-ns (source-test-ns-from-forms forms)
+         target-ns (template-runtime-test-ns source-ns from-lang to-lang)
+         source-ns-str (str source-ns)
+         target-ns-str (str target-ns)]
+    (->> forms
+         (remove #(form-skipped-for-lang? % to-lang))
+         (mapv (fn [form]
+                 (cond (and (seq? form) (= 'ns (first form)))
+                       (replace-ns-name form target-ns)
 
-                   :else
-                   (-> form
-                       (transform-script-form from-script to-script)
-                       (transform-script-runtime to-lang)
-                       (replace-runtime-symbol from-dispatch to-dispatch)
-                       (replace-string-value source-ns-str target-ns-str))))
-           forms)))
+                       :else
+                       (-> form
+                           (transform-script-form from-script to-script)
+                           (transform-script-runtime to-lang)
+                           (replace-runtime-symbol from-dispatch to-dispatch)
+                           (replace-string-value source-ns-str target-ns-str))))))))
 
 (defn split-fact-form
   [fact-form langs]
@@ -1532,12 +1569,23 @@
                       (throw (ex-info "Cannot infer template runtime language"
                                       {:path input-path
                                        :ns source-test-ns})))
-         to-lang (normalize-runtime-lang lang)
-         target-ns (template-runtime-test-ns source-test-ns from-lang to-lang)
+        to-lang (normalize-runtime-lang lang)
+        blockers (template-runtime-blockers forms from-lang to-lang)
+        _ (when-not (runtime-template-supported? forms to-lang)
+            (throw (ex-info "Template cannot be scaffolded safely for the target runtime"
+                            {:input-path input-path
+                             :source-ns source-test-ns
+                             :from-lang (normalize-runtime-lang from-lang)
+                             :lang to-lang
+                             :blockers blockers})))
+        target-ns (template-runtime-test-ns source-test-ns from-lang to-lang)
          output-path (or output-path
                          (test-file-path proj target-ns))
          rendered-forms (template-runtime-test-forms forms from-lang to-lang)
-         content (render-template-runtime-source source source-test-ns from-lang to-lang)]
+         skipped? (not= (count rendered-forms) (count forms))
+         content (if skipped?
+                   (render-top-level-forms rendered-forms)
+                   (render-template-runtime-source source source-test-ns from-lang to-lang))]
     (when write
       (fs/create-directory (fs/parent output-path))
       (spit output-path content))
@@ -1597,12 +1645,15 @@
   [proj input-path source-test-ns forms lang]
   (let [from-lang (single-runtime-template-lang forms)
         requested-lang (some-> lang normalize-runtime-lang)
+        requested-blockers (when (and from-lang requested-lang)
+                             (template-runtime-blockers forms from-lang requested-lang))
         eligible-langs (->> *runtime-test-langs*
                             (map normalize-runtime-lang)
                             distinct
                             (filter #(runtime-template-supported? forms %))
                             vec)
-        blockers (template-runtime-blockers forms)
+        twostep-blockers (:twostep requested-blockers)
+        runtime-blockers (:runtime-specific requested-blockers)
         unsupported (vec
                      (concat
                       (when-not from-lang
@@ -1615,10 +1666,17 @@
                       (when (and requested-lang
                                  (not (runtime-template-supported? forms requested-lang)))
                         [(cond
-                           (seq blockers)
+                           (seq twostep-blockers)
                            {:code :twostep-runtime-blocker
                             :message "Template uses runtime-coupled helpers that are blocked for twostep generation."
-                            :blockers blockers
+                            :blockers twostep-blockers
+                            :lang requested-lang}
+
+                           (seq runtime-blockers)
+                           {:code :runtime-specific-template-blocker
+                            :message "Template uses source-runtime-specific symbols that cannot be ported safely to the requested runtime."
+                            :blockers runtime-blockers
+                            :from-lang from-lang
                             :lang requested-lang}
 
                            :else

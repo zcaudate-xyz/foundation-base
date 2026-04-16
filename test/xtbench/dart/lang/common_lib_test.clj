@@ -71,18 +71,7 @@
  =>
  [true false])
 
-^{:refer xt.lang.common-lib/proto-create, :added "4.1"}
-(fact
- "creates the prototype map"
- (!.dt
-  (var mt (k/proto-create {:hello (fn:> [v] (. v world)), :world "hello"}))
-  (var a {})
-  (setmetatable a mt)
-  (. a (hello)))
- =>
- "hello")
-
-^{:refer xt.lang.common-lib/proto-get, :added "4.1"}
+^{:refer xt.lang.common-lib/proto-get, :added "4.1", :lang-exceptions {:python {:skip true}}}
 (fact
  "gets the prototype map from an object"
  (!.dt
@@ -93,18 +82,7 @@
  =>
  true)
 
-^{:refer xt.lang.common-lib/proto-set, :added "4.1"}
-(fact
- "sets the prototype map onto an object"
- (!.dt
-  (var mt (k/proto-create {:hello (fn:> [v] (. v world)), :world "hello"}))
-  (var a {})
-  (k/proto-set a mt nil)
-  (. a (hello)))
- =>
- "hello")
-
-^{:refer xt.lang.common-lib/proto-tostring, :added "4.1"}
+^{:refer xt.lang.common-lib/proto-tostring, :added "4.1", :lang-exceptions {:python {:skip true}}}
 (fact
  "compiles the runtime tostring helper"
  (!.dt (var _ (fn [obj] (k/proto-tostring obj))) true)
