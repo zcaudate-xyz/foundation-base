@@ -359,8 +359,8 @@
 
   (!.js
    (var out (list/list-to-array (p/read-var-quote (rdr/create "hello"))))
-   [(. (xt/x:first out) _name)
-    (. (xt/x:second out) _name)])
+    [(. (xt/x:first out) _name)
+     (. (xt/x:second out) _name)])
   => ["var" "hello"])
 
 ^{:refer xt.runtime.parser/read-discard :added "4.1"}
@@ -391,7 +391,7 @@
    (var out (p/read-dispatch (rdr/create "_hello world")))
    [[(. (xt/x:first quoted) _name)
      (. (xt/x:second quoted) _name)]
-    (. out _name)])
+     (. out _name)])
   => [["var" "hello"] "world"])
 
 (fact "rejects unsupported dispatch macros"
@@ -459,16 +459,16 @@
    (var var-out (list/list-to-array (p/read (rdr/create "#'hello"))))
    (var discard-out (p/read (rdr/create "#_hello world")))
    [[(. (xt/x:first syntax-out) _name)
-     (. (xt/x:second syntax-out) _name)]
-    [(. (xt/x:first deref-out) _name)
-      (. (xt/x:second deref-out) _name)]
+      (. (xt/x:second syntax-out) _name)]
+     [(. (xt/x:first deref-out) _name)
+       (. (xt/x:second deref-out) _name)]
     [(. (xt/x:first unquote-out) _name)
      (. (xt/x:second unquote-out) _name)]
-    [(. (xt/x:first splice-out) _name)
-     (. (xt/x:second splice-out) _name)]
-    [(. (xt/x:first var-out) _name)
-     (. (xt/x:second var-out) _name)]
-    (. discard-out _name)])
+     [(. (xt/x:first splice-out) _name)
+      (. (xt/x:second splice-out) _name)]
+     [(. (xt/x:first var-out) _name)
+      (. (xt/x:second var-out) _name)]
+     (. discard-out _name)])
   => [["syntax-quote" "hello"]
       ["deref" "hello"]
       ["unquote" "hello"]
