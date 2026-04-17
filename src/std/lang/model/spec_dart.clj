@@ -67,9 +67,7 @@
   {:added "4.0"}
   [[_ [e it] & body]]
   (let [it-sym (gensym "iter_")]
-    (template/$ (do (var ~it-sym (if (x:iter-native? ~it)
-                                   ~it
-                                   (x:iter-from ~it)))
+    (template/$ (do (var ~it-sym ~it)
                     (while (. ~it-sym (moveNext))
                       (var ~e (. ~it-sym current))
                       ~@body)))))
@@ -223,8 +221,8 @@
                                  :args {:sep ", "}}
                      :invoke    {:reversed true :hint ""}
                      :block     {:start " {" :end "}"}}
-         :block   {:for {:parameter {:sep ";"}}
-                   :defgen {:raw "sync*"}}
+         :block   {:for {:parameter {:sep ";"}}}
+         :function {:defgen {:body {:start " sync* {" :end "}"}}}
          :define  {:def {:raw "var"}}
          :token   {:symbol {:replace {\- "_"}}
                    :nil {:as "null"}}

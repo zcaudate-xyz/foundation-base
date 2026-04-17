@@ -60,24 +60,24 @@
   {:added "4.0"}
   ([it f init]
    (var out init)
-   (xt/for:iter [e it]
-             (:= out (f out e)))
+   (xt/for:iter [e (-/iter it)]
+              (:= out (f out e)))
    (return out)))
 
 (defn.xt nil<
   "consumes an iterator, returns nil"
   {:added "4.0"}
   [it]
-  (xt/for:iter [e it])
-  (return nil))
+   (xt/for:iter [e (-/iter it)])
+   (return nil))
 
 (defn.xt arr<
   "converts an array to iterator"
   {:added "4.0"}
   [it]
   (var out [])
-  (xt/for:iter [e it]
-    (xt/x:arr-push out e))
+   (xt/for:iter [e (-/iter it)]
+     (xt/x:arr-push out e))
   (return out))
 
 (defn.xt obj<
@@ -85,10 +85,10 @@
   {:added "4.0"}
   [it]
   (var out {})
-  (xt/for:iter [e it]
-    (xt/x:set-key out
-                  (xt/x:first e)
-                  (xt/x:second e)))
+   (xt/for:iter [e (-/iter it)]
+     (xt/x:set-key out
+                   (xt/x:first e)
+                   (xt/x:second e)))
   (return out))
 
 ;;
@@ -201,7 +201,7 @@
   "concats seqs into iterator"
   {:added "4.0"}
   ([seq]
-   (xt/for:iter [e (-/mapcat (fn:> [x] x) seq)]
+   (xt/for:iter [e (-/iter (-/mapcat (fn:> [x] x) seq))]
      (yield e))))
 
 (defgen.xt filter
@@ -218,7 +218,8 @@
   ([f seq]
    (xt/for:iter [e (-/iter seq)]
      (var v (f e))
-     (if v (yield v)))))
+     (if (xt/x:not-nil? v)
+       (yield v)))))
 
 (defgen.xt partition
   "partition seq into n items"
