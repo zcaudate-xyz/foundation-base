@@ -47,14 +47,13 @@
   (var list {"::" "list"
              :_head head
              :_rest rest})
-  (xt/x:proto-set list prototype nil)
-  (return list))
+  (return (spec/runtime-attach list prototype)))
 
 (defn.xt list-push
   "pushs onto the front of the list"
   {:added "4.0"}
   [list x]
-  (return (-/list-new x list (xt/x:proto-get list nil))))
+  (return (-/list-new x list (spec/runtime-protocol list))))
 
 (defn.xt list-pop
   "pops an element from front of list"
@@ -66,7 +65,7 @@
   "gets the empty list"
   {:added "4.0"}
   [list]
-  (return (-/list-new -/EMPTY_MARKER nil (xt/x:proto-get list nil))))
+  (return (-/list-new -/EMPTY_MARKER nil (spec/runtime-protocol list))))
 
 (def.xt LIST_SPEC
   [[spec/IColl   {:_start_string  "("
@@ -103,8 +102,7 @@
              :_head head})
   (when rest
     (xt/x:set-key list "_rest" rest))
-  (xt/x:proto-set list -/LIST_PROTOTYPE nil)
-  (return list))
+  (return (spec/runtime-attach list -/LIST_PROTOTYPE)))
 
 (def.xt EMPTY_LIST
   (-/list-create -/EMPTY_MARKER nil))

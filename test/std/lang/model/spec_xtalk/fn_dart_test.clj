@@ -39,7 +39,7 @@
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-random :added "4.1"}
 (fact "generates random number"
   (l/emit-as :dart [(dart-tf-x-random '[_])])
-  => #"Random.*nextDouble")
+  => #"math\.Random.*nextDouble")
 
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-type-native :added "4.1"}
 (fact "gets runtime type"
@@ -54,17 +54,17 @@
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-m-sin :added "4.1"}
 (fact "sine"
   (l/emit-as :dart [(dart-tf-x-m-sin '[_ x])])
-  => #"sin")
+  => #"math\.sin")
 
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-m-sqrt :added "4.1"}
 (fact "square root"
   (l/emit-as :dart [(dart-tf-x-m-sqrt '[_ x])])
-  => #"sqrt")
+  => #"math\.sqrt")
 
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-m-max :added "4.1"}
 (fact "maximum"
   (l/emit-as :dart [(dart-tf-x-m-max '[_ a b])])
-  => #"max")
+  => #"math\.max")
 
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-m-mod :added "4.1"}
 (fact "modulo"
@@ -75,6 +75,21 @@
 (fact "power"
   (l/emit-as :dart [(dart-tf-x-m-pow '[_ a b])])
   => #"math\.pow")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-arr-pop-first :added "4.1"}
+(fact "pops first item from array"
+  (emit-dart (dart-tf-x-arr-pop-first '[_ arr]))
+  => #"removeAt\(0\)")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-del-key :added "4.1"}
+(fact "deletes key from map by key"
+  (emit-dart (dart-tf-x-del-key '[_ obj key]))
+  => #"remove\(key\)")
+
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-lu-create :added "4.1"}
+(fact "creates a lookup map literal"
+  (emit-dart (dart-tf-x-lu-create '[_]))
+  => #"\{\}")
 
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-is-string? :added "4.1"}
 (fact "checks if string"
@@ -176,47 +191,47 @@
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-m-cos :added "4.1"}
 (fact "cosine"
   (emit-dart (dart-tf-x-m-cos '[_ x]))
-  => #"cos")
+  => #"math\.cos")
 
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-m-tan :added "4.1"}
 (fact "tangent"
   (emit-dart (dart-tf-x-m-tan '[_ x]))
-  => #"tan")
+  => #"math\.tan")
 
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-m-asin :added "4.1"}
 (fact "arc sine"
   (emit-dart (dart-tf-x-m-asin '[_ x]))
-  => #"asin")
+  => #"math\.asin")
 
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-m-acos :added "4.1"}
 (fact "arc cosine"
   (emit-dart (dart-tf-x-m-acos '[_ x]))
-  => #"acos")
+  => #"math\.acos")
 
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-m-atan :added "4.1"}
 (fact "arc tangent"
   (emit-dart (dart-tf-x-m-atan '[_ x]))
-  => #"atan")
+  => #"math\.atan")
 
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-m-exp :added "4.1"}
 (fact "exponential"
   (emit-dart (dart-tf-x-m-exp '[_ x]))
-  => #"exp")
+  => #"math\.exp")
 
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-m-loge :added "4.1"}
 (fact "natural logarithm"
   (emit-dart (dart-tf-x-m-loge '[_ x]))
-  => #"log")
+  => #"math\.log")
 
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-m-log10 :added "4.1"}
 (fact "base-10 logarithm"
   (emit-dart (dart-tf-x-m-log10 '[_ x]))
-  => #"log10")
+  => #"math\.log10")
 
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-m-min :added "4.1"}
 (fact "minimum"
   (emit-dart (dart-tf-x-m-min '[_ a b]))
-  => #"min")
+  => #"math\.min")
 
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-m-quot :added "4.1"}
 (fact "integer quotient"

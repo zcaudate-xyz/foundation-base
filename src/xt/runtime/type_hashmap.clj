@@ -56,8 +56,7 @@
   (var hashmap {"::" "hashmap"
                 :_root root
                 :_size size})
-  (xt/x:proto-set hashmap protocol nil)
-  (return hashmap))
+  (return (spec/runtime-attach hashmap protocol)))
 
 (defn.xt hashmap-empty
   "creates an empty hashmap from the current hashmap"
@@ -65,7 +64,7 @@
   [hashmap]
   (return (-/hashmap-new node/EMPTY_HASHMAP_NODE
                          0
-                         (xt/x:proto-get hashmap nil))))
+                         (spec/runtime-protocol hashmap))))
 
 (defn.xt hashmap-is-editable
   "checks if hashmap is editable"
@@ -81,7 +80,7 @@
     (return hashmap)
     (return (-/hashmap-new (node/node-editable-root (. hashmap _root))
                            (. hashmap _size)
-                           (xt/x:proto-get hashmap nil)))))
+                           (spec/runtime-protocol hashmap)))))
 
 (defn.xt hashmap-to-persistent!
   "creates a persistent hashmap"
@@ -90,7 +89,7 @@
   (if (-/hashmap-is-editable hashmap)
     (return (-/hashmap-new (node/ensure-persistent (. hashmap _root))
                            (. hashmap _size)
-                           (xt/x:proto-get hashmap nil)))
+                           (spec/runtime-protocol hashmap)))
     (return hashmap)))
 
 (defn.xt hashmap-find-key
@@ -137,7 +136,7 @@
   "associates a key/value pair into a persistent hashmap"
   {:added "4.1"}
   [hashmap key val]
-  (var protocol (xt/x:proto-get hashmap nil))
+  (var protocol (spec/runtime-protocol hashmap))
   (var result (node/node-assoc (. hashmap _root)
                                nil
                                0
@@ -172,7 +171,7 @@
   "dissociates a key from a persistent hashmap"
   {:added "4.1"}
   [hashmap key]
-  (var protocol (xt/x:proto-get hashmap nil))
+  (var protocol (spec/runtime-protocol hashmap))
   (var result (node/node-dissoc (. hashmap _root)
                                 nil
                                 0

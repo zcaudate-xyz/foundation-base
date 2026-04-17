@@ -26,11 +26,12 @@
   "checks object is an iter"
   {:added "4.0"}
   [x]
-  (return (or (xt/x:iter-native? x)
-              (and (xt/x:is-object? x)
-                   (xt/x:has-key? x
-                                  "::"
-                                  "iterator")))))
+  (return (and (xt/x:not-nil? x)
+               (or (xt/x:iter-native? x)
+                   (and (xt/x:is-object? x)
+                        (xt/x:has-key? x
+                                       "::"
+                                       "iterator"))))))
 
 (defn.xt iter
   "converts to an iterator"

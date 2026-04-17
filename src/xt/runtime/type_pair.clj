@@ -16,8 +16,7 @@
   (var pair {"::" "pair"
              :_key key
              :_val val})
-  (xt/x:proto-set pair protocol nil)
-  (return pair))
+  (return (spec/runtime-attach pair protocol)))
 
 (def.xt PAIR_SPEC
    [[spec/IColl   {:_start_string  "["

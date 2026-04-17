@@ -244,7 +244,7 @@
   "gets the intersection of two arrays"
   {:added "4.0"}
   [arr other]
-  (var lu  (-/arr-lookup arr) :inline)
+  (var lu  (-/arr-lookup arr))
   (var out [])
   (xt/for:array [e other]
     (if (xt/x:has-key? lu e)
@@ -255,7 +255,7 @@
   "gets the difference of two arrays"
   {:added "4.0"}
   [arr other]
-  (var lu  (-/arr-lookup arr) :inline)
+  (var lu  (-/arr-lookup arr))
   (var out [])
   (xt/for:array [e other]
     (if (not (xt/x:has-key? lu e))
@@ -564,7 +564,7 @@
   "sets item in object"
   {:added "4.1"}
   [obj arr v]
-  (when (== 0 (xt/x:len (or arr [])))
+  (when (== 0 (xt/x:len (:? (xt/x:nil? arr) [] arr)))
     (return obj))
 
   ;; If the current branch does not exist yet, build the remaining path.
@@ -699,19 +699,19 @@
   "switch for nested check"
   {:added "4.1"}
   [src dst eq-obj eq-arr cache]
+  (when (xt/x:nil? cache)
+    (:= cache (xt/x:lu-create)))
   (cond (and (xt/x:is-object? src) (xt/x:is-object? dst))
-        (if (and cache
-                 (xt/x:lu-get cache src)
-                 (xt/x:lu-get cache dst))
+        (if (and (xt/x:not-nil? (xt/x:lu-get cache src))
+                 (xt/x:not-nil? (xt/x:lu-get cache dst)))
           (return true)
-          (return (eq-obj src dst eq-obj eq-arr (or cache (xt/x:lu-create)))))
+          (return (eq-obj src dst eq-obj eq-arr cache)))
         
         (and (xt/x:is-array? src) (xt/x:is-array? dst))
-        (if (and cache
-                 (xt/x:lu-get cache src)
-                 (xt/x:lu-get cache dst))
+        (if (and (xt/x:not-nil? (xt/x:lu-get cache src))
+                 (xt/x:not-nil? (xt/x:lu-get cache dst)))
           (return true)
-          (return (eq-arr src dst eq-obj eq-arr (or cache (xt/x:lu-create)))))
+          (return (eq-arr src dst eq-obj eq-arr cache)))
         
         :else
         (return (== src dst))))
@@ -1046,8 +1046,8 @@
   "performs a merge on two sorted arrays"
   {:added "4.0"}
   [arr brr comp-fn]
-  (:= arr (or arr []))
-  (:= brr (or brr []))
+  (:= arr (:? (xt/x:nil? arr) [] arr))
+  (:= brr (:? (xt/x:nil? brr) [] brr))
   (var alen (xt/x:len arr))
   (var blen (xt/x:len brr))
   (var i 0)

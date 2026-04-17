@@ -55,8 +55,7 @@
   (var syntax {"::" "syntax"
                :_value value
                :_metadata metadata})
-  (xt/x:proto-set syntax -/SYNTAX_PROTOTYPE nil)
-  (return syntax))
+  (return (spec/runtime-attach syntax -/SYNTAX_PROTOTYPE)))
 
 (defn.xt get-metadata
   "gets metadata"

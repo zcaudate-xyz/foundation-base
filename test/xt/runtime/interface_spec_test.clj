@@ -101,9 +101,39 @@
         "to_iter" "to_array" "empty" "size"
         "assoc" "dissoc" "keys" "vals" "lookup" "find"
         "seq" "first" "rest" "next"]
-       ["is_mutable" "to_mutable" "is_persistent" "to_persistent"
-        "assoc_mutable" "dissoc_mutable"
-        "push_mutable" "pop_mutable"]])
+        ["is_mutable" "to_mutable" "is_persistent" "to_persistent"
+         "assoc_mutable" "dissoc_mutable"
+         "push_mutable" "pop_mutable"]])
+
+ ^{:refer xt.runtime.interface-spec/runtime-attach :added "4.1"}
+ (fact "attaches runtime dispatch entries directly to managed objects"
+   ^:hidden
+
+   (!.js
+   (var protocol (spec/proto-create
+                   {"extra" 4
+                    "read_value" (fn [self]
+                                   (return (. self value)))}))
+    (var obj (spec/runtime-attach {"::" "demo"
+                                   :value 10}
+                                  protocol))
+    [(. obj extra)
+     (. obj (read-value))
+     (== protocol (spec/runtime-protocol obj))])
+   => [4 10 true]
+
+   (!.lua
+   (var protocol (spec/proto-create
+                   {"extra" 4
+                    "read_value" (fn [self]
+                                   (return (. self value)))}))
+    (var obj (spec/runtime-attach {"::" "demo"
+                                   :value 10}
+                                  protocol))
+    [(. obj extra)
+     (. obj (read-value))
+     (== protocol (spec/runtime-protocol obj))])
+   => [4 10 true])
 
 
 ^{:refer xt.runtime.interface-spec/proto-create :added "4.1"}

@@ -16,6 +16,11 @@
   (normalize-dart-source "encode_bool(b) {\n  return \"TRUE\";\n}")
   => "encode_bool(b) {\n  return \"TRUE\";\n}")
 
+^{:refer rt.basic.impl.process-dart/ensure-dart-imports :added "4.1"}
+(fact "hoists required Dart imports for standalone scripts"
+  (ensure-dart-imports "void main() {\n  print(math.max(1, 2));\n  print(jsonEncode({\"a\": 1}));\n}")
+  => "import 'dart:convert';\nimport 'dart:math' as math;\n\nvoid main() {\n  print(math.max(1, 2));\n  print(jsonEncode({\"a\": 1}));\n}")
+
 
 ^{:refer rt.basic.impl.process-dart/sh-exec-dart :added "4.1"}
 (fact "executes dart twostep pipeline"

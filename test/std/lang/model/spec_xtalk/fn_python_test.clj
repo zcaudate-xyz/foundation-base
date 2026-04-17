@@ -58,6 +58,26 @@
   (l/emit-as :python [(python-tf-x-type-native '[_ obj])])
   => #"isinstance")
 
+^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-x-proto-create :added "4.1"}
+(fact "proto create"
+  (l/emit-as :python [(python-tf-x-proto-create '[_ {:a 1}])])
+  => #"\{\"a\": 1\}")
+
+^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-x-proto-get :added "4.1"}
+(fact "proto get"
+  (l/emit-as :python [(python-tf-x-proto-get '[_ obj nil])])
+  => #"get\(\"__proto__\"\)")
+
+^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-x-proto-set :added "4.1"}
+(fact "proto set"
+  (l/emit-as :python [(python-tf-x-proto-set '[_ obj prototype nil])])
+  => #"MethodType")
+
+^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-x-proto-tostring :added "4.1"}
+(fact "proto tostring"
+  (l/emit-as :python [(python-tf-x-proto-tostring '[_ obj])])
+  => #"__str__")
+
 ^{:refer std.lang.model.spec-xtalk.fn-python/python-tf-x-m-abs :added "4.0"}
 (fact "math abs"
   (l/emit-as :python [(python-tf-x-m-abs '[_ 1])])

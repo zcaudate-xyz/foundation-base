@@ -191,8 +191,41 @@
    :x-future-finally   {:macro #'python-tf-x-future-finally  :emit :macro}
    :x-future-cancel    {:macro #'python-tf-x-future-cancel   :emit :macro}
    :x-future-status    {:macro #'python-tf-x-future-status   :emit :macro}
-   :x-future-await     {:macro #'python-tf-x-future-await    :emit :macro}
-   :x-future-from-async {:macro #'python-tf-x-future-from-async :emit :macro}})
+    :x-future-await     {:macro #'python-tf-x-future-await    :emit :macro}
+    :x-future-from-async {:macro #'python-tf-x-future-from-async :emit :macro}})
+
+;;
+;; PROTO
+;;
+
+(defn python-tf-x-proto-create
+  [[_ m]]
+  m)
+
+(defn python-tf-x-proto-get
+  [[_ obj _]]
+  (template/$ (. ~obj (get "__proto__"))))
+
+(defn python-tf-x-proto-set
+  [[_ obj prototype _]]
+  (template/$
+   (do (:= (. ~obj ["__proto__"]) ~prototype)
+       (for:object [[k f] ~prototype]
+         (if (callable f)
+           (:= (. ~obj [k]) (. (__import__ "types") (MethodType f ~obj)))
+           (:= (. ~obj [k]) f)))
+       (return ~obj))))
+
+(defn python-tf-x-proto-tostring
+  [[_ _]]
+  '"__str__")
+
+(def +python-proto+
+  {:x-this           {:emit :unit :default 'self}
+   :x-proto-create   {:macro #'python-tf-x-proto-create   :emit :macro}
+   :x-proto-get      {:macro #'python-tf-x-proto-get      :emit :macro}
+   :x-proto-set      {:macro #'python-tf-x-proto-set      :emit :macro}
+   :x-proto-tostring {:macro #'python-tf-x-proto-tostring :emit :macro}})
 
 
 ;;
@@ -720,6 +753,7 @@
 
 (def +python+
   (merge +python-core+
+         +python-proto+
          +python-global+
          +python-custom+
          +python-math+

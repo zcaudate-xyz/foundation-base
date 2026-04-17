@@ -63,8 +63,7 @@
   (var sym {"::" "symbol"
             :_ns   ns
             :_name name})
-  (xt/x:proto-set sym -/SYMBOL_PROTOTYPE nil)
-  (return sym))
+  (return (spec/runtime-attach sym -/SYMBOL_PROTOTYPE)))
 
 (defn.xt symbol
   "creates the symbol or pulls it from cache"

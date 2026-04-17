@@ -92,6 +92,7 @@
  =>
  [true false])
 
+^{:refer xt.lang.common-lib/proto-create, :added "4.1"}
 ^{:refer xt.lang.common-lib/noop, :added "4.1"}
 (fact "returns nil" (!.py (k/noop)) => nil)
 

@@ -40,6 +40,47 @@
   (xt/x:set-key spec-map "__index" spec-map)
   (return spec-map))
 
+(defn.js runtime-attach
+  "attaches runtime dispatch using native JS prototype linkage"
+  {:added "4.1"}
+  [obj protocol]
+  (when protocol
+    (Object.setPrototypeOf obj protocol))
+  (return obj))
+
+(defn.js runtime-protocol
+  "gets runtime dispatch from a managed JS object"
+  {:added "4.1"}
+  [obj]
+  (return (Object.getPrototypeOf obj)))
+
+(defn.lua runtime-attach
+  "attaches runtime dispatch using native Lua metatables"
+  {:added "4.1"}
+  [obj protocol]
+  (when protocol
+    (setmetatable obj protocol))
+  (return obj))
+
+(defn.lua runtime-protocol
+  "gets runtime dispatch from a managed Lua object"
+  {:added "4.1"}
+  [obj]
+  (return (getmetatable obj)))
+
+(defn.py runtime-attach
+  "attaches runtime dispatch for Python-managed objects"
+  {:added "4.1"}
+  [obj protocol]
+  (xt/x:set-key obj "_rt_protocol" protocol)
+  (return obj))
+
+(defn.py runtime-protocol
+  "gets runtime dispatch from a managed Python object"
+  {:added "4.1"}
+  [obj]
+  (return (xt/x:get-key obj "_rt_protocol")))
+
 (l/script :xtalk
   {:require [[xt.lang.common-spec :as xt]
              [xt.lang.common-iter :as it]
@@ -250,3 +291,9 @@
 
 (defabstract.xt proto-create
   [spec-map])
+
+(defabstract.xt runtime-attach
+  [obj protocol])
+
+(defabstract.xt runtime-protocol
+  [obj])

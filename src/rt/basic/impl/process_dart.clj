@@ -103,18 +103,22 @@
   [source]
   (let [convert-needed? (or (str/includes? source "jsonEncode(")
                             (str/includes? source "jsonDecode("))
+        math-needed?    (str/includes? source "math.")
         lines           (str/split-lines source)
         [import-lines body-lines]
         (reduce (fn [[imports body] line]
                   (if (re-matches #"\s*import\s+'[^']+'(?:\s+as\s+\w+)?;\s*" line)
                     [(conj imports (str/trim line)) body]
                     [imports (conj body line)]))
-                [[] []]
-                lines)
+                 [[] []]
+                 lines)
         imports         (cond-> (vec (distinct import-lines))
                           (and convert-needed?
                                (not-any? #(= "import 'dart:convert';" %) import-lines))
-                          (conj "import 'dart:convert';"))]
+                          (conj "import 'dart:convert';")
+                          (and math-needed?
+                               (not-any? #(= "import 'dart:math' as math;" %) import-lines))
+                          (conj "import 'dart:math' as math;"))]
     (str/join "\n"
               (concat imports
                       (when (and (seq imports)

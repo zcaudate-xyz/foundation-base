@@ -183,8 +183,7 @@
   => [3 2])
 
 ^{:refer xt.lang.common-data/arr-tail
-  :added "4.1"
-  :lang-exceptions {:dart {:skip true}}}
+  :added "4.1"}
 (fact "gets the tail of the array"
   
   (!.lua (xtd/arr-tail [1 2 3 4] 2))
@@ -199,16 +198,14 @@
   => [[0 1 2 3 4] [2 3 4 5] [2 4 6]])
 
 ^{:refer xt.lang.common-data/arr-intersection
-  :added "4.1"
-  :lang-exceptions {:dart {:skip true}}}
+  :added "4.1"}
 (fact "gets the intersection of two arrays"
   
   (!.lua (xtd/arr-intersection [1 2 3] [2 3 4]))
   => [2 3])
 
 ^{:refer xt.lang.common-data/arr-difference
-  :added "4.1"
-  :lang-exceptions {:dart {:skip true}}}
+  :added "4.1"}
 (fact "gets the difference of two arrays"
   
   (!.lua (xtd/arr-difference [1 2] [2 3 4]))
@@ -221,16 +218,14 @@
   => #{1 2 3})
 
 ^{:refer xt.lang.common-data/arr-shuffle
-  :added "4.1"
-  :lang-exceptions {:dart {:skip true}}}
+  :added "4.1"}
 (fact "shuffles the array"
   
   (set (!.lua (xtd/arr-shuffle [1 2 3])))
   => #{1 2 3})
 
 ^{:refer xt.lang.common-data/arr-pushl
-  :added "4.1"
-  :lang-exceptions {:dart {:skip true}}}
+  :added "4.1"}
 (fact "pushs an element into array"
   
   (!.lua (xtd/arr-pushl [1 2 3] 4 3))
@@ -249,16 +244,14 @@
   => [1 0 2 0 3])
 
 ^{:refer xt.lang.common-data/arr-random
-  :added "4.1"
-  :lang-exceptions {:dart {:skip true}}}
+  :added "4.1"}
 (fact "gets a random element from array"
   
   (!.lua (xtd/arr-random [1]))
   => 1)
 
 ^{:refer xt.lang.common-data/arr-sample
-  :added "4.1"
-  :lang-exceptions {:dart {:skip true}}}
+  :added "4.1"}
 (fact "samples array according to probability"
   
   (!.lua (xtd/arr-sample ["a" "b" "c"] [0 1 0]))
@@ -307,8 +300,7 @@
   => {"a" 4, "b" 2, "c" 4})
 
 ^{:refer xt.lang.common-data/obj-del
-  :added "4.1"
-  :lang-exceptions {:dart {:skip true}}}
+  :added "4.1"}
 (fact "deletes multiple keys"
   
   (!.lua (xtd/obj-del {:a 1, :b 2, :c 3} ["a" "c"]))
@@ -316,8 +308,7 @@
 
 ^{:refer xt.lang.common-data/obj-del-all
   :added "4.1"
-  :lang-exceptions {:python {:skip true}
-                    :dart   {:skip true}}}
+  :lang-exceptions {:python {:skip true}}}
 (fact "obj del all"
   
   (!.lua
@@ -399,7 +390,7 @@
 
 ^{:refer xt.lang.common-data/set-in
   :added "4.1"
-  :lang-exceptions {:dart {:skip true}}}
+  }
 (fact "sets item in object"
 
   [(!.lua
@@ -466,7 +457,7 @@
 
 ^{:refer xt.lang.common-data/eq-nested-loop
   :added "4.1"
-  :lang-exceptions {:dart {:skip true}}}
+  }
 (fact "switch for nested check"
   
   (!.lua
@@ -476,7 +467,7 @@
 
 ^{:refer xt.lang.common-data/eq-nested-obj
   :added "4.1"
-  :lang-exceptions {:dart {:skip true}}}
+  }
 (fact "checks object equality"
   
   (!.lua
@@ -486,7 +477,7 @@
 
 ^{:refer xt.lang.common-data/eq-nested-arr
   :added "4.1"
-  :lang-exceptions {:dart {:skip true}}}
+  }
 (fact "checks array equality"
   
   (!.lua
@@ -496,7 +487,7 @@
 
 ^{:refer xt.lang.common-data/eq-nested
   :added "4.1"
-  :lang-exceptions {:dart {:skip true}}}
+  }
 (fact "checks for nested equality"
   
   (!.lua
@@ -508,8 +499,7 @@
 
 ^{:refer xt.lang.common-data/eq-shallow
   :added "4.1"
-  :lang-exceptions {:python {:skip true}
-                    :dart   {:skip true}}}
+  :lang-exceptions {:python {:skip true}}}
 (fact "checks for shallow equality"
   
   (!.lua
@@ -535,7 +525,7 @@
 
 ^{:refer xt.lang.common-data/tree-diff
   :added "4.1"
-  :lang-exceptions {:dart {:skip true}}}
+  }
 (fact "diffs only keys within map"
   
   (!.lua (xtd/tree-diff {:a 1, :b 2} {:a 1, :c 2}))
@@ -543,7 +533,7 @@
 
 ^{:refer xt.lang.common-data/tree-diff-nested
   :added "4.1"
-  :lang-exceptions {:dart {:skip true}}}
+  }
 (fact "diffs nested keys within map"
   
   (!.lua
@@ -709,7 +699,7 @@
 
 ^{:refer xt.lang.common-data/arr-sorted-merge
   :added "4.1"
-  :lang-exceptions {:dart {:skip true}}}
+  }
 (fact "performs a merge on two sorted arrays"
   
   (!.lua
@@ -764,7 +754,7 @@
 
 ^{:refer xt.lang.common-data/clone-nested-loop
   :added "4.1"
-  :lang-exceptions {:dart {:skip true}}}
+  }
 (fact "clone nested objects loop"
   
   (!.lua
@@ -776,7 +766,7 @@
 
 ^{:refer xt.lang.common-data/clone-nested
   :added "4.1"
-  :lang-exceptions {:dart {:skip true}}}
+  }
 (fact "cloning nested xects"
   
   (!.lua

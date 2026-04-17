@@ -33,15 +33,14 @@
   (var hashset {"::" "hashset"
                 :_map m
                 :_size (. m _size)})
-  (xt/x:proto-set hashset protocol nil)
-  (return hashset))
+  (return (spec/runtime-attach hashset protocol)))
 
 (defn.xt hashset-empty
   "creates an empty hashset from current"
   {:added "4.1"}
   [hashset]
   (return (-/hashset-new hashmap/EMPTY_HASHMAP
-                         (xt/x:proto-get hashset nil))))
+                         (spec/runtime-protocol hashset))))
 
 (defn.xt hashset-is-editable
   "checks if hashset is editable"
@@ -56,7 +55,7 @@
   (if (-/hashset-is-editable hashset)
     (return hashset)
     (return (-/hashset-new (hashmap/hashmap-to-mutable! (. hashset _map))
-                           (xt/x:proto-get hashset nil)))))
+                           (spec/runtime-protocol hashset)))))
 
 (defn.xt hashset-to-persistent!
   "creates a persistent hashset"
@@ -64,7 +63,7 @@
   [hashset]
   (if (-/hashset-is-editable hashset)
     (return (-/hashset-new (hashmap/hashmap-to-persistent! (. hashset _map))
-                           (xt/x:proto-get hashset nil)))
+                           (spec/runtime-protocol hashset)))
     (return hashset)))
 
 (defn.xt hashset-find
@@ -90,7 +89,7 @@
   {:added "4.1"}
   [hashset value]
   (return (-/hashset-new (hashmap/hashmap-assoc (. hashset _map) value true)
-                         (xt/x:proto-get hashset nil))))
+                         (spec/runtime-protocol hashset))))
 
 (defn.xt hashset-push!
   "adds a value to the mutable hashset"
@@ -107,7 +106,7 @@
   {:added "4.1"}
   [hashset value]
   (return (-/hashset-new (hashmap/hashmap-dissoc (. hashset _map) value)
-                         (xt/x:proto-get hashset nil))))
+                         (spec/runtime-protocol hashset))))
 
 (defn.xt hashset-dissoc!
   "removes a value from the mutable hashset"

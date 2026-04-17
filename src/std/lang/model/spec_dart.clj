@@ -217,9 +217,9 @@
          :define  {:def {:raw "var"}}
          :token   {:symbol {:replace {\- "_"}}
                    :nil {:as "null"}}
-         :data    {:vector {:start "[" :end "]" :space ""}
-                   :map    {:space ""}
-                  :map-entry {:key-fn #'dart-map-key}}})))
+          :data    {:vector {:start "[" :end "]" :space ""}
+                    :map    {:start "<dynamic, dynamic>{" :end "}" :space ""}
+                   :map-entry {:key-fn #'dart-map-key}}})))
 
 (def +grammar+
   (grammar/grammar :dt

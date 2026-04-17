@@ -64,8 +64,7 @@
   (var sym {"::" "keyword"
             :_ns   ns
             :_name name})
-  (xt/x:proto-set sym -/KEYWORD_PROTOTYPE nil)
-  (return sym))
+  (return (spec/runtime-attach sym -/KEYWORD_PROTOTYPE)))
 
 (defn.xt keyword
   "creates the keyword or pulls it from cache"

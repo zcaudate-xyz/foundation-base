@@ -36,7 +36,7 @@
 
 (defn dart-tf-x-random
   [_]
-  (dart-method0 (list 'Random) 'nextDouble))
+  (dart-method0 (list 'math.Random) 'nextDouble))
 
 (defn dart-tf-x-type-native
   [[_ obj]]
@@ -85,6 +85,10 @@
           (list '== check (list '. obj [key])))
     (list '. obj (list 'containsKey key))))
 
+(defn dart-tf-x-del-key
+  [[_ obj key]]
+  (list '. obj (list 'remove key)))
+
 (defn dart-tf-x-shell
   [[_ s opts]]
   (list 'throw '"shell not implemented in Dart"))
@@ -101,30 +105,31 @@
       :x-del      {:macro #'dart-tf-x-del      :emit :macro}
       :x-eval     {:macro #'dart-tf-x-eval     :emit :macro}
       :x-has-key? {:macro #'dart-tf-x-has-key? :emit :macro}
+      :x-del-key  {:macro #'dart-tf-x-del-key  :emit :macro}
       :x-unpack   {:emit :alias :raw '...}
       :x-shell    {:macro #'dart-tf-x-shell    :emit :macro}})
 
 (defn dart-tf-x-m-abs [[_ x]] (dart-method0 x 'abs))
 (defn dart-tf-x-m-ceil [[_ x]] (dart-method0 x 'ceil))
 (defn dart-tf-x-m-floor [[_ x]] (dart-method0 x 'floor))
-(defn dart-tf-x-m-sin [[_ x]] (list 'sin x))
-(defn dart-tf-x-m-cos [[_ x]] (list 'cos x))
-(defn dart-tf-x-m-tan [[_ x]] (list 'tan x))
-(defn dart-tf-x-m-asin [[_ x]] (list 'asin x))
-(defn dart-tf-x-m-acos [[_ x]] (list 'acos x))
-(defn dart-tf-x-m-atan [[_ x]] (list 'atan x))
-(defn dart-tf-x-m-sqrt [[_ x]] (list 'sqrt x))
-(defn dart-tf-x-m-exp [[_ x]] (list 'exp x))
-(defn dart-tf-x-m-loge [[_ x]] (list 'log x))
-(defn dart-tf-x-m-log10 [[_ x]] (list 'log10 x))
-(defn dart-tf-x-m-max [[_ & args]] (apply list 'max args))
-(defn dart-tf-x-m-min [[_ & args]] (apply list 'min args))
+(defn dart-tf-x-m-sin [[_ x]] (list 'math.sin x))
+(defn dart-tf-x-m-cos [[_ x]] (list 'math.cos x))
+(defn dart-tf-x-m-tan [[_ x]] (list 'math.tan x))
+(defn dart-tf-x-m-asin [[_ x]] (list 'math.asin x))
+(defn dart-tf-x-m-acos [[_ x]] (list 'math.acos x))
+(defn dart-tf-x-m-atan [[_ x]] (list 'math.atan x))
+(defn dart-tf-x-m-sqrt [[_ x]] (list 'math.sqrt x))
+(defn dart-tf-x-m-exp [[_ x]] (list 'math.exp x))
+(defn dart-tf-x-m-loge [[_ x]] (list 'math.log x))
+(defn dart-tf-x-m-log10 [[_ x]] (list 'math.log10 x))
+(defn dart-tf-x-m-max [[_ & args]] (apply list 'math.max args))
+(defn dart-tf-x-m-min [[_ & args]] (apply list 'math.min args))
 (defn dart-tf-x-m-mod [[_ a b]] (list (list :- "%") a b))
 (defn dart-tf-x-m-pow [[_ a b]] (list 'math.pow a b))
 (defn dart-tf-x-m-quot [[_ a b]] (list (list :- "~/") a b))
-(defn dart-tf-x-m-cosh [[_ x]] (list 'cosh x))
-(defn dart-tf-x-m-sinh [[_ x]] (list 'sinh x))
-(defn dart-tf-x-m-tanh [[_ x]] (list 'tanh x))
+(defn dart-tf-x-m-cosh [[_ x]] (list 'math.cosh x))
+(defn dart-tf-x-m-sinh [[_ x]] (list 'math.sinh x))
+(defn dart-tf-x-m-tanh [[_ x]] (list 'math.tanh x))
 
 (defn dart-tf-x-to-string [[_ x]]
   (dart-method0 x 'toString))
@@ -206,15 +211,19 @@
      :x-str-trim-right  {:macro #'dart-tf-x-str-trim-right :emit :macro}
      :x-str-format      {:macro #'dart-tf-x-str-format     :emit :macro}})
 
+(defn dart-tf-x-lu-create
+  ([[_]]
+   '{}))
+
 (defn dart-tf-x-lu-get [[_ lu obj]] (list '. lu [obj]))
 (defn dart-tf-x-lu-set [[_ lu obj gid]] (list ':= (list '. lu [obj]) gid))
 (defn dart-tf-x-lu-del [[_ lu obj]] (list '. lu (list 'remove obj)))
 
 (def +dart-lu+
-   {:x-lu-create      {:emit :unit :default '(new Map)}
-    :x-lu-get         {:macro #'dart-tf-x-lu-get :emit :macro}
-    :x-lu-set         {:macro #'dart-tf-x-lu-set :emit :macro}
-    :x-lu-del         {:macro #'dart-tf-x-lu-del :emit :macro}})
+   {:x-lu-create      {:macro #'dart-tf-x-lu-create :emit :macro}
+     :x-lu-get         {:macro #'dart-tf-x-lu-get :emit :macro}
+     :x-lu-set         {:macro #'dart-tf-x-lu-set :emit :macro}
+     :x-lu-del         {:macro #'dart-tf-x-lu-del :emit :macro}})
 
 (def +dart-json+
    {:x-json-encode {:emit :alias :raw 'jsonEncode}
@@ -245,7 +254,7 @@
 
 (defn dart-tf-x-arr-pop [[_ arr]] (dart-method0 arr 'removeLast))
 (defn dart-tf-x-arr-push-first [[_ arr item]] (list '. arr (list 'insert 0 item)))
-(defn dart-tf-x-arr-pop-first [[_ arr]] (list '. arr 'removeAt 0))
+(defn dart-tf-x-arr-pop-first [[_ arr]] (list '. arr (list 'removeAt 0)))
 (defn dart-tf-x-arr-insert [[_ arr idx e]] (list '. arr (list 'insert idx e)))
 (defn dart-tf-x-arr-remove [[_ arr idx]] (list '. arr (list 'removeAt idx)))
 (defn dart-tf-x-arr-sort [[_ arr key-fn comp-fn]] (dart-method0 arr 'sort))

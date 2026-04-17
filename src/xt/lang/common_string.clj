@@ -187,7 +187,7 @@
   (when (or (xt/x:nil? s)
             (== 0 (xt/x:str-len s)))
     (return []))
-  (:= line-len (or line-len 50))
+  (:= line-len (:? (xt/x:nil? line-len) 50 line-len))
   (var total (xt/x:str-len s))
   (var lines (xt/x:m-ceil (/ total line-len)))
   (var out [])
@@ -222,14 +222,14 @@
   {:added "4.0"}
   [tag]
   (var [ns name] (-/sym-pair tag))
-  (var parts (xt/x:str-split (or ns "") "."))
+  (var parts (xt/x:str-split (:? (xt/x:nil? ns) "" ns) "."))
   (var part-count (xt/x:len parts))
   (var desc (:? ns
                 (xt/x:cat (xt/x:get-idx parts (+ part-count
                                                  (xt/x:offset -1)))
                        " ")
                 ""))
-  (var clean-name (xt/x:str-replace (or name "") "_" " "))
+  (var clean-name (xt/x:str-replace (:? (xt/x:nil? name) "" name) "_" " "))
   (:= clean-name  (xt/x:str-replace clean-name "-" " "))
   (:= clean-name  (xt/x:str-replace clean-name (xt/x:str-trim desc) ""))
   (return (xt/x:cat desc clean-name)))

@@ -50,14 +50,13 @@
                :_size size
                :_shift shift
                :_tail tail})
-  (xt/x:proto-set vector protocol nil)
-  (return vector))
+  (return (spec/runtime-attach vector protocol)))
 
 (defn.xt vector-empty
   "creates an empty vector from current"
   {:added "4.0"}
   [vector]
-  (var protocol (xt/x:proto-get vector nil))
+  (var protocol (spec/runtime-protocol vector))
   (return (-/vector-new node/EMPTY_VECTOR_NODE 0 node/BITS [] protocol)))
 
 (defn.xt vector-is-editable
@@ -76,7 +75,7 @@
   "push-lastoins an element to the vector"
   {:added "4.0"}
   [vector x]
-  (var protocol (xt/x:proto-get vector nil))
+  (var protocol (spec/runtime-protocol vector))
   (var #{_root _size _shift _tail} vector)
   (when (< (- _size (node/impl-offset _size))
            node/WIDTH)
@@ -109,7 +108,7 @@
   "pops the last element off vector"
   {:added "4.0"}
   [vector]
-  (var protocol (xt/x:proto-get vector nil))
+  (var protocol (spec/runtime-protocol vector))
   (var #{_root _size _shift _tail} vector)
   (when (== _size 0)
     (return vector))
@@ -222,7 +221,7 @@
   "mutates the vector"
   {:added "4.0"}
   [vector]
-  (var protocol (xt/x:proto-get vector nil))
+  (var protocol (spec/runtime-protocol vector))
   (var #{_root _size _shift _tail} vector)
   (var #{edit-id} _root)
   (cond (xt/x:not-nil? edit-id)
@@ -239,7 +238,7 @@
   "creates persistent vector"
   {:added "4.0"}
   [vector]
-  (var protocol (xt/x:proto-get vector nil))
+  (var protocol (spec/runtime-protocol vector))
   (var #{_root _size _shift _tail} vector)
   (node/ensure-editable _root)
   (var #{children} _root)
