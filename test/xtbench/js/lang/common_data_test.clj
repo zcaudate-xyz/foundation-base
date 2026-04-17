@@ -182,7 +182,12 @@
   (!.js (xtd/arr-rslice [1 2 3 4] 1 3))
   => [3 2])
 
-(fact "gets the tail of the array" (!.js (xtd/arr-tail [1 2 3 4] 2)) => [4 3])
+^{:refer xt.lang.common-data/arr-tail
+  :added "4.1"}
+(fact "gets the tail of the array"
+  
+  (!.js (xtd/arr-tail [1 2 3 4] 2))
+  => [4 3])
 
 ^{:refer xt.lang.common-data/arr-range :added "4.1"}
 (fact "creates a range array"
@@ -192,9 +197,19 @@
           (xtd/arr-range [2 7 2])])
   => [[0 1 2 3 4] [2 3 4 5] [2 4 6]])
 
-(fact "gets the intersection of two arrays" (!.js (xtd/arr-intersection [1 2 3] [2 3 4])) => [2 3])
+^{:refer xt.lang.common-data/arr-intersection
+  :added "4.1"}
+(fact "gets the intersection of two arrays"
+  
+  (!.js (xtd/arr-intersection [1 2 3] [2 3 4]))
+  => [2 3])
 
-(fact "gets the difference of two arrays" (!.js (xtd/arr-difference [1 2] [2 3 4])) => [3 4])
+^{:refer xt.lang.common-data/arr-difference
+  :added "4.1"}
+(fact "gets the difference of two arrays"
+  
+  (!.js (xtd/arr-difference [1 2] [2 3 4]))
+  => [3 4])
 
 ^{:refer xt.lang.common-data/arr-union :added "4.1"}
 (fact "gets the union of two arrays"
@@ -202,9 +217,19 @@
   (set (!.js (xtd/arr-union [1 2] [2 3])))
   => #{1 2 3})
 
-(fact "shuffles the array" (set (!.js (xtd/arr-shuffle [1 2 3]))) => #{1 3 2})
+^{:refer xt.lang.common-data/arr-shuffle
+  :added "4.1"}
+(fact "shuffles the array"
+  
+  (set (!.js (xtd/arr-shuffle [1 2 3])))
+  => #{1 2 3})
 
-(fact "pushs an element into array" (!.js (xtd/arr-pushl [1 2 3] 4 3)) => [2 3 4])
+^{:refer xt.lang.common-data/arr-pushl
+  :added "4.1"}
+(fact "pushs an element into array"
+  
+  (!.js (xtd/arr-pushl [1 2 3] 4 3))
+  => [2 3 4])
 
 ^{:refer xt.lang.common-data/arr-pushr :added "4.1"}
 (fact "pushs an element into array"
@@ -218,9 +243,19 @@
   (!.js (xtd/arr-interpose [1 2 3] 0))
   => [1 0 2 0 3])
 
-(fact "gets a random element from array" (!.js (xtd/arr-random [1])) => 1)
+^{:refer xt.lang.common-data/arr-random
+  :added "4.1"}
+(fact "gets a random element from array"
+  
+  (!.js (xtd/arr-random [1]))
+  => 1)
 
-(fact "samples array according to probability" (!.js (xtd/arr-sample ["a" "b" "c"] [0 1 0])) => "b")
+^{:refer xt.lang.common-data/arr-sample
+  :added "4.1"}
+(fact "samples array according to probability"
+  
+  (!.js (xtd/arr-sample ["a" "b" "c"] [0 1 0]))
+  => "b")
 
 ^{:refer xt.lang.common-data/obj-empty? :added "4.1"}
 (fact "checks that object is empty"
@@ -264,7 +299,12 @@
     (fn [x y] (return (+ x y)))))
   => {"a" 4, "b" 2, "c" 4})
 
-(fact "deletes multiple keys" (!.js (xtd/obj-del {:a 1 :b 2 :c 3} ["a" "c"])) => {"b" 2})
+^{:refer xt.lang.common-data/obj-del
+  :added "4.1"}
+(fact "deletes multiple keys"
+  
+  (!.js (xtd/obj-del {:a 1, :b 2, :c 3} ["a" "c"]))
+  => {"b" 2})
 
 (fact "obj del all" (!.js (var out {:a 1 :b 2}) (xtd/obj-del-all out) out) => {})
 
@@ -339,7 +379,21 @@
         (xtd/get-in {:a {:b {:c 1}}} ["a" "b" "c"])])
   => [{"c" 1} 1])
 
-(fact "sets item in object" [(!.js (var a {:a {:b {:c 1}}}) (xtd/set-in a ["a" "b"] 2) a) (!.js (var a {:a {:b {:c 1}}}) (xtd/set-in a ["a" "d"] 2) a)] => [{"a" {"b" 2}} {"a" {"b" {"c" 1} "d" 2}}])
+^{:refer xt.lang.common-data/set-in
+  :added "4.1"
+  }
+(fact "sets item in object"
+
+  [(!.js
+     (var a {:a {:b {:c 1}}})
+     (xtd/set-in a ["a" "b"] 2)
+     a)
+   (!.js
+     (var a {:a {:b {:c 1}}})
+     (xtd/set-in a ["a" "d"] 2)
+     a)]
+  => [{"a" {"b" 2}}
+      {"a" {"b" {"c" 1}, "d" 2}}])
 
 ^{:refer xt.lang.common-data/obj-intersection :added "4.1"}
 (fact "finds the intersection between map lookups"
@@ -392,21 +446,70 @@
           (xtd/eq-nested-basic 1 2 nil nil nil)])
   => [true false])
 
-(fact "switch for nested check" (!.js [(xtd/eq-nested-loop {:a 1} {:a 1} xtd/eq-nested-obj xtd/eq-nested-arr nil) (xtd/eq-nested-loop {:a 1} {:a 2} xtd/eq-nested-obj xtd/eq-nested-arr nil)]) => [true false])
+^{:refer xt.lang.common-data/eq-nested-loop
+  :added "4.1"
+  }
+(fact "switch for nested check"
+  
+  (!.js
+   [(xtd/eq-nested-loop {:a 1} {:a 1} xtd/eq-nested-obj xtd/eq-nested-arr nil)
+    (xtd/eq-nested-loop {:a 1} {:a 2} xtd/eq-nested-obj xtd/eq-nested-arr nil)])
+  => [true false])
 
-(fact "checks object equality" (!.js [(xtd/eq-nested-obj {:a 1} {:a 1} xtd/eq-nested-obj xtd/eq-nested-arr (xtd/lu-create)) (xtd/eq-nested-obj {:a 1} {:a 2} xtd/eq-nested-obj xtd/eq-nested-arr (xtd/lu-create))]) => [true false])
+^{:refer xt.lang.common-data/eq-nested-obj
+  :added "4.1"
+  }
+(fact "checks object equality"
+  
+  (!.js
+   [(xtd/eq-nested-obj {:a 1} {:a 1} xtd/eq-nested-obj xtd/eq-nested-arr (xtd/lu-create))
+    (xtd/eq-nested-obj {:a 1} {:a 2} xtd/eq-nested-obj xtd/eq-nested-arr (xtd/lu-create))])
+  => [true false])
 
-(fact "checks array equality" (!.js [(xtd/eq-nested-arr [1 2] [1 2] xtd/eq-nested-obj xtd/eq-nested-arr (xtd/lu-create)) (xtd/eq-nested-arr [1 2] [2 1] xtd/eq-nested-obj xtd/eq-nested-arr (xtd/lu-create))]) => [true false])
+^{:refer xt.lang.common-data/eq-nested-arr
+  :added "4.1"
+  }
+(fact "checks array equality"
+  
+  (!.js
+   [(xtd/eq-nested-arr [1 2] [1 2] xtd/eq-nested-obj xtd/eq-nested-arr (xtd/lu-create))
+    (xtd/eq-nested-arr [1 2] [2 1] xtd/eq-nested-obj xtd/eq-nested-arr (xtd/lu-create))])
+  => [true false])
 
-(fact "checks for nested equality" (!.js [(xtd/eq-nested {:a {:b {:c 1}}} {:a {:b {:c 1}}}) (xtd/eq-nested {:a {:b {:c 1}}} {:a {:b {:c 2}}}) (xtd/eq-nested [1] [1]) (xtd/eq-nested [1] [2])]) => [true false true false])
+^{:refer xt.lang.common-data/eq-nested
+  :added "4.1"
+  }
+(fact "checks for nested equality"
+  
+  (!.js
+   [(xtd/eq-nested {:a {:b {:c 1}}} {:a {:b {:c 1}}})
+    (xtd/eq-nested {:a {:b {:c 1}}} {:a {:b {:c 2}}})
+    (xtd/eq-nested [1] [1])
+    (xtd/eq-nested [1] [2])])
+  => [true false true false])
 
 (fact "checks for shallow equality" (!.js (var arr [1]) [(xtd/eq-shallow arr arr) (xtd/eq-shallow [1] [1])]) => [true false])
 
 (fact "walks over object" (!.js (xtd/tree-walk {:a 1 :b [2 {:c 3}]} (fn [x] (return x)) (fn [x] (if (xt/x:is-number? x) (return (+ x 1)) (return x))))) => {"a" 2 "b" [3 {"c" 4}]})
 
-(fact "diffs only keys within map" (!.js (xtd/tree-diff {:a 1 :b 2} {:a 1 :c 2})) => {"c" 2})
+^{:refer xt.lang.common-data/tree-diff
+  :added "4.1"
+  }
+(fact "diffs only keys within map"
+  
+  (!.js (xtd/tree-diff {:a 1, :b 2} {:a 1, :c 2}))
+  => {"c" 2})
 
-(fact "diffs nested keys within map" (!.js [(xtd/tree-diff-nested {:a 1 :b 2} {:a 1 :c 2}) (xtd/tree-diff-nested {:a 1 :b {:c 3}} {:a 1 :b {:d 3}}) (xtd/tree-diff-nested {:a 1 :b {:c {:d 3}}} {:a 1 :b {:c {:e 3}}})]) => [{"c" 2} {"b" {"d" 3}} {"b" {"c" {"e" 3}}}])
+^{:refer xt.lang.common-data/tree-diff-nested
+  :added "4.1"
+  }
+(fact "diffs nested keys within map"
+  
+  (!.js
+   [(xtd/tree-diff-nested {:a 1, :b 2} {:a 1, :c 2})
+    (xtd/tree-diff-nested {:a 1, :b {:c 3}} {:a 1, :b {:d 3}})
+    (xtd/tree-diff-nested {:a 1, :b {:c {:d 3}}} {:a 1, :b {:c {:e 3}}})])
+  => [{"c" 2} {"b" {"d" 3}} {"b" {"c" {"e" 3}}}])
 
 ^{:refer xt.lang.common-data/arr-every :added "4.1"}
 (fact "checks that every element fulfills thet predicate"
@@ -551,7 +654,17 @@
     (fn [a b] (return (< a b)))))
   => [1 2 3])
 
-(fact "performs a merge on two sorted arrays" (!.js (xtd/arr-sorted-merge [1 3 5] [2 4 6] (fn [a b] (return (< a b))))) => [1 2 3 4 5 6])
+^{:refer xt.lang.common-data/arr-sorted-merge
+  :added "4.1"
+  }
+(fact "performs a merge on two sorted arrays"
+  
+  (!.js
+   (xtd/arr-sorted-merge
+    [1 3 5]
+    [2 4 6]
+    (fn [a b] (return (< a b)))))
+  => [1 2 3 4 5 6])
 
 ^{:refer xt.lang.common-data/obj-map :added "4.1"}
 (fact "maps a function across the values of an object"
@@ -584,23 +697,31 @@
           (xtd/clone-shallow 1)])
   => [nil 1])
 
-(fact "clone nested objects loop" (!.js (var src {:a {:b 1}}) (var out (xtd/clone-nested-loop src (xtd/lu-create))) (xtd/set-in src ["a" "b"] 2) out) => {"a" {"b" 1}})
-
-(fact "cloning nested xects" (!.js (var src {:a {:b 1}}) (var out (xtd/clone-nested src)) (xtd/set-in src ["a" "b"] 2) out) => {"a" {"b" 1}})
-
-^{:refer xt.lang.common-data/memoize-key
-  :added "4.1"}
-(fact "memoize for functions of single argument"
+^{:refer xt.lang.common-data/clone-nested-loop
+  :added "4.1"
+  }
+(fact "clone nested objects loop"
   
   (!.js
-   (var state {"n" 0})
-   (var f (xtd/memoize-key
-           (fn [x]
-             (do
-               (xtd/set-pair-step state "n" (+ 1 (xt/x:get-key state "n" 0)))
-               (return (* x 10))))))
-   [(f 2) (f 2) (f 3) (xt/x:get-key state "n")])
-  => [20 20 30 2])
+   (var src {:a {:b 1}})
+   (var out (xtd/clone-nested-loop src (xtd/lu-create)))
+   (xtd/set-in src ["a" "b"] 2)
+   out)
+  => {"a" {"b" 1}})
+
+^{:refer xt.lang.common-data/clone-nested
+  :added "4.1"
+  }
+(fact "cloning nested xects"
+  
+  (!.js
+   (var src {:a {:b 1}})
+   (var out (xtd/clone-nested src))
+   (xtd/set-in src ["a" "b"] 2)
+   out)
+  => {"a" {"b" 1}})
+
+(fact "memoize for functions of single argument" (!.js (var state {"n" 0}) (var f (xtd/memoize-key (fn [x] (do (xtd/set-pair-step state "n" (+ 1 (xt/x:get-key state "n" 0))) (return (* x 10)))))) [(f 2) (f 2) (f 3) (xt/x:get-key state "n")]) => [20 20 30 2])
 
 
 ^{:refer xt.lang.common-data/is-empty? :added "4.1"}

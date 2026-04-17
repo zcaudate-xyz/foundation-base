@@ -1,14 +1,16 @@
 (ns std.lang.manage
   (:require [clojure.pprint :as pprint]
-            [clojure.string :as str]
-            [std.lang.manage.xtalk-audit :as audit]
-            [std.lang.manage.xtalk-ops :as ops]
-            [std.lang.manage.xtalk-scaffold :as scaffold]
+             [clojure.string :as str]
+            [clojure.tools.reader :as reader]
+             [std.lang.manage.xtalk-audit :as audit]
+             [std.lang.manage.xtalk-ops :as ops]
+             [std.lang.manage.xtalk-scaffold :as scaffold]
             [code.project :as project]
-            [std.fs :as fs]
-            [std.lib.collection :as collection]
-            [std.lib.invoke :as invoke]
-            [std.task :as task]))
+            [std.block.reader :as block-reader]
+             [std.fs :as fs]
+             [std.lib.collection :as collection]
+             [std.lib.invoke :as invoke]
+             [std.task :as task]))
 
 (def ^:dynamic *xtalk-model-roots*
   ["src/std/lang/model/spec_xtalk"
@@ -151,12 +153,228 @@
      (into (sorted-map)
            (for [lang langs
                  :let [summary (get-in matrix [:summary lang] {})]]
-             [lang {:lang lang
-                    :spec-tracked? (contains? tracked lang)
-                    :spec-feature-count feature-count
-                    :spec-implemented (or (:implemented summary) 0)
-                    :spec-abstract (or (:abstract summary) 0)
-                    :spec-missing (or (:missing summary) 0)}])))))
+               [lang {:lang lang
+                      :spec-tracked? (contains? tracked lang)
+                      :spec-feature-count feature-count
+                      :spec-implemented (or (:implemented summary) 0)
+                      :spec-abstract (or (:abstract summary) 0)
+                      :spec-missing (or (:missing summary) 0)}])))))
+
+(defn- read-top-level-string
+  [s]
+  (let [rdr (block-reader/create s)]
+    (loop [forms []]
+      (let [form (reader/read {:read-cond :allow
+                               :eof ::eof}
+                              rdr)]
+        (if (= ::eof form)
+          forms
+          (recur (conj forms form)))))))
+
+(defn- normalized-top-level-forms
+  [forms]
+  (->> forms
+       (map scaffold/clean-render-form)
+       vec))
+
+(defn- fact-ref
+  [form]
+  (:refer (meta form)))
+
+(defn- fact-forms
+  [forms]
+  (->> forms
+       (mapcat scaffold/expand-top-level-form)
+       (filter scaffold/fact-form?)
+       vec))
+
+(defn- source-template-facts
+  [forms lang]
+  (->> (fact-forms forms)
+       (remove #(scaffold/form-skipped-for-lang? % lang))
+       vec))
+
+(defn- fact-refs
+  [forms]
+  (->> forms
+       (keep fact-ref)
+       distinct
+       sort
+       vec))
+
+(defn- summarize-statuses
+  [statuses]
+  (let [freqs (frequencies statuses)]
+    {:full (or (:full freqs) 0)
+     :partial (or (:partial freqs) 0)
+     :stub (or (:stub freqs) 0)
+     :unwritten (or (:unwritten freqs) 0)
+     :unsupported (or (:unsupported freqs) 0)
+     :scaffold-error (or (:scaffold-error freqs) 0)
+     :diagnose-error (or (:diagnose-error freqs) 0)}))
+
+(defn- coverage-status
+  [{:keys [scaffold-status output-exists? source-fact-count target-fact-count
+           missing-refs extra-refs]}]
+  (cond
+    (not= :ready scaffold-status)
+    scaffold-status
+
+    (not output-exists?)
+    :unwritten
+
+    (zero? source-fact-count)
+    :full
+
+    (zero? target-fact-count)
+    :stub
+
+    (or (seq missing-refs)
+        (seq extra-refs)
+        (< target-fact-count source-fact-count))
+    :partial
+
+    :else
+    :full))
+
+(defn- runtime-template-coverage
+  [source-ns lang output-path fresh-content]
+  (let [proj (project/project)
+        input-path (scaffold/test-file-path proj (project/test-ns source-ns))
+        source-forms (scaffold/read-top-level-forms input-path)
+        source-facts (source-template-facts source-forms lang)
+        source-refs (fact-refs source-facts)
+        output-exists? (boolean (and output-path (fs/exists? output-path)))
+        target-forms (when output-exists?
+                       (scaffold/read-top-level-forms output-path))
+        target-facts (if target-forms
+                       (fact-forms target-forms)
+                       [])
+        target-refs (fact-refs target-facts)
+        fresh-forms (read-top-level-string fresh-content)
+        generated-match? (when output-exists?
+                           (= (normalized-top-level-forms target-forms)
+                              (normalized-top-level-forms fresh-forms)))
+        missing-refs (vec (remove (set target-refs) source-refs))
+        extra-refs (vec (remove (set source-refs) target-refs))]
+    {:output-exists? output-exists?
+     :generated-match? generated-match?
+     :source-fact-count (count source-facts)
+     :target-fact-count (count target-facts)
+     :source-refs source-refs
+     :target-refs target-refs
+     :missing-refs missing-refs
+     :extra-refs extra-refs}))
+
+(defn- safe-runtime-template-status
+  [source-ns lang]
+  (try
+    (let [diagnosis (scaffold/diagnose-runtime-generation nil {:ns source-ns
+                                                               :lang lang})
+          warning-codes (mapv :code (:warnings diagnosis))
+          unsupported-codes (mapv :code (:unsupported diagnosis))]
+      (if-not (:expected-success? diagnosis)
+        {:status :unsupported
+         :source-ns (:source-ns diagnosis)
+         :from-lang (:from-lang diagnosis)
+         :lang (:requested-lang diagnosis)
+         :eligible-langs (:eligible-langs diagnosis)
+         :output-path (get-in diagnosis [:output :path])
+         :supported? (get-in diagnosis [:output :supported?])
+         :warning-codes warning-codes
+         :unsupported-codes unsupported-codes}
+        (try
+          (let [rendered (scaffold/scaffold-runtime-template nil {:ns source-ns
+                                                                  :lang lang})
+                coverage (runtime-template-coverage source-ns
+                                                    lang
+                                                    (:output-path rendered)
+                                                    (:content rendered))
+                scaffold-status :ready]
+            (merge
+             {:status scaffold-status
+              :coverage-status (coverage-status (assoc coverage
+                                                      :scaffold-status scaffold-status))
+             :source-ns (:source-ns diagnosis)
+             :from-lang (:from-lang rendered)
+             :lang (:lang rendered)
+             :eligible-langs (:eligible-langs diagnosis)
+             :target-ns (:target-ns rendered)
+             :output-path (:output-path rendered)
+             :supported? true
+             :warning-codes warning-codes
+             :unsupported-codes unsupported-codes
+              :content-length (count (:content rendered))}
+             coverage))
+          (catch Throwable t
+            {:status :scaffold-error
+             :coverage-status :scaffold-error
+             :source-ns (:source-ns diagnosis)
+             :from-lang (:from-lang diagnosis)
+             :lang (:requested-lang diagnosis)
+             :eligible-langs (:eligible-langs diagnosis)
+             :output-path (get-in diagnosis [:output :path])
+             :supported? (get-in diagnosis [:output :supported?])
+             :warning-codes warning-codes
+             :unsupported-codes unsupported-codes
+             :error (.getMessage t)
+             :data (ex-data t)}))))
+    (catch Throwable t
+      {:status :diagnose-error
+       :coverage-status :diagnose-error
+       :source-ns source-ns
+       :lang (some-> lang keyword)
+       :error (.getMessage t)
+       :data (ex-data t)})))
+
+(defn runtime-template-matrix
+  "returns runtime-template scaffold status grouped by source template and target runtime"
+  {:added "4.1"}
+  ([]
+   (runtime-template-matrix {}))
+  ([{:keys [nss langs]
+     :or {langs scaffold/*runtime-test-langs*}}]
+   (let [langs (->> langs (map scaffold/normalize-runtime-lang) distinct sort vec)
+         nss (->> nss distinct sort vec)
+         status (into (sorted-map)
+                      (for [source-ns nss]
+                        [source-ns
+                         (into (sorted-map)
+                               (for [lang langs]
+                                 [lang (safe-runtime-template-status source-ns lang)]))]))
+         summary (into (sorted-map)
+                       (for [source-ns nss
+                             :let [entries (vals (get status source-ns))]]
+                         [source-ns (summarize-statuses (map :coverage-status entries))]))
+         lang-summary (into (sorted-map)
+                            (for [lang langs
+                                  :let [entries (for [source-ns nss]
+                                                  (get-in status [source-ns lang]))]]
+                              [lang (summarize-statuses (map :coverage-status entries))]))
+         scaffold-summary (into (sorted-map)
+                                (for [source-ns nss
+                                      :let [entries (vals (get status source-ns))
+                                            freqs (frequencies (map :status entries))]]
+                                  [source-ns {:ready (or (:ready freqs) 0)
+                                              :unsupported (or (:unsupported freqs) 0)
+                                              :scaffold-error (or (:scaffold-error freqs) 0)
+                                              :diagnose-error (or (:diagnose-error freqs) 0)}]))
+         lang-scaffold-summary (into (sorted-map)
+                                     (for [lang langs
+                                           :let [entries (for [source-ns nss]
+                                                           (get-in status [source-ns lang]))
+                                                 freqs (frequencies (map :status entries))]]
+                                       [lang {:ready (or (:ready freqs) 0)
+                                              :unsupported (or (:unsupported freqs) 0)
+                                              :scaffold-error (or (:scaffold-error freqs) 0)
+                                              :diagnose-error (or (:diagnose-error freqs) 0)}]))]
+     {:templates nss
+      :languages langs
+      :status status
+      :summary summary
+      :lang-summary lang-summary
+      :scaffold-summary scaffold-summary
+      :lang-scaffold-summary lang-scaffold-summary})))
 
 (defn xtalk-language-status
   "returns unified model/runtime/spec/test status by language"
@@ -498,6 +716,7 @@
    :installed-languages    installed-languages
    :audit-languages        audit-languages
    :support-matrix         support-matrix
+   :runtime-template-matrix runtime-template-matrix
    :missing-by-language    missing-by-language
    :missing-by-feature     missing-by-feature
    :visualize-support      visualize-support
@@ -524,6 +743,7 @@
     :installed-languages
     :audit-languages
     :support-matrix
+    :runtime-template-matrix
     :missing-by-language
     :missing-by-feature
     :visualize-support
