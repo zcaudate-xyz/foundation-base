@@ -2,8 +2,11 @@
   (:require [clojure.edn :as edn]
             [clojure.pprint :as pprint]
             [clojure.string :as str]
+            [code.manage.fn-format :as fn-format]
+            [code.manage.ns-format :as ns-format]
             [code.project :as project]
             [clojure.tools.reader :as reader]
+            [std.block :as block]
             [std.block.navigate :as nav]
             [std.block.reader :as block-reader]
             [std.fs :as fs]
@@ -92,14 +95,15 @@
            rawequal}})
 
 (declare runtime-expr-lang
-           expand-top-level-form
-           fact-form?
-           script-form?
-           fact-global-form?
-            test-file-path
-            transform-script-form
-            transform-script-runtime
-            runtime-lang-suffix
+            expand-top-level-form
+            fact-form?
+            script-form?
+            fact-global-form?
+            clean-render-form
+             test-file-path
+             transform-script-form
+             transform-script-runtime
+             runtime-lang-suffix
             template-runtime-test-ns
             template-runtime-blockers
             xtlang-runtime-suite-sources)
@@ -667,158 +671,165 @@
        :else
        (str "xtbench." (name lang) "." source-str)))))
 
+(defn clean-render-meta-map
+  [m]
+  (let [m (not-empty
+           (reduce dissoc (or m {})
+                   [:line :column :end-line :end-column
+                    :row :col :end-row :end-col :file
+                    :lang-exceptions :exceptions]))]
+    (when m
+      (into (empty m)
+            (map (fn [[k v]]
+                   [(clean-render-form k) (clean-render-form v)]))
+            m))))
+
+(defn clean-render-iobj
+  [obj original]
+  (if (instance? clojure.lang.IObj obj)
+    (if-let [m (clean-render-meta-map (meta original))]
+      (with-meta obj m)
+      (with-meta obj nil))
+    obj))
+
+(defn clean-render-form
+  [form]
+  (cond (seq? form)
+        (clean-render-iobj (apply list (map clean-render-form form)) form)
+
+        (vector? form)
+        (clean-render-iobj (vec (map clean-render-form form)) form)
+
+        (set? form)
+        (clean-render-iobj (into #{} (map clean-render-form form)) form)
+
+        (map? form)
+        (clean-render-iobj
+         (into (empty form)
+               (map (fn [[k v]]
+                      [(clean-render-form k) (clean-render-form v)]))
+               form)
+         form)
+
+        (instance? clojure.lang.IObj form)
+        (clean-render-iobj form form)
+
+        :else
+        form))
+
 (defn render-top-level-forms
   [forms]
-  (letfn [(clean-meta-map [m]
-            (let [m (not-empty
-                     (reduce dissoc (or m {})
-                             [:line :column :end-line :end-column
-                              :row :col :end-row :end-col :file]))]
-              (when m
-                (into (empty m)
-                      (map (fn [[k v]]
-                             [(clean-form k) (clean-form v)]))
-                      m))))
-          (clean-iobj [obj original]
-            (if (instance? clojure.lang.IObj obj)
-              (if-let [m (clean-meta-map (meta original))]
-                (with-meta obj m)
-                (with-meta obj nil))
-              obj))
-          (clean-form [form]
-            (cond (seq? form)
-                  (clean-iobj (apply list (map clean-form form)) form)
+  (->> forms
+       (map clean-render-form)
+       (map (fn [form]
+              (binding [*print-meta* true]
+                (with-out-str
+                  (pprint/pprint form)))))
+       (str/join "\n")
+       (#(if (str/ends-with? % "\n")
+           %
+           (str % "\n")))))
 
-                  (vector? form)
-                  (clean-iobj (vec (map clean-form form)) form)
+(defn format-generated-namespace!
+  [proj target-ns output-path]
+  (let [proj (or proj (project/project))
+        lookup (project/file-lookup proj)
+        default-output-path (test-file-path proj target-ns)]
+    (when (= output-path default-output-path)
+      (ns-format/ns-format target-ns {:write true} lookup proj)
+      (fn-format/fn-format target-ns {:write true} lookup proj))))
 
-                  (set? form)
-                  (clean-iobj (into #{} (map clean-form form)) form)
+(defn delete-skipped-top-level-forms
+  [source forms lang]
+  (let [lang (normalize-runtime-lang lang)
+        root (nav/parse-root source)
+        start (nav/down root)]
+    (loop [state-nav root
+           current start
+           remaining forms]
+      (cond (or (nil? current)
+                (empty? remaining))
+            (nav/root-string state-nav)
 
-                  (map? form)
-                  (clean-iobj
-                   (into (empty form)
-                         (map (fn [[k v]]
-                                [(clean-form k) (clean-form v)]))
-                         form)
-                   form)
+            (form-skipped-for-lang? (first remaining) lang)
+            (let [updated (nav/delete current)]
+              (recur updated updated (rest remaining)))
 
-                  (instance? clojure.lang.IObj form)
-                  (clean-iobj form form)
-
-                  :else
-                  form))]
-    (binding [pprint/*print-right-margin* 100
-              *print-meta* true
-              *print-length* nil
-              *print-level* nil]
-      (with-out-str
-         (doseq [form (map clean-form forms)]
-           (pprint/pprint form)
-           (println))))))
+            :else
+            (recur current (nav/right current) (rest remaining))))))
 
 (defn render-template-runtime-source
-  [source source-test-ns from-lang to-lang]
-  (letfn [(clean-meta-map [m]
-            (let [m (not-empty
-                     (reduce dissoc (or m {})
-                             [:line :column :end-line :end-column
-                              :row :col :end-row :end-col :file]))]
-              (when m
-                (into (empty m)
-                      (map (fn [[k v]]
-                             [(clean-form k) (clean-form v)]))
-                      m))))
-          (clean-iobj [obj original]
-            (if (instance? clojure.lang.IObj obj)
-              (if-let [m (clean-meta-map (meta original))]
-                (with-meta obj m)
-                (with-meta obj nil))
-              obj))
-          (clean-form [form]
-            (cond (seq? form)
-                  (clean-iobj (apply list (map clean-form form)) form)
-
-                  (vector? form)
-                  (clean-iobj (vec (map clean-form form)) form)
-
-                  (set? form)
-                  (clean-iobj (into #{} (map clean-form form)) form)
-
-                  (map? form)
-                  (clean-iobj
-                   (into (empty form)
-                         (map (fn [[k v]]
-                                [(clean-form k) (clean-form v)]))
-                         form)
-                   form)
-
-                  (instance? clojure.lang.IObj form)
-                  (clean-iobj form form)
-
-                  :else
-                  form))]
-    (let [from-lang (normalize-runtime-lang from-lang)
-          to-lang (normalize-runtime-lang to-lang)
-          from-script (runtime-script-lang from-lang)
-          to-script (runtime-script-lang to-lang)
-          from-dispatch (runtime-dispatch-symbol from-lang)
-          to-dispatch (runtime-dispatch-symbol to-lang)
-          target-ns (template-runtime-test-ns source-test-ns from-lang to-lang)
-          source-ns-str (str source-test-ns)
-          target-ns-str (str target-ns)
-          root (nav/parse-root source)]
-      (loop [current (nav/down root)
-             last-nav root]
-        (if current
-          (let [form (nav/value current)
-                updated (cond (and (seq? form)
-                                   (= 'ns (first form))
-                                   (= source-test-ns (second form)))
-                              (if-let [ns-name-nav (some-> current nav/down nav/right)]
-                                (-> ns-name-nav
-                                    (nav/replace target-ns)
-                                    nav/up)
-                                current)
-
-                              (script-form? form)
-                              (let [head-nav (nav/down current)
-                                    script-lang-nav (some-> head-nav nav/right)
-                                    current (if script-lang-nav
-                                              (-> script-lang-nav
-                                                  (nav/replace to-script)
-                                                  nav/up)
-                                              current)
-                                    opts-nav (some-> current nav/down nav/right nav/right)
-                                    runtime-key-nav (when (and opts-nav
-                                                               (map? (nav/value opts-nav)))
-                                                      (loop [entry (nav/down opts-nav)]
-                                                        (cond
-                                                          (nil? entry)
-                                                          nil
-
-                                                          (= :runtime (nav/value entry))
-                                                          entry
-
-                                                          :else
-                                                          (recur (some-> entry nav/right nav/right)))))]
-                                (if-let [runtime-val-nav (some-> runtime-key-nav nav/right)]
-                                  (-> runtime-val-nav
-                                      (nav/replace (runtime-type to-lang))
-                                      nav/up
+  [source forms source-test-ns from-lang to-lang]
+  (let [from-lang (normalize-runtime-lang from-lang)
+        to-lang (normalize-runtime-lang to-lang)
+        from-script (runtime-script-lang from-lang)
+        to-script (runtime-script-lang to-lang)
+        from-dispatch (runtime-dispatch-symbol from-lang)
+        to-dispatch (runtime-dispatch-symbol to-lang)
+        target-ns (template-runtime-test-ns source-test-ns from-lang to-lang)
+        source-ns-str (str source-test-ns)
+        target-ns-str (str target-ns)
+        root (nav/parse-root source)
+        rewritten
+        (loop [current (nav/down root)
+               last-nav root]
+          (if current
+            (let [form (nav/value current)
+                  updated (cond (and (seq? form)
+                                     (= 'ns (first form))
+                                     (= source-test-ns (second form)))
+                                (if-let [ns-name-nav (some-> current nav/down nav/right)]
+                                  (-> ns-name-nav
+                                      (nav/replace target-ns)
                                       nav/up)
-                                  current))
+                                  current)
 
-                              (= form from-dispatch)
-                              (nav/replace current to-dispatch)
+                                (script-form? form)
+                                (let [head-nav (nav/down current)
+                                      script-lang-nav (some-> head-nav nav/right)
+                                      current (if script-lang-nav
+                                                (-> script-lang-nav
+                                                    (nav/replace to-script)
+                                                    nav/up)
+                                                current)
+                                      opts-nav (some-> current nav/down nav/right nav/right)
+                                      runtime-key-nav (when (and opts-nav
+                                                                 (map? (nav/value opts-nav)))
+                                                        (loop [entry (nav/down opts-nav)]
+                                                          (cond
+                                                            (nil? entry)
+                                                            nil
 
-                              (= form source-ns-str)
-                              (nav/replace current target-ns-str)
+                                                            (= :runtime (nav/value entry))
+                                                            entry
 
-                              :else
-                              current)]
-            (recur (nav/next updated) updated))
-          (nav/root-string last-nav))))))
+                                                            :else
+                                                            (recur (some-> entry nav/right nav/right)))))]
+                                  (if-let [runtime-val-nav (some-> runtime-key-nav nav/right)]
+                                    (-> runtime-val-nav
+                                        (nav/replace (runtime-type to-lang))
+                                        nav/up
+                                        nav/up)
+                                    current))
+
+                                (and (instance? clojure.lang.IObj form)
+                                     (seq (select-keys (meta form) [:lang-exceptions :exceptions])))
+                                (nav/replace current (vary-meta (clean-render-form form)
+                                                                dissoc
+                                                                :lang-exceptions
+                                                                :exceptions))
+
+                                (= form from-dispatch)
+                                (nav/replace current to-dispatch)
+
+                                (= form source-ns-str)
+                                (nav/replace current target-ns-str)
+
+                                :else
+                                current)]
+              (recur (nav/next updated) updated))
+            (nav/root-string last-nav)))]
+    (delete-skipped-top-level-forms rewritten forms to-lang)))
 
 (defn attach-leading-meta
   [clauses metadata]
@@ -841,6 +852,15 @@
                     (or (first (:test-paths project))
                         "test")
                     (str (fs/ns->file test-ns) ".clj")))))
+
+(defn derived-test-file-path
+  [project input-path source-test-ns target-test-ns]
+  (let [project-path (test-file-path project target-test-ns)
+        source-project-path (test-file-path project source-test-ns)]
+    (if (= input-path source-project-path)
+      project-path
+      (str (fs/path (fs/parent input-path)
+                    (str (fs/ns->file target-test-ns) ".clj"))))))
 
 (defn infer-runtime-lang
   [forms]
@@ -1350,17 +1370,17 @@
                      (throw (ex-info "Unable to determine runtime test namespace"
                                      {:input-path input-path})))
          {:keys [shared by-lang]} (separate-runtime-test-forms forms langs)
-         shared-path (test-file-path proj test-ns)
+         shared-path (derived-test-file-path proj input-path test-ns test-ns)
          outputs (into []
                        (concat
                         [{:lang :shared
                           :path shared-path
                           :forms shared}]
-                        (for [[lang out-forms] by-lang
-                              :let [out-ns (runtime-test-ns test-ns lang)]]
-                          {:lang lang
-                           :path (test-file-path proj out-ns)
-                           :forms out-forms})))
+                         (for [[lang out-forms] by-lang
+                               :let [out-ns (runtime-test-ns test-ns lang)]]
+                           {:lang lang
+                            :path (derived-test-file-path proj input-path test-ns out-ns)
+                            :forms out-forms})))
          rendered (mapv (fn [{:keys [path forms] :as entry}]
                           (assoc entry :content (render-top-level-forms forms)))
                         outputs)]
@@ -1550,8 +1570,8 @@
 
 (defn scaffold-runtime-template-single
   [proj {:keys [input-path output-path lang from-lang write]
-         :or {write false}
-         :as params}]
+          :or {write false}
+          :as params}]
   (let [source-test-ns-param (some-> (:ns params) project/test-ns)
         input-path (or input-path
                        (when source-test-ns-param
@@ -1569,36 +1589,41 @@
                       (throw (ex-info "Cannot infer template runtime language"
                                       {:path input-path
                                        :ns source-test-ns})))
-        to-lang (normalize-runtime-lang lang)
-        blockers (template-runtime-blockers forms from-lang to-lang)
-        _ (when-not (runtime-template-supported? forms to-lang)
-            (throw (ex-info "Template cannot be scaffolded safely for the target runtime"
+         to-lang (normalize-runtime-lang lang)
+         blockers (template-runtime-blockers forms from-lang to-lang)
+         _ (when-not (runtime-template-supported? forms to-lang)
+             (throw (ex-info "Template cannot be scaffolded safely for the target runtime"
                             {:input-path input-path
                              :source-ns source-test-ns
                              :from-lang (normalize-runtime-lang from-lang)
-                             :lang to-lang
-                             :blockers blockers})))
-        target-ns (template-runtime-test-ns source-test-ns from-lang to-lang)
+                              :lang to-lang
+                              :blockers blockers})))
+         proj (or proj (project/project))
+         target-ns (template-runtime-test-ns source-test-ns from-lang to-lang)
          output-path (or output-path
                          (test-file-path proj target-ns))
-         rendered-forms (template-runtime-test-forms forms from-lang to-lang)
-         skipped? (not= (count rendered-forms) (count forms))
-         content (if skipped?
-                   (render-top-level-forms rendered-forms)
-                   (render-template-runtime-source source source-test-ns from-lang to-lang))]
-    (when write
-      (fs/create-directory (fs/parent output-path))
-      (spit output-path content))
-    {:input-path input-path
-     :output-path output-path
-     :from-lang (normalize-runtime-lang from-lang)
-     :lang to-lang
-     :source-ns source-test-ns
-     :target-ns target-ns
-     :updated (not= (when (fs/exists? output-path)
-                      (slurp output-path))
-                    content)
-     :content content}))
+         previous-content (when (fs/exists? output-path)
+                            (slurp output-path))
+         content (render-template-runtime-source source
+                                                forms
+                                                source-test-ns
+                                                from-lang
+                                                to-lang)]
+     (when write
+       (fs/create-directory (fs/parent output-path))
+       (spit output-path content)
+       (format-generated-namespace! proj target-ns output-path))
+     (let [written-content (if (fs/exists? output-path)
+                             (slurp output-path)
+                             content)]
+       {:input-path input-path
+        :output-path output-path
+        :from-lang (normalize-runtime-lang from-lang)
+        :lang to-lang
+        :source-ns source-test-ns
+        :target-ns target-ns
+        :updated (not= previous-content written-content)
+        :content written-content})))
 
 (defn scaffold-runtime-template-pattern
   [proj {:keys [output-path ns pattern root input-root lang]

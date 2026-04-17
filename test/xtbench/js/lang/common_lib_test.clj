@@ -98,52 +98,13 @@
     (k/is-object? [1 2 3])])
   => [true false])
 
-^{:refer xt.lang.common-lib/proto-create
-  :added "4.1"
-  :lang-exceptions {:python {:skip true}
-                    :dart   {:skip true}}}
-(fact "creates the prototype map"
-  (!.js
-   (var mt (k/proto-create {:hello (fn:> [v] (. v world))
-                            :world "hello"}))
-   (var a {})
-   (k/proto-set a mt nil)
-   (. a (hello)))
-  => "hello")
+(fact "creates the prototype map" (!.js (var mt (k/proto-create {:hello (fn:> [v] (. v world)) :world "hello"})) (var a {}) (k/proto-set a mt nil) (. a (hello))) => "hello")
 
-^{:refer xt.lang.common-lib/proto-get
-  :added "4.1"
-  :lang-exceptions {:python {:skip true}}}
-(fact "gets the prototype map from an object"
-  (!.js
-   (var mt (k/proto-create {:world "hello"}))
-   (var a {})
-   (k/proto-set a mt nil)
-   (== (k/proto-get a nil) mt))
-  => true)
+(fact "gets the prototype map from an object" (!.js (var mt (k/proto-create {:world "hello"})) (var a {}) (k/proto-set a mt nil) (== (k/proto-get a nil) mt)) => true)
 
-^{:refer xt.lang.common-lib/proto-set
-  :added "4.1"
-  :lang-exceptions {:python {:skip true}
-                    :dart   {:skip true}}}
-(fact "sets the prototype map onto an object"
-  (!.js
-   (var mt (k/proto-create {:hello (fn:> [v] (. v world))
-                            :world "hello"}))
-   (var a {})
-   (k/proto-set a mt nil)
-   (. a (hello)))
-  => "hello")
+(fact "sets the prototype map onto an object" (!.js (var mt (k/proto-create {:hello (fn:> [v] (. v world)) :world "hello"})) (var a {}) (k/proto-set a mt nil) (. a (hello))) => "hello")
 
-^{:refer xt.lang.common-lib/proto-tostring
-  :added "4.1"
-  :lang-exceptions {:python {:skip true}}}
-(fact "compiles the runtime tostring helper"
-  (!.js
-   (var _ (fn [obj]
-            (k/proto-tostring obj)))
-   true)
-  => true)
+(fact "compiles the runtime tostring helper" (!.js (var _ (fn [obj] (k/proto-tostring obj))) true) => true)
 
 ^{:refer xt.lang.common-lib/noop :added "4.1"}
 (fact "returns nil"

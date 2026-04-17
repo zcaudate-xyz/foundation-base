@@ -634,6 +634,37 @@
        true
        true])
 
+^{:refer std.lang.manage.xtalk-scaffold/scaffold-runtime-template :added "4.1"}
+(fact "scaffold-runtime-template drops unsupported common_data facts for python and dart"
+  (let [{py-target-ns :target-ns
+         py-content :content}
+        (scaffold-runtime-template nil {:input-path "test/xt/lang/common_data_test.clj"
+                                        :lang :python})
+        {dt-target-ns :target-ns
+         dt-content :content}
+        (scaffold-runtime-template nil {:input-path "test/xt/lang/common_data_test.clj"
+                                        :lang :dart})]
+    [py-target-ns
+     (str/includes? py-content "xtbench.python.lang.common-data-test")
+     (str/includes? py-content "xt.lang.common-data/from-flat")
+     (str/includes? py-content "xt.lang.common-data/memoize-key")
+     (not (str/includes? py-content ":lang-exceptions"))
+     dt-target-ns
+     (str/includes? dt-content "xtbench.dart.lang.common-data-test")
+     (not (str/includes? dt-content "xt.lang.common-data/arr-tail"))
+     (not (str/includes? dt-content "xt.lang.common-data/clone-nested"))
+     (not (str/includes? dt-content ":lang-exceptions"))])
+  => '[xtbench.python.lang.common-data-test
+        true
+        true
+        false
+        true
+        xtbench.dart.lang.common-data-test
+        true
+        true
+        true
+        true])
+
 ^{:refer std.lang.manage.xtalk-scaffold/diagnose-runtime-generation :added "4.1"}
 (fact "diagnoses split generation rewrites and expected outputs"
   (with-temp-runtime-suite-file

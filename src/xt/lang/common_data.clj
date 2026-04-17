@@ -665,6 +665,13 @@
            (xt/x:arr-push out (xt/x:second e))))
    (return out)))
 
+(defn.xt set-pair-step
+  "sets a pair into an object and returns it"
+  {:added "4.1"}
+  [out k v]
+  (xt/x:set-key out k v)
+  (return out))
+
 (defn.xt from-flat
   "creates object from flattened pair array"
   {:added "4.0"}
@@ -1175,15 +1182,21 @@
 ;; MEMOIZE
 ;;
 
+(defn.xt memoize-key-step
+  "computes and caches a memoized value"
+  {:added "4.1"}
+  [f key cache]
+  (var value (f key))
+  (xt/x:set-key cache key value)
+  (return value))
+
 (defn.xt memoize-key
   "memoize for functions of single argument"
   {:added "4.0"}
   [f]
   (var cache {})
   (var cache-fn (fn [key]
-                  (var value (f key))
-                  (xt/x:set-key cache key value)
-                  (return value)))
+                  (return (-/memoize-key-step f key cache))))
   (return (fn [key]
             (return (or (xt/x:get-key cache key)
                         (cache-fn key))))))
