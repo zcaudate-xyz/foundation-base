@@ -37,12 +37,20 @@ jobs:
           -v $(pwd):$(pwd) 
           -w $(pwd) 
           ghcr.io/zcaudate-xyz/infra-foundation-clean:ci 
-          lein publish
+          lein exec -ep "(require '[code.doc :as doc]
+                                  '[code.doc.executive :as exec])
+                          (doc/init-template :std.lang {:write true})
+                          (doc/deploy-template :std.lang {:write true})
+                          (let [project (doc/make-project)
+                                lookup  (exec/all-pages project)]
+                            (doseq [k (sort (filter #(= \"std.lang\" (namespace %))
+                                                    (keys lookup)))]
+                              (exec/render k {:write true} lookup project)))"
           
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:
-          path: ./public
+          path: ./public/std-lang
           
   deploy:
     environment:

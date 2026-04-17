@@ -1,79 +1,17 @@
-{:theme    "bolton"
- :output   "public"
- :pages    {index      
-            {:base  "home.html"
-             :input "src-doc/documentation/main_index.clj"
-             :title "foundation"
-             :subtitle "core libs"}
-             
-            code-doc      
-            {:input "src-doc/documentation/code_doc.clj"
-             :title "code.doc"
-             :subtitle "tools for documentation"}
-            
-            std-block
-            {:input "src-doc/documentation/std_block.clj"
-             :title "std.block"
-             :subtitle "code representation"}
-            
-            #_#_
-            std-lib
-            {:input "src-doc/documentation/std_lib.clj"
-             :title "std.lib"
-             :subtitle "more functionality in std.lib"}
-            
-            #_#_
-            std-lib-bin
-            {:input "src-doc/documentation/std_lib_bin.clj"
-             :title "std.lib.bin"
-             :subtitle "basic functionality for buffers"}
+{:theme  "foundation"
+ :output "public/std-lang"
+ :pages  {index
+          {:base  "home.html"
+           :input "src-doc/documentation/std_lang_index.clj"
+           :title "std.lang"
+           :subtitle "polyglot templating, grammar-driven emission, and runtime-aware code generation"}
 
-            #_#_
-            std-lib-generate
-            {:input "src-doc/documentation/std_lib_generate.clj"
-             :title "std.lib.bin"
-             :subtitle "basic functionality for buffers"}
-            
-            std-lib-foundation
-            {:input "src-doc/documentation/std_lib_foundation.clj"
-             :title "std.lib.foundation"
-             :subtitle "basic functionality for foundation"}
-            
-            std-lib-collection
-            {:input "src-doc/documentation/std_lib_collection.clj"
-             :title "std.lib.collection"
-             :subtitle "collection utilities"}
-            
-            std-lib-atom
-            {:input "src-doc/documentation/std_lib_atom.clj"
-             :title "std.lib.atom"
-             :subtitle "atom utilities"}
-            
-            std-lib-env
-            {:input "src-doc/documentation/std_lib_env.clj"
-             :title "std.lib.env"
-             :subtitle "environment utilities"}
-            
-            #_#_
-            std-lib-link
-            {:input "src-doc/documentation/std_lib_foundation.clj"
-             :title "std.lib.foundation"
-             :subtitle "basic functionality for foundation"}
-            
-            #_#_
-            std-lib-stream
-            {:input "src-doc/documentation/std_lib_stream.clj"
-             :title "std.lib.system"
-             :subtitle "components and subcomponents"}
-            
-            #_#_
-            std-lib-system
-            {:input "src-doc/documentation/std_lib_system.clj"
-             :title "std.lib.system"
-             :subtitle "components and subcomponents"}
-            
-            #_#_
-            std-lib-zip
-            {:input "src-doc/documentation/std_lib_zip.clj"
-             :title "std.lib.system"
-             :subtitle "components and subcomponents"}}}
+          introduction
+          {:input "src-doc/documentation/std_lang_introduction.clj"
+           :title "Introduction"
+           :subtitle "what std.lang is, how the book + grammar model works, and why it exists"}
+
+          comparison
+          {:input "src-doc/documentation/std_lang_comparison.clj"
+           :title "Comparison"
+           :subtitle "where std.lang sits relative to straight transpilers, Haxe, Racket, and language workbenches"}}}

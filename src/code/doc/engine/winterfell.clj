@@ -58,26 +58,30 @@
 
 (defmethod page-element :hero
   ([{:keys [title subtitle lead actions badges]}]
-   [:section {:class "hero"}
-    (when (seq badges)
-      [:div {:class "hero-badges"}
-       (mapv (fn [badge]
-               [:span {:class "badge badge-hero"} badge])
-             badges)])
-    [:div {:class "hero-copy"}
-     [:h1 title]
-     (when subtitle [:p {:class "hero-subtitle"} subtitle])
-     (when lead [:div {:class "hero-lead"}
-                 (util/basic-html-unescape (util/markup lead))])]
-    (when (seq actions)
-      [:div {:class "hero-actions"}
-       (mapv (fn [{:keys [href label variant]}]
-               [:a {:class (str "hero-action"
-                                (when variant
-                                  (str " hero-action-" (name variant))))
-                    :href href}
-                label])
-             actions)])]))
+   (into
+    [:section {:class "hero"}]
+    (concat
+     (when (seq badges)
+       [(into
+         [:div {:class "hero-badges"}]
+         (map (fn [badge]
+                [:span {:class "badge badge-hero"} badge])
+              badges))])
+     [[:div {:class "hero-copy"}
+       [:h1 title]
+       (when subtitle [:p {:class "hero-subtitle"} subtitle])
+       (when lead [:div {:class "hero-lead"}
+                   (util/basic-html-unescape (util/markup lead))])]]
+     (when (seq actions)
+       [(into
+         [:div {:class "hero-actions"}]
+         (map (fn [{:keys [href label variant]}]
+                [:a {:class (str "hero-action"
+                                 (when variant
+                                   (str " hero-action-" (name variant))))
+                     :href href}
+                 label])
+              actions))])))))
 
 (defmethod page-element :callout
   ([{:keys [tone title content]}]
@@ -90,20 +94,23 @@
 
 (defmethod page-element :card-grid
   ([{:keys [title lead items]}]
-   [:section {:class "card-grid-shell"}
-    (when title [:div {:class "card-grid-heading"} [:h3 title]])
-    (when lead [:div {:class "card-grid-lead"}
-                (util/basic-html-unescape (util/markup lead))])
-    [:div {:class "card-grid"}
-     (mapv (fn [{:keys [title text href meta]}]
-             [:article {:class "card"}
-              (when meta [:span {:class "card-meta"} meta])
-              [:h4 title]
-              [:div {:class "card-text"}
-               (util/basic-html-unescape (util/markup text))]
-              (when href
-                [:a {:href href} "Learn more"])])
-           items)]]))
+   (into
+    [:section {:class "card-grid-shell"}]
+    (concat
+     [(when title [:div {:class "card-grid-heading"} [:h3 title]])
+      (when lead [:div {:class "card-grid-lead"}
+                  (util/basic-html-unescape (util/markup lead))])]
+     [(into
+       [:div {:class "card-grid"}]
+       (map (fn [{:keys [title text href meta]}]
+              [:article {:class "card"}
+               (when meta [:span {:class "card-meta"} meta])
+               [:h4 title]
+               [:div {:class "card-text"}
+                (util/basic-html-unescape (util/markup text))]
+               (when href
+                 [:a {:href href} "Learn more"])])
+            items))]))))
 
 (defmethod page-element :quote
   ([{:keys [text author source]}]

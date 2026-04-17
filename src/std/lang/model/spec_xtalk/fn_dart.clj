@@ -4,7 +4,9 @@
 
 (defn dart-method0
   [obj method]
-  (list '. obj (list method)))
+  ;; Wrap the receiver so negative literals emit as `(-1.2).ceil()`
+  ;; rather than `-1.2.ceil()`, which Dart parses with unary-minus precedence.
+  (list :% (list :- "(") obj (list :- ").") method (list :- "()")))
 
 (defn dart-runtime-type-string
   [obj]
@@ -70,8 +72,15 @@
          (return (. ~rtype (toLowerCase)))))))
 
 (defn dart-tf-x-del
-  [[_ obj key]]
-  (list '. obj (list 'remove key)))
+  [[_ obj]]
+  (if (and (seq? obj)
+           (= '. (first obj))
+           (vector? (nth obj 2 nil))
+           (= 1 (count (nth obj 2))))
+    (let [target (second obj)
+          [key]  (nth obj 2)]
+      (list '. target (list 'remove key)))
+    (list '. obj (list 'remove nil))))
 
 (defn dart-tf-x-eval
   [[_ s]]
@@ -281,9 +290,10 @@
 (defn dart-tf-x-arr-remove [[_ arr idx]] (list '. arr (list 'removeAt idx)))
 (defn dart-tf-x-arr-sort [[_ arr key-fn comp-fn]]
   (list '. arr (list 'sort (list 'fn '[a b]
-                                 (list ':? (list comp-fn (list key-fn 'a) (list key-fn 'b))
-                                       -1
-                                       1)))))
+                                 (list 'return
+                                       (list ':? (list comp-fn (list key-fn 'a) (list key-fn 'b))
+                                             -1
+                                             1))))))
 (defn dart-tf-x-str-comp [[_ a b]]
   (list '< (list '. (dart-method0 a 'toString) (list 'compareTo (dart-method0 b 'toString)))
         0))
@@ -348,10 +358,17 @@
            (return false))
          (if (not (~eq-fn (. ~a current) (. ~b current)))
            (return false)))
-       (return (not (. ~b (moveNext)))))))
+        (return (not (. ~b (moveNext)))))))
 (defn dart-tf-x-iter-from [[_ x]] (list '. x 'iterator))
 (defn dart-tf-x-iter-from-arr [[_ arr]] (list '. arr 'iterator))
-(defn dart-tf-x-iter-from-obj [[_ obj]] (list '. (list '. obj 'entries) 'iterator))
+(defn dart-tf-x-iter-from-obj
+  [[_ obj]]
+  (let [entry-fn (list 'fn:> '[e]
+                       [(list '. 'e 'key)
+                        (list '. 'e 'value)])]
+    (list '. (list '. (list '. obj 'entries)
+                    (list 'map entry-fn))
+          'iterator)))
 (defn dart-tf-x-iter-has?
   [[_ iter]]
   (let [rtype-expr (dart-runtime-type-string iter)]
@@ -367,7 +384,7 @@
           (list 'not= nil iter)
           (list '. rtype-expr (list 'contains "Iterator")))))
 (defn dart-tf-x-iter-next [[_ iter]] (list '. iter 'current))
-(defn dart-tf-x-iter-null [[_]] (list '. [] 'iterator))
+(defn dart-tf-x-iter-null [[_]] '(if false (yield nil)))
 
 (def +dart-iter+
    {:x-iter-eq          {:macro #'dart-tf-x-iter-eq         :emit :macro}

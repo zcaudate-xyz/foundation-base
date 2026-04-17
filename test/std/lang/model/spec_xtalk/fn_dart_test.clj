@@ -51,6 +51,13 @@
   (l/emit-as :dart [(dart-tf-x-m-abs '[_ x])])
   => #"\.abs")
 
+^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-m-abs :added "4.1"}
+(fact "wraps negative literal receivers for no-arg methods"
+  (l/emit-as :dart [(dart-tf-x-m-abs '[_ -5])
+                    (dart-tf-x-m-ceil '[_ -1.2])
+                    (dart-tf-x-m-floor '[_ -1.2])])
+  => #"(?s)\(-5\)\.abs\(\).*\(-1\.2\)\.ceil\(\).*\(-1\.2\)\.floor\(\)")
+
 ^{:refer std.lang.model.spec-xtalk.fn-dart/dart-tf-x-m-sin :added "4.1"}
 (fact "sine"
   (l/emit-as :dart [(dart-tf-x-m-sin '[_ x])])

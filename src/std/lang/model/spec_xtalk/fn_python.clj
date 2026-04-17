@@ -422,7 +422,7 @@
 
 (defn python-tf-x-obj-clone
   [[_ obj]]
-  (list 'return (list '. obj '(copy))))
+  (list '. obj '(copy)))
 
 (def +python-obj+
   {:x-obj-keys    {:macro #'python-tf-x-obj-keys   :emit :macro}
@@ -545,6 +545,18 @@
   ([[_ s tok replacement]]
    (list '. s (list 'replace tok replacement))))
 
+(defn python-tf-x-str-trim
+  ([[_ s]]
+   (list '. s '(strip))))
+
+(defn python-tf-x-str-trim-left
+  ([[_ s]]
+   (list '. s '(lstrip))))
+
+(defn python-tf-x-str-trim-right
+  ([[_ s]]
+   (list '. s '(rstrip))))
+
 (def +python-str+
   {:x-str-char       {:macro #'python-tf-x-str-char      :emit :macro}
    :x-str-split      {:macro #'python-tf-x-str-split      :emit :macro}
@@ -554,7 +566,10 @@
    :x-str-substring  {:macro #'python-tf-x-str-substring  :emit :macro}
    :x-str-to-upper   {:macro #'python-tf-x-str-to-upper      :emit :macro}
    :x-str-to-lower   {:macro #'python-tf-x-str-to-lower      :emit :macro}
-   :x-str-replace    {:macro #'python-tf-x-str-replace    :emit :macro}})
+   :x-str-replace    {:macro #'python-tf-x-str-replace    :emit :macro}
+   :x-str-trim       {:macro #'python-tf-x-str-trim       :emit :macro}
+   :x-str-trim-left  {:macro #'python-tf-x-str-trim-left  :emit :macro}
+   :x-str-trim-right {:macro #'python-tf-x-str-trim-right :emit :macro}})
 
 ;;
 ;; JSON

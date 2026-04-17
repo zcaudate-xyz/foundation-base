@@ -186,7 +186,7 @@
     (template/$ (try (var ~res ~statement)
                      ~(if final (list 'return success) success)
                      (catch [Exception :as ~err]
-                       ~(if final (list 'return error) error))))))
+                         ~(if final (list 'return error) error))))))
 
 (def +features+
   (let [base (-> (grammar/build :exclude [:pointer
