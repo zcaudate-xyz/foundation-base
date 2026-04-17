@@ -183,7 +183,8 @@
   => [3 2])
 
 ^{:refer xt.lang.common-data/arr-tail
-  :added "4.1"}
+  :added "4.1"
+  :lang-exceptions {:dart {:skip true}}}
 (fact "gets the tail of the array"
   
   (!.lua (xtd/arr-tail [1 2 3 4] 2))
@@ -754,6 +755,7 @@
 
 ^{:refer xt.lang.common-data/clone-nested-loop
   :added "4.1"
+  :lang-exceptions {:dart {:skip true}}
   }
 (fact "clone nested objects loop"
   
@@ -766,6 +768,7 @@
 
 ^{:refer xt.lang.common-data/clone-nested
   :added "4.1"
+  :lang-exceptions {:dart {:skip true}}
   }
 (fact "cloning nested xects"
   

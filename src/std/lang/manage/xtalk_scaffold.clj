@@ -635,6 +635,58 @@
   (and (seq? form)
        (= 'fact (first form))))
 
+(defn runtime-dispatch-form?
+  [form]
+  (and (seq? form)
+       (contains? +runtime-dispatch-map+ (str (first form)))))
+
+(defn template-language-exception
+  [expr lang]
+  (let [lang (normalize-runtime-lang lang)]
+    (or (get (form-language-exceptions expr) lang)
+        (when (and (runtime-dispatch-form? expr)
+                   (= 1 (count (rest expr))))
+          (get (form-language-exceptions (second expr)) lang)))))
+
+(defn apply-template-language-exception-expr
+  [expr lang]
+  (let [exception (template-language-exception expr lang)]
+    (cond
+      (true? (:skip exception))
+      nil
+
+      (contains? exception :form)
+      (let [replacement (:form exception)]
+        (if (runtime-dispatch-form? expr)
+          (with-meta (list (first expr) replacement) (meta expr))
+          replacement))
+
+      :else
+      expr)))
+
+(defn apply-template-language-exceptions-fact
+  [fact-form lang]
+  (let [[fact title & body] fact-form
+        lang (normalize-runtime-lang lang)
+        updated-body
+        (loop [xs body
+               out []]
+          (if (empty? xs)
+            out
+            (let [[expr arrow expect & more] xs]
+              (if (= '=> arrow)
+                (let [exception (template-language-exception expr lang)
+                      updated-expr (apply-template-language-exception-expr expr lang)
+                      updated-expect (if (contains? exception :expect)
+                                       (:expect exception)
+                                       expect)]
+                  (recur more
+                         (cond-> out
+                           updated-expr (conj updated-expr '=> updated-expect))))
+                (recur (rest xs) (conj out (first xs)))))))]
+    (with-meta (apply list fact title updated-body)
+      (meta fact-form))))
+
 (defn fact-global-form?
   [form]
   (and (seq? form)
@@ -1220,13 +1272,21 @@
          target-ns (template-runtime-test-ns source-ns from-lang to-lang)
          source-ns-str (str source-ns)
          target-ns-str (str target-ns)]
-    (->> forms
-         (remove #(form-skipped-for-lang? % to-lang))
-         (mapv (fn [form]
-                 (cond (and (seq? form) (= 'ns (first form)))
-                       (replace-ns-name form target-ns)
+     (->> forms
+          (remove #(form-skipped-for-lang? % to-lang))
+          (mapv (fn [form]
+                  (cond (fact-form? form)
+                        (-> form
+                            (apply-template-language-exceptions-fact to-lang)
+                            (transform-script-form from-script to-script)
+                            (transform-script-runtime to-lang)
+                            (replace-runtime-symbol from-dispatch to-dispatch)
+                            (replace-string-value source-ns-str target-ns-str))
 
-                       :else
+                        (and (seq? form) (= 'ns (first form)))
+                        (replace-ns-name form target-ns)
+
+                        :else
                        (-> form
                            (transform-script-form from-script to-script)
                            (transform-script-runtime to-lang)
@@ -1604,11 +1664,8 @@
                          (test-file-path proj target-ns))
          previous-content (when (fs/exists? output-path)
                             (slurp output-path))
-         content (render-template-runtime-source source
-                                                forms
-                                                source-test-ns
-                                                from-lang
-                                                to-lang)]
+         content (render-top-level-forms
+                  (template-runtime-test-forms forms from-lang to-lang))]
      (when write
        (fs/create-directory (fs/parent output-path))
        (spit output-path content)

@@ -42,8 +42,8 @@
   {:added "4.0"}
   ([s start finish]
    (return (xt/x:str-substring s
-                               (xt/x:offset start)
-                               finish))))
+                                (xt/x:offset start)
+                                finish))))
 
 (defn.xt to-uppercase
   "converts string to uppercase"
@@ -210,7 +210,8 @@
                 "0" "1" "2" "3" "4" "5" "6" "7" "8"])
   (var out "")
   (xt/for:index [i [0 (xt/x:offset-rlen n)]]
-    (var idx (xt/x:m-floor (* (xt/x:random) (xt/x:len choices))))
+    (var rand-idx (* (xt/x:random) (xt/x:len choices)))
+    (var idx (xt/x:m-floor rand-idx))
     (:= out (xt/x:cat out (xt/x:get-idx choices (xt/x:offset idx)))))
   (return out))
 
@@ -224,7 +225,7 @@
   (var [ns name] (-/sym-pair tag))
   (var parts (xt/x:str-split (:? (xt/x:nil? ns) "" ns) "."))
   (var part-count (xt/x:len parts))
-  (var desc (:? ns
+  (var desc (:? (xt/x:not-nil? ns)
                 (xt/x:cat (xt/x:get-idx parts (+ part-count
                                                  (xt/x:offset -1)))
                        " ")

@@ -158,16 +158,30 @@
   [[_ [[res err] statement] {:keys [success error final]}]]
   (if (and (seq? statement)
            (= 'x:return-run (first statement)))
-    (let [[_ runner] statement]
-      (template/$ (do (var ~res nil)
+    (let [[_ runner] statement
+          on-ok (gensym "on_ok")
+          on-err (gensym "on_err")
+          ex (gensym "ex")
+          state (gensym "state")]
+      (template/$ (do (var ~state {"res" nil
+                                   "err" nil})
+                      (var ~res nil)
+                      (var ~err nil)
+                      (fn ~on-ok [value]
+                        (:= (. ~state ["res"]) value)
+                        (:= (. ~state ["err"]) nil))
+                      (fn ~on-err [value]
+                        (:= (. ~state ["res"]) nil)
+                        (:= (. ~state ["err"]) value))
                       (try
-                        (~runner
-                         (fn [value]
-                           (:= ~res value))
-                         (fn [value]
-                           (throw value)))
-                        ~(if final (list 'return success) success)
-                        (catch [Exception :as ~err]
+                        (~runner ~on-ok ~on-err)
+                        (:= ~res (. ~state ["res"]))
+                        (:= ~err (. ~state ["err"]))
+                        (if (not= nil ~err)
+                          ~(if final (list 'return error) error)
+                          ~(if final (list 'return success) success))
+                        (catch [Exception :as ~ex]
+                          (:= ~err ~ex)
                           ~(if final (list 'return error) error))))))
     (template/$ (try (var ~res ~statement)
                      ~(if final (list 'return success) success)

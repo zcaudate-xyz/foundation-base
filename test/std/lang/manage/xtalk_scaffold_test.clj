@@ -665,6 +665,33 @@
         true
         true])
 
+^{:refer std.lang.manage.xtalk-scaffold/scaffold-runtime-template :added "4.1"}
+(fact "scaffold-runtime-template renders the real common_math seed for python and dart"
+  (let [{py-target-ns :target-ns
+         py-content :content}
+        (scaffold-runtime-template nil {:input-path "test/xt/lang/common_math_test.clj"
+                                        :lang :python})
+        {dt-target-ns :target-ns
+         dt-content :content}
+        (scaffold-runtime-template nil {:input-path "test/xt/lang/common_math_test.clj"
+                                        :lang :dart})]
+    [py-target-ns
+     (str/includes? py-content "xtbench.python.lang.common-math-test")
+     (str/includes? py-content "xt.lang.common-math/log10")
+     (str/includes? py-content "xt.lang.common-math/round")
+     dt-target-ns
+     (str/includes? dt-content "xtbench.dart.lang.common-math-test")
+     (str/includes? dt-content "xt.lang.common-math/log10")
+     (str/includes? dt-content "xt.lang.common-math/round")])
+  => '[xtbench.python.lang.common-math-test
+       true
+       true
+       true
+       xtbench.dart.lang.common-math-test
+       true
+       true
+       true])
+
 ^{:refer std.lang.manage.xtalk-scaffold/diagnose-runtime-generation :added "4.1"}
 (fact "diagnoses split generation rewrites and expected outputs"
   (with-temp-runtime-suite-file

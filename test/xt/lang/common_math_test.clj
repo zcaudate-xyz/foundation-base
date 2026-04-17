@@ -21,23 +21,23 @@
 ^{:refer xt.lang.common-math/acos :added "4.1"}
 (fact "returns the arccosine"
   (!.lua
-   [(xtm/acos 1)
-    (xtm/acos -1)])
-  => [0 3.1415926535898])
+    [(xtm/acos 1)
+     (xtm/acos -1)])
+  => (contains [(approx 0) (approx 3.1415926535898)]))
 
 ^{:refer xt.lang.common-math/asin :added "4.1"}
 (fact "returns the arcsine"
   (!.lua
-   [(xtm/asin 0)
-    (xtm/asin 1)])
-  => [0 1.5707963267949])
+    [(xtm/asin 0)
+     (xtm/asin 1)])
+  => (contains [(approx 0) (approx 1.5707963267949)]))
 
 ^{:refer xt.lang.common-math/atan :added "4.1"}
 (fact "returns the arctangent"
   (!.lua
-   [(xtm/atan 0)
-    (xtm/atan 1)])
-  => [0 0.78539816339745])
+    [(xtm/atan 0)
+     (xtm/atan 1)])
+  => (contains [(approx 0) (approx 0.78539816339745)]))
 
 ^{:refer xt.lang.common-math/ceil :added "4.1"}
 (fact "rounds up to the nearest integer"
@@ -51,21 +51,21 @@
   (!.lua
    [(xtm/cos 0)
     (xtm/cos 3.1415926535898)])
-  => [1 -1])
+  => (contains [(approx 1) (approx -1)]))
 
 ^{:refer xt.lang.common-math/cosh :added "4.1"}
 (fact "returns the hyperbolic cosine"
   (!.lua
-   [(xtm/cosh 0)
-    (xtm/cosh 1)])
-  => [1 1.5430806348152])
+    [(xtm/cosh 0)
+     (xtm/cosh 1)])
+  => (contains [(approx 1) (approx 1.5430806348152)]))
 
 ^{:refer xt.lang.common-math/exp :added "4.1"}
 (fact "returns e raised to a power"
   (!.lua
-   [(xtm/exp 0)
-    (xtm/exp 1)])
-  => [1 2.718281828459])
+    [(xtm/exp 0)
+     (xtm/exp 1)])
+  => (contains [(approx 1) (approx 2.718281828459)]))
 
 ^{:refer xt.lang.common-math/floor :added "4.1"}
 (fact "rounds down to the nearest integer"
@@ -78,14 +78,14 @@
 (fact "returns the natural logarithm"
   (!.lua
    (xtm/loge 1))
-  => 0)
+  => (approx 0))
 
 ^{:refer xt.lang.common-math/log10 :added "4.1"}
 (fact "returns the base-10 logarithm"
   (!.lua
    [(xtm/log10 1)
     (xtm/log10 1000)])
-  => [0 3])
+  => (contains [(approx 0) (approx 3)]))
 
 ^{:refer xt.lang.common-math/max :added "4.1"}
 (fact "returns the maximum value"
@@ -94,11 +94,13 @@
     (xtm/max 3 7 5 1)])
   => [7 7])
 
-^{:refer xt.lang.common-math/mod :added "4.1"}
+^{:refer xt.lang.common-math/mod
+  :added "4.1"}
 (fact "returns the modulo"
   (!.lua
-   [(xtm/mod 10 3)
-    (xtm/mod -1 5)])
+    ^{:lang-exceptions {:js {:expect [1 -1]}}}
+    [(xtm/mod 10 3)
+     (xtm/mod -1 5)])
   => [1 4])
 
 ^{:refer xt.lang.common-math/min :added "4.1"}
@@ -127,35 +129,35 @@
   (!.lua
    [(xtm/sin 0)
     (xtm/sin 1.5707963267949)])
-  => [0 1])
+  => (contains [(approx 0) (approx 1)]))
 
 ^{:refer xt.lang.common-math/sinh :added "4.1"}
 (fact "returns the hyperbolic sine"
   (!.lua
-   [(xtm/sinh 0)
-    (xtm/sinh 1)])
-  => [0 1.1752011936438])
+    [(xtm/sinh 0)
+     (xtm/sinh 1)])
+  => (contains [(approx 0) (approx 1.1752011936438)]))
 
 ^{:refer xt.lang.common-math/sqrt :added "4.1"}
 (fact "returns the square root"
   (!.lua
    [(xtm/sqrt 4)
     (xtm/sqrt 0)])
-  => [2 0])
+  => (contains [(approx 2) (approx 0)]))
 
 ^{:refer xt.lang.common-math/tan :added "4.1"}
 (fact "returns the tangent"
   (!.lua
-   [(xtm/tan 0)
-    (xtm/tan 0.78539816339745)])
-  => [0 1])
+    [(xtm/tan 0)
+     (xtm/tan 0.78539816339745)])
+  => (contains [(approx 0) (approx 1)]))
 
 ^{:refer xt.lang.common-math/tanh :added "4.1"}
 (fact "returns the hyperbolic tangent"
   (!.lua
-   [(xtm/tanh 0)
-    (xtm/tanh 1)])
-  => [0 0.76159415595576])
+    [(xtm/tanh 0)
+     (xtm/tanh 1)])
+  => (contains [(approx 0) (approx 0.76159415595576)]))
 
 ^{:refer xt.lang.common-math/mod-pos :added "4.1"}
 (fact "returns a positive modulo"

@@ -408,17 +408,17 @@
 
 (defn python-tf-x-obj-keys
   [[_ obj]]
-  (list 'return (list 'list (list '. obj '(keys)))))
+  (list 'list (list '. obj '(keys))))
 
 (defn python-tf-x-obj-vals
   [[_ obj]]
-  (list 'return (list 'list (list '. obj '(values)))))
+  (list 'list (list '. obj '(values))))
 
 (defn python-tf-x-obj-pairs
   "converts map to array"
   {:added "4.0"}
   ([[_ obj]]
-   (list 'return (list 'list (list '. obj '(items))))))
+   (list 'list (list '. obj '(items)))))
 
 (defn python-tf-x-obj-clone
   [[_ obj]]
@@ -440,7 +440,8 @@
 
   (defn python-tf-x-arr-slice
     [[_ arr start end]]
-    (list '. arr [(list :to start end)]))
+    (list '. arr [(list :to (list '- start (list 'x:offset))
+                         end)]))
 
 
 
@@ -468,6 +469,10 @@
   [[_ arr idx e]]
   (list '. arr (list 'insert idx e)))
 
+(defn python-tf-x-arr-remove
+  [[_ arr idx]]
+  (list '. arr (list 'pop idx)))
+
 (defn python-tf-x-arr-sort
   [[_ arr key-fn compare-fn]]
   (list '. arr (list 'sort :key #_key-fn
@@ -492,6 +497,7 @@
    :x-arr-push-first  {:macro #'python-tf-x-arr-push-first :emit :macro}
    :x-arr-pop-first   {:macro #'python-tf-x-arr-pop-first  :emit :macro}
    :x-arr-insert      {:macro #'python-tf-x-arr-insert     :emit :macro}
+   :x-arr-remove      {:macro #'python-tf-x-arr-remove     :emit :macro}
    :x-arr-sort        {:macro #'python-tf-x-arr-sort       :emit :macro}
    :x-str-comp        {:macro #'python-tf-x-str-comp       :emit :macro}})
 
@@ -502,7 +508,7 @@
 
 (defn python-tf-x-str-char
   ([[_ s i]]
-   (list 'ord (list '. s [i]))))
+   (list 'ord (list '. s [(list '- i (list 'x:offset))]))))
 
 (defn python-tf-x-str-split
   ([[_ s tok]]
@@ -513,8 +519,9 @@
    (list '. s (list 'join arr))))
 
 (defn python-tf-x-str-index-of
-  ([[_ s tok]]
-   (list '. s (list 'find tok))))
+  ([[_ s tok & [start]]]
+   (list '+ (list '. s (list 'find tok (or start 0)))
+         (list 'x:offset))))
 
 (defn python-tf-x-str-to-fixed
   [[_ num digits]]
@@ -523,7 +530,8 @@
 
 (defn python-tf-x-str-substring
   ([[_ s start & [end]]]
-   (template/$ (. ~s [~(list :to start (or end \0))]))))
+   (template/$ (. ~s [~(list :to (list '- start (list 'x:offset))
+                             (or end \0))]))))
 
 (defn python-tf-x-str-to-upper
   ([[_ s]]

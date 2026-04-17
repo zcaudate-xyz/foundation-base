@@ -49,20 +49,28 @@
   "for array transform"
   {:added "4.0"}
   [[_ [e arr] & body]]
-  (if (vector? e)
-    (let [[i v] e]
-      (template/$ (for [(var ~i := 0) (< ~i (. ~arr length)) (:++ ~i)]
-                   (var ~v (. ~arr [~i]))
-                   ~@body)))
-    (template/$ (for [(var ~e) :in ~arr]
-                 ~@body))))
+  (let [arr-sym (gensym "arr_")]
+    (if (vector? e)
+      (let [[i v] e]
+        (template/$ (do (var ~arr-sym ~arr)
+                        (for [(var ~i := 0) (< ~i (. ~arr-sym length)) (:++ ~i)]
+                          (var ~v (. ~arr-sym [~i]))
+                          ~@body))))
+      (let [i (gensym "i")]
+        (template/$ (do (var ~arr-sym ~arr)
+                        (for [(var ~i := 0) (< ~i (. ~arr-sym length)) (:++ ~i)]
+                          (var ~e (. ~arr-sym [~i]))
+                          ~@body)))))))
 
 (defn tf-for-iter
   "for iter transform"
   {:added "4.0"}
   [[_ [e it] & body]]
-  (template/$ (for [(var ~e) :in ~it]
-               ~@body)))
+  (let [it-sym (gensym "iter_")]
+    (template/$ (do (var ~it-sym ~it)
+                    (while (. ~it-sym (moveNext))
+                      (var ~e (. ~it-sym current))
+                      ~@body)))))
 
 (defn tf-for-return
   "for return transform"
@@ -78,7 +86,7 @@
                  error)
         out (if return-run?
               (let [[_ runner] statement]
-                (template/$
+               (template/$
                  (do (var ~res nil)
                      (var ~err nil)
                      (try
@@ -89,9 +97,9 @@
                         (fn [value]
                           (:= ~res nil)
                           (:= ~err value)))
-                       (if ~err
-                         ~error*
-                         ~success*)
+                       (if (not= nil ~err)
+                          ~error*
+                          ~success*)
                        (catch ~err ~error*)))))
               (let [cb (list 'fn [err res]
                              (list 'if (list 'not= err nil)
@@ -207,12 +215,12 @@
       (collection/merge-nested
        {:banned #{:set :regex}
          :highlight '#{return break continue}
-          :default {:common    {:statement ";"}
-                    :function  {:prefix ""
-                                :raw ""
-                                :args {:sep ", "}}
-                   :invoke    {:reversed true :hint ""}
-                   :block     {:start " {" :end "}"}}
+           :default {:common    {:statement ";"}
+                     :function  {:prefix ""
+                                 :raw ""
+                                 :args {:sep ", "}}
+                     :invoke    {:reversed true :hint ""}
+                     :block     {:start " {" :end "}"}}
          :block   {:for {:parameter {:sep ";"}}}
          :define  {:def {:raw "var"}}
          :token   {:symbol {:replace {\- "_"}}

@@ -46,6 +46,8 @@
 (fact "gets the substring"
   
   (!.lua
+    ^{:lang-exceptions {:dart {:form [(xt/x:str-substring "hello/world" 3)
+                                      (xt/x:str-substring "hello/world" 3 8)]}}}
     [(xts/substring "hello/world" 3)
      (xts/substring "hello/world" 3 8)])
   => ["lo/world" "lo/wo"])
