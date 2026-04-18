@@ -36,7 +36,13 @@
 ^{:refer rt.basic.impl.process-dart/transform-form :added "4.1"}
 (fact "wraps forms in standalone dart main"
   (-> (transform-form ['(+ 1 2)] {}) pr-str)
-  => #"void main"
+  => #"Future<void> main\(\) async"
 
   (-> (transform-form ['(+ 1 2)] {}) pr-str)
-  => #"print")
+  => #"print"
+
+  (-> (transform-form ['(notify 1) '(return-wrap (fn:> 1))] {}) pr-str)
+  => #"await"
+
+  (-> (transform-form ['(return-wrap (fn:> 1))] {}) pr-str)
+  => #"runtimeType")

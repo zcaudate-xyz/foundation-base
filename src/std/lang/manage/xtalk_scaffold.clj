@@ -87,6 +87,10 @@
      server/run-server
      ws/service-register})
 
+(def ^:dynamic *twostep-runtime-allowances*
+  {:dart '#{notify/wait-on
+            notify/wait-on-call}})
+
 (def ^:dynamic *template-runtime-symbol-blockers*
   {:lua '#{setmetatable
            getmetatable
@@ -980,6 +984,18 @@
           :else
           false)))
 
+(defn twostep-runtime-blockers
+  [forms lang]
+  (let [lang      (some-> lang normalize-runtime-lang)
+        allowed   (get *twostep-runtime-allowances* lang #{})
+        blockers  (remove allowed *twostep-runtime-blockers*)]
+    (->> blockers
+         (filter #(some (fn [form]
+                          (form-contains-symbol? form [%]))
+                        forms))
+         (sort-by str)
+         vec)))
+
 (defn runtime-template-supported?
   [forms lang]
   (let [lang (normalize-runtime-lang lang)
@@ -998,7 +1014,7 @@
           false
 
           (= :twostep (runtime-type lang))
-          (not (some #(form-contains-symbol? % *twostep-runtime-blockers*) forms))
+          (empty? (twostep-runtime-blockers forms lang))
 
           :else
           true)))
@@ -1034,13 +1050,8 @@
    (template-runtime-blockers forms (single-runtime-template-lang forms) nil))
   ([forms from-lang to-lang]
    (let [from-lang (some-> from-lang normalize-runtime-lang)
-         to-lang (some-> to-lang normalize-runtime-lang)
-         twostep-blockers (->> *twostep-runtime-blockers*
-                               (filter #(some (fn [form]
-                                                (form-contains-symbol? form [%]))
-                                              forms))
-                               (sort-by str)
-                               vec)
+          to-lang (some-> to-lang normalize-runtime-lang)
+         twostep-blockers (twostep-runtime-blockers forms to-lang)
          runtime-specific (if (and from-lang
                                    to-lang
                                    (not= from-lang to-lang))

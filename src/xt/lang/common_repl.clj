@@ -96,7 +96,7 @@
   (return (-/socket-connect
            host port
            {:success (fn [conn]
-                       (-/notify-socket-handler conn out))})))
+                       (return (-/notify-socket-handler conn out)))})))
 
 (defn.xt notify-socket-http-handler
   "helper function for `notify-socket-http`"
@@ -119,7 +119,7 @@
   (return (-/socket-connect
            host port
            {:success (fn [conn]
-                       (-/notify-socket-http-handler conn host port opts output))})))
+                       (return (-/notify-socket-http-handler conn host port opts output)))})))
 
 (defn.xt notify-http
   "call a http notify function."

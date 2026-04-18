@@ -396,9 +396,30 @@
     :x-iter-next        {:macro #'dart-tf-x-iter-next       :emit :macro}
     :x-iter-null        {:macro #'dart-tf-x-iter-null       :emit :macro}})
 
-(defn dart-tf-x-socket-connect [[_ host port opts cb]] (list 'throw '"Socket not implemented"))
-(defn dart-tf-x-socket-send [[_ conn s]] (list 'throw '"Socket not implemented"))
-(defn dart-tf-x-socket-close [[_ conn]] (list 'throw '"Socket not implemented"))
+(defn dart-tf-x-socket-connect
+  [[_ host port opts cb]]
+  (template/$
+   (do (:- "import 'dart:io';")
+        (return (. (Socket.connect ~host ~port)
+                   (then (fn [conn]
+                           (return (~cb nil conn))))
+                   (catchError (fn [err]
+                                  (return (~cb err nil)))))))))
+
+(defn dart-tf-x-socket-send
+  [[_ conn s]]
+  (template/$
+   (do (:- "import 'dart:io';")
+        (. ~conn (write ~s)))))
+
+(defn dart-tf-x-socket-close
+  [[_ conn]]
+  (template/$
+   (return
+    (. (. ~conn (flush))
+       (then (fn [_]
+               (. ~conn (destroy))
+               (return nil)))))))
 
 (defn dart-tf-x-client-basic [[_ host port opts cb]] (list 'throw '"Client not implemented"))
 (defn dart-tf-x-client-ws [[_ host port opts cb]] (list 'throw '"WebSocket client not implemented"))

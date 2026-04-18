@@ -337,12 +337,27 @@
   (let [forms (if (symbol? (first forms))
                 [forms]
                 forms)
-         body  (concat '[do]
-                       (butlast forms)
-                        [(list 'print (list 'jsonEncode (last forms)))])]
-    `(:- "void main() {\n "
+        statement-op? '#{:- := var return break throw}
+        await-form (fn [form]
+                     (if (and (seq? form)
+                              (statement-op? (first form)))
+                       form
+                       (list 'await form)))
+        out-json (list ':?
+                       (list '== 'out nil)
+                       (list 'jsonEncode 'out)
+                       (list ':?
+                             (list '== (list '. (list '. 'out 'runtimeType) (list 'toString))
+                                   "String")
+                             'out
+                             (list 'jsonEncode 'out)))
+        body  (concat '[do]
+                      (map await-form (butlast forms))
+                      [(list 'var 'out (list 'await (last forms)))
+                       (list 'print out-json)])]
+    `(:- "Future<void> main() async {\n "
          ~body
-         "\n}")))
+          "\n}")))
 
 (defn- dart-exec
   "Resolves a user-local Dart SDK binary before falling back to PATH."
