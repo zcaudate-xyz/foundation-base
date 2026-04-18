@@ -30,29 +30,29 @@
                                          (- (char-count trimmed \[)
                                             (char-count trimmed \])))
                        next-paren     (max 0 (+ paren-depth p-delta))
-                        closing-brace? (str/starts-with? trimmed "}")
-                        opening-brace? (str/ends-with? trimmed "{")
-                        ;; distinguish block bodies (fn/if/for/etc) from map/object literals
-                        block-brace?   (and opening-brace?
-                                            (or (re-find #"(?:\)|async|sync\*?)\s*\{$" trimmed)
-                                                (re-find #"^(?:else|try|finally|do)\s*\{$" trimmed)))
-                        assign-brace?  (and opening-brace?
-                                            (not block-brace?))
-                        next-brace-stack (let [closed-stack (if (and closing-brace?
-                                                                     (seq brace-stack))
-                                                              (rest brace-stack)
-                                                              brace-stack)]
-                                           (if opening-brace?
-                                             (cons (if assign-brace?
-                                                     :assignment
-                                                     :block)
-                                                   closed-stack)
-                                             closed-stack))
-                       in-brace?      (seq brace-stack)
-                       in-assign?     (= (first brace-stack) :assignment)
-                       complete?      (and (zero? paren-depth)
-                                           (zero? next-paren)
-                                           (not in-brace?))
+                       closing-brace? (str/starts-with? trimmed "}")
+                       opening-brace? (str/ends-with? trimmed "{")
+                       ;; distinguish block bodies (fn/if/for/etc) from map/object literals
+                       block-brace?   (and opening-brace?
+                                           (or (re-find #"(?:\)|async|sync\*?)\s*\{$" trimmed)
+                                               (re-find #"^(?:else|try|finally|do)\s*\{$" trimmed)))
+                       assign-brace?  (and opening-brace?
+                                           (not block-brace?))
+                       closed-stack   (if (and closing-brace?
+                                               (seq brace-stack))
+                                        (rest brace-stack)
+                                        brace-stack)
+                       next-brace-stack (if opening-brace?
+                                          (cons (if assign-brace?
+                                                  :assignment
+                                                  :block)
+                                                closed-stack)
+                                          closed-stack)
+                        in-brace?      (seq brace-stack)
+                        in-assign?     (= (first brace-stack) :assignment)
+                        complete?      (and (zero? paren-depth)
+                                            (zero? next-paren)
+                                            (not in-brace?))
                        line'          (cond
                                         ;; blank lines and comments unchanged
                                         (or (empty? trimmed)
@@ -61,10 +61,13 @@
 
                                         ;; closing brace of an assignment block (map/object)
                                         ;; the var declaration needs its semicolon here
-                                        (and closing-brace? in-assign?)
-                                        (if (str/ends-with? trimmed ";")
-                                          line
-                                          (str line ";"))
+                                         (and closing-brace?
+                                              in-assign?
+                                              (not opening-brace?)
+                                              (not= (first closed-stack) :assignment))
+                                         (if (str/ends-with? trimmed ";")
+                                           line
+                                           (str line ";"))
 
                                         ;; closing brace of a function/control block
                                         closing-brace?
@@ -347,6 +350,7 @@
                 forms)
         statement-op? '#{:- := var return break throw
                          do do* if for while try
+                         for:index for:array for:object for:iter
                          xt/for:index xt/for:array xt/for:object xt/for:iter}
         await-form (fn [form]
                      (if (and (seq? form)

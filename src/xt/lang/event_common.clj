@@ -170,8 +170,8 @@
   [container]
   (var #{listeners} container)
   (var out {})
-  (xt/for:object [[id entry] listeners]
-    (var #{meta} entry)
+  (xt/for:object [[id listener-entry] listeners]
+    (var #{meta} listener-entry)
     (var t   (xt/x:get-key meta "listener/type"))
     (var arr (xt/x:get-key out t))
     (when (xt/x:nil? arr)
@@ -187,18 +187,23 @@
   (var #{callback meta pred} entry)
   (when (or (xt/x:nil? pred)
             (pred event))
-    (var nmeta (xt/x:obj-assign (or (xt/x:get-key event "meta")
-                                 {})
-                             meta))
-    (callback (xt/x:obj-assign
-               (xt/x:obj-clone event)
-               {:meta nmeta}))))
+    (var event-meta (xt/x:get-key event "meta"))
+    (var nmeta (xt/x:obj-assign (:? (xt/x:nil? event-meta)
+                                    {}
+                                    event-meta)
+                                meta))
+    (return (callback (xt/x:obj-assign
+                       (xt/x:obj-clone event)
+                       {:meta nmeta}))))
+  (return nil))
 
 (defn.xt trigger-listeners
   "triggers listeners given event"
   {:added "4.0"}
   [container event]
-  (:= event (or event {}))
+  (:= event (:? (xt/x:nil? event)
+                {}
+                event))
   (var #{listeners} container)
   (var triggered [])
   (xt/for:object [[id entry] listeners]
@@ -263,7 +268,9 @@
   "triggers listeners under a key"
   {:added "4.0"}
   [container key event]
-  (:= event (or event {}))
+  (:= event (:? (xt/x:nil? event)
+                {}
+                event))
   (var #{listeners} container)
   (var group (xt/x:get-key listeners key))
   (var triggered [])

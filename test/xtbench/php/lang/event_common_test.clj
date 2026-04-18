@@ -1,5 +1,5 @@
 (ns
- xtbench.python.lang.event-common-test
+ xtbench.php.lang.event-common-test
  (:require
   [net.http :as http]
   [rt.basic :as basic]
@@ -8,39 +8,28 @@
   [xt.lang.common-notify :as notify])
  (:use code.test))
 
-(l/script-
- :python
- {:runtime :basic,
-  :require
-  [[xt.lang.common-lib :as k]
-   [xt.lang.common-data :as xtd]
-   [xt.lang.event-common :as event]
-   [xt.lang.common-repl :as repl]]})
-
 (fact:global {:setup [(l/rt:restart)], :teardown [(l/rt:stop)]})
 
 ^{:refer xt.lang.event-common/make-container, :added "4.0"}
 (fact
  "makes a container"
- (!.py
+ (!.php
   (k/to-string
    (event/make-container
     (fn:> 1)
     "custom.container"
     {:info {:name "hello"}})))
  ^{:hidden true}
- (!.py
-  (xtd/tree-get-spec
-   (event/make-container
-    (fn:> 1)
-    "custom.container"
-    {:info {:name "hello"}})))
+ (!.php
+  (event/make-container
+   (fn:> 1)
+   "custom.container"
+   {:info {:name "hello"}}))
  =>
- {"::" "string",
-  "info" {"name" "string"},
-  "initial" "function",
+ {"info" {"name" "hello"},
+  "::" "custom.container",
   "listeners" {},
-  "data" "number"})
+  "data" 1})
 
 ^{:refer xt.lang.event-common/make-listener-entry,
   :added "4.0",
@@ -56,14 +45,9 @@
 (fact
  "makes a listener entry"
  ^{:hidden true}
- (!.py
+ (!.php
   (xtd/tree-get-data
-   (event/make-listener-entry
-    "abc"
-    "custom"
-    (fn:>)
-    {:hello "world"}
-    nil)))
+   (event/make-listener-entry "abc" "custom" (fn:>) {:hello "world"})))
  =>
  +out+)
 
@@ -72,7 +56,7 @@
  "adds a listener to container"
  ^{:hidden true}
  (notify/wait-on
-  :python
+  :php
   (var
    c
    (event/make-container
@@ -84,8 +68,7 @@
    "abc"
    "custom"
    (repl/>notify)
-   #:custom{:label "hello"}
-   nil)
+   #:custom{:label "hello"})
   (event/trigger-listeners c {:data "hello"}))
  =>
  {"meta"
@@ -98,7 +81,7 @@
 (fact
  "removes a listener"
  ^{:hidden true}
- (!.py
+ (!.php
   (var
    c
    (event/make-container
@@ -108,16 +91,19 @@
   (event/add-listener c "a1" "custom" (fn:>) nil nil)
   (event/add-listener c "b2" "custom" (fn:>) nil nil)
   (event/add-listener c "c3" "custom" (fn:>) nil nil)
-  (event/remove-listener c "b2")
-  (event/list-listeners c))
+  [(xtd/tree-get-data (event/remove-listener c "b2"))
+   (event/list-listeners c)])
  =>
- ["a1" "c3"])
+ [{"callback" "<function>",
+   "pred" nil,
+   "meta" {"listener/id" "b2", "listener/type" "custom"}}
+  ["a1" "c3"]])
 
 ^{:refer xt.lang.event-common/list-listener-types, :added "4.0"}
 (fact
  "lists listeners by their type"
  ^{:hidden true}
- (!.py
+ (!.php
   (var
    c
    (event/make-container
@@ -136,10 +122,8 @@
  "triggers the individual entry"
  ^{:hidden true}
  (notify/wait-on
-  :python
-  (var
-   entry
-   (event/make-listener-entry "abc" "custom" (repl/>notify) nil nil))
+  :php
+  (var entry (event/make-listener-entry "abc" "custom" (repl/>notify)))
   (event/trigger-entry entry {}))
  =>
  {"meta" {"listener/id" "abc", "listener/type" "custom"}})
@@ -149,7 +133,7 @@
  "adds a keyed entry"
  ^{:hidden true}
  (notify/wait-on
-  :python
+  :php
   (var
    c
    (event/make-container
@@ -162,8 +146,7 @@
    "abc"
    "custom"
    (repl/>notify)
-   #:custom{:label "hello"}
-   nil)
+   #:custom{:label "hello"})
   (event/trigger-keyed-listeners c "key/common" {:data "hello"}))
  =>
  {"meta"
@@ -176,7 +159,7 @@
 (fact
  "removes a keyed listener"
  ^{:hidden true}
- (!.py
+ (!.php
   (var
    c
    (event/make-container

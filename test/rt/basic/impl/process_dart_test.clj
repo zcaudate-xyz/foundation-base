@@ -20,6 +20,9 @@
   (normalize-dart-source "make_listener_entry(listener_id, listener_type, callback, meta, pred) {\n  return <dynamic, dynamic>{\n    \"callback\":callback,\n    \"pred\":pred,\n    \"meta\":xtd.obj_assign(\n        <dynamic, dynamic>{\"listener/id\":listener_id,\"listener/type\":listener_type},\n        meta\n      )\n  };\n}")
   => "make_listener_entry(listener_id, listener_type, callback, meta, pred) {\n  return <dynamic, dynamic>{\n    \"callback\":callback,\n    \"pred\":pred,\n    \"meta\":xtd.obj_assign(\n        <dynamic, dynamic>{\"listener/id\":listener_id,\"listener/type\":listener_type},\n        meta\n      )\n  };\n}")
 
+  (normalize-dart-source "xt.lang.common_data.arr_sort(xt.lang.event_log.list_listeners(xt.lang.event_log.new_log(<dynamic, dynamic>{\n  \"listeners\":<dynamic, dynamic>{\n    \"test1\":(id, data, t) {\n      \n    },\n    \"test2\":(id, data, t) {\n      \n    }\n  }\n})),xt.lang.common_lib.identity,(x, y) {\n  return (x).toString().compareTo((y).toString()) < 0;\n})")
+  => "xt.lang.common_data.arr_sort(xt.lang.event_log.list_listeners(xt.lang.event_log.new_log(<dynamic, dynamic>{\n  \"listeners\":<dynamic, dynamic>{\n    \"test1\":(id, data, t) {\n      \n    },\n    \"test2\":(id, data, t) {\n      \n    }\n  }\n})),xt.lang.common_lib.identity,(x, y) {\n  return (x).toString().compareTo((y).toString()) < 0;\n});"
+
 ^{:refer rt.basic.impl.process-dart/ensure-dart-imports :added "4.1"}
 (fact "hoists required Dart imports for standalone scripts"
   (ensure-dart-imports "void main() {\n  print(math.max(1, 2));\n  print(jsonEncode({\"a\": 1}));\n}")

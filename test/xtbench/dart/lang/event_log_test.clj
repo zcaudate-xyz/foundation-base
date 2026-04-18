@@ -66,14 +66,15 @@
 (fact
  "lists all listeners"
  ^{:hidden true}
- (set
-  (!.dt
+ (!.dt
+  (xtd/arr-sort
    (log/list-listeners
     (log/new-log
-     {:listeners
-      {:test1 (fn [id data t]), :test2 (fn [id data t])}}))))
+     {:listeners {:test1 (fn [id data t]), :test2 (fn [id data t])}}))
+   k/identity
+   xt/x:str-lt))
  =>
- #{"test1" "test2"})
+ ["test1" "test2"])
 
 ^{:refer xt.lang.event-log/add-listener, :added "4.0"}
 (fact
