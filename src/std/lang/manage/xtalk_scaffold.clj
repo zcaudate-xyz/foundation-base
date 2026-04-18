@@ -257,6 +257,14 @@
                [(str dispatch) lang]))
         +runtime-lang-config+))
 
+(def ^:private +runtime-reference-heads+
+  '#{l/rt
+     notify/wait-on
+     notify/wait-on-fn
+     notify/captured
+     notify/captured:count
+     notify/captured:clear})
+
 (defn normalize-runtime-lang
   [lang]
   (let [lang (cond (keyword? lang) lang
@@ -290,6 +298,22 @@
 (defn runtime-check-mode
   [lang]
   (:check-mode (runtime-lang-config lang)))
+
+(defn- runtime-reference-lang
+  [form]
+  (when (seq? form)
+    (let [[head arg] form]
+      (when (contains? +runtime-reference-heads+ head)
+        (cond
+          (keyword? arg)
+          (normalize-runtime-lang arg)
+
+          (and (vector? arg)
+               (seq arg))
+          (normalize-runtime-lang (first arg))
+
+          :else
+          nil)))))
 
 (defn runtime-suite-groups
   ([] (runtime-suite-groups (keys +runtime-lang-config+)))
@@ -587,10 +611,11 @@
 (defn runtime-expr-lang
   [expr]
   (letfn [(collect-langs [form]
-            (cond (seq? form)
-                  (if-let [lang (get +runtime-dispatch-map+ (str (first form)))]
-                    #{lang}
-                    (reduce into #{} (map collect-langs form)))
+             (cond (seq? form)
+                   (if-let [lang (or (get +runtime-dispatch-map+ (str (first form)))
+                                     (runtime-reference-lang form))]
+                     #{lang}
+                     (reduce into #{} (map collect-langs form)))
 
                   (vector? form)
                   (reduce into #{} (map collect-langs form))
@@ -612,10 +637,11 @@
 (defn runtime-dispatch-langs
   [form]
   (letfn [(collect-langs [form]
-            (cond (seq? form)
-                  (if-let [lang (get +runtime-dispatch-map+ (str (first form)))]
-                    #{lang}
-                    (reduce into #{} (map collect-langs form)))
+             (cond (seq? form)
+                   (if-let [lang (or (get +runtime-dispatch-map+ (str (first form)))
+                                     (runtime-reference-lang form))]
+                     #{lang}
+                     (reduce into #{} (map collect-langs form)))
 
                   (vector? form)
                   (reduce into #{} (map collect-langs form))
@@ -987,14 +1013,16 @@
 (defn twostep-runtime-blockers
   [forms lang]
   (let [lang      (some-> lang normalize-runtime-lang)
-        allowed   (get *twostep-runtime-allowances* lang #{})
-        blockers  (remove allowed *twostep-runtime-blockers*)]
-    (->> blockers
-         (filter #(some (fn [form]
-                          (form-contains-symbol? form [%]))
-                        forms))
-         (sort-by str)
-         vec)))
+        allowed   (get *twostep-runtime-allowances* lang #{})]
+    (if (= :twostep (runtime-type lang))
+      (let [blockers (remove allowed *twostep-runtime-blockers*)]
+        (->> blockers
+             (filter #(some (fn [form]
+                              (form-contains-symbol? form [%]))
+                            forms))
+             (sort-by str)
+             vec))
+      [])))
 
 (defn runtime-template-supported?
   [forms lang]
@@ -1126,8 +1154,57 @@
                                                  form))
                              (meta form))
 
-                           :else
-                           form))]
+                            :else
+                            form))]
+    (recur-form form)))
+
+(defn- retarget-runtime-reference-arg
+  [arg lang]
+  (let [lang (normalize-runtime-lang lang)]
+    (cond
+      (and (keyword? arg)
+           (contains? +runtime-lang-config+ (normalize-runtime-lang arg)))
+      lang
+
+      (and (vector? arg)
+           (seq arg)
+           (some? (normalize-runtime-lang (first arg))))
+      (with-meta (vec (cons lang (rest arg))) (meta arg))
+
+      :else
+      arg)))
+
+(defn retarget-runtime-references
+  [form lang]
+  (let [lang (normalize-runtime-lang lang)
+        recur-form (fn recur-form [form]
+                     (cond
+                       (seq? form)
+                       (let [items (map recur-form form)
+                             updated (apply list items)
+                             head (first updated)]
+                         (with-meta
+                           (if (contains? +runtime-reference-heads+ head)
+                             (let [[f arg & more] updated]
+                               (apply list f (retarget-runtime-reference-arg arg lang) more))
+                             updated)
+                           (meta form)))
+
+                       (vector? form)
+                       (with-meta (vec (map recur-form form)) (meta form))
+
+                       (set? form)
+                       (with-meta (into #{} (map recur-form form)) (meta form))
+
+                       (map? form)
+                       (with-meta (into (empty form)
+                                        (map (fn [[k v]]
+                                               [(recur-form k) (recur-form v)])
+                                             form))
+                         (meta form))
+
+                       :else
+                       form))]
     (recur-form form)))
 
 (defn replace-string-value
@@ -1264,6 +1341,7 @@
   [form lang]
   (-> form
       (retarget-runtime-dispatch lang)
+      (retarget-runtime-references lang)
       (normalize-fact-global-form lang)))
 
 (defn template-runtime-test-ns
@@ -1292,6 +1370,7 @@
                             (transform-script-form from-script to-script)
                             (transform-script-runtime to-lang)
                             (replace-runtime-symbol from-dispatch to-dispatch)
+                            (retarget-runtime-references to-lang)
                             (replace-string-value source-ns-str target-ns-str))
 
                         (and (seq? form) (= 'ns (first form)))
@@ -1302,6 +1381,7 @@
                            (transform-script-form from-script to-script)
                            (transform-script-runtime to-lang)
                            (replace-runtime-symbol from-dispatch to-dispatch)
+                           (retarget-runtime-references to-lang)
                            (replace-string-value source-ns-str target-ns-str))))))))
 
 (defn split-fact-form

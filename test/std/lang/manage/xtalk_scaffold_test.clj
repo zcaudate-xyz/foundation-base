@@ -98,15 +98,37 @@
 (def blocked-runtime-template-forms
   (read-string
    "[(ns xt.sample.common-notify-test
+         (:require [std.lang :as l]
+                   [xt.lang.common-notify :as notify]
+                   [xt.lang.common-repl :as repl])
+        (:use code.test))
+       (l/script- :js {:runtime :basic})
+        (fact \"notify helper\"
+         (notify/wait-on :js
+           (repl/notify 1))
+         => 1)]"))
+
+(def split-runtime-reference-forms
+  (read-string
+   "[(ns xt.sample.common-notify-test
         (:require [std.lang :as l]
                   [xt.lang.common-notify :as notify]
                   [xt.lang.common-repl :as repl])
-       (:use code.test))
+        (:use code.test))
       (l/script- :js {:runtime :basic})
-       (fact \"notify helper\"
-        (notify/wait-on :js
-          (repl/notify 1))
-        => 1)]"))
+      (l/script- :lua {:runtime :basic})
+      (fact \"notify helper\"
+        (notify/wait-on :js (repl/notify 1))
+        => 1
+        (notify/wait-on :lua (repl/notify 1))
+        => 1)
+      (fact \"captured helper\"
+        [(notify/captured :js)
+         (:id (l/rt :js))]
+        => [nil nil]
+        [(notify/captured :lua)
+         (:id (l/rt :lua))]
+        => [nil nil])]"))
 
 (def lua-specific-template-forms
   (read-string
@@ -381,11 +403,11 @@
 ^{:refer std.lang.manage.xtalk-scaffold/runtime-template-supported? :added "4.1"}
 (fact "blocks twostep suite generation for runtime-coupled templates"
   [(runtime-template-supported? canonical-runtime-template-forms :dart)
-    (runtime-template-supported? blocked-runtime-template-forms :dart)
-    (runtime-template-supported? runtime-test-forms :dart)
-    (runtime-template-supported? lua-specific-template-forms :lua)
-    (runtime-template-supported? lua-specific-template-forms :js)]
-  => [true false false true false])
+     (runtime-template-supported? blocked-runtime-template-forms :dart)
+     (runtime-template-supported? runtime-test-forms :dart)
+     (runtime-template-supported? lua-specific-template-forms :lua)
+     (runtime-template-supported? lua-specific-template-forms :js)]
+  => [true true false true false])
 
 ^{:refer std.lang.manage.xtalk-scaffold/replace-runtime-symbol :added "4.1"}
 (fact "replaces runtime dispatch symbol"
@@ -422,11 +444,34 @@
       (str/includes? out ":refer xt.lang.common-lib/identity")])
   => [true true true true true true true true])
 
+^{:refer std.lang.manage.xtalk-scaffold/template-runtime-test-forms :added "4.1"}
+(fact "retargets host-side runtime references in template output"
+  (let [out (render-top-level-forms
+             (template-runtime-test-forms blocked-runtime-template-forms :js :lua))]
+    [(str/includes? out "(notify/wait-on :lua)")
+     (not (str/includes? out "(notify/wait-on :js)"))])
+  => [true true])
+
 ^{:refer std.lang.manage.xtalk-scaffold/split-fact-form :added "4.1"}
 (fact "splits a mixed runtime fact form"
   (let [{:keys [shared langs]} (split-fact-form '(fact "x" (!.js (k/a)) => 1 (!.lua (k/a)) => 1) [:js :lua])]
     [(some? shared) (set (keys langs))])
   => [true #{:js :lua}])
+
+^{:refer std.lang.manage.xtalk-scaffold/separate-runtime-test-forms :added "4.1"}
+(fact "retargets host-side runtime references in split output"
+  (let [{:keys [by-lang]} (separate-runtime-test-forms split-runtime-reference-forms [:js :lua])
+        js-out (render-top-level-forms (get by-lang :js))
+        lua-out (render-top-level-forms (get by-lang :lua))]
+    [(str/includes? js-out "(notify/wait-on :js)")
+     (not (str/includes? js-out "(notify/wait-on :lua)"))
+     (str/includes? js-out "(notify/captured :js)")
+     (not (str/includes? js-out "(notify/captured :lua)"))
+     (str/includes? js-out "(l/rt :js)")
+     (not (str/includes? js-out "(l/rt :lua)"))
+     (str/includes? lua-out "(notify/wait-on :lua)")
+     (not (str/includes? lua-out "(notify/wait-on :js)"))])
+  => [true true true true true true true true])
 
 ^{:refer std.lang.manage.xtalk-scaffold/classify-split-form :added "4.1"}
 (fact "classifies split-relevant forms"
@@ -749,11 +794,11 @@
          (mapv :code unsupported)
          (-> unsupported first :blockers)])))
   => '[:template
-       :js
-       :dart
-       false
-       [:twostep-runtime-blocker]
-       [notify/wait-on]])
+        :js
+        :dart
+        true
+        []
+        nil])
 
 ^{:refer std.lang.manage.xtalk-scaffold/diagnose-runtime-generation :added "4.1"}
 (fact "diagnoses the real common_lib seed as portable across generated runtimes"
