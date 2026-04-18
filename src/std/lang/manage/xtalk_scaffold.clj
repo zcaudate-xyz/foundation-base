@@ -952,22 +952,33 @@
               (let [[_ lang] form]
                 (some (fn [[k {:keys [script]}]]
                         (when (= lang script) k))
-                       +runtime-lang-config+))))
+                        +runtime-lang-config+))))
            expanded)))
+
+(defn script-form-lang
+  [form]
+  (when (script-form? form)
+    (let [[_ script-val] form]
+      (some (fn [[k {:keys [script]}]]
+              (when (= script-val script)
+                k))
+            +runtime-lang-config+))))
+
+(defn runtime-script-forms
+  [forms]
+  (let [expanded (mapcat expand-top-level-form forms)]
+    (reduce (fn [acc form]
+              (if-let [lang (script-form-lang form)]
+                (assoc acc lang form)
+                acc))
+            {}
+            expanded)))
 
 (defn runtime-script-langs
   [forms]
-  (let [expanded (mapcat expand-top-level-form forms)]
-    (->> expanded
-         (keep (fn [form]
-                 (when (script-form? form)
-                   (let [[_ script-val] form]
-                     (some (fn [[k {:keys [script]}]]
-                             (when (= script-val script)
-                               k))
-                            +runtime-lang-config+)))))
-         distinct
-         vec)))
+  (->> (runtime-script-forms forms)
+       keys
+       vec))
 
 (defn single-runtime-template-lang
   [forms]
@@ -1296,7 +1307,15 @@
                             (get *split-runtime-clause-preference*
                                  lang
                                  langs))
-                      clauses))])))
+                       clauses))])))
+
+(defn preferred-runtime-script-form
+  [script-forms lang]
+  (let [lang (normalize-runtime-lang lang)]
+    (or (get script-forms lang)
+        (some (fn [source-lang]
+                (get script-forms (normalize-runtime-lang source-lang)))
+              (get *split-runtime-clause-preference* lang)))))
 
 (defn transform-script-form
   [form from-script to-script]
@@ -1518,9 +1537,7 @@
   [forms langs]
   (let [expanded (mapcat expand-top-level-form forms)
          ns-form (some #(when (and (seq? %) (= 'ns (first %))) %) forms)
-         scripts (->> expanded
-                      (filter script-form?)
-                      (group-by #(second %)))
+         script-forms (runtime-script-forms forms)
          shared-forms (atom [])
          by-lang (atom (zipmap langs (repeat [])))]
      (doseq [form expanded]
@@ -1552,19 +1569,21 @@
                      [(replace-ns-name ns-form (second ns-form))]
                      @shared-forms))
        :by-lang (into {}
-                      (keep (fn [lang]
-                              (let [script-form (first (get scripts lang))
-                                    out-forms (get @by-lang lang)]
-                                (when (seq out-forms)
-                                  [lang (vec (concat
-                                              [(replace-ns-name ns-form
-                                                                (runtime-test-ns (second ns-form)
-                                                                                 lang))]
-                                              (when script-form
-                                                [(-> script-form
-                                                     (transform-script-runtime lang))])
-                                              out-forms))])))
-                            langs))}))
+                       (keep (fn [lang]
+                               (let [script-form (preferred-runtime-script-form script-forms lang)
+                                     out-forms (get @by-lang lang)]
+                                 (when (seq out-forms)
+                                   [lang (vec (concat
+                                               [(replace-ns-name ns-form
+                                                                 (runtime-test-ns (second ns-form)
+                                                                                  lang))]
+                                               (when script-form
+                                                 [(-> script-form
+                                                      (transform-script-form (second script-form)
+                                                                             (runtime-script-lang lang))
+                                                      (transform-script-runtime lang))])
+                                               out-forms))])))
+                             langs))}))
 
 (defn separate-runtime-tests
   "Splits a multi-runtime test namespace into per-language test files."
@@ -1738,6 +1757,7 @@
                    (map normalize-runtime-lang)
                    distinct
                    vec)
+        script-forms (runtime-script-forms forms)
         script-langs (runtime-script-langs forms)
         script-lang-set (set script-langs)
         expanded (vec (mapcat expand-top-level-form forms))
@@ -1747,17 +1767,18 @@
         {:keys [by-lang]} (separate-runtime-test-forms forms langs)
         output-diagnostics (vec
                             (for [lang langs
-                                  :let [out-forms (get by-lang lang)]
+                                  :let [out-forms (get by-lang lang)
+                                        script-form (preferred-runtime-script-form script-forms lang)]
                                   :when (seq out-forms)]
                               {:lang lang
                                :path (test-file-path proj (runtime-test-ns test-ns lang))
-                               :script-present (contains? script-lang-set lang)
+                               :script-present (some? script-form)
                                :fact-count (count (filter fact-form? out-forms))
-                               :status (if (contains? script-lang-set lang)
-                                         :expected-pass
-                                         :needs-review)
+                               :status (if (some? script-form)
+                                          :expected-pass
+                                          :needs-review)
                                :unsupported (vec
-                                             (when-not (contains? script-lang-set lang)
+                                             (when-not (some? script-form)
                                                [{:code :missing-runtime-script
                                                  :message "Generated output has runtime facts but the source seed does not define l/script- for this runtime."
                                                  :lang lang}]))}))

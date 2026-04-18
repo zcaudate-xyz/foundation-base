@@ -25,13 +25,6 @@
              [xt.lang.event-log-latest :as log-latest]
              [xt.lang.common-repl :as repl]]})
 
-(l/script- :dart
-  {:runtime :twostep
-   :require [[xt.lang.common-lib :as k]
-             [xt.lang.common-spec :as xt]
-             [xt.lang.event-log-latest :as log-latest]
-             [xt.lang.common-repl :as repl]]})
-
 (fact:global
  {:setup    [(l/rt:restart)]
   :teardown [(l/rt:stop)]})

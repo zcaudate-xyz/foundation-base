@@ -90,7 +90,7 @@
   (var #{last interval cache} log)
   (var stale [])
   (var out [])
-  (when (and last
+  (when (and (not (xt/x:nil? last))
              (>= interval (- t last)))
     (return out))
   
@@ -150,7 +150,7 @@
   (-/clear-cache log t)
   
   (cond (or (xt/x:nil? key)
-            (xt/x:get-key cache key))
+            (not (xt/x:nil? (xt/x:get-key cache key))))
         (return nil)
         
         :else
@@ -158,10 +158,12 @@
             (xtd/arr-pushl processed
                            (xtd/clone-nested data)
                            maximum)
-            (when callback (callback data t))
+            (when (not (xt/x:nil? callback))
+              (callback data t))
             (xt/for:object [[id listener-entry] listeners]
               (var #{callback meta} listener-entry)
-              (callback id data t meta))
+              (when (not (xt/x:nil? callback))
+                (callback id data t meta)))
             (return data))))
 
 (defn.xt add-listener

@@ -1,5 +1,6 @@
 (ns rt.basic.impl.process-dart-test
-  (:require [rt.basic.impl.process-dart :refer :all]
+  (:require [clojure.string :as str]
+            [rt.basic.impl.process-dart :refer :all]
             [std.lib.os :as os])
   (:use code.test))
 
@@ -14,7 +15,10 @@
   => "var OPERATORS = {\n  \"neq\":\"!=\",\n  \"gt\":\">\"\n};"
 
   (normalize-dart-source "encode_bool(b) {\n  return \"TRUE\";\n}")
-  => "encode_bool(b) {\n  return \"TRUE\";\n}")
+  => "encode_bool(b) {\n  return \"TRUE\";\n}"
+
+  (normalize-dart-source "make_listener_entry(listener_id, listener_type, callback, meta, pred) {\n  return <dynamic, dynamic>{\n    \"callback\":callback,\n    \"pred\":pred,\n    \"meta\":xtd.obj_assign(\n        <dynamic, dynamic>{\"listener/id\":listener_id,\"listener/type\":listener_type},\n        meta\n      )\n  };\n}")
+  => "make_listener_entry(listener_id, listener_type, callback, meta, pred) {\n  return <dynamic, dynamic>{\n    \"callback\":callback,\n    \"pred\":pred,\n    \"meta\":xtd.obj_assign(\n        <dynamic, dynamic>{\"listener/id\":listener_id,\"listener/type\":listener_type},\n        meta\n      )\n  };\n}")
 
 ^{:refer rt.basic.impl.process-dart/ensure-dart-imports :added "4.1"}
 (fact "hoists required Dart imports for standalone scripts"
@@ -45,4 +49,11 @@
   => #"await"
 
   (-> (transform-form ['(return-wrap (fn:> 1))] {}) pr-str)
-  => #"runtimeType")
+  => #"runtimeType"
+
+  (str/includes? (pr-str (transform-form ['(for [(var i := 0) (< i 10) (:++ i)]
+                                           (notify i))
+                                         '(+ 1 2)]
+                                        {}))
+                 "await for")
+  => false)

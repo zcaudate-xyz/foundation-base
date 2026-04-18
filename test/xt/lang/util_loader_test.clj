@@ -31,14 +31,6 @@
              [xt.lang.common-repl :as repl]
              [xt.lang.util-loader :as loader]]})
 
-(l/script- :dart
-  {:runtime :twostep
-   :require [[xt.lang.common-lib :as k]
-             [xt.lang.common-data :as xtd]
-             [xt.lang.common-spec :as xt]
-             [xt.lang.common-repl :as repl]
-             [xt.lang.util-loader :as loader]]})
-
 (fact:global
  {:setup    [(l/rt:restart)]
   :teardown [(l/rt:stop)]})

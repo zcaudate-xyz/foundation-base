@@ -28,13 +28,6 @@
              [xt.lang.common-repl :as repl]
              [xt.lang.util-validate :as validate]]})
 
-(l/script- :dart
-  {:runtime :twostep
-   :require [[xt.lang.common-lib :as k]
-             [xt.lang.common-spec :as xt]
-             [xt.lang.common-repl :as repl]
-             [xt.lang.util-validate :as validate]]})
-
 (fact:global
  {:setup    [(l/rt:restart)]
   :teardown [(l/rt:stop)]})
