@@ -74,7 +74,7 @@
   (var b (box/make-box (fn:> {:a {:b 2}})))
   [(box/set-data b "c" 3) (box/get-data b)])
  =>
- [[] {"a" {"b" 2}, "c" 3}])
+ [{} {"a" {"b" 2}, "c" 3}])
 
 ^{:refer xt.lang.event-box/del-data-raw, :added "4.0"}
 (fact
@@ -94,7 +94,7 @@
   (var b (box/make-box (fn:> {:a {:b 2}})))
   [(box/del-data b ["a" "b"]) (box/get-data b)])
  =>
- [[] {"a" {}}])
+ [{} {"a" {}}])
 
 ^{:refer xt.lang.event-box/merge-data, :added "4.0"}
 (fact

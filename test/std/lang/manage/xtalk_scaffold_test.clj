@@ -105,8 +105,21 @@
        (l/script- :js {:runtime :basic})
         (fact \"notify helper\"
          (notify/wait-on :js
-           (repl/notify 1))
-         => 1)]"))
+            (repl/notify 1))
+          => 1)]"))
+
+(def lua-empty-vector-runtime-forms
+  (read-string
+   "[(ns xt.sample.lua-empty-vector-test
+        (:require [std.lang :as l])
+        (:use code.test))
+      (l/script- :js {:runtime :basic})
+      (l/script- :lua {:runtime :basic})
+      (fact \"normalizes lua empty vectors\"
+        (!.js {:queued []})
+        => {\"queued\" []}
+        (!.lua {:queued []})
+        => {\"queued\" []})]"))
 
 (def split-runtime-reference-forms
   (read-string
@@ -359,6 +372,9 @@
 ^{:refer std.lang.manage.xtalk-scaffold/commented-form? :added "4.1"}
 (fact "detects commented forms by metadata"
   (commented-form? (with-meta '(+ 1 2) {:comment true}))
+  => true
+
+  (commented-form? '(comment (+ 1 2)))
   => true)
 
 ^{:refer std.lang.manage.xtalk-scaffold/test-file-path :added "4.1"}
@@ -567,10 +583,27 @@
     runtime-test-forms
     (fn [path]
       (let [before (slurp path)]
-        (separate-runtime-tests nil {:input-path path
-                                     :langs [:js :lua]
-                                     :write true})
+       (separate-runtime-tests nil {:input-path path
+                                    :langs [:js :lua]
+                                    :write true})
         (= before (slurp path)))))
+  => true)
+
+^{:refer std.lang.manage.xtalk-scaffold/separate-runtime-tests :added "4.1"}
+(fact "separate-runtime-tests normalizes empty vector expectations for lua"
+  (with-temp-runtime-suite-file
+    lua-empty-vector-runtime-forms
+    (fn [path]
+      (let [{:keys [outputs]}
+            (separate-runtime-tests nil {:input-path path
+                                         :langs [:lua]
+                                         :write true})
+            lua-path (->> outputs
+                          (filter #(= :lua (:lang %)))
+                          first
+                          :path)
+            lua-output (slurp lua-path)]
+        (boolean (re-find #"\{\"queued\"\s+\{\}\}" lua-output)))))
   => true)
 
 ^{:refer std.lang.manage.xtalk-scaffold/scaffold-runtime-template :added "4.1"}

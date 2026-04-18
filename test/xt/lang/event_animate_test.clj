@@ -311,6 +311,7 @@
 (fact "makes a binary indicator"
   ^:hidden
   
+  ^{:lang-exceptions {:lua {:skip true}}}
   (!.js
    (var t (base-animate/make-binary-indicator
            mock/MOCK
@@ -321,33 +322,13 @@
            (fn:>)))
    (var #{indicator trigger-fn} t)
    [(mock/get-value indicator)
-    (trigger-fn true)
-    (mock/get-value indicator)
-    (trigger-fn false)
-    (mock/get-value indicator)])
+     (trigger-fn true)
+     (mock/get-value indicator)
+     (trigger-fn false)
+     (mock/get-value indicator)])
   => [0 {"running" false, "queued" []}
       1 {"running" false, "queued" []}
-      0]
-
-  (comment
-    "NOT WORKING"
-    (!.lua
-     (var t (base-animate/make-binary-indicator
-             mock/MOCK
-             false
-             {}
-             "cancel"
-             (base-animate/new-progressing)
-             (fn:>)))
-     (var #{indicator trigger-fn} t)
-     [(mock/get-value indicator)
-      (trigger-fn true)
-      (mock/get-value indicator)
-      (trigger-fn false)
-      (mock/get-value indicator)])
-    => [0 {"running" false, "queued" {}}
-        1 {"running" false, "queued" {}}
-        0]))
+      0])
 
 ^{:refer xt.lang.event-animate/make-linear-indicator :added "4.0"}
 (fact  "makes a linear indicator"

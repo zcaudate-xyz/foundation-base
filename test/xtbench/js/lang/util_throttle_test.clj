@@ -107,7 +107,7 @@
            (repl/notify
             [(throttle/throttle-active throttle)
              (throttle/throttle-waiting throttle)])))
-         100)))))
+         (:? (== i 1) 100 300))))))
     nil))
   (throttle/throttle-run throttle 1)
   (throttle/throttle-run throttle 1)

@@ -691,8 +691,36 @@
           (with-meta (list (first expr) replacement) (meta expr))
           replacement))
 
+       :else
+       expr)))
+
+(defn normalize-runtime-expect
+  [form lang]
+  (let [lang (normalize-runtime-lang lang)]
+    (cond
+      (and (= :lua lang)
+           (vector? form)
+           (empty? form))
+      {}
+
+      (seq? form)
+      (apply list (map #(normalize-runtime-expect % lang) form))
+
+      (vector? form)
+      (vec (map #(normalize-runtime-expect % lang) form))
+
+      (set? form)
+      (into #{} (map #(normalize-runtime-expect % lang) form))
+
+      (map? form)
+      (into (empty form)
+            (map (fn [[k v]]
+                   [(normalize-runtime-expect k lang)
+                    (normalize-runtime-expect v lang)]))
+            form)
+
       :else
-      expr)))
+      form)))
 
 (defn apply-template-language-exceptions-fact
   [fact-form lang]
@@ -703,17 +731,18 @@
                out []]
           (if (empty? xs)
             out
-            (let [[expr arrow expect & more] xs]
-              (if (= '=> arrow)
-                (let [exception (template-language-exception expr lang)
-                      updated-expr (apply-template-language-exception-expr expr lang)
-                      updated-expect (if (contains? exception :expect)
-                                       (:expect exception)
-                                       expect)]
-                  (recur more
-                         (cond-> out
-                           updated-expr (conj updated-expr '=> updated-expect))))
-                (recur (rest xs) (conj out (first xs)))))))]
+             (let [[expr arrow expect & more] xs]
+               (if (= '=> arrow)
+                 (let [exception (template-language-exception expr lang)
+                       updated-expr (apply-template-language-exception-expr expr lang)
+                       updated-expect (if (contains? exception :expect)
+                                        (:expect exception)
+                                        expect)
+                       updated-expect (normalize-runtime-expect updated-expect lang)]
+                   (recur more
+                          (cond-> out
+                            updated-expr (conj updated-expr '=> updated-expect))))
+                 (recur (rest xs) (conj out (first xs)))))))]
     (with-meta (apply list fact title updated-body)
       (meta fact-form))))
 
@@ -925,7 +954,10 @@
 
 (defn commented-form?
   [form]
-  (boolean (:comment (meta form))))
+  (boolean
+   (or (:comment (meta form))
+       (and (seq? form)
+            (= 'comment (first form))))))
 
 (defn test-file-path
   [project test-ns]
@@ -1496,19 +1528,20 @@
                        (list fact-sym title)
                        (meta fact-form)))
             :runtime? runtime?
-            :langs (into {}
-                        (keep (fn [[lang clauses]]
-                                (when (seq clauses)
-                                  [lang (with-meta
-                                          (apply list
-                                                 fact-sym
-                                                 title
-                                                 (concat (map #(retarget-generated-form % lang) prefix)
-                                                         (attach-leading-meta
-                                                          (map #(retarget-generated-form % lang) clauses)
-                                                          leading-meta)))
-                                          (meta fact-form))])))
-                        by-lang)})
+             :langs (into {}
+                         (keep (fn [[lang clauses]]
+                                 (when (seq clauses)
+                                   (let [generated (with-meta
+                                                     (apply list
+                                                            fact-sym
+                                                            title
+                                                            (concat (map #(retarget-generated-form % lang) prefix)
+                                                                    (attach-leading-meta
+                                                                     (map #(retarget-generated-form % lang) clauses)
+                                                                     leading-meta)))
+                                                     (meta fact-form))]
+                                     [lang (apply-template-language-exceptions-fact generated lang)]))))
+                         by-lang)})
           (let [[expr arrow expect & more] xs]
             (if (= '=> arrow)
               (if-let [lang (runtime-expr-lang expr)]
@@ -1517,10 +1550,10 @@
                        prefix
                        shared
                        (or leading-meta (meta expr))
-                       (update by-lang lang into [expr arrow expect]))
-                (recur more
-                       runtime?
-                       prefix
+                       (update by-lang lang (fnil into []) [expr arrow expect]))
+                 (recur more
+                        runtime?
+                        prefix
                        (into shared [expr arrow expect])
                        leading-meta
                        by-lang))

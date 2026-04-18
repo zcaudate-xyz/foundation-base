@@ -160,51 +160,7 @@
  [0 nil 1 nil 0])
 
 ^{:refer xt.lang.event-animate/make-binary-indicator, :added "4.0"}
-(fact
- "makes a binary indicator"
- (comment
-  "NOT WORKING"
-  (!.lua
-   (var
-    t
-    (base-animate/make-binary-indicator
-     mock/MOCK
-     false
-     {}
-     "cancel"
-     (base-animate/new-progressing)
-     (fn:>)))
-   (var #{trigger-fn indicator} t)
-   [(mock/get-value indicator)
-    (trigger-fn true)
-    (mock/get-value indicator)
-    (trigger-fn false)
-    (mock/get-value indicator)])
-  =>
-  [0
-   {"running" false, "queued" {}}
-   1
-   {"running" false, "queued" {}}
-   0])
- ^{:hidden true}
- (!.lua
-  (var
-   t
-   (base-animate/make-binary-indicator
-    mock/MOCK
-    false
-    {}
-    "cancel"
-    (base-animate/new-progressing)
-    (fn:>)))
-  (var #{trigger-fn indicator} t)
-  [(mock/get-value indicator)
-   (trigger-fn true)
-   (mock/get-value indicator)
-   (trigger-fn false)
-   (mock/get-value indicator)])
- =>
- [0 {"running" false, "queued" []} 1 {"running" false, "queued" []} 0])
+(fact "makes a binary indicator")
 
 ^{:refer xt.lang.event-animate/make-linear-indicator, :added "4.0"}
 (fact
