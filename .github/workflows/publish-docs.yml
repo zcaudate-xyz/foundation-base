@@ -6,7 +6,8 @@ on:
     paths:
       - 'src-doc/**'
       - 'src/**'
-      - 'config/publish*.edn'
+      - 'config/publish.edn'
+      - 'config/publish/**'
       - 'template/**'
   workflow_dispatch:
 
@@ -30,6 +31,8 @@ jobs:
         
       - name: Setup Pages
         uses: actions/configure-pages@v5
+        with:
+          enablement: true
         
       - name: Generate Documentation
         run: >
