@@ -4,13 +4,10 @@
             [xt.lang.common-notify :as notify])
   (:use code.test))
 
-(l/script- :xtalk
-  {:require [[xt.lang.common-lib :as k]
-             [xt.lang.common-spec :as xt]]})
-
 (l/script- :js
   {:runtime :basic
    :require [[xt.lang.common-lib :as k]
+             [xt.lang.common-data :as xtd]
              [xt.lang.common-spec :as xt]
              [xt.lang.event-log :as log]
              [xt.lang.common-repl :as repl]]})
@@ -18,48 +15,26 @@
 (l/script- :lua
   {:runtime :basic
    :require [[xt.lang.common-lib :as k]
+             [xt.lang.common-data :as xtd]
+              [xt.lang.common-spec :as xt]
+              [xt.lang.event-log :as log]
+              [xt.lang.common-repl :as repl]]})
+
+(l/script- :python
+  {:runtime :basic
+   :require [[xt.lang.common-lib :as k]
+             [xt.lang.common-data :as xtd]
              [xt.lang.common-spec :as xt]
              [xt.lang.event-log :as log]
              [xt.lang.common-repl :as repl]]})
 
-(defn.xt walk
-  [obj pre-fn post-fn]
-  (:= obj (pre-fn obj))
-  (cond (xt/x:nil? obj)
-        (return (post-fn obj))
-
-        (xt/x:is-object? obj)
-        (do (var out := {})
-            (xt/for:object [[k v] obj]
-              (xt/x:set-key out k (-/walk v pre-fn post-fn)))
-            (return (post-fn out)))
-
-        (xt/x:is-array? obj)
-        (do (var out := [])
-            (xt/for:array [e obj]
-              (xt/x:arr-push out (-/walk e pre-fn post-fn)))
-            (return (post-fn out)))
-
-        :else
-        (return (post-fn obj))))
-
-(defn.xt get-data
-  [obj]
-  (var data-fn
-       (fn [obj]
-         (if (or (xt/x:is-string? obj)
-                 (xt/x:is-number? obj)
-                 (xt/x:is-boolean? obj)
-                 (xt/x:is-object? obj)
-                 (xt/x:is-array? obj)
-                 (xt/x:nil? obj))
-           (return obj)
-           (return (xt/x:cat "<" (k/type-native obj) ">")))))
-  (return (-/walk obj k/identity data-fn)))
-
-(defn.xt id-fn
-  [x]
-  (return (xt/x:get-key x "id")))
+(l/script- :dart
+  {:runtime :twostep
+   :require [[xt.lang.common-lib :as k]
+             [xt.lang.common-data :as xtd]
+             [xt.lang.common-spec :as xt]
+             [xt.lang.event-log :as log]
+             [xt.lang.common-repl :as repl]]})
 
 (fact:global
  {:setup    [(l/rt:restart)]
@@ -105,14 +80,14 @@
 (fact "queues a log entry"
   ^:hidden
   
-  (!.js
-   (var l (log/new-log {}))
-   
-   (xt/for:index [i [0 10]]
-     (log/queue-entry l {:id (xt/x:cat "id-" i)}
-                      -/id-fn
-                      k/identity
-                      1))
+   (!.js
+    (var l (log/new-log {}))
+    
+    (xt/for:index [i [0 10]]
+      (log/queue-entry l {:id (xt/x:cat "id-" (xt/x:to-string i))}
+                       log/id-fn
+                       k/identity
+                       1))
    (log/clear-cache l 100000)
    l)
   => {"callback" nil,
@@ -137,14 +112,14 @@
 
   (!.lua
    (var l (log/new-log {}))
-   
-   (xt/for:index [i [0 9]]
-     (log/queue-entry l {:id (xt/x:cat "id-" i)}
-                      -/id-fn
-                      k/identity
-                      1))
-   (log/clear-cache l 100000)
-   l)
+    
+    (xt/for:index [i [0 9]]
+      (log/queue-entry l {:id (xt/x:cat "id-" (xt/x:to-string i))}
+                       log/id-fn
+                       k/identity
+                       1))
+    (log/clear-cache l 100000)
+    l)
   => {"maximum" 100,
       "cache" {},
       "processed"
@@ -185,16 +160,28 @@
 
   (!.js
    (log/add-listener
-    (log/new-log {})
-    "test1" (fn [id data t])))
+     (log/new-log {})
+     "test1" (fn [id data t])
+     nil))
   => {"pred" nil, "meta" {"listener/id" "test1", "listener/type" "log"}}
 
   (!.lua
-   (-/get-data
-    (log/add-listener
-     (log/new-log {})
-     "test1" (fn [id data t]))))
+   (xtd/tree-get-data
+     (log/add-listener
+      (log/new-log {})
+      "test1" (fn [id data t])
+      nil)))
   => {"callback" "<function>",
+      "meta" {"listener/id" "test1", "listener/type" "log"}}
+
+  (!.py
+   (xtd/tree-get-data
+     (log/add-listener
+      (log/new-log {})
+      "test1" (fn [id data t])
+      nil)))
+  => {"callback" "<function>",
+      "pred" nil,
       "meta" {"listener/id" "test1", "listener/type" "log"}})
 
 ^{:refer xt.lang.event-log/remove-listener :adopt true :added "4.0"}
@@ -204,20 +191,36 @@
   (!.js
    (var l (log/new-log {}))
    (log/add-listener
-    l
-    "test1" (fn [id data t meta]))
+     l
+     "test1" (fn [id data t meta])
+     nil)
    (log/remove-listener
-    l
-    "test1"))
+     l
+     "test1"))
   => {"pred" nil, "meta" {"listener/id" "test1", "listener/type" "log"}}
 
 
   (!.js
    (var l (log/new-log {}))
    (log/add-listener
+     l
+     "test1" (fn [id data t meta])
+     nil)
+   (xtd/tree-get-data
+    (log/remove-listener
+     l
+     "test1")))
+  => {"callback" "<function>",
+      "pred" nil,
+      "meta" {"listener/id" "test1", "listener/type" "log"}}
+
+  (!.py
+   (var l (log/new-log {}))
+   (log/add-listener
     l
-    "test1" (fn [id data t meta]))
-   (-/get-data
+    "test1" (fn [id data t meta])
+    nil)
+   (xtd/tree-get-data
     (log/remove-listener
      l
      "test1")))

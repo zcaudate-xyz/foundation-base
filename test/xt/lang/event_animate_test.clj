@@ -19,6 +19,20 @@
              [xt.lang.event-animate :as base-animate]
              [xt.lang.event-animate-mock :as mock]]})
 
+(l/script- :python
+  {:runtime :basic
+   :require [[xt.lang.common-lib :as k]
+             [xt.lang.common-repl :as repl]
+             [xt.lang.event-animate :as base-animate]
+             [xt.lang.event-animate-mock :as mock]]})
+
+(l/script- :dart
+  {:runtime :twostep
+   :require [[xt.lang.common-lib :as k]
+             [xt.lang.common-repl :as repl]
+             [xt.lang.event-animate :as base-animate]
+             [xt.lang.event-animate-mock :as mock]]})
+
 (fact:global
  {:setup    [(l/rt:restart)]
   :teardown [(l/rt:stop)]})

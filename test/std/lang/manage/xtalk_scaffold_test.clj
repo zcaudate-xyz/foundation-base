@@ -458,6 +458,27 @@
     [(some? shared) (set (keys langs))])
   => [true #{:js :lua}])
 
+^{:refer std.lang.manage.xtalk-scaffold/split-fact-form :added "4.1"}
+(fact "synthesizes missing runtime clauses from portable source clauses"
+  (let [{:keys [langs]} (split-fact-form '(fact "x" (!.js (k/a)) => 1 (!.lua (k/a)) => 1)
+                                         [:js :lua :python :dart])
+        py-out (render-top-level-forms [(get langs :python)])
+        dt-out (render-top-level-forms [(get langs :dart)])]
+    [(contains? langs :python)
+     (contains? langs :dart)
+     (str/includes? py-out "!.py")
+     (not (str/includes? py-out "!.js"))
+     (str/includes? dt-out "!.dt")
+     (not (str/includes? dt-out "!.lua"))])
+  => [true true true true true true])
+
+^{:refer std.lang.manage.xtalk-scaffold/split-fact-form :added "4.1"}
+(fact "does not synthesize from runtime-specific helper aliases"
+  (let [{:keys [langs]} (split-fact-form '(fact "x" (!.js (j/future-delayed [10] (return 1))) => 1)
+                                         [:js :python :dart])]
+    (set (keys langs)))
+  => #{:js})
+
 ^{:refer std.lang.manage.xtalk-scaffold/separate-runtime-test-forms :added "4.1"}
 (fact "retargets host-side runtime references in split output"
   (let [{:keys [by-lang]} (separate-runtime-test-forms split-runtime-reference-forms [:js :lua])

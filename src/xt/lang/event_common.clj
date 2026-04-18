@@ -125,11 +125,11 @@
   [listener-id listener-type callback meta pred]
   (return
    {:callback callback
-          :meta (xt/x:obj-assign
-                 {:listener/id   listener-id
-                  :listener/type listener-type}
-                 meta)
-          :pred pred}))
+    :pred pred
+           :meta (xt/x:obj-assign
+                  {:listener/id   listener-id
+                   :listener/type listener-type}
+                  meta)}))
 
 (defn.xt clear-listeners
   "clears all listeners"

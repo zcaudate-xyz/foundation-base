@@ -800,6 +800,58 @@
         :else
         (return (post-fn x))))
 
+(defn.xt tree-type-native
+  "gets the normalized native type for tree helpers"
+  {:added "4.1"}
+  [obj]
+  (xt/x:type-native obj))
+
+(defn.xt tree-get-data
+  "normalizes nested data values for inspection"
+  {:added "4.1"}
+  [obj]
+  (cond (xt/x:nil? obj)
+        (return obj)
+
+        (xt/x:is-object? obj)
+        (do (var out := {})
+            (xt/for:object [[k v] obj]
+              (xt/x:set-key out k (-/tree-get-data v)))
+            (return out))
+
+        (xt/x:is-array? obj)
+        (do (var out := [])
+            (xt/for:array [e obj]
+              (xt/x:arr-push out (-/tree-get-data e)))
+            (return out))
+
+        (or (xt/x:is-string? obj)
+            (xt/x:is-number? obj)
+            (xt/x:is-boolean? obj))
+        (return obj)
+
+        :else
+        (return (xt/x:cat "<" (-/tree-type-native obj) ">"))))
+
+(defn.xt tree-get-spec
+  "normalizes nested values to their runtime-native types"
+  {:added "4.1"}
+  [obj]
+  (cond (xt/x:is-object? obj)
+        (do (var out := {})
+            (xt/for:object [[k v] obj]
+              (xt/x:set-key out k (-/tree-get-spec v)))
+            (return out))
+
+        (xt/x:is-array? obj)
+        (do (var out := [])
+            (xt/for:array [e obj]
+              (xt/x:arr-push out (-/tree-get-spec e)))
+            (return out))
+
+        :else
+        (return (-/tree-type-native obj))))
+
 
 (defn.xt tree-diff
   "diffs only keys within map"

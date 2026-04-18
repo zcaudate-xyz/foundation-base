@@ -81,8 +81,21 @@
    :x-ws-send         {:macro #'python-tf-x-ws-send         :emit :macro}
    :x-ws-close        {:macro #'python-tf-x-ws-close        :emit :macro}})
 
+(defn python-tf-x-notify-socket
+  ([[_ host port value id key connect-fn encode-fn]]
+   (template/$ (do (try
+                     (:= '[ok conn] (~connect-fn ~host ~port {}))
+                     (if (not ok)
+                       (return ["unable to connect"]))
+                     (. conn (sendall (. (~encode-fn ~value ~id ~key)
+                                         (encode))))
+                     (. conn (close))
+                     (return ["async"])
+                     (catch Exception
+                         (return ["unable to connect"])))))))
+
 (def +python-notify+
-  {})
+  {:x-notify-socket  {:macro #'python-tf-x-notify-socket    :emit :macro}})
 
 (defn python-tf-x-client-basic
   ([[_ host port connect-fn eval-fn]]

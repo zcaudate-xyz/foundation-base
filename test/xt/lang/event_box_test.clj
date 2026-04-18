@@ -4,62 +4,33 @@
             [xt.lang.common-notify :as notify])
   (:use code.test))
 
-(l/script- :xtalk
-  {:require [[xt.lang.common-lib :as k]
-             [xt.lang.common-spec :as xt]]})
-
 (l/script- :js
   {:runtime :basic
    :require [[xt.lang.common-lib :as k]
-             [xt.lang.common-repl :as repl]
-             [xt.lang.event-box :as box]]})
+             [xt.lang.common-data :as xtd]
+              [xt.lang.common-repl :as repl]
+              [xt.lang.event-box :as box]]})
 
 (l/script- :lua
   {:runtime :basic
    :require [[xt.lang.common-lib :as k]
-             [xt.lang.common-repl :as repl]
-             [xt.lang.event-box :as box]]})
+             [xt.lang.common-data :as xtd]
+              [xt.lang.common-repl :as repl]
+              [xt.lang.event-box :as box]]})
 
 (l/script- :python
   {:runtime :basic
    :require [[xt.lang.common-lib :as k]
-             [xt.lang.common-repl :as repl]
-             [xt.lang.event-box :as box]]})
+              [xt.lang.common-data :as xtd]
+               [xt.lang.common-repl :as repl]
+               [xt.lang.event-box :as box]]})
 
-(defn.xt walk
-  [obj pre-fn post-fn]
-  (:= obj (pre-fn obj))
-  (cond (xt/x:nil? obj)
-        (return (post-fn obj))
-
-        (xt/x:is-object? obj)
-        (do (var out := {})
-            (xt/for:object [[k v] obj]
-              (xt/x:set-key out k (-/walk v pre-fn post-fn)))
-            (return (post-fn out)))
-
-        (xt/x:is-array? obj)
-        (do (var out := [])
-            (xt/for:array [e obj]
-              (xt/x:arr-push out (-/walk e pre-fn post-fn)))
-            (return (post-fn out)))
-
-        :else
-        (return (post-fn obj))))
-
-(defn.xt get-data
-  [obj]
-  (var data-fn
-       (fn [obj]
-         (if (or (xt/x:is-string? obj)
-                 (xt/x:is-number? obj)
-                 (xt/x:is-boolean? obj)
-                 (xt/x:is-object? obj)
-                 (xt/x:is-array? obj)
-                 (xt/x:nil? obj))
-           (return obj)
-           (return (xt/x:cat "<" (k/type-native obj) ">")))))
-  (return (-/walk obj k/identity data-fn)))
+(l/script- :dart
+  {:runtime :twostep
+   :require [[xt.lang.common-lib :as k]
+             [xt.lang.common-data :as xtd]
+              [xt.lang.common-repl :as repl]
+              [xt.lang.event-box :as box]]})
 
 (fact:global
  {:setup    [(l/rt:restart)]
@@ -74,14 +45,14 @@
   => {"::" "event.box", "listeners" {}, "data" {"a" 1}}
 
   (!.lua
-   (-/get-data (box/make-box (fn:> {:a 1}))))
+   (xtd/tree-get-data (box/make-box (fn:> {:a 1}))))
   => {"::" "event.box",
       "initial" "<function>", 
       "listeners" {},
       "data" {"a" 1}}
 
   (!.py
-   (-/get-data (box/make-box (fn:> {:a 1}))))
+   (xtd/tree-get-data (box/make-box (fn:> {:a 1}))))
   => {"::" "event.box",
       "initial" "<function>", 
       "listeners" {},

@@ -1233,8 +1233,70 @@
                            to-value
 
                            :else
-                           form))]
+                            form))]
     (recur-form form)))
+
+(def ^:dynamic *split-runtime-clause-preference*
+  {:js     [:js :lua :python :dart]
+   :lua    [:lua :js :python :dart]
+   :python [:python :js :lua :dart]
+   :dart   [:dart :python :js :lua]})
+
+(def ^:dynamic *split-runtime-unsafe-aliases*
+  {:js #{"j"}
+   :lua #{"n" "ws"}})
+
+(defn clause-has-unsafe-alias?
+  [form aliases]
+  (let [aliases (set aliases)
+        recur-form (fn recur-form [form]
+                     (cond
+                       (symbol? form)
+                       (contains? aliases (namespace form))
+
+                       (seq? form)
+                       (boolean (some recur-form form))
+
+                       (vector? form)
+                       (boolean (some recur-form form))
+
+                       (set? form)
+                       (boolean (some recur-form form))
+
+                       (map? form)
+                       (boolean (some recur-form (mapcat identity form)))
+
+                       :else
+                       false))]
+    (recur-form form)))
+
+(defn portable-runtime-clauses?
+  [clauses source-lang]
+  (let [aliases (get *split-runtime-unsafe-aliases*
+                     (normalize-runtime-lang source-lang)
+                     #{})]
+    (or (empty? aliases)
+        (not-any? #(clause-has-unsafe-alias? % aliases)
+                  clauses))))
+
+(defn synthesize-runtime-clauses
+  [by-lang langs]
+  (into {}
+        (for [lang langs
+              :let [clauses (get by-lang lang)
+                    lang (normalize-runtime-lang lang)]]
+          [lang (if (seq clauses)
+                  clauses
+                  (or (some (fn [source-lang]
+                              (let [source-lang (normalize-runtime-lang source-lang)
+                                    source-clauses (get by-lang source-lang)]
+                                (when (and (seq source-clauses)
+                                           (portable-runtime-clauses? source-clauses source-lang))
+                                  source-clauses)))
+                            (get *split-runtime-clause-preference*
+                                 lang
+                                 langs))
+                      clauses))])))
 
 (defn transform-script-form
   [form from-script to-script]
@@ -1393,38 +1455,41 @@
        :langs {}}
       (loop [xs body
              runtime? false
-             prefix []
-             shared []
-             leading-meta nil
-             by-lang (zipmap langs (repeat []))]
+              prefix []
+              shared []
+              leading-meta nil
+              by-lang (zipmap langs (repeat []))]
         (if (empty? xs)
+          (let [by-lang (if runtime?
+                          (synthesize-runtime-clauses by-lang langs)
+                          by-lang)]
            {:shared (cond
-                      (not runtime?)
-                      fact-form
+                     (not runtime?)
+                     fact-form
 
-                      (seq shared)
-                      (with-meta
-                        (apply list fact-sym title (concat prefix shared))
-                        (meta fact-form))
+                     (seq shared)
+                     (with-meta
+                       (apply list fact-sym title (concat prefix shared))
+                       (meta fact-form))
 
-                      :else
-                      (with-meta
-                        (list fact-sym title)
-                        (meta fact-form)))
+                     :else
+                     (with-meta
+                       (list fact-sym title)
+                       (meta fact-form)))
             :runtime? runtime?
-             :langs (into {}
-                         (keep (fn [[lang clauses]]
-                                 (when (seq clauses)
-                                   [lang (with-meta
-                                           (apply list
-                                                  fact-sym
-                                                  title
-                                                  (concat (map #(retarget-generated-form % lang) prefix)
-                                                          (attach-leading-meta
-                                                           (map #(retarget-generated-form % lang) clauses)
-                                                           leading-meta)))
-                                           (meta fact-form))])))
-                         by-lang)}
+            :langs (into {}
+                        (keep (fn [[lang clauses]]
+                                (when (seq clauses)
+                                  [lang (with-meta
+                                          (apply list
+                                                 fact-sym
+                                                 title
+                                                 (concat (map #(retarget-generated-form % lang) prefix)
+                                                         (attach-leading-meta
+                                                          (map #(retarget-generated-form % lang) clauses)
+                                                          leading-meta)))
+                                          (meta fact-form))])))
+                        by-lang)})
           (let [[expr arrow expect & more] xs]
             (if (= '=> arrow)
               (if-let [lang (runtime-expr-lang expr)]

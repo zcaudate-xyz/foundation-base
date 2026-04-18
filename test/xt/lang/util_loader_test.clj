@@ -4,13 +4,10 @@
             [xt.lang.common-notify :as notify])
   (:use code.test))
 
-(l/script- :xtalk
-  {:require [[xt.lang.common-lib :as k]
-             [xt.lang.common-spec :as xt]]})
-
 (l/script- :js
   {:runtime :basic
    :require [[xt.lang.common-lib :as k]
+             [xt.lang.common-data :as xtd]
              [xt.lang.common-spec :as xt]
              [xt.lang.common-repl :as repl]
              [xt.lang.util-loader :as loader]
@@ -20,41 +17,27 @@
   {:runtime :basic
    :config  {:program :resty}
    :require [[xt.lang.common-lib :as k]
+             [xt.lang.common-data :as xtd]
              [xt.lang.common-spec :as xt]
              [xt.lang.common-repl :as repl]
              [xt.lang.util-loader :as loader]
              [lua.nginx :as n]]})
 
-(defn.xt walk
-  [obj pre-fn post-fn]
-  (:= obj (pre-fn obj))
-  (cond (xt/x:nil? obj)
-        (return (post-fn obj))
+(l/script- :python
+  {:runtime :basic
+   :require [[xt.lang.common-lib :as k]
+             [xt.lang.common-data :as xtd]
+             [xt.lang.common-spec :as xt]
+             [xt.lang.common-repl :as repl]
+             [xt.lang.util-loader :as loader]]})
 
-        (xt/x:is-object? obj)
-        (do (var out := {})
-            (xt/for:object [[k v] obj]
-              (xt/x:set-key out k (-/walk v pre-fn post-fn)))
-            (return (post-fn out)))
-
-        (xt/x:is-array? obj)
-        (do (var out := [])
-            (xt/for:array [e obj]
-              (xt/x:arr-push out (-/walk e pre-fn post-fn)))
-            (return (post-fn out)))
-
-        :else
-        (return (post-fn obj))))
-
-(defn.xt get-spec
-  [obj]
-  (var spec-fn
-       (fn [obj]
-         (if (not (or (xt/x:is-object? obj)
-                      (xt/x:is-array? obj)))
-           (return (k/type-native obj))
-           (return obj))))
-  (return (-/walk obj k/identity spec-fn)))
+(l/script- :dart
+  {:runtime :twostep
+   :require [[xt.lang.common-lib :as k]
+             [xt.lang.common-data :as xtd]
+             [xt.lang.common-spec :as xt]
+             [xt.lang.common-repl :as repl]
+             [xt.lang.util-loader :as loader]]})
 
 (fact:global
  {:setup    [(l/rt:restart)]
@@ -176,7 +159,7 @@
       "::" "loader"}
   
   (!.lua
-   (-/get-spec
+   (xtd/tree-get-spec
     (loader/new-loader [(loader/new-task
                          "A" [] []
                          {:load-fn (fn []

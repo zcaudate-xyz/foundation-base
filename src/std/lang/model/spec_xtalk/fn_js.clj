@@ -375,6 +375,14 @@
   ([[_ s tok]]
    (list '. s (list 'indexOf tok))))
 
+(defn js-tf-x-str-format
+  ([[_ fmt values]]
+   (template/$ (. ~fmt
+                   (replace (new RegExp "\\{(\\d+)\\}" "g")
+                            (fn [match idx]
+                              (return (or (. ~values [(Number idx)])
+                                          match))))))))
+
 (defn js-tf-x-str-substring
   ([[_ s start & args]]
    (list '. s (apply list 'substring start args))))
@@ -408,10 +416,11 @@
    (list '. s (list 'trimRight))))
 
 (def +js-str+
-  {:x-str-char        {:macro #'js-tf-x-str-char       :emit :macro}
-   :x-str-split       {:macro #'js-tf-x-str-split      :emit :macro}
-   :x-str-join        {:macro #'js-tf-x-str-join       :emit :macro}
-   :x-str-index-of    {:macro #'js-tf-x-str-index-of   :emit :macro}
+   {:x-str-char        {:macro #'js-tf-x-str-char       :emit :macro}
+    :x-str-format      {:macro #'js-tf-x-str-format     :emit :macro}
+    :x-str-split       {:macro #'js-tf-x-str-split      :emit :macro}
+    :x-str-join        {:macro #'js-tf-x-str-join       :emit :macro}
+    :x-str-index-of    {:macro #'js-tf-x-str-index-of   :emit :macro}
    :x-str-substring   {:macro #'js-tf-x-str-substring  :emit :macro}
    :x-str-to-upper    {:macro #'js-tf-x-str-to-upper   :emit :macro}
    :x-str-to-lower    {:macro #'js-tf-x-str-to-lower   :emit :macro}

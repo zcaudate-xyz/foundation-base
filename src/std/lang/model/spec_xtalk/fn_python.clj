@@ -706,6 +706,99 @@
    :x-iter-native?        {:macro #'python-tf-x-iter-native?        :emit :macro}})
 
 ;;
+;; CACHE
+;;
+
+(defn python-cache-name
+  [cache]
+  (or cache "__GLOBAL__"))
+
+(defn python-global-cache-root
+  []
+  (list '. '(globals) ["__xtalk_cache__"]))
+
+(defn python-global-cache-bucket
+  [cache]
+  (list '. (python-global-cache-root) [(python-cache-name cache)]))
+
+(defn python-tf-x-cache
+  ([[_ name]]
+   (template/$ (do (var g (globals))
+                   (if (not (. g (get "__xtalk_cache__")))
+                     (:= (. g ["__xtalk_cache__"]) {}))
+                   (if (not (. (. g ["__xtalk_cache__"]) (get ~name)))
+                     (:= (. (. g ["__xtalk_cache__"]) [~name]) {}))
+                   (return ~name)))))
+
+(defn python-tf-x-cache-list
+  ([[_ cache]]
+   (template/$ (do (var g (globals))
+                   (if (not (. g (get "__xtalk_cache__")))
+                     (:= (. g ["__xtalk_cache__"]) {}))
+                   (if (not (. (. g ["__xtalk_cache__"]) (get ~(python-cache-name cache))))
+                     (:= (. (. g ["__xtalk_cache__"]) [~(python-cache-name cache)]) {}))
+                   (return (list (. ~(python-global-cache-bucket cache) (keys))))))))
+
+(defn python-tf-x-cache-flush
+  ([[_ cache]]
+   (template/$ (do (var g (globals))
+                   (if (not (. g (get "__xtalk_cache__")))
+                     (:= (. g ["__xtalk_cache__"]) {}))
+                   (:= (. (. g ["__xtalk_cache__"]) [~(python-cache-name cache)]) {})
+                   (return ~(python-global-cache-bucket cache))))))
+
+(defn python-tf-x-cache-get
+  ([[_ cache key]]
+   (template/$ (do (var g (globals))
+                   (if (not (. g (get "__xtalk_cache__")))
+                     (:= (. g ["__xtalk_cache__"]) {}))
+                   (if (not (. (. g ["__xtalk_cache__"]) (get ~(python-cache-name cache))))
+                     (:= (. (. g ["__xtalk_cache__"]) [~(python-cache-name cache)]) {}))
+                   (return (. ~(python-global-cache-bucket cache) (get ~key)))))))
+
+(defn python-tf-x-cache-set
+  ([[_ cache key val]]
+   (template/$ (do (var g (globals))
+                   (if (not (. g (get "__xtalk_cache__")))
+                     (:= (. g ["__xtalk_cache__"]) {}))
+                   (if (not (. (. g ["__xtalk_cache__"]) (get ~(python-cache-name cache))))
+                     (:= (. (. g ["__xtalk_cache__"]) [~(python-cache-name cache)]) {}))
+                   (:= (. ~(python-global-cache-bucket cache) [~key]) ~val)
+                   (return ~val)))))
+
+(defn python-tf-x-cache-del
+  ([[_ cache key]]
+   (template/$ (do (var g (globals))
+                   (if (not (. g (get "__xtalk_cache__")))
+                     (:= (. g ["__xtalk_cache__"]) {}))
+                   (if (not (. (. g ["__xtalk_cache__"]) (get ~(python-cache-name cache))))
+                     (:= (. (. g ["__xtalk_cache__"]) [~(python-cache-name cache)]) {}))
+                   (. ~(python-global-cache-bucket cache) (pop ~key nil))
+                   (return true)))))
+
+(defn python-tf-x-cache-incr
+  ([[_ cache key amount]]
+   (template/$ (do (var g (globals))
+                   (if (not (. g (get "__xtalk_cache__")))
+                     (:= (. g ["__xtalk_cache__"]) {}))
+                   (if (not (. (. g ["__xtalk_cache__"]) (get ~(python-cache-name cache))))
+                     (:= (. (. g ["__xtalk_cache__"]) [~(python-cache-name cache)]) {}))
+                   (var prev (or (. ~(python-global-cache-bucket cache) (get ~key))
+                                 0))
+                   (var curr (+ prev ~amount))
+                   (:= (. ~(python-global-cache-bucket cache) [~key]) curr)
+                   (return curr)))))
+
+(def +python-cache+
+  {:x-cache                 {:macro #'python-tf-x-cache        :emit :macro}
+   :x-cache-list            {:macro #'python-tf-x-cache-list   :emit :macro}
+   :x-cache-flush           {:macro #'python-tf-x-cache-flush  :emit :macro}
+   :x-cache-get             {:macro #'python-tf-x-cache-get    :emit :macro}
+   :x-cache-set             {:macro #'python-tf-x-cache-set    :emit :macro}
+   :x-cache-del             {:macro #'python-tf-x-cache-del    :emit :macro}
+   :x-cache-incr            {:macro #'python-tf-x-cache-incr   :emit :macro}})
+
+;;
 ;; ASYNC
 ;;
 
@@ -789,6 +882,7 @@
          +python-return+
          +python-socket+
          +python-iter+
+         +python-cache+
          +python-thread+
          +python-file+
          +python-b64+))
